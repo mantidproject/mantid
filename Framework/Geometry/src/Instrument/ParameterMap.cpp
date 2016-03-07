@@ -823,7 +823,7 @@ Parameter_sptr ParameterMap::getByType(const IComponent *comp,
           }
         } // found->firdst
       }   // it_found != m_map.end()
-    }     //!m_map.empty()
+    }     //! m_map.empty()
   }       // PARALLEL_CRITICAL(m_map_access)
   return result;
 }

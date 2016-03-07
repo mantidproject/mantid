@@ -173,11 +173,6 @@ MDGeometryXMLParser::MDGeometryXMLParser()
     : m_executed(false), m_xmlToProcess("") {}
 
 /**
-Destructor
-*/
-MDGeometryXMLParser::~MDGeometryXMLParser() {}
-
-/**
 Getter for x dimension
 @return x dimension.
 */

@@ -40,11 +40,11 @@ namespace CustomInterfaces
 
   public:
     ILLCalibration(IndirectDataReduction * idrUI, QWidget * parent = 0);
-    virtual ~ILLCalibration();
+    ~ILLCalibration() override;
 
-    virtual void setup();
-    virtual void run();
-    virtual bool validate();
+    void setup() override;
+    void run() override;
+    bool validate() override;
 
   private slots:
     void algorithmComplete(bool error);

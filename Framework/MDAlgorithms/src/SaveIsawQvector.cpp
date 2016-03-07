@@ -61,12 +61,13 @@ void SaveIsawQvector::init() {
   // the validator which checks if the workspace has axis and any units
   ws_valid->add<WorkspaceUnitValidator>("TOF");
 
-  declareProperty(new WorkspaceProperty<EventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input, ws_valid),
                   "An input EventWorkspace with units along X-axis and defined "
                   "instrument with defined sample");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::OptionalSave, {".bin"}),
+      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+                                ".bin"),
       "Optional path to an hkl file to save.  Vectors returned if no file "
       "requested.");
   declareProperty("RightHanded", true, "Save the Q-vector as k_f - k_i");

@@ -142,7 +142,7 @@ class BayesQuasi(PythonAlgorithm):
                                    ReadWidthFile, QLAddSampleLogs, C2Fw,
                                    C2Se, QuasiPlot)
         from IndirectCommon import (CheckXrange, CheckAnalysers, getEfixed, GetThetaQ,
-                                    CheckHistZero, CheckHistSame)
+                                    CheckHistZero, CheckHistSame, IndentifyDataBoundaries)
         setup_prog = Progress(self, start=0.0, end=0.3, nreports = 5)
         self.log().information('BayesQuasi input')
 
@@ -179,6 +179,21 @@ class BayesQuasi(PythonAlgorithm):
 
         logger.information('Sample is ' + self._samWS)
         logger.information('Resolution is ' + self._resWS)
+
+        # Check for trailing and leading zeros in data
+        setup_prog.report('Checking for leading and trailing zeros in the data')
+        first_data_point, last_data_point = IndentifyDataBoundaries(self._samWS)
+        if first_data_point > self._e_min:
+            logger.warning("Sample workspace contains leading zeros within the energy range.")
+            logger.warning("Updating eMin: eMin = " + str(first_data_point))
+            self._e_min = first_data_point
+        if last_data_point < self._e_max:
+            logger.warning("Sample workspace contains trailing zeros within the energy range.")
+            logger.warning("Updating eMax: eMax = " + str(last_data_point))
+            self._e_max = last_data_point
+
+        # update erange with new values
+        erange = [self._e_min, self._e_max]
 
         setup_prog.report('Checking Analysers')
         CheckAnalysers(self._samWS,self._resWS)

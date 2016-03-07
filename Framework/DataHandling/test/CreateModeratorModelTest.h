@@ -23,11 +23,11 @@ public:
       : m_inputName("CreateModeratorModelTest"),
         m_testWS(createTestWorkspace()) {}
 
-  void setUp() {
+  void setUp() override {
     Mantid::API::AnalysisDataService::Instance().add(m_inputName, m_testWS);
   }
 
-  void tearDown() {
+  void tearDown() override {
     Mantid::API::AnalysisDataService::Instance().remove(m_inputName);
   }
 

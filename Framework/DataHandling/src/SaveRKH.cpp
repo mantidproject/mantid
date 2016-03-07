@@ -33,11 +33,12 @@ SaveRKH::~SaveRKH() {}
  * Initialise the algorithm
  */
 void SaveRKH::init() {
-  declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "",
-                                               Kernel::Direction::Input),
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                      "InputWorkspace", "", Kernel::Direction::Input),
                   "The name of the workspace to save");
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Save,
-                                        {".txt", ".Q", ".dat"}),
+  const std::vector<std::string> fileExts{".txt", ".Q", ".dat"};
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Save, fileExts),
                   "The name to use when saving the file");
   declareProperty(
       "Append", true,
@@ -153,11 +154,11 @@ void SaveRKH::write1D() {
     const auto &ydata = m_workspace->readY(i);
     const auto &edata = m_workspace->readE(i);
 
-    specid_t specid(0);
+    specnum_t specid(0);
     try {
       specid = m_workspace->getSpectrum(i)->getSpectrumNo();
     } catch (...) {
-      specid = static_cast<specid_t>(i + 1);
+      specid = static_cast<specnum_t>(i + 1);
     }
 
     auto hasDx = m_workspace->hasDx(i);

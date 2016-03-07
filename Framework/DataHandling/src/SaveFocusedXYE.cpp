@@ -29,12 +29,12 @@ SaveFocusedXYE::SaveFocusedXYE() : API::Algorithm(), m_headerType(XYE) {}
  */
 void SaveFocusedXYE::init() {
   declareProperty(
-      new API::WorkspaceProperty<>("InputWorkspace", "",
-                                   Kernel::Direction::Input),
+      Kernel::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
+                                                    Kernel::Direction::Input),
       "The name of the workspace containing the data you wish to save");
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Save),
-      "The filename to use when saving data");
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Save),
+                  "The filename to use when saving data");
   declareProperty("SplitFiles", true,
                   "Save each spectrum in a different file (default true)");
   declareProperty("StartAtBankNumber", 0,
@@ -74,7 +74,7 @@ void SaveFocusedXYE::exec() {
     std::string directory = path.parent().toString();
     std::string name = path.getFileName();
 
-    std::size_t pos = name.find_first_of(".");
+    std::size_t pos = name.find_first_of('.');
     if (pos != std::string::npos) // Remove the extension
     {
       ext = name.substr(pos + 1, name.npos);

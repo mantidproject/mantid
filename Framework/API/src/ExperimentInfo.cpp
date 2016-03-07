@@ -24,7 +24,6 @@
 #include <Poco/Path.h>
 #include <Poco/SAX/ContentHandler.h>
 #include <Poco/SAX/SAXParser.h>
-#include <Poco/ScopedLock.h>
 #include <nexus/NeXusException.hpp>
 
 using namespace Mantid::Geometry;
@@ -45,11 +44,6 @@ ExperimentInfo::ExperimentInfo()
     : m_moderatorModel(), m_choppers(), m_sample(new Sample()),
       m_run(new Run()), m_parmap(new ParameterMap()),
       sptr_instrument(new Instrument()) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ExperimentInfo::~ExperimentInfo() {}
 
 //---------------------------------------------------------------------------------------
 /**
@@ -168,7 +162,7 @@ Geometry::ParameterMap &ExperimentInfo::instrumentParameters() {
 
   // enter the critical region if absolutely necessary
   if (!m_parmap.unique()) {
-    Poco::Mutex::ScopedLock lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
     // Check again because another thread may have taken copy
     // and dropped reference count since previous check
     if (!m_parmap.unique()) {
@@ -447,7 +441,7 @@ ChopperModel &ExperimentInfo::chopperModel(const size_t index) const {
 * @return const reference to Sample object
 */
 const Sample &ExperimentInfo::sample() const {
-  Poco::Mutex::ScopedLock lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_mutex);
   return *m_sample;
 }
 
@@ -461,7 +455,7 @@ Sample &ExperimentInfo::mutableSample() {
   // Use a double-check for sharing so that we only
   // enter the critical region if absolutely necessary
   if (!m_sample.unique()) {
-    Poco::Mutex::ScopedLock lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
     // Check again because another thread may have taken copy
     // and dropped reference count since previous check
     if (!m_sample.unique()) {
@@ -477,7 +471,7 @@ Sample &ExperimentInfo::mutableSample() {
 * @return const reference to run object
 */
 const Run &ExperimentInfo::run() const {
-  Poco::Mutex::ScopedLock lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_mutex);
   return *m_run;
 }
 
@@ -491,7 +485,7 @@ Run &ExperimentInfo::mutableRun() {
   // Use a double-check for sharing so that we only
   // enter the critical region if absolutely necessary
   if (!m_run.unique()) {
-    Poco::Mutex::ScopedLock lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
     // Check again because another thread may have taken copy
     // and dropped reference count since previous check
     if (!m_run.unique()) {
@@ -845,7 +839,7 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
   DateAndTime refDateGoodFile("1900-01-31 23:59:00"); // used to help determine
                                                       // the most recently
                                                       // starting matching IDF
-  for (auto directoryName : directoryNames) {
+  for (const auto &directoryName : directoryNames) {
     // This will iterate around the directories from user ->etc ->install, and
     // find the first beat file
     for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter;

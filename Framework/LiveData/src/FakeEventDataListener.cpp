@@ -120,7 +120,7 @@ boost::shared_ptr<Workspace> FakeEventDataListener::extractData() {
 
   // Get an exclusive lock
   // will wait for generateEvents() to finish before swapping
-  Mutex::ScopedLock _lock(m_mutex);
+  std::lock_guard<std::mutex> _lock(m_mutex);
   std::swap(m_buffer, temp);
 
   // Add a run number
@@ -134,7 +134,7 @@ boost::shared_ptr<Workspace> FakeEventDataListener::extractData() {
  *  Used to fill buffer workspace with events between calls to extractData.
  */
 void FakeEventDataListener::generateEvents(Poco::Timer &) {
-  Mutex::ScopedLock _lock(m_mutex);
+  std::lock_guard<std::mutex> _lock(m_mutex);
   for (long i = 0; i < m_callbackloop; ++i) {
     m_buffer->getEventList(0)
         .addEventQuickly(DataObjects::TofEvent(m_rand->nextValue()));

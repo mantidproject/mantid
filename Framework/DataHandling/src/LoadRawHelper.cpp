@@ -52,13 +52,14 @@ LoadRawHelper::~LoadRawHelper() {}
 
 /// Initialisation method.
 void LoadRawHelper::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
-                                   {".raw", ".s*", ".add"}),
+  const std::vector<std::string> exts{".raw", ".s*", ".add"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
                   "The name of the RAW file to read, including its full or "
                   "relative path. The file extension must be .raw or .RAW "
                   "(N.B. case sensitive if running on Linux).");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will be created, filled with "
                   "the read-in data and stored in the Analysis Data Service. "
                   "If the input RAW file contains multiple periods higher "
@@ -172,12 +173,12 @@ void LoadRawHelper::setRunNumber(API::Run &run) {
  * @param lengthIn :: size of workspace vectors
  * @param noTimeRegimes :: number of time regime.
  */
-void LoadRawHelper::readworkspaceParameters(specid_t &numberOfSpectra,
+void LoadRawHelper::readworkspaceParameters(specnum_t &numberOfSpectra,
                                             int &numberOfPeriods,
                                             int64_t &lengthIn,
                                             int64_t &noTimeRegimes) {
   // Read in the number of spectra in the RAW file
-  m_numberOfSpectra = numberOfSpectra = static_cast<specid_t>(isisRaw->t_nsp1);
+  m_numberOfSpectra = numberOfSpectra = static_cast<specnum_t>(isisRaw->t_nsp1);
   // Read the number of periods in this file
   numberOfPeriods = isisRaw->t_nper;
   // Read the number of time channels (i.e. bins) from the RAW file
@@ -273,7 +274,7 @@ void LoadRawHelper::createMonitorWorkspace(
     // otherwise  set the workspace as "OutputWorkspace"
     if (nwsSpecs > 0) {
       std::string monitorwsName = wsName + "_monitors";
-      pAlg->declareProperty(new WorkspaceProperty<Workspace>(
+      pAlg->declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
           "MonitorWorkspace", monitorwsName, Direction::Output));
       setWorkspaceProperty("MonitorWorkspace", title, mongrp_sptr, monws_sptr,
                            numberOfPeriods, true, pAlg);
@@ -331,8 +332,8 @@ void LoadRawHelper::setWorkspaceProperty(DataObjects::Workspace2D_sptr ws_sptr,
     outputWorkspace = "OutputWorkspace";
   }
   outws = outputWorkspace + "_" + suffix.str();
-  pAlg->declareProperty(
-      new WorkspaceProperty<Workspace>(outws, wsName, Direction::Output));
+  pAlg->declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+      outws, wsName, Direction::Output));
   pAlg->setProperty(outws, boost::static_pointer_cast<Workspace>(ws_sptr));
   grpws_sptr->addWorkspace(ws_sptr);
 }
@@ -384,8 +385,8 @@ void LoadRawHelper::setWorkspaceProperty(const std::string &propertyName,
 void LoadRawHelper::setWorkspaceData(
     DataObjects::Workspace2D_sptr newWorkspace,
     const std::vector<boost::shared_ptr<MantidVec>> &timeChannelsVec,
-    int64_t wsIndex, specid_t nspecNum, int64_t noTimeRegimes, int64_t lengthIn,
-    int64_t binStart) {
+    int64_t wsIndex, specnum_t nspecNum, int64_t noTimeRegimes,
+    int64_t lengthIn, int64_t binStart) {
   if (!newWorkspace)
     return;
   typedef double (*uf)(double);
@@ -423,9 +424,9 @@ void LoadRawHelper::setWorkspaceData(
  *  @param mapping The spectrum number to detector mapping
  *  @return monitorSpecList The spectrum numbers of the monitors
  */
-std::vector<specid_t>
+std::vector<specnum_t>
 LoadRawHelper::getmonitorSpectrumList(const SpectrumDetectorMapping &mapping) {
-  std::vector<specid_t> spectrumIndices;
+  std::vector<specnum_t> spectrumIndices;
 
   if (!m_monitordetectorList.empty()) {
     const auto &map = mapping.getMapping();
@@ -599,7 +600,7 @@ void LoadRawHelper::runLoadInstrument(
     }
     // Debugging code??
     m_monitordetectorList = loadInst->getProperty("MonitorList");
-    std::vector<specid_t>::const_iterator itr;
+    std::vector<specnum_t>::const_iterator itr;
     for (itr = m_monitordetectorList.begin();
          itr != m_monitordetectorList.end(); ++itr) {
       g_log.debug() << "Monitor detector id is " << (*itr) << std::endl;
@@ -626,7 +627,7 @@ void LoadRawHelper::runLoadInstrumentFromRaw(
         "Unable to successfully run LoadInstrumentFromRaw Child Algorithm");
   }
   m_monitordetectorList = loadInst->getProperty("MonitorList");
-  std::vector<specid_t>::const_iterator itr;
+  std::vector<specnum_t>::const_iterator itr;
   for (itr = m_monitordetectorList.begin(); itr != m_monitordetectorList.end();
        ++itr) {
     g_log.debug() << "Monitor dtector id is " << (*itr) << std::endl;
@@ -917,7 +918,7 @@ void LoadRawHelper::checkOptionalProperties() {
   // Check validity of spectra list property, if set
   if (m_list) {
     m_list = true;
-    if (m_spec_list.size() == 0) {
+    if (m_spec_list.empty()) {
       m_list = false;
     } else {
       const int64_t minlist =
@@ -947,8 +948,8 @@ void LoadRawHelper::checkOptionalProperties() {
  * properties
  * @return the size of the workspace (number of spectra)
  */
-specid_t LoadRawHelper::calculateWorkspaceSize() {
-  specid_t total_specs(0);
+specnum_t LoadRawHelper::calculateWorkspaceSize() {
+  specnum_t total_specs(0);
   if (m_interval || m_list) {
     if (m_interval) {
       if (m_spec_min != 1 && m_spec_max == 1)
@@ -967,9 +968,9 @@ specid_t LoadRawHelper::calculateWorkspaceSize() {
           } else
             ++it;
       }
-      if (m_spec_list.size() == 0)
+      if (m_spec_list.empty())
         m_list = false;
-      total_specs += static_cast<specid_t>(m_spec_list.size());
+      total_specs += static_cast<specnum_t>(m_spec_list.size());
       m_total_specs = total_specs;
     }
   } else {
@@ -988,10 +989,10 @@ specid_t LoadRawHelper::calculateWorkspaceSize() {
 /// @param normalwsSpecs :: the spectra for the detector workspace
 /// @param monitorwsSpecs :: the spectra for the monitor workspace
 void LoadRawHelper::calculateWorkspacesizes(
-    const std::vector<specid_t> &monitorSpecList, specid_t &normalwsSpecs,
-    specid_t &monitorwsSpecs) {
+    const std::vector<specnum_t> &monitorSpecList, specnum_t &normalwsSpecs,
+    specnum_t &monitorwsSpecs) {
   if (!m_interval && !m_bmspeclist) {
-    monitorwsSpecs = static_cast<specid_t>(monitorSpecList.size());
+    monitorwsSpecs = static_cast<specnum_t>(monitorSpecList.size());
     normalwsSpecs = m_total_specs - monitorwsSpecs;
     g_log.debug()
         << "normalwsSpecs   when m_interval  & m_bmspeclist are  false is  "
@@ -1000,7 +1001,7 @@ void LoadRawHelper::calculateWorkspacesizes(
   } else if (m_interval || m_bmspeclist) {
     if (m_interval) {
       int msize = 0;
-      std::vector<specid_t>::const_iterator itr1;
+      std::vector<specnum_t>::const_iterator itr1;
       for (itr1 = monitorSpecList.begin(); itr1 != monitorSpecList.end();
            ++itr1) {
         if (*itr1 >= m_spec_min && *itr1 < m_spec_max)
@@ -1014,7 +1015,7 @@ void LoadRawHelper::calculateWorkspacesizes(
     }
     if (m_bmspeclist) {
       if (m_interval) {
-        std::vector<specid_t>::iterator itr;
+        std::vector<specnum_t>::iterator itr;
         for (itr = m_spec_list.begin();
              itr != m_spec_list.end();) { // if  the m_spec_list elements are in
                                           // the range between m_spec_min &
@@ -1024,16 +1025,16 @@ void LoadRawHelper::calculateWorkspacesizes(
           else
             ++itr;
         }
-        if (m_spec_list.size() == 0) {
+        if (m_spec_list.empty()) {
           g_log.debug() << "normalwsSpecs is " << normalwsSpecs
                         << "  monitorwsSpecs is " << monitorwsSpecs
                         << std::endl;
         } else { // at this point there are monitors in the list which are not
                  // in the min& max range
           // so find those  monitors  count and calculate the workspace specs
-          std::vector<specid_t>::const_iterator itr;
-          std::vector<specid_t>::const_iterator monitr;
-          specid_t monCounter = 0;
+          std::vector<specnum_t>::const_iterator itr;
+          std::vector<specnum_t>::const_iterator monitr;
+          specnum_t monCounter = 0;
           for (itr = m_spec_list.begin(); itr != m_spec_list.end(); ++itr) {
             monitr = find(monitorSpecList.begin(), monitorSpecList.end(), *itr);
             if (monitr != monitorSpecList.end())
@@ -1047,9 +1048,9 @@ void LoadRawHelper::calculateWorkspacesizes(
         }
       }      // end if loop for m_interval
       else { // if only List true
-        specid_t mSize = 0;
-        std::vector<specid_t>::const_iterator itr;
-        std::vector<specid_t>::const_iterator monitr;
+        specnum_t mSize = 0;
+        std::vector<specnum_t>::const_iterator itr;
+        std::vector<specnum_t>::const_iterator monitr;
         for (itr = m_spec_list.begin(); itr != m_spec_list.end(); ++itr) {
           monitr = find(monitorSpecList.begin(), monitorSpecList.end(), *itr);
           if (monitr != monitorSpecList.end()) {
@@ -1080,7 +1081,7 @@ void LoadRawHelper::loadSpectra(
   const int64_t periodTimesNSpectraP1 =
       period * (static_cast<int64_t>(m_numberOfSpectra) + 1);
   // loop through spectra
-  for (specid_t i = 1; i <= m_numberOfSpectra; ++i) {
+  for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
     int64_t histToRead = i + periodTimesNSpectraP1;
     if ((i >= m_spec_min && i < m_spec_max) ||
         (m_list &&
@@ -1165,7 +1166,7 @@ LoadRawHelper::searchForLogFiles(const std::string &pathToRawFile) {
   std::string l_filenamePart =
       Poco::Path(l_path.path()).getFileName(); // get filename part only
   if (isAscii(pathToRawFile) &&
-      l_filenamePart.rfind("_") != std::string::npos) {
+      l_filenamePart.rfind('_') != std::string::npos) {
     // then we will assume that the file is an ISIS log file
     potentialLogFiles.insert(pathToRawFile);
   } else {
@@ -1255,7 +1256,7 @@ LoadRawHelper::getLogFilenamesfromADS(const std::string &pathToRawFile) {
   std::string logFile;
   std::set<std::string> logfilesList;
   Poco::Path logpath(pathToRawFile);
-  size_t pos = pathToRawFile.find_last_of("/");
+  size_t pos = pathToRawFile.find_last_of('/');
   if (pos == std::string::npos) {
     pos = pathToRawFile.find_last_of("\\");
   }
@@ -1264,7 +1265,7 @@ LoadRawHelper::getLogFilenamesfromADS(const std::string &pathToRawFile) {
   }
   while (Mantid::Kernel::Strings::extractToEOL(adstream, str)) {
     std::string fileName;
-    pos = str.find("*");
+    pos = str.find('*');
     if (pos == std::string::npos)
       continue;
     fileName = str.substr(pos + 1, str.length() - pos);

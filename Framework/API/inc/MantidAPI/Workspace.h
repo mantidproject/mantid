@@ -53,8 +53,7 @@ class AnalysisDataServiceImpl;
  */
 class MANTID_API_DLL Workspace : public Kernel::DataItem {
 public:
-  Workspace();
-  ~Workspace() override;
+  Workspace() = default;
 
   /** Returns a clone (copy) of the workspace with covariant return type in all
    * derived classes.
@@ -76,7 +75,7 @@ public:
    *   clone() is not virtual this is a non-issue.
    */
   Workspace_uptr clone() const { return Workspace_uptr(doClone()); }
-
+  Workspace &operator=(const Workspace &other) = delete;
   // DataItem interface
   /// Name
   const std::string name() const override { return this->getName(); }
@@ -106,9 +105,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  Workspace(const Workspace &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  Workspace &operator=(const Workspace &other);
+  Workspace(const Workspace &) = default;
 
 private:
   void setName(const std::string &);

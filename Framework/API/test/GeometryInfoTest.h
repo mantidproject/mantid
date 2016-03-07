@@ -66,7 +66,7 @@ public:
   }
 
   void test_isMasked() {
-    auto factory = GeometryInfoFactory(m_workspace);
+    GeometryInfoFactory factory(m_workspace);
     TS_ASSERT_EQUALS(
         GeometryInfo(*m_factory, *(m_workspace.getSpectrum(0))).isMasked(),
         true);

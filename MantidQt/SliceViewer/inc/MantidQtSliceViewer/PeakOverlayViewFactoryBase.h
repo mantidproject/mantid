@@ -41,8 +41,8 @@ namespace MantidQt
     protected:
       QwtPlot * m_plot;
       QWidget * m_parent;
-      QColor m_peakColour;
-      QColor m_backColour;
+      PeakViewColor m_foregroundViewColor;
+      PeakViewColor m_backgroundViewColor;
       const int m_plotXIndex;
       const int m_plotYIndex;
     public:

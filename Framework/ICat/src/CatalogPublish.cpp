@@ -29,12 +29,12 @@ DECLARE_ALGORITHM(CatalogPublish)
 
 /// Init method to declare algorithm properties
 void CatalogPublish::init() {
-  declareProperty(new Mantid::API::FileProperty(
-                      "FileName", "", Mantid::API::FileProperty::OptionalLoad),
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "FileName", "", API::FileProperty::OptionalLoad),
                   "The file to publish.");
-  declareProperty(new Mantid::API::WorkspaceProperty<Mantid::API::Workspace>(
-                      "InputWorkspace", "", Mantid::Kernel::Direction::Input,
-                      Mantid::API::PropertyMode::Optional),
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+                      "InputWorkspace", "", Kernel::Direction::Input,
+                      API::PropertyMode::Optional),
                   "The workspace to publish.");
   declareProperty(
       "NameInCatalog", "",

@@ -62,9 +62,9 @@ const std::string AddTimeSeriesLog::category() const {
  * Initialize the algorithm's properties.
  */
 void AddTimeSeriesLog::init() {
-  declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("Workspace", "", Direction::InOut),
-      "In/out workspace that will store the new log information");
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "Workspace", "", Direction::InOut),
+                  "In/out workspace that will store the new log information");
 
   declareProperty(
       "Name", "", boost::make_shared<MandatoryValidator<std::string>>(),

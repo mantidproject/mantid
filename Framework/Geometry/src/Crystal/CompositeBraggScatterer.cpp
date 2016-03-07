@@ -188,7 +188,7 @@ void CompositeBraggScatterer::redeclareProperties() {
     for (auto &property : properties) {
       std::string propertyName = property->name();
       if (!existsProperty(propertyName)) {
-        declareProperty(property->clone());
+        declareProperty(std::unique_ptr<Property>(property->clone()));
       }
     }
   }

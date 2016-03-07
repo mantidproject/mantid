@@ -58,11 +58,6 @@ class FunctionHandler;
 */
 class MANTID_API_DLL IFunction1D : public virtual IFunction {
 public:
-  /// Virtual destructor
-  /// (avoids warnings about non-trivial move assignment in virtually inheriting
-  /// classes)
-  ~IFunction1D() override {}
-
   /* Overidden methods */
 
   void function(const FunctionDomain &domain,
@@ -81,7 +76,7 @@ public:
                             const size_t nData, const size_t order) const;
 
   /// Derivatives of function with respect to active parameters
-  virtual void functionDeriv1D(Jacobian *out, const double *xValues,
+  virtual void functionDeriv1D(Jacobian *jacobian, const double *xValues,
                                const size_t nData);
 
 protected:

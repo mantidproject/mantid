@@ -92,8 +92,8 @@ protected:
   void init() override;
   void exec() override;
 
-  void propagateMasks(API::MatrixWorkspace_const_sptr inputW,
-                      API::MatrixWorkspace_sptr outputW, int hist);
+  void propagateMasks(API::MatrixWorkspace_const_sptr inputWS,
+                      API::MatrixWorkspace_sptr outputWS, int hist);
 };
 
 } // namespace Algorithms

@@ -37,7 +37,7 @@ namespace DataObjects {
 class DLLExport PeakShapeFactory {
 public:
   /// Destructor
-  virtual ~PeakShapeFactory(){};
+  virtual ~PeakShapeFactory() = default;
   /// Make the product
   virtual Mantid::Geometry::PeakShape *
   create(const std::string &source) const = 0;

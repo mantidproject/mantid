@@ -45,9 +45,6 @@ class DLLExport Abragam : public API::ParamFunction,
                           public API::IFunctionMW,
                           public API::IFunction1D {
 public:
-  /// Destructor
-  ~Abragam() override {}
-
   /// overwrite IFunction base class methods
   std::string name() const override { return "Abragam"; }
 

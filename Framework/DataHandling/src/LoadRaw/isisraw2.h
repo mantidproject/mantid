@@ -10,7 +10,7 @@ public:
   ISISRAW2();
   ~ISISRAW2() override;
 
-  int ioRAW(FILE *file, bool from_file, bool do_data = true) override;
+  int ioRAW(FILE *file, bool from_file, bool read_data = true) override;
 
   void skipData(FILE *file, int i);
   bool readData(FILE *file, int i);

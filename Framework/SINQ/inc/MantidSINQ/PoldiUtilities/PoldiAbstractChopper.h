@@ -40,7 +40,7 @@ namespace Poldi {
 
 class MANTID_SINQ_DLL PoldiAbstractChopper {
 public:
-  virtual ~PoldiAbstractChopper() {}
+  virtual ~PoldiAbstractChopper() = default;
 
   virtual void
   loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) = 0;
@@ -57,7 +57,7 @@ public:
   virtual double distanceFromSample() = 0;
 
 protected:
-  PoldiAbstractChopper() {}
+  PoldiAbstractChopper() = default;
 };
 
 typedef boost::shared_ptr<PoldiAbstractChopper> PoldiAbstractChopper_sptr;

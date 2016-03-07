@@ -47,8 +47,6 @@ class DLLExport Chebyshev : public BackgroundFunction {
 public:
   /// Constructor
   Chebyshev();
-  /// Destructor
-  ~Chebyshev() override{};
 
   /// overwrite IFunction base class methods
   std::string name() const override { return "Chebyshev"; }

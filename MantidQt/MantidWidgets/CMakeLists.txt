@@ -7,6 +7,7 @@ set ( SRC_FILES
     src/ColorBarWidget.cpp
     src/DataSelector.cpp
     src/DiagResults.cpp
+    src/DisplayCurveFit.cpp
     src/DoubleDialogEditor.cpp
     src/DoubleSpinBox.cpp
     src/ErrorCurve.cpp
@@ -106,6 +107,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/ColorBarWidget.h
     inc/MantidQtMantidWidgets/DataSelector.h
     inc/MantidQtMantidWidgets/DiagResults.h
+    inc/MantidQtMantidWidgets/DisplayCurveFit.h
     inc/MantidQtMantidWidgets/DoubleDialogEditor.h
     inc/MantidQtMantidWidgets/DoubleSpinBox.h
     inc/MantidQtMantidWidgets/FilenameDialogEditor.h
@@ -237,6 +239,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/CatalogSearch.ui
     inc/MantidQtMantidWidgets/CatalogSelector.ui
     inc/MantidQtMantidWidgets/ColorBarWidget.ui
+    inc/MantidQtMantidWidgets/DisplayCurveFit.ui
     inc/MantidQtMantidWidgets/IndirectInstrumentConfig.ui
     inc/MantidQtMantidWidgets/MWDiag.ui
     inc/MantidQtMantidWidgets/MWRunFiles.ui

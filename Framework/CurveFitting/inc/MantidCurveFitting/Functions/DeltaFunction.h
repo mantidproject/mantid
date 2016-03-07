@@ -43,8 +43,6 @@ class DLLExport DeltaFunction : public API::IPeakFunction {
 public:
   /// Constructor
   DeltaFunction();
-  /// Destructor
-  ~DeltaFunction() override{};
 
   /// overwrite IPeakFunction base class methods
   double centre() const override { return 0; }

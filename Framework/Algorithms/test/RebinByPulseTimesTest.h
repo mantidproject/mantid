@@ -157,7 +157,9 @@ public:
 
   RebinByPulseTimesTestPerformance() {}
 
-  void setUp() { RebinByTimeBaseTestPerformance<RebinByPulseTimes>::setUp(); }
+  void setUp() override {
+    RebinByTimeBaseTestPerformance<RebinByPulseTimes>::setUp();
+  }
 
   void testExecution() {
     RebinByTimeBaseTestPerformance<RebinByPulseTimes>::testExecution();

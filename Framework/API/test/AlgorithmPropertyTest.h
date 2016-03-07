@@ -18,18 +18,18 @@ private:
   class SimpleSum : public Algorithm {
   public:
     SimpleSum() : Algorithm() {}
-    virtual ~SimpleSum() {}
-    const std::string name() const { return "SimpleSum"; }
-    int version() const { return 1; }
-    const std::string category() const { return "Dummy"; }
-    const std::string summary() const { return "Test summary"; }
+    ~SimpleSum() override {}
+    const std::string name() const override { return "SimpleSum"; }
+    int version() const override { return 1; }
+    const std::string category() const override { return "Dummy"; }
+    const std::string summary() const override { return "Test summary"; }
 
-    void init() {
+    void init() override {
       declareProperty("Input1", 2);
       declareProperty("Input2", 1);
       declareProperty("Output1", -1, Direction::Output);
     }
-    void exec() {
+    void exec() override {
       const int lhs = getProperty("Input1");
       const int rhs = getProperty("Input2");
       const int sum = lhs + rhs;
@@ -40,26 +40,28 @@ private:
 
   class HasAlgProp : public Algorithm {
   public:
-    const std::string name() const { return "HasAlgProp"; }
-    int version() const { return 1; }
-    const std::string category() const { return "Dummy"; }
-    const std::string summary() const { return "Test summary"; }
-    void init() { declareProperty(new AlgorithmProperty("CalculateStep")); }
-    void exec() {}
+    const std::string name() const override { return "HasAlgProp"; }
+    int version() const override { return 1; }
+    const std::string category() const override { return "Dummy"; }
+    const std::string summary() const override { return "Test summary"; }
+    void init() override {
+      declareProperty(make_unique<AlgorithmProperty>("CalculateStep"));
+    }
+    void exec() override {}
   };
 
   class HasAlgPropAndValidator : public Algorithm {
   public:
-    const std::string name() const { return "HasAlgPropAndValidator"; }
-    int version() const { return 1; }
-    const std::string category() const { return "Dummy"; }
-    const std::string summary() const { return "Test summary"; }
-    void init() {
-      declareProperty(new AlgorithmProperty(
+    const std::string name() const override { return "HasAlgPropAndValidator"; }
+    int version() const override { return 1; }
+    const std::string category() const override { return "Dummy"; }
+    const std::string summary() const override { return "Test summary"; }
+    void init() override {
+      declareProperty(make_unique<AlgorithmProperty>(
           "CalculateStep",
           boost::make_shared<AlgorithmHasProperty>("Output1")));
     }
-    void exec() {}
+    void exec() override {}
   };
 
 public:
@@ -77,7 +79,7 @@ public:
         .subscribe<HasAlgPropAndValidator>();
   }
 
-  ~AlgorithmPropertyTest() {
+  ~AlgorithmPropertyTest() override {
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("SimpleSum", 1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("HasAlgProp1", 1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe(

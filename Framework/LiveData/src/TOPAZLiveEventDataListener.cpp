@@ -300,7 +300,7 @@ void TOPAZLiveEventDataListener::start(Kernel::DateAndTime startTime) {
 void TOPAZLiveEventDataListener::run() {
   try {
 
-    if (m_isConnected == false) // sanity check
+    if (!m_isConnected) // sanity check
     {
       throw std::runtime_error(std::string("TOPAZLiveEventDataListener::run(): "
                                            "No connection to event_catcher."));
@@ -312,7 +312,7 @@ void TOPAZLiveEventDataListener::run() {
 
     Poco::Net::SocketAddress sendAddr; // address of the sender
     // loop until the foreground thread tells us to stop
-    while (m_stopThread == false) {
+    while (!m_stopThread) {
       // it's possible that a stop request came in while we were sleeping...
       if (m_stopThread) {
         break;
@@ -322,7 +322,7 @@ void TOPAZLiveEventDataListener::run() {
       try {
         bytesRead = m_dataSocket.receiveFrom(m_udpBuf, m_udpBufSize, sendAddr);
       } catch (Poco::TimeoutException &) {
-        if (m_stopThread == false) {
+        if (!m_stopThread) {
           // Don't need to stop processing or anything - just log a warning
           g_log.warning("Timeout reading from the network.  "
                         "Is event_catcher still sending?");
@@ -389,7 +389,7 @@ void TOPAZLiveEventDataListener::run() {
         // Timestamp for the events
         Mantid::Kernel::DateAndTime eventTime = timeFromPulse(&pid[i]);
 
-        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+        std::lock_guard<std::mutex> scopedLock(m_mutex);
         // Save the pulse charge in the logs
         // TODO:  We're not sure what the units are on the charge value
         // They *might* be picoCoulombs, or the might be units of 10pC
@@ -603,7 +603,7 @@ boost::shared_ptr<Workspace> TOPAZLiveEventDataListener::extractData() {
 
   // Lock the mutex and swap the workspaces
   {
-    Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+    std::lock_guard<std::mutex> scopedLock(m_mutex);
     std::swap(m_eventBuffer, temp);
   } // mutex automatically unlocks here
 

@@ -44,11 +44,6 @@ void copyLogs(const EventWorkspace_sptr &from, EventWorkspace_sptr &to) {
 EventWorkspaceCollection::EventWorkspaceCollection()
     : m_WsVec(1, createEmptyEventWorkspace()) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-EventWorkspaceCollection::~EventWorkspaceCollection() {}
-
 //-----------------------------------------------------------------------------
 /**
 * Create a blank event workspace
@@ -172,7 +167,7 @@ void EventWorkspaceCollection::setSpectrumNumbersFromUniqueSpectra(
 }
 
 void EventWorkspaceCollection::setSpectrumNumberForAllPeriods(
-    const size_t spectrumNumber, const specid_t specid) {
+    const size_t spectrumNumber, const specnum_t specid) {
   for (auto &ws : m_WsVec) {
     auto spec = ws->getSpectrum(spectrumNumber);
     spec->setSpectrumNo(specid);
@@ -218,12 +213,12 @@ EventWorkspaceCollection::getEventList(const std::size_t workspace_index) {
 }
 
 std::vector<size_t> EventWorkspaceCollection::getSpectrumToWorkspaceIndexVector(
-    Mantid::specid_t &offset) const {
+    Mantid::specnum_t &offset) const {
   return m_WsVec[0]->getSpectrumToWorkspaceIndexVector(offset);
 }
 std::vector<size_t>
 EventWorkspaceCollection::getDetectorIDToWorkspaceIndexVector(
-    Mantid::specid_t &offset, bool dothrow) const {
+    Mantid::specnum_t &offset, bool dothrow) const {
   return m_WsVec[0]->getDetectorIDToWorkspaceIndexVector(offset, dothrow);
 }
 

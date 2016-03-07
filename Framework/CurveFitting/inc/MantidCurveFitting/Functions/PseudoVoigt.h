@@ -49,8 +49,6 @@ namespace Functions {
 */
 class DLLExport PseudoVoigt : public API::IPeakFunction {
 public:
-  ~PseudoVoigt() override {}
-
   double centre() const override { return getParameter("PeakCentre"); }
   double height() const override { return getParameter("Height"); }
   double fwhm() const override { return getParameter("FWHM"); }

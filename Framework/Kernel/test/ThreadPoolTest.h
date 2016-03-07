@@ -6,19 +6,15 @@
 #include <MantidKernel/Timer.h>
 #include <MantidKernel/FunctionTask.h>
 #include <MantidKernel/ProgressText.h>
-#include "MantidKernel/MultiThreaded.h"
 #include <MantidKernel/ThreadPool.h>
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
 
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
-#include <Poco/Mutex.h>
 #include <cstdlib>
 
 using namespace Mantid::Kernel;
-
-//#include <boost/thread.hpp>
 
 //=======================================================================================
 
@@ -42,7 +38,7 @@ public:
 
   void waste_time_with_lock(double seconds) {
     {
-      Mutex::ScopedLock lock(m_mutex);
+      std::lock_guard<std::mutex> lock(m_mutex);
       std::cout << "waste_time for " << seconds << " seconds." << std::endl;
     }
     waste_time(seconds);
@@ -51,13 +47,13 @@ public:
   /** Add a number but use a lock to avoid contention */
   void add_to_number(size_t adding) {
     {
-      Mutex::ScopedLock lock(m_mutex);
+      std::lock_guard<std::mutex> lock(m_mutex);
       total += adding;
     }
   }
 
 private:
-  Mutex m_mutex;
+  std::mutex m_mutex;
 
 public:
   size_t total;
@@ -77,7 +73,7 @@ void threadpooltest_adding_stuff(int val) {
 
 // Counter for the test.
 size_t TaskThatAddsTasks_counter;
-Mutex TaskThatAddsTasks_mutex;
+std::mutex TaskThatAddsTasks_mutex;
 
 //=======================================================================================
 /** Class that adds tasks to its scheduler */
@@ -92,7 +88,7 @@ public:
   }
 
   // Run the task
-  void run() {
+  void run() override {
     if (depth < 4) {
       // Add ten tasks (one level deeper)
       for (size_t i = 0; i < 10; i++) {
@@ -100,7 +96,7 @@ public:
       }
     } else {
       // Lock to ensure you don't step on yourself.
-      Mutex::ScopedLock lock(TaskThatAddsTasks_mutex);
+      std::lock_guard<std::mutex> lock(TaskThatAddsTasks_mutex);
       // Increment the counter only at the lowest level.
       TaskThatAddsTasks_counter += 1;
     }
@@ -158,7 +154,7 @@ public:
                    ThreadPoolTest *myParent)
         : ProgressBase(start, end, numSteps), parent(myParent) {}
 
-    void doReport(const std::string &msg = "") {
+    void doReport(const std::string &msg = "") override {
       parent->last_report_message = msg;
       parent->last_report_counter = m_i;
       double p = m_start + m_step * double(m_i - m_ifirst);
@@ -334,7 +330,7 @@ public:
     TimeWaster mywaster;
     size_t num = 30000;
     mywaster.total = 0;
-    boost::shared_ptr<Mutex> lastMutex;
+    boost::shared_ptr<std::mutex> lastMutex;
     for (size_t i = 0; i <= num; i++) {
       Task *task = new FunctionTask(
           boost::bind(&TimeWaster::add_to_number, &mywaster, i),
@@ -342,7 +338,7 @@ public:
       // Create a new mutex every 1000 tasks. This is more relevant to the
       // ThreadSchedulerMutexes; others ignore it.
       if (i % 1000 == 0)
-        lastMutex = boost::make_shared<Mutex>();
+        lastMutex = boost::make_shared<std::mutex>();
       task->setMutex(lastMutex);
       p.schedule(task);
     }
@@ -413,7 +409,7 @@ public:
   //=======================================================================================
   /** Task that throws an exception */
   class TaskThatThrows : public Task {
-    void run() {
+    void run() override {
       ThreadPoolTest_TaskThatThrows_counter++;
       throw Mantid::Kernel::Exception::NotImplementedError(
           "Test exception from TaskThatThrows.");

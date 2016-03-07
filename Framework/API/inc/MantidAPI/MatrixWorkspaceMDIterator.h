@@ -41,7 +41,6 @@ public:
   MatrixWorkspaceMDIterator(const MatrixWorkspace *workspace,
                             Mantid::Geometry::MDImplicitFunction *function,
                             size_t beginWI = 0, size_t endWI = size_t(-1));
-  ~MatrixWorkspaceMDIterator() override;
   size_t getDataSize() const override;
 
   bool valid() const override;

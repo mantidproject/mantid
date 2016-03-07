@@ -154,7 +154,7 @@ private:
 
   /// used to store the lists of WORKSPACE INDICES that will be grouped, the
   /// keys are not used
-  typedef std::map<specid_t, std::vector<size_t>> storage_map;
+  typedef std::map<specnum_t, std::vector<size_t>> storage_map;
 
   /// An estimate of the percentage of the algorithm runtimes that has been
   /// completed

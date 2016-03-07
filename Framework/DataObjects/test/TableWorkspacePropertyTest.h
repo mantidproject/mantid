@@ -22,28 +22,28 @@ public:
   /// no arg constructor
   TableWorkspaceAlgorithm() : Algorithm() {}
   /// virtual destructor
-  virtual ~TableWorkspaceAlgorithm() {}
+  ~TableWorkspaceAlgorithm() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "TableWorkspaceAlgorithm"; }
+  const std::string name() const override { return "TableWorkspaceAlgorithm"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Examples"; }
-  virtual const std::string summary() const { return "Test summary"; }
+  const std::string category() const override { return "Examples"; }
+  const std::string summary() const override { return "Test summary"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   /// Static reference to the logger class
   static Mantid::Kernel::Logger &g_log;
 };
 
 void TableWorkspaceAlgorithm::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace>("Table", "", Direction::Input));
+  declareProperty(Mantid::Kernel::make_unique<WorkspaceProperty<Workspace>>(
+      "Table", "", Direction::Input));
 }
 
 void TableWorkspaceAlgorithm::exec() {

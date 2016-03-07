@@ -21,14 +21,14 @@ public:
   }
   static void destroySuite(IkedaCarpenterPVTest *suite) { delete suite; }
 
-  void setUp() {
+  void setUp() override {
     using Mantid::Kernel::ConfigService;
     m_preSetupPeakRadius =
         ConfigService::Instance().getString("curvefitting.peakRadius");
     ConfigService::Instance().setString("curvefitting.peakRadius", "100");
   }
 
-  void tearDown() {
+  void tearDown() override {
     using Mantid::Kernel::ConfigService;
     ConfigService::Instance().setString("curvefitting.peakRadius",
                                         m_preSetupPeakRadius);

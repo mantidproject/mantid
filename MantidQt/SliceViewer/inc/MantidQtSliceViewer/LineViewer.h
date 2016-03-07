@@ -21,7 +21,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER LineViewer : public QWidget {
 
 public:
   LineViewer(QWidget *parent = 0);
-  ~LineViewer();
+  ~LineViewer() override;
 
   void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
   void setFreeDimensions(bool all, int dimX, int dimY);

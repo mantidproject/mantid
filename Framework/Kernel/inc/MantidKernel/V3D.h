@@ -42,10 +42,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_KERNEL_DLL V3D {
 public:
   V3D();
-  V3D(const V3D &);
-  V3D &operator=(const V3D &);
   V3D(const double, const double, const double);
-  ~V3D();
 
   // Arithemetic operators overloaded
   V3D operator+(const V3D &v) const;

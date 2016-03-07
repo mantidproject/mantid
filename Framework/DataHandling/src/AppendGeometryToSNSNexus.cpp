@@ -59,14 +59,15 @@ void AppendGeometryToSNSNexus::init() {
   // Declare potential extensions for input NeXus file
   std::vector<std::string> extensions{".nxs", ".h5"};
 
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
-                                        extensions),
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, extensions),
                   "The name of the NeXus file to append geometry to.");
 
   // TODO: change MakeCopy default to False when comfortable. Otherwise need to
   // remove the extra copy once in production.
   declareProperty(
-      new PropertyWithValue<bool>("MakeCopy", true, Direction::Input),
+      Kernel::make_unique<PropertyWithValue<bool>>("MakeCopy", true,
+                                                   Direction::Input),
       "Copy the NeXus file first before appending (optional, default True).");
 }
 

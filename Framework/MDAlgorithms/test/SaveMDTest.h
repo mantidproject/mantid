@@ -250,7 +250,7 @@ public:
 class SaveMDTestPerformance : public CxxTest::TestSuite {
 public:
   MDEventWorkspace3Lean::sptr ws;
-  void setUp() {
+  void setUp() override {
     // Make a 1D MDEventWorkspace
     ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
     ws->getBoxController()->setSplitInto(5);

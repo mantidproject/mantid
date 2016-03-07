@@ -83,7 +83,7 @@ public:
   /// Constructor
   FunctionBrowser(QWidget *parent = NULL, bool multi = false);
   /// Destructor
-  ~FunctionBrowser();
+  ~FunctionBrowser() override;
   /// Clear the contents
   void clear();
   /// Set the function in the browser
