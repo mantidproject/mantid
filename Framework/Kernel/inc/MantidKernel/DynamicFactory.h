@@ -22,6 +22,7 @@
 // std
 #include <cstring>
 #include <functional>
+#include <iterator>
 #include <map>
 #include <vector>
 
