@@ -569,6 +569,7 @@ QString SANSDiagnostics::getDataLoadedWorkspace() {
   return wsName;
 }
 
+
 /// This method returns name of the whole workspace loaded from
 /// the data file, which will be further processed to separate the data from the
 /// banks (Rear-Detector and Front-Detector)

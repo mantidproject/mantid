@@ -90,7 +90,7 @@ void GetEi2::init()
 
   declareProperty(
       "FirstMonitorIndex", 0,
-      "The spectrum index of the first montitor in the input workspace.",
+      "The workspace index of the first monitor in the input workspace.",
       Direction::Output);
 
   declareProperty("Tzero", 0.0, "", Direction::Output);
@@ -344,7 +344,7 @@ double GetEi2::calculatePeakPosition(size_t ws_index, double t_min,
  *  @param end :: the number of the last bin to include (starts counting bins at
  * 0)
  *  @return The cropped workspace
- *  @throw out_of_range if start, end or specInd are set outside of the vaild
+ *  @throw out_of_range if start, end or ws_index are set outside of the valid
  * range for the workspace
  *  @throw runtime_error if the algorithm just falls over
  *  @throw invalid_argument if the input workspace does not have common binning
