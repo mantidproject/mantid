@@ -322,8 +322,8 @@ public:
 
   /** Return the total number of MD Boxes, irrespective of depth */
   size_t getTotalNumMDBoxes() const {
-    return std::accumulate(m_numMDBoxes.cbegin(), m_numMDBoxes.cend(), size_t{0},
-                           std::plus<size_t>());
+    return std::accumulate(m_numMDBoxes.cbegin(), m_numMDBoxes.cend(),
+                           size_t{0}, std::plus<size_t>());
   }
 
   /** Return the total number of MDGridBox'es, irrespective of depth */
