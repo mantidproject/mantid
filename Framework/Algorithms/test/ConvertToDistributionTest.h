@@ -10,6 +10,13 @@
 using namespace Mantid::API;
 using Mantid::Algorithms::ConvertToDistribution;
 
+class TestConvertToDistribution : public ConvertToDistribution {
+public:
+  std::map<std::string, std::string> wrapValidateInputs() {
+    return this->validateInputs();
+  }
+};
+
 class ConvertToDistributionTest : public CxxTest::TestSuite {
 public:
   static ConvertToDistributionTest *createSuite() {
@@ -51,6 +58,28 @@ public:
       TS_ASSERT_EQUALS(E[i], sqrt(2.0) / 0.5)
     }
     TS_ASSERT(output->isDistribution())
+  }
+
+  /**
+   * Test that the algorithm can handle a WorkspaceGroup as input without
+   * crashing
+   * We have to use the ADS to test WorkspaceGroups
+   */
+  void testValidateInputsWithWSGroup() {
+    auto ws1 = createTestWorkspace();
+    auto ws2 = createTestWorkspace();
+    AnalysisDataService::Instance().add("workspace1", ws1);
+    AnalysisDataService::Instance().add("workspace2", ws2);
+    auto group = boost::make_shared<WorkspaceGroup>();
+    AnalysisDataService::Instance().add("group", group);
+    group->add("workspace1");
+    group->add("workspace2");
+    TestConvertToDistribution conv;
+    conv.initialize();
+    conv.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("Workspace", "group"));
+    TS_ASSERT_THROWS_NOTHING(conv.wrapValidateInputs());
+    AnalysisDataService::Instance().clear();
   }
 
 private:
