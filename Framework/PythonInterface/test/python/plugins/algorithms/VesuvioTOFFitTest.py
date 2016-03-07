@@ -7,7 +7,7 @@ are configured to find the Vesuvio data
 import unittest
 
 from mantid.api import AlgorithmManager
-from mantid.simpleapi import LoadVesuvio
+from VesuvioTesting import create_test_ws
 import vesuvio.commands as vesuvio
 
 class VesuvioTOFFitTest(unittest.TestCase):
@@ -18,10 +18,7 @@ class VesuvioTOFFitTest(unittest.TestCase):
         if self._test_ws is not None:
             return
         # Cache a TOF workspace
-        self.__class__._test_ws = \
-            vesuvio.load_and_crop_data(runs="15039-15045",
-                                                ip_file="Vesuvio_IP_file_test.par",
-                                                spectra="135-136")
+        self.__class__._test_ws = create_test_ws()
 
     # -------------- Success cases ------------------
 
@@ -40,10 +37,10 @@ class VesuvioTOFFitTest(unittest.TestCase):
         self.assertAlmostEqual(50.0, output_ws.readX(0)[0])
         self.assertAlmostEqual(562.0, output_ws.readX(0)[-1])
 
-        self.assertAlmostEqual(0.000928695463881635, output_ws.readY(0)[0])
-        self.assertAlmostEqual(0.00722948549525415, output_ws.readY(0)[-1])
-        self.assertAlmostEqual(1.3595170868608914e-05, output_ws.readY(1)[0])
-        self.assertAlmostEqual(7.365455189265588e-05, output_ws.readY(1)[-1])
+        self.assertAlmostEqual(0.0279822, output_ws.readY(0)[0])
+        self.assertAlmostEqual(0.0063585, output_ws.readY(0)[-1])
+        self.assertAlmostEqual(0.8383345e-04, output_ws.readY(1)[0])
+        self.assertAlmostEqual(0.7507980e-04, output_ws.readY(1)[-1])
 
     def test_single_run_produces_correct_output_workspace_index1_kfixed_no_background(self):
         profiles = "function=GramCharlier,width=[2, 5, 7],hermite_coeffs=[1, 0, 0],k_free=0,sears_flag=1;"\
@@ -60,10 +57,10 @@ class VesuvioTOFFitTest(unittest.TestCase):
         self.assertAlmostEqual(50.0, output_ws.readX(0)[0])
         self.assertAlmostEqual(562.0, output_ws.readX(0)[-1])
 
-        self.assertAlmostEqual(-0.005852648610523481, output_ws.readY(0)[0])
-        self.assertAlmostEqual(-0.013112461599666836, output_ws.readY(0)[-1])
-        self.assertAlmostEqual(1.4735154307712157e-05, output_ws.readY(1)[0])
-        self.assertAlmostEqual(7.6920365161795522e-05, output_ws.readY(1)[-1])
+        self.assertAlmostEqual(0.0155041, output_ws.readY(0)[0])
+        self.assertAlmostEqual(-0.0070975, output_ws.readY(0)[-1])
+        self.assertAlmostEqual(0.8693019e-05, output_ws.readY(1)[0])
+        self.assertAlmostEqual(0.7458504e-04, output_ws.readY(1)[-1])
 
 
     def test_single_run_produces_correct_output_workspace_index0_kfixed_including_background(self):
@@ -84,10 +81,10 @@ class VesuvioTOFFitTest(unittest.TestCase):
         self.assertAlmostEqual(50.0, output_ws.readX(0)[0])
         self.assertAlmostEqual(562.0, output_ws.readX(0)[-1])
 
-        self.assertAlmostEqual(0.000928695463881635, output_ws.readY(0)[0])
-        self.assertAlmostEqual(0.00722948549525415, output_ws.readY(0)[-1])
-        self.assertAlmostEqual(-0.0053373057114913395, output_ws.readY(1)[0])
-        self.assertAlmostEqual(0.0031160012861094839, output_ws.readY(1)[-1])
+        self.assertAlmostEqual(0.0279822, output_ws.readY(0)[0])
+        self.assertAlmostEqual(0.0063585, output_ws.readY(0)[-1])
+        self.assertAlmostEqual(-0.010972, output_ws.readY(1)[0])
+        self.assertAlmostEqual(0.00522054, output_ws.readY(1)[-1])
 
     # -------------- Failure cases ------------------
 
