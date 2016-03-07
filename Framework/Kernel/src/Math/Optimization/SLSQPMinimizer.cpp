@@ -7,7 +7,7 @@
 #include <sstream>
 
 #ifdef __clang__
-#ifndef __OSX__
+#ifndef __APPLE__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored                                               \
     "-Wcppcoreguidelines-pro-bounds-pointer-arithmetic"
