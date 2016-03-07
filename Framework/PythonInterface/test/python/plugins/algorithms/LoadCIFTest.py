@@ -234,15 +234,15 @@ class AtomListBuilderTest(unittest.TestCase):
 
         uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in uElements.iteritems()])
         uDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
-                           (u'_atom_site_aniso_label', [u'Si']),
-                           (u'_atom_site_u_iso_or_equiv', [u'invalid', u'0.01'])
+                           (u'_atom_site_aniso_label', [u'Al']),
+                           (u'_atom_site_u_iso_or_equiv', [u'0.01', u'invalid'])
                            ]))
 
         data = self._getData(uDict)
         cell = UnitCell(5.4, 4.3, 3.2)
 
         self.assertEqual(self.builder._getAtoms(data, cell),
-                         'Si 1/8 1/8 1/8 1.0 0.02;Al 0.34 0.56 0.23 1.0 0.01')
+                         'Si 1/8 1/8 1/8 1.0 0.01;Al 0.34 0.56 0.23 1.0 0.02')
 
     def test_getAtoms_iso_preferred(self):
         uElements = {'11': [u'0.01', u'0.02'], '12': [u'0.0', u'0.0'], '13': [u'0.0', u'0.0'],

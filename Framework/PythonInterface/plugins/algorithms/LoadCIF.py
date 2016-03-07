@@ -26,6 +26,9 @@ def getFloatOrNone(strValue):
 
 
 def convertBtoU(bIso):
+    if bIso is None:
+        return None
+
     return bIso / (8.0 * np.pi * np.pi)
 
 
@@ -221,10 +224,11 @@ class AtomListBuilder(object):
         # Try to get a list of isotropic U-values, replace invalid ones by None
         isotropicUs = []
         if keyUIso in cifData.keys():
-            isotropicUs += [getFloatOrNone(u) for u in cifData[keyUIso]]
+            isotropicUNoErrors = [removeErrorEstimateFromNumber(u) for u in cifData[keyUIso]]
+            isotropicUs += [getFloatOrNone(u) for u in isotropicUNoErrors]
         elif keyBIso in cifData.keys():
-            isotropicUs += [convertBtoU(getFloatOrNone(b)) if getFloatOrNone(b) else None for b in
-                            cifData[keyBIso]]
+            isotropicBsNoErrors = [removeErrorEstimateFromNumber(b) for b in cifData[keyBIso]]
+            isotropicUs += [convertBtoU(getFloatOrNone(b)) for b in isotropicBsNoErrors]
         else:
             isotropicUs += [None] * len(labels)
 
@@ -260,13 +264,15 @@ class AtomListBuilder(object):
         if anisoLabel not in cifData.keys():
             raise RuntimeError('Mandatory field \'_atom_site_aniso_label\' is missing.')
 
+        anisoLabels = cifData[anisoLabel]
+
         # Try to extract U or if that fails, B.
         try:
-            return self._getTensors(cifData, labels,
+            return self._getTensors(cifData, anisoLabels,
                                     [u'_atom_site_aniso_u_11', u'_atom_site_aniso_u_12', u'_atom_site_aniso_u_13',
                                      u'_atom_site_aniso_u_22', u'_atom_site_aniso_u_23', u'_atom_site_aniso_u_33'])
         except RuntimeError:
-            bTensors = self._getTensors(cifData, labels,
+            bTensors = self._getTensors(cifData, anisoLabels,
                                         [u'_atom_site_aniso_b_11', u'_atom_site_aniso_b_12', u'_atom_site_aniso_b_13',
                                          u'_atom_site_aniso_b_22', u'_atom_site_aniso_b_23', u'_atom_site_aniso_b_33'])
             return dict([(label, convertBtoU(bTensor)) for label, bTensor in bTensors.iteritems()])
