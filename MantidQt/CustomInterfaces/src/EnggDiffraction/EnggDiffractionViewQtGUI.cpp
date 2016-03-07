@@ -78,6 +78,10 @@ void EnggDiffractionViewQtGUI::initLayout() {
   m_uiTabPreproc.setupUi(wPreproc);
   m_ui.tabMain->addTab(wPreproc, QString("Pre-processing"));
 
+  QWidget *wFitting = new QWidget(m_ui.tabMain);
+  m_uiTabFitting.setupUi(wFitting);
+  m_ui.tabMain->addTab(wFitting, QString("Fitting"));
+
   QWidget *wSettings = new QWidget(m_ui.tabMain);
   m_uiTabSettings.setupUi(wSettings);
   m_ui.tabMain->addTab(wSettings, QString("Settings"));

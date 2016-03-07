@@ -10,6 +10,7 @@
 #include "ui_EnggDiffractionQtTabCalib.h"
 #include "ui_EnggDiffractionQtTabFocus.h"
 #include "ui_EnggDiffractionQtTabPreproc.h"
+#include "ui_EnggDiffractionQtTabFitting.h"
 #include "ui_EnggDiffractionQtTabSettings.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -239,6 +240,7 @@ private:
   Ui::EnggDiffractionQtTabCalib m_uiTabCalib;
   Ui::EnggDiffractionQtTabFocus m_uiTabFocus;
   Ui::EnggDiffractionQtTabPreproc m_uiTabPreproc;
+  Ui::EnggDiffractionQtTabFitting m_uiTabFitting;
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
 
   /// converts QList to a vector
