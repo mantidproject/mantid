@@ -52,24 +52,23 @@ SliceSelector::SliceSelector(QWidget *parent) :
 
 SliceSelector::~SliceSelector() { m_selectedWorkspaceIndex = 0; }
 
-/// Initialize the ui form and connect SIGNALS to SLOTS
-void SliceSelector::initLayout() {
-  m_uiForm.setupUi(this);
-  connect(m_uiForm.dataSelector, SIGNAL(dataReady(const QString &)), this,
-          SLOT(loadSlices(const QString &)));
-  connect(m_uiForm.pushHelp, SIGNAL(clicked()), this, SLOT(showHelp()));
-  connect(m_uiForm.spinboxSliceSelector, SIGNAL(valueChanged(int)), this,
-          SLOT(updateSelectedSlice(int)));
-  connect(m_uiForm.sliderSelectSlice, SIGNAL(valueChanged(int)), this,
-          SLOT(updateSelectedSlice(int)));
-  connect(m_uiForm.pushLaunchBackgroundRemover, SIGNAL(clicked()), this,
-          SLOT(launchBackgroundRemover()));
-}
 
-/// Load file or workspace containing energy slices
+/*        *********************
+ *        **  Private Slots  **
+ *        *********************/
+
+
+/**
+ * @brief Load file or workspace, then initialize the widgets
+ * @param workspaceName
+ */
 void SliceSelector::loadSlices(const QString &workspaceName) {
   m_loadedWorkspace =
       boost::make_shared<WorkspaceRecord>(workspaceName.toStdString());
+  /// don't process if workspace is not valid
+  if(!this->isWorkspaceValid()){
+    return;
+  }
   m_selectedWorkspaceIndex = 0;
   m_loadedWorkspace->updateMetadata(m_selectedWorkspaceIndex);
   int maximumWorkspaceIndex =
@@ -94,11 +93,13 @@ void SliceSelector::loadSlices(const QString &workspaceName) {
   m_uiForm.slices2DPlot->setWorkspace(m_loadedWorkspace->m_ws);
   m_uiForm.slices2DPlot->updateDisplay();
 
-  /// initialize the preview plot
+  /// initialize the 1D PreviewPlot widget
   updatePlotSelectedSlice();
 }
 
-///
+/**
+ * @brief Refresh the slice showing in the 1D plot
+ */
 void SliceSelector::updatePlotSelectedSlice() {
   m_uiForm.previewPlotSelectedSlice->clear();
   m_uiForm.previewPlotSelectedSlice->addSpectrum(
@@ -106,7 +107,10 @@ void SliceSelector::updatePlotSelectedSlice() {
       m_loadedWorkspace->m_ws, m_selectedWorkspaceIndex);
 }
 
-/// Update all widgets in the form with the new selected index
+/**
+ * @brief Update all widgets in the form with the new selected index
+ * @param newSelectedIndex
+ */
 void SliceSelector::updateSelectedSlice(const int &newSelectedIndex) {
   m_selectedWorkspaceIndex = static_cast<size_t>(newSelectedIndex);
   /// Check  pointer m_loadedWorkspace because the user may attemp to manipulate
@@ -121,7 +125,9 @@ void SliceSelector::updateSelectedSlice(const int &newSelectedIndex) {
   }
 }
 
-/// Initialize and/or update the dialog to remove the multiphonon background
+/**
+ * @brief Initialize and/or update the dialog to remove the multiphonon background
+ */
 void SliceSelector::launchBackgroundRemover() {
   /// parent of BackgroundRemover is this main window
   // if (!m_BackgroundRemover){
@@ -132,11 +138,69 @@ void SliceSelector::launchBackgroundRemover() {
   g_log.error("Not implemented...yet");
 }
 
-/// Opens the Qt help page for the interface
+/**
+ * @brief Opens the Qt help page for the interface
+ */
 void SliceSelector::showHelp() {
   MantidQt::API::HelpWindow::showCustomInterface(
       NULL, QString("Dynamic PDF Calculator"));
 }
+
+
+/*        ***********************
+ *        **  Private Members  **
+ *        ***********************/
+
+
+/**
+ * @brief Initialize the ui form and connect SIGNALS to SLOTS
+ */
+void SliceSelector::initLayout() {
+  m_uiForm.setupUi(this);
+  connect(m_uiForm.dataSelector, SIGNAL(dataReady(const QString &)), this,
+          SLOT(loadSlices(const QString &)));
+  connect(m_uiForm.pushHelp, SIGNAL(clicked()), this, SLOT(showHelp()));
+  connect(m_uiForm.spinboxSliceSelector, SIGNAL(valueChanged(int)), this,
+          SLOT(updateSelectedSlice(int)));
+  connect(m_uiForm.sliderSelectSlice, SIGNAL(valueChanged(int)), this,
+          SLOT(updateSelectedSlice(int)));
+  connect(m_uiForm.pushLaunchBackgroundRemover, SIGNAL(clicked()), this,
+          SLOT(launchBackgroundRemover()));
+}
+
+/**
+ * @brief Check for correct units and workspace type
+ */
+bool SliceSelector::isWorkspaceValid(){
+  /// check the pointer to the workspace is not empty
+  if(!m_loadedWorkspace->m_ws){
+    auto title = QString::fromStdString(this->name());
+    auto error = QString::fromStdString("Workspace must be of type MatrixWorkspace");
+    QMessageBox::warning(this, title, error);
+    return false;
+  }
+  /// check the units of the "X-axis" is momentum transfer
+  auto axis = m_loadedWorkspace->m_ws->getAxis(0);
+  if (axis->unit()->unitID() != "MomentumTransfer") {
+    auto title = QString::fromStdString(this->name());
+    auto error = QString::fromStdString("X-axis units must be momentum transfer");
+    QMessageBox::warning(this, title, error);
+    return false;
+  }
+  /// check the units of the "vertical" dimension is energy transfer
+  axis = m_loadedWorkspace->m_ws->getAxis(1);
+  if (axis->unit()->unitID() != "DeltaE") {
+    auto title = QString::fromStdString(this->name());
+    auto error = QString::fromStdString("Y-axis units must be energy transfer (meV)");
+    QMessageBox::warning(this, title, error);
+    return false;
+  }
+  return true;
+}
+
+
+
+
 }
 }
 }
