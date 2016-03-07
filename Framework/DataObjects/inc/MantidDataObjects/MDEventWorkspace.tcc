@@ -774,8 +774,6 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
   // Next, we go through each dimension and see where the box boundaries
   // intersect the line.
   const IMDNode *box = nullptr;
-  size_t numVertexes = 0;
-  coord_t *vertices_arr;
   size_t last_id = size_t(-1);
   for (size_t d = 0; d < num_d; d++) {
     coord_t line_start = start[d];
@@ -794,15 +792,14 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
       VMD lastPos = start;
       coord_t lastLinePos = 0;
       coord_t dir_current_dim = dir[d];
-      for (size_t i = 0; i <= num_boundaries; i++) {
+      for (size_t i = 1; i <= num_boundaries; i++) {
         // Position along the line
-        coord_t linePos = i * box_size;
+        coord_t this_x = i * box_size;
+        coord_t linePos = this_x / dir_current_dim;
         // Full position
         VMD pos = start + (dir * linePos);
 
-        // Getting the box using boundary coordinate could return the box we
-        // want or the following box, therefore use a position halfway between
-        // previous boundary and this one
+        // Get box using midpoint as using boundary would be ambiguous
         VMD middle = (pos + lastPos) * 0.5;
         box = this->data->getBoxAtCoord(middle.getBareArray());
         lastPos = pos;
@@ -813,19 +810,8 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
           // we gained by assuming all boxes are the size of the smallest box
           if (current_id != last_id) {
             last_id = current_id;
-            // Get the line position at the previous boundary of the box
-            vertices_arr = box->getVertexesArray(numVertexes, 1, dim_mask_arr);
-            lastLinePos = findBoundaryCrossBisect(
-                vertices_arr[dirSign[d]], line_start, dir_current_dim, linePos,
-                lastLinePos, length, mid_points);
-            // To include the last box we also need a point halfway between
-            // previous boundary and the upper bound of the box
-            if (i == num_boundaries) {
-              lastLinePos = findBoundaryCrossBisect(
-                  vertices_arr[abs(static_cast<int>(dirSign[d] - 1))],
-                  line_start, dir_current_dim, linePos, lastLinePos, length,
-                  mid_points);
-            }
+            lastLinePos = findBoundaryCrossBisect(linePos, lastLinePos, length,
+                                                  mid_points);
           }
         }
       }
@@ -835,14 +821,11 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
 }
 
 TMDE(coord_t MDEventWorkspace)::findBoundaryCrossBisect(
-    const coord_t lower_bound, const coord_t line_start,
-    const coord_t dir_current_dim, coord_t linePos, coord_t lastLinePos,
-    const coord_t length, std::set<coord_t> &mid_points) const {
-  linePos = (lower_bound - line_start) / dir_current_dim;
-
+    coord_t linePos, coord_t lastLinePos, const coord_t length,
+    std::set<coord_t> &mid_points) const {
   if (linePos >= 0 && linePos <= length) {
     // Avoid picking up a 0 due to line hitting a box corner
-    if ((linePos - lastLinePos) > 1e-5) {
+    if (fabs(linePos - lastLinePos) > 1e-5) {
       coord_t line_pos_of_box_centre =
           static_cast<coord_t>((linePos + lastLinePos) * 0.5);
       mid_points.insert(line_pos_of_box_centre);
@@ -879,12 +862,6 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
     throw std::runtime_error(
         "End point must have the same number of dimensions as the workspace.");
 
-  // If the entire line is out-of-bounds
-  if (!(isInBounds(start.getBareArray()) && isInBounds(end.getBareArray()))) {
-    makeSinglePointWithNaN(x, y, e);
-    return;
-  }
-
   // Unit-vector of the direction
   VMD dir = end - start;
   const auto length = dir.normalize();
@@ -904,18 +881,21 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
     for (const auto &line_pos : mid_points) {
       // This position in coordinates of the workspace is
       VMD ws_pos = start + (dir * line_pos);
-      auto box = this->data->getBoxAtCoord(ws_pos.getBareArray());
 
-      // If the box is not masked then record the signal and error here
-      if (!box->getIsMasked()) {
-        x.push_back(line_pos);
-        signal_t signal = this->getNormalizedSignal(box, normalize);
-        if (boost::math::isinf(signal)) {
-          // The plotting library (qwt) doesn't like infs.
-          signal = std::numeric_limits<signal_t>::quiet_NaN();
+      if (isInBounds(ws_pos.getBareArray())) {
+        auto box = this->data->getBoxAtCoord(ws_pos.getBareArray());
+
+        // If the box is not masked then record the signal and error here
+        if (!box->getIsMasked()) {
+          x.push_back(line_pos);
+          signal_t signal = this->getNormalizedSignal(box, normalize);
+          if (boost::math::isinf(signal)) {
+            // The plotting library (qwt) doesn't like infs.
+            signal = std::numeric_limits<signal_t>::quiet_NaN();
+          }
+          y.push_back(signal);
+          e.push_back(this->getNormalizedError(box, normalize));
         }
-        y.push_back(signal);
-        e.push_back(this->getNormalizedError(box, normalize));
       }
     }
   }

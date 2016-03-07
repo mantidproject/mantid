@@ -305,7 +305,7 @@ public:
     const auto length = dir.normalize();
 
     auto box_mid_points =
-        ew->getBoxBoundaryBisectsOnLine(start, 3, dir, length);
+        ew->getBoxBoundaryBisectsOnLine(start, end, 3, dir, length);
 
     // Copy set to vector for test
     TSM_ASSERT_EQUALS("8 box boundary bisections should be found",
@@ -317,6 +317,31 @@ public:
     for (size_t i = 0; i < mid_points_vect.size(); ++i) {
       TS_ASSERT_DELTA(mid_points_vect[i],
                       (static_cast<double>(i) + 0.5) * 0.5 * sqrt(2.0), 1e-5);
+    }
+  }
+
+  void test_getBoxBoundaryBisectsOnLine_crossing_zero() {
+    MDEventWorkspace3Lean::sptr ew =
+        MDEventsTestHelper::makeMDEW<3>(8, -4.0, 4.0, 1);
+
+    // Create a diagonal line through the workspace
+    Mantid::Kernel::VMD start(-4.0, 0, 0);
+    Mantid::Kernel::VMD end(4.0, 0, 0);
+    Mantid::Kernel::VMD dir = end - start;
+    const auto length = dir.normalize();
+
+    auto box_mid_points =
+        ew->getBoxBoundaryBisectsOnLine(start, end, 3, dir, length);
+
+    // Copy set to vector for test
+    TSM_ASSERT_EQUALS("8 box boundary bisections should be found",
+                      box_mid_points.size(), 8);
+    std::vector<double> mid_points_vect(box_mid_points.begin(),
+                                        box_mid_points.end());
+
+    // Each box (cube) has edges 1.0 long
+    for (size_t i = 0; i < mid_points_vect.size(); ++i) {
+      TS_ASSERT_DELTA(mid_points_vect[i], static_cast<double>(i) + 0.5, 1e-5);
     }
   }
 
@@ -347,7 +372,7 @@ public:
     const auto length = dir.normalize();
 
     auto box_mid_points =
-        ew->getBoxBoundaryBisectsOnLine(start, 3, dir, length);
+        ew->getBoxBoundaryBisectsOnLine(start, end, 3, dir, length);
 
     // Copy set to vector for test
     TSM_ASSERT_EQUALS("14 box boundary bisections should be found",
