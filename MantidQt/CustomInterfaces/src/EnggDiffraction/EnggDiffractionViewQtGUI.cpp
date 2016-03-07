@@ -185,8 +185,15 @@ void EnggDiffractionViewQtGUI::doSetupTabPreproc() {
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabFitting() {
+
   connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)), this,
           SLOT(fittingBankIdChanged(int)));
+
+  connect(m_uiTabFitting.pushButton_fitting_browse_peaks,
+	  SIGNAL(released()), this, SLOT(browsePeaksToFit()));
+
+  connect(m_uiTabFitting.pushButton_fit, SIGNAL(released()), this,
+	  SLOT(fitClicked()));
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -569,6 +576,7 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabPreproc.MWRunFiles_preproc_run_num->setEnabled(enable);
   m_uiTabPreproc.pushButton_rebin_time->setEnabled(enable);
   m_uiTabPreproc.pushButton_rebin_multiperiod->setEnabled(enable);
+
 }
 
 void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
@@ -776,6 +784,10 @@ void EnggDiffractionViewQtGUI::rebinTimeClicked() {
 
 void EnggDiffractionViewQtGUI::rebinMultiperiodClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::RebinMultiperiod);
+}
+
+void EnggDiffractionViewQtGUI::fitClicked() {
+  m_presenter->notify(IEnggDiffractionPresenter::FitPeaks);
 }
 
 void EnggDiffractionViewQtGUI::browseInputDirCalib() {
@@ -998,11 +1010,35 @@ void EnggDiffractionViewQtGUI::plotRepChanged(int /*idx*/) {
   m_currentType = plotType->currentIndex();
 }
 
+// Fitting interface
 void EnggDiffractionViewQtGUI::fittingBankIdChanged(int /*idx*/) {
   QComboBox *BankName = m_uiTabFitting.comboBox_bank;
   if (!BankName)
     return;
   m_currentCropCalibBankName = BankName->currentIndex();
+}
+
+void EnggDiffractionViewQtGUI::browsePeaksToFit() {
+	QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirRaw);
+	if (prevPath.isEmpty()) {
+		prevPath =
+			MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+	}
+
+	QString path(QFileDialog::getOpenFileName(
+		this, tr("Open Peaks To Fit"), prevPath,
+		QString::fromStdString(g_DetGrpExtStr)));
+
+	if (path.isEmpty()) {
+		return;
+	}
+
+	MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
+	m_uiTabFitting.lineEdit_fitting_peaks->setText(path);
+}
+
+std::string EnggDiffractionViewQtGUI::fittingPeaksFile() const {
+	return m_uiTabFitting.lineEdit_fitting_peaks->text().toStdString();
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
