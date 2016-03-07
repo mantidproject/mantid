@@ -137,6 +137,10 @@ public:
 
   virtual double rebinningPulsesTime() const;
 
+  virtual std::vector<std::string> fittingRunNo() const;
+
+
+
   virtual void plotFocusedSpectrum(const std::string &wsName);
 
   virtual void plotWaterfallSpectrum(const std::string &wsName);
@@ -203,6 +207,9 @@ private slots:
   // enables the text field when appropriate bank name is selected
   void enableSpecIds();
 
+  // slot of the fitting bank part of the interface
+  void fittingBankIdChanged(int idx);
+
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
 
@@ -213,6 +220,7 @@ private:
   void doSetupTabCalib();
   void doSetupTabFocus();
   void doSetupTabPreproc();
+  void doSetupTabFitting();
   void doSetupTabSettings();
 
   std::string guessGSASTemplatePath() const;

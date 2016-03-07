@@ -184,6 +184,11 @@ void EnggDiffractionViewQtGUI::doSetupTabPreproc() {
           SLOT(rebinMultiperiodClicked()));
 }
 
+void EnggDiffractionViewQtGUI::doSetupTabFitting() {
+  connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(fittingBankIdChanged(int)));
+}
+
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
   // line edits that display paths and the like
   m_uiTabSettings.lineEdit_input_dir_calib->setText(
@@ -318,6 +323,9 @@ void EnggDiffractionViewQtGUI::readSettings() {
 
   m_uiTabPreproc.doubleSpinBox_step_time->setValue(
       qs.value("user-params-step-time", 1).toDouble());
+
+  // user params - fitting
+  m_uiTabFitting.comboBox_bank->setCurrentIndex(0);
 
   // settings
   QString lastPath =
@@ -585,6 +593,12 @@ size_t EnggDiffractionViewQtGUI::rebinningPulsesNumberPeriods() const {
 
 double EnggDiffractionViewQtGUI::rebinningPulsesTime() const {
   return m_uiTabPreproc.doubleSpinBox_step_time->value();
+}
+
+std::vector<std::string> EnggDiffractionViewQtGUI::fittingRunNo() const {
+  return qListToVector(
+      m_uiTabFitting.MWRunFiles_fititng_run_num->getFilenames(),
+      m_uiTabFitting.MWRunFiles_fititng_run_num->isValid());
 }
 
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
@@ -982,6 +996,13 @@ void EnggDiffractionViewQtGUI::plotRepChanged(int /*idx*/) {
   if (!plotType)
     return;
   m_currentType = plotType->currentIndex();
+}
+
+void EnggDiffractionViewQtGUI::fittingBankIdChanged(int /*idx*/) {
+  QComboBox *BankName = m_uiTabFitting.comboBox_bank;
+  if (!BankName)
+    return;
+  m_currentCropCalibBankName = BankName->currentIndex();
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
