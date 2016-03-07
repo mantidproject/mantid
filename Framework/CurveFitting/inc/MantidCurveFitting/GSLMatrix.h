@@ -188,6 +188,9 @@ public:
   void eigenSystem(GSLVector &eigenValues, GSLMatrix &eigenVectors);
 
   Tr<GSLMatrix> tr() {return Tr<GSLMatrix>(*this);}
+  /// Type of the matrix elements.
+  typedef double ElementConstType;
+  typedef double& ElementRefType;
 };
 
 /// Overloaded operator for matrix multiplication

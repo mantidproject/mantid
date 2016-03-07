@@ -450,27 +450,6 @@ public:
     TS_ASSERT(m(1, 0) == v21);
     TS_ASSERT(m(1, 1) == v22);
   }
-
-  void test_index_operator_index_ranges() {
-    ComplexMatrix m(2, 3, -2, -1);
-
-    TS_ASSERT_EQUALS(m.size1(), 2);
-    TS_ASSERT_EQUALS(m.size2(), 2);
-    m(2, -2) = v11;
-    m(2, -1) = v12;
-    m(3, -2) = v21;
-    m(3, -1) = v22;
-
-    TS_ASSERT(m(2, -2) == v11);
-    TS_ASSERT(m(2, -1) == v12);
-    TS_ASSERT(m(3, -2) == v21);
-    TS_ASSERT(m(3, -1) == v22);
-
-    TS_ASSERT(m.get(0, 0) == v11);
-    TS_ASSERT(m.get(0, 1) == v12);
-    TS_ASSERT(m.get(1, 0) == v21);
-    TS_ASSERT(m.get(1, 1) == v22);
-  }
 };
 
 #endif /*ComplexMatrixTEST_H_*/

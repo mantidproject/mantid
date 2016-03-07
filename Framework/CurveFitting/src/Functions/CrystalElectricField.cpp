@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
 #include "MantidCurveFitting/ComplexMatrix.h"
+#include "MantidCurveFitting/FortranMatrix.h"
 #include "MantidCurveFitting/GSLMatrix.h"
 
 #include <array>
@@ -10,6 +11,9 @@
 
 namespace Mantid {
 namespace CurveFitting {
+
+typedef FortranMatrix<ComplexMatrix> ComplexFortranMatrix;
+
 namespace Functions {
 
 namespace {
@@ -661,7 +665,7 @@ void sc_crystal_field(size_t nre, const std::string &type, int symmetry,
 //
 //       one finds:   dk0 = Bk0  and for q<>0: dkq = Bkq/2
 //       ------------------------------------------------------------
-  ComplexMatrix dkq_star(1, 6, -6, 6); // complex*16   dkq_star(6,-6:6)
+  ComplexFortranMatrix dkq_star(1, 6, -6, 6); // complex*16   dkq_star(6,-6:6)
   dkq_star.zero();
   auto i = ComplexType(0.0, 1.0);
   for (int k = 2; k <= 6; k += 2) { // do k=2,6,2
@@ -689,7 +693,7 @@ void sc_crystal_field(size_t nre, const std::string &type, int symmetry,
   auto a = alpha_euler;
   auto b = beta_euler;
   auto c = gamma_euler;
-  ComplexMatrix  rdkq_star(1, 6, -6, 6);
+  ComplexFortranMatrix  rdkq_star(1, 6, -6, 6);
   for (int k = 2; k <= 6; k += 2) { // do k=2,6,2
     for (int q = -k; q <= k; ++q) { // do q=-k,k
       rdkq_star(k, q) = ComplexType(0.0, 0.0);

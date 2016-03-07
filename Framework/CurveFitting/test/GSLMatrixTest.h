@@ -318,6 +318,39 @@ public:
     row[2] = 0;
     TS_ASSERT_EQUALS(m.get(1, 2), 12);
   }
+
+  void test_index_operator() {
+    GSLMatrix m(3,3);
+    m(0,0) = 0.0;
+    m(0,1) = 1.0;
+    m(0,2) = 2.0;
+    m(1,0) = 10.0;
+    m(1,1) = 11.0;
+    m(1,2) = 12.0;
+    m(2,0) = 20.0;
+    m(2,1) = 21.0;
+    m(2,2) = 22.0;
+    TS_ASSERT_EQUALS(m.get(0,0), 0.0);
+    TS_ASSERT_EQUALS(m.get(0,1), 1.0);
+    TS_ASSERT_EQUALS(m.get(0,2), 2.0);
+    TS_ASSERT_EQUALS(m.get(1,0), 10.0);
+    TS_ASSERT_EQUALS(m.get(1,1), 11.0);
+    TS_ASSERT_EQUALS(m.get(1,2), 12.0);
+    TS_ASSERT_EQUALS(m.get(2,0), 20.0);
+    TS_ASSERT_EQUALS(m.get(2,1), 21.0);
+    TS_ASSERT_EQUALS(m.get(2,2), 22.0);
+
+    TS_ASSERT_EQUALS(m(0,0), 0.0);
+    TS_ASSERT_EQUALS(m(0,1), 1.0);
+    TS_ASSERT_EQUALS(m(0,2), 2.0);
+    TS_ASSERT_EQUALS(m(1,0), 10.0);
+    TS_ASSERT_EQUALS(m(1,1), 11.0);
+    TS_ASSERT_EQUALS(m(1,2), 12.0);
+    TS_ASSERT_EQUALS(m(2,0), 20.0);
+    TS_ASSERT_EQUALS(m(2,1), 21.0);
+    TS_ASSERT_EQUALS(m(2,2), 22.0);
+  }
+
 };
 
 #endif /*GSLMATRIXTEST_H_*/

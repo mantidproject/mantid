@@ -23,9 +23,9 @@ class ComplexMatrix;
 /// ComplexMatrix
 struct ComplexMatrixValueConverter {
   ComplexMatrix &m_matrix;
-  int m_index1;
-  int m_index2;
-  ComplexMatrixValueConverter(ComplexMatrix &vector, int i, int j)
+  size_t m_index1;
+  size_t m_index2;
+  ComplexMatrixValueConverter(ComplexMatrix &vector, size_t i, size_t j)
       : m_matrix(vector), m_index1(i), m_index2(j) {}
   operator ComplexType() const;
   ComplexMatrixValueConverter& operator=(const ComplexType& c);
@@ -148,18 +148,12 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_CURVEFITTING_DLL ComplexMatrix {
   /// The pointer to the GSL matrix
   gsl_matrix_complex *m_matrix;
-  /// Base for the first index
-  int m_base1;
-  /// Base for the second index
-  int m_base2;
 
 public:
   /// Constructor
   ComplexMatrix();
   /// Constructor
   ComplexMatrix(const size_t nx, const size_t ny);
-  /// Constructor
-  ComplexMatrix(const int iFrom, const int iTo, const int jFrom, const int jTo);
   /// Copy constructor
   ComplexMatrix(const ComplexMatrix &M);
   /// Create a submatrix.
@@ -193,11 +187,11 @@ public:
   /// Get an element
   ComplexType get(size_t i, size_t j) const;
   /// Get a "const reference" to an element.
-  const ComplexMatrixValueConverter operator()(int i, int j) const {
+  const ComplexMatrixValueConverter operator()(size_t i, size_t j) const {
     return ComplexMatrixValueConverter(const_cast<ComplexMatrix&>(*this), i, j);
   }
   /// Get a "reference" to an element.
-  ComplexMatrixValueConverter operator()(int i, int j) {
+  ComplexMatrixValueConverter operator()(size_t i, size_t j) {
     return ComplexMatrixValueConverter(*this, i, j);
   }
 
@@ -245,7 +239,9 @@ public:
   /// Get "conjugate transposed" matrix to be used in multiplications
   CTr ctr() { return CTr(*this); }
 
-  friend struct ComplexMatrixValueConverter;
+  /// Type of the matrix elements.
+  typedef const ComplexMatrixValueConverter ElementConstType;
+  typedef ComplexMatrixValueConverter ElementRefType;
 };
 
 /// Overloaded operator for matrix multiplication
@@ -388,12 +384,12 @@ inline std::ostream &operator<<(std::ostream &ostr, const ComplexMatrix &m) {
 
 /// Convert an internal complex value (GSL type) to ComplexType.
 inline ComplexMatrixValueConverter::operator ComplexType() const {
-  return m_matrix.get(m_index1 - m_matrix.m_base1, m_index2 - m_matrix.m_base2);
+  return m_matrix.get(m_index1, m_index2);
 }
 
 /// Convert a value of ComplexType to the internal complex value (GSL type).
 inline ComplexMatrixValueConverter& ComplexMatrixValueConverter::operator=(const ComplexType& c) {
-  m_matrix.set(m_index1 - m_matrix.m_base1, m_index2 - m_matrix.m_base2, c);
+  m_matrix.set(m_index1, m_index2, c);
   return *this;
 }
 

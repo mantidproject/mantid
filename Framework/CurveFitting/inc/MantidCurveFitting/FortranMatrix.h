@@ -2,6 +2,7 @@
 #define MANTID_CURVEFITTING_FORTRANMATRIX_H_
 
 #include "MantidCurveFitting/DllConfig.h"
+#include "MantidCurveFitting/GSLMatrix.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -48,6 +49,8 @@ public:
   FortranMatrix(const FortranMatrix &M);
   /// Constructor
   FortranMatrix(const int iFrom, const int iTo, const int jFrom, const int jTo);
+  typename MatrixClass::ElementConstType operator()(int i, int j) const;
+  typename MatrixClass::ElementRefType operator()(int i, int j);
 
 private:
   /// Calculate the size (1D) of a matrix First
@@ -58,7 +61,7 @@ private:
 
 /// Calculate the size (1D) of a matrix First
 template <class MatrixClass>
-static size_t FortranMatrix<MatrixClass>::makeSize(int firstIndex, int lastIndex) {
+size_t FortranMatrix<MatrixClass>::makeSize(int firstIndex, int lastIndex) {
   if (lastIndex < firstIndex) {
     throw std::invalid_argument("Matrix defined with invalid index range.");
   }
@@ -93,8 +96,20 @@ FortranMatrix<MatrixClass>::FortranMatrix(const FortranMatrix &M)
 template <class MatrixClass>
 FortranMatrix<MatrixClass>::FortranMatrix(const int iFirst, const int iLast,
                              const int jFirst, const int jLast)
-    : GSLMatrix(makeSize(iFirst, iLast), makeSize(jFirst, jLast)),
+    : MatrixClass(makeSize(iFirst, iLast), makeSize(jFirst, jLast)),
       m_base1(iFirst), m_base2(jFirst) {}
+
+/// The "index" operator
+template <class MatrixClass>
+typename MatrixClass::ElementConstType FortranMatrix<MatrixClass>::operator()(int i, int j) const {
+  return this->MatrixClass::operator()(static_cast<size_t>(i - m_base1), static_cast<size_t>(j - m_base2));
+}
+
+/// Get the reference to the data element
+template <class MatrixClass>
+typename MatrixClass::ElementRefType FortranMatrix<MatrixClass>::operator()(int i, int j) {
+  return this->MatrixClass::operator()(static_cast<size_t>(i - m_base1), static_cast<size_t>(j - m_base2));
+}
 
 } // namespace CurveFitting
 } // namespace Mantid

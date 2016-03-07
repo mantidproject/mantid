@@ -8,30 +8,12 @@ namespace Mantid {
 namespace CurveFitting {
 
 /// Constructor
-ComplexMatrix::ComplexMatrix() : m_matrix(nullptr), m_base1(0), m_base2(0) {}
+ComplexMatrix::ComplexMatrix() : m_matrix(nullptr) {}
 /// Constructor
 /// @param nx :: First dimension
 /// @param ny :: Second dimension
-ComplexMatrix::ComplexMatrix(const size_t nx, const size_t ny) : m_base1(0), m_base2(0) {
+ComplexMatrix::ComplexMatrix(const size_t nx, const size_t ny) {
   m_matrix = gsl_matrix_complex_alloc(nx, ny);
-}
-/// Construct a ComplexMatrix that has arbitrary index bases.
-/// For example ComplexMatrix(1,5, -2,2) creates a 5 x 5 matrix.
-/// When accessing elements through operator(i,j) the first index
-/// must be in the range 1 <= i <= 5 and the second in the range
-/// -2 <= j <= 2.
-/// The index ranges defined by this constructor apply only to
-/// operator () but not to methods get() and set().
-/// @param iFrom :: Lowest value for the first index
-/// @param iTo :: Highest value for the first index
-/// @param jFrom :: Lowest value for the second index
-/// @param jTo :: Highest value for the second index
-ComplexMatrix::ComplexMatrix(const int iFrom, const int iTo,
-                             const int jFrom, const int jTo) : m_base1(iFrom), m_base2(jFrom) {
-  if (iTo < iFrom || jTo < jFrom) {
-    throw std::invalid_argument("Complex matrix defined with invalid index range.");
-  }
-  m_matrix = gsl_matrix_complex_alloc(iTo - iFrom + 1, jTo - jFrom + 1);
 }
 
 /// Copy constructor
@@ -39,8 +21,6 @@ ComplexMatrix::ComplexMatrix(const int iFrom, const int iTo,
 ComplexMatrix::ComplexMatrix(const ComplexMatrix &M) {
   m_matrix = gsl_matrix_complex_alloc(M.size1(), M.size2());
   gsl_matrix_complex_memcpy(m_matrix, M.gsl());
-  m_base1 = M.m_base1;
-  m_base2 = M.m_base2;
 }
 
 /// Create a submatrix. A submatrix is a view into the parent matrix.
@@ -86,8 +66,6 @@ ComplexMatrix::~ComplexMatrix() {
 ComplexMatrix &ComplexMatrix::operator=(const ComplexMatrix &M) {
   resize(M.size1(), M.size2());
   gsl_matrix_complex_memcpy(m_matrix, M.gsl());
-  m_base1 = M.m_base1;
-  m_base2 = M.m_base2;
   return *this;
 }
 
