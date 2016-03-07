@@ -211,8 +211,7 @@ void LoadISISNexus2::exec() {
   // Check input is consistent with the file, throwing if not
   checkOptionalProperties(bseparateMonitors, bexcludeMonitors);
   // Fill up m_spectraBlocks
-  size_t total_specs =
-      prepareSpectraBlocks(m_monitors, m_loadBlockInfo);
+  size_t total_specs = prepareSpectraBlocks(m_monitors, m_loadBlockInfo);
 
   m_progress = boost::make_shared<API::Progress>(
       this, 0.0, 1.0, total_specs * m_detBlockInfo.getNumberOfPeriods());
@@ -620,9 +619,9 @@ bool compareSpectraBlocks(const LoadISISNexus2::SpectraBlock &block1,
 * in a separate block.
 * @return :: Number of spectra to load.
 */
-size_t LoadISISNexus2::prepareSpectraBlocks(
-    std::map<int64_t, std::string> &monitors,
-    DataBlockComposite &LoadBlock) {
+size_t
+LoadISISNexus2::prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
+                                     DataBlockComposite &LoadBlock) {
   std::vector<int64_t> includedMonitors;
   // Setup the SpectraBlocks based on the DataBlocks
   auto dataBlocks = LoadBlock.getDataBlocks();

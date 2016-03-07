@@ -113,9 +113,8 @@ private:
   void checkOptionalProperties(bool bseparateMonitors, bool bexcludeMonitor);
 
   /// Prepare a vector of SpectraBlock structures to simplify loading
-  size_t
-  prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
-                       DataBlockComposite &LoadBlock);
+  size_t prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
+                              DataBlockComposite &LoadBlock);
   /// Run LoadInstrument as a ChildAlgorithm
   void runLoadInstrument(DataObjects::Workspace2D_sptr &);
   /// Load in details about the run
