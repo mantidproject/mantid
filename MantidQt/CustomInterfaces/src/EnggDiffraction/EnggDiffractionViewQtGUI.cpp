@@ -28,6 +28,8 @@ const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
 int EnggDiffractionViewQtGUI::m_currentType = 0;
 int EnggDiffractionViewQtGUI::m_currentRunMode = 0;
 int EnggDiffractionViewQtGUI::m_currentCropCalibBankName = 0;
+int EnggDiffractionViewQtGUI::m_bank_Id = 0;
+
 
 const std::string EnggDiffractionViewQtGUI::g_iparmExtStr =
     "GSAS instrument parameters, IPARM file: PRM, PAR, IPAR, IPARAM "
@@ -97,6 +99,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
   doSetupTabCalib();
   doSetupTabFocus();
   doSetupTabPreproc();
+  doSetupTabFitting();
   doSetupTabSettings();
 
   // presenter that knows how to handle a IEnggDiffractionView should take care
@@ -194,6 +197,9 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
 
   connect(m_uiTabFitting.pushButton_fit, SIGNAL(released()), this,
 	  SLOT(fitClicked()));
+
+  connect(m_uiTabFitting.listWidget_fitting_bank_preview, SIGNAL(triggered()), this, SLOT(fittingPreviewListViewBank()));
+
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -333,6 +339,8 @@ void EnggDiffractionViewQtGUI::readSettings() {
 
   // user params - fitting
   m_uiTabFitting.comboBox_bank->setCurrentIndex(0);
+  m_uiTabFitting.lineEdit_fitting_peaks->setText(
+      qs.value("user-params-fitting-peaks-to-fit", "").toString());
 
   // settings
   QString lastPath =
@@ -430,6 +438,10 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
 
   qs.value("user-params-step-time",
            m_uiTabPreproc.doubleSpinBox_step_time->value());
+
+  // fitting tab
+  qs.setValue("user-params-fitting-peaks-to-fit",
+              m_uiTabFitting.lineEdit_fitting_peaks->text());
 
   // TODO: this should become << >> operators on EnggDiffCalibSettings
   qs.setValue("input-dir-calib-files",
@@ -577,6 +589,10 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabPreproc.pushButton_rebin_time->setEnabled(enable);
   m_uiTabPreproc.pushButton_rebin_multiperiod->setEnabled(enable);
 
+  // fitting
+  m_uiTabFitting.MWRunFiles_fititng_run_num->setEnabled(enable);
+  m_uiTabFitting.lineEdit_fitting_peaks->setEnabled(enable);
+  m_uiTabFitting.pushButton_fit->setEnabled(enable);
 }
 
 void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
@@ -905,6 +921,25 @@ void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
   m_uiTabFocus.lineEdit_texture_grouping_file->setText(path);
 }
 
+void EnggDiffractionViewQtGUI::browsePeaksToFit() {
+	QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirRaw);
+	if (prevPath.isEmpty()) {
+		prevPath =
+			MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+	}
+
+	QString path(QFileDialog::getOpenFileName(
+		this, tr("Open Peaks To Fit"), prevPath,
+		QString::fromStdString(g_DetGrpExtStr)));
+
+	if (path.isEmpty()) {
+		return;
+	}
+
+	MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
+	m_uiTabFitting.lineEdit_fitting_peaks->setText(path);
+}
+
 std::vector<std::string> EnggDiffractionViewQtGUI::focusingRunNo() const {
   return qListToVector(m_uiTabFocus.lineEdit_run_num->getFilenames(),
                        m_uiTabFocus.lineEdit_run_num->isValid());
@@ -1010,35 +1045,25 @@ void EnggDiffractionViewQtGUI::plotRepChanged(int /*idx*/) {
   m_currentType = plotType->currentIndex();
 }
 
+// shahroz
 // Fitting interface
 void EnggDiffractionViewQtGUI::fittingBankIdChanged(int /*idx*/) {
   QComboBox *BankName = m_uiTabFitting.comboBox_bank;
   if (!BankName)
     return;
-  m_currentCropCalibBankName = BankName->currentIndex();
-}
-
-void EnggDiffractionViewQtGUI::browsePeaksToFit() {
-	QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirRaw);
-	if (prevPath.isEmpty()) {
-		prevPath =
-			MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-	}
-
-	QString path(QFileDialog::getOpenFileName(
-		this, tr("Open Peaks To Fit"), prevPath,
-		QString::fromStdString(g_DetGrpExtStr)));
-
-	if (path.isEmpty()) {
-		return;
-	}
-
-	MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
-	m_uiTabFitting.lineEdit_fitting_peaks->setText(path);
+  m_bank_Id = BankName->currentIndex();
 }
 
 std::string EnggDiffractionViewQtGUI::fittingPeaksFile() const {
 	return m_uiTabFitting.lineEdit_fitting_peaks->text().toStdString();
+}
+
+void EnggDiffractionViewQtGUI::fittingListWidgetBank(int /*idx*/) {
+
+	QListWidget *BankSelected = m_uiTabFitting.listWidget_fitting_bank_preview;
+	if (!BankSelected)
+		return;
+	m_bank_Id = BankSelected->currentRow();
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
