@@ -44,6 +44,7 @@
 #include <QProgressDialog>
 #include <QStackedWidget>
 #include <QHeaderView>
+#include<QSplitter>
 
 #include <gsl/gsl_math.h>
 
@@ -148,7 +149,13 @@ void ImportASCIIDialog::initAdvancedOptions()
 	d_advanced_options = new QGroupBox();
 	QVBoxLayout *main_layout = new QVBoxLayout(d_advanced_options);
 	QGridLayout *advanced_layout = new QGridLayout();
-	main_layout->addLayout(advanced_layout);
+
+    auto controlsWidget = new QWidget();
+    controlsWidget->setLayout(advanced_layout);
+    auto splitter = new QSplitter();
+    splitter->setOrientation(Qt::Vertical);
+    splitter->addWidget(controlsWidget);
+    main_layout->addWidget(splitter);
 
 	advanced_layout->addWidget(new QLabel(tr("Import each file as: ")), 0, 0);
 	d_import_mode = new QComboBox();
@@ -255,7 +262,7 @@ void ImportASCIIDialog::initAdvancedOptions()
 	d_preview_table = NULL;
 	d_preview_matrix = NULL;
 	d_preview_stack = new QStackedWidget();
-	main_layout->addWidget(d_preview_stack);
+    splitter->addWidget(d_preview_stack);
 }
 
 void ImportASCIIDialog::initPreview(int previewMode)
