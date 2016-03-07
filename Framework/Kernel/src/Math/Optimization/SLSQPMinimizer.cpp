@@ -7,9 +7,11 @@
 #include <sstream>
 
 #ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored                                               \
-    "-Wcppcoreguidelines-pro-bounds-pointer-arithmetic"
+	#ifndef __OSX__
+		#pragma clang diagnostic push
+		#pragma clang diagnostic ignored                                               \
+			"-Wcppcoreguidelines-pro-bounds-pointer-arithmetic"
+	#endif
 #endif
 
 namespace Mantid {
