@@ -247,6 +247,7 @@ public:
       throw std::invalid_argument("nd must be > 0");
     data = new TYPE[nd];
     std::copy(vals.cbegin(), vals.cend(), data);
+  }
 
   //-------------------------------------------------------------------------------------------
   /// Destructor
