@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>642</width>
+    <width>655</width>
     <height>671</height>
    </rect>
   </property>
@@ -71,13 +71,35 @@
          </widget>
         </item>
         <item>
-         <widget class="QListView" name="listView_fitting_bank_preview">
+         <widget class="QListWidget" name="listWidget_fitting_bank_preview">
           <property name="maximumSize">
            <size>
             <width>25</width>
-            <height>300</height>
+            <height>16777215</height>
            </size>
           </property>
+          <item>
+           <property name="text">
+            <string>1</string>
+           </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>2</string>
+           </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+          </item>
          </widget>
         </item>
        </layout>
@@ -190,11 +212,6 @@
             <string>Bank South - 2</string>
            </property>
           </item>
-          <item>
-           <property name="text">
-            <string>Both Bank - 1 &amp; 2</string>
-           </property>
-          </item>
          </widget>
         </item>
        </layout>
@@ -242,6 +259,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_fitting_browse_peaks">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="text">
            <string>Browse</string>
           </property>

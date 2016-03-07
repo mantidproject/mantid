@@ -139,6 +139,8 @@ public:
 
   virtual std::vector<std::string> fittingRunNo() const;
 
+  std::string fittingPeaksFile() const;
+
   virtual void plotFocusedSpectrum(const std::string &wsName);
 
   virtual void plotWaterfallSpectrum(const std::string &wsName);
@@ -180,7 +182,6 @@ private slots:
   // slots for the focusing options
   void browseTextureDetGroupingFile();
   void focusResetClicked();
-  void browsePeaksToFit();
 
   // slots of the calibration tab/section of the interface
 
@@ -207,10 +208,12 @@ private slots:
   // enables the text field when appropriate bank name is selected
   void enableSpecIds();
 
-  // slot of the fitting bank part of the interface
+  // slot of the fitting peaks per part of the interface
   void fittingBankIdChanged(int idx);
-
-  std::string fittingPeaksFile() const;
+  void setBankIdComboBox(int idx);
+  void browsePeaksToFit();
+  void fittingListWidgetBank(int idx);
+  void setListWidgetBank(int idx);
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
@@ -274,6 +277,8 @@ private:
 
   // multi-run focus mode type selected
   int static m_currentRunMode;
+
+  int static m_bank_Id;
 
   /// current calibration produced in the 'Calibration' tab
   std::string m_currentCalibFilename;
