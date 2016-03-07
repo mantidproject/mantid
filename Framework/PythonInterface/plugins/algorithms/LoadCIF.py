@@ -237,7 +237,8 @@ class AtomListBuilder(object):
         # If there are None-objects in the list, try to get the equivalent U-values
         if None in isotropicUs:
             try:
-                equivalentUMap = self._getEquivalentUs(cifData, labels, unitCell)
+                anisoLabels = self._get_ansitropic_labels(cifData)
+                equivalentUMap = self._getEquivalentUs(cifData, anisoLabels, unitCell)
 
                 for key, uIso in isotropicUMap.iteritems():
                     if uIso is None and key in equivalentUMap:
@@ -259,23 +260,23 @@ class AtomListBuilder(object):
                      for label, uMatrix in anisotropicParameters.iteritems() if uMatrix.dtype.type != np.object_])
 
     def _getAnisotropicParametersU(self, cifData, labels):
-        anisoLabel = u'_atom_site_aniso_label'
-
-        if anisoLabel not in cifData.keys():
-            raise RuntimeError('Mandatory field \'_atom_site_aniso_label\' is missing.')
-
-        anisoLabels = cifData[anisoLabel]
-
         # Try to extract U or if that fails, B.
         try:
-            return self._getTensors(cifData, anisoLabels,
+            return self._getTensors(cifData, labels,
                                     [u'_atom_site_aniso_u_11', u'_atom_site_aniso_u_12', u'_atom_site_aniso_u_13',
                                      u'_atom_site_aniso_u_22', u'_atom_site_aniso_u_23', u'_atom_site_aniso_u_33'])
         except RuntimeError:
-            bTensors = self._getTensors(cifData, anisoLabels,
+            bTensors = self._getTensors(cifData, labels,
                                         [u'_atom_site_aniso_b_11', u'_atom_site_aniso_b_12', u'_atom_site_aniso_b_13',
                                          u'_atom_site_aniso_b_22', u'_atom_site_aniso_b_23', u'_atom_site_aniso_b_33'])
             return dict([(label, convertBtoU(bTensor)) for label, bTensor in bTensors.iteritems()])
+
+    def _get_ansitropic_labels(self, cifData):
+        anisoLabel = u'_atom_site_aniso_label'
+        if anisoLabel not in cifData.keys():
+            raise RuntimeError('Mandatory field \'_atom_site_aniso_label\' is missing.')
+        anisoLabels = cifData[anisoLabel]
+        return anisoLabels
 
     def _getTensors(self, cifData, labels, keys):
         values = []
