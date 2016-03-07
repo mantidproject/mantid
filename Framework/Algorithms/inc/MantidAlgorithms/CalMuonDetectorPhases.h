@@ -51,13 +51,15 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Muon"; }
 
+protected:
+  /// Validate the inputs
+  std::map<std::string, std::string> validateInputs() override;
+
 private:
   /// Initialise the algorithm
   void init() override;
   /// Execute the algorithm
   void exec() override;
-  /// Validate the inputs
-  std::map<std::string, std::string> validateInputs() override;
   /// Prepare workspace for fit by extracting data
   API::MatrixWorkspace_sptr extractDataFromWorkspace(double startTime,
                                                      double endTime);
