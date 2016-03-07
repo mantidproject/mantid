@@ -76,7 +76,6 @@ private:
 
 public:
   void testExecMonSeparated() {
-#if 0
     Mantid::API::FrameworkManager::Instance();
     LoadISISNexus2 ld;
     ld.initialize();
@@ -149,11 +148,9 @@ public:
 
     AnalysisDataService::Instance().remove("outWS");
     AnalysisDataService::Instance().remove("outWS_monitors");
-#endif
   }
 
   void testExec() {
-#if 0
     Mantid::API::FrameworkManager::Instance();
     LoadISISNexus2 ld;
     ld.initialize();
@@ -265,11 +262,9 @@ public:
     Property *l_property = ws->run().getLogData("run_number");
     TS_ASSERT_EQUALS(l_property->value(), "49886");
     AnalysisDataService::Instance().remove("outWS");
-#endif
   }
 
   void testExec2() {
-#if 0
     Mantid::API::FrameworkManager::Instance();
     LoadISISNexus2 ld;
     ld.initialize();
@@ -353,11 +348,9 @@ public:
     TS_ASSERT(ws->getSpectrum(14)->hasDetectorID(38));
 
     AnalysisDataService::Instance().remove("outWS");
-#endif
   }
 
   void testExec3() {
-#if 0
     Mantid::API::FrameworkManager::Instance();
     LoadISISNexus2 ld;
     ld.initialize();
@@ -401,11 +394,9 @@ public:
     }
 
     AnalysisDataService::Instance().remove("outWS");
-#endif
   }
 
   void testMultiPeriodEntryNumberZero() {
-#if 0
     Mantid::API::FrameworkManager::Instance();
     LoadISISNexus2 ld;
     ld.initialize();
@@ -441,11 +432,9 @@ public:
     TS_ASSERT_EQUALS(ws->readY(9)[3], 0.);
     TS_ASSERT_EQUALS(ws->readY(9)[1], 0.);
     AnalysisDataService::Instance().remove("outWS");
-#endif
   }
 
   void testMultiPeriodEntryNumberNonZero() {
-#if 0
     Mantid::API::FrameworkManager::Instance();
     LoadISISNexus2 ld;
     ld.initialize();
@@ -476,11 +465,9 @@ public:
     TS_ASSERT_EQUALS(ws->readY(9)[3], 0.);
     TS_ASSERT_EQUALS(ws->readY(9)[1], 0.);
     AnalysisDataService::Instance().remove("outWS");
-#endif
   }
 
   void testLoadMultiPeriodData() {
-#if 0
     Mantid::API::FrameworkManager::Instance();
     const std::string wsName = "outWS";
     LoadISISNexus2 loadingAlg;
@@ -528,11 +515,9 @@ public:
                      "does not correspond to the total charge.",
                      totalCharge, chargeSum, 0.000001);
     AnalysisDataService::Instance().remove(wsName);
-#endif
   }
 
   void test_instrument_and_default_param_loaded_when_inst_not_in_nexus_file() {
-#if 0
     Mantid::API::FrameworkManager::Instance();
     const std::string wsName = "InstNotInNexus";
     LoadISISNexus2 loadingAlg;
@@ -560,11 +545,9 @@ public:
     auto params = inst->getParameterMap();
     TS_ASSERT_EQUALS(params->getString(inst.get(), "show-signed-theta"),
                      "Always");
-#endif
   }
 
   void testExecMonExcluded() {
-#if 0
     Mantid::API::FrameworkManager::Instance();
     LoadISISNexus2 ld;
     ld.initialize();
@@ -683,11 +666,9 @@ public:
     Property *l_property = ws->run().getLogData("run_number");
     TS_ASSERT_EQUALS(l_property->value(), "49886");
     AnalysisDataService::Instance().remove("outWS");
-#endif
   }
 
   void testExecMultiPeriodMonitorSeparate() {
-#if 0
     LoadISISNexus2 ld;
     ld.setChild(true);
     ld.initialize();
@@ -746,7 +727,6 @@ public:
                      monPeriod2Run.getLogData().size());
     TS_ASSERT(monPeriod1Run.hasProperty("period 1"))
     TS_ASSERT(monPeriod2Run.hasProperty("period 2"))
-#endif
   }
 
   std::string extractStringLog(const MatrixWorkspace &matrixWS,
@@ -758,7 +738,6 @@ public:
   }
 
   void testExecExtractMeasurmentData() {
-#if 0
     LoadISISNexus2 ld;
     ld.setChild(true);
     ld.initialize();
@@ -792,10 +771,12 @@ public:
                      extractStringLog(*secondMatrixWS, "measurement_label"));
     TS_ASSERT_EQUALS("PNR",
                      extractStringLog(*secondMatrixWS, "measurement_type"));
-#endif
   }
 
   void test_that_non_contiguous_data_loads_for_excluded_monitors() {
+    /*
+    Monitors can be found at detID: 145, 146, 147, 148
+    */
     // Arrange
     Mantid::API::FrameworkManager::Instance();
     LoadISISNexus2 ld;
@@ -846,6 +827,9 @@ public:
   }
 
   void test_that_non_contiguous_data_loads_for_included_monitors() {
+    /*
+    Monitors can be found at detID: 145, 146, 147, 148
+    */
     // Arrange
     Mantid::API::FrameworkManager::Instance();
     LoadISISNexus2 ld;
@@ -897,6 +881,9 @@ public:
   }
 
   void test_that_non_contiguous_data_loads_for_separate_monitors() {
+    /*
+    Monitors can be found at detID: 145, 146, 147, 148
+    */
     // Arrange
     Mantid::API::FrameworkManager::Instance();
     LoadISISNexus2 ld;
@@ -971,7 +958,9 @@ public:
 
   void
   test_that_non_contiguous_data_loads_for_included_monitors_and_spectra_range() {
-#if 0
+    /*
+     Monitors can be found at detID: 145, 146, 147, 148
+    */
     // Arrange
     Mantid::API::FrameworkManager::Instance();
     LoadISISNexus2 ld;
@@ -1002,8 +991,6 @@ public:
     for (Mantid::detid_t detID = 1; detID < min; ++detID) {
       TSM_ASSERT("Should not be in workspace",
                  detIDtoWSIndexMap.count(detID) == 0);
-      std::cout << std::endl <<"==========" << std::endl;
-      std::cout << detID << " is " << detIDtoWSIndexMap.count(detID)<< std::endl;
     }
     // Range from 50 to 146
     for (Mantid::detid_t detID = 50; detID < max + 1; ++detID) {
@@ -1016,7 +1003,76 @@ public:
     }
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
-#endif
+  }
+
+  void
+  test_that_non_contiguous_data_loads_for_included_monitors_and_spectra_range_and_spetra_list() {
+    /*
+    Monitors can be found at detID: 145, 146, 147, 148
+    */
+    // Arrange
+    Mantid::API::FrameworkManager::Instance();
+    LoadISISNexus2 ld;
+    ld.initialize();
+    ld.setPropertyValue("Filename", "INS09161.nxs");
+    ld.setPropertyValue("OutputWorkspace", "outWS");
+
+    ld.setPropertyValue("SpectrumMin", "50");
+    ld.setPropertyValue("SpectrumMax", "73");
+    ld.setPropertyValue("SpectrumList", "12, 145");
+
+    // Act
+    TS_ASSERT_THROWS_NOTHING(ld.execute());
+    TS_ASSERT(ld.isExecuted());
+
+    // Assert
+    MatrixWorkspace_sptr ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+
+    TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
+    TSM_ASSERT_EQUALS("Should have 26 detectors", ws->getNumberHistograms(),
+                      26);
+
+    // Check elements in workspace
+    auto detIDtoWSIndexMap = ws->getDetectorIDToWorkspaceIndexMap();
+
+    // Range from 1 to 11
+    for (Mantid::detid_t detID = 1; detID < 12; ++detID) {
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
+    }
+
+    // 12
+    TSM_ASSERT("Should be in workspace", detIDtoWSIndexMap.count(12) == 1);
+
+    // Range from 13 t0 49
+    for (Mantid::detid_t detID = 13; detID < 50; ++detID) {
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
+    }
+
+    // Range from 50 to 73
+    for (Mantid::detid_t detID = 50; detID < 74; ++detID) {
+      TSM_ASSERT("Should be in workspace", detIDtoWSIndexMap.count(detID) == 1);
+    }
+
+    // Range from 74 to 144
+    for (Mantid::detid_t detID = 74; detID < 145; ++detID) {
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
+    }
+
+    // 145
+    TSM_ASSERT("Should be in workspace", detIDtoWSIndexMap.count(12) == 1);
+
+    // Range from 146 to 172 (which is the number of detectors + monitors)
+    for (Mantid::detid_t detID = 146; detID <= 172; ++detID) {
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
+    }
+
+    // Clean up
+    AnalysisDataService::Instance().remove("outWS");
   }
 };
 

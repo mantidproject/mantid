@@ -624,53 +624,6 @@ size_t LoadISISNexus2::prepareSpectraBlocks(
     const std::map<int64_t, specnum_t> &specInd2specNum_map,
     DataBlockComposite &LoadBlock) {
   std::vector<int64_t> includedMonitors;
-
-  // fill in the data block descriptor vector
-  if (!specInd2specNum_map.empty()) {
-    auto itSpec = specInd2specNum_map.begin();
-    int64_t hist = itSpec->second;
-    SpectraBlock block(hist, hist, false, "");
-    itSpec++;
-    for (; itSpec != specInd2specNum_map.end(); ++itSpec) {
-      // try to put all consecutive numbers in same block
-
-      auto it_mon = monitors.find(hist);
-      bool isMonitor = it_mon != monitors.end();
-      if (isMonitor || itSpec->second != hist + 1) {
-
-        if (isMonitor) {
-          includedMonitors.push_back(hist);
-          block.monName = it_mon->second;
-        }
-
-        block.last = hist;
-        block.isMonitor = isMonitor;
-        m_spectraBlocks.push_back(block);
-
-        block = SpectraBlock(itSpec->second, itSpec->second, false, "");
-      }
-      hist = itSpec->second;
-    }
-
-    // push the last block
-    hist = specInd2specNum_map.rbegin()->second;
-    block.last = hist;
-
-    auto it_mon = monitors.find(hist);
-    if (it_mon != monitors.end()) {
-      includedMonitors.push_back(hist);
-      block.isMonitor = true;
-      block.monName = it_mon->second;
-    }
-    m_spectraBlocks.push_back(block);
-
-    return specInd2specNum_map.size();
-  }
-
-  // here we are only if ranges are not supplied
-  //
-  // put in the spectra range, possibly breaking it into parts by monitors
-
   // Setup the SpectraBlocks based on the DataBlocks
   auto dataBlocks = LoadBlock.getDataBlocks();
   auto isMonitor = [&monitors](int64_t spectrumIndex) {
