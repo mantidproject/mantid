@@ -879,6 +879,12 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
     throw std::runtime_error(
         "End point must have the same number of dimensions as the workspace.");
 
+  // If the entire line is out-of-bounds
+  if (!(isInBounds(start.getBareArray()) && isInBounds(end.getBareArray()))) {
+    makeSinglePointWithNaN(x, y, e);
+    return;
+  }
+
   // Unit-vector of the direction
   VMD dir = end - start;
   const auto length = dir.normalize();
@@ -891,7 +897,7 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
   e.clear();
 
   if (mid_points.empty()) {
-    this->makeSinglePointWithNaN(x, y, e);
+    makeSinglePointWithNaN(x, y, e);
     return;
   } else {
 
@@ -916,7 +922,7 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
 
   // If everything was masked
   if (x.size() == 0) {
-    this->makeSinglePointWithNaN(x, y, e);
+    makeSinglePointWithNaN(x, y, e);
   }
 }
 
