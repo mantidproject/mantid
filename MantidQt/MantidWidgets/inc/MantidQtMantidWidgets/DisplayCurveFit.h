@@ -70,7 +70,7 @@ public:
              ///Usually extends beyond the boundaries of the fit range.
   };
   DisplayCurveFit(QWidget *parent = nullptr);
-  virtual ~DisplayCurveFit();
+  ~DisplayCurveFit() override;
   void setAxisRange(QPair<double, double> range, int axisID = QwtPlot::xBottom);
   curveTypes
   getCurvesForWorkspace(const Mantid::API::MatrixWorkspace_sptr workspace);

@@ -42,8 +42,9 @@ public:
     declareParameter("A");
     declareAttribute("WorkspaceIndex", Attribute(0));
   }
-  std::string name() const { return "PLOTPEAKBYLOGVALUETEST_Fun"; }
-  void function1D(double *out, const double *, const size_t nData) const {
+  std::string name() const override { return "PLOTPEAKBYLOGVALUETEST_Fun"; }
+  void function1D(double *out, const double *,
+                  const size_t nData) const override {
     if (nData == 0)
       return;
     const double a =

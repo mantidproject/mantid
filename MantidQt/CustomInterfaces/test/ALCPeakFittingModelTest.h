@@ -31,9 +31,9 @@ public:
     FrameworkManager::Instance(); // To make sure everything is initialized
   }
 
-  void setUp() { m_model = new ALCPeakFittingModel(); }
+  void setUp() override { m_model = new ALCPeakFittingModel(); }
 
-  void tearDown() { delete m_model; }
+  void tearDown() override { delete m_model; }
 
   void test_setData() {
     MatrixWorkspace_sptr data =

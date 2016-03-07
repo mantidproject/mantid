@@ -49,7 +49,7 @@ public:
                                       "PeakParams", mess.str().c_str());
   }
 
-  void setUp() {
+  void setUp() override {
     // Fake MDWorkspace with 2 peaks
     createMDEW();
     addPeak(1000, 0, 0, 0, 1.0);

@@ -45,9 +45,9 @@ void unconditional_writer() {
 
 class MutexTest : public CxxTest::TestSuite {
 public:
-  void setUp() { shared_data.resize(DATA_SIZE, 1.000); }
+  void setUp() override { shared_data.resize(DATA_SIZE, 1.000); }
 
-  void tearDown() {}
+  void tearDown() override {}
 
   void test_nothing() {}
 

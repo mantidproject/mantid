@@ -42,11 +42,11 @@ namespace CustomInterfaces
 
   public:
     ISISCalibration(IndirectDataReduction * idrUI, QWidget * parent = 0);
-    virtual ~ISISCalibration();
+    ~ISISCalibration() override;
 
-    virtual void setup();
-    virtual void run();
-    virtual bool validate();
+    void setup() override;
+    void run() override;
+    bool validate() override;
 
   private slots:
     void algorithmComplete(bool error);

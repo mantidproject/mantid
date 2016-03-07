@@ -236,12 +236,12 @@ QPair<double, double> PreviewPlot::getCurveRange(const QString &curveName) {
  *
  * @param curveName Name of curve
  * @param ws Pointer to the workspace
- * @param specIndex Spectrum index to plot
+ * @param wsIndex workspace index to plot
  * @param curveColour Colour of curve to plot
  */
 void PreviewPlot::addSpectrum(const QString &curveName,
                               const MatrixWorkspace_sptr ws,
-                              const size_t specIndex,
+                              const size_t wsIndex,
                               const QColor &curveColour) {
   if (curveName.isEmpty()) {
     g_log.warning("Cannot plot with empty curve name");
@@ -269,7 +269,7 @@ void PreviewPlot::addSpectrum(const QString &curveName,
   m_showErrorsMenu->addAction(m_curves[curveName].showErrorsAction);
 
   // Create the curve
-  addCurve(m_curves[curveName], ws, specIndex, curveColour);
+  addCurve(m_curves[curveName], ws, wsIndex, curveColour);
 
   // Create the curve label
   QLabel *label = new QLabel(curveName);
@@ -283,7 +283,7 @@ void PreviewPlot::addSpectrum(const QString &curveName,
   m_curves[curveName].ws = ws;
   m_curves[curveName].label = label;
   m_curves[curveName].colour = curveColour;
-  m_curves[curveName].wsIndex = specIndex;
+  m_curves[curveName].wsIndex = wsIndex;
 
   // Replot
   emit needToReplot();
@@ -294,11 +294,11 @@ void PreviewPlot::addSpectrum(const QString &curveName,
  *
  * @param curveName Name of curve
  * @param wsName Name of workspace in ADS
- * @param specIndex Spectrum index to plot
+ * @param wsIndex workspace index to plot
  * @param curveColour Colour of curve to plot
  */
 void PreviewPlot::addSpectrum(const QString &curveName, const QString &wsName,
-                              const size_t specIndex,
+                              const size_t wsIndex,
                               const QColor &curveColour) {
   if (wsName.isEmpty()) {
     g_log.error("Cannot plot with empty workspace name");
@@ -314,7 +314,7 @@ void PreviewPlot::addSpectrum(const QString &curveName, const QString &wsName,
     throw std::runtime_error(
         wsNameStr + " is not a MatrixWorkspace, not supported by PreviewPlot.");
 
-  addSpectrum(curveName, ws, specIndex, curveColour);
+  addSpectrum(curveName, ws, wsIndex, curveColour);
 }
 
 /**
@@ -613,15 +613,15 @@ PreviewPlot::handleReplaceEvent(WorkspaceAfterReplaceNotification_ptr pNf) {
  * Creates a new curve and adds it to the plot.
  *
  * @param curveConfig Curve configuration to add to
- * @param ws Worksapce pointer
- * @param specIndex Index of histogram to plot
+ * @param ws Workspace pointer
+ * @param wsIndex Index of histogram to plot
  * @param curveColour Colour of curve
  */
 void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig,
-                           MatrixWorkspace_sptr ws, const size_t specIndex,
+                           MatrixWorkspace_sptr ws, const size_t wsIndex,
                            const QColor &curveColour) {
-  // Check the spectrum index is in range
-  if (specIndex >= ws->getNumberHistograms())
+  // Check the workspace index is in range
+  if (wsIndex >= ws->getNumberHistograms())
     throw std::runtime_error("Workspace index is out of range, cannot plot.");
 
   // Check the X axis is large enough
@@ -645,7 +645,7 @@ void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig,
     ws = convertXAlg->getProperty("OutputWorkspace");
   }
 
-  std::vector<double> wsDataY = ws->readY(specIndex);
+  std::vector<double> wsDataY = ws->readY(wsIndex);
 
   // If using log scale need to remove all negative Y values
   bool logYScale = getAxisType(QwtPlot::yLeft) == "Logarithmic";
@@ -664,7 +664,7 @@ void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig,
   }
 
   // Create the Qwt data
-  QwtArray<double> dataX = QVector<double>::fromStdVector(ws->readX(specIndex));
+  QwtArray<double> dataX = QVector<double>::fromStdVector(ws->readX(wsIndex));
   QwtArray<double> dataY = QVector<double>::fromStdVector(wsDataY);
   QwtArrayData wsData(dataX, dataY);
 
@@ -677,7 +677,7 @@ void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig,
   // Create error bars if needed
   if (curveConfig.showErrorsAction->isChecked()) {
     curveConfig.errorCurve =
-        new ErrorCurve(curveConfig.curve, ws->readE(specIndex));
+        new ErrorCurve(curveConfig.curve, ws->readE(wsIndex));
     curveConfig.errorCurve->attach(m_uiForm.plot);
   } else {
     curveConfig.errorCurve = NULL;

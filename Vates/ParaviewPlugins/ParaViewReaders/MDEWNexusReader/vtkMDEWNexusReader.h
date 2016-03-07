@@ -11,9 +11,8 @@ class vtkImplicitFunction;
 class VTK_EXPORT vtkMDEWNexusReader : public vtkUnstructuredGridAlgorithm {
 public:
   static vtkMDEWNexusReader *New();
-  vtkTypeMacro(vtkMDEWNexusReader,
-               vtkUnstructuredGridAlgorithm) void PrintSelf(ostream &os,
-                                                            vtkIndent indent);
+  vtkTypeMacro(vtkMDEWNexusReader, vtkUnstructuredGridAlgorithm) void PrintSelf(
+      ostream &os, vtkIndent indent) override;
   vtkSetStringMacro(FileName)
       vtkGetStringMacro(FileName) int CanReadFile(const char *fname);
   void SetInMemory(bool inMemory);
@@ -37,14 +36,14 @@ public:
 
 protected:
   vtkMDEWNexusReader();
-  ~vtkMDEWNexusReader();
+  ~vtkMDEWNexusReader() override;
   int RequestInformation(vtkInformation *, vtkInformationVector **,
-                         vtkInformationVector *);
+                         vtkInformationVector *) override;
   int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *);
+                  vtkInformationVector *) override;
   int Canreadfile(const char *fname);
   /// Handle time variation.
-  unsigned long GetMTime();
+  unsigned long GetMTime() override;
 
 private:
   void setTimeRange(vtkInformationVector *outputVector);

@@ -20,7 +20,7 @@ using namespace API;
 using namespace DataObjects;
 
 SumSpectra::SumSpectra()
-    : API::Algorithm(), m_outSpecId(0), m_minSpec(0), m_maxSpec(0),
+    : API::Algorithm(), m_outSpecId(0), m_minWsInd(0), m_maxWsInd(0),
       m_keepMonitors(false), m_numberOfSpectra(0), m_yLength(0), m_indices(),
       m_calculateWeightedSum(false) {}
 
@@ -76,8 +76,8 @@ void SumSpectra::init() {
  */
 void SumSpectra::exec() {
   // Try and retrieve the optional properties
-  m_minSpec = getProperty("StartWorkspaceIndex");
-  m_maxSpec = getProperty("EndWorkspaceIndex");
+  m_minWsInd = getProperty("StartWorkspaceIndex");
+  m_maxWsInd = getProperty("EndWorkspaceIndex");
   const std::vector<int> indices_list = getProperty("ListOfWorkspaceIndices");
 
   m_keepMonitors = getProperty("IncludeMonitors");
@@ -89,30 +89,30 @@ void SumSpectra::exec() {
   this->m_yLength = static_cast<int>(localworkspace->blocksize());
 
   // Check 'StartSpectrum' is in range 0-m_numberOfSpectra
-  if (m_minSpec > m_numberOfSpectra) {
+  if (m_minWsInd > m_numberOfSpectra) {
     g_log.warning("StartWorkspaceIndex out of range! Set to 0.");
-    m_minSpec = 0;
+    m_minWsInd = 0;
   }
 
   if (indices_list.empty()) {
     // If no list was given and no max, just do all.
-    if (isEmpty(m_maxSpec))
-      m_maxSpec = m_numberOfSpectra - 1;
+    if (isEmpty(m_maxWsInd))
+      m_maxWsInd = m_numberOfSpectra - 1;
   }
 
-  // Something for m_maxSpec was given but it is out of range?
-  if (!isEmpty(m_maxSpec) &&
-      (m_maxSpec > m_numberOfSpectra - 1 || m_maxSpec < m_minSpec)) {
+  // Something for m_maxWsIndex was given but it is out of range?
+  if (!isEmpty(m_maxWsInd) &&
+      (m_maxWsInd > m_numberOfSpectra - 1 || m_maxWsInd < m_minWsInd)) {
     g_log.warning("EndWorkspaceIndex out of range! Set to max Workspace Index");
-    m_maxSpec = m_numberOfSpectra;
+    m_maxWsInd = m_numberOfSpectra;
   }
 
   // Make the set of indices to sum up from the list
   this->m_indices.insert(indices_list.begin(), indices_list.end());
 
   // And add the range too, if any
-  if (!isEmpty(m_maxSpec)) {
-    for (int i = m_minSpec; i <= m_maxSpec; i++)
+  if (!isEmpty(m_maxWsInd)) {
+    for (int i = m_minWsInd; i <= m_maxWsInd; i++)
       this->m_indices.insert(i);
   }
 
@@ -135,7 +135,7 @@ void SumSpectra::exec() {
     // Create the 2D workspace for the output
     MatrixWorkspace_sptr outputWorkspace =
         API::WorkspaceFactory::Instance().create(
-            localworkspace, 1, localworkspace->readX(m_minSpec).size(),
+            localworkspace, 1, localworkspace->readX(m_minWsInd).size(),
             this->m_yLength);
     size_t numSpectra(0); // total number of processed spectra
     size_t numMasked(0);  // total number of the masked and skipped spectra
@@ -241,7 +241,6 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
   numZeros = 0;
 
   // Loop over spectra
-  // for (int i = m_minSpec; i <= m_maxSpec; ++i)
   for (auto it = this->m_indices.begin(); it != this->m_indices.end(); ++it) {
     int i = *it;
     // Don't go outside the range.
@@ -355,7 +354,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
   numZeros = 0;
 
   // Loop over spectra
-  // for (int i = m_minSpec; i <= m_maxSpec; ++i)
+  // for (int i = m_minWsIndex; i <= m_maxWsIndex; ++i)
   for (auto it = m_indices.begin(); it != m_indices.end(); ++it) {
     int i = *it;
     // Don't go outside the range.
@@ -452,7 +451,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
   size_t numSpectra(0);
   size_t numMasked(0);
   size_t numZeros(0);
-  // for (int i = m_minSpec; i <= m_maxSpec; ++i)
+  // for (int i = m_minWsIndex; i <= m_maxWsIndex; ++i)
   for (auto it = indices.begin(); it != indices.end(); ++it) {
     int i = *it;
     // Don't go outside the range.

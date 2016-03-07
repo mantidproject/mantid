@@ -169,6 +169,7 @@ std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(
     Poco::Net::SecureStreamSocket *socket =
         new Poco::Net::SecureStreamSocket(context);
     Poco::Net::HTTPSClientSession session(*socket);
+    socket = nullptr;
     session.setHost(uri.getHost());
     session.setPort(uri.getPort());
 

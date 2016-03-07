@@ -81,7 +81,7 @@ public:
 class ExposedLoadSQW : public LoadSQW {
 public:
   ExposedLoadSQW() : LoadSQW() {}
-  void exec() {
+  void exec() override {
     std::runtime_error("Don't use this method, use setup instead, or the "
                        "full-blown LoadSQW type.");
   }
@@ -101,7 +101,7 @@ public:
           "incorrect number of data points in the file, expected 580, got " +
           boost::lexical_cast<std::string>(int(m_nDataPoints))));
   }
-  virtual void readEvents(MDEventWorkspace4 *ws) { LoadSQW::readEvents(ws); };
+  void readEvents(MDEventWorkspace4 *ws) override { LoadSQW::readEvents(ws); };
   void readDNDDimensions(MDEventWorkspace4 *ws) {
     std::vector<Mantid::Geometry::MDHistoDimensionBuilder> DimVector;
     LoadSQW::readDNDDimensions(DimVector);
@@ -113,7 +113,7 @@ public:
     LoadSQW::readSQWDimensions(DimVector);
     this->addDimsToWs(ws, DimVector);
   }
-  virtual void addLattice(MDEventWorkspace4 *ws) { LoadSQW::addLattice(ws); }
+  void addLattice(MDEventWorkspace4 *ws) override { LoadSQW::addLattice(ws); }
   void readBoxSizes() { LoadSQW::readBoxSizes(); }
   //    void readBoxSizes(){LoadSQW::readBoxSizes();}
 };

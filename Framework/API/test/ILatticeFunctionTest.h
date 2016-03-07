@@ -77,7 +77,7 @@ private:
   class MockLatticeFunction : public ILatticeFunction {
   public:
     MockLatticeFunction() : ILatticeFunction() {}
-    ~MockLatticeFunction() {}
+    ~MockLatticeFunction() override {}
 
     MOCK_CONST_METHOD0(name, std::string());
     MOCK_CONST_METHOD2(functionLattice,

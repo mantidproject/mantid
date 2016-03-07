@@ -29,7 +29,7 @@ public:
     inWS_point->isDistribution(true);
   }
 
-  ~IQTransformTest() {
+  ~IQTransformTest() override {
     // Tidy up
     Mantid::API::AnalysisDataService::Instance().clear();
   }

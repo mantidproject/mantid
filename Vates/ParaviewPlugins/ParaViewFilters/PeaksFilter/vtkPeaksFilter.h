@@ -11,8 +11,8 @@ class VTK_EXPORT vtkPeaksFilter : public vtkUnstructuredGridAlgorithm
 {
 public:
   static vtkPeaksFilter *New();
-  vtkTypeMacro(vtkPeaksFilter, vtkUnstructuredGridAlgorithm)
-  void PrintSelf(ostream& os, vtkIndent indent);
+  vtkTypeMacro(vtkPeaksFilter, vtkUnstructuredGridAlgorithm) void PrintSelf(
+      ostream &os, vtkIndent indent) override;
   void SetPeaksWorkspace(std::string peaksWorkspaceName);
   void SetRadiusNoShape(double radius);
   void SetRadiusType(int type);
@@ -23,9 +23,12 @@ public:
   const char* GetInstrument();
 protected:
   vtkPeaksFilter();
-  ~vtkPeaksFilter();
-  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  ~vtkPeaksFilter() override;
+  int RequestInformation(vtkInformation *, vtkInformationVector **,
+                         vtkInformationVector *) override;
+  int RequestData(vtkInformation *, vtkInformationVector **,
+                  vtkInformationVector *) override;
+
 private:
   vtkPeaksFilter(const vtkPeaksFilter&);
   void operator = (const vtkPeaksFilter&);

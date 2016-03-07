@@ -10,6 +10,22 @@ compiling, linking, and/or using OpenSSL is allowed.
 
 #ifndef ICat3Stub_H
 #define ICat3Stub_H
+
+// -Wsuggest-override generates 2422 warnings in this file and
+// clang-tidy 3.8 segfaults when trying to fix them. At this point,
+// I think we are better off suppressing these warnings than trying
+// to fix all of them by hand and potentially introducing errors.
+
+#if defined(__GNUC__) && !defined(__clang__)
+#define GCC_VERSION                                                            \
+  (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+#endif
+
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsuggest-override"
+#endif
+
 #include <vector>
 #define SOAP_NAMESPACE_OF_ns2 ""
 #define SOAP_NAMESPACE_OF_ns2 ""
@@ -11886,6 +11902,11 @@ typedef char *_XML;
 \******************************************************************************/
 
 } // namespace ICat3
+
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
+#pragma GCC diagnostic pop
+#undef GCC_VERSION
+#endif
 
 #endif
 

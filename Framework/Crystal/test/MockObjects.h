@@ -21,10 +21,10 @@ class MockBackgroundStrategy : public BackgroundStrategy {
 public:
   MOCK_CONST_METHOD1(configureIterator, void(Mantid::API::IMDIterator *const));
   MOCK_CONST_METHOD1(isBackground, bool(Mantid::API::IMDIterator *const));
-  MockBackgroundStrategy *clone() const {
+  MockBackgroundStrategy *clone() const override {
     throw std::runtime_error("Cannot clone the mock object");
   }
-  virtual ~MockBackgroundStrategy() {}
+  ~MockBackgroundStrategy() override {}
 };
 
 class MockICluster : public ICluster {
@@ -41,7 +41,7 @@ public:
                void(std::vector<DisjointElement> &disjointSet));
   MOCK_METHOD1(setRootCluster, void(ICluster const *));
   MOCK_CONST_METHOD0(getRepresentitiveIndex, size_t());
-  virtual bool containsLabel(const size_t &label) const {
+  bool containsLabel(const size_t &label) const override {
     return this->getLabel() == label;
   }
 };

@@ -21,7 +21,7 @@ TMDE_CLASS
 class MDBoxBaseTester : public MDBoxBase<MDE, nd> {
 public:
   MDBoxBaseTester() : MDBoxBase<MDE, nd>() {}
-  virtual ~MDBoxBaseTester() {}
+  ~MDBoxBaseTester() override {}
   MDBoxBaseTester(uint64_t /*filePos*/) : MDBoxBase<MDE, nd>() {}
   MDBoxBaseTester(const MDBoxBaseTester &source)
       : MDBoxBase<MDE, nd>(source, source.getBoxController()) {}
@@ -30,124 +30,122 @@ public:
       Mantid::Geometry::MDDimensionExtents<coord_t>> &extentsVector)
       : MDBoxBase<MDE, nd>(NULL, 0, 0, extentsVector) {}
   //-----------------------------------------------------------------------------------------------
-  Kernel::ISaveable *getISaveable() { return NULL; }
-  Kernel::ISaveable *getISaveable() const { return NULL; }
+  Kernel::ISaveable *getISaveable() override { return NULL; }
+  Kernel::ISaveable *getISaveable() const override { return NULL; }
   void setFileBacked(const uint64_t /*fileLocation*/, const size_t /*fileSize*/,
-                     const bool /*markSaved*/){};
-  void clearFileBacked(bool /* loadData*/){/**does nothing*/};
-  void setFileBacked(){};
+                     const bool /*markSaved*/) override{};
+  void clearFileBacked(bool /* loadData*/) override{/**does nothing*/};
+  void setFileBacked() override{};
   void saveAt(API::IBoxControllerIO *const /* */,
-              uint64_t /*position*/) const {/*Not saveable */};
+              uint64_t /*position*/) const override{/*Not saveable */};
   void loadAndAddFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/,
-                      size_t /* Size */){};
-  void reserveMemoryForLoad(uint64_t /* Size */){};
+                      size_t /* Size */) override{};
+  void reserveMemoryForLoad(uint64_t /* Size */) override{};
   // regardless of what is actually instantiated, base tester would call itself
   // gridbox
-  bool isBox() const { return false; }
+  bool isBox() const override { return false; }
 
   /// Clear all contained data
-  virtual void clear() {}
+  void clear() override {}
 
-  virtual uint64_t getNPoints() const {
+  uint64_t getNPoints() const override {
     return 0;
     // return this->getFileSize();
   }
-  virtual size_t getDataInMemorySize() const { return 0; }
+  size_t getDataInMemorySize() const override { return 0; }
   /// @return the amount of memory that the object takes up in the MRU.
-  virtual uint64_t getTotalDataSize() const { return 0; }
+  uint64_t getTotalDataSize() const override { return 0; }
 
   /// Get number of dimensions
-  virtual size_t getNumDims() const { return nd; }
+  size_t getNumDims() const override { return nd; }
 
   /// Get the total # of unsplit MDBoxes contained.
-  virtual size_t getNumMDBoxes() const { return 0; }
+  size_t getNumMDBoxes() const override { return 0; }
 
-  virtual size_t getNumChildren() const { return 0; }
+  size_t getNumChildren() const override { return 0; }
 
-  MDBoxBase<MDE, nd> *getChild(size_t /*index*/) {
+  MDBoxBase<MDE, nd> *getChild(size_t /*index*/) override {
     throw std::runtime_error("MDBox does not have children.");
   }
 
   /// Sets the children from a vector of children
   void setChildren(const std::vector<API::IMDNode *> & /*boxes*/,
-                   const size_t /*indexStart*/, const size_t /*indexEnd*/) {
+                   const size_t /*indexStart*/,
+                   const size_t /*indexEnd*/) override {
     throw std::runtime_error("MDBox cannot have children.");
   }
 
   /// Return a copy of contained events
-  virtual std::vector<MDE> *getEventsCopy() { return NULL; }
+  std::vector<MDE> *getEventsCopy() override { return NULL; }
 
   /// Add a single event
-  virtual void addEvent(const MDE & /*point*/) {}
+  void addEvent(const MDE & /*point*/) override {}
   /// Add a single event and trace it if the box it has been added may need
   /// splitting
   virtual void addAndTraceEvent(const MDE & /*point*/, size_t /*index */) {}
 
   /// Add a single event
-  virtual void addEventUnsafe(const MDE & /*point*/) {}
-  virtual size_t
+  void addEventUnsafe(const MDE & /*point*/) override {}
+  size_t
   buildAndAddEvents(const std::vector<signal_t> & /*sigErrSq*/,
                     const std::vector<coord_t> & /*Coord*/,
                     const std::vector<uint16_t> & /*runIndex*/,
-                    const std::vector<uint32_t> & /*detectorId*/) {
+                    const std::vector<uint32_t> & /*detectorId*/) override {
     return 0;
   }
-  virtual void buildAndAddEvent(const Mantid::signal_t, const Mantid::signal_t,
-                                const std::vector<coord_t> &, uint16_t,
-                                uint32_t){};
+  void buildAndAddEvent(const Mantid::signal_t, const Mantid::signal_t,
+                        const std::vector<coord_t> &, uint16_t,
+                        uint32_t) override{};
   virtual void buildAndTraceEvent(const Mantid::signal_t,
                                   const Mantid::signal_t,
                                   const std::vector<coord_t> &, uint16_t,
                                   uint32_t, size_t){};
-  virtual void buildAndAddEventUnsafe(const Mantid::signal_t,
-                                      const Mantid::signal_t,
-                                      const std::vector<coord_t> &, uint16_t,
-                                      uint32_t){};
+  void buildAndAddEventUnsafe(const Mantid::signal_t, const Mantid::signal_t,
+                              const std::vector<coord_t> &, uint16_t,
+                              uint32_t) override{};
 
   /** Perform centerpoint binning of events
    * @param bin :: MDBin object giving the limits of events to accept.
    */
-  virtual void centerpointBin(MDBin<MDE, nd> & /*bin*/, bool *) const {}
-  virtual void
-  splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL){};
-  virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL){};
+  void centerpointBin(MDBin<MDE, nd> & /*bin*/, bool *) const override {}
+  void
+  splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL) override{};
+  void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL) override{};
   // virtual void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL){};
-  virtual void calculateCentroid(coord_t * /*centroid*/) const {};
-  virtual void calculateCentroid(coord_t * /*centroid*/,
-                                 const int /*runindex*/) const {};
-  virtual coord_t *getCentroid() const { return 0; };
-  virtual void
-  integrateSphere(Mantid::API::CoordTransform & /*radiusTransform*/,
-                  const coord_t /*radiusSquared*/, signal_t & /*signal*/,
-                  signal_t & /*errorSquared*/) const {};
-  virtual void centroidSphere(Mantid::API::CoordTransform & /*radiusTransform*/,
-                              const coord_t /*radiusSquared*/, coord_t *,
-                              signal_t &) const {};
-  virtual void
+  void calculateCentroid(coord_t * /*centroid*/) const override{};
+  void calculateCentroid(coord_t * /*centroid*/,
+                         const int /*runindex*/) const override{};
+  coord_t *getCentroid() const override { return 0; };
+  void integrateSphere(Mantid::API::CoordTransform & /*radiusTransform*/,
+                       const coord_t /*radiusSquared*/, signal_t & /*signal*/,
+                       signal_t & /*errorSquared*/) const override{};
+  void centroidSphere(Mantid::API::CoordTransform & /*radiusTransform*/,
+                      const coord_t /*radiusSquared*/, coord_t *,
+                      signal_t &) const override{};
+  void
   integrateCylinder(Mantid::API::CoordTransform & /*radiusTransform*/,
                     const coord_t /*radius*/, const coord_t /*length*/,
                     signal_t & /*signal*/, signal_t & /*errorSquared*/,
-                    std::vector<signal_t> & /*signal_fit*/) const {};
-  virtual void getBoxes(std::vector<API::IMDNode *> & /*boxes*/,
-                        size_t /*maxDepth*/, bool){};
-  virtual void getBoxes(std::vector<API::IMDNode *> & /*boxes*/,
-                        size_t /*maxDepth*/, bool,
-                        Mantid::Geometry::MDImplicitFunction *){};
+                    std::vector<signal_t> & /*signal_fit*/) const override{};
+  void getBoxes(std::vector<API::IMDNode *> & /*boxes*/, size_t /*maxDepth*/,
+                bool) override{};
+  void getBoxes(std::vector<API::IMDNode *> & /*boxes*/, size_t /*maxDepth*/,
+                bool, Mantid::Geometry::MDImplicitFunction *) override{};
 
-  virtual void
-  generalBin(MDBin<MDE, nd> & /*bin*/,
-             Mantid::Geometry::MDImplicitFunction & /*function*/) const {}
-  virtual void clearDataFromMemory(){};
+  void generalBin(
+      MDBin<MDE, nd> & /*bin*/,
+      Mantid::Geometry::MDImplicitFunction & /*function*/) const override {}
+  void clearDataFromMemory() override{};
 
-  virtual bool getIsMasked() const {
+  bool getIsMasked() const override {
     throw std::runtime_error("MDBoxBaseTester does not implement getIsMasked");
   }
 
-  virtual void mask() {
+  void mask() override {
     throw std::runtime_error("MDBoxBaseTester does not implement mask");
   }
 
-  virtual void unmask() {
+  void unmask() override {
     throw std::runtime_error("MDBoxBaseTester does not implement unmask");
   }
 };

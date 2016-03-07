@@ -47,9 +47,9 @@ class VTK_EXPORT vtkMDHWSource : public vtkStructuredGridAlgorithm
 {
 public:
   static vtkMDHWSource *New();
-  vtkTypeMacro(vtkMDHWSource, vtkStructuredGridAlgorithm)
-  void PrintSelf(ostream& os, vtkIndent indent);
-  
+  vtkTypeMacro(vtkMDHWSource, vtkStructuredGridAlgorithm) void PrintSelf(
+      ostream &os, vtkIndent indent) override;
+
   void SetWsName(std::string wsName);
 
   //------- MDLoadingView methods ----------------
@@ -79,9 +79,11 @@ public:
 
 protected:
   vtkMDHWSource();
-  ~vtkMDHWSource();
-  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  ~vtkMDHWSource() override;
+  int RequestInformation(vtkInformation *, vtkInformationVector **,
+                         vtkInformationVector *) override;
+  int RequestData(vtkInformation *, vtkInformationVector **,
+                  vtkInformationVector *) override;
 
 private:
   

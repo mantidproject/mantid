@@ -28,18 +28,22 @@ class TestableFunctionParameterDecorator : public FunctionParameterDecorator {
 
 public:
   TestableFunctionParameterDecorator() {}
-  ~TestableFunctionParameterDecorator() {}
+  ~TestableFunctionParameterDecorator() override {}
 
-  std::string name() const { return "TestableFunctionParameterDecorator"; }
+  std::string name() const override {
+    return "TestableFunctionParameterDecorator";
+  }
 
-  void function(const FunctionDomain &domain, FunctionValues &values) const {
+  void function(const FunctionDomain &domain,
+                FunctionValues &values) const override {
     throwIfNoFunctionSet();
 
     IFunction_sptr fn = getDecoratedFunction();
     fn->function(domain, values);
   }
 
-  void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) {
+  void functionDeriv(const FunctionDomain &domain,
+                     Jacobian &jacobian) override {
     throwIfNoFunctionSet();
 
     IFunction_sptr fn = getDecoratedFunction();
@@ -53,21 +57,24 @@ class FunctionWithParameters : public ParamFunction {
 public:
   FunctionWithParameters() : ParamFunction(), m_workspace() {}
 
-  std::string name() const { return "FunctionWithParameters"; }
+  std::string name() const override { return "FunctionWithParameters"; }
 
-  void init() {
+  void init() override {
     declareParameter("Height");
     declareParameter("PeakCentre");
     declareParameter("Sigma");
   }
 
-  void function(const FunctionDomain &domain, FunctionValues &values) const {
+  void function(const FunctionDomain &domain,
+                FunctionValues &values) const override {
     UNUSED_ARG(domain);
     UNUSED_ARG(values);
     // Does nothing, not required for this test.
   }
 
-  void setWorkspace(boost::shared_ptr<const Workspace> ws) { m_workspace = ws; }
+  void setWorkspace(boost::shared_ptr<const Workspace> ws) override {
+    m_workspace = ws;
+  }
 
   Workspace_const_sptr getWorkspace() const { return m_workspace; }
 
@@ -80,9 +87,9 @@ class FunctionWithAttributes : public ParamFunction {
 public:
   FunctionWithAttributes() : ParamFunction() {}
 
-  std::string name() const { return "FunctionWithAttributes"; }
+  std::string name() const override { return "FunctionWithAttributes"; }
 
-  void init() {
+  void init() override {
     declareParameter("PeakCentre");
     declareParameter("Sigma");
     declareParameter("Height");
@@ -91,7 +98,8 @@ public:
     declareAttribute("Attribute2", IFunction::Attribute("Test"));
   }
 
-  void function(const FunctionDomain &domain, FunctionValues &values) const {
+  void function(const FunctionDomain &domain,
+                FunctionValues &values) const override {
     UNUSED_ARG(domain);
     UNUSED_ARG(values);
     // Does nothing, not required for this test.
