@@ -22,6 +22,15 @@ Jump Fit
 
 - The interface now has the option to plot a guess of what the fit will look like before running the algorithm.
 
+Vesuvio
+#######
+
+- The following Mantid algorithms used for Vesuvio have been added:
+    - :ref:`VesuvioPreFit <algm-VesuvioPreFit>`
+    - :ref:`VesuvioTOFFit <algm-VesuvioTOFFit>`
+    - :ref:`VesuvioCorrections <algm-VesuvioCorrections>`
+- The script used to process data for Vesuvio has also been added. This used to be called ``VesuvioWorkflow.py``, but is now named``VesuvioCommands.py``
+
 Improvements
 ------------
 
