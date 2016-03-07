@@ -14,6 +14,8 @@ Loads a Nexus file created from an ISIS instrument.
 Data loaded from Nexus File
 ###########################
 
+Not all of the nexus file is loaded. This section tells you what is loaded and where it goes in the workspace.
+
 The nexus file must have ``raw_data_1`` as its main group and
 contain a ``/isis_vms_compat`` group to be loaded.
 
@@ -29,10 +31,10 @@ Here are some tables that show it in more detail:
 |                              | (within 'raw_data_1')                     |                                     |
 +==============================+===========================================+=====================================+
 | Monitor Data                 | within groups of Class NXMonitor          | Depending on property LoadMonitors, | 
-|                              | (one for each monitor)                    | monitor histogram data              |
+|                              | (one monitor per group)                   | monitor histogram data              |
 +------------------------------+-------------------------------------------+-------------------------------------+
 | Detector Data                | group ``Detector_1``                      | Histogram Data                      |
-|                              |                                           |                                     |
+|                              | (all detectors in one group)              |                                     |
 +------------------------------+-------------------------------------------+-------------------------------------+
 | Instrument                   | group ``Instrument``                      | Workspace instrument                |
 |                              |                                           | if not overridden                   |
@@ -40,7 +42,8 @@ Here are some tables that show it in more detail:
 | Spectrum of each detector ID | ``NSP1``, ``UDET`` and ``SPEC``           | Spectra-Detector mapping            |
 |                              | within ``isis_vms_compat``                |                                     |
 +------------------------------+-------------------------------------------+-------------------------------------+  
-| Run                          | various places as shown later on          | Run object                          |
+| Run                          | various places as shown later on,         | Run object                          |
+|                              | not ``runlog``                            |                                     |
 +------------------------------+-------------------------------------------+-------------------------------------+
 | Sample                       | ``SPB`` and ``RSPB`` within               | Sample Object                       | 
 |                              | ``isis_vms_compat``                       |                                     |
@@ -105,8 +108,12 @@ In the Nexus column, groups in capitals are in ``raw_data_1/isis_vms_compat`` an
 
 (data) indicates that the number is got from the histogram data in an appropiate manner.
 
-``IRPB`` and ``RRPB`` point to the same data. In ``IRPB``, the data is seen as integer and in RRPB it is seen as real (double precision).
-In all cases, integers are passed. Real numbers are used only to allow the integer to be larger.
+``IRPB`` and ``RRPB`` point to the same data. In ``IRPB``, the data is seen as 32-bit integer 
+and in RRPB it is seen as 32-bit floating point (same 32 bits).
+In all cases, integers are passed. The 32-bit floating point numbers are used only to store larger integers.
+
+The ``runlog`` group in the Nexus file is not read. The other indices of ``IRPB`` and ``RRPB`` are not read.
+
 
 Sample Object
 '''''''''''''
@@ -125,7 +132,7 @@ Properties of the sample object are loaded as follows:
 | ``RSPB[5]`` | Width                   |
 +-------------+-------------------------+
 
-Nexus groups found in ``raw_data_1/isis_vms_compat``.
+Nexus groups found in ``raw_data_1/isis_vms_compat``. Other indices of ``SPB`` & ``RSPB`` are not read.
 
 
 Usage
