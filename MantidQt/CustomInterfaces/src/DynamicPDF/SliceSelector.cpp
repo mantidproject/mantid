@@ -142,8 +142,7 @@ void SliceSelector::updateSelectedSlice(const int &newSelectedIndex) {
  */
 void SliceSelector::newIndexFromPickedEnergy(const double &newEnergySelected){
   auto axis = m_loadedWorkspace->m_ws->getAxis(1);
-  auto newSelectedIndex = axis->indexOfValue(newEnergySelected);
-  auto newE = axis->getValue(newSelectedIndex);
+  auto newSelectedIndex = static_cast<int>(axis->indexOfValue(newEnergySelected));
   updateSelectedSlice(newSelectedIndex);
 }
 
