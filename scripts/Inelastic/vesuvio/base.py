@@ -1,3 +1,4 @@
+# pylint: disable=too-few-public-methods
 from mantid.api import Algorithm
 
 class VesuvioBase(Algorithm):
