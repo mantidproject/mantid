@@ -487,21 +487,21 @@ void ApplyPaalmanPings::handleGeometryChange(int index) {
 /**
  * Replots the preview plot.
  *
- * @param specIndex Spectrum index to plot
+ * @param wsIndex Spectrum index to plot
  */
-void ApplyPaalmanPings::plotPreview(int specIndex) {
+void ApplyPaalmanPings::plotPreview(int wsIndex) {
   bool useCan = m_uiForm.ckUseCan->isChecked();
 
   m_uiForm.ppPreview->clear();
 
   // Plot sample
   m_uiForm.ppPreview->addSpectrum(
-      "Sample", m_uiForm.dsSample->getCurrentDataName(), specIndex, Qt::black);
+      "Sample", m_uiForm.dsSample->getCurrentDataName(), wsIndex, Qt::black);
 
   // Plot result
   if (!m_pythonExportWsName.empty())
     m_uiForm.ppPreview->addSpectrum(
-        "Corrected", QString::fromStdString(m_pythonExportWsName), specIndex,
+        "Corrected", QString::fromStdString(m_pythonExportWsName), wsIndex,
         Qt::green);
 
   // Scale can
@@ -523,16 +523,16 @@ void ApplyPaalmanPings::plotPreview(int specIndex) {
     // Plot container
     if (m_uiForm.ckScaleCan->isChecked()) {
       m_uiForm.ppPreview->addSpectrum("Container", "__container_corrected",
-                                      specIndex, Qt::red);
+                                      wsIndex, Qt::red);
     } else {
       if (m_uiForm.ckShiftCan->isChecked()) {
         m_uiForm.ppPreview->addSpectrum(
             "Container",
             (m_uiForm.dsContainer->getCurrentDataName() + "_Shifted"),
-            specIndex, Qt::red);
+            wsIndex, Qt::red);
       } else {
         m_uiForm.ppPreview->addSpectrum(
-            "Container", m_uiForm.dsContainer->getCurrentDataName(), specIndex,
+            "Container", m_uiForm.dsContainer->getCurrentDataName(), wsIndex,
             Qt::red);
       }
     }
