@@ -13,6 +13,8 @@ Description
 The algorithm calculates a normalization MD workspace for single crystal diffraction experiments. 
 Trajectories of each detector in reciprocal space are calculated, and the flux is integrated between intersections with each
 MDBox. A brief introduction to the multi-dimensional data normalization can be found :ref:`here <MDNorm>`.
+Results from using this algorithm for TOPAZ data at SNS can be found
+`here <http://journals.iucr.org/j/issues/2016/02/00/fs5119/fs5119.pdf>`_.
 
 
 Usage

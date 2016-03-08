@@ -57,6 +57,7 @@ public:
   MOCK_METHOD0(help, void());
   MOCK_METHOD1(checkBoxAutoChanged, void(int));
   MOCK_METHOD1(setCurrentAutoFile, void(const std::string &));
+  MOCK_METHOD0(handleFirstFileChanged, void());
 
   void requestLoading() { emit loadRequested(); }
   void selectFirstRun() { emit firstRunSelected(); }

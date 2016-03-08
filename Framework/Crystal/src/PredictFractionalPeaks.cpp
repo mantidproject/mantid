@@ -12,7 +12,8 @@
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 
-//#include "MantidKernel/Strings.h"
+#include <boost/math/special_functions/round.hpp>
+
 namespace Mantid {
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -144,8 +145,8 @@ void PredictFractionalPeaks::exec() {
 
   int N = NPeaks;
   if (includePeaksInRange) {
-    N = static_cast<int>(
-        (Hmax - Hmin + 1) * (Kmax - Kmin + 1) * (Lmax - Lmin + 1) + .5);
+    N = boost::math::iround((Hmax - Hmin + 1) * (Kmax - Kmin + 1) *
+                            (Lmax - Lmin + 1));
     N = max<int>(100, N);
   }
   IPeak &peak0 = Peaks->getPeak(0);
@@ -194,11 +195,10 @@ void PredictFractionalPeaks::exec() {
 
             if (Qs[2] > 0 && peak->findDetector()) {
               ErrPos = 2;
-              vector<int> SavPk;
-              SavPk.push_back(RunNumber);
-              SavPk.push_back(static_cast<int>(floor(1000 * hkl1[0] + .5)));
-              SavPk.push_back(static_cast<int>(floor(1000 * hkl1[1] + .5)));
-              SavPk.push_back(static_cast<int>(floor(1000 * hkl1[2] + .5)));
+              vector<int> SavPk{RunNumber,
+                                boost::math::iround(1000.0 * hkl1[0]),
+                                boost::math::iround(1000.0 * hkl1[1]),
+                                boost::math::iround(1000.0 * hkl1[2])};
 
               // TODO keep list sorted so searching is faster?
               auto it =

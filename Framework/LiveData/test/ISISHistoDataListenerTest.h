@@ -113,13 +113,13 @@ public:
     TS_ASSERT_EQUALS(spec->getSpectrumNo(), 1)
     auto dets = spec->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
-    TS_ASSERT_EQUALS(*dets.begin(), 1001);
+    TS_ASSERT_EQUALS(*dets.begin(), 1);
 
     spec = ws->getSpectrum(3);
     TS_ASSERT_EQUALS(spec->getSpectrumNo(), 10)
     dets = spec->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
-    TS_ASSERT_EQUALS(*dets.begin(), 1004);
+    TS_ASSERT_EQUALS(*dets.begin(), 4);
 
     res.wait();
 #else
@@ -217,25 +217,25 @@ public:
     TS_ASSERT_EQUALS(spec->getSpectrumNo(), 1)
     auto dets = spec->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
-    TS_ASSERT_EQUALS(*dets.begin(), 1001);
+    TS_ASSERT_EQUALS(*dets.begin(), 1);
 
     spec = ws1->getSpectrum(3);
     TS_ASSERT_EQUALS(spec->getSpectrumNo(), 4)
     dets = spec->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
-    TS_ASSERT_EQUALS(*dets.begin(), 1004);
+    TS_ASSERT_EQUALS(*dets.begin(), 4);
 
     spec = ws2->getSpectrum(0);
     TS_ASSERT_EQUALS(spec->getSpectrumNo(), 1)
     dets = spec->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
-    TS_ASSERT_EQUALS(*dets.begin(), 1001);
+    TS_ASSERT_EQUALS(*dets.begin(), 1);
 
     spec = ws2->getSpectrum(3);
     TS_ASSERT_EQUALS(spec->getSpectrumNo(), 4)
     dets = spec->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
-    TS_ASSERT_EQUALS(*dets.begin(), 1004);
+    TS_ASSERT_EQUALS(*dets.begin(), 4);
 
     dae.cancel();
     res.wait();

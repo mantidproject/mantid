@@ -141,6 +141,8 @@ box in :math:`HKL` space.
    
 The way to account for excluded data is algorithm dependent. See
 the documentation for each particular implementation.
+Results from using this normalization for a single crystal elastic experiment can be found
+`here <http://journals.iucr.org/j/issues/2016/02/00/fs5119/fs5119.pdf>`_.
 
 Symmetrization
 ++++++++++++++

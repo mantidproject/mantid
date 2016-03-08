@@ -333,28 +333,28 @@ SetPeaksWorkspaces ConcretePeaksPresenter::presentedWorkspaces() const {
   return workspaces;
 }
 
-QColor ConcretePeaksPresenter::getBackgroundColor() const {
-  return m_viewPeaks->getBackgroundColour();
+PeakViewColor ConcretePeaksPresenter::getBackgroundPeakViewColor() const {
+  return m_viewPeaks->getBackgroundPeakViewColor();
 }
 
-QColor ConcretePeaksPresenter::getForegroundColor() const {
-  return m_viewPeaks->getForegroundColour();
+PeakViewColor ConcretePeaksPresenter::getForegroundPeakViewColor() const {
+  return m_viewPeaks->getForegroundPeakViewColor();
 }
 
-void ConcretePeaksPresenter::setForegroundColor(const QColor colour) {
-  // Change foreground colours
+void ConcretePeaksPresenter::setForegroundColor(const PeakViewColor color) {
+  // Change foreground colors
   if (m_viewPeaks != NULL) {
-    m_viewPeaks->changeForegroundColour(colour);
+    m_viewPeaks->changeForegroundColour(color);
     m_viewPeaks->updateView();
   }
   // For the case that this has been performed outside the GUI.
   informOwnerUpdate();
 }
 
-void ConcretePeaksPresenter::setBackgroundColor(const QColor colour) {
+void ConcretePeaksPresenter::setBackgroundColor(const PeakViewColor color) {
   // Change background colours
   if (m_viewPeaks != NULL) {
-    m_viewPeaks->changeBackgroundColour(colour);
+    m_viewPeaks->changeBackgroundColour(color);
     m_viewPeaks->updateView();
   }
   // For the case that this has been performed outside the GUI.
