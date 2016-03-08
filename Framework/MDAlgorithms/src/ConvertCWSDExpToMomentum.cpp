@@ -69,9 +69,10 @@ void ConvertCWSDExpToMomentum::init() {
                                       "base name without directory.");
 
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>(
-          "BackgroundWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Name of optional background workspace.");
+        make_unique<WorkspaceProperty<MatrixWorkspace>>("BackgroundWorkspace",
+                                                        "", Direction::Input,
+                                                        PropertyMode::Optional),
+        "Name of optional background workspace.");
 
   declareProperty(
       make_unique<FileProperty>("Directory", "",
