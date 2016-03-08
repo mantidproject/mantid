@@ -635,12 +635,16 @@ std::vector<std::string> EnggDiffractionViewQtGUI::fittingRunNo() const {
 std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
   std::string fileData = "";
   std::string line;
+  std::string comma = ", ";
 
   std::ifstream peakFile(fileDir);
 
   if (peakFile.is_open()) {
     while (std::getline(peakFile, line)) {
       fileData += line;
+
+      if (!peakFile.eof())
+        fileData += comma;
     }
     peakFile.close();
   }
