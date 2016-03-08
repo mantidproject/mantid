@@ -2,17 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
-#include "MantidCurveFitting/ComplexMatrix.h"
-#include "MantidCurveFitting/FortranMatrix.h"
-#include "MantidCurveFitting/GSLMatrix.h"
 
 #include <array>
 #include <cmath>
+#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {
-
-typedef FortranMatrix<ComplexMatrix> ComplexFortranMatrix;
 
 namespace Functions {
 
@@ -398,7 +394,7 @@ double c_r0() {
 //--------------------------------------------------
 // set the full stevens' operators Okq to their R3+ value
 //--------------------------------------------------
-void s_okq(double dimj, int k, int q, const GSLMatrix &sbkq,
+void s_okq(double dimj, int k, int q, const DoubleFortranMatrix &sbkq,
            ComplexMatrix &okq) {
   okq.resize(sizeOfHam, sizeOfHam);
 //  ComplexType i = {0.0, 1.0};
@@ -479,7 +475,7 @@ void s_okq(double dimj, int k, int q, const GSLMatrix &sbkq,
 // k=0 q=2 : j-
 // k=0 q=4 : o4 = o40+ 5*o44
 // k=0 q=6 : o6 = o60-21*o64
-double c_operator_norm(double dimj, int k, int q, const GSLMatrix& sbkq, ComplexMatrix& okq) {
+double c_operator_norm(double dimj, int k, int q, const DoubleFortranMatrix& sbkq, ComplexMatrix& okq) {
 	s_okq(dimj, k, q, sbkq, okq);
 
 	double res = 0.0;
@@ -590,27 +586,70 @@ double epsilon(int k, int q) {
     return ComplexType(cos(m * a), -sin(m * a)) * d *
            ComplexType(cos(ms * c), -sin(ms * c));
   }
+//c--------------------------------------------------
+//c <jm| jp^|q| or jm^|q|  |nj>
+//c--------------------------------------------------
+  double jop(int q, double mj, double nj, double j) {
+    switch (q) {
+    case 0:
+      return delta(mj, nj, j);
+    case 1:
+      return delta(mj, nj + 1, j) * jp(nj, j);
+    case 2:
+      return delta(mj, nj + 2, j) * jp2(nj, j);
+    case 3:
+      return delta(mj, nj + 3, j) * jp3(nj, j);
+    case 4:
+      return delta(mj, nj + 4, j) * jp4(nj, j);
+    case 5:
+      return delta(mj, nj + 5, j) * jp5(nj, j);
+    case 6:
+      return delta(mj, nj + 6, j) * jp6(nj, j);
+    case -1:
+      return delta(mj, nj - 1, j) * jm(nj, j);
+    case -2:
+      return delta(mj, nj - 2, j) * jm2(nj, j);
+    case -3:
+      return delta(mj, nj - 3, j) * jm3(nj, j);
+    case -4:
+      return delta(mj, nj - 4, j) * jm4(nj, j);
+    case -5:
+      return delta(mj, nj - 5, j) * jm5(nj, j);
+    case -6:
+      return delta(mj, nj - 6, j) * jm6(nj, j);
+    default:
+      throw std::runtime_error("Cannot calculate jop with this q value.");
+    }
+    throw std::runtime_error("Cannot calculate jop with this q value.");
+  }
+  // c--------------------------------------------------
+  // c calculate the full stevens operators
+  // c--------------------------------------------------
+  double full_okq(int k, int q, double mj, double nj, double j) {
+    return 0.5*jop(q,mj,nj,j)*( ff(k,q,mj,j)+ff(k,q,nj,j) );
+  }
 
 } // anonymous
 
-void sc_crystal_field(size_t nre, const std::string &type, int symmetry,
-                      const GSLMatrix &sbkq, GSLVector &bmol, GSLVector &bext,
-                      ComplexMatrix &bkq) {
-  if (nre <= maxNre) {
+void sc_crystal_field(int nre, const std::string &type, int symmetry,
+                      const DoubleFortranMatrix &sbkq, DoubleFortranVector &bmol, DoubleFortranVector &bext,
+                      ComplexFortranMatrix &bkq) {
+  if (nre <=0 || nre > maxNre) {
     throw std::out_of_range("nre is out of range");
   }
   // initialize some rare earth constants
-  auto gj = ggj[nre];
-  auto dimj = ddimj[nre];
-  auto alphaj = aalphaj[nre];
-  auto betaj = bbetaj[nre];
-  auto gammaj = ggammaj[nre];
-  auto r2 = rr2[nre];
-  auto r4 = rr4[nre];
-  auto r6 = rr6[nre];
+  auto gj = ggj[nre-1];
+  auto dimj = ddimj[nre-1];
+  auto alphaj = aalphaj[nre-1];
+  auto betaj = bbetaj[nre-1];
+  auto gammaj = ggammaj[nre-1];
+  auto r2 = rr2[nre-1];
+  auto r4 = rr4[nre-1];
+  auto r6 = rr6[nre-1];
 
   // magneton of Bohr in kelvin per tesla
   auto myb = c_myb;
+  std::cerr << "myb=" << myb << std::endl;
 
 	if (type == "Vkq" || type == "vkq" || type == "VKQ") {
 //c          the Vkq are in kelvin and are the parameters which uses the normalized 
@@ -621,21 +660,21 @@ void sc_crystal_field(size_t nre, const std::string &type, int symmetry,
      ComplexMatrix okq(sizeOfHam, sizeOfHam);
      okq.zero();
 	   auto norm = c_operator_norm(dimj, 0, 0, sbkq, okq);    // 00 = j+ note:||j+||=||j-||
-	   bmol[0] = 2*bmol[0]/norm/f_bmol; //
-	   bext[0] = 2*bext[0]/norm/f_bext; //  V- / ||j+|| = 1/2*f*B-
-	   bmol[1] = 2*bmol[1]/norm/f_bmol; //   
-	   bext[1] = 2*bext[1]/norm/f_bext; //  V+ / ||j-|| = 1/2*f*B+
+	   bmol(1) = 2*bmol(1)/norm/f_bmol; //
+	   bext(1) = 2*bext(1)/norm/f_bext; //  V- / ||j+|| = 1/2*f*B-
+	   bmol(2) = 2*bmol(2)/norm/f_bmol; //   
+	   bext(2) = 2*bext(2)/norm/f_bext; //  V+ / ||j-|| = 1/2*f*B+
 	   norm = c_operator_norm(dimj, 0, 1, sbkq, okq);    // 01 = jz
-	   bmol[2] = bmol[2]/norm/f_bmol;      //
-	   bext[2] = bext[2]/norm/f_bext;      // Vz / ||jz|| = f*Bz
-     GSLMatrix ssbkq(N0_6, N0_6);
+	   bmol(3) = bmol(3)/norm/f_bmol;      //
+	   bext(3) = bext(3)/norm/f_bext;      // Vz / ||jz|| = f*Bz
+     DoubleFortranMatrix ssbkq(0,6, 0,6);
      ssbkq.zero();
 
      for(int k = 2; k <= 6; k+=2) {//	   do k=2,6,2
        for(int m = 0; m <= k; ++m) {//	      do m=0,k
-	        bkq.set(k,m, cifnull(bkq.get(k,m)));
-	        if (bkq.get(k,m) != 0.0) {
-		        ssbkq.set(k,m, 1); // note ||re(Okq)|| = ||im(Okq)|| for q<>0 
+	        bkq(k,m) =  cifnull(bkq.get(k,m));
+	        if (bkq(k,m) != 0.0) {
+		        ssbkq(k,m) = 1.0; // note ||re(Okq)|| = ||im(Okq)|| for q<>0 
             if (symmetry == 8) {
                 norm = 1.0;
                 if (k == 4) norm = c_operator_norm(dimj,4,0,ssbkq,okq);
@@ -643,7 +682,7 @@ void sc_crystal_field(size_t nre, const std::string &type, int symmetry,
             } else {
 		            norm = c_operator_norm(dimj,k,m,ssbkq,okq);
             }
-            bkq.set(k,m, bkq.get(k,m)/norm);
+            bkq(k,m) = bkq(k,m)/norm;
 	        }
        }
      }
@@ -656,6 +695,7 @@ void sc_crystal_field(size_t nre, const std::string &type, int symmetry,
 //       ------------------
 //       magnetic neutron scattering radius
   auto r0 = c_r0();
+  std::cerr << "r0=" << r0 << std::endl;
 //       ------------------------------------------------------------
 //       transform the Bkq with
 //       H = sum_k=0 Bk0 Ok0 + sum_k>0_q>0  ReBkq ReOkq + ImBkq ImOkq
@@ -679,6 +719,7 @@ void sc_crystal_field(size_t nre, const std::string &type, int symmetry,
         dkq_star(k, q) = dkq_star(k, q) / 2.0;
       }
       dkq_star(k, -q) = conjg(dkq_star(k, q));
+      std::cerr << "dkq*= " << k << ' ' << q << ' ' << ComplexType(dkq_star(k, q)) << std::endl;
     }
   }
    //c       -------------------------------------------------------------------
@@ -717,98 +758,111 @@ void sc_crystal_field(size_t nre, const std::string &type, int symmetry,
   // c        mag        -----    1q    1q
   // c                     q
   // c
-  //
-  //	bex(1, 1) = - (bext(1)-i*bext(2))/sqrt(2.0d0) ! /aj
-  //	bex(1,-1) =   (bext(1)+i*bext(2))/sqrt(2.0d0) ! /aj
-  //	bex(1, 0) =    bext(3)                        ! /aj
-  //
+  
+  ComplexFortranMatrix  bex(1,1, -1,1);
+  bex(1, 1) = - (bext(1)-i*bext(2))/sqrt(2.0); // ! /aj
+  bex(1,-1) =   (bext(1)+i*bext(2))/sqrt(2.0); // ! /aj
+  bex(1, 0) =    bext(3);                      // ! /aj
+  
   // c       calculates Bex(1,q) for a canted moment
   // c
   // c       moment    cry       cry   cry     +
   // c      h       = R   (abc) h     R   (abc)
   // c       mag                 mag
   // c
-  //        do q=-1,1
-  //           rbex(1,q) = cmplx(0.0d0,0.0d0)
-  //           do qs=-1,1
-  //             rbex(1,q) = rbex(1,q) + bex(1,qs)*ddrot(1,q,qs,a,b,c)
-  //           end do
-  //        end do
-  //
-  //        rbextp =  rbex(1,-1)*sqrt(2.0d0)  !*aj
-  //        rbextm = -rbex(1, 1)*sqrt(2.0d0)  !*aj
-  //        rbextz =  rbex(1, 0)              !*aj
+  ComplexFortranMatrix  rbex(1,1, -1,1);
+  for(int q = -1; q <= 1; ++q) { //        do q=-1,1
+    rbex(1,q) = ComplexType(0.0, 0.0);
+    for(int qs = -1; qs <= 1; ++qs) { //         do qs=-1,1
+      rbex(1,q) = rbex(1,q) + bex(1,qs)*ddrot(1,q,qs,a,b,c);
+    }
+  }
+  
+  ComplexType rbextp, rbextm, rbextz;
+  rbextp =  rbex(1,-1)*sqrt(2.0);    //  !*aj
+  rbextm =  rbex(1, 1)*(-sqrt(2.0)); //  !*aj
+  rbextz =  rbex(1, 0);              //  !*aj
   // c       -------------------------------------------------------------------
   // c       magneton of Bohr in kelvin per tesla
   //	myb    = c_myb()
-  //	facmol = 2*(gj-1)*myb
-  //	facext = gj*myb
+  auto facmol = 2*(gj-1)*myb;
+  auto facext = gj*myb;
   //	i = cmplx(0.0d0,1.0d0)
-  //	bmolp = bmol(1)+i*bmol(2)
-  //	bmolm = bmol(1)-i*bmol(2)
-  //	bmolz = bmol(3)
-  //	bextp = rbextp
-  //	bextm = rbextm
-  //	bextz = rbextz
+  auto bmolp = bmol(1)+i*bmol(2);
+  auto bmolm = bmol(1)-i*bmol(2);
+  auto bmolz = bmol(3);
+  auto bextp = rbextp;
+  auto bextm = rbextm;
+  auto bextz = rbextz;
   // c       -----------------------------------------
   // c       set the hamiltonian matrix h to complex 0
   // c       -----------------------------------------
   //	call mx_clear(h)
+  int dim = static_cast<int>(dimj);
+  std::cerr << "dim=" << dim <<std::endl;
+  ComplexFortranMatrix h(1, dim, 1, dim);
+  std::cerr << h.size1() << " x " << h.size2() << std::endl;
+  h.zero();
   // c       -------------------------------------------------------------------
   // c       calculate the crystal field hamiltonian
   // c       define only the lower triangle of h(m,n)
   // c       -------------------------------------------------------------------
-  //	dim = dimj
-  //	j   = 0.5d0*(dimj-1) ! total momentum J of R3+
-  //	do m=1,dim
-  //	   mj = dble(m) - j - 1
-  //	   do n=1,m
-  //	        nj = dble(n) - j - 1
-  //                h(m,n) = cmplx(0.0d0,0.0d0)
-  //                do k=2,6,2
-  //                   do q=-k,k
-  //                      h(m,n) = h(m,n) + rdkq_star(k,q)*full_okq(k,q,mj,nj,j)
-  //                   end do
-  //                end do
-  //           end do
-  //        end do
+  auto j   = 0.5*(dimj-1.0); // ! total momentum J of R3+
+  for(int m=1; m <= dim; ++m) { //  do m=1,dim
+    auto mj = double(m) - j - 1.0;
+  	for(int n=1; n <=m; ++n) { //   do n=1,m
+  	  auto nj = double(n) - j - 1.0;
+      // h is already zero
+      // h(m,n) = cmplx(0.0d0,0.0d0)
+      for(int k=2; k <=6; k +=2) { //            do k=2,6,2
+        for(int q=-k; q <= k; ++q) { //             do q=-k,k
+          h(m,n) = h(m,n) + rdkq_star(k,q)*full_okq(k,q,mj,nj,j);
+        }
+      }
+    }
+  }
   // c       -------------------------------------------------------------------
   // c       define only the lower triangle of h(m,n)
   // c       -------------------------------------------------------------------
   //	dim = dimj
   //	j   = 0.5d0*(dimj-1) ! total momentum J of R3+
-  //	do 10 m=1,dim
-  //	   mj = dble(m) - j - 1
-  //	   do 20 n=1,m
-  //	        nj = dble(n) - j - 1
+  for(int m=1; m <= dim; ++m) { //	do 10 m=1,dim
+    auto mj = double(m) - j - 1.0;
+    for(int n=1; n <= m; ++n) { //	   do 20 n=1,m
+     auto nj = double(n) - j - 1.0;
   // c
   // c add the molecular field
   // c f*J*B = f*( 1/2*(J+ * B-  +  J- * B+) + Jz*Bz )
   // c
-  //                h(m,n) = h(m,n)
-  //     *                 + 0.5d0*facmol*bmolm*delta(mj,nj+1,j)*jp(nj,j)
-  //     *                 + 0.5d0*facmol*bmolp*delta(mj,nj-1,j)*jm(nj,j)
-  //     *                 +       facmol*bmolz*delta(mj,nj,j)*nj
+     h(m,n) = h(m,n) + 0.5*facmol*bmolm*delta(mj,nj+1,j)*jp(nj,j)
+                     + 0.5*facmol*bmolp*delta(mj,nj-1,j)*jm(nj,j)
+                     +       facmol*bmolz*delta(mj,nj,j)*nj
   // c
   // c add an external magnetic field
   // c
-  //     *                 + 0.5d0*facext*bextm*delta(mj,nj+1,j)*jp(nj,j)
-  //     *                 + 0.5d0*facext*bextp*delta(mj,nj-1,j)*jm(nj,j)
-  //     *                 +       facext*bextz*delta(mj,nj,j)*nj
-  // 20	   continue
-  // 10	continue
+                     + 0.5*facext*bextm*delta(mj,nj+1,j)*jp(nj,j)
+                     + 0.5*facext*bextp*delta(mj,nj-1,j)*jm(nj,j)
+                     +       facext*bextz*delta(mj,nj,j)*nj;
+     h(n, m) = conjg(h(m, n));
+        std::cerr << m << ' ' << n << ' ' << ComplexType(h(m,n)) << std::endl;
+    }
+  }
   // c
   // c diagonalisation of the hamiltonian h
   // c only the lower triangle is needed
   // c
   //	call diagonal(h,energy,wavefunction,dim)
+  GSLVector energy;
+  ComplexMatrix wavefunction;
+  h.eigenSystemHermitian(energy, wavefunction);
   // c
   // c shift the lowest energy level to 0
   // c
   //	eshift = energy(1)
-  //	do 50 n=1,dim
+  for(size_t n = 0; n < energy.size(); ++n) {//	do 50 n=1,dim
   //	   energy(n) = energy(n) - eshift
-  // 50     continue
+    std::cerr << "En " << n << ' ' << energy[n] << std::endl;
+  }
   // c
   // c write the energies out (in meV)
   // c

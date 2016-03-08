@@ -403,6 +403,16 @@ inline bool operator==(const ComplexMatrixValueConverter& conv, const ComplexTyp
   return c == static_cast<ComplexType>(conv);
 }
 
+/// Inequality operator
+inline bool operator!=(const ComplexType& c, const ComplexMatrixValueConverter& conv) {
+  return c != static_cast<ComplexType>(conv);
+}
+
+/// Inequality operator
+inline bool operator!=(const ComplexMatrixValueConverter& conv, const ComplexType& c) {
+  return c != static_cast<ComplexType>(conv);
+}
+
 /// Plus operator
 inline ComplexType operator+(const ComplexMatrixValueConverter& conv, const ComplexType& c) {
   return static_cast<ComplexType>(conv) + c;
