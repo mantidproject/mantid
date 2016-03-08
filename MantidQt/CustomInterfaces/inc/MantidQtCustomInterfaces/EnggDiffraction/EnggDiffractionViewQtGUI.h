@@ -137,8 +137,6 @@ public:
 
   virtual double rebinningPulsesTime() const;
 
-  virtual std::vector<std::string> fittingRunNo() const;
-
   std::string fittingPeaksFile() const;
 
   std::string readPeaksFile(std::string fileDir);
@@ -211,6 +209,7 @@ private slots:
   void enableSpecIds();
 
   // slot of the fitting peaks per part of the interface
+  void browseFitFocusedRun();
   void fittingBankIdChanged(int idx);
   void setBankIdComboBox(int idx);
   void browsePeaksToFit();

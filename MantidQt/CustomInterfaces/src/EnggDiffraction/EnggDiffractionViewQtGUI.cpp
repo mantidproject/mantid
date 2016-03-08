@@ -187,6 +187,8 @@ void EnggDiffractionViewQtGUI::doSetupTabPreproc() {
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabFitting() {
+  connect(m_uiTabFitting.pushButton_fitting_browse_run_num, SIGNAL(released()), this,
+          SLOT(browseFitFocusedRun()));
 
   connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)), this,
           SLOT(fittingBankIdChanged(int)));
@@ -597,7 +599,7 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabPreproc.pushButton_rebin_multiperiod->setEnabled(enable);
 
   // fitting
-  m_uiTabFitting.MWRunFiles_fititng_run_num->setEnabled(enable);
+  m_uiTabFitting.pushButton_fitting_browse_run_num->setEnabled(enable);
   m_uiTabFitting.lineEdit_fitting_peaks->setEnabled(enable);
   m_uiTabFitting.pushButton_fit->setEnabled(enable);
 }
@@ -626,12 +628,6 @@ double EnggDiffractionViewQtGUI::rebinningPulsesTime() const {
   return m_uiTabPreproc.doubleSpinBox_step_time->value();
 }
 
-std::vector<std::string> EnggDiffractionViewQtGUI::fittingRunNo() const {
-  return qListToVector(
-      m_uiTabFitting.MWRunFiles_fititng_run_num->getFilenames(),
-      m_uiTabFitting.MWRunFiles_fititng_run_num->isValid());
-}
-
 std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
   std::string fileData = "";
   std::string line;
@@ -642,7 +638,6 @@ std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
   if (peakFile.is_open()) {
     while (std::getline(peakFile, line)) {
       fileData += line;
-
       if (!peakFile.eof())
         fileData += comma;
     }
@@ -949,6 +944,27 @@ void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
 
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
   m_uiTabFocus.lineEdit_texture_grouping_file->setText(path);
+}
+
+void EnggDiffractionViewQtGUI::browseFitFocusedRun() {
+  QString prevPath = QString::fromStdString(m_focusDir);
+  if (prevPath.isEmpty()) {
+    prevPath =
+        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  }
+  std::string nexusFormat = "Nexus file with calibration table: NXS, NEXUS"
+                            "(*.nxs *.nexus);;";
+
+  QString path(
+      QFileDialog::getOpenFileName(this, tr("Open Focused File "), prevPath,
+                                   QString::fromStdString(nexusFormat)));
+
+  if (path.isEmpty()) {
+    return;
+  }
+
+  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
+  m_uiTabFitting.lineEdit_pushButton_run_num->setText(path);
 }
 
 void EnggDiffractionViewQtGUI::browsePeaksToFit() {
