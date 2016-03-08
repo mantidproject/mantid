@@ -69,12 +69,12 @@ const std::string EstimateResolutionDiffraction::category() const {
 //----------------------------------------------------------------------------------------------
 void EstimateResolutionDiffraction::init() {
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                             Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
       "Name of the workspace to have detector resolution calculated. ");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace containing delta(d)/d of each "
                   "detector/spectrum.");
 

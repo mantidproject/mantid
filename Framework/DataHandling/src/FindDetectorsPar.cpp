@@ -38,8 +38,8 @@ void FindDetectorsPar::init() {
   wsValidator->add<API::CommonBinsValidator>();
   // input workspace
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              wsValidator),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                       wsValidator),
       "The name of the workspace that will be used as input for the algorithm");
   //
   declareProperty("ReturnLinearRanges", false,
@@ -47,12 +47,11 @@ void FindDetectorsPar::init() {
                   "detector's ranges (dx,dy) rather then angular ranges "
                   "(dAzimuthal,dPolar)");
   // optional par or phx file
-  std::vector<std::string> fileExts(2);
-  fileExts[0] = ".par";
-  fileExts[1] = ".phx";
+  const std::vector<std::string> fileExts{".par", ".phx"};
 
-  declareProperty(new FileProperty("ParFile", "not_used.par",
-                                   FileProperty::OptionalLoad, fileExts),
+  declareProperty(Kernel::make_unique<FileProperty>("ParFile", "not_used.par",
+                                                    FileProperty::OptionalLoad,
+                                                    fileExts),
                   "An optional file that contains of the list of angular "
                   "parameters for the detectors and detectors groups;\n"
                   "If specified, will use data from file instead of the data, "
@@ -157,7 +156,7 @@ void FindDetectorsPar::setOutputTable() {
     return;
   // Store the result in a table workspace
   try {
-    declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+    declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
         "OutputParTableWS", "", Direction::Output));
   } catch (std::exception &err) {
     g_log.information() << " findDetecotorsPar: unsuccessfully declaring "
@@ -627,7 +626,7 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
   if (space_to_symbol_change >
       1) { // more then one group of symbols in the string, spe file
     int nData_records(0), nData_blocks(0);
-    // cppcheck-suppress invalidscanf
+
     int nDatas = sscanf(&BUF[0], " %d %d ", &nData_records, &nData_blocks);
     file_descriptor.nData_records = static_cast<size_t>(nData_records);
     file_descriptor.nData_blocks = static_cast<size_t>(nData_blocks);

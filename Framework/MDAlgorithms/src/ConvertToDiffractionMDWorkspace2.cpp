@@ -38,33 +38,35 @@ public:
  */
 void ConvertToDiffractionMDWorkspace2::init() {
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace. If the workspace "
                   "already exists, then the events will be added to it.");
   declareProperty(
-      new PropertyWithValue<bool>("Append", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("Append", false, Direction::Input),
       "Append events to the output workspace. The workspace is replaced if "
       "unchecked.");
 
   // Disabled for this version
-  declareProperty(new PropertyWithValue<bool>("ClearInputWorkspace", false,
-                                              Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<bool>>("ClearInputWorkspace",
+                                                       false, Direction::Input),
                   "Clearing the events from the input workspace during "
                   "conversion (to save memory) is not supported by algorithm "
                   "v2");
   // disable property on interface
-  this->setPropertySettings("ClearInputWorkspace", new DisabledProperty());
+  this->setPropertySettings("ClearInputWorkspace",
+                            make_unique<DisabledProperty>());
 
   declareProperty(
-      new PropertyWithValue<bool>("OneEventPerBin", true, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("OneEventPerBin", true,
+                                           Direction::Input),
       "Use the histogram representation (event for event workspaces).\n"
       "One MDEvent will be created for each histogram bin (even empty ones).\n"
-      "Warning! This can use signficantly more memory!");
+      "Warning! This can use significantly more memory!");
 
   frameOptions.emplace_back("Q (sample frame)");
   frameOptions.emplace_back("Q (lab frame)");
@@ -78,17 +80,17 @@ void ConvertToDiffractionMDWorkspace2::init() {
       "the sample (taking out goniometer rotation).\n"
       "  HKL: Use the sample's UB matrix to convert to crystal's HKL indices.");
 
-  declareProperty(
-      new PropertyWithValue<bool>("LorentzCorrection", false, Direction::Input),
-      "Correct the weights of events with by multiplying by the Lorentz "
-      "formula: sin(theta)^2 / lambda^4");
+  declareProperty(make_unique<PropertyWithValue<bool>>("LorentzCorrection",
+                                                       false, Direction::Input),
+                  "Correct the weights of events by multiplying by the Lorentz "
+                  "formula: sin(theta)^2 / lambda^4");
 
   // Box controller properties. These are the defaults
   this->initBoxControllerProps("2" /*SplitInto*/, 1500 /*SplitThreshold*/,
                                20 /*MaxRecursionDepth*/);
 
   declareProperty(
-      new PropertyWithValue<int>("MinRecursionDepth", 1),
+      make_unique<PropertyWithValue<int>>("MinRecursionDepth", 1),
       "Optional. If specified, then all the boxes will be split to this "
       "minimum recursion depth. 1 = one level of splitting, etc.\n"
       "Be careful using this since it can quickly create a huge number of "
@@ -98,13 +100,12 @@ void ConvertToDiffractionMDWorkspace2::init() {
       "order to merge them later\n");
   setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 
-  std::vector<double> extents(2, 0);
-  extents[0] = -50;
-  extents[1] = +50;
-  declareProperty(new ArrayProperty<double>("Extents", extents),
-                  "A comma separated list of min, max for each dimension,\n"
-                  "specifying the extents of each dimension. Optional, default "
-                  "+-50 in each dimension.");
+  std::vector<double> extents{-50, +50};
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("Extents", extents),
+      "A comma separated list of min, max for each dimension,\n"
+      "specifying the extents of each dimension. Optional, default "
+      "+-50 in each dimension.");
   setPropertyGroup("Extents", getBoxSettingsGroupName());
 }
 

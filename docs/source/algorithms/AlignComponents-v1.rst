@@ -47,10 +47,11 @@ Fitting Sample/Source
 #####################
 
 When fitting the sample or source position it uses the entire
-instrument and only moves the *Z* position (*i.e.* along the
-beam). You can use a masking workspace to mask part of the instrument
-you don't want to use to align the sample/source position (*e.g.* in
-the *Align sample position in POWGEN* usage example below).
+instrument and moves in the directions that you select. All rotation
+options are ignored. You can use a masking workspace to mask part of
+the instrument you don't want to use to align the sample/source
+position (*e.g.* in the *Align sample position in POWGEN* usage
+example below).
 
 The source and sample positions (in that order) are aligned before an
 components are aligned.
@@ -60,7 +61,7 @@ Usage
 
 **Example - Align the X and Z position of bank26 in POWGEN:**
 
-.. testcode:: position
+.. code-block:: python
 
       LoadCalFile(InstrumentName="PG3",
             CalFilename="PG3_golden.cal",
@@ -81,14 +82,14 @@ Usage
 
 Output:
 
-.. testoutput:: position
+.. code-block:: none
 
     Start position is [1.54436,0.863271,-1.9297]
     Final position is [1.50591,0.863271,-1.92734]
 
 **Example - Align the Y rotation of bank26 and bank46 in POWGEN:**
 
-.. testcode:: rotation
+.. code-block:: python
 
       LoadCalFile(InstrumentName="PG3",
 	    CalFilename="PG3_golden.cal",
@@ -114,7 +115,9 @@ Output:
       print "Final bank26 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank26Rot[0], bank26Rot[1], bank26Rot[2])
       print "Final bank46 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank46Rot[0], bank46Rot[1], bank46Rot[2])
 
-.. testoutput:: rotation
+Output:
+
+.. code-block:: none
 
       Start bank26 rotation is [-24.061.0.120,18.016]
       Start bank46 rotation is [-41.092.0.061,17.795]
@@ -123,7 +126,7 @@ Output:
 
 **Example - Align sample position in POWGEN:**
 
-.. testcode:: sample
+.. code-block:: python
 
       LoadCalFile(InstrumentName="PG3",
 	    CalFilename="PG3_golden.cal",
@@ -139,10 +142,13 @@ Output:
       AlignComponents(CalibrationTable="PG3_cal",
             Workspace=ws,
             MaskWorkspace="PG3_mask",
-            FitSamplePosition=True)
+            FitSamplePosition=True,
+	    Zposition=True)
       print "Final sample position is {:.5f}".format(mtd['ws'].getInstrument().getSample().getPos().getZ())
 
-.. testoutput:: sample
+Output:
+
+.. code-block:: none
 
       Start sample position is 0.0
       Final sample position is 0.02826

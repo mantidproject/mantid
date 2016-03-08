@@ -34,8 +34,6 @@ SINQHMListener::SINQHMListener()
   rank = 0;
 }
 
-SINQHMListener::~SINQHMListener() {}
-
 bool SINQHMListener::connect(const Poco::Net::SocketAddress &address) {
   std::string host = address.toString();
   std::string::size_type i = host.find(':');
@@ -115,7 +113,7 @@ boost::shared_ptr<Workspace> SINQHMListener::extractData() {
 }
 
 void SINQHMListener::setSpectra(
-    const std::vector<Mantid::specid_t> & /*specList*/) {
+    const std::vector<Mantid::specnum_t> & /*specList*/) {
   /**
    * Nothing to do: we always go for the full data.
    * SINQHM would do subsampling but this cannot easily

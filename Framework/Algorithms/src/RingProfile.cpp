@@ -34,7 +34,7 @@ RingProfile::~RingProfile() {}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
-    It configure the algorithm to accept the following inputs:
+    It configures the algorithm to accept the following inputs:
 
      - InputWorkspace
      - OutputWorkspace
@@ -46,26 +46,27 @@ RingProfile::~RingProfile() {}
      - Sense
  */
 void RingProfile::init() {
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
-                      "InputWorkspace", "", Kernel::Direction::Input),
-                  "An input workspace.");
-  declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
-                                               Kernel::Direction::Output),
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "InputWorkspace", "", Kernel::Direction::Input),
+      "An input workspace.");
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Kernel::Direction::Output),
                   "An output workspace.");
 
   auto twoOrThree =
       boost::make_shared<Kernel::ArrayLengthValidator<double>>(2, 3);
   std::vector<double> myInput(3, 0);
-  declareProperty(
-      new Kernel::ArrayProperty<double>("Centre", myInput, twoOrThree),
-      "Coordinate of the centre of the ring");
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+                      "Centre", myInput, twoOrThree),
+                  "Coordinate of the centre of the ring");
   auto nonNegative = boost::make_shared<Kernel::BoundedValidator<double>>();
   nonNegative->setLower(0);
 
   declareProperty<double>("MinRadius", 0, nonNegative,
                           "Radius of the inner ring(m)");
   declareProperty(
-      new Kernel::PropertyWithValue<double>(
+      Kernel::make_unique<Kernel::PropertyWithValue<double>>(
           "MaxRadius", std::numeric_limits<double>::max(), nonNegative),
       "Radius of the outer ring(m)");
   auto nonNegativeInt = boost::make_shared<Kernel::BoundedValidator<int>>();

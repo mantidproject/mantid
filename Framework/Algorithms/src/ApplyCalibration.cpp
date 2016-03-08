@@ -29,11 +29,11 @@ ApplyCalibration::ApplyCalibration() : Algorithm(), m_pmap(nullptr) {}
 void ApplyCalibration::init() {
 
   declareProperty(
-      new API::WorkspaceProperty<API::MatrixWorkspace>("Workspace", "",
-                                                       Direction::InOut),
+      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "Workspace", "", Direction::InOut),
       "The name of the input workspace to apply the calibration to");
 
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
                       "PositionTable", "", Direction::Input),
                   "The name of the table workspace containing the new "
                   "positions of detectors");

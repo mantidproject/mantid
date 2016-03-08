@@ -125,12 +125,20 @@ public:
   virtual int currentCropCalibBankName() const = 0;
 
   /**
-  * customised spec will be passed via specID text field for the
-  * calibrartion process to be carried out
+  * customised spec will be passed via specNo text field for the
+  * cropped calibrartion process to be carried out
   *
   * @return which format should to applied for plotting data
   */
   virtual std::string currentCalibSpecNos() const = 0;
+
+  /**
+  * customised bank name will be passed with SpectrumNos to
+  * save workspace and file with particular bank name
+  *
+  * @return string which will be used to generate bank name
+  */
+  virtual std::string currentCalibCustomisedBankName() const = 0;
 
   /**
   * Selected plot data representation will be applied, which will
@@ -275,7 +283,7 @@ public:
    * @return spectrum IDs, expected as a comma separated list of
    * integers or ranges of integers.
    */
-  virtual std::string focusingCroppedSpectrumIDs() const = 0;
+  virtual std::string focusingCroppedSpectrumNos() const = 0;
 
   /**
    * Detector grouping file, used when focusing in "texture" mode.
@@ -291,6 +299,14 @@ public:
    * @return bool
    */
   virtual bool focusedOutWorkspace() const = 0;
+
+  /**
+  * Check box to consider when calibrating
+  * whether to plot focused workspace
+  *
+  * @return bool
+  */
+  virtual bool plotCalibWorkspace() const = 0;
 
   /**
    * Reset all focus inputs/options
@@ -343,31 +359,47 @@ public:
  *
  * @return bool
  */
-  virtual bool saveOutputFiles() const = 0;
+  virtual bool saveFocusedOutputFiles() const = 0;
 
   /**
-  * Produces a single spectrum graph for focused output. Runs
-  * plotSpectrum function via python.
+  * Produces vanadium curves graph with three spectrum for calib
+  * output.
+  *
+  */
+  virtual void plotVanCurvesCalibOutput() = 0;
+
+  /**
+  * Produces ceria peaks graph with two spectrum for calib
+  * output.
+  *
+  * @param pyCode string which is passed to Mantid via pyScript
+  */
+  virtual void plotDifcZeroCalibOutput(const std::string &pyCode) = 0;
+
+  /**
+  * Produces a single spectrum graph for focused output.
   *
   * @param wsName name of the workspace to plot (must be in the ADS)
   */
   virtual void plotFocusedSpectrum(const std::string &wsName) = 0;
 
   /**
- * Produces a waterfall spectrum graph for focused output. Runs
- * plotSpectrum function via python.
+ * Produces a waterfall spectrum graph for focused output.
  *
  * @param wsName name of the workspace to plot (must be in the ADS)
  */
   virtual void plotWaterfallSpectrum(const std::string &wsName) = 0;
 
   /**
-  * Produces a replaceable spectrum graph for focused output. Runs
-  * plotSpectrum function via python.
+  * Produces a replaceable spectrum graph for focused output.
   *
   * @param wsName name of the workspace to plot (must be in the ADS)
+  * @param spectrum number of the workspace to plot
+  * @param type of the workspace plot
   */
-  virtual void plotReplacingWindow(const std::string &wsName) = 0;
+  virtual void plotReplacingWindow(const std::string &wsName,
+                                   const std::string &spectrum,
+                                   const std::string &type) = 0;
 };
 
 } // namespace CustomInterfaces

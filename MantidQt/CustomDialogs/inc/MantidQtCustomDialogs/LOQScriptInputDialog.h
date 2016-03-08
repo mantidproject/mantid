@@ -50,15 +50,15 @@ class LOQScriptInputDialog : public MantidQt::API::AlgorithmDialog
   private:
 
   /// Initialize the layout
-  virtual void initLayout();
-  
-  /// Get the input out of the dialog
-  virtual void parseInput();
+    void initLayout() override;
 
-private slots:
+    /// Get the input out of the dialog
+    void parseInput() override;
 
-  ///browse clicked method
-  void browseClicked();
+  private slots:
+
+    /// browse clicked method
+    void browseClicked();
 
   private:
   // The form generated with Qt Designer

@@ -50,7 +50,7 @@ public:
   std::string name() const override { return "Levenberg-Marquardt"; }
 
   /// Initialize minimizer, i.e. pass a function to minimize.
-  void initialize(API::ICostFunction_sptr function,
+  void initialize(API::ICostFunction_sptr costFunction,
                   size_t maxIterations = 0) override;
   /// Do one iteration.
   bool iterate(size_t) override;

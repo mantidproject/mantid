@@ -37,17 +37,18 @@ SaveIsawDetCal::~SaveIsawDetCal() {}
 /** Initialize the algorithm's properties.
  */
 void SaveIsawDetCal::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "InputWorkspace", "", Direction::Input),
+                  "An input workspace.");
 
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Save, {".DetCal"}),
+      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".DetCal"),
       "Path to an ISAW-style .detcal file to save.");
 
   declareProperty("TimeOffset", 0.0, "Offsets to be applied to times");
-  declareProperty(new ArrayProperty<string>("BankNames", Direction::Input),
-                  "Optional: Only select the specified banks");
+  declareProperty(
+      make_unique<ArrayProperty<string>>("BankNames", Direction::Input),
+      "Optional: Only select the specified banks");
   declareProperty("AppendFile", false, "Append to file if true.\n"
                                        "If false, new file (default).");
 }

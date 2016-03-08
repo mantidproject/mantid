@@ -154,7 +154,7 @@ bool SCARFLSFJobManager::ping() {
  * logged in with authenticate().
  */
 void SCARFLSFJobManager::logout(const std::string &username) {
-  if (0 == g_tokenStash.size()) {
+  if (g_tokenStash.empty()) {
     throw std::runtime_error("Logout failed. No one is currenlty logged in.");
   }
 

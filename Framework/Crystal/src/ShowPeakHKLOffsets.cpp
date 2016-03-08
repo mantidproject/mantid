@@ -29,14 +29,14 @@ ShowPeakHKLOffsets::ShowPeakHKLOffsets() : Algorithm() {}
 ShowPeakHKLOffsets::~ShowPeakHKLOffsets() {}
 
 void ShowPeakHKLOffsets::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "PeaksWorkspace", "", Direction::Input),
                   "Workspace of Peaks with UB loaded");
 
-  declareProperty(new WorkspaceProperty<ITableWorkspace>("HKLIntegerOffsets",
-                                                         "HKLIntegerOffsets",
-                                                         Direction::Output),
-                  "Workspace with the Results");
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
+          "HKLIntegerOffsets", "HKLIntegerOffsets", Direction::Output),
+      "Workspace with the Results");
 }
 
 void ShowPeakHKLOffsets::exec() {

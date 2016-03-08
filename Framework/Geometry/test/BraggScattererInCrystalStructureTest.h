@@ -110,7 +110,7 @@ private:
   class MockBraggScatterer : public BraggScattererInCrystalStructure {
   public:
     MockBraggScatterer() : BraggScattererInCrystalStructure() {}
-    ~MockBraggScatterer() {}
+    ~MockBraggScatterer() override {}
 
     MOCK_CONST_METHOD0(name, std::string());
     MOCK_CONST_METHOD0(clone, BraggScatterer_sptr());

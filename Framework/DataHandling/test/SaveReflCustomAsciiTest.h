@@ -35,7 +35,7 @@ public:
       m_data0.push_back(0);
     }
   }
-  ~SaveReflCustomAsciiTest() {}
+  ~SaveReflCustomAsciiTest() override {}
 
   void testExec() {
     // create a new workspace and then delete it later on

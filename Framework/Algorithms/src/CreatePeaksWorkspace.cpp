@@ -30,14 +30,14 @@ CreatePeaksWorkspace::~CreatePeaksWorkspace() {}
  */
 void CreatePeaksWorkspace::init() {
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InstrumentWorkspace", "", Direction::Input, PropertyMode::Optional),
       "An optional input workspace containing the default instrument for peaks "
       "in this workspace.");
   declareProperty("NumberOfPeaks", 1,
                   "Number of dummy peaks to initially create.");
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 

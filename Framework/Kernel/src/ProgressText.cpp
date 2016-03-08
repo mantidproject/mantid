@@ -45,7 +45,7 @@ void ProgressText::doReport(const std::string &msg) {
   // Print out
   int pct = static_cast<int>(p * 100.0);
 
-  coutMutex.lock();
+  std::lock_guard<std::mutex> lock(coutMutex);
 
   // Return at the start of the line if not doing new lines
   if (!m_newLines)
@@ -69,8 +69,6 @@ void ProgressText::doReport(const std::string &msg) {
 
   // Save where we last reported to avoid notifying too often.
   this->m_last_reported = m_i;
-
-  coutMutex.unlock();
 }
 
 } // namespace Mantid

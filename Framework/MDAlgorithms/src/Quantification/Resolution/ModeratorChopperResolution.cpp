@@ -25,9 +25,6 @@ ModeratorChopperResolution::ModeratorChopperResolution(
   initCaches();
 }
 
-/// Destructor
-ModeratorChopperResolution::~ModeratorChopperResolution() {}
-
 /**
  * Returns the width, i.e the standard-deviation, in energy that the
  * moderator-chopper contributes to

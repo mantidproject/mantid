@@ -10,6 +10,7 @@
 #include "MantidQtSpectrumViewer/TrackingPicker.h"
 #include "MantidQtRefDetectorViewer/RefImageDisplay.h"
 #include "MantidQtSpectrumViewer/GraphDisplay.h"
+#include "MantidQtSpectrumViewer/ColorMaps.h"
 #include "DllOption.h"
 
 /**
@@ -63,7 +64,7 @@ public:
                     SpectrumView::GraphDisplay* hGraphDisplay,
                     SpectrumView::GraphDisplay* vGraphDisplay );
 
-  ~RefIVConnections();
+  ~RefIVConnections() override;
 
   /// Set the pix map that shows the color scale from the specified color maps
   void showColorScale( std::vector<QRgb> & positiveColorTable,
@@ -100,6 +101,8 @@ signals:
 
 private:
   RefIVConnections() {}
+  void setColorScale(MantidQt::SpectrumView::ColorMaps::ColorScale positive,
+                     MantidQt::SpectrumView::ColorMaps::ColorScale negative);
 
 private:
 

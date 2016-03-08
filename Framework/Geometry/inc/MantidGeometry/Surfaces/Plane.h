@@ -56,8 +56,8 @@ private:
   Plane *doClone() const override;
 
 protected:
-  Plane(const Plane &);
-  Plane &operator=(const Plane &);
+  Plane(const Plane &) = default;
+  Plane &operator=(const Plane &) = default;
 
 public:
   /// Effective typename

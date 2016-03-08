@@ -66,6 +66,8 @@ class Workspace;
 class MANTID_API_DLL WorkspaceFactoryImpl
     : public Kernel::DynamicFactory<Workspace> {
 public:
+  WorkspaceFactoryImpl(const WorkspaceFactoryImpl &) = delete;
+  WorkspaceFactoryImpl &operator=(const WorkspaceFactoryImpl &) = delete;
   MatrixWorkspace_sptr create(const MatrixWorkspace_const_sptr &parent,
                               size_t NVectors = size_t(-1),
                               size_t XLength = size_t(-1),
@@ -77,7 +79,6 @@ public:
   void initializeFromParent(const MatrixWorkspace_const_sptr parent,
                             const MatrixWorkspace_sptr child,
                             const bool differentSize) const;
-
   /// Create a ITableWorkspace
   boost::shared_ptr<ITableWorkspace>
   createTable(const std::string &className = "TableWorkspace") const;
@@ -91,13 +92,8 @@ private:
 
   /// Private Constructor for singleton class
   WorkspaceFactoryImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  WorkspaceFactoryImpl(const WorkspaceFactoryImpl &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  WorkspaceFactoryImpl &operator=(const WorkspaceFactoryImpl &);
   /// Private Destructor
-  ~WorkspaceFactoryImpl() override;
-
+  ~WorkspaceFactoryImpl() override = default;
   // Unhide the inherited create method but make it private
   using Kernel::DynamicFactory<Workspace>::create;
 };

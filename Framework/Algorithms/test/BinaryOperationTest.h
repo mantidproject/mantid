@@ -23,20 +23,20 @@ public:
   /// Default constructor
   BinaryOpHelper() : BinaryOperation(){};
   /// Destructor
-  virtual ~BinaryOpHelper(){};
+  ~BinaryOpHelper() override{};
 
   /// function to return a name of the algorithm, must be overridden in all
   /// algorithms
-  virtual const std::string name() const { return "BinaryOpHelper"; }
+  const std::string name() const override { return "BinaryOpHelper"; }
   /// function to return a version of the algorithm, must be overridden in all
   /// algorithms
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// function to return a category of the algorithm. A default implementation
   /// is provided
-  virtual const std::string category() const { return "Helper"; }
+  const std::string category() const override { return "Helper"; }
   /// function to return the summary of the algorithm. A default implementation
   /// is provided.
-  virtual const std::string summary() const { return "Summary of this test."; }
+  const std::string summary() const override { return "Summary of this test."; }
 
   std::string checkSizeCompatibility(const MatrixWorkspace_const_sptr ws1,
                                      const MatrixWorkspace_const_sptr ws2) {
@@ -55,12 +55,12 @@ private:
                               const Mantid::MantidVec &,
                               const Mantid::MantidVec &,
                               const Mantid::MantidVec &, Mantid::MantidVec &,
-                              Mantid::MantidVec &) {}
+                              Mantid::MantidVec &) override {}
   void performBinaryOperation(const Mantid::MantidVec &,
                               const Mantid::MantidVec &,
                               const Mantid::MantidVec &, const double,
                               const double, Mantid::MantidVec &,
-                              Mantid::MantidVec &) {}
+                              Mantid::MantidVec &) override {}
 };
 
 class BinaryOperationTest : public CxxTest::TestSuite {

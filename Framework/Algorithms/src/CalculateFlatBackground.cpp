@@ -29,15 +29,16 @@ using namespace API;
 
 void CalculateFlatBackground::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<HistogramValidator>()),
+      make_unique<WorkspaceProperty<>>(
+          "InputWorkspace", "", Direction::Input,
+          boost::make_shared<HistogramValidator>()),
       "The input workspace must either have constant width bins or is a "
       "distribution\n"
       "workspace. It is also assumed that all spectra have the same X bin "
       "boundaries");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Name to use for the output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Name to use for the output workspace.");
   auto mustHaveValue = boost::make_shared<MandatoryValidator<double>>();
 
   declareProperty("StartX", Mantid::EMPTY_DBL(), mustHaveValue,
@@ -45,7 +46,7 @@ void CalculateFlatBackground::init() {
   declareProperty("EndX", Mantid::EMPTY_DBL(), mustHaveValue,
                   "The X value at which to end the background fit");
   declareProperty(
-      new ArrayProperty<int>("WorkspaceIndexList"),
+      make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
       "Indices of the spectra that will have their background removed\n"
       "default: modify all spectra");
   std::vector<std::string> modeOptions{"Linear Fit", "Mean"};
@@ -97,9 +98,9 @@ void CalculateFlatBackground::exec() {
   double startX, endX;
   this->checkRange(startX, endX);
 
-  std::vector<int> specInds = getProperty("WorkspaceIndexList");
+  std::vector<int> wsInds = getProperty("WorkspaceIndexList");
   // check if the user passed an empty list, if so all of spec will be processed
-  this->getSpecInds(specInds, numHists);
+  this->getWsInds(wsInds, numHists);
 
   // Are we removing the background?
   const bool removeBackground =
@@ -130,14 +131,14 @@ void CalculateFlatBackground::exec() {
   // these are used to report information to the user, one progress update for
   // each percent and a report on the size of the background found
   double prg(0.2), backgroundTotal(0);
-  const double toFitsize(static_cast<double>(specInds.size()));
+  const double toFitsize(static_cast<double>(wsInds.size()));
   const int progStep(static_cast<int>(ceil(toFitsize / 80.0)));
 
   // Now loop over the required spectra
   std::vector<int>::const_iterator specIt;
   // local cache for global variable
   bool skipMonitors(m_skipMonitors);
-  for (specIt = specInds.begin(); specIt != specInds.end(); ++specIt) {
+  for (specIt = wsInds.begin(); specIt != wsInds.end(); ++specIt) {
     const int currentSpec = *specIt;
     try {
       if (skipMonitors) { // this will fail in Windows ReleaseWithDebug info
@@ -211,7 +212,7 @@ void CalculateFlatBackground::exec() {
     }
 
     // make regular progress reports and check for canceling the algorithm
-    if (static_cast<int>(specInds.end() - specInds.begin()) % progStep == 0) {
+    if (static_cast<int>(wsInds.end() - wsInds.begin()) % progStep == 0) {
       interruption_point();
       prg += (progStep * 0.7 / toFitsize);
       progress(prg);
@@ -308,9 +309,9 @@ void CalculateFlatBackground::checkRange(double &startX, double &endX) {
 *  @param workspaceTotal :: required to be the total number of spectra in the
 * workspace
 */
-void CalculateFlatBackground::getSpecInds(std::vector<int> &output,
-                                          const int workspaceTotal) {
-  if (output.size() > 0) {
+void CalculateFlatBackground::getWsInds(std::vector<int> &output,
+                                        const int workspaceTotal) {
+  if (!output.empty()) {
     return;
   }
 
@@ -323,7 +324,7 @@ void CalculateFlatBackground::getSpecInds(std::vector<int> &output,
 * variance (error^2) of that
 *  number
 *  @param WS :: points to the input workspace
-*  @param specInd :: index of the spectrum to process
+*  @param wsInd :: index of the spectrum to process
 *  @param startX :: a X-value in the first bin that will be considered, must not
 * be greater endX
 *  @param endX :: a X-value in the last bin that will be considered, must not
@@ -337,11 +338,11 @@ void CalculateFlatBackground::getSpecInds(std::vector<int> &output,
 * spectra
 */
 double CalculateFlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS,
-                                     const int specInd, const double startX,
+                                     const int wsInd, const double startX,
                                      const double endX,
                                      double &variance) const {
-  const MantidVec &XS = WS->readX(specInd), &YS = WS->readY(specInd);
-  const MantidVec &ES = WS->readE(specInd);
+  const MantidVec &XS = WS->readX(wsInd), &YS = WS->readY(wsInd);
+  const MantidVec &ES = WS->readE(wsInd);
   // the function checkRange should already have checked that startX <= endX,
   // but we still need to check values weren't out side the ranges
   if (endX > XS.back() || startX < XS.front()) {
@@ -394,7 +395,7 @@ double CalculateFlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS,
 * Uses linear algorithm to do the fitting.
 *
 * @param WS The workspace to fit
-* @param spectrum The spectrum index to fit, using the workspace numbering of
+* @param spectrum The spectrum number to fit, using the workspace numbering of
 *the spectra
 * @param startX An X value in the first bin to be included in the fit
 * @param endX An X value in the last bin to be included in the fit

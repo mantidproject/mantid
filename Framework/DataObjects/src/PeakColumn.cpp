@@ -4,8 +4,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 
-#include <Poco/Mutex.h>
-
 #include <boost/variant/get.hpp>
 
 using namespace Mantid::Kernel;
@@ -89,11 +87,6 @@ PeakColumn::PeakColumn(std::vector<Peak> &peaks, const std::string &name)
         << "' from the Config Service. Using default: " << this->m_hklPrec
         << "\n";
 }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeakColumn::~PeakColumn() {}
 
 /// Returns typeid for the data in the column
 const std::type_info &PeakColumn::get_type_info() const {

@@ -19,13 +19,13 @@ using namespace API;
  *
  */
 void MaxMin::init() {
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<HistogramValidator>()),
-      "The name of the Workspace2D to take as input");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name of the workspace in which to store the result");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<HistogramValidator>()),
+                  "The name of the Workspace2D to take as input");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name of the workspace in which to store the result");
 
   declareProperty("ShowMin", false,
                   "Flag to show minimum instead of maximum (default=false)");
@@ -126,7 +126,7 @@ void MaxMin::exec() {
 
     MantidVec::const_iterator maxY;
     // Find the max/min element
-    if (showMin == true) {
+    if (showMin) {
       maxY = std::min_element(Y.begin() + distmin, Y.begin() + distmax);
     } else {
       maxY = std::max_element(Y.begin() + distmin, Y.begin() + distmax);

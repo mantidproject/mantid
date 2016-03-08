@@ -42,12 +42,13 @@ MergeMDFiles::~MergeMDFiles() { clearEventLoaders(); }
  */
 void MergeMDFiles::init() {
   std::vector<std::string> exts(1, ".nxs");
-  declareProperty(new MultipleFileProperty("Filenames", exts),
+  declareProperty(Kernel::make_unique<MultipleFileProperty>("Filenames", exts),
                   "Select several MDEventWorkspace NXS files to merge "
                   "together. Files must have common box structure.");
 
   declareProperty(
-      new FileProperty("OutputFilename", "", FileProperty::OptionalSave, exts),
+      Kernel::make_unique<FileProperty>("OutputFilename", "",
+                                        FileProperty::OptionalSave, exts),
       "Choose a file to which to save the output workspace. \n"
       "Optional: if specified, the workspace created will be file-backed. \n"
       "If not, it will be created in memory.");
@@ -56,7 +57,7 @@ void MergeMDFiles::init() {
                   "Run the loading tasks in parallel.\n"
                   "This can be faster but might use more memory.");
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output MDEventWorkspace.");
 }
@@ -358,7 +359,7 @@ void MergeMDFiles::exec() {
   }
   m_Filenames =
       MultipleFileProperty::flattenFileNames(multiFileProp->operator()());
-  if (m_Filenames.size() == 0)
+  if (m_Filenames.empty())
     throw std::invalid_argument("Must specify at least one filename.");
   std::string firstFile = m_Filenames[0];
 

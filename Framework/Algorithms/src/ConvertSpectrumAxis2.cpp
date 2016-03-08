@@ -37,12 +37,12 @@ void ConvertSpectrumAxis2::init() {
   wsVal->add<SpectraAxisValidator>();
   wsVal->add<InstrumentValidator>();
 
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, wsVal),
-      "The name of the input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                   Direction::Input, wsVal),
+                  "The name of the input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the output workspace.");
   std::vector<std::string> targetOptions(6);
   targetOptions[0] = "Theta";
   targetOptions[1] = "SignedTheta";

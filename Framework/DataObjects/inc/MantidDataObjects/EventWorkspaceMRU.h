@@ -6,7 +6,7 @@
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/MRUList.h"
 #include <vector>
-#include "MantidKernel/MultiThreaded.h"
+#include <mutex>
 
 namespace Mantid {
 namespace DataObjects {
@@ -125,11 +125,11 @@ protected:
   mutable std::vector<MantidVecWithMarker *> m_markersToDelete;
 
   /// Mutex around accessing m_markersToDelete
-  Kernel::Mutex m_toDeleteMutex;
+  std::mutex m_toDeleteMutex;
 
   /// Mutex when adding entries in the MRU list
-  mutable Kernel::Mutex m_changeMruListsMutexE;
-  mutable Kernel::Mutex m_changeMruListsMutexY;
+  mutable std::mutex m_changeMruListsMutexE;
+  mutable std::mutex m_changeMruListsMutexY;
 };
 
 } // namespace DataObjects

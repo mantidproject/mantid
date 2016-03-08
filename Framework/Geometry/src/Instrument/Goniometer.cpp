@@ -51,11 +51,6 @@ void GoniometerAxis::loadNexus(::NeXus::File *file, const std::string &group) {
 /// The rotation matrix is initialized to identity
 Goniometer::Goniometer() : R(3, 3, true), initFromR(false) {}
 
-/// Copy constructor
-/// @param other :: Goniometer from which to copy information
-Goniometer::Goniometer(const Goniometer &other)
-    : R(other.R), motors(other.motors), initFromR(other.initFromR) {}
-
 /// Constructor from a rotation matrix
 /// @param rot :: DblMatrix matrix that is going to be the internal rotation
 /// matrix of the goniometer. Cannot push additional axes
@@ -69,9 +64,6 @@ Goniometer::Goniometer(DblMatrix rot) {
   } else
     throw std::invalid_argument("rot is not a rotation matrix");
 }
-
-/// Default destructor
-Goniometer::~Goniometer() {}
 
 /// Return global rotation matrix
 /// @return R :: 3x3 rotation matrix
@@ -98,7 +90,7 @@ std::string Goniometer::axesInfo() {
     std::vector<GoniometerAxis>::iterator it;
     std::string strCW("CW"), strCCW("CCW"), sense;
 
-    if (motors.size() == 0) {
+    if (motors.empty()) {
       info << "No axis is found\n";
     } else {
       info << "Name \t Direction \t Sense \t Angle \n";

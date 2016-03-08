@@ -19,10 +19,10 @@ using namespace API;
  *
  */
 void RenameWorkspace::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input));
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output));
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+      "InputWorkspace", "", Direction::Input));
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+      "OutputWorkspace", "", Direction::Output));
   declareProperty<bool>(
       "RenameMonitors", false,
       "If true, and monitor workspace found attached"

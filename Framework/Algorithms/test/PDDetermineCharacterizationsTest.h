@@ -132,19 +132,25 @@ public:
 
     PropertyManager_sptr expectedInfo = boost::make_shared<PropertyManager>();
     expectedInfo->declareProperty(
-        new PropertyWithValue<double>("frequency", freq));
+        make_unique<PropertyWithValue<double>>("frequency", freq));
     expectedInfo->declareProperty(
-        new PropertyWithValue<double>("wavelength", wl));
-    expectedInfo->declareProperty(new PropertyWithValue<int>("bank", bank));
-    expectedInfo->declareProperty(new ArrayProperty<int32_t>("vanadium", van));
-    expectedInfo->declareProperty(new ArrayProperty<int32_t>("container", can));
-    expectedInfo->declareProperty(new ArrayProperty<int32_t>("empty", empty));
-    expectedInfo->declareProperty(new ArrayProperty<double>("d_min", dmin));
-    expectedInfo->declareProperty(new ArrayProperty<double>("d_max", dmax));
+        make_unique<PropertyWithValue<double>>("wavelength", wl));
     expectedInfo->declareProperty(
-        new PropertyWithValue<double>("tof_min", tofmin));
+        make_unique<PropertyWithValue<int>>("bank", bank));
     expectedInfo->declareProperty(
-        new PropertyWithValue<double>("tof_max", tofmax));
+        Mantid::Kernel::make_unique<ArrayProperty<int32_t>>("vanadium", van));
+    expectedInfo->declareProperty(
+        Mantid::Kernel::make_unique<ArrayProperty<int32_t>>("container", can));
+    expectedInfo->declareProperty(
+        Mantid::Kernel::make_unique<ArrayProperty<int32_t>>("empty", empty));
+    expectedInfo->declareProperty(
+        Mantid::Kernel::make_unique<ArrayProperty<double>>("d_min", dmin));
+    expectedInfo->declareProperty(
+        Mantid::Kernel::make_unique<ArrayProperty<double>>("d_max", dmax));
+    expectedInfo->declareProperty(
+        make_unique<PropertyWithValue<double>>("tof_min", tofmin));
+    expectedInfo->declareProperty(
+        make_unique<PropertyWithValue<double>>("tof_max", tofmax));
 
     return expectedInfo;
   }

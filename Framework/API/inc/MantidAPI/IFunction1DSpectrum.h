@@ -40,8 +40,6 @@ namespace API {
   */
 class DLLExport IFunction1DSpectrum : public virtual IFunction {
 public:
-  ~IFunction1DSpectrum() override {}
-
   void function(const FunctionDomain &domain,
                 FunctionValues &values) const override;
   void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) override;

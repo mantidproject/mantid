@@ -783,7 +783,7 @@ private:
   size_t nBoxes;
 
 public:
-  void setUp() {
+  void setUp() override {
     size_t dim_size = 20;
     size_t sq_dim_size = dim_size * dim_size;
     m_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, (Mantid::coord_t)dim_size,

@@ -44,8 +44,6 @@ public:
       boost::shared_ptr<PoldiAbstractDetector> decoratedDetector =
           boost::shared_ptr<PoldiAbstractDetector>());
 
-  ~PoldiDetectorDecorator() override {}
-
   void setDecoratedDetector(boost::shared_ptr<PoldiAbstractDetector> detector);
   boost::shared_ptr<PoldiAbstractDetector> decoratedDetector();
 

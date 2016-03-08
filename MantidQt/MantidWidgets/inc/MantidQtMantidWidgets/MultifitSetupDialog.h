@@ -51,7 +51,7 @@ public:
 private slots:
 
   /// Setup the function and close dialog
-  void accept();
+  void accept() override;
   void cellChanged(int,int);
 
 private:

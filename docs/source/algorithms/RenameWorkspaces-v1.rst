@@ -43,11 +43,15 @@ Usage
    for name in names:
      CreateWorkspace([0], [0], OutputWorkspace=name)
 
-   print 'Workspaces in the ADS _before_ renaming:', mtd.getObjectNames()
+   ws_before_rename = mtd.getObjectNames()
+   ws_before_rename.sort()
+   print 'Workspaces in the ADS _before_ renaming:', ws_before_rename
 
    RenameWorkspaces(names, WorkspaceNames=['new_ws1', 'new_ws2', 'new_ws3'])
 
-   print 'Workspaces in the ADS _after_ renaming:', mtd.getObjectNames()
+   ws_after_rename = mtd.getObjectNames()
+   ws_after_rename.sort()
+   print 'Workspaces in the ADS _after_ renaming:', ws_after_rename
 
 Output:
 
@@ -69,11 +73,15 @@ Output:
    for name in names:
      CreateWorkspace([0], [0], OutputWorkspace=name)
 
-   print 'Workspaces in the ADS _before_ renaming:', mtd.getObjectNames()
+   ws_before_rename = mtd.getObjectNames()
+   ws_before_rename.sort()
+   print 'Workspaces in the ADS _before_ renaming:', ws_before_rename
 
    RenameWorkspaces(names, Prefix='new_', Suffix='_name')
 
-   print 'Workspaces in the ADS _after_ renaming:', mtd.getObjectNames()
+   ws_after_rename = mtd.getObjectNames()
+   ws_after_rename.sort()
+   print 'Workspaces in the ADS _after_ renaming:', ws_after_rename
 
 Output:
 

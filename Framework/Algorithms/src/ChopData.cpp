@@ -19,11 +19,11 @@ void ChopData::init() {
   wsVal->add<WorkspaceUnitValidator>("TOF");
   wsVal->add<HistogramValidator>();
   wsVal->add<SpectraAxisValidator>();
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, wsVal),
-      "Name of the input workspace to be split.");
-  declareProperty(new WorkspaceProperty<WorkspaceGroup>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                   Direction::Input, wsVal),
+                  "Name of the input workspace to be split.");
+  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name for the WorkspaceGroup that will be created.");
 
   declareProperty("Step", 20000.0);
@@ -152,7 +152,8 @@ void ChopData::exec() {
     name << output << "_" << wsCounter;
     std::string wsname = name.str();
 
-    declareProperty(new WorkspaceProperty<>(wsname, wsname, Direction::Output));
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        wsname, wsname, Direction::Output));
     setProperty(wsname, workspace);
     ++wsCounter;
 

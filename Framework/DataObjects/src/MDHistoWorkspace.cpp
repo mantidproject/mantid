@@ -502,15 +502,14 @@ bool pointInWorkspace(const MDHistoWorkspace *ws, const VMD &point) {
  * @param start :: coordinates of the start point of the line
  * @param end :: coordinates of the end point of the line
  * @param normalize :: how to normalize the signal
- * @param x :: linearly spaced points along the line between start and end.
- * @param y :: is set to the normalized signal for each bin. Length = length(x)
- *- 1
- * @param e :: error vector for each bin.
+ * @returns :: LinePlot with x as linearly spaced points along the line
+ * between start and end, y set to the normalized signal for each bin with
+ * Length = length(x) - 1 and e as the error vector for each bin.
  */
 IMDWorkspace::LinePlot
 MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
-                                   const Mantid::Kernel::VMD &end,
-                                   Mantid::API::MDNormalization normalize) const {
+                              const Mantid::Kernel::VMD &end,
+                              Mantid::API::MDNormalization normalize) const {
 
   return this->getLinePoints(start, end, normalize, true);
 }
@@ -525,10 +524,9 @@ MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
  * @param start :: coordinates of the start point of the line
  * @param end :: coordinates of the end point of the line
  * @param normalize :: how to normalize the signal
- * @param x :: linearly spaced points along the line between start and end.
- * @param y :: is set to the normalized signal for each bin. Length = length(x)
- *- 1
- * @param e :: error vector for each bin.
+ * @returns :: LinePlot with x as the boundaries of the bins, relative
+ * to start of the line, y set to the normalized signal for each bin with
+ * Length = length(x) - 1 and e as the error vector for each bin.
  * @param bin_centres :: if true then record points halfway between bin
  *boundaries, otherwise record on bin boundaries
  */

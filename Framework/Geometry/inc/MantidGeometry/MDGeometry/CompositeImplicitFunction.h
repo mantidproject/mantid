@@ -54,8 +54,6 @@ public:
   using MDImplicitFunction::isPointContained;
   //-----------------------------------------------------------------
 
-  CompositeImplicitFunction();
-  ~CompositeImplicitFunction() override;
   bool
   addFunction(Mantid::Geometry::MDImplicitFunction_sptr constituentFunction);
   std::string getName() const override;

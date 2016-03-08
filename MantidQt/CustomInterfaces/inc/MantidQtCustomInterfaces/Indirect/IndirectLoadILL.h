@@ -21,14 +21,14 @@ namespace MantidQt
 			IndirectLoadILL(QWidget * parent = 0);
 
 			/// Load default settings into the interface
-			void loadSettings(const QSettings& settings);
+                        void loadSettings(const QSettings &settings) override;
 
-    protected:
-      void setup();
-			bool validate();
-			void run();
+                      protected:
+                        void setup() override;
+                        bool validate() override;
+                        void run() override;
 
-		private slots:
+                      private slots:
 			/// Set the instrument based on the file name if possible
 			void handleFilesFound();
 

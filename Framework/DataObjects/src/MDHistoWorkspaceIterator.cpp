@@ -1,12 +1,13 @@
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/VMD.h"
-#include "MantidKernel/Utils.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Utils.h"
+#include "MantidKernel/VMD.h"
 #include <algorithm>
-#include <utility>
+#include <boost/math/special_functions/round.hpp>
 #include <functional>
 #include <numeric>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -276,7 +277,7 @@ MDHistoWorkspaceIterator::jumpToNearest(const VMD &fromLocation) {
   coord_t sqDiff = 0;
   for (size_t d = 0; d < m_nd; ++d) {
     coord_t dExact = getDExact(fromLocation[d], m_origin[d], m_binWidth[d]);
-    size_t dRound = size_t(dExact + 0.5); // Round to nearest bin edge.
+    size_t dRound = std::lround(dExact); // Round to nearest bin edge.
     sqDiff += (dExact - coord_t(dRound)) * (dExact - coord_t(dRound)) *
               m_binWidth[d] * m_binWidth[d];
     indexes[d] = dRound;

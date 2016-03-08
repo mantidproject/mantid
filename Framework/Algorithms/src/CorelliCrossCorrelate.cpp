@@ -39,11 +39,11 @@ void CorelliCrossCorrelate::init() {
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<InstrumentValidator>();
 
-  declareProperty(new WorkspaceProperty<EventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "An input workspace.");
-  declareProperty(new WorkspaceProperty<EventWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
   declareProperty("TimingOffset", EMPTY_INT(),

@@ -104,7 +104,7 @@ public:
     tofconv_tofconverter_content = TOFCONV_CONVERTER;
     fail = false;
   }
-  virtual ~ScriptRepositoryImplLocal() throw(){};
+  ~ScriptRepositoryImplLocal() throw() override{};
 
   std::string repository_json_content;
   std::string tofconv_readme_content;
@@ -130,7 +130,7 @@ public:
       It also make it public, in order to be able to test this method itself.
    */
   void doDownloadFile(const std::string &url_file,
-                      const std::string &local_file_path) {
+                      const std::string &local_file_path) override {
 
     // answer when the download it to 'forget' the downloaded file
     // request to ping the site
@@ -207,7 +207,7 @@ public:
                                  const std::string & /*file_path*/,
                                  const std::string & /*author*/,
                                  const std::string & /*email*/,
-                                 const std::string & /*comment*/) {
+                                 const std::string & /*comment*/) override {
     if (fail)
       return "{\n  \"message\": \"Invalid author: \"\n}";
     else
@@ -234,7 +234,7 @@ public:
   static void destroySuite(ScriptRepositoryTestImpl *suite) { delete suite; }
 
   // ensure that all tests will be perfomed in a fresh repository
-  void setUp() {
+  void setUp() override {
     ConfigServiceImpl &config = ConfigService::Instance();
     backup_local_repository_path = config.getString("ScriptLocalRepository");
     local_rep = std::string(Poco::Path::current()).append("mytemprepository/");
@@ -243,7 +243,7 @@ public:
   }
 
   // ensure that the local files are free from the test created.
-  void tearDown() {
+  void tearDown() override {
     delete repo;
     try {
       Poco::File f(local_rep);

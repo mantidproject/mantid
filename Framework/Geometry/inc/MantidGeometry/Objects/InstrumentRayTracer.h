@@ -57,8 +57,8 @@ public:
   InstrumentRayTracer(Instrument_const_sptr instrument);
   /// Trace a given track from the instrument source in the given direction
   /// and compile a list of results that this track intersects.
-  void trace(const Kernel::V3D &direction) const;
-  void traceFromSample(const Kernel::V3D &direction) const;
+  void trace(const Kernel::V3D &dir) const;
+  void traceFromSample(const Kernel::V3D &dir) const;
   /// Get the results of the intersection tests that have been updated
   /// since the previous call to trace
   Links getResults() const;

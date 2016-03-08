@@ -211,7 +211,7 @@ public:
 
   GetDetectorOffsetsTestPerformance() { FrameworkManager::Instance(); }
 
-  void setUp() {
+  void setUp() override {
     numpixels = 10000;
     WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
         numpixels, 200, false);

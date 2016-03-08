@@ -119,11 +119,6 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
 }
 
 /**
- * Destructor
- */
-LogParser::~LogParser() {}
-
-/**
 Common creational method for generating a command map.
 Better ensures that the same command mapping is available for any constructor.
 @param newStyle Command style selector.

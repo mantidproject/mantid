@@ -41,12 +41,13 @@ SaveNexusProcessed::SaveNexusProcessed()
  *
  */
 void SaveNexusProcessed::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input),
-      "Name of the workspace to be saved");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "InputWorkspace", "", Direction::Input),
+                  "Name of the workspace to be saved");
   // Declare required input parameters for algorithm
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save,
-                                   {".nxs", ".nx5", ".xml"}),
+  const std::vector<std::string> fileExts{".nxs", ".nx5", ".xml"};
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::Save, fileExts),
                   "The name of the Nexus file to write, as a full or relative\n"
                   "path");
 
@@ -62,7 +63,7 @@ void SaveNexusProcessed::init() {
   declareProperty("WorkspaceIndexMax", Mantid::EMPTY_INT(), mustBePositive,
                   "Index of last spectrum to write, only for single period\n"
                   "data.");
-  declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
+  declareProperty(make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
                   "List of spectrum numbers to read, only for single period\n"
                   "data.");
 
@@ -74,17 +75,17 @@ void SaveNexusProcessed::init() {
       "For EventWorkspaces, preserve the events when saving (default).\n"
       "If false, will save the 2D histogram version of the workspace with the "
       "current binning parameters.");
-  setPropertySettings(
-      "PreserveEvents",
-      new EnabledWhenWorkspaceIsType<EventWorkspace>("InputWorkspace", true));
+  setPropertySettings("PreserveEvents",
+                      make_unique<EnabledWhenWorkspaceIsType<EventWorkspace>>(
+                          "InputWorkspace", true));
 
   declareProperty(
       "CompressNexus", false,
       "For EventWorkspaces, compress the Nexus data field (default False).\n"
       "This will make smaller files but takes much longer.");
-  setPropertySettings(
-      "CompressNexus",
-      new EnabledWhenWorkspaceIsType<EventWorkspace>("InputWorkspace", true));
+  setPropertySettings("CompressNexus",
+                      make_unique<EnabledWhenWorkspaceIsType<EventWorkspace>>(
+                          "InputWorkspace", true));
 }
 
 /** Get the list of workspace indices to use

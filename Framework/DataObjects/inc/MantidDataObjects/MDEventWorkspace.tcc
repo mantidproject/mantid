@@ -34,12 +34,6 @@ GCC_DIAG_OFF(strict-aliasing)
 // clang-format on
 #endif
 
-using namespace Mantid;
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
-using namespace Mantid::Geometry;
-using namespace Mantid::DataObjects;
-
 namespace Mantid {
 namespace DataObjects {
 
@@ -51,10 +45,10 @@ TMDE(MDEventWorkspace)::MDEventWorkspace(
     Mantid::API::MDNormalization preferredNormalization,
     Mantid::API::MDNormalization preferredNormalizationHisto)
     : API::IMDEventWorkspace(), data(nullptr),
-      m_BoxController(new BoxController(nd)),
+      m_BoxController(new API::BoxController(nd)),
       m_displayNormalization(preferredNormalization),
       m_displayNormalizationHisto(preferredNormalizationHisto),
-      m_coordSystem(None) {
+      m_coordSystem(Kernel::None) {
   // First box is at depth 0, and has this default boxController
   data = new MDBox<MDE, nd>(m_BoxController.get(), 0);
 }
@@ -174,10 +168,10 @@ TMDE(uint64_t MDEventWorkspace)::getNPoints() const {
  * @throw std::runtime_error if there is not enough memory for the boxes.
  */
 TMDE(void MDEventWorkspace)::setMinRecursionDepth(size_t minDepth) {
-  BoxController_sptr bc = this->getBoxController();
+  API::BoxController_sptr bc = this->getBoxController();
   double numBoxes = pow(double(bc->getNumSplit()), double(minDepth));
   double memoryToUse = numBoxes * double(sizeof(MDBox<MDE, nd>)) / 1024.0;
-  MemoryStats stats;
+  Kernel::MemoryStats stats;
   if (double(stats.availMem()) < memoryToUse) {
     std::ostringstream mess;
     mess << "Not enough memory available for the given MinRecursionDepth! "
@@ -218,7 +212,7 @@ TMDE(std::vector<coord_t> MDEventWorkspace)::estimateResolution() const {
     size_t finestSplit = 1;
     for (size_t i = 0; i < realDepth; i++)
       finestSplit *= m_BoxController->getSplitInto(d);
-    IMDDimension_const_sptr dim = this->getDimension(d);
+    Geometry::IMDDimension_const_sptr dim = this->getDimension(d);
     // Calculate the bin size at the smallest split amount
     out.push_back((dim->getMaximum() - dim->getMinimum()) /
                   static_cast<coord_t>(finestSplit));
@@ -236,7 +230,7 @@ TMDE(std::vector<Mantid::API::IMDIterator *> MDEventWorkspace)::createIterators(
     size_t suggestedNumCores,
     Mantid::Geometry::MDImplicitFunction *function) const {
   // Get all the boxes in this workspaces
-  std::vector<IMDNode *> boxes;
+  std::vector<API::IMDNode *> boxes;
   // TODO: Should this be leaf only? Depends on most common use case
   if (function)
     this->data->getBoxes(boxes, 10000, true, function);
@@ -254,7 +248,7 @@ TMDE(std::vector<Mantid::API::IMDIterator *> MDEventWorkspace)::createIterators(
     numCores = 1;
 
   // Create one iterator per core, splitting evenly amongst spectra
-  std::vector<IMDIterator *> out;
+  std::vector<API::IMDIterator *> out;
   for (size_t i = 0; i < numCores; i++) {
     size_t begin = (i * numElements) / numCores;
     size_t end = ((i + 1) * numElements) / numCores;
@@ -290,11 +284,11 @@ TMDE(signal_t MDEventWorkspace)::getNormalizedSignal(
   if (box) {
     // What is our normalization factor?
     switch (normalization) {
-    case NoNormalization:
+    case API::NoNormalization:
       return box->getSignal();
-    case VolumeNormalization:
+    case API::VolumeNormalization:
       return box->getSignal() * box->getInverseVolume();
-    case NumEventsNormalization:
+    case API::NumEventsNormalization:
       return box->getSignal() / double(box->getNPoints());
     }
     // Should not reach here
@@ -349,9 +343,9 @@ TMDE(signal_t MDEventWorkspace)::getSignalWithMaskAtCoord(
   // Check if masked
   const API::IMDNode *box = data->getBoxAtCoord(coords);
   if (!box)
-    return MDMaskValue;
+    return API::MDMaskValue;
   if (box->getIsMasked()) {
-    return MDMaskValue;
+    return API::MDMaskValue;
   }
   return getNormalizedSignal(box, normalization);
 }
@@ -471,7 +465,7 @@ bool SortBoxesByID(const BOXTYPE &a, const BOXTYPE &b) {
 /** Create a table of data about the boxes contained */
 TMDE(Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(
     size_t start, size_t num) {
-  CPUTimer tim;
+  Kernel::CPUTimer tim;
   UNUSED_ARG(start);
   UNUSED_ARG(num);
 
@@ -623,7 +617,7 @@ TMDE(void MDEventWorkspace)::splitAllIfNeeded(Kernel::ThreadScheduler *ts) {
  * @param ts :: optional ThreadScheduler * that will be used to parallelize
  *        recursive splitting.
  */
-TMDE(void MDEventWorkspace)::splitTrackedBoxes(ThreadScheduler *ts) {
+TMDE(void MDEventWorkspace)::splitTrackedBoxes(Kernel::ThreadScheduler *ts) {
   UNUSED_ARG(ts);
   throw std::runtime_error("Not implemented yet");
   //    // Get a COPY of the vector (to avoid thread-safety issues)
@@ -988,7 +982,7 @@ TMDE(void MDEventWorkspace)::setDisplayNormalizationHisto(
 /**
 Return the preferred normalization preference for subsequent histoworkspaces.
 */
-TMDE(MDNormalization MDEventWorkspace)::displayNormalizationHisto() const {
+TMDE(API::MDNormalization MDEventWorkspace)::displayNormalizationHisto() const {
   return m_displayNormalizationHisto;
 }
 
@@ -1004,7 +998,7 @@ TMDE(void MDEventWorkspace)::setDisplayNormalization(
 /**
 Return the preferred normalization to use for visualization.
 */
-TMDE(MDNormalization MDEventWorkspace)::displayNormalization() const {
+TMDE(API::MDNormalization MDEventWorkspace)::displayNormalization() const {
   return m_displayNormalization;
 }
 

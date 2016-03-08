@@ -80,7 +80,7 @@ private slots:
   void functionChanged();
 
   /// Start the fit and close dialog
-  void accept();
+  void accept() override;
 
   /// Show the result plot
   //void showPlot();
@@ -104,7 +104,7 @@ private:
   void populateParameters();
 
   /// Called when the fit is finished
-  void finishHandle(const Mantid::API::IAlgorithm* alg);
+  void finishHandle(const Mantid::API::IAlgorithm *alg) override;
 
   /// set spectrum value for workspace/file in row row
   void setSpectrum(int row,int spec);

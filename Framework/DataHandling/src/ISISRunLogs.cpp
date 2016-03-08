@@ -2,6 +2,7 @@
 #include "MantidDataHandling/ISISRunLogs.h"
 
 #include "MantidKernel/LogFilter.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {
@@ -19,23 +20,20 @@ using Kernel::TimeSeriesProperty;
  * Construct using a run that has the required ICP event log
  * Throws if no icp event log exists
  * @param icpRun :: A run containing the ICP event log to parse
- * @param totalNumPeriods :: The total number of periods overall
  */
-ISISRunLogs::ISISRunLogs(const API::Run &icpRun, const int totalNumPeriods)
-    : m_logParser(), m_numOfPeriods(totalNumPeriods) {
+ISISRunLogs::ISISRunLogs(const API::Run &icpRun) {
   // ICP event either in form icp_event or icpevent
-  static const char *icpLogNames[2] = {"icp_event", "icpevent"};
-  for (auto &icpLogName : icpLogNames) {
+  for (const auto icpLogName : {"icp_event", "icpevent"}) {
     try {
       Kernel::Property *icpLog = icpRun.getLogData(icpLogName);
-      m_logParser.reset(new LogParser(icpLog));
+      m_logParser = Kernel::make_unique<LogParser>(icpLog);
       return;
     } catch (std::runtime_error &) {
     }
   }
   // If it does not exist then pass in a NULL log to indicate that period 1
   // should be assumed
-  m_logParser.reset(new LogParser(nullptr));
+  m_logParser = Kernel::make_unique<LogParser>(nullptr);
 }
 
 /**
@@ -53,12 +51,12 @@ void ISISRunLogs::addStatusLog(API::Run &exptRun) {
  */
 void ISISRunLogs::addPeriodLogs(const int period, API::Run &exptRun) {
   auto periodLog = m_logParser->createPeriodLog(period);
-  LogFilter *logFilter(nullptr);
+  auto logFilter = std::unique_ptr<LogFilter>();
   const TimeSeriesProperty<bool> *maskProp(nullptr);
   try {
     auto runningLog =
         exptRun.getTimeSeriesProperty<bool>(LogParser::statusLogName());
-    logFilter = new LogFilter(runningLog);
+    logFilter = Kernel::make_unique<LogFilter>(runningLog);
   } catch (std::exception &) {
     g_log.warning(
         "Cannot find status log. Logs will be not be filtered by run status");
@@ -75,7 +73,6 @@ void ISISRunLogs::addPeriodLogs(const int period, API::Run &exptRun) {
   // Filter logs if we have anything to filter on
   if (maskProp)
     exptRun.filterByLog(*maskProp);
-  delete logFilter;
 
   exptRun.addProperty(periodLog);
   exptRun.addProperty(m_logParser->createCurrentPeriodLog(period));

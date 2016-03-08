@@ -20,7 +20,7 @@ DECLARE_ALGORITHM(HFIRSANSNormalise)
 
 void HFIRSANSNormalise::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Workspace to be corrected");
 
   std::vector<std::string> normOptions{"Monitor", "Timer"};
@@ -28,9 +28,9 @@ void HFIRSANSNormalise::init() {
                         boost::make_shared<StringListValidator>(normOptions),
                         "Type of Normalisation to use");
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Corrected workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Corrected workspace");
   declareProperty("OutputMessage", "", Direction::Output);
 }
 

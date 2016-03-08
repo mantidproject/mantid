@@ -120,9 +120,8 @@ private:
                    const std::vector<Kernel::DateAndTime> &vectimes);
 
   /// Parse detector efficiency table workspace to map
-  void
-  parseDetectorEfficiencyTable(DataObjects::TableWorkspace_sptr detefftablews,
-                               std::map<detid_t, double> &deteffmap);
+  std::map<detid_t, double>
+  parseDetectorEfficiencyTable(DataObjects::TableWorkspace_sptr detefftablews);
 
   /// Apply the detector's efficiency correction to
   void

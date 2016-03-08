@@ -72,7 +72,7 @@ public:
   const std::string category() const override { return "Peak"; }
   void function1D(double *out, const double *xValues,
                   const size_t nData) const override;
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
+  void functionDeriv1D(API::Jacobian *jacobian, const double *xValues,
                        const size_t nData) override;
 
 protected:

@@ -18,7 +18,7 @@
 
 using namespace Mantid::API;
 using Mantid::Kernel::Unit_sptr;
-using Mantid::specid_t;
+using Mantid::specnum_t;
 using namespace boost::python;
 
 namespace {

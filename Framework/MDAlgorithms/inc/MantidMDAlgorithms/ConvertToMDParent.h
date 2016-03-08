@@ -63,7 +63,7 @@ protected:
   DataObjects::TableWorkspace_const_sptr preprocessDetectorsPositions(
       const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
       const std::string &dEModeRequested, bool updateMasks,
-      const std::string &preproc_detectorsWSName);
+      const std::string &OutWSName);
   DataObjects::TableWorkspace_sptr runPreprocessDetectorsToMDChildUpdatingMasks(
       const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
       const std::string &OutWSName, const std::string &dEModeRequested,

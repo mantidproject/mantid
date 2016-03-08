@@ -24,11 +24,11 @@ CropWorkspace::~CropWorkspace() {}
 
 void CropWorkspace::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The input workspace");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Name of the output workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Name of the output workspace");
 
   declareProperty("XMin", EMPTY_DBL(), "An X value that is within the first "
                                        "(lowest X value) bin that will be "

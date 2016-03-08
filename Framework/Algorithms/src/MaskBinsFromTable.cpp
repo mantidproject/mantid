@@ -37,17 +37,18 @@ MaskBinsFromTable::~MaskBinsFromTable() {}
 
 //----------------------------------------------------------------------------------------------
 void MaskBinsFromTable::init() {
+  this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+                            "InputWorkspace", "", Direction::Input,
+                            boost::make_shared<HistogramValidator>()),
+                        "Input Workspace to mask bins. ");
+  this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+                            "OutputWorkspace", "", Direction::Output),
+                        "Output Workspace with bins masked.");
   this->declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<HistogramValidator>()),
-      "Input Workspace to mask bins. ");
-  this->declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Output Workspace with bins masked.");
-  this->declareProperty(new WorkspaceProperty<DataObjects::TableWorkspace>(
-                            "MaskingInformation", "", Direction::Input),
-                        "Input TableWorkspace containing parameters, XMin and "
-                        "XMax and either SprectaList or DetectorIDsList");
+      Kernel::make_unique<WorkspaceProperty<DataObjects::TableWorkspace>>(
+          "MaskingInformation", "", Direction::Input),
+      "Input TableWorkspace containing parameters, XMin and "
+      "XMax and either SpectraList or DetectorIDsList");
 
   return;
 }
@@ -251,7 +252,7 @@ MaskBinsFromTable::convertToSpectraList(API::MatrixWorkspace_sptr dataws,
   }
 
   // Sort the vector
-  if (wsindexvec.size() == 0)
+  if (wsindexvec.empty())
     throw runtime_error("There is no spectrum found for input detectors list.");
 
   sort(wsindexvec.begin(), wsindexvec.end());
