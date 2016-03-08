@@ -96,6 +96,7 @@ set ( SRC_FILES
 	src/EditInstrumentGeometry.cpp
 	src/ElasticWindow.cpp
 	src/EstimateResolutionDiffraction.cpp
+	src/EventWorkspaceAccess.cpp
 	src/Exponential.cpp
 	src/ExponentialCorrection.cpp
 	src/ExportTimeSeriesLog.cpp
@@ -150,6 +151,7 @@ set ( SRC_FILES
 	src/MaskBins.cpp
 	src/MaskBinsFromTable.cpp
 	src/MaskDetectorsIf.cpp
+	src/MatrixWorkspaceAccess.cpp
 	src/Max.cpp
 	src/MaxEnt.cpp
 	src/MaxEnt/MaxentData.cpp
@@ -376,6 +378,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/EditInstrumentGeometry.h
 	inc/MantidAlgorithms/ElasticWindow.h
 	inc/MantidAlgorithms/EstimateResolutionDiffraction.h
+	inc/MantidAlgorithms/EventWorkspaceAccess.h
 	inc/MantidAlgorithms/Exponential.h
 	inc/MantidAlgorithms/ExponentialCorrection.h
 	inc/MantidAlgorithms/ExportTimeSeriesLog.h
@@ -431,6 +434,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MaskBins.h
 	inc/MantidAlgorithms/MaskBinsFromTable.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
+	inc/MantidAlgorithms/MatrixWorkspaceAccess.h
 	inc/MantidAlgorithms/Max.h
 	inc/MantidAlgorithms/MaxEnt.h
 	inc/MantidAlgorithms/MaxEnt/MaxentData.h

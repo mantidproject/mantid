@@ -2,8 +2,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidAlgorithms/MatrixWorkspaceGetters.h"
-#include "MantidAlgorithms/EventWorkspaceGetters.h"
+#include "MantidAlgorithms/MatrixWorkspaceAccess.h"
+#include "MantidAlgorithms/EventWorkspaceAccess.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -42,14 +42,15 @@ void ChangeBinOffset::exec() {
       boost::dynamic_pointer_cast<EventWorkspace>(outputW);
   if (eventWS) {
     this->for_each<Indices::FromProperty>(
-        *eventWS, std::make_tuple(Getters::eventList),
+        *eventWS, std::make_tuple(EventWorkspaceAccess::eventList),
         [=](EventList &eventList) { eventList.addTof(offset); });
   } else {
-    this->for_each<Indices::FromProperty>(*outputW, std::make_tuple(Getters::x),
-                                          [=](std::vector<double> &dataX) {
-                                            for (auto &x : dataX)
-                                              x += offset;
-                                          });
+    this->for_each<Indices::FromProperty>(
+        *outputW, std::make_tuple(MatrixWorkspaceAccess::x),
+        [=](std::vector<double> &dataX) {
+          for (auto &x : dataX)
+            x += offset;
+        });
   }
 }
 
