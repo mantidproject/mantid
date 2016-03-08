@@ -114,9 +114,6 @@ void MaxentData::loadComplex(const std::vector<double> &dataRe,
 * complex data
 * @param image : [input] A starting distribution for the image
 * @param background : [input] The background or sky level
-* @param whereToExtend : [input] A string indicating where to add the extra
-* calculated data.
-* @param size : [input] The size of the experimental data
 */
 void MaxentData::initImageSpace(const std::vector<double> &image,
                                 double background) {
