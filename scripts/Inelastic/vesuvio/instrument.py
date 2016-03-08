@@ -1,3 +1,4 @@
+#pylint: disable=too-few-public-methods
 """
 Holds an instrument class for VESUVIO
 """
@@ -20,4 +21,4 @@ class VESUVIO(object):
 
         self.forward_spectra = (135, 198)
         self.forward_banks = ((135, 142), (143, 150), (151, 158), (159, 166),
-                             (167, 174), (175, 182), (183, 190), (191, 198))
+                              (167, 174), (175, 182), (183, 190), (191, 198))
