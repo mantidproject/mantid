@@ -47,11 +47,11 @@ def parse_fit_options(mass_values, profile_strs, background_str="", constraints_
 class FittingOptions(object):
     """Holds all of the parameters for the fitting that are not related to the domain"""
 
-    def __init__(self, profiles, background=None, intensity_constraints=None):
+    def __init__(self, mass_profile, background=None, intensity_constraints=None):
         self.smooth_points = None
         self.bad_data_error = None
 
-        self.mass_profiles = profiles
+        self.mass_profiles = mass_profile
         if intensity_constraints is not None:
             # Ensure that the constraints is a "2D" list
             if hasattr(intensity_constraints[0], "__len__"):
@@ -71,17 +71,18 @@ class FittingOptions(object):
         """
         return getattr(self, name) is not None
 
-    # -------------------------------------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------
 
     def create_function_str(self, default_vals=None):
         """
-            Creates the function string to pass to fit
+        Creates the function string to pass to fit
 
-            @param default_vals: A dictionary of key/values specifying the parameter values
-            that have already been calculated. If None then the ComptonScatteringCountRate
-            function, along with the constraints matrix, is used rather than the standard CompositeFunction.
-            It is assumed that the standard CompositeFunction is used when running the fit for a
-            second time to compute the errors with everything free
+        @param default_vals: A dictionary of key/values specifying the parameter
+        values that have already been calculated. If None then the
+        ComptonScatteringCountRate function, along with the constraints matrix,
+        is used rather than the standard CompositeFunction. It is assumed that the
+        standard CompositeFunction is used when running the fit for a second time
+        to compute the errors with everything free
         """
         all_free = (default_vals is not None)
 
@@ -111,15 +112,15 @@ class FittingOptions(object):
         """Returns a string for the value of the Matrix of intensity
         constraint values
         """
-        if self.intensity_constraints is None or len(self.intensity_constraints) == 0:
+        if constraints_tuple is None or len(constraints_tuple) == 0:
             return ""
 
-        nrows = len(self.intensity_constraints)
-        ncols = len(self.intensity_constraints[0])
+        nrows = len(constraints_tuple)
+        ncols = len(constraints_tuple[0])
 
         matrix_str = "\"Matrix(%d|%d)%s\""
         values = ""
-        for row in self.intensity_constraints:
+        for row in constraints_tuple:
             for val in row:
                 values += "%f|" % val
         values = values.rstrip("|")
@@ -153,25 +154,28 @@ class FittingOptions(object):
 
         return ",".join(ties).rstrip(",")
 
-    def create_global_function_str(self, n, param_values=None):
+    def create_global_function_str(self, nspectra, param_values=None):
         """
-            Creates the function string to pass to fit for a multi-dataset (global) fitting
+        Creates the function string to pass to fit for a multi-dataset (global) fitting
 
-            @param n :: A number of datasets (spectra) to be fitted simultaneously.
+        @param nspectra :: A number of datasets (spectra) to be fitted simultaneously.
 
-            @param param_values :: A dict/tableworkspace of key/values specifying the parameter values
-            that have already been calculated. If None then the ComptonScatteringCountRate
-            function, along with the constraints matrix, is used rather than the standard CompositeFunction.
-            It is assumed that the standard CompositeFunction is used when running the fit for a
-            second time to compute the errors with everything free
+        @param param_values :: A dict/tableworkspace of key/values specifying the
+                               parameter values that have already been calculated. If
+                               None then the ComptonScatteringCountRate function,
+                               along with the constraints matrix, is used rather than
+                               the standard CompositeFunction. It is assumed that the
+                               standard CompositeFunction is used when running the fit
+                               for a second time to compute the errors with everything
+                               free
         """
 
         # create a local function to fit a single spectrum
-        f = self.create_function_str(param_values)
+        func_str = self.create_function_str(param_values)
         # insert an attribute telling the function which spectrum it should be applied to
-        i = f.index(';')
+        i = func_str.index(';')
         # $domains=i means "function index == workspace index"
-        fun_str = f[:i] + ',$domains=i' + f[i:]
+        fun_str = func_str[:i] + ',$domains=i' + func_str[i:]
 
         # append the constrints and ties within the local function
         fun_str += ';constraints=(' + self.create_constraints_str() + ')'
@@ -183,7 +187,7 @@ class FittingOptions(object):
         global_ties = 'f0.f0.Width'
         # build the multi-dataset function by joining local functions of the same type
         global_fun_str = 'composite=MultiDomainFunction'
-        for i in range(n):
+        for i in range(nspectra):
             global_fun_str += ';(' + fun_str + ')'
             if i > 0:
                 global_ties = 'f' + str(i) + '.f0.Width=' + global_ties
