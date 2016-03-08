@@ -54,17 +54,18 @@ const std::string ConvertToDetectorFaceMD::category() const {
 /** Initialize the algorithm's properties.
  */
 void ConvertToDetectorFaceMD::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MatrixWorkspace.");
-  declareProperty(new ArrayProperty<int>("BankNumbers", Direction::Input),
-                  "A list of the bank numbers to convert. If empty, will use "
-                  "all banksMust have at least one entry.");
+  declareProperty(
+      make_unique<ArrayProperty<int>>("BankNumbers", Direction::Input),
+      "A list of the bank numbers to convert. If empty, will use "
+      "all banksMust have at least one entry.");
 
   // Now the box controller settings
   this->initBoxControllerProps("2", 200, 20);
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace.");
 }
@@ -197,8 +198,8 @@ void ConvertToDetectorFaceMD::exec() {
     throw std::runtime_error("InputWorkspace is not an EventWorkspace");
 
   // Fill the map, throw if there are grouped pixels.
-  in_ws->getDetectorIDToWorkspaceIndexVector(m_detID_to_WI,
-                                             m_detID_to_WI_offset, true);
+  m_detID_to_WI =
+      in_ws->getDetectorIDToWorkspaceIndexVector(m_detID_to_WI_offset, true);
 
   // Get the map of the banks we'll display
   std::map<int, RectangularDetector_const_sptr> banks = this->getBanks();

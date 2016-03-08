@@ -144,22 +144,24 @@ private:
     RangeHelper(){};
     /// give an enum from poco a better name here
     enum {
-      IGNORE_SPACES = Poco::StringTokenizer::TOK_TRIM ///< equal to
-      /// Poco::StringTokenizer::TOK_TRIM but
+      IGNORE_SPACES =
+          Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY ///< equal to
+      /// Mantid::Kernel::StringTokenizer::TOK_TRIM but
       /// saves some typing
     };
   };
 
   /// used to store the lists of WORKSPACE INDICES that will be grouped, the
   /// keys are not used
-  typedef std::map<specid_t, std::vector<size_t>> storage_map;
+  typedef std::map<specnum_t, std::vector<size_t>> storage_map;
 
   /// An estimate of the percentage of the algorithm runtimes that has been
   /// completed
   double m_FracCompl;
   /// stores lists of spectra indexes to group, although we never do an index
   /// search on it
-  storage_map m_GroupSpecInds;
+  storage_map m_GroupWsInds;
 
   // Implement abstract Algorithm methods
   void init() override;
@@ -239,8 +241,8 @@ private:
     /// spectrum number to the this
     EMPTY_LINE = 1001 - INT_MAX, ///< when reading from the input file this
     /// value means that we found any empty line
-    IGNORE_SPACES = Poco::StringTokenizer::TOK_TRIM ///< equal to
-    /// Poco::StringTokenizer::TOK_TRIM but
+    IGNORE_SPACES = Mantid::Kernel::StringTokenizer::TOK_TRIM ///< equal to
+    /// Mantid::Kernel::StringTokenizer::TOK_TRIM but
     /// saves some typing
   };
 

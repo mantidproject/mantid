@@ -37,7 +37,7 @@ filterToNew(std::vector<std::string> &input_data,
 
 /// Check if the named data source is in the vector of data currently in the
 /// workspace
-bool appearsInCurrentData(const std::string &input_data,
+bool appearsInCurrentData(const std::string &data_source,
                           std::vector<std::string> &current_data);
 
 /// Return a vector of the names of files and workspaces which have been
@@ -51,7 +51,7 @@ getHistoricalDataSources(const API::WorkspaceHistory &ws_history,
 /// historical data sources
 void MANTID_MDALGORITHMS_DLL
 insertDataSources(const std::string &data_sources,
-                  std::set<std::string> &historical_data_sources);
+                  std::unordered_set<std::string> &historical_data_sources);
 
 /// Test if a file with the given full path name exists
 bool fileExists(const std::string &filename);

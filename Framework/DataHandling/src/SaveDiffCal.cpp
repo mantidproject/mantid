@@ -60,21 +60,22 @@ const std::string SaveDiffCal::summary() const {
 /** Initialize the algorithm's properties.
  */
 void SaveDiffCal::init() {
-  declareProperty(new WorkspaceProperty<ITableWorkspace>("CalibrationWorkspace",
-                                                         "", Direction::Input),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
+                      "CalibrationWorkspace", "", Direction::Input),
                   "An output workspace.");
 
   declareProperty(
-      new WorkspaceProperty<GroupingWorkspace>(
+      Kernel::make_unique<WorkspaceProperty<GroupingWorkspace>>(
           "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An GroupingWorkspace workspace giving the grouping info.");
 
   declareProperty(
-      new WorkspaceProperty<MaskWorkspace>(
+      Kernel::make_unique<WorkspaceProperty<MaskWorkspace>>(
           "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An Workspace workspace giving which detectors are masked.");
 
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, ".h5"),
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Save, ".h5"),
                   "Path to the .h5 file that will be created.");
 }
 

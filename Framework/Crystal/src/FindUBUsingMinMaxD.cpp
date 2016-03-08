@@ -41,35 +41,33 @@ const std::string FindUBUsingMinMaxD::category() const {
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingMinMaxD::init() {
-  this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
-  boost::shared_ptr<BoundedValidator<double>> mustBePositive(
-      new BoundedValidator<double>());
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
-  boost::shared_ptr<BoundedValidator<int>> atLeast3Int(
-      new BoundedValidator<int>());
+  auto atLeast3Int = boost::make_shared<BoundedValidator<int>>();
   atLeast3Int->setLower(3);
 
   // use negative values, force user to input all parameters
-  this->declareProperty(new PropertyWithValue<double>(
+  this->declareProperty(make_unique<PropertyWithValue<double>>(
                             "MinD", -1.0, mustBePositive, Direction::Input),
                         "Lower Bound on Lattice Parameters a, b, c");
 
-  this->declareProperty(new PropertyWithValue<double>(
+  this->declareProperty(make_unique<PropertyWithValue<double>>(
                             "MaxD", -1.0, mustBePositive, Direction::Input),
                         "Upper Bound on Lattice Parameters a, b, c");
 
-  this->declareProperty(new PropertyWithValue<int>(
+  this->declareProperty(make_unique<PropertyWithValue<int>>(
                             "NumInitial", 20, atLeast3Int, Direction::Input),
                         "Number of Peaks to Use on First Pass(20)");
 
-  this->declareProperty(new PropertyWithValue<double>("Tolerance", 0.15,
-                                                      mustBePositive,
-                                                      Direction::Input),
-                        "Indexing Tolerance (0.15)");
+  this->declareProperty(
+      make_unique<PropertyWithValue<double>>("Tolerance", 0.15, mustBePositive,
+                                             Direction::Input),
+      "Indexing Tolerance (0.15)");
 }
 
 //--------------------------------------------------------------------------

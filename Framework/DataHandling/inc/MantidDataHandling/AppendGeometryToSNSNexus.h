@@ -70,7 +70,7 @@ private:
 
   /// Load logs from the NeXus file
   static bool runLoadNexusLogs(const std::string &nexusFileName,
-                               API::MatrixWorkspace_sptr localWorkspaceName,
+                               API::MatrixWorkspace_sptr localWorkspace,
                                Algorithm *alg);
 
   /// Are we going to make a copy of the NeXus file to operate on ?

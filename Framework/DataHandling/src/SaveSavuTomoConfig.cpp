@@ -24,13 +24,14 @@ SaveSavuTomoConfig::SaveSavuTomoConfig()
 void SaveSavuTomoConfig::init() {
   // Get a list of table workspaces which contain the plugin information
   declareProperty(
-      new ArrayProperty<std::string>(
+      Kernel::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces",
           boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "The names of the table workspaces containing plugin information.");
 
-  declareProperty(new API::FileProperty("Filename", "", FileProperty::Save,
-                                        std::vector<std::string>(1, ".nxs")),
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", FileProperty::Save,
+                      std::vector<std::string>(1, ".nxs")),
                   "The name of the tomographic config file to write, as a full "
                   "or relative path. This will overwrite existing files.");
 }
@@ -165,7 +166,7 @@ void SaveSavuTomoConfig::saveFile(
 
   // Iterate through all plugin entries (number sub groups 0....n-1)
   size_t procCount = 0;
-  for (auto w : wss) {
+  for (const auto &w : wss) {
     // Concatenate table contents, putting pipeline processing steps in the same
     // sequence
     // as they come in the seq of table workspaces

@@ -36,10 +36,11 @@ const std::string ExtractMonitorWorkspace::summary() const {
  */
 void ExtractMonitorWorkspace::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "A data workspace that holds a monitor workspace within.");
   declareProperty(
-      new WorkspaceProperty<>("MonitorWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("MonitorWorkspace", "",
+                                       Direction::Output),
       "The workspace containing only monitor data relating to the main data in "
       "the InputWorkspace.");
   declareProperty(

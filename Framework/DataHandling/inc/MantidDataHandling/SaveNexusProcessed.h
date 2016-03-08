@@ -93,7 +93,7 @@ private:
                           const std::string &propertyValue,
                           int perioidNum) override;
   /// execute the algorithm.
-  void doExec(Mantid::API::Workspace_sptr workspace,
+  void doExec(Mantid::API::Workspace_sptr inputWorkspace,
               Mantid::NeXus::NexusFileIO_sptr &nexusFile,
               const bool keepFile = false,
               NeXus::NexusFileIO::optional_size_t entryNumber =

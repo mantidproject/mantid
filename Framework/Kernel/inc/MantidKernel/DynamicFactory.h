@@ -82,13 +82,13 @@ public:
   enum NotificationStatus { Enabled, Disabled };
   /// Defines replacement behaviour
   enum SubscribeAction { ErrorIfExists, OverwriteCurrent };
+  DynamicFactory(const DynamicFactory &) = delete;
+  DynamicFactory &operator=(const DynamicFactory &) = delete;
 
-public:
   /**
    * Base class for dynamic factory notifications
    */
   class DynamicFactoryNotification : public Poco::Notification {};
-
   /**
    * A notification that the factory has been updated. This is
    * blind to the details.
@@ -105,10 +105,8 @@ public:
    */
   void disableNotifications() { m_notifyStatus = Disabled; }
 
-public:
   /// A typedef for the instantiator
   typedef AbstractInstantiator<Base> AbstractFactory;
-
   /// Destroys the DynamicFactory and deletes the instantiators for
   /// all registered classes.
   virtual ~DynamicFactory() {
@@ -240,11 +238,6 @@ protected:
   DynamicFactory() : notificationCenter(), _map(), m_notifyStatus(Disabled) {}
 
 private:
-  /// Private copy constructor - NO COPY ALLOWED
-  DynamicFactory(const DynamicFactory &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  DynamicFactory &operator=(const DynamicFactory &);
-
   /// Send an update notification if they are enabled
   void sendUpdateNotificationIfEnabled() {
     if (m_notifyStatus == Enabled)

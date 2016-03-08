@@ -66,8 +66,5 @@ MementoTableWorkspace::MementoTableWorkspace(int nRows)
   this->addColumn("double", "gamma");
   this->addColumn("str", "Status");
 }
-
-/// Destructor
-MementoTableWorkspace::~MementoTableWorkspace() {}
 }
 }

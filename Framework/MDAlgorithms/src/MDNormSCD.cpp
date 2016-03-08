@@ -64,8 +64,8 @@ const std::string MDNormSCD::name() const { return "MDNormSCD"; }
   * Initialize the algorithm's properties.
   */
 void MDNormSCD::init() {
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDWorkspace.");
 
   std::string dimChars = getDimensionChars();
@@ -76,7 +76,8 @@ void MDNormSCD::init() {
     dim[0] = dimChars[i];
     std::string propName = "AlignedDim" + dim;
     declareProperty(
-        new PropertyWithValue<std::string>(propName, "", Direction::Input),
+        Kernel::make_unique<PropertyWithValue<std::string>>(propName, "",
+                                                            Direction::Input),
         "Binning parameters for the " + Strings::toString(i) +
             "th dimension.\n"
             "Enter it as a comma-separated list of values with the format: "
@@ -89,19 +90,19 @@ void MDNormSCD::init() {
   fluxValidator->add<CommonBinsValidator>();
   auto solidAngleValidator = fluxValidator->clone();
 
-  declareProperty(new WorkspaceProperty<>("FluxWorkspace", "", Direction::Input,
-                                          fluxValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "FluxWorkspace", "", Direction::Input, fluxValidator),
                   "An input workspace containing momentum dependent flux.");
-  declareProperty(new WorkspaceProperty<>("SolidAngleWorkspace", "",
-                                          Direction::Input,
-                                          solidAngleValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>("SolidAngleWorkspace", "",
+                                                   Direction::Input,
+                                                   solidAngleValidator),
                   "An input workspace containing momentum integrated vanadium "
                   "(a measure of the solid angle).");
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "A name for the output data MDHistoWorkspace.");
-  declareProperty(new WorkspaceProperty<Workspace>(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputNormalizationWorkspace", "", Direction::Output),
                   "A name for the output normalization MDHistoWorkspace.");
 }
@@ -401,7 +402,7 @@ void MDNormSCD::calculateNormalization(
   const detid2index_map solidAngDetToIdx =
       solidAngleWS->getDetectorIDToWorkspaceIndexMap();
 
-  auto *prog = new API::Progress(this, 0.3, 1.0, ndets);
+  auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
   PARALLEL_FOR1(integrFlux)
   for (int64_t i = 0; i < ndets; i++) {
     PARALLEL_START_INTERUPT_REGION
@@ -493,8 +494,6 @@ void MDNormSCD::calculateNormalization(
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
-  delete prog;
 }
 
 /**

@@ -30,18 +30,18 @@ DetectorEfficiencyVariation::DetectorEfficiencyVariation()
 /// Initialize the algorithm
 void DetectorEfficiencyVariation::init() {
   auto val = boost::make_shared<HistogramValidator>();
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("WhiteBeamBase", "",
-                                                         Direction::Input, val),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "WhiteBeamBase", "", Direction::Input, val),
                   "Name of a white beam vanadium workspace");
   // The histograms, the detectors in each histogram and their first and last
   // bin boundary must match
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("WhiteBeamCompare", "",
-                                             Direction::Input, val),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("WhiteBeamCompare", "",
+                                                      Direction::Input, val),
       "Name of a matching second white beam vanadium run from the same "
       "instrument");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "A MaskWorkpace where each spectra that failed the test is "
                   "masked. Each histogram from the input workspace maps to a "
                   "histogram in this workspace with one value that indicates "
@@ -129,15 +129,15 @@ void DetectorEfficiencyVariation::exec() {
  * instrument to use for comparison
  * @param variation :: The maximum fractional variation above the median that is
  * allowed for god detectors
- * @param minSpec :: Index number of the first spectrum to use
- * @param maxSpec :: Index number of the last spectrum to use
+ * @param startWsIndex :: Index number of the first spectrum to use
+ * @param endWsIndex :: Index number of the last spectrum to use
  * @throw invalid_argument if there is an incapatible property value and so the
  * algorithm can't continue
  */
 void DetectorEfficiencyVariation::retrieveProperties(
     API::MatrixWorkspace_sptr &whiteBeam1,
-    API::MatrixWorkspace_sptr &whiteBeam2, double &variation, int &minSpec,
-    int &maxSpec) {
+    API::MatrixWorkspace_sptr &whiteBeam2, double &variation, int &startWsIndex,
+    int &endWsIndex) {
   whiteBeam1 = getProperty("WhiteBeamBase");
   whiteBeam2 = getProperty("WhiteBeamCompare");
   if (whiteBeam1->getInstrument()->getName() !=
@@ -145,8 +145,8 @@ void DetectorEfficiencyVariation::retrieveProperties(
     throw std::invalid_argument("The two input white beam vanadium workspaces "
                                 "must be from the same instrument");
   }
-  int maxSpecIndex = static_cast<int>(whiteBeam1->getNumberHistograms()) - 1;
-  if (maxSpecIndex !=
+  int maxWsIndex = static_cast<int>(whiteBeam1->getNumberHistograms()) - 1;
+  if (maxWsIndex !=
       static_cast<int>(whiteBeam2->getNumberHistograms()) -
           1) { // we would get a crash later on if this were not true
     throw std::invalid_argument("The input white beam vanadium workspaces must "
@@ -155,24 +155,24 @@ void DetectorEfficiencyVariation::retrieveProperties(
 
   variation = getProperty("Variation");
 
-  minSpec = getProperty("StartWorkspaceIndex");
-  if ((minSpec < 0) || (minSpec > maxSpecIndex)) {
+  startWsIndex = getProperty("StartWorkspaceIndex");
+  if ((startWsIndex < 0) || (startWsIndex > maxWsIndex)) {
     g_log.warning("StartWorkspaceIndex out of range, changed to 0");
-    minSpec = 0;
+    startWsIndex = 0;
   }
-  maxSpec = getProperty("EndWorkspaceIndex");
-  if (maxSpec == Mantid::EMPTY_INT())
-    maxSpec = maxSpecIndex;
-  if ((maxSpec < 0) || (maxSpec > maxSpecIndex)) {
+  endWsIndex = getProperty("EndWorkspaceIndex");
+  if (endWsIndex == Mantid::EMPTY_INT())
+    endWsIndex = maxWsIndex;
+  if ((endWsIndex < 0) || (endWsIndex > maxWsIndex)) {
     g_log.warning(
         "EndWorkspaceIndex out of range, changed to max Workspace number");
-    maxSpec = maxSpecIndex;
+    endWsIndex = maxWsIndex;
   }
-  if ((maxSpec < minSpec)) {
+  if ((endWsIndex < startWsIndex)) {
     g_log.warning(
         "EndWorkspaceIndex can not be less than the StartWorkspaceIndex, "
         "changed to max Workspace number");
-    maxSpec = maxSpecIndex;
+    endWsIndex = maxWsIndex;
   }
 }
 

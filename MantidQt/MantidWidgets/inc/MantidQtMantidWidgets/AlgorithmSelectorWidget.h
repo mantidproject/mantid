@@ -27,6 +27,20 @@ namespace MantidWidgets
   class AlgorithmTreeWidget;
   class FindAlgComboBox;
 
+  /**
+   * Represents the algorithm selected by the user
+   * Contains name and version
+   */
+  struct SelectedAlgorithm {
+    QString name;
+    int version;
+    /// implicit conversion to QString
+    operator QString() { return name; }
+    /// constructor
+    SelectedAlgorithm(const QString nameIn, const int versionIn)
+        : name(nameIn), version(versionIn){};
+  };
+
   //============================================================================
   /** A widget consisting of a ComboBox and a TreeWidget
    * to allow a user to select an algorithm either by category
@@ -42,8 +56,7 @@ namespace MantidWidgets
   public:
     AlgorithmSelectorWidget(QWidget *parent);
     ~AlgorithmSelectorWidget() override;
-    void getSelectedAlgorithm(QString& algName, int& version);
-    QString getSelectedAlgorithm();
+    SelectedAlgorithm getSelectedAlgorithm();
     void setSelectedAlgorithm(QString & algName);
     bool showExecuteButton() const;
     void showExecuteButton(const bool);
@@ -87,7 +100,7 @@ signals:
     void mousePressEvent(QMouseEvent *e) override;
     void mouseMoveEvent(QMouseEvent *e) override;
     void mouseDoubleClickEvent(QMouseEvent *e) override;
-    void getSelectedAlgorithm(QString& algName, int& version);
+    SelectedAlgorithm getSelectedAlgorithm();
 
   public slots:
     void update();
@@ -110,7 +123,7 @@ signals:
     Q_OBJECT
   public:
     ~FindAlgComboBox() override {}
-    void getSelectedAlgorithm(QString& algName, int& version);
+    SelectedAlgorithm getSelectedAlgorithm();
 
   signals:
     void enterPressed();

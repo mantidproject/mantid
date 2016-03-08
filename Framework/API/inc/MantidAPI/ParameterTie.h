@@ -45,13 +45,13 @@ namespace API {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class MANTID_API_DLL ParameterTie : public ParameterReference {
+class MANTID_API_DLL ParameterTie final : public ParameterReference {
 public:
   /// Constructor
   ParameterTie(IFunction *funct, const std::string &parName,
                const std::string &expr = "", bool isDefault = false);
   /// Destructor
-  virtual ~ParameterTie();
+  ~ParameterTie() override;
   /// Set the tie expression
   virtual void set(const std::string &expr);
   /// Evaluate the expression

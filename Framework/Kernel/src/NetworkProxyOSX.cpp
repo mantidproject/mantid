@@ -124,7 +124,8 @@ ProxyInfoVec proxyInformationFromPac(CFDictionaryRef dict,
           kCFAllocatorDefault, pacData, kCFStringEncodingISOLatin1);
 
       CFURLRef targetURL = CFURLCreateWithBytes(
-          kCFAllocatorDefault, (UInt8 *)targetURLString.c_str(),
+          kCFAllocatorDefault, reinterpret_cast<UInt8 *>(
+                                   const_cast<char *>(targetURLString.c_str())),
           targetURLString.size(), kCFStringEncodingUTF8, nullptr);
       if (!targetURL) {
         logger.debug("Problem with Target URI for proxy script");
@@ -247,11 +248,6 @@ ProxyInfo findHttpProxy(const std::string &targetURLString,
 /** Constructor
  */
 NetworkProxy::NetworkProxy() : m_logger("network_proxy_logger_osx") {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-NetworkProxy::~NetworkProxy() {}
 
 ProxyInfo NetworkProxy::getHttpProxy(const std::string &targetURLString) {
   return findHttpProxy(targetURLString, m_logger);

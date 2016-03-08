@@ -17,16 +17,16 @@ const double B = 2.2;
 class IFunction1DTest_Function : public virtual IFunction1D,
                                  public virtual ParamFunction {
 protected:
-  virtual std::string name() const { return "IFunction1DTest_Function"; }
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const {
+  std::string name() const override { return "IFunction1DTest_Function"; }
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override {
     for (size_t i = 0; i < nData; ++i) {
       double x = xValues[i];
       out[i] = A * x + B;
     }
   }
-  virtual void functionDeriv1D(Jacobian *out, const double *xValues,
-                               const size_t nData) {
+  void functionDeriv1D(Jacobian *out, const double *xValues,
+                       const size_t nData) override {
     for (size_t i = 0; i < nData; ++i) {
       double x = xValues[i];
       out->set(i, 0, x);
@@ -40,10 +40,10 @@ public:
   IFunction1DTest_Jacobian(size_t ny, size_t np) : m_np(np) {
     m_data.resize(ny * np);
   }
-  virtual void set(size_t iY, size_t iP, double value) {
+  void set(size_t iY, size_t iP, double value) override {
     m_data[iY * m_np + iP] = value;
   }
-  virtual double get(size_t iY, size_t iP) { return m_data[iY * m_np + iP]; }
+  double get(size_t iY, size_t iP) override { return m_data[iY * m_np + iP]; }
 
 private:
   size_t m_np;

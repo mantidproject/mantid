@@ -37,17 +37,17 @@ private:
   public:
     using MDImplicitFunction::isPointContained; // Avoids Intel compiler
                                                 // warning.
-    virtual bool isPointContained(const Mantid::coord_t *) { return false; }
-    virtual std::string getName() const { return "MockImplicitFunction"; }
+    bool isPointContained(const Mantid::coord_t *) override { return false; }
+    std::string getName() const override { return "MockImplicitFunction"; }
     MOCK_CONST_METHOD0(toXMLString, std::string());
-    ~MockImplicitFunction() { ; }
+    ~MockImplicitFunction() override { ; }
   };
 
   // Helper class. Builds mock implicit functions.
   class MockImplicitFunctionBuilder
       : public Mantid::API::ImplicitFunctionBuilder {
   public:
-    Mantid::Geometry::MDImplicitFunction *create() const {
+    Mantid::Geometry::MDImplicitFunction *create() const override {
       return new MockImplicitFunction;
     }
   };
@@ -58,13 +58,13 @@ private:
   public:
     MockImplicitFunctionParser() : Mantid::API::ImplicitFunctionParser(NULL) {}
     Mantid::API::ImplicitFunctionBuilder *
-    createFunctionBuilder(Poco::XML::Element * /*functionElement*/) {
+    createFunctionBuilder(Poco::XML::Element * /*functionElement*/) override {
       return new MockImplicitFunctionBuilder;
     }
-    void
-    setSuccessorParser(Mantid::API::ImplicitFunctionParser * /*successor*/) {}
+    void setSuccessorParser(
+        Mantid::API::ImplicitFunctionParser * /*successor*/) override {}
     void setParameterParser(
-        Mantid::API::ImplicitFunctionParameterParser * /*parser*/) {}
+        Mantid::API::ImplicitFunctionParameterParser * /*parser*/) override {}
   };
   // helper ws creator
   Mantid::API::Workspace_sptr createSimple3DWorkspace() {
@@ -313,13 +313,13 @@ public:
     TS_ASSERT_EQUALS(out->getNEvents(), 1000);
 
     double expected_signal(2.);
-    std::vector<size_t> nBins(3), indexes(3);
+    std::vector<size_t> nBins(3);
     nBins[0] = 40;
     nBins[1] = 5;
     nBins[2] = 20;
 
     for (size_t i = 0; i < out->getNPoints(); i++) {
-      Utils::getIndicesFromLinearIndex(i, nBins, indexes);
+      auto indexes = Utils::getIndicesFromLinearIndex(i, nBins);
       if (etta(int(indexes[0]), 4) && etta(int(indexes[2]), 2)) {
         TS_ASSERT_DELTA(out->getSignalAt(i), expected_signal, 1e-5);
         TS_ASSERT_DELTA(out->getNumEventsAt(i), expected_signal, 1e-5);
@@ -977,7 +977,7 @@ public:
     TS_ASSERT_EQUALS(in_ws->getBoxController()->getMaxId(), 1001);
   }
 
-  ~BinMDTestPerformance() {
+  ~BinMDTestPerformance() override {
     AnalysisDataService::Instance().remove("BinMDTest_ws");
   }
 

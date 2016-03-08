@@ -37,7 +37,6 @@ namespace Geometry {
 class MANTID_GEOMETRY_DLL QLab : public MDFrame {
 public:
   QLab();
-  ~QLab() override;
   Mantid::Kernel::UnitLabel getUnitLabel() const override;
   const Mantid::Kernel::MDUnit &getMDUnit() const override;
   bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const override;

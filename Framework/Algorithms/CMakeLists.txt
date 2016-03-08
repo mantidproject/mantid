@@ -1,7 +1,4 @@
 set ( SRC_FILES
-	#	src/Q1DTOF.cpp
-	# src/CountEventsInPulses.cpp
-	# src/UpdatePeakParameterTable.cpp
 	src/AbsorptionCorrection.cpp
 	src/AddLogDerivative.cpp
 	src/AddNote.cpp
@@ -155,6 +152,9 @@ set ( SRC_FILES
 	src/MaskDetectorsIf.cpp
 	src/Max.cpp
 	src/MaxEnt.cpp
+	src/MaxEnt/MaxentData.cpp
+	src/MaxEnt/MaxentEntropyNegativeValues.cpp
+	src/MaxEnt/MaxentEntropyPositiveValues.cpp
 	src/MaxMin.cpp
 	src/MedianDetectorTest.cpp
 	src/MergeRuns.cpp
@@ -278,9 +278,6 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES
-	#	inc/MantidAlgorithms/Q1DTOF.h
-	# inc/MantidAlgorithms/CountEventsInPulses.h
-	# inc/MantidAlgorithms/UpdatePeakParameterTable.h
 	inc/MantidAlgorithms/AbsorptionCorrection.h
 	inc/MantidAlgorithms/AddLogDerivative.h
 	inc/MantidAlgorithms/AddNote.h
@@ -435,6 +432,10 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MaskDetectorsIf.h
 	inc/MantidAlgorithms/Max.h
 	inc/MantidAlgorithms/MaxEnt.h
+	inc/MantidAlgorithms/MaxEnt/MaxentData.h
+	inc/MantidAlgorithms/MaxEnt/MaxentEntropy.h
+	inc/MantidAlgorithms/MaxEnt/MaxentEntropyNegativeValues.h
+	inc/MantidAlgorithms/MaxEnt/MaxentEntropyPositiveValues.h
 	inc/MantidAlgorithms/MaxMin.h
 	inc/MantidAlgorithms/MedianDetectorTest.h
 	inc/MantidAlgorithms/MergeRuns.h
@@ -716,6 +717,9 @@ set ( TEST_FILES
 	MaskBinsFromTableTest.h
 	MaskBinsTest.h
 	MaxEntTest.h
+	MaxEnt/MaxentDataTest.h
+	MaxEnt/MaxentEntropyNegativeValuesTest.h
+	MaxEnt/MaxentEntropyPositiveValuesTest.h
 	MaxMinTest.h
 	MayersSampleCorrectionStrategyTest.h
 	MayersSampleCorrectionTest.h

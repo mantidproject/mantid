@@ -28,18 +28,22 @@ class SimpleFunctionParameterDecorator : public FunctionParameterDecorator {
 
 public:
   SimpleFunctionParameterDecorator() {}
-  ~SimpleFunctionParameterDecorator() {}
+  ~SimpleFunctionParameterDecorator() override {}
 
-  std::string name() const { return "SimpleFunctionParameterDecorator"; }
+  std::string name() const override {
+    return "SimpleFunctionParameterDecorator";
+  }
 
-  void function(const FunctionDomain &domain, FunctionValues &values) const {
+  void function(const FunctionDomain &domain,
+                FunctionValues &values) const override {
     throwIfNoFunctionSet();
 
     IFunction_sptr fn = getDecoratedFunction();
     fn->function(domain, values);
   }
 
-  void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) {
+  void functionDeriv(const FunctionDomain &domain,
+                     Jacobian &jacobian) override {
     throwIfNoFunctionSet();
 
     IFunction_sptr fn = getDecoratedFunction();

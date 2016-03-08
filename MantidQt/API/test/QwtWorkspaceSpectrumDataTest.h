@@ -13,9 +13,7 @@ class QwtWorkspaceSpectrumDataTest : public CxxTest::TestSuite
   Mantid::API::MatrixWorkspace_sptr ws;
 
 public:
-
-  void setUp()
-  {
+  void setUp() override {
     ws = WorkspaceCreationHelper::Create2DWorkspace(3, 4);
     for (size_t i=0; i<3; i++)
     {

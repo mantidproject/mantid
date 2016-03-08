@@ -25,7 +25,7 @@ public:
   static MergeMDTest *createSuite() { return new MergeMDTest(); }
   static void destroySuite(MergeMDTest *suite) { delete suite; }
 
-  void setUp() {
+  void setUp() override {
     makeAnyMDEW<MDEvent<3>, 3>(2, 5., 10., 1, "mde3");
     makeAnyMDEW<MDEvent<4>, 4>(2, 5., 10., 1, "mde4");
     makeAnyMDEW<MDLeanEvent<3>, 3>(2, 5., 10., 1, "mdle3");

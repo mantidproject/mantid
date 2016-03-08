@@ -67,7 +67,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay: public QObject
                       QTableWidget*   tableWidget,
                       bool            isTrackingOn = true);
 
-     virtual ~SpectrumDisplay();
+     ~SpectrumDisplay() override;
 
      virtual bool hasData(const std::string &wsName,
                           const boost::shared_ptr<Mantid::API::Workspace> ws);

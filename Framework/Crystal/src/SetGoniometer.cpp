@@ -35,7 +35,7 @@ SetGoniometer::~SetGoniometer() {}
  */
 void SetGoniometer::init() {
   declareProperty(
-      new WorkspaceProperty<>("Workspace", "", Direction::InOut),
+      make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
       "An workspace that will be modified with the new goniometer created.");
 
   std::vector<std::string> gonOptions{"None, Specify Individually",
@@ -51,8 +51,8 @@ void SetGoniometer::init() {
   for (size_t i = 0; i < NUM_AXES; i++) {
     std::ostringstream propName;
     propName << "Axis" << i;
-    declareProperty(new PropertyWithValue<std::string>(propName.str(), "",
-                                                       Direction::Input),
+    declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
+                        propName.str(), "", Direction::Input),
                     propName.str() + axisHelp);
   }
 }

@@ -565,7 +565,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_workspaceEvent_USEONCE;
 
 public:
-  void setUp() {
+  void setUp() override {
 
     DateAndTime date("2010-01-01T00:00:00");
 

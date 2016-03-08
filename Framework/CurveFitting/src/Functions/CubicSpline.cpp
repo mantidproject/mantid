@@ -358,10 +358,6 @@ void CubicSpline::reallocGSLObjects(const int n) {
   gsl_interp_accel_reset(m_acc.get());
 }
 
-/** Destructor
- *
- */
-CubicSpline::~CubicSpline() {}
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

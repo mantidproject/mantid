@@ -103,9 +103,6 @@ public:
   ScriptRepoException(const std::string &info, const std::string &system,
                       const std::string &file = std::string(), int line = -1);
 
-  /// Destructor
-  ~ScriptRepoException() throw() override {}
-
   /// Returns the message string.
   const char *what() const throw() override;
 
@@ -314,8 +311,7 @@ They will work as was expected for folders @ref folders-sec.
 class MANTID_API_DLL ScriptRepository {
 public:
   /// Virtual destructor (always needed for abstract classes)
-  virtual ~ScriptRepository(){};
-
+  virtual ~ScriptRepository() = default;
   /**
      Return the information about the script through the Mantid::API::ScriptInfo
      struct.

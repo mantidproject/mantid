@@ -55,11 +55,6 @@ MatrixWorkspaceMDIterator::MatrixWorkspaceMDIterator(
 }
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MatrixWorkspaceMDIterator::~MatrixWorkspaceMDIterator() {}
-
-//----------------------------------------------------------------------------------------------
 /** @return the number of points to be iterated on */
 size_t MatrixWorkspaceMDIterator::getDataSize() const { return size_t(m_max); }
 

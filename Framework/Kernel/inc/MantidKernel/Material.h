@@ -61,7 +61,7 @@ public:
       const double numberDensity, const double temperature = 300,
       const double pressure = PhysicalConstants::StandardAtmosphere);
   /// Virtual destructor.
-  virtual ~Material(){};
+  virtual ~Material() = default;
 
   /// Returns the name of the material
   const std::string &name() const;

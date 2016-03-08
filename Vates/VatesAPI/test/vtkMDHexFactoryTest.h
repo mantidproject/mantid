@@ -100,7 +100,7 @@ public:
                             VATES::VolumeNormalization);
     factory.setSuccessor(std::move(uniqueSuccessor));
 
-    ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
+    auto ws = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
 
     // Need the raw pointer to test assertions here. Object is not yet deleted
@@ -124,7 +124,7 @@ public:
                             VATES::VolumeNormalization);
     factory.setSuccessor(std::move(uniqueSuccessor));
 
-    ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
+    auto ws = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
     TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdater));
 
@@ -138,7 +138,7 @@ public:
                             VATES::VolumeNormalization);
     // factory.SetSuccessor(mockSuccessor); No Successor set.
 
-    ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
+    auto ws = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS(factory.initialize(ws), std::runtime_error);
   }
 
@@ -310,7 +310,7 @@ private:
   Mantid::DataObjects::MDEventWorkspace4Lean::sptr m_ws4;
 
 public:
-  void setUp() {
+  void setUp() override {
     m_ws3 = MDEventsTestHelper::makeMDEW<3>(100, 0.0, 100.0, 1);
     m_ws4 = MDEventsTestHelper::makeMDEW<4>(32, -50.0, 50.0, 1);
   }

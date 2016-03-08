@@ -48,11 +48,6 @@ ConvexPolygon &ConvexPolygon::operator=(const ConvexPolygon &rhs) {
   return *this;
 }
 
-/**
- * Destructor
- */
-ConvexPolygon::~ConvexPolygon() {}
-
 /// @return True if polygon has 3 or more points
 bool ConvexPolygon::isValid() const { return (npoints() > 2); }
 

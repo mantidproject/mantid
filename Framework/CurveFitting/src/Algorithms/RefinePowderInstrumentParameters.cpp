@@ -64,30 +64,32 @@ RefinePowderInstrumentParameters::~RefinePowderInstrumentParameters() {}
 void RefinePowderInstrumentParameters::init() {
   // Input/output peaks table workspace
   declareProperty(
-      new API::WorkspaceProperty<DataObjects::TableWorkspace>(
+      Kernel::make_unique<API::WorkspaceProperty<DataObjects::TableWorkspace>>(
           "BraggPeakParameterWorkspace", "Anonymous", Direction::Input),
       "TableWorkspace containg all peaks' parameters.");
 
   // Input and output instrument parameters table workspace
-  declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>(
-                      "InstrumentParameterWorkspace", "AnonymousInstrument",
-                      Direction::InOut),
-                  "TableWorkspace containg instrument's parameters.");
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<DataObjects::TableWorkspace>>(
+          "InstrumentParameterWorkspace", "AnonymousInstrument",
+          Direction::InOut),
+      "TableWorkspace containg instrument's parameters.");
 
   // Output workspace
-  declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>(
-                      "OutputWorkspace", "AnonymousOut", Direction::Output),
-                  "Output Workspace2D for the d-TOF curves. ");
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<DataObjects::Workspace2D>>(
+          "OutputWorkspace", "AnonymousOut", Direction::Output),
+      "Output Workspace2D for the d-TOF curves. ");
 
   // Workspace to output fitted peak parameters
   declareProperty(
-      new WorkspaceProperty<TableWorkspace>(
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
           "OutputInstrumentParameterWorkspace", "AnonymousOut2",
           Direction::Output),
       "Output TableWorkspace for the fitted peak parameters for each peak.");
 
   // Workspace to output N best MC parameters
-  declareProperty(new WorkspaceProperty<TableWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "OutputBestResultsWorkspace", "", Direction::Output,
                       PropertyMode::Optional),
                   "Output TableWorkspace for the N best MC fitting results. ");
@@ -107,7 +109,8 @@ void RefinePowderInstrumentParameters::init() {
                   "Number of Monte Carlo random walk steps. ");
 
   // Parameters to fit
-  declareProperty(new Kernel::ArrayProperty<std::string>("ParametersToFit"),
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+                      "ParametersToFit"),
                   "Names of the parameters to fit. ");
 
   // Mininum allowed peak's sigma (avoid wrong fitting peak with very narrow
@@ -244,7 +247,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   stringstream msgss;
   msgss << "Set Instrument Function Parameter : " << endl;
   std::map<std::string, double>::iterator paramiter;
-  for (auto parname : funparamnames) {
+  for (const auto &parname : funparamnames) {
     paramiter = m_FuncParameters.find(parname);
     if (paramiter == m_FuncParameters.end()) {
       // Not found and thus skip
@@ -336,7 +339,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   cout << "Homemade Chi^2 = " << selfchi2 << endl;
 
   // 5. Update fitted parameters
-  for (auto parname : funparamnames) {
+  for (const auto &parname : funparamnames) {
     double parvalue = fitfunc->getParameter(parname);
     m_FuncParameters[parname] = parvalue;
   }
@@ -1068,10 +1071,9 @@ void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
   }
 
   // 3. Retrieve the information for geometry parameters
-  map<string, vector<double>>::iterator mit;
-  for (auto parname : parameternames) {
+  for (const auto &parname : parameternames) {
     // a) Get on hold of the MC parameter vector
-    mit = mcparameters.find(parname);
+    auto mit = mcparameters.find(parname);
     if (mit == mcparameters.end()) {
       // Not found the parameter.  raise error!
       stringstream errss;

@@ -69,7 +69,7 @@ private:
   /// Get the rebin parameters
   Mantid::MantidVec getRebinParams(Mantid::API::MatrixWorkspace_sptr &lhsWS,
                                    Mantid::API::MatrixWorkspace_sptr &rhsWS,
-                                   const bool scaleRHSWS) const;
+                                   const bool scaleRHS) const;
   /// Perform rebin
   Mantid::API::MatrixWorkspace_sptr
   rebin(Mantid::API::MatrixWorkspace_sptr &input,

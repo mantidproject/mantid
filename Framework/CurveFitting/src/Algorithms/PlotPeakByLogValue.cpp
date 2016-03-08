@@ -6,7 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
@@ -67,8 +67,8 @@ void PlotPeakByLogValue::init() {
       "However, if spectra lists (or workspace-indices/values lists) are "
       "specified in the Input parameter string, \n"
       "or the Spectrum parameter integer, these take precedence.");
-  declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The output TableWorkspace");
   declareProperty("Function", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
@@ -125,10 +125,11 @@ void PlotPeakByLogValue::init() {
                   "If true and CreateOutput is true then the value of each "
                   "member of a Composite Function is also output.");
 
-  declareProperty(new Kernel::PropertyWithValue<bool>("ConvolveMembers", false),
-                  "If true and OutputCompositeMembers is true members of any "
-                  "Convolution are output convolved\n"
-                  "with corresponding resolution");
+  declareProperty(
+      make_unique<Kernel::PropertyWithValue<bool>>("ConvolveMembers", false),
+      "If true and OutputCompositeMembers is true members of any "
+      "Convolution are output convolved\n"
+      "with corresponding resolution");
 }
 
 /**
@@ -516,7 +517,7 @@ PlotPeakByLogValue::makeNames() const {
   double start = 0;
   double end = 0;
 
-  typedef Poco::StringTokenizer tokenizer;
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
   tokenizer names(inputList, ";",
                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
   for (const auto &input : names) {
@@ -587,16 +588,15 @@ PlotPeakByLogValue::makeNames() const {
  * Formats the minimizer string for a given spectrum from a given workspace.
  *
  * @param wsName Name of workspace being fitted
- * @param specIndex Index of spectrum being fitted
+ * @param wsIndex Index of spectrum being fitted
  * @return Formatted minimizer string
  */
-std::string
-PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
-                                       const std::string &specIndex) {
+std::string PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
+                                                   const std::string &wsIndex) {
   std::string format = getPropertyValue("Minimizer");
-  std::string wsBaseName = wsName + "_" + specIndex;
+  std::string wsBaseName = wsName + "_" + wsIndex;
   boost::replace_all(format, "$wsname", wsName);
-  boost::replace_all(format, "$wsindex", specIndex);
+  boost::replace_all(format, "$wsindex", wsIndex);
   boost::replace_all(format, "$basename", wsBaseName);
   boost::replace_all(format, "$outputname", m_baseName);
 

@@ -26,7 +26,7 @@ private:
   void startAsyncCalibWorker(const std::string &outFilename,
                              const std::string &vanNo,
                              const std::string &ceriaNo,
-                             const std::string &specNos) {
+                             const std::string &specNos) override {
     doNewCalibration(outFilename, vanNo, ceriaNo, specNos);
     calibrationFinished();
   }
@@ -35,7 +35,7 @@ private:
                              const std::vector<std::string> &multi_RunNo,
                              const std::vector<bool> &banks,
                              const std::string &specNos,
-                             const std::string &dgFile) {
+                             const std::string &dgFile) override {
     std::cerr << "focus run " << std::endl;
 
     std::string runNo = multi_RunNo[0];
@@ -46,14 +46,14 @@ private:
   }
 
   void startAsyncRebinningTimeWorker(const std::string &runNo, double bin,
-                                     const std::string &outWSName) {
+                                     const std::string &outWSName) override {
     doRebinningTime(runNo, bin, outWSName);
     rebinningFinished();
   }
 
   void startAsyncRebinningPulsesWorker(const std::string &runNo,
                                        size_t nperiods, double timeStep,
-                                       const std::string &outWSName) {
+                                       const std::string &outWSName) override {
     doRebinningPulses(runNo, nperiods, timeStep, outWSName);
     rebinningFinished();
   }
@@ -78,7 +78,7 @@ public:
                                                // initialized
   }
 
-  void setUp() {
+  void setUp() override {
     m_view.reset(new testing::NiceMock<MockEnggDiffractionView>());
     m_presenter.reset(
         new MantidQt::CustomInterfaces::EnggDiffractionPresenter(m_view.get()));
@@ -110,7 +110,7 @@ public:
     m_basicCalibSettings.m_rebinCalibrate = 1;
   }
 
-  void tearDown() {
+  void tearDown() override {
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(m_view.get()));
   }
 
@@ -176,6 +176,8 @@ public:
         .WillOnce(Return(mockFname));
     EXPECT_CALL(mockView, newCalibLoaded(testing::_, testing::_, mockFname))
         .Times(1);
+
+    EXPECT_CALL(mockView, plotCalibWorkspace()).Times(0);
 
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -290,7 +292,7 @@ public:
     EXPECT_CALL(mockView, focusingRunNo()).Times(0);
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
     EXPECT_CALL(mockView, focusingTextureRunNo()).Times(0);
-    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
+    EXPECT_CALL(mockView, focusingCroppedSpectrumNos()).Times(0);
     EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
 
     // should disable actions at the beginning of the calculations
@@ -299,6 +301,12 @@ public:
     // and should enable them again at the (unsuccessful) end - this happens
     // when a separate thread finished (here the thread is mocked)
     EXPECT_CALL(mockView, enableCalibrateAndFocusActions(true)).Times(1);
+
+    // plots peaks and curves
+    // the test doesnt get to here as it finishes at EnggCalibrate algo
+    EXPECT_CALL(mockView, plotCalibWorkspace()).Times(0);
+    EXPECT_CALL(mockView, plotVanCurvesCalibOutput()).Times(0);
+    EXPECT_CALL(mockView, plotDifcZeroCalibOutput(testing::_)).Times(0);
 
     // No warnings/error pop-ups: some exception(s) are thrown (because there
     // are missing settings and/or files) but these must be caught
@@ -328,6 +336,12 @@ public:
     // provided here instead
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
     EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(g_ceriaNo));
+
+    // plots peaks and curves
+    // the test doesnt get to here as it finishes at EnggCalibrate algo
+    EXPECT_CALL(mockView, plotCalibWorkspace()).Times(0);
+    EXPECT_CALL(mockView, plotVanCurvesCalibOutput()).Times(0);
+    EXPECT_CALL(mockView, plotDifcZeroCalibOutput(testing::_)).Times(0);
 
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -420,10 +434,11 @@ public:
 
     EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(g_ceriaNo));
 
-    std::string specid = "";
+    std::string specno = "";
     EXPECT_CALL(mockView, currentCalibSpecNos())
         .Times(1)
-        .WillOnce(Return(specid));
+        .WillOnce(Return(specno));
+    EXPECT_CALL(mockView, currentCalibCustomisedBankName()).Times(0);
 
     // No warnings/error pop-ups: some exception(s) are thrown (because there
     // are missing settings and/or files) but these must be caught
@@ -465,8 +480,8 @@ public:
 
     EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(g_ceriaNo));
 
-    // North bank selected so the spectrum ID will not be called and
-    // process should carry on without spec id input
+    // North bank selected so the spectrum Number will not be called and
+    // process should carry on without spec no input
     EXPECT_CALL(mockView, currentCropCalibBankName())
         .Times(1)
         .WillOnce(Return(1));
@@ -486,6 +501,11 @@ public:
     // when a separate thread finished (here the thread is mocked)
     EXPECT_CALL(mockView, enableCalibrateAndFocusActions(true)).Times(1);
 
+    // tests whether the plot functions have been called
+    EXPECT_CALL(mockView, plotCalibWorkspace()).Times(0);
+    EXPECT_CALL(mockView, plotVanCurvesCalibOutput()).Times(0);
+    EXPECT_CALL(mockView, plotDifcZeroCalibOutput(testing::_)).Times(0);
+
     // No warnings/error pop-ups: some exception(s) are thrown (because there
     // are missing settings and/or files) but these must be caught
     // and error messages logged
@@ -497,9 +517,9 @@ public:
 
   // this test actually starts the cropped calibration process - which implies
   // starting the thread unless you use the mock without thread
-  // this test case includes all valid settings, run numbers, spectrum id
+  // this test case includes all valid settings, run numbers, spectrum no
   // selected
-  // & valid spectrum id provided
+  // & valid spectrum no provided
   void test_calcCroppedCalibWithRunNumbers() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
 
@@ -530,10 +550,12 @@ public:
         .Times(1)
         .WillOnce(Return(0));
 
-    std::string specid = "100-200";
+    std::string specno = "100-200";
     EXPECT_CALL(mockView, currentCalibSpecNos())
         .Times(2)
-        .WillRepeatedly(Return(specid));
+        .WillRepeatedly(Return(specno));
+
+    EXPECT_CALL(mockView, currentCalibCustomisedBankName()).Times(0);
 
     const std::string filename =
         "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
@@ -547,7 +569,7 @@ public:
     EXPECT_CALL(mockView, focusingRunNo()).Times(0);
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
     EXPECT_CALL(mockView, focusingTextureRunNo()).Times(0);
-    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
+    EXPECT_CALL(mockView, focusingCroppedSpectrumNos()).Times(0);
     EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
 
     // should disable actions at the beginning of the calculations
@@ -585,10 +607,12 @@ public:
         .Times(1)
         .WillOnce(Return(0));
 
-    std::string specid = "100-200";
+    std::string specno = "100-200";
     EXPECT_CALL(mockView, currentCalibSpecNos())
         .Times(2)
-        .WillRepeatedly(Return(specid));
+        .WillRepeatedly(Return(specno));
+
+    EXPECT_CALL(mockView, currentCalibCustomisedBankName()).Times(0);
 
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -611,7 +635,7 @@ public:
 
     // should not try to use these ones
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
-    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
+    EXPECT_CALL(mockView, focusingCroppedSpectrumNos()).Times(0);
     EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
     EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
@@ -675,7 +699,7 @@ public:
     // Should not try to use options for other types of focusing
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
     EXPECT_CALL(mockView, focusingTextureRunNo()).Times(0);
-    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
+    EXPECT_CALL(mockView, focusingCroppedSpectrumNos()).Times(0);
     EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
     EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
@@ -728,7 +752,7 @@ public:
     // Should not try to use options for other types of focusing
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
     EXPECT_CALL(mockView, focusingTextureRunNo()).Times(0);
-    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
+    EXPECT_CALL(mockView, focusingCroppedSpectrumNos()).Times(0);
     EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
 
     // 0 errors/ 0 warnings
@@ -776,7 +800,7 @@ public:
     EXPECT_CALL(mockView, focusingBanks())
         .Times(1)
         .WillOnce(Return(m_ex_enginx_banks));
-    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs())
+    EXPECT_CALL(mockView, focusingCroppedSpectrumNos())
         .Times(1)
         .WillOnce(Return("1"));
 
@@ -809,7 +833,7 @@ public:
     EXPECT_CALL(mockView, focusingBanks())
         .Times(1)
         .WillOnce(Return(std::vector<bool>()));
-    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs())
+    EXPECT_CALL(mockView, focusingCroppedSpectrumNos())
         .Times(1)
         .WillOnce(Return("1,5"));
 
@@ -831,7 +855,7 @@ public:
     pres.notify(IEnggDiffractionPresenter::FocusCropped);
   }
 
-  void test_focusCropped_withoutSpectrumIDs() {
+  void test_focusCropped_withoutSpectrumNos() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -842,7 +866,7 @@ public:
     EXPECT_CALL(mockView, focusingBanks())
         .Times(1)
         .WillOnce(Return(m_ex_enginx_banks));
-    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs())
+    EXPECT_CALL(mockView, focusingCroppedSpectrumNos())
         .Times(1)
         .WillOnce(Return(""));
 
@@ -881,7 +905,7 @@ public:
     EXPECT_CALL(mockView, focusingBanks()).Times(0);
 
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
-    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
+    EXPECT_CALL(mockView, focusingCroppedSpectrumNos()).Times(0);
 
     EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
@@ -910,7 +934,7 @@ public:
     EXPECT_CALL(mockView, focusingRunNo()).Times(0);
 
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
-    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
+    EXPECT_CALL(mockView, focusingCroppedSpectrumNos()).Times(0);
 
     EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
@@ -939,7 +963,7 @@ public:
     EXPECT_CALL(mockView, focusingRunNo()).Times(0);
 
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
-    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
+    EXPECT_CALL(mockView, focusingCroppedSpectrumNos()).Times(0);
 
     EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);

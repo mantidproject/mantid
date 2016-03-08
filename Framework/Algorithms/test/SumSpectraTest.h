@@ -28,7 +28,7 @@ public:
         inputSpace->getDetector(1).get(), "masked", true);
   }
 
-  ~SumSpectraTest() { AnalysisDataService::Instance().clear(); }
+  ~SumSpectraTest() override { AnalysisDataService::Instance().clear(); }
 
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());

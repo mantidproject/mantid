@@ -37,20 +37,18 @@ CreateLogTimeCorrection::~CreateLogTimeCorrection() {}
 /** Declare properties
  */
 void CreateLogTimeCorrection::init() {
-  auto inpwsprop = new WorkspaceProperty<MatrixWorkspace>(
-      "InputWorkspace", "", Direction::Input,
-      boost::make_shared<InstrumentValidator>());
-  declareProperty(inpwsprop,
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<InstrumentValidator>()),
                   "Name of the input workspace to generate log correct from.");
 
-  auto outwsprop = new WorkspaceProperty<TableWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output);
-  declareProperty(outwsprop,
+  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace containing the corrections.");
 
-  auto fileprop =
-      new FileProperty("OutputFilename", "", FileProperty::OptionalSave);
-  declareProperty(fileprop, "Name of the output time correction file.");
+  declareProperty(Kernel::make_unique<FileProperty>("OutputFilename", "",
+                                                    FileProperty::OptionalSave),
+                  "Name of the output time correction file.");
 
   return;
 }
@@ -144,7 +142,7 @@ void CreateLogTimeCorrection::calculateCorrection() {
 /** Write L2 map and correction map to a TableWorkspace
   */
 TableWorkspace_sptr CreateLogTimeCorrection::generateCorrectionTable() {
-  TableWorkspace_sptr tablews(new TableWorkspace());
+  auto tablews = boost::make_shared<TableWorkspace>();
 
   tablews->addColumn("int", "DetectorID");
   tablews->addColumn("double", "Correction");

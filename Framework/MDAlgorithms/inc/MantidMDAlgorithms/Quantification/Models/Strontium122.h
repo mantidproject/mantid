@@ -45,7 +45,7 @@ private:
   /// Returns the type of model
   ModelType modelType() const override { return Broad; }
   /// Calculates the intensity for the model for the current parameters.
-  double scatteringIntensity(const API::ExperimentInfo &exptDescr,
+  double scatteringIntensity(const API::ExperimentInfo &exptSetup,
                              const std::vector<double> &point) const override;
 
   /// Twin type attribute

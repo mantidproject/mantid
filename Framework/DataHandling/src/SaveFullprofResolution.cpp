@@ -39,14 +39,13 @@ SaveFullprofResolution::~SaveFullprofResolution() {}
   */
 void SaveFullprofResolution::init() {
   declareProperty(
-      new WorkspaceProperty<TableWorkspace>("InputWorkspace", "",
-                                            Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
       "Input TableWorkspace containing the parameters for .irf file.");
 
-  std::vector<std::string> exts;
-  exts.emplace_back(".irf");
-  declareProperty(new API::FileProperty("OutputFilename", "",
-                                        API::FileProperty::Save, exts),
+  std::vector<std::string> exts{".irf"};
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "OutputFilename", "", API::FileProperty::Save, exts),
                   "Name of the output .irf file.");
 
   boost::shared_ptr<BoundedValidator<int>> bankboundval =

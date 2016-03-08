@@ -41,7 +41,6 @@ namespace API {
 class MANTID_API_DLL ILatticeFunction : public FunctionParameterDecorator {
 public:
   ILatticeFunction();
-  ~ILatticeFunction() override {}
 
   void function(const FunctionDomain &domain,
                 FunctionValues &values) const override;

@@ -556,20 +556,17 @@ public:
       ws->setSignalAt(i, double(i));
     VMD start(0.5, 0.5);
     VMD end(9.5, 0.5);
-    std::vector<coord_t> x;
-    std::vector<signal_t> y;
-    std::vector<signal_t> e;
-    ws->getLinePlot(start, end, NoNormalization, x, y, e);
-    TS_ASSERT_EQUALS(x.size(), 500);
-    TS_ASSERT_DELTA(x[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(x[50], 0.9018, 1e-5);
-    TS_ASSERT_DELTA(x[100], 1.8036, 1e-5);
-    TS_ASSERT_DELTA(x[499], 9.0, 1e-5);
+    auto line = ws->getLinePlot(start, end, NoNormalization);
+    TS_ASSERT_EQUALS(line.x.size(), 500);
+    TS_ASSERT_DELTA(line.x[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(line.x[50], 0.9018, 1e-5);
+    TS_ASSERT_DELTA(line.x[100], 1.8036, 1e-5);
+    TS_ASSERT_DELTA(line.x[499], 9.0, 1e-5);
 
-    TS_ASSERT_EQUALS(y.size(), 500);
-    TS_ASSERT_DELTA(y[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(y[50], 1.0, 1e-5);
-    TS_ASSERT_DELTA(y[100], 2.0, 1e-5);
+    TS_ASSERT_EQUALS(line.y.size(), 500);
+    TS_ASSERT_DELTA(line.y[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[50], 1.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[100], 2.0, 1e-5);
   }
 
   void test_getLinePlotWithMaskedData() {
@@ -587,15 +584,12 @@ public:
 
     VMD start(0.5, 0.5);
     VMD end(9.5, 0.5);
-    std::vector<coord_t> x;
-    std::vector<signal_t> y;
-    std::vector<signal_t> e;
-    ws->getLinePlot(start, end, NoNormalization, x, y, e);
+    auto line = ws->getLinePlot(start, end, NoNormalization);
 
     // Masked points omitted
-    TS_ASSERT_EQUALS(y.size(), 250);
+    TS_ASSERT_EQUALS(line.y.size(), 250);
     // Unmasked value
-    TS_ASSERT_DELTA(y[200], 8.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[200], 8.0, 1e-5);
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -610,17 +604,17 @@ public:
     std::vector<coord_t> x;
     std::vector<signal_t> y;
     std::vector<signal_t> e;
-    ws->getLineData(start, end, NoNormalization, x, y, e);
-    TS_ASSERT_EQUALS(x.size(), 11);
-    TS_ASSERT_DELTA(x[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(x[1], 0.5, 1e-5);
-    TS_ASSERT_DELTA(x[2], 1.5, 1e-5);
-    TS_ASSERT_DELTA(x[10], 9.0, 1e-5);
+    auto line = ws->getLineData(start, end, NoNormalization);
+    TS_ASSERT_EQUALS(line.x.size(), 11);
+    TS_ASSERT_DELTA(line.x[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(line.x[1], 0.5, 1e-5);
+    TS_ASSERT_DELTA(line.x[2], 1.5, 1e-5);
+    TS_ASSERT_DELTA(line.x[10], 9.0, 1e-5);
 
-    TS_ASSERT_EQUALS(y.size(), 10);
-    TS_ASSERT_DELTA(y[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(y[1], 1.0, 1e-5);
-    TS_ASSERT_DELTA(y[2], 2.0, 1e-5);
+    TS_ASSERT_EQUALS(line.y.size(), 10);
+    TS_ASSERT_DELTA(line.y[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[1], 1.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[2], 2.0, 1e-5);
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -640,16 +634,13 @@ public:
 
     VMD start(0.5, 0.5);
     VMD end(9.5, 0.5);
-    std::vector<coord_t> x;
-    std::vector<signal_t> y;
-    std::vector<signal_t> e;
-    ws->getLineData(start, end, NoNormalization, x, y, e);
+    auto line = ws->getLineData(start, end, NoNormalization);
 
-    TS_ASSERT_EQUALS(y.size(), 10);
+    TS_ASSERT_EQUALS(line.y.size(), 10);
     // Masked value should be zero
-    TS_ASSERT(boost::math::isnan(y[2]));
+    TS_ASSERT(boost::math::isnan(line.y[2]));
     // Unmasked value
-    TS_ASSERT_DELTA(y[9], 9.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[9], 9.0, 1e-5);
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -661,20 +652,17 @@ public:
       ws->setSignalAt(i, double(i));
     VMD start(0.5, 0.5, 0.5);
     VMD end(9.5, 0.5, 0.5);
-    std::vector<coord_t> x;
-    std::vector<signal_t> y;
-    std::vector<signal_t> e;
-    ws->getLineData(start, end, NoNormalization, x, y, e);
-    TS_ASSERT_EQUALS(x.size(), 11);
-    TS_ASSERT_DELTA(x[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(x[1], 0.5, 1e-5);
-    TS_ASSERT_DELTA(x[2], 1.5, 1e-5);
-    TS_ASSERT_DELTA(x[10], 9.0, 1e-5);
+    auto line = ws->getLineData(start, end, NoNormalization);
+    TS_ASSERT_EQUALS(line.x.size(), 11);
+    TS_ASSERT_DELTA(line.x[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(line.x[1], 0.5, 1e-5);
+    TS_ASSERT_DELTA(line.x[2], 1.5, 1e-5);
+    TS_ASSERT_DELTA(line.x[10], 9.0, 1e-5);
 
-    TS_ASSERT_EQUALS(y.size(), 10);
-    TS_ASSERT_DELTA(y[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(y[1], 1.0, 1e-5);
-    TS_ASSERT_DELTA(y[2], 2.0, 1e-5);
+    TS_ASSERT_EQUALS(line.y.size(), 10);
+    TS_ASSERT_DELTA(line.y[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[1], 1.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[2], 2.0, 1e-5);
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -686,20 +674,17 @@ public:
       ws->setSignalAt(i, double(i));
     VMD start(9.5, 0.5);
     VMD end(0.5, 0.5);
-    std::vector<coord_t> x;
-    std::vector<signal_t> y;
-    std::vector<signal_t> e;
-    ws->getLineData(start, end, NoNormalization, x, y, e);
-    TS_ASSERT_EQUALS(x.size(), 11);
-    TS_ASSERT_DELTA(x[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(x[1], 0.5, 1e-5);
-    TS_ASSERT_DELTA(x[2], 1.5, 1e-5);
-    TS_ASSERT_DELTA(x[10], 9.0, 1e-5);
+    auto line = ws->getLineData(start, end, NoNormalization);
+    TS_ASSERT_EQUALS(line.x.size(), 11);
+    TS_ASSERT_DELTA(line.x[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(line.x[1], 0.5, 1e-5);
+    TS_ASSERT_DELTA(line.x[2], 1.5, 1e-5);
+    TS_ASSERT_DELTA(line.x[10], 9.0, 1e-5);
 
-    TS_ASSERT_EQUALS(y.size(), 10);
-    TS_ASSERT_DELTA(y[0], 9.0, 1e-5);
-    TS_ASSERT_DELTA(y[1], 8.0, 1e-5);
-    TS_ASSERT_DELTA(y[2], 7.0, 1e-5);
+    TS_ASSERT_EQUALS(line.y.size(), 10);
+    TS_ASSERT_DELTA(line.y[0], 9.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[1], 8.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[2], 7.0, 1e-5);
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -711,23 +696,22 @@ public:
       ws->setSignalAt(i, double(i));
     VMD start(0.9, 0.5);
     VMD end(1.9, 1.5);
-    std::vector<coord_t> x;
-    std::vector<signal_t> y;
-    std::vector<signal_t> e;
-    ws->getLineData(start, end, NoNormalization, x, y, e);
-    std::cout << "X\n" << Strings::join(x.begin(), x.end(), ",") << std::endl;
-    std::cout << "Y\n" << Strings::join(y.begin(), y.end(), ",") << std::endl;
+    auto line = ws->getLineData(start, end, NoNormalization);
+    std::cout << "X\n" << Strings::join(line.x.begin(), line.x.end(), ",")
+              << std::endl;
+    std::cout << "Y\n" << Strings::join(line.y.begin(), line.y.end(), ",")
+              << std::endl;
 
-    TS_ASSERT_EQUALS(x.size(), 4);
-    TS_ASSERT_DELTA(x[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(x[1], 0.1 * sqrt(2.0), 1e-5);
-    TS_ASSERT_DELTA(x[2], 0.5 * sqrt(2.0), 1e-5);
-    TS_ASSERT_DELTA(x[3], 1.0 * sqrt(2.0), 1e-5);
+    TS_ASSERT_EQUALS(line.x.size(), 4);
+    TS_ASSERT_DELTA(line.x[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(line.x[1], 0.1 * sqrt(2.0), 1e-5);
+    TS_ASSERT_DELTA(line.x[2], 0.5 * sqrt(2.0), 1e-5);
+    TS_ASSERT_DELTA(line.x[3], 1.0 * sqrt(2.0), 1e-5);
 
-    TS_ASSERT_EQUALS(y.size(), 3);
-    TS_ASSERT_DELTA(y[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(y[1], 1.0, 1e-5);
-    TS_ASSERT_DELTA(y[2], 11.0, 1e-5);
+    TS_ASSERT_EQUALS(line.y.size(), 3);
+    TS_ASSERT_DELTA(line.y[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[1], 1.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[2], 11.0, 1e-5);
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -739,20 +723,17 @@ public:
       ws->setSignalAt(i, double(i));
     VMD start(-0.5, 0.5);
     VMD end(10.5, 0.5);
-    std::vector<coord_t> x;
-    std::vector<signal_t> y;
-    std::vector<signal_t> e;
-    ws->getLineData(start, end, NoNormalization, x, y, e);
-    TS_ASSERT_EQUALS(x.size(), 11);
-    TS_ASSERT_DELTA(x[0], 0.5, 1e-5);
-    TS_ASSERT_DELTA(x[1], 1.5, 1e-5);
-    TS_ASSERT_DELTA(x[2], 2.5, 1e-5);
-    TS_ASSERT_DELTA(x[10], 10.5, 1e-5);
+    auto line = ws->getLineData(start, end, NoNormalization);
+    TS_ASSERT_EQUALS(line.x.size(), 11);
+    TS_ASSERT_DELTA(line.x[0], 0.5, 1e-5);
+    TS_ASSERT_DELTA(line.x[1], 1.5, 1e-5);
+    TS_ASSERT_DELTA(line.x[2], 2.5, 1e-5);
+    TS_ASSERT_DELTA(line.x[10], 10.5, 1e-5);
 
-    TS_ASSERT_EQUALS(y.size(), 10);
-    TS_ASSERT_DELTA(y[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(y[1], 1.0, 1e-5);
-    TS_ASSERT_DELTA(y[2], 2.0, 1e-5);
+    TS_ASSERT_EQUALS(line.y.size(), 10);
+    TS_ASSERT_DELTA(line.y[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[1], 1.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[2], 2.0, 1e-5);
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -764,15 +745,12 @@ public:
       ws->setSignalAt(i, double(i));
     VMD start(-5, 5);
     VMD end(1, 20.5);
-    std::vector<coord_t> x;
-    std::vector<signal_t> y;
-    std::vector<signal_t> e;
-    ws->getLineData(start, end, NoNormalization, x, y, e);
-    TS_ASSERT_EQUALS(x.size(), 2);
-    TS_ASSERT_DELTA(x[0], 0, 1e-5);
+    auto line = ws->getLineData(start, end, NoNormalization);
+    TS_ASSERT_EQUALS(line.x.size(), 2);
+    TS_ASSERT_DELTA(line.x[0], 0, 1e-5);
     // NAN for Y
-    TS_ASSERT_EQUALS(y.size(), 1);
-    TS_ASSERT(y[0] != y[0]);
+    TS_ASSERT_EQUALS(line.y.size(), 1);
+    TS_ASSERT(line.y[0] != line.y[0]);
   }
 
   //--------------------------------------------------------------------------------------

@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <memory>
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
 
 using Mantid::Geometry::HKL;
@@ -23,8 +24,8 @@ public:
   }
 
   void test_check_unit_compatibility_unique_ptr() {
-    std::unique_ptr<Mantid::Kernel::MDUnit> badUnit(
-        new Mantid::Kernel::LabelUnit("MeV"));
+    std::unique_ptr<Mantid::Kernel::MDUnit> badUnit =
+        Mantid::Kernel::make_unique<Mantid::Kernel::LabelUnit>("MeV");
 
     HKL *testHKL = NULL;
     TSM_ASSERT_THROWS("Input unit for this frame must be a QUnit",
