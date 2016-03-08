@@ -786,7 +786,7 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
     bool dim_mask_arr[16];
     std::copy(dim_mask.begin(), dim_mask.end(), dim_mask_arr);
 
-    // +1 for the line start
+    // +1 to get the last box
     size_t num_boundaries =
         static_cast<size_t>(
             ceil(std::abs(line_end - line_start) / smallest_box_sizes[d])) +
@@ -798,6 +798,7 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
       coord_t previousLinePos = 0;
       coord_t dir_current_dim = dir[d];
       for (size_t i = 1; i <= num_boundaries; i++) {
+        size_t current_id = size_t(-1);
         // Position along the line
         coord_t this_x = i * box_size;
         coord_t linePos = static_cast<coord_t>(this_x / fabs(dir_current_dim));
@@ -809,26 +810,30 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
         box = this->data->getBoxAtCoord(middle.getBareArray());
         lastPos = pos;
         if (box != nullptr) {
-          size_t current_id = box->getID();
-          // If we haven't already a point for this box...
-          // This filters out the extra boundaries that don't really exist that
-          // we gained by assuming all boxes are the size of the smallest box
-          if ((current_id != last_id && i != 1) || i == num_boundaries) {
-            if (line_pos_of_box_centre >= 0 &&
-                line_pos_of_box_centre <= length) {
-              // Avoid picking up a 0 due to line hitting a box corner
-              if (fabs(linePos - lastLinePos) > 1e-5) {
-                mid_points.insert(line_pos_of_box_centre);
-              }
+          current_id = box->getID();
+          // Make sure we get the last box
+        } else if (i == num_boundaries) {
+          current_id = size_t(-1);
+        } else
+          continue;
+        // If we haven't already a point for this box...
+        // This filters out the extra boundaries that don't really exist that
+        // we gained by assuming all boxes are the size of the smallest box
+        if ((current_id != last_id && i != 1)) {
+          if (line_pos_of_box_centre >= 0 &&
+              line_pos_of_box_centre <= length) {
+            // Avoid picking up a 0 due to line hitting a box corner
+            if (fabs(linePos - lastLinePos) > 1e-5) {
+              mid_points.insert(line_pos_of_box_centre);
             }
-            lastLinePos = previousLinePos;
           }
-          line_pos_of_box_centre =
-              static_cast<coord_t>((linePos + lastLinePos) * 0.5);
-          previousLinePos = linePos;
-
-          last_id = current_id;
+          lastLinePos = previousLinePos;
         }
+        line_pos_of_box_centre =
+            static_cast<coord_t>((linePos + lastLinePos) * 0.5);
+        previousLinePos = linePos;
+
+        last_id = current_id;
       }
     }
   }
