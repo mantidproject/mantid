@@ -518,6 +518,12 @@ private:
 
   /// Grouping helper class
   MuonGroupingHelper m_groupingHelper;
+
+  /// Get period number string in summed set
+  std::string getSummedPeriods() const;
+
+  /// Get period number string in subtracted set
+  std::string getSubtractedPeriods() const;
 };
 }
 }

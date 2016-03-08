@@ -542,12 +542,8 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
       inputGroup->addWorkspace(ws);
     }
     // Parse selected operation
-    const std::string summedPeriods =
-        m_uiForm.homePeriodBox1->text().toStdString();
-    const std::string subtractedPeriods =
-        m_uiForm.homePeriodBox2->text().toStdString();
-    alg->setProperty("SummedPeriodSet", summedPeriods);
-    alg->setProperty("SubtractedPeriodSet", subtractedPeriods);
+    alg->setProperty("SummedPeriodSet", getSummedPeriods());
+    alg->setProperty("SubtractedPeriodSet", getSubtractedPeriods());
   } else if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS)) {
     // Put this single WS into a group and set it as the input property
     inputGroup->addWorkspace(ws);
@@ -1776,7 +1772,7 @@ void MuonAnalysis::clearLoadedRun() {
 
 /**
  * Get period labels for the periods selected in the GUI
- * Return an empty string for single-period data.
+ * Return an empty string for single-period data or all periods
  * @return String for the period(s) selected by user
  */
 std::string MuonAnalysis::getPeriodLabels() const {
@@ -3045,12 +3041,10 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm() {
 
   // -- Period options --------------------------------------------------------
 
-  QString periodLabel1 = m_uiForm.homePeriodBox1->text();
-  loadAlg->setProperty("SummedPeriodSet", periodLabel1.toStdString());
+  loadAlg->setProperty("SummedPeriodSet", getSummedPeriods());
 
-  QString periodLabel2 = m_uiForm.homePeriodBox2->text();
-  if (periodLabel2 != "None") {
-    loadAlg->setProperty("SubtractedPeriodSet", periodLabel2.toStdString());
+  if (m_uiForm.homePeriodBox2->text() != "None") {
+    loadAlg->setProperty("SubtractedPeriodSet", getSubtractedPeriods());
   }
 
   return loadAlg;
@@ -3112,6 +3106,26 @@ int MuonAnalysis::getGroupOrPairToPlot() const {
 void MuonAnalysis::fillGroupingTable(const Grouping &grouping) {
   int defaultIndex = m_groupingHelper.fillGroupingTable(grouping);
   setGroupOrPairAndReplot(defaultIndex);
+}
+
+/**
+ * Returns the set of summed period numbers
+ * @returns :: period number string
+ */
+std::string MuonAnalysis::getSummedPeriods() const {
+  auto summed = m_uiForm.homePeriodBox1->text().toStdString();
+  summed.erase(std::remove(summed.begin(), summed.end(), ' '));
+  return summed;
+}
+
+/**
+ * Returns the set of subtracted period numbers
+ * @returns :: period number string
+ */
+std::string MuonAnalysis::getSubtractedPeriods() const {
+  auto subtracted = m_uiForm.homePeriodBox2->text().toStdString();
+  subtracted.erase(std::remove(subtracted.begin(), subtracted.end(), ' '));
+  return subtracted;
 }
 
 } // namespace MantidQT
