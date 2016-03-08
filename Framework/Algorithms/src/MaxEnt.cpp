@@ -1,10 +1,12 @@
 #include "MantidAlgorithms/MaxEnt.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/MaxEnt/MaxentEntropyNegativeValues.h"
 #include "MantidAlgorithms/MaxEnt/MaxentEntropyPositiveValues.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitFactory.h"
 #include <boost/make_shared.hpp>
 #include <boost/shared_array.hpp>
 #include <gsl/gsl_linalg.h>
@@ -20,6 +22,20 @@ using namespace Kernel;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MaxEnt)
+
+namespace {
+
+std::map<std::string, std::string> inverseCaption = {{"Time", "Frequency"},
+                                                     {"Frequency", "Time"},
+                                                     {"d-Spacing", "q"},
+                                                     {"q", "d-Spacing"}};
+std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
+                                                   {"microsecond", "MHz"},
+                                                   {"Hz", "s"},
+                                                   {"MHz", "microsecond"},
+                                                   {"Angstrom", "Angstrom^-1"},
+                                                   {"Angstrom^-1", "Angstrom"}};
+}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -595,6 +611,22 @@ void MaxEnt::populateOutputWS(const MatrixWorkspace_sptr &inWS, size_t spec,
     }
     if (npointsX == npoints + 1)
       X[npoints] = X[npoints - 1] + delta;
+
+    // Caption & label
+    auto inputUnit = inWS->getAxis(0)->unit();
+    if (inputUnit) {
+      boost::shared_ptr<Kernel::Units::Label> lblUnit =
+          boost::dynamic_pointer_cast<Kernel::Units::Label>(
+              UnitFactory::Instance().create("Label"));
+      if (lblUnit) {
+
+        lblUnit->setLabel(
+            inverseCaption[inWS->getAxis(0)->unit()->caption()],
+            inverseLabel[inWS->getAxis(0)->unit()->label().ascii()]);
+        outWS->getAxis(0)->unit() = lblUnit;
+      }
+    }
+
   } else {
     for (int i = 0; i < npoints; i++) {
       X[i] = x0 + i * dx;
@@ -604,7 +636,6 @@ void MaxEnt::populateOutputWS(const MatrixWorkspace_sptr &inWS, size_t spec,
     if (npointsX == npoints + 1)
       X[npoints] = x0 + npoints * dx;
   }
-  // Reconstructed image
 
   outWS->dataX(spec).assign(X.begin(), X.end());
   outWS->dataY(spec).assign(YR.begin(), YR.end());
