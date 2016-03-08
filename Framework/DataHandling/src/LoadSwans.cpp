@@ -72,6 +72,18 @@ void LoadSwans::init() {
                   "The name of the text file to read, including its full or "
                   "relative path. The file extension must be meta.dat.");
 
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "FilterByTofMin", 10000.0, Direction::Input),
+                  "Optional: To exclude events that do not fall within a range "
+                  "of times-of-flight. "
+                  "This is the minimum accepted value in microseconds.");
+
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "FilterByTofMax", 30000.0, Direction::Input),
+                  "Optional: To exclude events that do not fall within a range "
+                  "of times-of-flight. "
+                  "This is the maximum accepted value in microseconds.");
+
   declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
@@ -239,6 +251,7 @@ std::vector<double> LoadSwans::loadMetaData() {
 void LoadSwans::setMetaDataAsWorkspaceProperties(
     const std::vector<double> &metadata) {
   API::Run &runDetails = m_ws->mutableRun();
+  runDetails.addProperty<double>("run_number", metadata[0]);
   runDetails.addProperty<double>("wavelength", metadata[1]);
   runDetails.addProperty<double>("angle", metadata[5]);
 }
@@ -266,14 +279,12 @@ void LoadSwans::loadDataIntoTheWorkspace(
  * longest-tof
  */
 void LoadSwans::setTimeAxis() {
-  const unsigned int shortest_tof = static_cast<unsigned int>(
-      m_ws->getInstrument()->getNumberParameter("shortest-tof")[0]);
-  const unsigned int longest_tof = static_cast<unsigned int>(
-      m_ws->getInstrument()->getNumberParameter("longest-tof")[0]);
+  double shortest_tof = getProperty("FilterByTofMin");
+  double longest_tof = getProperty("FilterByTofMax");
   // Now, create a default X-vector for histogramming, with just 2 bins.
   Kernel::cow_ptr<MantidVec> axis;
   MantidVec &xRef = axis.access();
-  xRef = {static_cast<double>(shortest_tof), static_cast<double>(longest_tof)};
+  xRef = {shortest_tof, longest_tof};
   // Set the binning axis using this.
   m_ws->setAllX(axis);
 }
