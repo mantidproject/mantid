@@ -530,11 +530,9 @@ MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
  * @param bin_centres :: if true then record points halfway between bin
  *boundaries, otherwise record on bin boundaries
  */
-IMDWorkspace::LinePlot
-MDHistoWorkspace::getLinePoints(const Mantid::Kernel::VMD &start,
-                                     const Mantid::Kernel::VMD &end,
-                                     Mantid::API::MDNormalization normalize,
-                                     const bool bin_centres) const {
+IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(
+    const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &end,
+    Mantid::API::MDNormalization normalize, const bool bin_centres) const {
   LinePlot line;
 
   size_t nd = this->getNumDims();
@@ -661,8 +659,8 @@ MDHistoWorkspace::getLinePoints(const Mantid::Kernel::VMD &start,
  */
 IMDWorkspace::LinePlot
 MDHistoWorkspace::getLineData(const Mantid::Kernel::VMD &start,
-                                   const Mantid::Kernel::VMD &end,
-                                   Mantid::API::MDNormalization normalize) const {
+                              const Mantid::Kernel::VMD &end,
+                              Mantid::API::MDNormalization normalize) const {
   return this->getLinePoints(start, end, normalize, false);
 }
 
