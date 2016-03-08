@@ -748,11 +748,12 @@ TMDE(void MDEventWorkspace)::refreshCache() {
 /** Get ordered list of positions-along-the-line that lie halfway between points
  *where the line crosses box boundaries
  *
- * @param start :: start of the line
+ * @param start :: coords of the start of the line
+ * @param end :: coords of the end of the line
  * @param num_d :: number of dimensions
- * @param dir :: vector of the direction
- * @param length :: vector of the direction of the line
- * @returns :: ordered list of halfway points between box crossings
+ * @param dir :: vector of the direction of the line
+ * @param length :: the length of the line
+ * @returns :: ordered set of halfway points between box crossings
  */
 TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
     const VMD &start, const VMD &end, const size_t num_d, const VMD &dir,
@@ -764,13 +765,6 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
   // which are not real later (by checking for unique box IDs)
   std::vector<coord_t> smallest_box_sizes = this->estimateResolution();
 
-// Vector with 0 where direction is positive, 1 where negative
-#define sgn(x) ((x < 0) ? 1 : ((x > 0.) ? 0 : 0))
-  std::vector<size_t> dirSign(num_d);
-  for (size_t d = 0; d < num_d; d++) {
-    dirSign[d] = sgn(dir[d]);
-  }
-
   // Next, we go through each dimension and see where the box boundaries
   // intersect the line.
   for (size_t d = 0; d < num_d; d++) {
@@ -778,11 +772,6 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
     coord_t line_end = end[d];
     coord_t box_size = smallest_box_sizes[d];
     coord_t dir_current_dim = dir[d];
-
-    std::vector<bool> dim_mask(num_d, false);
-    dim_mask[d] = true;
-    bool dim_mask_arr[16];
-    std::copy(dim_mask.begin(), dim_mask.end(), dim_mask_arr);
 
     // +1 to get the last box
     size_t num_boundaries =
@@ -799,6 +788,20 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
   return mid_points;
 }
 
+//----------------------------------------------------------------------------------------------
+/** Insert positions-along-the-line that lie halfway between points
+ * where the line crosses box boundaries in a single dimension of the workspace
+ * into ordered set
+ *
+ * @param start :: coords of the start of the line
+ * @param dir :: vector of the direction of the line
+ * @param num_boundaries :: maximum number of boundary crossings possible if all
+ *boxes are the size of the smallest box
+ * @param length :: the length of the line
+ * @param dir_current_dim :: component of the line direction in this dimension
+ * @param box_size :: the minimum box size in this dimension
+ * @param mid_points :: ordered set of halfway points between box crossings
+ */
 TMDE(void MDEventWorkspace)::getBoundariesInDimension(
     const VMD &start, const VMD &dir, const size_t num_boundaries,
     const coord_t length, const coord_t dir_current_dim, const coord_t box_size,
@@ -852,7 +855,7 @@ TMDE(void MDEventWorkspace)::getBoundariesInDimension(
 //-----------------------------------------------------------------------------------------------
 /** Obtain coordinates for a line plot through a MDWorkspace.
  * Cross the workspace from start to end points, recording the signal along the
- *line halfway between each bin boundary that the line crosses
+ * line halfway between each bin boundary that the line crosses
  *
  * @param start :: coordinates of the start point of the line
  * @param end :: coordinates of the end point of the line

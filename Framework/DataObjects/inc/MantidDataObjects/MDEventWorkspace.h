@@ -223,6 +223,7 @@ protected:
     return *this;
   }
 
+  /// Insert box bisects in position-along-line coords in a single dimension
   void getBoundariesInDimension(const Mantid::Kernel::VMD &start,
                                 const Mantid::Kernel::VMD &dir,
                                 const size_t num_boundaries,
