@@ -37,6 +37,16 @@ void WorkspaceRecord::updateMetadata(const size_t &newIndex) {
   m_label = energyLabelStream.str();
 }
 
+/**
+ * @brief Find out minimum and maximum energies in the loaded workspace
+ * @return (minimum, maximum) as std::pair
+ */
+std::pair<double,double> WorkspaceRecord::getErange(){
+  auto minimum = m_ws->getAxis(1)->getMin();
+  auto maximum = m_ws->getAxis(1)->getMax();
+  return std::pair<double,double>(minimum, maximum);
+}
+
 // Add this class to the list of specialised dialogs in this namespace
 DECLARE_SUBWINDOW(SliceSelector)
 
@@ -45,12 +55,15 @@ DECLARE_SUBWINDOW(SliceSelector)
 // m_loadedWorkspace{nullptr}, m_BackgroundRemover{nullptr} {
 SliceSelector::SliceSelector(QWidget *parent) :
   UserSubWindow{parent},
+  m_pickerLine{nullptr},
   m_loadedWorkspace(),
   m_selectedWorkspaceIndex{0} {
 
 }
 
-SliceSelector::~SliceSelector() { m_selectedWorkspaceIndex = 0; }
+SliceSelector::~SliceSelector() {
+  delete m_pickerLine;
+}
 
 
 /*        *********************
@@ -84,23 +97,21 @@ void SliceSelector::loadSlices(const QString &workspaceName) {
   m_uiForm.spinboxSliceSelector->setValue(0);
   m_uiForm.spinboxSliceSelector->setSingleStep(1);
 
-  /// initialize the slider next to the 2D view
-  m_uiForm.sliderSelectSlice->setMinimum(0);
-  m_uiForm.sliderSelectSlice->setMaximum(maximumWorkspaceIndex);
-  m_uiForm.spinboxSliceSelector->setValue(0);
+  /// show the slice picker
+  this->initPickerLine();
 
   /// initialize the 2D view of the slices;
   m_uiForm.slices2DPlot->setWorkspace(m_loadedWorkspace->m_ws);
   m_uiForm.slices2DPlot->updateDisplay();
 
   /// initialize the 1D PreviewPlot widget
-  updatePlotSelectedSlice();
+  updatePreviewPlotSelectedSlice();
 }
 
 /**
  * @brief Refresh the slice showing in the 1D plot
  */
-void SliceSelector::updatePlotSelectedSlice() {
+void SliceSelector::updatePreviewPlotSelectedSlice() {
   m_uiForm.previewPlotSelectedSlice->clear();
   m_uiForm.previewPlotSelectedSlice->addSpectrum(
       QString::fromStdString(m_loadedWorkspace->m_label),
@@ -120,9 +131,28 @@ void SliceSelector::updateSelectedSlice(const int &newSelectedIndex) {
     m_uiForm.labelSliceEnergy->setText(
         QString::fromStdString(m_loadedWorkspace->m_label));
     m_uiForm.spinboxSliceSelector->setValue(newSelectedIndex);
-    m_uiForm.sliderSelectSlice->setValue(newSelectedIndex);
-    updatePlotSelectedSlice();
+    updatePickerLine();
+    updatePreviewPlotSelectedSlice();
   }
+}
+
+/**
+ * @brief Update widgets when pickerLine is manually changed
+ * @param newEnergySelected the new energy retrieved from the pickerLine
+ */
+void SliceSelector::newIndexFromPickedEnergy(const double &newEnergySelected){
+  auto axis = m_loadedWorkspace->m_ws->getAxis(1);
+  auto newSelectedIndex = axis->indexOfValue(newEnergySelected);
+  auto newE = axis->getValue(newSelectedIndex);
+  updateSelectedSlice(newSelectedIndex);
+}
+
+/**
+ * @brief Update the position of the picker line as a response to changes in the
+ * SliceSelector. Do not emit a signal upon this change.
+ */
+void SliceSelector::updatePickerLine(){
+  m_pickerLine->setMinimum(m_loadedWorkspace->m_energy);
 }
 
 /**
@@ -135,7 +165,9 @@ void SliceSelector::launchBackgroundRemover() {
   //}
   // m_BackgroundRemover->refreshSlice(m_loadedWorkspace,
   // m_selectedWorkspaceIndex);
-  g_log.error("Not implemented...yet");
+  auto title = QString::fromStdString(this->name());
+  auto error = QString::fromStdString("Not so fast, cowboy! (not implemented)");
+  QMessageBox::warning(this, title, error);
 }
 
 /**
@@ -153,20 +185,47 @@ void SliceSelector::showHelp() {
 
 
 /**
- * @brief Initialize the ui form and connect SIGNALS to SLOTS
+ * @brief Initialize UI form, spawn picker line, connect SIGNALS/SLOTS
  */
 void SliceSelector::initLayout() {
   m_uiForm.setupUi(this);
+  this->spawnPickerLine();
   connect(m_uiForm.dataSelector, SIGNAL(dataReady(const QString &)), this,
           SLOT(loadSlices(const QString &)));
   connect(m_uiForm.pushHelp, SIGNAL(clicked()), this, SLOT(showHelp()));
   connect(m_uiForm.spinboxSliceSelector, SIGNAL(valueChanged(int)), this,
           SLOT(updateSelectedSlice(int)));
-  connect(m_uiForm.sliderSelectSlice, SIGNAL(valueChanged(int)), this,
-          SLOT(updateSelectedSlice(int)));
   connect(m_uiForm.pushLaunchBackgroundRemover, SIGNAL(clicked()), this,
           SLOT(launchBackgroundRemover()));
+  connect(m_pickerLine, SIGNAL(minValueChanged(double)), this,
+          SLOT(newIndexFromPickedEnergy(double)));
 }
+
+/**
+ * @brief Allocate the slice selector in the 2D view. No workspace loading is neccessary.
+ */
+void SliceSelector::spawnPickerLine(){
+  auto qwtplot = m_uiForm.slices2DPlot->getPlot2D();
+  bool isVisible{false};
+  m_pickerLine = new MantidWidgets::RangeSelector(
+      qwtplot, MantidWidgets::RangeSelector::YSINGLE, isVisible);
+  //    Mantid::Kernel::make_unique<MantidWidgets::RangeSelector>(
+  //        qwtplot, MantidWidgets::RangeSelector::YSINGLE, isVisible);
+  m_pickerLine->setColour(QColor(Qt::black));
+}
+
+/**
+ * @brief Initialize the picker line with default options after workspace is loaded.
+ */
+void SliceSelector::initPickerLine(){
+  auto eRange = m_loadedWorkspace->getErange();
+  m_pickerLine->setRange(eRange);
+  m_pickerLine->setMinimum(eRange.first);
+  m_pickerLine->setMaximum(eRange.second);
+
+  m_pickerLine->setVisible(true);
+}
+
 
 /**
  * @brief Check for correct units and workspace type

@@ -100,6 +100,10 @@ void MWView::updateDisplay() {
   m_uiForm.plot2D->replot();
 }
 
+SafeQwtPlot* MWView::getPlot2D(){
+  return m_uiForm.plot2D;
+}
+
 //               ++++++++++++++++++++++++++++++++
 //               ++++++++ Public slots   ++++++++
 //               ++++++++++++++++++++++++++++++++

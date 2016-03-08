@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>613</width>
-    <height>850</height>
+    <width>716</width>
+    <height>992</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -46,13 +46,33 @@
         <number>9</number>
        </property>
        <item row="0" column="0">
-        <widget class="MantidQt::MantidWidgets::DataSelector" name="dataSelector" native="true"/>
+        <widget class="MantidQt::MantidWidgets::DataSelector" name="dataSelector"/>
        </item>
       </layout>
      </widget>
     </item>
     <item>
+     <layout class="QHBoxLayout" name="layout2Dview">
+      <property name="spacing">
+       <number>6</number>
+      </property>
+      <item>
+       <widget class="MantidQt::MantidWidgets::MWView" name="slices2DPlot">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
      <layout class="QHBoxLayout" name="layoutSliceSelector">
+      <property name="spacing">
+       <number>0</number>
+      </property>
       <item>
        <widget class="QLabel" name="labelWorkspaceIndex">
         <property name="sizePolicy">
@@ -62,7 +82,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Workspace Index</string>
+         <string>Workspace Index: </string>
         </property>
        </widget>
       </item>
@@ -85,66 +105,53 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Energy  = NAN</string>
+         <string>,  Energy  = NAN</string>
         </property>
        </widget>
       </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="layout2Dview">
       <item>
-       <widget class="QSlider" name="sliderSelectSlice">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
+       <spacer name="horizontalSpacer">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Horizontal</enum>
         </property>
-       </widget>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
       <item>
-       <widget class="MantidQt::MantidWidgets::MWView" name="slices2DPlot" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+       <widget class="QPushButton" name="pushLaunchBackgroundRemover">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Launch the background removal tool.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>Launch Background Remover</string>
         </property>
        </widget>
       </item>
      </layout>
     </item>
     <item>
-     <widget class="QGroupBox" name="groupPlotSelectedSlice">
-      <property name="title">
-       <string>Plots Selected Slice</string>
+     <widget class="MantidQt::MantidWidgets::PreviewPlot" name="previewPlotSelectedSlice">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
-       <item>
-        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="previewPlotSelectedSlice" native="true">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="showLegend" stdset="0">
-          <bool>false</bool>
-         </property>
-         <property name="canvasColour" stdset="0">
-          <color>
-           <red>255</red>
-           <green>255</green>
-           <blue>255</blue>
-          </color>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <property name="canvasColour">
+       <color>
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
+       </color>
+      </property>
+      <property name="showLegend" stdset="0">
+       <bool>false</bool>
+      </property>
      </widget>
     </item>
     <item>
@@ -182,6 +189,9 @@
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::MinimumExpanding</enum>
+        </property>
         <property name="sizeHint" stdset="0">
          <size>
           <width>40</width>
@@ -190,22 +200,17 @@
         </property>
        </spacer>
       </item>
-      <item>
-       <widget class="QPushButton" name="pushLaunchBackgroundRemover">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Launch the background removal tool.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="text">
-         <string>Launch Background Remover</string>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
    </layout>
   </widget>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::MWView</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/MWView.h</header>
+  </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
@@ -217,15 +222,9 @@
    <header>MantidQtMantidWidgets/PreviewPlot.h</header>
    <container>1</container>
   </customwidget>
-  <customwidget>
-   <class>MantidQt::MantidWidgets::MWView</class>
-   <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWView.h</header>
-  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>spinboxSliceSelector</tabstop>
-  <tabstop>pushLaunchBackgroundRemover</tabstop>
   <tabstop>pushHelp</tabstop>
  </tabstops>
  <resources/>

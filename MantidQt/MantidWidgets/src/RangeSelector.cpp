@@ -426,5 +426,5 @@ void RangeSelector::verify() {
  */
 bool RangeSelector::inRange(double x)
 {
-  return (x > m_lower && x < m_higher);
+  return (x >= m_lower && x <= m_higher);
 }
