@@ -67,7 +67,8 @@ void LoadSwans::init() {
       "relative path. The file extension must be .dat.");
 
   declareProperty(make_unique<FileProperty>("FilenameMetaData", "",
-                                            FileProperty::Load, "meta.dat"),
+                                            API::FileProperty::OptionalLoad,
+                                            "meta.dat"),
                   "The name of the text file to read, including its full or "
                   "relative path. The file extension must be meta.dat.");
 
@@ -188,10 +189,21 @@ std::map<uint32_t, std::vector<uint32_t>> LoadSwans::loadData() {
 std::vector<double> LoadSwans::loadMetaData() {
   std::vector<double> metadata;
   std::string filename = getPropertyValue("FilenameMetaData");
+
+  // if the filename for metadata was not given, strip the extension of the data
+  // file, and add _meta.dat
+  if (filename == "") {
+    std::string filenameData = getPropertyValue("FilenameData");
+    size_t lastindex = filenameData.find_last_of(".");
+    std::string rawname = filenameData.substr(0, lastindex);
+    filename = rawname + "_meta.dat";
+    g_log.information("Assuming meta data file: " + filename);
+  }
+
   std::ifstream infile(filename);
   if (infile.fail()) {
     g_log.error("Error reading file " + filename);
-    throw Exception::FileError("Unable to read data in File:", filename);
+    throw Exception::FileError("Unable to read meta data in File:", filename);
   }
   std::string line;
   while (getline(infile, line)) {
