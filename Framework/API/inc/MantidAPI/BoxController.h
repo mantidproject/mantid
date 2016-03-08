@@ -9,6 +9,7 @@
 #include <nexus/NeXusFile.hpp>
 
 #include <boost/optional.hpp>
+#include <numeric>
 #include <vector>
 
 namespace Mantid {
@@ -294,10 +295,10 @@ public:
     // We need to account for optional top level splitting
     if (depth == 0 && m_splitTopInto) {
 
-      size_t numSplitTop = 1;
-      for (size_t d = 0; d < m_splitTopInto.get().size(); d++)
-        numSplitTop *= m_splitTopInto.get()[d];
-
+      const auto &splitTopInto = m_splitTopInto.get();
+      size_t numSplitTop =
+          std::accumulate(splitTopInto.cbegin(), splitTopInto.cend(), size_t{1},
+                          std::multiplies<size_t>());
       m_numMDBoxes[depth + 1] += numSplitTop;
     } else {
       m_numMDBoxes[depth + 1] += m_numSplit;
@@ -321,20 +322,14 @@ public:
 
   /** Return the total number of MD Boxes, irrespective of depth */
   size_t getTotalNumMDBoxes() const {
-    size_t total = 0;
-    for (size_t depth = 0; depth < m_numMDBoxes.size(); depth++) {
-      total += m_numMDBoxes[depth];
-    }
-    return total;
+    return std::accumulate(m_numMDBoxes.cbegin(), m_numMDBoxes.cend(),
+                           size_t{0}, std::plus<size_t>());
   }
 
   /** Return the total number of MDGridBox'es, irrespective of depth */
   size_t getTotalNumMDGridBoxes() const {
-    size_t total = 0;
-    for (size_t depth = 0; depth < m_numMDGridBoxes.size(); depth++) {
-      total += m_numMDGridBoxes[depth];
-    }
-    return total;
+    return std::accumulate(m_numMDGridBoxes.cbegin(), m_numMDGridBoxes.cend(),
+                           size_t{0}, std::plus<size_t>());
   }
 
   /** Return the average recursion depth of gridding.

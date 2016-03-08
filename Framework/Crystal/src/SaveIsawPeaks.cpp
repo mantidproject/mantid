@@ -166,9 +166,8 @@ void SaveIsawPeaks::exec() {
              "  CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY "
              "     UpZ" << std::endl;
       // Here would save each detector...
-      for (auto it = uniqueBanks.begin(); it != uniqueBanks.end(); ++it) {
+      for (const auto bank : uniqueBanks) {
         // Build up the bank name
-        int bank = *it;
         std::ostringstream mess;
         if (bankPart == "bank")
           mess << "bank" << bank;
