@@ -53,6 +53,7 @@ MD Algorithms (VATES CLI)
    user to save 3D MDHisto or 3D MDEvent workspaces as either a ``.vts`` or
    ``.vtu`` files. These file types can be loaded into a standalone version
    of ParaView.
+-  PlotMD now plots points at bin centres for MDEventWorkspaces as well as MDHistoWorkspaces.
 
 Performance
 -----------
