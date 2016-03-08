@@ -203,7 +203,7 @@ std::vector<double> MaxentData::calculateChiGrad() const {
   // calculate chi-square, but on the other hand this method should return a
   // vector of size equal to the size of the calculated data, so I am just
   // setting the 'leftovers' to zero. This is what is done in the original
-	// muon code.
+  // muon code.
   size_t sizeDatCalc = m_dataCalc.size();
   std::vector<double> cgrad(sizeDatCalc, 0.);
   for (size_t i = 0; i < sizeDat; i++) {
