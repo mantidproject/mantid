@@ -1073,11 +1073,11 @@ public:
 
     double delta = 1e-6;
     // Make sure that the monitor data is correct (should be workspace index 26)
-    TS_ASSERT_DELTA(ws->readY(26)[0], 0.0, delta);
-    TS_ASSERT_DELTA(ws->readY(26)[1], 176660.0, delta);
-    TS_ASSERT_DELTA(ws->readY(26)[2], 57659.0, delta);
-    TS_ASSERT_DELTA(ws->readY(26)[17034], 4851.0, delta);
-    TS_ASSERT_DELTA(ws->readY(26)[17035], 4513.0, delta);
+    TS_ASSERT_DELTA(ws->readY(25)[0], 0.0, delta);
+    TS_ASSERT_DELTA(ws->readY(25)[1], 176660.0, delta);
+    TS_ASSERT_DELTA(ws->readY(25)[2], 57659.0, delta);
+    TS_ASSERT_DELTA(ws->readY(25)[17034], 4851.0, delta);
+    TS_ASSERT_DELTA(ws->readY(25)[17035], 4513.0, delta);
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
