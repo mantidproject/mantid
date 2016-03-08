@@ -560,8 +560,7 @@ void LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
     populateDataBlockCompositeWithContainer(
         composite, spec_list, spec_list.size(),
         m_loadBlockInfo.getNumberOfPeriods(),
-        m_loadBlockInfo.getNumberOfChannels(),
-        monitorSpectra);
+        m_loadBlockInfo.getNumberOfChannels(), monitorSpectra);
 
     // If the monitors are to be loaded separately, then we have
     // to remove them at this point
@@ -1143,10 +1142,9 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
   NXInt data = nxData.openIntData();
 
   auto monitorSpectra = m_monBlockInfo.getAllSpectrumNumbers();
-  populateDataBlockCompositeWithContainer(m_detBlockInfo, spectrum_index, ndets,
-                                          data.dim0() /*Number of Periods*/,
-                                          data.dim2() /*Number of channels*/,
-                                          monitorSpectra);
+  populateDataBlockCompositeWithContainer(
+      m_detBlockInfo, spectrum_index, ndets, data.dim0() /*Number of Periods*/,
+      data.dim2() /*Number of channels*/, monitorSpectra);
 
   // We should handle legacy files which include the spectrum number of the
   // monitors

@@ -3,8 +3,7 @@
 #include <algorithm>
 #include <cassert>
 
-namespace
-{
+namespace {
 
 const int64_t invalidIntervalValue = std::numeric_limits<int64_t>::min();
 
@@ -20,26 +19,25 @@ const int64_t invalidIntervalValue = std::numeric_limits<int64_t>::min();
 std::vector<std::pair<int64_t, int64_t>>
 getRemovalIntervalsRelevantForTheCurrentOriginalInterval(
     const std::pair<int64_t, int64_t> &original,
-    const std::vector<std::pair<int64_t, int64_t>> &removeIntervals)
-{
+    const std::vector<std::pair<int64_t, int64_t>> &removeIntervals) {
 
-    auto hasOverlap = [](const std::pair<int64_t, int64_t> &original,
-                         const std::pair<int64_t, int64_t> &toRemove) {
-        return ((original.first <= toRemove.first)
-                && (toRemove.first <= original.second))
-               || ((original.first <= toRemove.second)
-                   && (toRemove.second <= original.second))
-               || ((toRemove.first <= original.first)
-                   && (original.first <= toRemove.second));
-    };
+  auto hasOverlap = [](const std::pair<int64_t, int64_t> &original,
+                       const std::pair<int64_t, int64_t> &toRemove) {
+    return ((original.first <= toRemove.first) &&
+            (toRemove.first <= original.second)) ||
+           ((original.first <= toRemove.second) &&
+            (toRemove.second <= original.second)) ||
+           ((toRemove.first <= original.first) &&
+            (original.first <= toRemove.second));
+  };
 
-    std::vector<std::pair<int64_t, int64_t>> overlaps;
-    for (auto &removeInterval : removeIntervals) {
-        if (hasOverlap(original, removeInterval)) {
-            overlaps.push_back(removeInterval);
-        }
+  std::vector<std::pair<int64_t, int64_t>> overlaps;
+  for (auto &removeInterval : removeIntervals) {
+    if (hasOverlap(original, removeInterval)) {
+      overlaps.push_back(removeInterval);
     }
-    return overlaps;
+  }
+  return overlaps;
 }
 
 /**
@@ -51,9 +49,8 @@ getRemovalIntervalsRelevantForTheCurrentOriginalInterval(
          return: NONE
 */
 void handleLeftHandSideOverlap(std::pair<int64_t, int64_t> &original,
-                               const std::pair<int64_t, int64_t> &toRemove)
-{
-    original.first = toRemove.second + 1;
+                               const std::pair<int64_t, int64_t> &toRemove) {
+  original.first = toRemove.second + 1;
 }
 
 /**
@@ -66,12 +63,11 @@ void handleLeftHandSideOverlap(std::pair<int64_t, int64_t> &original,
 */
 std::pair<int64_t, int64_t>
 handleRightHandSideOverlap(std::pair<int64_t, int64_t> &original,
-                           const std::pair<int64_t, int64_t> &toRemove)
-{
-    auto newInterval = std::make_pair(original.first, toRemove.first - 1);
-    original.first = invalidIntervalValue;
-    original.second = invalidIntervalValue;
-    return newInterval;
+                           const std::pair<int64_t, int64_t> &toRemove) {
+  auto newInterval = std::make_pair(original.first, toRemove.first - 1);
+  original.first = invalidIntervalValue;
+  original.second = invalidIntervalValue;
+  return newInterval;
 }
 
 /**
@@ -84,315 +80,292 @@ handleRightHandSideOverlap(std::pair<int64_t, int64_t> &original,
 */
 std::pair<int64_t, int64_t>
 handleFullyContained(std::pair<int64_t, int64_t> &original,
-                     const std::pair<int64_t, int64_t> &toRemove)
-{
-    // It is important to first creat the new pair and then perform the cut
-    auto newPair = std::make_pair(original.first, toRemove.first - 1);
-    original.first = toRemove.second + 1;
-    return newPair;
+                     const std::pair<int64_t, int64_t> &toRemove) {
+  // It is important to first creat the new pair and then perform the cut
+  auto newPair = std::make_pair(original.first, toRemove.first - 1);
+  original.first = toRemove.second + 1;
+  return newPair;
 }
 
 std::vector<std::pair<int64_t, int64_t>> getSlicedIntervals(
     std::pair<int64_t, int64_t> original,
-    const std::vector<std::pair<int64_t, int64_t>> &removeIntervals)
-{
-    // If there is nothing to remove return the original
-    if (removeIntervals.empty()) {
-        return std::vector<std::pair<int64_t, int64_t>>{original};
+    const std::vector<std::pair<int64_t, int64_t>> &removeIntervals) {
+  // If there is nothing to remove return the original
+  if (removeIntervals.empty()) {
+    return std::vector<std::pair<int64_t, int64_t>>{original};
+  }
+
+  // There are several overlap scenarios.
+  // 1. Full overlap
+  //    original :    |-------|      and |------|
+  //    toRemove: ...------------... and |------|
+  // 2. Left hand side overlap
+  //    original :     |------...  and |-----....
+  //    toRemove:   |------|       and |---|
+  // 3. Right hand side overlap
+  //    original :  ...-------|    and ...-----|
+  //    toRemove:          |-----| and     |---|
+  // 4. Fully contained
+  //    original :  ...-------...
+  //    toRemove:       |---|
+
+  auto isFullOverlap = [](const std::pair<int64_t, int64_t> &original,
+                          const std::pair<int64_t, int64_t> &toRemove) {
+    return (toRemove.first <= original.first) &&
+           (original.first <= toRemove.second) &&
+           (toRemove.first <= original.second) &&
+           (original.second <= toRemove.second);
+  };
+
+  auto isLeftHandSideOverlap = [](const std::pair<int64_t, int64_t> &original,
+                                  const std::pair<int64_t, int64_t> &toRemove) {
+    return (toRemove.first <= original.first) &&
+           (original.first <= toRemove.second) &&
+           (toRemove.second < original.second);
+  };
+
+  auto isRightHandSideOverlap =
+      [](const std::pair<int64_t, int64_t> &original,
+         const std::pair<int64_t, int64_t> &toRemove) {
+        return (original.first < toRemove.first) &&
+               (toRemove.first <= original.second) &&
+               (original.second <= toRemove.second);
+      };
+
+  auto isFullyContained = [](const std::pair<int64_t, int64_t> &original,
+                             const std::pair<int64_t, int64_t> &toRemove) {
+    return (original.first < toRemove.first) &&
+           (toRemove.first < original.second) &&
+           (original.first < toRemove.second) &&
+           (toRemove.second < original.second);
+  };
+
+  // Use that removeIntervals has oredred, non-overlapping intervals
+  // Subtract all the removeIntervals
+  std::vector<std::pair<int64_t, int64_t>> newIntervals;
+  for (auto &removeInterval : removeIntervals) {
+
+    if (isFullOverlap(original, removeInterval)) {
+      // In this case we should remove everything. At this point
+      // newIntervals
+      // should still be empty, since the remove intervals should not be
+      // overlapping
+      assert(newIntervals.empty() && "DataBlockComposite: The "
+                                     "newIntervals container should be "
+                                     "empty");
+      // Set the remainder of the original to invalid, such that we don't
+      // pick
+      // it up at the very end
+      original.first = invalidIntervalValue;
+      original.second = invalidIntervalValue;
+      break;
+    } else if (isRightHandSideOverlap(original, removeInterval)) {
+      auto newInterval = handleRightHandSideOverlap(original, removeInterval);
+      newIntervals.push_back(newInterval);
+    } else if (isLeftHandSideOverlap(original, removeInterval)) {
+      handleLeftHandSideOverlap(original, removeInterval);
+    } else if (isFullyContained(original, removeInterval)) {
+      auto newInterval = handleFullyContained(original, removeInterval);
+      newIntervals.push_back(newInterval);
+    } else {
+      throw std::runtime_error(
+          "DataBlockComposite: The intervals don't seem to overlap.");
     }
+  }
 
-    // There are several overlap scenarios.
-    // 1. Full overlap
-    //    original :    |-------|      and |------|
-    //    toRemove: ...------------... and |------|
-    // 2. Left hand side overlap
-    //    original :     |------...  and |-----....
-    //    toRemove:   |------|       and |---|
-    // 3. Right hand side overlap
-    //    original :  ...-------|    and ...-----|
-    //    toRemove:          |-----| and     |---|
-    // 4. Fully contained
-    //    original :  ...-------...
-    //    toRemove:       |---|
+  // There might be some remainder in the original interval, e.g if there
+  // wasn't
+  // a full overlap removal
+  // or no righ-hand-side overlap of a removal interval
+  if ((original.first != invalidIntervalValue) &&
+      (original.second != invalidIntervalValue)) {
+    newIntervals.push_back(original);
+  }
 
-    auto isFullOverlap = [](const std::pair<int64_t, int64_t> &original,
-                            const std::pair<int64_t, int64_t> &toRemove) {
-        return (toRemove.first <= original.first)
-               && (original.first <= toRemove.second)
-               && (toRemove.first <= original.second)
-               && (original.second <= toRemove.second);
-    };
-
-    auto isLeftHandSideOverlap =
-        [](const std::pair<int64_t, int64_t> &original,
-           const std::pair<int64_t, int64_t> &toRemove) {
-            return (toRemove.first <= original.first)
-                   && (original.first <= toRemove.second)
-                   && (toRemove.second < original.second);
-        };
-
-    auto isRightHandSideOverlap =
-        [](const std::pair<int64_t, int64_t> &original,
-           const std::pair<int64_t, int64_t> &toRemove) {
-            return (original.first < toRemove.first)
-                   && (toRemove.first <= original.second)
-                   && (original.second <= toRemove.second);
-        };
-
-    auto isFullyContained = [](const std::pair<int64_t, int64_t> &original,
-                               const std::pair<int64_t, int64_t> &toRemove) {
-        return (original.first < toRemove.first)
-               && (toRemove.first < original.second)
-               && (original.first < toRemove.second)
-               && (toRemove.second < original.second);
-    };
-
-    // Use that removeIntervals has oredred, non-overlapping intervals
-    // Subtract all the removeIntervals
-    std::vector<std::pair<int64_t, int64_t>> newIntervals;
-    for (auto &removeInterval : removeIntervals) {
-
-        if (isFullOverlap(original, removeInterval)) {
-            // In this case we should remove everything. At this point
-            // newIntervals
-            // should still be empty, since the remove intervals should not be
-            // overlapping
-            assert(newIntervals.empty() && "DataBlockComposite: The "
-                                           "newIntervals container should be "
-                                           "empty");
-            // Set the remainder of the original to invalid, such that we don't
-            // pick
-            // it up at the very end
-            original.first = invalidIntervalValue;
-            original.second = invalidIntervalValue;
-            break;
-        } else if (isRightHandSideOverlap(original, removeInterval)) {
-            auto newInterval
-                = handleRightHandSideOverlap(original, removeInterval);
-            newIntervals.push_back(newInterval);
-        } else if (isLeftHandSideOverlap(original, removeInterval)) {
-            handleLeftHandSideOverlap(original, removeInterval);
-        } else if (isFullyContained(original, removeInterval)) {
-            auto newInterval = handleFullyContained(original, removeInterval);
-            newIntervals.push_back(newInterval);
-        } else {
-            throw std::runtime_error(
-                "DataBlockComposite: The intervals don't seem to overlap.");
-        }
-    }
-
-    // There might be some remainder in the original interval, e.g if there
-    // wasn't
-    // a full overlap removal
-    // or no righ-hand-side overlap of a removal interval
-    if ((original.first != invalidIntervalValue)
-        && (original.second != invalidIntervalValue)) {
-        newIntervals.push_back(original);
-    }
-
-    return newIntervals;
+  return newIntervals;
 }
 
 /**
  * Sorts a data block collection.
  */
-template <typename T> void sortDataBlocks(T &dataBlcokCollection)
-{
-    // Sort the intervals. We sort them by minimum value
-    using namespace Mantid::DataHandling;
-    auto comparison = [](const DataBlock &el1, const DataBlock &el2) {
-        return el1.getMinSpectrumID() < el2.getMinSpectrumID();
-    };
-    std::sort(std::begin(dataBlcokCollection), std::end(dataBlcokCollection),
-              comparison);
+template <typename T> void sortDataBlocks(T &dataBlcokCollection) {
+  // Sort the intervals. We sort them by minimum value
+  using namespace Mantid::DataHandling;
+  auto comparison = [](const DataBlock &el1, const DataBlock &el2) {
+    return el1.getMinSpectrumID() < el2.getMinSpectrumID();
+  };
+  std::sort(std::begin(dataBlcokCollection), std::end(dataBlcokCollection),
+            comparison);
 }
 }
 
-namespace Mantid
-{
-namespace DataHandling
-{
+namespace Mantid {
+namespace DataHandling {
 
-int64_t DataBlockComposite::getMinSpectrumID() const
-{
-    int64_t min = std::numeric_limits<int64_t>::max();
-    for (const auto &child : m_dataBlocks) {
-        auto temp = child.getMinSpectrumID();
-        if (temp < min) {
-            min = temp;
-        }
+int64_t DataBlockComposite::getMinSpectrumID() const {
+  int64_t min = std::numeric_limits<int64_t>::max();
+  for (const auto &child : m_dataBlocks) {
+    auto temp = child.getMinSpectrumID();
+    if (temp < min) {
+      min = temp;
     }
-    return min;
+  }
+  return min;
 }
 
-void DataBlockComposite::setMinSpectrumID(int64_t)
-{
-    // DO NOTHING
+void DataBlockComposite::setMinSpectrumID(int64_t) {
+  // DO NOTHING
 }
 
-int64_t DataBlockComposite::getMaxSpectrumID() const
-{
-    int64_t max = std::numeric_limits<int64_t>::min();
-    for (const auto &child : m_dataBlocks) {
-        auto temp = child.getMaxSpectrumID();
-        if (temp > max) {
-            max = temp;
-        }
+int64_t DataBlockComposite::getMaxSpectrumID() const {
+  int64_t max = std::numeric_limits<int64_t>::min();
+  for (const auto &child : m_dataBlocks) {
+    auto temp = child.getMaxSpectrumID();
+    if (temp > max) {
+      max = temp;
     }
-    return max;
+  }
+  return max;
 }
 
-void DataBlockComposite::setMaxSpectrumID(int64_t)
-{
-    // DO NOTHING
+void DataBlockComposite::setMaxSpectrumID(int64_t) {
+  // DO NOTHING
 }
 
-std::unique_ptr<DataBlockGenerator> DataBlockComposite::getGenerator() const
-{
-    std::vector<std::pair<int64_t, int64_t>> intervals;
-    for (const auto &dataBlock : m_dataBlocks) {
-        intervals.push_back(std::make_pair(dataBlock.getMinSpectrumID(),
-                                           dataBlock.getMaxSpectrumID()));
-    }
-    return Mantid::Kernel::make_unique<DataBlockGenerator>(intervals);
+std::unique_ptr<DataBlockGenerator> DataBlockComposite::getGenerator() const {
+  std::vector<std::pair<int64_t, int64_t>> intervals;
+  for (const auto &dataBlock : m_dataBlocks) {
+    intervals.push_back(std::make_pair(dataBlock.getMinSpectrumID(),
+                                       dataBlock.getMaxSpectrumID()));
+  }
+  return Mantid::Kernel::make_unique<DataBlockGenerator>(intervals);
 }
 
-void DataBlockComposite::addDataBlock(DataBlock dataBlock)
-{
-    // Set the number of periods, number of spectra and number of channel
-    m_numberOfPeriods = dataBlock.getNumberOfPeriods();
-    m_numberOfChannels = dataBlock.getNumberOfChannels();
-    m_numberOfSpectra = dataBlock.getNumberOfSpectra();
+void DataBlockComposite::addDataBlock(DataBlock dataBlock) {
+  // Set the number of periods, number of spectra and number of channel
+  m_numberOfPeriods = dataBlock.getNumberOfPeriods();
+  m_numberOfChannels = dataBlock.getNumberOfChannels();
+  m_numberOfSpectra = dataBlock.getNumberOfSpectra();
 
-    // Insert the data block
-    m_dataBlocks.push_back(dataBlock);
+  // Insert the data block
+  m_dataBlocks.push_back(dataBlock);
 }
 
-size_t DataBlockComposite::getNumberOfSpectra() const
-{
-    size_t total = 0;
-    for (const auto &element : m_dataBlocks) {
-        total += element.getNumberOfSpectra();
-    }
-    return total;
+size_t DataBlockComposite::getNumberOfSpectra() const {
+  size_t total = 0;
+  for (const auto &element : m_dataBlocks) {
+    total += element.getNumberOfSpectra();
+  }
+  return total;
 }
 
-size_t DataBlockComposite::getNumberOfChannels() const
-{
-    return m_dataBlocks.empty() ? 0 : m_dataBlocks[0].getNumberOfChannels();
+size_t DataBlockComposite::getNumberOfChannels() const {
+  return m_dataBlocks.empty() ? 0 : m_dataBlocks[0].getNumberOfChannels();
 }
 
-int DataBlockComposite::getNumberOfPeriods() const
-{
-    return m_dataBlocks.empty() ? 0 : m_dataBlocks[0].getNumberOfPeriods();
+int DataBlockComposite::getNumberOfPeriods() const {
+  return m_dataBlocks.empty() ? 0 : m_dataBlocks[0].getNumberOfPeriods();
 }
 
 DataBlockComposite DataBlockComposite::
-operator+(const DataBlockComposite &other)
-{
-    DataBlockComposite output;
-    output.m_dataBlocks.insert(std::end(output.m_dataBlocks),
-                               std::begin(m_dataBlocks),
-                               std::end(m_dataBlocks));
-    output.m_dataBlocks.insert(std::end(output.m_dataBlocks),
-                               std::begin(other.m_dataBlocks),
-                               std::end(other.m_dataBlocks));
-    return output;
+operator+(const DataBlockComposite &other) {
+  DataBlockComposite output;
+  output.m_dataBlocks.insert(std::end(output.m_dataBlocks),
+                             std::begin(m_dataBlocks), std::end(m_dataBlocks));
+  output.m_dataBlocks.insert(std::end(output.m_dataBlocks),
+                             std::begin(other.m_dataBlocks),
+                             std::end(other.m_dataBlocks));
+  return output;
 }
 
-std::vector<DataBlock> DataBlockComposite::getDataBlocks()
-{
-    // Sort the intervals. We sort them by minimum value
-    sortDataBlocks(m_dataBlocks);
-    return m_dataBlocks;
+std::vector<DataBlock> DataBlockComposite::getDataBlocks() {
+  // Sort the intervals. We sort them by minimum value
+  sortDataBlocks(m_dataBlocks);
+  return m_dataBlocks;
 }
 
-void DataBlockComposite::truncate(int64_t specMin, int64_t specMax)
-{
-    sortDataBlocks(m_dataBlocks);
-    // Find the first data block which is not completely cut off by specMin
-    // original: |-----|      |--------|   |------|
-    // spec_min:         | or | or | or|
-    // result:                 this one
-    auto isNotCompletelyCutOffFromMin = [&specMin](DataBlock &block) {
-        return (specMin <= block.getMinSpectrumID())
-               || (specMin <= block.getMaxSpectrumID());
-    };
+void DataBlockComposite::truncate(int64_t specMin, int64_t specMax) {
+  sortDataBlocks(m_dataBlocks);
+  // Find the first data block which is not completely cut off by specMin
+  // original: |-----|      |--------|   |------|
+  // spec_min:         | or | or | or|
+  // result:                 this one
+  auto isNotCompletelyCutOffFromMin = [&specMin](DataBlock &block) {
+    return (specMin <= block.getMinSpectrumID()) ||
+           (specMin <= block.getMaxSpectrumID());
+  };
 
-    // Find the last data block which is not completely cut off by specMax
-    // original: |-----|      |--------|         |------|
-    // spec_min:              | or | or| or  |
-    // result:                 this one
-    auto isNotCompletelyCutOffFromMax = [&specMax](DataBlock &block) {
-        return (block.getMinSpectrumID() <= specMax)
-               || (block.getMaxSpectrumID() <= specMax);
-    };
+  // Find the last data block which is not completely cut off by specMax
+  // original: |-----|      |--------|         |------|
+  // spec_min:              | or | or| or  |
+  // result:                 this one
+  auto isNotCompletelyCutOffFromMax = [&specMax](DataBlock &block) {
+    return (block.getMinSpectrumID() <= specMax) ||
+           (block.getMaxSpectrumID() <= specMax);
+  };
 
-    auto firstDataBlock
-        = std::find_if(std::begin(m_dataBlocks), std::end(m_dataBlocks),
-                       isNotCompletelyCutOffFromMin);
+  auto firstDataBlock =
+      std::find_if(std::begin(m_dataBlocks), std::end(m_dataBlocks),
+                   isNotCompletelyCutOffFromMin);
 
-    // Note that we have to start from the back.
-    auto lastDataBlockReverseIterator
-        = std::find_if(m_dataBlocks.rbegin(), m_dataBlocks.rend(),
-                       isNotCompletelyCutOffFromMax);
-    auto lastDataBlock
-        = std::find(std::begin(m_dataBlocks), std::end(m_dataBlocks),
-                    *lastDataBlockReverseIterator);
+  // Note that we have to start from the back.
+  auto lastDataBlockReverseIterator = std::find_if(
+      m_dataBlocks.rbegin(), m_dataBlocks.rend(), isNotCompletelyCutOffFromMax);
+  auto lastDataBlock =
+      std::find(std::begin(m_dataBlocks), std::end(m_dataBlocks),
+                *lastDataBlockReverseIterator);
 
-    // Create datablocks
-    // Increment since we want to include the last data block
-    ++lastDataBlock;
-    std::vector<DataBlock> newDataBlocks(firstDataBlock, lastDataBlock);
+  // Create datablocks
+  // Increment since we want to include the last data block
+  ++lastDataBlock;
+  std::vector<DataBlock> newDataBlocks(firstDataBlock, lastDataBlock);
 
-    // Adjust the spec_min and spec_max value. Only change the block if
-    // the it cuts the block.
-    if (newDataBlocks[0].getMinSpectrumID() < specMin) {
-        auto numberOfSpectra = newDataBlocks[0].getMaxSpectrumID() - specMin
-                               + 1;
-        DataBlock block(newDataBlocks[0].getNumberOfPeriods(), numberOfSpectra,
-                        newDataBlocks[0].getNumberOfChannels());
-        block.setMinSpectrumID(specMin);
-        block.setMaxSpectrumID(newDataBlocks[0].getMaxSpectrumID());
-        newDataBlocks[0] = block;
-    }
+  // Adjust the spec_min and spec_max value. Only change the block if
+  // the it cuts the block.
+  if (newDataBlocks[0].getMinSpectrumID() < specMin) {
+    auto numberOfSpectra = newDataBlocks[0].getMaxSpectrumID() - specMin + 1;
+    DataBlock block(newDataBlocks[0].getNumberOfPeriods(), numberOfSpectra,
+                    newDataBlocks[0].getNumberOfChannels());
+    block.setMinSpectrumID(specMin);
+    block.setMaxSpectrumID(newDataBlocks[0].getMaxSpectrumID());
+    newDataBlocks[0] = block;
+  }
 
-    auto lastIndex = newDataBlocks.size() - 1;
-    if (specMax < newDataBlocks[lastIndex].getMaxSpectrumID()) {
-        auto numberOfSpectra
-            = specMax - newDataBlocks[lastIndex].getMaxSpectrumID() + 1;
-        DataBlock block(newDataBlocks[lastIndex].getNumberOfPeriods(),
-                        numberOfSpectra,
-                        newDataBlocks[lastIndex].getNumberOfChannels());
-        block.setMinSpectrumID(newDataBlocks[lastIndex].getMinSpectrumID());
-        block.setMaxSpectrumID(specMax);
-        newDataBlocks[lastIndex] = block;
-    }
+  auto lastIndex = newDataBlocks.size() - 1;
+  if (specMax < newDataBlocks[lastIndex].getMaxSpectrumID()) {
+    auto numberOfSpectra =
+        specMax - newDataBlocks[lastIndex].getMaxSpectrumID() + 1;
+    DataBlock block(newDataBlocks[lastIndex].getNumberOfPeriods(),
+                    numberOfSpectra,
+                    newDataBlocks[lastIndex].getNumberOfChannels());
+    block.setMinSpectrumID(newDataBlocks[lastIndex].getMinSpectrumID());
+    block.setMaxSpectrumID(specMax);
+    newDataBlocks[lastIndex] = block;
+  }
 
-    m_dataBlocks.swap(newDataBlocks);
+  m_dataBlocks.swap(newDataBlocks);
 }
 
-bool DataBlockComposite::operator==(const DataBlockComposite &other) const
-{
-    if (other.m_dataBlocks.size() != m_dataBlocks.size()) {
-        return false;
-    }
+bool DataBlockComposite::operator==(const DataBlockComposite &other) const {
+  if (other.m_dataBlocks.size() != m_dataBlocks.size()) {
+    return false;
+  }
 
-    // Create a copy of the intervals, since the comparison operator should not
-    // have
-    // side effects!!!!! We need the vector sorted to compare though
-    auto otherDataBlocks = other.m_dataBlocks;
-    auto thisDataBlocks = m_dataBlocks;
-    sortDataBlocks(otherDataBlocks);
-    sortDataBlocks(thisDataBlocks);
+  // Create a copy of the intervals, since the comparison operator should not
+  // have
+  // side effects!!!!! We need the vector sorted to compare though
+  auto otherDataBlocks = other.m_dataBlocks;
+  auto thisDataBlocks = m_dataBlocks;
+  sortDataBlocks(otherDataBlocks);
+  sortDataBlocks(thisDataBlocks);
 
-    auto isEqual = true;
-    auto itOther = otherDataBlocks.cbegin();
-    auto itThis = thisDataBlocks.cbegin();
-    for (; itOther != otherDataBlocks.cend(); ++itOther, ++itThis) {
-        isEqual = isEqual && *itOther == *itThis;
-    }
-    return isEqual;
+  auto isEqual = true;
+  auto itOther = otherDataBlocks.cbegin();
+  auto itThis = thisDataBlocks.cbegin();
+  for (; itOther != otherDataBlocks.cend(); ++itOther, ++itThis) {
+    isEqual = isEqual && *itOther == *itThis;
+  }
+  return isEqual;
 }
 
 /**
@@ -403,67 +376,65 @@ bool DataBlockComposite::operator==(const DataBlockComposite &other) const
  * toRemove:     |------|       |--|
  * result:   |---|      |------|    |----|
  */
-void DataBlockComposite::removeSpectra(DataBlockComposite &toRemove)
-{
-    // Get intervals for current data blocks
-    std::vector<std::pair<int64_t, int64_t>> originalIntervals;
-    for (auto &dataBlock : m_dataBlocks) {
-        originalIntervals.emplace_back(std::make_pair(
-            dataBlock.getMinSpectrumID(), dataBlock.getMaxSpectrumID()));
-    }
+void DataBlockComposite::removeSpectra(DataBlockComposite &toRemove) {
+  // Get intervals for current data blocks
+  std::vector<std::pair<int64_t, int64_t>> originalIntervals;
+  for (auto &dataBlock : m_dataBlocks) {
+    originalIntervals.emplace_back(std::make_pair(
+        dataBlock.getMinSpectrumID(), dataBlock.getMaxSpectrumID()));
+  }
 
-    // Get intervals for the data blocks which should be removed
-    auto removeBlocks = toRemove.getDataBlocks();
-    std::vector<std::pair<int64_t, int64_t>> toRemoveIntervals;
-    for (auto &dataBlock : removeBlocks) {
-        toRemoveIntervals.emplace_back(std::make_pair(
-            dataBlock.getMinSpectrumID(), dataBlock.getMaxSpectrumID()));
-    }
+  // Get intervals for the data blocks which should be removed
+  auto removeBlocks = toRemove.getDataBlocks();
+  std::vector<std::pair<int64_t, int64_t>> toRemoveIntervals;
+  for (auto &dataBlock : removeBlocks) {
+    toRemoveIntervals.emplace_back(std::make_pair(
+        dataBlock.getMinSpectrumID(), dataBlock.getMaxSpectrumID()));
+  }
 
-    // Now create the new intervals which don't include the removeInterval
-    // values
-    std::vector<std::pair<int64_t, int64_t>> newIntervals;
-    for (auto &originalInterval : originalIntervals) {
-        // Find all relevant remove intervals. In principal this could
-        // be made more efficient.
-        auto currentRemovalIntervals
-            = getRemovalIntervalsRelevantForTheCurrentOriginalInterval(
-                originalInterval, toRemoveIntervals);
-        auto slicedIntervals
-            = getSlicedIntervals(originalInterval, currentRemovalIntervals);
-        newIntervals.insert(std::end(newIntervals), std::begin(slicedIntervals),
-                            std::end(slicedIntervals));
-    }
+  // Now create the new intervals which don't include the removeInterval
+  // values
+  std::vector<std::pair<int64_t, int64_t>> newIntervals;
+  for (auto &originalInterval : originalIntervals) {
+    // Find all relevant remove intervals. In principal this could
+    // be made more efficient.
+    auto currentRemovalIntervals =
+        getRemovalIntervalsRelevantForTheCurrentOriginalInterval(
+            originalInterval, toRemoveIntervals);
+    auto slicedIntervals =
+        getSlicedIntervals(originalInterval, currentRemovalIntervals);
+    newIntervals.insert(std::end(newIntervals), std::begin(slicedIntervals),
+                        std::end(slicedIntervals));
+  }
 
-    // Create a new set of data blocks
-    auto numberOfPeriods = m_dataBlocks[0].getNumberOfPeriods();
-    auto numberOfChannels = m_dataBlocks[0].getNumberOfChannels();
+  // Create a new set of data blocks
+  auto numberOfPeriods = m_dataBlocks[0].getNumberOfPeriods();
+  auto numberOfChannels = m_dataBlocks[0].getNumberOfChannels();
 
-    m_dataBlocks.clear();
-    for (auto &newInterval : newIntervals) {
-        DataBlock dataBlock(numberOfPeriods,
-                            newInterval.second - newInterval.first + 1,
-                            numberOfChannels);
-        dataBlock.setMinSpectrumID(newInterval.first);
-        dataBlock.setMaxSpectrumID(newInterval.second);
-        m_dataBlocks.push_back(dataBlock);
-    }
+  m_dataBlocks.clear();
+  for (auto &newInterval : newIntervals) {
+    DataBlock dataBlock(numberOfPeriods,
+                        newInterval.second - newInterval.first + 1,
+                        numberOfChannels);
+    dataBlock.setMinSpectrumID(newInterval.first);
+    dataBlock.setMaxSpectrumID(newInterval.second);
+    m_dataBlocks.push_back(dataBlock);
+  }
 }
 
 /**
  * Provides a container with all spectrum numbers
  * @returns a container with all sepctrum numbers
  */
-std::vector<int64_t> DataBlockComposite::getAllSpectrumNumbers()
-{
-    auto generator = getGenerator();
-    std::vector<int64_t> allSpectra;
+std::vector<int64_t> DataBlockComposite::getAllSpectrumNumbers() {
+  auto generator = getGenerator();
+  std::vector<int64_t> allSpectra;
 
-    for (; !generator->isDone(); generator->next()) {
-        allSpectra.push_back(generator->getValue());
-    }
+  for (; !generator->isDone(); generator->next()) {
+    allSpectra.push_back(generator->getValue());
+  }
 
-    return allSpectra;
+  return allSpectra;
 }
 }
 }
