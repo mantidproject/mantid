@@ -31,7 +31,8 @@ class VesuvioTOFFit(VesuvioBase):
 
         self.declareProperty("MassProfiles", "", StringMandatoryValidator(),
                              doc="Functions used to approximate mass profile. "
-                                 "The format is function=Function1Name,param1=val1,param2=val2;function=Function2Name,param3=val3,param4=val4")
+                                 "The format is function=Function1Name,param1=val1,"
+                                 "param2=val2;function=Function2Name,param3=val3,param4=val4")
 
         # ----- Optional ------
         self.declareProperty("WorkspaceIndex", 0, IntBoundedValidator(lower=0),
@@ -40,8 +41,8 @@ class VesuvioTOFFit(VesuvioBase):
                              doc="Function used to fit the background. "
                                  "The format is function=FunctionName,param1=val1,param2=val2")
         self.declareProperty("IntensityConstraints", "",
-                             doc="A semi-colon separated list of intensity constraints defined as lists e.g "
-                                 "[0,1,0,-4];[1,0,-2,0]")
+                             doc="A semi-colon separated list of intensity constraints defined "
+                                 "as lists e.g [0,1,0,-4];[1,0,-2,0]")
 
         self.declareProperty("FitMode", "bank", StringListValidator(list(_FIT_MODES)),
                              doc="Fit either bank-by-bank or detector-by-detector")
@@ -125,6 +126,7 @@ class VesuvioTOFFit(VesuvioBase):
 
     # ----------------------------------------------------------------------------------------
 
+    #pylint: disable=too-many-arguments
     def _do_fit(self, function_str, data_ws, index, constraints, ties, max_iter):
 
         # The tof data is required to be in seconds for the fitting
@@ -133,9 +135,8 @@ class VesuvioTOFFit(VesuvioBase):
         # we would have to either implement a another wrapper to translate or write another
         # Polynomial.
         # The simplest option is to put the data in seconds here and then put it back afterward
-        # TODO: This is quite wasteful. Come up with something better!
         data_ws = self._execute_child_alg("ScaleX", InputWorkspace=data_ws, OutputWorkspace=data_ws,
-                                          Operation='Multiply',Factor=1e-06)
+                                          Operation='Multiply', Factor=1e-06)
 
         outputs = self._execute_child_alg("Fit",
                                           Function=function_str,
@@ -149,7 +150,8 @@ class VesuvioTOFFit(VesuvioBase):
                                           Minimizer=self.getPropertyValue("Minimizer"))
 
         reduced_chi_square, params, fitted_data = outputs[1], outputs[3], outputs[4]
-        fitted_data = self._execute_child_alg("ScaleX", InputWorkspace=fitted_data, OutputWorkspace=fitted_data,
+        fitted_data = self._execute_child_alg("ScaleX", InputWorkspace=fitted_data,
+                                              OutputWorkspace=fitted_data,
                                               Operation='Multiply', Factor=1e06)
         data_ws = self._execute_child_alg("ScaleX", InputWorkspace=data_ws, OutputWorkspace=data_ws,
                                           Operation='Multiply', Factor=1e06)
