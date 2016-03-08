@@ -92,11 +92,9 @@ public:
   getNormalizedError(const API::IMDNode *box,
                      const Mantid::API::MDNormalization &normalization) const;
 
-  void getLinePlot(const Mantid::Kernel::VMD &start,
-                   const Mantid::Kernel::VMD &end,
-                   API::MDNormalization normalize, std::vector<coord_t> &x,
-                   std::vector<signal_t> &y,
-                   std::vector<signal_t> &e) const override;
+  LinePlot getLinePlot(const Mantid::Kernel::VMD &start,
+                       const Mantid::Kernel::VMD &end,
+                       API::MDNormalization normalize) const override;
 
   // Get ordered list of boundaries in position-along-the-line coordinates
   std::set<coord_t> getBoxBoundaryBisectsOnLine(const Kernel::VMD &start,

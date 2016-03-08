@@ -865,12 +865,9 @@ TMDE(void MDEventWorkspace)::getBoundariesInDimension(
  * @param y :: signal of the box in which corresponding x position lies
  * @param e :: error of the box in which corresponding x position lies
  */
-TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
-                                         const Mantid::Kernel::VMD &end,
-                                         Mantid::API::MDNormalization normalize,
-                                         std::vector<coord_t> &x,
-                                         std::vector<signal_t> &y,
-                                         std::vector<signal_t> &e) const {
+TMDE(API::IMDWorkspace::LinePlot MDEventWorkspace)
+::getLinePlot(const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &end,
+              Mantid::API::MDNormalization normalize) const {
   size_t num_dims = this->getNumDims();
   if (start.getNumDims() != num_dims)
     throw std::runtime_error("Start point must have the same number of "
@@ -886,13 +883,11 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
   const std::set<coord_t> mid_points =
       getBoxBoundaryBisectsOnLine(start, end, num_dims, dir, length);
 
-  x.clear();
-  y.clear();
-  e.clear();
+  LinePlot line;
 
   if (mid_points.empty()) {
-    makeSinglePointWithNaN(x, y, e);
-    return;
+    makeSinglePointWithNaN(line.x, line.y, line.e);
+    return line;
   } else {
 
     for (const auto &line_pos : mid_points) {
@@ -904,23 +899,24 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
 
         // If the box is not masked then record the signal and error here
         if (!box->getIsMasked()) {
-          x.push_back(line_pos);
+          line.x.push_back(line_pos);
           signal_t signal = this->getNormalizedSignal(box, normalize);
           if (boost::math::isinf(signal)) {
             // The plotting library (qwt) doesn't like infs.
             signal = std::numeric_limits<signal_t>::quiet_NaN();
           }
-          y.push_back(signal);
-          e.push_back(this->getNormalizedError(box, normalize));
+          line.y.push_back(signal);
+          line.e.push_back(this->getNormalizedError(box, normalize));
         }
       }
     }
   }
 
   // If everything was masked
-  if (x.size() == 0) {
-    makeSinglePointWithNaN(x, y, e);
+  if (line.x.size() == 0) {
+    makeSinglePointWithNaN(line.x, line.y, line.e);
   }
+  return line;
 }
 
 /**

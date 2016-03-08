@@ -77,17 +77,13 @@ public:
       size_t suggestedNumCores = 1,
       Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 
-  void getLinePlot(const Mantid::Kernel::VMD &start,
-                   const Mantid::Kernel::VMD &end,
-                   Mantid::API::MDNormalization normalize,
-                   std::vector<coord_t> &x, std::vector<signal_t> &y,
-                   std::vector<signal_t> &e) const override;
+  LinePlot getLinePlot(const Mantid::Kernel::VMD &start,
+                       const Mantid::Kernel::VMD &end,
+                       Mantid::API::MDNormalization normalize) const override;
 
-  void getLineData(const Mantid::Kernel::VMD &start,
-                   const Mantid::Kernel::VMD &end,
-                   Mantid::API::MDNormalization normalize,
-                   std::vector<coord_t> &x, std::vector<signal_t> &y,
-                   std::vector<signal_t> &e) const override;
+  LinePlot getLineData(const Mantid::Kernel::VMD &start,
+                       const Mantid::Kernel::VMD &end,
+                       Mantid::API::MDNormalization normalize) const override;
 
   void checkWorkspaceSize(const MDHistoWorkspace &other, std::string operation);
 
@@ -478,13 +474,10 @@ private:
                                   size_t linearIndex) const;
 
 protected:
-
-  void getLinePoints(const Mantid::Kernel::VMD &start,
-                     const Mantid::Kernel::VMD &end,
-                     Mantid::API::MDNormalization normalize,
-                     std::vector<coord_t> &x, std::vector<signal_t> &y,
-                     std::vector<signal_t> &e,
-                     const bool bin_centres) const;
+  LinePlot getLinePoints(const Mantid::Kernel::VMD &start,
+                         const Mantid::Kernel::VMD &end,
+                         Mantid::API::MDNormalization normalize,
+                         const bool bin_centres) const;
 
   /// Protected copy constructor. May be used by childs for cloning.
   MDHistoWorkspace(const MDHistoWorkspace &other);

@@ -507,14 +507,12 @@ bool pointInWorkspace(const MDHistoWorkspace *ws, const VMD &point) {
  *- 1
  * @param e :: error vector for each bin.
  */
-void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
+IMDWorkspace::LinePlot
+MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
                                    const Mantid::Kernel::VMD &end,
-                                   Mantid::API::MDNormalization normalize,
-                                   std::vector<coord_t> &x,
-                                   std::vector<signal_t> &y,
-                                   std::vector<signal_t> &e) const {
+                                   Mantid::API::MDNormalization normalize) const {
 
-  this->getLinePoints(start, end, normalize, x, y, e, true);
+  return this->getLinePoints(start, end, normalize, true);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -534,13 +532,13 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
  * @param bin_centres :: if true then record points halfway between bin
  *boundaries, otherwise record on bin boundaries
  */
-void MDHistoWorkspace::getLinePoints(const Mantid::Kernel::VMD &start,
+IMDWorkspace::LinePlot
+MDHistoWorkspace::getLinePoints(const Mantid::Kernel::VMD &start,
                                      const Mantid::Kernel::VMD &end,
                                      Mantid::API::MDNormalization normalize,
-                                     std::vector<coord_t> &x,
-                                     std::vector<signal_t> &y,
-                                     std::vector<signal_t> &e,
                                      const bool bin_centres) const {
+  LinePlot line;
+
   size_t nd = this->getNumDims();
   if (start.getNumDims() != nd)
     throw std::runtime_error("Start point must have the same number of "
@@ -573,18 +571,14 @@ void MDHistoWorkspace::getLinePoints(const Mantid::Kernel::VMD &start,
   const std::set<coord_t> boundaries =
       getBinBoundariesOnLine(start, end, nd, dir, length);
 
-  x.clear();
-  y.clear();
-  e.clear();
-
   if (boundaries.empty()) {
-    this->makeSinglePointWithNaN(x, y, e);
+    this->makeSinglePointWithNaN(line.x, line.y, line.e);
 
     // Require x.size() = y.size()+1 if recording bin boundaries
     if (!bin_centres)
-      x.push_back(length);
+      line.x.push_back(length);
 
-    return;
+    return line;
   } else {
     // Get the first point
     std::set<coord_t>::iterator it;
@@ -593,7 +587,7 @@ void MDHistoWorkspace::getLinePoints(const Mantid::Kernel::VMD &start,
     coord_t lastLinePos = *it;
     VMD lastPos = start + (dir * lastLinePos);
     if (!bin_centres) {
-      x.push_back(lastLinePos);
+      line.x.push_back(lastLinePos);
     }
 
     ++it;
@@ -615,9 +609,9 @@ void MDHistoWorkspace::getLinePoints(const Mantid::Kernel::VMD &start,
       if (bin_centres && !this->getIsMaskedAt(linearIndex)) {
         coord_t bin_centrePos =
             static_cast<coord_t>((linePos + lastLinePos) * 0.5);
-        x.push_back(bin_centrePos);
+        line.x.push_back(bin_centrePos);
       } else if (!bin_centres)
-        x.push_back(linePos);
+        line.x.push_back(linePos);
 
       if (linearIndex < m_length) {
 
@@ -629,15 +623,15 @@ void MDHistoWorkspace::getLinePoints(const Mantid::Kernel::VMD &start,
           signal = std::numeric_limits<signal_t>::quiet_NaN();
         }
         if (!bin_centres || !this->getIsMaskedAt(linearIndex)) {
-          y.push_back(signal);
-          e.push_back(this->getErrorAt(linearIndex) * normalizer);
+          line.y.push_back(signal);
+          line.e.push_back(this->getErrorAt(linearIndex) * normalizer);
         }
         // Save the position for next bin
         lastPos = pos;
       } else {
         // Invalid index. This shouldn't happen
-        y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
-        e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
+        line.y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
+        line.e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
       }
 
       lastLinePos = linePos;
@@ -645,10 +639,11 @@ void MDHistoWorkspace::getLinePoints(const Mantid::Kernel::VMD &start,
     } // for each unique boundary
 
     // If all bins were masked
-    if (x.size() == 0) {
-      this->makeSinglePointWithNaN(x, y, e);
+    if (line.x.size() == 0) {
+      this->makeSinglePointWithNaN(line.x, line.y, line.e);
     }
   }
+  return line;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -666,14 +661,11 @@ void MDHistoWorkspace::getLinePoints(const Mantid::Kernel::VMD &start,
  *- 1
  * @param e :: error vector for each bin.
  */
-void MDHistoWorkspace::getLineData(const Mantid::Kernel::VMD &start,
+IMDWorkspace::LinePlot
+MDHistoWorkspace::getLineData(const Mantid::Kernel::VMD &start,
                                    const Mantid::Kernel::VMD &end,
-                                   Mantid::API::MDNormalization normalize,
-                                   std::vector<coord_t> &x,
-                                   std::vector<signal_t> &y,
-                                   std::vector<signal_t> &e) const {
-
-  this->getLinePoints(start, end, normalize, x, y, e, false);
+                                   Mantid::API::MDNormalization normalize) const {
+  return this->getLinePoints(start, end, normalize, false);
 }
 
 //----------------------------------------------------------------------------------------------

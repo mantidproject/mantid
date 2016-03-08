@@ -645,22 +645,20 @@ public:
 
     Mantid::Kernel::VMD start(0, 0, 0);
     Mantid::Kernel::VMD end(6.0, 0, 0);
-    std::vector<coord_t> x;
-    std::vector<signal_t> y, e;
-    ew->getLinePlot(start, end, NoNormalization, x, y, e);
-    TS_ASSERT_EQUALS(y.size(), 9);
-    TS_ASSERT_EQUALS(x.size(), 9);
-    TS_ASSERT_EQUALS(e.size(), 9);
-    for (size_t i = 0; i < y.size(); ++i) {
-      TS_ASSERT_EQUALS(y[i], signal);
+    auto line = ew->getLinePlot(start, end, NoNormalization);
+    TS_ASSERT_EQUALS(line.y.size(), 9);
+    TS_ASSERT_EQUALS(line.x.size(), 9);
+    TS_ASSERT_EQUALS(line.e.size(), 9);
+    for (size_t i = 0; i < line.y.size(); ++i) {
+      TS_ASSERT_EQUALS(line.y[i], signal);
     }
-    ew->getLinePlot(start, end, VolumeNormalization, x, y, e);
-    for (size_t i = 0; i < y.size(); ++i) {
-      TS_ASSERT_DELTA(y[i], signal / volume, 1e-7);
+    line = ew->getLinePlot(start, end, VolumeNormalization);
+    for (size_t i = 0; i < line.y.size(); ++i) {
+      TS_ASSERT_DELTA(line.y[i], signal / volume, 1e-7);
     }
-    ew->getLinePlot(start, end, NumEventsNormalization, x, y, e);
-    for (size_t i = 0; i < y.size(); ++i) {
-      TS_ASSERT_EQUALS(y[i], 1.0);
+    line = ew->getLinePlot(start, end, NumEventsNormalization);
+    for (size_t i = 0; i < line.y.size(); ++i) {
+      TS_ASSERT_EQUALS(line.y[i], 1.0);
     }
   }
 
@@ -679,14 +677,12 @@ public:
 
     Mantid::Kernel::VMD start(0, 0, 0);
     Mantid::Kernel::VMD end(6.0, 0, 0);
-    std::vector<coord_t> x;
-    std::vector<signal_t> y, e;
-    ew->getLinePlot(start, end, NoNormalization, x, y, e);
+    auto line = ew->getLinePlot(start, end, NoNormalization);
     // Masked data is omitted from line
-    TS_ASSERT_EQUALS(y.size(), 4);
-    TS_ASSERT_EQUALS(x.size(), 4);
+    TS_ASSERT_EQUALS(line.y.size(), 4);
+    TS_ASSERT_EQUALS(line.x.size(), 4);
     // Unmasked data
-    TS_ASSERT_EQUALS(y[1], 3.0);
+    TS_ASSERT_EQUALS(line.y[1], 3.0);
   }
 
   void test_that_sets_default_normalization_flags_to_volume_normalization() {

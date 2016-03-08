@@ -405,11 +405,9 @@ public:
   /// Dimensin id for y-dimension.
   static const std::string yDimensionId;
   /// Generate a line plot through the matrix workspace.
-  void getLinePlot(const Mantid::Kernel::VMD &start,
-                   const Mantid::Kernel::VMD &end,
-                   Mantid::API::MDNormalization normalize,
-                   std::vector<coord_t> &x, std::vector<signal_t> &y,
-                   std::vector<signal_t> &e) const override;
+  LinePlot getLinePlot(const Mantid::Kernel::VMD &start,
+                       const Mantid::Kernel::VMD &end,
+                       Mantid::API::MDNormalization normalize) const override;
   /// Get the signal at a coordinate in the workspace.
   signal_t getSignalAtCoord(
       const coord_t *coords,

@@ -95,10 +95,7 @@ public:
 
   virtual void getLinePlot(const Mantid::Kernel::VMD &,
                            const Mantid::Kernel::VMD &,
-                           Mantid::API::MDNormalization,
-                           std::vector<Mantid::coord_t> &,
-                           std::vector<Mantid::signal_t> &,
-                           std::vector<Mantid::signal_t> &) const {}
+                           Mantid::API::MDNormalization) const {}
 
   virtual std::vector<Mantid::API::IMDIterator *>
       createIterators(size_t = 1,

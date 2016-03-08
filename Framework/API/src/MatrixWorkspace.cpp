@@ -1508,20 +1508,16 @@ std::vector<IMDIterator *> MatrixWorkspace::createIterators(
 * @param start :: coordinates of the start point of the line
 * @param end :: coordinates of the end point of the line
 * @param normalize :: how to normalize the signal
-* @param x :: is set to the boundaries of the bins, relative to start of the
-*line.
-* @param y :: is set to the normalized signal for each bin. Length = length(x) -
-*1
-* @param e :: is set to the normalized errors for each bin. Length = length(x) -
-*1
+* @returns :: a LinePlot in which x is set to the boundaries of the bins,
+* relative to start of the line, y is set to the normalized signal for
+* each bin with Length = length(x) - 1 and e is set to the normalized
+* errors for each bin with Length = length(x) - 1.
 */
-void MatrixWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
-                                  const Mantid::Kernel::VMD &end,
-                                  Mantid::API::MDNormalization normalize,
-                                  std::vector<coord_t> &x,
-                                  std::vector<signal_t> &y,
-                                  std::vector<signal_t> &e) const {
-  IMDWorkspace::getLinePlot(start, end, normalize, x, y, e);
+IMDWorkspace::LinePlot
+MatrixWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
+                             const Mantid::Kernel::VMD &end,
+                             Mantid::API::MDNormalization normalize) const {
+  return IMDWorkspace::getLinePlot(start, end, normalize);
 }
 
 //------------------------------------------------------------------------------------
