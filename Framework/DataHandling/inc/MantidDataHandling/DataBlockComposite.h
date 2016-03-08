@@ -4,8 +4,10 @@
 #include "MantidDataHandling/DataBlock.h"
 #include "MantidDataHandling/DllConfig.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid
+{
+namespace DataHandling
+{
 
 /** DataBlockComposite: The DataBlockComposite handles a collection
     of DataBlocks. It represents a set of contiguous spectrum numbers
@@ -33,81 +35,133 @@ File change history is stored at:
 <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport DataBlockComposite : public DataBlock {
+class DLLExport DataBlockComposite : public DataBlock
+{
 public:
-  int64_t getMinSpectrumID() const override;
-  void setMinSpectrumID(int64_t) override;
+    int64_t getMinSpectrumID() const override;
+    void setMinSpectrumID(int64_t) override;
 
-  int64_t getMaxSpectrumID() const override;
-  void setMaxSpectrumID(int64_t) override;
+    int64_t getMaxSpectrumID() const override;
+    void setMaxSpectrumID(int64_t) override;
 
-  size_t getNumberOfSpectra() const override;
-  size_t getNumberOfChannels() const override;
-  int getNumberOfPeriods() const override;
+    size_t getNumberOfSpectra() const override;
+    size_t getNumberOfChannels() const override;
+    int getNumberOfPeriods() const override;
 
-  std::unique_ptr<DataBlockGenerator> getGenerator() const override;
+    std::unique_ptr<DataBlockGenerator> getGenerator() const override;
 
-  bool operator==(const DataBlockComposite &other) const;
+    bool operator==(const DataBlockComposite &other) const;
 
-  // DataBlockComposite only mehtods
-  void addDataBlock(DataBlock dataBlock);
-  std::vector<DataBlock> getDataBlocks();
-  DataBlockComposite operator+(const DataBlockComposite &other);
-  void removeSpectra(DataBlockComposite &toRemove);
-  void truncate(int64_t specMin, int64_t specMax);
+    // DataBlockComposite only mehtods
+    void addDataBlock(DataBlock dataBlock);
+    std::vector<DataBlock> getDataBlocks();
+    DataBlockComposite operator+(const DataBlockComposite &other);
+    void removeSpectra(DataBlockComposite &toRemove);
+    void truncate(int64_t specMin, int64_t specMax);
+    std::vector<int64_t> getAllSpectrumNumbers();
 
 private:
-  std::vector<DataBlock> m_dataBlocks;
+    std::vector<DataBlock> m_dataBlocks;
 };
+
+namespace
+{
+void handleWhenElementIsMonitor(
+    Mantid::DataHandling::DataBlockComposite &dataBlockComposite,
+    int numberOfPeriods, size_t numberOfChannels, int64_t previousValue,
+    int64_t startValue)
+{
+    if (previousValue - startValue > 0) {
+        auto numberOfSpectra
+            = previousValue
+              - startValue; /* Should be from [start, previousValue -1]*/
+        DataBlock dataBlock(numberOfPeriods, numberOfSpectra, numberOfChannels);
+        dataBlock.setMinSpectrumID(startValue);
+        dataBlock.setMaxSpectrumID(previousValue - 1);
+        dataBlockComposite.addDataBlock(dataBlock);
+    }
+
+    // Save out the monitor
+    DataBlock dataBlock(numberOfPeriods, 1, numberOfChannels);
+    dataBlock.setMinSpectrumID(previousValue);
+    dataBlock.setMaxSpectrumID(previousValue);
+    dataBlockComposite.addDataBlock(dataBlock);
+}
+
+
+void handleWhenElementMadeAJump(
+    Mantid::DataHandling::DataBlockComposite &dataBlockComposite,
+    int numberOfPeriods, size_t numberOfChannels, int64_t previousValue,
+    int64_t startValue)
+{
+  auto numberOfSpectra = previousValue - startValue + 1;
+  DataBlock dataBlock(numberOfPeriods, numberOfSpectra,
+                      numberOfChannels);
+  dataBlock.setMinSpectrumID(startValue);
+  dataBlock.setMaxSpectrumID(previousValue);
+  dataBlockComposite.addDataBlock(dataBlock);
+}
+
+}
 
 /**
 * Populates a DataBlockComposite with DataBlocks which are extracted from a
 * indexable collection (array-type). Note that std::is_array does not
 * work on boost::shared_array which is one of the use cases. Hence this
-* function could get abused.
+* function could get abused. Monitor spectra get their own data block
 * @param dataBlockComposite: the detector block composite which will get
 * populated
 * @param indexContainer: the container of indices
 * @param nArray: the number of array elements
 * @param numberOfPeriods: the number of periods
 * @param numberOfChannels: the number of channels
+* @param monitorSpectra: a collection of monitor spectrum numbers
 */
 template <typename T>
 void DLLExport
 populateDataBlockCompositeWithContainer(DataBlockComposite &dataBlockComposite,
                                         T &indexContainer, int64_t nArray,
                                         int numberOfPeriods,
-                                        size_t numberOfChannels) {
+                                        size_t numberOfChannels,
+                                        std::vector<int64_t> monitorSpectra)
+{
+    auto isMonitor = [&monitorSpectra](int64_t index) {
+        return std::find(std::begin(monitorSpectra), std::end(monitorSpectra),
+                         index) != std::end(monitorSpectra);
+    };
 
-  // Find all intervals among the index array (this assumes that spectrum index
-  // increases monotonically, else we would have to sort first)
-  int64_t startValue = indexContainer[0];
-  int64_t previousValue = startValue;
+    auto startValue = indexContainer[0];
+    auto previousValue = startValue;
 
-  for (int64_t arrayIndex = 1; arrayIndex < nArray; ++arrayIndex) {
-    auto isSequential = (indexContainer[arrayIndex] - previousValue) == 1;
-    if (!isSequential) {
-      // We must have completed an interval, we create a DataBlock and add it
-      auto numberOfSpectra = previousValue - startValue + 1;
-      DataBlock dataBlock(numberOfPeriods, numberOfSpectra, numberOfChannels);
-      dataBlock.setMinSpectrumID(startValue);
-      dataBlock.setMaxSpectrumID(previousValue);
-      dataBlockComposite.addDataBlock(dataBlock);
+    for (int64_t arrayIndex = 1; arrayIndex < nArray; ++arrayIndex) {
+        // There are two ways to write data out. Either when we have a jump of
+        // the indices or there is a monitor. In case of a monitor we also need
+        // to clear the data that was potentially before the monitor.
 
-      // Now reset the startValue to the beginning of the new index
-      startValue = indexContainer[arrayIndex];
+        if (isMonitor(previousValue)) {
+            handleWhenElementIsMonitor(dataBlockComposite, numberOfPeriods,
+                                       numberOfChannels, previousValue, startValue);
+            startValue = indexContainer[arrayIndex];
+        } else if ((indexContainer[arrayIndex] - previousValue) != 1) {
+            // We must have completed an interval, we create a DataBlock and add
+            // it
+            handleWhenElementMadeAJump(dataBlockComposite, numberOfPeriods,
+                                       numberOfChannels, previousValue, startValue);
+            startValue = indexContainer[arrayIndex];
+        }
+
+        // Set the previous value to the current value;
+        previousValue = indexContainer[arrayIndex];
     }
 
-    // Set the previous value to the current value;
-    previousValue = indexContainer[arrayIndex];
-  }
-
-  // The last interval would not have been added
-  auto numberOfSpectra = previousValue - startValue + 1;
-  DataBlock dataBlock(numberOfPeriods, numberOfSpectra, numberOfChannels);
-  dataBlock.setMinSpectrumID(startValue);
-  dataBlock.setMaxSpectrumID(previousValue);
-  dataBlockComposite.addDataBlock(dataBlock);
+    // The last interval would not have been added.
+    if (isMonitor(previousValue)) {
+        handleWhenElementIsMonitor(dataBlockComposite, numberOfPeriods,
+                                   numberOfChannels, previousValue, startValue);
+    } else {
+      handleWhenElementMadeAJump(dataBlockComposite, numberOfPeriods,
+                                   numberOfChannels, previousValue, startValue);
+    }
 }
 }
 }

@@ -553,12 +553,22 @@ void LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
       }
     }
 
+    auto monitorSpectra = m_monBlockInfo.getAllSpectrumNumbers();
+
     // Create DataBlocks from the spectrum list
     DataBlockComposite composite;
     populateDataBlockCompositeWithContainer(
         composite, spec_list, spec_list.size(),
         m_loadBlockInfo.getNumberOfPeriods(),
-        m_loadBlockInfo.getNumberOfChannels());
+        m_loadBlockInfo.getNumberOfChannels(),
+        monitorSpectra);
+
+    // If the monitors are to be loaded separately, then we have
+    // to remove them at this point
+    if (bseparateMonitors || bexcludeMonitor) {
+      composite.removeSpectra(m_monBlockInfo);
+    }
+
     m_loadBlockInfo = composite;
 
     hasSpecList = true;
@@ -625,8 +635,8 @@ LoadISISNexus2::prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
   std::vector<int64_t> includedMonitors;
   // Setup the SpectraBlocks based on the DataBlocks
   auto dataBlocks = LoadBlock.getDataBlocks();
-  auto isMonitor = [&monitors](int64_t spectrumIndex) {
-    return monitors.find(spectrumIndex) != monitors.end();
+  auto isMonitor = [&monitors](int64_t spectrumNumber) {
+    return monitors.find(spectrumNumber) != monitors.end();
   };
   for (const auto &dataBlock : dataBlocks) {
     auto min = dataBlock.getMinSpectrumID();
@@ -1131,9 +1141,12 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
   // not be contiguous.
   NXData nxData = entry.openNXData("detector_1");
   NXInt data = nxData.openIntData();
+
+  auto monitorSpectra = m_monBlockInfo.getAllSpectrumNumbers();
   populateDataBlockCompositeWithContainer(m_detBlockInfo, spectrum_index, ndets,
                                           data.dim0() /*Number of Periods*/,
-                                          data.dim2() /*Number of channels*/);
+                                          data.dim2() /*Number of channels*/,
+                                          monitorSpectra);
 
   // We should handle legacy files which include the spectrum number of the
   // monitors
