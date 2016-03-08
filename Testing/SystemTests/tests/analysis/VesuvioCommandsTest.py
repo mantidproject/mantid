@@ -12,7 +12,6 @@ from vesuvio.commands import fit_tof
 #=====================================Helper Function=================================
 
 def _create_test_flags(background):
-    runs = "15039-15045"
     flags = dict()
     flags['fit_mode'] = 'spectrum'
     flags['spectra'] = '135'
