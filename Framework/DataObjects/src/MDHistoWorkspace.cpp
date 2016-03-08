@@ -651,11 +651,7 @@ IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(
  * @param start :: coordinates of the start point of the line
  * @param end :: coordinates of the end point of the line
  * @param normalize :: how to normalize the signal
- * @param x :: is set to the boundaries of the bins, relative to start of the
- *line.
- * @param y :: is set to the normalized signal for each bin. Length = length(x)
- *- 1
- * @param e :: error vector for each bin.
+ * @returns :: LinePlot with points at bin boundaries
  */
 IMDWorkspace::LinePlot
 MDHistoWorkspace::getLineData(const Mantid::Kernel::VMD &start,
