@@ -1,5 +1,4 @@
-# pylint: disable=no-init
-from string import Template
+# pylint: disable=no-init, too-many-instance-attributes
 from mantid.kernel import *
 from mantid.api import *
 from vesuvio.base import VesuvioBase, TableWorkspaceDictionaryFacade
@@ -20,10 +19,14 @@ def create_cuboid_xml(height, width, depth):
     half_height, half_width, half_thick = 0.5*height, 0.5*width, 0.5*depth
     xml_str = \
       " <cuboid id=\"sample-shape\"> " \
-      + "<left-front-bottom-point x=\"%f\" y=\"%f\" z=\"%f\" /> " % (half_width, -half_height, half_thick) \
-      + "<left-front-top-point x=\"%f\" y=\"%f\" z=\"%f\" /> " % (half_width, half_height, half_thick) \
-      + "<left-back-bottom-point x=\"%f\" y=\"%f\" z=\"%f\" /> " % (half_width, -half_height, -half_thick) \
-      + "<right-front-bottom-point x=\"%f\" y=\"%f\" z=\"%f\" /> " % (-half_width, -half_height, half_thick) \
+      + "<left-front-bottom-point " \
+      + "x=\"%f\" y=\"%f\" z=\"%f\" /> " % (half_width, -half_height, half_thick) \
+      + "<left-front-top-point " \
+      + "x=\"%f\" y=\"%f\" z=\"%f\" /> " % (half_width, half_height, half_thick) \
+      + "<left-back-bottom-point " \
+      + "x=\"%f\" y=\"%f\" z=\"%f\" /> " % (half_width, -half_height, -half_thick) \
+      + "<right-front-bottom-point " \
+      + "x=\"%f\" y=\"%f\" z=\"%f\" /> " % (-half_width, -half_height, half_thick) \
       + "</cuboid>"
     return xml_str
 
@@ -50,6 +53,7 @@ class VesuvioCorrections(VesuvioBase):
 
 #------------------------------------------------------------------------------
 
+    # pylint: disable=too-many-locals
     def PyInit(self):
         # Inputs
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
@@ -296,7 +300,6 @@ class VesuvioCorrections(VesuvioBase):
 #------------------------------------------------------------------------------
 
     def _fit_corrections(self, fit_workspaces, param_table_name, **fixed_parameters):
-        func_template = Template("name=TabulatedFunction,Workspace=$ws_name,ties=(${scale_tie}Shift=0,XScaling=1),constraints=(Scaling>=0.0)")
         functions = []
 
         for idx, wsn in enumerate(fit_workspaces):
@@ -304,8 +307,10 @@ class VesuvioCorrections(VesuvioBase):
             for param, value in fixed_parameters.iteritems():
                 if param in wsn:
                     tie = 'Scaling=%f,' % value
-
-            functions.append(func_template.substitute(ws_name=wsn, scale_tie=tie))
+            function_str = "name=TabulatedFunction,Workspace=%s," % (wsn) \
+                           + "ties=(%sShift=0,XScaling=1)," % (tie) \
+                           + "constraints=(Scaling>=0.0)"
+            functions.append(function_str)
 
             logger.notice('Corrections scale fit index %d is %s' % (idx, wsn))
 
