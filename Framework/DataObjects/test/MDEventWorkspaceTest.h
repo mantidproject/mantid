@@ -375,8 +375,8 @@ public:
         ew->getBoxBoundaryBisectsOnLine(start, end, 3, dir, length);
 
     // Copy set to vector for test
-    TSM_ASSERT_EQUALS("14 box boundary bisections should be found",
-                      box_mid_points.size(), 14);
+    TSM_ASSERT_EQUALS("15 box boundary bisections should be found",
+                      box_mid_points.size(), 15);
     std::vector<double> mid_points_vect(box_mid_points.begin(),
                                         box_mid_points.end());
 

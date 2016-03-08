@@ -234,10 +234,6 @@ protected:
   /// Display normalization to pass onto generated histo workspaces
   Mantid::API::MDNormalization m_displayNormalizationHisto;
 
-  coord_t findBoundaryCrossBisect(coord_t linePos, coord_t lastLinePos,
-                                  const coord_t length,
-                                  std::set<coord_t> &mid_points) const;
-
 private:
   MDEventWorkspace *doClone() const override {
     return new MDEventWorkspace(*this);

@@ -779,23 +779,28 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
     coord_t line_start = start[d];
     coord_t line_end = end[d];
     coord_t box_size = smallest_box_sizes[d];
+    coord_t line_pos_of_box_centre = 0;
 
     std::vector<bool> dim_mask(num_d, false);
     dim_mask[d] = true;
     bool dim_mask_arr[16];
     std::copy(dim_mask.begin(), dim_mask.end(), dim_mask_arr);
 
-    size_t num_boundaries = static_cast<size_t>(
-        ceil(std::abs(line_end - line_start) / smallest_box_sizes[d]));
+    // +1 for the line start
+    size_t num_boundaries =
+        static_cast<size_t>(
+            ceil(std::abs(line_end - line_start) / smallest_box_sizes[d])) +
+        1;
 
     if (dir[d] != 0.0) {
       VMD lastPos = start;
       coord_t lastLinePos = 0;
+      coord_t previousLinePos = 0;
       coord_t dir_current_dim = dir[d];
       for (size_t i = 1; i <= num_boundaries; i++) {
         // Position along the line
         coord_t this_x = i * box_size;
-        coord_t linePos = this_x / dir_current_dim;
+        coord_t linePos = static_cast<coord_t>(this_x / fabs(dir_current_dim));
         // Full position
         VMD pos = start + (dir * linePos);
 
@@ -808,31 +813,26 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
           // If we haven't already a point for this box...
           // This filters out the extra boundaries that don't really exist that
           // we gained by assuming all boxes are the size of the smallest box
-          if (current_id != last_id) {
-            last_id = current_id;
-            lastLinePos = findBoundaryCrossBisect(linePos, lastLinePos, length,
-                                                  mid_points);
+          if ((current_id != last_id && i != 1) || i == num_boundaries) {
+            if (line_pos_of_box_centre >= 0 &&
+                line_pos_of_box_centre <= length) {
+              // Avoid picking up a 0 due to line hitting a box corner
+              if (fabs(linePos - lastLinePos) > 1e-5) {
+                mid_points.insert(line_pos_of_box_centre);
+              }
+            }
+            lastLinePos = previousLinePos;
           }
+          line_pos_of_box_centre =
+              static_cast<coord_t>((linePos + lastLinePos) * 0.5);
+          previousLinePos = linePos;
+
+          last_id = current_id;
         }
       }
     }
   }
   return mid_points;
-}
-
-TMDE(coord_t MDEventWorkspace)::findBoundaryCrossBisect(
-    coord_t linePos, coord_t lastLinePos, const coord_t length,
-    std::set<coord_t> &mid_points) const {
-  if (linePos >= 0 && linePos <= length) {
-    // Avoid picking up a 0 due to line hitting a box corner
-    if (fabs(linePos - lastLinePos) > 1e-5) {
-      coord_t line_pos_of_box_centre =
-          static_cast<coord_t>((linePos + lastLinePos) * 0.5);
-      mid_points.insert(line_pos_of_box_centre);
-    }
-    lastLinePos = linePos;
-  }
-  return lastLinePos;
 }
 
 //-----------------------------------------------------------------------------------------------
