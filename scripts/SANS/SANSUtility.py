@@ -6,7 +6,6 @@
 ########################################################
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup, FileLoaderRegistry
-import mantid
 from mantid.kernel import time_duration, DateAndTime
 import inspect
 import math
@@ -1397,7 +1396,7 @@ def get_start_q_and_end_q_values(rear_data_name, front_data_name, rescale_shift)
 
     if  rear_q_max < front_q_min:
         raise RuntimeError("The min value of the FRONT detector data set is larger"
-                            "than the max value of the REAR detector data set")
+                           "than the max value of the REAR detector data set")
 
     # Get the min and max range
     min_q = max(rear_q_min, front_q_min)
@@ -1527,7 +1526,7 @@ def correct_q_resolution_for_merged(count_ws_front, count_ws_rear,
 
     # We need to make sure that the workspaces match in length
     if ((len(q_resolution_front) != len(q_resolution_rear)) or
-       (len(counts_front) != len(counts_rear))):
+        (len(counts_front) != len(counts_rear))):
         return
 
     # Get everything for the FRONT detector
@@ -1608,8 +1607,8 @@ def get_measurement_time_from_file(filename):
     '''
     def get_month(month_string):
         month_conversion ={"JAN":"01", "FEB":"02", "MAR":"03", "APR":"04",
-                            "MAY":"05", "JUN":"06", "JUL":"07", "AUG":"08",
-                            "SEP":"09", "OCT":"10", "NOV":"11", "DEC":"12"}
+                           "MAY":"05", "JUN":"06", "JUL":"07", "AUG":"08",
+                           "SEP":"09", "OCT":"10", "NOV":"11", "DEC":"12"}
         month_upper = month_string.upper()
         if month_upper in month_conversion:
             return month_conversion[month_upper]

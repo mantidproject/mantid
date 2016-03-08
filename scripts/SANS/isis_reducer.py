@@ -772,7 +772,7 @@ class ISISReducer(Reducer):
             return
         else:
             logger.notice("Updating the IDF of the Reducer. Switching from " +
-                           str(idf_path_reducer) + " to " + str(idf_path_workspace))
+                          str(idf_path_reducer) + " to " + str(idf_path_workspace))
             idf_path = os.path.basename(idf_path_workspace)
             instrument = self._get_correct_instrument(instrument_name, idf_path)
 

@@ -1778,7 +1778,7 @@ def MatchIDFInReducerAndWorkspace(file_name):
     idf_path_reducer = get_current_idf_path_in_reducer()
 
     if ((idf_path_reducer == idf_path_workspace) and
-        su.are_two_files_identical(idf_path_reducer, idf_path_reducer)):
+         su.are_two_files_identical(idf_path_reducer, idf_path_reducer)):
         is_matched = True
     else:
         is_matched = False
