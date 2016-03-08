@@ -1,3 +1,4 @@
+# pylint: disable=too-few-public-methods
 """Holds classes that define the backgrounds for fitting
 """
 import ast
@@ -52,7 +53,7 @@ class PolynomialBackground(object):
         func_str = "name={0},n={1}".format(self.cfunction, str(self.order))
 
         if vals_provided:
-            for power in range (0,self.order+1):
+            for power in range(0, self.order+1):
                 param_name = 'A{0}'.format(power)
                 func_str += ",{0}={1:f}".format(param_name, param_vals[param_prefix + param_name])
 
