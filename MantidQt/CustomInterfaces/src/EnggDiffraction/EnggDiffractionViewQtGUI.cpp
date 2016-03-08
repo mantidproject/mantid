@@ -187,8 +187,8 @@ void EnggDiffractionViewQtGUI::doSetupTabPreproc() {
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabFitting() {
-  connect(m_uiTabFitting.pushButton_fitting_browse_run_num, SIGNAL(released()), this,
-          SLOT(browseFitFocusedRun()));
+  connect(m_uiTabFitting.pushButton_fitting_browse_run_num, SIGNAL(released()),
+          this, SLOT(browseFitFocusedRun()));
 
   connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)), this,
           SLOT(fittingBankIdChanged(int)));
@@ -1109,7 +1109,11 @@ void EnggDiffractionViewQtGUI::setBankIdComboBox(int idx) {
   bankName->setCurrentIndex(idx);
 }
 
-std::string EnggDiffractionViewQtGUI::fittingPeaksFile() const {
+std::string EnggDiffractionViewQtGUI::fittingRunNo() const {
+  return m_uiTabFitting.lineEdit_pushButton_run_num->text().toStdString();
+}
+
+std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {
   return m_uiTabFitting.lineEdit_fitting_peaks->text().toStdString();
 }
 

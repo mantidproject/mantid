@@ -137,7 +137,9 @@ public:
 
   virtual double rebinningPulsesTime() const;
 
-  std::string fittingPeaksFile() const;
+  std::string fittingRunNo() const;
+
+  std::string fittingPeaksData() const;
 
   std::string readPeaksFile(std::string fileDir);
 

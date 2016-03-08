@@ -103,6 +103,7 @@ protected:
   void processResetFocus();
   void processRebinTime();
   void processRebinMultiperiod();
+  void processFitPeaks();
   void processLogMsg();
   void processInstChange();
   void processRBNumberChange();
