@@ -223,6 +223,14 @@ protected:
     return *this;
   }
 
+  void getBoundariesInDimension(const Mantid::Kernel::VMD &start,
+                                const Mantid::Kernel::VMD &dir,
+                                const size_t num_boundaries,
+                                const coord_t length,
+                                const coord_t dir_current_dim,
+                                const coord_t box_size,
+                                std::set<coord_t> &mid_points) const;
+
   /** MDBox containing all of the events in the workspace. */
   MDBoxBase<MDE, nd> *data;
 

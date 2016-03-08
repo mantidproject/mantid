@@ -773,13 +773,11 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
 
   // Next, we go through each dimension and see where the box boundaries
   // intersect the line.
-  const IMDNode *box = nullptr;
-  size_t last_id = size_t(-1);
   for (size_t d = 0; d < num_d; d++) {
     coord_t line_start = start[d];
     coord_t line_end = end[d];
     coord_t box_size = smallest_box_sizes[d];
-    coord_t line_pos_of_box_centre = 0;
+    coord_t dir_current_dim = dir[d];
 
     std::vector<bool> dim_mask(num_d, false);
     dim_mask[d] = true;
@@ -788,56 +786,67 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
 
     // +1 to get the last box
     size_t num_boundaries =
-        static_cast<size_t>(
-            ceil(std::abs(line_end - line_start) / smallest_box_sizes[d])) +
+        static_cast<size_t>(ceil(std::abs(line_end - line_start) / box_size)) +
         1;
 
+    // If the line has some component in this dimension then look for boundaries
+    // it crosses
     if (dir[d] != 0.0) {
-      VMD lastPos = start;
-      coord_t lastLinePos = 0;
-      coord_t previousLinePos = 0;
-      coord_t dir_current_dim = dir[d];
-      for (size_t i = 1; i <= num_boundaries; i++) {
-        size_t current_id = size_t(-1);
-        // Position along the line
-        coord_t this_x = i * box_size;
-        coord_t linePos = static_cast<coord_t>(this_x / fabs(dir_current_dim));
-        // Full position
-        VMD pos = start + (dir * linePos);
-
-        // Get box using midpoint as using boundary would be ambiguous
-        VMD middle = (pos + lastPos) * 0.5;
-        box = this->data->getBoxAtCoord(middle.getBareArray());
-        lastPos = pos;
-        if (box != nullptr) {
-          current_id = box->getID();
-          // Make sure we get the last box
-        } else if (i == num_boundaries) {
-          current_id = size_t(-1);
-        } else
-          continue;
-        // If we haven't already a point for this box...
-        // This filters out the extra boundaries that don't really exist that
-        // we gained by assuming all boxes are the size of the smallest box
-        if ((current_id != last_id && i != 1)) {
-          if (line_pos_of_box_centre >= 0 &&
-              line_pos_of_box_centre <= length) {
-            // Avoid picking up a 0 due to line hitting a box corner
-            if (fabs(linePos - lastLinePos) > 1e-5) {
-              mid_points.insert(line_pos_of_box_centre);
-            }
-          }
-          lastLinePos = previousLinePos;
-        }
-        line_pos_of_box_centre =
-            static_cast<coord_t>((linePos + lastLinePos) * 0.5);
-        previousLinePos = linePos;
-
-        last_id = current_id;
-      }
+      getBoundariesInDimension(start, dir, num_boundaries, length,
+                               dir_current_dim, box_size, mid_points);
     }
   }
   return mid_points;
+}
+
+TMDE(void MDEventWorkspace)::getBoundariesInDimension(
+    const VMD &start, const VMD &dir, const size_t num_boundaries,
+    const coord_t length, const coord_t dir_current_dim, const coord_t box_size,
+    std::set<coord_t> &mid_points) const {
+  VMD lastPos = start;
+  coord_t lastLinePos = 0;
+  coord_t previousLinePos = 0;
+  coord_t line_pos_of_box_centre = 0;
+  const IMDNode *box = nullptr;
+  size_t last_id = static_cast<size_t>(-1);
+
+  for (size_t i = 1; i <= num_boundaries; i++) {
+    size_t current_id = static_cast<size_t>(-1);
+    // Position along the line
+    coord_t this_x = i * box_size;
+    coord_t linePos = static_cast<coord_t>(this_x / fabs(dir_current_dim));
+    // Full position
+    VMD pos = start + (dir * linePos);
+
+    // Get box using midpoint as using boundary would be ambiguous
+    VMD middle = (pos + lastPos) * 0.5;
+    box = this->data->getBoxAtCoord(middle.getBareArray());
+    lastPos = pos;
+    if (box != nullptr) {
+      current_id = box->getID();
+      // Make sure we get the last box
+    } else if (i == num_boundaries) {
+      current_id = size_t(-1);
+    } else
+      continue;
+    // If we haven't already a point for this box...
+    // This filters out the extra boundaries that don't really exist that
+    // we gained by assuming all boxes are the size of the smallest box
+    if ((current_id != last_id && i != 1)) {
+      if (line_pos_of_box_centre >= 0 && line_pos_of_box_centre <= length) {
+        // Avoid picking up a 0 due to line hitting a box corner
+        if (fabs(linePos - lastLinePos) > 1e-5) {
+          mid_points.insert(line_pos_of_box_centre);
+        }
+      }
+      lastLinePos = previousLinePos;
+    }
+    line_pos_of_box_centre =
+        static_cast<coord_t>((linePos + lastLinePos) * 0.5);
+    previousLinePos = linePos;
+
+    last_id = current_id;
+  }
 }
 
 //-----------------------------------------------------------------------------------------------
