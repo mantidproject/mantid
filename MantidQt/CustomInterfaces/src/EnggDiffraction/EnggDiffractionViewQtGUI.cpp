@@ -10,7 +10,7 @@ using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
 #include <boost/lexical_cast.hpp>
-
+#include <fstream>
 #include <Poco/Path.h>
 
 #include <QCheckBox>
@@ -347,6 +347,7 @@ void EnggDiffractionViewQtGUI::readSettings() {
   m_uiTabFitting.comboBox_bank->setCurrentIndex(0);
   m_uiTabFitting.lineEdit_fitting_peaks->setText(
       qs.value("user-params-fitting-peaks-to-fit", "").toString());
+  m_uiTabFitting.listWidget_fitting_bank_preview->setCurrentRow(0);
 
   // settings
   QString lastPath =
@@ -629,6 +630,25 @@ std::vector<std::string> EnggDiffractionViewQtGUI::fittingRunNo() const {
   return qListToVector(
       m_uiTabFitting.MWRunFiles_fititng_run_num->getFilenames(),
       m_uiTabFitting.MWRunFiles_fititng_run_num->isValid());
+}
+
+std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
+  std::string fileData = "";
+  std::string line;
+
+  std::ifstream peakFile(fileDir);
+
+  if (peakFile.is_open()) {
+    while (std::getline(peakFile, line)) {
+      fileData += line;
+    }
+    peakFile.close();
+  }
+
+  else
+    fileData = "";
+
+  return fileData;
 }
 
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
@@ -943,7 +963,11 @@ void EnggDiffractionViewQtGUI::browsePeaksToFit() {
   }
 
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
-  m_uiTabFitting.lineEdit_fitting_peaks->setText(path);
+
+  std::string peaksData = readPeaksFile(path.toStdString());
+
+  m_uiTabFitting.lineEdit_fitting_peaks->setText(
+      QString::fromStdString(peaksData));
 }
 
 std::vector<std::string> EnggDiffractionViewQtGUI::focusingRunNo() const {

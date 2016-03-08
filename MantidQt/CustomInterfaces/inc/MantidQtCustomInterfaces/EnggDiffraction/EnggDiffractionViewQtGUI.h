@@ -141,6 +141,8 @@ public:
 
   std::string fittingPeaksFile() const;
 
+  std::string readPeaksFile(std::string fileDir);
+
   virtual void plotFocusedSpectrum(const std::string &wsName);
 
   virtual void plotWaterfallSpectrum(const std::string &wsName);
