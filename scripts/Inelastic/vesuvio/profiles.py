@@ -120,7 +120,7 @@ class GaussianMassProfile(MassProfile):
 
         try:
             width = cls._parse_list(func_str, "width")
-        except ValueError, exc:
+        except ValueError:
             width = cls._parse_float(func_str, "width")
 
         params = {
@@ -229,6 +229,7 @@ class GramCharlierMassProfile(MassProfile):
 
         return GramCharlierMassProfile(**params)
 
+    # pylint: disable=too-many-branches
     def create_fit_function_str(self, param_vals=None, param_prefix=""):
         """Creates a string used by the Fit algorithm for this profile
 
@@ -284,7 +285,7 @@ class GramCharlierMassProfile(MassProfile):
         # All coefficients should be greater than zero
         for i, coeff in enumerate(self.hermite_co):
             if coeff > 0:
-                constraints += "{0}C_{1} > 0.0,".format(param_prefix,2*i)
+                constraints += "{0}C_{1} > 0.0,".format(param_prefix, 2*i)
         return constraints.rstrip(",")
 
     def create_ties_str(self, param_prefix=""):
