@@ -303,11 +303,11 @@ TMDE(signal_t MDEventWorkspace)::getNormalizedError(
   if (box) {
     // What is our normalization factor?
     switch (normalization) {
-    case NoNormalization:
+    case Mantid::API::NoNormalization:
       return box->getError();
-    case VolumeNormalization:
+    case Mantid::API::VolumeNormalization:
       return box->getError() * box->getInverseVolume();
-    case NumEventsNormalization:
+    case Mantid::API::NumEventsNormalization:
       return box->getError() / double(box->getNPoints());
     }
     // Should not reach here
@@ -750,7 +750,8 @@ TMDE(void MDEventWorkspace)::refreshCache() {
  * @returns :: ordered set of halfway points between box crossings
  */
 TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
-    const VMD &start, const VMD &end, const size_t num_d, const VMD &dir,
+    const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &end,
+    const size_t num_d, const Mantid::Kernel::VMD &dir,
     const coord_t length) const {
   std::set<coord_t> mid_points;
 
@@ -797,14 +798,15 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
  * @param mid_points :: ordered set of halfway points between box crossings
  */
 TMDE(void MDEventWorkspace)::getBoundariesInDimension(
-    const VMD &start, const VMD &dir, const size_t num_boundaries,
-    const coord_t length, const coord_t dir_current_dim, const coord_t box_size,
+    const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &dir,
+    const size_t num_boundaries, const coord_t length,
+    const coord_t dir_current_dim, const coord_t box_size,
     std::set<coord_t> &mid_points) const {
-  VMD lastPos = start;
+  Mantid::Kernel::VMD lastPos = start;
   coord_t lastLinePos = 0;
   coord_t previousLinePos = 0;
   coord_t line_pos_of_box_centre = 0;
-  const IMDNode *box = nullptr;
+  const API::IMDNode *box = nullptr;
   size_t last_id = static_cast<size_t>(-1);
 
   for (size_t i = 1; i <= num_boundaries; i++) {
@@ -813,10 +815,10 @@ TMDE(void MDEventWorkspace)::getBoundariesInDimension(
     coord_t this_x = i * box_size;
     coord_t linePos = static_cast<coord_t>(this_x / fabs(dir_current_dim));
     // Full position
-    VMD pos = start + (dir * linePos);
+    Mantid::Kernel::VMD pos = start + (dir * linePos);
 
     // Get box using midpoint as using boundary would be ambiguous
-    VMD middle = (pos + lastPos) * 0.5;
+    Mantid::Kernel::VMD middle = (pos + lastPos) * 0.5;
     box = this->data->getBoxAtCoord(middle.getBareArray());
     lastPos = pos;
     if (box != nullptr) {
@@ -871,7 +873,7 @@ TMDE(API::IMDWorkspace::LinePlot MDEventWorkspace)
         "End point must have the same number of dimensions as the workspace.");
 
   // Unit-vector of the direction
-  VMD dir = end - start;
+  Mantid::Kernel::VMD dir = end - start;
   const auto length = dir.normalize();
 
   const std::set<coord_t> mid_points =
@@ -886,7 +888,7 @@ TMDE(API::IMDWorkspace::LinePlot MDEventWorkspace)
 
     for (const auto &line_pos : mid_points) {
       // This position in coordinates of the workspace is
-      VMD ws_pos = start + (dir * line_pos);
+      Mantid::Kernel::VMD ws_pos = start + (dir * line_pos);
 
       if (isInBounds(ws_pos.getBareArray())) {
         auto box = this->data->getBoxAtCoord(ws_pos.getBareArray());
