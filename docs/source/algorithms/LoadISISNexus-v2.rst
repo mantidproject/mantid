@@ -22,7 +22,8 @@ contain a ``/isis_vms_compat`` group to be loaded.
 The workspace data is loaded from ``raw_data_1/Detector_1``. 
 Instrument information is loaded ``raw_data_1/Instrument``, if available there and not overriden.
 Also the ``NSP1``, ``UDET``, ``SPEC``, ``HDR``, ``IRPB``, ``RRPB``, ``SPB`` and ``RSPB`` sections of
-``raw_data_1/isis_vms_compat`` are read.
+``raw_data_1/isis_vms_compat`` are read. The contents of ``isis_vms_compat`` are a legacy from an older ISIS format.
+
 
 Here are some tables that show it in more detail:
 
@@ -43,7 +44,6 @@ Here are some tables that show it in more detail:
 |                              | within ``isis_vms_compat``                |                                     |
 +------------------------------+-------------------------------------------+-------------------------------------+  
 | Run                          | various places as shown later on,         | Run object                          |
-|                              | not ``runlog``                            |                                     |
 +------------------------------+-------------------------------------------+-------------------------------------+
 | Sample                       | ``SPB`` and ``RSPB`` within               | Sample Object                       | 
 |                              | ``isis_vms_compat``                       |                                     |
@@ -51,6 +51,8 @@ Here are some tables that show it in more detail:
 
 Run Object
 ''''''''''
+The Nexus ``runlog`` group is loaded into the ISIS run object by a call of :ref:`algm-LoadNexusLogs`. 
+Also LoadISISNexus loads the Nexus ``raw_data_1/periods/proton_charge`` group into the ``proton_charge_by_period`` property of the workspace run object.
 
 The default properties of ISIS run object (as listed in :ref:`Run <Run>` ) are loaded as follows:
 
@@ -112,7 +114,7 @@ In the Nexus column, groups in capitals are in ``raw_data_1/isis_vms_compat`` an
 and in RRPB it is seen as 32-bit floating point (same 32 bits).
 In all cases, integers are passed. The 32-bit floating point numbers are used only to store larger integers.
 
-The ``runlog`` group in the Nexus file is not read. The other indices of ``IRPB`` and ``RRPB`` are not read.
+The other indices of ``IRPB`` and ``RRPB`` are not read.
 
 
 Sample Object
