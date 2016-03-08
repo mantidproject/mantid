@@ -13,8 +13,6 @@ Description
 The algorithm calculates a normalization MD workspace for single crystal diffraction experiments. 
 Trajectories of each detector in reciprocal space are calculated, and the flux is integrated between intersections with each
 MDBox. A brief introduction to the multi-dimensional data normalization can be found :ref:`here <MDNorm>`.
-Results from using this algorithm for TOPAZ data at SNS can be found
-`here <http://journals.iucr.org/j/issues/2016/02/00/fs5119/fs5119.pdf>`_.
 
 
 Usage
@@ -87,7 +85,14 @@ Usage
 
     
     
-    
+
+References
+----------
+
+The source for how this calculation is done is
+
+#. T. M. Michels-Clark, A. T. Savici, V. E. Lynch, X. P. Wang and C. M. Hoffmann *Expanding Lorentz and spectrum corrections to large volumes of reciprocal space for single-crystal time-of-flight neutron diffraction. *J Appl Crystallogr **49.2** (2016) doi: `10.1107/S1600576716001369 <http://dx.doi.org/10.1107/S1600576716001369>`_
+
 .. categories::
 
 .. sourcelink::

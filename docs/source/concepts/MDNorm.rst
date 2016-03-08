@@ -141,8 +141,6 @@ box in :math:`HKL` space.
    
 The way to account for excluded data is algorithm dependent. See
 the documentation for each particular implementation.
-Results from using this normalization for a single crystal elastic experiment can be found
-`here <http://journals.iucr.org/j/issues/2016/02/00/fs5119/fs5119.pdf>`_.
 
 Symmetrization
 ++++++++++++++
@@ -161,5 +159,12 @@ As of release 3.3, the normalization can be calculated for single crystal
 diffraction (:ref:`MDNormSCD <algm-MDNormSCD>`) 
 and single crystal direct geometry inelastic scattering 
 (:ref:`MDNormDirectSC <algm-MDNormDirectSC>`).
+
+References
+----------
+
+The source for how this calculation is done is
+
+#. T. M. Michels-Clark, A. T. Savici, V. E. Lynch, X. P. Wang and C. M. Hoffmann *Expanding Lorentz and spectrum corrections to large volumes of reciprocal space for single-crystal time-of-flight neutron diffraction. *J Appl Crystallogr **49.2** (2016) doi: `10.1107/S1600576716001369 <http://dx.doi.org/10.1107/S1600576716001369>`_
 
 .. categories:: Concepts
