@@ -138,8 +138,8 @@ class IndirectCommonTests(unittest.TestCase):
         self.assertRaises(ValueError, indirect_common.CheckAnalysers, ws1, ws2)
 
     def test_CheckAnalysers_raises_runtimeError_with_no_inst_data(self):
-        ws1 = make_dummy_workspace_without_instrument('test_ws1')
-        ws2 = make_dummy_workspace_without_instrument('test_ws2')
+        ws1 = self.make_dummy_workspace_without_instrument('test_ws1')
+        ws2 = self.make_dummy_workspace_without_instrument('test_ws2')
         self.assertRaises(RuntimeError, indirect_common.CheckAnalysers, ws1, ws2)
 
     def test_CheckHistZero(self):
