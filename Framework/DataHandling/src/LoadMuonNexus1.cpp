@@ -590,7 +590,7 @@ LoadMuonNexus1::createDetectorGroupingTable(std::vector<int> specToLoad,
 
 /** Load in a single spectrum taken from a NeXus file
 *  @param hist ::     The workspace index
-*  @param i ::        The spectrum index
+*  @param i ::        The spectrum number
 *  @param specNo ::   The spectrum number
 *  @param nxload ::   A reference to the MuonNeXusReader object
 *  @param lengthIn :: The number of elements in a spectrum

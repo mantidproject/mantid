@@ -127,9 +127,9 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         return monitor_1_idx, monitor_2_idx, detector_1_idx
 
 
-    def _get_detector_spectrum_index(self, workspace, detector_id):
+    def _get_detector_workspace_index(self, workspace, detector_id):
         """
-        Returns the spectrum index for a given detector ID in a workspace.
+        Returns the workspace index for a given detector ID in a workspace.
 
         @param workspace Workspace to find detector in
         @param detector_id Detector ID to search for

@@ -136,7 +136,7 @@ void EQSANSTofStructure::execEvent(
     try {
       det = inputWS->getDetector(ispec);
     } catch (Exception::NotFoundError &) {
-      g_log.warning() << "Spectrum index " << ispec
+      g_log.warning() << "Workspace index " << ispec
                       << " has no detector assigned to it - discarding"
                       << std::endl;
       // 'continue' statement moved outside catch block because Mac Intel
