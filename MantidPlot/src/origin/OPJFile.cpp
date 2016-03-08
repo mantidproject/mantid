@@ -428,6 +428,8 @@ int OPJFile::ParseFormatOld() {
         current_col++;
       } else {
         fprintf(debug, "SPREADSHEET got negative index: %d\n", spread);
+        fclose(f);
+        fclose(debug);
         return -1;
       }
     }
@@ -845,6 +847,8 @@ int OPJFile::ParseFormatNew() {
   if (colpos < 0) {
     fprintf(debug,
             " ERROR : ftell returned a negative value after finding a column");
+    fclose(f);
+    fclose(debug);
     return -1;
   }
 
