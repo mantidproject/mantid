@@ -83,15 +83,6 @@ public:
     std::vector<signal_t> e;
   };
 
-  /**
- * Holds X, Y, E for a line plot
- */
-  struct LinePlot {
-    std::vector<coord_t> x;
-    std::vector<signal_t> y;
-    std::vector<signal_t> e;
-  };
-
   /// Returns a clone of the workspace
   std::unique_ptr<IMDWorkspace> clone() const {
     return std::unique_ptr<IMDWorkspace>(doClone());
