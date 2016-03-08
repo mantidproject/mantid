@@ -98,7 +98,6 @@ class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
         MaskFile('MASKSANS2D.091A')
         Set1D()
         instrument_name = "SANS2D"
-        #filename = 'SANS2D00000992.raw'
         filename = 'SANS2D00029089.nxs'
         idf_workspace = self._get_idf_path_for_workspace(filename, instrument_name)
         idf_reducer_before = ReductionSingleton().get_idf_file_path()
@@ -117,7 +116,6 @@ class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
         MaskFile('MASKSANS2D.091A')
         Set1D()
         instrument_name = "SANS2D"
-        #filename = 'SANS2D00000992.raw'
         filename = 'SANS2D00029089.nxs'
         idf_workspace = self._get_idf_path_for_workspace(filename, instrument_name)
         idf_reducer_before = ReductionSingleton().get_idf_file_path()

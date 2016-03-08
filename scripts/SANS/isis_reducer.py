@@ -744,7 +744,7 @@ class ISISReducer(Reducer):
         instrument_name = self.get_instrument_name()
         # We need to be able to handle file-based and workspace-based queries
         # If we have a workspace we look at the end time, else we
-        # need a sophisticated extraciton mechanism
+        # need a sophisticated extraction mechanism
         if isinstance(run, Workspace):
             ws = None
             if isinstance(run, WorkspaceGroup):
@@ -771,7 +771,8 @@ class ISISReducer(Reducer):
         if idf_path_reducer == idf_path_workspace and su.are_two_files_identical(idf_path_reducer, idf_path_reducer):
             return
         else:
-            logger.warning("Updating the IDF of the Reducer. Switching from " + str(idf_path_reducer) + " to " + str(idf_path_workspace))
+            logger.notice("Updating the IDF of the Reducer. Switching from " +
+                           str(idf_path_reducer) + " to " + str(idf_path_workspace))
             idf_path = os.path.basename(idf_path_workspace)
             instrument = self._get_correct_instrument(instrument_name, idf_path)
 
@@ -787,7 +788,7 @@ class ISISReducer(Reducer):
                 # seems to be the only reasonable way to do this.
                 self.user_settings.execute(self)
 
-                # Now we set the corret detector, this is also being done in the GUI
+                # Now we set the correct detector, this is also being done in the GUI
                 self.get_instrument().setDetector(old_detector_selection)
 
     def _get_correct_instrument(self, instrument_name, idf_path = None):
