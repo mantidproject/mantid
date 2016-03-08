@@ -26,7 +26,7 @@ void ChangeBinOffset::init() {
   declareProperty("Offset", 0.0, isDouble,
                   "The amount to change each time bin by");
 
-  declareSpectrumIndexSetProperties();
+  declareWorkspaceIndexSetProperties();
 }
 
 void ChangeBinOffset::exec() {

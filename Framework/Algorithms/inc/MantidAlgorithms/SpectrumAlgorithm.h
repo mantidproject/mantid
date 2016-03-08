@@ -84,7 +84,7 @@ private:
     // range property, otherwise default to the full range of all histograms.
     Kernel::IndexSet indexSet(workspace.getNumberHistograms());
     if (contains<Indices::FromProperty, Flags...>())
-      indexSet = getSpectrumIndexSet(workspace);
+      indexSet = getWorkspaceIndexSet(workspace);
     auto size = static_cast<int64_t>(indexSet.size());
     API::Progress progress(this, 0.0, 1.0, size);
 
@@ -107,6 +107,10 @@ private:
   template <class WS> void ifEventWorkspaceClearMRU(const WS &workspace) {
     UNUSED_ARG(workspace);
   }
+
+  std::string m_indexMinPropertyName;
+  std::string m_indexMaxPropertyName;
+  std::string m_indexRangePropertyName;
 
 protected:
   /// Dummy struct holding compile-time flags to for_each().
@@ -152,9 +156,12 @@ protected:
                        typename gens<sizeof...(Args)>::type(), operation);
   }
 
-  void declareSpectrumIndexSetProperties();
+  void declareWorkspaceIndexSetProperties(
+      const std::string &indexMinPropertyName = "IndexMin",
+      const std::string &indexMaxPropertyName = "IndexMax",
+      const std::string &indexRangePropertyName = "WorkspaceIndexList");
   Kernel::IndexSet
-  getSpectrumIndexSet(const API::MatrixWorkspace &workspace) const;
+  getWorkspaceIndexSet(const API::MatrixWorkspace &workspace) const;
 };
 
 template <>
