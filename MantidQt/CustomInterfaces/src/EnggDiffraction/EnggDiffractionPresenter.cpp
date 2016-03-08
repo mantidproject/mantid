@@ -123,9 +123,9 @@ void EnggDiffractionPresenter::notify(
     break;
 
   case IEnggDiffractionPresenter::FitPeaks:
-	  processFitPeaks();
+    processFitPeaks();
 
-	  break;
+    break;
 
   case IEnggDiffractionPresenter::LogMsg:
     processLogMsg();
@@ -451,36 +451,53 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
   startAsyncRebinningPulsesWorker(runNo, nperiods, timeStep, outWSName);
 }
 
-// shahroz
 void EnggDiffractionPresenter::processFitPeaks() {
-	MatrixWorkspace_sptr focusedWS;
+  MatrixWorkspace_sptr focusedWS;
 
-	const std::string runNo = m_view->fittingRunNo();
-	const std::string fitPeaks = m_view->fittingPeaksData();
+  const std::string runNo = m_view->fittingRunNo();
+  const std::string fitPeaksData = m_view->fittingPeaksData();
 
-	try {
-		auto load =
-			Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
-		load->initialize();
-		load->setPropertyValue("Filename", runNo);
-		const std::string FocusedWSName = "engggui_focused_ws";
-		load->setPropertyValue("OutputWorkspace", FocusedWSName);
-		load->execute();
+  try {
+    auto load =
+        Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+    load->initialize();
+    load->setPropertyValue("Filename", runNo);
+    const std::string FocusedWSName = "engggui_fitting_focused_ws";
+    load->setPropertyValue("OutputWorkspace", FocusedWSName);
+    load->execute();
 
-		AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-		focusedWS = ADS.retrieveWS<MatrixWorkspace>(FocusedWSName);
-	}
-	catch (std::runtime_error &re) {
-		g_log.error()
-			<< "Error while loading focused data. "
-			"Could not run the algorithm Load succesfully for the Fit "
-			"peaks (file name: " +
-			runNo + "). Error description: " + re.what() +
-			" Please check also the previous log messages for details.";
-		throw;
-	}
+    AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+    focusedWS = ADS.retrieveWS<MatrixWorkspace>(FocusedWSName);
+  } catch (std::runtime_error &re) {
+    g_log.error()
+        << "Error while loading focused data. "
+           "Could not run the algorithm Load succesfully for the Fit "
+           "peaks (file name: " +
+               runNo + "). Error description: " + re.what() +
+               " Please check also the previous log messages for details.";
+    throw;
+  }
 
-
+  auto alg =
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged("EnggFitPeaks");
+  try {
+    alg->initialize();
+    alg->setProperty("InputWorkspace", focusedWS);
+    // alg->setProperty("WorkspaceIndex", 0);
+    alg->setProperty("ExpectedPeaks", fitPeaksData);
+    const std::string FocusedFitPeaksWSName =
+        "engggui_fitting_focused_fitpeaks";
+    alg->setProperty("FittedPeaks", FocusedFitPeaksWSName);
+    alg->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Could not run the algorithm EnggFitPeaks "
+                     "successfully for bank, "
+                     // bank name
+                     "Error description: " +
+                         static_cast<std::string>(re.what()) +
+                         " Please check also the log message for detail.";
+    throw;
+  }
 }
 
 void EnggDiffractionPresenter::processLogMsg() {
