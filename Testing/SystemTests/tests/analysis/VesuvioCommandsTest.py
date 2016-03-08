@@ -1,11 +1,10 @@
+# pylint: disable=no-init
 """These are more integration tests as they will require that the test data is available
 and that mantid can be imported
 """
 import stresstesting
-from abc import ABCMeta, abstractmethod
 
 from mantid.api import (WorkspaceGroup, MatrixWorkspace)
-import mantid
 from mantid.simpleapi import *
 from vesuvio.commands import fit_tof
 
@@ -19,7 +18,7 @@ def _create_test_flags(background):
     flags['spectra'] = '135'
 
     mass1 = {'value': 1.0079, 'function': 'GramCharlier', 'width': [2, 5, 7],
-              'hermite_coeffs': [1,0,0], 'k_free': 0, 'sears_flag': 1}
+             'hermite_coeffs': [1, 0, 0], 'k_free': 0, 'sears_flag': 1}
     mass2 = {'value': 16.0, 'function': 'Gaussian', 'width': 10}
     mass3 = {'value': 27.0, 'function': 'Gaussian', 'width': 13}
     mass4 = {'value': 133.0, 'function': 'Gaussian', 'width': 30}
