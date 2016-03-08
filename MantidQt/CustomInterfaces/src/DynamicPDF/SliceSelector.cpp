@@ -131,27 +131,36 @@ void SliceSelector::updateSelectedSlice(const int &newSelectedIndex) {
     m_uiForm.labelSliceEnergy->setText(
         QString::fromStdString(m_loadedWorkspace->m_label));
     m_uiForm.spinboxSliceSelector->setValue(newSelectedIndex);
-    updatePickerLine();
-    updatePreviewPlotSelectedSlice();
+    this->updatePickerLine();
+    this->updatePreviewPlotSelectedSlice();
   }
 }
 
 /**
- * @brief Update widgets when pickerLine is manually changed
+ * @brief Update widgets when pickerLine is manually changed. Do not update if
+ * the pickerLine moved so little that it did not positioned over a different
+ * slice.
  * @param newEnergySelected the new energy retrieved from the pickerLine
  */
 void SliceSelector::newIndexFromPickedEnergy(const double &newEnergySelected){
   auto axis = m_loadedWorkspace->m_ws->getAxis(1);
-  auto newSelectedIndex = static_cast<int>(axis->indexOfValue(newEnergySelected));
-  updateSelectedSlice(newSelectedIndex);
+  auto newSelectedIndex = axis->indexOfValue(newEnergySelected);
+  if(m_selectedWorkspaceIndex != newSelectedIndex){
+    updateSelectedSlice(static_cast<int>(newSelectedIndex));
+  }
 }
 
 /**
  * @brief Update the position of the picker line as a response to changes in the
- * SliceSelector. Do not emit a signal upon this change.
+ * SliceSelector, unless the energy being pointed to corresponds to the current index.
  */
 void SliceSelector::updatePickerLine(){
-  m_pickerLine->setMinimum(m_loadedWorkspace->m_energy);
+  auto energyBeingPointedTo = m_pickerLine->getMinimum();
+  auto axis = m_loadedWorkspace->m_ws->getAxis(1);
+  auto indexBeingPointedTo = axis->indexOfValue(energyBeingPointedTo);
+  if(m_selectedWorkspaceIndex != indexBeingPointedTo){
+    m_pickerLine->setMinimum(m_loadedWorkspace->m_energy);
+  }
 }
 
 /**
