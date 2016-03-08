@@ -1777,15 +1777,28 @@ void MuonAnalysis::clearLoadedRun() {
  */
 std::string MuonAnalysis::getPeriodLabels() const {
   std::ostringstream retVal;
-  if (m_uiForm.homePeriodBox2->isEnabled()) {
-    retVal << m_uiForm.homePeriodBox1->text().toStdString();
-    if (m_uiForm.homePeriodBox2->text() != "") {
-      retVal << "_" << m_uiForm.homePeriodBox2->text().toStdString();
-    }
-  } else {
-    // single-period data
-    retVal << "";
+
+  // Change input comma-separated to more readable format
+  auto summed = getSummedPeriods();
+  std::replace(summed.begin(), summed.end(), ',', '+');
+  auto subtracted = getSubtractedPeriods();
+  if (!subtracted.empty()) {
+    std::replace(subtracted.begin(), subtracted.end(), ',', '+');
   }
+
+  // If single period, or all (1,2,3,...) then leave blank
+  // All periods => size of string is 2n-1
+  const bool isSinglePeriod = m_numPeriods == 1;
+  const bool isAllPeriods =
+      summed.size() == 2 * m_numPeriods - 1 && subtracted.empty();
+
+  if (!isSinglePeriod && !isAllPeriods) {
+    retVal << summed;
+    if (!subtracted.empty()) {
+      retVal << "-" << subtracted;
+    }
+  }
+
   return retVal.str();
 }
 
@@ -3043,8 +3056,9 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm() {
 
   loadAlg->setProperty("SummedPeriodSet", getSummedPeriods());
 
-  if (m_uiForm.homePeriodBox2->text() != "None") {
-    loadAlg->setProperty("SubtractedPeriodSet", getSubtractedPeriods());
+  const auto subtracted = getSubtractedPeriods();
+  if (subtracted != "None") {
+    loadAlg->setProperty("SubtractedPeriodSet", subtracted);
   }
 
   return loadAlg;

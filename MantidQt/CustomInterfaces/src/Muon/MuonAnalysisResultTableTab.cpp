@@ -978,9 +978,7 @@ MuonAnalysisResultTableTab::runNumberString(const std::string &workspaceName,
 
   QString ret(instRuns.c_str());
   if (!periods.empty()) {
-    QString fmtPeriods(periods.c_str());
-    fmtPeriods.replace(',', '+').replace('_', '-');
-    ret.append(": ").append(fmtPeriods);
+    ret.append(": ").append(periods.c_str());
   }
   return ret;
 }
