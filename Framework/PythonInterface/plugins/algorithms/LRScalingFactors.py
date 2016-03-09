@@ -1,5 +1,6 @@
 #pylint: disable=invalid-name, no-init
 import os
+import re
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
@@ -379,13 +380,19 @@ class LRScalingFactors(PythonAlgorithm):
         """
         scaling_file = self.getPropertyValue("ScalingFactorFile")
         # Extend the existing content of the scaling factor file
-        scaling_file_content = self.read_scaling_factor_file(scaling_file)
+        scaling_file_content, scaling_file_meta = self.read_scaling_factor_file(scaling_file)
         scaling_file_content.extend(self.scaling_factors)
+
+        direct_beams = list(self.getProperty("DirectBeamRuns").value)
+        medium = self.getProperty("IncidentMedium").value
+        scaling_file_meta[medium] = "# Medium=%s, runs: %s" % (medium, direct_beams)
 
         fd = open(scaling_file, 'w')
         fd.write("# y=a+bx\n#\n")
         fd.write("# LambdaRequested[Angstroms] S1H[mm] (S2/Si)H[mm] S1W[mm] (S2/Si)W[mm] a b error_a error_b\n#\n")
-        fd.write("# Direct beam runs: %s\n" % str(self.getProperty("DirectBeamRuns").value))
+
+        for k, v in scaling_file_meta.iteritems():
+            fd.write("%s\n" % v)
         for item in scaling_file_content:
             fd.write("IncidentMedium=%s " % item["IncidentMedium"])
             fd.write("LambdaRequested=%s " % item["LambdaRequested"])
@@ -405,12 +412,18 @@ class LRScalingFactors(PythonAlgorithm):
             @param scaling_file: path of the scaling factor file to read
         """
         scaling_file_content = []
+        scaling_file_meta = {}
         if os.path.isfile(scaling_file):
             fd = open(scaling_file, 'r')
             content = fd.read()
             fd.close()
             for line in content.split('\n'):
-                if line.startswith('#') or len(line.strip()) == 0:
+                if line.startswith('# Medium='):
+                    m=re.search('# Medium=(.+), runs', line)
+                    if m is not None:
+                        scaling_file_meta[m.group(1)] = line
+                    continue
+                elif line.startswith('#') or len(line.strip()) == 0:
                     continue
                 toks = line.split()
                 entry = {}
@@ -428,7 +441,7 @@ class LRScalingFactors(PythonAlgorithm):
                         add_this_entry = False
                 if add_this_entry:
                     scaling_file_content.append(entry)
-        return scaling_file_content
+        return scaling_file_content, scaling_file_meta
 
     def process_data(self, workspace, peak_range, background_range, low_res_range):
         """

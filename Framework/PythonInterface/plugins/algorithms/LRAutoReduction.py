@@ -284,7 +284,7 @@ class LRAutoReduction(PythonAlgorithm):
         # TODO: sync up names with new DAS
         # Get information from meta-data
         meta_data_run = self.event_data.getRun()
-        incident_medium = self._read_property(meta_data_run, "incident_medium", "air")
+        incident_medium = self._read_property(meta_data_run, "incident_medium", "medium")
         q_min = self._read_property(meta_data_run, "output_q_min", 0.001)
         q_step = -abs(self._read_property(meta_data_run, "output_q_step", 0.02))
         dQ_constant = self._read_property(meta_data_run, "dq_constant", 0.004)
@@ -519,10 +519,15 @@ class LRAutoReduction(PythonAlgorithm):
             logger.notice("Using automated scaling factor calculator")
             output_dir = self.getProperty("OutputDirectory").value
             sf_tof_step = self.getProperty("ScalingFactorTOFStep").value
+            
+            # The medium for these direct beam runs may not be what was set in the template,
+            # so either use the medium in the data file or a default name
+            meta_data_run = self.event_data.getRun()
+            incident_medium = self._read_property(meta_data_run, "incident_medium", "medium")
             LRDirectBeamSort(RunList=range(first_run_of_set, first_run_of_set + sequence_number),
                              UseLowResCut=True, ComputeScalingFactors=True, TOFSteps=sf_tof_step,
                              IncidentMedium=incident_medium,
-                             ScalingFactorFile=os.path.join(output_dir, "sf_%s_auto.txt" % first_run_of_set))
+                             ScalingFactorFile=os.path.join(output_dir, "sf_%s_auto.cfg" % first_run_of_set))
             return
         elif not do_reduction:
             logger.notice("The data is of a type that does not have to be reduced")
