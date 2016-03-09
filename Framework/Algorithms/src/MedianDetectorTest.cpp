@@ -252,7 +252,7 @@ int MedianDetectorTest::maskOutliers(
     double median = medianvec[i];
 
     PARALLEL_FOR1(countsWS)
-    for (int j = 0; j < static_cast<int>(hists.size()); ++j) {
+    for (int j = 0; j < static_cast<int>(hists.size()); ++j) { // NOLINT
       const double value = countsWS->readY(hists[j])[0];
       if ((value == 0.) && checkForMask) {
         const std::set<detid_t> &detids =
