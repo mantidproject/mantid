@@ -11,24 +11,25 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/ReadLock.h"
 
-#include <vtkAxes.h>
+#include "MantidVatesAPI/vtkGlyph3D_Silent.h"
 #include "vtkParametricEllipsoid.h"
 #include "vtkParametricFunctionSource.h"
-#include <vtkPolyDataAlgorithm.h>
 #include <vtkAppendPolyData.h>
-#include <vtkVertex.h>
-#include "MantidVatesAPI/vtkGlyph3D_Silent.h"
-#include <vtkSphereSource.h>
-#include <vtkUnstructuredGrid.h>
+#include <vtkAxes.h>
 #include <vtkFloatArray.h>
-#include <vtkCellData.h>
-#include <vtkPolyData.h>
-#include <vtkTransform.h>
-#include <vtkTransformPolyDataFilter.h>
+#include <vtkNew.h>
 #include <vtkPVGlyphFilter.h>
+#include <vtkPointData.h>
+#include <vtkPolyData.h>
+#include <vtkPolyDataAlgorithm.h>
 #include <vtkRegularPolygonSource.h>
 #include <vtkSmartPointer.h>
-#include <vtkNew.h>
+#include <vtkSphereSource.h>
+#include <vtkTensorGlyph.h>
+#include <vtkTransform.h>
+#include <vtkTransformPolyDataFilter.h>
+#include <vtkUnstructuredGrid.h>
+#include <vtkVertex.h>
 
 #include <vtkLineSource.h>
 #include <cmath>
@@ -110,12 +111,40 @@ namespace VATES
     validateWsNotNull();
   }
 
+  std::vector<Mantid::Kernel::V3D>
+  getDirections(const Mantid::DataObjects::PeakShapeEllipsoid &ellipticalShape,
+                const IPeak &peak,
+                vtkPeakMarkerFactory::ePeakDimensions dimensionToShow) {
+    std::vector<Mantid::Kernel::V3D> directions;
+    switch (dimensionToShow) {
+    case vtkPeakMarkerFactory::Peak_in_Q_lab:
+      directions = ellipticalShape.directions();
+      break;
+    case vtkPeakMarkerFactory::Peak_in_Q_sample: {
+      Mantid::Kernel::Matrix<double> goniometerMatrix =
+          peak.getGoniometerMatrix();
+      if (goniometerMatrix.Invert()) {
+        directions =
+            ellipticalShape.getDirectionInSpecificFrame(goniometerMatrix);
+      } else {
+        directions = ellipticalShape.directions();
+      }
+    } break;
+    case vtkPeakMarkerFactory::Peak_in_HKL:
+      directions = ellipticalShape.directions();
+      break;
+    default:
+      directions = ellipticalShape.directions();
+    }
+    return directions;
+  }
 
-    /**
-  Create the vtkStructuredGrid from the provided workspace
-  @param progressUpdating: Reporting object to pass progress information up the stack.
-  @return vtkPolyData glyph.
-  */
+  /**
+Create the vtkStructuredGrid from the provided workspace
+@param progressUpdating: Reporting object to pass progress information up the
+stack.
+@return vtkPolyData glyph.
+*/
   vtkPolyData* vtkPeakMarkerFactory::create(ProgressAction& progressUpdating) const
   {
     validate();
@@ -137,19 +166,23 @@ namespace VATES
       progressUpdating.eventRaised(double(i)*progressFactor);
 
       // Point
-      vtkPoints *peakPoint = vtkPoints::New();
+      vtkNew<vtkPoints> peakPoint;
       peakPoint->Allocate(1);
 
-      vtkFloatArray * peakSignal = vtkFloatArray::New();
+      vtkNew<vtkFloatArray> peakSignal;
       peakSignal->Allocate(1);
       peakSignal->SetName(m_scalarName.c_str());
       peakSignal->SetNumberOfComponents(1);
 
+      vtkFloatArray *transformSignal = vtkFloatArray::New();
+      transformSignal->Allocate(1);
+      transformSignal->SetNumberOfComponents(9);
+
       // What we'll return
-      vtkUnstructuredGrid *peakDataSet = vtkUnstructuredGrid::New();
+      vtkNew<vtkPolyData> peakDataSet;
       peakDataSet->Allocate(1);
-      peakDataSet->SetPoints(peakPoint);
-      peakDataSet->GetCellData()->SetScalars(peakSignal);
+      peakDataSet->SetPoints(peakPoint.GetPointer());
+      peakDataSet->GetPointData()->SetScalars(peakSignal.GetPointer());
 
       IPeak & peak = m_workspace->getPeak(i);
 
@@ -170,16 +203,7 @@ namespace VATES
         pos = peak.getQLabFrame();
       }
 
-      double x = pos.X();
-      double y = pos.Y();
-      double z = pos.Z();
-
-      // One point per peak
-      vtkVertex * vertex = vtkVertex::New();
-      vtkIdType id_xyz = peakPoint->InsertNextPoint(x,y,z);
-      vertex->GetPointIds()->SetId(0, id_xyz);
-
-      peakDataSet->InsertNextCell(VTK_VERTEX, vertex->GetPointIds());
+      peakPoint->InsertNextPoint(pos.X(), pos.Y(), pos.Z());
 
       // The integrated intensity = the signal on that point.
       peakSignal->InsertNextValue(static_cast<float>( peak.getIntensity() ));
@@ -190,124 +214,122 @@ namespace VATES
       const Mantid::Geometry::PeakShape& shape = m_workspace->getPeakPtr(i)->getPeakShape();
 
       // Pick the radius up from the factory if possible, otherwise use the user-provided value.
-      vtkPolyDataAlgorithm *shapeMarker = nullptr;
       if(shape.shapeName() == Mantid::DataObjects::PeakShapeSpherical::sphereShapeName())
       {
         const Mantid::DataObjects::PeakShapeSpherical& sphericalShape = dynamic_cast<const Mantid::DataObjects::PeakShapeSpherical&>(shape);
         double peakRadius = sphericalShape.radius();
-        /*vtkSphereSource *sphere = vtkSphereSource::New();
-        sphere->SetRadius(peakRadius);
-        sphere->SetPhiResolution(resolution);
-        sphere->SetThetaResolution(resolution);
-        shapeMarker = sphere;
-        */
-        auto polygonSource = vtkRegularPolygonSource::New();
-        polygonSource->GeneratePolygonOff(); // Uncomment this line to generate
-                                             // only the outline of the circle
+
+        vtkNew<vtkRegularPolygonSource> polygonSource;
+        polygonSource->GeneratePolygonOff();
         polygonSource->SetNumberOfSides(resolution * 10);
         polygonSource->SetRadius(peakRadius);
         polygonSource->SetCenter(0, 0, 0);
 
-        polygonSource->SetNormal(0, 0, 1);
-        vtkPVGlyphFilter *glyphFilter1 = vtkPVGlyphFilter::New();
-        glyphFilter1->SetInputData(peakDataSet);
+        polygonSource->SetNormal(1, 0, 0);
+        vtkNew<vtkPVGlyphFilter> glyphFilter1;
+        glyphFilter1->SetInputData(peakDataSet.GetPointer());
         glyphFilter1->SetSourceConnection(polygonSource->GetOutputPort());
         glyphFilter1->Update();
-        vtkPolyData *glyphed1 = glyphFilter1->GetOutput();
-        appendFilter->AddInputData(glyphed1);
+        appendFilter->AddInputData(glyphFilter1->GetOutput());
+        appendFilter->Update();
 
         polygonSource->SetNormal(0, 1, 0);
-        vtkPVGlyphFilter *glyphFilter2 = vtkPVGlyphFilter::New();
-        glyphFilter2->SetInputData(peakDataSet);
+        vtkNew<vtkPVGlyphFilter> glyphFilter2;
+        glyphFilter2->SetInputData(peakDataSet.GetPointer());
         glyphFilter2->SetSourceConnection(polygonSource->GetOutputPort());
         glyphFilter2->Update();
-        vtkPolyData *glyphed2 = glyphFilter2->GetOutput();
-        appendFilter->AddInputData(glyphed2);
+        appendFilter->AddInputData(glyphFilter2->GetOutput());
+        appendFilter->Update();
 
-        polygonSource->SetNormal(1, 0, 0);
-        shapeMarker = polygonSource;
-
+        polygonSource->SetNormal(0, 0, 1);
+        vtkNew<vtkPVGlyphFilter> glyphFilter3;
+        glyphFilter3->SetInputData(peakDataSet.GetPointer());
+        glyphFilter3->SetSourceConnection(polygonSource->GetOutputPort());
+        glyphFilter3->Update();
+        appendFilter->AddInputData(glyphFilter3->GetOutput());
+        appendFilter->Update();
       }
       else if (shape.shapeName() == Mantid::DataObjects::PeakShapeEllipsoid::ellipsoidShapeName())
       {
         const Mantid::DataObjects::PeakShapeEllipsoid& ellipticalShape = dynamic_cast<const Mantid::DataObjects::PeakShapeEllipsoid&>(shape);
         std::vector<double> radii = ellipticalShape.abcRadii();
-        std::vector<Mantid::Kernel::V3D> directions;
-         
-        switch (m_dimensionToShow)
-        {
-          case Peak_in_Q_lab:
-            directions = ellipticalShape.directions();
-            break;
-          case Peak_in_Q_sample:
-          {
-            Mantid::Kernel::Matrix<double> goniometerMatrix = peak.getGoniometerMatrix();
-            if (goniometerMatrix.Invert())
-            {
-              directions = ellipticalShape.getDirectionInSpecificFrame(goniometerMatrix);
-            }
-            else
-            {
-              directions = ellipticalShape.directions();
-            }
-          }
-          break;
-        case Peak_in_HKL:
-          directions = ellipticalShape.directions();
-          break;
-        default:
-          directions = ellipticalShape.directions();
-        }
+        std::vector<Mantid::Kernel::V3D> directions =
+            getDirections(ellipticalShape, peak, m_dimensionToShow);
+        std::array<float, 9> tensor = {
+            {static_cast<float>(radii[0] * directions[0][0]),
+             static_cast<float>(radii[0] * directions[0][1]),
+             static_cast<float>(radii[0] * directions[0][2]),
+             static_cast<float>(radii[1] * directions[1][0]),
+             static_cast<float>(radii[1] * directions[1][1]),
+             static_cast<float>(radii[1] * directions[1][2]),
+             static_cast<float>(radii[2] * directions[2][0]),
+             static_cast<float>(radii[2] * directions[2][1]),
+             static_cast<float>(radii[2] * directions[2][2])}};
 
-        vtkParametricEllipsoid* ellipsoid = vtkParametricEllipsoid::New();
-        ellipsoid->SetXRadius(radii[0]);
-        ellipsoid->SetYRadius(radii[1]);
-        ellipsoid->SetZRadius(radii[2]);
+        transformSignal->InsertNextTupleValue(tensor.data());
+        peakDataSet->GetPointData()->SetTensors(transformSignal);
 
-        vtkParametricFunctionSource* ellipsoidSource = vtkParametricFunctionSource::New();
-        ellipsoidSource->SetParametricFunction(ellipsoid);
-        ellipsoidSource->SetUResolution(resolution);
-        ellipsoidSource->SetVResolution(resolution);
-        ellipsoidSource->SetWResolution(resolution);
-        ellipsoidSource->Update();
+        vtkNew<vtkRegularPolygonSource> polygonSource;
+        polygonSource->GeneratePolygonOff();
+        polygonSource->SetNumberOfSides(resolution * 10.f);
+        polygonSource->SetRadius(1.f);
+        polygonSource->SetCenter(0.f, 0.f, 0.f);
 
-        vtkSmartPointer<vtkTransform> transform = ellipsoidTransformer.generateTransform(directions);
+        polygonSource->SetNormal(1.f, 0.f, 0.f);
+        vtkNew<vtkTensorGlyph> glyphFilter1;
+        glyphFilter1->SetInputData(peakDataSet.GetPointer());
+        glyphFilter1->SetSourceConnection(0, polygonSource->GetOutputPort());
+        glyphFilter1->ExtractEigenvaluesOff();
+        glyphFilter1->Update();
+        appendFilter->AddInputData(glyphFilter1->GetOutput());
+        appendFilter->Update();
 
-        vtkTransformPolyDataFilter* transformFilter = vtkTransformPolyDataFilter::New();
-        transformFilter->SetTransform(transform);
-        transformFilter->SetInputConnection(ellipsoidSource->GetOutputPort());
-        transformFilter->Update();
-        shapeMarker = transformFilter;
+        polygonSource->SetNormal(0.f, 1.f, 0.f);
+        vtkNew<vtkTensorGlyph> glyphFilter2;
+        glyphFilter2->SetInputData(peakDataSet.GetPointer());
+        glyphFilter2->SetSourceConnection(0, polygonSource->GetOutputPort());
+        glyphFilter2->ExtractEigenvaluesOff();
+        glyphFilter2->Update();
+        appendFilter->AddInputData(glyphFilter2->GetOutput());
+        appendFilter->Update();
+
+        polygonSource->SetNormal(0.f, 0.f, 1.f);
+        vtkNew<vtkTensorGlyph> glyphFilter3;
+        glyphFilter3->SetInputData(peakDataSet.GetPointer());
+        glyphFilter3->SetSourceConnection(0, polygonSource->GetOutputPort());
+        glyphFilter3->ExtractEigenvaluesOff();
+        glyphFilter3->Update();
+        appendFilter->AddInputData(glyphFilter3->GetOutput());
+        appendFilter->Update();
+
       }
       else
       {
-        vtkAxes* axis = vtkAxes::New();
+        vtkNew<vtkAxes> axis;
         axis->SymmetricOn();
         axis->SetScaleFactor(0.3);
 
-        vtkTransform* transform = vtkTransform::New();
+        vtkNew<vtkTransform> transform;
         const double rotationDegrees = 45;
         transform->RotateX(rotationDegrees);
         transform->RotateY(rotationDegrees);
         transform->RotateZ(rotationDegrees);
 
-        vtkTransformPolyDataFilter* transformFilter = vtkTransformPolyDataFilter::New();
-        transformFilter->SetTransform(transform);
+        vtkNew<vtkTransformPolyDataFilter> transformFilter;
+        transformFilter->SetTransform(transform.GetPointer());
         transformFilter->SetInputConnection(axis->GetOutputPort());
         transformFilter->Update();
-        shapeMarker = transformFilter;
+
+        vtkNew<vtkPVGlyphFilter> glyphFilter;
+        glyphFilter->SetInputData(peakDataSet.GetPointer());
+        glyphFilter->SetSourceConnection(transformFilter->GetOutputPort());
+        glyphFilter->Update();
+        appendFilter->AddInputData(glyphFilter->GetOutput());
+        appendFilter->Update();
       }
 
-      vtkPVGlyphFilter *glyphFilter = vtkPVGlyphFilter::New();
-      glyphFilter->SetInputData(peakDataSet);
-      glyphFilter->SetSourceConnection(shapeMarker->GetOutputPort());
-      glyphFilter->Update();
-      vtkPolyData *glyphed = glyphFilter->GetOutput();
-
-      appendFilter->AddInputData(glyphed);
     } // for each peak
 
-    appendFilter->Update();
     vtkPolyData* polyData = appendFilter->GetOutput();
 
     return polyData;
