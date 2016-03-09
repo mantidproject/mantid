@@ -1470,8 +1470,8 @@ public:
       for (size_t i = 1; i < el.getNumberEvents(); i++) {
         auto tAtSample1 = el.getEvent(i - 1).pulseTime().totalNanoseconds() +
                           static_cast<int64_t>(el.getEvent(i - 1).tof() * 1e3);
-        auto tAtSample2 = el.getEvent(i - 1).pulseTime().totalNanoseconds() +
-                          static_cast<int64_t>(el.getEvent(i - 1).tof() * 1e3);
+        auto tAtSample2 = el.getEvent(i).pulseTime().totalNanoseconds() +
+                          static_cast<int64_t>(el.getEvent(i).tof() * 1e3);
         TSM_ASSERT_LESS_THAN_EQUALS(this_type, tAtSample1, tAtSample2);
       }
     }
