@@ -4,6 +4,8 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/UnitLabel.h"
 
+#include <cmath>
+
 namespace Mantid {
 namespace Geometry {
 
@@ -33,11 +35,11 @@ public:
     // Always use minimum float value as DBL_EPS is always too small
     static constexpr CoordT twoEps = 2 * std::numeric_limits<float>::epsilon();
     if (std::fabs(min) > twoEps)
-      min *= (1 + twoEps);
+      min *= (1 - std::copysign(twoEps, min));
     else
       min -= twoEps;
     if (std::fabs(max) > twoEps)
-      max *= (1 + twoEps);
+      max *= (1 + std::copysign(twoEps, max));
     else
       max += twoEps;
   }
