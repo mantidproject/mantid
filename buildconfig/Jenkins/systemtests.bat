@@ -66,4 +66,6 @@ echo usagereports.enabled = 0 >> %USERPROPS%
 :: Run
 set PKGDIR=%WORKSPACE%\build
 set PATH=C:\MantidInstall\bin;C:\MantidInstall\plugins;%PATH%
-python %WORKSPACE%\Testing\SystemTests\scripts\InstallerTests.py -o -d %PKGDIR%
+:: Temporary fix to ensure that a full Python install is called otherwise we might get a broken one in MantidInstall.
+:: The correct thing to do is not have MantidInstall in the PATH and use mantidpython.bat internally.
+C:\Python27\python.exe %WORKSPACE%\Testing\SystemTests\scripts\InstallerTests.py -o -d %PKGDIR%

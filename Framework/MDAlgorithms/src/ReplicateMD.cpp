@@ -329,7 +329,7 @@ void ReplicateMD::exec() {
   auto iterators = outputWS->createIterators(nThreads, nullptr);
 
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int it = 0; it < int(iterators.size()); ++it) {
+  for (int it = 0; it < int(iterators.size()); ++it) { // NOLINT
 
     PARALLEL_START_INTERUPT_REGION
     auto outIt = std::unique_ptr<MDHistoWorkspaceIterator>(

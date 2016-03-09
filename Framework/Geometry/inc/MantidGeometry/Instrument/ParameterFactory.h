@@ -6,10 +6,11 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Instantiator.h"
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Logger.h"
-#include <vector>
+#include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/make_unique.h"
 #include <map>
+#include <vector>
 
 #ifdef _WIN32
 #if (IN_MANTID_GEOMETRY)
@@ -77,17 +78,7 @@ private:
 
   /// A typedef for the instantiator
   typedef Kernel::AbstractInstantiator<Parameter> AbstractFactory;
-  /// An inner class to specialise map such that it does a deep delete when
-  /// s_map is destroyed
-  class MANTID_GEOMETRY_DLL FactoryMap
-      : public std::map<std::string, AbstractFactory *> {
-  public:
-    /// Destructor. Deletes the AbstractInstantiator objects stored in the map.
-    virtual ~FactoryMap() {
-      for (iterator it = this->begin(); it != this->end(); ++it)
-        delete it->second;
-    }
-  };
+  typedef std::map<std::string, std::unique_ptr<AbstractFactory>> FactoryMap;
   /// The map holding the registered class names and their instantiators
   static FactoryMap s_map;
 };
@@ -100,7 +91,8 @@ template <class C>
 void ParameterFactory::subscribe(const std::string &className) {
   typename FactoryMap::iterator it = s_map.find(className);
   if (!className.empty() && it == s_map.end()) {
-    s_map[className] = new Kernel::Instantiator<C, Parameter>;
+    s_map[className] =
+        Mantid::Kernel::make_unique<Kernel::Instantiator<C, Parameter>>();
   } else {
     throw std::runtime_error("Parameter type" + className +
                              " is already registered.\n");

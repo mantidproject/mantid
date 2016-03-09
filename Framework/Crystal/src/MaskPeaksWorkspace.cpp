@@ -87,8 +87,7 @@ void MaskPeaksWorkspace::exec() {
 
   // Init a table workspace
   DataObjects::TableWorkspace_sptr tablews =
-      boost::shared_ptr<DataObjects::TableWorkspace>(
-          new DataObjects::TableWorkspace());
+      boost::make_shared<DataObjects::TableWorkspace>();
   tablews->addColumn("double", "XMin");
   tablews->addColumn("double", "XMax");
   tablews->addColumn("str", "SpectraList");
@@ -96,7 +95,7 @@ void MaskPeaksWorkspace::exec() {
   // Loop over peaks
   const std::vector<Peak> &peaks = peaksW->getPeaks();
   PARALLEL_FOR3(m_inputW, peaksW, tablews)
-  for (int i = 0; i < static_cast<int>(peaks.size()); i++) {
+  for (int i = 0; i < static_cast<int>(peaks.size()); i++) { // NOLINT
     PARALLEL_START_INTERUPT_REGION
     const Peak &peak = peaks[i];
     // get the peak location on the detector

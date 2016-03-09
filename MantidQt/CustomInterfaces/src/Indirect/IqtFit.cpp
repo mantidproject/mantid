@@ -356,18 +356,18 @@ void IqtFit::newDataLoaded(const QString wsName) {
   m_ffInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       m_ffInputWSName.toStdString());
 
-  int maxSpecIndex = static_cast<int>(m_ffInputWS->getNumberHistograms()) - 1;
+  int maxWsIndex = static_cast<int>(m_ffInputWS->getNumberHistograms()) - 1;
 
-  m_uiForm.spPlotSpectrum->setMaximum(maxSpecIndex);
+  m_uiForm.spPlotSpectrum->setMaximum(maxWsIndex);
   m_uiForm.spPlotSpectrum->setMinimum(0);
   m_uiForm.spPlotSpectrum->setValue(0);
 
-  m_uiForm.spSpectraMin->setMaximum(maxSpecIndex);
+  m_uiForm.spSpectraMin->setMaximum(maxWsIndex);
   m_uiForm.spSpectraMin->setMinimum(0);
 
-  m_uiForm.spSpectraMax->setMaximum(maxSpecIndex);
+  m_uiForm.spSpectraMax->setMaximum(maxWsIndex);
   m_uiForm.spSpectraMax->setMinimum(0);
-  m_uiForm.spSpectraMax->setValue(maxSpecIndex);
+  m_uiForm.spSpectraMax->setValue(maxWsIndex);
 
   updatePlot();
 }

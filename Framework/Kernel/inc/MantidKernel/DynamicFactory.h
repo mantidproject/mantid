@@ -22,6 +22,7 @@
 // std
 #include <cstring>
 #include <functional>
+#include <iterator>
 #include <map>
 #include <vector>
 
@@ -218,12 +219,11 @@ public:
   virtual const std::vector<std::string> getKeys() const {
     std::vector<std::string> names;
     names.reserve(_map.size());
-
-    typename FactoryMap::const_iterator iter = _map.begin();
-    for (; iter != _map.end(); ++iter) {
-      names.push_back(iter->first);
-    }
-
+    std::transform(
+        _map.cbegin(), _map.cend(), std::back_inserter(names),
+        [](const std::pair<std::string, AbstractFactory *> &mapPair) {
+          return mapPair.first;
+        });
     return names;
   }
 

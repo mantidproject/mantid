@@ -167,6 +167,9 @@ protected:
   /// Protected copy constructor. May be used by childs for cloning.
   IMDWorkspace(const IMDWorkspace &) = default;
 
+  void makeSinglePointWithNaN(std::vector<coord_t> &x, std::vector<signal_t> &y,
+                              std::vector<signal_t> &e) const;
+
   const std::string toString() const override;
 
 private:

@@ -400,7 +400,7 @@ void Quasi::handleProgramChange(int index) {
 /**
  * Handles setting a new preview spectrum on the preview plot.
  *
- * @param value Spectrum index
+ * @param value workspace index
  */
 void Quasi::previewSpecChanged(int value) {
   m_previewSpec = value;

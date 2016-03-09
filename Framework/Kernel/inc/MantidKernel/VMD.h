@@ -1,14 +1,12 @@
 #ifndef MANTID_KERNEL_VMD_H_
 #define MANTID_KERNEL_VMD_H_
 
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
-#ifndef Q_MOC_RUN
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#endif
+#include <algorithm>
 #include <cstddef>
 #include <sstream>
 #include <stdexcept>
@@ -227,29 +225,25 @@ public:
    * @param str :: string of comma or space-separated numbers for each component
    */
   VMDBase(const std::string &str) {
-    using boost::algorithm::split;
-    using boost::algorithm::is_any_of;
 
-    std::vector<std::string> strs;
-    boost::split(strs, str, boost::is_any_of(", "));
+    StringTokenizer strs(str, ", ", StringTokenizer::TOK_IGNORE_EMPTY);
 
     std::vector<TYPE> vals;
-    for (size_t d = 0; d < strs.size(); d++) {
-      if (!strs[d].empty()) {
-        TYPE v;
-        if (!Strings::convert(strs[d], v))
-          throw std::invalid_argument(
-              "VMDBase: Unable to convert the string '" + strs[d] +
-              "' to a number.");
-        vals.push_back(v);
-      }
-    }
+    std::transform(strs.cbegin(), strs.cend(), std::back_inserter(vals),
+                   [](const std::string &token) {
+                     TYPE v;
+                     if (!Strings::convert(token, v))
+                       throw std::invalid_argument(
+                           "VMDBase: Unable to convert the string '" + token +
+                           "' to a number.");
+                     return v;
+                   });
+
     nd = vals.size();
     if (nd <= 0)
       throw std::invalid_argument("nd must be > 0");
     data = new TYPE[nd];
-    for (size_t d = 0; d < nd; d++)
-      data[d] = vals[d];
+    std::copy(vals.cbegin(), vals.cend(), data);
   }
 
   //-------------------------------------------------------------------------------------------

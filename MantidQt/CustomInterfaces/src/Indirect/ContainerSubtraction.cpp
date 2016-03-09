@@ -280,19 +280,19 @@ void ContainerSubtraction::newData(const QString &dataName) {
 /**
  * Replots the preview plot.
  *
- * @param specIndex Spectrum index to plot
+ * @param wsIndex workspace index to plot
  */
-void ContainerSubtraction::plotPreview(int specIndex) {
+void ContainerSubtraction::plotPreview(int wsIndex) {
   m_uiForm.ppPreview->clear();
 
   // Plot sample
   m_uiForm.ppPreview->addSpectrum(
-      "Sample", m_uiForm.dsSample->getCurrentDataName(), specIndex, Qt::black);
+      "Sample", m_uiForm.dsSample->getCurrentDataName(), wsIndex, Qt::black);
 
   // Plot result
   if (!m_pythonExportWsName.empty())
     m_uiForm.ppPreview->addSpectrum(
-        "Subtracted", QString::fromStdString(m_pythonExportWsName), specIndex,
+        "Subtracted", QString::fromStdString(m_pythonExportWsName), wsIndex,
         Qt::green);
 
   const bool shift = m_uiForm.ckShiftCan->isChecked();
@@ -316,16 +316,16 @@ void ContainerSubtraction::plotPreview(int specIndex) {
   // Plot container
   if (scale) {
     m_uiForm.ppPreview->addSpectrum("Container", "__container_corrected",
-                                    specIndex, Qt::red);
+      wsIndex, Qt::red);
   } else {
     if (shift) {
       m_uiForm.ppPreview->addSpectrum(
           "Container",
-          (m_uiForm.dsContainer->getCurrentDataName() + "_Shifted"), specIndex,
+          (m_uiForm.dsContainer->getCurrentDataName() + "_Shifted"), wsIndex,
           Qt::red);
     } else {
       m_uiForm.ppPreview->addSpectrum(
-          "Container", m_uiForm.dsContainer->getCurrentDataName(), specIndex,
+          "Container", m_uiForm.dsContainer->getCurrentDataName(), wsIndex,
           Qt::red);
     }
   }
