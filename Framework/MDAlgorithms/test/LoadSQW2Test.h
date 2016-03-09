@@ -216,8 +216,8 @@ private:
     if (dtype == DataType::SQW) {
       expected.nbins = {3, 3, 2, 2};
       if (outputFrame == "HKL") {
-        expected.ulimits = {0.0439, 0.8959, -0.4644, -0.4046,
-                            -0.7818,   -0.5071,  2.5,     142.5};
+        expected.ulimits = {0.0439,  0.8959,  -0.4644, -0.4046,
+                            -0.7818, -0.5071, 2.5,     142.5};
       } else {
         expected.ulimits = {0.0962,  1.9615,  -1.0168, -0.8858,
                             -1.7116, -1.1103, 2.5,     142.5};
