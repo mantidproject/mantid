@@ -57,7 +57,7 @@ Veto pulses can be filtered out in a separate step using
 ``FilterByLogValue(InputWorkspace="ws", OutputWorkspace="ws", LogName="veto_pulse_time", PulseFilter="1")``
 
 Data Loaded from Nexus File
-###########################
+---------------------------
 
 The nexus file must have ``/raw_data_1`` or ``/entry`` as its main group and
 that group be of type ``NXentry``. It also needs a group of type ``NXevent_data``.
@@ -66,6 +66,35 @@ The data is read from each group of type ``NXevent_data``.
 
 If the file has an ``isis_vms_compat`` then it is taken to be an ISIS file and 
 the data will be modified according to the information obtained from this group.
+
+
+Here are some tables that show it in more detail:
+
++------------------------------+-------------------------------------------+-------------------------------------+
+| Description of Data          | Found in Nexus file                       | Placed in Workspace (Workspace2D)   |
+|                              | (within 'raw_data_1')                     |                                     |
++==============================+===========================================+=====================================+
+| Monitor Data                 | groups of Class NXMonitor                 | Monitor Data                        |
+|                              | (one monitor per group)                   |                                     |
++------------------------------+-------------------------------------------+-------------------------------------+
+| Detector Data                | groups of Class NXevent_data              | Event data                          |
+|                              | (one bank per group)                      |                                     |
++------------------------------+-------------------------------------------+-------------------------------------+
+| Instrument                   | group ``Instrument`` ???                  | ??? Workspace instrument            |
+|                              |                                           | ??? if not overridden               |
++------------------------------+-------------------------------------------+-------------------------------------+
+|                              | If ``isis_vms_compat`` exists,            |                                     |
+| Spectrum of each detector ID | ``NSP1``, ``UDET`` and ``SPEC``           | Spectra-Detector mapping            |
+|                              | within it,                                |                                     |
+|                              | else one spectrum per detector assumed    |                                     |
++------------------------------+-------------------------------------------+-------------------------------------+
+| Run                          | various places as shown later on,         | Run object                          |
++------------------------------+-------------------------------------------+-------------------------------------+
+|                              | If ``isis_vms_compat`` exists,            |                                     |
+| Sample                       | ``SPB`` and ``RSPB`` within               | Sample Object                       |
+|                              | ``isis_vms_compat``                       |                                     |
+|                              | else ???                                  |                                     |
++------------------------------+-------------------------------------------+-------------------------------------+
 
 
 Usage
