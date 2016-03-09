@@ -723,8 +723,6 @@ void LoadSQW2::warnIfMemoryInsufficient(int64_t npixtot) {
 /**
  * Assume the given pointer points to the start of a full pixel and create
  * an MDEvent based on it iff it has a valid run id.
- * @param coordRange In/out array that stores the current min/max value of
- * the coordinate for each dimension as an array of (min,max)
  * @param pixel A pointer assumed to point to at the start of a single pixel
  * from the data file
  * @return 1 if the event was added, 0 otherwise
