@@ -517,7 +517,8 @@ void EnggDiffractionPresenter::startAsyncFittingWorker(
 
 void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
                                          const std::string &ExpectedPeaks) {
-
+  // disable GUI to avoid any double threads
+	m_view->enableCalibrateAndFocusActions(false);
   g_log.notice() << "EnggDiffraction GUI: starting new fitting. This may "
                     "take a few seconds... "
                  << std::endl;
@@ -594,7 +595,6 @@ void EnggDiffractionPresenter::fittingFinished() {
   if (!m_view)
     return;
 
-  m_view->enableCalibrateAndFocusActions(true);
   if (!m_fittingFinishedOK) {
     g_log.warning() << "The single peak fitting did not finish correctly."
                     << std::endl;
@@ -624,6 +624,9 @@ void EnggDiffractionPresenter::fittingFinished() {
   g_log.notice() << "EnggDiffraction GUI: plotting of peaks for single peak "
                     "fits has completed. "
                  << std::endl;
+
+  // enable the GUI
+  m_view->enableCalibrateAndFocusActions(true);
 }
 
 void EnggDiffractionPresenter::processLogMsg() {

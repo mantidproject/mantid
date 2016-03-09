@@ -92,6 +92,8 @@ public:
   void doFitting(const std::string &focusedRunNo,
                  const std::string &ExpectedPeaks);
 
+  void plotFitPeaksCurves() const;
+
 protected:
   void initialize();
 
