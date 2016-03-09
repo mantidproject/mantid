@@ -48,9 +48,9 @@ class VTK_EXPORT vtkMDEWSource : public vtkUnstructuredGridAlgorithm
 {
 public:
   static vtkMDEWSource *New();
-  vtkTypeMacro(vtkMDEWSource, vtkUnstructuredGridAlgorithm)
-  void PrintSelf(ostream& os, vtkIndent indent);
-  
+  vtkTypeMacro(vtkMDEWSource, vtkUnstructuredGridAlgorithm) void PrintSelf(
+      ostream &os, vtkIndent indent) override;
+
   void SetWsName(std::string wsName);
   void SetDepth(int depth);
   void SetNormalization(int option);
@@ -80,9 +80,11 @@ public:
 
 protected:
   vtkMDEWSource();
-  ~vtkMDEWSource();
-  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  ~vtkMDEWSource() override;
+  int RequestInformation(vtkInformation *, vtkInformationVector **,
+                         vtkInformationVector *) override;
+  int RequestData(vtkInformation *, vtkInformationVector **,
+                  vtkInformationVector *) override;
 
 private:
   

@@ -26,7 +26,7 @@ protected:
   std::istream &httpGet(const std::string & /*path*/,
                         const std::string & /*query_str*/ = "",
                         const std::string & /*username*/ = "",
-                        const std::string & /*password*/ = "") const {
+                        const std::string & /*password*/ = "") const override {
     return is;
   }
 
@@ -36,11 +36,11 @@ protected:
            const MantidWebServiceAPIHelper::PostDataMap & /*fileData*/ =
                MantidWebServiceAPIHelper::PostDataMap(),
            const std::string & /*username*/ = "",
-           const std::string & /*password*/ = "") const {
+           const std::string & /*password*/ = "") const override {
     return is;
   }
 
-  Poco::Net::HTTPResponse::HTTPStatus lastStatus() const {
+  Poco::Net::HTTPResponse::HTTPStatus lastStatus() const override {
     return Poco::Net::HTTPResponse::HTTP_NOT_FOUND;
   }
 
@@ -62,7 +62,7 @@ protected:
   std::istream &httpGet(const std::string & /*path*/,
                         const std::string & /*query_str*/ = "",
                         const std::string & /*username*/ = "",
-                        const std::string & /*password*/ = "") const {
+                        const std::string & /*password*/ = "") const override {
     return is;
   }
 
@@ -72,11 +72,11 @@ protected:
            const MantidWebServiceAPIHelper::PostDataMap & /*fileData*/ =
                MantidWebServiceAPIHelper::PostDataMap(),
            const std::string & /*username*/ = "",
-           const std::string & /*password*/ = "") const {
+           const std::string & /*password*/ = "") const override {
     return is;
   }
 
-  Poco::Net::HTTPResponse::HTTPStatus lastStatus() const {
+  Poco::Net::HTTPResponse::HTTPStatus lastStatus() const override {
     return Poco::Net::HTTPResponse::HTTP_NOT_FOUND;
   }
 
@@ -95,7 +95,7 @@ protected:
   std::istream &httpGet(const std::string & /*path*/,
                         const std::string & /*query_str*/ = "",
                         const std::string & /*username*/ = "",
-                        const std::string & /*password*/ = "") const {
+                        const std::string & /*password*/ = "") const override {
     return is;
   }
 
@@ -105,11 +105,11 @@ protected:
            const MantidWebServiceAPIHelper::PostDataMap & /*fileData*/ =
                MantidWebServiceAPIHelper::PostDataMap(),
            const std::string & /*username*/ = "",
-           const std::string & /*password*/ = "") const {
+           const std::string & /*password*/ = "") const override {
     return is;
   }
 
-  Poco::Net::HTTPResponse::HTTPStatus lastStatus() const {
+  Poco::Net::HTTPResponse::HTTPStatus lastStatus() const override {
     return Poco::Net::HTTPResponse::HTTP_OK;
   }
 

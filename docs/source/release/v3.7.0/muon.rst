@@ -8,6 +8,11 @@ Muon Analysis
 Interfaces
 ----------
 
+Muon ALC
+########
+
+- The default directory for the last run is now set to the same directory selected for the first run `#15524 <https://github.com/mantidproject/mantid/pull/15524>`_
+
 Muon Analysis
 #############
 

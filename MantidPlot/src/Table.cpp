@@ -1598,7 +1598,10 @@ void Table::setText(int row, int col, const QString &text) {
   d_table->setText(row, col, text);
 }
 
-void Table::saveToMemory() {
+void Table::saveToMemory()
+{
+  // clear d_saved_cells
+  freeMemory();
   d_saved_cells = new double *[d_table->columnCount()];
   for (int i = 0; i < d_table->columnCount(); ++i)
     d_saved_cells[i] = new double[d_table->rowCount()];

@@ -19,14 +19,14 @@
  */
 class PythonProcessHandler : CxxTest::GlobalFixture {
 public:
-  bool setUpWorld() {
+  bool setUpWorld() override {
     Py_Initialize();
     // A fatal error occurs if initialization fails so
     // everything should be okay if we got here
     return true;
   }
 
-  bool tearDownWorld() {
+  bool tearDownWorld() override {
     // Py_Finalize(); // This kills RHEL5 for some reason
     return true;
   }
@@ -60,7 +60,7 @@ public:
   //
   PythonObjectInstantiatorTest() : m_creator(NULL) {}
 
-  ~PythonObjectInstantiatorTest() { delete m_creator; }
+  ~PythonObjectInstantiatorTest() override { delete m_creator; }
 
   void test_Bare_Pointer() {
     //    PythonObjectInstantiator<IAlgorithm> *factory = getInstantiator();

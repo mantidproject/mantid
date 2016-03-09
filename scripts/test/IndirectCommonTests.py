@@ -137,6 +137,11 @@ class IndirectCommonTests(unittest.TestCase):
 
         self.assertRaises(ValueError, indirect_common.CheckAnalysers, ws1, ws2)
 
+    def test_CheckAnalysers_raises_runtimeError_with_no_inst_data(self):
+        ws1 = self.make_dummy_workspace_without_instrument('test_ws1')
+        ws2 = self.make_dummy_workspace_without_instrument('test_ws2')
+        self.assertRaises(RuntimeError, indirect_common.CheckAnalysers, ws1, ws2)
+
     def test_CheckHistZero(self):
         ws = self.make_dummy_QENS_workspace()
         self.assert_does_not_raise(ValueError, indirect_common.CheckHistZero, ws)
@@ -349,6 +354,13 @@ class IndirectCommonTests(unittest.TestCase):
     #-----------------------------------------------------------
     # Test helper functions
     #-----------------------------------------------------------
+
+    def make_dummy_workspace_without_instrument(self, output_name):
+        """
+        Makes a workspace with no instrument information
+        """
+        ws = CreateWorkspace(OutputWorkspace=output_name, DataX='1,2,3,4,5', DataY='0,0,2,0,0')
+        return ws.name()
 
     def make_dummy_QENS_workspace(self, output_name="ws", instrument_name='IRIS',
                                   analyser='graphite', reflection='002', add_logs=True):

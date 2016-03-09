@@ -9,8 +9,9 @@ class VTK_EXPORT vtkNexusPeaksReader : public vtkPolyDataAlgorithm
 {
 public:
   static vtkNexusPeaksReader *New();
-  vtkTypeMacro(vtkNexusPeaksReader, vtkPolyDataAlgorithm)
-  void PrintSelf(ostream& os, vtkIndent indent);
+  vtkTypeMacro(vtkNexusPeaksReader,
+               vtkPolyDataAlgorithm) void PrintSelf(ostream &os,
+                                                    vtkIndent indent) override;
   vtkSetStringMacro(FileName);
   vtkGetStringMacro(FileName);
   int CanReadFile(const char* fname);
@@ -24,12 +25,14 @@ public:
 
 protected:
   vtkNexusPeaksReader();
-  ~vtkNexusPeaksReader();
-  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  ~vtkNexusPeaksReader() override;
+  int RequestInformation(vtkInformation *, vtkInformationVector **,
+                         vtkInformationVector *) override;
+  int RequestData(vtkInformation *, vtkInformationVector **,
+                  vtkInformationVector *) override;
   ///Handle time variation.
-  unsigned long GetMTime();
-  
+  unsigned long GetMTime() override;
+
 private:
   
   vtkNexusPeaksReader(const vtkNexusPeaksReader&);

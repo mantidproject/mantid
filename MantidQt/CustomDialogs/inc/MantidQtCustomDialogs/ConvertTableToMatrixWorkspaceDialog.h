@@ -65,7 +65,7 @@ namespace MantidQt
 
     private:
       /// Initialize the layout
-      void initLayout();
+      void initLayout() override;
 
     private:
       /// Form

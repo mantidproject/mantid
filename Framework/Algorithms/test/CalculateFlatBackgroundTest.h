@@ -146,7 +146,7 @@ public:
                                         WS2D);
   }
 
-  ~CalculateFlatBackgroundTest() {
+  ~CalculateFlatBackgroundTest() override {
     AnalysisDataService::Instance().remove("calculateflatbackgroundtest_ramp");
   }
 

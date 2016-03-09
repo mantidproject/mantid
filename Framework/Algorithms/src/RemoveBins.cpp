@@ -227,7 +227,7 @@ void RemoveBins::crop(const double &start, const double &end) {
 }
 
 /** Convert the X range given into the unit of the input workspace
- *  @param index ::  The current spectrum index
+ *  @param index ::  The current workspace index
  *  @param startX :: Returns the start of the range in the workspace's unit
  *  @param endX ::   Returns the end of the range in the workspace's unit
  */

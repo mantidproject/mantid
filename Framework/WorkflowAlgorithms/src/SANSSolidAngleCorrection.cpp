@@ -115,7 +115,7 @@ void SANSSolidAngleCorrection::exec() {
     try {
       det = inputWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
-      g_log.warning() << "Spectrum index " << i
+      g_log.warning() << "Workspace index " << i
                       << " has no detector assigned to it - discarding"
                       << std::endl;
       // Catch if no detector. Next line tests whether this happened - test
@@ -186,7 +186,7 @@ void SANSSolidAngleCorrection::execEvent() {
     try {
       det = outputEventWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
-      g_log.warning() << "Spectrum index " << i
+      g_log.warning() << "Workspace index " << i
                       << " has no detector assigned to it - discarding"
                       << std::endl;
       // Catch if no detector. Next line tests whether this happened - test

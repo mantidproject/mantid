@@ -66,7 +66,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS PreviewPlot : public API::MantidWidget {
 
 public:
   PreviewPlot(QWidget *parent = NULL, bool init = true);
-  virtual ~PreviewPlot();
+  ~PreviewPlot() override;
 
   QColor canvasColour();
   void setCanvasColour(const QColor &colour);
@@ -82,10 +82,10 @@ public:
 
   void addSpectrum(const QString &curveName,
                    const Mantid::API::MatrixWorkspace_sptr ws,
-                   const size_t specIndex = 0,
+                   const size_t wsIndex = 0,
                    const QColor &curveColour = QColor());
   void addSpectrum(const QString &curveName, const QString &wsName,
-                   const size_t specIndex = 0,
+                   const size_t wsIndex = 0,
                    const QColor &curveColour = QColor());
 
   void removeSpectrum(const Mantid::API::MatrixWorkspace_sptr ws);
@@ -142,7 +142,7 @@ private:
   handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
 
   void addCurve(PlotCurveConfiguration &curveConfig,
-                Mantid::API::MatrixWorkspace_sptr ws, const size_t specIndex,
+                Mantid::API::MatrixWorkspace_sptr ws, const size_t wsIndex,
                 const QColor &curveColour);
   void removeCurve(QwtPlotItem *curve);
 

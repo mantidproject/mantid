@@ -818,8 +818,7 @@ int FindPeaks::getVectorIndex(const MantidVec &vecX, double x) {
   * (This is not the CORE fit peak method)
   *
   *  @param input ::    The input workspace
-  *  @param spectrum :: The spectrum index of the peak (is actually the
-  *WorkspaceIndex)
+  *  @param wsIndex :: The workspace index of the peak
   *  @param center_guess :: A guess of the X-value of the center of the peak, in
   *whatever units of the X-axis of the workspace.
   *  @param fitWidth :: A guess of the full-width-half-max of the peak, in # of
@@ -832,14 +831,14 @@ int FindPeaks::getVectorIndex(const MantidVec &vecX, double x) {
   *  @param rightpeakcentre :: centre of the right peak if existed
   */
 void FindPeaks::fitPeakGivenFWHM(const API::MatrixWorkspace_sptr &input,
-                                 const int spectrum, const double center_guess,
+                                 const int wsIndex, const double center_guess,
                                  const int fitWidth, const bool hasleftpeak,
                                  const double leftpeakcentre,
                                  const bool hasrightpeak,
                                  const double rightpeakcentre) {
   // The X axis you are looking at
-  const MantidVec &vecX = input->readX(spectrum);
-  const MantidVec &vecY = input->readY(spectrum);
+  const MantidVec &vecX = input->readX(wsIndex);
+  const MantidVec &vecY = input->readY(wsIndex);
 
   // Find i_center - the index of the center - The guess is within the X axis?
   int i_centre = this->getVectorIndex(vecX, center_guess);
@@ -881,7 +880,7 @@ void FindPeaks::fitPeakGivenFWHM(const API::MatrixWorkspace_sptr &input,
         << ", " << vecX[i_max];
   g_log.information(outss.str());
 
-  fitSinglePeak(input, spectrum, i_min, i_max, i_centre);
+  fitSinglePeak(input, wsIndex, i_min, i_max, i_centre);
 
   return;
 }
@@ -890,15 +889,14 @@ void FindPeaks::fitPeakGivenFWHM(const API::MatrixWorkspace_sptr &input,
 /** Attempts to fit a candidate peak with a given window of where peak resides
   *
   *  @param input    The input workspace
-  *  @param spectrum The spectrum index of the peak (is actually the
-  *WorkspaceIndex)
+  *  @param wsIndex The workspace index of the peak
   *  @param centre_guess ::  Channel number of peak candidate i0 - the higher
   *side of the peak (right side)
   *  @param xmin    Minimum x value to find the peak
   *  @param xmax    Maximum x value to find the peak
   */
 void FindPeaks::fitPeakInWindow(const API::MatrixWorkspace_sptr &input,
-                                const int spectrum, const double centre_guess,
+                                const int wsIndex, const double centre_guess,
                                 const double xmin, const double xmax) {
   // Check
   g_log.information() << "Fit Peak with given window:  Guessed center = "
@@ -906,12 +904,12 @@ void FindPeaks::fitPeakInWindow(const API::MatrixWorkspace_sptr &input,
                       << ", x-max = " << xmax << "\n";
   if (xmin >= centre_guess || xmax <= centre_guess) {
     g_log.error("Peak centre is on the edge of Fit window. ");
-    addNonFitRecord(spectrum, centre_guess);
+    addNonFitRecord(wsIndex, centre_guess);
     return;
   }
 
   // The X axis you are looking at
-  const MantidVec &vecX = input->readX(spectrum);
+  const MantidVec &vecX = input->readX(wsIndex);
 
   // The centre index
   int i_centre = this->getVectorIndex(vecX, centre_guess);
@@ -923,7 +921,7 @@ void FindPeaks::fitPeakInWindow(const API::MatrixWorkspace_sptr &input,
                   << " is out side of minimum x = " << xmin
                   << ".  Input X ragne = " << vecX.front() << ", "
                   << vecX.back() << "\n";
-    addNonFitRecord(spectrum, centre_guess);
+    addNonFitRecord(wsIndex, centre_guess);
     return;
   }
 
@@ -932,12 +930,12 @@ void FindPeaks::fitPeakInWindow(const API::MatrixWorkspace_sptr &input,
   if (i_max < i_centre) {
     g_log.error() << "Input peak centre @ " << centre_guess
                   << " is out side of maximum x = " << xmax << "\n";
-    addNonFitRecord(spectrum, centre_guess);
+    addNonFitRecord(wsIndex, centre_guess);
     return;
   }
 
   // finally do the actual fit
-  fitSinglePeak(input, spectrum, i_min, i_max, i_centre);
+  fitSinglePeak(input, wsIndex, i_min, i_max, i_centre);
 
   return;
 }

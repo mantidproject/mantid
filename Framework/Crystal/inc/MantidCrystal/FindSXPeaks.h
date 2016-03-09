@@ -92,8 +92,8 @@ public:
     _intensity += rhs._intensity;
     _Ltot += rhs._Ltot;
     npixels += 1;
-    for (std::size_t i = 0; i < rhs._spectral.size(); i++)
-      _spectral.push_back(rhs._spectral[i]);
+    _spectral.insert(_spectral.end(), rhs._spectral.cbegin(),
+                     rhs._spectral.cend());
     return *this;
   }
   /// Normalise by number of pixels

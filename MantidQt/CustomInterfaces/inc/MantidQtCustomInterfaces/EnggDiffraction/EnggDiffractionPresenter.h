@@ -189,10 +189,12 @@ private:
                   size_t bank, const std::string &specNos,
                   const std::string &dgFile);
 
-  void loadOrCalcVanadiumWorkspaces(
-      const std::string &vanNo, const std::string &inputDirCalib,
-      Mantid::API::ITableWorkspace_sptr &vanIntegWS,
-      Mantid::API::MatrixWorkspace_sptr &vanCurvesWS, bool forceRecalc);
+  void
+  loadOrCalcVanadiumWorkspaces(const std::string &vanNo,
+                               const std::string &inputDirCalib,
+                               Mantid::API::ITableWorkspace_sptr &vanIntegWS,
+                               Mantid::API::MatrixWorkspace_sptr &vanCurvesWS,
+                               bool forceRecalc, const std::string specNos);
 
   void findPrecalcVanadiumCorrFilenames(const std::string &vanNo,
                                         const std::string &inputDirCalib,
@@ -203,7 +205,8 @@ private:
   void loadVanadiumPrecalcWorkspaces(
       const std::string &preIntegFilename, const std::string &preCurvesFilename,
       Mantid::API::ITableWorkspace_sptr &vanIntegWS,
-      Mantid::API::MatrixWorkspace_sptr &vanCurvesWS, const std::string &vanNo);
+      Mantid::API::MatrixWorkspace_sptr &vanCurvesWS, const std::string &vanNo,
+      const std::string specNos);
 
   void calcVanadiumWorkspaces(const std::string &vanNo,
                               Mantid::API::ITableWorkspace_sptr &vanIntegWS,
@@ -250,13 +253,15 @@ private:
   Poco::Path outFilesDir(std::string addToDir);
 
   // generates appropriate names for table workspaces
-  std::string outFitParamsTblNameGenerator(std::string specNos, size_t bank_i);
+  std::string outFitParamsTblNameGenerator(const std::string specNos,
+                                           size_t bank_i) const;
 
-  std::string DifcZeroWorkspaceFactory(const std::vector<double> &difc,
-                                       const std::vector<double> &tzero,
-                                       const std::string &specNo) const;
+  std::string DifcZeroWorkspaceFactory(
+      const std::vector<double> &difc, const std::vector<double> &tzero,
+      const std::string &specNo, const std::string &customisedBankName) const;
 
-  std::string plotDifcZeroWorkspace() const;
+  std::string
+  plotDifcZeroWorkspace(const std::string &customisedBankName) const;
 
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;
@@ -276,7 +281,7 @@ private:
   /// saves the last valid run number
   static std::string g_lastValidRun;
 
-  /// bank name use or specIds for cropped calibration
+  /// bank name use or SpecNos for cropped calibration
   static std::string g_calibCropIdentifier;
 
   // name of the workspace with the vanadium integration (of spectra)

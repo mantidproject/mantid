@@ -13,7 +13,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER LinePlotOptions : public QWidget
 
 public:
   LinePlotOptions(QWidget *parent = 0, bool logScaleOption=false);
-  ~LinePlotOptions();
+  ~LinePlotOptions() override;
 
   void setOriginalWorkspace(Mantid::API::IMDWorkspace_sptr ws);
 

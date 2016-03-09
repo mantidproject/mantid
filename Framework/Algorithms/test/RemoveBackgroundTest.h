@@ -78,7 +78,7 @@ public:
 
   RemoveBackgroundTest() { init_workspaces(1, 15000, BgWS, SourceWS); }
 
-  ~RemoveBackgroundTest() {
+  ~RemoveBackgroundTest() override {
     BgWS.reset();
     SourceWS.reset();
   }

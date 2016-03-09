@@ -42,7 +42,8 @@ namespace MantidQt
     Q_OBJECT
     public:
       QtReflOptionsDialog(ReflMainView* view, boost::shared_ptr<IReflPresenter> presenter);
-      virtual ~QtReflOptionsDialog();
+      ~QtReflOptionsDialog() override;
+
     protected:
       void initLayout();
       void initBindings();

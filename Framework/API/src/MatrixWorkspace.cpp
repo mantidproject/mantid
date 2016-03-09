@@ -1037,7 +1037,7 @@ void MatrixWorkspace::maskWorkspaceIndex(const std::size_t index) {
 * on the same spectrum. Writing to
 *  the mask set is marked parrallel critical so different spectra can be
 * analysised in parallel
-*  @param workspaceIndex :: The workspace spectrum index of the bin
+*  @param workspaceIndex :: The workspace index of the bin
 *  @param binIndex ::      The index of the bin in the spectrum
 *  @param weight ::        'How heavily' the bin is to be masked. =1 for full
 * masking (the default).
@@ -1065,20 +1065,20 @@ void MatrixWorkspace::maskBin(const size_t &workspaceIndex,
 }
 
 /** Writes the masking weight to m_masks (doesn't alter y-values). Contains a
-* parrallel critical section
+* parallel critical section
 *  and so is thread safe
-*  @param spectrumIndex :: The workspace spectrum index of the bin
+*  @param index :: The workspace index of the spectrum
 *  @param binIndex ::      The index of the bin in the spectrum
 *  @param weight ::        'How heavily' the bin is to be masked. =1 for full
 * masking (the default).
 */
-void MatrixWorkspace::flagMasked(const size_t &spectrumIndex,
-                                 const size_t &binIndex, const double &weight) {
+void MatrixWorkspace::flagMasked(const size_t &index, const size_t &binIndex,
+                                 const double &weight) {
   // Writing to m_masks is not thread-safe, so put in some protection
   PARALLEL_CRITICAL(maskBin) {
     // First get a reference to the list for this spectrum (or create a new
     // list)
-    MaskList &binList = m_masks[spectrumIndex];
+    MaskList &binList = m_masks[index];
     auto it = binList.find(binIndex);
     if (it != binList.end()) {
       binList.erase(it);
@@ -1088,7 +1088,7 @@ void MatrixWorkspace::flagMasked(const size_t &spectrumIndex,
 }
 
 /** Does this spectrum contain any masked bins
-*  @param workspaceIndex :: The workspace spectrum index to test
+*  @param workspaceIndex :: The workspace index to test
 *  @return True if there are masked bins for this spectrum
 */
 bool MatrixWorkspace::hasMaskedBins(const size_t &workspaceIndex) const {

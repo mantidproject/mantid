@@ -15,23 +15,23 @@ public:
   /// Default constructor
   UnaryOpHelper() : UnaryOperation(){};
   /// Destructor
-  virtual ~UnaryOpHelper(){};
+  ~UnaryOpHelper() override{};
 
-  const std::string name() const { return "None"; }
-  int version() const { return 0; }
-  const std::string summary() const { return "Test summary"; }
+  const std::string name() const override { return "None"; }
+  int version() const override { return 0; }
+  const std::string summary() const override { return "Test summary"; }
 
   // Pass-throughs to UnaryOperation methods
-  const std::string inputPropName() const {
+  const std::string inputPropName() const override {
     return UnaryOperation::inputPropName();
   }
-  const std::string outputPropName() const {
+  const std::string outputPropName() const override {
     return UnaryOperation::outputPropName();
   }
 
 private:
   void performUnaryOperation(const double, const double, const double, double &,
-                             double &) {}
+                             double &) override {}
 };
 
 class UnaryOperationTest : public CxxTest::TestSuite {

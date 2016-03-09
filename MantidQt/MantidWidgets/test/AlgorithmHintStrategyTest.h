@@ -23,14 +23,14 @@ class AlgorithmHintStrategyTest : public CxxTest::TestSuite {
 
   public:
     FakeAlgorithm() {}
-    ~FakeAlgorithm() {}
-    const std::string name() const { return "Fake Algorithm"; };
-    int version() const { return 1; };
-    const std::string category() const { return ""; };
-    const std::string summary() const { return "A Fake Algorithm"; };
+    ~FakeAlgorithm() override {}
+    const std::string name() const override { return "Fake Algorithm"; };
+    int version() const override { return 1; };
+    const std::string category() const override { return ""; };
+    const std::string summary() const override { return "A Fake Algorithm"; };
 
   private:
-    void init() {
+    void init() override {
       declareProperty("IntValue", 0);
       declareProperty("DoubleValue", 0.01);
       declareProperty("BoolValue", false);
@@ -50,7 +50,7 @@ class AlgorithmHintStrategyTest : public CxxTest::TestSuite {
           Mantid::Kernel::make_unique<
               Mantid::Kernel::ArrayProperty<std::string>>("StringArray"));
     };
-    void exec() { return; };
+    void exec() override { return; };
   };
 
 public:

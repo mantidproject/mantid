@@ -78,23 +78,23 @@ public:
   /// Standalone mode constructor.
   MdViewerWidget(QWidget *parent);
   /// Default destructor.
-  virtual ~MdViewerWidget();
+  ~MdViewerWidget() override;
 
   /// Add extra menus for standalone mode.
   void addMenus();
   /// Connect data loader.
   void connectLoadDataReaction(QAction *action);
   /// Filter events to check for hide.
-  bool eventFilter(QObject *obj, QEvent *ev);
+  bool eventFilter(QObject *obj, QEvent *ev) override;
   /// See MantidQt::API::VatesViewerInterface
   void renderWorkspace(QString workspaceName, int workspaceType,
-                       std::string instrumentName);
+                       std::string instrumentName) override;
   /// See MantidQt::API::VatesViewerInterface
-  void setupPluginMode();
+  void setupPluginMode() override;
 
 public slots:
   /// Seet MantidQt::API::VatesViewerInterface
-  void shutdown();
+  void shutdown() override;
 
 protected slots:
   /// Check for certain updates when an accept is fired.
@@ -125,15 +125,17 @@ protected slots:
 
 protected:
   /// Handle workspace preDeletion tasks.
-  void preDeleteHandle(const std::string &wsName,
-                       const boost::shared_ptr<Mantid::API::Workspace> ws);
+  void
+  preDeleteHandle(const std::string &wsName,
+                  const boost::shared_ptr<Mantid::API::Workspace> ws) override;
   /// Handle workspace replacement tasks.
-  void afterReplaceHandle(const std::string &wsName,
-                          const boost::shared_ptr<Mantid::API::Workspace> ws);
+  void afterReplaceHandle(
+      const std::string &wsName,
+      const boost::shared_ptr<Mantid::API::Workspace> ws) override;
   /// Detects if something is dragged onto the VSI
-  void dragEnterEvent(QDragEnterEvent *e);
+  void dragEnterEvent(QDragEnterEvent *e) override;
   /// Reacts to something being dropped onto the VSI
-  void dropEvent(QDropEvent *e);
+  void dropEvent(QDropEvent *e) override;
 
 private:
   Q_DISABLE_COPY(MdViewerWidget)
