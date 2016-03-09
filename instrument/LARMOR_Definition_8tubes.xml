@@ -4,9 +4,9 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="LARMOR" valid-from   ="2015-04-29 12:00:00"
-                          valid-to     ="2100-01-31 23:59:59"
-		          last-modified="2015-06-10 08:30:00">
+ name="LARMOR" valid-from   ="2015-03-18 00:00:00"
+                          valid-to     ="2015-04-29 11:59:59"
+		          last-modified="2015-03-20 18:30:00">
 
   <defaults>
     <length unit="meter"/>
@@ -64,7 +64,7 @@
     <component type="monitor-tbd">
       <!-- better positions and shapes will be defined later -->
       <location z="9.8195" name="monitor1"/>
-      <location z="20.313" name="monitor2"/>
+      <location z="20.2" name="monitor2"/>
       <location z="24.056" name="monitor3"/>
     </component>
     <component type="Moderator-Monitor4">
@@ -124,100 +124,100 @@
 
  <type name="LARMORSANSDetector">
  <component type="LARMORUptube">
-<location  x=" -0.3206709  " name="tube1"/>
-<location  x=" -0.3040129  " name="tube3"/>
-<location  x=" -0.2873549  " name="tube5"/>
-<location  x=" -0.2706969  " name="tube7"/>
-<location  x=" -0.2540389  " name="tube9"/>
-<location  x=" -0.2373809  " name="tube11"/>
-<location  x=" -0.2207229  " name="tube13"/>
-<location  x=" -0.2040649  " name="tube15"/>
-<location  x=" -0.1874069  " name="tube17"/>
-<location  x=" -0.1707489  " name="tube19"/>
-<location  x=" -0.1540909  " name="tube21"/>
-<location  x=" -0.1374329  " name="tube23"/>
-<location  x=" -0.1207749  " name="tube25"/>
-<location  x=" -0.1041169  " name="tube27"/>
-<location  x=" -0.0874589  " name="tube29"/>
-<location  x=" -0.0708009  " name="tube31"/>
-<location  x=" -0.0541429  " name="tube33"/>
-<location  x=" -0.0374849  " name="tube35"/>
-<location  x=" -0.0208269  " name="tube37"/>
-<location  x=" -0.0041689  " name="tube39"/>
-<location  x=" 0.0124891   " name="tube41"/>
-<location  x=" 0.0291471   " name="tube43"/>
-<location  x=" 0.0458051   " name="tube45"/>
-<location  x=" 0.0624631   " name="tube47"/>
-<location  x=" 0.0791211   " name="tube49"/>
-<location  x=" 0.0957791   " name="tube51"/>
-<location  x=" 0.1124371   " name="tube53"/>
-<location  x=" 0.1290951   " name="tube55"/>
-<location  x=" 0.1457531   " name="tube57"/>
-<location  x=" 0.1624111   " name="tube59"/>
-<location  x=" 0.1790691   " name="tube61"/>
-<location  x=" 0.1957271   " name="tube63"/>
-<location  x=" 0.2123851   " name="tube65"/>
-<location  x=" 0.2290431   " name="tube67"/>
-<location  x=" 0.2457011   " name="tube69"/>
-<location  x=" 0.2623591   " name="tube71"/>
-<location  x=" 0.2790171   " name="tube73"/>
-<location  x=" 0.2956751   " name="tube75"/>
-<location  x=" 0.3123331   " name="tube77"/>
-<location  x=" 0.3289911   " name="tube79"/>
+<location  x="-0.31995 " name="tube1"/>
+<location  x="-0.30375 " name="tube3"/>
+<location  x="-0.28755 " name="tube5"/>
+<location  x="-0.27135 " name="tube7"/>
+<location  x="-0.25515 " name="tube9"/>
+<location  x="-0.23895 " name="tube11"/>
+<location  x="-0.22275 " name="tube13"/>
+<location  x="-0.20655 " name="tube15"/>
+<location  x="-0.19035 " name="tube17"/>
+<location  x="-0.17415 " name="tube19"/>
+<location  x="-0.15795 " name="tube21"/>
+<location  x="-0.14175 " name="tube23"/>
+<location  x="-0.12555 " name="tube25"/>
+<location  x="-0.10935 " name="tube27"/>
+<location  x="-0.09315 " name="tube29"/>
+<location  x="-0.07695 " name="tube31"/>
+<location  x="-0.06075 " name="tube33"/>
+<location  x="-0.04455 " name="tube35"/>
+<location  x="-0.02835 " name="tube37"/>
+<location  x="-0.01215 " name="tube39"/>
+<location  x="0.00405  " name="tube41"/>
+<location  x="0.02025  " name="tube43"/>
+<location  x="0.03645  " name="tube45"/>
+<location  x="0.05265  " name="tube47"/>
+<location  x="0.06885  " name="tube49"/>
+<location  x="0.08505  " name="tube51"/>
+<location  x="0.10125  " name="tube53"/>
+<location  x="0.11745  " name="tube55"/>
+<location  x="0.13365  " name="tube57"/>
+<location  x="0.14985  " name="tube59"/>
+<location  x="0.16605  " name="tube61"/>
+<location  x="0.18225  " name="tube63"/>
+<location  x="0.19845  " name="tube65"/>
+<location  x="0.21465  " name="tube67"/>
+<location  x="0.23085  " name="tube69"/>
+<location  x="0.24705  " name="tube71"/>
+<location  x="0.26325  " name="tube73"/>
+<location  x="0.27945  " name="tube75"/>
+<location  x="0.29565  " name="tube77"/>
+<location  x="0.31185  " name="tube79"/>
 </component>
  <component type="LARMORDowntube">
-<location  x=" -0.3123799  " name="tube2"/>
-<location  x=" -0.2957219  " name="tube4"/>
-<location  x=" -0.2790639  " name="tube6"/>
-<location  x=" -0.2624059  " name="tube8"/>
-<location  x=" -0.2457479  " name="tube10"/>
-<location  x=" -0.2290899  " name="tube12"/>
-<location  x=" -0.2124319  " name="tube14"/>
-<location  x=" -0.1957739  " name="tube16"/>
-<location  x=" -0.1791159  " name="tube18"/>
-<location  x=" -0.1624579  " name="tube20"/>
-<location  x=" -0.1457999  " name="tube22"/>
-<location  x=" -0.1291419  " name="tube24"/>
-<location  x=" -0.1124839  " name="tube26"/>
-<location  x=" -0.0958259  " name="tube28"/>
-<location  x=" -0.0791679  " name="tube30"/>
-<location  x=" -0.0625099  " name="tube32"/>
-<location  x=" -0.0458519  " name="tube34"/>
-<location  x=" -0.0291939  " name="tube36"/>
-<location  x=" -0.0125359  " name="tube38"/>
-<location  x=" 0.0041221   " name="tube40"/>
-<location  x=" 0.0207801   " name="tube42"/>
-<location  x=" 0.0374381   " name="tube44"/>
-<location  x=" 0.0540961   " name="tube46"/>
-<location  x=" 0.0707541   " name="tube48"/>
-<location  x=" 0.0874121   " name="tube50"/>
-<location  x=" 0.1040701   " name="tube52"/>
-<location  x=" 0.1207281   " name="tube54"/>
-<location  x=" 0.1373861   " name="tube56"/>
-<location  x=" 0.1540441   " name="tube58"/>
-<location  x=" 0.1707021   " name="tube60"/>
-<location  x=" 0.1873601   " name="tube62"/>
-<location  x=" 0.2040181   " name="tube64"/>
-<location  x=" 0.2206761   " name="tube66"/>
-<location  x=" 0.2373341   " name="tube68"/>
-<location  x=" 0.2539921   " name="tube70"/>
-<location  x=" 0.2706501   " name="tube72"/>
-<location  x=" 0.2873081   " name="tube74"/>
-<location  x=" 0.3039661   " name="tube76"/>
-<location  x=" 0.3206241   " name="tube78"/>
-<location  x=" 0.3372821   " name="tube80"/>
+<location  x="-0.31185 " name="tube2"/>
+<location  x="-0.29565 " name="tube4"/>
+<location  x="-0.27945 " name="tube6"/>
+<location  x="-0.26325 " name="tube8"/>
+<location  x="-0.24705 " name="tube10"/>
+<location  x="-0.23085 " name="tube12"/>
+<location  x="-0.21465 " name="tube14"/>
+<location  x="-0.19845 " name="tube16"/>
+<location  x="-0.18225 " name="tube18"/>
+<location  x="-0.16605 " name="tube20"/>
+<location  x="-0.14985 " name="tube22"/>
+<location  x="-0.13365 " name="tube24"/>
+<location  x="-0.11745 " name="tube26"/>
+<location  x="-0.10125 " name="tube28"/>
+<location  x="-0.08505 " name="tube30"/>
+<location  x="-0.06885 " name="tube32"/>
+<location  x="-0.05265 " name="tube34"/>
+<location  x="-0.03645 " name="tube36"/>
+<location  x="-0.02025 " name="tube38"/>
+<location  x="-0.00405 " name="tube40"/>
+<location  x="0.01215  " name="tube42"/>
+<location  x="0.02835  " name="tube44"/>
+<location  x="0.04455  " name="tube46"/>
+<location  x="0.06075  " name="tube48"/>
+<location  x="0.07695  " name="tube50"/>
+<location  x="0.09315  " name="tube52"/>
+<location  x="0.10935  " name="tube54"/>
+<location  x="0.12555  " name="tube56"/>
+<location  x="0.14175  " name="tube58"/>
+<location  x="0.15795  " name="tube60"/>
+<location  x="0.17415  " name="tube62"/>
+<location  x="0.19035  " name="tube64"/>
+<location  x="0.20655  " name="tube66"/>
+<location  x="0.22275  " name="tube68"/>
+<location  x="0.23895  " name="tube70"/>
+<location  x="0.25515  " name="tube72"/>
+<location  x="0.27135  " name="tube74"/>
+<location  x="0.28755  " name="tube76"/>
+<location  x="0.30375  " name="tube78"/>
+<location  x="0.31995  " name="tube80"/>
 </component>
  </type>
  
  <type name="LARMORUptube" outline="yes">
  <component type="pixel">
-   <locations y="-0.32" y-end="0.32" n-elements="512" />
+   <locations y="-0.369" y-end="0.271" n-elements="512" name="det"/>
  </component>
  </type>
  
  <type name="LARMORDowntube" outline="yes">
  <component type="pixel">
-   <locations y="-0.32" y-end="0.32" n-elements="512" />
+   <locations y="-0.369" y-end="0.271" n-elements="512" name="det"/>
  </component>
  </type>
   
@@ -249,17 +249,17 @@
    <id start="1200000" end="1200511" />
    <id start="1202000" end="1202511" />
    <id start="1204000" end="1204511" />
-   <id start="1206000" end="1206511" />
-   <id start="1208000" end="1208511" />
-   <id start="1210000" end="1210511" />
-   <id start="1212000" end="1212511" />
-   <id start="1214000" end="1214511" />
-   <id start="1216000" end="1216511" />
-   <id start="1218000" end="1218511" />
    <id start="1220000" end="1220511" />
    <id start="1222000" end="1222511" />
+   <id start="1210000" end="1210511" />
    <id start="1300000" end="1300511" />
    <id start="1302000" end="1302511" />
+   <id start="1303000" end="1303511" />
+   <id start="1218000" end="1218511" />
+   <id start="1206000" end="1206511" />
+   <id start="1208000" end="1208511" />
+   <id start="1212000" end="1212511" />
+   <id start="1214000" end="1214511" />
    <id start="1304000" end="1304511" />
    <id start="1306000" end="1306511" />
    <id start="1308000" end="1308511" />
@@ -290,17 +290,17 @@
    <id start="1201000" end="1201511" />
    <id start="1203000" end="1203511" />
    <id start="1205000" end="1205511" />
-   <id start="1207000" end="1207511" />
+   <id start="1221000" end="1221511" />
    <id start="1209000" end="1209511" />
-   <id start="1211000" end="1211511" />
-   <id start="1213000" end="1213511" />
+   <id start="1223000" end="1223511" />
+   <id start="1301000" end="1301511" />
    <id start="1215000" end="1215511" />
    <id start="1217000" end="1217511" />
    <id start="1219000" end="1219511" />
-   <id start="1221000" end="1221511" />
-   <id start="1223000" end="1223511" />
-   <id start="1301000" end="1301511" />
-   <id start="1303000" end="1303511" />
+   <id start="1207000" end="1207511" />
+   <id start="1211000" end="1211511" />
+   <id start="1213000" end="1213511" />
+   <id start="1216000" end="1216511" />
    <id start="1305000" end="1305511" />
    <id start="1307000" end="1307511" />
    <id start="1309000" end="1309511" />
