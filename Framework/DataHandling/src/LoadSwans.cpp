@@ -1,4 +1,6 @@
 #include "MantidDataHandling/LoadSwans.h"
+#include "MantidAPI/Axis.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
@@ -84,7 +86,7 @@ void LoadSwans::init() {
                   "of times-of-flight. "
                   "This is the maximum accepted value in microseconds.");
 
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 }
@@ -155,6 +157,9 @@ void LoadSwans::placeDetectorInSpace() {
   const V3D axis(0.0, 1.0, 0.0);
   Quat rotation(angle, axis);
   helper.rotateComponent(m_ws, componentName, rotation);
+
+  // keep the Z distance as property
+  m_ws->mutableRun().addProperty<double>("sample_detector_distance", distance);
 }
 
 /**
@@ -168,9 +173,6 @@ std::map<uint32_t, std::vector<uint32_t>> LoadSwans::loadData() {
   std::string filename = getPropertyValue("FilenameData");
   std::ifstream input(filename, std::ifstream::binary | std::ios::ate);
   input.seekg(0);
-
-  m_ws->initialize(m_detector_size, 1, 1);
-
   std::map<uint32_t, std::vector<uint32_t>> eventMap;
 
   while (input.is_open()) {
@@ -262,6 +264,12 @@ void LoadSwans::setMetaDataAsWorkspaceProperties(
  */
 void LoadSwans::loadDataIntoTheWorkspace(
     const std::map<uint32_t, std::vector<uint32_t>> &eventMap) {
+
+  m_ws->initialize(m_detector_size, 1, 1);
+  m_ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+  m_ws->setYUnit("Counts");
+  m_ws->setTitle("SWANS Event Workspace");
+
   for (const auto &position : eventMap) {
     EventList &el = m_ws->getEventList(position.first);
     el.setSpectrumNo(position.first);
