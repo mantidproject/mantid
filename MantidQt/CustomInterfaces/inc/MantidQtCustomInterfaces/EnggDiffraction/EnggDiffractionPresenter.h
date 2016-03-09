@@ -239,6 +239,9 @@ private:
   virtual void startAsyncFittingWorker(const std::string &focusedRunNo,
                                        const std::string &ExpectedPeaks);
 
+  void inputChecksBeforeFitting(const std::string &focusedRunNo,
+                                const std::string &ExpectedPeaks);
+
   // plots workspace according to the user selection
   void plotFocusedWorkspace(std::string outWSName);
 

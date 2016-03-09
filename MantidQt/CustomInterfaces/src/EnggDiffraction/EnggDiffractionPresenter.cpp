@@ -451,27 +451,16 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
   startAsyncRebinningPulsesWorker(runNo, nperiods, timeStep, outWSName);
 }
 
-void EnggDiffractionPresenter::startAsyncFittingWorker(
-    const std::string &focusedRunNo, const std::string &ExpectedPeaks) {
-
-  delete m_workerThread;
-  m_workerThread = new QThread(this);
-  EnggDiffWorker *worker =
-      new EnggDiffWorker(this, focusedRunNo, ExpectedPeaks);
-  worker->moveToThread(m_workerThread);
-
-  connect(m_workerThread, SIGNAL(started()), worker, SLOT(fitting()));
-  connect(worker, SIGNAL(finished()), this, SLOT(fittingFinished()));
-  // early delete of thread and worker
-  connect(m_workerThread, SIGNAL(finished()), m_workerThread,
-          SLOT(deleteLater()), Qt::DirectConnection);
-  connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
-  m_workerThread->start();
-}
-
 void EnggDiffractionPresenter::processFitPeaks() {
   const std::string focusedRunNo = m_view->fittingRunNo();
   const std::string fitPeaksData = m_view->fittingPeaksData();
+
+  try {
+    inputChecksBeforeFitting(focusedRunNo, fitPeaksData);
+  } catch (std::invalid_argument &ia) {
+    m_view->userWarning("Error in the inputs required for fitting", ia.what());
+    return;
+  }
 
   const std::string outWSName = "engggui_fitting_fit_peak_ws";
   g_log.notice() << "EnggDiffraction GUI: starting new "
@@ -482,6 +471,46 @@ void EnggDiffractionPresenter::processFitPeaks() {
 
   //	startAsyncFittingWorker
   startAsyncFittingWorker(focusedRunNo, fitPeaksData);
+}
+
+void EnggDiffractionPresenter::inputChecksBeforeFitting(
+    const std::string &focusedRunNo, const std::string &ExpectedPeaks) {
+  if (focusedRunNo.size() == 0) {
+    throw std::invalid_argument(
+        "cannot be empty and must be a valid directory");
+  }
+
+  Poco::File file(focusedRunNo);
+  if (!file.exists()) {
+    throw std::invalid_argument("The focused workspace file for single peak "
+                                "fitting could not be found: " +
+                                focusedRunNo);
+  }
+
+  if (ExpectedPeaks.empty()) {
+    g_log.warning() << "Expected peaks were not passed, via fitting interface,"
+                       "the default list of"
+                       "expected peaks will be utlised instead."
+                    << std::endl;
+  }
+}
+
+void EnggDiffractionPresenter::startAsyncFittingWorker(
+	const std::string &focusedRunNo, const std::string &ExpectedPeaks) {
+
+	delete m_workerThread;
+	m_workerThread = new QThread(this);
+	EnggDiffWorker *worker =
+		new EnggDiffWorker(this, focusedRunNo, ExpectedPeaks);
+	worker->moveToThread(m_workerThread);
+
+	connect(m_workerThread, SIGNAL(started()), worker, SLOT(fitting()));
+	connect(worker, SIGNAL(finished()), this, SLOT(fittingFinished()));
+	// early delete of thread and worker
+	connect(m_workerThread, SIGNAL(finished()), m_workerThread,
+		SLOT(deleteLater()), Qt::DirectConnection);
+	connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
+	m_workerThread->start();
 }
 
 void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
