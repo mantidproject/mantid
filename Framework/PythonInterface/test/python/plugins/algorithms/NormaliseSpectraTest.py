@@ -16,34 +16,34 @@ class NormaliseSpectraTest(unittest.TestCase):
     def test_one_hist_positive(self):
         in_ws = self._create_workspace(1, 'test', self._positive)
         out_ws = NormaliseSpectra(InputWorkspace=in_ws)
-        self._check_workspace_is_within_boundaries(out_ws)
+        self._check_workspace_is_within_boundaries(out_ws, 1, 0)
 
     def test_one_hist_negative(self):
         in_ws = self._create_workspace(1, 'test', self._negative)
-        out_ws = NormaliseSpectra(InputWorkspace=in_ws)
-        self._check_workspace_is_within_boundaries(out_ws)
+        self.assertRaises(RuntimeError,  NormaliseSpectra,
+                          InputWorkspace=in_ws, OutputWorkspace='out_ws')
 
     def test_one_hist_zeros(self):
         in_ws = self._create_workspace(1, 'test', self._zeros)
-        out_ws = NormaliseSpectra(InputWorkspace=in_ws)
-        self._check_workspace_is_within_boundaries(out_ws)
+        self.assertRaises(RuntimeError,  NormaliseSpectra,
+                          InputWorkspace=in_ws, OutputWorkspace='out_ws')
 
     def test_one_hist_mixed(self):
         in_ws = self._create_workspace(1, 'test', self._mixed)
         out_ws = NormaliseSpectra(InputWorkspace=in_ws)
-        self._check_workspace_is_within_boundaries(out_ws)
+        self._check_workspace_is_within_boundaries(out_ws, 1, -1)
 
     def test_with_MatrixWorkspace_multi_hist_(self):
         in_ws = self._create_workspace(3, 'test', self._positive)
         out_ws = NormaliseSpectra(InputWorkspace=in_ws)
-        self._check_workspace_is_within_boundaries(out_ws)
+        self._check_workspace_is_within_boundaries(out_ws, 1, 0)
 
 #--------------------------------Validate results-----------------------------------------
 
-    def _check_workspace_is_within_boundaries(self, matrixWs):
+    def _check_workspace_is_within_boundaries(self, matrixWs, max, min):
         for i in range(matrixWs.getNumberHistograms()):
-            self._check_spectrum_less_than(matrixWs.readY(i), 1)
-            self._check_spectrum_more_than(matrixWs.readY(i), 0)
+            self._check_spectrum_less_than(matrixWs.readY(i), max)
+            self._check_spectrum_more_than(matrixWs.readY(i), min)
 
     def _check_spectrum_less_than(self, y_data, upper_boundary):
         for i in range(len(y_data)):
