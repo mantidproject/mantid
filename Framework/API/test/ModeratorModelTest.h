@@ -9,7 +9,7 @@
 
 class MockModerator : public Mantid::API::ModeratorModel {
 public:
-  boost::shared_ptr<ModeratorModel> clone() const {
+  boost::shared_ptr<ModeratorModel> clone() const override {
     return boost::shared_ptr<MockModerator>();
   }
   MOCK_CONST_METHOD0(emissionTimeMean, double());

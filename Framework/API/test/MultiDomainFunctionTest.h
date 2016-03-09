@@ -23,13 +23,13 @@ public:
     this->declareParameter("A", 0);
     this->declareParameter("B", 0);
   }
-  virtual std::string name() const {
+  std::string name() const override {
     return "MultiDomainFunctionTest_Function";
   }
 
 protected:
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const {
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override {
     const double A = getParameter(0);
     const double B = getParameter(1);
 
@@ -38,8 +38,8 @@ protected:
       out[i] = A + B * x;
     }
   }
-  virtual void functionDeriv1D(Jacobian *out, const double *xValues,
-                               const size_t nData) {
+  void functionDeriv1D(Jacobian *out, const double *xValues,
+                       const size_t nData) override {
     for (size_t i = 0; i < nData; ++i) {
       double x = xValues[i];
       out->set(i, 0, x);
@@ -64,7 +64,7 @@ public:
     n[1] = 10;
     n[2] = 11;
   }
-  void set(size_t iY, size_t iP, double value) {
+  void set(size_t iY, size_t iP, double value) override {
     // domain index the data point #iY comes from
     size_t jY = 2;
     size_t size = 0;
@@ -80,7 +80,7 @@ public:
     if (jY != jP)
       off_diag += value;
   }
-  double get(size_t, size_t) { return 0.0; }
+  double get(size_t, size_t) override { return 0.0; }
 };
 }
 

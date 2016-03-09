@@ -47,7 +47,7 @@ public:
   static QString categoryInfo() { return "DynamicPDF"; }
 
   DisplayCurveFitTest(QWidget *parent = nullptr);
-  ~DisplayCurveFitTest();
+  ~DisplayCurveFitTest() override;
 
 private slots:
   void loadSpectra(const QString &workspaceName);

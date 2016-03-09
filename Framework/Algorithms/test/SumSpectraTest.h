@@ -26,9 +26,11 @@ public:
                                                                      102, true);
     this->inputSpace->instrumentParameters().addBool(
         inputSpace->getDetector(1).get(), "masked", true);
+
+    inputSpace->dataE(5)[38] = 0.0;
   }
 
-  ~SumSpectraTest() { AnalysisDataService::Instance().clear(); }
+  ~SumSpectraTest() override { AnalysisDataService::Instance().clear(); }
 
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -306,7 +308,7 @@ public:
                      output2D->run().getLogData("NumAllSpectra")->value())
     TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(1),
                      output2D->run().getLogData("NumMaskSpectra")->value())
-    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0),
+    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(1),
                      output2D->run().getLogData("NumZeroSpectra")->value())
 
     size_t nSignals = nTestHist - 3;
@@ -315,9 +317,10 @@ public:
     TS_ASSERT_EQUALS(x[50], inputSpace->readX(0)[50]);
     TS_ASSERT_EQUALS(x[100], inputSpace->readX(0)[100]);
     TS_ASSERT_DELTA(y[7], double(nSignals) * y0[7], 1.e-6);
-    TS_ASSERT_DELTA(y[38], double(nSignals) * y0[38], 1.e-6);
+    TS_ASSERT_DELTA(y[38], double(nSignals - 1) * y0[38], 1.e-6);
     TS_ASSERT_DELTA(y[72], double(nSignals) * y0[72], 1.e-6);
     TS_ASSERT_DELTA(e[28], std::sqrt(double(nSignals)) * e0[28], 0.00001);
+    TS_ASSERT_DELTA(e[38], std::sqrt(double(nSignals - 1)) * e0[38], 0.00001);
     TS_ASSERT_DELTA(e[47], std::sqrt(double(nSignals)) * e0[47], 0.00001);
     TS_ASSERT_DELTA(e[99], std::sqrt(double(nSignals)) * e0[99], 0.00001);
 

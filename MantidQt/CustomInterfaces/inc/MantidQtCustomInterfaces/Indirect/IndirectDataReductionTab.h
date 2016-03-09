@@ -77,7 +77,7 @@ namespace CustomInterfaces
 
   public:
     IndirectDataReductionTab(IndirectDataReduction * idrUI, QObject * parent = 0);
-    virtual ~IndirectDataReductionTab();
+    ~IndirectDataReductionTab() override;
 
   public slots:
     void runTab();

@@ -253,7 +253,7 @@ public:
     return new CompactMDTestPerformance();
   }
   static void destroySuite(CompactMDTestPerformance *suite) { delete suite; }
-  void setUp() {
+  void setUp() override {
     // Create a 4D workspace.
     const size_t numDims = 4;
     const double signal = 0.0;

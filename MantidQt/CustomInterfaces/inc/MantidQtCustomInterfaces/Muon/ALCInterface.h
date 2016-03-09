@@ -59,7 +59,7 @@ namespace CustomInterfaces
     static QString categoryInfo() { return "Muon"; }
 
   protected:
-    void initLayout();
+    void initLayout() override;
 
   private slots:
     void nextStep();

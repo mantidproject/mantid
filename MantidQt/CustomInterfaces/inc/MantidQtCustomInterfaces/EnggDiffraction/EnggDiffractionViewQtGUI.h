@@ -61,83 +61,92 @@ public:
   /// Default Constructor
   EnggDiffractionViewQtGUI(QWidget *parent = 0);
   /// Destructor
-  virtual ~EnggDiffractionViewQtGUI();
+  ~EnggDiffractionViewQtGUI() override;
 
   /// Interface name
   static std::string name() { return "Engineering Diffraction"; }
   /// This interface's categories.
   static QString categoryInfo() { return "Diffraction"; }
 
-  void userWarning(const std::string &warn, const std::string &description);
+  void userWarning(const std::string &warn,
+                   const std::string &description) override;
 
-  void userError(const std::string &err, const std::string &description);
+  void userError(const std::string &err,
+                 const std::string &description) override;
 
-  std::string askNewCalibrationFilename(const std::string &suggestedFname);
+  std::string
+  askNewCalibrationFilename(const std::string &suggestedFname) override;
 
-  std::string askExistingCalibFilename();
+  std::string askExistingCalibFilename() override;
 
-  std::vector<std::string> logMsgs() const { return m_logMsgs; }
+  std::vector<std::string> logMsgs() const override { return m_logMsgs; }
 
-  std::string getRBNumber() const;
+  std::string getRBNumber() const override;
 
-  EnggDiffCalibSettings currentCalibSettings() const { return m_calibSettings; }
+  EnggDiffCalibSettings currentCalibSettings() const override {
+    return m_calibSettings;
+  }
 
-  std::string currentInstrument() const { return m_currentInst; }
+  std::string currentInstrument() const override { return m_currentInst; }
 
-  std::string currentVanadiumNo() const;
+  std::string currentVanadiumNo() const override;
 
-  std::string currentCeriaNo() const;
+  std::string currentCeriaNo() const override;
 
-  std::string currentCalibFile() const;
+  std::string currentCalibFile() const override;
 
-  std::vector<std::string> newVanadiumNo() const;
+  std::vector<std::string> newVanadiumNo() const override;
 
-  std::vector<std::string> newCeriaNo() const;
+  std::vector<std::string> newCeriaNo() const override;
 
-  std::string outCalibFilename() const { return m_outCalibFilename; }
+  std::string outCalibFilename() const override { return m_outCalibFilename; }
 
-  int currentCropCalibBankName() const { return m_currentCropCalibBankName; }
+  int currentCropCalibBankName() const override {
+    return m_currentCropCalibBankName;
+  }
 
-  std::string currentCalibSpecNos() const;
+  std::string currentCalibSpecNos() const override;
+
+  std::string currentCalibCustomisedBankName() const;
 
   void newCalibLoaded(const std::string &vanadiumNo, const std::string &ceriaNo,
-                      const std::string &fname);
+                      const std::string &fname) override;
 
   void writeOutCalibFile(const std::string &outFilename,
                          const std::vector<double> &difc,
-                         const std::vector<double> &tzero);
+                         const std::vector<double> &tzero) override;
 
-  virtual void enableTabs(bool enable);
+  void enableTabs(bool enable) override;
 
-  virtual void enableCalibrateAndFocusActions(bool enable);
+  void enableCalibrateAndFocusActions(bool enable) override;
 
-  virtual std::string focusingDir() const;
+  std::string focusingDir() const override;
 
-  virtual std::vector<std::string> focusingRunNo() const;
+  std::vector<std::string> focusingRunNo() const override;
 
-  virtual std::vector<std::string> focusingCroppedRunNo() const;
+  std::vector<std::string> focusingCroppedRunNo() const override;
 
-  virtual std::vector<std::string> focusingTextureRunNo() const;
+  std::vector<std::string> focusingTextureRunNo() const override;
 
-  virtual std::vector<bool> focusingBanks() const;
+  std::vector<bool> focusingBanks() const override;
 
-  virtual std::string focusingCroppedSpectrumIDs() const;
+  std::string focusingCroppedSpectrumNos() const override;
 
-  virtual std::string focusingTextureGroupingFile() const;
+  std::string focusingTextureGroupingFile() const override;
 
-  virtual bool focusedOutWorkspace() const;
+  bool focusedOutWorkspace() const override;
 
-  virtual bool plotCalibWorkspace() const;
+  bool plotCalibWorkspace() const override;
 
-  virtual void resetFocus();
+  void resetFocus() override;
 
-  virtual std::vector<std::string> currentPreprocRunNo() const;
+  std::vector<std::string> currentPreprocRunNo() const override;
 
-  virtual double rebinningTimeBin() const;
+  double rebinningTimeBin() const override;
 
-  virtual size_t rebinningPulsesNumberPeriods() const;
+  size_t rebinningPulsesNumberPeriods() const override;
 
-  virtual double rebinningPulsesTime() const;
+  double rebinningPulsesTime() const override;
 
   virtual std::string fittingRunNo() const;
 
@@ -147,23 +156,23 @@ public:
 
   virtual void setDataCurves(QwtData &data);
 
-  virtual void plotFocusedSpectrum(const std::string &wsName);
+  void plotFocusedSpectrum(const std::string &wsName) override;
 
-  virtual void plotWaterfallSpectrum(const std::string &wsName);
+  void plotWaterfallSpectrum(const std::string &wsName) override;
 
-  virtual void plotReplacingWindow(const std::string &wsName,
-                                   const std::string &spectrum,
-                                   const std::string &type);
+  void plotReplacingWindow(const std::string &wsName,
+                           const std::string &spectrum,
+                           const std::string &type) override;
 
-  virtual void plotVanCurvesCalibOutput();
+  void plotVanCurvesCalibOutput() override;
 
-  virtual void plotDifcZeroCalibOutput(const std::string &pyCode);
+  void plotDifcZeroCalibOutput(const std::string &pyCode) override;
 
-  virtual bool saveFocusedOutputFiles() const;
+  bool saveFocusedOutputFiles() const override;
 
-  int currentPlotType() const { return m_currentType; }
+  int currentPlotType() const override { return m_currentType; }
 
-  int currentMultiRunMode() const { return m_currentRunMode; }
+  int currentMultiRunMode() const override { return m_currentRunMode; }
 
 private slots:
   /// for buttons, do calibrate, focus, event->histo rebin, and similar
@@ -197,7 +206,7 @@ private slots:
   void RBNumberChanged();
 
   // slot of the cropped calibration part of the interface
-  void calibSpecIdChanged(int idx);
+  void calibspecNoChanged(int idx);
 
   // slots of the focus part of the interface
   void plotRepChanged(int idx);
@@ -212,7 +221,7 @@ private slots:
   void updateCroppedCalibRun();
 
   // enables the text field when appropriate bank name is selected
-  void enableSpecIds();
+  void enableSpecNos();
 
   // slot of the fitting peaks per part of the interface
   void browseFitFocusedRun();
@@ -227,7 +236,7 @@ private slots:
 
 private:
   /// Setup the interface (tab UI)
-  virtual void initLayout();
+  void initLayout() override;
   void doSetupGeneralWidgets();
   void doSetupTabCalib();
   void doSetupTabFocus();
@@ -241,10 +250,10 @@ private:
   /// Load default interface settings for each tab, normally on startup
   void readSettings();
   /// save settings (before closing)
-  void saveSettings() const;
+  void saveSettings() const override;
 
   // window (custom interface) close
-  virtual void closeEvent(QCloseEvent *ev);
+  void closeEvent(QCloseEvent *ev) override;
 
   // path/name for the persistent settings group of this interface
   const static std::string m_settingsGroup;

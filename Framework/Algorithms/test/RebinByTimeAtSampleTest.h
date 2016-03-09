@@ -289,7 +289,9 @@ public:
 
   RebinByTimeAtSampleTestPerformance() {}
 
-  void setUp() { RebinByTimeBaseTestPerformance<RebinByTimeAtSample>::setUp(); }
+  void setUp() override {
+    RebinByTimeBaseTestPerformance<RebinByTimeAtSample>::setUp();
+  }
 
   void testExecution() {
     RebinByTimeBaseTestPerformance<RebinByTimeAtSample>::testExecution();

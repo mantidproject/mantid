@@ -28,14 +28,14 @@ def write_header(subproject, classname, filename, args):
 
     # Create an Algorithm header; will not use it if not an algo
     algorithm_header = """
-  const std::string name() const final;
-  int version() const final;
-  const std::string category() const final;
-  const std::string summary() const final;
+  const std::string name() const override final;
+  int version() const override final;
+  const std::string category() const override final;
+  const std::string summary() const override final;
 
 private:
-  void init() final;
-  void exec() final;
+  void init() override final;
+  void exec() override final;
 """
 
     alg_class_declare = " final : public API::Algorithm"

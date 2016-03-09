@@ -57,7 +57,7 @@ public slots:
 
 private:
   /// Handle completion of algorithm started from UI
-  virtual void finishHandle(const Mantid::API::IAlgorithm *alg);
+  void finishHandle(const Mantid::API::IAlgorithm *alg) override;
 
   /// Name of displayed workspace
   QString m_wsName;

@@ -32,7 +32,8 @@ ALCDataLoadingView::~ALCDataLoadingView() {
     m_ui.setupUi(m_widget);
     connect(m_ui.load, SIGNAL(clicked()), SIGNAL(loadRequested()));
     connect(m_ui.firstRun, SIGNAL(fileFindingFinished()), SIGNAL(firstRunSelected()));
-
+    connect(m_ui.firstRun, SIGNAL(filesFoundChanged()), this,
+            SLOT(handleFirstFileChanged()));
     connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
     connect(m_ui.lastRunAuto, SIGNAL(stateChanged(int)), this, SLOT(checkBoxAutoChanged(int)));
 
@@ -287,6 +288,17 @@ ALCDataLoadingView::~ALCDataLoadingView() {
       // The search is necessary to clear the validator
       m_ui.lastRun->setFileTextWithSearch(m_currentAutoFile.c_str());
       m_ui.lastRun->setReadOnly(false);
+    }
+  }
+
+  /**
+   * Called when the "first run" file has changed.
+   * Sets the "last run" box to look in the same directory.
+   */
+  void ALCDataLoadingView::handleFirstFileChanged() {
+    QString directory = m_ui.firstRun->getLastDirectory();
+    if (!directory.isEmpty()) {
+      m_ui.lastRun->setLastDirectory(directory);
     }
   }
 

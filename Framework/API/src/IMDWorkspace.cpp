@@ -115,6 +115,22 @@ const std::string IMDWorkspace::toString() const {
   return os.str();
 }
 
+//----------------------------------------------------------------------------------------------
+/**
+ * Make a single point with NaN as the signal and error
+ * This can be returned when there would otherwise be nothing to plot
+ * @param x :: position on the line
+ * @param y :: signal value
+ * @param e :: error value
+ */
+void IMDWorkspace::makeSinglePointWithNaN(std::vector<coord_t> &x,
+                                          std::vector<signal_t> &y,
+                                          std::vector<signal_t> &e) const {
+  x.push_back(0);
+  y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
+  e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
+}
+
 //-----------------------------------------------------------------------------------------------
 /** Obtain coordinates for a line plot through a IMDWorkspace.
  * Cross the workspace from start to end points, recording the signal along the

@@ -128,7 +128,7 @@ public:
   }
 
 private:
-  ~SavePARTest() {
+  ~SavePARTest() override {
     // delete test ws from ds after the test ends
     API::AnalysisDataService::Instance().remove(WSName);
     API::AnalysisDataService::Instance().remove(TestOutputParTableWSName);

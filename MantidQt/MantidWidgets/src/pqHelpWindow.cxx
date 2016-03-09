@@ -64,16 +64,16 @@ class pqHelpWindowNetworkReply : public QNetworkReply
 public:
   pqHelpWindowNetworkReply(const QUrl& url, QHelpEngineCore* helpEngine);
 
-  virtual void abort() {}
+  void abort() override {}
 
-  virtual qint64 bytesAvailable() const
-  {
+  qint64 bytesAvailable() const override {
     return (this->RawData.size() - this->Offset) +
         this->Superclass::bytesAvailable();
   }
-  virtual bool isSequential() const {return true;}
+  bool isSequential() const override { return true; }
+
 protected:
-  virtual qint64 readData(char *data, qint64 maxSize);
+  qint64 readData(char *data, qint64 maxSize) override;
 
   QByteArray RawData;
   qint64 Offset;
@@ -156,9 +156,9 @@ public:
   }
 
 protected:
-  virtual QNetworkReply *createRequest(Operation operation,
-                                       const QNetworkRequest &request, QIODevice *device)
-  {
+  QNetworkReply *createRequest(Operation operation,
+                               const QNetworkRequest &request,
+                               QIODevice *device) override {
     if (request.url().scheme() == "qthelp" && operation == GetOperation)
     {
       return new pqHelpWindowNetworkReply(request.url(), this->Engine);

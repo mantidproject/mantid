@@ -14,12 +14,12 @@ public:
   JumpFit(QWidget *parent = 0);
 
   // Inherited methods from IndirectDataAnalysisTab
-  void setup();
-  bool validate();
-  void run();
+  void setup() override;
+  bool validate() override;
+  void run() override;
   void runImpl(bool plot = false, bool save = false);
   /// Load default settings into the interface
-  void loadSettings(const QSettings &settings);
+  void loadSettings(const QSettings &settings) override;
 
 private slots:
   /// Handle when the sample input is ready

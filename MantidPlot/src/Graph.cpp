@@ -4342,8 +4342,10 @@ void Graph::copy(Graph *g) {
       if (pie)
         pie->addLabel(dynamic_cast<PieLabel *>(t), true);
       else
+        // cppcheck-suppress leakReturnValNotUsed
         insertText(t);
     } else
+      // cppcheck-suppress leakReturnValNotUsed
       insertText(t);
   }
 

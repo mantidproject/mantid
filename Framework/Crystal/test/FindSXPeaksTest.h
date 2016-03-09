@@ -297,7 +297,7 @@ public:
 
   FindSXPeaksTestPerformance() : m_nHistograms(5000) {}
 
-  void setUp() {
+  void setUp() override {
     m_workspace2D =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             m_nHistograms, 10);

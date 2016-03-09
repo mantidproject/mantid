@@ -38,7 +38,7 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS PeaksTabWidget
 public:
   PeaksTabWidget(std::vector<Mantid::API::IPeaksWorkspace_sptr> ws,
                  const std::string &coordinateSystem, QWidget *parent = 0);
-  ~PeaksTabWidget();
+  ~PeaksTabWidget() override;
   void setupMvc(std::map<std::string, std::vector<bool>> visiblePeaks);
   void addNewPeaksWorkspace(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
                             std::vector<bool> visiblePeaks);

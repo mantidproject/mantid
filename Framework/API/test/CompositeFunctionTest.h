@@ -20,26 +20,26 @@ public:
   CompositeFunctionTest_MocSpectrum(size_t nx, size_t ny)
       : m_x(nx), m_y(ny), m_e(ny) {}
 
-  void clearData() {}
-  void setData(const MantidVec &) {}
-  void setData(const MantidVec &, const MantidVec &) {}
+  void clearData() override {}
+  void setData(const MantidVec &) override {}
+  void setData(const MantidVec &, const MantidVec &) override {}
 
-  void setData(const MantidVecPtr &) {}
-  void setData(const MantidVecPtr &, const MantidVecPtr &) {}
+  void setData(const MantidVecPtr &) override {}
+  void setData(const MantidVecPtr &, const MantidVecPtr &) override {}
 
-  void setData(const MantidVecPtr::ptr_type &) {}
-  void setData(const MantidVecPtr::ptr_type &, const MantidVecPtr::ptr_type &) {
-  }
+  void setData(const MantidVecPtr::ptr_type &) override {}
+  void setData(const MantidVecPtr::ptr_type &,
+               const MantidVecPtr::ptr_type &) override {}
 
-  virtual MantidVec &dataX() { return m_x; }
-  virtual MantidVec &dataY() { return m_y; }
-  virtual MantidVec &dataE() { return m_e; }
+  MantidVec &dataX() override { return m_x; }
+  MantidVec &dataY() override { return m_y; }
+  MantidVec &dataE() override { return m_e; }
 
-  virtual const MantidVec &dataX() const { return m_x; }
-  virtual const MantidVec &dataY() const { return m_y; }
-  virtual const MantidVec &dataE() const { return m_e; }
+  const MantidVec &dataX() const override { return m_x; }
+  const MantidVec &dataY() const override { return m_y; }
+  const MantidVec &dataE() const override { return m_e; }
 
-  virtual size_t getMemorySize() const { return 0; }
+  size_t getMemorySize() const override { return 0; }
 
   MantidVec m_x, m_y, m_e;
 };
@@ -54,38 +54,39 @@ public:
     }
   }
 
-  ~CompositeFunctionTest_MocMatrixWorkspace() {}
+  ~CompositeFunctionTest_MocMatrixWorkspace() override {}
 
   // Section required for iteration
   /// Returns the number of single indexable items in the workspace
-  virtual std::size_t size() const { return m_spectra.size() * m_blocksize; }
+  std::size_t size() const override { return m_spectra.size() * m_blocksize; }
   /// Returns the size of each block of data returned by the dataY accessors
-  virtual std::size_t blocksize() const { return m_blocksize; }
+  std::size_t blocksize() const override { return m_blocksize; }
   /// Returns the number of histograms in the workspace
-  virtual std::size_t getNumberHistograms() const { return m_spectra.size(); }
+  std::size_t getNumberHistograms() const override { return m_spectra.size(); }
 
   /// Return the underlying ISpectrum ptr at the given workspace index.
-  virtual ISpectrum *getSpectrum(const size_t index) {
+  ISpectrum *getSpectrum(const size_t index) override {
     return &m_spectra[index];
   }
 
   /// Return the underlying ISpectrum ptr (const version) at the given workspace
   /// index.
-  virtual const ISpectrum *getSpectrum(const size_t index) const {
+  const ISpectrum *getSpectrum(const size_t index) const override {
     return &m_spectra[index];
   }
-  const std::string id(void) const { return ""; }
-  void init(const size_t &, const size_t &, const size_t &) {}
+  const std::string id(void) const override { return ""; }
+  void init(const size_t &, const size_t &, const size_t &) override {}
   void generateHistogram(const std::size_t, const MantidVec &, MantidVec &,
-                         MantidVec &, bool) const {}
+                         MantidVec &, bool) const override {}
 
-  void clearFileBacked(bool){};
-  ITableWorkspace_sptr makeBoxTable(size_t /* start*/, size_t /*num*/) {
+  void clearFileBacked(bool) override{};
+  ITableWorkspace_sptr makeBoxTable(size_t /* start*/,
+                                    size_t /*num*/) override {
     return ITableWorkspace_sptr();
   }
 
 private:
-  virtual CompositeFunctionTest_MocMatrixWorkspace *doClone() const {
+  CompositeFunctionTest_MocMatrixWorkspace *doClone() const override {
     throw std::runtime_error("Cloning of "
                              "CompositeFunctionTest_MocMatrixWorkspace is not "
                              "implemented.");
@@ -102,10 +103,10 @@ public:
     declareParameter("s", 1.);
   }
 
-  std::string name() const { return "Gauss"; }
+  std::string name() const override { return "Gauss"; }
 
   void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const {
+                     const size_t nData) const override {
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
@@ -115,7 +116,7 @@ public:
     }
   }
   void functionDerivLocal(Jacobian *out, const double *xValues,
-                          const size_t nData) {
+                          const size_t nData) override {
     // throw Mantid::Kernel::Exception::NotImplementedError("");
     double c = getParameter("c");
     double h = getParameter("h");
@@ -129,16 +130,16 @@ public:
     }
   }
 
-  double centre() const { return getParameter(0); }
+  double centre() const override { return getParameter(0); }
 
-  double height() const { return getParameter(1); }
+  double height() const override { return getParameter(1); }
 
-  double fwhm() const { return getParameter(2); }
+  double fwhm() const override { return getParameter(2); }
 
-  void setCentre(const double c) { setParameter(0, c); }
-  void setHeight(const double h) { setParameter(1, h); }
+  void setCentre(const double c) override { setParameter(0, c); }
+  void setHeight(const double h) override { setParameter(1, h); }
 
-  void setFwhm(const double w) { setParameter(2, w); }
+  void setFwhm(const double w) override { setParameter(2, w); }
 };
 
 class Linear : public ParamFunction, public IFunction1D {
@@ -148,10 +149,10 @@ public:
     declareParameter("b");
   }
 
-  std::string name() const { return "Linear"; }
+  std::string name() const override { return "Linear"; }
 
   void function1D(double *out, const double *xValues,
-                  const size_t nData) const {
+                  const size_t nData) const override {
     double a = getParameter("a");
     double b = getParameter("b");
     for (size_t i = 0; i < nData; i++) {
@@ -159,7 +160,7 @@ public:
     }
   }
   void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) {
+                       const size_t nData) override {
     // throw Mantid::Kernel::Exception::NotImplementedError("");
     for (size_t i = 0; i < nData; i++) {
       out->set(static_cast<int>(i), 0, 1.);
@@ -177,10 +178,10 @@ public:
     declareParameter("c3");
   }
 
-  std::string name() const { return "Cubic"; }
+  std::string name() const override { return "Cubic"; }
 
   void function1D(double *out, const double *xValues,
-                  const size_t nData) const {
+                  const size_t nData) const override {
     double c0 = getParameter("c0");
     double c1 = getParameter("c1");
     double c2 = getParameter("c2");
@@ -191,7 +192,7 @@ public:
     }
   }
   void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) {
+                       const size_t nData) override {
     for (size_t i = 0; i < nData; i++) {
       double x = xValues[i];
       out->set(static_cast<int>(i), 0, 1.);
@@ -213,7 +214,7 @@ public:
     FunctionFactory::Instance().subscribe<Linear>("Linear");
   }
 
-  ~CompositeFunctionTest() {
+  ~CompositeFunctionTest() override {
     FunctionFactory::Instance().unsubscribe("Linear");
   }
 

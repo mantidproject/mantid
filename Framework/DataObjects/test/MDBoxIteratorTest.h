@@ -50,7 +50,7 @@ public:
   gbox_t *C21;
   ibox_t *D210, *D211, *D212, *D213;
   MDBoxIterator<MDLeanEvent<1>, 1> *it;
-  void setUp() {
+  void setUp() override {
     // Top level grid box
     A = MDEventsTestHelper::makeMDGridBox<1>(4, 1, 0.0, 64.0);
     A->splitContents(0); // Split B0 into C00 to C03
@@ -76,7 +76,7 @@ public:
     D213 = dynamic_cast<ibox_t *>(C21->getChild(3));
   }
 
-  void tearDown() {
+  void tearDown() override {
     delete A->getBoxController();
     delete A;
   }
@@ -519,7 +519,7 @@ public:
 
       {}
       MOCK_CONST_METHOD0(getIsMasked, bool());
-      ~MockMDBox() { delete pBC; }
+      ~MockMDBox() override { delete pBC; }
     };
 
     MockMDBox mockBox;
@@ -599,7 +599,7 @@ public:
     public:
       MOCK_CONST_METHOD0(keepGoing, bool());
       MOCK_METHOD0(Die, void());
-      ~MockSkippingPolicy() { Die(); }
+      ~MockSkippingPolicy() override { Die(); }
     };
 
     MockSkippingPolicy *mockPolicy = new MockSkippingPolicy;

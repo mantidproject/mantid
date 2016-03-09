@@ -67,7 +67,6 @@ namespace {
 const constexpr double DegreesPerRadian = 180.0 / M_PI;
 
 std::string getBankName(const std::string &bankPart, int idnum) {
-  std::ostringstream mess;
   if (bankPart == "WISHpanel" && idnum < 10) {
     return bankPart + "0" + std::to_string(idnum);
   } else {

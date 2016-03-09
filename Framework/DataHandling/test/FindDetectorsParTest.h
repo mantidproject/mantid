@@ -404,7 +404,7 @@ public:
 
     findPar = FrameworkManager::Instance().createAlgorithm("FindDetectorsPar");
   }
-  ~FindDetectorsParTest() {
+  ~FindDetectorsParTest() override {
     FrameworkManager::Instance().clearAlgorithms();
     FrameworkManager::Instance().deleteWorkspace(inputWS->getName());
   }

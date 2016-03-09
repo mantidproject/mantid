@@ -20,7 +20,7 @@ public:
   MOCK_CONST_METHOD2(obtain, MantidQt::CustomInterfaces::MeasurementItem(
                                  const std::string &, const std::string &));
   MOCK_CONST_METHOD0(clone, MockReflMeasurementItemSource *());
-  ~MockReflMeasurementItemSource() {}
+  ~MockReflMeasurementItemSource() override {}
 };
 
 class ReflMeasureTransferStrategyTest : public CxxTest::TestSuite {

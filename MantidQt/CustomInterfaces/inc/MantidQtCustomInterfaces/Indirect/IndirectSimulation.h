@@ -60,17 +60,17 @@ namespace CustomInterfaces
       /// Default Constructor
       IndirectSimulation(QWidget *parent = 0);
       /// Destructor
-      ~IndirectSimulation();
+      ~IndirectSimulation() override;
       /// Interface name
       static std::string name() { return "Simulation"; }
       /// This interface's categories.
       static QString categoryInfo() { return "Indirect"; }
       /// Setup tab UI
-      virtual void initLayout();
+      void initLayout() override;
 
-      private slots:
-        /// Slot for clicking on the run button
-        void runClicked();
+    private slots:
+      /// Slot for clicking on the run button
+      void runClicked();
       /// Slot for clicking on the help button
       void helpClicked();
       /// Slot for clicking on the manage directories button
@@ -82,7 +82,7 @@ namespace CustomInterfaces
       /// Load default interface settings for each tab
       void loadSettings();
       /// Called upon a close event.
-      virtual void closeEvent(QCloseEvent*);
+      void closeEvent(QCloseEvent *) override;
       /// handle POCO event
       void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 

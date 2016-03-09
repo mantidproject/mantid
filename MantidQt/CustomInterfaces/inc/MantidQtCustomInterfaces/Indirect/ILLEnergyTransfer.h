@@ -40,13 +40,13 @@ namespace CustomInterfaces
 
   public:
     ILLEnergyTransfer(IndirectDataReduction * idrUI, QWidget * parent = 0);
-    virtual ~ILLEnergyTransfer();
+    ~ILLEnergyTransfer() override;
 
-    virtual void setup();
-    virtual void run();
+    void setup() override;
+    void run() override;
 
   public slots:
-    virtual bool validate();
+    bool validate() override;
 
   private slots:
     void algorithmComplete(bool error);

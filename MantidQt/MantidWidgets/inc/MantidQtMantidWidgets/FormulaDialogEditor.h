@@ -18,7 +18,7 @@ public:
   FormulaDialogEditor(QtProperty *property, QWidget *parent)
     :StringDialogEditor(property,parent){}
 protected slots:
-  void runDialog();
+  void runDialog() override;
 };
 
 /**
@@ -30,8 +30,9 @@ class FormulaDialogEditorFactory: public StringDialogEditorFactory
 public:
   FormulaDialogEditorFactory(QObject* parent):StringDialogEditorFactory(parent){}
 protected:
-  QWidget *createEditorForManager(QtStringPropertyManager *, QtProperty *property,QWidget *parent)
-  {
+  QWidget *createEditorForManager(QtStringPropertyManager *,
+                                  QtProperty *property,
+                                  QWidget *parent) override {
     return new FormulaDialogEditor(property,parent);
   }
 };
