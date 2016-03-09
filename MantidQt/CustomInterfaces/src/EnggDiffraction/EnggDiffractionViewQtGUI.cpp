@@ -662,6 +662,14 @@ std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
   return fileData;
 }
 
+void EnggDiffractionViewQtGUI::setDataCurves(QwtData &data) {
+  // Set data
+  m_dataCurve->setData(data);
+
+  // replot the graph
+  m_uiTabFitting.dataPlot->replot();
+}
+
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
   std::string pyCode =
       "win=plotSpectrum('" + wsName + "', 0, error_bars=False, type=0)";
