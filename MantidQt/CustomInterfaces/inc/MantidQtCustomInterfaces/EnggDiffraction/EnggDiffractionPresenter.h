@@ -87,6 +87,10 @@ public:
   void doRebinningPulses(const std::string &runNo, size_t nperiods, double bin,
                          const std::string &outWSName);
 
+  /// the fitting hard work that a worker / thread will run
+  void doFitting(const std::string &focusedRunNo,
+                 const std::string &ExpectedPeaks);
+
 protected:
   void initialize();
 
@@ -114,6 +118,7 @@ protected slots:
   void calibrationFinished();
   void focusingFinished();
   void rebinningFinished();
+  void fittingFinished();
 
 private:
   bool validateRBNumber(const std::string &rbn) const;
@@ -230,6 +235,10 @@ private:
                                                const std::string &outWSName);
   //@}
 
+  // Methods related single peak fits
+  virtual void startAsyncFittingWorker(const std::string &focusedRunNo,
+                                       const std::string &ExpectedPeaks);
+
   // plots workspace according to the user selection
   void plotFocusedWorkspace(std::string outWSName);
 
@@ -291,6 +300,8 @@ private:
   bool m_focusFinishedOK;
   /// true if the last pre-processing/re-binning completed successfully
   bool m_rebinningFinishedOK;
+  /// true if the last fitting completed successfully
+  bool m_fittingFinishedOK;
 
   /// Counter for the cropped output files
   static int g_croppedCounter;

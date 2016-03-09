@@ -1095,8 +1095,6 @@ void EnggDiffractionViewQtGUI::plotRepChanged(int /*idx*/) {
   m_currentType = plotType->currentIndex();
 }
 
-// shahroz
-// Fitting interface
 void EnggDiffractionViewQtGUI::fittingBankIdChanged(int /*idx*/) {
   QComboBox *BankName = m_uiTabFitting.comboBox_bank;
   if (!BankName)

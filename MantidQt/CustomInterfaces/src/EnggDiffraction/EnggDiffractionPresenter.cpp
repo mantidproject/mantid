@@ -470,7 +470,7 @@ void EnggDiffractionPresenter::startAsyncFittingWorker(
 }
 
 void EnggDiffractionPresenter::processFitPeaks() {
-  const std::string runNo = m_view->fittingRunNo();
+  const std::string focusedRunNo = m_view->fittingRunNo();
   const std::string fitPeaksData = m_view->fittingPeaksData();
 
   const std::string outWSName = "engggui_fitting_fit_peak_ws";
@@ -481,6 +481,7 @@ void EnggDiffractionPresenter::processFitPeaks() {
                  << std::endl;
 
   //	startAsyncFittingWorker
+  startAsyncFittingWorker(focusedRunNo, fitPeaksData);
 }
 
 void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
