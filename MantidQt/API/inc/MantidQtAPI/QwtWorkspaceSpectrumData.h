@@ -19,7 +19,7 @@ class EXPORT_OPT_MANTIDQT_API QwtWorkspaceSpectrumData
     : public MantidQwtMatrixWorkspaceData {
 public:
   QwtWorkspaceSpectrumData(const Mantid::API::MatrixWorkspace &workspace,
-                           int specIndex, const bool logScale,
+                           int wsIndex, const bool logScale,
                            const bool plotAsDistribution);
 
   //! @return Pointer to a copy (virtual copy constructor)
@@ -81,7 +81,7 @@ private:
   friend class MantidMatrixCurve;
 
   /// Spectrum index in the workspace
-  int m_spec;
+  int m_wsIndex;
   /// Copy of the X vector
   Mantid::MantidVec m_X;
   /// Copy of the Y vector

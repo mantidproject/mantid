@@ -1,8 +1,6 @@
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
-#include "MantidKernel/Matrix.h"
-#include <cfloat>
 #include <iostream>
 
 #ifdef ENABLE_OPENCASCADE

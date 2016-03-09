@@ -106,8 +106,8 @@ static string getRunnumber(const string &filename) {
   if (runnumber.find("neutron") >= string::npos)
     return "0";
 
-  std::size_t left = runnumber.find("_");
-  std::size_t right = runnumber.find("_", left + 1);
+  std::size_t left = runnumber.find('_');
+  std::size_t right = runnumber.find('_', left + 1);
 
   return runnumber.substr(left + 1, right - left - 1);
 }
@@ -508,7 +508,7 @@ void FilterEventsByLogValuePreNexus::processProperties() {
   // Load partial spectra
   //---------------------------------------------------------------------------
   // For slight speed up
-  m_loadOnlySomeSpectra = (this->m_spectraList.size() > 0);
+  m_loadOnlySomeSpectra = (!this->m_spectraList.empty());
 
   // Turn the spectra list into a map, for speed of access
   for (auto spectra : m_spectraList)
@@ -602,10 +602,8 @@ FilterEventsByLogValuePreNexus::setupOutputEventWorkspace() {
   */
 void FilterEventsByLogValuePreNexus::processEventLogs() {
   std::map<PixelType, size_t>::iterator mit;
-  for (auto pit = this->wrongdetids.begin(); pit != this->wrongdetids.end();
-       ++pit) {
+  for (const auto pid : this->wrongdetids) {
     // Convert Pixel ID to 'wrong detectors ID' map's index
-    PixelType pid = *pit;
     mit = this->wrongdetidmap.find(pid);
     size_t mindex = mit->second;
     if (mindex > this->wrongdetid_pulsetimes.size()) {
@@ -788,7 +786,7 @@ void FilterEventsByLogValuePreNexus::runLoadInstrument(
   }
 
   // determine the instrument parameter file
-  size_t pos = instrument.rfind("_"); // get rid of the run number
+  size_t pos = instrument.rfind('_'); // get rid of the run number
   instrument = instrument.substr(0, pos);
 
   // do the actual work
@@ -1113,15 +1111,12 @@ void FilterEventsByLogValuePreNexus::procEvents(
                    << "Number of Wrong Detector IDs = " << wrongdetids.size()
                    << "\n";
 
-    for (auto wit = this->wrongdetids.begin(); wit != this->wrongdetids.end();
-         ++wit) {
-      g_log.notice() << "Wrong Detector ID : " << *wit << std::endl;
+    for (const auto pid : this->wrongdetids) {
+      g_log.notice() << "Wrong Detector ID : " << pid << std::endl;
     }
-    std::map<PixelType, size_t>::iterator git;
-    for (git = this->wrongdetidmap.begin(); git != this->wrongdetidmap.end();
-         ++git) {
-      PixelType tmpid = git->first;
-      size_t vindex = git->second;
+    for (const auto &detidPair : wrongdetidmap) {
+      PixelType tmpid = detidPair.first;
+      size_t vindex = detidPair.second;
       g_log.notice() << "Pixel " << tmpid << ":  Total number of events = "
                      << this->wrongdetid_pulsetimes[vindex].size() << std::endl;
     }
@@ -1362,10 +1357,8 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
     this->m_numBadEvents += local_numBadEvents;
     this->m_numWrongdetidEvents += local_numWrongdetidEvents;
 
-    for (auto it = local_wrongdetids.begin(); it != local_wrongdetids.end();
-         ++it) {
-      PixelType tmpid = *it;
-      this->wrongdetids.insert(*it);
+    for (auto tmpid : local_wrongdetids) {
+      this->wrongdetids.insert(tmpid);
 
       // Obtain the global map index for this wrong detector ID events entry in
       // local map
@@ -1423,7 +1416,8 @@ void FilterEventsByLogValuePreNexus::unmaskVetoEventIndexes() {
   size_t numerror = 0;
 
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-    for (int i = 0; i < static_cast<int>(m_vecEventIndex.size()); ++i) {
+    for (int i = 0; i < static_cast<int>(m_vecEventIndex.size()); // NOLINT
+         ++i) {
       PARALLEL_START_INTERUPT_REGION
 
       uint64_t eventindex = m_vecEventIndex[i];
@@ -1759,14 +1753,12 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
                    << " microsec; longest TOF: " << m_longestTof << " microsec."
                    << "\n";
 
-    for (auto wit = this->wrongdetids.begin(); wit != this->wrongdetids.end();
-         ++wit) {
-      g_log.notice() << "Wrong Detector ID : " << *wit << std::endl;
+    for (const auto wrongdetid : this->wrongdetids) {
+      g_log.notice() << "Wrong Detector ID : " << wrongdetid << std::endl;
     }
-    for (auto git = this->wrongdetidmap.begin();
-         git != this->wrongdetidmap.end(); ++git) {
-      PixelType tmpid = git->first;
-      size_t vindex = git->second;
+    for (const auto &detidPair : this->wrongdetidmap) {
+      PixelType tmpid = detidPair.first;
+      size_t vindex = detidPair.second;
       g_log.notice() << "Pixel " << tmpid << ":  Total number of events = "
                      << this->wrongdetid_pulsetimes[vindex].size() << std::endl;
     }

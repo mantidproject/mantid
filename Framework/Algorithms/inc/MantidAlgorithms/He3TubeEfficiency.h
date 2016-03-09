@@ -94,7 +94,7 @@ private:
                        const Geometry::Object *shape) const;
   /// Calculate the detector efficiency
   double detectorEfficiency(const double alpha,
-                            const double scale_fac = 1.0) const;
+                            const double scale_factor = 1.0) const;
   /// Log any errors with spectra that occurred
   void logErrors() const;
   /// Retrieve the detector parameters from workspace or detector properties

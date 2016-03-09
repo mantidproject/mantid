@@ -111,7 +111,7 @@ private:
 
   /// Create a minimizer string based on template string provided
   std::string getMinimizerString(const std::string &wsName,
-                                 const std::string &specIndex);
+                                 const std::string &wsIndex);
 
   /// Base name of output workspace
   std::string m_baseName;

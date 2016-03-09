@@ -195,7 +195,7 @@ void FitOneSinglePeak::setupGuessedFWHM(double usrwidth, int minfwhm,
 
   // From user specified minimum value to maximim value
   if (!fitwithsteppedfwhm) {
-    if (m_vecFWHM.size() == 0)
+    if (m_vecFWHM.empty())
       throw runtime_error("Logic error in setup guessed FWHM.  ");
     m_sstream << "No FWHM is not guessed by stepped FWHM. "
               << "\n";
@@ -1423,9 +1423,9 @@ void FitPeak::createFunctions() {
 
   // Set background function parameter values
   m_bkgdParameterNames = getProperty("BackgroundParameterNames");
-  if (usedefaultbkgdparorder && m_bkgdParameterNames.size() == 0) {
+  if (usedefaultbkgdparorder && m_bkgdParameterNames.empty()) {
     m_bkgdParameterNames = m_bkgdFunc->getParameterNames();
-  } else if (m_bkgdParameterNames.size() == 0) {
+  } else if (m_bkgdParameterNames.empty()) {
     throw runtime_error("In the non-default background parameter name mode, "
                         "user must give out parameter names. ");
   }
@@ -1456,7 +1456,7 @@ void FitPeak::createFunctions() {
 
   // Peak parameters' names
   m_peakParameterNames = getProperty("PeakParameterNames");
-  if (m_peakParameterNames.size() == 0) {
+  if (m_peakParameterNames.empty()) {
     if (defaultparorder) {
       // Use default peak parameter names' order
       m_peakParameterNames = m_peakFunc->getParameterNames();
@@ -1493,7 +1493,7 @@ std::string FitPeak::parseFunctionTypeFull(const std::string &fullstring,
 
   size_t n = std::count(fullstring.begin(), fullstring.end(), '(');
   if (n > 0) {
-    peaktype = fullstring.substr(0, fullstring.find("("));
+    peaktype = fullstring.substr(0, fullstring.find('('));
     boost::algorithm::trim(peaktype);
     defaultparorder = true;
   } else {

@@ -13,12 +13,12 @@ public:
   IndirectMolDyn(QWidget *parent = 0);
 
   // Inherited methods from IndirectTab
-  void setup();
-  bool validate();
-  void run();
+  void setup() override;
+  bool validate() override;
+  void run() override;
 
   /// Load default settings into the interface
-  void loadSettings(const QSettings &settings);
+  void loadSettings(const QSettings &settings) override;
 
 private slots:
   void versionSelected(const QString &);

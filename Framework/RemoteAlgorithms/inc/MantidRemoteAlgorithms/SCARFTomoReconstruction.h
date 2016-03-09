@@ -79,7 +79,7 @@ protected:
   /// method that deals with the actual HTTP(S) connection (convenient to
   /// mock up all inet messaging)
   virtual int doSendRequestGetResponse(
-      const std::string &url, std::ostream &response,
+      const std::string &url, std::ostream &rss,
       const StringToStringMap &headers = StringToStringMap(),
       const std::string &method = std::string(), const std::string &body = "");
 
@@ -91,7 +91,7 @@ private:
   // helper for the submit request
   std::string buildSubmitBody(const std::string &appName,
                               const std::string &boundary,
-                              const std::string &inputFiles,
+                              const std::string &inputFile,
                               const std::string &inputArgs,
                               const std::string &jobName);
 
@@ -106,7 +106,7 @@ private:
 
   /// fill in output properties with job status and info
   void genOutputStatusInfo(const std::string &resp,
-                           const std::string &jobID = std::string());
+                           const std::string &jobIDFilter = std::string());
 
   /// Job sequence number (from here, nothing to do with the job id on the
   /// cluster)

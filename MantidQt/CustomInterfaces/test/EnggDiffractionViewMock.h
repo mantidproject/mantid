@@ -56,6 +56,9 @@ public:
   // std::string currentCalibSpecNos
   MOCK_CONST_METHOD0(currentCalibSpecNos, std::string());
 
+  // std::string currentCalibCustomisedBankName
+  MOCK_CONST_METHOD0(currentCalibCustomisedBankName, std::string());
+
   // int currentPlotType
   MOCK_CONST_METHOD0(currentPlotType, int());
 
@@ -104,8 +107,8 @@ public:
   // virtual int focusingBank() const;
   MOCK_CONST_METHOD0(focusingBanks, std::vector<bool>());
 
-  // virtual std::string focusingCroppedSpectrumIDs() const;
-  MOCK_CONST_METHOD0(focusingCroppedSpectrumIDs, std::string());
+  // virtual std::string focusingCroppedSpectrumNos() const;
+  MOCK_CONST_METHOD0(focusingCroppedSpectrumNos, std::string());
 
   // virtual std::string focusingTextureGroupingFile() const;
   MOCK_CONST_METHOD0(focusingTextureGroupingFile, std::string());

@@ -84,7 +84,7 @@ public:
   void objectDeleted(ISaveable *item);
 
   // Free space map methods
-  void freeBlock(uint64_t const pos, uint64_t const fileSize);
+  void freeBlock(uint64_t const pos, uint64_t const size);
   void defragFreeBlocks();
 
   // Allocating

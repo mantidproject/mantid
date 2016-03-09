@@ -78,7 +78,7 @@ public:
 
   RemoveBackgroundTest() { init_workspaces(1, 15000, BgWS, SourceWS); }
 
-  ~RemoveBackgroundTest() {
+  ~RemoveBackgroundTest() override {
     BgWS.reset();
     SourceWS.reset();
   }
@@ -96,12 +96,6 @@ public:
     TSM_ASSERT_THROWS("Should throw if background is not 1 or equal to source",
                       bgRemoval.initialize(bkgWS, SourceWS, 0),
                       std::invalid_argument);
-
-    auto sourceWS = WorkspaceCreationHelper::Create2DWorkspace(5, 10);
-    sourceWS->getAxis(0)->setUnit("TOF");
-    TSM_ASSERT_THROWS(
-        "Should throw if source workspace does not have proper instrument",
-        bgRemoval.initialize(BgWS, sourceWS, 0), std::runtime_error);
   }
 
   void testBackgroundHelper() {

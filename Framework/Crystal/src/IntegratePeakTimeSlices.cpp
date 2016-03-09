@@ -16,9 +16,9 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-//#include "MantidGeometry/Surfaces/Surface.h"
 
-//#include <boost/random/poisson_distribution.hpp>
+#include <boost/math/special_functions/round.hpp>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -494,7 +494,7 @@ void IntegratePeakTimeSlices::exec() {
               auto XXX =
                   boost::make_shared<DataModeHandler>(*m_AttributeValues);
               m_AttributeValues = XXX;
-              if (X.size() > 0)
+              if (!X.empty())
                 m_AttributeValues->setTime((X[chanMax] + X[chanMin]) / 2.0);
 
             } else // lastAttributeList exists
@@ -929,8 +929,8 @@ void IntegratePeakTimeSlices::FindPlane(V3D &center, V3D &xvec, V3D &yvec,
 
   panel1->getBoundingBox(B);
 
-  NROWS = static_cast<int>((B.yMax() - B.yMin()) / pixHeighty + .5);
-  NCOLS = static_cast<int>((B.xMax() - B.xMin()) / pixWidthx + .5);
+  NROWS = boost::math::iround((B.yMax() - B.yMin()) / pixHeighty);
+  NCOLS = boost::math::iround((B.xMax() - B.xMin()) / pixWidthx);
 }
 
 /**
@@ -999,7 +999,7 @@ std::vector<double> DataModeHandler::InitValues(double Varx, double Vary,
   double x = 1;
   if (sigy * NstdY < 7 && sigy * NstdY >= 0) // is close to row edge
   {
-    x = probs[static_cast<int>(sigy * NstdY + .5)];
+    x = probs[std::lround(sigy * NstdY)];
     if (sigy < 0)
       x = 1 - x;
     double My2 = StatBase[IStartRow];
@@ -1010,7 +1010,7 @@ std::vector<double> DataModeHandler::InitValues(double Varx, double Vary,
   double x1 = 1;
   if (sigx * NstdX < 7 && sigx * NstdX > 0) // is close to x edge
   {
-    x1 = probs[static_cast<int>(sigx * NstdX + .5)];
+    x1 = probs[std::lround(sigx * NstdX)];
     if (sigx < 0)
       x1 = 1 - x1;
     double Mx2 = StatBase[IStartCol];
@@ -2391,7 +2391,7 @@ bool DataModeHandler::IsEnoughData(const double *ParameterValues,
   // Check if flat
   double Varx, Vary, Cov;
 
-  if (StatBase.size() <= 0)
+  if (StatBase.empty())
     return false;
 
   double ncells = static_cast<int>(StatBase[IIntensities]);

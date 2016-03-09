@@ -24,12 +24,12 @@ class LiveDataAlgorithmImpl : public LiveDataAlgorithm {
   friend class LiveDataAlgorithmTest;
 
 public:
-  virtual const std::string name() const { return "LiveDataAlgorithmImpl"; }
-  virtual int version() const { return 1; }
-  virtual const std::string category() const { return "Testing"; }
-  virtual const std::string summary() const { return "Test summary"; }
-  void init() { this->initProps(); }
-  void exec() {}
+  const std::string name() const override { return "LiveDataAlgorithmImpl"; }
+  int version() const override { return 1; }
+  const std::string category() const override { return "Testing"; }
+  const std::string summary() const override { return "Test summary"; }
+  void init() override { this->initProps(); }
+  void exec() override {}
 };
 
 class LiveDataAlgorithmTest : public CxxTest::TestSuite {

@@ -6,7 +6,8 @@ Description of work.
 
 Fixes #xxxx.
 
-Either link to [Release notes](http://www.mantidproject.org/Release_Notes_3.7) change-set or state "Does not need to be in the release notes."
+[Release notes](/docs/source/release/)
+<!-- Replace with a link above to the updated file or state "Does not need to be in the release notes." -->
 
 ---
 
@@ -19,6 +20,7 @@ Please comment on the following ([full description](http://www.mantidproject.org
 - [ ] Is the code of an acceptable quality?
 - [ ] Does the code conform to the coding standards? Is it well structured with small focussed classes/methods/functions?
 - [ ] Are there unit/system tests in place? Are the unit tests small and test the a class in isolation?
+- [ ] If there are changes in the release notes then do they describe the changes appropriately?
 
 ##### Functional Tests #####
 

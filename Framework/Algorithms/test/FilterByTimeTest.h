@@ -49,7 +49,7 @@ public:
     AnalysisDataService::Instance().add(inWS, ws);
   }
 
-  ~FilterByTimeTest() { AnalysisDataService::Instance().clear(); }
+  ~FilterByTimeTest() override { AnalysisDataService::Instance().clear(); }
 
   void testTooManyParams() {
     EventWorkspace_sptr ws =
@@ -217,7 +217,9 @@ public:
     alg.setProperty("StopTime", 120.0);
   }
 
-  ~FilterByTimeTestPerformance() { AnalysisDataService::Instance().clear(); }
+  ~FilterByTimeTestPerformance() override {
+    AnalysisDataService::Instance().clear();
+  }
 
   void test_filtering() { alg.execute(); }
 

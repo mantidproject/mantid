@@ -66,7 +66,7 @@ public:
                  GraphDisplay*      hGraphDisplay,
                  GraphDisplay*      vGraphDisplay );
 
-  ~SVConnections();
+  ~SVConnections() override;
 
   /// Set the pix map that shows the color scale from the specified color maps
   void showColorScale( std::vector<QRgb> & positiveColorTable,
@@ -102,7 +102,7 @@ public slots:
 
 private:
   /// Event filter for mouse wheel capture
-  bool eventFilter(QObject *object, QEvent *event);
+  bool eventFilter(QObject *object, QEvent *event) override;
   void setColorScale(ColorMaps::ColorScale positive,
                      ColorMaps::ColorScale negative);
 

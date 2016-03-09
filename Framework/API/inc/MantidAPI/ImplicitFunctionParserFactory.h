@@ -51,7 +51,7 @@ public:
   boost::shared_ptr<ImplicitFunctionParser>
   create(const std::string &xmlString) const override;
   ImplicitFunctionParser *
-  createImplicitFunctionParserFromXML(const std::string &configXML) const;
+  createImplicitFunctionParserFromXML(const std::string &functionXML) const;
 
   ImplicitFunctionParser *createImplicitFunctionParserFromXML(
       Poco::XML::Element *functionElement) const;

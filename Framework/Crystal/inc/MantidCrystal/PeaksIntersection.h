@@ -53,7 +53,7 @@ protected:
   void initBaseProperties();
 
   /// Run the algorithm.
-  void executePeaksIntersection(const bool checkExtents = true);
+  void executePeaksIntersection(const bool checkPeakExtents = true);
 
   /// Get the peak radius.
   double getPeakRadius() const;

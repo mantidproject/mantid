@@ -36,7 +36,7 @@ public:
         .subscribe<FakeMDResolutionConvolution>("FakeConvolution");
   }
 
-  ~ResolutionConvolvedCrossSectionTest() {
+  ~ResolutionConvolvedCrossSectionTest() override {
     using namespace Mantid::MDAlgorithms;
     ForegroundModelFactory::Instance().unsubscribe("FakeForegroundModel");
     MDResolutionConvolutionFactory::Instance().unsubscribe("FakeConvolution");

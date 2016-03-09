@@ -122,7 +122,7 @@ void LoadSINQFocus::setInstrumentName(NeXus::NXEntry &entry) {
   }
   m_instrumentName =
       m_loader.getStringFromNexusPath(entry, m_instrumentPath + "/name");
-  size_t pos = m_instrumentName.find(" ");
+  size_t pos = m_instrumentName.find(' ');
   m_instrumentName = m_instrumentName.substr(0, pos);
 }
 

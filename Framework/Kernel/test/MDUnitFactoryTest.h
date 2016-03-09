@@ -19,7 +19,7 @@ public:
   MOCK_CONST_METHOD1(canConvertTo, bool(const MDUnit &other));
   MOCK_CONST_METHOD0(isQUnit, bool());
   MOCK_CONST_METHOD0(clone, MDUnit *());
-  virtual ~MockMDUnit() {}
+  ~MockMDUnit() override {}
 };
 
 /**
@@ -29,7 +29,7 @@ class MockMDUnitFactory : public MDUnitFactory {
 public:
   MOCK_CONST_METHOD1(createRaw, MDUnit *(const std::string &));
   MOCK_CONST_METHOD1(canInterpret, bool(const std::string &));
-  virtual ~MockMDUnitFactory() {}
+  ~MockMDUnitFactory() override {}
 };
 
 class MDUnitFactoryTest : public CxxTest::TestSuite {

@@ -15,7 +15,7 @@
   <component idfillbyfirst="x" idstart="1" idstepbyrow="256" type="panel">
     <location name="bank1">
       <parameter name="r-position">
-        <value val="0.3518"/>
+	      <logfile eq="1.0*value+0.3750" id="diffr"/>
       </parameter>
       <parameter name="t-position">
         <logfile eq="-1.0*value+0.0" id="2theta"/>
@@ -28,7 +28,14 @@
       </parameter>
     </location>
   </component>
-  <type is="rectangular_detector" name="panel" type="pixel" xpixels="256" xstart="0.02530078125" xstep="-0.0001984375" ypixels="256" ystart="0.02530078125" ystep="-0.0001984375"/>
+  <type is="rectangular_detector" name="panel" type="pixel" xpixels="256" xstart="0.0252015625" xstep="-0.0001984375" ypixels="256" ystart="-0.022621875" ystep="0.0001984375">
+	  <parameter name="xstart">
+		  <value val="0.02530078125"/>
+	  </parameter>
+	  <parameter name="ystart">
+		  <value val="-0.02530078125"/>
+	  </parameter>
+ </type>
   <type is="detector" name="pixel">
     <cuboid id="pixel-shape">
       <left-front-bottom-point x="-9.921875e-05" y="-9.921875e-05" z="0.0"/>

@@ -69,7 +69,7 @@ Minimizer setup
 
 It is possible to supply a fully configured minimizer via the Minimizer
 property, this can also include several flags that are used to indicate the
-workspace name and spectrum index that has been fitted (useful for fitting using
+workspace name and workspace index that has been fitted (useful for fitting using
 a minimizer that output workspaces (i.e. FABADA)).
 
 The possible flags are:

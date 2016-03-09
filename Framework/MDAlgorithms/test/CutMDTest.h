@@ -68,7 +68,9 @@ public:
     eventWS->setDisplayNormalizationHisto(histoNorm);
   }
 
-  virtual ~CutMDTest() { AnalysisDataService::Instance().remove(sharedWSName); }
+  ~CutMDTest() override {
+    AnalysisDataService::Instance().remove(sharedWSName);
+  }
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests

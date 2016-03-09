@@ -43,7 +43,7 @@ double PoldiResidualCorrelationCore::reduceChopperSlitList(
 /// Calculates the average of the values in a vector.
 double PoldiResidualCorrelationCore::calculateAverage(
     const std::vector<double> &values) const {
-  if (values.size() == 0) {
+  if (values.empty()) {
     throw std::runtime_error("Cannot calculate average of 0 values.");
   }
 
@@ -134,7 +134,8 @@ void PoldiResidualCorrelationCore::correctCountData() const {
   double ratio = sumOfResiduals / numberOfCells;
 
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int i = 0; i < static_cast<int>(m_detectorElements.size()); ++i) {
+  for (int i = 0; i < static_cast<int>(m_detectorElements.size()); // NOLINT
+       ++i) {
     int element = m_detectorElements[i];
     for (int j = 0; j < m_timeBinCount; ++j) {
       addToCountData(element, j, -ratio);

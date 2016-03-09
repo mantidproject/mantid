@@ -56,7 +56,7 @@ public:
       : testFile("GEM38370_Focussed_Legacy.nxs"), output_ws("nxstest"),
         m_savedTmpEventFile("") {}
 
-  ~LoadNexusProcessedTest() {
+  ~LoadNexusProcessedTest() override {
     AnalysisDataService::Instance().clear();
     clearTmpEventNexus();
   }

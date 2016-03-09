@@ -109,7 +109,7 @@ public:
   DataObjects::EventList *getEventListPtr(size_t i);
   void populateInstrumentParameters();
   void setTitle(std::string title);
-  void applyFilter(boost::function<void(API::MatrixWorkspace_sptr)> filter);
+  void applyFilter(boost::function<void(API::MatrixWorkspace_sptr)> func);
   virtual bool threadSafe() const;
 };
 

@@ -121,12 +121,10 @@ public:
   WeightedEvent(double time_of_flight);
 
   /// Constructor, full
-  WeightedEvent(double time_of_flight,
-                const Mantid::Kernel::DateAndTime pulsetime, double weight,
-                double errorSquared);
-  WeightedEvent(double time_of_flight,
-                const Mantid::Kernel::DateAndTime pulsetime, float weight,
-                float errorSquared);
+  WeightedEvent(double tof, const Mantid::Kernel::DateAndTime pulsetime,
+                double weight, double errorSquared);
+  WeightedEvent(double tof, const Mantid::Kernel::DateAndTime pulsetime,
+                float weight, float errorSquared);
 
   WeightedEvent(const TofEvent &, double weight, double errorSquared);
   WeightedEvent(const TofEvent &, float weight, float errorSquared);
@@ -135,7 +133,7 @@ public:
 
   WeightedEvent();
 
-  bool operator==(const WeightedEvent &other) const;
+  bool operator==(const WeightedEvent &rhs) const;
   bool equals(const WeightedEvent &rhs, const double tolTof,
               const double tolWeight, const int64_t tolPulse) const;
 
@@ -181,9 +179,8 @@ public:
   WeightedEventNoTime(double time_of_flight);
 
   /// Constructor, full
-  WeightedEventNoTime(double time_of_flight, double weight,
-                      double errorSquared);
-  WeightedEventNoTime(double time_of_flight, float weight, float errorSquared);
+  WeightedEventNoTime(double tof, double weight, double errorSquared);
+  WeightedEventNoTime(double tof, float weight, float errorSquared);
 
   WeightedEventNoTime(double tof, const Mantid::Kernel::DateAndTime pulsetime,
                       double weight, double errorSquared);
@@ -199,9 +196,9 @@ public:
 
   WeightedEventNoTime();
 
-  bool operator==(const WeightedEventNoTime &other) const;
+  bool operator==(const WeightedEventNoTime &rhs) const;
   bool operator<(const WeightedEventNoTime &rhs) const;
-  bool operator<(const double rhs) const;
+  bool operator<(const double rhs_tof) const;
   bool equals(const WeightedEventNoTime &rhs, const double tolTof,
               const double tolWeight) const;
 

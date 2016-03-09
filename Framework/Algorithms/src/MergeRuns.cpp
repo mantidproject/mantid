@@ -133,7 +133,7 @@ void MergeRuns::exec() {
  * Throws an error if there is any incompatibility.
  */
 void MergeRuns::buildAdditionTables() {
-  if (m_inEventWS.size() <= 0)
+  if (m_inEventWS.empty())
     throw std::invalid_argument("MergeRuns: No workspaces found to merge.");
 
   // This'll hold the addition tables.

@@ -226,6 +226,26 @@
             </property>
            </widget>
           </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="current_idf_label">
+            <property name="toolTip">
+             <string>Displays the path to the current IDF which is used by the reducer framework</string>
+            </property>
+            <property name="text">
+             <string>Current IDF:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLabel" name="current_idf_path">
+            <property name="toolTip">
+             <string>Displays the path to the current IDF which is used by the reducer framework</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item row="1" column="0">

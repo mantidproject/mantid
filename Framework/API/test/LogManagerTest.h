@@ -20,16 +20,20 @@ namespace {
 class ConcreteProperty : public Property {
 public:
   ConcreteProperty() : Property("Test", typeid(int)) {}
-  ConcreteProperty *clone() const { return new ConcreteProperty(*this); }
-  bool isDefault() const { return true; }
-  std::string getDefault() const {
+  ConcreteProperty *clone() const override {
+    return new ConcreteProperty(*this);
+  }
+  bool isDefault() const override { return true; }
+  std::string getDefault() const override {
     return "getDefault() is not implemented in this class";
   }
-  std::string value() const { return "Nothing"; }
-  std::string setValue(const std::string &) { return ""; }
-  std::string setValueFromProperty(const Property &) { return ""; }
-  std::string setDataItem(const boost::shared_ptr<DataItem>) { return ""; }
-  Property &operator+=(Property const *) { return *this; }
+  std::string value() const override { return "Nothing"; }
+  std::string setValue(const std::string &) override { return ""; }
+  std::string setValueFromProperty(const Property &) override { return ""; }
+  std::string setDataItem(const boost::shared_ptr<DataItem>) override {
+    return "";
+  }
+  Property &operator+=(Property const *) override { return *this; }
 };
 
 void addTestTimeSeries(LogManager &run, const std::string &name) {

@@ -66,36 +66,36 @@ public:
    */
   explicit SplatterPlotView(QWidget *parent = 0, RebinnedSourcesManager* rebinnedSourcesManager = 0);
   /// Default destructor
-  virtual ~SplatterPlotView();
+  ~SplatterPlotView() override;
 
   /// @see ViewBase::checkView
-  void checkView(ModeControlWidget::Views initialView);
+  void checkView(ModeControlWidget::Views initialView) override;
   /**
    * ViewBase::destroyView
    */
-  void destroyView();
+  void destroyView() override;
   /**
    * ViewBase::getView
    */
-  pqRenderView* getView();
+  pqRenderView *getView() override;
   /**
    * ViewBase::render
    */
-  void render();
+  void render() override;
   /**
    * ViewBase::renderAll
    */
-  void renderAll();
+  void renderAll() override;
   /// ViewBase::resetCamera()
-  void resetCamera();
+  void resetCamera() override;
   /**
    * ViewBase::resetDisplay()
    */
-  void resetDisplay();
+  void resetDisplay() override;
   /**
    * Destroy all sources in the view. 
    */
-  virtual void destroyAllSourcesInView();
+  void destroyAllSourcesInView() override;
 
 signals:
   /// Reset to the Standard View
@@ -133,7 +133,7 @@ private:
   /// Destroy all peak sources.
   void destroyPeakSources();
   /// Filter events for pick mode.
-  bool eventFilter(QObject *obj, QEvent *ev);
+  bool eventFilter(QObject *obj, QEvent *ev) override;
   /// Read the coordinates and send to service.
   void readAndSendCoordinates();
   /// Setup the buttons for the visible peaks

@@ -61,7 +61,7 @@ private:
     MOCK_CONST_METHOD0(getMemorySize, size_t());
 
   private:
-    virtual MockWorkspace *doClone() const {
+    MockWorkspace *doClone() const override {
       throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
     }
   };

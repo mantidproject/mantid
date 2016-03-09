@@ -127,7 +127,7 @@ public:
     // AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
     // "multidetector_ws_1");
   }
-  ~ReflectometryReductionOneAutoTest() {
+  ~ReflectometryReductionOneAutoTest() override {
     AnalysisDataService::Instance().remove("TOF");
     AnalysisDataService::Instance().remove("NotTOF");
   }

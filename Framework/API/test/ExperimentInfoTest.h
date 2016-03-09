@@ -35,29 +35,29 @@ using namespace NeXus;
 
 class FakeChopper : public Mantid::API::ChopperModel {
 public:
-  boost::shared_ptr<ChopperModel> clone() const {
+  boost::shared_ptr<ChopperModel> clone() const override {
     return boost::make_shared<FakeChopper>(*this);
   }
 
-  double calculatePulseTimeVariance() const { return 0.0; }
-  double sampleTimeDistribution(const double) const { return 0.0; }
-  double sampleJitterDistribution(const double) const { return 0.0; }
+  double calculatePulseTimeVariance() const override { return 0.0; }
+  double sampleTimeDistribution(const double) const override { return 0.0; }
+  double sampleJitterDistribution(const double) const override { return 0.0; }
 
 private:
-  void setParameterValue(const std::string &, const std::string &){};
+  void setParameterValue(const std::string &, const std::string &) override{};
 };
 
 class FakeSource : public Mantid::API::ModeratorModel {
 public:
-  boost::shared_ptr<ModeratorModel> clone() const {
+  boost::shared_ptr<ModeratorModel> clone() const override {
     return boost::make_shared<FakeSource>(*this);
   }
-  double emissionTimeMean() const { return 0.0; }
-  double emissionTimeVariance() const { return 0.0; }
-  double sampleTimeDistribution(const double) const { return 0.0; }
+  double emissionTimeMean() const override { return 0.0; }
+  double emissionTimeVariance() const override { return 0.0; }
+  double sampleTimeDistribution(const double) const override { return 0.0; }
 
 private:
-  void setParameterValue(const std::string &, const std::string &){};
+  void setParameterValue(const std::string &, const std::string &) override{};
 };
 
 class ExperimentInfoTest : public CxxTest::TestSuite {
