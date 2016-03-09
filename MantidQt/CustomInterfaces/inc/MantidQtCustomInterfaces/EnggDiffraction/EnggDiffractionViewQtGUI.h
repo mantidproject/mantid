@@ -14,6 +14,8 @@
 #include "ui_EnggDiffractionQtTabSettings.h"
 
 #include <boost/scoped_ptr.hpp>
+#include <qwt_plot_curve.h>
+
 
 // Qt classes forward declarations
 class QMutex;
@@ -137,11 +139,13 @@ public:
 
   virtual double rebinningPulsesTime() const;
 
-  std::string fittingRunNo() const;
+  virtual std::string fittingRunNo() const;
 
-  std::string fittingPeaksData() const;
+  virtual std::string fittingPeaksData() const;
 
   std::string readPeaksFile(std::string fileDir);
+
+  virtual void setDataCurves(QwtData &data);
 
   virtual void plotFocusedSpectrum(const std::string &wsName);
 
@@ -228,7 +232,7 @@ private:
   void doSetupTabCalib();
   void doSetupTabFocus();
   void doSetupTabPreproc();
-  void doSetupTabFitting();
+  void doSetupTabFitting(QWidget *wFitting);
   void doSetupTabSettings();
 
   std::string guessGSASTemplatePath() const;
@@ -306,6 +310,9 @@ private:
 
   /// presenter as in the model-view-presenter
   boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;
+
+  /// Loaded data curve
+  QwtPlotCurve* m_dataCurve;
 };
 
 } // namespace CustomInterfaces

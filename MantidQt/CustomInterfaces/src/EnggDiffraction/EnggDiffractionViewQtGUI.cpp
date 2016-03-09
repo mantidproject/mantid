@@ -18,6 +18,7 @@ using namespace MantidQt::CustomInterfaces;
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
+#include <qwt_symbol.h>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -58,7 +59,8 @@ const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
 * @param parent Parent window (most likely the Mantid main app window).
 */
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
-    : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGINX"),
+    : UserSubWindow(parent), m_dataCurve(new QwtPlotCurve()),
+      IEnggDiffractionView(), m_currentInst("ENGINX"),
       m_currentCalibFilename(""), m_presenter(NULL) {}
 
 EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {}
@@ -98,7 +100,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
   doSetupTabCalib();
   doSetupTabFocus();
   doSetupTabPreproc();
-  doSetupTabFitting();
+  doSetupTabFitting(wFitting);
   doSetupTabSettings();
 
   // presenter that knows how to handle a IEnggDiffractionView should take care
@@ -186,7 +188,7 @@ void EnggDiffractionViewQtGUI::doSetupTabPreproc() {
           SLOT(rebinMultiperiodClicked()));
 }
 
-void EnggDiffractionViewQtGUI::doSetupTabFitting() {
+void EnggDiffractionViewQtGUI::doSetupTabFitting(QWidget *wFitting) {
   connect(m_uiTabFitting.pushButton_fitting_browse_run_num, SIGNAL(released()),
           this, SLOT(browseFitFocusedRun()));
 
@@ -208,6 +210,16 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
 
   connect(m_uiTabFitting.listWidget_fitting_bank_preview,
           SIGNAL(currentRowChanged(int)), this, SLOT(setBankIdComboBox(int)));
+
+  m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
+  m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::xBottom, wFitting->font());
+  m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::yLeft, wFitting->font());
+
+  m_dataCurve->setStyle(QwtPlotCurve::NoCurve);
+  m_dataCurve->setSymbol(
+      QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(), QSize(7, 7)));
+  m_dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+  m_dataCurve->attach(m_uiTabFitting.dataPlot);
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
