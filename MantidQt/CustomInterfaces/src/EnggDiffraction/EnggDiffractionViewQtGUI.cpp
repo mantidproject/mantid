@@ -358,6 +358,8 @@ void EnggDiffractionViewQtGUI::readSettings() {
       qs.value("user-params-step-time", 1).toDouble());
 
   // user params - fitting
+  m_uiTabFitting.lineEdit_pushButton_run_num->setText(
+      qs.value("user-params-fitting-focused-file", "").toString());
   m_uiTabFitting.comboBox_bank->setCurrentIndex(0);
   m_uiTabFitting.lineEdit_fitting_peaks->setText(
       qs.value("user-params-fitting-peaks-to-fit", "").toString());
@@ -461,6 +463,9 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
            m_uiTabPreproc.doubleSpinBox_step_time->value());
 
   // fitting tab
+
+  qs.setValue("user-params-fitting-focused-file",
+              m_uiTabFitting.lineEdit_pushButton_run_num->text());
   qs.setValue("user-params-fitting-peaks-to-fit",
               m_uiTabFitting.lineEdit_fitting_peaks->text());
 
@@ -612,8 +617,12 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
 
   // fitting
   m_uiTabFitting.pushButton_fitting_browse_run_num->setEnabled(enable);
+  m_uiTabFitting.lineEdit_pushButton_run_num->setEnabled(enable);
+  m_uiTabFitting.pushButton_fitting_browse_peaks->setEnabled(enable);
   m_uiTabFitting.lineEdit_fitting_peaks->setEnabled(enable);
   m_uiTabFitting.pushButton_fit->setEnabled(enable);
+  m_uiTabFitting.comboBox_bank->setEnabled(enable);
+  m_uiTabFitting.groupBox_fititng_preview->setEnabled(enable);
 }
 
 void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
