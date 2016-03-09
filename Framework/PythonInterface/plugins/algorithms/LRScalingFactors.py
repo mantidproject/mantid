@@ -61,7 +61,7 @@ class LRScalingFactors(PythonAlgorithm):
                              "Pixel range defining the background")
         self.declareProperty(IntArrayProperty("LowResolutionPixelRange", [94, 160]),
                              "Pixel range defining the region to use in the low-resolution direction")
-        self.declareProperty("IncidentMedium", "Air", doc="Name of the incident medium")
+        self.declareProperty("IncidentMedium", "Medium", doc="Name of the incident medium")
         self.declareProperty("FrontSlitName", "S1", doc="Name of the front slit")
         self.declareProperty("BackSlitName", "Si", doc="Name of the back slit")
         self.declareProperty("TOFSteps", 500.0, doc="TOF step size")
@@ -383,8 +383,9 @@ class LRScalingFactors(PythonAlgorithm):
         scaling_file_content.extend(self.scaling_factors)
 
         fd = open(scaling_file, 'w')
-        fd.write("#y=a+bx\n#\n")
-        fd.write("#lambdaRequested[Angstroms] S1H[mm] (S2/Si)H[mm] S1W[mm] (S2/Si)W[mm] a b error_a error_b\n#\n")
+        fd.write("# y=a+bx\n#\n")
+        fd.write("# LambdaRequested[Angstroms] S1H[mm] (S2/Si)H[mm] S1W[mm] (S2/Si)W[mm] a b error_a error_b\n#\n")
+        fd.write("# Direct beam runs: %s\n" % str(data_runs = self.getProperty("DirectBeamRuns").value))
         for item in scaling_file_content:
             fd.write("IncidentMedium=%s " % item["IncidentMedium"])
             fd.write("LambdaRequested=%s " % item["LambdaRequested"])
