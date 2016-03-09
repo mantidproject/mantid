@@ -347,116 +347,63 @@ void LoadSQW2::readDataSection() {
   readSQWDimensions();
   bool metadataOnly = getProperty("MetadataOnly");
   if (!metadataOnly)
-    readPixelData();
+    readPixelDataIntoWorkspace();
 }
 
 /**
- * Skip metadata in data section: filename, filepath, title, lattice,
- * projection information.
- * On exit the file pointer will be positioned after the last
- * ulen entry
+ * Skip metadata in data section.
+ * On exit the file pointer will be positioned before
+ * the npax entry
  */
 void LoadSQW2::skipDataSectionMetadata() {
-  std::string filename, filepath, title;
-  *m_reader >> filename >> filepath >> title;
+  std::string dropped;
+  *m_reader >> dropped >> dropped >> dropped;
   // skip alatt, angdeg, uoffset, u_to_rlu, ulen
   m_file->seekg(120, std::ios_base::cur);
-}
 
-/**
- * Read and create the SQW dimensions on the output
- * On exit the file pointer will be positioned after the last
- * ulimit entry
- */
-void LoadSQW2::readSQWDimensions() {
-  // Reads the information in the plot axes (pax) and integration axes (iax)
-  // fields to construct the SQW dimensions. The dimension limits are taken
-  // as the first/last entries of the pax/iax fields as required and the
-  // bin boundary values themselves are ignored as we are creating a full
-  // MDEventWorkspace
-
-  // skip dimension labels
+  // dimension labels
   std::vector<int32_t> ulabelShape(2);
   m_reader->read(ulabelShape, 2);
   m_file->seekg(ulabelShape[0] * ulabelShape[1], std::ios_base::cur);
+}
 
-  // projection information
-  int32_t nProjAxes(0);
-  *m_reader >> nProjAxes;
-  int32_t nIntAxes(4 - nProjAxes);
-  std::vector<float> dimLimits(8, 0.f);
-  if (nIntAxes > 0) {
-    // indices of integrated axes (1-based)
-    std::vector<int32_t> indices(nIntAxes, 0);
-    m_reader->read(indices, nIntAxes);
-    // range of integrated axes
-    std::vector<float> ranges(2 * nIntAxes, 0.f);
-    m_reader->read(ranges, 2 * nIntAxes);
-    for (int32_t i = 0; i < nIntAxes; ++i) {
-      auto zeroBasedIdx(indices[i] - 1);
-      dimLimits[2 * zeroBasedIdx] = ranges[2 * i];
-      dimLimits[2 * zeroBasedIdx + 1] = ranges[2 * i + 1];
-    }
-  }
-  std::vector<int32_t> nbins(4, 1);
-  int32_t signalLength(1);
-  if (nProjAxes > 0) {
-    // indices of projection axes (1-based)
-    std::vector<int32_t> indices(nProjAxes);
-    m_reader->read(indices, nProjAxes);
-    // limits & nbins for each projection axis
-    for (int32_t i = 0; i < nProjAxes; ++i) {
-      int32_t nBinBounds(0);
-      *m_reader >> nBinBounds;
-      auto zeroBasedIdx(indices[i] - 1);
-      nbins[zeroBasedIdx] = nBinBounds - 1;
-      signalLength *= nBinBounds - 1;
-      *m_reader >> dimLimits[2 * zeroBasedIdx];
-      m_file->seekg((nBinBounds - 2) * sizeof(float), std::ios_base::cur);
-      *m_reader >> dimLimits[2 * zeroBasedIdx + 1];
-    }
-    // skip display axes
-    m_file->seekg(nProjAxes * sizeof(int32_t), std::ios_base::cur);
-  }
-  // skip signal(float), error data(float), npix(int64)
-  m_file->seekg(2 * signalLength * sizeof(float) +
-                    signalLength * sizeof(int64_t),
-                std::ios_base::cur);
-  // skip data limits
-  m_file->seekg(8 * sizeof(int32_t), std::ios_base::cur);
-
+/**
+ * Read and create the SQW dimensions on the output. It assumes
+ * the file pointer is positioned before npix entry.
+ * On exit the file pointer will be positioned after the last
+ * urange entry
+ */
+void LoadSQW2::readSQWDimensions() {
+  auto nbins = readProjection();
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
     std::stringstream os;
-    os << "Data:\n"
-       << "    ranges (file): ";
-    for (size_t i = 0; i < 4; ++i) {
-      os << "(" << dimLimits[2 * i] << "," << dimLimits[2 * i + 1] << ") ";
-    }
-    os << "\n";
-    os << "    nbins: (";
+    os << "nbins: (";
     for (const auto &val : nbins) {
       os << val << ",";
     }
     os << ")";
     g_log.debug(os.str());
   }
-
-  transformLimitsToOutputFrame(dimLimits);
+  auto dimLimits = calculateDimLimitsFromData();
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
     std::stringstream os;
-    os << "    ranges (transformed): ";
+    os << "data extents (in output frame): ";
     for (size_t i = 0; i < 4; ++i) {
       os << "(" << dimLimits[2 * i] << "," << dimLimits[2 * i + 1] << ") ";
     }
+    os << "\n";
+    g_log.debug(os.str());
   }
+
   // The lattice is assumed to be the same in all contributing files so use
   // the first B matrix to create the axis information (only needed in HKL
   // frame)
   const auto &bmat0 =
       m_outputWS->getExperimentInfo(0)->sample().getOrientedLattice().getB();
   for (size_t i = 0; i < 4; ++i) {
+    // To ensure that we capture all of the data from the file we initially
+    // set the dimension limits to arbitrarily large values and reset them later
     float umin(dimLimits[2 * i]), umax(dimLimits[2 * i + 1]);
-    assert(umin <= umax);
     if (i < 3) {
       m_outputWS->addDimension(createQDimension(
           i, umin, umax, static_cast<size_t>(nbins[i]), bmat0));
@@ -468,6 +415,93 @@ void LoadSQW2::readSQWDimensions() {
   setupBoxController();
 }
 
+/**
+ * Read the required parts of the projection information from the data section
+ * The file pointer is assumed to be positioned after the ulabel entry on
+ * entry and will be positioned before the urange entry on exit.
+ * @return A vector containing the number of bins for each axis
+ */
+std::vector<int32_t> LoadSQW2::readProjection() {
+  int32_t nProjAxes(0);
+  *m_reader >> nProjAxes;
+  int32_t nIntAxes(4 - nProjAxes);
+  if (nIntAxes > 0) {
+    // n indices + 2*n limits
+    m_file->seekg(nIntAxes * sizeof(int32_t) + 2 * nIntAxes * sizeof(float),
+                  std::ios_base::cur);
+  }
+  std::vector<int32_t> nbins(4, 1);
+  if (nProjAxes > 0) {
+    // 1-based indices of the non-integrated axes
+    std::vector<int32_t> projAxIdx;
+    int32_t signalLength(1);
+    m_reader->read(projAxIdx, nProjAxes);
+    for (int32_t i = 0; i < nProjAxes; ++i) {
+      int32_t nbounds(0);
+      *m_reader >> nbounds;
+      m_file->seekg(nbounds * sizeof(float), std::ios_base::cur);
+      nbins[projAxIdx[i] - 1] = nbounds - 1;
+      signalLength *= nbounds - 1;
+    }
+    // skip display axes
+    m_file->seekg(nProjAxes * sizeof(int32_t), std::ios_base::cur);
+    // skip data+error+npix(binned)
+    m_file->seekg(2 * signalLength * sizeof(float) +
+                      signalLength * sizeof(int64_t),
+                  std::ios_base::cur);
+  }
+  return nbins;
+}
+
+/**
+ * Find the dimension limits for each dimension in the target frame. For the
+ * cuts the urange entry does not seem to specify the correct range to
+ * encompass all of the data so we manually calculate the limits from the
+ * data itself to ensure we don't drop pixels.
+ * It assumes that the file pointer is positioned before the first urange
+ * entry and on exit it will be placed after the last urange entry
+ * @return A vector containing the range for each dimension as
+ * min_0,max_0,min_1,max_1...
+ */
+std::vector<float> LoadSQW2::calculateDimLimitsFromData() {
+  // skip urange
+  m_file->seekg(8 * sizeof(float), std::ios_base::cur);
+
+  auto filePosAfterURange = m_file->tellg();
+  // Redundnant int32 field
+  m_file->seekg(sizeof(int32_t), std::ios_base::cur);
+
+  int64_t npixtot(0);
+  *m_reader >> npixtot;
+  constexpr int64_t bufferSize(FIELDS_PER_PIXEL * NPIX_CHUNK);
+  std::vector<float> pixBuffer(bufferSize);
+  int64_t pixelsLeftToRead(npixtot);
+  std::vector<float> dimLimits(8);
+  dimLimits[0] = dimLimits[2] = dimLimits[4] = dimLimits[6] = FLT_MAX;
+  dimLimits[1] = dimLimits[3] = dimLimits[5] = dimLimits[7] = -FLT_MAX;
+  while (pixelsLeftToRead > 0) {
+    int64_t chunkSize(pixelsLeftToRead);
+    if (chunkSize > NPIX_CHUNK) {
+      chunkSize = NPIX_CHUNK;
+    }
+    m_reader->read(pixBuffer, FIELDS_PER_PIXEL * chunkSize);
+    for (int64_t i = 0; i < chunkSize; ++i) {
+      float *pixel = pixBuffer.data() + i * 9;
+      toOutputFrame(pixel);
+      for (size_t j = 0; j < 4; ++j) {
+        auto uj(pixel[j]);
+        if (uj < dimLimits[2 * j])
+          dimLimits[2 * j] = uj;
+        else if (uj > dimLimits[2 * j + 1])
+          dimLimits[2 * j + 1] = uj;
+      }
+    }
+    pixelsLeftToRead -= chunkSize;
+  }
+  m_file->seekg(filePosAfterURange);
+  return dimLimits;
+}
+
 #ifdef __clang__
 // The missing braces warning is a false positive -
 // https://llvm.org/bugs/show_bug.cgi?id=21629
@@ -475,35 +509,14 @@ void LoadSQW2::readSQWDimensions() {
 #pragma clang diagnostic ignored "-Wmissing-braces"
 #endif
 /**
- * Transform the dimension limits to the output frame if required. The
- * projection axes in Horace are always in HKL so this simply transforms
- * to Q_sample if required
- * @param urange Limits from the projection/integration fields in the file
- * in HKLe
- */
-void LoadSQW2::transformLimitsToOutputFrame(std::vector<float> &urange) {
-  if (m_outputFrame == "HKL")
-    return;
-
-  V3D fileMin(urange[0], urange[2], urange[4]);
-  V3D transMin = m_rluToU * fileMin;
-  V3D fileMax(urange[1], urange[3], urange[5]);
-  V3D transMax = m_rluToU * fileMax;
-  for (size_t i = 0; i < 3; ++i) {
-    urange[2 * i] = static_cast<float>(transMin[i]);
-    urange[2 * i + 1] = static_cast<float>(transMax[i]);
-  }
-}
-
-/**
- * Create the Q MDHistoDimension for the output frame and given information from
- * the file
+ * Create the Q MDHistoDimension for the output frame and given information
+ * from the file
  * @param index Index of the dimension
  * @param dimMin Dimension minimum in output frame
  * @param dimMax Dimension maximum in output frame
  * @param nbins Number of bins for this dimension
- * @param bmat A reference to the B matrix to create the axis labels for the HKL
- * frame
+ * @param bmat A reference to the B matrix to create the axis labels for the
+ * HKL frame
  * @return A new MDHistoDimension object
  */
 Geometry::IMDDimension_sptr
@@ -523,10 +536,10 @@ LoadSQW2::createQDimension(size_t index, float dimMin, float dimMax,
   builder.setNumBins(nbins);
 
   std::string name, unit, frameName;
-  if (m_outputFrame == "Q_sample" || m_outputFrame == "Q_lab") {
+  if (m_outputFrame == "Q_sample") {
     name = m_outputFrame + "_" + indexToDim[index];
     unit = "A^-1";
-    frameName = (m_outputFrame == "Q_sample") ? "QSample" : "QLab";
+    frameName = "QSample";
   } else if (m_outputFrame == "HKL") {
     static std::array<const char *, 3> indexToHKL{"[H,0,0]", "[0,K,0]",
                                                   "[0,0,L]"};
@@ -622,7 +635,7 @@ void LoadSQW2::setupFileBackend(std::string filebackPath) {
 /**
  * Read the pixel data into the workspace
  */
-void LoadSQW2::readPixelData() {
+void LoadSQW2::readPixelDataIntoWorkspace() {
   using Kernel::Timer;
   Timer timer;
 
@@ -637,7 +650,7 @@ void LoadSQW2::readPixelData() {
   // Each pixel has 9 float fields. Do a chunked read to avoid
   // using too much memory for the buffer and also split the
   // boxes regularly to ensure that larger workspaces can be loaded
-  // without blowing the memory requirements
+  // without blowing the memory requirements.
   constexpr int64_t bufferSize(FIELDS_PER_PIXEL * NPIX_CHUNK);
   std::vector<float> pixBuffer(bufferSize);
   int64_t pixelsLeftToRead(npixtot), chunksRead(0);
@@ -710,6 +723,8 @@ void LoadSQW2::warnIfMemoryInsufficient(int64_t npixtot) {
 /**
  * Assume the given pointer points to the start of a full pixel and create
  * an MDEvent based on it iff it has a valid run id.
+ * @param coordRange In/out array that stores the current min/max value of
+ * the coordinate for each dimension as an array of (min,max)
  * @param pixel A pointer assumed to point to at the start of a single pixel
  * from the data file
  * @return 1 if the event was added, 0 otherwise
@@ -722,15 +737,14 @@ size_t LoadSQW2::addEventFromBuffer(const float *pixel) {
   if (irun < 1 || irun > m_nspe) {
     return 0;
   }
-  auto u1(pixel[0]), u2(pixel[1]), u3(pixel[2]), en(pixel[3]);
-  toOutputFrame(u1, u2, u3);
+  coord_t centers[4] = {pixel[0], pixel[1], pixel[2], pixel[3]};
+  toOutputFrame(centers);
   auto error = pixel[8];
-  coord_t centers[4] = {u1, u2, u3, en};
   auto added = m_outputWS->addEvent(
       MDEvent<4>(pixel[7], error * error, static_cast<uint16_t>(irun - 1),
                  static_cast<detid_t>(pixel[5]), centers));
   // At this point the workspace should be setup so that we always add the
-  // event so dononly do a runtime check in debug mode
+  // event so only do a runtime check in debug mode
   assert(added == 1);
   return added;
 }
@@ -739,18 +753,16 @@ size_t LoadSQW2::addEventFromBuffer(const float *pixel) {
  * Transform the given coordinates to the requested output frame if necessary.
  * The assumption is that the pixels on input are in the Q_sample (crystal)
  * frame as they are defined in Horace
- * @param u1 Coordinate parallel to the beam axis
- * @param u2 Coordinate perpendicular to u1 and in the horizontal plane
- * @param u3 The cross-product of u1 & u2
+ * @param centers Coordinates assumed to be in the crystal cartesian frame.
+ * The array should be atleast 3 in size
  */
-void LoadSQW2::toOutputFrame(float &u1, float &u2, float &u3) {
+void LoadSQW2::toOutputFrame(coord_t *centers) {
   if (m_outputFrame == "Q_sample")
     return;
-  V3D uVec(u1, u2, u3);
-  V3D qout = m_uToRLU * uVec;
-  u1 = static_cast<float>(qout[0]);
-  u2 = static_cast<float>(qout[1]);
-  u3 = static_cast<float>(qout[2]);
+  V3D qout = m_uToRLU * V3D(centers[0], centers[1], centers[2]);
+  centers[0] = static_cast<float>(qout[0]);
+  centers[1] = static_cast<float>(qout[1]);
+  centers[2] = static_cast<float>(qout[2]);
 }
 
 /**

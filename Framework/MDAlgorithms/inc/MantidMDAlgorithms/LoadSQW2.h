@@ -71,19 +71,20 @@ private:
   void readDataSection();
   void skipDataSectionMetadata();
   void readSQWDimensions();
+  std::vector<int32_t> readProjection();
+  std::vector<float> calculateDimLimitsFromData();
   Geometry::IMDDimension_sptr createQDimension(size_t index, float dimMin,
                                                float dimMax, size_t nbins,
                                                const Kernel::DblMatrix &bmat);
-  void transformLimitsToOutputFrame(std::vector<float> &urange);
   Geometry::IMDDimension_sptr createEnDimension(float umin, float umax,
                                                 size_t nbins);
   void setupBoxController();
   void setupFileBackend(std::string filebackPath);
-  void readPixelData();
+  void readPixelDataIntoWorkspace();
   void splitAllBoxes();
   void warnIfMemoryInsufficient(int64_t npixtot);
   size_t addEventFromBuffer(const float *pixel);
-  void toOutputFrame(float &u1, float &u2, float &u3);
+  void toOutputFrame(coord_t *centers);
   void finalize();
 
   std::unique_ptr<std::ifstream> m_file;
