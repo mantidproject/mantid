@@ -5,6 +5,7 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
+#include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 
 #include <fstream>
 
@@ -516,6 +517,11 @@ void EnggDiffractionPresenter::startAsyncFittingWorker(
 
 void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
                                          const std::string &ExpectedPeaks) {
+
+  g_log.notice() << "EnggDiffraction GUI: starting new fitting. This may "
+                    "take a few seconds... "
+                 << std::endl;
+
   MatrixWorkspace_sptr focusedWS;
   m_fittingFinishedOK = false;
 
@@ -563,7 +569,25 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
                          " Please check also the log message for detail.";
     throw;
   }
+
   m_fittingFinishedOK = true;
+}
+
+void EnggDiffractionPresenter::plotFitPeaksCurves() const {
+  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+  auto focusedWS =
+      ADS.retrieveWS<MatrixWorkspace>("engggui_fitting_focused_ws");
+
+  try {
+    m_view->setDataCurves(*(ALCHelper::curveDataFromWs(focusedWS, 0)));
+  } catch (std::runtime_error &re) {
+    g_log.error()
+        << "Unable to finish of the plotting of the graph for "
+           "engggui_fitting_focused_fitpeaks  workspace. Error description : " +
+               static_cast<std::string>(re.what()) +
+               " Please check also the log message for detail.";
+    throw;
+  }
 }
 
 void EnggDiffractionPresenter::fittingFinished() {
@@ -575,7 +599,7 @@ void EnggDiffractionPresenter::fittingFinished() {
     g_log.warning() << "The single peak fitting did not finish correctly."
                     << std::endl;
   } else {
-    g_log.notice() << "Single peals finished - the output "
+    g_log.notice() << "The single peak fitting finished - the output "
                       "workspace is ready."
                    << std::endl;
   }
@@ -583,6 +607,23 @@ void EnggDiffractionPresenter::fittingFinished() {
     delete m_workerThread;
     m_workerThread = NULL;
   }
+
+  g_log.notice() << "EnggDiffraction GUI: plotting peaks for single peak fits "
+                    "has started... "
+                 << std::endl;
+  try {
+    plotFitPeaksCurves();
+  } catch (std::runtime_error &re) {
+    g_log.error()
+        << "Unable to finish of the plotting of the graph for "
+           "engggui_fitting_focused_fitpeaks workspace. Error description : " +
+               static_cast<std::string>(re.what()) +
+               " Please check also the log message for detail.";
+    throw;
+  }
+  g_log.notice() << "EnggDiffraction GUI: plotting of peaks for single peak "
+                    "fits has completed. "
+                 << std::endl;
 }
 
 void EnggDiffractionPresenter::processLogMsg() {
