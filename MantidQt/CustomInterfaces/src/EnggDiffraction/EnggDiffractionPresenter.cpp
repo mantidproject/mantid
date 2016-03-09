@@ -477,6 +477,7 @@ void EnggDiffractionPresenter::inputChecksBeforeFitting(
     const std::string &focusedRunNo, const std::string &ExpectedPeaks) {
   if (focusedRunNo.size() == 0) {
     throw std::invalid_argument(
+        "Focused Run "
         "cannot be empty and must be a valid directory");
   }
 
@@ -496,27 +497,29 @@ void EnggDiffractionPresenter::inputChecksBeforeFitting(
 }
 
 void EnggDiffractionPresenter::startAsyncFittingWorker(
-	const std::string &focusedRunNo, const std::string &ExpectedPeaks) {
+    const std::string &focusedRunNo, const std::string &ExpectedPeaks) {
 
-	delete m_workerThread;
-	m_workerThread = new QThread(this);
-	EnggDiffWorker *worker =
-		new EnggDiffWorker(this, focusedRunNo, ExpectedPeaks);
-	worker->moveToThread(m_workerThread);
+  delete m_workerThread;
+  m_workerThread = new QThread(this);
+  EnggDiffWorker *worker =
+      new EnggDiffWorker(this, focusedRunNo, ExpectedPeaks);
+  worker->moveToThread(m_workerThread);
 
-	connect(m_workerThread, SIGNAL(started()), worker, SLOT(fitting()));
-	connect(worker, SIGNAL(finished()), this, SLOT(fittingFinished()));
-	// early delete of thread and worker
-	connect(m_workerThread, SIGNAL(finished()), m_workerThread,
-		SLOT(deleteLater()), Qt::DirectConnection);
-	connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
-	m_workerThread->start();
+  connect(m_workerThread, SIGNAL(started()), worker, SLOT(fitting()));
+  connect(worker, SIGNAL(finished()), this, SLOT(fittingFinished()));
+  // early delete of thread and worker
+  connect(m_workerThread, SIGNAL(finished()), m_workerThread,
+          SLOT(deleteLater()), Qt::DirectConnection);
+  connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
+  m_workerThread->start();
 }
 
 void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
                                          const std::string &ExpectedPeaks) {
   MatrixWorkspace_sptr focusedWS;
   m_fittingFinishedOK = false;
+
+  // load the focused workspace file to preform single peak fits
   try {
     auto load =
         Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
@@ -538,13 +541,15 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
     throw;
   }
 
+  // run the algorithm EnggFitPeaks with workspace loaded above
   auto alg =
       Mantid::API::AlgorithmManager::Instance().createUnmanaged("EnggFitPeaks");
   try {
     alg->initialize();
     alg->setProperty("InputWorkspace", focusedWS);
-    // alg->setProperty("WorkspaceIndex", 0);
-    alg->setProperty("ExpectedPeaks", ExpectedPeaks);
+    if (!ExpectedPeaks.empty()) {
+      alg->setProperty("ExpectedPeaks", ExpectedPeaks);
+    }
     const std::string FocusedFitPeaksWSName =
         "engggui_fitting_focused_fitpeaks";
     alg->setProperty("FittedPeaks", FocusedFitPeaksWSName);

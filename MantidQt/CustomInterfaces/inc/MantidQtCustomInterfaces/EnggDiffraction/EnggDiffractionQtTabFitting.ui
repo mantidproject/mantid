@@ -93,6 +93,9 @@
           <property name="readOnly">
            <bool>false</bool>
           </property>
+          <property name="placeholderText">
+           <string>Leave Blank To Use Default Expected Peaks</string>
+          </property>
          </widget>
         </item>
         <item>
