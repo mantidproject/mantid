@@ -77,6 +77,7 @@ BANNED_FILES = ['992 Descriptions.txt',
                 'poldi2014n019881.hdf',
                 'poldi2015n000977.hdf',
                 'USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt'
+                'Vesuvio_IP_file_test.par'
                ]
 
 EXPECTED_EXT = '.expected'
