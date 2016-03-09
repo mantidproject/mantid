@@ -60,7 +60,8 @@ public:
     numGoodFrames =
         boost::lexical_cast<double>(run.getProperty("goodfrm")->value());
 
-    MatrixWorkspace_sptr outputWs = applyDeadTime.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outputWs =
+        applyDeadTime.getProperty("OutputWorkspace");
     TS_ASSERT(outputWs);
 
     TS_ASSERT_EQUALS(
@@ -146,7 +147,8 @@ public:
     numGoodFrames =
         boost::lexical_cast<double>(run.getProperty("goodfrm")->value());
 
-    MatrixWorkspace_sptr outputWs = applyDeadTime.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outputWs =
+        applyDeadTime.getProperty("OutputWorkspace");
     TS_ASSERT(outputWs);
 
     TS_ASSERT_EQUALS(outputWs->dataY(0)[0], inputWs->dataY(0)[0]);
@@ -156,7 +158,7 @@ public:
             (1 -
              inputWs->dataY(14)[40] *
                  (g_deadValue / ((inputWs->dataX(0)[1] - inputWs->dataX(0)[0]) *
-                               numGoodFrames))));
+                                 numGoodFrames))));
     TS_ASSERT_EQUALS(outputWs->dataY(31)[20], inputWs->dataY(31)[20]);
 
     // Should be the same (no dead time associated with it)
