@@ -5,14 +5,15 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTableView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtMantidWidgets/SlitCalculator.h"
-#include <boost/scoped_ptr.hpp>
-#include <QSignalMapper>
 #include "ui_ReflMainWidget.h"
+#include <QSignalMapper>
+#include <boost/scoped_ptr.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -42,6 +43,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport QtReflMainView : public MantidQt::API::UserSubWindow,
                                  public ReflMainView,
+                                 public ReflTableView,
                                  public ProgressableView {
   Q_OBJECT
 public:

@@ -4,11 +4,12 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTableView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h"
 
 #include <Poco/AutoPtr.h>
 #include <memory>
@@ -41,7 +42,8 @@ class MANTIDQT_CUSTOMINTERFACES_DLL ReflMainViewPresenter
     : public IReflPresenter,
       public MantidQt::API::WorkspaceObserver {
 public:
-  ReflMainViewPresenter(ReflMainView *mainView, ProgressableView *progressView,
+  ReflMainViewPresenter(ReflMainView *mainView, ReflTableView *tableView,
+                        ProgressableView *progressView,
                         boost::shared_ptr<IReflSearcher> searcher =
                             boost::shared_ptr<IReflSearcher>());
   ~ReflMainViewPresenter() override;
@@ -59,6 +61,8 @@ protected:
   std::string m_wsName;
   // the main view we're managing
   ReflMainView *m_view;
+	// the table view we're managing
+	ReflTableView *m_tableView;
   // The progress view
   ProgressableView *m_progressView;
   // stores whether or not the table has changed since it was last saved

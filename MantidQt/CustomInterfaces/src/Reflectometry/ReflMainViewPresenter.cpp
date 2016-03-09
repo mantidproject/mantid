@@ -3,8 +3,8 @@
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/NotebookWriter.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -16,18 +16,18 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidKernel/Utils.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
+#include "MantidQtCustomInterfaces/ParseKeyValueString.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflOptionsDialog.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflGenerateNotebook.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
-#include "MantidQtCustomInterfaces/ParseKeyValueString.h"
 
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
@@ -138,9 +138,9 @@ ITableWorkspace_sptr createDefaultWorkspace() {
 namespace MantidQt {
 namespace CustomInterfaces {
 ReflMainViewPresenter::ReflMainViewPresenter(
-    ReflMainView *mainView, ProgressableView *progressView,
-    boost::shared_ptr<IReflSearcher> searcher)
-    : WorkspaceObserver(), m_view(mainView), m_progressView(progressView),
+    ReflMainView *mainView, ReflTableView *tableView,
+    ProgressableView *progressView, boost::shared_ptr<IReflSearcher> searcher)
+    : WorkspaceObserver(), m_view(mainView), m_tableView(tableView), m_progressView(progressView),
       m_tableDirty(false), m_searcher(searcher) {
 
   // TODO. Select strategy.
@@ -205,7 +205,7 @@ ReflMainViewPresenter::ReflMainViewPresenter(
                                   "OutputWorkspaceWavelength",
                                   "FirstTransmissionRun",
                                   "SecondTransmissionRun"};
-  m_view->setOptionsHintStrategy(new AlgorithmHintStrategy(alg, blacklist));
+  m_tableView->setOptionsHintStrategy(new AlgorithmHintStrategy(alg, blacklist));
 
   // If we don't have a searcher yet, use ReflCatalogSearcher
   if (!m_searcher)
@@ -253,15 +253,15 @@ Process selected rows
 */
 void ReflMainViewPresenter::process() {
   if (m_model->rowCount() == 0) {
-    m_view->giveUserWarning("Cannot process an empty Table", "Warning");
+    m_tableView->giveUserWarning("Cannot process an empty Table", "Warning");
     return;
   }
 
-  std::set<int> rows = m_view->getSelectedRows();
+  std::set<int> rows = m_tableView->getSelectedRows();
   if (rows.empty()) {
     if (m_options["WarnProcessAll"].toBool()) {
       // Does the user want to abort?
-      if (!m_view->askUserYesNo(
+      if (!m_tableView->askUserYesNo(
               "This will process all rows in the table. Continue?",
               "Process all rows?"))
         return;
@@ -291,7 +291,7 @@ void ReflMainViewPresenter::process() {
       err << "You have only selected " << groupRows.size() << " of the ";
       err << numRowsInGroup(groupId) << " rows in group " << groupId << ".";
       err << " Are you sure you want to continue?";
-      if (!m_view->askUserYesNo(err.str(), "Continue Processing?"))
+      if (!m_tableView->askUserYesNo(err.str(), "Continue Processing?"))
         return;
     }
   }
@@ -1006,7 +1006,7 @@ void ReflMainViewPresenter::insertRow(int index) {
 Insert a row after the last selected row
 */
 void ReflMainViewPresenter::appendRow() {
-  std::set<int> rows = m_view->getSelectedRows();
+  std::set<int> rows = m_tableView->getSelectedRows();
   if (rows.empty())
     insertRow(m_model->rowCount());
   else
@@ -1018,7 +1018,7 @@ void ReflMainViewPresenter::appendRow() {
 Insert a row before the first selected row
 */
 void ReflMainViewPresenter::prependRow() {
-  std::set<int> rows = m_view->getSelectedRows();
+  std::set<int> rows = m_tableView->getSelectedRows();
   if (rows.empty())
     insertRow(0);
   else
@@ -1061,7 +1061,7 @@ int ReflMainViewPresenter::getBlankRow() {
 Delete row(s) from the model
 */
 void ReflMainViewPresenter::deleteRow() {
-  std::set<int> rows = m_view->getSelectedRows();
+  std::set<int> rows = m_tableView->getSelectedRows();
   for (auto row = rows.rbegin(); row != rows.rend(); ++row)
     m_model->removeRow(*row);
 
@@ -1072,7 +1072,7 @@ void ReflMainViewPresenter::deleteRow() {
 Group rows together
 */
 void ReflMainViewPresenter::groupRows() {
-  const std::set<int> rows = m_view->getSelectedRows();
+  const std::set<int> rows = m_tableView->getSelectedRows();
   // Find the first unused group id, ignoring the selected rows
   const int groupId = getUnusedGroup(rows);
 
@@ -1194,7 +1194,7 @@ Start a new, untitled table
 */
 void ReflMainViewPresenter::newTable() {
   if (m_tableDirty && m_options["WarnDiscardChanges"].toBool())
-    if (!m_view->askUserYesNo("Your current table has unsaved changes. Are you "
+    if (!m_tableView->askUserYesNo("Your current table has unsaved changes. Are you "
                               "sure you want to discard them?",
                               "Start New Table?"))
       return;
@@ -1202,7 +1202,7 @@ void ReflMainViewPresenter::newTable() {
   m_ws = createDefaultWorkspace();
   m_model.reset(new QReflTableModel(m_ws));
   m_wsName.clear();
-  m_view->showTable(m_model);
+  m_tableView->showTable(m_model);
 
   m_tableDirty = false;
 }
@@ -1212,19 +1212,19 @@ Open a table from the ADS
 */
 void ReflMainViewPresenter::openTable() {
   if (m_tableDirty && m_options["WarnDiscardChanges"].toBool())
-    if (!m_view->askUserYesNo("Your current table has unsaved changes. Are you "
+    if (!m_tableView->askUserYesNo("Your current table has unsaved changes. Are you "
                               "sure you want to discard them?",
                               "Open Table?"))
       return;
 
   auto &ads = AnalysisDataService::Instance();
-  const std::string toOpen = m_view->getWorkspaceToOpen();
+  const std::string toOpen = m_tableView->getWorkspaceToOpen();
 
   if (toOpen.empty())
     return;
 
   if (!ads.isValid(toOpen).empty()) {
-    m_view->giveUserCritical("Could not open workspace: " + toOpen, "Error");
+    m_tableView->giveUserCritical("Could not open workspace: " + toOpen, "Error");
     return;
   }
 
@@ -1240,10 +1240,10 @@ void ReflMainViewPresenter::openTable() {
     m_ws = newTable;
     m_model.reset(new QReflTableModel(m_ws));
     m_wsName = toOpen;
-    m_view->showTable(m_model);
+    m_tableView->showTable(m_model);
     m_tableDirty = false;
   } catch (std::runtime_error &e) {
-    m_view->giveUserCritical(
+		m_tableView->giveUserCritical(
         "Could not open workspace: " + std::string(e.what()), "Error");
   }
 }
@@ -1340,7 +1340,7 @@ size_t ReflMainViewPresenter::numRowsInGroup(int groupId) const {
 void ReflMainViewPresenter::expandSelection() {
   std::set<int> groupIds;
 
-  std::set<int> rows = m_view->getSelectedRows();
+  std::set<int> rows = m_tableView->getSelectedRows();
   for (auto row = rows.begin(); row != rows.end(); ++row)
     groupIds.insert(
         m_model->data(m_model->index(*row, ReflTableSchema::COL_GROUP))
@@ -1354,12 +1354,12 @@ void ReflMainViewPresenter::expandSelection() {
                 .toInt()) != groupIds.end())
       selection.insert(i);
 
-  m_view->setSelection(selection);
+  m_tableView->setSelection(selection);
 }
 
 /** Clear the currently selected rows */
 void ReflMainViewPresenter::clearSelected() {
-  std::set<int> rows = m_view->getSelectedRows();
+  std::set<int> rows = m_tableView->getSelectedRows();
   std::set<int> ignore;
   for (auto row = rows.begin(); row != rows.end(); ++row) {
     ignore.clear();
@@ -1384,7 +1384,7 @@ void ReflMainViewPresenter::clearSelected() {
 void ReflMainViewPresenter::copySelected() {
   std::vector<std::string> lines;
 
-  std::set<int> rows = m_view->getSelectedRows();
+  std::set<int> rows = m_tableView->getSelectedRows();
   for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
     std::vector<std::string> line;
     for (int col = ReflTableSchema::COL_RUNS;
@@ -1394,7 +1394,7 @@ void ReflMainViewPresenter::copySelected() {
     lines.push_back(boost::algorithm::join(line, "\t"));
   }
 
-  m_view->setClipboard(boost::algorithm::join(lines, "\n"));
+  m_tableView->setClipboard(boost::algorithm::join(lines, "\n"));
 }
 
 /** Copy currently selected rows to the clipboard, and then delete them. */
@@ -1406,13 +1406,13 @@ void ReflMainViewPresenter::cutSelected() {
 /** Paste the contents of the clipboard into the currently selected rows, or
 * append new rows */
 void ReflMainViewPresenter::pasteSelected() {
-  const std::string text = m_view->getClipboard();
+  const std::string text = m_tableView->getClipboard();
   std::vector<std::string> lines;
   boost::split(lines, text, boost::is_any_of("\n"));
 
   // If we have rows selected, we'll overwrite them. If not, we'll append new
   // rows to write to.
-  std::set<int> rows = m_view->getSelectedRows();
+  std::set<int> rows = m_tableView->getSelectedRows();
   if (rows.empty()) {
     // Add as many new rows as required
     for (size_t i = 0; i < lines.size(); ++i) {
@@ -1596,7 +1596,7 @@ void ReflMainViewPresenter::transfer() {
 
 /** Plots any currently selected rows */
 void ReflMainViewPresenter::plotRow() {
-  auto selectedRows = m_view->getSelectedRows();
+  auto selectedRows = m_tableView->getSelectedRows();
 
   if (selectedRows.empty())
     return;
@@ -1616,19 +1616,19 @@ void ReflMainViewPresenter::plotRow() {
   }
 
   if (!notFound.empty())
-    m_view->giveUserWarning("The following workspaces were not plotted because "
+    m_tableView->giveUserWarning("The following workspaces were not plotted because "
                             "they were not found:\n" +
                                 boost::algorithm::join(notFound, "\n") +
                                 "\n\nPlease check that the rows you are trying "
                                 "to plot have been fully processed.",
                             "Error plotting rows.");
 
-  m_view->plotWorkspaces(workspaces);
+  m_tableView->plotWorkspaces(workspaces);
 }
 
 /** Plots any currently selected groups */
 void ReflMainViewPresenter::plotGroup() {
-  auto selectedRows = m_view->getSelectedRows();
+  auto selectedRows = m_tableView->getSelectedRows();
 
   if (selectedRows.empty())
     return;
@@ -1669,14 +1669,14 @@ void ReflMainViewPresenter::plotGroup() {
   }
 
   if (!notFound.empty())
-    m_view->giveUserWarning("The following workspaces were not plotted because "
+    m_tableView->giveUserWarning("The following workspaces were not plotted because "
                             "they were not found:\n" +
                                 boost::algorithm::join(notFound, "\n") +
                                 "\n\nPlease check that the groups you are "
                                 "trying to plot have been fully processed.",
                             "Error plotting groups.");
 
-  m_view->plotWorkspaces(workspaces);
+  m_tableView->plotWorkspaces(workspaces);
 }
 
 /** Shows the Refl Options dialog */

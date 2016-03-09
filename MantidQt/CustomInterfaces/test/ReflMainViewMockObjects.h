@@ -6,6 +6,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTableView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/ICatalogInfo.h"
@@ -33,23 +34,15 @@ public:
 
   //Prompts
   MOCK_METHOD3(askUserString, std::string(const std::string& prompt, const std::string& title, const std::string& defaultValue));
-  MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
   MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
-  MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
   MOCK_METHOD0(requestNotebookPath, std::string());
 
   MOCK_METHOD1(showAlgorithmDialog, void(const std::string&));
   MOCK_METHOD0(showImportDialog, void());
-  MOCK_METHOD1(plotWorkspaces, void(const std::set<std::string>&));
 
   //IO
-  MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());
-  MOCK_METHOD1(setSelection, void(const std::set<int>& rows));
-  MOCK_CONST_METHOD0(getSelectedRows, std::set<int>());
   MOCK_CONST_METHOD0(getSelectedSearchRows, std::set<int>());
-  MOCK_METHOD1(setClipboard, void(const std::string& text));
-  MOCK_CONST_METHOD0(getClipboard, std::string());
   MOCK_CONST_METHOD0(getSearchString, std::string());
   MOCK_CONST_METHOD0(getSearchInstrument, std::string());
   MOCK_METHOD0(getEnableNotebook, bool());
@@ -58,10 +51,7 @@ public:
   MOCK_METHOD1(setTransferMethods, void(const std::set<std::string>&));
 
   //Calls we don't care about
-  void showTable(QReflTableModel_sptr) override{};
   void showSearch(ReflSearchModel_sptr) override{};
-  void
-  setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *) override{};
   virtual void setProgressRange(int,int) {};
   virtual void setProgress(int) {};
   void setTableList(const std::set<std::string> &) override{};
@@ -73,6 +63,34 @@ public:
   boost::shared_ptr<IReflPresenter> getPresenter() const override {
     return boost::shared_ptr<IReflPresenter>();
   }
+};
+
+class MockTableView : public ReflTableView
+{
+public:
+	MockTableView() {};
+	~MockTableView() override {}
+
+	//Prompts
+	MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
+	MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
+	MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
+
+	MOCK_METHOD1(plotWorkspaces, void(const std::set<std::string>&));
+
+	//IO
+	MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());
+	MOCK_METHOD1(setSelection, void(const std::set<int>& rows));
+	MOCK_CONST_METHOD0(getSelectedRows, std::set<int>());
+	MOCK_METHOD1(setClipboard, void(const std::string& text));
+	MOCK_CONST_METHOD0(getClipboard, std::string());
+
+	//Calls we don't care about
+	void showTable(QReflTableModel_sptr) override {};
+	void
+		setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *) override {};
+	//virtual void setProgressRange(int, int) {};
+	//virtual void setProgress(int) {};
 };
 
 class MockProgressableView : public ProgressableView {
