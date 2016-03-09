@@ -13,6 +13,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <stdexcept>
 
@@ -230,7 +232,54 @@ public:
     AnalysisDataService::Instance().remove("AppliedTest");
   }
 
+  /// Test algorithm rejects an input workspace with uneven bin widths
+  void testUnevenBinWidths() {
+    constexpr size_t numSpectra(2);
+    auto workspace = WorkspaceCreationHelper::Create2DWorkspace(
+        static_cast<int>(numSpectra), 10);
+
+    // Rebin the workspace to make bin widths uneven
+    auto rebin = AlgorithmFactory::Instance().create("Rebin", 1);
+    rebin->initialize();
+    rebin->setChild(true);
+    rebin->setProperty("InputWorkspace", workspace);
+    rebin->setPropertyValue("OutputWorkspace", "__NotUsed");
+    rebin->setPropertyValue("Params", "0, 3, 6, 1, 10"); // uneven bins
+    rebin->execute();
+    MatrixWorkspace_sptr rebinned = rebin->getProperty("OutputWorkspace");
+
+    // Dead time table
+    auto deadTimes = makeDeadTimeTable(numSpectra);
+
+    // Test that algorithm throws
+    ApplyDeadTimeCorr applyDT;
+    applyDT.initialize();
+    applyDT.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(applyDT.setProperty("InputWorkspace", rebinned));
+    applyDT.setProperty("DeadTimeTable", deadTimes);
+    applyDT.setProperty("OutputWorkspace", "__NotUsed");
+    TS_ASSERT_THROWS(applyDT.execute(), std::runtime_error);
+  }
+
 private:
+  /**
+   * Generates a dead time table with the given number of spectra
+   * @param numSpectra :: [input] Number of rows in the table
+   * @returns :: Dead time table
+   */
+  boost::shared_ptr<ITableWorkspace> makeDeadTimeTable(size_t numSpectra) {
+    constexpr static double deadValue(-0.00456);
+    boost::shared_ptr<ITableWorkspace> deadTimes =
+        boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+    deadTimes->addColumn("int", "Spectrum Number");
+    deadTimes->addColumn("double", "DeadTime Value");
+    for (size_t i = 0; i < numSpectra; i++) {
+      Mantid::API::TableRow row = deadTimes->appendRow();
+      row << static_cast<int>(i + 1) << deadValue;
+    }
+    return deadTimes;
+  }
+
   ApplyDeadTimeCorr applyDeadTime;
   Mantid::DataHandling::LoadMuonNexus2 loader;
 };
