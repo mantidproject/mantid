@@ -17,6 +17,7 @@ MODES=["SingleDifference", "DoubleDifference", "ThickDifference", "FoilOut", "Fo
 SPECTRA_PROP = "SpectrumList"
 INST_PAR_PROP = "InstrumentParFile"
 SUM_PROP = "SumSpectra"
+LOAD_MON = "LoadMonitors"
 
 # Raw workspace names which are necessary at the moment
 SUMMED_WS, SUMMED_MON = "__loadraw_evs", "__loadraw_evs_monitors"
@@ -40,6 +41,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
     _inst_prefix = None
     _back_scattering = None
     _load_common_called = False
+    _load_monitors = False
     _crop_required = False
     _mon_spectra = None
     _mon_index = None
@@ -125,6 +127,10 @@ class LoadVesuvio(LoadEmptyVesuvio):
                              doc="If true then the final output is a single spectrum containing "
                                  "the sum of all of the requested spectra. All detector angles/"
                                  "parameters are averaged over the individual inputs")
+
+        self.declareProperty(LOAD_MON, False,
+                             doc="If true then the monitor data is loaded and will be output by the "
+                                 "algorithm.")
 
         self.declareProperty(WorkspaceProperty(WKSP_PROP, "", Direction.Output),
                              doc="The name of the output workspace.")
@@ -457,7 +463,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
     def _retrieve_input(self):
         self._diff_opt = self.getProperty(MODE_PROP).value
-
+        self._load_monitors = self.getProperty(LOAD_MON).value
         # Check for sets of spectra to sum. Semi colon delimits sets
         # that should be summed
         spectra_str = self.getPropertyValue(SPECTRA_PROP)
@@ -977,7 +983,8 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """
         if SUMMED_WS in mtd:
             ms.DeleteWorkspace(SUMMED_WS,EnableLogging=_LOGGING_)
-        if SUMMED_MON in mtd:
+        if SUMMED_MON in mtd and not(self._load_monitors):
+            logger.warning("deleting summed monitor")
             ms.DeleteWorkspace(SUMMED_MON,EnableLogging=_LOGGING_)
 
 #########################################################################################
