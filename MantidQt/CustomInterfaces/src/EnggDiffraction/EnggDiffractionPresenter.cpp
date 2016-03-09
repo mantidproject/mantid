@@ -45,7 +45,7 @@ std::string EnggDiffractionPresenter::g_sumOfFilesFocus = "";
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(NULL), m_calibFinishedOK(false), m_focusFinishedOK(false),
-      m_rebinningFinishedOK(false),
+      m_rebinningFinishedOK(false), m_fittingFinishedOK(false),
       m_view(view) /*, m_model(new EnggDiffractionModel()), */ {
   if (!m_view) {
     throw std::runtime_error(
@@ -451,17 +451,50 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
   startAsyncRebinningPulsesWorker(runNo, nperiods, timeStep, outWSName);
 }
 
+
+void EnggDiffractionPresenter::startAsyncFittingWorker(
+	const std::string &focusedRunNo, const std::string &ExpectedPeaks) {
+
+	delete m_workerThread;
+	m_workerThread = new QThread(this);
+	EnggDiffWorker *worker = new EnggDiffWorker(this, focusedRunNo, ExpectedPeaks);
+	worker->moveToThread(m_workerThread);
+
+	connect(m_workerThread, SIGNAL(started()), worker, SLOT(fitting()));
+	connect(worker, SIGNAL(finished()), this, SLOT(rebinningFinished()));
+	// early delete of thread and worker
+	connect(m_workerThread, SIGNAL(finished()), m_workerThread,
+		SLOT(deleteLater()), Qt::DirectConnection);
+	connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
+	m_workerThread->start();
+
+}
+
+
 void EnggDiffractionPresenter::processFitPeaks() {
-  MatrixWorkspace_sptr focusedWS;
+	const std::string runNo = m_view->fittingRunNo();
+	const std::string fitPeaksData = m_view->fittingPeaksData();
 
-  const std::string runNo = m_view->fittingRunNo();
-  const std::string fitPeaksData = m_view->fittingPeaksData();
+	const std::string outWSName = "engggui_fitting_fit_peak_ws";
+	g_log.notice() << "EnggDiffraction GUI: starting new "
+		"single peak fits into workspace '" +
+		outWSName + "'. This "
+		"may take some seconds... "
+		<< std::endl;
 
+	//	startAsyncFittingWorker
+
+}
+
+void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
+	const std::string &ExpectedPeaks){
+	MatrixWorkspace_sptr focusedWS;
+	m_fittingFinishedOK = false;
   try {
     auto load =
         Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
     load->initialize();
-    load->setPropertyValue("Filename", runNo);
+    load->setPropertyValue("Filename", focusedRunNo);
     const std::string FocusedWSName = "engggui_fitting_focused_ws";
     load->setPropertyValue("OutputWorkspace", FocusedWSName);
     load->execute();
@@ -473,7 +506,7 @@ void EnggDiffractionPresenter::processFitPeaks() {
         << "Error while loading focused data. "
            "Could not run the algorithm Load succesfully for the Fit "
            "peaks (file name: " +
-               runNo + "). Error description: " + re.what() +
+		focusedRunNo + "). Error description: " + re.what() +
                " Please check also the previous log messages for details.";
     throw;
   }
@@ -484,7 +517,7 @@ void EnggDiffractionPresenter::processFitPeaks() {
     alg->initialize();
     alg->setProperty("InputWorkspace", focusedWS);
     // alg->setProperty("WorkspaceIndex", 0);
-    alg->setProperty("ExpectedPeaks", fitPeaksData);
+    alg->setProperty("ExpectedPeaks", ExpectedPeaks);
     const std::string FocusedFitPeaksWSName =
         "engggui_fitting_focused_fitpeaks";
     alg->setProperty("FittedPeaks", FocusedFitPeaksWSName);
@@ -498,6 +531,7 @@ void EnggDiffractionPresenter::processFitPeaks() {
                          " Please check also the log message for detail.";
     throw;
   }
+  m_fittingFinishedOK = true;
 }
 
 void EnggDiffractionPresenter::processLogMsg() {
