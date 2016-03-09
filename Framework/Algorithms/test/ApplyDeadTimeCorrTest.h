@@ -19,6 +19,9 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
 class ApplyDeadTimeCorrTest : public CxxTest::TestSuite {
+private:
+  constexpr static double g_deadValue{-0.00456};
+
 public:
   void testName() {
     ApplyDeadTimeCorr applyDeadTime;
@@ -232,8 +235,6 @@ private:
     TS_ASSERT(data);
     return matrixWS;
   }
-
-  constexpr static double g_deadValue{-0.00456};
 };
 
 #endif /* MANTID_ALGORITHMS_APPLYDEADTIMECORRTEST_H_ */
