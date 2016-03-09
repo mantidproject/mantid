@@ -78,7 +78,7 @@ class LRAutoReduction(PythonAlgorithm):
 
         # Look for meta data information, available with the new DAS
         # If it's not available, parse the title.
-        elif meta_data_run.hasProperty("sequencer_number") and meta_data_run.hasProperty("sequence_id"):
+        elif meta_data_run.hasProperty("sequence_number") and meta_data_run.hasProperty("sequence_id"):
             sequence_number = meta_data_run.getProperty("sequence_number").value
             first_run_of_set = meta_data_run.getProperty("sequence_id").value
             data_type = meta_data_run.getProperty("data_type").value
@@ -119,7 +119,7 @@ class LRAutoReduction(PythonAlgorithm):
             logger.notice("Angle appears to be zero: probably a direct beam run")
             is_direct_beam = True
 
-        # Determine the sequence ID and sequencer number
+        # Determine the sequence ID and sequence number
         try:
             m = re.search("Run:(\d+)-(\d+)\.", title)
             if m is not None:
