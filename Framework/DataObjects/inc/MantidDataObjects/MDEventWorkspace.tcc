@@ -289,10 +289,10 @@ TMDE(signal_t MDEventWorkspace)::getNormalizedSignal(
     case API::VolumeNormalization:
       return box->getSignal() * box->getInverseVolume();
     case API::NumEventsNormalization:
-      return box->getSignal() / double(box->getNPoints());
+      return box->getSignal() / static_cast<double>(box->getNPoints());
+    default:
+      return box->getSignal();
     }
-    // Should not reach here
-    return box->getSignal();
   } else
     return std::numeric_limits<signal_t>::quiet_NaN();
 }
@@ -308,10 +308,10 @@ TMDE(signal_t MDEventWorkspace)::getNormalizedError(
     case Mantid::API::VolumeNormalization:
       return box->getError() * box->getInverseVolume();
     case Mantid::API::NumEventsNormalization:
-      return box->getError() / double(box->getNPoints());
+      return box->getError() / static_cast<double>(box->getNPoints());
+    default:
+      return box->getError();
     }
-    // Should not reach here
-    return box->getError();
   } else
     return std::numeric_limits<signal_t>::quiet_NaN();
 }
@@ -763,10 +763,10 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
   // Next, we go through each dimension and see where the box boundaries
   // intersect the line.
   for (size_t d = 0; d < num_d; d++) {
-    coord_t line_start = start[d];
-    coord_t line_end = end[d];
-    coord_t box_size = smallest_box_sizes[d];
-    coord_t dir_current_dim = dir[d];
+    auto line_start = start[d];
+    auto line_end = end[d];
+    auto box_size = smallest_box_sizes[d];
+    auto dir_current_dim = dir[d];
 
     // +1 to get the last box
     size_t num_boundaries =
@@ -775,7 +775,7 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
 
     // If the line has some component in this dimension then look for boundaries
     // it crosses
-    if (dir[d] != 0.0) {
+    if (dir_current_dim != 0.0) {
       getBoundariesInDimension(start, dir, num_boundaries, length,
                                dir_current_dim, box_size, mid_points);
     }
@@ -802,41 +802,41 @@ TMDE(void MDEventWorkspace)::getBoundariesInDimension(
     const size_t num_boundaries, const coord_t length,
     const coord_t dir_current_dim, const coord_t box_size,
     std::set<coord_t> &mid_points) const {
-  Mantid::Kernel::VMD lastPos = start;
+  auto lastPos = start;
   coord_t lastLinePos = 0;
   coord_t previousLinePos = 0;
   coord_t line_pos_of_box_centre = 0;
   const API::IMDNode *box = nullptr;
-  size_t last_id = static_cast<size_t>(-1);
+  auto last_id = std::numeric_limits<size_t>::max();
 
   for (size_t i = 1; i <= num_boundaries; i++) {
-    size_t current_id = static_cast<size_t>(-1);
+    size_t current_id = std::numeric_limits<size_t>::max();
     // Position along the line
     coord_t this_x = i * box_size;
-    coord_t linePos = static_cast<coord_t>(this_x / fabs(dir_current_dim));
+    auto linePos = static_cast<coord_t>(this_x / fabs(dir_current_dim));
     // Full position
-    Mantid::Kernel::VMD pos = start + (dir * linePos);
+    auto pos = start + (dir * linePos);
 
     // Get box using midpoint as using boundary would be ambiguous
-    Mantid::Kernel::VMD middle = (pos + lastPos) * 0.5;
+    auto middle = (pos + lastPos) * 0.5;
     box = this->data->getBoxAtCoord(middle.getBareArray());
     lastPos = pos;
     if (box != nullptr) {
       current_id = box->getID();
       // Make sure we get the last box
     } else if (i == num_boundaries) {
-      current_id = size_t(-1);
+      current_id = std::numeric_limits<size_t>::max();
     } else
       continue;
     // If we haven't already a point for this box...
     // This filters out the extra boundaries that don't really exist that
     // we gained by assuming all boxes are the size of the smallest box
     if ((current_id != last_id && i != 1)) {
-      if (line_pos_of_box_centre >= 0 && line_pos_of_box_centre <= length) {
-        // Avoid picking up a 0 due to line hitting a box corner
-        if (fabs(linePos - lastLinePos) > 1e-5) {
-          mid_points.insert(line_pos_of_box_centre);
-        }
+      // Check line position is within limits of the line and not too close to
+      // previous position
+      if (line_pos_of_box_centre >= 0 && line_pos_of_box_centre <= length &&
+          fabs(linePos - lastLinePos) > 1e-5) {
+        mid_points.insert(line_pos_of_box_centre);
       }
       lastLinePos = previousLinePos;
     }
@@ -864,7 +864,7 @@ TMDE(void MDEventWorkspace)::getBoundariesInDimension(
 TMDE(API::IMDWorkspace::LinePlot MDEventWorkspace)
 ::getLinePlot(const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &end,
               Mantid::API::MDNormalization normalize) const {
-  size_t num_dims = this->getNumDims();
+  auto num_dims = this->getNumDims();
   if (start.getNumDims() != num_dims)
     throw std::runtime_error("Start point must have the same number of "
                              "dimensions as the workspace.");
