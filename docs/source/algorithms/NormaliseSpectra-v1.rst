@@ -8,7 +8,9 @@
 
 Description
 -----------
-Algorithm designed to normalise all the spectra in the input workspace so that the value of the resulting data lies between 0 and 1.
+Algorithm designed to normalise all the spectra in the input workspace so that the value of the resulting workspace has a maximum of 1.
+This algorithm is designed to run on workspaces where every spectra contains at least one y value greater than 0.
+This is the case because the data is being normalised to be a maximum of positive 1.
 
 
 Usage
