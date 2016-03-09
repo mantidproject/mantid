@@ -28,7 +28,8 @@ void SpectrumAlgorithm::declareWorkspaceIndexSetProperties(
   declareProperty(m_indexMaxPropertyName, EMPTY_INT(), mustBePositive,
                   "The last Workspace index to be included in the summing");
 
-  declareProperty(new Kernel::ArrayProperty<size_t>(m_indexRangePropertyName),
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<size_t>>(
+                      m_indexRangePropertyName),
                   "A list of workspace indices as a string with ranges, for "
                   "example: 5-10,15,20-23. \n"
                   "Optional: if not specified, then the "
