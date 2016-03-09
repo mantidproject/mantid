@@ -139,6 +139,21 @@ namespace VATES
     return directions;
   }
 
+  void setNormal(vtkRegularPolygonSource *source, unsigned direction) {
+    assert(direction > 3);
+    switch (direction) {
+    case (0):
+      source->SetNormal(1.0, 0.0, 0.0);
+      break;
+    case (1):
+      source->SetNormal(0.0, 1.0, 0.0);
+      break;
+    case (2):
+      source->SetNormal(0.0, 0.0, 1.0);
+      break;
+    }
+  }
+
   /**
 Create the vtkStructuredGrid from the provided workspace
 @param progressUpdating: Reporting object to pass progress information up the
@@ -156,7 +171,7 @@ stack.
 
     vtkEllipsoidTransformer ellipsoidTransformer;
 
-    const int resolution = 8;
+    const int resolution = 100;
     double progressFactor = 1.0/double(numPeaks);
 
     vtkAppendPolyData* appendFilter = vtkAppendPolyData::New();
@@ -221,33 +236,19 @@ stack.
 
         vtkNew<vtkRegularPolygonSource> polygonSource;
         polygonSource->GeneratePolygonOff();
-        polygonSource->SetNumberOfSides(resolution * 10);
+        polygonSource->SetNumberOfSides(resolution);
         polygonSource->SetRadius(peakRadius);
         polygonSource->SetCenter(0, 0, 0);
 
-        polygonSource->SetNormal(1, 0, 0);
-        vtkNew<vtkPVGlyphFilter> glyphFilter1;
-        glyphFilter1->SetInputData(peakDataSet.GetPointer());
-        glyphFilter1->SetSourceConnection(polygonSource->GetOutputPort());
-        glyphFilter1->Update();
-        appendFilter->AddInputData(glyphFilter1->GetOutput());
-        appendFilter->Update();
-
-        polygonSource->SetNormal(0, 1, 0);
-        vtkNew<vtkPVGlyphFilter> glyphFilter2;
-        glyphFilter2->SetInputData(peakDataSet.GetPointer());
-        glyphFilter2->SetSourceConnection(polygonSource->GetOutputPort());
-        glyphFilter2->Update();
-        appendFilter->AddInputData(glyphFilter2->GetOutput());
-        appendFilter->Update();
-
-        polygonSource->SetNormal(0, 0, 1);
-        vtkNew<vtkPVGlyphFilter> glyphFilter3;
-        glyphFilter3->SetInputData(peakDataSet.GetPointer());
-        glyphFilter3->SetSourceConnection(polygonSource->GetOutputPort());
-        glyphFilter3->Update();
-        appendFilter->AddInputData(glyphFilter3->GetOutput());
-        appendFilter->Update();
+        for (unsigned direction = 0; direction < 3; ++direction) {
+          vtkNew<vtkPVGlyphFilter> glyphFilter;
+          setNormal(polygonSource.GetPointer(), direction);
+          glyphFilter->SetInputData(peakDataSet.GetPointer());
+          glyphFilter->SetSourceConnection(polygonSource->GetOutputPort());
+          glyphFilter->Update();
+          appendFilter->AddInputData(glyphFilter->GetOutput());
+          appendFilter->Update();
+        }
       }
       else if (shape.shapeName() == Mantid::DataObjects::PeakShapeEllipsoid::ellipsoidShapeName())
       {
@@ -271,37 +272,20 @@ stack.
 
         vtkNew<vtkRegularPolygonSource> polygonSource;
         polygonSource->GeneratePolygonOff();
-        polygonSource->SetNumberOfSides(resolution * 10.f);
-        polygonSource->SetRadius(1.f);
-        polygonSource->SetCenter(0.f, 0.f, 0.f);
+        polygonSource->SetNumberOfSides(resolution);
+        polygonSource->SetRadius(1.);
+        polygonSource->SetCenter(0., 0., 0.);
 
-        polygonSource->SetNormal(1.f, 0.f, 0.f);
-        vtkNew<vtkTensorGlyph> glyphFilter1;
-        glyphFilter1->SetInputData(peakDataSet.GetPointer());
-        glyphFilter1->SetSourceConnection(0, polygonSource->GetOutputPort());
-        glyphFilter1->ExtractEigenvaluesOff();
-        glyphFilter1->Update();
-        appendFilter->AddInputData(glyphFilter1->GetOutput());
-        appendFilter->Update();
-
-        polygonSource->SetNormal(0.f, 1.f, 0.f);
-        vtkNew<vtkTensorGlyph> glyphFilter2;
-        glyphFilter2->SetInputData(peakDataSet.GetPointer());
-        glyphFilter2->SetSourceConnection(0, polygonSource->GetOutputPort());
-        glyphFilter2->ExtractEigenvaluesOff();
-        glyphFilter2->Update();
-        appendFilter->AddInputData(glyphFilter2->GetOutput());
-        appendFilter->Update();
-
-        polygonSource->SetNormal(0.f, 0.f, 1.f);
-        vtkNew<vtkTensorGlyph> glyphFilter3;
-        glyphFilter3->SetInputData(peakDataSet.GetPointer());
-        glyphFilter3->SetSourceConnection(0, polygonSource->GetOutputPort());
-        glyphFilter3->ExtractEigenvaluesOff();
-        glyphFilter3->Update();
-        appendFilter->AddInputData(glyphFilter3->GetOutput());
-        appendFilter->Update();
-
+        for (unsigned direction = 0; direction < 3; ++direction) {
+          vtkNew<vtkTensorGlyph> glyphFilter;
+          setNormal(polygonSource.GetPointer(), direction);
+          glyphFilter->SetInputData(peakDataSet.GetPointer());
+          glyphFilter->SetSourceConnection(0, polygonSource->GetOutputPort());
+          glyphFilter->ExtractEigenvaluesOff();
+          glyphFilter->Update();
+          appendFilter->AddInputData(glyphFilter->GetOutput());
+          appendFilter->Update();
+        }
       }
       else
       {
@@ -330,9 +314,7 @@ stack.
 
     } // for each peak
 
-    vtkPolyData* polyData = appendFilter->GetOutput();
-
-    return polyData;
+    return appendFilter->GetOutput();
   }
 
   vtkPeakMarkerFactory::~vtkPeakMarkerFactory()
