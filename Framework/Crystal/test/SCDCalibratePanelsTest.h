@@ -45,9 +45,8 @@ public:
     alg->setProperty("RotateCenters", false);
     alg->setProperty("PanelGroups", "SpecifyGroups");
     alg->setProperty("Grouping", "26");
-    alg->setProperty("useL0", true);
-    alg->setProperty("useTimeOffset", true);
     alg->setPropertyValue("ResultWorkspace", "Result");
+    alg->setPropertyValue("QErrorWorkspace", "QErrorResult");
     alg->setPropertyValue("DetCalFilename", "/tmp/topaz.detcal"); // deleteme
     TS_ASSERT(alg->execute());
 
@@ -57,7 +56,7 @@ public:
     TS_ASSERT_DELTA(-0.000561209, results->cell<double>(3, 1), .01);
     TS_ASSERT_DELTA(6.6194e-06, results->cell<double>(2, 1), .01);
     TS_ASSERT_DELTA(-4.99864, results->cell<double>(9, 1), .01);
-    TS_ASSERT_DELTA(18.007, results->cell<double>(8, 1), .01);
+    TS_ASSERT_DELTA(18.0745, results->cell<double>(8, 1), .01);
   }
 };
 

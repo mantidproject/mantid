@@ -47,11 +47,9 @@ optimization is done.
 | ``    -*Xoffset,*Yoffset,and *Zoffset are in meters``
 | ``    -*Xrot,*Yrot, and *Zrot are in degrees. Note that Zrot is done first, then Yrot , the Xrot.``
 
-``  B)ColWorkspace contains the calculated and theoretical column for each peak. To plot go to Preferences/2D Plots/Curves and change the default curve style to Scatter and then Plot Spectra for all the desired banks.``
+``  B)QErrorWorkspace contains the Error in Q values for each peak, along with other associated information about the peak``
 
-``  C)RowWorkspace contains the calculated and theoretical row for each peak. To plot go to Preferences/2D Plots/Curves and change the default curve style to Scatter and then Plot Spectra for all the desired banks.``
-
-``  D)TofWorkspace contains the calculated and theoretical TOF for each peak. To plot go to Preferences/2D Plots/Curves and change the default curve style to Scatter and then Plot Spectra for all the desired banks.``
+``  C)CovarianceInfo contains the "correlations"(*100) between each of the parameters``
 
 ``6) Maximum changes in the quantities that are altered during optimization are now settable.``
 
