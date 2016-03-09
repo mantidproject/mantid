@@ -1497,6 +1497,28 @@ public:
     }
   }
 
+  void test_sortByPulseTimeTOF_random_tof_and_pulse_time() {
+    for (int this_type = 0; this_type < 3; this_type++) {
+      EventType curType = static_cast<EventType>(this_type);
+      EventList el = this->fake_data();
+      el.switchTo(curType);
+
+      if (curType == WEIGHTED_NOTIME) {
+        continue;
+      }
+
+      TS_ASSERT_THROWS_NOTHING(el.sortPulseTimeTOF());
+
+      for (size_t i = 1; i < el.getNumberEvents(); i++) {
+        TSM_ASSERT_LESS_THAN_EQUALS(this_type, el.getEvent(i - 1).pulseTime(),
+                                    el.getEvent(i).pulseTime());
+        if (el.getEvent(i - 1).pulseTime() == el.getEvent(i).pulseTime())
+          TSM_ASSERT_LESS_THAN_EQUALS(this_type, el.getEvent(i - 1).tof(),
+                                      el.getEvent(i).tof());
+      }
+    }
+  }
+
   //-----------------------------------------------------------------------------------------------
   void test_filterByPulseTime() {
     // Go through each possible EventType (except the no-time one) as the input
