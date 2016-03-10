@@ -35,14 +35,32 @@ class VesuvioTests(unittest.TestCase):
     def test_monitors_loaded_into_ADS_when_monitor_load_is_true_for_back_scattering(self):
         diff_mode = "SingleDifference"
         self._run_load("14188", "3-134", diff_mode, load_mon=True)
-        self.assertTrue(mtd.doesExist('evs_raw_monitor'))
-        self.assertTrue(isinstance(mtd['evs_raw_monitor'], MatrixWorkspace)
+        self.assertTrue(mtd.doesExist('evs_raw_monitors'))
+        self.assertTrue(isinstance(mtd['evs_raw_monitors'], MatrixWorkspace))
 
-    def test_monitors_loaded_into_ADS_when_monitor_load_is_true_for_back_scattering(self):
+    def test_monitors_loaded_into_ADS_when_monitor_load_is_true_for_forward_scattering(self):
         diff_mode = "SingleDifference"
         self._run_load("14188", "135-198", diff_mode, load_mon=True)
-        self.assertTrue(mtd.doesExist('evs_raw_monitor'))
-        self.assertTrue(isinstance(mtd['evs_raw_monitor'], MatrixWorkspace)
+        self.assertTrue(mtd.doesExist('evs_raw_monitors'))
+        self.assertTrue(isinstance(mtd['evs_raw_monitors'], MatrixWorkspace))
+
+    def test_monitors_loaded_when_LoadMonitors_is_true_for_multiple_runs_back_scattering(self):
+        diff_mode = "SingleDifference"
+        self._run_load("14188-14190", "3-134", diff_mode, load_mon=True)
+        self.assertTrue(mtd.doesExist('evs_raw_monitors'))
+        self.assertTrue(isinstance(mtd['evs_raw_monitors'], MatrixWorkspace))
+
+    def test_monitors_loaded_when_LoadMonitors_is_true_for_multiple_runs_forward_scattering(self):
+        diff_mode = "SingleDifference"
+        self._run_load("14188-14190", "135-198", diff_mode, load_mon=True)
+        self.assertTrue(mtd.doesExist('evs_raw_monitors'))
+        self.assertTrue(isinstance(mtd['evs_raw_monitors'], MatrixWorkspace))
+
+    def test_monitor_is_not_loaded_when_LoadMonitors_is_false(self):
+        diff_mode = "SingleDifference"
+        self._run_load("14188-14190", "3-134", diff_mode, load_mon=False)
+        self.assertFalse(mtd.doesExist('evs_raw_monitors'))
+
 
     def test_load_with_back_scattering_spectra_produces_correct_workspace_using_single_difference(self):
         diff_mode = "SingleDifference"
@@ -252,7 +270,7 @@ class VesuvioTests(unittest.TestCase):
     def _run_load(self, runs, spectra, diff_opt, ip_file="", sum_runs=False, load_mon=False):
         ms.LoadVesuvio(Filename=runs,OutputWorkspace=self.ws_name,
                        SpectrumList=spectra,Mode=diff_opt,InstrumentParFile=ip_file,
-                       SumSpectra=sum_runs, LoadMonitor=load_mon)
+                       SumSpectra=sum_runs, LoadMonitors=load_mon)
 
         self._do_ads_check(self.ws_name)
 
