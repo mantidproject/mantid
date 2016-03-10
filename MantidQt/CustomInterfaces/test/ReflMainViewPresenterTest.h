@@ -638,10 +638,10 @@ public:
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(rowlist));
-    EXPECT_CALL(mockView, getEnableNotebook())
+    EXPECT_CALL(mockTableView, getEnableNotebook())
         .Times(1)
         .WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, requestNotebookPath()).Times(0);
+    EXPECT_CALL(mockTableView, requestNotebookPath()).Times(0);
     presenter.notify(IReflPresenter::ProcessFlag);
 
     // Check output workspaces were created as expected
@@ -693,10 +693,10 @@ public:
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(rowlist));
-    EXPECT_CALL(mockView, getEnableNotebook())
+    EXPECT_CALL(mockTableView, getEnableNotebook())
         .Times(1)
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(mockView, requestNotebookPath()).Times(1);
+    EXPECT_CALL(mockTableView, requestNotebookPath()).Times(1);
     presenter.notify(IReflPresenter::ProcessFlag);
 
     // Tidy up
@@ -1605,7 +1605,7 @@ public:
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
-    EXPECT_CALL(mockView, showImportDialog());
+    EXPECT_CALL(mockTableView, showImportDialog());
     presenter.notify(IReflPresenter::ImportTableFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));

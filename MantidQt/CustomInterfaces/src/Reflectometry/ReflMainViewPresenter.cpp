@@ -140,8 +140,8 @@ namespace CustomInterfaces {
 ReflMainViewPresenter::ReflMainViewPresenter(
     ReflMainView *mainView, ReflTableView *tableView,
     ProgressableView *progressView, boost::shared_ptr<IReflSearcher> searcher)
-    : WorkspaceObserver(), m_view(mainView), m_tableView(tableView), m_progressView(progressView),
-      m_tableDirty(false), m_searcher(searcher) {
+    : WorkspaceObserver(), m_view(mainView), m_tableView(tableView),
+      m_progressView(progressView), m_tableDirty(false), m_searcher(searcher) {
 
   // TODO. Select strategy.
   /*
@@ -168,9 +168,9 @@ ReflMainViewPresenter::ReflMainViewPresenter(
       Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
   if (std::find(instruments.begin(), instruments.end(), defaultInst) !=
       instruments.end())
-    m_view->setInstrumentList(instruments, defaultInst);
+    m_tableView->setInstrumentList(instruments, defaultInst);
   else
-    m_view->setInstrumentList(instruments, "INTER");
+    m_tableView->setInstrumentList(instruments, "INTER");
 
   // Populate an initial list of valid tables to open, and subscribe to the ADS
   // to keep it up to date
@@ -189,7 +189,7 @@ ReflMainViewPresenter::ReflMainViewPresenter(
   observeRename();
   observeADSClear();
   observeAfterReplace();
-  m_view->setTableList(m_workspaceList);
+  m_tableView->setTableList(m_workspaceList);
 
   // Provide autocompletion hints for the options column. We use the algorithm's
   // properties minus
@@ -205,7 +205,8 @@ ReflMainViewPresenter::ReflMainViewPresenter(
                                   "OutputWorkspaceWavelength",
                                   "FirstTransmissionRun",
                                   "SecondTransmissionRun"};
-  m_tableView->setOptionsHintStrategy(new AlgorithmHintStrategy(alg, blacklist));
+  m_tableView->setOptionsHintStrategy(
+      new AlgorithmHintStrategy(alg, blacklist));
 
   // If we don't have a searcher yet, use ReflCatalogSearcher
   if (!m_searcher)
@@ -305,7 +306,7 @@ void ReflMainViewPresenter::process() {
   }
 
   // If "Output Notebook" checkbox is checked then create an ipython notebook
-  if (m_view->getEnableNotebook()) {
+  if (m_tableView->getEnableNotebook()) {
     saveNotebook(groups, rows);
   }
 }
@@ -319,13 +320,13 @@ there
 void ReflMainViewPresenter::saveNotebook(std::map<int, std::set<int>> groups,
                                          std::set<int> rows) {
 
-  std::string filename = m_view->requestNotebookPath();
+  std::string filename = m_tableView->requestNotebookPath();
   if (filename == "") {
     return;
   }
 
   auto notebook = Mantid::Kernel::make_unique<ReflGenerateNotebook>(
-      m_wsName, m_model, m_view->getProcessInstrument(),
+      m_wsName, m_model, m_tableView->getProcessInstrument(),
       ReflTableSchema::COL_RUNS, ReflTableSchema::COL_TRANSMISSION,
       ReflTableSchema::COL_OPTIONS, ReflTableSchema::COL_ANGLE,
       ReflTableSchema::COL_QMIN, ReflTableSchema::COL_QMAX,
@@ -570,7 +571,7 @@ desired TOF workspace
 */
 Workspace_sptr
 ReflMainViewPresenter::prepareRunWorkspace(const std::string &runStr) {
-  const std::string instrument = m_view->getProcessInstrument();
+  const std::string instrument = m_tableView->getProcessInstrument();
 
   std::vector<std::string> runs;
   boost::split(runs, runStr, boost::is_any_of("+"));
@@ -954,7 +955,7 @@ ReflMainViewPresenter::makeTransWS(const std::string &transString) {
     throw std::runtime_error("Failed to parse the transmission run list.");
 
   for (auto it = transVec.begin(); it != transVec.end(); ++it)
-    transWSVec.push_back(loadRun(*it, m_view->getProcessInstrument()));
+    transWSVec.push_back(loadRun(*it, m_tableView->getProcessInstrument()));
 
   // If the transmission workspace is already in the ADS, re-use it
   std::string lastName = "TRANS_" + boost::algorithm::join(transVec, "_");
@@ -1194,9 +1195,10 @@ Start a new, untitled table
 */
 void ReflMainViewPresenter::newTable() {
   if (m_tableDirty && m_options["WarnDiscardChanges"].toBool())
-    if (!m_tableView->askUserYesNo("Your current table has unsaved changes. Are you "
-                              "sure you want to discard them?",
-                              "Start New Table?"))
+    if (!m_tableView->askUserYesNo(
+            "Your current table has unsaved changes. Are you "
+            "sure you want to discard them?",
+            "Start New Table?"))
       return;
 
   m_ws = createDefaultWorkspace();
@@ -1212,9 +1214,10 @@ Open a table from the ADS
 */
 void ReflMainViewPresenter::openTable() {
   if (m_tableDirty && m_options["WarnDiscardChanges"].toBool())
-    if (!m_tableView->askUserYesNo("Your current table has unsaved changes. Are you "
-                              "sure you want to discard them?",
-                              "Open Table?"))
+    if (!m_tableView->askUserYesNo(
+            "Your current table has unsaved changes. Are you "
+            "sure you want to discard them?",
+            "Open Table?"))
       return;
 
   auto &ads = AnalysisDataService::Instance();
@@ -1224,7 +1227,8 @@ void ReflMainViewPresenter::openTable() {
     return;
 
   if (!ads.isValid(toOpen).empty()) {
-    m_tableView->giveUserCritical("Could not open workspace: " + toOpen, "Error");
+    m_tableView->giveUserCritical("Could not open workspace: " + toOpen,
+                                  "Error");
     return;
   }
 
@@ -1243,7 +1247,7 @@ void ReflMainViewPresenter::openTable() {
     m_tableView->showTable(m_model);
     m_tableDirty = false;
   } catch (std::runtime_error &e) {
-		m_tableView->giveUserCritical(
+    m_tableView->giveUserCritical(
         "Could not open workspace: " + std::string(e.what()), "Error");
   }
 }
@@ -1251,13 +1255,13 @@ void ReflMainViewPresenter::openTable() {
 /**
 Import a table from TBL file
 */
-void ReflMainViewPresenter::importTable() { m_view->showImportDialog(); }
+void ReflMainViewPresenter::importTable() { m_tableView->showImportDialog(); }
 
 /**
 Export a table to TBL file
 */
 void ReflMainViewPresenter::exportTable() {
-  m_view->showAlgorithmDialog("SaveReflTBL");
+  m_tableView->showAlgorithmDialog("SaveReflTBL");
 }
 
 /**
@@ -1273,7 +1277,7 @@ void ReflMainViewPresenter::addHandle(const std::string &name,
     return;
 
   m_workspaceList.insert(name);
-  m_view->setTableList(m_workspaceList);
+  m_tableView->setTableList(m_workspaceList);
 }
 
 /**
@@ -1281,7 +1285,7 @@ Handle ADS remove events
 */
 void ReflMainViewPresenter::postDeleteHandle(const std::string &name) {
   m_workspaceList.erase(name);
-  m_view->setTableList(m_workspaceList);
+  m_tableView->setTableList(m_workspaceList);
 }
 
 /**
@@ -1289,7 +1293,7 @@ Handle ADS clear events
 */
 void ReflMainViewPresenter::clearADSHandle() {
   m_workspaceList.clear();
-  m_view->setTableList(m_workspaceList);
+  m_tableView->setTableList(m_workspaceList);
 }
 
 /**
@@ -1305,7 +1309,7 @@ void ReflMainViewPresenter::renameHandle(const std::string &oldName,
 
   m_workspaceList.erase(oldName);
   m_workspaceList.insert(newName);
-  m_view->setTableList(m_workspaceList);
+  m_tableView->setTableList(m_workspaceList);
 }
 
 /**
@@ -1320,7 +1324,7 @@ void ReflMainViewPresenter::afterReplaceHandle(
   if (isValidModel(workspace))
     m_workspaceList.insert(name);
 
-  m_view->setTableList(m_workspaceList);
+  m_tableView->setTableList(m_workspaceList);
 }
 
 /** Returns how many rows there are in a given group
@@ -1616,12 +1620,13 @@ void ReflMainViewPresenter::plotRow() {
   }
 
   if (!notFound.empty())
-    m_tableView->giveUserWarning("The following workspaces were not plotted because "
-                            "they were not found:\n" +
-                                boost::algorithm::join(notFound, "\n") +
-                                "\n\nPlease check that the rows you are trying "
-                                "to plot have been fully processed.",
-                            "Error plotting rows.");
+    m_tableView->giveUserWarning(
+        "The following workspaces were not plotted because "
+        "they were not found:\n" +
+            boost::algorithm::join(notFound, "\n") +
+            "\n\nPlease check that the rows you are trying "
+            "to plot have been fully processed.",
+        "Error plotting rows.");
 
   m_tableView->plotWorkspaces(workspaces);
 }
@@ -1669,12 +1674,13 @@ void ReflMainViewPresenter::plotGroup() {
   }
 
   if (!notFound.empty())
-    m_tableView->giveUserWarning("The following workspaces were not plotted because "
-                            "they were not found:\n" +
-                                boost::algorithm::join(notFound, "\n") +
-                                "\n\nPlease check that the groups you are "
-                                "trying to plot have been fully processed.",
-                            "Error plotting groups.");
+    m_tableView->giveUserWarning(
+        "The following workspaces were not plotted because "
+        "they were not found:\n" +
+            boost::algorithm::join(notFound, "\n") +
+            "\n\nPlease check that the groups you are "
+            "trying to plot have been fully processed.",
+        "Error plotting groups.");
 
   m_tableView->plotWorkspaces(workspaces);
 }
@@ -1706,7 +1712,7 @@ void ReflMainViewPresenter::setOptions(
     m_options[it->first] = it->second;
 
   // Save any changes to disk
-  m_view->saveSettings(m_options);
+  m_tableView->saveSettings(m_options);
 }
 
 /** Load options from disk if possible, or set to defaults */
@@ -1727,7 +1733,7 @@ void ReflMainViewPresenter::initOptions() {
   m_options["RoundDQQPrecision"] = 3;
 
   // Load saved values from disk
-  m_view->loadSettings(m_options);
+  m_tableView->loadSettings(m_options);
 }
 
 /**

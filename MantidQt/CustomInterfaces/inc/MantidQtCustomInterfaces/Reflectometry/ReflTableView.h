@@ -49,11 +49,25 @@ public:
   virtual bool askUserYesNo(std::string prompt, std::string title) = 0;
   virtual void giveUserWarning(std::string prompt, std::string title) = 0;
   virtual void giveUserCritical(std::string prompt, std::string title) = 0;
+  virtual void showAlgorithmDialog(const std::string &algorithm) = 0;
+  virtual void showImportDialog() = 0;
+  virtual std::string requestNotebookPath() = 0;
+
+  // Settings
+  virtual void saveSettings(const std::map<std::string, QVariant> &options) = 0;
+  virtual void loadSettings(std::map<std::string, QVariant> &options) = 0;
+
+  // Get status of the checkbox which dictates whether an ipython notebook is
+  // produced
+  virtual bool getEnableNotebook() = 0;
 
   // Plotting
   virtual void plotWorkspaces(const std::set<std::string> &workspaces) = 0;
 
   // Setter methods
+  virtual void setTableList(const std::set<std::string> &tables) = 0;
+  virtual void setInstrumentList(const std::vector<std::string> &instruments,
+                                 const std::string &defaultInstrument) = 0;
   virtual void setSelection(const std::set<int> &rows) = 0;
   virtual void setOptionsHintStrategy(
       MantidQt::MantidWidgets::HintStrategy *hintStrategy) = 0;
@@ -63,6 +77,7 @@ public:
   virtual std::set<int> getSelectedRows() const = 0;
   virtual std::string getWorkspaceToOpen() const = 0;
   virtual std::string getClipboard() const = 0;
+  virtual std::string getProcessInstrument() const = 0;
 };
 }
 }
