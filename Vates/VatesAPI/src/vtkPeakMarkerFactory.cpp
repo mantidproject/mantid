@@ -187,7 +187,7 @@ stack.
     const int resolution = 100;
     double progressFactor = 1.0/double(numPeaks);
 
-    vtkNew<vtkAppendPolyData> appendFilter;
+    vtkAppendPolyData *appendFilter = vtkAppendPolyData::New();
     // Go peak-by-peak
     for (int i=0; i < numPeaks; i++)
     {
