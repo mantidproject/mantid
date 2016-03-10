@@ -1,0 +1,99 @@
+digraph SimulatedDensityOfStates {
+  label="SimulatedDensityOfStates Flowchart"
+  $global_style
+  
+  subgraph params {
+    $param_style
+	CASTEPFile
+	PHONONFile
+	Function
+	PeakWidth
+	SpectrumType
+	StickHeight
+	Scale
+	BinWidth
+	Temperature
+	ZeroThreshold
+	Ions
+	SumContributions
+	ScaleByCrossSection
+	OutputWorkspace
+	file_data
+	frequencies
+	ir_intensities
+	raman_intensities
+	weights
+	eigenvectors
+	ions
+	unit_cell
+	ion_table
+	bond_table
+	partial_workspaces
+	partial_ions
+	sum_workspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+	CreateEmptyTableWorkspace
+	CreateEmptyTableWorkspace1		[label="CreateEmptyTableWorkspace"]
+	DeleteWorkspace
+	DeleteWorkspace1				[label="DeleteWorkspace"]
+	
+  }
+  
+  subgraph decisions {
+    $decision_style
+	SpectrumType
+	sum_contributions 		[label="Sum Contributions"]
+  }
+  
+  subgraph process  {
+    $process_style
+	read_data_from_file
+	convert_to_cartesian_coordinates
+	compute_partial_ion_workflow
+
+  }
+  
+  CASTEPFile						->	read_data_from_file
+  PHONONFile						->	read_data_from_file
+  read_data_from_file				-> 	file_data
+  file_data							->	frequencies
+  file_data							->	ir_intensities
+  file_data							->	raman_intensities
+  file_data							->	weights
+  file_data							->	eigenvectors
+  file_data							->	ions
+  file_data							->	unit_cell
+  SpectrumType						-> 	CreateEmptyTableWorkspace 				[label="IonTable"]
+	CreateEmptyTableWorkspace			->	ion_table
+	ions								->	convert_to_cartesian_coordinates	[label="Convert fractional coordinates to Cartesian coordinates"]
+	unit_cell							->	convert_to_cartesian_coordinates
+	convert_to_cartesian_coordinates	->	add_ion_data_to_table				[label="Adds the ion data for each ion to the ion_table"]
+  SpectrumType						->  CreateEmptyTableWorkspace1				[label="BondTable"]
+	CreateEmptyTableWorkspace1			->	bond_table
+	bond_table							-> add_bond_data_to_table				[label="Adds the bond data for each bond to the bond_table"]
+  SpectrumType						->	partial_ions							[label="DOS and ions given in input"]
+	partial_ions					->	compute_partial_ion_workflow
+	frequencies						->	compute_partial_ion_workflow
+	eigenvectors					->	compute_partial_ion_workflow
+	weights							->	compute_partial_ion_workflow
+	compute_partial_ion_workflow	->	partial_workspaces
+	compute_partial_ion_workflow	->	sum_workspace
+	compute_partial_ion_workflow	-> 	sum_contributions						
+	sum_contributions				->	DeleteWorkspace							[label="Yes"]
+		partial_workspace				-> 	DeleteWorkspace
+		DeleteWorkspaces				->	RenameWorkspace
+		sum_workspace					-> 	RenameWorkspace
+	RenameWorkspace					-> 	OutputWorkspace
+	sum_contributions				-> 	DeleteWorkspace1						[label="No"]
+		sum_workspace					-> DeleteWorkspace1
+		DeleteWorkspace1				-> GroupWorkspaces
+		partial_workspaces				-> GroupWorkspaces
+	GroupWorkspace					-> 	OutputWorkspace
+  SpectrumType						->	all_ions								[label="DOS and scale_by_cross_section"]
+  SpectrumType						->	compute_DOS								[label="DOS"]
+  SpectrumType						->  ir_intensities							[label="IR_Active"]
+  SpectrumType						-> 	compute_raman							[label="Raman_Active"]
+  
