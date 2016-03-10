@@ -12,6 +12,10 @@ Algorithm designed to normalise all the spectra in the input workspace so that t
 This algorithm is designed to run on workspaces where every spectra contains at least one y value greater than 0.
 This is the case because the data is being normalised to be a maximum of positive 1.
 
+The algorithm works by extracting each spectrum from the workspace in turn, finding the maximum y value in the spectrum and then calculating 1/the maximum y value
+ to obtain the scale factor required to normalise the maximum point to 1. The whole spectrum is then scaled using the Scale algorithm and the scale factor and this
+ is repeated for all specta. The spectra are then all returned in the outputworkspace.
+
 
 Usage
 -----
