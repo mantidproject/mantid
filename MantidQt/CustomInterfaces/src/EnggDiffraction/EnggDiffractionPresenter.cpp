@@ -193,13 +193,13 @@ void EnggDiffractionPresenter::processCalcCalib() {
 void EnggDiffractionPresenter::ProcessCropCalib() {
   const std::string vanNo = isValidRunNumber(m_view->newVanadiumNo());
   const std::string ceriaNo = isValidRunNumber(m_view->newCeriaNo());
-  int specIdNum = m_view->currentCropCalibBankName();
-  enum BankMode { SPECIDS = 0, NORTH = 1, SOUTH = 2 };
+  int specNoNum = m_view->currentCropCalibBankName();
+  enum BankMode { SPECNOS = 0, NORTH = 1, SOUTH = 2 };
 
   try {
     inputChecksBeforeCalibrate(vanNo, ceriaNo);
     if (m_view->currentCalibSpecNos().empty() &&
-        specIdNum == BankMode::SPECIDS) {
+        specNoNum == BankMode::SPECNOS) {
       throw std::invalid_argument(
           "The Spectrum IDs cannot be empty, must be a"
           "valid range or a Bank Name can be selected instead");
@@ -217,25 +217,25 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
 
   const std::string outFilename = outputCalibFilename(vanNo, ceriaNo);
 
-  std::string specId = "";
-  if (specIdNum == BankMode::NORTH) {
-    specId = "North";
+  std::string specNo = "";
+  if (specNoNum == BankMode::NORTH) {
+    specNo = "North";
     g_calibCropIdentifier = "Bank";
 
-  } else if (specIdNum == BankMode::SOUTH) {
-    specId = "South";
+  } else if (specNoNum == BankMode::SOUTH) {
+    specNo = "South";
     g_calibCropIdentifier = "Bank";
 
-  } else if (specIdNum == BankMode::SPECIDS) {
+  } else if (specNoNum == BankMode::SPECNOS) {
     g_calibCropIdentifier = "SpectrumNumbers";
-    specId = m_view->currentCalibSpecNos();
+    specNo = m_view->currentCalibSpecNos();
   }
 
   m_view->enableCalibrateAndFocusActions(false);
   // alternatively, this would be GUI-blocking:
-  // doNewCalibration(outFilename, vanNo, ceriaNo, specID/bankName);
+  // doNewCalibration(outFilename, vanNo, ceriaNo, specNo/bankName);
   // calibrationFinished()
-  startAsyncCalibWorker(outFilename, vanNo, ceriaNo, specId);
+  startAsyncCalibWorker(outFilename, vanNo, ceriaNo, specNo);
 }
 
 void EnggDiffractionPresenter::processFocusBasic() {
@@ -281,7 +281,7 @@ void EnggDiffractionPresenter::processFocusCropped() {
   const std::vector<std::string> multi_RunNo =
       isValidMultiRunNumber(m_view->focusingCroppedRunNo());
   const std::vector<bool> banks = m_view->focusingBanks();
-  const std::string specNos = m_view->focusingCroppedSpectrumIDs();
+  const std::string specNos = m_view->focusingCroppedSpectrumNos();
 
   // reset global values
   g_abortThread = false;
@@ -757,7 +757,7 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
 * @param outFilename name for the output GSAS calibration file
 * @param vanNo vanadium run number
 * @param ceriaNo ceria run number
-* @param specNos specIDs or bank name to be passed
+* @param specNos SpecNos or bank name to be passed
 */
 void EnggDiffractionPresenter::startAsyncCalibWorker(
     const std::string &outFilename, const std::string &vanNo,
@@ -785,7 +785,7 @@ void EnggDiffractionPresenter::startAsyncCalibWorker(
 * @param outFilename name for the output GSAS calibration file
 * @param vanNo vanadium run number
 * @param ceriaNo ceria run number
-* @param specNos specIDs or bank name to be passed
+* @param specNos SpecNos or bank name to be passed
 */
 void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
                                                 const std::string &vanNo,
@@ -891,7 +891,7 @@ std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
 * @param vanNo Vanadium run number
 * @param ceriaNo Ceria run number
 * @param outFilename output filename chosen by the user
-* @param specNos specIDs or bank name to be passed
+* @param specNos SpecNos or bank name to be passed
 */
 void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                                        const std::string &vanNo,
@@ -1811,7 +1811,7 @@ void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
       saveOpenGenie(curvesWSName, specNosBank2, southBank, vanNo);
     } else {
 
-      // when spectrumIDs are provided
+      // when SpectrumNos are provided
       std::string CustomisedBankName = m_view->currentCalibCustomisedBankName();
 
       // assign default value if empty string passed
@@ -2442,7 +2442,7 @@ std::string EnggDiffractionPresenter::DifcZeroWorkspaceFactory(
 std::string EnggDiffractionPresenter::plotDifcZeroWorkspace(
     const std::string &customisedBankName) const {
   std::string pyCode =
-      // plotSpecNum is true when SpectrumIDs being used
+      // plotSpecNum is true when SpectrumNos being used
       " if (plotSpecNum == False):\n"
       "  output_ws = \"engggui_difc_zero_peaks_bank_\" + str(i)\n"
       " else:\n"
@@ -2492,7 +2492,7 @@ std::string EnggDiffractionPresenter::plotDifcZeroWorkspace(
 /**
 * Generates appropriate names for table workspaces
 *
-* @param specNos specIDs or bank name to be passed
+* @param specNos SpecNos or bank name to be passed
 * @param bank_i current loop of the bank during calibration
 */
 std::string EnggDiffractionPresenter::outFitParamsTblNameGenerator(

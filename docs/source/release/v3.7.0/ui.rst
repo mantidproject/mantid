@@ -17,6 +17,22 @@ OS X
 User Interface
 --------------
 
+Plotting Improvements
+#####################
+
+Line plots
+^^^^^^^^^^
+.. figure::  ../../images/R37AllErrorBars.png
+   :width: 500
+   :align: right
+
+- The default for plotting line plots has been changed to include plotting error bars on every data point.
+  This in general makes more sense than the previous approach of missing some points based on the data density.
+- However it can make dense data plots with errors look more obscured, so if you preferred the old approach you can change it back by unselecting the option Draw All Errors in the View->Prefences menu.
+
+.. figure::  ../../images/R37PlotAllErrorsOption.png
+   :align: center
+
 Instrument View
 ###############
 
@@ -74,8 +90,6 @@ Instrument View
         # put back the facility
         ConfigService.setFacility(facility)
 
-Plotting Improvements
-#####################
 
 Algorithm Toolbox
 #################

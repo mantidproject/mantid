@@ -126,20 +126,22 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
 
   // X values in input workspace must be equally spaced
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
-  const MantidVec &X = inWS->readX(0);
-  const double dx = X[1] - X[0];
-  for (size_t i = 1; i < X.size() - 2; i++) {
-    if (std::abs(dx - X[i + 1] + X[i]) / dx > 1e-7) {
-      result["InputWorkspace"] =
-          "X axis must be linear (all bins must have the same width)";
+  if (inWS) {
+    const MantidVec &X = inWS->readX(0);
+    const double dx = X[1] - X[0];
+    for (size_t i = 1; i < X.size() - 2; i++) {
+      if (std::abs(dx - X[i + 1] + X[i]) / dx > 1e-7) {
+        result["InputWorkspace"] =
+            "X axis must be linear (all bins must have the same width)";
+      }
     }
-  }
 
-  size_t nhistograms = inWS->getNumberHistograms();
-  bool complex = getProperty("ComplexData");
-  if (complex && (nhistograms % 2))
-    result["InputWorkspace"] = "The number of histograms in the input "
-                               "workspace must be even for complex data";
+    size_t nhistograms = inWS->getNumberHistograms();
+    bool complex = getProperty("ComplexData");
+    if (complex && (nhistograms % 2))
+      result["InputWorkspace"] = "The number of histograms in the input "
+                                 "workspace must be even for complex data";
+  }
 
   return result;
 }

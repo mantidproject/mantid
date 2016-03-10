@@ -471,7 +471,7 @@ QImage MatrixModel::renderImage() {
   const QwtDoubleInterval intensityRange =
       QwtDoubleInterval(minValue, maxValue);
   for (int i = 0; i < d_rows; i++) {
-    QRgb *line = (QRgb *)image.scanLine(i);
+    QRgb *line = reinterpret_cast<QRgb *>(image.scanLine(i));
     for (int j = 0; j < d_cols; j++) {
       double val = cell(i, j); // d_data[i*d_cols + j];
       if (gsl_isnan(val))

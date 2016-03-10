@@ -281,7 +281,7 @@ private:
   /// saves the last valid run number
   static std::string g_lastValidRun;
 
-  /// bank name use or specIds for cropped calibration
+  /// bank name use or SpecNos for cropped calibration
   static std::string g_calibCropIdentifier;
 
   // name of the workspace with the vanadium integration (of spectra)

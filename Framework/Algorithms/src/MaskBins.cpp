@@ -175,7 +175,8 @@ void MaskBins::execEvent() {
   if (!this->spectra_list.empty()) {
     // Specific spectra were specified
     PARALLEL_FOR1(outputWS)
-    for (int i = 0; i < static_cast<int>(this->spectra_list.size()); ++i) {
+    for (int i = 0; i < static_cast<int>(this->spectra_list.size()); // NOLINT
+         ++i) {
       PARALLEL_START_INTERUPT_REGION
       outputWS->getEventList(this->spectra_list[i]).maskTof(m_startX, m_endX);
       progress.report();

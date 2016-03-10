@@ -328,17 +328,17 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
   // results vector
   std::vector<Algorithm_descriptor> res;
 
-  for (auto s = sv.cbegin(); s != sv.cend(); ++s) {
-    if (s->empty())
+  for (const auto &s : sv) {
+    if (s.empty())
       continue;
     Algorithm_descriptor desc;
-    size_t i = s->find('|');
+    size_t i = s.find('|');
     if (i == std::string::npos) {
-      desc.name = *s;
+      desc.name = s;
       desc.version = 1;
     } else if (i > 0) {
-      desc.name = s->substr(0, i);
-      std::string vers = s->substr(i + 1);
+      desc.name = s.substr(0, i);
+      std::string vers = s.substr(i + 1);
       desc.version = vers.empty() ? 1 : atoi(vers.c_str());
     } else
       continue;
