@@ -20,7 +20,7 @@ SUM_PROP = "SumSpectra"
 LOAD_MON = "LoadMonitors"
 
 # Raw workspace names which are necessary at the moment
-SUMMED_WS, SUMMED_MON = "__loadraw_evs", "__loadraw_evs_monitors"
+SUMMED_WS = "__loadraw_evs"
 # Enumerate the indexes for the different foil state sums
 IOUT = 0
 ITHIN = 1
@@ -402,8 +402,10 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 parvalue = empty_vesuvio.getStringParameter(name)
             setattr(self, name, parvalue[0]) # Adds attributes to self from Parameter file
 
-        self._mon_spectra = [int(self.monitor_spectrum)]
-        self._mon_index = self._mon_spectra[0] - 1
+        int_mon_spectra = self.monitor_spectra.split(',')
+        int_mon_spectra = [int(i) for i in int_mon_spectra]
+        self._mon_spectra = int_mon_spectra
+        self._mon_index = int_mon_spectra[0] - 1
 
         self._backward_spectra_list = to_int_list(self.backward_scatter_spectra)
         self._forward_spectra_list = to_int_list(self.forward_scatter_spectra)
@@ -518,24 +520,22 @@ class LoadVesuvio(LoadEmptyVesuvio):
         runs = self._get_runs()
 
         self.summed_ws, self.summed_mon = "__loadraw_evs", "__loadraw_evs_monitors"
+        spec_inc_mon = self._mon_spectra
+        spec_inc_mon.extend(spectra)
         for index, run in enumerate(runs):
             run = inst_prefix + str(run)
             self._raise_error_period_scatter(run, self._back_scattering)
             if index == 0:
-                out_name, out_mon = SUMMED_WS, SUMMED_MON
+                out_name, out_mon = SUMMED_WS, SUMMED_WS + '_monitors'
             else:
-                out_name, out_mon = SUMMED_WS + 'tmp', SUMMED_MON + 'tmp'
+                out_name, out_mon = SUMMED_WS + 'tmp', SUMMED_WS + 'tmp_monitors'
 
             # Load data
             raw_filepath = FileFinder.findRuns(run)[0]
             ms.LoadRaw(Filename=raw_filepath,
-                       SpectrumList=spectra,
+                       SpectrumList=spec_inc_mon,
                        OutputWorkspace=out_name,
-                       LoadMonitors='Exclude',
-                       EnableLogging=_LOGGING_)
-            ms.LoadRaw(Filename=raw_filepath,
-                       SpectrumList=self._mon_spectra,
-                       OutputWorkspace=out_mon,
+                       LoadMonitors='Separate',
                        EnableLogging=_LOGGING_)
 
             # Sum
@@ -544,13 +544,13 @@ class LoadVesuvio(LoadEmptyVesuvio):
                         RHSWorkspace=out_name,
                         OutputWorkspace=SUMMED_WS,
                         EnableLogging=_LOGGING_)
-                ms.Plus(LHSWorkspace=SUMMED_MON,
+                ms.Plus(LHSWorkspace=SUMMED_WS + '_monitors',
                         RHSWorkspace=out_mon,
-                        OutputWorkspace=SUMMED_MON,
+                        OutputWorkspace=SUMMED_WS + '_monitors',
                         EnableLogging=_LOGGING_)
 
-                ms.DeleteWorkspace(out_name, EnableLogging=_LOGGING_)
-                ms.DeleteWorkspace(out_mon, EnableLogging=_LOGGING_)
+                ms.DeleteWorkspace(out_name, EnableLogging=True)
+                ms.DeleteWorkspace(out_mon, EnableLogging=True)
 
         # Check to see if extra data needs to be loaded to normalise in data
         x_max = self._tof_max
@@ -562,12 +562,12 @@ class LoadVesuvio(LoadEmptyVesuvio):
                          OutputWorkspace=SUMMED_WS,
                          XMax=x_max,
                          EnableLogging=_LOGGING_)
-        ms.CropWorkspace(Inputworkspace= SUMMED_MON,
-                         OutputWorkspace=SUMMED_MON,
+        ms.CropWorkspace(Inputworkspace= SUMMED_WS + '_monitors',
+                         OutputWorkspace=SUMMED_WS + '_monitors',
                          XMax=self._mon_tof_max,
                          EnableLogging=_LOGGING_)
 
-        summed_data, summed_mon = mtd[SUMMED_WS], mtd[SUMMED_MON]
+        summed_data, summed_mon = mtd[SUMMED_WS], mtd[SUMMED_WS + '_monitors']
         self._load_diff_mode_parameters(summed_data)
         return summed_data, summed_mon
 
@@ -983,9 +983,8 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """
         if SUMMED_WS in mtd:
             ms.DeleteWorkspace(SUMMED_WS,EnableLogging=_LOGGING_)
-        if SUMMED_MON in mtd and not(self._load_monitors):
-            logger.warning("deleting summed monitor")
-            ms.DeleteWorkspace(SUMMED_MON,EnableLogging=_LOGGING_)
+        if SUMMED_WS + '_monitors' in mtd:
+            ms.DeleteWorkspace(SUMMED_WS + '_monitors',EnableLogging=_LOGGING_)
 
 #########################################################################################
 
