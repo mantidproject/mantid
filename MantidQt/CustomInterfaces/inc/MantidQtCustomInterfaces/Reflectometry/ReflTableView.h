@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_REFLTABLEVIEW_H
 
 #include "MantidKernel/System.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 #include "MantidQtMantidWidgets/HintStrategy.h"
 

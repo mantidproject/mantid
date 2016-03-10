@@ -53,13 +53,9 @@ public:
 
     ReflLegacyTransferStrategy strategy;
 
-    MockProgressBase progress;
-    EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
-
-    auto transferRuns = strategy.transferRuns(input, progress);
+    auto transferRuns = strategy.transferRuns(input);
     auto output = transferRuns.getTransferRuns();
     TS_ASSERT_EQUALS(output, expected);
-    TS_ASSERT(Mock::VerifyAndClear(&progress));
   }
 
   void testGroupedTransfer() {
@@ -89,14 +85,10 @@ public:
 
     ReflLegacyTransferStrategy strategy;
 
-    MockProgressBase progress;
-    EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
-
-    auto transferRuns = strategy.transferRuns(input, progress);
+    auto transferRuns = strategy.transferRuns(input);
     auto output = transferRuns.getTransferRuns();
 
     TS_ASSERT_EQUALS(output, expected);
-    TS_ASSERT(Mock::VerifyAndClear(&progress));
   }
 
   void testThetaExtraction() {
@@ -134,14 +126,10 @@ public:
 
     ReflLegacyTransferStrategy strategy;
 
-    MockProgressBase progress;
-    EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
-
-    auto transferRuns = strategy.transferRuns(input, progress);
+    auto transferRuns = strategy.transferRuns(input);
     auto output = transferRuns.getTransferRuns();
 
     TS_ASSERT_EQUALS(output, expected);
-    TS_ASSERT(Mock::VerifyAndClear(&progress));
   }
 
   void testComplexExtraction() {
@@ -198,14 +186,10 @@ public:
 
     ReflLegacyTransferStrategy strategy;
 
-    MockProgressBase progress;
-    EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
-
-    auto transferRuns = strategy.transferRuns(input, progress);
+    auto transferRuns = strategy.transferRuns(input);
     auto output = transferRuns.getTransferRuns();
 
     TS_ASSERT_EQUALS(output, expected);
-    TS_ASSERT(Mock::VerifyAndClear(&progress));
   }
 
   void test_clone() {

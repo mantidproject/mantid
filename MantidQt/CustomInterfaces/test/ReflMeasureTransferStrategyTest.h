@@ -60,15 +60,10 @@ public:
         .Times(Exactly(static_cast<int>(data.size())))
         .WillRepeatedly(Return(std::string()));
 
-    MockProgressBase progress;
-    // We expect a progress update on each transfer
-    EXPECT_CALL(progress, doReport(_))
-        .Times(Exactly(static_cast<int>(data.size())));
-
     ReflMeasureTransferStrategy strategy(std::move(mockCatInfo),
                                          std::move(mockMeasurementItemSource));
 
-    strategy.transferRuns(data, progress);
+    strategy.transferRuns(data);
 
     TS_ASSERT(Mock::VerifyAndClear(mockCatInfo_ptr));
     TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource_ptr));
@@ -105,17 +100,12 @@ public:
         .Times(Exactly(static_cast<int>(data.size())))
         .WillRepeatedly(Return(std::string()));
 
-    MockProgressBase progress;
-    // Expect a progress update
-    EXPECT_CALL(progress, doReport(_))
-        .Times(Exactly(static_cast<int>(data.size())));
-
     // Make the transfer stragegy
     ReflMeasureTransferStrategy strategy(std::move(mockCatInfo),
                                          std::move(mockMeasurementItemSource));
 
     // Do the transfer
-    auto transferResult = strategy.transferRuns(data, progress);
+    auto transferResult = strategy.transferRuns(data);
 
     auto successfulRuns = transferResult.getTransferRuns();
     // Check the transfer entries
@@ -169,17 +159,12 @@ public:
         .Times(Exactly(static_cast<int>(data.size())))
         .WillRepeatedly(Return(std::string()));
 
-    MockProgressBase progress;
-    // Expect a progress update
-    EXPECT_CALL(progress, doReport(_))
-        .Times(Exactly(static_cast<int>(data.size())));
-
     // Make the transfer stragegy
     ReflMeasureTransferStrategy strategy(std::move(mockCatInfo),
                                          std::move(mockMeasurementItemSource));
 
     // retreive transfer results
-    auto transferResult = strategy.transferRuns(data, progress);
+    auto transferResult = strategy.transferRuns(data);
     // get valid runs
     auto successfulRuns = transferResult.getTransferRuns();
     // get invalid runs
@@ -229,17 +214,12 @@ public:
         .Times(Exactly(static_cast<int>(data.size())))
         .WillRepeatedly(Return(std::string()));
 
-    MockProgressBase progress;
-    // Expect a progress update
-    EXPECT_CALL(progress, doReport(_))
-        .Times(Exactly(static_cast<int>(data.size())));
-
     // Make the transfer stragegy
     ReflMeasureTransferStrategy strategy(std::move(mockCatInfo),
                                          std::move(mockMeasurementItemSource));
 
     // Do the transfer
-    auto transferResult = strategy.transferRuns(data, progress);
+    auto transferResult = strategy.transferRuns(data);
     auto successfulRuns = transferResult.getTransferRuns();
     // Check the transfer entries
     TSM_ASSERT_EQUALS("Should have two rows", 2, successfulRuns.size());
@@ -295,17 +275,12 @@ public:
         .Times(Exactly(static_cast<int>(data.size())))
         .WillRepeatedly(Return(std::string()));
 
-    MockProgressBase progress;
-    // Expect a progress update
-    EXPECT_CALL(progress, doReport(_))
-        .Times(Exactly(static_cast<int>(data.size())));
-
     // Make the transfer stragegy
     ReflMeasureTransferStrategy strategy(std::move(mockCatInfo),
                                          std::move(mockMeasurementItemSource));
 
     // Do the transfer
-    auto transferResult = strategy.transferRuns(data, progress);
+    auto transferResult = strategy.transferRuns(data);
     auto successfulRuns = transferResult.getTransferRuns();
 
     // Check the transfer entries
@@ -347,14 +322,10 @@ public:
     EXPECT_CALL(*mockCatInfo, transformArchivePath(_))
         .Times(Exactly(static_cast<int>(data.size())));
 
-    MockProgressBase progress;
-    // Nothing obtained. No progress to report.
-    EXPECT_CALL(progress, doReport(_)).Times(Exactly(1));
-
     ReflMeasureTransferStrategy strategy(std::move(mockCatInfo),
                                          std::move(mockMeasurementItemSource));
 
-    auto transferRuns = strategy.transferRuns(data, progress);
+    auto transferRuns = strategy.transferRuns(data);
     auto result = transferRuns.getTransferRuns();
     TSM_ASSERT_EQUALS("Measurements where invalid. Results should be empty.", 0,
                       result.size());

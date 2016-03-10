@@ -63,6 +63,9 @@ public:
   ~MockTableView() override {}
 
   // Prompts
+  MOCK_METHOD3(askUserString,
+               std::string(const std::string &prompt, const std::string &title,
+                           const std::string &defaultValue));
   MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
@@ -79,17 +82,21 @@ public:
   MOCK_METHOD0(getEnableNotebook, bool());
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
   MOCK_METHOD1(setClipboard, void(const std::string &text));
+  MOCK_METHOD1(setOptionsHintStrategy,
+               void(MantidQt::MantidWidgets::HintStrategy *));
+  MOCK_METHOD1(setTableList, void(const std::set<std::string> &));
+  MOCK_METHOD2(setInstrumentList,
+               void(const std::vector<std::string> &, const std::string &));
 
   // Calls we don't care about
   void showTable(QReflTableModel_sptr) override{};
-  void
-  setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *) override{};
-  void setTableList(const std::set<std::string> &) override{};
-  void setInstrumentList(const std::vector<std::string> &,
-                         const std::string &) override{};
   void saveSettings(const std::map<std::string, QVariant> &) override{};
   void loadSettings(std::map<std::string, QVariant> &) override{};
   std::string getProcessInstrument() const override { return "FAKE"; }
+
+  boost::shared_ptr<IReflTablePresenter> getTablePresenter() const override {
+    return boost::shared_ptr<IReflTablePresenter>();
+  }
 };
 
 class MockProgressableView : public ProgressableView {

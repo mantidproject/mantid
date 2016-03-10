@@ -1,5 +1,5 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTERTEST_H
-#define MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTERTEST_H
+#ifndef MANTID_CUSTOMINTERFACES_REFLTABLEVIEWPRESENTERTEST_H
+#define MANTID_CUSTOMINTERFACES_REFLTABLEVIEWPRESENTERTEST_H
 
 #include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
@@ -10,7 +10,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTableViewPresenter.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "ReflMainViewMockObjects.h"
@@ -23,7 +23,7 @@ using namespace testing;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class ReflMainViewPresenterTest : public CxxTest::TestSuite {
+class ReflTableViewPresenterTest : public CxxTest::TestSuite {
 
 private:
   ITableWorkspace_sptr createWorkspace(const std::string &wsName) {
@@ -117,127 +117,121 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ReflMainViewPresenterTest *createSuite() {
-    return new ReflMainViewPresenterTest();
+  static ReflTableViewPresenterTest *createSuite() {
+    return new ReflTableViewPresenterTest();
   }
-  static void destroySuite(ReflMainViewPresenterTest *suite) { delete suite; }
+  static void destroySuite(ReflTableViewPresenterTest *suite) { delete suite; }
 
-  ReflMainViewPresenterTest() { FrameworkManager::Instance(); }
+  ReflTableViewPresenterTest() { FrameworkManager::Instance(); }
 
-  void test_constructor_sets_possible_transfer_methods() {
-    NiceMock<MockView> mockView;
+  void test_constructor_sets_instruments_tables_and_hints() {
     NiceMock<MockTableView> mockTableView;
     MockProgressableView mockProgress;
 
-    // Expect that the transfer methods get initialized on the view
-    EXPECT_CALL(mockView, setTransferMethods(_)).Times(Exactly(1));
-
+    // Expect that the instrument list is initialized on the table view
+    EXPECT_CALL(mockTableView, setInstrumentList(_, _)).Times(Exactly(1));
+    // Expect that the list of tables is populated
+    EXPECT_CALL(mockTableView, setTableList(_)).Times(Exactly(1));
+    // Expect that the autocompletion hints are populated
+    EXPECT_CALL(mockTableView, setOptionsHintStrategy(_)).Times(Exactly(1));
     // Constructor
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     // Verify expectations
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testSaveNew() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
-    presenter.notify(IReflPresenter::NewTableFlag);
+    presenter.notify(IReflTablePresenter::NewTableFlag);
 
-    EXPECT_CALL(mockView, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockTableView, askUserString(_, _, "Workspace"))
         .Times(1)
         .WillOnce(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::SaveFlag);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TestWorkspace"));
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testSaveExisting() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
-    EXPECT_CALL(mockView, askUserString(_, _, "Workspace")).Times(0);
-    presenter.notify(IReflPresenter::SaveFlag);
+    EXPECT_CALL(mockTableView, askUserString(_, _, "Workspace")).Times(0);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testSaveAs() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     // The user hits "save as" but cancels when choosing a name
-    EXPECT_CALL(mockView, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockTableView, askUserString(_, _, "Workspace"))
         .Times(1)
         .WillOnce(Return(""));
-    presenter.notify(IReflPresenter::SaveAsFlag);
+    presenter.notify(IReflTablePresenter::SaveAsFlag);
 
     // The user hits "save as" and and enters "Workspace" for a name
-    EXPECT_CALL(mockView, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockTableView, askUserString(_, _, "Workspace"))
         .Times(1)
         .WillOnce(Return("Workspace"));
-    presenter.notify(IReflPresenter::SaveAsFlag);
+    presenter.notify(IReflTablePresenter::SaveAsFlag);
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace"));
 
     AnalysisDataService::Instance().remove("TestWorkspace");
     AnalysisDataService::Instance().remove("Workspace");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testAppendRow() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     // We should not receive any errors
-    EXPECT_CALL(mockView, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockTableView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "append row" twice with no rows selected
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(2)
         .WillRepeatedly(Return(std::set<int>()));
-    presenter.notify(IReflPresenter::AppendRowFlag);
-    presenter.notify(IReflPresenter::AppendRowFlag);
+    presenter.notify(IReflTablePresenter::AppendRowFlag);
+    presenter.notify(IReflTablePresenter::AppendRowFlag);
 
     // The user hits "save"
-    presenter.notify(IReflPresenter::SaveFlag);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     // Check that the table has been modified correctly
     auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
@@ -255,37 +249,35 @@ public:
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testAppendRowSpecify() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     std::set<int> rowlist;
     rowlist.insert(1);
 
     // We should not receive any errors
-    EXPECT_CALL(mockView, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockTableView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "append row" twice, with the second row selected
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(2)
         .WillRepeatedly(Return(rowlist));
-    presenter.notify(IReflPresenter::AppendRowFlag);
-    presenter.notify(IReflPresenter::AppendRowFlag);
+    presenter.notify(IReflTablePresenter::AppendRowFlag);
+    presenter.notify(IReflTablePresenter::AppendRowFlag);
 
     // The user hits "save"
-    presenter.notify(IReflPresenter::SaveFlag);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     // Check that the table has been modified correctly
     auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
@@ -303,38 +295,36 @@ public:
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testAppendRowSpecifyPlural() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     std::set<int> rowlist;
     rowlist.insert(1);
     rowlist.insert(2);
 
     // We should not receive any errors
-    EXPECT_CALL(mockView, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockTableView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "append row" once, with the second, third, and fourth row
     // selected.
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(rowlist));
-    presenter.notify(IReflPresenter::AppendRowFlag);
+    presenter.notify(IReflTablePresenter::AppendRowFlag);
 
     // The user hits "save"
-    presenter.notify(IReflPresenter::SaveFlag);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     // Check that the table was modified correctly
     auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
@@ -350,34 +340,32 @@ public:
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testPrependRow() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     // We should not receive any errors
-    EXPECT_CALL(mockView, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockTableView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "prepend row" twice with no rows selected
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(2)
         .WillRepeatedly(Return(std::set<int>()));
-    presenter.notify(IReflPresenter::PrependRowFlag);
-    presenter.notify(IReflPresenter::PrependRowFlag);
+    presenter.notify(IReflTablePresenter::PrependRowFlag);
+    presenter.notify(IReflTablePresenter::PrependRowFlag);
 
     // The user hits "save"
-    presenter.notify(IReflPresenter::SaveFlag);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     // Check that the table has been modified correctly
     ITableWorkspace_sptr ws =
@@ -394,37 +382,35 @@ public:
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testPrependRowSpecify() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     std::set<int> rowlist;
     rowlist.insert(1);
 
     // We should not receive any errors
-    EXPECT_CALL(mockView, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockTableView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "prepend row" twice, with the second row selected
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(2)
         .WillRepeatedly(Return(rowlist));
-    presenter.notify(IReflPresenter::PrependRowFlag);
-    presenter.notify(IReflPresenter::PrependRowFlag);
+    presenter.notify(IReflTablePresenter::PrependRowFlag);
+    presenter.notify(IReflTablePresenter::PrependRowFlag);
 
     // The user hits "save"
-    presenter.notify(IReflPresenter::SaveFlag);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     // Check that the table has been modified correctly
     ITableWorkspace_sptr ws =
@@ -441,21 +427,19 @@ public:
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testPrependRowSpecifyPlural() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     std::set<int> rowlist;
     rowlist.insert(1);
@@ -463,17 +447,17 @@ public:
     rowlist.insert(3);
 
     // We should not receive any errors
-    EXPECT_CALL(mockView, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockTableView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "prepend row" once, with the second, third, and fourth row
     // selected.
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(rowlist));
-    presenter.notify(IReflPresenter::PrependRowFlag);
+    presenter.notify(IReflTablePresenter::PrependRowFlag);
 
     // The user hits "save"
-    presenter.notify(IReflPresenter::SaveFlag);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     // Check that the table was modified correctly
     ITableWorkspace_sptr ws =
@@ -489,33 +473,31 @@ public:
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testDeleteRowNone() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     // We should not receive any errors
-    EXPECT_CALL(mockView, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockTableView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "delete row" with no rows selected
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(std::set<int>()));
-    presenter.notify(IReflPresenter::DeleteRowFlag);
+    presenter.notify(IReflTablePresenter::DeleteRowFlag);
 
     // The user hits save
-    presenter.notify(IReflPresenter::SaveFlag);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     // Check that the table has not lost any rows
     auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
@@ -525,36 +507,34 @@ public:
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testDeleteRowSingle() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     std::set<int> rowlist;
     rowlist.insert(1);
 
     // We should not receive any errors
-    EXPECT_CALL(mockView, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockTableView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "delete row" with the second row selected
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(rowlist));
-    presenter.notify(IReflPresenter::DeleteRowFlag);
+    presenter.notify(IReflTablePresenter::DeleteRowFlag);
 
     // The user hits "save"
-    presenter.notify(IReflPresenter::SaveFlag);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
         "TestWorkspace");
@@ -565,21 +545,19 @@ public:
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testDeleteRowPlural() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     std::set<int> rowlist;
     rowlist.insert(0);
@@ -587,16 +565,16 @@ public:
     rowlist.insert(2);
 
     // We should not receive any errors
-    EXPECT_CALL(mockView, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockTableView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "delete row" with the first three rows selected
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(rowlist));
-    presenter.notify(IReflPresenter::DeleteRowFlag);
+    presenter.notify(IReflTablePresenter::DeleteRowFlag);
 
     // The user hits save
-    presenter.notify(IReflPresenter::SaveFlag);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     // Check the rows were deleted as expected
     auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
@@ -608,21 +586,19 @@ public:
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testProcess() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     std::set<int> rowlist;
     rowlist.insert(0);
@@ -632,7 +608,7 @@ public:
     createTOFWorkspace("TOF_12346", "12346");
 
     // We should not receive any errors
-    EXPECT_CALL(mockView, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockTableView, giveUserCritical(_, _)).Times(0);
 
     // The user hits the "process" button with the first two rows selected
     EXPECT_CALL(mockTableView, getSelectedRows())
@@ -642,7 +618,7 @@ public:
         .Times(1)
         .WillRepeatedly(Return(false));
     EXPECT_CALL(mockTableView, requestNotebookPath()).Times(0);
-    presenter.notify(IReflPresenter::ProcessFlag);
+    presenter.notify(IReflTablePresenter::ProcessFlag);
 
     // Check output workspaces were created as expected
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_12345"));
@@ -663,21 +639,19 @@ public:
     AnalysisDataService::Instance().remove("TOF_12346");
     AnalysisDataService::Instance().remove("IvsQ_12345_12346");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testProcessWithNotebook() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     std::set<int> rowlist;
     rowlist.insert(0);
@@ -687,7 +661,7 @@ public:
     createTOFWorkspace("TOF_12346", "12346");
 
     // We should not receive any errors
-    EXPECT_CALL(mockView, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockTableView, giveUserCritical(_, _)).Times(0);
 
     // The user hits the "process" button with the first two rows selected
     EXPECT_CALL(mockTableView, getSelectedRows())
@@ -697,7 +671,7 @@ public:
         .Times(1)
         .WillRepeatedly(Return(true));
     EXPECT_CALL(mockTableView, requestNotebookPath()).Times(1);
-    presenter.notify(IReflPresenter::ProcessFlag);
+    presenter.notify(IReflTablePresenter::ProcessFlag);
 
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
@@ -709,7 +683,6 @@ public:
     AnalysisDataService::Instance().remove("TOF_12346");
     AnalysisDataService::Instance().remove("IvsQ_12345_12346");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
@@ -737,27 +710,26 @@ public:
     createTOFWorkspace("dataA");
     createTOFWorkspace("dataB", "12346");
 
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     std::set<int> rowlist;
     rowlist.insert(0);
     rowlist.insert(1);
 
     // We should not receive any errors
-    EXPECT_CALL(mockView, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockTableView, giveUserCritical(_, _)).Times(0);
 
     // The user hits the "process" button with the first two rows selected
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(rowlist));
-    presenter.notify(IReflPresenter::ProcessFlag);
+    presenter.notify(IReflTablePresenter::ProcessFlag);
 
     // Check output workspaces were created as expected
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_dataA"));
@@ -776,7 +748,6 @@ public:
     AnalysisDataService::Instance().remove("IvsLam_12346");
     AnalysisDataService::Instance().remove("IvsQ_dataA_12346");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
@@ -796,10 +767,9 @@ public:
 
     AnalysisDataService::Instance().addOrReplace("TestWorkspace", ws);
 
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     // We should receive an error
     EXPECT_CALL(mockTableView, giveUserCritical(_, _)).Times(1);
@@ -807,19 +777,17 @@ public:
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testBadWorkspaceLength() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     // Because we to open twice, get an error twice
     EXPECT_CALL(mockTableView, giveUserCritical(_, _)).Times(2);
@@ -839,32 +807,30 @@ public:
     AnalysisDataService::Instance().addOrReplace("TestWorkspace", ws);
 
     // Try to open with too few columns
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     ws->addColumn("str", "OptionsA");
     ws->addColumn("str", "OptionsB");
     AnalysisDataService::Instance().addOrReplace("TestWorkspace", ws);
 
     // Try to open with too many columns
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testPromptSaveAfterAppendRow() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     // User hits "append row"
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(std::set<int>()));
-    presenter.notify(IReflPresenter::AppendRowFlag);
+    presenter.notify(IReflTablePresenter::AppendRowFlag);
 
     // The user will decide not to discard their changes
     EXPECT_CALL(mockTableView, askUserYesNo(_, _))
@@ -872,40 +838,38 @@ public:
         .WillOnce(Return(false));
 
     // Then hits "new table" without having saved
-    presenter.notify(IReflPresenter::NewTableFlag);
+    presenter.notify(IReflTablePresenter::NewTableFlag);
 
     // The user saves
-    EXPECT_CALL(mockView, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockTableView, askUserString(_, _, "Workspace"))
         .Times(1)
         .WillOnce(Return("Workspace"));
-    presenter.notify(IReflPresenter::SaveFlag);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     // The user tries to create a new table again, and does not get bothered
     EXPECT_CALL(mockTableView, askUserYesNo(_, _)).Times(0);
-    presenter.notify(IReflPresenter::NewTableFlag);
+    presenter.notify(IReflTablePresenter::NewTableFlag);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testPromptSaveAfterDeleteRow() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     // User hits "append row" a couple of times
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(2)
         .WillRepeatedly(Return(std::set<int>()));
-    presenter.notify(IReflPresenter::AppendRowFlag);
-    presenter.notify(IReflPresenter::AppendRowFlag);
+    presenter.notify(IReflTablePresenter::AppendRowFlag);
+    presenter.notify(IReflTablePresenter::AppendRowFlag);
 
     // The user saves
-    EXPECT_CALL(mockView, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockTableView, askUserString(_, _, "Workspace"))
         .Times(1)
         .WillOnce(Return("Workspace"));
-    presenter.notify(IReflPresenter::SaveFlag);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     //...then deletes the 2nd row
     std::set<int> rows;
@@ -913,7 +877,7 @@ public:
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(rows));
-    presenter.notify(IReflPresenter::DeleteRowFlag);
+    presenter.notify(IReflTablePresenter::DeleteRowFlag);
 
     // The user will decide not to discard their changes when asked
     EXPECT_CALL(mockTableView, askUserYesNo(_, _))
@@ -921,51 +885,47 @@ public:
         .WillOnce(Return(false));
 
     // Then hits "new table" without having saved
-    presenter.notify(IReflPresenter::NewTableFlag);
+    presenter.notify(IReflTablePresenter::NewTableFlag);
 
     // The user saves
-    presenter.notify(IReflPresenter::SaveFlag);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     // The user tries to create a new table again, and does not get bothered
     EXPECT_CALL(mockTableView, askUserYesNo(_, _)).Times(0);
-    presenter.notify(IReflPresenter::NewTableFlag);
+    presenter.notify(IReflTablePresenter::NewTableFlag);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testPromptSaveAndDiscard() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     // User hits "append row" a couple of times
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(2)
         .WillRepeatedly(Return(std::set<int>()));
-    presenter.notify(IReflPresenter::AppendRowFlag);
-    presenter.notify(IReflPresenter::AppendRowFlag);
+    presenter.notify(IReflTablePresenter::AppendRowFlag);
+    presenter.notify(IReflTablePresenter::AppendRowFlag);
 
     // Then hits "new table", and decides to discard
     EXPECT_CALL(mockTableView, askUserYesNo(_, _))
         .Times(1)
         .WillOnce(Return(true));
-    presenter.notify(IReflPresenter::NewTableFlag);
+    presenter.notify(IReflTablePresenter::NewTableFlag);
 
     // These next two times they don't get prompted - they have a new table
-    presenter.notify(IReflPresenter::NewTableFlag);
-    presenter.notify(IReflPresenter::NewTableFlag);
+    presenter.notify(IReflTablePresenter::NewTableFlag);
+    presenter.notify(IReflTablePresenter::NewTableFlag);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testPromptSaveOnOpen() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
 
@@ -973,14 +933,14 @@ public:
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(std::set<int>()));
-    presenter.notify(IReflPresenter::AppendRowFlag);
+    presenter.notify(IReflTablePresenter::AppendRowFlag);
 
     // and tries to open a workspace, but gets prompted and decides not to
     // discard
     EXPECT_CALL(mockTableView, askUserYesNo(_, _))
         .Times(1)
         .WillOnce(Return(false));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     // the user does it again, but discards
     EXPECT_CALL(mockTableView, askUserYesNo(_, _))
@@ -989,16 +949,15 @@ public:
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     // the user does it one more time, and is not prompted
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
     EXPECT_CALL(mockTableView, askUserYesNo(_, _)).Times(0);
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
@@ -1075,18 +1034,17 @@ public:
         << ""
         << "" << 1.0 << 5 << ""; // Row 9
 
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     // We should not receive any errors
-    EXPECT_CALL(mockView, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockTableView, giveUserCritical(_, _)).Times(0);
 
     std::set<int> selection;
     std::set<int> expected;
@@ -1099,7 +1057,7 @@ public:
         .Times(1)
         .WillRepeatedly(Return(selection));
     EXPECT_CALL(mockTableView, setSelection(ContainerEq(expected))).Times(1);
-    presenter.notify(IReflPresenter::ExpandSelectionFlag);
+    presenter.notify(IReflTablePresenter::ExpandSelectionFlag);
 
     // With 0,1 selected, we should finish with 0,1,2 selected
     selection.clear();
@@ -1115,7 +1073,7 @@ public:
         .Times(1)
         .WillRepeatedly(Return(selection));
     EXPECT_CALL(mockTableView, setSelection(ContainerEq(expected))).Times(1);
-    presenter.notify(IReflPresenter::ExpandSelectionFlag);
+    presenter.notify(IReflTablePresenter::ExpandSelectionFlag);
 
     // With 1,6 selected, we should finish with 1,2,6 selected
     selection.clear();
@@ -1131,7 +1089,7 @@ public:
         .Times(1)
         .WillRepeatedly(Return(selection));
     EXPECT_CALL(mockTableView, setSelection(ContainerEq(expected))).Times(1);
-    presenter.notify(IReflPresenter::ExpandSelectionFlag);
+    presenter.notify(IReflTablePresenter::ExpandSelectionFlag);
 
     // With 4,8 selected, we should finish with 3,4,5,7,8 selected
     selection.clear();
@@ -1149,7 +1107,7 @@ public:
         .Times(1)
         .WillRepeatedly(Return(selection));
     EXPECT_CALL(mockTableView, setSelection(ContainerEq(expected))).Times(1);
-    presenter.notify(IReflPresenter::ExpandSelectionFlag);
+    presenter.notify(IReflTablePresenter::ExpandSelectionFlag);
 
     // With nothing selected, we should finish with nothing selected
     selection.clear();
@@ -1159,42 +1117,40 @@ public:
         .Times(1)
         .WillRepeatedly(Return(selection));
     EXPECT_CALL(mockTableView, setSelection(ContainerEq(expected))).Times(1);
-    presenter.notify(IReflPresenter::ExpandSelectionFlag);
+    presenter.notify(IReflTablePresenter::ExpandSelectionFlag);
 
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testClearRows() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     std::set<int> rowlist;
     rowlist.insert(1);
     rowlist.insert(2);
 
     // We should not receive any errors
-    EXPECT_CALL(mockView, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockTableView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "clear selected" with the second and third rows selected
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(rowlist));
-    presenter.notify(IReflPresenter::ClearSelectedFlag);
+    presenter.notify(IReflTablePresenter::ClearSelectedFlag);
 
     // The user hits "save"
-    presenter.notify(IReflPresenter::SaveFlag);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
         "TestWorkspace");
@@ -1228,21 +1184,19 @@ public:
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testCopyRow() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     std::set<int> rowlist;
     rowlist.insert(1);
@@ -1254,23 +1208,21 @@ public:
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(rowlist));
-    presenter.notify(IReflPresenter::CopySelectedFlag);
+    presenter.notify(IReflTablePresenter::CopySelectedFlag);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testCopyRows() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     std::set<int> rowlist;
     rowlist.insert(0);
@@ -1288,23 +1240,21 @@ public:
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(rowlist));
-    presenter.notify(IReflPresenter::CopySelectedFlag);
+    presenter.notify(IReflTablePresenter::CopySelectedFlag);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testCutRow() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     std::set<int> rowlist;
     rowlist.insert(1);
@@ -1316,10 +1266,10 @@ public:
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(2)
         .WillRepeatedly(Return(rowlist));
-    presenter.notify(IReflPresenter::CutSelectedFlag);
+    presenter.notify(IReflTablePresenter::CutSelectedFlag);
 
     // The user hits "save"
-    presenter.notify(IReflPresenter::SaveFlag);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
         "TestWorkspace");
@@ -1329,21 +1279,19 @@ public:
     TS_ASSERT_EQUALS(ws->String(1, RunCol), "24681");
     TS_ASSERT_EQUALS(ws->String(2, RunCol), "24682");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testCutRows() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     std::set<int> rowlist;
     rowlist.insert(0);
@@ -1359,10 +1307,10 @@ public:
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(2)
         .WillRepeatedly(Return(rowlist));
-    presenter.notify(IReflPresenter::CutSelectedFlag);
+    presenter.notify(IReflTablePresenter::CutSelectedFlag);
 
     // The user hits "save"
-    presenter.notify(IReflPresenter::SaveFlag);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
         "TestWorkspace");
@@ -1370,21 +1318,19 @@ public:
     // Check the only unselected row is left behind
     TS_ASSERT_EQUALS(ws->String(0, RunCol), "24682");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testPasteRow() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     std::set<int> rowlist;
     rowlist.insert(1);
@@ -1398,10 +1344,10 @@ public:
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(rowlist));
-    presenter.notify(IReflPresenter::PasteSelectedFlag);
+    presenter.notify(IReflTablePresenter::PasteSelectedFlag);
 
     // The user hits "save"
-    presenter.notify(IReflPresenter::SaveFlag);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
         "TestWorkspace");
@@ -1422,21 +1368,19 @@ public:
     TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 6);
     TS_ASSERT_EQUALS(ws->String(1, OptionsCol), "abc");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testPasteNewRow() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     const std::string clipboard = "123\t0.5\t456\t1.2\t3.4\t3.14\t5\t6\tabc";
 
@@ -1447,10 +1391,10 @@ public:
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(std::set<int>()));
-    presenter.notify(IReflPresenter::PasteSelectedFlag);
+    presenter.notify(IReflTablePresenter::PasteSelectedFlag);
 
     // The user hits "save"
-    presenter.notify(IReflPresenter::SaveFlag);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
         "TestWorkspace");
@@ -1472,21 +1416,19 @@ public:
     TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 6);
     TS_ASSERT_EQUALS(ws->String(4, OptionsCol), "abc");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testPasteRows() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     std::set<int> rowlist;
     rowlist.insert(1);
@@ -1502,10 +1444,10 @@ public:
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(rowlist));
-    presenter.notify(IReflPresenter::PasteSelectedFlag);
+    presenter.notify(IReflTablePresenter::PasteSelectedFlag);
 
     // The user hits "save"
-    presenter.notify(IReflPresenter::SaveFlag);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
         "TestWorkspace");
@@ -1535,21 +1477,19 @@ public:
     TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 2);
     TS_ASSERT_EQUALS(ws->String(2, OptionsCol), "def");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testPasteNewRows() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     const std::string clipboard = "123\t0.5\t456\t1.2\t3.4\t3.14\t5\t6\tabc\n"
                                   "345\t2.7\t123\t2.1\t4.3\t2.17\t3\t2\tdef";
@@ -1561,10 +1501,10 @@ public:
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(std::set<int>()));
-    presenter.notify(IReflPresenter::PasteSelectedFlag);
+    presenter.notify(IReflTablePresenter::PasteSelectedFlag);
 
     // The user hits "save"
-    presenter.notify(IReflPresenter::SaveFlag);
+    presenter.notify(IReflTablePresenter::SaveFlag);
 
     auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
         "TestWorkspace");
@@ -1596,39 +1536,33 @@ public:
     TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 2);
     TS_ASSERT_EQUALS(ws->String(5, OptionsCol), "def");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testImportTable() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     NiceMock<MockProgressableView> mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
     EXPECT_CALL(mockTableView, showImportDialog());
-    presenter.notify(IReflPresenter::ImportTableFlag);
+    presenter.notify(IReflTablePresenter::ImportTableFlag);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testExportTable() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     MockProgressableView mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
-    EXPECT_CALL(mockView, showAlgorithmDialog("SaveReflTBL"));
-    presenter.notify(IReflPresenter::ExportTableFlag);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
+    EXPECT_CALL(mockTableView, showAlgorithmDialog("SaveReflTBL"));
+    presenter.notify(IReflTablePresenter::ExportTableFlag);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testPlotRowWarn() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     MockProgressableView mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     createTOFWorkspace("TOF_12345", "12345");
@@ -1637,7 +1571,7 @@ public:
         .WillRepeatedly(Return("TestWorkspace"));
 
     // We should be warned
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     std::set<int> rowlist;
     rowlist.insert(0);
@@ -1650,21 +1584,19 @@ public:
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(rowlist));
-    presenter.notify(IReflPresenter::PlotRowFlag);
+    presenter.notify(IReflTablePresenter::PlotRowFlag);
 
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
     AnalysisDataService::Instance().remove("TOF_12345");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 
   void testPlotGroupWarn() {
-    NiceMock<MockView> mockView;
     NiceMock<MockTableView> mockTableView;
     MockProgressableView mockProgress;
-    ReflMainViewPresenter presenter(&mockView, &mockTableView, &mockProgress);
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     createTOFWorkspace("TOF_12345", "12345");
@@ -1672,7 +1604,7 @@ public:
     EXPECT_CALL(mockTableView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(IReflPresenter::OpenTableFlag);
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
 
     std::set<int> rowlist;
     rowlist.insert(0);
@@ -1685,16 +1617,15 @@ public:
     EXPECT_CALL(mockTableView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(rowlist));
-    presenter.notify(IReflPresenter::PlotGroupFlag);
+    presenter.notify(IReflTablePresenter::PlotGroupFlag);
 
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
     AnalysisDataService::Instance().remove("TOF_12345");
     AnalysisDataService::Instance().remove("TOF_12346");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 };
 
-#endif /* MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTERTEST_H */
+#endif /* MANTID_CUSTOMINTERFACES_REFLTABLEVIEWPRESENTERTEST_H */
