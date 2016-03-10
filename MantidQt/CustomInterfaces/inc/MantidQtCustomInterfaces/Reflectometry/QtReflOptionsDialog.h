@@ -2,8 +2,8 @@
 #define MANTID_CUSTOMINTERFACES_QTREFLOPTIONSDIALOG_H
 
 #include "MantidKernel/System.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTableView.h"
 
 #include <QDialog>
 
@@ -41,7 +41,7 @@ namespace MantidQt
     {
     Q_OBJECT
     public:
-      QtReflOptionsDialog(ReflMainView* view, boost::shared_ptr<IReflPresenter> presenter);
+      QtReflOptionsDialog(ReflTableView* view, boost::shared_ptr<IReflTablePresenter> presenter);
       ~QtReflOptionsDialog() override;
 
     protected:
@@ -54,7 +54,7 @@ namespace MantidQt
       //the interface
       Ui::reflOptionsDialog ui;
       //the presenter
-      boost::shared_ptr<IReflPresenter> m_presenter;
+      boost::shared_ptr<IReflTablePresenter> m_presenter;
       //maps option names to widget names
       std::map<std::string,QString> m_bindings;
     };

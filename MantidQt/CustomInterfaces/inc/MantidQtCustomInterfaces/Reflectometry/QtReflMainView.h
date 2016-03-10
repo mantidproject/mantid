@@ -6,10 +6,11 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflTableView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTableView.h"
 #include "MantidQtMantidWidgets/SlitCalculator.h"
 #include "ui_ReflMainWidget.h"
 #include <QSignalMapper>
@@ -105,6 +106,7 @@ public:
   std::string getTransferMethod() const override;
 
   boost::shared_ptr<IReflPresenter> getPresenter() const override;
+  boost::shared_ptr<IReflTablePresenter> getTablePresenter() const override;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
 
@@ -116,6 +118,8 @@ private:
 
   // the presenter
   boost::shared_ptr<IReflPresenter> m_presenter;
+  // the table's presenter
+  boost::shared_ptr<IReflTablePresenter> m_tablePresenter;
   // the models
   QReflTableModel_sptr m_model;
   ReflSearchModel_sptr m_searchModel;

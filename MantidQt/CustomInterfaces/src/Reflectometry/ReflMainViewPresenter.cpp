@@ -11,12 +11,12 @@
 #include "MantidKernel/CatalogInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidKernel/Utils.h"
 #include "MantidQtCustomInterfaces/ParseKeyValueString.h"
-#include "MantidQtCustomInterfaces/Reflectometry/QtReflOptionsDialog.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflGenerateNotebook.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
@@ -64,186 +64,6 @@ ReflMainViewPresenter::ReflMainViewPresenter(
 ReflMainViewPresenter::~ReflMainViewPresenter() {}
 
 /**
-Calculates the minimum and maximum values for Q
-@param ws : The workspace to fetch the instrument values from
-@param theta : The value of two theta to use in calculations
-*/
-std::vector<double> ReflMainViewPresenter::calcQRange(Workspace_sptr ws,
-                                                      double theta) {
-  auto mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  auto wsg = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
-
-  // If we've got a workspace group, use the first workspace in it
-  if (!mws && wsg)
-    mws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(0));
-
-  if (!mws)
-    throw std::runtime_error("Could not convert " + ws->name() +
-                             " to a MatrixWorkspace.");
-
-  double lmin, lmax;
-  try {
-    const Instrument_const_sptr instrument = mws->getInstrument();
-    lmin = instrument->getNumberParameter("LambdaMin")[0];
-    lmax = instrument->getNumberParameter("LambdaMax")[0];
-  } catch (std::exception &) {
-    throw std::runtime_error("LambdaMin/LambdaMax instrument parameters are "
-                             "required to calculate qmin/qmax");
-  }
-
-  double qmin = 4 * M_PI / lmax * sin(theta * M_PI / 180.0);
-  double qmax = 4 * M_PI / lmin * sin(theta * M_PI / 180.0);
-
-  if (m_options["RoundQMin"].toBool())
-    qmin = Utils::roundToDP(qmin, m_options["RoundQMinPrecision"].toInt());
-
-  if (m_options["RoundQMax"].toBool())
-    qmax = Utils::roundToDP(qmax, m_options["RoundQMaxPrecision"].toInt());
-
-  std::vector<double> ret;
-  ret.push_back(qmin);
-  ret.push_back(qmax);
-  return ret;
-}
-
-/**
-Stitches the workspaces created by the given rows together.
-@param rows : the list of rows
-*/
-void ReflMainViewPresenter::stitchRows(std::set<int> rows) {
-  // If we can get away with doing nothing, do.
-  if (rows.size() < 2)
-    return;
-
-  // Properties for Stitch1DMany
-  std::vector<std::string> workspaceNames;
-  std::vector<std::string> runs;
-
-  std::vector<double> params;
-  std::vector<double> startOverlaps;
-  std::vector<double> endOverlaps;
-
-  // Go through each row and prepare the properties
-  for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
-    const std::string runStr =
-        m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_RUNS))
-            .toString()
-            .toStdString();
-    const double qmin =
-        m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_QMIN))
-            .toDouble();
-    const double qmax =
-        m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_QMAX))
-            .toDouble();
-
-    Workspace_sptr runWS = prepareRunWorkspace(runStr);
-    if (runWS) {
-      const std::string runNo = getRunNumber(runWS);
-      if (AnalysisDataService::Instance().doesExist("IvsQ_" + runNo)) {
-        runs.push_back(runNo);
-        workspaceNames.emplace_back("IvsQ_" + runNo);
-      }
-    }
-
-    startOverlaps.push_back(qmin);
-    endOverlaps.push_back(qmax);
-  }
-
-  double dqq =
-      m_model->data(m_model->index(*(rows.begin()), ReflTableSchema::COL_DQQ))
-          .toDouble();
-
-  // params are qmin, -dqq, qmax for the final output
-  params.push_back(
-      *std::min_element(startOverlaps.begin(), startOverlaps.end()));
-  params.push_back(-dqq);
-  params.push_back(*std::max_element(endOverlaps.begin(), endOverlaps.end()));
-
-  // startOverlaps and endOverlaps need to be slightly offset from each other
-  // See usage examples of Stitch1DMany to see why we discard first qmin and
-  // last qmax
-  startOverlaps.erase(startOverlaps.begin());
-  endOverlaps.pop_back();
-
-  std::string outputWSName = "IvsQ_" + boost::algorithm::join(runs, "_");
-
-  // If the previous stitch result is in the ADS already, we'll need to remove
-  // it.
-  // If it's a group, we'll get an error for trying to group into a used group
-  // name
-  if (AnalysisDataService::Instance().doesExist(outputWSName))
-    AnalysisDataService::Instance().remove(outputWSName);
-
-  IAlgorithm_sptr algStitch =
-      AlgorithmManager::Instance().create("Stitch1DMany");
-  algStitch->initialize();
-  algStitch->setProperty("InputWorkspaces", workspaceNames);
-  algStitch->setProperty("OutputWorkspace", outputWSName);
-  algStitch->setProperty("Params", params);
-  algStitch->setProperty("StartOverlaps", startOverlaps);
-  algStitch->setProperty("EndOverlaps", endOverlaps);
-
-  algStitch->execute();
-
-  if (!algStitch->isExecuted())
-    throw std::runtime_error("Failed to run Stitch1DMany on IvsQ workspaces.");
-}
-
-/**
-Create a transmission workspace
-@param transString : the numbers of the transmission runs to use
-*/
-Workspace_sptr
-ReflMainViewPresenter::makeTransWS(const std::string &transString) {
-  const size_t maxTransWS = 2;
-
-  std::vector<std::string> transVec;
-  std::vector<Workspace_sptr> transWSVec;
-
-  // Take the first two run numbers
-  boost::split(transVec, transString, boost::is_any_of(","));
-  if (transVec.size() > maxTransWS)
-    transVec.resize(maxTransWS);
-
-  if (transVec.size() == 0)
-    throw std::runtime_error("Failed to parse the transmission run list.");
-
-  for (auto it = transVec.begin(); it != transVec.end(); ++it)
-    transWSVec.push_back(loadRun(*it, m_tableView->getProcessInstrument()));
-
-  // If the transmission workspace is already in the ADS, re-use it
-  std::string lastName = "TRANS_" + boost::algorithm::join(transVec, "_");
-  if (AnalysisDataService::Instance().doesExist(lastName))
-    return AnalysisDataService::Instance().retrieveWS<Workspace>(lastName);
-
-  // We have the runs, so we can create a TransWS
-  IAlgorithm_sptr algCreateTrans =
-      AlgorithmManager::Instance().create("CreateTransmissionWorkspaceAuto");
-  algCreateTrans->initialize();
-  algCreateTrans->setProperty("FirstTransmissionRun", transWSVec[0]->name());
-  if (transWSVec.size() > 1)
-    algCreateTrans->setProperty("SecondTransmissionRun", transWSVec[1]->name());
-
-  std::string wsName = "TRANS_" + getRunNumber(transWSVec[0]);
-  if (transWSVec.size() > 1)
-    wsName += "_" + getRunNumber(transWSVec[1]);
-
-  algCreateTrans->setProperty("OutputWorkspace", wsName);
-
-  if (!algCreateTrans->isInitialized())
-    throw std::runtime_error(
-        "Could not initialize CreateTransmissionWorkspaceAuto");
-
-  algCreateTrans->execute();
-
-  if (!algCreateTrans->isExecuted())
-    throw std::runtime_error(
-        "CreateTransmissionWorkspaceAuto failed to execute");
-
-  return AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
-}
-
-/**
 Used by the view to tell the presenter something has changed
 */
 void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
@@ -256,9 +76,6 @@ void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
     IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
     populateSearch(searchAlg);
   } break;
-  case IReflPresenter::TransferFlag:
-    transfer();
-    break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
@@ -315,8 +132,11 @@ void ReflMainViewPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   }
 }
 
-/** Transfers the selected runs in the search results to the processing table */
-void ReflMainViewPresenter::transfer() {
+/** Transfers the selected runs in the search results to the processing table
+* @return : The runs to transfer as a vector of maps
+*/
+std::vector<std::map<std::string, std::string>>
+ReflMainViewPresenter::getRunsToTransfer() {
   // Build the input for the transfer strategy
   SearchResultMap runs;
   auto selectedRows = m_view->getSelectedSearchRows();
@@ -339,11 +159,7 @@ void ReflMainViewPresenter::transfer() {
     runs[run] = searchResult;
   }
 
-  ReflProgress progress(0, static_cast<double>(selectedRows.size()),
-                        static_cast<int64_t>(selectedRows.size()),
-                        this->m_progressView);
-
-  TransferResults results = getTransferStrategy()->transferRuns(runs, progress);
+  TransferResults results = getTransferStrategy()->transferRuns(runs);
 
   auto invalidRuns =
       results.getErrorRuns(); // grab our invalid runs from the transfer
@@ -379,43 +195,7 @@ void ReflMainViewPresenter::transfer() {
     }
   }
 
-  auto newRows = results.getTransferRuns();
-
-  std::map<std::string, int> groups;
-  // Loop over the rows (vector elements)
-  for (auto rowsIt = newRows.begin(); rowsIt != newRows.end(); ++rowsIt) {
-    auto &row = *rowsIt;
-
-    if (groups.count(row[ReflTableSchema::GROUP]) == 0)
-      groups[row[ReflTableSchema::GROUP]] = getUnusedGroup();
-
-    // Overwrite the first blank row we find, otherwise, append a new row to the
-    // end.
-    int rowIndex = getBlankRow();
-    if (rowIndex == -1) {
-      rowIndex = m_model->rowCount();
-      insertRow(rowIndex);
-    }
-
-    /* Set the scale to 1.0 for new rows. If there's a columnHeading specified
-    otherwise,
-    it will be overwritten below.
-    */
-    m_model->setData(m_model->index(rowIndex, ReflTableSchema::COL_SCALE), 1.0);
-    auto colIndexLookup = ReflTableSchema::makeColumnNameMap();
-
-    // Loop over the map (each row with column heading keys to cell values)
-    for (auto rowIt = row.begin(); rowIt != row.end(); ++rowIt) {
-      const std::string columnHeading = rowIt->first;
-      const std::string cellEntry = rowIt->second;
-      m_model->setData(m_model->index(rowIndex, colIndexLookup[columnHeading]),
-                       QString::fromStdString(cellEntry));
-    }
-
-    // Special case grouping. Group cell entry is string it seems!
-    m_model->setData(m_model->index(rowIndex, ReflTableSchema::COL_GROUP),
-                     groups[row[ReflTableSchema::GROUP]]);
-  }
+  return results.getTransferRuns();
 }
 
 /**

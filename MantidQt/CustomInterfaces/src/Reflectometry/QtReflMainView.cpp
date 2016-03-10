@@ -6,6 +6,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTableViewPresenter.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 #include <qinputdialog.h>
 #include <qmessagebox.h>
@@ -58,9 +59,10 @@ void QtReflMainView::initLayout() {
   connect(ui.tableSearchResults,
           SIGNAL(customContextMenuRequested(const QPoint &)), this,
           SLOT(showSearchContextMenu(const QPoint &)));
-  // Finally, create a presenter to do the thinking for us
-  m_presenter = boost::make_shared<ReflMainViewPresenter>(
-      this /*main view*/, this /*table view*/,
+  // Finally, create the presenters to do the thinking for us
+  m_presenter = boost::make_shared<ReflMainViewPresenter>(this /*main view*/);
+  m_tablePresenter = boost::make_shared<ReflTableViewPresenter>(
+      this /*table view*/,
       this /*currently this concrete view is also responsibile for prog reporting*/);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 }
@@ -72,7 +74,7 @@ presenter
 */
 void QtReflMainView::setModel(QString name) {
   m_toOpen = name.toStdString();
-  m_presenter->notify(IReflPresenter::OpenTableFlag);
+  m_tablePresenter->notify(IReflTablePresenter::OpenTableFlag);
 }
 
 /**
@@ -146,49 +148,49 @@ void QtReflMainView::icatSearchComplete() {
 This slot notifies the presenter that the "save" button has been pressed
 */
 void QtReflMainView::on_actionSaveTable_triggered() {
-  m_presenter->notify(IReflPresenter::SaveFlag);
+  m_tablePresenter->notify(IReflTablePresenter::SaveFlag);
 }
 
 /**
 This slot notifies the presenter that the "save as" button has been pressed
 */
 void QtReflMainView::on_actionSaveTableAs_triggered() {
-  m_presenter->notify(IReflPresenter::SaveAsFlag);
+  m_tablePresenter->notify(IReflTablePresenter::SaveAsFlag);
 }
 
 /**
 This slot notifies the presenter that the "append row" button has been pressed
 */
 void QtReflMainView::on_actionAppendRow_triggered() {
-  m_presenter->notify(IReflPresenter::AppendRowFlag);
+  m_tablePresenter->notify(IReflTablePresenter::AppendRowFlag);
 }
 
 /**
 This slot notifies the presenter that the "prepend row" button has been pressed
 */
 void QtReflMainView::on_actionPrependRow_triggered() {
-  m_presenter->notify(IReflPresenter::PrependRowFlag);
+  m_tablePresenter->notify(IReflTablePresenter::PrependRowFlag);
 }
 
 /**
 This slot notifies the presenter that the "delete" button has been pressed
 */
 void QtReflMainView::on_actionDeleteRow_triggered() {
-  m_presenter->notify(IReflPresenter::DeleteRowFlag);
+  m_tablePresenter->notify(IReflTablePresenter::DeleteRowFlag);
 }
 
 /**
 This slot notifies the presenter that the "process" button has been pressed
 */
 void QtReflMainView::on_actionProcess_triggered() {
-  m_presenter->notify(IReflPresenter::ProcessFlag);
+  m_tablePresenter->notify(IReflTablePresenter::ProcessFlag);
 }
 
 /**
 This slot notifies the presenter that the "group rows" button has been pressed
 */
 void QtReflMainView::on_actionGroupRows_triggered() {
-  m_presenter->notify(IReflPresenter::GroupRowsFlag);
+  m_tablePresenter->notify(IReflTablePresenter::GroupRowsFlag);
 }
 
 /**
@@ -196,7 +198,7 @@ This slot notifies the presenter that the "clear selected" button has been
 pressed
 */
 void QtReflMainView::on_actionClearSelected_triggered() {
-  m_presenter->notify(IReflPresenter::ClearSelectedFlag);
+  m_tablePresenter->notify(IReflTablePresenter::ClearSelectedFlag);
 }
 
 /**
@@ -204,7 +206,7 @@ This slot notifies the presenter that the "copy selection" button has been
 pressed
 */
 void QtReflMainView::on_actionCopySelected_triggered() {
-  m_presenter->notify(IReflPresenter::CopySelectedFlag);
+  m_tablePresenter->notify(IReflTablePresenter::CopySelectedFlag);
 }
 
 /**
@@ -212,7 +214,7 @@ This slot notifies the presenter that the "cut selection" button has been
 pressed
 */
 void QtReflMainView::on_actionCutSelected_triggered() {
-  m_presenter->notify(IReflPresenter::CutSelectedFlag);
+  m_tablePresenter->notify(IReflTablePresenter::CutSelectedFlag);
 }
 
 /**
@@ -220,14 +222,14 @@ This slot notifies the presenter that the "paste selection" button has been
 pressed
 */
 void QtReflMainView::on_actionPasteSelected_triggered() {
-  m_presenter->notify(IReflPresenter::PasteSelectedFlag);
+  m_tablePresenter->notify(IReflTablePresenter::PasteSelectedFlag);
 }
 
 /**
 This slot notifies the presenter that the "new table" button has been pressed
 */
 void QtReflMainView::on_actionNewTable_triggered() {
-  m_presenter->notify(IReflPresenter::NewTableFlag);
+  m_tablePresenter->notify(IReflTablePresenter::NewTableFlag);
 }
 
 /**
@@ -235,14 +237,14 @@ This slot notifies the presenter that the "expand selection" button has been
 pressed
 */
 void QtReflMainView::on_actionExpandSelection_triggered() {
-  m_presenter->notify(IReflPresenter::ExpandSelectionFlag);
+  m_tablePresenter->notify(IReflTablePresenter::ExpandSelectionFlag);
 }
 
 /**
 This slot notifies the presenter that the "options..." button has been pressed
 */
 void QtReflMainView::on_actionOptionsDialog_triggered() {
-  m_presenter->notify(IReflPresenter::OptionsDialogFlag);
+  m_tablePresenter->notify(IReflTablePresenter::OptionsDialogFlag);
 }
 
 /**
@@ -255,24 +257,27 @@ void QtReflMainView::on_actionSearch_triggered() {
 }
 
 /**
-This slot notifies the presenter that the "transfer" button has been pressed
+This slot requests the list of runs to transfer to ReflMainViewPresenter
+Then updates ReflTableViewPresenter
 */
 void QtReflMainView::on_actionTransfer_triggered() {
-  m_presenter->notify(IReflPresenter::TransferFlag);
+  // m_presenter->notify(IReflPresenter::TransferFlag);
+  auto runs = m_presenter->getRunsToTransfer();
+  m_tablePresenter->transfer(runs);
 }
 
 /**
 This slot notifies the presenter that the "export table" button has been pressed
 */
 void QtReflMainView::on_actionExportTable_triggered() {
-  m_presenter->notify(IReflPresenter::ExportTableFlag);
+  m_tablePresenter->notify(IReflTablePresenter::ExportTableFlag);
 }
 
 /**
 This slot notifies the presenter that the "import table" button has been pressed
 */
 void QtReflMainView::on_actionImportTable_triggered() {
-  m_presenter->notify(IReflPresenter::ImportTableFlag);
+  m_tablePresenter->notify(IReflTablePresenter::ImportTableFlag);
 }
 
 /** This slot is used to syncrhonise the two instrument selection widgets */
@@ -306,7 +311,7 @@ This slot notifies the presenter that the "plot selected rows" button has been
 pressed
 */
 void QtReflMainView::on_actionPlotRow_triggered() {
-  m_presenter->notify(IReflPresenter::PlotRowFlag);
+  m_tablePresenter->notify(IReflTablePresenter::PlotRowFlag);
 }
 
 /**
@@ -314,7 +319,7 @@ This slot notifies the presenter that the "plot selected groups" button has been
 pressed
 */
 void QtReflMainView::on_actionPlotGroup_triggered() {
-  m_presenter->notify(IReflPresenter::PlotGroupFlag);
+  m_tablePresenter->notify(IReflTablePresenter::PlotGroupFlag);
 }
 
 /**
@@ -334,7 +339,7 @@ void QtReflMainView::tableUpdated(const QModelIndex &topLeft,
                                   const QModelIndex &bottomRight) {
   Q_UNUSED(topLeft);
   Q_UNUSED(bottomRight);
-  m_presenter->notify(IReflPresenter::TableUpdatedFlag);
+  m_tablePresenter->notify(IReflTablePresenter::TableUpdatedFlag);
 }
 
 /**
@@ -477,7 +482,7 @@ void QtReflMainView::showImportDialog() {
   // notifying the presenter that a new table should be opened
   // The presenter will ask about any unsaved changes etc
   // before opening the new table
-  m_presenter->notify(ReflMainViewPresenter::OpenTableFlag);
+  m_tablePresenter->notify(IReflTablePresenter::OpenTableFlag);
 }
 
 /**
@@ -690,6 +695,15 @@ Get a pointer to the presenter that's currently controlling this view.
 */
 boost::shared_ptr<IReflPresenter> QtReflMainView::getPresenter() const {
   return m_presenter;
+}
+
+/**
+Get a pointer to the presenter that's currently controlling this view.
+@returns A pointer to the presenter
+*/
+boost::shared_ptr<IReflTablePresenter>
+QtReflMainView::getTablePresenter() const {
+  return m_tablePresenter;
 }
 
 boost::shared_ptr<MantidQt::API::AlgorithmRunner>

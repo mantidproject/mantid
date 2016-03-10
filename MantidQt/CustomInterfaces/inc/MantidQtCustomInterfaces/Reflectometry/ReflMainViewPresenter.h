@@ -52,6 +52,7 @@ public:
                             boost::shared_ptr<IReflSearcher>());
   ~ReflMainViewPresenter() override;
   void notify(IReflPresenter::Flag flag) override;
+  std::vector<std::map<std::string, std::string>> getRunsToTransfer() override;
 
 protected:
   // the search model
@@ -60,16 +61,9 @@ protected:
   ReflMainView *m_view;
   // the search implementation
   boost::shared_ptr<IReflSearcher> m_searcher;
-  // make a transmission workspace
-  Mantid::API::Workspace_sptr makeTransWS(const std::string &transString);
-  // calculates qmin and qmax
-  std::vector<double> calcQRange(Mantid::API::Workspace_sptr ws, double theta);
-  // Stitch some rows
-  void stitchRows(std::set<int> rows);
   // searching
   void search();
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
-  void transfer();
 
 private:
   static const std::string LegacyTransferMethod;

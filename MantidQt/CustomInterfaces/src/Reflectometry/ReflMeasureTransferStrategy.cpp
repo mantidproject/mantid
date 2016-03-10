@@ -41,7 +41,7 @@ ReflMeasureTransferStrategy::~ReflMeasureTransferStrategy() {}
 
 TransferResults
 MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
-    SearchResultMap &searchResults, Mantid::Kernel::ProgressBase &progress) {
+    SearchResultMap &searchResults) {
 
   typedef std::vector<MeasurementItem> VecSameMeasurement;
   typedef std::map<MeasurementItem::IDType, VecSameMeasurement>
@@ -86,8 +86,6 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
       results.addErrorRow(metaData.run(), metaData.whyUnuseable());
     }
 
-    // Obtaining metadata could take time.
-    progress.report();
   }
 
   int nextGroupId = 0;

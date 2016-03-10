@@ -52,6 +52,8 @@ public:
   void notify(IReflTablePresenter::Flag flag) override;
   const std::map<std::string, QVariant> &options() const override;
   void setOptions(const std::map<std::string, QVariant> &options) override;
+  void transfer(
+      const std::vector<std::map<std::string, std::string>> &runs) override;
 
 protected:
   // the workspace the model is currently representing
@@ -68,6 +70,12 @@ protected:
   bool m_tableDirty;
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
+  // make a transmission workspace
+  Mantid::API::Workspace_sptr makeTransWS(const std::string &transString);
+  // calculates qmin and qmax
+  std::vector<double> calcQRange(Mantid::API::Workspace_sptr ws, double theta);
+  // Stitch some rows
+  void stitchRows(std::set<int> rows);
   // process selected rows
   void process();
   // process groups of rows
@@ -91,8 +99,6 @@ protected:
   void validateRow(int rowNo) const;
   // Autofill a row with sensible values
   void autofillRow(int rowNo);
-  // get the number of rows in a group
-  size_t numRowsInGroup(int groupId) const;
   // insert a row in the model before the given index
   void insertRow(int index);
   // add row(s) to the model

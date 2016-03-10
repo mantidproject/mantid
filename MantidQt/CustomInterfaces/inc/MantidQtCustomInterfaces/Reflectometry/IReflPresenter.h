@@ -35,14 +35,12 @@ class IReflPresenter {
 public:
   virtual ~IReflPresenter(){};
 
-  enum Flag {
-    SearchFlag,
-    ICATSearchCompleteFlag,
-    TransferFlag,
-  };
+  enum Flag { SearchFlag, ICATSearchCompleteFlag };
 
   // Tell the presenter something happened
   virtual void notify(IReflPresenter::Flag flag) = 0;
+  virtual std::vector<std::map<std::string, std::string>>
+  getRunsToTransfer() = 0;
 };
 }
 }

@@ -61,16 +61,13 @@ public:
 
   /**
    * @param searchResults : A map where the keys are the runs and the values
-   * the
-   * descriptions, location etc.
-   * @param progress : Progress object to notify.
+   * the descriptions, location etc.
    * @returns A vector of maps where each map represents a row,
    * with Keys matching Column headings and Values matching the row entries
    * for those columns
    */
   virtual TransferResults
-  transferRuns(SearchResultMap &searchResults,
-               Mantid::Kernel::ProgressBase &progress) = 0;
+  transferRuns(SearchResultMap &searchResults) = 0;
 
   std::unique_ptr<ReflTransferStrategy> clone() const {
     return std::unique_ptr<ReflTransferStrategy>(doClone());

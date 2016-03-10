@@ -11,7 +11,7 @@ namespace MantidQt
   {
   TransferResults
   ReflLegacyTransferStrategy::transferRuns(
-      SearchResultMap &searchResults, Mantid::Kernel::ProgressBase &progress) {
+      SearchResultMap &searchResults) {
       /*
        * If the descriptions are the same except for theta: same group, different rows.
        * If the descriptions are the same including theta: same row with runs separated by '+'
@@ -62,7 +62,6 @@ namespace MantidQt
         //Assign this description to the group it belongs to
         groupsByDesc[desc] = groupsByDesc[cleanDesc];
 
-        progress.report();
       }
 
       //All the data we need is now properly organised, so we can quickly throw out the rows needed

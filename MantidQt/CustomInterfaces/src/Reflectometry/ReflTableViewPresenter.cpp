@@ -66,7 +66,6 @@ public:
   void clear() { m_progressableView->clearProgress(); }
   ~ReflProgress() {}
 };
-
 void validateModel(ITableWorkspace_sptr model) {
   if (!model)
     throw std::runtime_error("Null pointer");
@@ -330,6 +329,89 @@ void ReflTableViewPresenter::saveNotebook(std::map<int, std::set<int>> groups,
 }
 
 /**
+Stitches the workspaces created by the given rows together.
+@param rows : the list of rows
+*/
+void ReflTableViewPresenter::stitchRows(std::set<int> rows) {
+  // If we can get away with doing nothing, do.
+  if (rows.size() < 2)
+    return;
+
+  // Properties for Stitch1DMany
+  std::vector<std::string> workspaceNames;
+  std::vector<std::string> runs;
+
+  std::vector<double> params;
+  std::vector<double> startOverlaps;
+  std::vector<double> endOverlaps;
+
+  // Go through each row and prepare the properties
+  for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
+    const std::string runStr =
+        m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_RUNS))
+            .toString()
+            .toStdString();
+    const double qmin =
+        m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_QMIN))
+            .toDouble();
+    const double qmax =
+        m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_QMAX))
+            .toDouble();
+
+    Workspace_sptr runWS = prepareRunWorkspace(runStr);
+    if (runWS) {
+      const std::string runNo = getRunNumber(runWS);
+      if (AnalysisDataService::Instance().doesExist("IvsQ_" + runNo)) {
+        runs.push_back(runNo);
+        workspaceNames.emplace_back("IvsQ_" + runNo);
+      }
+    }
+
+    startOverlaps.push_back(qmin);
+    endOverlaps.push_back(qmax);
+  }
+
+  double dqq =
+      m_model->data(m_model->index(*(rows.begin()), ReflTableSchema::COL_DQQ))
+          .toDouble();
+
+  // params are qmin, -dqq, qmax for the final output
+  params.push_back(
+      *std::min_element(startOverlaps.begin(), startOverlaps.end()));
+  params.push_back(-dqq);
+  params.push_back(*std::max_element(endOverlaps.begin(), endOverlaps.end()));
+
+  // startOverlaps and endOverlaps need to be slightly offset from each other
+  // See usage examples of Stitch1DMany to see why we discard first qmin and
+  // last qmax
+  startOverlaps.erase(startOverlaps.begin());
+  endOverlaps.pop_back();
+
+  std::string outputWSName = "IvsQ_" + boost::algorithm::join(runs, "_");
+
+  // If the previous stitch result is in the ADS already, we'll need to remove
+  // it.
+  // If it's a group, we'll get an error for trying to group into a used group
+  // name
+  if (AnalysisDataService::Instance().doesExist(outputWSName))
+    AnalysisDataService::Instance().remove(outputWSName);
+
+  IAlgorithm_sptr algStitch =
+      AlgorithmManager::Instance().create("Stitch1DMany");
+  algStitch->initialize();
+  algStitch->setProperty("InputWorkspaces", workspaceNames);
+  algStitch->setProperty("OutputWorkspace", outputWSName);
+  algStitch->setProperty("Params", params);
+  algStitch->setProperty("StartOverlaps", startOverlaps);
+  algStitch->setProperty("EndOverlaps", endOverlaps);
+
+  algStitch->execute();
+
+  if (!algStitch->isExecuted())
+    throw std::runtime_error("Failed to run Stitch1DMany on IvsQ workspaces.");
+}
+
+/**
 Process stitch groups
 @param rows : rows in the model
 @param groups : groups of rows to stitch
@@ -356,7 +438,7 @@ bool ReflTableViewPresenter::processGroups(std::map<int, std::set<int>> groups,
             Mantid::Kernel::Strings::toString<int>(*rIt + 1);
         const std::string message =
             "Error encountered while processing row " + rowNo + ":\n";
-        m_view->giveUserCritical(message + ex.what(), "Error");
+        m_tableView->giveUserCritical(message + ex.what(), "Error");
         progressReporter.clear();
         return false;
       }
@@ -370,7 +452,7 @@ bool ReflTableViewPresenter::processGroups(std::map<int, std::set<int>> groups,
           Mantid::Kernel::Strings::toString<int>(gIt->first);
       const std::string message =
           "Error encountered while stitching group " + groupNo + ":\n";
-      m_view->giveUserCritical(message + ex.what(), "Error");
+      m_tableView->giveUserCritical(message + ex.what(), "Error");
       progressReporter.clear();
       return false;
     }
@@ -395,7 +477,7 @@ bool ReflTableViewPresenter::rowsValid(std::set<int> rows) {
         continue;
 
       const std::string rowNo = Mantid::Kernel::Strings::toString<int>(*it + 1);
-      m_view->giveUserCritical(
+      m_tableView->giveUserCritical(
           "Error found in row " + rowNo + ":\n" + ex.what(), "Error");
       return false;
     }
@@ -657,6 +739,103 @@ ReflTableViewPresenter::loadRun(const std::string &run,
     throw std::runtime_error("Could not open " + filename);
 
   return AnalysisDataService::Instance().retrieveWS<Workspace>("TOF_" + run);
+}
+
+/**
+Calculates the minimum and maximum values for Q
+@param ws : The workspace to fetch the instrument values from
+@param theta : The value of two theta to use in calculations
+*/
+std::vector<double> ReflTableViewPresenter::calcQRange(Workspace_sptr ws,
+                                                       double theta) {
+  auto mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  auto wsg = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+
+  // If we've got a workspace group, use the first workspace in it
+  if (!mws && wsg)
+    mws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(0));
+
+  if (!mws)
+    throw std::runtime_error("Could not convert " + ws->name() +
+                             " to a MatrixWorkspace.");
+
+  double lmin, lmax;
+  try {
+    const Instrument_const_sptr instrument = mws->getInstrument();
+    lmin = instrument->getNumberParameter("LambdaMin")[0];
+    lmax = instrument->getNumberParameter("LambdaMax")[0];
+  } catch (std::exception &) {
+    throw std::runtime_error("LambdaMin/LambdaMax instrument parameters are "
+                             "required to calculate qmin/qmax");
+  }
+
+  double qmin = 4 * M_PI / lmax * sin(theta * M_PI / 180.0);
+  double qmax = 4 * M_PI / lmin * sin(theta * M_PI / 180.0);
+
+  if (m_options["RoundQMin"].toBool())
+    qmin = Utils::roundToDP(qmin, m_options["RoundQMinPrecision"].toInt());
+
+  if (m_options["RoundQMax"].toBool())
+    qmax = Utils::roundToDP(qmax, m_options["RoundQMaxPrecision"].toInt());
+
+  std::vector<double> ret;
+  ret.push_back(qmin);
+  ret.push_back(qmax);
+  return ret;
+}
+
+/**
+Create a transmission workspace
+@param transString : the numbers of the transmission runs to use
+*/
+Workspace_sptr
+ReflTableViewPresenter::makeTransWS(const std::string &transString) {
+  const size_t maxTransWS = 2;
+
+  std::vector<std::string> transVec;
+  std::vector<Workspace_sptr> transWSVec;
+
+  // Take the first two run numbers
+  boost::split(transVec, transString, boost::is_any_of(","));
+  if (transVec.size() > maxTransWS)
+    transVec.resize(maxTransWS);
+
+  if (transVec.size() == 0)
+    throw std::runtime_error("Failed to parse the transmission run list.");
+
+  for (auto it = transVec.begin(); it != transVec.end(); ++it)
+    transWSVec.push_back(loadRun(*it, m_tableView->getProcessInstrument()));
+
+  // If the transmission workspace is already in the ADS, re-use it
+  std::string lastName = "TRANS_" + boost::algorithm::join(transVec, "_");
+  if (AnalysisDataService::Instance().doesExist(lastName))
+    return AnalysisDataService::Instance().retrieveWS<Workspace>(lastName);
+
+  // We have the runs, so we can create a TransWS
+  IAlgorithm_sptr algCreateTrans =
+      AlgorithmManager::Instance().create("CreateTransmissionWorkspaceAuto");
+  algCreateTrans->initialize();
+  algCreateTrans->setProperty("FirstTransmissionRun", transWSVec[0]->name());
+  if (transWSVec.size() > 1)
+    algCreateTrans->setProperty("SecondTransmissionRun", transWSVec[1]->name());
+
+  std::string wsName = "TRANS_" + getRunNumber(transWSVec[0]);
+  if (transWSVec.size() > 1)
+    wsName += "_" + getRunNumber(transWSVec[1]);
+
+  algCreateTrans->setProperty("OutputWorkspace", wsName);
+
+  if (!algCreateTrans->isInitialized())
+    throw std::runtime_error(
+        "Could not initialize CreateTransmissionWorkspaceAuto");
+
+  algCreateTrans->execute();
+
+  if (!algCreateTrans->isExecuted())
+    throw std::runtime_error(
+        "CreateTransmissionWorkspaceAuto failed to execute");
+
+  return AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
 }
 
 /**
@@ -1242,71 +1421,13 @@ void ReflTableViewPresenter::pasteSelected() {
   }
 }
 
-/** Transfers the selected runs in the search results to the processing table */
-void ReflTableViewPresenter::transfer() {
-  // Build the input for the transfer strategy
-  SearchResultMap runs;
-  auto selectedRows = m_view->getSelectedSearchRows();
+/** Transfers the selected runs in the search results to the processing table
+* @param runs : [input] the set of runs to transfer as a vector of maps
+*/
+void ReflTableViewPresenter::transfer(
+    const std::vector<std::map<std::string, std::string>> &runs) {
 
-  for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
-       ++rowIt) {
-    const int row = *rowIt;
-    const std::string run = m_searchModel->data(m_searchModel->index(row, 0))
-                                .toString()
-                                .toStdString();
-    SearchResult searchResult;
-
-    searchResult.description = m_searchModel->data(m_searchModel->index(row, 1))
-                                   .toString()
-                                   .toStdString();
-
-    searchResult.location = m_searchModel->data(m_searchModel->index(row, 2))
-                                .toString()
-                                .toStdString();
-    runs[run] = searchResult;
-  }
-
-  ReflProgress progress(0, static_cast<double>(selectedRows.size()),
-                        static_cast<int64_t>(selectedRows.size()),
-                        this->m_progressView);
-
-  TransferResults results = getTransferStrategy()->transferRuns(runs, progress);
-
-  auto invalidRuns =
-      results.getErrorRuns(); // grab our invalid runs from the transfer
-
-  // iterate through invalidRuns to set the 'invalid transfers' in the search
-  // model
-  if (!invalidRuns.empty()) { // check if we have any invalid runs
-    for (auto invalidRowIt = invalidRuns.begin();
-         invalidRowIt != invalidRuns.end(); ++invalidRowIt) {
-      auto &error = *invalidRowIt; // grab row from vector
-      // iterate over row containing run number and reason why it's invalid
-      for (auto errorRowIt = error.begin(); errorRowIt != error.end();
-           ++errorRowIt) {
-        const std::string runNumber = errorRowIt->first; // grab run number
-
-        // iterate over rows that are selected in the search table
-        for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
-             ++rowIt) {
-          const int row = *rowIt;
-          // get the run number from that selected row
-          const auto searchRun =
-              m_searchModel->data(m_searchModel->index(row, 0))
-                  .toString()
-                  .toStdString();
-          if (searchRun == runNumber) { // if search run number is the same as
-                                        // our invalid run number
-
-            // add this error to the member of m_searchModel that holds errors.
-            m_searchModel->m_errors.push_back(error);
-          }
-        }
-      }
-    }
-  }
-
-  auto newRows = results.getTransferRuns();
+  auto newRows = runs;
 
   std::map<std::string, int> groups;
   // Loop over the rows (vector elements)
@@ -1434,7 +1555,8 @@ void ReflTableViewPresenter::plotGroup() {
 
 /** Shows the Refl Options dialog */
 void ReflTableViewPresenter::showOptionsDialog() {
-  auto options = new QtReflOptionsDialog(m_view, m_view->getPresenter());
+  auto options =
+      new QtReflOptionsDialog(m_tableView, m_tableView->getTablePresenter());
   // By default the dialog is only destroyed when ReflMainView is and so they'll
   // stack up.
   // This way, they'll be deallocated as soon as they've been closed.

@@ -35,8 +35,7 @@ namespace MantidQt
     {
     public:
       TransferResults
-      transferRuns(SearchResultMap &searchResults,
-                   Mantid::Kernel::ProgressBase &progress) override;
+      transferRuns(SearchResultMap &searchResults) override;
 
       std::unique_ptr<ReflLegacyTransferStrategy> clone() const;
 

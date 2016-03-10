@@ -56,8 +56,7 @@ public:
 
   ReflMeasureTransferStrategy(const ReflMeasureTransferStrategy &other);
 
-  TransferResults transferRuns(SearchResultMap &searchResults,
-                               Mantid::Kernel::ProgressBase &progress) override;
+  TransferResults transferRuns(SearchResultMap &searchResults) override;
 
   std::unique_ptr<ReflMeasureTransferStrategy> clone() const;
 

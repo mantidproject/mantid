@@ -6,7 +6,7 @@ namespace MantidQt
   namespace CustomInterfaces
   {
     /** Constructor */
-    QtReflOptionsDialog::QtReflOptionsDialog(ReflMainView* view, boost::shared_ptr<IReflPresenter> presenter) :
+    QtReflOptionsDialog::QtReflOptionsDialog(ReflTableView* view, boost::shared_ptr<IReflTablePresenter> presenter) :
       QDialog(dynamic_cast<QtReflMainView*>(view)),
       m_presenter(presenter)
     {

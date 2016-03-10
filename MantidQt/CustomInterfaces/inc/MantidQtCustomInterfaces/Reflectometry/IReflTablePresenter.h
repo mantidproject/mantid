@@ -67,6 +67,8 @@ public:
   virtual void notify(IReflTablePresenter::Flag flag) = 0;
   virtual const std::map<std::string, QVariant> &options() const = 0;
   virtual void setOptions(const std::map<std::string, QVariant> &options) = 0;
+  virtual void
+  transfer(const std::vector<std::map<std::string, std::string>> &runs) = 0;
 };
 }
 }
