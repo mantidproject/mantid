@@ -29,11 +29,11 @@ def map_to_color(data_array, base_color, change_color_flag):
             step_list = (value / num_steps_color, value % num_steps_color, 0)
         else:
             num_steps_color_sq = num_steps_color*num_steps_color
-            d2 = value / num_steps_color_sq
-            d1_0 = value % num_steps_color_sq
-            d1 = d1_0 / num_steps_color
-            d0 = d1_0 % num_steps_color
-            step_list = (d2, d1, d0)
+            d_2 = value / num_steps_color_sq
+            r_2 = value % num_steps_color_sq  # r_2 is for residue of d_2
+            d_1 = r_2 / num_steps_color
+            d_0 = r_2 % num_steps_color
+            step_list = (d_2, d_1, d_0)
         # END-IF
 
         step_list_index = 0

@@ -317,7 +317,7 @@ class MainWindow(QtGui.QMainWindow):
             # merge scan and find peak
             if not self._myControl.has_merged_data(exp_number, scan_number):
                 # merge all Pts. in scan if necessary
-                stauts, pt_number_list = self._myControl.get_pt_numbers(exp_number, scan_number)
+                status, pt_number_list = self._myControl.get_pt_numbers(exp_number, scan_number)
                 assert status
                 self._myControl.merge_pts_in_scan(exp_number, scan_number, pt_number_list,
                                                   'q-sample')
@@ -338,9 +338,9 @@ class MainWindow(QtGui.QMainWindow):
         pt_integral_outcome = dict()
         pt_number_list = self._myControl.get_pt_numbers(exp_number, scan_number)
         for pt_number in pt_number_list:
-            peak_ws_name, intensity, counts = self._myControl.integrate_peak(
-                    exp_number, scan_number, pt_number, weighted_peak_center,
-                    peak_radius)
+            return_tuple = self._myControl.integrate_peak(exp_number, scan_number, pt_number,
+                                                          weighted_peak_center, peak_radius)
+            peak_ws_name, intensity, counts = return_tuple
             pt_integral_outcome[(exp_number, scan_number, pt_number)] = (peak_ws_name,
                                                                          intensity,
                                                                          counts)
@@ -395,8 +395,7 @@ class MainWindow(QtGui.QMainWindow):
         # Get peak integration parameters
         line_editors = [self.ui.lineEdit_peakRadius,
                         self.ui.lineEdit_bkgdInnerR,
-                        self.ui.lineEdit_bkgdOuterR
-                        ]
+                        self.ui.lineEdit_bkgdOuterR]
         status, value_list = gutil.parse_float_editors(line_editors)
         if status is False:
             err_msg = value_list

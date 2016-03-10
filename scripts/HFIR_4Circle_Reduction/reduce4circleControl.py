@@ -655,8 +655,8 @@ class CWSCDReductionControl(object):
         assert AnalysisDataService.doesExist(merged_ws_name)
 
         # Build peak workspace
-        peak_info = PeakInfo()
         peak_ws_name = get_peak_ws_name(exp_num, scan_num, [pt_num])
+        peak_info = PeakInfo(exp_num, scan_num, peak_ws_name)
         zero_hkl = True
         hkl_to_int = False
         self._build_peaks_workspace([peak_info], peak_ws_name, zero_hkl, hkl_to_int)
@@ -1086,7 +1086,8 @@ class CWSCDReductionControl(object):
             else:
                 error_message = 'Unable to open data server URL: %s due to %s.' % (server_url, error_message)
         else:
-            is_url_good = True, error_message = ''
+            is_url_good = True
+            error_message = ''
 
         return is_url_good, error_message
 
