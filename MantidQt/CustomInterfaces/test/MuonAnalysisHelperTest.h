@@ -134,45 +134,15 @@ public:
     TS_ASSERT_EQUALS(ranges[3], std::make_pair(10, 14));
   }
 
-  void test_findStartAndEndTimes_singleWS() {
-    Workspace_sptr ws = createWs("MUSR", 15189);
-    DateAndTime start{"2015-12-23T15:32:40Z"};
-    DateAndTime end{"2015-12-24T09:00:00Z"};
-    addLog(ws, "run_start", start.toSimpleString());
-    addLog(ws, "run_end", end.toSimpleString());
-    auto times = findStartAndEndTimes(ws);
-    TS_ASSERT_EQUALS(times.first, start);
-    TS_ASSERT_EQUALS(times.second, end);
-  }
-
-  void test_findStartAndEndTimes_groupWS() {
-    Workspace_sptr ws1 = createWs("MUSR", 15189);
-    Workspace_sptr ws2 = createWs("MUSR", 15190);
-    DateAndTime start1{"2015-12-23T15:32:40Z"};
-    DateAndTime end1{"2016-12-24T09:00:00Z"};
-    DateAndTime start2{"2014-12-23T15:32:40Z"};
-    DateAndTime end2{"2015-12-24T09:00:00Z"};
-    addLog(ws1, "run_start", start1.toSimpleString());
-    addLog(ws1, "run_end", end1.toSimpleString());
-    addLog(ws2, "run_start", start2.toSimpleString());
-    addLog(ws2, "run_end", end2.toSimpleString());
-    auto groupWS = groupWorkspaces({ws1, ws2});
-    auto times = findStartAndEndTimes(groupWS);
-    TS_ASSERT_EQUALS(times.first, start2);
-    TS_ASSERT_EQUALS(times.second, end1);
-  }
-
   void test_replaceLogValue() {
     ScopedWorkspace ws(createWs("MUSR", 15189));
     DateAndTime start1{"2015-12-23T15:32:40Z"};
     DateAndTime start2{"2014-12-23T15:32:40Z"};
-    DateAndTime end{"2015-12-24T09:00:00Z"};
     addLog(ws.retrieve(), "run_start", start1.toSimpleString());
-    addLog(ws.retrieve(), "run_end", end.toSimpleString());
     replaceLogValue(ws.name(), "run_start", start2.toSimpleString());
-    auto times = findStartAndEndTimes(ws.retrieve());
-    TS_ASSERT_EQUALS(times.first, start2);
-    TS_ASSERT_EQUALS(times.second, end);
+    auto times = findLogValues(ws.retrieve(), "run_start");
+    TS_ASSERT_EQUALS(times.size(), 1);
+    TS_ASSERT_EQUALS(times[0], start2.toSimpleString());
   }
 
   void test_findLogValues() {
@@ -192,6 +162,89 @@ public:
     TS_ASSERT_EQUALS(0, badLogs.size());
     TS_ASSERT_EQUALS(1, singleStart.size());
     TS_ASSERT_EQUALS(start1, singleStart[0]);
+  }
+
+  void test_findLogRange_singleWS() {
+    Workspace_sptr ws = createWs("MUSR", 15189);
+    DateAndTime start{"2015-12-23T15:32:40Z"};
+    addLog(ws, "run_start", start.toSimpleString());
+    auto range = findLogRange(ws, "run_start", [](const std::string &first,
+                                                  const std::string &second) {
+      return DateAndTime(first) < DateAndTime(second);
+    });
+    TS_ASSERT_EQUALS(range.first, start.toSimpleString());
+    TS_ASSERT_EQUALS(range.second, start.toSimpleString());
+  }
+
+  void test_findLogRange_groupWS() {
+    Workspace_sptr ws1 = createWs("MUSR", 15189);
+    Workspace_sptr ws2 = createWs("MUSR", 15190);
+    DateAndTime start1{"2015-12-23T15:32:40Z"};
+    DateAndTime start2{"2014-12-23T15:32:40Z"};
+    addLog(ws1, "run_start", start1.toSimpleString());
+    addLog(ws2, "run_start", start2.toSimpleString());
+    auto groupWS = groupWorkspaces({ws1, ws2});
+    auto range =
+        findLogRange(groupWS, "run_start",
+                     [](const std::string &first, const std::string &second) {
+                       return DateAndTime(first) < DateAndTime(second);
+                     });
+    TS_ASSERT_EQUALS(range.first, start2.toSimpleString());
+    TS_ASSERT_EQUALS(range.second, start1.toSimpleString());
+  }
+
+  void test_findLogRange_vectorOfWorkspaces() {
+    Workspace_sptr ws1 = createWs("MUSR", 15189);
+    Workspace_sptr ws2 = createWs("MUSR", 15190);
+    DateAndTime start1{"2015-12-23T15:32:40Z"};
+    DateAndTime start2{"2014-12-23T15:32:40Z"};
+    addLog(ws1, "run_start", start1.toSimpleString());
+    addLog(ws2, "run_start", start2.toSimpleString());
+    std::vector<Workspace_sptr> workspaces = {ws1, ws2};
+    auto range =
+        findLogRange(workspaces, "run_start",
+                     [](const std::string &first, const std::string &second) {
+                       return DateAndTime(first) < DateAndTime(second);
+                     });
+    TS_ASSERT_EQUALS(range.first, start2.toSimpleString());
+    TS_ASSERT_EQUALS(range.second, start1.toSimpleString());
+  }
+
+  void test_findLogRange_notPresent() {
+    Workspace_sptr ws = createWs("MUSR", 15189);
+    // try a DateAndTime
+    auto timeRange =
+        findLogRange(ws, "run_start",
+                     [](const std::string &first, const std::string &second) {
+                       return DateAndTime(first) < DateAndTime(second);
+                     });
+    TS_ASSERT_EQUALS(timeRange.first, "");
+    TS_ASSERT_EQUALS(timeRange.second, "");
+    // now try a double
+    auto numRange =
+        findLogRange(ws, "sample_temp",
+                     [](const std::string &first, const std::string &second) {
+                       return boost::lexical_cast<double>(first) <
+                              boost::lexical_cast<double>(second);
+                     });
+    TS_ASSERT_EQUALS(numRange.first, "");
+    TS_ASSERT_EQUALS(numRange.second, "");
+  }
+
+  void test_findLogRange_numerical() {
+    Workspace_sptr ws1 = createWs("MUSR", 15189);
+    Workspace_sptr ws2 = createWs("MUSR", 15190);
+    addLog(ws1, "sample_magn_field", "15.4");
+    addLog(ws2, "sample_magn_field", "250");
+    std::vector<Workspace_sptr> workspaces = {ws1, ws2};
+    auto range =
+        findLogRange(workspaces, "sample_magn_field",
+                     [](const std::string &first, const std::string &second) {
+                       return boost::lexical_cast<double>(first) <
+                              boost::lexical_cast<double>(second);
+                     });
+    TS_ASSERT_EQUALS(range.first, "15.4");
+    TS_ASSERT_EQUALS(range.second, "250");
   }
 
 private:

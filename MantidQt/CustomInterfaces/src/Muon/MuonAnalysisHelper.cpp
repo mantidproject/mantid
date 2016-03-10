@@ -481,16 +481,29 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
   ScopedWorkspace firstEntry(workspaces.front());
   ScopedWorkspace accumulatorEntry;
 
-  // Earliest start and latest end times
-  DateAndTime firstStart, lastEnd;
-  auto times = findStartAndEndTimes(workspaces.front());
-  firstStart = times.first;
-  lastEnd = times.second;
+  // Comparison function for dates
+  auto dateCompare = [](const std::string &first, const std::string &second) {
+    return DateAndTime(first) < DateAndTime(second);
+  };
 
-  // Range of temperatures and magnetic fields
-  std::vector<std::string> temperatures, magFields;
+  // Comparison function for doubles
+  auto numericalCompare = [](const std::string &first,
+                             const std::string &second) {
+    try {
+      return boost::lexical_cast<double>(first) <
+             boost::lexical_cast<double>(second);
+    } catch (boost::bad_lexical_cast & /*e*/) {
+      return false;
+    }
+  };
 
-  // Create accumulator workspace, by cloning the first one from the list
+  // Range of log values
+  auto startRange = findLogRange(workspaces, "run_start", dateCompare);
+  auto endRange = findLogRange(workspaces, "run_end", dateCompare);
+  auto tempRange = findLogRange(workspaces, "sample_temp", numericalCompare);
+  auto fieldRange = findLogRange(workspaces, "sample_magn_field", numericalCompare);
+
+  // Create accumulator workspace by cloning the first one from the list
   IAlgorithm_sptr cloneAlg = AlgorithmManager::Instance().create("CloneWorkspace");
   cloneAlg->setLogging(false);
   cloneAlg->setRethrows(true);
@@ -498,29 +511,7 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
   cloneAlg->setPropertyValue("OutputWorkspace", accumulatorEntry.name());
   cloneAlg->execute();
 
-  for ( auto it = (workspaces.begin() + 1); it != workspaces.end(); ++it )
-  {
-    // Check start and end times
-    auto startEndTimes = findStartAndEndTimes(*it);
-    if (startEndTimes.first < firstStart) {
-      firstStart = startEndTimes.first;
-    }
-    if (startEndTimes.second > lastEnd) {
-      lastEnd = startEndTimes.second;
-    }
-
-    // Get temperatures, magnetic fields
-    auto sampleTemps = findLogValues(*it, "sample_temp");
-    auto sampleFields = findLogValues(*it, "sample_magn_field");
-    if (!sampleTemps.empty()) {
-      temperatures.insert(temperatures.end(), sampleTemps.begin(),
-                          sampleTemps.end());
-    }
-    if (!sampleFields.empty()) {
-      magFields.insert(magFields.end(), sampleFields.begin(),
-                       sampleFields.end());
-    }
-
+  for (auto it = (workspaces.begin() + 1); it != workspaces.end(); ++it) {
     // Add this workspace on to the sum
     ScopedWorkspace wsEntry(*it);
 
@@ -534,30 +525,22 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
   }
 
   // Replace the start and end times with the earliest start and latest end
-  replaceLogValue(accumulatorEntry.name(), "run_start",
-                  firstStart.toSimpleString());
-  replaceLogValue(accumulatorEntry.name(), "run_end", lastEnd.toSimpleString());
+  replaceLogValue(accumulatorEntry.name(), "run_start", startRange.first);
+  replaceLogValue(accumulatorEntry.name(), "run_end", endRange.second);
 
   // Put in range of temperatures and magnetic fields
-  if (!temperatures.empty() && !magFields.empty()) {
-    auto tempRange =
-        std::minmax_element(temperatures.begin(), temperatures.end());
-    auto fieldRange = std::minmax_element(magFields.begin(), magFields.end());
-    std::ostringstream tempRangeStream;
-    tempRangeStream << *tempRange.first;
-    if (*tempRange.second != *tempRange.first) {
-      tempRangeStream << " to " << *tempRange.second;
+  auto rangeString = [](const std::pair<std::string, std::string> &range) {
+    std::ostringstream oss;
+    oss << range.first;
+    if (range.second != range.first) {
+      oss << " to " << range.second;
     }
-    replaceLogValue(accumulatorEntry.name(), "sample_temp",
-                    tempRangeStream.str());
-    std::ostringstream fieldRangeStream;
-    fieldRangeStream << *fieldRange.first;
-    if (*fieldRange.first != *fieldRange.second) {
-      fieldRangeStream << " to " << *fieldRange.second;
-    }
-    replaceLogValue(accumulatorEntry.name(), "sample_magn_field",
-                    fieldRangeStream.str());
-  }
+    return oss.str();
+  };
+  replaceLogValue(accumulatorEntry.name(), "sample_temp",
+                  rangeString(tempRange));
+  replaceLogValue(accumulatorEntry.name(), "sample_magn_field",
+                  rangeString(fieldRange));
 
   return accumulatorEntry.retrieve();
 }
@@ -658,38 +641,6 @@ void replaceLogValue(const std::string &wsName, const std::string &logName,
 }
 
 /**
- * Finds the start and end times from the logs in the supplied workspace.
- * If given a workspace group, finds earliest start and latest end.
- *
- * If there are no start/end times, they're set to "default time" (midnight on
- * 1/1/1970)
- * @param ws :: [input] Workspace - could be a group
- * @return Pair containing (start time, end time)
- */
-std::pair<DateAndTime, DateAndTime> findStartAndEndTimes(Workspace_sptr ws) {
-  DateAndTime start = DateAndTime::defaultTime(),
-              end = DateAndTime::defaultTime();
-  MatrixWorkspace_sptr matrixWS;
-
-  auto starts = findLogValues(ws, "run_start");
-  auto ends = findLogValues(ws, "run_end");
-
-  if (starts.size() > 0 && ends.size() > 0) {
-    std::vector<DateAndTime> startTimes, endTimes;
-    for (std::string time : starts) {
-      startTimes.emplace_back(time);
-    }
-    for (std::string time : ends) {
-      endTimes.emplace_back(time);
-    }
-    start = *std::min_element(startTimes.begin(), startTimes.end());
-    end = *std::max_element(endTimes.begin(), endTimes.end());
-  }
-
-  return std::make_pair(start, end);
-}
-
-/**
  * Returns the range of values for the given log in the workspace given, which
  * could be a group. If it isn't a group, the vector will have only one entry
  * (or none, if log not present).
@@ -697,7 +648,7 @@ std::pair<DateAndTime, DateAndTime> findStartAndEndTimes(Workspace_sptr ws) {
  * @param logName :: [input] Name of log
  * @returns All values found for the given log
  */
-std::vector<std::string> findLogValues(Workspace_sptr ws,
+std::vector<std::string> findLogValues(const Workspace_sptr ws,
                                        const std::string &logName) {
   std::vector<std::string> values;
   MatrixWorkspace_sptr matrixWS;
@@ -724,6 +675,49 @@ std::vector<std::string> findLogValues(Workspace_sptr ws,
     }
   }
   return values;
+}
+
+/**
+ * Finds the range of values for the given log in the supplied workspace.
+ * @param ws :: [input] Workspace (can be group)
+ * @param logName :: [input] Name of log
+ * @param isLessThan :: [input] Function to sort values (<)
+ * @returns :: Pair of (smallest, largest) values
+ */
+std::pair<std::string, std::string> findLogRange(
+    const Workspace_sptr ws, const std::string &logName,
+    bool (*isLessThan)(const std::string &first, const std::string &second)) {
+  auto values = findLogValues(ws, logName);
+  if (!values.empty()) {
+    auto minmax = std::minmax_element(values.begin(), values.end(), isLessThan);
+    return std::make_pair(*(minmax.first), *(minmax.second));
+  } else {
+    return std::make_pair("", "");
+  }
+}
+
+/**
+ * Finds the range of values for the given log in the supplied vector of
+ * workspaces.
+ * @param ws :: [input] Vector of workspaces
+ * @param logName :: [input] Name of log
+ * @param isLessThan :: [input] Function to sort values (<)
+ * @returns :: Pair of (smallest, largest) values
+ */
+std::pair<std::string, std::string> findLogRange(
+    const std::vector<Workspace_sptr> &workspaces, const std::string &logName,
+    bool (*isLessThan)(const std::string &first, const std::string &second)) {
+  std::string smallest, largest;
+  for (auto ws : workspaces) {
+    auto range = findLogRange(ws, logName, isLessThan);
+    if (smallest.empty() || isLessThan(range.first, smallest)) {
+      smallest = range.first;
+    }
+    if (largest.empty() || isLessThan(largest, range.second)) {
+      largest = range.second;
+    }
+  }
+  return std::make_pair(smallest, largest);
 }
 
 } // namespace MuonAnalysisHelper

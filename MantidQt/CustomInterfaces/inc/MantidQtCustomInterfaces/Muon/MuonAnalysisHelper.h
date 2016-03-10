@@ -61,14 +61,20 @@ MANTIDQT_CUSTOMINTERFACES_DLL void replaceLogValue(const std::string &wsName,
                                                    const std::string &logName,
                                                    const std::string &logValue);
 
-/// Finds start, end times from logs
-MANTIDQT_CUSTOMINTERFACES_DLL
-std::pair<Mantid::Kernel::DateAndTime, Mantid::Kernel::DateAndTime>
-findStartAndEndTimes(Mantid::API::Workspace_sptr ws);
+/// Finds all of the values for a log
+MANTIDQT_CUSTOMINTERFACES_DLL std::vector<std::string>
+findLogValues(const Mantid::API::Workspace_sptr ws, const std::string &logName);
 
 /// Finds the range of values for a log
-MANTIDQT_CUSTOMINTERFACES_DLL std::vector<std::string>
-findLogValues(Mantid::API::Workspace_sptr ws, const std::string &logName);
+MANTIDQT_CUSTOMINTERFACES_DLL std::pair<std::string, std::string> findLogRange(
+    const Mantid::API::Workspace_sptr ws, const std::string &logName,
+    bool (*isLessThan)(const std::string &first, const std::string &second));
+
+/// Finds the range of values for a log for a vector of workspaces
+MANTIDQT_CUSTOMINTERFACES_DLL std::pair<std::string, std::string> findLogRange(
+    const std::vector<Mantid::API::Workspace_sptr> &workspaces,
+    const std::string &logName,
+    bool (*isLessThan)(const std::string &first, const std::string &second));
 
 /**
  * A class which deals with auto-saving the widget values. Widgets are registered and then on any
