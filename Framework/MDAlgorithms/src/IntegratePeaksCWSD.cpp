@@ -57,13 +57,12 @@ IntegratePeaksCWSD::~IntegratePeaksCWSD() {}
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksCWSD::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>("InputWorkspace",
-                                                                    "",
-                                                                    Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace.");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "",
-                                                                 Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
   declareProperty(
