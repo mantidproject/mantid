@@ -18,6 +18,7 @@ SPECTRA_PROP = "SpectrumList"
 INST_PAR_PROP = "InstrumentParFile"
 SUM_PROP = "SumSpectra"
 LOAD_MON = "LoadMonitors"
+WKSP_PROP_LOAD_MON= "OutputMonitorWorkspace"
 
 # Raw workspace names which are necessary at the moment
 SUMMED_WS = "__loadraw_evs"
@@ -42,6 +43,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
     _back_scattering = None
     _load_common_called = False
     _load_monitors = False
+    _load_monitors_workspace = None
     _crop_required = False
     _mon_spectra = None
     _mon_index = None
@@ -568,6 +570,28 @@ class LoadVesuvio(LoadEmptyVesuvio):
                          EnableLogging=_LOGGING_)
 
         summed_data, summed_mon = mtd[SUMMED_WS], mtd[SUMMED_WS + '_monitors']
+
+        # Sum monitors from each period together
+        if self._load_monitors:
+            mon_out_name = self.getPropertyValue(WKSP_PROP) + "_monitors"
+            clone = self.createChildAlgorithm("CloneWorkspace", False)
+            clone.setProperty("InputWorkspace",summed_mon.getItem(0))
+            clone.setProperty("OutputWorkspace", mon_out_name)
+            clone.execute()
+            self._load_monitors_workspace = clone.getProperty("OutputWorkspace").value
+
+            for mon_index in range(1, summed_mon.getNumberOfEntries()):
+                plus = self.createChildAlgorithm("Plus", False)
+                plus.setProperty("LHSWorkspace", self._load_monitors_workspace)
+                plus.setProperty("RHSWorkspace", summed_mon.getItem(mon_index))
+                plus.setProperty("OutputWorkspace", self._load_monitors_workspace)
+                plus.execute()
+                self._load_monitors_workspace = plus.getProperty("OutputWorkspace").value
+
+            # Add OutputWorkspace property for Monitors
+            self.declareProperty(WorkspaceProperty(WKSP_PROP_LOAD_MON, mon_out_name, Direction.Output),
+                             doc="The output workspace that contains the monitor spectra.")
+
         self._load_diff_mode_parameters(summed_data)
         return summed_data, summed_mon
 
@@ -974,8 +998,17 @@ class LoadVesuvio(LoadEmptyVesuvio):
             crop.setProperty("XMax", self._tof_max)
             crop.execute()
             self.foil_out = crop.getProperty("OutputWorkspace").value
+            if self._load_monitors:
+                crop_mon = self.createChildAlgorithm("CropWorkspace")
+                crop.setProperty("InputWorkspace" , self._load_monitors_workspace)
+                crop.setProperty("OutputWorkspace", self._load_monitors_workspace)
+                crop.setProperty("XMax", self._tof_max)
+                crop.execute()
+                self._load_monitors_workspace = crop.getProperty("OutputWorkspace").value
 
         self.setProperty(WKSP_PROP, self.foil_out)
+        if self._load_monitors:
+            self.setProperty(WKSP_PROP_LOAD_MON, self._load_monitors_workspace)
 
     def _cleanup_raw(self):
         """
