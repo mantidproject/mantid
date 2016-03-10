@@ -19,9 +19,6 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
 class ApplyDeadTimeCorrTest : public CxxTest::TestSuite {
-private:
-  constexpr static double g_deadValue{-0.00456};
-
 public:
   void testName() {
     ApplyDeadTimeCorr applyDeadTime;
@@ -72,21 +69,21 @@ public:
         inputWs->dataY(0)[0] /
             (1 -
              inputWs->dataY(0)[0] *
-                 (g_deadValue / ((inputWs->dataX(0)[1] - inputWs->dataX(0)[0]) *
+                 (deadValue() / ((inputWs->dataX(0)[1] - inputWs->dataX(0)[0]) *
                                  numGoodFrames))));
     TS_ASSERT_EQUALS(
         outputWs->dataY(0)[40],
         inputWs->dataY(0)[40] /
             (1 -
              inputWs->dataY(0)[40] *
-                 (g_deadValue / ((inputWs->dataX(0)[1] - inputWs->dataX(0)[0]) *
+                 (deadValue() / ((inputWs->dataX(0)[1] - inputWs->dataX(0)[0]) *
                                  numGoodFrames))));
     TS_ASSERT_EQUALS(
         outputWs->dataY(31)[20],
         inputWs->dataY(31)[20] /
             (1 -
              inputWs->dataY(31)[20] *
-                 (g_deadValue / ((inputWs->dataX(0)[1] - inputWs->dataX(0)[0]) *
+                 (deadValue() / ((inputWs->dataX(0)[1] - inputWs->dataX(0)[0]) *
                                  numGoodFrames))));
 
     TS_ASSERT_DELTA(35.9991, outputWs->dataY(12)[2], 0.001);
@@ -126,7 +123,7 @@ public:
     // Spectrum: 3,6,9,12,15,18,21 .....
     for (int i = 0; i < 7; ++i) {
       Mantid::API::TableRow row = deadTimes->appendRow();
-      row << (i + 1) * 3 << g_deadValue;
+      row << (i + 1) * 3 << deadValue();
     }
 
     //.... Index will therefore be 2,5,8,11,14,17,20
@@ -160,7 +157,7 @@ public:
         inputWs->dataY(14)[40] /
             (1 -
              inputWs->dataY(14)[40] *
-                 (g_deadValue / ((inputWs->dataX(0)[1] - inputWs->dataX(0)[0]) *
+                 (deadValue() / ((inputWs->dataX(0)[1] - inputWs->dataX(0)[0]) *
                                  numGoodFrames))));
     TS_ASSERT_EQUALS(outputWs->dataY(31)[20], inputWs->dataY(31)[20]);
 
@@ -213,7 +210,7 @@ private:
     deadTimes->addColumn("double", "DeadTime Value");
     for (size_t i = 0; i < numSpectra; i++) {
       Mantid::API::TableRow row = deadTimes->appendRow();
-      row << static_cast<int>(i + 1) << g_deadValue;
+      row << static_cast<int>(i + 1) << deadValue();
     }
     return deadTimes;
   }
@@ -235,6 +232,9 @@ private:
     TS_ASSERT(data);
     return matrixWS;
   }
+
+  /// Test dead time value
+  double deadValue() const { return -0.00456; }
 };
 
 #endif /* MANTID_ALGORITHMS_APPLYDEADTIMECORRTEST_H_ */
