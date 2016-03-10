@@ -2,6 +2,7 @@
 
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -522,6 +523,9 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
     alg->setPropertyValue("RHSWorkspace", wsEntry.name());
     alg->setPropertyValue("OutputWorkspace", accumulatorEntry.name());
     alg->execute();
+
+    appendTimeSeriesLogs<double>(wsEntry.retrieve(),
+                                 accumulatorEntry.retrieve(), "Temp_Sample");
   }
 
   // Replace the start and end times with the earliest start and latest end
@@ -718,6 +722,77 @@ std::pair<std::string, std::string> findLogRange(
     }
   }
   return std::make_pair(smallest, largest);
+}
+
+/**
+ * Takes the values in the named time series log of the first workspace
+ * and appends them to the same log in the second.
+ * Silently fails if either workspace is missing the named log.
+ * @param toAppend :: [input] Workspace with log to append to the other
+ * @param resultant :: [input, output] Workspace whose log will be appended to
+ * @param logName :: [input] Name of time series log
+ * @throws std::invalid_argument if the named log is of the incorrect type
+ * @throws std::invalid_argument if the workspaces supplied are null or have
+ * different number of periods
+ */
+template <typename T>
+void appendTimeSeriesLogs(Workspace_sptr toAppend, Workspace_sptr resultant,
+                          const std::string &logName) {
+  // check input
+  if (!toAppend || !resultant) {
+    throw std::invalid_argument(
+        "Cannot append logs: workspaces supplied are null");
+  }
+
+  // Cast the inputs to MatrixWorkspace (could be a group)
+  auto getWorkspaces = [](const Workspace_sptr ws) {
+    std::vector<MatrixWorkspace_sptr> workspaces;
+    MatrixWorkspace_sptr matrixWS;
+    if (matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
+      workspaces.push_back(matrixWS);
+    } else { // it's a workspace group
+      auto groupWS = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+      if (groupWS && groupWS->getNumberOfEntries() > 0) {
+        for (int index = 0; index < groupWS->getNumberOfEntries(); index++) {
+          matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+              groupWS->getItem(index));
+          if (matrixWS) {
+            workspaces.push_back(matrixWS);
+          }
+        }
+      }
+    }
+    return workspaces;
+  };
+
+  // Extract time series log from workspace
+  auto getTSLog = [&logName](const MatrixWorkspace_sptr ws) {
+    const Mantid::API::Run &run = ws->run();
+    TimeSeriesProperty<T> *prop = nullptr;
+    if (run.hasProperty(logName)) {
+      prop = dynamic_cast<TimeSeriesProperty<T> *>(run.getLogData(logName));
+      if (!prop) {
+        throw std::invalid_argument("Property" + logName + " of wrong type");
+      }
+    }
+    return prop;
+  };
+
+  auto firstWorkspaces = getWorkspaces(toAppend);
+  auto secondWorkspaces = getWorkspaces(resultant);
+  if (firstWorkspaces.size() == secondWorkspaces.size()) {
+    for (size_t i = 0; i < firstWorkspaces.size(); i++) {
+      TimeSeriesProperty<T> *firstProp = getTSLog(firstWorkspaces[i]);
+      TimeSeriesProperty<T> *secondProp = getTSLog(secondWorkspaces[i]);
+      if (firstProp && secondProp) {
+        secondProp->operator+=(
+            static_cast<const Property *>(firstProp)); // adds the values
+        secondProp->eliminateDuplicates();
+      }
+    }
+  } else {
+    throw std::invalid_argument("Workspaces have different number of periods");
+  }
 }
 
 } // namespace MuonAnalysisHelper

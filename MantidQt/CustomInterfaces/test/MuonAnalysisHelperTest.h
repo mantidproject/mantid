@@ -9,6 +9,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace MantidQt::CustomInterfaces::MuonAnalysisHelper;
@@ -247,6 +248,31 @@ public:
     TS_ASSERT_EQUALS(range.second, "250");
   }
 
+  void test_appendTimeSeriesLogs() {
+    Workspace_sptr ws1 = createWs("MUSR", 15189);
+    Workspace_sptr ws2 = createWs("MUSR", 15190);
+    const DateAndTime time1{"2015-12-23T15:32:40Z"},
+        time2{"2015-12-23T15:32:41Z"}, time3{"2015-12-23T15:32:42Z"},
+        time4{"2015-12-23T15:32:43Z"}, time5{"2015-12-23T15:32:44Z"},
+        time6{"2015-12-23T15:32:45Z"};
+    const double value1(1), value2(2), value3(3), value4(4), value5(5),
+        value6(6);
+    const std::string logName = "TSLog";
+    addTimeSeriesLog(ws1, logName, {time1, time2, time3},
+                     {value1, value2, value3});
+    addTimeSeriesLog(ws2, logName, {time4, time5, time6},
+                     {value4, value5, value6});
+    appendTimeSeriesLogs<double>(ws2, ws1, logName);
+    auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws1);
+    TS_ASSERT(matrixWS);
+    auto prop = matrixWS->run().getTimeSeriesProperty<double>(logName);
+    TS_ASSERT_EQUALS(time1, prop->firstTime());
+    TS_ASSERT_EQUALS(value1, prop->firstValue());
+    TS_ASSERT_EQUALS(time6, prop->lastTime());
+    TS_ASSERT_EQUALS(value6, prop->lastValue());
+    TS_ASSERT_EQUALS(6, prop->valueAsCorrectMap().size());
+  }
+
 private:
   // Creates a single-point workspace with instrument and runNumber set
   Workspace_sptr createWs(const std::string &instrName, int runNumber) {
@@ -282,6 +308,19 @@ private:
       group->addWorkspace(ws);
     }
     return group;
+  }
+
+  // Adds a time series log to the workspace
+  void addTimeSeriesLog(const Workspace_sptr &ws, const std::string &logName,
+                        const std::vector<Mantid::Kernel::DateAndTime> &times,
+                        const std::vector<double> &values) {
+    TS_ASSERT_EQUALS(times.size(), values.size());
+    auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    TS_ASSERT(matrixWS);
+    auto prop =
+        Mantid::Kernel::make_unique<TimeSeriesProperty<double>>(logName);
+    prop->addValues(times, values);
+    matrixWS->mutableRun().addLogData(std::move(prop));
   }
 };
 

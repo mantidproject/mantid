@@ -76,8 +76,16 @@ MANTIDQT_CUSTOMINTERFACES_DLL std::pair<std::string, std::string> findLogRange(
     const std::string &logName,
     bool (*isLessThan)(const std::string &first, const std::string &second));
 
+/// Concatenates time-series log of one workspace with the second
+template <typename T>
+MANTIDQT_CUSTOMINTERFACES_DLL void
+appendTimeSeriesLogs(Mantid::API::Workspace_sptr toAppend,
+                     Mantid::API::Workspace_sptr resultant,
+                     const std::string &logName);
+
 /**
- * A class which deals with auto-saving the widget values. Widgets are registered and then on any
+ * A class which deals with auto-saving the widget values. Widgets are
+ * registered and then on any
  * change, their value is stored using QSettings.
  */
 class MANTIDQT_CUSTOMINTERFACES_DLL WidgetAutoSaver : QObject
