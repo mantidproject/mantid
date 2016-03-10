@@ -5,7 +5,6 @@ from mantid.simpleapi import *
 
 import numpy as np
 
-
 class NormaliseSpectra(DataProcessorAlgorithm):
 
     _input_ws_name = None
@@ -24,11 +23,11 @@ class NormaliseSpectra(DataProcessorAlgorithm):
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
                                                      direction=Direction.Input),
-                                                     doc='Input workspace')
+                             doc='Input workspace')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
                                                      direction=Direction.Output),
-                                                     doc='Output workspace')
+                             doc='Output workspace')
 
 
     def PyExec(self):
@@ -43,9 +42,11 @@ class NormaliseSpectra(DataProcessorAlgorithm):
             single_spectrum = ExtractSpectra(InputWorkspace=self._input_ws, WorkspaceIndexList=idx)
             y_data = single_spectrum.readY(0)
             ymax = np.amax(y_data)
+            # raises a RuntimeError if the ymax is <= 0
             if ymax <= 0:
+                spectrum_no = single_spectrum.getSpectrum(0).getSpectrumNo()
                 DeleteWorkspace('single_spectrum')
-                raise RuntimeError("Spectrum number %d:" % (single_spectrum.getSpectrum(0).getSpectrumNo())\
+                raise RuntimeError("Spectrum number %d:" % (spectrum_no)\
                                    + "has a maximum y value of 0 or less. "\
                                    + "All spectra must have a maximum y value more than 0")
             Scale(InputWorkspace=single_spectrum, Operation="Multiply",
@@ -65,7 +66,7 @@ class NormaliseSpectra(DataProcessorAlgorithm):
 
         self._input_ws_name = self.getPropertyValue('InputWorkspace')
         self._input_ws = mtd[self._input_ws_name]
-        self._output_ws_name= self.getPropertyValue('OutputWorkspace')
+        self._output_ws_name = self.getPropertyValue('OutputWorkspace')
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(NormaliseSpectra)
