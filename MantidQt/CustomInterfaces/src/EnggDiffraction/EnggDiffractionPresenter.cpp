@@ -597,22 +597,28 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
 			// FocusedWSName is not going to change as its always going to be from single workspace
 			runEvaluateFunctionAlg(Bk2BkExpFunctionStr, FocusedWSName, single_peak_out_WS);
 
+			// crop workspace so only the correct workspace index is plotted
+			runCropWorkspaceAlg(single_peak_out_WS);
+
+			if (i != size_t(0) || i == (rowCount-1)) {
+				runAppendSpectraAlg("engggui_fitting_single_peaks0", single_peak_out_WS);
+			}
           }
 
   }
 
 
   // get the functionStrFactory to generate the string for function property
-  Bk2BkExpFunctionStr =
-      functionStrFactory(table, FocusedFitPeaksTableName, rowCount-1);
-  single_peak_out_WS = "engggui_fitting_single_peaks";
+/// Bk2BkExpFunctionStr =
+ ///     functionStrFactory(table, FocusedFitPeaksTableName, rowCount-1);
+ // single_peak_out_WS = "engggui_fitting_single_peaks";
 
   // run EvaluateFunction algorithm with focused workspace to produce
   // the correct fit function
-  runEvaluateFunctionAlg(Bk2BkExpFunctionStr, FocusedWSName, single_peak_out_WS);
+///  runEvaluateFunctionAlg(Bk2BkExpFunctionStr, FocusedWSName, single_peak_out_WS);
 
   // crop workspace so only the correct workspace index is plotted
-  runCropWorkspaceAlg(single_peak_out_WS);
+///  runCropWorkspaceAlg(single_peak_out_WS);
 
   m_fittingFinishedOK = true;
 }
@@ -681,7 +687,7 @@ void EnggDiffractionPresenter::runCropWorkspaceAlg(std::string workspaceName) {
   }
 }
 
-void runAppendSpectraAlg(std::string workspace1Name,
+void EnggDiffractionPresenter::runAppendSpectraAlg(std::string workspace1Name,
                          std::string workspace2Name) {
   auto appendSpec = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "CropWorkspace");
