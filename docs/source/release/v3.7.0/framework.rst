@@ -42,6 +42,15 @@ Improved
   `#15398 <https://github.com/mantidproject/mantid/pull/15398>`_
 -  :ref:`SumSpectra <algm-SumSpectra>` fixed broken scaling of bins for the `WeightedSum=true` case.
 -  :ref:`LoadISISNexus <algm-LoadISISNexus>`now works correctly for data with non-contiguous detector IDs for either monitors or detectors. `#15562 <https://github.com/mantidproject/mantid/pull/15562>`_
+-  A bug has been fixed in several algorithms where they would crash when given a :ref:`WorkspaceGroup <WorkspaceGroup>` as input (if run in the GUI).
+  These algorithms are:
+  - :ref:`AsymmetryCalc <algm-AsymmetryCalc>`
+  - :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>`
+  - :ref:`ConvertToDistribution <algm-ConvertToDistribution>`
+  - :ref:`ChangeTimeZero <algm-ChangeTimeZero>`
+  - :ref:`FFT <algm-FFT>`
+  - :ref:`MaxEnt <algm-MaxEnt>`
+  `#15584 <https://github.com/mantidproject/mantid/pull/15584>`_
 
 Deprecated
 ##########

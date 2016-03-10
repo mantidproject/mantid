@@ -6,8 +6,10 @@ Description of work.
 
 Fixes #xxxx.
 
-[Release notes](/docs/source/release/)
-<!-- Replace with a link above to the updated file or state "Does not need to be in the release notes." -->
+<!-- RELEASE NOTES
+Either edit the file in docs/source/release/... and it will be in your pull request or state
+*Does not need to be in the release notes.*
+-->
 
 ---
 

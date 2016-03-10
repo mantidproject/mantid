@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAlgorithms/MaxEnt.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -10,6 +11,16 @@
 
 using namespace Mantid::API;
 using Mantid::MantidVec;
+
+/**
+ * This is a test class that exists to test the method validateInputs()
+ */
+class TestMaxEnt : public Mantid::Algorithms::MaxEnt {
+public:
+  std::map<std::string, std::string> wrapValidateInputs() {
+    return this->validateInputs();
+  }
+};
 
 class MaxEntTest : public CxxTest::TestSuite {
 public:
@@ -240,6 +251,35 @@ public:
     TS_ASSERT_DELTA(data->readY(1)[35], 0.3266, 0.0001);
     TS_ASSERT_DELTA(data->readY(1)[36], 0.6101, 0.0001);
     TS_ASSERT_DELTA(data->readY(1)[37], 0.8074, 0.0001);
+  }
+
+  /**
+ * Test that the algorithm can handle a WorkspaceGroup as input without
+ * crashing
+ * We have to use the ADS to test WorkspaceGroups
+ */
+  void testValidateInputsWithWSGroup() {
+    auto ws1 = boost::static_pointer_cast<Workspace>(
+        WorkspaceCreationHelper::Create2DWorkspace(5, 10));
+    auto ws2 = boost::static_pointer_cast<Workspace>(
+        WorkspaceCreationHelper::Create2DWorkspace(5, 10));
+    AnalysisDataService::Instance().add("workspace1", ws1);
+    AnalysisDataService::Instance().add("workspace2", ws2);
+    auto group = boost::make_shared<WorkspaceGroup>();
+    AnalysisDataService::Instance().add("group", group);
+    group->add("workspace1");
+    group->add("workspace2");
+    TestMaxEnt alg;
+    alg.initialize();
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "group"));
+    alg.setPropertyValue("MaxIterations", "1");
+    alg.setPropertyValue("ReconstructedImage", "image");
+    alg.setPropertyValue("ReconstructedData", "data");
+    alg.setPropertyValue("EvolChi", "evolChi");
+    alg.setPropertyValue("EvolAngle", "evolAngle");
+    TS_ASSERT_THROWS_NOTHING(alg.wrapValidateInputs());
+    AnalysisDataService::Instance().clear();
   }
 
   MatrixWorkspace_sptr createWorkspaceReal(size_t maxt, double phase) {
