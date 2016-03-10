@@ -525,6 +525,7 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
                  << std::endl;
 
   MatrixWorkspace_sptr focusedWS;
+  const std::string FocusedWSName = "engggui_fitting_focused_ws";
   m_fittingFinishedOK = false;
 
   // load the focused workspace file to preform single peak fits
@@ -533,7 +534,6 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
         Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
     load->initialize();
     load->setPropertyValue("Filename", focusedRunNo);
-    const std::string FocusedWSName = "engggui_fitting_focused_ws";
     load->setPropertyValue("OutputWorkspace", FocusedWSName);
     load->execute();
 
@@ -550,35 +550,48 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
   }
 
   // run the algorithm EnggFitPeaks with workspace loaded above
-  auto EnggFitPeaks =
+  auto enggFitPeaks =
       Mantid::API::AlgorithmManager::Instance().createUnmanaged("EnggFitPeaks");
   try {
-    EnggFitPeaks->initialize();
-    EnggFitPeaks->setProperty("InputWorkspace", focusedWS);
+    enggFitPeaks->initialize();
+    enggFitPeaks->setProperty("InputWorkspace", focusedWS);
     if (!ExpectedPeaks.empty()) {
-      EnggFitPeaks->setProperty("ExpectedPeaks", ExpectedPeaks);
+      enggFitPeaks->setProperty("ExpectedPeaks", ExpectedPeaks);
     }
-    const std::string FocusedFitPeaksWSName =
-        "engggui_fitting_focused_fitpeaks";
-    EnggFitPeaks->setProperty("FittedPeaks", FocusedFitPeaksWSName);
-    EnggFitPeaks->execute();
+    const std::string FocusedFitPeaksWSName = "engggui_fitting_fitpeaks_params";
+    enggFitPeaks->setProperty("FittedPeaks", FocusedFitPeaksWSName);
+    enggFitPeaks->execute();
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm EnggFitPeaks "
                      "successfully for bank, "
                      // bank name
                      "Error description: " +
                          static_cast<std::string>(re.what()) +
-                         " Please check also the log message for detail.";
+                         " Please check also the log message for detail."
+                  << std::endl;
+    ;
     throw;
   }
 
   //  run EvaluateFunction algorithm with focused workspace
   auto evalFunc = Mantid::API::AlgorithmManager::Instance().createUnmanaged("EvaluateFunction");
-
-
-
-
-
+  g_log.notice() << "EvaluateFunction algorithm has started" << std::endl;
+  try {
+	  evalFunc->initialize();
+	  std::string function = "name=LinearBackground,A0=-0.00226199, "
+		  "A1=-1.64144e-07;name=BackToBackExponential,I="
+		  "12.3639,A=0.603249,B=0.0596724,X0=13352.5,S=2.71653";
+	  evalFunc->setProperty("Function", function);
+	  evalFunc->setProperty("InputWorkspace", FocusedWSName);
+	  std::string outputWorkspace = "engggui_fitting_single_peak";
+	  evalFunc->setProperty("OutputWorkspace", outputWorkspace);
+	  evalFunc->execute();
+  }
+  catch (std::runtime_error &re) {
+	  g_log.error() << "Could not run the algorithm EvaluateFunction, "
+		  "Error description: " +
+		  static_cast<std::string>(re.what()) << std::endl;
+  }
   m_fittingFinishedOK = true;
 }
 
