@@ -773,8 +773,7 @@ public:
                      extractStringLog(*secondMatrixWS, "measurement_type"));
   }
 
-  void test_that_non_contiguous_data_loads_for_excluded_monitors()
-  {
+  void test_that_non_contiguous_data_loads_for_excluded_monitors() {
     /*
     Monitors can be found at detID: 145, 146, 147, 148
     */
@@ -790,8 +789,8 @@ public:
     TS_ASSERT(ld.isExecuted());
 
     // Assert
-    MatrixWorkspace_sptr ws
-        = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
     TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
     TSM_ASSERT_EQUALS("Should have 168 detectors (no monitors)",
                       ws->getNumberHistograms(), 168);
@@ -831,10 +830,12 @@ public:
     TSM_ASSERT_EQUALS(
         "Detector at WS index 143 should have a spectrum number of 144", 144,
         ws->getSpectrum(143)->getSpectrumNo());
-    TSM_ASSERT_EQUALS("Detector at WS index 142 should have a detector ID of 143",
-                      143, ws->getDetector(142)->getID());
-    TSM_ASSERT_EQUALS("Detector at WS index 143 should have a detector ID of 144",
-                      144, ws->getDetector(143)->getID());
+    TSM_ASSERT_EQUALS(
+        "Detector at WS index 142 should have a detector ID of 143", 143,
+        ws->getDetector(142)->getID());
+    TSM_ASSERT_EQUALS(
+        "Detector at WS index 143 should have a detector ID of 144", 144,
+        ws->getDetector(143)->getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -898,10 +899,12 @@ public:
     TSM_ASSERT_EQUALS(
         "Monitor at WS index 144 should have a spectrum number of 145", 145,
         ws->getSpectrum(144)->getSpectrumNo());
-    TSM_ASSERT_EQUALS("Detector at WS index 142 should have a detector ID of 143",
-                      143, ws->getDetector(142)->getID());
-    TSM_ASSERT_EQUALS("Detector at WS index 144 should have a detector ID of 145",
-                      145, ws->getDetector(144)->getID());
+    TSM_ASSERT_EQUALS(
+        "Detector at WS index 142 should have a detector ID of 143", 143,
+        ws->getDetector(142)->getID());
+    TSM_ASSERT_EQUALS(
+        "Detector at WS index 144 should have a detector ID of 145", 145,
+        ws->getDetector(144)->getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -986,15 +989,18 @@ public:
     TSM_ASSERT_EQUALS(
         "Detector at WS index 143 should have a spectrum number of 144", 144,
         ws->getSpectrum(143)->getSpectrumNo());
-    TSM_ASSERT_EQUALS("Detector at WS index 142 should have a detector ID of 143",
-                      143, ws->getDetector(142)->getID());
-    TSM_ASSERT_EQUALS("Detector at WS index 143 should have a detector ID of 144",
-                      144, ws->getDetector(143)->getID());
+    TSM_ASSERT_EQUALS(
+        "Detector at WS index 142 should have a detector ID of 143", 143,
+        ws->getDetector(142)->getID());
+    TSM_ASSERT_EQUALS(
+        "Detector at WS index 143 should have a detector ID of 144", 144,
+        ws->getDetector(143)->getID());
 
-    TSM_ASSERT_EQUALS("Monitor at WS index 0 should have a spectrum number of 145",
-                      145, mon_ws->getSpectrum(0)->getSpectrumNo());
-    TSM_ASSERT_EQUALS("Monitor at WS index 0 should have a detector ID of 145", 145,
-                      mon_ws->getDetector(0)->getID());
+    TSM_ASSERT_EQUALS(
+        "Monitor at WS index 0 should have a spectrum number of 145", 145,
+        mon_ws->getSpectrum(0)->getSpectrumNo());
+    TSM_ASSERT_EQUALS("Monitor at WS index 0 should have a detector ID of 145",
+                      145, mon_ws->getDetector(0)->getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -1047,21 +1053,24 @@ public:
       TSM_ASSERT("Should be in workspace", detIDtoWSIndexMap.count(detID) == 0);
     }
 
-
     // Check that the data has the expected spectrum number and the expected
     // detecor ID (for some sample spectra)
-    TSM_ASSERT_EQUALS("Detector at WS index 0 should have a spectrum number of 50",
-                      50, ws->getSpectrum(0)->getSpectrumNo());
-    TSM_ASSERT_EQUALS("Detector at WS index 0 should have a detector ID of 50", 50,
-                      ws->getDetector(0)->getID());
+    TSM_ASSERT_EQUALS(
+        "Detector at WS index 0 should have a spectrum number of 50", 50,
+        ws->getSpectrum(0)->getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 0 should have a detector ID of 50",
+                      50, ws->getDetector(0)->getID());
 
-    TSM_ASSERT_EQUALS("Monitor at WS index 95 should have a spectrum number of 145",
-                      145, ws->getSpectrum(95)->getSpectrumNo());
-    TSM_ASSERT_EQUALS("Detector at WS index 95 should have a detector ID of 145",
-                      145, ws->getDetector(95)->getID());
+    TSM_ASSERT_EQUALS(
+        "Monitor at WS index 95 should have a spectrum number of 145", 145,
+        ws->getSpectrum(95)->getSpectrumNo());
+    TSM_ASSERT_EQUALS(
+        "Detector at WS index 95 should have a detector ID of 145", 145,
+        ws->getDetector(95)->getID());
 
-    TSM_ASSERT_EQUALS("Monitor at WS index 96 should have a spectrum number of 146",
-                      146, ws->getSpectrum(96)->getSpectrumNo());
+    TSM_ASSERT_EQUALS(
+        "Monitor at WS index 96 should have a spectrum number of 146", 146,
+        ws->getSpectrum(96)->getSpectrumNo());
     TSM_ASSERT_THROWS(
         "Monitor at WS index 96 is not defined in the IDF, so should throw",
         ws->getDetector(96)->getID(), Mantid::Kernel::Exception::NotFoundError);
@@ -1146,15 +1155,18 @@ public:
 
     // Check that the data has the expected spectrum number and the expected
     // detecor ID (for some sample spectra)
-    TSM_ASSERT_EQUALS("Detector at WS index 24 should have a spectrum number of 73",
-                      73, ws->getSpectrum(24)->getSpectrumNo());
-    TSM_ASSERT_EQUALS("Detector at WS index 24 should have a detector ID of 73", 73,
-                      ws->getDetector(24)->getID());
+    TSM_ASSERT_EQUALS(
+        "Detector at WS index 24 should have a spectrum number of 73", 73,
+        ws->getSpectrum(24)->getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 24 should have a detector ID of 73",
+                      73, ws->getDetector(24)->getID());
 
-    TSM_ASSERT_EQUALS("Monitor at WS index 25 should have a spectrum number of 145",
-                      145, ws->getSpectrum(25)->getSpectrumNo());
-    TSM_ASSERT_EQUALS("Detector at WS index 25 should have a detector ID of 145",
-                      145, ws->getDetector(25)->getID());
+    TSM_ASSERT_EQUALS(
+        "Monitor at WS index 25 should have a spectrum number of 145", 145,
+        ws->getSpectrum(25)->getSpectrumNo());
+    TSM_ASSERT_EQUALS(
+        "Detector at WS index 25 should have a detector ID of 145", 145,
+        ws->getDetector(25)->getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
