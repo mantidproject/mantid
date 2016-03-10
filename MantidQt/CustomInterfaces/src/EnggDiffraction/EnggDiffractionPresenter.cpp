@@ -552,13 +552,13 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
   // run the algorithm EnggFitPeaks with workspace loaded above
   auto enggFitPeaks =
       Mantid::API::AlgorithmManager::Instance().createUnmanaged("EnggFitPeaks");
+  const std::string FocusedFitPeaksWSName = "engggui_fitting_fitpeaks_params";
   try {
     enggFitPeaks->initialize();
     enggFitPeaks->setProperty("InputWorkspace", focusedWS);
     if (!ExpectedPeaks.empty()) {
       enggFitPeaks->setProperty("ExpectedPeaks", ExpectedPeaks);
     }
-    const std::string FocusedFitPeaksWSName = "engggui_fitting_fitpeaks_params";
     enggFitPeaks->setProperty("FittedPeaks", FocusedFitPeaksWSName);
     enggFitPeaks->execute();
   } catch (std::runtime_error &re) {
@@ -616,6 +616,30 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
 
   m_fittingFinishedOK = true;
 }
+
+std::string EnggDiffractionPresenter::getFunctionStr(
+    Mantid::API::ITableWorkspace_sptr &paramTableWS, std::string tableName) {
+  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+  paramTableWS = ADS.retrieveWS<ITableWorkspace>(tableName);
+
+  size_t count = paramTableWS->rowCount();
+  double A0 = paramTableWS->cell<double>(size_t(0), size_t(1));
+  double A1 = paramTableWS->cell<double>(size_t(0), size_t(3));
+  double I = paramTableWS->cell<double>(size_t(0), size_t(13));
+  double A = paramTableWS->cell<double>(size_t(0), size_t(7));
+  double B = paramTableWS->cell<double>(size_t(0), size_t(9));
+  double X0 = paramTableWS->cell<double>(size_t(0), size_t(5));
+  double S = paramTableWS->cell<double>(size_t(0), size_t(11));
+
+  std::string functionStr = "name=LinearBackground,A0=" + std::to_string(A0) +
+                            "A1=" + std::to_string(A1) +
+                            ";name=BackToBackExponential,I=" +
+                            std::to_string(I) + ",A=" + std::to_string(A) +
+                            ",B=" + std::to_string(B) + ",X0=" +
+                            std::to_string(X0) + ",S=" + std::to_string(S);
+
+  return functionStr;
+};
 
 void EnggDiffractionPresenter::plotFitPeaksCurves() const {
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();

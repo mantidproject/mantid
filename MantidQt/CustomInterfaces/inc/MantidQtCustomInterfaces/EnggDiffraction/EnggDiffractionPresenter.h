@@ -92,6 +92,9 @@ public:
   void doFitting(const std::string &focusedRunNo,
                  const std::string &ExpectedPeaks);
 
+  std::string getFunctionStr(Mantid::API::ITableWorkspace_sptr &paramTableWS,
+                             std::string tableName);
+
   void plotFitPeaksCurves() const;
 
 protected:
