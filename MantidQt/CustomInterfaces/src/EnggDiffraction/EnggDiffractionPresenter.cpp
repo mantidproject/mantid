@@ -659,6 +659,23 @@ void EnggDiffractionPresenter::runCropWorkspaceAlg(std::string workspaceName) {
   }
 }
 
+void runAppendSpectra(std::string workspace1Name, std::string workspace2Name) {
+  auto appendSpec = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "CropWorkspace");
+  try {
+    appendSpec->initialize();
+    appendSpec->setProperty("InputWorkspace1", workspace1Name);
+    appendSpec->setProperty("InputWorkspace2", workspace2Name);
+    appendSpec->setProperty("OutputWorkspace", workspace1Name);
+    appendSpec->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Could not run the algorithm AppendWorkspace, "
+                     "Error description: " +
+                         static_cast<std::string>(re.what())
+                  << std::endl;
+  }
+}
+
 void EnggDiffractionPresenter::plotFitPeaksCurves() const {
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   auto singlPeaksWS =
