@@ -1,14 +1,19 @@
-#ifndef MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
+#ifndef MANTID_CUSTOMINTERFACES_IREFLTABLEPRESENTER_H
+#define MANTID_CUSTOMINTERFACES_IREFLTABLEPRESENTER_H
+
+#include <map>
+#include <string>
 
 #include "MantidKernel/System.h"
 
+#include <QVariant>
+
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class IReflPresenter
+/** @class IReflTablePresenter
 
-IReflPresenter is an interface which defines the functions any reflectometry
-interface presenter needs to support.
+IReflTablePresenter is an interface which defines the functions any data
+processor interface presenter needs to support.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,18 +36,37 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IReflPresenter {
+class IReflTablePresenter {
 public:
-  virtual ~IReflPresenter(){};
+  virtual ~IReflTablePresenter(){};
 
   enum Flag {
-    SearchFlag,
-    ICATSearchCompleteFlag,
-    TransferFlag,
+    SaveFlag,
+    SaveAsFlag,
+    AppendRowFlag,
+    PrependRowFlag,
+    DeleteRowFlag,
+    ProcessFlag,
+    GroupRowsFlag,
+    OpenTableFlag,
+    NewTableFlag,
+    TableUpdatedFlag,
+    ExpandSelectionFlag,
+    OptionsDialogFlag,
+    ClearSelectedFlag,
+    CopySelectedFlag,
+    CutSelectedFlag,
+    PasteSelectedFlag,
+    ImportTableFlag,
+    ExportTableFlag,
+    PlotRowFlag,
+    PlotGroupFlag
   };
 
   // Tell the presenter something happened
-  virtual void notify(IReflPresenter::Flag flag) = 0;
+  virtual void notify(IReflTablePresenter::Flag flag) = 0;
+  virtual const std::map<std::string, QVariant> &options() const = 0;
+  virtual void setOptions(const std::map<std::string, QVariant> &options) = 0;
 };
 }
 }

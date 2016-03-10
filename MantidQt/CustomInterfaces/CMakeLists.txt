@@ -87,6 +87,7 @@ set ( SRC_FILES
 	src/Reflectometry/ReflNexusMeasurementItemSource.cpp
 	src/Reflectometry/ReflSearchModel.cpp
 	src/Reflectometry/ReflTableSchema.cpp
+	src/Reflectometry/ReflTableViewPresenter.cpp
 	src/Reflectometry/TransferResults.cpp
 	src/SANSBackgroundCorrectionSettings.cpp
 	src/SANSBackgroundCorrectionWidget.cpp
@@ -209,6 +210,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/ProgressableView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/MeasurementItem.h
 	inc/MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h
 	inc/MantidQtCustomInterfaces/Reflectometry/QtReflMainView.h
@@ -224,6 +226,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTableView.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflTableViewPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflVectorString.h
 	inc/MantidQtCustomInterfaces/Reflectometry/TransferResults.h
@@ -447,6 +450,7 @@ set ( TEST_FILES
 	ReflMainViewPresenterTest.h
 	ReflMeasureTransferStrategyTest.h
 	ReflNexusMeasurementItemSourceTest.h
+	ReflTableViewPresenterTest.h
 	StackOfImagesDirsTest.h
 	TomographyIfacePresenterTest.h
 	UserInputValidatorTest.h

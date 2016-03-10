@@ -46,6 +46,9 @@ public:
   virtual void showTable(QReflTableModel_sptr model) = 0;
 
   // Dialog/Prompt methods
+  virtual std::string askUserString(const std::string &prompt,
+                                    const std::string &title,
+                                    const std::string &defaultValue) = 0;
   virtual bool askUserYesNo(std::string prompt, std::string title) = 0;
   virtual void giveUserWarning(std::string prompt, std::string title) = 0;
   virtual void giveUserCritical(std::string prompt, std::string title) = 0;
