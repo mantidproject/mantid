@@ -52,7 +52,7 @@ namespace Factory
     Q_OBJECT
   public:
     static WidgetFactory* Instance();
-    virtual ~WidgetFactory();
+    ~WidgetFactory() override;
 
     MantidQt::SliceViewer::SliceViewerWindow* createSliceViewerWindow(const QString& wsName, const QString& label);
     MantidQt::SliceViewer::SliceViewerWindow* getSliceViewerWindow(const QString& wsName, const QString& label);

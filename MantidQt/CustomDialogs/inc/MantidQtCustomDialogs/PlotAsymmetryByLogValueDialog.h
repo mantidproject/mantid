@@ -59,14 +59,14 @@ public:
   /// Constructor
   PlotAsymmetryByLogValueDialog(QWidget *parent = 0);
   ///Destructor
-  ~PlotAsymmetryByLogValueDialog();
+  ~PlotAsymmetryByLogValueDialog() override;
 
 private:
 
   /** @name Virtual functions. */
   //@{
   /// Create the layout
-  void initLayout();
+  void initLayout() override;
   //@}
 	
 private slots:

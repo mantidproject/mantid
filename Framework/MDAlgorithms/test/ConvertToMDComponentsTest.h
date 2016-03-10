@@ -311,7 +311,7 @@ public:
 
     Mantid::API::FrameworkManager::Instance();
   }
-  ~ConvertToMDComponentsTest() {
+  ~ConvertToMDComponentsTest() override {
     AnalysisDataService::Instance().remove("testWSProcessed");
   }
 

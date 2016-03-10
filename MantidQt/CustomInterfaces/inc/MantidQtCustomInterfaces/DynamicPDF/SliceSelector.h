@@ -41,7 +41,7 @@ public:
 
 public:
   SliceSelector(QWidget *parent = nullptr);
-  ~SliceSelector();
+  ~SliceSelector() override;
 
 private slots:
   void showHelp();

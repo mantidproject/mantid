@@ -70,28 +70,30 @@ std::map<std::string, std::string> CalMuonDetectorPhases::validateInputs() {
 
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
-  // Check units, should be microseconds
-  Unit_const_sptr unit = inputWS->getAxis(0)->unit();
-  if ((unit->label().ascii() != "Microseconds") &&
-      (unit->label().ascii() != "microsecond")) {
-    result["InputWorkspace"] = "InputWorkspace units must be microseconds";
-  }
+  if (inputWS) {
+    // Check units, should be microseconds
+    Unit_const_sptr unit = inputWS->getAxis(0)->unit();
+    if ((unit->label().ascii() != "Microseconds") &&
+        (unit->label().ascii() != "microsecond")) {
+      result["InputWorkspace"] = "InputWorkspace units must be microseconds";
+    }
 
-  // Check spectra numbers are valid, if specified
-  int nspec = static_cast<int>(inputWS->getNumberHistograms());
-  std::vector<int> forward = getProperty("ForwardSpectra");
-  std::vector<int> backward = getProperty("BackwardSpectra");
-  for (int spec : forward) {
-    if (spec < 1 || spec > nspec) {
-      result["ForwardSpectra"] = "Invalid spectrum numbers in ForwardSpectra";
+    // Check spectra numbers are valid, if specified
+    int nspec = static_cast<int>(inputWS->getNumberHistograms());
+    std::vector<int> forward = getProperty("ForwardSpectra");
+    std::vector<int> backward = getProperty("BackwardSpectra");
+    for (int spec : forward) {
+      if (spec < 1 || spec > nspec) {
+        result["ForwardSpectra"] = "Invalid spectrum numbers in ForwardSpectra";
+      }
+    }
+    for (int spec : backward) {
+      if (spec < 1 || spec > nspec) {
+        result["BackwardSpectra"] =
+            "Invalid spectrum numbers in BackwardSpectra";
+      }
     }
   }
-  for (int spec : backward) {
-    if (spec < 1 || spec > nspec) {
-      result["BackwardSpectra"] = "Invalid spectrum numbers in BackwardSpectra";
-    }
-  }
-
   return result;
 }
 //----------------------------------------------------------------------------------------------
@@ -170,6 +172,7 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
     if (!fit->isExecuted() || status != success) {
       std::ostringstream error;
       error << "Fit failed for spectrum " << ispec;
+      error << ": " << status;
       throw std::runtime_error(error.str());
     }
 

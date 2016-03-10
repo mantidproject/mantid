@@ -17,7 +17,7 @@ public:
 
   AlgorithmFactoryTest() {}
 
-  ~AlgorithmFactoryTest() {}
+  ~AlgorithmFactoryTest() override {}
 
   void testSubscribe() {
     Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm> *newTwo =

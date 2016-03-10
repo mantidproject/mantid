@@ -203,11 +203,7 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite
   }
 
 public:
-
-  void setUp()
-  {
-    FrameworkManager::Instance();
-  }
+  void setUp() override { FrameworkManager::Instance(); }
 
   void test_construction()
   {
@@ -253,7 +249,6 @@ public:
     auto ownedPeaksWorkspace = presenter.presentedWorkspaces();
     TS_ASSERT_EQUALS(1, ownedPeaksWorkspace.size());
   }
-
 
   void test_update()
   {
@@ -426,12 +421,12 @@ public:
   void test_setForegroundColour()
   {
     const int nPeaks = 2;
-    const QColor colourToChangeTo = Qt::red;
+    const PeakViewColor colorToChangeTo(Qt::red, Qt::red, Qt::red);
 
     // Create a mock view object/product that will be returned by the mock factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView); 
-    EXPECT_CALL(*pMockView, changeForegroundColour(colourToChangeTo)).Times(1); // Expect that the foreground colour will be changed.
+    EXPECT_CALL(*pMockView, changeForegroundColour(colorToChangeTo)).Times(1); // Expect that the foreground colour will be changed.
     EXPECT_CALL(*pMockView, updateView()).Times(1); // Only one view for this presenter.
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
@@ -444,21 +439,24 @@ public:
     presenterBuilder.withViewFactory(mockViewFactory); // Change the view factories to deliver the expected mock object
     auto concretePresenter = presenterBuilder.create();
 
-    concretePresenter->setForegroundColor(colourToChangeTo);
+    concretePresenter->setForegroundColor(colorToChangeTo);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
   }
 
   void test_setBackgroundColour()
   {
+
     const int nPeaks = 2;
-    const QColor colourToChangeTo = Qt::red;
+    const PeakViewColor colorToChangeTo;
 
     // Create a mock view object/product that will be returned by the mock factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
-    EXPECT_CALL(*pMockView, changeBackgroundColour(colourToChangeTo)).Times(1); // Expect that the background colour will be changed.
+
+    EXPECT_CALL(*pMockView, changeBackgroundColour(colorToChangeTo)).Times(1); // Expect that the background colour will be changed.
     EXPECT_CALL(*pMockView, updateView()).Times(1); // Expect that each widget will be updated.
+
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
@@ -470,7 +468,7 @@ public:
     presenterBuilder.withViewFactory(mockViewFactory); // Change the view factories to deliver the expected mock object
     auto concretePresenter = presenterBuilder.create();
 
-    concretePresenter->setBackgroundColor(colourToChangeTo);
+    concretePresenter->setBackgroundColor(colorToChangeTo);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
   }
@@ -842,6 +840,7 @@ public:
       ConcretePeaksPresenter_sptr concretePeaksPresenter = builder.create();
       TSM_ASSERT("No peak add mode. As is not in the HKL frame", !concretePeaksPresenter->hasPeakAddMode());
   }
+
 
 };
 

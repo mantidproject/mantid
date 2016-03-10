@@ -17,7 +17,7 @@ using namespace Mantid::DataHandling;
 
 class LoadTest : public CxxTest::TestSuite {
 public:
-  void tearDown() { AnalysisDataService::Instance().clear(); }
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void testViaProxy() {
     IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");

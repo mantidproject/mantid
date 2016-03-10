@@ -29,7 +29,7 @@ public:
   MockPeakTransform()
       : PeakTransform("H (Lattice)", "K (Lattice)", regex("^H.*$"),
                       regex("^K.*$"), regex("^L.*$")) {}
-  ~MockPeakTransform() {}
+  ~MockPeakTransform() override {}
   MOCK_CONST_METHOD0(clone, PeakTransform_sptr());
   MOCK_CONST_METHOD1(transform,
                      Mantid::Kernel::V3D(const Mantid::Kernel::V3D &));

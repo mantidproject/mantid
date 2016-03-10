@@ -190,9 +190,8 @@ public:
   void clear() override {
     m_queueLock.lock();
     // Empty out the queue and delete the pointers!
-    for (std::deque<Task *>::iterator it = m_queue.begin(); it != m_queue.end();
-         it++)
-      delete *it;
+    for (auto &task : m_queue)
+      delete task;
     m_queue.clear();
     m_cost = 0;
     m_costExecuted = 0;
@@ -297,9 +296,8 @@ public:
   void clear() override {
     m_queueLock.lock();
     // Empty out the queue and delete the pointers!
-    for (std::multimap<double, Task *>::iterator it = m_map.begin();
-         it != m_map.end(); it++)
-      delete it->second;
+    for (auto &taskPair : m_map)
+      delete taskPair.second;
     m_map.clear();
     m_cost = 0;
     m_costExecuted = 0;

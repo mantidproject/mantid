@@ -49,7 +49,7 @@ public:
     AnalysisDataService::Instance().add("testSpace", space);
   }
 
-  ~IntegrationTest() { AnalysisDataService::Instance().clear(); }
+  ~IntegrationTest() override { AnalysisDataService::Instance().clear(); }
 
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());

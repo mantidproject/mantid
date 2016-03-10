@@ -38,8 +38,8 @@ public:
   {
     emit parameterChanged(funcIndex, paramName);
   }
-  void plotGuess() { emit plotGuessRequested(); }
-  void clearGuess() { emit removeGuessRequested(); }
+  void plotGuess() override { emit plotGuessRequested(); }
+  void clearGuess() override { emit removeGuessRequested(); }
 
   MOCK_CONST_METHOD1(function, IFunction_const_sptr(QString));
   MOCK_CONST_METHOD0(currentFunctionIndex, boost::optional<QString>());
@@ -103,8 +103,7 @@ public:
     API::FrameworkManager::Instance(); // To make sure everything is initialized
   }
 
-  void setUp()
-  {
+  void setUp() override {
     m_view = new NiceMock<MockALCPeakFittingView>();
     m_model = new NiceMock<MockALCPeakFittingModel>();
 
@@ -112,8 +111,7 @@ public:
     m_presenter->initialize();
   }
 
-  void tearDown()
-  {
+  void tearDown() override {
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
 

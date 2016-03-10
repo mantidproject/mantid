@@ -25,14 +25,14 @@ class BoxControllerSettingsAlgorithmImpl
   friend class BoxControllerSettingsAlgorithmTest;
 
 public:
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "BoxControllerSettingsAlgorithmImpl";
   }
-  virtual int version() const { return 1; }
-  virtual const std::string category() const { return "Testing"; }
-  virtual const std::string summary() const { return "Summary of this test."; }
-  void init() {}
-  void exec() {}
+  int version() const override { return 1; }
+  const std::string category() const override { return "Testing"; }
+  const std::string summary() const override { return "Summary of this test."; }
+  void init() override {}
+  void exec() override {}
 };
 
 class BoxControllerSettingsAlgorithmTest : public CxxTest::TestSuite {

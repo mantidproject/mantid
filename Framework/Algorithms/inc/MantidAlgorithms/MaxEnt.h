@@ -52,13 +52,15 @@ public:
   /// Algorithm's summary
   const std::string summary() const override;
 
+protected:
+  /// Validate the input properties
+  std::map<std::string, std::string> validateInputs() override;
+
 private:
   /// Initialise the algorithm's properties
   void init() override;
   /// Run the algorithm
   void exec() override;
-  /// Validate the input properties
-  std::map<std::string, std::string> validateInputs() override;
   // Calculates chi-square by solving the matrix equation A*x = b
   double calculateChi(const QuadraticCoefficients &coeffs, double a,
                       std::vector<double> &beta);

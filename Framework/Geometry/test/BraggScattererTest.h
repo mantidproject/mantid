@@ -43,7 +43,7 @@ private:
   class MockBraggScatterer : public BraggScatterer {
   public:
     MockBraggScatterer() : BraggScatterer() {}
-    ~MockBraggScatterer() {}
+    ~MockBraggScatterer() override {}
 
     MOCK_CONST_METHOD0(name, std::string());
     MOCK_CONST_METHOD0(clone, BraggScatterer_sptr());

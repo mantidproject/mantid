@@ -52,7 +52,7 @@ public:
 
 class PropertyManagerTest : public CxxTest::TestSuite {
 public:
-  void setUp() {
+  void setUp() override {
     manager = new PropertyManagerHelper;
     std::unique_ptr<Property> p =
         Mantid::Kernel::make_unique<PropertyWithValue<int>>("aProp", 1);
@@ -61,7 +61,7 @@ public:
     manager->declareProperty("yetAnotherProp", "itsValue");
   }
 
-  void tearDown() { delete manager; }
+  void tearDown() override { delete manager; }
 
   void testConstructor() {
     PropertyManagerHelper mgr;

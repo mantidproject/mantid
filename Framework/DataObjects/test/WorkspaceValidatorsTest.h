@@ -56,7 +56,7 @@ public:
     ws2->isDistribution(true);
   }
 
-  ~WorkspaceValidatorsTest() {
+  ~WorkspaceValidatorsTest() override {
     delete wavUnitVal;
     delete anyUnitVal;
     delete histVal;

@@ -119,10 +119,10 @@ private:
    */
   class SummingFunction : public IFunction1DSpectrum, public ParamFunction {
   public:
-    std::string name() const { return "SummingFunction"; }
+    std::string name() const override { return "SummingFunction"; }
 
     void function1DSpectrum(const FunctionDomain1DSpectrum &domain,
-                            FunctionValues &values) const {
+                            FunctionValues &values) const override {
       values.zeroCalculated();
 
       for (size_t i = 0; i < domain.size(); ++i) {
@@ -131,7 +131,7 @@ private:
     }
 
     void functionDeriv1DSpectrum(const FunctionDomain1DSpectrum &domain,
-                                 Jacobian &jacobian) {
+                                 Jacobian &jacobian) override {
       UNUSED_ARG(domain);
       UNUSED_ARG(jacobian);
     }
@@ -141,7 +141,7 @@ private:
   public:
     void poldiFunction1D(const std::vector<int> &indices,
                          const FunctionDomain1D &domain,
-                         FunctionValues &values) const {
+                         FunctionValues &values) const override {
       double totalSize = static_cast<double>(indices.size());
 
       for (size_t i = 0; i < values.size(); ++i) {

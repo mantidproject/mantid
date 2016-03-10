@@ -51,24 +51,24 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefSliderHandler : public SpectrumVi
     RefSliderHandler( Ui_RefImageViewer* ivUI );
 
     /// Configure the image scrollbars for the specified data and drawing area
-    void configureSliders( QRect drawArea,
-                           SpectrumView::SpectrumDataSource_sptr dataSource );
+    void
+    configureSliders(QRect drawArea,
+                     SpectrumView::SpectrumDataSource_sptr dataSource) override;
 
     /// Configure the horizontal scrollbar to cover the specified range
-    void configureHSlider( int nDataSteps,
-                           int nPixels );
+    void configureHSlider(int nDataSteps, int nPixels) override;
 
     /// Return true if the image horizontal scrollbar is enabled.
-    bool hSliderOn();
+    bool hSliderOn() override;
 
     /// Return true if the image vertical scrollbar is enabled.
-    bool vSliderOn();
+    bool vSliderOn() override;
 
     /// Get the range of columns to display in the image.
-    void getHSliderInterval( int &xMin, int &xMax );
+    void getHSliderInterval(int &xMin, int &xMax) override;
 
     /// Get the range of rows to display in the image.
-    void getVSliderInterval( int &yMin, int &yMax );
+    void getVSliderInterval(int &yMin, int &yMax) override;
 
   private:
     /// Configure the specified scrollbar to cover the specified range
