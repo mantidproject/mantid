@@ -550,18 +550,18 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
   }
 
   // run the algorithm EnggFitPeaks with workspace loaded above
-  auto alg =
+  auto EnggFitPeaks =
       Mantid::API::AlgorithmManager::Instance().createUnmanaged("EnggFitPeaks");
   try {
-    alg->initialize();
-    alg->setProperty("InputWorkspace", focusedWS);
+    EnggFitPeaks->initialize();
+    EnggFitPeaks->setProperty("InputWorkspace", focusedWS);
     if (!ExpectedPeaks.empty()) {
-      alg->setProperty("ExpectedPeaks", ExpectedPeaks);
+      EnggFitPeaks->setProperty("ExpectedPeaks", ExpectedPeaks);
     }
     const std::string FocusedFitPeaksWSName =
         "engggui_fitting_focused_fitpeaks";
-    alg->setProperty("FittedPeaks", FocusedFitPeaksWSName);
-    alg->execute();
+    EnggFitPeaks->setProperty("FittedPeaks", FocusedFitPeaksWSName);
+    EnggFitPeaks->execute();
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm EnggFitPeaks "
                      "successfully for bank, "
@@ -571,6 +571,13 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
                          " Please check also the log message for detail.";
     throw;
   }
+
+  //  run EvaluateFunction algorithm with focused workspace
+  auto evalFunc = Mantid::API::AlgorithmManager::Instance().createUnmanaged("EvaluateFunction");
+
+
+
+
 
   m_fittingFinishedOK = true;
 }
