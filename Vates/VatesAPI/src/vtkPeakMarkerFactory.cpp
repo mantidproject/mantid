@@ -185,7 +185,7 @@ stack.
     Mantid::Kernel::ReadLock lock(*m_workspace);
 
     const int resolution = 100;
-    double progressFactor = 1.0/double(numPeaks);
+    double progressFactor = 1.0 / static_cast<double>(numPeaks);
 
     vtkAppendPolyData *appendFilter = vtkAppendPolyData::New();
     // Go peak-by-peak
@@ -266,7 +266,7 @@ stack.
           vtkNew<vtkTensorGlyph> glyphFilter;
           setNormal(polygonSource.GetPointer(), axis);
           glyphFilter->SetInputData(peakDataSet.GetPointer());
-          glyphFilter->SetSourceConnection(0, polygonSource->GetOutputPort());
+          glyphFilter->SetSourceConnection(polygonSource->GetOutputPort());
           glyphFilter->ExtractEigenvaluesOff();
           glyphFilter->Update();
           appendFilter->AddInputData(glyphFilter->GetOutput());
@@ -277,22 +277,11 @@ stack.
       {
         vtkNew<vtkAxes> axis;
         axis->SymmetricOn();
-        axis->SetScaleFactor(0.3);
-
-        vtkNew<vtkTransform> transform;
-        const double rotationDegrees = 45;
-        transform->RotateX(rotationDegrees);
-        transform->RotateY(rotationDegrees);
-        transform->RotateZ(rotationDegrees);
-
-        vtkNew<vtkTransformPolyDataFilter> transformFilter;
-        transformFilter->SetTransform(transform.GetPointer());
-        transformFilter->SetInputConnection(axis->GetOutputPort());
-        transformFilter->Update();
+        axis->SetScaleFactor(0.2);
 
         vtkNew<vtkPVGlyphFilter> glyphFilter;
         glyphFilter->SetInputData(peakDataSet.GetPointer());
-        glyphFilter->SetSourceConnection(transformFilter->GetOutputPort());
+        glyphFilter->SetSourceConnection(axis->GetOutputPort());
         glyphFilter->Update();
         appendFilter->AddInputData(glyphFilter->GetOutput());
         appendFilter->Update();
