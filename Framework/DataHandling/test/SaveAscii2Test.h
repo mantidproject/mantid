@@ -162,6 +162,42 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
+  void test_valid_SpectrumMetaData() {
+    Mantid::DataObjects::Workspace2D_sptr wsToSave;
+    writeSampleWS(wsToSave);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+
+    TS_ASSERT_THROWS_NOTHING(
+        save.setProperty("SpectrumMetaData", "SpectrumNumber,Q,Angle"));
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    // has the algorithm written a file to disk?
+    TS_ASSERT(Poco::File(filename).exists());
+
+	// Now make some checks on the content of the file
+	std::ifstream in(filename.c_str());
+	int specID;
+	double qVal, angle;
+	std::string header1, header2, header3, header4, separator, comment;
+
+	// Test that the first few column headers, separator and first two bins are
+	// as expected
+	in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
+		separator >> header4 >> specID >> qVal >> angle;
+	TS_ASSERT_EQUALS(specID, 1);
+	TS_ASSERT_EQUALS(qVal, 1);
+	TS_ASSERT_EQUALS(angle, 1);
+	TS_ASSERT_EQUALS(comment, "#");
+	TS_ASSERT_EQUALS(separator, ",");
+	TS_ASSERT_EQUALS(header1, "X");
+	TS_ASSERT_EQUALS(header2, "Y");
+	TS_ASSERT_EQUALS(header3, "E");
+	TS_ASSERT_EQUALS(header4, "DX");
+
+  }
+
   void testExec_no_header() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -575,7 +611,7 @@ public:
   }
 
 private:
-  void writeSampleWS(Mantid::DataObjects::Workspace2D_sptr &wsToSave) {
+  void writeSampleWS(Mantid::DataObjects::Workspace2D_sptr &wsToSave, const bool &qAndAngle=false) {
     wsToSave = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
         WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
@@ -588,6 +624,10 @@ private:
         E[j] = 1.;
       }
     }
+
+	if (qAndAngle) {
+		// Add Q and Angle data to workspace
+	}
 
     AnalysisDataService::Instance().add(m_name, wsToSave);
   }
