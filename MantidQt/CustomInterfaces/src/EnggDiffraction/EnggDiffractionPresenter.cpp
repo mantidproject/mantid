@@ -577,27 +577,17 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   ITableWorkspace_sptr table =
       ADS.retrieveWS<ITableWorkspace>(FocusedFitPeaksWSName);
+
+  size_t rowCount = table->rowCount();
+
   // get the functionStrFactory to generate the string for function property
-  std::string Bk2BkExpFunction = functionStrFactory(table, FocusedFitPeaksWSName);
+  std::string Bk2BkExpFunction =
+      functionStrFactory(table, FocusedFitPeaksWSName, 0);
+  std::string single_peak_out_WS = "engggui_fitting_single_peaks";
 
   // run EvaluateFunction algorithm with focused workspace to produce
   // the correct fit function
-  std::string single_peak_out_WS = "engggui_fitting_single_peaks";
-  auto evalFunc = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-      "EvaluateFunction");
-  g_log.notice() << "EvaluateFunction algorithm has started" << std::endl;
-  try {
-    evalFunc->initialize();
-    evalFunc->setProperty("Function", Bk2BkExpFunction);
-    evalFunc->setProperty("InputWorkspace", FocusedWSName);
-    evalFunc->setProperty("OutputWorkspace", single_peak_out_WS);
-    evalFunc->execute();
-  } catch (std::runtime_error &re) {
-    g_log.error() << "Could not run the algorithm EvaluateFunction, "
-                     "Error description: " +
-                         static_cast<std::string>(re.what())
-                  << std::endl;
-  }
+  runEvaluateFunctionAlg(Bk2BkExpFunction, FocusedWSName, single_peak_out_WS);
 
   // crop workspace so only the correct workspace index is plotted
   auto cropWS = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
@@ -621,18 +611,18 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
 }
 
 std::string EnggDiffractionPresenter::functionStrFactory(
-    Mantid::API::ITableWorkspace_sptr &paramTableWS, std::string tableName) {
+    Mantid::API::ITableWorkspace_sptr &paramTableWS, std::string tableName,
+    size_t row) {
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   paramTableWS = ADS.retrieveWS<ITableWorkspace>(tableName);
 
-  size_t count = paramTableWS->rowCount();
-  double A0 = paramTableWS->cell<double>(size_t(0), size_t(1));
-  double A1 = paramTableWS->cell<double>(size_t(0), size_t(3));
-  double I = paramTableWS->cell<double>(size_t(0), size_t(13));
-  double A = paramTableWS->cell<double>(size_t(0), size_t(7));
-  double B = paramTableWS->cell<double>(size_t(0), size_t(9));
-  double X0 = paramTableWS->cell<double>(size_t(0), size_t(5));
-  double S = paramTableWS->cell<double>(size_t(0), size_t(11));
+  double A0 = paramTableWS->cell<double>(row, size_t(1));
+  double A1 = paramTableWS->cell<double>(row, size_t(3));
+  double I = paramTableWS->cell<double>(row, size_t(13));
+  double A = paramTableWS->cell<double>(row, size_t(7));
+  double B = paramTableWS->cell<double>(row, size_t(9));
+  double X0 = paramTableWS->cell<double>(row, size_t(5));
+  double S = paramTableWS->cell<double>(row, size_t(11));
 
   std::string functionStr = "name=LinearBackground,A0=" + std::to_string(A0) +
                             "A1=" + std::to_string(A1) +
@@ -643,6 +633,27 @@ std::string EnggDiffractionPresenter::functionStrFactory(
 
   return functionStr;
 };
+
+void EnggDiffractionPresenter::runEvaluateFunctionAlg(
+    std::string bk2BkExpFunction, std::string InputName,
+    std::string OutputName) {
+
+  auto evalFunc = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "EvaluateFunction");
+  g_log.notice() << "EvaluateFunction algorithm has started" << std::endl;
+  try {
+    evalFunc->initialize();
+    evalFunc->setProperty("Function", bk2BkExpFunction);
+    evalFunc->setProperty("InputWorkspace", InputName);
+    evalFunc->setProperty("OutputWorkspace", OutputName);
+    evalFunc->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Could not run the algorithm EvaluateFunction, "
+                     "Error description: " +
+                         static_cast<std::string>(re.what())
+                  << std::endl;
+  }
+}
 
 void EnggDiffractionPresenter::plotFitPeaksCurves() const {
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
