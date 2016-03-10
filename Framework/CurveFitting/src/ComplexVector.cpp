@@ -42,6 +42,13 @@ ComplexVector::ComplexVector(const gsl_vector_complex *v) {
   gsl_vector_complex_memcpy(m_vector, v);
 }
 
+/// Move from a gsl vector
+/// @param v :: A vector to move.
+ComplexVector::ComplexVector(gsl_vector_complex *&&v) {
+  m_vector = v;
+  v = nullptr;
+}
+
 /// Copy assignment operator
 /// @param v :: The other vector
 ComplexVector &ComplexVector::operator=(const ComplexVector &v) {
@@ -130,6 +137,11 @@ ComplexVector &ComplexVector::operator*=(const ComplexType d) {
   return *this;
 }
 
+/// Create a new ComplexVector and move all data to it.
+/// Destroys this vector.
+ComplexVector ComplexVector::move() {
+  return ComplexVector(std::move(m_vector));
+}
 
 /// The << operator.
 std::ostream &operator<<(std::ostream &ostr, const ComplexVector &v) {
@@ -142,6 +154,7 @@ std::ostream &operator<<(std::ostream &ostr, const ComplexVector &v) {
   ostr.flags(fflags);
   return ostr;
 }
+
 
 } // namespace CurveFitting
 } // namespace Mantid

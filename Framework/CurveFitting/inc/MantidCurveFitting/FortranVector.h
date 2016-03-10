@@ -39,9 +39,7 @@ class FortranVector : public VectorClass {
   typedef decltype(reinterpret_cast<VectorClass*>(nullptr)->operator[](0)) ElementRefType;
 public:
   /// Constructor
-  FortranVector();
-  /// Constructor
-  FortranVector(const size_t n);
+  FortranVector(const int n);
   /// Copy constructor
   FortranVector(const FortranVector &V);
   /// Constructor
@@ -50,6 +48,8 @@ public:
   ElementRefType operator()(int i);
   ElementConstType operator[](int i) const;
   ElementRefType operator[](int i);
+
+  VectorClass moveToBaseVector();
 
 private:
   /// Calculate the size (1D) of a matrix First
@@ -67,12 +67,8 @@ size_t FortranVector<VectorClass>::makeSize(int firstIndex, int lastIndex) {
 
 /// Constructor
 template <class VectorClass>
-FortranVector<VectorClass>::FortranVector() : VectorClass(), m_base(0) {}
-
-/// Constructor
-template <class VectorClass>
-FortranVector<VectorClass>::FortranVector(const size_t n)
-    : VectorClass(n), m_base(0) {}
+FortranVector<VectorClass>::FortranVector(const int n)
+    : VectorClass(makeSize(1, n)), m_base(1) {}
 
 /// Copy constructor
 template <class VectorClass>
@@ -116,6 +112,10 @@ typename FortranVector<VectorClass>::ElementRefType FortranVector<VectorClass>::
   return this->operator()(i);
 }
 
+template <class VectorClass>
+VectorClass FortranVector<VectorClass>::moveToBaseVector() {
+  return VectorClass::move();
+}
 
 } // namespace CurveFitting
 } // namespace Mantid

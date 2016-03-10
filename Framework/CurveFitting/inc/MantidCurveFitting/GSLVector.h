@@ -48,6 +48,8 @@ public:
   explicit GSLVector(const gsl_vector *v);
   /// Copy constructor.
   GSLVector(const GSLVector &v);
+  /// Move constructor.
+  GSLVector(std::vector<double> &&v);
   /// Copy assignment operator
   GSLVector &operator=(const GSLVector &v);
 
@@ -79,6 +81,12 @@ public:
   double norm2() const;
   /// Calculate the dot product
   double dot(const GSLVector &v) const;
+  /// Get index of the smallest element
+  size_t indexOfMinElement() const;
+  /// Create an index array that would sort this vector
+  std::vector<size_t> sortIndices(bool ascending = true) const;
+  /// Sort this vector in order defined by an index array
+  void sort(const std::vector<size_t>& indices) ;
 
   /// Add a vector
   GSLVector &operator+=(const GSLVector &v);
@@ -86,6 +94,10 @@ public:
   GSLVector &operator-=(const GSLVector &v);
   /// Multiply by a number
   GSLVector &operator*=(const double d);
+
+protected:
+  /// Create a new GSLVector and move all data to it. Destroys this vector.
+  GSLVector move();
 
 private:
   /// Default element storage

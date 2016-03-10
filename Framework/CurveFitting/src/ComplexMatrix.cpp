@@ -55,6 +55,12 @@ ComplexMatrix::ComplexMatrix(const ComplexMatrixMult3 &mult3)
   *this = mult3;
 }
 
+/// Move constructor
+ComplexMatrix::ComplexMatrix(gsl_matrix_complex *&&gslMatrix) {
+  m_matrix = gslMatrix;
+  gslMatrix = nullptr;
+}
+
 /// Destructor.
 ComplexMatrix::~ComplexMatrix() {
   if (m_matrix) {
@@ -281,7 +287,7 @@ ComplexVector ComplexMatrix::copyRow(size_t i) const {
     throw std::out_of_range("ComplexMatrix row index is out of range.");
   }
   auto rowView = gsl_matrix_complex_const_row(gsl(), i);
-  return ComplexVector(&rowView.vector);
+  return ComplexVector(static_cast<const gsl_vector_complex*>(&rowView.vector));
 }
 
 /// Copy a column into a GSLVector
@@ -291,7 +297,26 @@ ComplexVector ComplexMatrix::copyColumn(size_t i) const {
     throw std::out_of_range("ComplexMatrix column index is out of range.");
   }
   auto columnView = gsl_matrix_complex_const_column(gsl(), i);
-  return ComplexVector(&columnView.vector);
+  return ComplexVector(static_cast<const gsl_vector_complex*>(&columnView.vector));
+}
+
+/// Sort columns in order defined by an index array
+/// @param indices :: Indices defining the order of columns in sorted matrix.
+void ComplexMatrix::sortColumns(const std::vector<size_t>& indices) {
+  auto matrix = gsl_matrix_complex_alloc(size1(), size2());
+  for(size_t col = 0; col < size2(); ++col) {
+    auto col1 = indices[col];
+    for(size_t row = 0; row < size1(); ++row) {
+      gsl_matrix_complex_set(matrix, row, col, gsl_matrix_complex_get(m_matrix, row, col1));
+    }
+  }
+  std::swap(matrix, m_matrix);
+  gsl_matrix_complex_free(matrix);
+}
+
+/// Create a new matrix and move the data to it.
+ComplexMatrix ComplexMatrix::move() {
+  return ComplexMatrix(std::move(m_matrix));
 }
 
 } // namespace CurveFitting

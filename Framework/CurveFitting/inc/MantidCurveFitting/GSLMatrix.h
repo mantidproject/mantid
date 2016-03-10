@@ -98,13 +98,6 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_CURVEFITTING_DLL GSLMatrix {
-  /// The pointer to the GSL matrix
-  //gsl_matrix *m_matrix;
-  /// Default element storage
-  std::vector<double> m_data;
-  /// The pointer to the GSL vector
-  gsl_matrix_view m_view;
-
 public:
   /// Constructor
   GSLMatrix();
@@ -186,11 +179,21 @@ public:
   double det();
   /// Calculate the eigensystem of a symmetric matrix
   void eigenSystem(GSLVector &eigenValues, GSLMatrix &eigenVectors);
-
   Tr<GSLMatrix> tr() {return Tr<GSLMatrix>(*this);}
+
+protected:
   /// Type of the matrix elements.
   typedef double ElementConstType;
   typedef double& ElementRefType;
+  /// Create a new matrix and move the data to it.
+  GSLMatrix move();
+private:
+  /// "Move" constructor
+  GSLMatrix(std::vector<double> &&data, size_t nx, size_t ny);
+  /// Default element storage
+  std::vector<double> m_data;
+  /// The pointer to the GSL vector
+  gsl_matrix_view m_view;
 };
 
 /// Overloaded operator for matrix multiplication

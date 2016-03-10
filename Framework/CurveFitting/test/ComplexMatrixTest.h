@@ -450,6 +450,30 @@ public:
     TS_ASSERT(m(1, 0) == v21);
     TS_ASSERT(m(1, 1) == v22);
   }
+
+  void test_sort_columns() {
+    ComplexMatrix m(3, 3);
+    m(0, 0) = v11;
+    m(1, 0) = v11;
+    m(2, 0) = v11;
+    m(0, 1) = v22;
+    m(1, 1) = v22;
+    m(2, 1) = v22;
+    m(0, 2) = v33;
+    m(1, 2) = v33;
+    m(2, 2) = v33;
+    std::vector<size_t> indices{2, 0, 1};
+    m.sortColumns(indices);
+    TS_ASSERT_EQUALS(m(0, 0), v33);
+    TS_ASSERT_EQUALS(m(1, 0), v33);
+    TS_ASSERT_EQUALS(m(2, 0), v33);
+    TS_ASSERT_EQUALS(m(0, 1), v11);
+    TS_ASSERT_EQUALS(m(1, 1), v11);
+    TS_ASSERT_EQUALS(m(2, 1), v11);
+    TS_ASSERT_EQUALS(m(0, 2), v22);
+    TS_ASSERT_EQUALS(m(1, 2), v22);
+    TS_ASSERT_EQUALS(m(2, 2), v22);
+  }
 };
 
 #endif /*ComplexMatrixTEST_H_*/

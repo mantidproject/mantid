@@ -146,9 +146,6 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_CURVEFITTING_DLL ComplexMatrix {
-  /// The pointer to the GSL matrix
-  gsl_matrix_complex *m_matrix;
-
 public:
   /// Constructor
   ComplexMatrix();
@@ -220,6 +217,8 @@ public:
   ComplexVector copyRow(size_t i) const;
   /// Copy a column into a GSLVector
   ComplexVector copyColumn(size_t i) const;
+  /// Sort columns in order defined by an index array
+  void sortColumns(const std::vector<size_t>& indices) ;
 
   /// Solve system of linear equations M*x == rhs, M is this matrix
   /// This matrix is destroyed.
@@ -239,9 +238,19 @@ public:
   /// Get "conjugate transposed" matrix to be used in multiplications
   CTr ctr() { return CTr(*this); }
 
+protected:
   /// Type of the matrix elements.
   typedef const ComplexMatrixValueConverter ElementConstType;
   typedef ComplexMatrixValueConverter ElementRefType;
+  /// Create a new matrix and move the data to it.
+  ComplexMatrix move();
+
+private:
+  /// Move constructor
+  ComplexMatrix(gsl_matrix_complex *&&gslMatrix);
+  /// The pointer to the GSL matrix
+  gsl_matrix_complex *m_matrix;
+
 };
 
 /// Overloaded operator for matrix multiplication
@@ -374,7 +383,7 @@ inline std::ostream &operator<<(std::ostream &ostr, const ComplexMatrix &m) {
   for (size_t i = 0; i < m.size1(); ++i) {
     for (size_t j = 0; j < m.size2(); ++j) {
       auto value = m.get(i, j);
-      ostr << std::setw(28) << value.real() << "+" << value.imag() << "j ";
+      ostr << std::setw(28) << std::setprecision(13) << value.real() << "+" << value.imag() << "j ";
     }
     ostr << std::endl;
   }

@@ -100,7 +100,13 @@ public:
   /// Multiply by a number
   ComplexVector &operator*=(const ComplexType d);
 
+protected:
+  /// Create a new ComplexVector and move all data to it. Destroys this vector.
+  ComplexVector move();
+
 private:
+  /// Constructor
+  ComplexVector(gsl_vector_complex *&&gslVector);
   /// The pointer to the GSL vector
   gsl_vector_complex *m_vector;
 };
@@ -127,6 +133,16 @@ inline bool operator==(const ComplexType& c, const ComplexVectorValueConverter& 
 /// Equality operator
 inline bool operator==(const ComplexVectorValueConverter& conv, const ComplexType& c) {
   return c == static_cast<ComplexType>(conv);
+}
+
+/// Multiplication operator
+inline ComplexType operator*(const ComplexVectorValueConverter& conv, const ComplexType& c) {
+  return static_cast<ComplexType>(conv) * c;
+}
+
+/// Multiplication operator
+inline ComplexType operator*(const ComplexType& c, const ComplexVectorValueConverter& conv) {
+  return c * static_cast<ComplexType>(conv);
 }
 
 } // namespace CurveFitting

@@ -42,15 +42,15 @@ template <class MatrixClass> class FortranMatrix : public MatrixClass {
 
 public:
   /// Constructor
-  FortranMatrix();
-  /// Constructor
-  FortranMatrix(const size_t nx, const size_t ny);
+  FortranMatrix(const int nx, const int ny);
   /// Copy constructor
   FortranMatrix(const FortranMatrix &M);
   /// Constructor
   FortranMatrix(const int iFrom, const int iTo, const int jFrom, const int jTo);
   typename MatrixClass::ElementConstType operator()(int i, int j) const;
   typename MatrixClass::ElementRefType operator()(int i, int j);
+  /// Move the data to a new matrix of MatrixClass
+  MatrixClass moveToBaseMatrix();
 
 private:
   /// Calculate the size (1D) of a matrix First
@@ -70,12 +70,8 @@ size_t FortranMatrix<MatrixClass>::makeSize(int firstIndex, int lastIndex) {
 
 /// Constructor
 template <class MatrixClass>
-FortranMatrix<MatrixClass>::FortranMatrix() : MatrixClass(), m_base1(0), m_base2(0) {}
-
-/// Constructor
-template <class MatrixClass>
-FortranMatrix<MatrixClass>::FortranMatrix(const size_t nx, const size_t ny)
-    : MatrixClass(nx, ny), m_base1(0), m_base2(0) {}
+FortranMatrix<MatrixClass>::FortranMatrix(const int nx, const int ny)
+    : MatrixClass(makeSize(1, nx), makeSize(1, ny)), m_base1(1), m_base2(1) {}
 
 /// Copy constructor
 template <class MatrixClass>
@@ -109,6 +105,12 @@ typename MatrixClass::ElementConstType FortranMatrix<MatrixClass>::operator()(in
 template <class MatrixClass>
 typename MatrixClass::ElementRefType FortranMatrix<MatrixClass>::operator()(int i, int j) {
   return this->MatrixClass::operator()(static_cast<size_t>(i - m_base1), static_cast<size_t>(j - m_base2));
+}
+
+/// Move the data to a new matrix of MatrixClass
+template <class MatrixClass>
+MatrixClass FortranMatrix<MatrixClass>::moveToBaseMatrix() {
+  return move();
 }
 
 } // namespace CurveFitting

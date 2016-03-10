@@ -13,12 +13,13 @@ namespace Functions {
 
 typedef FortranMatrix<ComplexMatrix> ComplexFortranMatrix;
 typedef FortranMatrix<GSLMatrix> DoubleFortranMatrix;
+typedef FortranVector<ComplexVector> ComplexFortranVector;
 typedef FortranVector<GSLVector> DoubleFortranVector;
 
-void MANTID_CURVEFITTING_DLL sc_crystal_field(int nre, const std::string &type, int symmetry,
-                      const DoubleFortranMatrix &sbkq,
-                      DoubleFortranVector &bmol, DoubleFortranVector &bext,
-                      ComplexFortranMatrix &bkq);
+std::tuple<GSLVector, ComplexMatrix> MANTID_CURVEFITTING_DLL sc_crystal_field(
+    int nre, const std::string &type, int symmetry,
+    const DoubleFortranMatrix &sbkq, DoubleFortranVector &bmol,
+    DoubleFortranVector &bext, ComplexFortranMatrix &bkq, double temp);
 
 } // namespace Functions
 } // namespace CurveFitting

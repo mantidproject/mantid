@@ -24,36 +24,36 @@ public:
 
   void test_double_c_indexing() {
     DoubleFortranMatrix m(3, 3);
-    m(0, 0) = 0.0;
-    m(0, 1) = 1.0;
-    m(0, 2) = 2.0;
-    m(1, 0) = 10.0;
-    m(1, 1) = 11.0;
-    m(1, 2) = 12.0;
-    m(2, 0) = 20.0;
-    m(2, 1) = 21.0;
-    m(2, 2) = 22.0;
+    m(1, 1) = 0.0;
+    m(1, 2) = 1.0;
+    m(1, 3) = 2.0;
+    m(2, 1) = 10.0;
+    m(2, 2) = 11.0;
+    m(2, 3) = 12.0;
+    m(3, 1) = 20.0;
+    m(3, 2) = 21.0;
+    m(3, 3) = 22.0;
 
-    TS_ASSERT_EQUALS(m(0, 0), 0.0);
-    TS_ASSERT_EQUALS(m(0, 1), 1.0);
-    TS_ASSERT_EQUALS(m(0, 2), 2.0);
-    TS_ASSERT_EQUALS(m(1, 0), 10.0);
-    TS_ASSERT_EQUALS(m(1, 1), 11.0);
-    TS_ASSERT_EQUALS(m(1, 2), 12.0);
-    TS_ASSERT_EQUALS(m(2, 0), 20.0);
-    TS_ASSERT_EQUALS(m(2, 1), 21.0);
-    TS_ASSERT_EQUALS(m(2, 2), 22.0);
+    TS_ASSERT_EQUALS(m(1, 1), 0.0);
+    TS_ASSERT_EQUALS(m(1, 2), 1.0);
+    TS_ASSERT_EQUALS(m(1, 3), 2.0);
+    TS_ASSERT_EQUALS(m(2, 1), 10.0);
+    TS_ASSERT_EQUALS(m(2, 2), 11.0);
+    TS_ASSERT_EQUALS(m(2, 3), 12.0);
+    TS_ASSERT_EQUALS(m(3, 1), 20.0);
+    TS_ASSERT_EQUALS(m(3, 2), 21.0);
+    TS_ASSERT_EQUALS(m(3, 3), 22.0);
   }
 
   void test_double_fortran_indexing() {
     DoubleFortranMatrix m(2, 4, -1, 1);
-    m(2,-1) = 0.0;
+    m(2, -1) = 0.0;
     m(2, 0) = 1.0;
     m(2, 1) = 2.0;
-    m(3,-1) = 10.0;
+    m(3, -1) = 10.0;
     m(3, 0) = 11.0;
     m(3, 1) = 12.0;
-    m(4,-1) = 20.0;
+    m(4, -1) = 20.0;
     m(4, 0) = 21.0;
     m(4, 1) = 22.0;
 
@@ -67,13 +67,13 @@ public:
     TS_ASSERT_EQUALS(m.get(2, 1), 21.0);
     TS_ASSERT_EQUALS(m.get(2, 2), 22.0);
 
-    TS_ASSERT_EQUALS(m(2,-1), 0.0);
+    TS_ASSERT_EQUALS(m(2, -1), 0.0);
     TS_ASSERT_EQUALS(m(2, 0), 1.0);
     TS_ASSERT_EQUALS(m(2, 1), 2.0);
-    TS_ASSERT_EQUALS(m(3,-1), 10.0);
+    TS_ASSERT_EQUALS(m(3, -1), 10.0);
     TS_ASSERT_EQUALS(m(3, 0), 11.0);
     TS_ASSERT_EQUALS(m(3, 1), 12.0);
-    TS_ASSERT_EQUALS(m(4,-1), 20.0);
+    TS_ASSERT_EQUALS(m(4, -1), 20.0);
     TS_ASSERT_EQUALS(m(4, 0), 21.0);
     TS_ASSERT_EQUALS(m(4, 1), 22.0);
   }
@@ -87,10 +87,15 @@ public:
 
     TS_ASSERT_EQUALS(m.size1(), 2);
     TS_ASSERT_EQUALS(m.size2(), 2);
-    m(0, 0) = v11;
-    m(0, 1) = v12;
-    m(1, 0) = v21;
-    m(1, 1) = v22;
+    m(1, 1) = v11;
+    m(1, 2) = v12;
+    m(2, 1) = v21;
+    m(2, 2) = v22;
+
+    TS_ASSERT(m(1, 1) == v11);
+    TS_ASSERT(m(1, 2) == v12);
+    TS_ASSERT(m(2, 1) == v21);
+    TS_ASSERT(m(2, 2) == v22);
 
     TS_ASSERT(m.get(0, 0) == v11);
     TS_ASSERT(m.get(0, 1) == v12);
@@ -121,6 +126,42 @@ public:
     TS_ASSERT(m.get(0, 1) == v12);
     TS_ASSERT(m.get(1, 0) == v21);
     TS_ASSERT(m.get(1, 1) == v22);
+  }
+
+  void test_complex_move() {
+    ComplexFortranMatrix m(2, 2);
+    ComplexType v11{11, 0.11};
+    ComplexType v12{12, 0.12};
+    ComplexType v21{21, 0.21};
+    ComplexType v22{22, 0.22};
+    m(1, 1) = v11;
+    m(1, 2) = v12;
+    m(2, 1) = v21;
+    m(2, 2) = v22;
+    auto p = m.gsl();
+
+    auto mm = m.moveToBaseMatrix();
+    TS_ASSERT(mm(0, 0) == v11);
+    TS_ASSERT(mm(0, 1) == v12);
+    TS_ASSERT(mm(1, 0) == v21);
+    TS_ASSERT(mm(1, 1) == v22);
+    TS_ASSERT_EQUALS(p, mm.gsl());
+  }
+
+  void test_double_move() {
+    DoubleFortranMatrix m(2, 2);
+    m(1, 1) = 1.1;
+    m(1, 2) = 1.2;
+    m(2, 1) = 2.1;
+    m(2, 2) = 2.2;
+    auto p = &m(1, 1);
+
+    auto mm = m.moveToBaseMatrix();
+    TS_ASSERT_EQUALS(mm(0, 0), 1.1);
+    TS_ASSERT_EQUALS(mm(0, 1), 1.2);
+    TS_ASSERT_EQUALS(mm(1, 0), 2.1);
+    TS_ASSERT_EQUALS(mm(1, 1), 2.2);
+    TS_ASSERT_EQUALS(p, &mm(0, 0));
   }
 };
 

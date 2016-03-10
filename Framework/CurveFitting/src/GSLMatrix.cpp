@@ -56,6 +56,11 @@ GSLMatrix::GSLMatrix(const GSLMatrixMult3 &mult3) {
   *this = mult3;
 }
 
+/// "Move" constructor
+GSLMatrix::GSLMatrix(std::vector<double> &&data, size_t nx, size_t ny)
+    : m_data(std::move(data)),
+      m_view(gsl_matrix_view_array(m_data.data(), nx, ny)) {}
+
 /// Destructor.
 GSLMatrix::~GSLMatrix() {
 }
@@ -290,6 +295,11 @@ GSLVector GSLMatrix::copyColumn(size_t i) const {
   }
   auto columnView = gsl_matrix_const_column(gsl(), i);
   return GSLVector(&columnView.vector);
+}
+
+/// Create a new matrix and move the data to it.
+GSLMatrix GSLMatrix::move() {
+  return GSLMatrix(std::move(m_data), size1(), size2());
 }
 
 } // namespace CurveFitting
