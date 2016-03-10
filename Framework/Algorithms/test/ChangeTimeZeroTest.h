@@ -236,7 +236,7 @@ public:
   void test_exception_is_thrown_for_missing_proton_charge_and_absolute_time() {
     // Arrange
     const double timeShiftDouble = 1000;
-    DateAndTime abosluteTimeShift = m_startTime + timeShiftDouble;
+    DateAndTime absoluteTimeShift = m_startTime + timeShiftDouble;
     auto ws = provideWorkspace2D(LogType::NOPROTONCHARGE, "in_ws", m_startTime,
                                  m_length);
 
@@ -250,7 +250,7 @@ public:
     ScopedWorkspace scopedWorkspace(ws);
     alg.setPropertyValue("OutputWorkspace", scopedWorkspace.name());
     alg.setPropertyValue("AbsoluteTimeOffset",
-                         abosluteTimeShift.toISO8601String());
+                         absoluteTimeShift.toISO8601String());
 
     // We expect to see an exception because we are using absolute times and
     // there is no proton charge log
@@ -395,6 +395,37 @@ public:
     // Act and assert
     act_and_assert(relativeTimeShift, absoluteTimeShift.toISO8601String(), ws,
                    inputEqualsOutputWorkspace);
+  }
+
+  /**
+ * Test that the algorithm can handle a WorkspaceGroup as input without
+ * crashing
+ * We have to use the ADS to test WorkspaceGroups
+ *
+ * Need to use absolute time to test this part of validateInputs
+ */
+  void testValidateInputsWithWSGroup() {
+    const double timeShiftDouble = 1000;
+    DateAndTime absoluteTimeShift = m_startTime + timeShiftDouble;
+    auto ws1 = provideWorkspace2D(LogType::NOPROTONCHARGE, "in_ws", m_startTime,
+                                  m_length);
+    auto ws2 = provideWorkspace2D(LogType::NOPROTONCHARGE, "in_ws", m_startTime,
+                                  m_length);
+    AnalysisDataService::Instance().add("workspace1", ws1);
+    AnalysisDataService::Instance().add("workspace2", ws2);
+    auto group = boost::make_shared<WorkspaceGroup>();
+    AnalysisDataService::Instance().add("group", group);
+    group->add("workspace1");
+    group->add("workspace2");
+    ChangeTimeZero alg;
+    alg.initialize();
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "group"));
+    alg.setPropertyValue("OutputWorkspace", "__NoName");
+    alg.setPropertyValue("AbsoluteTimeOffset",
+                         absoluteTimeShift.toISO8601String());
+    TS_ASSERT_THROWS_NOTHING(alg.validateInputs());
+    AnalysisDataService::Instance().clear();
   }
 
 private:
