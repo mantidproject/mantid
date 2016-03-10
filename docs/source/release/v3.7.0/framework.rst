@@ -40,6 +40,16 @@ Improved
 -  When plotting a workspace that had been normalized by bin widths, the y-axis unit label was incorrect.
    An appropriate labelling has now been implemented
   `#15398 <https://github.com/mantidproject/mantid/pull/15398>`_
+-  :ref:`SumSpectra <algm-SumSpectra>` fixed broken scaling of bins for the `WeightedSum=true` case.
+-  A bug has been fixed in several algorithms where they would crash when given a :ref:`WorkspaceGroup <WorkspaceGroup>` as input (if run in the GUI).
+  These algorithms are:
+  - :ref:`AsymmetryCalc <algm-AsymmetryCalc>`
+  - :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>`
+  - :ref:`ConvertToDistribution <algm-ConvertToDistribution>`
+  - :ref:`ChangeTimeZero <algm-ChangeTimeZero>`
+  - :ref:`FFT <algm-FFT>`
+  - :ref:`MaxEnt <algm-MaxEnt>`
+  `#15584 <https://github.com/mantidproject/mantid/pull/15584>`_
 
 Deprecated
 ##########
@@ -53,6 +63,7 @@ MD Algorithms (VATES CLI)
    user to save 3D MDHisto or 3D MDEvent workspaces as either a ``.vts`` or
    ``.vtu`` files. These file types can be loaded into a standalone version
    of ParaView.
+-  PlotMD now plots points at bin centres for MDEventWorkspaces as well as MDHistoWorkspaces.
 
 Performance
 -----------
