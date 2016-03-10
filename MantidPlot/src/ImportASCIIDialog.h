@@ -43,17 +43,19 @@ class QStackedWidget;
 class Matrix;
 class MatrixModel;
 
-#include <q3table.h>
-#include <q3header.h>
+#include <QTableWidget>
 
-class PreviewTable : public Q3Table
+class PreviewTable : public QTableWidget
 {
 public:
     PreviewTable(int numRows, int numCols, QWidget * parent = 0, const char * name = 0);
 
 	void importASCII(const QString &fname, const QString &sep, int ignoredLines, bool renameCols,
-		bool stripSpaces, bool simplifySpaces, bool importComments, const QString& commentString,
-		int importMode, int endLine, int maxRows);
+	bool stripSpaces, bool simplifySpaces, bool importComments, const QString& commentString,
+	int importMode, int endLine, int maxRows);
+  QString text(int row, int col) const;
+  void setText(int row, int col, const QString& txt);
+  void insertColumns(int col, int count = 1);
 
 	void resetHeader();
 	void clear();
@@ -63,8 +65,11 @@ public:
 private:
 	void setHeader();
 	void addColumns(int c);
+  QTableWidgetItem* addNewItem(int row, int col);
+  void makeItemPrototype();
 	QStringList comments, col_label;
 	int d_numeric_precision;
+  QTableWidgetItem* m_itemPrototype;
 };
 
 class PreviewMatrix : public QTableView
