@@ -573,6 +573,13 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
     throw;
   }
 
+  // retrieve the table with parameters
+  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+  ITableWorkspace_sptr table =
+      ADS.retrieveWS<ITableWorkspace>(FocusedFitPeaksWSName);
+  // get the functionStrFactory to generate the string for function property
+  std::string Bk2BkExpFunction = functionStrFactory(table, FocusedFitPeaksWSName);
+
   // run EvaluateFunction algorithm with focused workspace to produce
   // the correct fit function
   std::string single_peak_out_WS = "engggui_fitting_single_peaks";
@@ -581,11 +588,7 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
   g_log.notice() << "EvaluateFunction algorithm has started" << std::endl;
   try {
     evalFunc->initialize();
-    std::string function =
-        "name=LinearBackground,A0=-0.00226199, "
-        "A1=-1.64144e-07;name=BackToBackExponential,I="
-        "12.3639,A=0.603249,B=0.0596724,X0=13352.5,S=2.71653";
-    evalFunc->setProperty("Function", function);
+    evalFunc->setProperty("Function", Bk2BkExpFunction);
     evalFunc->setProperty("InputWorkspace", FocusedWSName);
     evalFunc->setProperty("OutputWorkspace", single_peak_out_WS);
     evalFunc->execute();
@@ -617,7 +620,7 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
   m_fittingFinishedOK = true;
 }
 
-std::string EnggDiffractionPresenter::getFunctionStr(
+std::string EnggDiffractionPresenter::functionStrFactory(
     Mantid::API::ITableWorkspace_sptr &paramTableWS, std::string tableName) {
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   paramTableWS = ADS.retrieveWS<ITableWorkspace>(tableName);
