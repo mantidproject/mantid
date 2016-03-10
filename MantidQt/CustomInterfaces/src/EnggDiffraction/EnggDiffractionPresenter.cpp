@@ -552,14 +552,14 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
   // run the algorithm EnggFitPeaks with workspace loaded above
   auto enggFitPeaks =
       Mantid::API::AlgorithmManager::Instance().createUnmanaged("EnggFitPeaks");
-  const std::string FocusedFitPeaksWSName = "engggui_fitting_fitpeaks_params";
+  const std::string FocusedFitPeaksTableName = "engggui_fitting_fitpeaks_params";
   try {
     enggFitPeaks->initialize();
     enggFitPeaks->setProperty("InputWorkspace", focusedWS);
     if (!ExpectedPeaks.empty()) {
       enggFitPeaks->setProperty("ExpectedPeaks", ExpectedPeaks);
     }
-    enggFitPeaks->setProperty("FittedPeaks", FocusedFitPeaksWSName);
+    enggFitPeaks->setProperty("FittedPeaks", FocusedFitPeaksTableName);
     enggFitPeaks->execute();
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm EnggFitPeaks "
@@ -576,18 +576,40 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
   // retrieve the table with parameters
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   ITableWorkspace_sptr table =
-      ADS.retrieveWS<ITableWorkspace>(FocusedFitPeaksWSName);
+      ADS.retrieveWS<ITableWorkspace>(FocusedFitPeaksTableName);
 
   size_t rowCount = table->rowCount();
+  //std::string single_peak_out_WS = "engggui_fitting_single_peaks";
+  std::string Bk2BkExpFunctionStr;
+
+  std::string single_peak_out_WS;
+
+  if (rowCount > size_t(0)) {
+	  for (size_t i = 0; i < rowCount; i++) {
+
+		  // return the string with i row from table workspace
+		  // table is just passed so it works?
+            Bk2BkExpFunctionStr =
+                functionStrFactory(table, FocusedFitPeaksTableName, i);
+
+			single_peak_out_WS = "engggui_fitting_single_peaks" + std::to_string(i);
+
+			// FocusedWSName is not going to change as its always going to be from single workspace
+			runEvaluateFunctionAlg(Bk2BkExpFunctionStr, FocusedWSName, single_peak_out_WS);
+
+          }
+
+  }
+
 
   // get the functionStrFactory to generate the string for function property
-  std::string Bk2BkExpFunction =
-      functionStrFactory(table, FocusedFitPeaksWSName, 0);
-  std::string single_peak_out_WS = "engggui_fitting_single_peaks";
+  Bk2BkExpFunctionStr =
+      functionStrFactory(table, FocusedFitPeaksTableName, rowCount-1);
+  single_peak_out_WS = "engggui_fitting_single_peaks";
 
   // run EvaluateFunction algorithm with focused workspace to produce
   // the correct fit function
-  runEvaluateFunctionAlg(Bk2BkExpFunction, FocusedWSName, single_peak_out_WS);
+  runEvaluateFunctionAlg(Bk2BkExpFunctionStr, FocusedWSName, single_peak_out_WS);
 
   // crop workspace so only the correct workspace index is plotted
   runCropWorkspaceAlg(single_peak_out_WS);
@@ -659,7 +681,8 @@ void EnggDiffractionPresenter::runCropWorkspaceAlg(std::string workspaceName) {
   }
 }
 
-void runAppendSpectra(std::string workspace1Name, std::string workspace2Name) {
+void runAppendSpectraAlg(std::string workspace1Name,
+                         std::string workspace2Name) {
   auto appendSpec = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "CropWorkspace");
   try {

@@ -102,7 +102,7 @@ public:
 
   void runCropWorkspaceAlg(std::string workspaceName);
 
-  void runAppendSpectra();
+  void runAppendSpectraAlg(std::string workspace1Name, std::string workspace2Name);
 
 protected:
   void initialize();
