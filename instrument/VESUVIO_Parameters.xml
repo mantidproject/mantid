@@ -4,8 +4,8 @@
 <component-link name = "VESUVIO">
 
   <!-- The monitor spectrum  -->
-  <parameter name="monitor_spectra">
-    <!-- The first item in the list is used for monitor normalisation-->
+  <parameter name="monitor_spectra" type="string">
+    <!-- The first item in the list is used for monitor normalisation -->
     <value val="1,2"/>
   </parameter>
 
