@@ -25,10 +25,17 @@ DECLARE_ALGORITHM(MaxEnt)
 
 namespace {
 
+// Maps defining the inverse caption and label for the reconstructed image
+// Example:
+// The input workspaces (X axis) is in (Time, s)
+// The output image should be in (Frequency, Hz)
+
+// Defines the new caption
 std::map<std::string, std::string> inverseCaption = {{"Time", "Frequency"},
                                                      {"Frequency", "Time"},
                                                      {"d-Spacing", "q"},
                                                      {"q", "d-Spacing"}};
+// Defines the new label
 std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
                                                    {"microsecond", "MHz"},
                                                    {"Hz", "s"},

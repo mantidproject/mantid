@@ -5,7 +5,9 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
@@ -280,6 +282,76 @@ public:
     TS_ASSERT_DELTA(image->readY(0)[71], 1.3452, 0.001);
     TS_ASSERT_DELTA(image->readY(1)[78], 0.2293, 0.0001);
     TS_ASSERT_DELTA(image->readY(1)[79], 0.8566, 0.0001);
+  }
+  void test_output_label() {
+    // Test the output label
+
+    size_t npoints = 2;
+
+    auto ws = createWorkspaceReal(npoints, 0.0);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("A", 0.1);
+    alg->setProperty("ChiTarget", 50.);
+    alg->setProperty("MaxIterations", "1");
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
+        Mantid::Kernel::UnitFactory::Instance().create("Label"));
+
+    // 1. From (Time, s) to (Frequency, Hz)
+    label->setLabel("Time", "s");
+    ws->getAxis(0)->unit() = label;
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->caption(), "Frequency");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->label().ascii(), "Hz");
+
+    // 2. From (Time, ms) to (Frequency, MHz)
+    label->setLabel("Time", "microsecond");
+    ws->getAxis(0)->unit() = label;
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    image = alg->getProperty("ReconstructedImage");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->caption(), "Frequency");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->label().ascii(), "MHz");
+
+    // 3. From (Frequency, Hz) to (Time, s)
+    label->setLabel("Frequency", "Hz");
+    ws->getAxis(0)->unit() = label;
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    image = alg->getProperty("ReconstructedImage");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->caption(), "Time");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->label().ascii(), "s");
+
+    // 4. From (Frequency, MHz) to (Time, ms)
+    label->setLabel("Frequency", "MHz");
+    ws->getAxis(0)->unit() = label;
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    image = alg->getProperty("ReconstructedImage");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->caption(), "Time");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->label().ascii(), "microsecond");
+
+    // 5. From (d-Spacing, Angstrom) to (q, Angstrom^-1)
+    label->setLabel("d-Spacing", "Angstrom");
+    ws->getAxis(0)->unit() = label;
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    image = alg->getProperty("ReconstructedImage");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->caption(), "q");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->label().ascii(), "Angstrom^-1");
+
+    // 6. From (q, Angstrom^-1) to (d-Spacing, Angstrom)
+    label->setLabel("q", "Angstrom^-1");
+    ws->getAxis(0)->unit() = label;
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    image = alg->getProperty("ReconstructedImage");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->caption(), "d-Spacing");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->label().ascii(), "Angstrom");
   }
 
   MatrixWorkspace_sptr createWorkspaceReal(size_t maxt, double phase) {
