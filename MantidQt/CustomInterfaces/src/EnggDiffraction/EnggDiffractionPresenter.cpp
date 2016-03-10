@@ -519,7 +519,7 @@ void EnggDiffractionPresenter::startAsyncFittingWorker(
 void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
                                          const std::string &ExpectedPeaks) {
   // disable GUI to avoid any double threads
-	m_view->enableCalibrateAndFocusActions(false);
+  m_view->enableCalibrateAndFocusActions(false);
   g_log.notice() << "EnggDiffraction GUI: starting new fitting. This may "
                     "take a few seconds... "
                  << std::endl;
@@ -573,35 +573,58 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
     throw;
   }
 
-  //  run EvaluateFunction algorithm with focused workspace
-  auto evalFunc = Mantid::API::AlgorithmManager::Instance().createUnmanaged("EvaluateFunction");
+  // run EvaluateFunction algorithm with focused workspace to produce
+  // the correct fit function
+  std::string single_peak_out_WS = "engggui_fitting_single_peaks";
+  auto evalFunc = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "EvaluateFunction");
   g_log.notice() << "EvaluateFunction algorithm has started" << std::endl;
   try {
-	  evalFunc->initialize();
-	  std::string function = "name=LinearBackground,A0=-0.00226199, "
-		  "A1=-1.64144e-07;name=BackToBackExponential,I="
-		  "12.3639,A=0.603249,B=0.0596724,X0=13352.5,S=2.71653";
-	  evalFunc->setProperty("Function", function);
-	  evalFunc->setProperty("InputWorkspace", FocusedWSName);
-	  std::string outputWorkspace = "engggui_fitting_single_peak";
-	  evalFunc->setProperty("OutputWorkspace", outputWorkspace);
-	  evalFunc->execute();
+    evalFunc->initialize();
+    std::string function =
+        "name=LinearBackground,A0=-0.00226199, "
+        "A1=-1.64144e-07;name=BackToBackExponential,I="
+        "12.3639,A=0.603249,B=0.0596724,X0=13352.5,S=2.71653";
+    evalFunc->setProperty("Function", function);
+    evalFunc->setProperty("InputWorkspace", FocusedWSName);
+    evalFunc->setProperty("OutputWorkspace", single_peak_out_WS);
+    evalFunc->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Could not run the algorithm EvaluateFunction, "
+                     "Error description: " +
+                         static_cast<std::string>(re.what())
+                  << std::endl;
   }
-  catch (std::runtime_error &re) {
-	  g_log.error() << "Could not run the algorithm EvaluateFunction, "
-		  "Error description: " +
-		  static_cast<std::string>(re.what()) << std::endl;
+
+  // crop workspace so only the correct workspace index is plotted
+  auto cropWS = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "CropWorkspace");
+  try {
+    cropWS->initialize();
+    cropWS->setProperty("InputWorkspace", single_peak_out_WS);
+    cropWS->setProperty("OutputWorkspace", single_peak_out_WS);
+    std::string outputWorkspace = "engggui_fitting_single_peaks";
+    cropWS->setProperty("StartWorkspaceIndex", 1);
+    cropWS->setProperty("EndWorkspaceIndex", 1);
+    cropWS->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Could not run the algorithm CropWorkspace, "
+                     "Error description: " +
+                         static_cast<std::string>(re.what())
+                  << std::endl;
   }
+
   m_fittingFinishedOK = true;
 }
 
 void EnggDiffractionPresenter::plotFitPeaksCurves() const {
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-  auto focusedWS =
-      ADS.retrieveWS<MatrixWorkspace>("engggui_fitting_focused_ws");
+  auto singlPeaksWS =
+      ADS.retrieveWS<MatrixWorkspace>("engggui_fitting_single_peaks");
 
   try {
-    m_view->setDataCurves(*(ALCHelper::curveDataFromWs(focusedWS, 0)));
+    // 1 represent calc which is the required peak to plotted
+    m_view->setDataCurves(*(ALCHelper::curveDataFromWs(singlPeaksWS, 0)));
   } catch (std::runtime_error &re) {
     g_log.error()
         << "Unable to finish of the plotting of the graph for "
