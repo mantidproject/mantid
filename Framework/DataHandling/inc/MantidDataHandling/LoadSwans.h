@@ -56,6 +56,7 @@ private:
   void loadInstrument();
   void placeDetectorInSpace();
   unsigned int getDetectorSize();
+  void setAutoRecordAsWorkspaceProperties(std::string runNumber);
 
   // Member variables
   DataObjects::EventWorkspace_sptr m_ws =

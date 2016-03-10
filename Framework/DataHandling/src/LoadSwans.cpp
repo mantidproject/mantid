@@ -11,6 +11,8 @@
 #include <fstream>
 #include <algorithm>
 #include <boost/tokenizer.hpp>
+#include <boost/foreach.hpp>
+#include <boost/range/combine.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -73,6 +75,12 @@ void LoadSwans::init() {
                                             "meta.dat"),
                   "The name of the text file to read, including its full or "
                   "relative path. The file extension must be meta.dat.");
+
+  declareProperty(
+      make_unique<FileProperty>("FilenameAutoRecord", "",
+                                API::FileProperty::OptionalLoad, ".txt"),
+      "The name of the AutoRecord.txt file to read, including its full or "
+      "relative path. The file extension must be .txt");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "FilterByTofMin", 10000.0, Direction::Input),
@@ -241,6 +249,94 @@ std::vector<double> LoadSwans::loadMetaData() {
   return metadata;
 }
 
+/**
+ * Loads the /SNS/VULCAN/IPTS-16013/shared/AutoRecord.txt file *
+ * If not given will try to look for it from the filename
+ * /SNS/VULCAN/IPTS-16013/shared/SANS_detector/RUN80814.dat
+ *
+ * The AutoRecord is of the format:
+ * RUN     IPTS    Title   Notes   Sample  ITEM    StartTime       Duration
+ *ProtonCharge    TotalCounts     Monitor1        Monitor2        X       Y
+ *Z       O       HROT    VROT    BandCentre      BandWidth       Frequency
+ *Guide   IX      IY      IZ      IHA     IVA     Collimator
+ *MTSDisplacement MTSForce        MTSStrain       MTSStress       MTSAngle
+ *MTSTorque       MTSLaser        MTSlaserstrain  MTSDisplaceoffset
+ *MTSAngleceoffset        MTST1   MTST2   MTST3   MTST4   MTSHighTempStrain
+ *FurnaceT        FurnaceOT       FurnacePower    VacT    VacOT
+ *EuroTherm1Powder        EuroTherm1SP    EuroTherm1Temp  EuroTherm2Powder
+ *EuroTherm2SP    EuroTherm2Temp
+ * 80680   IPTS-16013      SWANS TESTING   SWANS TESTING   No sample       -1.0
+ *2016-02-12 09:35:45.856802666-EST       147.697776      179951088095.549500
+ *678.000000      2.000000        2.000000        1.411   -25.707 -152.067
+ *45.0    0.0     0.0     2.0     2.88    30.0    181.993 100.003 -0.125201
+ *-1.458688       4.997994        11.990609       0.0     2.25265546341
+ *2267.793997     0.010018        47.1121006667   -2.408037       11.7260375
+ *-0.010656       2.3415954       1.135141        1.470575        28.412535
+ *29.690638       542.133681      542.133681      0.00477137777778        0.0
+ *0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+ *
+ *
+ * It builds a dictionary for this run
+ */
+
+void LoadSwans::setAutoRecordAsWorkspaceProperties(std::string runNumber) {
+
+  std::string filename = getPropertyValue("FilenameAutoRecord");
+
+  // if the filename for AutoRecord was not given, find it from the data file.
+  if (filename == "") {
+    std::string filenameData = getPropertyValue("FilenameData");
+    size_t lastIndexForIPTS = filenameData.find("IPTS");
+    size_t lastIndexForIPTSBar = filenameData.find("/", lastIndexForIPTS);
+    std::string rawname = filenameData.substr(0, lastIndexForIPTSBar);
+    filename = rawname + "/shared/AutoRecord.txt";
+    g_log.information("Assuming AutoRecord file: " + filename);
+  }
+
+  std::vector<std::string> header;
+  std::vector<std::string> values;
+  std::ifstream infile(filename);
+  if (infile.fail()) {
+    g_log.error("Error reading AutoRecord file " + filename);
+  } else {
+    int count = 0;
+    std::string line;
+    while (getline(infile, line)) {
+      if (!line.empty()) {
+        auto tokenizer = Mantid::Kernel::StringTokenizer(
+            line, "\t", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                            Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+        if (count == 0) {
+          g_log.debug() << "HEADER: " << line << std::endl;
+          for (const auto &token : tokenizer)
+            header.push_back(token);
+        } else {
+          if (tokenizer[0] == runNumber) {
+            g_log.debug() << "Value for run " << runNumber << ": " << line
+                          << std::endl;
+            for (const auto &token : tokenizer)
+              values.push_back(token);
+            break;
+          }
+        }
+      }
+      count++;
+    }
+    // Sets parsed data as properties in the ws
+    API::Run &runDetails = m_ws->mutableRun();
+    std::vector<std::string>::const_iterator ih, iv;
+    for (ih = header.begin(), iv = values.begin();
+         ih < header.end() && iv < values.end(); ++ih, ++iv) {
+      try {
+        double value = boost::lexical_cast<double>(*iv);
+        runDetails.addProperty<double>(*ih, value, true);
+      } catch (const boost::bad_lexical_cast &) {
+        runDetails.addProperty(*ih, *iv, true);
+      }
+    }
+  }
+}
+
 /*
  * Known metadata positions to date:
  * 0 - run number
@@ -255,7 +351,11 @@ void LoadSwans::setMetaDataAsWorkspaceProperties(
   API::Run &runDetails = m_ws->mutableRun();
   runDetails.addProperty<double>("run_number", metadata[0]);
   runDetails.addProperty<double>("wavelength", metadata[1]);
+  runDetails.addProperty<double>("chopper_frequency",
+                                 metadata[2]); // chopper frequency
   runDetails.addProperty<double>("angle", metadata[5]);
+  setAutoRecordAsWorkspaceProperties(
+      boost::lexical_cast<std::string>(metadata[0]));
 }
 
 /*
