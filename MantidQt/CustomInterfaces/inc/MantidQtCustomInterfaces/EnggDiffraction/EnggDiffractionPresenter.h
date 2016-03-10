@@ -100,6 +100,8 @@ public:
   void runEvaluateFunctionAlg(std::string bk2BkExpFunction,
                               std::string InputName, std::string OutputName);
 
+  void runCropWorkspaceAlg(std::string workspaceName);
+
 protected:
   void initialize();
 

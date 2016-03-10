@@ -590,22 +590,7 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
   runEvaluateFunctionAlg(Bk2BkExpFunction, FocusedWSName, single_peak_out_WS);
 
   // crop workspace so only the correct workspace index is plotted
-  auto cropWS = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-      "CropWorkspace");
-  try {
-    cropWS->initialize();
-    cropWS->setProperty("InputWorkspace", single_peak_out_WS);
-    cropWS->setProperty("OutputWorkspace", single_peak_out_WS);
-    std::string outputWorkspace = "engggui_fitting_single_peaks";
-    cropWS->setProperty("StartWorkspaceIndex", 1);
-    cropWS->setProperty("EndWorkspaceIndex", 1);
-    cropWS->execute();
-  } catch (std::runtime_error &re) {
-    g_log.error() << "Could not run the algorithm CropWorkspace, "
-                     "Error description: " +
-                         static_cast<std::string>(re.what())
-                  << std::endl;
-  }
+  runCropWorkspaceAlg(single_peak_out_WS);
 
   m_fittingFinishedOK = true;
 }
@@ -649,6 +634,25 @@ void EnggDiffractionPresenter::runEvaluateFunctionAlg(
     evalFunc->execute();
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm EvaluateFunction, "
+                     "Error description: " +
+                         static_cast<std::string>(re.what())
+                  << std::endl;
+  }
+}
+
+void EnggDiffractionPresenter::runCropWorkspaceAlg(std::string workspaceName) {
+  auto cropWS = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "CropWorkspace");
+  try {
+    cropWS->initialize();
+    cropWS->setProperty("InputWorkspace", workspaceName);
+    cropWS->setProperty("OutputWorkspace", workspaceName);
+    std::string outputWorkspace = "engggui_fitting_single_peaks";
+    cropWS->setProperty("StartWorkspaceIndex", 1);
+    cropWS->setProperty("EndWorkspaceIndex", 1);
+    cropWS->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Could not run the algorithm CropWorkspace, "
                      "Error description: " +
                          static_cast<std::string>(re.what())
                   << std::endl;
