@@ -210,6 +210,11 @@ GSLVector GSLVector::move() {
   return GSLVector(std::move(m_data));
 }
 
+/// Copy the values to an std vector of doubles
+std::vector<double> GSLVector::toStdVector() const {
+  return m_data;
+}
+
 /// The << operator.
 std::ostream &operator<<(std::ostream &ostr, const GSLVector &v) {
   std::ios::fmtflags fflags(ostr.flags());

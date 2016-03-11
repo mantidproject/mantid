@@ -771,7 +771,6 @@ double epsilon(int k, int q) {
       auto coeff = exp_(-e(i) / temp) / z * constant;
       for (int k = 1; k <= dim; ++k) { //	   do 20 k=1,dim
         inten(i, k) = coeff * jt2(i, k);
-        std::cerr << "inten " << i << ' ' << k << ' ' << inten(i, k) << std::endl;
       }
     }
   }
@@ -801,72 +800,15 @@ sc_crystal_field(int nre, const std::string &type, int symmetry,
   if (nre <= 0 || nre > maxNre) {
     throw std::out_of_range("nre is out of range");
   }
+  std::cerr << "nre=" << nre << std::endl;
+  std::cerr << "symm=" << symmetry << std::endl;
   //// initialize some rare earth constants
   auto gj = ggj[nre-1];
   auto dimj = ddimj[nre-1];
-  //auto alphaj = aalphaj[nre-1];
-  //auto betaj = bbetaj[nre-1];
-  //auto gammaj = ggammaj[nre-1];
-  //auto r2 = rr2[nre-1];
-  //auto r4 = rr4[nre-1];
-  //auto r6 = rr6[nre-1];
 
   // magneton of Bohr in kelvin per tesla
   auto myb = c_myb;
   std::cerr << "myb=" << myb << std::endl;
-  ////for (int k = 2; k <= 6; k += 2) { //	   do k=2,6,2
-  ////  for (int m = 0; m <= k; ++m) {  //	      do m=0,k
-  ////    std::cerr << "bkq= " << k << ' ' << m << ' ' << std::setprecision(18) << ComplexType(bkq(k, m)) << std::endl;
-  ////  }
-  ////}
-
-  //if (type == "Vkq" || type == "vkq" || type == "VKQ") {
-  //  // c          the Vkq are in kelvin and are the parameters which uses the
-  //  // normalized
-  //  // c          operators Okq/||Okq|| and j+/||j+|| and j-/||j-|| and
-  //  // jz/||jz||
-  //  // c          calculates the Bkq,B+,B- and Bz from the given Vkq,V+,V- and
-  //  // Vz
-  //  auto f_bmol = 2 * (gj - 1) * myb;
-  //  auto f_bext = gj * myb;
-  //  ComplexMatrix okq(sizeOfHam, sizeOfHam);
-  //  okq.zero();
-  //  auto norm =
-  //      c_operator_norm(dimj, 0, 0, sbkq, okq);    // 00 = j+ note:||j+||=||j-||
-  //  bmol(1) = 2 * bmol(1) / norm / f_bmol;         //
-  //  bext(1) = 2 * bext(1) / norm / f_bext;         //  V- / ||j+|| = 1/2*f*B-
-  //  bmol(2) = 2 * bmol(2) / norm / f_bmol;         //
-  //  bext(2) = 2 * bext(2) / norm / f_bext;         //  V+ / ||j-|| = 1/2*f*B+
-  //  norm = c_operator_norm(dimj, 0, 1, sbkq, okq); // 01 = jz
-  //  bmol(3) = bmol(3) / norm / f_bmol;             //
-  //  bext(3) = bext(3) / norm / f_bext;             // Vz / ||jz|| = f*Bz
-  //  DoubleFortranMatrix ssbkq(0, 6, 0, 6);
-  //  ssbkq.zero();
-
-  //  for (int k = 2; k <= 6; k += 2) { //	   do k=2,6,2
-  //    for (int m = 0; m <= k; ++m) {  //	      do m=0,k
-  //      bkq(k, m) = cifnull(bkq.get(k, m));
-  //      if (bkq(k, m) != 0.0) {
-  //        ssbkq(k, m) = 1.0; // note ||re(Okq)|| = ||im(Okq)|| for q<>0
-  //        if (symmetry == 8) {
-  //          norm = 1.0;
-  //          if (k == 4)
-  //            norm = c_operator_norm(dimj, 4, 0, ssbkq, okq);
-  //          if (k == 6)
-  //            norm = c_operator_norm(dimj, 6, 0, ssbkq, okq);
-  //        } else {
-  //          norm = c_operator_norm(dimj, k, m, ssbkq, okq);
-  //        }
-  //        bkq(k, m) = bkq(k, m) / norm;
-  //      }
-  //    }
-  //  }
-  //}
-
-//       ------------------
-//       gives nearly 11.604... K
-//	pi = 4.0d0*atan(1.0d0)
-//	fmevkelvin = c_fmevkelvin()                        
 //       ------------------
 //       magnetic neutron scattering radius
   auto r0 = c_r0();
@@ -1039,15 +981,14 @@ sc_crystal_field(int nre, const std::string &type, int symmetry,
   auto indexMin = static_cast<int>(energy.indexOfMinElement() + 1);
   auto eshift = energy(indexMin);
   for(int n = 1; n <= dim; ++n) {//	do 50 n=1,dim
-    std::cerr << "En " << n << ' ' << std::setprecision(18) << energy[n] << std::endl;
+    //std::cerr << "En " << n << ' ' << std::setprecision(18) << energy[n] << std::endl;
     energy(n) = energy(n) - eshift;
   }
 
-  std::cerr << wavefunction.copyColumn(0) << std::endl;
-  ComplexMatrix II = wavefunction.ctr() * h1 * wavefunction;
-  for(size_t i = 0; i < II.size1(); ++i) {
-    std::cerr << "II " << i << ' ' << ComplexType(II(i,i)) << std::endl;
-  }
+  //ComplexMatrix II = wavefunction.ctr() * h1 * wavefunction;
+  //for(size_t i = 0; i < II.size1(); ++i) {
+  //  std::cerr << "II " << i << ' ' << ComplexType(II(i,i)) << std::endl;
+  //}
 
   // c
   // c write the energies out (in meV)

@@ -257,6 +257,15 @@ public:
     TS_ASSERT_EQUALS(p0, &v[0]);
   }
 
+  void test_toStdVector() {
+    auto v = makeVector1();
+    auto stdv = v.toStdVector();
+    TS_ASSERT_EQUALS(v.size(), stdv.size());
+    TS_ASSERT_EQUALS(v[0], stdv[0]);
+    TS_ASSERT_EQUALS(v[1], stdv[1]);
+    TS_ASSERT_EQUALS(v[2], stdv[2]);
+  }
+
 private:
   GSLVector makeVector1() {
     GSLVector v(3);

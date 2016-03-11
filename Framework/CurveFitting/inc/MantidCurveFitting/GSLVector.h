@@ -87,6 +87,8 @@ public:
   std::vector<size_t> sortIndices(bool ascending = true) const;
   /// Sort this vector in order defined by an index array
   void sort(const std::vector<size_t>& indices) ;
+  /// Copy the values to an std vector of doubles
+  std::vector<double> toStdVector() const;
 
   /// Add a vector
   GSLVector &operator+=(const GSLVector &v);

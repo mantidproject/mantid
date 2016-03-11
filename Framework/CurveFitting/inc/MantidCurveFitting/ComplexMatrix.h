@@ -237,6 +237,9 @@ public:
   Tr<ComplexMatrix> tr() { return Tr<ComplexMatrix>(*this); }
   /// Get "conjugate transposed" matrix to be used in multiplications
   CTr ctr() { return CTr(*this); }
+  /// Pack the matrix into a single std vector of doubles (for passing in and out
+  /// of algorithms)
+  std::vector<double> packToStdVector() const;
 
 protected:
   /// Type of the matrix elements.

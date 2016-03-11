@@ -474,6 +474,34 @@ public:
     TS_ASSERT_EQUALS(m(1, 2), v22);
     TS_ASSERT_EQUALS(m(2, 2), v22);
   }
+
+  void test_packing() {
+    ComplexMatrix m(4, 3);
+    m.set(0, 0, v0);
+    m.set(0, 1, v1);
+    m.set(0, 2, v2);
+    m.set(1, 0, v10);
+    m.set(1, 1, v11);
+    m.set(1, 2, v12);
+    m.set(2, 0, v20);
+    m.set(2, 1, v21);
+    m.set(2, 2, v22);
+    m.set(3, 0, v30);
+    m.set(3, 1, v31);
+    m.set(3, 2, v32);
+
+    std::vector<double> packed = m.packToStdVector();
+    TS_ASSERT_EQUALS(packed.size(), 2 * m.size1() * m.size2());
+
+    auto index = [&m](size_t i, size_t j) { return 2 * (i * m.size2() + j); };
+    for (size_t i = 0; i < m.size1(); ++i) {
+      for (size_t j = 0; j < m.size2(); ++j) {
+        TS_ASSERT_EQUALS(packed[index(i, j)], m.get(i, j).real());
+        TS_ASSERT_EQUALS(packed[index(i, j) + 1], m.get(i, j).imag());
+      }
+    }
+  }
+
 };
 
 #endif /*ComplexMatrixTEST_H_*/

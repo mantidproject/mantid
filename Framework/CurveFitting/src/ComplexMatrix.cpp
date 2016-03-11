@@ -319,5 +319,23 @@ ComplexMatrix ComplexMatrix::move() {
   return ComplexMatrix(std::move(m_matrix));
 }
 
+/// Pack the matrix into a single std vector of doubles (for passing in and out
+/// of algorithms)
+std::vector<double> ComplexMatrix::packToStdVector() const {
+  const size_t n1 = size1();
+  const size_t n2 = size2();
+
+  std::vector<double> packed(2 * n1 * n2);
+  for (size_t i = 0; i < n1; ++i) {
+    for (size_t j = 0; j < n2; ++j) {
+      auto k = 2 * (i * n2 + j);
+      ComplexType value = get(i, j);
+      packed[k] = value.real();
+      packed[k + 1] = value.imag();
+    }
+  }
+  return packed;
+}
+
 } // namespace CurveFitting
 } // namespace Mantid

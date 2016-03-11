@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/Algorithms/CalculateMSVesuvio.cpp
 	src/Algorithms/ConvertToYSpace.cpp
 	src/Algorithms/ConvolveWorkspaces.cpp
+	src/Algorithms/CrystalFieldEnergies.cpp
 	src/Algorithms/EstimatePeakErrors.cpp
 	src/Algorithms/EvaluateFunction.cpp
 	src/Algorithms/Fit.cpp
@@ -127,6 +128,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Algorithms/CalculateMSVesuvio.h
 	inc/MantidCurveFitting/Algorithms/ConvertToYSpace.h
 	inc/MantidCurveFitting/Algorithms/ConvolveWorkspaces.h
+	inc/MantidCurveFitting/Algorithms/CrystalFieldEnergies.h
 	inc/MantidCurveFitting/Algorithms/EstimatePeakErrors.h
 	inc/MantidCurveFitting/Algorithms/EvaluateFunction.h
 	inc/MantidCurveFitting/Algorithms/Fit.h
@@ -278,6 +280,7 @@ set ( TEST_FILES
 	Constraints/BoundaryConstraintTest.h
 	CostFunctions/CostFuncUnweightedLeastSquaresTest.h
 	CostFunctions/LeastSquaresTest.h
+	CrystalFieldEnergiesTest.h
 	FitMWTest.h
 	FortranMatrixTest.h
 	FortranVectorTest.h
