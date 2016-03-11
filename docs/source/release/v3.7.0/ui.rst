@@ -115,7 +115,7 @@ VSI Improvements
 
 .. figure:: ../../images/VSIEllipses.png
     :align: center  
-
+    :scale: 50 %
 |
 
 Full list of
