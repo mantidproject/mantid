@@ -56,6 +56,7 @@ public:
   void removeSpectra(DataBlockComposite &toRemove);
   void truncate(int64_t specMin, int64_t specMax);
   std::vector<int64_t> getAllSpectrumNumbers();
+  bool isEmpty();
 
 private:
   std::vector<DataBlock> m_dataBlocks;

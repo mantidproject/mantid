@@ -868,6 +868,63 @@ public:
     TSM_ASSERT("Should be equal", dataBlockComposite == dataBlockCompositeCopy);
   }
 
+  void test_that_truncation_with_empty_interval_produces_empty_data_blocks() {
+    // Arrange
+    // Scenario:
+    // original     |------|     |------|
+    // truncation            ||
+    // result        EMPTY
+    std::vector<std::pair<int64_t, int64_t>> intervals = {
+        std::make_pair(5, 16), std::make_pair(20, 26)};
+    auto dataBlockComposite = getSampleDataBlockComposite(intervals);
+    int64_t min = 17;
+    int64_t max = 19;
+
+    // Act
+    dataBlockComposite.truncate(min, max);
+
+    // Assert
+    TSM_ASSERT("Should be empty",  dataBlockComposite.isEmpty());
+  }
+
+  void test_that_truncation_less_than_min_produces_empty_data_blocks() {
+    // Arrange
+    // Scenario:
+    // original     |------|     |------|
+    // truncation ||
+    // result        EMPTY
+    std::vector<std::pair<int64_t, int64_t>> intervals = {
+        std::make_pair(5, 16), std::make_pair(20, 26)};
+    auto dataBlockComposite = getSampleDataBlockComposite(intervals);
+    int64_t min = 2;
+    int64_t max = 3;
+
+    // Act
+    dataBlockComposite.truncate(min, max);
+
+    // Assert
+    TSM_ASSERT("Should be empty",  dataBlockComposite.isEmpty());
+  }
+
+  void test_that_truncation_more_than_max_produces_empty_data_blocks() {
+    // Arrange
+    // Scenario:
+    // original     |------|     |------|
+    // truncation                         ||
+    // result            EMPTY
+    std::vector<std::pair<int64_t, int64_t>> intervals = {
+        std::make_pair(5, 16), std::make_pair(20, 26)};
+    auto dataBlockComposite = getSampleDataBlockComposite(intervals);
+    int64_t min = 32;
+    int64_t max = 33;
+
+    // Act
+    dataBlockComposite.truncate(min, max);
+
+    // Assert
+    TSM_ASSERT("Should be empty",  dataBlockComposite.isEmpty());
+  }
+
   void test_that_data_block_composites_are_equal() {
     // Arrange
     std::vector<std::pair<int64_t, int64_t>> intervals = {

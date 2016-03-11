@@ -110,7 +110,7 @@ private:
   /// Overwrites Algorithm method
   void exec() override;
   // Validate the optional input properties
-  void checkOptionalProperties(bool bseparateMonitors, bool bexcludeMonitor);
+  bool checkOptionalProperties(bool bseparateMonitors, bool bexcludeMonitor);
 
   /// Prepare a vector of SpectraBlock structures to simplify loading
   size_t prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
