@@ -142,11 +142,12 @@ class LoadVesuvio(LoadEmptyVesuvio):
     def PyExec(self):
         self._load_common_inst_parameters()
         self._retrieve_input()
-
         # Add OutputWorkspace property for Monitors
         if self._load_monitors:
-            mon_out_name = self.getPropertyValue(WKSP_PROP) + '_monitors'
-            self.declareProperty(WorkspaceProperty(WKSP_PROP_LOAD_MON, mon_out_name, Direction.Output),
+            # Check property is not being re-decalred
+            if not self.existsProperty(WKSP_PROP_LOAD_MON):
+                mon_out_name = self.getPropertyValue(WKSP_PROP) + '_monitors'
+                self.declareProperty(WorkspaceProperty(WKSP_PROP_LOAD_MON, mon_out_name, Direction.Output),
                              doc="The output workspace that contains the monitor spectra.")
 
         if "Difference" in self._diff_opt:
@@ -351,6 +352,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
             self._load_monitors_workspace = clone.getProperty("OutputWorkspace").value
             self._load_monitors_workspace = self._sum_monitors_in_group(monitor_group,
                                                                         self._load_monitors_workspace)
+            ms.DeleteWorkspace(Workspace=monitor_group)
 
         raw_group = mtd[SUMMED_WS]
         self._nperiods = raw_group.size()
