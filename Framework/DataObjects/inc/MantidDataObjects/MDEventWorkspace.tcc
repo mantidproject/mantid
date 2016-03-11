@@ -207,10 +207,16 @@ TMDE(std::vector<coord_t> MDEventWorkspace)::estimateResolution() const {
     if (numMD[i] > 0)
       realDepth = i;
 
+  auto splitTop = m_BoxController->getSplitTopInto();
   std::vector<coord_t> out;
   for (size_t d = 0; d < nd; d++) {
     size_t finestSplit = 1;
-    for (size_t i = 0; i < realDepth; i++)
+    size_t i = 0;
+    if (splitTop) {
+      finestSplit *= splitTop.get()[d];
+      i = 1;
+    }
+    for (; i < realDepth; i++)
       finestSplit *= m_BoxController->getSplitInto(d);
     Geometry::IMDDimension_const_sptr dim = this->getDimension(d);
     // Calculate the bin size at the smallest split amount
