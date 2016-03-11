@@ -1419,6 +1419,140 @@ public:
     AnalysisDataService::Instance().remove("outWS");
   }
 
+  void test_that_non_contiguous_data_loads_only_monitors_in_parts_when_only_lower_bound_is_specfied() {
+    /*
+    Monitors can be found at detID: 145, 146, 147, 148
+    */
+    // Arrange
+    Mantid::API::FrameworkManager::Instance();
+    LoadISISNexus2 ld;
+    ld.initialize();
+    ld.setPropertyValue("Filename", "INS09161.nxs");
+    ld.setPropertyValue("OutputWorkspace", "outWS");
+    ld.setPropertyValue("LoadMonitors", "1"); /*separate monitors*/
+    ld.setPropertyValue("SpectrumMin", "50"); /* Note that we don't specify a max*/
+    ld.setPropertyValue("SpectrumList", "145");
+
+    // Act
+    TS_ASSERT_THROWS_NOTHING(ld.execute());
+    TS_ASSERT(ld.isExecuted());
+
+    // Assert
+    MatrixWorkspace_sptr ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr mon_ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "outWS_monitors");
+
+    TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
+    TSM_ASSERT_EQUALS("Should have 110(172-50 +1 -4) detectors", ws->getNumberHistograms(),
+                      119);
+
+    TSM_ASSERT_EQUALS("Monitor workspace should have 17036 bins",
+                      mon_ws->blocksize(), 17036);
+    TSM_ASSERT_EQUALS("Monitor workspace should have 4 detector, since none "
+                      "was specifically selected",
+                      mon_ws->getNumberHistograms(), 4);
+
+    // Check elements in workspace
+    auto detIDtoWSIndexMap = ws->getDetectorIDToWorkspaceIndexMap();
+
+    // Range from 1 to 49
+    for (Mantid::detid_t detID = 1; detID < 50; ++detID) {
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
+    }
+
+    // Range from 50 to 144
+    for (Mantid::detid_t detID = 50; detID < 74; ++detID) {
+      TSM_ASSERT("Should be in workspace", detIDtoWSIndexMap.count(detID) == 1);
+    }
+
+    // 145, 146, 147, 148
+    TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(145) == 0);
+    TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(146) == 0);
+    TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(147) == 0);
+    TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(148) == 0);
+
+    // Range from 146 to 172 (which is the number of detectors + monitors)
+    for (Mantid::detid_t detID = 149; detID <= 172; ++detID) {
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 1);
+    }
+
+    TSM_ASSERT_EQUALS(
+        "Detector at WS index 2 should have a spectrum number of 52", 52,
+        ws->getSpectrum(2)->getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 52",
+                      52, ws->getDetector(2)->getID());
+
+
+
+    // Clean up
+    AnalysisDataService::Instance().remove("outWS");
+    AnalysisDataService::Instance().remove("outWS_monitors");
+  }
+
+
+  void test_that_non_contiguous_data_loads_only_monitors_in_parts_when_only_lower_bound_is_specfied_without_spectra_list() {
+    /*
+    Monitors can be found at detID: 145, 146, 147, 148
+    */
+    // Arrange
+    Mantid::API::FrameworkManager::Instance();
+    LoadISISNexus2 ld;
+    ld.initialize();
+    ld.setPropertyValue("Filename", "LOQ49886.nxs");
+    ld.setPropertyValue("OutputWorkspace", "outWS");
+    ld.setPropertyValue("LoadMonitors", "1"); /*separate monitors*/
+    ld.setPropertyValue("SpectrumMin", "2"); /* Note that we don't specify a max*/
+
+    // Act
+    TS_ASSERT_THROWS_NOTHING(ld.execute());
+    TS_ASSERT(ld.isExecuted());
+
+    // Assert
+    MatrixWorkspace_sptr ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr mon_ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "outWS_monitors");
+
+    TSM_ASSERT_EQUALS("Should have 5 bins", ws->blocksize(), 5);
+    TSM_ASSERT_EQUALS("Should have 17790 detectors", ws->getNumberHistograms(),
+                      17790);
+
+    TSM_ASSERT_EQUALS("Monitor workspace should have 5 bins",
+                      mon_ws->blocksize(), 5);
+    TSM_ASSERT_EQUALS("Monitor workspace should have 1 detector, since none "
+                      "was specifically selected",
+                      mon_ws->getNumberHistograms(), 1);
+
+    // Check some samples
+    TSM_ASSERT_EQUALS(
+        "Detector at WS index 2 should have a spectrum number of 5", 5,
+        ws->getSpectrum(2)->getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 5",
+                      5, ws->getDetector(2)->getID());
+    TSM_ASSERT_EQUALS(
+        "Detector at WS index 3 should have a spectrum number of 6", 6,
+        ws->getSpectrum(3)->getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 3 should have a detector ID of 6",
+                      6, ws->getDetector(3)->getID());
+
+    TSM_ASSERT_EQUALS(
+        "Detector at WS index 0 should have a spectrum number of 2", 2,
+        mon_ws->getSpectrum(0)->getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 0 should have a detector ID of 2",
+                      2, mon_ws->getDetector(0)->getID());
+
+    // Clean up
+    AnalysisDataService::Instance().remove("outWS");
+    AnalysisDataService::Instance().remove("outWS_monitors");
+  }
+
+
+
   //------------------------------------------------------------------
   // Exceptions
   //------------------------------------------------------------------
