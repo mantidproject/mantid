@@ -80,8 +80,8 @@ Here are some tables that show it in more detail:
 | Detector Data                | groups of Class NXevent_data              | Event data                          |
 |                              | (one bank per group)                      |                                     |
 +------------------------------+-------------------------------------------+-------------------------------------+
-| Instrument                   | group ``Instrument`` ???                  | ??? Workspace instrument            |
-|                              |                                           | ??? if not overridden               |
+| Instrument                   | group ``Instrument``                      | Workspace instrument                |
+|                              |                                           | if not overridden                   |
 +------------------------------+-------------------------------------------+-------------------------------------+
 |                              | If ``isis_vms_compat`` exists,            |                                     |
 | Spectrum of each detector ID | ``NSP1``, ``UDET`` and ``SPEC``           | Spectra-Detector mapping            |
