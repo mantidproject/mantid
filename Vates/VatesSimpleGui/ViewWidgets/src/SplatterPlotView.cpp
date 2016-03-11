@@ -517,16 +517,19 @@ void SplatterPlotView::createPeaksFilter()
     updatePeaksFilter(m_peaksFilter);
 
     // Create point representation of the source and set the point size 
-    const double pointSize = 2;
     pqDataRepresentation *dataRepresentation  = m_peaksFilter->getRepresentation(this->m_view);
-    vtkSMPropertyHelper(dataRepresentation->getProxy(), "Representation").Set("Points");
-    vtkSMPropertyHelper(dataRepresentation->getProxy(), "PointSize").Set(pointSize);
+    vtkSMPropertyHelper(dataRepresentation->getProxy(), "Representation")
+        .Set("Point Gaussian");
+    vtkSMPropertyHelper(dataRepresentation->getProxy(), "GaussianRadius")
+        .Set(0.005);
+    vtkSMPropertyHelper(dataRepresentation->getProxy(), "Opacity").Set(0.5);
     dataRepresentation->getProxy()->UpdateVTKObjects();
 
     if (!this->isPeaksWorkspace(this->origSrc))
     {
-      vtkSMPVRepresentationProxy::SetScalarColoring(dataRepresentation->getProxy(), "signal",
-                                                  vtkDataObject::FIELD_ASSOCIATION_CELLS);
+      vtkSMPVRepresentationProxy::SetScalarColoring(
+          dataRepresentation->getProxy(), "signal",
+          vtkDataObject::FIELD_ASSOCIATION_POINTS);
       dataRepresentation->getProxy()->UpdateVTKObjects();
     }
     this->resetDisplay();

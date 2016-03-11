@@ -131,38 +131,12 @@ void vtkDataSetToPeaksFilteredDataSet::execute(
     }
   }
 
-  // Now we have all ids for the points,  we need to retrieve the ids of the
-  // cells
-  std::map<vtkIdType, vtkIdType> uniqueCellTester;
-  vtkSmartPointer<vtkIdTypeArray> cellIds =
-      vtkSmartPointer<vtkIdTypeArray>::New();
-
-  for (int i = 0; i < ids->GetNumberOfTuples(); i++) {
-    vtkIdType pId = ids->GetValue(i);
-
-    vtkSmartPointer<vtkIdList> cIdList = vtkSmartPointer<vtkIdList>::New();
-    cIdList->Initialize();
-
-    m_inputData->GetPointCells(pId, cIdList);
-
-    if (cIdList->GetNumberOfIds() == 0) {
-      continue;
-    }
-
-    vtkIdType cId = cIdList->GetId(0);
-
-    if (uniqueCellTester.count(cId) == 0) {
-      cellIds->InsertNextValue(cId);
-      uniqueCellTester.insert(std::pair<vtkIdType, vtkIdType>(cId, cId));
-    }
-  }
-
   // Create the selection node and tell it the type of selection
   vtkSmartPointer<vtkSelectionNode> selectionNode =
       vtkSmartPointer<vtkSelectionNode>::New();
-  selectionNode->SetFieldType(vtkSelectionNode::CELL);
+  selectionNode->SetFieldType(vtkSelectionNode::POINT);
   selectionNode->SetContentType(vtkSelectionNode::INDICES);
-  selectionNode->SetSelectionList(cellIds);
+  selectionNode->SetSelectionList(ids);
 
   vtkSmartPointer<vtkSelection> selection =
       vtkSmartPointer<vtkSelection>::New();
