@@ -60,8 +60,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadSQW2)
 /// Default constructor
 LoadSQW2::LoadSQW2()
     : API::IFileLoader<Kernel::FileDescriptor>(), m_file(), m_reader(),
-      m_outputWS(), m_nspe(0), m_uToRLU(), m_rluToU(),
-      m_outputFrame() {}
+      m_outputWS(), m_nspe(0), m_uToRLU(), m_rluToU(), m_outputFrame() {}
 
 /// Default destructor
 LoadSQW2::~LoadSQW2() {}
@@ -649,7 +648,7 @@ void LoadSQW2::readPixelDataIntoWorkspace() {
   warnIfMemoryInsufficient(npixtot);
   API::Progress status(this, 0.5, 1.0, npixtot);
   status.setNotifyStep(0.01);
-  
+
   // Each pixel has 9 float fields. Do a chunked read to avoid
   // using too much memory for the buffer and also split the
   // boxes regularly to ensure that larger workspaces can be loaded
