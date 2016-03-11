@@ -16,6 +16,9 @@ class VesuvioTests(unittest.TestCase):
     def tearDown(self):
         if self.ws_name in mtd:
             mtd.remove(self.ws_name)
+        monitor_name = self.ws_name + '_monitors'
+        if monitor_name in mtd:
+            mtd.remove(monitor_name)
 
     #================== Success cases ================================
     def test_load_with_back_scattering_spectra_produces_correct_workspace_using_double_difference(self):
@@ -61,6 +64,16 @@ class VesuvioTests(unittest.TestCase):
         self._run_load("14188-14190", "3-134", diff_mode, load_mon=False)
         self.assertFalse(mtd.doesExist('evs_raw_monitors'))
 
+    def test_monitor_is_loaded_for_non_differencing_mode(self):
+        diff_mode = "FoilOut"
+        self._run_load("14188", "135-198", diff_mode, load_mon=True)
+        self.assertTrue(mtd.doesExist('evs_raw_monitors'))
+        self.assertTrue(isinstance(mtd['evs_raw_monitors'], MatrixWorkspace))
+
+    def test_monitor_is_not_loaded_for_non_differencing_mode_when_LoadMonitors_false(self):
+        diff_mode = "FoilOut"
+        self._run_load("14188", "135-198", diff_mode, load_mon=False)
+        self.assertFalse(mtd.doesExist('evs_raw_monitors'))
 
     def test_load_with_back_scattering_spectra_produces_correct_workspace_using_single_difference(self):
         diff_mode = "SingleDifference"
