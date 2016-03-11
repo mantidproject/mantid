@@ -1419,7 +1419,8 @@ public:
     AnalysisDataService::Instance().remove("outWS");
   }
 
-  void test_that_non_contiguous_data_loads_only_monitors_in_parts_when_only_lower_bound_is_specfied() {
+  void
+  test_that_non_contiguous_data_loads_only_monitors_in_parts_when_only_lower_bound_is_specfied() {
     /*
     Monitors can be found at detID: 145, 146, 147, 148
     */
@@ -1430,7 +1431,8 @@ public:
     ld.setPropertyValue("Filename", "INS09161.nxs");
     ld.setPropertyValue("OutputWorkspace", "outWS");
     ld.setPropertyValue("LoadMonitors", "1"); /*separate monitors*/
-    ld.setPropertyValue("SpectrumMin", "50"); /* Note that we don't specify a max*/
+    ld.setPropertyValue("SpectrumMin",
+                        "50"); /* Note that we don't specify a max*/
     ld.setPropertyValue("SpectrumList", "145");
 
     // Act
@@ -1445,8 +1447,8 @@ public:
             "outWS_monitors");
 
     TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
-    TSM_ASSERT_EQUALS("Should have 110(172-50 +1 -4) detectors", ws->getNumberHistograms(),
-                      119);
+    TSM_ASSERT_EQUALS("Should have 110(172-50 +1 -4) detectors",
+                      ws->getNumberHistograms(), 119);
 
     TSM_ASSERT_EQUALS("Monitor workspace should have 17036 bins",
                       mon_ws->blocksize(), 17036);
@@ -1486,15 +1488,13 @@ public:
     TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 52",
                       52, ws->getDetector(2)->getID());
 
-
-
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
     AnalysisDataService::Instance().remove("outWS_monitors");
   }
 
-
-  void test_that_non_contiguous_data_loads_only_monitors_in_parts_when_only_lower_bound_is_specfied_without_spectra_list() {
+  void
+  test_that_non_contiguous_data_loads_only_monitors_in_parts_when_only_lower_bound_is_specfied_without_spectra_list() {
     /*
     Monitors can be found at detID: 145, 146, 147, 148
     */
@@ -1505,7 +1505,8 @@ public:
     ld.setPropertyValue("Filename", "LOQ49886.nxs");
     ld.setPropertyValue("OutputWorkspace", "outWS");
     ld.setPropertyValue("LoadMonitors", "1"); /*separate monitors*/
-    ld.setPropertyValue("SpectrumMin", "2"); /* Note that we don't specify a max*/
+    ld.setPropertyValue("SpectrumMin",
+                        "2"); /* Note that we don't specify a max*/
 
     // Act
     TS_ASSERT_THROWS_NOTHING(ld.execute());
@@ -1550,8 +1551,6 @@ public:
     AnalysisDataService::Instance().remove("outWS");
     AnalysisDataService::Instance().remove("outWS_monitors");
   }
-
-
 
   //------------------------------------------------------------------
   // Exceptions

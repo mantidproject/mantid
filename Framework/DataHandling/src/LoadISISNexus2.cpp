@@ -596,9 +596,9 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
                       spec_list.end());
 
       // The spec_min - spec_max range needs to be added to the spec list
-        for (int64_t i = spec_min; i < spec_max + 1; ++i) {
-          specnum_t spec_num = static_cast<specnum_t>(i);
-          spec_list.push_back(spec_num);
+      for (int64_t i = spec_min; i < spec_max + 1; ++i) {
+        specnum_t spec_num = static_cast<specnum_t>(i);
+        spec_list.push_back(spec_num);
         std::sort(spec_list.begin(), spec_list.end());
         // supplied range converted into the list, so no more supplied range
       }
