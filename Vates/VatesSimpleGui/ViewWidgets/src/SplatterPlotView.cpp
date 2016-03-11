@@ -162,7 +162,7 @@ void SplatterPlotView::render()
     return;
   }
 
-  QString renderType = "Points";
+  const char *renderType = "Point Gaussian";
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
   // Do not allow overplotting of MDWorkspaces
@@ -213,16 +213,17 @@ void SplatterPlotView::render()
   src->updatePipeline();
   pqDataRepresentation *drep = builder->createDataRepresentation(\
            src->getOutputPort(0), this->m_view);
-  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(renderType.toStdString().c_str());
+  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(renderType);
   if (!isPeaksWorkspace)
   {
-    vtkSMPropertyHelper(drep->getProxy(), "PointSize").Set(1);
+    vtkSMPropertyHelper(drep->getProxy(), "Opacity").Set(0.5);
+    vtkSMPropertyHelper(drep->getProxy(), "GaussianRadius").Set(0.005);
   }
   drep->getProxy()->UpdateVTKObjects();
   if (!isPeaksWorkspace)
   {
-    vtkSMPVRepresentationProxy::SetScalarColoring(drep->getProxy(), "signal",
-                                                  vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    vtkSMPVRepresentationProxy::SetScalarColoring(
+        drep->getProxy(), "signal", vtkDataObject::FIELD_ASSOCIATION_POINTS);
     drep->getProxy()->UpdateVTKObjects();
   }
 
