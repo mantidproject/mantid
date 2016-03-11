@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import numpy as np
 import mantid
 
@@ -8,7 +9,7 @@ def calculateCenter(ws):
     tt=np.array(detector_table.column(2))       #in radians
     phi=np.array(detector_table.column(3))     #in radians
     masked=1-np.array(detector_table.column(7))
-    intrensities=intensities*masked
+    intensities=intensities*masked
     x=l2*np.sin(tt)*np.cos(phi)
     y=l2*np.sin(tt)*np.sin(phi)
     z=l2*np.cos(tt)
@@ -17,7 +18,7 @@ def calculateCenter(ws):
     avez=(z*intensities).sum()/intensities.sum()
     rotation010=np.degrees(mantid.kernel.V3D(avex,0,avez).angle(mantid.kernel.V3D(0,0,1)))
     return (-avey,-rotation010)
-    
+
 central=mantid.simpleapi.LoadEventNexus('REF_M_22715',NXentryName='entry-Off_Off')
 original=mantid.simpleapi.CloneWorkspace(central)
 translation,rotation=calculateCenter(original)
