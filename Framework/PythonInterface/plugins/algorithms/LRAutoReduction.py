@@ -46,6 +46,7 @@ class LRAutoReduction(PythonAlgorithm):
         self.declareProperty("WavelengthOffset", 0.0, doc="Wavelength offset used for TOF range determination")
         self.declareProperty("ScalingWavelengthCutoff", 10.0, "Wavelength above which the scaling factors are assumed to be one")
         self.declareProperty("FindPeaks", False, "Find reflectivity peaks instead of using the template values")
+        self.declareProperty("ReadSequenceFromFile", False, "Read the run sequence information from the file, not the title")
         self.declareProperty("ForceSequenceNumber", 0, "Force the sequence number value if it's not available")
 
         self.declareProperty(FileProperty('OutputFilename', '', action=FileAction.OptionalSave, extensions=["txt"]),
@@ -70,6 +71,7 @@ class LRAutoReduction(PythonAlgorithm):
 
         # Deal with a forced sequence number
         force_value = self.getProperty("ForceSequenceNumber").value
+        read_sequence_from_file = self.getProperty("ReadSequenceFromFile").value
         if force_value > 0:
             sequence_number = force_value
             first_run_of_set = int(run_number) - int(sequence_number) + 1
@@ -78,10 +80,13 @@ class LRAutoReduction(PythonAlgorithm):
 
         # Look for meta data information, available with the new DAS
         # If it's not available, parse the title.
-        elif meta_data_run.hasProperty("sequence_number") and meta_data_run.hasProperty("sequence_id"):
-            sequence_number = meta_data_run.getProperty("sequence_number").value
-            first_run_of_set = meta_data_run.getProperty("sequence_id").value
-            data_type = meta_data_run.getProperty("data_type").value
+        elif read_sequence_from_file is True \
+            and meta_data_run.hasProperty("sequence_number") \
+            and meta_data_run.hasProperty("sequence_id") \
+            and meta_data_run.hasProperty("data_type"):
+            sequence_number = meta_data_run.getProperty("sequence_number").value[0]
+            first_run_of_set = meta_data_run.getProperty("sequence_id").value[0]
+            data_type = meta_data_run.getProperty("data_type").value[0]
             # Normal sample data is type 0
             do_reduction = data_type==0
             # Direct beams for scaling factors are type 1
@@ -502,6 +507,29 @@ class LRAutoReduction(PythonAlgorithm):
 
         return file_path
 
+    def _get_sequence_total(self, default=10):
+        """
+            Return the total number of runs in the current sequence.
+            If reading sequence information from file was turned off,
+            or if the information was not found, return the given default.
+
+            For direct beams, a default of 10 is not efficient but is a
+            good value to avoid processing runs we know will be processed later.
+            That is because most direct beam run sets are either 13 (for 30 Hz)
+            or 21 (for 60 Hz).
+
+            @param default: default value for when the info is not available
+        """
+        meta_data_run = self.event_data.getRun()
+        # Get the total number of direct beams in a set.
+        # A default of 10 is not efficient but is a good default to
+        # avoid processing runs we know will be processed later.
+        read_sequence_from_file = self.getProperty("ReadSequenceFromFile").value
+        if read_sequence_from_file:
+            return self._read_property(meta_data_run, "sequence_total", [default])[0]
+        else:
+            return default
+        
     def PyExec(self):
         filename = self.getProperty("Filename").value
 
@@ -513,8 +541,9 @@ class LRAutoReduction(PythonAlgorithm):
 
         # If we have a direct beam, compute the scaling factors
         if is_direct_beam:
-            if sequence_number < 10:
-                logger.notice("Waiting for at least 10 runs before starting scaling factor calculator")
+            sequence_total = self._get_sequence_total(default=10)
+            if sequence_number < sequence_total:
+                logger.notice("Waiting for at least %s runs to compute scaling factors" % sequence_total)
                 return
             logger.notice("Using automated scaling factor calculator")
             output_dir = self.getProperty("OutputDirectory").value
