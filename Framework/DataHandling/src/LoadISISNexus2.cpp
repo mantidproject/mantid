@@ -483,12 +483,6 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
   int64_t spec_min = getProperty("SpectrumMin");
   int64_t spec_max = getProperty("SpectrumMax");
 
-  // default spectra ID-s would not work if spectraID_min!=1
-  if (m_loadBlockInfo.getMinSpectrumID() != 1) {
-    range_supplied = true;
-    m_load_selected_spectra = true;
-  }
-
   // If spearate monitors or excluded monitors is selected then we
   // need to build up a wsIndex to spectrum number map as well,
   // since we cannot rely on contiguous blocks of detectors
@@ -659,7 +653,7 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
       throw std::invalid_argument("Your spectrum number selection was not valid. "
                                   "Make sure that you select spectrum numbers "
                                   "and ranges which are compatible with your "
-                                  "monitor and selection");
+                                  "selection of excluded/included/seaparate monitors. ");
   }
 
   return bseparateMonitors;
