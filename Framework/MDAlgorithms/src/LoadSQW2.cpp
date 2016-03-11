@@ -60,7 +60,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadSQW2)
 /// Default constructor
 LoadSQW2::LoadSQW2()
     : API::IFileLoader<Kernel::FileDescriptor>(), m_file(), m_reader(),
-      m_outputWS(), m_nspe(0), m_uToRLU(), m_rluToU(), m_progress(),
+      m_outputWS(), m_nspe(0), m_uToRLU(), m_rluToU(),
       m_outputFrame() {}
 
 /// Default destructor
@@ -162,8 +162,6 @@ void LoadSQW2::initFileReader() {
   m_file = Kernel::make_unique<std::ifstream>(getPropertyValue("Filename"),
                                               std::ios_base::binary);
   m_reader = Kernel::make_unique<BinaryStreamReader>(*m_file);
-  // steps are reset once we know what we are reading
-  m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, 100);
 }
 
 /**
@@ -473,6 +471,9 @@ std::vector<float> LoadSQW2::calculateDimLimitsFromData() {
 
   int64_t npixtot(0);
   *m_reader >> npixtot;
+  API::Progress status(this, 0.0, 0.5, npixtot);
+  status.setNotifyStep(0.01);
+
   constexpr int64_t bufferSize(FIELDS_PER_PIXEL * NPIX_CHUNK);
   std::vector<float> pixBuffer(bufferSize);
   int64_t pixelsLeftToRead(npixtot);
@@ -495,6 +496,7 @@ std::vector<float> LoadSQW2::calculateDimLimitsFromData() {
         else if (uj > dimLimits[2 * j + 1])
           dimLimits[2 * j + 1] = uj;
       }
+      status.report("Calculating data extents");
     }
     pixelsLeftToRead -= chunkSize;
   }
@@ -645,8 +647,9 @@ void LoadSQW2::readPixelDataIntoWorkspace() {
   *m_reader >> npixtot;
   g_log.debug() << "    npixtot: " << npixtot << "\n";
   warnIfMemoryInsufficient(npixtot);
-  m_progress->setNumSteps(npixtot);
-
+  API::Progress status(this, 0.5, 1.0, npixtot);
+  status.setNotifyStep(0.01);
+  
   // Each pixel has 9 float fields. Do a chunked read to avoid
   // using too much memory for the buffer and also split the
   // boxes regularly to ensure that larger workspaces can be loaded
@@ -663,7 +666,7 @@ void LoadSQW2::readPixelDataIntoWorkspace() {
     m_reader->read(pixBuffer, FIELDS_PER_PIXEL * chunkSize);
     for (int64_t i = 0; i < chunkSize; ++i) {
       pixelsAdded += addEventFromBuffer(pixBuffer.data() + i * 9);
-      m_progress->report();
+      status.report("Reading pixel data to workspace");
     }
     pixelsLeftToRead -= chunkSize;
     ++chunksRead;

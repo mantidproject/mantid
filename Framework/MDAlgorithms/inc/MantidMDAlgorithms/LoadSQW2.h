@@ -13,7 +13,6 @@ namespace Mantid {
 // Forward declarations
 namespace API {
 class ExperimentInfo;
-class Progress;
 }
 
 namespace MDAlgorithms {
@@ -93,7 +92,6 @@ private:
   uint16_t m_nspe;
   Kernel::DblMatrix m_uToRLU;
   Kernel::DblMatrix m_rluToU;
-  std::unique_ptr<API::Progress> m_progress;
   std::string m_outputFrame;
 };
 
