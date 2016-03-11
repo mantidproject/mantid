@@ -631,12 +631,14 @@ std::string EnggDiffractionPresenter::functionStrFactory(
   double X0 = paramTableWS->cell<double>(row, size_t(5));
   double S = paramTableWS->cell<double>(row, size_t(11));
 
-  std::string functionStr = "name=LinearBackground,A0=" + std::to_string(A0) +
-                            "A1=" + std::to_string(A1) +
-                            ";name=BackToBackExponential,I=" +
-                            std::to_string(I) + ",A=" + std::to_string(A) +
-                            ",B=" + std::to_string(B) + ",X0=" +
-                            std::to_string(X0) + ",S=" + std::to_string(S);
+  std::string functionStr =
+      "name=LinearBackground,A0=" + boost::lexical_cast<std::string>(A0) +
+      ",A1=" + boost::lexical_cast<std::string>(A1) +
+      ";name=BackToBackExponential,I=" + boost::lexical_cast<std::string>(I) +
+      ",A=" + boost::lexical_cast<std::string>(A) + ",B=" +
+      boost::lexical_cast<std::string>(B) + ",X0=" +
+      boost::lexical_cast<std::string>(X0) + ",S=" +
+      boost::lexical_cast<std::string>(S);
 
   return functionStr;
 };
