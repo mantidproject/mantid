@@ -39,24 +39,21 @@
 #include <sstream>
 #include <vector>
 
-
-namespace
-{
+namespace {
 Mantid::DataHandling::DataBlockComposite
 getMonitorsFromComposite(Mantid::DataHandling::DataBlockComposite &composite,
-                         Mantid::DataHandling::DataBlockComposite &monitors)
-{
+                         Mantid::DataHandling::DataBlockComposite &monitors) {
   auto dataBlocks = composite.getDataBlocks();
   auto monitorBlocks = monitors.getDataBlocks();
   auto matchesMonitorBlock =
       [&monitorBlocks](Mantid::DataHandling::DataBlock &dataBlock) {
-          return std::find(std::begin(monitorBlocks), std::end(monitorBlocks),
-                           dataBlock) != std::end(monitorBlocks);
+        return std::find(std::begin(monitorBlocks), std::end(monitorBlocks),
+                         dataBlock) != std::end(monitorBlocks);
       };
 
   Mantid::DataHandling::DataBlockComposite newComposite;
-  for (auto& dataBlock : dataBlocks) {
-   if (matchesMonitorBlock(dataBlock)) {
+  for (auto &dataBlock : dataBlocks) {
+    if (matchesMonitorBlock(dataBlock)) {
       newComposite.addDataBlock(dataBlock);
     }
   }
@@ -64,7 +61,6 @@ getMonitorsFromComposite(Mantid::DataHandling::DataBlockComposite &composite,
   return newComposite;
 }
 }
-
 
 namespace Mantid {
 namespace DataHandling {
@@ -236,7 +232,8 @@ void LoadISISNexus2::exec() {
   size_t x_length = m_loadBlockInfo.getNumberOfChannels() + 1;
 
   // Check input is consistent with the file, throwing if not
-  bseparateMonitors = checkOptionalProperties(bseparateMonitors, bexcludeMonitors);
+  bseparateMonitors =
+      checkOptionalProperties(bseparateMonitors, bexcludeMonitors);
   // Fill up m_spectraBlocks
   size_t total_specs = prepareSpectraBlocks(m_monitors, m_loadBlockInfo);
 
@@ -544,7 +541,8 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
     std::sort(spec_list.begin(), spec_list.end());
 
     // Check if the spectra list entries are outside of the bounds
-    // If we load the monitors separately, then we need to make sure that we take
+    // If we load the monitors separately, then we need to make sure that we
+    // take
     // them
     // into account
     bool isSpectraListTooLarge;
@@ -552,38 +550,44 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
     auto maxLoadBlock = m_loadBlockInfo.getMaxSpectrumID();
     auto minLoadBlock = m_loadBlockInfo.getMinSpectrumID();
     if (bseparateMonitors) {
-        auto maxMonBlock = m_monBlockInfo.getMaxSpectrumID();
-        auto minMonBlock = m_monBlockInfo.getMinSpectrumID();
-        isSpectraListTooLarge = spec_list.back()
-                                > std::max(maxMonBlock, maxLoadBlock);
-        isSpectraListTooSmall = spec_list.front()
-                                < std::min(minMonBlock, minLoadBlock);
+      auto maxMonBlock = m_monBlockInfo.getMaxSpectrumID();
+      auto minMonBlock = m_monBlockInfo.getMinSpectrumID();
+      isSpectraListTooLarge =
+          spec_list.back() > std::max(maxMonBlock, maxLoadBlock);
+      isSpectraListTooSmall =
+          spec_list.front() < std::min(minMonBlock, minLoadBlock);
 
     } else {
-        isSpectraListTooLarge = spec_list.back() > maxLoadBlock;
-        isSpectraListTooSmall = spec_list.front() < minLoadBlock;
+      isSpectraListTooLarge = spec_list.back() > maxLoadBlock;
+      isSpectraListTooSmall = spec_list.front() < minLoadBlock;
     }
 
     if (isSpectraListTooLarge) {
       std::string err =
-          "The specified spectrum list contains a spectrum number which is larger "
+          "The specified spectrum list contains a spectrum number which is "
+          "larger "
           "than the largest loadable spectrum number for your selection of "
           "excluded/included/seaparate monitors. The largest loadable "
-          "spectrum number is " + std::to_string(m_loadBlockInfo.getMinSpectrumID());
+          "spectrum number is " +
+          std::to_string(m_loadBlockInfo.getMinSpectrumID());
       throw std::invalid_argument(err);
     }
     if (isSpectraListTooSmall) {
       std::string err =
-          "The specified spectrum list contains a spectrum number which is smaller "
+          "The specified spectrum list contains a spectrum number which is "
+          "smaller "
           "than the smallest loadable spectrum number for your selection of "
           "excluded/included/seaparate monitors. The smallest loadable "
-          "spectrum number is " + std::to_string(m_loadBlockInfo.getMinSpectrumID());
+          "spectrum number is " +
+          std::to_string(m_loadBlockInfo.getMinSpectrumID());
       throw std::invalid_argument(err);
     }
 
-    // The users can provide a spectrum list and and a spectrum range. Handle this here.
+    // The users can provide a spectrum list and and a spectrum range. Handle
+    // this here.
     if (range_supplied) {
-      // First remove all entries which are inside of the min and max spectrum, to avoid duplicates
+      // First remove all entries which are inside of the min and max spectrum,
+      // to avoid duplicates
       auto isInRange = [&spec_min, &spec_max](int64_t x) {
         return (spec_min <= x) && (x <= spec_max);
       };
@@ -616,18 +620,21 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
       auto newMonitors = getMonitorsFromComposite(composite, m_monBlockInfo);
       composite.removeSpectra(m_monBlockInfo);
 
-      // This is important. If there are no monitors which were specifically selected,
+      // This is important. If there are no monitors which were specifically
+      // selected,
       // then we load the full monitor range, else respect the selection.
       if (!newMonitors.isEmpty()) {
         m_monBlockInfo = newMonitors;
       }
 
-      // Handle case where the composite is empty since it only contained monitors, but
-      // we want to load the monitors sepearately. In this case we should set the loadBlock
+      // Handle case where the composite is empty since it only contained
+      // monitors, but
+      // we want to load the monitors sepearately. In this case we should set
+      // the loadBlock
       // to the selected monitors.
       if (bseparateMonitors && composite.isEmpty()) {
-          composite = m_monBlockInfo;
-          bseparateMonitors = false;
+        composite = m_monBlockInfo;
+        bseparateMonitors = false;
       }
     }
 
@@ -637,7 +644,8 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
   } else {
     // At this point we don't have a spectrum list but there might have been a
     // spectrum range which we need to take into account, by truncating
-    // the current range. If we load the monitors separately, we need to truncate
+    // the current range. If we load the monitors separately, we need to
+    // truncate
     // them as well (provided they are affected)
     if (range_supplied) {
       m_loadBlockInfo.truncate(spec_min, spec_max);
@@ -650,10 +658,11 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
 
   // Check that the load blocks contain anything at all.
   if (m_loadBlockInfo.isEmpty()) {
-      throw std::invalid_argument("Your spectrum number selection was not valid. "
-                                  "Make sure that you select spectrum numbers "
-                                  "and ranges which are compatible with your "
-                                  "selection of excluded/included/seaparate monitors. ");
+    throw std::invalid_argument(
+        "Your spectrum number selection was not valid. "
+        "Make sure that you select spectrum numbers "
+        "and ranges which are compatible with your "
+        "selection of excluded/included/seaparate monitors. ");
   }
 
   return bseparateMonitors;

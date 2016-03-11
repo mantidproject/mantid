@@ -773,11 +773,10 @@ public:
                      extractStringLog(*secondMatrixWS, "measurement_type"));
   }
 
-//------------------------------------------------------------------
-// Non-contiguous and excluded monitors
-//------------------------------------------------------------------
-void test_that_non_contiguous_data_loads_for_excluded_monitors()
-{
+  //------------------------------------------------------------------
+  // Non-contiguous and excluded monitors
+  //------------------------------------------------------------------
+  void test_that_non_contiguous_data_loads_for_excluded_monitors() {
     /*
     Monitors can be found at detID: 145, 146, 147, 148
     */
@@ -793,8 +792,8 @@ void test_that_non_contiguous_data_loads_for_excluded_monitors()
     TS_ASSERT(ld.isExecuted());
 
     // Assert
-    MatrixWorkspace_sptr ws
-        = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
     TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
     TSM_ASSERT_EQUALS("Should have 168 detectors (no monitors)",
                       ws->getNumberHistograms(), 168);
@@ -806,12 +805,12 @@ void test_that_non_contiguous_data_loads_for_excluded_monitors()
 
     // Check monitors are not in workspace
     for (const auto &monitorDetID : monitorDetIDs) {
-        TSM_ASSERT("Should not be in the detID2WSIndexMap.",
-                   detIDtoWSIndexMap.count(monitorDetID) == 0);
+      TSM_ASSERT("Should not be in the detID2WSIndexMap.",
+                 detIDtoWSIndexMap.count(monitorDetID) == 0);
     }
     for (const auto &neighborToCheck : neighborsToCheck) {
-        TSM_ASSERT("Should be in the detID2WSIndexMap.",
-                   detIDtoWSIndexMap.count(neighborToCheck) == 1);
+      TSM_ASSERT("Should be in the detID2WSIndexMap.",
+                 detIDtoWSIndexMap.count(neighborToCheck) == 1);
     }
 
     // Check some of the data
@@ -843,10 +842,10 @@ void test_that_non_contiguous_data_loads_for_excluded_monitors()
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
-}
+  }
 
-void test_that_non_contiguous_data_loads_for_excluded_monitors_and_spetra_list_which_contains_monitors()
-{
+  void
+  test_that_non_contiguous_data_loads_for_excluded_monitors_and_spetra_list_which_contains_monitors() {
     /*
     Monitors can be found at detID: 145, 146, 147, 148
     */
@@ -867,8 +866,8 @@ void test_that_non_contiguous_data_loads_for_excluded_monitors_and_spetra_list_w
     TS_ASSERT(ld.isExecuted());
 
     // Assert
-    MatrixWorkspace_sptr ws
-        = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
 
     TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
     TSM_ASSERT_EQUALS("Should have 25 detectors", ws->getNumberHistograms(),
@@ -879,8 +878,8 @@ void test_that_non_contiguous_data_loads_for_excluded_monitors_and_spetra_list_w
 
     // Range from 1 to 11
     for (Mantid::detid_t detID = 1; detID < 12; ++detID) {
-        TSM_ASSERT("Should not be in workspace",
-                   detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // 12
@@ -888,20 +887,19 @@ void test_that_non_contiguous_data_loads_for_excluded_monitors_and_spetra_list_w
 
     // Range from 13 t0 49
     for (Mantid::detid_t detID = 13; detID < 50; ++detID) {
-        TSM_ASSERT("Should not be in workspace",
-                   detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // Range from 50 to 73
     for (Mantid::detid_t detID = 50; detID < 74; ++detID) {
-        TSM_ASSERT("Should be in workspace",
-                   detIDtoWSIndexMap.count(detID) == 1);
+      TSM_ASSERT("Should be in workspace", detIDtoWSIndexMap.count(detID) == 1);
     }
 
     // Range from 74 to 144
     for (Mantid::detid_t detID = 74; detID < 145; ++detID) {
-        TSM_ASSERT("Should not be in workspace",
-                   detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // 145 --> not in workspace !!!
@@ -909,8 +907,8 @@ void test_that_non_contiguous_data_loads_for_excluded_monitors_and_spetra_list_w
 
     // Range from 146 to 172 (which is the number of detectors + monitors)
     for (Mantid::detid_t detID = 146; detID <= 172; ++detID) {
-        TSM_ASSERT("Should not be in workspace",
-                   detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
     }
     // Check that the data has the expected spectrum number and the expected
     // detecor ID (for some sample spectra)
@@ -922,13 +920,12 @@ void test_that_non_contiguous_data_loads_for_excluded_monitors_and_spetra_list_w
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
-}
+  }
 
-//-----------------------------------------------------------------
-// Non-contiguous and included monitors
-//------------------------------------------------------------------
-void test_that_non_contiguous_data_loads_for_included_monitors()
-{
+  //-----------------------------------------------------------------
+  // Non-contiguous and included monitors
+  //------------------------------------------------------------------
+  void test_that_non_contiguous_data_loads_for_included_monitors() {
     /*
     Monitors can be found at detID: 145, 146, 147, 148
     */
@@ -943,8 +940,8 @@ void test_that_non_contiguous_data_loads_for_included_monitors()
     TS_ASSERT(ld.isExecuted());
 
     // Assert
-    MatrixWorkspace_sptr ws
-        = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
     TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
     TSM_ASSERT_EQUALS("Should have 172 detectors (including 4 monitors)",
                       ws->getNumberHistograms(), 172);
@@ -956,12 +953,12 @@ void test_that_non_contiguous_data_loads_for_included_monitors()
 
     // Check monitors are not in workspace
     for (const auto &monitorDetID : monitorDetIDs) {
-        TSM_ASSERT("Should be in the detID2WSIndexMap.",
-                   detIDtoWSIndexMap.count(monitorDetID) == 1);
+      TSM_ASSERT("Should be in the detID2WSIndexMap.",
+                 detIDtoWSIndexMap.count(monitorDetID) == 1);
     }
     for (const auto &neighborToCheck : neighborsToCheck) {
-        TSM_ASSERT("Should be in the detID2WSIndexMap.",
-                   detIDtoWSIndexMap.count(neighborToCheck) == 1);
+      TSM_ASSERT("Should be in the detID2WSIndexMap.",
+                 detIDtoWSIndexMap.count(neighborToCheck) == 1);
     }
 
     // Check some of the data
@@ -995,10 +992,10 @@ void test_that_non_contiguous_data_loads_for_included_monitors()
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
-}
+  }
 
-void test_that_non_contiguous_data_loads_for_included_monitors_and_spectra_range_and_spetra_list()
-{
+  void
+  test_that_non_contiguous_data_loads_for_included_monitors_and_spectra_range_and_spetra_list() {
     /*
     Monitors can be found at detID: 145, 146, 147, 148
     */
@@ -1018,8 +1015,8 @@ void test_that_non_contiguous_data_loads_for_included_monitors_and_spectra_range
     TS_ASSERT(ld.isExecuted());
 
     // Assert
-    MatrixWorkspace_sptr ws
-        = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
 
     TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
     TSM_ASSERT_EQUALS("Should have 26 detectors", ws->getNumberHistograms(),
@@ -1030,8 +1027,8 @@ void test_that_non_contiguous_data_loads_for_included_monitors_and_spectra_range
 
     // Range from 1 to 11
     for (Mantid::detid_t detID = 1; detID < 12; ++detID) {
-        TSM_ASSERT("Should not be in workspace",
-                   detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // 12
@@ -1039,20 +1036,19 @@ void test_that_non_contiguous_data_loads_for_included_monitors_and_spectra_range
 
     // Range from 13 t0 49
     for (Mantid::detid_t detID = 13; detID < 50; ++detID) {
-        TSM_ASSERT("Should not be in workspace",
-                   detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // Range from 50 to 73
     for (Mantid::detid_t detID = 50; detID < 74; ++detID) {
-        TSM_ASSERT("Should be in workspace",
-                   detIDtoWSIndexMap.count(detID) == 1);
+      TSM_ASSERT("Should be in workspace", detIDtoWSIndexMap.count(detID) == 1);
     }
 
     // Range from 74 to 144
     for (Mantid::detid_t detID = 74; detID < 145; ++detID) {
-        TSM_ASSERT("Should not be in workspace",
-                   detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // 145
@@ -1060,8 +1056,8 @@ void test_that_non_contiguous_data_loads_for_included_monitors_and_spectra_range
 
     // Range from 146 to 172 (which is the number of detectors + monitors)
     for (Mantid::detid_t detID = 146; detID <= 172; ++detID) {
-        TSM_ASSERT("Should not be in workspace",
-                   detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
     }
 
     double delta = 1e-6;
@@ -1089,13 +1085,12 @@ void test_that_non_contiguous_data_loads_for_included_monitors_and_spectra_range
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
-}
+  }
 
-//------------------------------------------------------------------
-// Non-contiguous and separate monitors
-//------------------------------------------------------------------
-void test_that_non_contiguous_data_loads_for_separate_monitors()
-{
+  //------------------------------------------------------------------
+  // Non-contiguous and separate monitors
+  //------------------------------------------------------------------
+  void test_that_non_contiguous_data_loads_for_separate_monitors() {
     /*
     Monitors can be found at detID: 145, 146, 147, 148
     */
@@ -1112,10 +1107,10 @@ void test_that_non_contiguous_data_loads_for_separate_monitors()
     TS_ASSERT(ld.isExecuted());
 
     // Assert
-    MatrixWorkspace_sptr ws
-        = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
-    MatrixWorkspace_sptr mon_ws
-        = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr mon_ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "outWS_monitors");
 
     TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
@@ -1134,18 +1129,18 @@ void test_that_non_contiguous_data_loads_for_separate_monitors()
 
     // Check monitors are not in workspace
     for (const auto &monitorDetID : monitorDetIDs) {
-        TSM_ASSERT("Should not be in the detID2WSIndexMap.",
-                   detIDtoWSIndexMap.count(monitorDetID) == 0);
+      TSM_ASSERT("Should not be in the detID2WSIndexMap.",
+                 detIDtoWSIndexMap.count(monitorDetID) == 0);
     }
 
     for (const auto &monitorDetID : monitorDetIDs) {
-        TSM_ASSERT("Should be in the detID2WSIndexMapMon.",
-                   detIDtoWSIndexMapMon.count(monitorDetID) == 1);
+      TSM_ASSERT("Should be in the detID2WSIndexMapMon.",
+                 detIDtoWSIndexMapMon.count(monitorDetID) == 1);
     }
 
     for (const auto &neighborToCheck : neighborsToCheck) {
-        TSM_ASSERT("Should be in the detID2WSIndexMap.",
-                   detIDtoWSIndexMap.count(neighborToCheck) == 1);
+      TSM_ASSERT("Should be in the detID2WSIndexMap.",
+                 detIDtoWSIndexMap.count(neighborToCheck) == 1);
     }
 
     // Check some of the data
@@ -1190,10 +1185,10 @@ void test_that_non_contiguous_data_loads_for_separate_monitors()
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
     AnalysisDataService::Instance().remove("outWS_monitors");
-}
+  }
 
-void test_that_non_contiguous_data_loads_selected_monitors_for_separate_monitors_and_spectra_range_and_spectra_list()
-{
+  void
+  test_that_non_contiguous_data_loads_selected_monitors_for_separate_monitors_and_spectra_range_and_spectra_list() {
     /*
     Monitors can be found at detID: 145, 146, 147, 148
     */
@@ -1213,10 +1208,10 @@ void test_that_non_contiguous_data_loads_selected_monitors_for_separate_monitors
     TS_ASSERT(ld.isExecuted());
 
     // Assert
-    MatrixWorkspace_sptr ws
-        = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
-    MatrixWorkspace_sptr mon_ws
-        = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr mon_ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "outWS_monitors");
 
     TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
@@ -1234,8 +1229,8 @@ void test_that_non_contiguous_data_loads_selected_monitors_for_separate_monitors
 
     // Range from 1 to 11
     for (Mantid::detid_t detID = 1; detID < 12; ++detID) {
-        TSM_ASSERT("Should not be in workspace",
-                   detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // 12
@@ -1243,20 +1238,19 @@ void test_that_non_contiguous_data_loads_selected_monitors_for_separate_monitors
 
     // Range from 13 t0 49
     for (Mantid::detid_t detID = 13; detID < 50; ++detID) {
-        TSM_ASSERT("Should not be in workspace",
-                   detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // Range from 50 to 73
     for (Mantid::detid_t detID = 50; detID < 74; ++detID) {
-        TSM_ASSERT("Should be in workspace",
-                   detIDtoWSIndexMap.count(detID) == 1);
+      TSM_ASSERT("Should be in workspace", detIDtoWSIndexMap.count(detID) == 1);
     }
 
     // Range from 74 to 144
     for (Mantid::detid_t detID = 74; detID < 145; ++detID) {
-        TSM_ASSERT("Should not be in workspace",
-                   detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // 145
@@ -1264,8 +1258,8 @@ void test_that_non_contiguous_data_loads_selected_monitors_for_separate_monitors
 
     // Range from 146 to 172 (which is the number of detectors + monitors)
     for (Mantid::detid_t detID = 146; detID <= 172; ++detID) {
-        TSM_ASSERT("Should not be in workspace",
-                   detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
     }
 
     TSM_ASSERT_EQUALS(
@@ -1284,10 +1278,10 @@ void test_that_non_contiguous_data_loads_selected_monitors_for_separate_monitors
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
     AnalysisDataService::Instance().remove("outWS_monitors");
-}
+  }
 
-void test_that_non_contiguous_data_loads_all_monitors_for_separate_monitors_and_spectra_range_and_spectra_list()
-{
+  void
+  test_that_non_contiguous_data_loads_all_monitors_for_separate_monitors_and_spectra_range_and_spectra_list() {
     /*
     Monitors can be found at detID: 145, 146, 147, 148
     */
@@ -1307,10 +1301,10 @@ void test_that_non_contiguous_data_loads_all_monitors_for_separate_monitors_and_
     TS_ASSERT(ld.isExecuted());
 
     // Assert
-    MatrixWorkspace_sptr ws
-        = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
-    MatrixWorkspace_sptr mon_ws
-        = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr mon_ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "outWS_monitors");
 
     TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
@@ -1328,8 +1322,8 @@ void test_that_non_contiguous_data_loads_all_monitors_for_separate_monitors_and_
 
     // Range from 1 to 11
     for (Mantid::detid_t detID = 1; detID < 12; ++detID) {
-        TSM_ASSERT("Should not be in workspace",
-                   detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // 12
@@ -1337,20 +1331,19 @@ void test_that_non_contiguous_data_loads_all_monitors_for_separate_monitors_and_
 
     // Range from 13 t0 49
     for (Mantid::detid_t detID = 13; detID < 50; ++detID) {
-        TSM_ASSERT("Should not be in workspace",
-                   detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // Range from 50 to 73
     for (Mantid::detid_t detID = 50; detID < 74; ++detID) {
-        TSM_ASSERT("Should be in workspace",
-                   detIDtoWSIndexMap.count(detID) == 1);
+      TSM_ASSERT("Should be in workspace", detIDtoWSIndexMap.count(detID) == 1);
     }
 
     // Range from 74 to 144
     for (Mantid::detid_t detID = 74; detID < 145; ++detID) {
-        TSM_ASSERT("Should not be in workspace",
-                   detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // 145
@@ -1358,8 +1351,8 @@ void test_that_non_contiguous_data_loads_all_monitors_for_separate_monitors_and_
 
     // Range from 146 to 172 (which is the number of detectors + monitors)
     for (Mantid::detid_t detID = 146; detID <= 172; ++detID) {
-        TSM_ASSERT("Should not be in workspace",
-                   detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace",
+                 detIDtoWSIndexMap.count(detID) == 0);
     }
 
     TSM_ASSERT_EQUALS(
@@ -1378,10 +1371,10 @@ void test_that_non_contiguous_data_loads_all_monitors_for_separate_monitors_and_
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
     AnalysisDataService::Instance().remove("outWS_monitors");
-}
+  }
 
-void test_that_only_monitors_load_in_original_workspace_for_separate_monitors_when_spectra_list_only_contains_monitors()
-{
+  void
+  test_that_only_monitors_load_in_original_workspace_for_separate_monitors_when_spectra_list_only_contains_monitors() {
     /*
     Monitors can be found at detID: 145, 146, 147, 148
     */
@@ -1400,8 +1393,8 @@ void test_that_only_monitors_load_in_original_workspace_for_separate_monitors_wh
     TS_ASSERT(ld.isExecuted());
 
     // Assert
-    MatrixWorkspace_sptr ws
-        = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
 
     TSM_ASSERT_THROWS_ANYTHING(
         "We should not see the creation of a separate monitor workspace",
@@ -1424,13 +1417,13 @@ void test_that_only_monitors_load_in_original_workspace_for_separate_monitors_wh
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
-}
+  }
 
-//------------------------------------------------------------------
-// Exceptions
-//------------------------------------------------------------------
-void test_that_when_selecting_range_with_only_monitors_and_exclude_monitors_exception_is_thrown()
-{
+  //------------------------------------------------------------------
+  // Exceptions
+  //------------------------------------------------------------------
+  void
+  test_that_when_selecting_range_with_only_monitors_and_exclude_monitors_exception_is_thrown() {
     // Scenario:
     // Data:    |--Mon--||--Det--||--Mon--||--Det--|
     // Select:   |  |
@@ -1449,10 +1442,10 @@ void test_that_when_selecting_range_with_only_monitors_and_exclude_monitors_exce
     TSM_ASSERT_THROWS("Should throw, since it does not makes sense to only "
                       "select monitors, but to also exclude them",
                       ld.execute(), std::invalid_argument);
-}
+  }
 
-void test_that_when_selecting_range_with_only_monitors_in_the_middle_and_exclude_monitors_exception_is_thrown()
-{
+  void
+  test_that_when_selecting_range_with_only_monitors_in_the_middle_and_exclude_monitors_exception_is_thrown() {
     // Scenario:
     // Data:    |--Mon--||--Det--||--Mon--||--Det--|
     // Select:                      |  |
@@ -1470,10 +1463,10 @@ void test_that_when_selecting_range_with_only_monitors_in_the_middle_and_exclude
     TSM_ASSERT_THROWS("Should throw, since it does not makes sense to only "
                       "select monitors, but to also exclude them",
                       ld.execute(), std::invalid_argument);
-}
+  }
 
-void test_that_when_selecting_list_with_only_monitors_and_exclude_monitors_exception_is_thrown()
-{
+  void
+  test_that_when_selecting_list_with_only_monitors_and_exclude_monitors_exception_is_thrown() {
     // Arrange
     Mantid::API::FrameworkManager::Instance();
     LoadISISNexus2 ld;
@@ -1488,8 +1481,7 @@ void test_that_when_selecting_list_with_only_monitors_and_exclude_monitors_excep
     TSM_ASSERT_THROWS("Should throw, since it does not makes sense to only "
                       "select monitors, but to also exclude them",
                       ld.execute(), std::invalid_argument);
-}
-
+  }
 };
 
 //------------------------------------------------------------------------------

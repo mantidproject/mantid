@@ -884,7 +884,7 @@ public:
     dataBlockComposite.truncate(min, max);
 
     // Assert
-    TSM_ASSERT("Should be empty",  dataBlockComposite.isEmpty());
+    TSM_ASSERT("Should be empty", dataBlockComposite.isEmpty());
   }
 
   void test_that_truncation_less_than_min_produces_empty_data_blocks() {
@@ -903,7 +903,7 @@ public:
     dataBlockComposite.truncate(min, max);
 
     // Assert
-    TSM_ASSERT("Should be empty",  dataBlockComposite.isEmpty());
+    TSM_ASSERT("Should be empty", dataBlockComposite.isEmpty());
   }
 
   void test_that_truncation_more_than_max_produces_empty_data_blocks() {
@@ -922,7 +922,7 @@ public:
     dataBlockComposite.truncate(min, max);
 
     // Assert
-    TSM_ASSERT("Should be empty",  dataBlockComposite.isEmpty());
+    TSM_ASSERT("Should be empty", dataBlockComposite.isEmpty());
   }
 
   void test_that_data_block_composites_are_equal() {
