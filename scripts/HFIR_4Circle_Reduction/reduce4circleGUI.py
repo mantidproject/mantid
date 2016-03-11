@@ -1050,6 +1050,9 @@ class MainWindow(QtGui.QMainWindow):
         file_filter = 'CSV Files (*.csv);;All Files (*.*)'
         csv_file_name = str(QtGui.QFileDialog.getOpenFileName(self, 'Open Exp-Scan Survey File', self._homeDir,
                                                               file_filter))
+        if csv_file_name is None or len(csv_file_name) == 0:
+            # return if file selection is cancelled
+            return
 
         # call controller to load
         survey_tuple = self._myControl.load_scan_survey_file(csv_file_name)

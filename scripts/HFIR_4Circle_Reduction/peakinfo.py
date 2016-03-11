@@ -21,7 +21,11 @@ class PeakInfo(object):
         """
         # check
         assert isinstance(exp_number, int) and isinstance(scan_number, int)
-        assert isinstance(peak_ws_name, str) and AnalysisDataService.doesExist(peak_ws_name)
+        assert isinstance(peak_ws_name, str), 'Peak workspace name %s must be a string.' \
+                                              'but not %s.' % (str(peak_ws_name),
+                                                               str(type(peak_ws_name)))
+        assert AnalysisDataService.doesExist(peak_ws_name), 'Peak workspace %s does not' \
+                                                            'exist.' % peak_ws_name
 
         # set
         self._myExpNumber = exp_number

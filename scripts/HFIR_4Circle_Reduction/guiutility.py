@@ -175,7 +175,7 @@ def parse_float_editors(line_edits, allow_blank=False):
     Guarantees:
     - if 'allow blank' then use None for the value
     - return a list of float
-    :param line_edits:
+    :param line_edits: list/line edit
     :param allow_blank: flag to allow blanks
     :return: (True, list of floats); (False, error message)
     """
@@ -213,14 +213,14 @@ def parse_float_editors(line_edits, allow_blank=False):
 
     if len(error_message) > 0:
         return False, error_message
+    elif return_single_value is True:
+        # return single float mode
+        return True, float_list[0]
     else:
         # Final check
         assert len(line_edits) == len(float_list), 'Number of input line edits %d is not same as ' \
                                                    'number of output floats %d.' % (len(line_edits),
                                                                                     len(float_list))
-        if return_single_value is True:
-            # return single float mode
-            return True, float_list[0]
 
     return True, float_list
 
