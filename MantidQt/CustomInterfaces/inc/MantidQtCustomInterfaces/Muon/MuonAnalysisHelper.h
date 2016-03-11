@@ -54,7 +54,7 @@ MANTIDQT_CUSTOMINTERFACES_DLL void groupWorkspaces(const std::string& groupName,
 
 /// Finds runs of consecutive numbers
 MANTIDQT_CUSTOMINTERFACES_DLL std::vector<std::pair<int, int>>
-findConsecutiveRuns(const std::vector<int> &runNumbers);
+findConsecutiveRuns(const std::vector<int> &runs);
 
 /// Replaces sample log value
 MANTIDQT_CUSTOMINTERFACES_DLL void replaceLogValue(const std::string &wsName,

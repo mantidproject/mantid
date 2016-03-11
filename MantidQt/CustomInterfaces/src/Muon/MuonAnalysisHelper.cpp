@@ -395,7 +395,8 @@ std::string getRunLabel(std::vector<Workspace_sptr> wsList) {
   std::vector<int> runNumbers;
   int firstRunIndex = 0;
   int firstRunNumber = firstPeriod(wsList.front())->getRunNumber();
-  for (int i = 0; i < wsList.size(); i++) {
+  int numWorkspaces = static_cast<int>(wsList.size());
+  for (int i = 0; i < numWorkspaces; i++) {
     int runNumber = firstPeriod(wsList[i])->getRunNumber();
     runNumbers.push_back(runNumber);
     if (runNumber < firstRunNumber) {
@@ -439,7 +440,7 @@ std::string getRunLabel(std::vector<Workspace_sptr> wsList) {
 /**
  * Given a vector of run numbers, returns the consecutive ranges of runs.
  * e.g. 1,2,3,5,6,8 -> (1,3), (5,6), (8,8)
- * @param runNumbers :: [input] Vector of run numbers - need not be sorted
+ * @param runs :: [input] Vector of run numbers - need not be sorted
  * @returns Vector of pairs of (start, end) of consecutive runs
  */
 std::vector<std::pair<int, int>>
@@ -703,7 +704,7 @@ std::pair<std::string, std::string> findLogRange(
 /**
  * Finds the range of values for the given log in the supplied vector of
  * workspaces.
- * @param ws :: [input] Vector of workspaces
+ * @param workspaces :: [input] Vector of workspaces
  * @param logName :: [input] Name of log
  * @param isLessThan :: [input] Function to sort values (<)
  * @returns :: Pair of (smallest, largest) values
@@ -747,8 +748,9 @@ void appendTimeSeriesLogs(Workspace_sptr toAppend, Workspace_sptr resultant,
   // Cast the inputs to MatrixWorkspace (could be a group)
   auto getWorkspaces = [](const Workspace_sptr ws) {
     std::vector<MatrixWorkspace_sptr> workspaces;
-    MatrixWorkspace_sptr matrixWS;
-    if (matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
+    MatrixWorkspace_sptr matrixWS =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    if (matrixWS) {
       workspaces.push_back(matrixWS);
     } else { // it's a workspace group
       auto groupWS = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
