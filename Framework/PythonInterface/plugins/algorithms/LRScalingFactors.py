@@ -121,7 +121,7 @@ class LRScalingFactors(PythonAlgorithm):
 
             # Get wavelength, to make sure they all match across runs
             self.validate_wavelength(workspace)
-            
+
             # Get attenuators
             current_att = n_attenuator
             n_attenuator = self.get_attenuators(workspace, i)
@@ -150,10 +150,10 @@ class LRScalingFactors(PythonAlgorithm):
                 if self.references.has_key(0):
                     raise RuntimeError("More than one run with zero attenuator was supplied.")
                 self.references[0] = {'index': i,
-                                 'run': run,
-                                 'ref_ws': workspace_name,
-                                 'ratio_ws': None,
-                                 'diagnostics': str(run)}
+                                      'run': run,
+                                      'ref_ws': workspace_name,
+                                      'ratio_ws': None,
+                                      'diagnostics': str(run)}
                 previous_ws = workspace_name
                 continue
 
@@ -344,13 +344,13 @@ class LRScalingFactors(PythonAlgorithm):
         wl = mtd[workspace_name].getRun().getProperty('LambdaRequest').value[0]
         s1h, s1w, s2h, s2w = self.get_slit_settings(mtd[workspace_name])
         self.scaling_factors.append({'IncidentMedium': medium,
-                                'LambdaRequested': wl,
-                                'S1H':s1h, 'S1W':s1w,
-                                'S2iH':s2h, 'S2iW':s2w,
-                                'a':a, 'error_a': error_a,
-                                'b':b, 'error_b': error_b,
-                                'diagnostics': '%s / %s * %s' % (run, self.references[n_attenuator]['run'],
-                                                                 self.references[n_attenuator]['diagnostics'])})
+                                    'LambdaRequested': wl,
+                                    'S1H':s1h, 'S1W':s1w,
+                                    'S2iH':s2h, 'S2iW':s2w,
+                                    'a':a, 'error_a': error_a,
+                                    'b':b, 'error_b': error_b,
+                                    'diagnostics': '%s / %s * %s' % (run, self.references[n_attenuator]['run'],
+                                                                     self.references[n_attenuator]['diagnostics'])})
 
     def is_prompt_pulse_in_range(self, workspace, x_min, x_max):
         """
