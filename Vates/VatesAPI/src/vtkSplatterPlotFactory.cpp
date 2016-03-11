@@ -21,12 +21,13 @@
 #include <vtkCellData.h>
 #include <vtkFloatArray.h>
 #include <vtkHexahedron.h>
-#include <vtkVertex.h>
+#include <vtkNew.h>
+#include <vtkPointData.h>
 #include <vtkPoints.h>
 #include <vtkPolyVertex.h>
 #include <vtkSystemIncludes.h>
 #include <vtkUnstructuredGrid.h>
-#include <vtkNew.h>
+#include <vtkVertex.h>
 
 #include <algorithm>
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -180,15 +181,19 @@ void vtkSplatterPlotFactory::doCreate(
   // Also, if we are using a smaller number of points, we
   // won't get points from some of the boxes with lower signal.
 
-  std::vector<float> saved_signals;
-  std::vector<const coord_t *> saved_centers;
-  std::vector<size_t> saved_n_points_in_cell;
-  saved_signals.reserve(numPoints);
-  saved_centers.reserve(numPoints);
-  saved_n_points_in_cell.reserve(numPoints);
+  // Create the point list, one position for each point actually used
+  auto points = vtkSmartPointer<vtkPoints>::New();
+  // points->Allocate(numPoints);
+  // points->SetNumberOfPoints(numPoints);
 
-  double maxSignalScalar = 0;
-  double minSignalScalar = VTK_DOUBLE_MAX;
+  // Only one scalar for each point
+  auto signal = vtkSmartPointer<vtkFloatArray>::New();
+  // signal->Allocate(numPoints);
+  signal->SetName(m_scalarName.c_str());
+
+  // Create the data set.  Need space for each point
+  auto visualDataSet = vtkSmartPointer<vtkUnstructuredGrid>::New();
+  this->dataSet = visualDataSet;
 
   size_t pointIndex = 0;
   size_t box_index = 0;
@@ -197,83 +202,32 @@ void vtkSplatterPlotFactory::doCreate(
     MDBox<MDE, nd> *box =
         dynamic_cast<MDBox<MDE, nd> *>(m_sortedBoxes[box_index]);
     box_index++;
-    if (NULL == box) {
-      continue;
-    }
-    float signal_normalized = static_cast<float>((box->*getSignalFunction)());
-    maxSignalScalar = maxSignalScalar > signal_normalized ? maxSignalScalar
-                                                          : signal_normalized;
-    minSignalScalar = minSignalScalar > signal_normalized ? signal_normalized
-                                                          : minSignalScalar;
-    size_t newPoints = box->getNPoints();
-    size_t num_from_this_box = points_per_box;
-    if (num_from_this_box > newPoints) {
-      num_from_this_box = newPoints;
-    }
-    const std::vector<MDE> &events = box->getConstEvents();
-    size_t startPointIndex = pointIndex;
-    size_t event_index = 0;
-    while (event_index < num_from_this_box && !done) {
-      const MDE &ev = events[event_index];
-      event_index++;
-      const coord_t *center = ev.getCenter();
-      // Save location
-      saved_centers.push_back(center);
-      pointIndex++;
-      if (pointIndex >= numPoints) {
-        done = true;
-      }
-    }
-    box->releaseEvents();
-    // Save signal
-    saved_signals.push_back(signal_normalized);
-    // Save cell size
-    saved_n_points_in_cell.push_back(pointIndex - startPointIndex);
-  }
+    if (box) {
+      float signal_normalized = static_cast<float>((box->*getSignalFunction)());
 
-  numPoints = saved_centers.size();
-  size_t numCells = saved_signals.size();
+      size_t newPoints = box->getNPoints();
+      size_t num_from_this_box = std::min(points_per_box, newPoints);
+      const std::vector<MDE> &events = box->getConstEvents();
+      size_t event_index = 0;
+      while (event_index < num_from_this_box && !done) {
+        const MDE &ev = events[event_index];
+        event_index++;
+        // Save signal
+        signal->InsertNextTuple1(signal_normalized);
+        // Save location
+        points->InsertNextPoint(ev.getCenter());
+        pointIndex++;
+        if (pointIndex >= numPoints) {
+          done = true;
+        }
+      }
+      box->releaseEvents();
+    }
+  }
 
   if (VERBOSE) {
     std::cout << "Recorded data for all points" << std::endl;
     std::cout << "numPoints = " << numPoints << std::endl;
-    std::cout << "numCells  = " << numCells << std::endl;
-  }
-
-  // Create the point list, one position for each point actually used
-  auto points = vtkSmartPointer<vtkPoints>::New();
-  points->Allocate(numPoints);
-  points->SetNumberOfPoints(numPoints);
-
-  // The list of IDs of points used, one ID per point, since points
-  // are not reused to form polygon facets, etc.
-  std::vector<vtkIdType> ids(numPoints, 0);
-
-  // Only one scalar for each cell, NOT one per point
-  auto signal = vtkSmartPointer<vtkFloatArray>::New();
-  signal->Allocate(numCells);
-  signal->SetName(m_scalarName.c_str());
-
-  // Create the data set.  Need space for each cell, not for each point
-  auto visualDataSet = vtkSmartPointer<vtkUnstructuredGrid>::New();
-  this->dataSet = visualDataSet;
-  visualDataSet->Allocate(numCells);
-  // Now copy the saved point, cell and signal info into vtk data structures
-  pointIndex = 0;
-  for (size_t cell_i = 0; cell_i < numCells; cell_i++) {
-    size_t startPointIndex = pointIndex;
-    for (size_t point_i = 0; point_i < saved_n_points_in_cell[cell_i];
-         point_i++) {
-      points->SetPoint(pointIndex, saved_centers[pointIndex]);
-      ids[pointIndex] = pointIndex;
-      pointIndex++;
-    }
-    signal->InsertNextTuple1(saved_signals[cell_i]);
-    visualDataSet->InsertNextCell(
-        VTK_POLY_VERTEX, saved_n_points_in_cell[cell_i], &ids[startPointIndex]);
-  }
-
-  if (VERBOSE) {
     std::cout << tim << " to create " << pointIndex << " points." << std::endl;
   }
 
@@ -284,7 +238,7 @@ void vtkSplatterPlotFactory::doCreate(
 
   // Add points and scalars
   visualDataSet->SetPoints(points);
-  visualDataSet->GetCellData()->SetScalars(signal);
+  visualDataSet->GetPointData()->SetScalars(signal);
 }
 
 /**
