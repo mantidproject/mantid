@@ -200,7 +200,7 @@ void SliceSelector::initLayout() {
   this->spawnPickerLine();
   connect(m_uiForm.dataSelector, SIGNAL(dataReady(const QString &)), this,
           SLOT(loadSlices(const QString &)));
-  connect(m_uiForm.pushHelp, SIGNAL(clicked()), this, SLOT(showHelp()));
+  connect(m_uiForm.buttonpushHelp, SIGNAL(clicked()), this, SLOT(showHelp()));
   connect(m_uiForm.spinboxSliceSelector, SIGNAL(valueChanged(int)), this,
           SLOT(updateSelectedSlice(int)));
   connect(m_uiForm.pushLaunchBackgroundRemover, SIGNAL(clicked()), this,

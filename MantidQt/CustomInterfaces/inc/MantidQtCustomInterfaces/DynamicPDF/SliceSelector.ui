@@ -67,7 +67,7 @@
     </property>
     <layout class="QHBoxLayout" name="layoutActionButtons">
      <item>
-      <widget class="QPushButton" name="pushHelp">
+      <widget class="QPushButton" name="buttonpushHelp">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -245,7 +245,7 @@
  </customwidgets>
  <tabstops>
   <tabstop>spinboxSliceSelector</tabstop>
-  <tabstop>pushHelp</tabstop>
+  <tabstop>buttonpushHelp</tabstop>
  </tabstops>
  <resources/>
  <connections/>
