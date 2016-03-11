@@ -907,7 +907,7 @@ public:
       m_min_id = minSpectraToLoad;
     }
     if (maxSpectraToLoad != emptyInt && m_max_id > maxSpectraToLoad) {
-      if (maxSpectraToLoad > m_min_id) {
+      if (maxSpectraToLoad < m_min_id) {
         // the maximum spectra to load is less than the minimum of this bank
         return;
       }
