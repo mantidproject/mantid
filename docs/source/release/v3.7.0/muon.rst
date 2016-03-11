@@ -25,6 +25,13 @@ Muon Analysis
   - No period number is shown in the case of single-period data, or if the sum of all periods is used.
   - These changes can be combined, e.g. *15189-91: 1+2*
 
+- The "Run Information" box on the Home tab has been corrected for co-added sets of runs. The information shown now applies to all runs, where previously some of it was relevant to the first only: `#15648 <https://github.com/mantidproject/mantid/pull/15648>`_
+
+  - *Runs* label deals with non-consecutive ranges
+  - *Sample Temperature* and *Sample Magnetic Field* are a range if not all the same value
+  - *Average Temperature* is calculated from all logs
+  - *Start* and *End* are the earliest start and latest end
+
 Algorithms
 ----------
 
