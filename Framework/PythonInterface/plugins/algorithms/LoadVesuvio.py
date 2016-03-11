@@ -143,6 +143,12 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self._load_common_inst_parameters()
         self._retrieve_input()
 
+        # Add OutputWorkspace property for Monitors
+        if self._load_monitors:
+            mon_out_name = self.getPropertyValue(WKSP_PROP) + '_monitors'
+            self.declareProperty(WorkspaceProperty(WKSP_PROP_LOAD_MON, mon_out_name, Direction.Output),
+                             doc="The output workspace that contains the monitor spectra.")
+
         if "Difference" in self._diff_opt:
             self._exec_difference_mode()
         else:
@@ -551,8 +557,8 @@ class LoadVesuvio(LoadEmptyVesuvio):
                         OutputWorkspace=SUMMED_WS + '_monitors',
                         EnableLogging=_LOGGING_)
 
-                ms.DeleteWorkspace(out_name, EnableLogging=True)
-                ms.DeleteWorkspace(out_mon, EnableLogging=True)
+                ms.DeleteWorkspace(out_name, EnableLogging=_LOGGING_)
+                ms.DeleteWorkspace(out_mon, EnableLogging=_LOGGING_)
 
         # Check to see if extra data needs to be loaded to normalise in data
         x_max = self._tof_max
@@ -587,10 +593,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 plus.setProperty("OutputWorkspace", self._load_monitors_workspace)
                 plus.execute()
                 self._load_monitors_workspace = plus.getProperty("OutputWorkspace").value
-
-            # Add OutputWorkspace property for Monitors
-            self.declareProperty(WorkspaceProperty(WKSP_PROP_LOAD_MON, mon_out_name, Direction.Output),
-                             doc="The output workspace that contains the monitor spectra.")
 
         self._load_diff_mode_parameters(summed_data)
         return summed_data, summed_mon
