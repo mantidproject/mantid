@@ -358,8 +358,8 @@ void RangeSelector::setMin(double val) {
   if (val != m_min) {
     m_min = (val > m_lower) ? val : m_lower;
     setMinLinePos(m_min);
-    emit minValueChanged(val);
-    emit selectionChanged(val, m_max);
+    emit minValueChanged(m_min);
+    emit selectionChanged(m_min, m_max);
   }
 }
 

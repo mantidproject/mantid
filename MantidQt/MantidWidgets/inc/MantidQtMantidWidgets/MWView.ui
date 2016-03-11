@@ -34,9 +34,9 @@
      </widget>
     </item>
     <item>
-     <widget class="MantidQt::MantidWidgets::ColorBarWidget" name="colorBar">
+     <widget class="MantidQt::MantidWidgets::ColorBarWidget" name="colorBar" native="true">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+       <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
