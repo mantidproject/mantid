@@ -336,8 +336,22 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         self._raise_error_period_scatter(run_str, self._back_scattering)
         all_spectra = [item for sublist in self._spectra for item in sublist]
-        ms.LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spectra,
-                   EnableLogging=_LOGGING_)
+        all_spec_inc_mon = self._mon_spectra
+        all_spec_inc_mon.extend(all_spectra)
+        ms.LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spec_inc_mon,
+                   LoadMonitors='Separate', EnableLogging=_LOGGING_)
+        # assign load_monitor_spectra
+        if self._load_monitors:
+            monitor_group = mtd[SUMMED_WS +'_monitors']
+            mon_out_name = self.getPropertyValue(WKSP_PROP) + "_monitors"
+            clone = self.createChildAlgorithm("CloneWorkspace", False)
+            clone.setProperty("InputWorkspace", monitor_group.getItem(0))
+            clone.setProperty("OutputWorkspace", mon_out_name)
+            clone.execute()
+            self._load_monitors_workspace = clone.getProperty("OutputWorkspace").value
+            self._load_monitors_workspace = self._sum_monitors_in_group(monitor_group,
+                                                                        self._load_monitors_workspace)
+
         raw_group = mtd[SUMMED_WS]
         self._nperiods = raw_group.size()
         first_ws = raw_group[0]
@@ -585,17 +599,32 @@ class LoadVesuvio(LoadEmptyVesuvio):
             clone.setProperty("OutputWorkspace", mon_out_name)
             clone.execute()
             self._load_monitors_workspace = clone.getProperty("OutputWorkspace").value
-
-            for mon_index in range(1, summed_mon.getNumberOfEntries()):
-                plus = self.createChildAlgorithm("Plus", False)
-                plus.setProperty("LHSWorkspace", self._load_monitors_workspace)
-                plus.setProperty("RHSWorkspace", summed_mon.getItem(mon_index))
-                plus.setProperty("OutputWorkspace", self._load_monitors_workspace)
-                plus.execute()
-                self._load_monitors_workspace = plus.getProperty("OutputWorkspace").value
+            self._load_monitors_workspace = self._sum_monitors_in_group(summed_mon,
+                                                                        self._load_monitors_workspace)
 
         self._load_diff_mode_parameters(summed_data)
         return summed_data, summed_mon
+
+
+#----------------------------------------------------------------------------------------
+
+    def _sum_monitors_in_group(self, monitor_group, output_ws):
+        """
+        Sums together all the monitors for one run
+        @param monitor_group    :: All the monitor workspaces for a single run
+        @param output_ws        :: The workspace that will contain the summed monitor data
+        @return                 :: The workspace contianing the summed monitor data
+        """
+
+        for mon_index in range(1, monitor_group.getNumberOfEntries()):
+            plus = self.createChildAlgorithm("Plus", False)
+            plus.setProperty("LHSWorkspace", output_ws)
+            plus.setProperty("RHSWorkspace", monitor_group.getItem(mon_index))
+            plus.setProperty("OutputWorkspace", output_ws)
+            plus.execute()
+            output_ws = plus.getProperty("OutputWorkspace").value
+        return output_ws
+
 
 #----------------------------------------------------------------------------------------
 
