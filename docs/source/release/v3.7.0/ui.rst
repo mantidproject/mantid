@@ -112,8 +112,9 @@ VSI Improvements
 ----------------
 
 - The sphere and ellipse wireframes have been simplified so that it is easier to see the enclosed points. 
-.. image:: VSIEllipse.png
 
+.. figure:: ../../images/VSIEllipses.png
+    :align: center  
 
 |
 
