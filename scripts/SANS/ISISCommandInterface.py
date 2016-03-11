@@ -14,7 +14,7 @@ import isis_reducer
 from centre_finder import *
 # import SANSReduction
 from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup
+from mantid.api import WorkspaceGroup, ExperimentInfo
 import copy
 from SANSadd2 import *
 import SANSUtility as su
@@ -87,7 +87,8 @@ def SANS2D(idf_path=None):
     _printMessage('SANS2D()')
     try:
         instrument = isis_instrument.SANS2D(idf_path)
-
+        if instrument is None:
+            raise RuntimeError("The provided idf path seems to have been incorrect")
         ReductionSingleton().set_instrument(instrument)
         config['default.instrument'] = 'SANS2D'
     except (StandardError, Warning):
@@ -102,32 +103,34 @@ def SANS2DTUBES():
     """
     return SANS2D("SANS2D_Definition_Tubes.xml")
 
-
-def LOQ():
+def LOQ(idf_path='LOQ_Definition_20020226-.xml'):
     """
         Initialises the instrument settings for LOQ
         @return True on success
     """
     _printMessage('LOQ()')
     try:
-        instrument = isis_instrument.LOQ()
-
+        instrument = isis_instrument.LOQ(idf_path)
+        if instrument is None:
+            raise RuntimeError("The provided idf path seems to have been incorrect")
         ReductionSingleton().set_instrument(instrument)
         config['default.instrument'] = 'LOQ'
     except(StandardError, Warning):
         return False
     return True
 
-
-def LARMOR():
+def LARMOR(idf_path = None):
     """
     Initialises the instrument settings for LARMOR
+    @param idf_path :: optionally specify the path to the LARMOR IDF to use.
+                       Uses default if none specified.
     @return True on success
     """
     _printMessage('LARMOR()')
     try:
-        instrument = isis_instrument.LARMOR()
-
+        instrument = isis_instrument.LARMOR(idf_path)
+        if instrument is None:
+            raise RuntimeError("The provided idf path seems to have been incorrect")
         ReductionSingleton().set_instrument(instrument)
         config['default.instrument'] = 'LARMOR'
     except (StandardError, Warning):
@@ -1753,6 +1756,34 @@ def is_current_workspace_an_angle_workspace():
         is_angle = False
     return is_angle
 
+def MatchIDFInReducerAndWorkspace(file_name):
+    '''
+    This method checks if the IDF which gets loaded with the workspace associated
+    with the file name and the current instrument in the reducer singleton refer
+    to the same IDF. If not then switch the IDF in the reducer.
+    '''
+    is_matched = True
+
+    # Get measurement time from file
+    measurement_time = su.get_measurement_time_from_file(file_name)
+
+    # Get current instrument type
+    instrument_name = ReductionSingleton().get_instrument_name()
+
+    # Get the path to the instrument definition file
+    idf_path_workspace = ExperimentInfo.getInstrumentFilename(instrument_name, measurement_time)
+    idf_path_workspace = os.path.normpath(idf_path_workspace)
+
+    # Get the idf from the reducer
+    idf_path_reducer = get_current_idf_path_in_reducer()
+
+    if ((idf_path_reducer == idf_path_workspace) and
+         su.are_two_files_identical(idf_path_reducer, idf_path_reducer)):
+        is_matched = True
+    else:
+        is_matched = False
+
+    return is_matched
 
 def has_user_file_valid_extension(file_name):
     '''
@@ -1763,6 +1794,17 @@ def has_user_file_valid_extension(file_name):
     is_valid = su.is_valid_user_file_extension(file_name)
     print str(is_valid)
     return is_valid
+
+def get_current_idf_path_in_reducer():
+    '''
+    This function returns the path to the IDF which is currently being used by the
+    instrument stored in the reducer
+    @returns a string with the path to the IDF which is currently being used.
+    '''
+    idf_path_reducer = ReductionSingleton().get_idf_file_path()
+    idf_path_reducer = os.path.normpath(idf_path_reducer)
+    print str(idf_path_reducer)
+    return idf_path_reducer
 
 
 ##################### Accesor functions for BackgroundCorrection

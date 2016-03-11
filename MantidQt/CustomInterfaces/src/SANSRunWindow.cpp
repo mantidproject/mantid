@@ -1106,6 +1106,9 @@ bool SANSRunWindow::loadUserFile() {
   m_uiForm.tabWidget->setTabEnabled(2, true);
   m_uiForm.tabWidget->setTabEnabled(3, true);
 
+  // Display which IDf is currently being used by the reducer
+  updateIDFFilePath();
+
   return true;
 }
 
@@ -2146,6 +2149,10 @@ bool SANSRunWindow::handleLoadButtonClick() {
   updateBeamCenterCoordinates();
   // Set the beam finder specific settings
   setBeamFinderDetails();
+
+  // Display which IDF is currently being used by the reducer
+  updateIDFFilePath();
+
   return true;
 }
 
@@ -5087,5 +5094,17 @@ bool SANSRunWindow::isValidUserFile() {
   return true;
 }
 
+void SANSRunWindow::updateIDFFilePath() {
+  QString getIdf = "i.get_current_idf_path_in_reducer()\n";
+  QString resultIdf(runPythonCode(getIdf, false));
+  auto teset1 = resultIdf.toStdString();
+  resultIdf = resultIdf.simplified();
+  auto test2 = resultIdf.toStdString();
+  if (resultIdf != m_constants.getPythonEmptyKeyword() &&
+      !resultIdf.isEmpty()) {
+    auto test = resultIdf.toStdString();
+    m_uiForm.current_idf_path->setText(resultIdf);
+  }
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

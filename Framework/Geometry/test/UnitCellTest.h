@@ -125,7 +125,7 @@ public:
       msg << cell;
       TS_ASSERT_EQUALS(msg.str(), "Lattice Parameters:    2.000000    3.000000 "
                                   "   4.000000   80.000000   90.000000  "
-                                  "100.000000   23.265059");
+                                  "100.000000    23.265059");
     }
 
     // w/ uncertainties
@@ -136,7 +136,7 @@ public:
       TS_ASSERT_EQUALS(
           msg.str(), "Lattice Parameters:    2.000000    3.000000 "
                      "   4.000000   80.000000   90.000000  "
-                     "100.000000   23.265059\nParameter Errors  :    1.000000 "
+                     "100.000000    23.265059\nParameter Errors  :    1.000000 "
                      "   2.000000    3.000000    4.000000    "
                      "5.000000    6.000000   26.088800");
     }

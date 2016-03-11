@@ -21,6 +21,7 @@ Jump Fit
 ~~~~~~~~
 
 - The interface now has the option to plot a guess of what the fit will look like before running the algorithm.
+- The Plot button is no longer present in the interface as it is no longer used.
 
 Improvements
 ------------

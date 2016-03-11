@@ -85,7 +85,15 @@ Usage
 
     
     
-    
+
+References
+----------
+
+The source for how this calculation is done is
+
+#. T.M. Michels-Clark, A.T. Savici, V.E. Lynch, X.P. Wang and C.M. Hoffmann *Expanding Lorentz and spectrum corrections to large volumes of reciprocal space for single-crystal time-of-flight neutron diffraction.* J Appl Crystallogr **49.2** (2016) doi: `10.1107/S1600576716001369 <http://dx.doi.org/10.1107/S1600576716001369>`_
+
+
 .. categories::
 
 .. sourcelink::

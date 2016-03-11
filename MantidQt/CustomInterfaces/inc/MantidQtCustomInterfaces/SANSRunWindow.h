@@ -511,6 +511,8 @@ private:
   bool hasUserFileValidFileExtension();
   /// Check if the user file is valid
   bool isValidUserFile();
+  /// Update IDF file path
+  void updateIDFFilePath();
 
       
   UserSubWindow *slicingWindow;
