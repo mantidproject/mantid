@@ -27,12 +27,8 @@ class LRAutoReduction(PythonAlgorithm):
         return "Find reflectivity peak and return its pixel range."
 
     def PyInit(self):
-        self.declareProperty(FileProperty("Filename", "",
-                                          FileAction.Load, ['.nxs']),
-                                          "Data file to reduce")
-        self.declareProperty(FileProperty("TemplateFile", "",
-                                          FileAction.OptionalLoad, ['.xml']),
-                                          "Template reduction file")
+        self.declareProperty(FileProperty("Filename", "", FileAction.Load, ['.nxs']), "Data file to reduce")
+        self.declareProperty(FileProperty("TemplateFile", "", FileAction.OptionalLoad, ['.xml']), "Template reduction file")
 
         # ------------ Properties that should be in the meta data -------------
         self.declareProperty("ScaleToUnity", True,
@@ -529,7 +525,7 @@ class LRAutoReduction(PythonAlgorithm):
             return self._read_property(meta_data_run, "sequence_total", [default])[0]
         else:
             return default
-        
+
     def PyExec(self):
         filename = self.getProperty("Filename").value
 
@@ -548,7 +544,7 @@ class LRAutoReduction(PythonAlgorithm):
             logger.notice("Using automated scaling factor calculator")
             output_dir = self.getProperty("OutputDirectory").value
             sf_tof_step = self.getProperty("ScalingFactorTOFStep").value
-            
+
             # The medium for these direct beam runs may not be what was set in the template,
             # so either use the medium in the data file or a default name
             meta_data_run = self.event_data.getRun()
@@ -567,30 +563,30 @@ class LRAutoReduction(PythonAlgorithm):
 
         # Execute the reduction
         LiquidsReflectometryReduction(RunNumbers=[int(run_number)],
-              NormalizationRunNumber=str(data_set.norm_file),
-              SignalPeakPixelRange=data_set.DataPeakPixels,
-              SubtractSignalBackground=data_set.DataBackgroundFlag,
-              SignalBackgroundPixelRange=data_set.DataBackgroundRoi[:2],
-              NormFlag=data_set.NormFlag,
-              NormPeakPixelRange=data_set.NormPeakPixels,
-              NormBackgroundPixelRange=data_set.NormBackgroundRoi,
-              SubtractNormBackground=data_set.NormBackgroundFlag,
-              LowResDataAxisPixelRangeFlag=data_set.data_x_range_flag,
-              LowResDataAxisPixelRange=data_set.data_x_range,
-              LowResNormAxisPixelRangeFlag=data_set.norm_x_range_flag,
-              LowResNormAxisPixelRange=data_set.norm_x_range,
-              TOFRange=data_set.DataTofRange,
-              IncidentMediumSelected=incident_medium,
-              GeometryCorrectionFlag=False,
-              QMin=data_set.q_min,
-              QStep=data_set.q_step,
-              AngleOffset=data_set.angle_offset,
-              AngleOffsetError=data_set.angle_offset_error,
-              ScalingFactorFile=str(data_set.scaling_factor_file),
-              SlitsWidthFlag=data_set.slits_width_flag,
-              ApplyPrimaryFraction=True,
-              PrimaryFractionRange=[data_set.clocking_from, data_set.clocking_to],
-              OutputWorkspace='reflectivity_%s_%s_%s' % (first_run_of_set, sequence_number, run_number))
+                                      NormalizationRunNumber=str(data_set.norm_file),
+                                      SignalPeakPixelRange=data_set.DataPeakPixels,
+                                      SubtractSignalBackground=data_set.DataBackgroundFlag,
+                                      SignalBackgroundPixelRange=data_set.DataBackgroundRoi[:2],
+                                      NormFlag=data_set.NormFlag,
+                                      NormPeakPixelRange=data_set.NormPeakPixels,
+                                      NormBackgroundPixelRange=data_set.NormBackgroundRoi,
+                                      SubtractNormBackground=data_set.NormBackgroundFlag,
+                                      LowResDataAxisPixelRangeFlag=data_set.data_x_range_flag,
+                                      LowResDataAxisPixelRange=data_set.data_x_range,
+                                      LowResNormAxisPixelRangeFlag=data_set.norm_x_range_flag,
+                                      LowResNormAxisPixelRange=data_set.norm_x_range,
+                                      TOFRange=data_set.DataTofRange,
+                                      IncidentMediumSelected=incident_medium,
+                                      GeometryCorrectionFlag=False,
+                                      QMin=data_set.q_min,
+                                      QStep=data_set.q_step,
+                                      AngleOffset=data_set.angle_offset,
+                                      AngleOffsetError=data_set.angle_offset_error,
+                                      ScalingFactorFile=str(data_set.scaling_factor_file),
+                                      SlitsWidthFlag=data_set.slits_width_flag,
+                                      ApplyPrimaryFraction=True,
+                                      PrimaryFractionRange=[data_set.clocking_from, data_set.clocking_to],
+                                      OutputWorkspace='reflectivity_%s_%s_%s' % (first_run_of_set, sequence_number, run_number))
 
         # Put the reflectivity curve together
         self._save_partial_output(data_set, first_run_of_set, sequence_number, run_number)
