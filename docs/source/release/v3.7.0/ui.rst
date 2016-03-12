@@ -122,6 +122,14 @@ SliceViewer Improvements
 .. figure::  ../../images/Elliptical_peaks_slice_viewer.png
    :align: center
 
+VSI Improvements
+----------------
+
+-  The representation of points in the splatter plot was changed from opaque cubes to translucent spheres.
+
+.. figure::  ../../images/VSIPointGaussianRepresentation.png
+   :align: center 
+
 |
 
 Full list of
