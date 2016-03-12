@@ -53,9 +53,9 @@ private:
   class MockScatterer : public BraggScatterer {
   public:
     MockScatterer() : BraggScatterer() {}
-    ~MockScatterer() {}
+    ~MockScatterer() override {}
 
-    std::string name() const { return "MockScatterer"; }
+    std::string name() const override { return "MockScatterer"; }
 
     MOCK_CONST_METHOD0(clone, BraggScatterer_sptr());
     MOCK_CONST_METHOD1(calculateStructureFactor, StructureFactor(const V3D &));

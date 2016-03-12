@@ -6,7 +6,6 @@
 #include <vector>
 #include <map>
 #include <stack>
-#include <string>
 #include <algorithm>
 
 #include "MantidKernel/Strings.h"
@@ -64,15 +63,6 @@ Cone::Cone()
   setBaseEqn();
 }
 
-Cone::Cone(const Cone &A)
-    : Quadratic(A), Centre(A.Centre), Normal(A.Normal), alpha(A.alpha),
-      cangle(A.cangle)
-/**
- Standard Copy Constructor
- @param A :: Cone to copy
- */
-{}
-
 Cone *Cone::doClone() const
 /**
  Makes a clone (implicit virtual copy constructor)
@@ -84,23 +74,6 @@ Cone *Cone::doClone() const
 
 std::unique_ptr<Cone> Cone::clone() const {
   return std::unique_ptr<Cone>(doClone());
-}
-
-Cone &Cone::operator=(const Cone &A)
-/**
- Assignment operator
- @param A :: Cone to copy
- @return *this
- */
-{
-  if (this != &A) {
-    Quadratic::operator=(A);
-    Centre = A.Centre;
-    Normal = A.Normal;
-    alpha = A.alpha;
-    cangle = A.cangle;
-  }
-  return *this;
 }
 
 int Cone::setSurface(const std::string &Pstr)

@@ -36,14 +36,15 @@ RayTracerTester::~RayTracerTester() {}
 /** Initialize the algorithm's properties.
  */
 void RayTracerTester::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".xml"),
-                  "The filename (including its full or relative path) of an "
-                  "instrument definition file");
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".xml"),
+      "The filename (including its full or relative path) of an "
+      "instrument definition file");
   declareProperty("NumAzimuth", 100, "Steps in azimuthal angles");
   declareProperty("NumZenith", 50, "Steps in zenith angles");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "An output workspace.");
 }
 
 //----------------------------------------------------------------------------------------------

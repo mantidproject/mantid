@@ -195,7 +195,7 @@ Builder creational method. Processes added dimensions. creates xml string.
 template <typename CheckDimensionPolicy>
 const std::string &MDGeometryBuilderXML<CheckDimensionPolicy>::create() const {
   using namespace Poco::XML;
-  if (true == m_changed) {
+  if (m_changed) {
     // Create the root element for this fragment.
     AutoPtr<Document> pDoc = new Document;
     AutoPtr<Element> dimensionSetElement = pDoc->createElement("DimensionSet");

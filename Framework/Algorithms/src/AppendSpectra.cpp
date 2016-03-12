@@ -31,14 +31,14 @@ int AppendSpectra::version() const { return 1; }
 /** Initialize the algorithm's properties.
  */
 void AppendSpectra::init() {
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace1", "", Direction::Input,
-                              boost::make_shared<CommonBinsValidator>()),
-      "The name of the first input workspace");
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace2", "", Direction::Input,
-                              boost::make_shared<CommonBinsValidator>()),
-      "The name of the second input workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace1", "", Direction::Input,
+                      boost::make_shared<CommonBinsValidator>()),
+                  "The name of the first input workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace2", "", Direction::Input,
+                      boost::make_shared<CommonBinsValidator>()),
+                  "The name of the second input workspace");
 
   declareProperty(
       "ValidateInputs", true,
@@ -49,9 +49,9 @@ void AppendSpectra::init() {
                   "Append the spectra from InputWorkspace2 multiple times (for "
                   "MatrixWorkspaces only)");
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name of the output workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name of the output workspace");
 
   declareProperty("MergeLogs", false,
                   "Whether to combine the logs of the two input workspaces");
@@ -126,12 +126,12 @@ void AppendSpectra::exec() {
 void AppendSpectra::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
                                        API::MatrixWorkspace_const_sptr ws2,
                                        API::MatrixWorkspace_sptr output) {
-  specid_t ws1min;
-  specid_t ws1max;
+  specnum_t ws1min;
+  specnum_t ws1max;
   getMinMax(ws1, ws1min, ws1max);
 
-  specid_t ws2min;
-  specid_t ws2max;
+  specnum_t ws2min;
+  specnum_t ws2max;
   getMinMax(ws2, ws2min, ws2max);
 
   // is everything possibly ok?
@@ -141,7 +141,7 @@ void AppendSpectra::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
   // change the axis by adding the maximum existing spectrum number to the
   // current value
   for (size_t i = 0; i < output->getNumberHistograms(); i++)
-    output->getSpectrum(i)->setSpectrumNo(specid_t(i));
+    output->getSpectrum(i)->setSpectrumNo(specnum_t(i));
 }
 
 void AppendSpectra::combineLogs(const API::Run &lhs, const API::Run &rhs,

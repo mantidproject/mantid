@@ -328,7 +328,7 @@ protected:
   /// Apply if vector
   std::string apply(const std::vector<double> &v) const override {
     std::string res = "(";
-    if (v.size() > 0) {
+    if (!v.empty()) {
       for (size_t i = 0; i < v.size() - 1; ++i) {
         res += boost::lexical_cast<std::string>(v[i]) + ",";
       }
@@ -743,7 +743,7 @@ void IFunction::setMatrixWorkspace(
             IFunctionWithLocation *testWithLocation =
                 dynamic_cast<IFunctionWithLocation *>(this);
             if (testWithLocation == nullptr ||
-                (fitParam.getLookUpTable().containData() == false &&
+                (!fitParam.getLookUpTable().containData() &&
                  fitParam.getFormula().compare("") == 0)) {
               setParameter(i, fitParam.getValue());
             } else {

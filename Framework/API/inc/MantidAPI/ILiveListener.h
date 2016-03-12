@@ -135,14 +135,12 @@ public:
    * spectra.
    * @param specList :: A vector with spectra indices.
    */
-  virtual void setSpectra(const std::vector<specid_t> &specList) {
+  virtual void setSpectra(const std::vector<specnum_t> &specList) {
     (void)specList;
   }
 
   /// Constructor.
   ILiveListener();
-  /// Destructor. Should handle termination of any socket connections.
-  ~ILiveListener() override;
 
 protected:
   bool m_dataReset; ///< Indicates the receipt of a reset signal from the DAS.

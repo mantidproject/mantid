@@ -35,7 +35,7 @@ public:
   MOCK_CONST_METHOD0(macPrefix, const std::string());
   MOCK_CONST_METHOD0(linuxPrefix, const std::string());
   MOCK_CONST_METHOD0(clone, ICatalogInfo *());
-  virtual ~MockICatalogInfo() {}
+  ~MockICatalogInfo() override {}
 };
 
 // Adaptee

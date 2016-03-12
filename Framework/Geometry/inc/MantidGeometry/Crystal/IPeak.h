@@ -19,7 +19,7 @@ namespace Geometry {
  */
 class MANTID_GEOMETRY_DLL IPeak {
 public:
-  virtual ~IPeak();
+  virtual ~IPeak() = default;
 
   virtual void setInstrument(Geometry::Instrument_const_sptr inst) = 0;
 

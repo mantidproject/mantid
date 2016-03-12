@@ -18,10 +18,11 @@ using namespace API;
 
 void SmoothData::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Name of the input workspace");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                       Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
   std::vector<int> npts0;
   npts0.push_back(3);
@@ -29,11 +30,12 @@ void SmoothData::init() {
   min->setLower(3);
   // The number of points to use in the smoothing.
   declareProperty(
-      new ArrayProperty<int>("NPoints", npts0, min, Direction::Input),
+      Kernel::make_unique<ArrayProperty<int>>("NPoints", npts0, min,
+                                              Direction::Input),
       "The number of points to average over (minimum 3). If an even number is\n"
       "given, it will be incremented by 1 to make it odd (default value 3)");
   declareProperty(
-      new WorkspaceProperty<Mantid::DataObjects::GroupingWorkspace>(
+      make_unique<WorkspaceProperty<Mantid::DataObjects::GroupingWorkspace>>(
           "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: GroupingWorkspace to use for vector of NPoints.");
 }

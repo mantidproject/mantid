@@ -143,9 +143,7 @@ class vtkMDLineFactoryTestPerformance : public CxxTest::TestSuite
 {
 
 public:
-
-  void setUp()
-  {
+  void setUp() override {
     boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<1>,1> > input
       = MDEventsTestHelper::makeMDEWFull<1>(2, 10, 10, 4000);
     //Rebin it to make it possible to compare cells to bins.
@@ -158,10 +156,7 @@ public:
     slice->execute();
   }
 
-  void tearDown()
-  {
-    AnalysisDataService::Instance().remove("binned");
-  }
+  void tearDown() override { AnalysisDataService::Instance().remove("binned"); }
 
   void testCreationOnLargeWorkspace()
   {

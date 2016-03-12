@@ -46,13 +46,14 @@ void SaveNXSPE::init() {
   wsValidator->add<API::CommonBinsValidator>();
   wsValidator->add<API::HistogramValidator>();
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the workspace to save.");
 
   declareProperty(
-      new API::FileProperty("Filename", "", FileProperty::Save,
-                            std::vector<std::string>(1, ".nxspe")),
+      Kernel::make_unique<API::FileProperty>(
+          "Filename", "", FileProperty::Save,
+          std::vector<std::string>(1, ".nxspe")),
       "The name of the NXSPE file to write, as a full or relative path");
 
   declareProperty("Efixed", EMPTY_DBL(),
@@ -63,12 +64,10 @@ void SaveNXSPE::init() {
       "Flags in the file whether Ki/Kf scaling has been done or not.");
 
   // optional par or phx file
-  std::vector<std::string> fileExts(2);
-  fileExts[0] = ".par";
-  fileExts[1] = ".phx";
+  std::vector<std::string> fileExts{".par", ".phx"};
   declareProperty(
-      new FileProperty("ParFile", "not_used.par", FileProperty::OptionalLoad,
-                       fileExts),
+      Kernel::make_unique<FileProperty>("ParFile", "not_used.par",
+                                        FileProperty::OptionalLoad, fileExts),
       "If provided, will replace detectors parameters in resulting nxspe file with the values taken from the file. \n\
         Should be used only if the parameters, calculated by the [[FindDetectorsPar]] algorithm are not suitable for some reason. \n\
         See [[FindDetectorsPar]] description for the details.");

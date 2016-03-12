@@ -72,13 +72,21 @@ static const signal_t MDMaskValue = std::numeric_limits<double>::quiet_NaN();
 class MANTID_API_DLL IMDWorkspace : public Workspace, public API::MDGeometry {
 public:
   IMDWorkspace();
-  ~IMDWorkspace() override;
+  IMDWorkspace &operator=(const IMDWorkspace &other) = delete;
+
+  /**
+   * Holds X, Y, E for a line plot
+   */
+  struct LinePlot {
+    std::vector<coord_t> x;
+    std::vector<signal_t> y;
+    std::vector<signal_t> e;
+  };
 
   /// Returns a clone of the workspace
   std::unique_ptr<IMDWorkspace> clone() const {
     return std::unique_ptr<IMDWorkspace>(doClone());
   }
-
   /// Get the number of points associated with the workspace.
   /// For MDEvenWorkspace it is the number of events contributing into the
   /// workspace
@@ -110,17 +118,15 @@ public:
       const Mantid::API::MDNormalization &normalization) const = 0;
 
   /// Method to generate a line plot through a MD-workspace
-  virtual void getLinePlot(const Mantid::Kernel::VMD &start,
-                           const Mantid::Kernel::VMD &end,
-                           Mantid::API::MDNormalization normalize,
-                           std::vector<coord_t> &x, std::vector<signal_t> &y,
-                           std::vector<signal_t> &e) const;
+  virtual LinePlot getLinePlot(const Mantid::Kernel::VMD &start,
+                               const Mantid::Kernel::VMD &end,
+                               Mantid::API::MDNormalization normalize) const;
 
   IMDIterator *createIterator(
       Mantid::Geometry::MDImplicitFunction *function = nullptr) const;
 
   std::string getConvention() const;
-  void setConvention(std::string m_convention);
+  void setConvention(std::string convention);
   std::string changeQConvention();
 
   signal_t getSignalAtVMD(const Mantid::Kernel::VMD &coords,
@@ -159,9 +165,10 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  IMDWorkspace(const IMDWorkspace &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  IMDWorkspace &operator=(const IMDWorkspace &other);
+  IMDWorkspace(const IMDWorkspace &) = default;
+
+  void makeSinglePointWithNaN(std::vector<coord_t> &x, std::vector<signal_t> &y,
+                              std::vector<signal_t> &e) const;
 
   const std::string toString() const override;
 

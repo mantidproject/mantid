@@ -218,21 +218,21 @@ private:
       declareParameter("Width", 1.0);
       declareParameter("Intensity", 1.0);
     }
-    std::string name() const { return "ComptonProfileStub"; }
-    std::vector<size_t> intensityParameterIndices() const {
+    std::string name() const override { return "ComptonProfileStub"; }
+    std::vector<size_t> intensityParameterIndices() const override {
       return std::vector<size_t>(1, 1);
     }
 
     size_t fillConstraintMatrix(Mantid::Kernel::DblMatrix &cmatrix,
                                 const size_t start,
-                                const std::vector<double> &) const {
+                                const std::vector<double> &) const override {
       for (size_t i = 0; i < cmatrix.numRows(); ++i) {
         cmatrix[i][start] = 1.0;
       }
       return 1;
     }
 
-    void massProfile(double *result, const size_t nData) const {
+    void massProfile(double *result, const size_t nData) const override {
       for (size_t i = 0; i < nData; ++i)
         result[i] = 1;
     }
@@ -246,15 +246,17 @@ private:
     TwoIntensitiesComptonProfileStub() : ComptonProfileStub() {
       declareParameter("Intensity_2", 1.0);
     }
-    std::string name() const { return "TwoIntensitiesComptonProfileStub"; }
-    std::vector<size_t> intensityParameterIndices() const {
+    std::string name() const override {
+      return "TwoIntensitiesComptonProfileStub";
+    }
+    std::vector<size_t> intensityParameterIndices() const override {
       std::vector<size_t> indices(2, 1); // index 1
       indices[1] = 2;                    // index 2
       return indices;
     }
     size_t fillConstraintMatrix(Mantid::Kernel::DblMatrix &cmatrix,
                                 const size_t start,
-                                const std::vector<double> &) const {
+                                const std::vector<double> &) const override {
       for (size_t i = 0; i < cmatrix.numRows(); ++i) {
         for (size_t j = start; j < start + 2; ++j) {
           cmatrix[i][j] = 1.0;
@@ -274,8 +276,9 @@ private:
       declareParameter("A0", 1.0);
       declareParameter("A1", 1.0);
     }
-    std::string name() const { return "LinearStub"; }
-    void function1D(double *out, const double *, const size_t nData) const {
+    std::string name() const override { return "LinearStub"; }
+    void function1D(double *out, const double *,
+                    const size_t nData) const override {
       for (size_t i = 0; i < nData; ++i)
         out[i] = 0.25;
     }

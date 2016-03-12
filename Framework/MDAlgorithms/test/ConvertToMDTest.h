@@ -410,7 +410,7 @@ public:
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
   }
-  ~ConvertToMDTest() {
+  ~ConvertToMDTest() override {
     AnalysisDataService::Instance().remove("testWSProcessed");
   }
 

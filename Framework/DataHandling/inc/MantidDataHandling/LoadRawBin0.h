@@ -101,7 +101,7 @@ private:
   std::string m_filename;
 
   /// The number of spectra in the raw file
-  specid_t m_numberOfSpectra;
+  specnum_t m_numberOfSpectra;
   /// number of time regime
   int64_t m_noTimeRegimes;
 
@@ -118,7 +118,7 @@ private:
   boost::shared_ptr<Kernel::Property> m_perioids;
 
   /// total number of specs
-  specid_t m_total_specs;
+  specnum_t m_total_specs;
   /// time channel vector
   std::vector<boost::shared_ptr<MantidVec>> m_timeChannelsVec;
 };

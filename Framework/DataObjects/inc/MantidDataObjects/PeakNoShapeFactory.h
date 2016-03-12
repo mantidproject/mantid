@@ -35,10 +35,6 @@ namespace DataObjects {
 */
 class DLLExport PeakNoShapeFactory : public PeakShapeFactory {
 public:
-  // Constructor
-  PeakNoShapeFactory();
-  // Destructor
-  ~PeakNoShapeFactory() override;
   // Factory method
   Mantid::Geometry::PeakShape *create(const std::string &source) const override;
   // Set successor. No shape will not delegate.

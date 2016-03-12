@@ -58,32 +58,32 @@ public:
    */
   MultiSliceView(QWidget *parent = 0, RebinnedSourcesManager* rebinnedSourcesManager = 0);
   /// Default constructor.
-  virtual ~MultiSliceView();
+  ~MultiSliceView() override;
 
   /// ViewBase::closeSubWindows
-  void closeSubWindows();
+  void closeSubWindows() override;
   /**
    * ViewBase::destroyView
    */
-  void destroyView();
+  void destroyView() override;
   /**
    * ViewBase::getView
    */
-  pqRenderView* getView();
+  pqRenderView *getView() override;
   /**
    * ViewBase::render
    */
-  void render();
+  void render() override;
   /**
    * ViewBase::renderAll
    */
-  void renderAll();
+  void renderAll() override;
   /// ViewBase::resetCamera()
-  void resetCamera();
+  void resetCamera() override;
   /**
    * ViewBase::resetDisplay()
    */
-  void resetDisplay();
+  void resetDisplay() override;
 
 protected slots:
   /// Determine if slice is to be shown in SliceViewer.

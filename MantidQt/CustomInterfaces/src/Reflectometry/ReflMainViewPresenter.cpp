@@ -177,10 +177,8 @@ ReflMainViewPresenter::ReflMainViewPresenter(
   Mantid::API::AnalysisDataServiceImpl &ads =
       Mantid::API::AnalysisDataService::Instance();
 
-  std::set<std::string> items;
-  items = ads.getObjectNames();
-  for (auto it = items.begin(); it != items.end(); ++it) {
-    const std::string name = *it;
+  auto items = ads.getObjectNames();
+  for (auto const &name : items) {
     Workspace_sptr ws = ads.retrieve(name);
 
     if (isValidModel(ws))
@@ -1452,13 +1450,27 @@ void ReflMainViewPresenter::search() {
   // This is breaking the abstraction provided by IReflSearcher, but provides a
   // nice usability win
   // If we're not logged into a catalog, prompt the user to do so
-  if (CatalogManager::Instance().getActiveSessions().empty())
-    m_view->showAlgorithmDialog("CatalogLogin");
-
-  auto sessionId =
-      CatalogManager::Instance().getActiveSessions().front()->getSessionId();
-
-  // try {
+  if (CatalogManager::Instance().getActiveSessions().empty()) {
+    try {
+      m_view->showAlgorithmDialog("CatalogLogin");
+    } catch (std::runtime_error &e) {
+      m_view->giveUserCritical("Error Logging in:\n" + std::string(e.what()),
+                               "login failed");
+    }
+  }
+  std::string sessionId;
+  // check to see if we have any active sessions for ICAT
+  if (!CatalogManager::Instance().getActiveSessions().empty()) {
+    // we have an active session, so grab the ID
+    sessionId =
+        CatalogManager::Instance().getActiveSessions().front()->getSessionId();
+  } else {
+    // there are no active sessions, we return here to avoid an exception
+    m_view->giveUserInfo(
+        "Error Logging in: Please press 'Search' to try again.",
+        "Login Failed");
+    return;
+  }
   auto algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");
   algSearch->initialize();
   algSearch->setChild(true);
@@ -1468,34 +1480,6 @@ void ReflMainViewPresenter::search() {
   algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
   auto algRunner = m_view->getAlgorithmRunner();
   algRunner->startAlgorithm(algSearch);
-  /*
-  while (!currentAlg->isExecuted())
-  {
-
-  THIS WORKS FUNCTIONALLY BUT YOU NEED TO
-  FIND A BETTER WAY TO SEE IF ALGORITHM
-  HAS BEEN EXECUTED AS THIS STILL INTRODUCES
-  A SERIAL-TYPE LAG
-
-
-
-  }
-  if (currentAlg->isExecuted())
-  {
-  ITableWorkspace_sptr results = currentAlg->getProperty("OutputWorkspace");
-  m_searchModel = ReflSearchModel_sptr(
-  new ReflSearchModel(*getTransferStrategy(), results, searchInstr));
-  m_view->showSearch(m_searchModel);
-  }
-  //ITableWorkspace_sptr results = algSearch->getProperty("OutputWorkspace");
-  //auto results = m_searcher->search(searchString);
-  m_searchModel = ReflSearchModel_sptr(
-  new ReflSearchModel(*getTransferStrategy(), results, searchInstr));
-  m_view->showSearch(m_searchModel);
-  } catch (std::runtime_error &e) {
-  m_view->giveUserCritical("Error running search:\n" + std::string(e.what()),
-  "Search Failed");
-  }*/
 }
 
 void ReflMainViewPresenter::populateSearch(IAlgorithm_sptr searchAlg) {

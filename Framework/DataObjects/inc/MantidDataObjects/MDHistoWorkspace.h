@@ -51,7 +51,7 @@ public:
   MDHistoWorkspace(std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions,
                    Mantid::API::MDNormalization displayNormalization =
                        Mantid::API::NoNormalization);
-
+  MDHistoWorkspace &operator=(const MDHistoWorkspace &other) = delete;
   ~MDHistoWorkspace() override;
 
   /// Returns a clone of the workspace
@@ -77,17 +77,13 @@ public:
       size_t suggestedNumCores = 1,
       Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 
-  void getLinePlot(const Mantid::Kernel::VMD &start,
-                   const Mantid::Kernel::VMD &end,
-                   Mantid::API::MDNormalization normalize,
-                   std::vector<coord_t> &x, std::vector<signal_t> &y,
-                   std::vector<signal_t> &e) const override;
+  LinePlot getLinePlot(const Mantid::Kernel::VMD &start,
+                       const Mantid::Kernel::VMD &end,
+                       Mantid::API::MDNormalization normalize) const override;
 
-  void getLineData(const Mantid::Kernel::VMD &start,
-                   const Mantid::Kernel::VMD &end,
-                   Mantid::API::MDNormalization normalize,
-                   std::vector<coord_t> &x, std::vector<signal_t> &y,
-                   std::vector<signal_t> &e) const override;
+  LinePlot getLineData(const Mantid::Kernel::VMD &start,
+                       const Mantid::Kernel::VMD &end,
+                       Mantid::API::MDNormalization normalize) const override;
 
   void checkWorkspaceSize(const MDHistoWorkspace &other, std::string operation);
 
@@ -100,12 +96,12 @@ public:
   void subtract(const MDHistoWorkspace &b);
   void subtract(const signal_t signal, const signal_t error);
 
-  MDHistoWorkspace &operator*=(const MDHistoWorkspace &b);
-  void multiply(const MDHistoWorkspace &b);
+  MDHistoWorkspace &operator*=(const MDHistoWorkspace &b_ws);
+  void multiply(const MDHistoWorkspace &b_ws);
   void multiply(const signal_t signal, const signal_t error);
 
-  MDHistoWorkspace &operator/=(const MDHistoWorkspace &b);
-  void divide(const MDHistoWorkspace &b);
+  MDHistoWorkspace &operator/=(const MDHistoWorkspace &b_ws);
+  void divide(const MDHistoWorkspace &b_ws);
   void divide(const signal_t signal, const signal_t error);
 
   void log(double filler = 0.0);
@@ -421,6 +417,9 @@ private:
     return new MDHistoWorkspace(*this);
   }
 
+  void makeSingleBinWithNaN(std::vector<coord_t> &x, std::vector<signal_t> &y,
+                            std::vector<signal_t> &e) const;
+
   void initVertexesArray();
 
   /// Number of dimensions in this workspace
@@ -475,10 +474,13 @@ private:
                                   size_t linearIndex) const;
 
 protected:
+  LinePlot getLinePoints(const Mantid::Kernel::VMD &start,
+                         const Mantid::Kernel::VMD &end,
+                         Mantid::API::MDNormalization normalize,
+                         const bool bin_centres) const;
+
   /// Protected copy constructor. May be used by childs for cloning.
   MDHistoWorkspace(const MDHistoWorkspace &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  MDHistoWorkspace &operator=(const MDHistoWorkspace &other);
 
   /// Linear array of masks for each bin
   bool *m_masks;

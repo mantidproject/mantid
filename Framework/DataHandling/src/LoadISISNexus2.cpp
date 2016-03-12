@@ -52,7 +52,7 @@ using std::size_t;
 LoadISISNexus2::LoadISISNexus2()
     : m_filename(), m_instrument_name(), m_samplename(), m_detBlockInfo(),
       m_monBlockInfo(), m_loadBlockInfo(), m_have_detector(false),
-      m_load_selected_spectra(false), m_specInd2specNum_map(), m_spec2det_map(),
+      m_load_selected_spectra(false), m_wsInd2specNum_map(), m_spec2det_map(),
       m_entrynumber(0), m_tof_data(), m_proton_charge(0.), m_spec(),
       m_spec_end(nullptr), m_monitors(), m_logCreator(), m_progress(),
       m_cppFile() {}
@@ -74,18 +74,19 @@ int LoadISISNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
 
 /// Initialization method.
 void LoadISISNexus2::init() {
-  declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".nxs", ".n*"}),
-      "The name of the Nexus file to load");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output));
+  const std::vector<std::string> exts{".nxs", ".n*"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
+                  "The name of the Nexus file to load");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+      "OutputWorkspace", "", Direction::Output));
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int64_t>>();
   mustBePositive->setLower(0);
   declareProperty("SpectrumMin", static_cast<int64_t>(0), mustBePositive);
   declareProperty("SpectrumMax", static_cast<int64_t>(EMPTY_INT()),
                   mustBePositive);
-  declareProperty(new ArrayProperty<int64_t>("SpectrumList"));
+  declareProperty(make_unique<ArrayProperty<int64_t>>("SpectrumList"));
   declareProperty("EntryNumber", static_cast<int64_t>(0), mustBePositive,
                   "0 indicates that every entry is loaded, into a separate "
                   "workspace within a group. "
@@ -210,7 +211,7 @@ void LoadISISNexus2::exec() {
   checkOptionalProperties(ExcluedMonitorsSpectra);
   // Fill up m_spectraBlocks
   size_t total_specs =
-      prepareSpectraBlocks(m_monitors, m_specInd2specNum_map, m_loadBlockInfo);
+      prepareSpectraBlocks(m_monitors, m_wsInd2specNum_map, m_loadBlockInfo);
 
   m_progress = boost::make_shared<API::Progress>(
       this, 0.0, 1.0, total_specs * m_detBlockInfo.numberOfPeriods);
@@ -300,7 +301,7 @@ void LoadISISNexus2::exec() {
         // warnings where necessary.
         validateMultiPeriodLogs(local_workspace);
       }
-      declareProperty(new WorkspaceProperty<Workspace>(
+      declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
           prop_name + os.str(), base_name + os.str(), Direction::Output));
       wksp_group->addWorkspace(local_workspace);
       setProperty(prop_name + os.str(),
@@ -332,7 +333,7 @@ void LoadISISNexus2::exec() {
               WorkspaceFactory::Instance().create(period_free_workspace));
 
       m_spectraBlocks.clear();
-      m_specInd2specNum_map.clear();
+      m_wsInd2specNum_map.clear();
       std::vector<int64_t> dummyS1;
       // at the moment here we clear this map to enable possibility to load
       // monitors from the spectra block (wiring table bug).
@@ -343,14 +344,13 @@ void LoadISISNexus2::exec() {
                                     m_monBlockInfo.spectraID_max, dummyS1,
                                     ExcluedMonitorsSpectra);
       // lo
-      prepareSpectraBlocks(m_monitors, m_specInd2specNum_map, m_monBlockInfo);
+      prepareSpectraBlocks(m_monitors, m_wsInd2specNum_map, m_monBlockInfo);
 
       int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
       loadPeriodData(firstentry, entry, monitor_workspace, true);
       local_workspace->setMonitorWorkspace(monitor_workspace);
 
-      ISISRunLogs monLogCreator(monitor_workspace->run(),
-                                m_detBlockInfo.numberOfPeriods);
+      ISISRunLogs monLogCreator(monitor_workspace->run());
       monLogCreator.addPeriodLogs(1, monitor_workspace->mutableRun());
 
       const std::string monitorPropBase = "MonitorWorkspace";
@@ -378,7 +378,7 @@ void LoadISISNexus2::exec() {
                 wksp_group->getItem(p - 1));
             data_ws->setMonitorWorkspace(monitor_workspace);
           }
-          declareProperty(new WorkspaceProperty<Workspace>(
+          declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
               monitorPropBase + os.str(), monitorWsNameBase + os.str(),
               Direction::Output));
           monitor_group->addWorkspace(monitor_workspace);
@@ -386,13 +386,13 @@ void LoadISISNexus2::exec() {
                       boost::static_pointer_cast<Workspace>(monitor_workspace));
         }
         // The group is the root property value
-        declareProperty(new WorkspaceProperty<Workspace>(
+        declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
             monitorPropBase, monitorWsNameBase, Direction::Output));
         setProperty(monitorPropBase,
                     boost::dynamic_pointer_cast<Workspace>(monitor_group));
 
       } else {
-        declareProperty(new WorkspaceProperty<Workspace>(
+        declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
             monitorPropBase, monitorWsNameBase, Direction::Output));
         setProperty(monitorPropBase,
                     boost::static_pointer_cast<Workspace>(monitor_workspace));
@@ -407,7 +407,7 @@ void LoadISISNexus2::exec() {
   m_tof_data.reset();
   m_spec.reset();
   m_monitors.clear();
-  m_specInd2specNum_map.clear();
+  m_wsInd2specNum_map.clear();
 }
 
 // Function object for remove_if STL algorithm
@@ -538,9 +538,9 @@ void LoadISISNexus2::checkOptionalProperties(
       spec_list.erase(remove_if(spec_list.begin(), spec_list.end(), in_range),
                       spec_list.end());
       // combine spectra numbers from ranges and the list
-      if (spec_list.size() > 0) {
+      if (!spec_list.empty()) {
         for (int64_t i = spec_min; i < spec_max + 1; i++) {
-          specid_t spec_num = static_cast<specid_t>(i);
+          specnum_t spec_num = static_cast<specnum_t>(i);
           // remove excluded spectra now rather then inserting it here and
           // removing later
           if (SpectraExcluded.find(spec_num) == SpectraExcluded.end())
@@ -582,15 +582,14 @@ void LoadISISNexus2::buildSpectraInd2SpectraNumMap(
 
   int64_t ic(0);
 
-  if (spec_list.size() > 0) {
+  if (!spec_list.empty()) {
     ic = 0;
     auto start_point = spec_list.begin();
     for (auto it = start_point; it != spec_list.end(); it++) {
 
-      specid_t spec_num = static_cast<specid_t>(*it);
+      specnum_t spec_num = static_cast<specnum_t>(*it);
       if (SpectraExcluded.find(spec_num) == SpectraExcluded.end()) {
-        m_specInd2specNum_map.insert(
-            std::pair<int64_t, specid_t>(ic, spec_num));
+        m_wsInd2specNum_map.insert(std::pair<int64_t, specnum_t>(ic, spec_num));
         ic++;
       }
     }
@@ -598,10 +597,10 @@ void LoadISISNexus2::buildSpectraInd2SpectraNumMap(
     if (range_supplied) {
       ic = 0;
       for (int64_t i = range_min; i < range_max + 1; i++) {
-        specid_t spec_num = static_cast<specid_t>(i);
+        specnum_t spec_num = static_cast<specnum_t>(i);
         if (SpectraExcluded.find(spec_num) == SpectraExcluded.end()) {
-          m_specInd2specNum_map.insert(
-              std::pair<int64_t, specid_t>(ic, spec_num));
+          m_wsInd2specNum_map.insert(
+              std::pair<int64_t, specnum_t>(ic, spec_num));
           ic++;
         }
       }
@@ -629,16 +628,16 @@ bool compareSpectraBlocks(const LoadISISNexus2::SpectraBlock &block1,
 */
 size_t LoadISISNexus2::prepareSpectraBlocks(
     std::map<int64_t, std::string> &monitors,
-    const std::map<int64_t, specid_t> &specInd2specNum_map,
+    const std::map<int64_t, specnum_t> &wsInd2specNum_map,
     const DataBlock &LoadBlock) {
   std::vector<int64_t> includedMonitors;
   // fill in the data block descriptor vector
-  if (!specInd2specNum_map.empty()) {
-    auto itSpec = specInd2specNum_map.begin();
+  if (!wsInd2specNum_map.empty()) {
+    auto itSpec = wsInd2specNum_map.begin();
     int64_t hist = itSpec->second;
     SpectraBlock block(hist, hist, false, "");
     itSpec++;
-    for (; itSpec != specInd2specNum_map.end(); ++itSpec) {
+    for (; itSpec != wsInd2specNum_map.end(); ++itSpec) {
       // try to put all consecutive numbers in same block
 
       auto it_mon = monitors.find(hist);
@@ -660,7 +659,7 @@ size_t LoadISISNexus2::prepareSpectraBlocks(
     }
 
     // push the last block
-    hist = specInd2specNum_map.rbegin()->second;
+    hist = wsInd2specNum_map.rbegin()->second;
     block.last = hist;
 
     auto it_mon = monitors.find(hist);
@@ -671,7 +670,7 @@ size_t LoadISISNexus2::prepareSpectraBlocks(
     }
     m_spectraBlocks.push_back(block);
 
-    return specInd2specNum_map.size();
+    return wsInd2specNum_map.size();
   }
 
   // here we are only if ranges are not supplied
@@ -758,12 +757,12 @@ void LoadISISNexus2::loadPeriodData(
 
       if (update_spectra2det_mapping) {
         // local_workspace->getAxis(1)->setValue(hist_index,
-        // static_cast<specid_t>(it->first));
+        // static_cast<specnum_t>(it->first));
         auto spec = local_workspace->getSpectrum(hist_index);
-        specid_t specID = m_specInd2specNum_map.at(hist_index);
+        specnum_t specNum = m_wsInd2specNum_map.at(hist_index);
         spec->setDetectorIDs(
-            m_spec2det_map.getDetectorIDsForSpectrumNo(specID));
-        spec->setSpectrumNo(specID);
+            m_spec2det_map.getDetectorIDsForSpectrumNo(specNum));
+        spec->setSpectrumNo(specNum);
       }
 
       NXFloat timeBins = monitor.openNXFloat("time_of_flight");
@@ -858,13 +857,13 @@ void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize,
     local_workspace->setX(hist, m_tof_data);
     if (m_load_selected_spectra) {
       // local_workspace->getAxis(1)->setValue(hist,
-      // static_cast<specid_t>(spec_num));
+      // static_cast<specnum_t>(spec_num));
       auto spec = local_workspace->getSpectrum(hist);
-      specid_t specID = m_specInd2specNum_map.at(hist);
+      specnum_t specNum = m_wsInd2specNum_map.at(hist);
       // set detectors corresponding to spectra Number
-      spec->setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specID));
+      spec->setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specNum));
       // set correct spectra Number
-      spec->setSpectrumNo(specID);
+      spec->setSpectrumNo(specNum);
     }
 
     ++hist;
@@ -1125,8 +1124,7 @@ void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr &ws,
   ws->populateInstrumentParameters();
 
   // Make log creator object and add the run status log
-  m_logCreator.reset(
-      new ISISRunLogs(ws->run(), m_detBlockInfo.numberOfPeriods));
+  m_logCreator.reset(new ISISRunLogs(ws->run()));
   m_logCreator->addStatusLog(ws->mutableRun());
 }
 

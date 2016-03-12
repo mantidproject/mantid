@@ -39,8 +39,8 @@ StatisticsOfPeaksWorkspace::~StatisticsOfPeaksWorkspace() {}
 /** Initialize the algorithm's properties.
  */
 void StatisticsOfPeaksWorkspace::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace with an instrument.");
   std::vector<std::string> propOptions;
   propOptions.reserve(m_pointGroups.size());
@@ -60,10 +60,10 @@ void StatisticsOfPeaksWorkspace::init() {
                   boost::make_shared<StringListValidator>(centeringOptions),
                   "Appropriate lattice centering for the peaks.");
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Output PeaksWorkspace");
-  declareProperty(new WorkspaceProperty<ITableWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "StatisticsTable", "StatisticsTable", Direction::Output),
                   "An output table workspace for the statistics of the peaks.");
   std::vector<std::string> sortTypes{"ResolutionShell", "Bank", "RunNumber",

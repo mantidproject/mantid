@@ -35,15 +35,15 @@ using namespace API;
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFT::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The name of the input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name of the output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name of the output workspace.");
   // if desired, provide the imaginary part in a separate workspace.
-  declareProperty(new WorkspaceProperty<>("InputImagWorkspace", "",
-                                          Direction::Input,
-                                          PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<>>("InputImagWorkspace", "",
+                                                   Direction::Input,
+                                                   PropertyMode::Optional),
                   "The name of the input workspace for the imaginary part. "
                   "Leave blank if same as InputWorkspace");
 
@@ -293,37 +293,41 @@ std::map<std::string, std::string> FFT::validateInputs() {
   std::map<std::string, std::string> errors;
 
   MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
-  const int iReal = getProperty("Real");
-  const int iImag = getProperty("Imaginary");
-  const MantidVec &X = inWS->readX(iReal);
+  if (inWS) {
+    const int iReal = getProperty("Real");
+    const int iImag = getProperty("Imaginary");
+    const MantidVec &X = inWS->readX(iReal);
 
-  // check that the workspace isn't empty
-  if (X.size() < 2) {
-    errors["InputWorkspace"] = "Input workspace must have at least two values";
-  } else {
-    // Check that the x values are evenly spaced
-    // If accepting rounding errors, just give a warning if bins are different.
-    if (areBinWidthsUneven(X)) {
+    // check that the workspace isn't empty
+    if (X.size() < 2) {
       errors["InputWorkspace"] =
-          "X axis must be linear (all bins have same width)";
-    }
-  }
-
-  // check real, imaginary spectrum numbers and workspace sizes
-  int nHist = static_cast<int>(inWS->getNumberHistograms());
-  if (iReal >= nHist) {
-    errors["Real"] = "Real out of range";
-  }
-  if (iImag != EMPTY_INT()) {
-    MatrixWorkspace_const_sptr inImagWS = getProperty("InputImagWorkspace");
-    if (inImagWS) {
-      if (inWS->blocksize() != inImagWS->blocksize()) {
-        errors["Imaginary"] = "Real and Imaginary sizes do not match";
+          "Input workspace must have at least two values";
+    } else {
+      // Check that the x values are evenly spaced
+      // If accepting rounding errors, just give a warning if bins are
+      // different.
+      if (areBinWidthsUneven(X)) {
+        errors["InputWorkspace"] =
+            "X axis must be linear (all bins have same width)";
       }
-      nHist = static_cast<int>(inImagWS->getNumberHistograms());
     }
-    if (iImag >= nHist) {
-      errors["Imaginary"] = "Imaginary out of range";
+
+    // check real, imaginary spectrum numbers and workspace sizes
+    int nHist = static_cast<int>(inWS->getNumberHistograms());
+    if (iReal >= nHist) {
+      errors["Real"] = "Real out of range";
+    }
+    if (iImag != EMPTY_INT()) {
+      MatrixWorkspace_const_sptr inImagWS = getProperty("InputImagWorkspace");
+      if (inImagWS) {
+        if (inWS->blocksize() != inImagWS->blocksize()) {
+          errors["Imaginary"] = "Real and Imaginary sizes do not match";
+        }
+        nHist = static_cast<int>(inImagWS->getNumberHistograms());
+      }
+      if (iImag >= nHist) {
+        errors["Imaginary"] = "Imaginary out of range";
+      }
     }
   }
 

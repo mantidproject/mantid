@@ -25,20 +25,6 @@ UnitCell::UnitCell() : da(6), ra(6), errorda(6), G(3, 3), Gstar(3, 3), B(3, 3) {
   recalculate();
 }
 
-/** Copy constructor
-@param other :: The UnitCell from which to copy lattice parameters
-*/
-UnitCell::UnitCell(const UnitCell &other)
-    : da(other.da), ra(other.ra), errorda(other.errorda), G(other.G),
-      Gstar(other.Gstar), B(other.B), Binv(other.Binv) {}
-
-/** Copy constructor
- *@param other :: The UnitCell from which to copy lattice parameters
- */
-UnitCell::UnitCell(const UnitCell *other)
-    : da(other->da), ra(other->ra), errorda(other->errorda), G(other->G),
-      Gstar(other->Gstar), B(other->B), Binv(other->Binv) {}
-
 /** Constructor
 @param _a, _b, _c :: lattice parameters \f$ a, b, c \f$ \n
 with \f$\alpha = \beta = \gamma = 90^\circ \f$*/
@@ -78,9 +64,6 @@ UnitCell::UnitCell(double _a, double _b, double _c, double _alpha, double _beta,
       0.0;
   recalculate();
 }
-
-/// Destructor
-UnitCell::~UnitCell() {}
 
 /** Get lattice parameter
 @return a1 :: lattice parameter \f$ a \f$ (in \f$ \mbox{\AA} \f$ )
@@ -614,7 +597,7 @@ std::ostream &operator<<(std::ostream &out, const UnitCell &unitCell) {
       << std::setw(12) << unitCell.alpha() << std::fixed << std::setprecision(6)
       << std::setw(12) << unitCell.beta() << std::fixed << std::setprecision(6)
       << std::setw(12) << unitCell.gamma() << std::fixed << std::setprecision(6)
-      << std::setw(12) << unitCell.volume();
+      << " " << std::setw(12) << unitCell.volume();
 
   // write out the uncertainty if there is a positive one somewhere
   if ((unitCell.errora() > 0) || (unitCell.errorb() > 0) ||

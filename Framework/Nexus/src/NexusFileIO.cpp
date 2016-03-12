@@ -574,7 +574,7 @@ size_t getSizeOf(const Kernel::V3D &) { return 3; }
 
 /**
  * Writes given vector column to the currently open Nexus file.
- * @param column     :: Column to write
+ * @param col     :: Column to write
  * @param columnName :: Name of NXdata to write to
  * @param nexusType  :: Nexus type to use to store data
  * @param interpret_as   :: Name of the type to use for "interpret_as" attribute
@@ -760,7 +760,7 @@ int NexusFileIO::writeNexusProcessedDataEventCombined(
 
   // The array of indices for each event list #
   int dims_array[1] = {static_cast<int>(indices.size())};
-  if (indices.size() > 0) {
+  if (!indices.empty()) {
     if (compress)
       NXcompmakedata(fileID, "indices", NX_INT64, 1, dims_array,
                      m_nexuscompression, dims_array);
@@ -919,7 +919,7 @@ int NexusFileIO::writeEventList(const DataObjects::EventList &el,
   NXopengroup(fileID, group_name.c_str(), "NXdata");
 
   // Copy the detector IDs to an array.
-  const std::set<detid_t> &dets = el.getDetectorIDs();
+  const auto &dets = el.getDetectorIDs();
 
   // Write out the detector IDs
   if (!dets.empty()) {

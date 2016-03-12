@@ -41,7 +41,6 @@ namespace Poldi {
 class MANTID_SINQ_DLL PoldiBasicChopper : public PoldiAbstractChopper {
 public:
   PoldiBasicChopper();
-  ~PoldiBasicChopper() override {}
 
   void
   loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) override;

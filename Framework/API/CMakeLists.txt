@@ -12,7 +12,6 @@ set ( SRC_FILES
 	src/Axis.cpp
 	src/BinEdgeAxis.cpp
 	src/BoxController.cpp
-	src/CatalogFactory.cpp
 	src/CatalogManager.cpp
 	src/CatalogSession.cpp
 	src/ChopperModel.cpp
@@ -72,7 +71,6 @@ set ( SRC_FILES
 	src/IPeaksWorkspace.cpp
 	src/IPowderDiffPeakFunction.cpp
 	src/ISpectrum.cpp
-	src/ISplittersWorkspace.cpp
 	src/ITableWorkspace.cpp
 	src/IkedaCarpenterModerator.cpp
 	src/ImmutableCompositeFunction.cpp

@@ -59,25 +59,19 @@ public:
        };
 
   /// Get the specified color scale
-  static void GetColorMap( ColorScale          name, 
-                           size_t              n_colors,
-                           std::vector<QRgb> & color_table );
+  static std::vector<QRgb> GetColorMap(ColorScale name, size_t n_colors);
 
   /// Get look up table to brighten image
-  static void GetIntensityMap( double                 control_s,
-                               size_t                 n_entries,
-                               std::vector<double>  & intensity_table );
+  static std::vector<double> GetIntensityMap(double control_s,
+                                             size_t n_entries);
 
-  private:
-
-    /// Fill out a color table by interpolating the given base RGB components
-    static void InterpolateColorScale( double              base_red[],
-                                       double              base_green[], 
-                                       double              base_blue[], 
-                                       size_t              n_base_colors,
-                                       size_t              n_colors,
-                                       std::vector<QRgb> & color_table );
-
+private:
+  /// Fill out a color table by interpolating the given base RGB components
+  static std::vector<QRgb> InterpolateColorScale(double base_red[],
+                                                 double base_green[],
+                                                 double base_blue[],
+                                                 size_t n_base_colors,
+                                                 size_t n_colors);
 };
 
 } // namespace SpectrumView

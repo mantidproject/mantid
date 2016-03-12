@@ -4,8 +4,9 @@
 #include "MantidAPI/IBoxControllerIO.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidKernel/DiskBuffer.h"
-#include <Poco/Mutex.h>
 #include <nexus/NeXusFile.hpp>
+
+#include <mutex>
 
 namespace Mantid {
 namespace DataObjects {
@@ -40,7 +41,7 @@ namespace DataObjects {
 */
 class DLLExport BoxControllerNeXusIO : public API::IBoxControllerIO {
 public:
-  BoxControllerNeXusIO(API::BoxController *const theBC);
+  BoxControllerNeXusIO(API::BoxController *const bc);
 
   ///@return true if the file to write events is opened and false otherwise
   bool isOpened() const override { return m_File != nullptr; }
@@ -68,9 +69,9 @@ public:
   ~BoxControllerNeXusIO() override;
   // Auxiliary functions. Used to change default state of this object which is
   // not fully supported. Should be replaced by some IBoxControllerIO factory
-  void setDataType(const size_t coordSize,
+  void setDataType(const size_t blockSize,
                    const std::string &typeName) override;
-  void getDataType(size_t &coordSize, std::string &typeName) const override;
+  void getDataType(size_t &CoordSize, std::string &typeName) const override;
   //------------------------------------------------------------------------------------------------------------------------
   // Auxiliary functions (non-virtual, used for testing)
   int64_t getNDataColums() const { return m_BlockSize[1]; }
@@ -102,9 +103,8 @@ private:
   /// the vector, which describes the event specific data size, namely how many
   /// column an event is composed into and this class reads/writres
   std::vector<int64_t> m_BlockSize;
-  /// lock Nexus file operations as Nexus is not thread safe // Poco::Mutex -- >
-  /// is recursive.
-  mutable Poco::FastMutex m_fileMutex;
+  /// lock Nexus file operations as Nexus is not thread safe
+  mutable std::mutex m_fileMutex;
 
   // Mainly static information which may be split into different IO classes
   // selected through chein of responsibility.
@@ -159,9 +159,8 @@ private:
   void saveGenericBlock(const std::vector<Type> &DataBlock,
                         const uint64_t blockPosition) const;
   template <typename Type>
-  void loadGenericBlock(std::vector<Type> &DataBlock,
-                        const uint64_t blockPosition,
-                        const size_t blockSize) const;
+  void loadGenericBlock(std::vector<Type> &Block, const uint64_t blockPosition,
+                        const size_t nPoints) const;
 };
 }
 }

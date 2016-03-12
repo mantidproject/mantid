@@ -16,9 +16,9 @@ using namespace API;
 
 void Scale::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input));
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output));
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input));
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output));
 
   declareProperty("Factor", 1.0,
                   "The value by which to scale the input workspace");

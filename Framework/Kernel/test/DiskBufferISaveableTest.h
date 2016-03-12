@@ -13,6 +13,7 @@
 #include <boost/multi_index/mem_fun.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
 #include <cxxtest/TestSuite.h>
+#include <mutex>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -24,12 +25,12 @@ class ISaveableTester : public ISaveable {
 
 public:
   ISaveableTester(size_t idIn) : ISaveable(), id(idIn) {}
-  virtual ~ISaveableTester() {}
+  ~ISaveableTester() override {}
   size_t getFileId() const { return id; }
   //-----------------------------------------------------------------------------------------------
 
   /// Save the data - to be overriden
-  virtual void save() const {
+  void save() const override {
     // Fake writing to a file
     std::ostringstream out;
     out << id << ",";
@@ -40,12 +41,12 @@ public:
   }
 
   /// Load the data - to be overriden
-  virtual void load() { this->setLoaded(true); };
+  void load() override { this->setLoaded(true); };
 
   /// Method to flush the data to disk and ensure it is written.
-  virtual void flushData() const {};
+  void flushData() const override{};
   /// remove objects data from memory
-  virtual void clearDataFromMemory() { this->setLoaded(false); };
+  void clearDataFromMemory() override { this->setLoaded(false); };
 
   /** @return the amount of memory that the object takes as a whole.
       For filebased objects it should be the amount the object occupies in
@@ -55,16 +56,16 @@ public:
      * If the object has never been loaded, this should be equal to number of
      data points in the file
      */
-  virtual uint64_t getTotalDataSize() const { return 1; }
+  uint64_t getTotalDataSize() const override { return 1; }
   /// the data size kept in memory
-  virtual size_t getDataMemorySize() const { return 1; };
+  size_t getDataMemorySize() const override { return 1; };
 
   static std::string fakeFile;
-  static Kernel::Mutex streamMutex;
+  static std::mutex streamMutex;
 };
 // Declare the static members here.
 std::string ISaveableTester::fakeFile = "";
-Kernel::Mutex ISaveableTester::streamMutex;
+std::mutex ISaveableTester::streamMutex;
 
 //====================================================================================
 class DiskBufferISaveableTest : public CxxTest::TestSuite {
@@ -74,7 +75,7 @@ public:
   std::vector<ISaveableTester *> bigData;
   long BIG_NUM;
 
-  void setUp() {
+  void setUp() override {
     // Create the ISaveables
 
     num = 10;
@@ -88,7 +89,7 @@ public:
       bigData.push_back(new ISaveableTester(i));
   }
 
-  void tearDown() {
+  void tearDown() override {
     for (size_t i = 0; i < data.size(); i++) {
       delete data[i];
       data[i] = NULL;
@@ -429,7 +430,7 @@ public:
       data[i]->setBusy(true); // Items won't do any real saving
     }
   }
-  void setUp() { ISaveableTester::fakeFile = ""; }
+  void setUp() override { ISaveableTester::fakeFile = ""; }
 
   void test_smallCache_writeBuffer() {
     CPUTimer tim;

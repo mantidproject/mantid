@@ -55,7 +55,7 @@ private:
   void init() override;
   void exec() override;
 
-  void validateSpectraIndices(std::vector<int> &v);
+  void validateWorkspaceIndices(std::vector<int> &v);
   void validateChannelIndices(std::vector<int> &v);
 
   std::map<int, int> findElasticPeakPositions(const std::vector<int> &,

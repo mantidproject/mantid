@@ -44,7 +44,7 @@ namespace API {
 class DLLExport ICatalog {
 public:
   /// Virtual destructor
-  virtual ~ICatalog(){};
+  virtual ~ICatalog() = default;
   /// method to login to a catalog
   virtual CatalogSession_sptr login(const std::string &, const std::string &,
                                     const std::string &,

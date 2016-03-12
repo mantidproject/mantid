@@ -94,9 +94,9 @@ public:
   TableColumn() {
     int length = sizeof(Type);
     std::string name = std::string(typeid(Type).name());
-    if ((name.find("i") != std::string::npos) ||
-        (name.find("l") != std::string::npos) ||
-        (name.find("x") != std::string::npos)) {
+    if ((name.find('i') != std::string::npos) ||
+        (name.find('l') != std::string::npos) ||
+        (name.find('x') != std::string::npos)) {
       if (length == 4) {
         this->m_type = "int";
       }
@@ -104,13 +104,13 @@ public:
         this->m_type = "int64";
       }
     }
-    if (name.find("f") != std::string::npos) {
+    if (name.find('f') != std::string::npos) {
       this->m_type = "float";
     }
-    if (name.find("d") != std::string::npos) {
+    if (name.find('d') != std::string::npos) {
       this->m_type = "double";
     }
-    if (name.find("u") != std::string::npos) {
+    if (name.find('u') != std::string::npos) {
       if (length == 4) {
         this->m_type = "uint32_t";
       }
@@ -124,8 +124,6 @@ public:
   }
 
   // TableColumn();
-  /// Virtual destructor.
-  ~TableColumn() override {}
   /// Number of individual elements in the column.
   size_t size() const override { return m_data.size(); }
   /// Type id of the data in the column

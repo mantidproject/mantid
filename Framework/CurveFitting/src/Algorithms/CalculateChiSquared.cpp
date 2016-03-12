@@ -322,7 +322,7 @@ void CalculateChiSquared::estimateErrors() {
   if (baseName.empty()) {
     baseName = "CalculateChiSquared";
   }
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
                       "PDFs", "", Kernel::Direction::Output),
                   "The name of the TableWorkspace in which to store the "
                   "pdfs of fit parameters");
@@ -339,7 +339,7 @@ void CalculateChiSquared::estimateErrors() {
   auto quadraticErrColumn = errorsTable->addColumn("double", "Quadratic Error");
   auto chiMinColumn = errorsTable->addColumn("double", "Chi2 Min");
   errorsTable->setRowCount(nParams);
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
                       "Errors", "", Kernel::Direction::Output),
                   "The name of the TableWorkspace in which to store the "
                   "values and errors of fit parameters");

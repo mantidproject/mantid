@@ -418,7 +418,6 @@ public:
 // which process 0-dimension workspace operations (throw invalid argument)
 template <> class LOOP<0> {
 public:
-  LOOP() {}
   static inline void EXEC() {
     MDEventFactory::wsCreatorFP[0] = &MDEventFactory::createMDWorkspaceND<0>;
 

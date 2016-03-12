@@ -57,7 +57,7 @@ namespace MantidQt
 
     public:
       IndirectInstrumentConfig(QWidget *parent = 0);
-      virtual ~IndirectInstrumentConfig();
+      ~IndirectInstrumentConfig() override;
 
       /* Getters and setters for Qt properties */
       QStringList getTechniques();

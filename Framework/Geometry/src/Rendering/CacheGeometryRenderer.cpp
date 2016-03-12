@@ -10,18 +10,6 @@ using Kernel::V3D;
 using Kernel::Quat;
 
 /**
- * Constructor
- * Generated the display list
- */
-CacheGeometryRenderer::CacheGeometryRenderer() {}
-
-/**
- * Destructor
- * Deletes the display list
- */
-CacheGeometryRenderer::~CacheGeometryRenderer() {}
-
-/**
  * Render ObjComponent
  * @param ObjComp :: input to render
  */

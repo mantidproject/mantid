@@ -84,7 +84,7 @@ public:
    */
   virtual uint64_t finalize_rebinning() = 0;
   /// destructor
-  virtual ~IDynamicRebinning(){};
+  virtual ~IDynamicRebinning() = default;
 
 protected:
   /// logger -> to provide logging, for MD dataset file operations

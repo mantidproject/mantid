@@ -43,7 +43,6 @@ public:
   explicit FileValidator(
       const std::vector<std::string> &extensions = std::vector<std::string>(),
       bool testFileExists = true, bool testCanWrite = false);
-  ~FileValidator() override;
   std::vector<std::string> allowedValues() const override;
   IValidator_sptr clone() const override;
 

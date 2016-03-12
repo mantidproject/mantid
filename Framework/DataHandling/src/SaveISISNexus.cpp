@@ -46,16 +46,18 @@ SaveISISNexus::SaveISISNexus()
  *
  */
 void SaveISISNexus::init() {
+  const std::vector<std::string> inputExts{".raw", ".s*", ".add"};
   declareProperty(
-      new FileProperty("InputFilename", "", FileProperty::Load,
-                       {".raw", ".s*", ".add"}),
+      Kernel::make_unique<FileProperty>("InputFilename", "", FileProperty::Load,
+                                        inputExts),
       "The name of the RAW file to read, including its full or relative\n"
       "path. (N.B. case sensitive if running on Linux).");
 
   // Declare required parameters, filename with ext {.nx,.nx5,xml} and input
-  // workspac
-  declareProperty(new FileProperty("OutputFilename", "", FileProperty::Save,
-                                   {".nxs", ".nx5", ".xml"}),
+  // workspace
+  const std::vector<std::string> outputExts{".nxs", ".nx5", ".xml"};
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "OutputFilename", "", FileProperty::Save, outputExts),
                   "The name of the Nexus file to write, as a full or relative\n"
                   "path");
 }
@@ -641,7 +643,7 @@ void SaveISISNexus::monitor_i(int i) {
   NXmakegroup(handle, ostr.str().c_str(), "NXmonitor");
   NXopengroup(handle, ostr.str().c_str(), "NXmonitor");
 
-  //  int imon = m_isisRaw->mdet[i]; // spectrum index
+  //  int imon = m_isisRaw->mdet[i]; // spectrum number
   NXmakedata(handle, "data", NX_INT32, 3, dim);
   NXopendata(handle, "data");
   for (int p = 0; p < nper; ++p) {

@@ -77,21 +77,21 @@ LoadSQW::~LoadSQW() { delete m_prog; }
 
 /// Initialize the algorithm
 void LoadSQW::init() {
-  std::vector<std::string> fileExtensions(1);
-  fileExtensions[0] = ".sqw";
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
-                                        fileExtensions),
+  std::vector<std::string> fileExtensions{".sqw"};
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, fileExtensions),
                   "File of type SQW format");
-  declareProperty(new API::WorkspaceProperty<API::IMDEventWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::IMDEventWorkspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "Output IMDEventWorkspace reflecting SQW data read-in.");
-  declareProperty(new Kernel::PropertyWithValue<bool>("MetadataOnly", false),
-                  "Load Metadata without events.");
-  std::vector<std::string> fileExtensions2(1);
-  fileExtensions2[0] = ".nxs";
   declareProperty(
-      new API::FileProperty("OutputFilename", "",
-                            API::FileProperty::OptionalSave, fileExtensions2),
+      make_unique<Kernel::PropertyWithValue<bool>>("MetadataOnly", false),
+      "Load Metadata without events.");
+  std::vector<std::string> fileExtensions2{".nxs"};
+  declareProperty(
+      Kernel::make_unique<API::FileProperty>("OutputFilename", "",
+                                             API::FileProperty::OptionalSave,
+                                             fileExtensions2),
       "If the input SQW file is too large to fit in memory, specify an output "
       "NXS file.\n"
       "The MDEventWorkspace will be create with this file as its back-end.");

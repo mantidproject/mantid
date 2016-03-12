@@ -99,8 +99,6 @@ private:
   void setupMemberVariables(const API::MatrixWorkspace_const_sptr inputWS);
   API::MatrixWorkspace_sptr
   setupOutputWorkspace(const API::MatrixWorkspace_const_sptr inputWS);
-  void fillOutputHist(const API::MatrixWorkspace_const_sptr inputWS,
-                      const API::MatrixWorkspace_sptr outputWS);
 
   /// Convert the workspace units according to a simple output = a * (input^b)
   /// relationship
@@ -118,7 +116,7 @@ private:
   calculateRebinParams(const API::MatrixWorkspace_const_sptr workspace) const;
 
   /// Reverses the workspace if X values are in descending order
-  void reverse(API::MatrixWorkspace_sptr workspace);
+  void reverse(API::MatrixWorkspace_sptr WS);
 
   /// For conversions to energy transfer, removes bins corresponding to
   /// inaccessible values

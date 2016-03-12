@@ -42,8 +42,6 @@ class MANTID_GEOMETRY_DLL StructureFactorCalculatorSummation
     : public StructureFactorCalculator {
 public:
   StructureFactorCalculatorSummation();
-  ~StructureFactorCalculatorSummation() override {}
-
   StructureFactor getF(const Kernel::V3D &hkl) const override;
 
 protected:

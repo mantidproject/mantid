@@ -64,8 +64,8 @@ public:
   int runNumber() const override;
 
 private:
-  void setSpectra(const std::vector<specid_t> &specList) override;
-  void setPeriods(const std::vector<specid_t> &periodList);
+  void setSpectra(const std::vector<specnum_t> &specList) override;
+  void setPeriods(const std::vector<specnum_t> &periodList);
   int getInt(const std::string &par) const;
   std::string getString(const std::string &par) const;
   void getFloatArray(const std::string &par, std::vector<float> &arr,
@@ -107,10 +107,10 @@ private:
   std::vector<int> m_numberOfBins;
 
   /// list of spectra to read or empty to read all
-  std::vector<specid_t> m_specList;
+  std::vector<specnum_t> m_specList;
 
   /// list of periods to read or empty to read all
-  std::vector<specid_t> m_periodList;
+  std::vector<specnum_t> m_periodList;
 
   /// Store the bin boundaries for each time regime
   std::vector<boost::shared_ptr<MantidVec>> m_bins;

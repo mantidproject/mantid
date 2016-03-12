@@ -19,7 +19,8 @@ DECLARE_ALGORITHM(DefineGaugeVolume)
  */
 void DefineGaugeVolume::init() {
   declareProperty(
-      new WorkspaceProperty<>("Workspace", "", Kernel::Direction::InOut),
+      Kernel::make_unique<WorkspaceProperty<>>("Workspace", "",
+                                               Kernel::Direction::InOut),
       "The workspace with which to associate the defined gauge volume");
   declareProperty("ShapeXML", "",
                   boost::make_shared<Kernel::MandatoryValidator<std::string>>(),

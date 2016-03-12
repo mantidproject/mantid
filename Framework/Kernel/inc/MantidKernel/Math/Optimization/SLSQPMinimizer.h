@@ -134,7 +134,7 @@ private:
   private:
     class BaseHolder {
     public:
-      virtual ~BaseHolder(){};
+      virtual ~BaseHolder() = default;
       virtual double eval(const std::vector<double> &x) const = 0;
     };
     template <typename T> class TypeHolder : public BaseHolder {

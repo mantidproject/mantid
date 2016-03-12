@@ -154,14 +154,14 @@ private:
 
   /// used to store the lists of WORKSPACE INDICES that will be grouped, the
   /// keys are not used
-  typedef std::map<specid_t, std::vector<size_t>> storage_map;
+  typedef std::map<specnum_t, std::vector<size_t>> storage_map;
 
   /// An estimate of the percentage of the algorithm runtimes that has been
   /// completed
   double m_FracCompl;
   /// stores lists of spectra indexes to group, although we never do an index
   /// search on it
-  storage_map m_GroupSpecInds;
+  storage_map m_GroupWsInds;
 
   // Implement abstract Algorithm methods
   void init() override;

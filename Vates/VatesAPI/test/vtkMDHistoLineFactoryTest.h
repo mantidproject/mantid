@@ -208,9 +208,7 @@ class vtkMDHistoLineFactoryTestPerformance : public CxxTest::TestSuite
 private:
    Mantid::API::IMDWorkspace_sptr m_ws_sptr;
 public:
-
-  void setUp()
-  {
+  void setUp() override {
     //1D Workspace with 2000 points
     m_ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1, 200000);
   }

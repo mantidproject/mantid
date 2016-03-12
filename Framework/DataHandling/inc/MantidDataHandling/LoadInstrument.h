@@ -7,6 +7,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ExperimentInfo.h"
 
+#include <mutex>
+
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
@@ -107,7 +109,7 @@ private:
 
   /// Search directory for Parameter file, return full path name if found, else
   /// "".
-  std::string getFullPathParamIDF(std::string directory);
+  std::string getFullPathParamIDF(std::string directoryName);
 
   /// The name and path of the input file
   std::string m_filename;
@@ -119,7 +121,7 @@ private:
   std::string m_instName;
 
   /// Mutex to avoid simultaneous access
-  static Poco::Mutex m_mutex;
+  static std::recursive_mutex m_mutex;
 };
 
 } // namespace DataHandling

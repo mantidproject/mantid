@@ -41,9 +41,6 @@ DetectorGroup::DetectorGroup(const std::vector<IDetector_const_sptr> &dets,
   }
 }
 
-/// Destructor
-DetectorGroup::~DetectorGroup() {}
-
 /** Add a detector to the collection
 *  @param det ::  A pointer to the detector to add
 *  @param warn :: Whether to issue warnings to the log

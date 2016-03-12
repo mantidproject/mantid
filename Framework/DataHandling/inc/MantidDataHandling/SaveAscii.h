@@ -12,18 +12,6 @@ namespace DataHandling {
 
 Saves a workspace or selected spectra in a coma-separated ascii file. Spectra
 are saved in columns.
-Properties:
-<ul>
-      <li>Filename - the name of the file to write to.  </li>
-      <li>Workspace - the workspace name to be saved.</li>
-      <li>SpectrumMin - the starting spectrum index to save (optional) </li>
-      <li>SpectrumMax - the ending spectrum index to save (optional) </li>
-      <li>SpectrumList - a list of comma-separated spectra indeces to save
-(optional) </li>
-      <li>Precision - the numeric precision - the number of significant digits
-for the saved data (optional) </li>
-</ul>
-
 
 @author Roman Tolchenov, Tessella plc
 @date 3/07/09

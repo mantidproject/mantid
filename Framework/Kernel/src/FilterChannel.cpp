@@ -13,8 +13,7 @@ FilterChannel::~FilterChannel() { close(); }
 
 void FilterChannel::addChannel(Channel *pChannel) {
   poco_check_ptr(pChannel);
-
-  FastMutex::ScopedLock lock(_mutex);
+  std::lock_guard<std::mutex> lock(_mutex);
 
   pChannel->duplicate();
   _channel = pChannel;
@@ -36,7 +35,7 @@ void FilterChannel::setProperty(const std::string &name,
 }
 
 void FilterChannel::log(const Message &msg) {
-  FastMutex::ScopedLock lock(_mutex);
+  std::lock_guard<std::mutex> lock(_mutex);
 
   if (msg.getPriority() <= _priority) {
     _channel->log(msg);
@@ -44,7 +43,7 @@ void FilterChannel::log(const Message &msg) {
 }
 
 void FilterChannel::close() {
-  FastMutex::ScopedLock lock(_mutex);
+  std::lock_guard<std::mutex> lock(_mutex);
   if (_channel != nullptr) {
     _channel->release();
   }

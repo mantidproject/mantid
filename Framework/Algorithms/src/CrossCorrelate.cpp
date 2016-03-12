@@ -29,11 +29,11 @@ void CrossCorrelate::init() {
   wsValidator->add<API::RawCountValidator>();
 
   // Input and output workspaces
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "A 2D workspace with X values of d-spacing");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
@@ -172,15 +172,15 @@ void CrossCorrelate::exec() {
   for (int i = 0; i < nspecs; ++i) // Now loop on all spectra
   {
     PARALLEL_START_INTERUPT_REGION
-    size_t spec_index = indexes[i]; // Get the spectrum index from the table
+    size_t wsIndex = indexes[i]; // Get the ws index from the table
     // Copy spectra info from input Workspace
-    out->getSpectrum(i)->copyInfoFrom(*inputWS->getSpectrum(spec_index));
+    out->getSpectrum(i)->copyInfoFrom(*inputWS->getSpectrum(wsIndex));
     out->dataX(i) = XX;
 
     // Get temp references
-    const MantidVec &iX = inputWS->readX(spec_index);
-    const MantidVec &iY = inputWS->readY(spec_index);
-    const MantidVec &iE = inputWS->readE(spec_index);
+    const MantidVec &iX = inputWS->readX(wsIndex);
+    const MantidVec &iY = inputWS->readY(wsIndex);
+    const MantidVec &iE = inputWS->readE(wsIndex);
     // Copy Y,E data of spec(i) to temp vector
     // Now rebin on the grid of reference spectrum
     std::vector<double> tempY(nY);

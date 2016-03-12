@@ -44,8 +44,6 @@ class DLLExport CostFuncLeastSquares : public CostFuncFitting {
 public:
   /// Constructor
   CostFuncLeastSquares();
-  /// Virtual destructor
-  ~CostFuncLeastSquares() override {}
 
   /// Get name of minimizer
   std::string name() const override { return "Least squares"; }

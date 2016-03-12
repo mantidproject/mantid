@@ -45,14 +45,14 @@ const std::string ModeratorTzeroLinear::category() const {
 }
 
 void ModeratorTzeroLinear::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("TOF")),
                   "The name of the input workspace, containing events and/or "
                   "histogram data, in units of time-of-flight");
   // declare the output workspace
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace");
 
 } // end of void ModeratorTzeroLinear::init()

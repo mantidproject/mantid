@@ -45,7 +45,7 @@ void MultiDomainFunction::setDomainIndices(
 void MultiDomainFunction::countNumberOfDomains() {
   std::set<size_t> dSet;
   for (auto &domain : m_domains) {
-    if (domain.second.size()) {
+    if (!domain.second.empty()) {
       dSet.insert(domain.second.begin(), domain.second.end());
     }
   }
