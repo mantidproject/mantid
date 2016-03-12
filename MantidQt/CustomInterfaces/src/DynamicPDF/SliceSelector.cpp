@@ -183,7 +183,7 @@ void SliceSelector::launchBackgroundRemover() {
  */
 void SliceSelector::showHelp() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      NULL, QString("Dynamic PDF Calculator"));
+      NULL, QString("DynamicPDFSliceSelector"));
 }
 
 
