@@ -31,6 +31,7 @@
 
 #include <algorithm>
 #include <boost/math/special_functions/fpclassify.hpp>
+#include <iterator>
 #include <qwt_double_interval.h>
 
 using namespace Mantid::API;
@@ -52,12 +53,13 @@ vtkSplatterPlotFactory::vtkSplatterPlotFactory(
     ThresholdRange_scptr thresholdRange, const std::string &scalarName,
     const size_t numPoints, const double percentToUse)
     : m_thresholdRange(thresholdRange), m_scalarName(scalarName),
-      m_numPoints(numPoints), m_percentToUse(percentToUse),
-      m_buildSortedList(true), m_wsName(""), slice(false), m_time(0.0),
-      m_minValue(0.1), m_maxValue(0.1),
+      m_numPoints(numPoints), m_buildSortedList(true), m_wsName(""),
+      slice(false), m_time(0.0), m_minValue(0.1), m_maxValue(0.1),
       m_metaDataExtractor(new MetaDataExtractorUtils()),
       m_metadataJsonManager(new MetadataJsonManager()),
-      m_vatesConfigurations(new VatesConfigurations()) {}
+      m_vatesConfigurations(new VatesConfigurations()) {
+  this->SetPercentToUse(percentToUse);
+}
 
 /**
  * Destructor
@@ -83,22 +85,8 @@ void vtkSplatterPlotFactory::doCreate(
 
   // Find out how many events to plot, and the percentage of the largest
   // boxes to use.
-  size_t totalPoints = ws->getNPoints();
-  size_t numPoints = m_numPoints;
-
-  if (numPoints > totalPoints) {
-    numPoints = totalPoints;
-  }
-
-  double percent_to_use = m_percentToUse;
-  // Fail safe limits on fraction of boxes to use
-  if (percent_to_use <= 0) {
-    percent_to_use = 5;
-  }
-
-  if (percent_to_use > 100) {
-    percent_to_use = 100;
-  }
+  size_t numPoints =
+      std::min(m_numPoints, static_cast<std::size_t>(ws->getNPoints()));
 
   // First we get all the boxes, up to the given depth; with or wo the
   // slice function
@@ -134,22 +122,20 @@ void vtkSplatterPlotFactory::doCreate(
     sortBoxesByDecreasingSignal(getSignalFunction, VERBOSE);
   }
   size_t num_boxes_to_use = static_cast<size_t>(
-      percent_to_use * static_cast<double>(m_sortedBoxes.size()) / 100.0);
+      m_percentToUse * static_cast<double>(m_sortedBoxes.size()) / 100.0);
   if (num_boxes_to_use >= m_sortedBoxes.size()) {
     num_boxes_to_use = m_sortedBoxes.size() - 1;
   }
 
   // restrict the number of points to the
   // number of points in boxes being used
-  size_t total_points_available = 0;
-  for (size_t i = 0; i < num_boxes_to_use; i++) {
-    size_t newPoints = m_sortedBoxes[i]->getNPoints();
-    total_points_available += newPoints;
-  }
+  size_t total_points_available = std::accumulate(
+      m_sortedBoxes.begin(), std::next(m_sortedBoxes.begin(), num_boxes_to_use),
+      size_t{0}, [](size_t value, const Mantid::API::IMDNode *box) {
+        return value + box->getNPoints();
+      });
 
-  if (numPoints > total_points_available) {
-    numPoints = total_points_available;
-  }
+  numPoints = std::min(numPoints, total_points_available);
 
   size_t points_per_box = 0;
   // calculate the average number of points to use per box
@@ -157,9 +143,7 @@ void vtkSplatterPlotFactory::doCreate(
     points_per_box = numPoints / num_boxes_to_use;
   }
 
-  if (points_per_box < 1) {
-    points_per_box = 1;
-  }
+  points_per_box = std::max(points_per_box, size_t{1});
 
   if (VERBOSE) {
     std::cout << "numPoints                 = " << numPoints << std::endl;
@@ -173,7 +157,7 @@ void vtkSplatterPlotFactory::doCreate(
     std::cout << "points needed per box     = " << points_per_box << std::endl;
   }
 
-  // First save the events and signals that we actually use.
+  // Save the events and signals that we actually use.
   // For each box, get up to the average number of points
   // we want from each box, limited by the number of points
   // in the box.  NOTE: since boxes have different numbers
@@ -182,44 +166,46 @@ void vtkSplatterPlotFactory::doCreate(
   // won't get points from some of the boxes with lower signal.
 
   // Create the point list, one position for each point actually used
-  auto points = vtkSmartPointer<vtkPoints>::New();
-  // points->Allocate(numPoints);
-  // points->SetNumberOfPoints(numPoints);
+  vtkNew<vtkPoints> points;
+  vtkFloatArray *pointsArray = vtkFloatArray::SafeDownCast(points->GetData());
+  if (!pointsArray) {
+    throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");
+  }
+  float *points_ptr = pointsArray->WritePointer(0, numPoints * 3);
 
-  // Only one scalar for each point
-  auto signal = vtkSmartPointer<vtkFloatArray>::New();
-  // signal->Allocate(numPoints);
+  // One scalar for each point
+  vtkNew<vtkFloatArray> signal;
   signal->SetName(m_scalarName.c_str());
+  float *signal_ptr = signal->WritePointer(0, numPoints);
 
-  // Create the data set.  Need space for each point
+  // Create the data set.
   auto visualDataSet = vtkSmartPointer<vtkUnstructuredGrid>::New();
   this->dataSet = visualDataSet;
 
   size_t pointIndex = 0;
-  size_t box_index = 0;
-  bool done = false;
-  while (box_index < num_boxes_to_use && !done) {
+  for (size_t box_index = 0; box_index < num_boxes_to_use; ++box_index) {
     MDBox<MDE, nd> *box =
         dynamic_cast<MDBox<MDE, nd> *>(m_sortedBoxes[box_index]);
-    box_index++;
     if (box) {
+      size_t num_from_this_box =
+          std::min(points_per_box, static_cast<size_t>(box->getNPoints()));
+      pointIndex += num_from_this_box;
+      // verify there are never more than numPoints.
+      if (pointIndex > numPoints) {
+        num_from_this_box -= pointIndex - numPoints;
+        pointIndex = numPoints;
+      }
+      // Save signal
       float signal_normalized = static_cast<float>((box->*getSignalFunction)());
+      signal_ptr =
+          std::fill_n(signal_ptr, num_from_this_box, signal_normalized);
 
-      size_t newPoints = box->getNPoints();
-      size_t num_from_this_box = std::min(points_per_box, newPoints);
       const std::vector<MDE> &events = box->getConstEvents();
-      size_t event_index = 0;
-      while (event_index < num_from_this_box && !done) {
+      for (size_t event_index = 0; event_index < num_from_this_box;
+           ++event_index) {
         const MDE &ev = events[event_index];
-        event_index++;
-        // Save signal
-        signal->InsertNextTuple1(signal_normalized);
         // Save location
-        points->InsertNextPoint(ev.getCenter());
-        pointIndex++;
-        if (pointIndex >= numPoints) {
-          done = true;
-        }
+        points_ptr = std::copy_n(ev.getCenter(), 3, points_ptr);
       }
       box->releaseEvents();
     }
@@ -231,14 +217,11 @@ void vtkSplatterPlotFactory::doCreate(
     std::cout << tim << " to create " << pointIndex << " points." << std::endl;
   }
 
-  // Shrink to fit
-  // points->Squeeze();
-  signal->Squeeze();
-  visualDataSet->Squeeze();
-
+  pointsArray->Resize(pointIndex);
+  signal->Resize(pointIndex);
   // Add points and scalars
-  visualDataSet->SetPoints(points);
-  visualDataSet->GetPointData()->SetScalars(signal);
+  visualDataSet->SetPoints(points.GetPointer());
+  visualDataSet->GetPointData()->SetScalars(signal.GetPointer());
 }
 
 /**
