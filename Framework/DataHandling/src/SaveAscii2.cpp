@@ -100,6 +100,11 @@ void SaveAscii2::init() {
   declareProperty("ColumnHeader", true,
                   "If true, put column headers into file. ");
 
+  declareProperty("SpectrumMetaData", "SpectrumNumber",
+                  "A comma separated list that defines data that describes "
+                  "each spectrum in a workspace. The valid options for this "
+                  "are: SpectrumNumber,Q,Angle");
+
   declareProperty(
       "AppendToFile", false,
       "If true, don't overwrite the file. Append to the end of it. ");
@@ -120,6 +125,7 @@ void SaveAscii2::exec() {
   m_isHistogram = m_ws->isHistogramData();
   m_isCommonBins = m_ws->isCommonBins(); // checking for ragged workspace
   m_writeID = getProperty("WriteSpectrumID");
+  m_metaData = stringListToVector(getPropertyValue("SpectrumMetaData"));
 
   // Get the properties
   std::vector<int> spec_list = getProperty("SpectrumList");
@@ -333,5 +339,55 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
     file << std::endl;
   }
 }
+
+/**
+ * Generates the spectrumMetaData label for a spectrumNumber
+ * @param specNum	:: Current SpectrumNumber
+ * @return the string to use for the spectrumMetaData in the Ascii file
+ */
+std::string SaveAscii2::generateSpectrumMetaData(const int &specNum) {
+  std::string specMetaDataStr;
+  for (int i = 0; i < m_metaData.size(); i++) {
+    // Find data in map for current spectrum
+    specMetaDataStr += m_metaDataValues[m_metaData[i]][specNum];
+  }
+  return specMetaDataStr;
+}
+
+/**
+ * Populates the meta data map
+ */
+void SaveAscii2::populateMetaDataValues() {
+  for (auto iter = m_metaData.begin; iter != m_metaData.end(); ++iter) {
+    if (*iter.compare("SpectrumNumber")) {
+      // add data to metaData map
+    }
+  }
+}
+
+/**
+ * Converts a comma separated list to a vector of strings
+ * Also ensures all strings are valid input
+ * @param inputString	:: The user input comma separated string list
+ * @return A vector of valid meta data strings
+ */
+std::vector<std::string>
+SaveAscii2::stringListToVector(std::string &inputString) {
+  std::vector<std::string> stringVector;
+  // Add data to vector
+  auto nextComma = inputString.find(',');
+  while (nextComma != std::string::npos) {
+    stringVector.push_back(inputString.substr(0, nextComma));
+    inputString = inputString.substr(nextComma, inputString.size() - nextComma);
+    nextComma = inputString.find(',');
+  }
+  if (inputString.size() > 0) {
+    stringVector.push_back(inputString);
+  }
+  // Ensure all entries are valid
+
+  return stringVector;
+}
+
 } // namespace DataHandling
 } // namespace Mantid

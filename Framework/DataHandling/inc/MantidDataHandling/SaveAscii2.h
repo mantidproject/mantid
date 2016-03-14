@@ -72,6 +72,9 @@ private:
   */
   void writeSpectra(const std::set<int>::const_iterator &spectraItr,
                     std::ofstream &file);
+  std::string generateSpectrumMetaData(const int &specNum);
+  void populateMetaDataValues();
+  std::vector<std::string> stringListToVector(std::string &inputString);
 
   /// Map the separator options to their string equivalents
   std::map<std::string, std::string> m_separatorIndex;
@@ -83,6 +86,8 @@ private:
   bool m_isHistogram;
   bool m_isCommonBins;
   API::MatrixWorkspace_const_sptr m_ws;
+  std::map<std::string, std::vector<std::string>> m_metaDataValues;
+  std::vector<std::string> m_metaData;
 };
 } // namespace DataHandling
 } // namespace Mantid
