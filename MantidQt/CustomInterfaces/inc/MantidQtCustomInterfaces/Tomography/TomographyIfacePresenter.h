@@ -23,7 +23,7 @@ Tomography GUI. Presenter for the GUI (as in the MVP
 signals from the model should always be handled through this presenter
 and never go directly to the view, and viceversa.
 
-Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014-2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -54,9 +54,7 @@ public:
   /// Default constructor - normally used from the concrete view
   TomographyIfacePresenter(ITomographyIfaceView *view);
   ~TomographyIfacePresenter() override;
-  std::string RBNumber() const {
-	  return m_view->RBNumber();
-  }
+
   void notify(ITomographyIfacePresenter::Notification notif) override;
 
 protected:

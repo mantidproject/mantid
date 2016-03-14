@@ -142,7 +142,7 @@ const std::string TomographyIfaceViewQtGUI::g_customCmdTool = "Custom command";
 const std::string TomographyIfaceViewQtGUI::g_defPathComponentPhase =
     "phase_commissioning";
 
-const std::string TomographyIfaceViewQtGUI::g_defRBNumber = "RB000XXX";
+const std::string TomographyIfaceViewQtGUI::g_defExperimentRef = "RB000000";
 
 const std::string TomographyIfaceViewQtGUI::g_defPathReconScripts =
 #ifdef _WIN32
@@ -354,8 +354,8 @@ void TomographyIfaceViewQtGUI::doSetupSectionRun() {
           SLOT(jobCancelClicked()));
 
   // RB number changes
-  connect(m_uiTabRun.lineEdit_rb_number, SIGNAL(editingFinished()), this,
-          SLOT(updatedRBNumber()));
+  connect(m_uiTabRun.lineEdit_experiment_reference, SIGNAL(editingFinished()),
+          this, SLOT(updatedExperimentReference()));
 
   // update tools for a resource
   connect(m_uiTabRun.comboBox_run_compute_resource,
@@ -633,9 +633,10 @@ void TomographyIfaceViewQtGUI::readSettings() {
   }
 
   // User parameters for reconstructions
-  m_setupRBNumber = qs.value("RB-number", QString::fromStdString(g_defRBNumber))
-                        .toString()
-                        .toStdString();
+  m_setupExperimentRef = qs.value("experiment-reference",
+                                  QString::fromStdString(g_defExperimentRef))
+                             .toString()
+                             .toStdString();
 
   m_localExternalPythonPath =
       qs.value("path-local-external-python",
@@ -722,7 +723,7 @@ void TomographyIfaceViewQtGUI::saveSettings() const {
   qs.setValue("filters-settings", filtersSettings);
 
   // User parameters for reconstructions
-  qs.setValue("RB-number", QString::fromStdString(m_setupRBNumber));
+  qs.setValue("RB-number", QString::fromStdString(m_setupExperimentRef));
 
   qs.setValue("path-local-external-python",
               QString::fromStdString(m_localExternalPythonPath));
@@ -897,7 +898,7 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
           run.toStdString(),
           g_defOutPathLocal + "/" +
               m_uiTabSetup.lineEdit_cycle->text().toStdString() + "/" +
-              m_uiTabRun.lineEdit_rb_number->text().toStdString() +
+              m_uiTabRun.lineEdit_experiment_reference->text().toStdString() +
               localOutNameAppendix,
           paths.pathDark(), paths.pathOpenBeam(), paths.pathSamples());
       m_tomopyMethod = methods[mi].first;
@@ -925,7 +926,7 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
           Poco::Path::expand(
               g_defOutPathLocal + "/" +
               m_uiTabSetup.lineEdit_cycle->text().toStdString() + "/" +
-              m_uiTabRun.lineEdit_rb_number->text().toStdString() +
+              m_uiTabRun.lineEdit_experiment_reference->text().toStdString() +
               localOutNameAppendix),
           paths.pathDark(), paths.pathOpenBeam(), paths.pathSamples());
       m_astraMethod = methods[mi].first;
@@ -1060,8 +1061,8 @@ void TomographyIfaceViewQtGUI::browseImageClicked() {
  */
 void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
     const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
-        &localStatus) {
+    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
+        localStatus) {
 
   QTableWidget *t = m_uiTabRun.tableWidget_run_jobs;
   bool sort = t->isSortingEnabled();
@@ -1225,7 +1226,7 @@ void TomographyIfaceViewQtGUI::processPathBrowseClick(QLineEdit *le,
       else
         pp = pp.substr(2);
     }
-	pp = "/work" + pp;
+    pp = "/work" + pp;
     le->setText(QString::fromStdString(pp));
     data = pp;
 
@@ -1607,8 +1608,9 @@ void TomographyIfaceViewQtGUI::updatedCycleName() {
   m_setupPathComponentPhase = m_uiTabSetup.lineEdit_cycle->text().toStdString();
 }
 
-void TomographyIfaceViewQtGUI::updatedRBNumber() {
-  m_setupRBNumber = m_uiTabRun.lineEdit_rb_number->text().toStdString();
+void TomographyIfaceViewQtGUI::updatedExperimentReference() {
+  m_setupExperimentRef =
+      m_uiTabRun.lineEdit_experiment_reference->text().toStdString();
   // Might have to change: m_uiTabRun.lineEdit_local_out_recon_dir as well
 }
 

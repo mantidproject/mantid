@@ -105,8 +105,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>256</width>
-                <height>239</height>
+                <width>241</width>
+                <height>254</height>
                </rect>
               </property>
               <property name="sizePolicy">
@@ -361,14 +361,14 @@
         <item row="0" column="0" colspan="3">
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
-           <widget class="QLabel" name="label_rb_number">
+           <widget class="QLabel" name="label_experiment_reference">
             <property name="text">
-             <string>RB Number:</string>
+             <string>Exp. reference (RB number)</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit_rb_number">
+           <widget class="QLineEdit" name="lineEdit_experiment_reference">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>1</horstretch>

@@ -65,7 +65,7 @@ public:
    */
   virtual void userError(const std::string &err,
                          const std::string &description) = 0;
-  virtual std::string RBNumber() const = 0;
+
   /**
    * Set the compute resources available (remote and/or local). Note
    * that the order of the list is/can be important.
@@ -100,6 +100,18 @@ public:
    * @return list of messages to log, one by one.
    */
   virtual std::vector<std::string> logMsgs() const = 0;
+
+  /**
+   * Reference or ID of the experiment entered/selected by the
+   * user. The ID is effectively the RBNumber (defined at ISIS as the
+   * "experiment reference number from the proposal"). The RBNumber
+   * identifies one experiment or a set of experiments from an
+   * approved experiment proposal. See for example:
+   * www.isis.stfc.ac.uk/groups/computing/data/problems-finding-your-data11691.html
+   *
+   * @return identifier as a string
+   */
+  virtual std::string experimentReference() const = 0;
 
   /**
    * Username entered by the user
@@ -286,8 +298,8 @@ public:
    */
   virtual void updateJobsInfoDisplay(
       const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
-          &localStatus) = 0;
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
+          localStatus) = 0;
 
   /**
    * Save settings (normally when closing the interface). This refers

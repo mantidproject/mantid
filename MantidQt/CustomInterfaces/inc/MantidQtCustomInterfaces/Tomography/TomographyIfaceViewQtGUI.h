@@ -41,7 +41,7 @@ in a foreseeable horizon. The interface of this class is given by
 ITomographyIfaceView so that it fits in the MVP (Model-View-Presenter)
 design of the tomography GUI.
 
-Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014-2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -92,11 +92,11 @@ public:
   void setReconstructionTools(const std::vector<std::string> &tools,
                               const std::vector<bool> &enabled) override;
 
-  std::string getUsername() const override;
-
-  std::string RBNumber() const override {
-	  return m_setupRBNumber;
+  std::string experimentReference() const override {
+    return m_setupExperimentRef;
   }
+
+  std::string getUsername() const override;
 
   std::string getPassword() const override;
 
@@ -126,8 +126,8 @@ public:
 
   void updateJobsInfoDisplay(
       const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
-          &localStatus) override;
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
+          localStatus) override;
 
   std::vector<std::string> processingJobsIDs() const override {
     return m_processingJobsIDs;
@@ -167,7 +167,7 @@ private slots:
   void runVisualizeClicked();
   void jobCancelClicked();
   void jobTableRefreshClicked();
-  void updatedRBNumber();
+  void updatedExperimentReference();
 
   void compResourceIndexChanged(int);
   void runToolIndexChanged(int);
@@ -362,7 +362,7 @@ private:
   // (raw files, reconstructions, pre-post processed files, etc.)
   // These are the defaults
   static const std::string g_defPathComponentPhase;
-  static const std::string g_defRBNumber;
+  static const std::string g_defExperimentRef;
   // reconstruction scripts (external, but shipped with Mantid)
   static const std::string g_defPathReconScripts;
   // base dir for the reconstruction outputs
@@ -374,7 +374,7 @@ private:
   static const std::string g_defProcessedSubpath;
   // And these are the paths set up
   std::string m_setupPathComponentPhase;
-  std::string m_setupRBNumber;
+  std::string m_setupExperimentRef;
   std::string m_setupPathReconScripts;
   std::string m_setupPathReconOut;
   std::string m_setupParaviewPath;
