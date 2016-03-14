@@ -2,7 +2,6 @@
 #define MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h"
@@ -14,8 +13,6 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-// Forward decs
-class ProgressableView;
 
 /** @class ReflMainViewPresenter
 
@@ -44,8 +41,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_CUSTOMINTERFACES_DLL ReflMainViewPresenter
-    : public IReflPresenter,
-      public MantidQt::API::WorkspaceObserver {
+    : public IReflPresenter {
 public:
   ReflMainViewPresenter(ReflMainView *mainView,
                         boost::shared_ptr<IReflSearcher> searcher =

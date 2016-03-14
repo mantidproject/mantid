@@ -8,9 +8,6 @@
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableView.h"
 
-#include <Poco/AutoPtr.h>
-#include <memory>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 // Forward decs

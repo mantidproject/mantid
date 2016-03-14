@@ -6,7 +6,6 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 
-#include <map>
 #include <set>
 #include <string>
 

@@ -1,5 +1,4 @@
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableView.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/MantidWidget.h"
@@ -19,7 +18,8 @@ using namespace Mantid::API;
 //----------------------------------------------------------------------------------------------
 /** Constructor
 */
-QReflTableView::QReflTableView(QWidget *parent) : MantidWidget(parent) {
+QReflTableView::QReflTableView(QWidget *parent)
+    : MantidWidget(parent), m_openMap(new QSignalMapper(this)) {
 
   createTable();
 }
@@ -356,6 +356,7 @@ std::string QReflTableView::askUserString(const std::string &prompt,
 
 /**
 Show the user the dialog for an algorithm
+* @param algorithm : [input] The algorithm
 */
 void QReflTableView::showAlgorithmDialog(const std::string &algorithm) {
   std::stringstream pythonSrc;
@@ -366,6 +367,9 @@ void QReflTableView::showAlgorithmDialog(const std::string &algorithm) {
   runPythonCode(QString::fromStdString(pythonSrc.str()), false);
 }
 
+/**
+Show the user the dialog for "LoadReflTBL"
+*/
 void QReflTableView::showImportDialog() {
   std::stringstream pythonSrc;
   pythonSrc << "try:\n";
@@ -374,8 +378,9 @@ void QReflTableView::showImportDialog() {
             << "Dialog()\n";
   pythonSrc << "  print algm.getPropertyValue(\"OutputWorkspace\")\n";
   pythonSrc << "except:\n";
-  pythonSrc << "  pass\n";
-  // outputWorkspaceName will hold the name of the workspace
+  pythonSrc << "  print \"FAILED\"\n";
+	pythonSrc << "  pass\n";
+	// outputWorkspaceName will hold the name of the workspace
   // otherwise this should be an empty string.
   QString outputWorkspaceName =
       runPythonCode(QString::fromStdString(pythonSrc.str()), false);
@@ -441,7 +446,8 @@ void QReflTableView::loadSettings(std::map<std::string, QVariant> &options) {
 }
 
 /**
-Plot a workspace
+Plot a set of workspaces
+* @param workspaces : [input] The list of workspaces as a set
 */
 void QReflTableView::plotWorkspaces(const std::set<std::string> &workspaces) {
   if (workspaces.empty())

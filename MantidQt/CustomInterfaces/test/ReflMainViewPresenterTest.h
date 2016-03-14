@@ -1,17 +1,12 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTERTEST_H
 #define MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTERTEST_H
 
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "ReflMainViewMockObjects.h"
 

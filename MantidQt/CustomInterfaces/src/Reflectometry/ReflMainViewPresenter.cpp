@@ -2,29 +2,16 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/NotebookWriter.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/CatalogInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UserCatalogInfo.h"
-#include "MantidKernel/Utils.h"
-#include "MantidQtCustomInterfaces/ParseKeyValueString.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflGenerateNotebook.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
-#include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
@@ -32,15 +19,13 @@
 #include <sstream>
 
 using namespace Mantid::API;
-using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt {
 namespace CustomInterfaces {
 ReflMainViewPresenter::ReflMainViewPresenter(
     ReflMainView *mainView, boost::shared_ptr<IReflSearcher> searcher)
-    : WorkspaceObserver(), m_view(mainView), m_searcher(searcher) {
+    : m_view(mainView), m_searcher(searcher) {
 
   // TODO. Select strategy.
   /*
@@ -141,6 +126,9 @@ void ReflMainViewPresenter::search() {
   algRunner->startAlgorithm(algSearch);
 }
 
+/** Populates the search results table
+* @param searchAlg : [input] The search algorithm
+*/
 void ReflMainViewPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   if (searchAlg->isExecuted()) {
     ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");

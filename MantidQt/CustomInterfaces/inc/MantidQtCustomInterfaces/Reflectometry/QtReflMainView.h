@@ -10,7 +10,6 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtMantidWidgets/SlitCalculator.h"
 #include "ui_ReflMainWidget.h"
-#include <boost/scoped_ptr.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
