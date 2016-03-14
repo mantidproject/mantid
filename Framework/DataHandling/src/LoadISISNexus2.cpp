@@ -567,7 +567,7 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
           "The specified spectrum list contains a spectrum number which is "
           "larger "
           "than the largest loadable spectrum number for your selection of "
-          "excluded/included/seaparate monitors. The largest loadable "
+          "excluded/included/separate monitors. The largest loadable "
           "spectrum number is " +
           std::to_string(m_loadBlockInfo.getMinSpectrumID());
       throw std::invalid_argument(err);
@@ -577,7 +577,7 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
           "The specified spectrum list contains a spectrum number which is "
           "smaller "
           "than the smallest loadable spectrum number for your selection of "
-          "excluded/included/seaparate monitors. The smallest loadable "
+          "excluded/included/separate monitors. The smallest loadable "
           "spectrum number is " +
           std::to_string(m_loadBlockInfo.getMinSpectrumID());
       throw std::invalid_argument(err);
@@ -664,7 +664,7 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
         "Your spectrum number selection was not valid. "
         "Make sure that you select spectrum numbers "
         "and ranges which are compatible with your "
-        "selection of excluded/included/seaparate monitors. ");
+        "selection of excluded/included/separate monitors. ");
   }
 
   return bseparateMonitors;
