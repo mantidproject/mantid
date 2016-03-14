@@ -44,6 +44,7 @@ private:
   void exec() override final;
 
   void moveToBeamCenter();
+  void setSourceSlitSize();
 
   double m_low_TOF_cut;
   double m_high_TOF_cut;

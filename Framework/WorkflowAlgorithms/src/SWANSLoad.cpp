@@ -16,6 +16,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
+#include <boost/math/constants/constants.hpp> //pi
 
 #include "Poco/DirectoryIterator.h"
 #include "Poco/NumberParser.h"
@@ -25,6 +26,7 @@
 #include <iostream>
 #include <fstream>
 #include <istream>
+#include <cmath>       /* sqrt */
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -82,7 +84,6 @@ void SWANSLoad::init() {
   declareProperty("BeamCenterY", EMPTY_DBL(), "Beam position in Y pixel "
                                               "coordinates (used only if "
                                               "UseConfigBeam is false)");
-
 
   declareProperty("WavelengthStep", 0.1, "Wavelength steps to be used when "
                                          "rebinning the data before performing "
@@ -234,7 +235,6 @@ void SWANSLoad::exec() {
       reductionManager->setProperty("LatestBeamCenterY", m_center_y);
   }
 
-
   //
   // Convert to wavelength
   //
@@ -246,7 +246,10 @@ void SWANSLoad::exec() {
   convertUnits->setProperty("Target", "Wavelength");
   convertUnits->executeAsChildAlg();
 
-
+  //
+  //
+  // slits:
+  setSourceSlitSize();
 
   //
   // Rebin so all the wavelength bins are aligned
@@ -255,9 +258,10 @@ void SWANSLoad::exec() {
   const bool preserveEvents = getProperty("PreserveEvents");
   const double wl_step = getProperty("WavelengthStep");
 
-  std::string params = Poco::NumberFormatter::format(dataWS->readX(0).front(), 2) + "," +
-                       Poco::NumberFormatter::format(wl_step) + "," +
-                       Poco::NumberFormatter::format(dataWS->readX(0).back(), 2);
+  std::string params =
+      Poco::NumberFormatter::format(dataWS->readX(0).front(), 2) + "," +
+      Poco::NumberFormatter::format(wl_step) + "," +
+      Poco::NumberFormatter::format(dataWS->readX(0).back(), 2);
   g_log.information() << "Rebin parameters: " << params << std::endl;
   IAlgorithm_sptr rebinAlg = createChildAlgorithm("Rebin", 0.71, 0.72);
 
@@ -309,7 +313,6 @@ void SWANSLoad::moveToBeamCenter() {
   double beam_ctr_y = 0.0;
   EQSANSInstrument::getCoordinateFromPixel(m_center_x, m_center_y, dataWS,
                                            beam_ctr_x, beam_ctr_y);
-
   IAlgorithm_sptr mvAlg =
       createChildAlgorithm("MoveInstrumentComponent", 0.5, 0.50);
   mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
@@ -332,6 +335,29 @@ void SWANSLoad::moveToBeamCenter() {
   m_output_message += "   Beam center: " +
                       Poco::NumberFormatter::format(m_center_x) + ", " +
                       Poco::NumberFormatter::format(m_center_y) + "\n";
+}
+
+/// Get the source slit size from the slit information of the run properties
+void SWANSLoad::setSourceSlitSize() {
+
+  auto run = dataWS->run();
+  const double pi = boost::math::constants::pi<double>();
+
+  if (!run.hasProperty("IVA") && !run.hasProperty("IHA")) {
+    m_output_message += "   Could not determine source aperture diameter: ";
+    m_output_message += "slit parameters were not found in the run log\n";
+    g_log.information() << "Slit parameters were not found in the run log..." << std::endl;
+    return;
+  }
+  auto iva  = run.getPropertyValueAsType<double>("IVA");
+  auto iha  = run.getPropertyValueAsType<double>("IHA");
+  // aproximate square to circle and get the diameter
+  auto slitsDiameter = 2 * std::sqrt(iva*iha / pi);
+
+  dataWS->mutableRun().addProperty("source-aperture-diameter", slitsDiameter, "mm", true);
+  m_output_message += "   Source aperture diameter: ";
+  Poco::NumberFormatter::append(m_output_message, slitsDiameter, 1);
+  m_output_message += " mm\n";
 }
 
 } // namespace WorkflowAlgorithms
