@@ -413,6 +413,9 @@ class QECoverageGUI(QtGui.QWidget):
                 self.direct_ei_input.setText(ei_str)
                 ei_vec = [float(val) for val in ei_str.split(',')]
 
+            if self.direct_emin_input.text() == "":
+                self.direct_emin_input.setText(str((ei_vec[0] / 2) * -1))
+
             # reset min_emin according to list provided
             min_emin = float(self.direct_emin_input.text())
             minimum = min(ei_vec)
