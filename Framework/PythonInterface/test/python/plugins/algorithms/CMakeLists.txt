@@ -92,7 +92,10 @@ set ( TEST_PY_FILES
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py
   PoldiMergeTest.py
+  VesuvioCorrectionsTest.py
+  VesuvioPreFitTest.py
   VesuvioResolutionTest.py
+  VesuvioTOFFitTest.py
   PoldiCreatePeaksFromFileTest.py
   LoadCIFTest.py
 )

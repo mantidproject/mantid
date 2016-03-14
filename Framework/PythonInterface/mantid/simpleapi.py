@@ -263,6 +263,19 @@ def CalculateChiSquared(*args, **kwargs):
     """
     return None
 
+# Use a python decorator (defined above) to generate the code for this function.
+@fitting_algorithm
+def EvaluateFunction(*args, **kwargs):
+    """
+    This function evaluates a function on a data set.
+    The data set is defined in a way similar to Fit algorithm.
+
+    Example:
+      EvaluateFunction(Function='name=LinearBackground,A0=0.3', InputWorkspace=dataWS',
+          StartX='0.05',EndX='1.0',Output="Z1")
+    """
+    return None
+
 def FitDialog(*args, **kwargs):
     """Popup a dialog for the Load algorithm. More help on the Load function
     is available via help(Load).

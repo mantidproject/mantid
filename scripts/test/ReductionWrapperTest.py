@@ -225,7 +225,7 @@ class ReductionWrapperTest(unittest.TestCase):
         red2=mr.ReduceMARI(web_var)
         self.assertTrue(red2._run_from_web)
         self.assertEqual(red2.reducer.prop_man.sample_run,2000)
-
+    #
     def test_custom_print_name(self):
         th=test_helper()
         th.reducer.prop_man.sample_run = 100

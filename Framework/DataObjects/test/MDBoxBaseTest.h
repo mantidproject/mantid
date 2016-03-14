@@ -79,13 +79,13 @@ public:
   std::vector<MDE> *getEventsCopy() override { return NULL; }
 
   /// Add a single event
-  void addEvent(const MDE & /*point*/) override {}
+  size_t addEvent(const MDE & /*point*/) override { return 0; }
   /// Add a single event and trace it if the box it has been added may need
   /// splitting
   virtual void addAndTraceEvent(const MDE & /*point*/, size_t /*index */) {}
 
   /// Add a single event
-  void addEventUnsafe(const MDE & /*point*/) override {}
+  size_t addEventUnsafe(const MDE & /*point*/) override { return 0; }
   size_t
   buildAndAddEvents(const std::vector<signal_t> & /*sigErrSq*/,
                     const std::vector<coord_t> & /*Coord*/,
