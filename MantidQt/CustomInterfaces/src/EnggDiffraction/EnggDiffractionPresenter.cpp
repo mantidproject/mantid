@@ -43,6 +43,7 @@ bool EnggDiffractionPresenter::g_abortThread = false;
 std::string EnggDiffractionPresenter::g_lastValidRun = "";
 std::string EnggDiffractionPresenter::g_calibCropIdentifier = "SpectrumNumbers";
 std::string EnggDiffractionPresenter::g_sumOfFilesFocus = "";
+int EnggDiffractionPresenter::g_fittingRowCounter = 0;
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(NULL), m_calibFinishedOK(false), m_focusFinishedOK(false),
@@ -580,13 +581,14 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
       ADS.retrieveWS<ITableWorkspace>(FocusedFitPeaksTableName);
 
   size_t rowCount = table->rowCount();
+  g_fittingRowCounter = static_cast<int>(rowCount);
   // std::string single_peak_out_WS = "engggui_fitting_single_peaks";
   std::string Bk2BkExpFunctionStr;
 
   std::string single_peak_out_WS;
 
   if (rowCount > size_t(0)) {
-    for (size_t i = 0; i < rowCount; i++) {
+    for (size_t i = 0; i < 5; i++) {
 
       // get the functionStrFactory to generate the string for function property
       // return the string with i row from table workspace
@@ -701,14 +703,14 @@ void EnggDiffractionPresenter::runAppendSpectraAlg(std::string workspace1Name,
   }
 }
 
-void EnggDiffractionPresenter::plotFitPeaksCurves() const {
+void EnggDiffractionPresenter::plotFitPeaksCurves(int peak, bool attach) const {
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   auto singlPeaksWS =
       ADS.retrieveWS<MatrixWorkspace>("engggui_fitting_single_peaks0");
 
   try {
     // 1 represent calc which is the required peak to plotted
-    m_view->setDataCurves(*(ALCHelper::curveDataFromWs(singlPeaksWS, 0)));
+    m_view->setDataCurves(*(ALCHelper::curveDataFromWs(singlPeaksWS, peak)), attach);
   } catch (std::runtime_error &re) {
     g_log.error()
         << "Unable to finish of the plotting of the graph for "
@@ -740,7 +742,15 @@ void EnggDiffractionPresenter::fittingFinished() {
                     "has started... "
                  << std::endl;
   try {
-    plotFitPeaksCurves();
+	  bool attach = true;
+	  g_fittingRowCounter = 4;
+	  for (int i = 0; i < g_fittingRowCounter; i++)
+	  {
+		  if (i == (g_fittingRowCounter - 1))
+			  attach = false;
+
+		  plotFitPeaksCurves(i, attach);
+	  }
   } catch (std::runtime_error &re) {
     g_log.error()
         << "Unable to finish of the plotting of the graph for "

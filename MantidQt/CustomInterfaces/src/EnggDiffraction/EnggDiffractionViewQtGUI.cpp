@@ -215,9 +215,14 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting(QWidget *wFitting) {
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::xBottom, wFitting->font());
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::yLeft, wFitting->font());
 
-  m_dataCurve->setStyle(QwtPlotCurve::NoCurve);
+  m_dataCurve->setStyle(QwtPlotCurve::Lines);
+ /*
   m_dataCurve->setSymbol(
-      QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(), QSize(7, 7)));
+  QwtSymbol(
+	 QwtSymbol::Cross,
+	  QBrush(QColor(255, 255, 255, 0)), // QBrush(QColor(255,255,0,128)),
+	  QPen(Qt::black, 2), QSize(10, 10)));
+	  */
   m_dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
   m_dataCurve->attach(m_uiTabFitting.dataPlot);
 }
@@ -684,12 +689,18 @@ std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
   return fileData;
 }
 
-void EnggDiffractionViewQtGUI::setDataCurves(QwtData &data) {
+void EnggDiffractionViewQtGUI::setDataCurves(QwtData &data, bool attach) {
   // Set data
-  m_dataCurve->setData(data);
+  if (attach) {
 
-  // replot the graph
-  m_uiTabFitting.dataPlot->replot();
+    m_dataCurve->setData(data);
+
+    m_dataCurve->attach(m_uiTabFitting.dataPlot);
+  } else {
+
+    // replot the graph
+    m_uiTabFitting.dataPlot->replot();
+  }
 }
 
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {

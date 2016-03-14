@@ -425,7 +425,7 @@ public:
   * @param data of the workspace to be passed as QwtData
   *
   */
-  virtual void setDataCurves(QwtData &data) = 0;
+  virtual void setDataCurves(QwtData &data, bool attach) = 0;
 };
 
 } // namespace CustomInterfaces
