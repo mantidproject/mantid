@@ -99,6 +99,11 @@ private:
                         size_t &numPeriods,
                         std::map<int, std::string> &monitorNumber2Name);
 
+  bool createOutputWorkspace(size_t numHistMon, size_t numEventMon,
+                             bool monitorsAsEvents,
+                             std::vector<std::string> &monitorNames,
+                             const std::map<int, std::string> &monitorNumber2Name);
+
 private:
   std::string m_filename; ///< The name and path of the input file
   API::MatrixWorkspace_sptr m_workspace; ///< The workspace being filled out

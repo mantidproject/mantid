@@ -164,44 +164,12 @@ void LoadNexusMonitors2::exec() {
     }
 
   // only used if using event monitors
-  EventWorkspace_sptr eventWS;
+  // EventWorkspace_sptr eventWS;
   // Create the output workspace
-  bool useEventMon;
-  if (numHistMon == m_monitor_count || !monitorsAsEvents) {
-    useEventMon = false;
-    if (m_monitor_count == 0)
-      throw std::runtime_error(
-          "Not loading event data. Trying to load histogram data but failed to "
-          "find monitors with histogram data or could not interpret the data. "
-          "This file may be corrupted or it may not be supported");
-
-    m_workspace = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", m_monitor_count, 1, 1);
-    // if there is a distinct monitor number for each monitor sort them by that
-    // number
-    if (monitorNumber2Name.size() == monitorNames.size()) {
-      monitorNames.clear();
-      for (auto &numberName : monitorNumber2Name) {
-        monitorNames.push_back(numberName.second);
-      }
-    }
-  } else if (numEventMon == m_monitor_count) {
-    eventWS = EventWorkspace_sptr(new EventWorkspace());
-    useEventMon = true;
-    eventWS->initialize(m_monitor_count, 1, 1);
-
-    // Set the units
-    eventWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("TOF");
-    eventWS->setYUnit("Counts");
-    m_workspace = eventWS;
-  } else {
-    g_log.error() << "Found " << numEventMon << " event monitors and "
-                  << numHistMon << " histogram monitors (" << m_monitor_count
-                  << " total)\n";
-    throw std::runtime_error(
-        "All monitors must be either event or histogram based");
-  }
+  bool useEventMon = createOutputWorkspace(numHistMon, numEventMon,
+                                           monitorsAsEvents,
+                                           monitorNames,
+                                           monitorNumber2Name);
 
   // a temporary place to put the spectra/detector numbers
   boost::scoped_array<specnum_t> spectra_numbers(
@@ -245,6 +213,8 @@ void LoadNexusMonitors2::exec() {
 
     if (useEventMon) {
       // setup local variables
+      EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(m_workspace);
+
       std::vector<uint64_t> event_index;
       MantidVec time_of_flight;
       std::string tof_units;
@@ -330,6 +300,7 @@ void LoadNexusMonitors2::exec() {
 
   if (useEventMon) // set the x-range to be the range for min/max events
   {
+    EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(m_workspace);
     double xmin, xmax;
     eventWS->getEventXMinMax(xmin, xmax);
 
@@ -692,6 +663,58 @@ size_t LoadNexusMonitors2::getMonitorInfo(
   }
 
   return monitorNames.size();
+}
+
+bool LoadNexusMonitors2::createOutputWorkspace(size_t numHistMon, size_t numEventMon,
+                                               bool monitorsAsEvents,
+                                               std::vector<std::string> &monitorNames,
+                                               const std::map<int, std::string> &monitorNumber2Name)
+{
+  // only used if using event monitors
+  EventWorkspace_sptr eventWS;
+  // Create the output workspace
+  bool useEventMon;
+  if (numHistMon == m_monitor_count || !monitorsAsEvents) {
+
+    if (numHistMon != m_monitor_count)
+      throw std::runtime_error("I really don't think it could happen!");
+
+    useEventMon = false;
+    if (m_monitor_count == 0)
+      throw std::runtime_error(
+          "Not loading event data. Trying to load histogram data but failed to "
+          "find monitors with histogram data or could not interpret the data. "
+          "This file may be corrupted or it may not be supported");
+
+    m_workspace = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", m_monitor_count, 1, 1);
+    // if there is a distinct monitor number for each monitor sort them by that
+    // number
+    if (monitorNumber2Name.size() == monitorNames.size()) {
+      monitorNames.clear();
+      for (auto &numberName : monitorNumber2Name) {
+        monitorNames.push_back(numberName.second);
+      }
+    }
+  } else if (numEventMon == m_monitor_count) {
+    eventWS = EventWorkspace_sptr(new EventWorkspace());
+    useEventMon = true;
+    eventWS->initialize(m_monitor_count, 1, 1);
+
+    // Set the units
+    eventWS->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    eventWS->setYUnit("Counts");
+    m_workspace = eventWS;
+  } else {
+    g_log.error() << "Found " << numEventMon << " event monitors and "
+                  << numHistMon << " histogram monitors (" << m_monitor_count
+                  << " total)\n";
+    throw std::runtime_error(
+        "All monitors must be either event or histogram based");
+  }
+
+  return useEventMon;
 }
 
 } // end DataHandling
