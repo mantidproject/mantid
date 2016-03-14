@@ -133,8 +133,8 @@ void LoadNexusMonitors2::exec() {
   size_t numPeriods = 0;
   std::vector<std::string> monitorNames;
   std::map<int, std::string> monitorNumber2Name;
-  m_monitor_count = getMonitorInfo(file, monitorNames, numHistMon, numEventMon, numPeriods,
-                                   monitorNumber2Name);
+  m_monitor_count = getMonitorInfo(file, monitorNames, numHistMon, numEventMon,
+                                   numPeriods, monitorNumber2Name);
 
   // Nothing to do
   if (0 == m_monitor_count) {
@@ -621,13 +621,10 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
   this->setProperty("OutputWorkspace", wsGroup);
 }
 
-size_t LoadNexusMonitors2::getMonitorInfo(::NeXus::File &file,
-                                          std::vector<std::string> &monitorNames,
-                                          size_t &numHistMon,
-                                          size_t &numEventMon,
-                                          size_t &numPeriods,
-                                          std::map<int, std::string> &monitorNumber2Name)
-{
+size_t LoadNexusMonitors2::getMonitorInfo(
+    ::NeXus::File &file, std::vector<std::string> &monitorNames,
+    size_t &numHistMon, size_t &numEventMon, size_t &numPeriods,
+    std::map<int, std::string> &monitorNumber2Name) {
   typedef std::map<std::string, std::string> string_map_t;
 
   // Now we want to go through and find the monitors
