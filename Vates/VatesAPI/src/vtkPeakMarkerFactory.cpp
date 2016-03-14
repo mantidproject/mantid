@@ -197,16 +197,10 @@ stack.
       vtkNew<vtkPoints> peakPoint;
       peakPoint->Allocate(1);
 
-      vtkNew<vtkFloatArray> peakSignal;
-      peakSignal->Allocate(1);
-      peakSignal->SetName(m_scalarName.c_str());
-      peakSignal->SetNumberOfComponents(1);
-
       // What we'll return
       vtkNew<vtkPolyData> peakDataSet;
       peakDataSet->Allocate(1);
       peakDataSet->SetPoints(peakPoint.GetPointer());
-      peakDataSet->GetPointData()->SetScalars(peakSignal.GetPointer());
 
       IPeak & peak = m_workspace->getPeak(i);
 
@@ -214,13 +208,11 @@ stack.
       V3D pos = getPosition(peak);
       peakPoint->InsertNextPoint(pos.X(), pos.Y(), pos.Z());
 
-      // The integrated intensity = the signal on that point.
-      peakSignal->InsertNextValue(static_cast<float>( peak.getIntensity() ));
       peakPoint->Squeeze();
       peakDataSet->Squeeze();
 
       // Add a glyph and append to the appendFilter
-      const Mantid::Geometry::PeakShape& shape = m_workspace->getPeakPtr(i)->getPeakShape();
+      const Mantid::Geometry::PeakShape& shape = m_workspace->getPeak(i).getPeakShape();
 
       // Pick the radius up from the factory if possible, otherwise use the user-provided value.
       if(shape.shapeName() == Mantid::DataObjects::PeakShapeSpherical::sphereShapeName())
