@@ -47,6 +47,8 @@ public:
   MOCK_CONST_METHOD0(getAlgorithmRunner,
                      boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
   MOCK_METHOD1(setTransferMethods, void(const std::set<std::string> &));
+  MOCK_METHOD2(setInstrumentList,
+               void(const std::vector<std::string> &, const std::string &));
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};

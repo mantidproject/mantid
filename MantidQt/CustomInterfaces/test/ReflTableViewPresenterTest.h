@@ -124,12 +124,10 @@ public:
 
   ReflTableViewPresenterTest() { FrameworkManager::Instance(); }
 
-  void test_constructor_sets_instruments_tables_and_hints() {
+  void test_constructor_sets_tables_and_hints() {
     NiceMock<MockTableView> mockTableView;
     MockProgressableView mockProgress;
 
-    // Expect that the instrument list is initialized on the table view
-    EXPECT_CALL(mockTableView, setInstrumentList(_, _)).Times(Exactly(1));
     // Expect that the list of tables is populated
     EXPECT_CALL(mockTableView, setTableList(_)).Times(Exactly(1));
     // Expect that the autocompletion hints are populated
