@@ -63,7 +63,7 @@ void IntegratePeaksCWSD::init() {
 
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                     "PeaksWorkspace", "", Direction::Input,
-                    Kernel::PropertyMode::Optional),
+                    API::PropertyMode::Optional),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
   declareProperty(
@@ -134,7 +134,7 @@ void IntegratePeaksCWSD::processInputs() {
   // peak related
   m_peakRadius = getProperty("PeakRadius");
   if (m_peakRadius != EMPTY_DBL()){
-    throw std::invalid_argument('Peak radius cannot be left empty.');
+    throw std::invalid_argument("Peak radius cannot be left empty.");
   }
 
   // merge peak only makes sense when there is more than 1 peak
