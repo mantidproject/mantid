@@ -17,7 +17,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER SnapToGridDialog : public QDialog
 
 public:
   SnapToGridDialog(QWidget *parent = 0);
-  ~SnapToGridDialog();
+  ~SnapToGridDialog() override;
 
   void setSnap(double x, double y);
   double getSnapX();

@@ -26,7 +26,7 @@ DECLARE_SINGLE_VALUE_PARAMETER(OutDimParameter, size_t)
 class DLLExport CoordTransform {
 public:
   CoordTransform(const size_t inD, const size_t outD);
-  virtual ~CoordTransform();
+  virtual ~CoordTransform() = default;
 
   /// Pure abstract methods to be implemented
   virtual std::string toXMLString() const = 0;

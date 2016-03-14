@@ -43,6 +43,7 @@ std::tm *gmtime_r_portable(const std::time_t *clock, struct std::tm *result) {
 #ifdef _WIN32
   // Windows implementation
   if (!gmtime_s(result, clock)) { // Returns zero if successful
+    // cppcheck-suppress CastIntegerToAddressAtReturn
     return result;
   } else { // Returned some non-zero error code
     return NULL;
@@ -460,7 +461,7 @@ void DateAndTime::setFromISO8601(const std::string str, bool displayLogs) {
   // the
   // string to always denote the full timestamp so we check for a colon and if
   // it is not present then throw an exception.
-  if (time.find(":") == std::string::npos)
+  if (time.find(':') == std::string::npos)
     throw std::invalid_argument("Error interpreting string '" + str +
                                 "' as a date/time.");
   try {

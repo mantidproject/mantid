@@ -34,6 +34,7 @@ set ( SRC_FILES
 	src/ICatalogInfo.cpp
 	src/IPropertyManager.cpp
 	src/ISaveable.cpp
+	src/IndexSet.cpp
 	src/InstrumentInfo.cpp
 	src/InternetHelper.cpp
 	src/Interpolation.cpp
@@ -100,7 +101,6 @@ set ( SRC_FILES
 	src/Timer.cpp
 	src/Unit.cpp
 	src/UnitConversion.cpp
-	src/UnitFactory.cpp
 	src/UnitLabel.cpp
 	src/UnitLabelTypes.cpp
 	src/UsageService.cpp
@@ -143,6 +143,7 @@ set ( INC_FILES
 	inc/MantidKernel/Chainable.h
 	inc/MantidKernel/ChainableFactory.h
 	inc/MantidKernel/ChecksumHelper.h
+        inc/MantidKernel/ClassMacros.h
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ComputeResourceInfo.h
 	inc/MantidKernel/ConfigService.h
@@ -178,6 +179,7 @@ set ( INC_FILES
 	inc/MantidKernel/ISaveable.h
 	inc/MantidKernel/ITimeSeriesProperty.h
 	inc/MantidKernel/IValidator.h
+	inc/MantidKernel/IndexSet.h
 	inc/MantidKernel/Instantiator.h
 	inc/MantidKernel/InstrumentInfo.h
 	inc/MantidKernel/InternetHelper.h
@@ -323,6 +325,7 @@ set ( TEST_FILES
 	IPropertySettingsTest.h
 	ISaveableTest.h
 	IValidatorTest.h
+	IndexSetTest.h
 	InstrumentInfoTest.h
 	InternetHelperTest.h
 	InterpolationTest.h

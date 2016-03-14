@@ -19,7 +19,7 @@ public:
         inputWS, WorkspaceCreationHelper::Create2DWorkspaceBinned(100, 10));
   }
 
-  ~SumRowColumnTest() { AnalysisDataService::Instance().clear(); }
+  ~SumRowColumnTest() override { AnalysisDataService::Instance().clear(); }
 
   void testName() { TS_ASSERT_EQUALS(summer.name(), "SumRowColumn") }
 

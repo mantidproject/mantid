@@ -20,7 +20,7 @@ public:
 
   //=======================================================================================
   class SimpleTask : public Task {
-    void run() { ThreadPoolRunnableTest_value = 1234; }
+    void run() override { ThreadPoolRunnableTest_value = 1234; }
   };
 
   void test_run() {
@@ -45,7 +45,7 @@ public:
   //=======================================================================================
   /** Class that throws an exception */
   class TaskThatThrows : public Task {
-    void run() {
+    void run() override {
       ThreadPoolRunnableTest_value += 1;
       throw Mantid::Kernel::Exception::NotImplementedError(
           "Test exception from TaskThatThrows.");

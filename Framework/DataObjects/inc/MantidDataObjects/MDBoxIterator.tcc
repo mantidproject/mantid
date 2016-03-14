@@ -3,10 +3,6 @@
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDBoxIterator.h"
 
-using namespace Mantid;
-using namespace Mantid::API;
-using namespace Mantid::Geometry;
-
 namespace Mantid {
 namespace DataObjects {
 
@@ -229,11 +225,11 @@ TMDE(size_t MDBoxIterator)::getDataSize() const { return m_max; }
 TMDE(signal_t MDBoxIterator)::getNormalizedSignal() const {
   // What is our normalization factor?
   switch (m_normalization) {
-  case NoNormalization:
+  case API::NoNormalization:
     return m_current->getSignal();
-  case VolumeNormalization:
+  case API::VolumeNormalization:
     return m_current->getSignal() * m_current->getInverseVolume();
-  case NumEventsNormalization:
+  case API::NumEventsNormalization:
     return m_current->getSignal() / double(m_current->getNPoints());
   }
   return std::numeric_limits<signal_t>::quiet_NaN();
@@ -243,11 +239,11 @@ TMDE(signal_t MDBoxIterator)::getNormalizedSignal() const {
 TMDE(signal_t MDBoxIterator)::getNormalizedError() const {
   // What is our normalization factor?
   switch (m_normalization) {
-  case NoNormalization:
+  case API::NoNormalization:
     return m_current->getError();
-  case VolumeNormalization:
+  case API::VolumeNormalization:
     return m_current->getError() * m_current->getInverseVolume();
-  case NumEventsNormalization:
+  case API::NumEventsNormalization:
     return m_current->getError() / double(m_current->getNPoints());
   }
   return std::numeric_limits<signal_t>::quiet_NaN();

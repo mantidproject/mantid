@@ -24,26 +24,28 @@ using namespace Mantid::API;
 class NonExistingAlgorithm : public Algorithm {
 
 public:
-  virtual const std::string name() const { return "NonExistingAlgorithm"; }
+  const std::string name() const override { return "NonExistingAlgorithm"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Rubbish"; }
+  const std::string category() const override { return "Rubbish"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "I do not exist, or do I?";
   }
 
-  void init() {
-    declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
-                        "InputWorkspace", "", Kernel::Direction::Input),
-                    "A workspace with units of TOF");
-    declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
-                        "OutputWorkspace", "", Kernel::Direction::Output),
-                    "The name to use for the output workspace");
+  void init() override {
+    declareProperty(
+        Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+            "InputWorkspace", "", Kernel::Direction::Input),
+        "A workspace with units of TOF");
+    declareProperty(
+        Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+            "OutputWorkspace", "", Kernel::Direction::Output),
+        "The name to use for the output workspace");
     declareProperty("MissingProperty", "rubbish", Kernel::Direction::Input);
   };
-  void exec(){
+  void exec() override{
 
   };
 };

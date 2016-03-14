@@ -823,7 +823,7 @@ Parameter_sptr ParameterMap::getByType(const IComponent *comp,
           }
         } // found->firdst
       }   // it_found != m_map.end()
-    }     //!m_map.empty()
+    }     //! m_map.empty()
   }       // PARALLEL_CRITICAL(m_map_access)
   return result;
 }
@@ -1045,7 +1045,7 @@ void ParameterMap::copyFromParameterMap(const IComponent *oldComp,
                                         const IComponent *newComp,
                                         const ParameterMap *oldPMap) {
 
-  std::set<std::string> oldParameterNames = oldPMap->names(oldComp);
+  auto oldParameterNames = oldPMap->names(oldComp);
   for (const auto &oldParameterName : oldParameterNames) {
     Parameter_sptr thisParameter = oldPMap->get(oldComp, oldParameterName);
     // Insert the fetched parameter in the m_map

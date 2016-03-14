@@ -46,70 +46,69 @@ class DLLExport QtReflMainView : public MantidQt::API::UserSubWindow,
   Q_OBJECT
 public:
   QtReflMainView(QWidget *parent = 0);
-  virtual ~QtReflMainView();
+  ~QtReflMainView() override;
   /// Name of the interface
   static std::string name() { return "ISIS Reflectometry (Polref)"; }
   // This interface's categories.
   static QString categoryInfo() { return "Reflectometry"; }
   // Connect the model
-  virtual void showTable(QReflTableModel_sptr model);
-  virtual void showSearch(ReflSearchModel_sptr model);
+  void showTable(QReflTableModel_sptr model) override;
+  void showSearch(ReflSearchModel_sptr model) override;
 
   // Dialog/Prompt methods
-  virtual std::string askUserString(const std::string &prompt,
-                                    const std::string &title,
-                                    const std::string &defaultValue);
-  virtual bool askUserYesNo(std::string prompt, std::string title);
-  virtual void giveUserInfo(std::string prompt, std::string title);
-  virtual void giveUserWarning(std::string prompt, std::string title);
-  virtual void giveUserCritical(std::string prompt, std::string title);
-  virtual void showAlgorithmDialog(const std::string &algorithm);
-  virtual void showImportDialog();
-  virtual std::string requestNotebookPath();
+  std::string askUserString(const std::string &prompt, const std::string &title,
+                            const std::string &defaultValue) override;
+  bool askUserYesNo(std::string prompt, std::string title) override;
+  void giveUserInfo(std::string prompt, std::string title) override;
+  void giveUserWarning(std::string prompt, std::string title) override;
+  void giveUserCritical(std::string prompt, std::string title) override;
+  void showAlgorithmDialog(const std::string &algorithm) override;
+  void showImportDialog() override;
+  std::string requestNotebookPath() override;
 
   // Settings
-  virtual void saveSettings(const std::map<std::string, QVariant> &options);
-  virtual void loadSettings(std::map<std::string, QVariant> &options);
+  void saveSettings(const std::map<std::string, QVariant> &options) override;
+  void loadSettings(std::map<std::string, QVariant> &options) override;
 
   // Plotting
-  virtual void plotWorkspaces(const std::set<std::string> &workspaces);
+  void plotWorkspaces(const std::set<std::string> &workspaces) override;
 
   // Set the status of the progress bar
-  virtual void setProgressRange(int min, int max);
-  virtual void setProgress(int progress);
-  virtual void clearProgress();
+  void setProgressRange(int min, int max) override;
+  void setProgress(int progress) override;
+  void clearProgress() override;
 
   // Get status of the checkbox which dictates whether an ipython notebook is
   // produced
-  virtual bool getEnableNotebook();
+  bool getEnableNotebook() override;
 
   // Settor methods
-  virtual void setSelection(const std::set<int> &rows);
-  virtual void setTableList(const std::set<std::string> &tables);
-  virtual void setInstrumentList(const std::vector<std::string> &instruments,
-                                 const std::string &defaultInstrument);
-  virtual void
-  setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy);
-  virtual void setClipboard(const std::string &text);
-  virtual void setTransferMethods(const std::set<std::string> &methods);
+  void setSelection(const std::set<int> &rows) override;
+  void setTableList(const std::set<std::string> &tables) override;
+  void setInstrumentList(const std::vector<std::string> &instruments,
+                         const std::string &defaultInstrument) override;
+  void setOptionsHintStrategy(
+      MantidQt::MantidWidgets::HintStrategy *hintStrategy) override;
+  void setClipboard(const std::string &text) override;
+  void setTransferMethods(const std::set<std::string> &methods) override;
 
   // Accessor methods
-  virtual std::set<int> getSelectedRows() const;
-  virtual std::set<int> getSelectedSearchRows() const;
-  virtual std::string getSearchInstrument() const;
-  virtual std::string getProcessInstrument() const;
-  virtual std::string getWorkspaceToOpen() const;
-  virtual std::string getClipboard() const;
-  virtual std::string getSearchString() const;
-  virtual std::string getTransferMethod() const;
+  std::set<int> getSelectedRows() const override;
+  std::set<int> getSelectedSearchRows() const override;
+  std::string getSearchInstrument() const override;
+  std::string getProcessInstrument() const override;
+  std::string getWorkspaceToOpen() const override;
+  std::string getClipboard() const override;
+  std::string getSearchString() const override;
+  std::string getTransferMethod() const override;
 
-  virtual boost::shared_ptr<IReflPresenter> getPresenter() const;
-  virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
-  getAlgorithmRunner() const;
+  boost::shared_ptr<IReflPresenter> getPresenter() const override;
+  boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+  getAlgorithmRunner() const override;
 
 private:
   // initialise the interface
-  virtual void initLayout();
+  void initLayout() override;
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 

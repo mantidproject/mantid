@@ -90,10 +90,10 @@ public:
   DateAndTime operator-(const time_duration &td) const;
   DateAndTime &operator-=(const time_duration &td);
 
-  DateAndTime operator+(const double seconds) const;
-  DateAndTime &operator+=(const double seconds);
-  DateAndTime operator-(const double seconds) const;
-  DateAndTime &operator-=(const double seconds);
+  DateAndTime operator+(const double sec) const;
+  DateAndTime &operator+=(const double sec);
+  DateAndTime operator-(const double sec) const;
+  DateAndTime &operator-=(const double sec);
 
   time_duration operator-(const DateAndTime &rhs) const;
 
@@ -101,8 +101,8 @@ public:
   static DateAndTime getCurrentTime();
   static DateAndTime maximum();
   static DateAndTime minimum();
-  static double secondsFromDuration(time_duration td);
-  static time_duration durationFromSeconds(double seconds);
+  static double secondsFromDuration(time_duration duration);
+  static time_duration durationFromSeconds(double duration);
   static int64_t nanosecondsFromDuration(const time_duration &td);
   static int64_t nanosecondsFromSeconds(double sec);
   static time_duration durationFromNanoseconds(int64_t dur);

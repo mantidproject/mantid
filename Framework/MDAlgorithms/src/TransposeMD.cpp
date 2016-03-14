@@ -61,20 +61,21 @@ const std::string TransposeMD::summary() const {
 /** Initialize the algorithm's properties.
  */
 void TransposeMD::init() {
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
   auto axisValidator = boost::make_shared<ArrayBoundedValidator<int>>();
   axisValidator->clearUpper();
   axisValidator->setLower(0);
 
-  declareProperty(new ArrayProperty<int>("Axes", std::vector<int>(0),
-                                         axisValidator, Direction::Input),
-                  "Permutes the axes according to the indexes given. Zero "
-                  "based indexing. Defaults to no transpose.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<int>>("Axes", std::vector<int>(0),
+                                              axisValidator, Direction::Input),
+      "Permutes the axes according to the indexes given. Zero "
+      "based indexing. Defaults to no transpose.");
 
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -138,7 +139,7 @@ void TransposeMD::exec() {
   auto iterators = inWS->createIterators(nThreads, nullptr);
 
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int it = 0; it < int(iterators.size()); ++it) {
+  for (int it = 0; it < int(iterators.size()); ++it) { // NOLINT
 
     PARALLEL_START_INTERUPT_REGION
     auto inIterator = std::unique_ptr<IMDIterator>(iterators[it]);

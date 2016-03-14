@@ -59,7 +59,7 @@ public:
    */
   ThreeSliceView(QWidget *parent = 0, RebinnedSourcesManager* rebinnedSourcesManager = 0);
   /// Default destructor.
-  virtual ~ThreeSliceView();
+  ~ThreeSliceView() override;
 
   /// Correct the color scale range if not in automatic mode.
   void correctColorScaleRange();
@@ -71,25 +71,25 @@ public:
   /**
    * ViewBase::destroyView
    */
-  void destroyView();
+  void destroyView() override;
   /**
    * ViewBase::getView
    */
-  pqRenderView* getView();
+  pqRenderView *getView() override;
   /**
    * ViewBase::render
    */
-  void render();
+  void render() override;
   /**
    * ViewBase::renderAll
    */
-  void renderAll();
+  void renderAll() override;
   /// ViewBase::resetCamera()
-  void resetCamera();
+  void resetCamera() override;
   /**
    * ViewBase::resetDisplay()
    */
-  void resetDisplay();
+  void resetDisplay() override;
 
 private:
   Q_DISABLE_COPY(ThreeSliceView)

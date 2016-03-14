@@ -26,6 +26,7 @@ Mantid Documentation
    interfaces/index
    fitfunctions/*
    api/index
+   release/index
 
 
 This is the documentation for Mantid |release|.
@@ -44,5 +45,6 @@ This is the documentation for Mantid |release|.
 * `API <api/index.html>`_
     - `Python <api/python/index.html>`_
     - `C++ <http://doxygen.mantidproject.org/>`_ (Doxygen)
+* `Release Notes <release/index.html>`_
 
 

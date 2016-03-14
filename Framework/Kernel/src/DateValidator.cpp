@@ -86,12 +86,6 @@ struct tm getTimeValue(const std::string &sDate, std::string &error) {
 }
 }
 
-/// constructor
-DateValidator::DateValidator() {}
-
-/// destructor
-DateValidator::~DateValidator() {}
-
 /// create a copy of the the validator
 IValidator_sptr DateValidator::clone() const {
   return boost::make_shared<DateValidator>(*this);

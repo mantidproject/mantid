@@ -39,8 +39,8 @@ RefinePowderInstrumentParameters3::~RefinePowderInstrumentParameters3() {}
 void RefinePowderInstrumentParameters3::init() {
   // Peak position workspace
   declareProperty(
-      new WorkspaceProperty<Workspace2D>("InputPeakPositionWorkspace",
-                                         "Anonymous", Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
+          "InputPeakPositionWorkspace", "Anonymous", Direction::Input),
       "Data workspace containing workspace positions in TOF agains dSpacing.");
 
   // Workspace Index
@@ -50,20 +50,20 @@ void RefinePowderInstrumentParameters3::init() {
 
   // Output workspace
   declareProperty(
-      new WorkspaceProperty<Workspace2D>("OutputPeakPositionWorkspace",
-                                         "Anonymous2", Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
+          "OutputPeakPositionWorkspace", "Anonymous2", Direction::Output),
       "Output data workspace containing refined workspace positions in TOF "
       "agains dSpacing.");
 
   // Input Table workspace containing instrument profile parameters
   declareProperty(
-      new WorkspaceProperty<TableWorkspace>("InputInstrumentParameterWorkspace",
-                                            "Anonymous3", Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "InputInstrumentParameterWorkspace", "Anonymous3", Direction::Input),
       "INput tableWorkspace containg instrument's parameters.");
 
   // Output table workspace containing the refined parameters
   declareProperty(
-      new WorkspaceProperty<TableWorkspace>(
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
           "OutputInstrumentParameterWorkspace", "Anonymous4",
           Direction::Output),
       "Output tableworkspace containing instrument's fitted parameters. ");
@@ -517,7 +517,7 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
 void RefinePowderInstrumentParameters3::proposeNewValues(
     vector<string> mcgroup, map<string, Parameter> &curparammap,
     map<string, Parameter> &newparammap, double currchisq) {
-  for (auto paramname : mcgroup) {
+  for (const auto &paramname : mcgroup) {
     // random number between -1 and 1
     double randomnumber =
         2 * static_cast<double>(rand()) / static_cast<double>(RAND_MAX) - 1.0;
@@ -635,7 +635,6 @@ bool RefinePowderInstrumentParameters3::acceptOrDenyChange(double curchisq,
     // Higher Rwp. Take a chance to accept
     double dice = static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
     double bar = exp(-(newchisq - curchisq) / (curchisq * temperature));
-    // random number (dice, 0 and 1) is smaller than bar (between -infty and
     accept = dice < bar;
   }
 
@@ -663,7 +662,7 @@ void RefinePowderInstrumentParameters3::bookKeepMCResult(
   }
 
   // 2. Record for the best parameters
-  if (bestparammap.size() == 0) {
+  if (bestparammap.empty()) {
     // No record yet
     duplicateParameters(parammap, bestparammap);
   } else if (recordparameter) {
@@ -797,7 +796,7 @@ void RefinePowderInstrumentParameters3::addParameterToMCMinimize(
 double RefinePowderInstrumentParameters3::calculateFunction(
     map<string, Parameter> parammap, vector<double> &vecY) {
   // 1. Implement parameter values to m_positionFunc
-  if (parammap.size() > 0)
+  if (!parammap.empty())
     setFunctionParameterValues(m_positionFunc, parammap);
 
   // 2. Calculate
@@ -1173,9 +1172,8 @@ void RefinePowderInstrumentParameters3::setFunctionParameterValues(
   stringstream msgss;
   msgss << "Set Instrument Function Parameter : " << endl;
 
-  std::map<std::string, Parameter>::iterator paramiter;
-  for (auto parname : funparamnames) {
-    paramiter = params.find(parname);
+  for (const auto &parname : funparamnames) {
+    auto paramiter = params.find(parname);
 
     if (paramiter != params.end()) {
       // Found, set up the parameter

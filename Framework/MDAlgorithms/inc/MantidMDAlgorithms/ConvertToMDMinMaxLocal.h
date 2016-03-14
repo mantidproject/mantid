@@ -46,9 +46,9 @@ public:
   int version() const override { return 1; }
 
 protected: // for testing
-  void findMinMaxValues(MDWSDescription &targWSDescr,
-                        MDTransfInterface *const qTransf,
-                        Kernel::DeltaEMode::Type dEMode,
+  void findMinMaxValues(MDWSDescription &WSDescription,
+                        MDTransfInterface *const pQtransf,
+                        Kernel::DeltaEMode::Type iEMode,
                         std::vector<double> &MinValues,
                         std::vector<double> &MaxValues);
 

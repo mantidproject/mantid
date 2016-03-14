@@ -5,6 +5,7 @@
 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <gsl/gsl_statistics.h>
+#include <unordered_map>
 
 namespace Mantid {
 namespace Algorithms {
@@ -44,13 +45,13 @@ const std::string IntegrateByComponent::category() const {
 /** Initialize the algorithm's properties.
  */
 void IntegrateByComponent::init() {
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<HistogramValidator>()),
-      "The input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<HistogramValidator>()),
+                  "The input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The output workspace.");
   auto mustBePosInt = boost::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
   declareProperty(
@@ -88,7 +89,7 @@ void IntegrateByComponent::exec() {
           integratedWS->getInstrument();
 
       PARALLEL_FOR1(integratedWS)
-      for (int i = 0; i < static_cast<int>(hists.size()); ++i) {
+      for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
         PARALLEL_START_INTERUPT_REGION
 
         const std::set<detid_t> &detids =
@@ -130,7 +131,7 @@ void IntegrateByComponent::exec() {
       }
 
       PARALLEL_FOR1(integratedWS)
-      for (int i = 0; i < static_cast<int>(hists.size()); ++i) {
+      for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
         PARALLEL_START_INTERUPT_REGION
         const std::set<detid_t> &detids =
             integratedWS->getSpectrum(hists[i])
@@ -190,7 +191,7 @@ IntegrateByComponent::makeInstrumentMap(API::MatrixWorkspace_sptr countsWS) {
  */
 std::vector<std::vector<size_t>>
 IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
-  std::multimap<Mantid::Geometry::ComponentID, size_t> mymap;
+  std::unordered_multimap<Mantid::Geometry::ComponentID, size_t> mymap;
 
   Geometry::Instrument_const_sptr instrument = countsWS->getInstrument();
   if (parents == 0) // this should not happen in this file, but if one reuses
@@ -226,13 +227,16 @@ IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
   std::vector<std::vector<size_t>> speclist;
   std::vector<size_t> speclistsingle;
 
-  std::multimap<Mantid::Geometry::ComponentID, size_t>::iterator m_it, s_it;
+  std::unordered_multimap<Mantid::Geometry::ComponentID, size_t>::iterator m_it,
+      s_it;
 
   for (m_it = mymap.begin(); m_it != mymap.end(); m_it = s_it) {
     Mantid::Geometry::ComponentID theKey = (*m_it).first;
-    std::pair<std::multimap<Mantid::Geometry::ComponentID, size_t>::iterator,
-              std::multimap<Mantid::Geometry::ComponentID, size_t>::iterator>
-        keyRange = mymap.equal_range(theKey);
+    std::pair<std::unordered_multimap<Mantid::Geometry::ComponentID,
+                                      size_t>::iterator,
+              std::unordered_multimap<Mantid::Geometry::ComponentID,
+                                      size_t>::iterator> keyRange =
+        mymap.equal_range(theKey);
 
     // Iterate over all map elements with key == theKey
     speclistsingle.clear();

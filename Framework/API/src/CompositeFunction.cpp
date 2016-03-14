@@ -31,9 +31,6 @@ CompositeFunction::CompositeFunction()
   declareAttribute("NumDeriv", Attribute(false));
 }
 
-/// Destructor
-CompositeFunction::~CompositeFunction() {}
-
 /// Function initialization. Declare function parameters in this method.
 void CompositeFunction::init() {}
 
@@ -59,7 +56,7 @@ std::string CompositeFunction::asString() const {
   }
 
   if (name() != "CompositeFunction" || nAttributes() > 1 ||
-      getAttribute("NumDeriv").asBool() == true) {
+      getAttribute("NumDeriv").asBool()) {
     ostr << "composite=" << name();
     std::vector<std::string> attr = this->getAttributeNames();
     for (const auto &attName : attr) {
@@ -386,7 +383,7 @@ size_t CompositeFunction::addFunction(IFunction_sptr f) {
   m_IFunction.insert(m_IFunction.end(), f->nParams(), m_functions.size());
   m_functions.push_back(f);
   //?f->init();
-  if (m_paramOffsets.size() == 0) {
+  if (m_paramOffsets.empty()) {
     m_paramOffsets.push_back(0);
     m_nParams = f->nParams();
   } else {

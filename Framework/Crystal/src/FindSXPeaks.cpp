@@ -24,10 +24,10 @@ FindSXPeaks::FindSXPeaks()
  *
  */
 void FindSXPeaks::init() {
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<HistogramValidator>()),
-      "The name of the Workspace2D to take as input");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<HistogramValidator>()),
+                  "The name of the Workspace2D to take as input");
   declareProperty("RangeLower", EMPTY_DBL(),
                   "The X value to search from (default 0)");
   declareProperty("RangeUpper", EMPTY_DBL(),
@@ -43,8 +43,8 @@ void FindSXPeaks::init() {
   declareProperty(
       "Resolution", 0.01,
       "Tolerance needed to avoid peak duplication in number of pixels");
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the PeaksWorkspace in which to store the list "
                   "of peaks found");
 

@@ -65,7 +65,7 @@ public:
     return "Diffraction\\DataHandling;DataHandling\\Isaw";
   }
   /// Function to optimize
-  void center(double x, double y, double z, std::string detname,
+  void center(double x, double y, double z, const std::string &detname,
               API::Workspace_sptr ws);
 
 private:

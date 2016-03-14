@@ -30,7 +30,7 @@ ReflNexusMeasurementItemSource::~ReflNexusMeasurementItemSource() {}
 
 MeasurementItem
 ReflNexusMeasurementItemSource::obtain(const std::string &definedPath,
-                                   const std::string &fuzzyName) const {
+                                       const std::string &fuzzyName) const {
   std::string filenameArg = fuzzyName;
   if (!definedPath.empty()) {
     Poco::File file(definedPath);
@@ -74,8 +74,10 @@ ReflNexusMeasurementItemSource::obtain(const std::string &definedPath,
     } catch (Exception::NotFoundError &) {
       boost::regex re("([0-9]*)$");
       boost::smatch match;
-      boost::regex_search(fuzzyName, match, re);
-      runNumber = match[0];
+      bool regex_res = boost::regex_search(fuzzyName, match, re);
+      if (regex_res) {
+        runNumber = match[0];
+      }
     }
 
     double theta = -1.0;
@@ -88,8 +90,9 @@ ReflNexusMeasurementItemSource::obtain(const std::string &definedPath,
     } catch (Exception::NotFoundError &) {
     }
 
-    return MeasurementItem(measurementItemId, measurementItemSubId, measurementItemLabel,
-                       measurementItemType, theta, runNumber);
+    return MeasurementItem(measurementItemId, measurementItemSubId,
+                           measurementItemLabel, measurementItemType, theta,
+                           runNumber);
 
   } catch (std::invalid_argument &ex) {
     std::stringstream buffer;

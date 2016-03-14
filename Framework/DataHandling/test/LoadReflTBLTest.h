@@ -23,7 +23,7 @@ public:
       : m_filename("LoadReflTBLTest.tbl"), m_wsName("LoadReflTBLTestWS"),
         m_abspath() {}
 
-  ~LoadReflTBLTest() {}
+  ~LoadReflTBLTest() override {}
 
   void testFileNoQuotes() {
     // create a file with each line containing different but valid data format

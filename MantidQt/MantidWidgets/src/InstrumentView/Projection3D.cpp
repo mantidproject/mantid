@@ -273,8 +273,7 @@ namespace MantidQt
 			m_instrActor->cacheDetPos();
 
 			// find the layer of visible detectors
-			QList<QPoint> pixels;
-			m_maskShapes.getMaskedPixels(pixels);
+			QList<QPoint> pixels = m_maskShapes.getMaskedPixels();
 			double zmin = 1.0;
 			double zmax = 0.0;
 			QSet<int> ids;

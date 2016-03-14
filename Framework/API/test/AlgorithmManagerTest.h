@@ -17,49 +17,49 @@ using namespace Mantid::API;
 class AlgTest : public Algorithm {
 public:
   AlgTest() : Algorithm() {}
-  virtual ~AlgTest() {}
-  void init() {}
-  void exec() {}
-  virtual const std::string name() const { return "AlgTest"; }
-  virtual int version() const { return (1); }
-  virtual const std::string category() const { return ("Cat1"); }
-  virtual const std::string summary() const { return "Test summary"; }
+  ~AlgTest() override {}
+  void init() override {}
+  void exec() override {}
+  const std::string name() const override { return "AlgTest"; }
+  int version() const override { return (1); }
+  const std::string category() const override { return ("Cat1"); }
+  const std::string summary() const override { return "Test summary"; }
 };
 
 class AlgTestFail : public Algorithm {
 public:
   AlgTestFail() : Algorithm() {}
-  virtual ~AlgTestFail() {}
-  void init() {}
-  void exec() {}
-  virtual const std::string name() const { return "AlgTest"; }
-  virtual int version() const { return (1); }
-  virtual const std::string category() const { return ("Cat2"); }
-  virtual const std::string summary() const { return "Test summary"; }
+  ~AlgTestFail() override {}
+  void init() override {}
+  void exec() override {}
+  const std::string name() const override { return "AlgTest"; }
+  int version() const override { return (1); }
+  const std::string category() const override { return ("Cat2"); }
+  const std::string summary() const override { return "Test summary"; }
 };
 
 class AlgTestPass : public Algorithm {
 public:
   AlgTestPass() : Algorithm() {}
-  virtual ~AlgTestPass() {}
-  void init() {}
-  void exec() {}
-  virtual const std::string name() const { return "AlgTest"; }
-  virtual int version() const { return (2); }
-  virtual const std::string category() const { return ("Cat4"); }
-  virtual const std::string summary() const { return "Test summary"; }
+  ~AlgTestPass() override {}
+  void init() override {}
+  void exec() override {}
+  const std::string name() const override { return "AlgTest"; }
+  int version() const override { return (2); }
+  const std::string category() const override { return ("Cat4"); }
+  const std::string summary() const override { return "Test summary"; }
 };
 
 class AlgTestSecond : public Algorithm {
 public:
   AlgTestSecond() : Algorithm() {}
-  virtual ~AlgTestSecond() {}
-  void init() {}
-  void exec() {}
-  virtual const std::string name() const { return "AlgTestSecond"; }
-  virtual int version() const { return (1); }
-  virtual const std::string category() const { return ("Cat3"); }
-  virtual const std::string summary() const { return "Test summary"; }
+  ~AlgTestSecond() override {}
+  void init() override {}
+  void exec() override {}
+  const std::string name() const override { return "AlgTestSecond"; }
+  int version() const override { return (1); }
+  const std::string category() const override { return ("Cat3"); }
+  const std::string summary() const override { return "Test summary"; }
 };
 
 /** Algorithm that always says it's running if asked */
@@ -69,15 +69,15 @@ private:
 
 public:
   AlgRunsForever() : Algorithm(), isRunningFlag(true) {}
-  virtual ~AlgRunsForever() {}
-  void init() {}
-  void exec() {}
-  virtual const std::string name() const { return "AlgRunsForever"; }
-  virtual int version() const { return (1); }
-  virtual const std::string category() const { return ("Cat1"); }
-  virtual const std::string summary() const { return "Test summary"; }
+  ~AlgRunsForever() override {}
+  void init() override {}
+  void exec() override {}
+  const std::string name() const override { return "AlgRunsForever"; }
+  int version() const override { return (1); }
+  const std::string category() const override { return ("Cat1"); }
+  const std::string summary() const override { return "Test summary"; }
   // Override method so we can manipulate whether it appears to be running
-  virtual bool isRunning() const { return isRunningFlag; }
+  bool isRunning() const override { return isRunningFlag; }
   void setIsRunningTo(bool runningFlag) { isRunningFlag = runningFlag; }
 };
 

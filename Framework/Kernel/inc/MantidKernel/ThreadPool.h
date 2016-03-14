@@ -46,10 +46,10 @@ namespace Kernel {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class MANTID_KERNEL_DLL ThreadPool {
+class MANTID_KERNEL_DLL ThreadPool final {
 public:
   ThreadPool(ThreadScheduler *scheduler = new ThreadSchedulerFIFO(),
-             size_t numCores = 0, ProgressBase *prog = nullptr);
+             size_t numThreads = 0, ProgressBase *prog = nullptr);
 
   ~ThreadPool();
 

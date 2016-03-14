@@ -51,8 +51,19 @@ generate a new calibration file (which becomes the new current
 calibration).
 
 With the help of Cropped Calibration user can also calibrate according
-to bank or by setting the SpectrumIDs once the Cropped Calibration group
+to bank or by setting the Spectrum Numbers once the Cropped Calibration group
 box has been enabled.
+
+The plot Calibrated Workspace check-box will enable user to plot
+vanadium curves and Ceria peaks. For Ceria peaks there will be two
+workspace generated and plotted, one for each bank, whereas for
+cropped calibration there will only be only one workspace generate
+and plotted, depending on the selected bank or provided Spectrum
+IDs. The workspace contains difc and tzero data which is then
+utilised to plot the Ceria peaks per bank, the graph will plot Peaks
+Fitted and Difc/TZero Straight Line for comparison. More information
+regarding the fit peaks can be found on the
+:ref:`EnggFitPeaks<algm-EnggFitPeaks>` documentation.
 
 Parameters
 ^^^^^^^^^^
@@ -70,18 +81,27 @@ Calibration sample #
 Bank Name:
   This parameter is only required when Cropped Calibration is being
   carried out. The bank name can be selected from a drop down list with
-  option of North and South, which are equivalently to 1 and 2
-  respectively. The Bank Name drop down list is set to `Enable Spectrum-IDs`
-  by default. This option cannot be used together with Spectrum IDs,
-  as they overlap.
+  option of "North" and "South", which are equivalently to 1 and 2
+  respectively. However the Bank Name drop down list is set to
+  "Enable Spectrum-Nos" by default. This option cannot be used together
+  with Spectrum Nos, as they overlap. For the convenience of users, the
+  GUI will only enable Spectrum Numbers and Customise Bank Name text-fields
+  when Bank Name drop down list is set to "Enable Spectrum-Nos"
 
-SpectrumIDs:
+Spectrum Numbers:
   This parameter is only required when Cropped Calibration is being
   carried out, the parameter will set the spectrum numbers of the
   detectors, that should be considered in the calibration while all
   others will be ignored. This option cannot be used together with
   Bank Name, as they overlap. You may also give multiple ranges, for
   example: "0-100", or "0-9", "150-750".
+
+Customise Bank Name:
+  This parameter is only required when Cropped Calibration is being
+  carried out with Spectrum Numbers, the parameter will set the workspace
+  and .his file name according to this Bank Name provided by the user.
+  However if the user does not provide a personalised name, the
+  interface will use "cropped" as a default bank name.
 
 The calibration process depends on several additional parameters and
 settings which can be modified in the *Settings* section (tab), see
@@ -120,7 +140,7 @@ spectra present in the input runs are considered. In the second
 alternative, cropped focusing, all the banks are considered in
 principle but only a list of spectra provided manually are
 processed. In the third option, *texture focusing*, the banks are
-defined by a user-defined list of banks and corresponding spectrum IDs
+defined by a user-defined list of banks and corresponding spectrum Nos
 provided in a file. For these alternatives, the output focused
 workspace will take different suffixes: *_bank_1, _bank_2*, and so on
 for normal focusing, *_cropped* for cropped focusing, and

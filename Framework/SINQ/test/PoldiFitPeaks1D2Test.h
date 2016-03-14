@@ -98,7 +98,7 @@ public:
     TS_ASSERT_EQUALS(fitPeaks1D.propertyCount(), 8);
 
     std::vector<Property *> properties = fitPeaks1D.getProperties();
-    std::set<std::string> names;
+    std::unordered_set<std::string> names;
 
     for (size_t i = 0; i < properties.size(); ++i) {
       names.insert(properties[i]->name());

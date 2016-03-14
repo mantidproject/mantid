@@ -17,25 +17,6 @@ PeakTransformHKL::PeakTransformHKL(const std::string &xPlotLabel,
                     regex("^(K.*)|(\\[0,K,0\\].*)$"),
                     regex("^(L.*)|(\\[0,0,L\\].*)$")) {}
 
-PeakTransformHKL::PeakTransformHKL(const PeakTransformHKL &other)
-    : PeakTransform(other) {}
-
-PeakTransformHKL &PeakTransformHKL::operator=(const PeakTransformHKL &other) {
-  if (this != &other) {
-    m_xPlotLabel = other.m_xPlotLabel;
-    m_yPlotLabel = other.m_yPlotLabel;
-    m_indexOfPlotX = other.m_indexOfPlotX;
-    m_indexOfPlotY = other.m_indexOfPlotY;
-    m_indexOfPlotZ = other.m_indexOfPlotZ;
-    m_FirstRegex = other.m_FirstRegex;
-    m_SecondRegex = other.m_SecondRegex;
-    m_ThirdRegex = other.m_ThirdRegex;
-  }
-  return *this;
-}
-
-PeakTransformHKL::~PeakTransformHKL() {}
-
 /**
 Clone the PeakTransformHKL.
 */

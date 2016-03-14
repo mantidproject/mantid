@@ -36,8 +36,6 @@ private:
 public:
   explicit PolyBase(int const);
   PolyBase(int const, double const);
-  PolyBase(const PolyBase &);
-  ~PolyBase();
 
   // member access
   void setDegree(int const);
@@ -46,9 +44,6 @@ public:
   operator std::vector<double> &();
   double operator[](int const) const;
   double &operator[](int const);
-
-  // assignment
-  PolyBase &operator=(const PolyBase &);
 
   // evaluation
   double operator()(double const) const;

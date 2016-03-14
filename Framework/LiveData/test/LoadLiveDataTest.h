@@ -27,7 +27,7 @@ public:
   static LoadLiveDataTest *createSuite() { return new LoadLiveDataTest(); }
   static void destroySuite(LoadLiveDataTest *suite) { delete suite; }
 
-  void setUp() {
+  void setUp() override {
     FrameworkManager::Instance();
     AnalysisDataService::Instance().clear();
     ConfigService::Instance().setString("testdatalistener.reset_after", "0");

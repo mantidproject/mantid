@@ -109,8 +109,7 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
                     << proplist.size() << " properties." << std::endl;
       bool inputPropertyWorkspaceFound = false;
       for (auto prop : proplist) {
-        if ((prop->direction() == 0) &&
-            (inputPropertyWorkspaceFound == false)) {
+        if ((prop->direction() == 0) && (!inputPropertyWorkspaceFound)) {
           if (boost::ends_with(prop->type(), "Workspace")) {
             g_log.information() << "Using " << prop->name()
                                 << " as the input property." << std::endl;

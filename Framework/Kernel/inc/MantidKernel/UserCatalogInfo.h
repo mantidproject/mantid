@@ -15,7 +15,7 @@ typedef boost::optional<std::string> OptionalPath;
 class CatalogConfigService {
 public:
   virtual OptionalPath preferredMountPoint() const = 0;
-  virtual ~CatalogConfigService() {}
+  virtual ~CatalogConfigService() = default;
 };
 
 template <typename T>
@@ -68,7 +68,6 @@ public:
                   const CatalogConfigService &catalogConfigService);
 
   UserCatalogInfo(const UserCatalogInfo &other);
-  ~UserCatalogInfo() override;
 
   // ICatalogInfo interface
   const std::string catalogName() const override;

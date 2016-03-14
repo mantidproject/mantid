@@ -332,7 +332,6 @@ PeaksWorkspace::peakInfo(Kernel::V3D qFrame, bool labCoords) const {
     oss.clear();
 
     if (peak->findDetector()) {
-      V3D detPos = peak->getDetPos();
       std::pair<std::string, std::string> detpos(
           "Position(x,y,z)",
           boost::lexical_cast<std::string>(peak->getDetPos()));
@@ -517,10 +516,6 @@ API::ITableWorkspace_sptr PeaksWorkspace::createDetectorTable() const {
 
   return table;
 }
-
-//---------------------------------------------------------------------------------------------
-/** Destructor */
-PeaksWorkspace::~PeaksWorkspace() {}
 
 //---------------------------------------------------------------------------------------------
 /** Initialize all columns */

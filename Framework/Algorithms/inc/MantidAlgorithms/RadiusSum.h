@@ -77,7 +77,7 @@ private:
   double getMaxDistance(const Kernel::V3D &centre,
                         const std::vector<double> &boundary_limits);
 
-  void setUpOutputWorkspace(std::vector<double> &output);
+  void setUpOutputWorkspace(std::vector<double> &values);
 
   int getBinForPixelPos(const Kernel::V3D &pos);
 
@@ -118,7 +118,7 @@ private:
                             (max_radius - min_radius));
   }
 
-  void normalizeOutputByRadius(std::vector<double> &output, double exp_power);
+  void normalizeOutputByRadius(std::vector<double> &values, double exp_power);
 };
 
 } // namespace Algorithms

@@ -86,7 +86,7 @@ createTestWorkspace(const size_t nhist, const double x0, const double x1,
 
   // Link workspace with detector
   for (size_t i = 0; i < nhist; ++i) {
-    const Mantid::specid_t specID = static_cast<Mantid::specid_t>(id + i);
+    const Mantid::specnum_t specID = static_cast<Mantid::specnum_t>(id + i);
     auto *spec = ws2d->getSpectrum(i);
     spec->setSpectrumNo(specID);
     spec->clearDetectorIDs();

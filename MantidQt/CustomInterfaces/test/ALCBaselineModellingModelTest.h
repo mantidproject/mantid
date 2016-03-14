@@ -33,9 +33,9 @@ public:
     FrameworkManager::Instance(); // To make sure everything is initialized
   }
 
-  void setUp() { m_model = new ALCBaselineModellingModel(); }
+  void setUp() override { m_model = new ALCBaselineModellingModel(); }
 
-  void tearDown() { delete m_model; }
+  void tearDown() override { delete m_model; }
 
   void test_setData() {
     std::vector<double> y = {100, 1, 2, 100, 100, 3, 4, 5, 100};

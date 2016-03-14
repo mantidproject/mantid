@@ -113,11 +113,11 @@ public:
    */
   void test_ISISFormat() {
     // 1. Generate masking files
-    std::vector<specid_t> singlespectra;
+    std::vector<specnum_t> singlespectra;
     singlespectra.push_back(35);
     singlespectra.push_back(1001);
     singlespectra.push_back(2001);
-    std::vector<specid_t> pairspectra;
+    std::vector<specnum_t> pairspectra;
     pairspectra.push_back(1002);
     pairspectra.push_back(1005);
     pairspectra.push_back(37);
@@ -327,8 +327,8 @@ public:
    */
   ScopedFileHelper::ScopedFile
   genISISMaskingFile(std::string maskfilename,
-                     std::vector<specid_t> singlespectra,
-                     std::vector<specid_t> pairspectra) {
+                     std::vector<specnum_t> singlespectra,
+                     std::vector<specnum_t> pairspectra) {
     std::stringstream ss;
 
     // 1. Single spectra

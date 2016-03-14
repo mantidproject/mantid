@@ -255,9 +255,9 @@ void LoadMuonNexus1::exec() {
     size_t counter = 0;
     for (int64_t i = m_spec_min; i < m_spec_max; ++i) {
       // Shift the histogram to read if we're not in the first period
-      specid_t histToRead =
-          static_cast<specid_t>(i - 1 + period * nxload.t_nsp1);
-      specid_t specNo = static_cast<specid_t>(i);
+      specnum_t histToRead =
+          static_cast<specnum_t>(i - 1 + period * nxload.t_nsp1);
+      specnum_t specNo = static_cast<specnum_t>(i);
       loadData(counter, histToRead, specNo, nxload, lengthIn - 1,
                localWorkspace); // added -1 for NeXus
       counter++;
@@ -266,9 +266,9 @@ void LoadMuonNexus1::exec() {
     // Read in the spectra in the optional list parameter, if set
     if (m_list) {
       for (auto specid : m_spec_list) {
-        specid_t histToRead =
-            static_cast<specid_t>(specid - 1 + period * nxload.t_nsp1);
-        specid_t specNo = static_cast<specid_t>(specid);
+        specnum_t histToRead =
+            static_cast<specnum_t>(specid - 1 + period * nxload.t_nsp1);
+        specnum_t specNo = static_cast<specnum_t>(specid);
         loadData(counter, histToRead, specNo, nxload, lengthIn - 1,
                  localWorkspace);
         counter++;
@@ -590,14 +590,14 @@ LoadMuonNexus1::createDetectorGroupingTable(std::vector<int> specToLoad,
 
 /** Load in a single spectrum taken from a NeXus file
 *  @param hist ::     The workspace index
-*  @param i ::        The spectrum index
+*  @param i ::        The spectrum number
 *  @param specNo ::   The spectrum number
 *  @param nxload ::   A reference to the MuonNeXusReader object
 *  @param lengthIn :: The number of elements in a spectrum
 *  @param localWorkspace :: A pointer to the workspace in which the data will be
 * stored
 */
-void LoadMuonNexus1::loadData(size_t hist, specid_t &i, specid_t specNo,
+void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo,
                               MuonNexusReader &nxload, const int64_t lengthIn,
                               DataObjects::Workspace2D_sptr localWorkspace) {
   // Read in a spectrum
@@ -722,8 +722,7 @@ void LoadMuonNexus1::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace) {
   }
 
   auto &run = localWorkspace->mutableRun();
-  int n = static_cast<int>(m_numberOfPeriods);
-  ISISRunLogs runLogs(run, n);
+  ISISRunLogs runLogs(run);
   runLogs.addStatusLog(run);
 }
 
@@ -735,8 +734,7 @@ void LoadMuonNexus1::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace) {
 void LoadMuonNexus1::addPeriodLog(DataObjects::Workspace2D_sptr localWorkspace,
                                   int64_t period) {
   auto &run = localWorkspace->mutableRun();
-  int n = static_cast<int>(m_numberOfPeriods);
-  ISISRunLogs runLogs(run, n);
+  ISISRunLogs runLogs(run);
   if (period == 0) {
     runLogs.addPeriodLogs(1, run);
   } else {

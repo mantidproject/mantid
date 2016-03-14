@@ -43,9 +43,7 @@ namespace API {
 class MANTID_API_DLL HistoryItem {
 public:
   HistoryItem(AlgorithmHistory_const_sptr algHist);
-  HistoryItem(const HistoryItem &A);
   virtual ~HistoryItem(){};
-
   bool isUnrolled() const { return m_unrolled; }
   void unrolled(bool unrolled) { m_unrolled = unrolled; }
   AlgorithmHistory_const_sptr getAlgorithmHistory() const {
@@ -54,7 +52,6 @@ public:
   size_t numberOfChildren() const {
     return m_algorithmHistory->childHistorySize();
   }
-  HistoryItem &operator=(const HistoryItem &A);
 
 private:
   AlgorithmHistory_const_sptr m_algorithmHistory;

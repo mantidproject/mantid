@@ -229,11 +229,6 @@ Peak::Peak(const Geometry::IPeak &ipeak)
 }
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-Peak::~Peak() {}
-
-//----------------------------------------------------------------------------------------------
 /** Set the incident wavelength of the neutron. Calculates the energy from this.
  * Assumes elastic scattering.
  *
@@ -608,7 +603,6 @@ void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
 bool Peak::findDetector() {
 
   // Scattered beam direction
-  V3D oldDetPos = detPos;
   V3D beam = detPos - samplePos;
   beam.normalize();
 

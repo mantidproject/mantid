@@ -55,31 +55,34 @@ namespace CustomInterfaces
 
   public:
     ALCBaselineModellingView(QWidget* widget);
-    ~ALCBaselineModellingView();
+    ~ALCBaselineModellingView() override;
 
-  // -- IALCBaselineModellingView interface --------------------------------------------------------
+    // -- IALCBaselineModellingView interface
+    // --------------------------------------------------------
   public:
-    QString function() const;
-    SectionRow sectionRow(int row) const;
-    SectionSelector sectionSelector(int index) const;
-    int noOfSectionRows() const;
+    QString function() const override;
+    SectionRow sectionRow(int row) const override;
+    SectionSelector sectionSelector(int index) const override;
+    int noOfSectionRows() const override;
     void emitFitRequested();
 
   public slots:
-    void initialize();
-    void setDataCurve(const QwtData &data, const std::vector<double> &errors);
+    void initialize() override;
+    void setDataCurve(const QwtData &data,
+                      const std::vector<double> &errors) override;
     void setCorrectedCurve(const QwtData &data,
-                           const std::vector<double> &errors);
-    void setBaselineCurve(const QwtData& data);
-    void setFunction(Mantid::API::IFunction_const_sptr func);
-    void setNoOfSectionRows(int rows);
-    void setSectionRow(int row, SectionRow values);
-    void addSectionSelector(int index, SectionSelector values);
-    void deleteSectionSelector(int index);
-    void updateSectionSelector(int index, SectionSelector values);
-    void displayError(const QString& message);
-    void help();
-  // -- End of IALCBaselineModellingView interface -------------------------------------------------
+                           const std::vector<double> &errors) override;
+    void setBaselineCurve(const QwtData &data) override;
+    void setFunction(Mantid::API::IFunction_const_sptr func) override;
+    void setNoOfSectionRows(int rows) override;
+    void setSectionRow(int row, SectionRow values) override;
+    void addSectionSelector(int index, SectionSelector values) override;
+    void deleteSectionSelector(int index) override;
+    void updateSectionSelector(int index, SectionSelector values) override;
+    void displayError(const QString &message) override;
+    void help() override;
+    // -- End of IALCBaselineModellingView interface
+    // -------------------------------------------------
 
   private slots:
     /// Show context menu for sections table

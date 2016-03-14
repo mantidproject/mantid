@@ -31,11 +31,11 @@ GoniometerAnglesFromPhiRotation::GoniometerAnglesFromPhiRotation()
 GoniometerAnglesFromPhiRotation::~GoniometerAnglesFromPhiRotation() {}
 
 void GoniometerAnglesFromPhiRotation::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace1", "", Kernel::Direction::Input),
                   "Input Peaks Workspace for Run 1");
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace2", "", Kernel::Direction::InOut),
                   "Input Peaks Workspace for Run 2");
 

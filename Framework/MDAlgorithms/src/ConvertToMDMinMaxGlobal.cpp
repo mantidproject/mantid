@@ -63,8 +63,8 @@ void ConvertToMDMinMaxGlobal::init() {
   // histogram needed by ConvertUnits
   ws_valid->add<HistogramValidator>();
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                             Direction::Input, ws_valid),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input, ws_valid),
       "An input Matrix Workspace (Workspace2D or Event workspace) ");
 
   std::vector<std::string> Q_modes =
@@ -95,9 +95,9 @@ void ConvertToMDMinMaxGlobal::init() {
                   "*MD Transformation factory* for further details.",
                   Direction::InOut);
 
-  setPropertySettings(
-      "dEAnalysisMode",
-      new VisibleWhenProperty("QDimensions", IS_NOT_EQUAL_TO, "CopyToMD"));
+  setPropertySettings("dEAnalysisMode",
+                      make_unique<VisibleWhenProperty>(
+                          "QDimensions", IS_NOT_EQUAL_TO, "CopyToMD"));
 
   std::vector<std::string> TargFrames{"AutoSelect", "Q", "HKL"};
   declareProperty(
@@ -109,11 +109,12 @@ void ConvertToMDMinMaxGlobal::init() {
       "laboratory or sample frame."
       "  **HKL** - reciprocal lattice units");
 
-  setPropertySettings(
-      "Q3DFrames", new VisibleWhenProperty("QDimensions", IS_EQUAL_TO, "Q3D"));
+  setPropertySettings("Q3DFrames", make_unique<VisibleWhenProperty>(
+                                       "QDimensions", IS_EQUAL_TO, "Q3D"));
 
   declareProperty(
-      new ArrayProperty<std::string>("OtherDimensions", Direction::Input),
+      make_unique<ArrayProperty<std::string>>("OtherDimensions",
+                                              Direction::Input),
       "List(comma separated) of additional to **Q** and **DeltaE** variables "
       "which form additional "
       "(orthogonal) to **Q** dimensions in the target workspace (e.g. "
@@ -123,8 +124,10 @@ void ConvertToMDMinMaxGlobal::init() {
       "with the log names for the records of these variables in the source "
       "workspace.");
 
-  declareProperty(new ArrayProperty<double>("MinValues", Direction::Output));
-  declareProperty(new ArrayProperty<double>("MaxValues", Direction::Output));
+  declareProperty(
+      make_unique<ArrayProperty<double>>("MinValues", Direction::Output));
+  declareProperty(
+      make_unique<ArrayProperty<double>>("MaxValues", Direction::Output));
 }
 
 //----------------------------------------------------------------------------------------------

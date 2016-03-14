@@ -419,7 +419,7 @@ public:
     loadSampleLOQMonitors();
   }
 
-  ~CalculateTransmissionTest() {
+  ~CalculateTransmissionTest() override {
     Mantid::API::AnalysisDataService::Instance().remove(m_dirWS);
     Mantid::API::AnalysisDataService::Instance().remove(m_transWS);
   }

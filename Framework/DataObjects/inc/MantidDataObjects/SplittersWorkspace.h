@@ -48,13 +48,12 @@ class DLLExport SplittersWorkspace : public DataObjects::TableWorkspace,
                                      public API::ISplittersWorkspace {
 public:
   SplittersWorkspace();
-  ~SplittersWorkspace() override;
 
   /// Returns a clone of the workspace
   std::unique_ptr<SplittersWorkspace> clone() const {
     return std::unique_ptr<SplittersWorkspace>(doClone());
   }
-
+  SplittersWorkspace &operator=(const SplittersWorkspace &other) = delete;
   void addSplitter(Kernel::SplittingInterval splitter) override;
 
   Kernel::SplittingInterval getSplitter(size_t index) override;
@@ -65,10 +64,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  SplittersWorkspace(const SplittersWorkspace &other)
-      : TableWorkspace(other), ISplittersWorkspace(other) {}
-  /// Protected copy assignment operator. Assignment not implemented.
-  SplittersWorkspace &operator=(const SplittersWorkspace &other);
+  SplittersWorkspace(const SplittersWorkspace &) = default;
 
 private:
   SplittersWorkspace *doClone() const override {

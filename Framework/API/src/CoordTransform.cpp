@@ -34,11 +34,6 @@ CoordTransform::CoordTransform(const size_t inD, const size_t outD)
 }
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CoordTransform::~CoordTransform() {}
-
-//----------------------------------------------------------------------------------------------
 /** Apply the transformation to an input vector (as a VMD type).
  * This wraps the apply(in,out) method (and will be slower!)
  *

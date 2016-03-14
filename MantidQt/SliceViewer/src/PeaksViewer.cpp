@@ -55,21 +55,20 @@ void PeaksViewer::setPresenter(
   auto it = workspaces.begin();
   while (it != workspaces.end()) {
     Mantid::API::IPeaksWorkspace_const_sptr ws = *it;
-    auto backgroundColour = m_presenter->getBackgroundColour(ws);
-    auto foregroundColour = m_presenter->getForegroundColour(ws);
+
+    const auto backgroundPeakViewColor = m_presenter->getBackgroundPeakViewColor(ws);
+    const auto foregroundPeakViewColor = m_presenter->getForegroundPeakViewColor(ws);
+
     bool canAddPeaks = m_presenter->hasPeakAddModeFor(ws);
 
-    auto widget = new PeaksWorkspaceWidget(
-        ws, coordinateSystem, foregroundColour, backgroundColour, canAddPeaks ,  this);
+    auto widget = new PeaksWorkspaceWidget(ws, coordinateSystem, foregroundPeakViewColor,
+                                backgroundPeakViewColor, canAddPeaks, this);
 
-    connect(widget, SIGNAL(peakColourChanged(
-                        Mantid::API::IPeaksWorkspace_const_sptr, QColor)),
-            this, SLOT(onPeakColourChanged(
-                      Mantid::API::IPeaksWorkspace_const_sptr, QColor)));
-    connect(widget, SIGNAL(backgroundColourChanged(
-                        Mantid::API::IPeaksWorkspace_const_sptr, QColor)),
-            this, SLOT(onBackgroundColourChanged(
-                      Mantid::API::IPeaksWorkspace_const_sptr, QColor)));
+    connect(widget, SIGNAL(peakColorchanged(Mantid::API::IPeaksWorkspace_const_sptr,PeakViewColor)),
+            this, SLOT(onPeakColorChanged(Mantid::API::IPeaksWorkspace_const_sptr, PeakViewColor)));
+    connect(widget, SIGNAL(backgroundColorChanged(Mantid::API::IPeaksWorkspace_const_sptr,PeakViewColor)),
+            this, SLOT(onBackgroundColorChanged(Mantid::API::IPeaksWorkspace_const_sptr, PeakViewColor)));
+
     connect(widget, SIGNAL(backgroundRadiusShown(
                         Mantid::API::IPeaksWorkspace_const_sptr, bool)),
             this, SLOT(onBackgroundRadiusShown(
@@ -171,24 +170,23 @@ void PeaksViewer::addPeaksModeRequest(const PeaksWorkspaceWidget * const originW
     m_presenter->editCommand(mode, originWidget->getPeaksWorkspace());
 }
 
+
 /**
- * Handler for changing the peak radius colour.
- * @param peaksWS : Peaks workspace to change the foreground colour on.
- * @param newColour : New colour to apply.
+ * Handler for changing the peak  color.
+ * @param peaksWS : Peaks workspace to change the foreground color on.
+ * @param newColor : New color to apply.
  */
-void PeaksViewer::onPeakColourChanged(
-    Mantid::API::IPeaksWorkspace_const_sptr peaksWS, QColor newColour) {
-  m_presenter->setForegroundColour(peaksWS, newColour);
+void PeaksViewer::onPeakColorChanged(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, PeakViewColor newColor) {
+  m_presenter->setForegroundColor(peaksWS, newColor);
 }
 
 /**
- * Handler for Changing the background colour on a peak.
- * @param peaksWS : Peaks workspace to change the background colours on.
- * @param newColour : New colour to apply to the background.
+ * Handler for Changing the background color on a peak.
+ * @param peaksWS : Peaks workspace to change the background colors on.
+ * @param newColor : New color to apply to the background.
  */
-void PeaksViewer::onBackgroundColourChanged(
-    Mantid::API::IPeaksWorkspace_const_sptr peaksWS, QColor newColour) {
-  m_presenter->setBackgroundColour(peaksWS, newColour);
+void PeaksViewer::onBackgroundColorChanged(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, PeakViewColor newColor) {
+  m_presenter->setBackgroundColor(peaksWS, newColor);
 }
 
 /**
@@ -250,8 +248,10 @@ void PeaksViewer::performUpdate() {
   auto allWS = m_presenter->presentedWorkspaces();
   for (auto it = allWS.begin(); it != allWS.end(); ++it) {
     auto ws = *it;
-    QColor backgroundColor = m_presenter->getBackgroundColour(ws);
-    QColor foregroundColor = m_presenter->getForegroundColour(ws);
+
+    auto backgroundPeakViewColor = m_presenter->getBackgroundPeakViewColor(ws);
+    auto foregroundPeakViewColor = m_presenter->getForegroundPeakViewColor(ws);
+
     bool showBackground = m_presenter->getShowBackground(ws);
     bool isHidden = m_presenter->getIsHidden(ws);
     auto optionalZoomedPresenter = m_presenter->getZoomedPeakPresenter();
@@ -266,8 +266,8 @@ void PeaksViewer::performUpdate() {
           candidateWidget->getPeaksWorkspace();
       if (candidateWorkspace == ws) {
         // We have the right widget to update.
-        candidateWidget->setBackgroundColor(backgroundColor);
-        candidateWidget->setForegroundColor(foregroundColor);
+        candidateWidget->setBackgroundColor(backgroundPeakViewColor);
+        candidateWidget->setForegroundColor(foregroundPeakViewColor);
         candidateWidget->setShowBackground(showBackground);
         candidateWidget->setHidden(isHidden);
         if (optionalZoomedPresenter.is_initialized()) {

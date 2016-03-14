@@ -63,9 +63,6 @@ public:
   BoundaryConstraint(API::IFunction *fun, const std::string paramName,
                      const double lowerBound, bool isDefault = false);
 
-  /// Destructor
-  ~BoundaryConstraint() override {}
-
   /// Initialize the constraint from an expression
   void initialize(API::IFunction *fun, const API::Expression &expr,
                   bool isDefault) override;

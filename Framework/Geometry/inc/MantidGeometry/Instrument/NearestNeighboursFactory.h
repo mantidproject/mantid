@@ -36,8 +36,6 @@ namespace Geometry {
 class MANTID_GEOMETRY_DLL NearestNeighboursFactory
     : public INearestNeighboursFactory {
 public:
-  /// Constructor
-  NearestNeighboursFactory();
   /// Factory Method
   NearestNeighbours *create(boost::shared_ptr<const Instrument> instrument,
                             const ISpectrumDetectorMapping &spectraMap,
@@ -47,8 +45,6 @@ public:
                             boost::shared_ptr<const Instrument> instrument,
                             const ISpectrumDetectorMapping &spectraMap,
                             bool ignoreMasked = false) override;
-  /// Destructor
-  ~NearestNeighboursFactory() override;
 };
 
 } // namespace Geometry

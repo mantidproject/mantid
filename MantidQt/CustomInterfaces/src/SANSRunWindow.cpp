@@ -144,7 +144,8 @@ void setStringSetting(const QString &settingName, const QString &settingValue) {
 
   if (!settings->existsProperty(name))
     settings->declareProperty(
-        new Kernel::PropertyWithValue<std::string>(name, ""), value);
+        Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(name, ""),
+        value);
   else
     settings->setProperty(name, value);
 }
@@ -484,9 +485,7 @@ void SANSRunWindow::saveWorkspacesDialog() {
   // Connect the request for a zero-error-free workspace
   // cpp-check does not understand that the input are two references
   connect(m_saveWorkspaces,
-          // cppcheck-suppress duplicateExpression
           SIGNAL(createZeroErrorFreeWorkspace(QString &, QString &)),
-          // cppcheck-suppress duplicateExpression
           this, SLOT(createZeroErrorFreeClone(QString &, QString &)));
   // Connect the request for deleting a zero-error-free workspace
   connect(m_saveWorkspaces, SIGNAL(deleteZeroErrorFreeWorkspace(QString &)),
@@ -1107,6 +1106,9 @@ bool SANSRunWindow::loadUserFile() {
   m_uiForm.tabWidget->setTabEnabled(2, true);
   m_uiForm.tabWidget->setTabEnabled(3, true);
 
+  // Display which IDf is currently being used by the reducer
+  updateIDFFilePath();
+
   return true;
 }
 
@@ -1463,12 +1465,10 @@ bool SANSRunWindow::workspaceExists(const QString &ws_name) const {
  * @returns A list of the currently available workspaces
  */
 QStringList SANSRunWindow::currentWorkspaceList() const {
-  std::set<std::string> ws_list =
-      AnalysisDataService::Instance().getObjectNames();
-  std::set<std::string>::const_iterator iend = ws_list.end();
+  auto ws_list = AnalysisDataService::Instance().getObjectNames();
+  auto iend = ws_list.end();
   QStringList current_list;
-  for (std::set<std::string>::const_iterator itr = ws_list.begin(); itr != iend;
-       ++itr) {
+  for (auto itr = ws_list.begin(); itr != iend; ++itr) {
     current_list.append(QString::fromStdString(*itr));
   }
   return current_list;
@@ -1677,7 +1677,7 @@ void SANSRunWindow::setGeometryDetails() {
 
   // Moderator-monitor distance is common to LOQ and SANS2D.
   size_t monitorWsIndex = 0;
-  const specid_t monitorSpectrum = m_uiForm.monitor_spec->text().toInt();
+  const specnum_t monitorSpectrum = m_uiForm.monitor_spec->text().toInt();
   try {
     monitorWsIndex = monitorWs->getIndexFromSpectrumNumber(monitorSpectrum);
   } catch (std::runtime_error &) {
@@ -2149,6 +2149,10 @@ bool SANSRunWindow::handleLoadButtonClick() {
   updateBeamCenterCoordinates();
   // Set the beam finder specific settings
   setBeamFinderDetails();
+
+  // Display which IDF is currently being used by the reducer
+  updateIDFFilePath();
+
   return true;
 }
 
@@ -3664,10 +3668,9 @@ void SANSRunWindow::resetGeometryDetailsBox() {
 void SANSRunWindow::cleanup() {
   Mantid::API::AnalysisDataServiceImpl &ads =
       Mantid::API::AnalysisDataService::Instance();
-  std::set<std::string> workspaces = ads.getObjectNames();
-  std::set<std::string>::const_iterator iend = workspaces.end();
-  for (std::set<std::string>::const_iterator itr = workspaces.begin();
-       itr != iend; ++itr) {
+  auto workspaces = ads.getObjectNames();
+  auto iend = workspaces.end();
+  for (auto itr = workspaces.begin(); itr != iend; ++itr) {
     QString name = QString::fromStdString(*itr);
     if (name.endsWith("_raw") || name.endsWith("_nxs")) {
       ads.remove(*itr);
@@ -5091,5 +5094,17 @@ bool SANSRunWindow::isValidUserFile() {
   return true;
 }
 
+void SANSRunWindow::updateIDFFilePath() {
+  QString getIdf = "i.get_current_idf_path_in_reducer()\n";
+  QString resultIdf(runPythonCode(getIdf, false));
+  auto teset1 = resultIdf.toStdString();
+  resultIdf = resultIdf.simplified();
+  auto test2 = resultIdf.toStdString();
+  if (resultIdf != m_constants.getPythonEmptyKeyword() &&
+      !resultIdf.isEmpty()) {
+    auto test = resultIdf.toStdString();
+    m_uiForm.current_idf_path->setText(resultIdf);
+  }
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

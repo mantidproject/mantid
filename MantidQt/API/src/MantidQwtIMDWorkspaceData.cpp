@@ -168,9 +168,10 @@ MantidQwtIMDWorkspaceData* MantidQwtIMDWorkspaceData::copy(Mantid::API::IMDWorks
 /** Cache the X/Y line plot data from this workspace and start/end points */
 void MantidQwtIMDWorkspaceData::cacheLinePlot()
 {
-  m_workspace->getLinePlot(m_start, m_end, m_normalization, m_lineX, m_Y, m_E);
-//  std::cout << "MantidQwtIMDWorkspaceData found " << m_Y.size() << " points\n";
-//  std::cout << "Plotting from " << m_start << " to " << m_end << std::endl;
+  auto line = m_workspace->getLinePlot(m_start, m_end, m_normalization);
+  m_lineX = line.x;
+  m_Y = line.y;
+  m_E = line.e;
 }
 
 //-----------------------------------------------------------------------------

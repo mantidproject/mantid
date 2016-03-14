@@ -182,10 +182,10 @@ void ConvertToReflectometryQ::init() {
       boost::make_shared<API::WorkspaceUnitValidator>("Wavelength"));
   compositeValidator->add(boost::make_shared<API::HistogramValidator>());
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input,
-                                                         compositeValidator),
-                  "An input workspace in wavelength");
+  declareProperty(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input, compositeValidator),
+      "An input workspace in wavelength");
 
   std::vector<std::string> propOptions{qSpaceTransform(), pSpaceTransform(),
                                        kSpaceTransform()};
@@ -206,71 +206,75 @@ void ConvertToReflectometryQ::init() {
                   "  Centre: Use center point rebinning.\n"
                   "  NormalisedPolygon: Use normalised polygon rebinning.");
 
-  declareProperty(
-      new Kernel::PropertyWithValue<bool>("OverrideIncidentTheta", false),
-      "Use the provided incident theta value.");
+  declareProperty(make_unique<Kernel::PropertyWithValue<bool>>(
+                      "OverrideIncidentTheta", false),
+                  "Use the provided incident theta value.");
 
   declareProperty(
-      new PropertyWithValue<double>("IncidentTheta", -1),
+      make_unique<PropertyWithValue<double>>("IncidentTheta", -1),
       "An input incident theta value specified in degrees."
       "Optional input value for the incident theta specified in degrees.");
 
   std::vector<double> extents{-50, +50, -50, +50};
-  declareProperty(new ArrayProperty<double>("Extents", extents),
-                  "A comma separated list of min, max for each dimension. "
-                  "Takes four values in the form dim_0_min, dim_0_max, "
-                  "dim_1_min, dim_1_max,\n"
-                  "specifying the extents of each dimension. Optional, default "
-                  "+-50 in each dimension.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("Extents", extents),
+      "A comma separated list of min, max for each dimension. "
+      "Takes four values in the form dim_0_min, dim_0_max, "
+      "dim_1_min, dim_1_max,\n"
+      "specifying the extents of each dimension. Optional, default "
+      "+-50 in each dimension.");
 
   setPropertySettings("IncidentTheta",
-                      new Kernel::EnabledWhenProperty("OverrideIncidentTheta",
-                                                      IS_EQUAL_TO, "1"));
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "OverrideIncidentTheta", IS_EQUAL_TO, "1"));
 
   declareProperty(
-      new Kernel::PropertyWithValue<bool>("OutputAsMDWorkspace", true),
+      make_unique<Kernel::PropertyWithValue<bool>>("OutputAsMDWorkspace", true),
       "Generate the output as a MDWorkspace, otherwise a Workspace2D is "
       "returned.");
 
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace", "",
-                                                      Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Output 2D Workspace.");
 
-  declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputVertexes", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+                      "OutputVertexes", "", Direction::Output),
                   "Output TableWorkspace with vertex information. See "
                   "DumpVertexes property.");
 
-  declareProperty(new Kernel::PropertyWithValue<int>("NumberBinsQx", 100),
-                  "The number of bins along the qx axis. Optional and only "
-                  "applies to 2D workspaces. Defaults to 100.");
-  declareProperty(new Kernel::PropertyWithValue<int>("NumberBinsQz", 100),
-                  "The number of bins along the qx axis. Optional and only "
-                  "applies to 2D workspaces. Defaults to 100.");
+  declareProperty(
+      make_unique<Kernel::PropertyWithValue<int>>("NumberBinsQx", 100),
+      "The number of bins along the qx axis. Optional and only "
+      "applies to 2D workspaces. Defaults to 100.");
+  declareProperty(
+      make_unique<Kernel::PropertyWithValue<int>>("NumberBinsQz", 100),
+      "The number of bins along the qx axis. Optional and only "
+      "applies to 2D workspaces. Defaults to 100.");
 
-  declareProperty(new Kernel::PropertyWithValue<bool>("DumpVertexes", false),
-                  "If set, with 2D rebinning, the intermediate vertexes for "
-                  "each polygon will be written out for debugging purposes. "
-                  "Creates a second output table workspace.");
+  declareProperty(
+      make_unique<Kernel::PropertyWithValue<bool>>("DumpVertexes", false),
+      "If set, with 2D rebinning, the intermediate vertexes for "
+      "each polygon will be written out for debugging purposes. "
+      "Creates a second output table workspace.");
 
   setPropertySettings(
       "NumberBinsQx",
-      new EnabledWhenProperty("OutputAsMDWorkspace", IS_NOT_DEFAULT));
+      make_unique<EnabledWhenProperty>("OutputAsMDWorkspace", IS_NOT_DEFAULT));
   setPropertySettings(
       "NumberBinsQz",
-      new EnabledWhenProperty("OutputAsMDWorkspace", IS_NOT_DEFAULT));
+      make_unique<EnabledWhenProperty>("OutputAsMDWorkspace", IS_NOT_DEFAULT));
 
   // Create box controller properties.
   this->initBoxControllerProps("2,2", 50, 10);
 
   // Only show box controller properties when a md workspace is returned.
-  setPropertySettings(
-      "SplitInto", new EnabledWhenProperty("OutputAsMDWorkspace", IS_DEFAULT));
-  setPropertySettings("SplitThreshold", new EnabledWhenProperty(
+  setPropertySettings("SplitInto", make_unique<EnabledWhenProperty>(
+                                       "OutputAsMDWorkspace", IS_DEFAULT));
+  setPropertySettings("SplitThreshold", make_unique<EnabledWhenProperty>(
                                             "OutputAsMDWorkspace", IS_DEFAULT));
   setPropertySettings(
       "MaxRecursionDepth",
-      new EnabledWhenProperty("OutputAsMDWorkspace", IS_DEFAULT));
+      make_unique<EnabledWhenProperty>("OutputAsMDWorkspace", IS_DEFAULT));
 }
 
 //----------------------------------------------------------------------------------------------

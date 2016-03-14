@@ -78,7 +78,7 @@ FileProperty::FileProperty(const std::string &name,
                            unsigned int direction)
     : PropertyWithValue<std::string>(name, defaultValue,
                                      createValidator(action, exts), direction),
-      m_action(action), m_defaultExt((exts.size() > 0) ? exts.front() : ""),
+      m_action(action), m_defaultExt((!exts.empty()) ? exts.front() : ""),
       m_runFileProp(isLoadProperty() && extsMatchRunFiles()),
       m_oldLoadPropValue(""), m_oldLoadFoundFile("") {}
 

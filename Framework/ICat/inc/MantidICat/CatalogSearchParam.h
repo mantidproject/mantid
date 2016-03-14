@@ -37,8 +37,6 @@ class MANTID_ICAT_DLL CatalogSearchParam {
 public:
   /// constructor
   CatalogSearchParam();
-  /// Destructor
-  ~CatalogSearchParam();
 
   /// Set the start run to search for.
   void setRunStart(const double &startRun);
@@ -94,7 +92,7 @@ public:
   /// Get the investigation id.
   const std::string &getInvestigationId() const;
   /// Saves the start/end date times to time_t value.
-  time_t getTimevalue(const std::string &sDate);
+  time_t getTimevalue(const std::string &inputDate);
 
 private:
   /// start run number

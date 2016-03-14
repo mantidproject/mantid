@@ -65,8 +65,8 @@ const std::string MDNormDirectSC::name() const { return "MDNormDirectSC"; }
   * Initialize the algorithm's properties.
   */
 void MDNormDirectSC::init() {
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDWorkspace.");
 
   std::string dimChars = getDimensionChars();
@@ -77,7 +77,8 @@ void MDNormDirectSC::init() {
     dim[0] = dimChars[i];
     std::string propName = "AlignedDim" + dim;
     declareProperty(
-        new PropertyWithValue<std::string>(propName, "", Direction::Input),
+        Kernel::make_unique<PropertyWithValue<std::string>>(propName, "",
+                                                            Direction::Input),
         "Binning parameters for the " + Strings::toString(i) +
             "th dimension.\n"
             "Enter it as a comma-separated list of values with the format: "
@@ -89,15 +90,16 @@ void MDNormDirectSC::init() {
   solidAngleValidator->add<CommonBinsValidator>();
 
   declareProperty(
-      new WorkspaceProperty<>("SolidAngleWorkspace", "", Direction::Input,
-                              PropertyMode::Optional, solidAngleValidator),
+      make_unique<WorkspaceProperty<>>("SolidAngleWorkspace", "",
+                                       Direction::Input, PropertyMode::Optional,
+                                       solidAngleValidator),
       "An input workspace containing integrated vanadium (a measure of the "
       "solid angle).");
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "A name for the output data MDHistoWorkspace.");
-  declareProperty(new WorkspaceProperty<Workspace>(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputNormalizationWorkspace", "", Direction::Output),
                   "A name for the output normalization MDHistoWorkspace.");
 }
@@ -457,7 +459,7 @@ void MDNormDirectSC::calculateNormalization(
     solidAngDetToIdx = solidAngleWS->getDetectorIDToWorkspaceIndexMap();
   }
 
-  auto *prog = new API::Progress(this, 0.3, 1.0, ndets);
+  auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < ndets; i++) {
     PARALLEL_START_INTERUPT_REGION
@@ -534,8 +536,6 @@ void MDNormDirectSC::calculateNormalization(
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
-  delete prog;
 }
 
 /**
