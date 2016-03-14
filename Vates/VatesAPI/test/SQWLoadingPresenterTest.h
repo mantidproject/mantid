@@ -266,13 +266,13 @@ void testAxisLabels()
   TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(product));
   TSM_ASSERT_EQUALS("X Label should match exactly",
                     getStringFieldDataValue(product, "AxisTitleForX"),
-                    "qx ($\\AA^{-1}$)");
+                    "Q_sample_x ($\\AA^{-1}$)");
   TSM_ASSERT_EQUALS("Y Label should match exactly",
                     getStringFieldDataValue(product, "AxisTitleForY"),
-                    "qy ($\\AA^{-1}$)");
+                    "Q_sample_y ($\\AA^{-1}$)");
   TSM_ASSERT_EQUALS("Z Label should match exactly",
                     getStringFieldDataValue(product, "AxisTitleForZ"),
-                    "qz ($\\AA^{-1}$)");
+                    "Q_sample_z ($\\AA^{-1}$)");
 
   TS_ASSERT(Mock::VerifyAndClearExpectations(view.get()));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
