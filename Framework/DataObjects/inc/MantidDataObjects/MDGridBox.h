@@ -127,8 +127,8 @@ public:
   std::vector<MDE> *getEventsCopy() override;
 
   //----------------------------------------------------------------------------------------------------------------------
-  void addEvent(const MDE &event) override;
-  void addEventUnsafe(const MDE &event) override;
+  size_t addEvent(const MDE &event) override;
+  size_t addEventUnsafe(const MDE &event) override;
 
   /*--------------->  EVENTS from event data
    * <-------------------------------------------------------------*/
