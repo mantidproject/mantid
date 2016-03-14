@@ -12,6 +12,7 @@ Muon ALC
 ########
 
 - The default directory for the last run is now set to the same directory selected for the first run `#15524 <https://github.com/mantidproject/mantid/pull/15524>`_
+- Fixed an occasional crash seen when "Auto" was selected `#15673 <https://github.com/mantidproject/mantid/pull/15673>`_
 
 Muon Analysis
 #############
