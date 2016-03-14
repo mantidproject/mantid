@@ -57,6 +57,10 @@ void QtReflMainView::initLayout() {
           SIGNAL(comboProcessInstrument_currentIndexChanged(int)),
           ui.comboSearchInstrument, SLOT(setCurrentIndex(int)));
 
+  // Needed to Import/Export TBL, plot row and plot group
+  connect(ui.qReflTableView, SIGNAL(runAsPythonScript(const QString &, bool)),
+          this, SIGNAL(runAsPythonScript(const QString &, bool)));
+
   // The table view (must be intialized before creating the presenter)
   m_tableView = boost::shared_ptr<QReflTableView>(ui.qReflTableView);
   // connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)),

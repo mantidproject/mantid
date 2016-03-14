@@ -378,7 +378,6 @@ void QReflTableView::showImportDialog() {
             << "Dialog()\n";
   pythonSrc << "  print algm.getPropertyValue(\"OutputWorkspace\")\n";
   pythonSrc << "except:\n";
-  pythonSrc << "  print \"FAILED\"\n";
 	pythonSrc << "  pass\n";
 	// outputWorkspaceName will hold the name of the workspace
   // otherwise this should be an empty string.
