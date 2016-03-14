@@ -4,19 +4,33 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/Keren.h"
-#include "MantidCurveFitting/Algorithms/Fit.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::CurveFitting::Functions::Keren;
+using Mantid::API::Workspace_sptr;
+using Mantid::API::AlgorithmManager;
+using Mantid::API::IFunction_sptr;
+
+/**
+ * Structure to hold Y, E data with X0 and DeltaX
+ */
+struct MockData {
+  double x0;
+  double dX;
+  Mantid::MantidVec y;
+  Mantid::MantidVec e;
+};
 
 class KerenTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static KerenTest *createSuite() { return new KerenTest(); }
-  static void destroySuite( KerenTest *suite ) { delete suite; }
+  static void destroySuite(KerenTest *suite) { delete suite; }
 
   void test_name() {
     Keren function;
@@ -28,38 +42,70 @@ public:
     TS_ASSERT_EQUALS("Muon", function.category());
   }
 
-private:
-    void getMockData(Mantid::MantidVec &y, Mantid::MantidVec &e) {
-    // Mock data got from an Excel spreadsheet with
-    // Lambda = 0.16, Omega = 0.4, Beta = 1.2 &  A = 1.5
+  /// Test the function against mock data
+  void test_fitting() {
+    const auto workspace = getMockDataWorkspace();
+    Keren function;
+    function.initialize();
+    auto fit = AlgorithmManager::Instance().create("Fit");
+    fit->initialize();
+    fit->setChild(true);
+    fit->setPropertyValue("Function", function.asString());
+    fit->setProperty("InputWorkspace", workspace);
+    fit->setProperty("WorkspaceIndex", 0);
+    TS_ASSERT_THROWS_NOTHING(fit->execute());
+    TS_ASSERT(fit->isExecuted());
+    std::string status = fit->getPropertyValue("OutputStatus");
+    TS_ASSERT_EQUALS("success", status);
 
-    y[0] = 1.5;
-    y[1] = 1.141313628;
-    y[2] = 0.591838582;
-    y[3] = 0.217069719;
-    y[4] = 0.143355934;
-    y[5] = 0.256915274;
-    y[6] = 0.365739273;
-    y[7] = 0.360727646;
-    y[8] = 0.260023319;
-    y[9] = 0.146136639;
-    y[10] = 0.080853314;
-    y[11] = 0.068393706;
-    y[12] = 0.075537727;
-    y[13] = 0.071800717;
-    y[14] = 0.051659705;
-    y[15] = 0.028746883;
-    y[16] = 0.017073081;
-    y[17] = 0.018710399;
-    y[18] = 0.025298535;
-    y[19] = 0.027436201;
-
-    for (int i = 0; i <= 20; i++) {
-      e[i] = 0.01;
-    }
+    // check the output
+    const double field = 100;
+    const double delta =
+        Mantid::PhysicalConstants::MuonGyromagneticRatio * field * 0.2;
+    const double fluct = delta;
+    IFunction_sptr out = fit->getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("Field"), field, 0.001);
+    TS_ASSERT_DELTA(out->getParameter("Delta"), delta, 0.001);
+    TS_ASSERT_DELTA(out->getParameter("Fluct"), fluct, 0.001);
   }
 
-};
+private:
+  /**
+   * Mock data from an Excel spreadsheet with
+   * B = 100 Gauss, omega_L = 5*Delta, nu = Delta and time from 0-10 Delta^-1
+   * @returns :: Mock data structure
+   */
+  MockData getMockData() {
+    MockData data;
+    data.x0 = 0;
+    data.dX = 0.922276444; // steps of 0.25/Delta
+    data.y = {1,           0.950341815, 0.875262777, 0.848565312, 0.859885346,
+              0.863200168, 0.839703519, 0.808928875, 0.790496951, 0.782534602,
+              0.772858742, 0.75648003,  0.73822774,  0.723281868, 0.711316499,
+              0.699160478, 0.685454747, 0.671399296, 0.658356469, 0.646276957,
+              0.634337926, 0.622165429, 0.610055255, 0.598363028, 0.587082639,
+              0.575998979, 0.565007276, 0.554178119, 0.543602216, 0.533277709,
+              0.523146503, 0.51317749,  0.503385488, 0.493791756, 0.484393934,
+              0.475174597, 0.466122922, 0.45724013,  0.448529464, 0.439988183,
+              0.431609546};
+    data.e = Mantid::MantidVec(41, 0.01);
+    return data;
+  }
 
+  /**
+   * Get a workspace with mock data in it
+   * @returns :: Workspace with mock data in it
+   */
+  Workspace_sptr getMockDataWorkspace() {
+    MockData data = getMockData();
+    auto ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 40, data.x0,
+                                                               data.dX);
+    Mantid::MantidVec &Y = ws->dataY(0);
+    Mantid::MantidVec &E = ws->dataE(0);
+    Y = data.y;
+    E = data.e;
+    return ws;
+  }
+};
 
 #endif /* MANTID_CURVEFITTING_KERENTEST_H_ */
