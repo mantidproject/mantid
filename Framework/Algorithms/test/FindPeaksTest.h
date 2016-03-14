@@ -5,9 +5,9 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/FindPeaks.h"
+#include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -284,8 +284,6 @@ private:
   */
 
 class FindPeaksTestPerformance : public CxxTest::TestSuite {
-  Mantid::API::MatrixWorkspace_sptr m_dataWS;
-
 public:
   static FindPeaksTestPerformance *createSuite() {
     return new FindPeaksTestPerformance();
@@ -309,6 +307,8 @@ public:
     m_dataWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("FindPeaksTest_peaksWS"));
 
+    m_syntheticWS = createSyntheticWS();
+
     return;
   }
 
@@ -320,6 +320,7 @@ public:
     if (!finder.isInitialized())
       finder.initialize();
 
+    // The data file has 5 spectra, each of them with up to 5-6 peaks
     if (!m_dataWS)
       throw std::runtime_error("Unable to get input matrix workspace. ");
     finder.setPropertyValue("InputWorkspace", "FindPeaksTest_peaksWS");
@@ -330,6 +331,66 @@ public:
     finder.execute();
   }
 
+  /*
+   * Gives FindPeaks a synthetic spectrum with 10 peaks of various
+   * shapes, without 'PeakPositions' hint.
+   */
+  void test_singleSpectrumMultiplePeaksNoPeaksPositions() {
+    FindPeaks fp;
+    fp.setChild(true);
+    fp.initialize();
+    fp.setChild(true);
+    fp.setProperty("InputWorkspace", m_syntheticWS);
+    fp.setPropertyValue("PeaksList", "FindPeaksTest_foundpeaks");
+    fp.execute();
+    auto tbl = fp.getProperty("PeaksList");
+  }
+
+private:
+  /**
+   * Creates a synthetic single-spectrum workspace with synthetic data
+   * containing some peaks.
+   */
+  Mantid::API::MatrixWorkspace_sptr createSyntheticWS() const {
+    Mantid::Algorithms::CreateSampleWorkspace create;
+    create.initialize();
+    create.setChild(true);
+    create.setPropertyValue("Function", "User Defined");
+    create.setPropertyValue("UserDefinedFunction", makeSpectrum10Peaks());
+    create.setProperty("NumBanks", 1);
+    create.setProperty("BankPixelWidth", 1);
+    create.setProperty("XMin", 0.0);
+    create.setProperty("XMax", 200.0);
+    create.setProperty("BinWidth", 0.1);
+    create.setPropertyValue("OutputWorkspace", "FindPeaksTestPerf_peaks_ws");
+    create.execute();
+    return create.getProperty("OutputWorkspace");
+  }
+
+  /**
+   * Produces a user defined function with 10 peaks to keep FindPeaks
+   * busy for a small fraction of a second.  Some peaks are not easy
+   * (simulated here with different shapes).
+   */
+  std::string makeSpectrum10Peaks() const {
+    const std::string def =
+        "name=LinearBackground, A0=101.3, A1=8510.3;"
+        "name=Gaussian, PeakCentre=0.1, Height=200000, Sigma=0.007;"
+        "name=Lorentzian, PeakCentre=0.45, Amplitude=6000, FWHM=0.017;"
+        "name=PseudoVoigt, PeakCentre=0.75, Height=85050, FWHM=0.04;"
+        "name=Gaussian, PeakCentre=0.95, Height=110000, Sigma=0.007;"
+        "name=Gaussian, PeakCentre=1.15, Height=110000, Sigma=0.007;"
+        "name=BackToBackExponential, X0=1.30, I=7000, A=1500.1, B=1800.2, "
+        "S=0.01;"
+        "name=Gaussian, PeakCentre=1.50, Height=29000, Sigma=0.01;"
+        "name=Gaussian, PeakCentre=1.70, Height=90000, Sigma=0.02;"
+        "name=Gaussian, PeakCentre=1.90, Height=80000, Sigma=0.007;"
+        "name=Gaussian, PeakCentre=2.1, Height=150000, Sigma=0.007;";
+    return def;
+  }
+
+  Mantid::API::MatrixWorkspace_sptr m_dataWS;
+  Mantid::API::MatrixWorkspace_sptr m_syntheticWS;
 }; // end of class FindPeaksTestPerformance
 
 #endif /*FINDPEAKSTEST_H_*/

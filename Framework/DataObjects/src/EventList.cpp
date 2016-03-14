@@ -1321,7 +1321,8 @@ void EventList::sortPulseTimeTOF() const {
     std::sort(events.begin(), events.end(), compareEventPulseTimeTOF);
     break;
   case WEIGHTED:
-    std::sort(events.begin(), events.end(), compareEventPulseTimeTOF);
+    std::sort(weightedEvents.begin(), weightedEvents.end(),
+              compareEventPulseTimeTOF);
     break;
   case WEIGHTED_NOTIME:
     // Do nothing; there is no time to sort

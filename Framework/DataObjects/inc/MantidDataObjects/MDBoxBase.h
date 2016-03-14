@@ -105,9 +105,9 @@ public:
 
   //----------------------------------------------------------------------------------------------------------------------
   /// Add a single event
-  virtual void addEvent(const MDE &point) = 0;
+  virtual size_t addEvent(const MDE &point) = 0;
   /// Add a single event, with no mutex locking
-  virtual void addEventUnsafe(const MDE &point) = 0;
+  virtual size_t addEventUnsafe(const MDE &point) = 0;
   //----------------------------------------------------------------------------------------------------------------------
   // add range of events
   virtual size_t addEvents(const std::vector<MDE> &events);

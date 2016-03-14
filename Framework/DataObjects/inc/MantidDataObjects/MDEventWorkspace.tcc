@@ -564,8 +564,8 @@ TMDE(size_t MDEventWorkspace)::getMemorySize() const {
  *
  * @param event :: event to add.
  */
-TMDE(void MDEventWorkspace)::addEvent(const MDE &event) {
-  data->addEvent(event);
+TMDE(size_t MDEventWorkspace)::addEvent(const MDE &event) {
+  return data->addEvent(event);
 }
 
 //-----------------------------------------------------------------------------------------------

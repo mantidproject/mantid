@@ -152,7 +152,10 @@ const std::string SpiceXMLNode::getValue() const { return m_value; }
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadSpiceXML2DDet::LoadSpiceXML2DDet() {}
+LoadSpiceXML2DDet::LoadSpiceXML2DDet()
+    : m_detXMLFileName(), m_detXMLNodeName(), m_numPixelX(0), m_numPixelY(0),
+      m_loadInstrument(false), m_detSampleDistanceShift(0.0),
+      m_hasScanTable(false), m_ptNumber4Log(0), m_idfFileName() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
