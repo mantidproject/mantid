@@ -371,8 +371,8 @@ void RangeSelector::setMax(double val) {
   if (val != m_max) {
     m_max = (val < m_higher) ? val : m_higher;
     setMaxLinePos(m_max);
-    emit maxValueChanged(val);
-    emit selectionChanged(m_min, val);
+    emit maxValueChanged(m_max);
+    emit selectionChanged(m_min, m_max);
   }
 }
 
