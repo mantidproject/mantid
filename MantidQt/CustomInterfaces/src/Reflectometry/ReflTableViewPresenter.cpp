@@ -152,24 +152,6 @@ ReflTableViewPresenter::ReflTableViewPresenter(ReflTableView *tableView,
   // Initialise options
   initOptions();
 
-  // Set up the instrument selectors
-  std::vector<std::string> instruments;
-  instruments.emplace_back("INTER");
-  instruments.emplace_back("SURF");
-  instruments.emplace_back("CRISP");
-  instruments.emplace_back("POLREF");
-  instruments.emplace_back("OFFSPEC");
-
-  // If the user's configured default instrument is in this list, set it as the
-  // default, otherwise use INTER
-  const std::string defaultInst =
-      Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
-  if (std::find(instruments.begin(), instruments.end(), defaultInst) !=
-      instruments.end())
-    m_tableView->setInstrumentList(instruments, defaultInst);
-  else
-    m_tableView->setInstrumentList(instruments, "INTER");
-
   // Populate an initial list of valid tables to open, and subscribe to the ADS
   // to keep it up to date
   Mantid::API::AnalysisDataServiceImpl &ads =

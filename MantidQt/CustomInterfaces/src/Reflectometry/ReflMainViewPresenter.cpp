@@ -59,6 +59,24 @@ ReflMainViewPresenter::ReflMainViewPresenter(
   methods.insert(LegacyTransferMethod);
   methods.insert(MeasureTransferMethod);
   m_view->setTransferMethods(methods);
+
+  // Set up the instrument selectors
+  std::vector<std::string> instruments;
+  instruments.emplace_back("INTER");
+  instruments.emplace_back("SURF");
+  instruments.emplace_back("CRISP");
+  instruments.emplace_back("POLREF");
+  instruments.emplace_back("OFFSPEC");
+
+  // If the user's configured default instrument is in this list, set it as the
+  // default, otherwise use INTER
+  const std::string defaultInst =
+      Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
+  if (std::find(instruments.begin(), instruments.end(), defaultInst) !=
+      instruments.end())
+    m_view->setInstrumentList(instruments, defaultInst);
+  else
+    m_view->setInstrumentList(instruments, "INTER");
 }
 
 ReflMainViewPresenter::~ReflMainViewPresenter() {}

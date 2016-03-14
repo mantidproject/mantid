@@ -56,6 +56,8 @@ public:
   virtual void showAlgorithmDialog(const std::string &algorithm) = 0;
 
   // Setter methods
+  virtual void setInstrumentList(const std::vector<std::string> &instruments,
+                                 const std::string &defaultInstrument) = 0;
   virtual void setTransferMethods(const std::set<std::string> &methods) = 0;
 
   // Accessor methods

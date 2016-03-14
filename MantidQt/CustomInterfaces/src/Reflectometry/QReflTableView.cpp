@@ -44,6 +44,9 @@ void QReflTableView::createTable() {
   ui.viewTable->verticalHeader()->setMovable(true);
   ui.viewTable->horizontalHeader()->setMovable(true);
 
+  // Re-emit a signal when the instrument changes
+  connect(ui.comboProcessInstrument, SIGNAL(currentIndexChanged(int)), this,
+          SIGNAL(comboProcessInstrument_currentIndexChanged(int)));
   // Custom context menu for table
   connect(ui.viewTable, SIGNAL(customContextMenuRequested(const QPoint &)),
           this, SLOT(showContextMenu(const QPoint &)));
@@ -210,17 +213,6 @@ void QReflTableView::on_actionOptionsDialog_triggered() {
 }
 
 /**
-This slot requests the list of runs to transfer to ReflMainViewPresenter
-Then updates ReflTableViewPresenter
-*/
-// TODO: see below
-// void QtReflMainView::on_actionTransfer_triggered() {
-//  // m_presenter->notify(IReflPresenter::TransferFlag);
-//  auto runs = m_presenter->getRunsToTransfer();
-//  m_tablePresenter->transfer(runs);
-//}
-
-/**
 This slot notifies the presenter that the "export table" button has been pressed
 */
 void QReflTableView::on_actionExportTable_triggered() {
@@ -258,6 +250,11 @@ pressed
 */
 void QReflTableView::on_actionPlotGroup_triggered() {
   m_tablePresenter->notify(IReflTablePresenter::PlotGroupFlag);
+}
+
+/** This slot is used to update the instrument*/
+void QReflTableView::on_comboProcessInstrument_currentIndexChanged(int index) {
+  ui.comboProcessInstrument->setCurrentIndex(index);
 }
 
 /**
@@ -501,7 +498,7 @@ void QReflTableView::setSelection(const std::set<int> &rows) {
 }
 
 /**
-Set the list of available instruments to search and process for
+Set the list of available instruments to process
 @param instruments : The list of instruments available
 @param defaultInstrument : The instrument to have selected by default
 */
@@ -588,6 +585,15 @@ std::string QReflTableView::getClipboard() const {
 * Clear the progress
 */
 void QReflTableView::clearProgress() { ui.progressBar->reset(); }
+
+/**
+Loads some runs into the table
+* @param runs : [input] The set of runs to be transferred to the table
+*/
+void QReflTableView::transferRuns(
+    const std::vector<std::map<std::string, std::string>> &runs) {
+  m_tablePresenter->transfer(runs);
+}
 
 } // namespace CustomInterfaces
 } // namespace Mantid

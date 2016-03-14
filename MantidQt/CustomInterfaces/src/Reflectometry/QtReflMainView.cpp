@@ -49,6 +49,18 @@ void QtReflMainView::initLayout() {
   connect(ui.tableSearchResults,
           SIGNAL(customContextMenuRequested(const QPoint &)), this,
           SLOT(showSearchContextMenu(const QPoint &)));
+  // Synchronize the two instrument selection widgets
+  connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)),
+          ui.qReflTableView,
+          SLOT(on_comboProcessInstrument_currentIndexChanged(int)));
+  connect(ui.qReflTableView,
+          SIGNAL(comboProcessInstrument_currentIndexChanged(int)),
+          ui.comboSearchInstrument, SLOT(setCurrentIndex(int)));
+
+  // The table view (must be intialized before creating the presenter)
+  m_tableView = boost::shared_ptr<QReflTableView>(ui.qReflTableView);
+  // connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)),
+  // ui.qReflTableView->comboProcessInstrument, SLOT(setCurrentIndex(int));
   // Finally, create the presenters to do the thinking for us
   m_presenter = boost::make_shared<ReflMainViewPresenter>(this /*main view*/);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
@@ -62,6 +74,30 @@ void QtReflMainView::setTransferMethods(const std::set<std::string> &methods) {
   for (auto method = methods.begin(); method != methods.end(); ++method) {
     ui.comboTransferMethod->addItem((*method).c_str());
   }
+}
+
+/**
+Set the list of available instruments to search for and updates the list of
+available instruments in the table view
+@param instruments : The list of instruments available
+@param defaultInstrument : The instrument to have selected by default
+*/
+void QtReflMainView::setInstrumentList(
+    const std::vector<std::string> &instruments,
+    const std::string &defaultInstrument) {
+  ui.comboSearchInstrument->clear();
+
+  for (auto it = instruments.begin(); it != instruments.end(); ++it) {
+    QString instrument = QString::fromStdString(*it);
+    ui.comboSearchInstrument->addItem(instrument);
+  }
+
+  int index = ui.comboSearchInstrument->findData(
+      QString::fromStdString(defaultInstrument), Qt::DisplayRole);
+  ui.comboSearchInstrument->setCurrentIndex(index);
+
+  // Finally, populate the combo box in the table view
+  m_tableView->setInstrumentList(instruments, defaultInstrument);
 }
 
 /**
@@ -92,13 +128,11 @@ void QtReflMainView::on_actionSearch_triggered() {
 
 /**
 This slot requests the list of runs to transfer to ReflMainViewPresenter
-Then updates ReflTableViewPresenter
+Then updates m_tableView
 */
 void QtReflMainView::on_actionTransfer_triggered() {
-  // m_presenter->notify(IReflPresenter::TransferFlag);
-  // TODO: see below
-  // auto runs = m_presenter->getRunsToTransfer();
-  // m_tablePresenter->transfer(runs);
+  auto runs = m_presenter->getRunsToTransfer();
+  m_tableView->transferRuns(runs);
 }
 
 /**
@@ -115,11 +149,11 @@ void QtReflMainView::on_actionHelp_triggered() {
 This slot shows the slit calculator
 */
 void QtReflMainView::on_actionSlitCalculator_triggered() {
-  // TODO: see below
-  // m_calculator->setCurrentInstrumentName(
-  //    ui.comboProcessInstrument->currentText().toStdString());
+  m_calculator->setCurrentInstrumentName(
+      ui.comboSearchInstrument->currentText().toStdString());
   m_calculator->show();
 }
+
 /**
 This slot is triggered when the user right clicks on the search results table
 @param pos : The position of the right click within the table

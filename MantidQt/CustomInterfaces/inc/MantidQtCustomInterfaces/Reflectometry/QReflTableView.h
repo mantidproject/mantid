@@ -92,6 +92,10 @@ public:
 
   boost::shared_ptr<IReflTablePresenter> getTablePresenter() const override;
 
+  // Adds some runs to the table
+  void
+  transferRuns(const std::vector<std::map<std::string, std::string>> &runs);
+
 private:
   // initialise the interface
   void createTable();
@@ -105,6 +109,12 @@ private:
   // the workspace the user selected to open
   std::string m_toOpen;
   QSignalMapper *m_openMap;
+
+signals:
+  void comboProcessInstrument_currentIndexChanged(int index);
+
+public slots:
+  void on_comboProcessInstrument_currentIndexChanged(int index);
 
 private slots:
   void on_actionNewTable_triggered();
@@ -126,9 +136,6 @@ private slots:
   void on_actionHelp_triggered();
   void on_actionPlotRow_triggered();
   void on_actionPlotGroup_triggered();
-
-  // void on_comboSearchInstrument_currentIndexChanged(int index);
-  // void on_comboProcessInstrument_currentIndexChanged(int index);
 
   void setModel(QString name);
   void tableUpdated(const QModelIndex &topLeft, const QModelIndex &bottomRight);

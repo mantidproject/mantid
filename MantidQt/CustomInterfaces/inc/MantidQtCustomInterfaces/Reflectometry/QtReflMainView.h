@@ -5,6 +5,7 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/QReflTableView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtMantidWidgets/SlitCalculator.h"
@@ -57,7 +58,9 @@ public:
   void giveUserCritical(std::string prompt, std::string title) override;
   void showAlgorithmDialog(const std::string &algorithm) override;
 
-  // Settor methods
+  // Setter methods
+  void setInstrumentList(const std::vector<std::string> &instruments,
+                         const std::string &defaultInstrument) override;
   void setTransferMethods(const std::set<std::string> &methods) override;
 
   // Accessor methods
@@ -80,6 +83,8 @@ private:
   boost::shared_ptr<IReflPresenter> m_presenter;
   // the search model
   ReflSearchModel_sptr m_searchModel;
+  // the table view
+  boost::shared_ptr<QReflTableView> m_tableView;
   // the interface
   Ui::reflMainWidget ui;
   // the slit calculator
