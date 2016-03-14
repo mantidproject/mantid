@@ -93,6 +93,10 @@ private:
   /// split multi period histogram workspace into a workspace group
   void splitMutiPeriodHistrogramData(const size_t numPeriods);
 
+  size_t getMonitorInfo(NeXus::File &file, std::vector<std::string> &monitorNames,
+                        size_t &numHistMon, size_t &numEventMon, size_t &numPeriods,
+                        std::map<int, std::string> &monitorNumber2Name);
+
 private:
   std::string m_filename; ///< The name and path of the input file
   API::MatrixWorkspace_sptr m_workspace; ///< The workspace being filled out

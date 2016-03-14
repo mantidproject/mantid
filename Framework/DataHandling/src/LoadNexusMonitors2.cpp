@@ -128,70 +128,13 @@ void LoadNexusMonitors2::exec() {
   }
   prog1.report();
 
-  // Now we want to go through and find the monitors
-  entries = file.getEntries();
-  std::vector<std::string> monitorNames;
   size_t numHistMon = 0;
   size_t numEventMon = 0;
   size_t numPeriods = 0;
-  // we want to sort monitors by monitor_number if they are present
+  std::vector<std::string> monitorNames;
   std::map<int, std::string> monitorNumber2Name;
-  prog1.report();
-
-  API::Progress prog2(this, 0.2, 0.6, entries.size());
-
-  it = entries.begin();
-  for (; it != entries.end(); ++it) {
-    std::string entry_name(it->first);
-    std::string entry_class(it->second);
-    if ((entry_class == "NXmonitor")) {
-      monitorNames.push_back(entry_name);
-
-      // check for event/histogram monitor
-      // -> This will prefer event monitors over histogram
-      //    if they are found in the same group.
-      file.openGroup(entry_name, "NXmonitor");
-      int numEventThings =
-          0; // number of things that are eventish - should be 3
-      string_map_t inner_entries = file.getEntries(); // get list of entries
-      for (auto &entry : inner_entries) {
-        if (entry.first == "event_index") {
-          numEventThings += 1;
-          continue;
-        } else if (entry.first == "event_time_offset") {
-          numEventThings += 1;
-          continue;
-        } else if (entry.first == "event_time_zero") {
-          numEventThings += 1;
-          continue;
-        }
-      }
-
-      if (numEventThings == 3) {
-        numEventMon += 1;
-      } else {
-        numHistMon += 1;
-        if (inner_entries.find("monitor_number") != inner_entries.end()) {
-          specnum_t monitorNo;
-          file.openData("monitor_number");
-          file.getData(&monitorNo);
-          file.closeData();
-          monitorNumber2Name[monitorNo] = entry_name;
-        }
-        if ((numPeriods == 0) &&
-            (inner_entries.find("period_index") != inner_entries.end())) {
-          MantidVec period_data;
-          file.openData("period_index");
-          file.getDataCoerce(period_data);
-          file.closeData();
-          numPeriods = period_data.size();
-        }
-      }
-      file.closeGroup(); // close NXmonitor
-    }
-    prog2.report();
-  }
-  m_monitor_count = monitorNames.size();
+  m_monitor_count = getMonitorInfo(file, monitorNames, numHistMon, numEventMon, numPeriods,
+                                   monitorNumber2Name);
 
   // Nothing to do
   if (0 == m_monitor_count) {
@@ -676,6 +619,82 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
 
   // set the output workspace
   this->setProperty("OutputWorkspace", wsGroup);
+}
+
+size_t LoadNexusMonitors2::getMonitorInfo(::NeXus::File &file,
+                                          std::vector<std::string> &monitorNames,
+                                          size_t &numHistMon,
+                                          size_t &numEventMon,
+                                          size_t &numPeriods,
+                                          std::map<int, std::string> &monitorNumber2Name)
+{
+  typedef std::map<std::string, std::string> string_map_t;
+
+  // Now we want to go through and find the monitors
+  string_map_t entries = file.getEntries();
+  monitorNames.clear();
+  numHistMon = 0;
+  numEventMon = 0;
+  numPeriods = 0;
+  // we want to sort monitors by monitor_number if they are present
+  monitorNumber2Name.clear();
+  // prog1.report();
+
+  API::Progress prog2(this, 0.2, 0.6, entries.size());
+
+  string_map_t::const_iterator it = entries.begin();
+  for (; it != entries.end(); ++it) {
+    std::string entry_name(it->first);
+    std::string entry_class(it->second);
+    if ((entry_class == "NXmonitor")) {
+      monitorNames.push_back(entry_name);
+
+      // check for event/histogram monitor
+      // -> This will prefer event monitors over histogram
+      //    if they are found in the same group.
+      file.openGroup(entry_name, "NXmonitor");
+      int numEventThings =
+          0; // number of things that are eventish - should be 3
+      string_map_t inner_entries = file.getEntries(); // get list of entries
+      for (auto &entry : inner_entries) {
+        if (entry.first == "event_index") {
+          numEventThings += 1;
+          continue;
+        } else if (entry.first == "event_time_offset") {
+          numEventThings += 1;
+          continue;
+        } else if (entry.first == "event_time_zero") {
+          numEventThings += 1;
+          continue;
+        }
+      }
+
+      if (numEventThings == 3) {
+        numEventMon += 1;
+      } else {
+        numHistMon += 1;
+        if (inner_entries.find("monitor_number") != inner_entries.end()) {
+          specnum_t monitorNo;
+          file.openData("monitor_number");
+          file.getData(&monitorNo);
+          file.closeData();
+          monitorNumber2Name[monitorNo] = entry_name;
+        }
+        if ((numPeriods == 0) &&
+            (inner_entries.find("period_index") != inner_entries.end())) {
+          MantidVec period_data;
+          file.openData("period_index");
+          file.getDataCoerce(period_data);
+          file.closeData();
+          numPeriods = period_data.size();
+        }
+      }
+      file.closeGroup(); // close NXmonitor
+    }
+    prog2.report();
+  }
+
+  return monitorNames.size();
 }
 
 } // end DataHandling
