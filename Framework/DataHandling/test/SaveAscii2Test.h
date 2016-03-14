@@ -6,6 +6,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <fstream>
 #include <Poco/File.h>
 
@@ -164,7 +165,7 @@ public:
 
   void test_valid_SpectrumMetaData() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
-    writeSampleWS(wsToSave);
+    writeInelasticWS(wsToSave);
 
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
@@ -176,26 +177,25 @@ public:
     // has the algorithm written a file to disk?
     TS_ASSERT(Poco::File(filename).exists());
 
-	// Now make some checks on the content of the file
-	std::ifstream in(filename.c_str());
-	int specID;
-	double qVal, angle;
-	std::string header1, header2, header3, header4, separator, comment;
+    // Now make some checks on the content of the file
+    std::ifstream in(filename.c_str());
+    int specID;
+    double qVal, angle;
+    std::string header1, header2, header3, header4, separator, comment;
 
-	// Test that the first few column headers, separator and first two bins are
-	// as expected
-	in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
-		separator >> header4 >> specID >> qVal >> angle;
-	TS_ASSERT_EQUALS(specID, 1);
-	TS_ASSERT_EQUALS(qVal, 1);
-	TS_ASSERT_EQUALS(angle, 1);
-	TS_ASSERT_EQUALS(comment, "#");
-	TS_ASSERT_EQUALS(separator, ",");
-	TS_ASSERT_EQUALS(header1, "X");
-	TS_ASSERT_EQUALS(header2, "Y");
-	TS_ASSERT_EQUALS(header3, "E");
-	TS_ASSERT_EQUALS(header4, "DX");
-
+    // Test that the first few column headers, separator and first two bins are
+    // as expected
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
+        separator >> header4 >> specID >> qVal >> angle;
+    TS_ASSERT_EQUALS(specID, 1);
+    TS_ASSERT_EQUALS(qVal, 1);
+    TS_ASSERT_EQUALS(angle, 1);
+    TS_ASSERT_EQUALS(comment, "#");
+    TS_ASSERT_EQUALS(separator, ",");
+    TS_ASSERT_EQUALS(header1, "X");
+    TS_ASSERT_EQUALS(header2, "Y");
+    TS_ASSERT_EQUALS(header3, "E");
+    TS_ASSERT_EQUALS(header4, "DX");
   }
 
   void testExec_no_header() {
@@ -611,7 +611,7 @@ public:
   }
 
 private:
-  void writeSampleWS(Mantid::DataObjects::Workspace2D_sptr &wsToSave, const bool &qAndAngle=false) {
+  void writeSampleWS(Mantid::DataObjects::Workspace2D_sptr &wsToSave) {
     wsToSave = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
         WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
@@ -625,10 +625,20 @@ private:
       }
     }
 
-	if (qAndAngle) {
-		// Add Q and Angle data to workspace
-	}
+    AnalysisDataService::Instance().add(m_name, wsToSave);
+  }
 
+  void writeInelasticWS(Mantid::DataObjects::Workspace2D_sptr &wsToSave) {
+    const std::vector<double> l2{1, 2, 3, 4, 5};
+    const std::vector<double> polar{1, 2, 3, 4, 5};
+    const std::vector<double> azimutal{1, 2, 3, 4, 5};
+    const int nBins = 3;
+    const double eMin = 0.2;
+    const double eMax = 0.4;
+    const double Ei = 1;
+
+    wsToSave = WorkspaceCreationHelper::createProcessedInelasticWS(
+        l2, polar, azimutal, nBins);
     AnalysisDataService::Instance().add(m_name, wsToSave);
   }
 
