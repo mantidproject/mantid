@@ -28,6 +28,25 @@ namespace ALCHelper
     return boost::make_shared<QwtArrayData>(x,y,size);
   }
 
+  std::vector<boost::shared_ptr<QwtData>>
+  curveDataFromWs(MatrixWorkspace_const_sptr ws) {
+
+    std::vector<boost::shared_ptr<QwtData>> dataVector;
+    auto histograms = ws->getNumberHistograms();
+
+    for (int wsIndex = 0; wsIndex < histograms; wsIndex++) {
+
+      const double *x = &ws->readX(wsIndex)[0];
+      const double *y = &ws->readY(wsIndex)[0];
+      size_t size = ws->blocksize();
+
+      auto wsIdxData = boost::make_shared<QwtArrayData>(x, y, size);
+
+      dataVector.push_back(wsIdxData);
+    }
+    return dataVector;
+  }
+
   /**
    * Creates vector of errors using E values from the workspace spectra.
    * @param ws :: Workspace with E values to use
