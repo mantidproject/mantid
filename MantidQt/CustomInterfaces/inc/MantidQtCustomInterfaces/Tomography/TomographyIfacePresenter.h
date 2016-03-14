@@ -54,7 +54,9 @@ public:
   /// Default constructor - normally used from the concrete view
   TomographyIfacePresenter(ITomographyIfaceView *view);
   ~TomographyIfacePresenter() override;
-
+  std::string RBNumber() const {
+	  return m_view->RBNumber();
+  }
   void notify(ITomographyIfacePresenter::Notification notif) override;
 
 protected:

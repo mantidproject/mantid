@@ -65,7 +65,7 @@ public:
    */
   virtual void userError(const std::string &err,
                          const std::string &description) = 0;
-
+  virtual std::string RBNumber() const = 0;
   /**
    * Set the compute resources available (remote and/or local). Note
    * that the order of the list is/can be important.

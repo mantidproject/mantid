@@ -94,6 +94,10 @@ public:
 
   std::string getUsername() const override;
 
+  std::string RBNumber() const override {
+	  return m_setupRBNumber;
+  }
+
   std::string getPassword() const override;
 
   std::string externalInterpreterPath() const override {

@@ -87,14 +87,14 @@ const std::string TomographyIfaceViewQtGUI::g_defRemotePathScripts =
 const std::string TomographyIfaceViewQtGUI::g_SCARFName = "SCARF@STFC";
 const std::string TomographyIfaceViewQtGUI::g_defOutPathLocal =
 #ifdef _WIN32
-    "D:/imat/";
+    "D:/imat-data/";
 #else
     "~/imat/";
 #endif
 
 const std::string TomographyIfaceViewQtGUI::g_defOutPathRemote =
 #ifdef _WIN32
-    "I:/imat-data/";
+    "I:/imat/imat-data/";
 #else
     "~/imat-data/";
 #endif
@@ -1225,7 +1225,7 @@ void TomographyIfaceViewQtGUI::processPathBrowseClick(QLineEdit *le,
       else
         pp = pp.substr(2);
     }
-
+	pp = "/work" + pp;
     le->setText(QString::fromStdString(pp));
     data = pp;
 

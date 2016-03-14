@@ -57,6 +57,8 @@ public:
   // std::string tomopyMethod() const {}
   MOCK_CONST_METHOD0(tomopyMethod, std::string());
 
+  MOCK_CONST_METHOD0(RBNumber, std::string());
+
   // void updateLoginControls(bool loggedIn) {}
   MOCK_METHOD1(updateLoginControls, void(bool loggedIn));
 
