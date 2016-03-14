@@ -84,6 +84,7 @@ class QECoverageGUI(QtGui.QWidget):
         self.ei_emin_msgbox = QtGui.QMessageBox()
         self.ei_emin_msgbox.setText("Emin must be less than the values provided for Ei! Please try again")
         self.direct_grid.addWidget(self.direct_ei)
+        self.emaxfield_msgbox = QtGui.QMessageBox()
         self.direct_plotover = QtGui.QCheckBox("Plot Over", self.tab_direct)
         self.direct_plotover.setToolTip("Hold this plot?")
         self.direct_grid.addWidget(self.direct_plotover)
@@ -356,6 +357,7 @@ class QECoverageGUI(QtGui.QWidget):
         ef = self.indirect_analysers[inst][ana]
 
         try:
+            self.indirect_input_check(ana)
             Emax = float(self.indirect_emax_input.text())
         except ValueError:
             Emax = abs(ef)
@@ -427,7 +429,7 @@ class QECoverageGUI(QtGui.QWidget):
         return ei_vec
 
     def indirect_input_check(self, ana):
-        print('ana is equal to: ' + ana)
+
         Emax_min = 0
         if ana == 'PG002' or ana == 'Mica006':
             Emax_min = -1
@@ -438,8 +440,15 @@ class QECoverageGUI(QtGui.QWidget):
         elif ana == 'AuFoil':
             Emax_min = -4896
 
+        self.emaxfield_msgbox.setText("Invalid input has been provided for Emax. "
+                                      "Emax cannot be less than " +
+                                      str(Emax_min) + ", when Ef is set as " +
+                                      ana + "! Please try again.")
+
         if float(self.indirect_emax_input.text()) < Emax_min:
             self.indirect_emax_input.setText(str(Emax_min))
+            self.emaxfield_msgbox.show()
+
 
 def qapp():
     if QtGui.QApplication.instance():
