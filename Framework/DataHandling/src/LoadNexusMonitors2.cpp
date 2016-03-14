@@ -166,10 +166,9 @@ void LoadNexusMonitors2::exec() {
   // only used if using event monitors
   // EventWorkspace_sptr eventWS;
   // Create the output workspace
-  bool useEventMon = createOutputWorkspace(numHistMon, numEventMon,
-                                           monitorsAsEvents,
-                                           monitorNames,
-                                           monitorNumber2Name);
+  bool useEventMon =
+      createOutputWorkspace(numHistMon, numEventMon, monitorsAsEvents,
+                            monitorNames, monitorNumber2Name);
 
   // a temporary place to put the spectra/detector numbers
   boost::scoped_array<specnum_t> spectra_numbers(
@@ -213,7 +212,8 @@ void LoadNexusMonitors2::exec() {
 
     if (useEventMon) {
       // setup local variables
-      EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(m_workspace);
+      EventWorkspace_sptr eventWS =
+          boost::dynamic_pointer_cast<EventWorkspace>(m_workspace);
 
       std::vector<uint64_t> event_index;
       MantidVec time_of_flight;
@@ -300,7 +300,8 @@ void LoadNexusMonitors2::exec() {
 
   if (useEventMon) // set the x-range to be the range for min/max events
   {
-    EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(m_workspace);
+    EventWorkspace_sptr eventWS =
+        boost::dynamic_pointer_cast<EventWorkspace>(m_workspace);
     double xmin, xmax;
     eventWS->getEventXMinMax(xmin, xmax);
 
@@ -665,11 +666,10 @@ size_t LoadNexusMonitors2::getMonitorInfo(
   return monitorNames.size();
 }
 
-bool LoadNexusMonitors2::createOutputWorkspace(size_t numHistMon, size_t numEventMon,
-                                               bool monitorsAsEvents,
-                                               std::vector<std::string> &monitorNames,
-                                               const std::map<int, std::string> &monitorNumber2Name)
-{
+bool LoadNexusMonitors2::createOutputWorkspace(
+    size_t numHistMon, size_t numEventMon, bool monitorsAsEvents,
+    std::vector<std::string> &monitorNames,
+    const std::map<int, std::string> &monitorNumber2Name) {
   // only used if using event monitors
   EventWorkspace_sptr eventWS;
   // Create the output workspace
