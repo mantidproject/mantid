@@ -426,6 +426,20 @@ class QECoverageGUI(QtGui.QWidget):
 
         return ei_vec
 
+    def indirect_input_check(self, ana):
+        print('ana is equal to: ' + ana)
+        Emax_min = 0
+        if ana == 'PG002' or ana == 'Mica006':
+            Emax_min = -1
+        elif ana == 'Si111':
+            Emax_min = -2
+        elif ana == 'PG004' or ana == 'Si311':
+            Emax_min = -7
+        elif ana == 'AuFoil':
+            Emax_min = -4896
+
+        if float(self.indirect_emax_input.text()) < Emax_min:
+            self.indirect_emax_input.setText(str(Emax_min))
 
 def qapp():
     if QtGui.QApplication.instance():
