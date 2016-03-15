@@ -60,6 +60,37 @@ double Keren::activeParameter(size_t i) const {
 void Keren::function1D(double *out, const double *xValues,
                        const size_t nData) const {}
 
+/**
+ * Calculate the relaxation Gamma(t)t at time t
+ * Equation (4) in the paper
+ * @param delta :: [input] Delta, distribution width of local fields in MHz
+ * @param larmor :: [input] omega_L, Larmor frequency in MHz
+ * @param fluct :: [input] nu, hopping rate in MHz
+ * @param time :: [input] t, time in microseconds
+ * @returns :: Relaxation Gamma(t)*t (dimensionless)
+ */
+double Keren::relaxation(const double delta, const double larmor,
+                         const double fluct, const double time) const {
+  // Useful shortcuts
+  const double deltaSq = delta * delta;
+  const double omegaSq = larmor * larmor;
+  const double nuSq = fluct * fluct;
+  const double omegaT = larmor * time;
+  const double nuT = fluct * time;
+  const double expon = exp(-1.0 * nuT);
+
+  // 2*Delta^2 / (omega_L^2 + nu^2)^2
+  const double prefactor =
+      (2.0 * deltaSq) / ((omegaSq + nuSq) * (omegaSq + nuSq));
+
+  const double term1 = (omegaSq + nuSq) * nuT;
+  const double term2 = omegaSq - nuSq;
+  const double term3 = 1.0 - expon * cos(omegaT);
+  const double term4 = 2.0 * fluct * larmor * expon * sin(omegaT);
+
+  return prefactor * (term1 + term2 * term3 - term4);
+}
+
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

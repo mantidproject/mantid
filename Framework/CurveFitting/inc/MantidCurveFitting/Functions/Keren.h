@@ -55,7 +55,7 @@ protected:
   /// Initialize parameters
   void init() override;
   /// Relaxation form
-  double relaxation(const double delta, const double field, const double fluct,
+  double relaxation(const double delta, const double larmor, const double fluct,
                     const double time) const;
 };
 

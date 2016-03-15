@@ -25,6 +25,15 @@ struct MockData {
   Mantid::MantidVec e;
 };
 
+/// Test class to test protected methods
+class TestFunction : public Keren {
+public:
+  double wrapRelaxation(const double delta, const double larmor,
+                        const double fluct, const double time) const {
+    return relaxation(delta, larmor, fluct, time);
+  }
+};
+
 class KerenTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -67,6 +76,24 @@ public:
     TS_ASSERT_DELTA(out->getParameter("Field"), field, 0.001);
     TS_ASSERT_DELTA(out->getParameter("Delta"), delta, 0.001);
     TS_ASSERT_DELTA(out->getParameter("Fluct"), fluct, 0.001);
+  }
+
+  void test_relaxation() {
+    TestFunction function;
+    function.initialize();
+
+    const double field = 100;
+    const double larmor =
+        Mantid::PhysicalConstants::MuonGyromagneticRatio * field;
+    const double delta = larmor * 0.2;
+    const double fluct = delta;
+
+    TS_ASSERT_DELTA(function.wrapRelaxation(delta, larmor, fluct, 1.0), 0.0582,
+                    0.0001);
+    TS_ASSERT_DELTA(function.wrapRelaxation(delta, larmor, fluct, 5.0), 0.1555,
+                    0.001);
+    TS_ASSERT_DELTA(function.wrapRelaxation(delta, larmor, fluct, 10.0), 0.2753,
+                    0.001);
   }
 
 private:
