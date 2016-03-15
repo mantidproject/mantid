@@ -136,7 +136,7 @@ void CompositePeaksPresenterVsi::removePresenter(
  * @param peaksWorkspaceNames The names of all currently active peak sources.
  */
 void CompositePeaksPresenterVsi::updateWorkspaces(
-    std::vector<std::string> peaksWorkspaceNames) {
+    const std::vector<std::string> &peaksWorkspaceNames) {
   std::vector<std::string> storedPeaksWorkspaces = getPeaksWorkspaceNames();
   for (const auto &ws : storedPeaksWorkspaces) {
     size_t count =

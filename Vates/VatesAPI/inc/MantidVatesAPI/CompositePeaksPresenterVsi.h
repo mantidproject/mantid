@@ -37,7 +37,7 @@ public:
   void addPresenter(PeaksPresenterVsi_sptr presenter);
   std::map<std::string, std::vector<bool>> getInitializedViewablePeaks() const;
   void removePresenter(const std::string &peaksWorkspaceName);
-  void updateWorkspaces(std::vector<std::string> peaksWorkspaceNames);
+  void updateWorkspaces(const std::vector<std::string> &peaksWorkspaceNames);
   void sortPeaksWorkspace(const std::string &, const bool) override {}
   void sortPeaksWorkspace(
       const std::string &columnToSortBy, const bool sortedAscending,
