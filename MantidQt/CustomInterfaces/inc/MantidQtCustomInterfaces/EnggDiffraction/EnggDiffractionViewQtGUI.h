@@ -154,7 +154,7 @@ public:
 
   std::string readPeaksFile(std::string fileDir);
 
-  virtual void setDataCurves(std::vector<boost::shared_ptr<QwtData>> &data);
+  virtual void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data);
 
   void plotFocusedSpectrum(const std::string &wsName) override;
 
@@ -230,7 +230,6 @@ private slots:
   void browsePeaksToFit();
   void fittingListWidgetBank(int idx);
   void setListWidgetBank(int idx);
-  void createCurveVector(int idx);
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();

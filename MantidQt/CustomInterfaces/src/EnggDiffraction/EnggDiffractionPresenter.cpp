@@ -706,7 +706,7 @@ void EnggDiffractionPresenter::plotFitPeaksCurves() {
   auto singlPeaksWS =
       ADS.retrieveWS<MatrixWorkspace>("engggui_fitting_single_peaks0");
   try {
-    m_view->setDataCurves(ALCHelper::curveDataFromWs(singlPeaksWS));
+    m_view->dataCurvesFactory(ALCHelper::curveDataFromWs(singlPeaksWS));
   } catch (std::runtime_error &re) {
     g_log.error()
         << "Unable to finish of the plotting of the graph for "

@@ -679,12 +679,19 @@ std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
   return fileData;
 }
 
-void EnggDiffractionViewQtGUI::setDataCurves(
+void EnggDiffractionViewQtGUI::dataCurvesFactory(
     std::vector<boost::shared_ptr<QwtData>> &data) {
 
-  for (int i = 0; i < m_dataCurveVector.size(); i++) {
-    auto *xs = data[i].get();
-    m_dataCurveVector[i]->setData(*xs);
+  for (int i = 0; i < data.size(); i++) {
+    auto *peak = data[i].get();
+
+	QwtPlotCurve* datCurve = new QwtPlotCurve();
+	datCurve->setStyle(QwtPlotCurve::Lines);
+	datCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+	m_dataCurveVector.push_back(datCurve);
+
+    m_dataCurveVector[i]->setData(*peak);
+	m_dataCurveVector[i]->attach(m_uiTabFitting.dataPlot);
   }
 
   m_uiTabFitting.dataPlot->replot();

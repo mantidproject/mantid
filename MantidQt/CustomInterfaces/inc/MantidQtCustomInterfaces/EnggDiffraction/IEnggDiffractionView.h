@@ -421,11 +421,11 @@ public:
                                    const std::string &type) = 0;
 
   /**
-  * sets the curves on the fitting tab
+  * generates and sets the curves on the fitting tab
   * @param data of the workspace to be passed as QwtData
   *
   */
-  virtual void setDataCurves(std::vector<boost::shared_ptr<QwtData>> &data) = 0;
+  virtual void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data) = 0;
 };
 
 } // namespace CustomInterfaces
