@@ -227,6 +227,7 @@ void TomographyIfaceViewQtGUI::initLayout() {
 
   // basic UI setup
   doSetupGeneralWidgets();
+  doSetupSectionSystemSettings();
   doSetupSectionSetup();
   doSetupSectionRun();
   doSetupSectionFilters();
@@ -293,28 +294,11 @@ void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
   m_uiTabSetup.lineEdit_path_dark->setText(
       QString::fromStdString(m_pathsConfig.pathDark()));
 
-  // System/advanced/hidden settings:
-  m_uiTabSystemSettings.lineEdit_SCARF_path->setText(
-      QString::fromStdString(m_pathsConfig.pathBase()));
-  m_uiTabSystemSettings.lineEdit_scripts_base_dir->setText(
-      QString::fromStdString(m_pathsConfig.pathScriptsTools()));
-
-  // reset setup of the remote
-  connect(m_uiTabSystemSettings.pushButton_reset_scripts_base_dir,
-          SIGNAL(released()), this, SLOT(resetRemoteSetup()));
-
   // 'browse' buttons for local conf:
   connect(m_uiTabSetup.pushButton_in_out_dir, SIGNAL(released()), this,
           SLOT(browseLocalInOutDirClicked()));
   connect(m_uiTabSetup.pushButton_recon_scripts_dir, SIGNAL(released()), this,
           SLOT(browseLocalReconScriptsDirClicked()));
-}
-
-void TomographyIfaceViewQtGUI::resetRemoteSetup() {
-  m_uiTabSystemSettings.lineEdit_scripts_base_dir->setText(
-      QString::fromStdString(g_defRemotePathScripts));
-  m_uiTabSystemSettings.spinBox_SCARFnumNodes->setValue(1);
-  m_uiTabSystemSettings.spinBox_SCARFnumCores->setValue(8);
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionRun() {
@@ -384,8 +368,6 @@ void TomographyIfaceViewQtGUI::doSetupSectionVisualize() {
   m_setupProcessedSubpath = g_defProcessedSubpath;
   m_setupOctopusVisPath = g_defOctopusVisPath;
 
-  m_uiTabVisualize.lineEdit_processed_subpath->setText(
-      QString::fromStdString(g_defProcessedSubpath));
   m_uiTabVisualize.lineEdit_paraview_location->setText(
       QString::fromStdString(g_defParaviewPath));
 
@@ -442,6 +424,28 @@ void TomographyIfaceViewQtGUI::doSetupSectionEnergy() {
 
   connect(m_uiTabEnergy.pushButton_browse_input, SIGNAL(released()), this,
           SLOT(browseEnergyOutputClicked()));
+}
+
+void TomographyIfaceViewQtGUI::doSetupSectionSystemSettings() {
+  m_uiTabSystemSettings.lineEdit_processed_subpath->setText(
+      QString::fromStdString(g_defProcessedSubpath));
+
+  // System/advanced/hidden settings:
+  m_uiTabSystemSettings.lineEdit_SCARF_path->setText(
+      QString::fromStdString(m_pathsConfig.pathBase()));
+  m_uiTabSystemSettings.lineEdit_scripts_base_dir->setText(
+      QString::fromStdString(m_pathsConfig.pathScriptsTools()));
+
+  // reset setup of the remote
+  connect(m_uiTabSystemSettings.pushButton_reset_scripts_base_dir,
+          SIGNAL(released()), this, SLOT(resetRemoteSetup()));
+}
+
+void TomographyIfaceViewQtGUI::resetRemoteSetup() {
+  m_uiTabSystemSettings.lineEdit_scripts_base_dir->setText(
+      QString::fromStdString(g_defRemotePathScripts));
+  m_uiTabSystemSettings.spinBox_SCARFnumNodes->setValue(1);
+  m_uiTabSystemSettings.spinBox_SCARFnumCores->setValue(8);
 }
 
 void TomographyIfaceViewQtGUI::setComputeResources(

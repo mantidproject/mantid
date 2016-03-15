@@ -239,11 +239,11 @@ private:
   void doSetupSectionSetup();
   void doSetupSectionRun();
   void doSetupSectionFilters();
-  void doSetupGeneralWidgets();
-
   void doSetupSectionVisualize();
   void doSetupSectionConvert();
   void doSetupSectionEnergy();
+  void doSetupSectionSystemSettings();
+  void doSetupGeneralWidgets();
 
   void doSetupSavu();
 
