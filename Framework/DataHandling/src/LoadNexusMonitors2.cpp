@@ -149,8 +149,10 @@ void LoadNexusMonitors2::exec() {
   size_t numPeriods = 0;
   std::vector<std::string> monitorNames;
   std::map<int, std::string> monitorNumber2Name;
+  std::vector<bool> isEventMonitors;
   m_monitor_count = getMonitorInfo(file, monitorNames, numHistMon, numEventMon,
-                                   numPeriods, monitorNumber2Name);
+                                   numPeriods, monitorNumber2Name,
+                                   isEventMonitors);
 
   // Nothing to do
   if (0 == m_monitor_count) {
@@ -612,7 +614,8 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
 size_t LoadNexusMonitors2::getMonitorInfo(
     ::NeXus::File &file, std::vector<std::string> &monitorNames,
     size_t &numHistMon, size_t &numEventMon, size_t &numPeriods,
-    std::map<int, std::string> &monitorNumber2Name) {
+    std::map<int, std::string> &monitorNumber2Name,
+    std::vector<bool> &isEventMonitors) {
   typedef std::map<std::string, std::string> string_map_t;
 
   // Now we want to go through and find the monitors
@@ -655,9 +658,14 @@ size_t LoadNexusMonitors2::getMonitorInfo(
       }
 
       if (numEventThings == 3) {
+        // it is an event monitor
         numEventMon += 1;
+        isEventMonitors.push_back(true);
       } else {
+        // it is a histogram monitor
         numHistMon += 1;
+        isEventMonitors.push_back(false);
+
         if (inner_entries.find("monitor_number") != inner_entries.end()) {
           specnum_t monitorNo;
           file.openData("monitor_number");
@@ -710,10 +718,18 @@ bool LoadNexusMonitors2::createOutputWorkspace(
   } else if (!monitorsAsEvents) {
     // rule out some weird situation that is not logical
     if (numHistMon != m_monitor_count)
-      throw std::runtime_error("I really don't think it could happen!"
-                               "monitor as events should always be false if "
-                               "number of histogram monitor is equal to "
-                               "number of total monitors.");
+    {
+      std::stringstream error_msg;
+      error_msg << "I really don't think it could happen!"
+                << "Number of histogram monitor = " << numHistMon
+                << ", number of evnet monitor = " << numEventMon
+                << "; monitor as events = " << monitorsAsEvents << "\n"
+                << "Monitor names: ";
+      size_t numNames = monitorNames.size();
+      for (size_t i_name = 0; i_name < numNames; ++i_name)
+        error_msg << monitorNames[i_name];
+      throw std::runtime_error(error_msg.str());
+    }
   } else if (useEventMon == useHistogramMon) {
     // automatic mode but throw an exception in case that
     // both types of monitors are found in NeXus file
