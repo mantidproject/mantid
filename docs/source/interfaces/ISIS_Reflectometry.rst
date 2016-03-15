@@ -100,42 +100,9 @@ Menu bar
 .. interface:: ISIS Reflectometry (Polref)
   :widget: menuBar
 
-The **Reflectometry** menu provides access to the following functionality:
-
-+------------------+----------------------------------------------------------+
-| Action           | Effect                                                   |
-+==================+==========================================================+
-| Open Table       | Opens a valid *TableWorkspace* in the `Processing Table`_|
-|                  | for processing.                                          |
-+------------------+----------------------------------------------------------+
-| New Table        | Discards the current contents of the `Processing Table`_,|
-|                  | presenting a blank table.                                |
-+------------------+----------------------------------------------------------+
-| Save Table       | Saves the current contents of the `Processing Table`_ to |
-|                  | the *TableWorkspace* it came from. If no such workspace  |
-|                  | already exists, a new one can be created.                |
-+------------------+----------------------------------------------------------+
-| Save Table As    | Saves the current contents of the `Processing Table`_ to |
-|                  | a new *TableWorkspace*.                                  |
-+------------------+----------------------------------------------------------+
-| Import .TBL      | Opens a :ref:`LoadReflTBL <algm-LoadReflTBL>` dialog,    |
-|                  | enabling you to load a ``.tbl`` file into a              |
-|                  | *TableWorkspace*.                                        |
-+------------------+----------------------------------------------------------+
-| Export .TBL      | Opens a :ref:`SaveReflTBL <algm-SaveReflTBL>` dialog,    |
-|                  | enabling you to save a *TableWorkspace* to a ``.tbl``    |
-|                  | file.                                                    |
-+------------------+----------------------------------------------------------+
-| Slit Calculator  | Opens the slit calculator: a tool to help calculate the  |
-|                  | correct geometry for the instruments' slits. It's powered|
-|                  | by the :ref:`CalculateSlits <algm-CalculateSlits>`       |
-|                  | algorithm.                                               |
-+------------------+----------------------------------------------------------+
-| Options          | Opens the `Options <ISIS_Reflectomety-Options>`_ menu.   |
-+------------------+----------------------------------------------------------+
-
-The **Edit** menu provides access to the same actions found in the tool bar.
-These are documented in the `Tool Bar`_ section of this document.
+The **Reflectometry** menu provides access to the **Slit Calculator**,
+a tool to help calculate the correct geometry for the instruments' slits.
+It's powered by the :ref:`CalculateSlits <algm-CalculateSlits>` algorithm.
 
 Processing Table
 ~~~~~~~~~~~~~~~~
@@ -180,6 +147,29 @@ This table details the behaviour of the actions in the tool bar, from left to ri
 +------------------+----------------------------------------------------------+
 | Action           | Effect                                                   |
 +==================+==========================================================+
+| Open Table       | Opens a valid *TableWorkspace* in the `Processing Table`_|
+|                  | for processing.                                          |
++------------------+----------------------------------------------------------+
+| New Table        | Discards the current contents of the `Processing Table`_ |
+|                  | presenting a blank table.                                |
++------------------+----------------------------------------------------------+
+| Save Table       | Saves the current contents of the `Processing Table`_ to |
+|                  | the *TableWorkspace* it came from. If no such workspace  |
+|                  | already exists, a new one can be created.                |
++------------------+----------------------------------------------------------+
+| Save Table As    | Saves the current contents of the `Processing Table`_ to |
+|                  | a new *TableWorkspace*.                                  |
++------------------+----------------------------------------------------------+
+| Import .TBL      | Opens a :ref:`LoadReflTBL <algm-LoadReflTBL>` dialog,    |
+|                  | enabling you to load a ``.tbl`` file into a              |
+|                  | *TableWorkspace*.                                        |
++------------------+----------------------------------------------------------+
+| Export .TBL      | Opens a :ref:`SaveReflTBL <algm-SaveReflTBL>` dialog,    |
+|                  | enabling you to save a *TableWorkspace* to a ``.tbl``    |
+|                  | file.                                                    |
++------------------+----------------------------------------------------------+
+| Options          | Opens the `Options`_                             menu.   |
++------------------+----------------------------------------------------------+
 | Process          | Processes the selected runs, or, if no runs are selected,|
 |                  | all of the runs in the table.                            |
 +------------------+----------------------------------------------------------+
