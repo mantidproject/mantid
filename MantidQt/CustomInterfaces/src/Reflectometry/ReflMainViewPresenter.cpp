@@ -5,7 +5,9 @@
 #include "MantidKernel/CatalogInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/UserCatalogInfo.h"
+#include "MantidQtCustomInterfaces/ProgressableView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
@@ -21,11 +23,41 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
+namespace {
+
+class ReflProgress : public Mantid::Kernel::ProgressBase {
+private:
+  MantidQt::CustomInterfaces::ProgressableView *const m_progressableView;
+
+public:
+  ReflProgress(
+      double start, double end, int64_t nSteps,
+      MantidQt::CustomInterfaces::ProgressableView *const progressableView)
+      : ProgressBase(static_cast<int>(start), static_cast<int>(end),
+                     static_cast<int>(nSteps)),
+        m_progressableView(progressableView) {
+    if (!progressableView) {
+      throw std::runtime_error("ProgressableView is null");
+    }
+    m_progressableView->clearProgress();
+    m_progressableView->setProgressRange(static_cast<int>(start),
+                                         static_cast<int>(end));
+  }
+
+  void doReport(const std::string &) {
+    m_progressableView->setProgress(static_cast<int>(m_i));
+  }
+  void clear() { m_progressableView->clearProgress(); }
+  ~ReflProgress() {}
+};
+}
+
 namespace MantidQt {
 namespace CustomInterfaces {
 ReflMainViewPresenter::ReflMainViewPresenter(
-    ReflMainView *mainView, boost::shared_ptr<IReflSearcher> searcher)
-    : m_view(mainView), m_searcher(searcher) {
+    ReflMainView *mainView, ProgressableView *progressView,
+    boost::shared_ptr<IReflSearcher> searcher)
+    : m_view(mainView), m_progressView(progressView), m_searcher(searcher) {
 
   // TODO. Select strategy.
   /*
@@ -165,7 +197,11 @@ ReflMainViewPresenter::getRunsToTransfer() {
     runs[run] = searchResult;
   }
 
-  TransferResults results = getTransferStrategy()->transferRuns(runs);
+  ReflProgress progress(0, static_cast<double>(selectedRows.size()),
+                        static_cast<int64_t>(selectedRows.size()),
+                        this->m_progressView);
+
+  TransferResults results = getTransferStrategy()->transferRuns(runs, progress);
 
   auto invalidRuns =
       results.getErrorRuns(); // grab our invalid runs from the transfer

@@ -13,6 +13,8 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+// Forward declaration
+class ProgressableView;
 
 /** @class ReflMainViewPresenter
 
@@ -43,7 +45,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTIDQT_CUSTOMINTERFACES_DLL ReflMainViewPresenter
     : public IReflPresenter {
 public:
-  ReflMainViewPresenter(ReflMainView *mainView,
+  ReflMainViewPresenter(ReflMainView *mainView, ProgressableView *progressView,
                         boost::shared_ptr<IReflSearcher> searcher =
                             boost::shared_ptr<IReflSearcher>());
   ~ReflMainViewPresenter() override;
@@ -55,6 +57,8 @@ protected:
   ReflSearchModel_sptr m_searchModel;
   // the main view we're managing
   ReflMainView *m_view;
+  // The progress view
+  ProgressableView *m_progressView;
   // the search implementation
   boost::shared_ptr<IReflSearcher> m_searcher;
   // searching

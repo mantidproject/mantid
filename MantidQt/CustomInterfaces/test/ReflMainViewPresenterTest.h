@@ -33,12 +33,13 @@ public:
 
   void test_constructor_sets_possible_transfer_methods() {
     NiceMock<MockView> mockView;
+		MockProgressableView mockProgress;
 
     // Expect that the transfer methods get initialized on the view
     EXPECT_CALL(mockView, setTransferMethods(_)).Times(Exactly(1));
 
     // Constructor
-    ReflMainViewPresenter presenter(&mockView);
+    ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));

@@ -1,14 +1,14 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMEASURETRANSFERSTRATEGYTEST_H_
 #define MANTID_CUSTOMINTERFACES_REFLMEASURETRANSFERSTRATEGYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "ReflMainViewMockObjects.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasurementItemSource.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
-#include "MantidKernel/make_unique.h"
-#include <memory>
+#include "ReflMainViewMockObjects.h"
+#include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
+#include <memory>
 #include <utility>
 
 using namespace testing;
@@ -60,10 +60,15 @@ public:
         .Times(Exactly(static_cast<int>(data.size())))
         .WillRepeatedly(Return(std::string()));
 
+    MockProgressBase progress;
+    // We expect a progress update on each transfer
+    EXPECT_CALL(progress, doReport(_))
+        .Times(Exactly(static_cast<int>(data.size())));
+
     ReflMeasureTransferStrategy strategy(std::move(mockCatInfo),
                                          std::move(mockMeasurementItemSource));
 
-    strategy.transferRuns(data);
+    strategy.transferRuns(data, progress);
 
     TS_ASSERT(Mock::VerifyAndClear(mockCatInfo_ptr));
     TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource_ptr));
@@ -100,12 +105,17 @@ public:
         .Times(Exactly(static_cast<int>(data.size())))
         .WillRepeatedly(Return(std::string()));
 
+    MockProgressBase progress;
+    // Expect a progress update
+    EXPECT_CALL(progress, doReport(_))
+        .Times(Exactly(static_cast<int>(data.size())));
+
     // Make the transfer stragegy
     ReflMeasureTransferStrategy strategy(std::move(mockCatInfo),
                                          std::move(mockMeasurementItemSource));
 
     // Do the transfer
-    auto transferResult = strategy.transferRuns(data);
+    auto transferResult = strategy.transferRuns(data, progress);
 
     auto successfulRuns = transferResult.getTransferRuns();
     // Check the transfer entries
@@ -159,12 +169,17 @@ public:
         .Times(Exactly(static_cast<int>(data.size())))
         .WillRepeatedly(Return(std::string()));
 
+    MockProgressBase progress;
+    // Expect a progress update
+    EXPECT_CALL(progress, doReport(_))
+        .Times(Exactly(static_cast<int>(data.size())));
+
     // Make the transfer stragegy
     ReflMeasureTransferStrategy strategy(std::move(mockCatInfo),
                                          std::move(mockMeasurementItemSource));
 
     // retreive transfer results
-    auto transferResult = strategy.transferRuns(data);
+    auto transferResult = strategy.transferRuns(data, progress);
     // get valid runs
     auto successfulRuns = transferResult.getTransferRuns();
     // get invalid runs
@@ -214,12 +229,17 @@ public:
         .Times(Exactly(static_cast<int>(data.size())))
         .WillRepeatedly(Return(std::string()));
 
+    MockProgressBase progress;
+    // Expect a progress update
+    EXPECT_CALL(progress, doReport(_))
+        .Times(Exactly(static_cast<int>(data.size())));
+
     // Make the transfer stragegy
     ReflMeasureTransferStrategy strategy(std::move(mockCatInfo),
                                          std::move(mockMeasurementItemSource));
 
     // Do the transfer
-    auto transferResult = strategy.transferRuns(data);
+    auto transferResult = strategy.transferRuns(data, progress);
     auto successfulRuns = transferResult.getTransferRuns();
     // Check the transfer entries
     TSM_ASSERT_EQUALS("Should have two rows", 2, successfulRuns.size());
@@ -275,12 +295,17 @@ public:
         .Times(Exactly(static_cast<int>(data.size())))
         .WillRepeatedly(Return(std::string()));
 
+    MockProgressBase progress;
+    // Expect a progress update
+    EXPECT_CALL(progress, doReport(_))
+        .Times(Exactly(static_cast<int>(data.size())));
+
     // Make the transfer stragegy
     ReflMeasureTransferStrategy strategy(std::move(mockCatInfo),
                                          std::move(mockMeasurementItemSource));
 
     // Do the transfer
-    auto transferResult = strategy.transferRuns(data);
+    auto transferResult = strategy.transferRuns(data, progress);
     auto successfulRuns = transferResult.getTransferRuns();
 
     // Check the transfer entries
@@ -322,10 +347,14 @@ public:
     EXPECT_CALL(*mockCatInfo, transformArchivePath(_))
         .Times(Exactly(static_cast<int>(data.size())));
 
+    MockProgressBase progress;
+    // Nothing obtained. No progress to report.
+    EXPECT_CALL(progress, doReport(_)).Times(Exactly(1));
+
     ReflMeasureTransferStrategy strategy(std::move(mockCatInfo),
                                          std::move(mockMeasurementItemSource));
 
-    auto transferRuns = strategy.transferRuns(data);
+    auto transferRuns = strategy.transferRuns(data, progress);
     auto result = transferRuns.getTransferRuns();
     TSM_ASSERT_EQUALS("Measurements where invalid. Results should be empty.", 0,
                       result.size());

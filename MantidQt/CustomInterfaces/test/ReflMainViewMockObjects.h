@@ -2,6 +2,8 @@
 #define MANTID_CUSTOMINTERFACES_REFLMAINVIEWMOCKOBJECTS_H
 
 #include "MantidKernel/ICatalogInfo.h"
+#include "MantidKernel/ProgressBase.h"
+#include "MantidQtCustomInterfaces/ProgressableView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include <gmock/gmock.h>
@@ -42,6 +44,19 @@ public:
   }
 };
 
+class MockProgressableView : public ProgressableView {
+public:
+  MOCK_METHOD1(setProgress, void(int));
+  MOCK_METHOD2(setProgressRange, void(int, int));
+  MOCK_METHOD0(clearProgress, void());
+  ~MockProgressableView() override {}
+};
+
+class MockProgressBase : public Mantid::Kernel::ProgressBase {
+public:
+  MOCK_METHOD1(doReport, void(const std::string &));
+  ~MockProgressBase() override {}
+};
 class MockICatalogInfo : public Mantid::Kernel::ICatalogInfo {
 public:
   MOCK_CONST_METHOD0(catalogName, const std::string());

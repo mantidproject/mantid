@@ -4,10 +4,10 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h"
 
-#include <vector>
 #include <map>
-#include <string>
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
@@ -56,7 +56,8 @@ public:
 
   ReflMeasureTransferStrategy(const ReflMeasureTransferStrategy &other);
 
-  TransferResults transferRuns(SearchResultMap &searchResults) override;
+  TransferResults transferRuns(SearchResultMap &searchResults,
+                               Mantid::Kernel::ProgressBase &progress) override;
 
   std::unique_ptr<ReflMeasureTransferStrategy> clone() const;
 

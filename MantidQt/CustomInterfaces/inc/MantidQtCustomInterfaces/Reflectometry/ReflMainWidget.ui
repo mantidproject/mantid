@@ -183,17 +183,14 @@
         <item>
          <layout class="QHBoxLayout" name="layoutSearchBottomRow">
           <item>
-           <spacer name="spacerTransfer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
+            <widget class="QProgressBar" name="progressBar">
+              <property name="whatsThis">
+                <string>Shows the current progress when transferring runs.</string>
+              </property>
+              <property name="value">
+                <number>0</number>
+              </property>
+            </widget>
           </item>
           <item>
            <widget class="QToolButton" name="buttonTransfer">

@@ -66,7 +66,9 @@ void QtReflMainView::initLayout() {
   // connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)),
   // ui.qReflTableView->comboProcessInstrument, SLOT(setCurrentIndex(int));
   // Finally, create the presenters to do the thinking for us
-  m_presenter = boost::make_shared<ReflMainViewPresenter>(this /*main view*/);
+  m_presenter = boost::make_shared<ReflMainViewPresenter>(
+      this /*main view*/,
+      this /*currently this concrete view is also responsibile for prog reporting*/);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 }
 
@@ -103,6 +105,28 @@ void QtReflMainView::setInstrumentList(
   // Finally, populate the combo box in the table view
   m_tableView->setInstrumentList(instruments, defaultInstrument);
 }
+
+/**
+Set the range of the progress bar
+@param min : The minimum value of the bar
+@param max : The maxmimum value of the bar
+*/
+void QtReflMainView::setProgressRange(int min, int max) {
+  ui.progressBar->setRange(min, max);
+}
+
+/**
+Set the status of the progress bar
+@param progress : The current value of the bar
+*/
+void QtReflMainView::setProgress(int progress) {
+  ui.progressBar->setValue(progress);
+}
+
+/**
+* Clear the progress
+*/
+void QtReflMainView::clearProgress() { ui.progressBar->reset(); }
 
 /**
 Set a new model for search results

@@ -67,7 +67,8 @@ public:
    * for those columns
    */
   virtual TransferResults
-  transferRuns(SearchResultMap &searchResults) = 0;
+  transferRuns(SearchResultMap &searchResults,
+               Mantid::Kernel::ProgressBase &progress) = 0;
 
   std::unique_ptr<ReflTransferStrategy> clone() const {
     return std::unique_ptr<ReflTransferStrategy>(doClone());

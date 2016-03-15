@@ -2,10 +2,10 @@
 #define MANTID_CUSTOMINTERFACES_REFLLEGACYTRANSFERSTRATEGYTEST_H
 
 #include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
 #include <map>
 #include <string>
 #include <vector>
-#include <gmock/gmock.h>
 
 #include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
@@ -53,9 +53,13 @@ public:
 
     ReflLegacyTransferStrategy strategy;
 
-    auto transferRuns = strategy.transferRuns(input);
+    MockProgressBase progress;
+    EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
+
+    auto transferRuns = strategy.transferRuns(input, progress);
     auto output = transferRuns.getTransferRuns();
     TS_ASSERT_EQUALS(output, expected);
+    TS_ASSERT(Mock::VerifyAndClear(&progress));
   }
 
   void testGroupedTransfer() {
@@ -85,10 +89,14 @@ public:
 
     ReflLegacyTransferStrategy strategy;
 
-    auto transferRuns = strategy.transferRuns(input);
+    MockProgressBase progress;
+    EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
+
+    auto transferRuns = strategy.transferRuns(input, progress);
     auto output = transferRuns.getTransferRuns();
 
     TS_ASSERT_EQUALS(output, expected);
+    TS_ASSERT(Mock::VerifyAndClear(&progress));
   }
 
   void testThetaExtraction() {
@@ -126,10 +134,14 @@ public:
 
     ReflLegacyTransferStrategy strategy;
 
-    auto transferRuns = strategy.transferRuns(input);
+    MockProgressBase progress;
+    EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
+
+    auto transferRuns = strategy.transferRuns(input, progress);
     auto output = transferRuns.getTransferRuns();
 
     TS_ASSERT_EQUALS(output, expected);
+    TS_ASSERT(Mock::VerifyAndClear(&progress));
   }
 
   void testComplexExtraction() {
@@ -186,10 +198,14 @@ public:
 
     ReflLegacyTransferStrategy strategy;
 
-    auto transferRuns = strategy.transferRuns(input);
+    MockProgressBase progress;
+    EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
+
+    auto transferRuns = strategy.transferRuns(input, progress);
     auto output = transferRuns.getTransferRuns();
 
     TS_ASSERT_EQUALS(output, expected);
+    TS_ASSERT(Mock::VerifyAndClear(&progress));
   }
 
   void test_clone() {

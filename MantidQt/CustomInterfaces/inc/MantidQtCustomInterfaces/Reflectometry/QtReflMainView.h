@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/ProgressableView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
@@ -38,7 +39,8 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport QtReflMainView : public MantidQt::API::UserSubWindow,
-                                 public ReflMainView {
+                                 public ReflMainView,
+                                 public ProgressableView {
   Q_OBJECT
 public:
   QtReflMainView(QWidget *parent = 0);
@@ -61,6 +63,11 @@ public:
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
   void setTransferMethods(const std::set<std::string> &methods) override;
+
+  // Set the status of the progress bar
+  void setProgressRange(int min, int max) override;
+  void setProgress(int progress) override;
+  void clearProgress() override;
 
   // Accessor methods
   std::set<int> getSelectedSearchRows() const override;

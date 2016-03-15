@@ -1,17 +1,17 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMeasurementItemSource.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/UserCatalogInfo.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMeasurementItemSource.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
 #include <boost/regex.hpp>
-#include <memory>
-#include <vector>
-#include <map>
-#include <utility>
 #include <limits>
+#include <map>
+#include <memory>
 #include <set>
 #include <sstream>
+#include <utility>
+#include <vector>
 
 using namespace Mantid::Kernel;
 
@@ -41,7 +41,7 @@ ReflMeasureTransferStrategy::~ReflMeasureTransferStrategy() {}
 
 TransferResults
 MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
-    SearchResultMap &searchResults) {
+    SearchResultMap &searchResults, Mantid::Kernel::ProgressBase &progress) {
 
   typedef std::vector<MeasurementItem> VecSameMeasurement;
   typedef std::map<MeasurementItem::IDType, VecSameMeasurement>
@@ -86,6 +86,8 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
       results.addErrorRow(metaData.run(), metaData.whyUnuseable());
     }
 
+    // Obtaining metadata could take time.
+    progress.report();
   }
 
   int nextGroupId = 0;
