@@ -1,6 +1,10 @@
 #ifndef MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
 
+#include <map>
+#include <string>
+#include <vector>
+
 #include "MantidKernel/System.h"
 
 namespace MantidQt {
