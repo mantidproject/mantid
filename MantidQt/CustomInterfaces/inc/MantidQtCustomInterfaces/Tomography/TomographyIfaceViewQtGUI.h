@@ -20,6 +20,7 @@
 #include "ui_TomographyIfaceQtTabRun.h"
 #include "ui_TomographyIfaceQtTabSetup.h"
 #include "ui_TomographyIfaceQtTabVisualize.h"
+#include "ui_TomographyIfaceQtTabSystemSettings.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <json/json.h>
@@ -309,8 +310,8 @@ private:
   /// Interface definition with widgets for the main interface window
   Ui::TomographyIfaceQtGUI m_ui;
   // And its sections/tabs. Note that for compactness they're called simply
-  // 'tabs'
-  // but they could be separate dialogs, widgets, etc.
+  // 'tabs' but they could be separate dialogs, widgets, etc. combined in
+  // different ways.
   Ui::TomographyIfaceQtTabRun m_uiTabRun;
   Ui::TomographyIfaceQtTabSetup m_uiTabSetup;
   Ui::TomographyIfaceQtTabFiltersSettings m_uiTabFilters;
@@ -318,6 +319,7 @@ private:
   Ui::TomographyIfaceQtTabVisualize m_uiTabVisualize;
   Ui::ImgFormatsConversion m_uiTabConvertFormats;
   Ui::TomographyIfaceQtTabEnergy m_uiTabEnergy;
+  Ui::TomographyIfaceQtTabSystemSettings m_uiTabSystemSettings;
 
   ImageROIViewQtWidget *m_tabROIW;
 

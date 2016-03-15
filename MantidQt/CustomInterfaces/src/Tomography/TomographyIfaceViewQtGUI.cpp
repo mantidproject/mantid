@@ -219,6 +219,10 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_uiTabEnergy.setupUi(tabEBandsW);
   m_ui.tabMain->addTab(tabEBandsW, QString("Energy bands"));
 
+  QWidget *tabSystemSettingsW = new QWidget();
+  m_uiTabSystemSettings.setupUi(tabSystemSettingsW);
+  m_ui.tabMain->addTab(tabSystemSettingsW, QString("System"));
+
   readSettings();
 
   // basic UI setup
@@ -288,14 +292,16 @@ void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
       QString::fromStdString(m_pathsConfig.pathOpenBeam()));
   m_uiTabSetup.lineEdit_path_dark->setText(
       QString::fromStdString(m_pathsConfig.pathDark()));
-  m_uiTabSetup.lineEdit_SCARF_path->setText(
+
+  // System/advanced/hidden settings:
+  m_uiTabSystemSettings.lineEdit_SCARF_path->setText(
       QString::fromStdString(m_pathsConfig.pathBase()));
-  m_uiTabSetup.lineEdit_scripts_base_dir->setText(
+  m_uiTabSystemSettings.lineEdit_scripts_base_dir->setText(
       QString::fromStdString(m_pathsConfig.pathScriptsTools()));
 
   // reset setup of the remote
-  connect(m_uiTabSetup.pushButton_reset_scripts_base_dir, SIGNAL(released()),
-          this, SLOT(resetRemoteSetup()));
+  connect(m_uiTabSystemSettings.pushButton_reset_scripts_base_dir,
+          SIGNAL(released()), this, SLOT(resetRemoteSetup()));
 
   // 'browse' buttons for local conf:
   connect(m_uiTabSetup.pushButton_in_out_dir, SIGNAL(released()), this,
@@ -305,10 +311,10 @@ void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
 }
 
 void TomographyIfaceViewQtGUI::resetRemoteSetup() {
-  m_uiTabSetup.lineEdit_scripts_base_dir->setText(
+  m_uiTabSystemSettings.lineEdit_scripts_base_dir->setText(
       QString::fromStdString(g_defRemotePathScripts));
-  m_uiTabSetup.spinBox_SCARFnumNodes->setValue(1);
-  m_uiTabSetup.spinBox_SCARFnumCores->setValue(8);
+  m_uiTabSystemSettings.spinBox_SCARFnumNodes->setValue(1);
+  m_uiTabSystemSettings.spinBox_SCARFnumCores->setValue(8);
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionRun() {
@@ -676,7 +682,7 @@ void TomographyIfaceViewQtGUI::readSettings() {
 
   qs.endGroup();
 
-  m_uiTabSetup.lineEdit_SCARF_path->setText(
+  m_uiTabSystemSettings.lineEdit_SCARF_path->setText(
       QString::fromStdString(m_settings.SCARFBasePath));
 }
 
@@ -710,7 +716,7 @@ QDataStream &operator<<(QDataStream &stream,
 void TomographyIfaceViewQtGUI::saveSettings() const {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
-  QString s = m_uiTabSetup.lineEdit_SCARF_path->text();
+  QString s = m_uiTabSystemSettings.lineEdit_SCARF_path->text();
   qs.setValue("SCARF-base-path", s);
   qs.setValue("on-close-ask-for-confirmation",
               m_settings.onCloseAskForConfirmation);
