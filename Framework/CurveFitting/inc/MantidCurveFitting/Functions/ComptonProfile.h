@@ -89,10 +89,11 @@ public:
   fillConstraintMatrix(Kernel::DblMatrix &cmatrix, const size_t start,
                        const std::vector<double> &errors) const = 0;
 
-  void setParameter(size_t i, const double &value, bool explicitlySet = true) override;
+  void setParameter(size_t i, const double &value,
+                    bool explicitlySet = true) override;
 
-  void setParameter(const std::string &name, const double &value, bool explicitlySet = true) override
-  {
+  void setParameter(const std::string &name, const double &value,
+                    bool explicitlySet = true) override {
     ParamFunction::setParameter(name, value, explicitlySet);
   }
 
