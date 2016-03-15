@@ -138,6 +138,8 @@ namespace VATES
     std::vector<double> radii = ellipticalShape.abcRadii();
     std::vector<Mantid::Kernel::V3D> axes = getAxes(ellipticalShape, peak);
 
+    // The rotation+scaling matrix is the
+    // principal axes of the ellipsoid scaled by the radii.
     std::array<float, 9> tensor;
     for (unsigned j = 0; j < 3; ++j) {
       for (unsigned k = 0; k < 3; ++k) {
@@ -175,8 +177,8 @@ Create the vtkStructuredGrid from the provided workspace
 stack.
 @return vtkPolyData glyph.
 */
-  vtkPolyData* vtkPeakMarkerFactory::create(ProgressAction& progressUpdating) const
-  {
+  vtkSmartPointer<vtkPolyData>
+  vtkPeakMarkerFactory::create(ProgressAction &progressUpdating) const {
     validate();
 
     int numPeaks = m_workspace->getNumberPeaks();
@@ -281,7 +283,7 @@ stack.
 
     } // for each peak
 
-    return appendFilter->GetOutput();
+    return vtkSmartPointer<vtkPolyData>::Take(appendFilter->GetOutput());
   }
 }
 }

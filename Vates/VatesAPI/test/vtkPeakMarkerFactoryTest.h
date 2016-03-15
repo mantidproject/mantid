@@ -71,8 +71,7 @@ public:
 
     vtkPeakMarkerFactory factory("signal", dims);
     factory.initialize(pw_ptr);
-    auto set =
-        vtkSmartPointer<vtkPolyData>::Take(factory.create(updateProgress));
+    auto set = factory.create(updateProgress);
 
     // As the marker type are three axes(2 points), we expect 5*2*3 points
     // The angle is 0 degrees and the size is 0.3
@@ -105,7 +104,7 @@ public:
 
     vtkPeakMarkerFactory factory("signal", vtkPeakMarkerFactory::Peak_in_Q_lab);
     factory.initialize(pw_ptr);
-    auto set = vtkSmartPointer<vtkPolyData>::Take(factory.create(mockProgress));
+    auto set = factory.create(mockProgress);
 
     TSM_ASSERT("Progress Updates not used as expected.", Mock::VerifyAndClearExpectations(&mockProgress));
   }
@@ -242,8 +241,7 @@ public:
 
     vtkPeakMarkerFactory factory("signal");
     factory.initialize(pw_ptr);
-    auto set =
-        vtkSmartPointer<vtkPolyData>::Take(factory.create(updateProgress));
+    auto set = factory.create(updateProgress);
 
     TS_ASSERT(set);
     TS_ASSERT_EQUALS(set->GetNumberOfPoints(), 300);
@@ -290,8 +288,7 @@ public:
 
       vtkPeakMarkerFactory factory("signal");
       factory.initialize(pw_ptr);
-      auto set =
-          vtkSmartPointer<vtkPolyData>::Take(factory.create(updateProgress));
+      auto set = factory.create(updateProgress);
 
       TS_ASSERT(set);
       TS_ASSERT_EQUALS(set->GetNumberOfPoints(), 300);
