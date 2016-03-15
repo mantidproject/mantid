@@ -1,5 +1,6 @@
 #include "MantidKernel/UnitLabel.h"
 #include <cstring>
+#include <utility>
 
 namespace Mantid {
 namespace Kernel {
@@ -9,9 +10,9 @@ namespace Kernel {
  * @param unicode A label that can contain unicode characters
  * @param latex A text label containg the ascii characters with latex formatting
  */
-UnitLabel::UnitLabel(const AsciiString &ascii, const Utf8String &unicode,
-                     const AsciiString &latex)
-    : m_ascii(ascii), m_utf8(unicode), m_latex(latex) {}
+UnitLabel::UnitLabel(AsciiString ascii, Utf8String unicode, AsciiString latex)
+    : m_ascii(std::move(ascii)), m_utf8(std::move(unicode)),
+      m_latex(std::move(latex)) {}
 
 /**
  * Use an ASCII string for the unicode variant too

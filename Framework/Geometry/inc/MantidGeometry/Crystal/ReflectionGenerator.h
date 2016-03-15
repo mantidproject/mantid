@@ -108,7 +108,7 @@ enum struct ReflectionConditionFilter {
 */
 class MANTID_GEOMETRY_DLL ReflectionGenerator {
 public:
-  ReflectionGenerator(const CrystalStructure &crystalStructure,
+  ReflectionGenerator(CrystalStructure crystalStructure,
                       ReflectionConditionFilter defaultFilter =
                           ReflectionConditionFilter::SpaceGroup);
 

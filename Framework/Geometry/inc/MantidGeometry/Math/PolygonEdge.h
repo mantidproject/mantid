@@ -48,7 +48,7 @@ public:
   };
 
   /// Constructor with starting and ending points
-  PolygonEdge(const Kernel::V2D &start, const Kernel::V2D &end);
+  PolygonEdge(Kernel::V2D start, Kernel::V2D end);
   /// Access the start point
   inline const Kernel::V2D &start() const { return m_start; }
   /// Access the end point

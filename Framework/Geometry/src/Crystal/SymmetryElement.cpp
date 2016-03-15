@@ -8,8 +8,8 @@ namespace Mantid {
 namespace Geometry {
 
 /// Constructor with symbol argument.
-SymmetryElement::SymmetryElement(const std::string &symbol)
-    : m_hmSymbol(symbol) {}
+SymmetryElement::SymmetryElement(std::string symbol)
+    : m_hmSymbol(std::move(symbol)) {}
 
 SymmetryElementIdentity::SymmetryElementIdentity() : SymmetryElement("1") {}
 
@@ -19,8 +19,8 @@ SymmetryElement_sptr SymmetryElementIdentity::clone() const {
 }
 
 /// Constructor with inversion point, default is (0,0,0).
-SymmetryElementInversion::SymmetryElementInversion(const V3R &inversionPoint)
-    : SymmetryElement("-1"), m_inversionPoint(inversionPoint) {}
+SymmetryElementInversion::SymmetryElementInversion(V3R inversionPoint)
+    : SymmetryElement("-1"), m_inversionPoint(std::move(inversionPoint)) {}
 
 /// Returns a clone of the inversion element.
 SymmetryElement_sptr SymmetryElementInversion::clone() const {
@@ -30,8 +30,8 @@ SymmetryElement_sptr SymmetryElementInversion::clone() const {
 /// Constructor for SymmetryElementWithAxis.
 SymmetryElementWithAxis::SymmetryElementWithAxis(const std::string &symbol,
                                                  const V3R &axis,
-                                                 const V3R &translation)
-    : SymmetryElement(symbol), m_translation(translation) {
+                                                 V3R translation)
+    : SymmetryElement(symbol), m_translation(std::move(translation)) {
   setAxis(axis);
 }
 
@@ -70,8 +70,8 @@ SymmetryElement_sptr SymmetryElementMirror::clone() const {
 }
 
 /// Constructor for translation element, requires translation vector.
-SymmetryElementTranslation::SymmetryElementTranslation(const V3R &translation)
-    : SymmetryElement("t"), m_translation(translation) {}
+SymmetryElementTranslation::SymmetryElementTranslation(V3R translation)
+    : SymmetryElement("t"), m_translation(std::move(translation)) {}
 
 /// Returns a clone of the translation.
 SymmetryElement_sptr SymmetryElementTranslation::clone() const {

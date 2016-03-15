@@ -24,8 +24,8 @@ bool QUnit::isQUnit() const { return true; }
 //----------------------------------------------------------------------------------------------
 ReciprocalLatticeUnit::ReciprocalLatticeUnit() : m_unitLabel(UnitLabel("")) {}
 
-ReciprocalLatticeUnit::ReciprocalLatticeUnit(const UnitLabel &unitLabel)
-    : m_unitLabel(unitLabel) {}
+ReciprocalLatticeUnit::ReciprocalLatticeUnit(UnitLabel unitLabel)
+    : m_unitLabel(std::move(unitLabel)) {}
 
 UnitLabel ReciprocalLatticeUnit::getUnitLabel() const {
   if (isSpecialRLUUnitLabel()) {
@@ -80,7 +80,7 @@ InverseAngstromsUnit *InverseAngstromsUnit::clone() const {
 //  LabelUnit
 //----------------------------------------------------------------------------------------------
 
-LabelUnit::LabelUnit(const UnitLabel &unitLabel) : m_unitLabel(unitLabel) {}
+LabelUnit::LabelUnit(UnitLabel unitLabel) : m_unitLabel(std::move(unitLabel)) {}
 
 UnitLabel LabelUnit::getUnitLabel() const { return m_unitLabel; }
 

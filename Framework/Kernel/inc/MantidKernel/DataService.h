@@ -64,8 +64,8 @@ public:
   /// Class for named object notifications
   class NamedObjectNotification : public Poco::Notification {
   public:
-    NamedObjectNotification(const std::string &name)
-        : Poco::Notification(), m_name(name) {}
+    NamedObjectNotification(std::string name)
+        : Poco::Notification(), m_name(std::move(name)) {}
 
     /// Returns the name of the object
     std::string objectName() const { return m_name; }
@@ -171,8 +171,8 @@ public:
   class RenameNotification : public NamedObjectNotification {
   public:
     /// Constructor
-    RenameNotification(const std::string &name, const std::string &newName)
-        : NamedObjectNotification(name), m_newName(newName) {}
+    RenameNotification(const std::string &name, std::string newName)
+        : NamedObjectNotification(name), m_newName(std::move(newName)) {}
 
     /// New name for the object
     const std::string &newObjectName() const { return m_newName; }
@@ -469,7 +469,7 @@ public:
 
 protected:
   /// Protected constructor (singleton)
-  DataService(const std::string &name) : svcName(name), g_log(svcName) {}
+  DataService(std::string name) : svcName(std::move(name)), g_log(svcName) {}
   virtual ~DataService() = default;
 
 private:

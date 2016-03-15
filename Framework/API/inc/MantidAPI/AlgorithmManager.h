@@ -21,7 +21,7 @@ namespace API {
 class AlgorithmStartingNotification : public Poco::Notification {
 public:
   AlgorithmStartingNotification(IAlgorithm_sptr alg)
-      : Poco::Notification(), m_alg(alg) {}
+      : Poco::Notification(), m_alg(std::move(alg)) {}
   /// Returns the algorithm that is starting
   IAlgorithm_sptr getAlgorithm() const { return m_alg; }
 

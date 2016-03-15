@@ -26,7 +26,8 @@ ConvexPolygon::ConvexPolygon()
 /**
  * @param vertices A list of points that form the polygon
  */
-ConvexPolygon::ConvexPolygon(const Vertices &vertices) : m_vertices(vertices) {
+ConvexPolygon::ConvexPolygon(Vertices vertices)
+    : m_vertices(std::move(vertices)) {
   setup();
 }
 

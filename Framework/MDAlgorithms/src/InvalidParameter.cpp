@@ -4,7 +4,8 @@ namespace Mantid {
 namespace MDAlgorithms {
 InvalidParameter::InvalidParameter() {}
 
-InvalidParameter::InvalidParameter(std::string value) : m_value(value) {}
+InvalidParameter::InvalidParameter(std::string value)
+    : m_value(std::move(value)) {}
 
 std::string InvalidParameter::getName() const { return parameterName(); }
 

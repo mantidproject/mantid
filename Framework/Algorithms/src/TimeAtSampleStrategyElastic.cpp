@@ -48,7 +48,7 @@ namespace Algorithms {
  */
 TimeAtSampleStrategyElastic::TimeAtSampleStrategyElastic(
     Mantid::API::MatrixWorkspace_const_sptr ws)
-    : m_ws(ws) {}
+    : m_ws(std::move(ws)) {}
 
 /**
  * @brief Calculate correction

@@ -94,9 +94,8 @@ namespace Converters {
  * @param value :: A boost python object wrapping a numpy.ndarray
  */
 template <typename DestElementType>
-NDArrayToVector<DestElementType>::NDArrayToVector(
-    const boost::python::object &value)
-    : m_arr(value) {
+NDArrayToVector<DestElementType>::NDArrayToVector(boost::python::object value)
+    : m_arr(std::move(value)) {
   typeCheck();
 }
 

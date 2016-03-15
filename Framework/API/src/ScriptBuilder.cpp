@@ -24,7 +24,7 @@ const std::string COMMENT_ALG = "Comment";
 ScriptBuilder::ScriptBuilder(boost::shared_ptr<HistoryView> view,
                              std::string versionSpecificity)
     : m_historyItems(view->getAlgorithmsList()), m_output(),
-      m_versionSpecificity(versionSpecificity) {}
+      m_versionSpecificity(std::move(versionSpecificity)) {}
 
 /**
  * Build a python script for each algorithm included in the history view.

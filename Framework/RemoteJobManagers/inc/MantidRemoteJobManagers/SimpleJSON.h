@@ -92,7 +92,7 @@ private:
 
 class JSONException : public std::exception {
 public:
-  JSONException(const std::string &msg) : m_msg(msg) {}
+  JSONException(std::string msg) : m_msg(std::move(msg)) {}
   const std::string &getMsg() const { return m_msg; }
 
   // Default constructor, copy constructor & assignment operator are fine

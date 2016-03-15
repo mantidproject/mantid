@@ -6,9 +6,8 @@ namespace Geometry {
 V3R::V3R() : m_x(0), m_y(0), m_z(0) {}
 
 /// Constructor from three RationalNumbers, which may also be integers
-V3R::V3R(const RationalNumber &x, const RationalNumber &y,
-         const RationalNumber &z)
-    : m_x(x), m_y(y), m_z(z) {}
+V3R::V3R(RationalNumber x, RationalNumber y, RationalNumber z)
+    : m_x(std::move(x)), m_y(std::move(y)), m_z(std::move(z)) {}
 
 /// Constructor from an appropriately sized integer vector
 V3R::V3R(const std::vector<int> &vector) {

@@ -50,8 +50,7 @@ namespace Kernel {
 class FeatureUsage {
 public:
   /// Constructor
-  FeatureUsage(const std::string &type, const std::string &name,
-               const bool internal);
+  FeatureUsage(std::string type, std::string name, const bool internal);
   bool operator<(const FeatureUsage &r) const;
 
   ::Json::Value asJson() const;

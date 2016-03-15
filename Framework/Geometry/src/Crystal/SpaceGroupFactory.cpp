@@ -76,10 +76,9 @@ std::vector<std::string> operator*(const SymmetryOperation &symOp,
 
 /// Constructor for AbstractSpaceGroupGenerator
 AbstractSpaceGroupGenerator::AbstractSpaceGroupGenerator(
-    size_t number, const std::string &hmSymbol,
-    const std::string &generatorInformation)
-    : m_number(number), m_hmSymbol(hmSymbol),
-      m_generatorString(generatorInformation), m_prototype() {}
+    size_t number, std::string hmSymbol, std::string generatorInformation)
+    : m_number(number), m_hmSymbol(std::move(hmSymbol)),
+      m_generatorString(std::move(generatorInformation)), m_prototype() {}
 
 /// Returns the internally stored prototype, generates one if necessary.
 SpaceGroup_const_sptr AbstractSpaceGroupGenerator::getPrototype() {

@@ -21,8 +21,8 @@ std::function<bool(const Kernel::V3D &)> HKLFilter::fn() const {
 
 /// Stores the supplied filter, throws exception if filter is null.
 HKLFilterUnaryLogicOperation::HKLFilterUnaryLogicOperation(
-    const HKLFilter_const_sptr &filter)
-    : m_operand(filter) {
+    HKLFilter_const_sptr filter)
+    : m_operand(std::move(filter)) {
   if (!m_operand) {
     throw std::runtime_error(
         "Cannot create HKLFilterUnaryLogicOperation from null operand.");
@@ -42,8 +42,8 @@ bool HKLFilterNot::isAllowed(const Kernel::V3D &hkl) const {
 /// Stores the left-hand and right-hand side operators, throws exception if
 /// either is null.
 HKLFilterBinaryLogicOperation::HKLFilterBinaryLogicOperation(
-    const HKLFilter_const_sptr &lhs, const HKLFilter_const_sptr &rhs)
-    : m_lhs(lhs), m_rhs(rhs) {
+    HKLFilter_const_sptr lhs, HKLFilter_const_sptr rhs)
+    : m_lhs(std::move(lhs)), m_rhs(std::move(rhs)) {
   if (!m_lhs || !m_rhs) {
     throw std::runtime_error("Cannot construct HKLFilterBinaryLogicOperation "
                              "with one or more null-operands.");

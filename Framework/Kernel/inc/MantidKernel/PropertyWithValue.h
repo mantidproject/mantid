@@ -295,7 +295,7 @@ public:
       IValidator_sptr validator = IValidator_sptr(new NullValidator),
       const unsigned int direction = Direction::Input)
       : Property(name, typeid(TYPE), direction), m_value(defaultValue),
-        m_initialValue(defaultValue), m_validator(validator) {}
+        m_initialValue(defaultValue), m_validator(std::move(validator)) {}
 
   /** Constructor
    *  @param name :: The name to assign to the property
@@ -329,7 +329,7 @@ public:
       : Property(name, typeid(TYPE), direction),
         m_value(extractToValueVector<TYPE>(defaultValueStr)),
         m_initialValue(extractToValueVector<TYPE>(defaultValueStr)),
-        m_validator(validator) {
+        m_validator(std::move(validator)) {
     UNUSED_ARG(defaultValue);
   }
 

@@ -79,7 +79,7 @@ public:
   BbyDetectorBankFactory(Geometry::Instrument_sptr instrument,
                          Geometry::Object_sptr pixelShape, size_t xPixelCount,
                          size_t yPixelCount, double pixelWidth,
-                         double pixelHeight, const Kernel::V3D &center);
+                         double pixelHeight, Kernel::V3D center);
 
   // methods
   void createAndAssign(size_t startIndex, const Kernel::V3D &pos,
@@ -861,10 +861,11 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
 BbyDetectorBankFactory::BbyDetectorBankFactory(
     Geometry::Instrument_sptr instrument, Geometry::Object_sptr pixelShape,
     size_t xPixelCount, size_t yPixelCount, double pixelWidth,
-    double pixelHeight, const Kernel::V3D &center)
-    : m_instrument(instrument), m_pixelShape(pixelShape),
+    double pixelHeight, Kernel::V3D center)
+    : m_instrument(std::move(instrument)), m_pixelShape(std::move(pixelShape)),
       m_xPixelCount(xPixelCount), m_yPixelCount(yPixelCount),
-      m_pixelWidth(pixelWidth), m_pixelHeight(pixelHeight), m_center(center) {}
+      m_pixelWidth(pixelWidth), m_pixelHeight(pixelHeight),
+      m_center(std::move(center)) {}
 void BbyDetectorBankFactory::createAndAssign(size_t startIndex,
                                              const Kernel::V3D &pos,
                                              const Kernel::Quat &rot) const {

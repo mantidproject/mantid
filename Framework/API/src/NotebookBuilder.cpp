@@ -22,7 +22,7 @@ Mantid::Kernel::Logger g_log("NotebookBuilder");
 NotebookBuilder::NotebookBuilder(boost::shared_ptr<HistoryView> view,
                                  std::string versionSpecificity)
     : m_historyItems(view->getAlgorithmsList()), m_output(),
-      m_versionSpecificity(versionSpecificity),
+      m_versionSpecificity(std::move(versionSpecificity)),
       m_nb_writer(new NotebookWriter()) {}
 
 /**

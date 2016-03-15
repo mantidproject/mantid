@@ -160,7 +160,8 @@ struct TCPStreamEventDataNeutron {
   std::vector<TCPStreamEventNeutron> data; ///< list of neutron events
 
   TCPStreamEventDataNeutron() : head(TCPStreamEventHeader::Neutron) {}
-  TCPStreamEventDataNeutron(const TCPStreamEventHeader &head_) : head(head_) {}
+  TCPStreamEventDataNeutron(TCPStreamEventHeader head_)
+      : head(std::move(head_)) {}
   bool isValid() const {
     return head.isValid() && head_n.isValid() &&
            (head.type == TCPStreamEventHeader::Neutron) &&
@@ -175,7 +176,8 @@ struct TCPStreamEventDataSetup {
   /// and the number of neutron events in this packet
   TCPStreamEventHeaderSetup head_setup;
   TCPStreamEventDataSetup() : head(TCPStreamEventHeader::Setup) {}
-  TCPStreamEventDataSetup(const TCPStreamEventHeader &head_) : head(head_) {}
+  TCPStreamEventDataSetup(TCPStreamEventHeader head_)
+      : head(std::move(head_)) {}
   bool isValid() const {
     return head.isValid() && head_setup.isValid() &&
            (head.type == TCPStreamEventHeader::Setup);

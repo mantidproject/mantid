@@ -44,7 +44,8 @@ public:
   TestServerConnection(const Poco::Net::StreamSocket &soc, int nper, int nspec,
                        int rate, int nevents, boost::shared_ptr<Progress> prog)
       : Poco::Net::TCPServerConnection(soc), m_nPeriods(nper),
-        m_nSpectra(nspec), m_Rate(rate), m_nEvents(nevents), m_prog(prog) {
+        m_nSpectra(nspec), m_Rate(rate), m_nEvents(nevents),
+        m_prog(std::move(prog)) {
     m_prog->report(0, "Client Connected");
     sendInitialSetup();
   }
@@ -135,7 +136,8 @@ public:
   TestServerConnectionFactory(int nper, int nspec, int rate, int nevents,
                               boost::shared_ptr<Progress> prog)
       : Poco::Net::TCPServerConnectionFactory(), m_nPeriods(nper),
-        m_nSpectra(nspec), m_Rate(rate), m_nEvents(nevents), m_prog(prog) {}
+        m_nSpectra(nspec), m_Rate(rate), m_nEvents(nevents),
+        m_prog(std::move(prog)) {}
   /**
   * The factory method.
   * @param socket :: The socket.

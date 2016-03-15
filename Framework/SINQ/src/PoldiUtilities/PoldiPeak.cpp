@@ -139,7 +139,7 @@ bool PoldiPeak::lessThan(const PoldiPeak_sptr &first,
 
 PoldiPeak::PoldiPeak(UncertainValue d, UncertainValue intensity,
                      UncertainValue fwhm, MillerIndices hkl)
-    : m_hkl(hkl), m_intensity(intensity) {
+    : m_hkl(std::move(hkl)), m_intensity(std::move(intensity)) {
   setD(d);
   setFwhm(fwhm, Relative);
 }

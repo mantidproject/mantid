@@ -7,9 +7,10 @@ namespace Poldi {
 PoldiDGrid::PoldiDGrid(boost::shared_ptr<PoldiAbstractDetector> detector,
                        boost::shared_ptr<PoldiAbstractChopper> chopper,
                        double deltaT, std::pair<double, double> wavelengthRange)
-    : m_detector(detector), m_chopper(chopper), m_deltaT(deltaT),
-      m_wavelengthRange(wavelengthRange), m_dRangeAsMultiples(), m_deltaD(0.0),
-      m_dgrid(), m_hasCachedCalculation(false) {}
+    : m_detector(std::move(detector)), m_chopper(std::move(chopper)),
+      m_deltaT(deltaT), m_wavelengthRange(wavelengthRange),
+      m_dRangeAsMultiples(), m_deltaD(0.0), m_dgrid(),
+      m_hasCachedCalculation(false) {}
 
 void PoldiDGrid::setDetector(
     boost::shared_ptr<PoldiAbstractDetector> newDetector) {

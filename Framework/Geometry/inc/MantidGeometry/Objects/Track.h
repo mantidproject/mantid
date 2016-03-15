@@ -57,10 +57,10 @@ struct MANTID_GEOMETRY_DLL Link {
   * @param compID :: An optional component identifier for the physical object
   * hit. (Default=NULL)
   */
-  inline Link(const Kernel::V3D &entry, const Kernel::V3D &exit,
-              const double totalDistance, const Object &obj,
-              const ComponentID compID = nullptr)
-      : entryPoint(entry), exitPoint(exit), distFromStart(totalDistance),
+  inline Link(Kernel::V3D entry, Kernel::V3D exit, const double totalDistance,
+              const Object &obj, const ComponentID compID = nullptr)
+      : entryPoint(std::move(entry)), exitPoint(std::move(exit)),
+        distFromStart(totalDistance),
         distInsideObject(entryPoint.distance(exitPoint)), object(&obj),
         componentID(compID) {}
   /// Less than operator
@@ -103,11 +103,12 @@ struct IntersectionPoint {
   * (Default=NULL)
   * @param obj :: A reference to the object that was intersected
   */
-  inline IntersectionPoint(const int flag, const Kernel::V3D &end,
+  inline IntersectionPoint(const int flag, Kernel::V3D end,
                            const double distFromStartOfTrack, const Object &obj,
                            const ComponentID compID = nullptr)
-      : directionFlag(flag), endPoint(end), distFromStart(distFromStartOfTrack),
-        object(&obj), componentID(compID) {}
+      : directionFlag(flag), endPoint(std::move(end)),
+        distFromStart(distFromStartOfTrack), object(&obj), componentID(compID) {
+  }
 
   /**
   * A IntersectionPoint is less-than another if either
@@ -150,7 +151,7 @@ public:
   /// Default constructor
   Track();
   /// Constructor
-  Track(const Kernel::V3D &startPt, const Kernel::V3D &unitVector);
+  Track(Kernel::V3D startPt, Kernel::V3D unitVector);
   /// Adds a point of intersection to the track
   void addPoint(const int directionFlag, const Kernel::V3D &endPoint,
                 const Object &obj, const ComponentID compID = nullptr);

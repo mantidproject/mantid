@@ -37,9 +37,10 @@ public:
   OrEnabledWhenProperties(std::string prop1Name, ePropertyCriterion prop1Crit,
                           std::string prop1Value, std::string prop2Name,
                           ePropertyCriterion prop2Crit, std::string prop2Value)
-      : IPropertySettings(), propName1(prop1Name), propName2(prop2Name),
-        Criteria1(prop1Crit), Criteria2(prop2Crit), value1(prop1Value),
-        value2(prop2Value)
+      : IPropertySettings(), propName1(std::move(prop1Name)),
+        propName2(std::move(prop2Name)), Criteria1(prop1Crit),
+        Criteria2(prop2Crit), value1(std::move(prop1Value)),
+        value2(std::move(prop2Value))
 
   {
     Prop1 = new Kernel::EnabledWhenProperty(propName1, Criteria1, value1);

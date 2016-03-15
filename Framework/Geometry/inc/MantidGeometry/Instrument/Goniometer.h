@@ -59,8 +59,8 @@ struct GoniometerAxis {
   /// Constructor
   GoniometerAxis(std::string initname, Kernel::V3D initrotationaxis,
                  double initangle, int initsense, int initangleunit)
-      : name(initname), rotationaxis(initrotationaxis), angle(initangle),
-        sense(initsense), angleunit(initangleunit) {}
+      : name(std::move(initname)), rotationaxis(std::move(initrotationaxis)),
+        angle(initangle), sense(initsense), angleunit(initangleunit) {}
   GoniometerAxis()
       : name(""), rotationaxis(), angle(0.), sense(0), angleunit(0) {}
 

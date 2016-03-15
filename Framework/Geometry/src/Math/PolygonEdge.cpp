@@ -4,6 +4,7 @@
 #include "MantidGeometry/Math/PolygonEdge.h"
 #include "MantidKernel/FloatingPointComparison.h"
 #include <limits>
+#include <utility>
 
 namespace Mantid {
 namespace Geometry {
@@ -20,8 +21,9 @@ const double EPSILON = std::numeric_limits<double>::epsilon();
 /**
  * Contructor taking two points, start and end
  */
-PolygonEdge::PolygonEdge(const Kernel::V2D &start, const Kernel::V2D &end)
-    : m_start(start), m_end(end), m_dir(m_end - m_start) {}
+PolygonEdge::PolygonEdge(Kernel::V2D start, Kernel::V2D end)
+    : m_start(std::move(start)), m_end(std::move(end)), m_dir(m_end - m_start) {
+}
 
 /**
  * Create a point a given fraction along this edge

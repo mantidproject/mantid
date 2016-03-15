@@ -55,16 +55,17 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 class MANTID_GEOMETRY_DLL XMLInstrumentParameter {
 public:
   /// Default constructor
-  XMLInstrumentParameter(
-      const std::string &logfileID, const std::string &value,
-      const boost::shared_ptr<Kernel::Interpolation> &interpolation,
-      const std::string &formula, const std::string &formulaUnit,
-      const std::string &resultUnit, const std::string &paramName,
-      const std::string &type, const std::string &tie,
-      const std::vector<std::string> &constraint, std::string &penaltyFactor,
-      const std::string &fitFunc, const std::string &extractSingleValueAs,
-      const std::string &eq, const Geometry::IComponent *comp,
-      double angleConvertConst, const std::string &description);
+  XMLInstrumentParameter(std::string logfileID, std::string value,
+                         boost::shared_ptr<Kernel::Interpolation> interpolation,
+                         std::string formula, std::string formulaUnit,
+                         std::string resultUnit, std::string paramName,
+                         std::string type, std::string tie,
+                         std::vector<std::string> constraint,
+                         std::string penaltyFactor, std::string fitFunc,
+                         std::string extractSingleValueAs, std::string eq,
+                         const Geometry::IComponent *comp,
+                         double angleConvertConst,
+                         const std::string &description);
 
   // XML attributes from instrument definition file or instrument parameter file
   const std::string m_logfileID; ///< logfile id

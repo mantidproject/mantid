@@ -386,7 +386,7 @@ private:
     std::string m_name; ///< Name to find
   public:
     /// Constructor
-    FindName(const std::string &name) : m_name(name) {}
+    FindName(std::string name) : m_name(std::move(name)) {}
     /// Comparison operator
     bool operator()(boost::shared_ptr<API::Column> &cp) const {
       return cp->name() == m_name;

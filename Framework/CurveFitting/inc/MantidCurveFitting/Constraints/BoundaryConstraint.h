@@ -50,9 +50,10 @@ public:
         m_upperBound(-DBL_MAX) {}
 
   /// Constructor with no boundary arguments
-  BoundaryConstraint(const std::string &paramName)
-      : API::IConstraint(), m_penaltyFactor(1000.0), m_parameterName(paramName),
-        m_hasLowerBound(false), m_hasUpperBound(false) {}
+  BoundaryConstraint(std::string paramName)
+      : API::IConstraint(), m_penaltyFactor(1000.0),
+        m_parameterName(std::move(paramName)), m_hasLowerBound(false),
+        m_hasUpperBound(false) {}
 
   /// Constructor with boundary arguments
   BoundaryConstraint(API::IFunction *fun, const std::string paramName,

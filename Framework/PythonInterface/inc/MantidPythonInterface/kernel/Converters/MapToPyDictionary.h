@@ -40,7 +40,7 @@ struct DLLExport MapToPyDictionary {
 public:
   using MapType = std::map<KeyType, ValueType>;
 
-  MapToPyDictionary(const MapType &map) : m_map(map) {}
+  MapToPyDictionary(MapType map) : m_map(std::move(map)) {}
   /// Produces a python dictionary
   boost::python::dict operator()() {
     using namespace boost::python;

@@ -8,6 +8,7 @@
 #include "MantidISISLiveData/TCPEventStreamDefs.h"
 
 #include <iostream>
+#include <utility>
 
 namespace Mantid {
 namespace ISISLiveData {

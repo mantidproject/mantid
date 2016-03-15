@@ -108,8 +108,8 @@ protected:
 
   // cookie obtained after logging in
   struct Token {
-    Token(const std::string &u, const std::string &t)
-        : m_url(u), m_token_str(t){};
+    Token(const std::string &u, std::string t)
+        : m_url(u), m_token_str(std::move(t)){};
     Poco::URI m_url;
     std::string m_token_str;
   };

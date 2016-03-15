@@ -82,7 +82,7 @@ MayersSampleCorrectionStrategy::MayersSampleCorrectionStrategy(
     MayersSampleCorrectionStrategy::Parameters params,
     const std::vector<double> &tof, const std::vector<double> &sigIn,
     const std::vector<double> &errIn)
-    : m_pars(params), m_tof(tof), m_sigin(sigIn), m_errin(errIn),
+    : m_pars(std::move(params)), m_tof(tof), m_sigin(sigIn), m_errin(errIn),
       m_histogram(tof.size() == sigIn.size() + 1),
       m_muRrange(calculateMuRange()), m_rng(new MersenneTwister(1)) {
   // Sanity check

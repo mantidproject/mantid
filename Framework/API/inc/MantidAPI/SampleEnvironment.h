@@ -42,7 +42,7 @@ namespace API {
 class MANTID_API_DLL SampleEnvironment {
 public:
   /// Constructor defining the name of the environment
-  SampleEnvironment(const std::string &name);
+  SampleEnvironment(std::string name);
 
   /// @return The name of kit
   inline const std::string name() const { return m_name; }

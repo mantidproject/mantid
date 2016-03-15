@@ -51,7 +51,7 @@ public:
    */
   EnabledWhenWorkspaceIsType(std::string otherPropName,
                              bool enabledSetting = true)
-      : IPropertySettings(), m_otherPropName(otherPropName),
+      : IPropertySettings(), m_otherPropName(std::move(otherPropName)),
         m_enabledSetting(enabledSetting) {}
 
   //--------------------------------------------------------------------------------------------

@@ -67,8 +67,8 @@ template <typename Base>
 class PythonObjectInstantiator : public Kernel::AbstractInstantiator<Base> {
 public:
   /// Constructor taking a Python class object wrapped as a boost::python:object
-  PythonObjectInstantiator(const boost::python::object &classObject)
-      : m_classObject(classObject) {}
+  PythonObjectInstantiator(boost::python::object classObject)
+      : m_classObject(std::move(classObject)) {}
 
   /// Creates an instance of the object as shared_ptr to the Base type
   boost::shared_ptr<Base> createInstance() const override;

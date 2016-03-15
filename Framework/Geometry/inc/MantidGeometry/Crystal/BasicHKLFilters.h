@@ -109,7 +109,7 @@ private:
  */
 class MANTID_GEOMETRY_DLL HKLFilterSpaceGroup : public HKLFilter {
 public:
-  HKLFilterSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
+  HKLFilterSpaceGroup(SpaceGroup_const_sptr spaceGroup);
 
   std::string getDescription() const override;
   bool isAllowed(const Kernel::V3D &hkl) const override;
@@ -128,7 +128,7 @@ protected:
  */
 class MANTID_GEOMETRY_DLL HKLFilterStructureFactor : public HKLFilter {
 public:
-  HKLFilterStructureFactor(const StructureFactorCalculator_sptr &calculator,
+  HKLFilterStructureFactor(StructureFactorCalculator_sptr calculator,
                            double fSquaredMin = 1.0e-6);
 
   std::string getDescription() const override;
@@ -147,7 +147,7 @@ protected:
  */
 class MANTID_GEOMETRY_DLL HKLFilterCentering : public HKLFilter {
 public:
-  HKLFilterCentering(const ReflectionCondition_sptr &centering);
+  HKLFilterCentering(ReflectionCondition_sptr centering);
 
   std::string getDescription() const override;
   bool isAllowed(const Kernel::V3D &hkl) const override;

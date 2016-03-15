@@ -261,7 +261,7 @@ namespace {
 // Check the numbers supplied are not in the range and erase the ones that are
 struct range_check {
   range_check(specnum_t min, specnum_t max, detid2index_map id_to_wi)
-      : m_min(min), m_max(max), m_id_to_wi(id_to_wi) {}
+      : m_min(min), m_max(max), m_id_to_wi(std::move(id_to_wi)) {}
 
   bool operator()(specnum_t x) {
     specnum_t wi = static_cast<specnum_t>((m_id_to_wi)[x]);

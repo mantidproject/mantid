@@ -52,8 +52,7 @@ typedef boost::rational<int> RationalNumber;
 class MANTID_GEOMETRY_DLL V3R {
 public:
   V3R();
-  V3R(const RationalNumber &x, const RationalNumber &y,
-      const RationalNumber &z);
+  V3R(RationalNumber x, RationalNumber y, RationalNumber z);
   V3R(const std::vector<int> &vector);
 
   const RationalNumber &x() const;

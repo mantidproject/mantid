@@ -28,9 +28,9 @@ const std::string FEATURE_URL("http://reports.mantidproject.org/api/feature");
 //----------------------------------------------------------------------------------------------
 /** FeatureUsage
 */
-FeatureUsage::FeatureUsage(const std::string &type, const std::string &name,
+FeatureUsage::FeatureUsage(std::string type, std::string name,
                            const bool internal)
-    : type(type), name(name), internal(internal) {}
+    : type(std::move(type)), name(std::move(name)), internal(internal) {}
 
 // Better brute force.
 bool FeatureUsage::operator<(const FeatureUsage &r) const {

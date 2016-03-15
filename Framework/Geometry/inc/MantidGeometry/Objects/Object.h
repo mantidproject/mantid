@@ -64,7 +64,7 @@ public:
   /// Default constructor
   Object();
   /// Constructor providing shape xml.
-  Object(const std::string &shapeXML);
+  Object(std::string shapeXML);
   /// Copy constructor
   Object(const Object &);
   /// Assignment operator

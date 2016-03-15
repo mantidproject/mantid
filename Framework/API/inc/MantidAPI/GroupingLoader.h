@@ -73,7 +73,7 @@ class MANTID_API_DLL GroupingLoader {
 public:
   explicit GroupingLoader(Geometry::Instrument_const_sptr instrument);
   GroupingLoader(Geometry::Instrument_const_sptr instrument,
-                 const std::string &mainFieldDirection);
+                 std::string mainFieldDirection);
   virtual ~GroupingLoader();
   /// Load the grouping from the instrument's IDF
   boost::shared_ptr<Grouping> getGroupingFromIDF() const;

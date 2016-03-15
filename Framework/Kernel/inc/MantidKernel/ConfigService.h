@@ -98,10 +98,9 @@ public:
     *   @param newvalue :: new value of property
     *   @param prevvalue :: previous value of property
     */
-    ValueChanged(const std::string &name, const std::string &newvalue,
-                 const std::string &prevvalue)
-        : ConfigServiceNotification(), m_name(name), m_value(newvalue),
-          m_prev(prevvalue) {}
+    ValueChanged(std::string name, std::string newvalue, std::string prevvalue)
+        : ConfigServiceNotification(), m_name(std::move(name)),
+          m_value(std::move(newvalue)), m_prev(std::move(prevvalue)) {}
     /// The name of the user property that has changed, as it appears in the
     /// user.properties file
     const std::string &key() const {

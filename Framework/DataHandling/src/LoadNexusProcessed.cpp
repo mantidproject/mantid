@@ -72,8 +72,10 @@ struct SpectraInfo {
               IntArray_shared _detectorIndex, IntArray_shared _detectorCount,
               IntArray_shared _detectorList)
       : nSpectra(_nSpectra), hasSpectra(_hasSpectra),
-        spectraNumbers(_spectraNumbers), detectorIndex(_detectorIndex),
-        detectorCount(_detectorCount), detectorList(_detectorList) {}
+        spectraNumbers(std::move(_spectraNumbers)),
+        detectorIndex(std::move(_detectorIndex)),
+        detectorCount(std::move(_detectorCount)),
+        detectorList(std::move(_detectorList)) {}
 
   SpectraInfo(const SpectraInfo &other)
       : nSpectra(other.nSpectra), hasSpectra(other.hasSpectra),

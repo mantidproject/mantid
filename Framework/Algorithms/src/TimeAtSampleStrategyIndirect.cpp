@@ -29,7 +29,7 @@ namespace Algorithms {
  */
 TimeAtSampleStrategyIndirect::TimeAtSampleStrategyIndirect(
     MatrixWorkspace_const_sptr ws)
-    : m_ws(ws) {}
+    : m_ws(std::move(ws)) {}
 
 Correction
 TimeAtSampleStrategyIndirect::calculate(const size_t &workspace_index) const {

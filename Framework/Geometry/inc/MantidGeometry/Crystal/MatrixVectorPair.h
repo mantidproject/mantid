@@ -55,8 +55,8 @@ public:
 
   /// Constructor from matrix and vector.
   MatrixVectorPair(const Kernel::Matrix<MatrixNumericType> &matrix,
-                   const VectorType &vector)
-      : m_matrix(matrix), m_vector(vector) {}
+                   VectorType vector)
+      : m_matrix(matrix), m_vector(std::move(vector)) {}
 
   virtual ~MatrixVectorPair() = default;
 

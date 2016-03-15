@@ -7,8 +7,8 @@ namespace Kernel {
 EnabledWhenProperty::EnabledWhenProperty(std::string otherPropName,
                                          ePropertyCriterion when,
                                          std::string value)
-    : IPropertySettings(), m_otherPropName(otherPropName), m_when(when),
-      m_value(value) {}
+    : IPropertySettings(), m_otherPropName(std::move(otherPropName)),
+      m_when(when), m_value(std::move(value)) {}
 
 bool EnabledWhenProperty::fulfillsCriterion(
     const IPropertyManager *algo) const {

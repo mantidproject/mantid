@@ -95,8 +95,8 @@ public:
   /// Spectra block descriptor
   struct SpectraBlock {
     /// Constructor - initialize the block
-    SpectraBlock(int64_t f, int64_t l, bool is_mon, const std::string &monname)
-        : first(f), last(l), isMonitor(is_mon), monName(monname) {}
+    SpectraBlock(int64_t f, int64_t l, bool is_mon, std::string monname)
+        : first(f), last(l), isMonitor(is_mon), monName(std::move(monname)) {}
 
     int64_t first;  ///< first spectrum number of the block
     int64_t last;   ///< last spectrum number of the block

@@ -134,11 +134,11 @@ class DLLExport MonIDPropChanger : public Kernel::IPropertySettings {
 public:
   //   properties this property depends on:
   //   "InputWorkspace","MonitorSpectrum","MonitorWorkspace"
-  MonIDPropChanger(const std::string &WSProperty,
-                   const std::string &SpectrToNormByProperty,
-                   const std::string &MonitorWorkspace)
-      : hostWSname(WSProperty), SpectraNum(SpectrToNormByProperty),
-        MonitorWorkspaceProp(MonitorWorkspace), is_enabled(true) {}
+  MonIDPropChanger(std::string WSProperty, std::string SpectrToNormByProperty,
+                   std::string MonitorWorkspace)
+      : hostWSname(std::move(WSProperty)),
+        SpectraNum(std::move(SpectrToNormByProperty)),
+        MonitorWorkspaceProp(std::move(MonitorWorkspace)), is_enabled(true) {}
   // if input to this property is enabled
   bool isEnabled(const Mantid::Kernel::IPropertyManager *algo) const override;
   bool isConditionChanged(
