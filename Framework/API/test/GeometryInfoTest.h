@@ -6,9 +6,9 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidAPI/GeometryInfo.h"
-
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
+#include "MantidKernel/MultiThreaded.h"
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -85,7 +85,7 @@ public:
   }
 
   void test_getL1() {
-    auto info = GeometryInfo(*m_factory, *(m_workspace.getSpectrum(0)));
+    GeometryInfo info(*m_factory, *(m_workspace.getSpectrum(0)));
     TS_ASSERT_EQUALS(info.getL1(), 20.0);
   }
 
@@ -122,7 +122,7 @@ public:
   // Legacy test via the workspace method detectorTwoTheta(), which might be
   // removed at some point.
   void test_getTwoThetaLegacy() {
-    auto info = GeometryInfo(*m_factory, *(m_workspace.getSpectrum(2)));
+    GeometryInfo info(*m_factory, *(m_workspace.getSpectrum(2)));
     TS_ASSERT_EQUALS(info.getTwoTheta(),
                      m_workspace.detectorTwoTheta(info.getDetector()));
   }
@@ -142,14 +142,118 @@ public:
   // Legacy test via the workspace method detectorSignedTwoTheta(), which might
   // be removed at some point.
   void test_getSignedTwoThetaLegacy() {
-    auto info = GeometryInfo(*m_factory, *(m_workspace.getSpectrum(2)));
+    GeometryInfo info(*m_factory, *(m_workspace.getSpectrum(2)));
     TS_ASSERT_EQUALS(info.getSignedTwoTheta(),
                      m_workspace.detectorSignedTwoTheta(info.getDetector()));
+  }
+
+  void test_multithreaded_access_l2() {
+    GeometryInfo info(*m_factory, *(m_workspace.getSpectrum(2)));
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int i = 0; i < 100; ++i) {
+      info.getL2();
+    }
+  }
+
+  void test_multithreaded_access_two_theta() {
+    GeometryInfo info(*m_factory, *(m_workspace.getSpectrum(2)));
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int i = 0; i < 100; ++i) {
+      info.getTwoTheta();
+    }
+  }
+
+  void test_multithreaded_access_signed_two_theta() {
+    GeometryInfo info(*m_factory, *(m_workspace.getSpectrum(2)));
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int i = 0; i < 100; ++i) {
+      info.getSignedTwoTheta();
+    }
   }
 
 private:
   WorkspaceTester m_workspace;
   std::unique_ptr<GeometryInfoFactory> m_factory;
+};
+
+class GeometryInfoTestPerformance : public CxxTest::TestSuite {
+public:
+  static GeometryInfoTestPerformance *createSuite() {
+    return new GeometryInfoTestPerformance();
+  }
+  static void destroySuite(GeometryInfoTestPerformance *suite) { delete suite; }
+
+  GeometryInfoTestPerformance() {
+    const size_t numberOfHistograms = 100000;
+    const size_t numberOfBins = 1;
+    m_workspace.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
+    bool includeMonitors = false;
+    bool startYNegative = true;
+    const std::string instrumentName("SimpleFakeInstrument");
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(
+        m_workspace, includeMonitors, startYNegative, instrumentName);
+  }
+
+  void test_single_access_multiple_spectrum() {
+    /*
+     * We are testing the effect of single access to multiple detector detector
+     * l1 l2,
+     * twoTheta information.
+     */
+    double result = 0.0;
+    GeometryInfoFactory factory(m_workspace);
+
+    for (size_t i = 0; i < m_workspace.getNumberHistograms(); ++i) {
+      GeometryInfo geometryInfo(factory.create(i));
+      result += geometryInfo.getL1();
+      result += geometryInfo.getL2();
+      result += geometryInfo.getTwoTheta();
+    }
+    // We are computing an using the result to fool the optimizer.
+    TS_ASSERT(result > 0);
+  }
+
+  void test_typical_access_multiple_spectrum() {
+    /*
+     * We are testing the effect of typical access to multiple detector l1 l2,
+     * twoTheta information.
+     */
+    double result = 0.0;
+    GeometryInfoFactory factory(m_workspace);
+
+    for (size_t i = 0; i < m_workspace.getNumberHistograms(); ++i) {
+      for (size_t j = 0; j < 10; ++j) {
+        auto geometryInfo = factory.create(i);
+        result += geometryInfo.getL1();
+        result += geometryInfo.getL2();
+        result += geometryInfo.getTwoTheta();
+      }
+    }
+    // We are computing an using the result to fool the optimizer.
+    TS_ASSERT(result > 0);
+  }
+
+  void test_multiple_access_single_spectrum() {
+    /*
+     * We are testing the effect of repeated (probably unrealistic) access to
+     * the same detector l1 l2,
+     * twoTheta information.
+     */
+    double result = 0.0;
+    GeometryInfoFactory factory(m_workspace);
+    auto geometryInfo = factory.create(0);
+    for (size_t i = 0; i < 100000; ++i) {
+
+      result += geometryInfo.getL1();
+      result += geometryInfo.getL2();
+      result += geometryInfo.getTwoTheta();
+    }
+    // We are computing an using the result to fool the optimizer.
+    TS_ASSERT(result > 0);
+  }
+
+private:
+  WorkspaceTester m_workspace;
 };
 
 #endif /* MANTID_API_GEOMETRYINFOTEST_H_ */

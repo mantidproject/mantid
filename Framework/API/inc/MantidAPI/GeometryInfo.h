@@ -2,7 +2,8 @@
 #define MANTID_API_GEOMETRYINFO_H_
 
 #include "MantidAPI/GeometryInfoFactory.h"
-
+#include <boost/optional.hpp>
+#include <mutex>
 namespace Mantid {
 
 namespace Geometry {
@@ -84,10 +85,30 @@ public:
   double getSignedTwoTheta() const;
   /// Returns the detector or detector group associated with the spectrum.
   boost::shared_ptr<const Geometry::IDetector> getDetector() const;
+  /// Invalidate the cache
+  void invalidateCache();
+  /// Disable copy
+  GeometryInfo(const GeometryInfo &) =
+      delete; // Cannot remove this owing to GeometryInfoFactory::create
+  /// Disable assignement
+  GeometryInfo &operator=(const GeometryInfo &) =
+      delete; // Cannot remove this owing to GeometryInfoFactory::create
+  ///  Move constructor
+  GeometryInfo(GeometryInfo &&original);
+  ///  Move assignement
+  GeometryInfo &operator=(GeometryInfo &&original);
 
 private:
   const GeometryInfoFactory &m_factory;
   boost::shared_ptr<const Geometry::IDetector> m_detector;
+  using OptionalDouble = boost::optional<double>;
+  mutable OptionalDouble m_l2;
+  mutable OptionalDouble m_twoTheta;
+  mutable OptionalDouble m_signedTwoTheta;
+
+  mutable std::mutex m_l2Lock;
+  mutable std::mutex m_twoThetaLock;
+  mutable std::mutex m_signedTwoThetaLock;
 };
 }
 }
