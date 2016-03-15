@@ -27,6 +27,8 @@ createTestInstrumentWithNoFoilChanger(const Mantid::detid_t id,
                                       const std::string &detShape = "");
 static void addResolutionParameters(const Mantid::API::MatrixWorkspace_sptr &ws,
                                     const Mantid::detid_t detID);
+static void addBankResolution(const Mantid::API::MatrixWorkspace_sptr &ws,
+                              const std::string &name);
 static void addFoilResolution(const Mantid::API::MatrixWorkspace_sptr &ws,
                               const std::string &name);
 
@@ -78,7 +80,11 @@ createTestWorkspace(const size_t nhist, const double x0, const double x1,
     ws2d->setInstrument(createTestInstrumentWithNoFoilChanger(id, detPos));
   }
 
+  addBankResolution(ws2d, "back");
+  addBankResolution(ws2d, "forward");
+
   addResolutionParameters(ws2d, id);
+
   if (addFoilChanger) {
     addFoilResolution(ws2d, "foil-pos0");
     addFoilResolution(ws2d, "foil-pos1");
@@ -92,6 +98,7 @@ createTestWorkspace(const size_t nhist, const double x0, const double x1,
     spec->clearDetectorIDs();
     spec->addDetectorID(id);
   }
+
   return ws2d;
 }
 
@@ -147,6 +154,14 @@ createTestInstrumentWithNoFoilChanger(const Mantid::detid_t id,
   inst->add(sampleHolder);
   inst->markAsSamplePos(sampleHolder);
 
+  // Backscattering assembly
+  auto *back = new CompAssembly("back");
+  inst->add(back);
+
+  // Forward scattering assembly
+  auto *forward = new CompAssembly("forward");
+  inst->add(forward);
+
   // Just give it a single detector
   Detector *det0(NULL);
   if (!detShapeXML.empty()) {
@@ -174,6 +189,21 @@ static void addResolutionParameters(const Mantid::API::MatrixWorkspace_sptr &ws,
   pmap.addDouble(compID, "sigma_theta", 0.028);
   pmap.addDouble(compID, "efixed", 4908);
   pmap.addDouble(compID, "t0", -0.32);
+  pmap.addDouble(compID, "hwhm_lorentz", 24);
+  pmap.addDouble(compID, "sigma_gauss", 73);
+  pmap.addDouble(compID, "sigma_tof", 0.3);
+}
+
+static void addBankResolution(const Mantid::API::MatrixWorkspace_sptr &ws,
+                              const std::string &name) {
+  // Parameters
+  auto &pmap = ws->instrumentParameters();
+  auto comp = ws->getInstrument()->getComponentByName(name);
+  auto compID = comp->getComponentID();
+
+  pmap.addDouble(compID, "sigma_l1", 0.021);
+  pmap.addDouble(compID, "sigma_l2", 0.023);
+  pmap.addDouble(compID, "sigma_theta", 0.028);
   pmap.addDouble(compID, "hwhm_lorentz", 24);
   pmap.addDouble(compID, "sigma_gauss", 73);
   pmap.addDouble(compID, "sigma_tof", 0.3);

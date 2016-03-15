@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_GAUSSIANCOMPTONPROFILE_H_
-#define MANTID_CURVEFITTING_GAUSSIANCOMPTONPROFILE_H_
+#ifndef MANTID_CURVEFITTING_MULTIVARIATEGAUSSIANCOMPTONPROFILE_H_
+#define MANTID_CURVEFITTING_MULTIVARIATEGAUSSIANCOMPTONPROFILE_H_
 
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/Functions/ComptonProfile.h"
@@ -9,16 +9,6 @@ namespace CurveFitting {
 namespace Functions {
 
 /**
-  Implements a function to calculate the Compton profile of a nucleus using a
-  Gaussian approximation
-  convoluted with an instrument resolution function that is approximated by a
-  Voigt function. The function calculates
-
-  \f[\frac{E_0I(E_0)}{q}A_M J_M(y_M)\otimes R_M(t)\f]
-
-  for the given mass where \f$J_M\f$ is approximated using a Gaussian and
-  \f$R_M\f$ is the resolution function
-
   Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
@@ -40,37 +30,54 @@ namespace Functions {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_CURVEFITTING_DLL GaussianComptonProfile : public ComptonProfile {
+class MANTID_CURVEFITTING_DLL MultivariateGaussianComptonProfile
+    : public ComptonProfile {
 public:
-  static const char *WIDTH_PARAM;
   static const char *AMP_PARAM;
-  static const double STDDEV_TO_HWHM;
+  static const char *SIGMA_X_PARAM;
+  static const char *SIGMA_Y_PARAM;
+  static const char *SIGMA_Z_PARAM;
+  static const char *STEPS_ATTR;
 
   /// Default constructor required for factory
-  GaussianComptonProfile();
+  MultivariateGaussianComptonProfile();
+
+  void buildS2Cache(std::vector<double> &s2Cache) const;
 
 private:
   /// A string identifier for this function
-  std::string name() const override;
+  std::string name() const;
   /// Declare the function parameters
-  void declareParameters() override;
+  void declareParameters();
+  /// Declare parameters that will never participate in the fit
+  void declareAttributes();
+  /// Set an attribute value (and possibly cache its value)
+  void setAttribute(const std::string &name, const Attribute &value);
 
   /// Returns the indices of the intensity parameters
-  std::vector<size_t> intensityParameterIndices() const override;
+  std::vector<size_t> intensityParameterIndices() const;
   /// Fill in the columns of the matrix for this mass
   size_t fillConstraintMatrix(Kernel::DblMatrix &cmatrix, const size_t start,
-                              const std::vector<double> &errors) const override;
+                              const std::vector<double> &errors) const;
 
   /// Compute the function
-  void massProfile(double *result, const size_t nData) const override;
+  void massProfile(double *result, const size_t nData) const;
 
   /// Helper to allow the amplitude to be specified separately
   void massProfile(double *result, const size_t nData,
                    const double amplitude) const;
+
+  double integratePhi(int idx, std::vector<double> &s2Cache, double y) const;
+  double calculateIntegrand(int idx, std::vector<double> &s2Cache,
+                            double y) const;
+
+  int m_integrationSteps; //!< Number of steps to perform during integration
+  double m_thetaStep;     //!< Delta theta in integration
+  double m_phiStep;       //!< Delta phi in integration
 };
 
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /* MANTID_CURVEFITTING_GAUSSIANCOMPTONPROFILE_H_ */
+#endif /* MANTID_CURVEFITTING_MULTIVARIATEGAUSSIANCOMPTONPROFILE_H_ */

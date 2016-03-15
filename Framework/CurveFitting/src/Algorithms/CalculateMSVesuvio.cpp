@@ -59,8 +59,8 @@ CalculateMSVesuvio::CalculateMSVesuvio()
       m_halfSampleWidth(0.0), m_halfSampleThick(0.0), m_sampleShape(nullptr),
       m_sampleProps(nullptr), m_detHeight(-1.0), m_detWidth(-1.0),
       m_detThick(-1.0), m_tmin(-1.0), m_tmax(-1.0), m_delt(-1.0),
-      m_foilRes(-1.0), m_nscatters(0), m_nruns(0), m_nevents(0),
-      m_progress(nullptr), m_inputWS() {}
+      m_forwardRes(-1.0), m_backRes(-1.0), m_nscatters(0), m_nruns(0),
+      m_nevents(0), m_progress(nullptr), m_inputWS() {}
 
 /// Destructor
 CalculateMSVesuvio::~CalculateMSVesuvio() {
@@ -298,18 +298,33 @@ void CalculateMSVesuvio::cacheInputs() {
   m_detHeight = detBoxWidth[m_upIdx];
   m_detThick = detBoxWidth[m_beamIdx];
 
-  // Foil resolution
-  auto foil = instrument->getComponentByName("foil-pos0");
-  if (!foil) {
-    throw std::runtime_error("Workspace has no gold foil component defined.");
+  // Forward resolution
+  auto forward = instrument->getComponentByName("forward");
+  auto forwardResParam =
+      m_inputWS->instrumentParameters().get(instrument.get(), "hwhm_lorentz");
+  if (forward) {
+    forwardResParam =
+        m_inputWS->instrumentParameters().get(forward.get(), "hwhm_lorentz");
   }
-  auto param =
-      m_inputWS->instrumentParameters().get(foil.get(), "hwhm_lorentz");
-  if (!param) {
+  if (!forwardResParam) {
     throw std::runtime_error(
-        "Foil component has no hwhm_lorentz parameter defined.");
+        "Front scattering bank has no hwhm_lorentz parameter defined.");
   }
-  m_foilRes = param->value<double>();
+  m_forwardRes = forwardResParam->value<double>();
+
+  // Back resolution
+  auto back = instrument->getComponentByName("back");
+  auto backResParam =
+      m_inputWS->instrumentParameters().get(instrument.get(), "hwhm_lorentz");
+  if (back) {
+    backResParam =
+        m_inputWS->instrumentParameters().get(back.get(), "hwhm_lorentz");
+  }
+  if (!backResParam) {
+    throw std::runtime_error(
+        "Backscattering bank has no hwhm_lorentz parameter defined.");
+  }
+  m_backRes = backResParam->value<double>();
 }
 
 /**
@@ -505,7 +520,10 @@ double CalculateMSVesuvio::calculateCounts(
     double &curWgt = weights[i];
     curWgt *= exp(-m_sampleProps->mu * distToExit);
     // Weight by cross-section for the final energy
-    const double efinal = generateE1(detpar.theta, detpar.efixed, m_foilRes);
+    double res = m_forwardRes;
+    if (detpar.bank == -1)
+      res = m_backRes;
+    const double efinal = generateE1(detpar.theta, detpar.efixed, res);
     curWgt *= partialDiffXSec(en1[i], efinal, scang) / m_sampleProps->totalxsec;
     // final TOF
     const double veli = sqrt(efinal / MASS_TO_MEV);

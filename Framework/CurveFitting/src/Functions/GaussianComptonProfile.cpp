@@ -13,10 +13,9 @@ namespace Functions {
 using namespace CurveFitting;
 DECLARE_FUNCTION(GaussianComptonProfile)
 
-const char *WIDTH_PARAM = "Width";
-const char *AMP_PARAM = "Intensity";
-
-const double STDDEV_TO_HWHM = std::sqrt(std::log(4.0));
+const char *GaussianComptonProfile::WIDTH_PARAM = "Width";
+const char *GaussianComptonProfile::AMP_PARAM = "Intensity";
+const double GaussianComptonProfile::STDDEV_TO_HWHM = std::sqrt(std::log(4.0));
 
 /**
  */

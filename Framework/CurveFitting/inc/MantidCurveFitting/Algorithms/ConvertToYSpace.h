@@ -21,6 +21,7 @@ namespace Algorithms {
 /// Simple data structure to store nominal detector values
 /// It avoids some functions taking a huge number of arguments
 struct DetectorParams {
+  int bank; ///< detector bank (-1 for backscattering, 1 for forward scattering)
   double l1;       ///< source-sample distance in metres
   double l2;       ///< sample-detector distance in metres
   Kernel::V3D pos; ///< Full 3D position
