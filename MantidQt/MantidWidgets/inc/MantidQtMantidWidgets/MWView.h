@@ -26,13 +26,15 @@ class MdSettings;
 }
 
 namespace MantidWidgets {
+// forward declarations
 class ColorBarWidget;
+class SafeQwtPlot;
 
 using MWDimension_sptr = boost::shared_ptr<Mantid::API::MWDimension>;
 using MWDimension_const_sptr =
     boost::shared_ptr<const Mantid::API::MWDimension>;
 
-/** A viewer for a Matrix Workspace.
+/** A 2D viewer for a Matrix Workspace.
  *
  * Before drawing, it acquires a ReadLock to prevent
  * an algorithm from modifying the underlying workspace while it is
@@ -72,6 +74,7 @@ public:
   void loadColorMap(QString filename = QString());
   void setWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
   void updateDisplay();
+  SafeQwtPlot* getPlot2D();
 
 signals:
   /// Signal emitted when someone uses setWorkspace() on MWView
