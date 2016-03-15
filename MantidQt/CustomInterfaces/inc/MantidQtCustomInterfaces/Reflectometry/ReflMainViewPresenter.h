@@ -13,7 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-// Forward declaration
+// Forward decs
 class ProgressableView;
 
 /** @class ReflMainViewPresenter
