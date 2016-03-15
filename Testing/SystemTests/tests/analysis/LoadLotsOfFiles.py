@@ -69,7 +69,7 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'SANS2DTUBES_ZeroErrorFree_batch.csv',
                 'DIRECTM1_15785_12m_31Oct12_v12.dat',
                 'MaskSANS2DReductionGUI.txt',
-                'sans2d_reduction_gui_batch.csv'
+                'sans2d_reduction_gui_batch.csv',
                 'MANTID_FLAT_CELL.115',
                 'MaskLOQData.txt',
                 'DIRECTHAB.983',
@@ -81,7 +81,8 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'poldi2014n019881.hdf',
                 'poldi2015n000977.hdf',
                 'USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt',
-                'USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt'
+                'USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt',
+                'Vesuvio_IP_file_test.par'
                ]
 
 EXPECTED_EXT = '.expected'

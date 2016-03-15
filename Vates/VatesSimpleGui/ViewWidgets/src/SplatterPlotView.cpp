@@ -218,6 +218,8 @@ void SplatterPlotView::render()
   {
     vtkSMPropertyHelper(drep->getProxy(), "Opacity").Set(0.5);
     vtkSMPropertyHelper(drep->getProxy(), "GaussianRadius").Set(0.005);
+  } else {
+    vtkSMPropertyHelper(drep->getProxy(), "LineWidth").Set(2);
   }
   drep->getProxy()->UpdateVTKObjects();
   if (!isPeaksWorkspace)

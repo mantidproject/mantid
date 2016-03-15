@@ -8,7 +8,8 @@ namespace Mantid {
 namespace API {
 
 GeometryInfoFactory::GeometryInfoFactory(const MatrixWorkspace &workspace)
-    : m_workspace(workspace), m_instrument(workspace.getInstrument()) {
+    : m_workspace(workspace), m_instrument(workspace.getInstrument()),
+      m_L1(-1.0) {
   // Note: This does not seem possible currently (the instrument objects is
   // always allocated, even if it is empty), so this will not fail.
   if (!m_instrument)

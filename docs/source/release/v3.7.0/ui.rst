@@ -130,6 +130,11 @@ VSI Improvements
 .. figure::  ../../images/VSIPointGaussianRepresentation.png
    :align: center 
 
+- The sphere and ellipse wireframes have been simplified so that it is easier to see the enclosed points. 
+
+.. figure:: ../../images/VSIEllipses.png
+    :align: center  
+
 |
 
 Full list of
