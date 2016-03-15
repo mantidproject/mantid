@@ -23,7 +23,7 @@ using namespace ::testing;
 using namespace Mantid::VATES;
 using Mantid::VATES::vtkPeakMarkerFactory;
 
-class MockPeak1 : public Peak {
+class MockPeakShape : public Peak {
 public:
   MOCK_CONST_METHOD0(getHKL, Mantid::Kernel::V3D(void));
   MOCK_CONST_METHOD0(getQLabFrame, Mantid::Kernel::V3D(void));
@@ -234,7 +234,7 @@ public:
     PeakShapeSpherical sphere(actualRadius,
                               Kernel::SpecialCoordinateSystem::QLab);
 
-    MockPeak1 peak1;
+    MockPeakShape peak1;
     EXPECT_CALL(pw, getNumberPeaks()).WillOnce(Return(1));
     EXPECT_CALL(pw, getPeak(_)).WillRepeatedly(ReturnRef(peak1));
     EXPECT_CALL(peak1, getQLabFrame()).WillRepeatedly(Return(V3D(0., 0., 0.)));
@@ -281,7 +281,7 @@ public:
           directions, abcRadii, abcRadiiBackgroundInner,
           abcRadiiBackgroundOuter, Kernel::SpecialCoordinateSystem::QLab);
 
-      MockPeak1 peak1;
+      MockPeakShape peak1;
       EXPECT_CALL(pw, getNumberPeaks()).WillOnce(Return(1));
       EXPECT_CALL(pw, getPeak(_)).WillRepeatedly(ReturnRef(peak1));
       EXPECT_CALL(peak1, getQLabFrame())
