@@ -59,9 +59,8 @@ const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
 * @param parent Parent window (most likely the Mantid main app window).
 */
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
-    : UserSubWindow(parent), m_dataCurve(new QwtPlotCurve()),
-      m_dataCurveVector(), IEnggDiffractionView(), m_currentInst("ENGINX"),
-      m_currentCalibFilename(""), m_presenter(NULL) {}
+    : UserSubWindow(parent), m_dataCurveVector(), IEnggDiffractionView(),
+      m_currentInst("ENGINX"), m_currentCalibFilename(""), m_presenter(NULL) {}
 
 EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {}
 
@@ -214,7 +213,6 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting(QWidget *wFitting) {
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::xBottom, wFitting->font());
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::yLeft, wFitting->font());
-
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -685,13 +683,13 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
   for (int i = 0; i < data.size(); i++) {
     auto *peak = data[i].get();
 
-	QwtPlotCurve* datCurve = new QwtPlotCurve();
-	datCurve->setStyle(QwtPlotCurve::Lines);
-	datCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-	m_dataCurveVector.push_back(datCurve);
+    QwtPlotCurve *dataCurve = new QwtPlotCurve();
+    dataCurve->setStyle(QwtPlotCurve::Lines);
+    dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+    m_dataCurveVector.push_back(dataCurve);
 
     m_dataCurveVector[i]->setData(*peak);
-	m_dataCurveVector[i]->attach(m_uiTabFitting.dataPlot);
+    m_dataCurveVector[i]->attach(m_uiTabFitting.dataPlot);
   }
 
   m_uiTabFitting.dataPlot->replot();

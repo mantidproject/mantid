@@ -320,10 +320,7 @@ private:
   /// presenter as in the model-view-presenter
   boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;
 
-  /// Loaded data curve
-  QwtPlotCurve* m_dataCurve;
-
-  /// Loaded data curve
+  /// Loaded data curves
   std::vector<QwtPlotCurve*> m_dataCurveVector;
 };
 

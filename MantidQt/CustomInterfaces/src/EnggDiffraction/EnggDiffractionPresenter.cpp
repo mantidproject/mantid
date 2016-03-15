@@ -580,13 +580,13 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
       ADS.retrieveWS<ITableWorkspace>(FocusedFitPeaksTableName);
 
   size_t rowCount = table->rowCount();
-  // std::string single_peak_out_WS = "engggui_fitting_single_peaks";
+  std::string single_peak_out_WS = "engggui_fitting_single_peaks";
   std::string Bk2BkExpFunctionStr;
 
-  std::string single_peak_out_WS;
+  std::string current_peak_out_WS;
 
   if (rowCount > size_t(0)) {
-    for (size_t i = 0; i < 5; i++) {
+    for (size_t i = 0; i < rowCount; i++) {
 
       // get the functionStrFactory to generate the string for function property
       // return the string with i row from table workspace
@@ -594,22 +594,44 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
       Bk2BkExpFunctionStr =
           functionStrFactory(table, FocusedFitPeaksTableName, i);
 
-      single_peak_out_WS = "engggui_fitting_single_peaks" + std::to_string(i);
+      current_peak_out_WS = "engggui_fitting_single_peaks" + std::to_string(i);
 
       // run EvaluateFunction algorithm with focused workspace to produce
       // the correct fit function
       // FocusedWSName is not going to change as its always going to be from
       // single workspace
       runEvaluateFunctionAlg(Bk2BkExpFunctionStr, FocusedWSName,
-                             single_peak_out_WS);
+                             current_peak_out_WS);
 
       // crop workspace so only the correct workspace index is plotted
-      runCropWorkspaceAlg(single_peak_out_WS);
+      runCropWorkspaceAlg(current_peak_out_WS);
 
-      if (i != size_t(0)) {
-        runAppendSpectraAlg("engggui_fitting_single_peaks0",
-                            single_peak_out_WS);
-        ADS.remove(single_peak_out_WS);
+      // if the first peak
+      if (i == size_t(0)) {
+
+        auto renameWs =
+            Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+                "RenameWorkspace");
+        g_log.notice() << "EvaluateFunction algorithm has started" << std::endl;
+        try {
+          renameWs->initialize();
+
+          renameWs->setProperty("InputWorkspace",
+                                "engggui_fitting_single_peaks0");
+          renameWs->setProperty("OutputWorkspace", single_peak_out_WS);
+          renameWs->execute();
+        } catch (std::runtime_error &re) {
+          g_log.error() << "Could not run the algorithm EvaluateFunction, "
+                           "Error description: " +
+                               static_cast<std::string>(re.what())
+                        << std::endl;
+        }
+      }
+
+      else {
+        // append all peaks in to single workspace & remove
+        runAppendSpectraAlg(single_peak_out_WS, current_peak_out_WS);
+        ADS.remove(current_peak_out_WS);
       }
     }
   }
@@ -704,7 +726,7 @@ void EnggDiffractionPresenter::runAppendSpectraAlg(std::string workspace1Name,
 void EnggDiffractionPresenter::plotFitPeaksCurves() {
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   auto singlPeaksWS =
-      ADS.retrieveWS<MatrixWorkspace>("engggui_fitting_single_peaks0");
+      ADS.retrieveWS<MatrixWorkspace>("engggui_fitting_single_peaks");
   try {
     m_view->dataCurvesFactory(ALCHelper::curveDataFromWs(singlPeaksWS));
   } catch (std::runtime_error &re) {
