@@ -529,8 +529,10 @@ void QtReflMainView::loadSettings(std::map<std::string, QVariant> &options) {
   QSettings settings;
   settings.beginGroup(ReflSettingsGroup);
   QStringList keys = settings.childKeys();
-  for (auto it = keys.begin(); it != keys.end(); ++it)
+  for (auto it = keys.begin(); it != keys.end(); ++it) {
+    std::string iterStr = it->toStdString();
     options[it->toStdString()] = settings.value(*it);
+  }
   settings.endGroup();
 }
 
