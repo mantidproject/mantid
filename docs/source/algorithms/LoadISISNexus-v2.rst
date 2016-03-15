@@ -51,8 +51,9 @@ Here are some tables that show it in more detail:
 
 Run Object
 ''''''''''
-The Nexus ``runlog`` group is loaded into the ISIS run object by a call of :ref:`algm-LoadNexusLogs`. 
-Also LoadISISNexus loads the Nexus ``raw_data_1/periods/proton_charge`` group into the ``proton_charge_by_period`` property of the workspace run object.
+LoadISISNexus executes :ref:`algm-LoadNexusLogs` to load run logs from the Nexus ``runlog`` or some other appropriate group. 
+It also loads the Nexus ``raw_data_1/periods/proton_charge`` group 
+into the ``proton_charge_by_period`` property of the workspace run object.
 
 The default properties of ISIS run object (as listed in :ref:`Run <Run>` ) are loaded as follows:
 
