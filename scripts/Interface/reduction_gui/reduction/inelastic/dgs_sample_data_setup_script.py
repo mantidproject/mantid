@@ -40,8 +40,8 @@ class SampleSetupScript(BaseScriptElement):
     def set_default_pars(self, inst_name):
         import dgs_utils
         ip = dgs_utils.InstrumentParameters(inst_name)
-        SampleSetupScript.monitor1_specid = int(ip.get_parameter("ei-mon1-spec"))
-        SampleSetupScript.monitor2_specid = int(ip.get_parameter("ei-mon2-spec"))
+        SampleSetupScript.monitor1_specid = str(int(ip.get_parameter("ei-mon1-spec")))
+        SampleSetupScript.monitor2_specid = str(int(ip.get_parameter("ei-mon2-spec")))
 
     def to_script(self):
         script = ""
@@ -68,9 +68,17 @@ class SampleSetupScript(BaseScriptElement):
             if self.tzero_guess != SampleSetupScript.tzero_guess:
                 script += "TimeZeroGuess=%s,\n" % str(self.tzero_guess)
         if self.monitor1_specid != SampleSetupScript.monitor1_specid:
-            script += "Monitor1SpecId=%s,\n" % self.monitor1_specid
+            try:
+                temp1 = int(self.monitor1_specid)
+                script += "Monitor1SpecId=%s,\n" % temp1
+            except ValueError:
+                pass
         if self.monitor2_specid != SampleSetupScript.monitor2_specid:
-            script += "Monitor2SpecId=%s,\n" % self.monitor2_specid
+            try:
+                temp2 = int(self.monitor2_specid)
+                script += "Monitor2SpecId=%s,\n" % temp2
+            except ValueError:
+                pass
         if self.et_range_low != SampleSetupScript.et_range_low or \
            self.et_range_width != SampleSetupScript.et_range_width or \
            self.et_range_high != SampleSetupScript.et_range_high:
@@ -93,29 +101,29 @@ class SampleSetupScript(BaseScriptElement):
         """
             Create XML from the current data.
         """
-        xml = "<SampleSetup>\n"
-        xml += "  <sample_input_file>%s</sample_input_file>\n" % self.sample_file
-        xml += "  <live_button>%s</live_button>\n" % self.live_button
-        xml += "  <output_wsname>%s</output_wsname>\n" % self.output_wsname
-        xml += "  <detcal_file>%s</detcal_file>\n" % self.detcal_file
-        xml += "  <relocate_dets>%s</relocate_dets>\n" % self.relocate_dets
-        xml += "  <incident_energy_guess>%s</incident_energy_guess>\n" % self.incident_energy_guess
-        xml += "  <use_ei_guess>%s</use_ei_guess>\n" % str(self.use_ei_guess)
-        xml += "  <tzero_guess>%s</tzero_guess>\n" % str(self.tzero_guess)
-        xml += "  <monitor1_specid>%s</monitor1_specid>\n" % self.monitor1_specid
-        xml += "  <monitor2_specid>%s</monitor2_specid>\n" % self.monitor2_specid
-        xml += "  <et_range>\n"
-        xml += "    <low>%s</low>\n" % self.et_range_low
-        xml += "    <width>%s</width>\n"  % self.et_range_width
-        xml += "    <high>%s</high>\n" % self.et_range_high
-        xml += "  </et_range>\n"
-        xml += "  <sofphie_is_distribution>%s</sofphie_is_distribution>\n" % str(self.et_is_distribution)
-        xml += "  <hardmask_file>%s</hardmask_file>\n" % self.hardmask_file
-        xml += "  <grouping_file>%s</grouping_file>\n" % self.grouping_file
-        xml += "  <show_workspaces>%s</show_workspaces>\n" % self.show_workspaces
-        xml += "  <savedir>%s</savedir>\n" % self.savedir
-        xml += "</SampleSetup>\n"
-        return xml
+        xml_str = "<SampleSetup>\n"
+        xml_str += "  <sample_input_file>%s</sample_input_file>\n" % self.sample_file
+        xml_str += "  <live_button>%s</live_button>\n" % self.live_button
+        xml_str += "  <output_wsname>%s</output_wsname>\n" % self.output_wsname
+        xml_str += "  <detcal_file>%s</detcal_file>\n" % self.detcal_file
+        xml_str += "  <relocate_dets>%s</relocate_dets>\n" % self.relocate_dets
+        xml_str += "  <incident_energy_guess>%s</incident_energy_guess>\n" % self.incident_energy_guess
+        xml_str += "  <use_ei_guess>%s</use_ei_guess>\n" % str(self.use_ei_guess)
+        xml_str += "  <tzero_guess>%s</tzero_guess>\n" % str(self.tzero_guess)
+        xml_str += "  <monitor1_specid>%s</monitor1_specid>\n" % self.monitor1_specid
+        xml_str += "  <monitor2_specid>%s</monitor2_specid>\n" % self.monitor2_specid
+        xml_str += "  <et_range>\n"
+        xml_str += "    <low>%s</low>\n" % self.et_range_low
+        xml_str += "    <width>%s</width>\n"  % self.et_range_width
+        xml_str += "    <high>%s</high>\n" % self.et_range_high
+        xml_str += "  </et_range>\n"
+        xml_str += "  <sofphie_is_distribution>%s</sofphie_is_distribution>\n" % str(self.et_is_distribution)
+        xml_str += "  <hardmask_file>%s</hardmask_file>\n" % self.hardmask_file
+        xml_str += "  <grouping_file>%s</grouping_file>\n" % self.grouping_file
+        xml_str += "  <show_workspaces>%s</show_workspaces>\n" % self.show_workspaces
+        xml_str += "  <savedir>%s</savedir>\n" % self.savedir
+        xml_str += "</SampleSetup>\n"
+        return xml_str
 
     def from_xml(self, xml_str):
         """
@@ -150,10 +158,10 @@ class SampleSetupScript(BaseScriptElement):
             self.tzero_guess = BaseScriptElement.getFloatElement(instrument_dom,
                                                                  "tzero_guess",
                                                                  default=SampleSetupScript.tzero_guess)
-            self.monitor1_specid = BaseScriptElement.getIntElement(instrument_dom,
+            self.monitor1_specid = BaseScriptElement.getStringElement(instrument_dom,
                                                                    "monitor1_specid",
                                                                    default=SampleSetupScript.monitor1_specid)
-            self.monitor2_specid = BaseScriptElement.getIntElement(instrument_dom,
+            self.monitor2_specid = BaseScriptElement.getStringElement(instrument_dom,
                                                                    "monitor2_specid",
                                                                    default=SampleSetupScript.monitor2_specid)
             self.et_range_low = BaseScriptElement.getStringElement(instrument_dom,

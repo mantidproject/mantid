@@ -358,8 +358,8 @@ void RangeSelector::setMin(double val) {
   if (val != m_min) {
     m_min = (val > m_lower) ? val : m_lower;
     setMinLinePos(m_min);
-    emit minValueChanged(val);
-    emit selectionChanged(val, m_max);
+    emit minValueChanged(m_min);
+    emit selectionChanged(m_min, m_max);
   }
 }
 
@@ -371,8 +371,8 @@ void RangeSelector::setMax(double val) {
   if (val != m_max) {
     m_max = (val < m_higher) ? val : m_higher;
     setMaxLinePos(m_max);
-    emit maxValueChanged(val);
-    emit selectionChanged(m_min, val);
+    emit maxValueChanged(m_max);
+    emit selectionChanged(m_min, m_max);
   }
 }
 
@@ -426,5 +426,5 @@ void RangeSelector::verify() {
  */
 bool RangeSelector::inRange(double x)
 {
-  return (x < m_lower || x > m_higher);
+  return (x >= m_lower && x <= m_higher);
 }

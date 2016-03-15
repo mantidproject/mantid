@@ -191,7 +191,8 @@
 		
 		<!--   formula for t0 calculation. See http://muparser.sourceforge.net/mup_features.html#idDef2 for available operators-->
 		<parameter name="t0_formula" type="string">
-			<value val="198.2 * (1.0 + incidentEnergy)^(-0.84098)" />
+			<!--<value val="198.2 * (1.0 + incidentEnergy)^(-0.84098)" /> Old formula (valid till august 2015) -->
+            <value val="157.539+ln(incidentEnergy)*(-33.04593+ln(incidentEnergy)*(-8.07523+ln(incidentEnergy)*(2.2143-0.109521767*ln(incidentEnergy))))"/>
 		</parameter>
 
 		<parameter name="treat-background-as-events" type="string">
