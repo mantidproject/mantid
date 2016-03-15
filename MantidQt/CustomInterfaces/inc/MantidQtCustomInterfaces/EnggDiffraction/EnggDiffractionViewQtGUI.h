@@ -241,7 +241,7 @@ private:
   void doSetupTabCalib();
   void doSetupTabFocus();
   void doSetupTabPreproc();
-  void doSetupTabFitting(QWidget *wFitting);
+  void doSetupTabFitting();
   void doSetupTabSettings();
 
   std::string guessGSASTemplatePath() const;

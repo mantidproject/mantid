@@ -99,7 +99,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
   doSetupTabCalib();
   doSetupTabFocus();
   doSetupTabPreproc();
-  doSetupTabFitting(wFitting);
+  doSetupTabFitting();
   doSetupTabSettings();
 
   // presenter that knows how to handle a IEnggDiffractionView should take care
@@ -187,7 +187,7 @@ void EnggDiffractionViewQtGUI::doSetupTabPreproc() {
           SLOT(rebinMultiperiodClicked()));
 }
 
-void EnggDiffractionViewQtGUI::doSetupTabFitting(QWidget *wFitting) {
+void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   connect(m_uiTabFitting.pushButton_fitting_browse_run_num, SIGNAL(released()),
           this, SLOT(browseFitFocusedRun()));
 
@@ -211,8 +211,9 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting(QWidget *wFitting) {
           SIGNAL(currentRowChanged(int)), this, SLOT(setBankIdComboBox(int)));
 
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
-  m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::xBottom, wFitting->font());
-  m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::yLeft, wFitting->font());
+  // TODO:
+  // m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::xBottom, wFitting->font());
+  // m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::yLeft, wFitting->font());
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -680,12 +681,25 @@ std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
 void EnggDiffractionViewQtGUI::dataCurvesFactory(
     std::vector<boost::shared_ptr<QwtData>> &data) {
 
+  auto colorr = (Qt::red, 2);
+
+  const QColor QPenList[17] = {
+	  Qt::white,     Qt::black,      Qt::red,     Qt::darkRed,
+	  Qt::green,     Qt::darkGreen,  Qt::blue,    Qt::darkBlue,
+	  Qt::cyan,      Qt::darkCyan,   Qt::magenta, Qt::darkMagenta,
+	  Qt::yellow,    Qt::darkYellow, Qt::gray,    Qt::darkGray,
+	  Qt::lightGray };
+
   for (int i = 0; i < data.size(); i++) {
     auto *peak = data[i].get();
 
     QwtPlotCurve *dataCurve = new QwtPlotCurve();
     dataCurve->setStyle(QwtPlotCurve::Lines);
+    auto randIndex = std::rand() % 7;
+    dataCurve->setPen(QPen(QPenList[randIndex], 1));
+    // dataCurve->setPen(std::random_shuffle(&QPenList[0], &QPenList[7]));
     dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+
     m_dataCurveVector.push_back(dataCurve);
 
     m_dataCurveVector[i]->setData(*peak);
