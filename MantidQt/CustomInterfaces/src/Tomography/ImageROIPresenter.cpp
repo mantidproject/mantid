@@ -260,7 +260,7 @@ ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
 
   // Load all requested/supported image files using a list with their names
   try {
-    std::string allPaths = filterImagePathsForFITSStack(imgs);
+    const std::string allPaths = filterImagePathsForFITSStack(imgs);
     loadFITSImage(allPaths, wsName);
   } catch (std::runtime_error &exc) {
     m_view->userWarning("Error trying to open FITS file(s)",
@@ -282,7 +282,7 @@ ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
 
   if (wsg &&
       Mantid::API::AnalysisDataService::Instance().doesExist(wsg->name()) &&
-      imgs.size() == wsg->size()) {
+      wsg->size() > 0 && imgs.size() >= wsg->size()) {
     return wsg;
   } else {
     return Mantid::API::WorkspaceGroup_sptr();
@@ -306,6 +306,7 @@ std::string ImageROIPresenter::filterImagePathsForFITSStack(
   // Let's take only the ones that we can effectively load
   const std::string expectedShort = "fit";
   const std::string expectedLong = "fits";
+  std::vector<std::string> unexpectedFiles;
   for (size_t i = 0; i < paths.size(); i++) {
     const std::string extShort = paths[i].substr(paths[i].size() - 3);
     const std::string extLong = paths[i].substr(paths[i].size() - 4);
@@ -316,16 +317,28 @@ std::string ImageROIPresenter::filterImagePathsForFITSStack(
         allPaths.append(", " + paths[i]);
       }
     } else {
-      const std::string msg =
-          "Found files with unrecognized extension in this "
-          "stack ( " +
-          m_stackPath + "). Expected files with extension '" + expectedShort +
-          "' or '" + expectedLong + "' but found: " + paths[i];
-      if (g_warnIfUnexpectedFileExtensions) {
-        m_view->userWarning("Invalid files found in the stack of images", msg);
-      }
-      g_log.warning(msg);
+      unexpectedFiles.push_back(paths[i]);
     }
+  }
+
+  // If needed, give a warning once, at the end
+  if (!unexpectedFiles.empty()) {
+    std::string filesStrMsg = "";
+    for (auto path : unexpectedFiles) {
+      filesStrMsg += path + "\n";
+    }
+
+    const std::string msg =
+        "Found files with unrecognized or unsupported extension in this "
+        "stack ( " +
+        m_stackPath + "). Expected files with extension '" + expectedShort +
+        "' or '" + expectedLong +
+        "' the following file(s) were found (and not loaded):" + filesStrMsg;
+
+    if (g_warnIfUnexpectedFileExtensions) {
+      m_view->userWarning("Invalid files found in the stack of images", msg);
+    }
+    g_log.warning(msg);
   }
 
   return allPaths;
