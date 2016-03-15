@@ -164,24 +164,6 @@ void ImageROIPresenter::processNewStack() {
     return;
   }
 
-  // Let's take only the ones that we can effectively load
-  for (size_t i = 0; i < imgs.size(); i++) {
-    const std::string extShort = imgs[i].substr(imgs[i].size() - 3);
-    const std::string extLong = imgs[i].substr(imgs[i].size() - 4);
-    const std::string expectedShort = "fit";
-    const std::string expectedLong = "fits";
-    const std::string msg = "Found files with unrecognized extension in this "
-                            "stack ( " +
-                            m_stackPath + "). Expected files with extension '" +
-                            expectedShort + "' or '" + expectedLong +
-                            "' but found: " + imgs[i];
-    g_log.warning(msg);
-    if (g_warnIfUnexpectedFileExtensions &&
-        (extShort != expectedShort || extLong != expectedLong)) {
-      m_view->userWarning("Invalid files found in the stack of images", msg);
-    }
-  }
-
   Mantid::API::WorkspaceGroup_sptr wsg = loadFITSStack(imgs);
   if (!wsg)
     return;
@@ -278,13 +260,7 @@ ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
 
   // Load all requested/supported image files using a list with their names
   try {
-    std::string allPaths;
-    size_t i = 0;
-    allPaths = imgs[i];
-    i++;
-    while (i++ < imgs.size()) {
-      allPaths.append(", " + imgs[i]);
-    }
+    std::string allPaths = filterImagePathsForFITSStack(imgs);
     loadFITSImage(allPaths, wsName);
   } catch (std::runtime_error &exc) {
     m_view->userWarning("Error trying to open FITS file(s)",
@@ -311,6 +287,48 @@ ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
   } else {
     return Mantid::API::WorkspaceGroup_sptr();
   }
+}
+
+/**
+ * Produces a string with paths separated by commas. Takes the patsh from the
+ * input paths string but selects only the ones that look consistent with the
+ * supported format / extension.
+ *
+ * @param paths of the supposedly image files
+ *
+ * @return string with comma separated value (paths) ready to be passed as input
+ * to LoadFITS or similar algorithms
+ */
+std::string ImageROIPresenter::filterImagePathsForFITSStack(
+    const std::vector<std::string> &paths) {
+  std::string allPaths = "";
+
+  // Let's take only the ones that we can effectively load
+  const std::string expectedShort = "fit";
+  const std::string expectedLong = "fits";
+  for (size_t i = 0; i < paths.size(); i++) {
+    const std::string extShort = paths[i].substr(paths[i].size() - 3);
+    const std::string extLong = paths[i].substr(paths[i].size() - 4);
+    if (extShort == expectedShort || extLong == expectedLong) {
+      if (allPaths.empty()) {
+        allPaths = paths[i];
+      } else {
+        allPaths.append(", " + paths[i]);
+      }
+    } else {
+      const std::string msg =
+          "Found files with unrecognized extension in this "
+          "stack ( " +
+          m_stackPath + "). Expected files with extension '" + expectedShort +
+          "' or '" + expectedLong + "' but found: " + paths[i];
+      if (g_warnIfUnexpectedFileExtensions) {
+        m_view->userWarning("Invalid files found in the stack of images", msg);
+      }
+      g_log.warning(msg);
+    }
+  }
+
+  return allPaths;
 }
 
 void ImageROIPresenter::loadFITSImage(const std::string &path,
