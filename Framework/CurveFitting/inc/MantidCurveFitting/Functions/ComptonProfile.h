@@ -89,11 +89,16 @@ public:
   fillConstraintMatrix(Kernel::DblMatrix &cmatrix, const size_t start,
                        const std::vector<double> &errors) const = 0;
 
+  void setParameter(size_t i, const double &value, bool explicitlySet = true) override;
+
+  void setParameter(const std::string &name, const double &value, bool explicitlySet = true) override
+  {
+    ParamFunction::setParameter(name, value, explicitlySet);
+  }
+
 protected:
   /// Declare parameters that will never participate in the fit
   void declareParameters() override;
-
-  void setParameter(size_t i, const double &value, bool explicitlySet) override;
 
   /// Access y-values cache
   inline const std::vector<double> &ySpace() const { return m_yspace; }
