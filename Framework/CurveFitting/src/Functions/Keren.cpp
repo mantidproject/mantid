@@ -59,6 +59,20 @@ double Keren::activeParameter(size_t i) const {
 
 void Keren::function1D(double *out, const double *xValues,
                        const size_t nData) const {}
+/**
+ * Calculate the muon polarization P_z(t) at time t as a fraction of the initial
+ * polarization (P_0(t) = 1)
+ * Equation (3) in the paper
+ * @param delta :: [input] Delta, distribution width of local fields in MHz
+ * @param larmor :: [input] omega_L, Larmor frequency in MHz
+ * @param fluct :: [input] nu, hopping rate in MHz
+ * @param time :: [input] t, time in microseconds
+ * @returns :: Polarization P_z(t) (dimensionless)
+ */
+double Keren::polarization(const double delta, const double larmor,
+  const double fluct, const double time) const {
+  return exp(-1.0 * relaxation(delta, larmor, fluct, time));
+}
 
 /**
  * Calculate the relaxation Gamma(t)t at time t

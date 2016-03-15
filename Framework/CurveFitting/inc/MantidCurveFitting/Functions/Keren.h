@@ -54,6 +54,9 @@ protected:
                   const size_t nData) const override;
   /// Initialize parameters
   void init() override;
+  /// Time-dependent muon polarization
+  double polarization(const double delta, const double larmor,
+                      const double fluct, const double time) const;
   /// Relaxation form
   double relaxation(const double delta, const double larmor, const double fluct,
                     const double time) const;

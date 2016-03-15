@@ -32,6 +32,10 @@ public:
                         const double fluct, const double time) const {
     return relaxation(delta, larmor, fluct, time);
   }
+  double wrapPolarization(const double delta, const double larmor,
+                          const double fluct, const double time) const {
+    return polarization(delta, larmor, fluct, time);
+  }
 };
 
 class KerenTest : public CxxTest::TestSuite {
@@ -94,6 +98,24 @@ public:
                     0.001);
     TS_ASSERT_DELTA(function.wrapRelaxation(delta, larmor, fluct, 10.0), 0.2753,
                     0.001);
+  }
+
+  void test_polarization() {
+    TestFunction function;
+    function.initialize();
+
+    const double field = 100;
+    const double larmor =
+        Mantid::PhysicalConstants::MuonGyromagneticRatio * field;
+    const double delta = larmor * 0.2;
+    const double fluct = delta;
+
+    TS_ASSERT_DELTA(function.wrapPolarization(delta, larmor, fluct, 1.0),
+                    0.9434, 0.001);
+    TS_ASSERT_DELTA(function.wrapPolarization(delta, larmor, fluct, 5.0),
+                    0.8560, 0.001);
+    TS_ASSERT_DELTA(function.wrapPolarization(delta, larmor, fluct, 10.0),
+                    0.7594, 0.001);
   }
 
 private:
