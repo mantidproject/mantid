@@ -1423,7 +1423,10 @@ void MdViewerWidget::handleDragAndDropPeaksWorkspaces(QEvent *e, QString text,
     int startIndex = text.indexOf("[\"", endIndex) + 2;
     endIndex = text.indexOf("\"]", startIndex);
     QString candidate = text.mid(startIndex, endIndex - startIndex);
-    if (dynamic_cast<SplatterPlotView *>(this->currentView)) {
+    // Only append the candidate if SplattorPlotView is selected and an
+    // MDWorkspace is loaded.
+    if (dynamic_cast<SplatterPlotView *>(this->currentView) &&
+        pqActiveObjects::instance().activeSource()) {
       if (boost::dynamic_pointer_cast<IPeaksWorkspace>(
               AnalysisDataService::Instance().retrieve(
                   candidate.toStdString()))) {
