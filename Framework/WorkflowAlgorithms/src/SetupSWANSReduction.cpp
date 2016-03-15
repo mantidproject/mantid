@@ -14,6 +14,8 @@
 #include "MantidKernel/PropertyManager.h"
 #include "Poco/NumberFormatter.h"
 
+#include <memory>
+
 namespace Mantid {
 namespace WorkflowAlgorithms {
 
@@ -27,36 +29,17 @@ using namespace Geometry;
 void SetupSWANSReduction::init() {
   // Load options
   std::string load_grp = "Load Options";
-  declareProperty("UseConfigTOFCuts", false,
-                  "If true, the edges of the TOF distribution will be cut "
-                  "according to the configuration file");
-  declareProperty("LowTOFCut", 0.0, "TOF value below which events will not be "
-                                    "loaded into the workspace at load-time");
-  declareProperty("HighTOFCut", 0.0, "TOF value above which events will not be "
-                                     "loaded into the workspace at load-time");
+
   declareProperty("WavelengthStep", 0.1, "Wavelength steps to be used when "
                                          "rebinning the data before performing "
                                          "the reduction");
-  declareProperty("UseConfigMask", false, "If true, the masking information "
-                                          "found in the configuration file "
-                                          "will be used");
-  declareProperty("UseConfig", true,
-                  "If true, the best configuration file found will be used");
-  declareProperty("CorrectForFlightPath", false,
-                  "If true, the TOF will be modified for the true flight path "
-                  "from the sample to the detector pixel");
 
-  declareProperty("SkipTOFCorrection", false,
-                  "If true, the SWANS TOF correction will be skipped");
   declareProperty("PreserveEvents", false,
                   "If true, the output workspace will be an event workspace");
 
   declareProperty(
       "SampleDetectorDistance", EMPTY_DBL(),
       "Sample to detector distance to use (overrides meta data), in mm");
-  declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(),
-                  "Offset to the sample to detector distance (use only when "
-                  "using the distance found in the meta data), in mm");
 
   declareProperty(
       "SolidAngleCorrection", true,
@@ -66,21 +49,9 @@ void SetupSWANSReduction::init() {
       "If true, the solid angle correction for tube detectors will be applied");
 
   // -- Define group --
-  setPropertyGroup("UseConfigTOFCuts", load_grp);
-  setPropertyGroup("LowTOFCut", load_grp);
-  setPropertyGroup("HighTOFCut", load_grp);
-
   setPropertyGroup("WavelengthStep", load_grp);
-  setPropertyGroup("UseConfigMask", load_grp);
-  setPropertyGroup("UseConfig", load_grp);
-  setPropertyGroup("CorrectForFlightPath", load_grp);
-
-  setPropertyGroup("SkipTOFCorrection", load_grp);
   setPropertyGroup("PreserveEvents", load_grp);
-
   setPropertyGroup("SampleDetectorDistance", load_grp);
-  setPropertyGroup("SampleDetectorDistanceOffset", load_grp);
-
   setPropertyGroup("SolidAngleCorrection", load_grp);
   setPropertyGroup("DetectorTubes", load_grp);
 
@@ -92,12 +63,6 @@ void SetupSWANSReduction::init() {
   declareProperty("BeamCenterMethod", "None",
                   boost::make_shared<StringListValidator>(centerOptions),
                   "Method for determining the data beam center");
-
-  // declareProperty("FindBeamCenter", false, "If True, the beam center will be
-  // calculated");
-  declareProperty(
-      "UseConfigBeam", false,
-      "If True, the beam center will be taken from the config file");
 
   //    Option 1: Set beam center by hand
   declareProperty("BeamCenterX", EMPTY_DBL(),
@@ -114,7 +79,7 @@ void SetupSWANSReduction::init() {
   //    Option 2: Find it (expose properties from FindCenterOfMass)
   declareProperty(
       make_unique<API::FileProperty>(
-          "BeamCenterFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
+          "BeamCenterFile", "", API::FileProperty::OptionalLoad, ".dat"),
       "The name of the input event Nexus file to load");
   setPropertySettings("BeamCenterFile",
                       make_unique<VisibleWhenProperty>(
@@ -136,7 +101,6 @@ void SetupSWANSReduction::init() {
 
   // -- Define group --
   setPropertyGroup("BeamCenterMethod", center_grp);
-  setPropertyGroup("UseConfigBeam", center_grp);
   setPropertyGroup("BeamCenterX", center_grp);
   setPropertyGroup("BeamCenterY", center_grp);
   setPropertyGroup("BeamCenterFile", center_grp);
@@ -150,43 +114,26 @@ void SetupSWANSReduction::init() {
   incidentBeamNormOptions.emplace_back("None");
   // The data will be normalised to the monitor counts
   incidentBeamNormOptions.emplace_back("Monitor");
-  // The data will be normalised to the total charge and divided by the beam
-  // profile
-  incidentBeamNormOptions.emplace_back("BeamProfileAndCharge");
   // The data will be normalised to the total charge only (no beam profile)
-  incidentBeamNormOptions.emplace_back("Charge");
+  incidentBeamNormOptions.emplace_back("Timer");
   this->declareProperty(
-      "Normalisation", "BeamProfileAndCharge",
+      "Normalisation", "None",
       boost::make_shared<StringListValidator>(incidentBeamNormOptions),
       "Options for data normalisation");
 
-  declareProperty("LoadMonitors", false,
-                  "If true, the monitor workspace will be loaded");
-  // declareProperty("NormaliseToBeam", true, "If true, the data will be
-  // normalised to the total charge and divided by the beam profile");
-  // declareProperty("NormaliseToMonitor", false, "If true, the data will be
-  // normalised to the monitor, otherwise the total charge will be used");
-  declareProperty(
-      make_unique<API::FileProperty>("MonitorReferenceFile", "",
-                                     API::FileProperty::OptionalLoad,
-                                     "_event.nxs"),
-      "The name of the beam monitor reference file used for normalisation");
-
   setPropertyGroup("Normalisation", norm_grp);
-  setPropertyGroup("LoadMonitors", norm_grp);
-  setPropertyGroup("MonitorReferenceFile", norm_grp);
 
   // Dark current
   declareProperty(
       make_unique<API::FileProperty>(
-          "DarkCurrentFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
+          "DarkCurrentFile", "", API::FileProperty::OptionalLoad, ".dat"),
       "The name of the input event Nexus file to load as dark current.");
 
   // Sensitivity
   std::string eff_grp = "Sensitivity";
   declareProperty(
       make_unique<API::FileProperty>(
-          "SensitivityFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
+          "SensitivityFile", "", API::FileProperty::OptionalLoad, ".dat"),
       "Flood field or sensitivity file.");
   declareProperty(
       "MinEfficiency", EMPTY_DBL(), positiveDouble,
@@ -199,7 +146,7 @@ void SetupSWANSReduction::init() {
                                         "subtracted from the flood field.");
   declareProperty(make_unique<API::FileProperty>(
                       "SensitivityDarkCurrentFile", "",
-                      API::FileProperty::OptionalLoad, "_event.nxs"),
+                      API::FileProperty::OptionalLoad, ".dat"),
                   "The name of the input file to load as dark current.");
   // - sensitivity beam center
   declareProperty("SensitivityBeamCenterMethod", "None",
@@ -608,64 +555,29 @@ void SetupSWANSReduction::exec() {
 
   // Store normalization algorithm
   const std::string normalization = getProperty("Normalisation");
-  bool loadMonitors = getProperty("LoadMonitors");
-  const std::string monitorRefFile = getPropertyValue("MonitorReferenceFile");
-  // If we normalize to monitor, force the loading of monitor data
-  IAlgorithm_sptr normAlg = createChildAlgorithm("EQSANSNormalise");
 
-  if (boost::contains(normalization, "BeamProfileAndCharge")) {
-    normAlg->setProperty("NormaliseToBeam", true);
-    normAlg->setProperty("BeamSpectrumFile", monitorRefFile);
-  } else if (boost::contains(normalization, "Charge")) {
-    normAlg->setProperty("NormaliseToBeam", false);
-  } else if (boost::contains(normalization, "Monitor")) {
-    loadMonitors = true;
-    if (monitorRefFile.size() == 0) {
-      g_log.error() << "ERROR: normalize-to-monitor was turned ON but no "
-                       "reference data was selected" << std::endl;
-    }
-    normAlg->setProperty("NormaliseToMonitor", true);
-    normAlg->setProperty("BeamSpectrumFile", monitorRefFile);
+  if (!boost::contains(normalization, "None")) {
+    // If we normalize to monitor, force the loading of monitor data
+    IAlgorithm_sptr normAlg = createChildAlgorithm("HFIRSANSNormalise");
+    normAlg->setProperty("NormalisationType", normalization);
+    // normAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+    auto algProp = make_unique<AlgorithmProperty>("NormaliseAlgorithm");
+    algProp->setValue(normAlg->toString());
+    reductionManager->declareProperty(std::move(algProp));
   }
-  normAlg->setPropertyValue("ReductionProperties", reductionManagerName);
-  auto normAlgProp = make_unique<AlgorithmProperty>("NormaliseAlgorithm");
-  normAlgProp->setValue(normAlg->toString());
-  reductionManager->declareProperty(std::move(normAlgProp));
 
   // Load algorithm
-  IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadSwans");
-  const bool useConfigBeam = getProperty("UseConfigBeam");
-  loadAlg->setProperty("UseConfigBeam", useConfigBeam);
-  const bool useConfigTOFCuts = getProperty("UseConfigTOFCuts");
-  loadAlg->setProperty("UseConfigTOFCuts", useConfigTOFCuts);
-  if (!useConfigTOFCuts) {
-    const double lowTOFCut = getProperty("LowTOFCut");
-    const double highTOFCut = getProperty("HighTOFCut");
-    loadAlg->setProperty("LowTOFCut", lowTOFCut);
-    loadAlg->setProperty("HighTOFCut", highTOFCut);
-  }
-
-  const bool skipTOFCorrection = getProperty("SkipTOFCorrection");
-  loadAlg->setProperty("SkipTOFCorrection", skipTOFCorrection);
-
-  const bool correctForFlightPath = getProperty("CorrectForFlightPath");
-  loadAlg->setProperty("CorrectForFlightPath", correctForFlightPath);
+  IAlgorithm_sptr loadAlg = createChildAlgorithm("SWANSLoad");
 
   const bool preserveEvents = getProperty("PreserveEvents");
   loadAlg->setProperty("PreserveEvents", preserveEvents);
-  loadAlg->setProperty("LoadMonitors", loadMonitors);
 
   const double sdd = getProperty("SampleDetectorDistance");
   loadAlg->setProperty("SampleDetectorDistance", sdd);
-  const double sddOffset = getProperty("SampleDetectorDistanceOffset");
-  loadAlg->setProperty("SampleDetectorDistanceOffset", sddOffset);
+
   const double wlStep = getProperty("WavelengthStep");
   loadAlg->setProperty("WavelengthStep", wlStep);
 
-  const bool useConfig = getProperty("UseConfig");
-  loadAlg->setProperty("UseConfig", useConfig);
-  const bool useConfigMask = getProperty("UseConfigMask");
-  loadAlg->setProperty("UseConfigMask", useConfigMask);
   auto loadAlgProp = make_unique<AlgorithmProperty>("LoadAlgorithm");
   loadAlgProp->setValue(loadAlg->toString());
   reductionManager->declareProperty(std::move(loadAlgProp));
