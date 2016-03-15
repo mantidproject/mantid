@@ -3,6 +3,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -99,6 +100,10 @@ void CreateSimulationWorkspace::createInstrument() {
       createChildAlgorithm("LoadInstrument", 0.0, 0.5, enableLogging);
   MatrixWorkspace_sptr tempWS =
       WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+
+  // We need to set the correct start date for this workspace
+  setStartDate(tempWS);
+
   loadInstrument->setProperty("Workspace", tempWS);
   const std::string instrProp = getProperty("Instrument");
   if (boost::algorithm::ends_with(instrProp, ".xml")) {
@@ -344,6 +349,32 @@ void CreateSimulationWorkspace::adjustInstrument(const std::string &filename) {
     // is not correct.
     updateInst->execute();
   }
+}
+
+/**
+ * Sets the start date on a dummy workspace. If there is a detector table file
+ * available we update the dummy workspace with the start date from this file.
+ * @param workspace: dummy workspace
+ */
+void CreateSimulationWorkspace::setStartDate(API::MatrixWorkspace_sptr workspace) {
+  const std::string detTableFile = getProperty("DetectorTableFilename");
+  auto hasDetTableFile = !detTableFile.empty();
+  auto run = workspace->mutableRun();
+
+  Kernel::DateAndTime startTime = run.startTime();
+  Kernel::DateAndTime endTime = run.endTime();
+
+  if (hasDetTableFile) {
+      if (boost::algorithm::ends_with(detTableFile, ".raw") ||
+          boost::algorithm::ends_with(detTableFile, ".RAW")) {
+         //auto startDate = getStartDateFromRawFile(detTableFile);
+      } else if (boost::algorithm::ends_with(detTableFile, ".nxs") ||
+                 boost::algorithm::ends_with(detTableFile, ".NXS")) {
+        // auto startDate = getStartDateFromNexusFile(detTableFile);
+      }
+  }
+
+  run.setStartAndEndTime(startTime, endTime);
 }
 
 } // namespace DataHandling
