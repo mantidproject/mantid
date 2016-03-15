@@ -95,7 +95,7 @@ public:
     auto outputWS = runAlgorithm("LOQ", "DeltaE", "LOQ49886.nxs");
 
     const size_t nhist = outputWS->getNumberHistograms();
-    TS_ASSERT_EQUALS(nhist, 17790);
+    TS_ASSERT_EQUALS(nhist, 17788);
 
     TS_ASSERT_EQUALS(outputWS->getSpectrum(6)->getDetectorIDs().size(), 1);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(6)->getSpectrumNo(), 7);
