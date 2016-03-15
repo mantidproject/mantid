@@ -3177,7 +3177,7 @@ void SANSRunWindow::handleInstrumentChange() {
  */
 void SANSRunWindow::applyLOQSettings(bool isNowLOQ) {
   // M4 Transmission monitor
-  m_uiForm.trans_M4_check_box->setDisabled(isNowLOQ);
+  //m_uiForm.trans_M4_check_box->setDisabled(isNowLOQ);
 }
 
 /** Record if the user has changed the default filename, because then we don't
