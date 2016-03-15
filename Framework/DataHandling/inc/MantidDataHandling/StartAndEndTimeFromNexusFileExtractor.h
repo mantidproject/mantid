@@ -40,13 +40,13 @@ Mantid::Kernel::DateAndTime extractEndTime(std::string filename) const;
 
 private:
 enum class NexusType {Muon, Processed, ISIS, TofRaw};
-enum class ExtractType: unsigned char {StartTime, EndTime};
-Mantid::Kernel::DateAndTime extractDateAndTime(ExtractType type, std::string filename) const;
+enum class TimeType: unsigned char {StartTime, EndTime};
+Mantid::Kernel::DateAndTime extractDateAndTime(TimeType type, std::string filename) const;
 NexusType whichNexusType(std::string filename) const;
-Mantid::Kernel::DateAndTime handleMuonNexusFile(ExtractType type) const;
-Mantid::Kernel::DateAndTime handleProcessedNexusFile(ExtractType type) const;
-Mantid::Kernel::DateAndTime handleISISNexusFile(ExtractType type) const;
-Mantid::Kernel::DateAndTime handleTofRawNexusFile(ExtractType type) const;
+Mantid::Kernel::DateAndTime handleMuonNexusFile(TimeType type, std::string filename) const;
+Mantid::Kernel::DateAndTime handleProcessedNexusFile(TimeType type) const;
+Mantid::Kernel::DateAndTime handleISISNexusFile(TimeType type) const;
+Mantid::Kernel::DateAndTime handleTofRawNexusFile(TimeType type) const;
 
 
 };
