@@ -1409,6 +1409,22 @@ void MdViewerWidget::dropEvent(QDropEvent *e) {
   }
 }
 
+/* Verify that at least one source other than a "Peaks Source" has been loaded
+ * in the VSI.
+ * @return true if something other than a PeaksWorkspace is found.
+ */
+bool otherWorkspacePresent() {
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel =
+      pqApplicationCore::instance()->getServerManagerModel();
+  auto sources = smModel->findItems<pqPipelineSource *>(server);
+  auto result = std::find_if(
+      sources.begin(), sources.end(), [](const pqPipelineSource *src) {
+        return strcmp(src->getProxy()->GetXMLName(), "Peaks Source") != 0;
+      });
+  return result != sources.end();
+}
+
 /**
   * Handle the drag and drop events of peaks workspaces.
   * @param e The event.
@@ -1426,7 +1442,7 @@ void MdViewerWidget::handleDragAndDropPeaksWorkspaces(QEvent *e, QString text,
     // Only append the candidate if SplattorPlotView is selected and an
     // MDWorkspace is loaded.
     if (dynamic_cast<SplatterPlotView *>(this->currentView) &&
-        pqActiveObjects::instance().activeSource()) {
+        otherWorkspacePresent()) {
       if (boost::dynamic_pointer_cast<IPeaksWorkspace>(
               AnalysisDataService::Instance().retrieve(
                   candidate.toStdString()))) {
