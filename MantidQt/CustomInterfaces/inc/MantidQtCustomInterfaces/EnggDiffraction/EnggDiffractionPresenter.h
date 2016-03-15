@@ -92,17 +92,21 @@ public:
   void doFitting(const std::string &focusedRunNo,
                  const std::string &ExpectedPeaks);
 
-  std::string functionStrFactory(Mantid::API::ITableWorkspace_sptr &paramTableWS,
-                             std::string tableName, size_t row);
+  std::string
+  functionStrFactory(Mantid::API::ITableWorkspace_sptr &paramTableWS,
+                     std::string tableName, size_t row, std::string &startX,
+                     std::string &endX);
 
   void plotFitPeaksCurves();
 
   void runEvaluateFunctionAlg(std::string bk2BkExpFunction,
-                              std::string InputName, std::string OutputName);
+                              std::string InputName, std::string OutputName,
+                              std::string startX, std::string endX);
 
   void runCropWorkspaceAlg(std::string workspaceName);
 
-  void runAppendSpectraAlg(std::string workspace1Name, std::string workspace2Name);
+  void runAppendSpectraAlg(std::string workspace1Name,
+                           std::string workspace2Name);
 
 protected:
   void initialize();

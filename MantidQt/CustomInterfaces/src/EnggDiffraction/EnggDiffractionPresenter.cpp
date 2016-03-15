@@ -581,9 +581,11 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
 
   size_t rowCount = table->rowCount();
   std::string single_peak_out_WS = "engggui_fitting_single_peaks";
-  std::string Bk2BkExpFunctionStr;
-
   std::string current_peak_out_WS;
+
+  std::string Bk2BkExpFunctionStr;
+  std::string startX = "";
+  std::string endX = "";
 
   if (rowCount > size_t(0)) {
     for (size_t i = 0; i < rowCount; i++) {
@@ -592,7 +594,9 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
       // return the string with i row from table workspace
       // table is just passed so it works?
       Bk2BkExpFunctionStr =
-          functionStrFactory(table, FocusedFitPeaksTableName, i);
+          functionStrFactory(table, FocusedFitPeaksTableName, i, startX, endX);
+
+	  g_log.error() << "startX: " + startX + " . endX: " + endX << std::endl;
 
       current_peak_out_WS = "engggui_fitting_single_peaks" + std::to_string(i);
 
@@ -601,14 +605,14 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
       // FocusedWSName is not going to change as its always going to be from
       // single workspace
       runEvaluateFunctionAlg(Bk2BkExpFunctionStr, FocusedWSName,
-                             current_peak_out_WS);
+                             current_peak_out_WS, startX, endX);
 
       // crop workspace so only the correct workspace index is plotted
       runCropWorkspaceAlg(current_peak_out_WS);
 
       // if the first peak
       if (i == size_t(0)) {
-
+        // rename engggui_fitting_single_peaks0 to engggui_fitting_single_peaks
         auto renameWs =
             Mantid::API::AlgorithmManager::Instance().createUnmanaged(
                 "RenameWorkspace");
@@ -641,7 +645,7 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
 
 std::string EnggDiffractionPresenter::functionStrFactory(
     Mantid::API::ITableWorkspace_sptr &paramTableWS, std::string tableName,
-    size_t row) {
+    size_t row, std::string &startX, std::string &endX) {
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   paramTableWS = ADS.retrieveWS<ITableWorkspace>(tableName);
 
@@ -652,6 +656,9 @@ std::string EnggDiffractionPresenter::functionStrFactory(
   double B = paramTableWS->cell<double>(row, size_t(9));
   double X0 = paramTableWS->cell<double>(row, size_t(5));
   double S = paramTableWS->cell<double>(row, size_t(11));
+
+  startX = boost::lexical_cast<std::string>(X0 - (3 * S));
+  endX = boost::lexical_cast<std::string>(X0 + (3 * S));
 
   std::string functionStr =
       "name=LinearBackground,A0=" + boost::lexical_cast<std::string>(A0) +
@@ -666,8 +673,8 @@ std::string EnggDiffractionPresenter::functionStrFactory(
 };
 
 void EnggDiffractionPresenter::runEvaluateFunctionAlg(
-    std::string bk2BkExpFunction, std::string InputName,
-    std::string OutputName) {
+    std::string bk2BkExpFunction, std::string InputName, std::string OutputName,
+    std::string startX, std::string endX) {
 
   auto evalFunc = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "EvaluateFunction");
@@ -677,6 +684,8 @@ void EnggDiffractionPresenter::runEvaluateFunctionAlg(
     evalFunc->setProperty("Function", bk2BkExpFunction);
     evalFunc->setProperty("InputWorkspace", InputName);
     evalFunc->setProperty("OutputWorkspace", OutputName);
+    evalFunc->setProperty("StartX", startX);
+    evalFunc->setProperty("EndX", endX);
     evalFunc->execute();
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm EvaluateFunction, "
