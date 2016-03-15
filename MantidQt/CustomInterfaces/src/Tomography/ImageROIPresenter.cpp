@@ -11,8 +11,14 @@ using namespace MantidQt::CustomInterfaces;
 namespace MantidQt {
 namespace CustomInterfaces {
 
+namespace {
+Mantid::Kernel::Logger g_log("ImageROI");
+}
+
+bool ImageROIPresenter::g_warnIfUnexpectedFileExtensions = false;
+
 ImageROIPresenter::ImageROIPresenter(IImageROIView *view)
-    : m_view(view), m_model(new ImageStackPreParams()) {
+    : m_stackPath(), m_view(view), m_model(new ImageStackPreParams()) {
   if (!m_view) {
     throw std::runtime_error("Severe inconsistency found. Presenter created "
                              "with an empty/null view (tomography interface). "
@@ -151,24 +157,28 @@ void ImageROIPresenter::processNewStack() {
   std::vector<std::string> imgs = soid.sampleFiles();
   if (0 >= imgs.size()) {
     m_view->userWarning(
-        "Error trying to find image/projection files in the stack directories",
-        "Could not find any image file in the samples subdirectory: " +
+        "Error while trying to find image/projection files in the stack "
+        "directories",
+        "Could not find any (image) file in the samples subdirectory: " +
             soid.sampleImagesDir());
     return;
   }
 
+  // Let's take only the ones that we can effectively load
   for (size_t i = 0; i < imgs.size(); i++) {
     const std::string extShort = imgs[i].substr(imgs[i].size() - 3);
     const std::string extLong = imgs[i].substr(imgs[i].size() - 4);
     const std::string expectedShort = "fit";
     const std::string expectedLong = "fits";
-    if (extShort != expectedShort && extLong != expectedLong) {
-      m_view->userWarning("Invalid files found in the stack of images",
-                          "Found files with unrecognized extension. Expected "
-                          "files with extension '" +
-                              expectedShort + "' or '" + expectedLong +
-                              "' but found: " + imgs[i]);
-      return;
+    const std::string msg = "Found files with unrecognized extension in this "
+                            "stack ( " +
+                            m_stackPath + "). Expected files with extension '" +
+                            expectedShort + "' or '" + expectedLong +
+                            "' but found: " + imgs[i];
+    g_log.warning(msg);
+    if (g_warnIfUnexpectedFileExtensions &&
+        (extShort != expectedShort || extLong != expectedLong)) {
+      m_view->userWarning("Invalid files found in the stack of images", msg);
     }
   }
 
@@ -266,14 +276,14 @@ ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
   //  loadFITSImage(imgs[i], wsName);
   // }
 
-  // Load all image files using a list with their names
+  // Load all requested/supported image files using a list with their names
   try {
     std::string allPaths;
     size_t i = 0;
     allPaths = imgs[i];
     i++;
-    while (i < imgs.size()) {
-      allPaths.append(", " + imgs[i++]);
+    while (i++ < imgs.size()) {
+      allPaths.append(", " + imgs[i]);
     }
     loadFITSImage(allPaths, wsName);
   } catch (std::runtime_error &exc) {
