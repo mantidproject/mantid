@@ -433,16 +433,16 @@ void TomographyIfaceViewQtGUI::doSetupSectionSystemSettings() {
   // System/advanced/hidden settings:
   m_uiTabSystemSettings.lineEdit_SCARF_path->setText(
       QString::fromStdString(m_pathsConfig.pathBase()));
-  m_uiTabSystemSettings.lineEdit_scripts_base_dir->setText(
+  m_uiTabSystemSettings.lineEdit_scripts_base_dir_remote->setText(
       QString::fromStdString(m_pathsConfig.pathScriptsTools()));
 
   // reset setup of the remote
-  connect(m_uiTabSystemSettings.pushButton_reset_scripts_base_dir,
+  connect(m_uiTabSystemSettings.pushButton_reset_scripts_base_dir_remote,
           SIGNAL(released()), this, SLOT(resetRemoteSetup()));
 }
 
 void TomographyIfaceViewQtGUI::resetRemoteSetup() {
-  m_uiTabSystemSettings.lineEdit_scripts_base_dir->setText(
+  m_uiTabSystemSettings.lineEdit_scripts_base_dir_remote->setText(
       QString::fromStdString(g_defRemotePathScripts));
   m_uiTabSystemSettings.spinBox_SCARFnumNodes->setValue(1);
   m_uiTabSystemSettings.spinBox_SCARFnumCores->setValue(8);
