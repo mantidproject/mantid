@@ -36,6 +36,10 @@ public:
                           const double fluct, const double time) const {
     return polarization(delta, larmor, fluct, time);
   }
+  void wrapFunc1D(double *out, const double *xValues,
+                  const size_t nData) const {
+    function1D(out, xValues, nData);
+  }
 };
 
 class KerenTest : public CxxTest::TestSuite {
@@ -60,6 +64,12 @@ public:
     const auto workspace = getMockDataWorkspace();
     Keren function;
     function.initialize();
+    
+    // set some reasonable starting values
+    function.setParameter("Field", 80.0);
+    function.setParameter("Fluct", 0.2);
+    function.setParameter("Delta", 0.2);
+
     auto fit = AlgorithmManager::Instance().create("Fit");
     fit->initialize();
     fit->setChild(true);
@@ -116,6 +126,24 @@ public:
                     0.8560, 0.001);
     TS_ASSERT_DELTA(function.wrapPolarization(delta, larmor, fluct, 10.0),
                     0.7594, 0.001);
+  }
+
+  void test_evaluateFunction() {
+    TestFunction function;
+    function.initialize();
+    const double field = 100;
+    const double delta =
+        Mantid::PhysicalConstants::MuonGyromagneticRatio * field * 0.2;
+    const double fluct = delta;
+    function.setParameter("A", 1.0);
+    function.setParameter("Delta", delta);
+    function.setParameter("Field", field);
+    function.setParameter("Fluct", fluct);
+
+    double x = 1.0;
+    double y;
+    TS_ASSERT_THROWS_NOTHING(function.wrapFunc1D(&y, &x, 1));
+    TS_ASSERT_DELTA(y, 0.9434, 0.001);
   }
 
 private:

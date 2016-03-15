@@ -14,8 +14,8 @@ DECLARE_FUNCTION(Keren)
  */
 void Keren::init() {
   declareParameter("A", 1.0, "Polarization at time zero");
-  declareParameter("Delta", 0.2, "Distribution width of local field");
-  declareParameter("Field", 0.2, "Longitudinal field");
+  declareParameter("Delta", 0.2, "Distribution width of local fields");
+  declareParameter("Field", 50.0, "Longitudinal field");
   declareParameter("Fluct", 0.2, "Hopping rate (inverse correlation time)");
 }
 
@@ -57,8 +57,26 @@ double Keren::activeParameter(size_t i) const {
     return getParameter(i);
 }
 
+/**
+ * Calculate the value of the function for each given X value
+ * @param out :: [output] Array to be filled with function values
+ * @param xValues :: [input] Array of X values to calculate function at
+ * @param nData :: [input] Number of X values
+ */
 void Keren::function1D(double *out, const double *xValues,
-                       const size_t nData) const {}
+                       const size_t nData) const {
+  // Get parameters
+  const double initial = getParameter("A");
+  const double delta = getParameter("Delta");
+  const double fluct = getParameter("Fluct");
+  const double larmor =
+      getParameter("Field") * PhysicalConstants::MuonGyromagneticRatio;
+
+  for (size_t i = 0; i < nData; i++) {
+    out[i] = initial * polarization(delta, larmor, fluct, xValues[i]);
+  }
+}
+
 /**
  * Calculate the muon polarization P_z(t) at time t as a fraction of the initial
  * polarization (P_0(t) = 1)
