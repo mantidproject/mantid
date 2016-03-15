@@ -95,14 +95,20 @@ void LoadNexusMonitors2::init() {
                   "regardless of whether event data is found.");
 
   declareProperty("UseEventMonitor", true,
-                  "Load event monitor in NeXus file both event monitor and histogram monitor found in NeXus file."
-                  "If both of LoadEventMonitor and LoadHistoMonitor are true, or both of them are false,"
-                  "then it is in the auto mode such that any existing monitor will be loaded.");
+                  "Load event monitor in NeXus file both event monitor and "
+                  "histogram monitor found in NeXus file."
+                  "If both of LoadEventMonitor and LoadHistoMonitor are true, "
+                  "or both of them are false,"
+                  "then it is in the auto mode such that any existing monitor "
+                  "will be loaded.");
 
   declareProperty("UseHistoMonitor", true,
-                  "Load histogram monitor in NeXus file both event monitor and histogram monitor found in NeXus file."
-                  "If both of LoadEventMonitor and LoadHistoMonitor are true, or both of them are false,"
-                  "then it is in the auto mode such that any existing monitor will be loaded.");
+                  "Load histogram monitor in NeXus file both event monitor and "
+                  "histogram monitor found in NeXus file."
+                  "If both of LoadEventMonitor and LoadHistoMonitor are true, "
+                  "or both of them are false,"
+                  "then it is in the auto mode such that any existing monitor "
+                  "will be loaded.");
 }
 
 //------------------------------------------------------------------------------
@@ -695,26 +701,20 @@ bool LoadNexusMonitors2::createOutputWorkspace(
   bool useHistogramMon = getProperty("UseHistoMonitor");
 
   // Create the output workspace
-  if (numHistMon == m_monitor_count)
-  {
+  if (numHistMon == m_monitor_count) {
     // all monitors are histogram monitors
     useEventMon = false;
-  }
-  else if (numEventMon == m_monitor_count)
-  {
+  } else if (numEventMon == m_monitor_count) {
     // all monitors are event monitors
     useEventMon = true;
-  }
-  else if (!monitorsAsEvents)
-  {
+  } else if (!monitorsAsEvents) {
     // rule out some weird situation that is not logical
     if (numHistMon != m_monitor_count)
       throw std::runtime_error("I really don't think it could happen!"
-                               "monitor as events should always be false if number of histogram monitor is equal to "
+                               "monitor as events should always be false if "
+                               "number of histogram monitor is equal to "
                                "number of total monitors.");
-  }
-  else if (useEventMon == useHistogramMon)
-  {
+  } else if (useEventMon == useHistogramMon) {
     // automatic mode but throw an exception in case that
     // both types of monitors are found in NeXus file
     g_log.error() << "Found " << numEventMon << " event monitors and "
@@ -722,13 +722,9 @@ bool LoadNexusMonitors2::createOutputWorkspace(
                   << " total)\n";
     throw std::runtime_error(
         "All monitors must be either event or histogram based");
-  }
-  else if (useEventMon)
-  {
+  } else if (useEventMon) {
     useEventMon = true;
-  }
-  else
-  {
+  } else {
     useEventMon = false;
   }
 
@@ -740,8 +736,7 @@ bool LoadNexusMonitors2::createOutputWorkspace(
 
     useEventMon = false;
    */
-  if (!useEventMon)
-  {
+  if (!useEventMon) {
     if (m_monitor_count == 0)
       throw std::runtime_error(
           "Not loading event data. Trying to load histogram data but failed to "
@@ -758,7 +753,7 @@ bool LoadNexusMonitors2::createOutputWorkspace(
         monitorNames.push_back(numberName.second);
       }
     }
-  } else{
+  } else {
     // only used if using event monitors
     EventWorkspace_sptr eventWS = EventWorkspace_sptr(new EventWorkspace());
     // useEventMon = true;
