@@ -7,11 +7,6 @@
 #include <map>
 namespace Mantid {
 namespace VATES {
-/// Constructor
-CompositePeaksPresenterVsi::CompositePeaksPresenterVsi() {}
-
-/// Destructor
-CompositePeaksPresenterVsi::~CompositePeaksPresenterVsi() {}
 
 /**
  * Update the view frustum

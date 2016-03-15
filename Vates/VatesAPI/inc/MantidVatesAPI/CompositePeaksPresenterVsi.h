@@ -15,8 +15,6 @@ namespace Mantid {
 namespace VATES {
 class DLLExport CompositePeaksPresenterVsi : public PeaksPresenterVsi {
 public:
-  CompositePeaksPresenterVsi();
-  ~CompositePeaksPresenterVsi() override;
   Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() const override {
     throw std::runtime_error(
         "The composite peaks presenter has no single peaks workspace.");
