@@ -716,19 +716,20 @@ bool LoadNexusMonitors2::createOutputWorkspace(
     // all monitors are event monitors
     useEventMon = true;
   } else if (!monitorsAsEvents) {
-    // rule out some weird situation that is not logical
-    if (numHistMon != m_monitor_count) {
-      std::stringstream error_msg;
-      error_msg << "I really don't think it could happen!"
-                << "Number of histogram monitor = " << numHistMon
-                << ", number of evnet monitor = " << numEventMon
-                << "; monitor as events = " << monitorsAsEvents << "\n"
-                << "Monitor names: ";
-      size_t numNames = monitorNames.size();
-      for (size_t i_name = 0; i_name < numNames; ++i_name)
-        error_msg << monitorNames[i_name];
-      throw std::runtime_error(error_msg.str());
-    }
+    // Both event monitors and histogram monitors exist
+    useEventMon = false;
+
+    // print information out
+    std::stringstream info_ss;
+    info_ss << "I really don't think it could happen!"
+            << "Number of histogram monitor = " << numHistMon
+            << ", number of evnet monitor = " << numEventMon
+            << "; monitor as events = " << monitorsAsEvents << "\n"
+            << "Monitor names: ";
+    size_t numNames = monitorNames.size();
+    for (size_t i_name = 0; i_name < numNames; ++i_name)
+      info_ss << monitorNames[i_name] << " \t";
+    g_log.information(info_ss.str());
   } else if (useEventMon == useHistogramMon) {
     // automatic mode but throw an exception in case that
     // both types of monitors are found in NeXus file
@@ -738,8 +739,10 @@ bool LoadNexusMonitors2::createOutputWorkspace(
     throw std::runtime_error(
         "All monitors must be either event or histogram based");
   } else if (useEventMon) {
+    // user says: use event monitor
     useEventMon = true;
   } else {
+    // user says: use histogram monitor
     useEventMon = false;
   }
 
