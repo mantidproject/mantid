@@ -522,4 +522,36 @@ private:
   Detector *det, *det2, *det3;
 };
 
+class InstrumentTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static InstrumentTestPerformance *createSuite() {
+    return new InstrumentTestPerformance();
+  }
+  static void destroySuite(InstrumentTestPerformance *suite) { delete suite; }
+
+  InstrumentTestPerformance() {
+    Mantid::Kernel::V3D sourcePos(0, 0, 0);
+    Mantid::Kernel::V3D samplePos(0, 0, 1);
+    Mantid::Kernel::V3D trolley1Pos(0, 0, 3);
+    Mantid::Kernel::V3D trolley2Pos(0, 0, 6);
+
+    m_instrument = ComponentCreationHelper::sansInstrument(
+        sourcePos, samplePos, trolley1Pos, trolley2Pos);
+  }
+
+  void test_access() {
+
+    size_t nPixels = 100 * 100 * 6;
+    double pos_x = 0;
+    for (size_t i = 1; i <= nPixels; i++) {
+      pos_x += m_instrument->getDetector(i)->getPos().X();
+    }
+  }
+
+private:
+  Instrument_sptr m_instrument;
+};
+
 #endif /*INSTRUMENTTEST_H_*/
