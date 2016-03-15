@@ -596,7 +596,7 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
       Bk2BkExpFunctionStr =
           functionStrFactory(table, FocusedFitPeaksTableName, i, startX, endX);
 
-	  g_log.error() << "startX: " + startX + " . endX: " + endX << std::endl;
+      g_log.debug() << "startX: " + startX + " . endX: " + endX << std::endl;
 
       current_peak_out_WS = "engggui_fitting_single_peaks" + std::to_string(i);
 
@@ -610,9 +610,11 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
       // crop workspace so only the correct workspace index is plotted
       runCropWorkspaceAlg(current_peak_out_WS);
 
+      // apply the same binning as a focused workspace
+      runRebinToWorkspaceAlg(current_peak_out_WS);
+
       // if the first peak
       if (i == size_t(0)) {
-        // rename engggui_fitting_single_peaks0 to engggui_fitting_single_peaks
         auto renameWs =
             Mantid::API::AlgorithmManager::Instance().createUnmanaged(
                 "RenameWorkspace");
@@ -726,6 +728,24 @@ void EnggDiffractionPresenter::runAppendSpectraAlg(std::string workspace1Name,
     appendSpec->execute();
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm AppendWorkspace, "
+                     "Error description: " +
+                         static_cast<std::string>(re.what())
+                  << std::endl;
+  }
+}
+
+void EnggDiffractionPresenter::runRebinToWorkspaceAlg(
+    std::string workspaceName) {
+  auto RebinToWs = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "RebinToWorkspace");
+  try {
+    RebinToWs->initialize();
+    RebinToWs->setProperty("WorkspaceToRebin", workspaceName);
+    RebinToWs->setProperty("WorkspaceToMatch", "engggui_fitting_focused_ws");
+    RebinToWs->setProperty("OutputWorkspace", workspaceName);
+    RebinToWs->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Could not run the algorithm RebinToWorkspace, "
                      "Error description: " +
                          static_cast<std::string>(re.what())
                   << std::endl;

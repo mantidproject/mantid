@@ -108,6 +108,9 @@ public:
   void runAppendSpectraAlg(std::string workspace1Name,
                            std::string workspace2Name);
 
+  void runRebinToWorkspaceAlg(std::string workspaceName);
+
+
 protected:
   void initialize();
 
