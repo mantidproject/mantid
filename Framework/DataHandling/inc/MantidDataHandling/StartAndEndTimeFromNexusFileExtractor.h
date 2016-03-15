@@ -6,9 +6,10 @@
 #include <string>
 
 namespace Mantid {
-namespace DataHandling {  
+namespace DataHandling {
 
-/** StartAndEndTimeFromNexusFileExtractor : Extracts the start and the end time from
+/** StartAndEndTimeFromNexusFileExtractor : Extracts the start and the end time
+ from
  * a Nexus file.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -32,23 +33,25 @@ namespace DataHandling {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_DATAHANDLING_DLL StartAndEndTimeFromNexusFileExtractor {
+class DLLExport StartAndEndTimeFromNexusFileExtractor {
 public:
-
-Mantid::Kernel::DateAndTime extractStartTime(std::string filename) const;
-Mantid::Kernel::DateAndTime extractEndTime(std::string filename) const;
+  Mantid::Kernel::DateAndTime extractStartTime(std::string filename) const;
+  Mantid::Kernel::DateAndTime extractEndTime(std::string filename) const;
 
 private:
-enum class NexusType {Muon, Processed, ISIS, TofRaw};
-enum class TimeType: unsigned char {StartTime, EndTime};
-Mantid::Kernel::DateAndTime extractDateAndTime(TimeType type, std::string filename) const;
-NexusType whichNexusType(std::string filename) const;
-Mantid::Kernel::DateAndTime handleMuonNexusFile(TimeType type, std::string filename) const;
-Mantid::Kernel::DateAndTime handleProcessedNexusFile(TimeType type) const;
-Mantid::Kernel::DateAndTime handleISISNexusFile(TimeType type) const;
-Mantid::Kernel::DateAndTime handleTofRawNexusFile(TimeType type) const;
-
-
+  enum class NexusType { Muon, Processed, ISIS, TofRaw };
+  enum class TimeType : unsigned char { StartTime, EndTime };
+  Mantid::Kernel::DateAndTime extractDateAndTime(TimeType type,
+                                                 std::string filename) const;
+  NexusType whichNexusType(std::string filename) const;
+  Mantid::Kernel::DateAndTime handleMuonNexusFile(TimeType type,
+                                                  std::string filename) const;
+  Mantid::Kernel::DateAndTime
+  handleProcessedNexusFile(TimeType type, std::string filename) const;
+  Mantid::Kernel::DateAndTime handleISISNexusFile(TimeType type,
+                                                  std::string filename) const;
+  Mantid::Kernel::DateAndTime handleTofRawNexusFile(TimeType type,
+                                                    std::string filename) const;
 };
 
 } // namespace DataHandling
