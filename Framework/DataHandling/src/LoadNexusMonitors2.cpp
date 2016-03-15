@@ -93,6 +93,16 @@ void LoadNexusMonitors2::init() {
                   "an EventWorkspace), as long as there is event data. If "
                   "disabled, load monitors as spectra (into a Workspace2D, "
                   "regardless of whether event data is found.");
+
+  declareProperty("UseEventMonitor", true,
+                  "Load event monitor in NeXus file both event monitor and histogram monitor found in NeXus file."
+                  "If both of LoadEventMonitor and LoadHistoMonitor are true, or both of them are false,"
+                  "then it is in the auto mode such that any existing monitor will be loaded.");
+
+  declareProperty("UseHistoMonitor", true,
+                  "Load histogram monitor in NeXus file both event monitor and histogram monitor found in NeXus file."
+                  "If both of LoadEventMonitor and LoadHistoMonitor are true, or both of them are false,"
+                  "then it is in the auto mode such that any existing monitor will be loaded.");
 }
 
 //------------------------------------------------------------------------------
@@ -666,20 +676,72 @@ size_t LoadNexusMonitors2::getMonitorInfo(
   return monitorNames.size();
 }
 
+/** Create output workspace
+ * @brief LoadNexusMonitors2::createOutputWorkspace
+ * @param numHistMon
+ * @param numEventMon
+ * @param monitorsAsEvents
+ * @param monitorNames
+ * @param monitorNumber2Name
+ * @return
+ */
 bool LoadNexusMonitors2::createOutputWorkspace(
     size_t numHistMon, size_t numEventMon, bool monitorsAsEvents,
     std::vector<std::string> &monitorNames,
     const std::map<int, std::string> &monitorNumber2Name) {
-  // only used if using event monitors
-  EventWorkspace_sptr eventWS;
+
+  // Find out using event monitor or histogram monitor
+  bool useEventMon = getProperty("UseEventMonitor");
+  bool useHistogramMon = getProperty("UseHistoMonitor");
+
   // Create the output workspace
-  bool useEventMon;
+  if (numHistMon == m_monitor_count)
+  {
+    // all monitors are histogram monitors
+    useEventMon = false;
+  }
+  else if (numEventMon == m_monitor_count)
+  {
+    // all monitors are event monitors
+    useEventMon = true;
+  }
+  else if (!monitorsAsEvents)
+  {
+    // rule out some weird situation that is not logical
+    if (numHistMon != m_monitor_count)
+      throw std::runtime_error("I really don't think it could happen!"
+                               "monitor as events should always be false if number of histogram monitor is equal to "
+                               "number of total monitors.");
+  }
+  else if (useEventMon == useHistogramMon)
+  {
+    // automatic mode but throw an exception in case that
+    // both types of monitors are found in NeXus file
+    g_log.error() << "Found " << numEventMon << " event monitors and "
+                  << numHistMon << " histogram monitors (" << m_monitor_count
+                  << " total)\n";
+    throw std::runtime_error(
+        "All monitors must be either event or histogram based");
+  }
+  else if (useEventMon)
+  {
+    useEventMon = true;
+  }
+  else
+  {
+    useEventMon = false;
+  }
+
+  /*
   if (numHistMon == m_monitor_count || !monitorsAsEvents) {
 
     if (numHistMon != m_monitor_count)
       throw std::runtime_error("I really don't think it could happen!");
 
     useEventMon = false;
+   */
+  if (!useEventMon)
+  {
     if (m_monitor_count == 0)
       throw std::runtime_error(
           "Not loading event data. Trying to load histogram data but failed to "
@@ -696,9 +758,10 @@ bool LoadNexusMonitors2::createOutputWorkspace(
         monitorNames.push_back(numberName.second);
       }
     }
-  } else if (numEventMon == m_monitor_count) {
-    eventWS = EventWorkspace_sptr(new EventWorkspace());
-    useEventMon = true;
+  } else{
+    // only used if using event monitors
+    EventWorkspace_sptr eventWS = EventWorkspace_sptr(new EventWorkspace());
+    // useEventMon = true;
     eventWS->initialize(m_monitor_count, 1, 1);
 
     // Set the units
@@ -706,12 +769,6 @@ bool LoadNexusMonitors2::createOutputWorkspace(
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
     eventWS->setYUnit("Counts");
     m_workspace = eventWS;
-  } else {
-    g_log.error() << "Found " << numEventMon << " event monitors and "
-                  << numHistMon << " histogram monitors (" << m_monitor_count
-                  << " total)\n";
-    throw std::runtime_error(
-        "All monitors must be either event or histogram based");
   }
 
   return useEventMon;
