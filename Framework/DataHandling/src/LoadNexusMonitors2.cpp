@@ -150,9 +150,9 @@ void LoadNexusMonitors2::exec() {
   std::vector<std::string> monitorNames;
   std::map<int, std::string> monitorNumber2Name;
   std::vector<bool> isEventMonitors;
-  m_monitor_count = getMonitorInfo(file, monitorNames, numHistMon, numEventMon,
-                                   numPeriods, monitorNumber2Name,
-                                   isEventMonitors);
+  m_monitor_count =
+      getMonitorInfo(file, monitorNames, numHistMon, numEventMon, numPeriods,
+                     monitorNumber2Name, isEventMonitors);
 
   // Nothing to do
   if (0 == m_monitor_count) {
@@ -717,8 +717,7 @@ bool LoadNexusMonitors2::createOutputWorkspace(
     useEventMon = true;
   } else if (!monitorsAsEvents) {
     // rule out some weird situation that is not logical
-    if (numHistMon != m_monitor_count)
-    {
+    if (numHistMon != m_monitor_count) {
       std::stringstream error_msg;
       error_msg << "I really don't think it could happen!"
                 << "Number of histogram monitor = " << numHistMon

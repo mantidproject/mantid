@@ -97,7 +97,8 @@ private:
                         std::vector<std::string> &monitorNames,
                         size_t &numHistMon, size_t &numEventMon,
                         size_t &numPeriods,
-                        std::map<int, std::string> &monitorNumber2Name, std::vector<bool> &isEventMonitors);
+                        std::map<int, std::string> &monitorNumber2Name,
+                        std::vector<bool> &isEventMonitors);
 
   bool
   createOutputWorkspace(size_t numHistMon, size_t numEventMon,
