@@ -95,7 +95,7 @@ public:
   std::string functionStrFactory(Mantid::API::ITableWorkspace_sptr &paramTableWS,
                              std::string tableName, size_t row);
 
-  void plotFitPeaksCurves(int peak, bool attach) const;
+  void plotFitPeaksCurves();
 
   void runEvaluateFunctionAlg(std::string bk2BkExpFunction,
                               std::string InputName, std::string OutputName);
@@ -312,8 +312,6 @@ private:
 
   // name of the workspace with the vanadium integration (of spectra)
   static const std::string g_vanIntegrationWSName;
-
-  static int g_fittingRowCounter;
 
   QThread *m_workerThread;
 

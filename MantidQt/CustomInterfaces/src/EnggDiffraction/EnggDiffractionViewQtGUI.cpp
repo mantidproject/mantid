@@ -60,7 +60,7 @@ const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
 */
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), m_dataCurve(new QwtPlotCurve()),
-      IEnggDiffractionView(), m_currentInst("ENGINX"),
+      m_dataCurveVector(), IEnggDiffractionView(), m_currentInst("ENGINX"),
       m_currentCalibFilename(""), m_presenter(NULL) {}
 
 EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {}
@@ -215,16 +215,6 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting(QWidget *wFitting) {
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::xBottom, wFitting->font());
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::yLeft, wFitting->font());
 
-  m_dataCurve->setStyle(QwtPlotCurve::Lines);
- /*
-  m_dataCurve->setSymbol(
-  QwtSymbol(
-	 QwtSymbol::Cross,
-	  QBrush(QColor(255, 255, 255, 0)), // QBrush(QColor(255,255,0,128)),
-	  QPen(Qt::black, 2), QSize(10, 10)));
-	  */
-  m_dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-  m_dataCurve->attach(m_uiTabFitting.dataPlot);
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -689,18 +679,15 @@ std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
   return fileData;
 }
 
-void EnggDiffractionViewQtGUI::setDataCurves(QwtData &data, bool attach) {
-  // Set data
-  if (attach) {
+void EnggDiffractionViewQtGUI::setDataCurves(
+    std::vector<boost::shared_ptr<QwtData>> &data) {
 
-    m_dataCurve->setData(data);
-
-    m_dataCurve->attach(m_uiTabFitting.dataPlot);
-  } else {
-
-    // replot the graph
-    m_uiTabFitting.dataPlot->replot();
+  for (int i = 0; i < m_dataCurveVector.size(); i++) {
+    auto *xs = data[i].get();
+    m_dataCurveVector[i]->setData(*xs);
   }
+
+  m_uiTabFitting.dataPlot->replot();
 }
 
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
