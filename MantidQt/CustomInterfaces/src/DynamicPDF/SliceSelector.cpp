@@ -50,9 +50,9 @@ std::pair<double,double> WorkspaceRecord::getErange(){
 // Add this class to the list of specialised dialogs in this namespace
 DECLARE_SUBWINDOW(SliceSelector)
 
-/// Constructor
-// SliceSelector::SliceSelector(QWidget *parent) : UserSubWindow{parent},
-// m_loadedWorkspace{nullptr}, m_BackgroundRemover{nullptr} {
+/**
+ * @brief Constructor
+ */
 SliceSelector::SliceSelector(QWidget *parent) :
   UserSubWindow{parent},
   m_pickerLine{nullptr},
@@ -63,13 +63,10 @@ SliceSelector::SliceSelector(QWidget *parent) :
 
 SliceSelector::~SliceSelector() {
   delete m_pickerLine;
-}
-
 
 /*        *********************
  *        **  Private Slots  **
  *        *********************/
-
 
 /**
  * @brief Load file or workspace, then initialize the widgets
@@ -164,9 +161,9 @@ void SliceSelector::updatePickerLine(){
 }
 
 /**
- * @brief Initialize and/or update the dialog to remove the multiphonon background
+ * @brief reset the curve fit in the background remover with this slice
  */
-void SliceSelector::launchBackgroundRemover() {
+void SliceSelector::selectSliceForFitting() {
   /// parent of BackgroundRemover is this main window
   // if (!m_BackgroundRemover){
   //  m_BackgroundRemover = boost::make_shared<BackgroundRemover>(this);
@@ -186,11 +183,9 @@ void SliceSelector::showHelp() {
       NULL, QString("DynamicPDFSliceSelector"));
 }
 
-
 /*        ***********************
  *        **  Private Members  **
  *        ***********************/
-
 
 /**
  * @brief Initialize UI form, spawn picker line, connect SIGNALS/SLOTS
@@ -210,7 +205,7 @@ void SliceSelector::initLayout() {
 }
 
 /**
- * @brief Allocate the slice selector in the 2D view. No workspace loading is neccessary.
+ * @brief Allocate the slice selector in the 2D view. No workspace loading is necessary.
  */
 void SliceSelector::spawnPickerLine(){
   auto qwtplot = m_uiForm.slices2DPlot->getPlot2D();
@@ -230,10 +225,8 @@ void SliceSelector::initPickerLine(){
   m_pickerLine->setRange(eRange);
   m_pickerLine->setMinimum(eRange.first);
   m_pickerLine->setMaximum(eRange.second);
-
   m_pickerLine->setVisible(true);
 }
-
 
 /**
  * @brief Check for correct units and workspace type
@@ -264,8 +257,6 @@ bool SliceSelector::isWorkspaceValid(){
   }
   return true;
 }
-
-
 
 
 }

@@ -1,24 +1,29 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_SLICESELECTOR_H_
 #define MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_SLICESELECTOR_H_
-// includes for workspace handling
+
+//Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
+//Mantid Headers from the same project
+#include "ui_SliceSelector.h"
+//Mantid headers from other projects
 #include "MantidAPI/MatrixWorkspace.h"
 // includes for interface
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtAPI/UserSubWindow.h"
-#include "MantidQtMantidWidgets/RangeSelector.h"
-#include "ui_SliceSelector.h"
+
+//3rd party library headers
 #include <qwt_plot_spectrogram.h>
 
+// Forward Declarations
 namespace MantidQt {
 namespace MantidWidgets {
   class MWView;
   class RangeSelector;
 }
+}
+
+namespace MantidQt {
 namespace CustomInterfaces {
 namespace DynamicPDF {
-
-// Forward Declarations
-//class BackgroundRemover;
 
 /// Helper class containing pointer and some metadata for the loaded workspace
 class WorkspaceRecord{
@@ -55,7 +60,8 @@ private slots:
   void newIndexFromPickedEnergy(const double &newEnergySelected);
   void updatePreviewPlotSelectedSlice();
   void updatePickerLine();
-  void launchBackgroundRemover();
+  void updatePlotSelectedSlice();
+  void selectSliceForFitting();
 
 private:
   void initLayout() override;
@@ -69,9 +75,8 @@ private:
   MantidWidgets::RangeSelector *m_pickerLine;
   boost::shared_ptr<WorkspaceRecord> m_loadedWorkspace;
   size_t m_selectedWorkspaceIndex;
-  /// The child dialog to remove the multiphonon background
-  //boost::shared_ptr<BackgroundRemover> m_BackgroundRemover;
-};
+
+}; //class SliceSelector
 
 }
 }

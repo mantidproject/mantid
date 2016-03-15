@@ -1,0 +1,59 @@
+digraph DPDFBackgroundRemover {
+  label = "Dynamic PDF - Background remover Control chart"
+  $global_style
+
+  subgraph algorithms {
+    $algorithm_style
+    DisplayCurveFit        [label="DisplayCurveFit"]
+    DisplayCurveFitControl               [label="DisplayCurveFitControl"]
+    DisplayGREControl    [label="DisplayGREControl"]
+    DisplayGRE       [label="DisplayGRE"]
+    DisplaySQE                     [label="DisplaySQE"]
+    DisplaySQEControl          [label="DisplaySQEControl"]
+    FFTTransform       [label="FFTTransform"]
+    FitBrowser     [label="FitBrowser"]
+    FittedDataControl        [label="FittedDataControl"]
+    FunctionBrowser   [label="FunctionBrowser"]
+    GuessAndFit             [label="GuessAndFit"]
+    FitInputDataControl    [label="FitInputDataControl"]
+    SliceSelector                [label="SliceSelector"]
+}
+
+  subgraph params {
+    $param_style
+    aparam  [label="a parameter"]
+  }
+
+  subgraph decisions {
+    $decision_style
+    adecision               [label="adecision?"]
+  }
+
+  subgraph values {
+    $value_style
+    SliceSelectorOutput            [label="workspace\nindex"]
+    GuessAndFitOutput   [label="guess\nfit\nresiduals\workspaces"]
+    FFTTransformOutput  [label="GRE"]
+  }
+
+
+
+  SliceSelector        -> SliceSelectorOutput [label="launch background remover"]
+  SliceSelectorOutput ->  FitInputDataControl
+
+}
+
+digraph UserCase_LaunchBackgroundRemover {
+  label = "User Case - Launch the background remover"
+
+  subgraph algorithms {
+    $algorithm_style
+    SliceSelector   [label="SliceSelector"]
+    FitInputDataControl [label="FitInputDataControl\ninitializeSliceDataForPlotting()"]
+    DisplayCurveFitControl [label="DisplayCurveFitControl"]
+    DisplayCurveFit  [label="DisplayCurveFit\nplotNewSlice()"]
+}
+
+  SliceSelector -> FitInputDataControl  [label="launchBackgroundRemover()"]
+  FitInputDataControl -> DisplayCurveFitControl
+}

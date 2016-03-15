@@ -3,9 +3,7 @@ set ( SRC_FILES
 	src/DirectConvertToEnergy.cpp
 	src/DynamicPDF/DisplayCurveFitTest.cpp
 	src/DynamicPDF/SliceSelector.cpp
-	src/EnggDiffraction/EnggDiffractionPresenter.cpp
-	src/DynamicPDF/DisplayCurveFitTest.cpp
-	src/DynamicPDF/SliceSelector.cpp
+        src/DynamicPDF/DPDFBackgroundRemover.cpp
 	src/EnggDiffraction/EnggDiffractionPresenter.cpp
 	src/EnggDiffraction/EnggDiffractionViewQtGUI.cpp
 	src/Homer.cpp
@@ -135,6 +133,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/DllConfig.h
 	inc/MantidQtCustomInterfaces/DynamicPDF/DisplayCurveFitTest.h
 	inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h
+        inc/MantidQtCustomInterfaces/DynamicPDF/DPDFBackgroundRemover.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h
@@ -311,6 +310,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/DataComparison.h
                 inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/DynamicPDF/DisplayCurveFitTest.h
+                inc/MantidQtCustomInterfaces/DynamicPDF/DPDFBackgroundRemover.h
                 inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h
                 inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h
                 inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h
@@ -404,6 +404,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
 set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/DynamicPDF/DisplayCurveFitTest.ui
+               inc/MantidQtCustomInterfaces/DynamicPDF/DPDFBackgroundRemover.ui
                inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.ui
                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtGUI.ui
                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtTabCalib.ui
