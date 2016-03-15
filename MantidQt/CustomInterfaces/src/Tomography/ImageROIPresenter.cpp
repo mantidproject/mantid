@@ -246,8 +246,18 @@ ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
 
   const std::string wsName = "__stack_fits_viewer_tomography_gui";
   auto &ads = Mantid::API::AnalysisDataService::Instance();
-  if (ads.doesExist(wsName)) {
-    ads.remove(wsName);
+  try {
+    if (ads.doesExist(wsName)) {
+      ads.remove(wsName);
+    }
+  } catch (std::runtime_error &exc) {
+    m_view->userError(
+        "Error accessing the analysis data service",
+        "There was an error while accessing the Mantid analysis data service "
+        "to check for the presence of (and remove if present) workspace '" +
+            wsName + "'. This is a severe inconsistency . Error details:: " +
+            std::string(exc.what()));
+    return Mantid::API::WorkspaceGroup_sptr();
   }
 
   // This would be the alternative that loads images one by one (one
@@ -257,14 +267,22 @@ ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
   // }
 
   // Load all image files using a list with their names
-  std::string allPaths;
-  size_t i = 0;
-  allPaths = imgs[i];
-  i++;
-  while (i < imgs.size()) {
-    allPaths.append(", " + imgs[i++]);
+  try {
+    std::string allPaths;
+    size_t i = 0;
+    allPaths = imgs[i];
+    i++;
+    while (i < imgs.size()) {
+      allPaths.append(", " + imgs[i++]);
+    }
+    loadFITSImage(allPaths, wsName);
+  } catch (std::runtime_error &exc) {
+    m_view->userWarning("Error trying to open FITS file(s)",
+                        "There was an error which prevented the file(s) from "
+                        "being loaded. Details: " +
+                            std::string(exc.what()));
+    return Mantid::API::WorkspaceGroup_sptr();
   }
-  loadFITSImage(allPaths, wsName);
 
   Mantid::API::WorkspaceGroup_sptr wsg;
   try {
@@ -306,8 +324,8 @@ void ImageROIPresenter::loadFITSImage(const std::string &path,
   } catch (std::exception &e) {
     throw std::runtime_error(
         "Failed to load image. Could not load this file as a "
-        "FITS image: " +
-        std::string(e.what()));
+        "FITS image. Trying to load from this path: " +
+        path + ". Error details: " + std::string(e.what()));
   }
 
   if (!alg->isExecuted()) {
