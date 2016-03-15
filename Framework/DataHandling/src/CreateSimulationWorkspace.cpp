@@ -5,6 +5,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+
+#include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -18,6 +20,36 @@
 #include <nexus/NeXusException.hpp>
 
 #include <Poco/File.h>
+
+
+namespace {
+
+  struct StartAndEndTime {
+    Mantid::Kernel::DateAndTime startTime;
+    Mantid::Kernel::DateAndTime endTime;
+  };
+
+  StartAndEndTime getStartAndEndTimesFromRawFile(std::string filename) {
+    FILE *rawFile = fopen(filename.c_str(), "rb");
+    if (!rawFile)
+      throw std::runtime_error("Cannot open RAW file for reading: " + filename);
+
+    ISISRAW2 isisRaw;
+    const bool fromFile(true), readData(false);
+    isisRaw.ioRAW(rawFile, fromFile, readData);
+
+    StartAndEndTime startAndEndTime;
+    startAndEndTime.startTime = Mantid::DataHandling::LoadRawHelper::extractStartTime(&isisRaw);
+    startAndEndTime.endTime = Mantid::DataHandling::LoadRawHelper::extractEndTime(&isisRaw);
+    return startAndEndTime;
+  }
+
+  StartAndEndTime getStartAndEndTimesFromNexusFile(std::string filename) {
+
+    return StartAndEndTime();
+  }
+}
+
 
 namespace Mantid {
 namespace DataHandling {
@@ -367,10 +399,14 @@ void CreateSimulationWorkspace::setStartDate(API::MatrixWorkspace_sptr workspace
   if (hasDetTableFile) {
       if (boost::algorithm::ends_with(detTableFile, ".raw") ||
           boost::algorithm::ends_with(detTableFile, ".RAW")) {
-         //auto startDate = getStartDateFromRawFile(detTableFile);
+          auto startAndEndTime = getStartAndEndTimesFromRawFile(detTableFile);
+          startTime = startAndEndTime.startTime;
+          endTime = startAndEndTime.endTime;
       } else if (boost::algorithm::ends_with(detTableFile, ".nxs") ||
                  boost::algorithm::ends_with(detTableFile, ".NXS")) {
-        // auto startDate = getStartDateFromNexusFile(detTableFile);
+          auto startAndEndTime = getStartAndEndTimesFromNexusFile(detTableFile);
+          startTime = startAndEndTime.startTime;
+          endTime = startAndEndTime.endTime;
       }
   }
 
