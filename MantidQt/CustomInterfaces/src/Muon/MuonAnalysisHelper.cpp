@@ -525,8 +525,8 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
     alg->setPropertyValue("OutputWorkspace", accumulatorEntry.name());
     alg->execute();
 
-    appendTimeSeriesLogs<double>(wsEntry.retrieve(),
-                                 accumulatorEntry.retrieve(), "Temp_Sample");
+    appendTimeSeriesLogs(wsEntry.retrieve(), accumulatorEntry.retrieve(),
+                         "Temp_Sample");
   }
 
   // Replace the start and end times with the earliest start and latest end
@@ -736,7 +736,6 @@ std::pair<std::string, std::string> findLogRange(
  * @throws std::invalid_argument if the workspaces supplied are null or have
  * different number of periods
  */
-template <typename T>
 void appendTimeSeriesLogs(Workspace_sptr toAppend, Workspace_sptr resultant,
                           const std::string &logName) {
   // check input
@@ -770,9 +769,10 @@ void appendTimeSeriesLogs(Workspace_sptr toAppend, Workspace_sptr resultant,
   // Extract time series log from workspace
   auto getTSLog = [&logName](const MatrixWorkspace_sptr ws) {
     const Mantid::API::Run &run = ws->run();
-    TimeSeriesProperty<T> *prop = nullptr;
+    TimeSeriesProperty<double> *prop = nullptr;
     if (run.hasProperty(logName)) {
-      prop = dynamic_cast<TimeSeriesProperty<T> *>(run.getLogData(logName));
+      prop =
+          dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData(logName));
       if (!prop) {
         throw std::invalid_argument("Property" + logName + " of wrong type");
       }
@@ -784,8 +784,8 @@ void appendTimeSeriesLogs(Workspace_sptr toAppend, Workspace_sptr resultant,
   auto secondWorkspaces = getWorkspaces(resultant);
   if (firstWorkspaces.size() == secondWorkspaces.size()) {
     for (size_t i = 0; i < firstWorkspaces.size(); i++) {
-      TimeSeriesProperty<T> *firstProp = getTSLog(firstWorkspaces[i]);
-      TimeSeriesProperty<T> *secondProp = getTSLog(secondWorkspaces[i]);
+      TimeSeriesProperty<double> *firstProp = getTSLog(firstWorkspaces[i]);
+      TimeSeriesProperty<double> *secondProp = getTSLog(secondWorkspaces[i]);
       if (firstProp && secondProp) {
         secondProp->operator+=(
             static_cast<const Property *>(firstProp)); // adds the values

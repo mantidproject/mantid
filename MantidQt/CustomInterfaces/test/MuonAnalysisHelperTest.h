@@ -262,7 +262,7 @@ public:
                      {value1, value2, value3});
     addTimeSeriesLog(ws2, logName, {time4, time5, time6},
                      {value4, value5, value6});
-    appendTimeSeriesLogs<double>(ws2, ws1, logName);
+    appendTimeSeriesLogs(ws2, ws1, logName);
     auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws1);
     TS_ASSERT(matrixWS);
     auto prop = matrixWS->run().getTimeSeriesProperty<double>(logName);

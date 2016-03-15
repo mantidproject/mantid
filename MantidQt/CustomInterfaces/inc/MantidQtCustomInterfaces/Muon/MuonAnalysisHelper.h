@@ -77,10 +77,9 @@ MANTIDQT_CUSTOMINTERFACES_DLL std::pair<std::string, std::string> findLogRange(
     bool (*isLessThan)(const std::string &first, const std::string &second));
 
 /// Concatenates time-series log of one workspace with the second
-template <typename T>
 MANTIDQT_CUSTOMINTERFACES_DLL void
-appendTimeSeriesLogs(Mantid::API::Workspace_sptr toAppend,
-                     Mantid::API::Workspace_sptr resultant,
+appendTimeSeriesLogs(boost::shared_ptr<Mantid::API::Workspace> toAppend,
+                     boost::shared_ptr<Mantid::API::Workspace> resultant,
                      const std::string &logName);
 
 /**
