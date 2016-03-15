@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_ALCLATESTFILEFINDER_H_
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {

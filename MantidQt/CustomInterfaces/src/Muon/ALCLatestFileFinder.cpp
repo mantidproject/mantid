@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/Muon/ALCLatestFileFinder.h"
 #include <Poco/DirectoryIterator.h>
+#include <Poco/Exception.h>
 
 namespace MantidQt {
 namespace CustomInterfaces {
