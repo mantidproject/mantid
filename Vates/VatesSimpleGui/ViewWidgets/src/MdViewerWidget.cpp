@@ -1411,7 +1411,7 @@ void MdViewerWidget::dropEvent(QDropEvent *e) {
 
 /* Verify that at least one source other than a "Peaks Source" has been loaded
  * in the VSI.
- * @return true if something other than a PeaksWorkspace is found.
+ * @return true if something other than a Peaks Source is found.
  */
 bool otherWorkspacePresent() {
   pqServer *server = pqActiveObjects::instance().activeServer();
