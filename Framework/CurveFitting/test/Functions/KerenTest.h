@@ -64,7 +64,7 @@ public:
     const auto workspace = getMockDataWorkspace();
     Keren function;
     function.initialize();
-    
+
     // set some reasonable starting values
     function.setParameter("Field", 80.0);
     function.setParameter("Fluct", 0.2);

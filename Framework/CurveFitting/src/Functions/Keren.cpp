@@ -88,7 +88,7 @@ void Keren::function1D(double *out, const double *xValues,
  * @returns :: Polarization P_z(t) (dimensionless)
  */
 double Keren::polarization(const double delta, const double larmor,
-  const double fluct, const double time) const {
+                           const double fluct, const double time) const {
   return exp(-1.0 * relaxation(delta, larmor, fluct, time));
 }
 
