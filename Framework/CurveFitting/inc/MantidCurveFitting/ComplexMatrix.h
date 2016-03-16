@@ -165,6 +165,8 @@ public:
 
   /// Copy assignment operator
   ComplexMatrix &operator=(const ComplexMatrix &M);
+  /// Copy assignment operator
+  ComplexMatrix &operator=(const gsl_matrix_complex *M);
 
   /// Get the pointer to the GSL matrix
   gsl_matrix_complex *gsl() { return m_matrix; }
@@ -240,6 +242,9 @@ public:
   /// Pack the matrix into a single std vector of doubles (for passing in and out
   /// of algorithms)
   std::vector<double> packToStdVector() const;
+  /// Unpack an std vector into this matrix. Matrix size must match the size
+  /// of the vector
+  void unpackFromStdVector(const std::vector<double>& v);
 
 protected:
   /// Type of the matrix elements.

@@ -6,7 +6,8 @@
 namespace Mantid {
 namespace CurveFitting {
 
-/** CrystalFieldEnergies : TODO: DESCRIPTION
+/** CrystalFieldEnergies : Calculates crystal field energies
+  and wave functions for rare earth ions given the field parameters.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source

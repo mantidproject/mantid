@@ -52,6 +52,8 @@ public:
   GSLVector(std::vector<double> &&v);
   /// Copy assignment operator
   GSLVector &operator=(const GSLVector &v);
+  /// Assignment operator
+  GSLVector &operator=(const std::vector<double> &v);
 
   /// Get the pointer to the GSL vector
   gsl_vector *gsl();
@@ -96,6 +98,8 @@ public:
   GSLVector &operator-=(const GSLVector &v);
   /// Multiply by a number
   GSLVector &operator*=(const double d);
+  /// Add a number
+  GSLVector &operator+=(const double d);
 
 protected:
   /// Create a new GSLVector and move all data to it. Destroys this vector.

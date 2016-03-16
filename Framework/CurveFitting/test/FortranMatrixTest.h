@@ -163,6 +163,38 @@ public:
     TS_ASSERT_EQUALS(mm(1, 1), 2.2);
     TS_ASSERT_EQUALS(p, &mm(0, 0));
   }
+
+  void test_allocate_double() {
+    DoubleFortranMatrix m(2, 2);
+    m(1, 1) = 1.1;
+    m(1, 2) = 1.2;
+    m(2, 1) = 2.1;
+    m(2, 2) = 2.2;
+
+    m.allocate(3, 4);
+    TS_ASSERT_EQUALS(m.size1(), 3);
+    TS_ASSERT_EQUALS(m.size2(), 4);
+
+    m.allocate(0, 3, -4, 4);
+    TS_ASSERT_EQUALS(m.size1(), 4);
+    TS_ASSERT_EQUALS(m.size2(), 9);
+  }
+
+  void test_allocate_complex() {
+    ComplexFortranMatrix m(2, 2);
+    m(1, 1) = 1.1;
+    m(1, 2) = 1.2;
+    m(2, 1) = 2.1;
+    m(2, 2) = 2.2;
+
+    m.allocate(3, 4);
+    TS_ASSERT_EQUALS(m.size1(), 3);
+    TS_ASSERT_EQUALS(m.size2(), 4);
+
+    m.allocate(0, 3, -4, 4);
+    TS_ASSERT_EQUALS(m.size1(), 4);
+    TS_ASSERT_EQUALS(m.size2(), 9);
+  }
 };
 
 #endif /* MANTID_CURVEFITTING_FORTRANMATRIXTEST_H_ */

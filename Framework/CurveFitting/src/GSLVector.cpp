@@ -57,6 +57,13 @@ GSLVector &GSLVector::operator=(const GSLVector &v) {
   return *this;
 }
 
+/// Assignment operator
+GSLVector &GSLVector::operator=(const std::vector<double> &v) {
+  m_data = v;
+  m_view = gsl_vector_view_array(m_data.data(), m_data.size());
+  return *this;
+}
+
 /// Get the pointer to the GSL vector
 gsl_vector *GSLVector::gsl() { return &m_view.vector; }
 
@@ -126,7 +133,18 @@ GSLVector &GSLVector::operator-=(const GSLVector &v) {
 /// Multiply by a number
 /// @param d :: The number
 GSLVector &GSLVector::operator*=(const double d) {
-  gsl_vector_scale(gsl(), d);
+  for(auto &x : m_data) {
+    x *= d;
+  }
+  return *this;
+}
+
+/// Add a number
+/// @param d :: The number
+GSLVector &GSLVector::operator+=(const double d) {
+  for(auto &x : m_data) {
+    x += d;
+  }
   return *this;
 }
 

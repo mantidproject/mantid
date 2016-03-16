@@ -1,9 +1,6 @@
 #ifndef MANTID_CURVEFITTING_FORTRANMATRIX_H_
 #define MANTID_CURVEFITTING_FORTRANMATRIX_H_
 
-#include "MantidCurveFitting/DllConfig.h"
-#include "MantidCurveFitting/GSLMatrix.h"
-
 namespace Mantid {
 namespace CurveFitting {
 
@@ -42,11 +39,17 @@ template <class MatrixClass> class FortranMatrix : public MatrixClass {
 
 public:
   /// Constructor
+  FortranMatrix();
+  /// Constructor
   FortranMatrix(const int nx, const int ny);
   /// Copy constructor
   FortranMatrix(const FortranMatrix &M);
   /// Constructor
   FortranMatrix(const int iFrom, const int iTo, const int jFrom, const int jTo);
+  /// Resize the matrix.
+  void allocate(const int iFrom, const int iTo, const int jFrom, const int jTo);
+  /// Resize the matrix.
+  void allocate(const int nx, const int ny);
   typename MatrixClass::ElementConstType operator()(int i, int j) const;
   typename MatrixClass::ElementRefType operator()(int i, int j);
   /// Move the data to a new matrix of MatrixClass
@@ -67,6 +70,11 @@ size_t FortranMatrix<MatrixClass>::makeSize(int firstIndex, int lastIndex) {
   }
   return static_cast<size_t>(lastIndex - firstIndex + 1);
 }
+
+/// Constructor
+template <class MatrixClass>
+FortranMatrix<MatrixClass>::FortranMatrix()
+    : MatrixClass(makeSize(1, 1), makeSize(1, 1)), m_base1(1), m_base2(1) {}
 
 /// Constructor
 template <class MatrixClass>
@@ -94,6 +102,28 @@ FortranMatrix<MatrixClass>::FortranMatrix(const int iFirst, const int iLast,
                              const int jFirst, const int jLast)
     : MatrixClass(makeSize(iFirst, iLast), makeSize(jFirst, jLast)),
       m_base1(iFirst), m_base2(jFirst) {}
+
+/// Resize the matrix.
+/// @param iFirst :: Lowest value for the first index
+/// @param iLast :: Highest value for the first index
+/// @param jFirst :: Lowest value for the second index
+/// @param jLast :: Highest value for the second index
+template <class MatrixClass>
+void FortranMatrix<MatrixClass>::allocate(const int iFrom, const int iTo, const int jFrom, const int jTo) {
+  m_base1 = iFrom;
+  m_base2 = jFrom;
+  resize(makeSize(iFrom, iTo), makeSize(jFrom, jTo));
+}
+
+/// Resize the matrix. The index bases are 1.
+/// @param nx :: New size along the first index.
+/// @param ny :: New size along the second index.
+template <class MatrixClass>
+void FortranMatrix<MatrixClass>::allocate(const int nx, const int ny) {
+  m_base1 = 1;
+  m_base2 = 1;
+  resize(makeSize(1, nx), makeSize(1, ny));
+}
 
 /// The "index" operator
 template <class MatrixClass>

@@ -4,8 +4,16 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Algorithms/CrystalFieldEnergies.h"
+#include "MantidCurveFitting/FortranDefs.h"
+#include <map>
 
 using Mantid::CurveFitting::CrystalFieldEnergies;
+using Mantid::CurveFitting::DoubleFortranMatrix;
+using Mantid::CurveFitting::DoubleFortranVector;
+using Mantid::CurveFitting::ComplexFortranMatrix;
+using Mantid::CurveFitting::ComplexType;
+using Mantid::CurveFitting::GSLVector;
+using Mantid::CurveFitting::ComplexMatrix;
 
 class CrystalFieldEnergiesTest : public CxxTest::TestSuite {
 public:
@@ -24,47 +32,105 @@ public:
 
   void test_Something()
   {
-    double b20 = 0.3365;
-    double b22 = 7.4851;
-    double b40 = 0.4062;
-    double b42 = -3.8296;
-    double b44 = -2.3210;
-    run(2, 3, b20, b22, b40, b42, b44);
+    std::map<std::string,double> bkq;
+    bkq["B20"] = 0.3365;
+    bkq["B22"] = 7.4851;
+    bkq["B40"] = 0.4062;
+    bkq["B42"] = -3.8296;
+    bkq["B44"] = -2.3210;
+    
+    GSLVector evalues;
+    ComplexMatrix evectors;
+    ComplexMatrix hamiltonian;
+    run(1, bkq, evalues, evectors, hamiltonian);
+
+    doTestEigensystem(evalues, evectors, hamiltonian);
+
   }
 
 private:
 
-  void run(int nre, int symm, double B20, double B22, double B40, double B42, double B44)
+  void run(int nre, const std::map<std::string, double> &bkq,
+           GSLVector &evalues, ComplexMatrix &evectors,
+           ComplexMatrix &hamiltonian) 
   {
     CrystalFieldEnergies alg;
-    // Don't put output in ADS by default
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("Nre", nre) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Symmetry", symm) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Temperature", 25.0) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("B20", B20) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("B22", B22) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("B40", B40) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("B42", B42) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("B44", B44) );
+    for(auto b = bkq.begin(); b != bkq.end(); ++b) {
+      TS_ASSERT_THROWS_NOTHING( alg.setProperty(b->first, b->second) );
+    }
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
     std::vector<double> ener = alg.getProperty("Energies");
-    std::cerr << "Energies=" << std::endl;
-    for(size_t i = 0; i < ener.size(); ++i) {
-      std::cerr << i << ' ' << ener[i] << std::endl;
-    }
+    evalues = ener;
+    auto n = ener.size();
 
-    //std::vector<double> eigenv = alg.getProperty("Eigenvectors");
-    //std::cerr << "Eigenvectors=" << std::endl;
-    //for(size_t i = 0; i < eigenv.size(); ++i) {
-    //  std::cerr << i << ' ' << eigenv[i] << std::endl;
-    //}
+    std::vector<double> eigenv = alg.getProperty("Eigenvectors");
+    evectors.resize(n, n);
+    evectors.unpackFromStdVector(eigenv);
+
+    std::vector<double> ham = alg.getProperty("Hamiltonian");
+    hamiltonian.resize(n, n);
+    hamiltonian.unpackFromStdVector(ham);
   }
   
+private:
+
+  void doTestEigensystem(GSLVector &en, ComplexMatrix &wf, ComplexMatrix &ham) {
+    const size_t n = en.size();
+    TS_ASSERT_DIFFERS(n, 0);
+    TS_ASSERT_EQUALS(wf.size1(), n);
+    TS_ASSERT_EQUALS(wf.size2(), n);
+    TS_ASSERT_EQUALS(ham.size1(), n);
+    TS_ASSERT_EQUALS(ham.size2(), n);
+
+    ComplexMatrix I = wf.ctr() * wf;
+    TS_ASSERT_EQUALS(I.size1(), n);
+    TS_ASSERT_EQUALS(I.size2(), n);
+
+    for(size_t i = 0; i < I.size1(); ++i) {
+      for(size_t j = 0; j < I.size2(); ++j) {
+        ComplexType value = I(i, j);
+        if (i == j) {
+          TS_ASSERT_DELTA(value.real(), 1.0, 1e-10);
+          TS_ASSERT_DELTA(value.imag(), 0.0, 1e-10);
+        } else {
+          TS_ASSERT_DELTA(value.real(), 0.0, 1e-10);
+          TS_ASSERT_DELTA(value.imag(), 0.0, 1e-10);
+        }
+      }
+    }
+
+    ComplexMatrix V = wf.ctr() * ham * wf;
+    TS_ASSERT_EQUALS(V.size1(), n);
+    TS_ASSERT_EQUALS(V.size2(), n);
+
+    double minValue = 1e100;
+    for(size_t i = 0; i < V.size1(); ++i) {
+      ComplexType value = V(i, i);
+      if (value.real() < minValue) {
+        minValue = value.real();
+      }
+    }
+
+    for(size_t i = 0; i < V.size1(); ++i) {
+      for(size_t j = 0; j < V.size2(); ++j) {
+        ComplexType value = V(i, j);
+        if (i == j) {
+          value -= minValue;
+          TS_ASSERT_DELTA(value.real(), en.get(i), 1e-10);
+          TS_ASSERT_DELTA(value.imag(), 0.0, 1e-10);
+        } else {
+          TS_ASSERT_DELTA(value.real(), 0.0, 1e-10);
+          TS_ASSERT_DELTA(value.imag(), 0.0, 1e-10);
+        }
+      }
+    }
+  }
 
 };
 

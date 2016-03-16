@@ -39,11 +39,17 @@ class FortranVector : public VectorClass {
   typedef decltype(reinterpret_cast<VectorClass*>(nullptr)->operator[](0)) ElementRefType;
 public:
   /// Constructor
+  FortranVector();
+  /// Constructor
   FortranVector(const int n);
   /// Copy constructor
   FortranVector(const FortranVector &V);
   /// Constructor
   FortranVector(const int iFrom, const int iTo);
+  /// Resize the vector
+  void allocate(int firstIndex, int lastIndex);
+  /// Resize the vector
+  void allocate(int newSize);
   ElementConstType operator()(int i) const;
   ElementRefType operator()(int i);
   ElementConstType operator[](int i) const;
@@ -67,13 +73,18 @@ size_t FortranVector<VectorClass>::makeSize(int firstIndex, int lastIndex) {
 
 /// Constructor
 template <class VectorClass>
+FortranVector<VectorClass>::FortranVector()
+    : VectorClass(makeSize(1, 1)), m_base(1) {}
+
+/// Constructor
+template <class VectorClass>
 FortranVector<VectorClass>::FortranVector(const int n)
     : VectorClass(makeSize(1, n)), m_base(1) {}
 
 /// Copy constructor
 template <class VectorClass>
 FortranVector<VectorClass>::FortranVector(const FortranVector &V)
-    : VectorClass(V), m_base1(V.m_base) {}
+    : VectorClass(V), m_base(V.m_base) {}
 
 /// Construct a FortranVector that has arbitrary index bases.
 /// For example FortranVector(-2,2) creates a vector of length 5.
@@ -87,6 +98,25 @@ template <class VectorClass>
 FortranVector<VectorClass>::FortranVector(const int iFirst, const int iLast)
     : VectorClass(makeSize(iFirst, iLast)),
       m_base(iFirst) {}
+
+/// Resize the vector. Named this way to mimic the fortran style and to
+/// avoid confusion with resize() method of the base class.
+/// @param iFirst :: Lowest value for the index
+/// @param iLast :: Highest value for the index
+template <class VectorClass>
+void FortranVector<VectorClass>::allocate(int firstIndex, int lastIndex) {
+  m_base = firstIndex;
+  resize(makeSize(firstIndex, lastIndex));
+}
+
+/// Resize the vector. Named this way to mimic the fortran style and to
+/// avoid confusion with resize() method of the base class.
+/// @param newSize :: The new size of the vector. Index base is set to 1.
+template <class VectorClass>
+void FortranVector<VectorClass>::allocate(int newSize) {
+  m_base = 1;
+  resize(makeSize(1, newSize));
+}
 
 /// The "index" operator
 template <class VectorClass>

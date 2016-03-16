@@ -63,6 +63,19 @@ public:
     TS_ASSERT_EQUALS(gc[2], 6);
   }
 
+  void test_assignment_operator_std_vector() {
+    std::vector<double> v(3);
+    v[0] = 2;
+    v[1] = 4;
+    v[2] = 6;
+    GSLVector gc;
+    gc = v;
+    TS_ASSERT_EQUALS(gc.size(), 3);
+    TS_ASSERT_EQUALS(gc[0], 2);
+    TS_ASSERT_EQUALS(gc[1], 4);
+    TS_ASSERT_EQUALS(gc[2], 6);
+  }
+
   void test_zero() {
     std::vector<double> v(3);
     v[0] = 2;
@@ -264,6 +277,14 @@ public:
     TS_ASSERT_EQUALS(v[0], stdv[0]);
     TS_ASSERT_EQUALS(v[1], stdv[1]);
     TS_ASSERT_EQUALS(v[2], stdv[2]);
+  }
+
+  void tst_add_constant() {
+    auto v = makeVector1();
+    v += 10;
+    TS_ASSERT_EQUALS(v[0], 15.0);
+    TS_ASSERT_EQUALS(v[1], 65.0);
+    TS_ASSERT_EQUALS(v[2], 565.0);
   }
 
 private:

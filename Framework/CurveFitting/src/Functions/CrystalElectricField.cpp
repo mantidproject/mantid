@@ -16,14 +16,9 @@ namespace {
 
 // Get a complex conjugate of the value returned by
 // ComplexMatrix::operator(i,j)
-ComplexType conjg( const ComplexMatrixValueConverter& conv) {
+ComplexType conjg(const ComplexMatrixValueConverter &conv) {
   return std::conj(static_cast<ComplexType>(conv));
 }
-
-//TODO: these should be input parameters
-const double alpha_euler = 0.0;
-const double beta_euler = 0.0;
-const double gamma_euler = 0.0;
 
 // number of rare earth ions (?)
 const size_t maxNre = 13;
@@ -49,51 +44,51 @@ const std::array<double, maxNre> aalphaj = {
     -1.0 * 2 / 5 / 7,
     -1.0 * 2 * 2 * 13 / 3 / 3 / 5 / 5 / 11,
     -1.0 * 7 / 3 / 3 / 11 / 11,
-     1.0 * 2 * 7 / 3 / 5 / 11 / 11,
-     1.0 * 13 / 3 / 3 / 5 / 7,
-     1.0 * 0,
-     1.0 * 0,
+    1.0 * 2 * 7 / 3 / 5 / 11 / 11,
+    1.0 * 13 / 3 / 3 / 5 / 7,
+    1.0 * 0,
+    1.0 * 0,
     -1.0 * 1 / 3 / 3 / 11,
     -1.0 * 2 / 3 / 3 / 5 / 7,
     -1.0 * 1 / 2 / 3 / 3 / 5 / 5,
-     1.0 * 2 * 2 / 3 / 3 / 5 / 5 / 7,
-     1.0 * 1 / 3 / 3 / 11,
-     1.0 * 2 / 3 / 3 / 7};
+    1.0 * 2 * 2 / 3 / 3 / 5 / 5 / 7,
+    1.0 * 1 / 3 / 3 / 11,
+    1.0 * 2 / 3 / 3 / 7};
 
 const std::array<double, maxNre> bbetaj = {
-     1.0 * 2 / 3 / 3 / 5 / 7,
+    1.0 * 2 / 3 / 3 / 5 / 7,
     -1.0 * 2 * 2 / 3 / 3 / 5 / 11 / 11,
     -1.0 * 2 * 2 * 2 * 17 / 3 / 3 / 3 / 11 / 11 / 11 / 13,
-     1.0 * 2 * 2 * 2 * 7 * 17 / 3 / 3 / 3 / 5 / 11 / 11 / 11 / 13,
-     1.0 * 2 * 13 / 3 / 3 / 3 / 5 / 7 / 11,
-     1.0 * 0,
-     1.0 * 0,
-     1.0 * 2 / 3 / 3 / 3 / 5 / 11 / 11,
+    1.0 * 2 * 2 * 2 * 7 * 17 / 3 / 3 / 3 / 5 / 11 / 11 / 11 / 13,
+    1.0 * 2 * 13 / 3 / 3 / 3 / 5 / 7 / 11,
+    1.0 * 0,
+    1.0 * 0,
+    1.0 * 2 / 3 / 3 / 3 / 5 / 11 / 11,
     -1.0 * 2 * 2 * 2 / 3 / 3 / 3 / 5 / 7 / 11 / 13,
     -1.0 * 1 / 2 / 3 / 5 / 7 / 11 / 13,
-     1.0 * 2 / 3 / 3 / 5 / 7 / 11 / 13,
-     1.0 * 2 * 2 * 2 / 3 / 3 / 3 / 3 / 5 / 11 / 11,
+    1.0 * 2 / 3 / 3 / 5 / 7 / 11 / 13,
+    1.0 * 2 * 2 * 2 / 3 / 3 / 3 / 3 / 5 / 11 / 11,
     -1.0 * 2 / 3 / 5 / 7 / 11};
 
 const std::array<double, maxNre> ggammaj = {
-     1.0 * 0,
-     1.0 * 2 * 2 * 2 * 2 * 17 / 3 / 3 / 3 / 3 / 5 / 7 / 11 / 11 / 13,
+    1.0 * 0,
+    1.0 * 2 * 2 * 2 * 2 * 17 / 3 / 3 / 3 / 3 / 5 / 7 / 11 / 11 / 13,
     -1.0 * 5 * 17 * 19 / 3 / 3 / 3 / 7 / 11 / 11 / 11 / 13 / 13,
-     1.0 * 2 * 2 * 2 * 17 * 19 / 3 / 3 / 3 / 7 / 11 / 11 / 11 / 13 / 13,
-     1.0 * 0,
-     1.0 * 0,
-     1.0 * 0,
+    1.0 * 2 * 2 * 2 * 17 * 19 / 3 / 3 / 3 / 7 / 11 / 11 / 11 / 13 / 13,
+    1.0 * 0,
+    1.0 * 0,
+    1.0 * 0,
     -1.0 * 1 / 3 / 3 / 3 / 3 / 7 / 11 / 11 / 13,
-     1.0 * 2 * 2 / 3 / 3 / 3 / 7 / 11 / 11 / 13 / 13,
+    1.0 * 2 * 2 / 3 / 3 / 3 / 7 / 11 / 11 / 13 / 13,
     -1.0 * 5 / 3 / 3 / 3 / 7 / 11 / 11 / 13 / 13,
-     1.0 * 2 * 2 * 2 / 3 / 3 / 3 / 7 / 11 / 11 / 13 / 13,
+    1.0 * 2 * 2 * 2 / 3 / 3 / 3 / 7 / 11 / 11 / 13 / 13,
     -1.0 * 5 / 3 / 3 / 3 / 3 / 7 / 11 / 11 / 13,
-     1.0 * 2 * 2 / 3 / 3 / 3 / 7 / 11 / 13};
+    1.0 * 2 * 2 / 3 / 3 / 3 / 7 / 11 / 13};
 //       ---------------
 //       for the values of <r2>,<r4>,<r6> look to:
 //       Freeman and Desclaux, Journal of Magnetism
 //       and Magnetic Materials 12 (1979) 11 ff
-//       [<r2>] = a0**2       
+//       [<r2>] = a0**2
 //
 
 const std::array<double, maxNre> rr2 = {1.309,  1.1963, 1.114,  1.0353, 0.9743,
@@ -115,21 +110,21 @@ const std::array<double, maxNre> rr6 = {23.31, 18.353, 15.03, 12.546, 10.55,
 //---------------------------
 // set some natural constants
 //---------------------------
-const double pi = 4.0*atan(1.0);
-const double kb = 1.38062;       // x 10**(-23) J/K,   Boltzmann constant k_B
-const double hh = 6.626075540;   // x 10**(-34) J*sec, Planks constant h
-const double hq = hh/2/pi;
-const double ee = 1.6021773349;  // x 10**(-19) Coulomb, electric charge
-const double cc = 2.99792458;    // x 10**(8) m/sec, speed of light
-const double me = 9.109389754;   // x 10**(-31) kg, electron mass
-const double na = 6.022045;      // x 10**(23) particles/mol, Avogardo constant  
+const double pi = 4.0 * atan(1.0);
+const double kb = 1.38062;     // x 10**(-23) J/K,   Boltzmann constant k_B
+const double hh = 6.626075540; // x 10**(-34) J*sec, Planks constant h
+const double hq = hh / 2 / pi;
+const double ee = 1.6021773349; // x 10**(-19) Coulomb, electric charge
+const double cc = 2.99792458;   // x 10**(8) m/sec, speed of light
+const double me = 9.109389754;  // x 10**(-31) kg, electron mass
+const double na = 6.022045;     // x 10**(23) particles/mol, Avogardo constant
 //       within the above choose, the factor which connects
 //       1meV and 1 Kelvin is fixed and given by:
 //       10*ee/kb =: fmevkelvin = 11.6047...
 //       this means 1 meV is nearly 11.6 K
-const double c_fmevkelvin = 10*ee/kb;
+const double c_fmevkelvin = 10 * ee / kb;
 //  magneton of Bohr in kelvin per tesla
-const double c_myb = hq/me/2*c_fmevkelvin;
+const double c_myb = hq / me / 2 * c_fmevkelvin;
 
 //--------------------------------
 // define the delta function
@@ -143,7 +138,7 @@ double delta(double mj, double nj, double j) {
 }
 
 //--------------------
-//  jp(n) = <n+1|j+|n> 
+//  jp(n) = <n+1|j+|n>
 //--------------------
 double jp(double nj, double j) {
   if (fabs(nj) <= j) {
@@ -154,7 +149,7 @@ double jp(double nj, double j) {
 }
 
 //--------------------
-//  jm(n) = <n-1|j-|n>  
+//  jm(n) = <n-1|j-|n>
 //--------------------
 double jm(double nj, double j) {
   if (fabs(nj) <= j) {
@@ -165,164 +160,143 @@ double jm(double nj, double j) {
 }
 
 //-----------------------
-//  jp2(n) = <n+2|j+^2|n> 
+//  jp2(n) = <n+2|j+^2|n>
 //-----------------------
-double jp2(double nj, double j) { 
-  return jp(nj + 1, j) * jp(nj, j); 
-}
+double jp2(double nj, double j) { return jp(nj + 1, j) * jp(nj, j); }
 
 //-----------------------
-//  jm2(n) = <n-2|j-^2|n> 
+//  jm2(n) = <n-2|j-^2|n>
 //-----------------------
-double jm2(double nj, double j) {
-	return jm(nj-1,j)*jm(nj,j);
-}
+double jm2(double nj, double j) { return jm(nj - 1, j) * jm(nj, j); }
 
 //-----------------------
-//  jp3(n) = <n+3|j+^3|n> 
+//  jp3(n) = <n+3|j+^3|n>
 //-----------------------
 double jp3(double nj, double j) {
-	return jp(nj+2,j)*jp(nj+1,j)*jp(nj,j);
+  return jp(nj + 2, j) * jp(nj + 1, j) * jp(nj, j);
 }
 
 //-----------------------
-//  jm3(n) = <n-3|j-^3|n> 
+//  jm3(n) = <n-3|j-^3|n>
 //-----------------------
 double jm3(double nj, double j) {
-	return jm(nj-2,j)*jm(nj-1,j)*jm(nj,j);
+  return jm(nj - 2, j) * jm(nj - 1, j) * jm(nj, j);
 }
 
 //-----------------------
-//  jp4(n) = <n+4|j+^4|n> 
+//  jp4(n) = <n+4|j+^4|n>
 //-----------------------
 double jp4(double nj, double j) {
-	return jp(nj+3,j)*jp(nj+2,j)*jp(nj+1,j)*jp(nj,j);
+  return jp(nj + 3, j) * jp(nj + 2, j) * jp(nj + 1, j) * jp(nj, j);
 }
 
 //-----------------------
-//  jm4(n) = <n-4|j-^4|n> 
+//  jm4(n) = <n-4|j-^4|n>
 //-----------------------
 double jm4(double nj, double j) {
-	return jm(nj-3,j)*jm(nj-2,j)*jm(nj-1,j)*jm(nj,j);
+  return jm(nj - 3, j) * jm(nj - 2, j) * jm(nj - 1, j) * jm(nj, j);
 }
 
 //-----------------------
-//  jp5(n) = <n+5|j+^5|n> 
+//  jp5(n) = <n+5|j+^5|n>
 //-----------------------
 double jp5(double nj, double j) {
-	return jp(nj+4,j)*jp(nj+3,j)*jp(nj+2,j)*jp(nj+1,j)*jp(nj,j);
+  return jp(nj + 4, j) * jp(nj + 3, j) * jp(nj + 2, j) * jp(nj + 1, j) *
+         jp(nj, j);
 }
 
 //-----------------------
-//  jm5(n) = <n-5|j-^5|n> 
+//  jm5(n) = <n-5|j-^5|n>
 //-----------------------
 double jm5(double nj, double j) {
-	return jm(nj-4,j)*jm(nj-3,j)*jm(nj-2,j)*jm(nj-1,j)*jm(nj,j);
+  return jm(nj - 4, j) * jm(nj - 3, j) * jm(nj - 2, j) * jm(nj - 1, j) *
+         jm(nj, j);
 }
 
 //-----------------------
-//  jp6(n) = <n+6|j+^6|n> 
+//  jp6(n) = <n+6|j+^6|n>
 //-----------------------
 double jp6(double nj, double j) {
-	return jp(nj+5,j)*jp(nj+4,j)*jp(nj+3,j)*jp(nj+2,j)*jp(nj+1,j)*jp(nj,j);
+  return jp(nj + 5, j) * jp(nj + 4, j) * jp(nj + 3, j) * jp(nj + 2, j) *
+         jp(nj + 1, j) * jp(nj, j);
 }
 
 //-----------------------
-//  jm6(n) = <n-6|j-^6|n> 
+//  jm6(n) = <n-6|j-^6|n>
 //-----------------------
 double jm6(double nj, double j) {
-	return jm(nj-5,j)*jm(nj-4,j)*jm(nj-3,j)*jm(nj-2,j)*jm(nj-1,j)*jm(nj,j);
+  return jm(nj - 5, j) * jm(nj - 4, j) * jm(nj - 3, j) * jm(nj - 2, j) *
+         jm(nj - 1, j) * jm(nj, j);
 }
 
 //------------------------------
 //  f(1) = 1, f(-1) = 1/i = (-i)
 //------------------------------
-ComplexType f(double s) {
-	return ComplexType((s+1)/2, (s-1)/2);
-}
+ComplexType f(double s) { return ComplexType((s + 1) / 2, (s - 1) / 2); }
 
-//c-----------------------------
-double f20(double nj, double j) {
-	return 3*pow(nj,2) - j*(j+1);
-}
+//-----------------------------
+double f20(double nj, double j) { return 3 * pow(nj, 2) - j * (j + 1); }
 
-//c------------------------------
-double f21(double nj, double j) {
-	return nj;
-}
+//------------------------------
+double f21(double nj, double j) { return nj; }
 
-//c------------------------------
-double f22(double nj, double j) {
-	return 1.0;
-}
+//------------------------------
+double f22(double nj, double j) { return 1.0; }
 
-//c------------------------------
+//------------------------------
 double f40(double nj, double j) {
-	return 35*pow(nj,4) - 30*j*(j+1)*pow(nj,2) + 25*pow(nj,2) - 6*j*(j+1) 
-           + 3*pow(j,2)*pow((j+1),2);
+  return 35 * pow(nj, 4) - 30 * j * (j + 1) * pow(nj, 2) + 25 * pow(nj, 2) -
+         6 * j * (j + 1) + 3 * pow(j, 2) * pow((j + 1), 2);
 }
 
-//c------------------------------
+//------------------------------
 double f41(double nj, double j) {
-	return 7*pow(nj,3) - 3*j*(j+1)*nj - nj;
+  return 7 * pow(nj, 3) - 3 * j * (j + 1) * nj - nj;
 }
 
-//c------------------------------
-double f42(double nj, double j) {
-	return 7*pow(nj,2) - j*(j+1) - 5;
-}
+//------------------------------
+double f42(double nj, double j) { return 7 * pow(nj, 2) - j * (j + 1) - 5; }
 
-//c------------------------------
-double f43(double nj, double j) {
-	return nj;
-}
+//------------------------------
+double f43(double nj, double j) { return nj; }
 
-//c------------------------------
-double f44(double nj, double j) {
-	return 1.0;
-}
+//------------------------------
+double f44(double nj, double j) { return 1.0; }
 
-//c------------------------------
+//------------------------------
 double f60(double nj, double j) {
-	return 231*pow(nj,6) - 315*j*(j+1)*pow(nj,4) + 735*pow(nj,4)
-           + 105*pow(j,2)*pow((j+1),2)*pow(nj,2) - 525*j*(j+1)*pow(nj,2)
-           + 294*pow(nj,2) - 5*pow(j,3)*pow((j+1),3) + 40*pow(j,2)*pow((j+1),2)
-           - 60*j*(j+1);
+  return 231 * pow(nj, 6) - 315 * j * (j + 1) * pow(nj, 4) + 735 * pow(nj, 4) +
+         105 * pow(j, 2) * pow((j + 1), 2) * pow(nj, 2) -
+         525 * j * (j + 1) * pow(nj, 2) + 294 * pow(nj, 2) -
+         5 * pow(j, 3) * pow((j + 1), 3) + 40 * pow(j, 2) * pow((j + 1), 2) -
+         60 * j * (j + 1);
 }
 
-//c------------------------------
+//------------------------------
 double f61(double nj, double j) {
-	return 33*pow(nj,5) - ( 30*j*(j+1) - 15 )*pow(nj,3) 
-           - 10*j*(j+1)*nj + 5*pow(j,2)*pow((j+1),2)*nj
-           +  12*nj;
+  return 33 * pow(nj, 5) - (30 * j * (j + 1) - 15) * pow(nj, 3) -
+         10 * j * (j + 1) * nj + 5 * pow(j, 2) * pow((j + 1), 2) * nj + 12 * nj;
 }
 
-//c------------------------------
+//------------------------------
 double f62(double nj, double j) {
-	return 33*pow(nj,4) - 18*j*(j+1)*pow(nj,2) - 123*pow(nj,2)
-           + pow(j,2)*pow(j+1,2) + 10*j*(j+1) + 102;
+  return 33 * pow(nj, 4) - 18 * j * (j + 1) * pow(nj, 2) - 123 * pow(nj, 2) +
+         pow(j, 2) * pow(j + 1, 2) + 10 * j * (j + 1) + 102;
 }
 
-//c------------------------------     
+//------------------------------
 double f63(double nj, double j) {
-	return 11*pow(nj,3) - 3*j*(j+1)*nj - 59*nj;
+  return 11 * pow(nj, 3) - 3 * j * (j + 1) * nj - 59 * nj;
 }
 
-//c------------------------------  
-double f64(double nj, double j) {
-	return 11*pow(nj,2) - j*(j+1) - 38;
-}
+//------------------------------
+double f64(double nj, double j) { return 11 * pow(nj, 2) - j * (j + 1) - 38; }
 
-//c------------------------------
-double f65(double nj, double) {
-	return nj;
-}
+//------------------------------
+double f65(double nj, double) { return nj; }
 
-//c------------------------------  
-double f66(double, double) {
-	return 1.0;
-}
-
+//------------------------------
+double f66(double, double) { return 1.0; }
 
 //-------------------------------
 // ff(k,q,nj,j) := fkq(nj,j)
@@ -363,131 +337,32 @@ double ff(int k, int q, double nj, double j) {
   throw std::runtime_error("Unknown case in ff function.");
 }
 
-//c----------------------------------
-//c testing if the real number r is 0
-//c----------------------------------
+// c----------------------------------
+// c testing if the real number r is 0
+// c----------------------------------
 void ifnull(double &r) {
-	const double macheps = 1.0e-14;
-	if (fabs(r) <= macheps) r=0.0;
+  const double macheps = 1.0e-14;
+  if (fabs(r) <= macheps)
+    r = 0.0;
 }
 
-//c-------------------------------------
-//c testing if the complex number c is 0
-//c-------------------------------------
-ComplexType cifnull(const ComplexType& c) {
-	auto i = ComplexType(0.0, 1.0);
-	double re= (0.5*( c+conj(c) )).real();
-	double im= (0.5*(-c+conj(c) )*i).real();
-	ifnull(re);
-	ifnull(im);
-	return ComplexType(re, im);
+// c-------------------------------------
+// c testing if the complex number c is 0
+// c-------------------------------------
+ComplexType cifnull(const ComplexType &c) {
+  auto i = ComplexType(0.0, 1.0);
+  double re = (0.5 * (c + conj(c))).real();
+  double im = (0.5 * (-c + conj(c)) * i).real();
+  ifnull(re);
+  ifnull(im);
+  return ComplexType(re, im);
 }
 
 //---------------------------------------------
 // calculates the neutron scattering radius r0
 //---------------------------------------------
 double c_r0() {
-	return -1.91*pow(ee,2)/me; // * 10**(-12) cm    
-}
-
-
-//--------------------------------------------------
-// set the full stevens' operators Okq to their R3+ value
-//--------------------------------------------------
-void s_okq(double dimj, int k, int q, const DoubleFortranMatrix &sbkq,
-           ComplexMatrix &okq) {
-  okq.resize(sizeOfHam, sizeOfHam);
-//  ComplexType i = {0.0, 1.0};
-  // TODO: what is the range of dimj?
-  int dim = static_cast<int>(dimj);
-  double j = 0.5 * (dimj - 1.0);
-  for (int m = 0; m < dim; ++m) {
-    double mj = double(m + 1) - j - 1.0;
-    for (int n = 0; n < dim; ++n) {
-      double nj = double(n + 1) - j - 1.0;
-      if (k == 0) {
-        if (q == 0) { // q=0 chose j+ operator
-          okq.set(m, n, delta(mj, nj + 1, j) * jp(nj, j));
-        } else if (q == 1) { // q=1 chose jz operator
-          okq.set(m, n, delta(mj, nj, j) * nj);
-        } else if (q == 2) { // q=2 chose j- operator
-          okq.set(m, n, delta(mj, nj - 1, j) * jm(nj, j));
-        } else if (q == 4) { // q=4 chose o4 = o40 + 5*o44
-          auto d0 = delta(mj, nj, j);
-          ComplexType o40 = d0 * ff(4, 0, nj, j);
-          auto d4 = delta(mj, nj + 4, j) * jp4(nj, j) +
-                    delta(mj, nj - 4, j) * jm4(nj, j);
-          ComplexType o44 = 0.25 * (ff(4, 4, mj, j) + ff(4, 4, nj, j)) * d4;
-          okq.set(m, n, o40 + 5.0 * o44);
-        } else if (q == 6) { // q=6 chose o6 = o60 -21*o64
-          auto d0 = delta(mj, nj, j);
-          auto o60 = d0 * ff(6, 0, nj, j);
-          auto d4 = delta(mj, nj + 4, j) * jp4(nj, j) +
-                    delta(mj, nj - 4, j) * jm4(nj, j);
-          auto o64 = 0.25 * (ff(6, 4, mj, j) + ff(6, 4, nj, j)) * d4;
-          okq.set(m, n, o60 - 21 * o64);
-        }
-      } else {
-        if (q == 0) {
-          auto d0 = delta(mj, nj, j);
-          okq.set(m, n, d0 * ff(k, q, nj, j) * (1 + sbkq.get(k, q)) / 2);
-        } else if (q == 1) {
-          auto d1 = delta(mj, nj + 1, j) * jp(nj, j) +
-                    sbkq.get(k, q) * delta(mj, nj - 1, j) * jm(nj, j);
-          okq.set(m, n, 0.25 * (ff(k, q, mj, j) + ff(k, q, nj, j)) * d1 *
-                            f(sbkq.get(k, q)));
-        } else if (q == 2) {
-          auto d2 = delta(mj, nj + 2, j) * jp2(nj, j) +
-                    sbkq.get(k, q) * delta(mj, nj - 2, j) * jm2(nj, j);
-          okq.set(m, n, 0.25 * (ff(k, q, mj, j) + ff(k, q, nj, j)) * d2 *
-                            f(sbkq.get(k, q)));
-        } else if (q == 3) {
-          auto d3 = delta(mj, nj + 3, j) * jp3(nj, j) +
-                    sbkq.get(k, q) * delta(mj, nj - 3, j) * jm3(nj, j);
-          okq.set(m, n, 0.25 * (ff(k, q, mj, j) + ff(k, q, nj, j)) * d3 *
-                            f(sbkq.get(k, q)));
-        } else if (q == 4) {
-          auto d4 = delta(mj, nj + 4, j) * jp4(nj, j) +
-                    sbkq.get(k, q) * delta(mj, nj - 4, j) * jm4(nj, j);
-          okq.set(m, n, 0.25 * (ff(k, q, mj, j) + ff(k, q, nj, j)) * d4 *
-                            f(sbkq.get(k, q)));
-        } else if (q == 5) {
-          auto d5 = delta(mj, nj + 5, j) * jp5(nj, j) +
-                    sbkq.get(k, q) * delta(mj, nj - 5, j) * jm5(nj, j);
-          okq.set(m, n, 0.25 * (ff(k, q, mj, j) + ff(k, q, nj, j)) * d5 *
-                            f(sbkq.get(k, q)));
-        } else if (q == 6) {
-          auto d6 = delta(mj, nj + 6, j) * jp6(nj, j) +
-                    sbkq.get(k, q) * delta(mj, nj - 6, j) * jm6(nj, j);
-          okq.set(m, n, 0.25 * (ff(k, q, mj, j) + ff(k, q, nj, j)) * d6 *
-                            f(sbkq.get(k, q)));
-        }
-      }
-    } // for n
-  }   // for m
-}
-
-//-------------------------------------------------
-// calculates the norm ||A|| of a given operator A
-//-------------------------------------------------
-// k=0 q=0 : j+
-// k=0 q=1 : jz
-// k=0 q=2 : j-
-// k=0 q=4 : o4 = o40+ 5*o44
-// k=0 q=6 : o6 = o60-21*o64
-double c_operator_norm(double dimj, int k, int q, const DoubleFortranMatrix& sbkq, ComplexMatrix& okq) {
-	s_okq(dimj, k, q, sbkq, okq);
-
-	double res = 0.0;
-	for(size_t m=0; m < static_cast<size_t>(dimj); ++m) {
-    for(size_t n=0; n < static_cast<size_t>(dimj); ++n) {
-	      //res += okq.get(m,n) * conj(okq.get(m,n));
-	      res += std::norm(okq.get(m,n));
-    }
-  }
-	res /= dimj;
-	res = sqrt(res);
-  return res;
+  return -1.91 * pow(ee, 2) / me; // * 10**(-12) cm
 }
 
 // c---------------------------------------
@@ -513,516 +388,501 @@ double epsilon(int k, int q) {
   return eps[k * (k + 1) + q];
 }
 
-//c---------------------------------------
-  double omega(int k, int q) {
-    const std::array<double,49> oma = {
-                                   1.0,
-                              1.0, 1.0, 1.0,
-                          1.0,1.0, 1.0, 1.0,1.0,
-                      1.0,1.0,1.0, 1.0, 1.0,1.0,1.0,
-                  1.0,1.0,1.0,1.0, 1.0, 1.0,1.0,1.0,1.0,
-              1.0,1.0,1.0,3.0,3.0, 1.0, 3.0,3.0,1.0,1.0,1.0,
-          1.0,1.0,1.0,1.0,3.0,3.0, 1.0, 3.0,3.0,1.0,1.0,1.0,1.0 };
+// c---------------------------------------
+double omega(int k, int q) {
+  const std::array<double, 49> oma = {
+      1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+      1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+      1.0, 1.0, 3.0, 3.0, 1.0, 3.0, 3.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+      1.0, 3.0, 3.0, 1.0, 3.0, 3.0, 1.0, 1.0, 1.0, 1.0};
 
-    return oma[k*(k+1) + q];
+  return oma[k * (k + 1) + q];
+}
+
+//--------------------------------------------------------
+// Function to calculate factorial
+//--------------------------------------------------------
+double fac(double n) {
+  if (n < 0.0)
+    return 0.0;
+  if (n == 0.0)
+    return 1.0;
+  double f = 1.0;
+  int m = static_cast<int>(std::floor(n));
+  for (int i = 1; i <= m; ++i) {
+    f *= i;
   }
+  return f;
+}
 
-  // c***********************************************************************
-  // c                                                                      *
-  // c                   Function  fac                                      *
-  // c                                                                      *
-  // c***********************************************************************
-  double fac(double n) {
-    if (n < 0.0)
-      return 0.0;
-    if (n == 0.0)
-      return 1.0;
-    double f = 1.0;
-    int m = static_cast<int>(std::floor(n));
-    for (int i = 1; i <= m; ++i) {
-      f *= i;
+//--------------------------------------------------------
+// binom (n over k)
+//--------------------------------------------------------
+double binom(int n, int k) {
+  return fac(double(n)) / fac(double(k)) / fac(double(n - k));
+}
+
+//--------------------------------------------------------
+//              (k)
+// calculates  D    (a,b,c)
+//              ms m
+//
+// see Lindner A, 'Drehimpulse in der Quantenmechanik',
+// ISBN 3-519-03061-6                  (j)
+// Stuttgart: Teubner, 1984  page 86 (d    (beta)=...)
+// for equation (1)                    m ms
+//
+// see Buckmaster phys. stat. sol. (a) 13 (1972) 9
+// for equation (2)
+//
+//--------------------------------------------------------
+ComplexType ddrot(int j, int m, int ms, double a, double b, double c) {
+  // c       equation (1)
+  double d = delta(double(ms), double(m), double(j));
+  ifnull(b);
+  if (b != 0.0) {
+    d = 0.0;
+    for (int n = std::max(0, -(m + ms)); n <= std::min(j - m, j - ms);
+         ++n) { // do n=max(0,-(m+ms)),min(j-m,j-ms)
+      d = d +
+          pow(-1.0, (j - ms - n)) * binom(j - ms, n) *
+              binom(j + ms, j - m - n) * pow(cos(0.5 * b), (2 * n + m + ms)) *
+              pow(sin(0.5 * b), (2 * j - 2 * n - m - ms));
     }
-    return f;
+    d = d * sqrt(fac(double(j + m)) / fac(double(j + ms)) * fac(double(j - m)) /
+                 fac(double(j - ms)));
   }
-
-  // c--------------------------------------------------------
-  // c binom (n over k)
-  // c--------------------------------------------------------
-  double binom(int n, int k) {
-    return fac(double(n)) / fac(double(k)) / fac(double(n - k));
-  }
-
-  // c--------------------------------------------------------
-  // c              (k)
-  // c calculates  D    (a,b,c)
-  // c              ms m
-  // c
-  // c see Lindner A, 'Drehimpulse in der Quantenmechanik',
-  // c ISBN 3-519-03061-6                  (j)
-  // c Stuttgart: Teubner, 1984  page 86 (d    (beta)=...)
-  // c for equation (1)                    m ms
-  // c
-  // c see Buckmaster phys. stat. sol. (a) 13 (1972) 9
-  // c for equation (2)
-  // c
-  // c--------------------------------------------------------
-  ComplexType ddrot(int j, int m, int ms, double a, double b, double c) {
-    // c       equation (1)
-    double d = delta(double(ms), double(m), double(j));
-    ifnull(b);
-    if (b != 0.0) {
-      d = 0.0;
-      for (int n = std::max(0, -(m + ms)); n <= std::min(j - m, j - ms);
-           ++n) { // do n=max(0,-(m+ms)),min(j-m,j-ms)
-        d = d +
-            pow(-1.0, (j - ms - n)) * binom(j - ms, n) *
-                binom(j + ms, j - m - n) * pow(cos(0.5 * b), (2 * n + m + ms)) *
-                pow(sin(0.5 * b), (2 * j - 2 * n - m - ms));
-      }
-      d = d * sqrt(fac(double(j + m)) / fac(double(j + ms)) *
-                   fac(double(j - m)) / fac(double(j - ms)));
-    }
-    // c       equation (2)
-    return ComplexType(cos(m * a), -sin(m * a)) * d *
-           ComplexType(cos(ms * c), -sin(ms * c));
-  }
-//c--------------------------------------------------
-//c <jm| jp^|q| or jm^|q|  |nj>
-//c--------------------------------------------------
-  double jop(int q, double mj, double nj, double j) {
-    switch (q) {
-    case 0:
-      return delta(mj, nj, j);
-    case 1:
-      return delta(mj, nj + 1, j) * jp(nj, j);
-    case 2:
-      return delta(mj, nj + 2, j) * jp2(nj, j);
-    case 3:
-      return delta(mj, nj + 3, j) * jp3(nj, j);
-    case 4:
-      return delta(mj, nj + 4, j) * jp4(nj, j);
-    case 5:
-      return delta(mj, nj + 5, j) * jp5(nj, j);
-    case 6:
-      return delta(mj, nj + 6, j) * jp6(nj, j);
-    case -1:
-      return delta(mj, nj - 1, j) * jm(nj, j);
-    case -2:
-      return delta(mj, nj - 2, j) * jm2(nj, j);
-    case -3:
-      return delta(mj, nj - 3, j) * jm3(nj, j);
-    case -4:
-      return delta(mj, nj - 4, j) * jm4(nj, j);
-    case -5:
-      return delta(mj, nj - 5, j) * jm5(nj, j);
-    case -6:
-      return delta(mj, nj - 6, j) * jm6(nj, j);
-    default:
-      throw std::runtime_error("Cannot calculate jop with this q value.");
-    }
+  // c       equation (2)
+  return ComplexType(cos(m * a), -sin(m * a)) * d *
+         ComplexType(cos(ms * c), -sin(ms * c));
+}
+//--------------------------------------------------
+// <jm| jp^|q| or jm^|q|  |nj>
+//--------------------------------------------------
+double jop(int q, double mj, double nj, double j) {
+  switch (q) {
+  case 0:
+    return delta(mj, nj, j);
+  case 1:
+    return delta(mj, nj + 1, j) * jp(nj, j);
+  case 2:
+    return delta(mj, nj + 2, j) * jp2(nj, j);
+  case 3:
+    return delta(mj, nj + 3, j) * jp3(nj, j);
+  case 4:
+    return delta(mj, nj + 4, j) * jp4(nj, j);
+  case 5:
+    return delta(mj, nj + 5, j) * jp5(nj, j);
+  case 6:
+    return delta(mj, nj + 6, j) * jp6(nj, j);
+  case -1:
+    return delta(mj, nj - 1, j) * jm(nj, j);
+  case -2:
+    return delta(mj, nj - 2, j) * jm2(nj, j);
+  case -3:
+    return delta(mj, nj - 3, j) * jm3(nj, j);
+  case -4:
+    return delta(mj, nj - 4, j) * jm4(nj, j);
+  case -5:
+    return delta(mj, nj - 5, j) * jm5(nj, j);
+  case -6:
+    return delta(mj, nj - 6, j) * jm6(nj, j);
+  default:
     throw std::runtime_error("Cannot calculate jop with this q value.");
   }
+  throw std::runtime_error("Cannot calculate jop with this q value.");
+}
 
-  // c--------------------------------------------------
-  // c calculate the full stevens operators
-  // c--------------------------------------------------
-  double full_okq(int k, int q, double mj, double nj, double j) {
-    return 0.5*jop(q,mj,nj,j)*( ff(k,q,mj,j)+ff(k,q,nj,j) );
-  }
+//--------------------------------------------------
+// calculate the full stevens operators
+//--------------------------------------------------
+double full_okq(int k, int q, double mj, double nj, double j) {
+  return 0.5 * jop(q, mj, nj, j) * (ff(k, q, mj, j) + ff(k, q, nj, j));
+}
 
-  // c-------------------------------
-  // c  calculates <i|j+|k>
-  // c-------------------------------
-  ComplexType matjp(const ComplexFortranMatrix &ev, int i, int k, int dim) {
-    ComplexFortranVector v(1, dim);
-    auto j = 0.5 * (double(dim) - 1.0);
-    for (int s = dim; s >= 2; --s) { // do 10 s=dim,2,-1
-      auto sj = double(s) - j - 1.0;
-      v(s) = ev(s - 1, k) * jp(sj - 1, j);
-    }
-    v(1) = 0.0;
-    ComplexType res = 0.0;
-    for (int s = 1; s <= dim; ++s) { // do 20 s=1,dim
-      res += conjg(ev(s, i)) * v(s);
-    }
-    return res;
+//-------------------------------
+//  calculates <i|j+|k>
+//-------------------------------
+ComplexType matjp(const ComplexFortranMatrix &ev, int i, int k, int dim) {
+  ComplexFortranVector v(1, dim);
+  auto j = 0.5 * (double(dim) - 1.0);
+  for (int s = dim; s >= 2; --s) { // do 10 s=dim,2,-1
+    auto sj = double(s) - j - 1.0;
+    v(s) = ev(s - 1, k) * jp(sj - 1, j);
   }
-  // c--------------------
-  // c calculates <i|j-|k>
-  // c--------------------
-  ComplexType matjm(const ComplexFortranMatrix &ev, int i, int k, int dim) {
-    ComplexFortranVector v(1, dim);
-    auto j = 0.5 * (double(dim) - 1.0);
-    for (int s = 1; s <= dim - 1; ++s) { // do 10 s=1,dim-1
-      auto sj = double(s) - j - 1.0;
-      v(s) = ev(s + 1, k) * jm(sj + 1, j);
-    }
-    v(dim) = 0.0;
-    ComplexType res = 0.0;
-    for (int s = 1; s <= dim; ++s) { // do 20 s=1,dim
-      res += conjg(ev(s, i)) * v(s);
-    }
-    return res;
+  v(1) = 0.0;
+  ComplexType res = 0.0;
+  for (int s = 1; s <= dim; ++s) { // do 20 s=1,dim
+    res += conjg(ev(s, i)) * v(s);
   }
-  // c--------------------
-  // c calculates <i|jx|k>
-  // c--------------------
-  ComplexType matjx(const ComplexFortranMatrix &ev, int i, int k, int dim) {
-    return 0.5 * (matjm(ev, i, k, dim) + matjp(ev, i, k, dim));
+  return res;
+}
+//--------------------
+// calculates <i|j-|k>
+//--------------------
+ComplexType matjm(const ComplexFortranMatrix &ev, int i, int k, int dim) {
+  ComplexFortranVector v(1, dim);
+  auto j = 0.5 * (double(dim) - 1.0);
+  for (int s = 1; s <= dim - 1; ++s) { // do 10 s=1,dim-1
+    auto sj = double(s) - j - 1.0;
+    v(s) = ev(s + 1, k) * jm(sj + 1, j);
   }
-  // c-------------------------
-  // c calculates |<i|jx|k>|**2
-  // c-------------------------
-  double matjx2(const ComplexFortranMatrix &ev, int i, int k, int dim) {
-    return std::norm(matjx(ev, i, k, dim));
+  v(dim) = 0.0;
+  ComplexType res = 0.0;
+  for (int s = 1; s <= dim; ++s) { // do 20 s=1,dim
+    res += conjg(ev(s, i)) * v(s);
   }
-  // c--------------------
-  // c calculates <i|jy|k>
-  // c--------------------
-  ComplexType matjy(const ComplexFortranMatrix &ev, int i, int k, int dim) {
-    auto ci = ComplexType(0.0, 1.0);
-    return 0.5 * ci * (matjm(ev, i, k, dim) - matjp(ev, i, k, dim));
+  return res;
+}
+//--------------------
+// calculates <i|jx|k>
+//--------------------
+ComplexType matjx(const ComplexFortranMatrix &ev, int i, int k, int dim) {
+  return 0.5 * (matjm(ev, i, k, dim) + matjp(ev, i, k, dim));
+}
+//-------------------------
+// calculates |<i|jx|k>|**2
+//-------------------------
+double matjx2(const ComplexFortranMatrix &ev, int i, int k, int dim) {
+  return std::norm(matjx(ev, i, k, dim));
+}
+//--------------------
+// calculates <i|jy|k>
+//--------------------
+ComplexType matjy(const ComplexFortranMatrix &ev, int i, int k, int dim) {
+  auto ci = ComplexType(0.0, 1.0);
+  return 0.5 * ci * (matjm(ev, i, k, dim) - matjp(ev, i, k, dim));
+}
+//-------------------------
+// calculates |<i|jy|k>|**2
+//-------------------------
+double matjy2(const ComplexFortranMatrix &ev, int i, int k, int dim) {
+  return std::norm(matjy(ev, i, k, dim));
+}
+//--------------------
+// calculates <i|jz|k>
+//--------------------
+ComplexType matjz(const ComplexFortranMatrix &ev, int i, int k, int dim) {
+  ComplexFortranVector v(1, dim);
+  auto j = 0.5 * (double(dim) - 1.0);
+  for (int s = 1; s <= dim; ++s) { // do 10 s=1,dim
+    auto sj = double(s) - j - 1.0;
+    v(s) = ev(s, k) * sj;
   }
-  // c-------------------------
-  // c calculates |<i|jy|k>|**2
-  // c-------------------------
-  double matjy2(const ComplexFortranMatrix &ev, int i, int k, int dim) {
-    return std::norm(matjy(ev, i, k, dim));
+  ComplexType res = 0.0;
+  for (int s = 1; s <= dim; ++s) { //	do 20 s=1,dim
+    res += conjg(ev(s, i)) * v(s);
   }
-  // c--------------------
-  // c calculates <i|jz|k>
-  // c--------------------
-  ComplexType matjz(const ComplexFortranMatrix &ev, int i, int k, int dim) {
-    ComplexFortranVector v(1, dim);
-    auto j = 0.5 * (double(dim) - 1.0);
-    for (int s = 1; s <= dim; ++s) { // do 10 s=1,dim
-      auto sj = double(s) - j - 1.0;
-      v(s) = ev(s, k) * sj;
-    }
-    ComplexType res = 0.0;
-    for (int s = 1; s <= dim; ++s) { //	do 20 s=1,dim
-      res += conjg(ev(s, i)) * v(s);
-    }
-    return res;
-  }
-  // c-------------------------
-  // c calculates |<i|jz|k>|**2
-  // c-------------------------
-  double matjz2(const ComplexFortranMatrix &ev, int i, int k, int dim) {
-    return std::norm(matjz(ev, i, k, dim));
-  }
+  return res;
+}
+//-------------------------
+// calculates |<i|jz|k>|**2
+//-------------------------
+double matjz2(const ComplexFortranMatrix &ev, int i, int k, int dim) {
+  return std::norm(matjz(ev, i, k, dim));
+}
 
-  // c-------------------------
-  // c calculates |<i|jT|k>|**2
-  // c-------------------------
-  double matjt2(const ComplexFortranMatrix &ev, int i, int k, int dim) {
-    return 2.0 / 3 * (matjx2(ev, i, k, dim) + matjy2(ev, i, k, dim) +
-                      matjz2(ev, i, k, dim));
-  }
+//-------------------------
+// calculates |<i|jT|k>|**2
+//-------------------------
+double matjt2(const ComplexFortranMatrix &ev, int i, int k, int dim) {
+  return 2.0 / 3 * (matjx2(ev, i, k, dim) + matjy2(ev, i, k, dim) +
+                    matjz2(ev, i, k, dim));
+}
 
-  // c---------------------------------------------------------------
-  // c calculates all transition matrix elements for a single crystal
-  // c and a polycrystalline sample (powder)
-  // c---------------------------------------------------------------
-  void matcalc(const ComplexFortranMatrix &ev, int dim,
-               DoubleFortranMatrix &jx2, DoubleFortranMatrix &jy2,
-               DoubleFortranMatrix &jz2, DoubleFortranMatrix &jt2) {
-    for (int i = 1; i <= dim; ++i) {   // do 10 i=1,dim
-      for (int k = 1; k <= dim; ++k) { //   do 20 k=1,dim
-        jx2(i, k) = matjx2(ev, i, k, dim);
-        jy2(i, k) = matjy2(ev, i, k, dim);
-        jz2(i, k) = matjz2(ev, i, k, dim);
-        jt2(i, k) = 2.0 / 3 * (jx2(i, k) + jy2(i, k) + jz2(i, k));
-      }
-    }
-  }
-
-  // c------------------------------------------------------------
-  // c make sure that no underflow and overflow appears within exp
-  // c------------------------------------------------------------
-  double exp_(double z) {
-    //	implicit none
-    //	real*8 z,exp,zmax
-    const double zmax = 71.0;
-    //	exp_ = exp(zmax)
-    //	if(z.lt.0.0d0) exp_ = 0.0d0
-    //	if(abs(z).lt.zmax) exp_ = exp(z)
-    if (z < -zmax) {
-      return 0.0;
-    }
-    if (z < zmax) {
-      return exp(z);
-    }
-    return exp(zmax);
-  }
-
-  // c------------------------------------------
-  // c calculates all transition intensities for
-  // c a polycrystalline sample (powder)
-  // c------------------------------------------
-  void intcalc(double pi, double r0, double gj, double z,
-               const DoubleFortranMatrix &jt2, const DoubleFortranVector &e,
-               DoubleFortranMatrix &inten, int dim, double temp) {
-    auto constant = 4.0 * pi * pow(0.5 * r0 * gj, 2);
-    if (temp == 0.0) {
-      temp = 1.0;
-    }
-    for (int i = 1; i <= dim; ++i) { // do 10 i=1,dim
-      auto coeff = exp_(-e(i) / temp) / z * constant;
-      for (int k = 1; k <= dim; ++k) { //	   do 20 k=1,dim
-        inten(i, k) = coeff * jt2(i, k);
-      }
+//---------------------------------------------------------------
+// calculates all transition matrix elements for a single crystal
+// and a polycrystalline sample (powder)
+//---------------------------------------------------------------
+void matcalc(const ComplexFortranMatrix &ev, int dim, DoubleFortranMatrix &jx2,
+             DoubleFortranMatrix &jy2, DoubleFortranMatrix &jz2,
+             DoubleFortranMatrix &jt2) {
+  for (int i = 1; i <= dim; ++i) {   // do 10 i=1,dim
+    for (int k = 1; k <= dim; ++k) { // do 20 k=1,dim
+      jx2(i, k) = matjx2(ev, i, k, dim);
+      jy2(i, k) = matjy2(ev, i, k, dim);
+      jz2(i, k) = matjz2(ev, i, k, dim);
+      jt2(i, k) = 2.0 / 3 * (jx2(i, k) + jy2(i, k) + jz2(i, k));
     }
   }
-  // c-------------------------------------
-  // c calculation of the occupation factor
-  // c-------------------------------------
-  double c_occupation_factor(const DoubleFortranVector &energy, double dimj,
-                             double temp) {
-    int dim = static_cast<int>(dimj);
-    double occupation_factor = 0.0;
-    if (temp == 0.0) {
-      temp = 1.0;
-    }
-    for (int s = 1; s <= dim; ++s) { // do 10 s=1,dim
-      occupation_factor += exp_(-energy(s) / temp);
-    }
-    return occupation_factor;
+}
+
+//------------------------------------------------------------
+// make sure that no underflow and overflow appears within exp
+//------------------------------------------------------------
+double exp_(double z) {
+  const double zmax = 71.0;
+  if (z < -zmax) {
+    return 0.0;
   }
+  if (z < zmax) {
+    return exp(z);
+  }
+  return exp(zmax);
+}
 
-} // anonymous
+//------------------------------------------
+// calculates all transition intensities for
+// a polycrystalline sample (powder)
+//------------------------------------------
+void intcalc(double pi, double r0, double gj, double z,
+             const DoubleFortranMatrix &jt2, const DoubleFortranVector &e,
+             DoubleFortranMatrix &inten, int dim, double temp) {
+  auto constant = 4.0 * pi * pow(0.5 * r0 * gj, 2);
+  if (temp == 0.0) {
+    temp = 1.0;
+  }
+  for (int i = 1; i <= dim; ++i) { // do 10 i=1,dim
+    auto coeff = exp_(-e(i) / temp) / z * constant;
+    for (int k = 1; k <= dim; ++k) { // do 20 k=1,dim
+      inten(i, k) = coeff * jt2(i, k);
+    }
+  }
+}
+//-------------------------------------
+// calculation of the occupation factor
+//-------------------------------------
+double c_occupation_factor(const DoubleFortranVector &energy, double dimj,
+                           double temp) {
+  int dim = static_cast<int>(dimj);
+  double occupation_factor = 0.0;
+  if (temp == 0.0) {
+    temp = 1.0;
+  }
+  for (int s = 1; s <= dim; ++s) { // do 10 s=1,dim
+    occupation_factor += exp_(-energy(s) / temp);
+  }
+  return occupation_factor;
+}
 
-std::tuple<GSLVector, ComplexMatrix>
-sc_crystal_field(int nre, const std::string &type, int symmetry,
-                 const DoubleFortranMatrix &sbkq, DoubleFortranVector &bmol,
-                 DoubleFortranVector &bext, ComplexFortranMatrix &bkq,
-                 double temp) {
+} // anonymous namespace
+
+/// Calculate eigenvalues and eigenvectors of the crystal field hamiltonian.
+/// @param eigenvalues :: Output. The eigenvalues in ascending order. The smallest
+///   value is subtracted from all eigenvalues so they always start with 0.
+/// @param eigenvectors :: Output. The matrix of eigenvectors. The eigenvectors
+///    are in columns with indices corresponding to the indices of eigenvalues.
+/// @param hamiltonian  :: Output. The hamiltonian.
+/// @param nre :: A number denoting the type of ion.
+///  |1=Ce|2=Pr|3=Nd|4=Pm|5=Sm|6=Eu|7=Gd|8=Tb|9=Dy|10=Ho|11=Er|12=Tm|13=Yb|
+/// @param bmol :: Parameters of the molecular field. TODO: ref. frame, units.
+/// @param bext :: Parameters of the external field. TODO: ref. frame, units.
+/// @param bkq :: The crystal field parameters. TODO: units.
+/// @param alpha_euler :: The alpha Euler angle. TOD: units.
+/// @param beta_euler :: The beta Euler angle. TOD: units.
+/// @param gamma_euler :: The gamma Euler angle. TOD: units.
+void calculateEigesystem(DoubleFortranVector &eigenvalues,
+                         ComplexFortranMatrix &eigenvectors,
+                         ComplexFortranMatrix &hamiltonian, int nre,
+                         const DoubleFortranVector &bmol,
+                         const DoubleFortranVector &bext,
+                         const ComplexFortranMatrix &bkq, double alpha_euler,
+                         double beta_euler, double gamma_euler) {
   if (nre <= 0 || nre > maxNre) {
     throw std::out_of_range("nre is out of range");
   }
-  std::cerr << "nre=" << nre << std::endl;
-  std::cerr << "symm=" << symmetry << std::endl;
-  //// initialize some rare earth constants
-  auto gj = ggj[nre-1];
-  auto dimj = ddimj[nre-1];
+
+  // initialize some rare earth constants
+  auto gj = ggj[nre - 1];
+  auto dimj = ddimj[nre - 1];
 
   // magneton of Bohr in kelvin per tesla
   auto myb = c_myb;
-  std::cerr << "myb=" << myb << std::endl;
-//       ------------------
-//       magnetic neutron scattering radius
+  //  magnetic neutron scattering radius
   auto r0 = c_r0();
-  std::cerr << "r0=" << r0 << std::endl;
-//       ------------------------------------------------------------
-//       transform the Bkq with
-//       H = sum_k=0 Bk0 Ok0 + sum_k>0_q>0  ReBkq ReOkq + ImBkq ImOkq
-//       to a representation with
-//                     *
-//       H = sum_kq dkq  Okq
-//
-//       one finds:   dk0 = Bk0  and for q<>0: dkq = Bkq/2
-//       ------------------------------------------------------------
-  ComplexFortranMatrix dkq_star(1, 6, -6, 6); // complex*16   dkq_star(6,-6:6)
+  //------------------------------------------------------------
+  //       transform the Bkq with
+  //       H = sum_k=0 Bk0 Ok0 + sum_k>0_q>0  ReBkq ReOkq + ImBkq ImOkq
+  //       to a representation with
+  //                     *
+  //       H = sum_kq dkq  Okq
+  //
+  //       one finds:   dk0 = Bk0  and for q<>0: dkq = Bkq/2
+  //-------------------------------------------------------
+  ComplexFortranMatrix dkq_star(1, 6, -6, 6);
   dkq_star.zero();
   auto i = ComplexType(0.0, 1.0);
   for (int k = 2; k <= 6; k += 2) { // do k=2,6,2
     for (int q = 0; q <= k; ++q) {  //  do q=0,k
       ComplexType b_kq = bkq(k, q);
-      if (sbkq.get(k, q) == -1) {
-        b_kq = i * b_kq;
-      }
-      dkq_star(k,q) = b_kq;
+      dkq_star(k, q) = b_kq;
       if (q != 0) {
         dkq_star(k, q) = dkq_star(k, q) / 2.0;
       }
       dkq_star(k, -q) = conjg(dkq_star(k, q));
-      //std::cerr << "dkq*= " << k << ' ' << q << ' ' << std::setprecision(18) << ComplexType(dkq_star(k, q)) << std::endl;
     }
   }
-   //c       -------------------------------------------------------------------
-   //c       the parameters are   conjg(D_kq)
-   //c       -------------------------------------------------------------------
+  //-------------------------------------------------------------------
+  //  the parameters are   conjg(D_kq)
+  //-------------------------------------------------------------------
   for (int k = 2; k <= 6; k += 2) { // do k=2,6,2
     for (int q = -k; q <= k; ++q) { // do q=-k,k
       dkq_star(k, q) = conjg(dkq_star(k, q));
     }
   }
-  // c       -------------------------------------------------------------------
-  auto a = alpha_euler;
-  auto b = beta_euler;
-  auto c = gamma_euler;
-  ComplexFortranMatrix  rdkq_star(1, 6, -6, 6);
+  //-------------------------------------------------------------------
+  // Rotate the crystal field (?)
+  //-------------------------------------------------------------------
+  ComplexFortranMatrix rdkq_star(1, 6, -6, 6);
   for (int k = 2; k <= 6; k += 2) { // do k=2,6,2
     for (int q = -k; q <= k; ++q) { // do q=-k,k
       rdkq_star(k, q) = ComplexType(0.0, 0.0);
       for (int qs = -k; qs <= k; ++qs) { // do qs=-k,k
-        rdkq_star(k, q) = rdkq_star(k, q) +
-                          dkq_star(k, qs) * epsilon(k, qs) / epsilon(k, q) *
-                              omega(k, qs) / omega(k, q) *
-                              ddrot(k, q, qs, a, b, c);
+        rdkq_star(k, q) =
+            rdkq_star(k, q) +
+            dkq_star(k, qs) * 
+                epsilon(k, qs) / epsilon(k, q) * 
+                omega(k, qs) / omega(k, q) *
+                ddrot(k, q, qs, alpha_euler, beta_euler, gamma_euler);
       }
     }
   }
-  // c       -------------------------------------------------------------------
-  // c       rotate the external magnetic field
-  // c       -------------------------------------------------------------------
-  // c       aj  = sqrt(3/j/(j+1)/(2*j+1))
-  // c
-  // c       the following hamiltonian will be rotated
-  // c
-  // c        cry        -----    cry    cry
-  // c       h     = f * >     Bex     V       with  <j|| V1 ||j> = sqrt(3)
-  // c        mag        -----    1q    1q
-  // c                     q
-  // c
-  
-  ComplexFortranMatrix  bex(1,1, -1,1);
-  bex(1, 1) = - (bext(1)-i*bext(2))/sqrt(2.0); // ! /aj
-  bex(1,-1) =   (bext(1)+i*bext(2))/sqrt(2.0); // ! /aj
-  bex(1, 0) =    bext(3);                      // ! /aj
-  
-  // c       calculates Bex(1,q) for a canted moment
-  // c
-  // c       moment    cry       cry   cry     +
-  // c      h       = R   (abc) h     R   (abc)
-  // c       mag                 mag
-  // c
-  ComplexFortranMatrix  rbex(1,1, -1,1);
-  for(int q = -1; q <= 1; ++q) { //        do q=-1,1
-    rbex(1,q) = ComplexType(0.0, 0.0);
-    for(int qs = -1; qs <= 1; ++qs) { //         do qs=-1,1
-      rbex(1,q) = rbex(1,q) + bex(1,qs)*ddrot(1,q,qs,a,b,c);
+  // -------------------------------------------------------------------
+  // rotate the external magnetic field
+  // -------------------------------------------------------------------
+  //       aj  = sqrt(3/j/(j+1)/(2*j+1))
+  //
+  //       the following hamiltonian will be rotated
+  //
+  //        cry        -----    cry    cry
+  //       h     = f * >     Bex     V       with  <j|| V1 ||j> = sqrt(3)
+  //        mag        -----    1q    1q
+  //                     q
+  // -------------------------------------------------------------------
+
+  ComplexFortranMatrix bex(1, 1, -1, 1);
+  bex(1, 1) = -(bext(1) - i * bext(2)) / sqrt(2.0);
+  bex(1, -1) = (bext(1) + i * bext(2)) / sqrt(2.0);
+  bex(1, 0) = bext(3);
+
+  //  calculates Bex(1,q) for a canted moment
+  //
+  //       moment    cry       cry   cry     +
+  //      h       = R   (abc) h     R   (abc)
+  //       mag                 mag
+  //
+  ComplexFortranMatrix rbex(1, 1, -1, 1);
+  for (int q = -1; q <= 1; ++q) { // do q=-1,1
+    rbex(1, q) = ComplexType(0.0, 0.0);
+    for (int qs = -1; qs <= 1; ++qs) { // do qs=-1,1
+      rbex(1, q) =
+          rbex(1, q) +
+          bex(1, qs) * ddrot(1, q, qs, alpha_euler, beta_euler, gamma_euler);
     }
   }
-  
+
   ComplexType rbextp, rbextm, rbextz;
-  rbextp =  rbex(1,-1)*sqrt(2.0);    //  !*aj
-  rbextm =  rbex(1, 1)*(-sqrt(2.0)); //  !*aj
-  rbextz =  rbex(1, 0);              //  !*aj
-  // c       -------------------------------------------------------------------
-  // c       magneton of Bohr in kelvin per tesla
-  //	myb    = c_myb()
-  auto facmol = 2*(gj-1)*myb;
-  auto facext = gj*myb;
-  //	i = cmplx(0.0d0,1.0d0)
-  auto bmolp = bmol(1)+i*bmol(2);
-  auto bmolm = bmol(1)-i*bmol(2);
+  rbextp = rbex(1, -1) * sqrt(2.0);
+  rbextm = rbex(1, 1) * (-sqrt(2.0));
+  rbextz = rbex(1, 0);
+
+  auto facmol = 2 * (gj - 1) * myb;
+  auto facext = gj * myb;
+
+  auto bmolp = bmol(1) + i * bmol(2);
+  auto bmolm = bmol(1) - i * bmol(2);
   auto bmolz = bmol(3);
   auto bextp = rbextp;
   auto bextm = rbextm;
   auto bextz = rbextz;
-  // c       -----------------------------------------
-  // c       set the hamiltonian matrix h to complex 0
-  // c       -----------------------------------------
-  //	call mx_clear(h)
+
   int dim = static_cast<int>(dimj);
-  std::cerr << "dim=" << dim <<std::endl;
-  ComplexFortranMatrix h(1, dim, 1, dim);
-  std::cerr << h.size1() << " x " << h.size2() << std::endl;
-  h.zero();
-  // c       -------------------------------------------------------------------
-  // c       calculate the crystal field hamiltonian
-  // c       define only the lower triangle of h(m,n)
-  // c       -------------------------------------------------------------------
-  auto j   = 0.5*(dimj-1.0); // ! total momentum J of R3+
-  for(int m=1; m <= dim; ++m) { //  do m=1,dim
+  hamiltonian.allocate(1, dim, 1, dim);
+  hamiltonian.zero();
+  //-------------------------------------------------------------------
+  //      calculate the crystal field hamiltonian
+  //      define only the lower triangle of h(m,n)
+  //-------------------------------------------------------------------
+  // total momentum J of R3+
+  auto j = 0.5 * (dimj - 1.0);
+  for (int m = 1; m <= dim; ++m) { // do m=1,dim
     auto mj = double(m) - j - 1.0;
-  	for(int n=1; n <=m; ++n) { //   do n=1,m
-  	  auto nj = double(n) - j - 1.0;
-      // h is already zero
-      // h(m,n) = cmplx(0.0d0,0.0d0)
-      for(int k=2; k <=6; k +=2) { //            do k=2,6,2
-        for(int q=-k; q <= k; ++q) { //             do q=-k,k
-          h(m,n) = h(m,n) + rdkq_star(k,q)*full_okq(k,q,mj,nj,j);
+    for (int n = 1; n <= m; ++n) { // do n=1,m
+      auto nj = double(n) - j - 1.0;
+      for (int k = 2; k <= 6; k += 2) { // do k=2,6,2
+        for (int q = -k; q <= k; ++q) { // do q=-k,k
+          hamiltonian(m, n) =
+              hamiltonian(m, n) + rdkq_star(k, q) * full_okq(k, q, mj, nj, j);
         }
       }
     }
   }
-  // c       -------------------------------------------------------------------
-  // c       define only the lower triangle of h(m,n)
-  // c       -------------------------------------------------------------------
-  //	dim = dimj
-  //	j   = 0.5d0*(dimj-1) ! total momentum J of R3+
-  for(int m=1; m <= dim; ++m) { //	do 10 m=1,dim
+  //-------------------------------------------------------------------
+  //       define only the lower triangle of h(m,n)
+  //-------------------------------------------------------------------
+  for (int m = 1; m <= dim; ++m) { //	do 10 m=1,dim
     auto mj = double(m) - j - 1.0;
-    for(int n=1; n <= m; ++n) { //	   do 20 n=1,m
-     auto nj = double(n) - j - 1.0;
-  // c
-  // c add the molecular field
-  // c f*J*B = f*( 1/2*(J+ * B-  +  J- * B+) + Jz*Bz )
-  // c
-     h(m,n) = h(m,n) + 0.5*facmol*bmolm*delta(mj,nj+1,j)*jp(nj,j)
-                     + 0.5*facmol*bmolp*delta(mj,nj-1,j)*jm(nj,j)
-                     +       facmol*bmolz*delta(mj,nj,j)*nj
-  // c
-  // c add an external magnetic field
-  // c
-                     + 0.5*facext*bextm*delta(mj,nj+1,j)*jp(nj,j)
-                     + 0.5*facext*bextp*delta(mj,nj-1,j)*jm(nj,j)
-                     +       facext*bextz*delta(mj,nj,j)*nj;
-     h(n, m) = conjg(h(m, n));
-     //std::cerr << m << ' ' << n << ' ' << std::setprecision(18) << ComplexType(h(m,n)) << std::endl;
+    for (int n = 1; n <= m; ++n) { // do 20 n=1,m
+      auto nj = double(n) - j - 1.0;
+      // add the molecular field
+      //  f*J*B = f*( 1/2*(J+ * B-  +  J- * B+) + Jz*Bz )
+      hamiltonian(m, n) =
+          hamiltonian(m, n) +
+          0.5 * facmol * bmolm * delta(mj, nj + 1, j) * jp(nj, j) +
+          0.5 * facmol * bmolp * delta(mj, nj - 1, j) * jm(nj, j) +
+          facmol * bmolz * delta(mj, nj, j) * nj +
+          // c add an external magnetic field
+          0.5 * facext * bextm * delta(mj, nj + 1, j) * jp(nj, j) +
+          0.5 * facext * bextp * delta(mj, nj - 1, j) * jm(nj, j) +
+          facext * bextz * delta(mj, nj, j) * nj;
+      hamiltonian(n, m) = conjg(hamiltonian(m, n));
     }
   }
 
-  auto h1 = h;
-  // c
-  // c diagonalisation of the hamiltonian h
-  // c
-  DoubleFortranVector energy(1, dim);
-  ComplexFortranMatrix wavefunction(1, dim, 1, dim);
-  h.eigenSystemHermitian(energy, wavefunction);
-  auto sortedIndices = energy.sortIndices();
-  energy.sort(sortedIndices);
-  wavefunction.sortColumns(sortedIndices);
-  // c
-  // c shift the lowest energy level to 0
-  // c
-  auto indexMin = static_cast<int>(energy.indexOfMinElement() + 1);
-  auto eshift = energy(indexMin);
-  for(int n = 1; n <= dim; ++n) {//	do 50 n=1,dim
-    //std::cerr << "En " << n << ' ' << std::setprecision(18) << energy[n] << std::endl;
-    energy(n) = energy(n) - eshift;
+  // Diagonalisation of the hamiltonian
+  eigenvalues.allocate(1, dim);
+  eigenvectors.allocate(1, dim, 1, dim);
+  ComplexFortranMatrix h = hamiltonian;
+  h.eigenSystemHermitian(eigenvalues, eigenvectors);
+
+  // Sort the eigenvalues in ascending order
+  auto sortedIndices = eigenvalues.sortIndices();
+  eigenvalues.sort(sortedIndices);
+  // Eigenvectors are in columns. Sort the columns
+  // to match the sorted eigenvalues.
+  eigenvectors.sortColumns(sortedIndices);
+
+  // Shift the lowest energy level to 0
+  auto indexMin = static_cast<int>(eigenvalues.indexOfMinElement() + 1);
+  auto eshift = eigenvalues(indexMin);
+  eigenvalues += -eshift;
+}
+
+/// Calculate the intensities of transitions.
+/// @param nre :: Ion number.
+/// @param energies :: The energies.
+/// @param wavefunctions :: The wavefunctions.
+/// @param temperature :: The temperature.
+DoubleFortranMatrix
+calculateIntensities(int nre, const DoubleFortranVector &energies,
+                     const ComplexFortranMatrix &wavefunctions,
+                     double temperature) {
+  int dim = static_cast<int>(energies.size());
+  auto dimj = ddimj[nre - 1];
+  if (static_cast<double>(dim) != dimj) {
+    throw std::runtime_error("calculateIntensities was called for a wrong ion");
   }
 
-  //ComplexMatrix II = wavefunction.ctr() * h1 * wavefunction;
-  //for(size_t i = 0; i < II.size1(); ++i) {
-  //  std::cerr << "II " << i << ' ' << ComplexType(II(i,i)) << std::endl;
-  //}
-
-  // c
-  // c write the energies out (in meV)
-  // c
-  // c	write(6,*) (energy(m)/11.6,m=1,dim)
-  // c
-  // c test if the wavefunction matrix wavefunction(dim,dim) is unitary
-  // c
-  // c       call t_orthonormalisation(6,wavefunction,dimj)
-  // c
-  // c calculates the transition matrixelements for a single crystal and
-  // c a powdered sample
-  // c
+  // calculates the transition matrixelements for a single crystal and
+  // a powdered sample
   DoubleFortranMatrix jx2mat(1, dim, 1, dim);
   DoubleFortranMatrix jy2mat(1, dim, 1, dim);
   DoubleFortranMatrix jz2mat(1, dim, 1, dim);
   DoubleFortranMatrix jt2mat(1, dim, 1, dim);
-  matcalc(wavefunction,dim,jx2mat,jy2mat,jz2mat,jt2mat);
-  // c
-  // c calculates the sum over all occupation_factor
-  // c
-  auto occupation_factor = c_occupation_factor(energy, dimj, temp);
-  // c
-  // c calculates the transition intensities for a powdered sample
-  // c
-  //	call
-  DoubleFortranMatrix intensity(1, dim, 1, dim);
-  intcalc(pi, r0, gj, occupation_factor, jt2mat, energy, intensity, dim, temp);
-  // c
-  // c end of subroutine cfcalc
-  // c
-  return std::make_tuple(energy.moveToBaseVector(), wavefunction.moveToBaseMatrix());
-}
+  matcalc(wavefunctions, dim, jx2mat, jy2mat, jz2mat, jt2mat);
 
+  // calculates the sum over all occupation_factor
+  auto occupation_factor = c_occupation_factor(energies, dimj, temperature);
+
+  // calculates the transition intensities for a powdered sample
+  auto r0 = c_r0();
+  auto gj = ggj[nre - 1];
+  DoubleFortranMatrix intensity(1, dim, 1, dim);
+  intcalc(pi, r0, gj, occupation_factor, jt2mat, energies, intensity, dim,
+          temperature);
+
+  return intensity;
+}
 
 } // namespace Functions
 } // namespace CurveFitting

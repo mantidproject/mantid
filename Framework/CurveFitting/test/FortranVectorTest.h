@@ -161,6 +161,57 @@ public:
     TS_ASSERT_EQUALS(p, vv.gsl());
   }
 
+  void test_allocate_double() {
+    FortranDoubleVector v(3);
+    v[1] = 0.1;
+    v[2] = 0.2;
+    v[3] = 0.3;
+    v.allocate(2);
+    TS_ASSERT_EQUALS(v.size(), 2);
+    TS_ASSERT_EQUALS(v(1), 0.1);
+    TS_ASSERT_EQUALS(v(2), 0.2);
+    v.allocate(5);
+    TS_ASSERT_EQUALS(v.size(), 5);
+    TS_ASSERT_EQUALS(v(1), 0.1);
+    TS_ASSERT_EQUALS(v(2), 0.2);
+
+    v.allocate(2, 5);
+    TS_ASSERT_EQUALS(v.size(), 4);
+    TS_ASSERT_EQUALS(v(2), 0.1);
+    TS_ASSERT_EQUALS(v(3), 0.2);
+  }
+
+  void test_allocate_complex() {
+    FortranComplexVector v(3);
+    v[1] = 0.1;
+    v[2] = 0.2;
+    v[3] = 0.3;
+    v.allocate(2);
+    TS_ASSERT_EQUALS(v.size(), 2);
+    TS_ASSERT_EQUALS(v(1), 0.1);
+    TS_ASSERT_EQUALS(v(2), 0.2);
+    v.allocate(5);
+    TS_ASSERT_EQUALS(v.size(), 5);
+    TS_ASSERT_EQUALS(v(1), 0.1);
+    TS_ASSERT_EQUALS(v(2), 0.2);
+
+    v.allocate(2, 5);
+    TS_ASSERT_EQUALS(v.size(), 4);
+    TS_ASSERT_EQUALS(v(2), 0.1);
+    TS_ASSERT_EQUALS(v(3), 0.2);
+  }
+
+  void test_add_double() {
+    FortranDoubleVector v(3);
+    v[1] = 0.1;
+    v[2] = 0.2;
+    v[3] = 0.3;
+    v += 10;
+    TS_ASSERT_EQUALS(v(1), 10.1);
+    TS_ASSERT_EQUALS(v(2), 10.2);
+    TS_ASSERT_EQUALS(v(3), 10.3);
+  }
+
 };
 
 

@@ -1,14 +1,15 @@
 #include "MantidCurveFitting/Algorithms/CrystalFieldEnergies.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ArrayLengthValidator.h"
 
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
 
 #include <sstream>
 
-using Mantid::CurveFitting::Functions::ComplexFortranMatrix;
-using Mantid::CurveFitting::Functions::DoubleFortranMatrix;
-using Mantid::CurveFitting::Functions::DoubleFortranVector;
-using Mantid::CurveFitting::Functions::sc_crystal_field;
+using Mantid::CurveFitting::ComplexFortranMatrix;
+using Mantid::CurveFitting::DoubleFortranMatrix;
+using Mantid::CurveFitting::DoubleFortranVector;
+using Mantid::CurveFitting::Functions::calculateEigesystem;
 
 namespace Mantid {
 namespace CurveFitting {
@@ -29,23 +30,27 @@ int CrystalFieldEnergies::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CrystalFieldEnergies::category() const {
-  return "TODO: FILL IN A CATEGORY";
+  return "Inelastic";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string CrystalFieldEnergies::summary() const {
-  return "TODO: FILL IN A SUMMARY";
+  return "Calculates crystal field energies and wave functions for rare earth "
+         "ions given the field parameters.";
 }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CrystalFieldEnergies::init() {
+
+  // Input
   declareProperty("Nre", 1,  "A rare earth ion.");
-  declareProperty("Symmetry", 1,  "A symmetry.");
-  declareProperty("Temperature", 1.0,  "Temperature.");
-  //declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("Bmol"), "Bmol.");
-  //declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("Bbext"), "Bext.");
+  auto threeElements =
+      boost::make_shared<Kernel::ArrayLengthValidator<double>>(3);
+  std::vector<double> defaultVector(3, 0);
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("Bmol", defaultVector, threeElements), "Bmol.");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("Bbext", defaultVector, threeElements), "Bext.");
   declareProperty("B20", 0.0,  "B20.");
   declareProperty("B21", 0.0,  "B21.");
   declareProperty("B22", 0.0,  "B22.");
@@ -65,6 +70,7 @@ void CrystalFieldEnergies::init() {
   // Output
   declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("Energies", Kernel::Direction::Output), "Energies.");
   declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("Eigenvectors", Kernel::Direction::Output), "The eigenvectors.");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("Hamiltonian", Kernel::Direction::Output), "The Hamiltonian.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -72,11 +78,10 @@ void CrystalFieldEnergies::init() {
  */
 void CrystalFieldEnergies::exec() {
   int nre = getProperty("Nre");
-  int symmetry = getProperty("Symmetry");
-  double temp = getProperty("Temperature");
-  const DoubleFortranMatrix sbkq(0,6, 0,6);
 
   DoubleFortranVector bmol(1, 3);
+  std::vector<double> bmolProp = getProperty("Bmol");
+
   DoubleFortranVector bext(1, 3);
 
   double B20 = getProperty("B20");
@@ -112,20 +117,14 @@ void CrystalFieldEnergies::exec() {
   bkq(6, 5) = B65;
   bkq(6, 6) = B66;
 
-  GSLVector en;
-  ComplexMatrix wf;
-  std::tie(en, wf) = sc_crystal_field(nre, "", symmetry, sbkq, bmol, bext, bkq, temp);
-
-  //std::cerr << "Energies:" << std::endl;
-  //std::cerr << en << std::endl;
-  //std::cerr << "Wavefunctions:" << std::endl;
-  //std::cerr << wf<< std::endl;
-
-  //ComplexMatrix I = wf.ctr() * wf;
-  //std::cerr << I << std::endl;
+  DoubleFortranVector en;
+  ComplexFortranMatrix wf;
+  ComplexFortranMatrix ham;
+  calculateEigesystem(en, wf, ham, nre, bmol, bext, bkq);
 
   setProperty("Energies", en.toStdVector());
   setProperty("Eigenvectors", wf.packToStdVector());
+  setProperty("Hamiltonian", ham.packToStdVector());
 
 }
 

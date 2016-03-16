@@ -154,6 +154,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/CostFunctions/CostFuncUnweightedLeastSquares.h
 	inc/MantidCurveFitting/DllConfig.h
 	inc/MantidCurveFitting/FitMW.h
+	inc/MantidCurveFitting/FortranDefs.h
 	inc/MantidCurveFitting/FortranMatrix.h
 	inc/MantidCurveFitting/FortranVector.h
 	inc/MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h

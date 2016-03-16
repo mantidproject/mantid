@@ -75,6 +75,13 @@ ComplexMatrix &ComplexMatrix::operator=(const ComplexMatrix &M) {
   return *this;
 }
 
+/// Copy assignment operator
+ComplexMatrix &ComplexMatrix::operator=(const gsl_matrix_complex *gslMatrix) {
+  resize(gslMatrix->size1, gslMatrix->size2);
+  gsl_matrix_complex_memcpy(m_matrix, gslMatrix);
+  return *this;
+}
+
 /// Is matrix empty
 bool ComplexMatrix::isEmpty() const { return m_matrix == nullptr; }
 
@@ -82,6 +89,9 @@ bool ComplexMatrix::isEmpty() const { return m_matrix == nullptr; }
 /// @param nx :: New first dimension
 /// @param ny :: New second dimension
 void ComplexMatrix::resize(const size_t nx, const size_t ny) {
+  if (nx == size1() && ny == size2()) {
+    return;
+  }
   if (m_matrix) {
     gsl_matrix_complex_free(m_matrix);
   }
@@ -276,6 +286,8 @@ void ComplexMatrix::eigenSystemHermitian(GSLVector &eigenValues,
   eigenValues.resize(n);
   eigenVectors.resize(n, n);
   auto workspace = gsl_eigen_hermv_alloc(n);
+  // RT: I think there is a bug in this function. It returns garbage in 
+  // eigenvectors in a repeated call.
   gsl_eigen_hermv(gsl(), eigenValues.gsl(), eigenVectors.gsl(), workspace);
   gsl_eigen_hermv_free(workspace);
 }
@@ -336,6 +348,25 @@ std::vector<double> ComplexMatrix::packToStdVector() const {
   }
   return packed;
 }
+
+/// Unpack an std vector into this matrix. Matrix size must match the size
+/// of the vector
+/// @param packed :: A vector with complex data packed with ComplexMatrix::packToStdVector().
+void ComplexMatrix::unpackFromStdVector(const std::vector<double>& packed) {
+  const size_t n1 = size1();
+  const size_t n2 = size2();
+  if (2 * n1 * n2 != packed.size()) {
+    throw std::runtime_error("Cannot unpack vector into ComplexMatrix: size mismatch.");
+  }
+  for (size_t i = 0; i < n1; ++i) {
+    for (size_t j = 0; j < n2; ++j) {
+      auto k = 2 * (i * n2 + j);
+      ComplexType value(packed[k], packed[k + 1]);
+      set(i, j, value);
+    }
+  }
+}
+
 
 } // namespace CurveFitting
 } // namespace Mantid
