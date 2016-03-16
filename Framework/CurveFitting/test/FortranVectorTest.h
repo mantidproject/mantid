@@ -7,7 +7,6 @@
 #include "MantidCurveFitting/GSLVector.h"
 #include "MantidCurveFitting/ComplexVector.h"
 
-
 using Mantid::CurveFitting::FortranVector;
 using Mantid::CurveFitting::ComplexType;
 typedef FortranVector<Mantid::CurveFitting::GSLVector> FortranDoubleVector;
@@ -18,10 +17,9 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static FortranVectorTest *createSuite() { return new FortranVectorTest(); }
-  static void destroySuite( FortranVectorTest *suite ) { delete suite; }
+  static void destroySuite(FortranVectorTest *suite) { delete suite; }
 
-  void test_double_c_indexing()
-  {
+  void test_double_c_indexing() {
     FortranDoubleVector v(3);
     v[1] = 1;
     v[2] = 2;
@@ -36,8 +34,7 @@ public:
     TS_ASSERT_EQUALS(v.get(2), 3);
   }
 
-  void test_double_fortran_indexing()
-  {
+  void test_double_fortran_indexing() {
     FortranDoubleVector v(-1, 1);
     v[-1] = 1;
     v[0] = 2;
@@ -72,9 +69,7 @@ public:
     TS_ASSERT_EQUALS(v.get(2), 33);
   }
 
-
-  void test_complex_c_indexing()
-  {
+  void test_complex_c_indexing() {
     ComplexType v1{1, 0.1};
     ComplexType v2{2, 0.2};
     ComplexType v3{3, 0.3};
@@ -97,8 +92,7 @@ public:
     TS_ASSERT_EQUALS(v.get(2), v3);
   }
 
-  void test_complex_fortran_indexing()
-  {
+  void test_complex_fortran_indexing() {
     ComplexType v1{1, 0.1};
     ComplexType v2{2, 0.2};
     ComplexType v3{3, 0.3};
@@ -211,8 +205,6 @@ public:
     TS_ASSERT_EQUALS(v(2), 10.2);
     TS_ASSERT_EQUALS(v(3), 10.3);
   }
-
 };
-
 
 #endif /* MANTID_CURVEFITTING_FORTRANVECTORTEST_H_ */

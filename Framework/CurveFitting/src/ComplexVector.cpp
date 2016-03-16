@@ -13,14 +13,10 @@ namespace Mantid {
 namespace CurveFitting {
 
 /// Constructor
-ComplexVector::ComplexVector(){
-  m_vector = gsl_vector_complex_alloc(1);
-}
+ComplexVector::ComplexVector() { m_vector = gsl_vector_complex_alloc(1); }
 
 /// Destructor
-ComplexVector::~ComplexVector(){
-  gsl_vector_complex_free(m_vector);
-}
+ComplexVector::~ComplexVector() { gsl_vector_complex_free(m_vector); }
 
 /// Constructor
 /// @param n :: The length of the vector.
@@ -70,7 +66,7 @@ void ComplexVector::resize(const size_t n) {
   auto oldVector = m_vector;
   m_vector = gsl_vector_complex_alloc(n);
   size_t m = oldVector->size < n ? oldVector->size : n;
-  for(size_t i = 0; i < m; ++i) {
+  for (size_t i = 0; i < m; ++i) {
     gsl_vector_complex_set(m_vector, i, gsl_vector_complex_get(oldVector, i));
   }
   gsl_vector_complex_free(oldVector);
@@ -89,7 +85,8 @@ void ComplexVector::set(size_t i, const ComplexType &value) {
   } else {
     std::stringstream errmsg;
     errmsg << "ComplexVector index = " << i
-           << " is out of range = " << m_vector->size << " in ComplexVector.set()";
+           << " is out of range = " << m_vector->size
+           << " in ComplexVector.set()";
     throw std::out_of_range(errmsg.str());
   }
 }
@@ -102,7 +99,8 @@ ComplexType ComplexVector::get(size_t i) const {
   }
 
   std::stringstream errmsg;
-  errmsg << "ComplexVector index = " << i << " is out of range = " << m_vector->size
+  errmsg << "ComplexVector index = " << i
+         << " is out of range = " << m_vector->size
          << " in ComplexVector.get()";
   throw std::out_of_range(errmsg.str());
 }
@@ -154,7 +152,6 @@ std::ostream &operator<<(std::ostream &ostr, const ComplexVector &v) {
   ostr.flags(fflags);
   return ostr;
 }
-
 
 } // namespace CurveFitting
 } // namespace Mantid

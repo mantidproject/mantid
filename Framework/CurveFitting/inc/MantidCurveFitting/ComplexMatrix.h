@@ -28,7 +28,7 @@ struct ComplexMatrixValueConverter {
   ComplexMatrixValueConverter(ComplexMatrix &vector, size_t i, size_t j)
       : m_matrix(vector), m_index1(i), m_index2(j) {}
   operator ComplexType() const;
-  ComplexMatrixValueConverter& operator=(const ComplexType& c);
+  ComplexMatrixValueConverter &operator=(const ComplexType &c);
 };
 
 // Complex matrix conjugate transpose helper
@@ -185,7 +185,8 @@ public:
   ComplexType get(size_t i, size_t j) const;
   /// Get a "const reference" to an element.
   const ComplexMatrixValueConverter operator()(size_t i, size_t j) const {
-    return ComplexMatrixValueConverter(const_cast<ComplexMatrix&>(*this), i, j);
+    return ComplexMatrixValueConverter(const_cast<ComplexMatrix &>(*this), i,
+                                       j);
   }
   /// Get a "reference" to an element.
   ComplexMatrixValueConverter operator()(size_t i, size_t j) {
@@ -218,7 +219,7 @@ public:
   /// Copy a column into a GSLVector
   ComplexVector copyColumn(size_t i) const;
   /// Sort columns in order defined by an index array
-  void sortColumns(const std::vector<size_t>& indices) ;
+  void sortColumns(const std::vector<size_t> &indices);
 
   /// Solve system of linear equations M*x == rhs, M is this matrix
   /// This matrix is destroyed.
@@ -237,12 +238,13 @@ public:
   Tr<ComplexMatrix> tr() { return Tr<ComplexMatrix>(*this); }
   /// Get "conjugate transposed" matrix to be used in multiplications
   CTr ctr() { return CTr(*this); }
-  /// Pack the matrix into a single std vector of doubles (for passing in and out
+  /// Pack the matrix into a single std vector of doubles (for passing in and
+  /// out
   /// of algorithms)
   std::vector<double> packToStdVector() const;
   /// Unpack an std vector into this matrix. Matrix size must match the size
   /// of the vector
-  void unpackFromStdVector(const std::vector<double>& v);
+  void unpackFromStdVector(const std::vector<double> &v);
 
 protected:
   /// Type of the matrix elements.
@@ -256,7 +258,6 @@ private:
   ComplexMatrix(gsl_matrix_complex *&&gslMatrix);
   /// The pointer to the GSL matrix
   gsl_matrix_complex *m_matrix;
-
 };
 
 /// Overloaded operator for matrix multiplication
@@ -389,7 +390,8 @@ inline std::ostream &operator<<(std::ostream &ostr, const ComplexMatrix &m) {
   for (size_t i = 0; i < m.size1(); ++i) {
     for (size_t j = 0; j < m.size2(); ++j) {
       auto value = m.get(i, j);
-      ostr << std::setw(28) << std::setprecision(13) << value.real() << "+" << value.imag() << "j ";
+      ostr << std::setw(28) << std::setprecision(13) << value.real() << "+"
+           << value.imag() << "j ";
     }
     ostr << std::endl;
   }
@@ -403,48 +405,57 @@ inline ComplexMatrixValueConverter::operator ComplexType() const {
 }
 
 /// Convert a value of ComplexType to the internal complex value (GSL type).
-inline ComplexMatrixValueConverter& ComplexMatrixValueConverter::operator=(const ComplexType& c) {
+inline ComplexMatrixValueConverter &ComplexMatrixValueConverter::
+operator=(const ComplexType &c) {
   m_matrix.set(m_index1, m_index2, c);
   return *this;
 }
 
 /// Equality operator
-inline bool operator==(const ComplexType& c, const ComplexMatrixValueConverter& conv) {
+inline bool operator==(const ComplexType &c,
+                       const ComplexMatrixValueConverter &conv) {
   return c == static_cast<ComplexType>(conv);
 }
 
 /// Equality operator
-inline bool operator==(const ComplexMatrixValueConverter& conv, const ComplexType& c) {
+inline bool operator==(const ComplexMatrixValueConverter &conv,
+                       const ComplexType &c) {
   return c == static_cast<ComplexType>(conv);
 }
 
 /// Inequality operator
-inline bool operator!=(const ComplexType& c, const ComplexMatrixValueConverter& conv) {
+inline bool operator!=(const ComplexType &c,
+                       const ComplexMatrixValueConverter &conv) {
   return c != static_cast<ComplexType>(conv);
 }
 
 /// Inequality operator
-inline bool operator!=(const ComplexMatrixValueConverter& conv, const ComplexType& c) {
+inline bool operator!=(const ComplexMatrixValueConverter &conv,
+                       const ComplexType &c) {
   return c != static_cast<ComplexType>(conv);
 }
 
 /// Plus operator
-inline ComplexType operator+(const ComplexMatrixValueConverter& conv, const ComplexType& c) {
+inline ComplexType operator+(const ComplexMatrixValueConverter &conv,
+                             const ComplexType &c) {
   return static_cast<ComplexType>(conv) + c;
 }
 
 /// Minus operator
-inline ComplexType operator-(const ComplexMatrixValueConverter& conv, const ComplexType& c) {
+inline ComplexType operator-(const ComplexMatrixValueConverter &conv,
+                             const ComplexType &c) {
   return static_cast<ComplexType>(conv) - c;
 }
 
 /// Multiplication operator
-inline ComplexType operator*(const ComplexMatrixValueConverter& conv, const ComplexType& c) {
+inline ComplexType operator*(const ComplexMatrixValueConverter &conv,
+                             const ComplexType &c) {
   return static_cast<ComplexType>(conv) * c;
 }
 
 /// Division operator
-inline ComplexType operator/(const ComplexMatrixValueConverter& conv, const ComplexType& c) {
+inline ComplexType operator/(const ComplexMatrixValueConverter &conv,
+                             const ComplexType &c) {
   return static_cast<ComplexType>(conv) / c;
 }
 

@@ -30,7 +30,8 @@ namespace CurveFitting {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_CURVEFITTING_DLL CrystalFieldEnergies final : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL CrystalFieldEnergies final
+    : public API::Algorithm {
 public:
   const std::string name() const final;
   int version() const final;

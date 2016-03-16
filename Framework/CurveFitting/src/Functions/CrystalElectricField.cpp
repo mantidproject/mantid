@@ -41,44 +41,27 @@ const std::array<double, maxNre> ddimj = {
 //            appendix B, table 20, page 874-875
 //
 const std::array<double, maxNre> aalphaj = {
-    -1.0 * 2 / 5 / 7,
-    -1.0 * 2 * 2 * 13 / 3 / 3 / 5 / 5 / 11,
-    -1.0 * 7 / 3 / 3 / 11 / 11,
-    1.0 * 2 * 7 / 3 / 5 / 11 / 11,
-    1.0 * 13 / 3 / 3 / 5 / 7,
-    1.0 * 0,
-    1.0 * 0,
-    -1.0 * 1 / 3 / 3 / 11,
-    -1.0 * 2 / 3 / 3 / 5 / 7,
-    -1.0 * 1 / 2 / 3 / 3 / 5 / 5,
-    1.0 * 2 * 2 / 3 / 3 / 5 / 5 / 7,
-    1.0 * 1 / 3 / 3 / 11,
-    1.0 * 2 / 3 / 3 / 7};
+    -1.0 * 2 / 5 / 7, -1.0 * 2 * 2 * 13 / 3 / 3 / 5 / 5 / 11,
+    -1.0 * 7 / 3 / 3 / 11 / 11, 1.0 * 2 * 7 / 3 / 5 / 11 / 11,
+    1.0 * 13 / 3 / 3 / 5 / 7, 1.0 * 0, 1.0 * 0, -1.0 * 1 / 3 / 3 / 11,
+    -1.0 * 2 / 3 / 3 / 5 / 7, -1.0 * 1 / 2 / 3 / 3 / 5 / 5,
+    1.0 * 2 * 2 / 3 / 3 / 5 / 5 / 7, 1.0 * 1 / 3 / 3 / 11, 1.0 * 2 / 3 / 3 / 7};
 
 const std::array<double, maxNre> bbetaj = {
-    1.0 * 2 / 3 / 3 / 5 / 7,
-    -1.0 * 2 * 2 / 3 / 3 / 5 / 11 / 11,
+    1.0 * 2 / 3 / 3 / 5 / 7, -1.0 * 2 * 2 / 3 / 3 / 5 / 11 / 11,
     -1.0 * 2 * 2 * 2 * 17 / 3 / 3 / 3 / 11 / 11 / 11 / 13,
     1.0 * 2 * 2 * 2 * 7 * 17 / 3 / 3 / 3 / 5 / 11 / 11 / 11 / 13,
-    1.0 * 2 * 13 / 3 / 3 / 3 / 5 / 7 / 11,
-    1.0 * 0,
-    1.0 * 0,
+    1.0 * 2 * 13 / 3 / 3 / 3 / 5 / 7 / 11, 1.0 * 0, 1.0 * 0,
     1.0 * 2 / 3 / 3 / 3 / 5 / 11 / 11,
     -1.0 * 2 * 2 * 2 / 3 / 3 / 3 / 5 / 7 / 11 / 13,
-    -1.0 * 1 / 2 / 3 / 5 / 7 / 11 / 13,
-    1.0 * 2 / 3 / 3 / 5 / 7 / 11 / 13,
-    1.0 * 2 * 2 * 2 / 3 / 3 / 3 / 3 / 5 / 11 / 11,
-    -1.0 * 2 / 3 / 5 / 7 / 11};
+    -1.0 * 1 / 2 / 3 / 5 / 7 / 11 / 13, 1.0 * 2 / 3 / 3 / 5 / 7 / 11 / 13,
+    1.0 * 2 * 2 * 2 / 3 / 3 / 3 / 3 / 5 / 11 / 11, -1.0 * 2 / 3 / 5 / 7 / 11};
 
 const std::array<double, maxNre> ggammaj = {
-    1.0 * 0,
-    1.0 * 2 * 2 * 2 * 2 * 17 / 3 / 3 / 3 / 3 / 5 / 7 / 11 / 11 / 13,
+    1.0 * 0, 1.0 * 2 * 2 * 2 * 2 * 17 / 3 / 3 / 3 / 3 / 5 / 7 / 11 / 11 / 13,
     -1.0 * 5 * 17 * 19 / 3 / 3 / 3 / 7 / 11 / 11 / 11 / 13 / 13,
-    1.0 * 2 * 2 * 2 * 17 * 19 / 3 / 3 / 3 / 7 / 11 / 11 / 11 / 13 / 13,
-    1.0 * 0,
-    1.0 * 0,
-    1.0 * 0,
-    -1.0 * 1 / 3 / 3 / 3 / 3 / 7 / 11 / 11 / 13,
+    1.0 * 2 * 2 * 2 * 17 * 19 / 3 / 3 / 3 / 7 / 11 / 11 / 11 / 13 / 13, 1.0 * 0,
+    1.0 * 0, 1.0 * 0, -1.0 * 1 / 3 / 3 / 3 / 3 / 7 / 11 / 11 / 13,
     1.0 * 2 * 2 / 3 / 3 / 3 / 7 / 11 / 11 / 13 / 13,
     -1.0 * 5 / 3 / 3 / 3 / 7 / 11 / 11 / 13 / 13,
     1.0 * 2 * 2 * 2 / 3 / 3 / 3 / 7 / 11 / 11 / 13 / 13,
@@ -658,7 +641,8 @@ double c_occupation_factor(const DoubleFortranVector &energy, double dimj,
 } // anonymous namespace
 
 /// Calculate eigenvalues and eigenvectors of the crystal field hamiltonian.
-/// @param eigenvalues :: Output. The eigenvalues in ascending order. The smallest
+/// @param eigenvalues :: Output. The eigenvalues in ascending order. The
+/// smallest
 ///   value is subtracted from all eigenvalues so they always start with 0.
 /// @param eigenvectors :: Output. The matrix of eigenvectors. The eigenvectors
 ///    are in columns with indices corresponding to the indices of eigenvalues.
@@ -730,9 +714,8 @@ void calculateEigesystem(DoubleFortranVector &eigenvalues,
       for (int qs = -k; qs <= k; ++qs) { // do qs=-k,k
         rdkq_star(k, q) =
             rdkq_star(k, q) +
-            dkq_star(k, qs) * 
-                epsilon(k, qs) / epsilon(k, q) * 
-                omega(k, qs) / omega(k, q) *
+            dkq_star(k, qs) * epsilon(k, qs) / epsilon(k, q) * omega(k, qs) /
+                omega(k, q) *
                 ddrot(k, q, qs, alpha_euler, beta_euler, gamma_euler);
       }
     }

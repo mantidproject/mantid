@@ -23,7 +23,7 @@ struct ComplexVectorValueConverter {
   ComplexVectorValueConverter(ComplexVector &vector, size_t i)
       : m_vector(vector), m_index(i) {}
   operator ComplexType() const;
-  ComplexVectorValueConverter& operator=(const ComplexType& c);
+  ComplexVectorValueConverter &operator=(const ComplexType &c);
 };
 
 /**
@@ -83,7 +83,7 @@ public:
   void zero();
   /// Get a "const reference" to an element.
   const ComplexVectorValueConverter operator[](size_t i) const {
-    return ComplexVectorValueConverter(const_cast<ComplexVector&>(*this), i);
+    return ComplexVectorValueConverter(const_cast<ComplexVector &>(*this), i);
   }
   /// Get a "reference" to an element.
   ComplexVectorValueConverter operator[](size_t i) {
@@ -117,28 +117,33 @@ inline ComplexVectorValueConverter::operator ComplexType() const {
 }
 
 /// Convert a value of ComplexType to the internal complex value (GSL type).
-inline ComplexVectorValueConverter& ComplexVectorValueConverter::operator=(const ComplexType& c) {
+inline ComplexVectorValueConverter &ComplexVectorValueConverter::
+operator=(const ComplexType &c) {
   m_vector.set(m_index, c);
   return *this;
 }
 
 /// Equality operator
-inline bool operator==(const ComplexType& c, const ComplexVectorValueConverter& conv) {
+inline bool operator==(const ComplexType &c,
+                       const ComplexVectorValueConverter &conv) {
   return c == static_cast<ComplexType>(conv);
 }
 
 /// Equality operator
-inline bool operator==(const ComplexVectorValueConverter& conv, const ComplexType& c) {
+inline bool operator==(const ComplexVectorValueConverter &conv,
+                       const ComplexType &c) {
   return c == static_cast<ComplexType>(conv);
 }
 
 /// Multiplication operator
-inline ComplexType operator*(const ComplexVectorValueConverter& conv, const ComplexType& c) {
+inline ComplexType operator*(const ComplexVectorValueConverter &conv,
+                             const ComplexType &c) {
   return static_cast<ComplexType>(conv) * c;
 }
 
 /// Multiplication operator
-inline ComplexType operator*(const ComplexType& c, const ComplexVectorValueConverter& conv) {
+inline ComplexType operator*(const ComplexType &c,
+                             const ComplexVectorValueConverter &conv) {
   return c * static_cast<ComplexType>(conv);
 }
 

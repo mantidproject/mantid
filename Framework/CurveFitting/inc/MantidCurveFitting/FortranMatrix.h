@@ -99,7 +99,7 @@ FortranMatrix<MatrixClass>::FortranMatrix(const FortranMatrix &M)
 /// @param jLast :: Highest value for the second index
 template <class MatrixClass>
 FortranMatrix<MatrixClass>::FortranMatrix(const int iFirst, const int iLast,
-                             const int jFirst, const int jLast)
+                                          const int jFirst, const int jLast)
     : MatrixClass(makeSize(iFirst, iLast), makeSize(jFirst, jLast)),
       m_base1(iFirst), m_base2(jFirst) {}
 
@@ -109,7 +109,8 @@ FortranMatrix<MatrixClass>::FortranMatrix(const int iFirst, const int iLast,
 /// @param jFirst :: Lowest value for the second index
 /// @param jLast :: Highest value for the second index
 template <class MatrixClass>
-void FortranMatrix<MatrixClass>::allocate(const int iFrom, const int iTo, const int jFrom, const int jTo) {
+void FortranMatrix<MatrixClass>::allocate(const int iFrom, const int iTo,
+                                          const int jFrom, const int jTo) {
   m_base1 = iFrom;
   m_base2 = jFrom;
   resize(makeSize(iFrom, iTo), makeSize(jFrom, jTo));
@@ -127,14 +128,18 @@ void FortranMatrix<MatrixClass>::allocate(const int nx, const int ny) {
 
 /// The "index" operator
 template <class MatrixClass>
-typename MatrixClass::ElementConstType FortranMatrix<MatrixClass>::operator()(int i, int j) const {
-  return this->MatrixClass::operator()(static_cast<size_t>(i - m_base1), static_cast<size_t>(j - m_base2));
+typename MatrixClass::ElementConstType FortranMatrix<MatrixClass>::
+operator()(int i, int j) const {
+  return this->MatrixClass::operator()(static_cast<size_t>(i - m_base1),
+                                       static_cast<size_t>(j - m_base2));
 }
 
 /// Get the reference to the data element
 template <class MatrixClass>
-typename MatrixClass::ElementRefType FortranMatrix<MatrixClass>::operator()(int i, int j) {
-  return this->MatrixClass::operator()(static_cast<size_t>(i - m_base1), static_cast<size_t>(j - m_base2));
+typename MatrixClass::ElementRefType FortranMatrix<MatrixClass>::
+operator()(int i, int j) {
+  return this->MatrixClass::operator()(static_cast<size_t>(i - m_base1),
+                                       static_cast<size_t>(j - m_base2));
 }
 
 /// Move the data to a new matrix of MatrixClass

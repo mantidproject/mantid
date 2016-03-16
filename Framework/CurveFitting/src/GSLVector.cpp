@@ -137,7 +137,7 @@ GSLVector &GSLVector::operator-=(const GSLVector &v) {
 /// Multiply by a number
 /// @param d :: The number
 GSLVector &GSLVector::operator*=(const double d) {
-  for(auto &x : m_data) {
+  for (auto &x : m_data) {
     x *= d;
   }
   return *this;
@@ -146,7 +146,7 @@ GSLVector &GSLVector::operator*=(const double d) {
 /// Add a number
 /// @param d :: The number
 GSLVector &GSLVector::operator+=(const double d) {
-  for(auto &x : m_data) {
+  for (auto &x : m_data) {
     x += d;
   }
   return *this;
@@ -202,15 +202,15 @@ size_t GSLVector::indexOfMinElement() const {
 ///     sort in descending order.
 std::vector<size_t> GSLVector::sortIndices(bool ascending) const {
   std::vector<size_t> indices(size());
-  for(size_t i = 0; i < size(); ++i) {
+  for (size_t i = 0; i < size(); ++i) {
     indices[i] = i;
   }
   if (ascending) {
-    std::sort(indices.begin(), indices.end(), [this](size_t i, size_t j){
+    std::sort(indices.begin(), indices.end(), [this](size_t i, size_t j) {
       return this->m_data[i] < m_data[j];
     });
   } else {
-    std::sort(indices.begin(), indices.end(), [this](size_t i, size_t j){
+    std::sort(indices.begin(), indices.end(), [this](size_t i, size_t j) {
       return this->m_data[i] > m_data[j];
     });
   }
@@ -219,23 +219,19 @@ std::vector<size_t> GSLVector::sortIndices(bool ascending) const {
 
 /// Sort this vector in order defined by an index array
 /// @param indices :: Indices defining the order of elements in sorted vector.
-void GSLVector::sort(const std::vector<size_t>& indices) {
+void GSLVector::sort(const std::vector<size_t> &indices) {
   std::vector<double> data(size());
-  for(size_t i = 0; i < size(); ++i) {
+  for (size_t i = 0; i < size(); ++i) {
     data[i] = m_data[indices[i]];
   }
   std::swap(m_data, data);
 }
 
 /// Create a new GSLVector and move all data to it. Destroys this vector.
-GSLVector GSLVector::move() {
-  return GSLVector(std::move(m_data));
-}
+GSLVector GSLVector::move() { return GSLVector(std::move(m_data)); }
 
 /// Copy the values to an std vector of doubles
-std::vector<double> GSLVector::toStdVector() const {
-  return m_data;
-}
+std::vector<double> GSLVector::toStdVector() const { return m_data; }
 
 /// The << operator.
 std::ostream &operator<<(std::ostream &ostr, const GSLVector &v) {

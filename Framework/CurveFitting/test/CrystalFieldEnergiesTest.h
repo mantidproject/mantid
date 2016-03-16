@@ -19,20 +19,19 @@ class CrystalFieldEnergiesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CrystalFieldEnergiesTest *createSuite() { return new CrystalFieldEnergiesTest(); }
-  static void destroySuite( CrystalFieldEnergiesTest *suite ) { delete suite; }
+  static CrystalFieldEnergiesTest *createSuite() {
+    return new CrystalFieldEnergiesTest();
+  }
+  static void destroySuite(CrystalFieldEnergiesTest *suite) { delete suite; }
 
-
-  void test_Init()
-  {
+  void test_Init() {
     CrystalFieldEnergies alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
   }
 
-  void test_C2v()
-  {
-    std::map<std::string,double> bkq;
+  void test_C2v() {
+    std::map<std::string, double> bkq;
     bkq["B20"] = 0.3365;
     bkq["B22"] = 7.4851;
     bkq["B40"] = 0.4062;
@@ -46,9 +45,8 @@ public:
     doTestEigensystem(evalues, evectors, hamiltonian);
   }
 
-  void test_C2()
-  {
-    std::map<std::string,double> bkq;
+  void test_C2() {
+    std::map<std::string, double> bkq;
     bkq["IB20"] = 0.3365;
     bkq["B22"] = 7.4851;
     bkq["B40"] = 0.4062;
@@ -62,9 +60,8 @@ public:
     doTestEigensystem(evalues, evectors, hamiltonian);
   }
 
-  void test_Ci()
-  {
-    std::map<std::string,double> bkq;
+  void test_Ci() {
+    std::map<std::string, double> bkq;
     bkq["B20"] = 0.3365;
     bkq["B21"] = 2.0;
     bkq["IB22"] = 7.4851;
@@ -81,9 +78,8 @@ public:
     doTestEigensystem(evalues, evectors, hamiltonian);
   }
 
-  void test_C4()
-  {
-    std::map<std::string,double> bkq;
+  void test_C4() {
+    std::map<std::string, double> bkq;
     bkq["B20"] = 0.3365;
     bkq["B40"] = 7.4851;
     bkq["B44"] = 0.4062;
@@ -97,9 +93,8 @@ public:
     doTestEigensystem(evalues, evectors, hamiltonian);
   }
 
-  void test_D4()
-  {
-    std::map<std::string,double> bkq;
+  void test_D4() {
+    std::map<std::string, double> bkq;
     bkq["B20"] = 0.3365;
     bkq["B40"] = 7.4851;
     bkq["B44"] = 0.4062;
@@ -113,15 +108,14 @@ public:
     doTestEigensystem(evalues, evectors, hamiltonian);
   }
 
-  void test_C3()
-  {
-    std::map<std::string,double> bkq;
+  void test_C3() {
+    std::map<std::string, double> bkq;
     bkq["B20"] = 0.3365;
     bkq["B40"] = 7.4851;
     bkq["B43"] = 0.4062;
     bkq["B60"] = -3.8296;
     bkq["IB63"] = -2.3210;
-    bkq["IB66"] =  3.2310;
+    bkq["IB66"] = 3.2310;
 
     GSLVector evalues;
     ComplexMatrix evectors;
@@ -130,15 +124,14 @@ public:
     doTestEigensystem(evalues, evectors, hamiltonian);
   }
 
-  void test_D3()
-  {
-    std::map<std::string,double> bkq;
+  void test_D3() {
+    std::map<std::string, double> bkq;
     bkq["B20"] = 0.3365;
     bkq["B40"] = 7.4851;
     bkq["B43"] = 0.4062;
     bkq["B60"] = -3.8296;
     bkq["B63"] = -2.3210;
-    bkq["B66"] =  3.2310;
+    bkq["B66"] = 3.2310;
 
     GSLVector evalues;
     ComplexMatrix evectors;
@@ -147,9 +140,8 @@ public:
     doTestEigensystem(evalues, evectors, hamiltonian);
   }
 
-  void test_C6()
-  {
-    std::map<std::string,double> bkq;
+  void test_C6() {
+    std::map<std::string, double> bkq;
     bkq["B20"] = 0.3365;
     bkq["B40"] = 7.4851;
     bkq["B60"] = -3.8296;
@@ -162,9 +154,8 @@ public:
     doTestEigensystem(evalues, evectors, hamiltonian);
   }
 
-  void test_T()
-  {
-    std::map<std::string,double> bkq;
+  void test_T() {
+    std::map<std::string, double> bkq;
     bkq["B40"] = 0.3365;
     bkq["B44"] = 5 * bkq["B40"];
     bkq["B60"] = -3.8296;
@@ -177,9 +168,8 @@ public:
     doTestEigensystem(evalues, evectors, hamiltonian);
   }
 
-  void test_C2v_mol()
-  {
-    std::map<std::string,double> bkq;
+  void test_C2v_mol() {
+    std::map<std::string, double> bkq;
     bkq["B20"] = 0.3365;
     bkq["B22"] = 7.4851;
     bkq["B40"] = 0.4062;
@@ -196,9 +186,8 @@ public:
     doTestEigensystem(evalues, evectors, hamiltonian);
   }
 
-  void test_C2v_ext()
-  {
-    std::map<std::string,double> bkq;
+  void test_C2v_ext() {
+    std::map<std::string, double> bkq;
     bkq["B20"] = 0.3365;
     bkq["B22"] = 7.4851;
     bkq["B40"] = 0.4062;
@@ -215,9 +204,8 @@ public:
     doTestEigensystem(evalues, evectors, hamiltonian);
   }
 
-  void test_C2v_mol_ext()
-  {
-    std::map<std::string,double> bkq;
+  void test_C2v_mol_ext() {
+    std::map<std::string, double> bkq;
     bkq["B20"] = 0.3365;
     bkq["B22"] = 7.4851;
     bkq["B40"] = 0.4062;
@@ -242,17 +230,18 @@ private:
            ComplexMatrix &hamiltonian) {
     CrystalFieldEnergies alg;
     alg.setChild(true);
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Nre", nre) );
-    for(auto b = bkq.begin(); b != bkq.end(); ++b) {
-      TS_ASSERT_THROWS_NOTHING( alg.setProperty(b->first, b->second) );
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Nre", nre));
+    for (auto b = bkq.begin(); b != bkq.end(); ++b) {
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(b->first, b->second));
     }
-    for(auto b = bme.begin(); b != bme.end(); ++b) {
-      TS_ASSERT_THROWS_NOTHING( alg.setProperty(b->first, b->second) );
+    for (auto b = bme.begin(); b != bme.end(); ++b) {
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(b->first, b->second));
     }
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    if ( !alg.isExecuted() ) return false;
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    if (!alg.isExecuted())
+      return false;
 
     std::vector<double> ener = alg.getProperty("Energies");
     evalues = ener;
@@ -268,14 +257,14 @@ private:
 
     return true;
   }
-  
-private:
 
+private:
   std::map<std::string, std::vector<double>> emptyBme;
 
   void doTestEigensystem(GSLVector &en, ComplexMatrix &wf, ComplexMatrix &ham) {
     const size_t n = en.size();
-    if (n <= 1) return;
+    if (n <= 1)
+      return;
     TS_ASSERT_DIFFERS(n, 0);
     TS_ASSERT_EQUALS(wf.size1(), n);
     TS_ASSERT_EQUALS(wf.size2(), n);
@@ -286,8 +275,8 @@ private:
     TS_ASSERT_EQUALS(I.size1(), n);
     TS_ASSERT_EQUALS(I.size2(), n);
 
-    for(size_t i = 0; i < I.size1(); ++i) {
-      for(size_t j = 0; j < I.size2(); ++j) {
+    for (size_t i = 0; i < I.size1(); ++i) {
+      for (size_t j = 0; j < I.size2(); ++j) {
         ComplexType value = I(i, j);
         if (i == j) {
           TS_ASSERT_DELTA(value.real(), 1.0, 1e-10);
@@ -304,15 +293,15 @@ private:
     TS_ASSERT_EQUALS(V.size2(), n);
 
     double minValue = 1e100;
-    for(size_t i = 0; i < V.size1(); ++i) {
+    for (size_t i = 0; i < V.size1(); ++i) {
       ComplexType value = V(i, i);
       if (value.real() < minValue) {
         minValue = value.real();
       }
     }
 
-    for(size_t i = 0; i < V.size1(); ++i) {
-      for(size_t j = 0; j < V.size2(); ++j) {
+    for (size_t i = 0; i < V.size1(); ++i) {
+      for (size_t j = 0; j < V.size2(); ++j) {
         ComplexType value = V(i, j);
         if (i == j) {
           value -= minValue;
@@ -325,8 +314,6 @@ private:
       }
     }
   }
-
 };
-
 
 #endif /* MANTID_CURVEFITTING_CRYSTALFIELDENERGIESTEST_H_ */

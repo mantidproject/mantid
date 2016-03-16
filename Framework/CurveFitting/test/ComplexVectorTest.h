@@ -9,16 +9,16 @@
 using namespace Mantid::CurveFitting;
 
 namespace {
-  const ComplexType v10 {5, 0.5};
-  const ComplexType v11 {55, 0.55};
-  const ComplexType v12 {555, 0.555};
+const ComplexType v10{5, 0.5};
+const ComplexType v11{55, 0.55};
+const ComplexType v12{555, 0.555};
 
-  const ComplexType v20 {3, 0.3};
-  const ComplexType v21 {33, 0.33};
-  const ComplexType v22 {333, 0.333};
+const ComplexType v20{3, 0.3};
+const ComplexType v21{33, 0.33};
+const ComplexType v22{333, 0.333};
 
-  const ComplexType v30 {1, 0.1};
-  const ComplexType v31 {11, 0.11};
+const ComplexType v30{1, 0.1};
+const ComplexType v31{11, 0.11};
 }
 
 class ComplexVectorTest : public CxxTest::TestSuite {
@@ -63,7 +63,7 @@ public:
     auto v = makeVector1();
     ComplexVector gv(v);
     gv.zero();
-    ComplexType z(0,0);
+    ComplexType z(0, 0);
     TS_ASSERT_EQUALS(gv.get(0), z);
     TS_ASSERT_EQUALS(gv.get(1), z);
     TS_ASSERT_EQUALS(gv.get(2), z);
@@ -71,7 +71,7 @@ public:
 
   void xtest_set_get() {
     ComplexVector gv(3);
-    ComplexType a(9,0.9), b(7, 0.7), c(3, 0.3);
+    ComplexType a(9, 0.9), b(7, 0.7), c(3, 0.3);
     gv.set(0, a);
     gv.set(1, b);
     gv.set(2, c);

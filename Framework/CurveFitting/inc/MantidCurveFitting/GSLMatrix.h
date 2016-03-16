@@ -19,8 +19,7 @@ namespace CurveFitting {
 class GSLMatrix;
 
 // matrix transpose helper
-template<class M>
-struct Tr {
+template <class M> struct Tr {
   const M &matrix;
   Tr(const M &m) : matrix(m) {}
 };
@@ -140,7 +139,7 @@ public:
   /// The "index" operator
   double operator()(size_t i, size_t j) const;
   /// Get the reference to the data element
-  double& operator()(size_t i, size_t j);
+  double &operator()(size_t i, size_t j);
 
   /// Set this matrix to identity matrix
   void identity();
@@ -179,14 +178,15 @@ public:
   double det();
   /// Calculate the eigensystem of a symmetric matrix
   void eigenSystem(GSLVector &eigenValues, GSLMatrix &eigenVectors);
-  Tr<GSLMatrix> tr() {return Tr<GSLMatrix>(*this);}
+  Tr<GSLMatrix> tr() { return Tr<GSLMatrix>(*this); }
 
 protected:
   /// Type of the matrix elements.
   typedef double ElementConstType;
-  typedef double& ElementRefType;
+  typedef double &ElementRefType;
   /// Create a new matrix and move the data to it.
   GSLMatrix move();
+
 private:
   /// "Move" constructor
   GSLMatrix(std::vector<double> &&data, size_t nx, size_t ny);
@@ -220,7 +220,8 @@ inline GSLMatrixMult2 operator*(const GSLMatrix &m1, const Tr<GSLMatrix> &m2) {
 /// Overloaded operator for matrix multiplication
 /// @param m1 :: First matrix transposed
 /// @param m2 :: Second matrix transposed
-inline GSLMatrixMult2 operator*(const Tr<GSLMatrix> &m1, const Tr<GSLMatrix> &m2) {
+inline GSLMatrixMult2 operator*(const Tr<GSLMatrix> &m1,
+                                const Tr<GSLMatrix> &m2) {
   return GSLMatrixMult2(m1, m2);
 }
 
@@ -244,7 +245,8 @@ inline GSLMatrixMult3 operator*(const GSLMatrixMult2 &mm, const GSLMatrix &m) {
 /// product of two other matrices.
 /// @param m :: A transposed matrix
 /// @param mm :: Product of two matrices
-inline GSLMatrixMult3 operator*(const Tr<GSLMatrix> &m, const GSLMatrixMult2 &mm) {
+inline GSLMatrixMult3 operator*(const Tr<GSLMatrix> &m,
+                                const GSLMatrixMult2 &mm) {
   return GSLMatrixMult3(m, mm);
 }
 
@@ -252,7 +254,8 @@ inline GSLMatrixMult3 operator*(const Tr<GSLMatrix> &m, const GSLMatrixMult2 &mm
 /// product of two other matrices.
 /// @param mm :: Product of two matrices
 /// @param m :: A transposed matrix
-inline GSLMatrixMult3 operator*(const GSLMatrixMult2 &mm, const Tr<GSLMatrix> &m) {
+inline GSLMatrixMult3 operator*(const GSLMatrixMult2 &mm,
+                                const Tr<GSLMatrix> &m) {
   return GSLMatrixMult3(mm, m);
 }
 
@@ -272,16 +275,15 @@ inline std::ostream &operator<<(std::ostream &ostr, const GSLMatrix &m) {
 
 /// The "index" operator
 inline double GSLMatrix::operator()(size_t i, size_t j) const {
-  return const_cast<GSLMatrix&>(*this)(i,j);
+  return const_cast<GSLMatrix &>(*this)(i, j);
 }
 
 /// Get the reference to the data element
-inline double& GSLMatrix::operator()(size_t i, size_t j) {
+inline double &GSLMatrix::operator()(size_t i, size_t j) {
   // This is how it works according to the GSL docs
   // https://www.gnu.org/software/gsl/manual/html_node/Matrix-views.html
-  return m_data[i*m_view.matrix.size2 + j];
+  return m_data[i * m_view.matrix.size2 + j];
 }
-
 
 } // namespace CurveFitting
 } // namespace Mantid

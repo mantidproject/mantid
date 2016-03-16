@@ -26,7 +26,7 @@ public:
     int nre = 1;
     DoubleFortranVector bmol(1, 3);
     DoubleFortranVector bext(1, 3);
-    ComplexFortranMatrix bkq(0,6, 0,6);
+    ComplexFortranMatrix bkq(0, 6, 0, 6);
 
     bkq(2, 0) = 0.3365;
     bkq(2, 2) = 7.4851;
@@ -45,7 +45,7 @@ public:
     int nre = 1;
     DoubleFortranVector bmol(1, 3);
     DoubleFortranVector bext(1, 3);
-    ComplexFortranMatrix bkq(0,6, 0,6);
+    ComplexFortranMatrix bkq(0, 6, 0, 6);
 
     bmol(1) = 10.;
     bkq(2, 0) = 0.3365;
@@ -65,7 +65,7 @@ public:
     int nre = 1;
     DoubleFortranVector bmol(1, 3);
     DoubleFortranVector bext(1, 3);
-    ComplexFortranMatrix bkq(0,6, 0,6);
+    ComplexFortranMatrix bkq(0, 6, 0, 6);
 
     bmol(1) = 10.;
     bkq(2, 0) = 0.3365;
@@ -93,13 +93,14 @@ public:
       doTestEigensystem(en, wf, ham);
       en2 = en;
     }
-    for(size_t i = 1; i < en1.size(); ++i) {
+    for (size_t i = 1; i < en1.size(); ++i) {
       TS_ASSERT_LESS_THAN(1.0, fabs(en1.get(i) - en2.get(i)));
     }
   }
 
 private:
-  void doTestEigensystem(DoubleFortranVector &en, ComplexFortranMatrix &wf, ComplexFortranMatrix &ham) {
+  void doTestEigensystem(DoubleFortranVector &en, ComplexFortranMatrix &wf,
+                         ComplexFortranMatrix &ham) {
     const size_t n = en.size();
     TS_ASSERT_DIFFERS(n, 0);
     TS_ASSERT_EQUALS(wf.size1(), n);
@@ -111,8 +112,8 @@ private:
     TS_ASSERT_EQUALS(I.size1(), n);
     TS_ASSERT_EQUALS(I.size2(), n);
 
-    for(size_t i = 0; i < I.size1(); ++i) {
-      for(size_t j = 0; j < I.size2(); ++j) {
+    for (size_t i = 0; i < I.size1(); ++i) {
+      for (size_t j = 0; j < I.size2(); ++j) {
         ComplexType value = I(i, j);
         if (i == j) {
           TS_ASSERT_DELTA(value.real(), 1.0, 1e-10);
@@ -129,15 +130,15 @@ private:
     TS_ASSERT_EQUALS(V.size2(), n);
 
     double minValue = 1e100;
-    for(size_t i = 0; i < V.size1(); ++i) {
+    for (size_t i = 0; i < V.size1(); ++i) {
       ComplexType value = V(i, i);
       if (value.real() < minValue) {
         minValue = value.real();
       }
     }
 
-    for(size_t i = 0; i < V.size1(); ++i) {
-      for(size_t j = 0; j < V.size2(); ++j) {
+    for (size_t i = 0; i < V.size1(); ++i) {
+      for (size_t j = 0; j < V.size2(); ++j) {
         ComplexType value = V(i, j);
         if (i == j) {
           value -= minValue;

@@ -31,12 +31,14 @@ namespace CurveFitting {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template<class VectorClass>
-class FortranVector : public VectorClass {
+template <class VectorClass> class FortranVector : public VectorClass {
   /// Base for the index
   int m_base;
-  typedef decltype(reinterpret_cast<const VectorClass*>(nullptr)->operator[](0)) ElementConstType;
-  typedef decltype(reinterpret_cast<VectorClass*>(nullptr)->operator[](0)) ElementRefType;
+  typedef decltype(reinterpret_cast<const VectorClass *>(nullptr)->operator[](
+      0)) ElementConstType;
+  typedef decltype(
+      reinterpret_cast<VectorClass *>(nullptr)->operator[](0)) ElementRefType;
+
 public:
   /// Constructor
   FortranVector();
@@ -96,8 +98,7 @@ FortranVector<VectorClass>::FortranVector(const FortranVector &V)
 /// @param iLast :: Highest value for the index
 template <class VectorClass>
 FortranVector<VectorClass>::FortranVector(const int iFirst, const int iLast)
-    : VectorClass(makeSize(iFirst, iLast)),
-      m_base(iFirst) {}
+    : VectorClass(makeSize(iFirst, iLast)), m_base(iFirst) {}
 
 /// Resize the vector. Named this way to mimic the fortran style and to
 /// avoid confusion with resize() method of the base class.
@@ -120,25 +121,31 @@ void FortranVector<VectorClass>::allocate(int newSize) {
 
 /// The "index" operator
 template <class VectorClass>
-typename FortranVector<VectorClass>::ElementConstType FortranVector<VectorClass>::operator()(int i) const {
+typename FortranVector<VectorClass>::ElementConstType
+    FortranVector<VectorClass>::
+    operator()(int i) const {
   return this->VectorClass::operator[](static_cast<size_t>(i - m_base));
 }
 
 /// Get the reference to the data element
 template <class VectorClass>
-typename FortranVector<VectorClass>::ElementRefType FortranVector<VectorClass>::operator()(int i) {
+typename FortranVector<VectorClass>::ElementRefType FortranVector<VectorClass>::
+operator()(int i) {
   return this->VectorClass::operator[](static_cast<size_t>(i - m_base));
 }
 
 /// The "index" operator
 template <class VectorClass>
-typename FortranVector<VectorClass>::ElementConstType FortranVector<VectorClass>::operator[](int i) const {
+typename FortranVector<VectorClass>::ElementConstType
+    FortranVector<VectorClass>::
+    operator[](int i) const {
   return this->operator()(i);
 }
 
 /// Get the reference to the data element
 template <class VectorClass>
-typename FortranVector<VectorClass>::ElementRefType FortranVector<VectorClass>::operator[](int i) {
+typename FortranVector<VectorClass>::ElementRefType FortranVector<VectorClass>::
+operator[](int i) {
   return this->operator()(i);
 }
 

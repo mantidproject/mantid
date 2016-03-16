@@ -46,15 +46,11 @@ GSLMatrix::GSLMatrix(const Kernel::Matrix<double> &M)
 
 /// Create this matrix from a product of two other matrices
 /// @param mult2 :: Matrix multiplication helper object.
-GSLMatrix::GSLMatrix(const GSLMatrixMult2 &mult2) {
-  *this = mult2;
-}
+GSLMatrix::GSLMatrix(const GSLMatrixMult2 &mult2) { *this = mult2; }
 
 /// Create this matrix from a product of three other matrices
 /// @param mult3 :: Matrix multiplication helper object.
-GSLMatrix::GSLMatrix(const GSLMatrixMult3 &mult3) {
-  *this = mult3;
-}
+GSLMatrix::GSLMatrix(const GSLMatrixMult3 &mult3) { *this = mult3; }
 
 /// "Move" constructor
 GSLMatrix::GSLMatrix(std::vector<double> &&data, size_t nx, size_t ny)
@@ -62,8 +58,7 @@ GSLMatrix::GSLMatrix(std::vector<double> &&data, size_t nx, size_t ny)
       m_view(gsl_matrix_view_array(m_data.data(), nx, ny)) {}
 
 /// Destructor.
-GSLMatrix::~GSLMatrix() {
-}
+GSLMatrix::~GSLMatrix() {}
 
 /// Copy assignment operator
 GSLMatrix &GSLMatrix::operator=(const GSLMatrix &M) {
@@ -89,10 +84,14 @@ void GSLMatrix::resize(const size_t nx, const size_t ny) {
 }
 
 /// First size of the matrix
-size_t GSLMatrix::size1() const { return &m_view.matrix ? m_view.matrix.size1 : 0; }
+size_t GSLMatrix::size1() const {
+  return &m_view.matrix ? m_view.matrix.size1 : 0;
+}
 
 /// Second size of the matrix
-size_t GSLMatrix::size2() const { return &m_view.matrix ? m_view.matrix.size2 : 0; }
+size_t GSLMatrix::size2() const {
+  return &m_view.matrix ? m_view.matrix.size2 : 0;
+}
 
 /// set an element
 /// @param i :: The row

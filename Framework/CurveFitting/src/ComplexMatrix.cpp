@@ -286,7 +286,7 @@ void ComplexMatrix::eigenSystemHermitian(GSLVector &eigenValues,
   eigenValues.resize(n);
   eigenVectors.resize(n, n);
   auto workspace = gsl_eigen_hermv_alloc(n);
-  // RT: I think there is a bug in this function. It returns garbage in 
+  // RT: I think there is a bug in this function. It returns garbage in
   // eigenvectors in a repeated call.
   gsl_eigen_hermv(gsl(), eigenValues.gsl(), eigenVectors.gsl(), workspace);
   gsl_eigen_hermv_free(workspace);
@@ -299,7 +299,8 @@ ComplexVector ComplexMatrix::copyRow(size_t i) const {
     throw std::out_of_range("ComplexMatrix row index is out of range.");
   }
   auto rowView = gsl_matrix_complex_const_row(gsl(), i);
-  return ComplexVector(static_cast<const gsl_vector_complex*>(&rowView.vector));
+  return ComplexVector(
+      static_cast<const gsl_vector_complex *>(&rowView.vector));
 }
 
 /// Copy a column into a GSLVector
@@ -309,17 +310,19 @@ ComplexVector ComplexMatrix::copyColumn(size_t i) const {
     throw std::out_of_range("ComplexMatrix column index is out of range.");
   }
   auto columnView = gsl_matrix_complex_const_column(gsl(), i);
-  return ComplexVector(static_cast<const gsl_vector_complex*>(&columnView.vector));
+  return ComplexVector(
+      static_cast<const gsl_vector_complex *>(&columnView.vector));
 }
 
 /// Sort columns in order defined by an index array
 /// @param indices :: Indices defining the order of columns in sorted matrix.
-void ComplexMatrix::sortColumns(const std::vector<size_t>& indices) {
+void ComplexMatrix::sortColumns(const std::vector<size_t> &indices) {
   auto matrix = gsl_matrix_complex_alloc(size1(), size2());
-  for(size_t col = 0; col < size2(); ++col) {
+  for (size_t col = 0; col < size2(); ++col) {
     auto col1 = indices[col];
-    for(size_t row = 0; row < size1(); ++row) {
-      gsl_matrix_complex_set(matrix, row, col, gsl_matrix_complex_get(m_matrix, row, col1));
+    for (size_t row = 0; row < size1(); ++row) {
+      gsl_matrix_complex_set(matrix, row, col,
+                             gsl_matrix_complex_get(m_matrix, row, col1));
     }
   }
   std::swap(matrix, m_matrix);
@@ -351,12 +354,14 @@ std::vector<double> ComplexMatrix::packToStdVector() const {
 
 /// Unpack an std vector into this matrix. Matrix size must match the size
 /// of the vector
-/// @param packed :: A vector with complex data packed with ComplexMatrix::packToStdVector().
-void ComplexMatrix::unpackFromStdVector(const std::vector<double>& packed) {
+/// @param packed :: A vector with complex data packed with
+/// ComplexMatrix::packToStdVector().
+void ComplexMatrix::unpackFromStdVector(const std::vector<double> &packed) {
   const size_t n1 = size1();
   const size_t n2 = size2();
   if (2 * n1 * n2 != packed.size()) {
-    throw std::runtime_error("Cannot unpack vector into ComplexMatrix: size mismatch.");
+    throw std::runtime_error(
+        "Cannot unpack vector into ComplexMatrix: size mismatch.");
   }
   for (size_t i = 0; i < n1; ++i) {
     for (size_t j = 0; j < n2; ++j) {
@@ -366,7 +371,6 @@ void ComplexMatrix::unpackFromStdVector(const std::vector<double>& packed) {
     }
   }
 }
-
 
 } // namespace CurveFitting
 } // namespace Mantid

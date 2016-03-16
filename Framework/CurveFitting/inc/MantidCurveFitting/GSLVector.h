@@ -88,7 +88,7 @@ public:
   /// Create an index array that would sort this vector
   std::vector<size_t> sortIndices(bool ascending = true) const;
   /// Sort this vector in order defined by an index array
-  void sort(const std::vector<size_t>& indices) ;
+  void sort(const std::vector<size_t> &indices);
   /// Copy the values to an std vector of doubles
   std::vector<double> toStdVector() const;
 

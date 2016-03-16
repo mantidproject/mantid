@@ -501,7 +501,6 @@ public:
       }
     }
   }
-
 };
 
 #endif /*ComplexMatrixTEST_H_*/
