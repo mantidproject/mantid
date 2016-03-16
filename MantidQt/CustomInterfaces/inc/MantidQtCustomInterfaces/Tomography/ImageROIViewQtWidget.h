@@ -14,6 +14,12 @@
 class QWidget;
 class QPixmap;
 
+namespace Mantid {
+namespace Kernel {
+class V2D;
+}
+}
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -154,6 +160,17 @@ private:
   // shows the image in a widget
   void showProjectionImage(const Mantid::API::WorkspaceGroup_sptr &wsg,
                            size_t idx);
+
+  /// draw a cross/target symbol
+  void drawCenterCrossSymbol(QPainter &painter, Mantid::Kernel::V2D &center);
+
+  /// draw a rectangle/box to highlight the ROI: region of interest
+  void drawBoxROI(QPainter &painter, Mantid::Kernel::V2D &first,
+                  Mantid::Kernel::V2D &second);
+
+  /// draw a rectangle/box to highlight the normalization ("air") region
+  void drawBoxNormalizationRegion(QPainter &painter, Mantid::Kernel::V2D &first,
+                                  Mantid::Kernel::V2D &second);
 
   /// repaint the image with new positions of points and rectangles
   void refreshROIetAl();

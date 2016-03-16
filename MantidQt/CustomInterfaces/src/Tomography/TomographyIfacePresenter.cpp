@@ -144,7 +144,7 @@ void TomographyIfacePresenter::processSetup() {
 
     m_view->enableLoggedActions(false);
     // This would ideally be shown to the user as a "fatal error" pop-up, as
-    // itis an unrecoverable error. But in facilities other than ISIS this
+    // it is an unrecoverable error. But in facilities other than ISIS this
     // would block the builds (docs-qthelp).
     // m_view->userError("Fatal error", msg);
     m_model->logMsg(msg);
