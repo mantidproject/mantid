@@ -83,6 +83,12 @@ Python
 Python Algorithms
 #################
 
+
+Script Repository
+-----------------
+
+- A bug has been fixed that caused uploads to fail with some incorrectly configured proxy servers.
+
 |
 
 Full list of
@@ -90,4 +96,3 @@ Full list of
 and
 `Python <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Python%22>`__
 changes on GitHub
-
