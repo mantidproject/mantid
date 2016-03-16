@@ -495,6 +495,8 @@ void EnggDiffractionPresenter::inputChecksBeforeFitting(
                        "the default list of"
                        "expected peaks will be utlised instead."
                     << std::endl;
+  } else if (ExpectedPeaks.find(",") == std::string::npos) {
+    throw std::invalid_argument("Please enter more than one expected peak.");
   }
 }
 
@@ -560,9 +562,10 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
     if (!ExpectedPeaks.empty()) {
       enggFitPeaks->setProperty("ExpectedPeaks", ExpectedPeaks);
     }
+
     enggFitPeaks->setProperty("FittedPeaks", FocusedFitPeaksTableName);
     enggFitPeaks->execute();
-  } catch (std::runtime_error &re) {
+  } catch (std::exception &re) {
     g_log.error() << "Could not run the algorithm EnggFitPeaks "
                      "successfully for bank, "
                      // bank name
@@ -570,8 +573,8 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
                          static_cast<std::string>(re.what()) +
                          " Please check also the log message for detail."
                   << std::endl;
-    ;
-    throw;
+  } catch (...) {
+    g_log.error() << "Caught an unknown exception\n";
   }
 
   // retrieve the table with parameters
@@ -632,9 +635,7 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
                                static_cast<std::string>(re.what())
                         << std::endl;
         }
-      }
-
-      else {
+      } else {
         // append all peaks in to single workspace & remove
         runAppendSpectraAlg(single_peak_out_WS, current_peak_out_WS);
         ADS.remove(current_peak_out_WS);

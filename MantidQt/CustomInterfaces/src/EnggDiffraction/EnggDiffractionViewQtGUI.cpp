@@ -689,7 +689,7 @@ std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
 void EnggDiffractionViewQtGUI::dataCurvesFactory(
     std::vector<boost::shared_ptr<QwtData>> &data) {
 
-	// clear vector
+  // clear vector
   for (auto curves : m_dataCurveVector) {
     if (curves) {
       curves->detach();
@@ -697,7 +697,7 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
     }
   }
   if (m_dataCurveVector.size() > 0)
-	  m_dataCurveVector.clear();
+    m_dataCurveVector.clear();
 
   const QColor QPenList[16] = {
       Qt::white,      Qt::red,     Qt::darkRed,     Qt::green,
@@ -722,7 +722,6 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
 
   m_uiTabFitting.dataPlot->replot();
   data.clear();
-
 }
 
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
@@ -1195,7 +1194,18 @@ std::string EnggDiffractionViewQtGUI::fittingRunNo() const {
 }
 
 std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {
-  return m_uiTabFitting.lineEdit_fitting_peaks->text().toStdString();
+  auto exptPeaks = m_uiTabFitting.lineEdit_fitting_peaks->text().toStdString();
+  size_t strLength = exptPeaks.length() - 1;
+  char ch = ',';
+  if (exptPeaks.at(0) == ch) {
+    exptPeaks.erase(0, 1);
+  }
+
+  if (exptPeaks.at(strLength) == ch) {
+    exptPeaks.erase(strLength, 1);
+  }
+
+  return exptPeaks;
 }
 
 void EnggDiffractionViewQtGUI::fittingListWidgetBank(int /*idx*/) {
