@@ -1192,13 +1192,13 @@ void TomographyIfaceViewQtGUI::darkPathBrowseClicked() {
 }
 
 void TomographyIfaceViewQtGUI::browseLocalInOutDirClicked() {
-  m_setupPathReconScripts =
-      checkUserBrowsePath(m_uiTabSetup.lineEdit_local_out_recon_dir);
+  m_setupPathReconOut =
+      checkUserBrowsePath(m_uiTabSystemSettings.lineEdit_on_local_data_drive_path);
 }
 
 void TomographyIfaceViewQtGUI::browseLocalReconScriptsDirClicked() {
   m_setupPathReconScripts =
-      checkUserBrowsePath(m_uiTabSetup.lineEdit_local_recon_scripts);
+      checkUserBrowsePath(m_uiTabSystemSettings.lineEdit_local_recon_scripts);
 }
 
 /**
@@ -1621,7 +1621,8 @@ void TomographyIfaceViewQtGUI::updatedCycleName() {
 void TomographyIfaceViewQtGUI::updatedExperimentReference() {
   m_setupExperimentRef =
       m_uiTabRun.lineEdit_experiment_reference->text().toStdString();
-  // Might have to change: m_uiTabRun.lineEdit_local_out_recon_dir as well
+  // Might have to change: m_uiTabSystemSettings.lineEdit_local_out_recon_dir as
+  // well
 }
 
 /**
