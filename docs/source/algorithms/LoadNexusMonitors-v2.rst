@@ -23,6 +23,15 @@ group workspace when invoked from Python with a multiperiod input
 workspace. As a side-effect of the fix, the contained individual
 workspaces for each of the periods are named slightly differently.
 
+Event monitor and histogram monitor
+===================================
+
+There are two types of monitors, event monitors and histograms monitors.
+Both of them are of class *NXmonitor* in NeXus file.
+
+ * Event monitor must include all of the following three entries:
+   ** 
+
 Usage
 -----
 

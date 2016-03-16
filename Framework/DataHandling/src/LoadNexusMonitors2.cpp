@@ -186,9 +186,11 @@ void LoadNexusMonitors2::exec() {
   // only used if using event monitors
   // EventWorkspace_sptr eventWS;
   // Create the output workspace
+  std::vector<bool> loadMonitorFlags;
   bool useEventMon =
       createOutputWorkspace(numHistMon, numEventMon, monitorsAsEvents,
-                            monitorNames, monitorNumber2Name);
+                            monitorNames, isEventMonitors, monitorNumber2Name,
+                            loadMonitorFlags);
 
   // a temporary place to put the spectra/detector numbers
   boost::scoped_array<specnum_t> spectra_numbers(
@@ -201,17 +203,18 @@ void LoadNexusMonitors2::exec() {
   //            load histogram monitor if it is required to do so
   // Require a tuple: monitorNames[i], loadAsEvent[i], loadAsHistogram[i]
   size_t ws_index = 0;
-  for (std::size_t i = 0; i < m_monitor_count; ++i) {
+  for (std::size_t i_mon = 0; i_mon < m_monitor_count; ++i_mon) {
 
     // TODO 1: SKIP if this monitor is not to be loaded!
-    g_log.information() << "Loading " << monitorNames[i];
-    if (true)
+    g_log.information() << "Loading " << monitorNames[i_mon];
+    if (loadMonitorFlags[i_mon])
     {
       g_log.information() << "\n";
     }
     else
     {
       g_log.information() << " is skipped.\n";
+      continue;
     }
 
     // TODO 2: CHECK
@@ -221,7 +224,7 @@ void LoadNexusMonitors2::exec() {
 
     // TODO 3: REFACTOR to get spectrumNo and momIndex
     // Do not rely on the order in path list
-    Poco::Path monPath(monitorNames[i]);
+    Poco::Path monPath(monitorNames[i_mon]);
     std::string monitorName = monPath.getBaseName();
 
     // check for monitor name - in our case will be of the form either monitor1
@@ -233,10 +236,10 @@ void LoadNexusMonitors2::exec() {
 
     detid_t monIndex = -1 * boost::lexical_cast<int>(
                                 monitorName.substr(loc + 1)); // SNS default
-    file.openGroup(monitorNames[i], "NXmonitor");
+    file.openGroup(monitorNames[i_mon], "NXmonitor");
 
     // Check if the spectra index is there
-    specnum_t spectrumNo(static_cast<specnum_t>(i + 1));
+    specnum_t spectrumNo(static_cast<specnum_t>(ws_index + 1));
     try {
       file.openData("spectrum_index");
       file.getData(&spectrumNo);
@@ -248,8 +251,8 @@ void LoadNexusMonitors2::exec() {
     g_log.debug() << "monIndex = " << monIndex << std::endl;
     g_log.debug() << "spectrumNo = " << spectrumNo << std::endl;
 
-    spectra_numbers[i] = spectrumNo;
-    detector_numbers[i] = monIndex;
+    spectra_numbers[ws_index] = spectrumNo;
+    detector_numbers[ws_index] = monIndex;
 
     if (useEventMon) {
       // load as an event monitor
@@ -263,8 +266,8 @@ void LoadNexusMonitors2::exec() {
     file.closeGroup(); // NXmonitor
 
     // Default values, might change later.
-    m_workspace->getSpectrum(i)->setSpectrumNo(spectrumNo);
-    m_workspace->getSpectrum(i)->setDetectorID(monIndex);
+    m_workspace->getSpectrum(ws_index)->setSpectrumNo(spectrumNo);
+    m_workspace->getSpectrum(ws_index)->setDetectorID(monIndex);
 
     ++ ws_index;
     prog3.report();
@@ -288,7 +291,8 @@ void LoadNexusMonitors2::exec() {
   }
 
   // Fix the detector numbers if the defaults above are not correct
-  fixUDets(detector_numbers, file, spectra_numbers, m_monitor_count);
+  // fixUDets(detector_numbers, file, spectra_numbers, m_monitor_count);
+  fixUDets(detector_numbers, file, spectra_numbers, m_workspace->getNumberHistograms());
 
   // Check for and ISIS compat block to get the detector IDs for the loaded
   // spectrum numbers
@@ -656,7 +660,9 @@ size_t LoadNexusMonitors2::getMonitorInfo(
 bool LoadNexusMonitors2::createOutputWorkspace(
     size_t numHistMon, size_t numEventMon, bool monitorsAsEvents,
     std::vector<std::string> &monitorNames,
-    const std::map<int, std::string> &monitorNumber2Name) {
+    std::vector<bool> &isEventMonitors,
+    const std::map<int, std::string> &monitorNumber2Name,
+    std::vector<bool> &loadMonitorFlags) {
 
   // Find out using event monitor or histogram monitor
   bool loadEventMon = getProperty("LoadEventMonitor");
@@ -666,6 +672,9 @@ bool LoadNexusMonitors2::createOutputWorkspace(
     loadEventMon = true;
     loadHistoMon = true;
   }
+  // create vector for flags to load monitor or not
+  loadMonitorFlags.clear();
+  loadMonitorFlags.resize(m_monitor_count);
 
   bool useEventMon;
   // Create the output workspace
@@ -714,6 +723,40 @@ bool LoadNexusMonitors2::createOutputWorkspace(
   } else {
     // coexistence of event monitor and histo monitor. load histo monitor only.
     useEventMon = false;
+  }
+
+  // set up the flags to load monitor
+  if (useEventMon)
+  {
+    // load event
+    for (size_t i_mon = 0; i_mon < m_monitor_count; ++i_mon)
+    {
+      if (isEventMonitors[i_mon])
+        loadMonitorFlags[i_mon] = true;
+      else
+        loadMonitorFlags[i_mon] = false;
+    }
+  }
+  else
+  {
+    // load histogram
+    for (size_t i_mon = 0; i_mon < m_monitor_count; ++i_mon)
+    {
+      if (!isEventMonitors[i_mon])
+      {
+        // histo
+        loadMonitorFlags[i_mon] = true;
+      }
+      else if (loadEventMon && loadHistoMon)
+      {
+        // event mode but load both
+        loadMonitorFlags[i_mon] = true;
+      }
+      else
+      {
+        loadMonitorFlags[i_mon] = false;
+      }
+    }
   }
 
   // create workspace

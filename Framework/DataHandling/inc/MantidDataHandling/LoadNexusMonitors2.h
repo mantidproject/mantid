@@ -103,8 +103,8 @@ private:
   bool
   createOutputWorkspace(size_t numHistMon, size_t numEventMon,
                         bool monitorsAsEvents,
-                        std::vector<std::string> &monitorNames,
-                        const std::map<int, std::string> &monitorNumber2Name);
+                        std::vector<std::string> &monitorNames, std::vector<bool> &isEventMonitors,
+                        const std::map<int, std::string> &monitorNumber2Name, std::vector<bool> &loadMonitorFlags);
 
   void readEventMonitorEntry(NeXus::File &file, size_t i);
 
