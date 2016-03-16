@@ -761,6 +761,10 @@ std::string TomographyIfaceModel::filtersCfgToCmdOpts(
       opts += " --input-path-dark=" + dark;
   }
 
+  // TODO: this should take the several possible alternatives from the user
+  // interface
+  opts += " ----out-img-format=png";
+
   opts +=
       " --median-filter-size=" + std::to_string(filters.prep.medianFilterWidth);
 

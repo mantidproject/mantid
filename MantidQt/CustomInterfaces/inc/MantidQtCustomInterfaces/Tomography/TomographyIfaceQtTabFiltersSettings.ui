@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>769</width>
-    <height>618</height>
+    <height>578</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,7 +25,7 @@
         <x>0</x>
         <y>0</y>
         <width>731</width>
-        <height>643</height>
+        <height>671</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -378,20 +378,37 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <widget class="QCheckBox" name="checkBox_out_preproc_images">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="toolTip">
-             <string>Write pre-processed images in addition to reconstructed volume</string>
-            </property>
-            <property name="text">
-             <string>Produce pre-processed images stack</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>Output image format:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="comboBox">
+              <item>
+               <property name="text">
+                <string>PNG</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -425,6 +442,22 @@
              </spacer>
             </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBox_out_preproc_images">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="toolTip">
+             <string>Write pre-processed images in addition to reconstructed volume</string>
+            </property>
+            <property name="text">
+             <string>Produce pre-processed images stack</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QGroupBox" name="groupBox_out_intermediate_prep">
