@@ -88,8 +88,7 @@ int vtkNexusPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   p_peakFactory->initialize(m_PeakWS);
 
   FilterUpdateProgressAction<vtkNexusPeaksReader> drawingProgressUpdate(this, "Drawing...");
-  auto structuredMesh = vtkSmartPointer<vtkDataSet>::Take(
-      p_peakFactory->create(drawingProgressUpdate));
+  auto structuredMesh = p_peakFactory->create(drawingProgressUpdate);
 
   vtkSmartPointer<vtkPolyDataAlgorithm> shapeMarker;
   if(p_peakFactory->isPeaksWorkspaceIntegrated())

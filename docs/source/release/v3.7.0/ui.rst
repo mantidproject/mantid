@@ -122,6 +122,13 @@ SliceViewer Improvements
 .. figure::  ../../images/Elliptical_peaks_slice_viewer.png
    :align: center
 
+VSI Improvements
+----------------
+
+- The sphere and ellipse wireframes have been simplified so that it is easier to see the enclosed points. 
+
+.. figure:: ../../images/VSIEllipses.png
+    :align: center  
 |
 
 Full list of

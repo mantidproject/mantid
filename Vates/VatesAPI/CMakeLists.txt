@@ -49,7 +49,6 @@ src/vtkDataSetToPeaksFilteredDataSet.cpp
 src/vtkDataSetToScaledDataSet.cpp
 src/vtkDataSetToWsName.cpp
 src/vtkDataSetToWsLocation.cpp
-src/vtkEllipsoidTransformer.cpp
 src/vtkMDLineFactory.cpp
 src/vtkMDQuadFactory.cpp
 src/vtkMD0DFactory.cpp
@@ -122,7 +121,6 @@ inc/MantidVatesAPI/vtkDataSetToPeaksFilteredDataSet.h
 inc/MantidVatesAPI/vtkDataSetToScaledDataSet.h
 inc/MantidVatesAPI/vtkDataSetToWsName.h
 inc/MantidVatesAPI/vtkDataSetToWsLocation.h
-inc/MantidVatesAPI/vtkEllipsoidTransformer.h
 inc/MantidVatesAPI/vtkMDLineFactory.h
 inc/MantidVatesAPI/vtkMDQuadFactory.h
 inc/MantidVatesAPI/vtkMDHexFactory.h
@@ -194,7 +192,6 @@ test/vtkDataSetToNonOrthogonalDataSetTest.h
 test/vtkNullUnstructuredGridTest.h
 test/vtkNullStructuredGridTest.h
 test/vtkMDHWSignalArrayTest.h
-test/vtkEllipsoidTransformerTest.h
 test/NullPeaksPresenterVsiTest.h
 test/ConcretePeaksPresenterVsiTest.h
 test/CompositePeaksPresenterVsiTest.h
