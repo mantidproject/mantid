@@ -64,8 +64,8 @@ private:
 
   void mergePeaks();
 
-  DataObjects::PeaksWorkspace_sptr createPeakworkspace(Kernel::V3D peakCenter,
-                                                       API::IMDEventWorkspace_sptr mdws);
+  DataObjects::PeaksWorkspace_sptr
+  createPeakworkspace(Kernel::V3D peakCenter, API::IMDEventWorkspace_sptr mdws);
 
   /// Input MDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr m_inputWS;

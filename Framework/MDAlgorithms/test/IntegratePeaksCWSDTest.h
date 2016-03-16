@@ -78,7 +78,7 @@ public:
     TS_ASSERT(alg.isExecuted())
     // check result
     PeaksWorkspace_sptr outws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-          AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
+        AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
     TS_ASSERT(outws)
     TS_ASSERT_EQUALS(outws->getNumberPeaks(), 1)
 
@@ -135,7 +135,7 @@ public:
 
     // check
     PeaksWorkspace_sptr outws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-          AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
+        AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
     TS_ASSERT(outws)
     TS_ASSERT_EQUALS(outws->getNumberPeaks(), 2)
 
@@ -178,10 +178,11 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // check result
-    bool doesexit = AnalysisDataService::Instance().doesExist("IntegratedPeakWS");
+    bool doesexit =
+        AnalysisDataService::Instance().doesExist("IntegratedPeakWS");
     TS_ASSERT(doesexit);
     PeaksWorkspace_sptr outws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-          AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
+        AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->getNumberPeaks(), 2)
@@ -190,7 +191,6 @@ public:
     Peak peak2 = outws->getPeak(1);
     TS_ASSERT_DELTA(peak1.getIntensity(), peak2.getIntensity(), 0.000001);
   }
-
 
   //-------------------------------------------------------------------------------
   /** Add a list of MDEvents around Q = (1, 2, 3)
