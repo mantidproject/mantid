@@ -101,7 +101,7 @@ public:
     std::string filename("LOQ48094.raw");
     auto outputWS = runAlgorithm("LOQ", "DeltaE", filename);
 
-    //doInstrumentCheck(outputWS, "LOQ", 12120);
+    // doInstrumentCheck(outputWS, "LOQ", 12120);
     const size_t nhist = outputWS->getNumberHistograms();
     TS_ASSERT_EQUALS(nhist, 17790);
 
@@ -124,7 +124,8 @@ public:
     TS_ASSERT_EQUALS(outputWS->getSpectrum(2083)->getSpectrumNo(), 2084);
 
     // The LOQ49886 data set was measured around 2009 on the LOQ instrument.
-    // It does not link to the most recent version of the LOQ IDF (2012 or later).
+    // It does not link to the most recent version of the LOQ IDF (2012 or
+    // later).
     compareSimulationWorkspaceIDFWithNexusFileIDF(outputWS, filename);
   }
 
@@ -222,10 +223,11 @@ private:
   }
 
   void compareSimulationWorkspaceIDFWithRawFileIDF(
-      Mantid::API::MatrixWorkspace_sptr simulationWorkspace, const std::string& filename) {
+      Mantid::API::MatrixWorkspace_sptr simulationWorkspace,
+      const std::string &filename) {
     std::string outputWSName = "outWSIDFCompareRaw";
     auto alg =
-      Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadRaw");
+        Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadRaw");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("Filename", filename);
@@ -234,12 +236,12 @@ private:
     TS_ASSERT(alg->isExecuted());
     Mantid::API::Workspace_sptr outWS = alg->getProperty("OutputWorkspace");
     auto matWS =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outWS);
+        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outWS);
     auto idfForOriginal = matWS->getInstrument()->getFilename();
     auto idfForSimulationWS =
-      simulationWorkspace->getInstrument()->getFilename();
+        simulationWorkspace->getInstrument()->getFilename();
     TSM_ASSERT_EQUALS("Should have the same IDF", idfForOriginal,
-      idfForSimulationWS);
+                      idfForSimulationWS);
   }
 
   std::string m_wsName;

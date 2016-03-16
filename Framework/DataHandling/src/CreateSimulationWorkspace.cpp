@@ -404,7 +404,7 @@ void CreateSimulationWorkspace::setStartDate(
     API::MatrixWorkspace_sptr workspace) {
   const std::string detTableFile = getProperty("DetectorTableFilename");
   auto hasDetTableFile = !detTableFile.empty();
-  auto& run = workspace->mutableRun();
+  auto &run = workspace->mutableRun();
 
   Kernel::DateAndTime startTime;
   Kernel::DateAndTime endTime;
@@ -412,8 +412,7 @@ void CreateSimulationWorkspace::setStartDate(
     // The start and end times might not be valid, and hence can throw
     Kernel::DateAndTime startTime = run.startTime();
     Kernel::DateAndTime endTime = run.endTime();
-  }
-  catch (std::runtime_error&) {
+  } catch (std::runtime_error &) {
     startTime = Kernel::DateAndTime::getCurrentTime();
     endTime = Kernel::DateAndTime::getCurrentTime();
   }
@@ -426,7 +425,8 @@ void CreateSimulationWorkspace::setStartDate(
       endTime = startAndEndTime.endTime;
     } else if (boost::algorithm::ends_with(detTableFile, ".nxs") ||
                boost::algorithm::ends_with(detTableFile, ".NXS")) {
-      auto startAndEndTime = getStartAndEndTimesFromNexusFile(detTableFile, startTime, endTime);
+      auto startAndEndTime =
+          getStartAndEndTimesFromNexusFile(detTableFile, startTime, endTime);
       startTime = startAndEndTime.startTime;
       endTime = startAndEndTime.endTime;
     }

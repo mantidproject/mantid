@@ -93,7 +93,6 @@ void LoadNexus::exec() {
   // imply it should be.
   // std::string dataName="analysis";
 
-
   std::vector<std::string> entryName, definition;
   int count =
       Mantid::NeXus::getNexusEntryTypes(m_filename, entryName, definition);

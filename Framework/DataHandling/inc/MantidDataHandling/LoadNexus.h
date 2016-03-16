@@ -78,6 +78,7 @@ public:
 
   static const std::string muonTD;
   static const std::string pulsedTD;
+
 private:
   /// Overwrites Algorithm method.
   void init() override;
