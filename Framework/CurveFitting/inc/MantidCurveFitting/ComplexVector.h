@@ -27,10 +27,7 @@ struct ComplexVectorValueConverter {
 };
 
 /**
-A wrapper around gsl_vector.
-
-@author Roman Tolchenov, Tessella plc
-@date 24/02/2012
+A complex-valued vector for linear algebra computations.
 
 Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source

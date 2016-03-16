@@ -30,7 +30,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
 
-  void test_it_works()
+  void test_C2v()
   {
     std::map<std::string,double> bkq;
     bkq["B20"] = 0.3365;
@@ -38,14 +38,143 @@ public:
     bkq["B40"] = 0.4062;
     bkq["B42"] = -3.8296;
     bkq["B44"] = -2.3210;
-    
+
     GSLVector evalues;
     ComplexMatrix evectors;
     ComplexMatrix hamiltonian;
     run(1, bkq, evalues, evectors, hamiltonian);
-
     doTestEigensystem(evalues, evectors, hamiltonian);
+  }
 
+  void test_C2()
+  {
+    std::map<std::string,double> bkq;
+    bkq["B20"] = 0.3365;
+    bkq["B22"] = 7.4851;
+    bkq["B40"] = 0.4062;
+    bkq["IB42"] = -3.8296;
+    bkq["IB44"] = -2.3210;
+
+    GSLVector evalues;
+    ComplexMatrix evectors;
+    ComplexMatrix hamiltonian;
+    run(1, bkq, evalues, evectors, hamiltonian);
+    doTestEigensystem(evalues, evectors, hamiltonian);
+  }
+
+  void test_Ci()
+  {
+    std::map<std::string,double> bkq;
+    bkq["B20"] = 0.3365;
+    bkq["B21"] = 2.0;
+    bkq["IB22"] = 7.4851;
+    bkq["B40"] = 0.4062;
+    bkq["IB41"] = -1.8296;
+    bkq["IB42"] = -3.8296;
+    bkq["IB43"] = -4.8296;
+    bkq["IB44"] = -2.3210;
+
+    GSLVector evalues;
+    ComplexMatrix evectors;
+    ComplexMatrix hamiltonian;
+    run(1, bkq, evalues, evectors, hamiltonian);
+    doTestEigensystem(evalues, evectors, hamiltonian);
+  }
+
+  void test_C4()
+  {
+    std::map<std::string,double> bkq;
+    bkq["B20"] = 0.3365;
+    bkq["B40"] = 7.4851;
+    bkq["B44"] = 0.4062;
+    bkq["B60"] = -3.8296;
+    bkq["IB64"] = -2.3210;
+
+    GSLVector evalues;
+    ComplexMatrix evectors;
+    ComplexMatrix hamiltonian;
+    run(1, bkq, evalues, evectors, hamiltonian);
+    doTestEigensystem(evalues, evectors, hamiltonian);
+  }
+
+  void test_D4()
+  {
+    std::map<std::string,double> bkq;
+    bkq["B20"] = 0.3365;
+    bkq["B40"] = 7.4851;
+    bkq["B44"] = 0.4062;
+    bkq["B60"] = -3.8296;
+    bkq["B64"] = -2.3210;
+
+    GSLVector evalues;
+    ComplexMatrix evectors;
+    ComplexMatrix hamiltonian;
+    run(1, bkq, evalues, evectors, hamiltonian);
+    doTestEigensystem(evalues, evectors, hamiltonian);
+  }
+
+  void test_C3()
+  {
+    std::map<std::string,double> bkq;
+    bkq["B20"] = 0.3365;
+    bkq["B40"] = 7.4851;
+    bkq["B43"] = 0.4062;
+    bkq["B60"] = -3.8296;
+    bkq["IB63"] = -2.3210;
+    bkq["IB66"] =  3.2310;
+
+    GSLVector evalues;
+    ComplexMatrix evectors;
+    ComplexMatrix hamiltonian;
+    run(1, bkq, evalues, evectors, hamiltonian);
+    doTestEigensystem(evalues, evectors, hamiltonian);
+  }
+
+  void test_D3()
+  {
+    std::map<std::string,double> bkq;
+    bkq["B20"] = 0.3365;
+    bkq["B40"] = 7.4851;
+    bkq["B43"] = 0.4062;
+    bkq["B60"] = -3.8296;
+    bkq["B63"] = -2.3210;
+    bkq["B66"] =  3.2310;
+
+    GSLVector evalues;
+    ComplexMatrix evectors;
+    ComplexMatrix hamiltonian;
+    run(1, bkq, evalues, evectors, hamiltonian);
+    doTestEigensystem(evalues, evectors, hamiltonian);
+  }
+
+  void test_C6()
+  {
+    std::map<std::string,double> bkq;
+    bkq["B20"] = 0.3365;
+    bkq["B40"] = 7.4851;
+    bkq["B60"] = -3.8296;
+    bkq["B66"] = -2.3210;
+
+    GSLVector evalues;
+    ComplexMatrix evectors;
+    ComplexMatrix hamiltonian;
+    run(1, bkq, evalues, evectors, hamiltonian);
+    doTestEigensystem(evalues, evectors, hamiltonian);
+  }
+
+  void test_T()
+  {
+    std::map<std::string,double> bkq;
+    bkq["B40"] = 0.3365;
+    bkq["B44"] = 5 * bkq["B40"];
+    bkq["B60"] = -3.8296;
+    bkq["B64"] = -21 * bkq["B60"];
+
+    GSLVector evalues;
+    ComplexMatrix evectors;
+    ComplexMatrix hamiltonian;
+    run(1, bkq, evalues, evectors, hamiltonian);
+    doTestEigensystem(evalues, evectors, hamiltonian);
   }
 
 private:

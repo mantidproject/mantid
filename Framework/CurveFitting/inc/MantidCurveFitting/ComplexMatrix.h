@@ -118,11 +118,9 @@ struct ComplexMatrixMult3 {
 };
 
 /**
-A wrapper around gsl_matrix. The '*' operator is overloaded to help with
+A complex-valued matrix for linear algebra computations.
+The '*' operator is overloaded to help with
 matrix multiplication.
-
-@author Roman Tolchenov, Tessella plc
-@date 24/02/2012
 
 Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
