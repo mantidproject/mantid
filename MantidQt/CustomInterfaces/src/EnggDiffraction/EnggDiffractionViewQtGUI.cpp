@@ -216,7 +216,12 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
           SIGNAL(currentRowChanged(int)), this, SLOT(setBankIdComboBox(int)));
 
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
-
+  m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom,
+                                        "Time-of-flight (us)");
+  m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::yLeft, "Counts (us)-¹");
+  QFont font("MS Shell Dlg 2", 8);
+  m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::xBottom, font);
+  m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::yLeft, font);
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
