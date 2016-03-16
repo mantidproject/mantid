@@ -618,8 +618,8 @@ Instrument_sptr sansInstrument(const Mantid::Kernel::V3D &sourcePos,
   therefore not
   an exact representation of an instrument one might expect to create for SANS.
    */
+  auto instrument = boost::make_shared<Instrument>();
 
-  Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
       Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left,
       "0,0,0"));
@@ -662,7 +662,6 @@ Instrument_sptr sansInstrument(const Mantid::Kernel::V3D &sourcePos,
 
   instrument->add(trolley1);
   instrument->add(trolley2);
-
   return instrument;
 }
 }
