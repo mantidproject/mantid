@@ -410,8 +410,8 @@ void CreateSimulationWorkspace::setStartDate(
   Kernel::DateAndTime endTime;
   try {
     // The start and end times might not be valid, and hence can throw
-    Kernel::DateAndTime startTime = run.startTime();
-    Kernel::DateAndTime endTime = run.endTime();
+    startTime = run.startTime();
+    endTime = run.endTime();
   } catch (std::runtime_error &) {
     startTime = Kernel::DateAndTime::getCurrentTime();
     endTime = Kernel::DateAndTime::getCurrentTime();
