@@ -30,6 +30,8 @@ namespace CustomInterfaces
     connect(m_model, SIGNAL(dataChanged()), SLOT(onDataChanged()));
     connect(m_view, SIGNAL(plotGuessRequested()), SLOT(onPlotGuess()));
     connect(m_view, SIGNAL(removeGuessRequested()), SLOT(removePlots()));
+    connect(m_model, SIGNAL(errorInModel(const QString &)), m_view,
+            SLOT(displayError(const QString &)));
   }
 
   void ALCPeakFittingPresenter::fit()

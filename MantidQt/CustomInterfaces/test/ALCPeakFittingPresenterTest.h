@@ -61,6 +61,7 @@ class MockALCPeakFittingModel : public IALCPeakFittingModel
 public:
   void changeFittedPeaks() { emit fittedPeaksChanged(); }
   void changeData() { emit dataChanged(); }
+  void setError(const QString &message) { emit errorInModel(message); }
 
   MOCK_CONST_METHOD0(fittedPeaks, IFunction_const_sptr());
   MOCK_CONST_METHOD0(data, MatrixWorkspace_const_sptr());
@@ -314,6 +315,14 @@ public:
     ON_CALL(*m_view, function(QString(""))).WillByDefault(Return(peaks));
     EXPECT_CALL(*m_view, setFittedCurve(_));
     m_view->plotGuess();
+  }
+
+  /**
+   * Test that errors coming from the model are displayed in the view
+   */
+  void test_displayError() {
+    EXPECT_CALL(*m_view, displayError(QString("Test error")));
+    m_model->setError("Test error");
   }
 };
 
