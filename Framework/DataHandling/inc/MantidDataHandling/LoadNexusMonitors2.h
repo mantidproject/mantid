@@ -106,6 +106,10 @@ private:
                         std::vector<std::string> &monitorNames,
                         const std::map<int, std::string> &monitorNumber2Name);
 
+  void readEventMonitorEntry(NeXus::File &file, size_t i);
+
+  void readHistoMonitorEntry(NeXus::File &file, size_t i);
+
 private:
   std::string m_filename; ///< The name and path of the input file
   API::MatrixWorkspace_sptr m_workspace; ///< The workspace being filled out
