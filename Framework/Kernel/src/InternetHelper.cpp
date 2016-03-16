@@ -104,17 +104,19 @@ void InternetHelper::createRequest(Poco::URI &uri) {
   }
 
   m_request->set("User-Agent", "MANTID");
-  if (m_contentLength > 0) {
+  if (m_method == "POST") {
+    // HTTP states that the 'Content-Length' header should not be included
+    // if the 'Transfer-Encoding' header is set. UNKNOWN_CONTENT_LENGTH
+    // indicates to Poco to remove the header field
+    m_request->setContentLength(HTTPMessage::UNKNOWN_CONTENT_LENGTH);
+    m_request->setChunkedTransferEncoding(true);
+  } else if (m_contentLength > 0) {
     m_request->setContentLength(m_contentLength);
   }
 
   for (auto itHeaders = m_headers.begin(); itHeaders != m_headers.end();
        ++itHeaders) {
     m_request->set(itHeaders->first, itHeaders->second);
-  }
-
-  if (m_method == "POST") {
-    m_request->setChunkedTransferEncoding(true);
   }
 }
 
