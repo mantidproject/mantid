@@ -8,6 +8,8 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/DateAndTime.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include <boost/make_shared.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -537,21 +539,35 @@ public:
     Mantid::Kernel::V3D trolley1Pos(0, 0, 3);
     Mantid::Kernel::V3D trolley2Pos(0, 0, 6);
 
-    m_instrument = ComponentCreationHelper::sansInstrument(
+    m_instrumentNotParameterized = ComponentCreationHelper::sansInstrument(
         sourcePos, samplePos, trolley1Pos, trolley2Pos);
+
+    auto map = boost::make_shared<ParameterMap>();
+    m_instrumentParameterized = boost::make_shared<Instrument>(m_instrumentNotParameterized, map);
   }
 
-  void test_access() {
+  void test_access_non_parameterized() {
 
     const detid_t nPixels = 100 * 100 * 6;
     double pos_x = 0;
     for (detid_t i = 1; i <= nPixels; i++) {
-      pos_x += m_instrument->getDetector(i)->getPos().X();
+      pos_x += m_instrumentNotParameterized->getDetector(i)->getPos().X();
     }
   }
 
+  void test_access_parameterized() {
+
+    const detid_t nPixels = 100 * 100 * 6;
+    double pos_x = 0;
+    for (detid_t i = 1; i <= nPixels; i++) {
+      pos_x += m_instrumentParameterized->getDetector(i)->getPos().X();
+    }
+  }
+
+
 private:
-  Instrument_sptr m_instrument;
+  Instrument_sptr m_instrumentParameterized;
+  Instrument_sptr m_instrumentNotParameterized;
 };
 
 #endif /*INSTRUMENTTEST_H_*/
