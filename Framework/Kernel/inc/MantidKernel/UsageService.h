@@ -108,8 +108,8 @@ private:
   /// Send featureUsageReport
   void sendFeatureUsageReport(const bool synchronous);
 
-  int UsageServiceImpl::sendStartupAsyncImpl(const std::string &message);
-  int UsageServiceImpl::sendFeatureAsyncImpl(const std::string &message);
+  int sendStartupAsyncImpl(const std::string &message);
+  int sendFeatureAsyncImpl(const std::string &message);
 
   /// A method to handle the timerCallbacks
   void timerCallback(Poco::Timer &);
