@@ -406,9 +406,7 @@ void CalculateGammaBackground::calculateTofSpectrum(
     profile->setUpForFit();
 
     // Fix the Mass parameter
-    std::stringstream tiesStr;
-    tiesStr << "Mass=" << profile->getParameter("Mass");
-    profile->addTies(tiesStr.str());
+    profile->fix(0);
 
     profile->cacheYSpaceValues(tseconds, false, detpar, respar);
 
