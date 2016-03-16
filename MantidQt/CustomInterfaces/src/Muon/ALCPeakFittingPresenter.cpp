@@ -11,37 +11,37 @@ namespace MantidQt
 namespace CustomInterfaces
 {
 
-  ALCPeakFittingPresenter::ALCPeakFittingPresenter(IALCPeakFittingView* view, IALCPeakFittingModel* model)
-    : m_view(view), m_model(model)
-  {}
+ALCPeakFittingPresenter::ALCPeakFittingPresenter(IALCPeakFittingView *view,
+                                                 IALCPeakFittingModel *model)
+    : m_view(view), m_model(model), m_guessPlotted(false) {}
 
-  void ALCPeakFittingPresenter::initialize()
-  {
-    m_view->initialize();
+void ALCPeakFittingPresenter::initialize() {
+  m_view->initialize();
 
-    connect(m_view, SIGNAL(fitRequested()), SLOT(fit()));
-    connect(m_view, SIGNAL(currentFunctionChanged()), SLOT(onCurrentFunctionChanged()));
-    connect(m_view, SIGNAL(peakPickerChanged()), SLOT(onPeakPickerChanged()));
+  connect(m_view, SIGNAL(fitRequested()), SLOT(fit()));
+  connect(m_view, SIGNAL(currentFunctionChanged()),
+          SLOT(onCurrentFunctionChanged()));
+  connect(m_view, SIGNAL(peakPickerChanged()), SLOT(onPeakPickerChanged()));
 
-    // We are updating the whole function anyway, so paramName if left out
-    connect(m_view, SIGNAL(parameterChanged(QString,QString)), SLOT(onParameterChanged(QString)));
+  // We are updating the whole function anyway, so paramName if left out
+  connect(m_view, SIGNAL(parameterChanged(QString, QString)),
+          SLOT(onParameterChanged(QString)));
 
-    connect(m_model, SIGNAL(fittedPeaksChanged()), SLOT(onFittedPeaksChanged()));
-    connect(m_model, SIGNAL(dataChanged()), SLOT(onDataChanged()));
-    connect(m_view, SIGNAL(plotGuessRequested()), SLOT(onPlotGuess()));
-    connect(m_view, SIGNAL(removeGuessRequested()), SLOT(removePlots()));
-    connect(m_model, SIGNAL(errorInModel(const QString &)), m_view,
-            SLOT(displayError(const QString &)));
+  connect(m_model, SIGNAL(fittedPeaksChanged()), SLOT(onFittedPeaksChanged()));
+  connect(m_model, SIGNAL(dataChanged()), SLOT(onDataChanged()));
+  connect(m_view, SIGNAL(plotGuessClicked()), SLOT(onPlotGuessClicked()));
+  connect(m_model, SIGNAL(errorInModel(const QString &)), m_view,
+          SLOT(displayError(const QString &)));
   }
 
-  void ALCPeakFittingPresenter::fit()
-  {
+  void ALCPeakFittingPresenter::fit() {
     IFunction_const_sptr func = m_view->function("");
-    if ( func ) {
-      m_view->clearGuess();
+    auto dataWS = m_model->data();
+    if (func && dataWS) {
+      removePlots();
       m_model->fitPeaks(func);
     } else {
-       m_view->displayError("Couldn't fit an empty function");
+      m_view->displayError("Couldn't fit with empty function/data");
     }
   }
 
@@ -122,16 +122,38 @@ namespace CustomInterfaces
   }
 
   /**
-   * Called when user clicks "Plot guess" on the view.
-   * Plots the current guess fit on the graph.
+   * Called when user clicks "Plot/Remove guess" on the view.
+   * Plots the current guess fit on the graph, or removes it.
    */
-  void ALCPeakFittingPresenter::onPlotGuess() {
-    if (auto func = m_view->function("")) {
-      auto xdata = m_model->data()->readX(0);
-      m_view->setFittedCurve(*(ALCHelper::curveDataFromFunction(func, xdata)));
-    } else {
+  void ALCPeakFittingPresenter::onPlotGuessClicked() {
+    if (m_guessPlotted) {
       removePlots();
+    } else {
+      if (plotGuessOnGraph()) {
+        m_view->changePlotGuessState(true);
+        m_guessPlotted = true;
+      } else {
+        m_view->displayError("Couldn't plot with empty function/data");
+        removePlots();
+      }
     }
+  }
+
+  /**
+   * Plots current guess on the graph, if possible
+   * Not possible if function or data are null
+   * @returns :: success or failure
+   */
+  bool ALCPeakFittingPresenter::plotGuessOnGraph() {
+    bool plotted = false;
+    auto func = m_view->function("");
+    auto dataWS = m_model->data();
+    if (func && dataWS) {
+      auto xdata = dataWS->readX(0);
+      m_view->setFittedCurve(*(ALCHelper::curveDataFromFunction(func, xdata)));
+      plotted = true;
+    }
+    return plotted;
   }
 
   /**
@@ -139,6 +161,8 @@ namespace CustomInterfaces
    */
   void ALCPeakFittingPresenter::removePlots() {
     m_view->setFittedCurve(*(ALCHelper::emptyCurveData()));
+    m_view->changePlotGuessState(false);
+    m_guessPlotted = false;
   }
 
   } // namespace CustomInterfaces
