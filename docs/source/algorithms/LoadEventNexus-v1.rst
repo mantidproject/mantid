@@ -88,12 +88,13 @@ Here are some tables that show it in more detail:
 |                              | within it,                                |                                     |
 |                              | else one spectrum per detector assumed    |                                     |
 +------------------------------+-------------------------------------------+-------------------------------------+
-| Run                          | various places as shown later on,         | Run object                          |
+| Run                          | mainly as loaded from                     | Run Object                          |
+|                              | :ref:`algm-LoadNexusLogs`                 |                                     | 
 +------------------------------+-------------------------------------------+-------------------------------------+
-|                              | If ``isis_vms_compat`` exists,            |                                     |
-| Sample                       | ``SPB`` and ``RSPB`` within               | Sample Object                       |
+| Sample                       | If ``isis_vms_compat`` exists,            | Sample Object                       |
+|                              | ``SPB`` and ``RSPB`` within               |                                     |
 |                              | ``isis_vms_compat``                       |                                     |
-|                              | else ???                                  |                                     |
+|                              | else sample not loaded                    |                                     |
 +------------------------------+-------------------------------------------+-------------------------------------+
 
 
