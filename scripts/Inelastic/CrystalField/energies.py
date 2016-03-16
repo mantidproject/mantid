@@ -21,7 +21,10 @@ def energies(nre, **kwargs):
 
             kwargs: the keyword arguments for crystal field parameters.
                     They can be:
-                        B20, B22, B40, B42, B44, ... : values of the crystal field parameters.
+                        B20, B22, B40, B42, B44, ... : real parts of the crystal field parameters.
+                        IB20, IB22, IB40, IB42, IB44, ... : imaginary parts of the crystal field parameters.
+                        Bmol: a list of 3 molecular field parameters
+                        Bext: a list of 3 external field parameters
             
       Return:
             a tuple of energies(1D numpy array), wavefunctions (2D numpy array)

@@ -1,6 +1,6 @@
 #include "MantidCurveFitting/Algorithms/CrystalFieldEnergies.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
@@ -24,15 +24,15 @@ DECLARE_ALGORITHM(CrystalFieldEnergies)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string CrystalFieldEnergies::name() const { return "CrystalFieldEnergies"; }
+const std::string CrystalFieldEnergies::name() const {
+  return "CrystalFieldEnergies";
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CrystalFieldEnergies::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CrystalFieldEnergies::category() const {
-  return "Inelastic";
-}
+const std::string CrystalFieldEnergies::category() const { return "Inelastic"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string CrystalFieldEnergies::summary() const {
@@ -53,44 +53,54 @@ void CrystalFieldEnergies::init() {
   auto threeElements =
       boost::make_shared<Kernel::ArrayLengthValidator<double>>(3);
   std::vector<double> defaultVector(3, 0);
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("Bmol", defaultVector, threeElements), "Parameters of the molecular field (3 values).");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("Bext", defaultVector, threeElements), "Parameters of the external field (3 values).");
-  declareProperty("B20", 0.0,  "Real part of the B20 field parameter.");
-  declareProperty("B21", 0.0,  "Real part of the B21 field parameter.");
-  declareProperty("B22", 0.0,  "Real part of the B22 field parameter.");
-  declareProperty("B40", 0.0,  "Real part of the B40 field parameter.");
-  declareProperty("B41", 0.0,  "Real part of the B41 field parameter.");
-  declareProperty("B42", 0.0,  "Real part of the B42 field parameter.");
-  declareProperty("B43", 0.0,  "Real part of the B43 field parameter.");
-  declareProperty("B44", 0.0,  "Real part of the B44 field parameter.");
-  declareProperty("B60", 0.0,  "Real part of the B60 field parameter.");
-  declareProperty("B61", 0.0,  "Real part of the B61 field parameter.");
-  declareProperty("B62", 0.0,  "Real part of the B62 field parameter.");
-  declareProperty("B63", 0.0,  "Real part of the B63 field parameter.");
-  declareProperty("B64", 0.0,  "Real part of the B64 field parameter.");
-  declareProperty("B65", 0.0,  "Real part of the B65 field parameter.");
-  declareProperty("B66", 0.0,  "Real part of the B66 field parameter.");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
+                      "Bmol", defaultVector, threeElements),
+                  "Parameters of the molecular field (3 values).");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
+                      "Bext", defaultVector, threeElements),
+                  "Parameters of the external field (3 values).");
+  declareProperty("B20", 0.0, "Real part of the B20 field parameter.");
+  declareProperty("B21", 0.0, "Real part of the B21 field parameter.");
+  declareProperty("B22", 0.0, "Real part of the B22 field parameter.");
+  declareProperty("B40", 0.0, "Real part of the B40 field parameter.");
+  declareProperty("B41", 0.0, "Real part of the B41 field parameter.");
+  declareProperty("B42", 0.0, "Real part of the B42 field parameter.");
+  declareProperty("B43", 0.0, "Real part of the B43 field parameter.");
+  declareProperty("B44", 0.0, "Real part of the B44 field parameter.");
+  declareProperty("B60", 0.0, "Real part of the B60 field parameter.");
+  declareProperty("B61", 0.0, "Real part of the B61 field parameter.");
+  declareProperty("B62", 0.0, "Real part of the B62 field parameter.");
+  declareProperty("B63", 0.0, "Real part of the B63 field parameter.");
+  declareProperty("B64", 0.0, "Real part of the B64 field parameter.");
+  declareProperty("B65", 0.0, "Real part of the B65 field parameter.");
+  declareProperty("B66", 0.0, "Real part of the B66 field parameter.");
 
-  declareProperty("IB20", 0.0,  "Imaginery part of the B20 field parameter.");
-  declareProperty("IB21", 0.0,  "Imaginery part of the B21 field parameter.");
-  declareProperty("IB22", 0.0,  "Imaginery part of the B22 field parameter.");
-  declareProperty("IB40", 0.0,  "Imaginery part of the B40 field parameter.");
-  declareProperty("IB41", 0.0,  "Imaginery part of the B41 field parameter.");
-  declareProperty("IB42", 0.0,  "Imaginery part of the B42 field parameter.");
-  declareProperty("IB43", 0.0,  "Imaginery part of the B43 field parameter.");
-  declareProperty("IB44", 0.0,  "Imaginery part of the B44 field parameter.");
-  declareProperty("IB60", 0.0,  "Imaginery part of the B60 field parameter.");
-  declareProperty("IB61", 0.0,  "Imaginery part of the B61 field parameter.");
-  declareProperty("IB62", 0.0,  "Imaginery part of the B62 field parameter.");
-  declareProperty("IB63", 0.0,  "Imaginery part of the B63 field parameter.");
-  declareProperty("IB64", 0.0,  "Imaginery part of the B64 field parameter.");
-  declareProperty("IB65", 0.0,  "Imaginery part of the B65 field parameter.");
-  declareProperty("IB66", 0.0,  "Imaginery part of the B66 field parameter.");
+  declareProperty("IB20", 0.0, "Imaginery part of the B20 field parameter.");
+  declareProperty("IB21", 0.0, "Imaginery part of the B21 field parameter.");
+  declareProperty("IB22", 0.0, "Imaginery part of the B22 field parameter.");
+  declareProperty("IB40", 0.0, "Imaginery part of the B40 field parameter.");
+  declareProperty("IB41", 0.0, "Imaginery part of the B41 field parameter.");
+  declareProperty("IB42", 0.0, "Imaginery part of the B42 field parameter.");
+  declareProperty("IB43", 0.0, "Imaginery part of the B43 field parameter.");
+  declareProperty("IB44", 0.0, "Imaginery part of the B44 field parameter.");
+  declareProperty("IB60", 0.0, "Imaginery part of the B60 field parameter.");
+  declareProperty("IB61", 0.0, "Imaginery part of the B61 field parameter.");
+  declareProperty("IB62", 0.0, "Imaginery part of the B62 field parameter.");
+  declareProperty("IB63", 0.0, "Imaginery part of the B63 field parameter.");
+  declareProperty("IB64", 0.0, "Imaginery part of the B64 field parameter.");
+  declareProperty("IB65", 0.0, "Imaginery part of the B65 field parameter.");
+  declareProperty("IB66", 0.0, "Imaginery part of the B66 field parameter.");
 
   // Output
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("Energies", Kernel::Direction::Output), "Energies.");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("Eigenvectors", Kernel::Direction::Output), "The eigenvectors.");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("Hamiltonian", Kernel::Direction::Output), "The Hamiltonian.");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
+                      "Energies", Kernel::Direction::Output),
+                  "The energies starting at 0 in ascending order.");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
+                      "Eigenvectors", Kernel::Direction::Output),
+                  "The eigenvectors.");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
+                      "Hamiltonian", Kernel::Direction::Output),
+                  "The Hamiltonian.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -101,13 +111,13 @@ void CrystalFieldEnergies::exec() {
 
   DoubleFortranVector bmol(1, 3);
   std::vector<double> bmolProp = getProperty("Bmol");
-  for(size_t i = 0; i < bmolProp.size(); ++i) {
+  for (size_t i = 0; i < bmolProp.size(); ++i) {
     bmol.set(i, bmolProp[i]);
   }
 
   DoubleFortranVector bext(1, 3);
   std::vector<double> bextProp = getProperty("Bext");
-  for(size_t i = 0; i < bextProp.size(); ++i) {
+  for (size_t i = 0; i < bextProp.size(); ++i) {
     bext.set(i, bextProp[i]);
   }
 
@@ -143,7 +153,7 @@ void CrystalFieldEnergies::exec() {
   double IB65 = getProperty("IB65");
   double IB66 = getProperty("IB66");
 
-  ComplexFortranMatrix bkq(0,6, 0,6);
+  ComplexFortranMatrix bkq(0, 6, 0, 6);
   bkq(2, 0) = ComplexType(B20, IB20);
   bkq(2, 1) = ComplexType(B21, IB21);
   bkq(2, 2) = ComplexType(B22, IB22);
@@ -168,7 +178,6 @@ void CrystalFieldEnergies::exec() {
   setProperty("Energies", en.toStdVector());
   setProperty("Eigenvectors", wf.packToStdVector());
   setProperty("Hamiltonian", ham.packToStdVector());
-
 }
 
 } // namespace CurveFitting
