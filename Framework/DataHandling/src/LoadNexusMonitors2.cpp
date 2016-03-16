@@ -94,7 +94,7 @@ void LoadNexusMonitors2::init() {
                   "disabled, load monitors as spectra (into a Workspace2D, "
                   "regardless of whether event data is found.");
 
-  declareProperty("UseEventMonitor", true,
+  declareProperty("LoadEventMonitor", true,
                   "Load event monitor in NeXus file both event monitor and "
                   "histogram monitor found in NeXus file."
                   "If both of LoadEventMonitor and LoadHistoMonitor are true, "
@@ -102,7 +102,7 @@ void LoadNexusMonitors2::init() {
                   "then it is in the auto mode such that any existing monitor "
                   "will be loaded.");
 
-  declareProperty("UseHistoMonitor", true,
+  declareProperty("LoadHistoMonitor", true,
                   "Load histogram monitor in NeXus file both event monitor and "
                   "histogram monitor found in NeXus file."
                   "If both of LoadEventMonitor and LoadHistoMonitor are true, "
@@ -172,8 +172,10 @@ void LoadNexusMonitors2::exec() {
   // check if there's histogram data. If not, ignore setting, step back and load
   // monitors as
   // events which is the only possibility left.
+
+  m_allMonitorsHaveHistoData = allMonitorsHaveHistoData(file, monitorNames);
   if (!monitorsAsEvents)
-    if (!allMonitorsHaveHistoData(file, monitorNames)) {
+    if (!m_allMonitorsHaveHistoData) {
       g_log.information() << "Cannot load monitors as histogram data. Loading "
                              "as events even if the opposite was requested by "
                              "disabling the property MonitorsAsEvents"
@@ -705,64 +707,107 @@ bool LoadNexusMonitors2::createOutputWorkspace(
     const std::map<int, std::string> &monitorNumber2Name) {
 
   // Find out using event monitor or histogram monitor
-  bool useEventMon = getProperty("UseEventMonitor");
-  bool useHistogramMon = getProperty("UseHistoMonitor");
+  bool loadEventMon = getProperty("LoadEventMonitor");
+  bool loadHistoMon = getProperty("LoadHistoMonitor");
+  if (!loadEventMon && !loadHistoMon)
+  {
+    // both of them are false is equivlanet to both of them are true
+    loadEventMon = true;
+    loadHistoMon = true;
+  }
 
+  bool useEventMon;
   // Create the output workspace
   if (numHistMon == m_monitor_count) {
     // all monitors are histogram monitors
     useEventMon = false;
+    // with single type of monitor, there is no need to be specified right by user
+    loadHistoMon = true;
+    loadEventMon = false;
+
   } else if (numEventMon == m_monitor_count) {
     // all monitors are event monitors
     useEventMon = true;
-  } else if (!monitorsAsEvents) {
-    // Both event monitors and histogram monitors exist
-    useEventMon = false;
+    // with single type of monitor, there is no need to be specified right by user
+    loadHistoMon = false;
+    loadEventMon = true;
 
-    // print information out
-    std::stringstream info_ss;
-    info_ss << "I really don't think it could happen!"
-            << "Number of histogram monitor = " << numHistMon
-            << ", number of evnet monitor = " << numEventMon
-            << "; monitor as events = " << monitorsAsEvents << "\n"
-            << "Monitor names: ";
-    size_t numNames = monitorNames.size();
-    for (size_t i_name = 0; i_name < numNames; ++i_name)
-      info_ss << monitorNames[i_name] << " \t";
-    g_log.information(info_ss.str());
-  } else if (useEventMon == useHistogramMon) {
-    // automatic mode but throw an exception in case that
-    // both types of monitors are found in NeXus file
-    g_log.error() << "Found " << numEventMon << " event monitors and "
-                  << numHistMon << " histogram monitors (" << m_monitor_count
-                  << " total)\n";
-    throw std::runtime_error(
-        "All monitors must be either event or histogram based");
-  } else if (useEventMon) {
-    // user says: use event monitor
+  } else if (loadEventMon == loadHistoMon && !monitorsAsEvents) {
+    // Both event monitors and histogram monitors exist
+    // while the user wants the result be read from histogram data
+    // in the event monitor
+
+    // check
+    if (!m_allMonitorsHaveHistoData)
+    {
+      std::stringstream errmsg;
+      errmsg << "There are " << numHistMon << " histogram monitors and "
+             << numEventMon << " event monitors.  But not all of the event "
+             << "monitors have 'data' entry to be converted to histogram.";
+      throw std::invalid_argument(errmsg.str());
+    }
+    // set value
+    useEventMon = false;
+  } else if (loadEventMon == loadHistoMon && monitorsAsEvents)
+  {
+    // Both event monitors are histogram monitor exist,
+    // But the user tries to export them as event data.
+    std::stringstream errmsg;
+    errmsg << "There are " << numHistMon << " histogram monitors and "
+           << numEventMon << " event monitors.  It is not allowed to "
+           << "read all of them as event monitor.";
+    throw std::invalid_argument(errmsg.str());
+  }
+  else if (loadEventMon)
+  {
+    // coexistence of event monitor and histo monitor. load event monitor only.
     useEventMon = true;
-  } else {
-    // user says: use histogram monitor
+  }
+  else
+  {
+    // coexistence of event monitor and histo monitor. load histo monitor only.
     useEventMon = false;
   }
 
-  /*
-  if (numHistMon == m_monitor_count || !monitorsAsEvents) {
+  // create workspace
+  if (useEventMon)
+  {
+    // Use event monitors and create event workspace
+    // check
+    if (numEventMon == 0)
+      throw std::runtime_error(
+          "Loading event data. Trying to load event data but failed to "
+          "find event monitors."
+          "This file may be corrupted or it may not be supported");
 
-    if (numHistMon != m_monitor_count)
-      throw std::runtime_error("I really don't think it could happen!");
+    // only used if using event monitors
+    EventWorkspace_sptr eventWS = EventWorkspace_sptr(new EventWorkspace());
+    eventWS->initialize(numEventMon, 1, 1);
 
-    useEventMon = false;
-   */
-  if (!useEventMon) {
+    // Set the units
+    eventWS->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    eventWS->setYUnit("Counts");
+    m_workspace = eventWS;
+  }
+  else
+  {
+    // Use histogram monitors and event monitors' histogram data.
+    // And thus create a Workspace2D.
+    // check
     if (m_monitor_count == 0)
       throw std::runtime_error(
           "Not loading event data. Trying to load histogram data but failed to "
           "find monitors with histogram data or could not interpret the data. "
           "This file may be corrupted or it may not be supported");
 
+    // Create
+    size_t numSpec(numHistMon);
+    if (loadEventMon)
+      numSpec = m_monitor_count;
+
     m_workspace = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", m_monitor_count, 1, 1);
+        "Workspace2D", numSpec, 1, 1);
     // if there is a distinct monitor number for each monitor sort them by that
     // number
     if (monitorNumber2Name.size() == monitorNames.size()) {
@@ -771,17 +816,6 @@ bool LoadNexusMonitors2::createOutputWorkspace(
         monitorNames.push_back(numberName.second);
       }
     }
-  } else {
-    // only used if using event monitors
-    EventWorkspace_sptr eventWS = EventWorkspace_sptr(new EventWorkspace());
-    // useEventMon = true;
-    eventWS->initialize(m_monitor_count, 1, 1);
-
-    // Set the units
-    eventWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("TOF");
-    eventWS->setYUnit("Counts");
-    m_workspace = eventWS;
   }
 
   return useEventMon;
