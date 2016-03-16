@@ -95,6 +95,12 @@ void MultipleExperimentInfos::copyExperimentInfos(
   }
 }
 
+//-----------------------------------------------------------------------------------------------
+/*
+ * Clear all experiment infos
+ */
+void MultipleExperimentInfos::clearExperimentInfos() { m_expInfos.clear(); }
+
 const std::string MultipleExperimentInfos::toString() const {
   //    if (m_expInfos.size() == 1)
   //      return m_expInfos[0]->toString();

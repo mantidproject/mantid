@@ -51,6 +51,8 @@ public:
 
   void copyExperimentInfos(const MultipleExperimentInfos &other);
 
+  void clearExperimentInfos();
+
 protected:
   /// Returns a string description of the object
   const std::string toString() const;

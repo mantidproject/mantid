@@ -36,6 +36,16 @@ public:
     TSM_ASSERT_DIFFERS("ExperimentInfo's were deep-copied",
                        copy.getExperimentInfo(0), mei.getExperimentInfo(0));
   }
+
+  void test_clearExperimentInfos() {
+    MultipleExperimentInfos mei;
+    TS_ASSERT_EQUALS(mei.getNumExperimentInfo(), 0);
+    ExperimentInfo_sptr ei(new ExperimentInfo);
+    TS_ASSERT_EQUALS(mei.addExperimentInfo(ei), 0);
+    TS_ASSERT_EQUALS(mei.getNumExperimentInfo(), 1);
+    mei.clearExperimentInfos();
+    TS_ASSERT_EQUALS(mei.getNumExperimentInfo(), 0);
+  }
 };
 
 #endif /* MANTID_API_MULTIPLEEXPERIMENTINFOSTEST_H_ */
