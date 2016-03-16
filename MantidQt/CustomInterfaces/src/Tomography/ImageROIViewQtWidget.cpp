@@ -321,8 +321,6 @@ void ImageROIViewQtWidget::refreshROIetAl() {
   QPixmap toDisplay(*m_basePixmap.get());
   QPainter painter(&toDisplay);
 
-  // TODO: display settings / nicer symbol?
-
   drawCenterCrossSymbol(painter, m_params.cor);
 
   drawBoxROI(painter, m_params.roi.first, m_params.roi.second);
@@ -331,38 +329,6 @@ void ImageROIViewQtWidget::refreshROIetAl() {
                              m_params.normalizationRegion.second);
 
   m_ui.label_img->setPixmap(toDisplay);
-}
-
-void ImageROIViewQtWidget::drawBoxNormalizationRegion(
-    QPainter &painter, Mantid::Kernel::V2D &first,
-    Mantid::Kernel::V2D &second) {
-  QPen penNA(Qt::yellow);
-  painter.setPen(penNA);
-  painter.drawRect(static_cast<int>(first.X()), static_cast<int>(first.Y()),
-                   static_cast<int>(second.X() - first.X()),
-                   static_cast<int>(second.Y() - first.Y()));
-}
-
-void ImageROIViewQtWidget::drawBoxROI(QPainter &painter,
-                                      Mantid::Kernel::V2D &first,
-                                      Mantid::Kernel::V2D &second) {
-  QPen penROI(Qt::green);
-  painter.setPen(penROI);
-  painter.drawRect(static_cast<int>(first.X()), static_cast<int>(first.Y()),
-                   static_cast<int>(second.X() - first.X()),
-                   static_cast<int>(second.Y() - first.Y()));
-}
-
-void ImageROIViewQtWidget::drawCenterCrossSymbol(QPainter &painter,
-                                                 Mantid::Kernel::V2D &center) {
-  QPen penCoR(Qt::red);
-  painter.setPen(penCoR);
-  painter.drawLine(
-      static_cast<int>(center.X() - 5), static_cast<int>(center.Y()),
-      static_cast<int>(center.X() + 5), static_cast<int>(center.Y()));
-  painter.drawLine(
-      static_cast<int>(center.X()), static_cast<int>(center.Y() - 5),
-      static_cast<int>(center.X()), static_cast<int>(center.Y() + 5));
 }
 
 void ImageROIViewQtWidget::refreshCoR() {
@@ -374,16 +340,8 @@ void ImageROIViewQtWidget::refreshCoR() {
 
   QPixmap toDisplay(*m_basePixmap.get());
   QPainter painter(&toDisplay);
-  QPen pen(Qt::red);
-  painter.setPen(pen);
-  painter.drawLine(static_cast<int>(m_params.cor.X() - 5),
-                   static_cast<int>(m_params.cor.Y()),
-                   static_cast<int>(m_params.cor.X() + 5),
-                   static_cast<int>(m_params.cor.Y()));
-  painter.drawLine(static_cast<int>(m_params.cor.X()),
-                   static_cast<int>(m_params.cor.Y() - 5),
-                   static_cast<int>(m_params.cor.X()),
-                   static_cast<int>(m_params.cor.Y() + 5));
+  drawCenterCrossSymbol(painter, m_params.cor);
+
   m_ui.label_img->setPixmap(toDisplay);
 }
 
@@ -398,13 +356,8 @@ void ImageROIViewQtWidget::refreshROI() {
   // QPixmap const *pm = m_ui.label_img->pixmap();
   QPixmap toDisplay(*m_basePixmap.get());
   QPainter painter(&toDisplay);
-  QPen pen(Qt::green);
-  painter.setPen(pen);
-  painter.drawRect(
-      static_cast<int>(m_params.roi.first.X()),
-      static_cast<int>(m_params.roi.first.Y()),
-      static_cast<int>(m_params.roi.second.X() - m_params.roi.first.X()),
-      static_cast<int>(m_params.roi.second.Y() - m_params.roi.first.Y()));
+  drawBoxROI(painter, m_params.roi.first, m_params.roi.second);
+
   m_ui.label_img->setPixmap(toDisplay);
 }
 
@@ -419,15 +372,45 @@ void ImageROIViewQtWidget::refreshNormArea() {
   // QPixmap const *pm = m_ui.label_img->pixmap();
   QPixmap toDisplay(*m_basePixmap.get());
   QPainter painter(&toDisplay);
-  QPen pen(Qt::yellow);
-  painter.setPen(pen);
-  painter.drawRect(static_cast<int>(m_params.normalizationRegion.first.X()),
-                   static_cast<int>(m_params.normalizationRegion.first.Y()),
-                   static_cast<int>(m_params.normalizationRegion.second.X() -
-                                    m_params.normalizationRegion.first.X()),
-                   static_cast<int>(m_params.normalizationRegion.second.Y() -
-                                    m_params.normalizationRegion.first.Y()));
+
+  drawBoxNormalizationRegion(painter, m_params.normalizationRegion.first,
+                             m_params.normalizationRegion.second);
+
   m_ui.label_img->setPixmap(toDisplay);
+}
+
+void ImageROIViewQtWidget::drawCenterCrossSymbol(QPainter &painter,
+                                                 Mantid::Kernel::V2D &center) {
+  // TODO: display settings / nicer symbol?
+
+  QPen penCoR(Qt::red);
+  painter.setPen(penCoR);
+  painter.drawLine(
+      static_cast<int>(center.X() - 5), static_cast<int>(center.Y()),
+      static_cast<int>(center.X() + 5), static_cast<int>(center.Y()));
+  painter.drawLine(
+      static_cast<int>(center.X()), static_cast<int>(center.Y() - 5),
+      static_cast<int>(center.X()), static_cast<int>(center.Y() + 5));
+}
+
+void ImageROIViewQtWidget::drawBoxROI(QPainter &painter,
+                                      Mantid::Kernel::V2D &first,
+                                      Mantid::Kernel::V2D &second) {
+  QPen penROI(Qt::green);
+  painter.setPen(penROI);
+  painter.drawRect(static_cast<int>(first.X()), static_cast<int>(first.Y()),
+                   static_cast<int>(second.X() - first.X()),
+                   static_cast<int>(second.Y() - first.Y()));
+}
+
+void ImageROIViewQtWidget::drawBoxNormalizationRegion(
+    QPainter &painter, Mantid::Kernel::V2D &first,
+    Mantid::Kernel::V2D &second) {
+  QPen penNA(Qt::yellow);
+  painter.setPen(penNA);
+  painter.drawRect(static_cast<int>(first.X()), static_cast<int>(first.Y()),
+                   static_cast<int>(second.X() - first.X()),
+                   static_cast<int>(second.Y() - first.Y()));
 }
 
 void ImageROIViewQtWidget::enableParamWidgets(bool enable) {

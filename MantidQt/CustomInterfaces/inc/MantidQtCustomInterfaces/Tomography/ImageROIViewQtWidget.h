@@ -161,6 +161,12 @@ private:
   void showProjectionImage(const Mantid::API::WorkspaceGroup_sptr &wsg,
                            size_t idx);
 
+  /// repaint the image with new positions of points and rectangles
+  void refreshROIetAl();
+  void refreshCoR();
+  void refreshROI();
+  void refreshNormArea();
+
   /// draw a cross/target symbol
   void drawCenterCrossSymbol(QPainter &painter, Mantid::Kernel::V2D &center);
 
@@ -171,12 +177,6 @@ private:
   /// draw a rectangle/box to highlight the normalization ("air") region
   void drawBoxNormalizationRegion(QPainter &painter, Mantid::Kernel::V2D &first,
                                   Mantid::Kernel::V2D &second);
-
-  /// repaint the image with new positions of points and rectangles
-  void refreshROIetAl();
-  void refreshCoR();
-  void refreshROI();
-  void refreshNormArea();
 
   bool eventFilter(QObject *obj, QEvent *event) override;
 
