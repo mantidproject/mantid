@@ -102,6 +102,7 @@ void ComptonProfile::buildCaches() {
                                 boost::lexical_cast<std::string>(m_wsIndex));
   }
 
+  m_resolutionFunction->setAttributeValue("Mass", m_mass);
   m_resolutionFunction->setMatrixWorkspace(m_workspace, m_wsIndex, m_startX,
                                            m_endX);
 
