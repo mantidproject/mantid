@@ -97,25 +97,28 @@ namespace CustomInterfaces
     }
   }
 
-  void ALCPeakFittingPresenter::onFittedPeaksChanged()
-  {
-    if(IFunction_const_sptr fittedPeaks = m_model->fittedPeaks())
-    {
-      auto x = m_model->data()->readX(0);
-      m_view->setFittedCurve(*(ALCHelper::curveDataFromFunction(fittedPeaks, x)));
+  void ALCPeakFittingPresenter::onFittedPeaksChanged() {
+    IFunction_const_sptr fittedPeaks = m_model->fittedPeaks();
+    auto dataWS = m_model->data();
+    if (fittedPeaks && dataWS) {
+      auto x = dataWS->readX(0);
+      m_view->setFittedCurve(
+          *(ALCHelper::curveDataFromFunction(fittedPeaks, x)));
       m_view->setFunction(fittedPeaks);
-    }
-    else
-    {
+    } else {
       m_view->setFittedCurve(*(ALCHelper::emptyCurveData()));
       m_view->setFunction(IFunction_const_sptr());
     }
   }
 
-  void ALCPeakFittingPresenter::onDataChanged()
-  {
-    m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_model->data(), 0)),
-                         ALCHelper::curveErrorsFromWs(m_model->data(), 0));
+  void ALCPeakFittingPresenter::onDataChanged() {
+    auto dataWS = m_model->data();
+    if (dataWS) {
+      m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_model->data(), 0)),
+                           ALCHelper::curveErrorsFromWs(m_model->data(), 0));
+    } else {
+      m_view->setDataCurve(*(ALCHelper::emptyCurveData()), Mantid::MantidVec{});
+    }
   }
 
   /**
