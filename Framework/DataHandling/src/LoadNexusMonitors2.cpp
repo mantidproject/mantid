@@ -197,9 +197,29 @@ void LoadNexusMonitors2::exec() {
 
   API::Progress prog3(this, 0.6, 1.0, m_monitor_count);
 
+  // TODO-NEXT: load event monitor if it is required to do so
+  //            load histogram monitor if it is required to do so
+  // Require a tuple: monitorNames[i], loadAsEvent[i], loadAsHistogram[i]
   size_t ws_index = 0;
   for (std::size_t i = 0; i < m_monitor_count; ++i) {
-    g_log.information() << "Loading " << monitorNames[i] << std::endl;
+
+    // TODO 1: SKIP if this monitor is not to be loaded!
+    g_log.information() << "Loading " << monitorNames[i];
+    if (true)
+    {
+      g_log.information() << "\n";
+    }
+    else
+    {
+      g_log.information() << " is skipped.\n";
+    }
+
+    // TODO 2: CHECK
+    if (ws_index == m_workspace->getNumberHistograms())
+      throw std::runtime_error("Overcedes the number of histograms in output event "
+                               "workspace.");
+
+    // TODO 3: REFACTOR to get spectrumNo and momIndex
     // Do not rely on the order in path list
     Poco::Path monPath(monitorNames[i]);
     std::string monitorName = monPath.getBaseName();
@@ -232,18 +252,12 @@ void LoadNexusMonitors2::exec() {
     detector_numbers[i] = monIndex;
 
     if (useEventMon) {
-      // check
-      if (ws_index == m_workspace->getNumberHistograms())
-        throw std::runtime_error("Overcedes the number of histograms in output event workspace.");
+      // load as an event monitor
       readEventMonitorEntry(file, ws_index);
-      ++ ws_index;
-    } else // is a histogram monitor
+    } else
     {
-      // check
-      if (ws_index == m_workspace->getNumberHistograms())
-        throw std::runtime_error("Overcedes the number of hisograms in output workspace2D.");
+      // load as a histogram monitor
       readHistoMonitorEntry(file, ws_index);
-      ++ ws_index;
     }
 
     file.closeGroup(); // NXmonitor
@@ -252,6 +266,7 @@ void LoadNexusMonitors2::exec() {
     m_workspace->getSpectrum(i)->setSpectrumNo(spectrumNo);
     m_workspace->getSpectrum(i)->setDetectorID(monIndex);
 
+    ++ ws_index;
     prog3.report();
   }
 
