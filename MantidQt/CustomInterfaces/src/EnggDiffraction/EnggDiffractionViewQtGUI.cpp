@@ -62,7 +62,12 @@ EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), m_dataCurveVector(), IEnggDiffractionView(),
       m_currentInst("ENGINX"), m_currentCalibFilename(""), m_presenter(NULL) {}
 
-EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {}
+EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {
+  for (auto curves : m_dataCurveVector) {
+    curves->detach();
+    delete curves;
+  }
+}
 
 void EnggDiffractionViewQtGUI::initLayout() {
   // setup container ui
@@ -211,9 +216,7 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
           SIGNAL(currentRowChanged(int)), this, SLOT(setBankIdComboBox(int)));
 
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
-  // TODO:
-  // m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::xBottom, wFitting->font());
-  // m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::yLeft, wFitting->font());
+
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -681,23 +684,29 @@ std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
 void EnggDiffractionViewQtGUI::dataCurvesFactory(
     std::vector<boost::shared_ptr<QwtData>> &data) {
 
-  auto colorr = (Qt::red, 2);
+	// clear vector
+  for (auto curves : m_dataCurveVector) {
+    if (curves) {
+      curves->detach();
+      delete curves;
+    }
+  }
+  if (m_dataCurveVector.size() > 0)
+	  m_dataCurveVector.clear();
 
-  const QColor QPenList[17] = {
-	  Qt::white,     Qt::black,      Qt::red,     Qt::darkRed,
-	  Qt::green,     Qt::darkGreen,  Qt::blue,    Qt::darkBlue,
-	  Qt::cyan,      Qt::darkCyan,   Qt::magenta, Qt::darkMagenta,
-	  Qt::yellow,    Qt::darkYellow, Qt::gray,    Qt::darkGray,
-	  Qt::lightGray };
+  const QColor QPenList[16] = {
+      Qt::white,      Qt::red,     Qt::darkRed,     Qt::green,
+      Qt::darkGreen,  Qt::blue,    Qt::darkBlue,    Qt::cyan,
+      Qt::darkCyan,   Qt::magenta, Qt::darkMagenta, Qt::yellow,
+      Qt::darkYellow, Qt::gray,    Qt::darkGray,    Qt::lightGray};
 
   for (int i = 0; i < data.size(); i++) {
     auto *peak = data[i].get();
 
     QwtPlotCurve *dataCurve = new QwtPlotCurve();
     dataCurve->setStyle(QwtPlotCurve::Lines);
-    auto randIndex = std::rand() % 7;
+    auto randIndex = std::rand() % 15;
     dataCurve->setPen(QPen(QPenList[randIndex], 1));
-    // dataCurve->setPen(std::random_shuffle(&QPenList[0], &QPenList[7]));
     dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
 
     m_dataCurveVector.push_back(dataCurve);
@@ -707,6 +716,8 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
   }
 
   m_uiTabFitting.dataPlot->replot();
+  data.clear();
+
 }
 
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
