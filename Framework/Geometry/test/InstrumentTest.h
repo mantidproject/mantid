@@ -543,9 +543,9 @@ public:
 
   void test_access() {
 
-    size_t nPixels = 100 * 100 * 6;
+    const detid_t nPixels = 100 * 100 * 6;
     double pos_x = 0;
-    for (size_t i = 1; i <= nPixels; i++) {
+    for (detid_t i = 1; i <= nPixels; i++) {
       pos_x += m_instrument->getDetector(i)->getPos().X();
     }
   }
