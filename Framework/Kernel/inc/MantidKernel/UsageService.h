@@ -131,11 +131,10 @@ private:
   mutable std::mutex m_mutex;
   std::string m_application;
 
-  ///Async method for sending startup notifications
+  /// Async method for sending startup notifications
   Poco::ActiveMethod<int, std::string, UsageServiceImpl> m_startupActiveMethod;
-  ///Async method for sending feature notifications
+  /// Async method for sending feature notifications
   Poco::ActiveMethod<int, std::string, UsageServiceImpl> m_featureActiveMethod;
-
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

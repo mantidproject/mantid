@@ -290,7 +290,7 @@ int UsageServiceImpl::sendReport(const std::string &message,
   try {
     Kernel::InternetHelper helper;
     std::stringstream responseStream;
-    helper.setTimeout(2);
+    helper.setTimeout(20);
     helper.setBody(message);
     status = helper.sendRequest(url, responseStream);
   } catch (Mantid::Kernel::Exception::InternetError &e) {
