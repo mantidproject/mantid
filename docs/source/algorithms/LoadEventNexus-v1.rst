@@ -57,7 +57,7 @@ Veto pulses can be filtered out in a separate step using
 ``FilterByLogValue(InputWorkspace="ws", OutputWorkspace="ws", LogName="veto_pulse_time", PulseFilter="1")``
 
 Data Loaded from Nexus File
----------------------------
+###########################
 
 The nexus file must have ``/raw_data_1`` or ``/entry`` as its main group and
 that group be of type ``NXentry``. It also needs a group of type ``NXevent_data``.
@@ -96,6 +96,27 @@ Here are some tables that show it in more detail:
 |                              | ``isis_vms_compat``                       |                                     |
 |                              | else sample not loaded                    |                                     |
 +------------------------------+-------------------------------------------+-------------------------------------+
+
+Sample Object
+'''''''''''''
+
+If ``isis_vms_compat`` exists,
+then the following sample properties are read from it: 
+
++-------------+-------------------------+
+| Nexus       | Workspace sample object |
++=============+=========================+
+| ``SPB[2]``  | Geometry flag           |
++-------------+-------------------------+
+| ``RSPB[3]`` | Thickness               |
++-------------+-------------------------+
+| ``RSPB[4]`` | Height                  |
++-------------+-------------------------+
+| ``RSPB[5]`` | Width                   |
++-------------+-------------------------+
+
+This is the same as read by :ref:`algm-LoadISISNexus`.
+
 
 
 Usage
