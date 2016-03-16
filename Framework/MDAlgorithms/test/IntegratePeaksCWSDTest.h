@@ -43,7 +43,7 @@ public:
   //-------------------------------------------------------------------------------
   /** Test integrate MDEventWorkspace with 1 run
    */
-  void Ptest_singleRun() {
+  void test_singleRun() {
     // Initialize algorithm and set up
     IntegratePeaksCWSD alg;
     alg.initialize();
@@ -76,10 +76,24 @@ public:
 
     alg.execute();
     TS_ASSERT(alg.isExecuted())
+    // check result
+    PeaksWorkspace_sptr outws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+          AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
+    TS_ASSERT(outws)
+    TS_ASSERT_EQUALS(outws->getNumberPeaks(), 1)
+
+    Peak peak = outws->getPeak(0);
+    // TS_ASSERT(peak.getIntensity() > 0)
+
+    // clean the workspaces
+    AnalysisDataService::Instance().remove("TestPeaksWS");
+    AnalysisDataService::Instance().remove("TestMDWS");
+    AnalysisDataService::Instance().remove("IntegratedPeakWS");
   }
 
   //-------------------------------------------------------------------------------
-  /** Test integrate MDEventWorkspace with 1 run
+  /** Test integrate MDEventWorkspace with multiple runs and multiple peaks
+   *  in a given PeaksWorkspace
    */
   void test_multipleRun() {
     // Create workspaces to test
@@ -114,12 +128,69 @@ public:
     alg.setProperty("PeaksWorkspace", peakws);
     alg.setProperty("OutputWorkspace", "IntegratedPeakWS");
     alg.setProperty("PeakRadius", 0.2);
+    alg.setProperty("MergePeaks", false);
+
+    alg.execute();
+    TS_ASSERT(alg.isExecuted())
+
+    // check
+    PeaksWorkspace_sptr outws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+          AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
+    TS_ASSERT(outws)
+    TS_ASSERT_EQUALS(outws->getNumberPeaks(), 2)
+
+    // clean the workspaces
+    AnalysisDataService::Instance().remove("TestMDWS2");
+    AnalysisDataService::Instance().remove("TesetPeaksWS");
+    AnalysisDataService::Instance().remove("IntegratedPeakWS");
+  }
+
+  //-------------------------------------------------------------------------------
+  /** Test integrate MDEventWorkspace with multiple runs without PeaksWorkspace
+   *  but with a given peak center
+   */
+  void test_multipleRun1Peak() {
+    // Create MDEventWorkspace for testing
+    std::vector<Mantid::Kernel::V3D> vec_qsample;
+    std::vector<double> vec_signal;
+    std::vector<int> vec_detid;
+    std::vector<int> vec_runnumbers;
+    createMDEvents2Run(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
+
+    IMDEventWorkspace_sptr inputws =
+        createMDWorkspace(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
+    AnalysisDataService::Instance().addOrReplace("TestMDWS2", inputws);
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TestMDWS2"));
+
+    // Initialize algorithm and set up
+    IntegratePeaksCWSD alg;
+    alg.initialize();
+    TS_ASSERT(alg.isInitialized())
+
+    alg.setProperty("InputWorkspace", inputws);
+    // alg.setProperty("PeaksWorkspace", peakws);
+    alg.setProperty("OutputWorkspace", "IntegratedPeakWS");
+    alg.setProperty("PeakRadius", 0.2);
     alg.setPropertyValue("PeakCentre", "3, 3, 3");
     alg.setProperty("MergePeaks", true);
 
     alg.execute();
-    TS_ASSERT(alg.isExecuted())
+    TS_ASSERT(alg.isExecuted());
+
+    // check result
+    bool doesexit = AnalysisDataService::Instance().doesExist("IntegratedPeakWS");
+    TS_ASSERT(doesexit);
+    PeaksWorkspace_sptr outws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+          AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
+    TS_ASSERT(outws);
+
+    TS_ASSERT_EQUALS(outws->getNumberPeaks(), 2)
+
+    Peak peak1 = outws->getPeak(0);
+    Peak peak2 = outws->getPeak(1);
+    TS_ASSERT_DELTA(peak1.getIntensity(), peak2.getIntensity(), 0.000001);
   }
+
 
   //-------------------------------------------------------------------------------
   /** Add a list of MDEvents around Q = (1, 2, 3)
@@ -207,11 +278,23 @@ public:
     ExperimentInfo_sptr exp_info = boost::make_shared<ExperimentInfo>();
     exp_info->mutableRun().addProperty("run_number", 121);
     exp_info->mutableRun().addProperty("monitor", 3021);
+
+    // add instrument
+    Instrument_sptr inst1 =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+    inst1->setName("SillyInstrument1");
+    exp_info->setInstrument(inst1);
     mdws->addExperimentInfo(exp_info);
 
     ExperimentInfo_sptr exp_info2 = boost::make_shared<ExperimentInfo>();
     exp_info2->mutableRun().addProperty("run_number", 144);
     exp_info2->mutableRun().addProperty("monitor", 1022);
+    // add instrument
+    Instrument_sptr inst2 =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 11);
+    inst1->setName("SillyInstrument2");
+    exp_info2->setInstrument(inst2);
+
     mdws->addExperimentInfo(exp_info2);
 
     return mdws;

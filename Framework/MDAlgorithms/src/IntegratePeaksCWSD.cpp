@@ -6,6 +6,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidGeometry/Instrument.h"
 
 /*
 #include "MantidDataObjects/PeakShapeSpherical.h"
@@ -46,7 +47,7 @@ const signal_t THRESHOLD_SIGNAL = 0;
 /** Constructor
  */
 IntegratePeaksCWSD::IntegratePeaksCWSD()
-    : m_haveSinglePeakCenter(false), m_doMergePeak(false) {}
+    : m_useSinglePeakCenterFmUser(false), m_doMergePeak(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -81,7 +82,9 @@ void IntegratePeaksCWSD::init() {
       make_unique<ArrayProperty<double>>("PeakCentre"),
       "A comma separated list for peak centre in Q-sample frame. "
       "Its length is either 3 (Qx, Qy, Qz) or 0. "
-      "It is applied in the case that there are more than 1 run numbers.");
+      "If peak center is defined, then all the data among all the runs will be "
+      "integrated in respect to this peak center. Otherwise, the peaks that will "
+      "be integrated shall be found in the given peak workspace.");
 
   declareProperty("PeakRadius", EMPTY_DBL(), "Radius of a peak.");
 
@@ -109,7 +112,15 @@ void IntegratePeaksCWSD::exec() {
     mergePeaks();
 
   // Output
-  DataObjects::PeaksWorkspace_sptr outws = createOutputs();
+  DataObjects::PeaksWorkspace_sptr outws;
+  if (m_useSinglePeakCenterFmUser)
+  {
+    outws = createPeakworkspace(m_peakCenter, m_inputWS);
+  }
+  else
+  {
+    outws = createOutputs();
+  }
   setProperty("OutputWorkspace", outws);
 }
 
@@ -119,13 +130,44 @@ void IntegratePeaksCWSD::exec() {
 void IntegratePeaksCWSD::processInputs() {
   // Required input workspaces
   m_inputWS = getProperty("InputWorkspace");
-  m_peaksWS = getProperty("PeaksWorkspace");
+
+  // Input peaks
+  std::vector<double> peak_center = getProperty("PeakCentre");
+  if (peak_center.size() > 0) {
+    // assigned peak center
+    if (peak_center.size() != 3)
+      throw std::invalid_argument("PeakCentre must have 3 elements.");
+    m_peakCenter.setX(peak_center[0]);
+    m_peakCenter.setY(peak_center[1]);
+    m_peakCenter.setZ(peak_center[2]);
+    // no use input peak workspace
+    m_haveInputPeakWS = false;
+    m_useSinglePeakCenterFmUser = true;
+  }
+  else
+  {
+    // use input peak workspace
+    std::string peakWSName = getPropertyValue("PeaksWorkspace");
+    if (peakWSName.length() == 0)
+      throw std::invalid_argument("It is not allowed that neither peak center "
+                                  "nor PeaksWorkspace is specified.");
+    m_peaksWS = getProperty("PeaksWorkspace");
+    m_haveInputPeakWS = true;
+    m_useSinglePeakCenterFmUser = false;
+  }
+  m_doMergePeak = getProperty("MergePeaks");
+  if (m_haveInputPeakWS && m_peaksWS->getNumberPeaks() > 1 && m_doMergePeak)
+  {
+    throw std::invalid_argument("It is not allowed to merge peaks when there are "
+                                "multiple peaks present in PeaksWorkspace.");
+  }
 
   // monitor counts
   monitorCountMap = getMonitorCounts();
 
   // go through peak
-  getPeakInformation();
+  if (m_haveInputPeakWS)
+    getPeakInformation();
   if (m_runPeakCenterMap.size() > 1)
     m_haveMultipleRun = true;
   else
@@ -133,28 +175,17 @@ void IntegratePeaksCWSD::processInputs() {
 
   // peak related
   m_peakRadius = getProperty("PeakRadius");
-  if (m_peakRadius != EMPTY_DBL()){
+  if (m_peakRadius == EMPTY_DBL()){
     throw std::invalid_argument("Peak radius cannot be left empty.");
   }
 
   // merge peak only makes sense when there is more than 1 peak
+  /*
   if (m_haveMultipleRun)
     m_doMergePeak = getProperty("MergePeaks");
   else
     m_doMergePeak = false;
-
-  std::vector<double> peak_center = getProperty("PeakCentre");
-  if (peak_center.size() == 0) {
-    // no single peak center
-    assert(!m_doMergePeak &&
-           "In order to merge peak, peak center must be given!");
-  } else {
-    // assigned peak center
-    assert(peak_center.size() == 3 && "PeakCentre must have 3 elements.");
-    m_peakCenter.setX(peak_center[0]);
-    m_peakCenter.setY(peak_center[1]);
-    m_peakCenter.setZ(peak_center[2]);
-  }
+    */
 
   // optional mask workspace
   std::string maskwsname = getPropertyValue("MaskWorkspace");
@@ -184,8 +215,8 @@ void IntegratePeaksCWSD::simplePeakIntegration(
     const std::vector<detid_t> &vecMaskedDetID,
     const std::map<int, signal_t> &run_monitor_map) {
   // Check requirements
-  assert(m_inputWS && "MDEventWorkspace is not defined.");
-  assert(m_peaksWS && "PeaksWorkspace is not defined.");
+  if (!m_inputWS)
+    throw std::runtime_error("MDEventWorkspace is not defined.");
 
   // Go through to get value
   API::IMDIterator *mditer = m_inputWS->createIterator();
@@ -244,7 +275,7 @@ void IntegratePeaksCWSD::simplePeakIntegration(
         }
 
         // update peak center
-        if (!m_haveSinglePeakCenter)
+        if (!m_useSinglePeakCenterFmUser)
           current_peak_center = m_runPeakCenterMap[current_run_number];
       }
 
@@ -361,6 +392,58 @@ DataObjects::PeaksWorkspace_sptr IntegratePeaksCWSD::createOutputs() {
   }
 
   return outws;
+}
+
+//----------------------------------------------------------------------------------------------
+/**
+ * @brief IntegratePeaksCWSD::createPeakworkspace
+ * @param peakCenter
+ * @param mdws :: source MDEventWorkspace where the run numbers come from
+ * @return
+ */
+DataObjects::PeaksWorkspace_sptr
+IntegratePeaksCWSD::createPeakworkspace(Kernel::V3D peakCenter,
+                                        API::IMDEventWorkspace_sptr mdws)
+{
+  g_log.notice("Create peak workspace for output ... ...");
+  // new peak workspace
+  DataObjects::PeaksWorkspace_sptr peakws = boost::make_shared<DataObjects::PeaksWorkspace>();
+
+  // get number of runs
+  size_t numruns = mdws->getNumExperimentInfo();
+  for (size_t i_run = 0; i_run < numruns; ++i_run)
+  {
+    // get experiment info for run number, instrument and peak count
+    API::ExperimentInfo_const_sptr expinfo = mdws->getExperimentInfo(i_run);
+    int runnumber = expinfo->getRunNumber();
+    std::map<int, double>::iterator miter = m_runPeakCountsMap.find(runnumber);
+    double peakcount(0);
+    if (miter != m_runPeakCountsMap.end())
+    {
+      peakcount = miter->second;
+    }
+
+    // Create and add a new peak to peak workspace
+    DataObjects::Peak newpeak;
+    try
+    {
+      Geometry::Instrument_const_sptr instrument = expinfo->getInstrument();
+      newpeak.setInstrument(instrument);
+    }
+    catch (std::exception)
+    {
+
+    }
+
+    newpeak.setQSampleFrame(peakCenter);
+    newpeak.setRunNumber(runnumber);
+    newpeak.setIntensity(peakcount);
+
+    peakws->addPeak(newpeak);
+  }
+
+  g_log.notice("Peak workspace is generated.... ");
+  return peakws;
 }
 
 //----------------------------------------------------------------------------------------------

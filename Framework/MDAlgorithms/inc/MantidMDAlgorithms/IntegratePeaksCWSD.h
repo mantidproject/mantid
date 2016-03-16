@@ -64,6 +64,9 @@ private:
 
   void mergePeaks();
 
+  DataObjects::PeaksWorkspace_sptr createPeakworkspace(Kernel::V3D peakCenter,
+                                                       API::IMDEventWorkspace_sptr mdws);
+
   /// Input MDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr m_inputWS;
 
@@ -75,7 +78,7 @@ private:
   std::map<int, signal_t> monitorCountMap;
 
   std::map<int, Kernel::V3D> m_runPeakCenterMap;
-  bool m_haveSinglePeakCenter;
+  bool m_useSinglePeakCenterFmUser;
   Kernel::V3D m_peakCenter;
   double m_peakRadius;
   bool m_doMergePeak;
@@ -89,6 +92,9 @@ private:
   bool m_maskDets;
   DataObjects::MaskWorkspace_sptr m_maskWS;
   std::vector<detid_t> vecMaskedDetID;
+
+  /// Peak workspace
+  bool m_haveInputPeakWS;
 };
 
 } // namespace Mantid
