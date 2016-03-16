@@ -30,7 +30,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
 
-  void test_Something()
+  void test_it_works()
   {
     std::map<std::string,double> bkq;
     bkq["B20"] = 0.3365;

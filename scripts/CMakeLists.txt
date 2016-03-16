@@ -31,6 +31,7 @@ set_property ( TARGET CompileUIHFIR_4Circle_Reduction PROPERTY FOLDER "CompilePy
 
 set ( TEST_PY_FILES
       test/ConvertToWavelengthTest.py
+      test/CrystalFieldTest.py
       test/DirectReductionHelpersTest.py
       test/DirectPropertyManagerTest.py
       test/DirectEnergyConversionTest.py

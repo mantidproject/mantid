@@ -11,19 +11,24 @@ def _unpack_complex_matrix(packed, n1, n2):
       return unpacked
 
               
-def energies(nre, B20, B22, B40, B42, B44):
+def energies(nre, **kwargs):
       """
       Calculate the crystal field energies and wavefunctions.
-      
+
       Args:
             nre: a number denoting a rare earth ion
-            B20, B22, B40, B42, B44: values of the crystal field parameters.
+            |1=Ce|2=Pr|3=Nd|4=Pm|5=Sm|6=Eu|7=Gd|8=Tb|9=Dy|10=Ho|11=Er|12=Tm|13=Yb|
+
+            kwargs: the keyword arguments for crystal field parameters.
+                    They can be:
+                        B20, B22, B40, B42, B44, ... : values of the crystal field parameters.
             
       Return:
-            a tuple of energies(1D numpy array) and wavefunctions (2D numpy array)
+            a tuple of energies(1D numpy array), wavefunctions (2D numpy array)
+            and the hamiltonian (2D numpy array).
       """
       # Do the calculations
-      res = CrystalFieldEnergies(nre, B20=B20, B22=B22, B40=B40, B42=B42, B44=B44)
+      res = CrystalFieldEnergies(nre, **kwargs)
 
       # Unpack the results
       energies = res[0]
