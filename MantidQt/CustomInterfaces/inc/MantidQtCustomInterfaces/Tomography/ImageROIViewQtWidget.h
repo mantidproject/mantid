@@ -74,7 +74,8 @@ public:
   /// show a stack of images given the path to the files
   void showStack(const std::string &path) override;
 
-  /// show a stack of images that have been loaded into a group of workspaces
+  /// show a (new) stack of images that have been loaded into a group of
+  /// workspaces
   void showStack(Mantid::API::WorkspaceGroup_sptr &ws) override;
 
   const Mantid::API::WorkspaceGroup_sptr stack() const override {
@@ -102,13 +103,15 @@ public:
 
   void saveSettings() const override;
 
+protected:
+  void initLayout();
+  void showImg();
+
   void resetCoR() override;
   void resetROI() override;
   void resetNormArea() override;
 
-protected:
-  void initLayout();
-  void showImg();
+  void resetWidgetsOnNewStack();
 
   /// update coordinates from mouse event
   void mouseUpdateCoR(int x, int y);
@@ -121,6 +124,8 @@ protected:
 
 private slots:
   void browseImgClicked();
+
+  void updatedRotation(int idx);
 
   void corClicked();
   void corResetClicked();
@@ -163,7 +168,7 @@ private:
 
   // shows the image in a widget
   void showProjectionImage(const Mantid::API::WorkspaceGroup_sptr &wsg,
-                           size_t idx);
+                           size_t idx, float rotationAngle = 0);
 
   /// repaint the image with new positions of points and rectangles
   void refreshROIetAl();

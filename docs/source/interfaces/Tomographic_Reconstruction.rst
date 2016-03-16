@@ -201,6 +201,12 @@ the tool and/or reconstruction method used.
    :align: center
    :scale: 60%
 
+Stacks of images can be opened by using the browse button located at
+the top of the interface. You can point the interface to a folder
+(directory) containing directories for sample, dark, and flat images,
+or alternatively to a folder containing images. The interface will
+pick all the files recognized as images.
+
 At any stage during the process of selecting the regions it is also
 possible to see how the selections fit different images by sliding
 through the images of the stack (using the slider or scroll bar).
@@ -226,6 +232,11 @@ If when selection a region the mouse is moved outside of the images,
 it is possible to continue the selection of the region (second corner)
 by clicking again inside the image. Alternatively, any selection can
 be reset at any point by using the "reset" buttons.
+
+When loading a stack of images, note that when the images are loaded from
+the folder(s) (directorie(s)) any files with unrecognized extension or
+type (for example .txt) will be ignored. Normally a warning about this
+will be shown in the Mantid logs.
 
 Pre-/post-processing
 ~~~~~~~~~~~~~~~~~~~~

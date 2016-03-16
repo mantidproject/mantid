@@ -47,6 +47,12 @@ public:
   // void updateImgWithIndex(size_t idx)
   MOCK_METHOD1(updateImgWithIndex, void(size_t));
 
+  // float currentRotationAngle() const
+  MOCK_CONST_METHOD0(currentRotationAngle, float());
+
+  // void updateRotationAngle(float angle)
+  MOCK_METHOD1(updateRotationAngle, void(float));
+
   // std::string askImgOrStackPath();
   MOCK_METHOD0(askImgOrStackPath, std::string());
 
@@ -61,6 +67,9 @@ public:
 
   // void resetNormArea()
   MOCK_METHOD0(resetNormArea, void());
+
+  // void resetNormArea()
+  MOCK_METHOD0(resetWidgetsOnNewStack, void());
 };
 
 #endif // MANTID_CUSTOMINTERFACES_IMAGEROIVIEWMOCK_H

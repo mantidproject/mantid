@@ -63,10 +63,7 @@ void ImageROIViewQtWidget::showStack(Mantid::API::WorkspaceGroup_sptr &wsg) {
 
   m_stack = wsg;
 
-  m_ui.horizontalScrollBar_img_stack->setEnabled(true);
-  m_ui.horizontalScrollBar_img_stack->setMinimum(0);
-  m_ui.horizontalScrollBar_img_stack->setMaximum(
-      static_cast<int>(m_stack->size() - 1));
+  resetWidgetsOnNewStack();
 
   size_t width = 0, height = 0;
   try {
@@ -268,6 +265,14 @@ void ImageROIViewQtWidget::setupConnections() {
           SLOT(valueUpdatedNormArea(int)));
   connect(m_ui.spinBox_norm_bottom_y, SIGNAL(valueChanged(int)), this,
           SLOT(valueUpdatedNormArea(int)));
+}
+
+void ImageROIViewQtWidget::resetWidgetsOnNewStack() {
+  m_ui.horizontalScrollBar_img_stack->setEnabled(true);
+  m_ui.horizontalScrollBar_img_stack->setMinimum(0);
+  m_ui.horizontalScrollBar_img_stack->setMaximum(
+      static_cast<int>(m_stack->size() - 1));
+  m_ui.comboBox_rotation->setCurrentIndex(0);
 }
 
 void ImageROIViewQtWidget::valueUpdatedCoR(int) {
@@ -514,7 +519,7 @@ void ImageROIViewQtWidget::updateFromImagesSlider(int /* current */) {
   m_presenter->notify(IImageROIPresenter::UpdateImgIndex);
 }
 
-void ImageROIViewQtWidget::updateRotation(int idx) {
+void ImageROIViewQtWidget::updatedRotation(int /* idx */) {
   m_presenter->notify(ImageROIPresenter::ChangeRotation);
 }
 
@@ -533,7 +538,8 @@ void ImageROIViewQtWidget::updateImgWithIndex(size_t idx) {
 }
 
 void ImageROIViewQtWidget::showProjectionImage(
-    const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx) {
+    const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx,
+    float rotationAngle) {
 
   MatrixWorkspace_sptr ws;
   try {
@@ -645,15 +651,16 @@ void ImageROIViewQtWidget::showProjectionImage(
 }
 
 float ImageROIViewQtWidget::currentRotationAngle() const {
-  return m_ui.comboBox_rotation->currentIndex() * 90.0;
+  return static_cast<float>(m_ui.comboBox_rotation->currentIndex()) * 90.0f;
 }
 
 void ImageROIViewQtWidget::updateRotationAngle(float angle) {
-  if (angle < 0 || angle > 360 || (0 != angle % % 90))
+  if (angle < 0 || (0 != static_cast<int>(angle) % 90))
     return;
 
-  m_ui.comboBox->setCurrentIndex(static_cast<int>((angle / 90) % % 4));
-  showStack(m_stack);
+  m_ui.comboBox->setCurrentIndex(
+      static_cast<int>((static_cast<int>(angle) / 90) % 4));
+  showProjectionImage(m_stack, currentImgIndex(), currentRotationAngle());
 }
 
 /**

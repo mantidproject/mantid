@@ -47,6 +47,13 @@ public:
 
     EXPECT_CALL(mockView, setParams(testing::_)).Times(1);
 
+    EXPECT_CALL(mockView, resetCoR()).Times(0);
+    EXPECT_CALL(mockView, resetROI()).Times(0);
+    EXPECT_CALL(mockView, resetNormArea()).Times(0);
+    EXPECT_CALL(mockView, resetWidgetsOnNewStack()).Times(0);
+    EXPECT_CALL(mockView, currentRotationAngle()).Times(0);
+    EXPECT_CALL(mockView, updateRotationAngle(testing::_)).Times(0);
+
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
@@ -59,6 +66,8 @@ public:
     MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
 
     EXPECT_CALL(mockView, setParams(testing::_)).Times(1);
+
+    EXPECT_CALL(mockView, resetWidgetsOnNewStack()).Times(0);
 
     // One error, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -76,6 +85,9 @@ public:
     // No error, no warnings, just ignored
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    // because the path is wrong this should not happen
+    EXPECT_CALL(mockView, resetWidgetsOnNewStack()).Times(0);
 
     // should not get there:
     EXPECT_CALL(mockView, showStack(testing::An<const std::string &>()))
@@ -97,6 +109,9 @@ public:
     // No error, one warning pop-up because a stack is not found
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    // because the path is wrong this should not happen
+    EXPECT_CALL(mockView, resetWidgetsOnNewStack()).Times(0);
 
     // should not get there because there's no stack/img - it's just ignored:
     EXPECT_CALL(mockView, showStack(testing::An<const std::string &>()))
@@ -120,6 +135,9 @@ public:
     // A warning
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    // because the path is wrong this should not happen
+    EXPECT_CALL(mockView, resetWidgetsOnNewStack()).Times(0);
 
     // should not get there because there's no stack/img
     EXPECT_CALL(mockView, showStack(testing::An<const std::string &>()))

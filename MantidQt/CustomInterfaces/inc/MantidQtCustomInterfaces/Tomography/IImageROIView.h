@@ -46,7 +46,7 @@ public:
 
   // Selection states
   enum SelectionState {
-    SelectNone,          ///< Init, or after any reset
+    SelectNone, ///< Init, or after any reset
     SelectCoR,
     SelectROIFirst,
     SelectROISecond,
@@ -86,7 +86,7 @@ public:
    *
    * @param state new state we're transitioning into.
    */
-  virtual void changeSelectionState(const SelectionState& state) = 0;
+  virtual void changeSelectionState(const SelectionState &state) = 0;
 
   /**
    * Display a special case of stack of images: individual image, from

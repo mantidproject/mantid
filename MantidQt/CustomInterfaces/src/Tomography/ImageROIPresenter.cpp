@@ -248,7 +248,11 @@ ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
   if (imgs.empty())
     return Mantid::API::WorkspaceGroup_sptr();
 
-  const std::string wsName = "__stack_fits_viewer_tomography_gui";
+  const std::string wsName = "__tomography_gui_stack_fits_viewer_sample_images";
+
+  // const std::string wsName =
+  // "__tomography_gui_stack_fits_viewer_flat_images";
+
   auto &ads = Mantid::API::AnalysisDataService::Instance();
   try {
     if (ads.doesExist(wsName)) {

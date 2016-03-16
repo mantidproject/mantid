@@ -661,7 +661,7 @@
        <item row="0" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
-          <widget class="QLabel" name="label">
+          <widget class="QLabel" name="label_image_type">
            <property name="text">
             <string>Display:</string>
            </property>
@@ -681,7 +681,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QComboBox" name="comboBox_2">
+          <widget class="QComboBox" name="comboBox_image_type">
            <item>
             <property name="text">
              <string>Sample</string>
@@ -704,7 +704,7 @@
        <item row="1" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
-          <widget class="QLabel" name="label_8">
+          <widget class="QLabel" name="label_rotation">
            <property name="text">
             <string>Rotate (clockwise):</string>
            </property>
@@ -724,7 +724,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QComboBox" name="comboBox_3">
+          <widget class="QComboBox" name="comboBox_rotation">
            <property name="editable">
             <bool>false</bool>
            </property>
