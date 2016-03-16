@@ -33,7 +33,6 @@ void QtReflOptionsDialog::initBindings() {
   auto widgetsVec = widgets.toVector();
   for (auto it = widgets.begin(); it != widgets.end(); ++it) {
     QVariant binding = (*it)->property("reflOptionName");
-    std::string bind = binding.toString().toStdString();
     if (binding.isValid())
       m_bindings[binding.toString().toStdString()] = (*it)->objectName();
   }
