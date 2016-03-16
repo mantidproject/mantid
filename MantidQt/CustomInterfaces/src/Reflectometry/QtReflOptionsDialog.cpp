@@ -1,6 +1,5 @@
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflOptionsDialog.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflMainView.h"
-#include "Qt/qvalidator.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
