@@ -10,6 +10,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableViewPresenter.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "ProgressableViewMockObject.h"
 
 #include "ReflTableViewMockObjects.h"
 

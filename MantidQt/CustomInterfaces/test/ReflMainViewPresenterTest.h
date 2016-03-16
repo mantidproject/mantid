@@ -8,6 +8,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
 
+#include "ProgressableViewMockObject.h"
 #include "ReflMainViewMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;
@@ -33,7 +34,7 @@ public:
 
   void test_constructor_sets_possible_transfer_methods() {
     NiceMock<MockView> mockView;
-		MockProgressableView mockProgress;
+    MockProgressableView mockProgress;
 
     // Expect that the transfer methods get initialized on the view
     EXPECT_CALL(mockView, setTransferMethods(_)).Times(Exactly(1));

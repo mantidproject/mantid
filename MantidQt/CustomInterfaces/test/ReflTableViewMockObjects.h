@@ -1,8 +1,6 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLTABLEVIEWMOCKOBJECTS_H
 #define MANTID_CUSTOMINTERFACES_REFLTABLEVIEWMOCKOBJECTS_H
 
-#include "MantidKernel/ProgressBase.h"
-#include "MantidQtCustomInterfaces/ProgressableView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableView.h"
@@ -62,14 +60,6 @@ public:
   boost::shared_ptr<IReflTablePresenter> getTablePresenter() const override {
     return boost::shared_ptr<IReflTablePresenter>();
   }
-};
-
-class MockProgressableView : public ProgressableView {
-public:
-  MOCK_METHOD1(setProgress, void(int));
-  MOCK_METHOD2(setProgressRange, void(int, int));
-  MOCK_METHOD0(clearProgress, void());
-  ~MockProgressableView() override {}
 };
 
 #endif /*MANTID_CUSTOMINTERFACES_REFLTABLEVIEWMOCKOBJECTS_H*/

@@ -213,6 +213,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/MeasurementItem.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ProgressPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h
 	inc/MantidQtCustomInterfaces/Reflectometry/QReflTableView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/QtReflMainView.h

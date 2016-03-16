@@ -11,13 +11,13 @@
 #include "MantidKernel/CatalogInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidKernel/Utils.h"
 #include "MantidQtCustomInterfaces/ParseKeyValueString.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ProgressPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflOptionsDialog.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h"
@@ -40,32 +40,6 @@ using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
 
 namespace {
-
-class ReflProgress : public Mantid::Kernel::ProgressBase {
-private:
-  MantidQt::CustomInterfaces::ProgressableView *const m_progressableView;
-
-public:
-  ReflProgress(
-      double start, double end, int64_t nSteps,
-      MantidQt::CustomInterfaces::ProgressableView *const progressableView)
-      : ProgressBase(static_cast<int>(start), static_cast<int>(end),
-                     static_cast<int>(nSteps)),
-        m_progressableView(progressableView) {
-    if (!progressableView) {
-      throw std::runtime_error("ProgressableView is null");
-    }
-    m_progressableView->clearProgress();
-    m_progressableView->setProgressRange(static_cast<int>(start),
-                                         static_cast<int>(end));
-  }
-
-  void doReport(const std::string &) {
-    m_progressableView->setProgress(static_cast<int>(m_i));
-  }
-  void clear() { m_progressableView->clearProgress(); }
-  ~ReflProgress() {}
-};
 void validateModel(ITableWorkspace_sptr model) {
   if (!model)
     throw std::runtime_error("Null pointer");
@@ -404,8 +378,8 @@ bool ReflTableViewPresenter::processGroups(std::map<int, std::set<int>> groups,
   int progress = 0;
   // Each group and each row within count as a progress step.
   const int maxProgress = (int)(rows.size() + groups.size());
-  ReflProgress progressReporter(progress, maxProgress, maxProgress,
-                                m_progressView);
+  ProgressPresenter progressReporter(progress, maxProgress, maxProgress,
+                                     m_progressView);
 
   for (auto gIt = groups.begin(); gIt != groups.end(); ++gIt) {
     const std::set<int> groupRows = gIt->second;
