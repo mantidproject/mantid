@@ -115,6 +115,7 @@ void ComptonProfile::cacheYSpaceValues(const std::vector<double> &tseconds,
                                        const bool isHistogram,
                                        const Algorithms::DetectorParams &detpar,
                                        const ResolutionParams &respar) {
+  m_resolutionFunction->setAttributeValue("Mass", m_mass);
   m_resolutionFunction->cacheResolutionComponents(detpar, respar);
   this->cacheYSpaceValues(tseconds, isHistogram, detpar);
 }
