@@ -1,5 +1,5 @@
 #include "MantidDataHandling/CreateSimulationWorkspace.h"
-
+#include "MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -21,35 +21,46 @@
 
 #include <Poco/File.h>
 
-
 namespace {
 
-  struct StartAndEndTime {
-    Mantid::Kernel::DateAndTime startTime;
-    Mantid::Kernel::DateAndTime endTime;
-  };
+struct StartAndEndTime {
+  Mantid::Kernel::DateAndTime startTime;
+  Mantid::Kernel::DateAndTime endTime;
+};
 
-  StartAndEndTime getStartAndEndTimesFromRawFile(std::string filename) {
-    FILE *rawFile = fopen(filename.c_str(), "rb");
-    if (!rawFile)
-      throw std::runtime_error("Cannot open RAW file for reading: " + filename);
+StartAndEndTime getStartAndEndTimesFromRawFile(std::string filename) {
+  FILE *rawFile = fopen(filename.c_str(), "rb");
+  if (!rawFile)
+    throw std::runtime_error("Cannot open RAW file for reading: " + filename);
 
-    ISISRAW2 isisRaw;
-    const bool fromFile(true), readData(false);
-    isisRaw.ioRAW(rawFile, fromFile, readData);
+  ISISRAW2 isisRaw;
+  const bool fromFile(true), readData(false);
+  isisRaw.ioRAW(rawFile, fromFile, readData);
 
-    StartAndEndTime startAndEndTime;
-    startAndEndTime.startTime = Mantid::DataHandling::LoadRawHelper::extractStartTime(&isisRaw);
-    startAndEndTime.endTime = Mantid::DataHandling::LoadRawHelper::extractEndTime(&isisRaw);
-    return startAndEndTime;
-  }
-
-  StartAndEndTime getStartAndEndTimesFromNexusFile(std::string filename) {
-
-    return StartAndEndTime();
-  }
+  StartAndEndTime startAndEndTime;
+  startAndEndTime.startTime =
+      Mantid::DataHandling::LoadRawHelper::extractStartTime(&isisRaw);
+  startAndEndTime.endTime =
+      Mantid::DataHandling::LoadRawHelper::extractEndTime(&isisRaw);
+  return startAndEndTime;
 }
 
+StartAndEndTime getStartAndEndTimesFromNexusFile(
+    std::string filename, const Mantid::Kernel::DateAndTime &startTimeDefault,
+    const Mantid::Kernel::DateAndTime &endTimeDefault) {
+  StartAndEndTime startAndEndTime;
+  try {
+    Mantid::DataHandling::StartAndEndTimeFromNexusFileExtractor extractor;
+    startAndEndTime.startTime = extractor.extractStartTime(filename);
+    startAndEndTime.endTime = extractor.extractEndTime(filename);
+  } catch (...) {
+    startAndEndTime.startTime = startTimeDefault;
+    startAndEndTime.endTime = endTimeDefault;
+  }
+
+  return startAndEndTime;
+}
+}
 
 namespace Mantid {
 namespace DataHandling {
@@ -134,6 +145,7 @@ void CreateSimulationWorkspace::createInstrument() {
       WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
   // We need to set the correct start date for this workspace
+  // else we might be pulling an inadequate IDF
   setStartDate(tempWS);
 
   loadInstrument->setProperty("Workspace", tempWS);
@@ -388,26 +400,36 @@ void CreateSimulationWorkspace::adjustInstrument(const std::string &filename) {
  * available we update the dummy workspace with the start date from this file.
  * @param workspace: dummy workspace
  */
-void CreateSimulationWorkspace::setStartDate(API::MatrixWorkspace_sptr workspace) {
+void CreateSimulationWorkspace::setStartDate(
+    API::MatrixWorkspace_sptr workspace) {
   const std::string detTableFile = getProperty("DetectorTableFilename");
   auto hasDetTableFile = !detTableFile.empty();
-  auto run = workspace->mutableRun();
+  auto& run = workspace->mutableRun();
 
-  Kernel::DateAndTime startTime = run.startTime();
-  Kernel::DateAndTime endTime = run.endTime();
+  Kernel::DateAndTime startTime;
+  Kernel::DateAndTime endTime;
+  try {
+    // The start and end times might not be valid, and hence can throw
+    Kernel::DateAndTime startTime = run.startTime();
+    Kernel::DateAndTime endTime = run.endTime();
+  }
+  catch (std::runtime_error&) {
+    startTime = Kernel::DateAndTime::getCurrentTime();
+    endTime = Kernel::DateAndTime::getCurrentTime();
+  }
 
   if (hasDetTableFile) {
-      if (boost::algorithm::ends_with(detTableFile, ".raw") ||
-          boost::algorithm::ends_with(detTableFile, ".RAW")) {
-          auto startAndEndTime = getStartAndEndTimesFromRawFile(detTableFile);
-          startTime = startAndEndTime.startTime;
-          endTime = startAndEndTime.endTime;
-      } else if (boost::algorithm::ends_with(detTableFile, ".nxs") ||
-                 boost::algorithm::ends_with(detTableFile, ".NXS")) {
-          auto startAndEndTime = getStartAndEndTimesFromNexusFile(detTableFile);
-          startTime = startAndEndTime.startTime;
-          endTime = startAndEndTime.endTime;
-      }
+    if (boost::algorithm::ends_with(detTableFile, ".raw") ||
+        boost::algorithm::ends_with(detTableFile, ".RAW")) {
+      auto startAndEndTime = getStartAndEndTimesFromRawFile(detTableFile);
+      startTime = startAndEndTime.startTime;
+      endTime = startAndEndTime.endTime;
+    } else if (boost::algorithm::ends_with(detTableFile, ".nxs") ||
+               boost::algorithm::ends_with(detTableFile, ".NXS")) {
+      auto startAndEndTime = getStartAndEndTimesFromNexusFile(detTableFile, startTime, endTime);
+      startTime = startAndEndTime.startTime;
+      endTime = startAndEndTime.endTime;
+    }
   }
 
   run.setStartAndEndTime(startTime, endTime);

@@ -1,5 +1,6 @@
-#include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h"
+#include "MantidAPI/FileFinder.h"
+#include "MantidDataHandling/LoadNexus.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidNexus/NexusClasses.h"
@@ -92,23 +93,24 @@ StartAndEndTimeFromNexusFileExtractor::whichNexusType(
 Mantid::Kernel::DateAndTime
 StartAndEndTimeFromNexusFileExtractor::extractDateAndTime(
     TimeType type, std::string filename) const {
+  auto fullFileName = Mantid::API::FileFinder::Instance().getFullPath(filename);
   // Figure out the type of the Nexus file. We need to handle them individually
   // since they store the datetime differently
-  auto nexusType = whichNexusType(filename);
+  auto nexusType = whichNexusType(fullFileName);
   Mantid::Kernel::DateAndTime dateAndTime;
 
   switch (nexusType) {
   case NexusType::Muon:
-    dateAndTime = handleMuonNexusFile(type, filename);
+    dateAndTime = handleMuonNexusFile(type, fullFileName);
     break;
   case NexusType::ISIS:
-    dateAndTime = handleISISNexusFile(type, filename);
+    dateAndTime = handleISISNexusFile(type, fullFileName);
     break;
   case NexusType::Processed:
-    dateAndTime = handleProcessedNexusFile(type, filename);
+    dateAndTime = handleProcessedNexusFile(type, fullFileName);
     break;
   case NexusType::TofRaw:
-    dateAndTime = handleTofRawNexusFile(type, filename);
+    dateAndTime = handleTofRawNexusFile(type, fullFileName);
     break;
   default:
     throw std::runtime_error(
