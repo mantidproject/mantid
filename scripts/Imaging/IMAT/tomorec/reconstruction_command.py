@@ -356,6 +356,11 @@ class ReconstructionCommand(object):
                 raise ValueError("Wrong air region coordinates when trying to use them to normalize images: {0}".
                                  format(pre_cfg.normalize_air_region))
 
+            # skip if for example: 0, 0, 0, 0 (empty selection)
+            if (cfg.normalize_air_region[1] >= cfg.normalize_air_region[3] or
+                cfg.normalize_air_region[0] >= cfg.normalize_air_region[2]):
+                return data
+
             air_sums = []
             for idx in range(0, data.shape[0]):
                 air_data_sum = data[idx, cfg.normalize_air_region[1]:cfg.normalize_air_region[3],
@@ -561,8 +566,8 @@ class ReconstructionCommand(object):
             # 'sirt' with num_iter=30 => 698.119 ~= 11.63
             if verbosity >= 1:
                 print("Running iterative method with tomopy. Algorithm: {0}, "
-                      "number of iterations: {1}".format(algorithm, alg_cfg.num_iter))
-            rec = tomopy.recon(tomo=proj_data, theta=proj_angles, center=cor,
+                      "number of iterations: {1}".format(alg_cfg.algorithm, alg_cfg.num_iter))
+            rec = tomopy.recon(tomo=proj_data, theta=proj_angles, center=preproc_cfg.cor,
                                algorithm=alg_cfg.algorithm, num_iter=alg_cfg.num_iter) #, filter_name='parzen')
         else:
             if verbosity >= 1:
