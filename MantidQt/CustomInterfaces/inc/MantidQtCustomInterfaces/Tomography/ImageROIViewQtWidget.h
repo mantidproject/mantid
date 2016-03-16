@@ -94,6 +94,10 @@ public:
 
   void updateImgWithIndex(size_t idx) override;
 
+  float currentRotationAngle() const override;
+
+  void updateRotationAngle(float angle) override;
+
   std::string askImgOrStackPath() override;
 
   void saveSettings() const override;

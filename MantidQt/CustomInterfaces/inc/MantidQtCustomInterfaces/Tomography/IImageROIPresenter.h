@@ -49,6 +49,7 @@ public:
     BrowseImgOrStack,     ///< User browses for an image file or stack
     NewImgOrStack,        ///< A new image or stack needs to be loaded
     UpdateImgIndex,       ///< Sliding/scrolling through the stack
+    ChangeRotation,       ///< Modify the rotation in the images displayed
     SelectCoR,            ///< Start picking of the center of rotation
     SelectROI,            ///< Start selection of the region of interest
     SelectNormalization,  ///< Start selection of the normalization region

@@ -241,6 +241,10 @@ void ImageROIViewQtWidget::setupConnections() {
   connect(m_ui.horizontalScrollBar_img_stack, SIGNAL(valueChanged(int)), this,
           SLOT(updateFromImagesSlider(int)));
 
+  // image rotation
+  connect(m_ui.comboBox_rotation, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(updateRotation(int)));
+
   // parameter (points) widgets
   connect(m_ui.spinBox_cor_x, SIGNAL(valueChanged(int)), this,
           SLOT(valueUpdatedCoR(int)));
@@ -510,6 +514,10 @@ void ImageROIViewQtWidget::updateFromImagesSlider(int /* current */) {
   m_presenter->notify(IImageROIPresenter::UpdateImgIndex);
 }
 
+void ImageROIViewQtWidget::updateRotation(int idx) {
+  m_presenter->notify(ImageROIPresenter::ChangeRotation);
+}
+
 size_t ImageROIViewQtWidget::currentImgIndex() const {
   return m_ui.horizontalScrollBar_img_stack->value();
 }
@@ -539,7 +547,7 @@ void ImageROIViewQtWidget::showProjectionImage(
             QString::fromStdString(e.what()));
   }
 
-  const size_t MAXDIM = 2048 * 16;
+  const size_t MAXDIM = 2048 * 32;
   size_t width;
   try {
     width = boost::lexical_cast<size_t>(ws->run().getLogData("Axis1")->value());
@@ -634,6 +642,18 @@ void ImageROIViewQtWidget::showProjectionImage(
   // m_ui.label_img->setPixmap(pix);
   // m_ui.label_img->show();
   // m_basePixmap.reset(new QPixmap(pix));
+}
+
+float ImageROIViewQtWidget::currentRotationAngle() const {
+  return m_ui.comboBox_rotation->currentIndex() * 90.0;
+}
+
+void ImageROIViewQtWidget::updateRotationAngle(float angle) {
+  if (angle < 0 || angle > 360 || (0 != angle % % 90))
+    return;
+
+  m_ui.comboBox->setCurrentIndex(static_cast<int>((angle / 90) % % 4));
+  showStack(m_stack);
 }
 
 /**

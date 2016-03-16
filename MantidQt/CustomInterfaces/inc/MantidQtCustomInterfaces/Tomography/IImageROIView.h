@@ -175,6 +175,21 @@ public:
   virtual void updateImgWithIndex(size_t idx) = 0;
 
   /**
+   * The rotation angle selected.
+   *
+   * @return angle in degrees.
+   */
+  virtual float currentRotationAngle() const = 0;
+
+  /**
+   * Modify the rotation angle selection and update the image display
+   * to match the new rotation.
+   *
+   * @param rotation angle in degrees
+   */
+  virtual void updateRotationAngle(float angle) = 0;
+
+  /**
    * Get the path/location of a stack of images (or single image as a
    * particular case) that the user is requesting to display.  The
    * path would be expected to point to a recognized directory
