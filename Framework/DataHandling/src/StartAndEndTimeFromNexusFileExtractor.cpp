@@ -1,6 +1,6 @@
-#include "MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidDataHandling/LoadNexus.h"
+#include "MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidNexus/NexusClasses.h"
@@ -15,38 +15,52 @@ Mantid::Kernel::Logger g_log("StartAndEndTimeFromNexusFileExtractor");
 namespace Mantid {
 namespace DataHandling {
 
-/**
- * Gets the start time from the nexus file
- * @param filename: the file name
- * @return the start time
- * @throws if the the start time cannot be extracted
- */
-Mantid::Kernel::DateAndTime
-StartAndEndTimeFromNexusFileExtractor::extractStartTime(
-    std::string filename) const {
-  return extractDateAndTime(TimeType::StartTime, filename);
+enum class NexusType { Muon, Processed, ISIS, TofRaw };
+enum class TimeType : unsigned char { StartTime, EndTime };
+
+Mantid::Kernel::DateAndTime handleMuonNexusFile(TimeType type,
+                                                std::string filename) {
+  Mantid::NeXus::NXRoot root(filename);
+  if (type == TimeType::StartTime) {
+    return Mantid::Kernel::DateAndTime(root.getString("run/start_time"));
+  } else {
+    return Mantid::Kernel::DateAndTime(root.getString("run/stop_time"));
+  }
 }
 
-/**
- * Gets the start time from the nexus file
- * @param filename: the file name
- * @return the start time
- * @throws if the the start time cannot be extracted
- */
-Mantid::Kernel::DateAndTime
-StartAndEndTimeFromNexusFileExtractor::extractEndTime(
-    std::string filename) const {
-  return extractDateAndTime(TimeType::EndTime, filename);
+Mantid::Kernel::DateAndTime handleProcessedNexusFile(TimeType type,
+                                                     std::string filename) {
+  Mantid::NeXus::NXRoot root(filename);
+  if (type == TimeType::StartTime) {
+    return Mantid::Kernel::DateAndTime(
+        root.getString("mantid_workspace_1/logs/run_start/value"));
+  } else {
+    return Mantid::Kernel::DateAndTime(
+        root.getString("mantid_workspace_1/logs/run_end/value"));
+  }
 }
 
-/**
- * Get the nexus file type
- * @param filename
- * @return
- */
-StartAndEndTimeFromNexusFileExtractor::NexusType
-StartAndEndTimeFromNexusFileExtractor::whichNexusType(
-    std::string filename) const {
+Mantid::Kernel::DateAndTime handleISISNexusFile(TimeType type,
+                                                std::string filename) {
+  Mantid::NeXus::NXRoot root(filename);
+  if (type == TimeType::StartTime) {
+    return Mantid::Kernel::DateAndTime(root.getString("raw_data_1/start_time"));
+  } else {
+    return Mantid::Kernel::DateAndTime(root.getString("raw_data_1/end_time"));
+  }
+}
+
+Mantid::Kernel::DateAndTime handleTofRawNexusFile(TimeType type,
+                                                  std::string filename) {
+  Mantid::NeXus::NXRoot root(filename);
+  if (type == TimeType::StartTime) {
+    return Mantid::Kernel::DateAndTime(root.getString("entry/start_time"));
+  } else {
+    return Mantid::Kernel::DateAndTime(root.getString("entry/end_time"));
+  }
+}
+
+NexusType whichNexusType(std::string filename) {
   std::vector<std::string> entryName;
   std::vector<std::string> definition;
   auto count =
@@ -90,9 +104,8 @@ StartAndEndTimeFromNexusFileExtractor::whichNexusType(
   return nexusType;
 }
 
-Mantid::Kernel::DateAndTime
-StartAndEndTimeFromNexusFileExtractor::extractDateAndTime(
-    TimeType type, std::string filename) const {
+Mantid::Kernel::DateAndTime extractDateAndTime(TimeType type,
+                                               std::string filename) {
   auto fullFileName = Mantid::API::FileFinder::Instance().getFullPath(filename);
   // Figure out the type of the Nexus file. We need to handle them individually
   // since they store the datetime differently
@@ -120,50 +133,24 @@ StartAndEndTimeFromNexusFileExtractor::extractDateAndTime(
   return dateAndTime;
 }
 
-Mantid::Kernel::DateAndTime
-StartAndEndTimeFromNexusFileExtractor::handleMuonNexusFile(
-    TimeType type, std::string filename) const {
-  Mantid::NeXus::NXRoot root(filename);
-  if (type == TimeType::StartTime) {
-    return Mantid::Kernel::DateAndTime(root.getString("run/start_time"));
-  } else {
-    return Mantid::Kernel::DateAndTime(root.getString("run/stop_time"));
-  }
+/**
+ * Gets the start time from the nexus file
+ * @param filename: the file name
+ * @return the start time
+ * @throws if the the start time cannot be extracted
+ */
+Mantid::Kernel::DateAndTime extractStartTime(std::string filename) {
+  return extractDateAndTime(TimeType::StartTime, filename);
 }
 
-Mantid::Kernel::DateAndTime
-StartAndEndTimeFromNexusFileExtractor::handleProcessedNexusFile(
-    TimeType type, std::string filename) const {
-  Mantid::NeXus::NXRoot root(filename);
-  if (type == TimeType::StartTime) {
-    return Mantid::Kernel::DateAndTime(
-        root.getString("mantid_workspace_1/logs/run_start/value"));
-  } else {
-    return Mantid::Kernel::DateAndTime(
-        root.getString("mantid_workspace_1/logs/run_end/value"));
-  }
-}
-
-Mantid::Kernel::DateAndTime
-StartAndEndTimeFromNexusFileExtractor::handleISISNexusFile(
-    TimeType type, std::string filename) const {
-  Mantid::NeXus::NXRoot root(filename);
-  if (type == TimeType::StartTime) {
-    return Mantid::Kernel::DateAndTime(root.getString("raw_data_1/start_time"));
-  } else {
-    return Mantid::Kernel::DateAndTime(root.getString("raw_data_1/end_time"));
-  }
-}
-
-Mantid::Kernel::DateAndTime
-StartAndEndTimeFromNexusFileExtractor::handleTofRawNexusFile(
-    TimeType type, std::string filename) const {
-  Mantid::NeXus::NXRoot root(filename);
-  if (type == TimeType::StartTime) {
-    return Mantid::Kernel::DateAndTime(root.getString("entry/start_time"));
-  } else {
-    return Mantid::Kernel::DateAndTime(root.getString("entry/end_time"));
-  }
+/**
+ * Gets the start time from the nexus file
+ * @param filename: the file name
+ * @return the start time
+ * @throws if the the start time cannot be extracted
+ */
+Mantid::Kernel::DateAndTime extractEndTime(std::string filename) {
+  return extractDateAndTime(TimeType::EndTime, filename);
 }
 
 } // namespace DataHandling

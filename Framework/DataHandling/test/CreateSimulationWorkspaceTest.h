@@ -93,7 +93,7 @@ public:
 
     // The HET15869 data set was measured around 2005 on the HET instrument.
     // This is also the latest IDF.
-    compareSimulationWorkspaceIDFWithRawFileIDF(outputWS, filename);
+    compareSimulationWorkspaceIDFWithFileIDF(outputWS, filename, "LoadRaw");
   }
 
   void test_correct_IDF_is_used_for_RAW_File() {
@@ -107,7 +107,7 @@ public:
 
     // The LOQ48094 data set was measured around 2008 on the LOQ instrument.
     // This latest IDF is 2012 or later.
-    compareSimulationWorkspaceIDFWithRawFileIDF(outputWS, filename);
+    compareSimulationWorkspaceIDFWithFileIDF(outputWS, filename, "LoadRaw");
   }
 
   void test_Spectra_Detector_Mapping_Is_Pulled_From_Given_ISIS_NeXus_File() {
@@ -126,7 +126,7 @@ public:
     // The LOQ49886 data set was measured around 2009 on the LOQ instrument.
     // It does not link to the most recent version of the LOQ IDF (2012 or
     // later).
-    compareSimulationWorkspaceIDFWithNexusFileIDF(outputWS, filename);
+    compareSimulationWorkspaceIDFWithFileIDF(outputWS, filename, "LoadNexus");
   }
 
   void test_UnitX_Throws_When_Invalid() {
@@ -200,12 +200,12 @@ private:
     return alg;
   }
 
-  void compareSimulationWorkspaceIDFWithNexusFileIDF(
-      Mantid::API::MatrixWorkspace_sptr simulationWorkspace,
-      const std::string &filename) {
+  void compareSimulationWorkspaceIDFWithFileIDF(
+    Mantid::API::MatrixWorkspace_sptr simulationWorkspace,
+    const std::string &filename, const std::string& algorithmName) {
     std::string outputWSName = "outWSIDFCompareNexus";
     auto alg =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadNexus");
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged(algorithmName);
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("Filename", filename);
@@ -214,34 +214,12 @@ private:
     TS_ASSERT(alg->isExecuted());
     Mantid::API::Workspace_sptr outWS = alg->getProperty("OutputWorkspace");
     auto matWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outWS);
+      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outWS);
     auto idfForOriginal = matWS->getInstrument()->getFilename();
     auto idfForSimulationWS =
-        simulationWorkspace->getInstrument()->getFilename();
+      simulationWorkspace->getInstrument()->getFilename();
     TSM_ASSERT_EQUALS("Should have the same IDF", idfForOriginal,
-                      idfForSimulationWS);
-  }
-
-  void compareSimulationWorkspaceIDFWithRawFileIDF(
-      Mantid::API::MatrixWorkspace_sptr simulationWorkspace,
-      const std::string &filename) {
-    std::string outputWSName = "outWSIDFCompareRaw";
-    auto alg =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadRaw");
-    alg->initialize();
-    alg->setChild(true);
-    alg->setProperty("Filename", filename);
-    alg->setProperty("OutputWorkspace", outputWSName);
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-    TS_ASSERT(alg->isExecuted());
-    Mantid::API::Workspace_sptr outWS = alg->getProperty("OutputWorkspace");
-    auto matWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outWS);
-    auto idfForOriginal = matWS->getInstrument()->getFilename();
-    auto idfForSimulationWS =
-        simulationWorkspace->getInstrument()->getFilename();
-    TSM_ASSERT_EQUALS("Should have the same IDF", idfForOriginal,
-                      idfForSimulationWS);
+      idfForSimulationWS);
   }
 
   std::string m_wsName;
