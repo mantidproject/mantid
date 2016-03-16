@@ -34,10 +34,11 @@ const std::string TomographyIfaceModel::g_customCmdTool = "Custom command";
  * compute resource.
  */
 TomographyIfaceModel::TomographyIfaceModel()
-    : m_loggedInUser(""), m_loggedInComp(""), m_facility("ISIS"),
-      m_localCompName("Local"), m_computeRes(), m_computeResStatus(),
-      m_reconTools(), m_reconToolsStatus(), m_jobsStatus(), m_SCARFtools(),
-      m_toolsSettings(), m_tomopyMethod("gridrec"), m_astraMethod("FBP3D_CUDA"),
+    : m_facility("ISIS"), m_localCompName("Local"), m_experimentRef("RB000000"),
+      m_loggedInUser(""), m_loggedInComp(""), m_computeRes(),
+      m_computeResStatus(), m_reconTools(), m_reconToolsStatus(),
+      m_jobsStatus(), m_SCARFtools(), m_toolsSettings(),
+      m_tomopyMethod("gridrec"), m_astraMethod("FBP3D_CUDA"),
       m_externalInterpreterPath(""), m_prePostProcSettings(),
       m_imageStackPreParams(), m_statusMutex(NULL) {
 
@@ -732,15 +733,6 @@ std::string TomographyIfaceModel::filtersCfgToCmdOpts(
     const ImageStackPreParams &corRegions) const {
   std::string opts;
 
-  opts +=
-      " --region-of-interest='[" + boxCoordinatesToCSV(corRegions.roi) + "]'";
-
-  opts += " --air-region='[" +
-          boxCoordinatesToCSV(corRegions.normalizationRegion) + "]'";
-
-  // TODO: (we require here IMAT specific headers to become available soon)
-  // filters.prep.normalizeByProtonCharge
-
   opts += " --input-path=" + m_pathsConfig.pathSamples();
   std::string alg = "alg";
   if (g_TomoPyTool == usingTool())
@@ -748,21 +740,37 @@ std::string TomographyIfaceModel::filtersCfgToCmdOpts(
   else if (g_AstraTool == usingTool())
     alg = m_astraMethod;
 
-  const std::string outRoot =
-      "/work/imat/imat-data/" + m_experimentRef + "/processed/";
-  opts += " --output=" + outRoot + "out_recon_" + m_currentTool + "_" + alg;
-  if (filters.prep.normalizeByFlatDark) {
+  if (filters.prep.normalizeByFlats) {
     const std::string flat = m_pathsConfig.pathOpenBeam();
     if (!flat.empty())
       opts += " --input-path-flat=" + flat;
+  }
 
-    const std::string dark = m_pathsConfig.pathDark();
+  if (filters.prep.normalizeByDarks) {
+    const std::string dark = m_pathsConfig.pathDarks();
     if (!dark.empty())
       opts += " --input-path-dark=" + dark;
   }
 
   opts +=
+      " --region-of-interest='[" + boxCoordinatesToCSV(corRegions.roi) + "]'";
+
+  if (filters.prep.normalizeByAirRegion) {
+    opts += " --air-region='[" +
+            boxCoordinatesToCSV(corRegions.normalizationRegion) + "]'";
+  }
+
+  const std::string outRoot =
+      "/work/imat/imat-data/" + m_experimentRef + "/processed/";
+  opts += " --output=" + outRoot + "out_recon_" + m_currentTool + "_" + alg;
+
+  opts +=
       " --median-filter-size=" + std::to_string(filters.prep.medianFilterWidth);
+
+  // Filters:
+
+  // TODO: (we require here IMAT specific headers to become available soon)
+  // if (filters.prep.normalizeByProtonCharge)
 
   int rotationIdx = filters.prep.rotation / 90;
   double cor = 0;
@@ -789,6 +797,10 @@ std::string TomographyIfaceModel::filtersCfgToCmdOpts(
   // postp.cutOffLevel
   if (filters.postp.cutOffLevel > 0.0)
     opts += " --cut-off=" + std::to_string(filters.postp.cutOffLevel);
+
+  // TODO: this should take the several possible alternatives from the user
+  // interface
+  opts += " --out-img-format=png";
 
   return opts;
 }

@@ -69,8 +69,8 @@ public:
   void updatePathSamples(const std::string &p) { m_pathFITS = p; }
 
   /**
-   * Path to the open beam file(s) (sample images, typically FITS files)
-   * Note: open bean a.k.a. 'flat' or 'white'
+   * Path to the open beam / flat file(s) (sample images, typically
+   * FITS files) Note: open bean a.k.a. 'flat' or 'white'
    *
    * @return path (full or relative, directory or file) as a string.
    */
@@ -83,9 +83,9 @@ public:
    *
    * @return path (full or relative, directory or file) as a string.
    */
-  std::string pathDark() const { return m_pathDark; }
+  std::string pathDarks() const { return m_pathDark; }
 
-  void updatePathDark(const std::string &p) { m_pathDark = p; }
+  void updatePathDarks(const std::string &p) { m_pathDark = p; }
 
   /**
    * Path to a base directory (for data usually). All other paths

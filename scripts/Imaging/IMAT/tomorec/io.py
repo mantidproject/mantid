@@ -97,7 +97,7 @@ def write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=Non
     Returns:: name of the file saved
     """
     if not img_format:
-        img_format = 'tiff'
+        img_format = 'png'
     filename = filename + '.' + img_format
 
     # The special case dtype = 'uint8' could be handled with bytescale:

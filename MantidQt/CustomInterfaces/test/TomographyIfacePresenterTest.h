@@ -351,12 +351,20 @@ public:
     //             Return("TomoPy"));
 
     TSM_ASSERT_EQUALS("Pre-processing filter settings default values should be "
-                      "as expected (proton-charge normalization)",
-                      def.prep.normalizeByFlatDark, true);
+                      "as expected (normalization by air region)",
+                      def.prep.normalizeByAirRegion, true);
 
     TSM_ASSERT_EQUALS("Pre-processing settings default values should be as "
-                      "expected (flat/dark normalization)",
-                      def.prep.normalizeByProtonCharge, true);
+                      "expected (proton-charge normalization)",
+                      def.prep.normalizeByProtonCharge, false);
+
+    TSM_ASSERT_EQUALS("Pre-processing filter settings default values should be "
+                      "as expected (normalization by flat images)",
+                      def.prep.normalizeByFlats, true);
+
+    TSM_ASSERT_EQUALS("Pre-processing filter settings default values should be "
+                      "as expected (normalization by dark images)",
+                      def.prep.normalizeByDarks, true);
 
     TSM_ASSERT_EQUALS("Pre-processing settings default values should be as "
                       "expected (median filter width)",

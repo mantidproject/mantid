@@ -121,8 +121,8 @@ def setup_cmd_options():
 
     grp_pre.add_argument("--air-region", required=False, type=str,
                          help="Air region /region for normalization. "
-                         "If not provided, the normalization against beam intensity fluctuations will not be "
-                         "performed")
+                         "If not provided, the normalization against beam intensity fluctuations in this "
+                         "region will not be performed")
 
     grp_pre.add_argument("--median-filter-size", type=int,
                          required=False, help="Size/width of the median filter (pre-processing")

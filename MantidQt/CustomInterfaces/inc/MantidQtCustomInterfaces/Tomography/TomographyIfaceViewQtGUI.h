@@ -182,8 +182,10 @@ private slots:
   void browseLocalInOutDirClicked();
   void browseLocalReconScriptsDirClicked();
 
-  void resetRemoteSetup();
-  void fitsPathBrowseClicked();
+  void flatsPathCheckStatusChanged(int status);
+  void darksPathCheckStatusChanged(int status);
+
+  void samplesPathBrowseClicked();
   void flatPathBrowseClicked();
   void darkPathBrowseClicked();
 
@@ -209,6 +211,9 @@ private slots:
   // processing of energy bands
   void browseEnergyInputClicked();
   void browseEnergyOutputClicked();
+
+  // system / advanced settings
+  void resetRemoteSetup();
 
   // for the savu functionality - waiting for Savu
   void menuSaveClicked();
@@ -377,11 +382,13 @@ private:
   // And these are the paths set up
   std::string m_setupPathComponentPhase;
   std::string m_setupExperimentRef;
-  std::string m_setupPathReconScripts;
-  std::string m_setupPathReconOut;
   std::string m_setupParaviewPath;
   std::string m_setupOctopusVisPath;
   std::string m_setupProcessedSubpath;
+  // path of reconstruction scripts locally
+  std::string m_setupPathReconScripts;
+  // path (sometimes drive) for in/out on the local machine
+  std::string m_setupPathReconOut;
 
   // here the view puts messages before notifying the presenter to show them
   std::vector<std::string> m_logMsgs;
