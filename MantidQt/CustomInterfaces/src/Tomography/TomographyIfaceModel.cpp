@@ -747,7 +747,10 @@ std::string TomographyIfaceModel::filtersCfgToCmdOpts(
     alg = m_tomopyMethod;
   else if (g_AstraTool == usingTool())
     alg = m_astraMethod;
-  opts += " --output=out_recon_" + m_currentTool + "_" + alg;
+
+  const std::string outRoot =
+      "/work/imat/imat-data/" + m_experimentRef + "/processed/";
+  opts += " --output=" + outRoot + "out_recon_" + m_currentTool + "_" + alg;
   if (filters.prep.normalizeByFlatDark) {
     const std::string flat = m_pathsConfig.pathOpenBeam();
     if (!flat.empty())

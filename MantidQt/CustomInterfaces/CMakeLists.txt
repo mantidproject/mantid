@@ -423,6 +423,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabRun.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabSetup.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabVisualize.ui
+               inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabSystemSettings.ui
                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigAstra.ui
                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigCustom.ui
                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigSavu.ui

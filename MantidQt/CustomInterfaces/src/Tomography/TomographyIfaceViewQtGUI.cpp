@@ -87,14 +87,14 @@ const std::string TomographyIfaceViewQtGUI::g_defRemotePathScripts =
 const std::string TomographyIfaceViewQtGUI::g_SCARFName = "SCARF@STFC";
 const std::string TomographyIfaceViewQtGUI::g_defOutPathLocal =
 #ifdef _WIN32
-    "D:/imat/";
+    "D:/imat-data/";
 #else
     "~/imat/";
 #endif
 
 const std::string TomographyIfaceViewQtGUI::g_defOutPathRemote =
 #ifdef _WIN32
-    "I:/imat-data/";
+    "I:/imat/imat-data/";
 #else
     "~/imat-data/";
 #endif
@@ -142,7 +142,7 @@ const std::string TomographyIfaceViewQtGUI::g_customCmdTool = "Custom command";
 const std::string TomographyIfaceViewQtGUI::g_defPathComponentPhase =
     "phase_commissioning";
 
-const std::string TomographyIfaceViewQtGUI::g_defRBNumber = "RB000XXX";
+const std::string TomographyIfaceViewQtGUI::g_defExperimentRef = "RB000000";
 
 const std::string TomographyIfaceViewQtGUI::g_defPathReconScripts =
 #ifdef _WIN32
@@ -219,10 +219,15 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_uiTabEnergy.setupUi(tabEBandsW);
   m_ui.tabMain->addTab(tabEBandsW, QString("Energy bands"));
 
+  QWidget *tabSystemSettingsW = new QWidget();
+  m_uiTabSystemSettings.setupUi(tabSystemSettingsW);
+  m_ui.tabMain->addTab(tabSystemSettingsW, QString("System"));
+
   readSettings();
 
   // basic UI setup
   doSetupGeneralWidgets();
+  doSetupSectionSystemSettings();
   doSetupSectionSetup();
   doSetupSectionRun();
   doSetupSectionFilters();
@@ -288,27 +293,12 @@ void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
       QString::fromStdString(m_pathsConfig.pathOpenBeam()));
   m_uiTabSetup.lineEdit_path_dark->setText(
       QString::fromStdString(m_pathsConfig.pathDark()));
-  m_uiTabSetup.lineEdit_SCARF_path->setText(
-      QString::fromStdString(m_pathsConfig.pathBase()));
-  m_uiTabSetup.lineEdit_scripts_base_dir->setText(
-      QString::fromStdString(m_pathsConfig.pathScriptsTools()));
-
-  // reset setup of the remote
-  connect(m_uiTabSetup.pushButton_reset_scripts_base_dir, SIGNAL(released()),
-          this, SLOT(resetRemoteSetup()));
 
   // 'browse' buttons for local conf:
   connect(m_uiTabSetup.pushButton_in_out_dir, SIGNAL(released()), this,
           SLOT(browseLocalInOutDirClicked()));
   connect(m_uiTabSetup.pushButton_recon_scripts_dir, SIGNAL(released()), this,
           SLOT(browseLocalReconScriptsDirClicked()));
-}
-
-void TomographyIfaceViewQtGUI::resetRemoteSetup() {
-  m_uiTabSetup.lineEdit_scripts_base_dir->setText(
-      QString::fromStdString(g_defRemotePathScripts));
-  m_uiTabSetup.spinBox_SCARFnumNodes->setValue(1);
-  m_uiTabSetup.spinBox_SCARFnumCores->setValue(8);
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionRun() {
@@ -354,8 +344,8 @@ void TomographyIfaceViewQtGUI::doSetupSectionRun() {
           SLOT(jobCancelClicked()));
 
   // RB number changes
-  connect(m_uiTabRun.lineEdit_rb_number, SIGNAL(editingFinished()), this,
-          SLOT(updatedRBNumber()));
+  connect(m_uiTabRun.lineEdit_experiment_reference, SIGNAL(editingFinished()),
+          this, SLOT(updatedExperimentReference()));
 
   // update tools for a resource
   connect(m_uiTabRun.comboBox_run_compute_resource,
@@ -378,8 +368,6 @@ void TomographyIfaceViewQtGUI::doSetupSectionVisualize() {
   m_setupProcessedSubpath = g_defProcessedSubpath;
   m_setupOctopusVisPath = g_defOctopusVisPath;
 
-  m_uiTabVisualize.lineEdit_processed_subpath->setText(
-      QString::fromStdString(g_defProcessedSubpath));
   m_uiTabVisualize.lineEdit_paraview_location->setText(
       QString::fromStdString(g_defParaviewPath));
 
@@ -436,6 +424,28 @@ void TomographyIfaceViewQtGUI::doSetupSectionEnergy() {
 
   connect(m_uiTabEnergy.pushButton_browse_input, SIGNAL(released()), this,
           SLOT(browseEnergyOutputClicked()));
+}
+
+void TomographyIfaceViewQtGUI::doSetupSectionSystemSettings() {
+  m_uiTabSystemSettings.lineEdit_processed_subpath->setText(
+      QString::fromStdString(g_defProcessedSubpath));
+
+  // System/advanced/hidden settings:
+  m_uiTabSystemSettings.lineEdit_SCARF_path->setText(
+      QString::fromStdString(m_pathsConfig.pathBase()));
+  m_uiTabSystemSettings.lineEdit_scripts_base_dir_remote->setText(
+      QString::fromStdString(m_pathsConfig.pathScriptsTools()));
+
+  // reset setup of the remote
+  connect(m_uiTabSystemSettings.pushButton_reset_scripts_base_dir_remote,
+          SIGNAL(released()), this, SLOT(resetRemoteSetup()));
+}
+
+void TomographyIfaceViewQtGUI::resetRemoteSetup() {
+  m_uiTabSystemSettings.lineEdit_scripts_base_dir_remote->setText(
+      QString::fromStdString(g_defRemotePathScripts));
+  m_uiTabSystemSettings.spinBox_SCARFnumNodes->setValue(1);
+  m_uiTabSystemSettings.spinBox_SCARFnumCores->setValue(8);
 }
 
 void TomographyIfaceViewQtGUI::setComputeResources(
@@ -633,9 +643,10 @@ void TomographyIfaceViewQtGUI::readSettings() {
   }
 
   // User parameters for reconstructions
-  m_setupRBNumber = qs.value("RB-number", QString::fromStdString(g_defRBNumber))
-                        .toString()
-                        .toStdString();
+  m_setupExperimentRef = qs.value("experiment-reference",
+                                  QString::fromStdString(g_defExperimentRef))
+                             .toString()
+                             .toStdString();
 
   m_localExternalPythonPath =
       qs.value("path-local-external-python",
@@ -675,7 +686,7 @@ void TomographyIfaceViewQtGUI::readSettings() {
 
   qs.endGroup();
 
-  m_uiTabSetup.lineEdit_SCARF_path->setText(
+  m_uiTabSystemSettings.lineEdit_SCARF_path->setText(
       QString::fromStdString(m_settings.SCARFBasePath));
 }
 
@@ -709,7 +720,7 @@ QDataStream &operator<<(QDataStream &stream,
 void TomographyIfaceViewQtGUI::saveSettings() const {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
-  QString s = m_uiTabSetup.lineEdit_SCARF_path->text();
+  QString s = m_uiTabSystemSettings.lineEdit_SCARF_path->text();
   qs.setValue("SCARF-base-path", s);
   qs.setValue("on-close-ask-for-confirmation",
               m_settings.onCloseAskForConfirmation);
@@ -722,7 +733,7 @@ void TomographyIfaceViewQtGUI::saveSettings() const {
   qs.setValue("filters-settings", filtersSettings);
 
   // User parameters for reconstructions
-  qs.setValue("RB-number", QString::fromStdString(m_setupRBNumber));
+  qs.setValue("RB-number", QString::fromStdString(m_setupExperimentRef));
 
   qs.setValue("path-local-external-python",
               QString::fromStdString(m_localExternalPythonPath));
@@ -897,7 +908,7 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
           run.toStdString(),
           g_defOutPathLocal + "/" +
               m_uiTabSetup.lineEdit_cycle->text().toStdString() + "/" +
-              m_uiTabRun.lineEdit_rb_number->text().toStdString() +
+              m_uiTabRun.lineEdit_experiment_reference->text().toStdString() +
               localOutNameAppendix,
           paths.pathDark(), paths.pathOpenBeam(), paths.pathSamples());
       m_tomopyMethod = methods[mi].first;
@@ -925,7 +936,7 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
           Poco::Path::expand(
               g_defOutPathLocal + "/" +
               m_uiTabSetup.lineEdit_cycle->text().toStdString() + "/" +
-              m_uiTabRun.lineEdit_rb_number->text().toStdString() +
+              m_uiTabRun.lineEdit_experiment_reference->text().toStdString() +
               localOutNameAppendix),
           paths.pathDark(), paths.pathOpenBeam(), paths.pathSamples());
       m_astraMethod = methods[mi].first;
@@ -1060,8 +1071,8 @@ void TomographyIfaceViewQtGUI::browseImageClicked() {
  */
 void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
     const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
-        &localStatus) {
+    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
+        localStatus) {
 
   QTableWidget *t = m_uiTabRun.tableWidget_run_jobs;
   bool sort = t->isSortingEnabled();
@@ -1225,7 +1236,7 @@ void TomographyIfaceViewQtGUI::processPathBrowseClick(QLineEdit *le,
       else
         pp = pp.substr(2);
     }
-
+    pp = "/work" + pp;
     le->setText(QString::fromStdString(pp));
     data = pp;
 
@@ -1607,8 +1618,9 @@ void TomographyIfaceViewQtGUI::updatedCycleName() {
   m_setupPathComponentPhase = m_uiTabSetup.lineEdit_cycle->text().toStdString();
 }
 
-void TomographyIfaceViewQtGUI::updatedRBNumber() {
-  m_setupRBNumber = m_uiTabRun.lineEdit_rb_number->text().toStdString();
+void TomographyIfaceViewQtGUI::updatedExperimentReference() {
+  m_setupExperimentRef =
+      m_uiTabRun.lineEdit_experiment_reference->text().toStdString();
   // Might have to change: m_uiTabRun.lineEdit_local_out_recon_dir as well
 }
 

@@ -20,6 +20,7 @@
 #include "ui_TomographyIfaceQtTabRun.h"
 #include "ui_TomographyIfaceQtTabSetup.h"
 #include "ui_TomographyIfaceQtTabVisualize.h"
+#include "ui_TomographyIfaceQtTabSystemSettings.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <json/json.h>
@@ -41,7 +42,7 @@ in a foreseeable horizon. The interface of this class is given by
 ITomographyIfaceView so that it fits in the MVP (Model-View-Presenter)
 design of the tomography GUI.
 
-Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014-2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -92,6 +93,10 @@ public:
   void setReconstructionTools(const std::vector<std::string> &tools,
                               const std::vector<bool> &enabled) override;
 
+  std::string experimentReference() const override {
+    return m_setupExperimentRef;
+  }
+
   std::string getUsername() const override;
 
   std::string getPassword() const override;
@@ -122,8 +127,8 @@ public:
 
   void updateJobsInfoDisplay(
       const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
-          &localStatus) override;
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
+          localStatus) override;
 
   std::vector<std::string> processingJobsIDs() const override {
     return m_processingJobsIDs;
@@ -163,7 +168,7 @@ private slots:
   void runVisualizeClicked();
   void jobCancelClicked();
   void jobTableRefreshClicked();
-  void updatedRBNumber();
+  void updatedExperimentReference();
 
   void compResourceIndexChanged(int);
   void runToolIndexChanged(int);
@@ -234,11 +239,11 @@ private:
   void doSetupSectionSetup();
   void doSetupSectionRun();
   void doSetupSectionFilters();
-  void doSetupGeneralWidgets();
-
   void doSetupSectionVisualize();
   void doSetupSectionConvert();
   void doSetupSectionEnergy();
+  void doSetupSectionSystemSettings();
+  void doSetupGeneralWidgets();
 
   void doSetupSavu();
 
@@ -305,8 +310,8 @@ private:
   /// Interface definition with widgets for the main interface window
   Ui::TomographyIfaceQtGUI m_ui;
   // And its sections/tabs. Note that for compactness they're called simply
-  // 'tabs'
-  // but they could be separate dialogs, widgets, etc.
+  // 'tabs' but they could be separate dialogs, widgets, etc. combined in
+  // different ways.
   Ui::TomographyIfaceQtTabRun m_uiTabRun;
   Ui::TomographyIfaceQtTabSetup m_uiTabSetup;
   Ui::TomographyIfaceQtTabFiltersSettings m_uiTabFilters;
@@ -314,6 +319,7 @@ private:
   Ui::TomographyIfaceQtTabVisualize m_uiTabVisualize;
   Ui::ImgFormatsConversion m_uiTabConvertFormats;
   Ui::TomographyIfaceQtTabEnergy m_uiTabEnergy;
+  Ui::TomographyIfaceQtTabSystemSettings m_uiTabSystemSettings;
 
   ImageROIViewQtWidget *m_tabROIW;
 
@@ -358,7 +364,7 @@ private:
   // (raw files, reconstructions, pre-post processed files, etc.)
   // These are the defaults
   static const std::string g_defPathComponentPhase;
-  static const std::string g_defRBNumber;
+  static const std::string g_defExperimentRef;
   // reconstruction scripts (external, but shipped with Mantid)
   static const std::string g_defPathReconScripts;
   // base dir for the reconstruction outputs
@@ -370,7 +376,7 @@ private:
   static const std::string g_defProcessedSubpath;
   // And these are the paths set up
   std::string m_setupPathComponentPhase;
-  std::string m_setupRBNumber;
+  std::string m_setupExperimentRef;
   std::string m_setupPathReconScripts;
   std::string m_setupPathReconOut;
   std::string m_setupParaviewPath;

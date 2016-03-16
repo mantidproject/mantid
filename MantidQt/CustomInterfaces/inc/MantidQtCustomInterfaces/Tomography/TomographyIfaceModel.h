@@ -22,7 +22,7 @@ Tomography GUI. Model for the interface (as in the MVP
 signals from this model should always be handled through the presenter
 and never go directly to the view.
 
-Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014,2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -109,6 +109,10 @@ public:
 
   void doRunReconstructionJobLocal();
 
+  void updateExperimentReference(const std::string ref) {
+    m_experimentRef = ref;
+  }
+
   /// Update to the current setings given by the user
   void updateReconToolsSettings(const TomoReconToolsUserSettings &ts) {
     m_toolsSettings = ts;
@@ -181,15 +185,18 @@ private:
 
   void checkDataPathsSet() const;
 
-  /// username last logged in (empty if not in login status), from local
-  /// perspective
-  std::string m_loggedInUser;
-  std::string m_loggedInComp;
-
   /// facility for the remote compute resource
   const std::string m_facility;
   /// display name of the "local" compute resource
   const std::string m_localCompName;
+
+  /// Experiment reference (RBNumber for example)
+  std::string m_experimentRef;
+
+  /// username last logged in (empty if not in login status), from local
+  /// perspective
+  std::string m_loggedInUser;
+  std::string m_loggedInComp;
 
   /// compute resources suppoted by this GUI (remote ones, clusters, etc.)
   std::vector<std::string> m_computeRes;

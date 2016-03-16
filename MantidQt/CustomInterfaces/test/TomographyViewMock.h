@@ -39,6 +39,9 @@ public:
   // std::string getPassword() const {}
   MOCK_CONST_METHOD0(getUsername, std::string());
 
+  // std::string experimentReference() const {}
+  MOCK_CONST_METHOD0(experimentReference, std::string());
+
   // std::string getPassword() const {}
   MOCK_CONST_METHOD0(getPassword, std::string());
 
@@ -102,10 +105,10 @@ public:
   //    localStatus) = 0;
   MOCK_METHOD2(
       updateJobsInfoDisplay,
-      void(const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
-               &status,
-           const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
-               &localStatus));
+      void(const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
+               status,
+           const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
+               localStatus));
 
   // MantidQt::CustomInterfaces::TomoReconToolsUserSettings
   // reconToolsSettings() const {}
