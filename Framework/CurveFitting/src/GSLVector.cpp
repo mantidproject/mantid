@@ -59,7 +59,11 @@ GSLVector &GSLVector::operator=(const GSLVector &v) {
 
 /// Assignment operator
 GSLVector &GSLVector::operator=(const std::vector<double> &v) {
-  m_data = v;
+  if (v.empty()) {
+    m_data.resize(1, 0);
+  } else {
+    m_data = v;
+  }
   m_view = gsl_vector_view_array(m_data.data(), m_data.size());
   return *this;
 }

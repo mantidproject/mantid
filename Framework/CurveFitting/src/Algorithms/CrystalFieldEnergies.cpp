@@ -54,7 +54,7 @@ void CrystalFieldEnergies::init() {
       boost::make_shared<Kernel::ArrayLengthValidator<double>>(3);
   std::vector<double> defaultVector(3, 0);
   declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("Bmol", defaultVector, threeElements), "Parameters of the molecular field (3 values).");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("Bbext", defaultVector, threeElements), "Parameters of the external field (3 values).");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("Bext", defaultVector, threeElements), "Parameters of the external field (3 values).");
   declareProperty("B20", 0.0,  "Real part of the B20 field parameter.");
   declareProperty("B21", 0.0,  "Real part of the B21 field parameter.");
   declareProperty("B22", 0.0,  "Real part of the B22 field parameter.");
@@ -101,8 +101,15 @@ void CrystalFieldEnergies::exec() {
 
   DoubleFortranVector bmol(1, 3);
   std::vector<double> bmolProp = getProperty("Bmol");
+  for(size_t i = 0; i < bmolProp.size(); ++i) {
+    bmol.set(i, bmolProp[i]);
+  }
 
   DoubleFortranVector bext(1, 3);
+  std::vector<double> bextProp = getProperty("Bext");
+  for(size_t i = 0; i < bextProp.size(); ++i) {
+    bext.set(i, bextProp[i]);
+  }
 
   double B20 = getProperty("B20");
   double B21 = getProperty("B21");
