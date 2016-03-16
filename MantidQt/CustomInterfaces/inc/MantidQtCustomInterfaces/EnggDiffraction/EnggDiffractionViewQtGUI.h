@@ -154,6 +154,8 @@ public:
 
   std::string readPeaksFile(std::string fileDir);
 
+  virtual void dataCurvesFactory(boost::shared_ptr<QwtData> &data);
+
   virtual void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data);
 
   void plotFocusedSpectrum(const std::string &wsName) override;
@@ -322,6 +324,9 @@ private:
 
   /// Loaded data curves
   std::vector<QwtPlotCurve*> m_dataCurveVector;
+
+  /// Loaded focused workspace
+  QwtPlotCurve* m_focusedDataCurve;
 };
 
 } // namespace CustomInterfaces

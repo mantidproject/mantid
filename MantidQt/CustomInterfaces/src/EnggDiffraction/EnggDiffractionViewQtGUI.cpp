@@ -59,8 +59,9 @@ const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
 * @param parent Parent window (most likely the Mantid main app window).
 */
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
-    : UserSubWindow(parent), m_dataCurveVector(), IEnggDiffractionView(),
-      m_currentInst("ENGINX"), m_currentCalibFilename(""), m_presenter(NULL) {}
+    : UserSubWindow(parent), m_focusedDataCurve(new QwtPlotCurve()),
+      m_dataCurveVector(), IEnggDiffractionView(), m_currentInst("ENGINX"),
+      m_currentCalibFilename(""), m_presenter(NULL) {}
 
 EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {
   for (auto curves : m_dataCurveVector) {
@@ -686,6 +687,23 @@ std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
   return fileData;
 }
 
+void EnggDiffractionViewQtGUI::dataCurvesFactory(boost::shared_ptr<QwtData>& data)
+{
+	if (m_focusedDataCurve) {
+		m_focusedDataCurve->detach();
+		delete m_focusedDataCurve;
+	}
+
+	QwtPlotCurve *FocusedCurve = new QwtPlotCurve();
+	FocusedCurve->setStyle(QwtPlotCurve::Lines);
+	FocusedCurve->setPen(QPen(Qt::black, 1));
+	FocusedCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+	FocusedCurve->setData(*data);
+	FocusedCurve->attach(m_uiTabFitting.dataPlot);
+
+	m_uiTabFitting.dataPlot->replot();
+}
+
 void EnggDiffractionViewQtGUI::dataCurvesFactory(
     std::vector<boost::shared_ptr<QwtData>> &data) {
 
@@ -1194,17 +1212,22 @@ std::string EnggDiffractionViewQtGUI::fittingRunNo() const {
 }
 
 std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {
-  auto exptPeaks = m_uiTabFitting.lineEdit_fitting_peaks->text().toStdString();
+  std::string exptPeaks =
+      m_uiTabFitting.lineEdit_fitting_peaks->text().toStdString();
   size_t strLength = exptPeaks.length() - 1;
+
   char ch = ',';
-  if (exptPeaks.at(0) == ch) {
-    exptPeaks.erase(0, 1);
-  }
+  if (!exptPeaks.empty()) {
 
-  if (exptPeaks.at(strLength) == ch) {
-    exptPeaks.erase(strLength, 1);
-  }
+    if (exptPeaks.at(size_t(0)) == ch) {
+      exptPeaks.erase(size_t(0), 1);
+      strLength -= size_t(1);
+    }
 
+    if (exptPeaks.at(strLength) == ch) {
+      exptPeaks.erase(strLength, 1);
+    }
+  }
   return exptPeaks;
 }
 

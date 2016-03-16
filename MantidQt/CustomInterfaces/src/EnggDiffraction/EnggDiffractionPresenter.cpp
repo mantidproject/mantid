@@ -457,6 +457,8 @@ void EnggDiffractionPresenter::processFitPeaks() {
   const std::string focusedRunNo = m_view->fittingRunNo();
   const std::string fitPeaksData = m_view->fittingPeaksData();
 
+  g_log.error() << "the expected peaks are: " << fitPeaksData << std::endl;
+
   try {
     inputChecksBeforeFitting(focusedRunNo, fitPeaksData);
   } catch (std::invalid_argument &ia) {
@@ -576,6 +578,8 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
   } catch (...) {
     g_log.error() << "Caught an unknown exception\n";
   }
+
+  g_log.error() << "Abobut to recieve table workspace " << std::endl;
 
   // retrieve the table with parameters
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
@@ -755,10 +759,14 @@ void EnggDiffractionPresenter::runRebinToWorkspaceAlg(
 
 void EnggDiffractionPresenter::plotFitPeaksCurves() {
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-  auto singlPeaksWS =
+  auto focusedPeaksWS =
+      ADS.retrieveWS<MatrixWorkspace>("engggui_fitting_focused_ws");
+  auto singlePeaksWS =
       ADS.retrieveWS<MatrixWorkspace>("engggui_fitting_single_peaks");
   try {
-    m_view->dataCurvesFactory(ALCHelper::curveDataFromWs(singlPeaksWS));
+    m_view->dataCurvesFactory(ALCHelper::curveDataFromWs(focusedPeaksWS, 0));
+    m_view->dataCurvesFactory(ALCHelper::curveDataFromWs(singlePeaksWS));
+
   } catch (std::runtime_error &re) {
     g_log.error()
         << "Unable to finish of the plotting of the graph for "

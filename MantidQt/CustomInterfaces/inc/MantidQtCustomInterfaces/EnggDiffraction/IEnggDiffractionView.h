@@ -426,6 +426,8 @@ public:
   *
   */
   virtual void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data) = 0;
+
+  virtual void dataCurvesFactory(boost::shared_ptr<QwtData> &data) = 0;
 };
 
 } // namespace CustomInterfaces
