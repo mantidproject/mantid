@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>769</width>
+    <width>826</width>
     <height>578</height>
    </rect>
   </property>
@@ -24,7 +24,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>731</width>
+        <width>788</width>
         <height>671</height>
        </rect>
       </property>
@@ -102,7 +102,7 @@
            </spacer>
           </item>
           <item row="2" column="0">
-           <widget class="QCheckBox" name="checkBox_normalize_flat_dark">
+           <widget class="QCheckBox" name="checkBox_normalize_by_flats">
             <property name="statusTip">
              <string>Normalize every image with respect to the reference flat and dark images, if available</string>
             </property>
@@ -229,7 +229,7 @@
            </layout>
           </item>
           <item row="4" column="0">
-           <widget class="QCheckBox" name="checkBox_2">
+           <widget class="QCheckBox" name="checkBox_corrections_MCP_detector">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -239,7 +239,7 @@
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QCheckBox" name="checkBox_normalize_flat_dark_2">
+           <widget class="QCheckBox" name="checkBox_normalize_by_darks">
             <property name="statusTip">
              <string>Normalize every image with respect to the reference flat and dark images, if available</string>
             </property>
@@ -252,7 +252,7 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QCheckBox" name="checkBox_normalize_proton_charge">
+           <widget class="QCheckBox" name="checkBox_normalize_by_air_region">
             <property name="statusTip">
              <string>Normalize every image by their relative proton charges</string>
             </property>
@@ -261,6 +261,16 @@
             </property>
             <property name="checked">
              <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="checkBox_normalize_by_proton_charge">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Normalize by proton charge</string>
             </property>
            </widget>
           </item>
@@ -380,14 +390,14 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
-             <widget class="QLabel" name="label">
+             <widget class="QLabel" name="label_out_img_format">
               <property name="text">
                <string>Output image format:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="comboBox">
+             <widget class="QComboBox" name="comboBox_out_img_format">
               <item>
                <property name="text">
                 <string>PNG</string>
@@ -413,14 +423,14 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_6">
             <item>
-             <widget class="QLabel" name="label_4">
+             <widget class="QLabel" name="label_out_bit_depth">
               <property name="text">
                <string>Pixel bit-depth in outputs:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="comboBox_4">
+             <widget class="QComboBox" name="comboBox_out_bit_depth">
               <item>
                <property name="text">
                 <string>16 bits</string>

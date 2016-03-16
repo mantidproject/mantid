@@ -182,8 +182,10 @@ private slots:
   void browseLocalInOutDirClicked();
   void browseLocalReconScriptsDirClicked();
 
-  void resetRemoteSetup();
-  void fitsPathBrowseClicked();
+  void flatsPathCheckStatusChanged(int status);
+  void darksPathCheckStatusChanged(int status);
+
+  void samplesPathBrowseClicked();
   void flatPathBrowseClicked();
   void darkPathBrowseClicked();
 
@@ -209,6 +211,9 @@ private slots:
   // processing of energy bands
   void browseEnergyInputClicked();
   void browseEnergyOutputClicked();
+
+  // system / advanced settings
+  void resetRemoteSetup();
 
   // for the savu functionality - waiting for Savu
   void menuSaveClicked();

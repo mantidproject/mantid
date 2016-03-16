@@ -268,37 +268,37 @@ void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
 
   resetRemoteSetup();
 
+  // populate setup values from defaults
+  m_uiTabSetup.lineEdit_path_samples->setText(
+      QString::fromStdString(m_pathsConfig.pathSamples()));
+  m_uiTabSetup.lineEdit_path_flats->setText(
+      QString::fromStdString(m_pathsConfig.pathOpenBeam()));
+  m_uiTabSetup.lineEdit_path_darks->setText(
+      QString::fromStdString(m_pathsConfig.pathDarks()));
+
+  // cycle changes
+  connect(m_uiTabSetup.lineEdit_cycle, SIGNAL(editingFinished()), this,
+          SLOT(updatedCycleName()));
+
+  // check boxes to enable search for dark and flat images
+  connect(m_uiTabSetup.checkBox_path_flats, SIGNAL(stateChanged(int)), this,
+          SLOT(flatsPathCheckStatusChanged(int)));
+  connect(m_uiTabSetup.checkBox_path_darks, SIGNAL(stateChanged(int)), this,
+          SLOT(darksPathCheckStatusChanged(int)));
+
+  // 'browse' buttons for image paths
+  connect(m_uiTabSetup.pushButton_samples_dir, SIGNAL(released()), this,
+          SLOT(samplesPathBrowseClicked()));
+  connect(m_uiTabSetup.pushButton_flats_dir, SIGNAL(released()), this,
+          SLOT(flatPathBrowseClicked()));
+  connect(m_uiTabSetup.pushButton_darks_dir, SIGNAL(released()), this,
+          SLOT(darkPathBrowseClicked()));
+
   // log in/out
   connect(m_uiTabSetup.pushButton_SCARF_login, SIGNAL(released()), this,
           SLOT(SCARFLoginClicked()));
   connect(m_uiTabSetup.pushButton_SCARF_logout, SIGNAL(released()), this,
           SLOT(SCARFLogoutClicked()));
-
-  // RB number changes
-  connect(m_uiTabSetup.lineEdit_cycle, SIGNAL(editingFinished()), this,
-          SLOT(updatedCycleName()));
-
-  // 'browse' buttons for image paths
-  connect(m_uiTabSetup.pushButton_fits_dir, SIGNAL(released()), this,
-          SLOT(fitsPathBrowseClicked()));
-  connect(m_uiTabSetup.pushButton_flat_dir, SIGNAL(released()), this,
-          SLOT(flatPathBrowseClicked()));
-  connect(m_uiTabSetup.pushButton_dark_dir, SIGNAL(released()), this,
-          SLOT(darkPathBrowseClicked()));
-
-  // populate setup values from defaults
-  m_uiTabSetup.lineEdit_path_FITS->setText(
-      QString::fromStdString(m_pathsConfig.pathSamples()));
-  m_uiTabSetup.lineEdit_path_flat->setText(
-      QString::fromStdString(m_pathsConfig.pathOpenBeam()));
-  m_uiTabSetup.lineEdit_path_dark->setText(
-      QString::fromStdString(m_pathsConfig.pathDark()));
-
-  // 'browse' buttons for local conf:
-  connect(m_uiTabSetup.pushButton_in_out_dir, SIGNAL(released()), this,
-          SLOT(browseLocalInOutDirClicked()));
-  connect(m_uiTabSetup.pushButton_recon_scripts_dir, SIGNAL(released()), this,
-          SLOT(browseLocalReconScriptsDirClicked()));
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionRun() {
@@ -439,6 +439,12 @@ void TomographyIfaceViewQtGUI::doSetupSectionSystemSettings() {
   // reset setup of the remote
   connect(m_uiTabSystemSettings.pushButton_reset_scripts_base_dir_remote,
           SIGNAL(released()), this, SLOT(resetRemoteSetup()));
+
+  // 'browse' buttons for local conf:
+  connect(m_uiTabSystemSettings.pushButton_on_local_in_out_dir,
+          SIGNAL(released()), this, SLOT(browseLocalInOutDirClicked()));
+  connect(m_uiTabSystemSettings.pushButton_recon_scripts_dir,
+          SIGNAL(released()), this, SLOT(browseLocalReconScriptsDirClicked()));
 }
 
 void TomographyIfaceViewQtGUI::resetRemoteSetup() {
@@ -588,15 +594,17 @@ QDataStream &operator>>(QDataStream &stream, size_t &num) {
 /// deserialize a filters settings, from a QDataStream <= QByteArray
 QDataStream &operator>>(QDataStream &stream, TomoReconFiltersSettings &fs) {
   // clang-format off
-  stream >> fs.prep.normalizeByProtonCharge
-                >> fs.prep.normalizeByFlatDark
-                >> fs.prep.medianFilterWidth
-                >> fs.prep.rotation
-                >> fs.prep.maxAngle
-                >> fs.prep.scaleDownFactor
-                >> fs.postp.circMaskRadius
-                >> fs.postp.cutOffLevel
-                >> fs.outputPreprocImages;
+  stream >> fs.prep.normalizeByAirRegion
+         >> fs.prep.normalizeByProtonCharge
+         >> fs.prep.normalizeByFlats
+         >> fs.prep.normalizeByDarks
+         >> fs.prep.medianFilterWidth
+         >> fs.prep.rotation
+         >> fs.prep.maxAngle
+         >> fs.prep.scaleDownFactor
+         >> fs.postp.circMaskRadius
+         >> fs.postp.cutOffLevel
+         >> fs.outputPreprocImages;
   // clang-format on
   fs.prep.rotation *= 90;
 
@@ -700,15 +708,17 @@ QDataStream &operator<<(QDataStream &stream, size_t const &num) {
 QDataStream &operator<<(QDataStream &stream,
                         TomoReconFiltersSettings const &fs) {
   // clang-format off
-  stream << fs.prep.normalizeByProtonCharge
-                << fs.prep.normalizeByFlatDark
-                << fs.prep.medianFilterWidth
-                << (fs.prep.rotation/90)
-                << fs.prep.maxAngle
-                << fs.prep.scaleDownFactor
-                << fs.postp.circMaskRadius
-                << fs.postp.cutOffLevel
-                << fs.outputPreprocImages;
+  stream << fs.prep.normalizeByAirRegion
+         << fs.prep.normalizeByProtonCharge
+         << fs.prep.normalizeByFlats
+         << fs.prep.normalizeByDarks
+         << fs.prep.medianFilterWidth
+         << (fs.prep.rotation/90)
+         << fs.prep.maxAngle
+         << fs.prep.scaleDownFactor
+         << fs.postp.circMaskRadius
+         << fs.postp.cutOffLevel
+         << fs.outputPreprocImages;
   // clang-format on
 
   return stream;
@@ -910,7 +920,7 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
               m_uiTabSetup.lineEdit_cycle->text().toStdString() + "/" +
               m_uiTabRun.lineEdit_experiment_reference->text().toStdString() +
               localOutNameAppendix,
-          paths.pathDark(), paths.pathOpenBeam(), paths.pathSamples());
+          paths.pathDarks(), paths.pathOpenBeam(), paths.pathSamples());
       m_tomopyMethod = methods[mi].first;
     }
   } else if (g_AstraTool == name) {
@@ -938,7 +948,7 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
               m_uiTabSetup.lineEdit_cycle->text().toStdString() + "/" +
               m_uiTabRun.lineEdit_experiment_reference->text().toStdString() +
               localOutNameAppendix),
-          paths.pathDark(), paths.pathOpenBeam(), paths.pathSamples());
+          paths.pathDarks(), paths.pathOpenBeam(), paths.pathSamples());
       m_astraMethod = methods[mi].first;
     }
   } else if (g_SavuTool == name) {
@@ -1170,30 +1180,50 @@ std::string TomographyIfaceViewQtGUI::getPassword() const {
     return "none";
 }
 
-void TomographyIfaceViewQtGUI::fitsPathBrowseClicked() {
+void TomographyIfaceViewQtGUI::flatsPathCheckStatusChanged(int status) {
+  bool enable = 0 != status;
+  m_uiTabSetup.lineEdit_path_flats->setEnabled(enable);
+  m_uiTabSetup.pushButton_flats_dir->setEnabled(enable);
+  if (!enable) {
+    m_pathsConfig.updatePathOpenBeam("");
+  }
+  m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
+}
+
+void TomographyIfaceViewQtGUI::darksPathCheckStatusChanged(int status) {
+  bool enable = 0 != status;
+  m_uiTabSetup.lineEdit_path_darks->setEnabled(enable);
+  m_uiTabSetup.pushButton_darks_dir->setEnabled(enable);
+  if (!enable) {
+    m_pathsConfig.updatePathDarks("");
+  }
+  m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
+}
+
+void TomographyIfaceViewQtGUI::samplesPathBrowseClicked() {
   std::string str;
-  processPathBrowseClick(m_uiTabSetup.lineEdit_path_FITS, str);
+  processPathBrowseClick(m_uiTabSetup.lineEdit_path_samples, str);
   m_pathsConfig.updatePathSamples(str);
   m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
 void TomographyIfaceViewQtGUI::flatPathBrowseClicked() {
   std::string str;
-  processPathBrowseClick(m_uiTabSetup.lineEdit_path_flat, str);
+  processPathBrowseClick(m_uiTabSetup.lineEdit_path_flats, str);
   m_pathsConfig.updatePathOpenBeam(str);
   m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
 void TomographyIfaceViewQtGUI::darkPathBrowseClicked() {
   std::string str;
-  processPathBrowseClick(m_uiTabSetup.lineEdit_path_dark, str);
-  m_pathsConfig.updatePathDark(str);
+  processPathBrowseClick(m_uiTabSetup.lineEdit_path_darks, str);
+  m_pathsConfig.updatePathDarks(str);
   m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
 void TomographyIfaceViewQtGUI::browseLocalInOutDirClicked() {
-  m_setupPathReconOut =
-      checkUserBrowsePath(m_uiTabSystemSettings.lineEdit_on_local_data_drive_path);
+  m_setupPathReconOut = checkUserBrowsePath(
+      m_uiTabSystemSettings.lineEdit_on_local_data_drive_path);
 }
 
 void TomographyIfaceViewQtGUI::browseLocalReconScriptsDirClicked() {
@@ -1370,11 +1400,21 @@ TomographyIfaceViewQtGUI::grabPrePostProcSettings() const {
   TomoReconFiltersSettings opts;
 
   // pre-processing
-  opts.prep.normalizeByProtonCharge =
-      m_uiTabFilters.checkBox_normalize_proton_charge->isChecked();
+  opts.prep.normalizeByAirRegion =
+      m_uiTabFilters.checkBox_normalize_by_air_region->isChecked();
 
-  opts.prep.normalizeByFlatDark =
-      m_uiTabFilters.checkBox_normalize_flat_dark->isChecked();
+  // TODO
+  // m_uiTabFilters.checkBox_normalize_by_proton_charge is disabled for now
+  opts.prep.normalizeByProtonCharge = false;
+
+  opts.prep.normalizeByFlats =
+      m_uiTabFilters.checkBox_normalize_by_flats->isChecked();
+
+  opts.prep.normalizeByDarks =
+      m_uiTabFilters.checkBox_normalize_by_darks->isChecked();
+
+  // TODO
+  // m_uiTabFilters.checkBox_corrections_MCP_detector is disabled for now
 
   opts.prep.medianFilterWidth = static_cast<size_t>(
       m_uiTabFilters.spinBox_prep_median_filter_width->value());
@@ -1404,11 +1444,17 @@ void TomographyIfaceViewQtGUI::setPrePostProcSettings(
     TomoReconFiltersSettings &opts) const {
 
   // pre-processing
-  m_uiTabFilters.checkBox_normalize_proton_charge->setChecked(
+  m_uiTabFilters.checkBox_normalize_by_air_region->setChecked(
+      opts.prep.normalizeByAirRegion);
+
+  m_uiTabFilters.checkBox_normalize_by_proton_charge->setChecked(
       opts.prep.normalizeByProtonCharge);
 
-  m_uiTabFilters.checkBox_normalize_flat_dark->setChecked(
-      opts.prep.normalizeByFlatDark);
+  m_uiTabFilters.checkBox_normalize_by_flats->setChecked(
+      opts.prep.normalizeByFlats);
+
+  m_uiTabFilters.checkBox_normalize_by_flats->setChecked(
+      opts.prep.normalizeByDarks);
 
   m_uiTabFilters.spinBox_prep_median_filter_width->setValue(
       static_cast<int>(opts.prep.medianFilterWidth));
@@ -1556,7 +1602,7 @@ void TomographyIfaceViewQtGUI::browseImgInputConvertClicked() {
   // it could be an option.
   // const std::string path =
   checkUserBrowsePath(m_uiTabConvertFormats.lineEdit_input);
-  // m_pathsConfig.updatePathDark(str);
+  // m_pathsConfig.updatePathDarks(str);
   // m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
@@ -1565,7 +1611,7 @@ void TomographyIfaceViewQtGUI::browseImgOutputConvertClicked() {
   // it could be an option.
   // const std::string path =
   checkUserBrowsePath(m_uiTabConvertFormats.lineEdit_output);
-  // m_pathsConfig.updatePathDark(str);
+  // m_pathsConfig.updatePathDarks(str);
   // m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 

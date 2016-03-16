@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>825</width>
-    <height>542</height>
+    <width>836</width>
+    <height>579</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,8 +27,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>787</width>
-        <height>678</height>
+        <width>798</width>
+        <height>682</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_6">
@@ -61,12 +61,18 @@
                <item>
                 <widget class="QLabel" name="label_26">
                  <property name="text">
-                  <string>Tomography data drive / path:</string>
+                  <string>Base drive / path for tomography data (in/out)::</string>
                  </property>
                 </widget>
                </item>
                <item>
                 <widget class="QLineEdit" name="lineEdit_on_local_data_drive_path">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>1</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="minimumSize">
                   <size>
                    <width>0</width>
@@ -79,7 +85,14 @@
                 </widget>
                </item>
                <item>
-                <spacer name="horizontalSpacer_3">
+                <widget class="QPushButton" name="pushButton_on_local_in_out_dir">
+                 <property name="text">
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer">
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                  </property>
@@ -104,6 +117,12 @@
                </item>
                <item>
                 <widget class="QLineEdit" name="lineEdit_on_local_remote_drive_path">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>1</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="text">
                   <string>/work/imat/phase_commissioning</string>
                  </property>
@@ -115,6 +134,19 @@
                   <string>Reset</string>
                  </property>
                 </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_3">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
                </item>
               </layout>
              </item>
