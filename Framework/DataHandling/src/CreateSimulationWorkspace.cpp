@@ -50,7 +50,8 @@ StartAndEndTime getStartAndEndTimesFromNexusFile(
     const Mantid::Kernel::DateAndTime &endTimeDefault) {
   StartAndEndTime startAndEndTime;
   try {
-    startAndEndTime.startTime = Mantid::DataHandling::extractStartTime(filename);
+    startAndEndTime.startTime =
+        Mantid::DataHandling::extractStartTime(filename);
     startAndEndTime.endTime = Mantid::DataHandling::extractEndTime(filename);
   } catch (...) {
     startAndEndTime.startTime = startTimeDefault;

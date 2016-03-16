@@ -201,11 +201,11 @@ private:
   }
 
   void compareSimulationWorkspaceIDFWithFileIDF(
-    Mantid::API::MatrixWorkspace_sptr simulationWorkspace,
-    const std::string &filename, const std::string& algorithmName) {
+      Mantid::API::MatrixWorkspace_sptr simulationWorkspace,
+      const std::string &filename, const std::string &algorithmName) {
     std::string outputWSName = "outWSIDFCompareNexus";
-    auto alg =
-      Mantid::API::AlgorithmManager::Instance().createUnmanaged(algorithmName);
+    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+        algorithmName);
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("Filename", filename);
@@ -214,12 +214,12 @@ private:
     TS_ASSERT(alg->isExecuted());
     Mantid::API::Workspace_sptr outWS = alg->getProperty("OutputWorkspace");
     auto matWS =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outWS);
+        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outWS);
     auto idfForOriginal = matWS->getInstrument()->getFilename();
     auto idfForSimulationWS =
-      simulationWorkspace->getInstrument()->getFilename();
+        simulationWorkspace->getInstrument()->getFilename();
     TSM_ASSERT_EQUALS("Should have the same IDF", idfForOriginal,
-      idfForSimulationWS);
+                      idfForSimulationWS);
   }
 
   std::string m_wsName;
