@@ -51,6 +51,7 @@ Improved
   - :ref:`FFT <algm-FFT>`
   - :ref:`MaxEnt <algm-MaxEnt>`
   `#15584 <https://github.com/mantidproject/mantid/pull/15584>`_
+- :ref:`CreateSimulationWorkspace <algm-CreateSimulationWorkspace>` now matches the IDF of the simulation workspace to the IDF of a reference workspace (either Nexus or Raw).
 
 Deprecated
 ##########
