@@ -135,11 +135,9 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // bc->setCacheParameters(1,0);
 
   BoxController_sptr obc = outWS->getBoxController();
-  // Use the "number of bins" as the "split into" parameter for the top level
-  for (size_t od = 0; od < m_binDimensions.size(); od++) {
-    obc->setSplitTopInto(od, m_binDimensions[od]->getNBins());
-    obc->setSplitInto(od, bc->getSplitInto(od));
-  }
+  // Use the "number of bins" as the "split into" parameter
+  for (size_t od = 0; od < m_binDimensions.size(); od++)
+    obc->setSplitInto(od, m_binDimensions[od]->getNBins());
   obc->setSplitThreshold(bc->getSplitThreshold());
 
   bool bTakeDepthFromInputWorkspace =

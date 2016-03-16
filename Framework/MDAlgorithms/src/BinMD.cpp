@@ -429,15 +429,7 @@ void BinMD::exec() {
       boost::dynamic_pointer_cast<IMDEventWorkspace>(m_inWS);
   if (inEWS) {
     outWS->setCoordinateSystem(inEWS->getSpecialCoordinateSystem());
-    try {
-      outWS->copyExperimentInfos(*inEWS);
-    } catch (std::runtime_error &) {
-      g_log.warning()
-          << this->name()
-          << " was not able to copy experiment info to output workspace "
-          << outWS->getName()
-          << std::endl;
-    }
+    outWS->copyExperimentInfos(*inEWS);
   }
 
   // Pass on the display normalization from the input workspace
