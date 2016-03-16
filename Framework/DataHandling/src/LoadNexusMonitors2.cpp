@@ -197,6 +197,7 @@ void LoadNexusMonitors2::exec() {
 
   API::Progress prog3(this, 0.6, 1.0, m_monitor_count);
 
+  size_t ws_index = 0;
   for (std::size_t i = 0; i < m_monitor_count; ++i) {
     g_log.information() << "Loading " << monitorNames[i] << std::endl;
     // Do not rely on the order in path list
@@ -231,88 +232,18 @@ void LoadNexusMonitors2::exec() {
     detector_numbers[i] = monIndex;
 
     if (useEventMon) {
-      /*
-      // setup local variables
-      EventWorkspace_sptr eventWS =
-          boost::dynamic_pointer_cast<EventWorkspace>(m_workspace);
-
-      std::vector<uint64_t> event_index;
-      MantidVec time_of_flight;
-      std::string tof_units;
-      MantidVec seconds;
-
-      // read in the data
-      file.openData("event_index");
-      file.getData(event_index);
-      file.closeData();
-      file.openData("event_time_offset");
-      file.getDataCoerce(time_of_flight);
-      file.getAttr("units", tof_units);
-      file.closeData();
-      file.openData("event_time_zero");
-      file.getDataCoerce(seconds);
-      Mantid::Kernel::DateAndTime pulsetime_offset;
-      {
-        std::string startTime;
-        file.getAttr("offset", startTime);
-        pulsetime_offset = Mantid::Kernel::DateAndTime(startTime);
-      }
-      file.closeData();
-
-      // load up the event list
-      DataObjects::EventList &event_list = eventWS->getEventList(i);
-
-      Mantid::Kernel::DateAndTime pulsetime(0);
-      Mantid::Kernel::DateAndTime lastpulsetime(0);
-      std::size_t numEvents = time_of_flight.size();
-      bool pulsetimesincreasing = true;
-      size_t pulse_index(0);
-      size_t numPulses = seconds.size();
-      for (std::size_t j = 0; j < numEvents; ++j) {
-        while (!((j >= event_index[pulse_index]) &&
-                 (j < event_index[pulse_index + 1]))) {
-          pulse_index += 1;
-          if (pulse_index > (numPulses + 1))
-            break;
-        }
-        if (pulse_index >= (numPulses))
-          pulse_index = numPulses - 1; // fix it
-        pulsetime = pulsetime_offset + seconds[pulse_index];
-        if (pulsetime < lastpulsetime)
-          pulsetimesincreasing = false;
-        lastpulsetime = pulsetime;
-        event_list.addEventQuickly(
-            DataObjects::TofEvent(time_of_flight[j], pulsetime));
-      }
-      if (pulsetimesincreasing)
-        event_list.setSortOrder(DataObjects::PULSETIME_SORT);
-        */
-      readEventMonitorEntry(file, i);
+      // check
+      if (ws_index == m_workspace->getNumberHistograms())
+        throw std::runtime_error("Overcedes the number of histograms in output event workspace.");
+      readEventMonitorEntry(file, ws_index);
+      ++ ws_index;
     } else // is a histogram monitor
     {
-      /*
-      // Now, actually retrieve the necessary data
-      file.openData("data");
-      MantidVec data;
-      file.getDataCoerce(data);
-      file.closeData();
-      MantidVec error(data.size()); // create vector of correct size
-
-      // Transform errors via square root
-      std::transform(data.begin(), data.end(), error.begin(),
-                     (double (*)(double))sqrt);
-
-      // Get the TOF axis
-      file.openData("time_of_flight");
-      MantidVec tof;
-      file.getDataCoerce(tof);
-      file.closeData();
-
-      m_workspace->dataX(i) = tof;
-      m_workspace->dataY(i) = data;
-      m_workspace->dataE(i) = error;
-      */
-      readHistoMonitorEntry(file, i);
+      // check
+      if (ws_index == m_workspace->getNumberHistograms())
+        throw std::runtime_error("Overcedes the number of hisograms in output workspace2D.");
+      readHistoMonitorEntry(file, ws_index);
+      ++ ws_index;
     }
 
     file.closeGroup(); // NXmonitor
