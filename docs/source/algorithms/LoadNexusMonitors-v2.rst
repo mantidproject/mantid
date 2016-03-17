@@ -29,8 +29,20 @@ Event monitor and histogram monitor
 There are two types of monitors, event monitors and histograms monitors.
 Both of them are of class *NXmonitor* in NeXus file.
 
- * Event monitor must include all of the following three entries:
-   ** 
+ * Event monitor must contain all of the following three entries:
+   * event_index
+   * event_time_offset
+   * event_time_zero
+
+ * Histogram monitor must contain entry
+   * data
+   * period_index
+
+ISIS event monitor
+++++++++++++++++++
+
+ISIS monitor of event mode may contain entry *data*.  In this case,
+the monitor of event mode can be loaded in histogram mode.
 
 Usage
 -----
