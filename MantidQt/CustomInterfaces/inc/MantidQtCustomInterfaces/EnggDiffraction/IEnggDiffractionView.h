@@ -9,9 +9,6 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h"
 
-
-
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -426,8 +423,8 @@ public:
   * @param focused to check whether focused workspace
   *
   */
-  virtual void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data, bool focused) = 0;
-
+  virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
+                             bool focused) = 0;
 };
 
 } // namespace CustomInterfaces

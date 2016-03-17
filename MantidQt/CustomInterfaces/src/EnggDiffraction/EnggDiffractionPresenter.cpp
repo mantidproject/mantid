@@ -588,8 +588,9 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
     runFittingAlgs(FocusedFitPeaksTableName, FocusedWSName);
 
   } catch (std::invalid_argument &ia) {
-	  g_log.error() << "Error, Fitting could not finish off correctly, " +
-		  std::string(ia.what()) << std::endl;
+    g_log.error() << "Error, Fitting could not finish off correctly, " +
+                         std::string(ia.what())
+                  << std::endl;
     return;
   }
 }
@@ -603,7 +604,7 @@ void EnggDiffractionPresenter::runFittingAlgs(
         FocusedFitPeaksTableName +
         " workspace could not be found. "
         "Please check the log messages for more details.");
-	return;
+    return;
   };
 
   ITableWorkspace_sptr table =
@@ -673,7 +674,6 @@ void EnggDiffractionPresenter::runFittingAlgs(
 
   m_fittingFinishedOK = true;
 }
-
 
 std::string EnggDiffractionPresenter::functionStrFactory(
     Mantid::API::ITableWorkspace_sptr &paramTableWS, std::string tableName,
@@ -791,10 +791,8 @@ void EnggDiffractionPresenter::plotFitPeaksCurves() {
     auto focusedPeaksWS = ADS.retrieveWS<MatrixWorkspace>(focusedPeaksWs);
     auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(singlePeaksWs);
     try {
-      m_view->dataCurvesFactory(ALCHelper::curveDataFromWs(focusedPeaksWS),
-                                true);
-      m_view->dataCurvesFactory(ALCHelper::curveDataFromWs(singlePeaksWS),
-                                false);
+      m_view->setDataVector(ALCHelper::curveDataFromWs(focusedPeaksWS), true);
+      m_view->setDataVector(ALCHelper::curveDataFromWs(singlePeaksWS), false);
 
     } catch (std::runtime_error &re) {
       g_log.error() << "Unable to finish of the plotting of the graph for "

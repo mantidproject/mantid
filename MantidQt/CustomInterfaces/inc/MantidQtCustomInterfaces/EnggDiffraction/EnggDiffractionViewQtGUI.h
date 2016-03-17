@@ -16,7 +16,6 @@
 #include <boost/scoped_ptr.hpp>
 #include <qwt_plot_curve.h>
 
-
 // Qt classes forward declarations
 class QMutex;
 
@@ -154,7 +153,12 @@ public:
 
   std::string readPeaksFile(std::string fileDir);
 
-  virtual void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data, bool focused);
+  virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
+                             bool focused);
+
+  virtual void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data,
+                                 std::vector<QwtPlotCurve *> &dataVector,
+                                 bool focused);
 
   void plotFocusedSpectrum(const std::string &wsName) override;
 
@@ -321,10 +325,10 @@ private:
   boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;
 
   /// Loaded data curves
-  std::vector<QwtPlotCurve*> m_fittedDataVector;
+  std::vector<QwtPlotCurve *> m_fittedDataVector;
 
   /// Loaded focused workspace
-  std::vector<QwtPlotCurve*> m_focusedDataVector;
+  std::vector<QwtPlotCurve *> m_focusedDataVector;
 };
 
 } // namespace CustomInterfaces

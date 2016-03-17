@@ -692,15 +692,18 @@ std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
   return fileData;
 }
 
-void EnggDiffractionViewQtGUI::dataCurvesFactory(
+void EnggDiffractionViewQtGUI::setDataVector(
     std::vector<boost::shared_ptr<QwtData>> &data, bool focused) {
+  if (focused) {
+    dataCurvesFactory(data, m_focusedDataVector, focused);
+  } else {
+    dataCurvesFactory(data, m_fittedDataVector, focused);
+  }
+}
 
-  std::vector<QwtPlotCurve *> dataVector;
-
-  if (focused)
-    dataVector = m_fittedDataVector;
-  else
-    dataVector = m_focusedDataVector;
+void EnggDiffractionViewQtGUI::dataCurvesFactory(
+    std::vector<boost::shared_ptr<QwtData>> &data,
+    std::vector<QwtPlotCurve *> &dataVector, bool focused) {
 
   // clear vector
   for (auto curves : dataVector) {
