@@ -1252,21 +1252,31 @@ std::string TomographyIfaceViewQtGUI::getPassword() const {
 
 void TomographyIfaceViewQtGUI::flatsPathCheckStatusChanged(int status) {
   bool enable = 0 != status;
+  // Alternative behavior, whereby disabling would also imply clearing:
+  // TODO: not totally clear at the moment what users will prefer
+  // if (!enable) {
+  //   m_pathsConfig.updatePathOpenBeam("");
+  // } else {
+  //   m_uiTabSetup.lineEdit_path_flats->setText(
+  //       QString::fromStdString(m_pathsConfig));
+  // }
   m_uiTabSetup.lineEdit_path_flats->setEnabled(enable);
   m_uiTabSetup.pushButton_flats_dir->setEnabled(enable);
-  if (!enable) {
-    m_pathsConfig.updatePathOpenBeam("");
-  }
   m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
 void TomographyIfaceViewQtGUI::darksPathCheckStatusChanged(int status) {
   bool enable = 0 != status;
+  // Alternative behavior, whereby disabling would also imply clearing:
+  // TODO: not totally clear at the moment what users will prefer
+  // if (!enable) {
+  //   m_pathsConfig.updatePathDarks("");
+  // } else {
+  //   m_uiTabSetup.lineEdit_path_darks->setText(
+  //       QString::fromStdString(m_pathsConfig));
+  // }
   m_uiTabSetup.lineEdit_path_darks->setEnabled(enable);
   m_uiTabSetup.pushButton_darks_dir->setEnabled(enable);
-  if (!enable) {
-    m_pathsConfig.updatePathDarks("");
-  }
   m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 

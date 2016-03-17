@@ -252,9 +252,11 @@ public:
     pres.notify(ITomographyIfacePresenter::CompResourceChanged);
   }
 
-  void test_changePaths() {
+  void test_changePathsWithBrowseEmpty() {
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, updatePathsConfig(testing::_)).Times(0);
 
     // needs some basic paths config - using defaults from constructor
     EXPECT_CALL(mockView, currentPathsConfig())
@@ -266,6 +268,71 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(ITomographyIfacePresenter::TomoPathsChanged);
+  }
+
+  void test_changePathsWithBrowseNonEmpty() {
+    testing::NiceMock<MockTomographyIfaceView> mockView;
+    MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
+
+    TomoPathsConfig cfg;
+    cfg.updatePathSamples("/nowhere/foo_samples");
+    cfg.updatePathOpenBeam("/nonexistent/bla_ob");
+    cfg.updatePathDarks("/missing_place/bla_dark");
+    mockView.updatePathsConfig(cfg);
+
+    EXPECT_CALL(mockView, updatePathsConfig(testing::_)).Times(0);
+
+    // needs some basic paths config - using defaults from constructor
+    EXPECT_CALL(mockView, currentPathsConfig())
+        .Times(1)
+        .WillOnce(Return(TomoPathsConfig()));
+
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(ITomographyIfacePresenter::TomoPathsChanged);
+  }
+
+  void test_changePathsEditingByHandEmpty() {
+    testing::NiceMock<MockTomographyIfaceView> mockView;
+    MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, updatePathsConfig(testing::_)).Times(1);
+
+    // needs some basic paths config - using defaults from constructor
+    EXPECT_CALL(mockView, currentPathsConfig())
+        .Times(1)
+        .WillOnce(Return(TomoPathsConfig()));
+
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(ITomographyIfacePresenter::TomoPathsEditedByUser);
+  }
+
+  void test_changePathsEditingByHand() {
+    testing::NiceMock<MockTomographyIfaceView> mockView;
+    MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
+
+    // give only the samples path
+    TomoPathsConfig cfg;
+    cfg.updatePathSamples("/nowhere/foo_samples");
+    mockView.updatePathsConfig(cfg);
+
+    EXPECT_CALL(mockView, updatePathsConfig(testing::_)).Times(1);
+
+    // needs some basic paths config - using defaults from constructor
+    EXPECT_CALL(mockView, currentPathsConfig())
+        .Times(1)
+        .WillOnce(Return(TomoPathsConfig()));
+
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(ITomographyIfacePresenter::TomoPathsEditedByUser);
   }
 
   void test_loginFails() {
@@ -396,7 +463,8 @@ public:
   }
 
   // An attempt at testing a sequence of steps from the user.
-  // TODO: more interesting sessions should follow
+  // TODO: more interesting sessions should follow, but how to do it
+  // without loading too many and too big files?
   void test_sillySession() {
     // the user does a few silly things...
     testing::NiceMock<MockTomographyIfaceView> mockView;

@@ -243,17 +243,14 @@ void TomographyIfacePresenter::findFlatsDarksFromSampleGivenByUser(
     const std::string name = it.name();
     const std::string flatsPrefix = "flat";
     const std::string darksPrefix = "dark";
-    std::cerr << "iterating  dir name: " <<  name << std::endl;
 
     if (boost::iequals(name.substr(0, flatsPrefix.length()), flatsPrefix)) {
       cfg.updatePathOpenBeam(it->path());
       foundFlat = true;
-      std::cerr << "found flat! " << it->path() << std::endl;
     } else if (boost::iequals(name.substr(0, darksPrefix.length()),
                               darksPrefix)) {
       cfg.updatePathDarks(it->path());
       foundDark = true;
-      std::cerr << "found dark! " << it->path() << std::endl;
     }
     if (foundFlat && foundDark)
       break;
