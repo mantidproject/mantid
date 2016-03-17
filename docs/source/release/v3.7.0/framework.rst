@@ -51,6 +51,10 @@ Improved
   - :ref:`FFT <algm-FFT>`
   - :ref:`MaxEnt <algm-MaxEnt>`
   `#15584 <https://github.com/mantidproject/mantid/pull/15584>`_
+- :ref:`LoadNexusMonitors <algm-LoadNexusMonitors>` 
+  now allow user to choose to load either histogram monitor or event monitor only with 2 new
+  properties (``LoadEventMonitor`` and ``LoadHistogramMonitor``).
+  `#15667 <https://github.com/mantidproject/mantid/pull/15667>`_
 - :ref:`CreateSimulationWorkspace <algm-CreateSimulationWorkspace>` now matches the IDF of the simulation workspace to the IDF of a reference workspace (either Nexus or Raw).
 
 Deprecated
