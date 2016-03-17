@@ -92,6 +92,7 @@ const std::string TomographyIfaceViewQtGUI::g_defOutPathLocal =
     "~/imat/";
 #endif
 
+// TODO: could use ConfigService::isNetworkDrive(const std::string &)
 const std::string TomographyIfaceViewQtGUI::g_defOutPathRemote =
 #ifdef _WIN32
     "I:/imat/imat-data/";

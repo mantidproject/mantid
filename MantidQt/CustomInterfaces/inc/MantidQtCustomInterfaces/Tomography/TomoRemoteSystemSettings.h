@@ -35,16 +35,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-struct MANTIDQT_CUSTOMINTERFACES_DLL TomoLocalSystemSettings {
+struct MANTIDQT_CUSTOMINTERFACES_DLL TomoRemoteSystemSettings {
   std::string m_basePathTomoData;
   std::string m_basePathReconScripts;
   int m_cores;
   int m_nodes;
 
-  std::string g_defBasePathTomoData;
-  std::string g_defBasePathReconScripts;
+  static const std::string g_defBasePathTomoData;
+  static const std::string g_defBasePathReconScripts;
 
-  TomoRemoteSystemsettings();
+  TomoRemoteSystemSettings();
 };
 
 } // namespace CustomInterfaces

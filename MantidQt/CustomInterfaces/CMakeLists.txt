@@ -109,6 +109,9 @@ set ( SRC_FILES
 	src/Tomography/TomoPathsConfig.cpp
 	src/Tomography/TomoReconPostprocSettings.cpp
 	src/Tomography/TomoReconPreprocSettings.cpp
+	src/Tomography/TomoSystemSettings.cpp
+	src/Tomography/TomoLocalSystemSettings.cpp
+	src/Tomography/TomoRemoteSystemSettings.cpp
 	src/Tomography/TomoToolConfigDialog.cpp
 	src/Tomography/ToolConfig.cpp
 	src/UserInputValidator.cpp
@@ -251,6 +254,9 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Tomography/TomoReconPostprocSettings.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoReconPreprocSettings.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoLocalSystemSettings.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoRemoteSystemSettings.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h
 	inc/MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h

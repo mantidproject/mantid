@@ -6,6 +6,9 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
+#include <string>
+#include <vector>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -38,6 +41,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 struct MANTIDQT_CUSTOMINTERFACES_DLL TomoSystemSettings {
+  // TODO use dictionary(es) for the string settings when they settle down
   TomoLocalSystemSettings local;
   TomoLocalSystemSettings remote;
 
@@ -47,11 +51,19 @@ struct MANTIDQT_CUSTOMINTERFACES_DLL TomoSystemSettings {
   std::string m_flatsDirPrefix;
   std::string m_darksDirPrefix;
 
-  std::string g_defSamplesDirPrefix;
-  std::string g_defflatsDirPrefix;
-  std::string g_defdarksDirPrefix;
+  /// path component for the pre-processed file (outputs)
+  std::string m_outputPathCompPreProcessed;
+  /// path component for the reconstructed files (outputs)
+  std::string m_outputPathCompReconst;
 
-  TomoSystemsettings();
+  static const std::string g_defSamplesDirPrefix;
+  static const std::string g_defFlatsDirPrefix;
+  static const std::string g_defDarksDirPrefix;
+
+  static const std::string g_defOutputPathCompPreProcessed;
+  static const std::string g_defOutputPathCompReconst;
+
+  TomoSystemSettings();
 };
 
 } // namespace CustomInterfaces

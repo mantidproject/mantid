@@ -35,17 +35,23 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 struct MANTIDQT_CUSTOMINTERFACES_DLL TomoLocalSystemSettings {
-  std::string m_basePath;
+  std::string m_basePathTomoData;
   std::string m_remoteDriveOrMountPoint;
   std::string m_reconScriptsPath;
+
+  std::string m_outputPathCompPreProcessed;
+  std::string m_outputPathCompReconst;
+
   int m_maxProcesses;
   int m_cores;
 
-  std::string g_defBasePath;
-  std::string g_defRemoteDriveOrMountPoint;
-  std::string g_defReconScriptsPath;
+  static const std::string g_defBasePathTomoData;
+  static const std::string g_defRemoteDriveOrMountPoint;
+  static const std::string g_defReconScriptsPath;
+  static const std::string g_defOutputPathCompPreProcessed;
+  static const std::string g_defOutputPathCompReconst;
 
-  TomoLocalSystemsettings();
+  TomoLocalSystemSettings();
 };
 
 } // namespace CustomInterfaces
