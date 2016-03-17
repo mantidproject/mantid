@@ -1171,14 +1171,12 @@ void LoadEventNexus::init() {
                                            Direction::Input),
       "If present, load the monitors as events. '''WARNING:''' WILL "
       "SIGNIFICANTLY INCREASE MEMORY USAGE (optional, default False). ");
-  declareProperty(
-        make_unique<PropertyWithValue<bool>>("LoadEventMonitors", true,
-                                             Direction::Input),
-        "blablabla");
-  declareProperty(
-        make_unique<PropertyWithValue<bool>>("LoadHistoMonitors", true,
-                                             Direction::Input),
-        "blablabla");
+  declareProperty(make_unique<PropertyWithValue<bool>>("LoadEventMonitors",
+                                                       true, Direction::Input),
+                  "blablabla");
+  declareProperty(make_unique<PropertyWithValue<bool>>("LoadHistoMonitors",
+                                                       true, Direction::Input),
+                  "blablabla");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "FilterMonByTofMin", EMPTY_DBL(), Direction::Input),
@@ -1208,11 +1206,11 @@ void LoadEventNexus::init() {
       "MonitorsAsEvents",
       make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
   setPropertySettings(
-        "LoadEventMonitors",
-        make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
+      "LoadEventMonitors",
+      make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
   setPropertySettings(
-        "LoadHistoMonitors",
-        make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
+      "LoadHistoMonitors",
+      make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
   auto asEventsIsOn = [] {
     std::unique_ptr<IPropertySettings> prop =
         make_unique<VisibleWhenProperty>("MonitorsAsEvents", IS_EQUAL_TO, "1");
