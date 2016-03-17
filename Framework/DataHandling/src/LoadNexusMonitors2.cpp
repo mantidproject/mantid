@@ -651,7 +651,9 @@ size_t LoadNexusMonitors2::getMonitorInfo(
  * @param numEventMon
  * @param monitorsAsEvents
  * @param monitorNames
+ * @param isEventMonitors
  * @param monitorNumber2Name
+ * @param loadMonitorFlags
  * @return
  */
 bool LoadNexusMonitors2::createOutputWorkspace(
