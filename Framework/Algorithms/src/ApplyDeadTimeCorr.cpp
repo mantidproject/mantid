@@ -130,5 +130,43 @@ void ApplyDeadTimeCorr::exec() {
   }
 }
 
+/**
+ * Validates input properties:
+ * - input workspace must have all bins the same size (within reasonable error)
+ * @returns :: map of property names to error strings (empty if no error)
+ */
+std::map<std::string, std::string> ApplyDeadTimeCorr::validateInputs() {
+  std::map<std::string, std::string> errors;
+  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  if (inputWS) { // in case input was a WorkspaceGroup
+    const MantidVec &xValues = inputWS->readX(0);
+    const size_t xSize = xValues.size();
+    if (xSize < 2) {
+      errors["InputWorkspace"] = "Input workspace cannot be empty";
+    } else {
+      // average bin width
+      const double dx =
+          (xValues[xSize - 1] - xValues[0]) / static_cast<double>(xSize - 1);
+
+      // Use cumulative errors
+      auto difference = [&xValues, &dx](size_t i) {
+        return std::abs((xValues[i] - xValues[0] - (double)i * dx) / dx);
+      };
+
+      // Check each width against dx
+      constexpr double tolerance = 0.5;
+      for (size_t i = 1; i < xValues.size() - 2; i++) {
+        if (difference(i) > tolerance) {
+          g_log.error() << "dx=" << xValues[i + 1] - xValues[i] << ' ' << dx
+                        << ' ' << i << std::endl;
+          errors["InputWorkspace"] = "Uneven bin widths in input workspace";
+          break;
+        }
+      }
+    }
+  }
+  return errors;
+}
+
 } // namespace Mantid
 } // namespace Algorithms

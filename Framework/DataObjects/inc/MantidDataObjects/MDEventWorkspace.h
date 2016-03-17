@@ -154,7 +154,7 @@ public:
     this->getBox()->getBoxes(boxes, maxDepth, leafOnly);
   }
 
-  void addEvent(const MDE &event);
+  size_t addEvent(const MDE &event);
 
   size_t addEvents(const std::vector<MDE> &events);
 
