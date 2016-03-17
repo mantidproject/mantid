@@ -2,21 +2,23 @@
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/make_unique.h"
 
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
 
 #include <sstream>
 
-using Mantid::CurveFitting::ComplexFortranMatrix;
-using Mantid::CurveFitting::DoubleFortranMatrix;
-using Mantid::CurveFitting::DoubleFortranVector;
-using Mantid::CurveFitting::Functions::calculateEigesystem;
 
 namespace Mantid {
 namespace CurveFitting {
 
+using namespace Mantid::Kernel;
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::CurveFitting::ComplexFortranMatrix;
+using Mantid::CurveFitting::DoubleFortranMatrix;
+using Mantid::CurveFitting::DoubleFortranVector;
+using Mantid::CurveFitting::Functions::calculateEigesystem;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CrystalFieldEnergies)
@@ -53,10 +55,10 @@ void CrystalFieldEnergies::init() {
   auto threeElements =
       boost::make_shared<Kernel::ArrayLengthValidator<double>>(3);
   std::vector<double> defaultVector(3, 0);
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(make_unique<Kernel::ArrayProperty<double>>(
                       "Bmol", defaultVector, threeElements),
                   "Parameters of the molecular field (3 values).");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(make_unique<Kernel::ArrayProperty<double>>(
                       "Bext", defaultVector, threeElements),
                   "Parameters of the external field (3 values).");
   declareProperty("B20", 0.0, "Real part of the B20 field parameter.");
@@ -92,13 +94,13 @@ void CrystalFieldEnergies::init() {
   declareProperty("IB66", 0.0, "Imaginery part of the B66 field parameter.");
 
   // Output
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(make_unique<Kernel::ArrayProperty<double>>(
                       "Energies", Kernel::Direction::Output),
                   "The energies starting at 0 in ascending order.");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(make_unique<Kernel::ArrayProperty<double>>(
                       "Eigenvectors", Kernel::Direction::Output),
                   "The eigenvectors.");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(make_unique<Kernel::ArrayProperty<double>>(
                       "Hamiltonian", Kernel::Direction::Output),
                   "The Hamiltonian.");
 }

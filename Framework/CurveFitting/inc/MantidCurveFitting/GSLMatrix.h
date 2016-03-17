@@ -181,9 +181,6 @@ public:
   Tr<GSLMatrix> tr() { return Tr<GSLMatrix>(*this); }
 
 protected:
-  /// Type of the matrix elements.
-  typedef double ElementConstType;
-  typedef double &ElementRefType;
   /// Create a new matrix and move the data to it.
   GSLMatrix move();
 

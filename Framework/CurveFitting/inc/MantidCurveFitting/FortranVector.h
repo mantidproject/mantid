@@ -1,6 +1,8 @@
 #ifndef MANTID_CURVEFITTING_FORTRANVECTOR_H_
 #define MANTID_CURVEFITTING_FORTRANVECTOR_H_
 
+#include <utility>
+
 namespace Mantid {
 namespace CurveFitting {
 
@@ -34,10 +36,10 @@ namespace CurveFitting {
 template <class VectorClass> class FortranVector : public VectorClass {
   /// Base for the index
   int m_base;
-  typedef decltype(reinterpret_cast<const VectorClass *>(nullptr)->operator[](
-      0)) ElementConstType;
-  typedef decltype(
-      reinterpret_cast<VectorClass *>(nullptr)->operator[](0)) ElementRefType;
+  /// Typedef the types returned by the base class's operators []. They aren't
+  /// necessarily the same as the stored type (double or complex).
+  typedef decltype(std::declval<const VectorClass>().operator[](0)) ElementConstType;
+  typedef decltype(std::declval<VectorClass>().operator[](0)) ElementRefType;
 
 public:
   /// Constructor
@@ -50,12 +52,11 @@ public:
   FortranVector(const int iFrom, const int iTo);
   /// Resize the vector
   void allocate(int firstIndex, int lastIndex);
-  /// Resize the vector
+  /// Resize the vector with base 1
   void allocate(int newSize);
+
   ElementConstType operator()(int i) const;
   ElementRefType operator()(int i);
-  ElementConstType operator[](int i) const;
-  ElementRefType operator[](int i);
 
   VectorClass moveToBaseVector();
 
@@ -107,7 +108,7 @@ FortranVector<VectorClass>::FortranVector(const int iFirst, const int iLast)
 template <class VectorClass>
 void FortranVector<VectorClass>::allocate(int firstIndex, int lastIndex) {
   m_base = firstIndex;
-  resize(makeSize(firstIndex, lastIndex));
+  this->resize(makeSize(firstIndex, lastIndex));
 }
 
 /// Resize the vector. Named this way to mimic the fortran style and to
@@ -134,21 +135,9 @@ operator()(int i) {
   return this->VectorClass::operator[](static_cast<size_t>(i - m_base));
 }
 
-/// The "index" operator
-template <class VectorClass>
-typename FortranVector<VectorClass>::ElementConstType
-    FortranVector<VectorClass>::
-    operator[](int i) const {
-  return this->operator()(i);
-}
-
-/// Get the reference to the data element
-template <class VectorClass>
-typename FortranVector<VectorClass>::ElementRefType FortranVector<VectorClass>::
-operator[](int i) {
-  return this->operator()(i);
-}
-
+/// Move the data of this vector to a newly created vector of the bas class.
+/// Do not use this vector after calling this method. The intension of it is
+/// to keep fortran-style calculations separate from C++-style.
 template <class VectorClass>
 VectorClass FortranVector<VectorClass>::moveToBaseVector() {
   return VectorClass::move();

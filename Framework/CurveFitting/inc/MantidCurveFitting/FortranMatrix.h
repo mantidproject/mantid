@@ -1,6 +1,9 @@
 #ifndef MANTID_CURVEFITTING_FORTRANMATRIX_H_
 #define MANTID_CURVEFITTING_FORTRANMATRIX_H_
 
+#include <cstddef>
+#include <stdexcept>
+
 namespace Mantid {
 namespace CurveFitting {
 
@@ -36,6 +39,10 @@ template <class MatrixClass> class FortranMatrix : public MatrixClass {
   int m_base1;
   /// Base for the second index
   int m_base2;
+  /// Typedef the types returned by the base class's operators []. They aren't
+  /// necessarily the same as the stored type (double or complex).
+  typedef decltype(std::declval<const MatrixClass>().operator()(0, 0)) ElementConstType;
+  typedef decltype(std::declval<MatrixClass>().operator()(0, 0)) ElementRefType;
 
 public:
   /// Constructor
@@ -50,8 +57,9 @@ public:
   void allocate(const int iFrom, const int iTo, const int jFrom, const int jTo);
   /// Resize the matrix.
   void allocate(const int nx, const int ny);
-  typename MatrixClass::ElementConstType operator()(int i, int j) const;
-  typename MatrixClass::ElementRefType operator()(int i, int j);
+  /// Index operator
+  ElementConstType operator()(int i, int j) const;
+  ElementRefType operator()(int i, int j);
   /// Move the data to a new matrix of MatrixClass
   MatrixClass moveToBaseMatrix();
 
@@ -74,12 +82,12 @@ size_t FortranMatrix<MatrixClass>::makeSize(int firstIndex, int lastIndex) {
 /// Constructor
 template <class MatrixClass>
 FortranMatrix<MatrixClass>::FortranMatrix()
-    : MatrixClass(makeSize(1, 1), makeSize(1, 1)), m_base1(1), m_base2(1) {}
+    : MatrixClass(this->makeSize(1, 1), this->makeSize(1, 1)), m_base1(1), m_base2(1) {}
 
 /// Constructor
 template <class MatrixClass>
 FortranMatrix<MatrixClass>::FortranMatrix(const int nx, const int ny)
-    : MatrixClass(makeSize(1, nx), makeSize(1, ny)), m_base1(1), m_base2(1) {}
+    : MatrixClass(this->makeSize(1, nx), this->makeSize(1, ny)), m_base1(1), m_base2(1) {}
 
 /// Copy constructor
 template <class MatrixClass>
@@ -100,7 +108,7 @@ FortranMatrix<MatrixClass>::FortranMatrix(const FortranMatrix &M)
 template <class MatrixClass>
 FortranMatrix<MatrixClass>::FortranMatrix(const int iFirst, const int iLast,
                                           const int jFirst, const int jLast)
-    : MatrixClass(makeSize(iFirst, iLast), makeSize(jFirst, jLast)),
+    : MatrixClass(this->makeSize(iFirst, iLast), this->makeSize(jFirst, jLast)),
       m_base1(iFirst), m_base2(jFirst) {}
 
 /// Resize the matrix.
@@ -113,7 +121,7 @@ void FortranMatrix<MatrixClass>::allocate(const int iFrom, const int iTo,
                                           const int jFrom, const int jTo) {
   m_base1 = iFrom;
   m_base2 = jFrom;
-  resize(makeSize(iFrom, iTo), makeSize(jFrom, jTo));
+  this->resize(this->makeSize(iFrom, iTo), this->makeSize(jFrom, jTo));
 }
 
 /// Resize the matrix. The index bases are 1.
@@ -123,12 +131,12 @@ template <class MatrixClass>
 void FortranMatrix<MatrixClass>::allocate(const int nx, const int ny) {
   m_base1 = 1;
   m_base2 = 1;
-  resize(makeSize(1, nx), makeSize(1, ny));
+  this->resize(this->makeSize(1, nx), this->makeSize(1, ny));
 }
 
 /// The "index" operator
 template <class MatrixClass>
-typename MatrixClass::ElementConstType FortranMatrix<MatrixClass>::
+typename FortranMatrix<MatrixClass>::ElementConstType FortranMatrix<MatrixClass>::
 operator()(int i, int j) const {
   return this->MatrixClass::operator()(static_cast<size_t>(i - m_base1),
                                        static_cast<size_t>(j - m_base2));
@@ -136,7 +144,7 @@ operator()(int i, int j) const {
 
 /// Get the reference to the data element
 template <class MatrixClass>
-typename MatrixClass::ElementRefType FortranMatrix<MatrixClass>::
+typename FortranMatrix<MatrixClass>::ElementRefType FortranMatrix<MatrixClass>::
 operator()(int i, int j) {
   return this->MatrixClass::operator()(static_cast<size_t>(i - m_base1),
                                        static_cast<size_t>(j - m_base2));
@@ -145,7 +153,7 @@ operator()(int i, int j) {
 /// Move the data to a new matrix of MatrixClass
 template <class MatrixClass>
 MatrixClass FortranMatrix<MatrixClass>::moveToBaseMatrix() {
-  return move();
+  return this->move();
 }
 
 } // namespace CurveFitting

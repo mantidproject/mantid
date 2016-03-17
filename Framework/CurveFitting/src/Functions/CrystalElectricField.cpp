@@ -21,11 +21,7 @@ ComplexType conjg(const ComplexMatrixValueConverter &conv) {
 }
 
 // number of rare earth ions (?)
-const size_t maxNre = 13;
-// [max?] size of the Hamiltonian
-const size_t sizeOfHam = 17;
-// some size of something in array definitions of the form '0:6'
-const size_t N0_6 = 7;
+const int maxNre = 13;
 
 // define some rare earth constants (?)
 const std::array<double, maxNre> ggj = {
@@ -221,10 +217,10 @@ ComplexType f(double s) { return ComplexType((s + 1) / 2, (s - 1) / 2); }
 double f20(double nj, double j) { return 3 * pow(nj, 2) - j * (j + 1); }
 
 //------------------------------
-double f21(double nj, double j) { return nj; }
+double f21(double nj, double) { return nj; }
 
 //------------------------------
-double f22(double nj, double j) { return 1.0; }
+double f22(double, double) { return 1.0; }
 
 //------------------------------
 double f40(double nj, double j) {
@@ -241,10 +237,10 @@ double f41(double nj, double j) {
 double f42(double nj, double j) { return 7 * pow(nj, 2) - j * (j + 1) - 5; }
 
 //------------------------------
-double f43(double nj, double j) { return nj; }
+double f43(double nj, double) { return nj; }
 
 //------------------------------
-double f44(double nj, double j) { return 1.0; }
+double f44(double, double) { return 1.0; }
 
 //------------------------------
 double f60(double nj, double j) {
@@ -672,8 +668,6 @@ void calculateEigesystem(DoubleFortranVector &eigenvalues,
 
   // magneton of Bohr in kelvin per tesla
   auto myb = c_myb;
-  //  magnetic neutron scattering radius
-  auto r0 = c_r0();
   //------------------------------------------------------------
   //       transform the Bkq with
   //       H = sum_k=0 Bk0 Ok0 + sum_k>0_q>0  ReBkq ReOkq + ImBkq ImOkq

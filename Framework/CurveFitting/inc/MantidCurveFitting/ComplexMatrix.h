@@ -239,17 +239,13 @@ public:
   /// Get "conjugate transposed" matrix to be used in multiplications
   CTr ctr() { return CTr(*this); }
   /// Pack the matrix into a single std vector of doubles (for passing in and
-  /// out
-  /// of algorithms)
+  /// out of algorithms)
   std::vector<double> packToStdVector() const;
   /// Unpack an std vector into this matrix. Matrix size must match the size
   /// of the vector
   void unpackFromStdVector(const std::vector<double> &v);
 
 protected:
-  /// Type of the matrix elements.
-  typedef const ComplexMatrixValueConverter ElementConstType;
-  typedef ComplexMatrixValueConverter ElementRefType;
   /// Create a new matrix and move the data to it.
   ComplexMatrix move();
 
