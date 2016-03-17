@@ -3,20 +3,19 @@
 #include "MantidKernel/Logger.h"
 #include <vector>
 
-// Have to deal with ParaView warnings and Intel compiler the hard way.
-#if defined(__INTEL_COMPILER)
-  #pragma warning disable 1170
-#endif
-#include <pqRenderView.h>
-#include <vtkSMDoubleVectorProperty.h>
-#include <vtkSMViewProxy.h>
-#include <vtkCommand.h>
-#include <vtkCallbackCommand.h>
-#include <vtkSmartPointer.h>
+#include <pqActiveObjects.h>
+#include <pqDataRepresentation.h>
+#include <pqPipelineRepresentation.h>
 
-#if defined(__INTEL_COMPILER)
-  #pragma warning enable 1170
-#endif
+#include <pqRenderView.h>
+#include <vtkCallbackCommand.h>
+#include <vtkCommand.h>
+#include <vtkNew.h>
+#include <vtkSMDoubleVectorProperty.h>
+#include <vtkSMPropertyHelper.h>
+#include <vtkSMTransferFunctionProxy.h>
+#include <vtkSMViewProxy.h>
+#include <vtkSmartPointer.h>
 
 namespace Mantid
 {
@@ -120,6 +119,15 @@ namespace Mantid
         vtkSMDoubleVectorProperty* background = vtkSMDoubleVectorProperty::SafeDownCast(view->getViewProxy()->GetProperty("Background"));
 
         background->SetElements3(backgroundRgb[0],backgroundRgb[1],backgroundRgb[2]);
+
+        double black[3] = {0., 0., 0.};
+        vtkSMPropertyHelper(view->getProxy(), "OrientationAxesLabelColor")
+            .Set(black, 3);
+        auto color =
+            vtkSMPropertyHelper(view->getProxy(), "OrientationAxesLabelColor")
+                .GetDoubleArray();
+        std::cout << "color:" << color[0] << " " << color[1] << " " << color[2]
+                  << "\n";
 
         view->resetCamera();
       }
