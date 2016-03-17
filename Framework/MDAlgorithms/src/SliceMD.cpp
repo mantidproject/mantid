@@ -230,9 +230,8 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           // Copy extra data, if any
           copyEvent(*it, newEvent);
           // Add it to the workspace
-          outRootBox->addEvent(newEvent);
-
-          numSinceSplit++;
+          if (outRootBox->addEvent(newEvent))
+            numSinceSplit++;
         }
       }
       box->releaseEvents();
@@ -270,7 +269,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Account for events that were added after the last split
   totalAdded += numSinceSplit;
   g_log.notice() << totalAdded << " " << OMDE::getTypeName()
-                 << "'s added to the output workspace." << std::endl;
+                 << "s added to the output workspace." << std::endl;
 
   if (outWS->isFileBacked()) {
     // Update the file-back-end
