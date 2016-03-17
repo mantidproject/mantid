@@ -107,6 +107,8 @@ The calibration process depends on several additional parameters and
 settings which can be modified in the *Settings* section (tab), see
 below for details.
 
+.. _focus-Engineering_Diffraction-ref:
+
 Focus
 -----
 
@@ -208,8 +210,8 @@ The user also has an option of generated GSS, XYE and OpenGenie
 formatted file by clicking the Output Files checkbox. This will
 generated three different files for each focused output workspace
 in Mantid. These files can be found with appropriate name at location:
-C:\EnginX_Mantid\User\236516\Focus on Windows, the
-EnginX_Mantid folder can be found on Desktop/Home on other platforms.
+`C:\EnginX_Mantid\User\236516\Focus` on Windows, the
+EnginX_Mantid folder can be found on `Desktop/Home` on other platforms.
 
 The Multiple Runs Focus Mode combo-box enables two alternative
 focus mode. `Focus Individual Run Files Separately` is the default
@@ -257,6 +259,36 @@ convention:
 This tab uses the algorithms :ref:`Rebin <algm-Rebin>` and :ref:`Rebin
 <algm-RebinByPulseTimes>` to bin the data in different ways when
 converting event data into histogram data.
+
+Fitting
+-------
+
+.. warning:: This is a new capability that is currently in a very
+             early stage of definition and implementation. Not all
+             options may be supported and/or consistent at the moment.
+
+The Fitting tab provides a graphical interface which fits an expected
+diffraction pattern and visualises them. The pastern is specified by
+providing a list of dSpacing values where Bragg peaks are expected.
+The algorithm :ref:`EnggFitPeaks<algm-EnggFitPeaks>` used in the
+background fit peaks in those areas using a peak fitting function.
+
+To use the Fitting tab, user is required to provide a focused workspace
+as Focus Run input, list of expected peaks which can be either by browsing
+a (*CSV*) file or entering within the text-field and simply click on the Fit
+button.
+
+Parameters
+^^^^^^^^^^
+
+These parameters are required to process Fitting successfully:
+
+Focused Run #:
+  Focused workspace directory or selected with the help of browse button.
+  Focused workspace can be generated with the help of
+  :ref:`focus-Engineering_Diffraction-ref` tab, the output folder
+  directory can be set in the :ref:`setting-Engineering_Diffraction-ref`
+  tab under the *Focusing settings* section.
 
 Settings
 --------
