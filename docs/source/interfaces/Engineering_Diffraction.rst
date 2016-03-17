@@ -290,6 +290,32 @@ Focused Run #:
   directory can be set in the :ref:`setting-Engineering_Diffraction-ref`
   tab under the *Focusing settings* section.
 
+Peaks:
+  A list of dSpacing values to be translated into TOF to find expected
+  peaks. These peaks can be manually written or imported by selected a
+  (*CSV*) file.
+
+Output
+^^^^^^
+
+Once the Fit button has been clicked, wait until the Fitting process has
+completed and upon completion you should be able to view on the Fitting
+tab the focused workspace plotted in the background in black, whereas the
+expected peaks plotted in various colours over lapping the focused
+workspace peaks.
+
+The interface will also generate workspaces that can be inspected in the
+workspaces window:
+
+1. The *engggui_fitting_fitpeaks_param* Table workspace
+   with the parameters of the peaks found and fitted.
+2. The *engggui_fitting_focused_ws* Focused workspace also loaded
+   so the fitted data can be compared with focused data
+3. The *engggui_fitting_single_peaks* workspace within each workspace
+   index representing individual expected peak.
+
+.. _setting-Engineering_Diffraction-ref:
+
 Settings
 --------
 

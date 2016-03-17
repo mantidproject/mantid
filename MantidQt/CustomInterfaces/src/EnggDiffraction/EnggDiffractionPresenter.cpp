@@ -457,7 +457,7 @@ void EnggDiffractionPresenter::processFitPeaks() {
   const std::string focusedRunNo = m_view->fittingRunNo();
   const std::string fitPeaksData = m_view->fittingPeaksData();
 
-  g_log.error() << "the expected peaks are: " << fitPeaksData << std::endl;
+  g_log.debug() << "the expected peaks are: " << fitPeaksData << std::endl;
 
   try {
     inputChecksBeforeFitting(focusedRunNo, fitPeaksData);
