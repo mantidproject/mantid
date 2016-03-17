@@ -257,6 +257,7 @@ public:
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
     EXPECT_CALL(mockView, updatePathsConfig(testing::_)).Times(0);
+    EXPECT_CALL(mockView, experimentReference()).Times(0);
 
     // needs some basic paths config - using defaults from constructor
     EXPECT_CALL(mockView, currentPathsConfig())
@@ -281,6 +282,14 @@ public:
     mockView.updatePathsConfig(cfg);
 
     EXPECT_CALL(mockView, updatePathsConfig(testing::_)).Times(0);
+    EXPECT_CALL(mockView, experimentReference()).Times(0);
+    EXPECT_CALL(
+        mockView,
+        showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
+            testing::_))).Times(0);
+    EXPECT_CALL(mockView,
+                showImage(testing::Matcher<const std::string &>(testing::_)))
+        .Times(0);
 
     // needs some basic paths config - using defaults from constructor
     EXPECT_CALL(mockView, currentPathsConfig())
@@ -299,6 +308,7 @@ public:
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
     EXPECT_CALL(mockView, updatePathsConfig(testing::_)).Times(1);
+    EXPECT_CALL(mockView, experimentReference()).Times(0);
 
     // needs some basic paths config - using defaults from constructor
     EXPECT_CALL(mockView, currentPathsConfig())
@@ -316,12 +326,21 @@ public:
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
+    EXPECT_CALL(mockView, experimentReference()).Times(0);
+
     // give only the samples path
     TomoPathsConfig cfg;
     cfg.updatePathSamples("/nowhere/foo_samples");
     mockView.updatePathsConfig(cfg);
 
     EXPECT_CALL(mockView, updatePathsConfig(testing::_)).Times(1);
+    EXPECT_CALL(
+        mockView,
+        showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
+            testing::_))).Times(0);
+    EXPECT_CALL(mockView,
+                showImage(testing::Matcher<const std::string &>(testing::_)))
+        .Times(0);
 
     // needs some basic paths config - using defaults from constructor
     EXPECT_CALL(mockView, currentPathsConfig())
