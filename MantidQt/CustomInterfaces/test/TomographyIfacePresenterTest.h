@@ -40,6 +40,28 @@ public:
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(m_view.get()));
   }
 
+  void test_setupSystemSettings() {
+    testing::NiceMock<MockTomographyIfaceView> mockView;
+    MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
+
+    // system settings should be self-contained - no need for any of these:
+    EXPECT_CALL(mockView, currentPathsConfig()).Times(0);
+    EXPECT_CALL(mockView, enableLoggedActions(false)).Times(0);
+    EXPECT_CALL(mockView, setComputeResources(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, setReconstructionTools(testing::_, testing::_))
+        .Times(0);
+
+    EXPECT_CALL(mockView, systemSettings())
+        .Times(1)
+        .WillOnce(Return(TomoSystemSettings()));
+
+    // No errors/warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(ITomographyIfacePresenter::SystemSettingsUpdated);
+  }
+
   void test_setupGood() {
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
@@ -49,6 +71,9 @@ public:
         .Times(1)
         .WillOnce(Return(TomoPathsConfig()));
 
+    EXPECT_CALL(mockView, systemSettings())
+        .Times(1)
+        .WillOnce(Return(TomoSystemSettings()));
     EXPECT_CALL(mockView, enableLoggedActions(false)).Times(1);
     EXPECT_CALL(mockView, setComputeResources(testing::_, testing::_)).Times(1);
     EXPECT_CALL(mockView, setReconstructionTools(testing::_, testing::_))
@@ -65,6 +90,9 @@ public:
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
+    EXPECT_CALL(mockView, systemSettings())
+        .Times(1)
+        .WillOnce(Return(TomoSystemSettings()));
     EXPECT_CALL(mockView, enableLoggedActions(false)).Times(1);
     EXPECT_CALL(mockView, setComputeResources(testing::_, testing::_)).Times(1);
     EXPECT_CALL(mockView, setReconstructionTools(testing::_, testing::_))
@@ -98,6 +126,7 @@ public:
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
+    EXPECT_CALL(mockView, systemSettings()).Times(0);
     EXPECT_CALL(mockView, currentReconTool())
         .Times(1)
         .WillRepeatedly(Return(g_ccpi));
@@ -117,6 +146,7 @@ public:
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
+    EXPECT_CALL(mockView, systemSettings()).Times(0);
     // needs the basic paths at a very minimum
     EXPECT_CALL(mockView, currentReconTool())
         .Times(2)
@@ -175,6 +205,9 @@ public:
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
+    EXPECT_CALL(mockView, systemSettings())
+        .Times(1)
+        .WillOnce(Return(TomoSystemSettings()));
     // needs basic paths config - using defaults
     EXPECT_CALL(mockView, currentPathsConfig())
         .Times(1)
@@ -369,10 +402,15 @@ public:
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
+    EXPECT_CALL(mockView, systemSettings())
+        .Times(1)
+        .WillOnce(Return(TomoSystemSettings()));
+
     // needs basic paths config - using defaults
     EXPECT_CALL(mockView, currentPathsConfig())
         .Times(1)
         .WillOnce(Return(TomoPathsConfig()));
+
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
@@ -426,6 +464,61 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(ITomographyIfacePresenter::RefreshJobs);
+  }
+
+  void test_systemSettingsDefs() {
+    TomoSystemSettings sets;
+
+    const std::string msg = "Global tomography system settings default values "
+                            "should be as expected";
+
+    TSM_ASSERT_EQUALS(msg + " (number of path components for image data)",
+                      sets.m_pathComponents.size(), 4);
+
+    TSM_ASSERT_EQUALS(msg + " (prefix for sample images dir)",
+                      sets.m_samplesDirPrefix, "data");
+
+    TSM_ASSERT_EQUALS(msg + " (prefix for flat/open beam images dir)",
+                      sets.m_flatsDirPrefix, "flat");
+
+    TSM_ASSERT_EQUALS(msg + " (prefix for dark images dir)",
+                      sets.m_darksDirPrefix, "dark");
+
+    TSM_ASSERT_EQUALS(
+        msg + " (path component in the output for pre-processed images)",
+        sets.m_outputPathCompPreProcessed, "pre_processed");
+
+    TSM_ASSERT_EQUALS(msg + " (path component in the output for "
+                            "processed/reconstructed images/volumes)",
+                      sets.m_outputPathCompReconst, "processed");
+  }
+
+  void test_systemSettingsDefsLocal() {
+    TomoSystemSettings sets;
+
+    const std::string msg =
+        "Local system settings default values should be as expected";
+
+    const std::string path = sets.local.m_basePathTomoData;
+    TSM_ASSERT_LESS_THAN_EQUALS(
+        msg + " (base path for tomography data too short)", 5, path.length());
+
+    TSM_ASSERT_EQUALS(msg + " (base path for tomography data)",
+                      path.substr(path.length() - 4), "data");
+  }
+
+  void test_systemSettingsDefsRemote() {
+    TomoSystemSettings sets;
+
+    const std::string msg =
+        "Remote system settings default values should be as expected";
+
+    TSM_ASSERT_EQUALS(msg + " (base path for tomography data)",
+                      sets.remote.m_basePathTomoData, "/work/imat");
+
+    TSM_ASSERT_EQUALS(msg + " (base path for reconstruction scripts)",
+                      sets.remote.m_basePathReconScripts,
+                      "/work/imat/phase_commissioning");
   }
 
   void test_filtersSettings() {
@@ -488,6 +581,8 @@ public:
     // the user does a few silly things...
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, systemSettings()).Times(0);
 
     EXPECT_CALL(mockView, currentPathsConfig())
         .Times(1)

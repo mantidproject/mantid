@@ -114,8 +114,12 @@ public:
            const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
                localStatus));
 
+  // TomoSystemSettings systemSettings() const
+  MOCK_CONST_METHOD0(systemSettings,
+                     MantidQt::CustomInterfaces::TomoSystemSettings());
+
   // MantidQt::CustomInterfaces::TomoReconToolsUserSettings
-  // reconToolsSettings() const {}
+  // reconToolsSettings() const
   MOCK_CONST_METHOD0(reconToolsSettings,
                      MantidQt::CustomInterfaces::TomoReconToolsUserSettings());
 
