@@ -39,10 +39,17 @@
           <property name="text">
            <string>Dark field:</string>
           </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_path_darks"/>
+         <widget class="QLineEdit" name="lineEdit_path_darks">
+          <property name="text">
+           <string>D:/data/RB000000/experiment1/dark</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_darks_dir">
@@ -83,7 +90,7 @@
         <item>
          <widget class="QLineEdit" name="lineEdit_path_samples">
           <property name="text">
-           <string/>
+           <string>D:/data/RB000000/experiment1/sample</string>
           </property>
          </widget>
         </item>
@@ -112,10 +119,17 @@
           <property name="text">
            <string>Flat/open beam</string>
           </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_path_flats"/>
+         <widget class="QLineEdit" name="lineEdit_path_flats">
+          <property name="text">
+           <string>D:/data/RB000000/experiment1/flat</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_flats_dir">

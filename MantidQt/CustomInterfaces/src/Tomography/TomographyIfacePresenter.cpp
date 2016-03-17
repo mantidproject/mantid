@@ -9,6 +9,9 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <Poco/DirectoryIterator.h>
+#include <Poco/Path.h>
+
 #include <QFileInfo>
 #include <QMutex>
 #include <QString>
@@ -73,6 +76,10 @@ void TomographyIfacePresenter::notify(
 
   case ITomographyIfacePresenter::TomoPathsChanged:
     processTomoPathsChanged();
+    break;
+
+  case ITomographyIfacePresenter::TomoPathsEditedByUser:
+    processTomoPathsEditedByUser();
     break;
 
   case ITomographyIfacePresenter::LogInRequested:
@@ -186,8 +193,71 @@ void TomographyIfacePresenter::processToolChange() {
   m_model->usingTool(tool);
 }
 
+/**
+ * Simply take the paths that the user has provided.
+ */
 void TomographyIfacePresenter::processTomoPathsChanged() {
   m_model->updateTomoPathsConfig(m_view->currentPathsConfig());
+}
+
+/**
+* Updates the model with the new path. In the process it also tries to
+* guess and find a new path for the flats and darks images from the
+* path to the sample images that the user has given. It would normally
+* look one level up in the directory tree to see if it can find dark*
+* and flat*.
+*
+* @param path path to the sample images
+*/
+void TomographyIfacePresenter::processTomoPathsEditedByUser() {
+  TomoPathsConfig cfg = m_view->currentPathsConfig();
+  const std::string samples = cfg.pathSamples();
+  if (samples.empty())
+    return;
+
+  try {
+    findFlatsDarksFromSampleGivenByUser(cfg);
+  } catch (std::exception &exc) {
+    const std::string msg = "There was a problem while trying to guess the "
+                            "location of dark and flat images from this path "
+                            "to sample images: " +
+                            samples + ". Error details: " + exc.what();
+    m_model->logMsg(msg);
+  }
+
+  m_model->updateTomoPathsConfig(cfg);
+  m_view->updatePathsConfig(cfg);
+}
+
+void TomographyIfacePresenter::findFlatsDarksFromSampleGivenByUser(
+    TomoPathsConfig &cfg) {
+  Poco::Path samplesPath(cfg.pathSamples());
+  Poco::DirectoryIterator end;
+  bool foundDark = false;
+  bool foundFlat = false;
+  for (Poco::DirectoryIterator it(samplesPath.parent()); it != end; ++it) {
+    if (!it->isDirectory()) {
+      continue;
+    }
+
+    const std::string name = it.name();
+    const std::string flatsPrefix = "flat";
+    const std::string darksPrefix = "dark";
+    std::cerr << "iterating  dir name: " <<  name << std::endl;
+
+    if (boost::iequals(name.substr(0, flatsPrefix.length()), flatsPrefix)) {
+      cfg.updatePathOpenBeam(it->path());
+      foundFlat = true;
+      std::cerr << "found flat! " << it->path() << std::endl;
+    } else if (boost::iequals(name.substr(0, darksPrefix.length()),
+                              darksPrefix)) {
+      cfg.updatePathDarks(it->path());
+      foundDark = true;
+      std::cerr << "found dark! " << it->path() << std::endl;
+    }
+    if (foundFlat && foundDark)
+      break;
+  }
 }
 
 void TomographyIfacePresenter::processLogin() {
@@ -195,7 +265,8 @@ void TomographyIfacePresenter::processLogin() {
     m_view->userError(
         "Fatal error",
         "Cannot do any login operation because the current facility is not "
-        "supported by this interface. Please check the log messages for more "
+        "supported by this interface. Please check the log messages for "
+        "more "
         "details.");
     return;
   }

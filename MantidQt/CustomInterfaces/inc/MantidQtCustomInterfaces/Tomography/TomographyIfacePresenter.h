@@ -17,6 +17,8 @@ class QTimer;
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class TomoPathsConfig;
+
 /**
 Tomography GUI. Presenter for the GUI (as in the MVP
 (Model-View-Presenter) pattern). In principle, in a strict MVP setup,
@@ -67,6 +69,7 @@ protected:
   void processCompResourceChange();
   void processToolChange();
   void processTomoPathsChanged();
+  void processTomoPathsEditedByUser();
   void processLogin();
   void processLogout();
   void processSetupReconTool();
@@ -88,6 +91,13 @@ protected:
 
   void doVisualize(const std::vector<std::string> &ids);
 
+  /// To prepare a local run
+  void makeRunnableWithOptionsLocal(const std::string &comp, std::string &run,
+                                    std::string &opt);
+
+  /// auto-guess additional directories when the user gives the samples path
+  void findFlatsDarksFromSampleGivenByUser(TomoPathsConfig &cfg);
+
   /// Starts a periodic query just to keep sessions alive when logged in
   void startKeepAliveMechanism(int period);
   /// Stops/kills the periodic query (for example if the user logs out)
@@ -99,10 +109,6 @@ private:
 
   /// Associated model for this presenter (MVP pattern)
   const boost::scoped_ptr<TomographyIfaceModel> m_model;
-
-  /// To prepare a local run
-  void makeRunnableWithOptionsLocal(const std::string &comp, std::string &run,
-                                    std::string &opt);
 
   // TODO: replace this with an std::mutex. Also below for threads.
   // mutex for the job status info update operations on the view

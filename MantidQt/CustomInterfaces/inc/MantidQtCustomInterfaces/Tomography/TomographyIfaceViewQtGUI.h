@@ -157,6 +157,8 @@ public:
 
   TomoPathsConfig currentPathsConfig() const override { return m_pathsConfig; }
 
+  void updatePathsConfig(const TomoPathsConfig &cfg) override;
+
   ImageStackPreParams currentROIEtcParams() const override {
     return m_tabROIW->userSelection();
   }
@@ -186,8 +188,12 @@ private slots:
   void darksPathCheckStatusChanged(int status);
 
   void samplesPathBrowseClicked();
-  void flatPathBrowseClicked();
-  void darkPathBrowseClicked();
+  void flatsPathBrowseClicked();
+  void darksPathBrowseClicked();
+
+  void samplesPathEditedByUser();
+  void flatsPathEditedByUser();
+  void darksPathEditedByUser();
 
   /// For the filters tab
   void resetPrePostFilters();
@@ -263,9 +269,11 @@ private:
 
   void processPathBrowseClick(QLineEdit *le, std::string &data);
 
+  void updateFlatsDarksFromSamplePath(const std::string &path);
+
   TomoReconFiltersSettings grabPrePostProcSettings() const;
 
-  void setPrePostProcSettings(TomoReconFiltersSettings &opts) const;
+  void setPrePostProcSettings(const TomoReconFiltersSettings &opts);
 
   std::string
   checkUserBrowsePath(QLineEdit *le,
@@ -276,8 +284,9 @@ private:
 
   void sendLog(const std::string &msg);
 
-  // Begin of Savu related functionality. This will grow and will need
-  // separation. They should find a better place to live.
+  // Begin of Savu related functionality. Waiting for the tool to become
+  // available. When that happens, this area of the code will grow and will
+  // need separation. They should find a better place to live.
   ///@name Savu related methods
   ///@{
   /// to load plugins (savu classification / API)

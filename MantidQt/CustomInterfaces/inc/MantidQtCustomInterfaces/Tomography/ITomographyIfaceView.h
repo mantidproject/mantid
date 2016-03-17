@@ -257,6 +257,15 @@ public:
   virtual TomoPathsConfig currentPathsConfig() const = 0;
 
   /**
+   * Takes paths produces programmatically and displays them to the
+   * user. This can be used for example when modifying the paths based
+   * on some logic/consistency checks outside of this view.
+   *
+   * @param paths configuration to use from now on
+   */
+  virtual void updatePathsConfig(const TomoPathsConfig &cfg) = 0;
+
+  /**
    * Regions and center of rotation, normally defined by the user with
    * a graphical rectangle selection tool.
    *

@@ -85,6 +85,10 @@ public:
   MOCK_CONST_METHOD0(currentPathsConfig,
                      MantidQt::CustomInterfaces::TomoPathsConfig());
 
+  // void updatePathsConfig(const TomoPathsConfig &cfg)
+  MOCK_METHOD1(updatePathsConfig,
+               void(const MantidQt::CustomInterfaces::TomoPathsConfig &cfg));
+
   // ImageStackPreParams currentROIEtcParams() const = 0;
   MOCK_CONST_METHOD0(currentROIEtcParams,
                      MantidQt::CustomInterfaces::ImageStackPreParams());
