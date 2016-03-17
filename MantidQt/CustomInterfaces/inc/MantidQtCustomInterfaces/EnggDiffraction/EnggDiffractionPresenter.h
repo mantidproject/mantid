@@ -92,6 +92,9 @@ public:
   void doFitting(const std::string &focusedRunNo,
                  const std::string &ExpectedPeaks);
 
+  void runFittingAlgs(std::string FocusedFitPeaksTableName,
+                      std::string FocusedWSName);
+
   std::string
   functionStrFactory(Mantid::API::ITableWorkspace_sptr &paramTableWS,
                      std::string tableName, size_t row, std::string &startX,
@@ -109,7 +112,6 @@ public:
                            std::string workspace2Name);
 
   void runRebinToWorkspaceAlg(std::string workspaceName);
-
 
 protected:
   void initialize();
