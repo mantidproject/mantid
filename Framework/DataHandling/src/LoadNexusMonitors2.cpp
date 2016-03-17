@@ -187,10 +187,9 @@ void LoadNexusMonitors2::exec() {
   // EventWorkspace_sptr eventWS;
   // Create the output workspace
   std::vector<bool> loadMonitorFlags;
-  bool useEventMon =
-      createOutputWorkspace(numHistMon, numEventMon, monitorsAsEvents,
-                            monitorNames, isEventMonitors, monitorNumber2Name,
-                            loadMonitorFlags);
+  bool useEventMon = createOutputWorkspace(
+      numHistMon, numEventMon, monitorsAsEvents, monitorNames, isEventMonitors,
+      monitorNumber2Name, loadMonitorFlags);
 
   // a temporary place to put the spectra/detector numbers
   boost::scoped_array<specnum_t> spectra_numbers(
@@ -207,20 +206,18 @@ void LoadNexusMonitors2::exec() {
 
     // TODO 1: SKIP if this monitor is not to be loaded!
     g_log.information() << "Loading " << monitorNames[i_mon];
-    if (loadMonitorFlags[i_mon])
-    {
+    if (loadMonitorFlags[i_mon]) {
       g_log.information() << "\n";
-    }
-    else
-    {
+    } else {
       g_log.information() << " is skipped.\n";
       continue;
     }
 
     // TODO 2: CHECK
     if (ws_index == m_workspace->getNumberHistograms())
-      throw std::runtime_error("Overcedes the number of histograms in output event "
-                               "workspace.");
+      throw std::runtime_error(
+          "Overcedes the number of histograms in output event "
+          "workspace.");
 
     // TODO 3: REFACTOR to get spectrumNo and momIndex
     // Do not rely on the order in path list
@@ -257,8 +254,7 @@ void LoadNexusMonitors2::exec() {
     if (useEventMon) {
       // load as an event monitor
       readEventMonitorEntry(file, ws_index);
-    } else
-    {
+    } else {
       // load as a histogram monitor
       readHistoMonitorEntry(file, ws_index);
     }
@@ -269,7 +265,7 @@ void LoadNexusMonitors2::exec() {
     m_workspace->getSpectrum(ws_index)->setSpectrumNo(spectrumNo);
     m_workspace->getSpectrum(ws_index)->setDetectorID(monIndex);
 
-    ++ ws_index;
+    ++ws_index;
     prog3.report();
   }
 
@@ -292,7 +288,8 @@ void LoadNexusMonitors2::exec() {
 
   // Fix the detector numbers if the defaults above are not correct
   // fixUDets(detector_numbers, file, spectra_numbers, m_monitor_count);
-  fixUDets(detector_numbers, file, spectra_numbers, m_workspace->getNumberHistograms());
+  fixUDets(detector_numbers, file, spectra_numbers,
+           m_workspace->getNumberHistograms());
 
   // Check for and ISIS compat block to get the detector IDs for the loaded
   // spectrum numbers
@@ -659,8 +656,7 @@ size_t LoadNexusMonitors2::getMonitorInfo(
  */
 bool LoadNexusMonitors2::createOutputWorkspace(
     size_t numHistMon, size_t numEventMon, bool monitorsAsEvents,
-    std::vector<std::string> &monitorNames,
-    std::vector<bool> &isEventMonitors,
+    std::vector<std::string> &monitorNames, std::vector<bool> &isEventMonitors,
     const std::map<int, std::string> &monitorNumber2Name,
     std::vector<bool> &loadMonitorFlags) {
 
@@ -726,34 +722,24 @@ bool LoadNexusMonitors2::createOutputWorkspace(
   }
 
   // set up the flags to load monitor
-  if (useEventMon)
-  {
+  if (useEventMon) {
     // load event
-    for (size_t i_mon = 0; i_mon < m_monitor_count; ++i_mon)
-    {
+    for (size_t i_mon = 0; i_mon < m_monitor_count; ++i_mon) {
       if (isEventMonitors[i_mon])
         loadMonitorFlags[i_mon] = true;
       else
         loadMonitorFlags[i_mon] = false;
     }
-  }
-  else
-  {
+  } else {
     // load histogram
-    for (size_t i_mon = 0; i_mon < m_monitor_count; ++i_mon)
-    {
-      if (!isEventMonitors[i_mon])
-      {
+    for (size_t i_mon = 0; i_mon < m_monitor_count; ++i_mon) {
+      if (!isEventMonitors[i_mon]) {
         // histo
         loadMonitorFlags[i_mon] = true;
-      }
-      else if (loadEventMon && loadHistoMon)
-      {
+      } else if (loadEventMon && loadHistoMon) {
         // event mode but load both
         loadMonitorFlags[i_mon] = true;
-      }
-      else
-      {
+      } else {
         loadMonitorFlags[i_mon] = false;
       }
     }
@@ -808,9 +794,7 @@ bool LoadNexusMonitors2::createOutputWorkspace(
   return useEventMon;
 }
 
-void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file,
-                                               size_t i)
-{
+void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file, size_t i) {
   // setup local variables
   EventWorkspace_sptr eventWS =
       boost::dynamic_pointer_cast<EventWorkspace>(m_workspace);
@@ -867,9 +851,7 @@ void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file,
     event_list.setSortOrder(DataObjects::PULSETIME_SORT);
 }
 
-void LoadNexusMonitors2::readHistoMonitorEntry(NeXus::File &file,
-                                               size_t i)
-{
+void LoadNexusMonitors2::readHistoMonitorEntry(NeXus::File &file, size_t i) {
   // Now, actually retrieve the necessary data
   file.openData("data");
   MantidVec data;
