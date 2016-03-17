@@ -158,12 +158,53 @@ Data locations
 This is dependent on the facility and instrument.
 
 TODO: this is work in progress. At ISIS In principle data will be
-replicated in the ISIS archive, the SCARF imat disk space, and
-possibly an analysis machine located in R3.
+replicated in the ISIS archive, the IMAT disk space on the cluster
+SCARF (remote compute resource), and possibly an analysis machine
+located in R3.
+
+The path to the files of a particular tomographic reconstruction
+consists of several components. An example path would be (on a Windows
+system where the input/output data is on the drive "D":
+
+* D:/data/RB987654321/experiment_foo/
+
+where:
+
+* *data* is the root or base path for all tomography data. This folder
+  or directory is synchronized (at least partially) between the remote
+  compure resource and the (local) instrument analysis machine.
+
+* *RB987654321* is the experiment reference number (or so-called RB
+number) which usually starts with the prefix "RB".
+
+* *experiment_foo* is a name given by the user to the particular
+  experiment the data comes from. This is specified in free form.
+
+* inside the path there will normally be at least three folders or
+subdirectories for the sample, flat, and dark images:
+
+  - data
+  - flat
+  - dark
+
+As the files are mirrored on the remote computer cluster, if a network
+drive have been added (or mapped) in the local system, for example
+using the drive "S:", then the following path would contain a similar
+tree of image files:
+
+* D:/data/RB987654321/experiment_foo/
+
+The equivalent on a non-Windows system would be for example:
+
+* /media/scarf/data/RB987654321/experiment_foo/
+
+These and related parameters can be inspected and modified in the
+sytem settings section (or **System** tab).
 
 The tab *Visualization* has simple push buttons to browse the files
 available from the local and remote locations, as well as any other
-directory or folder selected by the user.
+directory or folder selected by the user. The data for the different
+experiments can be found under these locations.
 
 Running jobs remotely
 ---------------------
