@@ -50,6 +50,7 @@ Improved
    - :ref:`ChangeTimeZero <algm-ChangeTimeZero>`
    - :ref:`FFT <algm-FFT>`
    - :ref:`MaxEnt <algm-MaxEnt>`
+- :ref:`CreateSimulationWorkspace <algm-CreateSimulationWorkspace>` now matches the IDF of the simulation workspace to the IDF of a reference workspace (either Nexus or Raw).
 
 Deprecated
 ##########
