@@ -94,7 +94,7 @@ void LoadNexusMonitors2::init() {
                   "disabled, load monitors as spectra (into a Workspace2D, "
                   "regardless of whether event data is found.");
 
-  declareProperty("LoadEventMonitor", true,
+  declareProperty("LoadEventMonitors", true,
                   "Load event monitor in NeXus file both event monitor and "
                   "histogram monitor found in NeXus file."
                   "If both of LoadEventMonitor and LoadHistoMonitor are true, "
@@ -102,7 +102,7 @@ void LoadNexusMonitors2::init() {
                   "then it is in the auto mode such that any existing monitor "
                   "will be loaded.");
 
-  declareProperty("LoadHistoMonitor", true,
+  declareProperty("LoadHistoMonitors", true,
                   "Load histogram monitor in NeXus file both event monitor and "
                   "histogram monitor found in NeXus file."
                   "If both of LoadEventMonitor and LoadHistoMonitor are true, "
@@ -663,8 +663,8 @@ bool LoadNexusMonitors2::createOutputWorkspace(
     std::vector<bool> &loadMonitorFlags) {
 
   // Find out using event monitor or histogram monitor
-  bool loadEventMon = getProperty("LoadEventMonitor");
-  bool loadHistoMon = getProperty("LoadHistoMonitor");
+  bool loadEventMon = getProperty("LoadEventMonitors");
+  bool loadHistoMon = getProperty("LoadHistoMonitors");
   if (!loadEventMon && !loadHistoMon) {
     // both of them are false is equivlanet to both of them are true
     loadEventMon = true;
