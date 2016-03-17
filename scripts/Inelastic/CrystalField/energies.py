@@ -2,11 +2,11 @@ from mantid.simpleapi import *
 import numpy as np
 
 
-def _unpack_complex_matrix(packed, n1, n2):
-    unpacked = np.ndarray(n1 * n2, dtype=complex).reshape((n1, n2))
-    for i in range(n1):
-        for j in range(n2):
-            k = 2 * (i * n2 + j)
+def _unpack_complex_matrix(packed, n_rows, n_cols):
+    unpacked = np.ndarray(n_rows * n_cols, dtype=complex).reshape((n_rows, n_cols))
+    for i in range(n_rows):
+        for j in range(n_cols):
+            k = 2 * (i * n_cols + j)
             value = complex(packed[k], packed[k + 1])
             unpacked[i, j] = value
     return unpacked
@@ -36,8 +36,8 @@ def energies(nre, **kwargs):
 
     # Unpack the results
     eigenvalues = res[0]
-    n = len(eigenvalues)
-    eigenvectors = _unpack_complex_matrix(res[1], n, n)
-    hamiltonian = _unpack_complex_matrix(res[2], n, n)
+    dim = len(eigenvalues)
+    eigenvectors = _unpack_complex_matrix(res[1], dim, dim)
+    hamiltonian = _unpack_complex_matrix(res[2], dim, dim)
 
     return eigenvalues, eigenvectors, hamiltonian
