@@ -588,8 +588,8 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
     runFittingAlgs(FocusedFitPeaksTableName, FocusedWSName);
 
   } catch (std::invalid_argument &ia) {
-    m_view->userError("Error, Fitting could not finish off correctly, ",
-                      ia.what());
+	  g_log.error() << "Error, Fitting could not finish off correctly, " +
+		  std::string(ia.what()) << std::endl;
     return;
   }
 }
@@ -598,83 +598,82 @@ void EnggDiffractionPresenter::runFittingAlgs(
     std::string FocusedFitPeaksTableName, std::string FocusedWSName) {
   // retrieve the table with parameters
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-  if (ADS.doesExist(FocusedFitPeaksTableName)) {
-    ITableWorkspace_sptr table =
-        ADS.retrieveWS<ITableWorkspace>(FocusedFitPeaksTableName);
-
-    size_t rowCount = table->rowCount();
-    std::string single_peak_out_WS = "engggui_fitting_single_peaks";
-    std::string current_peak_out_WS;
-
-    std::string Bk2BkExpFunctionStr;
-    std::string startX = "";
-    std::string endX = "";
-
-    if (rowCount > size_t(0)) {
-      for (size_t i = 0; i < rowCount; i++) {
-
-        // get the functionStrFactory to generate the string for function
-        // property
-        // return the string with i row from table workspace
-        // table is just passed so it works?
-        Bk2BkExpFunctionStr = functionStrFactory(
-            table, FocusedFitPeaksTableName, i, startX, endX);
-
-        g_log.debug() << "startX: " + startX + " . endX: " + endX << std::endl;
-
-        current_peak_out_WS =
-            "engggui_fitting_single_peaks" + std::to_string(i);
-
-        // run EvaluateFunction algorithm with focused workspace to produce
-        // the correct fit function
-        // FocusedWSName is not going to change as its always going to be from
-        // single workspace
-        runEvaluateFunctionAlg(Bk2BkExpFunctionStr, FocusedWSName,
-                               current_peak_out_WS, startX, endX);
-
-        // crop workspace so only the correct workspace index is plotted
-        runCropWorkspaceAlg(current_peak_out_WS);
-
-        // apply the same binning as a focused workspace
-        runRebinToWorkspaceAlg(current_peak_out_WS);
-
-        // if the first peak
-        if (i == size_t(0)) {
-          auto renameWs =
-              Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-                  "RenameWorkspace");
-          g_log.notice() << "EvaluateFunction algorithm has started"
-                         << std::endl;
-          try {
-            renameWs->initialize();
-
-            renameWs->setProperty("InputWorkspace",
-                                  "engggui_fitting_single_peaks0");
-            renameWs->setProperty("OutputWorkspace", single_peak_out_WS);
-            renameWs->execute();
-          } catch (std::runtime_error &re) {
-            g_log.error() << "Could not run the algorithm EvaluateFunction, "
-                             "Error description: " +
-                                 static_cast<std::string>(re.what())
-                          << std::endl;
-          }
-        } else {
-          // append all peaks in to single workspace & remove
-          runAppendSpectraAlg(single_peak_out_WS, current_peak_out_WS);
-          ADS.remove(current_peak_out_WS);
-        }
-      }
-    }
-
-    m_fittingFinishedOK = true;
-
-  } else {
+  if (!ADS.doesExist(FocusedFitPeaksTableName)) {
     throw std::invalid_argument(
         FocusedFitPeaksTableName +
         " workspace could not be found. "
         "Please check the log messages for more details.");
+	return;
+  };
+
+  ITableWorkspace_sptr table =
+      ADS.retrieveWS<ITableWorkspace>(FocusedFitPeaksTableName);
+
+  size_t rowCount = table->rowCount();
+  std::string single_peak_out_WS = "engggui_fitting_single_peaks";
+  std::string current_peak_out_WS;
+
+  std::string Bk2BkExpFunctionStr;
+  std::string startX = "";
+  std::string endX = "";
+
+  if (rowCount > size_t(0)) {
+    for (size_t i = 0; i < rowCount; i++) {
+
+      // get the functionStrFactory to generate the string for function
+      // property
+      // return the string with i row from table workspace
+      // table is just passed so it works?
+      Bk2BkExpFunctionStr =
+          functionStrFactory(table, FocusedFitPeaksTableName, i, startX, endX);
+
+      g_log.debug() << "startX: " + startX + " . endX: " + endX << std::endl;
+
+      current_peak_out_WS = "engggui_fitting_single_peaks" + std::to_string(i);
+
+      // run EvaluateFunction algorithm with focused workspace to produce
+      // the correct fit function
+      // FocusedWSName is not going to change as its always going to be from
+      // single workspace
+      runEvaluateFunctionAlg(Bk2BkExpFunctionStr, FocusedWSName,
+                             current_peak_out_WS, startX, endX);
+
+      // crop workspace so only the correct workspace index is plotted
+      runCropWorkspaceAlg(current_peak_out_WS);
+
+      // apply the same binning as a focused workspace
+      runRebinToWorkspaceAlg(current_peak_out_WS);
+
+      // if the first peak
+      if (i == size_t(0)) {
+        auto renameWs =
+            Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+                "RenameWorkspace");
+        g_log.notice() << "EvaluateFunction algorithm has started" << std::endl;
+        try {
+          renameWs->initialize();
+
+          renameWs->setProperty("InputWorkspace",
+                                "engggui_fitting_single_peaks0");
+          renameWs->setProperty("OutputWorkspace", single_peak_out_WS);
+          renameWs->execute();
+        } catch (std::runtime_error &re) {
+          g_log.error() << "Could not run the algorithm EvaluateFunction, "
+                           "Error description: " +
+                               static_cast<std::string>(re.what())
+                        << std::endl;
+        }
+      } else {
+        // append all peaks in to single workspace & remove
+        runAppendSpectraAlg(single_peak_out_WS, current_peak_out_WS);
+        ADS.remove(current_peak_out_WS);
+      }
+    }
   }
+
+  m_fittingFinishedOK = true;
 }
+
 
 std::string EnggDiffractionPresenter::functionStrFactory(
     Mantid::API::ITableWorkspace_sptr &paramTableWS, std::string tableName,
@@ -792,8 +791,10 @@ void EnggDiffractionPresenter::plotFitPeaksCurves() {
     auto focusedPeaksWS = ADS.retrieveWS<MatrixWorkspace>(focusedPeaksWs);
     auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(singlePeaksWs);
     try {
-      m_view->dataCurvesFactory(ALCHelper::curveDataFromWs(focusedPeaksWS), true);
-      m_view->dataCurvesFactory(ALCHelper::curveDataFromWs(singlePeaksWS), false);
+      m_view->dataCurvesFactory(ALCHelper::curveDataFromWs(focusedPeaksWS),
+                                true);
+      m_view->dataCurvesFactory(ALCHelper::curveDataFromWs(singlePeaksWS),
+                                false);
 
     } catch (std::runtime_error &re) {
       g_log.error() << "Unable to finish of the plotting of the graph for "
@@ -822,6 +823,7 @@ void EnggDiffractionPresenter::fittingFinished() {
       delete m_workerThread;
       m_workerThread = NULL;
     }
+
   } else {
     g_log.notice() << "The single peak fitting finished - the output "
                       "workspace is ready."

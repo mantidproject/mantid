@@ -321,7 +321,7 @@ private:
   boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;
 
   /// Loaded data curves
-  std::vector<QwtPlotCurve*> m_dataCurveVector;
+  std::vector<QwtPlotCurve*> m_fittedDataVector;
 
   /// Loaded focused workspace
   std::vector<QwtPlotCurve*> m_focusedDataVector;
