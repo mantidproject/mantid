@@ -59,15 +59,20 @@ const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
 * @param parent Parent window (most likely the Mantid main app window).
 */
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
-    : UserSubWindow(parent), m_focusedDataCurve(new QwtPlotCurve()),
-      m_dataCurveVector(), IEnggDiffractionView(), m_currentInst("ENGINX"),
+    : UserSubWindow(parent), m_focusedDataVector(), m_dataCurveVector(),
+      IEnggDiffractionView(), m_currentInst("ENGINX"),
       m_currentCalibFilename(""), m_presenter(NULL) {}
 
 EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {
-  for (auto curves : m_dataCurveVector) {
-    curves->detach();
-    delete curves;
-  }
+	for (auto curves : m_focusedDataVector) {
+		curves->detach();
+		delete curves;
+	}
+
+	for (auto curves : m_dataCurveVector) {
+		curves->detach();
+		delete curves;
+	}
 }
 
 void EnggDiffractionViewQtGUI::initLayout() {
@@ -223,6 +228,7 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   QFont font("MS Shell Dlg 2", 8);
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::xBottom, font);
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::yLeft, font);
+
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -687,21 +693,34 @@ std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
   return fileData;
 }
 
-void EnggDiffractionViewQtGUI::dataCurvesFactory(boost::shared_ptr<QwtData>& data)
-{
-	if (m_focusedDataCurve) {
-		m_focusedDataCurve->detach();
-		delete m_focusedDataCurve;
-	}
+void EnggDiffractionViewQtGUI::focusedDataFactory(
+	std::vector<boost::shared_ptr<QwtData>> &data) {
 
-	QwtPlotCurve *FocusedCurve = new QwtPlotCurve();
-	FocusedCurve->setStyle(QwtPlotCurve::Lines);
-	FocusedCurve->setPen(QPen(Qt::black, 1));
-	FocusedCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-	FocusedCurve->setData(*data);
-	FocusedCurve->attach(m_uiTabFitting.dataPlot);
+  // clear vector
+  for (auto curves : m_focusedDataVector) {
+    if (curves) {
+      curves->detach();
+      delete curves;
+    }
+  }
+  if (m_focusedDataVector.size() > 0)
+	  m_focusedDataVector.clear();
 
-	m_uiTabFitting.dataPlot->replot();
+  for (int i = 0; i < data.size(); i++) {
+    auto *peak = data[i].get();
+
+    QwtPlotCurve *dataCurve = new QwtPlotCurve();
+    dataCurve->setStyle(QwtPlotCurve::Lines);
+    dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+
+	m_focusedDataVector.push_back(dataCurve);
+
+	m_focusedDataVector[i]->setData(*peak);
+	m_focusedDataVector[i]->attach(m_uiTabFitting.dataPlot);
+  }
+
+  m_uiTabFitting.dataPlot->replot();
+  data.clear();;
 }
 
 void EnggDiffractionViewQtGUI::dataCurvesFactory(
@@ -717,6 +736,7 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
   if (m_dataCurveVector.size() > 0)
     m_dataCurveVector.clear();
 
+  // dark colours could be removed so the colored peaks stand out more
   const QColor QPenList[16] = {
       Qt::white,      Qt::red,     Qt::darkRed,     Qt::green,
       Qt::darkGreen,  Qt::blue,    Qt::darkBlue,    Qt::cyan,

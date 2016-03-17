@@ -556,6 +556,13 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
       Mantid::API::AlgorithmManager::Instance().createUnmanaged("EnggFitPeaks");
   const std::string FocusedFitPeaksTableName =
       "engggui_fitting_fitpeaks_params";
+
+  // delete existing table workspace to avoid confusion
+  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+  if (ADS.doesExist(FocusedFitPeaksTableName)) {
+    ADS.remove(FocusedFitPeaksTableName);
+  }
+
   try {
     enggFitPeaks->initialize();
     enggFitPeaks->setProperty("InputWorkspace", focusedWS);
@@ -564,6 +571,7 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
     }
     enggFitPeaks->setProperty("FittedPeaks", FocusedFitPeaksTableName);
     enggFitPeaks->execute();
+
   } catch (std::exception &re) {
     g_log.error() << "Could not run the algorithm EnggFitPeaks "
                      "successfully for bank, "
@@ -580,14 +588,10 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
     runFittingAlgs(FocusedFitPeaksTableName, FocusedWSName);
 
   } catch (std::invalid_argument &ia) {
-    m_view->userWarning("Error, the Fitting could not finish off correctly, "
-                        "Error description: "
-                        " Please check also the log message for detail.",
-                        ia.what());
+    m_view->userError("Error, Fitting could not finish off correctly, ",
+                      ia.what());
     return;
   }
-
-  m_fittingFinishedOK = true;
 }
 
 void EnggDiffractionPresenter::runFittingAlgs(
@@ -662,11 +666,14 @@ void EnggDiffractionPresenter::runFittingAlgs(
       }
     }
 
+    m_fittingFinishedOK = true;
+
   } else {
-    throw std::invalid_argument(FocusedFitPeaksTableName +
-                                " could not be found.");
+    throw std::invalid_argument(
+        FocusedFitPeaksTableName +
+        " workspace could not be found. "
+        "Please check the log messages for more details.");
   }
-  m_fittingFinishedOK = true;
 }
 
 std::string EnggDiffractionPresenter::functionStrFactory(
@@ -785,7 +792,7 @@ void EnggDiffractionPresenter::plotFitPeaksCurves() {
     auto focusedPeaksWS = ADS.retrieveWS<MatrixWorkspace>(focusedPeaksWs);
     auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(singlePeaksWs);
     try {
-      m_view->dataCurvesFactory(ALCHelper::curveDataFromWs(focusedPeaksWS, 0));
+      m_view->focusedDataFactory(ALCHelper::curveDataFromWs(focusedPeaksWS));
       m_view->dataCurvesFactory(ALCHelper::curveDataFromWs(singlePeaksWS));
 
     } catch (std::runtime_error &re) {
@@ -811,34 +818,39 @@ void EnggDiffractionPresenter::fittingFinished() {
   if (!m_fittingFinishedOK) {
     g_log.warning() << "The single peak fitting did not finish correctly."
                     << std::endl;
+    if (m_workerThread) {
+      delete m_workerThread;
+      m_workerThread = NULL;
+    }
   } else {
     g_log.notice() << "The single peak fitting finished - the output "
                       "workspace is ready."
                    << std::endl;
-  }
-  if (m_workerThread) {
-    delete m_workerThread;
-    m_workerThread = NULL;
-  }
 
-  g_log.notice() << "EnggDiffraction GUI: plotting peaks for single peak fits "
-                    "has started... "
-                 << std::endl;
-  try {
-    plotFitPeaksCurves();
+    if (m_workerThread) {
+      delete m_workerThread;
+      m_workerThread = NULL;
+    }
 
-  } catch (std::runtime_error &re) {
-    g_log.error()
-        << "Unable to finish of the plotting of the graph for "
-           "engggui_fitting_focused_fitpeaks workspace. Error description : " +
-               static_cast<std::string>(re.what()) +
-               " Please check also the log message for detail.";
-    throw;
+    g_log.notice()
+        << "EnggDiffraction GUI: plotting peaks for single peak fits "
+           "has started... "
+        << std::endl;
+    try {
+      plotFitPeaksCurves();
+
+    } catch (std::runtime_error &re) {
+      g_log.error() << "Unable to finish of the plotting of the graph for "
+                       "engggui_fitting_focused_fitpeaks workspace. Error "
+                       "description : " +
+                           static_cast<std::string>(re.what()) +
+                           " Please check also the log message for detail.";
+      throw;
+    }
+    g_log.notice() << "EnggDiffraction GUI: plotting of peaks for single peak "
+                      "fits has completed. "
+                   << std::endl;
   }
-  g_log.notice() << "EnggDiffraction GUI: plotting of peaks for single peak "
-                    "fits has completed. "
-                 << std::endl;
-
   // enable the GUI
   m_view->enableCalibrateAndFocusActions(true);
 }
