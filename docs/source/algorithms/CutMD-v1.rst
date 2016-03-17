@@ -33,6 +33,31 @@ MDHistoWorkspaces
 
 If the input is an :ref:`MDHistoWorkspace <MDHistoWorkspace>` :ref:`algm-BinMD` and :ref:`algm-SliceMD` are not made available as they needto get hold of the original MDEvents associated with an :ref:`MDEventWorkspace <MDWorkspace>` in order to perform the rebinning. As this information is missing from the MDHistoWorkspace images, those operations are forbidden. Instead, a limited subset of the operations are allowed, and are performed via :ref:`algm-IntegrateMDHistoWorkspace`. In this case, the Projection and NoPix properties are ignored. See :ref:`algm-IntegrateMDHistoWorkspace` for how the binning parameters are used.
 
+PBins
+~~~~~
+
+The PBins property is used to specify the binning for each dimension of the output workspace.
+The dimension will be truncated to have extents 'minimum' and 'maximum', with 'stepsize' specifying the size of the bins inbetween.
+(maximum - minimum)/stepsize is rounded down to produce an integer number, greater than or equal to 1, of equally-sized bins between 'minimum' and 'maximum'.
+
+Note that if the output workspace is an MDEventWorkspace (NoPix=False), PBins defines the top-level box structure of the workspace.
+If many events fall within a single box it is split further, see the documentation for :ref:`MDEventWorkspace <MDWorkspace>`.
+
+Each element of the PBins list matches one of three possible formats:
+
++----------------------------------+-------------------------------------------------------+
+| Format                           |                                                       |
++==================================+=======================================================+
+| [minimum, stepsize, maximum]     | The dimension in the output workspace will extend     |
+|                                  | from 'minimum' to 'maximum' with bins of width        |
+|                                  | 'stepsize'.                                           |
++----------------------------------+-------------------------------------------------------+
+| [minimum, maximum]               | A single bin will be created between 'minimum' and    |
+|                                  | 'maximum'.                                            |
++----------------------------------+-------------------------------------------------------+
+| [stepsize]                       | The 'minimum' and 'maximum' are set to the dimension  |
+|                                  | limits; the workspace is not cut in this dimension.   |
++----------------------------------+-------------------------------------------------------+
 
 Creating Projections
 ~~~~~~~~~~~~~~~~~~~~
