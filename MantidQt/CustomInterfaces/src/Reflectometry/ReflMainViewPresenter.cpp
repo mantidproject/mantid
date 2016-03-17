@@ -7,6 +7,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ProgressPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
@@ -26,9 +27,10 @@ using namespace Mantid::Kernel;
 namespace MantidQt {
 namespace CustomInterfaces {
 ReflMainViewPresenter::ReflMainViewPresenter(
-    ReflMainView *mainView, ProgressableView *progressView,
-    boost::shared_ptr<IReflSearcher> searcher)
-    : m_view(mainView), m_progressView(progressView), m_searcher(searcher) {
+    ReflMainView *mainView, IReflTablePresenter *tablePresenter,
+    ProgressableView *progressView, boost::shared_ptr<IReflSearcher> searcher)
+    : m_view(mainView), m_tablePresenter(tablePresenter),
+      m_progressView(progressView), m_searcher(searcher) {
 
   // TODO. Select strategy.
   /*
@@ -82,6 +84,9 @@ void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
     IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
     populateSearch(searchAlg);
   } break;
+  case IReflPresenter::TransferFlag:
+    transfer();
+    break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
@@ -144,8 +149,7 @@ void ReflMainViewPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
 /** Transfers the selected runs in the search results to the processing table
 * @return : The runs to transfer as a vector of maps
 */
-std::vector<std::map<std::string, std::string>>
-ReflMainViewPresenter::getRunsToTransfer() {
+void ReflMainViewPresenter::transfer() {
   // Build the input for the transfer strategy
   SearchResultMap runs;
   auto selectedRows = m_view->getSelectedSearchRows();
@@ -208,7 +212,7 @@ ReflMainViewPresenter::getRunsToTransfer() {
     }
   }
 
-  return results.getTransferRuns();
+  m_tablePresenter->transfer(results.getTransferRuns());
 }
 
 /**

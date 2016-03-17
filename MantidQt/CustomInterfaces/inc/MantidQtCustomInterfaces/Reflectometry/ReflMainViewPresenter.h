@@ -15,6 +15,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 // Forward decs
 class ProgressableView;
+class IReflTablePresenter;
 
 /** @class ReflMainViewPresenter
 
@@ -45,18 +46,21 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTIDQT_CUSTOMINTERFACES_DLL ReflMainViewPresenter
     : public IReflPresenter {
 public:
-  ReflMainViewPresenter(ReflMainView *mainView, ProgressableView *progressView,
+  ReflMainViewPresenter(ReflMainView *mainView,
+                        IReflTablePresenter *tablePresenter,
+                        ProgressableView *progressView,
                         boost::shared_ptr<IReflSearcher> searcher =
                             boost::shared_ptr<IReflSearcher>());
   ~ReflMainViewPresenter() override;
   void notify(IReflPresenter::Flag flag) override;
-  std::vector<std::map<std::string, std::string>> getRunsToTransfer() override;
 
 protected:
   // the search model
   ReflSearchModel_sptr m_searchModel;
   // the main view we're managing
   ReflMainView *m_view;
+	// The table view's presenter
+	IReflTablePresenter *m_tablePresenter;
   // The progress view
   ProgressableView *m_progressView;
   // the search implementation
@@ -64,6 +68,7 @@ protected:
   // searching
   void search();
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
+	void transfer();
 
 private:
   static const std::string LegacyTransferMethod;

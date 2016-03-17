@@ -3,10 +3,10 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/HelpWindow.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflTableViewPresenter.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 #include <qinputdialog.h>
 #include <qmessagebox.h>
@@ -63,11 +63,10 @@ void QtReflMainView::initLayout() {
 
   // The table view (must be intialized before creating the presenter)
   m_tableView = boost::shared_ptr<QReflTableView>(ui.qReflTableView);
-  // connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)),
-  // ui.qReflTableView->comboProcessInstrument, SLOT(setCurrentIndex(int));
   // Finally, create the presenters to do the thinking for us
   m_presenter = boost::make_shared<ReflMainViewPresenter>(
       this /*main view*/,
+      m_tableView->getTablePresenter().get(), /*table view's presenter*/
       this /*currently this concrete view is also responsibile for prog reporting*/);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 }
@@ -155,12 +154,10 @@ void QtReflMainView::on_actionSearch_triggered() {
 }
 
 /**
-This slot requests the list of runs to transfer to ReflMainViewPresenter
-Then updates m_tableView
+This slot notifies the presenter that the "transfer" button has been pressed
 */
 void QtReflMainView::on_actionTransfer_triggered() {
-  auto runs = m_presenter->getRunsToTransfer();
-  m_tableView->transferRuns(runs);
+  m_presenter->notify(IReflPresenter::Flag::TransferFlag);
 }
 
 /**
