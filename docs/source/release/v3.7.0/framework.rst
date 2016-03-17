@@ -41,6 +41,7 @@ Improved
    An appropriate labelling has now been implemented
   `#15398 <https://github.com/mantidproject/mantid/pull/15398>`_
 -  :ref:`SumSpectra <algm-SumSpectra>` fixed broken scaling of bins for the `WeightedSum=true` case.
+-  :ref:`LoadISISNexus <algm-LoadISISNexus>`now works correctly for data with non-contiguous detector IDs for either monitors or detectors. `#15562 <https://github.com/mantidproject/mantid/pull/15562>`_
 -  A bug has been fixed in several algorithms where they would crash when given a :ref:`WorkspaceGroup <WorkspaceGroup>` as input (if run in the GUI).
   These algorithms are:
   - :ref:`AsymmetryCalc <algm-AsymmetryCalc>`
@@ -54,6 +55,7 @@ Improved
   now allow user to choose to load either histogram monitor or event monitor only with 2 new
   properties (``LoadEventMonitor`` and ``LoadHistogramMonitor``).
   `#15667 <https://github.com/mantidproject/mantid/pull/15667>`_
+- :ref:`CreateSimulationWorkspace <algm-CreateSimulationWorkspace>` now matches the IDF of the simulation workspace to the IDF of a reference workspace (either Nexus or Raw).
 
 Deprecated
 ##########
@@ -86,6 +88,12 @@ Python
 Python Algorithms
 #################
 
+
+Script Repository
+-----------------
+
+- A bug has been fixed that caused uploads to fail with some incorrectly configured proxy servers.
+
 |
 
 Full list of
@@ -93,4 +101,3 @@ Full list of
 and
 `Python <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Python%22>`__
 changes on GitHub
-
