@@ -64,15 +64,15 @@ EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
       m_currentCalibFilename(""), m_presenter(NULL) {}
 
 EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {
-	for (auto curves : m_focusedDataVector) {
-		curves->detach();
-		delete curves;
-	}
+  for (auto curves : m_focusedDataVector) {
+    curves->detach();
+    delete curves;
+  }
 
-	for (auto curves : m_dataCurveVector) {
-		curves->detach();
-		delete curves;
-	}
+  for (auto curves : m_dataCurveVector) {
+    curves->detach();
+    delete curves;
+  }
 }
 
 void EnggDiffractionViewQtGUI::initLayout() {
@@ -228,7 +228,6 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   QFont font("MS Shell Dlg 2", 8);
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::xBottom, font);
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::yLeft, font);
-
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -693,48 +692,26 @@ std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
   return fileData;
 }
 
-void EnggDiffractionViewQtGUI::focusedDataFactory(
-	std::vector<boost::shared_ptr<QwtData>> &data) {
-
-  // clear vector
-  for (auto curves : m_focusedDataVector) {
-    if (curves) {
-      curves->detach();
-      delete curves;
-    }
-  }
-  if (m_focusedDataVector.size() > 0)
-	  m_focusedDataVector.clear();
-
-  for (int i = 0; i < data.size(); i++) {
-    auto *peak = data[i].get();
-
-    QwtPlotCurve *dataCurve = new QwtPlotCurve();
-    dataCurve->setStyle(QwtPlotCurve::Lines);
-    dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-
-	m_focusedDataVector.push_back(dataCurve);
-
-	m_focusedDataVector[i]->setData(*peak);
-	m_focusedDataVector[i]->attach(m_uiTabFitting.dataPlot);
-  }
-
-  m_uiTabFitting.dataPlot->replot();
-  data.clear();;
-}
-
 void EnggDiffractionViewQtGUI::dataCurvesFactory(
-    std::vector<boost::shared_ptr<QwtData>> &data) {
+    std::vector<boost::shared_ptr<QwtData>> &data, bool focused) {
+
+  std::vector<QwtPlotCurve *> dataVector;
+
+  if (focused)
+    dataVector = m_dataCurveVector;
+  else
+    dataVector = m_focusedDataVector;
 
   // clear vector
-  for (auto curves : m_dataCurveVector) {
+  for (auto curves : dataVector) {
     if (curves) {
       curves->detach();
       delete curves;
     }
   }
-  if (m_dataCurveVector.size() > 0)
-    m_dataCurveVector.clear();
+
+  if (dataVector.size() > 0)
+    dataVector.clear();
 
   // dark colours could be removed so the colored peaks stand out more
   const QColor QPenList[16] = {
@@ -748,14 +725,16 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
 
     QwtPlotCurve *dataCurve = new QwtPlotCurve();
     dataCurve->setStyle(QwtPlotCurve::Lines);
-    auto randIndex = std::rand() % 15;
-    dataCurve->setPen(QPen(QPenList[randIndex], 1));
+    if (!focused) {
+      auto randIndex = std::rand() % 15;
+      dataCurve->setPen(QPen(QPenList[randIndex], 1));
+    }
     dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
 
-    m_dataCurveVector.push_back(dataCurve);
+    dataVector.push_back(dataCurve);
 
-    m_dataCurveVector[i]->setData(*peak);
-    m_dataCurveVector[i]->attach(m_uiTabFitting.dataPlot);
+    dataVector[i]->setData(*peak);
+    dataVector[i]->attach(m_uiTabFitting.dataPlot);
   }
 
   m_uiTabFitting.dataPlot->replot();

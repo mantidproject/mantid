@@ -154,9 +154,7 @@ public:
 
   std::string readPeaksFile(std::string fileDir);
 
-  virtual void focusedDataFactory(std::vector<boost::shared_ptr<QwtData>> &data);
-
-  virtual void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data);
+  virtual void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data, bool focused);
 
   void plotFocusedSpectrum(const std::string &wsName) override;
 

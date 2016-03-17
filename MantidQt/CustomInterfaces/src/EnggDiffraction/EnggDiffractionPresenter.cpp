@@ -792,8 +792,8 @@ void EnggDiffractionPresenter::plotFitPeaksCurves() {
     auto focusedPeaksWS = ADS.retrieveWS<MatrixWorkspace>(focusedPeaksWs);
     auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(singlePeaksWs);
     try {
-      m_view->focusedDataFactory(ALCHelper::curveDataFromWs(focusedPeaksWS));
-      m_view->dataCurvesFactory(ALCHelper::curveDataFromWs(singlePeaksWS));
+      m_view->dataCurvesFactory(ALCHelper::curveDataFromWs(focusedPeaksWS), true);
+      m_view->dataCurvesFactory(ALCHelper::curveDataFromWs(singlePeaksWS), false);
 
     } catch (std::runtime_error &re) {
       g_log.error() << "Unable to finish of the plotting of the graph for "

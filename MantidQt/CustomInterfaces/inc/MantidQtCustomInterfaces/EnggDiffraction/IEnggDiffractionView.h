@@ -423,11 +423,11 @@ public:
   /**
   * generates and sets the curves on the fitting tab
   * @param data of the workspace to be passed as QwtData
+  * @param focused to check whether focused workspace
   *
   */
-  virtual void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data) = 0;
+  virtual void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data, bool focused) = 0;
 
-  virtual void dataCurvesFactory(boost::shared_ptr<QwtData> &data) = 0;
 };
 
 } // namespace CustomInterfaces
