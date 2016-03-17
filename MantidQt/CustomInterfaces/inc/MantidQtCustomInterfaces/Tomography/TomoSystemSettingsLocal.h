@@ -1,5 +1,5 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOLOCALSYSTEMSETTINGS_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOLOCALSYSTEMSETTINGS_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOSYSTEMSETTINGSLOCAL_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOSYSTEMSETTINGSLOCAL_H_
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
@@ -34,13 +34,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-struct MANTIDQT_CUSTOMINTERFACES_DLL TomoLocalSystemSettings {
+struct MANTIDQT_CUSTOMINTERFACES_DLL TomoSystemSettingsLocal {
   std::string m_basePathTomoData;
   std::string m_remoteDriveOrMountPoint;
   std::string m_reconScriptsPath;
-
-  std::string m_outputPathCompPreProcessed;
-  std::string m_outputPathCompReconst;
 
   int m_maxProcesses;
   int m_cores;
@@ -48,13 +45,11 @@ struct MANTIDQT_CUSTOMINTERFACES_DLL TomoLocalSystemSettings {
   static const std::string g_defBasePathTomoData;
   static const std::string g_defRemoteDriveOrMountPoint;
   static const std::string g_defReconScriptsPath;
-  static const std::string g_defOutputPathCompPreProcessed;
-  static const std::string g_defOutputPathCompReconst;
 
-  TomoLocalSystemSettings();
+  TomoSystemSettingsLocal();
 };
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOLOCALSYSTEMSETTINGS_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOSYSTEMSETTINGSLOCAL_H_

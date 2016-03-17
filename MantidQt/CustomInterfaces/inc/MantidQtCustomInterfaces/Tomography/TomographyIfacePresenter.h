@@ -65,9 +65,10 @@ protected:
   /// clean shut down of model, view, etc.
   void cleanup();
 
-  void processSetup();
-  void processCompResourceChange();
-  void processToolChange();
+  void processSystemSettingsUpdated();
+  void processSetupResourcesAndTools();
+  void processCompResourceChanged();
+  void processToolChanged();
   void processTomoPathsChanged();
   void processTomoPathsEditedByUser();
   void processLogin();

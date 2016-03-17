@@ -1,5 +1,5 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOREMOTESYSTEMSETTINGS_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOREMOTESYSTEMSETTINGS_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOSYSTEMSETTINGSREMOTE_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOSYSTEMSETTINGSREMOTE_H_
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
@@ -35,19 +35,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-struct MANTIDQT_CUSTOMINTERFACES_DLL TomoRemoteSystemSettings {
+struct MANTIDQT_CUSTOMINTERFACES_DLL TomoSystemSettingsRemote {
   std::string m_basePathTomoData;
   std::string m_basePathReconScripts;
-  int m_cores;
   int m_nodes;
+  int m_cores;
 
   static const std::string g_defBasePathTomoData;
   static const std::string g_defBasePathReconScripts;
 
-  TomoRemoteSystemSettings();
+  TomoSystemSettingsRemote();
 };
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOREMOTESYSTEMSETTINGS_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOSYSTEMSETTINGSREMOTE_H_

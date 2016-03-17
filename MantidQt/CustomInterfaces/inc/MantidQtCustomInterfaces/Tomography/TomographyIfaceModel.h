@@ -9,6 +9,7 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconFiltersSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 // Qt classes forward declarations
 class QMutex;
@@ -111,6 +112,11 @@ public:
 
   void updateExperimentReference(const std::string ref) {
     m_experimentRef = ref;
+  }
+
+  /// Update to the current setings given by the user
+  void updateSystemSettings(const TomoSystemSettings &settings) {
+    m_systemSettings = settings;
   }
 
   /// Update to the current setings given by the user
@@ -220,6 +226,9 @@ private:
   std::string m_currentTool;
 
   TomoPathsConfig m_pathsConfig;
+
+  // System settting including several paths and parameters (local and remote)
+  TomoSystemSettings m_systemSettings;
 
   // Settings for the third party (tomographic reconstruction) tools
   TomoReconToolsUserSettings m_toolsSettings;

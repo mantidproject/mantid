@@ -1,18 +1,18 @@
-#include "MantidQtCustomInterfaces/Tomography/TomoRemoteSystemSettings.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoSystemSettingsRemote.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-const std::string TomoRemoteSystemSettings::g_defBasePathTomoData =
+const std::string TomoSystemSettingsRemote::g_defBasePathTomoData =
     "/work/imat";
 
-const std::string TomoRemoteSystemSettings::g_defBasePathReconScripts =
+const std::string TomoSystemSettingsRemote::g_defBasePathReconScripts =
     "/work/imat/phase_commissioning";
 
 /**
  * Default initialization which should be enough in most cases.
  */
-TomoRemoteSystemSettings::TomoRemoteSystemSettings()
+TomoSystemSettingsRemote::TomoSystemSettingsRemote()
     : m_basePathTomoData(g_defBasePathTomoData),
       m_basePathReconScripts(g_defBasePathReconScripts), m_nodes(2),
       m_cores(4) {}

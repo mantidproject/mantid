@@ -11,6 +11,7 @@
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfacePresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 #include "ui_ImageSelectCoRAndRegions.h"
 #include "ui_ImgFormatsConversion.h"
@@ -133,6 +134,8 @@ public:
   std::vector<std::string> processingJobsIDs() const override {
     return m_processingJobsIDs;
   }
+
+  TomoSystemSettings systemSettings() const override { return m_systeSettings; }
 
   /// Get the current reconstruction tools settings set by the user
   TomoReconToolsUserSettings reconToolsSettings() const override {
@@ -401,6 +404,10 @@ private:
 
   // here the view puts messages before notifying the presenter to show them
   std::vector<std::string> m_logMsgs;
+
+  /// The not-so-small set of paths, path compnents and related parameters for
+  /// the local and remote machines
+  TomoSystemSettings m_systeSettings;
 
   /// Settings for the third party (tomographic reconstruction) tools
   TomoReconToolsUserSettings m_toolsSettings;

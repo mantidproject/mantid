@@ -1,8 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOSYSTEMSETTINGS_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOSYSTEMSETTINGS_H_
 
-#include "MantidQtCustomInterfaces/Tomography/TomoLocalSystemSettings.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoRemoteSystemSettings.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoSystemSettingsLocal.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoSystemSettingsRemote.h"
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
@@ -42,8 +42,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 struct MANTIDQT_CUSTOMINTERFACES_DLL TomoSystemSettings {
   // TODO use dictionary(es) for the string settings when they settle down
-  TomoLocalSystemSettings local;
-  TomoLocalSystemSettings remote;
+  TomoSystemSettingsLocal local;
+  TomoSystemSettingsRemote remote;
 
   std::vector<std::string> m_pathComponents;
 

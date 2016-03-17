@@ -62,16 +62,20 @@ void TomographyIfacePresenter::notify(
 
   switch (notif) {
 
+  case ITomographyIfacePresenter::SystemSettingsUpdated:
+    processSystemSettingsUpdated();
+    break;
+
   case ITomographyIfacePresenter::SetupResourcesAndTools:
-    processSetup();
+    processSetupResourcesAndTools();
     break;
 
   case ITomographyIfacePresenter::CompResourceChanged:
-    processCompResourceChange();
+    processCompResourceChanged();
     break;
 
   case ITomographyIfacePresenter::ToolChanged:
-    processToolChange();
+    processToolChanged();
     break;
 
   case ITomographyIfacePresenter::TomoPathsChanged:
@@ -124,7 +128,14 @@ void TomographyIfacePresenter::notify(
   }
 }
 
-void TomographyIfacePresenter::processSetup() {
+void TomographyIfacePresenter::processSystemSettingsUpdated() {
+  m_model->updateSystemSettings(m_view->systemSettings());
+}
+
+void TomographyIfacePresenter::processSetupResourcesAndTools() {
+  // first time update, even if not requested by user
+  processSystemSettingsUpdated();
+
   try {
     m_model->setupComputeResource();
     if (m_model->computeResources().size() < 1) {
@@ -158,7 +169,7 @@ void TomographyIfacePresenter::processSetup() {
   }
 }
 
-void TomographyIfacePresenter::processCompResourceChange() {
+void TomographyIfacePresenter::processCompResourceChanged() {
   const std::string comp = m_view->currentComputeResource();
 
   m_model->setupRunTool(comp);
@@ -171,7 +182,7 @@ void TomographyIfacePresenter::processCompResourceChange() {
   }
 }
 
-void TomographyIfacePresenter::processToolChange() {
+void TomographyIfacePresenter::processToolChanged() {
   const std::string tool = m_view->currentReconTool();
 
   // disallow reconstruct on tools that don't run yet: Savu and CCPi

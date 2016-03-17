@@ -37,6 +37,7 @@ public:
   /// These are user actions, triggered from the (passive) view, that need
   /// handling by the presenter
   enum Notification {
+    SystemSettingsUpdated,  ///< Change in the system settings (local or remote)
     SetupResourcesAndTools, ///< Setup what are available, normally at startup
     CompResourceChanged,    ///< 'current' compute resource changed
     ToolChanged,      ///< 'current' tomographic reconstruction tool changed

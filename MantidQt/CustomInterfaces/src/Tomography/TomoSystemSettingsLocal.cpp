@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/Tomography/TomoLocalSystemSettings.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoSystemSettingsLocal.h"
 #include "MantidKernel/ConfigService.h"
 
 #include <Poco/Path.h>
@@ -6,16 +6,16 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-const std::string TomoLocalSystemSettings::g_defBasePathTomoData =
+const std::string TomoSystemSettingsLocal::g_defBasePathTomoData =
 #ifdef _WIN32
     "D:/data";
 #else
-    "~/imat-data/";
+    "~/imat-data";
 #endif
 
-const std::string TomoLocalSystemSettings::g_defRemoteDriveOrMountPoint;
+const std::string TomoSystemSettingsLocal::g_defRemoteDriveOrMountPoint;
 
-const std::string TomoLocalSystemSettings::g_defReconScriptsPath =
+const std::string TomoSystemSettingsLocal::g_defReconScriptsPath =
 #ifdef _WIN32
     "C:/MantidInstall/scripts";
 #else
@@ -26,21 +26,14 @@ const std::string TomoLocalSystemSettings::g_defReconScriptsPath =
         .toString();
 #endif
 
-const std::string TomoLocalSystemSettings::g_defOutputPathCompPreProcessed =
-    "pre_processed";
-
-const std::string TomoLocalSystemSettings::g_defOutputPathCompReconst =
-    "processed";
-
 /**
  * Default initialization which should be enough in most cases.
  */
-TomoLocalSystemSettings::TomoLocalSystemSettings()
+TomoSystemSettingsLocal::TomoSystemSettingsLocal()
     : m_basePathTomoData(g_defBasePathTomoData),
       m_remoteDriveOrMountPoint(g_defRemoteDriveOrMountPoint),
       m_reconScriptsPath(g_defReconScriptsPath),
-      m_outputPathCompPreProcessed(g_defOutputPathCompPreProcessed),
-      m_outputPathCompReconst(g_defOutputPathCompReconst), m_maxProcesses(4),
+      m_maxProcesses(4),
       m_cores(4) {}
 
 } // namespace CustomInterfaces
