@@ -3,11 +3,11 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/ComplexVector.h"
 
+#include <cmath>
 #include <gsl/gsl_blas.h>
-#include <stdexcept>
 #include <iomanip>
 #include <sstream>
-#include <cmath>
+#include <stdexcept>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -80,7 +80,8 @@ size_t ComplexVector::size() const { return m_vector->size; }
 /// @param value :: The new value
 void ComplexVector::set(size_t i, const ComplexType &value) {
   if (i < m_vector->size) {
-    gsl_vector_complex_set(m_vector, i, gsl_complex{value.real(), value.imag()});
+    gsl_vector_complex_set(m_vector, i,
+                           gsl_complex{value.real(), value.imag()});
 
   } else {
     std::stringstream errmsg;
