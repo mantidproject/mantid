@@ -374,6 +374,7 @@ prefix *Engg*). This includes :ref:`EnggCalibrate
 <algm-EnggCalibrate>`, :ref:`EnggCalibrateFull
 <algm-EnggCalibrateFull>`, :ref:`EnggVanadiumCorrections
 <algm-EnggVanadiumCorrections>`, :ref:`EnggFocus <algm-EnggFocus>`,
+:ref:`EnggFitPeaks<algm-EnggFitPeaks>`
 and several other algorithms, explained in detail in the Mantid
 algorithms documentation.
 
