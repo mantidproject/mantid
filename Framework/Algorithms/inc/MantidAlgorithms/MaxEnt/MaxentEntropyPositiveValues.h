@@ -34,10 +34,6 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL MaxentEntropyPositiveValues : public MaxentEntropy {
 public:
-  // Constructor
-  MaxentEntropyPositiveValues() = default;
-  // Destructor
-  virtual ~MaxentEntropyPositiveValues() = default;
   // First derivative
   double getDerivative(double value) override;
   // Second derivative
