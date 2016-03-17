@@ -1422,6 +1422,19 @@ void ReflTableViewPresenter::transfer(
   }
 }
 
+/**
+Set the list of available instruments to search for and updates the list of
+available instruments in the table view
+@param instruments : The list of instruments available
+@param defaultInstrument : The instrument to have selected by default
+*/
+void ReflTableViewPresenter::setInstrumentList(
+	const std::vector<std::string> &instruments,
+	const std::string &defaultInstrument) {
+
+    m_tableView->setInstrumentList(instruments, defaultInstrument);
+}
+
 /** Plots any currently selected rows */
 void ReflTableViewPresenter::plotRow() {
   auto selectedRows = m_tableView->getSelectedRows();

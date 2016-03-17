@@ -6,7 +6,6 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/QReflTableView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtMantidWidgets/SlitCalculator.h"
@@ -89,8 +88,6 @@ private:
   boost::shared_ptr<IReflPresenter> m_presenter;
   // the search model
   ReflSearchModel_sptr m_searchModel;
-  // the table view
-  boost::shared_ptr<QReflTableView> m_tableView;
   // the interface
   Ui::reflMainWidget ui;
   // the slit calculator

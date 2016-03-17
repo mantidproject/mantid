@@ -51,6 +51,8 @@ public:
   void setOptions(const std::map<std::string, QVariant> &options) override;
   void transfer(
       const std::vector<std::map<std::string, std::string>> &runs) override;
+  void setInstrumentList(const std::vector<std::string> &instruments,
+                         const std::string &defaultInstrument) override;
 
 protected:
   // the workspace the model is currently representing

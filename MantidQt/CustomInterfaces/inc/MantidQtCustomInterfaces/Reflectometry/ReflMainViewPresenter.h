@@ -59,8 +59,8 @@ protected:
   ReflSearchModel_sptr m_searchModel;
   // the main view we're managing
   ReflMainView *m_view;
-	// The table view's presenter
-	IReflTablePresenter *m_tablePresenter;
+  // The table view's presenter
+  IReflTablePresenter *m_tablePresenter;
   // The progress view
   ProgressableView *m_progressView;
   // the search implementation
@@ -68,7 +68,7 @@ protected:
   // searching
   void search();
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
-	void transfer();
+  void transfer();
 
 private:
   static const std::string LegacyTransferMethod;

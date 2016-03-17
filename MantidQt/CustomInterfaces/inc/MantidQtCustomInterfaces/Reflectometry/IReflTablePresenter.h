@@ -70,6 +70,8 @@ public:
   virtual void setOptions(const std::map<std::string, QVariant> &options) = 0;
   virtual void
   transfer(const std::vector<std::map<std::string, std::string>> &runs) = 0;
+  virtual void setInstrumentList(const std::vector<std::string> &instruments,
+                                 const std::string &defaultInstrument) = 0;
 };
 }
 }

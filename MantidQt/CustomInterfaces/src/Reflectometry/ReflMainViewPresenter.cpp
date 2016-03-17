@@ -63,10 +63,13 @@ ReflMainViewPresenter::ReflMainViewPresenter(
   const std::string defaultInst =
       Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
   if (std::find(instruments.begin(), instruments.end(), defaultInst) !=
-      instruments.end())
+      instruments.end()) {
     m_view->setInstrumentList(instruments, defaultInst);
-  else
+    m_tablePresenter->setInstrumentList(instruments, defaultInst);
+  } else {
     m_view->setInstrumentList(instruments, "INTER");
+    m_tablePresenter->setInstrumentList(instruments, "INTER");
+  }
 }
 
 ReflMainViewPresenter::~ReflMainViewPresenter() {}

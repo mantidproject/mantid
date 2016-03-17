@@ -61,12 +61,8 @@ void QtReflMainView::initLayout() {
   connect(ui.qReflTableView, SIGNAL(runAsPythonScript(const QString &, bool)),
           this, SIGNAL(runAsPythonScript(const QString &, bool)));
 
-  // The table view (must be intialized before creating the presenter)
-  m_tableView = boost::shared_ptr<QReflTableView>(ui.qReflTableView);
-  // Finally, create the presenters to do the thinking for us
   m_presenter = boost::make_shared<ReflMainViewPresenter>(
-      this /*main view*/,
-      m_tableView->getTablePresenter().get(), /*table view's presenter*/
+      this /*main view*/, ui.qReflTableView->getTablePresenter().get(),
       this /*currently this concrete view is also responsibile for prog reporting*/);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 }
@@ -100,9 +96,6 @@ void QtReflMainView::setInstrumentList(
   int index = ui.comboSearchInstrument->findData(
       QString::fromStdString(defaultInstrument), Qt::DisplayRole);
   ui.comboSearchInstrument->setCurrentIndex(index);
-
-  // Finally, populate the combo box in the table view
-  m_tableView->setInstrumentList(instruments, defaultInstrument);
 }
 
 /**

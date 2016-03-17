@@ -7,9 +7,11 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTableViewPresenter.h"
 
 #include "ProgressableViewMockObject.h"
 #include "ReflMainViewMockObjects.h"
+#include "ReflTableViewMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
@@ -34,16 +36,21 @@ public:
 
   void test_constructor_sets_possible_transfer_methods() {
     NiceMock<MockView> mockView;
+    NiceMock<MockTableView> mockTableView;
     MockProgressableView mockProgress;
+    ReflTableViewPresenter tablePresenter(&mockTableView, &mockProgress);
 
     // Expect that the transfer methods get initialized on the view
     EXPECT_CALL(mockView, setTransferMethods(_)).Times(Exactly(1));
+    // Expect that the view is populated with the instrument list
+    EXPECT_CALL(mockTableView, setInstrumentList(_, _)).Times(Exactly(1));
 
     // Constructor
-    ReflMainViewPresenter presenter(&mockView, &mockProgress);
+    ReflMainViewPresenter presenter(&mockView, &tablePresenter, &mockProgress);
 
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
 };
 #endif /* MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTERTEST_H */
