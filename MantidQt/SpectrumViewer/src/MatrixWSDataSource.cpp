@@ -44,7 +44,7 @@ MatrixWSDataSource::MatrixWSDataSource(MatrixWorkspace_const_sptr matWs)
   m_totalXMin = matWs->getXMin();
   m_totalXMax = matWs->getXMax();
 
-  m_totalYMin = 0; // Y direction is spectrum index
+  m_totalYMin = 0;  // Y direction is workspace index
   m_totalYMax = (double)matWs->getNumberHistograms();
 
   m_totalRows = matWs->getNumberHistograms();
@@ -162,7 +162,7 @@ DataArray_const_sptr MatrixWSDataSource::getDataArray(double xMin, double xMax,
     }
   }
 
-  // Choose spectra from required range of spectrum indexes
+  // Choose spectra from required range of workspace indexes
   double yStep = (yMax - yMin) / (double)numRows;
   double dYIndex;
 

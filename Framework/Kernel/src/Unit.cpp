@@ -7,7 +7,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include <cfloat>
-#include <limits>
 
 namespace Mantid {
 namespace Kernel {
@@ -135,7 +134,8 @@ void Unit::initialize(const double &_l1, const double &_l2,
 }
 
 //---------------------------------------------------------------------------------------
-/** Perform the conversion to TOF on a vector of data */
+/** Perform the conversion to TOF on a vector of data
+*/
 void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
                  const double &_l1, const double &_l2, const double &_twoTheta,
                  const int &_emode, const double &_efixed,
@@ -147,7 +147,15 @@ void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
     xdata[i] = this->singleToTOF(xdata[i]);
 }
 
-/** Convert a single value to TOF */
+/** Convert a single value to TOF
+@param xvalue
+@param l1
+@param l2
+@param twoTheta
+@param emode
+@param efixed
+@param delta
+*/
 double Unit::convertSingleToTOF(const double xvalue, const double &l1,
                                 const double &l2, const double &twoTheta,
                                 const int &emode, const double &efixed,
@@ -157,7 +165,8 @@ double Unit::convertSingleToTOF(const double xvalue, const double &l1,
 }
 
 //---------------------------------------------------------------------------------------
-/** Perform the conversion to TOF on a vector of data */
+/** Perform the conversion to TOF on a vector of data
+*/
 void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
                    const double &_l1, const double &_l2,
                    const double &_twoTheta, const int &_emode,
@@ -169,7 +178,15 @@ void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
     xdata[i] = this->singleFromTOF(xdata[i]);
 }
 
-/** Convert a single value from TOF */
+/** Convert a single value from TOF
+@param xvalue
+@param l1
+@param l2
+@param twoTheta
+@param emode
+@param efixed
+@param delta
+*/
 double Unit::convertSingleFromTOF(const double xvalue, const double &l1,
                                   const double &l2, const double &twoTheta,
                                   const int &emode, const double &efixed,

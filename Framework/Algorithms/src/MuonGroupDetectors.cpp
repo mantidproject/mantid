@@ -73,11 +73,11 @@ void MuonGroupDetectors::exec() {
 
   // First pass to determine how many non-empty groups we have
   for (size_t row = 0; row < table->rowCount(); ++row) {
-    if (table->cell<std::vector<int>>(row, 0).size() != 0)
+    if (!table->cell<std::vector<int>>(row, 0).empty())
       nonEmptyRows.push_back(row);
   }
 
-  if (nonEmptyRows.size() == 0)
+  if (nonEmptyRows.empty())
     throw std::invalid_argument(
         "Detector Grouping Table doesn't contain any non-empty groups");
 

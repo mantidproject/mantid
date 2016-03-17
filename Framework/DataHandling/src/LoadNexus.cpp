@@ -21,6 +21,9 @@
 namespace Mantid {
 namespace DataHandling {
 
+const std::string LoadNexus::muonTD = "muonTD";
+const std::string LoadNexus::pulsedTD = "pulsedTD";
+
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadNexus)
 
@@ -90,7 +93,6 @@ void LoadNexus::exec() {
   // imply it should be.
   // std::string dataName="analysis";
 
-  std::string muonTD = "muonTD", pulsedTD = "pulsedTD";
   std::vector<std::string> entryName, definition;
   int count =
       Mantid::NeXus::getNexusEntryTypes(m_filename, entryName, definition);

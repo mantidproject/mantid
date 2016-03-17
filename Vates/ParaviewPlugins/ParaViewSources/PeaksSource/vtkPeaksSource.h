@@ -39,9 +39,10 @@ class VTK_EXPORT vtkPeaksSource : public vtkPolyDataAlgorithm
 {
 public:
   static vtkPeaksSource *New();
-  vtkTypeMacro(vtkPeaksSource,vtkPolyDataAlgorithm)
-  void PrintSelf(ostream& os, vtkIndent indent);
-  
+  vtkTypeMacro(vtkPeaksSource,
+               vtkPolyDataAlgorithm) void PrintSelf(ostream &os,
+                                                    vtkIndent indent) override;
+
   void SetWsName(std::string wsName);
   void SetPeakDimension(int dim);
   /// Setter for the unitegrated peak marker size
@@ -57,9 +58,11 @@ public:
 
 protected:
   vtkPeaksSource();
-  ~vtkPeaksSource();
-  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  ~vtkPeaksSource() override;
+  int RequestInformation(vtkInformation *, vtkInformationVector **,
+                         vtkInformationVector *) override;
+  int RequestData(vtkInformation *, vtkInformationVector **,
+                  vtkInformationVector *) override;
 
 private:
   /// Name of the workspace.

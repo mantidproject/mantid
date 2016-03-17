@@ -645,7 +645,9 @@ class LoadInstrumentTestPerformance : public CxxTest::TestSuite {
 public:
   MatrixWorkspace_sptr ws;
 
-  void setUp() { ws = WorkspaceCreationHelper::Create2DWorkspace(1, 2); }
+  void setUp() override {
+    ws = WorkspaceCreationHelper::Create2DWorkspace(1, 2);
+  }
 
   void doTest(std::string filename, size_t numTimes = 1) {
     for (size_t i = 0; i < numTimes; ++i) {

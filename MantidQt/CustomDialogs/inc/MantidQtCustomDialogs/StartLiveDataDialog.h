@@ -22,7 +22,7 @@ class StartLiveDataDialog : public MantidQt::API::AlgorithmDialog
 public:
   /// Default Constructor
   StartLiveDataDialog(QWidget *parent = 0);
-  virtual ~StartLiveDataDialog();
+  ~StartLiveDataDialog() override;
 
 public slots:
   void radioProcessClicked();
@@ -35,15 +35,15 @@ public slots:
 private slots:
   void setDefaultAccumulationMethod(const QString&);
   void updateUiElements(const QString&);
-  void accept();
+  void accept() override;
   void initListenerPropLayout(const QString&);
 
 private:
   /// Initialize the layout
-  virtual void initLayout();
+  void initLayout() override;
 
   /// Parse the input from the dialog when it has been accepted
-  virtual void parseInput();
+  void parseInput() override;
 
   Mantid::API::Algorithm_sptr changeAlgorithm(MantidQt::MantidWidgets::AlgorithmSelectorWidget * selector, MantidQt::API::AlgorithmPropertiesWidget * propWidget);
 

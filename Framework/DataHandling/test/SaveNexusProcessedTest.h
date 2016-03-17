@@ -52,9 +52,9 @@ public:
     clearfiles = !file.exists();
   }
 
-  void setUp() {}
+  void setUp() override {}
 
-  void tearDown() {}
+  void tearDown() override {}
 
   void testInit() {
     SaveNexusProcessed algToBeTested;

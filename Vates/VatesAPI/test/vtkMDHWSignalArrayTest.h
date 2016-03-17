@@ -213,7 +213,7 @@ public:
   vtkNew<vtkMDHWSignalArray<double>> m_signal;
   int imageSize;
 
-  void setUp() {
+  void setUp() override {
     ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 200, 10.0,
                                                            1.0, "", 4.0);
     std::size_t offset = 0;
@@ -229,7 +229,7 @@ public:
     m_signal->InitializeArray(std::move(iterator), offset, imageSize);
   }
 
-  void tearDown() {}
+  void tearDown() override {}
 
   void testGetTupleValuePerformance() {
     for (auto index = 0; index < imageSize; ++index) {

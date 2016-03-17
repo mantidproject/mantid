@@ -21,8 +21,8 @@ using namespace Mantid::DataObjects;
 class ComplexOpTest : public Algorithm {
 public:
   ComplexOpTest() : Algorithm() {}
-  virtual ~ComplexOpTest() {}
-  void init() {
+  ~ComplexOpTest() override {}
+  void init() override {
     declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
         "InputWorkspace_1", "", Direction::Input));
     declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -30,16 +30,16 @@ public:
     declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
         "OutputWorkspace", "", Direction::Output));
   }
-  void exec() {
+  void exec() override {
     MatrixWorkspace_sptr in_work1 = getProperty("InputWorkspace_1");
     MatrixWorkspace_sptr in_work2 = getProperty("InputWorkspace_2");
 
     MatrixWorkspace_sptr out_work = (in_work1 + in_work2) / 3 + 5;
     setProperty("OutputWorkspace", out_work);
   }
-  virtual const std::string name() const { return "ComplexOpTest"; }
-  virtual int version() const { return (1); }
-  virtual const std::string summary() const { return "Summary of this test."; }
+  const std::string name() const override { return "ComplexOpTest"; }
+  int version() const override { return (1); }
+  const std::string summary() const override { return "Summary of this test."; }
 };
 
 class ChainedOperatorTest : public CxxTest::TestSuite {

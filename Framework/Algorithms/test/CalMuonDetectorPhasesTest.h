@@ -3,10 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAlgorithms/CalMuonDetectorPhases.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -14,6 +17,17 @@ using namespace Mantid::API;
 using Mantid::MantidVec;
 
 const std::string outputName = "MuonRemoveExpDecay_Output";
+
+/**
+ * This is a test class that exists to test the method validateInputs()
+ */
+class TestCalMuonDetectorPhases
+    : public Mantid::Algorithms::CalMuonDetectorPhases {
+public:
+  std::map<std::string, std::string> wrapValidateInputs() {
+    return this->validateInputs();
+  }
+};
 
 class CalMuonDetectorPhasesTest : public CxxTest::TestSuite {
 public:
@@ -96,6 +110,34 @@ public:
 
     TS_ASSERT_THROWS(calc->execute(), std::runtime_error);
     TS_ASSERT(!calc->isExecuted());
+  }
+
+  /**
+   * Test that the algorithm can handle a WorkspaceGroup as input without
+   * crashing
+   * We have to use the ADS to test WorkspaceGroups
+   */
+  void testValidateInputsWithWSGroup() {
+    auto ws1 = boost::static_pointer_cast<Workspace>(
+        createWorkspace(2, 4, "Microseconds"));
+    auto ws2 = boost::static_pointer_cast<Workspace>(
+        createWorkspace(2, 4, "Microseconds"));
+    AnalysisDataService::Instance().add("workspace1", ws1);
+    AnalysisDataService::Instance().add("workspace2", ws2);
+    auto group = boost::make_shared<WorkspaceGroup>();
+    AnalysisDataService::Instance().add("group", group);
+    group->add("workspace1");
+    group->add("workspace2");
+    TestCalMuonDetectorPhases calc;
+    calc.initialize();
+    calc.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(calc.setPropertyValue("InputWorkspace", "group"));
+    calc.setPropertyValue("DataFitted", "fit");
+    calc.setPropertyValue("DetectorTable", "tab");
+    calc.setProperty("ForwardSpectra", std::vector<int>{1});
+    calc.setProperty("BackwardSpectra", std::vector<int>{2});
+    TS_ASSERT_THROWS_NOTHING(calc.wrapValidateInputs());
+    AnalysisDataService::Instance().clear();
   }
 
   MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt,

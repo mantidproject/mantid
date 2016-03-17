@@ -79,7 +79,9 @@ public:
     AnalysisDataService::Instance().add(inputWS, space);
   }
 
-  ~GroupDetectors2Test() { AnalysisDataService::Instance().remove(inputWS); }
+  ~GroupDetectors2Test() override {
+    AnalysisDataService::Instance().remove(inputWS);
+  }
 
   void testSetup() {
     GroupDetectors2 gd;

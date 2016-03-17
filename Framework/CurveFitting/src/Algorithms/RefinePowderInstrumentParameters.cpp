@@ -247,7 +247,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   stringstream msgss;
   msgss << "Set Instrument Function Parameter : " << endl;
   std::map<std::string, double>::iterator paramiter;
-  for (auto parname : funparamnames) {
+  for (const auto &parname : funparamnames) {
     paramiter = m_FuncParameters.find(parname);
     if (paramiter == m_FuncParameters.end()) {
       // Not found and thus skip
@@ -339,7 +339,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   cout << "Homemade Chi^2 = " << selfchi2 << endl;
 
   // 5. Update fitted parameters
-  for (auto parname : funparamnames) {
+  for (const auto &parname : funparamnames) {
     double parvalue = fitfunc->getParameter(parname);
     m_FuncParameters[parname] = parvalue;
   }
@@ -1071,10 +1071,9 @@ void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
   }
 
   // 3. Retrieve the information for geometry parameters
-  map<string, vector<double>>::iterator mit;
-  for (auto parname : parameternames) {
+  for (const auto &parname : parameternames) {
     // a) Get on hold of the MC parameter vector
-    mit = mcparameters.find(parname);
+    auto mit = mcparameters.find(parname);
     if (mit == mcparameters.end()) {
       // Not found the parameter.  raise error!
       stringstream errss;

@@ -12,6 +12,8 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 
+#include <boost/math/special_functions/round.hpp>
+
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -380,7 +382,7 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
   vector<double> vec_timeintervals = this->getProperty("TimeInterval");
 
   bool singleslot = false;
-  if (vec_timeintervals.size() == 0)
+  if (vec_timeintervals.empty())
     singleslot = true;
 
   // Progress
@@ -607,13 +609,13 @@ void GenerateEventsFilter::setFilterByLogValue(std::string logname) {
       minvaluei = m_intLog->minValue();
       minvalue = static_cast<double>(minvaluei);
     } else
-      minvaluei = static_cast<int>(minvalue + 0.5);
+      minvaluei = boost::math::iround(minvalue);
 
     if (maxvalue == EMPTY_DBL()) {
       maxvaluei = m_intLog->maxValue();
       maxvalue = static_cast<double>(maxvaluei);
     } else
-      maxvaluei = static_cast<int>(maxvalue + 0.5);
+      maxvaluei = boost::math::iround(maxvalue);
 
     if (minvalue > maxvalue) {
       stringstream errmsg;
@@ -1420,7 +1422,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
   // To fill the blanks at the end of log to make last entry of splitter is stop
   // time
   // To make it non-empty
-  if (vecSplitTime.size() == 0) {
+  if (vecSplitTime.empty()) {
     start = m_dblLog->nthTime(istart);
     stop = m_dblLog->nthTime(iend);
     lastindex = -1;
@@ -1455,7 +1457,7 @@ void GenerateEventsFilter::processIntegerValueFilter(int minvalue, int maxvalue,
     if (isEmpty(deltadbl))
       delta = maxvalue - minvalue + 1;
     else
-      delta = static_cast<int>(deltadbl + 0.5);
+      delta = boost::math::iround(deltadbl);
 
     if (delta <= 0) {
       stringstream errss;
@@ -1686,7 +1688,7 @@ void GenerateEventsFilter::addNewTimeFilterSplitter(
   if (m_forFastLog) {
     // For MatrixWorkspace splitter
     // Start of splitter
-    if (m_vecSplitterTime.size() == 0) {
+    if (m_vecSplitterTime.empty()) {
       // First splitter
       m_vecSplitterTime.push_back(starttime);
     } else if (m_vecSplitterTime.back() < starttime) {

@@ -11,27 +11,29 @@ using namespace Mantid::API;
 class ToyAlgorithm : public Algorithm {
 public:
   ToyAlgorithm() : Algorithm() {}
-  virtual ~ToyAlgorithm() {}
-  const std::string name() const {
+  ~ToyAlgorithm() override {}
+  const std::string name() const override {
     return "ToyAlgorithm";
-  }                                 ///< Algorithm's name for identification
-  int version() const { return 1; } ///< Algorithm's version for identification
-  const std::string category() const {
+  } ///< Algorithm's name for identification
+  int version() const override {
+    return 1;
+  } ///< Algorithm's version for identification
+  const std::string category() const override {
     return "Cat";
   } ///< Algorithm's category for identification
-  const std::string alias() const { return "Dog"; }
-  const std::string summary() const { return "Test summary"; }
+  const std::string alias() const override { return "Dog"; }
+  const std::string summary() const override { return "Test summary"; }
 
-  void init() {
+  void init() override {
     declareProperty("prop1", "value");
     declareProperty("prop2", 1);
   }
-  void exec() {}
+  void exec() override {}
 
-  bool existsProperty(const std::string &name) const {
+  bool existsProperty(const std::string &name) const override {
     return PropertyManagerOwner::existsProperty(name);
   }
-  const std::vector<Property *> &getProperties() const {
+  const std::vector<Property *> &getProperties() const override {
     return PropertyManagerOwner::getProperties();
   }
 };
@@ -39,19 +41,21 @@ public:
 class ToyAlgorithmTwo : public Algorithm {
 public:
   ToyAlgorithmTwo() : Algorithm() {}
-  virtual ~ToyAlgorithmTwo() {}
+  ~ToyAlgorithmTwo() override {}
 
-  const std::string name() const {
+  const std::string name() const override {
     return "ToyAlgorithm";
-  }                                 ///< Algorithm's name for identification
-  int version() const { return 2; } ///< Algorithm's version for identification
-  const std::string category() const { return "Cat,Leopard,Mink"; }
-  const std::string categorySeparator() const {
+  } ///< Algorithm's name for identification
+  int version() const override {
+    return 2;
+  } ///< Algorithm's version for identification
+  const std::string category() const override { return "Cat,Leopard,Mink"; }
+  const std::string categorySeparator() const override {
     return ",";
   } ///< testing the ability to change the seperator
-  const std::string alias() const { return "Dog"; }
-  const std::string summary() const { return "Test summary"; }
-  void init() {
+  const std::string alias() const override { return "Dog"; }
+  const std::string summary() const override { return "Test summary"; }
+  void init() override {
     declareProperty("prop1", "value");
     declareProperty("prop2", 1);
     declareProperty("prop3", 10.5);
@@ -62,46 +66,50 @@ public:
     declareProperty(Mantid::Kernel::make_unique<ArrayProperty<double>>(
         "Binning", binning, boost::make_shared<RebinParamsValidator>()));
   }
-  void exec() {}
+  void exec() override {}
 };
 
 class ToyAlgorithmThree : public Algorithm {
 public:
   ToyAlgorithmThree() : Algorithm() {}
-  virtual ~ToyAlgorithmThree() {}
+  ~ToyAlgorithmThree() override {}
 
-  const std::string name() const {
+  const std::string name() const override {
     return "ToyAlgorithm";
-  }                                 ///< Algorithm's name for identification
-  int version() const { return 2; } ///< Algorithm's version for identification
-  const std::string category() const { return "Cat;Leopard;Mink"; }
-  const std::string alias() const { return "Dog"; }
-  const std::string summary() const { return "Test summary"; }
-  void init() {
+  } ///< Algorithm's name for identification
+  int version() const override {
+    return 2;
+  } ///< Algorithm's version for identification
+  const std::string category() const override { return "Cat;Leopard;Mink"; }
+  const std::string alias() const override { return "Dog"; }
+  const std::string summary() const override { return "Test summary"; }
+  void init() override {
     declareProperty("prop1", "value");
     declareProperty("prop2", 1);
     declareProperty("prop3", 10.5);
   }
-  void exec() {}
+  void exec() override {}
 };
 
 class CategoryAlgorithm : public Algorithm {
 public:
   CategoryAlgorithm() : Algorithm() {}
-  virtual ~CategoryAlgorithm() {}
+  ~CategoryAlgorithm() override {}
 
-  const std::string name() const {
+  const std::string name() const override {
     return "CategoryAlgorithm";
-  }                                 ///< Algorithm's name for identification
-  int version() const { return 1; } ///< Algorithm's version for identification
-  const std::string category() const { return "Fake"; }
-  const std::string alias() const { return "CategoryTester"; }
-  const std::string summary() const { return "Test summary"; }
-  void init() {
+  } ///< Algorithm's name for identification
+  int version() const override {
+    return 1;
+  } ///< Algorithm's version for identification
+  const std::string category() const override { return "Fake"; }
+  const std::string alias() const override { return "CategoryTester"; }
+  const std::string summary() const override { return "Test summary"; }
+  void init() override {
     declareProperty("prop1", "value");
     declareProperty("prop2", 1);
     declareProperty("prop3", 10.5);
   }
-  void exec() {}
+  void exec() override {}
 };
 #endif

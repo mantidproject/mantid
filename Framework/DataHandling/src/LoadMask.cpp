@@ -240,7 +240,7 @@ void LoadMask::componentToDetectors(std::vector<std::string> componentnames,
     int32_t id_min = 1000000;
     int32_t id_max = 0;
 
-    for (auto child : children) {
+    for (const auto &child : children) {
       // c) convert component to detector
       Geometry::IDetector_const_sptr det =
           boost::dynamic_pointer_cast<const Geometry::IDetector>(child);
@@ -304,7 +304,7 @@ void LoadMask::bankToDetectors(std::vector<std::string> singlebanks,
                     << "DetID: " << detid_first << ", " << detid_last
                     << std::endl;
 
-      for (auto det : idetectors) {
+      for (const auto &det : idetectors) {
         int32_t detid = det->getID();
         detectors.push_back(detid);
       }
@@ -322,7 +322,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
                                            std::vector<int32_t> pairslow,
                                            std::vector<int32_t> pairsup) {
   // 1. Check
-  if (pairslow.size() == 0)
+  if (pairslow.empty())
     return;
   if (pairslow.size() != pairsup.size()) {
     g_log.error() << "Input spectrum IDs are not paired.  Size(low) = "

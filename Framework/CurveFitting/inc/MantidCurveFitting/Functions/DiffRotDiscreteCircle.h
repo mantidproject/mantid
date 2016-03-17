@@ -109,7 +109,7 @@ public:
                                 const API::IFunction::Attribute &defaultValue);
 
   /// Override parent definition
-  void setAttribute(const std::string &attName, const Attribute &att) override;
+  void setAttribute(const std::string &name, const Attribute &att) override;
 
 private:
   boost::shared_ptr<ElasticDiffRotDiscreteCircle> m_elastic;

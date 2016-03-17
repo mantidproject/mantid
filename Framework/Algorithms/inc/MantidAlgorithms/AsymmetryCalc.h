@@ -68,11 +68,13 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Muon"; }
 
+protected:
+  std::map<std::string, std::string> validateInputs() override;
+
 private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace Algorithm

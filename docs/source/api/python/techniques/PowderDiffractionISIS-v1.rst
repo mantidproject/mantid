@@ -1,3 +1,5 @@
+.. _isis-powder-diffraction:
+
 ==============================
 ISIS Powder Diffraction Script
 ==============================

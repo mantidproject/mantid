@@ -201,6 +201,7 @@ struct Pulse {
   uint32_t seconds;
 
   /// The index of the first event for this pulse.
+  // cppcheck-suppress unusedStructMember
   uint64_t event_index;
 
   /// The proton charge for the pulse.

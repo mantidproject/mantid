@@ -69,16 +69,16 @@ namespace MantidQt
       Homer(QWidget *parent, Ui::DirectConvertToEnergy & uiForm);
 
       // Initialize the layout
-      virtual void initLayout();
+      void initLayout() override;
 
       void runClicked();
       void helpClicked();
       void setIDFValues(const QString & prefix);  
 
     private:
-      void showEvent(QShowEvent *event);
-      void hideEvent(QHideEvent *event);
-      void closeEvent(QCloseEvent *event);
+      void showEvent(QShowEvent *event) override;
+      void hideEvent(QHideEvent *event) override;
+      void closeEvent(QCloseEvent *event) override;
       /// Enable the run button if the results dialog has been closed and the python has stopped
       void pythonIsRunning(bool running = true);
       QString defaultName();

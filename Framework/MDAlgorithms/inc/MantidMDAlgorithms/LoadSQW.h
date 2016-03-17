@@ -62,19 +62,19 @@ struct dataPositions {
   // the helper methods
   /// Block 1:  Main_header: Parse SQW main data header
   void parse_sqw_main_header(
-      std::ifstream &stream); // Legacy - candidate for removal
+      std::ifstream &dataStream); // Legacy - candidate for removal
   /// Block 2: Header: Parse header of single SPE file
   std::streamoff parse_component_header(
-      std::ifstream &stream,
+      std::ifstream &dataStream,
       std::streamoff start_location); // Legacy -candidate for removal
   /// Block 3: Detpar: parse positions of the contributed detectors. These
   /// detectors have to be the same for all contributing spe files
   std::streamoff parse_sqw_detpar(
-      std::ifstream &stream,
+      std::ifstream &dataStream,
       std::streamoff start_location); // Legacy - candidate for removal
   /// Block 4: Data: parse positions of the data fields
   void
-  parse_data_locations(std::ifstream &stream, std::streamoff data_start,
+  parse_data_locations(std::ifstream &dataStream, std::streamoff data_start,
                        std::vector<size_t> &nBins,
                        uint64_t &nDataPoints); // Legacy - candidate for removal
 };

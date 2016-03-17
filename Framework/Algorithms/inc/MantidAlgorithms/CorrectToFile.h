@@ -74,8 +74,7 @@ private:
   API::MatrixWorkspace_sptr loadInFile(const std::string &corrFile);
   /// Multiply or divide the input workspace as specified by the user
   void doWkspAlgebra(API::MatrixWorkspace_sptr lhs,
-                     API::MatrixWorkspace_sptr rhs,
-                     const std::string &operation,
+                     API::MatrixWorkspace_sptr rhs, const std::string &algName,
                      API::MatrixWorkspace_sptr &result);
 };
 }

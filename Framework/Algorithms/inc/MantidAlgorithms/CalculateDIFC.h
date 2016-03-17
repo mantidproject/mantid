@@ -47,7 +47,7 @@ private:
 
   /// Calculate the DIFC for every pixel
   void calculate(API::Progress &progress, API::MatrixWorkspace_sptr &outputWs,
-                 DataObjects::OffsetsWorkspace_sptr &offsetsWs, double l1,
+                 DataObjects::OffsetsWorkspace_sptr &offsetsWS, double l1,
                  double beamlineNorm, Kernel::V3D &beamline,
                  Kernel::V3D &samplePos, detid2det_map &allDetectors);
 };

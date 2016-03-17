@@ -39,10 +39,9 @@ namespace MantidQt
       {
       }
 
-      virtual ~AlgorithmHintStrategy() {};
+      ~AlgorithmHintStrategy() override{};
 
-      virtual std::map<std::string,std::string> createHints()
-      {
+      std::map<std::string, std::string> createHints() override {
         std::map<std::string,std::string> hints;
 
         auto properties = m_algorithm->getProperties();

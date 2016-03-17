@@ -399,8 +399,7 @@ private:
     std::string error;
 
     // Cycle through each workspace in the group ...
-    for (auto it = wsGroupNames.begin(); it != wsGroupNames.end(); ++it) {
-      std::string memberWsName = *it;
+    for (const auto &memberWsName : wsGroupNames) {
       boost::shared_ptr<Workspace> memberWs =
           AnalysisDataService::Instance().retrieve(memberWsName);
 

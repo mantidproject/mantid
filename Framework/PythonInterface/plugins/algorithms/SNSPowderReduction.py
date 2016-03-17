@@ -56,8 +56,10 @@ def allEventWorkspaces(*args):
     result = True
 
     for arg in args:
-        assert isinstance(arg, str)
-        workspace = AnalysisDataService.retrieve(arg)
+        if isinstance(arg, str):
+            workspace = AnalysisDataService.retrieve(arg)
+        else:
+            workspace = arg
         result = result and (workspace.id() == EVENT_WORKSPACE_ID)
 
     return result
@@ -383,7 +385,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             if can_run_ws_name is not None:
                 can_run_ws = self.get_workspace(can_run_ws_name)
                 # must convert the sample to a matrix workspace if the can run isn't one
-                if can_run_ws.id() != EVENT_WORKSPACE_ID and sam_ws_.id() == EVENT_WORKSPACE_ID:
+                if allEventWorkspaces(can_run_ws, sam_ws_name):
                     sam_ws = api.ConvertToMatrixWorkspace(InputWorkspace=sam_ws_name,
                                                           OutputWorkspace=sam_ws_name)
                     assert sam_ws is not None

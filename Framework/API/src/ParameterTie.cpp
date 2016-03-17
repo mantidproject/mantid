@@ -65,7 +65,7 @@ void ParameterTie::set(const std::string &expr) {
        it != m_varMap.end(); ++it) {
     delete it->first;
   }
-  if (m_varMap.size()) {
+  if (!m_varMap.empty()) {
     m_varMap.clear();
   }
   try { // Set the expression and initialize the variables
@@ -137,7 +137,7 @@ std::string ParameterTie::asString(const IFunction *fun) const {
   try {
     res_expression = fun->parameterName(fun->getParameterIndex(*this)) + "=";
 
-    if (m_varMap.size() == 0) { // constants
+    if (m_varMap.empty()) { // constants
       return res_expression + m_expression;
       ;
     }

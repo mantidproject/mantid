@@ -54,7 +54,7 @@ public:
   /// Constructor
   MultiDatasetFit(QWidget *parent = NULL);
   /// Destructor
-  ~MultiDatasetFit();
+  ~MultiDatasetFit() override;
   /// Get the name of the output matrix workspace for the i-th spectrum
   QString getOutputWorkspaceName(int i) const;
   /// Workspace name for the i-th spectrum
@@ -104,14 +104,14 @@ private slots:
   void updateGuessFunction(const QString&, const QString&);
 
 protected:
-  virtual void initLayout();
+  void initLayout() override;
 
 private:
   void createPlotToolbar();
   boost::shared_ptr<Mantid::API::IFunction> createFunction() const;
   void updateParameters(const Mantid::API::IFunction& fun);
   void showInfo(const QString& text);
-  bool eventFilter(QObject *widget, QEvent *evn);
+  bool eventFilter(QObject *widget, QEvent *evn) override;
   void showFunctionBrowserInfo();
   void showFitOptionsBrowserInfo();
   void showTableInfo();

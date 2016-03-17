@@ -32,7 +32,7 @@ public:
     saver = FrameworkManager::Instance().createAlgorithm("SaveDaveGrp");
   }
 
-  ~SaveDaveGrpTest() {}
+  ~SaveDaveGrpTest() override {}
 
   void testName() { TS_ASSERT_EQUALS(saver->name(), "SaveDaveGrp"); }
 

@@ -190,7 +190,7 @@ public:
                                     const std::vector<Kernel::V3D> &q_vectors,
                                     double tolerance,
                                     std::vector<Kernel::V3D> &miller_indices,
-                                    double &average_error);
+                                    double &ave_error);
 
   /// Get lists of indices and Qs for peaks indexed in the specified direction
   static int GetIndexedPeaks_1D(const Kernel::V3D &direction,

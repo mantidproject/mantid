@@ -766,8 +766,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
   // Apply to m_detTofOffsets and m_detTofShifts
   if (usedetid) {
     // Get vector IDs
-    vector<detid_t> vecDetIDs;
-    vecDetIDs.resize(numhist, 0);
+    vector<detid_t> vecDetIDs(numhist, 0);
     // Set up the detector IDs to vecDetIDs and set up the initial value
     for (size_t i = 0; i < numhist; ++i) {
       // It is assumed that there is one detector per spectra.
@@ -784,10 +783,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
               << detids.size() << " detectors.";
         throw runtime_error(errss.str());
       }
-      detid_t detid = 0;
-      for (auto detit = detids.begin(); detit != detids.end(); ++detit)
-        detid = *detit;
-      vecDetIDs[i] = detid;
+      vecDetIDs[i] = *detids.begin();
     }
 
     // Map correction map to list
@@ -920,7 +916,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
                   << "; Number of splitters = " << splitters.size() << ".\n";
 
     // Skip output workspace has ZERO splitters
-    if (splitters.size() == 0) {
+    if (splitters.empty()) {
       g_log.warning() << "[FilterEvents] Workspace " << opws->name()
                       << " Indexed @ " << wsindex
                       << " won't have logs splitted due to zero splitter size. "
@@ -1019,7 +1015,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
  */
 Kernel::TimeSplitterType FilterEvents::generateSplitters(int wsindex) {
   Kernel::TimeSplitterType splitters;
-  for (auto splitter : m_splitters) {
+  for (const auto &splitter : m_splitters) {
     int index = splitter.index();
     if (index == wsindex) {
       splitters.push_back(splitter);
@@ -1042,7 +1038,7 @@ void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
                     << std::endl;
     return;
   } else {
-    for (auto split : splitters) {
+    for (const auto &split : splitters) {
       g_log.debug() << "[FilterEvents DB1226] Going to filter workspace "
                     << eventws->name() << ": "
                     << "log name = " << logname
