@@ -1674,6 +1674,12 @@ TMDE(inline size_t MDGridBox)::addEvent(const MDE &event) {
  * */
 TMDE(inline size_t MDGridBox)::addEventUnsafe(const MDE &event) {
   size_t cindex = calculateChildIndex(event);
+
+  // We can erroneously get cindex == numBoxes for events which fall on the
+  // upper boundary of the last child box, so add these events to the last box
+  if (cindex == numBoxes)
+    cindex = numBoxes - 1;
+
   if (cindex < numBoxes)
     return m_Children[cindex]->addEventUnsafe(event);
   else
