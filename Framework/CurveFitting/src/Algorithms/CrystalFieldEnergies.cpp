@@ -8,7 +8,6 @@
 
 #include <sstream>
 
-
 namespace Mantid {
 namespace CurveFitting {
 

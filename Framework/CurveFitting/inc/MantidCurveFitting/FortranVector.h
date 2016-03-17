@@ -38,7 +38,8 @@ template <class VectorClass> class FortranVector : public VectorClass {
   int m_base;
   /// Typedef the types returned by the base class's operators []. They aren't
   /// necessarily the same as the stored type (double or complex).
-  typedef decltype(std::declval<const VectorClass>().operator[](0)) ElementConstType;
+  typedef decltype(
+      std::declval<const VectorClass>().operator[](0)) ElementConstType;
   typedef decltype(std::declval<VectorClass>().operator[](0)) ElementRefType;
 
 public:
