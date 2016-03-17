@@ -120,11 +120,11 @@ FortranMatrix<MatrixClass>::FortranMatrix(const int iFirst, const int iLast,
 /// @param jFirst :: Lowest value for the second index
 /// @param jLast :: Highest value for the second index
 template <class MatrixClass>
-void FortranMatrix<MatrixClass>::allocate(const int iFrom, const int iTo,
-                                          const int jFrom, const int jTo) {
-  m_base1 = iFrom;
-  m_base2 = jFrom;
-  this->resize(this->makeSize(iFrom, iTo), this->makeSize(jFrom, jTo));
+void FortranMatrix<MatrixClass>::allocate(const int iFirst, const int iLast,
+                                          const int jFirst, const int jLast) {
+  m_base1 = iFirst;
+  m_base2 = jFirst;
+  this->resize(this->makeSize(iFirst, iLast), this->makeSize(jFirst, jLast));
 }
 
 /// Resize the matrix. The index bases are 1.

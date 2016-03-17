@@ -107,9 +107,9 @@ FortranVector<VectorClass>::FortranVector(const int iFirst, const int iLast)
 /// @param iFirst :: Lowest value for the index
 /// @param iLast :: Highest value for the index
 template <class VectorClass>
-void FortranVector<VectorClass>::allocate(int firstIndex, int lastIndex) {
-  m_base = firstIndex;
-  this->resize(makeSize(firstIndex, lastIndex));
+void FortranVector<VectorClass>::allocate(int iFirst, int iLast) {
+  m_base = iFirst;
+  this->resize(makeSize(iFirst, iLast));
 }
 
 /// Resize the vector. Named this way to mimic the fortran style and to
