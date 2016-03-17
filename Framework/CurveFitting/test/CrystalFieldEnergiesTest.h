@@ -47,7 +47,7 @@ public:
 
   void test_C2() {
     std::map<std::string, double> bkq;
-    bkq["IB20"] = 0.3365;
+    bkq["B20"] = 0.3365;
     bkq["B22"] = 7.4851;
     bkq["B40"] = 0.4062;
     bkq["IB42"] = -3.8296;

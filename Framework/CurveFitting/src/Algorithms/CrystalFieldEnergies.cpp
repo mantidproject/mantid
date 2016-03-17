@@ -11,7 +11,6 @@
 namespace Mantid {
 namespace CurveFitting {
 
-using namespace Mantid::Kernel;
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
 using Mantid::CurveFitting::ComplexFortranMatrix;
@@ -54,10 +53,10 @@ void CrystalFieldEnergies::init() {
   auto threeElements =
       boost::make_shared<Kernel::ArrayLengthValidator<double>>(3);
   std::vector<double> defaultVector(3, 0);
-  declareProperty(make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
                       "Bmol", defaultVector, threeElements),
                   "Parameters of the molecular field (3 values).");
-  declareProperty(make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
                       "Bext", defaultVector, threeElements),
                   "Parameters of the external field (3 values).");
   declareProperty("B20", 0.0, "Real part of the B20 field parameter.");
@@ -93,13 +92,13 @@ void CrystalFieldEnergies::init() {
   declareProperty("IB66", 0.0, "Imaginery part of the B66 field parameter.");
 
   // Output
-  declareProperty(make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
                       "Energies", Kernel::Direction::Output),
                   "The energies starting at 0 in ascending order.");
-  declareProperty(make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
                       "Eigenvectors", Kernel::Direction::Output),
                   "The eigenvectors.");
-  declareProperty(make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
                       "Hamiltonian", Kernel::Direction::Output),
                   "The Hamiltonian.");
 }
