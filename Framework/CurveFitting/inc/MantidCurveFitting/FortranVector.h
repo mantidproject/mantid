@@ -118,7 +118,7 @@ void FortranVector<VectorClass>::allocate(int firstIndex, int lastIndex) {
 template <class VectorClass>
 void FortranVector<VectorClass>::allocate(int newSize) {
   m_base = 1;
-  resize(makeSize(1, newSize));
+  this->resize(makeSize(1, newSize));
 }
 
 /// The "index" operator

@@ -109,9 +109,10 @@ size_t ComplexMatrix::size2() const { return m_matrix ? m_matrix->size2 : 0; }
 /// @param j :: The column
 /// @param value :: The new vaule
 void ComplexMatrix::set(size_t i, size_t j, ComplexType value) {
-  if (i < m_matrix->size1 && j < m_matrix->size2)
-    gsl_matrix_complex_set(m_matrix, i, j, {value.real(), value.imag()});
-  else {
+  if (i < m_matrix->size1 && j < m_matrix->size2) {
+    gsl_matrix_complex_set(m_matrix, i, j,
+                           gsl_complex{value.real(), value.imag()});
+  } else {
     throw std::out_of_range("ComplexMatrix indices are out of range.");
   }
 }
@@ -153,7 +154,7 @@ ComplexMatrix &ComplexMatrix::operator+=(const ComplexMatrix &M) {
 /// add a constant to this matrix
 /// @param d :: A number
 ComplexMatrix &ComplexMatrix::operator+=(const ComplexType &d) {
-  gsl_matrix_complex_add_constant(m_matrix, {d.real(), d.imag()});
+  gsl_matrix_complex_add_constant(m_matrix, gsl_complex{d.real(), d.imag()});
   return *this;
 }
 /// subtract a matrix from this
@@ -184,8 +185,8 @@ ComplexMatrix &ComplexMatrix::operator=(const ComplexMatrixMult2 &mult2) {
       mult2.tr2 ? CblasTrans : (mult2.ctr2 ? CblasConjTrans : CblasNoTrans);
 
   // this = m_1 * m_2
-  gsl_blas_zgemm(tr1, tr2, {1.0, 0.0}, mult2.m_1.gsl(), mult2.m_2.gsl(),
-                 {0.0, 0.0}, gsl());
+  gsl_blas_zgemm(tr1, tr2, gsl_complex{1.0, 0.0}, mult2.m_1.gsl(),
+                 mult2.m_2.gsl(), gsl_complex{0.0, 0.0}, gsl());
 
   return *this;
 }
@@ -210,12 +211,12 @@ ComplexMatrix &ComplexMatrix::operator=(const ComplexMatrixMult3 &mult3) {
       mult3.tr3 ? CblasTrans : (mult3.ctr3 ? CblasConjTrans : CblasNoTrans);
 
   // AB = m_1 * m_2
-  gsl_blas_zgemm(tr1, tr2, {1.0, 0.0}, mult3.m_1.gsl(), mult3.m_2.gsl(),
-                 {0.0, 0.0}, AB.gsl());
+  gsl_blas_zgemm(tr1, tr2, gsl_complex{1.0, 0.0}, mult3.m_1.gsl(),
+                 mult3.m_2.gsl(), gsl_complex{0.0, 0.0}, AB.gsl());
 
   // this = AB * m_3
-  gsl_blas_zgemm(CblasNoTrans, tr3, {1.0, 0.0}, AB.gsl(), mult3.m_3.gsl(),
-                 {0.0, 0.0}, gsl());
+  gsl_blas_zgemm(CblasNoTrans, tr3, gsl_complex{1.0, 0.0}, AB.gsl(),
+                 mult3.m_3.gsl(), gsl_complex{0.0, 0.0}, gsl());
 
   return *this;
 }

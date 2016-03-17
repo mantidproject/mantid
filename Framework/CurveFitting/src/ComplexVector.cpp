@@ -80,7 +80,7 @@ size_t ComplexVector::size() const { return m_vector->size; }
 /// @param value :: The new value
 void ComplexVector::set(size_t i, const ComplexType &value) {
   if (i < m_vector->size) {
-    gsl_vector_complex_set(m_vector, i, {value.real(), value.imag()});
+    gsl_vector_complex_set(m_vector, i, gsl_complex{value.real(), value.imag()});
 
   } else {
     std::stringstream errmsg;
@@ -131,7 +131,7 @@ ComplexVector &ComplexVector::operator-=(const ComplexVector &v) {
 /// Multiply by a number
 /// @param d :: The number
 ComplexVector &ComplexVector::operator*=(const ComplexType d) {
-  gsl_vector_complex_scale(gsl(), {d.real(), d.imag()});
+  gsl_vector_complex_scale(gsl(), gsl_complex{d.real(), d.imag()});
   return *this;
 }
 
