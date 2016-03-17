@@ -123,7 +123,7 @@ public:
     TS_ASSERT_THROWS(m_converter->execute(), std::runtime_error);
   }
 
-  void setUp() {
+  void setUp() override {
     tws = WorkspaceFactory::Instance().createTable();
     tws->addColumn("double", "A");
     tws->addColumn("double", "B");

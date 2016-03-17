@@ -290,7 +290,7 @@ void LoadIDFFromNexus::LoadParameters(
         ConfigService::Instance().getInstrumentDirectories();
     const std::string instrumentName =
         localWorkspace->getInstrument()->getName();
-    for (auto directoryName : directoryNames) {
+    for (const auto &directoryName : directoryNames) {
       // This will iterate around the directories from user ->etc ->install, and
       // find the first appropriate file
       const std::string paramFile =

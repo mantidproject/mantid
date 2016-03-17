@@ -74,7 +74,7 @@ private:
   void exec() override;
   // Extract the charge value from the logs.
   double
-  extractCharge(boost::shared_ptr<Mantid::API::MatrixWorkspace> inputWs) const;
+  extractCharge(boost::shared_ptr<Mantid::API::MatrixWorkspace> inputWS) const;
 };
 
 } // namespace Algorithm

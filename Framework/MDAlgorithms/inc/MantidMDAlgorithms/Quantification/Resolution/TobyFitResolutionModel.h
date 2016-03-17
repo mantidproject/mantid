@@ -65,7 +65,7 @@ public:
   TobyFitResolutionModel();
   /// Construct with a model pointer & a pointer to the fitting function
   TobyFitResolutionModel(const API::IFunctionMD &fittedFunction,
-                         const std::string &fgModelName);
+                         const std::string &fgModel);
   /// Destructor
   ~TobyFitResolutionModel() override;
 
@@ -99,7 +99,7 @@ private:
 
   /// Map integration variables to perturbed values in Q-E space
   void calculatePerturbedQE(const CachedExperimentInfo &observation,
-                            const QOmegaPoint &eventPoint) const;
+                            const QOmegaPoint &qOmega) const;
   /// Return true if it is time to check for convergence of the
   /// current sigma value
   bool checkForConvergence(const int step) const;

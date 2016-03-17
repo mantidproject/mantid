@@ -142,7 +142,7 @@ void TOFSANSResolutionByPixel::exec() {
     try {
       det = inWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
-      g_log.information() << "Spectrum index " << i
+      g_log.information() << "Workspace index " << i
                           << " has no detector assigned to it - discarding"
                           << std::endl;
     }

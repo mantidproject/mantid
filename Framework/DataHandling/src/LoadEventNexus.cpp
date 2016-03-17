@@ -515,7 +515,7 @@ public:
     std::string thisStartTime = "";
     size_t thisNumPulses = 0;
     file.getAttr("offset", thisStartTime);
-    if (file.getInfo().dims.size() > 0)
+    if (!file.getInfo().dims.empty())
       thisNumPulses = file.getInfo().dims[0];
     file.closeData();
 
@@ -912,7 +912,7 @@ public:
       m_min_id = minSpectraToLoad;
     }
     if (maxSpectraToLoad != emptyInt && m_max_id > maxSpectraToLoad) {
-      if (maxSpectraToLoad > m_min_id) {
+      if (maxSpectraToLoad < m_min_id) {
         // the maximum spectra to load is less than the minimum of this bank
         return;
       }
@@ -2149,7 +2149,7 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
       }
     }
   }
-  if (detList.size() == 0)
+  if (detList.empty())
     return;
   for (auto &det : detList) {
     bool keep = false;

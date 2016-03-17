@@ -12,9 +12,8 @@ class vtkImplicitFunction;
 class VTK_EXPORT vtkMDHWNexusReader : public vtkStructuredGridAlgorithm {
 public:
   static vtkMDHWNexusReader *New();
-  vtkTypeMacro(vtkMDHWNexusReader,
-               vtkStructuredGridAlgorithm) void PrintSelf(ostream &os,
-                                                          vtkIndent indent);
+  vtkTypeMacro(vtkMDHWNexusReader, vtkStructuredGridAlgorithm) void PrintSelf(
+      ostream &os, vtkIndent indent) override;
   vtkSetStringMacro(FileName)
       vtkGetStringMacro(FileName) int CanReadFile(const char *fname);
   void SetInMemory(bool inMemory);
@@ -38,14 +37,14 @@ public:
 
 protected:
   vtkMDHWNexusReader();
-  ~vtkMDHWNexusReader();
+  ~vtkMDHWNexusReader() override;
   int RequestInformation(vtkInformation *, vtkInformationVector **,
-                         vtkInformationVector *);
+                         vtkInformationVector *) override;
   int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *);
+                  vtkInformationVector *) override;
   int Canreadfile(const char *fname);
   /// Handle time variation.
-  unsigned long GetMTime();
+  unsigned long GetMTime() override;
 
 private:
   void setTimeRange(vtkInformationVector *outputVector);

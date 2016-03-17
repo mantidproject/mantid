@@ -164,8 +164,8 @@ void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax,
   pMax = snappedPMax;
 
   // Bins
-  numberOfBins = static_cast<size_t>(
-      (pMax - pMin) / width + 0.5); // round up to a whole number of bins.
+  numberOfBins =
+      std::lround((pMax - pMin) / width); // round up to a whole number of bins.
 }
 }
 
@@ -362,7 +362,7 @@ void IntegrateMDHistoWorkspace::exec() {
     auto outIterators = outWS->createIterators(nThreads, nullptr);
 
     PARALLEL_FOR_NO_WSP_CHECK()
-    for (int i = 0; i < int(outIterators.size()); ++i) {
+    for (int i = 0; i < int(outIterators.size()); ++i) { // NOLINT
       PARALLEL_START_INTERUPT_REGION
       boost::scoped_ptr<MDHistoWorkspaceIterator> outIterator(
           dynamic_cast<MDHistoWorkspaceIterator *>(outIterators[i]));

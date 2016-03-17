@@ -96,7 +96,7 @@ private:
   /// Load Parameter File specified by full pathname into given workspace,
   /// return success
   bool loadParameterFile(const std::string &fullPathName,
-                         const API::MatrixWorkspace_sptr workspace);
+                         const API::MatrixWorkspace_sptr localWorkspace);
 };
 
 } // namespace DataHandling

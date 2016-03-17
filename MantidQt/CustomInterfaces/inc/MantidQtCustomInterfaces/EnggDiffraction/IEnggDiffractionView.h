@@ -125,12 +125,20 @@ public:
   virtual int currentCropCalibBankName() const = 0;
 
   /**
-  * customised spec will be passed via specID text field for the
-  * calibrartion process to be carried out
+  * customised spec will be passed via specNo text field for the
+  * cropped calibrartion process to be carried out
   *
   * @return which format should to applied for plotting data
   */
   virtual std::string currentCalibSpecNos() const = 0;
+
+  /**
+  * customised bank name will be passed with SpectrumNos to
+  * save workspace and file with particular bank name
+  *
+  * @return string which will be used to generate bank name
+  */
+  virtual std::string currentCalibCustomisedBankName() const = 0;
 
   /**
   * Selected plot data representation will be applied, which will
@@ -275,7 +283,7 @@ public:
    * @return spectrum IDs, expected as a comma separated list of
    * integers or ranges of integers.
    */
-  virtual std::string focusingCroppedSpectrumIDs() const = 0;
+  virtual std::string focusingCroppedSpectrumNos() const = 0;
 
   /**
    * Detector grouping file, used when focusing in "texture" mode.

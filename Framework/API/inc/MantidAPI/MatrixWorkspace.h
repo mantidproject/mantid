@@ -108,12 +108,12 @@ public:
   std::map<specnum_t, Mantid::Kernel::V3D>
   getNeighbours(const Geometry::IDetector *comp, const double radius = 0.0,
                 const bool ignoreMaskedDetectors = false) const;
-  /// Query the NearestNeighbours object for a given spectrum index using a
+  /// Query the NearestNeighbours object for a given spectrum number using a
   /// search radius
   std::map<specnum_t, Mantid::Kernel::V3D>
   getNeighbours(specnum_t spec, const double radius,
                 const bool ignoreMaskedDetectors = false) const;
-  /// Query the NearestNeighbours object for a given spectrum index using the
+  /// Query the NearestNeighbours object for a given spectrum number using the
   /// direct number of nearest neighbours
   std::map<specnum_t, Mantid::Kernel::V3D>
   getNeighboursExact(specnum_t spec, const int nNeighbours,
@@ -315,7 +315,7 @@ public:
 
   /**
    * Probes if DX (X Error) values were set on a particular spectrum
-   * @param index: the spectrum index
+   * @param index: the workspace index
    */
   virtual bool hasDx(const std::size_t index) const {
     return getSpectrum(index)->hasDx();
@@ -364,13 +364,13 @@ public:
   // Methods to set and access masked bins
   void maskBin(const size_t &workspaceIndex, const size_t &binIndex,
                const double &weight = 1.0);
-  void flagMasked(const size_t &spectrumIndex, const size_t &binIndex,
+  void flagMasked(const size_t &index, const size_t &binIndex,
                   const double &weight = 1.0);
-  bool hasMaskedBins(const size_t &spectrumIndex) const;
+  bool hasMaskedBins(const size_t &workspaceIndex) const;
   /// Masked bins for each spectrum are stored as a set of pairs containing <bin
   /// index, weight>
   typedef std::map<size_t, double> MaskList;
-  const MaskList &maskedBins(const size_t &spectrumIndex) const;
+  const MaskList &maskedBins(const size_t &workspaceIndex) const;
 
   // Methods handling the internal monitor workspace
   virtual void
@@ -470,7 +470,7 @@ protected:
   MatrixWorkspace(const MatrixWorkspace &other);
 
   MatrixWorkspace(
-      Mantid::Geometry::INearestNeighboursFactory *factory = nullptr);
+      Mantid::Geometry::INearestNeighboursFactory *nnFactory = nullptr);
 
   /// Initialises the workspace. Sets the size and lengths of the arrays. Must
   /// be overloaded.
@@ -512,7 +512,7 @@ private:
   /// Flag indicating whether the data has common bins. False by default
   mutable bool m_isCommonBinsFlag;
 
-  /// The set of masked bins in a map keyed on spectrum index
+  /// The set of masked bins in a map keyed on workspace index
   std::map<int64_t, MaskList> m_masks;
 
   /// A workspace holding monitor data relating to the main data in the

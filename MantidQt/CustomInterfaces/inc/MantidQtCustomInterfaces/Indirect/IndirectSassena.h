@@ -15,18 +15,18 @@ namespace MantidQt
 		public:
 			IndirectSassena(QWidget * parent = 0);
 
-      void setup();
-			bool validate();
-			void run();
+                        void setup() override;
+                        bool validate() override;
+                        void run() override;
 
-			/// Load default settings into the interface
-			void loadSettings(const QSettings& settings);
+                        /// Load default settings into the interface
+                        void loadSettings(const QSettings &settings) override;
 
-    private slots:
-      /// Handle completion of the algorithm batch
-      void handleAlgorithmFinish(bool error);
+                      private slots:
+                        /// Handle completion of the algorithm batch
+                        void handleAlgorithmFinish(bool error);
 
-		private:
+                      private:
 			/// The ui form
 			Ui::IndirectSassena m_uiForm;
       /// Name of the output workspace group

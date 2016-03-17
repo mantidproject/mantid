@@ -29,7 +29,7 @@ void ExtractFFTSpectrum::init() {
                                                    PropertyMode::Optional),
                   "The optional input workspace for the imaginary part.");
   declareProperty("FFTPart", 2, boost::make_shared<BoundedValidator<int>>(0, 5),
-                  "Spectrum index, one of the six possible spectra output by "
+                  "Spectrum number, one of the six possible spectra output by "
                   "the FFT algorithm");
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),

@@ -138,6 +138,9 @@ namespace CustomInterfaces
     /// Toggles "auto" mode for last file
     virtual void checkBoxAutoChanged(int state) = 0;
 
+    /// Gets directory from first file and sets last file directory
+    virtual void handleFirstFileChanged() = 0;
+
   signals:
     /// Request to load data
     void loadRequested();

@@ -46,7 +46,7 @@ public:
   /// Default constructor.
   RotationPointDialog(QWidget *parent = 0);
   /// Default destructor.
-  ~RotationPointDialog();
+  ~RotationPointDialog() override;
 
 signals:
   /**

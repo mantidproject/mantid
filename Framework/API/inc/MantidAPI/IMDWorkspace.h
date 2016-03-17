@@ -126,7 +126,7 @@ public:
       Mantid::Geometry::MDImplicitFunction *function = nullptr) const;
 
   std::string getConvention() const;
-  void setConvention(std::string m_convention);
+  void setConvention(std::string convention);
   std::string changeQConvention();
 
   signal_t getSignalAtVMD(const Mantid::Kernel::VMD &coords,
@@ -166,6 +166,9 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   IMDWorkspace(const IMDWorkspace &) = default;
+
+  void makeSinglePointWithNaN(std::vector<coord_t> &x, std::vector<signal_t> &y,
+                              std::vector<signal_t> &e) const;
 
   const std::string toString() const override;
 

@@ -94,7 +94,7 @@ public:
   Unit_sptr getYUnit() const { return m_yUnit; };
 
   /// return false if no data has been added
-  bool containData() const { return m_x.size() ? true : false; }
+  bool containData() const { return !m_x.empty() ? true : false; }
 
   /// Prints object to stream
   void printSelf(std::ostream &os) const;

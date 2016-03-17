@@ -39,8 +39,8 @@ public:
   bool changeShownDim() override;
   bool isLabelOfFreeAxis(const std::string &label) const override;
   SetPeaksWorkspaces presentedWorkspaces() const override;
-  void setForegroundColor(const QColor) override;
-  void setBackgroundColor(const QColor) override;
+  void setForegroundColor(const PeakViewColor) override;
+  void setBackgroundColor(const PeakViewColor) override;
   std::string getTransformName() const override;
   void setShown(const bool shown) override;
   PeakBoundingBox getBoundingBox(const int) const override;
@@ -52,8 +52,8 @@ public:
   double getPeakSizeIntoProjection() const override;
   void registerOwningPresenter(UpdateableOnDemand *owner) override;
   bool getShowBackground() const override;
-  QColor getBackgroundColor() const override;
-  QColor getForegroundColor() const override;
+  PeakViewColor getBackgroundPeakViewColor() const override;
+  PeakViewColor getForegroundPeakViewColor() const override;
   void zoomToPeak(const int index) override;
   bool isHidden() const override;
   bool contentsDifferent(PeaksPresenter const *other) const override;

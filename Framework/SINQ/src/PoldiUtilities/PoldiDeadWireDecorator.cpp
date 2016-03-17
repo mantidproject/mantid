@@ -58,7 +58,7 @@ void PoldiDeadWireDecorator::detectorSetHook() {
 
 std::vector<int>
 PoldiDeadWireDecorator::getGoodElements(std::vector<int> rawElements) {
-  if (m_deadWireSet.size() > 0) {
+  if (!m_deadWireSet.empty()) {
     if (*m_deadWireSet.rbegin() > rawElements.back()) {
       throw std::runtime_error(
           std::string("Deadwires set contains illegal index."));

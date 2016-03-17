@@ -30,7 +30,7 @@ public:
     m_testno = 0;
   }
 
-  ~LoadAscii2Test() {}
+  ~LoadAscii2Test() override {}
 
   void testProperties() {
     m_testno++;

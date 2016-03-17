@@ -48,10 +48,10 @@ public:
     declareParameter("s", 1.);
   }
 
-  std::string name() const { return "ConvolutionTest_Gauss"; }
+  std::string name() const override { return "ConvolutionTest_Gauss"; }
 
   void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const {
+                     const size_t nData) const override {
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
@@ -61,7 +61,7 @@ public:
     }
   }
   void functionDerivLocal(Jacobian *out, const double *xValues,
-                          const size_t nData) {
+                          const size_t nData) override {
     // throw Mantid::Kernel::Exception::NotImplementedError("");
     double c = getParameter("c");
     double h = getParameter("h");
@@ -75,16 +75,16 @@ public:
     }
   }
 
-  double centre() const { return getParameter(0); }
+  double centre() const override { return getParameter(0); }
 
-  double height() const { return getParameter(1); }
+  double height() const override { return getParameter(1); }
 
-  double fwhm() const { return getParameter(2); }
+  double fwhm() const override { return getParameter(2); }
 
-  void setCentre(const double c) { setParameter(0, c); }
-  void setHeight(const double h) { setParameter(1, h); }
+  void setCentre(const double c) override { setParameter(0, c); }
+  void setHeight(const double h) override { setParameter(1, h); }
 
-  void setFwhm(const double w) { setParameter(2, w); }
+  void setFwhm(const double w) override { setParameter(2, w); }
 };
 
 class ConvolutionTest_Lorentz : public IPeakFunction {
@@ -95,10 +95,10 @@ public:
     declareParameter("w", 1.);
   }
 
-  std::string name() const { return "ConvolutionTest_Lorentz"; }
+  std::string name() const override { return "ConvolutionTest_Lorentz"; }
 
   void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const {
+                     const size_t nData) const override {
     const double height = getParameter("h");
     const double peakCentre = getParameter("c");
     const double hwhm = getParameter("w");
@@ -110,7 +110,7 @@ public:
   }
 
   void functionDerivLocal(Jacobian *out, const double *xValues,
-                          const size_t nData) {
+                          const size_t nData) override {
     const double height = getParameter("h");
     const double peakCentre = getParameter("c");
     const double hwhm = getParameter("w");
@@ -126,13 +126,13 @@ public:
     }
   }
 
-  double centre() const { return getParameter(0); }
-  double height() const { return getParameter(1); }
-  double fwhm() const { return getParameter(2); }
+  double centre() const override { return getParameter(0); }
+  double height() const override { return getParameter(1); }
+  double fwhm() const override { return getParameter(2); }
 
-  void setCentre(const double c) { setParameter(0, c); }
-  void setHeight(const double h) { setParameter(1, h); }
-  void setFwhm(const double w) { setParameter(2, w); }
+  void setCentre(const double c) override { setParameter(0, c); }
+  void setHeight(const double h) override { setParameter(1, h); }
+  void setFwhm(const double w) override { setParameter(2, w); }
 };
 
 class ConvolutionTest_Linear : public ParamFunction, public IFunction1D {
@@ -142,10 +142,10 @@ public:
     declareParameter("b");
   }
 
-  std::string name() const { return "ConvolutionTest_Linear"; }
+  std::string name() const override { return "ConvolutionTest_Linear"; }
 
   void function1D(double *out, const double *xValues,
-                  const size_t nData) const {
+                  const size_t nData) const override {
     double a = getParameter("a");
     double b = getParameter("b");
     for (size_t i = 0; i < nData; i++) {
@@ -153,7 +153,7 @@ public:
     }
   }
   void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) {
+                       const size_t nData) override {
     // throw Mantid::Kernel::Exception::NotImplementedError("");
     for (size_t i = 0; i < nData; i++) {
       out->set(i, 0, 1.);

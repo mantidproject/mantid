@@ -29,7 +29,7 @@ class MockView : public ReflMainView
 {
 public:
   MockView(){};
-  virtual ~MockView(){}
+  ~MockView() override {}
 
   //Prompts
   MOCK_METHOD3(askUserString, std::string(const std::string& prompt, const std::string& title, const std::string& defaultValue));
@@ -58,17 +58,21 @@ public:
   MOCK_METHOD1(setTransferMethods, void(const std::set<std::string>&));
 
   //Calls we don't care about
-  virtual void showTable(QReflTableModel_sptr) {};
-  virtual void showSearch(ReflSearchModel_sptr) {};
-  virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy*) {};
+  void showTable(QReflTableModel_sptr) override{};
+  void showSearch(ReflSearchModel_sptr) override{};
+  void
+  setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *) override{};
   virtual void setProgressRange(int,int) {};
   virtual void setProgress(int) {};
-  virtual void setTableList(const std::set<std::string>&) {};
-  virtual void setInstrumentList(const std::vector<std::string>&, const std::string&) {};
-  virtual void saveSettings(const std::map<std::string,QVariant>&) {};
-  virtual void loadSettings(std::map<std::string,QVariant>&) {};
-  virtual std::string getProcessInstrument() const {return "FAKE";}
-  virtual boost::shared_ptr<IReflPresenter> getPresenter() const {return boost::shared_ptr<IReflPresenter>();}
+  void setTableList(const std::set<std::string> &) override{};
+  void setInstrumentList(const std::vector<std::string> &,
+                         const std::string &) override{};
+  void saveSettings(const std::map<std::string, QVariant> &) override{};
+  void loadSettings(std::map<std::string, QVariant> &) override{};
+  std::string getProcessInstrument() const override { return "FAKE"; }
+  boost::shared_ptr<IReflPresenter> getPresenter() const override {
+    return boost::shared_ptr<IReflPresenter>();
+  }
 };
 
 class MockProgressableView : public ProgressableView {
@@ -76,13 +80,13 @@ public:
   MOCK_METHOD1(setProgress, void(int));
   MOCK_METHOD2(setProgressRange, void(int, int));
   MOCK_METHOD0(clearProgress, void());
-  ~MockProgressableView() {}
+  ~MockProgressableView() override {}
 };
 
 class MockProgressBase : public Mantid::Kernel::ProgressBase {
 public:
   MOCK_METHOD1(doReport, void(const std::string &));
-  ~MockProgressBase() {}
+  ~MockProgressBase() override {}
 };
 
 class MockICatalogInfo : public Mantid::Kernel::ICatalogInfo {
@@ -96,7 +100,7 @@ public:
   MOCK_CONST_METHOD0(linuxPrefix, const std::string());
   MOCK_CONST_METHOD0(clone, ICatalogInfo *());
   MOCK_CONST_METHOD1(transformArchivePath, std::string(const std::string &));
-  virtual ~MockICatalogInfo() {}
+  ~MockICatalogInfo() override {}
 };
 
 #endif /*MANTID_CUSTOMINTERFACES_REFLMAINVIEWMOCKOBJECTS_H*/

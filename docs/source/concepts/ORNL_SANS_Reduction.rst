@@ -112,7 +112,7 @@ Options for finding the beam center
     Sets the beam center location to be used, in pixel coordinates.
 
 ``DirectBeamCenter(datafile)``
-   Finds the beam center using the direct beam method. The position of the beam center p is given by
+    Finds the beam center using the direct beam method. The position of the beam center p is given by
 
         :math:`p(x,y) = \frac{\sum_i I_i \ d_i(x,y)}{\sum_i I_i}`
 
