@@ -58,6 +58,8 @@ public:
 
   ElementConstType operator()(int i) const;
   ElementRefType operator()(int i);
+  ElementConstType operator[](int i) const;
+  ElementRefType operator[](int i);
 
   VectorClass moveToBaseVector();
 
@@ -124,8 +126,7 @@ void FortranVector<VectorClass>::allocate(int newSize) {
 /// The "index" operator
 template <class VectorClass>
 typename FortranVector<VectorClass>::ElementConstType
-    FortranVector<VectorClass>::
-    operator()(int i) const {
+FortranVector<VectorClass>::operator()(int i) const {
   return this->VectorClass::operator[](static_cast<size_t>(i - m_base));
 }
 
@@ -133,6 +134,20 @@ typename FortranVector<VectorClass>::ElementConstType
 template <class VectorClass>
 typename FortranVector<VectorClass>::ElementRefType FortranVector<VectorClass>::
 operator()(int i) {
+  return this->VectorClass::operator[](static_cast<size_t>(i - m_base));
+}
+
+/// The "index" operator
+template <class VectorClass>
+typename FortranVector<VectorClass>::ElementConstType
+    FortranVector<VectorClass>::operator[](int i) const {
+  return this->VectorClass::operator[](static_cast<size_t>(i - m_base));
+}
+
+/// Get the reference to the data element
+template <class VectorClass>
+typename FortranVector<VectorClass>::ElementRefType FortranVector<VectorClass>::
+operator[](int i) {
   return this->VectorClass::operator[](static_cast<size_t>(i - m_base));
 }
 
