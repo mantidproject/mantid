@@ -531,6 +531,38 @@ class CWSCDReductionControl(object):
 
         return self._myPeakInfoDict[p_key]
 
+    def get_peaks_integrated_intensities(self, exp_number, scan_number, pt_list):
+        """
+
+        :param exp_number:
+        :param scan_number:
+        :param pt_list:
+        :return:
+        """
+        # TODO/NOW: doc & check
+
+        if pt_list is None:
+            status, pt_list = self.get_pt_numbers(exp_number, scan_number)
+        assert status
+        int_peak_ws_name = get_integrated_peak_ws_name(exp_number, scan_number, pt_list)
+
+        assert AnalysisDataService.doesExist(int_peak_ws_name)
+        int_peak_ws = AnalysisDataService.retrieve(int_peak_ws_name)
+
+        num_peaks = int_peak_ws.getNumberPeaks()
+        array_size = num_peaks
+        vec_x = numpy.ndarray(shape=(array_size,))
+        vec_y = numpy.ndarray(shape=(array_size,))
+        for index in xrange(array_size):
+            peak_i = int_peak_ws.getPeak(index)
+            pt_number = peak_i.getRunNumber() % 1000
+            intensity = peak_i.getIntensity()
+            vec_x[index] = pt_number
+            vec_y[index] = intensity
+        # END-FOR
+
+        return vec_x, vec_y
+
     def has_merged_data(self, exp_number, scan_number, pt_number_list=None):
         """
         Check whether the data has been merged to an MDEventWorkspace
@@ -676,6 +708,42 @@ class CWSCDReductionControl(object):
         counts = peak_ws.getPeak(0).getBinCounts()
 
         return peak_ws_name, intensity, counts
+
+    def integrate_scan_peaks(self, exp, scan, peak_radius, peak_centre,
+                             merge=True):
+        """
+
+        :param exp:
+        :param scan:
+        :param peak_centre:
+        :param merge:
+        :return:
+        """
+        # TODO/NOW - documentation and check
+
+        # FIXME - combine the download and naming for common use
+        # get spice file
+        spice_table_name = get_spice_table_name(exp, scan)
+        if AnalysisDataService.doesExist(spice_table_name) is False:
+            self.download_spice_file(exp, scan, False)
+            self.load_spice_scan_file(exp, scan)
+
+        # get MD workspace name
+        status, pt_list = self.get_pt_numbers(exp, scan)
+        assert status
+        md_ws_name = get_merged_md_name(self._instrumentName, exp, scan, pt_list)
+
+        peak_centre_str = '%f, %f, %f' % (peak_centre[0], peak_centre[1],
+                                          peak_centre[2])
+
+        integrated_peak_ws_name = get_integrated_peak_ws_name(exp, scan, pt_list)
+        api.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
+                               OutputWorkspace=integrated_peak_ws_name,
+                               PeakRadius=peak_radius,
+                               PeakCentre=peak_centre_str,
+                               MergePeaks=merge)
+
+        return
 
     def integrate_peaks_q(self, exp_no, scan_no):
         """

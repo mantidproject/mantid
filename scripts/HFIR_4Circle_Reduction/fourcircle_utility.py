@@ -308,6 +308,22 @@ def get_raw_data_workspace_name(exp_number, scan_number, pt_number):
     return ws_name
 
 
+def get_integrated_peak_ws_name(exp_number, scan_number, pt_list):
+    """
+
+    :param exp_number:
+    :param scan_number:
+    :param pt_list:
+    :return:
+    """
+    # TODO/NOW - doc & check
+    ws_name = 'Integrated_exp%d_scan%d' % (exp_number, scan_number)
+    if pt_list is not None:
+        ws_name += 'Pt%d_%d' % (pt_list[0], pt_list[-1])
+
+    return ws_name
+
+
 def get_merged_md_name(instrument_name, exp_no, scan_no, pt_list):
     """
     Build the merged scan's MDEventworkspace's name under convention

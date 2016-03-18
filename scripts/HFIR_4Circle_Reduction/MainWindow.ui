@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1290</width>
-    <height>836</height>
+    <width>1234</width>
+    <height>784</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -193,7 +193,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>4</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1866,481 +1866,236 @@ p, li { white-space: pre-wrap; }
            <attribute name="title">
             <string>Merge Scan</string>
            </attribute>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QGroupBox" name="groupBox_5">
-              <property name="title">
-               <string>UB Matrix</string>
-              </property>
-              <layout class="QVBoxLayout" name="verticalLayout_13">
-               <item>
-                <widget class="UBMatrixTable" name="tableWidget_ubMergeScan">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>16777215</width>
-                   <height>150</height>
-                  </size>
-                 </property>
-                 <row>
-                  <property name="text">
-                   <string/>
-                  </property>
-                 </row>
-                 <row>
-                  <property name="text">
-                   <string/>
-                  </property>
-                 </row>
-                 <row>
-                  <property name="text">
-                   <string/>
-                  </property>
-                 </row>
-                 <column>
-                  <property name="text">
-                   <string/>
-                  </property>
-                 </column>
-                 <column>
-                  <property name="text">
-                   <string/>
-                  </property>
-                 </column>
-                 <column>
-                  <property name="text">
-                   <string/>
-                  </property>
-                 </column>
-                 <item row="0" column="0">
-                  <property name="text">
-                   <string>1</string>
-                  </property>
-                 </item>
-                 <item row="1" column="1">
-                  <property name="text">
-                   <string>1</string>
-                  </property>
-                 </item>
-                 <item row="2" column="2">
-                  <property name="text">
-                   <string>1</string>
-                  </property>
-                 </item>
-                </widget>
-               </item>
-               <item>
-                <spacer name="verticalSpacer_13">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="sizeType">
-                  <enum>QSizePolicy::Ignored</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>40</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
-                <layout class="QGridLayout" name="gridLayout_4">
-                 <item row="0" column="2">
-                  <widget class="QLabel" name="label_3">
-                   <property name="text">
-                    <string>From tab 'Caclulate UB'</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="0">
-                  <widget class="QRadioButton" name="radioButton_ubFromTab1">
-                   <property name="text">
-                    <string/>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <spacer name="horizontalSpacer_9">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="sizeType">
-                    <enum>QSizePolicy::Preferred</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>40</width>
-                     <height>20</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QRadioButton" name="radioButton_ubFromTab3">
-                   <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="text">
-                    <string/>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="2">
-                  <widget class="QLabel" name="label_28">
-                   <property name="text">
-                    <string>From tab 'Refine UB'</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="2">
-                  <widget class="QPlainTextEdit" name="plainTextEdit_ubInput">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>100</height>
-                    </size>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="0">
-                  <layout class="QVBoxLayout" name="verticalLayout_15"/>
-                 </item>
-                 <item row="3" column="2">
-                  <widget class="QComboBox" name="comboBox_ubOption">
-                   <item>
-                    <property name="text">
-                     <string>Mantid UB Matrix</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>SPICE UB Matrix</string>
-                    </property>
-                   </item>
-                  </widget>
-                 </item>
-                 <item row="3" column="0">
-                  <widget class="QRadioButton" name="radioButton_ubFromList">
-                   <property name="text">
-                    <string/>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <spacer name="verticalSpacer_14">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="sizeType">
-                  <enum>QSizePolicy::Ignored</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>40</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
-                <widget class="QPushButton" name="pushButton_setUBSliceView">
+           <layout class="QGridLayout" name="gridLayout_4">
+            <item row="1" column="0">
+             <layout class="QGridLayout" name="gridLayout_10">
+              <item row="0" column="6">
+               <spacer name="horizontalSpacer_12">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Preferred</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="0" column="3">
+               <widget class="QLabel" name="label_29">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For MDEventsWorkspace with merged runs&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;For example:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Base Workspace Name</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <spacer name="horizontalSpacer_10">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Preferred</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="0" column="4">
+               <widget class="QLineEdit" name="lineEdit_baseMergeMDName">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="lineEdit_listScansSliceView">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;List of scans and possibly Pt numbers.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Example 1:&lt;/p&gt;&lt;p&gt;123, 125-130, 301, 304&lt;/p&gt;&lt;p&gt;It will integrate all Pts. in each scan&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Example 2:&lt;/p&gt;&lt;p&gt;123 (1, 2, 3, 4-10), 125-130, &lt;/p&gt;&lt;p&gt;It will integrate all Pts. in all scans excpet 123, which will have a selected few to be integrated&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Example 3:&lt;/p&gt;&lt;p&gt;123, 125-130, 301, 304 | 1, 2, 3-9&lt;/p&gt;&lt;p&gt;It will integrate selected Pts. in the previous one&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_30">
+                <property name="text">
+                 <string>Scans List</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="8">
+               <widget class="QPushButton" name="pushButton_2">
+                <property name="text">
+                 <string>Show UB Matrix</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="7">
+               <widget class="QComboBox" name="comboBox_mergeScanFrame">
+                <property name="minimumSize">
+                 <size>
+                  <width>140</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type of frame that the final merged scan will be in.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <item>
                  <property name="text">
-                  <string>Set</string>
+                  <string>HKL-Space</string>
                  </property>
-                </widget>
-               </item>
-               <item>
-                <spacer name="verticalSpacer_10">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Q-Sample-Space</string>
                  </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>40</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-              </layout>
+                </item>
+               </widget>
+              </item>
+              <item row="0" column="5">
+               <widget class="QCheckBox" name="checkBox">
+                <property name="text">
+                 <string>use default</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="1">
+             <widget class="QPushButton" name="pushButton_addScanSliceView">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Add the selected scans and Pts for merging to table&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="text">
+               <string>Add</string>
+              </property>
              </widget>
             </item>
-            <item>
-             <widget class="QGroupBox" name="groupBox_6">
-              <property name="title">
-               <string>Process Data</string>
+            <item row="2" column="0">
+             <widget class="ProcessTableWidget" name="tableWidget_mergeScans">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;? columns: &lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;1. Scan number&lt;/p&gt;&lt;p&gt;2. Number of Pts.&lt;/p&gt;&lt;p&gt;3. Status: &lt;/p&gt;&lt;p&gt;(a) done&lt;/p&gt;&lt;p&gt;(b) error with error message&lt;/p&gt;&lt;p&gt;(c) on-going&lt;/p&gt;&lt;p&gt;(d) empty as not yet&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
-              <layout class="QVBoxLayout" name="verticalLayout_14">
-               <item>
-                <layout class="QGridLayout" name="gridLayout_10">
-                 <item row="0" column="4">
-                  <widget class="QLineEdit" name="lineEdit_baseMergeMDName">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="6">
-                  <widget class="QComboBox" name="comboBox_mergeScanFrame">
-                   <property name="minimumSize">
-                    <size>
-                     <width>140</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type of frame that the final merged scan will be in.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <item>
-                    <property name="text">
-                     <string>HKL-Space</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Q-Sample-Space</string>
-                    </property>
-                   </item>
-                  </widget>
-                 </item>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_30">
-                   <property name="text">
-                    <string>Scans List</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_listScansSliceView">
-                   <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;List of scans and possibly Pt numbers.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Example 1:&lt;/p&gt;&lt;p&gt;123, 125-130, 301, 304&lt;/p&gt;&lt;p&gt;It will integrate all Pts. in each scan&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Example 2:&lt;/p&gt;&lt;p&gt;123 (1, 2, 3, 4-10), 125-130, &lt;/p&gt;&lt;p&gt;It will integrate all Pts. in all scans excpet 123, which will have a selected few to be integrated&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Example 3:&lt;/p&gt;&lt;p&gt;123, 125-130, 301, 304 | 1, 2, 3-9&lt;/p&gt;&lt;p&gt;It will integrate selected Pts. in the previous one&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="3">
-                  <widget class="QLabel" name="label_29">
-                   <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For MDEventsWorkspace with merged runs&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;For example:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <property name="text">
-                    <string>Base Workspace Name</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="2">
-                  <spacer name="horizontalSpacer_10">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="sizeType">
-                    <enum>QSizePolicy::Preferred</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>40</width>
-                     <height>20</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
-                 <item row="0" column="5">
-                  <spacer name="horizontalSpacer_12">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="sizeType">
-                    <enum>QSizePolicy::Preferred</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>40</width>
-                     <height>20</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
-                 <item row="0" column="7">
-                  <widget class="QPushButton" name="pushButton_addScanSliceView">
-                   <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Add the selected scans and Pts for merging to table&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <property name="text">
-                    <string>Add</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <layout class="QHBoxLayout" name="horizontalLayout_4">
-                 <item>
-                  <widget class="ProcessTableWidget" name="tableWidget_mergeScans">
-                   <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;? columns: &lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;1. Scan number&lt;/p&gt;&lt;p&gt;2. Number of Pts.&lt;/p&gt;&lt;p&gt;3. Status: &lt;/p&gt;&lt;p&gt;(a) done&lt;/p&gt;&lt;p&gt;(b) error with error message&lt;/p&gt;&lt;p&gt;(c) on-going&lt;/p&gt;&lt;p&gt;(d) empty as not yet&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <layout class="QVBoxLayout" name="verticalLayout_18">
-                   <item>
-                    <widget class="QPushButton" name="pushButton_refreshMerged">
-                     <property name="text">
-                      <string>Refresh</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QCheckBox" name="checkBox_3">
-                     <property name="text">
-                      <string>Select</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <spacer name="verticalSpacer_17">
-                     <property name="orientation">
-                      <enum>Qt::Vertical</enum>
-                     </property>
-                     <property name="sizeType">
-                      <enum>QSizePolicy::Preferred</enum>
-                     </property>
-                     <property name="sizeHint" stdset="0">
-                      <size>
-                       <width>20</width>
-                       <height>40</height>
-                      </size>
-                     </property>
-                    </spacer>
-                   </item>
-                   <item>
-                    <widget class="Line" name="line_8">
-                     <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QPushButton" name="pushButton_process4SliceView">
-                     <property name="font">
-                      <font>
-                       <weight>75</weight>
-                       <bold>true</bold>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>Merge</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <spacer name="verticalSpacer_20">
-                     <property name="orientation">
-                      <enum>Qt::Vertical</enum>
-                     </property>
-                     <property name="sizeType">
-                      <enum>QSizePolicy::Preferred</enum>
-                     </property>
-                     <property name="sizeHint" stdset="0">
-                      <size>
-                       <width>20</width>
-                       <height>40</height>
-                      </size>
-                     </property>
-                    </spacer>
-                   </item>
-                   <item>
-                    <widget class="Line" name="line_7">
-                     <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QPushButton" name="pushButton_plotMergedScans">
-                     <property name="text">
-                      <string>Plot</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QPushButton" name="pushButton_readyToIntegratePeak">
-                     <property name="maximumSize">
-                      <size>
-                       <width>130</width>
-                       <height>16777215</height>
-                      </size>
-                     </property>
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the scan that are to be merged,&lt;/p&gt;&lt;p&gt;Then it will jump to tab 'Peak Integrate' to integrate peaks&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                     <property name="text">
-                      <string>Integrate</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <spacer name="verticalSpacer_15">
-                     <property name="orientation">
-                      <enum>Qt::Vertical</enum>
-                     </property>
-                     <property name="sizeHint" stdset="0">
-                      <size>
-                       <width>20</width>
-                       <height>40</height>
-                      </size>
-                     </property>
-                    </spacer>
-                   </item>
-                   <item>
-                    <widget class="QPushButton" name="pushButton_saveMergedResult">
-                     <property name="maximumSize">
-                      <size>
-                       <width>130</width>
-                       <height>16777215</height>
-                      </size>
-                     </property>
-                     <property name="text">
-                      <string>Save</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <spacer name="verticalSpacer_16">
-                     <property name="orientation">
-                      <enum>Qt::Vertical</enum>
-                     </property>
-                     <property name="sizeHint" stdset="0">
-                      <size>
-                       <width>20</width>
-                       <height>40</height>
-                      </size>
-                     </property>
-                    </spacer>
-                   </item>
-                  </layout>
-                 </item>
-                </layout>
-               </item>
-              </layout>
              </widget>
+            </item>
+            <item row="2" column="1">
+             <layout class="QVBoxLayout" name="verticalLayout_13">
+              <item>
+               <widget class="QPushButton" name="pushButton_refreshMerged">
+                <property name="text">
+                 <string>Refresh</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="checkBox_3">
+                <property name="text">
+                 <string>Select All</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_10">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Preferred</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_process4SliceView">
+                <property name="font">
+                 <font>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Merge</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_readyToIntegratePeak">
+                <property name="maximumSize">
+                 <size>
+                  <width>130</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the scan that are to be merged,&lt;/p&gt;&lt;p&gt;Then it will jump to tab 'Peak Integrate' to integrate peaks&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Integrate</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_saveMergedResult">
+                <property name="maximumSize">
+                 <size>
+                  <width>130</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Save</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_plotMergedScans">
+                <property name="text">
+                 <string>Plot</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_13">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Expanding</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_4">
+                <property name="text">
+                 <string>Delete</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </widget>
@@ -2351,151 +2106,22 @@ p, li { white-space: pre-wrap; }
            <layout class="QVBoxLayout" name="verticalLayout_11">
             <item>
              <layout class="QGridLayout" name="gridLayout_13">
-              <item row="2" column="10">
-               <widget class="QPushButton" name="pushButton_loadMask">
-                <property name="font">
-                 <font>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Load Mask</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="4">
-               <widget class="QLineEdit" name="lineEdit_bkgdInnerR"/>
-              </item>
-              <item row="2" column="6">
-               <widget class="QLabel" name="label_36">
-                <property name="text">
-                 <string>Percent Background</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="7">
-               <widget class="QLineEdit" name="lineEdit_cylinderBkgdPercent"/>
-              </item>
-              <item row="2" column="8">
-               <widget class="QComboBox" name="comboBox_cylinderProfile">
-                <item>
-                 <property name="text">
-                  <string>Gaussian</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item row="1" column="3">
-               <widget class="QLabel" name="label_37">
-                <property name="text">
-                 <string>Background Inner Radius</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="8">
-               <widget class="QComboBox" name="comboBox_ubSource">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose the name of the tab, in which the UB matrix is used to convert signals to HKL frame.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <item>
-                 <property name="text">
-                  <string>Calculate UB</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Merge Scan</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Refine UB</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item row="2" column="9">
-               <widget class="QComboBox" name="comboBox_cylinderIntOption"/>
-              </item>
-              <item row="0" column="10">
-               <widget class="QPushButton" name="pushButton_integratePeak">
-                <property name="font">
-                 <font>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Integrate Peaks</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="10">
-               <widget class="QPushButton" name="pushButton_findPeaks">
-                <property name="font">
-                 <font>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Find Peaks</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="8">
-               <widget class="QComboBox" name="comboBox_maskWSList"/>
-              </item>
-              <item row="0" column="9">
-               <widget class="QPushButton" name="pushButton_plot3DMerged">
-                <property name="text">
-                 <string>Plot 3D</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="6">
-               <widget class="QCheckBox" name="checkBox_integrateOnEdge">
-                <property name="text">
-                 <string>Integrate on Edge</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="6">
-               <widget class="QLabel" name="label_39">
-                <property name="text">
-                 <string>Cylinder Length</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="3">
-               <widget class="QLabel" name="label_35">
-                <property name="text">
-                 <string>Background Outer Radius</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="7">
-               <widget class="QCheckBox" name="checkBox_adaptQBkgd">
-                <property name="font">
-                 <font>
-                  <pointsize>10</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Adaptive Q Background</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="3">
+              <item row="0" column="2">
                <widget class="QLabel" name="label_34">
                 <property name="text">
                  <string>Peak Radius</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="4">
-               <widget class="QLineEdit" name="lineEdit_peakRadius"/>
+              <item row="0" column="3">
+               <widget class="QLineEdit" name="lineEdit_peakRadius">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
               </item>
               <item row="0" column="1">
                <widget class="QLineEdit" name="lineEdit_scanIntegratePeak">
@@ -2510,19 +2136,6 @@ p, li { white-space: pre-wrap; }
                 </property>
                </widget>
               </item>
-              <item row="1" column="7">
-               <widget class="QLineEdit" name="lineEdit_cylinderLength"/>
-              </item>
-              <item row="2" column="4">
-               <widget class="QLineEdit" name="lineEdit_bkgdOuterR"/>
-              </item>
-              <item row="1" column="9">
-               <widget class="QCheckBox" name="checkBox_cylinder">
-                <property name="text">
-                 <string>Cylinder</string>
-                </property>
-               </widget>
-              </item>
               <item row="0" column="0">
                <widget class="QLabel" name="label_5">
                 <property name="text">
@@ -2530,29 +2143,94 @@ p, li { white-space: pre-wrap; }
                 </property>
                </widget>
               </item>
-              <item row="0" column="5">
+              <item row="0" column="4">
                <widget class="QPushButton" name="pushButton_integratePt">
                 <property name="text">
                  <string>Integrate Pt</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="5">
-               <widget class="QPushButton" name="pushButton_plotScanPt">
+              <item row="0" column="8">
+               <spacer name="horizontalSpacer_9">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="0" column="10">
+               <widget class="QPushButton" name="pushButton_loadMask">
+                <property name="font">
+                 <font>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
                 <property name="text">
-                 <string>Plot</string>
+                 <string>Load Mask</string>
                 </property>
                </widget>
+              </item>
+              <item row="0" column="9">
+               <widget class="QComboBox" name="comboBox_maskWSList">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="6">
+               <widget class="QPushButton" name="pushButton_integratePeak">
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Integrate Peak</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="5">
+               <spacer name="horizontalSpacer_17">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Preferred</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
              </layout>
             </item>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_3">
               <item>
-               <widget class="IntegratePeaksTableWidget" name="tableWidget_peakIntegration"/>
+               <widget class="IntegratePeaksTableWidget" name="tableWidget_peakIntegration">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Table for integrating 1 scan&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
               </item>
               <item>
                <layout class="QVBoxLayout" name="verticalLayout_12">
+                <item>
+                 <widget class="MplGraphicsView" name="graphicsView_integratedPeakView"/>
+                </item>
                 <item>
                  <layout class="QGridLayout" name="gridLayout_15">
                   <item row="0" column="0">
@@ -2565,14 +2243,11 @@ p, li { white-space: pre-wrap; }
                   <item row="0" column="1">
                    <widget class="QPushButton" name="pushButton_3">
                     <property name="text">
-                     <string>PushButton</string>
+                     <string>Normalize By Monitor</string>
                     </property>
                    </widget>
                   </item>
                  </layout>
-                </item>
-                <item>
-                 <widget class="MplGraphicsView" name="graphicsView_integratedPeakView"/>
                 </item>
                </layout>
               </item>
@@ -3013,7 +2688,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1290</width>
+     <width>1234</width>
      <height>25</height>
     </rect>
    </property>
@@ -3022,8 +2697,11 @@ p, li { white-space: pre-wrap; }
      <string>File</string>
     </property>
     <addaction name="separator"/>
-    <addaction name="actionExit"/>
     <addaction name="separator"/>
+    <addaction name="actionOpen_Project"/>
+    <addaction name="actionSave_Project"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -3113,6 +2791,22 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionOpen_Project">
+   <property name="text">
+    <string>Open Project</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSave_Project">
+   <property name="text">
+    <string>Save Project</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
  </widget>

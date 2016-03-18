@@ -124,8 +124,6 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_refine_ub_fft)
 
         # Tab 'Merge'
-        self.connect(self.ui.pushButton_setUBSliceView, QtCore.SIGNAL('clicked()'),
-                     self.do_set_ub_sv)
         self.connect(self.ui.pushButton_addScanSliceView, QtCore.SIGNAL('clicked()'),
                      self.do_add_scans_merge)
         self.connect(self.ui.pushButton_process4SliceView, QtCore.SIGNAL('clicked()'),
@@ -202,7 +200,6 @@ class MainWindow(QtGui.QMainWindow):
         # Initial setup
         self.ui.tabWidget.setCurrentIndex(0)
         self._init_table_widgets()
-        self.ui.radioButton_ubFromTab1.setChecked(True)
         self.ui.lineEdit_numSurveyOutput.setText('50')
         self.ui.checkBox_loadHKLfromFile.setChecked(True)
         self.ui.checkBox_sortDescending.setChecked(False)
@@ -237,7 +234,6 @@ class MainWindow(QtGui.QMainWindow):
         #       thus a 2-step initialization has to been adopted
         self.ui.tableWidget_peaksCalUB.setup()
         self.ui.tableWidget_ubMatrix.setup()
-        self.ui.tableWidget_ubMergeScan.setup()
         self.ui.tableWidget_surveyTable.setup()
         self.ui.tableWidget_peakIntegration.setup()
         self.ui.tableWidget_mergeScans.setup()
@@ -312,7 +308,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             exp_number, scan_number = ret_obj
 
-        # call myController to get peak center
+        # call myController to get peak center from all pt in scans
         if self._myControl.has_peak_info(exp_number, scan_number) is False:
             # merge scan and find peak
             if not self._myControl.has_merged_data(exp_number, scan_number):
@@ -325,6 +321,8 @@ class MainWindow(QtGui.QMainWindow):
             self._myControl.find_peak(exp_number, scan_number)
         scan_peak_info = self._myControl.get_peak_info(exp_number, scan_number)
         weighted_peak_center = scan_peak_info.get_peak_centre()
+        print '[INFO] Exp %d Scan %d: weighted peak center = %s.' % (exp_number, scan_number,
+                                                                     str(weighted_peak_center))
 
         # get peak radius
         status, peak_radius = gutil.parse_float_editors(self.ui.lineEdit_peakRadius)
@@ -335,30 +333,12 @@ class MainWindow(QtGui.QMainWindow):
             assert peak_radius > 0, 'Peak radius cannot be zero or negative!'
 
         # call myController to integrate on each individual Pt.
-        pt_integral_outcome = dict()
-        pt_number_list = self._myControl.get_pt_numbers(exp_number, scan_number)
-        for pt_number in pt_number_list:
-            return_tuple = self._myControl.integrate_peak(exp_number, scan_number, pt_number,
-                                                          weighted_peak_center, peak_radius)
-            peak_ws_name, intensity, counts = return_tuple
-            pt_integral_outcome[(exp_number, scan_number, pt_number)] = (peak_ws_name,
-                                                                         intensity,
-                                                                         counts)
-        # END-FOR
-
-        # find peak center of each individual Pt. and calculate its distance to
-        # weighted peak center
+        self._myControl.integrate_scan_peaks(exp_number, scan_number, peak_radius,
+                                             peak_centre=weighted_peak_center,
+                                             merge=False)
 
         # plot all the result to the table
-        array_size = len(pt_number_list)
-        vec_x = numpy.ndarray(shape=(array_size,))
-        vec_y = numpy.ndarray(shape=(array_size,))
-        pt_number_list.sort()
-        for index in xrange(array_size):
-            pt_number = pt_number_list[index]
-            intensity = pt_integral_outcome[(exp_number, scan_number, pt_number)][1]
-            vec_x[index] = pt_number
-            vec_y[index] = intensity
+        vec_x, vec_y = self._myControl.get_peaks_integrated_intensities(exp_number, scan_number, None)
 
         self.ui.graphicsView_integratedPeakView.clear_all_lines()
         self.ui.graphicsView_integratedPeakView.add_plot_1d(vec_x, vec_y)
@@ -1084,12 +1064,6 @@ class MainWindow(QtGui.QMainWindow):
         # Call to plot 2D
         self._plot_raw_xml_2d(exp_no, scan_no, pt_no)
 
-        # Information
-        info = '%-10s: %d\n%-10s: %d\n%-10s: %d\n' % ('Exp', exp_no,
-                                                      'Scan', scan_no,
-                                                      'Pt', pt_no)
-        self.ui.plainTextEdit_rawDataInformation.setPlainText(info)
-
         return
 
     def do_plot_prev_pt_raw(self):
@@ -1324,42 +1298,6 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_exp.setStyleSheet('color: red')
 
         self.ui.tabWidget.setCurrentIndex(0)
-
-        return
-
-    def do_set_ub_sv(self):
-        """ Set UB matrix in Slice view
-        :return:
-        """
-        if self.ui.radioButton_ubFromTab1.isChecked():
-            # from tab 'calculate UB'
-            self.ui.tableWidget_ubMergeScan.set_from_matrix(self.ui.tableWidget_ubMatrix.get_matrix())
-        elif self.ui.radioButton_ubFromTab3.isChecked():
-            # from tab 'refine UB'
-            self.ui.tableWidget_ubMergeScan.set_from_matrix(self.ui.tableWidget_refinedUB.get_matrix())
-        elif self.ui.radioButton_ubFromList.isChecked():
-            # set ub matrix manually
-            ub_str = str(self.ui.plainTextEdit_ubInput.toPlainText())
-            status, ret_obj = gutil.parse_float_array(ub_str)
-            if status is False:
-                # unable to parse to float arrays
-                self.pop_one_button_dialog(ret_obj)
-            elif len(ret_obj) != 9:
-                # number of floats is not 9
-                self.pop_one_button_dialog('Requiring 9 floats for UB matrix.  Only %d are given.' % len(ret_obj))
-            else:
-                # in good UB matrix format
-                ub_str = ret_obj
-                option = str(self.ui.comboBox_ubOption.currentText())
-                if option.lower().count('spice') > 0:
-                    # convert from SPICE UB matrix to Mantid one
-                    spice_ub = gutil.convert_str_to_matrix(ub_str, (3, 3))
-                    mantid_ub = r4c.convert_spice_ub_to_mantid(spice_ub)
-                    self.ui.tableWidget_ubMergeScan.set_from_matrix(mantid_ub)
-                else:
-                    self.ui.tableWidget_ubMergeScan.set_from_list(ub_str)
-        else:
-            self.pop_one_button_dialog('None is selected to set UB matrix.')
 
         return
 
@@ -1750,7 +1688,8 @@ class MainWindow(QtGui.QMainWindow):
         save_dict['lineEdit_gamma'] = str(self.ui.lineEdit_gamma.text())
 
         # Merge scan
-        save_dict['plainTextEdit_ubInput'] = str(self.ui.plainTextEdit_ubInput.toPlainText())
+        # FIXME : use self._myUBMatrix instead
+        #         save_dict['plainTextEdit_ubInput'] = str(self.ui.plainTextEdit_ubInput.toPlainText())
         save_dict['lineEdit_listScansSliceView'] = str(self.ui.lineEdit_listScansSliceView.text())
         save_dict['lineEdit_baseMergeMDName'] = str(self.ui.lineEdit_baseMergeMDName.text())
 
@@ -2000,5 +1939,11 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.graphicsView.clear_canvas()
         self.ui.graphicsView.add_plot_2d(raw_det_data, x_min=0, x_max=256, y_min=0, y_max=256,
                                          hold_prev_image=False)
+
+        # Information
+        info = '%-10s: %d\n%-10s: %d\n%-10s: %d\n' % ('Exp', exp_no,
+                                                      'Scan', scan_no,
+                                                      'Pt', pt_no)
+        self.ui.plainTextEdit_rawDataInformation.setPlainText(info)
 
         return
