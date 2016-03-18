@@ -99,22 +99,16 @@ void ColorUpdater::colorScaleChange(double min, double max)
     pqServer *server = pqActiveObjects::instance().activeServer();
     pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
     QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
-    QList<pqPipelineSource *>::Iterator source;
 
     // For all sources
-    for(QList<pqPipelineSource*>::iterator source = sources.begin(); source != sources.end(); ++source)
-    {
-      QList<pqView*> views = (*source)->getViews();
-
+    foreach (pqPipelineSource *source, sources) {
+      QList<pqView *> views = source->getViews();
       // For all views
-      for (QList<pqView*>::iterator view = views.begin(); view != views.end(); ++view)
-      {
-        QList<pqDataRepresentation*> reps =  (*source)->getRepresentations((*view));
-
+      foreach (pqView *view, views) {
+        QList<pqDataRepresentation *> reps = source->getRepresentations(view);
         // For all representations
-        for (QList<pqDataRepresentation*>::iterator rep = reps.begin(); rep != reps.end(); ++rep)
-        {
-          this->updateLookupTable(*rep);
+        foreach (pqDataRepresentation *rep, reps) {
+          this->updateLookupTable(rep);
         }
       }
     }
@@ -174,34 +168,28 @@ void ColorUpdater::logScale(int state)
       pqApplicationCore::instance()->getServerManagerModel();
   QList<pqPipelineSource *> sources =
       smModel->findItems<pqPipelineSource *>(server);
-  QList<pqPipelineSource *>::Iterator source;
 
   // For all sources
-  for (QList<pqPipelineSource *>::iterator source = sources.begin();
-       source != sources.end(); ++source) {
-    QList<pqView *> views = (*source)->getViews();
-
+  foreach (pqPipelineSource *source, sources) {
+    QList<pqView *> views = source->getViews();
     // For all views
-    for (QList<pqView *>::iterator view = views.begin(); view != views.end();
-         ++view) {
-      QList<pqDataRepresentation *> reps =
-          (*source)->getRepresentations((*view));
-
+    foreach (pqView *view, views) {
+      QList<pqDataRepresentation *> reps = source->getRepresentations(view);
       // For all representations
-      for (QList<pqDataRepresentation *>::iterator rep = reps.begin();
-           rep != reps.end(); ++rep) {
+      foreach (pqDataRepresentation *rep, reps) {
         // Set the logarithmic (linear) scale
-        auto lut = (*rep)->getLookupTable();
+        auto lut = rep->getLookupTable();
         if (lut) {
           pqSMAdaptor::setElementProperty(
-              (*rep)->getLookupTable()->getProxy()->GetProperty("UseLogScale"),
+              rep->getLookupTable()->getProxy()->GetProperty("UseLogScale"),
               this->m_logScaleState);
-          if (m_logScaleState)
+          if (m_logScaleState) {
             vtkSMTransferFunctionProxy::MapControlPointsToLogSpace(
-                (*rep)->getLookupTable()->getProxy());
-          else
+                rep->getLookupTable()->getProxy());
+          } else {
             vtkSMTransferFunctionProxy::MapControlPointsToLinearSpace(
-                (*rep)->getLookupTable()->getProxy());
+                rep->getLookupTable()->getProxy());
+          }
         }
       }
     }

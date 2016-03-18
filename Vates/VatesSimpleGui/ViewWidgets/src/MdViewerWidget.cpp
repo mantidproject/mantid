@@ -1341,7 +1341,7 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
 
   pqPipelineSource *src = this->currentView->hasWorkspace(wsName.c_str());
   if (NULL != src) {
-    unsigned int numSources = this->currentView->getNumSources();
+    long long numSources = this->currentView->getNumSources();
     if (numSources > 1) {
       pqObjectBuilder *builder =
           pqApplicationCore::instance()->getObjectBuilder();
@@ -1369,9 +1369,8 @@ void MdViewerWidget::setDestroyedListener() {
       smModel->findItems<pqPipelineSource *>(server);
 
   // Attach the destroyd signal of all sources to the viewbase.
-  for (QList<pqPipelineSource *>::iterator source = sources.begin();
-       source != sources.end(); ++source) {
-    QObject::connect((*source), SIGNAL(destroyed()), this->currentView,
+  foreach (pqPipelineSource *source, sources) {
+    QObject::connect(source, SIGNAL(destroyed()), this->currentView,
                      SLOT(onSourceDestroyed()), Qt::UniqueConnection);
   }
 }
