@@ -50,20 +50,43 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         alg.execute()
         self.assertTrue(alg.isExecuted())
 
+        # Test Corrections Workspaces
         corrections_wsg = alg.getProperty("CorrectionWorkspaces").value
         self._validate_group_structure(corrections_wsg, 3)
-        # Validate peak height
-        # Total scattering
-        self._validate_matrix_peak_height(corrections_wsg.getItem(1), 0.0839943)
+        corrections_gamma_background = [-1.87834804e-09, 4.22729680e-07, 8.27670912e-10]
+        corrections_total_scattering = [9.643118112e-06, 0.083994253007, 1.33971722e-14]
+        corrections_multiple_scatter = [6.090438846e-06, 8.64757253e-05, 1.04961868e-17]
+        corrections_expected_values = [corrections_gamma_background,
+                                       corrections_total_scattering,
+                                       corrections_multiple_scatter]
+        for i in range(corrections_wsg.getNumberOfEntries()):
+            self._validate_matrix_workspace_values(corrections_wsg.getItem(i),
+                                                   corrections_expected_values[i])
 
+        # Test Corrected Workspaces
         corrected_wsg = alg.getProperty("CorrectedWorkspaces").value
         self._validate_group_structure(corrected_wsg, 3)
+        corrected_gamma_background = [0.02798220, 0.46638088, 0.0063585]
+        corrected_total_scattering = [0.02797256, 0.46593182, 0.0063585]
+        corrected_multiple_scatter = [0.02797611, 0.46635277, 0.0063585]
+        corrected_expected_values = [corrected_gamma_background,
+                                     corrected_total_scattering,
+                                     corrected_multiple_scatter]
+        for i in range(corrected_wsg.getNumberOfEntries()):
+            self._validate_matrix_workspace_values(corrected_wsg.getItem(i),
+                                                   corrected_expected_values[i])
 
+        # Test OutputWorkspace
         output_ws = alg.getProperty("OutputWorkspace").value
         self._validate_matrix_structure(output_ws, 1, self._input_bins)
+        output_expected_values = [0.02797611 ,0.46635315 ,0.00635850]
+        self._validate_matrix_workspace_values(output_ws, output_expected_values)
 
+        # Test Linear fit Result Workspace
         linear_params = alg.getProperty("LinearFitResult").value
         self._validate_table_workspace(linear_params, 7, 3)
+        expected_values = [4.17063e-05, 0.0, 1.0, 2.026619013, 0.0, 1.0, 2.02661901]
+        self._validate_table_values_top_to_bottom(linear_params, expected_values)
 
 
     def test_gamma_and_ms_correct_workspace_index_two(self):
@@ -114,7 +137,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         # Test Linear fit Result Workspace
         linear_params = alg.getProperty("LinearFitResult").value
         self._validate_table_workspace(linear_params, 7, 3)
-        expected_values = [0.0001183, 0.0, 1.0, 2.4028667, 0.0, 1.0]
+        expected_values = [0.0001183, 0.0, 1.0, 2.4028667, 0.0, 1.0, 10.5412]
         self._validate_table_values_top_to_bottom(linear_params, expected_values)
 
 
