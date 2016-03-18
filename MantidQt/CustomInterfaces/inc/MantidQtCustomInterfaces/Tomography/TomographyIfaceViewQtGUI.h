@@ -135,7 +135,7 @@ public:
     return m_processingJobsIDs;
   }
 
-  TomoSystemSettings systemSettings() const override { return m_systeSettings; }
+  TomoSystemSettings systemSettings() const override;
 
   /// Get the current reconstruction tools settings set by the user
   TomoReconToolsUserSettings reconToolsSettings() const override {
@@ -221,6 +221,9 @@ private slots:
   void browseEnergyInputClicked();
   void browseEnergyOutputClicked();
 
+  void systemSettingsEdited();
+  void systemSettingsNumericEdited(int idx);
+
   // system / advanced settings
   void resetRemoteSetup();
 
@@ -273,6 +276,8 @@ private:
   void processPathBrowseClick(QLineEdit *le, std::string &data);
 
   void updateFlatsDarksFromSamplePath(const std::string &path);
+
+  TomoSystemSettings grabSystemSettingsFromUser() const;
 
   TomoReconFiltersSettings grabPrePostProcSettings() const;
 
@@ -407,7 +412,7 @@ private:
 
   /// The not-so-small set of paths, path compnents and related parameters for
   /// the local and remote machines
-  TomoSystemSettings m_systeSettings;
+  TomoSystemSettings m_systemSettings;
 
   /// Settings for the third party (tomographic reconstruction) tools
   TomoReconToolsUserSettings m_toolsSettings;

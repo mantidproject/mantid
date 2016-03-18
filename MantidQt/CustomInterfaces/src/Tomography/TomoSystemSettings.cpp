@@ -16,7 +16,7 @@ const std::string TomoSystemSettings::g_defOutputPathCompReconst = "processed";
  * Default initialization which should be enough in most cases.
  */
 TomoSystemSettings::TomoSystemSettings()
-    : local(), remote(),
+    : m_local(), m_remote(),
       m_pathComponents({"data", "RB number", "experiment name", "input type"}),
       m_samplesDirPrefix(g_defSamplesDirPrefix),
       m_flatsDirPrefix(g_defFlatsDirPrefix),

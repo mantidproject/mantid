@@ -770,8 +770,8 @@ std::string TomographyIfaceModel::filtersCfgToCmdOpts(
   // Split in components like: /work/imat + / + data + / + RB00XYZTUV + / +
   // sampleA + / + processed
   std::string m_sampleName = "sampleA";
-  const std::string outBase = m_systemSettings.remote.m_basePathTomoData + "/" +
-                              m_systemSettings.m_pathComponents[0] + "/" +
+  const std::string outBase = m_systemSettings.m_remote.m_basePathTomoData +
+                              "/" + m_systemSettings.m_pathComponents[0] + "/" +
                               m_experimentRef + "/" + m_sampleName + "/" +
                               m_systemSettings.m_outputPathCompReconst;
 

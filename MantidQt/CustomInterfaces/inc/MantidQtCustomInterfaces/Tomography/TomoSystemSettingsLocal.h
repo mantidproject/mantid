@@ -37,9 +37,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 struct MANTIDQT_CUSTOMINTERFACES_DLL TomoSystemSettingsLocal {
   std::string m_basePathTomoData;
   std::string m_remoteDriveOrMountPoint;
+
   std::string m_reconScriptsPath;
 
-  int m_maxProcesses;
+  int m_processes;
   int m_cores;
 
   static const std::string g_defBasePathTomoData;

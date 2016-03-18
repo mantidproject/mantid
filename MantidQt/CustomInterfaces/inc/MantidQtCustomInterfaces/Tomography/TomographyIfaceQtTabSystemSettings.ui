@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>836</width>
-    <height>579</height>
+    <width>738</width>
+    <height>571</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_7">
-   <item row="1" column="0">
+  <layout class="QGridLayout" name="gridLayout_9">
+   <item row="0" column="0">
     <widget class="QScrollArea" name="scrollArea">
      <property name="lineWidth">
       <number>0</number>
@@ -26,16 +26,22 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>0</y>
-        <width>798</width>
-        <height>680</height>
+        <y>-97</y>
+        <width>700</width>
+        <height>646</height>
        </rect>
       </property>
-      <layout class="QGridLayout" name="gridLayout_6">
+      <layout class="QGridLayout" name="gridLayout_8">
        <item row="0" column="0">
-        <widget class="QGroupBox" name="groupBox_9">
+        <widget class="QGroupBox" name="groupBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>1</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
-          <string>File system</string>
+          <string>File system and paths of the tomography system:</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -43,211 +49,218 @@
          <property name="checked">
           <bool>false</bool>
          </property>
-         <layout class="QGridLayout" name="gridLayout_2">
+         <layout class="QGridLayout" name="gridLayout_7">
           <item row="0" column="0">
-           <widget class="QGroupBox" name="groupBox">
+           <widget class="QGroupBox" name="groupBox_2">
             <property name="title">
-             <string>Path components of the tomography data:</string>
+             <string>Path components of the inputs and outputs:</string>
             </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-            <layout class="QGridLayout" name="gridLayout">
+            <layout class="QGridLayout" name="gridLayout_5">
              <item row="0" column="0">
-              <widget class="QGroupBox" name="groupBox_2">
-               <property name="title">
-                <string>Path components of the inputs:</string>
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>1st level:</string>
                </property>
-               <layout class="QFormLayout" name="formLayout_5">
-                <item row="0" column="0">
-                 <widget class="QLabel" name="label_4">
-                  <property name="text">
-                   <string>1st level:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QLineEdit" name="lineEdit_processed_subpath_2">
-                  <property name="text">
-                   <string>data</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QLabel" name="label_5">
-                  <property name="text">
-                   <string>2nd level:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QComboBox" name="comboBox">
-                  <item>
-                   <property name="text">
-                    <string>Experiment Reference (RB number)</string>
-                   </property>
-                  </item>
-                 </widget>
-                </item>
-                <item row="2" column="0">
-                 <widget class="QLabel" name="label_6">
-                  <property name="text">
-                   <string>3rd level:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="1">
-                 <widget class="QComboBox" name="comboBox_2">
-                  <item>
-                   <property name="text">
-                    <string>Sample/experiment name (free form)</string>
-                   </property>
-                  </item>
-                 </widget>
-                </item>
-                <item row="3" column="0">
-                 <widget class="QLabel" name="label_7">
-                  <property name="text">
-                   <string>4th level:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="4" column="0" colspan="2">
-                 <layout class="QHBoxLayout" name="horizontalLayout_3">
-                  <item>
-                   <widget class="QGroupBox" name="groupBox_7">
-                    <property name="title">
-                     <string>Path components of the inputs:</string>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="lineEdit_path_comp_1st">
+               <property name="text">
+                <string>data</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>2nd level:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QComboBox" name="comboBox_path_comp_2nd">
+               <item>
+                <property name="text">
+                 <string>Experiment Reference (RB number)</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>3rd level:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QComboBox" name="comboBox_path_comp_3rd">
+               <item>
+                <property name="text">
+                 <string>Sample/experiment name (free form)</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_7">
+               <property name="text">
+                <string>4th level:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0" colspan="2">
+              <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <item>
+                <widget class="QGroupBox" name="groupBox_7">
+                 <property name="title">
+                  <string>Path components (prefixes) of the inputs:</string>
+                 </property>
+                 <layout class="QGridLayout" name="gridLayout_4">
+                  <item row="2" column="1">
+                   <widget class="QLineEdit" name="lineEdit_path_comp_input_darks">
+                    <property name="text">
+                     <string>dark</string>
                     </property>
-                    <widget class="QLineEdit" name="lineEdit_processed_subpath_6">
-                     <property name="geometry">
-                      <rect>
-                       <x>116</x>
-                       <y>77</y>
-                       <width>110</width>
-                       <height>20</height>
-                      </rect>
-                     </property>
-                     <property name="text">
-                      <string>dark</string>
-                     </property>
-                    </widget>
-                    <widget class="QLineEdit" name="lineEdit_processed_subpath_5">
-                     <property name="geometry">
-                      <rect>
-                       <x>116</x>
-                       <y>51</y>
-                       <width>110</width>
-                       <height>20</height>
-                      </rect>
-                     </property>
-                     <property name="text">
-                      <string>flat</string>
-                     </property>
-                    </widget>
-                    <widget class="QLabel" name="label_11">
-                     <property name="geometry">
-                      <rect>
-                       <x>11</x>
-                       <y>77</y>
-                       <width>82</width>
-                       <height>16</height>
-                      </rect>
-                     </property>
-                     <property name="text">
-                      <string>Dark images:</string>
-                     </property>
-                    </widget>
-                    <widget class="QLabel" name="label_10">
-                     <property name="geometry">
-                      <rect>
-                       <x>11</x>
-                       <y>51</y>
-                       <width>76</width>
-                       <height>16</height>
-                      </rect>
-                     </property>
-                     <property name="text">
-                      <string>Flat images:</string>
-                     </property>
-                    </widget>
-                    <widget class="QLineEdit" name="lineEdit_processed_subpath_4">
-                     <property name="geometry">
-                      <rect>
-                       <x>116</x>
-                       <y>25</y>
-                       <width>110</width>
-                       <height>20</height>
-                      </rect>
-                     </property>
-                     <property name="text">
-                      <string>data</string>
-                     </property>
-                    </widget>
-                    <widget class="QLabel" name="label_9">
-                     <property name="geometry">
-                      <rect>
-                       <x>11</x>
-                       <y>25</y>
-                       <width>99</width>
-                       <height>16</height>
-                      </rect>
-                     </property>
-                     <property name="text">
-                      <string>Sample images:</string>
-                     </property>
-                    </widget>
                    </widget>
                   </item>
-                  <item>
-                   <widget class="QGroupBox" name="groupBox_6">
-                    <property name="title">
-                     <string>Path components of the outputs:</string>
+                  <item row="1" column="1">
+                   <widget class="QLineEdit" name="lineEdit_path_comp_input_flats">
+                    <property name="text">
+                     <string>flat</string>
                     </property>
-                    <layout class="QFormLayout" name="formLayout_3">
-                     <item row="0" column="0">
-                      <widget class="QLabel" name="label_8">
-                       <property name="text">
-                        <string>Pre-processed data::</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="0" column="1">
-                      <widget class="QLineEdit" name="lineEdit_processed_subpath">
-                       <property name="text">
-                        <string>pre_processed</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="1" column="0">
-                      <widget class="QLabel" name="label_2">
-                       <property name="text">
-                        <string>Reconstructed data::</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="1" column="1">
-                      <widget class="QLineEdit" name="lineEdit_processed_subpath_3">
-                       <property name="text">
-                        <string>processed</string>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
                    </widget>
+                  </item>
+                  <item row="2" column="0">
+                   <widget class="QLabel" name="label_11">
+                    <property name="text">
+                     <string>Dark images:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label_9">
+                    <property name="text">
+                     <string>Sample images</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="0">
+                   <widget class="QLabel" name="label_10">
+                    <property name="text">
+                     <string>Flat images:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QLineEdit" name="lineEdit_path_comp_input_samples">
+                    <property name="text">
+                     <string>data</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="2">
+                   <spacer name="horizontalSpacer_6">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
                   </item>
                  </layout>
-                </item>
-               </layout>
-              </widget>
+                </widget>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayout">
+                 <item>
+                  <widget class="QGroupBox" name="groupBox_6">
+                   <property name="title">
+                    <string>Path components of the outputs:</string>
+                   </property>
+                   <layout class="QGridLayout" name="gridLayout_3">
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="label_8">
+                      <property name="text">
+                       <string>Pre-processed data::</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="1">
+                     <widget class="QLineEdit" name="lineEdit_path_comp_out_preprocessed">
+                      <property name="text">
+                       <string>pre_processed</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="2">
+                     <spacer name="horizontalSpacer_4">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QLabel" name="label_2">
+                      <property name="text">
+                       <string>Reconstructed data::</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="1">
+                     <widget class="QLineEdit" name="lineEdit_path_comp_out_processed">
+                      <property name="text">
+                       <string>processed</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="2">
+                     <spacer name="horizontalSpacer_5">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="verticalSpacer">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>18</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </item>
+              </layout>
              </item>
             </layout>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="1" column="0">
            <widget class="QGroupBox" name="groupBox_3">
             <property name="title">
              <string>Paths on the remote (SCARF) file system</string>
@@ -258,7 +271,7 @@
             <property name="checked">
              <bool>false</bool>
             </property>
-            <layout class="QGridLayout" name="gridLayout_3">
+            <layout class="QGridLayout" name="gridLayout_2">
              <item row="0" column="0">
               <layout class="QHBoxLayout" name="horizontalLayout_10">
                <item>
@@ -269,7 +282,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="lineEdit_SCARF_path">
+                <widget class="QLineEdit" name="lineEdit_remote_base_path_data">
                  <property name="minimumSize">
                   <size>
                    <width>0</width>
@@ -306,7 +319,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="lineEdit_scripts_base_dir_remote">
+                <widget class="QLineEdit" name="lineEdit_remote_scripts_base_dir">
                  <property name="text">
                   <string>/work/imat/phase_commissioning</string>
                  </property>
@@ -324,7 +337,7 @@
             </layout>
            </widget>
           </item>
-          <item row="3" column="0">
+          <item row="2" column="0">
            <widget class="QGroupBox" name="groupBox_8">
             <property name="title">
              <string>Root paths on the local system</string>
@@ -335,7 +348,7 @@
             <property name="checked">
              <bool>false</bool>
             </property>
-            <layout class="QGridLayout" name="gridLayout_4">
+            <layout class="QGridLayout" name="gridLayout">
              <item row="0" column="0">
               <layout class="QHBoxLayout" name="horizontalLayout_11">
                <item>
@@ -346,7 +359,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="lineEdit_on_local_data_drive_path">
+                <widget class="QLineEdit" name="lineEdit_on_local_data_drive_or_path">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                    <horstretch>1</horstretch>
@@ -365,7 +378,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="pushButton_on_local_in_out_dir">
+                <widget class="QPushButton" name="pushButton_on_local_data_drive_or_path">
                  <property name="text">
                   <string>Browse</string>
                  </property>
@@ -396,7 +409,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="lineEdit_on_local_remote_drive_path">
+                <widget class="QLineEdit" name="lineEdit_on_local_remote_data_drive_path">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                    <horstretch>1</horstretch>
@@ -404,14 +417,14 @@
                   </sizepolicy>
                  </property>
                  <property name="text">
-                  <string>/work/imat/phase_commissioning</string>
+                  <string>S:</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="pushButton_reset_scripts_base_dir_local">
+                <widget class="QPushButton" name="pushButton_on_local_remote_data_drive_path">
                  <property name="text">
-                  <string>Reset</string>
+                  <string>Browse</string>
                  </property>
                 </widget>
                </item>
@@ -447,114 +460,7 @@
          <property name="checked">
           <bool>false</bool>
          </property>
-         <layout class="QGridLayout" name="gridLayout_5">
-          <item row="0" column="2">
-           <layout class="QHBoxLayout" name="horizontalLayout"/>
-          </item>
-          <item row="0" column="1">
-           <widget class="QGroupBox" name="groupBox_4">
-            <property name="title">
-             <string>Local runs:</string>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-            <layout class="QFormLayout" name="formLayout_2">
-             <property name="fieldGrowthPolicy">
-              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-             </property>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_3">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Max. processes:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QSpinBox" name="spinBox">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="minimum">
-                <number>1</number>
-               </property>
-               <property name="maximum">
-                <number>10</number>
-               </property>
-               <property name="value">
-                <number>4</number>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_25">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Number of cores:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QSpinBox" name="spinBox_localNumCores">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>10</height>
-                </size>
-               </property>
-               <property name="maximum">
-                <number>99</number>
-               </property>
-               <property name="value">
-                <number>4</number>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0" colspan="2">
-              <layout class="QHBoxLayout" name="horizontalLayout_5">
-               <item>
-                <widget class="QLabel" name="label_recon_scripts">
-                 <property name="text">
-                  <string>Reconstruction scripts:</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="lineEdit_local_recon_scripts">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                   <horstretch>1</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text">
-                  <string>C:/MantidInstall/scripts/</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="pushButton_recon_scripts_dir">
-                 <property name="text">
-                  <string>Browse</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </widget>
-          </item>
+         <layout class="QGridLayout" name="gridLayout_6">
           <item row="0" column="0">
            <widget class="QGroupBox" name="groupBox_5">
             <property name="title">
@@ -566,22 +472,22 @@
             <property name="checked">
              <bool>false</bool>
             </property>
-            <layout class="QFormLayout" name="formLayout">
-             <property name="fieldGrowthPolicy">
-              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-             </property>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_24">
-               <property name="enabled">
-                <bool>false</bool>
+            <layout class="QGridLayout" name="gridLayout_12">
+             <item row="4" column="0">
+              <spacer name="verticalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
                </property>
-               <property name="text">
-                <string>Number of cores:</string>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>19</height>
+                </size>
                </property>
-              </widget>
+              </spacer>
              </item>
-             <item row="0" column="1">
-              <widget class="QSpinBox" name="spinBox_SCARFnumCores">
+             <item row="2" column="1">
+              <widget class="QSpinBox" name="spinBox_remote_cores">
                <property name="enabled">
                 <bool>false</bool>
                </property>
@@ -602,7 +508,17 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_24">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Number of cores:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
               <widget class="QLabel" name="label_23">
                <property name="enabled">
                 <bool>false</bool>
@@ -612,8 +528,8 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
-              <widget class="QSpinBox" name="spinBox_SCARFnumNodes">
+             <item row="0" column="1">
+              <widget class="QSpinBox" name="spinBox_remote_nodes">
                <property name="enabled">
                 <bool>false</bool>
                </property>
@@ -637,6 +553,124 @@
             </layout>
            </widget>
           </item>
+          <item row="0" column="1">
+           <widget class="QGroupBox" name="groupBox_4">
+            <property name="title">
+             <string>Local runs:</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_11">
+             <item row="0" column="0">
+              <layout class="QGridLayout" name="gridLayout_10">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_3">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="text">
+                  <string>Max. processes:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QSpinBox" name="spinBox_local_processes">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="minimum">
+                  <number>1</number>
+                 </property>
+                 <property name="maximum">
+                  <number>10</number>
+                 </property>
+                 <property name="value">
+                  <number>4</number>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_25">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="text">
+                  <string>Number of cores:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QSpinBox" name="spinBox_local_cores">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>10</height>
+                  </size>
+                 </property>
+                 <property name="maximum">
+                  <number>99</number>
+                 </property>
+                 <property name="value">
+                  <number>4</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="0" column="1">
+              <spacer name="horizontalSpacer_7">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>259</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="1" column="0" colspan="2">
+              <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <item>
+                <widget class="QLabel" name="label_recon_scripts">
+                 <property name="text">
+                  <string>Reconstruction scripts:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="lineEdit_local_recon_scripts">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>2</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>C:/MantidInstall/scripts/</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_recon_scripts_dir">
+                 <property name="text">
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -647,32 +681,30 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>groupBox_9</tabstop>
   <tabstop>groupBox</tabstop>
-  <tabstop>lineEdit_processed_subpath_2</tabstop>
-  <tabstop>comboBox</tabstop>
-  <tabstop>comboBox_2</tabstop>
-  <tabstop>lineEdit_processed_subpath_4</tabstop>
-  <tabstop>lineEdit_processed_subpath_5</tabstop>
-  <tabstop>lineEdit_processed_subpath_6</tabstop>
-  <tabstop>lineEdit_processed_subpath</tabstop>
-  <tabstop>lineEdit_processed_subpath_3</tabstop>
+  <tabstop>lineEdit_path_comp_1st</tabstop>
+  <tabstop>comboBox_path_comp_2nd</tabstop>
+  <tabstop>comboBox_path_comp_3rd</tabstop>
+  <tabstop>lineEdit_path_comp_input_samples</tabstop>
+  <tabstop>lineEdit_path_comp_input_flats</tabstop>
+  <tabstop>lineEdit_path_comp_input_darks</tabstop>
+  <tabstop>lineEdit_path_comp_out_preprocessed</tabstop>
+  <tabstop>lineEdit_path_comp_out_processed</tabstop>
   <tabstop>groupBox_3</tabstop>
-  <tabstop>lineEdit_SCARF_path</tabstop>
-  <tabstop>lineEdit_scripts_base_dir_remote</tabstop>
+  <tabstop>lineEdit_remote_base_path_data</tabstop>
+  <tabstop>lineEdit_remote_scripts_base_dir</tabstop>
   <tabstop>pushButton_reset_scripts_base_dir_remote</tabstop>
   <tabstop>groupBox_8</tabstop>
-  <tabstop>lineEdit_on_local_data_drive_path</tabstop>
-  <tabstop>pushButton_on_local_in_out_dir</tabstop>
-  <tabstop>lineEdit_on_local_remote_drive_path</tabstop>
-  <tabstop>pushButton_reset_scripts_base_dir_local</tabstop>
+  <tabstop>lineEdit_on_local_data_drive_or_path</tabstop>
+  <tabstop>pushButton_on_local_data_drive_or_path</tabstop>
+  <tabstop>lineEdit_on_local_remote_data_drive_path</tabstop>
+  <tabstop>pushButton_on_local_remote_data_drive_path</tabstop>
   <tabstop>groupBox_10</tabstop>
   <tabstop>groupBox_5</tabstop>
-  <tabstop>spinBox_SCARFnumCores</tabstop>
-  <tabstop>spinBox_SCARFnumNodes</tabstop>
+  <tabstop>spinBox_remote_cores</tabstop>
   <tabstop>groupBox_4</tabstop>
-  <tabstop>spinBox</tabstop>
-  <tabstop>spinBox_localNumCores</tabstop>
+  <tabstop>spinBox_local_processes</tabstop>
+  <tabstop>spinBox_local_cores</tabstop>
   <tabstop>lineEdit_local_recon_scripts</tabstop>
   <tabstop>pushButton_recon_scripts_dir</tabstop>
   <tabstop>scrollArea</tabstop>

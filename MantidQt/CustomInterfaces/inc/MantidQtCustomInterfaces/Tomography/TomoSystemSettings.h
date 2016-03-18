@@ -42,8 +42,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 struct MANTIDQT_CUSTOMINTERFACES_DLL TomoSystemSettings {
   // TODO use dictionary(es) for the string settings when they settle down
-  TomoSystemSettingsLocal local;
-  TomoSystemSettingsRemote remote;
+  TomoSystemSettingsLocal m_local;
+  TomoSystemSettingsRemote m_remote;
 
   std::vector<std::string> m_pathComponents;
 

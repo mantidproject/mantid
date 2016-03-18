@@ -32,9 +32,7 @@ const std::string TomoSystemSettingsLocal::g_defReconScriptsPath =
 TomoSystemSettingsLocal::TomoSystemSettingsLocal()
     : m_basePathTomoData(g_defBasePathTomoData),
       m_remoteDriveOrMountPoint(g_defRemoteDriveOrMountPoint),
-      m_reconScriptsPath(g_defReconScriptsPath),
-      m_maxProcesses(4),
-      m_cores(4) {}
+      m_reconScriptsPath(g_defReconScriptsPath), m_processes(4), m_cores(4) {}
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -499,7 +499,7 @@ public:
     const std::string msg =
         "Local system settings default values should be as expected";
 
-    const std::string path = sets.local.m_basePathTomoData;
+    const std::string path = sets.m_local.m_basePathTomoData;
     TSM_ASSERT_LESS_THAN_EQUALS(
         msg + " (base path for tomography data too short)", 5, path.length());
 
@@ -514,10 +514,10 @@ public:
         "Remote system settings default values should be as expected";
 
     TSM_ASSERT_EQUALS(msg + " (base path for tomography data)",
-                      sets.remote.m_basePathTomoData, "/work/imat");
+                      sets.m_remote.m_basePathTomoData, "/work/imat");
 
     TSM_ASSERT_EQUALS(msg + " (base path for reconstruction scripts)",
-                      sets.remote.m_basePathReconScripts,
+                      sets.m_remote.m_basePathReconScripts,
                       "/work/imat/phase_commissioning");
   }
 

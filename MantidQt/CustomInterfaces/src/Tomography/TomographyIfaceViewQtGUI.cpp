@@ -10,6 +10,7 @@
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigCustom.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -172,9 +173,10 @@ DECLARE_SUBWINDOW(TomographyIfaceViewQtGUI)
 TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), ITomographyIfaceView(), m_tabROIW(NULL),
       m_processingJobsIDs(), m_currentComputeRes(""), m_currentReconTool(""),
-      m_imgPath(""), m_logMsgs(), m_toolsSettings(), m_settings(),
-      m_settingsGroup("CustomInterfaces/Tomography"), m_availPlugins(),
-      m_currPlugins(), m_currentParamPath(), m_presenter(NULL) {
+      m_imgPath(""), m_logMsgs(), m_systemSettings(), m_toolsSettings(),
+      m_settings(), m_settingsGroup("CustomInterfaces/Tomography"),
+      m_availPlugins(), m_currPlugins(), m_currentParamPath(),
+      m_presenter(NULL) {
 
   // defaults from the tools
   m_tomopyMethod = ToolConfigTomoPy::methods().front().first;
@@ -448,31 +450,73 @@ void TomographyIfaceViewQtGUI::doSetupSectionEnergy() {
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionSystemSettings() {
-  m_uiTabSystemSettings.lineEdit_processed_subpath->setText(
+  m_uiTabSystemSettings.lineEdit_path_comp_out_processed->setText(
       QString::fromStdString(g_defProcessedSubpath));
 
   // System/advanced/hidden settings:
-  m_uiTabSystemSettings.lineEdit_SCARF_path->setText(
+  m_uiTabSystemSettings.lineEdit_remote_base_path_data->setText(
       QString::fromStdString(m_pathsConfig.pathBase()));
-  m_uiTabSystemSettings.lineEdit_scripts_base_dir_remote->setText(
+  m_uiTabSystemSettings.lineEdit_remote_scripts_base_dir->setText(
       QString::fromStdString(m_pathsConfig.pathScriptsTools()));
+
+  // All possible modifications to system settings
+  connect(m_uiTabSystemSettings.lineEdit_path_comp_1st,
+          SIGNAL(editingFinished()), this, SLOT(systemSettingsEdited()));
+  connect(m_uiTabSystemSettings.lineEdit_path_comp_input_samples,
+          SIGNAL(editingFinished()), this, SLOT(systemSettingsEdited()));
+  connect(m_uiTabSystemSettings.lineEdit_path_comp_input_flats,
+          SIGNAL(editingFinished()), this, SLOT(systemSettingsEdited()));
+  connect(m_uiTabSystemSettings.lineEdit_path_comp_input_darks,
+          SIGNAL(editingFinished()), this, SLOT(systemSettingsEdited()));
+
+  connect(m_uiTabSystemSettings.lineEdit_path_comp_out_processed,
+          SIGNAL(editingFinished()), this, SLOT(systemSettingsEdited()));
+  connect(m_uiTabSystemSettings.lineEdit_path_comp_out_preprocessed,
+          SIGNAL(editingFinished()), this, SLOT(systemSettingsEdited()));
+
+  connect(m_uiTabSystemSettings.lineEdit_remote_base_path_data,
+          SIGNAL(editingFinished()), this, SLOT(systemSettingsEdited()));
+  connect(m_uiTabSystemSettings.lineEdit_remote_scripts_base_dir,
+          SIGNAL(editingFinished()), this, SLOT(systemSettingsEdited()));
+
+  connect(m_uiTabSystemSettings.lineEdit_on_local_data_drive_or_path,
+          SIGNAL(editingFinished()), this, SLOT(systemSettingsEdited()));
+  connect(m_uiTabSystemSettings.lineEdit_on_local_remote_data_drive_path,
+          SIGNAL(editingFinished()), this, SLOT(systemSettingsEdited()));
+
+  // 'browse' buttons for local (data) settings:
+  connect(m_uiTabSystemSettings.pushButton_on_local_data_drive_or_path,
+          SIGNAL(released()), this, SLOT(browseLocalInOutDirClicked()));
+  connect(m_uiTabSystemSettings.pushButton_on_local_remote_data_drive_path,
+          SIGNAL(released()), this, SLOT(browseLocalRemoteDriveOrPath()));
 
   // reset setup of the remote
   connect(m_uiTabSystemSettings.pushButton_reset_scripts_base_dir_remote,
           SIGNAL(released()), this, SLOT(resetRemoteSetup()));
 
-  // 'browse' buttons for local conf:
-  connect(m_uiTabSystemSettings.pushButton_on_local_in_out_dir,
-          SIGNAL(released()), this, SLOT(browseLocalInOutDirClicked()));
+  // remote execution settings
+  connect(m_uiTabSystemSettings.spinBox_remote_cores, SIGNAL(valueChanged(int)),
+          this, SLOT(systemSettingsNumericEdited(int)));
+  connect(m_uiTabSystemSettings.spinBox_remote_cores, SIGNAL(valueChanged(int)),
+          this, SLOT(systemSettingsNumericEdited(int)));
+
+  // remote local settings
+  connect(m_uiTabSystemSettings.spinBox_local_processes,
+          SIGNAL(valueChanged(int)), this,
+          SLOT(systemSettingsNumericEdited(int)));
+  connect(m_uiTabSystemSettings.spinBox_local_cores, SIGNAL(valueChanged(int)),
+          this, SLOT(systemSettingsNumericEdited(int)));
+
+  // 'browse' buttons for local (scripts) settings:
   connect(m_uiTabSystemSettings.pushButton_recon_scripts_dir,
           SIGNAL(released()), this, SLOT(browseLocalReconScriptsDirClicked()));
 }
 
 void TomographyIfaceViewQtGUI::resetRemoteSetup() {
-  m_uiTabSystemSettings.lineEdit_scripts_base_dir_remote->setText(
+  m_uiTabSystemSettings.lineEdit_remote_scripts_base_dir->setText(
       QString::fromStdString(g_defRemotePathScripts));
-  m_uiTabSystemSettings.spinBox_SCARFnumNodes->setValue(1);
-  m_uiTabSystemSettings.spinBox_SCARFnumCores->setValue(8);
+  m_uiTabSystemSettings.spinBox_remote_nodes->setValue(1);
+  m_uiTabSystemSettings.spinBox_remote_cores->setValue(8);
 }
 
 void TomographyIfaceViewQtGUI::setComputeResources(
@@ -668,11 +712,21 @@ void TomographyIfaceViewQtGUI::readSettings() {
   m_settings.useKeepAlive =
       qs.value("use-keep-alive", m_settings.useKeepAlive).toInt();
 
+  // User parameters for reconstructions
+  m_setupExperimentRef = qs.value("experiment-reference",
+                                  QString::fromStdString(g_defExperimentRef))
+                             .toString()
+                             .toStdString();
+
   m_uiTabSetup.lineEdit_SCARF_username->setText(
       qs.value("SCARF-remote-username",
                QString::fromStdString(
                    Mantid::Kernel::ConfigService::Instance().getUsername()))
           .toString());
+
+  // TODO: TomoSystemSettings
+  m_uiTabSystemSettings.lineEdit_remote_base_path_data->setText(
+      QString::fromStdString(m_settings.SCARFBasePath));
 
   // Get input paths (sample/dark/flats)
   QByteArray rawInputPaths =
@@ -699,12 +753,6 @@ void TomographyIfaceViewQtGUI::readSettings() {
     // defaults
     setPrePostProcSettings(TomoReconFiltersSettings());
   }
-
-  // User parameters for reconstructions
-  m_setupExperimentRef = qs.value("experiment-reference",
-                                  QString::fromStdString(g_defExperimentRef))
-                             .toString()
-                             .toStdString();
 
   m_localExternalPythonPath =
       qs.value("path-local-external-python",
@@ -743,9 +791,6 @@ void TomographyIfaceViewQtGUI::readSettings() {
   restoreGeometry(qs.value("interface-win-geometry").toByteArray());
 
   qs.endGroup();
-
-  m_uiTabSystemSettings.lineEdit_SCARF_path->setText(
-      QString::fromStdString(m_settings.SCARFBasePath));
 }
 
 #ifndef _MSC_VER
@@ -791,14 +836,19 @@ QDataStream &operator<<(QDataStream &stream, TomoPathsConfig const &cfg) {
 void TomographyIfaceViewQtGUI::saveSettings() const {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
-  QString s = m_uiTabSystemSettings.lineEdit_SCARF_path->text();
-  qs.setValue("SCARF-base-path", s);
   qs.setValue("on-close-ask-for-confirmation",
               m_settings.onCloseAskForConfirmation);
   qs.setValue("use-keep-alive", m_settings.useKeepAlive);
 
+  qs.setValue("experiment-reference",
+              QString::fromStdString(m_setupExperimentRef));
+
   qs.setValue("SCARF-remote-username",
               m_uiTabSetup.lineEdit_SCARF_username->text());
+
+  // TODO: SystemSettings
+  QString s = m_uiTabSystemSettings.lineEdit_remote_base_path_data->text();
+  qs.setValue("SCARF-base-path", s);
 
   // Save input data paths (samples/flats/darks, etc.)
   QByteArray pathsConfig;
@@ -1344,7 +1394,7 @@ void TomographyIfaceViewQtGUI::darksPathEditedByUser() {
 
 void TomographyIfaceViewQtGUI::browseLocalInOutDirClicked() {
   m_setupPathReconOut = checkUserBrowsePath(
-      m_uiTabSystemSettings.lineEdit_on_local_data_drive_path);
+      m_uiTabSystemSettings.lineEdit_on_local_data_drive_or_path);
 }
 
 void TomographyIfaceViewQtGUI::browseLocalReconScriptsDirClicked() {
@@ -1766,6 +1816,72 @@ TomographyIfaceViewQtGUI::checkUserBrowsePath(QLineEdit *le,
   }
 
   return path.toStdString();
+}
+
+TomoSystemSettings TomographyIfaceViewQtGUI::systemSettings() const {
+  return grabSystemSettingsFromUser();
+}
+
+void TomographyIfaceViewQtGUI::systemSettingsEdited() {
+  m_presenter->notify(ITomographyIfacePresenter::SystemSettingsUpdated);
+}
+
+void TomographyIfaceViewQtGUI::systemSettingsNumericEdited(int /* idx */) {
+  m_presenter->notify(ITomographyIfacePresenter::SystemSettingsUpdated);
+}
+
+TomoSystemSettings
+TomographyIfaceViewQtGUI::grabSystemSettingsFromUser() const {
+  TomoSystemSettings setts;
+
+  // paths and related
+  setts.m_pathComponents[0] =
+      m_uiTabSystemSettings.lineEdit_path_comp_1st->text().toStdString();
+  // Not modifyable at the moment: m_uiTabSystemSettings.lineEdit_path_comp_2nd;
+  // Not modifyable at the moment: m_uiTabSystemSettings.lineEdit_path_comp_3rd;
+  setts.m_samplesDirPrefix =
+      m_uiTabSystemSettings.lineEdit_path_comp_input_samples->text()
+          .toStdString();
+  setts.m_flatsDirPrefix =
+      m_uiTabSystemSettings.lineEdit_path_comp_input_flats->text()
+          .toStdString();
+  setts.m_darksDirPrefix =
+      m_uiTabSystemSettings.lineEdit_path_comp_input_darks->text()
+          .toStdString();
+
+  setts.m_outputPathCompPreProcessed =
+      m_uiTabSystemSettings.lineEdit_path_comp_out_preprocessed->text()
+          .toStdString();
+  setts.m_outputPathCompReconst =
+      m_uiTabSystemSettings.lineEdit_path_comp_out_processed->text()
+          .toStdString();
+
+  setts.m_remote.m_basePathTomoData =
+      m_uiTabSystemSettings.lineEdit_remote_base_path_data->text()
+          .toStdString();
+  setts.m_remote.m_basePathReconScripts =
+      m_uiTabSystemSettings.lineEdit_remote_scripts_base_dir->text()
+          .toStdString();
+
+  setts.m_local.m_basePathTomoData =
+      m_uiTabSystemSettings.lineEdit_on_local_data_drive_or_path->text()
+          .toStdString();
+  setts.m_local.m_remoteDriveOrMountPoint =
+      m_uiTabSystemSettings.lineEdit_on_local_remote_data_drive_path->text()
+          .toStdString();
+
+  // scripts and processes
+  setts.m_remote.m_nodes = m_uiTabSystemSettings.spinBox_remote_nodes->value();
+  setts.m_remote.m_cores = m_uiTabSystemSettings.spinBox_remote_cores->value();
+
+  setts.m_local.m_processes =
+      m_uiTabSystemSettings.spinBox_local_processes->value();
+  setts.m_local.m_cores = m_uiTabSystemSettings.spinBox_local_cores->value();
+
+  setts.m_local.m_reconScriptsPath =
+      m_uiTabSystemSettings.lineEdit_local_recon_scripts->text().toStdString();
+
+  return setts;
 }
 
 /**
