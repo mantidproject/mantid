@@ -215,10 +215,8 @@ void TomographyIfacePresenter::processTomoPathsChanged() {
 * Updates the model with the new path. In the process it also tries to
 * guess and find a new path for the flats and darks images from the
 * path to the sample images that the user has given. It would normally
-* look one level up in the directory tree to see if it can find dark*
-* and flat*.
-*
-* @param path path to the sample images
+* look one level up in the directory tree to see if it can find
+* 'dark*' and 'flat*'.
 */
 void TomographyIfacePresenter::processTomoPathsEditedByUser() {
   TomoPathsConfig cfg = m_view->currentPathsConfig();

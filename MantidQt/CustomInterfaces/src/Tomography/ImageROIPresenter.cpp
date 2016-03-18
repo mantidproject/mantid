@@ -115,10 +115,6 @@ void ImageROIPresenter::processBrowseImg() {
  *
  * @param path user provided path to the stack of images
  *
- * @param acceptSimpleLayout be happy with just a single directory
- * with image files in it if we cannot find the standard
- * data/flat/dark subdirectories (and don't show any warning).
- *
  * @return a stack of images built from the path passed, not
  * necessarily correct (check with isValid())
  */

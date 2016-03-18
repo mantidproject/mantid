@@ -1797,16 +1797,64 @@ void TomographyIfaceViewQtGUI::setPrePostProcSettings(
       opts.outputPreprocImages);
 }
 
-void TomographyIfaceViewQtGUI::resetPrePostFilters() {
-  // default constructors with factory defaults
-  TomoReconFiltersSettings def;
-  setPrePostProcSettings(def);
+TomoSystemSettings TomographyIfaceViewQtGUI::systemSettings() const {
+  return grabSystemSettingsFromUser();
 }
 
-void TomographyIfaceViewQtGUI::resetSystemSettings() {
-  // From factory defaults
-  TomoSystemSettings defaults;
-  updateSystemSettings(defaults);
+TomoSystemSettings
+TomographyIfaceViewQtGUI::grabSystemSettingsFromUser() const {
+  TomoSystemSettings setts;
+
+  // paths and related
+  setts.m_pathComponents[0] =
+      m_uiTabSystemSettings.lineEdit_path_comp_1st->text().toStdString();
+  // Not modifyable at the moment:
+  // m_uiTabSystemSettings.lineEdit_path_comp_2nd;
+  // Not modifyable at the moment:
+  // m_uiTabSystemSettings.lineEdit_path_comp_3rd;
+  setts.m_samplesDirPrefix =
+      m_uiTabSystemSettings.lineEdit_path_comp_input_samples->text()
+          .toStdString();
+  setts.m_flatsDirPrefix =
+      m_uiTabSystemSettings.lineEdit_path_comp_input_flats->text()
+          .toStdString();
+  setts.m_darksDirPrefix =
+      m_uiTabSystemSettings.lineEdit_path_comp_input_darks->text()
+          .toStdString();
+
+  setts.m_outputPathCompPreProcessed =
+      m_uiTabSystemSettings.lineEdit_path_comp_out_preprocessed->text()
+          .toStdString();
+  setts.m_outputPathCompReconst =
+      m_uiTabSystemSettings.lineEdit_path_comp_out_processed->text()
+          .toStdString();
+
+  setts.m_remote.m_basePathTomoData =
+      m_uiTabSystemSettings.lineEdit_remote_base_path_data->text()
+          .toStdString();
+  setts.m_remote.m_basePathReconScripts =
+      m_uiTabSystemSettings.lineEdit_remote_scripts_base_dir->text()
+          .toStdString();
+
+  setts.m_local.m_basePathTomoData =
+      m_uiTabSystemSettings.lineEdit_on_local_data_drive_or_path->text()
+          .toStdString();
+  setts.m_local.m_remoteDriveOrMountPoint =
+      m_uiTabSystemSettings.lineEdit_on_local_remote_data_drive_path->text()
+          .toStdString();
+
+  // scripts and processes
+  setts.m_remote.m_nodes = m_uiTabSystemSettings.spinBox_remote_nodes->value();
+  setts.m_remote.m_cores = m_uiTabSystemSettings.spinBox_remote_cores->value();
+
+  setts.m_local.m_processes =
+      m_uiTabSystemSettings.spinBox_local_processes->value();
+  setts.m_local.m_cores = m_uiTabSystemSettings.spinBox_local_cores->value();
+
+  setts.m_local.m_reconScriptsPath =
+      m_uiTabSystemSettings.lineEdit_local_recon_scripts->text().toStdString();
+
+  return setts;
 }
 
 void TomographyIfaceViewQtGUI::sendToOctopusVisClicked() {
@@ -1972,8 +2020,10 @@ TomographyIfaceViewQtGUI::checkUserBrowsePath(QLineEdit *le,
   return path.toStdString();
 }
 
-TomoSystemSettings TomographyIfaceViewQtGUI::systemSettings() const {
-  return grabSystemSettingsFromUser();
+void TomographyIfaceViewQtGUI::resetPrePostFilters() {
+  // default constructors with factory defaults
+  TomoReconFiltersSettings def;
+  setPrePostProcSettings(def);
 }
 
 void TomographyIfaceViewQtGUI::systemSettingsEdited() {
@@ -1984,60 +2034,10 @@ void TomographyIfaceViewQtGUI::systemSettingsNumericEdited() {
   m_presenter->notify(ITomographyIfacePresenter::SystemSettingsUpdated);
 }
 
-TomoSystemSettings
-TomographyIfaceViewQtGUI::grabSystemSettingsFromUser() const {
-  TomoSystemSettings setts;
-
-  // paths and related
-  setts.m_pathComponents[0] =
-      m_uiTabSystemSettings.lineEdit_path_comp_1st->text().toStdString();
-  // Not modifyable at the moment:
-  // m_uiTabSystemSettings.lineEdit_path_comp_2nd;
-  // Not modifyable at the moment:
-  // m_uiTabSystemSettings.lineEdit_path_comp_3rd;
-  setts.m_samplesDirPrefix =
-      m_uiTabSystemSettings.lineEdit_path_comp_input_samples->text()
-          .toStdString();
-  setts.m_flatsDirPrefix =
-      m_uiTabSystemSettings.lineEdit_path_comp_input_flats->text()
-          .toStdString();
-  setts.m_darksDirPrefix =
-      m_uiTabSystemSettings.lineEdit_path_comp_input_darks->text()
-          .toStdString();
-
-  setts.m_outputPathCompPreProcessed =
-      m_uiTabSystemSettings.lineEdit_path_comp_out_preprocessed->text()
-          .toStdString();
-  setts.m_outputPathCompReconst =
-      m_uiTabSystemSettings.lineEdit_path_comp_out_processed->text()
-          .toStdString();
-
-  setts.m_remote.m_basePathTomoData =
-      m_uiTabSystemSettings.lineEdit_remote_base_path_data->text()
-          .toStdString();
-  setts.m_remote.m_basePathReconScripts =
-      m_uiTabSystemSettings.lineEdit_remote_scripts_base_dir->text()
-          .toStdString();
-
-  setts.m_local.m_basePathTomoData =
-      m_uiTabSystemSettings.lineEdit_on_local_data_drive_or_path->text()
-          .toStdString();
-  setts.m_local.m_remoteDriveOrMountPoint =
-      m_uiTabSystemSettings.lineEdit_on_local_remote_data_drive_path->text()
-          .toStdString();
-
-  // scripts and processes
-  setts.m_remote.m_nodes = m_uiTabSystemSettings.spinBox_remote_nodes->value();
-  setts.m_remote.m_cores = m_uiTabSystemSettings.spinBox_remote_cores->value();
-
-  setts.m_local.m_processes =
-      m_uiTabSystemSettings.spinBox_local_processes->value();
-  setts.m_local.m_cores = m_uiTabSystemSettings.spinBox_local_cores->value();
-
-  setts.m_local.m_reconScriptsPath =
-      m_uiTabSystemSettings.lineEdit_local_recon_scripts->text().toStdString();
-
-  return setts;
+void TomographyIfaceViewQtGUI::resetSystemSettings() {
+  // From factory defaults
+  TomoSystemSettings defaults;
+  updateSystemSettings(defaults);
 }
 
 /**
