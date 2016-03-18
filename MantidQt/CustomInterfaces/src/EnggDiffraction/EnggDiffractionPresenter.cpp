@@ -473,7 +473,8 @@ void EnggDiffractionPresenter::processFitPeaks() {
                                     "may take some seconds... "
                  << std::endl;
 
-  //	startAsyncFittingWorker
+  // startAsyncFittingWorker
+  // doFitting()
   startAsyncFittingWorker(focusedRunNo, fitPeaksData);
 }
 
@@ -497,6 +498,13 @@ void EnggDiffractionPresenter::inputChecksBeforeFitting(
                        "the default list of"
                        "expected peaks will be utlised instead."
                     << std::endl;
+  }
+  bool contains_non_digits =
+      ExpectedPeaks.find_first_not_of("0123456789,. ") != std::string::npos;
+  if (contains_non_digits) {
+    throw std::invalid_argument("The expected peaks provided " + ExpectedPeaks +
+                                " are invalid, "
+                                "fitting process failed. Please try again!");
   }
 }
 
