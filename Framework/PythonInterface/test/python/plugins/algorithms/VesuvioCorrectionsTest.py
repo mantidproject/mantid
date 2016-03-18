@@ -41,11 +41,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
                                      GammaBackground=True,
                                      FitParameters=self._create_dummy_fit_parameters(),
                                      Masses=self._create_dummy_masses(),
-                                     MassProfiles=self._create_dummy_profiles(),
-                                     CorrectionWorkspaces='__Correction',
-                                     CorrectedWorkspaces='__Corrected',
-                                     OutputWorkspace='__Output',
-                                     LinearFitResult='__LinearFit')
+                                     MassProfiles=self._create_dummy_profiles())
 
         alg.execute()
         self.assertTrue(alg.isExecuted())
@@ -69,11 +65,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
                                      GammaBackground=False,
                                      FitParameters=self._create_dummy_fit_parameters(),
                                      Masses=self._create_dummy_masses(),
-                                     MassProfiles=self._create_dummy_profiles(),
-                                     CorrectionWorkspaces='__Correction',
-                                     CorrectedWorkspaces='__Corrected',
-                                     OutputWorkspace='__Output',
-                                     LinearFitResult='__LinearFit')
+                                     MassProfiles=self._create_dummy_profiles())
 
         alg.execute()
         self.assertTrue(alg.isExecuted())
@@ -96,11 +88,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
                                      ContainerWorkspace=self._test_container_ws,
                                      FitParameters=self._create_dummy_fit_parameters(),
                                      Masses=self._create_dummy_masses(),
-                                     MassProfiles=self._create_dummy_profiles(),
-                                     CorrectionWorkspaces='__Correction',
-                                     CorrectedWorkspaces='__Corrected',
-                                     OutputWorkspace='__Output',
-                                     LinearFitResult='__LinearFit')
+                                     MassProfiles=self._create_dummy_profiles())
 
         alg.execute()
         self.assertTrue(alg.isExecuted())
@@ -126,17 +114,13 @@ class VesuvioCorrectionsTest(unittest.TestCase):
                                      Masses=self._create_dummy_masses(),
                                      MassProfiles=self._create_dummy_profiles(),
                                      ContainerScale=0.1,
-                                     GammaBackgroundScale=0.2,
-                                     CorrectionWorkspaces='__Correction',
-                                     CorrectedWorkspaces='__Corrected',
-                                     OutputWorkspace='__Output',
-                                     LinearFitResult='__LinearFit')
+                                     GammaBackgroundScale=0.2)
 
         alg.execute()
         self.assertTrue(alg.isExecuted())
 
         corrections_wsg = alg.getProperty("CorrectionWorkspaces").value
-        self._validate_group_structure(corrections_wsg, 4)        
+        self._validate_group_structure(corrections_wsg, 4)
 
         corrected_wsg = alg.getProperty("CorrectedWorkspaces").value
         self._validate_group_structure(corrected_wsg, 4)
@@ -188,6 +172,9 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         alg.initialize()
         alg.setChild(True)
         alg.setProperty("OutputWorkspace", "__Output")
+        alg.setProperty("CorrectionWorkspaces", "__Correction")
+        alg.setProperty("CorrectedWorkspaces", "__Corrected")
+        alg.setProperty("LinearFitResult", "__LinearFit")
         for key, value in kwargs.iteritems():
             alg.setProperty(key, value)
         return alg
