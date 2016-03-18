@@ -942,6 +942,32 @@ void ViewBase::removeVisibilityListener() {
   }
 }
 
+void SafeSetAxisTitle(vtkSMProxy *gridAxis, const char *pname,
+                      const char *value) {
+  vtkSMProperty *prop = gridAxis->GetProperty(pname);
+  Q_ASSERT(prop);
+
+  vtkSMPropertyHelper helper(prop);
+  QString key = QString("MTSBAutoTitle.%1").arg(pname);
+  if (value) {
+    helper.Set(value);
+    gridAxis->SetAnnotation(key.toLatin1().data(), value);
+  } else {
+    prop->ResetToDefault();
+    gridAxis->RemoveAnnotation(key.toLatin1().data());
+  }
+}
+
+void SafeSetAxisTitleProperty(vtkSMProxy *gridAxis, const char *pname,
+                              double *value) {
+  vtkSMProperty *prop = gridAxis->GetProperty(pname);
+  Q_ASSERT(prop);
+  vtkSMPropertyHelper helper(prop);
+  if (value) {
+    helper.Set(value, 3);
+  }
+}
+
 /**
  * Sets the axes grid if the user has this enabled
  */
@@ -951,6 +977,22 @@ void ViewBase::setAxesGrid(bool on) {
       vtkSMProxy *gridAxes3DActor = vtkSMPropertyHelper(renderView->getProxy(), "AxesGrid", true).GetAsProxy();
       vtkSMPropertyHelper(gridAxes3DActor, "Visibility").Set(1);
       gridAxes3DActor->UpdateProperty("Visibility");
+
+      double black[3] = {0., 0., 0.};
+      SafeSetAxisTitleProperty(gridAxes3DActor, "XTitleColor", black);
+      gridAxes3DActor->UpdateProperty("XTitleColor");
+      SafeSetAxisTitleProperty(gridAxes3DActor, "YTitleColor", black);
+      gridAxes3DActor->UpdateProperty("YTitleColor");
+      SafeSetAxisTitleProperty(gridAxes3DActor, "ZTitleColor", black);
+      gridAxes3DActor->UpdateProperty("ZTitleColor");
+      SafeSetAxisTitleProperty(gridAxes3DActor, "XLabelColor", black);
+      gridAxes3DActor->UpdateProperty("XLabelColor");
+      SafeSetAxisTitleProperty(gridAxes3DActor, "YLabelColor", black);
+      gridAxes3DActor->UpdateProperty("YLabelColor");
+      SafeSetAxisTitleProperty(gridAxes3DActor, "ZLabelColor", black);
+      gridAxes3DActor->UpdateProperty("ZLabelColor");
+      SafeSetAxisTitleProperty(gridAxes3DActor, "GridColor", black);
+      gridAxes3DActor->UpdateProperty("GridColor");
     }
   }
 }
