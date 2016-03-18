@@ -1171,6 +1171,12 @@ void LoadEventNexus::init() {
                                            Direction::Input),
       "If present, load the monitors as events. '''WARNING:''' WILL "
       "SIGNIFICANTLY INCREASE MEMORY USAGE (optional, default False). ");
+  declareProperty(make_unique<PropertyWithValue<bool>>("LoadEventMonitors",
+                                                       true, Direction::Input),
+                  "blablabla");
+  declareProperty(make_unique<PropertyWithValue<bool>>("LoadHistoMonitors",
+                                                       true, Direction::Input),
+                  "blablabla");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "FilterMonByTofMin", EMPTY_DBL(), Direction::Input),
@@ -1199,6 +1205,12 @@ void LoadEventNexus::init() {
   setPropertySettings(
       "MonitorsAsEvents",
       make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
+  setPropertySettings(
+      "LoadEventMonitors",
+      make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
+  setPropertySettings(
+      "LoadHistoMonitors",
+      make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
   auto asEventsIsOn = [] {
     std::unique_ptr<IPropertySettings> prop =
         make_unique<VisibleWhenProperty>("MonitorsAsEvents", IS_EQUAL_TO, "1");
@@ -1212,6 +1224,8 @@ void LoadEventNexus::init() {
   std::string grp4 = "Monitors";
   setPropertyGroup("LoadMonitors", grp4);
   setPropertyGroup("MonitorsAsEvents", grp4);
+  setPropertyGroup("LoadEventMonitors", grp4);
+  setPropertyGroup("LoadHistoMonitors", grp4);
   setPropertyGroup("FilterMonByTofMin", grp4);
   setPropertyGroup("FilterMonByTofMax", grp4);
   setPropertyGroup("FilterMonByTimeStart", grp4);
@@ -2380,6 +2394,10 @@ void LoadEventNexus::runLoadMonitors() {
     loadMonitors->setPropertyValue("OutputWorkspace", mon_wsname);
     loadMonitors->setPropertyValue("MonitorsAsEvents",
                                    this->getProperty("MonitorsAsEvents"));
+    loadMonitors->setPropertyValue("LoadEventMonitors",
+                                   this->getProperty("LoadEventMonitors"));
+    loadMonitors->setPropertyValue("LoadHistoMonitors",
+                                   this->getProperty("LoadHistoMonitors"));
     loadMonitors->execute();
     Workspace_sptr monsOut = loadMonitors->getProperty("OutputWorkspace");
     this->declareProperty(
