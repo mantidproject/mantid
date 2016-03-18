@@ -36,7 +36,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
 
     # -------------- Success cases ------------------
 
-    def test_gamma_and_ms_correct(self):
+    def test_gamma_and_ms_correct_workspace_index_one(self):
         alg = self._create_algorithm(InputWorkspace=self._test_ws,
                                      GammaBackground=True,
                                      FitParameters=self._create_dummy_fit_parameters(),
@@ -57,6 +57,30 @@ class VesuvioCorrectionsTest(unittest.TestCase):
 
         linear_params = alg.getProperty("LinearFitResult").value
         self._validate_table_workspace(linear_params, 7, 3)
+
+    def test_gamma_and_ms_correct_workspace_index_two(self):
+        alg = self._create_algorithm(InputWorkspace=self._test_ws,
+                                     GammaBackground=True,
+                                     FitParameters=self._create_dummy_fit_parameters(),
+                                     Masses=self._create_dummy_masses(),
+                                     MassProfiles=self._create_dummy_profiles(),
+                                     WorkspaceIndex=1)
+
+        alg.execute()
+        self.assertTrue(alg.isExecuted())
+
+        corrections_wsg = alg.getProperty("CorrectionWorkspaces").value
+        self._validate_group_structure(corrections_wsg, 3)
+
+        corrected_wsg = alg.getProperty("CorrectedWorkspaces").value
+        self._validate_group_structure(corrected_wsg, 3)
+
+        output_ws = alg.getProperty("OutputWorkspace").value
+        self._validate_matrix_structure(output_ws, 1, 257)
+
+        linear_params = alg.getProperty("LinearFitResult").value
+        self._validate_table_workspace(linear_params, 7, 3)
+
 
 
     def test_ms_correct_with_container(self):
