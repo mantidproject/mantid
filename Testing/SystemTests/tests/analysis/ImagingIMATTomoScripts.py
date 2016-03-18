@@ -1,5 +1,5 @@
-import stresstesting
 import unittest
+import stresstesting
 
 import numpy as np
 
@@ -45,7 +45,7 @@ class ImagingIMATTomoTests(unittest.TestCase):
 
         # double-check before every test that the input workspaces are available and of the
         # correct types
-        if not self.data_wsg or not _data_wsname in mtd:
+        if not self.data_wsg or _data_wsname not in mtd:
             raise RuntimeError("Input workspace not available")
 
         # this could use assertIsInstance (new in version 2.7)
@@ -544,10 +544,7 @@ class ImagingIMATScriptsTest(stresstesting.MantidStressTest):
         runner = unittest.TextTestRunner()
         # Run using either runner
         res = runner.run(suite)
-        if res.wasSuccessful():
-            self._success = True
-        else:
-            self._success = False
+        self._success = res.wasSuccessful()
 
     def validate(self):
         return self._success
