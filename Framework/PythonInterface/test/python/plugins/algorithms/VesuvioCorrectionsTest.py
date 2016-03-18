@@ -7,6 +7,7 @@ Assumes that mantid can be imported and the data paths
 are configured to find the Vesuvio data
 """
 import unittest
+import numpy as np
 
 from mantid.api import *
 from mantid import logger
@@ -51,6 +52,9 @@ class VesuvioCorrectionsTest(unittest.TestCase):
 
         corrections_wsg = alg.getProperty("CorrectionWorkspaces").value
         self._validate_group_structure(corrections_wsg, 3)
+        # Validate peak height
+        # Total scattering
+        self._validate_matrix_peak_height(corrections_wsg.getItem(1), 0.0839943)
 
         corrected_wsg = alg.getProperty("CorrectedWorkspaces").value
         self._validate_group_structure(corrected_wsg, 3)
@@ -74,6 +78,9 @@ class VesuvioCorrectionsTest(unittest.TestCase):
 
         corrections_wsg = alg.getProperty("CorrectionWorkspaces").value
         self._validate_group_structure(corrections_wsg, 3)
+        # Validate tpeak height
+        # Total scattering
+        self._validate_matrix_peak_height(corrections_wsg.getItem(1), 0.0984485)
 
         corrected_wsg = alg.getProperty("CorrectedWorkspaces").value
         self._validate_group_structure(corrected_wsg, 3)
@@ -89,7 +96,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         self._validate_table_values_top_to_bottom(linear_params, expected_values)
 
 
-    def test_ms_correct_with_container(self):
+   def test_ms_correct_with_container(self):
         alg = self._create_algorithm(InputWorkspace=self._test_ws,
                                      ContainerWorkspace=self._test_container_ws,
                                      GammaBackground=False,
@@ -288,6 +295,16 @@ class VesuvioCorrectionsTest(unittest.TestCase):
             if expected_values[i] != 'skip':
                 self.assertAlmostEqual(table_ws.cell(i, 1), expected_values[i])
 
+    def _validate_matrix_peak_height(self, matrix_ws, expected_height, ws_index=0):
+        """
+        Checks that the heightest peak value is as expected
+        matrix_ws       :: Workspace to validate
+        expected_height :: Expected maximum y value (peak height)
+        ws_index        :: The Index to read from the workspace
+        """
+        y_data = matrix_ws.readY(ws_index)
+        peak_height = np.amax(y_data)
+        self.assertAlmostEqual(peak_height, expected_height)
 
 
 if __name__ == "__main__":
