@@ -232,12 +232,12 @@ bool TomographyIfaceModel::facilitySupported() {
 bool TomographyIfaceModel::doPing(const std::string &compRes) {
   // This actually does more than a simple ping. Ping and check that a
   // transaction can be created succesfully
-  auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-      "StartRemoteTransaction");
-  alg->initialize();
-  alg->setProperty("ComputeResource", compRes);
-  std::string tid;
   try {
+    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+        "StartRemoteTransaction");
+    alg->initialize();
+    alg->setProperty("ComputeResource", compRes);
+    std::string tid;
     alg->execute();
     tid = alg->getPropertyValue("TransactionID");
     g_log.information() << "Pinged '" << compRes
@@ -264,30 +264,34 @@ void TomographyIfaceModel::doLogin(const std::string &compRes,
                                    const std::string &pw) {
   auto alg =
       Mantid::API::AlgorithmManager::Instance().createUnmanaged("Authenticate");
-  alg->initialize();
-  alg->setPropertyValue("UserName", user);
-  alg->setPropertyValue("ComputeResource", compRes);
-  alg->setPropertyValue("Password", pw);
   try {
+    alg->initialize();
+    alg->setPropertyValue("UserName", user);
+    alg->setPropertyValue("ComputeResource", compRes);
+    alg->setPropertyValue("Password", pw);
     alg->execute();
   } catch (std::runtime_error &e) {
-    throw std::runtime_error(
-        "Error when trying to log into the remote compute resource " + compRes +
-        " with username " + user + ": " + e.what());
+    throw std::runtime_error("Unexpected error when trying to log into the "
+                             "remote compute resource " +
+                             compRes + " with username " + user + ": " +
+                             e.what());
   }
 
-  m_loggedInUser = user;
-  m_loggedInComp = compRes;
+  // Status: logged in
+  if (alg->isExecuted()) {
+    m_loggedInUser = user;
+    m_loggedInComp = compRes;
+  }
 }
 
 void TomographyIfaceModel::doLogout(const std::string &compRes,
                                     const std::string &username) {
-  auto alg =
-      Mantid::API::AlgorithmManager::Instance().createUnmanaged("Logout");
-  alg->initialize();
-  alg->setProperty("ComputeResource", compRes);
-  alg->setProperty("UserName", username);
   try {
+    auto alg =
+        Mantid::API::AlgorithmManager::Instance().createUnmanaged("Logout");
+    alg->initialize();
+    alg->setProperty("ComputeResource", compRes);
+    alg->setProperty("UserName", username);
     alg->execute();
   } catch (std::runtime_error &e) {
     throw std::runtime_error(
@@ -305,9 +309,9 @@ void TomographyIfaceModel::doQueryJobStatus(const std::string &compRes,
                                             std::vector<std::string> &cmds) {
   auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "QueryAllRemoteJobs");
-  alg->initialize();
-  alg->setPropertyValue("ComputeResource", compRes);
   try {
+    alg->initialize();
+    alg->setPropertyValue("ComputeResource", compRes);
     alg->execute();
   } catch (std::runtime_error &e) {
     throw std::runtime_error(
@@ -756,13 +760,31 @@ std::string TomographyIfaceModel::filtersCfgToCmdOpts(
       " --region-of-interest='[" + boxCoordinatesToCSV(corRegions.roi) + "]'";
 
   if (filters.prep.normalizeByAirRegion) {
-    opts += " --air-region='[" +
-            boxCoordinatesToCSV(corRegions.normalizationRegion) + "]'";
+    if (0 != corRegions.normalizationRegion.first.X() ||
+        0 != corRegions.normalizationRegion.second.X())
+      opts += " --air-region='[" +
+              boxCoordinatesToCSV(corRegions.normalizationRegion) + "]'";
   }
 
-  const std::string outRoot =
-      "/work/imat/imat-data/" + m_experimentRef + "/processed/";
-  opts += " --output=" + outRoot + "out_recon_" + m_currentTool + "_" + alg;
+  // Like /work/imat/data/RB00XYZTUV/sampleA/processed/
+  // Split in components like: /work/imat + / + data + / + RB00XYZTUV + / +
+  // sampleA + / + processed
+  std::string m_sampleName = "sampleA";
+  const std::string outBase = m_systemSettings.remote.m_basePathTomoData + "/" +
+                              m_systemSettings.m_pathComponents[0] + "/" +
+                              m_experimentRef + "/" + m_sampleName + "/" +
+                              m_systemSettings.m_outputPathCompReconst;
+
+  // append a 'now' string
+  auto now = Mantid::Kernel::DateAndTime::getCurrentTime();
+  const std::string timeAppendix = now.toFormattedString("%Y%B%d_%H%M%S") +
+                                   "_" + std::to_string(now.nanoseconds());
+
+  // one name for this particular reconstruction, like:
+  // out_reconstruction_TomoPy_gridrec_
+  const std::string reconName =
+      "out_reconstruction_" + m_currentTool + "_" + alg + "_" + timeAppendix;
+  opts += " --output=\"" + outBase + "/" + reconName + "\"";
 
   opts +=
       " --median-filter-size=" + std::to_string(filters.prep.medianFilterWidth);

@@ -284,6 +284,7 @@ void TomographyIfacePresenter::processLogin() {
         "Better to logout before logging in again",
         "You're currently logged in. Please, log out before logging in "
         "again if that's what you meant.");
+    return;
   }
 
   std::string compRes = m_view->currentComputeResource();
@@ -296,18 +297,30 @@ void TomographyIfacePresenter::processLogin() {
     if (user.empty()) {
       m_view->userError(
           "Cannot log in",
-          "To log in you need to specify a username (and a password!).");
+          "To log in you need to specify a username (and a password).");
       return;
     }
 
-    m_model->doLogin(compRes, m_view->getUsername(), m_view->getPassword());
+    const std::string passw = m_view->getPassword();
+    if (passw.empty()) {
+      m_view->userError(
+          "Cannot log in with an empty password",
+          "Empty passwords are not allowed. Please provide a password).");
+      return;
+    }
+
+    m_model->doLogin(compRes, user, passw);
   } catch (std::exception &e) {
     throw(std::string("Problem when logging in. Error description: ") +
           e.what());
   }
 
-  m_view->updateLoginControls(true);
-  m_view->enableLoggedActions(!m_model->loggedIn().empty());
+  bool loggedOK = !m_model->loggedIn().empty();
+  m_view->updateLoginControls(loggedOK);
+  m_view->enableLoggedActions(loggedOK);
+
+  if (!loggedOK)
+    return;
 
   try {
     m_model->doRefreshJobsInfo(compRes);

@@ -278,6 +278,10 @@ void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
   m_uiTabSetup.lineEdit_path_darks->setText(
       QString::fromStdString(cfg.pathDarks()));
 
+  m_uiTabSetup.lineEdit_SCARF_password->setText("");
+  m_uiTabSetup.pushButton_SCARF_login->setEnabled(true);
+  m_uiTabSetup.pushButton_SCARF_logout->setEnabled(false);
+
   // cycle changes
   connect(m_uiTabSetup.lineEdit_cycle, SIGNAL(editingFinished()), this,
           SLOT(updatedCycleName()));
@@ -664,6 +668,12 @@ void TomographyIfaceViewQtGUI::readSettings() {
   m_settings.useKeepAlive =
       qs.value("use-keep-alive", m_settings.useKeepAlive).toInt();
 
+  m_uiTabSetup.lineEdit_SCARF_username->setText(
+      qs.value("SCARF-remote-username",
+               QString::fromStdString(
+                   Mantid::Kernel::ConfigService::Instance().getUsername()))
+          .toString());
+
   // Get input paths (sample/dark/flats)
   QByteArray rawInputPaths =
       qs.value("input-paths-samples-flats-darks").toByteArray();
@@ -786,6 +796,9 @@ void TomographyIfaceViewQtGUI::saveSettings() const {
   qs.setValue("on-close-ask-for-confirmation",
               m_settings.onCloseAskForConfirmation);
   qs.setValue("use-keep-alive", m_settings.useKeepAlive);
+
+  qs.setValue("SCARF-remote-username",
+              m_uiTabSetup.lineEdit_SCARF_username->text());
 
   // Save input data paths (samples/flats/darks, etc.)
   QByteArray pathsConfig;
