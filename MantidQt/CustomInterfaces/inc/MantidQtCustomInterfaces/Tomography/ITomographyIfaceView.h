@@ -272,7 +272,7 @@ public:
    * user. This can be used for example when modifying the paths based
    * on some logic/consistency checks outside of this view.
    *
-   * @param paths configuration to use from now on
+   * @param cfg configuration to use from now on
    */
   virtual void updatePathsConfig(const TomoPathsConfig &cfg) = 0;
 

@@ -111,6 +111,35 @@ void ImageROIPresenter::processBrowseImg() {
   processNewStack();
 }
 
+/**
+ * Validates the input stack of images (directories and files), and
+ * shows warning/error messages as needed. The outocome of the
+ * validation can be checkec via isValid() on the returned stack of
+ * images object.
+ *
+ * @param path user provided path to the stack of images
+ *
+ * @return a stack of images built from the path passed, not
+ * necessarily correct (check with isValid())
+ */
+StackOfImagesDirs ImageROIPresenter::checkInputStack(const std::string &path) {
+  StackOfImagesDirs soid(path, true);
+
+  const std::string soiPath = soid.sampleImagesDir();
+  if (soiPath.empty()) {
+    m_view->userWarning("Error trying to find a stack of images",
+                        "Could not find the sample images directory. The stack "
+                        "of images is expected as: \n\n" +
+                            soid.description());
+  } else if (!soid.isValid()) {
+    m_view->userWarning("Error while checking/validating the stack of images",
+                        "The stack of images could not be loaded correctly. " +
+                            soid.status());
+  }
+
+  return soid;
+}
+
 void ImageROIPresenter::processNewStack() {
 
   StackOfImagesDirs soid("");
