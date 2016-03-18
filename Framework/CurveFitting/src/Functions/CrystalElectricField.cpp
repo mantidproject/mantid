@@ -9,10 +9,16 @@
 
 namespace Mantid {
 namespace CurveFitting {
-
 namespace Functions {
 
 namespace {
+
+#ifdef __clang__
+// The missing braces warning is a false positive -
+// https://llvm.org/bugs/show_bug.cgi?id=21629
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-braces"
+#endif
 
 // Get a complex conjugate of the value returned by
 // ComplexMatrix::operator(i,j)
@@ -30,62 +36,6 @@ const std::array<double, maxNre> ggj = {
 
 const std::array<double, maxNre> ddimj = {
     6.0, 9.0, 10.0, 9.0, 6.0, 1.0, 8.0, 13.0, 16.0, 17.0, 16.0, 13.0, 8.0};
-//       -----------------------------------------------
-//       for the values of alphaj,betaj and gammaj
-//       see: Abragam and Bleaney, Electronic Paramagnetic
-//            Resonance of Transition Ions, 1970
-//            appendix B, table 20, page 874-875
-//
-const std::array<double, maxNre> aalphaj = {
-    -1.0 * 2 / 5 / 7, -1.0 * 2 * 2 * 13 / 3 / 3 / 5 / 5 / 11,
-    -1.0 * 7 / 3 / 3 / 11 / 11, 1.0 * 2 * 7 / 3 / 5 / 11 / 11,
-    1.0 * 13 / 3 / 3 / 5 / 7, 1.0 * 0, 1.0 * 0, -1.0 * 1 / 3 / 3 / 11,
-    -1.0 * 2 / 3 / 3 / 5 / 7, -1.0 * 1 / 2 / 3 / 3 / 5 / 5,
-    1.0 * 2 * 2 / 3 / 3 / 5 / 5 / 7, 1.0 * 1 / 3 / 3 / 11, 1.0 * 2 / 3 / 3 / 7};
-
-const std::array<double, maxNre> bbetaj = {
-    1.0 * 2 / 3 / 3 / 5 / 7, -1.0 * 2 * 2 / 3 / 3 / 5 / 11 / 11,
-    -1.0 * 2 * 2 * 2 * 17 / 3 / 3 / 3 / 11 / 11 / 11 / 13,
-    1.0 * 2 * 2 * 2 * 7 * 17 / 3 / 3 / 3 / 5 / 11 / 11 / 11 / 13,
-    1.0 * 2 * 13 / 3 / 3 / 3 / 5 / 7 / 11, 1.0 * 0, 1.0 * 0,
-    1.0 * 2 / 3 / 3 / 3 / 5 / 11 / 11,
-    -1.0 * 2 * 2 * 2 / 3 / 3 / 3 / 5 / 7 / 11 / 13,
-    -1.0 * 1 / 2 / 3 / 5 / 7 / 11 / 13, 1.0 * 2 / 3 / 3 / 5 / 7 / 11 / 13,
-    1.0 * 2 * 2 * 2 / 3 / 3 / 3 / 3 / 5 / 11 / 11, -1.0 * 2 / 3 / 5 / 7 / 11};
-
-const std::array<double, maxNre> ggammaj = {
-    1.0 * 0, 1.0 * 2 * 2 * 2 * 2 * 17 / 3 / 3 / 3 / 3 / 5 / 7 / 11 / 11 / 13,
-    -1.0 * 5 * 17 * 19 / 3 / 3 / 3 / 7 / 11 / 11 / 11 / 13 / 13,
-    1.0 * 2 * 2 * 2 * 17 * 19 / 3 / 3 / 3 / 7 / 11 / 11 / 11 / 13 / 13, 1.0 * 0,
-    1.0 * 0, 1.0 * 0, -1.0 * 1 / 3 / 3 / 3 / 3 / 7 / 11 / 11 / 13,
-    1.0 * 2 * 2 / 3 / 3 / 3 / 7 / 11 / 11 / 13 / 13,
-    -1.0 * 5 / 3 / 3 / 3 / 7 / 11 / 11 / 13 / 13,
-    1.0 * 2 * 2 * 2 / 3 / 3 / 3 / 7 / 11 / 11 / 13 / 13,
-    -1.0 * 5 / 3 / 3 / 3 / 3 / 7 / 11 / 11 / 13,
-    1.0 * 2 * 2 / 3 / 3 / 3 / 7 / 11 / 13};
-//       ---------------
-//       for the values of <r2>,<r4>,<r6> look to:
-//       Freeman and Desclaux, Journal of Magnetism
-//       and Magnetic Materials 12 (1979) 11 ff
-//       [<r2>] = a0**2
-//
-
-const std::array<double, maxNre> rr2 = {1.309,  1.1963, 1.114,  1.0353, 0.9743,
-                                        0.9175, 0.8671, 0.8220, 0.7814, 0.7446,
-                                        0.7111, 0.6804, 0.6522};
-
-//       ---------------
-//       [<r4>] = a0**4
-const std::array<double, maxNre> rr4 = {3.964, 3.3335, 2.910, 2.5390, 2.260,
-                                        2.020, 1.820,  1.651, 1.505,  1.379,
-                                        1.270, 1.174,  1.089};
-
-//       ---------------
-//       [<r6>] = a0**6
-const std::array<double, maxNre> rr6 = {23.31, 18.353, 15.03, 12.546, 10.55,
-                                        9.039, 7.831,  6.582, 6.048,  5.379,
-                                        4.816, 4.340,  3.932};
-
 //---------------------------
 // set some natural constants
 //---------------------------
@@ -94,9 +44,7 @@ const double kb = 1.38062;     // x 10**(-23) J/K,   Boltzmann constant k_B
 const double hh = 6.626075540; // x 10**(-34) J*sec, Planks constant h
 const double hq = hh / 2 / pi;
 const double ee = 1.6021773349; // x 10**(-19) Coulomb, electric charge
-const double cc = 2.99792458;   // x 10**(8) m/sec, speed of light
 const double me = 9.109389754;  // x 10**(-31) kg, electron mass
-const double na = 6.022045;     // x 10**(23) particles/mol, Avogardo constant
 //       within the above choose, the factor which connects
 //       1meV and 1 Kelvin is fixed and given by:
 //       10*ee/kb =: fmevkelvin = 11.6047...
@@ -208,11 +156,6 @@ double jm6(double nj, double j) {
          jm(nj - 1, j) * jm(nj, j);
 }
 
-//------------------------------
-//  f(1) = 1, f(-1) = 1/i = (-i)
-//------------------------------
-ComplexType f(double s) { return ComplexType((s + 1) / 2, (s - 1) / 2); }
-
 //-----------------------------
 double f20(double nj, double j) { return 3 * pow(nj, 2) - j * (j + 1); }
 
@@ -323,18 +266,6 @@ void ifnull(double &r) {
   const double macheps = 1.0e-14;
   if (fabs(r) <= macheps)
     r = 0.0;
-}
-
-// c-------------------------------------
-// c testing if the complex number c is 0
-// c-------------------------------------
-ComplexType cifnull(const ComplexType &c) {
-  auto i = ComplexType(0.0, 1.0);
-  double re = (0.5 * (c + conj(c))).real();
-  double im = (0.5 * (-c + conj(c)) * i).real();
-  ifnull(re);
-  ifnull(im);
-  return ComplexType(re, im);
 }
 
 //---------------------------------------------
@@ -561,14 +492,6 @@ double matjz2(const ComplexFortranMatrix &ev, int i, int k, int dim) {
   return std::norm(matjz(ev, i, k, dim));
 }
 
-//-------------------------
-// calculates |<i|jT|k>|**2
-//-------------------------
-double matjt2(const ComplexFortranMatrix &ev, int i, int k, int dim) {
-  return 2.0 / 3 * (matjx2(ev, i, k, dim) + matjy2(ev, i, k, dim) +
-                    matjz2(ev, i, k, dim));
-}
-
 //---------------------------------------------------------------
 // calculates all transition matrix elements for a single crystal
 // and a polycrystalline sample (powder)
@@ -633,6 +556,10 @@ double c_occupation_factor(const DoubleFortranVector &energy, double dimj,
   }
   return occupation_factor;
 }
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 } // anonymous namespace
 
