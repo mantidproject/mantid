@@ -11,6 +11,7 @@
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfacePresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 #include "ui_ImageSelectCoRAndRegions.h"
 #include "ui_ImgFormatsConversion.h"
@@ -105,9 +106,7 @@ public:
     return m_localExternalPythonPath;
   }
 
-  std::string pathLocalReconScripts() const override {
-    return m_setupPathReconScripts;
-  };
+  std::string pathLocalReconScripts() const override;
 
   std::string astraMethod() const override { return m_astraMethod; }
 
@@ -133,6 +132,8 @@ public:
   std::vector<std::string> processingJobsIDs() const override {
     return m_processingJobsIDs;
   }
+
+  TomoSystemSettings systemSettings() const override;
 
   /// Get the current reconstruction tools settings set by the user
   TomoReconToolsUserSettings reconToolsSettings() const override {
@@ -180,14 +181,19 @@ private slots:
   void updatedCycleName();
 
   void browseLocalInOutDirClicked();
+  void browseLocalRemoteDriveOrPath();
   void browseLocalReconScriptsDirClicked();
 
   void flatsPathCheckStatusChanged(int status);
   void darksPathCheckStatusChanged(int status);
 
   void samplesPathBrowseClicked();
-  void flatPathBrowseClicked();
-  void darkPathBrowseClicked();
+  void flatsPathBrowseClicked();
+  void darksPathBrowseClicked();
+
+  void samplesPathEditedByUser();
+  void flatsPathEditedByUser();
+  void darksPathEditedByUser();
 
   /// For the filters tab
   void resetPrePostFilters();
@@ -212,8 +218,14 @@ private slots:
   void browseEnergyInputClicked();
   void browseEnergyOutputClicked();
 
-  // system / advanced settings
+  void systemSettingsEdited();
+  void systemSettingsNumericEdited();
+
+  // part of the system / advanced settings
   void resetRemoteSetup();
+
+  // reset all system / advanced settings
+  void resetSystemSettings();
 
   // for the savu functionality - waiting for Savu
   void menuSaveClicked();
@@ -227,15 +239,6 @@ private slots:
   void menuOpenClicked();
   void paramValModified(QTreeWidgetItem *, int);
   void expandedItem(QTreeWidgetItem *);
-
-private:
-  void processLocalRunRecon();
-
-  void makeRunnableWithOptions(const std::string &comp, std::string &run,
-                               std::string &opt);
-
-  void splitCmdLine(const std::string &cmd, std::string &run,
-                    std::string &opts);
 
 private:
   /// Setup the interface (tab UI)
@@ -257,15 +260,23 @@ private:
   /// save settings (before closing)
   void saveSettings() const override;
 
+  void updateSystemSettings(const TomoSystemSettings &setts);
+
+  void updatePathsConfig(const TomoPathsConfig &cfg) override;
+
   void showToolConfig(const std::string &name) override;
 
   void closeEvent(QCloseEvent *ev) override;
 
   void processPathBrowseClick(QLineEdit *le, std::string &data);
 
+  void updateFlatsDarksFromSamplePath(const std::string &path);
+
+  TomoSystemSettings grabSystemSettingsFromUser() const;
+
   TomoReconFiltersSettings grabPrePostProcSettings() const;
 
-  void setPrePostProcSettings(TomoReconFiltersSettings &opts) const;
+  void setPrePostProcSettings(const TomoReconFiltersSettings &opts);
 
   std::string
   checkUserBrowsePath(QLineEdit *le,
@@ -276,8 +287,9 @@ private:
 
   void sendLog(const std::string &msg);
 
-  // Begin of Savu related functionality. This will grow and will need
-  // separation. They should find a better place to live.
+  // Begin of Savu related functionality. Waiting for the tool to become
+  // available. When that happens, this area of the code will grow and will
+  // need separation. They should find a better place to live.
   ///@name Savu related methods
   ///@{
   /// to load plugins (savu classification / API)
@@ -385,13 +397,13 @@ private:
   std::string m_setupParaviewPath;
   std::string m_setupOctopusVisPath;
   std::string m_setupProcessedSubpath;
-  // path of reconstruction scripts locally
-  std::string m_setupPathReconScripts;
-  // path (sometimes drive) for in/out on the local machine
-  std::string m_setupPathReconOut;
 
   // here the view puts messages before notifying the presenter to show them
   std::vector<std::string> m_logMsgs;
+
+  /// The not-so-small set of paths, path compnents and related parameters for
+  /// the local and remote machines
+  TomoSystemSettings m_systemSettings;
 
   /// Settings for the third party (tomographic reconstruction) tools
   TomoReconToolsUserSettings m_toolsSettings;

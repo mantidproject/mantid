@@ -7,6 +7,7 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconFiltersSettings.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -17,7 +18,7 @@ Tomography GUI. Base class / interface for the view of the tomo GUI
 specific functionality/dependencies are added in a class derived from
 this.
 
-Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014-2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -128,6 +129,16 @@ public:
   virtual std::string getPassword() const = 0;
 
   virtual std::vector<std::string> processingJobsIDs() const = 0;
+
+  /**
+   * Get the current system settings. This includes several
+   * parameters. Most of them are paths or path components them, but
+   * there are also some naming conventions and other parameters.
+   *
+   * @return Settings with current values (possibly modified by the
+   * user).
+   */
+  virtual TomoSystemSettings systemSettings() const = 0;
 
   /**
    * Get the current reconstruction tool settings set by the
@@ -255,6 +266,15 @@ public:
    * @return paths configuration object
    */
   virtual TomoPathsConfig currentPathsConfig() const = 0;
+
+  /**
+   * Takes paths produces programmatically and displays them to the
+   * user. This can be used for example when modifying the paths based
+   * on some logic/consistency checks outside of this view.
+   *
+   * @param paths configuration to use from now on
+   */
+  virtual void updatePathsConfig(const TomoPathsConfig &cfg) = 0;
 
   /**
    * Regions and center of rotation, normally defined by the user with

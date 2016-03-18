@@ -23,7 +23,7 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>0</y>
+        <y>-115</y>
         <width>788</width>
         <height>671</height>
        </rect>
@@ -574,6 +574,31 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>checkBox_normalize_by_air_region</tabstop>
+  <tabstop>checkBox_normalize_by_proton_charge</tabstop>
+  <tabstop>checkBox_normalize_by_flats</tabstop>
+  <tabstop>checkBox_normalize_by_darks</tabstop>
+  <tabstop>checkBox_corrections_MCP_detector</tabstop>
+  <tabstop>spinBox_prep_median_filter_width</tabstop>
+  <tabstop>comboBox_3</tabstop>
+  <tabstop>comboBox_prep_rotation</tabstop>
+  <tabstop>doubleSpinBox_prep_max_angle</tabstop>
+  <tabstop>spinBox_prep_scale_factor</tabstop>
+  <tabstop>doubleSpinBox_post_circ_mask</tabstop>
+  <tabstop>doubleSpinBox_post_cutoff</tabstop>
+  <tabstop>comboBox_out_img_format</tabstop>
+  <tabstop>comboBox_out_bit_depth</tabstop>
+  <tabstop>checkBox_out_preproc_images</tabstop>
+  <tabstop>groupBox_out_intermediate_prep</tabstop>
+  <tabstop>checkBox_output_cropped_images</tabstop>
+  <tabstop>checkBox_output_normalized_proton_images</tabstop>
+  <tabstop>checkBox_output_normalized_flat_images</tabstop>
+  <tabstop>checkBox_output_dot_removal</tabstop>
+  <tabstop>checkBox_output_sinograms</tabstop>
+  <tabstop>pushButton_reset</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -39,10 +39,17 @@
           <property name="text">
            <string>Dark field:</string>
           </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_path_darks"/>
+         <widget class="QLineEdit" name="lineEdit_path_darks">
+          <property name="text">
+           <string>D:/data/RB000000/experiment1/dark</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_darks_dir">
@@ -83,7 +90,7 @@
         <item>
          <widget class="QLineEdit" name="lineEdit_path_samples">
           <property name="text">
-           <string/>
+           <string>D:/data/RB000000/experiment1/sample</string>
           </property>
          </widget>
         </item>
@@ -112,10 +119,17 @@
           <property name="text">
            <string>Flat/open beam</string>
           </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_path_flats"/>
+         <widget class="QLineEdit" name="lineEdit_path_flats">
+          <property name="text">
+           <string>D:/data/RB000000/experiment1/flat</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_flats_dir">
@@ -254,6 +268,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_SCARF_logout">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -431,6 +448,22 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>lineEdit_cycle</tabstop>
+  <tabstop>lineEdit_path_samples</tabstop>
+  <tabstop>pushButton_samples_dir</tabstop>
+  <tabstop>checkBox_path_flats</tabstop>
+  <tabstop>lineEdit_path_flats</tabstop>
+  <tabstop>pushButton_flats_dir</tabstop>
+  <tabstop>checkBox_path_darks</tabstop>
+  <tabstop>lineEdit_path_darks</tabstop>
+  <tabstop>pushButton_darks_dir</tabstop>
+  <tabstop>tabWidget_comp_resource</tabstop>
+  <tabstop>lineEdit_SCARF_username</tabstop>
+  <tabstop>lineEdit_SCARF_password</tabstop>
+  <tabstop>pushButton_SCARF_login</tabstop>
+  <tabstop>pushButton_SCARF_logout</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

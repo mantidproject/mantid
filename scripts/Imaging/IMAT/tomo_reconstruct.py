@@ -195,12 +195,9 @@ def grab_preproc_options(args):
 
     if args.region_of_interest:
         pre_config.crop_coords = ast.literal_eval(args.region_of_interest)
-    else:
-        border_pix = 5
-        pre_config.crop_coords = [0+border_pix, 252, 512-border_pix, 512-border_pix]
 
     if args.air_region:
-        pre_config.crop_coords = ast.literal_eval(args.air_region)
+        pre_config.normalize_air_region = ast.literal_eval(args.air_region)
 
     if args.median_filter_size:
         if isinstance(args.median_filter_size, str) and not args.median_filter_size.isdigit():

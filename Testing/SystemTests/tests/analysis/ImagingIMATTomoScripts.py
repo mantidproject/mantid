@@ -125,6 +125,67 @@ class ImagingIMATTomoTests(unittest.TestCase):
         self.assertEquals(self.data_vol.shape[1]/2, scaled.shape[1])
         self.assertEquals(self.data_vol.shape[2]/2, scaled.shape[2])
 
+    def test_crop_errors(self):
+        import IMAT.prep as iprep
+
+        coords = None
+        with self.assertRaises(ValueError):
+            cropped = iprep.filters.crop_vol(self.data_vol, coords)
+
+        coords = [0, 0, 0]
+        with self.assertRaises(ValueError):
+            cropped = iprep.filters.crop_vol(self.data_vol, coords)
+
+        coords = [0, 0, 0, 0, 0]
+        with self.assertRaises(ValueError):
+            cropped = iprep.filters.crop_vol(self.data_vol, coords)
+
+        coords = [0, 0, 10, 10]
+        with self.assertRaises(ValueError):
+            cropped = iprep.filters.crop_vol(self.data_vol[1, :, :], coords)
+
+
+    def test_crop_empty(self):
+        import IMAT.prep as iprep
+
+        coords = [0, 0, 0, 0]
+
+        cropped = iprep.filters.crop_vol(self.data_vol, coords)
+
+        self.assertTrue(isinstance(self.data_vol, np.ndarray))
+        self.assertTrue(isinstance(cropped, np.ndarray),
+                        msg="the result of cropping with empty (0) coordinates should be a "
+                        "numpy array")
+
+        self.assertEqual(cropped.shape, self.data_vol.shape,
+                         msg="the result of cropping with empty (0) coordinates should have "
+                         "the appropriate dimensions. Found {0} instead of {1}".
+                         format(cropped.shape, self.data_vol.shape))
+
+        peek_positions = [[3,57], [57, 4]]
+        for pos in peek_positions:
+            (pos_x, pos_y) = pos
+            cropped_coord_equals = cropped[:, pos_y, pos_x] == self.data_vol[:, pos_y, pos_x]
+            self.assertTrue(cropped_coord_equals.all(),
+                             msg="cropping should not change values (found differences at "
+                            "coordinates: {0}, {1})".format(pos_x, pos_y))
+
+    def test_crop_wrong_coordinates_skips(self):
+        import IMAT.prep as iprep
+
+        coords = [50, 40, 0, 0]
+        cropped = iprep.filters.crop_vol(self.data_vol, coords)
+
+        self.assertTrue(isinstance(self.data_vol, np.ndarray))
+        self.assertTrue(isinstance(cropped, np.ndarray),
+                        msg="the result of cropping with inconsistent) coordinates should be a "
+                        "numpy array")
+
+        self.assertEqual(cropped.shape, self.data_vol.shape,
+                         msg="the result of cropping with inconsistent coordinates should have "
+                         "the appropriate dimensions (same as original). Found {0} instead of {1}".
+                         format(cropped.shape, self.data_vol.shape))
+
     def test_crop_ok(self):
         import IMAT.prep as iprep
 

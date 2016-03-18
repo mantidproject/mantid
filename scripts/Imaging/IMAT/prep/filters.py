@@ -77,6 +77,9 @@ def crop_vol(data_vol, coords):
         raise ValueError("Wrong coordinates object when trying to crop: {0}".format(coords))
     elif not isinstance(data_vol, np.ndarray) or 3 != len(data_vol.shape):
         raise ValueError("Wrong data volume when trying to crop: {0}".format(data_vol))
+    elif (not any(coords) or coords[1] > coords[3] or coords[0] > coords[2]):
+        # skip if for example: 0, 0, 0, 0 (empty selection)
+        return data_vol
     else:
         cropped_data = data_vol[:, coords[1]:coords[3], coords[0]:coords[2]]
 
