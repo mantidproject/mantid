@@ -17,10 +17,11 @@
 #include <pqServerManagerModel.h>
 #include <pqSMAdaptor.h>
 
-#include <vtkCallbackCommand.h>
 #include "vtk_jsoncpp.h"
+#include <vtkCallbackCommand.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMIntVectorProperty.h>
+#include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
 #include <vtkSMTransferFunctionProxy.h>
 
@@ -160,6 +161,16 @@ void ColorUpdater::updateLookupTable(pqDataRepresentation* representation)
   }
 }
 
+void SafeSetScalarBarColor(vtkSMProxy *gridAxis, const char *pname,
+                           double *value) {
+  vtkSMProperty *prop = gridAxis->GetProperty(pname);
+  Q_ASSERT(prop);
+  vtkSMPropertyHelper helper(prop);
+  if (value) {
+    helper.Set(value, 3);
+  }
+}
+
 /**
  * React to changing the log scale option
  * @param state The state to which the log scale is being changed.
@@ -203,6 +214,27 @@ void ColorUpdater::logScale(int state)
             vtkSMTransferFunctionProxy::MapControlPointsToLinearSpace(
                 (*rep)->getLookupTable()->getProxy());
         }
+      }
+    }
+  }
+  // For all sources
+  foreach (pqPipelineSource *source, sources) {
+    const QList<pqView *> views = source->getViews();
+    // For all views
+    foreach (pqView *view, views) {
+      const QList<pqDataRepresentation *> reps =
+          source->getRepresentations(view);
+      // For all representations
+      foreach (pqDataRepresentation *rep, reps) {
+        double black[3] = {0., 0., 0.};
+        vtkSMProxy *ScalarBarProxy =
+            vtkSMTransferFunctionProxy::FindScalarBarRepresentation(
+                rep->getLookupTableProxy(), view->getProxy());
+
+        SafeSetScalarBarColor(ScalarBarProxy, "TitleColor", black);
+        ScalarBarProxy->UpdateProperty("TitleColor");
+        SafeSetScalarBarColor(ScalarBarProxy, "LabelColor", black);
+        ScalarBarProxy->UpdateProperty("LabelColor");
       }
     }
   }
