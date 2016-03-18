@@ -13,7 +13,12 @@ const std::string TomoSystemSettingsLocal::g_defBasePathTomoData =
     "~/imat-data";
 #endif
 
-const std::string TomoSystemSettingsLocal::g_defRemoteDriveOrMountPoint;
+const std::string TomoSystemSettingsLocal::g_defRemoteDriveOrMountPoint =
+#ifdef _WIN32
+    "S:";
+#else
+  "/media/scarf";
+#endif
 
 const std::string TomoSystemSettingsLocal::g_defReconScriptsPath =
 #ifdef _WIN32

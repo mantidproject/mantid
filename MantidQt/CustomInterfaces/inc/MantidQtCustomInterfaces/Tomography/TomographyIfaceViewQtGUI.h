@@ -106,9 +106,7 @@ public:
     return m_localExternalPythonPath;
   }
 
-  std::string pathLocalReconScripts() const override {
-    return m_setupPathReconScripts;
-  };
+  std::string pathLocalReconScripts() const override;
 
   std::string astraMethod() const override { return m_astraMethod; }
 
@@ -160,8 +158,6 @@ public:
 
   TomoPathsConfig currentPathsConfig() const override { return m_pathsConfig; }
 
-  void updatePathsConfig(const TomoPathsConfig &cfg) override;
-
   ImageStackPreParams currentROIEtcParams() const override {
     return m_tabROIW->userSelection();
   }
@@ -185,6 +181,7 @@ private slots:
   void updatedCycleName();
 
   void browseLocalInOutDirClicked();
+  void browseLocalRemoteDriveOrPath();
   void browseLocalReconScriptsDirClicked();
 
   void flatsPathCheckStatusChanged(int status);
@@ -222,10 +219,13 @@ private slots:
   void browseEnergyOutputClicked();
 
   void systemSettingsEdited();
-  void systemSettingsNumericEdited(int idx);
+  void systemSettingsNumericEdited();
 
-  // system / advanced settings
+  // part of the system / advanced settings
   void resetRemoteSetup();
+
+  // reset all system / advanced settings
+  void resetSystemSettings();
 
   // for the savu functionality - waiting for Savu
   void menuSaveClicked();
@@ -239,15 +239,6 @@ private slots:
   void menuOpenClicked();
   void paramValModified(QTreeWidgetItem *, int);
   void expandedItem(QTreeWidgetItem *);
-
-private:
-  void processLocalRunRecon();
-
-  void makeRunnableWithOptions(const std::string &comp, std::string &run,
-                               std::string &opt);
-
-  void splitCmdLine(const std::string &cmd, std::string &run,
-                    std::string &opts);
 
 private:
   /// Setup the interface (tab UI)
@@ -268,6 +259,10 @@ private:
   void readSettings();
   /// save settings (before closing)
   void saveSettings() const override;
+
+  void updateSystemSettings(const TomoSystemSettings &setts);
+
+  void updatePathsConfig(const TomoPathsConfig &cfg) override;
 
   void showToolConfig(const std::string &name) override;
 
@@ -402,10 +397,6 @@ private:
   std::string m_setupParaviewPath;
   std::string m_setupOctopusVisPath;
   std::string m_setupProcessedSubpath;
-  // path of reconstruction scripts locally
-  std::string m_setupPathReconScripts;
-  // path (sometimes drive) for in/out on the local machine
-  std::string m_setupPathReconOut;
 
   // here the view puts messages before notifying the presenter to show them
   std::vector<std::string> m_logMsgs;

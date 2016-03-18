@@ -756,8 +756,11 @@ std::string TomographyIfaceModel::filtersCfgToCmdOpts(
       opts += " --input-path-dark=" + dark;
   }
 
-  opts +=
-      " --region-of-interest='[" + boxCoordinatesToCSV(corRegions.roi) + "]'";
+  if ((corRegions.roi.first.X() > 0 || corRegions.roi.second.X() > 0) &&
+      (corRegions.roi.first.Y() > 0 || corRegions.roi.second.Y() > 0)) {
+    opts +=
+        " --region-of-interest='[" + boxCoordinatesToCSV(corRegions.roi) + "]'";
+  }
 
   if (filters.prep.normalizeByAirRegion) {
     if (0 != corRegions.normalizationRegion.first.X() ||

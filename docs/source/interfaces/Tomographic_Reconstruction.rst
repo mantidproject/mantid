@@ -282,6 +282,11 @@ applied on the reconstructed volume produced by the algorithm.
    :align: center
    :scale: 60%
 
+Among other options, normalization by flat and/or dark images can be
+enabled here. Note that this setting is global and will be effective
+for any input dataset. In the **Setup** section it is possible to
+enable or disable them specifically for the dataset being processed.
+
 The tab also shows options to define what outputs should be produced
 in addition to the reconstructed volume.
 
