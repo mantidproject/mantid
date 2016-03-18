@@ -358,7 +358,7 @@ class ReconstructionCommand(object):
 
             # skip if for example: 0, 0, 0, 0 (empty selection)
             if (cfg.normalize_air_region[1] >= cfg.normalize_air_region[3] or
-                cfg.normalize_air_region[0] >= cfg.normalize_air_region[2]):
+               cfg.normalize_air_region[0] >= cfg.normalize_air_region[2]):
                 return data
 
             air_sums = []

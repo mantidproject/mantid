@@ -130,26 +130,25 @@ class ImagingIMATTomoTests(unittest.TestCase):
 
         coords = None
         with self.assertRaises(ValueError):
-            cropped = iprep.filters.crop_vol(self.data_vol, coords)
+            iprep.filters.crop_vol(self.data_vol, coords)
 
         coords = [0, 0, 0]
         with self.assertRaises(ValueError):
-            cropped = iprep.filters.crop_vol(self.data_vol, coords)
+            iprep.filters.crop_vol(self.data_vol, coords)
 
         coords = [0, 0, 0, 0, 0]
         with self.assertRaises(ValueError):
-            cropped = iprep.filters.crop_vol(self.data_vol, coords)
+            iprep.filters.crop_vol(self.data_vol, coords)
 
         coords = [0, 0, 10, 10]
         with self.assertRaises(ValueError):
-            cropped = iprep.filters.crop_vol(self.data_vol[1, :, :], coords)
+            iprep.filters.crop_vol(self.data_vol[1, :, :], coords)
 
 
     def test_crop_empty(self):
         import IMAT.prep as iprep
 
         coords = [0, 0, 0, 0]
-
         cropped = iprep.filters.crop_vol(self.data_vol, coords)
 
         self.assertTrue(isinstance(self.data_vol, np.ndarray))
@@ -167,10 +166,10 @@ class ImagingIMATTomoTests(unittest.TestCase):
             (pos_x, pos_y) = pos
             cropped_coord_equals = cropped[:, pos_y, pos_x] == self.data_vol[:, pos_y, pos_x]
             self.assertTrue(cropped_coord_equals.all(),
-                             msg="cropping should not change values (found differences at "
+                            msg="cropping should not change values (found differences at "
                             "coordinates: {0}, {1})".format(pos_x, pos_y))
 
-    def test_crop_wrong_coordinates_skips(self):
+    def test_crop_coordinates_skips(self):
         import IMAT.prep as iprep
 
         coords = [50, 40, 0, 0]

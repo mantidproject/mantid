@@ -207,7 +207,7 @@ def _agg_img(acc, img_data, agg_method=None, index=1):
     Returns :: result from aggregating (sum, average, etc.) the new image
 
     """
-    if None == agg_method:
+    if agg_method is None:
         agg_method = 'sum'
 
     if 'sum' == agg_method:
