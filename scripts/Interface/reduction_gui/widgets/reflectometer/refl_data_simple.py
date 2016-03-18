@@ -729,7 +729,7 @@ class DataReflWidget(BaseWidget):
             @param max_ctrl: control widget containing the range maximum
         """
         if not IS_IN_MANTIDPLOT:
-            return
+            return None, None
 
         try:
             f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(file_ctrl.text())))[0]

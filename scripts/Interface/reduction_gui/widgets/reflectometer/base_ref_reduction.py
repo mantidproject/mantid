@@ -501,7 +501,7 @@ class BaseRefWidget(BaseWidget):
         binning_parameters = _from_q + ',-' + _bin_size + ',' + _bin_max
 
         # DEBUGGING ONLY
-        file_number = 0
+        _file_number = 0
 #        print '=========== BEFORE REBINING =========='
         for ws in scaled_ws_list:
             # print 'file_number: ' , file_number
@@ -1270,7 +1270,7 @@ class BaseRefWidget(BaseWidget):
         """
 
         if not IS_IN_MANTIDPLOT:
-            return
+            return None, None
 
         try:
             f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(file_ctrl.text())))[0]
