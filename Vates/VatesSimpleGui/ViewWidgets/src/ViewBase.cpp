@@ -107,7 +107,7 @@ void ViewBase::destroyFilter(const QString &name)
 {
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources =
+  const QList<pqPipelineSource *> sources =
       smModel->findItems<pqPipelineSource *>(server);
 
   QSet<pqPipelineSource*> toDelete;
@@ -437,7 +437,7 @@ void ViewBase::updateAnimationControls()
 long long ViewBase::getNumSources() {
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources =
+  const QList<pqPipelineSource *> sources =
       smModel->findItems<pqPipelineSource *>(server);
 
   return std::count_if(
@@ -716,7 +716,7 @@ bool ViewBase::hasFilter(const QString &name)
 {
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources =
+  const QList<pqPipelineSource *> sources =
       smModel->findItems<pqPipelineSource *>(server);
   foreach (pqPipelineSource *source, sources) {
     const QString sourceName = source->getSMName();
@@ -765,7 +765,7 @@ bool ViewBase::hasWorkspaceType(const QString &wsTypeName)
 {
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources =
+  const QList<pqPipelineSource *> sources =
       smModel->findItems<pqPipelineSource *>(server);
   bool hasWsType = false;
   foreach (pqPipelineSource *source, sources) {
@@ -847,7 +847,8 @@ void ViewBase::onSourceDestroyed()
 void ViewBase::destroyAllSourcesInView() {
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
+  const QList<pqPipelineSource *> sources =
+      smModel->findItems<pqPipelineSource *>(server);
 
   // Out of all pqPipelineSources, find the "true" sources, which were
   // created by a Source Plugin, i.e. MDEW Source, MDHW Source, PeakSource
@@ -899,7 +900,7 @@ void ViewBase::setVisibilityListener()
   // Set the connection to listen to a visibility change of the representation.
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources =
+  const QList<pqPipelineSource *> sources =
       smModel->findItems<pqPipelineSource *>(server);
 
   // Attach the visibilityChanged signal for all sources.
@@ -920,7 +921,7 @@ void ViewBase::removeVisibilityListener() {
     // Set the connection to listen to a visibility change of the representation.
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources =
+  const QList<pqPipelineSource *> sources =
       smModel->findItems<pqPipelineSource *>(server);
 
   // Attach the visibilityChanged signal for all sources.

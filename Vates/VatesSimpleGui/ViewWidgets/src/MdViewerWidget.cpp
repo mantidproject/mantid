@@ -1365,7 +1365,7 @@ void MdViewerWidget::setDestroyedListener() {
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel =
       pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources =
+  const QList<pqPipelineSource *> sources =
       smModel->findItems<pqPipelineSource *>(server);
 
   // Attach the destroyd signal of all sources to the viewbase.

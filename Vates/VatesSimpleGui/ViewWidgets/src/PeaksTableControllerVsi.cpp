@@ -215,7 +215,7 @@ void PeaksTableControllerVsi::updatePeakWorkspaceColor() {
     pqServer *server = pqActiveObjects::instance().activeServer();
     pqServerManagerModel *smModel =
         pqApplicationCore::instance()->getServerManagerModel();
-    QList<pqPipelineSource *> sources =
+    const QList<pqPipelineSource *> sources =
         smModel->findItems<pqPipelineSource *>(server);
     foreach (pqPipelineSource *src, sources) {
       // Make sure that the source is a peak workspace
@@ -545,7 +545,7 @@ PeaksTableControllerVsi::getConcatenatedWorkspaceNames(std::string delimiter) {
  * @param splatSource The splatterplot source
  */
 void PeaksTableControllerVsi::updatePeaksWorkspaces(
-    QList<QPointer<pqPipelineSource>> peakSources,
+    const QList<QPointer<pqPipelineSource>> &peakSources,
     pqPipelineSource *splatSource) {
   // Check if the presenters exist and which need to be added
   std::vector<std::string> peaksWorkspaceNames;

@@ -128,7 +128,7 @@ namespace SimpleGui
 
     bool initialSetting = true;
 
-    QList<pqPipelineSource *> sources = getAllPVSources();
+    const QList<pqPipelineSource *> sources = getAllPVSources();
 
     pqView* activeView = pqActiveObjects::instance().activeView();
 

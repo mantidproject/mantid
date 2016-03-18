@@ -333,7 +333,8 @@ void StandardView::setRebinAndUnbinButtons()
 
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
+  const QList<pqPipelineSource *> sources =
+      smModel->findItems<pqPipelineSource *>(server);
 
   foreach (pqPipelineSource *source, sources) {
     if (isInternallyRebinnedWorkspace(source)) {

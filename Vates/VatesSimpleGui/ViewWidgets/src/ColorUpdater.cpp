@@ -98,14 +98,16 @@ void ColorUpdater::colorScaleChange(double min, double max)
     // Update for all sources and all reps
     pqServer *server = pqActiveObjects::instance().activeServer();
     pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-    QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
+    const QList<pqPipelineSource *> sources =
+        smModel->findItems<pqPipelineSource *>(server);
 
     // For all sources
     foreach (pqPipelineSource *source, sources) {
-      QList<pqView *> views = source->getViews();
+      const QList<pqView *> views = source->getViews();
       // For all views
       foreach (pqView *view, views) {
-        QList<pqDataRepresentation *> reps = source->getRepresentations(view);
+        const QList<pqDataRepresentation *> reps =
+            source->getRepresentations(view);
         // For all representations
         foreach (pqDataRepresentation *rep, reps) {
           this->updateLookupTable(rep);
@@ -166,15 +168,16 @@ void ColorUpdater::logScale(int state)
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel =
       pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources =
+  const QList<pqPipelineSource *> sources =
       smModel->findItems<pqPipelineSource *>(server);
 
   // For all sources
   foreach (pqPipelineSource *source, sources) {
-    QList<pqView *> views = source->getViews();
+    const QList<pqView *> views = source->getViews();
     // For all views
     foreach (pqView *view, views) {
-      QList<pqDataRepresentation *> reps = source->getRepresentations(view);
+      const QList<pqDataRepresentation *> reps =
+          source->getRepresentations(view);
       // For all representations
       foreach (pqDataRepresentation *rep, reps) {
         // Set the logarithmic (linear) scale
