@@ -62,7 +62,7 @@ public:
 
     std::vector<int> runnumberlist;
     runnumberlist.push_back(vec_runnumbers[0]);
-    Mantid::Kernel::V3D peakcenter(3, 3, 3);
+    Mantid::Kernel::V3D peakcenter(1.4, 2.4, 3.4);
     std::vector<Mantid::Kernel::V3D> peakcenterlist;
     peakcenterlist.push_back(peakcenter);
     PeaksWorkspace_sptr peakws =
@@ -83,7 +83,7 @@ public:
     TS_ASSERT_EQUALS(outws->getNumberPeaks(), 1)
 
     Peak peak = outws->getPeak(0);
-    // TS_ASSERT(peak.getIntensity() > 0)
+    TS_ASSERT(peak.getIntensity() > 0)
 
     // clean the workspaces
     AnalysisDataService::Instance().remove("TestPeaksWS");
@@ -95,7 +95,7 @@ public:
   /** Test integrate MDEventWorkspace with multiple runs and multiple peaks
    *  in a given PeaksWorkspace
    */
-  void test_multipleRun() {
+  void Xtest_multipleRun() {
     // Create workspaces to test
     std::vector<Mantid::Kernel::V3D> vec_qsample;
     std::vector<double> vec_signal;
@@ -149,7 +149,7 @@ public:
   /** Test integrate MDEventWorkspace with multiple runs without PeaksWorkspace
    *  but with a given peak center
    */
-  void test_multipleRun1Peak() {
+  void Xtest_multipleRun1Peak() {
     // Create MDEventWorkspace for testing
     std::vector<Mantid::Kernel::V3D> vec_qsample;
     std::vector<double> vec_signal;
@@ -328,23 +328,29 @@ public:
     for (size_t i_peak = 0; i_peak < num_peaks; ++i_peak) {
       Peak p(inst, 1, 3.0);
       Mantid::Kernel::V3D qsample = vec_q_sample[i_peak];
-      p.setQSampleFrame(qsample);
+      p.setQSampleFrame(qsample, 0.37);
       p.setRunNumber(vec_run_number[i_peak]);
-
       pw->addPeak(p);
     }
     return pw;
   }
 
   //-------------------------------------------------------------------------------
+  /** Create MDEventsWorkspace containing data of 1 run
+   * @brief createMDEvents1Run
+   * @param vec_qsample
+   * @param vec_signal
+   * @param vec_detid
+   * @param vec_runnumber
+   */
   void createMDEvents1Run(std::vector<Mantid::Kernel::V3D> &vec_qsample,
                           std::vector<double> &vec_signal,
                           std::vector<Mantid::detid_t> &vec_detid,
                           std::vector<int> &vec_runnumber) {
 
-    double q_x0 = -0.4;
-    double q_y0 = -0.4;
-    double q_z0 = -0.4;
+    double q_x0 = 1.0;
+    double q_y0 = 2.0;
+    double q_z0 = 3.0;
     double d_q = 0.1;
     Mantid::Kernel::V3D origin(0, 0, 0);
 

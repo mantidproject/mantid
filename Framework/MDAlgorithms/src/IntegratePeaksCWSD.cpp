@@ -286,6 +286,12 @@ void IntegratePeaksCWSD::simplePeakIntegration(
         // total_signal += signal/current_monitor_counts;
         m_runPeakCountsMap[run_number] += signal / current_monitor_counts;
       }
+      else
+      {
+        g_log.warning() << "Out of radius " << distance << " > " << m_peakRadius
+                        << ": Center = " << current_peak_center.toString()
+                        << ", Pixel  = " << pixel_pos.toString() << "\n";
+      }
 
       if (distance < min_distance)
         min_distance = distance;
@@ -409,12 +415,18 @@ IntegratePeaksCWSD::createPeakworkspace(Kernel::V3D peakCenter,
   size_t numruns = mdws->getNumExperimentInfo();
   for (size_t i_run = 0; i_run < numruns; ++i_run) {
     // get experiment info for run number, instrument and peak count
-    API::ExperimentInfo_const_sptr expinfo = mdws->getExperimentInfo(i_run);
+    API::ExperimentInfo_const_sptr expinfo = mdws->getExperimentInfo(static_cast<uint16_t>(i_run));
     int runnumber = expinfo->getRunNumber();
-    std::map<int, double>::iterator miter = m_runPeakCountsMap.find(runnumber);
+    // FIXME - This is a hack for HB3A's run number issue
+    std::map<int, double>::iterator miter = m_runPeakCountsMap.find(runnumber%1000);
     double peakcount(0);
     if (miter != m_runPeakCountsMap.end()) {
       peakcount = miter->second;
+      g_log.notice() << "[DB] Get peak count of run " << runnumber << " as " << peakcount << "\n";
+    }
+    else
+    {
+      g_log.notice() << "[DB] Unable to find run " << runnumber << " in peak count map." << "\n";
     }
 
     // Create and add a new peak to peak workspace
@@ -422,7 +434,10 @@ IntegratePeaksCWSD::createPeakworkspace(Kernel::V3D peakCenter,
     try {
       Geometry::Instrument_const_sptr instrument = expinfo->getInstrument();
       newpeak.setInstrument(instrument);
+      newpeak.setGoniometerMatrix(
+            expinfo->run().getGoniometerMatrix());
     } catch (std::exception) {
+      throw std::runtime_error("Unable to set instrument and goniometer matrix.");
     }
 
     newpeak.setQSampleFrame(peakCenter);
@@ -449,13 +464,17 @@ std::map<int, signal_t> IntegratePeaksCWSD::getMonitorCounts() {
     ExperimentInfo_const_sptr expinfo =
         m_inputWS->getExperimentInfo(static_cast<uint16_t>(iexpinfo));
     std::string run_str = expinfo->run().getProperty("run_number")->value();
-    uint16_t run_number = static_cast<uint16_t>(atoi(run_str.c_str()));
+    g_log.warning() << "run number of exp " << iexpinfo << " is " << run_str << "\n";
+    int run_number = atoi(run_str.c_str());
+    // FIXME - HACK FOE HB3A
+    run_number = run_number % 1000;
     std::string mon_str = expinfo->run().getProperty("monitor")->value();
     signal_t monitor = static_cast<signal_t>(atoi(mon_str.c_str()));
     run_monitor_map.insert(
-        std::make_pair(static_cast<int>(run_number), monitor));
-    g_log.notice() << "[DB] Add run " << run_number << ", monitor = " << monitor
-                   << "\n";
+        std::make_pair(run_number, monitor));
+    g_log.information() << "From MD workspace add run " << run_number
+                        << ", monitor = " << monitor
+                        << "\n";
   }
 
   return run_monitor_map;
@@ -477,7 +496,8 @@ void IntegratePeaksCWSD::getPeakInformation() {
     // set up the data structure to store integrated peaks' counts
     m_runPeakCountsMap.insert(std::make_pair(run_number, 0.));
 
-    g_log.notice() << "[DB] Q sample = " << qsample.toString() << "\n";
+    g_log.information() << "From peak workspace: peak " << ipeak << " Center (Qsample) = "
+                        << qsample.toString() << "\n";
   }
 }
 
