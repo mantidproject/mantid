@@ -131,14 +131,8 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         linear_params = alg.getProperty("LinearFitResult").value
         self._validate_table_workspace(linear_params, 10, 3)
 
-        self.assertAlmostEqual(linear_params.cell(0, 1), 0.1)
-        self.assertAlmostEqual(linear_params.cell(1, 1), 0.0)
-        self.assertAlmostEqual(linear_params.cell(2, 1), 1.0)
-        self.assertAlmostEqual(linear_params.cell(3, 1), 0.2)
-        self.assertAlmostEqual(linear_params.cell(4, 1), 0.0)
-        self.assertAlmostEqual(linear_params.cell(5, 1), 1.0)
-        self.assertAlmostEqual(linear_params.cell(7, 1), 0.0)
-        self.assertAlmostEqual(linear_params.cell(8, 1), 1.0)
+        expected_table_values = [0.1,0.0,1.0,0.2,0.0,1.0,'skip',0.0,1.0]
+        self._validate_table_values_top_to_bottom(linear_params, expected_table_values)
 
 
     # -------------- Failure cases ------------------
@@ -249,8 +243,21 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         num_columns = table_ws.columnCount()
         self.assertEqual(num_rows, expected_rows)
         self.assertEqual(num_columns, expected_columns)
-        
+
     # -----------------------Values-----------------------------------
+
+    def _validate_table_values_top_to_bottom(self, table_ws, expected_values):
+        """
+        Checks that a table workspace has the expected values from top to bottom
+        table_ws            :: Workspace to validate
+        expected_values     :: The expected values to be in the table workspace,
+                               if any values contained in the list are skip then
+                               that value will not be tested.
+        """
+        for i in range(0, len(expected_values)):
+            if expected_values[i] != 'skip':
+                self.assertAlmostEqual(table_ws.cell(i, 1), expected_values[i])
+
 
 
 if __name__ == "__main__":
