@@ -59,9 +59,9 @@ const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
 * @param parent Parent window (most likely the Mantid main app window).
 */
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
-    : UserSubWindow(parent), m_focusedDataVector(), m_fittedDataVector(),
-      IEnggDiffractionView(), m_currentInst("ENGINX"),
-      m_currentCalibFilename(""), m_presenter(NULL) {}
+    : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGINX"),
+      m_currentCalibFilename(""), m_focusedDataVector(), m_fittedDataVector(),
+      m_presenter(NULL) {}
 
 EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {
   for (auto curves : m_focusedDataVector) {
@@ -723,7 +723,7 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
       Qt::darkCyan,   Qt::magenta, Qt::darkMagenta, Qt::yellow,
       Qt::darkYellow, Qt::gray,    Qt::darkGray,    Qt::lightGray};
 
-  for (int i = 0; i < data.size(); i++) {
+  for (size_t i = 0; i < data.size(); i++) {
     auto *peak = data[i].get();
 
     QwtPlotCurve *dataCurve = new QwtPlotCurve();

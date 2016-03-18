@@ -34,7 +34,7 @@ namespace ALCHelper
     std::vector<boost::shared_ptr<QwtData>> dataVector;
     auto histograms = ws->getNumberHistograms();
 
-    for (int wsIndex = 0; wsIndex < histograms; wsIndex++) {
+    for (size_t wsIndex = 0; wsIndex < histograms; wsIndex++) {
 
       const double *x = &ws->readX(wsIndex)[0];
       const double *y = &ws->readY(wsIndex)[0];
