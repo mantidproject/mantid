@@ -300,7 +300,7 @@ Output
 
 Once the Fit button has been clicked, wait until the Fitting process has
 completed and upon completion you should be able to view on the Fitting
-tab the focused workspace plotted in the background in black, whereas the
+tab plots the focused workspace in the background in black, whereas the
 expected peaks plotted in various colours over lapping the focused
 workspace peaks.
 

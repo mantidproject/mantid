@@ -612,7 +612,6 @@ void EnggDiffractionPresenter::runFittingAlgs(
         FocusedFitPeaksTableName +
         " workspace could not be found. "
         "Please check the log messages for more details.");
-    return;
   };
 
   ITableWorkspace_sptr table =
@@ -742,7 +741,6 @@ void EnggDiffractionPresenter::runCropWorkspaceAlg(std::string workspaceName) {
     cropWS->initialize();
     cropWS->setProperty("InputWorkspace", workspaceName);
     cropWS->setProperty("OutputWorkspace", workspaceName);
-    std::string outputWorkspace = "engggui_fitting_single_peaks";
     cropWS->setProperty("StartWorkspaceIndex", 1);
     cropWS->setProperty("EndWorkspaceIndex", 1);
     cropWS->execute();

@@ -1218,15 +1218,14 @@ std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {
       m_uiTabFitting.lineEdit_fitting_peaks->text().toStdString();
   size_t strLength = exptPeaks.length() - 1;
 
-  char ch = ',';
   if (!exptPeaks.empty()) {
 
-    if (exptPeaks.at(size_t(0)) == ch) {
+    if (exptPeaks.at(size_t(0)) == ',') {
       exptPeaks.erase(size_t(0), 1);
       strLength -= size_t(1);
     }
 
-    if (exptPeaks.at(strLength) == ch) {
+    if (exptPeaks.at(strLength) == ',') {
       exptPeaks.erase(strLength, 1);
     }
   }
