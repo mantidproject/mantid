@@ -553,18 +553,17 @@ void PeaksTableControllerVsi::updatePeaksWorkspaces(
   std::vector<pqPipelineSource *> nonTrackedWorkspaces;
   std::vector<std::string> trackedWorkspaceNames =
       m_presenter->getPeaksWorkspaceNames();
-  foreach (QPointer<pqPipelineSource> it, peakSources) {
+  foreach (QPointer<pqPipelineSource> source, peakSources) {
     std::string workspaceName(
-        vtkSMPropertyHelper(it->getProxy(), "WorkspaceName").GetAsString());
+        vtkSMPropertyHelper(source->getProxy(), "WorkspaceName").GetAsString());
 
     peaksWorkspaceNames.push_back(workspaceName);
 
-    int count = static_cast<int>(std::count(trackedWorkspaceNames.begin(),
-                                            trackedWorkspaceNames.end(),
-                                            workspaceName));
+    auto count = std::count(trackedWorkspaceNames.begin(),
+                            trackedWorkspaceNames.end(), workspaceName);
 
     if (count == 0) {
-      nonTrackedWorkspaces.push_back(it);
+      nonTrackedWorkspaces.push_back(source);
     }
   }
 
