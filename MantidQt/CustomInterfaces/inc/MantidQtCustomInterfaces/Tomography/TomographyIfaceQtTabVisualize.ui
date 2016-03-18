@@ -217,6 +217,20 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>pushButton_local_default_dir</tabstop>
+  <tabstop>pushButton_remote_default_dir</tabstop>
+  <tabstop>pushButton_browse_files</tabstop>
+  <tabstop>treeView_files</tabstop>
+  <tabstop>pushButton_paraview</tabstop>
+  <tabstop>pushButton_octopus</tabstop>
+  <tabstop>pushButton_vgstudio</tabstop>
+  <tabstop>groupBox</tabstop>
+  <tabstop>lineEdit_paraview_location</tabstop>
+  <tabstop>pushButton_browse_paraview</tabstop>
+  <tabstop>lineEdit</tabstop>
+  <tabstop>pushButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

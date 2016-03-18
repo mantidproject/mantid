@@ -445,6 +445,22 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>lineEdit_cycle</tabstop>
+  <tabstop>lineEdit_path_samples</tabstop>
+  <tabstop>pushButton_samples_dir</tabstop>
+  <tabstop>checkBox_path_flats</tabstop>
+  <tabstop>lineEdit_path_flats</tabstop>
+  <tabstop>pushButton_flats_dir</tabstop>
+  <tabstop>checkBox_path_darks</tabstop>
+  <tabstop>lineEdit_path_darks</tabstop>
+  <tabstop>pushButton_darks_dir</tabstop>
+  <tabstop>tabWidget_comp_resource</tabstop>
+  <tabstop>lineEdit_SCARF_username</tabstop>
+  <tabstop>lineEdit_SCARF_password</tabstop>
+  <tabstop>pushButton_SCARF_login</tabstop>
+  <tabstop>pushButton_SCARF_logout</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

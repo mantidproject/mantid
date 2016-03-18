@@ -646,6 +646,37 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>groupBox_9</tabstop>
+  <tabstop>groupBox</tabstop>
+  <tabstop>lineEdit_processed_subpath_2</tabstop>
+  <tabstop>comboBox</tabstop>
+  <tabstop>comboBox_2</tabstop>
+  <tabstop>lineEdit_processed_subpath_4</tabstop>
+  <tabstop>lineEdit_processed_subpath_5</tabstop>
+  <tabstop>lineEdit_processed_subpath_6</tabstop>
+  <tabstop>lineEdit_processed_subpath</tabstop>
+  <tabstop>lineEdit_processed_subpath_3</tabstop>
+  <tabstop>groupBox_3</tabstop>
+  <tabstop>lineEdit_SCARF_path</tabstop>
+  <tabstop>lineEdit_scripts_base_dir_remote</tabstop>
+  <tabstop>pushButton_reset_scripts_base_dir_remote</tabstop>
+  <tabstop>groupBox_8</tabstop>
+  <tabstop>lineEdit_on_local_data_drive_path</tabstop>
+  <tabstop>pushButton_on_local_in_out_dir</tabstop>
+  <tabstop>lineEdit_on_local_remote_drive_path</tabstop>
+  <tabstop>pushButton_reset_scripts_base_dir_local</tabstop>
+  <tabstop>groupBox_10</tabstop>
+  <tabstop>groupBox_5</tabstop>
+  <tabstop>spinBox_SCARFnumCores</tabstop>
+  <tabstop>spinBox_SCARFnumNodes</tabstop>
+  <tabstop>groupBox_4</tabstop>
+  <tabstop>spinBox</tabstop>
+  <tabstop>spinBox_localNumCores</tabstop>
+  <tabstop>lineEdit_local_recon_scripts</tabstop>
+  <tabstop>pushButton_recon_scripts_dir</tabstop>
+  <tabstop>scrollArea</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
