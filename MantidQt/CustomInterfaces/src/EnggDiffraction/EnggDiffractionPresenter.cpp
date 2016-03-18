@@ -503,7 +503,7 @@ void EnggDiffractionPresenter::inputChecksBeforeFitting(
       ExpectedPeaks.find_first_not_of("0123456789,. ") != std::string::npos;
   if (contains_non_digits) {
     throw std::invalid_argument("The expected peaks provided " + ExpectedPeaks +
-                                " are invalid, "
+                                " is invalid, "
                                 "fitting process failed. Please try again!");
   }
 }
