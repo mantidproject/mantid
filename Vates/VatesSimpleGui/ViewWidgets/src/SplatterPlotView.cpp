@@ -374,7 +374,7 @@ void SplatterPlotView::destroyPeakSources()
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources =
+  const QList<pqPipelineSource *> sources =
       smModel->findItems<pqPipelineSource *>(server);
 
   foreach (pqPipelineSource *source, sources) {
@@ -551,12 +551,12 @@ void SplatterPlotView::onPeakSourceDestroyed()
   for (auto it = m_peaksSource.begin(); it != m_peaksSource.end();) {
     pqServer *server = pqActiveObjects::instance().activeServer();
     pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-    QList<pqPipelineSource *> sources =
+    const QList<pqPipelineSource *> sources =
         smModel->findItems<pqPipelineSource *>(server);
 
     auto foundSource = std::find(sources.begin(), sources.end(), *it);
 
-    if (foundSource != sources.end()) {
+    if (foundSource == sources.end()) {
       it = m_peaksSource.erase(it);
     } else {
       ++it;
