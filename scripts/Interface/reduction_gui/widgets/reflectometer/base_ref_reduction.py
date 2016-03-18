@@ -515,7 +515,7 @@ class BaseRefWidget(BaseWidget):
                     _y_val = np.nan
                     _y_val = np.nan
 
-            file_number += 1
+            _file_number += 1
 
         # END OF DEBUGGING ONLY
 

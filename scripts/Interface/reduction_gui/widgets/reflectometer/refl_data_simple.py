@@ -402,7 +402,7 @@ class DataReflWidget(BaseWidget):
             self._summary.q_min_label.hide()
             self._summary.q_min_unit_label.hide()
 
-            # TODO: allow log binning
+            # to-do: allow log binning
             self._summary.log_scale_chk.hide()
 
     def _create_auto_reduce_template(self):

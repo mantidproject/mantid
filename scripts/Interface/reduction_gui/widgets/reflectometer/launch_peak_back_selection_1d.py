@@ -312,11 +312,11 @@ class DesignerMainWindow(QtGui.QMainWindow):
     def select_file(self):
         """ opens a file select dialog """
         # open the dialog and get the selected file
-        file = QtGui.QFileDialog.getOpenFileName()
+        file_to_open = QtGui.QFileDialog.getOpenFileName()
         # if a file is selected
-        if file:
+        if file_to_open:
             # update the lineEdit text with the selected filename
-            self.mpllineEdit.setText(file)
+            self.mpllineEdit.setText(file_to_open)
 
     def parse_file(self, filename):
         """ parse a text file to extract letters frequencies """
@@ -328,7 +328,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
         with open(filename) as f:
             for line in f:
                 for char in line:
-                    #counts only letters
+                    # counts only letters
                     if ord(char.lower()) in range(97, 122+1):
                         letters[char.lower()] += 1
 
@@ -336,7 +336,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
         k = sorted(letters.keys())
         v = [letters[ki] for ki in k]
 
-        return k,v
+        return k, v
 
     def update_plot(self):
         """ retrieve the value of the peak/back/lowres and save it
