@@ -18,6 +18,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
 
     _test_ws = None
     _test_container_ws = None
+    _input_bins = None
 
     def setUp(self):
         if self._test_ws is None:
@@ -26,6 +27,8 @@ class VesuvioCorrectionsTest(unittest.TestCase):
 
         if self._test_container_ws is None:
             self.__class__._test_container_ws = create_test_container_ws()
+
+        self._input_bins = self._test_ws.blocksize()
 
     def tearDown(self):
         workspace_names =['__Correction','__Corrected','__Output','__LinearFit']
@@ -53,7 +56,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         self._validate_group_structure(corrected_wsg, 3)
 
         output_ws = alg.getProperty("OutputWorkspace").value
-        self._validate_matrix_structure(output_ws, 1, 257)
+        self._validate_matrix_structure(output_ws, 1, self._input_bins)
 
         linear_params = alg.getProperty("LinearFitResult").value
         self._validate_table_workspace(linear_params, 7, 3)
@@ -76,11 +79,14 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         self._validate_group_structure(corrected_wsg, 3)
 
         output_ws = alg.getProperty("OutputWorkspace").value
-        self._validate_matrix_structure(output_ws, 1, 257)
+        self._validate_matrix_structure(output_ws, 1, self._input_bins)
 
         linear_params = alg.getProperty("LinearFitResult").value
         self._validate_table_workspace(linear_params, 7, 3)
 
+        #[f0.Scaling, f0.Shift, f0.XScaling, f1.Scaling, f1.Shift, f1.XScaling]
+        expected_values = [0.0001183, 0.0, 1.0, 2.4028667, 0.0, 1.0]
+        self._validate_table_values_top_to_bottom(linear_params, expected_values)
 
 
     def test_ms_correct_with_container(self):
@@ -101,7 +107,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         self._validate_group_structure(corrected_wsg, 3)
 
         output_ws = alg.getProperty("OutputWorkspace").value
-        self._validate_matrix_structure(output_ws, 1, 257)
+        self._validate_matrix_structure(output_ws, 1, self._input_bins)
 
         linear_params = alg.getProperty("LinearFitResult").value
         self._validate_table_workspace(linear_params, 7, 3)
@@ -124,7 +130,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         self._validate_group_structure(corrected_wsg, 4)
 
         output_ws = alg.getProperty("OutputWorkspace").value
-        self._validate_matrix_structure(output_ws, 1, 257)
+        self._validate_matrix_structure(output_ws, 1, self._input_bins)
 
         linear_params = alg.getProperty("LinearFitResult").value
         self._validate_table_workspace(linear_params, 10, 3)
@@ -150,7 +156,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         self._validate_group_structure(corrected_wsg, 4)
 
         output_ws = alg.getProperty("OutputWorkspace").value
-        self._validate_matrix_structure(output_ws, 1, 257)
+        self._validate_matrix_structure(output_ws, 1, self._input_bins)
 
         linear_params = alg.getProperty("LinearFitResult").value
         self._validate_table_workspace(linear_params, 10, 3)
