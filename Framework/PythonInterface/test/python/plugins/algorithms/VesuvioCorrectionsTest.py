@@ -65,6 +65,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         linear_params = alg.getProperty("LinearFitResult").value
         self._validate_table_workspace(linear_params, 7, 3)
 
+
     def test_gamma_and_ms_correct_workspace_index_two(self):
         alg = self._create_algorithm(InputWorkspace=self._test_ws,
                                      GammaBackground=True,
@@ -76,27 +77,48 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         alg.execute()
         self.assertTrue(alg.isExecuted())
 
+        # Test Corrections Workspaces
         corrections_wsg = alg.getProperty("CorrectionWorkspaces").value
         self._validate_group_structure(corrections_wsg, 3)
-        # Validate tpeak height
-        # Total scattering
-        self._validate_matrix_peak_height(corrections_wsg.getItem(1), 0.0984485)
+        corrections_gamma_background = [-5.098401e-09, 1.2250951e-06, 2.4124663e-09]
+        corrections_total_scattering = [9.3158594e-06, 0.09844847237, 2.1144768e-14]
+        corrections_multiple_scatter = [7.5371204e-06, 9.9243003e-05, 1.4333982e-17]
+        corrections_expected_values = [corrections_gamma_background,
+                                       corrections_total_scattering,
+                                       corrections_multiple_scatter]
+        for i in range(corrections_wsg.getNumberOfEntries()):
+            self._validate_matrix_workspace_values(corrections_wsg.getItem(i),
+                                                   corrections_expected_values[i])
 
+
+        # Test Corrected Workspaces
         corrected_wsg = alg.getProperty("CorrectedWorkspaces").value
         self._validate_group_structure(corrected_wsg, 3)
+        corrected_gamma_background = [0.01550411, 0.52350495, -0.00709750]
+        corrected_total_scattering = [0.01549478, 0.52341546, -0.00709750]
+        corrected_multiple_scatter = [0.01549656, 0.52344493, -0.00709750]
+        corrected_expected_values = [corrected_gamma_background,
+                                     corrected_total_scattering,
+                                     corrected_multiple_scatter]
+        for i in range(corrected_wsg.getNumberOfEntries()):
+            self._validate_matrix_workspace_values(corrected_wsg.getItem(i),
+                                                   corrected_expected_values[i])
 
+
+        # Test OutputWorkspace
         output_ws = alg.getProperty("OutputWorkspace").value
         self._validate_matrix_structure(output_ws, 1, self._input_bins)
+        output_expected_values = [0.0154965679779247 ,0.5234438813082305 ,-0.00709750241246634]
+        self._validate_matrix_workspace_values(output_ws, output_expected_values)
 
+        # Test Linear fit Result Workspace
         linear_params = alg.getProperty("LinearFitResult").value
         self._validate_table_workspace(linear_params, 7, 3)
-
-        #[f0.Scaling, f0.Shift, f0.XScaling, f1.Scaling, f1.Shift, f1.XScaling]
         expected_values = [0.0001183, 0.0, 1.0, 2.4028667, 0.0, 1.0]
         self._validate_table_values_top_to_bottom(linear_params, expected_values)
 
 
-   def test_ms_correct_with_container(self):
+    def test_ms_correct_with_container(self):
         alg = self._create_algorithm(InputWorkspace=self._test_ws,
                                      ContainerWorkspace=self._test_container_ws,
                                      GammaBackground=False,
@@ -305,6 +327,27 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         y_data = matrix_ws.readY(ws_index)
         peak_height = np.amax(y_data)
         self.assertAlmostEqual(peak_height, expected_height)
+
+    def _validate_matrix_workspace_values(self, matrix_workspace, expected_values):
+        """
+        Validates that the workspace first, last and maximum value are as expected
+        matrix_workspace    :: Workspace to validate
+        expected_values     :: Expected values in the format [first, largest, last]
+        """
+        self._validate_value_at(matrix_workspace, 0, expected_values[0])
+        self._validate_matrix_peak_height(matrix_workspace, expected_values[1])
+        self._validate_value_at(matrix_workspace, -1, expected_values[2])
+
+    def _validate_value_at(self, matrix_ws, bin_index, expected_value):
+        """
+        Validates that the value at the given bin index is what is expected
+        Assumes that the first spectra is being checked
+        matrix_ws       :: The Matrix workspace to be validated
+        bin_index       :: Which bin index to check
+        expected_value  :: The expected value for the given bin index
+        """
+        actual_value = matrix_ws.readY(0)[bin_index]
+        self.assertAlmostEqual(actual_value, expected_value)
 
 
 if __name__ == "__main__":
