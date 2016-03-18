@@ -139,12 +139,12 @@ private:
   const std::string m_SpectrumNos;
   // for focusing "texture"
   const std::string m_dgFile;
+  // parameters for fitting
+  const std::string m_expectedPeaks;
   // parameters for pre-processing/rebinning
   const double m_bin;
   const size_t m_nperiods;
-  // parameters for fitting
   const std::string m_outWSName;
-  const std::string m_expectedPeaks;
 };
 
 } // namespace CustomInterfaces

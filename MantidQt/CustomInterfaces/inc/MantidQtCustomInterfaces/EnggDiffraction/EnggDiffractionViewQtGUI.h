@@ -151,14 +151,13 @@ public:
 
   virtual std::string fittingPeaksData() const override;
 
-  std::string readPeaksFile(std::string fileDir);
-
   virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                              bool focused);
 
+  std::string readPeaksFile(std::string fileDir);
+
   void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data,
-                                 std::vector<QwtPlotCurve *> &dataVector,
-                                 bool focused);
+                         std::vector<QwtPlotCurve *> &dataVector, bool focused);
 
   void plotFocusedSpectrum(const std::string &wsName) override;
 
@@ -324,11 +323,11 @@ private:
   /// presenter as in the model-view-presenter
   boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;
 
-  /// Loaded data curves
-  std::vector<QwtPlotCurve *> m_fittedDataVector;
-
   /// Loaded focused workspace
   std::vector<QwtPlotCurve *> m_focusedDataVector;
+
+  /// Loaded data curves
+  std::vector<QwtPlotCurve *> m_fittedDataVector;
 };
 
 } // namespace CustomInterfaces

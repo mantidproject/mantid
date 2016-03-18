@@ -360,6 +360,15 @@ public:
   * @return list of dSpacing values as std::string
   */
   virtual std::string fittingPeaksData() const = 0;
+
+  /**
+  * generates and sets the curves on the fitting tab
+  * @param data of the workspace to be passed as QwtData
+  * @param focused to check whether focused workspace
+  *
+  */
+  virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
+                             bool focused) = 0;
   //@}
 
   /**
@@ -416,15 +425,6 @@ public:
   virtual void plotReplacingWindow(const std::string &wsName,
                                    const std::string &spectrum,
                                    const std::string &type) = 0;
-
-  /**
-  * generates and sets the curves on the fitting tab
-  * @param data of the workspace to be passed as QwtData
-  * @param focused to check whether focused workspace
-  *
-  */
-  virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
-                             bool focused) = 0;
 };
 
 } // namespace CustomInterfaces

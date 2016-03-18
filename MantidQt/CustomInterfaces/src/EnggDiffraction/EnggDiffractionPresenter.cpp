@@ -709,7 +709,7 @@ std::string EnggDiffractionPresenter::functionStrFactory(
       boost::lexical_cast<std::string>(S);
 
   return functionStr;
-};
+}
 
 void EnggDiffractionPresenter::runEvaluateFunctionAlg(
     std::string bk2BkExpFunction, std::string InputName, std::string OutputName,
@@ -797,8 +797,10 @@ void EnggDiffractionPresenter::plotFitPeaksCurves() {
     auto focusedPeaksWS = ADS.retrieveWS<MatrixWorkspace>(focusedPeaksWs);
     auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(singlePeaksWs);
     try {
-      m_view->setDataVector(ALCHelper::curveDataFromWs(focusedPeaksWS), true);
-      m_view->setDataVector(ALCHelper::curveDataFromWs(singlePeaksWS), false);
+      auto focusedData = ALCHelper::curveDataFromWs(focusedPeaksWS);
+      m_view->setDataVector(focusedData, true);
+      auto singlePeaksData = ALCHelper::curveDataFromWs(singlePeaksWS);
+      m_view->setDataVector(singlePeaksData, false);
 
     } catch (std::runtime_error &re) {
       g_log.error() << "Unable to finish of the plotting of the graph for "
