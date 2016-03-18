@@ -358,7 +358,7 @@ class ReconstructionCommand(object):
 
             # skip if for example: 0, 0, 0, 0 (empty selection)
             if cfg.normalize_air_region[1] >= cfg.normalize_air_region[3] or\
-               cfg.normalize_air_region[0] >= cfg.normalize_air_region[2]):
+               cfg.normalize_air_region[0] >= cfg.normalize_air_region[2]:
                 return data
 
             air_sums = []
@@ -593,7 +593,7 @@ class ReconstructionCommand(object):
         algs_avail = "[FP3D_CUDA], [BP3D_CUDA]], [FDK_CUDA], [SIRT3D_CUDA], [CGLS3D_CUDA]"
 
 
-        if not alg_cfg.algorithm.upper() in algs_avail:
+        if alg_cfg.algorithm.upper() not in algs_avail:
             raise ValueError("Invalid algorithm requested for the Astra package: {0}. "
                              "Supported algorithms: {1}".format(alg_cfg.algorithm, algs_avail))
         det_rows = sinogram.shape[0]
@@ -855,6 +855,6 @@ class ReconstructionCommand(object):
         if not isinstance(data, np.ndarray):
             raise ValueError("Invalid stack of images data. It is not a numpy array: {0}".format(data))
 
-        if not 3 == len(data.shape):
+        if 3 != len(data.shape):
             raise ValueError("Invalid stack of images data. It does not have 3 dimensions. Shape: {0}".
                              format(data.shape))
