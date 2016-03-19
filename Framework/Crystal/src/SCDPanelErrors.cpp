@@ -4,6 +4,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidKernel/ConfigService.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -76,6 +77,7 @@ void initializeAttributeList(vector<string> &attrs) {
 SCDPanelErrors::SCDPanelErrors()
     : API::ParamFunction(), IFunction1D(), tolerance(.6), m_startX(-1),
       m_endX(-1) {
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   initializeAttributeList(m_attrNames);
 
   SampleX = SampleY = SampleZ = 0.;
@@ -463,9 +465,10 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   try {
     Kernel::Matrix<double> UB(3, 3, false);
     Geometry::IndexingUtils::Optimize_UB(UB, hkl_vectors, q_vectors);
-    Geometry::OrientedLattice lat;
+    lattice.setUB(UB);
+    /*Geometry::OrientedLattice lat;
     lat.setUB(UB);
-    lattice.setU(lat.getU());
+    lattice.setU(lat.getU());*/
   } catch (...) {
     for (size_t i = StartX; i <= EndX; ++i)
       out[i] = 10000;
@@ -673,7 +676,11 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
   L0 = ppeak.getL1();
 
   velocity = (L0 + ppeak.getL2()) / ppeak.getTOF();
-  K = 2. * M_PI / ppeak.getWavelength() / velocity; // 2pi/lambda = K*velocity
+  // Default for ki-kf has -q
+  double qSign = 1.0;
+  if (convention == "Crystallography")
+    qSign = -1.0;
+  K = qSign * 2.* M_PI / ppeak.getWavelength() / velocity; // 2pi/lambda = K*velocity
 
   for (size_t xval = StartX; xval <= EndX; xval += 3) {
     double x = floor(xValues[xval]);

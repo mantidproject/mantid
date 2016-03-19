@@ -349,6 +349,7 @@ private:
   void saveXmlFile(std::string const FileName,
                    std::vector<std::vector<std::string>> const Groups,
                    Geometry::Instrument_const_sptr const instrument) const;
+  void removeOutliers(std::vector<double> &intensities);
 };
 
 } // namespace Crystal

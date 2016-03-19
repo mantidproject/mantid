@@ -605,9 +605,9 @@ void SCDCalibratePanels::exec() {
 
   bool useL0 = getProperty("useL0");
   bool useTimeOffset = getProperty("useTimeOffset");
-  int Niter = 1;
+  int nIter = 1;
   if (useL0 || useTimeOffset)
-    Niter = 2;
+    nIter = 2;
   bool use_PanelWidth = getProperty("usePanelWidth");
   bool use_PanelHeight = getProperty("usePanelHeight");
   bool use_PanelPosition = getProperty("usePanelPosition");
@@ -656,7 +656,16 @@ void SCDCalibratePanels::exec() {
   boost::shared_ptr<const Instrument> instrument =
       peaksWs->getPeak(0).getInstrument();
 
-  double T0 = 0;
+  // Time offset from property
+  const API::Run &run = peaksWs->run();
+  double T0 = 0.0;
+  if (run.hasProperty("T0")) {
+    Kernel::Property *prop = run.getProperty("T0");
+    T0 = boost::lexical_cast<double, std::string>(prop->value());
+    if (T0 != 0) {
+      g_log.notice() << "T0 = " << T0 << std::endl;
+    }
+  }
   if ((string)getProperty("PreProcessInstrument") ==
       "C)Apply a LoadParameter.xml type file")
     T0 = getProperty("InitialTimeOffset"); //!*****
@@ -666,7 +675,7 @@ void SCDCalibratePanels::exec() {
   g_log.debug() << "Initial L0,T0=" << L0 << "," << T0 << endl;
   std::vector<std::string> detcal;
 
-  for (auto it0l0 = 0; it0l0 != Niter; ++it0l0) {
+  for (auto iIter = 0; iIter != nIter; ++iIter) {
     detcal.clear();
     PARALLEL_FOR1(peaksWs)
     for (int iGr = 0; iGr < nGroups; iGr++) {
@@ -1021,7 +1030,7 @@ void SCDCalibratePanels::exec() {
       std::ifstream infile(DetCalFileName +
                            boost::lexical_cast<std::string>(iGr));
       while (std::getline(infile, line)) {
-        if (iGr == 0) {
+        if (iGr == 0 && iIter == nIter-1) {
           if (line[0] == '#' || line[0] == '6')
             outfile << line << "\n";
         }
@@ -1040,41 +1049,22 @@ void SCDCalibratePanels::exec() {
             .remove();
     }
     if (useL0) {
-      std::vector<double> Zscore = getZscore(l0vec);
-      std::vector<size_t> banned;
-      for (size_t i = 0; i < l0vec.size(); ++i) {
-        if (Zscore[i] > 0.5) {
-          banned.push_back(i);
-        }
-      }
-      // delete outliers
-      for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin();
-           it != banned.rend(); ++it) {
-        l0vec.erase(l0vec.begin() + (*it));
-      }
+      removeOutliers(l0vec);
+      Statistics stats = getStatistics(l0vec);
+      L0 = stats.mean * 0.01;  // cm when read from file
+      useL0 = false;
     }
     if (useTimeOffset) {
-      Statistics stats = getStatistics(l0vec);
-      L0 = stats.mean * 0.01;
-      std::vector<double> Zscore = getZscore(t0vec);
-      std::vector<size_t> banned;
-      for (size_t i = 0; i < t0vec.size(); ++i) {
-        if (Zscore[i] > 0.5) {
-          banned.push_back(i);
-        }
-      }
-      // delete outliers
-      for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin();
-           it != banned.rend(); ++it) {
-        t0vec.erase(t0vec.begin() + (*it));
-      }
+      removeOutliers(t0vec);
+      Statistics stats = getStatistics(t0vec);
+      T0 = stats.mean;
+      // set T0 in the run parameters
+      API::Run &m_run = peaksWs->mutableRun();
+      m_run.addProperty<double>("T0", T0, true);
+      useTimeOffset = false;
     }
-    Statistics stats = getStatistics(t0vec);
-    T0 = stats.mean;
-    useL0 = false;
-    useTimeOffset = false;
   }
-  L0 *= 100.;
+  L0 *= 100;  // ISAW uses cm
   outfile << "7  " << std::setprecision(4) << std::fixed << L0;
   outfile << std::setw(13) << std::setprecision(3) << T0 << std::endl;
   outfile << "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX "
@@ -1147,7 +1137,7 @@ void SCDCalibratePanels::exec() {
       TofWksp->dataY(iSpectrum)[icount] = theoretical.getTOF();
       icount++;
     } catch (...) {
-      g_log.debug() << "Problem only in printing peaks" << std::endl;
+      //g_log.debug() << "Problem only in printing peaks" << std::endl;
     }
   }
 }
@@ -1892,6 +1882,30 @@ void SCDCalibratePanels::saveXmlFile(
   // flush and close the file
   oss3.flush();
   oss3.close();
+}
+/// Removes values that deviates more than sigmaCritical from the
+/// intensities' mean.
+void SCDCalibratePanels::removeOutliers(std::vector<double> &intensities) {
+
+  if (intensities.size() > 2) {
+    const std::vector<double> &zScores = Kernel::getZscore(intensities);
+
+    std::vector<size_t> outlierIndices;
+    for (size_t i = 0; i < zScores.size(); ++i) {
+      if (zScores[i] > 1.0) {
+        outlierIndices.push_back(i);
+      }
+    }
+
+    if (outlierIndices.size() == intensities.size()) return;
+
+    if (!outlierIndices.empty()) {
+      for (auto it = outlierIndices.rbegin(); it != outlierIndices.rend();
+           ++it) {
+        intensities.erase(intensities.begin() + (*it));
+      }
+    }
+  }
 }
 
 } // namespace Crystal
