@@ -2,6 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIVIEWQTWIDGET_H_
 
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/IImageROIPresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/IImageROIView.h"
@@ -125,7 +126,7 @@ protected:
 private slots:
   void browseImgClicked();
 
-  void updatedRotation(int idx);
+  void rotationUpdated(int idx);
 
   void corClicked();
   void corResetClicked();
@@ -169,6 +170,16 @@ private:
   // shows the image in a widget
   void showProjectionImage(const Mantid::API::WorkspaceGroup_sptr &wsg,
                            size_t idx, float rotationAngle = 0);
+
+  void getCheckedDimensions(const Mantid::API::MatrixWorkspace_sptr ws,
+                            size_t &width, size_t &height);
+
+  void getPixelMinMax(Mantid::API::MatrixWorkspace_sptr ws, double &min,
+                      double &max);
+
+  QPixmap transferWSImageToQPixmap(const Mantid::API::MatrixWorkspace_sptr ws,
+                                   const size_t width, const size_t height,
+                                   float rotationAngle);
 
   /// repaint the image with new positions of points and rectangles
   void refreshROIetAl();

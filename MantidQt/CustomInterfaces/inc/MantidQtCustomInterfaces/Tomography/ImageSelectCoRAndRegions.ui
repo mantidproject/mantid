@@ -682,6 +682,9 @@
          </item>
          <item>
           <widget class="QComboBox" name="comboBox_image_type">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <item>
             <property name="text">
              <string>Sample</string>
@@ -725,6 +728,9 @@
          </item>
          <item>
           <widget class="QComboBox" name="comboBox_rotation">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="editable">
             <bool>false</bool>
            </property>

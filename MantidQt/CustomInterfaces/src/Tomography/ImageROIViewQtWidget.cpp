@@ -84,6 +84,8 @@ void ImageROIViewQtWidget::showStack(Mantid::API::WorkspaceGroup_sptr &wsg) {
   initParamWidgets(width, height);
   refreshROIetAl();
   enableParamWidgets(true);
+  // TODO:
+  // enableImageTypes(wsg, wsgFlats, wsgDarks)
 }
 
 void ImageROIViewQtWidget::showProjection(
@@ -240,7 +242,7 @@ void ImageROIViewQtWidget::setupConnections() {
 
   // image rotation
   connect(m_ui.comboBox_rotation, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(updateRotation(int)));
+          SLOT(rotationUpdated(int)));
 
   // parameter (points) widgets
   connect(m_ui.spinBox_cor_x, SIGNAL(valueChanged(int)), this,
@@ -423,6 +425,9 @@ void ImageROIViewQtWidget::drawBoxNormalizationRegion(
 }
 
 void ImageROIViewQtWidget::enableParamWidgets(bool enable) {
+  m_ui.comboBox_image_type->setEnabled(enable);
+  m_ui.comboBox_rotation->setEnabled(enable);
+
   m_ui.groupBox_cor->setEnabled(enable);
   m_ui.groupBox_roi->setEnabled(enable);
   m_ui.groupBox_norm->setEnabled(enable);
@@ -464,6 +469,13 @@ void ImageROIViewQtWidget::initParamWidgets(size_t maxWidth, size_t maxHeight) {
 }
 
 void ImageROIViewQtWidget::setParamWidgets(ImageStackPreParams &params) {
+  if (params.rotation > 0 && params.rotation <= 360) {
+    m_ui.comboBox_rotation->setCurrentIndex(
+        static_cast<int>(params.rotation / 90.0f) % 4);
+  } else {
+    m_ui.comboBox_rotation->setCurrentIndex(0);
+  }
+
   m_ui.spinBox_cor_x->setValue(static_cast<int>(params.cor.X()));
   m_ui.spinBox_cor_y->setValue(static_cast<int>(params.cor.Y()));
 
@@ -519,7 +531,9 @@ void ImageROIViewQtWidget::updateFromImagesSlider(int /* current */) {
   m_presenter->notify(IImageROIPresenter::UpdateImgIndex);
 }
 
-void ImageROIViewQtWidget::updatedRotation(int /* idx */) {
+void ImageROIViewQtWidget::rotationUpdated(int /* idx */) {
+  m_params.rotation =
+      static_cast<float>(m_ui.comboBox_rotation->currentIndex()) * 90.0f;
   m_presenter->notify(ImageROIPresenter::ChangeRotation);
 }
 
@@ -551,49 +565,163 @@ void ImageROIViewQtWidget::showProjectionImage(
         this, "Cannot load image",
         "There was a problem while trying to find the image data: " +
             QString::fromStdString(e.what()));
+    return;
   }
 
-  const size_t MAXDIM = 2048 * 32;
-  size_t width;
+  size_t width, height;
   try {
-    width = boost::lexical_cast<size_t>(ws->run().getLogData("Axis1")->value());
+    getCheckedDimensions(ws, width, height);
+  } catch (std::runtime_error &rexc) {
+    QMessageBox::critical(this, "Cannot load image",
+                          "There was a problem while trying to "
+                          "find the width of the image: " +
+                              QString::fromStdString(rexc.what()));
+    return;
+  }
+
+  // load / transfer image into a QImage, handling the rotation, width height
+  // consistently
+  QPixmap pixmap = transferWSImageToQPixmap(ws, width, height, rotationAngle);
+
+  m_ui.label_img->setPixmap(pixmap);
+  m_ui.label_img->show();
+  m_basePixmap.reset(new QPixmap(pixmap));
+}
+
+/**
+ * Paint an image from a workspace (MatrixWorkspace) into a
+ * QPixmap. The QPixmap can then be display by for example setting
+ * it into a QLabel widget.
+ *
+ * @param ws image workspace
+ *
+ * @param width width of the image in pixels
+ *
+ * @param height height of the image in pixels
+ *
+ * @param rotationAngle rotate the image by this angle with respect to the
+ *  original image in the workspace when displaying it
+ */
+QPixmap ImageROIViewQtWidget::transferWSImageToQPixmap(
+    const MatrixWorkspace_sptr ws, const size_t width, const size_t height,
+    float rotationAngle) {
+
+  // find min and max to scale pixel values
+  double min = std::numeric_limits<double>::max(),
+         max = std::numeric_limits<double>::min();
+  getPixelMinMax(ws, min, max);
+  if (max <= min) {
+    QMessageBox::warning(
+        this, "Empty image!",
+        "The image could be loaded but it contains "
+        "effectively no information, all pixels have the same value.");
+    // black picture
+    QPixmap pix(static_cast<int>(width), static_cast<int>(height));
+    pix.fill(QColor(0, 0, 0));
+    return pix;
+  }
+
+  QImage rawImg(QSize(static_cast<int>(width), static_cast<int>(height)),
+                QImage::Format_RGB32);
+  const double max_min = max - min;
+  const double scaleFactor = 255.0 / max_min;
+
+  for (size_t yi = 0; yi < width; ++yi) {
+    const auto &yvec = ws->readY(yi);
+    for (size_t xi = 0; xi < width; ++xi) {
+      const double &v = yvec[xi];
+      // color the range min-max in gray scale. To apply different color
+      // maps you'd need to use rawImg.setColorTable() or similar.
+      const int scaled = static_cast<int>(scaleFactor * (v - min));
+      QRgb vRgb = qRgb(scaled, scaled, scaled);
+
+      size_t rotX = 0, rotY = 0;
+      if (0 == rotationAngle) {
+        rotX = xi;
+        rotY = yi;
+      } else if (90 == rotationAngle) {
+        rotX = height - (yi + 1);
+        rotY = xi;
+      } else if (180 == rotationAngle) {
+        rotX = width - (xi + 1);
+        rotY = height - (yi + 1);
+      } else if (270 == rotationAngle) {
+        rotX = yi;
+        rotY = width - (xi + 1);
+      }
+      rawImg.setPixel(static_cast<int>(rotX), static_cast<int>(rotY), vRgb);
+    }
+  }
+
+  // paint image direct from QImage object
+  QPixmap pix = QPixmap::fromImage(rawImg);
+  // Alternative, drawing with a painter:
+  // QPixmap pix(static_cast<int>(width), static_cast<int>(height));
+  // QPainter painter;
+  // painter.begin(&pix);
+  // painter.drawImage(0, 0, rawImg);
+  // painter.end();
+
+  return pix;
+}
+
+/**
+ * Gets the width and height of an image MatrixWorkspace.
+ *
+ * @param width width of the image in pixels (bins)
+ *
+ * @param hegiht height of the image in pixels (histograms)
+ *
+ * @throws runtime_error if there are problems when retrieving the
+ * width/height or if they are inconsistent.
+ */
+void ImageROIViewQtWidget::getCheckedDimensions(const MatrixWorkspace_sptr ws,
+                                                size_t &width, size_t &height) {
+  const size_t MAXDIM = 2048 * 32;
+  const std::string widthLogName = "Axis1";
+  try {
+    width = boost::lexical_cast<size_t>(
+        ws->run().getLogData(widthLogName)->value());
     // TODO: add a settings option for this (like max mem allocation for
     // images)?
     if (width >= MAXDIM)
       width = MAXDIM;
   } catch (std::exception &e) {
-    QMessageBox::critical(this, "Cannot load image",
-                          "There was a problem while trying to "
-                          "find the width of the image: " +
-                              QString::fromStdString(e.what()));
-    return;
+    throw std::runtime_error(
+        "Could not find the width of the image from the run log data (entry: " +
+        widthLogName + ")");
   }
 
-  size_t height;
+  const std::string heightLogName = "Axis2";
   try {
-    height =
-        boost::lexical_cast<size_t>(ws->run().getLogData("Axis2")->value());
+    height = boost::lexical_cast<size_t>(
+        ws->run().getLogData(heightLogName)->value());
     if (height >= MAXDIM)
       height = MAXDIM;
   } catch (std::exception &e) {
-    QMessageBox::critical(this, "Cannot load image",
-                          "There was a problem while trying to "
-                          "find the height of the image: " +
-                              QString::fromStdString(e.what()));
-    return;
+    throw std::runtime_error("could not find the height of the image from the "
+                             "run log data (entry: " +
+                             heightLogName + ")");
   }
 
-  // images are loaded as 1 histogram == 1 pixel (1 bin per histogram):
-  if (height != ws->getNumberHistograms() || width != ws->blocksize()) {
-    QMessageBox::critical(
-        this, "Image dimensions do not match in the input image workspace",
+  // images are loaded as 1 histogram == 1 row (1 bin per image column):
+  size_t histos = ws->getNumberHistograms();
+  size_t bins = ws->blocksize();
+  if (height != histos || width != bins) {
+    throw std::runtime_error(
+        "Image dimensions do not match in the input image workspace. "
         "Could not load the expected "
-        "number of rows and columns.");
-    return;
+        "number of rows and columns. The width and height found in the run log "
+        "data of the input files is: " +
+        std::to_string(width) + ", " + std::to_string(height) +
+        ", but the number of bins, histograms in "
+        "the workspace loaded is: " +
+        std::to_string(histos) + ", " + std::to_string(bins) + ".");
   }
-  // find min and max to scale pixel values
-  double min = std::numeric_limits<double>::max(),
-         max = std::numeric_limits<double>::min();
+}
+
+void ImageROIViewQtWidget::getPixelMinMax(MatrixWorkspace_sptr ws, double &min,
+                                          double &max) {
   for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
     for (size_t j = 0; j < ws->blocksize(); ++j) {
       const double &v = ws->readY(i)[j];
@@ -603,61 +731,17 @@ void ImageROIViewQtWidget::showProjectionImage(
         max = v;
     }
   }
-  if (min >= max) {
-    QMessageBox::warning(
-        this, "Empty image!",
-        "The image could be loaded but it contains "
-        "effectively no information, all pixels have the same value.");
-    // black picture
-    QPixmap pix(static_cast<int>(width), static_cast<int>(height));
-    pix.fill(QColor(0, 0, 0));
-    m_ui.label_img->setPixmap(pix);
-    m_ui.label_img->show();
-    m_basePixmap.reset(new QPixmap(pix));
-    return;
-  }
-
-  // load / transfer image into a QImage
-  QImage rawImg(QSize(static_cast<int>(width), static_cast<int>(height)),
-                QImage::Format_RGB32);
-  const double max_min = max - min;
-  const double scaleFactor = 255.0 / max_min;
-  for (size_t yi = 0; yi < width; ++yi) {
-    for (size_t xi = 0; xi < width; ++xi) {
-      const double &v = ws->readY(yi)[xi];
-      // color the range min-max in gray scale. To apply different color
-      // maps you'd need to use rawImg.setColorTable() or similar.
-      const int scaled = static_cast<int>(scaleFactor * (v - min));
-      QRgb vRgb = qRgb(scaled, scaled, scaled);
-      rawImg.setPixel(static_cast<int>(xi), static_cast<int>(yi), vRgb);
-    }
-  }
-
-  // paint and show image
-  // direct from image
-  QPixmap pix = QPixmap::fromImage(rawImg);
-  m_ui.label_img->setPixmap(pix);
-  m_ui.label_img->show();
-  m_basePixmap.reset(new QPixmap(pix));
-  // Alternative, drawing with a painter:
-  // QPixmap pix(static_cast<int>(width), static_cast<int>(height));
-  // QPainter painter;
-  // painter.begin(&pix);
-  // painter.drawImage(0, 0, rawImg);
-  // painter.end();
-  // m_ui.label_img->setPixmap(pix);
-  // m_ui.label_img->show();
-  // m_basePixmap.reset(new QPixmap(pix));
 }
 
 float ImageROIViewQtWidget::currentRotationAngle() const {
-  return static_cast<float>(m_ui.comboBox_rotation->currentIndex()) * 90.0f;
+  return m_params.rotation;
 }
 
 void ImageROIViewQtWidget::updateRotationAngle(float angle) {
   if (angle < 0 || (0 != static_cast<int>(angle) % 90))
     return;
 
+  m_params.rotation = angle;
   m_ui.comboBox->setCurrentIndex(
       static_cast<int>((static_cast<int>(angle) / 90) % 4));
   showProjectionImage(m_stack, currentImgIndex(), currentRotationAngle());

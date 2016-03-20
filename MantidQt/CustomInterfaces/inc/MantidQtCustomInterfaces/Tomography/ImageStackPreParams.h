@@ -54,6 +54,7 @@ public:
   Mantid::Kernel::V2D cor;
   Box2D roi;
   Box2D normalizationRegion;  //< also known as 'air' region
+  float rotation; //< rotation angle in degrees
 };
 
 } // namespace CustomInterfaces
