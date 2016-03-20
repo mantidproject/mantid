@@ -183,7 +183,9 @@ void ImageROIPresenter::processNewStack() {
     return;
   }
 
-  m_view->showStack(wsg);
+  Mantid::API::WorkspaceGroup_sptr wsgFlats;
+  Mantid::API::WorkspaceGroup_sptr wsgDarks;
+  m_view->showStack(wsg, wsgFlats, wsgDarks);
 
   // clean-up container group workspace? Not for now
   if (false && wsg)

@@ -75,9 +75,11 @@ public:
   /// show a stack of images given the path to the files
   void showStack(const std::string &path) override;
 
-  /// show a (new) stack of images that have been loaded into a group of
-  /// workspaces
-  void showStack(Mantid::API::WorkspaceGroup_sptr &ws) override;
+  /// show a (new) stack of images that have been loaded into groups of
+  /// workspaces (samples, flats, darks)
+  void showStack(const Mantid::API::WorkspaceGroup_sptr &wsg,
+                 const Mantid::API::WorkspaceGroup_sptr &wsgFlats,
+                 const Mantid::API::WorkspaceGroup_sptr &wsgDarks) override;
 
   const Mantid::API::WorkspaceGroup_sptr stack() const override {
     return m_stack;
@@ -142,6 +144,13 @@ private slots:
   void valueUpdatedNormArea(int v);
 
 private:
+  /// enable types of images (sample, flat, dark) depending on their
+  /// availability
+  void enableImageTypes(bool enableSamples, bool enableFlats, bool enableDarks);
+
+  /// enable/disable the groups with spin boxes for the center and corners
+  void enableParamWidgets(bool enable);
+
   void grabCoRFromWidgets();
   void grabROIFromWidgets();
   void grabNormAreaFromWidgets();
@@ -159,8 +168,6 @@ private:
   // widget closing
   void closeEvent(QCloseEvent *ev) override;
 
-  /// enable/disable the groups with spin boxes for the center and corners
-  void enableParamWidgets(bool enable);
   /// initialize values to defaults and set max/min for the spin boxes
   void initParamWidgets(size_t maxWidth, size_t maxHeight);
 
@@ -178,7 +185,7 @@ private:
                       double &max);
 
   QPixmap transferWSImageToQPixmap(const Mantid::API::MatrixWorkspace_sptr ws,
-                                   const size_t width, const size_t height,
+                                   size_t width, size_t height,
                                    float rotationAngle);
 
   /// repaint the image with new positions of points and rectangles

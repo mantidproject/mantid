@@ -57,7 +57,10 @@ void ImageROIViewQtWidget::showStack(const std::string & /*path*/) {
   // enableParamWidgets(true);
 }
 
-void ImageROIViewQtWidget::showStack(Mantid::API::WorkspaceGroup_sptr &wsg) {
+void ImageROIViewQtWidget::showStack(
+    const Mantid::API::WorkspaceGroup_sptr &wsg,
+    const Mantid::API::WorkspaceGroup_sptr &wsgFlats,
+    const Mantid::API::WorkspaceGroup_sptr &wsgDarks) {
   if (0 == wsg->size())
     return;
 
@@ -84,8 +87,8 @@ void ImageROIViewQtWidget::showStack(Mantid::API::WorkspaceGroup_sptr &wsg) {
   initParamWidgets(width, height);
   refreshROIetAl();
   enableParamWidgets(true);
-  // TODO:
-  // enableImageTypes(wsg, wsgFlats, wsgDarks)
+  enableImageTypes(wsg && wsg->size() > 0, wsgFlats && wsgFlats->size() > 0,
+                   wsgDarks && wsgDarks->size() > 0);
 }
 
 void ImageROIViewQtWidget::showProjection(
@@ -150,6 +153,24 @@ std::string ImageROIViewQtWidget::askImgOrStackPath() {
   }
 
   return path.toStdString();
+}
+
+void ImageROIViewQtWidget::enableImageTypes(bool enableSamples,
+                                            bool enableFlats,
+                                            bool enableDarks) {
+  QComboBox *itypes = m_ui.comboBox_image_type;
+  if (!itypes || 3 != itypes->count())
+    return;
+
+  std::vector<bool> enable = {enableSamples, enableFlats, enableDarks};
+  for (size_t idx = 0; idx < enable.size(); idx++) {
+    if (!enable[idx]) {
+      // trick to display a combobox entry as a disabled row
+      QModelIndex modelIdx = itypes->model()->index(static_cast<int>(idx), 0);
+      QVariant disabled(0);
+      itypes->model()->setData(modelIdx, disabled, Qt::UserRole - 1);
+    }
+  }
 }
 
 void ImageROIViewQtWidget::saveSettings() const {
@@ -602,9 +623,10 @@ void ImageROIViewQtWidget::showProjectionImage(
  * @param rotationAngle rotate the image by this angle with respect to the
  *  original image in the workspace when displaying it
  */
-QPixmap ImageROIViewQtWidget::transferWSImageToQPixmap(
-    const MatrixWorkspace_sptr ws, const size_t width, const size_t height,
-    float rotationAngle) {
+QPixmap
+ImageROIViewQtWidget::transferWSImageToQPixmap(const MatrixWorkspace_sptr ws,
+                                               size_t width, size_t height,
+                                               float rotationAngle) {
 
   // find min and max to scale pixel values
   double min = std::numeric_limits<double>::max(),

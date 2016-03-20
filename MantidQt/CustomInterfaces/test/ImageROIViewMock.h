@@ -19,19 +19,26 @@ public:
   MOCK_CONST_METHOD0(selectionState, SelectionState());
 
   // void changeSelectionState(const SelectionState state);
-  MOCK_METHOD1(changeSelectionState, void(const IImageROIView::SelectionState&));
+  MOCK_METHOD1(changeSelectionState,
+               void(const IImageROIView::SelectionState &));
 
   // void showStack(const std::string &path);
   MOCK_METHOD1(showStack, void(const std::string &));
 
-  // void showStack(const Mantid::API::WorkspaceGroup_sptr &ws);
-  MOCK_METHOD1(showStack, void(Mantid::API::WorkspaceGroup_sptr &));
+  // void showStack(Mantid::API::WorkspaceGroup_sptr &ws,
+  // Mantid::API::WorkspaceGroup_sptr &wsgFlats,
+  // Mantid::API::WorkspaceGroup_sptr &wsgDarks);
+  MOCK_METHOD3(showStack, void(const Mantid::API::WorkspaceGroup_sptr &,
+                               const Mantid::API::WorkspaceGroup_sptr &,
+                               const Mantid::API::WorkspaceGroup_sptr &));
 
   // const Mantid::API::WorkspaceGroup_sptr stack() const;
   MOCK_CONST_METHOD0(stack, const Mantid::API::WorkspaceGroup_sptr());
 
-  // void showProjection(const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx);
-  MOCK_METHOD2(showProjection, void(const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx));
+  // void showProjection(const Mantid::API::WorkspaceGroup_sptr &wsg, size_t
+  // idx);
+  MOCK_METHOD2(showProjection,
+               void(const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx));
 
   // void userWarning(const std::string &warn, const std::string &description)
   MOCK_METHOD2(userWarning,

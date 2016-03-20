@@ -268,15 +268,9 @@
            </spacer>
           </item>
           <item row="8" column="0">
-           <widget class="QCheckBox" name="checkBox_prep_rotation">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
+           <widget class="QLabel" name="label">
             <property name="text">
              <string>Rotation (°, clockwise)</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
             </property>
            </widget>
           </item>

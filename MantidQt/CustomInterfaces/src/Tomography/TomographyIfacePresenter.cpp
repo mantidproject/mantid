@@ -369,7 +369,7 @@ void TomographyIfacePresenter::processSetupReconTool() {
 
 void TomographyIfacePresenter::processRunRecon() {
   // m_model->checkDataPathsSet();
-  // TODO: validate data path:
+  // TODO: validate data path with additional rules/constraints?
   TomoPathsConfig paths = m_view->currentPathsConfig();
   if (paths.pathSamples().empty()) {
     m_view->userWarning("Sample images path not set!",

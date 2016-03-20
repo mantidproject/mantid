@@ -92,8 +92,11 @@ public:
     // should not get there:
     EXPECT_CALL(mockView, showStack(testing::An<const std::string &>()))
         .Times(0);
-    EXPECT_CALL(mockView,
-                showStack(testing::An<Mantid::API::WorkspaceGroup_sptr &>()))
+    EXPECT_CALL(
+        mockView,
+        showStack(testing::An<const Mantid::API::WorkspaceGroup_sptr &>(),
+                  testing::An<const Mantid::API::WorkspaceGroup_sptr &>(),
+                  testing::An<const Mantid::API::WorkspaceGroup_sptr &>()))
         .Times(0);
     EXPECT_CALL(mockView, updateImgWithIndex(testing::_)).Times(0);
 
@@ -116,8 +119,11 @@ public:
     // should not get there because there's no stack/img - it's just ignored:
     EXPECT_CALL(mockView, showStack(testing::An<const std::string &>()))
         .Times(0);
-    EXPECT_CALL(mockView,
-                showStack(testing::An<Mantid::API::WorkspaceGroup_sptr &>()))
+    EXPECT_CALL(
+        mockView,
+        showStack(testing::An<const Mantid::API::WorkspaceGroup_sptr &>(),
+                  testing::An<const Mantid::API::WorkspaceGroup_sptr &>(),
+                  testing::An<const Mantid::API::WorkspaceGroup_sptr &>()))
         .Times(0);
     EXPECT_CALL(mockView, updateImgWithIndex(testing::_)).Times(0);
 
@@ -142,13 +148,17 @@ public:
     // should not get there because there's no stack/img
     EXPECT_CALL(mockView, showStack(testing::An<const std::string &>()))
         .Times(0);
-    EXPECT_CALL(mockView,
-                showStack(testing::An<Mantid::API::WorkspaceGroup_sptr &>()))
+    EXPECT_CALL(
+        mockView,
+        showStack(testing::An<const Mantid::API::WorkspaceGroup_sptr &>(),
+                  testing::An<const Mantid::API::WorkspaceGroup_sptr &>(),
+                  testing::An<const Mantid::API::WorkspaceGroup_sptr &>()))
         .Times(0);
     EXPECT_CALL(mockView, updateImgWithIndex(testing::_)).Times(0);
 
     // this exception is currently handled, and a warning given
-    //TSM_ASSERT_THROWS("There should be an exception if there is an unexpected "
+    // TSM_ASSERT_THROWS("There should be an exception if there is an unexpected
+    // "
     //                  "error with the images path",
     //                  pres.notify(IImageROIPresenter::BrowseImgOrStack),
     //                  Poco::FileNotFoundException);
@@ -197,8 +207,11 @@ public:
     EXPECT_CALL(mockView, resetROI()).Times(0);
     EXPECT_CALL(mockView, showStack(testing::An<const std::string &>()))
         .Times(0);
-    EXPECT_CALL(mockView,
-                showStack(testing::An<Mantid::API::WorkspaceGroup_sptr &>()))
+    EXPECT_CALL(
+        mockView,
+        showStack(testing::An<const Mantid::API::WorkspaceGroup_sptr &>(),
+                  testing::An<const Mantid::API::WorkspaceGroup_sptr &>(),
+                  testing::An<const Mantid::API::WorkspaceGroup_sptr &>()))
         .Times(0);
     EXPECT_CALL(mockView, updateImgWithIndex(testing::_)).Times(0);
 
@@ -249,8 +262,11 @@ public:
     EXPECT_CALL(mockView, resetCoR()).Times(0);
     EXPECT_CALL(mockView, showStack(testing::An<const std::string &>()))
         .Times(0);
-    EXPECT_CALL(mockView,
-                showStack(testing::An<Mantid::API::WorkspaceGroup_sptr &>()))
+    EXPECT_CALL(
+        mockView,
+        showStack(testing::An<const Mantid::API::WorkspaceGroup_sptr &>(),
+                  testing::An<const Mantid::API::WorkspaceGroup_sptr &>(),
+                  testing::An<const Mantid::API::WorkspaceGroup_sptr &>()))
         .Times(0);
     EXPECT_CALL(mockView, updateImgWithIndex(testing::_)).Times(0);
 
@@ -302,8 +318,11 @@ public:
     EXPECT_CALL(mockView, resetROI()).Times(0);
     EXPECT_CALL(mockView, showStack(testing::An<const std::string &>()))
         .Times(0);
-    EXPECT_CALL(mockView,
-                showStack(testing::An<Mantid::API::WorkspaceGroup_sptr &>()))
+    EXPECT_CALL(
+        mockView,
+        showStack(testing::An<const Mantid::API::WorkspaceGroup_sptr &>(),
+                  testing::An<const Mantid::API::WorkspaceGroup_sptr &>(),
+                  testing::An<const Mantid::API::WorkspaceGroup_sptr &>()))
         .Times(0);
     EXPECT_CALL(mockView, updateImgWithIndex(testing::_)).Times(0);
 
