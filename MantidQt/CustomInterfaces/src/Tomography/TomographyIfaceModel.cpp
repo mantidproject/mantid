@@ -631,7 +631,7 @@ void TomographyIfaceModel::splitCmdLine(const std::string &cmd,
   if (cmd.empty())
     return;
 
-  auto pos = cmd.find(' ');
+  const auto pos = cmd.find(' ');
   if (std::string::npos == pos)
     return;
 

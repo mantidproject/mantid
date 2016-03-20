@@ -33,8 +33,8 @@ try:
 except ImportError:
     raise ImportError("Could not find the subpackage scipy.ndimage, required for image pre-/post-processing")
 
-import IMAT.tomorec.io as tomoio
-import IMAT.tomorec.configs as tomocfg
+from . import io as tomoio
+from . import configs as tomocfg
 
 class ReconstructionCommand(object):
     """

@@ -879,7 +879,7 @@ QDataStream &operator<<(QDataStream &stream,
 QDataStream &operator<<(QDataStream &stream, TomoSystemSettings const &ss) {
   // clang-format off
   stream << ss.m_local << ss.m_remote;
-  for (auto comp : ss.m_pathComponents) {
+  for (const auto comp : ss.m_pathComponents) {
     stream << comp;
   }
   stream << ss.m_samplesDirPrefix
@@ -1177,7 +1177,7 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
     TomoToolConfigTomoPy tomopy;
     m_uiTomoPy.setupUi(&tomopy);
     m_uiTomoPy.comboBox_method->clear();
-    auto methods = ToolConfigTomoPy::methods();
+    const auto methods = ToolConfigTomoPy::methods();
     for (size_t i = 0; i < methods.size(); i++) {
       m_uiTomoPy.comboBox_method->addItem(
           QString::fromStdString(methods[i].second));
@@ -1204,7 +1204,7 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
     TomoToolConfigAstra astra;
     m_uiAstra.setupUi(&astra);
     m_uiAstra.comboBox_method->clear();
-    auto methods = ToolConfigAstraToolbox::methods();
+    const auto methods = ToolConfigAstraToolbox::methods();
     for (size_t i = 0; i < methods.size(); i++) {
       m_uiAstra.comboBox_method->addItem(
           QString::fromStdString(methods[i].second));
@@ -1891,7 +1891,7 @@ void TomographyIfaceViewQtGUI::sendToVisTool(const std::string &toolName,
   if (!model)
     return;
 
-  auto selection =
+  const auto selection =
       m_uiTabVisualize.treeView_files->selectionModel()->selectedIndexes();
   // just take the first selected item/directory
   if (selection.empty())
