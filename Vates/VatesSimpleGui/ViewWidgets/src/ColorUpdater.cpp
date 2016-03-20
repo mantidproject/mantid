@@ -84,6 +84,16 @@ void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
   vtkSMTransferFunctionProxy::ApplyPreset(lutProxy, model, true);
 }
 
+void SafeSetScalarBarColor(vtkSMProxy *gridAxis, const char *pname,
+                           double *value) {
+  vtkSMProperty *prop = gridAxis->GetProperty(pname);
+  Q_ASSERT(prop);
+  vtkSMPropertyHelper helper(prop);
+  if (value) {
+    helper.Set(value, 3);
+  }
+}
+
 /**
  * React to a change of the color scale settings.
  * @param min The lower end of the color scale.
@@ -100,7 +110,6 @@ void ColorUpdater::colorScaleChange(double min, double max)
     pqServer *server = pqActiveObjects::instance().activeServer();
     pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
     QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
-    QList<pqPipelineSource *>::Iterator source;
 
     // For all sources
     for(QList<pqPipelineSource*>::iterator source = sources.begin(); source != sources.end(); ++source)
@@ -115,6 +124,17 @@ void ColorUpdater::colorScaleChange(double min, double max)
         // For all representations
         for (QList<pqDataRepresentation*>::iterator rep = reps.begin(); rep != reps.end(); ++rep)
         {
+
+          double black[3] = {0., 0., 0.};
+          vtkSMProxy *ScalarBarProxy =
+              vtkSMTransferFunctionProxy::FindScalarBarRepresentation(
+                  (*rep)->getLookupTableProxy(), (*view)->getProxy());
+          if (ScalarBarProxy) {
+            SafeSetScalarBarColor(ScalarBarProxy, "TitleColor", black);
+            ScalarBarProxy->UpdateProperty("TitleColor");
+            SafeSetScalarBarColor(ScalarBarProxy, "LabelColor", black);
+            ScalarBarProxy->UpdateProperty("LabelColor");
+          }
           this->updateLookupTable(*rep);
         }
       }
@@ -161,16 +181,6 @@ void ColorUpdater::updateLookupTable(pqDataRepresentation* representation)
   }
 }
 
-void SafeSetScalarBarColor(vtkSMProxy *gridAxis, const char *pname,
-                           double *value) {
-  vtkSMProperty *prop = gridAxis->GetProperty(pname);
-  Q_ASSERT(prop);
-  vtkSMPropertyHelper helper(prop);
-  if (value) {
-    helper.Set(value, 3);
-  }
-}
-
 /**
  * React to changing the log scale option
  * @param state The state to which the log scale is being changed.
@@ -214,27 +224,6 @@ void ColorUpdater::logScale(int state)
             vtkSMTransferFunctionProxy::MapControlPointsToLinearSpace(
                 (*rep)->getLookupTable()->getProxy());
         }
-      }
-    }
-  }
-  // For all sources
-  foreach (pqPipelineSource *source, sources) {
-    const QList<pqView *> views = source->getViews();
-    // For all views
-    foreach (pqView *view, views) {
-      const QList<pqDataRepresentation *> reps =
-          source->getRepresentations(view);
-      // For all representations
-      foreach (pqDataRepresentation *rep, reps) {
-        double black[3] = {0., 0., 0.};
-        vtkSMProxy *ScalarBarProxy =
-            vtkSMTransferFunctionProxy::FindScalarBarRepresentation(
-                rep->getLookupTableProxy(), view->getProxy());
-
-        SafeSetScalarBarColor(ScalarBarProxy, "TitleColor", black);
-        ScalarBarProxy->UpdateProperty("TitleColor");
-        SafeSetScalarBarColor(ScalarBarProxy, "LabelColor", black);
-        ScalarBarProxy->UpdateProperty("LabelColor");
       }
     }
   }

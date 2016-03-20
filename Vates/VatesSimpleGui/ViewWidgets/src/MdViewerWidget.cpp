@@ -1057,9 +1057,7 @@ void MdViewerWidget::swapViews() {
     g_log.error(
         "Inconsistency found when swapping views, the next view is NULL");
 
-  ViewBase *temp = this->currentView;
-  this->currentView = this->hiddenView;
-  this->hiddenView = temp;
+  std::swap(this->currentView, this->hiddenView);
 }
 
 /**

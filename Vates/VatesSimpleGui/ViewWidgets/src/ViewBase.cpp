@@ -13,6 +13,7 @@
   #pragma warning disable 1170
 #endif
 
+#include <QVTKWidget.h>
 #include <pqActiveObjects.h>
 #include <pqAnimationManager.h>
 #include <pqAnimationScene.h>
@@ -20,25 +21,25 @@
 #include <pqDataRepresentation.h>
 #include <pqDeleteReaction.h>
 #include <pqObjectBuilder.h>
+#include <pqPVApplicationCore.h>
 #include <pqPipelineFilter.h>
 #include <pqPipelineRepresentation.h>
 #include <pqPipelineSource.h>
-#include <pqPVApplicationCore.h>
 #include <pqRenderView.h>
 #include <pqScalarsToColors.h>
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
 #include <pqView.h>
-#include <QVTKWidget.h>
-#include <vtkRendererCollection.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkRendererCollection.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMPropertyIterator.h>
 #include <vtkSMProxy.h>
 #include <vtkSMRenderViewProxy.h>
 #include <vtkSMSourceProxy.h>
+#include <vtkSMTransferFunctionProxy.h>
 
 #include <pqMultiSliceAxisWidget.h>
 
