@@ -185,7 +185,7 @@ public:
    * Modify the rotation angle selection and update the image display
    * to match the new rotation.
    *
-   * @param rotation angle in degrees
+   * @param angle rotation angle in degrees
    */
   virtual void updateRotationAngle(float angle) = 0;
 
