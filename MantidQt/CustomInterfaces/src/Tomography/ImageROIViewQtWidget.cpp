@@ -64,7 +64,9 @@ void ImageROIViewQtWidget::showStack(
   if (0 == wsg->size())
     return;
 
-  m_stack = wsg;
+  m_stackSamples = wsg;
+  m_stackFlats = wsgFlats;
+  m_stackDarks = wsgDarks;
 
   resetWidgetsOnNewStack();
 
@@ -83,7 +85,7 @@ void ImageROIViewQtWidget::showStack(
                              QString::fromStdString(e.what()));
   }
 
-  showProjection(m_stack, 0);
+  showProjection(m_stackSamples, 0);
   initParamWidgets(width, height);
   refreshROIetAl();
   enableParamWidgets(true);
@@ -94,8 +96,9 @@ void ImageROIViewQtWidget::showStack(
 void ImageROIViewQtWidget::showProjection(
     const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx) {
 
-  showProjectionImage(wsg, idx);
-  refreshROIetAl();
+  m_params.rotation = 0;
+  m_ui.comboBox_rotation->setCurrentIndex(0);
+  showProjectionImage(wsg, idx, 0);
 
   // give name, set up scroll/slider
   std::string name;
@@ -213,6 +216,9 @@ void ImageROIViewQtWidget::initLayout() {
   sizes.push_back(100);
   m_ui.splitter_main_horiz->setSizes(sizes);
 
+  m_ui.comboBox_image_type->setCurrentIndex(0);
+  m_ui.comboBox_rotation->setCurrentIndex(0);
+
   sizes.clear();
   sizes.push_back(10);
   sizes.push_back(1000);
@@ -265,6 +271,10 @@ void ImageROIViewQtWidget::setupConnections() {
   connect(m_ui.comboBox_rotation, SIGNAL(currentIndexChanged(int)), this,
           SLOT(rotationUpdated(int)));
 
+  // image type
+  connect(m_ui.comboBox_image_type, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(imageTypeUpdated(int)));
+
   // parameter (points) widgets
   connect(m_ui.spinBox_cor_x, SIGNAL(valueChanged(int)), this,
           SLOT(valueUpdatedCoR(int)));
@@ -294,7 +304,7 @@ void ImageROIViewQtWidget::resetWidgetsOnNewStack() {
   m_ui.horizontalScrollBar_img_stack->setEnabled(true);
   m_ui.horizontalScrollBar_img_stack->setMinimum(0);
   m_ui.horizontalScrollBar_img_stack->setMaximum(
-      static_cast<int>(m_stack->size() - 1));
+      static_cast<int>(m_stackSamples->size() - 1));
   m_ui.comboBox_rotation->setCurrentIndex(0);
 }
 
@@ -552,6 +562,10 @@ void ImageROIViewQtWidget::updateFromImagesSlider(int /* current */) {
   m_presenter->notify(IImageROIPresenter::UpdateImgIndex);
 }
 
+void ImageROIViewQtWidget::imageTypeUpdated(int /* idx */) {
+  m_presenter->notify(ImageROIPresenter::ChangeImageType);
+}
+
 void ImageROIViewQtWidget::rotationUpdated(int /* idx */) {
   m_params.rotation =
       static_cast<float>(m_ui.comboBox_rotation->currentIndex()) * 90.0f;
@@ -566,10 +580,11 @@ void ImageROIViewQtWidget::updateImgWithIndex(size_t idx) {
   int max = m_ui.horizontalScrollBar_img_stack->maximum();
   int current = m_ui.horizontalScrollBar_img_stack->value();
 
-  showProjection(m_stack, idx);
   m_ui.lineEdit_img_seq->setText(
       QString::fromStdString(boost::lexical_cast<std::string>(current + 1) +
                              "/" + boost::lexical_cast<std::string>(max + 1)));
+
+  showProjectionImage(currentImageTypeStack(), idx, currentRotationAngle());
 }
 
 void ImageROIViewQtWidget::showProjectionImage(
@@ -607,6 +622,8 @@ void ImageROIViewQtWidget::showProjectionImage(
   m_ui.label_img->setPixmap(pixmap);
   m_ui.label_img->show();
   m_basePixmap.reset(new QPixmap(pixmap));
+
+  refreshROIetAl();
 }
 
 /**
@@ -690,6 +707,8 @@ ImageROIViewQtWidget::transferWSImageToQPixmap(const MatrixWorkspace_sptr ws,
 /**
  * Gets the width and height of an image MatrixWorkspace.
  *
+ * @param ws image workspace
+ *
  * @param width width of the image in pixels (bins)
  *
  * @param height height of the image in pixels (histograms)
@@ -708,10 +727,10 @@ void ImageROIViewQtWidget::getCheckedDimensions(const MatrixWorkspace_sptr ws,
     // images)?
     if (width >= MAXDIM)
       width = MAXDIM;
-  } catch (std::exception &e) {
+  } catch (std::exception &exc) {
     throw std::runtime_error(
         "Could not find the width of the image from the run log data (entry: " +
-        widthLogName + ")");
+        widthLogName + "). Error: " + exc.what());
   }
 
   const std::string heightLogName = "Axis2";
@@ -720,10 +739,10 @@ void ImageROIViewQtWidget::getCheckedDimensions(const MatrixWorkspace_sptr ws,
         ws->run().getLogData(heightLogName)->value());
     if (height >= MAXDIM)
       height = MAXDIM;
-  } catch (std::exception &e) {
+  } catch (std::exception &exc) {
     throw std::runtime_error("could not find the height of the image from the "
                              "run log data (entry: " +
-                             heightLogName + ")");
+                             heightLogName + "). Error: " + exc.what());
   }
 
   // images are loaded as 1 histogram == 1 row (1 bin per image column):
@@ -764,9 +783,43 @@ void ImageROIViewQtWidget::updateRotationAngle(float angle) {
     return;
 
   m_params.rotation = angle;
-  m_ui.comboBox->setCurrentIndex(
+  m_ui.comboBox_rotation->setCurrentIndex(
       static_cast<int>((static_cast<int>(angle) / 90) % 4));
-  showProjectionImage(m_stack, currentImgIndex(), currentRotationAngle());
+
+  showProjectionImage(currentImageTypeStack(), currentImgIndex(),
+                      currentRotationAngle());
+}
+
+void ImageROIViewQtWidget::updateImageType(
+    const Mantid::API::WorkspaceGroup_sptr wsg) {
+  if (!wsg || 0 == wsg->size())
+    return;
+
+  const int newIdx = 0;
+  m_ui.horizontalScrollBar_img_stack->setEnabled(true);
+  m_ui.horizontalScrollBar_img_stack->setMinimum(0);
+  m_ui.horizontalScrollBar_img_stack->setValue(newIdx);
+  m_ui.horizontalScrollBar_img_stack->setMaximum(
+      static_cast<int>(wsg->size() - 1));
+
+  const size_t numPics = wsg->size();
+  m_ui.lineEdit_img_seq->setText(
+      QString::fromStdString("1/" + boost::lexical_cast<std::string>(numPics)));
+
+  showProjectionImage(wsg, currentImgIndex(), currentRotationAngle());
+}
+
+Mantid::API::WorkspaceGroup_sptr
+ImageROIViewQtWidget::currentImageTypeStack() const {
+  int type = m_ui.comboBox_image_type->currentIndex();
+
+  if (1 == type) {
+    return m_stackFlats;
+  } else if (2 == type) {
+    return m_stackDarks;
+  } else {
+    return m_stackSamples;
+  }
 }
 
 /**

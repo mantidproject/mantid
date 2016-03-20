@@ -57,8 +57,9 @@ protected:
   void processInit();
   void processBrowseImg();
   void processNewStack();
-  void processUpdateImgIndex();
+  void processChangeImageType();
   void processChangeRotation();
+  void processUpdateImgIndex();
   void processSelectCoR();
   void processSelectROI();
   void processSelectNormalization();

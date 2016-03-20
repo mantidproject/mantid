@@ -120,13 +120,13 @@ public:
                          const Mantid::API::WorkspaceGroup_sptr &wsgDarks) = 0;
 
   /**
-   * Get the stack of images currently being displayed (it has been
-   * shown using showStack()), as a workspace group.
+   * Get the stack of (sample) images currently being displayed (it
+   * has been shown using showStack()), as a workspace group.
    *
    * @return workspace group containing the individual images, which
    * can be empty if no stack has been loaded.
    */
-  virtual const Mantid::API::WorkspaceGroup_sptr stack() const = 0;
+  virtual const Mantid::API::WorkspaceGroup_sptr stackSamples() const = 0;
 
   /**
    * Normally one image (projection for tomography stacks) will be
@@ -162,6 +162,20 @@ public:
    */
   virtual void userError(const std::string &err,
                          const std::string &description) = 0;
+
+  /**
+   * The images of the type selected by the user (samples/flats/darks).
+   *
+   * @return a workspace group with the images of the current type
+   */
+  virtual Mantid::API::WorkspaceGroup_sptr currentImageTypeStack() const = 0;
+
+  /**
+   * Sets the type of image (sample/flat/dark).
+   *
+   * @param wsg workspace group that contains the type of image
+   */
+  virtual void updateImageType(const Mantid::API::WorkspaceGroup_sptr wsg) = 0;
 
   /**
    * The index of the image currently shown (from the current stack if there's

@@ -193,7 +193,7 @@ StackOfImagesDirs::findImgFiles(const std::string &path) const {
     // prefix,
     // and a sequence number (with a fixed number of digits).
     std::sort(fnames.begin(), fnames.end());
-  } catch (std::runtime_error &rexc) {
+  } catch (std::runtime_error &) {
     // it's fine if the files are not found, not readable, etc.
   }
 

@@ -32,8 +32,8 @@ public:
                                const Mantid::API::WorkspaceGroup_sptr &,
                                const Mantid::API::WorkspaceGroup_sptr &));
 
-  // const Mantid::API::WorkspaceGroup_sptr stack() const;
-  MOCK_CONST_METHOD0(stack, const Mantid::API::WorkspaceGroup_sptr());
+  // const Mantid::API::WorkspaceGroup_sptr stackSamples() const;
+  MOCK_CONST_METHOD0(stackSamples, const Mantid::API::WorkspaceGroup_sptr());
 
   // void showProjection(const Mantid::API::WorkspaceGroup_sptr &wsg, size_t
   // idx);
@@ -47,6 +47,13 @@ public:
   // void userError(const std::string &err, const std::string &description)
   MOCK_METHOD2(userError,
                void(const std::string &err, const std::string &description));
+
+  // Mantid::API::WorkspaceGroup_sptr currentImageTypeStack() const
+  MOCK_CONST_METHOD0(currentImageTypeStack, Mantid::API::WorkspaceGroup_sptr());
+
+  // void updateImageType(const Mantid::API::WorkspaceGroup_sptr wsg)
+  MOCK_METHOD1(updateImageType,
+               void(const Mantid::API::WorkspaceGroup_sptr wsg));
 
   // size_t currentImgIndex() const;
   MOCK_CONST_METHOD0(currentImgIndex, size_t());

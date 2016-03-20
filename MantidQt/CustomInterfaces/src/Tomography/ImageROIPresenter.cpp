@@ -46,12 +46,16 @@ void ImageROIPresenter::notify(Notification notif) {
     processNewStack();
     break;
 
-  case IImageROIPresenter::UpdateImgIndex:
-    processUpdateImgIndex();
+  case IImageROIPresenter::ChangeImageType:
+    processChangeImageType();
     break;
 
   case IImageROIPresenter::ChangeRotation:
     processChangeRotation();
+    break;
+
+  case IImageROIPresenter::UpdateImgIndex:
+    processUpdateImgIndex();
     break;
 
   case IImageROIPresenter::SelectCoR:
@@ -197,6 +201,10 @@ void ImageROIPresenter::processUpdateImgIndex() {
   m_view->updateImgWithIndex(m_view->currentImgIndex());
 }
 
+void ImageROIPresenter::processChangeImageType() {
+  m_view->updateImageType(m_view->currentImageTypeStack());
+}
+
 void ImageROIPresenter::processChangeRotation() {
   m_view->updateRotationAngle(m_view->currentRotationAngle());
 }
@@ -255,9 +263,6 @@ void ImageROIPresenter::loadFITSStack(
   wsg = loadFITSList(imgs, wsgName);
 
   auto flats = soid.flatFiles();
-  for (int i =0; i< flats.size(); i++) {
-  }
-
   if (!flats.empty()) {
     const std::string wsgFlatsName =
         "__tomography_gui_stack_fits_viewer_flat_images";

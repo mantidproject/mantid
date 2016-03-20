@@ -81,8 +81,8 @@ public:
                  const Mantid::API::WorkspaceGroup_sptr &wsgFlats,
                  const Mantid::API::WorkspaceGroup_sptr &wsgDarks) override;
 
-  const Mantid::API::WorkspaceGroup_sptr stack() const override {
-    return m_stack;
+  const Mantid::API::WorkspaceGroup_sptr stackSamples() const override {
+    return m_stackSamples;
   }
 
   void showProjection(const Mantid::API::WorkspaceGroup_sptr &wsg,
@@ -101,6 +101,10 @@ public:
   float currentRotationAngle() const override;
 
   void updateRotationAngle(float angle) override;
+
+  Mantid::API::WorkspaceGroup_sptr currentImageTypeStack() const override;
+
+  void updateImageType(const Mantid::API::WorkspaceGroup_sptr wsg) override;
 
   std::string askImgOrStackPath() override;
 
@@ -129,6 +133,8 @@ private slots:
   void browseImgClicked();
 
   void rotationUpdated(int idx);
+
+  void imageTypeUpdated(int idx);
 
   void corClicked();
   void corResetClicked();
@@ -209,7 +215,7 @@ private:
 
   Ui::ImageSelectCoRAndRegions m_ui;
 
-  Mantid::API::WorkspaceGroup_sptr m_stack;
+  Mantid::API::WorkspaceGroup_sptr m_stackSamples, m_stackFlats, m_stackDarks;
 
   /// this holds the base image on top of which rectangles and other
   /// objects are drawn
