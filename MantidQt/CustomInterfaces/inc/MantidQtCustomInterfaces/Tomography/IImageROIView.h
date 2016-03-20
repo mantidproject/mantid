@@ -107,15 +107,15 @@ public:
    * LoadFITS loads FITS images (or spectrum per row, all of them with
    * the same number of data points (columns)).
    *
-   * @param ws Workspace group where every workspace is a FITS or
+   * @param wsg Workspace group where every workspace is a FITS or
    * similar image that has been loaded with LoadFITS or similar
    * algorithm. This holds the sample images.
    *
-   * @param wsFlats Workspace group with flat (open beam) images.
+   * @param wsgFlats Workspace group with flat (open beam) images.
    *
-   * @param wsDarks Workspace group with dark images.
+   * @param wsgDarks Workspace group with dark images.
    */
-  virtual void showStack(const Mantid::API::WorkspaceGroup_sptr &ws,
+  virtual void showStack(const Mantid::API::WorkspaceGroup_sptr &wsg,
                          const Mantid::API::WorkspaceGroup_sptr &wsgFlats,
                          const Mantid::API::WorkspaceGroup_sptr &wsgDarks) = 0;
 

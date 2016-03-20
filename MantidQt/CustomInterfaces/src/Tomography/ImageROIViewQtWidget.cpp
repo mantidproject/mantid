@@ -692,7 +692,7 @@ ImageROIViewQtWidget::transferWSImageToQPixmap(const MatrixWorkspace_sptr ws,
  *
  * @param width width of the image in pixels (bins)
  *
- * @param hegiht height of the image in pixels (histograms)
+ * @param height height of the image in pixels (histograms)
  *
  * @throws runtime_error if there are problems when retrieving the
  * width/height or if they are inconsistent.

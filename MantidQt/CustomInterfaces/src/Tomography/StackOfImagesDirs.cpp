@@ -134,10 +134,10 @@ bool StackOfImagesDirs::findStackDirsComplex(Poco::File &dir) {
       m_sampleDir = it.path().toString();
     } else if (boost::iequals(name.substr(0, g_flatNamePrefix.length()),
                               g_flatNamePrefix)) {
-      m_flatDir = name;
+      m_flatDir = it.path().toString();
     } else if (boost::iequals(name.substr(0, g_darkNamePrefix.length()),
                               g_darkNamePrefix)) {
-      m_darkDir = name;
+      m_darkDir = it.path().toString();
     }
   }
 
@@ -170,26 +170,33 @@ bool StackOfImagesDirs::findStackDirsComplex(Poco::File &dir) {
 std::vector<std::string>
 StackOfImagesDirs::findImgFiles(const std::string &path) const {
   std::vector<std::string> fnames;
-  Poco::File dir(path);
-  if (!dir.isDirectory() || !dir.exists())
-    return fnames;
 
-  // as an alternative could also use Poco::Glob to find the files
-  Poco::DirectoryIterator it(dir);
-  Poco::DirectoryIterator end;
-  while (it != end) {
-    // TODO: filter names by extension?
-    // const std::string name = it.name();
-    if (it->isFile()) {
-      fnames.push_back(it.path().toString());
+  try {
+    Poco::File dir(path);
+    if (!dir.isDirectory() || !dir.exists())
+      return fnames;
+
+    // as an alternative could also use Poco::Glob to find the files
+    Poco::DirectoryIterator it(dir);
+    Poco::DirectoryIterator end;
+    while (it != end) {
+      // TODO: filter names by extension?
+      // const std::string name = it.name();
+      if (it->isFile()) {
+        fnames.push_back(it.path().toString());
+      }
+
+      ++it;
     }
 
-    ++it;
+    // this assumes the usual sorting of images of a stack (directory): a
+    // prefix,
+    // and a sequence number (with a fixed number of digits).
+    std::sort(fnames.begin(), fnames.end());
+  } catch (std::runtime_error &rexc) {
+    // it's fine if the files are not found, not readable, etc.
   }
 
-  // this assumes the usual sorting of images of a stack (directory): a prefix,
-  // and a sequence number (with a fixed number of digits).
-  std::sort(fnames.begin(), fnames.end());
   return fnames;
 }
 

@@ -74,8 +74,13 @@ private:
   StackOfImagesDirs checkInputStack(const std::string &path);
 
   /// loads a list of images from a stack, from their individual paths
+  void loadFITSStack(const StackOfImagesDirs &soid,
+                     Mantid::API::WorkspaceGroup_sptr &wsg,
+                     Mantid::API::WorkspaceGroup_sptr &wsgFlats,
+                     Mantid::API::WorkspaceGroup_sptr &wsgDarks);
+
   Mantid::API::WorkspaceGroup_sptr
-  loadFITSStack(const std::vector<std::string> &imgs);
+  loadFITSList(const std::vector<std::string> &imgs, const std::string &wsName);
 
   void loadFITSImage(const std::string &path, const std::string &wsName);
 

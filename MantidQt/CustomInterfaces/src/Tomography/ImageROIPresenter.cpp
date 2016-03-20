@@ -168,7 +168,10 @@ void ImageROIPresenter::processNewStack() {
     return;
   }
 
-  Mantid::API::WorkspaceGroup_sptr wsg = loadFITSStack(imgs);
+  Mantid::API::WorkspaceGroup_sptr wsg;
+  Mantid::API::WorkspaceGroup_sptr wsgFlats;
+  Mantid::API::WorkspaceGroup_sptr wsgDarks;
+  loadFITSStack(soid, wsg, wsgFlats, wsgDarks);
   if (!wsg)
     return;
 
@@ -183,8 +186,6 @@ void ImageROIPresenter::processNewStack() {
     return;
   }
 
-  Mantid::API::WorkspaceGroup_sptr wsgFlats;
-  Mantid::API::WorkspaceGroup_sptr wsgDarks;
   m_view->showStack(wsg, wsgFlats, wsgDarks);
 
   // clean-up container group workspace? Not for now
@@ -241,15 +242,39 @@ void ImageROIPresenter::processResetNormalization() {
 
 void ImageROIPresenter::processShutDown() { m_view->saveSettings(); }
 
-Mantid::API::WorkspaceGroup_sptr
-ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
+void ImageROIPresenter::loadFITSStack(
+    const StackOfImagesDirs &soid, Mantid::API::WorkspaceGroup_sptr &wsg,
+    Mantid::API::WorkspaceGroup_sptr &wsgFlats,
+    Mantid::API::WorkspaceGroup_sptr &wsgDarks) {
+  const std::vector<std::string> &imgs = soid.sampleFiles();
   if (imgs.empty())
-    return Mantid::API::WorkspaceGroup_sptr();
+    return;
 
-  const std::string wsName = "__tomography_gui_stack_fits_viewer_sample_images";
+  const std::string wsgName =
+      "__tomography_gui_stack_fits_viewer_sample_images";
+  wsg = loadFITSList(imgs, wsgName);
 
-  // const std::string wsName =
-  // "__tomography_gui_stack_fits_viewer_flat_images";
+  auto flats = soid.flatFiles();
+  for (int i =0; i< flats.size(); i++) {
+  }
+
+  if (!flats.empty()) {
+    const std::string wsgFlatsName =
+        "__tomography_gui_stack_fits_viewer_flat_images";
+    wsgFlats = loadFITSList(flats, wsgFlatsName);
+  }
+
+  auto darks = soid.darkFiles();
+  if (!darks.empty()) {
+    const std::string wsgDarksName =
+        "__tomography_gui_stack_fits_viewer_dark_images";
+    wsgDarks = loadFITSList(darks, wsgDarksName);
+  }
+}
+
+Mantid::API::WorkspaceGroup_sptr
+ImageROIPresenter::loadFITSList(const std::vector<std::string> &imgs,
+                                const std::string &wsName) {
 
   auto &ads = Mantid::API::AnalysisDataService::Instance();
   try {
@@ -289,7 +314,7 @@ ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
     wsg = ads.retrieveWS<Mantid::API::WorkspaceGroup>(wsName);
   } catch (std::exception &e) {
     throw std::runtime_error(
-        "Could not produce a workspace group for the stack images. Cannot "
+        "Could not produce a workspace group for the stack of images. Cannot "
         "display it. Error details: " +
         std::string(e.what()));
   }
@@ -310,7 +335,8 @@ ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
  *
  * @param paths of the supposedly image files
  *
- * @return string with comma separated value (paths) ready to be passed as input
+ * @return string with comma separated value (paths) ready to be passed as
+ *input
  * to LoadFITS or similar algorithms
  */
 std::string ImageROIPresenter::filterImagePathsForFITSStack(
