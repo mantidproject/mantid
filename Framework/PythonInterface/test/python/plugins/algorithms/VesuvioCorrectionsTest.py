@@ -10,7 +10,6 @@ import unittest
 import numpy as np
 
 from mantid.api import *
-from mantid import logger
 from VesuvioTesting import create_test_container_ws, create_test_ws
 import mantid.simpleapi as ms
 import vesuvio.commands as vesuvio
