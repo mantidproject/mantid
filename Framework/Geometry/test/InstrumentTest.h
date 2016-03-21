@@ -543,7 +543,8 @@ public:
         sourcePos, samplePos, trolley1Pos, trolley2Pos);
 
     auto map = boost::make_shared<ParameterMap>();
-    m_instrumentParameterized = boost::make_shared<Instrument>(m_instrumentNotParameterized, map);
+    m_instrumentParameterized =
+        boost::make_shared<Instrument>(m_instrumentNotParameterized, map);
   }
 
   void test_access_non_parameterized() {
@@ -563,7 +564,6 @@ public:
       pos_x += m_instrumentParameterized->getDetector(i)->getPos().X();
     }
   }
-
 
 private:
   Instrument_sptr m_instrumentParameterized;
