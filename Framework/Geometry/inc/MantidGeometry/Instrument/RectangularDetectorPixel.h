@@ -58,6 +58,11 @@ public:
 
   RectangularDetectorPixel();
 
+  /// Create a cloned instance with a parameter map applied
+  RectangularDetectorPixel *cloneParameterized(const ParameterMap* map) const override {
+    return new RectangularDetectorPixel(this, map);
+  }
+
   const Kernel::V3D getRelativePos() const override;
 
 protected:

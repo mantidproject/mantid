@@ -57,6 +57,9 @@ public:
   Component *clone() const override { return new Detector(*this); }
 
   // IDetector methods
+  Detector *cloneParameterized(const ParameterMap *map) const override {
+    return new Detector(this, map);
+  }
   detid_t getID() const override;
   std::size_t nDets() const override {
     return 1;
