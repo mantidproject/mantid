@@ -51,6 +51,10 @@ Improved
   - :ref:`FFT <algm-FFT>`
   - :ref:`MaxEnt <algm-MaxEnt>`
   `#15584 <https://github.com/mantidproject/mantid/pull/15584>`_
+- :ref:`LoadNexusMonitors <algm-LoadNexusMonitors>` 
+  now allow user to choose to load either histogram monitor or event monitor only with 2 new
+  properties (``LoadEventMonitor`` and ``LoadHistogramMonitor``).
+  `#15667 <https://github.com/mantidproject/mantid/pull/15667>`_
 - :ref:`CreateSimulationWorkspace <algm-CreateSimulationWorkspace>` now matches the IDF of the simulation workspace to the IDF of a reference workspace (either Nexus or Raw).
 
 Deprecated
@@ -84,6 +88,12 @@ Python
 Python Algorithms
 #################
 
+
+Script Repository
+-----------------
+
+- A bug has been fixed that caused uploads to fail with some incorrectly configured proxy servers.
+
 |
 
 Full list of
@@ -91,4 +101,3 @@ Full list of
 and
 `Python <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Python%22>`__
 changes on GitHub
-

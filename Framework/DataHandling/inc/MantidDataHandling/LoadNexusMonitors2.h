@@ -93,11 +93,32 @@ private:
   /// split multi period histogram workspace into a workspace group
   void splitMutiPeriodHistrogramData(const size_t numPeriods);
 
+  size_t getMonitorInfo(NeXus::File &file,
+                        std::vector<std::string> &monitorNames,
+                        size_t &numHistMon, size_t &numEventMon,
+                        size_t &numPeriods,
+                        std::map<int, std::string> &monitorNumber2Name,
+                        std::vector<bool> &isEventMonitors);
+
+  bool
+  createOutputWorkspace(size_t numHistMon, size_t numEventMon,
+                        bool monitorsAsEvents,
+                        std::vector<std::string> &monitorNames,
+                        std::vector<bool> &isEventMonitors,
+                        const std::map<int, std::string> &monitorNumber2Name,
+                        std::vector<bool> &loadMonitorFlags);
+
+  void readEventMonitorEntry(NeXus::File &file, size_t i);
+
+  void readHistoMonitorEntry(NeXus::File &file, size_t i);
+
 private:
   std::string m_filename; ///< The name and path of the input file
   API::MatrixWorkspace_sptr m_workspace; ///< The workspace being filled out
   size_t m_monitor_count;                ///< Number of monitors
   std::string m_top_entry_name;          ///< name of top level NXentry to use
+  bool m_allMonitorsHaveHistoData; ///< Flag that all monitors have histogram
+  /// data in the entry
 };
 
 } // namespace DataHandling
