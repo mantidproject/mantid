@@ -124,7 +124,7 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         self.assertTrue(isinstance(exit_iteration, int))
 
 #====================================================================================
-'''
+
 class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
 
     _fit_results = None
@@ -202,11 +202,11 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         spec143_data = spec143[0]
         self.assertTrue(isinstance(spec143_data, MatrixWorkspace))
 
-        # self.assertAlmostEqual(50.0, spec143_data.readX(0)[0])
-        # self.assertAlmostEqual(562.0, spec143_data.readX(0)[-1])
+        self.assertAlmostEqual(50.0, spec143_data.readX(0)[0])
+        self.assertAlmostEqual(562.0, spec143_data.readX(0)[-1])
 
-        # self.assertAlmostEqual(2.37897941103748e-06, spec143_data.readY(1)[0])
-        # self.assertAlmostEqual(3.58226563303213e-05, spec143_data.readY(1)[-1])
+        self.assertAlmostEqual(2.3090594752e-06, spec143_data.readY(1)[0])
+        self.assertAlmostEqual(3.51960367895e-05, spec143_data.readY(1)[-1])
 
         spec144 = fitted_spec[-1]
         self.assertTrue(isinstance(spec144, WorkspaceGroup))
@@ -214,11 +214,11 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         spec144_data = spec144[0]
         self.assertTrue(isinstance(spec144_data, MatrixWorkspace))
 
-        # self.assertAlmostEqual(50.0, spec144_data.readX(0)[0])
-        # self.assertAlmostEqual(562.0, spec144_data.readX(0)[-1])
+        self.assertAlmostEqual(50.0, spec144_data.readX(0)[0])
+        self.assertAlmostEqual(562.0, spec144_data.readX(0)[-1])
 
-        # self.assertAlmostEqual(5.57952304659615e-06, spec144_data.readY(1)[0])
-        # self.assertAlmostEqual(6.00056973529846e-05, spec144_data.readY(1)[-1])
+        self.assertAlmostEqual(7.79185212491e-06, spec144_data.readY(1)[0])
+        self.assertAlmostEqual(4.79448882168e-05, spec144_data.readY(1)[-1])
 
         chisq_values = self._fit_results[2]
         self.assertTrue(isinstance(chisq_values, list))
@@ -226,5 +226,5 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
 
         exit_iteration = self._fit_results[3]
         self.assertTrue(isinstance(exit_iteration, int))
-'''
+
 #====================================================================================
