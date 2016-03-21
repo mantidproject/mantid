@@ -195,6 +195,10 @@ def grab_preproc_options(args):
         coords = ast.literal_eval(args.air_region)
         pre_config.normalize_air_region = [int(val) for val in coords]
 
+    if args.air_region:
+        coords = ast.literal_eval(args.air_region)
+        pre_config.normalize_air_region = [int(val) for val in coords]
+
     if args.region_of_interest:
         roi_coords = ast.literal_eval(args.region_of_interest)
         pre_config.crop_coords = [int(val) for val in roi_coords]

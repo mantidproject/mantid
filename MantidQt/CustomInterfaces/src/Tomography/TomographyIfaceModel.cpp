@@ -794,26 +794,14 @@ std::string TomographyIfaceModel::filtersCfgToCmdOpts(
 
   // Filters:
 
-  // TODO: (we require here IMAT specific headers to become available soon)
+  // TODO: (we'd require here IMAT specific headers to become available soon)
   // if (filters.prep.normalizeByProtonCharge)
 
-  // The rotation option from the interactive "ROI etc." selection
-  // takes precedence
-  int rotation = 0;
-  if (corRegions.rotation >= 0) {
-    rotation = static_cast<int>(corRegions.rotation);
-  } else {
-    rotation = filters.prep.rotation;
-  }
-  int rotationIdx = rotation / 90;
   double cor = 0;
-  if (1 == rotationIdx % 2) {
-    cor = corRegions.cor.Y();
-  } else {
-    cor = corRegions.cor.X();
-  }
+  cor = corRegions.cor.X();
   opts += " --cor=" + std::to_string(cor);
 
+  int rotationIdx = filters.prep.rotation / 90;
   // filters.prep.rotation
   opts += " --rotation=" + std::to_string(rotationIdx);
 

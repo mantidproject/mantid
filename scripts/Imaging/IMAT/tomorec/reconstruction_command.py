@@ -45,7 +45,7 @@ class ReconstructionCommand(object):
     """
 
     def __init__(self):
-        self._PREPROC_IMGS_SUBDIR_NAME = 'preproc_images'
+        self._PREPROC_IMGS_SUBDIR_NAME = 'pre_processed'
         self._OUT_README_FNAME = '0.README_reconstruction.txt'
         self._OUT_SLICES_FILENAME_PREFIX='out_recon_slice'
         self._OUT_HORIZ_SLICES_SUBDIR='out_recon_horiz_slice'
