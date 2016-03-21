@@ -404,6 +404,10 @@ void CalculateGammaBackground::calculateTofSpectrum(
             profileFunction->getFunction(i));
     profile->disableLogging();
     profile->setUpForFit();
+
+    // Fix the Mass parameter
+    profile->fix(0);
+
     profile->cacheYSpaceValues(tseconds, false, detpar, respar);
 
     profile->massProfile(tmpWork.data(), tmpWork.size());
