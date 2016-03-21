@@ -165,6 +165,10 @@ public:
     pres.notify(IImageROIPresenter::BrowseImgOrStack);
   }
 
+  void test_changeImageType() {}
+
+  void test_changeRotation() {}
+
   void test_updateImgIndex() {
     testing::NiceMock<MockImageROIView> mockView;
     MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);

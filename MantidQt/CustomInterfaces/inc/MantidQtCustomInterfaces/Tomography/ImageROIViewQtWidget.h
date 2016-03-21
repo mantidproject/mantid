@@ -34,7 +34,7 @@ foreseeable horizon. The interface of this class is given by
 IImageROIView so that it fits in the MVP (Model-View-Presenter) design
 of the ImageROI widget.
 
-Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2015-2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -150,26 +150,17 @@ private slots:
   void valueUpdatedNormArea(int v);
 
 private:
+
+  void setupConnections();
+
+  void readSettings();
+
   /// enable types of images (sample, flat, dark) depending on their
   /// availability
   void enableImageTypes(bool enableSamples, bool enableFlats, bool enableDarks);
 
   /// enable/disable the groups with spin boxes for the center and corners
   void enableParamWidgets(bool enable);
-
-  void grabCoRFromWidgets();
-  void grabROIFromWidgets();
-  void grabNormAreaFromWidgets();
-
-  void grabCoRFromMousePoint(int x, int y);
-  void grabROICorner1FromMousePoint(int x, int y);
-  void grabROICorner2FromMousePoint(int x, int y);
-  void grabNormAreaCorner1FromMousePoint(int x, int y);
-  void grabNormAreaCorner2FromMousePoint(int x, int y);
-
-  void setupConnections();
-
-  void readSettings();
 
   // widget closing
   void closeEvent(QCloseEvent *ev) override;
@@ -193,6 +184,16 @@ private:
   QPixmap transferWSImageToQPixmap(const Mantid::API::MatrixWorkspace_sptr ws,
                                    size_t width, size_t height,
                                    float rotationAngle);
+
+  void grabCoRFromWidgets();
+  void grabROIFromWidgets();
+  void grabNormAreaFromWidgets();
+
+  void grabCoRFromMousePoint(int x, int y);
+  void grabROICorner1FromMousePoint(int x, int y);
+  void grabROICorner2FromMousePoint(int x, int y);
+  void grabNormAreaCorner1FromMousePoint(int x, int y);
+  void grabNormAreaCorner2FromMousePoint(int x, int y);
 
   /// repaint the image with new positions of points and rectangles
   void refreshROIetAl();

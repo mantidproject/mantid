@@ -264,7 +264,7 @@ can be selected again by pushing the respective "Select" buttons
 and/or editing their coordinates manually.
 
 The default values, set in principle when a new stack of images is
-loaded, is as follows. The region of intererest is set to cover all
+loaded, are as follows. The region of intererest is set to cover all
 the images. The regions of normalization is not set (empty), and the
 center of rotation is set to the center of the image. The option to
 find the center of rotation automatically is disabled at present.
