@@ -9,13 +9,12 @@
 namespace Mantid {
 namespace Kernel {
 
-
-  /** Constructor
-   *  @param name :: The name of the property
-   *  @param type :: The type of the property
-   *  @param direction :: Whether this is a Direction::Input, Direction::Output or
-   * Direction::InOut (Input & Output) property
-   */
+/** Constructor
+ *  @param name :: The name of the property
+ *  @param type :: The type of the property
+ *  @param direction :: Whether this is a Direction::Input, Direction::Output or
+ * Direction::InOut (Input & Output) property
+ */
 Property::Property(const std::string &name, const std::type_info &type,
                    const unsigned int direction)
     : m_name(name), m_documentation(""), m_typeinfo(&type),
@@ -386,20 +385,18 @@ std::string getUnmangledTypeName(const std::type_info &type) {
 }
 
 /**
-* Returns if the property is set to  automatically trim string unput values of whitespace
+* Returns if the property is set to  automatically trim string unput values of
+* whitespace
 * @returns True/False
 */
-bool Property::autoTrim() const {
-  return m_autotrim;
-}
+bool Property::autoTrim() const { return m_autotrim; }
 
 /**
-* Sets if the property is set to  automatically trim string unput values of whitespace
+* Sets if the property is set to  automatically trim string unput values of
+* whitespace
 * @param setting The new setting value
 */
-void Property::setAutoTrim(const bool& setting) {
-  m_autotrim = setting;
-}
+void Property::setAutoTrim(const bool &setting) { m_autotrim = setting; }
 } // namespace Kernel
 
 } // namespace Mantid

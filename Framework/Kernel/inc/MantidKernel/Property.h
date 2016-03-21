@@ -183,7 +183,7 @@ public:
   const std::string &getGroup() { return m_group; }
 
   bool autoTrim() const;
-  void setAutoTrim(const bool& setting);
+  void setAutoTrim(const bool &setting);
 
 protected:
   /// Constructor
@@ -221,7 +221,8 @@ private:
   /// Flag whether to save input values
   bool m_remember;
 
-  /// Flag to determine if string inputs to the property should be automatically trimmed of whitespace
+  /// Flag to determine if string inputs to the property should be automatically
+  /// trimmed of whitespace
   bool m_autotrim;
 };
 
