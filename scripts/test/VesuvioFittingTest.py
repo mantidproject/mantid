@@ -54,12 +54,12 @@ class VesuvioFittingTest(unittest.TestCase):
     def test_ties_str_gives_expected_value(self):
         fit_opts = self._create_test_fitting_opts()
 
-        expected = "f1.Width=10.000000"
+        expected = "f0.Mass=1.007900,f1.Mass=16.000000,f1.Width=10.000000"
         self.assertEqual(expected, fit_opts.create_ties_str())
         # Fix the width and FSECoeff
         fit_opts.mass_profiles[0].width = 5.0
         fit_opts.mass_profiles[0].k_free = 0
-        expected = "f0.Width=5.000000,f0.FSECoeff=f0.Width*sqrt(2)/12,f1.Width=10.000000"
+        expected = "f0.Mass=1.007900,f0.Width=5.000000,f0.FSECoeff=f0.Width*sqrt(2)/12,f1.Mass=16.000000,f1.Width=10.000000"
         self.assertEqual(expected, fit_opts.create_ties_str())
 
     def test_parse_fit_options(self):

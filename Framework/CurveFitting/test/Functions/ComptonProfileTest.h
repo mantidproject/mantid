@@ -17,29 +17,29 @@ public:
   static ComptonProfileTest *createSuite() { return new ComptonProfileTest(); }
   static void destroySuite(ComptonProfileTest *suite) { delete suite; }
 
-  void test_initialized_object_has_no_parameters() {
+  void test_initialized_object_has_no_attributes() {
     auto profile = createFunction();
-    TS_ASSERT_EQUALS(0, profile->nParams());
+    TS_ASSERT_EQUALS(0, profile->nAttributes());
   }
 
-  void test_initialized_object_has_expected_attributes() {
+  void test_initialized_object_has_expected_parameters() {
     auto profile = createFunction();
-    static const size_t nattrs(1);
-    const char *expectedAttrs[nattrs] = {"Mass"};
+    static const size_t nparams(1);
+    const char *expectedParams[nparams] = {"Mass"};
 
-    TS_ASSERT_EQUALS(nattrs, profile->nAttributes());
+    TS_ASSERT_EQUALS(nparams, profile->nParams());
 
     // Test names as they are used in scripts
-    if (profile->nAttributes() > 0) {
-      std::unordered_set<std::string> expectedAttrSet(expectedAttrs,
-                                                      expectedAttrs + nattrs);
-      std::vector<std::string> actualNames = profile->getAttributeNames();
+    if (profile->nParams() > 0) {
+      std::unordered_set<std::string> expectedParamStr(
+          expectedParams, expectedParams + nparams);
+      std::vector<std::string> actualNames = profile->getParameterNames();
 
-      for (size_t i = 0; i < nattrs; ++i) {
+      for (size_t i = 0; i < nparams; ++i) {
         const std::string &name = actualNames[i];
-        size_t keyCount = expectedAttrSet.count(name);
+        size_t keyCount = expectedParamStr.count(name);
         TSM_ASSERT_EQUALS("Expected " + name +
-                              " to be found as attribute but it was not.",
+                              " to be found as parameter but it was not.",
                           1, keyCount);
       }
     }
