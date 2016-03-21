@@ -629,14 +629,6 @@ public:
         .Times(1)
         .WillOnce(Return(filters));
 
-    EXPECT_CALL(mockView, externalInterpreterPath())
-        .Times(1)
-        .WillOnce(Return(""));
-
-    EXPECT_CALL(mockView, pathLocalReconScripts())
-        .Times(1)
-        .WillOnce(Return(""));
-
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);

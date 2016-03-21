@@ -62,16 +62,6 @@ const std::string TomographyIfaceViewQtGUI::g_styleSheetOnline =
 
 size_t TomographyIfaceViewQtGUI::g_nameSeqNo = 0;
 
-std::string TomographyIfaceViewQtGUI::g_defLocalExternalPythonPath =
-#ifdef _WIN32
-    // assume we're using Aanconda Python and it is installed in c:/local
-    // could also be c:/local/anaconda/scripts/ipython
-    "c:/local/anaconda/python.exe";
-#else
-    // just use the system Python, assuming is in the system path
-    "python";
-#endif
-
 // For paths where Python third party tools are installed, if they're
 // not included in the system python path. For example you could have
 // put the AstraToolbox package in
@@ -473,9 +463,15 @@ void TomographyIfaceViewQtGUI::doSetupSectionSystemSettings() {
           SIGNAL(editingFinished()), this, SLOT(systemSettingsEdited()));
 
   connect(m_uiTabSystemSettings.lineEdit_on_local_data_drive_or_path,
-          SIGNAL(editingFinished()), this, SLOT(systemSettingsEdited()));
+          SIGNAL(textChanged(const QString &)), this,
+          SLOT(systemSettingsEdited()));
   connect(m_uiTabSystemSettings.lineEdit_on_local_remote_data_drive_path,
-          SIGNAL(editingFinished()), this, SLOT(systemSettingsEdited()));
+          SIGNAL(textChanged(const QString &)), this,
+          SLOT(systemSettingsEdited()));
+
+  connect(m_uiTabSystemSettings.lineEdit_local_recon_scripts,
+          SIGNAL(textChanged(const QString &)), this,
+          SLOT(systemSettingsEdited()));
 
   // 'browse' buttons for local (data) settings:
   connect(m_uiTabSystemSettings.pushButton_on_local_data_drive_or_path,
@@ -681,6 +677,7 @@ QDataStream &operator>>(QDataStream &stream, TomoSystemSettingsLocal &ssl) {
   stream >> ssl.m_basePathTomoData
          >> ssl.m_remoteDriveOrMountPoint
          >> ssl.m_reconScriptsPath
+         >> ssl.m_externalInterpreterPath
          >> ssl.m_processes
          >> ssl.m_cores;
   // clang-format on
@@ -811,12 +808,6 @@ void TomographyIfaceViewQtGUI::readSettings() {
     setPrePostProcSettings(TomoReconFiltersSettings());
   }
 
-  m_localExternalPythonPath =
-      qs.value("path-local-external-python",
-               QString::fromStdString(g_defLocalExternalPythonPath))
-          .toString()
-          .toStdString();
-
   int pathSize = qs.beginReadArray("path-default-add-for-python");
   for (int i = 0; i < pathSize; ++i) {
     qs.setArrayIndex(i);
@@ -854,6 +845,7 @@ QDataStream &operator<<(QDataStream &stream,
   stream << ssl.m_basePathTomoData
          << ssl.m_remoteDriveOrMountPoint
          << ssl.m_reconScriptsPath
+         << ssl.m_externalInterpreterPath
          << ssl.m_processes
          << ssl.m_cores;
   // clang-format on
@@ -961,9 +953,6 @@ void TomographyIfaceViewQtGUI::saveSettings() const {
 
   // User parameters for reconstructions
   qs.setValue("RB-number", QString::fromStdString(m_setupExperimentRef));
-
-  qs.setValue("path-local-external-python",
-              QString::fromStdString(m_localExternalPythonPath));
 
   qs.beginWriteArray("path-default-add-for-python");
   for (size_t i = 0; i < m_defAddPathPython.size(); ++i) {
@@ -1105,11 +1094,6 @@ void TomographyIfaceViewQtGUI::updatePathsConfig(const TomoPathsConfig &cfg) {
   m_pathsConfig = cfg;
 }
 
-std::string TomographyIfaceViewQtGUI::pathLocalReconScripts() const {
-  return m_uiTabSystemSettings.lineEdit_local_recon_scripts->text()
-      .toStdString();
-}
-
 /**
  * Updates the view/forms with new system settings (local and remote,
  * including multiple paths and path components)
@@ -1158,6 +1142,9 @@ void TomographyIfaceViewQtGUI::updateSystemSettings(
 
   m_uiTabSystemSettings.lineEdit_local_recon_scripts->setText(
       QString::fromStdString(setts.m_local.m_reconScriptsPath));
+
+  // TODO:
+  // setts.m_local.m_externalInterpreterPath
 }
 
 /**

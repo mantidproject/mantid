@@ -102,12 +102,6 @@ public:
 
   std::string getPassword() const override;
 
-  std::string externalInterpreterPath() const override {
-    return m_localExternalPythonPath;
-  }
-
-  std::string pathLocalReconScripts() const override;
-
   std::string astraMethod() const override { return m_astraMethod; }
 
   std::string tomopyMethod() const override { return m_tomopyMethod; }
@@ -356,10 +350,7 @@ private:
   std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> m_localJobsStatus;
 
   // Settings for external tools. where to find the system Python
-  static std::string g_defLocalExternalPythonPath;
   static std::vector<std::string> g_defAddPathPython;
-
-  std::string m_localExternalPythonPath;
   std::vector<std::string> m_defAddPathPython;
 
   static const std::string g_SCARFName;

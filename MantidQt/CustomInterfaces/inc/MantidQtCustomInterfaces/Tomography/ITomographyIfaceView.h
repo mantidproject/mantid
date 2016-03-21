@@ -292,22 +292,6 @@ public:
   virtual void showToolConfig(const std::string &name) = 0;
 
   /**
-   * Path to local scripts (reconstruction). Normally set to the
-   * installation path, but user modifyable
-   *
-   * @return path to the scrtips as a string
-   */
-  virtual std::string pathLocalReconScripts() const = 0;
-
-  /**
-   * User choice of external (Python) interpreter for third party
-   * tools
-   *
-   * @return path to the interpreter as a string
-   */
-  virtual std::string externalInterpreterPath() const = 0;
-
-  /**
    * Refresh the table, tree etc. that displays info on the running/finished
    *jobs.
    *
