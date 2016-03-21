@@ -6,6 +6,7 @@
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
@@ -1319,7 +1320,149 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
           "Duplicate detector ID found when adding RectangularDetector " +
           name + " in XML instrument file" + filename);
     }
-  } else if (category.compare("Detector") == 0 ||
+  }else if (category.compare("StructuredDetector") == 0 ||
+	  category.compare("structuredDetector") == 0 ||
+	  category.compare("structureddetector") == 0 ||
+	  category.compare("structured_detector") == 0) {
+    //-------------- Create a StructuredDetector
+    //------------------------------------------------
+    std::string name = InstrumentDefinitionParser::getNameOfLocationElement(
+        pLocElem, pCompElem);
+
+    // Create the bank with the given parent.
+    auto bank = new Geometry::StructuredDetector(name, parent);
+
+    // set location for this newly added comp and set facing if specified in
+    // instrument def. file. Also
+    // check if any logfiles are referred to through the <parameter> element.
+    setLocation(bank, pLocElem, m_angleConvertConst, m_deltaOffsets);
+    setLogfile(
+        bank, pCompElem,
+        m_instrument->getLogfileCache()); // params specified within <component>
+    setLogfile(
+        bank, pLocElem,
+        m_instrument
+            ->getLogfileCache()); // params specified within specific <location>
+
+    // Extract all the parameters from the XML attributes
+    int xpixels = 0;
+    int ypixels = 0;
+    int idstart = 0;
+    bool idfillbyfirst_y = true;
+    int idstepbyrow = 0;
+    int idstep = 1;
+    std::vector<double> xValues;
+    std::vector<double> yValues;
+
+    // The shape!
+    // Given that this leaf component is actually an assembly, its constituent
+    // component detector shapes comes from its type attribute.
+    const std::string shapeType = pType->getAttribute("type");
+    boost::shared_ptr<Geometry::Object> shape = mapTypeNameToShape[shapeType];
+
+    // These parameters are in the TYPE defining StructuredDetector
+    if (pType->hasAttribute("xpixels"))
+      xpixels = atoi((pType->getAttribute("xpixels")).c_str());
+    if (pType->hasAttribute("ypixels"))
+      ypixels = atoi((pType->getAttribute("ypixels")).c_str());
+
+    // THESE parameters are in the INSTANCE of this type - since they will
+    // change.
+    if (pCompElem->hasAttribute("idstart"))
+      idstart = atoi((pCompElem->getAttribute("idstart")).c_str());
+    if (pCompElem->hasAttribute("idfillbyfirst"))
+      idfillbyfirst_y = (pCompElem->getAttribute("idfillbyfirst") == "y");
+    // Default ID row step size
+    if (idfillbyfirst_y)
+      idstepbyrow = ypixels;
+    else
+      idstepbyrow = xpixels;
+    if (pCompElem->hasAttribute("idstepbyrow")) {
+      idstepbyrow = atoi((pCompElem->getAttribute("idstepbyrow")).c_str());
+    }
+    // Default ID row step size
+    if (pCompElem->hasAttribute("idstep"))
+      idstep = atoi((pCompElem->getAttribute("idstep")).c_str());
+
+    // Access type element which defines structured detecor vertices
+    Element *pElem;
+    NodeIterator tags(pCompElem->ownerDocument(), NodeFilter::SHOW_ELEMENT);
+    Node *pNode = tags.nextNode();
+
+    while (pNode) {
+      Element *check = static_cast<Element *>(pNode);
+      if (pNode->nodeName().compare("type") == 0 && check->hasAttribute("is")) {
+        std::string is = check->getAttribute("is").c_str();
+        if (is.compare("StructuredDetector") == 0 ||
+            is.compare("structuredDetector") == 0 ||
+            is.compare("structureddetector") == 0 ||
+            is.compare("structured_detector") == 0) {
+          pElem = check;
+          break;
+        }
+      }
+
+      pNode = tags.nextNode();
+    }
+
+    if (pElem == nullptr)
+      throw Kernel::Exception::InstrumentDefinitionError(
+          "No <type> with attribute is=\"StructuredDetector\"", filename);
+
+    // Ensure vertices are present within the IDF
+    Poco::AutoPtr<NodeList> pNL = pElem->getElementsByTagName("vertex");
+
+    if (pNL->length() == 0)
+      throw Kernel::Exception::InstrumentDefinitionError(
+          "StructuredDetector must contain vertices.", filename);
+
+    NodeIterator it(pElem, NodeFilter::SHOW_ELEMENT);
+
+    pNode = it.nextNode();
+
+    while (pNode) {
+      if (pNode->nodeName().compare("vertex") == 0) {
+        Element *pVertElem = static_cast<Element *>(pNode);
+
+        if (pVertElem->hasAttribute("x"))
+          xValues.push_back(atof(pVertElem->getAttribute("x").c_str()));
+        if (pVertElem->hasAttribute("y"))
+          yValues.push_back(atof(pVertElem->getAttribute("y").c_str()));
+      }
+
+      pNode = it.nextNode();
+    }
+
+    // Now, initialize all the pixels in the bank
+    bank->initialize(xpixels, ypixels, xValues, yValues, idstart,
+                     idfillbyfirst_y, idstepbyrow, idstep);
+
+    // Loop through all detectors in the newly created bank and mark those in
+    // the instrument.
+    try {
+      for (int x = 0; x < bank->nelements(); x++) {
+        boost::shared_ptr<Geometry::ICompAssembly> xColumn =
+            boost::dynamic_pointer_cast<Geometry::ICompAssembly>((*bank)[x]);
+        for (int y = 0; y < xColumn->nelements(); y++) {
+          boost::shared_ptr<Geometry::Detector> detector =
+              boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
+          if (detector) {
+            // Make default facing for the pixel
+            Geometry::IComponent *comp =
+                static_cast<IComponent *>(detector.get());
+            if (m_haveDefaultFacing)
+              makeXYplaneFaceComponent(comp, m_defaultFacing);
+            // Mark it as a detector (add to the instrument cache)
+            m_instrument->markAsDetector(detector.get());
+          }
+        }
+      }
+    } catch (Kernel::Exception::ExistsError &) {
+      throw Kernel::Exception::InstrumentDefinitionError(
+          "Duplicate detector ID found when adding StructuredDetector " +
+          name + " in XML instrument file" + filename);
+    }
+  }else if (category.compare("Detector") == 0 ||
              category.compare("detector") == 0 ||
              category.compare("Monitor") == 0 ||
              category.compare("monitor") == 0) {

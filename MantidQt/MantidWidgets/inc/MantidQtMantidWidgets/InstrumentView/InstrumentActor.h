@@ -63,25 +63,25 @@ namespace MantidQt
                         ///< Type of the GL object
 			virtual std::string type()const { return "InstrumentActor"; }
 			/// Draw the instrument in 3D
-                        void draw(bool picking = false) const override;
-                        /// Return the bounding box in 3D
-                        void getBoundingBox(
-                            Mantid::Kernel::V3D &minBound,
-                            Mantid::Kernel::V3D &maxBound) const override {
-                          m_scene.getBoundingBox(minBound, maxBound);
-                        }
-                        /// Run visitors callback on each component
-                        bool accept(GLActorVisitor &visitor,
-                                    VisitorAcceptRule rule = VisitAll) override;
-                        /// Run visitors callback on each component (const version)
-                        bool accept(
-                            GLActorConstVisitor &visitor,
-                            VisitorAcceptRule rule = VisitAll) const override;
-                        /// Toggle the visibility of the child actors (if exist).
-                        void setChildVisibility(bool) override;
-                        /// Check if any child is visible
-                        bool hasChildVisible() const override;
-                        /// Get the underlying instrument
+            void draw(bool picking = false) const override;
+            /// Return the bounding box in 3D
+            void getBoundingBox(
+                Mantid::Kernel::V3D &minBound,
+                Mantid::Kernel::V3D &maxBound) const override {
+                m_scene.getBoundingBox(minBound, maxBound);
+            }
+            /// Run visitors callback on each component
+            bool accept(GLActorVisitor &visitor,
+                        VisitorAcceptRule rule = VisitAll) override;
+            /// Run visitors callback on each component (const version)
+            bool accept(
+                GLActorConstVisitor &visitor,
+                VisitorAcceptRule rule = VisitAll) const override;
+            /// Toggle the visibility of the child actors (if exist).
+            void setChildVisibility(bool) override;
+            /// Check if any child is visible
+            bool hasChildVisible() const override;
+            /// Get the underlying instrument
 			boost::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const;
 			/// Get the associated data workspace
 			boost::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const;
@@ -273,6 +273,7 @@ namespace MantidQt
 			friend class ObjComponentActor;
 			friend class ObjCompAssemblyActor;
 			friend class RectangularDetectorActor;
+			friend class StructuredDetectorActor;
 		};
 
 		/**

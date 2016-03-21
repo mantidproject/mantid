@@ -6,7 +6,9 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
+#include "MantidGeometry/Instrument/StructuredDetectorPixel.h"
 #include <boost/make_shared.hpp>
 
 namespace Mantid {
@@ -29,6 +31,11 @@ ParComponentFactory::createDetector(const IDetector *base,
       dynamic_cast<const RectangularDetectorPixel *>(base);
   if (rdp)
     return boost::make_shared<RectangularDetectorPixel>(rdp, map);
+
+  const StructuredDetectorPixel *sdp =
+	  dynamic_cast<const StructuredDetectorPixel *>(base);
+  if (sdp)
+	  return boost::make_shared<StructuredDetectorPixel>(sdp, map);
 
   const Detector *baseDet = dynamic_cast<const Detector *>(base);
   if (baseDet)
@@ -71,6 +78,12 @@ ParComponentFactory::create(boost::shared_ptr<const IComponent> base,
     return boost::shared_ptr<IComponent>(
         new RectangularDetectorPixel(rdp, map));
 
+  const StructuredDetectorPixel *sdp =
+	  dynamic_cast<const StructuredDetectorPixel *>(base.get());
+  if (sdp)
+	  return boost::shared_ptr<IComponent>(
+		  new StructuredDetectorPixel(sdp, map));
+
   boost::shared_ptr<const IDetector> det_sptr =
       boost::dynamic_pointer_cast<const IDetector>(base);
   if (det_sptr) {
@@ -92,6 +105,11 @@ ParComponentFactory::create(boost::shared_ptr<const IComponent> base,
   // Everything gets created on the fly. Note that the order matters here
   // @todo Really could do with a better system than this. Virtual function
   // maybe?
+  const StructuredDetector *sd =
+	  dynamic_cast<const StructuredDetector *>(base.get());
+  if (sd)
+	  return boost::make_shared<StructuredDetector>(sd, map);
+
   const RectangularDetector *rd =
       dynamic_cast<const RectangularDetector *>(base.get());
   if (rd)

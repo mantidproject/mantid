@@ -11,6 +11,22 @@
 #include <stdexcept>
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 
+namespace {
+/**
+* Return the number of pixels to make a texture in, given the
+* desired pixel size. A texture has to have 2^n pixels per side.
+* @param desired :: the requested pixel size
+* @return number of pixels for texture
+*/
+int getOneTextureSize(int desired) {
+  int size = 2;
+  while (desired > size) {
+    size = size * 2;
+  }
+  return size;
+}
+} // namespace
+
 namespace Mantid {
 namespace Geometry {
 
@@ -622,20 +638,6 @@ void RectangularDetector::getBoundingBox(BoundingBox &assemblyBox) const {
 
   // Use cached box
   assemblyBox = *m_cachedBoundingBox;
-}
-
-/**
- * Return the number of pixels to make a texture in, given the
- * desired pixel size. A texture has to have 2^n pixels per side.
- * @param desired :: the requested pixel size
- * @return number of pixels for texture
- */
-int getOneTextureSize(int desired) {
-  int size = 2;
-  while (desired > size) {
-    size = size * 2;
-  }
-  return size;
 }
 
 /**
