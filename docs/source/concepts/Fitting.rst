@@ -1,29 +1,29 @@
 .. _Fitting:
 
 Fitting
-==============
+=======
 
 Introduction
 ------------
 Fitting in Mantid is the process of trying to fit a model to some data, 
-where data can originate from measurements at beamlines, simulations or 
-anything which can be represented in the form:
+where data may originate from measurements at beamlines, simulations or 
+in fact can be any data which has the form:
 
--  :math:`x` could for example be: a TOF value, a Q value or a temperature value, or instead :math:`x` can represent a point in a multi-dimensional space for example :math:`x` could represent :math:`(Q_x, Q_y, Q_z)`
+-  :math:`x` - could for example be a TOF value, a Q value or a temperature value, or :math:`x` can represent a point in a multi-dimensional space, for example, :math:`x` could represent :math:`(Q_x, Q_y, Q_z)`
 
--  :math:`y^{obs}` is the observed or calculated value at :math:`x`
+-  :math:`y^{obs}` - is the observed or calculated value at :math:`x`
 
--  :math:`\sigma` is an error estimate of :math:`y^{obs}`
+-  :math:`\sigma` - is an error estimate of :math:`y^{obs}`
 
 Error estimates are important in data reduction and data analysis and 
-see :ref:`here <ErrorPropagation>` for information about how Mantid 
+see :ref:`here <Error Propagation>` for information about how Mantid 
 deals with error propagation. However, errors may optionally not be used in  
 fitting, by choosing a cost function that does not depend on these.  
 
 A cost function (also sometimes called a figure of merit or goodness of fit) 
 is some metric which attempts to give an indication as to how good a given 
 model fits some data. The by far most common way of measuring the difference 
-between a model and data, for neutron data reduction for example, is to use 
+between a model and data, for example for fitting neutron faciltiy data, is to use 
 a so-called least-squares cost function which has the form
 
 .. math:: \sum_i \left( \frac{y_i^{obs}-y_i}{\sigma_i} \right)^2
@@ -32,7 +32,7 @@ where the :math:`y_i`'s are calculated from a model.
 Mantid supports a number of other cost functions and these are described :ref:`here <algm-Fit>`. 
 The above cost function is the default Mantid cost function. If you use the 
 :ref:`Fit algorithm <algm-Fit>` this cost function goes under the name 
-‘Least squares’ and in some placed in Mantid is referred to as Chi-sq.
+'Least squares' and in some placed in Mantid is referred to as Chi-sq.
 
 Consider the simple example where a model depends on just one fitting parameter, 
 here called Bob. The :math:`y_i`'s then only depend on this parameter and hence the same 
@@ -42,7 +42,7 @@ cost function could depend on the fitting parameter Bob:
 .. figure:: ../images/CostFunctionVSbob.png
    :alt: CostFunctionVSbob.png
 
-The primary problem which Mantid, as of this writting, deals with is that of 
+The primary problem which Mantid deals with is that of 
 local minimization, also referred to as download minimization. Referencing to 
 the figure above, this corresponds either to reach target B through fitting from 
 the value of the fitting parameter shown by the red label 1 or 2, or reach 
@@ -59,9 +59,9 @@ Mantid supports see :ref:`here <algm-Fit>`. The default Mantid minimizer is
 Levenberg-Marquardt, 
 which is a strictly downhill mimimizer. Mantid has a plug-in mechanism for added
 minimizers and hence the number of minimizers which Mantid supports is not static.
-For example, as of this writing, recently a minimizer called FABADA was added which 
+For example recently a minimizer called FABADA was added which 
 is aimed at fitting for Bayesian data analysis. New fitting minimizers can be added 
-through the plug-in mechanism or as is demonstrated in the section below entitled 
+through the plug-in mechanism or as is demonstrated in the section entitled
 'Global fitting' can be scripted from minimizers that already exist. 
 
 Fitting in Mantid is more than just selecting a cost functions and minimizer. 
@@ -75,7 +75,7 @@ looks like this
 minimizer (IFuncMinimizer) and cost function (ICostFunction), but also the fit 
 function (IFunction). The fit function defines the model that is used to model 
 the data. The user defined fit function can be a complex mathematical product, 
-sum and convolution of other fit function. For more information for 
+sum and convolution of other fit functions. For more information for 
 how to create a model see the documentation for :ref:`Fit <algm-Fit>`, the 
 Fitting section of the Mantid Introduction tutorial 
 (http://www.mantidproject.org/Mantid_Basic_Course)
@@ -83,7 +83,7 @@ for how to do this using the Fit Function Toolbox and
 this Python fit tutorial: http://www.mantidproject.org/Introduction_to_Python_Fit_Functions. 
 
 From the class diagram above note fitting also support constraints (IConstraint), 
-see :ref:`here <FitConstraint>` for more on this. Further fitting parameters can be 
+see :ref:`here <algm-Fit>` for more on this. Further fitting parameters can be 
 :ref:`tied <algm-Fit>` to specific values or tied to other fitting parameters 
 through mathematical formulas.
 
@@ -94,10 +94,10 @@ Mantid can fit multiple datasets to one model. This can perhaps most easily be
 done using the Multi-Dataset Fitting interface 
 (http://www.mantidproject.org/Fitting_QENS_I%28Q,_t%29). 
 
-For sequential fitting, which is simply the sequential fitting of datasets 
-using the same fit function, and where for example fitting parameters obtained 
+Sequential fitting is simply the sequential fitting of datasets 
+using the same fit function, and where, for example, fitting parameters obtained 
 from one fit may be used as starting values in a next fit and so on. For
-an example for example see here: 
+an example of sequential fitting see here: 
 http://www.mantidproject.org/MantidPlot:_Simple_Peak_Fitting_with_the_Fit_Wizard
 
 
@@ -136,19 +136,16 @@ inspection of the cost function in the neighbourhood of a found minimum.
 Global fitting
 -------------------------
 As of this writing the primary use of Mantid fitting is to do local 
-minimization. However, recently e.g. the FABADA minimizer, which although
-not a decicated global fitting algorithm may be used for this purpose. 
-With reference to the well know global fitting algorithm 
-Simulated annealing (https://en.wikipedia.org/wiki/Simulated_annealing),
-FABADA can be thought of as algorithm without the annealing. 
+minimization. 
 
-Adding your own favorite global fitting algorithm can be done using 
-the minimizer plug-in mechanism (although you will need to program in
-C++ for this). However writing a simply script may get you a long way.
-For instance below is demonstrated an example of how script a global fitting 
-algorithm, which has been demonstrated (http://dx.doi.org/10.1107/S0021889810008113) 
-to be competitive with a highly tuned simulation annealing algorithm used for solving 
-crystal structures from powder diffraction data.
+Many well known global fitting algorithms are very simple in their
+implementation. 
+
+To demonstrate an example of this, below is shown how to script 
+a global fitting algorithm, which for example in http://dx.doi.org/10.1107/S0021889810008113 
+has been shown to be competitive with a tuned Simulation Annealing algorithm
+(https://en.wikipedia.org/wiki/Simulated_annealing)
+implementation used for solving crystal structures from powder diffraction data.
 
 **Example: Multi local minimizations from random starting points**
 
@@ -195,11 +192,13 @@ crystal structures from powder diffraction data.
         # find the global minima (graphically and/or from command line)
         # print costFuncVal
         # sleep(2)
+        
+    print 'test'
 
 .. testoutput:: LocalMinimizationRandowStartingPoints
     :hide:
     :options: +NORMALIZE_WHITESPACE
 
-    
+    test
 
 .. categories:: Concepts
