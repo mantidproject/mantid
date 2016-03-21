@@ -708,6 +708,11 @@ public:
     *sProp = stringWithWhitespace;
     TSM_ASSERT_EQUALS("Assignment input value has not been trimmed",
                       sProp->value(), trimmedStringWithWhitespace);
+
+    // test assignment with string literal
+    *sProp = "  value with whitespace\t\t \r\n";
+    TSM_ASSERT_EQUALS("Assignment string literal has not been trimmed",
+      sProp->value(), trimmedStringWithWhitespace);
   }
 
   void test_trimming_integer_property() {
