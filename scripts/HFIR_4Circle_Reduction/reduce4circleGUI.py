@@ -39,6 +39,11 @@ from ui_MainWindow import Ui_MainWindow
 class MainWindow(QtGui.QMainWindow):
     """ Class of Main Window (top)
     """
+    TabPage = {'View Raw Data': 1,
+               'Calculate UB': 2,
+               'UB Matrix': 3,
+               'Peak Integration': 5}
+
     def __init__(self, parent=None):
         """ Initialization and set up
         """
@@ -123,18 +128,6 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_refineUBFFT, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub_fft)
 
-        # Tab 'Merge'
-        self.connect(self.ui.pushButton_addScanSliceView, QtCore.SIGNAL('clicked()'),
-                     self.do_add_scans_merge)
-        self.connect(self.ui.pushButton_process4SliceView, QtCore.SIGNAL('clicked()'),
-                     self.do_merge_scans)
-        self.connect(self.ui.pushButton_readyToIntegratePeak, QtCore.SIGNAL('clicked()'),
-                     self.do_advance_to_integrate_peaks)
-        self.connect(self.ui.pushButton_refreshMerged, QtCore.SIGNAL('clicked()'),
-                     self.do_refresh_merged_scans_table)
-        self.connect(self.ui.pushButton_plotMergedScans, QtCore.SIGNAL('clicked()'),
-                     self.do_view_merged_scans_3d)
-
         # Tab 'Setup'
         self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
                      self.do_setup_dir_default)
@@ -145,13 +138,35 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.comboBox_instrument, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.change_instrument_name)
 
+        # Tab 'UB Matrix'
+        self.connect(self.ui.pushButton_showUB2Edit, QtCore.SIGNAL('clicked()'),
+                     self.do_show_ub_in_box)
+        self.connect(self.ui.pushButton_syncUB, QtCore.SIGNAL('clicked()'),
+                     self.do_sync_ub)
+        self.connect(self.ui.pushButton_setUBSliceView, QtCore.SIGNAL('clicked()'),
+                     self.do_set_ub_from_text)
+
+        # Tab 'Merge'
+        self.connect(self.ui.pushButton_addScanSliceView, QtCore.SIGNAL('clicked()'),
+                     self.do_add_scans_merge)
+        self.connect(self.ui.pushButton_mergeScans, QtCore.SIGNAL('clicked()'),
+                     self.do_merge_scans)
+        self.connect(self.ui.pushButton_integratePeaks, QtCore.SIGNAL('clicked()'),
+                     self.do_integrate_peaks)
+        self.connect(self.ui.pushButton_setupPeakIntegration, QtCore.SIGNAL('clicked()'),
+                     self.do_switch_tab_peak_int)
+        self.connect(self.ui.pushButton_refreshMerged, QtCore.SIGNAL('clicked()'),
+                     self.do_refresh_merged_scans_table)
+        self.connect(self.ui.pushButton_plotMergedScans, QtCore.SIGNAL('clicked()'),
+                     self.do_view_merged_scans_3d)
+        self.connect(self.ui.pushButton_showUB, QtCore.SIGNAL('clicked()'),
+                     self.do_view_ub)
+
         # Tab 'Integrate Peaks'
         self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
                      self.do_integrate_per_pt)
         self.connect(self.ui.pushButton_integratePeak, QtCore.SIGNAL('clicked()'),
                      self.do_integrate_peaks)
-        self.connect(self.ui.pushButton_findPeaks, QtCore.SIGNAL('clicked()'),
-                     self.do_find_peaks_integrate)
 
         # Tab survey
         self.connect(self.ui.pushButton_survey, QtCore.SIGNAL('clicked()'),
@@ -200,6 +215,7 @@ class MainWindow(QtGui.QMainWindow):
         # Initial setup
         self.ui.tabWidget.setCurrentIndex(0)
         self._init_table_widgets()
+        self.ui.radioButton_ubMantidStyle.setChecked(True)
         self.ui.lineEdit_numSurveyOutput.setText('50')
         self.ui.checkBox_loadHKLfromFile.setChecked(True)
         self.ui.checkBox_sortDescending.setChecked(False)
@@ -254,7 +270,7 @@ class MainWindow(QtGui.QMainWindow):
             print '[DB] Total %d rows are selected for peak integration.' % len(ret_list)
 
         # Switch tab
-        self.ui.tabWidget.setCurrentIndex(5)
+        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['Peak Integration'])
 
         # Add table
         for row_index in ret_list:
@@ -271,24 +287,6 @@ class MainWindow(QtGui.QMainWindow):
                 status, msg = self.ui.tableWidget_peakIntegration.append_scan(merged_info)
                 if status is False:
                     self.pop_one_button_dialog(msg)
-        # END-FOR
-
-        return
-
-    def do_find_peaks_integrate(self):
-        """ Find the centre of the 3D peak of the merged MD workspace
-        :return:
-        """
-        row_index_list = self.ui.tableWidget_peakIntegration.get_selected_rows()
-
-        for i_row in row_index_list:
-            md_ws_name = self.ui.tableWidget_peakIntegration.get_md_ws_name(i_row)
-            status, peak_centre_tuple = self._myControl.find_peak_centre_md(md_ws_name)
-            if status is True:
-                q_centre, hkl_centre = peak_centre_tuple
-                self.ui.tableWidget_peakIntegration.set_q(i_row, q_centre)
-                self.ui.tableWidget_peakIntegration.set_hkl(i_row, hkl_centre)
-            # END-IF
         # END-FOR
 
         return
@@ -346,30 +344,52 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_integrate_peaks(self):
-        """ Integrate peaks
+        """ Integrate selected peaks with.  If any scan is not merged, then it will merge the scan first
         Integrate peaks
         :return:
         """
-        # Determine the workspace/scan to integrate
-        merged_ws_name = str(self.ui.comboBox_mergedScanWSName.currentText()).strip()
-        if len(merged_ws_name) == 0:
-            # merge a scan
-            scan_number = gutil.parse_integers_editors([self.ui.lineEdit_scanIntegratePeak])[0]
-            if scan_number is None:
-                self.pop_one_button_dialog('Scan number is not given!')
-                return
-            pt_list = gutil.parse_integer_list(str(self.ui.lineEdit_ptNumListIntPeak.text()))
-            assert len(pt_list) > 0
-            # self._myControl.merge_pts_in_scan(exp_number, scan_number, pt_list,
-            #                                   target_ws_name=None,
-            #                                   target_frame=None)
-        else:
-            if self._myControl.does_workspace_exist(merged_ws_name) is False:
-                self.pop_one_button_dialog('Merged MDEventWorkspace %s does not exist!' % merged_ws_name)
-                return
-        # END-IF-ELSE
+        # get rows to merge
+        row_number_list = self.ui.tableWidget_mergeScans.get_selected_rows(True)
+        if len(row_number_list) == 0:
+            self.pop_one_button_dialog('No scan is selected for scan')
+            return
 
-        raise NotImplementedError('ASAP')
+        # get the parameters for integration
+        status, peak_radius = gutil.parse_float_editors([self.ui.lineEdit_peakRadius], allow_blank=False)
+        if status is False:
+            self.pop_one_button_dialog('Peak radius is not given right')
+            return
+
+        # merged workspace base name
+        use_default_merge_name = self.ui.checkBox_useDefaultMergedName.isChecked()
+
+        # integrate peak
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp], allow_blank=False)
+        if status:
+            exp_number = ret_obj[0]
+        else:
+            self.pop_one_button_dialog('Unable to get valid experiment number due to %s.' % ret_obj)
+            return
+
+        for row_number in row_number_list:
+            scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
+            pt_number_list = self._myControl.get_pt_numbers(exp_number, scan_number)
+
+            # merge if required
+            merged = self.ui.tableWidget_mergeScans.get_merged_status(row_number)
+            if merged is False:
+                self._myControl.merge_pts_in_scan(exp_no=exp_number, scan_no=scan_number, pt_num_list=pt_number_list,
+                                                  target_frame='qsample')
+                self.ui.tableWidget_mergeScans.set_status_by_row(row_number, 'Done')
+            # END-IF
+
+            # integrate peak
+            peak_intensity = self._myControl.integrate_peak(exp_number, scan_number, pt_number_list, peak_radius)
+            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, peak_intensity)
+
+        # END-FOR
+
+        return
 
     def _how_to_deal_with_this(self):
         # Get peak integration parameters
@@ -580,7 +600,7 @@ class MainWindow(QtGui.QMainWindow):
             exp_no, scan_no, pt_no = int_list
 
         # Switch tab
-        self.ui.tabWidget.setCurrentIndex(2)
+        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['Calculate UB'])
 
         # Find and index peak
         self._myControl.find_peak(exp_no, scan_no, [pt_no])
@@ -662,7 +682,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         # peak finding will use all points in the selected scan.
         scan_no = self.ui.lineEdit_run.text()
-        self.ui.tabWidget.setCurrentIndex(2)
+        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['Calculate UB'])
         self.ui.lineEdit_scanNumber.setText(scan_no)
 
         return
@@ -684,7 +704,7 @@ class MainWindow(QtGui.QMainWindow):
         assert status
 
         # switch to tab-3
-        self.ui.tabWidget.setCurrentIndex(2)
+        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['Calculate UB'])
 
         # find peak and add peak
         failed_list = list()
@@ -1147,7 +1167,7 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # Get UB matrix
-        ub_matrix = self.ui.tableWidget_ubMergeScan.get_matrix()
+        ub_matrix = self.ui.tableWidget_ubInUse.get_matrix()
         self._myControl.set_ub_matrix(exp_number=None, ub_matrix=ub_matrix)
 
         # Warning
@@ -1441,6 +1461,59 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_set_ub_from_text(self):
+        """ Purpose: Set UB matrix in use from plain text edit plainTextEdit_ubInput.
+        Requirements:
+          1. the string in the plain text edit must be able to be split to 9 floats by ',', ' ', '\t' and '\n'
+        Guarantees: the matrix will be set up the UB matrix in use
+        :return:
+        """
+        ub_str = str(self.ui.plainTextEdit_ubInput.toPlainText())
+        status, ret_obj = gutil.parse_float_array(ub_str)
+        if status is False:
+            # unable to parse to float arrays
+            self.pop_one_button_dialog(ret_obj)
+            return
+
+        elif len(ret_obj) != 9:
+            # number of floats is not 9
+            self.pop_one_button_dialog('Requiring 9 floats for UB matrix.  Only %d are given.' % len(ret_obj))
+            return
+
+        # in good UB matrix format
+        ub_str = ret_obj
+        if self.ui.radioButton_ubMantidStyle.isChecked():
+            # UB matrix in mantid style
+            self.ui.tableWidget_ubInUse.set_from_list(ub_str)
+
+        elif self.ui.radioButton_ubSpiceStyle.isChecked():
+            # UB matrix in SPICE style
+            spice_ub = gutil.convert_str_to_matrix(ub_str, (3, 3))
+            mantid_ub = r4c.convert_spice_ub_to_mantid(spice_ub)
+            self.ui.tableWidget_ubInUse.set_from_matrix(mantid_ub)
+
+        else:
+            # not defined
+            self.pop_one_button_dialog('Neither Mantid or SPICE-styled UB is checked!')
+
+        return
+
+    def do_show_ub_in_box(self):
+        """ Get UB matrix in table tableWidget_ubMergeScan and write to plain text edit plainTextEdit_ubInput
+        :return:
+        """
+        ub_matrix = self.ui.tableWidget_ubInUse.get_matrix()
+
+        text = ''
+        for i in xrange(3):
+            for j in xrange(3):
+                text += '%.7f, ' % ub_matrix[i][j]
+            text += '\n'
+
+        self.ui.plainTextEdit_ubInput.setPlainText(text)
+
+        return
+
     def do_survey(self):
         """
         Purpose: survey for the strongest reflections
@@ -1466,6 +1539,28 @@ class MainWindow(QtGui.QMainWindow):
         scan_sum_list = ret_obj
         self.ui.tableWidget_surveyTable.set_survey_result(scan_sum_list)
         self.ui.tableWidget_surveyTable.show_reflections(max_number)
+
+        return
+
+    def do_switch_tab_peak_int(self):
+        """ Switch to tab 'Peak Integration' to set up and learn how to do peak integration
+        :return:
+        """
+        # switch tab
+        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['Peak Integration'])
+
+        # set up value
+        selected_scans = self.ui.tableWidget_mergeScans.get_scan_list()
+        if len(selected_scans) > 0:
+            self.ui.lineEdit_scanIntegratePeak.setText(str(selected_scans[0]))
+
+        return
+
+    def do_sync_ub(self):
+        """ Purpose: synchronize UB matrix in use with UB matrix calculated.
+        :return:
+        """
+        self.ui.tableWidget_ubInUse.set_from_matrix(self.ui.tableWidget_ubMatrix.get_matrix())
 
         return
 
@@ -1629,6 +1724,14 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_view_ub(self):
+        """ View UB matrix in tab 'UB matrix'
+        :return:
+        """
+        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['UB Matrix'])
+
+        return
+
     def do_view_survey_peak(self):
         """ View selected peaks from survey table
         Requirements: one and only 1 run is selected
@@ -1647,7 +1750,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.tableWidget_surveyTable.select_all_rows(False)
 
         # switch tab
-        self.ui.tabWidget.setCurrentIndex(1)
+        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['View Raw Data'])
         self.ui.lineEdit_run.setText(str(scan_num))
         self.ui.lineEdit_rawDataPtNo.setText(str(pt_num))
 

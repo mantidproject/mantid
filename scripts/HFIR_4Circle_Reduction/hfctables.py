@@ -146,6 +146,7 @@ class UBMatrixTable(tableBase.NTableWidget):
     def get_matrix(self):
         """
         Get the copy of the matrix
+        Guarantees: return a 3 x 3 ndarray
         :return:
         """
         # print '[DB] MatrixTable: _Matrix = ', self._matrix
@@ -437,7 +438,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         return self.get_cell_value(i_row, j_col_merged)
 
     def get_scan_list(self):
-        """ Get list of scans to merge from table
+        """ Get list of selected scans to merge from table
         :return: list of 2-tuples (scan number, row number)
         """
         scan_list = list()
@@ -451,6 +452,16 @@ class ProcessTableWidget(tableBase.NTableWidget):
                 scan_list.append((scan_num, i_row))
 
         return scan_list
+
+    def get_scan_number(self, row_number):
+        """ Get scan number of a row
+        Guarantees: get scan number of a row
+        :param row_number:
+        :return:
+        """
+        col_index = ProcessTableWidget.TableSetup.index(('Scan', 'int'))
+
+        return self.get_cell_value(row_number, col_index)
 
     def setup(self):
         """
@@ -484,6 +495,40 @@ class ProcessTableWidget(tableBase.NTableWidget):
             return 'Unable to find scan %d in table.' % scan_no
 
         return ''
+
+    def set_peak_intensity(self, row_number, scan_number, peak_intensity):
+        """ Set peak intensity to a row or scan
+        Requirement: Either row number or scan number must be given
+        Guarantees: peak intensity is set
+        :param row_number:
+        :param scan_number:
+        :param peak_intensity:
+        :return:
+        """
+        # check requirements
+        assert row_number is not None and scan_number is not None, 'Row number and scan number cannot be defined ' \
+                                                                   'simultaneously.'
+        assert row_number is None and scan_number is None, 'Row number and scan number cannot be left empty ' \
+                                                           'simultaneously.'
+        assert isinstance(peak_intensity, float)
+
+        if row_number is None:
+            # row number is not defined.  go through table for scan number
+            row_number = -1
+            num_rows = self.rowCount()
+            scan_col_index = ProcessTableWidget.TableSetup.index(('Scan', 'int'))
+            for row_index in xrange(num_rows):
+                scan_i = self.get_cell_value(row_index, scan_col_index)
+                if scan_i == scan_number:
+                    row_number = row_index
+                    break
+            # check
+            if row_number < 0:
+                raise RuntimeError('Scan %d cannot be found in the table.' % scan_number)
+        # END-IF
+
+        intensity_col_index = ProcessTableWidget.TableSetup.index(('Intensity', 'float'))
+        return self.update_cell_value(row_number, intensity_col_index, peak_intensity)
 
     def set_pt_by_row(self, row_number, pt_list):
         """
