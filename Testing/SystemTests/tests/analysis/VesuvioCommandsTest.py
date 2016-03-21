@@ -40,7 +40,7 @@ def _create_test_flags(background):
     return flags
 
 #====================================================================================
-'''
+
 class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
 
     _fit_results = None
@@ -176,7 +176,7 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         self.assertTrue(isinstance(exit_iteration, int))
 
 #====================================================================================
-'''
+
 class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest):
 
     _fit_results = None
