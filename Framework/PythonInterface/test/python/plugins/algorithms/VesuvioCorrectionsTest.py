@@ -85,7 +85,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         # Test Linear fit Result Workspace
         linear_params = alg.getProperty("LinearFitResult").value
         self._validate_table_workspace(linear_params, 7, 3)
-        expected_values = [4.17063e-05, 0.0, 1.0, 2.026619013, 0.0, 1.0, 2.02661901]
+        expected_values = [4.17063e-05, 0.0, 1.0, 2.026619013, 0.0, 1.0, 11.799966]
         self._validate_table_values_top_to_bottom(linear_params, expected_values)
 
 
@@ -137,7 +137,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         # Test Linear fit Result Workspace
         linear_params = alg.getProperty("LinearFitResult").value
         self._validate_table_workspace(linear_params, 7, 3)
-        expected_values = [0.0001183, 0.0, 1.0, 2.4028667, 0.0, 1.0, 10.5412]
+        expected_values = [0.0001183, 0.0, 1.0, 2.4028667, 0.0, 1.0, 10.5412496]
         self._validate_table_values_top_to_bottom(linear_params, expected_values)
 
 
