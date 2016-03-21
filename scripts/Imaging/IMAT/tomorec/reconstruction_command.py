@@ -537,9 +537,12 @@ class ReconstructionCommand(object):
 
         Returns :: rotated images
         """
+        if not cfg or not isinstance(cfg, tomocfg.PreProcConfig):
+            raise ValueError("Cannot rotate images without a valid pre-processing configuration")
+
         if not cfg.rotation or cfg.rotation < 0:
             print " * Note: not rotating the input images."
-            return data
+            return data, white, dark
 
         data = self._rotate_imgs(data, cfg)
         if white:
@@ -550,7 +553,7 @@ class ReconstructionCommand(object):
         print (" * Finished rotation step ({0} degrees clockwise), with pixel data type: {1}".
                format(cfg.rotation * 90, data.dtype))
 
-        return data, white, dark
+        return (data, white, dark)
 
     def _rotate_imgs(self, data, cfg):
         """
@@ -562,9 +565,6 @@ class ReconstructionCommand(object):
         Returns :: rotated data (stack of images)
         """
         self._check_data_stack(data)
-
-        if not cfg or not isinstance(cfg, tomocfg.PreProcConfig):
-            raise ValueError("Cannot rotate images without a valid pre-processing configuration")
 
         if 0 == cfg.rotation % 2:
             dim_y = data.shape[1]

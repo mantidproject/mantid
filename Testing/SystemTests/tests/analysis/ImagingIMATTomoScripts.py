@@ -422,6 +422,7 @@ class ImagingIMATTomoTests(unittest.TestCase):
         post_conf = cfgs.PostProcConfig()
         conf = cfgs.ReconstructionConfig(pre_conf, alg_conf, post_conf)
 
+        pre_conf.rotation = 1
         # absolutely invalid data
         with self.assertRaises(ValueError):
             cmd.rotate_stack([], pre_conf)
@@ -441,7 +442,7 @@ class ImagingIMATTomoTests(unittest.TestCase):
 
         # invalid configurations
         with self.assertRaises(ValueError):
-            cmd.rotate_stack(self.data_vol, alg_conf)
+            cmd.rotate_stack(self.data_vol, None)
 
         with self.assertRaises(ValueError):
             cmd.rotate_stack(self.data_vol, [])
@@ -455,6 +456,7 @@ class ImagingIMATTomoTests(unittest.TestCase):
 
         import IMAT.tomorec.configs as cfgs
         pre_conf = cfgs.PreProcConfig()
+        pre_conf.rotation = 1
 
         (rotated, white, dark) = cmd.rotate_stack(self.data_vol, pre_conf)
         np.testing.assert_allclose(rotated, self.data_vol,
