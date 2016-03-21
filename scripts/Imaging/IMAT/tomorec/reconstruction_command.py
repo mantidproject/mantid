@@ -45,7 +45,7 @@ class ReconstructionCommand(object):
     """
 
     def __init__(self):
-        self._PREPROC_IMGS_SUBDIR_NAME = 'preproc_images'
+        self._PREPROC_IMGS_SUBDIR_NAME = 'pre_processed'
         self._OUT_README_FNAME = '0.README_reconstruction.txt'
         self._OUT_SLICES_FILENAME_PREFIX='out_recon_slice'
         self._OUT_HORIZ_SLICES_SUBDIR='out_recon_horiz_slice'
@@ -357,14 +357,14 @@ class ReconstructionCommand(object):
                                  format(pre_cfg.normalize_air_region))
 
             # skip if for example: 0, 0, 0, 0 (empty selection)
-            if cfg.normalize_air_region[1] >= cfg.normalize_air_region[3] or\
-               cfg.normalize_air_region[0] >= cfg.normalize_air_region[2]:
+            if pre_cfg.normalize_air_region[1] >= pre_cfg.normalize_air_region[3] or\
+               pre_cfg.normalize_air_region[0] >= pre_cfg.normalize_air_region[2]:
                 return data
 
             air_sums = []
             for idx in range(0, data.shape[0]):
-                air_data_sum = data[idx, cfg.normalize_air_region[1]:cfg.normalize_air_region[3],
-                                    cfg.normalize_air_region[0]:cfg.normalize_air_region[2]].sum()
+                air_data_sum = data[idx, pre_cfg.normalize_air_region[1]:pre_cfg.normalize_air_region[3],
+                                    pre_cfg.normalize_air_region[0]:pre_cfg.normalize_air_region[2]].sum()
                 air_sums.append(air_data_sum)
 
             too_verbose = True

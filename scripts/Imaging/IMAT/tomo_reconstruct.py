@@ -193,11 +193,13 @@ def grab_preproc_options(args):
     if 'wf' == args.remove_stripes:
         pre_config.stripe_removal_method = 'wavelet-fourier'
 
-    if args.region_of_interest:
-        pre_config.crop_coords = ast.literal_eval(args.region_of_interest)
-
     if args.air_region:
-        pre_config.normalize_air_region = ast.literal_eval(args.air_region)
+        coords = ast.literal_eval(args.air_region)
+        pre_config.normalize_air_region = [int(val) for val in coords]
+
+    if args.region_of_interest:
+        coords = ast.literal_eval(args.region_of_interest)
+        pre_config.crop_coords = [int(val) for val in coords]
 
     if args.median_filter_size:
         if isinstance(args.median_filter_size, str) and not args.median_filter_size.isdigit():

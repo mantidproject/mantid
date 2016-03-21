@@ -157,10 +157,10 @@ Data locations
 
 This is dependent on the facility and instrument.
 
-TODO: this is work in progress. At ISIS In principle data will be
-replicated in the ISIS archive, the IMAT disk space on the cluster
-SCARF (remote compute resource), and possibly an analysis machine
-located in R3.
+.. warning:: This is work in progress. At ISIS, in principle data will
+             be replicated in the ISIS archive, the IMAT disk space on
+             the cluster SCARF (remote compute resource), and possibly
+             an IMAT analysis machine.
 
 The path to the files of a particular tomographic reconstruction
 consists of several components. An example path would be (on a Windows
@@ -199,7 +199,12 @@ The equivalent on a non-Windows system would be for example:
 * /media/scarf/data/RB987654321/experiment_foo/
 
 These and related parameters can be inspected and modified in the
-sytem settings section (or **System** tab).
+sytem settings section (or **System** tab). Their default values are
+set for the current setup of the IMAT analysis machine. The "Reset
+all" button resets all these settings to their factory defaults.  Note
+that the **System** section of the interface is currently work in
+progress and it may change significantly as required during
+commissioning of IMAT.
 
 The tab *Visualization* has simple push buttons to browse the files
 available from the local and remote locations, as well as any other
@@ -211,8 +216,9 @@ Running jobs remotely
 
 To be able to run jobs on a remote compute resource (cluster, supercomputer, etc.)
 
-* Log into the resource
-* Select it and setup one reconstruction tool
+* Log into the resource (in **Setup**)
+* Then in **Run** select the compute resource and setup one
+  reconstruction tool
 * Use the **reconstruct** button in the **Run** tab of the interface
 
 You can monitor the status of the jobs currently running (and recently
