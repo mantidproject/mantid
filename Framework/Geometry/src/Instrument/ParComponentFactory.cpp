@@ -20,22 +20,12 @@ namespace Geometry {
  * @param map A pointer to the ParameterMap
  * @returns A pointer to a parameterized component
  */
-boost::shared_ptr<Detector>
+boost::shared_ptr<IDetector>
 ParComponentFactory::createDetector(const IDetector *base,
                                     const ParameterMap *map) {
-  // RectangularDetectorPixel subclasses Detector so it has to be checked
-  // before.
-  const RectangularDetectorPixel *rdp =
-      dynamic_cast<const RectangularDetectorPixel *>(base);
-  if (rdp)
-    return boost::make_shared<RectangularDetectorPixel>(rdp, map);
-
-  const Detector *baseDet = dynamic_cast<const Detector *>(base);
-  if (baseDet)
-    return boost::shared_ptr<Detector>(
-        new Detector(baseDet, map)); // g_detPool.create(baseDet,map);
-
-  return boost::shared_ptr<Detector>();
+  // Clone may be a Detector or RectangularDetectorPixel instance (or nullptr)
+  auto clone = base->cloneParameterized(map);
+  return boost::shared_ptr<IDetector>(clone);
 }
 
 /**
