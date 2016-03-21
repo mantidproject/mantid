@@ -1,8 +1,9 @@
+#include "MantidVatesAPI/EventNexusLoadingPresenter.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidVatesAPI/EventNexusLoadingPresenter.h"
-#include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidVatesAPI/MDLoadingView.h"
 
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
@@ -47,9 +48,9 @@ namespace Mantid
       return 0;
     }
 
-    ::NeXus::File *file = NULL;
+    std::unique_ptr<NeXus::File> file;
     try {
-      file = new ::NeXus::File(this->m_filename);
+      file = Kernel::make_unique<NeXus::File>(this->m_filename);
       // All SNS (event or histo) nxs files have an entry named "entry"
       try {
         file->openGroup("entry", "NXentry");
@@ -59,16 +60,13 @@ namespace Mantid
       }
       // But only eventNexus files have bank123_events as a group name
       std::map<std::string, std::string> entries = file->getEntries();
-      bool hasEvents = false;
-      std::map<std::string, std::string>::iterator it;
-      for (it = entries.begin(); it != entries.end(); ++it) {
-        if (it->first.find("_events") != std::string::npos) {
-          hasEvents = true;
-          break;
-        }
-      }
+      auto hasEvents = std::find_if(
+          entries.begin(), entries.end(),
+          [](const std::pair<std::string, std::string> &entry) {
+            return entry.first.find("_events") != std::string::npos;
+          });
       file->close();
-      return hasEvents ? 1 : 0;
+      return hasEvents != entries.end();
     } catch (std::exception &e) {
       std::cerr << "Could not open " << this->m_filename
                 << " as an EventNexus file because of exception: " << e.what()

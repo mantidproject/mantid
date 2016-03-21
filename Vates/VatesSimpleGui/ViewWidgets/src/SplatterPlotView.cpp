@@ -374,15 +374,12 @@ void SplatterPlotView::destroyPeakSources()
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources;
-  QList<pqPipelineSource *>::Iterator source;
-  sources = smModel->findItems<pqPipelineSource *>(server);
+  const QList<pqPipelineSource *> sources =
+      smModel->findItems<pqPipelineSource *>(server);
 
-  for (source = sources.begin(); source != sources.end(); ++source)
-  {
-    if (this->isPeaksWorkspace(*source))
-    {
-      builder->destroy(*source);
+  foreach (pqPipelineSource *source, sources) {
+    if (this->isPeaksWorkspace(source)) {
+      builder->destroy(source);
     }
   }
 
@@ -551,23 +548,17 @@ void SplatterPlotView::onPeakSourceDestroyed()
 {
   // For each peak Source check if there is a "true" source available.
   // If it is not availble then remove it from the peakSource storage.
-  for (QList<QPointer<pqPipelineSource>>::Iterator it = m_peaksSource.begin(); it != m_peaksSource.end();) {
+  for (auto it = m_peaksSource.begin(); it != m_peaksSource.end();) {
     pqServer *server = pqActiveObjects::instance().activeServer();
     pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-    QList<pqPipelineSource *> sources;
-    sources = smModel->findItems<pqPipelineSource *>(server);
+    const QList<pqPipelineSource *> sources =
+        smModel->findItems<pqPipelineSource *>(server);
 
-    bool foundSource = false;
-    for (QList<pqPipelineSource *>::iterator src = sources.begin(); src != sources.end(); ++src) {
-      if ((*src) == (*it)) {
-        foundSource = true;
-      }
-    }
+    auto foundSource = std::find(sources.begin(), sources.end(), *it);
 
-    if (!foundSource) {
-      it = m_peaksSource.erase(it); 
-    } 
-    else {
+    if (foundSource == sources.end()) {
+      it = m_peaksSource.erase(it);
+    } else {
       ++it;
     }
   }

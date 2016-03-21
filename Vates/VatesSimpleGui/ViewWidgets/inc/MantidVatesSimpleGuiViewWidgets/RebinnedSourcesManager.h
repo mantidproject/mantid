@@ -136,7 +136,9 @@ namespace Mantid
 
           pqPipelineSource* goToPipelineBeginning(pqPipelineSource* source);
 
-          bool doesSourceNeedToBeDeleted(std::string sourceName, std::vector<std::string> trackedSources);
+          bool doesSourceNeedToBeDeleted(
+              const std::string &sourceName,
+              const std::vector<std::string> &trackedSources);
       };
 
     } // SimpleGui
