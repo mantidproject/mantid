@@ -1,3 +1,4 @@
+#include <array>
 #include <cmath>
 #include <limits>
 #include <stdexcept>
@@ -119,21 +120,37 @@ void ColorUpdater::colorScaleChange(double min, double max)
       // For all views
       for (QList<pqView*>::iterator view = views.begin(); view != views.end(); ++view)
       {
+        std::vector<double> backgroundRgb;
+        if (*view) {
+          vtkSMProperty *prop = (*view)->getProxy()->GetProperty("Background");
+          vtkSMPropertyHelper helper(prop);
+          backgroundRgb = helper.GetDoubleArray();
+        }
         QList<pqDataRepresentation*> reps =  (*source)->getRepresentations((*view));
 
         // For all representations
         for (QList<pqDataRepresentation*>::iterator rep = reps.begin(); rep != reps.end(); ++rep)
         {
+          if (backgroundRgb.size() == 3) {
+            double a =
+                1. - (0.299 * backgroundRgb[0] + 0.587 * backgroundRgb[1] +
+                      0.114 * backgroundRgb[2]);
 
-          double black[3] = {0., 0., 0.};
-          vtkSMProxy *ScalarBarProxy =
-              vtkSMTransferFunctionProxy::FindScalarBarRepresentation(
-                  (*rep)->getLookupTableProxy(), (*view)->getProxy());
-          if (ScalarBarProxy) {
-            SafeSetScalarBarColor(ScalarBarProxy, "TitleColor", black);
-            ScalarBarProxy->UpdateProperty("TitleColor");
-            SafeSetScalarBarColor(ScalarBarProxy, "LabelColor", black);
-            ScalarBarProxy->UpdateProperty("LabelColor");
+            std::array<double, 3> color;
+            if (a < 0.5)
+              color = {{0., 0., 0.}};
+            else
+              color = {{1., 1., 1.}};
+
+            vtkSMProxy *ScalarBarProxy =
+                vtkSMTransferFunctionProxy::FindScalarBarRepresentation(
+                    (*rep)->getLookupTableProxy(), (*view)->getProxy());
+            if (ScalarBarProxy) {
+              SafeSetScalarBarColor(ScalarBarProxy, "TitleColor", color.data());
+              ScalarBarProxy->UpdateProperty("TitleColor");
+              SafeSetScalarBarColor(ScalarBarProxy, "LabelColor", color.data());
+              ScalarBarProxy->UpdateProperty("LabelColor");
+            }
           }
           this->updateLookupTable(*rep);
         }

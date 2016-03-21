@@ -1,6 +1,9 @@
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidQtAPI/MdSettings.h"
 #include "MantidKernel/Logger.h"
+
+#include <array>
+#include <cmath>
 #include <vector>
 
 #include <pqActiveObjects.h>
@@ -120,14 +123,19 @@ namespace Mantid
 
         background->SetElements3(backgroundRgb[0],backgroundRgb[1],backgroundRgb[2]);
 
-        double black[3] = {0., 0., 0.};
+        // Counting the perceptive luminance
+        // human eye favors green color...
+        double a = 1. - (0.299 * backgroundRgb[0] + 0.587 * backgroundRgb[1] +
+                         0.114 * backgroundRgb[2]);
+
+        std::array<double, 3> color;
+        if (a < 0.5)
+          color = {{0., 0., 0.}};
+        else
+          color = {{1., 1., 1.}};
+
         vtkSMPropertyHelper(view->getProxy(), "OrientationAxesLabelColor")
-            .Set(black, 3);
-        auto color =
-            vtkSMPropertyHelper(view->getProxy(), "OrientationAxesLabelColor")
-                .GetDoubleArray();
-        std::cout << "color:" << color[0] << " " << color[1] << " " << color[2]
-                  << "\n";
+            .Set(color.data(), 3);
 
         view->resetCamera();
       }

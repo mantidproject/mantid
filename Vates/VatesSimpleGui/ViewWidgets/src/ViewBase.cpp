@@ -979,20 +979,32 @@ void ViewBase::setAxesGrid(bool on) {
       vtkSMPropertyHelper(gridAxes3DActor, "Visibility").Set(1);
       gridAxes3DActor->UpdateProperty("Visibility");
 
-      double black[3] = {0., 0., 0.};
-      SafeSetAxisTitleProperty(gridAxes3DActor, "XTitleColor", black);
+      vtkSMProperty *prop = renderView->getProxy()->GetProperty("Background");
+      vtkSMPropertyHelper helper(prop);
+      std::vector<double> backgroundRgb = helper.GetDoubleArray();
+
+      double a = 1. - (0.299 * backgroundRgb[0] + 0.587 * backgroundRgb[1] +
+                       0.114 * backgroundRgb[2]);
+
+      std::array<double, 3> color;
+      if (a < 0.5)
+        color = {{0., 0., 0.}};
+      else
+        color = {{1., 1., 1.}};
+
+      SafeSetAxisTitleProperty(gridAxes3DActor, "XTitleColor", color.data());
       gridAxes3DActor->UpdateProperty("XTitleColor");
-      SafeSetAxisTitleProperty(gridAxes3DActor, "YTitleColor", black);
+      SafeSetAxisTitleProperty(gridAxes3DActor, "YTitleColor", color.data());
       gridAxes3DActor->UpdateProperty("YTitleColor");
-      SafeSetAxisTitleProperty(gridAxes3DActor, "ZTitleColor", black);
+      SafeSetAxisTitleProperty(gridAxes3DActor, "ZTitleColor", color.data());
       gridAxes3DActor->UpdateProperty("ZTitleColor");
-      SafeSetAxisTitleProperty(gridAxes3DActor, "XLabelColor", black);
+      SafeSetAxisTitleProperty(gridAxes3DActor, "XLabelColor", color.data());
       gridAxes3DActor->UpdateProperty("XLabelColor");
-      SafeSetAxisTitleProperty(gridAxes3DActor, "YLabelColor", black);
+      SafeSetAxisTitleProperty(gridAxes3DActor, "YLabelColor", color.data());
       gridAxes3DActor->UpdateProperty("YLabelColor");
-      SafeSetAxisTitleProperty(gridAxes3DActor, "ZLabelColor", black);
+      SafeSetAxisTitleProperty(gridAxes3DActor, "ZLabelColor", color.data());
       gridAxes3DActor->UpdateProperty("ZLabelColor");
-      SafeSetAxisTitleProperty(gridAxes3DActor, "GridColor", black);
+      SafeSetAxisTitleProperty(gridAxes3DActor, "GridColor", color.data());
       gridAxes3DActor->UpdateProperty("GridColor");
     }
   }
