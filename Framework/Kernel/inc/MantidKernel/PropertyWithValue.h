@@ -13,10 +13,12 @@
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #endif
 
 #include <MantidKernel/StringTokenizer.h>
 #include <vector>
+#include <type_traits>
 #include "MantidKernel/IPropertySettings.h"
 
 namespace Mantid {
@@ -391,7 +393,11 @@ public:
   std::string setValue(const std::string &value) override {
     try {
       TYPE result = m_value;
-      toValue(value, result);
+      std::string valueCopy = value;
+      if (autoTrim()) {
+        boost::trim(valueCopy);
+      }
+      toValue(valueCopy, result);
       // Uses the assignment operator defined below which runs isValid() and
       // throws based on the result
       *this = result;
@@ -463,7 +469,15 @@ public:
    */
   virtual TYPE &operator=(const TYPE &value) {
     TYPE oldValue = m_value;
-    m_value = value;
+    if (std::is_same<TYPE, std::string>::value) {
+      std::string valueCopy = toString(value);
+      if (autoTrim()) {
+        boost::trim(valueCopy);
+      }
+      toValue(valueCopy, m_value);
+    } else {
+      m_value = value;
+    }
     std::string problem = this->isValid();
     if (problem == "") {
       return m_value;
