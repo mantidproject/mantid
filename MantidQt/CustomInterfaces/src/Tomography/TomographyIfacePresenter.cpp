@@ -385,8 +385,6 @@ void TomographyIfacePresenter::processRunRecon() {
   m_model->updateImageStackPreParams(m_view->currentROIEtcParams());
   m_model->updateTomopyMethod(m_view->tomopyMethod());
   m_model->updateAstraMethod(m_view->astraMethod());
-  m_model->updateExternalInterpreterPath(m_view->externalInterpreterPath());
-  m_model->updatePathLocalReconScripts(m_view->pathLocalReconScripts());
   const std::string &resource = m_view->currentComputeResource();
   if (m_model->localComputeResource() == resource) {
     subprocessRunReconLocal();

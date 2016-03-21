@@ -130,14 +130,6 @@ public:
 
   void updateAstraMethod(const std::string &method) { m_astraMethod = method; }
 
-  void updateExternalInterpreterPath(const std::string &interp) {
-    m_externalInterpreterPath = interp;
-  }
-
-  void updatePathLocalReconScripts(const std::string &path) {
-    m_pathLocalReconScripts = path;
-  }
-
   void updatePrePostProcSettings(const TomoReconFiltersSettings &filters) {
     m_prePostProcSettings = filters;
   }
@@ -174,17 +166,18 @@ private:
 
   /// makes the command line string to run on the remote/local
   void makeRunnableWithOptions(const std::string &comp, std::string &run,
-                               std::string &opt) const;
+                               std::vector<std::string> &opt) const;
 
   void checkWarningToolNotSetup(const std::string &tool,
                                 const std::string &settings,
                                 const std::string &cmd,
                                 const std::string &opt) const;
 
-  std::string makeTomoRecScriptOptions() const;
+  std::vector<std::string> makeTomoRecScriptOptions(bool local) const;
 
-  std::string filtersCfgToCmdOpts(const TomoReconFiltersSettings &filters,
-                                  const ImageStackPreParams &corRegions) const;
+  void filtersCfgToCmdOpts(const TomoReconFiltersSettings &filters,
+                           const ImageStackPreParams &corRegions, bool local,
+                           std::vector<std::string> &opts) const;
 
   void splitCmdLine(const std::string &cmd, std::string &run,
                     std::string &opts) const;
@@ -235,9 +228,6 @@ private:
 
   std::string m_tomopyMethod;
   std::string m_astraMethod;
-
-  std::string m_externalInterpreterPath;
-  std::string m_pathLocalReconScripts;
 
   // Settings for the pre-/post-processing filters
   TomoReconFiltersSettings m_prePostProcSettings;

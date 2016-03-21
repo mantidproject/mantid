@@ -39,6 +39,7 @@ struct MANTIDQT_CUSTOMINTERFACES_DLL TomoSystemSettingsLocal {
   std::string m_remoteDriveOrMountPoint;
 
   std::string m_reconScriptsPath;
+  std::string m_externalInterpreterPath;
 
   int m_processes;
   int m_cores;
@@ -46,6 +47,7 @@ struct MANTIDQT_CUSTOMINTERFACES_DLL TomoSystemSettingsLocal {
   static const std::string g_defBasePathTomoData;
   static const std::string g_defRemoteDriveOrMountPoint;
   static const std::string g_defReconScriptsPath;
+  static const std::string g_defExternalInterpreterPath;
 
   TomoSystemSettingsLocal();
 };

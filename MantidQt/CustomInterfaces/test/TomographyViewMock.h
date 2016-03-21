@@ -96,12 +96,6 @@ public:
   // void showToolConfig(const std::string &name) {}
   MOCK_METHOD1(showToolConfig, void(const std::string &name));
 
-  // std::string pathLocalReconScripts() {}
-  MOCK_CONST_METHOD0(pathLocalReconScripts, std::string());
-
-  // std::string externalInterpreterPath() {}
-  MOCK_CONST_METHOD0(externalInterpreterPath, std::string());
-
   // virtual void updateJobsInfoDisplay( const
   //    std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
   //    &status, const
