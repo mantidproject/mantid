@@ -103,13 +103,14 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         fitted_ws = fitted_wsg[0]
         self.assertTrue(isinstance(fitted_ws, MatrixWorkspace))
         self.assertEqual(8, fitted_ws.getNumberHistograms())
-        # self.assertAlmostEqual(50.0, fitted_ws.readX(0)[0])
-        # self.assertAlmostEqual(562.0, fitted_ws.readX(0)[-1])
 
-        # self.assertAlmostEqual(0.000928695463881635, fitted_ws.readY(0)[0])
-        # self.assertAlmostEqual(0.00722948549525415, fitted_ws.readY(0)[-1])
-        # self.assertAlmostEqual(-0.00756178413274695, fitted_ws.readY(1)[0])
-        # self.assertAlmostEqual(0.00355843687365601, fitted_ws.readY(1)[-1])
+        self.assertAlmostEqual(50.0, fitted_ws.readX(0)[0])
+        self.assertAlmostEqual(562.0, fitted_ws.readX(0)[-1])
+
+        self.assertAlmostEqual(-0.0221362198069, fitted_ws.readY(0)[0])
+        self.assertAlmostEqual(0.00720728978699, fitted_ws.readY(0)[-1])
+        self.assertAlmostEqual(0.00571520523979, fitted_ws.readY(1)[0])
+        self.assertAlmostEqual(-0.00211277263055, fitted_ws.readY(1)[-1])
 
         fitted_params = self._fit_results[1]
         self.assertTrue(isinstance(fitted_params, MatrixWorkspace))
