@@ -62,6 +62,8 @@ Performance
 CurveFitting
 ------------
 
+- Concept page for :ref:`Mantid Fitting <Fitting>` has been added. 
+
 Improved
 ########
 
