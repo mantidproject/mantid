@@ -391,8 +391,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
                 # remove container run
                 api.RebinToWorkspace(WorkspaceToRebin=can_run_ws_name,
-                                 WorkspaceToMatch=sam_ws_name,
-                                 OutputWorkspace=can_run_ws_name)
+                                     WorkspaceToMatch=sam_ws_name,
+                                     OutputWorkspace=can_run_ws_name)
                 sam_ws = api.Minus(LHSWorkspace=sam_ws_name,
                                    RHSWorkspace=can_run_ws_name,
                                    OutputWorkspace=sam_ws_name)
@@ -755,7 +755,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 self.checkInfoMatch(info, tempinfo)
                 # add current workspace to sub sum
                 temp_ws = api.Plus(LHSWorkspace=sumRun, RHSWorkspace=out_ws_name, OutputWorkspace=sumRun,
-                                  ClearRHSWorkspace=allEventWorkspaces(sumRun, out_ws_name))
+                                   ClearRHSWorkspace=allEventWorkspaces(sumRun, out_ws_name))
                 if temp_ws.id() == EVENT_WORKSPACE_ID:
                     temp_ws = api.CompressEvents(InputWorkspace=sumRun, OutputWorkspace=sumRun,
                                                  Tolerance=self.COMPRESS_TOL_TOF) # 10ns
