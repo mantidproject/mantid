@@ -89,7 +89,7 @@ void IntegrateByComponent::exec() {
           integratedWS->getInstrument();
 
       PARALLEL_FOR1(integratedWS)
-      for (int i = 0; i < static_cast<int>(hists.size()); ++i) {
+      for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
         PARALLEL_START_INTERUPT_REGION
 
         const std::set<detid_t> &detids =
@@ -131,7 +131,7 @@ void IntegrateByComponent::exec() {
       }
 
       PARALLEL_FOR1(integratedWS)
-      for (int i = 0; i < static_cast<int>(hists.size()); ++i) {
+      for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
         PARALLEL_START_INTERUPT_REGION
         const std::set<detid_t> &detids =
             integratedWS->getSpectrum(hists[i])

@@ -428,6 +428,8 @@ int OPJFile::ParseFormatOld() {
         current_col++;
       } else {
         fprintf(debug, "SPREADSHEET got negative index: %d\n", spread);
+        fclose(f);
+        fclose(debug);
         return -1;
       }
     }
@@ -845,6 +847,8 @@ int OPJFile::ParseFormatNew() {
   if (colpos < 0) {
     fprintf(debug,
             " ERROR : ftell returned a negative value after finding a column");
+    fclose(f);
+    fclose(debug);
     return -1;
   }
 
@@ -857,6 +861,13 @@ int OPJFile::ParseFormatNew() {
     short data_type;
     char data_type_u;
     int oldpos = int(ftell(f));
+    if (oldpos < 0) {
+      fprintf(debug, " ERROR : ftell returned a negative value when trying to "
+                     "read a column");
+      fclose(f);
+      fclose(debug);
+      return -1;
+    }
     CHECKED_FSEEK(debug, f, oldpos + 0x16, SEEK_SET);
     CHECKED_FREAD(debug, &data_type, 2, 1, f);
     if (IsBigEndian())

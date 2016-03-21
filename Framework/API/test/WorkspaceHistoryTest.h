@@ -20,18 +20,18 @@ private:
   class SimpleSum : public Algorithm {
   public:
     SimpleSum() : Algorithm() {}
-    virtual ~SimpleSum() {}
-    const std::string name() const { return "SimpleSum"; }
-    int version() const { return 1; }
-    const std::string category() const { return "Dummy"; }
-    const std::string summary() const { return "Dummy summary"; }
+    ~SimpleSum() override {}
+    const std::string name() const override { return "SimpleSum"; }
+    int version() const override { return 1; }
+    const std::string category() const override { return "Dummy"; }
+    const std::string summary() const override { return "Dummy summary"; }
 
-    void init() {
+    void init() override {
       declareProperty("Input1", 2);
       declareProperty("Input2", 1);
       declareProperty("Output1", -1, Direction::Output);
     }
-    void exec() {
+    void exec() override {
       const int lhs = getProperty("Input1");
       const int rhs = getProperty("Input2");
       const int sum = lhs + rhs;
@@ -42,16 +42,16 @@ private:
 
   class SimpleSum2 : public SimpleSum {
   public:
-    const std::string name() const { return "SimpleSum2"; }
-    int version() const { return 1; }
-    const std::string category() const { return "Dummy"; }
+    const std::string name() const override { return "SimpleSum2"; }
+    int version() const override { return 1; }
+    const std::string category() const override { return "Dummy"; }
 
-    void init() {
+    void init() override {
       SimpleSum::init();
       declareProperty("Input3", 4);
       declareProperty("Output2", -1, Direction::Output);
     }
-    void exec() {
+    void exec() override {
       SimpleSum::exec();
       int sum = this->getProperty("Output1");
       setProperty("Output2", sum + 1);

@@ -32,13 +32,13 @@ public:
     this->declareParameter("A", 0);
     this->declareParameter("B", 0);
   }
-  virtual std::string name() const {
+  std::string name() const override {
     return "MultiDomainFunctionTest_Function";
   }
 
 protected:
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const {
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override {
     const double A = getParameter(0);
     const double B = getParameter(1);
 
@@ -47,8 +47,8 @@ protected:
       out[i] = A + B * x;
     }
   }
-  virtual void functionDeriv1D(Jacobian *out, const double *xValues,
-                               const size_t nData) {
+  void functionDeriv1D(Jacobian *out, const double *xValues,
+                       const size_t nData) override {
     for (size_t i = 0; i < nData; ++i) {
       double x = xValues[i];
       out->set(i, 1, x);

@@ -597,7 +597,7 @@ std::ostream &operator<<(std::ostream &out, const UnitCell &unitCell) {
       << std::setw(12) << unitCell.alpha() << std::fixed << std::setprecision(6)
       << std::setw(12) << unitCell.beta() << std::fixed << std::setprecision(6)
       << std::setw(12) << unitCell.gamma() << std::fixed << std::setprecision(6)
-      << std::setw(12) << unitCell.volume();
+      << " " << std::setw(12) << unitCell.volume();
 
   // write out the uncertainty if there is a positive one somewhere
   if ((unitCell.errora() > 0) || (unitCell.errorb() > 0) ||

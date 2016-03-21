@@ -55,41 +55,46 @@ class MANTIDQT_CUSTOMINTERFACES_DLL ImageROIViewQtWidget
 
 public:
   ImageROIViewQtWidget(QWidget *parent = 0);
-  virtual ~ImageROIViewQtWidget(){};
+  ~ImageROIViewQtWidget() override{};
 
-  void setParams(ImageStackPreParams &params);
+  void setParams(ImageStackPreParams &params) override;
 
-  ImageStackPreParams userSelection() const;
+  ImageStackPreParams userSelection() const override;
 
-  SelectionState selectionState() const { return m_selectionState; }
+  SelectionState selectionState() const override { return m_selectionState; }
 
-  void changeSelectionState(const SelectionState &state);
+  void changeSelectionState(const SelectionState &state) override;
 
   /// show a stack of images given the path to the files
-  void showStack(const std::string &path);
+  void showStack(const std::string &path) override;
 
   /// show a stack of images that have been loaded into a group of workspaces
-  void showStack(Mantid::API::WorkspaceGroup_sptr &ws);
+  void showStack(Mantid::API::WorkspaceGroup_sptr &ws) override;
 
-  const Mantid::API::WorkspaceGroup_sptr stack() const { return m_stack; }
+  const Mantid::API::WorkspaceGroup_sptr stack() const override {
+    return m_stack;
+  }
 
-  void showProjection(const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx);
+  void showProjection(const Mantid::API::WorkspaceGroup_sptr &wsg,
+                      size_t idx) override;
 
-  void userWarning(const std::string &warn, const std::string &description);
+  void userWarning(const std::string &warn,
+                   const std::string &description) override;
 
-  void userError(const std::string &err, const std::string &description);
+  void userError(const std::string &err,
+                 const std::string &description) override;
 
-  size_t currentImgIndex() const;
+  size_t currentImgIndex() const override;
 
-  void updateImgWithIndex(size_t idx);
+  void updateImgWithIndex(size_t idx) override;
 
-  std::string askImgOrStackPath();
+  std::string askImgOrStackPath() override;
 
-  void saveSettings() const;
+  void saveSettings() const override;
 
-  void resetCoR();
-  void resetROI();
-  void resetNormArea();
+  void resetCoR() override;
+  void resetROI() override;
+  void resetNormArea() override;
 
 protected:
   void initLayout();
@@ -136,7 +141,7 @@ private:
   void readSettings();
 
   // widget closing
-  virtual void closeEvent(QCloseEvent *ev);
+  void closeEvent(QCloseEvent *ev) override;
 
   /// enable/disable the groups with spin boxes for the center and corners
   void enableParamWidgets(bool enable);
@@ -156,7 +161,7 @@ private:
   void refreshROI();
   void refreshNormArea();
 
-  bool eventFilter(QObject *obj, QEvent *event);
+  bool eventFilter(QObject *obj, QEvent *event) override;
 
   Ui::ImageSelectCoRAndRegions m_ui;
 

@@ -44,10 +44,10 @@ public:
   ReflMainViewPresenter(ReflMainView *mainView, ProgressableView *progressView,
                         boost::shared_ptr<IReflSearcher> searcher =
                             boost::shared_ptr<IReflSearcher>());
-  virtual ~ReflMainViewPresenter();
-  virtual void notify(IReflPresenter::Flag flag);
-  virtual const std::map<std::string, QVariant> &options() const;
-  virtual void setOptions(const std::map<std::string, QVariant> &options);
+  ~ReflMainViewPresenter() override;
+  void notify(IReflPresenter::Flag flag) override;
+  const std::map<std::string, QVariant> &options() const override;
+  void setOptions(const std::map<std::string, QVariant> &options) override;
 
 protected:
   // the workspace the model is currently representing
@@ -139,12 +139,13 @@ protected:
   std::set<std::string> m_workspaceList;
 
   void addHandle(const std::string &name,
-                 Mantid::API::Workspace_sptr workspace);
-  void postDeleteHandle(const std::string &name);
-  void clearADSHandle();
-  void renameHandle(const std::string &oldName, const std::string &newName);
+                 Mantid::API::Workspace_sptr workspace) override;
+  void postDeleteHandle(const std::string &name) override;
+  void clearADSHandle() override;
+  void renameHandle(const std::string &oldName,
+                    const std::string &newName) override;
   void afterReplaceHandle(const std::string &name,
-                          Mantid::API::Workspace_sptr workspace);
+                          Mantid::API::Workspace_sptr workspace) override;
   void saveNotebook(std::map<int, std::set<int>> groups, std::set<int> rows);
 
 private:

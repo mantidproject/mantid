@@ -44,6 +44,7 @@
 #include <QProgressDialog>
 #include <QStackedWidget>
 #include <QHeaderView>
+#include<QSplitter>
 
 #include <gsl/gsl_math.h>
 
@@ -148,7 +149,13 @@ void ImportASCIIDialog::initAdvancedOptions()
 	d_advanced_options = new QGroupBox();
 	QVBoxLayout *main_layout = new QVBoxLayout(d_advanced_options);
 	QGridLayout *advanced_layout = new QGridLayout();
-	main_layout->addLayout(advanced_layout);
+
+    auto controlsWidget = new QWidget();
+    controlsWidget->setLayout(advanced_layout);
+    auto splitter = new QSplitter();
+    splitter->setOrientation(Qt::Vertical);
+    splitter->addWidget(controlsWidget);
+    main_layout->addWidget(splitter);
 
 	advanced_layout->addWidget(new QLabel(tr("Import each file as: ")), 0, 0);
 	d_import_mode = new QComboBox();
@@ -255,7 +262,7 @@ void ImportASCIIDialog::initAdvancedOptions()
 	d_preview_table = NULL;
 	d_preview_matrix = NULL;
 	d_preview_stack = new QStackedWidget();
-	main_layout->addWidget(d_preview_stack);
+    splitter->addWidget(d_preview_stack);
 }
 
 void ImportASCIIDialog::initPreview(int previewMode)
@@ -561,14 +568,13 @@ void ImportASCIIDialog::setNewWindowsOnly(bool on)
  *****************************************************************************/
 
 PreviewTable::PreviewTable(int numRows, int numCols, QWidget * parent, const char * name)
-:Q3Table(numRows, numCols, parent, name)
+:QTableWidget(parent)
 {
+  makeItemPrototype();
+  setWindowTitle(name);
+  setRowCount(numRows);
+  setColumnCount(numCols);
 	setAttribute(Qt::WA_DeleteOnClose);
-	setSelectionMode(Q3Table::NoSelection);
-	setReadOnly(true);
-	setRowMovingEnabled(false);
-	setColumnMovingEnabled(false);
-	verticalHeader()->setResizeEnabled(false);
 
 	for (int i=0; i<numCols; i++){
 		comments << "";
@@ -619,31 +625,31 @@ void PreviewTable::importASCII(const QString &fname, const QString &sep, int ign
         }
 
         int startRow = 0, startCol = 0;
-        int c = numCols();
-        int r = numRows();
+        int c = columnCount();
+        int r = rowCount();
 		switch(importMode){
 			case Table::Overwrite:
-                if (numRows() != rows)
-                    setNumRows(rows);
+                if (rowCount() != rows)
+                    setRowCount(rows);
 
                 if (c != cols){
                     if (c < cols)
                         addColumns(cols - c);
                     else
-                        setNumCols(cols);
+                        setColumnCount(cols);
                 }
 			break;
 			case Table::NewColumns:
                 startCol = c;
                 addColumns(cols);
                 if (r < rows)
-                    setNumRows(rows);
+                    setRowCount(rows);
 			break;
 			case Table::NewRows:
                 startRow = r;
                 if (c < cols)
                     addColumns(cols - c);
-                setNumRows(r + rows);
+                setRowCount(r + rows);
 			break;
 		}
 
@@ -686,7 +692,7 @@ void PreviewTable::importASCII(const QString &fname, const QString &sep, int ign
         QApplication::restoreOverrideCursor();
 
 		int row = startRow;
-		rows = numRows();
+		rows = rowCount();
 		while (!t.atEnd() && row < rows){
 		    s = t.readLine();
 			if (simplifySpaces)
@@ -712,7 +718,7 @@ void PreviewTable::importASCII(const QString &fname, const QString &sep, int ign
 
 void PreviewTable::resetHeader()
 {
-	for (int i=0; i<numCols(); i++){
+	for (int i=0; i<columnCount(); i++){
 	    comments[i] = QString::null;
 		col_label[i] = QString::number(i+1);
 	}
@@ -720,8 +726,8 @@ void PreviewTable::resetHeader()
 
 void PreviewTable::clear()
 {
-	for (int i=0; i<numCols(); i++){
-		for (int j=0; j<numRows(); j++)
+	for (int i=0; i<columnCount(); i++){
+		for (int j=0; j<rowCount(); j++)
 			setText(j, i, QString::null);
 	}
 }
@@ -729,8 +735,8 @@ void PreviewTable::clear()
 void PreviewTable::updateDecimalSeparators(const QLocale& oldSeparators)
 {
   QLocale locale = (dynamic_cast<QWidget *>(parent()))->locale();
-	for (int i=0; i<numCols(); i++){
-        for (int j=0; j<numRows(); j++){
+	for (int i=0; i<columnCount(); i++){
+        for (int j=0; j<rowCount(); j++){
             if (!text(j, i).isEmpty()){
 				double val = oldSeparators.toDouble(text(j, i));
                 setText(j, i, locale.toString(val, 'g', d_numeric_precision));
@@ -741,21 +747,25 @@ void PreviewTable::updateDecimalSeparators(const QLocale& oldSeparators)
 
 void PreviewTable::setHeader()
 {
-	Q3Header *head = horizontalHeader();
-	for (int i=0; i<numCols(); i++){
+	for (int i=0; i<columnCount(); i++){
     QString s = col_label[i];
 	#ifdef Q_OS_MAC
-		head->setLabel(i, s.remove("\n"));
+    QString label = s.remove("\n");
+    auto item = new QTableWidgetItem(label);
+    setHorizontalHeaderItem(i, item);
   #else
+    auto head = horizontalHeader();
     int lines = columnWidth(i)/head->fontMetrics().averageCharWidth();
-		head->setLabel(i, s.remove("\n") + "\n" + QString(lines, '_') + "\n" + comments[i]);
+    QString label = s.remove("\n") + "\n" + QString(lines, '_') + "\n" + comments[i];
+    auto item = new QTableWidgetItem(label);
+    setHorizontalHeaderItem(i, item);
 	#endif
 	}
 }
 
 void PreviewTable::addColumns(int c)
 {
-	int max=0, cols = numCols();
+	int max=0, cols = columnCount();
 	for (int i=0; i<cols; i++){
 		if (!col_label[i].contains(QRegExp ("\\D"))){
 			int index=col_label[i].toInt();
@@ -769,6 +779,40 @@ void PreviewTable::addColumns(int c)
 		comments << QString();
 		col_label<< QString::number(max+i);
 	}
+}
+
+void PreviewTable::makeItemPrototype() {
+  m_itemPrototype = new QTableWidgetItem();
+  m_itemPrototype->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+  setItemPrototype(m_itemPrototype);
+}
+
+QTableWidgetItem* PreviewTable::addNewItem(int row, int col) {
+  auto item = m_itemPrototype->clone();
+  setItem(row, col, item);
+  return item;
+}
+
+QString PreviewTable::text(int row, int col) const {
+  auto it = item(row, col);
+  if (it == nullptr) {
+    return QString();
+  }
+  return it->text();
+}
+
+void PreviewTable::setText(int row, int col, const QString& txt) {
+  auto it = item(row, col);
+  if (it == nullptr) {
+    it = addNewItem(row, col);
+  }
+  it->setText(txt);
+}
+
+void PreviewTable::insertColumns(int col, int count) {
+  for(int i = col; i < col + count; ++i) {
+    insertColumn(i);
+  }
 }
 
 /*****************************************************************************

@@ -25,7 +25,7 @@ public:
 
   std::set<QString> getShownColumns();
   void setShownColumns(std::set<QString> &cols);
-  virtual ~PeaksWorkspaceWidget();
+  ~PeaksWorkspaceWidget() override;
   Mantid::API::IPeaksWorkspace_const_sptr getPeaksWorkspace() const;
   void setBackgroundColor(const PeakViewColor &backgroundColor);
   void setForegroundColor(const PeakViewColor &foregroundColor);

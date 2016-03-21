@@ -257,7 +257,7 @@ public:
     m_rawFile = RAWFILE;
   }
 
-  ~LoadDetectorInfoTest() {
+  ~LoadDetectorInfoTest() override {
     Poco::File(m_DatFile).remove();
     Poco::File(m_NXSFile).remove();
   }
@@ -443,7 +443,7 @@ public:
       : m_testfile("LoadDetectorInfoTestPerformance_largefile.dat"),
         m_wsName("LoadDetectorInfoTestPerformance") {}
 
-  void setUp() {
+  void setUp() override {
     // 100,000 histograms
     const int ndets(100000);
     writeLargeTestDatFile(m_testfile, ndets);
@@ -451,7 +451,7 @@ public:
     makeTestWorkspace(100000, 1000, m_wsName); // Adds it to the ADS
   }
 
-  void tearDown() {
+  void tearDown() override {
     Poco::File(m_testfile).remove();
     AnalysisDataService::Instance().remove(m_wsName);
   }

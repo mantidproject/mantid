@@ -203,11 +203,7 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite
   }
 
 public:
-
-  void setUp()
-  {
-    FrameworkManager::Instance();
-  }
+  void setUp() override { FrameworkManager::Instance(); }
 
   void test_construction()
   {

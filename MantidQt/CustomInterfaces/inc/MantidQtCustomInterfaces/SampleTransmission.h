@@ -39,7 +39,7 @@ namespace CustomInterfaces
 
   private:
     /// Initialize the layout
-    virtual void initLayout();
+    void initLayout() override;
     /// Validates UI input
     bool validate(bool silent = false);
 

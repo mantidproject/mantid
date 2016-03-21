@@ -652,8 +652,8 @@ void GeneratePeaks::getSpectraSet(
   }
 
   specnum_t icount = 0;
-  for (auto pit = m_spectraSet.begin(); pit != m_spectraSet.end(); ++pit) {
-    m_SpectrumMap.emplace(*pit, icount);
+  for (const auto specnum : m_spectraSet) {
+    m_SpectrumMap.emplace(specnum, icount);
     ++icount;
   }
 
@@ -725,9 +725,7 @@ API::MatrixWorkspace_sptr GeneratePeaks::createOutputWorkspace() {
 
     // Only copy the X-values from spectra with peaks specified in the table
     // workspace.
-    for (auto siter = m_spectraSet.begin(); siter != m_spectraSet.end();
-         ++siter) {
-      specnum_t iws = *siter;
+    for (const auto &iws : m_spectraSet) {
       std::copy(inputWS->dataX(iws).begin(), inputWS->dataX(iws).end(),
                 outputWS->dataX(iws).begin());
     }

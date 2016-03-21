@@ -310,7 +310,7 @@ private:
   Mantid::DataObjects::MDEventWorkspace4Lean::sptr m_ws4;
 
 public:
-  void setUp() {
+  void setUp() override {
     m_ws3 = MDEventsTestHelper::makeMDEW<3>(100, 0.0, 100.0, 1);
     m_ws4 = MDEventsTestHelper::makeMDEW<4>(32, -50.0, 50.0, 1);
   }

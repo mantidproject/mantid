@@ -28,7 +28,7 @@ using namespace Mantid::Geometry;
 
 class NormaliseVanadiumImpl : public NormaliseVanadium {
 public:
-  virtual void exec() { NormaliseVanadium::exec(); };
+  void exec() override { NormaliseVanadium::exec(); };
 };
 
 class NormaliseVanadiumTest : public CxxTest::TestSuite {

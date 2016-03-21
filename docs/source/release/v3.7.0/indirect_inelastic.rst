@@ -21,6 +21,16 @@ Jump Fit
 ~~~~~~~~
 
 - The interface now has the option to plot a guess of what the fit will look like before running the algorithm.
+- The Plot button is no longer present in the interface as it is no longer used.
+
+Vesuvio
+#######
+
+- The following Mantid algorithms used for Vesuvio have been added:
+    - :ref:`VesuvioPreFit <algm-VesuvioPreFit>`
+    - :ref:`VesuvioTOFFit <algm-VesuvioTOFFit>`
+    - :ref:`VesuvioCorrections <algm-VesuvioCorrections>`
+- The script used to process data for Vesuvio has also been added. This used to be called ``VesuvioWorkflow.py``, but is now named``VesuvioCommands.py``
 
 Improvements
 ------------
@@ -29,6 +39,13 @@ Improvements
    has been adapted to be a Mantid algorithm. This has not effected the way this script is used in the Indirect Data Analysis:
    I(Q,t) Fit tab, but it does now have a dialogue box interface from the algorithm list.
    This also allows for better testing, progress tracking and documentation of the algorithm.
+
+- :ref:`BASISReduction <algm-BASISReduction>` now accepts Vanadium runs for normalization.
+
+- :ref:`QECoverage <Interfaces>` planning tool has now been updated, There is now an Emin option included for direct tab,
+    If Emin or Emax are left empty; appropriate values are set automatically, the negative values of Ei are treated as
+    positive, appropriate informative pop-up messages displayed for invalid values and minor calculations updates.
+
 
 
 Bugfixes

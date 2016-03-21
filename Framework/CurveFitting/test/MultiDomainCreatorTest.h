@@ -30,13 +30,13 @@ class MultiDomainCreatorTest_Fun : public IFunction1D, public ParamFunction {
 public:
   size_t m_wsIndex;
   boost::shared_ptr<const MatrixWorkspace> m_workspace;
-  std::string name() const { return "MultiDomainCreatorTest_Fun"; }
-  void function1D(double *, const double *, const size_t) const {}
+  std::string name() const override { return "MultiDomainCreatorTest_Fun"; }
+  void function1D(double *, const double *, const size_t) const override {}
   void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace>,
-                          size_t wi, double, double) {
+                          size_t wi, double, double) override {
     m_wsIndex = wi;
   }
-  void setWorkspace(boost::shared_ptr<const Workspace> ws) {
+  void setWorkspace(boost::shared_ptr<const Workspace> ws) override {
     m_workspace = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
   }
 };

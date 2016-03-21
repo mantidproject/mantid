@@ -217,6 +217,8 @@ void SplatterPlotView::render()
   if (!isPeaksWorkspace)
   {
     vtkSMPropertyHelper(drep->getProxy(), "PointSize").Set(1);
+  } else {
+    vtkSMPropertyHelper(drep->getProxy(), "LineWidth").Set(2);
   }
   drep->getProxy()->UpdateVTKObjects();
   if (!isPeaksWorkspace)
