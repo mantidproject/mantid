@@ -66,6 +66,9 @@ namespace CustomInterfaces
 
     /// Signal to inform that data was set
     void dataChanged();
+
+    /// Signal to inform presenter of an error with fitting
+    void errorInModel(const QString &message);
   };
 
 

@@ -27,8 +27,8 @@ public:
 
   void test_Initialized_Function_Has_Expected_Parameters_In_Right_Order() {
     Mantid::API::IFunction_sptr profile = createFunction();
-    static const size_t nparams(2);
-    const char *expectedParams[nparams] = {"Width", "Intensity"};
+    static const size_t nparams(3);
+    const char *expectedParams[nparams] = {"Mass", "Width", "Intensity"};
 
     auto currentNames = profile->getParameterNames();
     const size_t nnames = currentNames.size();
@@ -45,29 +45,6 @@ public:
 
     auto intensityIndices = profile->intensityParameterIndices();
     TS_ASSERT_EQUALS(1, intensityIndices.size());
-  }
-
-  void test_Initialized_Function_Has_Expected_Attributes() {
-    Mantid::API::IFunction_sptr profile = createFunction();
-    static const size_t nattrs(1);
-    const char *expectedAttrs[nattrs] = {"Mass"};
-
-    TS_ASSERT_EQUALS(nattrs, profile->nAttributes());
-
-    // Test names as they are used in scripts
-    if (profile->nAttributes() > 0) {
-      std::unordered_set<std::string> expectedAttrSet(expectedAttrs,
-                                                      expectedAttrs + nattrs);
-      std::vector<std::string> actualNames = profile->getAttributeNames();
-
-      for (size_t i = 0; i < nattrs; ++i) {
-        const std::string &name = actualNames[i];
-        size_t keyCount = expectedAttrSet.count(name);
-        TSM_ASSERT_EQUALS("Expected " + name +
-                              " to be found as attribute but it was not.",
-                          1, keyCount);
-      }
-    }
   }
 
   void test_Expected_Results_Returned_Given_Data() {
@@ -105,7 +82,7 @@ public:
 private:
   boost::shared_ptr<GaussianComptonProfile> createFunctionWithParamsSet() {
     auto func = createFunction();
-    func->setAttributeValue("Mass", 30.0);
+    func->setParameter("Mass", 30.0);
     func->setParameter("Intensity", 4.0);
     func->setParameter("Width", 13.0);
     func->setUpForFit();

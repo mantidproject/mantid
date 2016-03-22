@@ -160,6 +160,7 @@ set ( SRC_FILES
 	src/SetSampleMaterial.cpp
 	src/SetScalingPSD.cpp
 	src/SortTableWorkspace.cpp
+	src/StartAndEndTimeFromNexusFileExtractor.cpp
 	src/UpdateInstrumentFromFile.cpp
 	src/XmlHandler.cpp
 )
@@ -321,6 +322,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SetSampleMaterial.h
 	inc/MantidDataHandling/SetScalingPSD.h
 	inc/MantidDataHandling/SortTableWorkspace.h
+	inc/MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
 	inc/MantidDataHandling/XmlHandler.h
 	src/LoadRaw/byte_rel_comp.h
@@ -339,9 +341,9 @@ set ( TEST_FILES
 	CreateModeratorModelTest.h
 	CreateSampleShapeTest.h
 	CreateSimulationWorkspaceTest.h
-	DataBlockTest.h
 	DataBlockCompositeTest.h
 	DataBlockGeneratorTest.h
+	DataBlockTest.h
 	DefineGaugeVolumeTest.h
 	DeleteTableRowsTest.h
 	DetermineChunkingTest.h
@@ -474,6 +476,7 @@ set ( TEST_FILES
 	SetSampleMaterialTest.h
 	SetScalingPSDTest.h
 	SortTableWorkspaceTest.h
+	StartAndEndTimeFromNexusFileExtractorTest.h
 	UpdateInstrumentFromFileTest.h
 	XMLInstrumentParameterTest.h
 )
