@@ -26,7 +26,7 @@
 #include <iostream>
 #include <fstream>
 #include <istream>
-#include <cmath>       /* sqrt */
+#include <cmath> /* sqrt */
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -85,6 +85,11 @@ void SWANSLoad::init() {
                                               "coordinates (used only if "
                                               "UseConfigBeam is false)");
 
+  declareProperty("LowTOFCut", 0.0, "TOF value below which events will not be "
+                                    "loaded into the workspace at load-time");
+  declareProperty("HighTOFCut", 0.0, "TOF value above which events will not be "
+                                     "loaded into the workspace at load-time");
+
   declareProperty("WavelengthStep", 0.1, "Wavelength steps to be used when "
                                          "rebinning the data before performing "
                                          "the reduction");
@@ -133,6 +138,10 @@ void SWANSLoad::exec() {
                                                         reductionManager);
   }
 
+  // TOFS
+  double low_TOF_cut = getProperty("LowTOFCut");
+  double high_TOF_cut = getProperty("HighTOFCut");
+
   g_log.debug() << "Set LoadAlgorithm if it's in the Properties." << std::endl;
 
   if (!reductionManager->existsProperty("LoadAlgorithm")) {
@@ -156,6 +165,10 @@ void SWANSLoad::exec() {
     g_log.debug() << "Loading data..." << std::endl;
     IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadSwans", 0, 0.2);
     loadAlg->setProperty("FilenameData", fileName);
+    if (low_TOF_cut > 0.0)
+      loadAlg->setProperty("FilterByTofMin", low_TOF_cut);
+    if (high_TOF_cut > 0.0)
+      loadAlg->setProperty("FilterByTofMax", high_TOF_cut);
     loadAlg->execute();
     Workspace_sptr dataWS_asWks = loadAlg->getProperty("OutputWorkspace");
     dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_asWks);
@@ -275,8 +288,25 @@ void SWANSLoad::exec() {
   if (!preserveEvents)
     dataWS = rebinAlg->getProperty("OutputWorkspace");
 
+  dataWS->mutableRun().addProperty("wavelength_min", dataWS->readX(0).front(),
+                                   "Angstrom", true);
+  dataWS->mutableRun().addProperty("wavelength_max", dataWS->readX(0).back(),
+                                   "Angstrom", true);
+
+  // For algo: EQSANSAzimuthalAverage1D
+  dataWS->mutableRun().addProperty("is_frame_skipping", 0, true);
+
   dataWS->mutableRun().addProperty("event_ws",
                                    getPropertyValue("OutputWorkspace"), true);
+
+  //
+  if (low_TOF_cut > 0.0)
+    dataWS->mutableRun().addProperty("low_tof_cut", low_TOF_cut, "microsecond",
+                                     true);
+  if (high_TOF_cut > 0.0)
+    dataWS->mutableRun().addProperty("high_tof_cut", high_TOF_cut,
+                                     "microsecond", true);
+
   setProperty<MatrixWorkspace_sptr>(
       "OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS));
   // m_output_message = "Loaded " + fileName + '\n' + m_output_message;
@@ -346,15 +376,17 @@ void SWANSLoad::setSourceSlitSize() {
   if (!run.hasProperty("IVA") && !run.hasProperty("IHA")) {
     m_output_message += "   Could not determine source aperture diameter: ";
     m_output_message += "slit parameters were not found in the run log\n";
-    g_log.information() << "Slit parameters were not found in the run log..." << std::endl;
+    g_log.information() << "Slit parameters were not found in the run log..."
+                        << std::endl;
     return;
   }
-  auto iva  = run.getPropertyValueAsType<double>("IVA");
-  auto iha  = run.getPropertyValueAsType<double>("IHA");
+  auto iva = run.getPropertyValueAsType<double>("IVA");
+  auto iha = run.getPropertyValueAsType<double>("IHA");
   // aproximate square to circle and get the diameter
-  auto slitsDiameter = 2 * std::sqrt(iva*iha / pi);
+  auto slitsDiameter = 2 * std::sqrt(iva * iha / pi);
 
-  dataWS->mutableRun().addProperty("source-aperture-diameter", slitsDiameter, "mm", true);
+  dataWS->mutableRun().addProperty("source-aperture-diameter", slitsDiameter,
+                                   "mm", true);
   m_output_message += "   Source aperture diameter: ";
   Poco::NumberFormatter::append(m_output_message, slitsDiameter, 1);
   m_output_message += " mm\n";

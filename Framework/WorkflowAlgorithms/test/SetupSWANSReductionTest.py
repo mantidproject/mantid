@@ -40,27 +40,42 @@ CombineTransmissionFits(False)
 SaveIq(process='None')
 Reduce()
 
+
+---
+
+
+GPSANS()
+SetSampleDetectorDistance(19534)
+SolidAngle(detector_tubes=True)
+MonitorNormalization()
+SetAbsoluteScale(1)
+AzimuthalAverage(n_bins=100, n_subpix=1, log_binning=False, align_log_with_decades=True)
+IQxQy(nbins=100)
+SetWedges(number_of_wedges=2, wedge_angle=30, wedge_offset=0)
+SetBeamCenter(0, 0)
+NoSensitivityCorrection()
+SetTransmission(1, 0)
+ThetaDependentTransmission(True)
+DataPath("/home/rhf/Documents/SANS/GPSANS-Data/20150925-Grasp_Raw_read_ORNL")
+AppendDataFile(["/home/rhf/Documents/SANS/GPSANS-Data/20150925-Grasp_Raw_read_ORNL/HiResSANS_exp3_scan0010_0001.xml"])
+SaveIq(pro
+
+
+
         '''
-        SWANS()
-        SolidAngle(detector_tubes=True)
-        TotalChargeNormalization()
-        SetAbsoluteScale(1)
-        AzimuthalAverage(n_bins=100, n_subpix=1, log_binning=False)
-        IQxQy(nbins=100)
-        OutputPath("/home/rhf")
-        UseConfigTOFTailsCutoff(True)
-        UseConfigMask(True)
-        Resolution(sample_aperture_diameter=10)
-        PerformFlightPathCorrection(True)
-        SetBeamCenter(0, 0)
-        NoSensitivityCorrection()
-        DirectBeamTransmission("/SNS/VULCAN/IPTS-16013/shared/SANS_detector/RUN80814.dat", "/SNS/VULCAN/IPTS-16013/shared/SANS_detector/RUN80815.dat", beam_radius=3)
-        ThetaDependentTransmission(True)
-        DataPath("/SNS/VULCAN/IPTS-16013/shared/SANS_detector")
-        AppendDataFile(["/SNS/VULCAN/IPTS-16013/shared/SANS_detector/RUN80816.dat"])
-        CombineTransmissionFits(False)
+        SWANS(keep_events=True)
+        OutputPath("/tmp")
         
-        SaveIq(process='None')
+        # Beam center files
+        #DirectBeamCenter("/SNS/VULCAN/IPTS-16013/shared/SANS_detector/RUN80837.dat")
+        SetBeamCenter(63,63)
+        
+        AppendDataFile(["/SNS/VULCAN/IPTS-16013/shared/SANS_detector/RUN80818.dat"])
+        
+        NoSolidAngle()
+        NoIQxQy()
+        Resolution(sample_aperture_diameter=10.0)
+        SetTOFTailsCutoff(low_cut=5000, high_cut=60000)
         Reduce()
 
 if __name__ == '__main__':

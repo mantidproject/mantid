@@ -49,7 +49,7 @@ def EQSANS(keep_events=False, property_manager=None):
 
 def SWANS(keep_events=False, property_manager=None):
     '''
-    Copy from EQSANS with respective changes
+    Copied from EQSANS with respective changes
     '''
     Clear()
     ReductionSingleton().set_instrument("SWANS",

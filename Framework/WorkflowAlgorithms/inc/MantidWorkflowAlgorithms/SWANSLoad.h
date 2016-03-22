@@ -46,8 +46,6 @@ private:
   void moveToBeamCenter();
   void setSourceSlitSize();
 
-  double m_low_TOF_cut;
-  double m_high_TOF_cut;
   double m_center_x;
   double m_center_y;
   std::string m_mask_as_string;

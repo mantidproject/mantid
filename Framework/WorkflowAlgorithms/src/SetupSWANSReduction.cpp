@@ -30,6 +30,10 @@ void SetupSWANSReduction::init() {
   // Load options
   std::string load_grp = "Load Options";
 
+  declareProperty("LowTOFCut", 0.0, "TOF value below which events will not be "
+                                    "loaded into the workspace at load-time");
+  declareProperty("HighTOFCut", 0.0, "TOF value above which events will not be "
+                                     "loaded into the workspace at load-time");
   declareProperty("WavelengthStep", 0.1, "Wavelength steps to be used when "
                                          "rebinning the data before performing "
                                          "the reduction");
@@ -49,6 +53,8 @@ void SetupSWANSReduction::init() {
       "If true, the solid angle correction for tube detectors will be applied");
 
   // -- Define group --
+  setPropertyGroup("LowTOFCut", load_grp);
+  setPropertyGroup("HighTOFCut", load_grp);
   setPropertyGroup("WavelengthStep", load_grp);
   setPropertyGroup("PreserveEvents", load_grp);
   setPropertyGroup("SampleDetectorDistance", load_grp);
@@ -78,8 +84,8 @@ void SetupSWANSReduction::init() {
 
   //    Option 2: Find it (expose properties from FindCenterOfMass)
   declareProperty(
-      make_unique<API::FileProperty>(
-          "BeamCenterFile", "", API::FileProperty::OptionalLoad, ".dat"),
+      make_unique<API::FileProperty>("BeamCenterFile", "",
+                                     API::FileProperty::OptionalLoad, ".dat"),
       "The name of the input event Nexus file to load");
   setPropertySettings("BeamCenterFile",
                       make_unique<VisibleWhenProperty>(
@@ -125,15 +131,15 @@ void SetupSWANSReduction::init() {
 
   // Dark current
   declareProperty(
-      make_unique<API::FileProperty>(
-          "DarkCurrentFile", "", API::FileProperty::OptionalLoad, ".dat"),
+      make_unique<API::FileProperty>("DarkCurrentFile", "",
+                                     API::FileProperty::OptionalLoad, ".dat"),
       "The name of the input event Nexus file to load as dark current.");
 
   // Sensitivity
   std::string eff_grp = "Sensitivity";
   declareProperty(
-      make_unique<API::FileProperty>(
-          "SensitivityFile", "", API::FileProperty::OptionalLoad, ".dat"),
+      make_unique<API::FileProperty>("SensitivityFile", "",
+                                     API::FileProperty::OptionalLoad, ".dat"),
       "Flood field or sensitivity file.");
   declareProperty(
       "MinEfficiency", EMPTY_DBL(), positiveDouble,
@@ -144,10 +150,10 @@ void SetupSWANSReduction::init() {
   declareProperty("UseDefaultDC", true, "If true, the dark current subtracted "
                                         "from the sample data will also be "
                                         "subtracted from the flood field.");
-  declareProperty(make_unique<API::FileProperty>(
-                      "SensitivityDarkCurrentFile", "",
-                      API::FileProperty::OptionalLoad, ".dat"),
-                  "The name of the input file to load as dark current.");
+  declareProperty(
+      make_unique<API::FileProperty>("SensitivityDarkCurrentFile", "",
+                                     API::FileProperty::OptionalLoad, ".dat"),
+      "The name of the input file to load as dark current.");
   // - sensitivity beam center
   declareProperty("SensitivityBeamCenterMethod", "None",
                   boost::make_shared<StringListValidator>(centerOptions),
@@ -568,9 +574,15 @@ void SetupSWANSReduction::exec() {
 
   // Load algorithm
   IAlgorithm_sptr loadAlg = createChildAlgorithm("SWANSLoad");
-
+  double low_TOF_cut = getProperty("LowTOFCut");
+  double high_TOF_cut = getProperty("HighTOFCut");
+  if (low_TOF_cut > 0.0)
+    loadAlg->setProperty("LowTOFCut", low_TOF_cut);
+  if (high_TOF_cut > 0.0)
+    loadAlg->setProperty("HighTOFCut", high_TOF_cut);
   const bool preserveEvents = getProperty("PreserveEvents");
   loadAlg->setProperty("PreserveEvents", preserveEvents);
+
 
   const double sdd = getProperty("SampleDetectorDistance");
   loadAlg->setProperty("SampleDetectorDistance", sdd);

@@ -188,11 +188,16 @@ std::map<uint32_t, std::vector<uint32_t>> LoadSwans::loadData() {
       break;
     uint32_t tof = 0;
     input.read(reinterpret_cast<char *>(&tof), sizeof(tof));
-    tof -= static_cast<uint32_t>(1e9);
-    tof = static_cast<uint32_t>(tof * 0.1);
-
     uint32_t pos = 0;
     input.read(reinterpret_cast<char *>(&pos), sizeof(pos));
+
+    // The 1e9 added to the tof ticks is used to signal a “problem” with the
+    // event.
+    // 2e6 is the maximum allowed tof tick for 5Hz operation, thus a very safe
+    // upperlimit.
+    if (tof > 2e6)
+      tof -= static_cast<uint32_t>(1e9);
+    tof = static_cast<uint32_t>(tof * 0.1);
     if (pos < 400000) {
       g_log.warning() << "Detector index invalid: " << pos << std::endl;
       continue;
