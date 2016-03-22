@@ -184,6 +184,19 @@ private:
 
   void checkDataPathsSet() const;
 
+  std::string adaptInputPathForExecution(const std::string &path,
+                                         bool local) const;
+
+  std::string buildOutReconstructionDir(const std::string &samplesDir,
+                                        bool local) const;
+
+  std::string
+  buildOutReconstructionDirFromSystemRoot(const std::string &samplesDir,
+                                          bool local) const;
+
+  std::string
+  buildOutReconstructionDirFromSamplesDir(const std::string &samplesDir) const;
+
   /// facility for the remote compute resource
   const std::string m_facility;
   /// display name of the "local" compute resource

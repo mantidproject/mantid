@@ -172,11 +172,10 @@ private slots:
 
   void browseImageClicked();
 
-  void updatedCycleName();
-
   void browseLocalInOutDirClicked();
   void browseLocalRemoteDriveOrPath();
   void browseLocalReconScriptsDirClicked();
+  void browseLocalExternalInterpreterClicked();
 
   void flatsPathCheckStatusChanged(int status);
   void darksPathCheckStatusChanged(int status);
@@ -273,8 +272,12 @@ private:
   void setPrePostProcSettings(const TomoReconFiltersSettings &opts);
 
   std::string
-  checkUserBrowsePath(QLineEdit *le,
-                      const std::string &userMsg = "Open directory/folder");
+  checkUserBrowseDir(QLineEdit *le,
+                     const std::string &userMsg = "Open directory/folder",
+                     bool remember=true);
+
+  std::string checkUserBrowseFile(QLineEdit *le,
+                                  const std::string &userMsg = "Open file", bool remember=true);
 
   void sendToVisTool(const std::string &toolName, const std::string &pathString,
                      const std::string &appendBin);

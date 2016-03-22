@@ -274,10 +274,6 @@ void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
   m_uiTabSetup.pushButton_SCARF_login->setEnabled(true);
   m_uiTabSetup.pushButton_SCARF_logout->setEnabled(false);
 
-  // cycle changes
-  connect(m_uiTabSetup.lineEdit_cycle, SIGNAL(editingFinished()), this,
-          SLOT(updatedCycleName()));
-
   // check boxes to enable search for dark and flat images
   connect(m_uiTabSetup.checkBox_path_flats, SIGNAL(stateChanged(int)), this,
           SLOT(flatsPathCheckStatusChanged(int)));
@@ -440,8 +436,6 @@ void TomographyIfaceViewQtGUI::doSetupSectionEnergy() {
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionSystemSettings() {
-  resetSystemSettings();
-
   // All possible modifications to system settings
   connect(m_uiTabSystemSettings.lineEdit_path_comp_1st,
           SIGNAL(editingFinished()), this, SLOT(systemSettingsEdited()));
@@ -496,8 +490,12 @@ void TomographyIfaceViewQtGUI::doSetupSectionSystemSettings() {
           this, SLOT(systemSettingsNumericEdited()));
 
   // 'browse' buttons for local (scripts) settings:
-  connect(m_uiTabSystemSettings.pushButton_recon_scripts_dir,
+  connect(m_uiTabSystemSettings.pushButton_local_recon_scripts_dir,
           SIGNAL(released()), this, SLOT(browseLocalReconScriptsDirClicked()));
+
+  connect(m_uiTabSystemSettings.pushButton_local_external_interpreter,
+          SIGNAL(released()), this,
+          SLOT(browseLocalExternalInterpreterClicked()));
 
   connect(m_uiTabSystemSettings.pushButton_reset_all, SIGNAL(released()), this,
           SLOT(resetSystemSettings()));
@@ -1142,9 +1140,8 @@ void TomographyIfaceViewQtGUI::updateSystemSettings(
 
   m_uiTabSystemSettings.lineEdit_local_recon_scripts->setText(
       QString::fromStdString(setts.m_local.m_reconScriptsPath));
-
-  // TODO:
-  // setts.m_local.m_externalInterpreterPath
+  m_uiTabSystemSettings.lineEdit_local_external_interpreter->setText(
+      QString::fromStdString(setts.m_local.m_externalInterpreterPath));
 }
 
 /**
@@ -1181,7 +1178,6 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
       m_toolsSettings.tomoPy = ToolConfigTomoPy(
           run.toStdString(),
           g_defOutPathLocal + "/" +
-              m_uiTabSetup.lineEdit_cycle->text().toStdString() + "/" +
               m_uiTabRun.lineEdit_experiment_reference->text().toStdString() +
               localOutNameAppendix,
           paths.pathDarks(), paths.pathOpenBeam(), paths.pathSamples());
@@ -1209,7 +1205,6 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
           run.toStdString(),
           Poco::Path::expand(
               g_defOutPathLocal + "/" +
-              m_uiTabSetup.lineEdit_cycle->text().toStdString() + "/" +
               m_uiTabRun.lineEdit_experiment_reference->text().toStdString() +
               localOutNameAppendix),
           paths.pathDarks(), paths.pathOpenBeam(), paths.pathSamples());
@@ -1523,17 +1518,25 @@ void TomographyIfaceViewQtGUI::darksPathEditedByUser() {
 }
 
 void TomographyIfaceViewQtGUI::browseLocalInOutDirClicked() {
-  checkUserBrowsePath(
+  checkUserBrowseDir(
       m_uiTabSystemSettings.lineEdit_on_local_data_drive_or_path);
 }
 
 void TomographyIfaceViewQtGUI::browseLocalRemoteDriveOrPath() {
-  checkUserBrowsePath(
+  checkUserBrowseDir(
       m_uiTabSystemSettings.lineEdit_on_local_remote_data_drive_path);
 }
 
 void TomographyIfaceViewQtGUI::browseLocalReconScriptsDirClicked() {
-  checkUserBrowsePath(m_uiTabSystemSettings.lineEdit_local_recon_scripts);
+  checkUserBrowseDir(m_uiTabSystemSettings.lineEdit_local_recon_scripts,
+                     "Select location of scripts (scripts subdirectory/folder "
+                     "in the Mantid installation",
+                     false);
+}
+
+void TomographyIfaceViewQtGUI::browseLocalExternalInterpreterClicked() {
+  checkUserBrowseFile(m_uiTabSystemSettings.lineEdit_local_external_interpreter,
+                      "Select interpreter executable", false);
 }
 
 /**
@@ -1563,18 +1566,8 @@ void TomographyIfaceViewQtGUI::processPathBrowseClick(QLineEdit *le,
       this, tr("Open directory/folder"), prev));
 
   if (!path.isEmpty()) {
-    std::string pp = path.toStdString();
-    // to UNIX, assuming SCARF or similar
-    boost::replace_all(pp, "\\", "/");
-    if (pp.length() >= 2 && ':' == pp[1]) {
-      if (2 == pp.length())
-        pp = ""; // don't accept '/'
-      else
-        pp = pp.substr(2);
-    }
-    pp = "/work" + pp;
-    le->setText(QString::fromStdString(pp));
-    data = pp;
+    le->setText(path);
+    data = path.toStdString();
 
     MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
   }
@@ -1950,19 +1943,19 @@ void TomographyIfaceViewQtGUI::defaultDirRemoteVisualizeClicked() {
 
 void TomographyIfaceViewQtGUI::browseVisToolParaviewClicke() {
   m_setupParaviewPath =
-      checkUserBrowsePath(m_uiTabConvertFormats.lineEdit_input);
+      checkUserBrowseDir(m_uiTabConvertFormats.lineEdit_input);
 }
 
 void TomographyIfaceViewQtGUI::browseVisToolOctopusClicked() {
   m_setupOctopusVisPath =
-      checkUserBrowsePath(m_uiTabConvertFormats.lineEdit_input);
+      checkUserBrowseDir(m_uiTabConvertFormats.lineEdit_input);
 }
 
 void TomographyIfaceViewQtGUI::browseImgInputConvertClicked() {
   // Not using this path to update the "current" path where to load from, but
   // it could be an option.
   // const std::string path =
-  checkUserBrowsePath(m_uiTabConvertFormats.lineEdit_input);
+  checkUserBrowseDir(m_uiTabConvertFormats.lineEdit_input);
   // m_pathsConfig.updatePathDarks(str);
   // m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
@@ -1971,22 +1964,37 @@ void TomographyIfaceViewQtGUI::browseImgOutputConvertClicked() {
   // Not using this path to update the "current" path where to load from, but
   // it could be an option.
   // const std::string path =
-  checkUserBrowsePath(m_uiTabConvertFormats.lineEdit_output);
+  checkUserBrowseDir(m_uiTabConvertFormats.lineEdit_output);
   // m_pathsConfig.updatePathDarks(str);
   // m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
 void TomographyIfaceViewQtGUI::browseEnergyInputClicked() {
-  checkUserBrowsePath(m_uiTabEnergy.lineEdit_input_path);
+  checkUserBrowseDir(m_uiTabEnergy.lineEdit_input_path);
 }
 
 void TomographyIfaceViewQtGUI::browseEnergyOutputClicked() {
-  checkUserBrowsePath(m_uiTabEnergy.lineEdit_output_path);
+  checkUserBrowseDir(m_uiTabEnergy.lineEdit_output_path);
 }
 
-std::string
-TomographyIfaceViewQtGUI::checkUserBrowsePath(QLineEdit *le,
-                                              const std::string &userMsg) {
+/**
+ * Show the usual pop-up asking for a directory. Checks if the
+ * directory is valid, and updates the "previous/last directory" for
+ * the next browse directory.
+ *
+ * @param le line edit object on which the path is displayed.
+ *
+ * @param userMsg message to show in the pop-up window
+ *
+ * @param remember whether to remember this path for the next time
+ * that a browse-directory button is used. Normally you would set it
+ * to true for the data paths, but not for things like executable,
+ * external tools, etc.
+ *
+ * @return the directory path as a string
+ */
+std::string TomographyIfaceViewQtGUI::checkUserBrowseDir(
+    QLineEdit *le, const std::string &userMsg, bool remember) {
 
   QString prev;
   if (le->text().isEmpty()) {
@@ -2001,7 +2009,51 @@ TomographyIfaceViewQtGUI::checkUserBrowsePath(QLineEdit *le,
 
   if (!path.isEmpty()) {
     le->setText(path);
-    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
+    if (remember) {
+      MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(
+          path);
+    }
+  }
+
+  return path.toStdString();
+}
+
+/**
+ * Show the usual pop-up asking for an (existing) file. Checks if a
+ * file is actually selected, and updates the "previous/last directory" for
+ * the next browse file/directory.
+ *
+ * @param le line edit object on which the path is displayed.
+ *
+ * @param userMsg message to show in the pop-up window
+ *
+ * @param remember whether to remember this path for the next time
+ * that a browse-file/directory button is used. Normally you would set
+ * it to true for the data paths, but not for things like executable,
+ * external tools, etc.
+ *
+ * @return the file path as a string
+ */
+std::string TomographyIfaceViewQtGUI::checkUserBrowseFile(
+    QLineEdit *le, const std::string &userMsg, bool remember) {
+
+  QString prev;
+  if (le->text().isEmpty()) {
+    prev =
+        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  } else {
+    prev = le->text();
+  }
+
+  QString path(QFileDialog::getOpenFileName(
+      this, tr(QString::fromStdString(userMsg)), prev));
+
+  if (!path.isEmpty()) {
+    le->setText(path);
+    if (remember) {
+      MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(
+          path);
+    }
   }
 
   return path.toStdString();
@@ -2039,10 +2091,6 @@ void TomographyIfaceViewQtGUI::userWarning(const std::string &err,
   QMessageBox::warning(this, QString::fromStdString(err),
                        QString::fromStdString(description), QMessageBox::Ok,
                        QMessageBox::Ok);
-}
-
-void TomographyIfaceViewQtGUI::updatedCycleName() {
-  m_setupPathComponentPhase = m_uiTabSetup.lineEdit_cycle->text().toStdString();
 }
 
 void TomographyIfaceViewQtGUI::updatedExperimentReference() {
