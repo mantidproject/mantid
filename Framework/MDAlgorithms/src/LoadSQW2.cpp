@@ -269,6 +269,8 @@ boost::shared_ptr<API::ExperimentInfo> LoadSQW2::readSingleSPEHeader() {
        << "Inverse B matrix (calculated): " << lattice->getBinv() << "\n";
     g_log.debug(os.str());
   }
+  // Lattice is copied into the Sample object
+  delete lattice;
 
   // goniometer angles
   float psi(0.0f), omega(0.0f), dpsi(0.0f), gl(0.0f), gs(0.0f);
