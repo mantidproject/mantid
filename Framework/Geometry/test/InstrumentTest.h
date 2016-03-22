@@ -547,25 +547,30 @@ public:
   }
 
   void test_access_non_parameterized() {
-
-    const detid_t nPixels = 100 * 100 * 6;
-    double pos_x = 0;
-    for (detid_t i = 1; i <= nPixels; i++) {
-      pos_x += m_instrumentNotParameterized->getDetector(i)->getPos().X();
-    }
+    access_instrument(*m_instrumentNotParameterized, 1, 8);
   }
 
   void test_access_parameterized() {
+    access_instrument(*m_instrumentParameterized, 1, 8);
+  }
 
+private:
+  void access_instrument(const Instrument &instrument, int numberOfThreads,
+                         int repetitions = 1) {
     const detid_t nPixels = 100 * 100 * 6;
-    double pos_x = 0;
-    for (detid_t i = 1; i <= nPixels; i++) {
-      pos_x += m_instrumentParameterized->getDetector(i)->getPos().X();
+    double result = 0.0;
+    for (int rep = 0; rep < repetitions; ++rep) {
+      std::vector<double> pos_x(numberOfThreads, 0.0);
+#pragma omp parallel for num_threads(numberOfThreads)
+      for (detid_t i = 1; i <= nPixels; i++) {
+        int thread = omp_get_thread_num();
+        pos_x[thread] += instrument.getDetector(i)->getPos().X();
+      }
+      result +=
+          std::accumulate(pos_x.begin(), pos_x.end(), 0, std::plus<double>());
     }
   }
 
-
-private:
   Instrument_sptr m_instrumentParameterized;
   Instrument_sptr m_instrumentNotParameterized;
 };
