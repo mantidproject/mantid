@@ -292,6 +292,7 @@ namespace MantidQt
                         bool visit(ObjCompAssemblyActor *actor) override;
                         bool visit(InstrumentActor *actor) override;
                         bool visit(RectangularDetectorActor *actor) override;
+						bool visit(StructuredDetectorActor *actor) override;
                         Mantid::Geometry::ComponentID getID()const { return m_id; }
 		private:
 			Mantid::Geometry::ComponentID m_id;
