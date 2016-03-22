@@ -112,6 +112,8 @@ Bugs Resolved
 -  VSI: Fix Mantid crash when pressing :ref:`Scale <algm-Scale>` or Cut when "builtin" node
    is selected in Pipeline Browser
 
+-  VSI: The TECHNIQUE-DEPENDENT initial view now checks for Spectroscopy before Neutron Diffraction.  
+
 SliceViewer Improvements
 ------------------------
 
