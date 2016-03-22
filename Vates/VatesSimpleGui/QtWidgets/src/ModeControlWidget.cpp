@@ -29,13 +29,6 @@ ModeControlWidget::ModeControlWidget(QWidget *parent) : QWidget(parent)
                    this, SLOT(onThreeSliceViewButtonClicked()));
   QObject::connect(this->ui.splatterPlotButton, SIGNAL(clicked()),
                    this, SLOT(onSplatterPlotViewButtonClicked()));
-
-  // Add the mapping from string to the view enum
-  MantidQt::API::MdConstants mdConstants;
-  mapFromStringToView.insert(std::pair<QString, ModeControlWidget::Views>(mdConstants.getStandardView(), ModeControlWidget::STANDARD));
-  mapFromStringToView.insert(std::pair<QString, ModeControlWidget::Views>(mdConstants.getThreeSliceView(), ModeControlWidget::THREESLICE));
-  mapFromStringToView.insert(std::pair<QString, ModeControlWidget::Views>(mdConstants.getMultiSliceView(), ModeControlWidget::MULTISLICE));
-  mapFromStringToView.insert(std::pair<QString, ModeControlWidget::Views>(mdConstants.getSplatterPlotView(), ModeControlWidget::SPLATTERPLOT));
 }
 
 ModeControlWidget::~ModeControlWidget()

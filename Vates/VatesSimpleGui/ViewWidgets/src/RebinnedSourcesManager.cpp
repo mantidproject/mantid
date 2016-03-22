@@ -396,11 +396,13 @@ namespace Mantid
             inputWorkspace = m_rebinnedWorkspaceAndSourceToOriginalWorkspace[createKeyPairForSource(source)];
             outputWorkspace = m_tempPrefix + inputWorkspace + algorithmType + m_tempPostfix;
             // Keep track of the old rebinned workspace and source
-            m_newRebinnedWorkspacePairBuffer.insert(std::pair<std::string, std::pair<std::string, pqPipelineSource*>>(workspaceName, std::pair<std::string, pqPipelineSource*>(outputWorkspace, source)));
+            m_newRebinnedWorkspacePairBuffer.emplace(
+                workspaceName, std::make_pair(outputWorkspace, source));
           }
         }
         // Record the workspaces
-        m_newWorkspacePairBuffer.insert(std::pair<std::string, std::pair<std::string, pqPipelineSource*>>(inputWorkspace, std::pair<std::string, pqPipelineSource*>(outputWorkspace, source)));
+        m_newWorkspacePairBuffer.emplace(
+            inputWorkspace, std::make_pair(outputWorkspace, source));
         m_inputSource= source;
       }
 
