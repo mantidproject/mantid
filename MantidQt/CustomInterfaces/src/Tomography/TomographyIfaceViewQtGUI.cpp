@@ -436,8 +436,6 @@ void TomographyIfaceViewQtGUI::doSetupSectionEnergy() {
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionSystemSettings() {
-  resetSystemSettings();
-
   // All possible modifications to system settings
   connect(m_uiTabSystemSettings.lineEdit_path_comp_1st,
           SIGNAL(editingFinished()), this, SLOT(systemSettingsEdited()));
@@ -1530,12 +1528,15 @@ void TomographyIfaceViewQtGUI::browseLocalRemoteDriveOrPath() {
 }
 
 void TomographyIfaceViewQtGUI::browseLocalReconScriptsDirClicked() {
-  checkUserBrowseDir(m_uiTabSystemSettings.lineEdit_local_recon_scripts);
+  checkUserBrowseDir(m_uiTabSystemSettings.lineEdit_local_recon_scripts,
+                     "Select location of scripts (scripts subdirectory/folder "
+                     "in the Mantid installation",
+                     false);
 }
 
 void TomographyIfaceViewQtGUI::browseLocalExternalInterpreterClicked() {
-  checkUserBrowseFile(
-      m_uiTabSystemSettings.lineEdit_local_external_interpreter);
+  checkUserBrowseFile(m_uiTabSystemSettings.lineEdit_local_external_interpreter,
+                      "Select interpreter executable", false);
 }
 
 /**
@@ -1976,9 +1977,24 @@ void TomographyIfaceViewQtGUI::browseEnergyOutputClicked() {
   checkUserBrowseDir(m_uiTabEnergy.lineEdit_output_path);
 }
 
-std::string
-TomographyIfaceViewQtGUI::checkUserBrowseDir(QLineEdit *le,
-                                             const std::string &userMsg) {
+/**
+ * Show the usual pop-up asking for a directory. Checks if the
+ * directory is valid, and updates the "previous/last directory" for
+ * the next browse directory.
+ *
+ * @param le line edit object on which the path is displayed.
+ *
+ * @param userMsg message to show in the pop-up window
+ *
+ * @param remember whether to remember this path for the next time
+ * that a browse-directory button is used. Normally you would set it
+ * to true for the data paths, but not for things like executable,
+ * external tools, etc.
+ *
+ * @return the directory path as a string
+ */
+std::string TomographyIfaceViewQtGUI::checkUserBrowseDir(
+    QLineEdit *le, const std::string &userMsg, bool remember) {
 
   QString prev;
   if (le->text().isEmpty()) {
@@ -1993,15 +2009,33 @@ TomographyIfaceViewQtGUI::checkUserBrowseDir(QLineEdit *le,
 
   if (!path.isEmpty()) {
     le->setText(path);
-    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
+    if (remember) {
+      MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(
+          path);
+    }
   }
 
   return path.toStdString();
 }
 
-std::string
-TomographyIfaceViewQtGUI::checkUserBrowseFile(QLineEdit *le,
-                                              const std::string &userMsg) {
+/**
+ * Show the usual pop-up asking for an (existing) file. Checks if a
+ * file is actually selected, and updates the "previous/last directory" for
+ * the next browse file/directory.
+ *
+ * @param le line edit object on which the path is displayed.
+ *
+ * @param userMsg message to show in the pop-up window
+ *
+ * @param remember whether to remember this path for the next time
+ * that a browse-file/directory button is used. Normally you would set
+ * it to true for the data paths, but not for things like executable,
+ * external tools, etc.
+ *
+ * @return the file path as a string
+ */
+std::string TomographyIfaceViewQtGUI::checkUserBrowseFile(
+    QLineEdit *le, const std::string &userMsg, bool remember) {
 
   QString prev;
   if (le->text().isEmpty()) {
@@ -2016,7 +2050,10 @@ TomographyIfaceViewQtGUI::checkUserBrowseFile(QLineEdit *le,
 
   if (!path.isEmpty()) {
     le->setText(path);
-    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
+    if (remember) {
+      MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(
+          path);
+    }
   }
 
   return path.toStdString();

@@ -273,10 +273,11 @@ private:
 
   std::string
   checkUserBrowseDir(QLineEdit *le,
-                     const std::string &userMsg = "Open directory/folder");
+                     const std::string &userMsg = "Open directory/folder",
+                     bool remember=true);
 
   std::string checkUserBrowseFile(QLineEdit *le,
-                                  const std::string &userMsg = "Open file");
+                                  const std::string &userMsg = "Open file", bool remember=true);
 
   void sendToVisTool(const std::string &toolName, const std::string &pathString,
                      const std::string &appendBin);

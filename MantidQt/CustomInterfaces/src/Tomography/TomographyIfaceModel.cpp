@@ -792,18 +792,27 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
                         adaptInputPathForExecution(dark, local));
   }
 
+  std::string openList;
+  std::string closeList;
+  if (local) {
+    openList = "[";
+    closeList = "]";
+  } else {
+    openList = "'[";
+    closeList = "]'";
+  }
   if ((corRegions.roi.first.X() > 0 || corRegions.roi.second.X() > 0) &&
       (corRegions.roi.first.Y() > 0 || corRegions.roi.second.Y() > 0)) {
-    opts.emplace_back("--region-of-interest='[" +
-                      boxCoordinatesToCSV(corRegions.roi) + "]'");
+    opts.emplace_back("--region-of-interest=" + openList +
+                      boxCoordinatesToCSV(corRegions.roi) + closeList);
   }
 
   if (filters.prep.normalizeByAirRegion) {
     if (0 != corRegions.normalizationRegion.first.X() ||
         0 != corRegions.normalizationRegion.second.X())
-      opts.emplace_back("--air-region='[" +
+      opts.emplace_back("--air-region=" + openList +
                         boxCoordinatesToCSV(corRegions.normalizationRegion) +
-                        "]'");
+                        closeList);
   }
 
   const std::string outBase =
@@ -906,7 +915,7 @@ TomographyIfaceModel::adaptInputPathForExecution(const std::string &path,
  * a subdirectory usually called 'processed' next to the
  * samples/flats/darks directories).
  *
- * @param samples|Dir full path to samples
+ * @param samplesDir full path to samples
  *
  * @return path to which an output directory name can be appended, to
  * output the reconstructed volume to.
@@ -926,7 +935,7 @@ TomographyIfaceModel::buildOutReconstructionDir(const std::string &samplesDir,
  * path following current IMAT rules, regardless of where the samples
  * path was located.
  *
- * @param samples|Dir full path to sample images
+ * @param samplesDir full path to sample images
  *
  * @param local whether to adapt the path rules options for a local
  * run (as opposed to a remote compute resource)
@@ -968,7 +977,7 @@ std::string TomographyIfaceModel::buildOutReconstructionDirFromSystemRoot(
  * regardless of whether the samples directory location follows the
  * proper IMAT conventions.
  *
- * @param samples|Dir full path to samples
+ * @param samplesDir full path to samples
  *
  * @return path to which an output directory name can be appended, to
  * output the reconstructed volume to.
