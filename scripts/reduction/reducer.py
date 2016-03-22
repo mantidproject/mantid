@@ -37,12 +37,12 @@ from reduction.find_data import find_data
 __version__ = '1.0'
 
 
-def validate_loader(f):
+def validate_loader(func):
     def validated_f(reducer, algorithm, *args, **kwargs):
         if issubclass(algorithm.__class__, ReductionStep) or algorithm is None:
             # If we have a ReductionStep object, just use it.
             # "None" is allowed as an algorithm (usually tells the reducer to skip a step)
-            return f(reducer, algorithm)
+            return func(reducer, algorithm)
 
         if isinstance(algorithm, types.FunctionType):
             # If we get a function, assume its name is an algorithm name
@@ -113,7 +113,7 @@ def validate_loader(f):
                         return alg.getPropertyValue("OutputMessage")
                     return "%s applied" % alg.name()
 
-            return f(reducer, _AlgorithmStep())
+            return func(reducer, _AlgorithmStep())
 
         elif isinstance(algorithm, mantid.api.IAlgorithm) \
                 or type(algorithm).__name__ == "IAlgorithm":
@@ -167,15 +167,15 @@ def validate_loader(f):
                     algorithm.execute()
                     return "%s applied" % algorithm.name()
 
-            return f(reducer, _AlgorithmStep())
+            return func(reducer, _AlgorithmStep())
 
         else:
-            raise RuntimeError, "%s expects a ReductionStep object, found %s" % (f.__name__, algorithm.__class__)
+            raise RuntimeError, "%s expects a ReductionStep object, found %s" % (func.__name__, algorithm.__class__)
 
     return validated_f
 
 
-def validate_step(f):
+def validate_step(func):
     """
         Decorator for Reducer methods that need a ReductionStep
         object as its first argument.
@@ -196,7 +196,7 @@ def validate_step(f):
 
     def validated_f(reducer, algorithm, *args, **kwargs):
         """
-            Wrapper function around the function f.
+            Wrapper function around the function func.
             The function ensures that the algorithm parameter
             is a sub-class of ReductionStep
             @param algorithm: algorithm name, ReductionStep object, or Mantid algorithm function
@@ -204,7 +204,7 @@ def validate_step(f):
         if issubclass(algorithm.__class__, ReductionStep) or algorithm is None:
             # If we have a ReductionStep object, just use it.
             # "None" is allowed as an algorithm (usually tells the reducer to skip a step)
-            return f(reducer, algorithm)
+            return func(reducer, algorithm)
 
         if isinstance(algorithm, types.FunctionType):
             # If we get a function, assume its name is an algorithm name
@@ -261,7 +261,7 @@ def validate_step(f):
                         return alg.getPropertyValue("OutputMessage")
                     return "%s applied" % alg.name()
 
-            return f(reducer, _AlgorithmStep())
+            return func(reducer, _AlgorithmStep())
 
         elif isinstance(algorithm, mantid.api.IAlgorithm) \
                 or type(algorithm).__name__ == "IAlgorithm":
@@ -303,10 +303,10 @@ def validate_step(f):
                         return algorithm.getPropertyValue("OutputMessage")
                     return "%s applied" % algorithm.name()
 
-            return f(reducer, _AlgorithmStep())
+            return func(reducer, _AlgorithmStep())
 
         else:
-            raise RuntimeError, "%s expects a ReductionStep object, found %s" % (f.__name__, algorithm.__class__)
+            raise RuntimeError, "%s expects a ReductionStep object, found %s" % (func.__name__, algorithm.__class__)
 
     return validated_f
 
@@ -529,10 +529,10 @@ class Reducer(object):
         self.log_text += "Log saved to %s" % log_path
 
         # Write the log to file
-        f = open(log_path, 'a')
-        f.write("\n-------------------------------------------\n")
-        f.write(self.log_text)
-        f.close()
+        file_dat = open(log_path, 'a')
+        file_dat.write("\n-------------------------------------------\n")
+        file_dat.write(self.log_text)
+        file_dat.close()
         return self.log_text
 
 

@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name,unused-variable, too-many-arguments
+# pylint: disable=invalid-name
 from xml.dom.minidom import getDOMImplementation
 from datetime import datetime
 import re
@@ -142,9 +142,7 @@ class MantidGeom(object):
     def addMonitors(self, distance=None, names=None):
         self.list_func(distance)
         self.list_func(names)
-        """
-            Add a list of monitors to the geometry.
-        """
+        # Add a list of monitors to the geometry.
         if len(distance) != len(names):
             raise IndexError("Distance and name list must be same size!")
 
@@ -156,7 +154,7 @@ class MantidGeom(object):
         basecomponent.setAttribute("mark-as", "monitor")
 
         for i in range(len(distance)):
-            zi = float(distance[i])
+            dummy_zi = float(distance[i])
             self._append_child("location", basecomponent, z=distance[i], name=names[i])
 
     def addComponent(self, type_name, idlist=None, root=None, blank_location=True):
@@ -211,7 +209,7 @@ class MantidGeom(object):
             self.addLocation(comp_element, x, y, z, rot_x, rot_y, rot_z)
 
     def addSingleDetector(self, root, x, y, z, rot_x, rot_y, rot_z, name=None,
-                          id=None, usepolar=None):
+                          _id=None, usepolar=None):
         """
         Add a single detector by explicit declaration. The rotation order is
         performed as follows: y, x, z.
@@ -251,17 +249,17 @@ class MantidGeom(object):
 
     def addLocationPolar(self, root, r, theta, phi, name=None):
         if name is not None:
-            pos_loc = self._append_child("location", root, r=r, t=theta, p=phi, name=name)
+            _pos_loc = self._append_child("location", root, r=r, t=theta, p=phi, name=name)
         else:
-            pos_loc = self._append_child("location", root, r=r, t=theta, p=phi)
+            _pos_loc = self._append_child("location", root, r=r, t=theta, p=phi)
 
     def addLocationRTP(self, root, r, t, p, rot_x, rot_y, rot_z, name=None):
         """
         Add a location element to a specific parent node given by root, using r, theta, phi coordinates.
         """
-        rf = float(r)
-        tf = float(f)
-        pf = float(p)
+        dummy_rf = float(r)
+        dummy_tf = float(f)
+        dummy_pf = float(p)
         if name is not None:
             pos_loc = self._append_child("location", root, r=r, t=t, p=p, name=name)
         else:
@@ -271,15 +269,15 @@ class MantidGeom(object):
         # the combined rotation is equals that obtained by applying rotx, then roty and finally rotz.
         if rot_x is not None:
             log = self._append_child("parameter", pos_loc, name="rotx")
-            rotxf = float(rot_x)
+            _rotxf = float(rot_x)
             self._append_child("value", log, val=rot_x)
         if rot_y is not None:
             log = self._append_child("parameter", pos_loc, name="roty")
-            rotyf = float(rot_y)
+            _rotyf = float(rot_y)
             self._append_child("value", log, val=rot_y)
         if rot_z is not None:
             log = self._append_child("parameter", pos_loc, name="rotz")
-            rotzf = float(rot_z)
+            _rotzf = float(rot_z)
             self._append_child("value", log, val=rot_z)
 
     def addNPack(self, name, num_tubes, tube_width, air_gap, type_name="tube"):
@@ -408,9 +406,8 @@ class MantidGeom(object):
 
     def addMonitorIds(self, ids=None):
         self.list_func(ids)
-        """
-        Add the monitor IDs.
-        """
+
+        # Add the monitor IDs.
         idElt = self._append_child("idlist", self._root, idname="monitors")
         for i in range(len(ids)):
             self._append_child("id", idElt, val=ids[i])
