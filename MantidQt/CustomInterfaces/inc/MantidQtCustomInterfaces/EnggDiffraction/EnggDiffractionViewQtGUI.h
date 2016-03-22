@@ -320,14 +320,14 @@ private:
   /// (focusing)
   static const std::string g_DetGrpExtStr;
 
-  /// presenter as in the model-view-presenter
-  boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;
-
   /// Loaded focused workspace
   std::vector<QwtPlotCurve *> m_focusedDataVector;
 
   /// Loaded data curves
   std::vector<QwtPlotCurve *> m_fittedDataVector;
+
+  /// presenter as in the model-view-presenter
+  boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;
 };
 
 } // namespace CustomInterfaces
