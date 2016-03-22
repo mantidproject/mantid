@@ -24,6 +24,7 @@ digraph ReflectometryReductionOne {
     checkCorDetPos  [label="Correct Detector Positions?"]
     checkNormDetMon [label="Normalize by\nIntegrated Monitors?"]
     checkCorrAlg    [label="CorrectionAlgorithm?"]
+    checkSourceRotation [label="Is source back at original position?"]
   }
 
   subgraph algorithms {
@@ -38,17 +39,17 @@ digraph ReflectometryReductionOne {
     specRefPosCor   [label="SpecularReflectionPositionCorrect"]
     polyCorr        [label="PolynomialCorrection"]
     expCorr         [label="ExponentialCorrection"]
-    rotateSource    [label="RotateSource"]
+    rotateSource [label = "RotateSource"]
+   rotateSourceBack [label="RotateSource by minus thetaIn"]
   }
 
   subgraph processes {
     $process_style
     directBeamNorm  [label="Perform Direct\nBeam Normalisation"]
-    rotateSourceBack [label="Rotate Source back by ThetaIn"]
   }
 
   subgraph values {
-    $value_style
+   $value_style
     valMon          [label="I&#8320;(&lambda;)"]
     valDet          [label="I(&lambda;)"]
     valIntegrated   [label="&Sigma; I&#8320;(&lambda;)"]
@@ -94,7 +95,10 @@ digraph ReflectometryReductionOne {
   checkCorDetPos    -> outputWorkspaceWL[label="No"]
   specRefPosCor     -> outputWorkspaceWL
   outputWorkspaceWL -> rotateSource
+  thetaIn                -> rotateSource
   rotateSource      -> convertToMT
-  convertToMT       -> rotateSourceBack
-  rotateSourceBack -> outputWorkspaceMT
+  convertToMT       -> checkSourceRotation
+  checkSourceRotation -> rotateSourceBack [label="No"]
+  checkSourceRotation -> outputWorkspaceMT [label="Yes"]
+  rotateSourceBack      -> outputWorkspaceMT
 }
