@@ -95,6 +95,11 @@ void IntegratePeaksCWSD::init() {
       "PeaksWorkspace "
       "and MDEVentWorkspace, if it is set to true, then the peaks' intensities "
       "will be merged.");
+
+  declareProperty("NormalizeByMonitor", true,
+                  "If selected, then all the signals will be normalized by monitor counts."
+                  "Otherwise, the output peak intensity will be just simple addition of peak intensity."
+                  "It is only applied to the situation that Mergepeaks is not selected.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -157,6 +162,10 @@ void IntegratePeaksCWSD::processInputs() {
         "It is not allowed to merge peaks when there are "
         "multiple peaks present in PeaksWorkspace.");
   }
+  if (m_doMergePeak)
+    m_normalizeByMonitor = getProperty("NormalizeByMonitor");
+  else
+    m_normalizeByMonitor = true;
 
   // monitor counts
   monitorCountMap = getMonitorCounts();
@@ -174,14 +183,6 @@ void IntegratePeaksCWSD::processInputs() {
   if (m_peakRadius == EMPTY_DBL()) {
     throw std::invalid_argument("Peak radius cannot be left empty.");
   }
-
-  // merge peak only makes sense when there is more than 1 peak
-  /*
-  if (m_haveMultipleRun)
-    m_doMergePeak = getProperty("MergePeaks");
-  else
-    m_doMergePeak = false;
-    */
 
   // optional mask workspace
   std::string maskwsname = getPropertyValue("MaskWorkspace");
@@ -259,15 +260,22 @@ void IntegratePeaksCWSD::simplePeakIntegration(
         // update run number
         current_run_number = run_number_i;
         // update monitor counts
-        std::map<int, signal_t>::const_iterator m_finder =
-            run_monitor_map.find(current_run_number);
-        if (m_finder != run_monitor_map.end())
-          current_monitor_counts = m_finder->second;
-        else {
-          std::stringstream errss;
-          errss << "Unable to find run number " << current_run_number
-                << " in monitor counts map";
-          throw std::runtime_error(errss.str());
+        if (m_normalizeByMonitor)
+        {
+          std::map<int, signal_t>::const_iterator m_finder =
+              run_monitor_map.find(current_run_number);
+          if (m_finder != run_monitor_map.end())
+            current_monitor_counts = m_finder->second;
+          else {
+            std::stringstream errss;
+            errss << "Unable to find run number " << current_run_number
+                  << " in monitor counts map";
+            throw std::runtime_error(errss.str());
+          }
+        }
+        else
+        {
+          current_monitor_counts = 1.;
         }
 
         // update peak center

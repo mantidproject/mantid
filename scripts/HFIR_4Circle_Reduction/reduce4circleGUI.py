@@ -167,6 +167,10 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_integrate_per_pt)
         self.connect(self.ui.pushButton_integratePeak, QtCore.SIGNAL('clicked()'),
                      self.do_integrate_peaks)
+        self.connect(self.ui.pushButton_showAbsoluteCounts, QtCore.SIGNAL('clicked()'),
+                     self.do_plot_peak_abs_counts)
+        self.connect(self.ui.pushButton_showNormalizedIntensity, QtCore.SIGNAL('clicked()'),
+                     self.do_plot_peak_normalized_intensity)
 
         # Tab survey
         self.connect(self.ui.pushButton_survey, QtCore.SIGNAL('clicked()'),
@@ -390,42 +394,6 @@ class MainWindow(QtGui.QMainWindow):
         # END-FOR
 
         return
-
-    def _how_to_deal_with_this(self):
-        # Get peak integration parameters
-        line_editors = [self.ui.lineEdit_peakRadius,
-                        self.ui.lineEdit_bkgdInnerR,
-                        self.ui.lineEdit_bkgdOuterR]
-        status, value_list = gutil.parse_float_editors(line_editors)
-        if status is False:
-            err_msg = value_list
-            print '[DB] Error message: %s' % err_msg
-            return
-        else:
-            peak_radius = value_list[0]
-            bkgd_inner_radius = value_list[1]
-            bkgd_outer_radius = value_list[2]
-
-        # Get peak integration options
-        adapt_q_bkgd = self.ui.checkBox_adaptQBkgd.isChecked()
-        integrate_on_edge = self.ui.checkBox_integrateOnEdge.isChecked()
-        print '[DB-NEXT] Unused widgets: AdaptQBackground (%s) and IntegrateOnEdge (%s).' % (
-            str(adapt_q_bkgd), str(integrate_on_edge)
-        )
-        is_cylinder = self.ui.checkBox_cylinder.isChecked()
-
-        # Choose the peaks to be integrated
-        row_index_list = self.ui.tableWidget_peakIntegration.get_selected_rows()
-
-        for i_row in row_index_list:
-            md_ws_name = self.ui.tableWidget_peakIntegration.get_md_ws_name(i_row)
-            exp_num = None
-            scan_num = self.ui.tableWidget_peakIntegration.get_scan_number(i_row)
-            pt_list = None
-            self._myControl.integrate_peaks(exp_num, scan_num, pt_list, md_ws_name,
-                                            peak_radius, bkgd_inner_radius, bkgd_outer_radius,
-                                            is_cylinder)
-        # END-FOR
 
     def do_refine_ub(self):
         """
@@ -1498,6 +1466,30 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_plot_peak_abs_counts(self):
+        """
+
+        :return:
+        """
+        # Integrate peak
+        if self._myControl.has_integrated_peak(exp_num, scan_num, pt_list=xx,
+                                               normalized_by_monitor) is False:
+            self._myControl.integrate_peak(exp_num=xx, scan_num=xx, pt_num=xx,
+                                           normalized_by_monitor=False)
+
+        self.ui.pushButton_showAbsoluteCounts.setEnabled(False)
+
+        self.ui.tableWidget_peakIntegration.update_peak_counts()
+
+        return
+
+    def do_plot_peak_normalized_intensity(self):
+        """ Plot the Pt. vs. normalized intensity within peak radius
+        :return:
+        """
+        self._my3DWindow
+
+
     def do_show_ub_in_box(self):
         """ Get UB matrix in table tableWidget_ubMergeScan and write to plain text edit plainTextEdit_ubInput
         :return:
@@ -1552,7 +1544,8 @@ class MainWindow(QtGui.QMainWindow):
         # set up value
         selected_scans = self.ui.tableWidget_mergeScans.get_scan_list()
         if len(selected_scans) > 0:
-            self.ui.lineEdit_scanIntegratePeak.setText(str(selected_scans[0]))
+            # set the first one.  remember that the return is a list of tuple
+            self.ui.lineEdit_scanIntegratePeak.setText(str(selected_scans[0][0]))
 
         return
 

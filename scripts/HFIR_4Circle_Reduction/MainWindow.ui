@@ -193,7 +193,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>4</number>
+           <number>5</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -2588,6 +2588,13 @@ p, li { white-space: pre-wrap; }
              </layout>
             </item>
             <item>
+             <widget class="QLabel" name="label_peakIntegraeInfo">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <layout class="QHBoxLayout" name="horizontalLayout_3">
               <item>
                <widget class="IntegratePeaksTableWidget" name="tableWidget_peakIntegration">
@@ -2611,7 +2618,7 @@ p, li { white-space: pre-wrap; }
                    </widget>
                   </item>
                   <item row="0" column="1">
-                   <widget class="QPushButton" name="pushButton_3">
+                   <widget class="QPushButton" name="pushButton_showNormalizedIntensity">
                     <property name="text">
                      <string>Normalize By Monitor</string>
                     </property>

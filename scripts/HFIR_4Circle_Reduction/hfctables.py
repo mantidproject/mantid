@@ -5,22 +5,18 @@ import sys
 import NTableWidget as tableBase
 
 # UB peak information table
-Peak_Integration_Table_Setup = [('Scan', 'int'),
-                                ('Pt', 'str'),
-                                ('Merged Workspace', 'str'),
-                                ('H', 'float'),
-                                ('K', 'float'),
-                                ('L', 'float'),
-                                ('Q_x', 'float'),
-                                ('Q_y', 'float'),
-                                ('Q_z', 'float'),
-                                ('Intensity', 'float'),
-                                ('Selected', 'checkbox')]
+Peak_Integration_Table_Setup = [('Pt', 'int'),
+                                ('HKL', 'str'),
+                                ('Q sample', 'str'),
+                                ('Signal', 'float'),    # signal is simple summation of counts
+                                                        # in region of interest
+                                ('Intensity', 'float')  # normalized signals by monitor counts
+                                ]
 
 
-class IntegratePeaksTableWidget(tableBase.NTableWidget):
+class PeakIntegrationTableWidget(tableBase.NTableWidget):
     """
-    Extended table widget for peak integration
+    Extended table widget for studying peak integration of scan on various Pts.
     """
     def __init__(self, parent):
         """
@@ -427,6 +423,24 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return return_list
 
+    def get_merged_status(self, row_number):
+        """ Get the status whether it is merged
+        :param row_number:
+        :return: boolean
+        """
+        # check
+        assert isinstance(row_number, int)
+        assert 0 <= row_number < self.rowCount()
+
+        # get value
+        merge_status_col_index = self._myColumnNameList.index('status')
+        status_str = self.get_cell_value(row_number, merge_status_col_index)
+
+        if status_str.lower() == 'done':
+            return True
+
+        return False
+
     def get_merged_ws_name(self, i_row):
         """
         Get ...
@@ -443,12 +457,12 @@ class ProcessTableWidget(tableBase.NTableWidget):
         """
         scan_list = list()
         num_rows = self.rowCount()
-        j_select = self.TableSetup.index(('Select', 'checkbox'))
-        j_scan = self.TableSetup.index(('Scan', 'int'))
+        col_select_index = self._myColumnNameList.index('Select')
+        col_scan_index = self._myColumnNameList.index('Scan')
 
         for i_row in xrange(num_rows):
-            if self.get_cell_value(i_row, j_select) is True:
-                scan_num = self.get_cell_value(i_row, j_scan)
+            if self.get_cell_value(i_row, col_select_index) is True:
+                scan_num = self.get_cell_value(i_row, col_scan_index)
                 scan_list.append((scan_num, i_row))
 
         return scan_list
@@ -469,6 +483,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :return:
         """
         self.init_setup(self.TableSetup)
+        self._statusColName = 'Select'
 
         return
 

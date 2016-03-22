@@ -82,6 +82,7 @@ private:
   Kernel::V3D m_peakCenter;
   double m_peakRadius;
   bool m_doMergePeak;
+  bool m_normalizeByMonitor;
 
   /// Peaks
   std::vector<DataObjects::Peak> m_vecPeaks;
