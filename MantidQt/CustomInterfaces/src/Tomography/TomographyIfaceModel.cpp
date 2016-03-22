@@ -499,7 +499,7 @@ void TomographyIfaceModel::doRunReconstructionJobLocal() {
       info.name = "Mantid_Local";
       info.status = "Starting";
       info.cmdLine = run + " " + allOpts;
-      m_jobsStatusLocal.push_back(info);
+      m_jobsStatusLocal.emplace_back(info);
     } catch (Poco::SystemException &sexc) {
       g_log.error()
           << "Execution failed. Could not run the tool. Error details: "
@@ -509,7 +509,7 @@ void TomographyIfaceModel::doRunReconstructionJobLocal() {
       info.name = "Mantid_Local";
       info.status = "Exit";
       info.cmdLine = run + " " + allOpts;
-      m_jobsStatusLocal.push_back(info);
+      m_jobsStatusLocal.emplace_back(info);
     }
   } catch (std::runtime_error &rexc) {
     logMsg("The execution of " + toolName + "failed. details: " +
@@ -597,21 +597,21 @@ TomographyIfaceModel::makeTomoRecScriptOptions(bool local) const {
 
   if (local) {
     const std::string mainScript = "/Imaging/IMAT/tomo_reconstruct.py";
-    opts.push_back(m_systemSettings.m_local.m_reconScriptsPath + mainScript);
+    opts.emplace_back(m_systemSettings.m_local.m_reconScriptsPath + mainScript);
   }
 
   const std::string toolName = usingTool();
   if (g_TomoPyTool == toolName) {
-    opts.push_back("--tool=tomopy");
-    opts.push_back("--algorithm=" + m_tomopyMethod);
+    opts.emplace_back("--tool=tomopy");
+    opts.emplace_back("--algorithm=" + m_tomopyMethod);
   } else if (g_AstraTool == toolName) {
-    opts.push_back("--tool=astra");
-    opts.push_back("--algorithm=" + m_astraMethod);
+    opts.emplace_back("--tool=astra");
+    opts.emplace_back("--algorithm=" + m_astraMethod);
   }
 
   if (g_TomoPyTool != toolName || m_tomopyMethod != "gridred" ||
       m_tomopyMethod != "fbp")
-    opts.push_back("--num-iter=5");
+    opts.emplace_back("--num-iter=5");
 
   filtersCfgToCmdOpts(m_prePostProcSettings, m_imageStackPreParams, local,
                       opts);
@@ -769,7 +769,7 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
     const ImageStackPreParams &corRegions, bool local,
     std::vector<std::string> &opts) const {
 
-  opts.push_back("--input-path=" + m_pathsConfig.pathSamples());
+  opts.emplace_back("--input-path=" + m_pathsConfig.pathSamples());
   std::string alg = "alg";
   if (g_TomoPyTool == usingTool())
     alg = m_tomopyMethod;
@@ -779,27 +779,27 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
   if (filters.prep.normalizeByFlats) {
     const std::string flat = m_pathsConfig.pathOpenBeam();
     if (!flat.empty())
-      opts.push_back("--input-path-flat=" + flat);
+      opts.emplace_back("--input-path-flat=" + flat);
   }
 
   if (filters.prep.normalizeByDarks) {
     const std::string dark = m_pathsConfig.pathDarks();
     if (!dark.empty())
-      opts.push_back("--input-path-dark=" + dark);
+      opts.emplace_back("--input-path-dark=" + dark);
   }
 
   if ((corRegions.roi.first.X() > 0 || corRegions.roi.second.X() > 0) &&
       (corRegions.roi.first.Y() > 0 || corRegions.roi.second.Y() > 0)) {
-    opts.push_back("--region-of-interest='[" +
-                   boxCoordinatesToCSV(corRegions.roi) + "]'");
+    opts.emplace_back("--region-of-interest='[" +
+                      boxCoordinatesToCSV(corRegions.roi) + "]'");
   }
 
   if (filters.prep.normalizeByAirRegion) {
     if (0 != corRegions.normalizationRegion.first.X() ||
         0 != corRegions.normalizationRegion.second.X())
-      opts.push_back("--air-region='[" +
-                     boxCoordinatesToCSV(corRegions.normalizationRegion) +
-                     "]'");
+      opts.emplace_back("--air-region='[" +
+                        boxCoordinatesToCSV(corRegions.normalizationRegion) +
+                        "]'");
   }
 
   // Like /work/imat/data/RB00XYZTUV/sampleA/processed/
@@ -827,10 +827,12 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
   // out_reconstruction_TomoPy_gridrec_
   const std::string reconName =
       "reconstruction_" + m_currentTool + "_" + alg + "_" + timeAppendix;
-  opts.push_back("--output=\"" + outBase + "/" + reconName + "\"");
+  opts.emplace_back("--output=\"" + outBase + "/" + reconName + "\"");
 
-  opts.push_back("--median-filter-size=" +
-                 std::to_string(filters.prep.medianFilterWidth));
+  // TODO: will/should use m_systemSettings.m_outputPathCompPreProcessed to
+  // set an option like --output-pre-processed
+  opts.emplace_back("--median-filter-size=" +
+                    std::to_string(filters.prep.medianFilterWidth));
 
   // Filters:
 
@@ -839,31 +841,31 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
 
   double cor = 0;
   cor = corRegions.cor.X();
-  opts.push_back("--cor=" + std::to_string(cor));
+  opts.emplace_back("--cor=" + std::to_string(cor));
 
   int rotationIdx = filters.prep.rotation / 90;
   // filters.prep.rotation
-  opts.push_back("--rotation=" + std::to_string(rotationIdx));
+  opts.emplace_back("--rotation=" + std::to_string(rotationIdx));
 
   // filters.prep.maxAngle
-  opts.push_back("--max-angle=" + std::to_string(filters.prep.maxAngle));
+  opts.emplace_back("--max-angle=" + std::to_string(filters.prep.maxAngle));
 
   // prep.scaleDownFactor
   if (filters.prep.scaleDownFactor > 1)
-    opts.push_back("--scale-down=" +
-                   std::to_string(filters.prep.scaleDownFactor));
+    opts.emplace_back("--scale-down=" +
+                      std::to_string(filters.prep.scaleDownFactor));
 
   // postp.circMaskRadius
-  opts.push_back("--circular-mask=" +
-                 std::to_string(filters.postp.circMaskRadius));
+  opts.emplace_back("--circular-mask=" +
+                    std::to_string(filters.postp.circMaskRadius));
 
   // postp.cutOffLevel
   if (filters.postp.cutOffLevel > 0.0)
-    opts.push_back("--cut-off=" + std::to_string(filters.postp.cutOffLevel));
+    opts.emplace_back("--cut-off=" + std::to_string(filters.postp.cutOffLevel));
 
   // TODO: this should take the several possible alternatives from the user
   // interface
-  opts.push_back("--out-img-format=png");
+  opts.emplace_back("--out-img-format=png");
 }
 
 } // namespace CustomInterfaces

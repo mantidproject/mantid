@@ -26,9 +26,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-129</y>
+        <y>-161</y>
         <width>700</width>
-        <height>678</height>
+        <height>710</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_8">
@@ -64,7 +64,7 @@
                <property name="sizeHint" stdset="0">
                 <size>
                  <width>20</width>
-                 <height>19</height>
+                 <height>51</height>
                 </size>
                </property>
               </spacer>
@@ -148,6 +148,40 @@
              <bool>false</bool>
             </property>
             <layout class="QGridLayout" name="gridLayout_11">
+             <item row="1" column="0" colspan="2">
+              <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <item>
+                <widget class="QLabel" name="label_recon_scripts">
+                 <property name="text">
+                  <string>Reconstruction scripts:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="lineEdit_local_recon_scripts">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>2</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>C:/MantidInstall/scripts/</string>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_local_recon_scripts_dir">
+                 <property name="text">
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
              <item row="0" column="0">
               <layout class="QGridLayout" name="gridLayout_10">
                <item row="0" column="0">
@@ -220,33 +254,24 @@
                </property>
               </spacer>
              </item>
-             <item row="1" column="0" colspan="2">
-              <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <item row="2" column="0" colspan="2">
+              <layout class="QHBoxLayout" name="horizontalLayout_6">
                <item>
-                <widget class="QLabel" name="label_recon_scripts">
+                <widget class="QLabel" name="label_13_local_external_interpreter">
                  <property name="text">
-                  <string>Reconstruction scripts:</string>
+                  <string>External interpreter:</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="lineEdit_local_recon_scripts">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                   <horstretch>2</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
+                <widget class="QLineEdit" name="lineEdit_local_external_interpreter">
                  <property name="text">
-                  <string>C:/MantidInstall/scripts/</string>
-                 </property>
-                 <property name="readOnly">
-                  <bool>true</bool>
+                  <string>C:\local\Anaconda\python.exe</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="pushButton_recon_scripts_dir">
+                <widget class="QPushButton" name="pushButton_local_external_interpreter">
                  <property name="text">
                   <string>Browse</string>
                  </property>
@@ -350,12 +375,18 @@
                     <property name="text">
                      <string>dark</string>
                     </property>
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
                    </widget>
                   </item>
                   <item row="1" column="1">
                    <widget class="QLineEdit" name="lineEdit_path_comp_input_flats">
                     <property name="text">
                      <string>flat</string>
+                    </property>
+                    <property name="readOnly">
+                     <bool>true</bool>
                     </property>
                    </widget>
                   </item>
@@ -384,6 +415,9 @@
                    <widget class="QLineEdit" name="lineEdit_path_comp_input_samples">
                     <property name="text">
                      <string>data</string>
+                    </property>
+                    <property name="readOnly">
+                     <bool>true</bool>
                     </property>
                    </widget>
                   </item>
@@ -423,6 +457,9 @@
                       <property name="text">
                        <string>pre_processed</string>
                       </property>
+                      <property name="readOnly">
+                       <bool>true</bool>
+                      </property>
                      </widget>
                     </item>
                     <item row="0" column="2">
@@ -449,6 +486,9 @@
                      <widget class="QLineEdit" name="lineEdit_path_comp_out_processed">
                       <property name="text">
                        <string>processed</string>
+                      </property>
+                      <property name="readOnly">
+                       <bool>false</bool>
                       </property>
                      </widget>
                     </item>
@@ -739,7 +779,7 @@
   <tabstop>spinBox_local_processes</tabstop>
   <tabstop>spinBox_local_cores</tabstop>
   <tabstop>lineEdit_local_recon_scripts</tabstop>
-  <tabstop>pushButton_recon_scripts_dir</tabstop>
+  <tabstop>pushButton_local_recon_scripts_dir</tabstop>
   <tabstop>scrollArea</tabstop>
  </tabstops>
  <resources/>

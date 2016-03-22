@@ -496,8 +496,12 @@ void TomographyIfaceViewQtGUI::doSetupSectionSystemSettings() {
           this, SLOT(systemSettingsNumericEdited()));
 
   // 'browse' buttons for local (scripts) settings:
-  connect(m_uiTabSystemSettings.pushButton_recon_scripts_dir,
+  connect(m_uiTabSystemSettings.pushButton_local_recon_scripts_dir,
           SIGNAL(released()), this, SLOT(browseLocalReconScriptsDirClicked()));
+
+  connect(m_uiTabSystemSettings.pushButton_local_external_interpreter,
+          SIGNAL(released()), this,
+          SLOT(browseLocalExternalInterpreterClicked()));
 
   connect(m_uiTabSystemSettings.pushButton_reset_all, SIGNAL(released()), this,
           SLOT(resetSystemSettings()));
@@ -1142,9 +1146,8 @@ void TomographyIfaceViewQtGUI::updateSystemSettings(
 
   m_uiTabSystemSettings.lineEdit_local_recon_scripts->setText(
       QString::fromStdString(setts.m_local.m_reconScriptsPath));
-
-  // TODO:
-  // setts.m_local.m_externalInterpreterPath
+  m_uiTabSystemSettings.lineEdit_local_external_interpreter->setText(
+      QString::fromStdString(setts.m_local.m_externalInterpreterPath));
 }
 
 /**
@@ -1523,17 +1526,22 @@ void TomographyIfaceViewQtGUI::darksPathEditedByUser() {
 }
 
 void TomographyIfaceViewQtGUI::browseLocalInOutDirClicked() {
-  checkUserBrowsePath(
+  checkUserBrowseDir(
       m_uiTabSystemSettings.lineEdit_on_local_data_drive_or_path);
 }
 
 void TomographyIfaceViewQtGUI::browseLocalRemoteDriveOrPath() {
-  checkUserBrowsePath(
+  checkUserBrowseDir(
       m_uiTabSystemSettings.lineEdit_on_local_remote_data_drive_path);
 }
 
 void TomographyIfaceViewQtGUI::browseLocalReconScriptsDirClicked() {
-  checkUserBrowsePath(m_uiTabSystemSettings.lineEdit_local_recon_scripts);
+  checkUserBrowseDir(m_uiTabSystemSettings.lineEdit_local_recon_scripts);
+}
+
+void TomographyIfaceViewQtGUI::browseLocalExternalInterpreterClicked() {
+  checkUserBrowseFile(
+      m_uiTabSystemSettings.lineEdit_local_external_interpreter);
 }
 
 /**
@@ -1950,19 +1958,19 @@ void TomographyIfaceViewQtGUI::defaultDirRemoteVisualizeClicked() {
 
 void TomographyIfaceViewQtGUI::browseVisToolParaviewClicke() {
   m_setupParaviewPath =
-      checkUserBrowsePath(m_uiTabConvertFormats.lineEdit_input);
+      checkUserBrowseDir(m_uiTabConvertFormats.lineEdit_input);
 }
 
 void TomographyIfaceViewQtGUI::browseVisToolOctopusClicked() {
   m_setupOctopusVisPath =
-      checkUserBrowsePath(m_uiTabConvertFormats.lineEdit_input);
+      checkUserBrowseDir(m_uiTabConvertFormats.lineEdit_input);
 }
 
 void TomographyIfaceViewQtGUI::browseImgInputConvertClicked() {
   // Not using this path to update the "current" path where to load from, but
   // it could be an option.
   // const std::string path =
-  checkUserBrowsePath(m_uiTabConvertFormats.lineEdit_input);
+  checkUserBrowseDir(m_uiTabConvertFormats.lineEdit_input);
   // m_pathsConfig.updatePathDarks(str);
   // m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
@@ -1971,22 +1979,22 @@ void TomographyIfaceViewQtGUI::browseImgOutputConvertClicked() {
   // Not using this path to update the "current" path where to load from, but
   // it could be an option.
   // const std::string path =
-  checkUserBrowsePath(m_uiTabConvertFormats.lineEdit_output);
+  checkUserBrowseDir(m_uiTabConvertFormats.lineEdit_output);
   // m_pathsConfig.updatePathDarks(str);
   // m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
 void TomographyIfaceViewQtGUI::browseEnergyInputClicked() {
-  checkUserBrowsePath(m_uiTabEnergy.lineEdit_input_path);
+  checkUserBrowseDir(m_uiTabEnergy.lineEdit_input_path);
 }
 
 void TomographyIfaceViewQtGUI::browseEnergyOutputClicked() {
-  checkUserBrowsePath(m_uiTabEnergy.lineEdit_output_path);
+  checkUserBrowseDir(m_uiTabEnergy.lineEdit_output_path);
 }
 
 std::string
-TomographyIfaceViewQtGUI::checkUserBrowsePath(QLineEdit *le,
-                                              const std::string &userMsg) {
+TomographyIfaceViewQtGUI::checkUserBrowseDir(QLineEdit *le,
+                                             const std::string &userMsg) {
 
   QString prev;
   if (le->text().isEmpty()) {
@@ -1997,6 +2005,29 @@ TomographyIfaceViewQtGUI::checkUserBrowsePath(QLineEdit *le,
   }
 
   QString path(QFileDialog::getExistingDirectory(
+      this, tr(QString::fromStdString(userMsg)), prev));
+
+  if (!path.isEmpty()) {
+    le->setText(path);
+    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
+  }
+
+  return path.toStdString();
+}
+
+std::string
+TomographyIfaceViewQtGUI::checkUserBrowseFile(QLineEdit *le,
+                                              const std::string &userMsg) {
+
+  QString prev;
+  if (le->text().isEmpty()) {
+    prev =
+        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  } else {
+    prev = le->text();
+  }
+
+  QString path(QFileDialog::getOpenFileName(
       this, tr(QString::fromStdString(userMsg)), prev));
 
   if (!path.isEmpty()) {
