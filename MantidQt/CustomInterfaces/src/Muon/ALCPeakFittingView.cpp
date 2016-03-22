@@ -15,7 +15,7 @@ namespace CustomInterfaces
 ALCPeakFittingView::ALCPeakFittingView(QWidget *widget)
     : m_widget(widget), m_ui(), m_dataCurve(new QwtPlotCurve()),
       m_fittedCurve(new QwtPlotCurve()), m_dataErrorCurve(NULL),
-      m_peakPicker(NULL), m_guessPlotted(false) {}
+      m_peakPicker(NULL) {}
 
 ALCPeakFittingView::~ALCPeakFittingView()
 {
@@ -150,38 +150,20 @@ void ALCPeakFittingView::displayError(const QString& message)
 
 void ALCPeakFittingView::emitFitRequested() {
   // Fit requested: reset "plot guess"
-  clearGuess();
   emit fitRequested();
 }
 
 /**
- * Clears fit guess and changes button text
+ * Emit signal that "plot/remove guess" has been clicked
  */
-void ALCPeakFittingView::clearGuess() {
-  m_guessPlotted = false;
-  m_ui.plotGuess->setText("Plot guess");
-}
+void ALCPeakFittingView::plotGuess() { emit plotGuessClicked(); }
 
 /**
- * Changes the text on the "Plot guess" button and emits a signal
- * to plot the guess on the graph
+ * Changes the text on the "Plot guess" button
+ * @param plotted :: [input] Whether guess is plotted or not
  */
-void ALCPeakFittingView::plotGuess() {
-  QString buttonText("Plot guess");
-
-  if (m_guessPlotted) {
-    // Remove the plotted guess
-    emit removeGuessRequested();
-    m_guessPlotted = false;
-  } else {
-    // Plot the guess function, if there is one
-    if (function("") != nullptr) {
-      buttonText = "Remove guess";
-      emit plotGuessRequested();
-      m_guessPlotted = true;
-    }
-  }
-  m_ui.plotGuess->setText(buttonText);
+void ALCPeakFittingView::changePlotGuessState(bool plotted) {
+  m_ui.plotGuess->setText(plotted ? "Remove guess" : "Plot guess");
 }
 
 } // namespace CustomInterfaces
