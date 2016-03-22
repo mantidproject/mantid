@@ -286,11 +286,7 @@ void vtkDataSetToNonOrthogonalDataSet::createSkewInformation(
   m_skewMat *= scaleMat;
 
   // Setup basis normalisation array
-  // Intel and MSBuild can't handle this
-  // m_basisNorm = {ol.astar(), ol.bstar(), ol.cstar()};
-  m_basisNorm.push_back(ol.astar());
-  m_basisNorm.push_back(ol.bstar());
-  m_basisNorm.push_back(ol.cstar());
+  m_basisNorm = {ol.astar(), ol.bstar(), ol.cstar()};
 
   // Expand matrix to 4 dimensions if necessary
   if (4 == m_numDims) {
