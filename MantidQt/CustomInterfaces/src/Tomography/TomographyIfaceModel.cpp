@@ -515,12 +515,9 @@ void TomographyIfaceModel::checkDataPathsSet() const {
  */
 bool TomographyIfaceModel::processIsRunning(int pid) {
 #ifdef WIN32
-  bool running = true;
   DWORD code;
   BOOL rc = GetExitCodeProcess(handle.process(), &code);
-  if (!rc || code != STILL_ACTIVE)
-    result = false;
-  return result;
+  return (rc && code == STILL_ACTIVE)
 #else
   // zombie/defunct processes
   while (waitpid(-1, 0, WNOHANG) > 0) {
