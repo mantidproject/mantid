@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>978</width>
-    <height>854</height>
+    <width>1091</width>
+    <height>1047</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -234,6 +234,7 @@
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/PreviewPlot.h</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::DisplayCurveFit</class>
