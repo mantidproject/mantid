@@ -108,6 +108,8 @@ public:
   /// Get fresh status information on running/recent jobs
   void doRefreshJobsInfo(const std::string &compRes);
 
+  void refreshLocalJobsInfo();
+
   void doRunReconstructionJobLocal();
 
   void updateExperimentReference(const std::string ref) {
@@ -188,7 +190,9 @@ private:
                                          bool local) const;
 
   std::string buildOutReconstructionDir(const std::string &samplesDir,
-                                        bool local) const;
+                                        bool) const;
+
+  bool processIsRunning(int pid);
 
   std::string
   buildOutReconstructionDirFromSystemRoot(const std::string &samplesDir,

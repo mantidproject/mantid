@@ -9,6 +9,12 @@
 
 #include <QMutex>
 
+#ifndef WIN32
+// This is exclusively for kill/waitpid (interim solution, see below)
+#include <signal.h>
+#include <sys/wait.h>
+#endif
+
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
@@ -398,6 +404,12 @@ void TomographyIfaceModel::doCancelJobs(const std::string &compRes,
 }
 
 void TomographyIfaceModel::doRefreshJobsInfo(const std::string &compRes) {
+
+  if ("Local" == compRes) {
+    refreshLocalJobsInfo();
+    return;
+  }
+
   // get the info from the server into data members. This operation is subject
   // to delays in the connection, etc.
   try {
@@ -411,6 +423,19 @@ void TomographyIfaceModel::doRefreshJobsInfo(const std::string &compRes) {
                        "update mechanism again by logging in, as apparently "
                        "there is some problem with the last session: "
                     << e.what() << std::endl;
+  }
+}
+
+void TomographyIfaceModel::refreshLocalJobsInfo() {
+  for (auto &job : m_jobsStatusLocal) {
+    if ("Exited" == job.status)
+      continue;
+
+    if (processIsRunning(boost::lexical_cast<int>(job.id))) {
+      job.status = "Running";
+    } else {
+      job.status = "Done";
+    }
   }
 }
 
@@ -476,6 +501,31 @@ void TomographyIfaceModel::checkDataPathsSet() const {
   }
 }
 
+/**
+ * Whether a process (identified by pid) is running.
+ *
+ * This should use Poco::Process, but only more recent Poco versions
+ * than what we currently support across platforms have the required
+ * Poco::Process::isRunning. Allternatively, it could use QProcess,
+ * but that would require Qt 5.
+ *
+ * @param pid ID of the process
+ *
+ * @return running status
+ */
+bool TomographyIfaceModel::processIsRunning(int pid) {
+#ifdef WIN32
+  DWORD code;
+  BOOL rc = GetExitCodeProcess(handle.process(), &code);
+  return (rc && code == STILL_ACTIVE);
+#else
+  // zombie/defunct processes
+  while (waitpid(-1, 0, WNOHANG) > 0) {
+  }
+  return (0 == kill(pid, 0));
+#endif
+}
+
 void TomographyIfaceModel::doRunReconstructionJobLocal() {
   const std::string toolName = usingTool();
   try {
@@ -498,7 +548,11 @@ void TomographyIfaceModel::doRunReconstructionJobLocal() {
       Mantid::API::IRemoteJobManager::RemoteJobInfo info;
       info.id = boost::lexical_cast<std::string>(pid);
       info.name = "Mantid_Local";
-      info.status = "Starting";
+      if (pid > 0) {
+        info.status = "Starting";
+      } else {
+        info.status = "Exited";
+      }
       info.cmdLine = run + " " + allOpts;
       m_jobsStatusLocal.emplace_back(info);
     } catch (Poco::SystemException &sexc) {
@@ -519,6 +573,8 @@ void TomographyIfaceModel::doRunReconstructionJobLocal() {
         << "Execution failed. Coult not execute the tool. Error details: "
         << std::string(rexc.what());
   }
+
+  doRefreshJobsInfo("Local");
 }
 
 /**
