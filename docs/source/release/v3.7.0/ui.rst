@@ -125,6 +125,11 @@ SliceViewer Improvements
 VSI Improvements
 ----------------
 
+-  The representation of points in the splatter plot was changed from opaque cubes to translucent spheres.
+
+.. figure::  ../../images/VSIPointGaussianRepresentation.png
+   :align: center 
+
 - The sphere and ellipse wireframes have been simplified so that it is easier to see the enclosed points. 
 
 .. figure:: ../../images/VSIEllipses.png

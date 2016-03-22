@@ -68,6 +68,7 @@ set ( TEST_PY_FILES
   SANSFitShiftScaleTest.py
   SANSWideAngleCorrectionTest.py
   SavePlot1DTest.py
+  SavePlot1DAsJsonTest.py
   SaveVulcanGSSTest.py
   SimulatedDensityOfStatesTest.py
   SortByQVectorsTest.py

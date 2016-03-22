@@ -48,8 +48,6 @@ public:
   /// A string representation of the component type
   std::string type() const override { return "DetectorComponent"; }
 
-  /// Constructor for parametrized version
-  Detector(const Detector *base, const ParameterMap *map);
   Detector(const std::string &name, int id, IComponent *parent);
   Detector(const std::string &name, int id, boost::shared_ptr<Object> shape,
            IComponent *parent);
@@ -57,6 +55,9 @@ public:
   Component *clone() const override { return new Detector(*this); }
 
   // IDetector methods
+  Detector *cloneParameterized(const ParameterMap *map) const override {
+    return new Detector(this, map);
+  }
   detid_t getID() const override;
   std::size_t nDets() const override {
     return 1;
@@ -88,6 +89,10 @@ private:
   const detid_t m_id;
   /// Flags if this is a monitor
   bool m_isMonitor;
+
+protected:
+  /// Constructor for parametrized version
+  Detector(const Detector *base, const ParameterMap *map);
 };
 
 } // namespace Geometry
