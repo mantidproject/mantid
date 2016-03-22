@@ -317,7 +317,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
 
     # -----------------------Values-----------------------------------
 
-    def _validate_table_values_top_to_bottom(self, table_ws, expected_values):
+    def _validate_table_values_top_to_bottom(self, table_ws, expected_values, tolerance=0.05):
         """
         Checks that a table workspace has the expected values from top to bottom
         table_ws            :: Workspace to validate
@@ -327,9 +327,11 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         """
         for i in range(0, len(expected_values)):
             if expected_values[i] != 'skip':
-                self.assertAlmostEqual(table_ws.cell(i, 1), expected_values[i])
+                tolerance_value = expected_values[i] * tolerance
+                abs_difference = abs(expected_values[i] - table_ws.cell(i,1))
+                self.assertTrue(abs_difference < tolerance_value)
 
-    def _validate_matrix_peak_height(self, matrix_ws, expected_height, ws_index=0):
+    def _validate_matrix_peak_height(self, matrix_ws, expected_height, ws_index=0, tolerance=0.05):
         """
         Checks that the heightest peak value is as expected
         matrix_ws       :: Workspace to validate
@@ -338,7 +340,9 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         """
         y_data = matrix_ws.readY(ws_index)
         peak_height = np.amax(y_data)
-        self.assertAlmostEqual(peak_height, expected_height)
+        tolerance_value = expected_height * tolerance
+        abs_difference = abs(expected_height - peak_height)
+        self.assertTrue(abs_difference < tolerance_value)
 
 
 if __name__ == "__main__":
