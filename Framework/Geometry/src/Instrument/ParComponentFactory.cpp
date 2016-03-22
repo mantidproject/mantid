@@ -53,14 +53,6 @@ ParComponentFactory::createInstrument(boost::shared_ptr<const Instrument> base,
 IComponent_sptr
 ParComponentFactory::create(boost::shared_ptr<const IComponent> base,
                             const ParameterMap *map) {
-  // RectangularDetectorPixel subclasses Detector so it has to be checked
-  // before.
-  const RectangularDetectorPixel *rdp =
-      dynamic_cast<const RectangularDetectorPixel *>(base.get());
-  if (rdp)
-    return boost::shared_ptr<IComponent>(
-        new RectangularDetectorPixel(rdp, map));
-
   boost::shared_ptr<const IDetector> det_sptr =
       boost::dynamic_pointer_cast<const IDetector>(base);
   if (det_sptr) {
