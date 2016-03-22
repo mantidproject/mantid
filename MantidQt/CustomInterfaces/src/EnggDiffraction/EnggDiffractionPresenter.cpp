@@ -802,12 +802,11 @@ void EnggDiffractionPresenter::plotFitPeaksCurves() {
       auto singlePeaksData = ALCHelper::curveDataFromWs(singlePeaksWS);
       m_view->setDataVector(singlePeaksData, false);
 
-    } catch (std::runtime_error &re) {
-      g_log.error() << "Unable to finish of the plotting of the graph for "
-                       "engggui_fitting_focused_fitpeaks  workspace. Error "
-                       "description : " +
-                           static_cast<std::string>(re.what()) +
-                           " Please check also the log message for detail.";
+    } catch (std::runtime_error) {
+      g_log.error()
+          << "Unable to finish of the plotting of the graph for "
+             "engggui_fitting_focused_fitpeaks  workspace. Error "
+             "description. Please check also the log message for detail.";
       throw;
     }
   } else {

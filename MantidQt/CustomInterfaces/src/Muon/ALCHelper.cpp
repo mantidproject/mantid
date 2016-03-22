@@ -28,6 +28,12 @@ namespace ALCHelper
     return boost::make_shared<QwtArrayData>(x,y,size);
   }
 
+  /**
+  * Creates a vector of QwtData using X and Y values from every single
+  * workspace index in ws, written for only Engg Diffraction fitting tab
+  * @param ws :: Workspace with X and Y values to use
+  * @return Pointer to created Vector QwtData
+  */
   std::vector<boost::shared_ptr<QwtData>>
   curveDataFromWs(MatrixWorkspace_const_sptr ws) {
 

@@ -15,7 +15,6 @@
 #include <Poco/Path.h>
 
 #include <QObject>
-#include <qwt_plot_curve.h>
 
 class QThread;
 

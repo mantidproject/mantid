@@ -1221,6 +1221,7 @@ std::string EnggDiffractionViewQtGUI::fittingRunNo() const {
 }
 
 std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {
+  // this should be moved to Helper or could use the poco string tokenizers
   std::string exptPeaks =
       m_uiTabFitting.lineEdit_fitting_peaks->text().toStdString();
   size_t strLength = exptPeaks.length() - 1;
