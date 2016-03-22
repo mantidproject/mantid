@@ -1138,6 +1138,13 @@ public:
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
+    EXPECT_CALL(mockView, fittingRunNo()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, fittingPeaksData()).Times(1).WillOnce(Return(""));
+
+    // No errors/1 warnings. There will be an error log from the algorithms
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
     pres.notify(IEnggDiffractionPresenter::FitPeaks);
   }
 

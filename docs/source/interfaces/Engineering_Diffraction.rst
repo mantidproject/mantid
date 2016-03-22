@@ -292,7 +292,7 @@ Focused Run #:
 
 Peaks:
   A list of dSpacing values to be translated into TOF to find expected
-  peaks. These peaks can be manually written or imported by selected a
+  peaks. These peaks can be manually written or imported by selecting a
   (*CSV*) file.
 
 Output
