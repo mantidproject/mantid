@@ -838,10 +838,10 @@ MdViewerWidget::getViewForInstrument(const std::string &instrumentName) const {
 
     if (techniques.count("Single Crystal Diffraction") > 0) {
       associatedView = mdConstants.getSplatterPlotView();
-    } else if (techniques.count("Neutron Diffraction") > 0) {
-      associatedView = mdConstants.getSplatterPlotView();
     } else if (checkIfTechniqueContainsKeyword(techniques, "Spectroscopy")) {
       associatedView = mdConstants.getMultiSliceView();
+    } else if (techniques.count("Neutron Diffraction") > 0) {
+      associatedView = mdConstants.getSplatterPlotView();
     } else {
       associatedView = mdConstants.getStandardView();
     }
