@@ -4,20 +4,21 @@ import sys
 
 import NTableWidget as tableBase
 
-# UB peak information table
-Peak_Integration_Table_Setup = [('Pt', 'int'),
-                                ('HKL', 'str'),
-                                ('Q sample', 'str'),
-                                ('Signal', 'float'),    # signal is simple summation of counts
-                                                        # in region of interest
-                                ('Intensity', 'float')  # normalized signals by monitor counts
-                                ]
-
 
 class PeakIntegrationTableWidget(tableBase.NTableWidget):
     """
     Extended table widget for studying peak integration of scan on various Pts.
     """
+
+    # UB peak information table
+    Table_Setup = [('Pt', 'int'),
+                   ('HKL', 'str'),
+                   ('Q sample', 'str'),
+                   # signal is simple summation of counts  in region of interest
+                   ('Signal', 'float'),
+                   # normalized signals by monitor counts
+                   ('Intensity', 'float')]
+
     def __init__(self, parent):
         """
         :param parent:
@@ -48,7 +49,7 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         :param row_index:
         :return:
         """
-        j_col = Peak_Integration_Table_Setup.index(('Merged Workspace', 'str'))
+        j_col = self.Table_Setup.index(('Merged Workspace', 'str'))
 
         return self.get_cell_value(row_index, j_col)
 
@@ -57,7 +58,7 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         :param row_index:
         :return:
         """
-        j_col = Peak_Integration_Table_Setup.index(('Scan', 'int'))
+        j_col = self.Table_Setup.index(('Scan', 'int'))
 
         return self.get_cell_value(row_index, j_col)
 
@@ -66,7 +67,7 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         Init setup
         :return:
         """
-        self.init_setup(Peak_Integration_Table_Setup)
+        self.init_setup(self.Table_Setup)
 
         self._statusColName = 'Selected'
 
@@ -84,10 +85,34 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         assert len(vec_hkl) == 3
 
         # locate
-        index_h = Peak_Integration_Table_Setup.index(('H', 'float'))
+        index_h = self.Table_Setup.index(('H', 'float'))
         for j in xrange(3):
             col_index = j + index_h
             self.update_cell_value(row_index, col_index, vec_hkl[j])
+
+        return
+
+    def set_integrated_values(self, pt_vec, intensity_vec):
+        """
+
+        :param pt_vec:
+        :param intensity_vec:
+        :return:
+        """
+        # check
+        assert len(pt_vec) == len(intensity_vec)
+
+        # common value
+        hkl = '0, 0, 0'
+        q = '0, 0, 0'
+        signal = -1
+
+        num_rows = len(pt_vec)
+        for i_row in xrange(num_rows):
+            pt = int(pt_vec[i_row])
+            intensity = intensity_vec[i_row]
+            item_list = [pt, hkl, q, signal, intensity]
+            self.append_row(item_list)
 
         return
 
@@ -100,7 +125,7 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         assert len(vec_q) == 3
 
         # locate
-        index_q_x = Peak_Integration_Table_Setup.index(('Q_x', 'float'))
+        index_q_x = self.Table_Setup.index(('Q_x', 'float'))
         for j in xrange(3):
             col_index = j + index_q_x
             self.update_cell_value(row_index, col_index, vec_q[j])

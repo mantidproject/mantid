@@ -81,7 +81,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_downloadExpData, QtCore.SIGNAL('clicked()'),
                      self.do_download_spice_data)
         self.connect(self.ui.comboBox_mode, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.change_data_access_mode)
+                     self.do_change_data_access_mode)
 
         # Tab 'View Raw Data'
         self.connect(self.ui.pushButton_setScanInfo, QtCore.SIGNAL('clicked()'),
@@ -107,7 +107,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_calUB, QtCore.SIGNAL('clicked()'),
                      self.do_cal_ub_matrix)
         self.connect(self.ui.pushButton_acceptUB, QtCore.SIGNAL('clicked()'),
-                     self.doAcceptCalUB)
+                     self.do_accept_ub)
         self.connect(self.ui.pushButton_indexUBPeaks, QtCore.SIGNAL('clicked()'),
                      self.do_index_ub_peaks)
         self.connect(self.ui.pushButton_deleteUBPeak, QtCore.SIGNAL('clicked()'),
@@ -136,7 +136,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_browseWorkDir, QtCore.SIGNAL('clicked()'),
                      self.do_browse_working_dir)
         self.connect(self.ui.comboBox_instrument, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.change_instrument_name)
+                     self.do_change_instrument_name)
 
         # Tab 'UB Matrix'
         self.connect(self.ui.pushButton_showUB2Edit, QtCore.SIGNAL('clicked()'),
@@ -167,10 +167,14 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_integrate_per_pt)
         self.connect(self.ui.pushButton_integratePeak, QtCore.SIGNAL('clicked()'),
                      self.do_integrate_peaks)
-        self.connect(self.ui.pushButton_showAbsoluteCounts, QtCore.SIGNAL('clicked()'),
-                     self.do_plot_peak_abs_counts)
-        self.connect(self.ui.pushButton_showNormalizedIntensity, QtCore.SIGNAL('clicked()'),
-                     self.do_plot_peak_normalized_intensity)
+        self.connect(self.ui.comboBox_ptCountType, QtCore.SIGNAL('currentIndexChanged(int)'),
+                     self.do_plot_pt_peak)
+        self.connect(self.ui.comboBox_ptCountNormType, QtCore.SIGNAL('currentIndexChanged(int)'),
+                     self.do_plot_pt_peak)
+        self.connect(self.ui.pushButton_fitBkgd, QtCore.SIGNAL('clicked()'),
+                     self.do_fit_bkgd())
+        self.connect(self.ui.pushButton_handPickBkgd, QtCore.SIGNAL('clicked()'),
+                     self.do_manual_bkgd())
 
         # Tab survey
         self.connect(self.ui.pushButton_survey, QtCore.SIGNAL('clicked()'),
@@ -236,15 +240,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def closeEvent(self, QCloseEvent):
-        """
-        Close event
-        :param QCloseEvent:
-        :return:
-        """
-        print '[QCloseEvent=]', str(QCloseEvent)
-        self.menu_quit()
-
     def _init_table_widgets(self):
         """ Initialize the table widgets
         :return:
@@ -257,228 +252,6 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.tableWidget_surveyTable.setup()
         self.ui.tableWidget_peakIntegration.setup()
         self.ui.tableWidget_mergeScans.setup()
-
-        return
-
-    def do_advance_to_integrate_peaks(self):
-        """
-        Advance from 'merge'-tab to peak integration tab
-        :return:
-        """
-        # Check whether there is any scan merged and selected
-        ret_list = self.ui.tableWidget_mergeScans.get_rows_by_state('Done')
-        if len(ret_list) == 0:
-            self.pop_one_button_dialog('No scan is selected for integration!')
-            return
-        else:
-            print '[DB] Total %d rows are selected for peak integration.' % len(ret_list)
-
-        # Switch tab
-        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['Peak Integration'])
-
-        # Add table
-        for row_index in ret_list:
-            # merged_ws_name = self.ui.tableWidget_mergeScans.get_merged_ws_name(row_index)
-            # status, merged_info = self._myControl.get_merged_scan_info()
-            status = False
-            merged_info = None
-            if status is False:
-                err_msg = merged_info
-                self.pop_one_button_dialog(err_msg)
-                return
-            else:
-                print '[DB] Add selected row %d. ' % row_index
-                status, msg = self.ui.tableWidget_peakIntegration.append_scan(merged_info)
-                if status is False:
-                    self.pop_one_button_dialog(msg)
-        # END-FOR
-
-        return
-
-    def do_integrate_per_pt(self):
-        """
-        Use the peak center of the merged scan. Then on each Pt. with specified radius,
-        calculate the integrated peak intensity and number of counts
-        :return:
-        """
-        # get experiment and scan number
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                        self.ui.lineEdit_scanIntegratePeak])
-        if not status:
-            self.pop_one_button_dialog('Unable to integrate peak due to %s.' % ret_obj)
-            return
-        else:
-            exp_number, scan_number = ret_obj
-
-        # call myController to get peak center from all pt in scans
-        if self._myControl.has_peak_info(exp_number, scan_number) is False:
-            # merge scan and find peak
-            if not self._myControl.has_merged_data(exp_number, scan_number):
-                # merge all Pts. in scan if necessary
-                status, pt_number_list = self._myControl.get_pt_numbers(exp_number, scan_number)
-                assert status
-                self._myControl.merge_pts_in_scan(exp_number, scan_number, pt_number_list,
-                                                  'q-sample')
-            # find peak
-            self._myControl.find_peak(exp_number, scan_number)
-        scan_peak_info = self._myControl.get_peak_info(exp_number, scan_number)
-        weighted_peak_center = scan_peak_info.get_peak_centre()
-        print '[INFO] Exp %d Scan %d: weighted peak center = %s.' % (exp_number, scan_number,
-                                                                     str(weighted_peak_center))
-
-        # get peak radius
-        status, peak_radius = gutil.parse_float_editors(self.ui.lineEdit_peakRadius)
-        if not status:
-            self.pop_one_button_dialog('Unable to get valid peak radius from GUI.')
-            return
-        else:
-            assert peak_radius > 0, 'Peak radius cannot be zero or negative!'
-
-        # call myController to integrate on each individual Pt.
-        self._myControl.integrate_scan_peaks(exp_number, scan_number, peak_radius,
-                                             peak_centre=weighted_peak_center,
-                                             merge=False)
-
-        # plot all the result to the table
-        vec_x, vec_y = self._myControl.get_peaks_integrated_intensities(exp_number, scan_number, None)
-
-        self.ui.graphicsView_integratedPeakView.clear_all_lines()
-        self.ui.graphicsView_integratedPeakView.add_plot_1d(vec_x, vec_y)
-
-        return
-
-    def do_integrate_peaks(self):
-        """ Integrate selected peaks with.  If any scan is not merged, then it will merge the scan first
-        Integrate peaks
-        :return:
-        """
-        # get rows to merge
-        row_number_list = self.ui.tableWidget_mergeScans.get_selected_rows(True)
-        if len(row_number_list) == 0:
-            self.pop_one_button_dialog('No scan is selected for scan')
-            return
-
-        # get the parameters for integration
-        status, peak_radius = gutil.parse_float_editors([self.ui.lineEdit_peakRadius], allow_blank=False)
-        if status is False:
-            self.pop_one_button_dialog('Peak radius is not given right')
-            return
-
-        # merged workspace base name
-        use_default_merge_name = self.ui.checkBox_useDefaultMergedName.isChecked()
-
-        # integrate peak
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp], allow_blank=False)
-        if status:
-            exp_number = ret_obj[0]
-        else:
-            self.pop_one_button_dialog('Unable to get valid experiment number due to %s.' % ret_obj)
-            return
-
-        for row_number in row_number_list:
-            scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
-            pt_number_list = self._myControl.get_pt_numbers(exp_number, scan_number)
-
-            # merge if required
-            merged = self.ui.tableWidget_mergeScans.get_merged_status(row_number)
-            if merged is False:
-                self._myControl.merge_pts_in_scan(exp_no=exp_number, scan_no=scan_number, pt_num_list=pt_number_list,
-                                                  target_frame='qsample')
-                self.ui.tableWidget_mergeScans.set_status_by_row(row_number, 'Done')
-            # END-IF
-
-            # integrate peak
-            peak_intensity = self._myControl.integrate_peak(exp_number, scan_number, pt_number_list, peak_radius)
-            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, peak_intensity)
-
-        # END-FOR
-
-        return
-
-    def do_refine_ub(self):
-        """
-        Refine UB matrix
-        :return:
-        """
-        peak_info_list = self._build_peak_info_list()
-        set_hkl_int = self.ui.checkBox_roundHKLInt.isChecked()
-
-        # Refine UB matrix
-        try:
-            self._myControl.refine_ub_matrix_indexed_peaks(peak_info_list, set_hkl_int)
-        except AssertionError as error:
-            self.pop_one_button_dialog(str(error))
-            return
-
-        # show result
-        self._show_refined_ub_result()
-
-        return
-
-    def do_refine_ub_fft(self):
-        """
-        Refine UB matrix by calling FFT method
-        :return:
-        """
-        # get PeakInfo list and check
-        peak_info_list = self._build_peak_info_list()
-        assert isinstance(peak_info_list, list), \
-            'PeakInfo list must be a list but not %s.' % str(type(peak_info_list))
-        assert len(peak_info_list) >= 3, \
-            'PeakInfo must be larger or equal to 3 (.now given %d) to refine UB matrix' % len(peak_info_list)
-
-        # get lattice range information
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_minD,
-                                                        self.ui.lineEdit_maxD])
-        if status is False:
-            self.pop_one_button_dialog('Must specify Min D and max D to refine UB using FFT.')
-            return
-        min_d, max_d = ret_obj
-        if (0 < min_d < max_d) is False:
-            self.pop_one_button_dialog('Range of d is not correct!')
-            return
-
-        # friendly suggestion
-        if len(peak_info_list) <= 9:
-            self.pop_one_button_dialog('It is recommended to use at least 9 reflections'
-                                       'to refine UB matrix without prior knowledge.')
-
-        # refine
-        self._myControl.refine_ub_matrix_least_info(peak_info_list, min_d, max_d)
-
-        # set value
-        self._show_refined_ub_result()
-
-        return
-
-    def _show_refined_ub_result(self):
-        """
-        Show the result from refined UB matrix
-        :return:
-        """
-        # Deal with result
-        ub_matrix, lattice, lattice_error = self._myControl.get_refined_ub_matrix()
-        # ub matrix
-        self.ui.tableWidget_ubMatrix.set_from_matrix(ub_matrix)
-
-        # lattice parameter
-        assert isinstance(lattice, list)
-        assert len(lattice) == 6
-        self.ui.lineEdit_aUnitCell.setText('%.5f' % lattice[0])
-        self.ui.lineEdit_bUnitCell.setText('%.5f' % lattice[1])
-        self.ui.lineEdit_cUnitCell.setText('%.5f' % lattice[2])
-        self.ui.lineEdit_alphaUnitCell.setText('%.5f' % lattice[3])
-        self.ui.lineEdit_betaUnitCell.setText('%.5f' % lattice[4])
-        self.ui.lineEdit_gammaUnitCell.setText('%.5f' % lattice[5])
-
-        assert isinstance(lattice_error, list)
-        assert len(lattice_error) == 6
-        self.ui.lineEdit_aError.setText('%.5f' % lattice_error[0])
-        self.ui.lineEdit_bError.setText('%.5f' % lattice_error[1])
-        self.ui.lineEdit_cError.setText('%.5f' % lattice_error[2])
-        self.ui.lineEdit_alphaError.setText('%.5f' % lattice_error[3])
-        self.ui.lineEdit_betaError.setText('%.5f' % lattice_error[4])
-        self.ui.lineEdit_gammaError.setText('%.5f' % lattice_error[5])
 
         return
 
@@ -512,42 +285,51 @@ class MainWindow(QtGui.QMainWindow):
 
         return peak_info_list
 
-    def change_data_access_mode(self):
-        """ Change data access mode between downloading from server and local
-        Event handling methods
+    def _show_refined_ub_result(self):
+        """
+        Show the result from refined UB matrix
         :return:
         """
-        new_mode = str(self.ui.comboBox_mode.currentText())
-        self._dataAccessMode = new_mode
+        # Deal with result
+        ub_matrix, lattice, lattice_error = self._myControl.get_refined_ub_matrix()
+        # ub matrix
+        self.ui.tableWidget_ubMatrix.set_from_matrix(ub_matrix)
 
-        if new_mode.startswith('Local') is True:
-            self.ui.lineEdit_localSpiceDir.setEnabled(True)
-            self.ui.pushButton_browseLocalDataDir.setEnabled(True)
-            self.ui.lineEdit_url.setEnabled(False)
-            self.ui.lineEdit_localSrcDir.setEnabled(False)
-            self.ui.pushButton_browseLocalCache.setEnabled(False)
-            self._allowDownload = False
-        else:
-            self.ui.lineEdit_localSpiceDir.setEnabled(False)
-            self.ui.pushButton_browseLocalDataDir.setEnabled(False)
-            self.ui.lineEdit_url.setEnabled(True)
-            self.ui.lineEdit_localSrcDir.setEnabled(True)
-            self.ui.pushButton_browseLocalCache.setEnabled(True)
-            self._allowDownload = True
+        # lattice parameter
+        assert isinstance(lattice, list)
+        assert len(lattice) == 6
+        self.ui.lineEdit_aUnitCell.setText('%.5f' % lattice[0])
+        self.ui.lineEdit_bUnitCell.setText('%.5f' % lattice[1])
+        self.ui.lineEdit_cUnitCell.setText('%.5f' % lattice[2])
+        self.ui.lineEdit_alphaUnitCell.setText('%.5f' % lattice[3])
+        self.ui.lineEdit_betaUnitCell.setText('%.5f' % lattice[4])
+        self.ui.lineEdit_gammaUnitCell.setText('%.5f' % lattice[5])
+
+        assert isinstance(lattice_error, list)
+        assert len(lattice_error) == 6
+        self.ui.lineEdit_aError.setText('%.5f' % lattice_error[0])
+        self.ui.lineEdit_bError.setText('%.5f' % lattice_error[1])
+        self.ui.lineEdit_cError.setText('%.5f' % lattice_error[2])
+        self.ui.lineEdit_alphaError.setText('%.5f' % lattice_error[3])
+        self.ui.lineEdit_betaError.setText('%.5f' % lattice_error[4])
+        self.ui.lineEdit_gammaError.setText('%.5f' % lattice_error[5])
 
         return
 
-    def change_instrument_name(self):
-        """ Handing the event as the instrument name is changed
+    def closeEvent(self, QCloseEvent):
+        """
+        Close event
+        :param QCloseEvent:
         :return:
         """
-        new_instrument = str(self.ui.comboBox_instrument.currentText())
-        self.pop_one_button_dialog('Change of instrument during data processing is dangerous.')
-        status, error_message = self._myControl.set_instrument_name(new_instrument)
-        if status is False:
-            self.pop_one_button_dialog(error_message)
+        print '[QCloseEvent=]', str(QCloseEvent)
+        self.menu_quit()
 
-        return
+    def do_accept_ub(self):
+        """ Accept the calculated UB matrix and thus put to controller
+        """
+        self._myControl.set_ub_matrix(exp_number, self.ui.tableWidget_ubMatrix.get_matrix())
+        raise RuntimeError('ASAP')
 
     def do_add_peak_no_index(self):
         """
@@ -580,68 +362,6 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         return
-
-    def do_add_ub_peak(self):
-        """ Add current to ub peaks
-        :return:
-        """
-        # Add peak
-        status, int_list = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                         self.ui.lineEdit_scanNumber])
-        if status is False:
-            self.pop_one_button_dialog(int_list)
-            return
-        exp_no, scan_no = int_list
-
-        # Get HKL from GUI
-        status, float_list = gutil.parse_float_editors([self.ui.lineEdit_H,
-                                                        self.ui.lineEdit_K,
-                                                        self.ui.lineEdit_L])
-        if status is False:
-            err_msg = float_list
-            self.pop_one_button_dialog(err_msg)
-            return
-        h, k, l = float_list
-
-        try:
-            peak_info_obj = self._myControl.get_peak_info(exp_no, scan_no)
-        except AssertionError as ass_err:
-            self.pop_one_button_dialog(str(ass_err))
-            return
-
-        assert isinstance(peak_info_obj, r4c.PeakInfo)
-        if self.ui.checkBox_roundHKLInt.isChecked():
-            h = math.copysign(1, h)*int(abs(h)+0.5)
-            k = math.copysign(1, k)*int(abs(k)+0.5)
-            l = math.copysign(1, l)*int(abs(l)+0.5)
-        peak_info_obj.set_user_hkl(h, k, l)
-        self.set_ub_peak_table(peak_info_obj)
-
-        # Clear
-        self.ui.lineEdit_scanNumber.setText('')
-
-        self.ui.lineEdit_sampleQx.setText('')
-        self.ui.lineEdit_sampleQy.setText('')
-        self.ui.lineEdit_sampleQz.setText('')
-
-        self.ui.lineEdit_H.setText('')
-        self.ui.lineEdit_K.setText('')
-        self.ui.lineEdit_L.setText('')
-
-        return
-
-    def doAcceptCalUB(self):
-        """ Accept the calculated UB matrix
-        """
-        raise RuntimeError('ASAP')
-
-    def doAddScanPtToRefineUB(self):
-        """ Add scan/pt numbers to the list of data points for refining ub matrix
-
-        And the added scan number and pt numbers will be reflected in the (left sidebar)
-
-        """
-        raise RuntimeError("ASAP")
 
     def do_add_peak_to_find(self):
         """
@@ -711,6 +431,130 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(failed_scans_str)
             self.pop_one_button_dialog(sum_error_str)
         # END-FOR
+
+        return
+
+    def do_add_scans_merge(self):
+        """ Add scans to merge
+        :return:
+        """
+        # Get list of scans
+        scan_list = gutil.parse_integer_list(str(self.ui.lineEdit_listScansSliceView.text()))
+        if len(scan_list) == 0:
+            self.pop_one_button_dialog('Scan list is empty.')
+
+        # Set table
+        self.ui.tableWidget_mergeScans.append_scans(scans=scan_list)
+
+        return
+
+    def do_add_ub_peak(self):
+        """ Add current to ub peaks
+        :return:
+        """
+        # Add peak
+        status, int_list = gutil.parse_integers_editors([self.ui.lineEdit_exp,
+                                                         self.ui.lineEdit_scanNumber])
+        if status is False:
+            self.pop_one_button_dialog(int_list)
+            return
+        exp_no, scan_no = int_list
+
+        # Get HKL from GUI
+        status, float_list = gutil.parse_float_editors([self.ui.lineEdit_H,
+                                                        self.ui.lineEdit_K,
+                                                        self.ui.lineEdit_L])
+        if status is False:
+            err_msg = float_list
+            self.pop_one_button_dialog(err_msg)
+            return
+        h, k, l = float_list
+
+        try:
+            peak_info_obj = self._myControl.get_peak_info(exp_no, scan_no)
+        except AssertionError as ass_err:
+            self.pop_one_button_dialog(str(ass_err))
+            return
+
+        assert isinstance(peak_info_obj, r4c.PeakInfo)
+        if self.ui.checkBox_roundHKLInt.isChecked():
+            h = math.copysign(1, h)*int(abs(h)+0.5)
+            k = math.copysign(1, k)*int(abs(k)+0.5)
+            l = math.copysign(1, l)*int(abs(l)+0.5)
+        peak_info_obj.set_user_hkl(h, k, l)
+        self.set_ub_peak_table(peak_info_obj)
+
+        # Clear
+        self.ui.lineEdit_scanNumber.setText('')
+
+        self.ui.lineEdit_sampleQx.setText('')
+        self.ui.lineEdit_sampleQy.setText('')
+        self.ui.lineEdit_sampleQz.setText('')
+
+        self.ui.lineEdit_H.setText('')
+        self.ui.lineEdit_K.setText('')
+        self.ui.lineEdit_L.setText('')
+
+        return
+
+    def do_apply_setup(self):
+        """
+        Purpose:
+         - Apply the setup to controller.
+        Requirements:
+         - data directory, working directory must be given; but not necessarily correct
+         - URL must be given; but not necessary to be correct
+        :return:
+        """
+        # get data directory, working directory and data server URL from GUI
+        local_data_dir = str(self.ui.lineEdit_localSpiceDir.text()).strip()
+        working_dir = str(self.ui.lineEdit_workDir.text()).strip()
+        data_server = str(self.ui.lineEdit_url.text()).strip()
+
+        # set to my controller
+        self._myControl.set_local_data_dir(local_data_dir)
+        self._myControl.set_working_directory(working_dir)
+        self._myControl.set_server_url(data_server, check_link=False)
+
+        # check
+        error_message = ''
+
+        # local data dir
+        if local_data_dir == '':
+            error_message += 'Local data directory is not specified!\n'
+        elif os.path.exists(local_data_dir) is False:
+            try:
+                os.mkdir(local_data_dir)
+            except OSError as os_error:
+                error_message += 'Unable to create local data directory %s due to %s.\n' % (
+                    local_data_dir, str(os_error))
+                self.ui.lineEdit_localSpiceDir.setStyleSheet("color: red;")
+            else:
+                self.ui.lineEdit_localSpiceDir.setStyleSheet("color: green;")
+        else:
+            self.ui.lineEdit_localSpiceDir.setStyleSheet("color: green;")
+        # END-IF-ELSE
+
+        # working directory
+        if working_dir == '':
+            error_message += 'Working directory is not specified!\n'
+        elif os.path.exists(working_dir) is False:
+            try:
+                os.mkdir(working_dir)
+                self.ui.lineEdit_workDir.setStyleSheet("color: green;")
+            except OSError as os_error:
+                error_message += 'Unable to create working directory %s due to %s.\n' % (
+                    working_dir, str(os_error))
+                self.ui.lineEdit_workDir.setStyleSheet("color: red;")
+        else:
+            self.ui.lineEdit_workDir.setStyleSheet("color: green;")
+        # END-IF-ELSE
+
+        # Set the URL red as it is better not check at this stage. Leave it to user
+        self.ui.lineEdit_url.setStyleSheet("color: black;")
+
+        if len(error_message) > 0:
+            self.pop_one_button_dialog(error_message)
 
         return
 
@@ -806,6 +650,43 @@ class MainWindow(QtGui.QMainWindow):
         else:
             err_msg = ub_matrix
             self.pop_one_button_dialog(err_msg)
+
+        return
+
+    def do_change_data_access_mode(self):
+        """ Change data access mode between downloading from server and local
+        Event handling methods
+        :return:
+        """
+        new_mode = str(self.ui.comboBox_mode.currentText())
+        self._dataAccessMode = new_mode
+
+        if new_mode.startswith('Local') is True:
+            self.ui.lineEdit_localSpiceDir.setEnabled(True)
+            self.ui.pushButton_browseLocalDataDir.setEnabled(True)
+            self.ui.lineEdit_url.setEnabled(False)
+            self.ui.lineEdit_localSrcDir.setEnabled(False)
+            self.ui.pushButton_browseLocalCache.setEnabled(False)
+            self._allowDownload = False
+        else:
+            self.ui.lineEdit_localSpiceDir.setEnabled(False)
+            self.ui.pushButton_browseLocalDataDir.setEnabled(False)
+            self.ui.lineEdit_url.setEnabled(True)
+            self.ui.lineEdit_localSrcDir.setEnabled(True)
+            self.ui.pushButton_browseLocalCache.setEnabled(True)
+            self._allowDownload = True
+
+        return
+
+    def do_change_instrument_name(self):
+        """ Handing the event as the instrument name is changed
+        :return:
+        """
+        new_instrument = str(self.ui.comboBox_instrument.currentText())
+        self.pop_one_button_dialog('Change of instrument during data processing is dangerous.')
+        status, error_message = self._myControl.set_instrument_name(new_instrument)
+        if status is False:
+            self.pop_one_button_dialog(error_message)
 
         return
 
@@ -942,6 +823,215 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_fit_bkgd(self):
+        """
+
+        :return:
+        """
+        vec_x = numpy.array(list_x)
+        vec_y = numpy.array(list_y)
+        vec_e = numpy.array(list_e)
+        def gauss(x, a, b, c):
+            return c*numpy.exp(-(x-a)**2/b)
+
+        def gauss4(x, a, b, c, d):
+            return c*numpy.exp(-(x-a)**2/b)+d
+
+        popt, pcov = curve_fit(gauss, vec_x, vec_y)
+        gauss_fit = gauss(vec_x, popt[0], popt[1], popt[2])
+        plt.plot(vec_x, vec_y)
+        plt.plot(vec_x, gauss_fit, 'r-')
+
+        # fit2
+        p0 = [popt[0], popt[1], popt[2], 0.]
+        popt2, pcov2 = curve_fit(gauss4, vec_x, vec_y, sigma=vec_e,  p0=p0)
+        gauss_fit4 = gauss4(vec_x, popt2[0], popt2[1], popt2[2], popt2[3])
+        plt.plot(vec_x, gauss_fit4, 'r-')
+
+        plt.show()
+
+        return
+
+    def do_filter_sort_survey_table(self):
+        """
+        Sort and filter survey table by specified field
+        Requirements:
+        Guarantees: the original table is cleared and a new list is appended
+        :return:
+        """
+        # Get column name
+        if self.ui.radioButton_sortByScan.isChecked():
+            column_name = 'Scan'
+        elif self.ui.radioButton_sortByCounts.isChecked():
+            column_name = 'Max Counts'
+        else:
+            self.pop_one_button_dialog('No column is selected to sort.')
+            return
+
+        # Get filters
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_filterScanLower,
+                                                        self.ui.lineEdit_filterScanUpper],
+                                                       allow_blank=True)
+
+        # return with error
+        if status is False:
+            self.pop_one_button_dialog(ret_obj)
+            return
+
+        # set up default with return as None
+        start_scan_number = ret_obj[0]
+        if start_scan_number is None:
+            start_scan_number = 0
+        end_scan_number = ret_obj[1]
+        if end_scan_number is None:
+            end_scan_number = sys.maxint
+
+        status, ret_obj = gutil.parse_float_editors([self.ui.lineEdit_filterCountsLower,
+                                                     self.ui.lineEdit_filterCountsUpper],
+                                                    allow_blank=True)
+        if status is False:
+            # return with error message
+            self.pop_one_button_dialog(ret_obj)
+            return
+
+        # set up default with return as None
+        min_counts = ret_obj[0]
+        if min_counts is None:
+            min_counts = -0.0
+        max_counts = ret_obj[1]
+        if max_counts is None:
+            max_counts = sys.float_info.max
+
+        # filter and sort
+        ascending_order = not self.ui.checkBox_sortDescending.isChecked()
+        if ascending_order:
+            sort_order = 0
+        else:
+            sort_order = 1
+        self.ui.tableWidget_surveyTable.filter_and_sort(start_scan_number, end_scan_number,
+                                                        min_counts, max_counts,
+                                                        column_name, sort_order)
+
+        return
+
+    def do_integrate_per_pt(self):
+        """
+        Use the peak center of the merged scan. Then on each Pt. with specified radius,
+        calculate the integrated peak intensity and number of counts
+        :return:
+        """
+        # get experiment and scan number
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
+                                                        self.ui.lineEdit_scanIntegratePeak])
+        if not status:
+            self.pop_one_button_dialog('Unable to integrate peak due to %s.' % ret_obj)
+            return
+        else:
+            exp_number, scan_number = ret_obj
+
+        # call myController to get peak center from all pt in scans
+        if self._myControl.has_peak_info(exp_number, scan_number) is False:
+            # merge scan and find peak
+            if not self._myControl.has_merged_data(exp_number, scan_number):
+                # merge all Pts. in scan if necessary
+                status, pt_number_list = self._myControl.get_pt_numbers(exp_number, scan_number)
+                assert status
+                self._myControl.merge_pts_in_scan(exp_number, scan_number, pt_number_list,
+                                                  'q-sample')
+            # find peak
+            self._myControl.find_peak(exp_number, scan_number)
+        scan_peak_info = self._myControl.get_peak_info(exp_number, scan_number)
+        weighted_peak_center = scan_peak_info.get_peak_centre()
+
+        label = 'Exp %d Scan %d: weighted peak center = %s.' % (exp_number, scan_number,
+                                                                str(weighted_peak_center))
+        self.ui.label_peakIntegraeInfo.setText(label)
+        print '[DB] ', label
+
+        # get peak radius
+        status, peak_radius = gutil.parse_float_editors(self.ui.lineEdit_peakRadius)
+        if not status:
+            self.pop_one_button_dialog('Unable to get valid peak radius from GUI.')
+            return
+        else:
+            assert peak_radius > 0, 'Peak radius cannot be zero or negative!'
+
+        # call myController to integrate on each individual Pt.
+        self._myControl.integrate_scan_peaks(exp_number, scan_number, peak_radius,
+                                             peak_centre=weighted_peak_center,
+                                             merge=False)
+
+        # plot all the result to the table
+        vec_x, vec_y = self._myControl.get_peaks_integrated_intensities(exp_number, scan_number, None)
+        self.ui.graphicsView_integratedPeakView.clear_all_lines()
+        self.ui.graphicsView_integratedPeakView.add_plot_1d(vec_x, vec_y)
+
+        # set the integrated result to table
+        self.ui.tableWidget_peakIntegration.remove_all_rows()
+        self.ui.tableWidget_peakIntegration.set_integrated_values(vec_x, vec_y)
+
+        print '[DB] Print for testing fit!'
+        for i in xrange(len(vec_x)):
+            print vec_x[i], vec_y[i]
+
+        return
+
+    def do_integrate_peaks(self):
+        """ Integrate selected peaks with.  If any scan is not merged, then it will merge the scan first
+        Integrate peaks
+        :return:
+        """
+        # get rows to merge
+        row_number_list = self.ui.tableWidget_mergeScans.get_selected_rows(True)
+        if len(row_number_list) == 0:
+            self.pop_one_button_dialog('No scan is selected for scan')
+            return
+
+        # get the parameters for integration
+        status, peak_radius = gutil.parse_float_editors([self.ui.lineEdit_peakRadius], allow_blank=False)
+        if status is False:
+            self.pop_one_button_dialog('Peak radius is not given right')
+            return
+
+        # merged workspace base name
+        use_default_merge_name = self.ui.checkBox_useDefaultMergedName.isChecked()
+
+        # integrate peak
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp], allow_blank=False)
+        if status:
+            exp_number = ret_obj[0]
+        else:
+            self.pop_one_button_dialog('Unable to get valid experiment number due to %s.' % ret_obj)
+            return
+
+        for row_number in row_number_list:
+            scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
+            pt_number_list = self._myControl.get_pt_numbers(exp_number, scan_number)
+
+            # merge if required
+            merged = self.ui.tableWidget_mergeScans.get_merged_status(row_number)
+            if merged is False:
+                self._myControl.merge_pts_in_scan(exp_no=exp_number, scan_no=scan_number, pt_num_list=pt_number_list,
+                                                  target_frame='qsample')
+                self.ui.tableWidget_mergeScans.set_status_by_row(row_number, 'Done')
+            # END-IF
+
+            # integrate peak
+            peak_intensity = self._myControl.integrate_peak(exp_number, scan_number, pt_number_list, peak_radius)
+            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, peak_intensity)
+
+        # END-FOR
+
+        return
+
+    def doAddScanPtToRefineUB(self):
+        """ Add scan/pt numbers to the list of data points for refining ub matrix
+
+        And the added scan number and pt numbers will be reflected in the (left sidebar)
+
+        """
+        raise RuntimeError("ASAP")
+
     def do_index_ub_peaks(self):
         """ Index the peaks in the UB matrix peak table
         :return:
@@ -1054,6 +1144,32 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_plot_pt_peak(self):
+        """
+
+        :return:
+        """
+        # Find out the current condition including (1) absolute (2) normalized by time
+        # (3) normalized by monitor counts
+        blablabla
+
+        # Integrate peak if the integrated peak workspace does not exist
+        blablabla
+
+        has_integrated = self._myControl.has_integrated_peak(exp_num, scan_num, pt_list=xx,
+                                                             normalized_by_monitor=False)
+        if has_integrated is False:
+            self._myControl.integrate_peak(exp_num=xx, scan_num=xx, pt_num=xx,
+                                           normalized_by_monitor=False)
+
+        # update table
+        self.ui.tableWidget_peakIntegration.update_peak_counts()
+
+        # update figure
+        blablabla
+
+        return
+
     def do_plot_prev_pt_raw(self):
         """ Plot the Pt.
         """
@@ -1116,19 +1232,15 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_add_scans_merge(self):
-        """ Add scans to merge
+    def do_manual_bkgd(self):
+        """
+
         :return:
         """
-        # Get list of scans
-        scan_list = gutil.parse_integer_list(str(self.ui.lineEdit_listScansSliceView.text()))
-        if len(scan_list) == 0:
-            self.pop_one_button_dialog('Scan list is empty.')
-
-        # Set table
-        self.ui.tableWidget_mergeScans.append_scans(scans=scan_list)
-
-        return
+        if str(self.ui.pushButton_handPickBkgd.text()) == 'Customize Bkgd':
+            self.ui.pushButton_handPickBkgd.setText('Done')
+        elif str(self.ui.pushButton_handPickBkgd.text()) == 'Done':
+            self.ui.pushButton_handPickBkgd.setText('Customize Bkgd')
 
     def do_merge_scans(self):
         """ Process data for slicing view
@@ -1187,6 +1299,62 @@ class MainWindow(QtGui.QMainWindow):
             # Sleep for a while
             time.sleep(0.1)
         # END-FOR
+
+        return
+
+    def do_refine_ub(self):
+        """
+        Refine UB matrix
+        :return:
+        """
+        peak_info_list = self._build_peak_info_list()
+        set_hkl_int = self.ui.checkBox_roundHKLInt.isChecked()
+
+        # Refine UB matrix
+        try:
+            self._myControl.refine_ub_matrix_indexed_peaks(peak_info_list, set_hkl_int)
+        except AssertionError as error:
+            self.pop_one_button_dialog(str(error))
+            return
+
+        # show result
+        self._show_refined_ub_result()
+
+        return
+
+    def do_refine_ub_fft(self):
+        """
+        Refine UB matrix by calling FFT method
+        :return:
+        """
+        # get PeakInfo list and check
+        peak_info_list = self._build_peak_info_list()
+        assert isinstance(peak_info_list, list), \
+            'PeakInfo list must be a list but not %s.' % str(type(peak_info_list))
+        assert len(peak_info_list) >= 3, \
+            'PeakInfo must be larger or equal to 3 (.now given %d) to refine UB matrix' % len(peak_info_list)
+
+        # get lattice range information
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_minD,
+                                                        self.ui.lineEdit_maxD])
+        if status is False:
+            self.pop_one_button_dialog('Must specify Min D and max D to refine UB using FFT.')
+            return
+        min_d, max_d = ret_obj
+        if (0 < min_d < max_d) is False:
+            self.pop_one_button_dialog('Range of d is not correct!')
+            return
+
+        # friendly suggestion
+        if len(peak_info_list) <= 9:
+            self.pop_one_button_dialog('It is recommended to use at least 9 reflections'
+                                       'to refine UB matrix without prior knowledge.')
+
+        # refine
+        self._myControl.refine_ub_matrix_least_info(peak_info_list, min_d, max_d)
+
+        # set value
+        self._show_refined_ub_result()
 
         return
 
@@ -1306,129 +1474,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_apply_setup(self):
-        """
-        Purpose:
-         - Apply the setup to controller.
-        Requirements:
-         - data directory, working directory must be given; but not necessarily correct
-         - URL must be given; but not necessary to be correct
-        :return:
-        """
-        # get data directory, working directory and data server URL from GUI
-        local_data_dir = str(self.ui.lineEdit_localSpiceDir.text()).strip()
-        working_dir = str(self.ui.lineEdit_workDir.text()).strip()
-        data_server = str(self.ui.lineEdit_url.text()).strip()
-
-        # set to my controller
-        self._myControl.set_local_data_dir(local_data_dir)
-        self._myControl.set_working_directory(working_dir)
-        self._myControl.set_server_url(data_server, check_link=False)
-
-        # check
-        error_message = ''
-
-        # local data dir
-        if local_data_dir == '':
-            error_message += 'Local data directory is not specified!\n'
-        elif os.path.exists(local_data_dir) is False:
-            try:
-                os.mkdir(local_data_dir)
-            except OSError as os_error:
-                error_message += 'Unable to create local data directory %s due to %s.\n' % (
-                    local_data_dir, str(os_error))
-                self.ui.lineEdit_localSpiceDir.setStyleSheet("color: red;")
-            else:
-                self.ui.lineEdit_localSpiceDir.setStyleSheet("color: green;")
-        else:
-            self.ui.lineEdit_localSpiceDir.setStyleSheet("color: green;")
-        # END-IF-ELSE
-
-        # working directory
-        if working_dir == '':
-            error_message += 'Working directory is not specified!\n'
-        elif os.path.exists(working_dir) is False:
-            try:
-                os.mkdir(working_dir)
-                self.ui.lineEdit_workDir.setStyleSheet("color: green;")
-            except OSError as os_error:
-                error_message += 'Unable to create working directory %s due to %s.\n' % (
-                    working_dir, str(os_error))
-                self.ui.lineEdit_workDir.setStyleSheet("color: red;")
-        else:
-            self.ui.lineEdit_workDir.setStyleSheet("color: green;")
-        # END-IF-ELSE
-
-        # Set the URL red as it is better not check at this stage. Leave it to user
-        self.ui.lineEdit_url.setStyleSheet("color: black;")
-
-        if len(error_message) > 0:
-            self.pop_one_button_dialog(error_message)
-
-        return
-
-    def do_filter_sort_survey_table(self):
-        """
-        Sort and filter survey table by specified field
-        Requirements:
-        Guarantees: the original table is cleared and a new list is appended
-        :return:
-        """
-        # Get column name
-        if self.ui.radioButton_sortByScan.isChecked():
-            column_name = 'Scan'
-        elif self.ui.radioButton_sortByCounts.isChecked():
-            column_name = 'Max Counts'
-        else:
-            self.pop_one_button_dialog('No column is selected to sort.')
-            return
-
-        # Get filters
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_filterScanLower,
-                                                        self.ui.lineEdit_filterScanUpper],
-                                                       allow_blank=True)
-
-        # return with error
-        if status is False:
-            self.pop_one_button_dialog(ret_obj)
-            return
-
-        # set up default with return as None
-        start_scan_number = ret_obj[0]
-        if start_scan_number is None:
-            start_scan_number = 0
-        end_scan_number = ret_obj[1]
-        if end_scan_number is None:
-            end_scan_number = sys.maxint
-
-        status, ret_obj = gutil.parse_float_editors([self.ui.lineEdit_filterCountsLower,
-                                                     self.ui.lineEdit_filterCountsUpper],
-                                                    allow_blank=True)
-        if status is False:
-            # return with error message
-            self.pop_one_button_dialog(ret_obj)
-            return
-
-        # set up default with return as None
-        min_counts = ret_obj[0]
-        if min_counts is None:
-            min_counts = -0.0
-        max_counts = ret_obj[1]
-        if max_counts is None:
-            max_counts = sys.float_info.max
-
-        # filter and sort
-        ascending_order = not self.ui.checkBox_sortDescending.isChecked()
-        if ascending_order:
-            sort_order = 0
-        else:
-            sort_order = 1
-        self.ui.tableWidget_surveyTable.filter_and_sort(start_scan_number, end_scan_number,
-                                                        min_counts, max_counts,
-                                                        column_name, sort_order)
-
-        return
-
     def do_set_ub_from_text(self):
         """ Purpose: Set UB matrix in use from plain text edit plainTextEdit_ubInput.
         Requirements:
@@ -1465,30 +1510,6 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog('Neither Mantid or SPICE-styled UB is checked!')
 
         return
-
-    def do_plot_peak_abs_counts(self):
-        """
-
-        :return:
-        """
-        # Integrate peak
-        if self._myControl.has_integrated_peak(exp_num, scan_num, pt_list=xx,
-                                               normalized_by_monitor) is False:
-            self._myControl.integrate_peak(exp_num=xx, scan_num=xx, pt_num=xx,
-                                           normalized_by_monitor=False)
-
-        self.ui.pushButton_showAbsoluteCounts.setEnabled(False)
-
-        self.ui.tableWidget_peakIntegration.update_peak_counts()
-
-        return
-
-    def do_plot_peak_normalized_intensity(self):
-        """ Plot the Pt. vs. normalized intensity within peak radius
-        :return:
-        """
-        self._my3DWindow
-
 
     def do_show_ub_in_box(self):
         """ Get UB matrix in table tableWidget_ubMergeScan and write to plain text edit plainTextEdit_ubInput

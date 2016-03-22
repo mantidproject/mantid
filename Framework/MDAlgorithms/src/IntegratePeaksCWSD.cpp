@@ -100,6 +100,15 @@ void IntegratePeaksCWSD::init() {
                   "If selected, then all the signals will be normalized by monitor counts."
                   "Otherwise, the output peak intensity will be just simple addition of peak intensity."
                   "It is only applied to the situation that Mergepeaks is not selected.");
+
+  declareProperty("NormalizeByTime", true,
+                  "It selected, then all the signals will be normalized by time "
+                  "in the case that the counting time is very short and thus the beam monitor "
+                  "is not accurate.");
+
+  declareProperty("ScaleFactor", 1000.,
+                  "If NormalizeByMonitor or NormalizeByTime is selected, the intensity "
+                  "will be scaled by this factor.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -296,9 +305,9 @@ void IntegratePeaksCWSD::simplePeakIntegration(
       }
       else
       {
-        g_log.warning() << "Out of radius " << distance << " > " << m_peakRadius
-                        << ": Center = " << current_peak_center.toString()
-                        << ", Pixel  = " << pixel_pos.toString() << "\n";
+        g_log.debug() << "Out of radius " << distance << " > " << m_peakRadius
+                      << ": Center = " << current_peak_center.toString()
+                      << ", Pixel  = " << pixel_pos.toString() << "\n";
       }
 
       if (distance < min_distance)
@@ -472,7 +481,7 @@ std::map<int, signal_t> IntegratePeaksCWSD::getMonitorCounts() {
     ExperimentInfo_const_sptr expinfo =
         m_inputWS->getExperimentInfo(static_cast<uint16_t>(iexpinfo));
     std::string run_str = expinfo->run().getProperty("run_number")->value();
-    g_log.warning() << "run number of exp " << iexpinfo << " is " << run_str << "\n";
+    g_log.information() << "run number of exp " << iexpinfo << " is " << run_str << "\n";
     int run_number = atoi(run_str.c_str());
     // FIXME - HACK FOE HB3A
     run_number = run_number % 1000;
