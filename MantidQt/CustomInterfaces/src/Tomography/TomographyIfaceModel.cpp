@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 
+#include <Poco/Path.h>
 #include <Poco/Process.h>
 
 #include <QMutex>
@@ -769,7 +770,8 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
     const ImageStackPreParams &corRegions, bool local,
     std::vector<std::string> &opts) const {
 
-  opts.emplace_back("--input-path=" + m_pathsConfig.pathSamples());
+  opts.emplace_back("--input-path=" + adaptInputPathForExecution(
+                                          m_pathsConfig.pathSamples(), local));
   std::string alg = "alg";
   if (g_TomoPyTool == usingTool())
     alg = m_tomopyMethod;
@@ -779,13 +781,15 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
   if (filters.prep.normalizeByFlats) {
     const std::string flat = m_pathsConfig.pathOpenBeam();
     if (!flat.empty())
-      opts.emplace_back("--input-path-flat=" + flat);
+      opts.emplace_back("--input-path-flat=" +
+                        adaptInputPathForExecution(flat, local));
   }
 
   if (filters.prep.normalizeByDarks) {
     const std::string dark = m_pathsConfig.pathDarks();
     if (!dark.empty())
-      opts.emplace_back("--input-path-dark=" + dark);
+      opts.emplace_back("--input-path-dark=" +
+                        adaptInputPathForExecution(dark, local));
   }
 
   if ((corRegions.roi.first.X() > 0 || corRegions.roi.second.X() > 0) &&
@@ -802,21 +806,8 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
                         "]'");
   }
 
-  // Like /work/imat/data/RB00XYZTUV/sampleA/processed/
-  // Split in components like: /work/imat + / + data + / + RB00XYZTUV + / +
-  // sampleA + / + processed
-  std::string m_sampleName = "sampleA";
-  std::string rootBase;
-  if (local) {
-    rootBase = m_systemSettings.m_local.m_basePathTomoData;
-  } else {
-    rootBase = m_systemSettings.m_remote.m_basePathTomoData;
-  }
-
-  const std::string outBase = rootBase + "/" +
-                              m_systemSettings.m_pathComponents[0] + "/" +
-                              m_experimentRef + "/" + m_sampleName + "/" +
-                              m_systemSettings.m_outputPathCompReconst;
+  const std::string outBase =
+      buildOutReconstructionDir(m_pathsConfig.pathSamples(), local);
 
   // append a 'now' string
   auto now = Mantid::Kernel::DateAndTime::getCurrentTime();
@@ -827,10 +818,20 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
   // out_reconstruction_TomoPy_gridrec_
   const std::string reconName =
       "reconstruction_" + m_currentTool + "_" + alg + "_" + timeAppendix;
-  opts.emplace_back("--output=\"" + outBase + "/" + reconName + "\"");
+
+  const std::string outOpt = outBase + "/" + reconName;
+
+  if (local) {
+    // doesn't go through the shell so it should not have quotes
+    opts.emplace_back("--output=" + outOpt);
+  } else {
+    opts.emplace_back("--output=\"" + outOpt + "\"");
+  }
 
   // TODO: will/should use m_systemSettings.m_outputPathCompPreProcessed to
-  // set an option like --output-pre-processed
+  // set an option like --output-pre_processed. For now the pre_processed
+  // files go inside the directory of the reconstructed files.
+
   opts.emplace_back("--median-filter-size=" +
                     std::to_string(filters.prep.medianFilterWidth));
 
@@ -868,5 +869,120 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
   opts.emplace_back("--out-img-format=png");
 }
 
+/**
+ * Converts paths to paths that will work for the reconstruction
+ * scripts on the local or remote machine.
+ *
+ * @param path path to a directory (samples/flats/darks)
+ * @param local adapt the path to local or remote execution
+ *
+ * @return path string ready to be used by the reconstruction scripts
+ */
+std::string
+TomographyIfaceModel::adaptInputPathForExecution(const std::string &path,
+                                                 bool local) const {
+  if (local)
+    return path;
+
+  std::string pp = path;
+  // Remote (to UNIX), assuming SCARF or similar
+  boost::replace_all(pp, "\\", "/");
+  if (pp.length() >= 2 && ':' == pp[1]) {
+    if (2 == pp.length())
+      pp = ""; // don't accept '/'
+    else
+      pp = pp.substr(2);
+  }
+
+  // this appends the base path for the instrument data space on the
+  // remote (like '/work/imat' or similar)
+  pp = m_systemSettings.m_remote.m_basePathTomoData + pp;
+
+  return pp;
+}
+
+/**
+ * Builds a base path for the output directory and files (which go in
+ * a subdirectory usually called 'processed' next to the
+ * samples/flats/darks directories).
+ *
+ * @param samples|Dir full path to samples
+ *
+ * @return path to which an output directory name can be appended, to
+ * output the reconstructed volume to.
+ */
+std::string
+TomographyIfaceModel::buildOutReconstructionDir(const std::string &samplesDir,
+                                                bool) const {
+  // TODO: guessing from sample dir always at the moment.
+  // We might want to distinguish local/remote runs at some point
+  // (second parameter)
+  // Remote runs would ideally use buildOutReconstructionDirFromSystemRoot()
+  return buildOutReconstructionDirFromSamplesDir(samplesDir);
+}
+
+/**
+ * This method enforces the proper
+ * path following current IMAT rules, regardless of where the samples
+ * path was located.
+ *
+ * @param samples|Dir full path to sample images
+ *
+ * @param local whether to adapt the path rules options for a local
+ * run (as opposed to a remote compute resource)
+ *
+ * @return path to which an output directory name can be appended, to
+ * output the reconstructed volume to.
+ */
+std::string TomographyIfaceModel::buildOutReconstructionDirFromSystemRoot(
+    const std::string &samplesDir, bool local) const {
+  // Like /work/imat/data/RB00XYZTUV/sampleA/processed/
+  // Split in components like: /work/imat + / + data + / + RB00XYZTUV + / +
+  // sampleA + / + processed
+  std::string rootBase;
+  if (local) {
+    rootBase = m_systemSettings.m_local.m_basePathTomoData;
+  } else {
+    rootBase = m_systemSettings.m_remote.m_basePathTomoData;
+  }
+
+  // Guess sample name (example: 'sampleA') from the input data path
+  Poco::Path pathToSample(samplesDir);
+  pathToSample = pathToSample.parent();
+  std::string sampleName = pathToSample.directory(pathToSample.depth() - 1);
+  // safe fallback for pathological cases (samples in a root directory, etc.)
+  if (sampleName.empty())
+    sampleName = "sample";
+
+  const std::string outBase = rootBase + "/" +
+                              m_systemSettings.m_pathComponents[0] + "/" +
+                              m_experimentRef + "/" + sampleName + "/" +
+                              m_systemSettings.m_outputPathCompReconst;
+
+  return outBase;
+}
+
+/**
+ * Builds a base path for the output directory and files by looking
+ * for the parent of the samples directory. This method will work
+ * regardless of whether the samples directory location follows the
+ * proper IMAT conventions.
+ *
+ * @param samples|Dir full path to samples
+ *
+ * @return path to which an output directory name can be appended, to
+ * output the reconstructed volume to.
+ */
+std::string TomographyIfaceModel::buildOutReconstructionDirFromSamplesDir(
+    const std::string &samplesDir) const {
+  // Guess sample name (example 'sampleA') from the input data/sample
+  // images path
+  Poco::Path path(samplesDir);
+
+  path = path.parent();
+  path.append(m_systemSettings.m_outputPathCompReconst);
+
+  return path.toString();
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

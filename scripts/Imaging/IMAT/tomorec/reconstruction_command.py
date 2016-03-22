@@ -108,6 +108,8 @@ class ReconstructionCommand(object):
         self.gen_readme_summary_end(readme_fullpath, (data, preproc_data, recon_data), tstart,
                                     t_recon_end - t_recon_start)
 
+        print "Finished reconstruction."
+
     def gen_readme_summary_begin(self, filename, cfg, cmd_line):
         """
         To write configuration, settings, etc. early on. As early as possible, before any failure

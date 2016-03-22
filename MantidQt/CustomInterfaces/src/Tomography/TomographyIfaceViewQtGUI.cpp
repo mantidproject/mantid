@@ -274,10 +274,6 @@ void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
   m_uiTabSetup.pushButton_SCARF_login->setEnabled(true);
   m_uiTabSetup.pushButton_SCARF_logout->setEnabled(false);
 
-  // cycle changes
-  connect(m_uiTabSetup.lineEdit_cycle, SIGNAL(editingFinished()), this,
-          SLOT(updatedCycleName()));
-
   // check boxes to enable search for dark and flat images
   connect(m_uiTabSetup.checkBox_path_flats, SIGNAL(stateChanged(int)), this,
           SLOT(flatsPathCheckStatusChanged(int)));
@@ -1184,7 +1180,6 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
       m_toolsSettings.tomoPy = ToolConfigTomoPy(
           run.toStdString(),
           g_defOutPathLocal + "/" +
-              m_uiTabSetup.lineEdit_cycle->text().toStdString() + "/" +
               m_uiTabRun.lineEdit_experiment_reference->text().toStdString() +
               localOutNameAppendix,
           paths.pathDarks(), paths.pathOpenBeam(), paths.pathSamples());
@@ -1212,7 +1207,6 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
           run.toStdString(),
           Poco::Path::expand(
               g_defOutPathLocal + "/" +
-              m_uiTabSetup.lineEdit_cycle->text().toStdString() + "/" +
               m_uiTabRun.lineEdit_experiment_reference->text().toStdString() +
               localOutNameAppendix),
           paths.pathDarks(), paths.pathOpenBeam(), paths.pathSamples());
@@ -1571,18 +1565,8 @@ void TomographyIfaceViewQtGUI::processPathBrowseClick(QLineEdit *le,
       this, tr("Open directory/folder"), prev));
 
   if (!path.isEmpty()) {
-    std::string pp = path.toStdString();
-    // to UNIX, assuming SCARF or similar
-    boost::replace_all(pp, "\\", "/");
-    if (pp.length() >= 2 && ':' == pp[1]) {
-      if (2 == pp.length())
-        pp = ""; // don't accept '/'
-      else
-        pp = pp.substr(2);
-    }
-    pp = "/work" + pp;
-    le->setText(QString::fromStdString(pp));
-    data = pp;
+    le->setText(path);
+    data = path.toStdString();
 
     MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
   }
@@ -2070,10 +2054,6 @@ void TomographyIfaceViewQtGUI::userWarning(const std::string &err,
   QMessageBox::warning(this, QString::fromStdString(err),
                        QString::fromStdString(description), QMessageBox::Ok,
                        QMessageBox::Ok);
-}
-
-void TomographyIfaceViewQtGUI::updatedCycleName() {
-  m_setupPathComponentPhase = m_uiTabSetup.lineEdit_cycle->text().toStdString();
 }
 
 void TomographyIfaceViewQtGUI::updatedExperimentReference() {

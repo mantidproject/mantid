@@ -172,8 +172,6 @@ private slots:
 
   void browseImageClicked();
 
-  void updatedCycleName();
-
   void browseLocalInOutDirClicked();
   void browseLocalRemoteDriveOrPath();
   void browseLocalReconScriptsDirClicked();
