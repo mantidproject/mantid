@@ -541,8 +541,8 @@ class ReconstructionCommand(object):
 
         verbosity = 1
         if 'astra' == alg_cfg.tool:
-            #run_reconstruct_3d_astra(proj_data, algorithm, cor, proj_angles=proj_angles)
-            return run_reconstruct_3d_astra_simple(proj_data, proj_angles, alg_cfg, preproc_cfg.cor)
+            # run_reconstruct_3d_astra(proj_data, algorithm, cor, proj_angles=proj_angles)
+            return self.run_reconstruct_3d_astra_simple(proj_data, proj_angles, alg_cfg, preproc_cfg.cor)
 
         for slice_idx in [200]: # examples to check: [30, 130, 230, 330, 430]:
             print " > Finding center with tomopy find_center, slice_idx: {0}...".format(slice_idx)
@@ -690,6 +690,8 @@ class ReconstructionCommand(object):
         @param cor :: center of rotation
         @param proj_angles :: angles corresponding to the projection images
         """
+        import tomorec.tool_imports as tti
+        astra = tti.import_tomo_tool('astra')
         sinograms = proj_data
 
         sinograms = np.swapaxes(sinograms, 0, 1)

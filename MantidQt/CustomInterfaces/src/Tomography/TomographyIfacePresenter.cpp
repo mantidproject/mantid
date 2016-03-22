@@ -408,8 +408,6 @@ void TomographyIfacePresenter::subprocessRunReconRemote() {
   } catch (std::exception &e) {
     m_view->userWarning("Issue when trying to start a job", e.what());
   }
-
-  processRefreshJobs();
 }
 
 void TomographyIfacePresenter::subprocessRunReconLocal() {
@@ -419,6 +417,7 @@ void TomographyIfacePresenter::subprocessRunReconLocal() {
 void TomographyIfacePresenter::processRefreshJobs() {
   // No need to be logged in, there can be local processes
   if (m_model->loggedIn().empty()) {
+    m_model->doRefreshJobsInfo("Local");
     m_view->updateJobsInfoDisplay(m_model->jobsStatus(),
                                   m_model->jobsStatusLocal());
     return;
