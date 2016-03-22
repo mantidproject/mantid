@@ -416,7 +416,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         idealTube = IdealTube()
         idealTube.setArray(numpy.array(knownPositions))
 
-    # pylint: disable = raising-bad-type
+    #pylint: disable = raising-bad-type
     # deal with funcForm parameter
     try:
         nPeaks = len(idealTube.getArray())
@@ -455,8 +455,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         # Get tube length and number of detectors
         tube_length = tubeSet.getTubeLength(0)
         # ndets = len(wsp_index_for_tube0)
-        # pylint:disable= unused-variable
-        id1, ndets, step = tubeSet.getDetectorInfoFromTube(0)
+        dummy_id1, ndets, dummy_step = tubeSet.getDetectorInfoFromTube(0)
 
         known_pos = idealTube.getArray()
         # position of the peaks in pixels

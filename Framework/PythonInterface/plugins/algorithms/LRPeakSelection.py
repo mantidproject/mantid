@@ -1,4 +1,4 @@
-# pylint: disable=no-init,invalid-name, attribute-defined-outside-init, too-many-instance-attributes
+# pylint: disable=no-init,invalid-name, too-many-instance-attributes
 
 import math
 import numpy as np

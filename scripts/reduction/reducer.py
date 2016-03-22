@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name, protected-access, unused-variable, W0121
+# pylint: disable=protected-access, unused-variable, W0121
 
 # W0121 = Use raise ErrorClass(args) instead of raise ErrorClass, args.
 """
