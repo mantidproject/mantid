@@ -5,6 +5,7 @@
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCommandAdapter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
@@ -65,6 +66,29 @@ void QtReflMainView::initLayout() {
       this /*main view*/, ui.qReflTableView->getTablePresenter().get(),
       this /*currently this concrete view is also responsibile for prog reporting*/);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
+
+  // Options in the "Reflectometry" menu
+  auto tableCommands =
+      ui.qReflTableView->getTablePresenter()->publishTableCommands();
+  for (auto &command : tableCommands) {
+    QAction *action =
+        new QAction(QString::fromStdString(command->name()), this);
+    action->setIcon(QIcon(QString::fromStdString(command->icon())));
+    ui.menuTable->addAction(action);
+    ReflCommandAdapter *adapter = new ReflCommandAdapter(std::move(command));
+    connect(action, SIGNAL(triggered()), adapter, SLOT(call()));
+  }
+  // Options in the "Edit" menu
+  auto rowCommands =
+      ui.qReflTableView->getTablePresenter()->publishRowCommands();
+  for (auto &command : rowCommands) {
+    QAction *action =
+        new QAction(QString::fromStdString(command->name()), this);
+    action->setIcon(QIcon(QString::fromStdString(command->icon())));
+    ui.menuRows->addAction(action);
+    ReflCommandAdapter *adapter = new ReflCommandAdapter(std::move(command));
+    connect(action, SIGNAL(triggered()), adapter, SLOT(call()));
+  }
 }
 
 /**

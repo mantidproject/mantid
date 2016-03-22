@@ -245,7 +245,13 @@
     </property>
     <addaction name="actionSlitCalculator"/>
    </widget>
+   <widget class="QMenu" name="menuRows">
+     <property name="title">
+       <string>&amp;Edit</string>
+     </property>
+   </widget>
    <addaction name="menuTable"/>
+   <addaction name="menuRows"/>
   </widget>
   <action name="actionSearch">
    <property name="icon">

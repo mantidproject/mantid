@@ -15,16 +15,36 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidKernel/Utils.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidQtCustomInterfaces/ParseKeyValueString.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ProgressPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflOptionsDialog.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflAppendRowCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflClearSelectedCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCopySelectedCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCutSelectedCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflDeleteRowCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflExpandCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflExportTableCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflGenerateNotebook.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflGroupRowsCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflImportTableCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflNewTableCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflOpenTableCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflOptionsCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflPasteSelectedCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflPlotGroupCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflPlotRowCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflPrependRowCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflProcessCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflSaveTableAsCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflSaveTableCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableView.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
@@ -1429,10 +1449,10 @@ available instruments in the table view
 @param defaultInstrument : The instrument to have selected by default
 */
 void ReflTableViewPresenter::setInstrumentList(
-	const std::vector<std::string> &instruments,
-	const std::string &defaultInstrument) {
+    const std::vector<std::string> &instruments,
+    const std::string &defaultInstrument) {
 
-    m_tableView->setInstrumentList(instruments, defaultInstrument);
+  m_tableView->setInstrumentList(instruments, defaultInstrument);
 }
 
 /** Plots any currently selected rows */
@@ -1572,6 +1592,48 @@ void ReflTableViewPresenter::initOptions() {
 
   // Load saved values from disk
   m_tableView->loadSettings(m_options);
+}
+
+void addToCommand(std::vector<ReflCommandBase_uptr> &commands,
+                  ReflCommandBase_uptr command) {
+  commands.push_back(std::move(command));
+}
+
+/** TODO */
+std::vector<ReflCommandBase_uptr>
+ReflTableViewPresenter::publishTableCommands() {
+
+  std::vector<ReflCommandBase_uptr> commands;
+
+  addToCommand(commands, make_unique<ReflOpenTableCommand>(this));
+  addToCommand(commands, make_unique<ReflNewTableCommand>(this));
+  addToCommand(commands, make_unique<ReflSaveTableCommand>(this));
+  addToCommand(commands, make_unique<ReflSaveTableAsCommand>(this));
+  addToCommand(commands, make_unique<ReflImportTableCommand>(this));
+  addToCommand(commands, make_unique<ReflExportTableCommand>(this));
+  addToCommand(commands, make_unique<ReflOptionsCommand>(this));
+
+  return commands;
+}
+
+std::vector<ReflCommandBase_uptr> ReflTableViewPresenter::publishRowCommands() {
+
+  std::vector<ReflCommandBase_uptr> commands;
+
+  addToCommand(commands, make_unique<ReflProcessCommand>(this));
+  addToCommand(commands, make_unique<ReflExpandCommand>(this));
+  addToCommand(commands, make_unique<ReflPlotRowCommand>(this));
+  addToCommand(commands, make_unique<ReflPlotGroupCommand>(this));
+  addToCommand(commands, make_unique<ReflAppendRowCommand>(this));
+  addToCommand(commands, make_unique<ReflPrependRowCommand>(this));
+  addToCommand(commands, make_unique<ReflGroupRowsCommand>(this));
+  addToCommand(commands, make_unique<ReflCopySelectedCommand>(this));
+  addToCommand(commands, make_unique<ReflCutSelectedCommand>(this));
+  addToCommand(commands, make_unique<ReflPasteSelectedCommand>(this));
+  addToCommand(commands, make_unique<ReflClearSelectedCommand>(this));
+  addToCommand(commands, make_unique<ReflDeleteRowCommand>(this));
+
+  return commands;
 }
 }
 }

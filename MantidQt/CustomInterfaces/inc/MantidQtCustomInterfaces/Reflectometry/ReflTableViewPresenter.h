@@ -53,6 +53,8 @@ public:
       const std::vector<std::map<std::string, std::string>> &runs) override;
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
+  std::vector<ReflCommandBase_uptr> publishTableCommands();
+  std::vector<ReflCommandBase_uptr> publishRowCommands();
 
 protected:
   // the workspace the model is currently representing
