@@ -60,7 +60,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadSQW2)
 /// Default constructor
 LoadSQW2::LoadSQW2()
     : API::IFileLoader<Kernel::FileDescriptor>(), m_file(), m_reader(),
-      m_outputWS(), m_nspe(0), m_uToRLU(), m_rluToU(), m_outputFrame() {}
+      m_outputWS(), m_nspe(0), m_uToRLU(), m_outputFrame() {}
 
 /// Default destructor
 LoadSQW2::~LoadSQW2() {}
@@ -317,7 +317,6 @@ boost::shared_ptr<API::ExperimentInfo> LoadSQW2::readSingleSPEHeader() {
  */
 void LoadSQW2::cacheFrameTransforms(const Geometry::OrientedLattice &lattice) {
   m_uToRLU = lattice.getBinv() * INV_TWO_PI;
-  m_rluToU = lattice.getB() * 2.0 * M_PI;
 }
 
 /**
