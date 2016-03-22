@@ -62,6 +62,11 @@ void GluGeometryHandler::Render() {
       (dynamic_cast<GluGeometryRenderer *>(Renderer))
           ->RenderCube(Point1, Point2, Point3, Point4);
       break;
+    case HEXAHEDRON:
+      (dynamic_cast<GluGeometryRenderer *>(Renderer))
+          ->RenderHexahedron(Point1, Point2, Point3, Point4, Point5, Point6,
+                             Point7, Point8);
+      break;
     case SPHERE:
       (dynamic_cast<GluGeometryRenderer *>(Renderer))
           ->RenderSphere(center, radius);
@@ -97,6 +102,17 @@ void GluGeometryHandler::GetObjectGeom(int &mytype,
       vectors.push_back(Point3);
       vectors.push_back(Point4);
       break;
+	case HEXAHEDRON:
+		mytype = 1;
+		vectors.push_back(Point1);
+		vectors.push_back(Point2);
+		vectors.push_back(Point3);
+		vectors.push_back(Point4);
+		vectors.push_back(Point5);
+		vectors.push_back(Point6);
+		vectors.push_back(Point7);
+		vectors.push_back(Point8);
+		break;
     case SPHERE:
       mytype = 2;
       vectors.push_back(center);
@@ -141,6 +157,22 @@ void GluGeometryHandler::setCuboid(V3D p1, V3D p2, V3D p3, V3D p4) {
   Point3 = p3;
   Point4 = p4;
 }
+
+void GluGeometryHandler::setHexahedron(Kernel::V3D p1, Kernel::V3D p2,
+                                       Kernel::V3D p3, Kernel::V3D p4,
+                                       Kernel::V3D p5, Kernel::V3D p6,
+                                       Kernel::V3D p7, Kernel::V3D p8) {
+  type = HEXAHEDRON;
+  Point1 = p1;
+  Point2 = p2;
+  Point3 = p3;
+  Point4 = p4;
+  Point5 = p5;
+  Point6 = p6;
+  Point7 = p7;
+  Point8 = p8;
+}
+
 void GluGeometryHandler::setSphere(V3D c, double r) {
   type = SPHERE;
   center = c;

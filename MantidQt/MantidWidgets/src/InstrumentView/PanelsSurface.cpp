@@ -3,6 +3,7 @@
 #include "MantidQtMantidWidgets/InstrumentView/CompAssemblyActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/ObjCompAssemblyActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/RectangularDetectorActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/StructuredDetectorActor.h"
 
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidKernel/Logger.h"
@@ -171,39 +172,43 @@ namespace MantidQt
 
 		//-----------------------------------------------------------------------------------------------//
 
-		class FlatBankFinder : public GLActorConstVisitor
-		{
-			PanelsSurface &m_surface;
-		public:
-			explicit FlatBankFinder(PanelsSurface &surface) : m_surface(surface) {}
+                class FlatBankFinder : public GLActorConstVisitor {
+                  PanelsSurface &m_surface;
 
-                        bool visit(const GLActor *) override { return false; }
-                        bool visit(const GLActorCollection *) override {
-                          return false;
-                        }
-                        bool visit(const ComponentActor *) override {
-                          return false;
-                        }
-                        bool visit(const InstrumentActor *) override {
-                          return false;
-                        }
-                        bool visit(const ObjCompAssemblyActor *) override {
-                          return false;
-                        }
+                public:
+                  explicit FlatBankFinder(PanelsSurface &surface)
+                      : m_surface(surface) {}
 
-                        bool visit(const CompAssemblyActor *actor) override {
-                                m_surface.addObjCompAssemblies(actor->getComponent()->getComponentID());
-				return false;
-			}
+                  bool visit(const GLActor *) override { return false; }
+                  bool visit(const GLActorCollection *) override {
+                    return false;
+                  }
+                  bool visit(const ComponentActor *) override { return false; }
+                  bool visit(const InstrumentActor *) override { return false; }
+                  bool visit(const ObjCompAssemblyActor *) override {
+                    return false;
+                  }
 
-                        bool
-                        visit(const RectangularDetectorActor *actor) override {
-                                m_surface.addRectangularDetector(actor->getComponent()->getComponentID());
-				return false;
-			}
-		};
+                  bool visit(const CompAssemblyActor *actor) override {
+                    m_surface.addObjCompAssemblies(
+                        actor->getComponent()->getComponentID());
+                    return false;
+                  }
 
-		/**
+                  bool visit(const RectangularDetectorActor *actor) override {
+                    m_surface.addRectangularDetector(
+                        actor->getComponent()->getComponentID());
+                    return false;
+                  }
+
+				  bool visit(const StructuredDetectorActor *actor) override {
+					  m_surface.addStructuredDetector(
+						  actor->getComponent()->getComponentID());
+					  return false;
+				  }
+                };
+
+                /**
 		* Traverse the instrument tree and find the banks which detectors lie in the same plane.
 		*
 		*/
@@ -567,6 +572,74 @@ namespace MantidQt
 				for (int j = 0; j < ny; ++j)
 				{
 					Mantid::Geometry::IDetector_const_sptr det = rectDetector->getAtXY(i, j);
+					addDetector(det, pos0, index, info->rotation);
+				}
+
+			// record the end detector index of the bank
+			info->endDetectorIndex = m_unwrappedDetectors.size();
+		}
+
+		/**
+		* Add a structured detector which is flat.
+		* @param bankId :: Component id of a structured detector.
+		*/
+		void PanelsSurface::addStructuredDetector(Mantid::Geometry::ComponentID bankId) 
+		{
+			Mantid::Geometry::Instrument_const_sptr instr = m_instrActor->getInstrument();
+			Mantid::Geometry::StructuredDetector_const_sptr structDetector = boost::dynamic_pointer_cast<const Mantid::Geometry::StructuredDetector>(
+				instr->getComponentByID(bankId));
+
+			int nx = structDetector->xpixels();
+			int ny = structDetector->ypixels();
+			Mantid::Kernel::V3D pos0 = structDetector->getAtXY(0, 0)->getPos();
+			Mantid::Kernel::V3D pos1 = structDetector->getAtXY(nx - 1, 0)->getPos();
+			Mantid::Kernel::V3D pos2 = structDetector->getAtXY(nx - 1, ny - 1)->getPos();
+			Mantid::Kernel::V3D pos3 = structDetector->getAtXY(0, ny - 1)->getPos();
+
+			// find the normal
+			Mantid::Kernel::V3D xaxis = pos1 - pos0;
+			Mantid::Kernel::V3D yaxis = pos3 - pos0;
+			Mantid::Kernel::V3D normal = xaxis.cross_prod(yaxis);
+			normal.normalize();
+
+			int index = m_flatBanks.size();
+			// save bank info
+			FlatBankInfo *info = new FlatBankInfo(this);
+			m_flatBanks << info;
+			info->id = bankId;
+			// find the rotation to put the bank on the plane
+			info->rotation = calcBankRotation(pos0, normal);
+			// record the first detector index of the bank
+			info->startDetectorIndex = m_unwrappedDetectors.size();
+			// set the outline
+			QVector<QPointF> verts;
+			Mantid::Kernel::V3D pos = pos0;
+			verts << QPointF(pos.X(), pos.Y());
+
+			pos = pos1 - pos0;
+			info->rotation.rotate(pos);
+			pos += pos0;
+			verts << QPointF(pos.X(), pos.Y());
+
+			pos = pos2 - pos0;
+			info->rotation.rotate(pos);
+			pos += pos0;
+			verts << QPointF(pos.X(), pos.Y());
+
+			pos = pos3 - pos0;
+			info->rotation.rotate(pos);
+			pos += pos0;
+			verts << QPointF(pos.X(), pos.Y());
+
+			info->polygon = QPolygonF(verts);
+
+			int nelem = structDetector->nelements();
+			m_unwrappedDetectors.reserve(m_unwrappedDetectors.size() + nelem);
+
+			for (int i = 0; i < nx; ++i)
+				for (int j = 0; j < ny; ++j)
+				{
+					Mantid::Geometry::IDetector_const_sptr det = structDetector->getAtXY(i, j);
 					addDetector(det, pos0, index, info->rotation);
 				}
 

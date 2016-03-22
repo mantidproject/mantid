@@ -76,9 +76,11 @@ void StructuredGeometryHandler::Render() {
   auto w = m_Det->xpixels() + 1;
   auto h = m_Det->ypixels() + 1;
 
+  glBegin(GL_QUADS);
+
   for (auto iy = 0; iy < h - 1; iy++) {
     for (auto ix = 0; ix < w - 1; ix++) {
-      glBegin(GL_QUADS);
+      
 
       glColor3ub(r[(iy * (w - 1)) + ix], g[(iy * (w - 1)) + ix],
                 b[(iy * (w - 1)) + ix]);
@@ -96,9 +98,10 @@ void StructuredGeometryHandler::Render() {
       pos = V3D(xVerts[(iy * w) + ix], yVerts[(iy * w) + ix], 0.0);
       glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
                  static_cast<GLfloat>(pos.Z()));
-      glEnd();
     }
   }
+
+  glEnd();
 
   if (glGetError() > 0)
     std::cout << "OpenGL error in StructuredGeometryHandler::Render \n";

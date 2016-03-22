@@ -64,7 +64,7 @@ namespace MantidQt
 						boost::shared_ptr<RectangularDetector> ChildRDPtr = boost::dynamic_pointer_cast<RectangularDetector>(ChildCompPtr);
 						boost::shared_ptr<StructuredDetector> ChildSDPtr = boost::dynamic_pointer_cast<StructuredDetector>(ChildCompPtr);
 
-						/*if (ChildSDPtr)
+						if (ChildSDPtr)
 						{
 							StructuredDetectorActor *iActor = new StructuredDetectorActor(instrActor, ChildSDPtr->getComponentID());
 							iActor->getBoundingBox(minBound, maxBound);
@@ -72,7 +72,7 @@ namespace MantidQt
 							mNumberOfDetectors += iActor->getNumberOfDetectors();
 							mChildCompAssemActors.push_back(iActor);
 						}
-						else */if (ChildRDPtr)
+						else if (ChildRDPtr)
 						{
 							//If the child is a RectangularDetector, then create a RectangularDetectorActor for it.
 							RectangularDetectorActor* iActor = new RectangularDetectorActor(instrActor, ChildCAPtr->getComponentID());
