@@ -8,6 +8,25 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflAppendRowCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflClearSelectedCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCopySelectedCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCutSelectedCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflDeleteRowCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflExpandCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflExportTableCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflGroupRowsCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflImportTableCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflNewTableCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflOpenTableCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflOptionsCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflPasteSelectedCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflPlotGroupCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflPlotRowCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflPrependRowCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflProcessCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflSaveTableAsCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflSaveTableCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableViewPresenter.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "ProgressableViewMockObject.h"
@@ -1622,6 +1641,43 @@ public:
     AnalysisDataService::Instance().remove("TOF_12346");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
+  }
+
+  void testPublishCommands() {
+    // The mock view is not needed for this test
+    // We just want to test the list of commands returned by the presenter
+    NiceMock<MockTableView> mockTableView;
+    MockProgressableView mockProgress;
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
+
+    // Actions (commands) related to the table (new, save, save as, etc)
+    auto tableCommands = presenter.publishTableCommands();
+    TS_ASSERT_EQUALS(tableCommands.size(), 7);
+    // Actions (commands) related to rows (add, delete, copy row, etc)
+    auto rowCommands = presenter.publishRowCommands();
+    TS_ASSERT_EQUALS(rowCommands.size(), 12);
+
+    // Test tableCommands vector
+    TS_ASSERT(dynamic_cast<ReflOpenTableCommand *>(tableCommands[0].get()));
+    TS_ASSERT(dynamic_cast<ReflNewTableCommand *>(tableCommands[1].get()));
+    TS_ASSERT(dynamic_cast<ReflSaveTableCommand *>(tableCommands[2].get()));
+    TS_ASSERT(dynamic_cast<ReflSaveTableAsCommand *>(tableCommands[3].get()));
+    TS_ASSERT(dynamic_cast<ReflImportTableCommand *>(tableCommands[4].get()));
+    TS_ASSERT(dynamic_cast<ReflExportTableCommand *>(tableCommands[5].get()));
+    TS_ASSERT(dynamic_cast<ReflOptionsCommand *>(tableCommands[6].get()));
+    // Test rowCommands vector
+    TS_ASSERT(dynamic_cast<ReflProcessCommand *>(rowCommands[0].get()));
+    TS_ASSERT(dynamic_cast<ReflExpandCommand *>(rowCommands[1].get()));
+    TS_ASSERT(dynamic_cast<ReflPlotRowCommand *>(rowCommands[2].get()));
+    TS_ASSERT(dynamic_cast<ReflPlotGroupCommand *>(rowCommands[3].get()));
+    TS_ASSERT(dynamic_cast<ReflAppendRowCommand *>(rowCommands[4].get()));
+    TS_ASSERT(dynamic_cast<ReflPrependRowCommand *>(rowCommands[5].get()));
+    TS_ASSERT(dynamic_cast<ReflGroupRowsCommand *>(rowCommands[6].get()));
+    TS_ASSERT(dynamic_cast<ReflCopySelectedCommand *>(rowCommands[7].get()));
+    TS_ASSERT(dynamic_cast<ReflCutSelectedCommand *>(rowCommands[8].get()));
+    TS_ASSERT(dynamic_cast<ReflPasteSelectedCommand *>(rowCommands[9].get()));
+    TS_ASSERT(dynamic_cast<ReflClearSelectedCommand *>(rowCommands[10].get()));
+    TS_ASSERT(dynamic_cast<ReflDeleteRowCommand *>(rowCommands[11].get()));
   }
 };
 

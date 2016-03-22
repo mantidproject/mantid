@@ -1,6 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLCOPYSELECTEDCOMMAND_H
 #define MANTID_CUSTOMINTERFACES_REFLCOPYSELECTEDCOMMAND_H
 
+#include "MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflCommandBase.h"
 
 namespace MantidQt {
