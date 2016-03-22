@@ -71,7 +71,7 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
 
         fitted_params = self._fit_results[1]
         self.assertTrue(isinstance(fitted_params, MatrixWorkspace))
-        self.assertEqual(10, fitted_params.getNumberHistograms())
+        self.assertEqual(14, fitted_params.getNumberHistograms())
 
         chisq_values = self._fit_results[2]
         self.assertTrue(isinstance(chisq_values, list))
@@ -112,7 +112,7 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
 
         fitted_params = self._fit_results[1]
         self.assertTrue(isinstance(fitted_params, MatrixWorkspace))
-        self.assertEqual(14, fitted_params.getNumberHistograms())
+        self.assertEqual(18, fitted_params.getNumberHistograms())
 
         chisq_values = self._fit_results[2]
         self.assertTrue(isinstance(chisq_values, list))

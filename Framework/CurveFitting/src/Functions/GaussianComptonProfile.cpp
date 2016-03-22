@@ -32,9 +32,7 @@ std::string GaussianComptonProfile::name() const {
 /**
  */
 void GaussianComptonProfile::declareParameters() {
-  // DO NOT REORDER WITHOUT CHANGING THE getParameter AND
-  // intensityParameterIndices methods
-  //
+  ComptonProfile::declareParameters();
   declareParameter(WIDTH_PARAM, 1.0, "Gaussian width parameter");
   declareParameter(AMP_PARAM, 1.0, "Gaussian intensity parameter");
 }
@@ -75,7 +73,7 @@ size_t GaussianComptonProfile::fillConstraintMatrix(
  */
 void GaussianComptonProfile::massProfile(double *result,
                                          const size_t nData) const {
-  const double amplitude(getParameter(1));
+  const double amplitude(getParameter(AMP_PARAM));
   this->massProfile(result, nData, amplitude);
 }
 
@@ -89,7 +87,7 @@ void GaussianComptonProfile::massProfile(double *result,
  */
 void GaussianComptonProfile::massProfile(double *result, const size_t nData,
                                          const double amplitude) const {
-  double lorentzPos(0.0), gaussWidth(getParameter(0));
+  double lorentzPos(0.0), gaussWidth(getParameter(WIDTH_PARAM));
   double gaussFWHM =
       std::sqrt(std::pow(m_resolutionFunction->resolutionFWHM(), 2) +
                 std::pow(2.0 * STDDEV_TO_HWHM * gaussWidth, 2));
