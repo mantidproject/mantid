@@ -112,10 +112,13 @@ class MantidGeom(object):
         child = self._append_child("type", self._root, name="sample-position")
         child.setAttribute("is", "SamplePos")
 
-    # pylint:disable = dangerous-default-value
-    def addDetectorPixels(self, name, r=[], theta=[], phi=[], names=[], energy=[]):
+    def addDetectorPixels(self, name, r=None, theta=None, phi=None, names=None, energy=None):
+        self.list_func(r)
+        self.list_func(theta)
+        self.list_func(phi)
+        self.list_func(names)
+        self.list_func(energy)
         type_element = self._append_child("type", self._root, name=name)
-
         for i in range(len(r)):
             for j in range(len(r[i])):
                 if str(r[i][j]) != "nan":
@@ -127,14 +130,18 @@ class MantidGeom(object):
                     efixed_comp = self._append_child("parameter", basecomponent, name="Efixed")
                     self._append_child("value", efixed_comp, val=str(energy[i][j]))
 
-    def addDetectorPixelsIdList(self, name, r=[], names=[]):
+    def addDetectorPixelsIdList(self, name, r=None, names=None):
+        self.list_func(r)
+        self.list_func(names)
         component = self._append_child("idlist", self._root, idname=name)
         for i in range(len(r)):
             for j in range(len(r[i])):
                 if str(r[i][j]) != "nan":
                     self._append_child("id", component, val=str(names[i][j]))
 
-    def addMonitors(self, distance=[], names=[]):
+    def addMonitors(self, distance=None, names=None):
+        self.list_func(distance)
+        self.list_func(names)
         """
             Add a list of monitors to the geometry.
         """
@@ -399,7 +406,8 @@ class MantidGeom(object):
                                    step=str(idlist[(i * 3) + 2]), \
                                    end=str(idlist[(i * 3) + 1]))
 
-    def addMonitorIds(self, ids=[]):
+    def addMonitorIds(self, ids=None):
+        self.list_func(ids)
         """
         Add the monitor IDs.
         """
@@ -420,3 +428,8 @@ class MantidGeom(object):
 
             par = self._append_child("parameter", complink, name=arg[0])
             self._append_child("value", par, val=str(arg[1]), units=str(arg[2]))
+
+    def list_func(self, items=None):
+        if items is None:
+            items = []
+        return items
