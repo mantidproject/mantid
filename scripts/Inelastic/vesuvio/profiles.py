@@ -41,10 +41,12 @@ class MassProfile(object):
 
         :param param_prefix: An optional prefix for the parameter name
         """
+        ties_str = "{0}Mass={1:f}".format(param_prefix, self.mass)
+
         if not isinstance(self.width, collections.Iterable):
-            return "{0}={1:f}".format(param_prefix + "Width", self.width)
-        else:
-            return ""
+            ties_str += ",{0}={1:f}".format(param_prefix + "Width", self.width)
+
+        return ties_str
 
     @classmethod
     def _parse_list(cls, func_str, prop_name):

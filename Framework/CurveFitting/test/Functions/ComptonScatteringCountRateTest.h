@@ -129,8 +129,10 @@ public:
     func->iterationStarting();
     TS_ASSERT_DELTA(func->getParameter(0), 5.0, 1e-10);
     TS_ASSERT_DELTA(func->getParameter(1), 0.5, 1e-10);
-    TS_ASSERT_DELTA(func->getParameter(2), 10.0, 1e-10);
-    TS_ASSERT_DELTA(func->getParameter(3), 0.5, 1e-10);
+    TS_ASSERT_DELTA(func->getParameter(2), 1.0, 1e-10);
+    TS_ASSERT_DELTA(func->getParameter(3), 10.0, 1e-10);
+    TS_ASSERT_DELTA(func->getParameter(4), 0.5, 1e-10);
+    TS_ASSERT_DELTA(func->getParameter(5), 1.0, 1e-10);
   }
 
   void
@@ -151,8 +153,10 @@ public:
     func->iterationStarting();
     TS_ASSERT_DELTA(func->getParameter(0), 5.0, 1e-10);          // width_1
     TS_ASSERT_DELTA(func->getParameter(1), 0.6666666633, 1e-10); // I_1
-    TS_ASSERT_DELTA(func->getParameter(2), 10.0, 1e-10);         // width_2
-    TS_ASSERT_DELTA(func->getParameter(3), 0.3333333317, 1e-10); // I_2
+    TS_ASSERT_DELTA(func->getParameter(2), 1.0, 1e-10);
+    TS_ASSERT_DELTA(func->getParameter(3), 10.0, 1e-10);         // width_2
+    TS_ASSERT_DELTA(func->getParameter(4), 0.3333333317, 1e-10); // I_2
+    TS_ASSERT_DELTA(func->getParameter(5), 1.0, 1e-10);
   }
 
   void
@@ -177,9 +181,11 @@ public:
                     1e-8); // first mass intensity 1
     TS_ASSERT_DELTA(func->getParameter(2), 0.33333333,
                     1e-8); // first mass intensity 2
-    TS_ASSERT_DELTA(func->getParameter(3), 10.0, 1e-10); // width_2
-    TS_ASSERT_DELTA(func->getParameter(4), 0.33333333,
+    TS_ASSERT_DELTA(func->getParameter(3), 1.0, 1e-10);
+    TS_ASSERT_DELTA(func->getParameter(4), 10.0, 1e-10); // width_2
+    TS_ASSERT_DELTA(func->getParameter(5), 0.33333333,
                     1e-8); // second mass intensity
+    TS_ASSERT_DELTA(func->getParameter(6), 1.0, 1e-10);
   }
 
   void
@@ -306,15 +312,17 @@ private:
       func1 = boost::make_shared<ComptonProfileStub>();
       func1->initialize();
     }
-    func1->setAttributeValue("Mass", 1.0);
+    func1->setParameter("Mass", 1.0);
     func1->setParameter("Width", 5.0);
     func1->setParameter("Intensity", 2.0);
+    func1->addTies("Mass=1.0");
 
     auto func2 = boost::make_shared<ComptonProfileStub>();
     func2->initialize();
-    func2->setAttributeValue("Mass", 1.0);
+    func2->setParameter("Mass", 1.0);
     func2->setParameter("Width", 10.0);
     func2->setParameter("Intensity", 3.0);
+    func2->addTies("Mass=1.0");
 
     auto profile = boost::make_shared<ComptonScatteringCountRate>();
     profile->initialize();

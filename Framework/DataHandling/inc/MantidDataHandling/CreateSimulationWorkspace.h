@@ -68,6 +68,8 @@ private:
   void applyDetectorMapping();
   /// Apply any instrument adjustments from the file
   void adjustInstrument(const std::string &filename);
+  /// Set start date for dummy workspace
+  void setStartDate(API::MatrixWorkspace_sptr workspace);
 
   /// Pointer to a progress object
   boost::shared_ptr<API::Progress> m_progress;
