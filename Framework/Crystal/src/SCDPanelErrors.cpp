@@ -462,19 +462,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
 
   // determine the OrientedLattice for converting to Q-sample
   Geometry::OrientedLattice lattice(*m_unitCell.get());
-  try {
-    Kernel::Matrix<double> UB(3, 3, false);
-    Geometry::IndexingUtils::Optimize_UB(UB, hkl_vectors, q_vectors);
-    lattice.setUB(UB);
-    /*Geometry::OrientedLattice lat;
-    lat.setUB(UB);
-    lattice.setU(lat.getU());*/
-  } catch (...) {
-    for (size_t i = StartX; i <= EndX; ++i)
-      out[i] = 10000;
-    g_log.debug() << "Could Not find a UB matix" << std::endl;
-    return;
-  }
+  lattice.setUB(m_peaks->sample().getOrientedLattice().getUB());
 
   // cumulative error
   double chiSq = 0; // for debug log message
@@ -759,20 +747,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
 
   InvhklThkl.Invert();
 
-  try {
-    Geometry::IndexingUtils::Optimize_UB(UB, hkl, qXtal);
-  } catch (std::exception &s) {
-
-    g_log.error("Not enough points to find Optimized UB1 =" +
-                std::string(s.what()));
-    throw runtime_error("Not enough good points to find Optimized UB");
-  } catch (char *s1) {
-    g_log.error("Not enough points to find Optimized UB2=" + std::string(s1));
-    throw runtime_error("Not enough good points to find Optimized UB");
-  } catch (...) {
-    g_log.error("Not enough points to find Optimized UB3");
-    throw runtime_error("Not enough good points to find Optimized UB");
-  }
+  UB = m_peaks->sample().getOrientedLattice().getUB();
 
   boost::split(Groups, BankNames, boost::is_any_of("!"));
 

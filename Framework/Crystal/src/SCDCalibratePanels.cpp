@@ -491,23 +491,20 @@ bool GoodStart(const PeaksWorkspace_sptr &peaksWs, double a, double b, double c,
   }
 
   // determine the lattice constants
-  Kernel::Matrix<double> UB(3, 3);
-  IndexingUtils::Optimize_UB(UB, hkl, qVecs);
-  std::vector<double> lat(7);
-  IndexingUtils::GetLatticeParameters(UB, lat);
+  OrientedLattice lat = peaksWs->sample().getOrientedLattice();
 
   // see if the lattice constants are no worse than 25% out
-  if (fabs(lat[0] - a) / a > .25)
+  if (fabs(lat.a() - a) / a > .25)
     return false;
-  if (fabs(lat[1] - b) / b > .25)
+  if (fabs(lat.b() - b) / b > .25)
     return false;
-  if (fabs(lat[2] - c) / c > .25)
+  if (fabs(lat.c() - c) / c > .25)
     return false;
-  if (fabs(lat[3] - alpha) / alpha > .25)
+  if (fabs(lat.alpha() - alpha) / alpha > .25)
     return false;
-  if (fabs(lat[4] - beta) / beta > .25)
+  if (fabs(lat.beta() - beta) / beta > .25)
     return false;
-  if (fabs(lat[5] - gamma) / gamma > .25)
+  if (fabs(lat.gamma() - gamma) / gamma > .25)
     return false;
 
   return true;
@@ -517,10 +514,8 @@ bool GoodStart(const PeaksWorkspace_sptr &peaksWs, double a, double b, double c,
  * Tests inputs. Does the indexing correspond to the entered lattice parameters
  * @param peaksWs  The peaks workspace with indexed peaks
  * @param  tolerance   The indexing tolerance
- * @param U  U of UB matrix
  */
-std::string GoodEnd(const PeaksWorkspace_sptr &peaksWs, double tolerance,
-                    Kernel::Matrix<double> &U) {
+std::string GoodEnd(const PeaksWorkspace_sptr &peaksWs, double tolerance) {
   // put together a list of indexed peaks
   int nPeaks = peaksWs->getNumberPeaks();
   std::vector<V3D> hkl;
@@ -537,12 +532,7 @@ std::string GoodEnd(const PeaksWorkspace_sptr &peaksWs, double tolerance,
 
   // determine the lattice constants
   Kernel::Matrix<double> UB(3, 3);
-  IndexingUtils::Optimize_UB(UB, hkl, qVecs);
-  vector<double> lat;
-  IndexingUtils::GetLatticeParameters(UB, lat);
-  OrientedLattice lattice(lat[0], lat[1], lat[2], lat[3], lat[4], lat[5]);
-  lattice.setUB(UB);
-  U = lattice.getU();
+  UB = peaksWs->sample().getOrientedLattice().getUB();
 
   return IndexingUtils::GetLatticeParameterString(UB);
 }
@@ -580,15 +570,8 @@ static inline void constrain(IFunction_sptr &iFunc, const string &parName,
 void SCDCalibratePanels::exec() {
   PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
   int nPeaks = peaksWs->getNumberPeaks();
-  double a = getProperty("a");
-  double b = getProperty("b");
-  double c = getProperty("c");
-  double alpha = getProperty("alpha");
-  double beta = getProperty("beta");
-  double gamma = getProperty("gamma");
-  if ((a == EMPTY_DBL() || b == EMPTY_DBL() || c == EMPTY_DBL() ||
-       alpha == EMPTY_DBL() || beta == EMPTY_DBL() || gamma == EMPTY_DBL()) &&
-      peaksWs->sample().hasOrientedLattice()) {
+  double a, b, c, alpha, beta, gamma;
+  if (peaksWs->sample().hasOrientedLattice()) {
     OrientedLattice latt = peaksWs->mutableSample().getOrientedLattice();
     a = latt.a();
     b = latt.b();
@@ -597,6 +580,7 @@ void SCDCalibratePanels::exec() {
     beta = latt.beta();
     gamma = latt.gamma();
   }
+  else throw std::runtime_error("PeaksWorkspace must have UB matrix.");
   double tolerance = getProperty("tolerance");
 
   string DetCalFileName = getProperty("DetCalFilename");
@@ -1089,9 +1073,9 @@ void SCDCalibratePanels::exec() {
     peak.setInstrument(instrument);
     peak.setDetectorID(peak.getDetectorID());
   }
-  Kernel::Matrix<double> U(3, 3);
+
   g_log.notice() << "Lattice after optimization: "
-                 << GoodEnd(peaksWs, tolerance, U) << "\n";
+                 << GoodEnd(peaksWs, tolerance) << "\n";
 
   // We must sort the peaks
   std::vector<std::pair<std::string, bool>> criteria;
@@ -1103,9 +1087,8 @@ void SCDCalibratePanels::exec() {
   peaksWs->sort(criteria);
 
   // create table of theoretical vs calculated
-  Geometry::OrientedLattice lattice(a, b, c, alpha, beta, gamma, U);
   Kernel::Matrix<double> UB(3, 3);
-  UB = lattice.getUB();
+  UB = peaksWs->sample().getOrientedLattice().getUB();
   int bankLast = -1;
   int iSpectrum = -1;
   int icount = 0;
@@ -1414,28 +1397,6 @@ void SCDCalibratePanels::init() {
                   "A bracketed([]) list of groupings( comma or :(for range) "
                   "separated list of bank numbers");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
-  mustBePositive->setLower(0.0);
-
-  declareProperty("a", EMPTY_DBL(), mustBePositive,
-                  "Lattice Parameter a (Leave empty to use lattice constants "
-                  "in peaks workspace)");
-  declareProperty("b", EMPTY_DBL(), mustBePositive,
-                  "Lattice Parameter b (Leave empty to use lattice constants "
-                  "in peaks workspace)");
-  declareProperty("c", EMPTY_DBL(), mustBePositive,
-                  "Lattice Parameter c (Leave empty to use lattice constants "
-                  "in peaks workspace)");
-  declareProperty("alpha", EMPTY_DBL(), mustBePositive,
-                  "Lattice Parameter alpha in degrees (Leave empty to use "
-                  "lattice constants in peaks workspace)");
-  declareProperty("beta", EMPTY_DBL(), mustBePositive,
-                  "Lattice Parameter beta in degrees (Leave empty to use "
-                  "lattice constants in peaks workspace)");
-  declareProperty("gamma", EMPTY_DBL(), mustBePositive,
-                  "Lattice Parameter gamma in degrees (Leave empty to use "
-                  "lattice constants in peaks workspace)");
-
   declareProperty("useL0", false, "Fit the L0(source to sample) distance");
   declareProperty("usetimeOffset", false, "Fit the time offset value");
   declareProperty("usePanelWidth", false, "Fit the Panel Width value");
@@ -1516,6 +1477,9 @@ void SCDCalibratePanels::init() {
 
   //------------------------------------ Tolerance
   // settings-------------------------
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  mustBePositive->setLower(0.0);
+
   declareProperty("tolerance", .12, mustBePositive,
                   "offset of hkl values from integer for GOOD Peaks");
   declareProperty("MinimizerError", 1.e-12, mustBePositive,
@@ -1601,15 +1565,14 @@ void SCDCalibratePanels::CreateFxnGetValues(
       FunctionFactory::Instance().createFunction("SCDPanelErrors"));
   if (!fit)
     cout << "Could not create fit function" << endl;
-
-  fit->setAttribute("a", IFunction::Attribute((double)getProperty("a")));
-  fit->setAttribute("b", IFunction::Attribute((double)getProperty("b")));
-  fit->setAttribute("c", IFunction::Attribute((double)getProperty("c")));
-  fit->setAttribute("alpha",
-                    IFunction::Attribute((double)getProperty("alpha")));
-  fit->setAttribute("beta", IFunction::Attribute((double)getProperty("beta")));
-  fit->setAttribute("gamma",
-                    IFunction::Attribute((double)getProperty("gamma")));
+  PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
+  OrientedLattice latt = peaksWs->mutableSample().getOrientedLattice();
+  fit->setAttribute("a", IFunction::Attribute(latt.a()));
+  fit->setAttribute("b", IFunction::Attribute(latt.b()));
+  fit->setAttribute("c", IFunction::Attribute(latt.c()));
+  fit->setAttribute("alpha", IFunction::Attribute(latt.alpha()));
+  fit->setAttribute("beta", IFunction::Attribute(latt.beta()));
+  fit->setAttribute("gamma", IFunction::Attribute(latt.gamma()));
   string PeakWSName = getPropertyValue("PeakWorkspace");
   if (PeakWSName.length() < 1)
     PeakWSName = "xxx";
