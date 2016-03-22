@@ -428,7 +428,7 @@ void TomographyIfaceModel::doRefreshJobsInfo(const std::string &compRes) {
 
 void TomographyIfaceModel::refreshLocalJobsInfo() {
   for (auto &job : m_jobsStatusLocal) {
-    if ("Exited" == job.status)
+    if ("Exit" == job.status || "Done" == job.status)
       continue;
 
     if (processIsRunning(boost::lexical_cast<int>(job.id))) {
@@ -515,8 +515,10 @@ void TomographyIfaceModel::checkDataPathsSet() const {
  */
 bool TomographyIfaceModel::processIsRunning(int pid) {
 #ifdef WIN32
+  HANDLE handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
   DWORD code;
-  BOOL rc = GetExitCodeProcess(handle.process(), &code);
+  BOOL rc = GetExitCodeProcess(handle, &code);
+  CloseHandle(handle);
   return (rc && code == STILL_ACTIVE);
 #else
   // zombie/defunct processes
@@ -551,7 +553,7 @@ void TomographyIfaceModel::doRunReconstructionJobLocal() {
       if (pid > 0) {
         info.status = "Starting";
       } else {
-        info.status = "Exited";
+        info.status = "Exit";
       }
       info.cmdLine = run + " " + allOpts;
       m_jobsStatusLocal.emplace_back(info);
@@ -560,7 +562,7 @@ void TomographyIfaceModel::doRunReconstructionJobLocal() {
           << "Execution failed. Could not run the tool. Error details: "
           << std::string(sexc.what());
       Mantid::API::IRemoteJobManager::RemoteJobInfo info;
-      info.id = boost::lexical_cast<std::string>(std::rand());
+      info.id = "none";
       info.name = "Mantid_Local";
       info.status = "Exit";
       info.cmdLine = run + " " + allOpts;
