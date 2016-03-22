@@ -517,7 +517,7 @@ bool TomographyIfaceModel::processIsRunning(int pid) {
 #ifdef WIN32
   DWORD code;
   BOOL rc = GetExitCodeProcess(handle.process(), &code);
-  return (rc && code == STILL_ACTIVE)
+  return (rc && code == STILL_ACTIVE);
 #else
   // zombie/defunct processes
   while (waitpid(-1, 0, WNOHANG) > 0) {
