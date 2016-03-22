@@ -162,7 +162,7 @@ void SplatterPlotView::render()
     return;
   }
 
-  QString renderType = "Points";
+  const char *renderType = "Point Gaussian";
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
   // Do not allow overplotting of MDWorkspaces
@@ -213,18 +213,19 @@ void SplatterPlotView::render()
   src->updatePipeline();
   pqDataRepresentation *drep = builder->createDataRepresentation(\
            src->getOutputPort(0), this->m_view);
-  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(renderType.toStdString().c_str());
+  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(renderType);
   if (!isPeaksWorkspace)
   {
-    vtkSMPropertyHelper(drep->getProxy(), "PointSize").Set(1);
+    vtkSMPropertyHelper(drep->getProxy(), "Opacity").Set(0.5);
+    vtkSMPropertyHelper(drep->getProxy(), "GaussianRadius").Set(0.005);
   } else {
     vtkSMPropertyHelper(drep->getProxy(), "LineWidth").Set(2);
   }
   drep->getProxy()->UpdateVTKObjects();
   if (!isPeaksWorkspace)
   {
-    vtkSMPVRepresentationProxy::SetScalarColoring(drep->getProxy(), "signal",
-                                                  vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    vtkSMPVRepresentationProxy::SetScalarColoring(
+        drep->getProxy(), "signal", vtkDataObject::FIELD_ASSOCIATION_POINTS);
     drep->getProxy()->UpdateVTKObjects();
   }
 
@@ -515,16 +516,19 @@ void SplatterPlotView::createPeaksFilter()
     updatePeaksFilter(m_peaksFilter);
 
     // Create point representation of the source and set the point size 
-    const double pointSize = 2;
     pqDataRepresentation *dataRepresentation  = m_peaksFilter->getRepresentation(this->m_view);
-    vtkSMPropertyHelper(dataRepresentation->getProxy(), "Representation").Set("Points");
-    vtkSMPropertyHelper(dataRepresentation->getProxy(), "PointSize").Set(pointSize);
+    vtkSMPropertyHelper(dataRepresentation->getProxy(), "Representation")
+        .Set("Point Gaussian");
+    vtkSMPropertyHelper(dataRepresentation->getProxy(), "GaussianRadius")
+        .Set(0.005);
+    vtkSMPropertyHelper(dataRepresentation->getProxy(), "Opacity").Set(0.5);
     dataRepresentation->getProxy()->UpdateVTKObjects();
 
     if (!this->isPeaksWorkspace(this->origSrc))
     {
-      vtkSMPVRepresentationProxy::SetScalarColoring(dataRepresentation->getProxy(), "signal",
-                                                  vtkDataObject::FIELD_ASSOCIATION_CELLS);
+      vtkSMPVRepresentationProxy::SetScalarColoring(
+          dataRepresentation->getProxy(), "signal",
+          vtkDataObject::FIELD_ASSOCIATION_POINTS);
       dataRepresentation->getProxy()->UpdateVTKObjects();
     }
     this->resetDisplay();
