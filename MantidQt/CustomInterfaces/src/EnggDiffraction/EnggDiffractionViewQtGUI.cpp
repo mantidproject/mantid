@@ -1062,26 +1062,33 @@ void EnggDiffractionViewQtGUI::browseFitFocusedRun() {
 }
 
 void EnggDiffractionViewQtGUI::browsePeaksToFit() {
-  QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirRaw);
-  if (prevPath.isEmpty()) {
-    prevPath =
-        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-  }
 
-  QString path(
-      QFileDialog::getOpenFileName(this, tr("Open Peaks To Fit"), prevPath,
-                                   QString::fromStdString(g_DetGrpExtStr)));
+  try {
+    QString prevPath = QString::fromStdString(m_focusDir);
+    if (prevPath.isEmpty()) {
+      prevPath = MantidQt::API::AlgorithmInputHistory::Instance()
+                     .getPreviousDirectory();
+    }
 
-  if (path.isEmpty()) {
+    QString path(
+        QFileDialog::getOpenFileName(this, tr("Open Peaks To Fit"), prevPath,
+                                     QString::fromStdString(g_DetGrpExtStr)));
+
+    if (path.isEmpty()) {
+      return;
+    }
+
+    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
+
+    std::string peaksData = readPeaksFile(path.toStdString());
+
+    m_uiTabFitting.lineEdit_fitting_peaks->setText(
+        QString::fromStdString(peaksData));
+  } catch (...) {
+    userWarning("Unable to import the peaks from a file: ",
+                "File corrupted or could not be opened. Please try again");
     return;
   }
-
-  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
-
-  std::string peaksData = readPeaksFile(path.toStdString());
-
-  m_uiTabFitting.lineEdit_fitting_peaks->setText(
-      QString::fromStdString(peaksData));
 }
 
 std::vector<std::string> EnggDiffractionViewQtGUI::focusingRunNo() const {
