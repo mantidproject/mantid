@@ -30,7 +30,9 @@ public:
   MOCK_CONST_METHOD0(getTransferMethod, std::string());
   MOCK_CONST_METHOD0(getAlgorithmRunner,
                      boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
+  MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());
   MOCK_METHOD1(setTransferMethods, void(const std::set<std::string> &));
+  MOCK_METHOD1(setTableList, void(const std::set<std::string> &));
   MOCK_METHOD2(setInstrumentList,
                void(const std::vector<std::string> &, const std::string &));
 
