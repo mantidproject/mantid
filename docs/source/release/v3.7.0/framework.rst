@@ -70,11 +70,14 @@ MD Algorithms (VATES CLI)
    ``.vtu`` files. These file types can be loaded into a standalone version
    of ParaView.
 -  PlotMD now plots points at bin centres for MDEventWorkspaces as well as MDHistoWorkspaces.
+-  SliceMD now reports the correct number of events in the output workspace.
+-  The size of densely populated, multidimensional MDEventWorkspace slices produced by SliceMD has been greatly reduced by using more sensible box splitting parameters.
 
 Performance
 -----------
 
 - :ref:`ChangeBinOffset <algm-ChangeBinOffset>` should now run faster for a :ref:`MatrixWorkspace <MatrixWorkspace>` (not EventWorkspaces).
+- Applying ParameterMaps to Detectors now about 30% faster. Algorithms that involve applying ParameterMaps will see performance improvements.
 
 CurveFitting
 ------------
