@@ -39,6 +39,14 @@ def _create_test_flags(background):
 
     return flags
 
+def _equal_within_tolerance(expected, actual, tolerance=0.05):
+    """
+    Checks the expected value is equal to the actual value with in a percentage of tolerance
+    """
+    tolerance_value = expected * tolerance
+    abs_difference = abs(expected - actual)
+    return abs_difference <= abs(tolerance_value)
+
 #====================================================================================
 
 class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
@@ -65,10 +73,10 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, fitted_ws.readX(0)[0])
         self.assertAlmostEqual(562.0, fitted_ws.readX(0)[-1])
 
-        self.assertAlmostEqual(-0.016289703, fitted_ws.readY(0)[0])
-        self.assertAlmostEqual(0.0072029933, fitted_ws.readY(0)[-1])
-        self.assertAlmostEqual(1.057476742e-05, fitted_ws.readY(1)[0])
-        self.assertAlmostEqual(7.023179770e-05, fitted_ws.readY(1)[-1])
+        self.assertTrue(_equal_within_tolerance(-0.016289703, fitted_ws.readY(0)[0]))
+        self.assertTrue(_equal_within_tolerance(0.0072029933, fitted_ws.readY(0)[-1]))
+        self.assertTrue(_equal_within_tolerance(1.057476742e-05, fitted_ws.readY(1)[0]))
+        self.assertTrue(_equal_within_tolerance(7.023179770e-05, fitted_ws.readY(1)[-1]))
 
         fitted_params = self._fit_results[1]
         self.assertTrue(isinstance(fitted_params, MatrixWorkspace))
@@ -107,10 +115,10 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, fitted_ws.readX(0)[0])
         self.assertAlmostEqual(562.0, fitted_ws.readX(0)[-1])
 
-        self.assertAlmostEqual(-0.0221362198069, fitted_ws.readY(0)[0])
-        self.assertAlmostEqual(0.00720728978699, fitted_ws.readY(0)[-1])
-        self.assertAlmostEqual(0.00571520523979, fitted_ws.readY(1)[0])
-        self.assertAlmostEqual(-0.00211277263055, fitted_ws.readY(1)[-1])
+        self.assertTrue(_equal_within_tolerance(-0.0221362198069, fitted_ws.readY(0)[0]))
+        self.assertTrue(_equal_within_tolerance(0.00720728978699, fitted_ws.readY(0)[-1]))
+        self.assertTrue(_equal_within_tolerance(0.00571520523979, fitted_ws.readY(1)[0]))
+        self.assertTrue(_equal_within_tolerance(-0.00211277263055, fitted_ws.readY(1)[-1]))
 
         fitted_params = self._fit_results[1]
         self.assertTrue(isinstance(fitted_params, MatrixWorkspace))
@@ -153,8 +161,8 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, bank1_data.readX(0)[0])
         self.assertAlmostEqual(562.0, bank1_data.readX(0)[-1])
 
-        self.assertAlmostEqual(8.03245852426e-05, bank1_data.readY(1)[0])
-        self.assertAlmostEqual(0.000559789299755, bank1_data.readY(1)[-1])
+        self.assertTrue(_equal_within_tolerance(8.03245852426e-05, bank1_data.readY(1)[0]))
+        self.assertTrue(_equal_within_tolerance(0.000559789299755, bank1_data.readY(1)[-1]))
 
         bank8 = fitted_banks[-1]
         self.assertTrue(isinstance(bank8, WorkspaceGroup))
@@ -165,8 +173,8 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, bank8_data.readX(0)[0])
         self.assertAlmostEqual(562.0, bank8_data.readX(0)[-1])
 
-        self.assertAlmostEqual(0.000279169151321, bank8_data.readY(1)[0])
-        self.assertAlmostEqual(0.000505355349359, bank8_data.readY(1)[-1])
+        self.assertTrue(_equal_within_tolerance(0.000279169151321, bank8_data.readY(1)[0]))
+        self.assertTrue(_equal_within_tolerance(0.000505355349359, bank8_data.readY(1)[-1]))
 
         chisq_values = self._fit_results[2]
         self.assertTrue(isinstance(chisq_values, list))
@@ -205,8 +213,8 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         self.assertAlmostEqual(50.0, spec143_data.readX(0)[0])
         self.assertAlmostEqual(562.0, spec143_data.readX(0)[-1])
 
-        self.assertAlmostEqual(2.3090594752e-06, spec143_data.readY(1)[0])
-        self.assertAlmostEqual(3.51960367895e-05, spec143_data.readY(1)[-1])
+        self.assertTrue(_equal_within_tolerance(2.3090594752e-06, spec143_data.readY(1)[0]))
+        self.assertTrue(_equal_within_tolerance(3.51960367895e-05, spec143_data.readY(1)[-1]))
 
         spec144 = fitted_spec[-1]
         self.assertTrue(isinstance(spec144, WorkspaceGroup))
@@ -217,8 +225,8 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         self.assertAlmostEqual(50.0, spec144_data.readX(0)[0])
         self.assertAlmostEqual(562.0, spec144_data.readX(0)[-1])
 
-        self.assertAlmostEqual(7.79185212491e-06, spec144_data.readY(1)[0])
-        self.assertAlmostEqual(4.79448882168e-05, spec144_data.readY(1)[-1])
+        self.assertTrue(_equal_within_tolerance(7.79185212491e-06, spec144_data.readY(1)[0]))
+        self.assertTrue(_equal_within_tolerance(4.79448882168e-05, spec144_data.readY(1)[-1]))
 
         chisq_values = self._fit_results[2]
         self.assertTrue(isinstance(chisq_values, list))
