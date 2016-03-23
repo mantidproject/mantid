@@ -91,7 +91,6 @@ private:
   boost::shared_ptr<SQWWorkspace> m_outputWS;
   uint16_t m_nspe;
   Kernel::DblMatrix m_uToRLU;
-  Kernel::DblMatrix m_rluToU;
   std::string m_outputFrame;
 };
 
