@@ -26,6 +26,7 @@ DECLARE_ALGORITHM(ConvertCWSDExpToMomentum)
  */
 ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
     : m_iColScan(0), m_iColPt(1), m_iColFilename(2), m_iColStartDetID(3),
+      m_iTime(2),
       m_iMonitorCounts(4), m_setQRange(true), m_isBaseName(false),
       m_removeBackground(false) {}
 
@@ -281,11 +282,12 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
     // int runid = static_cast<int>(ir) + 1;
     int scanid = m_expDataTableWS->cell<int>(ir, m_iColScan);
     int runid = m_expDataTableWS->cell<int>(ir, m_iColPt);
+    double time = m_expDataTableWS->cell<double>(ir, m_iTime);
     int monitor_counts = m_expDataTableWS->cell<int>(ir, m_iMonitorCounts);
     if (!usevirtual)
       start_detid = 0;
     convertSpiceMatrixToMomentumMDEvents(spicews, usevirtual, start_detid,
-                                         scanid, runid, monitor_counts);
+                                         scanid, runid, time, monitor_counts);
   }
 
   // Set box extentes
@@ -362,12 +364,13 @@ void ConvertCWSDExpToMomentum::setupTransferMatrix(
  * to virtual instrument in MDEventWorkspace
  * @param scannumber :: scan number
  * @param runnumber :: run number for all MDEvents created from this matrix
+ * @param measuretime :: duration (time) to measure this point
  * @param monitor_counts :: monitor counts; add to ExpInfo
  * workspace
  */
 void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
     MatrixWorkspace_sptr dataws, bool usevirtual, const detid_t &startdetid,
-    const int scannumber, const int runnumber, int monitor_counts) {
+    const int scannumber, const int runnumber, double measuretime, int monitor_counts) {
   // Create transformation matrix from which the transformation is
   Kernel::DblMatrix rotationMatrix;
   setupTransferMatrix(dataws, rotationMatrix);
@@ -448,6 +451,7 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
   expinfo->mutableRun().setGoniometer(dataws->run().getGoniometer(), false);
   int scan_run_number = scannumber * 1000 + runnumber;
   expinfo->mutableRun().addProperty("run_number", scan_run_number);
+  expinfo->mutableRun().addProperty("duration", measuretime);
   expinfo->mutableRun().addProperty("monitor", monitor_counts);
   // Add all the other propertys from original data workspace
   const std::vector<Kernel::Property *> vec_property =

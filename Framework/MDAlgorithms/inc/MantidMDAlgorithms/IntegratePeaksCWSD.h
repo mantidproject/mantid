@@ -53,7 +53,11 @@ private:
   void integrate(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws,
                  const std::map<uint16_t, signal_t> &run_monitor_map);
 
+  /// Get the run/monitor counts map
   std::map<int, signal_t> getMonitorCounts();
+
+  /// Get the run/measuring time map
+  std::map<int, double> getMeasureTime();
 
   std::vector<detid_t>
   processMaskWorkspace(DataObjects::MaskWorkspace_const_sptr maskws);
@@ -75,7 +79,8 @@ private:
 
   /// Peak centers
   bool m_haveMultipleRun;
-  std::map<int, signal_t> monitorCountMap;
+  /// a map for run number and normalization value (monitor or time)
+  std::map<int, double> m_runNormMap;
 
   std::map<int, Kernel::V3D> m_runPeakCenterMap;
   bool m_useSinglePeakCenterFmUser;
@@ -83,6 +88,8 @@ private:
   double m_peakRadius;
   bool m_doMergePeak;
   bool m_normalizeByMonitor;
+  bool m_normalizeByTime;  // NormalizeByTime
+  double m_scaleFactor; // ScaleFactor
 
   /// Peaks
   std::vector<DataObjects::Peak> m_vecPeaks;

@@ -11,6 +11,8 @@ import csv
 import time
 import random
 import numpy
+from scipy.optimize import curve_fit
+
 
 from PyQt4 import QtCore, QtGui
 try:
@@ -172,9 +174,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.comboBox_ptCountNormType, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.do_plot_pt_peak)
         self.connect(self.ui.pushButton_fitBkgd, QtCore.SIGNAL('clicked()'),
-                     self.do_fit_bkgd())
+                     self.do_fit_bkgd)
         self.connect(self.ui.pushButton_handPickBkgd, QtCore.SIGNAL('clicked()'),
-                     self.do_manual_bkgd())
+                     self.do_manual_bkgd)
 
         # Tab survey
         self.connect(self.ui.pushButton_survey, QtCore.SIGNAL('clicked()'),
@@ -824,31 +826,33 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_fit_bkgd(self):
-        """
-
+        """ Purpose: fit the Pt.-integrated peak intensity curve with Gaussian to find out the background
         :return:
         """
-        vec_x = numpy.array(list_x)
-        vec_y = numpy.array(list_y)
-        vec_e = numpy.array(list_e)
         def gauss(x, a, b, c):
             return c*numpy.exp(-(x-a)**2/b)
 
         def gauss4(x, a, b, c, d):
             return c*numpy.exp(-(x-a)**2/b)+d
 
+        # get the curve
+        vec_x, vec_y, vec_e = self.ui.graphicsView_integratedPeakView.get_xye()
+
+        # fit Gaussian for starting value of a, b and c
         popt, pcov = curve_fit(gauss, vec_x, vec_y)
         gauss_fit = gauss(vec_x, popt[0], popt[1], popt[2])
-        plt.plot(vec_x, vec_y)
-        plt.plot(vec_x, gauss_fit, 'r-')
 
-        # fit2
+        # fit Gaussian again including background
         p0 = [popt[0], popt[1], popt[2], 0.]
         popt2, pcov2 = curve_fit(gauss4, vec_x, vec_y, sigma=vec_e,  p0=p0)
         gauss_fit4 = gauss4(vec_x, popt2[0], popt2[1], popt2[2], popt2[3])
-        plt.plot(vec_x, gauss_fit4, 'r-')
 
-        plt.show()
+        # plot the result
+        self.ui.graphicsView_integratedPeakView.add_plot_1d(vec_x, gauss_fit4, color='red', marker='-')
+
+        # write out the result
+        background_value = popt2[3]
+        self.ui.lineEdit_background.setText('%.7f' % background_value)
 
         return
 
@@ -1151,13 +1155,29 @@ class MainWindow(QtGui.QMainWindow):
         """
         # Find out the current condition including (1) absolute (2) normalized by time
         # (3) normalized by monitor counts
-        blablabla
+        be_norm_str = str(self.ui.comboBox_ptCountType.currentText())
+        if be_norm_str.startswith('Absolute'):
+            to_norm = False
+        else:
+            to_norm = True
+
+        norm_by_time = False
+        norm_by_monitor = False
+        if to_norm:
+            norm_type = str(self.ui.comboBox_ptCountNormType.currentText())
+            if norm_type.count('Time') > 0:
+                norm_by_time = True
+            else:
+                norm_by_monitor = True
 
         # Integrate peak if the integrated peak workspace does not exist
-        blablabla
+        status, exp_number = gutil.parse_integers_editors([self.ui.lineEdit_exp])
+        assert status
+        exp_number = exp_number[0]
 
-        has_integrated = self._myControl.has_integrated_peak(exp_num, scan_num, pt_list=xx,
-                                                             normalized_by_monitor=False)
+        has_integrated = self._myControl.has_integrated_peak(exp_number, scan_num, pt_list=xx,
+                                                             normalized_by_monitor=norm_by_monitor,
+                                                             normalized_by_time=norm_by_time)
         if has_integrated is False:
             self._myControl.integrate_peak(exp_num=xx, scan_num=xx, pt_num=xx,
                                            normalized_by_monitor=False)
@@ -1233,14 +1253,31 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_manual_bkgd(self):
-        """
-
+        """ Select background by moving indicator manually
         :return:
         """
         if str(self.ui.pushButton_handPickBkgd.text()) == 'Customize Bkgd':
+            # get into customize background mode.  add an indicator to the line and make it movable
+            self._bkgdIndicatorKey = self.ui.graphicsView_integratedPeakView.add_vertical_indicator(x=0.1, color='red')
+            # modify the push buttons status
             self.ui.pushButton_handPickBkgd.setText('Done')
+
         elif str(self.ui.pushButton_handPickBkgd.text()) == 'Done':
+            # get out from the customize-background mode.  get the vertical indicator's position as background
+            background_value = self.ui.graphicsView_integratedPeakView.get_indicator_position(self._bkgdIndicatorKey)
+
+            # set the ground value to UI
+            self._myControl.set_background_value(background_value)
+            self.ui.lineEdit_bkgdValue.setText('%.7f' % background_value)
+
+            # modify the push button status
             self.ui.pushButton_handPickBkgd.setText('Customize Bkgd')
+
+        else:
+            raise RuntimeError('Push button in state %s is not supported.' %
+                               str(self.ui.pushButton_handPickBkgd.text()))
+
+        return
 
     def do_merge_scans(self):
         """ Process data for slicing view

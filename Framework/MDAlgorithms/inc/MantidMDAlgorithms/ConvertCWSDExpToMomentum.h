@@ -65,7 +65,7 @@ private:
                                             bool usevirtual,
                                             const detid_t &startdetid,
                                             const int scannumber,
-                                            const int runnumber,
+                                            const int runnumber, double measuretime,
                                             int monitor_counts);
 
   /// Convert |Q| with detector position to Q_sample
@@ -107,6 +107,7 @@ private:
   size_t m_iColPt;
   size_t m_iColFilename;
   size_t m_iColStartDetID;
+  size_t m_iTime;
   size_t m_iMonitorCounts;
 
   std::vector<double> m_extentMins;
