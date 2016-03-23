@@ -53,6 +53,9 @@ public:
   void addDetector(IDetector_const_sptr det, bool &warn);
 
   // IDetector methods
+  IDetector *cloneParameterized(const ParameterMap *) const override {
+    return nullptr;
+  }
   detid_t getID() const override;
   std::size_t nDets() const override;
   Kernel::V3D getPos() const override;
@@ -237,11 +240,11 @@ protected:
   // functions inherited from IObjComponent
 
   void getBoundingBox(double &, double &, double &, double &, double &,
-                      double &) const {};
+                      double &) const {}
 
-  void draw() const override{};
-  void drawObject() const override{};
-  void initDraw() const override{};
+  void draw() const override {}
+  void drawObject() const override {}
+  void initDraw() const override {}
 
   /// Returns the shape of the Object
   const boost::shared_ptr<const Object> shape() const override {
