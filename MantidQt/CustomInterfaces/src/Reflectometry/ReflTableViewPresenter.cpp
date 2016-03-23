@@ -18,7 +18,7 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidQtCustomInterfaces/ParseKeyValueString.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflOuterPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ProgressPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflOptionsDialog.h"
@@ -1652,7 +1652,7 @@ std::vector<ReflCommandBase_uptr> ReflTableViewPresenter::publishCommands() {
 * @param outerPresenter : [input] The outer presenter
 */
 void ReflTableViewPresenter::registerOuterPresenter(
-    IReflPresenter *outerPresenter) {
+    IReflOuterPresenter *outerPresenter) {
   m_outerPresenter = outerPresenter;
 }
 

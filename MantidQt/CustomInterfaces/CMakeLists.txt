@@ -209,6 +209,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
 	inc/MantidQtCustomInterfaces/ParseKeyValueString.h
 	inc/MantidQtCustomInterfaces/ProgressableView.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflOuterPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h

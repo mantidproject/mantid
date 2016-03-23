@@ -1,19 +1,21 @@
-#ifndef MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
+#ifndef MANTID_CUSTOMINTERFACES_IREFLOUTERPRESENTER_H
+#define MANTID_CUSTOMINTERFACES_IREFLOUTERPRESENTER_H
 
 #include <map>
 #include <string>
 #include <vector>
 
-#include "MantidQtCustomInterfaces/Reflectometry/IReflOuterPresenter.h"
 #include "MantidKernel/System.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class IReflPresenter
+/** @class IReflOuterPresenter
 
-IReflPresenter is an interface which defines the functions any reflectometry
-interface presenter needs to support.
+IReflOuterPresenter is an interface that defines the functions needed to receive
+information from a table presenter. IReflTablePresenter uses this interface
+to notify changes to an outer, concrete presenter. Any outer presenter that
+needs to receive information from IReflTablePresenter should inherit from this
+class.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -36,18 +38,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IReflPresenter : public IReflOuterPresenter {
+class IReflOuterPresenter {
 public:
-  virtual ~IReflPresenter(){};
+  virtual ~IReflOuterPresenter(){};
 
-  enum Flag { OpenTableFlag, SearchFlag, ICATSearchCompleteFlag, TransferFlag };
-
-  // Tell the presenter something happened
-  virtual void notify(IReflPresenter::Flag flag) = 0;
   // Update the presenter with the list of workspaces the user can open
   virtual void
   pushWorkspaceList(const std::set<std::string> &workspaceList) = 0;
 };
 }
 }
-#endif
+#endif /*MANTID_CUSTOMINTERFACES_IREFLOUTERPRESENTER_H*/

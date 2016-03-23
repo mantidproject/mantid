@@ -69,7 +69,7 @@ protected:
   // The progress view
   ProgressableView *m_progressView;
   // An outer presenter we want to notify
-  IReflPresenter *m_outerPresenter;
+  IReflOuterPresenter *m_outerPresenter;
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
   // stores the user options for the presenter
@@ -150,7 +150,7 @@ protected:
   void afterReplaceHandle(const std::string &name,
                           Mantid::API::Workspace_sptr workspace) override;
   void saveNotebook(std::map<int, std::set<int>> groups, std::set<int> rows);
-  void registerOuterPresenter(IReflPresenter *outerPresenter) override;
+  void registerOuterPresenter(IReflOuterPresenter *outerPresenter) override;
 };
 }
 }
