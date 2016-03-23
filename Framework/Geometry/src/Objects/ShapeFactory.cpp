@@ -197,7 +197,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element *pElem) {
             idMatching[idFromUser] = parseCone(pE, primitives, l_id);
             numPrimitives++;
           } else if (!primitiveName.compare("hexahedron")) {
-			lastElement = pE;
+            lastElement = pE;
             idMatching[idFromUser] = parseHexahedron(pE, primitives, l_id);
             numPrimitives++;
           } else if (!primitiveName.compare("tapered-guide")) {
@@ -898,45 +898,45 @@ parseHexahedronFromStruct(Hexahedron &hex,
 }
 } // anonymous namespace
 
-  /**
-  * Get all corners of a hexahedron from an XML element.  
-  *
-  * @param pElem :: XML 'hexahedron' element from instrument definition file.
-  * @return All corners of the hexahedron.
-  *
-  * @throw std::invalid_argument if XML string is invalid.
-  */
+/**
+* Get all corners of a hexahedron from an XML element.
+*
+* @param pElem :: XML 'hexahedron' element from instrument definition file.
+* @return All corners of the hexahedron.
+*
+* @throw std::invalid_argument if XML string is invalid.
+*/
 Hexahedron ShapeFactory::parseHexahedron(Poco::XML::Element *pElem) {
-	Element *pElem_lfb = getShapeElement(pElem, "left-front-bottom-point");
-	Element *pElem_lft = getShapeElement(pElem, "left-front-top-point");
-	Element *pElem_lbb = getShapeElement(pElem, "left-back-bottom-point");
-	Element *pElem_lbt = getShapeElement(pElem, "left-back-top-point");
-	Element *pElem_rfb = getShapeElement(pElem, "right-front-bottom-point");
-	Element *pElem_rft = getShapeElement(pElem, "right-front-top-point");
-	Element *pElem_rbb = getShapeElement(pElem, "right-back-bottom-point");
-	Element *pElem_rbt = getShapeElement(pElem, "right-back-top-point");
+  Element *pElem_lfb = getShapeElement(pElem, "left-front-bottom-point");
+  Element *pElem_lft = getShapeElement(pElem, "left-front-top-point");
+  Element *pElem_lbb = getShapeElement(pElem, "left-back-bottom-point");
+  Element *pElem_lbt = getShapeElement(pElem, "left-back-top-point");
+  Element *pElem_rfb = getShapeElement(pElem, "right-front-bottom-point");
+  Element *pElem_rft = getShapeElement(pElem, "right-front-top-point");
+  Element *pElem_rbb = getShapeElement(pElem, "right-back-bottom-point");
+  Element *pElem_rbt = getShapeElement(pElem, "right-back-top-point");
 
-	Hexahedron hex;
-	hex.lfb = parsePosition(pElem_lfb);
-	hex.lft = parsePosition(pElem_lft);
-	hex.lbb = parsePosition(pElem_lbb);
-	hex.lbt = parsePosition(pElem_lbt);
-	hex.rfb = parsePosition(pElem_rfb);
-	hex.rft = parsePosition(pElem_rft);
-	hex.rbb = parsePosition(pElem_rbb);
-	hex.rbt = parsePosition(pElem_rbt);
+  Hexahedron hex;
+  hex.lfb = parsePosition(pElem_lfb);
+  hex.lft = parsePosition(pElem_lft);
+  hex.lbb = parsePosition(pElem_lbb);
+  hex.lbt = parsePosition(pElem_lbt);
+  hex.rfb = parsePosition(pElem_rfb);
+  hex.rft = parsePosition(pElem_rft);
+  hex.rbb = parsePosition(pElem_rbb);
+  hex.rbt = parsePosition(pElem_rbt);
 
-    const bool isValid = pElem_lfb && pElem_lft && pElem_lbb && pElem_lbt &&
-                            pElem_rfb && pElem_rft && pElem_rbb && pElem_rbt;
+  const bool isValid = pElem_lfb && pElem_lft && pElem_lbb && pElem_lbt &&
+                       pElem_rfb && pElem_rft && pElem_rbb && pElem_rbt;
 
-	const std::string ERROR_MSG =
-		"XML element: <" + pElem->tagName() +
-		"> contains invalid syntax for defining hexahedron.";
+  const std::string ERROR_MSG =
+      "XML element: <" + pElem->tagName() +
+      "> contains invalid syntax for defining hexahedron.";
 
-	if(!isValid)
-		throw std::invalid_argument(ERROR_MSG);
+  if (!isValid)
+    throw std::invalid_argument(ERROR_MSG);
 
-    return hex;
+  return hex;
 }
 
 /** Parse XML 'hexahedron' element

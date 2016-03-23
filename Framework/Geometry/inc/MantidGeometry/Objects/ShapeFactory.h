@@ -36,14 +36,14 @@ struct CuboidCorners {
 };
 
 struct Hexahedron {
-	Kernel::V3D lfb; // left front bottom
-	Kernel::V3D lft; // left front top
-	Kernel::V3D lbb; // left back bottom
-	Kernel::V3D lbt; // left back top
-	Kernel::V3D rfb; // right front bottom
-	Kernel::V3D rft; // right front top
-	Kernel::V3D rbb; // right back bottom
-	Kernel::V3D rbt; // right back top
+  Kernel::V3D lfb; // left front bottom
+  Kernel::V3D lft; // left front top
+  Kernel::V3D lbb; // left back bottom
+  Kernel::V3D lbt; // left back top
+  Kernel::V3D rfb; // right front bottom
+  Kernel::V3D rft; // right front top
+  Kernel::V3D rbb; // right back bottom
+  Kernel::V3D rbt; // right back top
 };
 /**
 

@@ -102,17 +102,17 @@ void GluGeometryHandler::GetObjectGeom(int &mytype,
       vectors.push_back(Point3);
       vectors.push_back(Point4);
       break;
-	case HEXAHEDRON:
-		mytype = 1;
-		vectors.push_back(Point1);
-		vectors.push_back(Point2);
-		vectors.push_back(Point3);
-		vectors.push_back(Point4);
-		vectors.push_back(Point5);
-		vectors.push_back(Point6);
-		vectors.push_back(Point7);
-		vectors.push_back(Point8);
-		break;
+    case HEXAHEDRON:
+      mytype = 1;
+      vectors.push_back(Point1);
+      vectors.push_back(Point2);
+      vectors.push_back(Point3);
+      vectors.push_back(Point4);
+      vectors.push_back(Point5);
+      vectors.push_back(Point6);
+      vectors.push_back(Point7);
+      vectors.push_back(Point8);
+      break;
     case SPHERE:
       mytype = 2;
       vectors.push_back(center);

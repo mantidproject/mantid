@@ -1320,10 +1320,10 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
           "Duplicate detector ID found when adding RectangularDetector " +
           name + " in XML instrument file" + filename);
     }
-  }else if (category.compare("StructuredDetector") == 0 ||
-	  category.compare("structuredDetector") == 0 ||
-	  category.compare("structureddetector") == 0 ||
-	  category.compare("structured_detector") == 0) {
+  } else if (category.compare("StructuredDetector") == 0 ||
+             category.compare("structuredDetector") == 0 ||
+             category.compare("structureddetector") == 0 ||
+             category.compare("structured_detector") == 0) {
     //-------------- Create a StructuredDetector
     //------------------------------------------------
     std::string name = InstrumentDefinitionParser::getNameOfLocationElement(
@@ -1459,10 +1459,10 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
       }
     } catch (Kernel::Exception::ExistsError &) {
       throw Kernel::Exception::InstrumentDefinitionError(
-          "Duplicate detector ID found when adding StructuredDetector " +
-          name + " in XML instrument file" + filename);
+          "Duplicate detector ID found when adding StructuredDetector " + name +
+          " in XML instrument file" + filename);
     }
-  }else if (category.compare("Detector") == 0 ||
+  } else if (category.compare("Detector") == 0 ||
              category.compare("detector") == 0 ||
              category.compare("Monitor") == 0 ||
              category.compare("monitor") == 0) {

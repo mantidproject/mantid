@@ -311,7 +311,7 @@ void StructuredDetector::initialize(int xpixels, int ypixels,
     throw std::invalid_argument("StructuredDetector::initialize(): x.size() "
                                 "should be = (xpixels+1)*(ypixels+1)");
 
-  //Store vertices
+  // Store vertices
   m_xvalues = x;
   m_yvalues = y;
 
@@ -346,7 +346,7 @@ void StructuredDetector::initialize(int xpixels, int ypixels,
         maxDetId = id;
       }
 
-	  //Create and store detector pixel
+      // Create and store detector pixel
       auto detector = addDetector(xColumn, oss.str(), ix, iy, id);
       xColumn->add(detector);
     }
@@ -356,7 +356,7 @@ void StructuredDetector::initialize(int xpixels, int ypixels,
   m_maxDetId = maxDetId;
 }
 
-/** Creates new hexahedral detector pixel at row x column y using the 
+/** Creates new hexahedral detector pixel at row x column y using the
 *   detector vertex values.
 * @param name :: The Pixel name identifier
 * @param x :: The pixel row
@@ -371,7 +371,7 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   std::ostringstream shapestr;
   Mantid::Geometry::ShapeFactory shapeCreator;
 
-  //Store hexahedral vertices for detector shape
+  // Store hexahedral vertices for detector shape
   auto xlb = m_xvalues[(y * w) + x];
   auto xlf = m_xvalues[(y * w) + x + w];
   auto xrf = m_xvalues[(y * w) + x + w + 1];
@@ -381,18 +381,18 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   auto yrf = m_yvalues[(y * w) + x + w + 1];
   auto yrb = m_yvalues[(y * w) + x + 1];
 
-  //calculate midpoint of trapeziod
+  // calculate midpoint of trapeziod
   auto a = abs(xrf - xlf);
   auto b = abs(xrb - xlb);
   auto h = abs(ylb - ylf);
   auto cx = ((a + b) / 4);
   auto cy = h / 2;
 
-  //store detector position before translating to origin
+  // store detector position before translating to origin
   auto xpos = xlb + cx;
   auto ypos = ylb + cy;
 
-  //Translate detector shape to origin
+  // Translate detector shape to origin
   xlf -= xpos;
   xrf -= xpos;
   xrb -= xpos;
@@ -401,7 +401,6 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   yrf -= ypos;
   yrb -= ypos;
   ylb -= ypos;
-
 
   // Create XML shape used to describe detector pixel
   shapestr << "<type name=\"userShape\" >";
@@ -448,9 +447,9 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   // Create detector
   auto detector = new Detector(name, id, shape, parent);
 
-  //Set detector position relative to parent
+  // Set detector position relative to parent
   V3D pos(xpos, ypos, 0);
-  
+
   detector->translate(pos);
 
   return detector;
@@ -555,44 +554,44 @@ int StructuredDetector::getPointInObject(V3D &point) const {
 */
 void StructuredDetector::getBoundingBox(BoundingBox &assemblyBox) const {
   /*if (!m_cachedBoundingBox) {
-	  auto w = m_xpixels + 1;
+          auto w = m_xpixels + 1;
 
-	  auto x = getXValues();
-	  auto y = getYValues();
+          auto x = getXValues();
+          auto y = getYValues();
 
-	  double xmin = x[0], xmax = x[0], ymin = y[0], ymax =y[0];
+          double xmin = x[0], xmax = x[0], ymin = y[0], ymax =y[0];
 
-	  for (int i = 0; i < x.size(); i++)
-	  {
-		  if (x[i] < xmin)
-			  xmin = x[i];
-		  if (x[i] > xmax)
-			  xmax = x[i];
-		  if (y[i] < ymin)
-			  ymin = y[i];
-		  if (y[i] > ymax)
-			  ymax = y[i];
-	  }
+          for (int i = 0; i < x.size(); i++)
+          {
+                  if (x[i] < xmin)
+                          xmin = x[i];
+                  if (x[i] > xmax)
+                          xmax = x[i];
+                  if (y[i] < ymin)
+                          ymin = y[i];
+                  if (y[i] > ymax)
+                          ymax = y[i];
+          }
 
     m_cachedBoundingBox = new BoundingBox(xmax, ymax, 0.001, xmin, ymin, 0);*/
-	if (!m_cachedBoundingBox) {
-		m_cachedBoundingBox = new BoundingBox();
-		// Get all the corners
-		BoundingBox compBox;
+  if (!m_cachedBoundingBox) {
+    m_cachedBoundingBox = new BoundingBox();
+    // Get all the corners
+    BoundingBox compBox;
 
-		boost::shared_ptr<Detector> det = getAtXY(0, 0);
-		det->getBoundingBox(compBox);
-		m_cachedBoundingBox->grow(compBox);
-		det = getAtXY(this->xpixels() - 1, 0);
-		det->getBoundingBox(compBox);
-		m_cachedBoundingBox->grow(compBox);
-		det = getAtXY(this->xpixels() - 1, this->ypixels() - 1);
-		det->getBoundingBox(compBox);
-		m_cachedBoundingBox->grow(compBox);
-		det = getAtXY(0, this->ypixels() - 1);
-		det->getBoundingBox(compBox);
-		m_cachedBoundingBox->grow(compBox);
-	}
+    boost::shared_ptr<Detector> det = getAtXY(0, 0);
+    det->getBoundingBox(compBox);
+    m_cachedBoundingBox->grow(compBox);
+    det = getAtXY(this->xpixels() - 1, 0);
+    det->getBoundingBox(compBox);
+    m_cachedBoundingBox->grow(compBox);
+    det = getAtXY(this->xpixels() - 1, this->ypixels() - 1);
+    det->getBoundingBox(compBox);
+    m_cachedBoundingBox->grow(compBox);
+    det = getAtXY(0, this->ypixels() - 1);
+    det->getBoundingBox(compBox);
+    m_cachedBoundingBox->grow(compBox);
+  }
   // Use cached box
   assemblyBox = *m_cachedBoundingBox;
 }

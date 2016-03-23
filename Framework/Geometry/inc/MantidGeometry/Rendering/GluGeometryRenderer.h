@@ -69,9 +69,9 @@ public:
                   const Kernel::V3D &Point3, const Kernel::V3D &Point4);
   /// Creates a Hexahedron from the input values
   void CreateHexahedron(const Kernel::V3D &Point1, const Kernel::V3D &Point2,
-	  const Kernel::V3D &Point3, const Kernel::V3D &Point4,
-	  const Kernel::V3D &Point5, const Kernel::V3D &Point6,
-	  const Kernel::V3D &Point7, const Kernel::V3D &Point8);
+                        const Kernel::V3D &Point3, const Kernel::V3D &Point4,
+                        const Kernel::V3D &Point5, const Kernel::V3D &Point6,
+                        const Kernel::V3D &Point7, const Kernel::V3D &Point8);
   /// Creates a Cone from the input values
   void CreateCone(const Kernel::V3D &center, const Kernel::V3D &axis,
                   double radius, double height);

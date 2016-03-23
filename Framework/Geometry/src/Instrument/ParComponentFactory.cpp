@@ -94,9 +94,9 @@ ParComponentFactory::create(boost::shared_ptr<const IComponent> base,
   // @todo Really could do with a better system than this. Virtual function
   // maybe?
   const StructuredDetector *sd =
-	  dynamic_cast<const StructuredDetector *>(base.get());
+      dynamic_cast<const StructuredDetector *>(base.get());
   if (sd)
-	  return boost::make_shared<StructuredDetector>(sd, map);
+    return boost::make_shared<StructuredDetector>(sd, map);
 
   const RectangularDetector *rd =
       dynamic_cast<const RectangularDetector *>(base.get());
