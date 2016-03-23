@@ -56,7 +56,7 @@ public:
   /// Set whether to accept/reject close events
   void acceptCloseEvent(const bool value);
   /// Opens a script providing a copy is not already open
-  void openUnique(const QString &);
+  void openUnique(const QString &filename);
 
 signals:
   /// Show the scripting language dialog

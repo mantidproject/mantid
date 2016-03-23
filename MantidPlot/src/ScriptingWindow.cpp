@@ -765,14 +765,18 @@ bool ScriptingWindow::shouldEnableAbort() const {
 }
 
 /**
- * Opens a script providing a copy is not already open
- * @param newTabName The name of the newTab to open
+ * Opens a script providing a copy is not already open. On exit the
+ * active tab will be the one containing the given script.
+ * @param filename The name of the newTab to open
  */
-void ScriptingWindow::openUnique(const QString &newTabName) {
+void ScriptingWindow::openUnique(const QString &filename) {
   auto openFiles = m_manager->fileNamesToQStringList();
-  auto position = openFiles.contains(newTabName);
-  if (!position) {
-    m_manager->newTab(openFiles.size(), newTabName);
+  auto position = openFiles.indexOf(filename);
+  if (position < 0) {
+    m_manager->newTab(openFiles.size(), filename);
+  } else {
+    // make it the current tab
+    m_manager->setCurrentIndex(position);
   }
 }
 
