@@ -22,7 +22,6 @@
 #include <vtkCallbackCommand.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMIntVectorProperty.h>
-#include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
 #include <vtkSMTransferFunctionProxy.h>
 
@@ -85,16 +84,6 @@ void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
   vtkSMTransferFunctionProxy::ApplyPreset(lutProxy, model, true);
 }
 
-void SafeSetScalarBarColor(vtkSMProxy *gridAxis, const char *pname,
-                           double *value) {
-  vtkSMProperty *prop = gridAxis->GetProperty(pname);
-  Q_ASSERT(prop);
-  vtkSMPropertyHelper helper(prop);
-  if (value) {
-    helper.Set(value, 3);
-  }
-}
-
 /**
  * React to a change of the color scale settings.
  * @param min The lower end of the color scale.
@@ -112,43 +101,15 @@ void ColorUpdater::colorScaleChange(double min, double max)
     pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
     const QList<pqPipelineSource *> sources =
         smModel->findItems<pqPipelineSource *>(server);
-
     // For all sources
     foreach (pqPipelineSource *source, sources) {
       const QList<pqView *> views = source->getViews();
       // For all views
       foreach (pqView *view, views) {
-        std::vector<double> backgroundRgb;
-        if (view) {
-          vtkSMProperty *prop = view->getProxy()->GetProperty("Background");
-          vtkSMPropertyHelper helper(prop);
-          backgroundRgb = helper.GetDoubleArray();
-        }
         QList<pqDataRepresentation*> reps =  source->getRepresentations(view);
 
         // For all representations
         foreach (pqDataRepresentation *rep, reps) {
-          if (backgroundRgb.size() == 3) {
-            double a =
-                1. - (0.299 * backgroundRgb[0] + 0.587 * backgroundRgb[1] +
-                      0.114 * backgroundRgb[2]);
-
-            std::array<double, 3> color;
-            if (a < 0.5)
-              color = {{0., 0., 0.}};
-            else
-              color = {{1., 1., 1.}};
-
-            vtkSMProxy *ScalarBarProxy =
-                vtkSMTransferFunctionProxy::FindScalarBarRepresentation(
-                    rep->getLookupTableProxy(), view->getProxy());
-            if (ScalarBarProxy) {
-              SafeSetScalarBarColor(ScalarBarProxy, "TitleColor", color.data());
-              ScalarBarProxy->UpdateProperty("TitleColor");
-              SafeSetScalarBarColor(ScalarBarProxy, "LabelColor", color.data());
-              ScalarBarProxy->UpdateProperty("LabelColor");
-            }
-          }
           this->updateLookupTable(rep);
         }
       }

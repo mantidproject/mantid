@@ -930,16 +930,6 @@ void MdViewerWidget::renderAndFinalSetup() {
   this->currentView->setColorsForView(this->ui.colorSelectionWidget);
   this->currentView->checkView(this->initialView);
   this->currentView->updateAnimationControls();
-  pqPipelineSource *source = this->currentView->origSrc;
-  // suppress unused variable;
-  (void)source;
-  pqPipelineRepresentation *repr = this->currentView->origRep;
-  // suppress unused variable;
-  (void)repr;
-  // this->ui.proxiesPanel->clear();
-  // this->ui.proxiesPanel->addProxy(source->getProxy(),"datasource",QStringList(),true);
-  // this->ui.proxiesPanel->addProxy(repr->getProxy(),"display",QStringList("CubeAxesVisibility"),true);
-  // this->ui.proxiesPanel->updateLayout();
   this->setDestroyedListener();
   this->currentView->setVisibilityListener();
   this->currentView->onAutoScale(this->ui.colorSelectionWidget);
@@ -950,6 +940,10 @@ void MdViewerWidget::renderAndFinalSetup() {
  */
 void MdViewerWidget::setColorForBackground() {
   this->currentView->setColorForBackground(this->useCurrentColorSettings);
+}
+
+void MdViewerWidget::setVisibleAxesColors() {
+  this->currentView->setVisibleAxesColors(this->useCurrentColorSettings);
 }
 
 /**
@@ -1029,6 +1023,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v) {
   // ViewBase and the specialized VSI view classes (trac ticket #11739).
   restoreViewState(this->currentView, v);
   this->currentView->setColorsForView(this->ui.colorSelectionWidget);
+  this->currentView->setVisibleAxesColors(this->useCurrentColorSettings);
 
   this->currentView->checkViewOnSwitch();
   this->updateAppState();

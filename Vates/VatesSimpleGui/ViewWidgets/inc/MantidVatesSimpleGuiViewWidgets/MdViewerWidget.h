@@ -92,7 +92,7 @@ public:
   void setupPluginMode() override;
 
 public slots:
-  /// Seet MantidQt::API::VatesViewerInterface
+  /// See MantidQt::API::VatesViewerInterface
   void shutdown() override;
 
 protected slots:
@@ -244,6 +244,8 @@ private:
                                         QStringList &wsNames);
   /// Set up the default color for the background of the view.
   void setColorForBackground();
+  /// Sets axes colors that are visible against the background.
+  void setVisibleAxesColors();
   /// Set the color map
   void setColorMap();
   /// Render the original workspace

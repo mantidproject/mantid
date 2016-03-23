@@ -9,9 +9,6 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/BoxInfo.h"
 #include "MantidKernel/WarningSuppressions.h"
-#if defined(__INTEL_COMPILER)
-  #pragma warning disable 1170
-#endif
 
 #include <QVTKWidget.h>
 #include <pqActiveObjects.h>
@@ -39,13 +36,8 @@
 #include <vtkSMProxy.h>
 #include <vtkSMRenderViewProxy.h>
 #include <vtkSMSourceProxy.h>
-#include <vtkSMTransferFunctionProxy.h>
 
 #include <pqMultiSliceAxisWidget.h>
-
-#if defined(__INTEL_COMPILER)
-  #pragma warning enable 1170
-#endif
 
 #include <QHBoxLayout>
 #include <QPointer>
@@ -797,6 +789,18 @@ void ViewBase::setColorForBackground(bool useCurrentColorSettings)
   backgroundRgbProvider.observe(this->getView());
 }
 
+/**
+ * This function sets the default colors for the background and connects a
+ * tracker for changes of the background color by the user.
+ * @param useCurrentColorSettings If the view was switched or created.
+ */
+void ViewBase::setVisibleAxesColors(bool useCurrentColorSettings) {
+  m_visibleAxesColor.setOrientationAxesLabelColor(this->getView(),
+                                                  useCurrentColorSettings);
+  m_visibleAxesColor.setGridAxesColor(this->getView(), true);
+  m_visibleAxesColor.setScalarBarColor();
+  // m_visibleAxesColor.observe(this->getView());
+}
 
 /**
  * Set color scale lock
@@ -935,32 +939,6 @@ void ViewBase::removeVisibilityListener() {
   }
 }
 
-void SafeSetAxisTitle(vtkSMProxy *gridAxis, const char *pname,
-                      const char *value) {
-  vtkSMProperty *prop = gridAxis->GetProperty(pname);
-  Q_ASSERT(prop);
-
-  vtkSMPropertyHelper helper(prop);
-  QString key = QString("MTSBAutoTitle.%1").arg(pname);
-  if (value) {
-    helper.Set(value);
-    gridAxis->SetAnnotation(key.toLatin1().data(), value);
-  } else {
-    prop->ResetToDefault();
-    gridAxis->RemoveAnnotation(key.toLatin1().data());
-  }
-}
-
-void SafeSetAxisTitleProperty(vtkSMProxy *gridAxis, const char *pname,
-                              double *value) {
-  vtkSMProperty *prop = gridAxis->GetProperty(pname);
-  Q_ASSERT(prop);
-  vtkSMPropertyHelper helper(prop);
-  if (value) {
-    helper.Set(value, 3);
-  }
-}
-
 /**
  * Sets the axes grid if the user has this enabled
  */
@@ -970,34 +948,6 @@ void ViewBase::setAxesGrid(bool on) {
       vtkSMProxy *gridAxes3DActor = vtkSMPropertyHelper(renderView->getProxy(), "AxesGrid", true).GetAsProxy();
       vtkSMPropertyHelper(gridAxes3DActor, "Visibility").Set(1);
       gridAxes3DActor->UpdateProperty("Visibility");
-
-      vtkSMProperty *prop = renderView->getProxy()->GetProperty("Background");
-      vtkSMPropertyHelper helper(prop);
-      std::vector<double> backgroundRgb = helper.GetDoubleArray();
-
-      double a = 1. - (0.299 * backgroundRgb[0] + 0.587 * backgroundRgb[1] +
-                       0.114 * backgroundRgb[2]);
-
-      std::array<double, 3> color;
-      if (a < 0.5)
-        color = {{0., 0., 0.}};
-      else
-        color = {{1., 1., 1.}};
-
-      SafeSetAxisTitleProperty(gridAxes3DActor, "XTitleColor", color.data());
-      gridAxes3DActor->UpdateProperty("XTitleColor");
-      SafeSetAxisTitleProperty(gridAxes3DActor, "YTitleColor", color.data());
-      gridAxes3DActor->UpdateProperty("YTitleColor");
-      SafeSetAxisTitleProperty(gridAxes3DActor, "ZTitleColor", color.data());
-      gridAxes3DActor->UpdateProperty("ZTitleColor");
-      SafeSetAxisTitleProperty(gridAxes3DActor, "XLabelColor", color.data());
-      gridAxes3DActor->UpdateProperty("XLabelColor");
-      SafeSetAxisTitleProperty(gridAxes3DActor, "YLabelColor", color.data());
-      gridAxes3DActor->UpdateProperty("YLabelColor");
-      SafeSetAxisTitleProperty(gridAxes3DActor, "ZLabelColor", color.data());
-      gridAxes3DActor->UpdateProperty("ZLabelColor");
-      SafeSetAxisTitleProperty(gridAxes3DActor, "GridColor", color.data());
-      gridAxes3DActor->UpdateProperty("GridColor");
     }
   }
 }

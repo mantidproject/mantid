@@ -6,17 +6,10 @@
 #include <cmath>
 #include <vector>
 
-#include <pqActiveObjects.h>
-#include <pqDataRepresentation.h>
-#include <pqPipelineRepresentation.h>
-
 #include <pqRenderView.h>
 #include <vtkCallbackCommand.h>
 #include <vtkCommand.h>
-#include <vtkNew.h>
 #include <vtkSMDoubleVectorProperty.h>
-#include <vtkSMPropertyHelper.h>
-#include <vtkSMTransferFunctionProxy.h>
 #include <vtkSMViewProxy.h>
 #include <vtkSmartPointer.h>
 
@@ -122,20 +115,6 @@ namespace Mantid
         vtkSMDoubleVectorProperty* background = vtkSMDoubleVectorProperty::SafeDownCast(view->getViewProxy()->GetProperty("Background"));
 
         background->SetElements3(backgroundRgb[0],backgroundRgb[1],backgroundRgb[2]);
-
-        // Counting the perceptive luminance
-        // human eye favors green color...
-        double a = 1. - (0.299 * backgroundRgb[0] + 0.587 * backgroundRgb[1] +
-                         0.114 * backgroundRgb[2]);
-
-        std::array<double, 3> color;
-        if (a < 0.5)
-          color = {{0., 0., 0.}};
-        else
-          color = {{1., 1., 1.}};
-
-        vtkSMPropertyHelper(view->getProxy(), "OrientationAxesLabelColor")
-            .Set(color.data(), 3);
 
         view->resetCamera();
       }
