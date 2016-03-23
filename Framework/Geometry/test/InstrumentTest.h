@@ -618,13 +618,10 @@ private:
     const detid_t nPixels = 100 * 100 * 6;
     double sum = 0.0;
     for (int rep = 0; rep < repetitions; ++rep) {
-      std::vector<double> pos_x(threads, 0.0);
-#pragma omp parallel for num_threads(threads)
+#pragma omp parallel for reduction(+:sum) num_threads(threads)
       for (detid_t i = 1; i <= nPixels; i++) {
-        int thread = omp_get_thread_num();
-        pos_x[thread] += instrument.getDetector(i)->getPos().X();
+        sum += instrument.getDetector(i)->getPos().X();
       }
-      sum += std::accumulate(begin(pos_x), end(pos_x), 0, std::plus<double>());
     }
   }
 
