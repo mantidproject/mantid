@@ -230,9 +230,9 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
         """
         bin_width = 3
         wks_grp = SimulatedDensityOfStates(PHONONFile=self._phonon_file,
-                                       SpectrumType='DOS',
-                                       BinWidth=bin_width,
-                                       Ions='H,C,O')
+                                           SpectrumType='DOS',
+                                           BinWidth=bin_width,
+                                           Ions='H,C,O')
         expected_x_min = -0.051481
         for idx in range(wks_grp.getNumberOfEntries()):
             ws = wks_grp.getItem(idx)
