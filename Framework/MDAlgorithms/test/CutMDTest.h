@@ -56,13 +56,13 @@ private:
         "Dimensions", "4", "Extents", "-1,1,-1,1,-1,1,-10,10", "Names",
         "H,K,L,E", "Units", units_string.c_str());
 
-    FrameworkManager::Instance().exec("SetSpecialCoordinates", 4,
-                                      "InputWorkspace", sharedWSName.c_str(),
-                                      "SpecialCoordinates", "HKL");
+    FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(),
+                                      "a", "1", "b", "1", "c", "1", "alpha",
+                                      "90", "beta", "90", "gamma", "90");
 
-    FrameworkManager::Instance().exec(
-        "SetUB", 14, "Workspace", sharedWSName.c_str(), "a", "1", "b", "1", "c",
-        "1", "alpha", "90", "beta", "90", "gamma", "90");
+    FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace",
+                                      wsName.c_str(), "PeakParams",
+                                      "1000,0,0,0,0,1");
 
     IMDWorkspace_const_sptr cutMDtestws =
         AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(wsName);
@@ -75,10 +75,6 @@ public:
         "CreateMDWorkspace", 10, "OutputWorkspace", sharedWSName.c_str(),
         "Dimensions", "3", "Extents", "-10,10,-10,10,-10,10", "Names", "A,B,C",
         "Units", "U,U,U");
-
-    FrameworkManager::Instance().exec("SetSpecialCoordinates", 4,
-                                      "InputWorkspace", sharedWSName.c_str(),
-                                      "SpecialCoordinates", "HKL");
 
     FrameworkManager::Instance().exec(
         "SetUB", 14, "Workspace", sharedWSName.c_str(), "a", "1", "b", "1", "c",
@@ -118,9 +114,6 @@ public:
         "Dimensions", "3", "Extents", "-10,10,-10,10,-10,10", "Names", "H,K,L",
         "Units", "U,U,U");
 
-    FrameworkManager::Instance().exec("SetSpecialCoordinates", 4,
-                                      "InputWorkspace", wsName.c_str(),
-                                      "SpecialCoordinates", "HKL");
     auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
@@ -245,10 +238,6 @@ public:
                                       "a", "1", "b", "1", "c", "1", "alpha",
                                       "90", "beta", "90", "gamma", "90");
 
-    FrameworkManager::Instance().exec("SetSpecialCoordinates", 4,
-                                      "InputWorkspace", wsName.c_str(),
-                                      "SpecialCoordinates", "HKL");
-
     ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
     proj->addColumn("str", "name");
     proj->addColumn("V3D", "value");
@@ -308,10 +297,6 @@ public:
     FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(),
                                       "a", "1", "b", "1", "c", "1", "alpha",
                                       "90", "beta", "90", "gamma", "90");
-
-    FrameworkManager::Instance().exec("SetSpecialCoordinates", 4,
-                                      "InputWorkspace", wsName.c_str(),
-                                      "SpecialCoordinates", "HKL");
 
     ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
     proj->addColumn("str", "name");
@@ -373,10 +358,6 @@ public:
                                       "a", "1", "b", "1", "c", "1", "alpha",
                                       "90", "beta", "90", "gamma", "90");
 
-    FrameworkManager::Instance().exec("SetSpecialCoordinates", 4,
-                                      "InputWorkspace", wsName.c_str(),
-                                      "SpecialCoordinates", "HKL");
-
     ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
     proj->addColumn("str", "name");
     proj->addColumn("V3D", "value");
@@ -436,10 +417,6 @@ public:
     FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(),
                                       "a", "1", "b", "1", "c", "1", "alpha",
                                       "90", "beta", "90", "gamma", "90");
-
-    FrameworkManager::Instance().exec("SetSpecialCoordinates", 4,
-                                      "InputWorkspace", wsName.c_str(),
-                                      "SpecialCoordinates", "HKL");
 
     addNormalization(wsName);
 
