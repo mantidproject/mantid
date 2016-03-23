@@ -3,6 +3,8 @@
 
 #include "MantidQtCustomInterfaces/Reflectometry/ReflCommand.h"
 
+#include <memory>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 class IReflTablePresenter;

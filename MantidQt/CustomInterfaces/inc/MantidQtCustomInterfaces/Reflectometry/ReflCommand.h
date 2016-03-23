@@ -1,6 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLCOMMAND_H
 #define MANTID_CUSTOMINTERFACES_REFLCOMMAND_H
 
+#include <string>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 /** @class ReflCommand

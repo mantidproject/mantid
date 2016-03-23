@@ -1,11 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_IREFLOUTERPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_IREFLOUTERPRESENTER_H
 
-#include <map>
+#include <set>
 #include <string>
-#include <vector>
-
-#include "MantidKernel/System.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

@@ -16,6 +16,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 
+#include <vector>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
