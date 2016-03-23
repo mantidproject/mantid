@@ -39,5 +39,6 @@ Bugfixes
 
 - *BayesQuasi* no longer crashes if the you supply data with trailing or leading zeros
 - :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>` only corrects for detailed balance when one is actually specified as input.
+- :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` should no longer manipulate the actual data values and only rebins the data to the desired bin width.
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_
