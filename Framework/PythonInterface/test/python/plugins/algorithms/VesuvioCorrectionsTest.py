@@ -159,7 +159,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         self._validate_table_workspace(linear_params, 7, 3)
         expected_values = [0.0001183, 0.0, 1.0, 2.4028667, 0.0, 1.0, 10.5412496]
         if self._is_linux:
-            expected_values = [0.550200e-04, 0.0, 1.0, 2.390063, 0.0, 1.0, 10.055330]
+            expected_values = [1.550200e-04, 0.0, 1.0, 2.390063, 0.0, 1.0, 10.055330]
         self._validate_table_values_top_to_bottom(linear_params, expected_values)
 
 
