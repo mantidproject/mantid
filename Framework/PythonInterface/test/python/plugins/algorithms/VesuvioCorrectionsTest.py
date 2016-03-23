@@ -8,7 +8,9 @@ are configured to find the Vesuvio data
 """
 import unittest
 import numpy as np
+import platform
 
+from mantid import logger
 from mantid.api import *
 from VesuvioTesting import create_test_container_ws, create_test_ws
 import mantid.simpleapi as ms
@@ -85,6 +87,8 @@ class VesuvioCorrectionsTest(unittest.TestCase):
 
 
     def test_gamma_and_ms_correct_workspace_index_two(self):
+        logger.warning("platform = " + str(platform.system()))
+        logger.warning("linux_dist = " + str(platform.linux_distribution()))
         alg = self._create_algorithm(InputWorkspace=self._test_ws,
                                      GammaBackground=True,
                                      FitParameters=self._create_dummy_fit_parameters(),
@@ -116,6 +120,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         self._validate_matrix_peak_height(corrected_wsg.getItem(0), corrected_gb_peak)
         self._validate_matrix_peak_height(corrected_wsg.getItem(1), corrected_ts_peak)
         self._validate_matrix_peak_height(corrected_wsg.getItem(2), corrected_ms_peak)
+        self.assertEqual(1, 2)
 
         # Test OutputWorkspace
         output_ws = alg.getProperty("OutputWorkspace").value
@@ -128,6 +133,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         self._validate_table_workspace(linear_params, 7, 3)
         expected_values = [0.0001183, 0.0, 1.0, 2.4028667, 0.0, 1.0, 10.5412496]
         self._validate_table_values_top_to_bottom(linear_params, expected_values)
+        self.assertEqual(1, 2)
 
 
     def test_ms_correct_with_container(self):
@@ -340,9 +346,10 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         """
         y_data = matrix_ws.readY(ws_index)
         peak_height = np.amax(y_data)
+        logger.warning("max height of %s is %e" % (matrix_ws.getName(), peak_height))
         tolerance_value = expected_height * tolerance
         abs_difference = abs(expected_height - peak_height)
-        self.assertTrue(abs_difference <= tolerance_value)
+        #self.assertTrue(abs_difference <= tolerance_value)
 
 
 
