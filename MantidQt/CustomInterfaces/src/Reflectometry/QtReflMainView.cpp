@@ -399,7 +399,7 @@ presenter
 @param name : the string name of the workspace to be grabbed
 */
 void QtReflMainView::setModel(QString name) {
-	m_toOpen = name;
+  m_toOpen = name.toStdString();
   m_presenter->notify(IReflPresenter::OpenTableFlag);
 }
 

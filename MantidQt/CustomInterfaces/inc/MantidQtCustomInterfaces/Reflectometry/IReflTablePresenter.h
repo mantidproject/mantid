@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_IREFLTABLEPRESENTER_H
 
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
