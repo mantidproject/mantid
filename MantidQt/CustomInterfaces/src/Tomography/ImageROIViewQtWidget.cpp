@@ -136,6 +136,16 @@ void ImageROIViewQtWidget::userError(const std::string &err,
                         QMessageBox::Ok);
 }
 
+void ImageROIViewQtWidget::enableActions(bool enable) {
+  m_ui.pushButton_browse_img->setEnabled(enable);
+  m_ui.pushButton_play->setEnabled(enable);
+  m_ui.comboBox_image_type->setEnabled(enable);
+  m_ui.comboBox_rotation->setEnabled(enable);
+  m_ui.groupBox_cor->setEnabled(enable);
+  m_ui.groupBox_roi->setEnabled(enable);
+  m_ui.groupBox_norm->setEnabled(enable);
+}
+
 std::string ImageROIViewQtWidget::askImgOrStackPath() {
   // get path
   QString fitsStr = QString("Supported formats: FITS, TIFF and PNG "
@@ -167,12 +177,15 @@ void ImageROIViewQtWidget::enableImageTypes(bool enableSamples,
 
   std::vector<bool> enable = {enableSamples, enableFlats, enableDarks};
   for (size_t idx = 0; idx < enable.size(); idx++) {
+    QVariant var;
     if (!enable[idx]) {
-      // trick to display a combobox entry as a disabled row
-      QModelIndex modelIdx = itypes->model()->index(static_cast<int>(idx), 0);
-      QVariant disabled(0);
-      itypes->model()->setData(modelIdx, disabled, Qt::UserRole - 1);
+      var = 0;
+    } else {
+      var = 1 | 32;
     }
+    // trick to display a combobox entry as a disabled/enabled row
+    QModelIndex modelIdx = itypes->model()->index(static_cast<int>(idx), 0);
+    itypes->model()->setData(modelIdx, var, Qt::UserRole - 1);
   }
 }
 

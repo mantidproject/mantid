@@ -94,6 +94,8 @@ public:
   void userError(const std::string &err,
                  const std::string &description) override;
 
+  void enableActions(bool enable) override;
+
   size_t currentImgIndex() const override;
 
   void updateImgWithIndex(size_t idx) override;

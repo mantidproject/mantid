@@ -17,10 +17,11 @@ const std::string StackOfImagesDirs::g_descrComplex =
 const std::string StackOfImagesDirs::g_descrSimple =
     "A directory containing (readable) image files.";
 
-const std::string StackOfImagesDirs::g_descrBoth = "Two alternatives: \n"
+const std::string StackOfImagesDirs::g_descrBoth = "Two alternatives: \n\n"
                                                    "Simple: " +
-                                                   g_descrSimple + "\n"
-                                                                   "Or Full: " +
+                                                   g_descrSimple +
+                                                   "\n\n"
+                                                   "Or Full:\n\n" +
                                                    g_descrComplex + "\n";
 
 const std::string StackOfImagesDirs::g_sampleNamePrefix = "data";
@@ -170,6 +171,9 @@ bool StackOfImagesDirs::findStackDirsComplex(Poco::File &dir) {
 std::vector<std::string>
 StackOfImagesDirs::findImgFiles(const std::string &path) const {
   std::vector<std::string> fnames;
+  if (path.empty()) {
+    return fnames;
+  }
 
   try {
     Poco::File dir(path);

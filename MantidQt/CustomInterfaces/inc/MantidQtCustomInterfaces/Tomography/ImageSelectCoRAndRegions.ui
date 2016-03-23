@@ -367,7 +367,7 @@
              </spacer>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton">
+             <widget class="QPushButton" name="pushButton_center_find">
               <property name="enabled">
                <bool>false</bool>
               </property>

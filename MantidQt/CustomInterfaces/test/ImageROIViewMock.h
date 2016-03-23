@@ -48,6 +48,9 @@ public:
   MOCK_METHOD2(userError,
                void(const std::string &err, const std::string &description));
 
+  // void enableActions(bool enable)
+  MOCK_METHOD1(enableActions, void(bool));
+
   // Mantid::API::WorkspaceGroup_sptr currentImageTypeStack() const
   MOCK_CONST_METHOD0(currentImageTypeStack, Mantid::API::WorkspaceGroup_sptr());
 
