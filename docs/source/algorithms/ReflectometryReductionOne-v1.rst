@@ -92,7 +92,8 @@ the sample-to-detector vector. When we have the typical setup seen below, :math:
 
 .. figure:: /images/CurrentExperimentSetupForReflectometry.PNG
 
-We rotate the position of the Source (and therefore the Beam vector) until :math:`\theta_i = \theta_f` to achieve the desired result for :math:`2\theta` (see below for rotated source diagram).
+We rotate the position of the Source (and therefore the Beam vector) in the Instrument Defintion associated with the IvsLambda workspace
+until the condition :math:`\theta_i = \theta_f` is satisfied. This will achieve the desired result for :math:`2\theta` (see below for rotated source diagram).
 After :ref:`algm-ConvertUnits` has produced our IvsQ workspace, we will rotate the position of the source back to its original position so that the experimental setup remains unchanged for other
 algorithms that may need to manipulate/use it.
 

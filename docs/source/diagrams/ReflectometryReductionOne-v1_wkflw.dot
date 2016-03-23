@@ -47,7 +47,7 @@ digraph ReflectometryReductionOne {
   }
 
   subgraph processes {
- //   $process_style
+   $process_style
     directBeamNorm  [label="Perform Direct\nBeam Normalisation"]
     getSourceRotationAngle [label="Get Angle for Source Rotation"]
   }
