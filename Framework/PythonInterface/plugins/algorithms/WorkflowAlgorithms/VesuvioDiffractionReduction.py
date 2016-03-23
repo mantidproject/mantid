@@ -6,7 +6,7 @@ from mantid import config
 
 import os
 
-class EVSDiffractionReduction(DataProcessorAlgorithm):
+class VesuvioDiffractionReduction(DataProcessorAlgorithm):
 
     _workspace_names = None
     _chopped_data = None
@@ -216,4 +216,4 @@ class EVSDiffractionReduction(DataProcessorAlgorithm):
                 logger.information('SumFiles options is ignored when only one file is provided')
 
 
-AlgorithmFactory.subscribe(EVSDiffractionReduction)
+AlgorithmFactory.subscribe(VesuvioDiffractionReduction)
