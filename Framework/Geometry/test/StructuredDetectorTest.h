@@ -106,7 +106,7 @@ public:
 		boost::shared_ptr<Geometry::Object> cuboidShape =
 			ComponentCreationHelper::createCuboid(0.5);
 
-		StructuredDetector *det = new StructuredDetector("MyStructedDetector");
+		StructuredDetector *det = new StructuredDetector("MyStructuredDetector");
 		det->setPos(1000., 2000., 3000.);
 
 		std::vector<double> x{ 0, 1, 2, 0, 1, 2, 0, 1, 2 };
@@ -131,7 +131,7 @@ public:
 		boost::shared_ptr<Geometry::Object> cuboidShape =
 			ComponentCreationHelper::createCuboid(0.5);
 
-		StructuredDetector *det = new StructuredDetector("MyStructedDetector");
+		StructuredDetector *det = new StructuredDetector("MyStructuredDetector");
 		det->setPos(1000., 2000., 3000.);
 
 		std::vector<double> x{ 0, 1, 2, 0, 1, 2};
@@ -173,36 +173,29 @@ public:
 		// Check some ids
 		TS_ASSERT_EQUALS(det->getAtXY(0, 0)->getID(), 0);
 		TS_ASSERT_EQUALS(det->getAtXY(0, 1)->getID(), 1);
-		TS_ASSERT_EQUALS(det->getAtXY(1, 1)->getID(), 2);
+		TS_ASSERT_EQUALS(det->getAtXY(1, 1)->getID(), 3);
 
 		std::pair<int, int> xy;
 		int x;
 		int y;
 
-		TS_ASSERT_THROWS_NOTHING(xy = det->getXYForDetectorID(1));
+		TS_ASSERT_THROWS_NOTHING(xy = det->getXYForDetectorID(0));
 		x = xy.first;
 		y = xy.second;
 		TS_ASSERT_EQUALS(x, 0);
 		TS_ASSERT_EQUALS(y, 0);
 
+		TS_ASSERT_THROWS_NOTHING(xy = det->getXYForDetectorID(1));
+		x = xy.first;
+		y = xy.second;
+		TS_ASSERT_EQUALS(x, 0);
+		TS_ASSERT_EQUALS(y, 1);
+
 		TS_ASSERT_THROWS_NOTHING(xy = det->getXYForDetectorID(2));
 		x = xy.first;
 		y = xy.second;
-		TS_ASSERT_EQUALS(x, 0);
-		TS_ASSERT_EQUALS(y, 12);
-
-		TS_ASSERT_THROWS_NOTHING(xy = det->getXYForDetectorID(3));
-		x = xy.first;
-		y = xy.second;
-		TS_ASSERT_EQUALS(x, 0);
-		TS_ASSERT_EQUALS(y, 112);
-
-
-		// Check some positions
-		TS_ASSERT_EQUALS(det->getAtXY(0, 0)->getPos(),
-			V3D(0, 0, 0));
-		TS_ASSERT_EQUALS(det->getAtXY(1, 0)->getPos(),
-			V3D(1, 0, 0));
+		TS_ASSERT_EQUALS(x, 1);
+		TS_ASSERT_EQUALS(y, 0);
 
 		// Name
 		TS_ASSERT_EQUALS(det->getAtXY(0, 1)->getName(), "MyStructuredDetector(0,1)");
