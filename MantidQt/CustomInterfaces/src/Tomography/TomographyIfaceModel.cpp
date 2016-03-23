@@ -890,9 +890,10 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
 
   if (local) {
     // doesn't go through the shell so it should not have quotes
-    opts.emplace_back("--output=" + outOpt);
+    opts.emplace_back("--output=" + adaptInputPathForExecution(outOpt, local));
   } else {
-    opts.emplace_back("--output=\"" + outOpt + "\"");
+    opts.emplace_back("--output=\"" +
+                      adaptInputPathForExecution(outOpt, local) + "\"");
   }
 
   // TODO: will/should use m_systemSettings.m_outputPathCompPreProcessed to
@@ -951,21 +952,32 @@ TomographyIfaceModel::adaptInputPathForExecution(const std::string &path,
   if (local)
     return path;
 
-  std::string pp = path;
-  // Remote (to UNIX), assuming SCARF or similar
-  boost::replace_all(pp, "\\", "/");
-  if (pp.length() >= 2 && ':' == pp[1]) {
-    if (2 == pp.length())
-      pp = ""; // don't accept '/'
-    else
-      pp = pp.substr(2);
+  std::string result;
+  // For example, request /media/scarf/data/RB0000/...
+  // which needs to be translated into: /work/scarf/data/RB0000/...
+  if (std::string::npos !=
+      path.find(m_systemSettings.m_local.m_remoteDriveOrMountPoint)) {
+    result = path;
+    boost::replace_all(result,
+                       m_systemSettings.m_local.m_remoteDriveOrMountPoint,
+                       m_systemSettings.m_remote.m_basePathTomoData);
+  } else {
+    result = path;
+    // Remote (to UNIX), assuming SCARF or similar
+    boost::replace_all(result, "\\", "/");
+    if (result.length() >= 2 && ':' == result[1]) {
+      if (2 == result.length())
+        result = ""; // don't accept '/'
+      else
+        result = result.substr(2);
+    }
+
+    // this appends the base path for the instrument data space on the
+    // remote (like '/work/imat' or similar)
+    result = m_systemSettings.m_remote.m_basePathTomoData + result;
   }
 
-  // this appends the base path for the instrument data space on the
-  // remote (like '/work/imat' or similar)
-  pp = m_systemSettings.m_remote.m_basePathTomoData + pp;
-
-  return pp;
+  return result;
 }
 
 /**
