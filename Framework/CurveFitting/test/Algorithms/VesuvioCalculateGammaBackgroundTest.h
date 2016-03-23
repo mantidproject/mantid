@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Algorithms/CalculateGammaBackground.h"
+#include "MantidCurveFitting/Algorithms/VesuvioCalculateGammaBackground.h"
 #include "../Functions/ComptonProfileTestHelpers.h"
 
-using Mantid::CurveFitting::Algorithms::CalculateGammaBackground;
+using Mantid::CurveFitting::Algorithms::VesuvioCalculateGammaBackground;
 
 class CalculateGammaBackgroundTest : public CxxTest::TestSuite {
 public:
@@ -222,7 +222,7 @@ private:
 
   Mantid::API::IAlgorithm_sptr createAlgorithm() {
     Mantid::API::IAlgorithm_sptr alg =
-        boost::make_shared<CalculateGammaBackground>();
+        boost::make_shared<VesuvioCalculateGammaBackground>();
     alg->initialize();
     alg->setChild(true);
     alg->setPropertyValue("CorrectedWorkspace", "__UNUSED__");

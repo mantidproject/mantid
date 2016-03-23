@@ -1,4 +1,4 @@
-#include "MantidCurveFitting/Algorithms/CalculateGammaBackground.h"
+#include "MantidCurveFitting/Algorithms/VesuvioCalculateGammaBackground.h"
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidCurveFitting/Functions/ComptonProfile.h"
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
@@ -29,7 +29,7 @@ using namespace BOOST_FUNCTION_STD_NS;
 using namespace std;
 
 // Subscription
-DECLARE_ALGORITHM(CalculateGammaBackground)
+DECLARE_ALGORITHM(VesuvioCalculateGammaBackground)
 
 namespace {
 /// Number of elements in theta direction integration
@@ -52,14 +52,14 @@ specnum_t FORWARD_SCATTER_SPECMAX = 198;
 //--------------------------------------------------------------------------------------------------------
 
 /// Default constructor
-CalculateGammaBackground::CalculateGammaBackground()
+VesuvioCalculateGammaBackground::VesuvioCalculateGammaBackground()
     : Algorithm(), m_inputWS(), m_indices(), m_profileFunction(), m_npeaks(0),
       m_reversed(), m_samplePos(), m_l1(0.0), m_foilRadius(0.0),
       m_foilUpMin(0.0), m_foilUpMax(0.0), m_foils0(), m_foils1(),
       m_backgroundWS(), m_correctedWS(), m_progress(nullptr) {}
 
 /// Destructor
-CalculateGammaBackground::~CalculateGammaBackground() {
+VesuvioCalculateGammaBackground::~VesuvioCalculateGammaBackground() {
   delete m_progress;
   m_indices.clear();
 }
@@ -68,17 +68,17 @@ CalculateGammaBackground::~CalculateGammaBackground() {
 // Private members
 //--------------------------------------------------------------------------------------------------------
 
-const std::string CalculateGammaBackground::name() const {
-  return "CalculateGammaBackground";
+const std::string VesuvioCalculateGammaBackground::name() const {
+  return "VesuvioCalculateGammaBackground";
 }
 
-int CalculateGammaBackground::version() const { return 1; }
+int VesuvioCalculateGammaBackground::version() const { return 1; }
 
-const std::string CalculateGammaBackground::category() const {
+const std::string VesuvioCalculateGammaBackground::category() const {
   return "CorrectionFunctions\\BackgroundCorrections";
 }
 
-void CalculateGammaBackground::init() {
+void VesuvioCalculateGammaBackground::init() {
 
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
@@ -107,7 +107,7 @@ void CalculateGammaBackground::init() {
       "the input.");
 }
 
-void CalculateGammaBackground::exec() {
+void VesuvioCalculateGammaBackground::exec() {
   retrieveInputs();
   createOutputWorkspaces();
 
@@ -146,7 +146,7 @@ void CalculateGammaBackground::exec() {
  * stored
  * @return True if the background was subtracted, false otherwise
  */
-bool CalculateGammaBackground::calculateBackground(const size_t inputIndex,
+bool VesuvioCalculateGammaBackground::calculateBackground(const size_t inputIndex,
                                                    const size_t outputIndex) {
   // Copy X values
   m_backgroundWS->setX(outputIndex, m_inputWS->refX(inputIndex));
@@ -183,7 +183,7 @@ bool CalculateGammaBackground::calculateBackground(const size_t inputIndex,
 * @param outputIndex A workspace index that defines the output to hold the
 * results
 */
-void CalculateGammaBackground::applyCorrection(const size_t inputIndex,
+void VesuvioCalculateGammaBackground::applyCorrection(const size_t inputIndex,
                                                const size_t outputIndex) {
   m_progress->report("Computing TOF from detector");
 
@@ -231,7 +231,7 @@ void CalculateGammaBackground::applyCorrection(const size_t inputIndex,
 * @param outputIndex Workspace index that defines the spectrum to hold the
 * results
 */
-void CalculateGammaBackground::calculateSpectrumFromDetector(
+void VesuvioCalculateGammaBackground::calculateSpectrumFromDetector(
     const size_t inputIndex, const size_t outputIndex) {
   // -- Setup detector & resolution parameters --
   DetectorParams detPar =
@@ -259,7 +259,7 @@ void CalculateGammaBackground::calculateSpectrumFromDetector(
 * @param outputIndex Workspace index that defines the spectrum to hold the
 * results
 */
-void CalculateGammaBackground::calculateBackgroundFromFoils(
+void VesuvioCalculateGammaBackground::calculateBackgroundFromFoils(
     const size_t inputIndex, const size_t outputIndex) {
   // -- Setup detector & resolution parameters --
   DetectorParams detPar =
@@ -312,7 +312,7 @@ void CalculateGammaBackground::calculateBackgroundFromFoils(
 * @param detRes ResolutionParams object that defines information on the
 * resolution associated with spectrum at wsIndex
 */
-void CalculateGammaBackground::calculateBackgroundSingleFoil(
+void VesuvioCalculateGammaBackground::calculateBackgroundSingleFoil(
     std::vector<double> &ctfoil, const size_t wsIndex, const FoilInfo &foilInfo,
     const V3D &detPos, const DetectorParams &detPar,
     const ResolutionParams &detRes) {
@@ -381,7 +381,7 @@ void CalculateGammaBackground::calculateBackgroundSingleFoil(
 * @param detpar Struct containing parameters about the detector
 * @param respar Struct containing parameters about the resolution
 */
-void CalculateGammaBackground::calculateTofSpectrum(
+void VesuvioCalculateGammaBackground::calculateTofSpectrum(
     std::vector<double> &result, std::vector<double> &tmpWork,
     const size_t wsIndex, const DetectorParams &detpar,
     const ResolutionParams &respar) {
@@ -424,7 +424,7 @@ void CalculateGammaBackground::calculateTofSpectrum(
 /**
 * Caches input details for the peak information
 */
-void CalculateGammaBackground::retrieveInputs() {
+void VesuvioCalculateGammaBackground::retrieveInputs() {
   m_inputWS = getProperty("InputWorkspace");
   m_profileFunction = getPropertyValue("ComptonFunction");
   if (m_profileFunction.find(';') == std::string::npos) // not composite
@@ -481,7 +481,7 @@ void CalculateGammaBackground::retrieveInputs() {
 /**
 * Create & cache output workspaces
 */
-void CalculateGammaBackground::createOutputWorkspaces() {
+void VesuvioCalculateGammaBackground::createOutputWorkspaces() {
   const size_t nhist = m_indices.size();
   m_backgroundWS = WorkspaceFactory::Instance().create(m_inputWS, nhist);
   m_correctedWS = WorkspaceFactory::Instance().create(m_inputWS, nhist);
@@ -489,7 +489,7 @@ void CalculateGammaBackground::createOutputWorkspaces() {
 
 /**
 */
-void CalculateGammaBackground::cacheInstrumentGeometry() {
+void VesuvioCalculateGammaBackground::cacheInstrumentGeometry() {
   auto inst = m_inputWS->getInstrument();
   auto refFrame = inst->getReferenceFrame();
   auto upAxis = refFrame->pointingUp();
@@ -587,7 +587,7 @@ void CalculateGammaBackground::cacheInstrumentGeometry() {
 * @return The min/max angle in theta(degrees) (horizontal direction if you
 * assume mid-point theta = 0)
 */
-std::pair<double, double> CalculateGammaBackground::calculateThetaRange(
+std::pair<double, double> VesuvioCalculateGammaBackground::calculateThetaRange(
     const Geometry::IComponent_const_sptr &foilComp, const double radius,
     const unsigned int horizDir) const {
   auto shapedObject =
