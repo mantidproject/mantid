@@ -1,22 +1,23 @@
 digraph ReflectometryReductionOne {
   label = "ReflectometryReductionOne Flowchart"
-//  $global_style
+ $global_style
 
   subgraph params {
-//    $param_style
+   $param_style
     inputWorkspace    [label="InputWorkspace"]
     firstTransRun     [label="FirstTransmissionRun"]
     secondTransRun    [label="SecondTransmissionRun"]
     outputWorkspaceWL [label="OutputWorkspaceWavelength"]
     outputWorkspaceMT [label="OutputWorkspace"]
     thetaIn           [label="ThetaIn"]
-    sourceRotationAngle  [label = "Rotation Angle"]
+    sourceRotationAngle  [label = "Rotation Angle"] 
+   sourceRotationAngleBack [label = "-Rotation Angle"]
     thetaOut          [label="ThetaOut"]
     corrAlg           [label="CorrectionAlgorithm"]
   }
 
   subgraph decisions {
-//    $decision_style
+   $decision_style
     checkXUnit      [label="X axis in &lambda;?"]
     checkMultDet    [label="Multidetector?"]
     checkTransRun   [label="FirstTransmissionRun\ngiven?"]
@@ -25,12 +26,12 @@ digraph ReflectometryReductionOne {
     checkCorDetPos  [label="Correct Detector Positions?"]
     checkNormDetMon [label="Normalize by\nIntegrated Monitors?"]
     checkCorrAlg    [label="CorrectionAlgorithm?"]
-    checkSourceRotation [label="Is ThetaIn = ThetaOut?"]
-    checkSourcePosition [label = "Is Source in Original Position?"]
+    checkSourceRotation [label="Is Source in Correct Position?"]
+    checkSourceRotationBack [label = "Is Source in Correct Position?"]
   }
 
   subgraph algorithms {
-//    $algorithm_style
+    $algorithm_style
     calcTheta       [label="SpecularReflectionCalculateTheta"]
     convertToMT     [label="ConvertUnits\n(Momentum-transfer)"]
     convertToWL     [label="ConvertUnits\n(To &lambda;)"]
@@ -52,7 +53,7 @@ digraph ReflectometryReductionOne {
   }
 
   subgraph values {
-//    $value_style
+  $value_style
     valMon          [label="I&#8320;(&lambda;)"]
     valDet          [label="I(&lambda;)"]
     valIntegrated   [label="&Sigma; I&#8320;(&lambda;)"]
@@ -103,9 +104,9 @@ digraph ReflectometryReductionOne {
   getSourceRotationAngle -> sourceRotationAngle
   sourceRotationAngle -> rotateSource
   rotateSource      -> convertToMT
-  convertToMT      -> checkSourcePosition
-  checkSourcePosition -> rotateSourceBack [label = "No"]
-  checkSourcePosition -> outputWorkspaceMT [label="Yes"]
-  rotationAngle            -> rotateSourceBack
+  convertToMT      -> checkSourceRotationBack
+  checkSourceRotationBack -> rotateSourceBack [label = "No"]
+  checkSourceRotationBack -> outputWorkspaceMT [label="Yes"]
+  sourceRotationAngleBack -> rotateSourceBack [label = "Rotate back by Rotation Angle"]
   rotateSourceBack      -> outputWorkspaceMT
 }
