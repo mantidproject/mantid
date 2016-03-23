@@ -572,6 +572,12 @@ void ImageROIViewQtWidget::normAreaResetClicked() {
 }
 
 void ImageROIViewQtWidget::playClicked() {
+  if (m_ui.horizontalScrollBar_img_stack->maximum() ==
+      m_ui.horizontalScrollBar_img_stack->minimum()) {
+    userWarning(
+        "Cannot \"play\" a single image",
+        "The stack currently loaded has a single image. Cannot play it.");
+  }
   // TODO: split this into start / stop. Handle via presenter!
   if (m_playStatus) {
     // stop timer
@@ -596,7 +602,7 @@ void ImageROIViewQtWidget::updatePlay() {
   // preference
   int val = m_ui.horizontalScrollBar_img_stack->value();
   ++val;
-  if (m_ui.horizontalScrollBar_img_stack->maximum() == val) {
+  if (m_ui.horizontalScrollBar_img_stack->maximum() <= val) {
     val = m_ui.horizontalScrollBar_img_stack->minimum();
   }
   m_ui.horizontalScrollBar_img_stack->setValue(val);
