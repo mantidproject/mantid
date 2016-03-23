@@ -961,6 +961,7 @@ TomographyIfaceModel::adaptInputPathForExecution(const std::string &path,
     boost::replace_all(result,
                        m_systemSettings.m_local.m_remoteDriveOrMountPoint,
                        m_systemSettings.m_remote.m_basePathTomoData);
+    boost::replace_all(result, "\\", "/");
   } else {
     result = path;
     // Remote (to UNIX), assuming SCARF or similar
