@@ -6,7 +6,6 @@
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
-#include "MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "vtk_jsoncpp.h"
 #include <QPointer>

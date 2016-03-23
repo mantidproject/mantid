@@ -1,4 +1,3 @@
-#include <array>
 #include <cmath>
 #include <limits>
 #include <stdexcept>
@@ -101,13 +100,14 @@ void ColorUpdater::colorScaleChange(double min, double max)
     pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
     const QList<pqPipelineSource *> sources =
         smModel->findItems<pqPipelineSource *>(server);
+
     // For all sources
     foreach (pqPipelineSource *source, sources) {
       const QList<pqView *> views = source->getViews();
       // For all views
       foreach (pqView *view, views) {
-        QList<pqDataRepresentation*> reps =  source->getRepresentations(view);
-
+        const QList<pqDataRepresentation *> reps =
+            source->getRepresentations(view);
         // For all representations
         foreach (pqDataRepresentation *rep, reps) {
           this->updateLookupTable(rep);
