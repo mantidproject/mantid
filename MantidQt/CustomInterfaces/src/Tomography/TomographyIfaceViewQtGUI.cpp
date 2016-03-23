@@ -17,6 +17,7 @@ using namespace MantidQt::CustomInterfaces;
 
 #include <boost/lexical_cast.hpp>
 
+#include <Poco/File.h>
 #include <Poco/Path.h>
 
 #include <QFileDialog>
@@ -1921,10 +1922,21 @@ void TomographyIfaceViewQtGUI::defaultDirLocalVisualizeClicked() {
   if (!model)
     return;
 
-  const QString path =
-      QString::fromStdString(Poco::Path::expand(g_defOutPathLocal));
-  if (!path.isEmpty()) {
+  // TODO: this should be moved to presenter?
+  Poco::Path local(Poco::Path::expand(
+      m_uiTabSystemSettings.lineEdit_on_local_data_drive_or_path->text()
+          .toStdString()));
+  local.append(
+      m_uiTabSystemSettings.lineEdit_path_comp_1st->text().toStdString());
+  Poco::File localDir(local);
+  const QString path = QString::fromStdString(local.toString());
+  if (!path.isEmpty() && localDir.exists() && localDir.canRead()) {
     m_uiTabVisualize.treeView_files->setRootIndex(model->index(path));
+  } else {
+    userWarning(
+        "Cannot open the path",
+        "Cannot open " + path.toStdString() +
+            ". Please check that it exists on your system and it is readable.");
   }
 }
 
@@ -1934,10 +1946,21 @@ void TomographyIfaceViewQtGUI::defaultDirRemoteVisualizeClicked() {
   if (!model)
     return;
 
-  const QString path =
-      QString::fromStdString(Poco::Path::expand(g_defOutPathRemote));
-  if (!path.isEmpty()) {
+  // TODO: this should be moved to presenter?
+  Poco::Path remote(Poco::Path::expand(
+      m_uiTabSystemSettings.lineEdit_on_local_remote_data_drive_path->text()
+          .toStdString()));
+  remote.append(
+      m_uiTabSystemSettings.lineEdit_path_comp_1st->text().toStdString());
+  Poco::File remoteDir(remote);
+  const QString path = QString::fromStdString(remote.toString());
+  if (!path.isEmpty() && remoteDir.exists() && remoteDir.canRead()) {
     m_uiTabVisualize.treeView_files->setRootIndex(model->index(path));
+  } else {
+    userWarning(
+        "Cannot open the path",
+        "Cannot open " + path.toStdString() +
+            ". Please check that it exists on your system and it is readable.");
   }
 }
 
