@@ -14,6 +14,7 @@ using namespace MantidQt::CustomInterfaces;
 #include <QMessageBox>
 #include <QPainter>
 #include <QSettings>
+#include <QTimer>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -23,8 +24,8 @@ const std::string ImageROIViewQtWidget::m_settingsGroup =
     "CustomInterfaces/ImageROIView";
 
 ImageROIViewQtWidget::ImageROIViewQtWidget(QWidget *parent)
-    : QWidget(parent), IImageROIView(), m_imgWidth(0), m_imgHeight(0),
-      m_selectionState(SelectNone), m_presenter(NULL) {
+    : QWidget(parent), IImageROIView(), m_playStatus(false), m_imgWidth(0),
+      m_imgHeight(0), m_selectionState(SelectNone), m_presenter(NULL) {
   initLayout();
 
   // using an event filter. might be worth refactoring into a specific
@@ -275,6 +276,9 @@ void ImageROIViewQtWidget::setupConnections() {
           SLOT(normAreaClicked()));
   connect(m_ui.pushButton_norm_area_reset, SIGNAL(released()), this,
           SLOT(normAreaResetClicked()));
+
+  // "Play" the stack for quick visualization of input images
+  connect(m_ui.pushButton_play, SIGNAL(released()), this, SLOT(playClicked()));
 
   // image sequence scroll/slide:
   connect(m_ui.horizontalScrollBar_img_stack, SIGNAL(valueChanged(int)), this,
@@ -565,6 +569,38 @@ void ImageROIViewQtWidget::normAreaClicked() {
 void ImageROIViewQtWidget::normAreaResetClicked() {
   m_presenter->notify(IImageROIPresenter::ResetNormalization);
   refreshROIetAl();
+}
+
+void ImageROIViewQtWidget::playClicked() {
+  // TODO: split this into start / stop. Handle via presenter!
+  if (m_playStatus) {
+    // stop timer
+    m_playTimer->stop();
+    m_playStatus = false;
+    m_ui.pushButton_play->setText("Play");
+    enableActions(true);
+  } else {
+    enableActions(false);
+    m_ui.pushButton_play->setEnabled(true);
+    m_ui.pushButton_play->setText("Stop");
+    m_playStatus = true;
+    // start timer
+    m_playTimer = Mantid::Kernel::make_unique<QTimer>(this);
+    connect(m_playTimer.get(), SIGNAL(timeout()), this, SLOT(updatePlay()));
+    m_playTimer->start(133);
+  }
+}
+
+void ImageROIViewQtWidget::updatePlay() {
+  // TODO: maybe change to sample? Not obvious what would be users'
+  // preference
+  int val = m_ui.horizontalScrollBar_img_stack->value();
+  ++val;
+  if (m_ui.horizontalScrollBar_img_stack->maximum() == val) {
+    val = m_ui.horizontalScrollBar_img_stack->minimum();
+  }
+  m_ui.horizontalScrollBar_img_stack->setValue(val);
+  showProjectionImage(m_stackSamples, val, currentRotationAngle());
 }
 
 void ImageROIViewQtWidget::browseImgClicked() {

@@ -11,6 +11,8 @@
 
 #include <boost/scoped_ptr.hpp>
 
+#include <QTimer>
+
 // forward declarations for Qt
 class QWidget;
 class QPixmap;
@@ -145,6 +147,9 @@ private slots:
   void normAreaClicked();
   void normAreaResetClicked();
 
+  void playClicked();
+  void updatePlay();
+
   void updateFromImagesSlider(int current);
 
   void valueUpdatedCoR(int v);
@@ -229,6 +234,12 @@ private:
 
   /// parameters currently set by the user
   ImageStackPreParams m_params;
+
+  /// whether 'playing' the current stack of images
+  bool m_playStatus;
+
+  /// Timer for the "play" function
+  std::unique_ptr<QTimer> m_playTimer;
 
   /// max image size for the current stack
   int m_imgWidth, m_imgHeight;
