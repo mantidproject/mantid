@@ -193,7 +193,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>5</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -733,7 +733,7 @@ p, li { white-space: pre-wrap; }
             <item row="0" column="0">
              <layout class="QGridLayout" name="gridLayout_3">
               <item row="0" column="0">
-               <widget class="MplGraphicsView" name="graphicsView">
+               <widget class="Detector2DView" name="graphicsView">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                   <horstretch>0</horstretch>
@@ -985,6 +985,13 @@ p, li { white-space: pre-wrap; }
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_addROI">
+                  <property name="text">
+                   <string>Add ROI</string>
                   </property>
                  </widget>
                 </item>
@@ -2635,7 +2642,7 @@ p, li { white-space: pre-wrap; }
               <item>
                <layout class="QVBoxLayout" name="verticalLayout_12">
                 <item>
-                 <widget class="MplGraphicsView" name="graphicsView_integratedPeakView">
+                 <widget class="IntegratedPeakView" name="graphicsView_integratedPeakView">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                     <horstretch>0</horstretch>
@@ -2666,7 +2673,7 @@ p, li { white-space: pre-wrap; }
                      <enum>Qt::Horizontal</enum>
                     </property>
                     <property name="sizeType">
-                     <enum>QSizePolicy::Preferred</enum>
+                     <enum>QSizePolicy::Expanding</enum>
                     </property>
                     <property name="sizeHint" stdset="0">
                      <size>
@@ -3280,11 +3287,6 @@ p, li { white-space: pre-wrap; }
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MplGraphicsView</class>
-   <extends>QGraphicsView</extends>
-   <header>mplgraphicsview.h</header>
-  </customwidget>
-  <customwidget>
    <class>UBMatrixPeakTable</class>
    <extends>QTableWidget</extends>
    <header>hfctables.h</header>
@@ -3308,6 +3310,16 @@ p, li { white-space: pre-wrap; }
    <class>PeakIntegrationTableWidget</class>
    <extends>QTableWidget</extends>
    <header>hfctables.h</header>
+  </customwidget>
+  <customwidget>
+   <class>IntegratedPeakView</class>
+   <extends>QGraphicsView</extends>
+   <header>integratedpeakview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>Detector2DView</class>
+   <extends>QGraphicsView</extends>
+   <header>detector2dview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

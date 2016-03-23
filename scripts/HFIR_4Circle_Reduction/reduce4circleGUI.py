@@ -100,6 +100,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_add_peak_to_find)
         self.connect(self.ui.pushButton_addPeakNoIndex, QtCore.SIGNAL('clicked()'),
                      self.do_add_peak_no_index)
+        self.connect(self.ui.pushButton_addROI, QtCore.SIGNAL('clicked()'),
+                     self.do_add_roi)
 
         # Tab 'calculate ub matrix'
         self.connect(self.ui.pushButton_findPeak, QtCore.SIGNAL('clicked()'),
@@ -435,6 +437,12 @@ class MainWindow(QtGui.QMainWindow):
         # END-FOR
 
         return
+
+    def do_add_roi(self):
+        """ Add region of interest to 2D image
+        :return:
+        """
+        self.ui.graphicsView.add_roi()
 
     def do_add_scans_merge(self):
         """ Add scans to merge
@@ -1258,7 +1266,8 @@ class MainWindow(QtGui.QMainWindow):
         """
         if str(self.ui.pushButton_handPickBkgd.text()) == 'Customize Bkgd':
             # get into customize background mode.  add an indicator to the line and make it movable
-            self._bkgdIndicatorKey = self.ui.graphicsView_integratedPeakView.add_vertical_indicator(x=0.1, color='red')
+            self.ui.graphicsView_integratedPeakView.add_background_indictor()
+
             # modify the push buttons status
             self.ui.pushButton_handPickBkgd.setText('Done')
 
@@ -2090,6 +2099,7 @@ class MainWindow(QtGui.QMainWindow):
         # Convert a list of vector to 2D numpy array for imshow()
         # Get data and plot
         raw_det_data = self._myControl.get_raw_detector_counts(exp_no, scan_no, pt_no)
+        # raw_det_data = numpy.rot90(raw_det_data, 1)
         self.ui.graphicsView.clear_canvas()
         self.ui.graphicsView.add_plot_2d(raw_det_data, x_min=0, x_max=256, y_min=0, y_max=256,
                                          hold_prev_image=False)

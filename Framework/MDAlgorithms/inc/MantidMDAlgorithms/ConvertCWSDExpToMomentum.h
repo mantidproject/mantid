@@ -107,8 +107,9 @@ private:
   size_t m_iColPt;
   size_t m_iColFilename;
   size_t m_iColStartDetID;
-  size_t m_iTime;
   size_t m_iMonitorCounts;
+  size_t m_iTime;
+
 
   std::vector<double> m_extentMins;
   std::vector<double> m_extentMaxs;

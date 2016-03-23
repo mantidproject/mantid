@@ -438,7 +438,7 @@ class CWSCDReductionControl(object):
                 array2d[i][j] = raw_ws.readY(i * DET_X_SIZE + j)[0]
 
         # Rotate the output matrix
-        array2d = numpy.rot90(array2d, 1)
+        # array2d = numpy.rot90(array2d, 1)
 
         return array2d
 
@@ -741,7 +741,9 @@ class CWSCDReductionControl(object):
                                OutputWorkspace=integrated_peak_ws_name,
                                PeakRadius=peak_radius,
                                PeakCentre=peak_centre_str,
-                               MergePeaks=merge)
+                               MergePeaks=merge,
+                               NormalizeByMonitor=True,
+                               NormalizeByTime=False)
 
         return
 

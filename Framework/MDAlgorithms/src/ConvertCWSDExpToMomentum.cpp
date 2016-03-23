@@ -26,8 +26,7 @@ DECLARE_ALGORITHM(ConvertCWSDExpToMomentum)
  */
 ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
     : m_iColScan(0), m_iColPt(1), m_iColFilename(2), m_iColStartDetID(3),
-      m_iTime(2),
-      m_iMonitorCounts(4), m_setQRange(true), m_isBaseName(false),
+      m_iMonitorCounts(4), m_iTime(5), m_setQRange(true), m_isBaseName(false),
       m_removeBackground(false) {}
 
 //----------------------------------------------------------------------------------------------
@@ -281,8 +280,10 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
     // Convert from MatrixWorkspace to MDEvents and add events to
     // int runid = static_cast<int>(ir) + 1;
     int scanid = m_expDataTableWS->cell<int>(ir, m_iColScan);
+    g_log.notice() << "[DB] Scan = " << scanid << "\n";
     int runid = m_expDataTableWS->cell<int>(ir, m_iColPt);
-    double time = m_expDataTableWS->cell<double>(ir, m_iTime);
+    g_log.notice() << "Pt = " << runid << "\n" << m_iTime << "-th for time/duration" << "\n";
+    double time = static_cast<double>(m_expDataTableWS->cell<float>(ir, m_iTime));
     int monitor_counts = m_expDataTableWS->cell<int>(ir, m_iMonitorCounts);
     if (!usevirtual)
       start_detid = 0;
@@ -481,8 +482,8 @@ bool ConvertCWSDExpToMomentum::getInputs(bool virtualinstrument,
   m_expDataTableWS = getProperty("InputWorkspace");
   const std::vector<std::string> datacolnames =
       m_expDataTableWS->getColumnNames();
-  if (datacolnames.size() != 5) {
-    errss << "InputWorkspace must have 5 columns.  But now it has "
+  if (datacolnames.size() != 6) {
+    errss << "InputWorkspace must have 6 columns.  But now it has "
           << datacolnames.size() << " columns. \n";
   } else {
     if (datacolnames[m_iColFilename].compare("File Name") != 0 &&

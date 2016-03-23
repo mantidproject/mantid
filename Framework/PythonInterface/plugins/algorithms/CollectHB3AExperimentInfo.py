@@ -31,6 +31,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self._2thetaScanPtDict = {}
         self._scanPt2ThetaDict = {}
         self._monitorCountsDict = dict()    # key = 2-tuple (int, int) as scan number and pt number.
+        self._expDurationDict = dict()  # key = 2-tuple (int, int) as scan number and pt number.
 
         self._currStartDetID = -999999999
 
@@ -134,8 +135,9 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
                 # get detector counts file name and monitor counts
                 data_file_name = 'HB3A_exp%d_scan%04d_%04d.xml' % (self._expNumber, scan_number, pt_number)
                 monitor_counts = self._monitorCountsDict[(scan_number, pt_number)]
+                duration = self._expDurationDict[(scan_number, pt_number)]
                 self._myScanPtFileTableWS.addRow([int(scan_number), int(pt_number), str(data_file_name),
-                                                  int(start_det_id), int(monitor_counts)])
+                                                  int(start_det_id), int(monitor_counts), float(duration)])
 
         # Output
         self.setProperty("OutputWorkspace", self._myScanPtFileTableWS)
@@ -159,6 +161,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self._myScanPtFileTableWS.addColumn("str", "Filename")
         self._myScanPtFileTableWS.addColumn("int", "StartDetID")
         self._myScanPtFileTableWS.addColumn('int', 'MonitorCounts')
+        self._myScanPtFileTableWS.addColumn('float', 'Duration')
 
         return
 
@@ -246,6 +249,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
                 iColPtNumber = colnames.index('Pt.')
                 iCol2Theta = colnames.index('2theta')
                 iColMonitor = colnames.index('monitor')
+                iColTime = colnames.index('time')
             except IndexError as e:
                 raise IndexError("Either Pt. or 2theta is not found in columns: %d"%(str(e)))
 
@@ -254,11 +258,14 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
                 if ptnumber in requiredptnumbers:
                     twotheta = spicetable.cell(irow, iCol2Theta)
                     monitor = spicetable.cell(irow, iColMonitor)
+                    exp_time = spicetable.cell(irow, iColTime)
                     self._monitorCountsDict[(scannumber, ptnumber)] = monitor
+                    self._expDurationDict[(scannumber, ptnumber)] = exp_time
                     if self._2thetaScanPtDict.has_key(twotheta) is False:
                         self._2thetaScanPtDict[twotheta] = []
-                    self._2thetaScanPtDict[twotheta].append( (scannumber, ptnumber) ) # ENDFOR
-        # ENDFOR
+                    self._2thetaScanPtDict[twotheta].append((scannumber, ptnumber))
+            # END-FOR
+        # END-FOR
 
         self.log().notice("[DB] Number of 2theta entries = %d." % (len(self._2thetaScanPtDict.keys())))
 
