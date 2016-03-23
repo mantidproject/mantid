@@ -39,10 +39,13 @@ class IReflPresenter {
 public:
   virtual ~IReflPresenter(){};
 
-  enum Flag { SearchFlag, ICATSearchCompleteFlag, TransferFlag };
+  enum Flag { OpenTableFlag, SearchFlag, ICATSearchCompleteFlag, TransferFlag };
 
   // Tell the presenter something happened
   virtual void notify(IReflPresenter::Flag flag) = 0;
+  // Update the presenter with the list of workspaces the user can open
+  virtual void
+  pushWorkspaceList(const std::set<std::string> &workspaceList) = 0;
 };
 }
 }

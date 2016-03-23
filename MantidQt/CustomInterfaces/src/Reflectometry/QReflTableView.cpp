@@ -67,6 +67,18 @@ void QReflTableView::setModel(QString name) {
 }
 
 /**
+This method loads a table workspace model. Unlike
+QReflTableView::setModel(QString name),
+this method is public and takes a std::string as argument. The reason is that
+this method is intended to be called by the presenter
+@param name : the string name of the workspace to be grabbed
+*/
+void QReflTableView::setModel(std::string name) {
+  m_toOpen = name;
+  m_tablePresenter->notify(IReflTablePresenter::OpenTableFlag);
+}
+
+/**
 Set a new model in the tableview
 @param model : the model to be attached to the tableview
 */
@@ -378,8 +390,8 @@ void QReflTableView::showImportDialog() {
             << "Dialog()\n";
   pythonSrc << "  print algm.getPropertyValue(\"OutputWorkspace\")\n";
   pythonSrc << "except:\n";
-	pythonSrc << "  pass\n";
-	// outputWorkspaceName will hold the name of the workspace
+  pythonSrc << "  pass\n";
+  // outputWorkspaceName will hold the name of the workspace
   // otherwise this should be an empty string.
   QString outputWorkspaceName =
       runPythonCode(QString::fromStdString(pythonSrc.str()), false);

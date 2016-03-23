@@ -18,6 +18,7 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidQtCustomInterfaces/ParseKeyValueString.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ProgressPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflOptionsDialog.h"
@@ -1231,6 +1232,7 @@ void ReflTableViewPresenter::addHandle(const std::string &name,
 
   m_workspaceList.insert(name);
   m_tableView->setTableList(m_workspaceList);
+  m_outerPresenter->pushWorkspaceList(m_workspaceList);
 }
 
 /**
@@ -1239,6 +1241,7 @@ Handle ADS remove events
 void ReflTableViewPresenter::postDeleteHandle(const std::string &name) {
   m_workspaceList.erase(name);
   m_tableView->setTableList(m_workspaceList);
+  m_outerPresenter->pushWorkspaceList(m_workspaceList);
 }
 
 /**
@@ -1247,6 +1250,7 @@ Handle ADS clear events
 void ReflTableViewPresenter::clearADSHandle() {
   m_workspaceList.clear();
   m_tableView->setTableList(m_workspaceList);
+  m_outerPresenter->pushWorkspaceList(m_workspaceList);
 }
 
 /**
@@ -1263,6 +1267,7 @@ void ReflTableViewPresenter::renameHandle(const std::string &oldName,
   m_workspaceList.erase(oldName);
   m_workspaceList.insert(newName);
   m_tableView->setTableList(m_workspaceList);
+  m_outerPresenter->pushWorkspaceList(m_workspaceList);
 }
 
 /**
@@ -1594,14 +1599,29 @@ void ReflTableViewPresenter::initOptions() {
   m_tableView->loadSettings(m_options);
 }
 
+/**
+* Tells the view to load a table workspace
+* @param name : [input] The workspace's name
+*/
+void ReflTableViewPresenter::setModel(std::string name) {
+  m_tableView->setModel(name);
+}
+
+/**
+* Adds a command to a vector of commands
+* @param commands : [input] The vector where the new command will be added
+* @param command : [input] The command to add
+*/
 void addToCommand(std::vector<ReflCommandBase_uptr> &commands,
                   ReflCommandBase_uptr command) {
   commands.push_back(std::move(command));
 }
 
-/** TODO */
-std::vector<ReflCommandBase_uptr>
-ReflTableViewPresenter::publishTableCommands() {
+/**
+* Publishes a list of available commands
+* @return : The list of available commands
+*/
+std::vector<ReflCommandBase_uptr> ReflTableViewPresenter::publishCommands() {
 
   std::vector<ReflCommandBase_uptr> commands;
 
@@ -1612,14 +1632,6 @@ ReflTableViewPresenter::publishTableCommands() {
   addToCommand(commands, make_unique<ReflImportTableCommand>(this));
   addToCommand(commands, make_unique<ReflExportTableCommand>(this));
   addToCommand(commands, make_unique<ReflOptionsCommand>(this));
-
-  return commands;
-}
-
-std::vector<ReflCommandBase_uptr> ReflTableViewPresenter::publishRowCommands() {
-
-  std::vector<ReflCommandBase_uptr> commands;
-
   addToCommand(commands, make_unique<ReflProcessCommand>(this));
   addToCommand(commands, make_unique<ReflExpandCommand>(this));
   addToCommand(commands, make_unique<ReflPlotRowCommand>(this));
@@ -1634,6 +1646,21 @@ std::vector<ReflCommandBase_uptr> ReflTableViewPresenter::publishRowCommands() {
   addToCommand(commands, make_unique<ReflDeleteRowCommand>(this));
 
   return commands;
+}
+
+/** Register an outer presenter
+* @param outerPresenter : [input] The outer presenter
+*/
+void ReflTableViewPresenter::registerOuterPresenter(
+    IReflPresenter *outerPresenter) {
+  m_outerPresenter = outerPresenter;
+}
+
+/** Get the list of table workspaces the user can open
+* @return : The list of table workspaces
+*/
+std::set<std::string> ReflTableViewPresenter::getTableList() const {
+  return m_workspaceList;
 }
 }
 }

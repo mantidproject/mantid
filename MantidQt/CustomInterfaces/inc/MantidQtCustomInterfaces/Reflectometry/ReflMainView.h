@@ -58,12 +58,14 @@ public:
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
                                  const std::string &defaultInstrument) = 0;
   virtual void setTransferMethods(const std::set<std::string> &methods) = 0;
+  virtual void setTableList(const std::set<std::string> &tables) = 0;
 
   // Accessor methods
   virtual std::set<int> getSelectedSearchRows() const = 0;
   virtual std::string getSearchInstrument() const = 0;
   virtual std::string getSearchString() const = 0;
   virtual std::string getTransferMethod() const = 0;
+  virtual std::string getWorkspaceToOpen() const = 0;
 
   virtual boost::shared_ptr<IReflPresenter> getPresenter() const = 0;
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>

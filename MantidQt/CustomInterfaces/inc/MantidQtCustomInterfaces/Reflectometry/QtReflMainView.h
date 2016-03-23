@@ -62,6 +62,7 @@ public:
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
   void setTransferMethods(const std::set<std::string> &methods) override;
+  void setTableList(const std::set<std::string> &tables) override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;
@@ -73,6 +74,7 @@ public:
   std::string getSearchInstrument() const override;
   std::string getSearchString() const override;
   std::string getTransferMethod() const override;
+  std::string getWorkspaceToOpen() const override;
 
   boost::shared_ptr<IReflPresenter> getPresenter() const override;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
@@ -81,6 +83,12 @@ public:
 private:
   // initialise the interface
   void initLayout() override;
+  // Adds actions to the "Reflectometry" menu
+  void createReflectometryActions();
+  // Adds actions to the "Edit" menu
+  void createEditActions();
+  // Adds an action (command) to a menu
+  void addToMenu(QMenu *menu, ReflCommandBase_uptr command);
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 
@@ -92,6 +100,10 @@ private:
   Ui::reflMainWidget ui;
   // the slit calculator
   MantidWidgets::SlitCalculator *m_calculator;
+  // Signal mapper
+  QSignalMapper *m_openMap;
+  // the workspace the user selected to open
+  std::string m_toOpen;
 
 private slots:
   void on_actionSearch_triggered();
@@ -100,6 +112,7 @@ private slots:
   void on_actionSlitCalculator_triggered();
   void icatSearchComplete();
 
+  void setModel(QString name);
   void showSearchContextMenu(const QPoint &pos);
 };
 

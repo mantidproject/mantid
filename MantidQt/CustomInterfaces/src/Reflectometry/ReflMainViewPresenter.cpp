@@ -32,6 +32,14 @@ ReflMainViewPresenter::ReflMainViewPresenter(
     : m_view(mainView), m_tablePresenter(tablePresenter),
       m_progressView(progressView), m_searcher(searcher) {
 
+  // Register this presenter as the m_tablePresenter's outer presenter
+  m_tablePresenter->registerOuterPresenter(this);
+  // Get the workspace list (i.e. list of workspaces in the ADS the user can
+  // open) from the inner presenter
+  auto tableList = m_tablePresenter->getTableList();
+  // Push the workspace list
+  pushWorkspaceList(tableList);
+
   // TODO. Select strategy.
   /*
   std::unique_ptr<CatalogConfigService> catConfigService(
@@ -79,6 +87,9 @@ Used by the view to tell the presenter something has changed
 */
 void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
   switch (flag) {
+  case IReflPresenter::OpenTableFlag:
+    openTable();
+    break;
   case IReflPresenter::SearchFlag:
     search();
     break;
@@ -220,9 +231,7 @@ void ReflMainViewPresenter::transfer() {
 
 /**
 * Select and make a transfer strategy on demand based. Pick up the
-*user-provided
-* transfer strategy to do this.
-*
+* user-provided transfer strategy to do this.
 * @return new TransferStrategy
 */
 std::unique_ptr<ReflTransferStrategy>
@@ -256,6 +265,25 @@ ReflMainViewPresenter::getTransferStrategy() {
     throw std::runtime_error("Unknown tranfer method selected: " +
                              currentMethod);
   }
+}
+
+/**
+* Open a table from the ADS.
+*/
+void ReflMainViewPresenter::openTable() {
+  // Get the name of the selected table
+  std::string toOpen = m_view->getWorkspaceToOpen();
+  // Send the workspace to open to the inner presenter
+  m_tablePresenter->setModel(toOpen);
+}
+
+/**
+* Push the list of workspaces the user is offered to open
+* @param workspaceList : [input] The workspace list
+*/
+void ReflMainViewPresenter::pushWorkspaceList(
+    const std::set<std::string> &workspaceList) {
+  m_view->setTableList(workspaceList);
 }
 
 const std::string ReflMainViewPresenter::MeasureTransferMethod = "Measurement";

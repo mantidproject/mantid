@@ -53,8 +53,9 @@ public:
       const std::vector<std::map<std::string, std::string>> &runs) override;
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
-  std::vector<ReflCommandBase_uptr> publishTableCommands();
-  std::vector<ReflCommandBase_uptr> publishRowCommands();
+  std::vector<ReflCommandBase_uptr> publishCommands() override;
+  void setModel(std::string name) override;
+  std::set<std::string> getTableList() const override;
 
 protected:
   // the workspace the model is currently representing
@@ -67,6 +68,8 @@ protected:
   ReflTableView *m_tableView;
   // The progress view
   ProgressableView *m_progressView;
+  // An outer presenter we want to notify
+  IReflPresenter *m_outerPresenter;
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
   // stores the user options for the presenter
@@ -147,6 +150,7 @@ protected:
   void afterReplaceHandle(const std::string &name,
                           Mantid::API::Workspace_sptr workspace) override;
   void saveNotebook(std::map<int, std::set<int>> groups, std::set<int> rows);
+  void registerOuterPresenter(IReflPresenter *outerPresenter) override;
 };
 }
 }
