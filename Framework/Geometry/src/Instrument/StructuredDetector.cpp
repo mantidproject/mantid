@@ -362,7 +362,7 @@ void StructuredDetector::initialize(int xpixels, int ypixels,
 * @param id :: The pixel ID
 * @ returns newly created detector.
 */
-StructuredDetectorPixel *StructuredDetector::addDetector(CompAssembly *parent,
+Detector *StructuredDetector::addDetector(CompAssembly *parent,
                                           const std::string &name, int x, int y,
                                           int id) {
   auto w = m_xpixels + 1;
@@ -379,9 +379,16 @@ StructuredDetectorPixel *StructuredDetector::addDetector(CompAssembly *parent,
   auto yrf = m_yvalues[(y * w) + x + w + 1];
   auto yrb = m_yvalues[(y * w) + x + 1];
 
+  //calculate midpoint of trapeziod
+  auto a = abs(xrf - xlf);
+  auto b = abs(xrb - xlb);
+  auto h = abs(ylb - ylf);
+  auto cx = ((a + b) / 4);
+  auto cy = h / 2;
+
   //store detector position before translating to origin
-  auto xpos = xlb;
-  auto ypos = ylb;
+  auto xpos = xlb + cx;
+  auto ypos = ylb + cy;
 
   //Translate detector shape to origin
   xlf -= xpos;
@@ -393,42 +400,8 @@ StructuredDetectorPixel *StructuredDetector::addDetector(CompAssembly *parent,
   yrb -= ypos;
   ylb -= ypos;
 
-  // Calculate min and max y/x values for detector bounding box
-  auto ymin = std::min(ylb, ylf);
-  ymin = std::min(ymin, yrf);
-  ymin = std::min(ymin, yrb);
-
-  auto ymax = std::max(ylb, ylf);
-  ymax = std::max(ymax, yrf);
-  ymax = std::max(ymax, yrb);
-
-  auto xmin = std::min(xlb, xlf);
-  xmin = std::min(xmin, xrf);
-  xmin = std::min(xmin, xrb);
-
-  auto xmax = std::max(xlb, xlf);
-  xmax = std::max(xmax, xrf);
-  xmax = std::max(xmax, xrb);
 
   // Create XML shape used to describe detector pixel
-
-  /*shapestr << "<type name=\"userShape\" >";
-  shapestr << "<cuboid id=\"" << name << "\" >";
-  shapestr << "<left-front-bottom-point x=\"" << xlb << "\""
-	  << " y=\"" << ylb << "\""
-	  << " z=\"0\" />";
-  shapestr << "<left-front-top-point x=\"" << xlb << "\""
-	  << " y=\"" << ylf << "\""
-	  << " z=\"0\" />";
-  shapestr << "<right-front-bottom-point x=\"" << xrb << "\""
-	  << " y=\"" << yrb << "\""
-	  << " z=\"0\" />";
-  shapestr << "<left-back-bottom-point x=\"" << xlb<< "\""
-	  << " y=\"" << ylb << "\""
-	  << " z=\"-0.001\" />";
-  shapestr << "</cuboid>";
-  shapestr << "<algebra val=\"" << name << "\" />";
-  shapestr << "</type>"; */
   shapestr << "<type name=\"userShape\" >";
   shapestr << "<hexahedron id=\"" << name << "\" >";
   shapestr << "<left-back-bottom-point x=\"" << xlb << "\""
@@ -457,12 +430,12 @@ StructuredDetectorPixel *StructuredDetector::addDetector(CompAssembly *parent,
            << " z=\"0.001\" />";
   shapestr << "</hexahedron>";
   shapestr << "<bounding-box>";
-  shapestr << "<x-min val=\"" << xmin << "\" />";
-  shapestr << "<x-max val=\"" << xmax << "\" />";
-  shapestr << "<y-min val=\"" << ymin << "\" />";
-  shapestr << "<y-max val=\"" << ymax << "\" />";
+  shapestr << "<x-min val=\"" << std::min(xlf, xlb) << "\" />";
+  shapestr << "<x-max val=\"" << std::max(xrb, xrf) << "\" />";
+  shapestr << "<y-min val=\"" << ylb << "\" />";
+  shapestr << "<y-max val=\"" << yrf << "\" />";
   shapestr << "<z-min val=\"0\" />";
-  shapestr << "<z-max val=\"0.01625583\" />";
+  shapestr << "<z-max val=\"0.001\" />";
   shapestr << "</bounding-box>";
   shapestr << "<algebra val=\"" << name << "\" />";
   shapestr << "</type>";
@@ -471,9 +444,9 @@ StructuredDetectorPixel *StructuredDetector::addDetector(CompAssembly *parent,
       shapeCreator.createShape(shapestr.str(), false);
 
   // Create detector
-  auto detector = new StructuredDetectorPixel(name, id, shape, parent, this,
-                                              size_t(y), size_t(x));
+  auto detector = new Detector(name, id, shape, parent);
 
+  //Set detector position relative to parent
   V3D pos(xpos, ypos, 0);
   
   detector->translate(pos);
