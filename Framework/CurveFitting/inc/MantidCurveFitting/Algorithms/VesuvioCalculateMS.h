@@ -57,7 +57,7 @@ struct DetectorParams;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CalculateMSVesuvio : public API::Algorithm {
+class DLLExport VesuvioCalculateMS : public API::Algorithm {
 private:
   // Holds date on the compton scattering properties of an atom
   struct ComptonNeutronAtom {
@@ -78,11 +78,11 @@ private:
   };
 
 public:
-  CalculateMSVesuvio();
-  ~CalculateMSVesuvio() override;
+  VesuvioCalculateMS();
+  ~VesuvioCalculateMS() override;
 
   /// @copydoc Algorithm::name
-  const std::string name() const override { return "CalculateMSVesuvio"; }
+  const std::string name() const override { return "VesuvioCalculateMS"; }
   /// @copydoc Algorithm::version
   int version() const override { return 1; }
   /// @copydoc Algorithm::category
