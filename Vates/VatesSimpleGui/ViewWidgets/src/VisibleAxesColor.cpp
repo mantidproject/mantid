@@ -52,13 +52,12 @@ std::vector<double> getBackgroundColor(pqRenderView *view) {
 }
 }
 
-void VisibleAxesColor::setOrientationAxesLabelColor(
-    pqRenderView *view, bool /*useCurrentBackgroundColor*/) {
+void VisibleAxesColor::setOrientationAxesLabelColor(pqRenderView *view) {
   auto color = GetContrastingColor(getBackgroundColor(view));
   SafeSetProperty(view->getProxy(), {"OrientationAxesLabelColor"}, color);
 }
 
-void VisibleAxesColor::setGridAxesColor(pqRenderView *view, bool /*on*/) {
+void VisibleAxesColor::setGridAxesColor(pqRenderView *view) {
   auto color = GetContrastingColor(getBackgroundColor(view));
   vtkSMProxy *gridAxes3DActor =
       vtkSMPropertyHelper(view->getProxy(), "AxesGrid", true).GetAsProxy();

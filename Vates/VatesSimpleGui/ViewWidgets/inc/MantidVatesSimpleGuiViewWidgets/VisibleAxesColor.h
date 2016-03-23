@@ -36,13 +36,10 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS VisibleAxesColor {
 public:
   /**
    * Set the Rgb values for the color of the view's orientation axes Label.
-   * @param useCurrentBackgroundColor Is this the initial loading or were the
-   * views switched?
-   * @param view The view which has its background color set.
+   * @param view The view which has its color set.
    */
-  void setOrientationAxesLabelColor(pqRenderView *view,
-                                    bool useCurrentBackgroundColor);
-  void setGridAxesColor(pqRenderView *view, bool /*on*/);
+  void setOrientationAxesLabelColor(pqRenderView *view);
+  void setGridAxesColor(pqRenderView *view);
   void setScalarBarColor(pqRenderView *view);
 
 private:

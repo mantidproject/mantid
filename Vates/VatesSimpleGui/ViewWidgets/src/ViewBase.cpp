@@ -795,11 +795,14 @@ void ViewBase::setColorForBackground(bool useCurrentColorSettings)
  * @param useCurrentColorSettings If the view was switched or created.
  */
 void ViewBase::setVisibleAxesColors(bool useCurrentColorSettings) {
-  m_visibleAxesColor.setOrientationAxesLabelColor(this->getView(),
-                                                  useCurrentColorSettings);
-  m_visibleAxesColor.setGridAxesColor(this->getView(), true);
-  m_visibleAxesColor.setScalarBarColor(this->getView());
-  // m_visibleAxesColor.observe(this->getView());
+  // TODO keep user color settings?
+  // TODO utilize parameter useCurrentColorSettings
+  (void)useCurrentColorSettings;
+  {
+    m_visibleAxesColor.setOrientationAxesLabelColor(this->getView());
+    m_visibleAxesColor.setGridAxesColor(this->getView());
+    m_visibleAxesColor.setScalarBarColor(this->getView());
+  }
 }
 
 /**
