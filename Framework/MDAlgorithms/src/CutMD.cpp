@@ -185,18 +185,23 @@ std::vector<std::string> labelProjection(const DblMatrix &projection) {
   return ret;
 }
 
+} // anonymous namespace
+
+namespace Mantid {
+namespace MDAlgorithms {
+
 /**
 Determine the original q units. Assumes first 3 dimensions by index are r,l,d
 @param inws : Input workspace to extract dimension info from
 @param logger : logging object
 @return vector of markers
 */
-std::vector<std::string> findOriginalQUnits(IMDWorkspace const *const inws,
+std::vector<std::string> findOriginalQUnits(IMDWorkspace_const_sptr inws,
                                             Mantid::Kernel::Logger &logger) {
   std::vector<std::string> unitMarkers(3);
   for (size_t i = 0; i < inws->getNumDims() && i < 3; ++i) {
     auto units = inws->getDimension(i)->getUnits();
-    const boost::regex re("A\\^-1", boost::regex::icase);
+    const boost::regex re("(Angstrom\\^-1)|(A\\^-1)", boost::regex::icase);
     // Does the unit label look like it's in Angstroms?
     std::string unitMarker;
     if (boost::regex_match(units.ascii(), re)) {
@@ -211,11 +216,6 @@ std::vector<std::string> findOriginalQUnits(IMDWorkspace const *const inws,
   }
   return unitMarkers;
 }
-
-} // anonymous namespace
-
-namespace Mantid {
-namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CutMD)
@@ -357,7 +357,7 @@ void CutMD::exec() {
         this->getProperty("InterpretQDimensionUnits");
     std::vector<std::string> originUnits;
     if (determineUnitsMethod == AutoMethod) {
-      originUnits = findOriginalQUnits(inWS.get(), g_log);
+      originUnits = findOriginalQUnits(inWS, g_log);
     } else if (determineUnitsMethod == RLUMethod) {
       originUnits = std::vector<std::string>(3, RLUSymbol);
     } else {

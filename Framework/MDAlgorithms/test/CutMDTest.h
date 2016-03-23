@@ -11,6 +11,10 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "../../Kernel/inc/MantidKernel/MDUnit.h"
+#include "../inc/MantidMDAlgorithms/CutMD.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
+#include "../../API/inc/MantidAPI/IMDWorkspace.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -40,6 +44,22 @@ private:
     } else {
       eventWS->setDisplayNormalization(histoNorm);
     }
+  }
+
+  IMDWorkspace_const_sptr
+  makeWorkspaceWithSpecifiedUnits(const std::string &units) {
+    const std::string wsName = "__CutMDTest_unitsws";
+
+    const std::string units_string = units + "," + units + "," + units + ",V";
+
+    FrameworkManager::Instance().exec(
+        "CreateMDWorkspace", 10, "OutputWorkspace", wsName.c_str(),
+        "Dimensions", "4", "Extents", "-1,1,-1,1,-1,1,-10,10", "Names",
+        "H,K,L,E", "Units", units_string.c_str());
+
+    IMDWorkspace_const_sptr cutMDtestws =
+        AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(wsName);
+    return cutMDtestws;
   }
 
 public:
@@ -549,6 +569,39 @@ public:
     TSM_ASSERT_DELTA("Wrong error value",
                      std::sqrt(6.0 * (ws->getErrorAt(0) * ws->getErrorAt(0))),
                      histoOutWS->getErrorAt(0), 1e-4);
+  }
+
+  void test_findOriginalQUnits_invA() {
+    Mantid::Kernel::Logger logger("CutMDTestLogger");
+
+    auto cutMDtestws = makeWorkspaceWithSpecifiedUnits("A^-1");
+
+    auto foundUnits = findOriginalQUnits(cutMDtestws, logger);
+    TSM_ASSERT_EQUALS("Units should be found to be inverse angstroms",
+                      foundUnits[0],
+                      Mantid::MDAlgorithms::CutMD::InvAngstromSymbol);
+  }
+
+  void test_findOriginalQUnits_invAngstroms() {
+    Mantid::Kernel::Logger logger("CutMDTestLogger");
+
+    auto cutMDtestws = makeWorkspaceWithSpecifiedUnits("Angstrom^-1");
+
+    auto foundUnits = findOriginalQUnits(cutMDtestws, logger);
+    TSM_ASSERT_EQUALS("Units should be found to be inverse angstroms",
+                      foundUnits[0],
+                      Mantid::MDAlgorithms::CutMD::InvAngstromSymbol);
+  }
+
+  void test_findOriginalQUnits_rlu() {
+    Mantid::Kernel::Logger logger("CutMDTestLogger");
+
+    // When units have been converted to RLU the unit label looks like this
+    auto cutMDtestws = makeWorkspaceWithSpecifiedUnits("in 1.11A^-1");
+
+    auto foundUnits = findOriginalQUnits(cutMDtestws, logger);
+    TSM_ASSERT_EQUALS("Units should be found to be RLU", foundUnits[0],
+                      Mantid::MDAlgorithms::CutMD::RLUSymbol);
   }
 };
 
