@@ -61,12 +61,14 @@ set ( TEST_PY_FILES
   MolDynTest.py
   MSDFitTest.py
   MuscatSofQWTest.py
+  NormaliseSpectraTest.py
   OSIRISDiffractionReductionTest.py
   ResNorm2Test.py
   RetrieveRunInfoTest.py
   SANSFitShiftScaleTest.py
   SANSWideAngleCorrectionTest.py
   SavePlot1DTest.py
+  SavePlot1DAsJsonTest.py
   SaveVulcanGSSTest.py
   SimulatedDensityOfStatesTest.py
   SortByQVectorsTest.py
@@ -92,7 +94,10 @@ set ( TEST_PY_FILES
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py
   PoldiMergeTest.py
+  VesuvioCorrectionsTest.py
+  VesuvioPreFitTest.py
   VesuvioResolutionTest.py
+  VesuvioTOFFitTest.py
   PoldiCreatePeaksFromFileTest.py
   LoadCIFTest.py
 )

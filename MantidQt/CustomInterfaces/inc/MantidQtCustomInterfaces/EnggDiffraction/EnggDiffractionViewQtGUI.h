@@ -104,7 +104,7 @@ public:
 
   std::string currentCalibSpecNos() const override;
 
-  std::string currentCalibCustomisedBankName() const;
+  std::string currentCalibCustomisedBankName() const override;
 
   void newCalibLoaded(const std::string &vanadiumNo, const std::string &ceriaNo,
                       const std::string &fname) override;

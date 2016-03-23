@@ -176,6 +176,7 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
         self._file_to_clear=""
 
         self.red.reducer.prop_man.sample_run = [11001,11002]
+       # self.red.reducer.background_range = (10000,12000)
         MARreducedRuns = self.red.run_reduction()
 
         RenameWorkspace(InputWorkspace=MARreducedRuns[0],OutputWorkspace='MARreducedFromFile')

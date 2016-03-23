@@ -1716,9 +1716,7 @@ void SCDCalibratePanels::saveXmlFile(
 
   // write out the detector banks
   for (const auto &Group : Groups) {
-    for (auto it1 = Group.begin(); it1 != Group.end(); ++it1) {
-      string bankName = (*it1);
-
+    for (const auto &bankName : Group) {
       oss3 << "<component-link name=\"" << bankName << "\">" << endl;
 
       boost::shared_ptr<const IComponent> bank =

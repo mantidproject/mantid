@@ -8,6 +8,7 @@
 """
 from reducer_singleton import Reducer
 import isis_reduction_steps
+import isis_instrument
 from reduction_settings import get_settings_object
 from mantid.simpleapi import *
 from mantid.api import *
@@ -16,7 +17,6 @@ from mantid.api import IEventWorkspace
 import SANSUtility as su
 import os
 import copy
-
 import sys
 
 logger = Logger("ISISReducer")
@@ -287,6 +287,9 @@ class ISISReducer(Reducer):
         """
         if not self.user_settings.executed:
             raise RuntimeError('User settings must be loaded before the sample can be assigned, run UserFile() first')
+
+        # At this point we need to check if the IDF associated with the
+        self._match_IDF(run = run)
 
         # ensure that when you set sample, you start with no can, transmission previously used.
         self._clean_loaded_data()
@@ -569,6 +572,18 @@ class ISISReducer(Reducer):
         """
         return self.instrument
 
+    def get_instrument_name(self):
+        """
+            Get the name of the instrument
+        """
+        return self.instrument._NAME
+
+    def get_idf_file_path(self):
+        """
+            Get the IDF path
+        """
+        return self.instrument.get_idf_file_path()
+
     # quicker to write than .instrument
     inst = property(get_instrument, None, None, None)
 
@@ -715,6 +730,85 @@ class ISISReducer(Reducer):
         centre_pos1, centre_pos2 = self.instrument.get_updated_beam_centre_after_move()
         # Update the beam centre finder for the rear
         self._beam_finder.update_beam_center(centre_pos1, centre_pos2)
+
+    def _match_IDF(self, run):
+        '''
+        Compares the IDF in the stored instrument with the IDF in the workspace.
+        If they are the same all is well. If they diff, then load the adequate
+        user file.
+        @param run: name of the run for which the file is to be extracted
+        '''
+        # We need the instrument name and the measurement time to determine
+        # the IDF
+        measurement_time = None
+        instrument_name = self.get_instrument_name()
+        # We need to be able to handle file-based and workspace-based queries
+        # If we have a workspace we look at the end time, else we
+        # need a sophisticated extraction mechanism
+        if isinstance(run, Workspace):
+            ws = None
+            if isinstance(run, WorkspaceGroup):
+                # Just look at the first element in a workspace group
+                ws = run[0]
+            else:
+                ws = run
+            measurement_time = str(ws.getRun().endTime()).strip()
+        else:
+            if run is None or run == "":
+                return
+            measurement_time = su.get_measurement_time_from_file(run)
+
+        # Get the path to the instrument definition file
+        idf_path_workspace = ExperimentInfo.getInstrumentFilename(instrument_name, measurement_time)
+        idf_path_workspace = os.path.normpath(idf_path_workspace)
+
+        # Get the idf from the reducer
+        idf_path_reducer = self.get_idf_file_path()
+        idf_path_reducer = os.path.normpath(idf_path_reducer)
+
+        # Now check if both idf paths and underlying files. If they are, then don't do anything
+        # else switch the underlying instrument
+        if idf_path_reducer == idf_path_workspace and su.are_two_files_identical(idf_path_reducer, idf_path_reducer):
+            return
+        else:
+            logger.notice("Updating the IDF of the Reducer. Switching from " +
+                          str(idf_path_reducer) + " to " + str(idf_path_workspace))
+            idf_path = os.path.basename(idf_path_workspace)
+            instrument = self._get_correct_instrument(instrument_name, idf_path)
+
+            # Get detector of the old instrument
+            old_instrument = self.get_instrument()
+            old_detector_selection = old_instrument.get_detector_selection()
+
+            if instrument is not None:
+                self.set_instrument(instrument)
+
+                # We need to update the instrument, by reloading the user file.
+                # This is pretty bad, but looking at the reducer architecture this
+                # seems to be the only reasonable way to do this.
+                self.user_settings.execute(self)
+
+                # Now we set the correct detector, this is also being done in the GUI
+                self.get_instrument().setDetector(old_detector_selection)
+
+    def _get_correct_instrument(self, instrument_name, idf_path = None):
+        '''
+        Creates an ISIS instrument based on the name and the chosen idf_path
+        @param instrument_name: the name of the instrument
+        @param idf_path: the full path to the IDF
+        '''
+        instrument = None
+        try:
+            if instrument_name.upper() == "LARMOR":
+                instrument = isis_instrument.LARMOR(idf_path)
+            elif instrument_name.upper() == "SANS2D":
+                instrument = isis_instrument.SANS2D(idf_path)
+            elif instrument_name.upper() == "LOQ":
+                instrument = isis_instrument.LOQ(idf_path)
+        # pylint: disable=bare-except
+        except:
+            instrument = None
+        return instrument
 
     def add_dark_run_setting(self, dark_run_setting):
         '''

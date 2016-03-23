@@ -16,6 +16,16 @@
 using namespace Mantid;
 using namespace Mantid::API;
 
+/**
+ * This is a test class that exists to test the method validateInputs()
+ */
+class TestFFT : public Mantid::Algorithms::FFT {
+public:
+  std::map<std::string, std::string> wrapValidateInputs() {
+    return this->validateInputs();
+  }
+};
+
 class FFTTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -528,6 +538,31 @@ public:
     TS_ASSERT_THROWS(fft->execute(), std::runtime_error);
     FrameworkManager::Instance().deleteWorkspace("FFT_WS_real_mismatch");
     FrameworkManager::Instance().deleteWorkspace("FFT_WS_imag_mismatch");
+  }
+
+  /**
+ * Test that the algorithm can handle a WorkspaceGroup as input without
+ * crashing
+ * We have to use the ADS to test WorkspaceGroups
+ */
+  void testValidateInputsWithWSGroup() {
+    auto ws1 =
+        boost::static_pointer_cast<Workspace>(createWS(100, 0, "real_1"));
+    auto ws2 =
+        boost::static_pointer_cast<Workspace>(createWS(100, 0, "real_2"));
+    auto group = boost::make_shared<WorkspaceGroup>();
+    AnalysisDataService::Instance().add("group", group);
+    group->addWorkspace(ws1);
+    group->addWorkspace(ws2);
+    TestFFT fft;
+    fft.initialize();
+    fft.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(fft.setPropertyValue("InputWorkspace", "group"));
+    fft.setPropertyValue("OutputWorkspace", "__NotUsed");
+    fft.setPropertyValue("Real", "0");
+    fft.setPropertyValue("Imaginary", "0");
+    TS_ASSERT_THROWS_NOTHING(fft.wrapValidateInputs());
+    AnalysisDataService::Instance().clear();
   }
 
 private:

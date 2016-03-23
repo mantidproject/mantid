@@ -17,6 +17,22 @@ OS X
 User Interface
 --------------
 
+Plotting Improvements
+#####################
+
+Line plots
+^^^^^^^^^^
+.. figure::  ../../images/R37AllErrorBars.png
+   :width: 500
+   :align: right
+
+- The default for plotting line plots has been changed to include plotting error bars on every data point.
+  This in general makes more sense than the previous approach of missing some points based on the data density.
+- However it can make dense data plots with errors look more obscured, so if you preferred the old approach you can change it back by unselecting the option Draw All Errors in the View->Prefences menu.
+
+.. figure::  ../../images/R37PlotAllErrorsOption.png
+   :align: center
+
 Instrument View
 ###############
 
@@ -74,8 +90,6 @@ Instrument View
         # put back the facility
         ConfigService.setFacility(facility)
 
-Plotting Improvements
-#####################
 
 Algorithm Toolbox
 #################
@@ -98,6 +112,8 @@ Bugs Resolved
 -  VSI: Fix Mantid crash when pressing :ref:`Scale <algm-Scale>` or Cut when "builtin" node
    is selected in Pipeline Browser
 
+-  VSI: The TECHNIQUE-DEPENDENT initial view now checks for Spectroscopy before Neutron Diffraction.  
+
 SliceViewer Improvements
 ------------------------
 
@@ -107,6 +123,19 @@ SliceViewer Improvements
 
 .. figure::  ../../images/Elliptical_peaks_slice_viewer.png
    :align: center
+
+VSI Improvements
+----------------
+
+-  The representation of points in the splatter plot was changed from opaque cubes to translucent spheres.
+
+.. figure::  ../../images/VSIPointGaussianRepresentation.png
+   :align: center 
+
+- The sphere and ellipse wireframes have been simplified so that it is easier to see the enclosed points. 
+
+.. figure:: ../../images/VSIEllipses.png
+    :align: center  
 
 |
 

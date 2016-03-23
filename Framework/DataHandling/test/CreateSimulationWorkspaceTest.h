@@ -5,6 +5,7 @@
 
 #include "MantidDataHandling/CreateSimulationWorkspace.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 using Mantid::DataHandling::CreateSimulationWorkspace;
@@ -76,9 +77,10 @@ public:
     }
   }
 
-  void xtest_Spectra_Detector_Mapping_Is_Pulled_From_Given_RAW_File() {
+  void test_Spectra_Detector_Mapping_Is_Pulled_From_Given_RAW_File() {
     using namespace Mantid::API;
-    auto outputWS = runAlgorithm("HET", "DeltaE", "HET15869.raw");
+    std::string filename("HET15869.raw");
+    auto outputWS = runAlgorithm("HET", "DeltaE", filename);
 
     doInstrumentCheck(outputWS, "HET", 12120);
     const size_t nhist = outputWS->getNumberHistograms();
@@ -88,11 +90,30 @@ public:
     TS_ASSERT_EQUALS(outputWS->getSpectrum(6)->getSpectrumNo(), 7);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(2083)->getDetectorIDs().size(), 10);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(2083)->getSpectrumNo(), 2084);
+
+    // The HET15869 data set was measured around 2005 on the HET instrument.
+    // This is also the latest IDF.
+    compareSimulationWorkspaceIDFWithFileIDF(outputWS, filename, "LoadRaw");
+  }
+
+  void test_correct_IDF_is_used_for_RAW_File() {
+    using namespace Mantid::API;
+    std::string filename("LOQ48094.raw");
+    auto outputWS = runAlgorithm("LOQ", "DeltaE", filename);
+
+    // doInstrumentCheck(outputWS, "LOQ", 12120);
+    const size_t nhist = outputWS->getNumberHistograms();
+    TS_ASSERT_EQUALS(nhist, 17790);
+
+    // The LOQ48094 data set was measured around 2008 on the LOQ instrument.
+    // This latest IDF is 2012 or later.
+    compareSimulationWorkspaceIDFWithFileIDF(outputWS, filename, "LoadRaw");
   }
 
   void test_Spectra_Detector_Mapping_Is_Pulled_From_Given_ISIS_NeXus_File() {
     using namespace Mantid::API;
-    auto outputWS = runAlgorithm("LOQ", "DeltaE", "LOQ49886.nxs");
+    std::string filename("LOQ49886.nxs");
+    auto outputWS = runAlgorithm("LOQ", "DeltaE", filename);
 
     const size_t nhist = outputWS->getNumberHistograms();
     TS_ASSERT_EQUALS(nhist, 17790);
@@ -101,6 +122,11 @@ public:
     TS_ASSERT_EQUALS(outputWS->getSpectrum(6)->getSpectrumNo(), 7);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(2083)->getDetectorIDs().size(), 1);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(2083)->getSpectrumNo(), 2084);
+
+    // The LOQ49886 data set was measured around 2009 on the LOQ instrument.
+    // It does not link to the most recent version of the LOQ IDF (2012 or
+    // later).
+    compareSimulationWorkspaceIDFWithFileIDF(outputWS, filename, "LoadNexus");
   }
 
   void test_UnitX_Throws_When_Invalid() {
@@ -172,6 +198,28 @@ private:
     if (!wsName.empty())
       alg->setPropertyValue("OutputWorkspace", wsName);
     return alg;
+  }
+
+  void compareSimulationWorkspaceIDFWithFileIDF(
+      Mantid::API::MatrixWorkspace_sptr simulationWorkspace,
+      const std::string &filename, const std::string &algorithmName) {
+    std::string outputWSName = "outWSIDFCompareNexus";
+    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+        algorithmName);
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("Filename", filename);
+    alg->setProperty("OutputWorkspace", outputWSName);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    Mantid::API::Workspace_sptr outWS = alg->getProperty("OutputWorkspace");
+    auto matWS =
+        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outWS);
+    auto idfForOriginal = matWS->getInstrument()->getFilename();
+    auto idfForSimulationWS =
+        simulationWorkspace->getInstrument()->getFilename();
+    TSM_ASSERT_EQUALS("Should have the same IDF", idfForOriginal,
+                      idfForSimulationWS);
   }
 
   std::string m_wsName;
