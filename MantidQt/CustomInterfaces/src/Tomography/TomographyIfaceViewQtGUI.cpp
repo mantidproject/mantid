@@ -1918,15 +1918,20 @@ void TomographyIfaceViewQtGUI::browseFilesToVisualizeClicked() {
 
 // helper that should go to the presenter. Makes sure that the path is
 // effectively readable
-std::string checkDefaultVisualizeDir(const std::string &basePath,
-                                     const std::string &appendComp) {
+std::string TomographyIfaceViewQtGUI::checkDefaultVisualizeDir(
+    const std::string &basePath, const std::string &appendComp) {
   Poco::Path location(Poco::Path::expand(basePath));
   location.append(appendComp);
   Poco::File locationDir(location);
 
   std::string path;
-  if (locationDir.exists() && locationDir.canRead()) {
+  if (locationDir.exists()) {
     path = location.toString();
+  } else {
+    userWarning(
+        "Cannot open the path",
+        "Cannot open " + path +
+            ". Please check that it exists on your system and it is readable.");
   }
 
   return path;
@@ -1947,11 +1952,6 @@ void TomographyIfaceViewQtGUI::defaultDirLocalVisualizeClicked() {
   const QString path = QString::fromStdString(checkedPath);
   if (!path.isEmpty()) {
     m_uiTabVisualize.treeView_files->setRootIndex(model->index(path));
-  } else {
-    userWarning(
-        "Cannot open the path",
-        "Cannot open " + path.toStdString() +
-            ". Please check that it exists on your system and it is readable.");
   }
 }
 
@@ -1970,11 +1970,6 @@ void TomographyIfaceViewQtGUI::defaultDirRemoteVisualizeClicked() {
   const QString path = QString::fromStdString(checkedPath);
   if (!path.isEmpty()) {
     m_uiTabVisualize.treeView_files->setRootIndex(model->index(path));
-  } else {
-    userWarning(
-        "Cannot open the path",
-        "Cannot open " + path.toStdString() +
-            ". Please check that it exists on your system and it is readable.");
   }
 }
 
