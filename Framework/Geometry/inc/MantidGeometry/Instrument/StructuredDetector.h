@@ -45,7 +45,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL StructuredDetector : public CompAssembly,
                                                public IObjComponent {
-	friend class StructuredDetectorPixel;
 public:
 	/// String description of the type of component
 	std::string type() const override { return "StructuredDetector"; }

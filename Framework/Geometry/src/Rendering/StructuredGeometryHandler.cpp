@@ -1,6 +1,6 @@
-#include "MantidGeometry/Rendering/StructuredGeometryHandler.h"
-#include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
+#include "MantidGeometry/Rendering/OpenGL_Headers.h"
+#include "MantidGeometry/Rendering/StructuredGeometryHandler.h"
 #include <climits>
 #include <iostream>
 
@@ -56,7 +56,7 @@ void StructuredGeometryHandler::Triangulate() {
 }
 
 //----------------------------------------------------------------------------------------------
-///< Render Object or ObjComponent
+///< Draw pixels according to StructuredDetector vertices
 void StructuredGeometryHandler::Render() {
   V3D pos;
 
@@ -80,10 +80,9 @@ void StructuredGeometryHandler::Render() {
 
   for (auto iy = 0; iy < h - 1; iy++) {
     for (auto ix = 0; ix < w - 1; ix++) {
-      
 
       glColor3ub(r[(iy * (w - 1)) + ix], g[(iy * (w - 1)) + ix],
-                b[(iy * (w - 1)) + ix]);
+                 b[(iy * (w - 1)) + ix]);
 
       pos = V3D(xVerts[(iy * w) + ix + w], yVerts[(iy * w) + ix + w], 0.0);
       glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),

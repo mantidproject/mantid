@@ -1,4 +1,4 @@
-#include "MantidGeometry/Instrument/StructuredDetectorPixel.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Object.h"
@@ -311,6 +311,7 @@ void StructuredDetector::initialize(int xpixels, int ypixels,
     throw std::invalid_argument("StructuredDetector::initialize(): x.size() "
                                 "should be = (xpixels+1)*(ypixels+1)");
 
+  //Store vertices
   m_xvalues = x;
   m_yvalues = y;
 
@@ -345,6 +346,7 @@ void StructuredDetector::initialize(int xpixels, int ypixels,
         maxDetId = id;
       }
 
+	  //Create and store detector pixel
       auto detector = addDetector(xColumn, oss.str(), ix, iy, id);
       xColumn->add(detector);
     }
@@ -625,27 +627,51 @@ void StructuredDetector::initDraw() const {
 /// Returns the shape of the Object
 const boost::shared_ptr<const Object> StructuredDetector::shape() const {
   // --- Create a hexahedral shape for your pixels ----
-  double szX = m_xpixels;
-  double szY = m_ypixels;
-  double szZ = 0.5;
+  auto w = this->xpixels() + 1;
+  auto xlb = m_xvalues[0];
+  auto xlf = m_xvalues[w * m_ypixels];
+  auto xrf = m_xvalues[(w * m_ypixels) + m_xpixels];
+  auto xrb = m_xvalues[w];
+  auto ylb = m_yvalues[0];
+  auto ylf = m_yvalues[(w * m_ypixels)];
+  auto yrf = m_yvalues[(w * m_ypixels) + m_xpixels];
+  auto yrb = m_yvalues[w];
+
   std::ostringstream xmlShapeStream;
-  xmlShapeStream << " <cuboid id=\"detector-shape\"> "
-                 << "<left-front-bottom-point x=\"" << szX << "\" y=\"" << -szY
-                 << "\" z=\"" << -szZ << "\"  /> "
-                 << "<left-front-top-point  x=\"" << szX << "\" y=\"" << -szY
-                 << "\" z=\"" << szZ << "\"  /> "
-                 << "<left-back-bottom-point  x=\"" << -szX << "\" y=\"" << -szY
-                 << "\" z=\"" << -szZ << "\"  /> "
-                 << "<right-front-bottom-point  x=\"" << szX << "\" y=\"" << szY
-                 << "\" z=\"" << -szZ << "\"  /> "
-                 << "</cuboid>";
 
-  std::string xmlCuboidShape(xmlShapeStream.str());
+  xmlShapeStream << "<hexahedron id=\"detector-shape\" >"
+                 << "<left-back-bottom-point x=\"" << xlb << "\""
+                 << " y=\"" << ylb << "\""
+                 << " z=\"0\" />"
+                 << "<left-front-bottom-point x=\"" << xlf << "\""
+                 << " y=\"" << ylf << "\""
+                 << " z=\"0\" />"
+                 << "<right-front-bottom-point x=\"" << xrf << "\""
+                 << " y=\"" << yrf << "\""
+                 << " z=\"0\" />"
+                 << "<right-back-bottom-point x=\"" << xrb << "\""
+                 << " y=\"" << yrb << "\""
+                 << " z=\"0\" />"
+                 << "<left-back-top-point x=\"" << xlb << "\""
+                 << " y=\"" << ylb << "\""
+                 << " z=\"0.5\" />"
+                 << "<left-front-top-point x=\"" << xlf << "\""
+                 << " y=\"" << ylf << "\""
+                 << " z=\"0.5\" />"
+                 << "<right-front-top-point x=\"" << xrf << "\""
+                 << " y=\"" << yrf << "\""
+                 << " z=\"0.5\" />"
+                 << "<right-back-top-point x=\"" << xrb << "\""
+                 << " y=\"" << yrb << "\""
+                 << " z=\"0.5\" />"
+                 << "</hexahedron>";
+
+  std::string xmlHexahedralShape(xmlShapeStream.str());
   Geometry::ShapeFactory shapeCreator;
-  boost::shared_ptr<Geometry::Object> cuboidShape =
-      shapeCreator.createShape(xmlCuboidShape);
+  boost::shared_ptr<Geometry::Object> hexahedralShape =
+      shapeCreator.createShape(xmlHexahedralShape);
 
-  return cuboidShape;
+  return hexahedralShape;
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -64,7 +64,6 @@ set ( SRC_FILES
 	src/Instrument/RectangularDetectorPixel.cpp
 	src/Instrument/ReferenceFrame.cpp
 	src/Instrument/StructuredDetector.cpp
-        src/Instrument/StructuredDetectorPixel.cpp
 	src/Instrument/XMLInstrumentParameter.cpp
 	src/MDGeometry/CompositeImplicitFunction.cpp
 	src/MDGeometry/GeneralFrame.cpp
@@ -218,7 +217,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/RectangularDetectorPixel.h
 	inc/MantidGeometry/Instrument/ReferenceFrame.h
 	inc/MantidGeometry/Instrument/StructuredDetector.h
-        inc/MantidGeometry/Instrument/StructuredDetectorPixel.h
 	inc/MantidGeometry/Instrument/XMLInstrumentParameter.h
 	inc/MantidGeometry/MDGeometry/CompositeImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/GeneralFrame.h
@@ -395,7 +393,6 @@ set ( TEST_FILES
 	SpaceGroupTest.h
 	SphereTest.h
 	StructuredDetectorTest.h
-        StructuredDetectorPixelTest.h
 	StructureFactorCalculatorSummationTest.h
 	StructureFactorCalculatorTest.h
 	SurfaceFactoryTest.h

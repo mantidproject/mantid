@@ -8,7 +8,6 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
-#include "MantidGeometry/Instrument/StructuredDetectorPixel.h"
 #include <boost/make_shared.hpp>
 
 namespace Mantid {
@@ -31,11 +30,6 @@ ParComponentFactory::createDetector(const IDetector *base,
       dynamic_cast<const RectangularDetectorPixel *>(base);
   if (rdp)
     return boost::make_shared<RectangularDetectorPixel>(rdp, map);
-
-  const StructuredDetectorPixel *sdp =
-	  dynamic_cast<const StructuredDetectorPixel *>(base);
-  if (sdp)
-	  return boost::make_shared<StructuredDetectorPixel>(sdp, map);
 
   const Detector *baseDet = dynamic_cast<const Detector *>(base);
   if (baseDet)
@@ -77,12 +71,6 @@ ParComponentFactory::create(boost::shared_ptr<const IComponent> base,
   if (rdp)
     return boost::shared_ptr<IComponent>(
         new RectangularDetectorPixel(rdp, map));
-
-  const StructuredDetectorPixel *sdp =
-	  dynamic_cast<const StructuredDetectorPixel *>(base.get());
-  if (sdp)
-	  return boost::shared_ptr<IComponent>(
-		  new StructuredDetectorPixel(sdp, map));
 
   boost::shared_ptr<const IDetector> det_sptr =
       boost::dynamic_pointer_cast<const IDetector>(base);
