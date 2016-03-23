@@ -203,8 +203,8 @@ void SaveMDWorkspaceToVTKImpl::setupMembers() {
   m_normalizations.emplace("VolumeNormalization",
                            VisualNormalization::VolumeNormalization);
 
-  m_thresholds.push_back("IgnoreZerosThresholdRange");
-  m_thresholds.push_back("NoThresholdRange");
+  m_thresholds.emplace_back("IgnoreZerosThresholdRange");
+  m_thresholds.emplace_back("NoThresholdRange");
 }
 
 std::vector<std::string>
