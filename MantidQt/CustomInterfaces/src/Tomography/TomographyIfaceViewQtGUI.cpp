@@ -1930,7 +1930,7 @@ std::string TomographyIfaceViewQtGUI::checkDefaultVisualizeDir(
   } else {
     userWarning(
         "Cannot open the path",
-        "Cannot open " + path +
+        "Cannot open " + location.toString() +
             ". Please check that it exists on your system and it is readable.");
   }
 

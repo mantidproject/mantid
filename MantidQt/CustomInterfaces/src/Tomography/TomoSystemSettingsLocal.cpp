@@ -8,7 +8,7 @@ namespace CustomInterfaces {
 
 const std::string TomoSystemSettingsLocal::g_defBasePathTomoData =
 #ifdef _WIN32
-    "D:\\data";
+    "D:\\";
 #else
     "${HOME}/imat-data";
 #endif
