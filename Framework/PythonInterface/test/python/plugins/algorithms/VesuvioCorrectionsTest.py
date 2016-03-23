@@ -10,7 +10,6 @@ import unittest
 import numpy as np
 import platform
 
-from mantid import logger
 from mantid.api import *
 from VesuvioTesting import create_test_container_ws, create_test_ws
 import mantid.simpleapi as ms
@@ -59,7 +58,6 @@ class VesuvioCorrectionsTest(unittest.TestCase):
 
         alg.execute()
         self.assertTrue(alg.isExecuted())
-        logger.warning("===================================START OF WS INDEX 1============================")
         # Test Corrections Workspaces
         corrections_wsg = alg.getProperty("CorrectionWorkspaces").value
         self._validate_group_structure(corrections_wsg, 3)
@@ -102,9 +100,9 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         linear_params = alg.getProperty("LinearFitResult").value
         self._validate_table_workspace(linear_params, 7, 3)
         expected_values = [4.17063e-05, 0.0, 1.0, 2.026619013, 0.0, 1.0, 11.799966]
+        if self._is_linux:
+            expected_values = [6.087759e-05, 0.0, 1.0, 2.019595, 0.0, 1.0, 11.80356]
         self._validate_table_values_top_to_bottom(linear_params, expected_values)
-        logger.warning("===================================END OF INDEX 1===============================")
-        self.assertEqual(1, 2)
 
 
     def test_gamma_and_ms_correct_workspace_index_two(self):
@@ -118,7 +116,6 @@ class VesuvioCorrectionsTest(unittest.TestCase):
 
         alg.execute()
         self.assertTrue(alg.isExecuted())
-        logger.warning("=============================START OF INDEX 2================================")
         # Test Corrections Workspaces
         corrections_wsg = alg.getProperty("CorrectionWorkspaces").value
         self._validate_group_structure(corrections_wsg, 3)
@@ -153,15 +150,17 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         output_ws = alg.getProperty("OutputWorkspace").value
         self._validate_matrix_structure(output_ws, 1, self._input_bins)
         output_expected_peak = 0.5234438813082305
+        if self._is_linux:
+            output_expected_peak = 0.5234463
         self._validate_matrix_peak_height(output_ws, output_expected_peak)
 
         # Test Linear fit Result Workspace
         linear_params = alg.getProperty("LinearFitResult").value
         self._validate_table_workspace(linear_params, 7, 3)
         expected_values = [0.0001183, 0.0, 1.0, 2.4028667, 0.0, 1.0, 10.5412496]
+        if self._is_linux:
+            expected_values = [0.550200e-04, 0.0, 1.0, 2.390063, 0.0, 1.0, 10.055330]
         self._validate_table_values_top_to_bottom(linear_params, expected_values)
-        logger.warning("================================END OF INDEX 2===========================")
-        self.assertEqual(1, 2)
 
 
     def test_ms_correct_with_container(self):
@@ -363,8 +362,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
             if expected_values[i] != 'skip':
                 tolerance_value = expected_values[i] * tolerance
                 abs_difference = abs(expected_values[i] - table_ws.cell(i,1))
-                logger.warning(" index %d has a value of %e" % (i, table_ws.cell(i,1)))
-                #self.assertTrue(abs_difference <= tolerance_value)
+                self.assertTrue(abs_difference <= tolerance_value)
 
     def _validate_matrix_peak_height(self, matrix_ws, expected_height, ws_index=0, tolerance=0.05):
         """
@@ -377,9 +375,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         peak_height = np.amax(y_data)
         tolerance_value = expected_height * tolerance
         abs_difference = abs(expected_height - peak_height)
-        logger.warning("%s peak is of value %e" %(matrix_ws.getName(), peak_height))
-        #self.assertTrue(abs_difference <= tolerance_value)
-
+        self.assertTrue(abs_difference <= tolerance_value)
 
 
 if __name__ == "__main__":
