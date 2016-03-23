@@ -104,6 +104,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         expected_values = [4.17063e-05, 0.0, 1.0, 2.026619013, 0.0, 1.0, 11.799966]
         self._validate_table_values_top_to_bottom(linear_params, expected_values)
         logger.warning("===================================END OF INDEX 1===============================")
+        self.assertEqual(1, 2)
 
 
     def test_gamma_and_ms_correct_workspace_index_two(self):
@@ -160,6 +161,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         expected_values = [0.0001183, 0.0, 1.0, 2.4028667, 0.0, 1.0, 10.5412496]
         self._validate_table_values_top_to_bottom(linear_params, expected_values)
         logger.warning("================================END OF INDEX 2===========================")
+        self.assertEqual(1, 2)
 
 
     def test_ms_correct_with_container(self):
