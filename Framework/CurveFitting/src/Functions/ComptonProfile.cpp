@@ -29,8 +29,7 @@ const char *MASS_NAME = "Mass";
 ComptonProfile::ComptonProfile()
     : API::ParamFunction(), API::IFunction1D(), m_log("ComptonProfile"),
       m_wsIndex(0), m_voigt(), m_resolutionFunction(), m_yspace(), m_modQ(),
-      m_e0() {
-
+      m_e0(), m_mass(0.0) {
   using namespace Mantid::API;
   m_resolutionFunction = boost::dynamic_pointer_cast<VesuvioResolution>(
       FunctionFactory::Instance().createFunction("VesuvioResolution"));
