@@ -17,6 +17,7 @@ using namespace MantidQt::CustomInterfaces;
 
 #include <boost/lexical_cast.hpp>
 
+#include <Poco/File.h>
 #include <Poco/Path.h>
 
 #include <QFileDialog>
@@ -1474,7 +1475,7 @@ void TomographyIfaceViewQtGUI::samplesPathBrowseClicked() {
   processPathBrowseClick(m_uiTabSetup.lineEdit_path_samples, str);
   if (!str.empty()) {
     m_pathsConfig.updatePathSamples(str);
-    m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
+    m_presenter->notify(ITomographyIfacePresenter::TomoPathsEditedByUser);
   }
 }
 
@@ -1915,16 +1916,42 @@ void TomographyIfaceViewQtGUI::browseFilesToVisualizeClicked() {
   }
 }
 
+// helper that should go to the presenter. Makes sure that the path is
+// effectively readable
+std::string checkDefaultVisualizeDir(const std::string &basePath,
+                                     const std::string &appendComp) {
+  Poco::Path location(Poco::Path::expand(basePath));
+  location.append(appendComp);
+  Poco::File locationDir(location);
+
+  std::string path;
+  if (locationDir.exists() && locationDir.canRead()) {
+    path = location.toString();
+  }
+
+  return path;
+}
+
 void TomographyIfaceViewQtGUI::defaultDirLocalVisualizeClicked() {
   const QFileSystemModel *model = dynamic_cast<QFileSystemModel *>(
       m_uiTabVisualize.treeView_files->model());
   if (!model)
     return;
 
-  const QString path =
-      QString::fromStdString(Poco::Path::expand(g_defOutPathLocal));
+  // TODO: this should be moved to presenter?
+  std::string checkedPath = checkDefaultVisualizeDir(
+      m_uiTabSystemSettings.lineEdit_on_local_data_drive_or_path->text()
+          .toStdString(),
+      m_uiTabSystemSettings.lineEdit_path_comp_1st->text().toStdString());
+
+  const QString path = QString::fromStdString(checkedPath);
   if (!path.isEmpty()) {
     m_uiTabVisualize.treeView_files->setRootIndex(model->index(path));
+  } else {
+    userWarning(
+        "Cannot open the path",
+        "Cannot open " + path.toStdString() +
+            ". Please check that it exists on your system and it is readable.");
   }
 }
 
@@ -1934,10 +1961,20 @@ void TomographyIfaceViewQtGUI::defaultDirRemoteVisualizeClicked() {
   if (!model)
     return;
 
-  const QString path =
-      QString::fromStdString(Poco::Path::expand(g_defOutPathRemote));
+  // TODO: this should be moved to presenter?
+  std::string checkedPath = checkDefaultVisualizeDir(
+      m_uiTabSystemSettings.lineEdit_on_local_remote_data_drive_path->text()
+          .toStdString(),
+      m_uiTabSystemSettings.lineEdit_path_comp_1st->text().toStdString());
+
+  const QString path = QString::fromStdString(checkedPath);
   if (!path.isEmpty()) {
     m_uiTabVisualize.treeView_files->setRootIndex(model->index(path));
+  } else {
+    userWarning(
+        "Cannot open the path",
+        "Cannot open " + path.toStdString() +
+            ". Please check that it exists on your system and it is readable.");
   }
 }
 
