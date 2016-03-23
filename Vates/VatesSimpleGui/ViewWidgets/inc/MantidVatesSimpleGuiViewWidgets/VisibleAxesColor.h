@@ -43,7 +43,7 @@ public:
   void setOrientationAxesLabelColor(pqRenderView *view,
                                     bool useCurrentBackgroundColor);
   void setGridAxesColor(pqRenderView *view, bool /*on*/);
-  void setScalarBarColor();
+  void setScalarBarColor(pqRenderView *view);
 
 private:
 };

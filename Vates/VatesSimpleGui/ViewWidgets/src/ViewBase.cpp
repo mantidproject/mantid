@@ -798,7 +798,7 @@ void ViewBase::setVisibleAxesColors(bool useCurrentColorSettings) {
   m_visibleAxesColor.setOrientationAxesLabelColor(this->getView(),
                                                   useCurrentColorSettings);
   m_visibleAxesColor.setGridAxesColor(this->getView(), true);
-  m_visibleAxesColor.setScalarBarColor();
+  m_visibleAxesColor.setScalarBarColor(this->getView());
   // m_visibleAxesColor.observe(this->getView());
 }
 
