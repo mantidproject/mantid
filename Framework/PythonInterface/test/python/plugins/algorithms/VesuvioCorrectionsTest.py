@@ -362,7 +362,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
             if expected_values[i] != 'skip':
                 tolerance_value = expected_values[i] * tolerance
                 abs_difference = abs(expected_values[i] - table_ws.cell(i,1))
-                self.assertTrue(abs_difference <= tolerance_value)
+                self.assertTrue(abs_difference <= abs(tolerance_value))
 
     def _validate_matrix_peak_height(self, matrix_ws, expected_height, ws_index=0, tolerance=0.05):
         """
@@ -375,7 +375,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         peak_height = np.amax(y_data)
         tolerance_value = expected_height * tolerance
         abs_difference = abs(expected_height - peak_height)
-        self.assertTrue(abs_difference <= tolerance_value)
+        self.assertTrue(abs_difference <= abs(tolerance_value))
 
 
 if __name__ == "__main__":
