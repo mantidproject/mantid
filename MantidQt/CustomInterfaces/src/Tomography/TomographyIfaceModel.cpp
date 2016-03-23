@@ -912,7 +912,7 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
   cor = corRegions.cor.X();
   opts.emplace_back("--cor=" + std::to_string(cor));
 
-  int rotationIdx = filters.prep.rotation / 90;
+  int rotationIdx = static_cast<int>(corRegions.rotation / 90);
   // filters.prep.rotation
   opts.emplace_back("--rotation=" + std::to_string(rotationIdx));
 
