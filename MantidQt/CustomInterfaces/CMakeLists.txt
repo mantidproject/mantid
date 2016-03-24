@@ -475,6 +475,7 @@ set ( TEST_FILES
 	MeasurementItemTest.h
 	MuonAnalysisHelperTest.h
 	ParseKeyValueStringTest.h
+	ReflCommandsTest.h
 	ReflGenerateNotebookTest.h
 	ReflLegacyTransferStrategyTest.h
 	ReflMainViewPresenterTest.h
