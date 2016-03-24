@@ -27,3 +27,13 @@ file(WRITE ${DATA_DIRS_FILE} "${DATA_DIRS}")
 set(SAVE_DIR ${CMAKE_CURRENT_BINARY_DIR} )
 set(SAVE_DIR_FILE ${CMAKE_CURRENT_LIST_DIR}/defaultsave-directory.txt)
 file(WRITE ${SAVE_DIR_FILE} "${SAVE_DIR}")
+
+# Configure files for developers running tests
+set (SYSTEMTESTS_RUNNER_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/runSystemTests.py)
+if (MSVC OR XCODE_VERSION)
+  set (MULTI_CONFIG_GENERATOR "true")
+else ()
+  set (MULTI_CONFIG_GENERATOR "false")
+endif ()
+configure_file(${CMAKE_CURRENT_LIST_DIR}/systemtest.in ${CMAKE_BINARY_DIR}/systemtest
+    @ONLY)
