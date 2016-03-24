@@ -4,14 +4,17 @@
 TimeSeriesProperty
 ==================
 
-A TimeSeriesProperty is a specialised [[Property]] class that holds time/value pairs. It offers a selection of statistics through it's Python interface which you can use in your scripts.
+A TimeSeriesProperty is a specialised :class:`mantid.kernel.Property`
+class that holds time/value pairs. It offers a selection of statistics
+through it's Python interface which you can use in your scripts.
 
 Introduction
 ============
 
-To get hold of a time series property, you need to get the handle to the object from the [[Run]] object.
+To get hold of a time series property, you need to get the handle to the object from the :class:`mantid.api.Run` object.
 
-To get the statistics object, you then call <code>getStatistics()</code> on the property.
+To get the :class:`mantid.kernel.TimeSeriesPropertyStatistics` object,
+you then call ``getStatistics()`` on the property.
 
 This allows you to access the following attributes:
 
