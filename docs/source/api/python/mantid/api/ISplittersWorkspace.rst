@@ -4,9 +4,6 @@
 Splitters Workspace
 ===================
 
-.. contents::
-   :local:
-
 SplittersWorkspaces stores a vector of SplittingIntervals. It
 inherits from :ref:`TableWorkspace <Table Workspaces>`.
 
@@ -29,3 +26,8 @@ time-splitter. Each SplitterInterval will have an 'index'. The 'index'
 (starting from zero) denotes which workspace to which any neutron
 event falls into its time interval will be copied. An 'index' of -1 to
 not filter the events.
+
+.. autoclass:: mantid.api.ISplittersWorkspace
+    :members:
+    :undoc-members:
+    :inherited-members:

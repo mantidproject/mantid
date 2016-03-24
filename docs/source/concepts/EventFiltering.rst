@@ -18,21 +18,22 @@ How to generate event filters
 Generating filters explicitly
 -----------------------------
 
-:ref:`algm-FilterEvents` reads and parses a :ref:`SplittersWorkspace`
-object to generate a list of :ref:`SplittingIntervals
-<SplittingInterval>`, which are used to split neutron events to
-specified output workspaces according to the times that they arrive
-detectors.
+:ref:`algm-FilterEvents` reads and parses a
+:class:`mantid.api.ISplittersWorkspace` object to generate a list of
+:ref:`SplittingIntervals <SplittingInterval>`, which are used to split
+neutron events to specified output workspaces according to the times
+that they arrive detectors.
 
-There can be two approaches to create a :ref:`SplittersWorkspace`.
+There can be two approaches to create a
+:class:`mantid.api.ISplittersWorkspace`.
 
 * :ref:`algm-GenerateEventsFilter` generate event filters by either by
   time or log value.  The output filters are stored in a
   :ref:`SplittersWorkspace`, which is taken as an input property of
   :ref:`algm-FilterEvents`.
 
-* Users can create a :ref:`SplittersWorkspace` from scrach from Python
-  script, because :ref:`SplittersWorkspace` inherits from
+* Users can create a :class:`mantid.api.ISplittersWorkspace` from scrach from Python
+  script, because :class:`mantid.api.ISplittersWorkspace` inherits from
   :ref:`TableWorkspace <Table Workspaces>`.
 
 Generating inexplicit filters
