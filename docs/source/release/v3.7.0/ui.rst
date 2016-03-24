@@ -137,6 +137,9 @@ VSI Improvements
 .. figure:: ../../images/VSIEllipses.png
     :align: center  
 
+- Removed the error-prone right-click option to view peaks workspaces in the VSI. One should load a MDWorkspace,
+  then drag the corresponding peaks workspace into the VSI window.
+
 |
 
 Full list of
