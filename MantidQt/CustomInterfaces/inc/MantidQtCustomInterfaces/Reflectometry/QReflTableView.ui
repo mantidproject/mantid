@@ -27,16 +27,6 @@
                  <property name="styleSheet">
                    <string>QToolBar{border: none;}</string>
                  </property>
-                 <addaction name="menuOpenTable"/>
-                 <addaction name="actionNewTable"/>
-                 <addaction name="actionSaveTable"/>
-                 <addaction name="actionSaveTableAs"/>
-                 <addaction name="separator"/>
-                 <addaction name="actionImportTable"/>
-                 <addaction name="actionExportTable"/>
-                 <addaction name="separator"/>
-                 <addaction name="actionOptionsDialog"/>
-                 <addaction name="separator"/>
                  <addaction name="actionProcess"/>
                  <addaction name="actionExpandSelection"/>
                  <addaction name="separator"/>
