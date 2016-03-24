@@ -402,7 +402,7 @@ void CutMD::exec() {
     }
 
     // Make labels
-    std::vector<std::string> labels = labelProjection(scaledProjectionMatrix);
+    std::vector<std::string> labels = labelProjection(projectionMatrix);
 
     // Either run RebinMD or SliceMD
     const std::string cutAlgName = noPix ? "BinMD" : "SliceMD";

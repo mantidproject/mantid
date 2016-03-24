@@ -686,7 +686,7 @@ public:
     TS_ASSERT_EQUALS(outWS->getDimension(1)->getName(), "[0, 'eta', 0]")
     TS_ASSERT_EQUALS(outWS->getDimension(2)->getName(), "[0, 0, 'xi']")
     TSM_ASSERT_EQUALS("Output workspace unit label should show scaling from conversion to RLU",
-                      outWS->getDimension(0)->getUnits().ascii(), "in XA^-1")
+                      outWS->getDimension(0)->getUnits().ascii(), "in 3.14A^-1")
 
     // Clean up
     AnalysisDataService::Instance().remove(ws_name);
