@@ -2,6 +2,9 @@
 """
 import unittest
 import numpy as np
+
+# Import mantid to setup the python paths to the bundled scripts
+import mantid
 from CrystalField.energies import energies
 
 
