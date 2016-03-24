@@ -504,9 +504,6 @@ public:
     const std::string path = sets.m_local.m_basePathTomoData;
     TSM_ASSERT_LESS_THAN_EQUALS(
         msg + " (base path for tomography data too short)", 3, path.length());
-
-    TSM_ASSERT_EQUALS(msg + " (base path for tomography data)",
-                      path.substr(path.length() - 4), "data");
   }
 
   void test_systemSettingsDefsRemote() {
