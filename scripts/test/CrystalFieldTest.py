@@ -2,8 +2,6 @@
 """
 import unittest
 import numpy as np
-
-from mantid.simpleapi import *
 from CrystalField.energies import energies
 
 

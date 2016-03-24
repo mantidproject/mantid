@@ -50,8 +50,6 @@ public:
   FortranMatrix();
   /// Constructor
   FortranMatrix(const int nx, const int ny);
-  /// Copy constructor
-  FortranMatrix(const FortranMatrix &M);
   /// Constructor
   FortranMatrix(const int iFrom, const int iTo, const int jFrom, const int jTo);
   /// Resize the matrix.
@@ -91,11 +89,6 @@ template <class MatrixClass>
 FortranMatrix<MatrixClass>::FortranMatrix(const int nx, const int ny)
     : MatrixClass(this->makeSize(1, nx), this->makeSize(1, ny)), m_base1(1),
       m_base2(1) {}
-
-/// Copy constructor
-template <class MatrixClass>
-FortranMatrix<MatrixClass>::FortranMatrix(const FortranMatrix &M)
-    : MatrixClass(M), m_base1(M.m_base1), m_base2(M.m_base2) {}
 
 /// Construct a FortranMatrix that has arbitrary index bases.
 /// For example FortranMatrix(1,5, -2,2) creates a 5 x 5 matrix.

@@ -47,8 +47,6 @@ public:
   FortranVector();
   /// Constructor
   FortranVector(const int n);
-  /// Copy constructor
-  FortranVector(const FortranVector &V);
   /// Constructor
   FortranVector(const int iFrom, const int iTo);
   /// Resize the vector
@@ -86,11 +84,6 @@ FortranVector<VectorClass>::FortranVector()
 template <class VectorClass>
 FortranVector<VectorClass>::FortranVector(const int n)
     : VectorClass(makeSize(1, n)), m_base(1) {}
-
-/// Copy constructor
-template <class VectorClass>
-FortranVector<VectorClass>::FortranVector(const FortranVector &V)
-    : VectorClass(V), m_base(V.m_base) {}
 
 /// Construct a FortranVector that has arbitrary index bases.
 /// For example FortranVector(-2,2) creates a vector of length 5.

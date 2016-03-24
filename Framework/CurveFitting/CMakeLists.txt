@@ -29,7 +29,6 @@ set ( SRC_FILES
 	src/CostFunctions/CostFuncRwp.cpp
 	src/CostFunctions/CostFuncUnweightedLeastSquares.cpp
 	src/FitMW.cpp
-	src/FortranMatrix.cpp
 	src/FuncMinimizers/BFGS_Minimizer.cpp
 	src/FuncMinimizers/DampingMinimizer.cpp
 	src/FuncMinimizers/DerivMinimizer.cpp

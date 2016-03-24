@@ -1,5 +1,6 @@
-from mantid.simpleapi import *
+from mantid.simpleapi import CrystalFieldEnergies
 import numpy as np
+import warnings
 
 
 def _unpack_complex_matrix(packed, n_rows, n_cols):
@@ -28,9 +29,11 @@ def energies(nre, **kwargs):
             Bext: a list of 3 external field parameters
 
     Return:
-        a tuple of energies(1D numpy array), wavefunctions (2D numpy array)
+        a tuple of energies (1D numpy array), wavefunctions (2D numpy array)
         and the hamiltonian (2D numpy array).
     """
+    warnings.warn('This function is under development and can be changed/removed in the future',
+      FutureWarning)
     # Do the calculations
     res = CrystalFieldEnergies(nre, **kwargs)
 

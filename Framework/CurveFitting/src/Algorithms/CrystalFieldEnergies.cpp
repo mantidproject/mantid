@@ -75,21 +75,21 @@ void CrystalFieldEnergies::init() {
   declareProperty("B65", 0.0, "Real part of the B65 field parameter.");
   declareProperty("B66", 0.0, "Real part of the B66 field parameter.");
 
-  declareProperty("IB20", 0.0, "Imaginery part of the B20 field parameter.");
-  declareProperty("IB21", 0.0, "Imaginery part of the B21 field parameter.");
-  declareProperty("IB22", 0.0, "Imaginery part of the B22 field parameter.");
-  declareProperty("IB40", 0.0, "Imaginery part of the B40 field parameter.");
-  declareProperty("IB41", 0.0, "Imaginery part of the B41 field parameter.");
-  declareProperty("IB42", 0.0, "Imaginery part of the B42 field parameter.");
-  declareProperty("IB43", 0.0, "Imaginery part of the B43 field parameter.");
-  declareProperty("IB44", 0.0, "Imaginery part of the B44 field parameter.");
-  declareProperty("IB60", 0.0, "Imaginery part of the B60 field parameter.");
-  declareProperty("IB61", 0.0, "Imaginery part of the B61 field parameter.");
-  declareProperty("IB62", 0.0, "Imaginery part of the B62 field parameter.");
-  declareProperty("IB63", 0.0, "Imaginery part of the B63 field parameter.");
-  declareProperty("IB64", 0.0, "Imaginery part of the B64 field parameter.");
-  declareProperty("IB65", 0.0, "Imaginery part of the B65 field parameter.");
-  declareProperty("IB66", 0.0, "Imaginery part of the B66 field parameter.");
+  declareProperty("IB20", 0.0, "Imaginary part of the B20 field parameter.");
+  declareProperty("IB21", 0.0, "Imaginary part of the B21 field parameter.");
+  declareProperty("IB22", 0.0, "Imaginary part of the B22 field parameter.");
+  declareProperty("IB40", 0.0, "Imaginary part of the B40 field parameter.");
+  declareProperty("IB41", 0.0, "Imaginary part of the B41 field parameter.");
+  declareProperty("IB42", 0.0, "Imaginary part of the B42 field parameter.");
+  declareProperty("IB43", 0.0, "Imaginary part of the B43 field parameter.");
+  declareProperty("IB44", 0.0, "Imaginary part of the B44 field parameter.");
+  declareProperty("IB60", 0.0, "Imaginary part of the B60 field parameter.");
+  declareProperty("IB61", 0.0, "Imaginary part of the B61 field parameter.");
+  declareProperty("IB62", 0.0, "Imaginary part of the B62 field parameter.");
+  declareProperty("IB63", 0.0, "Imaginary part of the B63 field parameter.");
+  declareProperty("IB64", 0.0, "Imaginary part of the B64 field parameter.");
+  declareProperty("IB65", 0.0, "Imaginary part of the B65 field parameter.");
+  declareProperty("IB66", 0.0, "Imaginary part of the B66 field parameter.");
 
   // Output
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
