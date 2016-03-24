@@ -43,6 +43,7 @@ DblMatrix scaleProjection(const DblMatrix &inMatrix,
     throw std::runtime_error(
         "scaleProjection given different quantity of input and output units");
 
+  assert(inWS->getNumExperimentInfo() > 0);
   const OrientedLattice &orientedLattice =
       inWS->getExperimentInfo(0)->sample().getOrientedLattice();
 
@@ -296,7 +297,7 @@ void CutMD::exec() {
       getProperty("P1Bin"), getProperty("P2Bin"), getProperty("P3Bin"),
       getProperty("P4Bin"), getProperty("P5Bin")};
 
-  Workspace_sptr sliceWS; // output worskpace
+  Workspace_sptr sliceWS; // output workspace
 
   // Histogram workspaces can be sliced axis-aligned only.
   if (auto histInWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(inWS)) {

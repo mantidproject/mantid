@@ -13,12 +13,14 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "../../Kernel/inc/MantidKernel/MDUnit.h"
 #include "../inc/MantidMDAlgorithms/CutMD.h"
-#include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 #include "../../API/inc/MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::MDAlgorithms;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -64,9 +66,32 @@ private:
                                       wsName.c_str(), "PeakParams",
                                       "1000,0,0,0,0,1");
 
-    IMDWorkspace_const_sptr cutMDtestws =
+    IMDWorkspace_sptr cutMDtestws =
         AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(wsName);
-    return cutMDtestws;
+
+    auto eventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(cutMDtestws);
+
+    Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
+        Mantid::Kernel::QSample;
+    eventWS->setCoordinateSystem(appliedCoord);
+
+    FrameworkManager::Instance().exec(
+        "CreateSampleWorkspace", 4, "OutputWorkspace", "__CutMDTest_tempMatWS",
+        "WorkspaceType", "Event");
+
+    MatrixWorkspace_sptr tempMatWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "__CutMDTest_tempMatWS");
+
+    Mantid::Geometry::OrientedLattice latt(2, 3, 4, 90, 90, 90);
+    tempMatWS->mutableSample().setOrientedLattice(&latt);
+
+    ExperimentInfo_sptr ei(tempMatWS->cloneExperimentInfo());
+    eventWS->addExperimentInfo(ei);
+
+    AnalysisDataService::Instance().addOrReplace(wsName, eventWS);
+
+    return eventWS;
   }
 
 public:
@@ -593,6 +618,49 @@ public:
     auto foundUnits = findOriginalQUnits(cutMDtestws, logger);
     TSM_ASSERT_EQUALS("Units should be found to be RLU", foundUnits[0],
                       Mantid::MDAlgorithms::CutMD::RLUSymbol);
+    // Clean up
+    AnalysisDataService::Instance().remove(ws_name);
+  }
+
+  void test_CutMD_dimension_labels_A_to_A() {
+    Mantid::Kernel::Logger logger("CutMDTestLogger");
+    const std::string ws_name = "__CutMDTest_unitstest";
+    makeWorkspaceWithSpecifiedUnits("Angstrom^-1", ws_name);
+
+    ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
+    proj->addColumn("str", "name");
+    proj->addColumn("V3D", "value");
+    proj->addColumn("double", "offset");
+    proj->addColumn("str", "type");
+
+    TableRow uRow = proj->appendRow();
+    TableRow vRow = proj->appendRow();
+    TableRow wRow = proj->appendRow();
+    uRow << "u" << V3D(1, 0, 0) << 0.0 << "a";
+    vRow << "v" << V3D(0, 1, 0) << 0.0 << "a";
+    wRow << "w" << V3D(0, 0, 1) << 0.0 << "a";
+
+    CutMD alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", ws_name);
+    alg.setProperty("P1Bin", "-0.4,0.8");
+    alg.setProperty("P2Bin", "-0.4,0.8");
+    alg.setProperty("P3Bin", "-0.4,0.8");
+    alg.setProperty("P4Bin", "-1.0,1.0");
+    alg.setProperty("Projection", proj);
+    alg.setProperty("NoPix", true);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    IMDWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(outWS->getDimension(0)->getName(), "['zeta', 0, 0]")
+    TS_ASSERT_EQUALS(outWS->getDimension(1)->getName(), "[0, 'eta', 0]")
+    TS_ASSERT_EQUALS(outWS->getDimension(2)->getName(), "[0, 0, 'xi']")
+    TSM_ASSERT_EQUALS("Units should still show inverse angstroms",
+                      outWS->getDimension(0)->getUnits().ascii(), "Angstrom^-1")
+
     // Clean up
     AnalysisDataService::Instance().remove(ws_name);
   }
