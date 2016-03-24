@@ -7,6 +7,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h"
+#include "MantidQtCustomInterfaces/Reflectometry/WorkspaceReceiver.h"
 
 #include <Poco/AutoPtr.h>
 #include <memory>
@@ -44,7 +45,8 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_CUSTOMINTERFACES_DLL ReflMainViewPresenter
-    : public IReflPresenter {
+    : public IReflPresenter,
+      public WorkspaceReceiver {
 public:
   ReflMainViewPresenter(ReflMainView *mainView,
                         IReflTablePresenter *tablePresenter,

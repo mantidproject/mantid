@@ -18,7 +18,6 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidQtCustomInterfaces/ParseKeyValueString.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflOuterPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ProgressPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflOptionsDialog.h"
@@ -48,6 +47,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSaveTableCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/WorkspaceReceiver.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 
 #include <boost/regex.hpp>
@@ -1232,7 +1232,7 @@ void ReflTableViewPresenter::addHandle(const std::string &name,
 
   m_workspaceList.insert(name);
   m_tableView->setTableList(m_workspaceList);
-  m_outerPresenter->pushWorkspaceList(m_workspaceList);
+  m_workspaceReceiver->pushWorkspaceList(m_workspaceList);
 }
 
 /**
@@ -1241,7 +1241,7 @@ Handle ADS remove events
 void ReflTableViewPresenter::postDeleteHandle(const std::string &name) {
   m_workspaceList.erase(name);
   m_tableView->setTableList(m_workspaceList);
-  m_outerPresenter->pushWorkspaceList(m_workspaceList);
+  m_workspaceReceiver->pushWorkspaceList(m_workspaceList);
 }
 
 /**
@@ -1250,7 +1250,7 @@ Handle ADS clear events
 void ReflTableViewPresenter::clearADSHandle() {
   m_workspaceList.clear();
   m_tableView->setTableList(m_workspaceList);
-  m_outerPresenter->pushWorkspaceList(m_workspaceList);
+  m_workspaceReceiver->pushWorkspaceList(m_workspaceList);
 }
 
 /**
@@ -1267,7 +1267,7 @@ void ReflTableViewPresenter::renameHandle(const std::string &oldName,
   m_workspaceList.erase(oldName);
   m_workspaceList.insert(newName);
   m_tableView->setTableList(m_workspaceList);
-  m_outerPresenter->pushWorkspaceList(m_workspaceList);
+  m_workspaceReceiver->pushWorkspaceList(m_workspaceList);
 }
 
 /**
@@ -1648,12 +1648,12 @@ std::vector<ReflCommandBase_uptr> ReflTableViewPresenter::publishCommands() {
   return commands;
 }
 
-/** Register an outer presenter
-* @param outerPresenter : [input] The outer presenter
+/** Register a workspace receiver
+* @param workspaceReceiver : [input] The outer presenter
 */
-void ReflTableViewPresenter::registerOuterPresenter(
-    IReflOuterPresenter *outerPresenter) {
-  m_outerPresenter = outerPresenter;
+void ReflTableViewPresenter::accept(
+    WorkspaceReceiver *workspaceReceiver) {
+  m_workspaceReceiver = workspaceReceiver;
 }
 
 /** Get the list of table workspaces the user can open

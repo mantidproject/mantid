@@ -1,8 +1,6 @@
 #ifndef MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
 
-#include "MantidQtCustomInterfaces/Reflectometry/IReflOuterPresenter.h"
-
 namespace MantidQt {
 namespace CustomInterfaces {
 /** @class IReflPresenter
@@ -31,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IReflPresenter : public IReflOuterPresenter {
+class IReflPresenter {
 public:
   virtual ~IReflPresenter(){};
 
@@ -39,9 +37,6 @@ public:
 
   // Tell the presenter something happened
   virtual void notify(IReflPresenter::Flag flag) = 0;
-  // Update the presenter with the list of workspaces the user can open
-  virtual void
-  pushWorkspaceList(const std::set<std::string> &workspaceList) = 0;
 };
 }
 }

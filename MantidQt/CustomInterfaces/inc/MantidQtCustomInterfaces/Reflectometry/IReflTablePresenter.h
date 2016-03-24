@@ -13,7 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class IReflOuterPresenter;
+class WorkspaceReceiver;
 
 /** @class IReflTablePresenter
 
@@ -77,7 +77,7 @@ public:
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
                                  const std::string &defaultInstrument) = 0;
   virtual std::vector<ReflCommandBase_uptr> publishCommands() = 0;
-  virtual void registerOuterPresenter(IReflOuterPresenter *outerPresenter) = 0;
+  virtual void accept(WorkspaceReceiver *workspaceReceiver) = 0;
   virtual void setModel(std::string name) = 0;
   virtual std::set<std::string> getTableList() const = 0;
 };

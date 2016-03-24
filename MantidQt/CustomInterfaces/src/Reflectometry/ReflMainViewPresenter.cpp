@@ -34,7 +34,7 @@ ReflMainViewPresenter::ReflMainViewPresenter(
       m_progressView(progressView), m_searcher(searcher) {
 
   // Register this presenter as the m_tablePresenter's outer presenter
-  m_tablePresenter->registerOuterPresenter(this);
+  m_tablePresenter->accept(this);
   // Get the workspace list (i.e. list of workspaces in the ADS the user can
   // open) from the inner presenter
   auto tableList = m_tablePresenter->getTableList();

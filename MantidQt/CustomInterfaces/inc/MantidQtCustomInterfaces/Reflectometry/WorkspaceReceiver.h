@@ -1,14 +1,14 @@
-#ifndef MANTID_CUSTOMINTERFACES_IREFLOUTERPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_IREFLOUTERPRESENTER_H
+#ifndef MANTID_CUSTOMINTERFACES_WORKSPACERECEIVER_H
+#define MANTID_CUSTOMINTERFACES_WORKSPACERECEIVER_H
 
 #include <set>
 #include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class IReflOuterPresenter
+/** @class WorkspaceReceiver
 
-IReflOuterPresenter is an interface that defines the functions needed to receive
+WorkspaceReceiver is an interface that defines the functions needed to receive
 information from a table presenter. IReflTablePresenter uses this interface
 to notify changes to an outer, concrete presenter. Any outer presenter that
 needs to receive information from IReflTablePresenter should inherit from this
@@ -35,9 +35,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IReflOuterPresenter {
+class WorkspaceReceiver {
 public:
-  virtual ~IReflOuterPresenter(){};
+  virtual ~WorkspaceReceiver(){};
 
   // Update the presenter with the list of workspaces the user can open
   virtual void
@@ -45,4 +45,4 @@ public:
 };
 }
 }
-#endif /*MANTID_CUSTOMINTERFACES_IREFLOUTERPRESENTER_H*/
+#endif /*MANTID_CUSTOMINTERFACES_WORKSPACERECEIVER_H*/
