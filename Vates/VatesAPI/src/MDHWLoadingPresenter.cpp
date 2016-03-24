@@ -62,8 +62,8 @@ void MDHWLoadingPresenter::transposeWs(Mantid::API::IMDHistoWorkspace_sptr &inHi
         nonIntegratedDims.push_back(i);
       }
     }
-    std::vector<int> orderedDims;
-    orderedDims = nonIntegratedDims;
+
+    std::vector<int> orderedDims = nonIntegratedDims;
     orderedDims.insert(orderedDims.end(), integratedDims.begin(),
                        integratedDims.end());
 
