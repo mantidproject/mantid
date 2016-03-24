@@ -28,5 +28,9 @@ if [ -n "$1" ] && [ "$1" = "--classic" ]; then
     PROG=$(command -v python)
 fi
 
+# Define MANTIDPATH
+MANTIDPATH="${SCRIPT_PATH}"
+
 PYTHONPATH=${LOCAL_PYTHONPATH} \
-	${PROG} $*
+    MANTIDPATH \
+    ${PROG} $*
