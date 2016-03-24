@@ -169,7 +169,7 @@ public:
     fft->setPropertyValue("OutputWorkspace", "__NotUsed");
     fft->setPropertyValue("Real", "0");
     fft->execute();
-    
+
     MatrixWorkspace_sptr intermediate = fft->getProperty("OutputWorkspace");
     TS_ASSERT(intermediate);
 
