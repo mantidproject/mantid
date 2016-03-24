@@ -13,7 +13,6 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <Poco/File.h>
-#include <fstream>
 #include <sstream>
 
 using namespace Mantid::DataObjects;
@@ -126,6 +125,17 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
   bounds.clear();
   bounds.push_back(0);
 
+  double sumSigInt = 0.0;
+  double sumInt = 0.0;
+  double sumBinCnt = 0.0;
+  for(int it = 0; it != pwks->getNumberPeaks(); ++it)
+  {
+      const Peak &peak = pwks->getPeak(it);
+      sumSigInt += peak.getSigmaIntensity();
+      sumInt += peak.getIntensity();
+      sumBinCnt += peak.getBinCount();
+  }
+
   for (size_t k = 0; k < bankNames.size(); ++k) {
     for (int j = 0; j < pwks->getNumberPeaks(); ++j) {
       const Geometry::IPeak &peak = pwks->getPeak(j);
@@ -135,13 +145,14 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
           N += 3;
 
           // 1/sigma is considered the weight for the fit
+          // weight = 1/error in FunctionDomain1DSpectrumCreator
           double weight = 1.;                // default is even weighting
           if (peak.getSigmaIntensity() > 0.) // prefer weight by sigmaI
-            weight = 1. / peak.getSigmaIntensity();
+            weight = sumSigInt / peak.getSigmaIntensity();
           else if (peak.getIntensity() > 0.) // next favorite weight by I
-            weight = 1. / peak.getIntensity();
+            weight = sumInt / peak.getIntensity();
           else if (peak.getBinCount() > 0.) // then by counts in peak centre
-            weight = 1. / peak.getBinCount();
+            weight = sumBinCnt / peak.getBinCount();
 
           const double PEAK_INDEX = static_cast<double>(j);
           for (size_t i = 0; i < 3; ++i) {
@@ -490,8 +501,11 @@ bool GoodStart(const PeaksWorkspace_sptr &peaksWs, double a, double b, double c,
     }
   }
 
+  Kernel::Logger g_log("Calibration");
   // determine the lattice constants
   OrientedLattice lat = peaksWs->sample().getOrientedLattice();
+  g_log.notice() << "Lattice before optimization: "
+                 << lat << "\n";
 
   // see if the lattice constants are no worse than 25% out
   if (fabs(lat.a() - a) / a > .25)
@@ -515,7 +529,7 @@ bool GoodStart(const PeaksWorkspace_sptr &peaksWs, double a, double b, double c,
  * @param peaksWs  The peaks workspace with indexed peaks
  * @param  tolerance   The indexing tolerance
  */
-std::string GoodEnd(const PeaksWorkspace_sptr &peaksWs, double tolerance) {
+OrientedLattice GoodEnd(const PeaksWorkspace_sptr &peaksWs, double tolerance) {
   // put together a list of indexed peaks
   int nPeaks = peaksWs->getNumberPeaks();
   std::vector<V3D> hkl;
@@ -532,13 +546,14 @@ std::string GoodEnd(const PeaksWorkspace_sptr &peaksWs, double tolerance) {
 
   // determine the lattice constants
   Kernel::Matrix<double> UB(3, 3);
-  UB = peaksWs->sample().getOrientedLattice().getUB();
-
-  return IndexingUtils::GetLatticeParameterString(UB);
+  IndexingUtils::Optimize_UB(UB, hkl, qVecs);
+  OrientedLattice o_lattice;
+  o_lattice.setUB(UB);
+  peaksWs->mutableSample().setOrientedLattice(&o_lattice);
+  return o_lattice;
 }
 
 namespace { // anonymous namespace
-
 /**
  * Adds a tie to the IFunction.
  * @param iFunc The function to add the tie to.

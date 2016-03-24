@@ -462,6 +462,20 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
 
   // determine the OrientedLattice for converting to Q-sample
   Geometry::OrientedLattice lattice(*m_unitCell.get());
+  bool modifyU = false;
+  if (modifyU) try {
+    Kernel::Matrix<double> UB(3, 3, false);
+    Geometry::IndexingUtils::Optimize_UB(UB, hkl_vectors, q_vectors);
+    Geometry::OrientedLattice lat;
+    lat.setUB(UB);
+    lattice.setU(lat.getU());
+  } catch (...) {
+    for (size_t i = StartX; i <= EndX; ++i)
+      out[i] = 10000;
+    g_log.debug() << "Could Not find a UB matix" << std::endl;
+    return;
+  }
+  else
   lattice.setUB(m_peaks->sample().getOrientedLattice().getUB());
 
   // cumulative error
