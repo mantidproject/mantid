@@ -16,10 +16,18 @@ namespace {
 Mantid::Kernel::Logger g_log("ImageROI");
 }
 
+const std::string ImageROIPresenter::g_wsgName =
+    "__tomography_gui_stack_fits_viewer_sample_images";
+const std::string ImageROIPresenter::g_wsgFlatsName =
+    "__tomography_gui_stack_fits_viewer_flat_images";
+const std::string ImageROIPresenter::g_wsgDarksName =
+    "__tomography_gui_stack_fits_viewer_dark_images";
+
 bool ImageROIPresenter::g_warnIfUnexpectedFileExtensions = false;
 
 ImageROIPresenter::ImageROIPresenter(IImageROIView *view)
-    : m_stackPath(), m_view(view), m_model(new ImageStackPreParams()) {
+    : m_playStatus(false), m_stackPath(), m_view(view),
+      m_model(new ImageStackPreParams()) {
   if (!m_view) {
     throw std::runtime_error("Severe inconsistency found. Presenter created "
                              "with an empty/null view (tomography interface). "
@@ -58,6 +66,10 @@ void ImageROIPresenter::notify(Notification notif) {
 
   case IImageROIPresenter::UpdateImgIndex:
     processUpdateImgIndex();
+    break;
+
+  case IImageROIPresenter::PlayStartStop:
+    processPlayStartStop();
     break;
 
   case IImageROIPresenter::SelectCoR:
@@ -173,14 +185,7 @@ void ImageROIPresenter::processNewStack() {
     return;
   }
 
-  const std::string wsgName =
-      "__tomography_gui_stack_fits_viewer_sample_images";
-  const std::string wsgFlatsName =
-      "__tomography_gui_stack_fits_viewer_flat_images";
-  const std::string wsgDarksName =
-      "__tomography_gui_stack_fits_viewer_dark_images";
-
-  loadFITSStack(soid, wsgName, wsgFlatsName, wsgDarksName);
+  loadFITSStack(soid, g_wsgName, g_wsgFlatsName, g_wsgDarksName);
 
   connect(m_algRunner.get(), SIGNAL(batchComplete(bool)), this,
           SLOT(finishedLoadStack(bool)), Qt::QueuedConnection);
@@ -200,17 +205,9 @@ void ImageROIPresenter::finishedLoadStack(bool error) {
     return;
   }
 
-  const std::string wsgName =
-      "__tomography_gui_stack_fits_viewer_sample_images";
-  const std::string wsgFlatsName =
-      "__tomography_gui_stack_fits_viewer_flat_images";
-  const std::string wsgDarksName =
-      "__tomography_gui_stack_fits_viewer_dark_images";
-
-  Mantid::API::WorkspaceGroup_sptr wsg;
   const auto &ads = Mantid::API::AnalysisDataService::Instance();
   try {
-    wsg = ads.retrieveWS<Mantid::API::WorkspaceGroup>(wsgName);
+    m_stackSamples = ads.retrieveWS<Mantid::API::WorkspaceGroup>(g_wsgName);
   } catch (std::exception &e) {
     m_view->userWarning("Could not load the stack of sample images",
 
@@ -234,9 +231,10 @@ void ImageROIPresenter::finishedLoadStack(bool error) {
   // }
 
   try {
-    Mantid::API::MatrixWorkspace_sptr ws;
-    wsg = ads.retrieveWS<Mantid::API::WorkspaceGroup>(wsgName);
-    ws = ads.retrieveWS<Mantid::API::MatrixWorkspace>(wsg->getNames()[0]);
+    m_stackSamples = ads.retrieveWS<Mantid::API::WorkspaceGroup>(g_wsgName);
+    Mantid::API::MatrixWorkspace_sptr ws =
+        ads.retrieveWS<Mantid::API::MatrixWorkspace>(
+            m_stackSamples->getNames()[0]);
   } catch (std::exception &exc) {
     m_view->userWarning(
         "Failed to load contents for at least the first sample image",
@@ -248,7 +246,7 @@ void ImageROIPresenter::finishedLoadStack(bool error) {
     return;
   }
 
-  size_t imgCount = wsg->size();
+  size_t imgCount = m_stackSamples->size();
   if (0 == imgCount) {
     m_view->userWarning(
         "Failed to load any FITS images - directory structure issue",
@@ -261,10 +259,10 @@ void ImageROIPresenter::finishedLoadStack(bool error) {
   }
 
   // check flats and darks
-  Mantid::API::WorkspaceGroup_sptr wsgFlats;
   try {
-    if (ads.doesExist(wsgFlatsName)) {
-      wsgFlats = ads.retrieveWS<Mantid::API::WorkspaceGroup>(wsgFlatsName);
+    if (ads.doesExist(g_wsgFlatsName)) {
+      m_stackFlats =
+          ads.retrieveWS<Mantid::API::WorkspaceGroup>(g_wsgFlatsName);
     }
   } catch (std::runtime_error &exc) {
     m_view->userWarning("Failed to load the stack of flat (open beam) images",
@@ -277,10 +275,10 @@ void ImageROIPresenter::finishedLoadStack(bool error) {
                             std::string(exc.what()));
   }
 
-  Mantid::API::WorkspaceGroup_sptr wsgDarks;
   try {
-    if (ads.doesExist(wsgDarksName)) {
-      wsgDarks = ads.retrieveWS<Mantid::API::WorkspaceGroup>(wsgDarksName);
+    if (ads.doesExist(g_wsgDarksName)) {
+      m_stackDarks =
+          ads.retrieveWS<Mantid::API::WorkspaceGroup>(g_wsgDarksName);
     }
   } catch (std::runtime_error &exc) {
     m_view->userWarning(
@@ -293,16 +291,8 @@ void ImageROIPresenter::finishedLoadStack(bool error) {
             std::string(exc.what()));
   }
 
-  m_view->showStack(wsg, wsgFlats, wsgDarks);
+  m_view->showStack(m_stackSamples, m_stackFlats, m_stackDarks);
   m_view->enableActions(true);
-
-  // clean-up container group workspace? Not for now
-  if (false && wsg)
-    Mantid::API::AnalysisDataService::Instance().remove(wsg->getName());
-}
-
-void ImageROIPresenter::processUpdateImgIndex() {
-  m_view->updateImgWithIndex(m_view->currentImgIndex());
 }
 
 void ImageROIPresenter::processChangeImageType() {
@@ -311,6 +301,32 @@ void ImageROIPresenter::processChangeImageType() {
 
 void ImageROIPresenter::processChangeRotation() {
   m_view->updateRotationAngle(m_view->currentRotationAngle());
+}
+
+void ImageROIPresenter::processUpdateImgIndex() {
+  m_view->updateImgWithIndex(m_view->currentImgIndex());
+}
+
+void ImageROIPresenter::processPlayStartStop() {
+  auto wsg = m_view->currentImageTypeStack();
+  if (!wsg)
+    return;
+
+  if (wsg->size() <= 1) {
+    m_view->userWarning(
+        "Cannot \"play\" a single image",
+        "The stack currently loaded has a single image. Cannot play it.");
+  }
+
+  if (m_playStatus) {
+    m_view->playStop();
+    m_playStatus = false;
+    m_view->enableActions(true);
+  } else {
+    m_view->enableActions(false);
+    m_playStatus = true;
+    m_view->playStart();
+  }
 }
 
 void ImageROIPresenter::processSelectCoR() {
@@ -365,9 +381,11 @@ void ImageROIPresenter::loadFITSStack(const StackOfImagesDirs &soid,
   loadFITSList(imgs, wsgName);
 
   auto flats = soid.flatFiles();
+  m_stackFlats = nullptr;
   loadFITSList(flats, wsgFlatsName);
 
   auto darks = soid.darkFiles();
+  m_stackDarks = nullptr;
   loadFITSList(darks, wsgDarksName);
 }
 

@@ -24,8 +24,8 @@ const std::string ImageROIViewQtWidget::m_settingsGroup =
     "CustomInterfaces/ImageROIView";
 
 ImageROIViewQtWidget::ImageROIViewQtWidget(QWidget *parent)
-    : QWidget(parent), IImageROIView(), m_playStatus(false), m_imgWidth(0),
-      m_imgHeight(0), m_selectionState(SelectNone), m_presenter(NULL) {
+    : QWidget(parent), IImageROIView(), m_imgWidth(0), m_imgHeight(0),
+      m_selectionState(SelectNone), m_presenter(NULL) {
   initLayout();
 
   // using an event filter. might be worth refactoring into a specific
@@ -572,29 +572,22 @@ void ImageROIViewQtWidget::normAreaResetClicked() {
 }
 
 void ImageROIViewQtWidget::playClicked() {
-  if (m_ui.horizontalScrollBar_img_stack->maximum() ==
-      m_ui.horizontalScrollBar_img_stack->minimum()) {
-    userWarning(
-        "Cannot \"play\" a single image",
-        "The stack currently loaded has a single image. Cannot play it.");
-  }
-  // TODO: split this into start / stop. Handle via presenter!
-  if (m_playStatus) {
-    // stop timer
-    m_playTimer->stop();
-    m_playStatus = false;
-    m_ui.pushButton_play->setText("Play");
-    enableActions(true);
-  } else {
-    enableActions(false);
-    m_ui.pushButton_play->setEnabled(true);
-    m_ui.pushButton_play->setText("Stop");
-    m_playStatus = true;
-    // start timer
-    m_playTimer = Mantid::Kernel::make_unique<QTimer>(this);
-    connect(m_playTimer.get(), SIGNAL(timeout()), this, SLOT(updatePlay()));
-    m_playTimer->start(133);
-  }
+  m_presenter->notify(IImageROIPresenter::PlayStartStop);
+}
+
+void ImageROIViewQtWidget::playStart() {
+  m_ui.pushButton_play->setText("Stop");
+  // start timer
+  m_playTimer = Mantid::Kernel::make_unique<QTimer>(this);
+  connect(m_playTimer.get(), SIGNAL(timeout()), this, SLOT(updatePlay()));
+  m_playTimer->start(133);
+  m_ui.pushButton_play->setEnabled(true);
+}
+
+void ImageROIViewQtWidget::playStop() {
+  // stop timer
+  m_playTimer->stop();
+  m_ui.pushButton_play->setText("Play");
 }
 
 void ImageROIViewQtWidget::updatePlay() {

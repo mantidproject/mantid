@@ -204,6 +204,17 @@ public:
   virtual void updateImgWithIndex(size_t idx) = 0;
 
   /**
+   * Start to play/animate the stack currently displayed.
+   */
+  virtual void playStart() = 0;
+
+  /**
+   * Stop playing/animating the stack currently displayed, and goes
+   * back to the default status.
+   */
+  virtual void playStop() = 0;
+
+  /**
    * The rotation angle selected.
    *
    * @return angle in degrees.

@@ -102,6 +102,10 @@ public:
 
   void updateImgWithIndex(size_t idx) override;
 
+  void playStart() override;
+
+  void playStop() override;
+
   float currentRotationAngle() const override;
 
   void updateRotationAngle(float angle) override;
@@ -157,7 +161,6 @@ private slots:
   void valueUpdatedNormArea(int v);
 
 private:
-
   void setupConnections();
 
   void readSettings();
@@ -234,9 +237,6 @@ private:
 
   /// parameters currently set by the user
   ImageStackPreParams m_params;
-
-  /// whether 'playing' the current stack of images
-  bool m_playStatus;
 
   /// Timer for the "play" function
   std::unique_ptr<QTimer> m_playTimer;

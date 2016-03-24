@@ -50,7 +50,8 @@ class MANTIDQT_CUSTOMINTERFACES_DLL ImageROIPresenter
     : public QObject,
       public IImageROIPresenter {
   // Q_OBJECT for the 'algorithm runner' signals
-  // TODO: move the AlgorithmRunner to the view
+  // TODO: move the AlgorithmRunner to the view? Have a different, non-Qt
+  // runner?
   // Remove Q_OBJECT and take this file out out MOC_FILES in CMakeLists.txt
   Q_OBJECT
 
@@ -67,11 +68,13 @@ protected:
   /// clean shut down of model, view, etc.
   void cleanup();
 
+  // Methods that process notifications from view->presenter
   void processInit();
   void processBrowseImg();
   void processNewStack();
   void processChangeImageType();
   void processChangeRotation();
+  void processPlayStartStop();
   void processUpdateImgIndex();
   void processSelectCoR();
   void processSelectROI();
@@ -103,6 +106,12 @@ private:
   std::string
   filterImagePathsForFITSStack(const std::vector<std::string> &paths);
 
+  /// the workspaces being visualized
+  Mantid::API::WorkspaceGroup_sptr m_stackSamples, m_stackFlats, m_stackDarks;
+
+  /// whether 'playing' the current stack of images
+  bool m_playStatus;
+
   /// whether to show (potentially too many and too annoying) warning pop-ups or
   /// messages
   static bool g_warnIfUnexpectedFileExtensions;
@@ -112,6 +121,9 @@ private:
 
   /// To run sequences of algorithms in a separate thread
   std::unique_ptr<MantidQt::API::BatchAlgorithmRunner> m_algRunner;
+
+  /// Names used by the widget to store workspace groups
+  static const std::string g_wsgName, g_wsgFlatsName, g_wsgDarksName;
 
   /// Associated view for this presenter (MVP pattern)
   IImageROIView *const m_view;
