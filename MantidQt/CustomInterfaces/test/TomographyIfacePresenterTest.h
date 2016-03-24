@@ -499,9 +499,11 @@ public:
     const std::string msg =
         "Local system settings default values should be as expected";
 
+    // Normally this would be 3 for Win32 (example: D:\) and
+    // >=5 otherwise
     const std::string path = sets.m_local.m_basePathTomoData;
     TSM_ASSERT_LESS_THAN_EQUALS(
-        msg + " (base path for tomography data too short)", 5, path.length());
+        msg + " (base path for tomography data too short)", 3, path.length());
 
     TSM_ASSERT_EQUALS(msg + " (base path for tomography data)",
                       path.substr(path.length() - 4), "data");
