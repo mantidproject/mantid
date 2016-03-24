@@ -62,8 +62,12 @@ public:
   explicit ComplexVector(const gsl_vector_complex *v);
   /// Copy constructor.
   ComplexVector(const ComplexVector &v);
+  /// Move constructor.
+  ComplexVector(ComplexVector &&v);
   /// Copy assignment operator
   ComplexVector &operator=(const ComplexVector &v);
+  /// Move assignment operator
+  ComplexVector &operator=(ComplexVector &&v);
 
   /// Get the pointer to the GSL vector
   gsl_vector_complex *gsl();

@@ -23,6 +23,12 @@ ComplexMatrix::ComplexMatrix(const ComplexMatrix &M) {
   gsl_matrix_complex_memcpy(m_matrix, M.gsl());
 }
 
+/// Move constructor
+/// @param M :: The other matrix.
+ComplexMatrix::ComplexMatrix(ComplexMatrix &&M) : m_matrix(nullptr)  {
+  std::swap(m_matrix, M.m_matrix);
+}
+
 /// Create a submatrix. A submatrix is a view into the parent matrix.
 /// Lifetime of a submatrix cannot exceed the lifetime of the parent.
 /// @param M :: The parent matrix.
@@ -72,6 +78,12 @@ ComplexMatrix::~ComplexMatrix() {
 ComplexMatrix &ComplexMatrix::operator=(const ComplexMatrix &M) {
   resize(M.size1(), M.size2());
   gsl_matrix_complex_memcpy(m_matrix, M.gsl());
+  return *this;
+}
+
+/// Move assignment operator
+ComplexMatrix &ComplexMatrix::operator=(ComplexMatrix &&M) {
+  std::swap(m_matrix, M.m_matrix);
   return *this;
 }
 

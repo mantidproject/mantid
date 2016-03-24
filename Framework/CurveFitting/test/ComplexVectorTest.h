@@ -48,6 +48,19 @@ public:
     TS_ASSERT_EQUALS(gc.get(2), v12);
   }
 
+  void test_move_constructor() {
+    auto v = makeVector1();
+    ComplexVector gv(v);
+    auto gsl = gv.gsl();
+    ComplexVector gm(std::move(gv));
+    TS_ASSERT_EQUALS(gm.size(), 3);
+    TS_ASSERT_EQUALS(gm.get(0), v10);
+    TS_ASSERT_EQUALS(gm.get(1), v11);
+    TS_ASSERT_EQUALS(gm.get(2), v12);
+    // test that is was a move
+    TS_ASSERT_EQUALS(gm.gsl(), gsl);
+  }
+
   void test_assignment_operator() {
     auto v = makeVector1();
     ComplexVector gv(v);
@@ -57,6 +70,20 @@ public:
     TS_ASSERT_EQUALS(gc.get(0), v10);
     TS_ASSERT_EQUALS(gc.get(1), v11);
     TS_ASSERT_EQUALS(gc.get(2), v12);
+  }
+
+  void test_move_assignment_operator() {
+    auto v = makeVector1();
+    ComplexVector gv(v);
+    auto gsl = gv.gsl();
+    ComplexVector gm;
+    gm = std::move(gv);
+    TS_ASSERT_EQUALS(gm.size(), 3);
+    TS_ASSERT_EQUALS(gm.get(0), v10);
+    TS_ASSERT_EQUALS(gm.get(1), v11);
+    TS_ASSERT_EQUALS(gm.get(2), v12);
+    // test that is was a move
+    TS_ASSERT_EQUALS(gm.gsl(), gsl);
   }
 
   void test_zero() {

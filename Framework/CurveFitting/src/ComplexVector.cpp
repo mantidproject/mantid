@@ -31,6 +31,13 @@ ComplexVector::ComplexVector(const ComplexVector &v) {
   gsl_vector_complex_memcpy(m_vector, v.gsl());
 }
 
+/// Move constructor.
+/// @param v :: The other vector
+ComplexVector::ComplexVector(ComplexVector &&v) {
+  m_vector = v.m_vector;
+  v.m_vector = gsl_vector_complex_alloc(1);
+}
+
 /// Copy from a gsl vector
 /// @param v :: A vector to copy from.
 ComplexVector::ComplexVector(const gsl_vector_complex *v) {
@@ -51,6 +58,13 @@ ComplexVector &ComplexVector::operator=(const ComplexVector &v) {
   gsl_vector_complex_free(m_vector);
   m_vector = gsl_vector_complex_alloc(v.size());
   gsl_vector_complex_memcpy(m_vector, v.gsl());
+  return *this;
+}
+
+/// Move assignment operator
+/// @param v :: The other vector
+ComplexVector &ComplexVector::operator=(ComplexVector &&v) {
+  std::swap(m_vector, v.m_vector);
   return *this;
 }
 

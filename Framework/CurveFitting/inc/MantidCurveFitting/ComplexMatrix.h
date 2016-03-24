@@ -151,6 +151,8 @@ public:
   ComplexMatrix(const size_t nx, const size_t ny);
   /// Copy constructor
   ComplexMatrix(const ComplexMatrix &M);
+  /// Move constructor
+  ComplexMatrix(ComplexMatrix &&M);
   /// Create a submatrix.
   ComplexMatrix(const ComplexMatrix &M, size_t row, size_t col, size_t nRows,
                 size_t nCols);
@@ -163,6 +165,8 @@ public:
 
   /// Copy assignment operator
   ComplexMatrix &operator=(const ComplexMatrix &M);
+  /// Move assignment operator
+  ComplexMatrix &operator=(ComplexMatrix &&M);
   /// Copy assignment operator
   ComplexMatrix &operator=(const gsl_matrix_complex *M);
 

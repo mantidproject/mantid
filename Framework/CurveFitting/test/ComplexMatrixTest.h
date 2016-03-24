@@ -501,6 +501,68 @@ public:
       }
     }
   }
+
+  void test_copy_constructor() {
+    ComplexMatrix a(2, 2);
+    a(0, 0) = v11;
+    a(0, 1) = v12;
+    a(1, 0) = v21;
+    a(1, 1) = v22;
+    auto gsl = a.gsl();
+    ComplexMatrix m(a);
+    TS_ASSERT(m(0, 0) == v11);
+    TS_ASSERT(m(0, 1) == v12);
+    TS_ASSERT(m(1, 0) == v21);
+    TS_ASSERT(m(1, 1) == v22);
+    TS_ASSERT_DIFFERS(m.gsl(), gsl);
+  }
+
+  void test_move_constructor() {
+    ComplexMatrix a(2, 2);
+    a(0, 0) = v11;
+    a(0, 1) = v12;
+    a(1, 0) = v21;
+    a(1, 1) = v22;
+    auto gsl = a.gsl();
+    ComplexMatrix m(std::move(a));
+    TS_ASSERT(m(0, 0) == v11);
+    TS_ASSERT(m(0, 1) == v12);
+    TS_ASSERT(m(1, 0) == v21);
+    TS_ASSERT(m(1, 1) == v22);
+    TS_ASSERT_EQUALS(m.gsl(), gsl);
+  }
+
+  void test_copy_assignment() {
+    ComplexMatrix a(2, 2);
+    a(0, 0) = v11;
+    a(0, 1) = v12;
+    a(1, 0) = v21;
+    a(1, 1) = v22;
+    auto gsl = a.gsl();
+    ComplexMatrix m;
+    m = a;
+    TS_ASSERT(m(0, 0) == v11);
+    TS_ASSERT(m(0, 1) == v12);
+    TS_ASSERT(m(1, 0) == v21);
+    TS_ASSERT(m(1, 1) == v22);
+    TS_ASSERT_DIFFERS(m.gsl(), gsl);
+  }
+
+  void test_move_assignment() {
+    ComplexMatrix a(2, 2);
+    a(0, 0) = v11;
+    a(0, 1) = v12;
+    a(1, 0) = v21;
+    a(1, 1) = v22;
+    auto gsl = a.gsl();
+    ComplexMatrix m;
+    m = std::move(a);
+    TS_ASSERT(m(0, 0) == v11);
+    TS_ASSERT(m(0, 1) == v12);
+    TS_ASSERT(m(1, 0) == v21);
+    TS_ASSERT(m(1, 1) == v22);
+    TS_ASSERT_EQUALS(m.gsl(), gsl);
+  }
 };
 
 #endif /*ComplexMatrixTEST_H_*/
