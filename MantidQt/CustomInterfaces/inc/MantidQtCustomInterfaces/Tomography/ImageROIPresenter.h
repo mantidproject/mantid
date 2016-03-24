@@ -123,7 +123,9 @@ private:
   std::unique_ptr<MantidQt::API::BatchAlgorithmRunner> m_algRunner;
 
   /// Names used by the widget to store workspace groups
-  static const std::string g_wsgName, g_wsgFlatsName, g_wsgDarksName;
+  static const std::string g_wsgName;
+  static const std::string g_wsgFlatsName;
+  static const std::string g_wsgDarksName;
 
   /// Associated view for this presenter (MVP pattern)
   IImageROIView *const m_view;
