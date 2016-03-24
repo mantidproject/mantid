@@ -8,7 +8,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 /** @class ReflCommandAdapter
 
-TODO: ReflCommandAdapter is an interface which defines the functions any data
+ReflCommandAdapter is an interface which defines the functions any data
 processor interface presenter needs to support.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge

@@ -33,16 +33,11 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class IReflTableCommand {
 public:
-	//IReflTableCommand(IReflTablePresenter *tablePresenter)
-	//	: m_tablePresenter(tablePresenter) {};
-	IReflTableCommand() = default;
-	virtual ~IReflTableCommand(){};
+  IReflTableCommand() = default;
+  virtual ~IReflTableCommand(){};
 
   // Tell the presenter something happened
   virtual void execute() = 0;
-
-//protected:
-//  IReflTablePresenter *m_tablePresenter;
 };
 
 typedef std::unique_ptr<IReflTableCommand> IReflTableCommand_uptr;
