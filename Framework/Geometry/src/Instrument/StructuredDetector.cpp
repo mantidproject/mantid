@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <ostream>
 #include <stdexcept>
+#include <boost/regex.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -48,6 +49,13 @@ StructuredDetector::StructuredDetector(const StructuredDetector *base,
                                        const ParameterMap *map)
     : CompAssembly(base, map), IObjComponent(nullptr), m_base(base) {
   init();
+}
+
+bool StructuredDetector::compareName(const std::string &proposedMatch) {
+  boost::regex exp("(StructuredDetector)|(structuredDetector)|(structureddetector)|"
+                   "(structured_detector)");
+
+  return boost::regex_match(proposedMatch, exp);
 }
 
 void StructuredDetector::init() {
@@ -320,8 +328,6 @@ void StructuredDetector::initialize(int xpixels, int ypixels,
   auto maxDetId = idstart;
   auto detSize = x.size();
 
-  CompAssembly *detAssembly = new CompAssembly(name);
-
   for (auto ix = 0; ix < m_xpixels; ix++) {
     // Create an ICompAssembly for each x-column
     std::ostringstream oss_col;
@@ -356,52 +362,12 @@ void StructuredDetector::initialize(int xpixels, int ypixels,
   m_maxDetId = maxDetId;
 }
 
-/** Creates new hexahedral detector pixel at row x column y using the
-*   detector vertex values.
-* @param name :: The Pixel name identifier
-* @param x :: The pixel row
-* @param y :: The pixel column
-* @param id :: The pixel ID
-* @ returns newly created detector.
-*/
-Detector *StructuredDetector::addDetector(CompAssembly *parent,
-                                          const std::string &name, int x, int y,
-                                          int id) {
-  auto w = m_xpixels + 1;
+boost::shared_ptr<Mantid::Geometry::Object>
+streamShape(const std::string &name, double xlb, double xlf, double xrf,
+            double xrb, double ylb, double ylf, double yrf, double yrb) {
+
   std::ostringstream shapestr;
-  Mantid::Geometry::ShapeFactory shapeCreator;
-
-  // Store hexahedral vertices for detector shape
-  auto xlb = m_xvalues[(y * w) + x];
-  auto xlf = m_xvalues[(y * w) + x + w];
-  auto xrf = m_xvalues[(y * w) + x + w + 1];
-  auto xrb = m_xvalues[(y * w) + x + 1];
-  auto ylb = m_yvalues[(y * w) + x];
-  auto ylf = m_yvalues[(y * w) + x + w];
-  auto yrf = m_yvalues[(y * w) + x + w + 1];
-  auto yrb = m_yvalues[(y * w) + x + 1];
-
-  // calculate midpoint of trapeziod
-  auto a = abs(xrf - xlf);
-  auto b = abs(xrb - xlb);
-  auto h = abs(ylb - ylf);
-  auto cx = ((a + b) / 4);
-  auto cy = h / 2;
-
-  // store detector position before translating to origin
-  auto xpos = xlb + cx;
-  auto ypos = ylb + cy;
-
-  // Translate detector shape to origin
-  xlf -= xpos;
-  xrf -= xpos;
-  xrb -= xpos;
-  xlb -= xpos;
-  ylf -= ypos;
-  yrf -= ypos;
-  yrb -= ypos;
-  ylb -= ypos;
-
+	
   // Create XML shape used to describe detector pixel
   shapestr << "<type name=\"userShape\" >";
   shapestr << "<hexahedron id=\"" << name << "\" >";
@@ -441,8 +407,57 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   shapestr << "<algebra val=\"" << name << "\" />";
   shapestr << "</type>";
 
+  Mantid::Geometry::ShapeFactory shapeCreator;
+
+  return shapeCreator.createShape(shapestr.str(), false);
+}
+
+/** Creates new hexahedral detector pixel at row x column y using the
+*   detector vertex values.
+* @param name :: The Pixel name identifier
+* @param x :: The pixel row
+* @param y :: The pixel column
+* @param id :: The pixel ID
+* @ returns newly created detector.
+*/
+Detector *StructuredDetector::addDetector(CompAssembly *parent,
+                                          const std::string &name, int x, int y,
+                                          int id) {
+	auto w = m_xpixels + 1;
+
+  // Store hexahedral vertices for detector shape
+  auto xlb = m_xvalues[(y * w) + x];
+  auto xlf = m_xvalues[(y * w) + x + w];
+  auto xrf = m_xvalues[(y * w) + x + w + 1];
+  auto xrb = m_xvalues[(y * w) + x + 1];
+  auto ylb = m_yvalues[(y * w) + x];
+  auto ylf = m_yvalues[(y * w) + x + w];
+  auto yrf = m_yvalues[(y * w) + x + w + 1];
+  auto yrb = m_yvalues[(y * w) + x + 1];
+
+  // calculate midpoint of trapeziod
+  auto a = abs(xrf - xlf);
+  auto b = abs(xrb - xlb);
+  auto h = abs(ylb - ylf);
+  auto cx = ((a + b) / 4);
+  auto cy = h / 2;
+
+  // store detector position before translating to origin
+  auto xpos = xlb + cx;
+  auto ypos = ylb + cy;
+
+  // Translate detector shape to origin
+  xlf -= xpos;
+  xrf -= xpos;
+  xrb -= xpos;
+  xlb -= xpos;
+  ylf -= ypos;
+  yrf -= ypos;
+  yrb -= ypos;
+  ylb -= ypos;
+
   boost::shared_ptr<Mantid::Geometry::Object> shape =
-      shapeCreator.createShape(shapestr.str(), false);
+      streamShape(name, xlb, xlf, xrf, xrb, ylb, ylf, yrf, yrb);
 
   // Create detector
   auto detector = new Detector(name, id, shape, parent);
@@ -486,16 +501,12 @@ StructuredDetector::getComponentByName(const std::string &cname,
   // and this prevents Bank11 matching Bank 1
   const std::string MEMBER_NAME = this->getName() + "(";
 
-  // if the component name is too short, just return
-  if (cname.length() <= MEMBER_NAME.length())
-    return boost::shared_ptr<const IComponent>();
-
   // check that the searched for name starts with the detector's
   // name as they are generated
-  if (cname.substr(0, MEMBER_NAME.length()).compare(MEMBER_NAME) == 0) {
-    return CompAssembly::getComponentByName(cname, nlevels);
+  if (cname.substr(0, MEMBER_NAME.length()).compare(MEMBER_NAME) != 0) {
+	return boost::shared_ptr<const IComponent>();
   } else {
-    return boost::shared_ptr<const IComponent>();
+	  return CompAssembly::getComponentByName(cname, nlevels);
   }
 }
 
@@ -507,42 +518,32 @@ StructuredDetector::getComponentByName(const std::string &cname,
 
 //-------------------------------------------------------------------------------------------------
 /// Does the point given lie within this object component?
-bool StructuredDetector::isValid(const V3D &point) const {
-  // Avoid compiler warning
-  (void)point;
+bool StructuredDetector::isValid(const V3D &) const {
   throw Kernel::Exception::NotImplementedError(
       "StructuredDetector::isValid() is not implemented.");
 }
 
 /// Does the point given lie on the surface of this object component?
-bool StructuredDetector::isOnSide(const V3D &point) const {
-  // Avoid compiler warning
-  (void)point;
+bool StructuredDetector::isOnSide(const V3D &) const {
   throw Kernel::Exception::NotImplementedError(
       "StructuredDetector::isOnSide() is not implemented.");
 }
 
 /// Checks whether the track given will pass through this Component.
-int StructuredDetector::interceptSurface(Track &track) const {
-  // Avoid compiler warning
-  (void)track;
+int StructuredDetector::interceptSurface(Track &) const {
   throw Kernel::Exception::NotImplementedError(
       "StructuredDetector::interceptSurface() is not implemented.");
 }
 
 /// Finds the approximate solid angle covered by the component when viewed from
 /// the point given
-double StructuredDetector::solidAngle(const V3D &observer) const {
-  // Avoid compiler warning
-  (void)observer;
+double StructuredDetector::solidAngle(const V3D &) const {
   throw Kernel::Exception::NotImplementedError(
       "StructuredDetector::solidAngle() is not implemented.");
 }
 
 /// Try to find a point that lies within (or on) the object
-int StructuredDetector::getPointInObject(V3D &point) const {
-  // Avoid compiler warning
-  (void)point;
+int StructuredDetector::getPointInObject(V3D &) const {
   throw Kernel::Exception::NotImplementedError(
       "StructuredDetector::getPointInObject() is not implemented.");
 }
@@ -553,27 +554,6 @@ int StructuredDetector::getPointInObject(V3D &point) const {
 * @param assemblyBox :: A BoundingBox object that will be overwritten
 */
 void StructuredDetector::getBoundingBox(BoundingBox &assemblyBox) const {
-  /*if (!m_cachedBoundingBox) {
-          auto w = m_xpixels + 1;
-
-          auto x = getXValues();
-          auto y = getYValues();
-
-          double xmin = x[0], xmax = x[0], ymin = y[0], ymax =y[0];
-
-          for (int i = 0; i < x.size(); i++)
-          {
-                  if (x[i] < xmin)
-                          xmin = x[i];
-                  if (x[i] > xmax)
-                          xmax = x[i];
-                  if (y[i] < ymin)
-                          ymin = y[i];
-                  if (y[i] > ymax)
-                          ymax = y[i];
-          }
-
-    m_cachedBoundingBox = new BoundingBox(xmax, ymax, 0.001, xmin, ymin, 0);*/
   if (!m_cachedBoundingBox) {
     m_cachedBoundingBox = new BoundingBox();
     // Get all the corners
@@ -667,10 +647,8 @@ const boost::shared_ptr<const Object> StructuredDetector::shape() const {
 
   std::string xmlHexahedralShape(xmlShapeStream.str());
   Geometry::ShapeFactory shapeCreator;
-  boost::shared_ptr<Geometry::Object> hexahedralShape =
-      shapeCreator.createShape(xmlHexahedralShape);
 
-  return hexahedralShape;
+  return shapeCreator.createShape(xmlHexahedralShape);
 }
 
 //-------------------------------------------------------------------------------------------------

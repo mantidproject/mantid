@@ -88,14 +88,14 @@ void StructuredDetectorActor::draw(bool picking) const {
 
   if (picking) {
     for (std::vector<GLColor>::const_iterator i = m_pickColors.cbegin();
-         i != m_pickColors.cend(); i++) {
+         i != m_pickColors.cend(); ++i) {
       r.push_back((*i).red());
       g.push_back((*i).green());
       b.push_back((*i).blue());
     }
   } else {
     for (std::vector<GLColor>::const_iterator i = m_clist.cbegin();
-         i != m_clist.cend(); i++) {
+         i != m_clist.cend(); ++i) {
       r.push_back((*i).red());
       g.push_back((*i).green());
       b.push_back((*i).blue());

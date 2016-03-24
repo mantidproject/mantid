@@ -1,5 +1,5 @@
-#include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Rendering/GluGeometryRenderer.h"
@@ -97,21 +97,23 @@ void GluGeometryHandler::GetObjectGeom(int &mytype,
     switch (type) {
     case CUBOID:
       mytype = 1;
-      vectors.push_back(Point1);
-      vectors.push_back(Point2);
-      vectors.push_back(Point3);
-      vectors.push_back(Point4);
+	  vectors.resize(4);
+      vectors[0] = Point1;
+      vectors[1] = Point2;
+      vectors[2] = Point3;
+      vectors[3] = Point4;
       break;
     case HEXAHEDRON:
       mytype = 1;
-      vectors.push_back(Point1);
-      vectors.push_back(Point2);
-      vectors.push_back(Point3);
-      vectors.push_back(Point4);
-      vectors.push_back(Point5);
-      vectors.push_back(Point6);
-      vectors.push_back(Point7);
-      vectors.push_back(Point8);
+	  vectors.resize(8);
+      vectors[0] =Point1;
+      vectors[1] =Point2;
+      vectors[2] =Point3;
+      vectors[3] =Point4;
+      vectors[4] =Point5;
+      vectors[5] =Point6;
+      vectors[6] =Point7;
+      vectors[7] =Point8;
       break;
     case SPHERE:
       mytype = 2;
@@ -120,22 +122,25 @@ void GluGeometryHandler::GetObjectGeom(int &mytype,
       break;
     case CYLINDER:
       mytype = 3;
-      vectors.push_back(center);
-      vectors.push_back(axis);
+	  vectors.resize(2);
+      vectors[0] = center;
+      vectors[1] = axis;
       myradius = radius;
       myheight = height;
       break;
     case CONE:
       mytype = 4;
-      vectors.push_back(center);
-      vectors.push_back(axis);
+	  vectors.resize(2);
+	  vectors[0] = center;
+	  vectors[1] = axis;
       myradius = radius;
       myheight = height;
       break;
     case SEGMENTED_CYLINDER:
       mytype = 5;
-      vectors.push_back(center);
-      vectors.push_back(axis);
+	  vectors.reserve(2);
+	  vectors[0] = center;
+	  vectors[1] = axis;
       myradius = radius;
       myheight = height;
       break;
@@ -150,7 +155,8 @@ void GluGeometryHandler::Initialize() {
   }
 }
 
-void GluGeometryHandler::setCuboid(V3D p1, V3D p2, V3D p3, V3D p4) {
+void GluGeometryHandler::setCuboid(const V3D &p1, const V3D &p2, const V3D &p3,
+                                   const V3D &p4) {
   type = CUBOID;
   Point1 = p1;
   Point2 = p2;
@@ -158,10 +164,10 @@ void GluGeometryHandler::setCuboid(V3D p1, V3D p2, V3D p3, V3D p4) {
   Point4 = p4;
 }
 
-void GluGeometryHandler::setHexahedron(Kernel::V3D p1, Kernel::V3D p2,
-                                       Kernel::V3D p3, Kernel::V3D p4,
-                                       Kernel::V3D p5, Kernel::V3D p6,
-                                       Kernel::V3D p7, Kernel::V3D p8) {
+void GluGeometryHandler::setHexahedron(const V3D &p1, const V3D &p2,
+                                       const V3D &p3, const V3D &p4,
+                                       const V3D &p5, const V3D &p6,
+                                       const V3D &p7, const V3D &p8) {
   type = HEXAHEDRON;
   Point1 = p1;
   Point2 = p2;
@@ -173,27 +179,29 @@ void GluGeometryHandler::setHexahedron(Kernel::V3D p1, Kernel::V3D p2,
   Point8 = p8;
 }
 
-void GluGeometryHandler::setSphere(V3D c, double r) {
+void GluGeometryHandler::setSphere(const V3D &c, double r) {
   type = SPHERE;
   center = c;
   radius = r;
 }
-void GluGeometryHandler::setCylinder(V3D c, V3D a, double r, double h) {
+void GluGeometryHandler::setCylinder(const V3D &c, const V3D &a, double r,
+                                     double h) {
   type = CYLINDER;
   center = c;
   axis = a;
   radius = r;
   height = h;
 }
-void GluGeometryHandler::setCone(V3D c, V3D a, double r, double h) {
+void GluGeometryHandler::setCone(const V3D &c, const V3D &a, double r,
+                                 double h) {
   type = CONE;
   center = c;
   axis = a;
   radius = r;
   height = h;
 }
-void GluGeometryHandler::setSegmentedCylinder(V3D c, V3D a, double r,
-                                              double h) {
+void GluGeometryHandler::setSegmentedCylinder(const V3D &c, const V3D &a,
+                                              double r, double h) {
   type = SEGMENTED_CYLINDER;
   center = c;
   axis = a;

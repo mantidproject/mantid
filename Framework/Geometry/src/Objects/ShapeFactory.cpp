@@ -1304,7 +1304,7 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
         boost::make_shared<GluGeometryHandler>(Obj);
     Obj->setGeometryHandler(handler);
     auto corners = parseHexahedron(pElem);
-    ((GluGeometryHandler *)(handler.get()))
+    dynamic_cast<GluGeometryHandler *>(handler.get())
         ->setHexahedron(corners.lbb, corners.lfb, corners.rfb, corners.rbb,
                         corners.lbt, corners.lft, corners.rft, corners.rbt);
   } else if (pElem->tagName() == "sphere") {

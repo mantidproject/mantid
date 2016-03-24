@@ -29,21 +29,18 @@ StructuredGeometryHandler::StructuredGeometryHandler()
 
 ///< Create an instance of concrete geometry handler for ObjComponent
 StructuredGeometryHandler *
-StructuredGeometryHandler::createInstance(IObjComponent *comp) {
-  (void)comp;
+StructuredGeometryHandler::createInstance(IObjComponent *) {
   return new StructuredGeometryHandler();
 }
 
 ///< Create an instance of concrete geometry handler for Object
 StructuredGeometryHandler *
-StructuredGeometryHandler::createInstance(boost::shared_ptr<Object> obj) {
-  (void)obj;
+StructuredGeometryHandler::createInstance(boost::shared_ptr<Object> ) {
   return new StructuredGeometryHandler();
 }
 
 ///< Create an instance of concrete geometry handler for Object
-GeometryHandler *StructuredGeometryHandler::createInstance(Object *obj) {
-  (void)obj;
+GeometryHandler *StructuredGeometryHandler::createInstance(Object *) {
   return new StructuredGeometryHandler();
 }
 
