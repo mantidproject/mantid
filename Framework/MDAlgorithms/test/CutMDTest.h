@@ -94,6 +94,23 @@ private:
     return eventWS;
   }
 
+  ITableWorkspace_sptr createProjection(const std::string &units) {
+    ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
+    proj->addColumn("str", "name");
+    proj->addColumn("V3D", "value");
+    proj->addColumn("double", "offset");
+    proj->addColumn("str", "type");
+
+    TableRow uRow = proj->appendRow();
+    TableRow vRow = proj->appendRow();
+    TableRow wRow = proj->appendRow();
+    uRow << "u" << V3D(1, 0, 0) << 0.0 << units;
+    vRow << "v" << V3D(0, 1, 0) << 0.0 << units;
+    wRow << "w" << V3D(0, 0, 1) << 0.0 << units;
+
+    return proj;
+  }
+
 public:
   CutMDTest() {
     FrameworkManager::Instance().exec(
@@ -383,18 +400,7 @@ public:
                                       "a", "1", "b", "1", "c", "1", "alpha",
                                       "90", "beta", "90", "gamma", "90");
 
-    ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
-    proj->addColumn("str", "name");
-    proj->addColumn("V3D", "value");
-    proj->addColumn("double", "offset");
-    proj->addColumn("str", "type");
-
-    TableRow uRow = proj->appendRow();
-    TableRow vRow = proj->appendRow();
-    TableRow wRow = proj->appendRow();
-    uRow << "u" << V3D(1, 0, 0) << 0.0 << "r";
-    vRow << "v" << V3D(0, 1, 0) << 0.0 << "r";
-    wRow << "w" << V3D(0, 0, 1) << 0.0 << "r";
+    auto proj = createProjection("r");
 
     addNormalization(wsName);
 
@@ -625,20 +631,12 @@ public:
   void test_CutMD_dimension_labels_A_to_A() {
     Mantid::Kernel::Logger logger("CutMDTestLogger");
     const std::string ws_name = "__CutMDTest_unitstest";
-    makeWorkspaceWithSpecifiedUnits("Angstrom^-1", ws_name);
+    auto ws_temp = makeWorkspaceWithSpecifiedUnits("Angstrom^-1", ws_name);
+    TSM_ASSERT_EQUALS(
+      "Input workspace dimensions have units of inverse angstroms",
+      ws_temp->getDimension(0)->getUnits().ascii(), "Angstrom^-1");
 
-    ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
-    proj->addColumn("str", "name");
-    proj->addColumn("V3D", "value");
-    proj->addColumn("double", "offset");
-    proj->addColumn("str", "type");
-
-    TableRow uRow = proj->appendRow();
-    TableRow vRow = proj->appendRow();
-    TableRow wRow = proj->appendRow();
-    uRow << "u" << V3D(1, 0, 0) << 0.0 << "a";
-    vRow << "v" << V3D(0, 1, 0) << 0.0 << "a";
-    wRow << "w" << V3D(0, 0, 1) << 0.0 << "a";
+    auto proj = createProjection("a");
 
     CutMD alg;
     alg.setChild(true);
@@ -658,8 +656,43 @@ public:
     TS_ASSERT_EQUALS(outWS->getDimension(0)->getName(), "['zeta', 0, 0]")
     TS_ASSERT_EQUALS(outWS->getDimension(1)->getName(), "[0, 'eta', 0]")
     TS_ASSERT_EQUALS(outWS->getDimension(2)->getName(), "[0, 0, 'xi']")
-    TSM_ASSERT_EQUALS("Units should still show inverse angstroms",
+    TSM_ASSERT_EQUALS("Output workspace should have units of inverse angstroms",
                       outWS->getDimension(0)->getUnits().ascii(), "Angstrom^-1")
+
+    // Clean up
+    AnalysisDataService::Instance().remove(ws_name);
+  }
+
+  void test_CutMD_dimension_labels_A_to_RLU() {
+    Mantid::Kernel::Logger logger("CutMDTestLogger");
+    const std::string ws_name = "__CutMDTest_unitstest";
+    auto ws_temp = makeWorkspaceWithSpecifiedUnits("Angstrom^-1", ws_name);
+    TSM_ASSERT_EQUALS(
+        "Input workspace dimensions have units of inverse angstroms",
+        ws_temp->getDimension(0)->getUnits().ascii(), "Angstrom^-1");
+
+    auto proj = createProjection("r");
+
+    CutMD alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", ws_name);
+    alg.setProperty("P1Bin", "-0.4,0.8");
+    alg.setProperty("P2Bin", "-0.4,0.8");
+    alg.setProperty("P3Bin", "-0.4,0.8");
+    alg.setProperty("P4Bin", "-1.0,1.0");
+    alg.setProperty("Projection", proj);
+    alg.setProperty("NoPix", true);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    IMDWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(outWS->getDimension(0)->getName(), "['zeta', 0, 0]")
+    TS_ASSERT_EQUALS(outWS->getDimension(1)->getName(), "[0, 'eta', 0]")
+    TS_ASSERT_EQUALS(outWS->getDimension(2)->getName(), "[0, 0, 'xi']")
+    TSM_ASSERT_EQUALS("Output workspace unit label should show scaling from conversion to RLU",
+                      outWS->getDimension(0)->getUnits().ascii(), "in XA^-1")
 
     // Clean up
     AnalysisDataService::Instance().remove(ws_name);
