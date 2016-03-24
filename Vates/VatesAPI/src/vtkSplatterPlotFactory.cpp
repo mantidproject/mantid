@@ -76,50 +76,45 @@ template <typename MDE, size_t nd>
 void vtkSplatterPlotFactory::doCreate(
     typename MDEventWorkspace<MDE, nd>::sptr ws) const {
   bool VERBOSE = true;
-  CPUTimer tim;
   // Acquire a scoped read-only lock to the workspace (prevent segfault
   // from algos modifying ws)
   ReadLock lock(*ws);
-
-  SigFuncIMDNodePtr getSignalFunction = &IMDNode::getSignalNormalized;
 
   // Find out how many events to plot, and the percentage of the largest
   // boxes to use.
   size_t numPoints =
       std::min(m_numPoints, static_cast<std::size_t>(ws->getNPoints()));
 
-  // First we get all the boxes, up to the given depth; with or wo the
-  // slice function
-  std::vector<API::IMDNode *> boxes;
-  if (this->slice) {
-      ws->getBox()->getBoxes(boxes, 1000, true, this->sliceImplicitFunction.get());
-  } else {
-    ws->getBox()->getBoxes(boxes, 1000, true);
-  }
-
-  if (VERBOSE) {
-    std::cout << tim << " to retrieve the " << boxes.size() << " boxes down."
-              << std::endl;
-  }
-
   std::string new_name = ws->getName();
   if (new_name != m_wsName || m_buildSortedList) {
-    m_wsName = new_name;
-    m_buildSortedList = false;
+    // First we get all the boxes, up to the given depth; with or wo the
+    // slice function
+    CPUTimer tim;
+
     m_sortedBoxes.clear();
-    // get list of boxes with signal > 0 and sort
-    // the list in order of decreasing signal
-    for (size_t i = 0; i < boxes.size(); i++) {
-      MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
-      if (box) {
-        size_t newPoints = box->getNPoints();
-        if (newPoints > 0) {
-          m_sortedBoxes.push_back(box);
-        }
-      }
+    if (this->slice) {
+      ws->getBox()->getBoxes(m_sortedBoxes, 1000, true,
+                             this->sliceImplicitFunction.get());
+    } else {
+      ws->getBox()->getBoxes(m_sortedBoxes, 1000, true);
     }
 
-    sortBoxesByDecreasingSignal(getSignalFunction, VERBOSE);
+    if (VERBOSE) {
+      std::cout << tim << " to retrieve the " << m_sortedBoxes.size()
+                << " boxes down." << std::endl;
+    }
+
+    m_wsName = new_name;
+    m_buildSortedList = false;
+    // get list of boxes with signal > 0 and sort
+    // the list in order of decreasing signal
+    m_sortedBoxes.erase(std::remove_if(m_sortedBoxes.begin(),
+                                       m_sortedBoxes.end(),
+                                       [](const API::IMDNode *box) {
+                                         return !box || box->getNPoints() == 0;
+                                       }),
+                        m_sortedBoxes.end());
+    sortBoxesByDecreasingSignal(VERBOSE);
   }
   size_t num_boxes_to_use = static_cast<size_t>(
       m_percentToUse * static_cast<double>(m_sortedBoxes.size()) / 100.0);
@@ -147,7 +142,7 @@ void vtkSplatterPlotFactory::doCreate(
 
   if (VERBOSE) {
     std::cout << "numPoints                 = " << numPoints << std::endl;
-    std::cout << "num boxes in all          = " << boxes.size() << std::endl;
+    // std::cout << "num boxes in all          = " << boxes.size() << std::endl;
     std::cout << "num boxes above zero      = " << m_sortedBoxes.size()
               << std::endl;
     std::cout << "num boxes to use          = " << num_boxes_to_use
@@ -196,7 +191,7 @@ void vtkSplatterPlotFactory::doCreate(
         pointIndex = numPoints;
       }
       // Save signal
-      float signal_normalized = static_cast<float>((box->*getSignalFunction)());
+      float signal_normalized = static_cast<float>(box->getSignalNormalized());
       signal_ptr =
           std::fill_n(signal_ptr, num_from_this_box, signal_normalized);
 
@@ -214,7 +209,8 @@ void vtkSplatterPlotFactory::doCreate(
   if (VERBOSE) {
     std::cout << "Recorded data for all points" << std::endl;
     std::cout << "numPoints = " << numPoints << std::endl;
-    std::cout << tim << " to create " << pointIndex << " points." << std::endl;
+    // std::cout << tim << " to create " << pointIndex << " points." <<
+    // std::endl;
   }
 
   pointsArray->Resize(pointIndex);
@@ -230,17 +226,15 @@ void vtkSplatterPlotFactory::doCreate(
  * @param VERBOSE : if true then print when sorting happens
  */
 void vtkSplatterPlotFactory::sortBoxesByDecreasingSignal(
-    SigFuncIMDNodePtr getSignalFunction, const bool VERBOSE) const {
+    const bool VERBOSE) const {
   if (VERBOSE) {
     std::cout << "START SORTING" << std::endl;
   }
 
-  std::sort(m_sortedBoxes.begin(), m_sortedBoxes.end(),
-            [getSignalFunction](IMDNode *box_1, IMDNode *box_2) {
-              double signal_1 = (box_1->*getSignalFunction)();
-              double signal_2 = (box_2->*getSignalFunction)();
-              return (signal_1 > signal_2);
-            });
+  std::sort(m_sortedBoxes.begin(), m_sortedBoxes.end(), [](IMDNode *box_1,
+                                                           IMDNode *box_2) {
+    return box_1->getSignalNormalized() > box_2->getSignalNormalized();
+  });
 
   if (VERBOSE) {
     std::cout << "DONE SORTING" << std::endl;
@@ -316,11 +310,9 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
   size_t index = 0;
 
   for (int z = 0; z < nBinsZ; z++) {
-    in[2] = (minZ + (static_cast<coord_t>(z) * incrementZ +
-                     static_cast<coord_t>(0.5) * incrementZ));
+    in[2] = (minZ + static_cast<coord_t>(z + 0.5f) * incrementZ);
     for (int y = 0; y < nBinsY; y++) {
-      in[1] = (minY + (static_cast<coord_t>(y) * incrementY +
-                       static_cast<coord_t>(0.5) * incrementY));
+      in[1] = (minY + static_cast<coord_t>(y + 0.5f) * incrementY);
       for (int x = 0; x < nBinsX; x++) {
         // Get the signalScalar
         signalScalar = this->extractScalarSignal(workspace, do4D, x, y, z);
@@ -330,9 +322,7 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
         if (!Mantid::VATES::isSpecial(static_cast<double>(signalScalar)) &&
             m_thresholdRange->inRange(signalScalar) &&
             (signalScalar > static_cast<signal_t>(0.0))) {
-          in[0] = (minX + (static_cast<coord_t>(x) * incrementX +
-                           static_cast<coord_t>(0.5) * incrementX));
-
+          in[0] = (minX + static_cast<coord_t>(x + 0.5f) * incrementX);
           // Create the transformed value if required
           if (transform) {
             transform->apply(in, out);
