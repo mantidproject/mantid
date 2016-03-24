@@ -25,7 +25,7 @@ ComplexMatrix::ComplexMatrix(const ComplexMatrix &M) {
 
 /// Move constructor
 /// @param M :: The other matrix.
-ComplexMatrix::ComplexMatrix(ComplexMatrix &&M) : m_matrix(nullptr)  {
+ComplexMatrix::ComplexMatrix(ComplexMatrix &&M) : m_matrix(nullptr) {
   std::swap(m_matrix, M.m_matrix);
 }
 
