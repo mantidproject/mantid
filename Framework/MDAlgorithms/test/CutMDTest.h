@@ -111,8 +111,10 @@ private:
     return proj;
   }
 
+  Mantid::Kernel::Logger m_log;
+
 public:
-  CutMDTest() {
+  CutMDTest() : m_log("CutMDTest") {
     FrameworkManager::Instance().exec(
         "CreateMDWorkspace", 10, "OutputWorkspace", sharedWSName.c_str(),
         "Dimensions", "3", "Extents", "-10,10,-10,10,-10,10", "Names", "A,B,C",
@@ -587,12 +589,10 @@ public:
   }
 
   void test_findOriginalQUnits_invA() {
-    Mantid::Kernel::Logger logger("CutMDTestLogger");
-
     const std::string ws_name = "__CutMDTest_unitstest";
     auto cutMDtestws = makeWorkspaceWithSpecifiedUnits("A^-1", ws_name);
 
-    auto foundUnits = findOriginalQUnits(cutMDtestws, logger);
+    auto foundUnits = findOriginalQUnits(cutMDtestws, m_log);
     TSM_ASSERT_EQUALS("Units should be found to be inverse angstroms",
                       foundUnits[0],
                       Mantid::MDAlgorithms::CutMD::InvAngstromSymbol);
@@ -601,12 +601,10 @@ public:
   }
 
   void test_findOriginalQUnits_invAngstroms() {
-    Mantid::Kernel::Logger logger("CutMDTestLogger");
-
     const std::string ws_name = "__CutMDTest_unitstest";
     auto cutMDtestws = makeWorkspaceWithSpecifiedUnits("Angstrom^-1", ws_name);
 
-    auto foundUnits = findOriginalQUnits(cutMDtestws, logger);
+    auto foundUnits = findOriginalQUnits(cutMDtestws, m_log);
     TSM_ASSERT_EQUALS("Units should be found to be inverse angstroms",
                       foundUnits[0],
                       Mantid::MDAlgorithms::CutMD::InvAngstromSymbol);
@@ -615,13 +613,11 @@ public:
   }
 
   void test_findOriginalQUnits_rlu() {
-    Mantid::Kernel::Logger logger("CutMDTestLogger");
-
     const std::string ws_name = "__CutMDTest_unitstest";
     // When units have been converted to RLU the unit label looks like this
     auto cutMDtestws = makeWorkspaceWithSpecifiedUnits("in 1.11A^-1", ws_name);
 
-    auto foundUnits = findOriginalQUnits(cutMDtestws, logger);
+    auto foundUnits = findOriginalQUnits(cutMDtestws, m_log);
     TSM_ASSERT_EQUALS("Units should be found to be RLU", foundUnits[0],
                       Mantid::MDAlgorithms::CutMD::RLUSymbol);
     // Clean up
@@ -629,7 +625,6 @@ public:
   }
 
   void test_CutMD_dimension_labels_A_to_A() {
-    Mantid::Kernel::Logger logger("CutMDTestLogger");
     const std::string ws_name = "__CutMDTest_unitstest";
     auto ws_temp = makeWorkspaceWithSpecifiedUnits("Angstrom^-1", ws_name);
     TSM_ASSERT_EQUALS(
@@ -664,7 +659,6 @@ public:
   }
 
   void test_CutMD_dimension_labels_A_to_RLU() {
-    Mantid::Kernel::Logger logger("CutMDTestLogger");
     const std::string ws_name = "__CutMDTest_unitstest";
     auto ws_temp = makeWorkspaceWithSpecifiedUnits("Angstrom^-1", ws_name);
     TSM_ASSERT_EQUALS(
