@@ -3,8 +3,8 @@
 and that mantid can be imported
 """
 import stresstesting
+import platform
 
-from mantid import logger
 from mantid.api import (WorkspaceGroup, MatrixWorkspace)
 from mantid.simpleapi import *
 from vesuvio.commands import fit_tof
@@ -74,15 +74,18 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, fitted_ws.readX(0)[0])
         self.assertAlmostEqual(562.0, fitted_ws.readX(0)[-1])
 
-        logger.warning("=======================FitSingleSpectrumNoBackgroundTest==================")
-        logger.warning("%e" %(fitted_ws.readY(0)[0]))
-        logger.warning("%e" %(fitted_ws.readY(0)[-1]))
-        logger.warning("%e" %(fitted_ws.readY(1)[0]))
-        logger.warning("%e" %(fitted_ws.readY(1)[-1]))
-        self.assertTrue(_equal_within_tolerance(-0.016289703, fitted_ws.readY(0)[0]))
-        self.assertTrue(_equal_within_tolerance(0.0072029933, fitted_ws.readY(0)[-1]))
-        self.assertTrue(_equal_within_tolerance(1.057476742e-05, fitted_ws.readY(1)[0]))
-        self.assertTrue(_equal_within_tolerance(7.023179770e-05, fitted_ws.readY(1)[-1]))
+        index_one_first = -0.016289703
+        index_one_last = 0.0072029933
+        index_two_first = 1.057476742e-05
+        index_two_last = 7.023179770e-05
+        dist = platform.linux_distribution()
+        if dist[0] == 'Red Hat Enterprise Linux Workstation' and dist[1] == '7.2':
+            index_one_first = 7.798020e-04
+
+        self.assertTrue(_equal_within_tolerance(index_one_first, fitted_ws.readY(0)[0]))
+        self.assertTrue(_equal_within_tolerance(index_one_last, fitted_ws.readY(0)[-1]))
+        self.assertTrue(_equal_within_tolerance(index_two_first, fitted_ws.readY(1)[0]))
+        self.assertTrue(_equal_within_tolerance(index_two_last, fitted_ws.readY(1)[-1]))
 
         fitted_params = self._fit_results[1]
         self.assertTrue(isinstance(fitted_params, MatrixWorkspace))
@@ -121,15 +124,21 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, fitted_ws.readX(0)[0])
         self.assertAlmostEqual(562.0, fitted_ws.readX(0)[-1])
 
-        logger.warning("=======================SingleSpectrumBackground==================")
-        logger.warning("%e" %(fitted_ws.readY(0)[0]))
-        logger.warning("%e" %(fitted_ws.readY(0)[-1]))
-        logger.warning("%e" %(fitted_ws.readY(1)[0]))
-        logger.warning("%e" %(fitted_ws.readY(1)[-1]))
-        self.assertTrue(_equal_within_tolerance(-0.0221362198069, fitted_ws.readY(0)[0]))
-        self.assertTrue(_equal_within_tolerance(0.00720728978699, fitted_ws.readY(0)[-1]))
-        self.assertTrue(_equal_within_tolerance(0.00571520523979, fitted_ws.readY(1)[0]))
-        self.assertTrue(_equal_within_tolerance(-0.00211277263055, fitted_ws.readY(1)[-1]))
+        index_one_first = -0.0221362198069
+        index_one_last = 0.00720728978699
+        index_two_first = 0.00571520523979
+        index_two_last = -0.00211277263055
+        dist = platform.linux_distribution()
+        if dist[0] == 'Red Hat Enterprise Linux Workstation' and dist[1] == '7.2':
+            index_one_first = 6.809169e-04
+            index_one_last = 7.206634e-03
+            index_two_first = 3.360576e-03
+            index_two_last = -1.431954e-03
+
+        self.assertTrue(_equal_within_tolerance(index_one_first, fitted_ws.readY(0)[0]))
+        self.assertTrue(_equal_within_tolerance(index_one_last, fitted_ws.readY(0)[-1]))
+        self.assertTrue(_equal_within_tolerance(index_two_first, fitted_ws.readY(1)[0]))
+        self.assertTrue(_equal_within_tolerance(index_two_last, fitted_ws.readY(1)[-1]))
 
         fitted_params = self._fit_results[1]
         self.assertTrue(isinstance(fitted_params, MatrixWorkspace))
@@ -172,9 +181,6 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, bank1_data.readX(0)[0])
         self.assertAlmostEqual(562.0, bank1_data.readX(0)[-1])
 
-        logger.warning("=======================BankByBankForwardSpectraNoBackground - bank 1==================")
-        logger.warning("%e" %(bank1_data.readY(1)[0]))
-        logger.warning("%e" %(bank1_data.readY(1)[-1]))
         self.assertTrue(_equal_within_tolerance(8.03245852426e-05, bank1_data.readY(1)[0]))
         self.assertTrue(_equal_within_tolerance(0.000559789299755, bank1_data.readY(1)[-1]))
 
@@ -187,9 +193,6 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, bank8_data.readX(0)[0])
         self.assertAlmostEqual(562.0, bank8_data.readX(0)[-1])
 
-        logger.warning("=======================BankByBankForwardSpectraNoBackground - bank 8==================")
-        logger.warning("%e" %(bank8_data.readY(1)[0]))
-        logger.warning("%e" %(bank8_data.readY(1)[-1]))
         self.assertTrue(_equal_within_tolerance(0.000279169151321, bank8_data.readY(1)[0]))
         self.assertTrue(_equal_within_tolerance(0.000505355349359, bank8_data.readY(1)[-1]))
 
@@ -230,9 +233,6 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         self.assertAlmostEqual(50.0, spec143_data.readX(0)[0])
         self.assertAlmostEqual(562.0, spec143_data.readX(0)[-1])
 
-        logger.warning("=======================SpectraBySpectraForwardSpectraNoBackground - spec 143==================")
-        logger.warning("%e" %(spec143_data.readY(1)[0]))
-        logger.warning("%e" %(spec143_data.readY(1)[-1]))
         self.assertTrue(_equal_within_tolerance(2.3090594752e-06, spec143_data.readY(1)[0]))
         self.assertTrue(_equal_within_tolerance(3.51960367895e-05, spec143_data.readY(1)[-1]))
 
@@ -245,9 +245,6 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         self.assertAlmostEqual(50.0, spec144_data.readX(0)[0])
         self.assertAlmostEqual(562.0, spec144_data.readX(0)[-1])
 
-        logger.warning("=======================SpectraBySpectraForwardSpectraNoBackground - spec 144==================")
-        logger.warning("%e" %(spec144_data.readY(1)[0]))
-        logger.warning("%e" %(spec144_data.readY(1)[-1]))
         self.assertTrue(_equal_within_tolerance(7.79185212491e-06, spec144_data.readY(1)[0]))
         self.assertTrue(_equal_within_tolerance(4.79448882168e-05, spec144_data.readY(1)[-1]))
 
