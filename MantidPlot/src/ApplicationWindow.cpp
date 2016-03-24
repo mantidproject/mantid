@@ -2792,6 +2792,10 @@ MultiLayer *ApplicationWindow::multilayerPlot(
   if (!autoscale2DPlots)
     ag->enableAutoscaling(false);
 
+  // Set graph title to the same as the table
+  if (auto mantidTable = dynamic_cast<MantidTable *>(w)) {
+    ag->setTitle(mantidTable->getWorkspaceName().c_str());
+  }
   QApplication::restoreOverrideCursor();
   return g;
 }
