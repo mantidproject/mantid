@@ -209,7 +209,7 @@
       <item row="1" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_10">
         <item>
-         <widget class="QLabel" name="label_cropped_spec_ids">
+         <widget class="QLabel" name="label_cropped_spec_nos">
           <property name="text">
            <string>Spectrum Numbers:</string>
           </property>
@@ -229,7 +229,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_cropped_spec_ids">
+         <widget class="QLineEdit" name="lineEdit_cropped_spec_nos">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>1</horstretch>

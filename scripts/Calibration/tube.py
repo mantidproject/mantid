@@ -1,10 +1,11 @@
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 """
 =========================
 Definition of Calibration
 =========================
 
-.. autofunction:: calibrate(ws, tubeSet, knownPositions, funcForm, [fitPar, margin, rangeList, calibTable, plotTube, excludeShorTubes, overridePeaks, fitPolyn, outputPeak ] )
+.. autofunction:: calibrate(ws, tubeSet, knownPositions, funcForm, [fitPar, margin, rangeList, calibTable, plotTube,
+excludeShorTubes, overridePeaks, fitPolyn, outputPeak ] )
 
 =========
 Use Cases
@@ -14,13 +15,21 @@ Among the examples, inside the :py:mod:`Examples` folder, the user is encouraged
 :py:mod:`~Examples.TubeCalibDemoMaps_All`, there he will find 7 examples showing how to use calibrate method.
 
 * :py:func:`~Examples.TubeCalibDemoMaps_All.minimalInput` shows the easiest way to use calibrate.
-* :py:func:`~Examples.TubeCalibDemoMaps_All.provideTheExpectedValue` shows the usage of **fitPar** parameter to provide the expected values for the peaks in pixels.
-* :py:func:`~Examples.TubeCalibDemoMaps_All.changeMarginAndExpectedValue` demonstrate how to use **margin**, **fitPar**, **plotTube**, and **outputPeak**
-* :py:func:`~Examples.TubeCalibDemoMaps_All.improvingCalibrationSingleTube` explores the usage of **rangeList** and **overridePeaks** to improve the calibration of specific tubes.
-* :py:func:`~Examples.TubeCalibDemoMaps_All.improvingCalibrationOfListOfTubes` extends the improvingCalibrationSingleTube to provide a good calibration to almost all instrument.
-* :py:func:`~Examples.TubeCalibDemoMaps_All.calibrateB2Window` explore a singularity of the MAP14919 example, where the second peak does not appear clear on some tubes inside one door. So, this example, shows how to use **rangeList** to carry a calibration to the group of tubes.
-* :py:func:`~Examples.TubeCalibDemoMaps_All.completeCalibration` demonstrate how the **rangeList**, **overridePeaks**, may be used together to allow the calibration of the whole instrument, despite, its particularities in some cases.
-* :py:func:`~Examples.TubeCalibDemoMaps_All.findThoseTubesThatNeedSpecialCareForCalibration` show an aproach to find the tubes that will require special care on calibrating. It will also help to find detectors that are not working well.
+* :py:func:`~Examples.TubeCalibDemoMaps_All.provideTheExpectedValue` shows the usage of **fitPar** parameter to provide
+the expected values for the peaks in pixels.
+* :py:func:`~Examples.TubeCalibDemoMaps_All.changeMarginAndExpectedValue` demonstrate how to use **margin**, **fitPar**,
+ **plotTube**, and **outputPeak**
+* :py:func:`~Examples.TubeCalibDemoMaps_All.improvingCalibrationSingleTube` explores the usage of **rangeList** and
+**overridePeaks** to improve the calibration of specific tubes.
+* :py:func:`~Examples.TubeCalibDemoMaps_All.improvingCalibrationOfListOfTubes` extends theimprovingCalibrationSingleTube
+to provide a good calibration to almost all instrument.
+* :py:func:`~Examples.TubeCalibDemoMaps_All.calibrateB2Window` explore a singularity of the MAP14919 example, where the
+second peak does not appear clear on some tubes inside one door. So, this example, shows how to use **rangeList** to
+carry a calibration to the group of tubes.
+* :py:func:`~Examples.TubeCalibDemoMaps_All.completeCalibration` demonstrate how the **rangeList**, **overridePeaks**,
+may be used together to allow the calibration of the whole instrument, despite, its particularities in some cases.
+* :py:func:`~Examples.TubeCalibDemoMaps_All.findThoseTubesThatNeedSpecialCareForCalibration` show an aproach to find the
+tubes that will require special care on calibrating. It will also help to find detectors that are not working well.
 
 ========
 Examples
@@ -48,7 +57,6 @@ from tube_spec import TubeSpec
 from ideal_tube import IdealTube
 from tube_calib_fit_params import TubeCalibFitParams
 from tube_calib import getCalibration
-
 
 
 def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
@@ -268,7 +276,8 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
 
 
       :param ws: Integrated workspace with tubes to be calibrated.
-      :param tubeSet: Specification of Set of tubes to be calibrated. If a string is passed, a TubeSpec will be created passing the string as the setTubeSpecByString.
+      :param tubeSet: Specification of Set of tubes to be calibrated. If a string is passed, a TubeSpec will be created
+      passing the string as the setTubeSpecByString.
 
        This will be the case for TubeSpec as string
 
@@ -287,35 +296,44 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
        If a :class:`~tube_spec.TubeSpec` object is passed, it will be used as it is.
 
 
-      :param knownPositions: The defined position for the peaks/edges, taking the center as the origin and having the same units as the tube length in the 3D space.
+      :param knownPositions: The defined position for the peaks/edges, taking the center as the origin and having the
+      same units as the tube length in the 3D space.
 
-      :param funcForm: list with special values to define the format of the peaks/edge (peaks=1, edge=2). If it is not provided, it will be assumed that all the knownPositions are peaks.
+      :param funcForm: list with special values to define the format of the peaks/edge (peaks=1, edge=2). If it is not
+      provided, it will be assumed that all the knownPositions are peaks.
 
 
       Optionals parameters to tune the calibration:
 
-      :param fitPar: Define the parameters to be used in the fit as a :class:`~tube_calib_fit_params.TubeCalibFitParams`. If not provided, the dynamic mode is used. See :py:func:`~Examples.TubeCalibDemoMaps_All.provideTheExpectedValue`
+      :param fitPar: Define the parameters to be used in the fit as a :class:`~tube_calib_fit_params.TubeCalibFitParams`.
+       If not provided, the dynamic mode is used. See :py:func:`~Examples.TubeCalibDemoMaps_All.provideTheExpectedValue`
 
-      :param margin: value in pixesl that will be used around the peaks/edges to fit them. Default = 15. See the code of :py:mod:`~Examples.TubeCalibDemoMerlin` where **margin** is used to calibrate small tubes.
+      :param margin: value in pixesl that will be used around the peaks/edges to fit them. Default = 15. See the code of
+      :py:mod:`~Examples.TubeCalibDemoMerlin` where **margin** is used to calibrate small tubes.
 
        .. code-block:: python
 
           fit_start, fit_end = centre - margin, centre + margin
 
-      :param rangeList: list of tubes indexes that will be calibrated. As in the following code (see: :py:func:`~Examples.TubeCalibDemoMaps_All.improvingCalibrationSingleTube`):
+      :param rangeList: list of tubes indexes that will be calibrated. As in the following code
+      (see: :py:func:`~Examples.TubeCalibDemoMaps_All.improvingCalibrationSingleTube`):
 
        .. code-block:: python
 
           for index in rangelist:
               do_calibrate(tubeSet.getTube(index))
 
-      :param calibTable: Pass the calibration table, it will them append the values to the provided one and return it. (see: :py:mod:`~Examples.TubeCalibDemoMerlin`)
+      :param calibTable: Pass the calibration table, it will them append the values to the provided one and return it.
+      (see: :py:mod:`~Examples.TubeCalibDemoMerlin`)
 
-      :param plotTube: If given, the tube whose index is in plotTube will be ploted as well as its fitted peaks, it can receive a list of indexes to plot.(see: :py:func:`~Examples.TubeCalibDemoMaps_All.changeMarginAndExpectedValue`)
+      :param plotTube: If given, the tube whose index is in plotTube will be ploted as well as its fitted peaks, it can
+      receive a list of indexes to plot.(see: :py:func:`~Examples.TubeCalibDemoMaps_All.changeMarginAndExpectedValue`)
 
-      :param excludeShortTubes: Do not calibrate tubes whose length is smaller than given value. (see at: Examples/TubeCalibDemoMerlin_Adjustable.py)
+      :param excludeShortTubes: Do not calibrate tubes whose length is smaller than given value. (see at:
+      Examples/TubeCalibDemoMerlin_Adjustable.py)
 
-      :param overridePeaks: dictionary that defines an array of peaks positions (in pixels) to be used for the specific tube(key). (see: :py:func:`~Examples.TubeCalibDemoMaps_All.improvingCalibrationSingleTube`)
+      :param overridePeaks: dictionary that defines an array of peaks positions (in pixels) to be used for the specific
+      tube(key). (see: :py:func:`~Examples.TubeCalibDemoMaps_All.improvingCalibrationSingleTube`)
 
        .. code-block:: python
 
@@ -325,10 +343,14 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
               # skip finding peaks
               fit_peaks_to_position()
 
-      :param fitPolyn: Define the order of the polinomial to fit the pixels positions agains the known positions. The acceptable values are 1, 2 or 3. Default = 2.
+      :param fitPolyn: Define the order of the polinomial to fit the pixels positions agains the known positions. The
+      acceptable values are 1, 2 or 3. Default = 2.
 
 
-      :param outputPeak: Enable the calibrate to output the peak table, relating the tubes with the pixels positions. It may be passed as a boolean value (outputPeak=True) or as a peakTable value. The later case is to inform calibrate to append the new values to the given peakTable. This is usefull when you have to operate in subsets of tubes. (see :py:mod:`~Examples.TubeCalibDemoMerlin` that shows a nice inspection on this table).
+      :param outputPeak: Enable the calibrate to output the peak table, relating the tubes with the pixels positions. It
+      may be passed as a boolean value (outputPeak=True) or as a peakTable value. The later case is to inform calibrate
+      to append the new values to the given peakTable. This is usefull when you have to operate in subsets of tubes.
+      (see :py:mod:`~Examples.TubeCalibDemoMerlin` that shows a nice inspection on this table).
 
        .. code-block:: python
 
@@ -352,24 +374,25 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     FITPOLIN = 'fitPolyn'
     OUTPUTPEAK = 'outputPeak'
 
-    #check that only valid arguments were passed through kwargs
+    # check that only valid arguments were passed through kwargs
     for key in kwargs.keys():
         if key not in [FITPAR, MARGIN, RANGELIST, CALIBTABLE, PLOTTUBE,
                        EXCLUDESHORT, OVERRIDEPEAKS, FITPOLIN,
                        OUTPUTPEAK]:
-            msg = "Wrong argument: '%s'! This argument is not defined in the signature of this function. Hint: remember that arguments are case sensitive" % key
+            msg = "Wrong argument: '%s'! This argument is not defined in the signature of this function. Hint: remember" \
+                  "that arguments are case sensitive" % key
             raise RuntimeError(msg)
 
 
     # check parameter ws: if it was given as string, transform it in
     # mantid object
-    if isinstance(ws,str):
+    if isinstance(ws, str):
         ws = mtd[ws]
-    if not isinstance(ws,MatrixWorkspace):
+    if not isinstance(ws, MatrixWorkspace):
         raise RuntimeError("Wrong argument ws = %s. It must be a MatrixWorkspace" % (str(ws)))
 
     # check parameter tubeSet. It accepts string or preferable a TubeSpec
-    if isinstance(tubeSet,str):
+    if isinstance(tubeSet, str):
         selectedTubes = tubeSet
         tubeSet = TubeSpec(ws)
         tubeSet.setTubeSpecByString(selectedTubes)
@@ -377,33 +400,39 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         selectedTubes = tubeSet
         tubeSet = TubeSpec(ws)
         tubeSet.setTubeSpecByStringArray(selectedTubes)
-    elif not isinstance(tubeSet,TubeSpec):
-        raise RuntimeError("Wrong argument tubeSet. It must be a TubeSpec or a string that defines the set of tubes to be calibrated. For example: WISH/panel03")
+    elif not isinstance(tubeSet, TubeSpec):
+        raise RuntimeError(
+            "Wrong argument tubeSet. It must be a TubeSpec or a string that defines the set of tubes to be calibrated."
+            "For example: WISH/panel03")
 
     # check the known_positions parameter
     # for old version compatibility, it also accepts IdealTube, eventhough
     # they should only be used internally
-    if not (isinstance(knownPositions, list) or
-            isinstance(knownPositions, tuple) or
-            isinstance(knownPositions, numpy.ndarray)):
-        raise RuntimeError("Wrong argument knownPositions. It expects a list of values for the positions expected for the peaks in relation to the center of the tube")
+    if not (isinstance(knownPositions, list) or isinstance(knownPositions, tuple) or isinstance(knownPositions, numpy.ndarray)):
+        raise RuntimeError(
+            "Wrong argument knownPositions. It expects a list of values for the positions expected for the peaks in"
+            "relation to the center of the tube")
     else:
         idealTube = IdealTube()
         idealTube.setArray(numpy.array(knownPositions))
 
-
-    #deal with funcForm parameter
+    #pylint: disable = raising-bad-type
+    # deal with funcForm parameter
     try:
         nPeaks = len(idealTube.getArray())
         if len(funcForm) != nPeaks:
             raise 1
         for val in funcForm:
-            if val not in [1,2]:
+            if val not in [1, 2]:
                 raise 2
     except:
-        raise RuntimeError("Wrong argument FuncForm. It expects a list of values describing the form of everysingle peaks. So, for example, if there are three peaks where the first is a peak and the followers as edge, funcForm = [1, 2, 2]. Currently, it is defined 1-Gaussian Peak, 2 - Edge. The knownPos has %d elements and the given funcForm has %d."%(nPeaks, len(funcForm)))
+        raise RuntimeError(
+            "Wrong argument FuncForm. It expects a list of values describing the form of everysingle peaks. So, for"
+            "example, if there are three peaks where the first is a peak and the followers as edge,"
+            "funcForm = [1, 2, 2].Currently, it is defined 1-Gaussian Peak, 2 - Edge. The knownPos has %d elements"
+            "and the given funcForm has %d." % (nPeaks, len(funcForm)))
 
-    #apply the functional form to the ideal Tube
+    # apply the functional form to the ideal Tube
     idealTube.setForm(funcForm)
 
     # check the FITPAR parameter (optional)
@@ -413,9 +442,10 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     # for the peaks automatically
     if kwargs.has_key(FITPAR):
         fitPar = kwargs[FITPAR]
-        #fitPar must be a TubeCalibFitParams
+        # fitPar must be a TubeCalibFitParams
         if not isinstance(fitPar, TubeCalibFitParams):
-            raise RuntimeError("Wrong argument %s. This argument, when given, must be a valid TubeCalibFitParams object"%FITPAR)
+            raise RuntimeError(
+                "Wrong argument %s. This argument, when given, must be a valid TubeCalibFitParams object" % FITPAR)
     else:
         # create a fit parameters guessing centre positions
         # the guessing obeys the following rule:
@@ -424,12 +454,12 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         #
         # Get tube length and number of detectors
         tube_length = tubeSet.getTubeLength(0)
-        #ndets = len(wsp_index_for_tube0)
-        id1, ndets, step = tubeSet.getDetectorInfoFromTube(0)
+        # ndets = len(wsp_index_for_tube0)
+        dummy_id1, ndets, dummy_step = tubeSet.getDetectorInfoFromTube(0)
 
         known_pos = idealTube.getArray()
         # position of the peaks in pixels
-        centre_pixel = known_pos * ndets/tube_length + ndets * 0.5
+        centre_pixel = known_pos * ndets / tube_length + ndets * 0.5
 
         fitPar = TubeCalibFitParams(centre_pixel)
         # make it automatic, it means, that for every tube,
@@ -443,33 +473,33 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         try:
             margin = float(kwargs[MARGIN])
         except:
-            raise RuntimeError("Wrong argument %s. It was expected a number!"%MARGIN)
+            raise RuntimeError("Wrong argument %s. It was expected a number!" % MARGIN)
         fitPar.setMargin(margin)
 
-    #deal with RANGELIST parameter
+    # deal with RANGELIST parameter
     if kwargs.has_key(RANGELIST):
         rangeList = kwargs[RANGELIST]
-        if isinstance(rangeList,int):
+        if isinstance(rangeList, int):
             rangeList = [rangeList]
         try:
             # this deals with list and tuples and iterables to make sure
             # rangeList becomes a list
             rangeList = list(rangeList)
         except:
-            raise RuntimeError("Wrong argument %s. It expects a list of indexes for calibration"%RANGELIST)
+            raise RuntimeError("Wrong argument %s. It expects a list of indexes for calibration" % RANGELIST)
     else:
         rangeList = range(tubeSet.getNumTubes())
 
     # check if the user passed the option calibTable
     if kwargs.has_key(CALIBTABLE):
         calibTable = kwargs[CALIBTABLE]
-        #ensure the correct type is passed
+        # ensure the correct type is passed
         # if a string was passed, transform it in mantid object
-        if isinstance(calibTable,str):
+        if isinstance(calibTable, str):
             calibTable = mtd[calibTable]
-        #check that calibTable has the expected form
+        # check that calibTable has the expected form
         try:
-            if not isinstance(calibTable,ITableWorkspace):
+            if not isinstance(calibTable, ITableWorkspace):
                 raise 1
             if calibTable.columnCount() != 2:
                 raise 2
@@ -477,16 +507,18 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
             if colNames[0] != 'Detector ID' or colNames[1] != 'Detector Position':
                 raise 3
         except:
-            raise RuntimeError("Invalid type for %s. The expected type was ITableWorkspace with 2 columns(Detector ID and Detector Positions)" % CALIBTABLE)
+            raise RuntimeError(
+                "Invalid type for %s. The expected type was ITableWorkspace with 2 columns(Detector ID and Detector"
+                "Positions)" % CALIBTABLE)
     else:
         calibTable = CreateEmptyTableWorkspace(OutputWorkspace="CalibTable")
         # "Detector ID" column required by ApplyCalibration
-        calibTable.addColumn(type="int",name="Detector ID")
+        calibTable.addColumn(type="int", name="Detector ID")
         # "Detector Position" column required by ApplyCalibration
-        calibTable.addColumn(type="V3D",name="Detector Position")
+        calibTable.addColumn(type="V3D", name="Detector Position")
 
 
-    #deal with plotTube option
+    # deal with plotTube option
     if kwargs.has_key(PLOTTUBE):
         plotTube = kwargs[PLOTTUBE]
         if isinstance(plotTube, int):
@@ -494,22 +526,23 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         try:
             plotTube = list(plotTube)
         except:
-            raise RuntimeError("Wrong argument %s. It expects an index (int) or a list of indexes" %PLOTTUBE)
+            raise RuntimeError("Wrong argument %s. It expects an index (int) or a list of indexes" % PLOTTUBE)
     else:
         plotTube = []
 
-    #deal with minimun tubes sizes
+    # deal with minimun tubes sizes
     if kwargs.has_key(EXCLUDESHORT):
         excludeShortTubes = kwargs[EXCLUDESHORT]
         try:
             excludeShortTubes = float(excludeShortTubes)
         except:
-            raise RuntimeError("Wrong argument %s. It expects a float value for the minimun size of tubes to be calibrated")
+            raise RuntimeError(
+                "Wrong argument %s. It expects a float value for the minimun size of tubes to be calibrated")
     else:
-        #a tube with length 0 can not be calibrated, this is the minimun value
+        # a tube with length 0 can not be calibrated, this is the minimun value
         excludeShortTubes = 0.0
 
-    #deal with OVERRIDEPEAKS parameters
+    # deal with OVERRIDEPEAKS parameters
     if kwargs.has_key(OVERRIDEPEAKS):
         overridePeaks = kwargs[OVERRIDEPEAKS]
         try:
@@ -518,14 +551,16 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
             if not isinstance(overridePeaks, dict):
                 raise 1
             for key in overridePeaks.keys():
-                if not isinstance(key,int):
+                if not isinstance(key, int):
                     raise 2
                 if key < 0 or key >= tubeSet.getNumTubes():
                     raise 3
                 if len(overridePeaks[key]) != nPeaks:
                     raise 4
         except:
-            raise RuntimeError("Wrong argument %s. It expects a dictionary with key as the tube index and the value as a list of peaks positions. Ex (3 peaks): overridePeaks = {1:[2,5.4,500]}"%OVERRIDEPEAKS)
+            raise RuntimeError(
+                "Wrong argument %s. It expects a dictionary with key as the tube index and the value as a list of peaks"
+                "positions. Ex (3 peaks): overridePeaks = {1:[2,5.4,500]}" % OVERRIDEPEAKS)
     else:
         overridePeaks = dict()
 
@@ -533,8 +568,10 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     # deal with FITPOLIN parameter
     if kwargs.has_key(FITPOLIN):
         polinFit = kwargs[FITPOLIN]
-        if polinFit not in [1, 2,3]:
-            raise RuntimeError("Wrong argument %s. It expects a number 1 for linear, 2 for quadratic, or 3 for 3rd polinomial order when fitting the pixels positions agains the known positions" % FITPOLIN)
+        if polinFit not in [1, 2, 3]:
+            raise RuntimeError(
+                "Wrong argument %s. It expects a number 1 for linear, 2 for quadratic, or 3 for 3rd polinomial order"
+                "when fitting the pixels positions agains the known positions" % FITPOLIN)
     else:
         polinFit = 2
 
@@ -546,18 +583,20 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         outputPeak = False
     if isinstance(outputPeak, ITableWorkspace):
         if outputPeak.columnCount() < len(idealTube.getArray()):
-            raise RuntimeError("Wrong argument %s. It expects a boolean flag, or a ITableWorksapce with columns (TubeId, Peak1,...,PeakM) for M = number of peaks given in knownPositions" % OUTPUTPEAK)
+            raise RuntimeError(
+                "Wrong argument %s. It expects a boolean flag, or a ITableWorksapce with columns (TubeId, Peak1,...,"
+                "PeakM) for M = number of peaks given in knownPositions" % OUTPUTPEAK)
     else:
         if not outputPeak:
             deletePeakTableAfter = True
         # create the output peak table
         outputPeak = CreateEmptyTableWorkspace(OutputWorkspace="PeakTable")
-        outputPeak.addColumn(type='str',name='TubeId')
+        outputPeak.addColumn(type='str', name='TubeId')
         for i in range(len(idealTube.getArray())):
-            outputPeak.addColumn(type='float',name='Peak%d'%(i+1))
+            outputPeak.addColumn(type='float', name='Peak%d' % (i + 1))
 
-    getCalibration(ws, tubeSet, calibTable, fitPar, idealTube, outputPeak,\
-        overridePeaks, excludeShortTubes, plotTube, rangeList, polinFit)
+    getCalibration(ws, tubeSet, calibTable, fitPar, idealTube, outputPeak, \
+                   overridePeaks, excludeShortTubes, plotTube, rangeList, polinFit)
 
     if deletePeakTableAfter:
         DeleteWorkspace(str(outputPeak))
@@ -577,7 +616,8 @@ def savePeak(peakTable, filePath):
        calibTable, peakTable = calibrate(..., outputPeak=peakTable)
        savePeak(peakTable, 'myfolder/myfile.txt')
 
-    :param filePath: where to save the file. If the filePath is not given as an absolute path, it will be considered relative to the defaultsave.directory.
+    :param filePath: where to save the file. If the filePath is not given as an absolute path, it will be considered
+    relative to the defaultsave.directory.
 
     The file will be saved with the following format:
 
@@ -597,18 +637,19 @@ def savePeak(peakTable, filePath):
         pFile = open(os.path.join(saveDirectory, filePath), 'w')
     else:
         pFile = open(filePath, 'w')
-    if isinstance(peakTable,str):
+    if isinstance(peakTable, str):
         peakTable = mtd[peakTable]
-    nPeaks = peakTable.columnCount()-1
-    peaksNames = ['Peak%d'%(i+1) for i in range(nPeaks)]
+    nPeaks = peakTable.columnCount() - 1
+    peaksNames = ['Peak%d' % (i + 1) for i in range(nPeaks)]
 
     for line in range(peakTable.rowCount()):
         row = peakTable.row(line)
         peak_values = [row[k] for k in peaksNames]
-        tube_name = row['TubeId'].replace(' ','%20')
+        tube_name = row['TubeId'].replace(' ', '%20')
         print >> pFile, tube_name, peak_values
 
     pFile.close()
+
 
 def readPeakFile(file_name):
     """Load the file calibration
@@ -629,29 +670,28 @@ def readPeakFile(file_name):
 
     """
     loaded_file = []
-    #split the entries to the main values:
+    # split the entries to the main values:
     # For example:
     # MERLIN/door1/tube_1_1 [34.199347724575574, 525.5864438725401, 1001.7456248836971]
     # Will be splited as:
     # ['MERLIN/door1/tube_1_1', '', '34.199347724575574', '', '525.5864438725401', '', '1001.7456248836971', '', '', '']
-    pattern = re.compile('[\[\],\s\r]')
+    pattern = re.compile(r'[\[\],\s\r]')
     saveDirectory = config['defaultsave.directory']
     pfile = os.path.join(saveDirectory, file_name)
-    for line in open(pfile,'r'):
-        #check if the entry is a comment line
+    for line in open(pfile, 'r'):
+        # check if the entry is a comment line
         if line.startswith('#'):
             continue
-        #split all values
-        line_vals = re.split(pattern,line)
-        id_ = str(line_vals[0]).replace('%20',' ')
+        # split all values
+        line_vals = re.split(pattern, line)
+        id_ = str(line_vals[0]).replace('%20', ' ')
         if id_ == '':
             continue
         try:
-            f_values = [float(v) for v in line_vals[1:] if v!='']
+            f_values = [float(v) for v in line_vals[1:] if v != '']
         except ValueError:
-            #print 'Wrong format: we expected only numbers, but receive this line ',str(line_vals[1:])
+            # print 'Wrong format: we expected only numbers, but receive this line ',str(line_vals[1:])
             continue
 
-        loaded_file.append((id_,f_values))
+        loaded_file.append((id_, f_values))
     return loaded_file
-

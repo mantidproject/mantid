@@ -54,7 +54,7 @@ class MANTID_KERNEL_DLL Quat {
 public:
   Quat();
   // direct quat definition
-  Quat(const double, const double, const double, const double);
+  Quat(const double _w, const double _a, const double _b, const double _c);
   // * Construct a Quat between two vectors;
   // * The angle between them is defined differently from usual if vectors are
   // not unit or the same length vectors, so quat would be not consistent
@@ -73,7 +73,7 @@ public:
   void set(const double ww, const double aa, const double bb, const double cc);
   void setAngleAxis(const double _deg, const V3D &_axis);
   void getAngleAxis(double &_deg, double &_ax0, double &_ax1,
-                    double &_ax2) const;
+                    double &ax2) const;
   std::vector<double> getEulerAngles(const std::string &convention) const;
   /// Set the rotation (both don't change rotation axis)
   void setRotation(const double deg);
@@ -102,7 +102,7 @@ public:
   std::vector<double> getRotation(bool check_normalisation = false,
                                   bool throw_on_errors = false) const;
   //! Convert GL Matrix into Quat
-  void setQuat(double[16]);
+  void setQuat(double mat[16]);
   //! Convert usual 3D rotation matrix into quat; Will throw if matirix is not
   // rotational;
   void setQuat(const DblMatrix &rMat);

@@ -5,10 +5,21 @@ Reflectometry Changes
 .. contents:: Table of Contents
    :local:
 
+Reflectometry Instruments
+--------------------------
+
+An updated version of the OFFSPEC IDF is now being used in mantid `#15561 <https://github.com/mantidproject/mantid/pull/15561>`_
+   
 ConvertToReflectometryQ
 -----------------------
 
 - A bug producing dark regions in *QxQz* maps was fixed `#15321 <https://github.com/mantidproject/mantid/pull/15321>`_
+
+ReflectometryReductionOne
+-------------------------
+
+- Transmission corrections options are now applicable with both PointDetectorAnalysis and MultiDetectorAnalysis modes as long as a first 
+  transmission workspace has been provided. `#15683 <https://github.com/mantidproject/mantid/pull/15683>`_
 
 Reflectometry Reduction Interface
 ---------------------------------
@@ -27,6 +38,5 @@ ISIS Reflectometry
   were being added to the values of Lambda min and max causing the calculation of the Qrange to be affected.
   `#15143 <https://github.com/mantidproject/mantid/pull/15143>`_
 
-|
 
 `Full list of changes on github <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Reflectometry%22>`__

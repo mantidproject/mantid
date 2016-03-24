@@ -168,6 +168,7 @@
            </property>
            <property name="font">
             <font>
+             <family>Segoe UI</family>
              <pointsize>10</pointsize>
              <weight>50</weight>
              <bold>false</bold>
@@ -1074,6 +1075,35 @@ The mask information is saved separately so that your data file will NOT be modi
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>runnumbers_edit</tabstop>
+  <tabstop>sum_checkbox</tabstop>
+  <tabstop>calfile_edit</tabstop>
+  <tabstop>calfile_browse</tabstop>
+  <tabstop>charfile_edit</tabstop>
+  <tabstop>charfile_browse</tabstop>
+  <tabstop>lineEdit_expIniFile</tabstop>
+  <tabstop>pushButton_browseExpIniFile</tabstop>
+  <tabstop>outputdir_edit</tabstop>
+  <tabstop>outputdir_browse</tabstop>
+  <tabstop>saveas_combo</tabstop>
+  <tabstop>unit_combo</tabstop>
+  <tabstop>emptyrun_edit</tabstop>
+  <tabstop>disablebkgdcorr_chkbox</tabstop>
+  <tabstop>vanrun_edit</tabstop>
+  <tabstop>disablevancorr_chkbox</tabstop>
+  <tabstop>vanbkgdrun_edit</tabstop>
+  <tabstop>disablevanbkgdcorr_chkbox</tabstop>
+  <tabstop>usebin_button</tabstop>
+  <tabstop>binning_edit</tabstop>
+  <tabstop>resamplex_button</tabstop>
+  <tabstop>resamplex_edit</tabstop>
+  <tabstop>binind_checkbox</tabstop>
+  <tabstop>bintype_combo</tabstop>
+  <tabstop>tofmin_edit</tabstop>
+  <tabstop>tofmax_edit</tabstop>
+  <tabstop>scrollArea</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

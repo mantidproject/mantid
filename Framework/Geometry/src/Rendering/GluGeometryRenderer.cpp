@@ -136,8 +136,7 @@ void GluGeometryRenderer::CreateCube(const V3D &Point1, const V3D &Point2,
                  .cross_prod((vertex[row[0]] - vertex[row[2]]));
     normal.normalize();
     glNormal3d(normal[0], normal[1], normal[2]);
-    for (int j = 0; j < 4; j++) {
-      int ij = row[j];
+    for (const int ij : row) {
       if (ij == 0)
         glTexCoord2i(0, 0);
       if (ij == 1)

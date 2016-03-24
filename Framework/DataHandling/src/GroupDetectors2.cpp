@@ -148,7 +148,7 @@ void GroupDetectors2::exec() {
   const size_t numUnGrouped = keepAll ? unGroupedSet.size() - 1 : 0;
 
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(
-      inputWS, m_GroupSpecInds.size() + numUnGrouped, inputWS->readX(0).size(),
+      inputWS, m_GroupWsInds.size() + numUnGrouped, inputWS->readX(0).size(),
       inputWS->blocksize());
 
   // prepare to move the requested histograms into groups, first estimate how
@@ -214,7 +214,7 @@ void GroupDetectors2::execEvent() {
   // Make a brand new EventWorkspace
   EventWorkspace_sptr outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
       WorkspaceFactory::Instance().create(
-          "EventWorkspace", m_GroupSpecInds.size() + numUnGrouped,
+          "EventWorkspace", m_GroupWsInds.size() + numUnGrouped,
           inputWS->readX(0).size(), inputWS->blocksize()));
   // Copy geometry over.
   WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, true);
@@ -258,7 +258,7 @@ void GroupDetectors2::execEvent() {
 void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
                                 std::vector<int64_t> &unUsedSpec) {
   // this is the map that we are going to fill
-  m_GroupSpecInds.clear();
+  m_GroupWsInds.clear();
 
   // There are several properties that may contain the user data go through them
   // in order of precedence
@@ -334,7 +334,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
 
   // only look at these other parameters if the file wasn't set
   if (!spectraList.empty()) {
-    m_GroupSpecInds[0] = workspace->getIndicesFromSpectra(spectraList);
+    m_GroupWsInds[0] = workspace->getIndicesFromSpectra(spectraList);
     g_log.debug() << "Converted " << spectraList.size()
                   << " spectra numbers into spectra indices to be combined\n";
   } else { // go through the rest of the properties in order of decreasing
@@ -342,18 +342,18 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
     if (!detectorList.empty()) {
       // we are going to group on the basis of detector IDs, convert from
       // detectors to workspace indices
-      m_GroupSpecInds[0] = workspace->getIndicesFromDetectorIDs(detectorList);
-      g_log.debug() << "Found " << m_GroupSpecInds[0].size()
+      m_GroupWsInds[0] = workspace->getIndicesFromDetectorIDs(detectorList);
+      g_log.debug() << "Found " << m_GroupWsInds[0].size()
                     << " spectra indices from the list of "
                     << detectorList.size() << " detectors\n";
     } else if (!indexList.empty()) {
-      m_GroupSpecInds[0] = indexList;
-      g_log.debug() << "Read in " << m_GroupSpecInds[0].size()
+      m_GroupWsInds[0] = indexList;
+      g_log.debug() << "Read in " << m_GroupWsInds[0].size()
                     << " spectra indices to be combined\n";
     }
     // check we don't have an index that is too high for the workspace
     size_t maxIn = static_cast<size_t>(workspace->getNumberHistograms() - 1);
-    auto indices0 = m_GroupSpecInds[0];
+    auto indices0 = m_GroupWsInds[0];
     auto it = indices0.begin();
     for (; it != indices0.end(); ++it) {
       if (*it > maxIn) {
@@ -366,7 +366,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
     }
   }
 
-  if (m_GroupSpecInds[0].empty()) {
+  if (m_GroupWsInds[0].empty()) {
     g_log.information() << name() << ": File, WorkspaceIndexList, SpectraList, "
                                      "and DetectorList properties are all "
                                      "empty\n";
@@ -376,10 +376,10 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
 
   // up date unUsedSpec, this is used to find duplicates and when the user has
   // set KeepUngroupedSpectra
-  auto indices0 = m_GroupSpecInds[0];
+  auto indices0 = m_GroupWsInds[0];
   auto index = indices0.begin();
   for (; index != indices0.end();
-       ++index) { // the vector<int> m_GroupSpecInds[0] must not index contain
+       ++index) { // the vector<int> m_GroupWsInds[0] must not index contain
                   // numbers that don't exist in the workspaace
     if (unUsedSpec[*index] != USED) {
       unUsedSpec[*index] = USED;
@@ -444,10 +444,10 @@ void GroupDetectors2::processFile(std::string fname,
     bool ignoreGroupNo = getProperty("IgnoreGroupNumber");
     readFile(specs2index, File, lineNum, unUsedSpec, ignoreGroupNo);
 
-    if (m_GroupSpecInds.size() != static_cast<size_t>(totalNumberOfGroups)) {
+    if (m_GroupWsInds.size() != static_cast<size_t>(totalNumberOfGroups)) {
       g_log.warning() << "The input file header states there are "
                       << totalNumberOfGroups << " but the file contains "
-                      << m_GroupSpecInds.size() << " groups\n";
+                      << m_GroupWsInds.size() << " groups\n";
     }
   }
   // add some more info to the error messages, including the line number, to
@@ -475,8 +475,8 @@ void GroupDetectors2::processFile(std::string fname,
   }
   File.close();
   g_log.debug() << "Closed file " << fname << " after reading in "
-                << m_GroupSpecInds.size() << " groups\n";
-  m_FracCompl += fileReadProg(m_GroupSpecInds.size(), specs2index.size());
+                << m_GroupWsInds.size() << " groups\n";
+  m_FracCompl += fileReadProg(m_GroupWsInds.size(), specs2index.size());
   return;
 }
 
@@ -511,9 +511,9 @@ void GroupDetectors2::processXMLFile(std::string fname,
   std::map<int, std::vector<int>> mGroupSpectraMap =
       loader.getGroupSpectraMap();
 
-  // 3. Build m_GroupSpecInds
+  // 3. Build m_GroupWsInds
   for (const auto &det : mGroupDetectorsMap) {
-    m_GroupSpecInds.emplace(det.first, std::vector<size_t>());
+    m_GroupWsInds.emplace(det.first, std::vector<size_t>());
   }
 
   // 4. Detector IDs
@@ -521,8 +521,8 @@ void GroupDetectors2::processXMLFile(std::string fname,
     int groupid = det.first;
     const std::vector<detid_t> &detids = det.second;
 
-    auto sit = m_GroupSpecInds.find(groupid);
-    if (sit == m_GroupSpecInds.end())
+    auto sit = m_GroupWsInds.find(groupid);
+    if (sit == m_GroupWsInds.end())
       continue;
 
     std::vector<size_t> &wsindexes = sit->second;
@@ -549,8 +549,8 @@ void GroupDetectors2::processXMLFile(std::string fname,
     std::vector<int> spectra = pit->second;
 
     storage_map::iterator sit;
-    sit = m_GroupSpecInds.find(groupid);
-    if (sit == m_GroupSpecInds.end())
+    sit = m_GroupWsInds.find(groupid);
+    if (sit == m_GroupWsInds.end())
       continue;
 
     std::vector<size_t> &wsindexes = sit->second;
@@ -630,13 +630,13 @@ void GroupDetectors2::processGroupingWorkspace(
     }
   }
 
-  // Build m_GroupSpecInds (group -> list of ws indices)
+  // Build m_GroupWsInds (group -> list of ws indices)
   for (auto &dit : group2WSIndexSetmap) {
     size_t groupid = dit.first;
     std::set<size_t> &targetWSIndexSet = dit.second;
     std::vector<size_t> tempv;
     tempv.assign(targetWSIndexSet.begin(), targetWSIndexSet.end());
-    m_GroupSpecInds.insert(
+    m_GroupWsInds.insert(
         std::make_pair(static_cast<specnum_t>(groupid), tempv));
   }
 
@@ -697,14 +697,14 @@ void GroupDetectors2::processMatrixWorkspace(
     }
   }
 
-  // Build m_GroupSpecInds (group -> list of ws indices)
+  // Build m_GroupWsInds (group -> list of ws indices)
   for (auto &dit : group2WSIndexSetmap) {
     size_t groupid = dit.first;
     std::set<size_t> &targetWSIndexSet = dit.second;
     if (!targetWSIndexSet.empty()) {
       std::vector<size_t> tempv;
       tempv.assign(targetWSIndexSet.begin(), targetWSIndexSet.end());
-      m_GroupSpecInds.insert(
+      m_GroupWsInds.insert(
           std::make_pair(static_cast<specnum_t>(groupid), tempv));
     }
   }
@@ -801,7 +801,7 @@ void GroupDetectors2::readFile(spec2index_map &specs2index, std::istream &File,
 
     // the value of this map is the list of spectra numbers that will be
     // combined into a group
-    m_GroupSpecInds[spectrumNo].reserve(numberOfSpectra);
+    m_GroupWsInds[spectrumNo].reserve(numberOfSpectra);
     do {
       if (!File)
         throw std::invalid_argument("Premature end of file, found number of "
@@ -809,11 +809,11 @@ void GroupDetectors2::readFile(spec2index_map &specs2index, std::istream &File,
                                     "list");
       std::getline(File, thisLine), lineNum++;
       // the spectra numbers that will be included in the group
-      readSpectraIndexes(thisLine, specs2index, m_GroupSpecInds[spectrumNo],
+      readSpectraIndexes(thisLine, specs2index, m_GroupWsInds[spectrumNo],
                          unUsedSpec);
-    } while (static_cast<int>(m_GroupSpecInds[spectrumNo].size()) <
+    } while (static_cast<int>(m_GroupWsInds[spectrumNo].size()) <
              numberOfSpectra);
-    if (static_cast<int>(m_GroupSpecInds[spectrumNo].size()) !=
+    if (static_cast<int>(m_GroupWsInds[spectrumNo].size()) !=
         numberOfSpectra) { // it makes no sense to continue reading the file,
                            // we'll stop here
       throw std::invalid_argument(
@@ -822,8 +822,8 @@ void GroupDetectors2::readFile(spec2index_map &specs2index, std::istream &File,
           boost::lexical_cast<std::string>(lineNum));
     }
     // make regular progress reports and check for a cancellation notification
-    if ((m_GroupSpecInds.size() % INTERVAL) == 1) {
-      fileReadProg(m_GroupSpecInds.size(), specs2index.size());
+    if ((m_GroupWsInds.size() % INTERVAL) == 1) {
+      fileReadProg(m_GroupWsInds.size(), specs2index.size());
     }
   }
 }
@@ -922,10 +922,10 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
     bhv = 1;
 
   API::MatrixWorkspace_sptr beh = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", static_cast<int>(m_GroupSpecInds.size()), 1, 1);
+      "Workspace2D", static_cast<int>(m_GroupWsInds.size()), 1, 1);
 
   g_log.debug() << name() << ": Preparing to group spectra into "
-                << m_GroupSpecInds.size() << " groups\n";
+                << m_GroupWsInds.size() << " groups\n";
 
   // where we are copying spectra to, we start copying to the start of the
   // output workspace
@@ -933,8 +933,8 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
   // Only used for averaging behaviour. We may have a 1:1 map where a Divide
   // would be waste as it would be just dividing by 1
   bool requireDivide(false);
-  for (storage_map::const_iterator it = m_GroupSpecInds.begin();
-       it != m_GroupSpecInds.end(); ++it) {
+  for (storage_map::const_iterator it = m_GroupWsInds.begin();
+       it != m_GroupWsInds.end(); ++it) {
     // This is the grouped spectrum
     ISpectrum *outSpec = outputWS->getSpectrum(outIndex);
 
@@ -1032,10 +1032,10 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
     bhv = 1;
 
   API::MatrixWorkspace_sptr beh = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", static_cast<int>(m_GroupSpecInds.size()), 1, 1);
+      "Workspace2D", static_cast<int>(m_GroupWsInds.size()), 1, 1);
 
   g_log.debug() << name() << ": Preparing to group spectra into "
-                << m_GroupSpecInds.size() << " groups\n";
+                << m_GroupWsInds.size() << " groups\n";
 
   // where we are copying spectra to, we start copying to the start of the
   // output workspace
@@ -1043,8 +1043,8 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
   // Only used for averaging behaviour. We may have a 1:1 map where a Divide
   // would be waste as it would be just dividing by 1
   bool requireDivide(false);
-  for (storage_map::const_iterator it = m_GroupSpecInds.begin();
-       it != m_GroupSpecInds.end(); ++it) {
+  for (storage_map::const_iterator it = m_GroupWsInds.begin();
+       it != m_GroupWsInds.end(); ++it) {
     // This is the grouped spectrum
     EventList &outEL = outputWS->getEventList(outIndex);
 
