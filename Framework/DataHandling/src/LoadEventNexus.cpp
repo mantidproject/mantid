@@ -1550,6 +1550,15 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     loadLogs->setPropertyValue("Filename", nexusfilename);
     loadLogs->setProperty<API::MatrixWorkspace_sptr>("Workspace",
                                                      localWorkspace);
+    try{
+    alg.getLogger().error("trying log "+alg.name());
+    alg.getLogger().error("EN: "+alg.getPropertyValue("NXEntryName"));
+    loadLogs->setPropertyValue("EntryName",alg.getPropertyValue("NXEntryName"));
+    } catch(...)
+    {
+
+    }
+
     loadLogs->execute();
 
     const Run &run = localWorkspace->run();
