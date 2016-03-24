@@ -16,11 +16,11 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 
-#include <vector>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -79,6 +79,27 @@ ReflMainViewPresenter::ReflMainViewPresenter(
     m_view->setInstrumentList(instruments, "INTER");
     m_tablePresenter->setInstrumentList(instruments, "INTER");
   }
+
+  // Push the list of commands to the view
+  // The expected number of commands
+  const size_t nCommands = 25;
+  auto commands = std::move(m_tablePresenter->publishCommands());
+  if (commands.size() != nCommands) {
+    throw std::runtime_error("Invalid list of commands");
+  }
+  // The index at which "row" commands start
+  const size_t rowCommStart = 9;
+  // We want to have two menus
+  // Populate the "Reflectometry" menu
+  std::vector<ReflCommandBase_uptr> tableCommands;
+  for (size_t i = 0; i < rowCommStart; i++)
+    tableCommands.push_back(std::move(commands[i]));
+  m_view->setTableCommands(std::move(tableCommands));
+  // Populate the "Edit" menu
+  std::vector<ReflCommandBase_uptr> rowCommands;
+  for (size_t i = rowCommStart; i < nCommands; i++)
+    rowCommands.push_back(std::move(commands[i]));
+  m_view->setRowCommands(std::move(rowCommands));
 }
 
 ReflMainViewPresenter::~ReflMainViewPresenter() {}

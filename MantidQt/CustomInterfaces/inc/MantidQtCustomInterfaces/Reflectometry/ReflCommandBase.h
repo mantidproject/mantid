@@ -47,6 +47,7 @@ public:
   virtual void execute() = 0;
   virtual std::string name() = 0;
   virtual std::string icon() = 0;
+  virtual bool isSeparator() final { return name().empty() && icon().empty(); }
 
 protected:
   IReflTablePresenter *const m_tablePresenter;

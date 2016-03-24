@@ -68,11 +68,6 @@ void QtReflMainView::initLayout() {
       this /*main view*/, ui.qReflTableView->getTablePresenter().get(),
       this /*currently this concrete view is also responsibile for prog reporting*/);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
-
-  // Adds actions (New Table, Save Table, ...) to the "Reflectometry" menu
-  createReflectometryActions();
-  // Adds actions (Process, Expand Selection, ...) to the "Edit" menu
-  createEditActions();
 }
 
 /**
@@ -88,60 +83,27 @@ void QtReflMainView::addToMenu(QMenu *menu, ReflCommandBase_uptr command) {
 
 /**
 * Adds actions to the "Reflectometry" menu
+* @param tableCommands : [input] The list of commands to add to the
+* "Reflectometry" menu
 */
-void QtReflMainView::createReflectometryActions() {
+void QtReflMainView::setTableCommands(
+    std::vector<ReflCommandBase_uptr> tableCommands) {
 
-  auto commands = ui.qReflTableView->getTablePresenter()->publishCommands();
-
-  if (commands.size() != 19)
-    throw std::runtime_error("Invalid number of commands");
-
-  // New Table, Save Table, Save Table As
-  addToMenu(ui.menuTable, std::move(commands.at(1)));
-  addToMenu(ui.menuTable, std::move(commands.at(2)));
-  addToMenu(ui.menuTable, std::move(commands.at(3)));
-  ui.menuTable->addSeparator();
-  // Import .TBL, Export .TBL
-  addToMenu(ui.menuTable, std::move(commands.at(4)));
-  addToMenu(ui.menuTable, std::move(commands.at(5)));
-  ui.menuTable->addSeparator();
-  // Options
-  addToMenu(ui.menuTable, std::move(commands.at(6)));
+  for (auto &command : tableCommands) {
+    addToMenu(ui.menuTable, std::move(command));
+  }
 }
 
 /**
 * Adds actions to the "Edit" menu
+* @param rowCommands : [input] The list of commands to add to the "Edit" menu
 */
-void QtReflMainView::createEditActions() {
+void QtReflMainView::setRowCommands(
+    std::vector<ReflCommandBase_uptr> rowCommands) {
 
-  // Options in the "Edit" menu
-  auto commands = ui.qReflTableView->getTablePresenter()->publishCommands();
-
-  if (commands.size() != 19)
-    throw std::runtime_error("Invalid number of commands");
-
-  // Process, Expand Selection
-  addToMenu(ui.menuRows, std::move(commands.at(7)));
-  addToMenu(ui.menuRows, std::move(commands.at(8)));
-  ui.menuRows->addSeparator();
-  // Plot Selected Rows, Plot Selected Groups
-  addToMenu(ui.menuRows, std::move(commands.at(9)));
-  addToMenu(ui.menuRows, std::move(commands.at(10)));
-  ui.menuRows->addSeparator();
-  // Insert Row Before, Insert Row After
-  addToMenu(ui.menuRows, std::move(commands.at(11)));
-  addToMenu(ui.menuRows, std::move(commands.at(12)));
-  ui.menuRows->addSeparator();
-  // Group Selected, Copy Selected, Cut Selected
-  // Paste Selected, Clear Selected
-  addToMenu(ui.menuRows, std::move(commands.at(13)));
-  addToMenu(ui.menuRows, std::move(commands.at(14)));
-  addToMenu(ui.menuRows, std::move(commands.at(15)));
-  addToMenu(ui.menuRows, std::move(commands.at(16)));
-  addToMenu(ui.menuRows, std::move(commands.at(17)));
-  ui.menuRows->addSeparator();
-  // Delete Row
-  addToMenu(ui.menuRows, std::move(commands.at(18)));
+  for (auto &command : rowCommands) {
+    addToMenu(ui.menuRows, std::move(command));
+  }
 }
 /**
 * Set all possible tranfer methods

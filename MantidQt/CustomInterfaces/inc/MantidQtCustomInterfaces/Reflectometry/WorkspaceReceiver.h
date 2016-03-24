@@ -3,6 +3,7 @@
 
 #include <set>
 #include <string>
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCommandBase.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

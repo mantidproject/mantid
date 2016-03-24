@@ -46,6 +46,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSaveTableAsCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSaveTableCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflSeparatorCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/WorkspaceReceiver.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
@@ -1629,20 +1630,26 @@ std::vector<ReflCommandBase_uptr> ReflTableViewPresenter::publishCommands() {
   addToCommand(commands, make_unique<ReflNewTableCommand>(this));
   addToCommand(commands, make_unique<ReflSaveTableCommand>(this));
   addToCommand(commands, make_unique<ReflSaveTableAsCommand>(this));
+  addToCommand(commands, make_unique<ReflSeparatorCommand>(this));
   addToCommand(commands, make_unique<ReflImportTableCommand>(this));
   addToCommand(commands, make_unique<ReflExportTableCommand>(this));
+  addToCommand(commands, make_unique<ReflSeparatorCommand>(this));
   addToCommand(commands, make_unique<ReflOptionsCommand>(this));
   addToCommand(commands, make_unique<ReflProcessCommand>(this));
   addToCommand(commands, make_unique<ReflExpandCommand>(this));
+  addToCommand(commands, make_unique<ReflSeparatorCommand>(this));
   addToCommand(commands, make_unique<ReflPlotRowCommand>(this));
   addToCommand(commands, make_unique<ReflPlotGroupCommand>(this));
+  addToCommand(commands, make_unique<ReflSeparatorCommand>(this));
   addToCommand(commands, make_unique<ReflAppendRowCommand>(this));
   addToCommand(commands, make_unique<ReflPrependRowCommand>(this));
+  addToCommand(commands, make_unique<ReflSeparatorCommand>(this));
   addToCommand(commands, make_unique<ReflGroupRowsCommand>(this));
   addToCommand(commands, make_unique<ReflCopySelectedCommand>(this));
   addToCommand(commands, make_unique<ReflCutSelectedCommand>(this));
   addToCommand(commands, make_unique<ReflPasteSelectedCommand>(this));
   addToCommand(commands, make_unique<ReflClearSelectedCommand>(this));
+  addToCommand(commands, make_unique<ReflSeparatorCommand>(this));
   addToCommand(commands, make_unique<ReflDeleteRowCommand>(this));
 
   return commands;
@@ -1651,8 +1658,7 @@ std::vector<ReflCommandBase_uptr> ReflTableViewPresenter::publishCommands() {
 /** Register a workspace receiver
 * @param workspaceReceiver : [input] The outer presenter
 */
-void ReflTableViewPresenter::accept(
-    WorkspaceReceiver *workspaceReceiver) {
+void ReflTableViewPresenter::accept(WorkspaceReceiver *workspaceReceiver) {
   m_workspaceReceiver = workspaceReceiver;
 }
 

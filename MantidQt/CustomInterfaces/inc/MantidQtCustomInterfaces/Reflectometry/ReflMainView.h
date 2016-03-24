@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCommandBase.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 
 #include <set>
@@ -59,6 +60,10 @@ public:
                                  const std::string &defaultInstrument) = 0;
   virtual void setTransferMethods(const std::set<std::string> &methods) = 0;
   virtual void setTableList(const std::set<std::string> &tables) = 0;
+  virtual void
+  setTableCommands(std::vector<ReflCommandBase_uptr> tableCommands) = 0;
+  virtual void
+  setRowCommands(std::vector<ReflCommandBase_uptr> rowCommands) = 0;
 
   // Accessor methods
   virtual std::set<int> getSelectedSearchRows() const = 0;

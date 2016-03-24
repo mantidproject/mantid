@@ -1,16 +1,15 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLCOMMANDADAPTER_H
-#define MANTID_CUSTOMINTERFACES_REFLCOMMANDADAPTER_H
+#ifndef MANTID_CUSTOMINTERFACES_REFLSEPARATORCOMMAND_H
+#define MANTID_CUSTOMINTERFACES_REFLSEPARATORCOMMAND_H
 
+#include "MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflCommandBase.h"
-#include <QObject>
-#include <qmenu.h>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class ReflCommandAdapter
+/** @class ReflSeparatorCommand
 
-ReflCommandAdapter is an adapter that allows ReflCommands to be treated as
-QObjects for signals.
+ReflSeparatorCommand defines a separator. It has no name, no icon and empty
+execute() method
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -33,25 +32,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ReflCommandAdapter : public QObject {
-  Q_OBJECT
+class ReflSeparatorCommand : public ReflCommandBase {
 public:
-  ReflCommandAdapter(QMenu *menu, ReflCommandBase_sptr adaptee)
-      : m_adaptee(adaptee) {
+  ReflSeparatorCommand(IReflTablePresenter *tablePresenter)
+      : ReflCommandBase(tablePresenter){};
+  virtual ~ReflSeparatorCommand(){};
 
-    QAction *action =
-        new QAction(QString::fromStdString(m_adaptee->name()), this);
-    action->setIcon(QIcon(QString::fromStdString(m_adaptee->icon())));
-    action->setSeparator(m_adaptee->isSeparator());
-    menu->addAction(action);
-    connect(action, SIGNAL(triggered()), this, SLOT(call()));
-  };
-public slots:
-  void call() { m_adaptee->execute(); }
-
-private:
-  ReflCommandBase_sptr m_adaptee;
+  void execute() override{};
+  std::string name() override { return std::string(); }
+  std::string icon() override { return std::string(); }
 };
 }
 }
-#endif /*MANTID_CUSTOMINTERFACES_REFLCOMMANDADAPTER_H*/
+#endif /*MANTID_CUSTOMINTERFACES_REFLSEPARATORCOMMAND_H*/
