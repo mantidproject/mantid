@@ -628,8 +628,8 @@ public:
     const std::string ws_name = "__CutMDTest_unitstest";
     auto ws_temp = makeWorkspaceWithSpecifiedUnits("Angstrom^-1", ws_name);
     TSM_ASSERT_EQUALS(
-      "Input workspace dimensions have units of inverse angstroms",
-      ws_temp->getDimension(0)->getUnits().ascii(), "Angstrom^-1");
+        "Input workspace dimensions have units of inverse angstroms",
+        ws_temp->getDimension(0)->getUnits().ascii(), "Angstrom^-1");
 
     auto proj = createProjection("a");
 
@@ -685,7 +685,8 @@ public:
     TS_ASSERT_EQUALS(outWS->getDimension(0)->getName(), "['zeta', 0, 0]")
     TS_ASSERT_EQUALS(outWS->getDimension(1)->getName(), "[0, 'eta', 0]")
     TS_ASSERT_EQUALS(outWS->getDimension(2)->getName(), "[0, 0, 'xi']")
-    TSM_ASSERT_EQUALS("Output workspace unit label should show scaling from conversion to RLU",
+    TSM_ASSERT_EQUALS("Output workspace unit label should show scaling from "
+                      "conversion to RLU",
                       outWS->getDimension(0)->getUnits().ascii(), "in 3.14A^-1")
 
     // Clean up
