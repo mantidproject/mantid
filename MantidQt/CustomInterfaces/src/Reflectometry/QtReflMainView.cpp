@@ -82,11 +82,8 @@ void QtReflMainView::initLayout() {
 */
 void QtReflMainView::addToMenu(QMenu *menu, ReflCommandBase_uptr command) {
 
-  QAction *action = new QAction(QString::fromStdString(command->name()), this);
-  action->setIcon(QIcon(QString::fromStdString(command->icon())));
-  menu->addAction(action);
-  ReflCommandAdapter *adapter = new ReflCommandAdapter(std::move(command));
-  connect(action, SIGNAL(triggered()), adapter, SLOT(call()));
+  ReflCommandAdapter *adapter =
+      new ReflCommandAdapter(menu, std::move(command));
 }
 
 /**

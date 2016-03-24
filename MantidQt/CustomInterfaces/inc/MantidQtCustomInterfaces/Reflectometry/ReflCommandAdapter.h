@@ -3,13 +3,14 @@
 
 #include "MantidQtCustomInterfaces/Reflectometry/ReflCommandBase.h"
 #include <QObject>
+#include <qmenu.h>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 /** @class ReflCommandAdapter
 
-ReflCommandAdapter is an interface which defines the functions any data
-processor interface presenter needs to support.
+ReflCommandAdapter is an adapter that allows ReflCommands to be treated as
+QObjects for signals.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -35,12 +36,20 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class ReflCommandAdapter : public QObject {
   Q_OBJECT
 public:
-  ReflCommandAdapter(ReflCommandBase_sptr adaptee) : m_adaptee(adaptee){};
+  ReflCommandAdapter(QMenu *menu, ReflCommandBase_sptr adaptee)
+      : m_adaptee(adaptee) {
+
+    QAction *action =
+        new QAction(QString::fromStdString(m_adaptee->name()), this);
+    action->setIcon(QIcon(QString::fromStdString(m_adaptee->icon())));
+    menu->addAction(action);
+    connect(action, SIGNAL(triggered()), this, SLOT(call()));
+  };
 public slots:
   void call() { m_adaptee->execute(); }
 
 private:
-	ReflCommandBase_sptr m_adaptee;
+  ReflCommandBase_sptr m_adaptee;
 };
 }
 }
