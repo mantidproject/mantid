@@ -64,6 +64,12 @@ public:
   // void updateImgWithIndex(size_t idx)
   MOCK_METHOD1(updateImgWithIndex, void(size_t));
 
+  // void playStart( idx)
+  MOCK_METHOD0(playStart, void());
+
+  // void playStop()
+  MOCK_METHOD0(playStop, void());
+
   // float currentRotationAngle() const
   MOCK_CONST_METHOD0(currentRotationAngle, float());
 
