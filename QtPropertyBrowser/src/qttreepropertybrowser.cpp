@@ -591,9 +591,10 @@ void QtTreePropertyBrowserPrivate::init(QWidget *parent, const QStringList &opti
     labels.append(QApplication::translate("QtTreePropertyBrowser", "Property", 0, QApplication::UnicodeUTF8));
     labels.append(QApplication::translate("QtTreePropertyBrowser", "Value", 0, QApplication::UnicodeUTF8));
     // add optional columns
-    for(auto opt = m_options.begin(); opt != m_options.end(); ++opt)
-    {
-      labels.append(QApplication::translate("QtTreePropertyBrowser", *opt, 0, QApplication::UnicodeUTF8));
+    foreach (auto opt, m_options) {
+      labels.append(QApplication::translate("QtTreePropertyBrowser",
+                                            opt.toStdString().c_str(), 0,
+                                            QApplication::UnicodeUTF8));
     }
     m_treeWidget->setHeaderLabels(labels);
     m_treeWidget->setAlternatingRowColors(true);
