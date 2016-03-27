@@ -67,9 +67,13 @@ private:
   void massProfile(double *result, const size_t nData,
                    const double amplitude) const;
 
-  double integratePhi(int idx, std::vector<double> &s2Cache, double y) const;
-  double calculateIntegrand(int idx, std::vector<double> &s2Cache,
-                            double y) const;
+  double calculateJ(std::vector<double> s2Cache, double y) const;
+
+  double intervalCoeff(int i, int j) const;
+
+  inline double calculateJIntegrand(double s2, double y) const {
+    return s2 * exp(-(y * y) / (2.0 * s2));
+  }
 
   int m_integrationSteps; //!< Number of steps to perform during integration
   double m_thetaStep;     //!< Delta theta in integration

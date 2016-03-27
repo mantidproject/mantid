@@ -57,9 +57,14 @@ void MultivariateGaussianComptonProfile::setAttribute(const std::string &name,
   ComptonProfile::setAttribute(name, value);
   if (name == STEPS_ATTR) {
     int steps = value.asInt();
+
     if (steps < 1)
       throw std::runtime_error(std::string(STEPS_ATTR) +
                                " attribute must be positive and non-zero");
+
+    if (steps % 2 == 1)
+      throw std::runtime_error(std::string(STEPS_ATTR) +
+                               " attribute must be an even number");
 
     m_integrationSteps = steps;
     m_thetaStep = M_PI / steps;
@@ -114,48 +119,46 @@ void MultivariateGaussianComptonProfile::massProfile(
   const double sigmaY(getParameter(SIGMA_Y_PARAM));
   const double sigmaZ(getParameter(SIGMA_Z_PARAM));
 
-  const double prefactor =
+  const double prefactorJ =
       (1.0 / (sqrt(2.0 * M_PI) * sigmaX * sigmaY * sigmaZ)) * (2.0 / M_PI);
+
   const auto &yspace = ySpace();
 
   for (size_t i = 0; i < nData; i++) {
     double y = yspace[i];
-
-    double sum = 0.0;
-
-    for (int j = 0; j < m_integrationSteps; j++) {
-      int thetaIdx = (m_integrationSteps + 1) * j;
-      sum += (integratePhi(thetaIdx, s2Cache, y) +
-              integratePhi(thetaIdx + (m_integrationSteps + 1), s2Cache, y)) *
-             0.5;
-    }
-
-    sum *= m_thetaStep;
-
-    result[i] = amplitude * prefactor * sum;
+    double j = prefactorJ * calculateJ(s2Cache, y);
+    result[i] = amplitude * j;
   }
 }
 
-double MultivariateGaussianComptonProfile::integratePhi(
-    int idx, std::vector<double> &s2Cache, double y) const {
-  double sum = 0.0;
+double
+MultivariateGaussianComptonProfile::calculateJ(std::vector<double> s2Cache,
+                                               double y) const {
+  double sum(0.0);
 
   for (int i = 0; i < m_integrationSteps; i++) {
-    sum += (calculateIntegrand(idx + i, s2Cache, y) +
-            calculateIntegrand(idx + i + 1, s2Cache, y)) *
-           0.5;
+    for (int j = 0; j < m_integrationSteps; j++) {
+      double s2 = s2Cache[i * m_integrationSteps + j];
+      sum += intervalCoeff(i, j) * calculateJIntegrand(s2, y);
+    }
   }
 
-  sum *= m_phiStep;
+  double fact = (m_thetaStep * m_phiStep) / 9.0;
 
-  return sum;
+  return fact * sum;
 }
 
-double MultivariateGaussianComptonProfile::calculateIntegrand(
-    int idx, std::vector<double> &s2Cache, double y) const {
-  double s2 = s2Cache[idx];
-  double i = s2 * exp(-(y * y) / (2.0 * s2));
-  return i;
+double MultivariateGaussianComptonProfile::intervalCoeff(int i, int j) const {
+  double a = 1.0;
+  double b = 1.0;
+
+  if (i > 0 && i <= m_integrationSteps)
+    a = i % 2 == 1 ? 4 : 2;
+
+  if (j > 0 && j <= m_integrationSteps)
+    b = j % 2 == 1 ? 4 : 2;
+
+  return a * b;
 }
 
 /**

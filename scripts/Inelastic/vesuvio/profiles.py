@@ -177,7 +177,7 @@ class GaussianMassProfile(MassProfile):
 class MultivariateGaussianMassProfile(MassProfile):
 
     cfunction = "MultivariateGaussianComptonProfile"
-    integration_steps = 35
+    integration_steps = 64
 
     def __init__(self, width, mass, sigma_x = 1.0, sigma_y = 1.0, sigma_z = 1.0):
         super(MultivariateGaussianMassProfile, self).__init__(width, mass)
