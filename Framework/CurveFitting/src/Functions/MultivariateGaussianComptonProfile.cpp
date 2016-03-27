@@ -34,6 +34,7 @@ std::string MultivariateGaussianComptonProfile::name() const {
 /**
  */
 void MultivariateGaussianComptonProfile::declareParameters() {
+  ComptonProfile::declareParameters();
   declareParameter(AMP_PARAM, 1.0, "Gaussian intensity parameter");
   declareParameter(SIGMA_X_PARAM, 1.0, "Sigma X parameter");
   declareParameter(SIGMA_Y_PARAM, 1.0, "Sigma Y parameter");
