@@ -169,6 +169,18 @@ public:
                       uniquePeriods.size());
   }
 
+  void test_log_non_default_entry() {
+    auto testWS = createTestWorkspace();
+    LoadNexusLogs loader;
+
+    loader.setChild(true);
+    loader.initialize();
+    loader.setProperty("Workspace", testWS);
+    loader.setPropertyValue("Filename", "REF_M_9709_event.nxs");
+    loader.execute();
+    auto run = testWS->run();
+  }
+
 private:
   API::MatrixWorkspace_sptr createTestWorkspace() {
     return WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
