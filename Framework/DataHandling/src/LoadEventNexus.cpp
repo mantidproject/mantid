@@ -1551,7 +1551,7 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     loadLogs->setProperty<API::MatrixWorkspace_sptr>("Workspace",
                                                      localWorkspace);
     try{
-    loadLogs->setPropertyValue("EntryName",alg.getPropertyValue("NXEntryName"));
+    loadLogs->setPropertyValue("NXentryName",alg.getPropertyValue("NXentryName"));
     } catch(...)
     {
 
