@@ -116,7 +116,6 @@ void LoadNexusLogs::exec() {
   if(entry_name.empty()) {
       entry_name = LoadTOFRawNexus::getEntryName(filename);
   }
-  g_log.error("entry name "+entry_name);
   ::NeXus::File file(filename);
   // Find the root entry
   try {
