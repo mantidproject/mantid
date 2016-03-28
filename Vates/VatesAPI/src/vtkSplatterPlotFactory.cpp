@@ -220,7 +220,6 @@ void vtkSplatterPlotFactory::doCreate(
 
 /**
  * Sort the boxes by their normalized signal in decreasing order
- * @param getSignalFunction : the function to use to get the signal
  * @param VERBOSE : if true then print when sorting happens
  */
 void vtkSplatterPlotFactory::sortBoxesByDecreasingSignal(
