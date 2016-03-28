@@ -31,6 +31,7 @@ from hfir_command_interface import Mask, MaskRectangle, MaskDetectors, MaskDetec
 from hfir_command_interface import SetAbsoluteScale, SetDirectBeamAbsoluteScale
 from hfir_command_interface import Stitch
 
+from hfir_command_interface import AzimuthalAverage as HFIRAzimuthalAverage
 #from mantid.api import AlgorithmManager
 #from mantid.kernel import Logger
 #import mantid.simpleapi as simpleapi
@@ -57,7 +58,7 @@ def SWANS(keep_events=False, property_manager=None):
                                         "SANSReduction")
     ReductionSingleton().reduction_properties["PreserveEvents"]=keep_events
     SolidAngle()
-    AzimuthalAverage()
+    HFIRAzimuthalAverage()
     if property_manager is not None:
         ReductionSingleton().set_reduction_table_name(property_manager)
 

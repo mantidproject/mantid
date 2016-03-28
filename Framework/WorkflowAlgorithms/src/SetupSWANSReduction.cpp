@@ -489,37 +489,47 @@ void SetupSWANSReduction::init() {
   // I(Q) calculation
   std::string iq1d_grp = "I(q) Calculation";
   declareProperty("DoAzimuthalAverage", true);
+  declareProperty(make_unique<ArrayProperty<double>>(
+      "IQBinning", boost::make_shared<RebinParamsValidator>(true)));
+
   auto positiveInt = boost::make_shared<BoundedValidator<int>>();
   positiveInt->setLower(0);
   declareProperty("IQNumberOfBins", 100, positiveInt,
-                  "Number of I(q) bins when binning is not specified");
+                  "Number of I(q) bins when binning is not specified.");
   declareProperty("IQLogBinning", false,
-                  "I(q) log binning when binning is not specified");
-  declareProperty("IQIndependentBinning", true, "If true and frame skipping is "
-                                                "used, each frame will have "
-                                                "its own binning");
+                  "I(q) log binning when binning is not specified.");
   declareProperty(
-      "IQScaleResults", true,
-      "If true and frame skipping is used, frame 1 will be scaled to frame 2");
-  declareProperty("ComputeResolution", false,
-                  "If true the Q resolution will be computed");
-  declareProperty("SampleApertureDiameter", 10.0,
-                  "Sample aperture diameter [mm]");
+      "IQAlignLogWithDecades", false,
+      "If true and log binning was selected, the bins will be aligned to log "
+      "decades "
+      "and the number of bins will be used as the number of bins per decade.");
+
+  declareProperty(
+      "NumberOfSubpixels", 1, positiveInt,
+      "Number of sub-pixels used for each detector pixel in each direction."
+      "The total number of sub-pixels will be NPixelDivision*NPixelDivision.");
+  declareProperty(
+      "ErrorWeighting", false,
+      "Choose whether each pixel contribution will be weighted by 1/error^2.");
+
+  // Wedge options
+  declareProperty("NumberOfWedges", 2, positiveInt,
+                  "Number of wedges to calculate.");
+  declareProperty("WedgeAngle", 30.0,
+                  "Opening angle of each wedge, in degrees.");
+  declareProperty("WedgeOffset", 0.0,
+                  "Angular offset for the wedges, in degrees.");
 
   declareProperty("Do2DReduction", true);
   declareProperty("IQ2DNumberOfBins", 100, positiveInt,
                   "Number of I(qx,qy) bins.");
 
-  // -- Define group --
   setPropertyGroup("DoAzimuthalAverage", iq1d_grp);
+  setPropertyGroup("IQBinning", iq1d_grp);
   setPropertyGroup("IQNumberOfBins", iq1d_grp);
   setPropertyGroup("IQLogBinning", iq1d_grp);
-  setPropertyGroup("IQIndependentBinning", iq1d_grp);
-  setPropertyGroup("IQScaleResults", iq1d_grp);
-  setPropertyGroup("ComputeResolution", iq1d_grp);
-  setPropertyGroup("SampleApertureDiameter", iq1d_grp);
-  setPropertyGroup("Do2DReduction", iq1d_grp);
-  setPropertyGroup("IQ2DNumberOfBins", iq1d_grp);
+  setPropertyGroup("NumberOfSubpixels", iq1d_grp);
+  setPropertyGroup("ErrorWeighting", iq1d_grp);
 
   // Outputs
   declareProperty("ProcessInfo", "", "Additional process information");
@@ -582,7 +592,6 @@ void SetupSWANSReduction::exec() {
     loadAlg->setProperty("HighTOFCut", high_TOF_cut);
   const bool preserveEvents = getProperty("PreserveEvents");
   loadAlg->setProperty("PreserveEvents", preserveEvents);
-
 
   const double sdd = getProperty("SampleDetectorDistance");
   loadAlg->setProperty("SampleDetectorDistance", sdd);
@@ -734,27 +743,34 @@ void SetupSWANSReduction::exec() {
   // Azimuthal averaging
   const bool doAveraging = getProperty("DoAzimuthalAverage");
   if (doAveraging) {
-    const std::string nBins = getPropertyValue("IQNumberOfBins");
-    const bool logBinning = getProperty("IQLogBinning");
-    const double sampleApert = getProperty("SampleApertureDiameter");
-    const bool computeResolution = getProperty("ComputeResolution");
-    const bool indepBinning = getProperty("IQIndependentBinning");
-    const bool scaleResults = getProperty("IQScaleResults");
+    const std::string binning = getPropertyValue("IQBinning");
+    const std::string n_bins = getPropertyValue("IQNumberOfBins");
+    const bool log_binning = getProperty("IQLogBinning");
+    const std::string n_subpix = getPropertyValue("NumberOfSubpixels");
+    const bool err_weighting = getProperty("ErrorWeighting");
 
-    IAlgorithm_sptr iqAlg = createChildAlgorithm("EQSANSAzimuthalAverage1D");
-    iqAlg->setPropertyValue("NumberOfBins", nBins);
-    iqAlg->setProperty("LogBinning", logBinning);
-    iqAlg->setProperty("ScaleResults", scaleResults);
-    iqAlg->setProperty("ComputeResolution", computeResolution);
-    iqAlg->setProperty("IndependentBinning", indepBinning);
-    iqAlg->setProperty("SampleApertureDiameter", sampleApert);
+    const std::string n_wedges = getPropertyValue("NumberOfWedges");
+    const double wedge_angle = getProperty("WedgeAngle");
+    const double wedge_offset = getProperty("WedgeOffset");
+    const bool align = getProperty("IQAlignLogWithDecades");
+
+    IAlgorithm_sptr iqAlg = createChildAlgorithm("SANSAzimuthalAverage1D");
+    iqAlg->setPropertyValue("Binning", binning);
+    iqAlg->setPropertyValue("NumberOfBins", n_bins);
+    iqAlg->setProperty("LogBinning", log_binning);
+    iqAlg->setPropertyValue("NumberOfSubpixels", n_subpix);
+    iqAlg->setProperty("ErrorWeighting", err_weighting);
+    iqAlg->setProperty("ComputeResolution", false);
+    iqAlg->setProperty("NumberOfWedges", n_wedges);
+    iqAlg->setProperty("WedgeAngle", wedge_angle);
+    iqAlg->setProperty("WedgeOffset", wedge_offset);
+    iqAlg->setProperty("AlignWithDecades", align);
     iqAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
-    auto iqalgProp = make_unique<AlgorithmProperty>("IQAlgorithm");
-    iqalgProp->setValue(iqAlg->toString());
-    reductionManager->declareProperty(std::move(iqalgProp));
+    auto iqAlgProp = make_unique<AlgorithmProperty>("IQAlgorithm");
+    iqAlgProp->setValue(iqAlg->toString());
+    reductionManager->declareProperty(std::move(iqAlgProp));
   }
-
   // 2D reduction
   const bool do2DReduction = getProperty("Do2DReduction");
   if (do2DReduction) {
