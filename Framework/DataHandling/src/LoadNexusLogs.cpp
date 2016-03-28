@@ -121,7 +121,8 @@ void LoadNexusLogs::exec() {
     file.openGroup(entry_name, "NXentry");
   } catch (::NeXus::Exception &) {
     throw std::invalid_argument("Unknown NeXus file format found in file '" +
-                                filename + "', or '" + entry_name + "' is not a valid NXentry");
+                                filename + "', or '" + entry_name +
+                                "' is not a valid NXentry");
   }
 
   /// Use frequency start for Monitor19 and Special1_19 logs with "No Time" for

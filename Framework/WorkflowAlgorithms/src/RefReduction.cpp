@@ -510,8 +510,8 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
       try {
         loadAlg->executeAsChildAlg();
       } catch (...) {
-          g_log.notice() << "Could not load polarization " << polarization;
-          return nullptr;
+        g_log.notice() << "Could not load polarization " << polarization;
+        return nullptr;
       }
 
       Workspace_sptr temp = loadAlg->getProperty("OutputWorkspace");
