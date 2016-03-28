@@ -93,10 +93,9 @@ void LoadNexusLogs::init() {
                                            Direction::Input),
       "If true then existing logs will be overwritten, if false they will "
       "not.");
-  declareProperty(
-      make_unique<PropertyWithValue<std::string>>("NXentryName", "",
-                                             Direction::Input),
-      "Entry in the nexus file from which to read the logs");
+  declareProperty(make_unique<PropertyWithValue<std::string>>("NXentryName", "",
+                                                              Direction::Input),
+                  "Entry in the nexus file from which to read the logs");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -110,11 +109,11 @@ void LoadNexusLogs::exec() {
   std::string filename = getPropertyValue("Filename");
   MatrixWorkspace_sptr workspace = getProperty("Workspace");
 
-  std::string entry_name= getPropertyValue("NXentryName");
+  std::string entry_name = getPropertyValue("NXentryName");
   // Find the entry name to use (normally "entry" for SNS, "raw_data_1" for
   // ISIS) if entry name is empty
-  if(entry_name.empty()) {
-      entry_name = LoadTOFRawNexus::getEntryName(filename);
+  if (entry_name.empty()) {
+    entry_name = LoadTOFRawNexus::getEntryName(filename);
   }
   ::NeXus::File file(filename);
   // Find the root entry
