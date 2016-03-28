@@ -16,6 +16,14 @@ class Detector2DView(mplgraphicsview.MplGraphicsView):
         """
         mplgraphicsview.MplGraphicsView.__init__(self, parent)
 
+        # connect the mouse motion to interact with the canvas
+        self._myCanvas.mpl_connect('button_press_event', self.on_mouse_press_event)
+        self._myCanvas.mpl_connect('button_release_event', self.on_mouse_release_event)
+        self._myCanvas.mpl_connect('motion_notify_event', self.on_mouse_motion)
+
+        # class variables
+        self._myPolygon = None
+
         return
 
     def add_roi(self):
@@ -32,10 +40,31 @@ class Detector2DView(mplgraphicsview.MplGraphicsView):
         vertex_array[3][0] = 20.
         vertex_array[3][1] = 10.
 
+        # TODO - Refactor to Mpl2DGraphicsview as draw_polygon()
+        # TODO - create an Art_ID system in Mpl2dGraphicsView to manage artists.
         p = plt.Polygon(vertex_array, fill=False, color='w')
         self._myCanvas.axes.add_artist(p)
+
+        # register
+        self._myPolygon = p
 
         # Flush...
         self._myCanvas._flush()
 
         return
+
+    def remove_roi(self):
+        """
+        Remove the rectangular for region of interest
+        :return:
+        """
+        self._myPolygon.remove()
+
+        self._myCanvas._flush()
+
+        return
+
+    def get_roi(self):
+        """
+        :return: A list for polygon0
+        """

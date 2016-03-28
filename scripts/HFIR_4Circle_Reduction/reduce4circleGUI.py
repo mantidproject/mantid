@@ -102,6 +102,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_add_peak_no_index)
         self.connect(self.ui.pushButton_addROI, QtCore.SIGNAL('clicked()'),
                      self.do_add_roi)
+        self.connect(self.ui.pushButton_cancelROI, QtCore.SIGNAL('clicked()'),
+                     self.do_del_roi)
 
         # Tab 'calculate ub matrix'
         self.connect(self.ui.pushButton_findPeak, QtCore.SIGNAL('clicked()'),
@@ -721,6 +723,14 @@ class MainWindow(QtGui.QMainWindow):
         num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
         row_number_list = range(num_rows)
         self.ui.tableWidget_peaksCalUB.delete_rows(row_number_list)
+
+        return
+
+    def do_del_roi(self):
+        """ Delete ROI
+        :return:
+        """
+        self.ui.graphicsView.remove_roi()
 
         return
 
