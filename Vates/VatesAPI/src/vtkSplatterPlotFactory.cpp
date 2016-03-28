@@ -76,6 +76,7 @@ template <typename MDE, size_t nd>
 void vtkSplatterPlotFactory::doCreate(
     typename MDEventWorkspace<MDE, nd>::sptr ws) const {
   bool VERBOSE = true;
+  CPUTimer tim;
   // Acquire a scoped read-only lock to the workspace (prevent segfault
   // from algos modifying ws)
   ReadLock lock(*ws);
@@ -89,7 +90,6 @@ void vtkSplatterPlotFactory::doCreate(
   if (new_name != m_wsName || m_buildSortedList) {
     // First we get all the boxes, up to the given depth; with or wo the
     // slice function
-    CPUTimer tim;
 
     m_sortedBoxes.clear();
     if (this->slice) {
@@ -142,7 +142,6 @@ void vtkSplatterPlotFactory::doCreate(
 
   if (VERBOSE) {
     std::cout << "numPoints                 = " << numPoints << std::endl;
-    // std::cout << "num boxes in all          = " << boxes.size() << std::endl;
     std::cout << "num boxes above zero      = " << m_sortedBoxes.size()
               << std::endl;
     std::cout << "num boxes to use          = " << num_boxes_to_use
@@ -209,8 +208,7 @@ void vtkSplatterPlotFactory::doCreate(
   if (VERBOSE) {
     std::cout << "Recorded data for all points" << std::endl;
     std::cout << "numPoints = " << numPoints << std::endl;
-    // std::cout << tim << " to create " << pointIndex << " points." <<
-    // std::endl;
+    std::cout << tim << " to create " << pointIndex << " points." << std::endl;
   }
 
   pointsArray->Resize(pointIndex);
@@ -310,9 +308,9 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
   size_t index = 0;
 
   for (int z = 0; z < nBinsZ; z++) {
-    in[2] = (minZ + static_cast<coord_t>(z + 0.5f) * incrementZ);
+    in[2] = (minZ + (static_cast<coord_t>(z) + 0.5f) * incrementZ);
     for (int y = 0; y < nBinsY; y++) {
-      in[1] = (minY + static_cast<coord_t>(y + 0.5f) * incrementY);
+      in[1] = (minY + (static_cast<coord_t>(y) + 0.5f) * incrementY);
       for (int x = 0; x < nBinsX; x++) {
         // Get the signalScalar
         signalScalar = this->extractScalarSignal(workspace, do4D, x, y, z);
@@ -322,7 +320,7 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
         if (!Mantid::VATES::isSpecial(static_cast<double>(signalScalar)) &&
             m_thresholdRange->inRange(signalScalar) &&
             (signalScalar > static_cast<signal_t>(0.0))) {
-          in[0] = (minX + static_cast<coord_t>(x + 0.5f) * incrementX);
+          in[0] = (minX + (static_cast<coord_t>(x) + 0.5f) * incrementX);
           // Create the transformed value if required
           if (transform) {
             transform->apply(in, out);

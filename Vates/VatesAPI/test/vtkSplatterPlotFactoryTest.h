@@ -113,8 +113,9 @@ public:
     FakeProgressAction progressUpdate;
 
     MDEventWorkspace3Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<3>(400, 0.0, 100.0, 1);
-    vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+        MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    vtkSplatterPlotFactory factory(
+        boost::make_shared<UserDefinedThresholdRange>(0, 1), "signal");
     factory.initialize(ws);
     vtkSmartPointer<vtkDataSet> product;
 
@@ -127,7 +128,7 @@ public:
 
     // New sizes for splatter plot test, after changing the way the points 
     // are selected, 5/28/2013
-    const size_t expected_n_points = 200;
+    const size_t expected_n_points = 50;
     const size_t expected_n_cells = 0;
 
     const size_t expected_n_signals = expected_n_points;
