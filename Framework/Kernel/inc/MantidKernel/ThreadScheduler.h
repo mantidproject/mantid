@@ -52,7 +52,7 @@ public:
       : m_cost(0), m_costExecuted(0), m_abortException(""), m_aborted(false) {}
 
   /// Destructor
-  virtual ~ThreadScheduler() {}
+  virtual ~ThreadScheduler() = default;
 
   //-----------------------------------------------------------------------------------
   /** Add a Task to the queue.
@@ -169,7 +169,7 @@ public:
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.
-    if (m_queue.size() > 0) {
+    if (!m_queue.empty()) {
       // TODO: Would a try/catch block be smart here?
       temp = m_queue.front();
       m_queue.pop_front();
@@ -190,9 +190,8 @@ public:
   void clear() override {
     m_queueLock.lock();
     // Empty out the queue and delete the pointers!
-    for (std::deque<Task *>::iterator it = m_queue.begin(); it != m_queue.end();
-         it++)
-      delete *it;
+    for (auto &task : m_queue)
+      delete task;
     m_queue.clear();
     m_cost = 0;
     m_costExecuted = 0;
@@ -222,7 +221,7 @@ class MANTID_KERNEL_DLL ThreadSchedulerLIFO : public ThreadSchedulerFIFO {
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.
-    if (m_queue.size() > 0) {
+    if (!m_queue.empty()) {
       // TODO: Would a try/catch block be smart here?
       temp = m_queue.back();
       m_queue.pop_back();
@@ -274,7 +273,7 @@ public:
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.
-    if (m_map.size() > 0) {
+    if (!m_map.empty()) {
       // Since the map is sorted by cost, we want the LAST item.
       std::multimap<double, Task *>::iterator it = m_map.end();
       it--;
@@ -297,9 +296,8 @@ public:
   void clear() override {
     m_queueLock.lock();
     // Empty out the queue and delete the pointers!
-    for (std::multimap<double, Task *>::iterator it = m_map.begin();
-         it != m_map.end(); it++)
-      delete it->second;
+    for (auto &taskPair : m_map)
+      delete taskPair.second;
     m_map.clear();
     m_cost = 0;
     m_costExecuted = 0;

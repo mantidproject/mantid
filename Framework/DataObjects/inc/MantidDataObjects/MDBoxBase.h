@@ -46,10 +46,10 @@ TMDE_CLASS
 class DLLExport MDBoxBase : public Mantid::API::IMDNode {
 public:
   //-----------------------------------------------------------------------------------------------
-  MDBoxBase(Mantid::API::BoxController *const BoxController = nullptr,
+  MDBoxBase(Mantid::API::BoxController *const boxController = nullptr,
             const uint32_t depth = 0, const size_t boxID = UNDEF_SIZET);
 
-  MDBoxBase(Mantid::API::BoxController *const BoxController,
+  MDBoxBase(Mantid::API::BoxController *const boxController,
             const uint32_t depth, const size_t boxID,
             const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
                 extentsVector);
@@ -57,8 +57,6 @@ public:
   MDBoxBase(const MDBoxBase<MDE, nd> &box,
             Mantid::API::BoxController *const otherBC);
 
-  /// Destructor
-  ~MDBoxBase() override {}
   ///@return the type of the event this box contains
   std::string getEventType() const override { return MDE::getTypeName(); }
   ///@return the length of the coordinates (in bytes), the events in the box
@@ -107,9 +105,9 @@ public:
 
   //----------------------------------------------------------------------------------------------------------------------
   /// Add a single event
-  virtual void addEvent(const MDE &point) = 0;
+  virtual size_t addEvent(const MDE &point) = 0;
   /// Add a single event, with no mutex locking
-  virtual void addEventUnsafe(const MDE &point) = 0;
+  virtual size_t addEventUnsafe(const MDE &point) = 0;
   //----------------------------------------------------------------------------------------------------------------------
   // add range of events
   virtual size_t addEvents(const std::vector<MDE> &events);

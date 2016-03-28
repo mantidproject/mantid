@@ -55,7 +55,7 @@ class PlotController: public QObject
   Q_OBJECT
 public:
   PlotController(MultiDatasetFit *parent, QwtPlot *plot, QTableWidget *table, QComboBox *plotSelector, QPushButton *prev, QPushButton *next);
-  ~PlotController();
+  ~PlotController() override;
   void clear(bool clearGuess = false);
   void update();
   int getCurrentIndex() const {return m_currentIndex;}

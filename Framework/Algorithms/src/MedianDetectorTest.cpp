@@ -17,19 +17,20 @@ using namespace Geometry;
 /// Default constructor
 MedianDetectorTest::MedianDetectorTest()
     : DetectorDiagnostic(), m_inputWS(), m_loFrac(0.1), m_hiFrac(1.5),
-      m_minSpec(0), m_maxSpec(EMPTY_INT()), m_rangeLower(0.0),
+      m_minWsIndex(0), m_maxWsIndex(EMPTY_INT()), m_rangeLower(0.0),
       m_rangeUpper(0.0), m_solidAngle(false) {}
 
 const std::string MedianDetectorTest::category() const { return "Diagnostics"; }
 
 /// Declare algorithm properties
 void MedianDetectorTest::init() {
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<HistogramValidator>()),
+                  "Name of the input workspace");
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<HistogramValidator>()),
-      "Name of the input workspace");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                       Direction::Output),
       "A MaskWorkspace where 0 denotes a masked spectra. Any spectra containing"
       "a zero is also masked on the output");
 
@@ -96,11 +97,12 @@ void MedianDetectorTest::exec() {
   // masking and will be used to record any
   // required masking from this algorithm
   MatrixWorkspace_sptr countsWS = integrateSpectra(
-      m_inputWS, m_minSpec, m_maxSpec, m_rangeLower, m_rangeUpper, true);
+      m_inputWS, m_minWsIndex, m_maxWsIndex, m_rangeLower, m_rangeUpper, true);
 
   // 0. Correct for solid angle, if desired
   if (m_solidAngle) {
-    MatrixWorkspace_sptr solidAngle = getSolidAngles(m_minSpec, m_maxSpec);
+    MatrixWorkspace_sptr solidAngle =
+        getSolidAngles(m_minWsIndex, m_maxWsIndex);
     if (solidAngle != nullptr) {
       countsWS = countsWS / solidAngle;
     }
@@ -145,25 +147,25 @@ void MedianDetectorTest::exec() {
  */
 void MedianDetectorTest::retrieveProperties() {
   m_inputWS = getProperty("InputWorkspace");
-  int maxSpecIndex = static_cast<int>(m_inputWS->getNumberHistograms()) - 1;
+  int maxWsIndex = static_cast<int>(m_inputWS->getNumberHistograms()) - 1;
 
   m_parents = getProperty("LevelsUp");
-  m_minSpec = getProperty("StartWorkspaceIndex");
-  if ((m_minSpec < 0) || (m_minSpec > maxSpecIndex)) {
+  m_minWsIndex = getProperty("StartWorkspaceIndex");
+  if ((m_minWsIndex < 0) || (m_minWsIndex > maxWsIndex)) {
     g_log.warning("StartSpectrum out of range, changed to 0");
-    m_minSpec = 0;
+    m_minWsIndex = 0;
   }
-  m_maxSpec = getProperty("EndWorkspaceIndex");
-  if (m_maxSpec == EMPTY_INT())
-    m_maxSpec = maxSpecIndex;
-  if ((m_maxSpec < 0) || (m_maxSpec > maxSpecIndex)) {
+  m_maxWsIndex = getProperty("EndWorkspaceIndex");
+  if (m_maxWsIndex == EMPTY_INT())
+    m_maxWsIndex = maxWsIndex;
+  if ((m_maxWsIndex < 0) || (m_maxWsIndex > maxWsIndex)) {
     g_log.warning("EndSpectrum out of range, changed to max spectrum number");
-    m_maxSpec = maxSpecIndex;
+    m_maxWsIndex = maxWsIndex;
   }
-  if ((m_maxSpec < m_minSpec)) {
+  if ((m_maxWsIndex < m_minWsIndex)) {
     g_log.warning("EndSpectrum can not be less than the StartSpectrum, changed "
                   "to max spectrum number");
-    m_maxSpec = maxSpecIndex;
+    m_maxWsIndex = maxWsIndex;
   }
 
   m_loFrac = getProperty("LowThreshold");
@@ -250,7 +252,7 @@ int MedianDetectorTest::maskOutliers(
     double median = medianvec[i];
 
     PARALLEL_FOR1(countsWS)
-    for (int j = 0; j < static_cast<int>(hists.size()); ++j) {
+    for (int j = 0; j < static_cast<int>(hists.size()); ++j) { // NOLINT
       const double value = countsWS->readY(hists[j])[0];
       if ((value == 0.) && checkForMask) {
         const std::set<detid_t> &detids =
@@ -299,7 +301,7 @@ int MedianDetectorTest::doDetectorTests(
   const double minSigma = getProperty("SignificanceTest");
 
   // prepare to report progress
-  const int numSpec(m_maxSpec - m_minSpec);
+  const int numSpec(m_maxWsIndex - m_minWsIndex);
   const int progStep = static_cast<int>(ceil(numSpec / 30.0));
   int steps(0);
 

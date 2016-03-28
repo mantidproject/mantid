@@ -38,14 +38,12 @@ namespace API {
 class DLLExport IMDHistoWorkspace : public IMDWorkspace,
                                     public MultipleExperimentInfos {
 public:
-  IMDHistoWorkspace();
-  ~IMDHistoWorkspace() override;
-
+  IMDHistoWorkspace() = default;
+  IMDHistoWorkspace &operator=(const IMDHistoWorkspace &) = delete;
   /// Returns a clone of the workspace
   IMDHistoWorkspace_uptr clone() const {
     return IMDHistoWorkspace_uptr(doClone());
   }
-
   /// See the MDHistoWorkspace definition for descriptions of these
   virtual coord_t getInverseVolume() const = 0;
   virtual signal_t *getSignalArray() const = 0;
@@ -105,9 +103,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  IMDHistoWorkspace(const IMDHistoWorkspace &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  IMDHistoWorkspace &operator=(const IMDHistoWorkspace &other);
+  IMDHistoWorkspace(const IMDHistoWorkspace &) = default;
 
   const std::string toString() const override;
 

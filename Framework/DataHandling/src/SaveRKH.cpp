@@ -33,11 +33,12 @@ SaveRKH::~SaveRKH() {}
  * Initialise the algorithm
  */
 void SaveRKH::init() {
-  declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "",
-                                               Kernel::Direction::Input),
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                      "InputWorkspace", "", Kernel::Direction::Input),
                   "The name of the workspace to save");
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Save,
-                                        {".txt", ".Q", ".dat"}),
+  const std::vector<std::string> fileExts{".txt", ".Q", ".dat"};
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Save, fileExts),
                   "The name to use when saving the file");
   declareProperty(
       "Append", true,

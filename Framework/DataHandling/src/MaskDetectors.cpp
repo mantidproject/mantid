@@ -34,19 +34,20 @@ MaskDetectors::~MaskDetectors() {}
  */
 void MaskDetectors::init() {
   declareProperty(
-      new WorkspaceProperty<Workspace>("Workspace", "", Direction::InOut),
+      make_unique<WorkspaceProperty<Workspace>>("Workspace", "",
+                                                Direction::InOut),
       "The name of the input and output workspace on which to perform the "
       "algorithm.");
-  declareProperty(new ArrayProperty<specnum_t>("SpectraList"),
+  declareProperty(make_unique<ArrayProperty<specnum_t>>("SpectraList"),
                   "An ArrayProperty containing a list of spectra to mask");
   declareProperty(
-      new ArrayProperty<detid_t>("DetectorList"),
+      make_unique<ArrayProperty<detid_t>>("DetectorList"),
       "An ArrayProperty containing a list of detector ID's to mask");
-  declareProperty(new ArrayProperty<size_t>("WorkspaceIndexList"),
+  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
                   "An ArrayProperty containing the workspace indices to mask");
-  declareProperty(new WorkspaceProperty<>("MaskedWorkspace", "",
-                                          Direction::Input,
-                                          PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<>>("MaskedWorkspace", "",
+                                                   Direction::Input,
+                                                   PropertyMode::Optional),
                   "If given but not as a SpecialWorkspace2D, the masking from "
                   "this workspace will be copied. If given as a "
                   "SpecialWorkspace2D, the masking is read from its Y values.");

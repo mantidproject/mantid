@@ -131,38 +131,12 @@ void vtkDataSetToPeaksFilteredDataSet::execute(
     }
   }
 
-  // Now we have all ids for the points,  we need to retrieve the ids of the
-  // cells
-  std::map<vtkIdType, vtkIdType> uniqueCellTester;
-  vtkSmartPointer<vtkIdTypeArray> cellIds =
-      vtkSmartPointer<vtkIdTypeArray>::New();
-
-  for (int i = 0; i < ids->GetNumberOfTuples(); i++) {
-    vtkIdType pId = ids->GetValue(i);
-
-    vtkSmartPointer<vtkIdList> cIdList = vtkSmartPointer<vtkIdList>::New();
-    cIdList->Initialize();
-
-    m_inputData->GetPointCells(pId, cIdList);
-
-    if (cIdList->GetNumberOfIds() == 0) {
-      continue;
-    }
-
-    vtkIdType cId = cIdList->GetId(0);
-
-    if (uniqueCellTester.count(cId) == 0) {
-      cellIds->InsertNextValue(cId);
-      uniqueCellTester.insert(std::pair<vtkIdType, vtkIdType>(cId, cId));
-    }
-  }
-
   // Create the selection node and tell it the type of selection
   vtkSmartPointer<vtkSelectionNode> selectionNode =
       vtkSmartPointer<vtkSelectionNode>::New();
-  selectionNode->SetFieldType(vtkSelectionNode::CELL);
+  selectionNode->SetFieldType(vtkSelectionNode::POINT);
   selectionNode->SetContentType(vtkSelectionNode::INDICES);
-  selectionNode->SetSelectionList(cellIds);
+  selectionNode->SetSelectionList(ids);
 
   vtkSmartPointer<vtkSelection> selection =
       vtkSmartPointer<vtkSelection>::New();
@@ -282,13 +256,14 @@ GCC_DIAG_OFF(strict-aliasing)
     switch(coordinateSystem)
     {
       case(Mantid::Kernel::SpecialCoordinateSystem::HKL):
-        peaksInfo.push_back(std::pair<Mantid::Kernel::V3D, double>(peak->getHKL(), radius*m_radiusFactor));
+        peaksInfo.emplace_back(peak->getHKL(), radius * m_radiusFactor);
         break;
       case(Mantid::Kernel::SpecialCoordinateSystem::QLab):
-        peaksInfo.push_back(std::pair<Mantid::Kernel::V3D, double>(peak->getQLabFrame(), radius*m_radiusFactor));
+        peaksInfo.emplace_back(peak->getQLabFrame(), radius * m_radiusFactor);
         break;
       case(Mantid::Kernel::SpecialCoordinateSystem::QSample):
-        peaksInfo.push_back(std::pair<Mantid::Kernel::V3D, double>(peak->getQSampleFrame(), radius*m_radiusFactor));
+        peaksInfo.emplace_back(peak->getQSampleFrame(),
+                               radius * m_radiusFactor);
         break;
       default:
         throw std::invalid_argument("The special coordinate systems don't match.");

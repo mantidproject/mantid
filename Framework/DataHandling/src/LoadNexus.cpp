@@ -21,6 +21,9 @@
 namespace Mantid {
 namespace DataHandling {
 
+const std::string LoadNexus::muonTD = "muonTD";
+const std::string LoadNexus::pulsedTD = "pulsedTD";
+
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadNexus)
 
@@ -36,13 +39,14 @@ LoadNexus::LoadNexus() : Algorithm(), m_filename() {}
  */
 void LoadNexus::init() {
   // Declare required input parameters for all Child Algorithms
+  const std::vector<std::string> exts{".nxs", ".nx5", ".xml", ".n*"};
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load,
-                       {".nxs", ".nx5", ".xml", ".n*"}),
+      Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
+                                        exts),
       "The name of the Nexus file to read, as a full or relative path.");
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm.  A workspace of this name will be created "
                   "and stored in the Analysis Data Service. For multiperiod "
@@ -58,7 +62,7 @@ void LoadNexus::init() {
       "SpectrumMax", Mantid::EMPTY_INT(), mustBePositive,
       "Number of last spectrum to read, only for single period data.");
   declareProperty(
-      new ArrayProperty<int>("SpectrumList"),
+      make_unique<ArrayProperty<int>>("SpectrumList"),
       "List of spectrum numbers to read, only for single period data.");
 
   declareProperty("EntryNumber", 0, mustBePositive,
@@ -89,7 +93,6 @@ void LoadNexus::exec() {
   // imply it should be.
   // std::string dataName="analysis";
 
-  std::string muonTD = "muonTD", pulsedTD = "pulsedTD";
   std::vector<std::string> entryName, definition;
   int count =
       Mantid::NeXus::getNexusEntryTypes(m_filename, entryName, definition);
@@ -293,7 +296,7 @@ void LoadNexus::setOutputWorkspace(const API::IAlgorithm_sptr &loader) {
         prop->direction() == Direction::Output) {
       const std::string &name = prop->name();
       if (!this->existsProperty(name)) {
-        declareProperty(new WorkspaceProperty<Workspace>(
+        declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
             name, loader->getPropertyValue(name), Direction::Output));
       }
       Workspace_sptr wkspace = loader->getProperty(name);

@@ -64,7 +64,8 @@ private:
                         const std::vector<double> &difa,
                         const std::vector<double> &tzero,
                         const std::vector<int32_t> &dasids,
-                        const std::vector<double> &offsets);
+                        const std::vector<double> &offsets,
+                        const std::vector<int32_t> &use);
 
   std::string m_filename;
   std::string m_workspaceName;

@@ -31,13 +31,13 @@ public:
                                                // initialized
   }
 
-  void setUp() {
+  void setUp() override {
     m_view.reset(new testing::NiceMock<MockImageROIView>());
     m_presenter.reset(
         new MantidQt::CustomInterfaces::ImageROIPresenter(m_view.get()));
   }
 
-  void tearDown() {
+  void tearDown() override {
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(m_view.get()));
   }
 

@@ -27,7 +27,7 @@ public:
     bProp = new PropertyWithValue<OptionalBool>("boolProp", bool(true));
   }
 
-  ~PropertyWithValueTest() {
+  ~PropertyWithValueTest() override {
     delete iProp;
     delete dProp;
     delete sProp;
@@ -164,17 +164,17 @@ public:
 
 private:
   class DataObjectOne : public DataItem {
-    virtual const std::string name() const { return "MyName1"; };
-    virtual const std::string id() const { return "DataObjectOne"; }
-    virtual bool threadSafe() const { return true; }
-    virtual const std::string toString() const { return name(); }
+    const std::string name() const override { return "MyName1"; };
+    const std::string id() const override { return "DataObjectOne"; }
+    bool threadSafe() const override { return true; }
+    const std::string toString() const override { return name(); }
   };
 
   class DataObjectTwo : public DataItem {
-    virtual const std::string name() const { return "MyName2"; };
-    virtual const std::string id() const { return "DataObjectTwo"; }
-    virtual bool threadSafe() const { return true; }
-    virtual const std::string toString() const { return name(); }
+    const std::string name() const override { return "MyName2"; };
+    const std::string id() const override { return "DataObjectTwo"; }
+    bool threadSafe() const override { return true; }
+    const std::string toString() const override { return name(); }
   };
 
 public:

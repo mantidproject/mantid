@@ -53,8 +53,8 @@ private:
   Torus *doClone() const override;
 
 protected:
-  Torus(const Torus &);
-  Torus &operator=(const Torus &);
+  Torus(const Torus &) = default;
+  Torus &operator=(const Torus &) = default;
 
 public:
   /// Public identifier

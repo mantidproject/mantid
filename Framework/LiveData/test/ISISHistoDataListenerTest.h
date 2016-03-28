@@ -45,8 +45,8 @@ public:
     auto res = dae.executeAsync();
 
     Kernel::PropertyManager props;
-    props.declareProperty(
-        new Kernel::ArrayProperty<specnum_t>("SpectraList", ""));
+    props.declareProperty(Kernel::make_unique<Kernel::ArrayProperty<specnum_t>>(
+        "SpectraList", ""));
     int s[] = {1, 2, 3, 10, 11, 95, 96, 97, 98, 99, 100};
     std::vector<specnum_t> specs;
     specs.assign(s, s + 11);
@@ -113,13 +113,13 @@ public:
     TS_ASSERT_EQUALS(spec->getSpectrumNo(), 1)
     auto dets = spec->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
-    TS_ASSERT_EQUALS(*dets.begin(), 1001);
+    TS_ASSERT_EQUALS(*dets.begin(), 1);
 
     spec = ws->getSpectrum(3);
     TS_ASSERT_EQUALS(spec->getSpectrumNo(), 10)
     dets = spec->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
-    TS_ASSERT_EQUALS(*dets.begin(), 1004);
+    TS_ASSERT_EQUALS(*dets.begin(), 4);
 
     res.wait();
 #else
@@ -217,25 +217,25 @@ public:
     TS_ASSERT_EQUALS(spec->getSpectrumNo(), 1)
     auto dets = spec->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
-    TS_ASSERT_EQUALS(*dets.begin(), 1001);
+    TS_ASSERT_EQUALS(*dets.begin(), 1);
 
     spec = ws1->getSpectrum(3);
     TS_ASSERT_EQUALS(spec->getSpectrumNo(), 4)
     dets = spec->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
-    TS_ASSERT_EQUALS(*dets.begin(), 1004);
+    TS_ASSERT_EQUALS(*dets.begin(), 4);
 
     spec = ws2->getSpectrum(0);
     TS_ASSERT_EQUALS(spec->getSpectrumNo(), 1)
     dets = spec->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
-    TS_ASSERT_EQUALS(*dets.begin(), 1001);
+    TS_ASSERT_EQUALS(*dets.begin(), 1);
 
     spec = ws2->getSpectrum(3);
     TS_ASSERT_EQUALS(spec->getSpectrumNo(), 4)
     dets = spec->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
-    TS_ASSERT_EQUALS(*dets.begin(), 1004);
+    TS_ASSERT_EQUALS(*dets.begin(), 4);
 
     dae.cancel();
     res.wait();
@@ -256,7 +256,8 @@ public:
     auto res = dae.executeAsync();
 
     Kernel::PropertyManager props;
-    props.declareProperty(new Kernel::ArrayProperty<int>("PeriodList"));
+    props.declareProperty(
+        Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     std::vector<int> periods(2);
     periods[0] = 2;
     periods[1] = 3;
@@ -308,8 +309,10 @@ public:
     auto res = dae.executeAsync();
 
     Kernel::PropertyManager props;
-    props.declareProperty(new Kernel::ArrayProperty<int>("SpectraList"));
-    props.declareProperty(new Kernel::ArrayProperty<int>("PeriodList"));
+    props.declareProperty(
+        Kernel::make_unique<Kernel::ArrayProperty<int>>("SpectraList"));
+    props.declareProperty(
+        Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     props.setProperty("PeriodList", "1,3");
     // FakeISISHistoDAE has 3 monitors with spectra numbers NSpectra+1,
     // NSpectra+2, NSpectra+2
@@ -365,8 +368,10 @@ public:
     auto res = dae.executeAsync();
 
     Kernel::PropertyManager props;
-    props.declareProperty(new Kernel::ArrayProperty<int>("SpectraList"));
-    props.declareProperty(new Kernel::ArrayProperty<int>("PeriodList"));
+    props.declareProperty(
+        Kernel::make_unique<Kernel::ArrayProperty<int>>("SpectraList"));
+    props.declareProperty(
+        Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     props.setProperty("PeriodList", "1,3");
     // FakeISISHistoDAE has 3 monitors with spectra numbers NSpectra+1,
     // NSpectra+2, NSpectra+2
@@ -400,7 +405,8 @@ public:
     auto res = dae.executeAsync();
 
     Kernel::PropertyManager props;
-    props.declareProperty(new Kernel::ArrayProperty<int>("PeriodList"));
+    props.declareProperty(
+        Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     std::vector<int> periods(2);
     periods[0] = 2;
     periods[1] = 5; // this period doesn't exist in dae

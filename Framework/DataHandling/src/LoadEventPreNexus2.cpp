@@ -107,8 +107,8 @@ static string getRunnumber(const string &filename) {
   if (runnumber.find("neutron") >= string::npos)
     return "0";
 
-  std::size_t left = runnumber.find("_");
-  std::size_t right = runnumber.find("_", left + 1);
+  std::size_t left = runnumber.find('_');
+  std::size_t right = runnumber.find('_', left + 1);
 
   return runnumber.substr(left + 1, right - left - 1);
 }
@@ -246,23 +246,25 @@ void LoadEventPreNexus2::init() {
   // which files to use
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);
   declareProperty(
-      new FileProperty(EVENT_PARAM, "", FileProperty::Load, eventExts),
+      Kernel::make_unique<FileProperty>(EVENT_PARAM, "", FileProperty::Load,
+                                        eventExts),
       "The name of the neutron event file to read, including its full or "
       "relative path. In most cases, the file typically ends in "
       "neutron_event.dat (N.B. case sensitive if running on Linux).");
   vector<string> pulseExts(PULSE_EXTS, PULSE_EXTS + NUM_EXT);
-  declareProperty(new FileProperty(PULSEID_PARAM, "",
-                                   FileProperty::OptionalLoad, pulseExts),
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      PULSEID_PARAM, "", FileProperty::OptionalLoad, pulseExts),
                   "File containing the accelerator pulse information; the "
                   "filename will be found automatically if not specified.");
   declareProperty(
-      new FileProperty(MAP_PARAM, "", FileProperty::OptionalLoad, ".dat"),
+      Kernel::make_unique<FileProperty>(MAP_PARAM, "",
+                                        FileProperty::OptionalLoad, ".dat"),
       "File containing the pixel mapping (DAS pixels to pixel IDs) file "
       "(typically INSTRUMENT_TS_YYYY_MM_DD.dat). The filename will be found "
       "automatically if not specified.");
 
   // which pixels to load
-  declareProperty(new ArrayProperty<int64_t>(PID_PARAM),
+  declareProperty(Kernel::make_unique<ArrayProperty<int64_t>>(PID_PARAM),
                   "A list of individual spectra (pixel IDs) to read, specified "
                   "as e.g. 10:20. Only used if set.");
 
@@ -277,8 +279,8 @@ void LoadEventPreNexus2::init() {
   // TotalChunks is only meaningful if ChunkNumber is set
   // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at
   // validation
-  setPropertySettings("TotalChunks",
-                      new VisibleWhenProperty("ChunkNumber", IS_NOT_DEFAULT));
+  setPropertySettings("TotalChunks", make_unique<VisibleWhenProperty>(
+                                         "ChunkNumber", IS_NOT_DEFAULT));
 
   std::vector<std::string> propOptions{"Auto", "Serial", "Parallel"};
   declareProperty("UseParallelProcessing", "Auto",
@@ -291,11 +293,12 @@ void LoadEventPreNexus2::init() {
 
   // the output workspace name
   declareProperty(
-      new WorkspaceProperty<IEventWorkspace>(OUT_PARAM, "", Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<IEventWorkspace>>(
+          OUT_PARAM, "", Direction::Output),
       "The name of the workspace that will be created, filled with the read-in "
       "data and stored in the [[Analysis Data Service]].");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "EventNumberWorkspace", "", Direction::Output,
                       PropertyMode::Optional),
                   "Workspace with number of events per pulse");
@@ -529,12 +532,9 @@ LoadEventPreNexus2::generateEventDistribtionWorkspace() {
 /** Process imbed logs (marked by bad pixel IDs)
  */
 void LoadEventPreNexus2::processImbedLogs() {
-  std::map<PixelType, size_t>::iterator mit;
-  for (auto pit = this->wrongdetids.begin(); pit != this->wrongdetids.end();
-       ++pit) {
+  for (const auto pid : this->wrongdetids) {
     // a. pixel ID -> index
-    PixelType pid = *pit;
-    mit = this->wrongdetidmap.find(pid);
+    const auto mit = this->wrongdetidmap.find(pid);
     size_t mindex = mit->second;
     if (mindex > this->wrongdetid_pulsetimes.size()) {
       g_log.error() << "Wrong Index " << mindex << " for Pixel " << pid
@@ -609,8 +609,8 @@ void LoadEventPreNexus2::runLoadInstrument(
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);
   std::reverse(eventExts.begin(), eventExts.end());
 
-  for (auto &eventExt : eventExts) {
-    size_t pos = instrument.find(eventExt);
+  for (const auto &ending : eventExts) {
+    size_t pos = instrument.find(ending);
     if (pos != string::npos) {
       instrument = instrument.substr(0, pos);
       break;
@@ -618,7 +618,7 @@ void LoadEventPreNexus2::runLoadInstrument(
   }
 
   // determine the instrument parameter file
-  size_t pos = instrument.rfind("_"); // get rid of the run number
+  size_t pos = instrument.rfind('_'); // get rid of the run number
   instrument = instrument.substr(0, pos);
 
   // do the actual work
@@ -723,7 +723,7 @@ void LoadEventPreNexus2::procEvents(
   }
 
   // For slight speed up
-  loadOnlySomeSpectra = (this->spectra_list.size() > 0);
+  loadOnlySomeSpectra = (!this->spectra_list.empty());
 
   // Turn the spectra list into a map, for speed of access
   for (auto &spectrum : spectra_list)

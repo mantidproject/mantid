@@ -1,7 +1,6 @@
 #include "MantidKernel/OptionalBool.h"
 #include <ostream>
 #include <istream>
-#include <utility>
 
 namespace Mantid {
 namespace Kernel {
@@ -14,17 +13,6 @@ OptionalBool::OptionalBool() : m_arg(Unset) {}
 OptionalBool::OptionalBool(bool arg) { m_arg = arg ? True : False; }
 
 OptionalBool::OptionalBool(Value arg) : m_arg(arg) {}
-
-OptionalBool::~OptionalBool() {}
-
-OptionalBool::OptionalBool(const OptionalBool &other) : m_arg(other.m_arg) {}
-
-OptionalBool &OptionalBool::operator=(const OptionalBool &other) {
-  if (this != &other) {
-    m_arg = other.m_arg;
-  }
-  return *this;
-}
 
 bool OptionalBool::operator==(const OptionalBool &other) const {
   return m_arg == other.getValue();

@@ -70,17 +70,8 @@ public:
   /// id
   TofEvent(double tof, const Mantid::Kernel::DateAndTime pulsetime);
 
-  /// Constructor, copy from another TofEvent object
-  TofEvent(const TofEvent &);
-
   /// Empty constructor
   TofEvent();
-
-  /// Destructor
-  ~TofEvent();
-
-  /// Copy from another TofEvent object
-  TofEvent &operator=(const TofEvent &rhs);
 
   bool operator==(const TofEvent &rhs) const;
   bool operator<(const TofEvent &rhs) const;
@@ -130,28 +121,19 @@ public:
   WeightedEvent(double time_of_flight);
 
   /// Constructor, full
-  WeightedEvent(double time_of_flight,
-                const Mantid::Kernel::DateAndTime pulsetime, double weight,
-                double errorSquared);
-  WeightedEvent(double time_of_flight,
-                const Mantid::Kernel::DateAndTime pulsetime, float weight,
-                float errorSquared);
+  WeightedEvent(double tof, const Mantid::Kernel::DateAndTime pulsetime,
+                double weight, double errorSquared);
+  WeightedEvent(double tof, const Mantid::Kernel::DateAndTime pulsetime,
+                float weight, float errorSquared);
 
   WeightedEvent(const TofEvent &, double weight, double errorSquared);
   WeightedEvent(const TofEvent &, float weight, float errorSquared);
-
-  WeightedEvent(const WeightedEvent &);
 
   WeightedEvent(const TofEvent &);
 
   WeightedEvent();
 
-  ~WeightedEvent();
-
-  /// Copy from another WeightedEvent object
-  WeightedEvent &operator=(const WeightedEvent &rhs);
-
-  bool operator==(const WeightedEvent &other) const;
+  bool operator==(const WeightedEvent &rhs) const;
   bool equals(const WeightedEvent &rhs, const double tolTof,
               const double tolWeight, const int64_t tolPulse) const;
 
@@ -197,9 +179,8 @@ public:
   WeightedEventNoTime(double time_of_flight);
 
   /// Constructor, full
-  WeightedEventNoTime(double time_of_flight, double weight,
-                      double errorSquared);
-  WeightedEventNoTime(double time_of_flight, float weight, float errorSquared);
+  WeightedEventNoTime(double tof, double weight, double errorSquared);
+  WeightedEventNoTime(double tof, float weight, float errorSquared);
 
   WeightedEventNoTime(double tof, const Mantid::Kernel::DateAndTime pulsetime,
                       double weight, double errorSquared);
@@ -209,22 +190,15 @@ public:
   WeightedEventNoTime(const TofEvent &, double weight, double errorSquared);
   WeightedEventNoTime(const TofEvent &, float weight, float errorSquared);
 
-  WeightedEventNoTime(const WeightedEventNoTime &);
-
   WeightedEventNoTime(const WeightedEvent &);
 
   WeightedEventNoTime(const TofEvent &);
 
   WeightedEventNoTime();
 
-  ~WeightedEventNoTime();
-
-  /// Copy from another WeightedEventNoTime object
-  WeightedEventNoTime &operator=(const WeightedEventNoTime &rhs);
-
-  bool operator==(const WeightedEventNoTime &other) const;
+  bool operator==(const WeightedEventNoTime &rhs) const;
   bool operator<(const WeightedEventNoTime &rhs) const;
-  bool operator<(const double rhs) const;
+  bool operator<(const double rhs_tof) const;
   bool equals(const WeightedEventNoTime &rhs, const double tolTof,
               const double tolWeight) const;
 

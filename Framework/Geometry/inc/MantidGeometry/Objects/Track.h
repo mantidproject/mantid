@@ -151,12 +151,6 @@ public:
   Track();
   /// Constructor
   Track(const Kernel::V3D &startPt, const Kernel::V3D &unitVector);
-  /// Copy constructor
-  Track(const Track &);
-  /// Assignment operator
-  Track &operator=(const Track &);
-  /// Destructor
-  ~Track();
   /// Adds a point of intersection to the track
   void addPoint(const int directionFlag, const Kernel::V3D &endPoint,
                 const Object &obj, const ComponentID compID = nullptr);

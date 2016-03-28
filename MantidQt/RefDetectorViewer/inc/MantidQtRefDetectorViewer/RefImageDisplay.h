@@ -47,13 +47,14 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageDisplay : public SpectrumVie
                       SpectrumView::GraphDisplay* vGraph,
                       QTableWidget*               tableWidget);
 
-     ~RefImageDisplay();
+     ~RefImageDisplay() override;
 
      /// Record the point that the user is currently pointing at with the mouse
      /// default right click (mouseClick = 2)
-     QPair<double,double> setPointedAtPoint( QPoint point, int mouseClick = 2, bool isFirst = true );
+     QPair<double, double> setPointedAtPoint(QPoint point, int mouseClick = 2,
+                                             bool isFirst = true) override;
 
-private:
+   private:
      RefLimitsHandler*    m_limitsHandler; // Owned by RefImagePlotItem
 
 };

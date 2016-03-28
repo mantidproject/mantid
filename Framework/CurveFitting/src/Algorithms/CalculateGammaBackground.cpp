@@ -83,25 +83,26 @@ void CalculateGammaBackground::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<HistogramValidator>(false); // point data
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "An input workspace containing TOF data");
 
   declareProperty(
-      new API::FunctionProperty("ComptonFunction"),
+      make_unique<API::FunctionProperty>("ComptonFunction"),
       "Function that is able to compute the mass spectrum for the input data"
       "This will usually be the output from the Fitting");
 
-  declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
+  declareProperty(make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
                   "Indices of the spectra to include in the correction. If "
                   "provided, the output only include these spectra\n"
                   "(Default: all spectra from input)");
 
+  declareProperty(make_unique<WorkspaceProperty<>>("BackgroundWorkspace", "",
+                                                   Direction::Output),
+                  "A new workspace containing the calculated background.");
   declareProperty(
-      new WorkspaceProperty<>("BackgroundWorkspace", "", Direction::Output),
-      "A new workspace containing the calculated background.");
-  declareProperty(
-      new WorkspaceProperty<>("CorrectedWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("CorrectedWorkspace", "",
+                                       Direction::Output),
       "A new workspace containing the calculated background subtracted from "
       "the input.");
 }
@@ -403,6 +404,10 @@ void CalculateGammaBackground::calculateTofSpectrum(
             profileFunction->getFunction(i));
     profile->disableLogging();
     profile->setUpForFit();
+
+    // Fix the Mass parameter
+    profile->fix(0);
+
     profile->cacheYSpaceValues(tseconds, false, detpar, respar);
 
     profile->massProfile(tmpWork.data(), tmpWork.size());
@@ -422,7 +427,7 @@ void CalculateGammaBackground::calculateTofSpectrum(
 void CalculateGammaBackground::retrieveInputs() {
   m_inputWS = getProperty("InputWorkspace");
   m_profileFunction = getPropertyValue("ComptonFunction");
-  if (m_profileFunction.find(";") == std::string::npos) // not composite
+  if (m_profileFunction.find(';') == std::string::npos) // not composite
   {
     m_profileFunction = "composite=CompositeFunction;" + m_profileFunction;
   }

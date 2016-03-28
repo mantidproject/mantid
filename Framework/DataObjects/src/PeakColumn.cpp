@@ -88,11 +88,6 @@ PeakColumn::PeakColumn(std::vector<Peak> &peaks, const std::string &name)
         << "\n";
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeakColumn::~PeakColumn() {}
-
 /// Returns typeid for the data in the column
 const std::type_info &PeakColumn::get_type_info() const {
   // This is horrible copy-and-paste with the method below. The whole thing

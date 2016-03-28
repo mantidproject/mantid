@@ -48,7 +48,7 @@ CompAssembly::CompAssembly(const std::string &n, IComponent *reference)
  *  @param assem :: assembly to copy
  */
 CompAssembly::CompAssembly(const CompAssembly &assem)
-    : Component(assem), m_children(assem.m_children),
+    : ICompAssembly(assem), Component(assem), m_children(assem.m_children),
       m_cachedBoundingBox(assem.m_cachedBoundingBox) {
   // Need to do a deep copy
   comp_it it;

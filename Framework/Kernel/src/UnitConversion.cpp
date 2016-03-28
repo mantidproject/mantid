@@ -4,8 +4,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <cmath>
-
 namespace Mantid {
 namespace Kernel {
 /**

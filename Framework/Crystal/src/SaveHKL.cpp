@@ -53,8 +53,8 @@ SaveHKL::~SaveHKL() {}
 /** Initialize the algorithm's properties.
  */
 void SaveHKL::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
@@ -79,13 +79,14 @@ void SaveHKL::init() {
                   "not set with SetSampleMaterial");
   declareProperty("Radius", EMPTY_DBL(), mustBePositive,
                   "Radius of the sample in centimeters");
-  declareProperty("PowerLambda", 4.0, "Power of lamda ");
-  declareProperty(new FileProperty("SpectraFile", "",
-                                   API::FileProperty::OptionalLoad, ".dat"),
+  declareProperty("PowerLambda", 4.0, "Power of lambda ");
+  declareProperty(make_unique<FileProperty>("SpectraFile", "",
+                                            API::FileProperty::OptionalLoad,
+                                            ".dat"),
                   " Spectrum data read from a spectrum file.");
 
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Save, {".hkl"}),
+      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".hkl"),
       "Path to an hkl file to save.");
 
   std::vector<std::string> histoTypes{"Bank", "RunNumber", ""};
@@ -97,7 +98,7 @@ void SaveHKL::init() {
   declareProperty("WidthBorder", EMPTY_INT(), "Width of border of detectors");
   declareProperty("MinIntensity", EMPTY_DBL(), mustBePositive,
                   "The minimum Intensity");
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "SaveHKLOutput", Direction::Output),
                   "Output PeaksWorkspace");
   declareProperty(

@@ -15,8 +15,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-#define round(x) ((x) >= 0 ? (int)((x) + 0.5) : (int)((x)-0.5))
-
 //--------------------------------------------------------------------------
 /** Constructor
  */
@@ -31,11 +29,10 @@ FindUBUsingIndexedPeaks::~FindUBUsingIndexedPeaks() {}
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingIndexedPeaks::init() {
-  this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
-  boost::shared_ptr<BoundedValidator<double>> mustBePositive(
-      new BoundedValidator<double>());
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   this->declareProperty("Tolerance", 0.1, mustBePositive,
                         "Indexing Tolerance (0.1)");
@@ -66,7 +63,8 @@ void FindUBUsingIndexedPeaks::exec() {
                                              // just check for (0,0,0)
     {
       q_vectors.push_back(peaks[i].getQSampleFrame());
-      hkl_vectors.emplace_back(round(hkl[0]), round(hkl[1]), round(hkl[2]));
+      hkl_vectors.emplace_back(std::round(hkl[0]), std::round(hkl[1]),
+                               std::round(hkl[2]));
       indexed_count++;
     }
   }

@@ -263,7 +263,7 @@ ConventionalCell ScalarUtils::GetCellForForm(const DblMatrix &UB,
  */
 void ScalarUtils::RemoveHighErrorForms(std::vector<ConventionalCell> &list,
                                        double level) {
-  if (list.size() <= 0) // nothing to do
+  if (list.empty()) // nothing to do
     return;
 
   std::vector<ConventionalCell> new_list;
@@ -293,7 +293,7 @@ void ScalarUtils::RemoveHighErrorForms(std::vector<ConventionalCell> &list,
 ConventionalCell
 ScalarUtils::GetCellBestError(const std::vector<ConventionalCell> &list,
                               bool use_triclinic) {
-  if (list.size() == 0) {
+  if (list.empty()) {
     throw std::invalid_argument("GetCellBestError(): list is empty");
   }
 

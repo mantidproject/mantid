@@ -41,7 +41,6 @@ class DLLExport NeutronBk2BkExpConvPVoigt
 
 public:
   NeutronBk2BkExpConvPVoigt();
-  ~NeutronBk2BkExpConvPVoigt() override;
 
   /// Overwrite IFunction base class method: name
   std::string name() const override { return "NeutronBk2BkExpConvPVoigt"; }
@@ -61,7 +60,7 @@ public:
 
   /// Override setting a new value to a parameter by name
   void setParameter(const std::string &name, const double &value,
-                    bool explicitlySe = true) override;
+                    bool explicitlySet = true) override;
 
   /// Set peak's height
   // virtual void setHeight(const double h);

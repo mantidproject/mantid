@@ -46,21 +46,23 @@ const std::string SplineInterpolation::category() const {
 /** Initialize the algorithm's properties.
  */
 void SplineInterpolation::init() {
-  declareProperty(
-      new WorkspaceProperty<>("WorkspaceToMatch", "", Direction::Input),
-      "The workspace which defines the points of the spline.");
+  declareProperty(make_unique<WorkspaceProperty<>>("WorkspaceToMatch", "",
+                                                   Direction::Input),
+                  "The workspace which defines the points of the spline.");
 
   declareProperty(
-      new WorkspaceProperty<>("WorkspaceToInterpolate", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("WorkspaceToInterpolate", "",
+                                       Direction::Input),
       "The workspace on which to perform the interpolation algorithm.");
 
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                       Direction::Output),
       "The workspace containing the calculated points and derivatives");
 
-  declareProperty(new WorkspaceProperty<WorkspaceGroup>("OutputWorkspaceDeriv",
-                                                        "", Direction::Output,
-                                                        PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+                      "OutputWorkspaceDeriv", "", Direction::Output,
+                      PropertyMode::Optional),
                   "The workspace containing the calculated derivatives");
 
   auto validator = boost::make_shared<BoundedValidator<int>>(0, 2);

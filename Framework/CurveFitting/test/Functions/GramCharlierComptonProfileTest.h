@@ -44,7 +44,7 @@ public:
     checkDefaultAttrsExist(*profile);
     checkDefaultParametersExist(*profile);
 
-    static const size_t npars(4);
+    static const size_t npars(5);
     TS_ASSERT_EQUALS(npars, profile->nParams());
 
     if (npars == profile->nParams()) {
@@ -102,11 +102,11 @@ public:
 private:
   Mantid::API::IFunction_sptr createFunctionWithParamsSet() {
     auto func = createFunction();
-    func->setAttributeValue("Mass", 1.0);
     // must be before C_0 C_4 parameter calls as they are created by this
     // attribute
     func->setAttributeValue("HermiteCoeffs", "1 0 1");
 
+    func->setParameter("Mass", 1.0);
     func->setParameter("C_0", 21.0);
     func->setParameter("C_4", 33.0);
     func->setParameter("FSECoeff", 0.82);
@@ -122,13 +122,13 @@ private:
   }
 
   void checkDefaultAttrsExist(const Mantid::API::IFunction &profile) {
-    static const size_t nattrs = 2;
+    static const size_t nattrs = 1;
     TS_ASSERT_LESS_THAN_EQUALS(nattrs, profile.nAttributes()); // at least
                                                                // nattrs
 
     // Test names as they are used in scripts
     if (nattrs <= profile.nAttributes()) {
-      const char *attrAarr[nattrs] = {"Mass", "HermiteCoeffs"};
+      const char *attrAarr[nattrs] = {"HermiteCoeffs"};
       std::unordered_set<std::string> expectedAttrs(attrAarr,
                                                     attrAarr + nattrs);
       std::vector<std::string> actualNames = profile.getAttributeNames();
@@ -143,8 +143,8 @@ private:
   }
 
   void checkDefaultParametersExist(const Mantid::API::IFunction &profile) {
-    static const size_t nparams(2);
-    const char *expectedParams[nparams] = {"Width", "FSECoeff"};
+    static const size_t nparams(3);
+    const char *expectedParams[nparams] = {"Mass", "Width", "FSECoeff"};
 
     auto currentNames = profile.getParameterNames();
     const size_t nnames = currentNames.size();

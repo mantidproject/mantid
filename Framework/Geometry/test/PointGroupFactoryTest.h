@@ -36,7 +36,7 @@ public:
                                                       "test");
   }
 
-  ~PointGroupFactoryTest() {
+  ~PointGroupFactoryTest() override {
     // Unsubscribing the fake point groups
     PointGroupFactory::Instance().unsubscribePointGroup("monoclinicA");
     PointGroupFactory::Instance().unsubscribePointGroup("monoclinicB");

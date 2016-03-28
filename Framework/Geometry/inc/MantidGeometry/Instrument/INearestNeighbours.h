@@ -53,7 +53,7 @@ typedef std::unordered_map<specnum_t, std::set<detid_t>>
 class MANTID_GEOMETRY_DLL INearestNeighbours {
 public:
   /// Default (empty) destructor
-  virtual ~INearestNeighbours(){};
+  virtual ~INearestNeighbours() = default;
 
   // Neighbouring spectra by radius
   virtual std::map<specnum_t, Mantid::Kernel::V3D>

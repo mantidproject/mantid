@@ -96,10 +96,10 @@ public:
   MOCK_METHOD3(init, void(const size_t &, const size_t &, const size_t &));
   MOCK_CONST_METHOD0(getSpecialCoordinateSystem,
                      Mantid::Kernel::SpecialCoordinateSystem());
-  virtual ~MockIEventWorkspace() {}
+  ~MockIEventWorkspace() override {}
 
 private:
-  virtual MockIEventWorkspace *doClone() const {
+  MockIEventWorkspace *doClone() const override {
     throw std::runtime_error(
         "Cloning of MockIEventWorkspace is not implemented.");
   }

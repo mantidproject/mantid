@@ -430,8 +430,8 @@ bool File::append(const std::string &path, const std::string &name,
   if (!good)
     return false;
 
-  if (targetPosition == -1)
-    targetPosition = lastHeaderPosition;
+  if (targetPosition < 0)
+    targetPosition = (lastHeaderPosition >= 0) ? lastHeaderPosition : 0;
 
   // empty buffer
   char padding[512];

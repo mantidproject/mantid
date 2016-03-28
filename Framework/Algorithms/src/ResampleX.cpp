@@ -51,17 +51,17 @@ const std::string ResampleX::alias() const { return ""; }
  */
 void ResampleX::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "An output workspace.");
 
   declareProperty(
-      new ArrayProperty<double>("XMin"),
+      make_unique<ArrayProperty<double>>("XMin"),
       "A comma separated list of the XMin for every spectrum. (Optional)");
   declareProperty(
-      new ArrayProperty<double>("XMax"),
+      make_unique<ArrayProperty<double>>("XMax"),
       "A comma separated list of the XMax for every spectrum. (Optional)");
 
   auto min = boost::make_shared<BoundedValidator<int>>();
@@ -69,7 +69,7 @@ void ResampleX::init() {
   declareProperty("NumberBins", 0, min,
                   "Number of bins to split up each spectrum into.");
   declareProperty("LogBinning", false,
-                  "Use logorithmic binning. If false use constant step sizes.");
+                  "Use logarithmic binning. If false use constant step sizes.");
 
   declareProperty("PreserveEvents", true,
                   "Keep the output workspace as an EventWorkspace, if the "

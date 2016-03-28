@@ -43,7 +43,8 @@ public:
                        Mantid::API::MDNormalization::VolumeNormalization,
                    Mantid::API::MDNormalization preferredNormalizationHisto =
                        Mantid::API::MDNormalization::VolumeNormalization);
-
+  MDEventWorkspace<MDE, nd> &
+  operator=(const MDEventWorkspace<MDE, nd> &other) = delete;
   ~MDEventWorkspace() override;
 
   /// Returns a clone of the workspace
@@ -88,9 +89,20 @@ public:
   getNormalizedSignal(const API::IMDNode *box,
                       const Mantid::API::MDNormalization &normalization) const;
 
+  signal_t
+  getNormalizedError(const API::IMDNode *box,
+                     const Mantid::API::MDNormalization &normalization) const;
+
   LinePlot getLinePlot(const Mantid::Kernel::VMD &start,
                        const Mantid::Kernel::VMD &end,
                        API::MDNormalization normalize) const override;
+
+  // Get ordered list of boundaries in position-along-the-line coordinates
+  std::set<coord_t> getBoxBoundaryBisectsOnLine(const Kernel::VMD &start,
+                                                const Kernel::VMD &end,
+                                                const size_t num_d,
+                                                const Kernel::VMD &dir,
+                                                const coord_t length) const;
 
   //------------------------ (END) IMDWorkspace Methods
   //-----------------------------------------
@@ -142,7 +154,7 @@ public:
     this->getBox()->getBoxes(boxes, maxDepth, leafOnly);
   }
 
-  void addEvent(const MDE &event);
+  size_t addEvent(const MDE &event);
 
   size_t addEvents(const std::vector<MDE> &events);
 
@@ -199,16 +211,15 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  /// Windows Visual Studio 2012 has trouble with declaration without definition
-  /// so we provide one that throws an error. This seems template related.
-  /// TODO: clean this up.
-  MDEventWorkspace<MDE, nd> &operator=(const MDEventWorkspace<MDE, nd> &other) {
-    throw std::runtime_error("MDEventWorkspace::operator= not implemented.");
-    // this codepath should never be reached, prevent unused parameter warning:
-    setTitle(other.getTitle());
-    return *this;
-  }
+
+  /// Insert box bisects in position-along-line coords in a single dimension
+  void getBoundariesInDimension(const Mantid::Kernel::VMD &start,
+                                const Mantid::Kernel::VMD &dir,
+                                const size_t num_boundaries,
+                                const coord_t length,
+                                const coord_t dir_current_dim,
+                                const coord_t box_size,
+                                std::set<coord_t> &mid_points) const;
 
   /** MDBox containing all of the events in the workspace. */
   MDBoxBase<MDE, nd> *data;

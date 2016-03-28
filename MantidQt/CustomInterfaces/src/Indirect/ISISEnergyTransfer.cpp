@@ -342,7 +342,7 @@ void ISISEnergyTransfer::setInstrumentDefault() {
   m_uiForm.spSpectraMax->setValue(specMax);
 
   // Plot time spectra spinners
-  m_uiForm.spPlotTimeSpecMin->setMinimum(1);		// 1 to allow for monitors
+  m_uiForm.spPlotTimeSpecMin->setMinimum(1); // 1 to allow for monitors
   m_uiForm.spPlotTimeSpecMin->setMaximum(specMax);
   m_uiForm.spPlotTimeSpecMin->setValue(1);
 

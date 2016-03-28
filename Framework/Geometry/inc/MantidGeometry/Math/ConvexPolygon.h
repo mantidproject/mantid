@@ -91,7 +91,7 @@ public:
   /// Copy-assignment operator
   ConvexPolygon &operator=(const ConvexPolygon &rhs);
   /// Destructor
-  virtual ~ConvexPolygon();
+  virtual ~ConvexPolygon() = default;
 
   /// Check if polygon is valid
   bool isValid() const;

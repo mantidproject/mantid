@@ -24,16 +24,17 @@ DECLARE_ALGORITHM(AsymmetryCalc)
  */
 void AsymmetryCalc::init() {
 
+  declareProperty(make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Name of the input workspace");
   declareProperty(
-      new API::WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
-      "Name of the input workspace");
-  declareProperty(
-      new API::WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "",
+                                            Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
-  declareProperty(new ArrayProperty<int>("ForwardSpectra"),
+  declareProperty(make_unique<ArrayProperty<int>>("ForwardSpectra"),
                   "The spectra numbers of the forward group");
-  declareProperty(new ArrayProperty<int>("BackwardSpectra"),
+  declareProperty(make_unique<ArrayProperty<int>>("BackwardSpectra"),
                   "The spectra numbers of the backward group");
   declareProperty("Alpha", 1.0, "The balance parameter (default 1)",
                   Direction::Input);
@@ -72,8 +73,8 @@ std::map<std::string, std::string> AsymmetryCalc::validateInputs() {
 void AsymmetryCalc::exec() {
   std::vector<int> forward_list = getProperty("ForwardSpectra");
   std::vector<int> backward_list = getProperty("BackwardSpectra");
-  int forward = forward_list.size() ? forward_list[0] : 1;
-  int backward = backward_list.size() ? backward_list[0] : 2;
+  int forward = !forward_list.empty() ? forward_list[0] : 1;
+  int backward = !backward_list.empty() ? backward_list[0] : 2;
   double alpha = getProperty("Alpha");
 
   // Get original workspace

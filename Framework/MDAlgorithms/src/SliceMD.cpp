@@ -37,30 +37,28 @@ SliceMD::~SliceMD() {}
 /** Initialize the algorithm's properties.
  */
 void SliceMD::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDWorkspace.");
 
   // Properties for specifying the slice to perform.
   this->initSlicingProps();
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace.");
 
   declareProperty(
-      new FileProperty("OutputFilename", "", FileProperty::OptionalSave,
-                       {".nxs"}),
+      make_unique<FileProperty>("OutputFilename", "",
+                                FileProperty::OptionalSave, ".nxs"),
       "Optional: Specify a NeXus file to write if you want the output "
       "workspace to be file-backed.");
 
   declareProperty(
-      new PropertyWithValue<int>("Memory", -1),
+      make_unique<PropertyWithValue<int>>("Memory", -1),
       "If OutputFilename is specified to use a file back end:\n"
       "  The amount of memory (in MB) to allocate to the in-memory cache.\n"
       "  If not specified, a default of 40% of free physical memory is used.");
-  // setPropertySettings("Memory", new EnabledWhenProperty("OutputFilename",
-  // IS_NOT_DEFAULT));
 
   declareProperty("TakeMaxRecursionDepthFromInput", true,
                   "Copy the maximum recursion depth from the input workspace.");
@@ -72,8 +70,8 @@ void SliceMD::init() {
                   "Sets the maximum recursion depth to use. Can be used to "
                   "constrain the workspaces internal structure");
   setPropertySettings("MaxRecursionDepth",
-                      new EnabledWhenProperty("TakeMaxRecursionDepthFromInput",
-                                              IS_EQUAL_TO, "0"));
+                      make_unique<EnabledWhenProperty>(
+                          "TakeMaxRecursionDepthFromInput", IS_EQUAL_TO, "0"));
 
   setPropertyGroup("OutputFilename", "File Back-End");
   setPropertyGroup("Memory", "File Back-End");
@@ -137,9 +135,11 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // bc->setCacheParameters(1,0);
 
   BoxController_sptr obc = outWS->getBoxController();
-  // Use the "number of bins" as the "split into" parameter
-  for (size_t od = 0; od < m_binDimensions.size(); od++)
-    obc->setSplitInto(od, m_binDimensions[od]->getNBins());
+  // Use the "number of bins" as the "split into" parameter for the top level
+  for (size_t od = 0; od < m_binDimensions.size(); od++) {
+    obc->setSplitTopInto(od, m_binDimensions[od]->getNBins());
+    obc->setSplitInto(od, bc->getSplitInto(od));
+  }
   obc->setSplitThreshold(bc->getSplitThreshold());
 
   bool bTakeDepthFromInputWorkspace =
@@ -230,9 +230,8 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           // Copy extra data, if any
           copyEvent(*it, newEvent);
           // Add it to the workspace
-          outRootBox->addEvent(newEvent);
-
-          numSinceSplit++;
+          if (outRootBox->addEvent(newEvent))
+            numSinceSplit++;
         }
       }
       box->releaseEvents();
@@ -267,8 +266,10 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Refresh all cache.
   outWS->refreshCache();
 
+  // Account for events that were added after the last split
+  totalAdded += numSinceSplit;
   g_log.notice() << totalAdded << " " << OMDE::getTypeName()
-                 << "'s added to the output workspace." << std::endl;
+                 << "s added to the output workspace." << std::endl;
 
   if (outWS->isFileBacked()) {
     // Update the file-back-end

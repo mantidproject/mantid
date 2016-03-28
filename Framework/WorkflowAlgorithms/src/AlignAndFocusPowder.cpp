@@ -61,11 +61,11 @@ const std::string AlignAndFocusPowder::category() const {
 /** Initialisation method. Declares properties to be used in algorithm.
  */
 void AlignAndFocusPowder::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
   // declareProperty(
   //   new WorkspaceProperty<MatrixWorkspace>("LowResTOFWorkspace", "",
@@ -73,33 +73,34 @@ void AlignAndFocusPowder::init() {
   //   "The name of the workspace containing the filtered low resolution TOF
   //   data.");
   declareProperty(
-      new FileProperty("CalFileName", "", FileProperty::OptionalLoad,
-                       {".h5", ".hd5", ".hdf", ".cal"}),
+      Kernel::make_unique<FileProperty>(
+          "CalFileName", "", FileProperty::OptionalLoad,
+          std::vector<std::string>{".h5", ".hd5", ".hdf", ".cal"}),
       "The name of the CalFile with offset, masking, and grouping data");
   declareProperty(
-      new WorkspaceProperty<GroupingWorkspace>(
+      make_unique<WorkspaceProperty<GroupingWorkspace>>(
           "GroupingWorkspace", "", Direction::InOut, PropertyMode::Optional),
       "Optional: A GroupingWorkspace giving the grouping info.");
 
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>(
+      make_unique<WorkspaceProperty<ITableWorkspace>>(
           "CalibrationWorkspace", "", Direction::InOut, PropertyMode::Optional),
       "Optional: A Workspace containing the calibration information. Either "
       "this or CalibrationFile needs to be specified.");
   declareProperty(
-      new WorkspaceProperty<OffsetsWorkspace>(
+      make_unique<WorkspaceProperty<OffsetsWorkspace>>(
           "OffsetsWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An OffsetsWorkspace giving the detector calibration values.");
-  declareProperty(new WorkspaceProperty<MaskWorkspace>("MaskWorkspace", "",
-                                                       Direction::InOut,
-                                                       PropertyMode::Optional),
-                  "Optional: A workspace giving which detectors are masked.");
-  declareProperty(new WorkspaceProperty<TableWorkspace>("MaskBinTable", "",
-                                                        Direction::Input,
-                                                        PropertyMode::Optional),
-                  "Optional: A workspace giving pixels and bins to mask.");
   declareProperty(
-      new ArrayProperty<double>(
+      make_unique<WorkspaceProperty<MaskWorkspace>>(
+          "MaskWorkspace", "", Direction::InOut, PropertyMode::Optional),
+      "Optional: A workspace giving which detectors are masked.");
+  declareProperty(
+      make_unique<WorkspaceProperty<TableWorkspace>>(
+          "MaskBinTable", "", Direction::Input, PropertyMode::Optional),
+      "Optional: A workspace giving pixels and bins to mask.");
+  declareProperty(
+      make_unique<ArrayProperty<double>>(
           "Params" /*, boost::make_shared<RebinParamsValidator>()*/),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "Optionally\n"
@@ -108,15 +109,15 @@ void AlignAndFocusPowder::init() {
       "Negative width values indicate logarithmic binning.");
   declareProperty("ResampleX", 0, "Number of bins in x-axis. Non-zero value "
                                   "overrides \"Params\" property. Negative "
-                                  "value means logorithmic binning.");
-  setPropertySettings("Params",
-                      new EnabledWhenProperty("ResampleX", IS_DEFAULT));
+                                  "value means logarithmic binning.");
+  setPropertySettings(
+      "Params", make_unique<EnabledWhenProperty>("ResampleX", IS_DEFAULT));
   declareProperty("Dspacing", true,
                   "Bin in Dspace. (True is Dspace; False is TOF)");
-  declareProperty(new ArrayProperty<double>("DMin"),
+  declareProperty(make_unique<ArrayProperty<double>>("DMin"),
                   "Minimum for Dspace axis. (Default 0.) ");
   mapPropertyName("DMin", "d_min");
-  declareProperty(new ArrayProperty<double>("DMax"),
+  declareProperty(make_unique<ArrayProperty<double>>("DMax"),
                   "Maximum for Dspace axis. (Default 0.) ");
   mapPropertyName("DMax", "d_max");
   declareProperty("TMin", EMPTY_DBL(), "Minimum for TOF axis. Defaults to 0. ");
@@ -147,14 +148,14 @@ void AlignAndFocusPowder::init() {
                   "CropWavelengthMin.");
   declareProperty("PrimaryFlightPath", -1.0,
                   "If positive, focus positions are changed.  (Default -1) ");
-  declareProperty(new ArrayProperty<int32_t>("SpectrumIDs"),
+  declareProperty(make_unique<ArrayProperty<int32_t>>("SpectrumIDs"),
                   "Optional: Spectrum IDs (note that it is not detector ID or "
                   "workspace indices).");
-  declareProperty(new ArrayProperty<double>("L2"),
+  declareProperty(make_unique<ArrayProperty<double>>("L2"),
                   "Optional: Secondary flight (L2) paths for each detector");
-  declareProperty(new ArrayProperty<double>("Polar"),
+  declareProperty(make_unique<ArrayProperty<double>>("Polar"),
                   "Optional: Polar angles (two thetas) for detectors");
-  declareProperty(new ArrayProperty<double>("Azimuthal"),
+  declareProperty(make_unique<ArrayProperty<double>>("Azimuthal"),
                   "Azimuthal angles (out-of-plain) for detectors");
 
   declareProperty("LowResSpectrumOffset", -1,
@@ -916,6 +917,8 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
   alg->setProperty<bool>("MakeCalWorkspace", loadCalibration);
   alg->setProperty<bool>("MakeGroupingWorkspace", loadGrouping);
   alg->setProperty<bool>("MakeMaskWorkspace", loadMask);
+  alg->setProperty<double>("TofMin", getProperty("TMin"));
+  alg->setProperty<double>("TofMax", getProperty("TMax"));
   alg->setPropertyValue("WorkspaceName", m_instName);
   alg->executeAsChildAlg();
 

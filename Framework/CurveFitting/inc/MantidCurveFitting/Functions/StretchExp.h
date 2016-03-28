@@ -42,8 +42,6 @@ class DLLExport StretchExp : public API::ParamFunction,
 public:
   /// Constructor
   StretchExp();
-  /// Destructor
-  ~StretchExp() override {}
 
   /// overwrite IFunction base class methods
   std::string name() const override { return "StretchExp"; }

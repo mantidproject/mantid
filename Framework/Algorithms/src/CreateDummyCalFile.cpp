@@ -37,11 +37,11 @@ CreateDummyCalFile::CreateDummyCalFile() : API::Algorithm() {}
  *
  */
 void CreateDummyCalFile::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "The workspace containing the geometry to be calibrated.");
   declareProperty(
-      new FileProperty("CalFilename", "", FileProperty::Save, ".cal"),
+      make_unique<FileProperty>("CalFilename", "", FileProperty::Save, ".cal"),
       "The name of the output [[CalFile]]");
 }
 

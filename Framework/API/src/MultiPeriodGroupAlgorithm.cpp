@@ -35,7 +35,7 @@ bool MultiPeriodGroupAlgorithm::checkGroups() {
     m_worker.reset(new MultiPeriodGroupWorker(propName));
   }
   m_multiPeriodGroups = m_worker->findMultiPeriodGroups(this);
-  bool useDefaultGroupingBehaviour = m_multiPeriodGroups.size() == 0;
+  bool useDefaultGroupingBehaviour = m_multiPeriodGroups.empty();
   /*
    * Give the opportunity to treat this as a regular group workspace.
    */

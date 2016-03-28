@@ -10,6 +10,8 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/ArrayProperty.h"
 
+#include <boost/math/special_functions/round.hpp>
+
 namespace Mantid {
 namespace Crystal {
 
@@ -35,15 +37,15 @@ MaskPeaksWorkspace::~MaskPeaksWorkspace() {}
  */
 void MaskPeaksWorkspace::init() {
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "A workspace containing one or more rectangular area "
                   "detectors. Each spectrum needs to correspond to only one "
                   "pixelID (e.g. no grouping or previous calls to "
                   "SumNeighbours).");
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("InPeaksWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "InPeaksWorkspace", "", Direction::Input),
                   "The name of the workspace that will be created. Can replace "
                   "the input workspace.");
   declareProperty(
@@ -85,8 +87,7 @@ void MaskPeaksWorkspace::exec() {
 
   // Init a table workspace
   DataObjects::TableWorkspace_sptr tablews =
-      boost::shared_ptr<DataObjects::TableWorkspace>(
-          new DataObjects::TableWorkspace());
+      boost::make_shared<DataObjects::TableWorkspace>();
   tablews->addColumn("double", "XMin");
   tablews->addColumn("double", "XMax");
   tablews->addColumn("str", "SpectraList");
@@ -94,14 +95,14 @@ void MaskPeaksWorkspace::exec() {
   // Loop over peaks
   const std::vector<Peak> &peaks = peaksW->getPeaks();
   PARALLEL_FOR3(m_inputW, peaksW, tablews)
-  for (int i = 0; i < static_cast<int>(peaks.size()); i++) {
+  for (int i = 0; i < static_cast<int>(peaks.size()); i++) { // NOLINT
     PARALLEL_START_INTERUPT_REGION
     const Peak &peak = peaks[i];
     // get the peak location on the detector
     double col = peak.getCol();
     double row = peak.getRow();
-    int xPeak = int(col + 0.5) - 1;
-    int yPeak = int(row + 0.5) - 1;
+    int xPeak = boost::math::iround(col) - 1;
+    int yPeak = boost::math::iround(row) - 1;
     g_log.debug() << "Generating information for peak at x=" << xPeak
                   << " y=" << yPeak << "\n";
 

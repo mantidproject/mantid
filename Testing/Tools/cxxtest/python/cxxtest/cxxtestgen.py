@@ -380,12 +380,12 @@ def writeTestDescriptions( output, suite ):
 
 def writeTestDescription( output, suite, test ):
     '''Write test description object'''
-    output.write( 'static class %s : public CxxTest::RealTestDescription {\n' % test['class'] )
+    output.write( 'static class %s final : public CxxTest::RealTestDescription {\n' % test['class'] )
     output.write( 'public:\n' )
     if not options.noStaticInit:
         output.write( ' %s() : CxxTest::RealTestDescription( %s, %s, %s, "%s" ) {}\n' %
                       (test['class'], suite['tlist'], suite['dobject'], test['line'], test['name']) )
-    output.write( ' void runTest() { %s }\n' % runBody( suite, test ) )
+    output.write( ' void runTest() override final { %s }\n' % runBody( suite, test ) )
     output.write( '} %s;\n\n' % test['object'] )
 
 def runBody( suite, test ):

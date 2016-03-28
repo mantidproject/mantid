@@ -73,7 +73,7 @@ public:
   }
   static void destroySuite(ConvertToReflectometryQTest *suite) { delete suite; }
 
-  void setUp() { Mantid::API::FrameworkManager::Instance(); }
+  void setUp() override { Mantid::API::FrameworkManager::Instance(); }
 
   void test_name() {
     ConvertToReflectometryQ alg;
@@ -296,7 +296,7 @@ private:
   WorkspaceGroup_sptr ws;
 
 public:
-  void setUp() {
+  void setUp() override {
     // Load some data
     IAlgorithm *loadalg = FrameworkManager::Instance().createAlgorithm("Load");
     loadalg->setRethrows(true);

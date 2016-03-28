@@ -45,13 +45,13 @@ const std::string IntegrateByComponent::category() const {
 /** Initialize the algorithm's properties.
  */
 void IntegrateByComponent::init() {
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<HistogramValidator>()),
-      "The input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<HistogramValidator>()),
+                  "The input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The output workspace.");
   auto mustBePosInt = boost::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
   declareProperty(
@@ -89,7 +89,7 @@ void IntegrateByComponent::exec() {
           integratedWS->getInstrument();
 
       PARALLEL_FOR1(integratedWS)
-      for (int i = 0; i < static_cast<int>(hists.size()); ++i) {
+      for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
         PARALLEL_START_INTERUPT_REGION
 
         const std::set<detid_t> &detids =
@@ -131,7 +131,7 @@ void IntegrateByComponent::exec() {
       }
 
       PARALLEL_FOR1(integratedWS)
-      for (int i = 0; i < static_cast<int>(hists.size()); ++i) {
+      for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
         PARALLEL_START_INTERUPT_REGION
         const std::set<detid_t> &detids =
             integratedWS->getSpectrum(hists[i])

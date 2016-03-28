@@ -29,8 +29,8 @@ void SANSDirectBeamScaling::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator));
+  declareProperty(make_unique<WorkspaceProperty<>>(
+      "InputWorkspace", "", Direction::Input, wsValidator));
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
@@ -57,9 +57,9 @@ void SANSDirectBeamScaling::init() {
   declareProperty("BeamMonitor", 1, zeroOrMore,
                   "The UDET of the incident beam monitor.");
 
-  declareProperty(new ArrayProperty<double>("ScaleFactor",
-                                            boost::make_shared<NullValidator>(),
-                                            Direction::Output),
+  declareProperty(make_unique<ArrayProperty<double>>(
+                      "ScaleFactor", boost::make_shared<NullValidator>(),
+                      Direction::Output),
                   "Scale factor value and uncertainty [n/(monitor "
                   "count)/(cm^2)/steradian].");
 }
@@ -106,7 +106,7 @@ void SANSDirectBeamScaling::exec() {
     try {
       det = inputWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
-      g_log.warning() << "Spectrum index " << i
+      g_log.warning() << "Workspace index " << i
                       << " has no detector assigned to it - discarding"
                       << std::endl;
       continue;
