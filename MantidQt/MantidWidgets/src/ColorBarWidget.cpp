@@ -310,7 +310,6 @@ void ColorBarWidget::updateColorMap() {
   // Try to limit the number of steps based on the height of the color bar
   int maxMajorSteps =
       m_colorBar->height() / 15; // 15 pixels per div looked about right
-  // std::cout << "maxMajorSteps" << maxMajorSteps << std::endl;
   if (maxMajorSteps > 10)
     maxMajorSteps = 10;
 

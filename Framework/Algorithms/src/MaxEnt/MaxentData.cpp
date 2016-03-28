@@ -31,23 +31,18 @@ void MaxentData::loadReal(const std::vector<double> &data,
     // Data and errors must have the same number of points
     throw std::runtime_error("Couldn't load invalid data");
   }
-  if (image.size() != 2 * data.size()) {
-    // If data and errors have N datapoints, image should have 2N datapoints
-    throw std::runtime_error("Couldn't load invalid data");
+  if (image.size() % (2 * data.size())) {
+    // If data and errors have N datapoints, image should have 2*F*N datapoints
+    // Where F is an integer factor
+    throw std::runtime_error("Couldn't load invalid image");
   }
   if (background == 0) {
     throw std::runtime_error("Background must be positive");
   }
-  // Set to -1, these will be calculated later
-  m_angle = -1.;
-  m_chisq = -1.;
-  // Load image, calculated data and background
-  m_image = image;
-  m_background = background;
-  correctImage();
-  m_dataCalc = transformImageToData(image);
 
   size_t size = data.size();
+
+  initImageSpace(image, background);
 
   m_data = std::vector<double>(2 * size);
   m_errors = std::vector<double>(2 * size);
@@ -88,24 +83,18 @@ void MaxentData::loadComplex(const std::vector<double> &dataRe,
     // Real and imaginary components must have the same number of datapoints
     throw std::runtime_error("Couldn't load invalid data");
   }
-  if (2 * dataRe.size() != image.size()) {
+  if (image.size() % (2 * dataRe.size())) {
     // If real and imaginary parts have N datapoints, image should have 2N
     // datapoints
-    throw std::runtime_error("Couldn't load invalid data");
+    throw std::runtime_error("Couldn't load invalid image");
   }
   if (background == 0) {
     throw std::runtime_error("Background must be positive");
   }
-  // Set to -1, these will be calculated later
-  m_angle = -1.;
-  m_chisq = -1.;
-  // Set the image, background and calculated data
-  m_image = image;
-  m_background = background;
-  correctImage();
-  m_dataCalc = transformImageToData(image);
 
   size_t size = dataRe.size();
+
+  initImageSpace(image, background);
 
   m_data = std::vector<double>(2 * size);
   m_errors = std::vector<double>(2 * size);
@@ -118,6 +107,25 @@ void MaxentData::loadComplex(const std::vector<double> &dataRe,
     m_errors[2 * i] = errorsRe[i];
     m_errors[2 * i + 1] = errorsIm[i];
   }
+}
+
+/**
+* Initializes some of the member variables, those which are common to real and
+* complex data
+* @param image : [input] A starting distribution for the image
+* @param background : [input] The background or sky level
+*/
+void MaxentData::initImageSpace(const std::vector<double> &image,
+                                double background) {
+
+  // Set to -1, these will be calculated later
+  m_angle = -1.;
+  m_chisq = -1.;
+  // Load image, calculated data and background
+  m_image = image;
+  m_background = background;
+  correctImage();
+  m_dataCalc = transformImageToData(image);
 }
 
 /**
@@ -174,17 +182,28 @@ void MaxentData::updateImage(const std::vector<double> &delta) {
 */
 std::vector<double> MaxentData::calculateChiGrad() const {
 
+  // Calculates the gradient of Chi
+  // CGrad_i = -2 * [ data_i - dataCalc_i ] / [ error_i ]^2
+
   if ((m_data.size() != m_errors.size()) ||
-      (m_data.size() != m_dataCalc.size())) {
+      (m_dataCalc.size() % m_data.size())) {
+    // Data and errors must have the same number of data points
+    // but the reconstructed (calculated) data may contain more points
     throw std::invalid_argument("Cannot compute gradient of Chi");
   }
 
-  size_t size = m_data.size();
-
-  // Calculate gradient of Chi
-  // CGrad_i = -2 * [ data_i - dataCalc_i ] / [ error_i ]^2
-  std::vector<double> cgrad(size, 0.);
-  for (size_t i = 0; i < size; i++) {
+  // We only consider the experimental data points to calculate chi grad
+  size_t sizeDat = m_data.size();
+  // The number of calculated data points can be bigger than the number of
+  // experimental data points I am not sure how we should deal with this
+  // situation. On the one hand one can only consider real data and errors to
+  // calculate chi-square, but on the other hand this method should return a
+  // vector of size equal to the size of the calculated data, so I am just
+  // setting the 'leftovers' to zero. This is what is done in the original
+  // muon code.
+  size_t sizeDatCalc = m_dataCalc.size();
+  std::vector<double> cgrad(sizeDatCalc, 0.);
+  for (size_t i = 0; i < sizeDat; i++) {
     if (m_errors[i] != 0)
       cgrad[i] = -2. * (m_data[i] - m_dataCalc[i]) / m_errors[i] / m_errors[i];
   }
@@ -403,24 +422,33 @@ void MaxentData::calculateQuadraticCoefficients() {
     m_coeffs.c1[k][0] /= chiSq;
   }
 
-  // Then s2, c2
+  // Then s2
   m_coeffs.s2 = Kernel::DblMatrix(dim, dim);
-  m_coeffs.c2 = Kernel::DblMatrix(dim, dim);
   for (size_t k = 0; k < dim; k++) {
     for (size_t l = 0; l < k + 1; l++) {
       m_coeffs.s2[k][l] = 0.;
+      for (size_t i = 0; i < npoints; i++) {
+        m_coeffs.s2[k][l] -=
+            m_directionsIm[k][i] * m_directionsIm[l][i] / metric[i];
+      }
+      m_coeffs.s2[k][l] *= 1.0 / m_background;
+    }
+  }
+  // Then c2
+  npoints = m_errors.size();
+  m_coeffs.c2 = Kernel::DblMatrix(dim, dim);
+  for (size_t k = 0; k < dim; k++) {
+    for (size_t l = 0; l < k + 1; l++) {
       m_coeffs.c2[k][l] = 0.;
       for (size_t i = 0; i < npoints; i++) {
         if (m_errors[i] != 0)
           m_coeffs.c2[k][l] += directionsDat[k][i] * directionsDat[l][i] /
                                m_errors[i] / m_errors[i];
-        m_coeffs.s2[k][l] -=
-            m_directionsIm[k][i] * m_directionsIm[l][i] / metric[i];
       }
       m_coeffs.c2[k][l] *= 2.0 / chiSq;
-      m_coeffs.s2[k][l] *= 1.0 / m_background;
     }
   }
+
   // Symmetrise s2, c2: reflect accross the diagonal
   for (size_t k = 0; k < dim; k++) {
     for (size_t l = k + 1; l < dim; l++) {

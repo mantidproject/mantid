@@ -101,9 +101,9 @@ public:
     ew3.initialize();
     ew3.getBoxController()->setSplitThreshold(1);
     const coord_t centers[3] = {1.0f, 2.0f, 3.0f};
-    ew3.addEvent(MDLeanEvent<3>(1.0, 1.0, centers));
-    ew3.addEvent(MDLeanEvent<3>(2.0, 2.0, centers));
-    ew3.addEvent(MDLeanEvent<3>(3.0, 3.0, centers));
+    TS_ASSERT_EQUALS(1, ew3.addEvent(MDLeanEvent<3>(1.0, 1.0, centers)));
+    TS_ASSERT_EQUALS(1, ew3.addEvent(MDLeanEvent<3>(2.0, 2.0, centers)));
+    TS_ASSERT_EQUALS(1, ew3.addEvent(MDLeanEvent<3>(3.0, 3.0, centers)));
     ew3.splitBox();
 
     ExperimentInfo_sptr ei(new ExperimentInfo);
@@ -437,6 +437,28 @@ public:
     TS_ASSERT_EQUALS(binSizes.size(), 2);
     TS_ASSERT_DELTA(binSizes[0], 1.0, 1e-6);
     TS_ASSERT_DELTA(binSizes[1], 1.0, 1e-6);
+  }
+
+  //-------------------------------------------------------------------------------------
+  void test_estimateResolution_with_top_level_splitting() {
+    MDEventWorkspace2Lean::sptr b =
+        MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
+    std::vector<coord_t> binSizes;
+    // First, before any splitting
+    binSizes = b->estimateResolution();
+    TS_ASSERT_EQUALS(binSizes.size(), 2);
+    TS_ASSERT_DELTA(binSizes[0], 10.0, 1e-6);
+    TS_ASSERT_DELTA(binSizes[1], 10.0, 1e-6);
+
+    auto bc = b->getBoxController();
+    bc->setSplitTopInto(0, 5);
+
+    // Resolution is smaller after splitting
+    b->splitBox();
+    binSizes = b->estimateResolution();
+    TS_ASSERT_EQUALS(binSizes.size(), 2);
+    TS_ASSERT_DELTA(binSizes[0], 2.0, 1e-6);
+    TS_ASSERT_DELTA(binSizes[1], 10.0, 1e-6);
   }
 
   ////-------------------------------------------------------------------------------------
