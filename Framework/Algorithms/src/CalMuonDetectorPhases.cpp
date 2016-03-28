@@ -354,17 +354,25 @@ void CalMuonDetectorPhases::getGroupingFromInstrument(
   backward.clear();
 
   const auto instrument = ws->getInstrument();
+  auto loader = Kernel::make_unique<API::GroupingLoader>(instrument);
+
   if (instrument->getName() == "MUSR") {
-    // Two possibilities for grouping, but we have no way of knowing which
-    throw new std::invalid_argument(
-        "Cannot use default instrument grouping for MUSR "
-        "as main field direction is unknown");
+    // Two possibilities for grouping - use workspace log
+    auto fieldDir = ws->run().getLogData("main_field_direction");
+    if (fieldDir) {
+      loader = Kernel::make_unique<API::GroupingLoader>(instrument,
+                                                        fieldDir->value());
+    }
+    if (!fieldDir) {
+      throw std::invalid_argument(
+          "Cannot use default instrument grouping for MUSR "
+          "as main field direction is unknown");
+    }
   }
 
   // Load grouping and find forward, backward groups
   std::string fwdRange, bwdRange;
-  API::GroupingLoader loader(instrument);
-  const auto grouping = loader.getGroupingFromIDF();
+  const auto grouping = loader->getGroupingFromIDF();
   size_t nGroups = grouping->groups.size();
   for (size_t iGroup = 0; iGroup < nGroups; iGroup++) {
     const std::string name = grouping->groupNames[iGroup];
