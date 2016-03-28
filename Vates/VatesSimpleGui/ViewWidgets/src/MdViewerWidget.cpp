@@ -618,26 +618,22 @@ void MdViewerWidget::removeAllRebinning(ModeControlWidget::Views view) {
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel =
       pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources =
+  const QList<pqPipelineSource *> sources =
       smModel->findItems<pqPipelineSource *>(server);
 
   // We need to record all true sources, The filters will be removed in the
   // removeRebinning step
   // Hence the iterator will not point to a valid object anymore.
   QList<pqPipelineSource *> sourcesToAlter;
-
-  for (QList<pqPipelineSource *>::Iterator source = sources.begin();
-       source != sources.end(); ++source) {
-    const QString srcProxyName = (*source)->getProxy()->GetXMLGroup();
-
+  foreach (pqPipelineSource *source, sources) {
+    const QString srcProxyName = source->getProxy()->GetXMLGroup();
     if (srcProxyName == QString("sources")) {
-      sourcesToAlter.push_back(*source);
+      sourcesToAlter.push_back(source);
     }
   }
 
-  for (QList<pqPipelineSource *>::Iterator source = sourcesToAlter.begin();
-       source != sourcesToAlter.end(); ++source) {
-    removeRebinning(*source, false, view);
+  foreach (pqPipelineSource *source, sourcesToAlter) {
+    removeRebinning(source, false, view);
   }
 }
 
@@ -838,10 +834,10 @@ MdViewerWidget::getViewForInstrument(const std::string &instrumentName) const {
 
     if (techniques.count("Single Crystal Diffraction") > 0) {
       associatedView = mdConstants.getSplatterPlotView();
-    } else if (techniques.count("Neutron Diffraction") > 0) {
-      associatedView = mdConstants.getSplatterPlotView();
     } else if (checkIfTechniqueContainsKeyword(techniques, "Spectroscopy")) {
       associatedView = mdConstants.getMultiSliceView();
+    } else if (techniques.count("Neutron Diffraction") > 0) {
+      associatedView = mdConstants.getSplatterPlotView();
     } else {
       associatedView = mdConstants.getStandardView();
     }
@@ -1408,6 +1404,22 @@ void MdViewerWidget::dropEvent(QDropEvent *e) {
   }
 }
 
+/* Verify that at least one source other than a "Peaks Source" has been loaded
+ * in the VSI.
+ * @return true if something other than a Peaks Source is found.
+ */
+bool otherWorkspacePresent() {
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel =
+      pqApplicationCore::instance()->getServerManagerModel();
+  auto sources = smModel->findItems<pqPipelineSource *>(server);
+  auto result = std::find_if(
+      sources.begin(), sources.end(), [](const pqPipelineSource *src) {
+        return strcmp(src->getProxy()->GetXMLName(), "Peaks Source") != 0;
+      });
+  return result != sources.end();
+}
+
 /**
   * Handle the drag and drop events of peaks workspaces.
   * @param e The event.
@@ -1422,7 +1434,10 @@ void MdViewerWidget::handleDragAndDropPeaksWorkspaces(QEvent *e, QString text,
     int startIndex = text.indexOf("[\"", endIndex) + 2;
     endIndex = text.indexOf("\"]", startIndex);
     QString candidate = text.mid(startIndex, endIndex - startIndex);
-    if (dynamic_cast<SplatterPlotView *>(this->currentView)) {
+    // Only append the candidate if SplattorPlotView is selected and an
+    // MDWorkspace is loaded.
+    if (dynamic_cast<SplatterPlotView *>(this->currentView) &&
+        otherWorkspacePresent()) {
       if (boost::dynamic_pointer_cast<IPeaksWorkspace>(
               AnalysisDataService::Instance().retrieve(
                   candidate.toStdString()))) {
