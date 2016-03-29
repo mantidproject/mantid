@@ -10,8 +10,13 @@
 namespace Mantid {
 namespace API {
 
-/** IFunctionGeneral :
+/** IFunctionGeneral: a very general function definition.
+    It gets its arguments from a FunctionDomainGeneral and they
+    can have any type. An argument can be a collection of a number
+    of values of different types.
 
+    The domain and the values object can have different sizes.
+    In particular the domain can be empty.
     
 
     Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -45,6 +50,20 @@ public:
   /// FunctionDomainGeneral.
   virtual void functionGeneral(const FunctionDomainGeneral &domain,
                                   FunctionValues &values) const = 0;
+
+  /// Get number of columns that the domain must have.
+  /// If consider the collection of these columns as a table
+  /// then a row corresponds to a single (multi-valued) argument.
+  virtual size_t getNumberDomainColumns() const = 0;
+
+  /// Get number of values per argument in the domain.
+  virtual size_t getNumberValuesPerArgument() const = 0;
+
+  /// Get the default size of an output FunctionValues object.
+  /// It is a number of values the function will produce if it is 
+  /// given an empty domain.
+  /// The default size must not be infinite (max of size_t).
+  virtual size_t getDefaultValuesSize() const;
 
 protected:
   static Kernel::Logger g_log;
