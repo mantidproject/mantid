@@ -528,17 +528,10 @@ class TestRunner(object):
         '''
         Spawn a new process and run the given command within it
         '''
-
         proc = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE,
                                 stderr = subprocess.STDOUT, bufsize=-1)
-        std_out = ""
-        std_err = ""
-        for line in proc.stdout:
-            print line,
-            std_out += line
-        proc.wait()
-
-        return proc.returncode, std_out, std_err 
+        std_out, _ = proc.communicate()
+        return proc.returncode, std_out
     
     def start(self, script):
         '''
@@ -568,8 +561,7 @@ class TestScript(object):
         self._test_cls_name = test_cls_name
 
     def asString(self):
-        code = '''
-import sys
+        code = '''import sys
 sys.path.append('{0}')
 sys.path.append('{1}')
 from {2} import {3}
@@ -630,9 +622,12 @@ class TestSuite(object):
 
     def execute(self, runner):
         print time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()) + ': Executing ' + self._fqtestname
-        script = TestScript(self._test_dir, self._modname, self._test_cls_name)
-        # Start the new process and wait until it finishes
-        retcode, output, err = runner.start(script)
+        if self._test_cls_name is not None:
+          script = TestScript(self._test_dir, self._modname, self._test_cls_name)
+          # Start the new process and wait until it finishes
+          retcode, output  = runner.start(script)
+        else:
+          retcode, output = TestRunner.SKIP_TEST, ""
         self._result.date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         self._result.addItem(['test_date',self._result.date])
 
