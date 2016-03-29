@@ -239,6 +239,7 @@ void ImageROIViewQtWidget::initLayout() {
   m_ui.splitter_img_vertical->setSizes(sizes);
   m_ui.horizontalScrollBar_img_stack->setEnabled(false);
   m_ui.lineEdit_img_seq->setText("---");
+  m_ui.label_img_name->setText("none");
 
   enableParamWidgets(false);
 
@@ -639,30 +640,20 @@ void ImageROIViewQtWidget::showProjectionImage(
     const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx,
     float rotationAngle) {
 
-  MatrixWorkspace_sptr ws;
-  try {
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(idx));
-    if (!ws)
-      return;
-  } catch (std::exception &e) {
-    QMessageBox::warning(
-        this, "Cannot load image",
-        "There was a problem while trying to find the image data: " +
-            QString::fromStdString(e.what()));
-    return;
-  }
-
   size_t width, height;
+  std::string imgName;
+  Mantid::API::MatrixWorkspace_sptr ws;
   try {
-    getCheckedDimensions(ws, width, height);
+    checkNewProjectionImage(wsg, idx, width, height, ws, imgName);
   } catch (std::runtime_error &rexc) {
     QMessageBox::critical(this, "Cannot load image",
                           "There was a problem while trying to "
-                          "find the width of the image: " +
+                          "find essential parameters of the image. Details: " +
                               QString::fromStdString(rexc.what()));
     return;
   }
 
+  m_ui.label_img_name->setText(QString::fromStdString(imgName));
   // load / transfer image into a QImage, handling the rotation, width height
   // consistently
   QPixmap pixmap = transferWSImageToQPixmap(ws, width, height, rotationAngle);
@@ -750,6 +741,57 @@ ImageROIViewQtWidget::transferWSImageToQPixmap(const MatrixWorkspace_sptr ws,
   // painter.end();
 
   return pix;
+}
+
+/**
+ * Finds several parameters from an image in a stack (given the group
+ * of images and an index), checking for errors. This is meant to be
+ * used whenever a new image is going to be shown (for example when
+ * using the slider to go through a stack).
+ *
+ * @param wsg the group of images
+ * @param idx index of the image
+ * @param width width or number of columns (in pixels)
+ * @param height height or number of rows (in pixels)
+ * @param imgWS image workspace corresponding to the index given
+ * @param imgName name of the image (normally derived from the
+ * original filename)
+ *
+ * @throws runtime_error when unrecoverable errors are found (no
+ * data, issue with dimensions, etc.).
+ */
+void ImageROIViewQtWidget::checkNewProjectionImage(
+    const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx, size_t &width,
+    size_t &height, Mantid::API::MatrixWorkspace_sptr &imgWS,
+    std::string &imgName) {
+  try {
+    imgWS = boost::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(idx));
+    if (!imgWS)
+      return;
+  } catch (std::exception &exc) {
+    throw std::runtime_error(
+        "There was a problem while trying to find the image data: " +
+        QString::fromStdString(exc.what()));
+  }
+
+  try {
+    getCheckedDimensions(imgWS, width, height);
+  } catch (std::runtime_error &rexc) {
+    throw std::runtime_error("There was a problem while trying to "
+                             "find the width of the image: " +
+                             QString::fromStdString(rexc.what()));
+    return;
+  }
+
+  try {
+    imgName = imgWS->run().getLogData("run_title")->value();
+  } catch (std::exception &e) {
+    QMessageBox::warning(
+        this, "Cannot load image information",
+        "There was a problem while "
+        " trying to find the name (run_title log entry) of the image: " +
+            QString::fromStdString(e.what()));
+  }
 }
 
 /**

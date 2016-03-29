@@ -493,7 +493,7 @@ std::string ImageROIPresenter::filterImagePathsForFITSStack(
 
     const std::string msg =
         "Found file(s) that look like summed images (have '" + summedSkipStr +
-        "' in their names) in this "
+        "' in their name) in this "
         "stack ( " +
         m_stackPath + "). Ignoring them under the assumption that these are "
                       "note original images. Please make sure that this is "

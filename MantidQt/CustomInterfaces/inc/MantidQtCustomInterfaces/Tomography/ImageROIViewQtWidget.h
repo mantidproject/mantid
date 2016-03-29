@@ -188,6 +188,11 @@ private:
   void getCheckedDimensions(const Mantid::API::MatrixWorkspace_sptr ws,
                             size_t &width, size_t &height);
 
+  void checkNewProjectionImage(const Mantid::API::WorkspaceGroup_sptr &wsg,
+                               size_t idx, size_t &width, size_t &height,
+                               Mantid::API::MatrixWorkspace_sptr &imgWS,
+                               std::string &imgName);
+
   void getPixelMinMax(Mantid::API::MatrixWorkspace_sptr ws, double &min,
                       double &max);
 
