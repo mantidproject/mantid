@@ -28,9 +28,8 @@ const char *MASS_NAME = "Mass";
  */
 ComptonProfile::ComptonProfile()
     : API::ParamFunction(), API::IFunction1D(), m_log("ComptonProfile"),
-      m_wsIndex(0), m_mass(0.0), m_voigt(), m_resolutionFunction(), m_yspace(),
-      m_modQ(), m_e0() {
-
+      m_wsIndex(0), m_voigt(), m_resolutionFunction(), m_yspace(), m_modQ(),
+      m_e0(), m_mass(0.0) {
   using namespace Mantid::API;
   m_resolutionFunction = boost::dynamic_pointer_cast<VesuvioResolution>(
       FunctionFactory::Instance().createFunction("VesuvioResolution"));
@@ -77,9 +76,6 @@ void ComptonProfile::setUpForFit() {
 void ComptonProfile::setMatrixWorkspace(
     boost::shared_ptr<const API::MatrixWorkspace> workspace, size_t wsIndex,
     double startX, double endX) {
-  UNUSED_ARG(startX);
-  UNUSED_ARG(endX);
-
   auto inst = workspace->getInstrument();
   auto sample = inst->getSample();
   auto source = inst->getSource();
@@ -87,10 +83,18 @@ void ComptonProfile::setMatrixWorkspace(
     throw std::invalid_argument(
         "ComptonProfile - Workspace has no source/sample.");
   }
+  m_workspace = workspace;
   m_wsIndex = wsIndex;
+  m_startX = startX;
+  m_endX = endX;
+
+  buildCaches();
+}
+
+void ComptonProfile::buildCaches() {
   Geometry::IDetector_const_sptr det;
   try {
-    det = workspace->getDetector(m_wsIndex);
+    det = m_workspace->getDetector(m_wsIndex);
   } catch (Kernel::Exception::NotFoundError &) {
     throw std::invalid_argument("ComptonProfile - Workspace has no detector "
                                 "attached to histogram at index " +
@@ -98,18 +102,20 @@ void ComptonProfile::setMatrixWorkspace(
   }
 
   m_resolutionFunction->setAttributeValue("Mass", m_mass);
-  m_resolutionFunction->setMatrixWorkspace(workspace, wsIndex, startX, endX);
+  m_resolutionFunction->setMatrixWorkspace(m_workspace, m_wsIndex, m_startX,
+                                           m_endX);
 
   Algorithms::DetectorParams detpar =
-      ConvertToYSpace::getDetectorParameters(workspace, m_wsIndex);
-  this->cacheYSpaceValues(workspace->readX(m_wsIndex),
-                          workspace->isHistogramData(), detpar);
+      ConvertToYSpace::getDetectorParameters(m_workspace, m_wsIndex);
+  this->cacheYSpaceValues(m_workspace->readX(m_wsIndex),
+                          m_workspace->isHistogramData(), detpar);
 }
 
 void ComptonProfile::cacheYSpaceValues(const std::vector<double> &tseconds,
                                        const bool isHistogram,
                                        const Algorithms::DetectorParams &detpar,
                                        const ResolutionParams &respar) {
+  m_resolutionFunction->setAttributeValue("Mass", m_mass);
   m_resolutionFunction->cacheResolutionComponents(detpar, respar);
   this->cacheYSpaceValues(tseconds, isHistogram, detpar);
 }
@@ -147,20 +153,21 @@ void ComptonProfile::cacheYSpaceValues(
 
 /**
  */
-void ComptonProfile::declareAttributes() {
-  declareAttribute(MASS_NAME, IFunction::Attribute(m_mass));
+void ComptonProfile::declareParameters() {
+  declareParameter(MASS_NAME, 0.0, "Atomic mass (amu)");
 }
 
-/**
- * @param name The name of the attribute
- * @param value The attribute's value
- */
-void ComptonProfile::setAttribute(const std::string &name,
-                                  const Attribute &value) {
-  IFunction::setAttribute(name, value); // Make sure the base-class stores it
-  if (name == MASS_NAME) {
-    m_mass = value.asDouble();
+void ComptonProfile::setParameter(size_t i, const double &value,
+                                  bool explicitlySet) {
+  ParamFunction::setParameter(i, value, explicitlySet);
+
+  // Mass parameter has changed, need to rebuild Y-space cache
+  if (i == parameterIndex(MASS_NAME) && m_mass != value) {
+    m_mass = value;
     m_resolutionFunction->setAttributeValue("Mass", m_mass);
+
+    if (m_workspace)
+      buildCaches();
   }
 }
 

@@ -49,24 +49,32 @@ public:
   /// A string representation of the component type
   std::string type() const override { return "RectangularDetectorPixel"; }
 
-  /// Constructor for parametrized version
-  RectangularDetectorPixel(const RectangularDetectorPixel *base,
-                           const ParameterMap *map);
   RectangularDetectorPixel(const std::string &name, int id,
                            boost::shared_ptr<Object> shape, IComponent *parent,
                            RectangularDetector *panel, size_t row, size_t col);
 
   RectangularDetectorPixel();
 
+  /// Create a cloned instance with a parameter map applied
+  RectangularDetectorPixel *
+  cloneParameterized(const ParameterMap *map) const override {
+    return new RectangularDetectorPixel(this, map);
+  }
+
   const Kernel::V3D getRelativePos() const override;
 
-protected:
+private:
   /// RectangularDetector that is the parent of this pixel.
   RectangularDetector *m_panel;
   /// Row of the pixel in the panel (y index)
   size_t m_row;
   /// Column of the pixel in the panel (x index)
   size_t m_col;
+
+protected:
+  /// Constructor for parametrized version
+  RectangularDetectorPixel(const RectangularDetectorPixel *base,
+                           const ParameterMap *map);
 };
 
 } // namespace Geometry

@@ -99,8 +99,13 @@ void LoadDiffCal::init() {
   declareProperty("TofMin", 0., "Minimum for TOF axis. Defaults to 0.");
   declareProperty("TofMax", EMPTY_DBL(),
                   "Maximum for TOF axis. Defaults to Unused.");
+  declareProperty(Kernel::make_unique<PropertyWithValue<bool>>(
+                      "FixConversionIssues", true, Direction::Input),
+                  "Set DIFA and TZERO to zero if there is an error and the "
+                  "pixel is masked");
   setPropertyGroup("TofMin", grpName);
   setPropertyGroup("TofMax", grpName);
+  setPropertyGroup("FixConversionIssues", grpName);
 }
 
 namespace { // anonymous
@@ -358,7 +363,8 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
                                    const std::vector<double> &difa,
                                    const std::vector<double> &tzero,
                                    const std::vector<int32_t> &dasids,
-                                   const std::vector<double> &offsets) {
+                                   const std::vector<double> &offsets,
+                                   const std::vector<int32_t> &use) {
   bool makeWS = getProperty("MakeCalWorkspace");
   if (!makeWS) {
     g_log.information("Not making a calibration workspace");
@@ -370,6 +376,7 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
 
   bool haveDasids = !dasids.empty();
   bool haveOffsets = !offsets.empty();
+  bool fixIssues = getProperty("FixConversionIssues");
 
   double tofMin = getProperty("TofMin");
   double tofMax = getProperty("TofMax");
@@ -426,6 +433,27 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
       if (haveDasids)
         longMsg << ", dasid=" << dasids[i];
       longMsg << "] " << msg.str();
+
+      // to fix issues for masked pixels, just zero difa and tzero
+      if (fixIssues && (!use[i])) {
+        longMsg << " pixel is masked, ";
+        longMsg << " changing difa (" << wksp->cell<double>(i, 2) << " to 0.)";
+        wksp->cell<double>(i, 2) = 0.;
+
+        longMsg << " and tzero (" << wksp->cell<double>(i, 3) << " to 0.)";
+        wksp->cell<double>(i, 3) = 0.;
+
+        // restore valid tof range
+        size_t index = 4; // where tofmin natively is
+        if (haveDasids)
+          index += 1;
+        if (haveOffsets)
+          index += 1;
+        wksp->cell<double>(i, index) = tofMin;
+        if (useTofMax)
+          wksp->cell<double>(i, index + 1) = tofMax;
+      }
+
       this->g_log.warning(longMsg.str());
     }
 
@@ -543,7 +571,7 @@ void LoadDiffCal::exec() {
   // create the appropriate output workspaces
   makeGroupingWorkspace(detids, groups);
   makeMaskWorkspace(detids, use);
-  makeCalWorkspace(detids, difc, difa, tzero, dasids, offset);
+  makeCalWorkspace(detids, difc, difa, tzero, dasids, offset, use);
 }
 
 } // namespace DataHandling
