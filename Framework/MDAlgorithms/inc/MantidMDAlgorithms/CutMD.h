@@ -56,11 +56,11 @@ public:
   void init() override;
   void exec() override;
 
-  static const std::string InvAngstromSymbol;
-  static const std::string RLUSymbol;
-  static const std::string AutoMethod;
-  static const std::string RLUMethod;
-  static const std::string InvAngstromMethod;
+  static const DLLExport std::string InvAngstromSymbol;
+  static const DLLExport std::string RLUSymbol;
+  static const DLLExport std::string AutoMethod;
+  static const DLLExport std::string RLUMethod;
+  static const DLLExport std::string InvAngstromMethod;
 };
 
 } // namespace MDAlgorithms
