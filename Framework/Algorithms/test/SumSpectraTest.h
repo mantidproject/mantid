@@ -429,4 +429,45 @@ private:
   MatrixWorkspace_sptr inputSpace;
 };
 
+class SumSpectraTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static SumSpectraTestPerformance *createSuite() {
+    return new SumSpectraTestPerformance();
+  }
+  static void destroySuite(SumSpectraTestPerformance *suite) {
+    AnalysisDataService::Instance().clear();
+    delete suite;
+  }
+
+  SumSpectraTestPerformance() {
+    input = WorkspaceCreationHelper::Create2DWorkspaceBinned(40000, 10000);
+    inputEvent =
+        WorkspaceCreationHelper::CreateEventWorkspace(20000, 1000, 2000);
+  }
+
+  void testExec2D() {
+    Algorithms::SumSpectra alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", input);
+    alg.setProperty("IncludeMonitors", false);
+    alg.setPropertyValue("OutputWorkspace", "SumSpectra2DOut");
+    alg.execute();
+  }
+
+  void testExecEvent() {
+    Algorithms::SumSpectra alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inputEvent);
+    alg.setProperty("IncludeMonitors", false);
+    alg.setPropertyValue("OutputWorkspace", "SumSpectraEventOut");
+    alg.execute();
+  }
+
+private:
+  MatrixWorkspace_sptr input;
+  EventWorkspace_sptr inputEvent;
+};
+
 #endif /*SUMSPECTRATEST_H_*/

@@ -67,6 +67,13 @@ public:
       : m_pres(pres), m_runNo(runNo), m_bin(timeStep), m_nperiods(nperiods),
         m_outWSName(outWSName) {}
 
+  // for fitting (single peak fits)
+  EnggDiffWorker(EnggDiffractionPresenter *pres,
+                 const std::string &focusedRunNo,
+                 const std::string &ExpectedPeaks)
+      : m_pres(pres), m_runNo(focusedRunNo), m_expectedPeaks(ExpectedPeaks),
+        m_bin(.0), m_nperiods(0) {}
+
 private slots:
 
   /**
@@ -103,6 +110,11 @@ private slots:
     emit finished();
   }
 
+  void fitting() {
+    m_pres->doFitting(m_runNo, m_expectedPeaks);
+    emit finished();
+  }
+
 signals:
   void finished();
 
@@ -127,6 +139,8 @@ private:
   const std::string m_SpectrumNos;
   // for focusing "texture"
   const std::string m_dgFile;
+  // parameters for fitting
+  const std::string m_expectedPeaks;
   // parameters for pre-processing/rebinning
   const double m_bin;
   const size_t m_nperiods;

@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/ArrayProperty.cpp
 	src/Atom.cpp
 	src/BinFinder.cpp
+	src/BinaryStreamReader.cpp
 	src/CPUTimer.cpp
 	src/CatalogInfo.cpp
 	src/ChecksumHelper.cpp
@@ -136,6 +137,7 @@ set ( INC_FILES
 	inc/MantidKernel/Atom.h
 	inc/MantidKernel/BinFinder.h
 	inc/MantidKernel/BinaryFile.h
+	inc/MantidKernel/BinaryStreamReader.h
 	inc/MantidKernel/BoundedValidator.h
 	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/Cache.h
@@ -289,6 +291,7 @@ set ( TEST_FILES
 	AtomTest.h
 	BinFinderTest.h
 	BinaryFileTest.h
+	BinaryStreamReaderTest.h
 	BoseEinsteinDistributionTest.h
 	BoundedValidatorTest.h
 	CPUTimerTest.h

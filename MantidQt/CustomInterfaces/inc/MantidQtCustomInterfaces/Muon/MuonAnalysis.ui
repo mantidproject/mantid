@@ -1069,7 +1069,7 @@ p, li { white-space: pre-wrap; }
                </item>
                <item>
                 <property name="text">
-                 <string>Logorithm</string>
+                 <string>Logarithm</string>
                 </property>
                </item>
               </widget>

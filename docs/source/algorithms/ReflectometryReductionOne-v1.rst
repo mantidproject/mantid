@@ -24,11 +24,12 @@ background normalization will not be performed on the monitors.
 Analysis Modes
 ##############
 
-The default analysis mode is *PointDetectorAnalysis*. Only this mode
-supports Transmission corrections (see below). For PointAnalysisMode the
+The default analysis mode is *PointDetectorAnalysis*. For PointAnalysisMode the
 analysis can be roughly reduced to IvsLam = DetectorWS / sum(I0) /
-TransmissionWS / sum(I0). The normalization by tranmission run(s) is
-optional. If necessary, input workspaces are converted to *Wavelength*
+TransmissionWS / sum(I0). For MultiDetectorAnalysis the analysis can be roughly reduced to 
+IvsLam = DetectorWS / RegionOfDirectBeamWS / sum(I0) / TransmissionWS / sum(I0).
+The normalization by tranmission run(s) is optional.
+If necessary, input workspaces are converted to *Wavelength*
 first via :ref:`algm-ConvertUnits`.
 
 IvsQ is calculated via :ref:`algm-ConvertUnits` into units of
@@ -40,8 +41,8 @@ Theta input value has been provided.
 Transmission Runs
 #################
 
-Transmission correction is a normalization step, which may be applied to
-*PointDetectorAnalysis* reduction.
+Transmission correction is a normalization step, which may be applied to both
+*PointDetectorAnalysis* and *MultiDetectorAnalysis* reduction.
 
 Transmission runs are expected to be in TOF. The spectra numbers in the
 Transmission run workspaces must be the same as those in the Input Run

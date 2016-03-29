@@ -81,6 +81,9 @@ private:
   /// Names of the non-timeseries logs we should display
   static const QStringList NON_TIMESERIES_LOGS;
 
+  /// "run_number" log string
+  static const QString RUN_NUMBER_LOG;
+
   /// LessThan function used to sort log names
   static bool logNameLessThan(const QString& logName1, const QString& logName2);
 
@@ -133,6 +136,10 @@ private:
   std::string getFileName();
   QMap<int,int> getWorkspaceColors(const QStringList& wsList);
   
+  /// Gets "run number: period" string from workspace
+  static QString runNumberString(const std::string &workspaceName,
+                                 const std::string &firstRun);
+
   Ui::MuonAnalysis& m_uiForm;
   int m_numLogsdisplayed;
   
