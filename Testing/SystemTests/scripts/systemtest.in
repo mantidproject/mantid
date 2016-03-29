@@ -53,10 +53,19 @@ fi
 # For multi-config generators mantidpython is in a config-dependent subdirectory, otherwise it's just in bin
 MANTIDPYTHON=""
 setup_mantidpython_path $1 $2
+CMAKE_TARGET_ARG=""
 if [ "$MULTI_CONFIG_GENERATOR" == "true" ]; then
   shift 2
+  CMAKE_TARGET_ARG="-target"
 fi
 
+# Update test data targets
+echo "Updating testing data..."
+cmake --build . $CMAKE_TARGET_ARG -- StandardTestData
+cmake --build . $CMAKE_TARGET_ARG -- SystemTestData
+
 # Execute
+echo
+echo "Running tests..."
 $MANTIDPYTHON $MANTIDPYTHON_ARGS $RUNNER_SCRIPT \
   --executable="${MANTIDPYTHON}" --exec-args="${MANTIDPYTHON_ARGS}" "$@"
