@@ -677,7 +677,7 @@ public:
     alg.setProperty("P3Bin", "-0.4,0.8");
     alg.setProperty("P4Bin", "-1.0,1.0");
     alg.setProperty("Projection", proj);
-    alg.setProperty("NoPix", true);
+    alg.setProperty("NoPix", false);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     IMDWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
