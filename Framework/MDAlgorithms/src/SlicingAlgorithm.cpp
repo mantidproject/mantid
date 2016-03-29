@@ -1100,11 +1100,16 @@ SlicingAlgorithm::extractMDFrameForNonAxisAligned(
   }
 
   Mantid::Geometry::MDFrame_uptr mdFrame(referenceMDFrame.clone());
-  setTargetUnits(mdFrame, unit);
+  setTargetUnits(mdFrame, units);
 
   return mdFrame;
 }
 
+/*
+ * Set units of the output workspace
+ * @param mdFrame: MDFrame to be added to the output workspace
+ * @param unit: the unit to use in mdFrame
+ */
 void SlicingAlgorithm::setTargetUnits(Mantid::Geometry::MDFrame_uptr &mdFrame,
                                       const std::string &unit) const {
   boost::regex pattern("in.*A.*\\^-1");
