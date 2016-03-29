@@ -172,7 +172,7 @@ where:
 
 * *data* is the root or base path for all tomography data. This folder
   or directory is synchronized (at least partially) between the remote
-  compure resource and the (local) instrument analysis machine.
+  compute resource and the (local) instrument analysis machine.
 
 * *RB987654321* is the experiment reference number (or so-called RB
 number) which usually starts with the prefix "RB".

@@ -254,11 +254,11 @@ void TomographyIfacePresenter::findFlatsDarksFromSampleGivenByUser(
     const std::string darksPrefix = "dark";
 
     if (boost::iequals(name.substr(0, flatsPrefix.length()), flatsPrefix)) {
-      cfg.updatePathOpenBeam(it->path());
+      cfg.updatePathOpenBeam(it->path(), cfg.m_pathOpenBeamEnabled);
       foundFlat = true;
     } else if (boost::iequals(name.substr(0, darksPrefix.length()),
                               darksPrefix)) {
-      cfg.updatePathDarks(it->path());
+      cfg.updatePathDarks(it->path(), cfg.m_pathDarkEnabled);
       foundDark = true;
     }
     if (foundFlat && foundDark)

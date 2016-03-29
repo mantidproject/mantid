@@ -305,35 +305,37 @@ public:
   }
 
   void test_changePathsWithBrowseNonEmpty() {
-    testing::NiceMock<MockTomographyIfaceView> mockView;
-    MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
+    for (bool enableFlatDark : {true, false}) {
+      testing::NiceMock<MockTomographyIfaceView> mockView;
+      MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
-    TomoPathsConfig cfg;
-    cfg.updatePathSamples("/nowhere/foo_samples");
-    cfg.updatePathOpenBeam("/nonexistent/bla_ob");
-    cfg.updatePathDarks("/missing_place/bla_dark");
-    mockView.updatePathsConfig(cfg);
+      TomoPathsConfig cfg;
+      cfg.updatePathSamples("/nowhere/foo_samples");
+      cfg.updatePathOpenBeam("/nonexistent/bla_ob", enableFlatDark);
+      cfg.updatePathDarks("/missing_place/bla_dark", enableFlatDark);
+      mockView.updatePathsConfig(cfg);
 
-    EXPECT_CALL(mockView, updatePathsConfig(testing::_)).Times(0);
-    EXPECT_CALL(mockView, experimentReference()).Times(0);
-    EXPECT_CALL(
-        mockView,
-        showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
-            testing::_))).Times(0);
-    EXPECT_CALL(mockView,
-                showImage(testing::Matcher<const std::string &>(testing::_)))
-        .Times(0);
+      EXPECT_CALL(mockView, updatePathsConfig(testing::_)).Times(0);
+      EXPECT_CALL(mockView, experimentReference()).Times(0);
+      EXPECT_CALL(
+          mockView,
+          showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
+              testing::_))).Times(0);
+      EXPECT_CALL(mockView,
+                  showImage(testing::Matcher<const std::string &>(testing::_)))
+          .Times(0);
 
-    // needs some basic paths config - using defaults from constructor
-    EXPECT_CALL(mockView, currentPathsConfig())
-        .Times(1)
-        .WillOnce(Return(TomoPathsConfig()));
+      // needs some basic paths config - using test / inexistent paths
+      EXPECT_CALL(mockView, currentPathsConfig())
+          .Times(1)
+          .WillOnce(Return(cfg));
 
-    // No errors, no warnings
-    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+      // No errors, no warnings
+      EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+      EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(ITomographyIfacePresenter::TomoPathsChanged);
+      pres.notify(ITomographyIfacePresenter::TomoPathsChanged);
+    }
   }
 
   void test_changePathsEditingByHandEmpty() {
