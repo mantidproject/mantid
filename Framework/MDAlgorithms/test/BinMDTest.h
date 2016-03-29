@@ -959,7 +959,7 @@ public:
     // The algorithm should still successfully execute, even if the workspace is
     // file-backed and the named instrument doesn't exist
 
-    // -------- Create workspace with non-existent instrument ----------
+    // Create workspace with non-existent instrument
     Mantid::Geometry::QSample frame;
     IMDEventWorkspace_sptr in_ws =
         MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<3>, 3>(
@@ -978,42 +978,12 @@ public:
     exp_info->setInstrument(inst);
     in_ws->setExperimentInfo(0, exp_info);
 
-    // -------- Save the workspace ---------------
-    SaveMD2 saver;
-    saver.setChild(true);
-    saver.setRethrows(true);
-    saver.initialize();
-    TS_ASSERT(saver.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(saver.setProperty("InputWorkspace", in_ws));
-    TS_ASSERT_THROWS_NOTHING(
-        saver.setPropertyValue("Filename", "BinMDTestFileBack.nxs"));
+    auto filename = saveWorkspace(in_ws);
+    auto outWSName = loadFileBackWorkspace(filename);
+    runBinMDOnFileBackWorkspace(outWSName);
+  }
 
-    // Retrieve the full path; delete any pre-existing file
-    std::string filename = saver.getPropertyValue("Filename");
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
-
-    TS_ASSERT_THROWS_NOTHING(saver.execute(););
-    TS_ASSERT(saver.isExecuted());
-
-    //------ Load the workspace as file-backed ----------------
-    // Name of the output workspace.
-    std::string outWSName("BinMDTest_filebackWS");
-
-    LoadMD loader;
-    loader.setRethrows(true);
-    loader.initialize();
-    TS_ASSERT(loader.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", filename));
-    TS_ASSERT_THROWS_NOTHING(loader.setProperty("FileBackEnd", true));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(loader.setProperty("MetadataOnly", false));
-    TS_ASSERT_THROWS_NOTHING(loader.setProperty("BoxStructureOnly", false));
-    TS_ASSERT_THROWS_NOTHING(loader.execute(););
-    TS_ASSERT(loader.isExecuted());
-
-    //------- Run BinMD on the file-backed workspace ----------
+  void runBinMDOnFileBackWorkspace(const std::string &outWSName) {
     BinMD alg;
     alg.setChild(true);
     alg.setRethrows(true);
@@ -1034,6 +1004,47 @@ public:
                               "still execute",
                               alg.execute();)
     TS_ASSERT(alg.isExecuted());
+  }
+
+  std::string loadFileBackWorkspace(const std::string &filename) {
+    // Name of the output workspace.
+    std::string outWSName("BinMDTest_filebackWS");
+
+    LoadMD loader;
+    loader.setRethrows(true);
+    loader.initialize();
+    TS_ASSERT(loader.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("FileBackEnd", true));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("MetadataOnly", false));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("BoxStructureOnly", false));
+    TS_ASSERT_THROWS_NOTHING(loader.execute(););
+    TS_ASSERT(loader.isExecuted());
+
+    return outWSName;
+  }
+
+  std::string saveWorkspace(IMDEventWorkspace_sptr in_ws) {
+    SaveMD2 saver;
+    saver.setChild(true);
+    saver.setRethrows(true);
+    saver.initialize();
+    TS_ASSERT(saver.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("InputWorkspace", in_ws));
+    TS_ASSERT_THROWS_NOTHING(
+        saver.setPropertyValue("Filename", "BinMDTestFileBack.nxs"));
+
+    // Retrieve the full path; delete any pre-existing file
+    std::string filename = saver.getPropertyValue("Filename");
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
+
+    TS_ASSERT_THROWS_NOTHING(saver.execute(););
+    TS_ASSERT(saver.isExecuted());
+
+    return filename;
   }
 };
 
