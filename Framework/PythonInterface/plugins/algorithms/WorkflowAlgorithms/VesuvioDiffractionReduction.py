@@ -1,4 +1,4 @@
-#pylint: disable=no-init
+#pylint: disable=no-init, too-many-instance-attributes
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -53,7 +53,7 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
                              doc='Selects the type of detector grouping to be used.')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
-                             direction=Direction.Output),
+                                                    direction=Direction.Output),
                              doc='Group name for the result workspaces.')
 
 
