@@ -1082,7 +1082,7 @@ std::vector<size_t> SlicingAlgorithm::getIndicesWithProjection(
  */
 Mantid::Geometry::MDFrame_uptr
 SlicingAlgorithm::extractMDFrameForNonAxisAligned(
-    std::vector<size_t> indicesWithProjection, std::string unit) const {
+    std::vector<size_t> indicesWithProjection, std::string units) const {
   if (indicesWithProjection.empty()) {
     g_log.warning() << "Slicing Algorithm: Chosen vector does not "
                        "project on any vector of the old basis.";
