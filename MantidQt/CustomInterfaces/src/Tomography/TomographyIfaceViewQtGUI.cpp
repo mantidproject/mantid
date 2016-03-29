@@ -268,8 +268,10 @@ void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
       QString::fromStdString(cfg.pathSamples()));
   m_uiTabSetup.lineEdit_path_flats->setText(
       QString::fromStdString(cfg.pathOpenBeam()));
+  m_uiTabSetup.checkBox_path_flats->setChecked(cfg.m_pathOpenBeamEnabled);
   m_uiTabSetup.lineEdit_path_darks->setText(
       QString::fromStdString(cfg.pathDarks()));
+  m_uiTabSetup.checkBox_path_darks->setChecked(cfg.m_pathDarkEnabled);
 
   m_uiTabSetup.lineEdit_SCARF_password->setText("");
   m_uiTabSetup.pushButton_SCARF_login->setEnabled(true);
@@ -294,6 +296,7 @@ void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
           SLOT(samplesPathEditedByUser()));
   connect(m_uiTabSetup.lineEdit_path_flats, SIGNAL(editingFinished()), this,
           SLOT(flatsPathEditedByUser()));
+
   connect(m_uiTabSetup.lineEdit_path_darks, SIGNAL(editingFinished()), this,
           SLOT(darksPathEditedByUser()));
 
@@ -723,11 +726,15 @@ QDataStream &operator>>(QDataStream &stream, TomoReconFiltersSettings &fs) {
 
 /// deserialize an input paths configuration
 QDataStream &operator>>(QDataStream &stream, TomoPathsConfig &cfg) {
-  QString samples, ob, darks;
-  stream >> samples >> ob >> darks;
+  QString samples;
+  QString ob;
+  bool obEnabled;
+  QString darks;
+  bool darksEnabled;
+  stream >> samples >> ob >> obEnabled >> darks >> darksEnabled;
   cfg.updatePathSamples(samples.toStdString());
-  cfg.updatePathOpenBeam(ob.toStdString());
-  cfg.updatePathDarks(darks.toStdString());
+  cfg.updatePathOpenBeam(ob.toStdString(), obEnabled);
+  cfg.updatePathDarks(darks.toStdString(), darksEnabled);
 
   return stream;
 }
@@ -908,7 +915,9 @@ QDataStream &operator<<(QDataStream &stream, TomoPathsConfig const &cfg) {
   // clang-format off
   stream << QString::fromStdString(cfg.pathSamples())
          << QString::fromStdString(cfg.pathOpenBeam())
-         << QString::fromStdString(cfg.pathDarks());
+         << cfg.m_pathOpenBeamEnabled
+         << QString::fromStdString(cfg.pathDarks())
+         << cfg.m_pathDarkEnabled;
   // clang-format on
 
   return stream;
@@ -1088,8 +1097,10 @@ void TomographyIfaceViewQtGUI::updatePathsConfig(const TomoPathsConfig &cfg) {
       QString::fromStdString(cfg.pathSamples()));
   m_uiTabSetup.lineEdit_path_flats->setText(
       QString::fromStdString(cfg.pathOpenBeam()));
+  m_uiTabSetup.checkBox_path_flats->setChecked(cfg.m_pathOpenBeamEnabled);
   m_uiTabSetup.lineEdit_path_darks->setText(
       QString::fromStdString(cfg.pathDarks()));
+  m_uiTabSetup.checkBox_path_darks->setChecked(cfg.m_pathDarkEnabled);
   m_pathsConfig = cfg;
 }
 
@@ -1450,6 +1461,9 @@ void TomographyIfaceViewQtGUI::flatsPathCheckStatusChanged(int status) {
   //   m_uiTabSetup.lineEdit_path_flats->setText(
   //       QString::fromStdString(m_pathsConfig));
   // }
+
+  // grab new value and enable/disable related widgets
+  m_pathsConfig.m_pathOpenBeamEnabled = enable;
   m_uiTabSetup.lineEdit_path_flats->setEnabled(enable);
   m_uiTabSetup.pushButton_flats_dir->setEnabled(enable);
   m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
@@ -1465,6 +1479,7 @@ void TomographyIfaceViewQtGUI::darksPathCheckStatusChanged(int status) {
   //   m_uiTabSetup.lineEdit_path_darks->setText(
   //       QString::fromStdString(m_pathsConfig));
   // }
+  m_pathsConfig.m_pathDarkEnabled = enable;
   m_uiTabSetup.lineEdit_path_darks->setEnabled(enable);
   m_uiTabSetup.pushButton_darks_dir->setEnabled(enable);
   m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
@@ -1483,7 +1498,8 @@ void TomographyIfaceViewQtGUI::flatsPathBrowseClicked() {
   std::string str;
   processPathBrowseClick(m_uiTabSetup.lineEdit_path_flats, str);
   if (!str.empty()) {
-    m_pathsConfig.updatePathOpenBeam(str);
+    m_pathsConfig.updatePathOpenBeam(
+        str, m_uiTabSetup.checkBox_path_flats->isChecked());
     m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
   }
 }
@@ -1492,7 +1508,8 @@ void TomographyIfaceViewQtGUI::darksPathBrowseClicked() {
   std::string str;
   processPathBrowseClick(m_uiTabSetup.lineEdit_path_darks, str);
   if (!str.empty()) {
-    m_pathsConfig.updatePathDarks(str);
+    m_pathsConfig.updatePathDarks(
+        str, m_uiTabSetup.checkBox_path_darks->isChecked());
     m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
   }
 }
@@ -1507,14 +1524,16 @@ void TomographyIfaceViewQtGUI::samplesPathEditedByUser() {
 void TomographyIfaceViewQtGUI::flatsPathEditedByUser() {
   const std::string path =
       m_uiTabSetup.lineEdit_path_flats->text().toStdString();
-  m_pathsConfig.updatePathOpenBeam(path);
+  m_pathsConfig.updatePathOpenBeam(
+      path, m_uiTabSetup.checkBox_path_flats->isChecked());
   m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
 void TomographyIfaceViewQtGUI::darksPathEditedByUser() {
   const std::string path =
       m_uiTabSetup.lineEdit_path_darks->text().toStdString();
-  m_pathsConfig.updatePathDarks(path);
+  m_pathsConfig.updatePathDarks(path,
+                                m_uiTabSetup.checkBox_path_flats->isChecked());
   m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
@@ -1988,7 +2007,7 @@ void TomographyIfaceViewQtGUI::browseImgInputConvertClicked() {
   // it could be an option.
   // const std::string path =
   checkUserBrowseDir(m_uiTabConvertFormats.lineEdit_input);
-  // m_pathsConfig.updatePathDarks(str);
+  // m_pathsConfig.updatePathDarks(str, );
   // m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
@@ -1997,7 +2016,7 @@ void TomographyIfaceViewQtGUI::browseImgOutputConvertClicked() {
   // it could be an option.
   // const std::string path =
   checkUserBrowseDir(m_uiTabConvertFormats.lineEdit_output);
-  // m_pathsConfig.updatePathDarks(str);
+  // m_pathsConfig.updatePathDarks(str, );
   // m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 

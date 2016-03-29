@@ -836,14 +836,15 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
   else if (g_AstraTool == usingTool())
     alg = m_astraMethod;
 
-  if (filters.prep.normalizeByFlats) {
+  // check the general enable option and the dataset specific enable
+  if (filters.prep.normalizeByFlats && m_pathsConfig.m_pathOpenBeamEnabled) {
     const std::string flat = m_pathsConfig.pathOpenBeam();
     if (!flat.empty())
       opts.emplace_back("--input-path-flat=" +
                         adaptInputPathForExecution(flat, local));
   }
 
-  if (filters.prep.normalizeByDarks) {
+  if (filters.prep.normalizeByDarks && m_pathsConfig.m_pathDarkEnabled) {
     const std::string dark = m_pathsConfig.pathDarks();
     if (!dark.empty())
       opts.emplace_back("--input-path-dark=" +
