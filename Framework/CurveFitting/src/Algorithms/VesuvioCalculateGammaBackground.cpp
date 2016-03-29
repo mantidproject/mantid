@@ -146,8 +146,8 @@ void VesuvioCalculateGammaBackground::exec() {
  * stored
  * @return True if the background was subtracted, false otherwise
  */
-bool VesuvioCalculateGammaBackground::calculateBackground(const size_t inputIndex,
-                                                   const size_t outputIndex) {
+bool VesuvioCalculateGammaBackground::calculateBackground(
+    const size_t inputIndex, const size_t outputIndex) {
   // Copy X values
   m_backgroundWS->setX(outputIndex, m_inputWS->refX(inputIndex));
   m_correctedWS->setX(outputIndex, m_inputWS->refX(inputIndex));
@@ -183,8 +183,8 @@ bool VesuvioCalculateGammaBackground::calculateBackground(const size_t inputInde
 * @param outputIndex A workspace index that defines the output to hold the
 * results
 */
-void VesuvioCalculateGammaBackground::applyCorrection(const size_t inputIndex,
-                                               const size_t outputIndex) {
+void VesuvioCalculateGammaBackground::applyCorrection(
+    const size_t inputIndex, const size_t outputIndex) {
   m_progress->report("Computing TOF from detector");
 
   // results go straight in m_correctedWS to save memory allocations
