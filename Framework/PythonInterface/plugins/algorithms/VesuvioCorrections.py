@@ -319,7 +319,7 @@ class VesuvioCorrections(VesuvioBase):
         fit.setChild(True)
         fit.setLogging(True)
         fit.setProperty("Function", ";".join(functions))
-        fit.setProperty("InputWorkspace", self._input_ws)
+        fit.setProperty("InputWorkspace", self._output_ws)
         fit.setProperty("Output", param_table_name)
         fit.setProperty("CreateOutput", True)
         fit.execute()

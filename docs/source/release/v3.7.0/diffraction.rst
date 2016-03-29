@@ -18,6 +18,9 @@ Engineering Diffraction
 - Vanadium Curves and Ceria Peaks graphs are plotted once basic and cropped calibration process has been carried out
 - Customise Bank Name text-field will set the workspace and .his file name according to this Bank Name
   provided by the user for Cropped Calibration
+- The Fitting tab provides a graphical interface which fits an expected diffraction pattern and visualises them.
+  The pastern is specified by providing a list of dSpacing values where Bragg peaks are expected. The algorithm
+  :ref:`EnggFitPeaks<algm-EnggFitPeaks>` used in the background fit peaks in those areas using a peak fitting function.
 
 Imaging
 -------
