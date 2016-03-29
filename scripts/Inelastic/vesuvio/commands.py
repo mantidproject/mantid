@@ -145,6 +145,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         ms.DeleteWorkspace(corrections_fit_name)
         corrections_args['FitParameters'] = pre_correction_pars_name
 
+
         # Add the mutiple scattering arguments
         corrections_args.update(flags['ms_flags'])
 
@@ -195,11 +196,14 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         if pars_workspace is None:
             pars_workspace = _create_param_workspace(num_spec, mtd[pars_name])
 
+        spec_num_str = str(sample_data.getSpectrum(index).getSpectrumNo())
+        current_spec = 'spectrum_' + spec_num_str
+
         _update_fit_params(pre_correct_pars_workspace,
                            index, mtd[pre_correction_pars_name],
-                           suffix[1:])
+                           current_spec)
         _update_fit_params(pars_workspace, index,
-                           mtd[pars_name], suffix[1:])
+                           mtd[pars_name], current_spec)
 
         ms.DeleteWorkspace(pre_correction_pars_name)
         ms.DeleteWorkspace(pars_name)
@@ -218,9 +222,10 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
                                                 OutputWorkspace=group_name))
 
         # Output the parameter workspaces
-        params_pre_corr = runs + "_params_pre_correction" + suffix
+        params_pre_corr = runs + "_params_pre_correction_iteration_" + str(flags['iteration'])
+        params_name = runs + "_params_iteration_" + str(flags['iteration'])
         AnalysisDataService.Instance().addOrReplace(params_pre_corr, pre_correct_pars_workspace)
-        AnalysisDataService.Instance().addOrReplace(runs + "_params" + suffix, pars_workspace)
+        AnalysisDataService.Instance().addOrReplace(params_name, pars_workspace)
 
     if len(output_groups) > 1:
         result_ws = output_groups

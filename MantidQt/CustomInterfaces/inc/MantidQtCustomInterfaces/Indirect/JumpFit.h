@@ -34,18 +34,25 @@ private slots:
   void findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws);
   /// Handles plotting results of algorithm on miniplot
   void fitAlgDone(bool error);
-  /// Handles plotting fit result in MantidPlot
-  void plotFitResult(bool error);
   /// Handles a fit algorithm being selected
   void fitFunctionSelected(const QString &functionName);
-
+  /// Generates the plot guess data
+  void generatePlotGuess();
+  /// Add the plot guess to the mini plot
+  void plotGuess(bool error);
 
 private:
   /// Gets a list of parameter names for a given fit function
   QStringList getFunctionParameters(const QString &functionName);
 
+  /// Generates the function string for fitting
+  std::string generateFunctionName(const QString &functionName);
+
   /// Clears the mini plot of data excluding sample
   void clearPlot();
+
+  /// Deletes Plot Guess Workspace after use
+  void deletePlotGuessWorkspaces(const bool &removePlotGuess);
 
   // The UI form
   Ui::JumpFit m_uiForm;
@@ -53,9 +60,12 @@ private:
   // Map of axis labels to spectrum number
   std::map<std::string, int> m_spectraList;
 
-  QtTreePropertyBrowser* m_jfTree;
+  QtTreePropertyBrowser *m_jfTree;
 
   Mantid::API::IAlgorithm_sptr m_fitAlg;
+
+  // The state of plot result when the algorithm was run
+  bool m_plotResult;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

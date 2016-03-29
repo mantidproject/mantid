@@ -256,13 +256,14 @@ GCC_DIAG_OFF(strict-aliasing)
     switch(coordinateSystem)
     {
       case(Mantid::Kernel::SpecialCoordinateSystem::HKL):
-        peaksInfo.push_back(std::pair<Mantid::Kernel::V3D, double>(peak->getHKL(), radius*m_radiusFactor));
+        peaksInfo.emplace_back(peak->getHKL(), radius * m_radiusFactor);
         break;
       case(Mantid::Kernel::SpecialCoordinateSystem::QLab):
-        peaksInfo.push_back(std::pair<Mantid::Kernel::V3D, double>(peak->getQLabFrame(), radius*m_radiusFactor));
+        peaksInfo.emplace_back(peak->getQLabFrame(), radius * m_radiusFactor);
         break;
       case(Mantid::Kernel::SpecialCoordinateSystem::QSample):
-        peaksInfo.push_back(std::pair<Mantid::Kernel::V3D, double>(peak->getQSampleFrame(), radius*m_radiusFactor));
+        peaksInfo.emplace_back(peak->getQSampleFrame(),
+                               radius * m_radiusFactor);
         break;
       default:
         throw std::invalid_argument("The special coordinate systems don't match.");
