@@ -11,6 +11,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/tokenizer.hpp>
@@ -307,6 +308,7 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
   if (m_writeID)
     file << specNo << std::endl;
 
+
   for (int bin = 0; bin < m_nBins; bin++) {
     if (m_isHistogram & m_isCommonBins) // bin centres,
     {
@@ -341,31 +343,6 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
 }
 
 /**
- * Generates the spectrumMetaData label for a spectrumNumber
- * @param specNum	:: Current SpectrumNumber
- * @return the string to use for the spectrumMetaData in the Ascii file
- */
-std::string SaveAscii2::generateSpectrumMetaData(const int &specNum) {
-  std::string specMetaDataStr;
-  for (int i = 0; i < m_metaData.size(); i++) {
-    // Find data in map for current spectrum
-    specMetaDataStr += m_metaDataValues[m_metaData[i]][specNum];
-  }
-  return specMetaDataStr;
-}
-
-/**
- * Populates the meta data map
- */
-void SaveAscii2::populateMetaDataValues() {
-  for (auto iter = m_metaData.begin; iter != m_metaData.end(); ++iter) {
-    if (*iter.compare("SpectrumNumber")) {
-      // add data to metaData map
-    }
-  }
-}
-
-/**
  * Converts a comma separated list to a vector of strings
  * Also ensures all strings are valid input
  * @param inputString	:: The user input comma separated string list
@@ -374,18 +351,17 @@ void SaveAscii2::populateMetaDataValues() {
 std::vector<std::string>
 SaveAscii2::stringListToVector(std::string &inputString) {
   std::vector<std::string> stringVector;
-  // Add data to vector
-  auto nextComma = inputString.find(',');
-  while (nextComma != std::string::npos) {
-    stringVector.push_back(inputString.substr(0, nextComma));
-    inputString = inputString.substr(nextComma, inputString.size() - nextComma);
-    nextComma = inputString.find(',');
+  const std::string validMetaData[]{"SpectrumNumber", "Q", "Angle"};
+  stringVector =
+      Kernel::VectorHelper::splitStringIntoVector<std::string>(inputString);
+  for (auto iter = stringVector.begin(); iter != stringVector.end(); ++iter) {
+	const auto value = validMetaData->find("Q");
+    if (value) {
+      throw std::runtime_error(*iter + " is not recognised as a possible input "
+                                       "for SpectrumMetaData.\n Valid inputs "
+                                       "are: SpectrumNumber, Q, Angle.");
+    }
   }
-  if (inputString.size() > 0) {
-    stringVector.push_back(inputString);
-  }
-  // Ensure all entries are valid
-
   return stringVector;
 }
 
