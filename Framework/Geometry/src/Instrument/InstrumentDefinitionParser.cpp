@@ -2661,23 +2661,6 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
       pElem->removeChild(*it);
   }
 
-  /// return absolute position of point which is set relative to the
-  /// coordinate system of the input component
-  /// @param comp Reference coordinate system
-  /// @param pos A position relative to the coord. sys. of comp
-  /// @return absolute position
-  V3D InstrumentDefinitionParser::getAbsolutPositionInCompCoorSys(
-      ICompAssembly * comp, V3D pos) {
-    Component *dummyComp = new Component("dummy", comp);
-    comp->add(dummyComp);
-
-    dummyComp->setPos(pos); // set pos relative to comp coord. sys.
-
-    V3D retVal = dummyComp->getPos(); // get absolute position
-
-    return retVal;
-  }
-
   /// Returns a translated and rotated \<cuboid\> element with "id" attribute
   /// equal cuboidName
   /// @param comp coordinate system to translate and rotate cuboid to
@@ -2732,6 +2715,23 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
     obj_str << "</cuboid>";
 
     return obj_str.str();
+  }
+
+  /// return absolute position of point which is set relative to the
+  /// coordinate system of the input component
+  /// @param comp Reference coordinate system
+  /// @param pos A position relative to the coord. sys. of comp
+  /// @return absolute position
+  V3D InstrumentDefinitionParser::getAbsolutPositionInCompCoorSys(
+	  ICompAssembly *comp, V3D pos) {
+	  Component *dummyComp = new Component("dummy", comp);
+	  comp->add(dummyComp);
+
+	  dummyComp->setPos(pos); // set pos relative to comp coord. sys.
+
+	  V3D retVal = dummyComp->getPos(); // get absolute position
+
+	  return retVal;
   }
 
   /// Returns a translated and rotated \<cuboid\> element with "id" attribute

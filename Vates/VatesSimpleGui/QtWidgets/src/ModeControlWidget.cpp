@@ -32,10 +32,14 @@ ModeControlWidget::ModeControlWidget(QWidget *parent) : QWidget(parent)
 
   // Add the mapping from string to the view enum
   MantidQt::API::MdConstants mdConstants;
-  mapFromStringToView.insert(std::pair<QString, ModeControlWidget::Views>(mdConstants.getStandardView(), ModeControlWidget::STANDARD));
-  mapFromStringToView.insert(std::pair<QString, ModeControlWidget::Views>(mdConstants.getThreeSliceView(), ModeControlWidget::THREESLICE));
-  mapFromStringToView.insert(std::pair<QString, ModeControlWidget::Views>(mdConstants.getMultiSliceView(), ModeControlWidget::MULTISLICE));
-  mapFromStringToView.insert(std::pair<QString, ModeControlWidget::Views>(mdConstants.getSplatterPlotView(), ModeControlWidget::SPLATTERPLOT));
+  mapFromStringToView.emplace(mdConstants.getStandardView(),
+                              ModeControlWidget::STANDARD);
+  mapFromStringToView.emplace(mdConstants.getThreeSliceView(),
+                              ModeControlWidget::THREESLICE);
+  mapFromStringToView.emplace(mdConstants.getMultiSliceView(),
+                              ModeControlWidget::MULTISLICE);
+  mapFromStringToView.emplace(mdConstants.getSplatterPlotView(),
+                              ModeControlWidget::SPLATTERPLOT);
 }
 
 ModeControlWidget::~ModeControlWidget()

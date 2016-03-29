@@ -10,6 +10,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -49,34 +50,7 @@ public:
 
   void testExecute() {
     auto ws = createWorkspace(4, 100, "Microseconds");
-    auto calc = AlgorithmManager::Instance().create("CalMuonDetectorPhases");
-    calc->initialize();
-    calc->setChild(true);
-    calc->setProperty("InputWorkspace", ws);
-    calc->setPropertyValue("Frequency", "25");
-    calc->setPropertyValue("DataFitted", "fit");
-    calc->setPropertyValue("DetectorTable", "tab");
-    calc->setProperty("ForwardSpectra", std::vector<int>{1, 2});
-    calc->setProperty("BackwardSpectra", std::vector<int>{3, 4});
-
-    TS_ASSERT_THROWS_NOTHING(calc->execute());
-
-    WorkspaceGroup_sptr fitResults = calc->getProperty("DataFitted");
-    ITableWorkspace_sptr tab = calc->getProperty("DetectorTable");
-
-    // Check the table workspace
-    TS_ASSERT_EQUALS(tab->rowCount(), 4);
-    TS_ASSERT_EQUALS(tab->columnCount(), 3);
-    // Test asymmetries
-    TS_ASSERT_DELTA(tab->Double(0, 1), 0.099, 0.001);
-    TS_ASSERT_DELTA(tab->Double(1, 1), 0.100, 0.001);
-    TS_ASSERT_DELTA(tab->Double(2, 1), 0.100, 0.001);
-    TS_ASSERT_DELTA(tab->Double(3, 1), 0.100, 0.001);
-    // Test phases
-    TS_ASSERT_DELTA(tab->Double(0, 2), 6.278, 0.001);
-    TS_ASSERT_DELTA(tab->Double(1, 2), 0.781, 0.001);
-    TS_ASSERT_DELTA(tab->Double(2, 2), 1.566, 0.001);
-    TS_ASSERT_DELTA(tab->Double(3, 2), 2.350, 0.001);
+    runExecutionTest(ws);
   }
 
   void testBadWorkspaceUnits() {
@@ -140,8 +114,19 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void testWithMUSRWorkspaceLongitudinal() {
+    auto ws = createWorkspace(4, 100, "Microseconds", "MUSR", "Longitudinal");
+    runExecutionTest(ws);
+  }
+
+  void testWithMUSRWorkspaceTransverse() {
+    auto ws = createWorkspace(4, 100, "Microseconds", "MUSR", "Transverse");
+    runExecutionTest(ws);
+  }
+
+private:
   MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt,
-                                       std::string units) {
+                                       const std::string &units) {
 
     // Create a fake muon dataset
     double a = 0.1; // Amplitude of the oscillations
@@ -179,6 +164,50 @@ public:
     MatrixWorkspace_sptr ws = createWS->getProperty("OutputWorkspace");
 
     return ws;
+  }
+
+  /// overload that adds instrument and main field direction log to workspace
+  MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt,
+                                       const std::string &units,
+                                       const std::string &instrumentName,
+                                       const std::string &mainFieldDirection) {
+    auto ws = createWorkspace(nspec, maxt, units);
+    auto instrument =
+        boost::make_shared<Mantid::Geometry::Instrument>(instrumentName);
+    ws->setInstrument(instrument);
+    ws->mutableRun().addProperty("main_field_direction", mainFieldDirection);
+    return ws;
+  }
+
+  /// Runs test of execution on the given workspace
+  void runExecutionTest(const MatrixWorkspace_sptr workspace) {
+    auto calc = AlgorithmManager::Instance().create("CalMuonDetectorPhases");
+    calc->initialize();
+    calc->setChild(true);
+    calc->setProperty("InputWorkspace", workspace);
+    calc->setPropertyValue("Frequency", "25");
+    calc->setPropertyValue("DataFitted", "fit");
+    calc->setPropertyValue("DetectorTable", "tab");
+    calc->setProperty("ForwardSpectra", std::vector<int>{1, 2});
+    calc->setProperty("BackwardSpectra", std::vector<int>{3, 4});
+
+    TS_ASSERT_THROWS_NOTHING(calc->execute());
+
+    ITableWorkspace_sptr tab = calc->getProperty("DetectorTable");
+
+    // Check the table workspace
+    TS_ASSERT_EQUALS(tab->rowCount(), 4);
+    TS_ASSERT_EQUALS(tab->columnCount(), 3);
+    // Test asymmetries
+    TS_ASSERT_DELTA(tab->Double(0, 1), 0.099, 0.001);
+    TS_ASSERT_DELTA(tab->Double(1, 1), 0.100, 0.001);
+    TS_ASSERT_DELTA(tab->Double(2, 1), 0.100, 0.001);
+    TS_ASSERT_DELTA(tab->Double(3, 1), 0.100, 0.001);
+    // Test phases
+    TS_ASSERT_DELTA(tab->Double(0, 2), 6.278, 0.001);
+    TS_ASSERT_DELTA(tab->Double(1, 2), 0.781, 0.001);
+    TS_ASSERT_DELTA(tab->Double(2, 2), 1.566, 0.001);
+    TS_ASSERT_DELTA(tab->Double(3, 2), 2.350, 0.001);
   }
 };
 
