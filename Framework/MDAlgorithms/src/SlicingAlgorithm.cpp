@@ -1121,9 +1121,8 @@ void SlicingAlgorithm::setTargetUnits(Mantid::Geometry::MDFrame_uptr &mdFrame,
     // Inverse angstroms
     auto md_unit = InverseAngstromsUnit();
     mdFrame->setMDUnit(md_unit);
-  } else {
-    g_log.error("Unknown target unit");
   }
+  // else leave the unit the same as the input workspace
 }
 
 } // namespace Mantid

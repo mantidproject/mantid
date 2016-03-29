@@ -30,9 +30,17 @@ MinMax getDimensionExtents(IMDEventWorkspace_sptr ws, size_t index) {
   return std::make_pair(dim->getMinimum(), dim->getMaximum());
 }
 
+std::string numToStringWithPrecision(const double num) {
+  std::stringstream s;
+  s.precision(2);
+  s.setf(std::ios::fixed, std::ios::floatfield);
+  s << num;
+  return s.str();
+}
+
 DblMatrix scaleProjection(const DblMatrix &inMatrix,
                           const std::vector<std::string> &inUnits,
-                          const std::vector<std::string> &outUnits,
+                          std::vector<std::string> &outUnits,
                           IMDEventWorkspace_sptr inWS) {
   DblMatrix ret(inMatrix);
   // Check if we actually need to do anything
@@ -56,6 +64,7 @@ DblMatrix scaleProjection(const DblMatrix &inMatrix,
       continue;
     else if (inUnits[i] == Mantid::MDAlgorithms::CutMD::InvAngstromSymbol) {
       // inv angstroms to rlu
+      outUnits[i] = "in " + numToStringWithPrecision(dStar) + " A^-1";
       for (size_t j = 0; j < numDims; ++j)
         ret[i][j] *= dStar;
     } else {
@@ -173,12 +182,7 @@ std::vector<std::string> labelProjection(const DblMatrix &projection) {
       else if (in == 0)
         labels[j] = "0";
       else {
-        // We have to be explicit about precision, so lexical cast won't work
-        std::stringstream s;
-        s.precision(2);
-        s.setf(std::ios::fixed, std::ios::floatfield);
-        s << "'" << in << replacements[i] << "'";
-        labels[j] = s.str();
+        labels[j] = "'" + numToStringWithPrecision(in) + replacements[i] + "'";
       }
     }
     ret[i] = "[" + boost::algorithm::join(labels, ", ") + "]";
