@@ -76,10 +76,11 @@ RectangularDetector::RectangularDetector(const std::string &n,
 }
 
 bool RectangularDetector::compareName(const std::string &proposedMatch) {
-	boost::regex exp("(RectangularDetector)|(rectangularDetector)|(rectangulardetector)|"
-		"(rectangular_detector)");
+  boost::regex exp(
+      "(RectangularDetector)|(rectangularDetector)|(rectangulardetector)|"
+      "(rectangular_detector)");
 
-	return boost::regex_match(proposedMatch, exp);
+  return boost::regex_match(proposedMatch, exp);
 }
 
 void RectangularDetector::init() {
@@ -487,7 +488,7 @@ RectangularDetector::getComponentByName(const std::string &cname,
   // check that the searched for name starts with the detector's
   // name as they are generated
   if (cname.substr(0, MEMBER_NAME.length()).compare(MEMBER_NAME) != 0) {
-	return boost::shared_ptr<const IComponent>();
+    return boost::shared_ptr<const IComponent>();
   } else {
     return CompAssembly::getComponentByName(cname, nlevels);
   }

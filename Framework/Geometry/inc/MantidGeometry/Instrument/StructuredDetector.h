@@ -50,8 +50,8 @@ public:
   /// String description of the type of component
   std::string type() const override { return "StructuredDetector"; }
 
-  ///Matches name to Structured Detector
-  static bool compareName(const std::string& proposedMatch);
+  /// Matches name to Structured Detector
+  static bool compareName(const std::string &proposedMatch);
 
   //! Empty constructor
   StructuredDetector();

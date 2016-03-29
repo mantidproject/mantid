@@ -35,7 +35,7 @@ StructuredGeometryHandler::createInstance(IObjComponent *) {
 
 ///< Create an instance of concrete geometry handler for Object
 StructuredGeometryHandler *
-StructuredGeometryHandler::createInstance(boost::shared_ptr<Object> ) {
+    StructuredGeometryHandler::createInstance(boost::shared_ptr<Object>) {
   return new StructuredGeometryHandler();
 }
 

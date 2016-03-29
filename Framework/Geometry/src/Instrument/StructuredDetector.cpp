@@ -52,8 +52,9 @@ StructuredDetector::StructuredDetector(const StructuredDetector *base,
 }
 
 bool StructuredDetector::compareName(const std::string &proposedMatch) {
-  boost::regex exp("(StructuredDetector)|(structuredDetector)|(structureddetector)|"
-                   "(structured_detector)");
+  boost::regex exp(
+      "(StructuredDetector)|(structuredDetector)|(structureddetector)|"
+      "(structured_detector)");
 
   return boost::regex_match(proposedMatch, exp);
 }
@@ -370,7 +371,7 @@ streamShape(const std::string &name, double xlb, double xlf, double xrf,
             double xrb, double ylb, double ylf, double yrf, double yrb) {
 
   std::ostringstream shapestr;
-	
+
   // Create XML shape used to describe detector pixel
   shapestr << "<type name=\"userShape\" >";
   shapestr << "<hexahedron id=\"" << name << "\" >";
@@ -426,7 +427,7 @@ streamShape(const std::string &name, double xlb, double xlf, double xrf,
 Detector *StructuredDetector::addDetector(CompAssembly *parent,
                                           const std::string &name, int x, int y,
                                           int id) {
-	auto w = m_xpixels + 1;
+  auto w = m_xpixels + 1;
 
   // Store hexahedral vertices for detector shape
   auto xlb = m_xvalues[(y * w) + x];
@@ -507,9 +508,9 @@ StructuredDetector::getComponentByName(const std::string &cname,
   // check that the searched for name starts with the detector's
   // name as they are generated
   if (cname.substr(0, MEMBER_NAME.length()).compare(MEMBER_NAME) != 0) {
-	return boost::shared_ptr<const IComponent>();
+    return boost::shared_ptr<const IComponent>();
   } else {
-	  return CompAssembly::getComponentByName(cname, nlevels);
+    return CompAssembly::getComponentByName(cname, nlevels);
   }
 }
 

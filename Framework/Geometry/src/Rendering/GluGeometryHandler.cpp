@@ -97,7 +97,7 @@ void GluGeometryHandler::GetObjectGeom(int &mytype,
     switch (type) {
     case CUBOID:
       mytype = 1;
-	  vectors.resize(4);
+      vectors.resize(4);
       vectors[0] = Point1;
       vectors[1] = Point2;
       vectors[2] = Point3;
@@ -105,15 +105,15 @@ void GluGeometryHandler::GetObjectGeom(int &mytype,
       break;
     case HEXAHEDRON:
       mytype = 1;
-	  vectors.resize(8);
-      vectors[0] =Point1;
-      vectors[1] =Point2;
-      vectors[2] =Point3;
-      vectors[3] =Point4;
-      vectors[4] =Point5;
-      vectors[5] =Point6;
-      vectors[6] =Point7;
-      vectors[7] =Point8;
+      vectors.resize(8);
+      vectors[0] = Point1;
+      vectors[1] = Point2;
+      vectors[2] = Point3;
+      vectors[3] = Point4;
+      vectors[4] = Point5;
+      vectors[5] = Point6;
+      vectors[6] = Point7;
+      vectors[7] = Point8;
       break;
     case SPHERE:
       mytype = 2;
@@ -122,7 +122,7 @@ void GluGeometryHandler::GetObjectGeom(int &mytype,
       break;
     case CYLINDER:
       mytype = 3;
-	  vectors.resize(2);
+      vectors.resize(2);
       vectors[0] = center;
       vectors[1] = axis;
       myradius = radius;
@@ -130,17 +130,17 @@ void GluGeometryHandler::GetObjectGeom(int &mytype,
       break;
     case CONE:
       mytype = 4;
-	  vectors.resize(2);
-	  vectors[0] = center;
-	  vectors[1] = axis;
+      vectors.resize(2);
+      vectors[0] = center;
+      vectors[1] = axis;
       myradius = radius;
       myheight = height;
       break;
     case SEGMENTED_CYLINDER:
       mytype = 5;
-	  vectors.reserve(2);
-	  vectors[0] = center;
-	  vectors[1] = axis;
+      vectors.reserve(2);
+      vectors[0] = center;
+      vectors[1] = axis;
       myradius = radius;
       myheight = height;
       break;
