@@ -916,6 +916,34 @@ Hexahedron ShapeFactory::parseHexahedron(Poco::XML::Element *pElem) {
   Element *pElem_rbb = getShapeElement(pElem, "right-back-bottom-point");
   Element *pElem_rbt = getShapeElement(pElem, "right-back-top-point");
 
+  const bool isValid = pElem_lfb && pElem_lft && pElem_lbb && pElem_lbt &&
+	  pElem_rfb && pElem_rft && pElem_rbb && pElem_rbt;
+
+  std::ostringstream ERROR_MSG;
+  ERROR_MSG << "XML element: <" + pElem->tagName() + ""
+	  << "> contains invalid syntax for defining hexahedron. The "
+	  "following points have not been defined:\n\n";
+
+  if (!pElem_lfb)
+	  ERROR_MSG << "left-front-bottom-point\n";
+  if (!pElem_lft)
+	  ERROR_MSG << "left-front-top-point\n";
+  if (!pElem_lbb)
+	  ERROR_MSG << "left-back-bottom-point\n";
+  if (!pElem_lbt)
+	  ERROR_MSG << "left-back-top-point\n";
+  if (!pElem_rfb)
+	  ERROR_MSG << "right-front-bottom-point\n";
+  if (!pElem_rft)
+	  ERROR_MSG << "right-front-top-point\n";
+  if (!pElem_rbb)
+	  ERROR_MSG << "right-back-bottom-point\n";
+  if (!pElem_rbt)
+	  ERROR_MSG << "right-back-top-point\n";
+
+  if (!isValid)
+	  throw std::invalid_argument(ERROR_MSG.str());
+
   Hexahedron hex;
   hex.lfb = parsePosition(pElem_lfb);
   hex.lft = parsePosition(pElem_lft);
@@ -925,16 +953,6 @@ Hexahedron ShapeFactory::parseHexahedron(Poco::XML::Element *pElem) {
   hex.rft = parsePosition(pElem_rft);
   hex.rbb = parsePosition(pElem_rbb);
   hex.rbt = parsePosition(pElem_rbt);
-
-  const bool isValid = pElem_lfb && pElem_lft && pElem_lbb && pElem_lbt &&
-                       pElem_rfb && pElem_rft && pElem_rbb && pElem_rbt;
-
-  const std::string ERROR_MSG =
-      "XML element: <" + pElem->tagName() +
-      "> contains invalid syntax for defining hexahedron.";
-
-  if (!isValid)
-    throw std::invalid_argument(ERROR_MSG);
 
   return hex;
 }

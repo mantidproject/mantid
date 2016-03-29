@@ -323,21 +323,25 @@ void StructuredDetector::initialize(int xpixels, int ypixels,
   m_xvalues = x;
   m_yvalues = y;
 
-  std::string name = this->getName();
-  auto minDetId = idstart;
-  auto maxDetId = idstart;
-  auto detSize = x.size();
+  createDetectors();
+}
+
+/** Creates all detector pixels within the StructuredDetector.
+*/
+void StructuredDetector::createDetectors() {
+  auto minDetId = m_idstart;
+  auto maxDetId = m_idstart;
 
   for (auto ix = 0; ix < m_xpixels; ix++) {
     // Create an ICompAssembly for each x-column
     std::ostringstream oss_col;
 
-    oss_col << name << "(x=" << ix << ")";
+    oss_col << this->getName() << "(x=" << ix << ")";
     CompAssembly *xColumn = new CompAssembly(oss_col.str(), this);
 
     for (auto iy = 0; iy < m_ypixels; iy++) {
       std::ostringstream oss;
-      oss << name << "(" << ix << "," << iy << ")";
+      oss << this->getName() << "(" << ix << "," << iy << ")";
 
       // Calculate its id and set it.
       auto id = this->getDetectorIDAtXY(ix, iy);
@@ -353,8 +357,7 @@ void StructuredDetector::initialize(int xpixels, int ypixels,
       }
 
       // Create and store detector pixel
-      auto detector = addDetector(xColumn, oss.str(), ix, iy, id);
-      xColumn->add(detector);
+      xColumn->add(addDetector(xColumn, oss.str(), ix, iy, id));
     }
   }
 

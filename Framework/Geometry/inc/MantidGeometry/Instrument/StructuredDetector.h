@@ -149,6 +149,8 @@ private:
   /// initialize members to bare defaults
   void init();
 
+  void createDetectors();
+
   Detector *addDetector(CompAssembly *parent, const std::string &name, int x,
                         int y, int id);
   /// Pointer to the base RectangularDetector, for parametrized
