@@ -1,7 +1,7 @@
 #include "MantidQtMantidWidgets/InstrumentView/GLActorVisitor.h"
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/ObjComponentActor.h"
-#include "MantidQtMantidWidgets\InstrumentView/StructuredDetectorActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/StructuredDetectorActor.h"
 
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IComponent.h"
