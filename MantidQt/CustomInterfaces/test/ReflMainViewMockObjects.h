@@ -3,6 +3,7 @@
 
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCommandBase.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include <gmock/gmock.h>
@@ -14,6 +15,24 @@ class MockView : public ReflMainView {
 public:
   MockView(){};
   ~MockView() override {}
+
+  // Gmock requires parameters and return values of mocked methods to be
+  // copyable
+  // We can't mock setTableCommands(std::vector<ReflCommandBase_uptr>) because
+  // of the vector of unique pointers
+  // I will mock a proxy method, setTableCommandsProxy, I just want to test that
+  // this method is invoked by the presenter's constructor
+  virtual void
+  setTableCommands(std::vector<ReflCommandBase_uptr> tableCommands) override {
+
+    setTableCommandsProxy();
+  }
+  // The same happens for setRowCommands
+  virtual void
+  setRowCommands(std::vector<ReflCommandBase_uptr> tableCommands) override {
+
+    setRowCommandsProxy();
+  }
 
   // Prompts
   MOCK_METHOD3(askUserString,
@@ -33,6 +52,8 @@ public:
   MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());
   MOCK_METHOD1(setTransferMethods, void(const std::set<std::string> &));
   MOCK_METHOD1(setTableList, void(const std::set<std::string> &));
+  MOCK_METHOD0(setTableCommandsProxy, void());
+  MOCK_METHOD0(setRowCommandsProxy, void());
   MOCK_METHOD2(setInstrumentList,
                void(const std::vector<std::string> &, const std::string &));
 

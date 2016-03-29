@@ -46,6 +46,10 @@ public:
     EXPECT_CALL(mockTableView, setInstrumentList(_, _)).Times(Exactly(1));
     // Expect that the view is populated with the list of workspaces in the ADS
     EXPECT_CALL(mockView, setTableList(std::set<std::string>()));
+    // Expect that the view is populated with the list of table commands
+    EXPECT_CALL(mockView, setTableCommandsProxy()).Times(Exactly(1));
+    // Expect that the view is populated with the list of row commands
+    EXPECT_CALL(mockView, setRowCommandsProxy()).Times(Exactly(1));
 
     // Constructor
     ReflMainViewPresenter presenter(&mockView, &tablePresenter, &mockProgress);

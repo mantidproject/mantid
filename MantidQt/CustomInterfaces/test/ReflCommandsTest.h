@@ -5,7 +5,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflAppendRowCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflClearSelectedCommand.h"
@@ -26,6 +25,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflProcessCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSaveTableAsCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSaveTableCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflSeparatorCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableViewPresenter.h"
 
 using namespace MantidQt::CustomInterfaces;
@@ -68,8 +68,6 @@ public:
   // This means the constructor isn't called when running other tests
   static ReflCommandsTest *createSuite() { return new ReflCommandsTest(); }
   static void destroySuite(ReflCommandsTest *suite) { delete suite; }
-
-  ReflCommandsTest() { FrameworkManager::Instance(); }
 
   void test_open_table_command() {
     NiceMock<MockIReflTablePresenter> mockPresenter;
@@ -312,6 +310,18 @@ public:
     // The presenter should be notified with the DeleteRowFlag
     EXPECT_CALL(mockPresenter, notify(IReflTablePresenter::DeleteRowFlag))
         .Times(Exactly(1));
+    // Execute the command
+    command.execute();
+    // Verify expectations
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockPresenter));
+  }
+
+  void test_separator_command() {
+    NiceMock<MockIReflTablePresenter> mockPresenter;
+    ReflSeparatorCommand command(&mockPresenter);
+
+    // The presenter should not be notified with any of the flags
+    EXPECT_CALL(mockPresenter, notify(_)).Times(Exactly(0));
     // Execute the command
     command.execute();
     // Verify expectations

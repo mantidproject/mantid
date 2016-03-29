@@ -27,6 +27,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflProcessCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSaveTableAsCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSaveTableCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflSeparatorCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableViewPresenter.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "ProgressableViewMockObject.h"
@@ -1652,27 +1653,33 @@ public:
 
     // Actions (commands)
     auto commands = presenter.publishCommands();
-    TS_ASSERT_EQUALS(commands.size(), 19);
+    TS_ASSERT_EQUALS(commands.size(), 25);
 
     TS_ASSERT(dynamic_cast<ReflOpenTableCommand *>(commands[0].get()));
     TS_ASSERT(dynamic_cast<ReflNewTableCommand *>(commands[1].get()));
     TS_ASSERT(dynamic_cast<ReflSaveTableCommand *>(commands[2].get()));
     TS_ASSERT(dynamic_cast<ReflSaveTableAsCommand *>(commands[3].get()));
-    TS_ASSERT(dynamic_cast<ReflImportTableCommand *>(commands[4].get()));
-    TS_ASSERT(dynamic_cast<ReflExportTableCommand *>(commands[5].get()));
-    TS_ASSERT(dynamic_cast<ReflOptionsCommand *>(commands[6].get()));
-    TS_ASSERT(dynamic_cast<ReflProcessCommand *>(commands[7].get()));
-    TS_ASSERT(dynamic_cast<ReflExpandCommand *>(commands[8].get()));
-    TS_ASSERT(dynamic_cast<ReflPlotRowCommand *>(commands[9].get()));
-    TS_ASSERT(dynamic_cast<ReflPlotGroupCommand *>(commands[10].get()));
-    TS_ASSERT(dynamic_cast<ReflAppendRowCommand *>(commands[11].get()));
-    TS_ASSERT(dynamic_cast<ReflPrependRowCommand *>(commands[12].get()));
-    TS_ASSERT(dynamic_cast<ReflGroupRowsCommand *>(commands[13].get()));
-    TS_ASSERT(dynamic_cast<ReflCopySelectedCommand *>(commands[14].get()));
-    TS_ASSERT(dynamic_cast<ReflCutSelectedCommand *>(commands[15].get()));
-    TS_ASSERT(dynamic_cast<ReflPasteSelectedCommand *>(commands[16].get()));
-    TS_ASSERT(dynamic_cast<ReflClearSelectedCommand *>(commands[17].get()));
-    TS_ASSERT(dynamic_cast<ReflDeleteRowCommand *>(commands[18].get()));
+    TS_ASSERT(dynamic_cast<ReflSeparatorCommand *>(commands[4].get()));
+    TS_ASSERT(dynamic_cast<ReflImportTableCommand *>(commands[5].get()));
+    TS_ASSERT(dynamic_cast<ReflExportTableCommand *>(commands[6].get()));
+    TS_ASSERT(dynamic_cast<ReflSeparatorCommand *>(commands[7].get()));
+    TS_ASSERT(dynamic_cast<ReflOptionsCommand *>(commands[8].get()));
+    TS_ASSERT(dynamic_cast<ReflProcessCommand *>(commands[9].get()));
+    TS_ASSERT(dynamic_cast<ReflExpandCommand *>(commands[10].get()));
+    TS_ASSERT(dynamic_cast<ReflSeparatorCommand *>(commands[11].get()));
+    TS_ASSERT(dynamic_cast<ReflPlotRowCommand *>(commands[12].get()));
+    TS_ASSERT(dynamic_cast<ReflPlotGroupCommand *>(commands[13].get()));
+    TS_ASSERT(dynamic_cast<ReflSeparatorCommand *>(commands[14].get()));
+    TS_ASSERT(dynamic_cast<ReflAppendRowCommand *>(commands[15].get()));
+    TS_ASSERT(dynamic_cast<ReflPrependRowCommand *>(commands[16].get()));
+    TS_ASSERT(dynamic_cast<ReflSeparatorCommand *>(commands[17].get()));
+    TS_ASSERT(dynamic_cast<ReflGroupRowsCommand *>(commands[18].get()));
+    TS_ASSERT(dynamic_cast<ReflCopySelectedCommand *>(commands[19].get()));
+    TS_ASSERT(dynamic_cast<ReflCutSelectedCommand *>(commands[20].get()));
+    TS_ASSERT(dynamic_cast<ReflPasteSelectedCommand *>(commands[21].get()));
+    TS_ASSERT(dynamic_cast<ReflClearSelectedCommand *>(commands[22].get()));
+    TS_ASSERT(dynamic_cast<ReflSeparatorCommand *>(commands[23].get()));
+    TS_ASSERT(dynamic_cast<ReflDeleteRowCommand *>(commands[24].get()));
   }
 };
 
