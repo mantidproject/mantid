@@ -363,9 +363,9 @@ class VesuvioCorrections(VesuvioBase):
         func_str = fit_opts.create_function_str(params_dict)
 
         ms.VesuvioCalculateGammaBackground(InputWorkspace=self._output_ws,
-                                    ComptonFunction=func_str,
-                                    BackgroundWorkspace=correction_background_ws,
-                                    CorrectedWorkspace='__corrected_dummy')
+                                           ComptonFunction=func_str,
+                                           BackgroundWorkspace=correction_background_ws,
+                                           CorrectedWorkspace='__corrected_dummy')
         ms.DeleteWorkspace('__corrected_dummy')
 
         return correction_background_ws
