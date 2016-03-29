@@ -163,7 +163,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_valid_SpectrumMetaData() {
+  void test_valid_SpectrumMetaData_values() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeInelasticWS(wsToSave);
 
@@ -196,6 +196,24 @@ public:
     TS_ASSERT_EQUALS(header2, "Y");
     TS_ASSERT_EQUALS(header3, "E");
     TS_ASSERT_EQUALS(header4, "DX");
+  }
+
+  void test_input_success_with_valid_SpectrumMetaData_list() {
+    Mantid::DataObjects::Workspace2D_sptr wsToSave;
+    writeSampleWS(wsToSave);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+
+    TS_ASSERT_THROWS_NOTHING(
+        save.setPropertyValue("SpectrumMetaData", "SpectrumNumber,Q,Angle"));
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    // the algorithm will have used a defualt and written a file to disk
+    TS_ASSERT(Poco::File(filename).exists());
+    Poco::File(filename).remove();
+
+    AnalysisDataService::Instance().remove(m_name);
   }
 
   void testExec_no_header() {
@@ -583,6 +601,24 @@ public:
         save.setPropertyValue("Separator", "NotAValidChoice"));
 
     TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    // the algorithm will have used a defualt and written a file to disk
+    TS_ASSERT(Poco::File(filename).exists());
+    Poco::File(filename).remove();
+
+    AnalysisDataService::Instance().remove(m_name);
+  }
+
+  void test_fail_with_invalid_SpectrumMetaData() {
+    Mantid::DataObjects::Workspace2D_sptr wsToSave;
+    writeSampleWS(wsToSave);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+
+    TS_ASSERT_THROWS_NOTHING(
+        save.setPropertyValue("SpectrumMetaData", "NotAValidChoice"));
+    TS_ASSERT_THROWS_ANYTHING(save.execute());
 
     // the algorithm will have used a defualt and written a file to disk
     TS_ASSERT(Poco::File(filename).exists());
