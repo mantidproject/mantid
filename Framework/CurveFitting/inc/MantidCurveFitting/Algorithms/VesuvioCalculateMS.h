@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_CALCULATEMSVESUVIO_H_
-#define MANTID_CURVEFITTING_CALCULATEMSVESUVIO_H_
+#ifndef MANTID_CURVEFITTING_VESUVIOCALCULATEMS_H_
+#define MANTID_CURVEFITTING_VESUVIOCALCULATEMS_H_
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
@@ -156,4 +156,4 @@ private:
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /* MANTID_CURVEFITTING_CALCULATEMSVESUVIO_H_ */
+#endif /* MANTID_CURVEFITTING_VESUVIOCALCULATEMS_H_ */
