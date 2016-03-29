@@ -280,10 +280,13 @@ it is possible to continue the selection of the region (second corner)
 by clicking again inside the image. Alternatively, any selection can
 be reset at any point by using the "reset" buttons.
 
-When loading a stack of images, note that when the images are loaded from
-the folder(s) (directorie(s)) any files with unrecognized extension or
-type (for example .txt) will be ignored. Normally a warning about this
-will be shown in the Mantid logs.
+When loading a stack of images, note that when the images are loaded
+from the folder(s) (directorie(s)) any files with unrecognized
+extension or type (for example .txt) will be ignored. Normally a
+warning about this will be shown in the Mantid logs. Image files with
+the string **_SummedImg** at the end of their names will be skipped as
+well, as this is a convention used by some detectors/control software
+to generate summed images
 
 Pre-/post-processing
 ~~~~~~~~~~~~~~~~~~~~
