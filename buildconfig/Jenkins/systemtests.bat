@@ -58,10 +58,10 @@ if ERRORLEVEL 1 exit /b %ERRORLEVEL%
 :: Remove any Mantid.user.properties file
 set USERPROPS=C:\MantidInstall\bin\Mantid.user.properties
 del /Q %USERPROPS%
-:: Turn off usage reports and instrument downloading for the mantid call
-:: that creates the properties file
+:: Turn off any auto updating on startup
 echo UpdateInstrumentDefinitions.OnStartup = 0 > %USERPROPS%
 echo usagereports.enabled = 0 >> %USERPROPS%
+echo CheckMantidVersion.OnStartup = 0 >> %USERPROPS%
 
 :: Run
 set PKGDIR=%WORKSPACE%\build
