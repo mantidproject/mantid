@@ -5,6 +5,7 @@ import os
 import glob
 import sys
 import subprocess
+import time
 
 scriptLog = None
 
@@ -164,7 +165,19 @@ class NSISInstaller(MantidInstaller):
     def do_uninstall(self):
         "Runs the uninstall exe"
         uninstall_path = 'C:/MantidInstall/Uninstall.exe'
+        # The NSIS uninstaller actually runs a new process & detaches itself from the parent
+        # process so that it is able to remove itself. This means that the /WAIT has no affect
+        # because the parent appears to finish almost immediately
         run('start "Uninstaller" /B /WAIT ' + uninstall_path + ' /S')
+        # Keep checking for the presence of Uninstall & assume we done when its gone. Wait
+        # for a maximum of 5 minutes
+        start_time = time.time()
+        elapsed = 0
+        while os.path.exists(uninstall_path) and elapsed < 300:
+            time.sleep(5)
+            elapsed = time.time() - start_time
+        # A bit of clean up time
+        time.sleep(5)
 
 class LinuxInstaller(MantidInstaller):
     """Defines common properties for linux-based packages"""
