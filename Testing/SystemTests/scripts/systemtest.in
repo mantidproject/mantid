@@ -53,6 +53,9 @@ fi
 # For multi-config generators mantidpython is in a config-dependent subdirectory, otherwise it's just in bin
 MANTIDPYTHON=""
 setup_mantidpython_path $1 $2
+if [ "$MULTI_CONFIG_GENERATOR" == "true" ]; then
+  shift 2
+fi
 
 # Execute
 $MANTIDPYTHON $MANTIDPYTHON_ARGS $RUNNER_SCRIPT \
