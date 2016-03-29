@@ -147,7 +147,7 @@ class NSISInstaller(MantidInstaller):
 
     def __init__(self, package_dir, do_install):
         MantidInstaller.__init__(self, package_dir, 'Mantid-*-win*.exe', do_install)
-        self.mantidPlotPath = 'C:/MantidInstall/bin/MantidPlot.exe'
+        self.mantidPlotPath = 'C:/MantidInstall/bin/launch_mantidplot.bat'
         self.python_cmd = "C:/MantidInstall/bin/mantidpython.bat"
         
     def do_install(self):
