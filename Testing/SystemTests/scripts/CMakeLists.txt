@@ -35,5 +35,10 @@ if (MSVC OR XCODE_VERSION)
 else ()
   set (MULTI_CONFIG_GENERATOR "false")
 endif ()
-configure_file(${CMAKE_CURRENT_LIST_DIR}/systemtest.in ${CMAKE_BINARY_DIR}/systemtest
-    @ONLY)
+if (MSVC)
+  configure_file(${CMAKE_CURRENT_LIST_DIR}/systemtest.bat.in ${CMAKE_BINARY_DIR}/systemtest.bat
+      @ONLY)
+else ()
+  configure_file(${CMAKE_CURRENT_LIST_DIR}/systemtest.in ${CMAKE_BINARY_DIR}/systemtest
+      @ONLY)
+endif()
