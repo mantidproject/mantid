@@ -21,6 +21,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
     _test_container_ws = None
     _input_bins = None
     _is_linux = False
+    _is_rhel6 = False
 
 
     def setUp(self):
@@ -35,10 +36,10 @@ class VesuvioCorrectionsTest(unittest.TestCase):
 
         # Check OS for RHEL7 or Ubuntu
         dist = platform.linux_distribution()
-        if dist[0] == 'Ubuntu':
+        if any(dist):
             self._is_linux = True
-        if dist[0] == 'Red Hat Enterprise Linux Workstation' and dist[1] == '7.2':
-            self._is_linux = True
+            if dist[0] == 'Red Hat Enterprise Linux Workstation' and dist[1] == '6.7':
+                self._is_rhel6 = True
 
     def tearDown(self):
         workspace_names =['__Correction','__Corrected','__Output','__LinearFit']
@@ -64,7 +65,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         corrections_gb_peak = 4.22729680e-07
         corrections_ts_peak = 0.083994253007
         corrections_ms_peak = 8.64757253e-05
-        if self._is_linux:
+        if self._is_linux and not self._is_rhel6:
             corrections_gb_peak = 6.170476e-07
             corrections_ts_peak = 8.545568e-02
             corrections_ms_peak = 9.109919e-05
@@ -79,7 +80,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         corrected_gb_peak = 0.46638088
         corrected_ts_peak = 0.46593182
         corrected_ms_peak = 0.46635277
-        if self._is_linux:
+        if self._is_linux and not self._is_rhel6:
             corrected_gb_peak = 4.663811e-01
             corrected_ts_peak = 4.659339e-01
             corrected_ms_peak = 4.663553e-01
@@ -92,7 +93,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         output_ws = alg.getProperty("OutputWorkspace").value
         self._validate_matrix_structure(output_ws, 1, self._input_bins)
         output_expected_peak = 0.46635315
-        if self._is_linux:
+        if self._is_linux and not self._is_rhel6:
             output_expected_peak = 4.663559e-01
         self._validate_matrix_peak_height(output_ws, output_expected_peak)
 
@@ -100,7 +101,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         linear_params = alg.getProperty("LinearFitResult").value
         self._validate_table_workspace(linear_params, 7, 3)
         expected_values = [4.17063e-05, 0.0, 1.0, 2.026619013, 0.0, 1.0, 11.799966]
-        if self._is_linux:
+        if self._is_linux and not self._is_rhel6:
             expected_values = [6.087759e-05, 0.0, 1.0, 2.019595, 0.0, 1.0, 11.80356]
         self._validate_table_values_top_to_bottom(linear_params, expected_values)
 
@@ -122,7 +123,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         corrections_gb_peak = 1.2250951e-06
         corrections_ts_peak = 0.09844847237
         corrections_ms_peak = 9.9243003e-05
-        if self._is_linux:
+        if self._is_linux and not self._is_rhel6:
             corrections_gb_peak = 1.605327e-06
             corrections_ts_peak = 9.994254e-02
             corrections_ms_peak = 1.089477e-04
@@ -137,7 +138,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         corrected_gb_peak = 0.52350495
         corrected_ts_peak = 0.52341546
         corrected_ms_peak = 0.52344493
-        if self._is_linux:
+        if self._is_linux and not self._is_rhel6:
             corrected_gb_peak = 5.235046e-01
             corrected_ts_peak = 5.234076e-01
             corrected_ms_peak = 5.234477e-01
@@ -150,7 +151,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         output_ws = alg.getProperty("OutputWorkspace").value
         self._validate_matrix_structure(output_ws, 1, self._input_bins)
         output_expected_peak = 0.5234438813082305
-        if self._is_linux:
+        if self._is_linux and not self._is_rhel6:
             output_expected_peak = 0.5234463
         self._validate_matrix_peak_height(output_ws, output_expected_peak)
 
@@ -158,7 +159,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         linear_params = alg.getProperty("LinearFitResult").value
         self._validate_table_workspace(linear_params, 7, 3)
         expected_values = [0.0001183, 0.0, 1.0, 2.4028667, 0.0, 1.0, 10.5412496]
-        if self._is_linux:
+        if self._is_linux and not self._is_rhel6:
             expected_values = [1.550200e-04, 0.0, 1.0, 2.390063, 0.0, 1.0, 10.055330]
         self._validate_table_values_top_to_bottom(linear_params, expected_values)
 
