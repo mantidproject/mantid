@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_CALCULATEGAMMABACKGROUNDTEST_H_
-#define MANTID_CURVEFITTING_CALCULATEGAMMABACKGROUNDTEST_H_
+#ifndef MANTID_CURVEFITTING_VESUVIOCALCULATEGAMMABACKGROUNDTEST_H_
+#define MANTID_CURVEFITTING_VESUVIOCALCULATEGAMMABACKGROUNDTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -8,14 +8,14 @@
 
 using Mantid::CurveFitting::Algorithms::VesuvioCalculateGammaBackground;
 
-class CalculateGammaBackgroundTest : public CxxTest::TestSuite {
+class VesuvioCalculateGammaBackgroundTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CalculateGammaBackgroundTest *createSuite() {
-    return new CalculateGammaBackgroundTest();
+  static VesuvioCalculateGammaBackgroundTest *createSuite() {
+    return new VesuvioCalculateGammaBackgroundTest();
   }
-  static void destroySuite(CalculateGammaBackgroundTest *suite) {
+  static void destroySuite(VesuvioCalculateGammaBackgroundTest *suite) {
     delete suite;
   }
 
@@ -259,4 +259,4 @@ private:
   }
 };
 
-#endif /* MANTID_ALGORITHMS_CalculateGammaBackgroundTEST_H_ */
+#endif /* MANTID_ALGORITHMS_VesuvioCalculateGammaBackgroundTEST_H_ */
