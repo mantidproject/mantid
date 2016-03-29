@@ -118,12 +118,12 @@ void StructuredDetectorActor::draw(bool picking) const {
 *
 */
 bool StructuredDetectorActor::accept(GLActorVisitor &visitor,
-                                     VisitorAcceptRule rule) {
+                                     VisitorAcceptRule) {
   return visitor.visit(this);
 }
 
 bool StructuredDetectorActor::accept(GLActorConstVisitor &visitor,
-                                     VisitorAcceptRule rule) const {
+                                     VisitorAcceptRule) const {
   return visitor.visit(this);
 }
 

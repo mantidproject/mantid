@@ -316,7 +316,7 @@ void StructuredDetector::initialize(int xpixels, int ypixels,
   if (x.size() != y.size())
     throw std::invalid_argument(
         "StructuredDetector::initialize(): x.size() should be = y.size()");
-  if (x.size() != ((m_xpixels + 1) * (m_ypixels + 1)))
+  if (x.size() != (size_t)((m_xpixels + 1) * (m_ypixels + 1)))
     throw std::invalid_argument("StructuredDetector::initialize(): x.size() "
                                 "should be = (xpixels+1)*(ypixels+1)");
 
@@ -440,9 +440,9 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   auto yrb = m_yvalues[(y * w) + x + 1];
 
   // calculate midpoint of trapeziod
-  auto a = abs(xrf - xlf);
-  auto b = abs(xrb - xlb);
-  auto h = abs(ylb - ylf);
+  double a = abs(xrf - xlf);
+  double b = abs(xrb - xlb);
+  double h = abs(ylb - ylf);
   auto cx = ((a + b) / 4);
   auto cy = h / 2;
 
@@ -680,4 +680,4 @@ std::ostream &operator<<(std::ostream &os, const StructuredDetector &ass) {
 }
 
 } // namespace Geometry
-} // namespace Mantid
+} 

@@ -1160,8 +1160,7 @@ void InstrumentDefinitionParser::appendAssembly(
 void InstrumentDefinitionParser::createDetectorOrMonitor(
     Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElem,
     const Poco::XML::Element *pCompElem, const std::string &filename,
-    const Poco::XML::Element *pType, IdList &idList,
-    const std::string &category) {
+    IdList &idList, const std::string &category) {
 
   //-------------- Create a Detector
   //------------------------------------------------
@@ -1427,7 +1426,7 @@ void InstrumentDefinitionParser::createStructuredDetector(
     idstep = atoi((pCompElem->getAttribute("idstep")).c_str());
 
   // Access type element which defines structured detecor vertices
-  Element *pElem;
+  Element *pElem = nullptr;
   NodeIterator tags(pCompElem->ownerDocument(), NodeFilter::SHOW_ELEMENT);
   Node *pNode = tags.nextNode();
 
@@ -1572,8 +1571,8 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
   } else if (StructuredDetector::compareName(category)) {
     createStructuredDetector(parent, pLocElem, pCompElem, filename, pType);
   } else if (boost::regex_match(category, exp)) {
-    createDetectorOrMonitor(parent, pLocElem, pCompElem, filename, pType,
-                            idList, category);
+    createDetectorOrMonitor(parent, pLocElem, pCompElem, filename, idList,
+                            category);
   } else {
     //-------------- Not a Detector, RectangularDetector or Structured Detector
     //------------------------------
