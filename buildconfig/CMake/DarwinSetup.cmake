@@ -60,11 +60,13 @@ else ()
 endif ()
 
 # Generate a target to put a mantidpython wrapper in the appropriate directory
-add_custom_target ( mantidpython ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-    ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx
-    ${PROJECT_BINARY_DIR}/bin/${CMAKE_CFG_INTDIR}/mantidpython
-    COMMENT "Generating mantidpython" )
+if ( NOT TARGET mantidpython )
+  add_custom_target ( mantidpython ALL
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx
+      ${PROJECT_BINARY_DIR}/bin/${CMAKE_CFG_INTDIR}/mantidpython
+      COMMENT "Generating mantidpython" )
+endif ()
 
 ###########################################################################
 # Mac-specific installation setup
