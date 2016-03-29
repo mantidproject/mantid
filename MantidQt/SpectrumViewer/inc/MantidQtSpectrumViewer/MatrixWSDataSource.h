@@ -65,16 +65,16 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource: public SpectrumData
     bool hasData(const std::string &wsName,
                  const boost::shared_ptr<Mantid::API::Workspace> ws) override;
 
-    /// OVERRIDES: Get the smallest 'x' value covered by the data
+    /// Get the smallest 'x' value covered by the data
     double getXMin() override;
 
-    /// OVERRIDES: Get the largest 'x' value covered by the data
+    /// Get the largest 'x' value covered by the data
     double getXMax() override;
 
-    /// OVERRIDES: Get the largest 'y' value covered by the data
+    /// Get the largest 'y' value covered by the data
     double getYMax() override;
 
-    /// OVERRIDES: Get the total number of rows of data
+    /// Get the total number of rows of data
     size_t getNRows() override;
 
     /// Get DataArray covering full range of data in x, and y directions

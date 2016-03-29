@@ -27,12 +27,8 @@ class LRAutoReduction(PythonAlgorithm):
         return "Find reflectivity peak and return its pixel range."
 
     def PyInit(self):
-        self.declareProperty(FileProperty("Filename", "",
-                                          FileAction.Load, ['.nxs']),
-                                          "Data file to reduce")
-        self.declareProperty(FileProperty("TemplateFile", "",
-                                          FileAction.OptionalLoad, ['.xml']),
-                                          "Template reduction file")
+        self.declareProperty(FileProperty("Filename", "", FileAction.Load, ['.nxs']), "Data file to reduce")
+        self.declareProperty(FileProperty("TemplateFile", "", FileAction.OptionalLoad, ['.xml']), "Template reduction file")
 
         # ------------ Properties that should be in the meta data -------------
         self.declareProperty("ScaleToUnity", True,
@@ -46,6 +42,7 @@ class LRAutoReduction(PythonAlgorithm):
         self.declareProperty("WavelengthOffset", 0.0, doc="Wavelength offset used for TOF range determination")
         self.declareProperty("ScalingWavelengthCutoff", 10.0, "Wavelength above which the scaling factors are assumed to be one")
         self.declareProperty("FindPeaks", False, "Find reflectivity peaks instead of using the template values")
+        self.declareProperty("ReadSequenceFromFile", False, "Read the run sequence information from the file, not the title")
         self.declareProperty("ForceSequenceNumber", 0, "Force the sequence number value if it's not available")
 
         self.declareProperty(FileProperty('OutputFilename', '', action=FileAction.OptionalSave, extensions=["txt"]),
@@ -70,6 +67,7 @@ class LRAutoReduction(PythonAlgorithm):
 
         # Deal with a forced sequence number
         force_value = self.getProperty("ForceSequenceNumber").value
+        read_sequence_from_file = self.getProperty("ReadSequenceFromFile").value
         if force_value > 0:
             sequence_number = force_value
             first_run_of_set = int(run_number) - int(sequence_number) + 1
@@ -78,10 +76,13 @@ class LRAutoReduction(PythonAlgorithm):
 
         # Look for meta data information, available with the new DAS
         # If it's not available, parse the title.
-        elif meta_data_run.hasProperty("sequencer_number") and meta_data_run.hasProperty("sequence_id"):
-            sequence_number = meta_data_run.getProperty("sequence_number").value
-            first_run_of_set = meta_data_run.getProperty("sequence_id").value
-            data_type = meta_data_run.getProperty("data_type").value
+        elif read_sequence_from_file is True \
+            and meta_data_run.hasProperty("sequence_number") \
+            and meta_data_run.hasProperty("sequence_id") \
+            and meta_data_run.hasProperty("data_type"):
+            sequence_number = meta_data_run.getProperty("sequence_number").value[0]
+            first_run_of_set = meta_data_run.getProperty("sequence_id").value[0]
+            data_type = meta_data_run.getProperty("data_type").value[0]
             # Normal sample data is type 0
             do_reduction = data_type==0
             # Direct beams for scaling factors are type 1
@@ -119,7 +120,7 @@ class LRAutoReduction(PythonAlgorithm):
             logger.notice("Angle appears to be zero: probably a direct beam run")
             is_direct_beam = True
 
-        # Determine the sequence ID and sequencer number
+        # Determine the sequence ID and sequence number
         try:
             m = re.search("Run:(\d+)-(\d+)\.", title)
             if m is not None:
@@ -284,7 +285,7 @@ class LRAutoReduction(PythonAlgorithm):
         # TODO: sync up names with new DAS
         # Get information from meta-data
         meta_data_run = self.event_data.getRun()
-        incident_medium = self._read_property(meta_data_run, "incident_medium", "air")
+        incident_medium = self._read_property(meta_data_run, "incident_medium", "medium")
         q_min = self._read_property(meta_data_run, "output_q_min", 0.001)
         q_step = -abs(self._read_property(meta_data_run, "output_q_step", 0.02))
         dQ_constant = self._read_property(meta_data_run, "dq_constant", 0.004)
@@ -502,6 +503,29 @@ class LRAutoReduction(PythonAlgorithm):
 
         return file_path
 
+    def _get_sequence_total(self, default=10):
+        """
+            Return the total number of runs in the current sequence.
+            If reading sequence information from file was turned off,
+            or if the information was not found, return the given default.
+
+            For direct beams, a default of 10 is not efficient but is a
+            good value to avoid processing runs we know will be processed later.
+            That is because most direct beam run sets are either 13 (for 30 Hz)
+            or 21 (for 60 Hz).
+
+            @param default: default value for when the info is not available
+        """
+        meta_data_run = self.event_data.getRun()
+        # Get the total number of direct beams in a set.
+        # A default of 10 is not efficient but is a good default to
+        # avoid processing runs we know will be processed later.
+        read_sequence_from_file = self.getProperty("ReadSequenceFromFile").value
+        if read_sequence_from_file:
+            return self._read_property(meta_data_run, "sequence_total", [default])[0]
+        else:
+            return default
+
     def PyExec(self):
         filename = self.getProperty("Filename").value
 
@@ -513,16 +537,22 @@ class LRAutoReduction(PythonAlgorithm):
 
         # If we have a direct beam, compute the scaling factors
         if is_direct_beam:
-            if sequence_number < 10:
-                logger.notice("Waiting for at least 10 runs before starting scaling factor calculator")
+            sequence_total = self._get_sequence_total(default=10)
+            if sequence_number < sequence_total:
+                logger.notice("Waiting for at least %s runs to compute scaling factors" % sequence_total)
                 return
             logger.notice("Using automated scaling factor calculator")
             output_dir = self.getProperty("OutputDirectory").value
             sf_tof_step = self.getProperty("ScalingFactorTOFStep").value
+
+            # The medium for these direct beam runs may not be what was set in the template,
+            # so either use the medium in the data file or a default name
+            meta_data_run = self.event_data.getRun()
+            incident_medium = self._read_property(meta_data_run, "incident_medium", "medium")
             LRDirectBeamSort(RunList=range(first_run_of_set, first_run_of_set + sequence_number),
                              UseLowResCut=True, ComputeScalingFactors=True, TOFSteps=sf_tof_step,
                              IncidentMedium=incident_medium,
-                             ScalingFactorFile=os.path.join(output_dir, "sf_%s_auto.txt" % first_run_of_set))
+                             ScalingFactorFile=os.path.join(output_dir, "sf_%s_auto.cfg" % first_run_of_set))
             return
         elif not do_reduction:
             logger.notice("The data is of a type that does not have to be reduced")
@@ -533,30 +563,30 @@ class LRAutoReduction(PythonAlgorithm):
 
         # Execute the reduction
         LiquidsReflectometryReduction(RunNumbers=[int(run_number)],
-              NormalizationRunNumber=str(data_set.norm_file),
-              SignalPeakPixelRange=data_set.DataPeakPixels,
-              SubtractSignalBackground=data_set.DataBackgroundFlag,
-              SignalBackgroundPixelRange=data_set.DataBackgroundRoi[:2],
-              NormFlag=data_set.NormFlag,
-              NormPeakPixelRange=data_set.NormPeakPixels,
-              NormBackgroundPixelRange=data_set.NormBackgroundRoi,
-              SubtractNormBackground=data_set.NormBackgroundFlag,
-              LowResDataAxisPixelRangeFlag=data_set.data_x_range_flag,
-              LowResDataAxisPixelRange=data_set.data_x_range,
-              LowResNormAxisPixelRangeFlag=data_set.norm_x_range_flag,
-              LowResNormAxisPixelRange=data_set.norm_x_range,
-              TOFRange=data_set.DataTofRange,
-              IncidentMediumSelected=incident_medium,
-              GeometryCorrectionFlag=False,
-              QMin=data_set.q_min,
-              QStep=data_set.q_step,
-              AngleOffset=data_set.angle_offset,
-              AngleOffsetError=data_set.angle_offset_error,
-              ScalingFactorFile=str(data_set.scaling_factor_file),
-              SlitsWidthFlag=data_set.slits_width_flag,
-              ApplyPrimaryFraction=True,
-              PrimaryFractionRange=[data_set.clocking_from, data_set.clocking_to],
-              OutputWorkspace='reflectivity_%s_%s_%s' % (first_run_of_set, sequence_number, run_number))
+                                      NormalizationRunNumber=str(data_set.norm_file),
+                                      SignalPeakPixelRange=data_set.DataPeakPixels,
+                                      SubtractSignalBackground=data_set.DataBackgroundFlag,
+                                      SignalBackgroundPixelRange=data_set.DataBackgroundRoi[:2],
+                                      NormFlag=data_set.NormFlag,
+                                      NormPeakPixelRange=data_set.NormPeakPixels,
+                                      NormBackgroundPixelRange=data_set.NormBackgroundRoi,
+                                      SubtractNormBackground=data_set.NormBackgroundFlag,
+                                      LowResDataAxisPixelRangeFlag=data_set.data_x_range_flag,
+                                      LowResDataAxisPixelRange=data_set.data_x_range,
+                                      LowResNormAxisPixelRangeFlag=data_set.norm_x_range_flag,
+                                      LowResNormAxisPixelRange=data_set.norm_x_range,
+                                      TOFRange=data_set.DataTofRange,
+                                      IncidentMediumSelected=incident_medium,
+                                      GeometryCorrectionFlag=False,
+                                      QMin=data_set.q_min,
+                                      QStep=data_set.q_step,
+                                      AngleOffset=data_set.angle_offset,
+                                      AngleOffsetError=data_set.angle_offset_error,
+                                      ScalingFactorFile=str(data_set.scaling_factor_file),
+                                      SlitsWidthFlag=data_set.slits_width_flag,
+                                      ApplyPrimaryFraction=True,
+                                      PrimaryFractionRange=[data_set.clocking_from, data_set.clocking_to],
+                                      OutputWorkspace='reflectivity_%s_%s_%s' % (first_run_of_set, sequence_number, run_number))
 
         # Put the reflectivity curve together
         self._save_partial_output(data_set, first_run_of_set, sequence_number, run_number)

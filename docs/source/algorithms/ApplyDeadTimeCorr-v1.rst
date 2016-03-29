@@ -29,6 +29,10 @@ where
 1. Integer type, containing spectrum number (not index)
 2. Double type, containing :math:`t_{dead}` value of the spectrum
 
+It is assumed that all bins in the *InputWorkspace* are the same 
+size (to within reasonable rounding error). 
+If they are not, the algorithm will exit with an error.
+
 Usage
 -----
 

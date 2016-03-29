@@ -26,10 +26,10 @@ public:
   }
   void setBackgroundColor(const PeakViewColor) override { /*Do nothing*/
   }
-  PeakViewColor getBackgroundPeakViewColor() const {
+  PeakViewColor getBackgroundPeakViewColor() const override {
     return PeakViewColor();
   }
-  PeakViewColor getForegroundPeakViewColor() const {
+  PeakViewColor getForegroundPeakViewColor() const override {
     return PeakViewColor();
   }
   std::string getTransformName() const override { return ""; }

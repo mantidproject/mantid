@@ -38,8 +38,7 @@ public:
   {
     emit parameterChanged(funcIndex, paramName);
   }
-  void plotGuess() override { emit plotGuessRequested(); }
-  void clearGuess() override { emit removeGuessRequested(); }
+  void plotGuess() override { emit plotGuessClicked(); }
 
   MOCK_CONST_METHOD1(function, IFunction_const_sptr(QString));
   MOCK_CONST_METHOD0(currentFunctionIndex, boost::optional<QString>());
@@ -54,6 +53,7 @@ public:
   MOCK_METHOD3(setParameter, void(const QString&, const QString&, double));
   MOCK_METHOD1(displayError, void(const QString&));
   MOCK_METHOD0(help, void());
+  MOCK_METHOD1(changePlotGuessState, void(bool));
 };
 
 class MockALCPeakFittingModel : public IALCPeakFittingModel
@@ -61,6 +61,7 @@ class MockALCPeakFittingModel : public IALCPeakFittingModel
 public:
   void changeFittedPeaks() { emit fittedPeaksChanged(); }
   void changeData() { emit dataChanged(); }
+  void setError(const QString &message) { emit errorInModel(message); }
 
   MOCK_CONST_METHOD0(fittedPeaks, IFunction_const_sptr());
   MOCK_CONST_METHOD0(data, MatrixWorkspace_const_sptr());
@@ -129,16 +130,22 @@ public:
     presenter.initialize();
   }
 
-  void test_fitEmptyFunction()
-  {
-    ON_CALL(*m_view, function(QString(""))).WillByDefault(Return(IFunction_const_sptr()));
-    EXPECT_CALL(*m_view, displayError(QString("Couldn't fit an empty function"))).Times(1);
+  void test_fitEmptyFunction() {
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
+    ON_CALL(*m_model, data()).WillByDefault(Return(ws));
+    ON_CALL(*m_view, function(QString("")))
+        .WillByDefault(Return(IFunction_const_sptr()));
+    EXPECT_CALL(*m_view,
+                displayError(QString("Couldn't fit with empty function/data")))
+        .Times(1);
 
     m_view->requestFit();
   }
 
-  void test_fit()
-  {
+  void test_fit() {
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
+    ON_CALL(*m_model, data()).WillByDefault(Return(ws));
+
     IFunction_sptr peaks = createGaussian(1,2,3);
 
     ON_CALL(*m_view, function(QString(""))).WillByDefault(Return(peaks));
@@ -285,14 +292,6 @@ public:
   }
 
   /**
-   * Test that clearing the guess from the view removes the fitted curve
-   */
-  void test_clearGuess() {
-    EXPECT_CALL(*m_view, setFittedCurve(Property(&QwtData::size, 0)));
-    m_view->clearGuess();
-  }
-
-  /**
    * Test that clicking "Plot guess" with no function set plots nothing
    */
   void test_plotGuess_noFunction() {
@@ -305,6 +304,18 @@ public:
   }
 
   /**
+   * Test that clicking "Plot guess" with no data plots nothing
+   * (and doesn't crash)
+   */
+  void test_plotGuess_noData() {
+    ON_CALL(*m_model, data()).WillByDefault(Return(nullptr));
+    IFunction_sptr peaks = createGaussian(1, 2, 3);
+    ON_CALL(*m_view, function(QString(""))).WillByDefault(Return(peaks));
+    EXPECT_CALL(*m_view, setFittedCurve(Property(&QwtData::size, 0)));
+    TS_ASSERT_THROWS_NOTHING(m_view->plotGuess());
+  }
+
+  /**
    * Test that "Plot guess" with a function set plots a function
    */
   void test_plotGuess() {
@@ -314,6 +325,23 @@ public:
     ON_CALL(*m_view, function(QString(""))).WillByDefault(Return(peaks));
     EXPECT_CALL(*m_view, setFittedCurve(_));
     m_view->plotGuess();
+  }
+
+  /**
+   * Test that plotting a guess, then clicking again, clears the guess
+   */
+  void test_plotGuessAndThenClear() {
+    test_plotGuess();
+    EXPECT_CALL(*m_view, setFittedCurve(Property(&QwtData::size, 0)));
+    m_view->plotGuess(); // click again i.e. "Remove guess"
+  }
+
+  /**
+   * Test that errors coming from the model are displayed in the view
+   */
+  void test_displayError() {
+    EXPECT_CALL(*m_view, displayError(QString("Test error")));
+    m_model->setError("Test error");
   }
 };
 

@@ -98,7 +98,7 @@ public:
     MDLeanEvent<2> ev(1.2, 3.4);
     ev.setCenter(0, 2.0);
     ev.setCenter(1, 3.0);
-    b.addEvent(ev);
+    TS_ASSERT_EQUALS(1, b.addEvent(ev));
     TS_ASSERT_EQUALS(b.getNPoints(), 1)
 
     b.refreshCache();
@@ -135,7 +135,7 @@ public:
     MDLeanEvent<2> ev(1.2, 3.4);
     ev.setCenter(0, 2.0);
     ev.setCenter(1, 3.0);
-    b.addEventUnsafe(ev);
+    TS_ASSERT_EQUALS(1, b.addEventUnsafe(ev));
     TS_ASSERT_EQUALS(b.getNPoints(), 1)
 
     b.refreshCache();

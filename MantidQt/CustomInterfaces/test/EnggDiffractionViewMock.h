@@ -128,6 +128,12 @@ public:
   // virtual double rebinningPulsesPerPeriod() const;
   MOCK_CONST_METHOD0(rebinningPulsesTime, double());
 
+  // virtual std::string fittingRunNo() const;
+  MOCK_CONST_METHOD0(fittingRunNo, std::string());
+
+  // virtual std::string fittingPeaksData() const;
+  MOCK_CONST_METHOD0(fittingPeaksData, std::string());
+
   // virtual bool focusedOutWorkspace() const;
   MOCK_CONST_METHOD0(focusedOutWorkspace, bool());
 
@@ -156,6 +162,10 @@ public:
   MOCK_METHOD3(plotReplacingWindow,
                void(const std::string &wsName, const std::string &spectrum,
                     const std::string &type));
+
+  // virtual void setDataVector
+  MOCK_METHOD2(setDataVector,
+	  void(std::vector<boost::shared_ptr<QwtData>> &data, bool focused));
 
   // virtual void plotVanCurvesCalibOutput();
   MOCK_METHOD0(plotVanCurvesCalibOutput, void());

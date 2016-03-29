@@ -917,6 +917,8 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
   alg->setProperty<bool>("MakeCalWorkspace", loadCalibration);
   alg->setProperty<bool>("MakeGroupingWorkspace", loadGrouping);
   alg->setProperty<bool>("MakeMaskWorkspace", loadMask);
+  alg->setProperty<double>("TofMin", getProperty("TMin"));
+  alg->setProperty<double>("TofMax", getProperty("TMax"));
   alg->setPropertyValue("WorkspaceName", m_instName);
   alg->executeAsChildAlg();
 
