@@ -156,7 +156,10 @@ public:
   virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                              bool focused);
 
-  void bankFullDir(QString path);
+  void setBankDir(QString path);
+
+  std::string fittingRunNoFactory(std::string bank, std::string fileName,
+                                  std::string &bankDir, std::string fileDir);
 
   std::string readPeaksFile(std::string fileDir);
 

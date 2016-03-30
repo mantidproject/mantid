@@ -671,51 +671,57 @@ double EnggDiffractionViewQtGUI::rebinningPulsesTime() const {
 }
 
 /// shahroz
-void EnggDiffractionViewQtGUI::bankFullDir(QString path) {
+void EnggDiffractionViewQtGUI::setBankDir(QString path) {
   // m_bank_Id
-	QString rPath;
+  QString rPath;
   std::string dir = path.toStdString();
   Poco::Path fpath(dir);
 
   std::string bank1Dir;
   std::string bank2Dir;
+  std::string bank3Dir;
 
   if (fpath.isFile()) {
-	  auto fileName = fpath.getFileName();
+    std::string fileName = fpath.getFileName();
+	std::string fileDir = fpath.parent().toString();
 
-	  if (fileName.find("bank_1") != std::string::npos && m_bank_Id == 0) {
-		  bank1Dir = path;
-	  }
-	  else {
-		  std::string genDir = fileName.substr(0, fileName.size() - 5);
-		  Poco::Path bankFile(genDir + "1.nxs");
-		  if(bankFile.isFile()) {
-			  bank1Dir = genDir + "1.nxs";
-		  }
-	  }
+    if (fileName.find("bank_1") != std::string::npos && m_bank_Id == 0) {
+      bank1Dir = path;
+    } else {
+		bank1Dir =fittingRunNoFactory("1", fileName, bank1Dir, fileDir);
+    }
 
-	  if (fileName.find("bank_2") != std::string::npos && m_bank_Id == 1) {
-		  bank2Dir = path;
-	  }
-	  else {
-		  std::string genDir = fileName.substr(0, fileName.size() - 5);
-		  Poco::Path bankFile(genDir + "2.nxs");
-		  if (bankFile.isFile()) {
-			  bank2Dir = bankFile.toString();
-		  }
+    if (fileName.find("bank_2") != std::string::npos && m_bank_Id == 1) {
+      bank2Dir = path;
+    } else {
+		bank2Dir = fittingRunNoFactory("2", fileName, bank2Dir, fileDir);
+    }
 
-	  }
-
-	  if (m_bank_Id == 0) {
-		  setfittingRunNo(QString::fromUtf8(bank1Dir.c_str()));
-	  }
-	  else if (m_bank_Id == 1) {
-		  setfittingRunNo(QString::fromUtf8(bank2Dir.c_str()));
-	  }
-
-
+    if (fileName.find("bank_3") != std::string::npos && m_bank_Id == 2) {
+      bank3Dir = path;
+    } else {
+		bank3Dir = fittingRunNoFactory("3", fileName, bank3Dir, fileDir);
+    }
   }
 
+  if (m_bank_Id == 0) {
+    setfittingRunNo(QString::fromUtf8(bank1Dir.c_str()));
+  } else if (m_bank_Id == 1) {
+    setfittingRunNo(QString::fromUtf8(bank2Dir.c_str()));
+  } else if (m_bank_Id == 2) {
+    setfittingRunNo(QString::fromUtf8(bank3Dir.c_str()));
+  }
+}
+
+std::string EnggDiffractionViewQtGUI::fittingRunNoFactory(
+    std::string bank, std::string fileName, std::string &bankDir, std::string fileDir) {
+
+  std::string genDir = fileName.substr(0, fileName.size() - 5);
+  Poco::Path bankFile(genDir + bank + ".nxs");
+  if (bankFile.isFile()) {
+    bankDir = fileDir + genDir + bank + ".nxs";
+  }
+  return bankDir;
 }
 
 std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
@@ -748,7 +754,6 @@ void EnggDiffractionViewQtGUI::setDataVector(
     dataCurvesFactory(data, m_fittedDataVector, focused);
   }
 }
-
 
 void EnggDiffractionViewQtGUI::dataCurvesFactory(
     std::vector<boost::shared_ptr<QwtData>> &data,
@@ -1092,7 +1097,7 @@ void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
 /// shahroz
 void EnggDiffractionViewQtGUI::browseFitFocusedRun() {
   QString prevPath = QString::fromStdString(m_focusDir);
-  ///m_bank_Id
+  /// m_bank_Id
   if (prevPath.isEmpty()) {
     prevPath =
         MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
@@ -1104,16 +1109,13 @@ void EnggDiffractionViewQtGUI::browseFitFocusedRun() {
       QFileDialog::getOpenFileName(this, tr("Open Focused File "), prevPath,
                                    QString::fromStdString(nexusFormat)));
 
-  
-
   if (path.isEmpty()) {
     return;
   }
 
-  bankFullDir(path);
+  setBankDir(path);
 
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
- 
 }
 
 void EnggDiffractionViewQtGUI::browsePeaksToFit() {
@@ -1273,11 +1275,11 @@ void EnggDiffractionViewQtGUI::setBankIdComboBox(int idx) {
 
 /// shahroz
 void EnggDiffractionViewQtGUI::setfittingRunNo(QString path) {
-	m_uiTabFitting.lineEdit_pushButton_run_num->setText(path);
+  m_uiTabFitting.lineEdit_pushButton_run_num->setText(path);
 }
 
 std::string EnggDiffractionViewQtGUI::fittingRunNo() const {
-	return m_uiTabFitting.lineEdit_pushButton_run_num->text().toStdString();
+  return m_uiTabFitting.lineEdit_pushButton_run_num->text().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {
