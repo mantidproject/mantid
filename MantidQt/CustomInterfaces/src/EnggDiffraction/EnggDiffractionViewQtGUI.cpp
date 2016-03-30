@@ -671,23 +671,48 @@ double EnggDiffractionViewQtGUI::rebinningPulsesTime() const {
 }
 
 /// shahroz
-QString EnggDiffractionViewQtGUI::bankFullDir(int bank, QString path) {
+void EnggDiffractionViewQtGUI::bankFullDir(QString path) {
   // m_bank_Id
 	QString rPath;
   std::string dir = path.toStdString();
   Poco::Path fpath(dir);
 
-  auto fileName = fpath.getFileName();
+  std::string bank1Dir;
+  std::string bank2Dir;
 
   if (fpath.isFile()) {
+	  auto fileName = fpath.getFileName();
 
-	  if (fileName.find("bank_1") != std::string::npos && (m_bank_Id == 0))
-			  return path;
+	  if (fileName.find("bank_1") != std::string::npos && m_bank_Id == 0) {
+		  bank1Dir = path;
+	  }
+	  else {
+		  std::string genDir = fileName.substr(0, fileName.size() - 5);
+		  Poco::Path bankFile(genDir + "1.nxs");
+		  if(bankFile.isFile()) {
+			  bank1Dir = genDir + "1.nxs";
+		  }
+	  }
 
-	  else if (fileName.find("bank_2") != std::string::npos && (m_bank_Id == 1))
-			  return path;
-	  else 
-		  return rPath;
+	  if (fileName.find("bank_2") != std::string::npos && m_bank_Id == 1) {
+		  bank2Dir = path;
+	  }
+	  else {
+		  std::string genDir = fileName.substr(0, fileName.size() - 5);
+		  Poco::Path bankFile(genDir + "2.nxs");
+		  if (bankFile.isFile()) {
+			  bank2Dir = bankFile.toString();
+		  }
+
+	  }
+
+	  if (m_bank_Id == 0) {
+		  setfittingRunNo(QString::fromUtf8(bank1Dir.c_str()));
+	  }
+	  else if (m_bank_Id == 1) {
+		  setfittingRunNo(QString::fromUtf8(bank2Dir.c_str()));
+	  }
+
 
   }
 
@@ -1079,14 +1104,16 @@ void EnggDiffractionViewQtGUI::browseFitFocusedRun() {
       QFileDialog::getOpenFileName(this, tr("Open Focused File "), prevPath,
                                    QString::fromStdString(nexusFormat)));
 
-  auto newPath = bankFullDir(2, path);
+  
 
   if (path.isEmpty()) {
     return;
   }
 
-  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(newPath);
-  m_uiTabFitting.lineEdit_pushButton_run_num->setText(newPath);
+  bankFullDir(path);
+
+  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
+ 
 }
 
 void EnggDiffractionViewQtGUI::browsePeaksToFit() {
@@ -1244,8 +1271,13 @@ void EnggDiffractionViewQtGUI::setBankIdComboBox(int idx) {
   bankName->setCurrentIndex(idx);
 }
 
+/// shahroz
+void EnggDiffractionViewQtGUI::setfittingRunNo(QString path) {
+	m_uiTabFitting.lineEdit_pushButton_run_num->setText(path);
+}
+
 std::string EnggDiffractionViewQtGUI::fittingRunNo() const {
-  return m_uiTabFitting.lineEdit_pushButton_run_num->text().toStdString();
+	return m_uiTabFitting.lineEdit_pushButton_run_num->text().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {

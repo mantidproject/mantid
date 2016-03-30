@@ -147,12 +147,16 @@ public:
 
   double rebinningPulsesTime() const override;
 
+  void setfittingRunNo(QString path);
+
   virtual std::string fittingRunNo() const override;
 
   virtual std::string fittingPeaksData() const override;
 
   virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                              bool focused);
+
+  void bankFullDir(QString path);
 
   std::string readPeaksFile(std::string fileDir);
 
