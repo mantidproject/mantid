@@ -682,7 +682,7 @@ void EnggDiffractionViewQtGUI::setBankDir(QString path) {
   std::string bank3Dir;
 
   if (fpath.isFile()) {
-    std::string fileName = fpath.getFileName();
+    std::string fileName = fpath.getBaseName();
 	std::string fileDir = fpath.parent().toString();
 
     if (fileName.find("bank_1") != std::string::npos && m_bank_Id == 0) {
@@ -716,7 +716,7 @@ void EnggDiffractionViewQtGUI::setBankDir(QString path) {
 std::string EnggDiffractionViewQtGUI::fittingRunNoFactory(
     std::string bank, std::string fileName, std::string &bankDir, std::string fileDir) {
 
-  std::string genDir = fileName.substr(0, fileName.size() - 5);
+  std::string genDir = fileName.substr(0, fileName.size() - 1);
   Poco::Path bankFile(genDir + bank + ".nxs");
   if (bankFile.isFile()) {
     bankDir = fileDir + genDir + bank + ".nxs";
@@ -1097,7 +1097,7 @@ void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
 /// shahroz
 void EnggDiffractionViewQtGUI::browseFitFocusedRun() {
   QString prevPath = QString::fromStdString(m_focusDir);
-  /// m_bank_Id
+
   if (prevPath.isEmpty()) {
     prevPath =
         MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
@@ -1112,10 +1112,11 @@ void EnggDiffractionViewQtGUI::browseFitFocusedRun() {
   if (path.isEmpty()) {
     return;
   }
-
-  setBankDir(path);
+  /// shahroz
+ // setBankDir(path);
 
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
+  m_uiTabFitting.lineEdit_pushButton_run_num->setText(path);
 }
 
 void EnggDiffractionViewQtGUI::browsePeaksToFit() {
@@ -1314,6 +1315,31 @@ void EnggDiffractionViewQtGUI::setListWidgetBank(int idx) {
 
   QListWidget *selectBank = m_uiTabFitting.listWidget_fitting_bank_preview;
   selectBank->setCurrentRow(idx);
+}
+
+/// shahroz
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::fittingRunNoChanged()
+{
+	auto focusedFile = m_uiTabFitting.lineEdit_pushButton_run_num->text().toStdString();
+	Poco::Path fPath(focusedFile);
+	std::string fName = fPath.getBaseName();
+	std::string fDir = fPath.parent().toString();
+	std::string bankDir;
+	int fileRange = 4;
+	std::vector<std::string> bankWithDir;
+
+	for (int i = 1; i < fileRange; i++) {
+		bankDir = fittingRunNoFactory(std::to_string(i), fName, bankDir, fDir);
+		Poco::Path bankPath(bankDir);
+		if (bankPath.isDirectory()) {
+			bankWithDir.push_back(bankDir);
+		}
+	}
+
+	
+
+
+
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {

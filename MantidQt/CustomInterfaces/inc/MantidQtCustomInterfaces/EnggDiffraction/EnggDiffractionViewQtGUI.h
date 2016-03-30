@@ -240,6 +240,7 @@ private slots:
   void browsePeaksToFit();
   void fittingListWidgetBank(int idx);
   void setListWidgetBank(int idx);
+  void fittingRunNoChanged();
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
