@@ -133,27 +133,18 @@ public:
     doTestPropertyExistance("OutputFilename");
   }
 
-  /** Test the algo
-  * @param nameX : name of the axis
-  * @param expectedNumPoints :: how many points in the output
-  */
-  template <typename MDE, size_t nd>
-  void do_test_exec(std::string name1, std::string name2, std::string name3,
-                    std::string name4, uint64_t expectedNumPoints,
-                    size_t expectedNumDims, bool willFail = false,
-                    std::string OutputFilename = "") {
-
+  void execute_slice(const std::string &name1, const std::string &name2,
+                     const std::string &name3, const std::string &name4,
+                     const uint64_t expectedNumPoints,
+                     const size_t expectedNumDims, bool willFail,
+                     const std::string &OutputFilename,
+                     IMDEventWorkspace_sptr in_ws) {
     SliceMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    Mantid::Geometry::QSample frame;
-    IMDEventWorkspace_sptr in_ws =
-        MDEventsTestHelper::makeAnyMDEWWithFrames<MDE, nd>(10, 0.0, 10.0, frame,
-                                                           1);
+
     Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
         Mantid::Kernel::QSample;
-    in_ws->setCoordinateSystem(appliedCoord);
-    AnalysisDataService::Instance().addOrReplace("SliceMDTest_ws", in_ws);
 
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("InputWorkspace", "SliceMDTest_ws"));
@@ -202,6 +193,30 @@ public:
 
     AnalysisDataService::Instance().remove("SliceMDTest_ws");
     AnalysisDataService::Instance().remove("SliceMDTest_outWS");
+  }
+
+  /** Test the algo
+  * @param nameX : name of the axis
+  * @param expectedNumPoints :: how many points in the output
+  */
+  template <typename MDE, size_t nd>
+  void do_test_exec(const std::string &name1, const std::string &name2,
+                    const std::string &name3, const std::string &name4,
+                    const uint64_t expectedNumPoints,
+                    const size_t expectedNumDims, bool willFail = false,
+                    std::string OutputFilename = "") {
+
+    Mantid::Geometry::QSample frame;
+    IMDEventWorkspace_sptr in_ws =
+        MDEventsTestHelper::makeAnyMDEWWithFrames<MDE, nd>(10, 0.0, 10.0, frame,
+                                                           1);
+    Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
+        Mantid::Kernel::QSample;
+    in_ws->setCoordinateSystem(appliedCoord);
+    AnalysisDataService::Instance().addOrReplace("SliceMDTest_ws", in_ws);
+
+    execute_slice(name1, name2, name3, name4, expectedNumPoints,
+                  expectedNumDims, willFail, OutputFilename, in_ws);
   }
 
   void test_exec_3D_lean() {
