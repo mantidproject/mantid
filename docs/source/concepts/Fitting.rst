@@ -43,7 +43,7 @@ cost function could depend on the fitting parameter Bob:
    :alt: CostFunctionVSbob.png
 
 The primary problem which Mantid deals with is that of 
-local minimization, also referred to as download minimization. Referencing to 
+local minimization, also referred to as downhill minimization. Referencing to 
 the figure above, this corresponds either to reach target B through fitting from 
 the value of the fitting parameter shown by the red label 1 or 2, or reach 
 target A from the parameter position 3. This is the common problem in 
@@ -106,7 +106,7 @@ How do you know if a fit is successful
 If you are fitting using the Fit Function toolbox or the Multi-dataset 
 Fitting interface then you get visual feedback as to how well the fit was. 
 
-If you are scientists experience in fitting a particular type of data 
+If you are scientists experienced in fitting a particular type of data 
 then the absolute value of the cost function may be sufficient in itself 
 to tell whether a fit is successful.
 
@@ -128,7 +128,7 @@ problem, beyond that of the generic Fit algorithm. An example of this
 is :ref:`FitPeak <algm-FitPeak>` which aims to fit single peaks 
 with some checks to ensure results are physical.
 
-If you are remain unsure if a given fit was successful then e.g. try the
+If you remain unsure if a given fit was successful then e.g. try the
 tool :ref:`CalculateChiSquared <algm-CalculateChiSquared>`, which allows
 inspection of the cost function in the neighbourhood of a found minimum.
 
