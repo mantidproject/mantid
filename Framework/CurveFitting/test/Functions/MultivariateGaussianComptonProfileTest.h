@@ -29,9 +29,9 @@ public:
 
   void test_Initialized_Function_Has_Expected_Parameters_In_Right_Order() {
     Mantid::API::IFunction_sptr profile = createFunction();
-    static const size_t nparams(4);
-    const char *expectedParams[nparams] = {"Intensity", "SigmaX", "SigmaY",
-                                           "SigmaZ"};
+    static const size_t nparams(5);
+    const char *expectedParams[nparams] = {"Mass", "Intensity", "SigmaX",
+                                           "SigmaY", "SigmaZ"};
     auto currentNames = profile->getParameterNames();
     const size_t nnames = currentNames.size();
     TS_ASSERT_EQUALS(nparams, nnames);
@@ -44,8 +44,8 @@ public:
 
   void test_Initialized_Function_Has_Expected_Attributes() {
     Mantid::API::IFunction_sptr profile = createFunction();
-    static const size_t nattrs(2);
-    const char *expectedAttrs[nattrs] = {"Mass", "IntegrationSteps"};
+    static const size_t nattrs(1);
+    const char *expectedAttrs[nattrs] = {"IntegrationSteps"};
 
     TS_ASSERT_EQUALS(nattrs, profile->nAttributes());
 
@@ -81,35 +81,34 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(func->function(domain, values));
 
-    const double tol(1e-10);
-    TS_ASSERT_DELTA(0.0335150539, values.getCalculated(0), tol);
-    TS_ASSERT_DELTA(0.0198096734, values.getCalculated(1), tol);
-    TS_ASSERT_DELTA(0.0114435282, values.getCalculated(2), tol);
+    const double tol(1e-6);
+    TS_ASSERT_DELTA(0.1777, values.getCalculated(0), tol);
+    TS_ASSERT_DELTA(0.115784, values.getCalculated(1), tol);
+    TS_ASSERT_DELTA(0.0730074, values.getCalculated(2), tol);
   }
 
   void test_Build_S2_Cache() {
     auto func = createFunctionWithParamsSet();
-    func->setAttributeValue("IntegrationSteps", 35);
+    func->setAttributeValue("IntegrationSteps", 34);
 
     std::vector<double> s2;
     func->buildS2Cache(s2);
 
-    TS_ASSERT_EQUALS(1296, s2.size());
+    TS_ASSERT_EQUALS(1225, s2.size());
 
     const double tol(1e-3);
     TS_ASSERT_DELTA(36.0, s2[0], tol);
-    TS_ASSERT_DELTA(36.0, s2[35], tol);
-    TS_ASSERT_DELTA(35.8606, s2[36], tol);
-    TS_ASSERT_DELTA(35.8606, s2[71], tol);
-    TS_ASSERT_DELTA(15.04823, s2[740], tol);
+    TS_ASSERT_DELTA(36.0, s2[34], tol);
+    TS_ASSERT_DELTA(34.598, s2[35], tol);
+    TS_ASSERT_DELTA(34.598, s2[69], tol);
   }
 
 private:
   boost::shared_ptr<MultivariateGaussianComptonProfile>
   createFunctionWithParamsSet() {
     auto func = createFunction();
-    func->setAttributeValue("Mass", 1.0);
-    func->setAttributeValue("IntegrationSteps", 35);
+    func->setAttributeValue("IntegrationSteps", 34);
+    func->setParameter("Mass", 1.0);
     func->setParameter("Intensity", 1.0);
     func->setParameter("SigmaX", 2.5);
     func->setParameter("SigmaY", 2.5);
