@@ -7,9 +7,11 @@
 #include "MantidDataHandling/SaveAscii2.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
@@ -234,7 +236,10 @@ void SaveAscii2::exec() {
     }
     file << std::endl;
   }
-
+  // populate the meta data map
+  if (m_metaData.size() > 0) {
+    populateAllMetaData();
+  }
   if (idx.empty()) {
     Progress progress(this, 0, 1, nSpectra);
     for (int i = 0; i < nSpectra; i++) {
@@ -309,8 +314,12 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
   auto spec = m_ws->getSpectrum(spectraIndex);
   auto specNo = spec->getSpectrumNo();
   if (m_writeID)
-    file << specNo << std::endl;
-
+    file << specNo;
+  for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
+    auto value = m_metaDataMap[*iter][spectraIndex];
+    file << m_sep << value;
+  }
+  file << std::endl;
 
   for (int bin = 0; bin < m_nBins; bin++) {
     if (m_isHistogram & m_isCommonBins) // bin centres,
@@ -366,6 +375,79 @@ SaveAscii2::stringListToVector(const std::string &inputString) {
     }
   }
   return stringVector;
+}
+
+/**
+ * Populate the map with the Q values associated with each spectrum in the workspace
+ */
+void SaveAscii2::populateQMetaData() {
+  std::vector<std::string> qValues;
+  const auto nHist = m_ws->getNumberHistograms();
+  for (size_t i = 0; i < nHist; i++) {
+    const auto detector = m_ws->getDetector(i);
+    double twoTheta(0.0), efixed(0.0);
+    if (!detector->isMonitor()) {
+      twoTheta = m_ws->detectorTwoTheta(detector) / 2.0;
+	  try {
+		  efixed = m_ws->getEFixed(detector);
+	  }
+	  catch (std::runtime_error error) {
+		  throw error;
+	  }
+    } else {
+      twoTheta = 0.0;
+      efixed = DBL_MIN;
+    }
+    // Convert to MomentumTransfer
+	auto qValue = Kernel::UnitConversion::run(twoTheta, efixed);
+	auto qValueStr = boost::lexical_cast<std::string>(qValue);
+    qValues.push_back(qValueStr);
+  }
+  m_metaDataMap["Q"] = qValues;
+}
+
+/**
+ * Populate the map with the SpectrumNumber for each Spectrum in the workspace
+ */
+void SaveAscii2::populateSpectrumNumberMetaData() {
+  std::vector<std::string> spectrumNumbers;
+  const auto nHist = m_ws->getNumberHistograms();
+  for (auto i = 0; i < nHist; i++) {
+    const auto specNum = m_ws->getSpectrum(i)->getSpectrumNo();
+    const auto specNumStr = boost::lexical_cast<std::string>(specNum);
+    spectrumNumbers.push_back(specNumStr);
+  }
+  m_metaDataMap["SpectrumNumber"] = spectrumNumbers;
+}
+
+/**
+ * Populate the map with the Angle for each spectrum in the workspace
+ */
+void SaveAscii2::populateAngleMetaData() {
+  std::vector<std::string> angles;
+  const auto nHist = m_ws->getNumberHistograms();
+  for (auto i = 0; i < nHist; i++) {
+
+	  //TODO: implement this 
+    const auto angleStr = "";
+    angles.push_back(angleStr);
+  }
+  m_metaDataMap["Angle"] = angles;
+}
+
+/**
+ * Populate all required meta data in the meta data map
+ */
+void SaveAscii2::populateAllMetaData() {
+  for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
+	auto metaDataType = *iter;
+	if (metaDataType.compare("SpectrumNumber"))
+		populateSpectrumNumberMetaData();
+	if (metaDataType.compare("Q"))
+		populateQMetaData();
+	if (metaDataType.compare("Angle"))
+		populateAngleMetaData();
+  }
 }
 
 } // namespace DataHandling
