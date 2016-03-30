@@ -152,7 +152,7 @@ class VesuvioTOFFit(VesuvioBase):
         result, reduced_chi_square, params, fitted_data = outputs[0], outputs[1], outputs[3], outputs[4]
 
         # Output result of fiting to log
-        result_log_str = 'Fit result: {}'.format(result)
+        result_log_str = 'Fit result: {0}'.format(result)
         if result == 'success':
             logger.information(result_log_str)
         else:
