@@ -169,7 +169,7 @@ actor
 * @param r red color channel
 * @param g green color channel
 * @param b blue color channel
-/*/
+*/
 void StructuredDetector::setColors(const std::vector<int> &r,
                                    const std::vector<int> &g,
                                    const std::vector<int> &b) const {
