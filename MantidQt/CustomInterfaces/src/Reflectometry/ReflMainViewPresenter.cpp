@@ -86,9 +86,6 @@ Used by the view to tell the presenter something has changed
 */
 void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
   switch (flag) {
-  case IReflPresenter::OpenTableFlag:
-    openTable();
-    break;
   case IReflPresenter::SearchFlag:
     search();
     break;
@@ -288,16 +285,6 @@ ReflMainViewPresenter::getTransferStrategy() {
     throw std::runtime_error("Unknown tranfer method selected: " +
                              currentMethod);
   }
-}
-
-/**
-* Open a table from the ADS.
-*/
-void ReflMainViewPresenter::openTable() {
-  // Get the name of the selected table
-  std::string toOpen = m_view->getWorkspaceToOpen();
-  // Send the workspace to open to the inner presenter
-  m_tablePresenter->setModel(toOpen);
 }
 
 /**

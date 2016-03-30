@@ -9,7 +9,6 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
-#include <QSignalMapper>
 #include <qinputdialog.h>
 #include <qmessagebox.h>
 
@@ -28,8 +27,7 @@ DECLARE_SUBWINDOW(QtReflMainView)
 */
 QtReflMainView::QtReflMainView(QWidget *parent)
     : UserSubWindow(parent),
-      m_calculator(new MantidWidgets::SlitCalculator(this)),
-      m_openMap(new QSignalMapper(this)) {}
+      m_calculator(new MantidWidgets::SlitCalculator(this)) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -328,22 +326,6 @@ std::string QtReflMainView::getSearchString() const {
 std::string QtReflMainView::getTransferMethod() const {
   return ui.comboTransferMethod->currentText().toStdString();
 }
-
-/**
-This slot loads a table workspace model and changes to a LoadedMainView
-presenter
-@param name : the string name of the workspace to be grabbed
-*/
-void QtReflMainView::setModel(QString name) {
-  m_toOpen = name.toStdString();
-  m_presenter->notify(IReflPresenter::OpenTableFlag);
-}
-
-/**
-Get the name of the workspace that the user wishes to open as a table
-@returns The name of the workspace to open
-*/
-std::string QtReflMainView::getWorkspaceToOpen() const { return m_toOpen; }
 
 } // namespace CustomInterfaces
 } // namespace Mantid

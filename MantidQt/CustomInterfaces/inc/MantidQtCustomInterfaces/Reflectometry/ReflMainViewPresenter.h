@@ -72,7 +72,6 @@ protected:
   void search();
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
   void transfer();
-  void openTable();
   void pushCommands();
 
 private:
