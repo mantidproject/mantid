@@ -769,14 +769,15 @@ void ImageROIViewQtWidget::checkNewProjectionImage(
     if (!imgWS)
       return;
   } catch (std::exception &exc) {
-    throw std::runtime_error("Could not find the image data: " + exc.what());
+    throw std::runtime_error("Could not find the image data: " +
+                             std::string(exc.what()));
   }
 
   try {
     getCheckedDimensions(imgWS, width, height);
   } catch (std::runtime_error &rexc) {
     throw std::runtime_error("Could not find the width of the image: " +
-                             rexc.what());
+                             std::string(rexc.what()));
   }
 
   try {
