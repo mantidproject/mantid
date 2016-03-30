@@ -104,29 +104,41 @@ public:
   * @param expected_signal :: how many events in each resulting bin
   * @param expected_numBins :: how many points/bins in the output
   */
-  void do_test_exec(std::string functionXML, std::string name1,
-                    std::string name2, std::string name3, std::string name4,
-                    double expected_signal, size_t expected_numBins,
-                    bool IterateEvents = true, size_t numEventsPerBox = 1,
-                    VMD expectBasisX = VMD(1, 0, 0),
+  void do_test_exec(const std::string &functionXML, const std::string &name1,
+                    const std::string &name2, const std::string &name3,
+                    const std::string &name4, const double expected_signal,
+                    const size_t expected_numBins, bool IterateEvents = true,
+                    size_t numEventsPerBox = 1, VMD expectBasisX = VMD(1, 0, 0),
                     VMD expectBasisY = VMD(0, 1, 0),
                     VMD expectBasisZ = VMD(0, 0, 1)) {
-    BinMD alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-
     Mantid::Geometry::QSample frame;
     IMDEventWorkspace_sptr in_ws =
         MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<3>, 3>(
             10, 0.0, 10.0, frame, numEventsPerBox);
-    Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
-        Mantid::Kernel::QSample;
 
     auto eventNorm = Mantid::API::MDNormalization::VolumeNormalization;
     auto histoNorm = Mantid::API::MDNormalization::NumEventsNormalization;
     in_ws->setDisplayNormalization(eventNorm);
     in_ws->setDisplayNormalizationHisto(histoNorm);
     AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
+
+    execute_bin(functionXML, name1, name2, name3, name4, expected_signal,
+                expected_numBins, IterateEvents, numEventsPerBox, expectBasisX,
+                expectBasisY, expectBasisZ, in_ws);
+  }
+
+  void execute_bin(const std::string &functionXML, const std::string &name1,
+                   const std::string &name2, const std::string &name3,
+                   const std::string &name4, const double expected_signal,
+                   const size_t expected_numBins, bool IterateEvents,
+                   size_t numEventsPerBox, VMD expectBasisX, VMD expectBasisY,
+                   VMD expectBasisZ, IMDEventWorkspace_sptr in_ws) {
+    BinMD alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
+        Mantid::Kernel::QSample;
+    auto histoNorm = Mantid::API::MDNormalization::NumEventsNormalization;
 
     // 1000 boxes with 1 event each
     TS_ASSERT_EQUALS(in_ws->getNPoints(), 1000 * numEventsPerBox);
@@ -168,10 +180,10 @@ public:
       } else {
         // All NAN cause of implicit function
         TS_ASSERT(boost::math::isnan(out->getSignalAt(i))); // The implicit
-                                                            // function should
-                                                            // have ensured that
-                                                            // no bins were
-                                                            // present.
+        // function should
+        // have ensured that
+        // no bins were
+        // present.
       }
     }
     // check basis vectors
