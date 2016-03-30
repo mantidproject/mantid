@@ -44,8 +44,6 @@ public:
     EXPECT_CALL(mockView, setTransferMethods(_)).Times(Exactly(1));
     // Expect that the view is populated with the instrument list
     EXPECT_CALL(mockTableView, setInstrumentList(_, _)).Times(Exactly(1));
-    // Expect that the view is populated with the list of workspaces in the ADS
-    EXPECT_CALL(mockView, setTableList(std::set<std::string>()));
     // Expect that the view is populated with the list of table commands
     EXPECT_CALL(mockView, setTableCommandsProxy()).Times(Exactly(1));
     // Expect that the view is populated with the list of row commands
@@ -57,6 +55,25 @@ public:
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
+  }
+
+  void test_presenter_sets_commands_when_notified() {
+    NiceMock<MockView> mockView;
+    NiceMock<MockTableView> mockTableView;
+    MockProgressableView mockProgress;
+    ReflTableViewPresenter tablePresenter(&mockTableView, &mockProgress);
+
+    ReflMainViewPresenter presenter(&mockView, &tablePresenter, &mockProgress);
+
+    // Expect that the view is populated with the list of table commands
+    EXPECT_CALL(mockView, setTableCommandsProxy()).Times(Exactly(1));
+    // Expect that the view is populated with the list of row commands
+    EXPECT_CALL(mockView, setRowCommandsProxy()).Times(Exactly(1));
+    // The presenter is notified that something changed in the ADS
+    presenter.notify(WorkspaceReceiver::ADSChangedFlag);
+
+    // Verify expectations
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 };
 #endif /* MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTERTEST_H */

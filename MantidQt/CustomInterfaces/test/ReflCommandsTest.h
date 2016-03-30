@@ -27,6 +27,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSaveTableCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSeparatorCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableViewPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflWorkspaceCommand.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
@@ -36,6 +37,7 @@ class MockIReflTablePresenter : public IReflTablePresenter {
 
 public:
   MOCK_METHOD1(notify, void(IReflTablePresenter::Flag));
+  MOCK_METHOD1(setModel, void(std::string name));
 
 private:
   // Calls we don't care about
@@ -52,7 +54,6 @@ private:
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument){};
   void accept(WorkspaceReceiver *workspaceReceiver){};
-  void setModel(std::string name){};
 
   std::map<std::string, QVariant> m_options;
 };
@@ -322,6 +323,21 @@ public:
 
     // The presenter should not be notified with any of the flags
     EXPECT_CALL(mockPresenter, notify(_)).Times(Exactly(0));
+    // Execute the command
+    command.execute();
+    // Verify expectations
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockPresenter));
+  }
+
+  void test_workspace_command() {
+    NiceMock<MockIReflTablePresenter> mockPresenter;
+    ReflWorkspaceCommand command(&mockPresenter, "workspace");
+
+    // The presenter should set the name of the ws
+    EXPECT_CALL(mockPresenter, setModel("workspace")).Times(Exactly(1));
+    // The presenter should be notified with the OpenTableFlag
+    EXPECT_CALL(mockPresenter, notify(IReflTablePresenter::OpenTableFlag))
+        .Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations

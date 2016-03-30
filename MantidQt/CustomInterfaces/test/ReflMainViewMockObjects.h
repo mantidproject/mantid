@@ -51,7 +51,6 @@ public:
                      boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
   MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());
   MOCK_METHOD1(setTransferMethods, void(const std::set<std::string> &));
-  MOCK_METHOD1(setTableList, void(const std::set<std::string> &));
   MOCK_METHOD0(setTableCommandsProxy, void());
   MOCK_METHOD0(setRowCommandsProxy, void());
   MOCK_METHOD2(setInstrumentList,
