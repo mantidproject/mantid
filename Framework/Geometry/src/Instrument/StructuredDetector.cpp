@@ -26,7 +26,7 @@ StructuredDetector::StructuredDetector()
 }
 
 /** Valued constructor
-*  @param n :: name of the assembly
+*  @param name :: name of the assembly
 *  @param reference :: the parent Component
 *
 * 	If the reference is an object of class Component,
@@ -418,7 +418,8 @@ streamShape(const std::string &name, double xlb, double xlf, double xrf,
 
 /** Creates new hexahedral detector pixel at row x column y using the
 *   detector vertex values.
-* @param name :: The Pixel name identifier
+* @param parent :: The parent component assembly
+* @param name :: The pixel name identifier
 * @param x :: The pixel row
 * @param y :: The pixel column
 * @param id :: The pixel ID
