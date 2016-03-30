@@ -265,6 +265,25 @@ public:
                                 false /*WillFail*/, "SliceMDTest_output.nxs");
   }
 
+  void test_exec_with_masked_ws() {
+    Mantid::Geometry::QSample frame;
+    IMDEventWorkspace_sptr in_ws =
+        MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<2>, 2>(
+            10, 0.0, 10.0, frame, 1);
+
+    Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
+        Mantid::Kernel::QSample;
+    in_ws->setCoordinateSystem(appliedCoord);
+    AnalysisDataService::Instance().addOrReplace("SliceMDTest_ws", in_ws);
+
+    FrameworkManager::Instance().exec("MaskMD", 6, "Workspace",
+                                      "SliceMDTest_ws", "Dimensions",
+                                      "Axis0,Axis1", "Extents", "0,2,0,10");
+
+    execute_slice("Axis0,0.0,8.0, 4", "Axis1,0.0,8.0, 4", "", "", 6 * 8, 2,
+                  false, "", in_ws);
+  }
+
   void test_dont_use_max_recursion_depth() {
     bool bTakeDepthFromInput = true;
     doTestRecursionDepth(bTakeDepthFromInput);
