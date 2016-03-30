@@ -37,7 +37,6 @@ public:
     TSM_ASSERT_EQUALS("We expect two arg constructor to be called",
                       product->args, 2);
   }
-
 };
 
 #endif
