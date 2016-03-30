@@ -277,6 +277,7 @@ public:
   int nbins, nhist;
   Workspace2D_sptr ws1;
   Workspace2D_sptr ws2;
+  MatrixWorkspace_sptr m_wsSANS;
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -295,6 +296,7 @@ public:
         spec->addDetectorID(j);
       }
     }
+    m_wsSANS = WorkspaceCreationHelper::createSANSWorkspace();
   }
 
   void test_ISpectrum_getDetectorIDs() {
@@ -326,6 +328,15 @@ public:
     std::cout << tim << " to set all detector IDs for " << nhist
               << " spectra, using the ISpectrum method (in parallel)."
               << std::endl;
+  }
+
+  void test_getDetector() {
+
+    double pos_x = 0;
+    for (size_t i = 0; i < m_wsSANS->getNumberHistograms(); ++i) {
+      auto det = m_wsSANS->getDetector(i);
+      pos_x += det->getPos().X();
+    }
   }
 };
 

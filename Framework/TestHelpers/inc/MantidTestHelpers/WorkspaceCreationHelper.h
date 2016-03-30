@@ -335,6 +335,7 @@ void createInstrumentForWorkspaceWithDistances(
     const Mantid::Kernel::V3D &samplePosition,
     const Mantid::Kernel::V3D &sourcePosition,
     const std::vector<Mantid::Kernel::V3D> &detectorPositions);
-}
 
+Mantid::API::MatrixWorkspace_sptr createSANSWorkspace();
+}
 #endif /*WORKSPACECREATIONHELPER_H_*/

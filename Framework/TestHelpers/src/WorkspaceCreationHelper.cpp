@@ -1345,4 +1345,30 @@ void create2DAngles(std::vector<double> &L2, std::vector<double> &polar,
     }
   }
 }
+
+Mantid::API::MatrixWorkspace_sptr createSANSWorkspace() {
+
+  Mantid::Kernel::V3D sourcePos(0, 0, 0);
+  Mantid::Kernel::V3D samplePos(0, 0, 1);
+  Mantid::Kernel::V3D trolley1Pos(0, 0, 3);
+  Mantid::Kernel::V3D trolley2Pos(0, 0, 6);
+
+  auto instrument = ComponentCreationHelper::sansInstrument(
+      sourcePos, samplePos, trolley1Pos, trolley2Pos);
+
+  const int numBanks = 6;
+  const int numPixels = 100;
+  const int numBins = 10;
+
+  Workspace2D_sptr ws =
+      Create2DWorkspaceBinned(numBanks * numPixels * numPixels, numBins);
+  ws->setInstrument(instrument);
+  ws->getAxis(0)->setUnit("TOF");
+
+  for (size_t wi = 0; wi < ws->getNumberHistograms(); wi++) {
+    ws->getSpectrum(wi)->setDetectorID(detid_t(numPixels * numPixels + wi));
+    ws->getSpectrum(wi)->setSpectrumNo(specnum_t(wi));
+  }
+  return ws;
+}
 }

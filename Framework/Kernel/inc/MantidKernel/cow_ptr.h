@@ -64,6 +64,8 @@ private:
   std::mutex copyMutex;
 
 public:
+  cow_ptr(ptr_type &&resourceSptr);
+  cow_ptr(DataType *resourcePtr);
   cow_ptr();
   cow_ptr(const cow_ptr<DataType> &);
   cow_ptr(cow_ptr<DataType> &&) = default;
@@ -82,6 +84,18 @@ public:
   } ///< Based on ptr equality
   DataType &access();
 };
+
+/**
+ Constructor : creates a new cow_ptr around the resource
+ resource is a sink.
+ */
+template <typename DataType>
+cow_ptr<DataType>::cow_ptr(DataType *resourcePtr)
+    : Data(resourcePtr) {
+  if (resourcePtr == nullptr) {
+    throw std::invalid_argument("cow_ptr source pointer cannot be null");
+  }
+}
 
 /**
   Constructor : creates new data() object
@@ -146,6 +160,14 @@ template <typename DataType> DataType &cow_ptr<DataType>::access() {
   }
 
   return *Data;
+}
+
+template <typename DataType>
+cow_ptr<DataType>::cow_ptr(ptr_type &&resourceSptr) {
+  if (resourceSptr.get() == nullptr) {
+    throw std::invalid_argument("cow_ptr source pointer cannot be null");
+  }
+  this->Data = std::move(resourceSptr);
 }
 
 } // NAMESPACE Kernel
