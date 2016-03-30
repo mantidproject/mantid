@@ -1,6 +1,8 @@
 #ifndef MANTID_CURVEFITTING_MULTIVARIATEGAUSSIANCOMPTONPROFILE_H_
 #define MANTID_CURVEFITTING_MULTIVARIATEGAUSSIANCOMPTONPROFILE_H_
 
+#include <cmath>
+
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/Functions/ComptonProfile.h"
 
