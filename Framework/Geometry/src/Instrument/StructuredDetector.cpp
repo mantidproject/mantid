@@ -422,7 +422,7 @@ streamShape(const std::string &name, double xlb, double xlf, double xrf,
 * @param x :: The pixel row
 * @param y :: The pixel column
 * @param id :: The pixel ID
-* @ returns newly created detector.
+* @return newly created detector.
 */
 Detector *StructuredDetector::addDetector(CompAssembly *parent,
                                           const std::string &name, int x, int y,
@@ -678,5 +678,6 @@ std::ostream &operator<<(std::ostream &os, const StructuredDetector &ass) {
   ass.printChildren(os);
   return os;
 }
-}
-}
+
+} // namespace Geometry
+} // namespace Mantid
