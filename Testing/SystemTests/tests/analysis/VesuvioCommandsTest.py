@@ -59,6 +59,16 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
         runs = "15039-15045"
         self._fit_results = fit_tof(runs, flags)
 
+    def skipTests(self):
+        # Only run tests on Windows and RHEL7
+        dist = platform.linux_distribution()
+        is_rhel7 =  dist[0] == 'Red Hat Enterprise Linux Workstation' and dist[1] == '7.2'
+        if platform.system() == "Windows" or is_rhel7:
+            return False
+        else:
+            return True
+
+
     def validate(self):
         self.assertTrue(isinstance(self._fit_results, tuple))
         self.assertEqual(4, len(self._fit_results))
@@ -108,6 +118,15 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         flags = _create_test_flags(background=True)
         runs = "15039-15045"
         self._fit_results = fit_tof(runs, flags)
+
+    def skipTests(self):
+        # Only run tests on Windows and RHEL7
+        dist = platform.linux_distribution()
+        is_rhel7 =  dist[0] == 'Red Hat Enterprise Linux Workstation' and dist[1] == '7.2'
+        if platform.system() == "Windows" or is_rhel7:
+            return False
+        else:
+            return True
 
     def validate(self):
         self.assertTrue(isinstance(self._fit_results, tuple))
@@ -164,6 +183,15 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         runs = "15039-15045"
         self._fit_results = fit_tof(runs, flags)
 
+    def skipTests(self):
+        # Only run tests on Windows and RHEL7
+        dist = platform.linux_distribution()
+        is_rhel7 =  dist[0] == 'Red Hat Enterprise Linux Workstation' and dist[1] == '7.2'
+        if platform.system() == "Windows" or is_rhel7:
+            return False
+        else:
+            return True
+
     def validate(self):
         self.assertTrue(isinstance(self._fit_results, tuple))
         self.assertEquals(4, len(self._fit_results))
@@ -215,6 +243,15 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         flags['spectra'] = '143-144'
         runs = "15039-15045"
         self._fit_results = fit_tof(runs, flags)
+
+    def skipTests(self):
+        # Only run tests on Windows and RHEL7
+        dist = platform.linux_distribution()
+        is_rhel7 =  dist[0] == 'Red Hat Enterprise Linux Workstation' and dist[1] == '7.2'
+        if platform.system() == "Windows" or is_rhel7:
+            return False
+        else:
+            return True
 
     def validate(self):
         self.assertTrue(isinstance(self._fit_results, tuple))
