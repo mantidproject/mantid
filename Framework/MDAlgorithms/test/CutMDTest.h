@@ -595,7 +595,7 @@ public:
     auto foundUnits = findOriginalQUnits(cutMDtestws, m_log);
     TSM_ASSERT_EQUALS("Units should be found to be inverse angstroms",
                       foundUnits[0],
-                      Mantid::MDAlgorithms::CutMD::InvAngstromSymbol);
+                      CutMD::InvAngstromSymbol);
     // Clean up
     AnalysisDataService::Instance().remove(ws_name);
   }
@@ -607,7 +607,7 @@ public:
     auto foundUnits = findOriginalQUnits(cutMDtestws, m_log);
     TSM_ASSERT_EQUALS("Units should be found to be inverse angstroms",
                       foundUnits[0],
-                      Mantid::MDAlgorithms::CutMD::InvAngstromSymbol);
+                      CutMD::InvAngstromSymbol);
     // Clean up
     AnalysisDataService::Instance().remove(ws_name);
   }
@@ -619,7 +619,7 @@ public:
 
     auto foundUnits = findOriginalQUnits(cutMDtestws, m_log);
     TSM_ASSERT_EQUALS("Units should be found to be RLU", foundUnits[0],
-                      Mantid::MDAlgorithms::CutMD::RLUSymbol);
+                      CutMD::RLUSymbol);
     // Clean up
     AnalysisDataService::Instance().remove(ws_name);
   }
