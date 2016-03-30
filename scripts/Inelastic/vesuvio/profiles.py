@@ -229,11 +229,12 @@ class MultivariateGaussianMassProfile(MassProfile):
             sig_z = param_vals[param_prefix + "SigmaZ"]
         else:
             intensity = self.intensity
-            sig_x = self._sigma_x;
-            sig_y = self._sigma_y;
-            sig_z = self._sigma_z;
+            sig_x = self._sigma_x
+            sig_y = self._sigma_y
+            sig_z = self._sigma_z
 
-        fitting_str = "name={0},IntegrationSteps={1},Mass={2:f},SigmaX={3:f},SigmaY={4:f},SigmaZ={5:f}".format(self.cfunction, self.integration_steps, self.mass, sig_x, sig_y, sig_z)
+        fitting_str = "name={0},IntegrationSteps={1},Mass={2:f},SigmaX={3:f},SigmaY={4:f},SigmaZ={5:f}".format(
+                self.cfunction, self.integration_steps, self.mass, sig_x, sig_y, sig_z)
 
         if intensity is not None:
             fitting_str += ",Intensity={0:f}".format(intensity)
