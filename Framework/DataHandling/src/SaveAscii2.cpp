@@ -101,7 +101,7 @@ void SaveAscii2::init() {
   declareProperty("ColumnHeader", true,
                   "If true, put column headers into file. ");
 
-  declareProperty("SpectrumMetaData", "SpectrumNumber",
+  declareProperty("SpectrumMetaData", "",
                   "A comma separated list that defines data that describes "
                   "each spectrum in a workspace. The valid options for this "
                   "are: SpectrumNumber,Q,Angle");
@@ -126,7 +126,10 @@ void SaveAscii2::exec() {
   m_isHistogram = m_ws->isHistogramData();
   m_isCommonBins = m_ws->isCommonBins(); // checking for ragged workspace
   m_writeID = getProperty("WriteSpectrumID");
-  m_metaData = stringListToVector(getPropertyValue("SpectrumMetaData"));
+  const auto metaDataString = getPropertyValue("SpectrumMetaData");
+  if (metaDataString.size() != 0) {
+	  m_metaData = stringListToVector(metaDataString);
+  }
 
   // Get the properties
   std::vector<int> spec_list = getProperty("SpectrumList");
@@ -349,14 +352,14 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
  * @return A vector of valid meta data strings
  */
 std::vector<std::string>
-SaveAscii2::stringListToVector(std::string &inputString) {
+SaveAscii2::stringListToVector(const std::string &inputString) {
   std::vector<std::string> stringVector;
-  const std::string validMetaData[]{"SpectrumNumber", "Q", "Angle"};
+  const std::vector<std::string> validMetaData{"SpectrumNumber", "Q", "Angle"};
   stringVector =
       Kernel::VectorHelper::splitStringIntoVector<std::string>(inputString);
   for (auto iter = stringVector.begin(); iter != stringVector.end(); ++iter) {
-	const auto value = validMetaData->find("Q");
-    if (value) {
+    if (std::find(validMetaData.begin(), validMetaData.end(), *iter) ==
+        validMetaData.end()) {
       throw std::runtime_error(*iter + " is not recognised as a possible input "
                                        "for SpectrumMetaData.\n Valid inputs "
                                        "are: SpectrumNumber, Q, Angle.");

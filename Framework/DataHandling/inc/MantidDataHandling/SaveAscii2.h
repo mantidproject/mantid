@@ -72,7 +72,7 @@ private:
   */
   void writeSpectra(const std::set<int>::const_iterator &spectraItr,
                     std::ofstream &file);
-  std::vector<std::string> stringListToVector(std::string &inputString);
+  std::vector<std::string> stringListToVector(const std::string &inputString);
 
   /// Map the separator options to their string equivalents
   std::map<std::string, std::string> m_separatorIndex;
