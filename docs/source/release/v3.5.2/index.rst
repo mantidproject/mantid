@@ -7,7 +7,8 @@ Mantid 3.5.2 Release Notes
 .. contents:: Table of Contents
    :local:
 
-This is a patch release that corrects some significant issues with Poco since `version 3.5.1 <http://www.mantidproject.org/Release_Notes_3.5.1>`_. All changes are to support Poco 1.4.2-1.7.2.
+
+This is a patch of `version 3.5.1 <http://www.mantidproject.org/Release_Notes_3.5.1>`_ with changes to support Poco 1.4.2-1.7.2.
 
 Citation
 --------
