@@ -1,10 +1,9 @@
-import mplgraphicsview
+import mpl2dgraphicsview
 
 import numpy as np
-from matplotlib import pyplot as plt
 
 
-class Detector2DView(mplgraphicsview.MplGraphicsView):
+class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
     """
     Customized 2D detector view
     """
@@ -19,7 +18,7 @@ class Detector2DView(mplgraphicsview.MplGraphicsView):
         :param parent:
         :return:
         """
-        mplgraphicsview.MplGraphicsView.__init__(self, parent)
+        mpl2dgraphicsview.Mpl2dGraphicsView.__init__(self, parent)
 
         # connect the mouse motion to interact with the canvas
         self._myCanvas.mpl_connect('button_press_event', self.on_mouse_press_event)
@@ -51,26 +50,42 @@ class Detector2DView(mplgraphicsview.MplGraphicsView):
         """ Add region of interest
         :return:
         """
+        # check
+        assert self._roiStart is not None
+        assert self._roiEnd is not None
+
+        print '[DB] Polygon corner = [%s, %s]' % (str(self._roiStart), str(self._roiEnd))
+
+        # create a vertex list of a rectangular
         vertex_array = np.ndarray(shape=(4, 2))
-        vertex_array[0][0] = 10.
-        vertex_array[0][1] = 10.
-        vertex_array[1][0] = 10.
-        vertex_array[1][1] = 20.
-        vertex_array[2][0] = 20.
-        vertex_array[2][1] = 20.
-        vertex_array[3][0] = 20.
-        vertex_array[3][1] = 10.
+        # upper left corner
+        vertex_array[0][0] = self._roiStart[0]
+        vertex_array[0][1] = self._roiStart[1]
 
-        # TODO - Refactor to Mpl2DGraphicsview as draw_polygon()
-        # TODO - create an Art_ID system in Mpl2dGraphicsView to manage artists.
-        p = plt.Polygon(vertex_array, fill=False, color='w')
-        self._myCanvas.axes.add_artist(p)
+        # lower right corner
+        vertex_array[2][0] = self._roiEnd[0]
+        vertex_array[2][1] = self._roiEnd[1]
 
-        # register
-        self._myPolygon = p
+        # upper right corner
+        vertex_array[1][0] = self._roiEnd[0]
+        vertex_array[1][1] = self._roiStart[1]
 
-        # Flush...
-        self._myCanvas._flush()
+        # lower left corner
+        vertex_array[3][0] = self._roiStart[0]
+        vertex_array[3][1] = self._roiEnd[1]
+
+        self._myCanvas.plot_polygon(vertex_array, fill=False, color='w')
+
+        return
+
+    def enter_roi_mode(self, state):
+        """
+        Enter the region of interest (ROI) selection mode
+        :return:
+        """
+        assert isinstance(state, bool)
+
+        self._roiSelectMode = state
 
         return
 
@@ -89,17 +104,6 @@ class Detector2DView(mplgraphicsview.MplGraphicsView):
         """
         :return: A list for polygon0
         """
-        return
-
-    def enter_roi_mode(self, state):
-        """
-        Enter the region of interest (ROI) selection mode
-        :return:
-        """
-        assert isinstance(state, bool)
-
-        self._roiSelectMode = state
-
         return
 
     def on_mouse_motion(self, event):
@@ -123,7 +127,7 @@ class Detector2DView(mplgraphicsview.MplGraphicsView):
         elif self._mousePressed == Detector2DView.MousePress.LEFT:
             if self._roiSelectMode is True:
                 # in ROI selection mode, update the size
-                self.update_roi(event.xdata, event.ydata)
+                self.update_roi_poly(event.xdata, event.ydata)
 
         # update current mouse' position
         self._currX = event.xdata
@@ -168,7 +172,7 @@ class Detector2DView(mplgraphicsview.MplGraphicsView):
         if self._roiSelectMode is True and self._mousePressed == Detector2DView.MousePress.LEFT:
             # end the ROI selection mode
             self._roiEnd = (self._currX, self._currY)
-            self.update_roi()
+            self.update_roi_poly()
 
             # release the mode
             self._roiStart = self._roiEnd = None
@@ -183,14 +187,30 @@ class Detector2DView(mplgraphicsview.MplGraphicsView):
 
         :return:
         """
-        x_min, x_max = self.getXLimit()
-        return (x_max - x_min) * self._resolutionX
+        return (self.x_max - self.x_min) * self._resolutionX
 
     def resolutionY(self):
         """
 
         :return:
         """
-        y_min, y_max = self.getYLimit()
-        return (y_max - y_min) * self._resolutionY
+        return (self.y_max - self.y_min) * self._resolutionY
+
+    def update_roi_poly(self, cursor_x, cursor_y):
+        """ Update region of interest
+        :return:
+        """
+        # remove the original polygon
+        if self._myPolygon is not None:
+            self._myPolygon.remove()
+
+        # set RIO end
+        self._roiEnd = [cursor_x, cursor_y]
+
+        # plot the new polygon
+        self.add_roi()
+
+        return
+
+
 

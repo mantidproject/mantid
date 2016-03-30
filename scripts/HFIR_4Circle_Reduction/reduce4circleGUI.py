@@ -334,8 +334,10 @@ class MainWindow(QtGui.QMainWindow):
     def do_accept_ub(self):
         """ Accept the calculated UB matrix and thus put to controller
         """
+        exp_number = int(str(self.ui.lineEdit_exp))
         self._myControl.set_ub_matrix(exp_number, self.ui.tableWidget_ubMatrix.get_matrix())
-        raise RuntimeError('ASAP')
+
+        return
 
     def do_add_peak_no_index(self):
         """
@@ -444,7 +446,20 @@ class MainWindow(QtGui.QMainWindow):
         """ Add region of interest to 2D image
         :return:
         """
-        self.ui.graphicsView.add_roi()
+        # set the button to next mode
+        if str(self.ui.pushButton_addROI.text()) == 'Add ROI':
+            # enter adding ROI mode
+            self.ui.graphicsView.enter_roi_mode(state=True)
+            # rename the button
+            self.ui.pushButton_addROI.setText('Quit ROI')
+        else:
+            # quit editing ROI mode
+            self.ui.graphicsView.enter_roi_mode(state=False)
+            # rename the button
+            self.ui.pushButton_addROI.setText('Add ROI')
+        # END-IF-ELSE
+
+        return
 
     def do_add_scans_merge(self):
         """ Add scans to merge
