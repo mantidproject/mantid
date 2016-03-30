@@ -127,12 +127,13 @@ public:
                 expectBasisY, expectBasisZ, in_ws);
   }
 
-  void execute_bin(const std::string &functionXML, const std::string &name1,
-                   const std::string &name2, const std::string &name3,
-                   const std::string &name4, const double expected_signal,
-                   const size_t expected_numBins, bool IterateEvents,
-                   size_t numEventsPerBox, VMD expectBasisX, VMD expectBasisY,
-                   VMD expectBasisZ, IMDEventWorkspace_sptr in_ws) {
+  MDHistoWorkspace_sptr
+  execute_bin(const std::string &functionXML, const std::string &name1,
+              const std::string &name2, const std::string &name3,
+              const std::string &name4, const double expected_signal,
+              const size_t expected_numBins, bool IterateEvents,
+              size_t numEventsPerBox, VMD expectBasisX, VMD expectBasisY,
+              VMD expectBasisZ, IMDEventWorkspace_sptr in_ws) {
     BinMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -167,7 +168,7 @@ public:
             AnalysisDataService::Instance().retrieve("BinMDTest_ws"));)
     TS_ASSERT(out);
     if (!out)
-      return;
+      return out;
 
     TS_ASSERT_EQUALS(appliedCoord, out->getSpecialCoordinateSystem());
     // Took 6x6x6 bins in the middle of the box
@@ -204,6 +205,8 @@ public:
     TSM_ASSERT_EQUALS("Should have num events normalization",
                       out->displayNormalization(), histoNorm);
     AnalysisDataService::Instance().remove("BinMDTest_ws");
+
+    return out;
   }
 
   void test_exec_with_masked_ws() {
@@ -226,9 +229,15 @@ public:
                                       "Dimensions", "Axis0,Axis1,Axis2",
                                       "Extents", "0,2,0,10,0,10");
 
-    execute_bin("NO_FUNCTION", "Axis0,0.0,8.0, 4", "Axis1,0.0,8.0, 4",
-                "Axis2,0.0,8.0, 4", "", 1.0, 6 * 8, true, 1.0, VMD(1, 0, 0),
-                VMD(0, 1, 0), VMD(0, 0, 1), in_ws);
+    auto out_ws =
+        execute_bin("NO_FUNCTION", "Axis0,0.0,8.0, 8", "Axis1,0.0,8.0, 8",
+                    "Axis2,0.0,8.0, 8", "", 1.0, 8 * 8 * 8, true, 1,
+                    VMD(1, 0, 0), VMD(0, 1, 0), VMD(0, 0, 1), in_ws);
+
+    TSM_ASSERT_DELTA("Data was masked bin should have a signal of 0",
+                     out_ws->getSignalAt(0), 0.0, 1e-5);
+    TSM_ASSERT_DELTA("Data was unmasked bin should have a signal of 1",
+                     out_ws->getSignalAt(3), 1.0, 1e-5);
   }
 
   void test_exec_3D() {
