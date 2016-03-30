@@ -18,7 +18,7 @@ public:
 };
 }
 
-class cow_ptr_test : public CxxTest::TestSuite {
+class CowPtrTest : public CxxTest::TestSuite {
 public:
   void testDefaultConstruct() {
 
@@ -43,10 +43,23 @@ public:
 
     int value = 3;
     auto resource = boost::make_shared<MyType>(value);
-    cow_ptr<MyType> cow{std::move(resource)}; // via lhr
+    cow_ptr<MyType> cow{std::move(resource)};
 
     TS_ASSERT_EQUALS(cow->value, value);
     TSM_ASSERT("Resource should have been moved", resource.get() == nullptr);
+  }
+
+  void testCow() {
+
+    int value = 3;
+    cow_ptr<MyType> original{boost::make_shared<MyType>(value)};
+
+    MyType copy = original.access();
+
+    TSM_ASSERT_EQUALS("Value should not have changed", original->value,
+                      copy.value);
+    TSM_ASSERT_DIFFERS("These should be different resources now",
+                       &original->value, &copy.value);
   }
 };
 
