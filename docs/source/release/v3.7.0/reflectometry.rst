@@ -24,12 +24,10 @@ ISIS Reflectometry (Polref)
 - Bugfix: When using the ICAT search in the interface, if the wrong user credentials were entered or the login dialog
   was closed before the details had been entered then mantid crashed. This has been fixed.
   `#15410 <https://github.com/mantidproject/mantid/pull/15410>`_
-- Some changes were made to the interface (functional behaviour remains the same). Specifically, options related to
-  the processing table have been moved to the *Process Runs* section. Therefore, there is only one menu left,
-  *Reflectometry*, to open the Slit Calculator. All table options are still accesible from the tool bar.
-  A new progress bar has been added to the *Search Runs* section, it show the progress when
+- Some changes were made to the interface as part of a code refactoring (functional behaviour remains the same). 
+  The only change visible to user is a new progress bar that has been added to the *Search Runs* section. It show the progress when
   transferring runs. The progress bar that existed before will only indicate the progress of processing that is
-  in progress.
+  in progress. `#15670 <https://github.com/mantidproject/mantid/pull/15670>`_
 
 .. figure:: /images/ISISReflectometryPolref_newTableView.png
 

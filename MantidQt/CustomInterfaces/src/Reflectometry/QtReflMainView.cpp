@@ -75,6 +75,7 @@ void QtReflMainView::initLayout() {
 */
 void QtReflMainView::addToMenu(QMenu *menu, ReflCommandBase_uptr command) {
 
+  // cppcheck-suppress unreadVariable
   ReflCommandAdapter *adapter =
       new ReflCommandAdapter(menu, std::move(command));
 }
