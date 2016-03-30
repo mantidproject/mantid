@@ -73,6 +73,7 @@ MD Algorithms (VATES CLI)
 -  PlotMD now plots points at bin centres for MDEventWorkspaces as well as MDHistoWorkspaces.
 -  SliceMD now reports the correct number of events in the output workspace.
 -  The size of densely populated, multidimensional MDEventWorkspace slices produced by SliceMD has been greatly reduced by using more sensible box splitting parameters.
+-  Slicing algorithms (SliceMD and BinMD) do not add masked data to their output workspaces.
 
 Performance
 -----------
