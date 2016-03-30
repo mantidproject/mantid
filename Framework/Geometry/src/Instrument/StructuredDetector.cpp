@@ -679,5 +679,5 @@ std::ostream &operator<<(std::ostream &os, const StructuredDetector &ass) {
   return os;
 }
 
-} // namespace Geometry 
-} // namespace Mantid 
+} // namespace Geometry
+} // namespace Mantid
