@@ -68,7 +68,7 @@ class MassProfile(object):
         return value
 
     @classmethod
-    def _parse_float(cls, func_str, prop_name):
+    def _parse_float(cls, func_str, prop_name, default=None):
         """
         :param prop_name: The string on the lhs of the equality
         :return: The parsed float
@@ -80,7 +80,10 @@ class MassProfile(object):
             if not isinstance(value, float):
                 raise ValueError("Unexpected format for {0} value. Expected e.g. {0}=0".format(prop_name))
         else:
-            raise ValueError("Cannot find {0}= in function_str (float) ({1})".format(prop_name, func_str))
+            if default is None:
+                raise ValueError("Cannot find {0}= in function_str (float) ({1})".format(prop_name, func_str))
+            else:
+                value = default
 
         return value
 
@@ -190,6 +193,9 @@ class MultivariateGaussianMassProfile(MassProfile):
     def from_str(cls, func_str, mass):
         """Attempt to create an object of this type from a string.
         Raises a TypeError if parsing fails
+
+        Sigma values are taken as the initial value of the parameter, not the
+        fixed value of the parameter.
         """
         profile_prefix = "function=MultivariateGaussian"
         if not func_str.startswith(profile_prefix):
@@ -198,9 +204,9 @@ class MultivariateGaussianMassProfile(MassProfile):
         params = {
             'width': 0.0,
             'mass': mass,
-            'sigma_x': cls._parse_float(func_str, "SigmaX"),
-            'sigma_y': cls._parse_float(func_str, "SigmaY"),
-            'sigma_z': cls._parse_float(func_str, "SigmaZ")
+            'sigma_x': cls._parse_float(func_str, "SigmaX", 1.0),
+            'sigma_y': cls._parse_float(func_str, "SigmaY", 1.0),
+            'sigma_z': cls._parse_float(func_str, "SigmaZ", 1.0)
         }
 
         return MultivariateGaussianMassProfile(**params)
