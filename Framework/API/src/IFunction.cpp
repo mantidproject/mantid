@@ -651,10 +651,10 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain,
   double step;                   // real step
   double cutoff = 100.0 * minDouble / stepPercentage;
   size_t nParam = nParams();
-  size_t nData = domain.size();
+  size_t nData = getValuesSize(domain);
 
-  FunctionValues minusStep(domain);
-  FunctionValues plusStep(domain);
+  FunctionValues minusStep(nData);
+  FunctionValues plusStep(nData);
 
   // PARALLEL_CRITICAL(numeric_deriv)
   {
@@ -1095,6 +1095,13 @@ void IFunction::setCovarianceMatrix(
   }
   m_covar = covar;
 }
+
+/// Get number of values for a given domain.
+/// @param domain :: A domain.
+size_t IFunction::getValuesSize(const FunctionDomain &domain) const {
+  return domain.size();
+}
+
 
 } // namespace API
 } // namespace Mantid

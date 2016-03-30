@@ -45,7 +45,7 @@ IDomainCreator *createDomainCreator(const IFunction *fun, const Workspace *ws,
   } else if (dynamic_cast<const IFunction1DSpectrum *>(fun)) {
     creator = new SeqDomainSpectrumCreator(manager, workspacePropertyName);
   } else if (auto gfun = dynamic_cast<const IFunctionGeneral *>(fun)) {
-    creator = new GeneralDomainCreator(*gfun, manager, workspacePropertyName);
+    creator = new GeneralDomainCreator(*gfun, *manager, workspacePropertyName);
   } else {
     creator = new FitMW(manager, workspacePropertyName, domainType);
   }

@@ -21,9 +21,12 @@ void IFunctionGeneral::functionDeriv(const FunctionDomain &domain,
   calNumericalDeriv(domain, jacobian);
 }
 
-size_t IFunctionGeneral::getDefaultValuesSize() const {
-  return 0;
+size_t IFunctionGeneral::getValuesSize(const FunctionDomain &domain) const {
+  return domain.size() == 0 ? getDefaultValuesSize()
+                            : domain.size() * getNumberValuesPerArgument();
 }
+
+size_t IFunctionGeneral::getDefaultValuesSize() const { return 0; }
 
 } // namespace API
 } // namespace Mantid

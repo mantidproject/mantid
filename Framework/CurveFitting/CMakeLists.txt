@@ -343,6 +343,7 @@ set ( TEST_FILES
 	Functions/UserFunctionTest.h
 	Functions/VesuvioResolutionTest.h
 	Functions/VoigtTest.h
+	GeneralDomainCreatorTest.h
 	GSLMatrixTest.h
 	GSLVectorTest.h
 	IPeakFunctionCentreParameterNameTest.h

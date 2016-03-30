@@ -46,6 +46,8 @@ public:
                 FunctionValues &values) const override;
   void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) override;
 
+  size_t getValuesSize(const FunctionDomain &domain) const override;
+
   /// Provide a concrete function in an implementation that operates on a
   /// FunctionDomainGeneral.
   virtual void functionGeneral(const FunctionDomainGeneral &domain,

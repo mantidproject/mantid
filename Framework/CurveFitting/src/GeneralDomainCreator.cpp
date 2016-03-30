@@ -22,14 +22,10 @@ using namespace API;
  * workspace in case a PropertyManager is used.
  */
 GeneralDomainCreator::GeneralDomainCreator(
-    const API::IFunctionGeneral &fun, Kernel::IPropertyManager *manager,
+    const API::IFunctionGeneral &fun, Kernel::IPropertyManager &manager,
     const std::string &workspacePropertyName)
-    : IDomainCreator(manager,
+    : IDomainCreator(&manager,
                      std::vector<std::string>(1, workspacePropertyName)) {
-  if (manager == nullptr) {
-    throw std::invalid_argument(
-        "Property manager cannot be null for GeneralDomainCreator.");
-  }
 
   m_defaultValuesSize = fun.getDefaultValuesSize();
 
@@ -37,7 +33,7 @@ GeneralDomainCreator::GeneralDomainCreator(
   if (nDomainColumns > 0) {
     m_domainColumnNames.push_back("ArgumentColumn");
     for(size_t i = 1; i < nDomainColumns; ++i) {
-      m_domainColumnNames.push_back(m_domainColumnNames.front() +
+      m_domainColumnNames.push_back(m_domainColumnNames.front() + "_" +
                                     boost::lexical_cast<std::string>(i));
     }
   }
@@ -47,7 +43,7 @@ GeneralDomainCreator::GeneralDomainCreator(
     m_dataColumnNames.push_back("DataColumn");
     m_weightsColumnNames.push_back("WeightsColumn");
     for(size_t i = 1; i < nDataColumns; ++i) {
-      auto si = boost::lexical_cast<std::string>(i);
+      auto si = "_" + boost::lexical_cast<std::string>(i);
       m_dataColumnNames.push_back(m_dataColumnNames.front() + si);
       m_weightsColumnNames.push_back(m_weightsColumnNames.front() + si);
     }
@@ -119,6 +115,7 @@ void GeneralDomainCreator::createDomain(
       values->setFitData(i0 + j, dataColumn->toDouble(j));
       values->setFitWeight(i0 + j, weightsColumn->toDouble(j));
     }
+    i0 += domainSize;
   }
 }
 
@@ -152,12 +149,6 @@ Workspace_sptr GeneralDomainCreator::createOutputWorkspace(
  */
 size_t GeneralDomainCreator::getDomainSize() const {
   return 0;
-}
-
-/// Add data and weights to a FunctionValues object
-void GeneralDomainCreator::addDataAndWeights(API::FunctionValues &values,
-                                             const API::Column &dataColumn,
-                                             const API::Column *weightsColumn) {
 }
 
 } // namespace CurveFitting

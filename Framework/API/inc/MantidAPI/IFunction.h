@@ -493,6 +493,8 @@ public:
 
   /// Set up the function for a fit.
   virtual void setUpForFit() = 0;
+  /// Get number of values for a given domain.
+  virtual size_t getValuesSize(const FunctionDomain &domain) const;
 
   /// Calculate numerical derivatives
   void calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobian);

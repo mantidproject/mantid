@@ -41,7 +41,7 @@ namespace CurveFitting {
 class DLLExport GeneralDomainCreator : public API::IDomainCreator {
 public:
   GeneralDomainCreator(const API::IFunctionGeneral &fun,
-                       Kernel::IPropertyManager *manager,
+                       Kernel::IPropertyManager &manager,
                        const std::string &workspacePropertyName);
 
   void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
@@ -61,9 +61,6 @@ public:
   void declareDatasetProperties(const std::string &suffix = "",
                                 bool addProp = true) override;
 private:
-  /// Add data and weights to a FunctionValues object
-  void addDataAndWeights(API::FunctionValues& values, const API::Column& dataColumn, const API::Column *weightsColumn);
-
   // Names of additional properties
   /// Property names for columns in a TableWorkspace to be passed to
   /// the domain.
