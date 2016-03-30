@@ -102,7 +102,7 @@ private slots:
   void on_actionSearch_triggered();
   void on_actionTransfer_triggered();
   void on_actionHelp_triggered();
-  void on_actionSlitCalculator_triggered();
+  void slitCalculatorTriggered();
   void icatSearchComplete();
 
   void showSearchContextMenu(const QPoint &pos);

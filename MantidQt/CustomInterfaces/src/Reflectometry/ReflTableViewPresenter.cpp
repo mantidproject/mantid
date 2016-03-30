@@ -1636,6 +1636,7 @@ std::vector<ReflCommandBase_uptr> ReflTableViewPresenter::publishCommands() {
   addToCommand(commands, make_unique<ReflExportTableCommand>(this));
   addToCommand(commands, make_unique<ReflSeparatorCommand>(this));
   addToCommand(commands, make_unique<ReflOptionsCommand>(this));
+  addToCommand(commands, make_unique<ReflSeparatorCommand>(this));
   addToCommand(commands, make_unique<ReflProcessCommand>(this));
   addToCommand(commands, make_unique<ReflExpandCommand>(this));
   addToCommand(commands, make_unique<ReflSeparatorCommand>(this));

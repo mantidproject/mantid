@@ -243,8 +243,6 @@
     <property name="title">
      <string>&amp;Reflectometry</string>
     </property>
-     <addaction name="actionSlitCalculator"/>
-     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuRows">
      <property name="title">
@@ -276,15 +274,6 @@
    </property>
    <property name="whatsThis">
     <string>Transfers the selected runs into the processing table.</string>
-   </property>
-  </action>
-  <action name="actionSlitCalculator">
-   <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
-     <normaloff>:/param_range_btn.png</normaloff>:/param_range_btn.png</iconset>
-   </property>
-   <property name="text">
-    <string>Slit Calculator</string>
    </property>
   </action>
  </widget>

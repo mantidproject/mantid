@@ -91,6 +91,12 @@ void QtReflMainView::setTableCommands(
   for (auto &command : tableCommands) {
     addToMenu(ui.menuTable, std::move(command));
   }
+
+  // Slit calculator
+  QAction *slitCalc = ui.menuTable->addAction(
+      QIcon(QString::fromStdString(":/param_range_btn.png")),
+      QString("Slit Calculator"));
+  connect(slitCalc, SIGNAL(triggered()), this, SLOT(slitCalculatorTriggered()));
 }
 
 /**
@@ -204,7 +210,7 @@ void QtReflMainView::on_actionHelp_triggered() {
 /**
 This slot shows the slit calculator
 */
-void QtReflMainView::on_actionSlitCalculator_triggered() {
+void QtReflMainView::slitCalculatorTriggered() {
   m_calculator->setCurrentInstrumentName(
       ui.comboSearchInstrument->currentText().toStdString());
   m_calculator->show();

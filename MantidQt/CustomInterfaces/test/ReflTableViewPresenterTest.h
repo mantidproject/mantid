@@ -1653,7 +1653,7 @@ public:
 
     // Actions (commands)
     auto commands = presenter.publishCommands();
-    TS_ASSERT_EQUALS(commands.size(), 25);
+    TS_ASSERT_EQUALS(commands.size(), 26);
 
     TS_ASSERT(dynamic_cast<ReflOpenTableCommand *>(commands[0].get()));
     TS_ASSERT(dynamic_cast<ReflNewTableCommand *>(commands[1].get()));
@@ -1664,22 +1664,23 @@ public:
     TS_ASSERT(dynamic_cast<ReflExportTableCommand *>(commands[6].get()));
     TS_ASSERT(dynamic_cast<ReflSeparatorCommand *>(commands[7].get()));
     TS_ASSERT(dynamic_cast<ReflOptionsCommand *>(commands[8].get()));
-    TS_ASSERT(dynamic_cast<ReflProcessCommand *>(commands[9].get()));
-    TS_ASSERT(dynamic_cast<ReflExpandCommand *>(commands[10].get()));
-    TS_ASSERT(dynamic_cast<ReflSeparatorCommand *>(commands[11].get()));
-    TS_ASSERT(dynamic_cast<ReflPlotRowCommand *>(commands[12].get()));
-    TS_ASSERT(dynamic_cast<ReflPlotGroupCommand *>(commands[13].get()));
-    TS_ASSERT(dynamic_cast<ReflSeparatorCommand *>(commands[14].get()));
-    TS_ASSERT(dynamic_cast<ReflAppendRowCommand *>(commands[15].get()));
-    TS_ASSERT(dynamic_cast<ReflPrependRowCommand *>(commands[16].get()));
-    TS_ASSERT(dynamic_cast<ReflSeparatorCommand *>(commands[17].get()));
-    TS_ASSERT(dynamic_cast<ReflGroupRowsCommand *>(commands[18].get()));
-    TS_ASSERT(dynamic_cast<ReflCopySelectedCommand *>(commands[19].get()));
-    TS_ASSERT(dynamic_cast<ReflCutSelectedCommand *>(commands[20].get()));
-    TS_ASSERT(dynamic_cast<ReflPasteSelectedCommand *>(commands[21].get()));
-    TS_ASSERT(dynamic_cast<ReflClearSelectedCommand *>(commands[22].get()));
-    TS_ASSERT(dynamic_cast<ReflSeparatorCommand *>(commands[23].get()));
-    TS_ASSERT(dynamic_cast<ReflDeleteRowCommand *>(commands[24].get()));
+    TS_ASSERT(dynamic_cast<ReflSeparatorCommand *>(commands[9].get()));
+    TS_ASSERT(dynamic_cast<ReflProcessCommand *>(commands[10].get()));
+    TS_ASSERT(dynamic_cast<ReflExpandCommand *>(commands[11].get()));
+    TS_ASSERT(dynamic_cast<ReflSeparatorCommand *>(commands[12].get()));
+    TS_ASSERT(dynamic_cast<ReflPlotRowCommand *>(commands[13].get()));
+    TS_ASSERT(dynamic_cast<ReflPlotGroupCommand *>(commands[14].get()));
+    TS_ASSERT(dynamic_cast<ReflSeparatorCommand *>(commands[15].get()));
+    TS_ASSERT(dynamic_cast<ReflAppendRowCommand *>(commands[16].get()));
+    TS_ASSERT(dynamic_cast<ReflPrependRowCommand *>(commands[17].get()));
+    TS_ASSERT(dynamic_cast<ReflSeparatorCommand *>(commands[18].get()));
+    TS_ASSERT(dynamic_cast<ReflGroupRowsCommand *>(commands[19].get()));
+    TS_ASSERT(dynamic_cast<ReflCopySelectedCommand *>(commands[20].get()));
+    TS_ASSERT(dynamic_cast<ReflCutSelectedCommand *>(commands[21].get()));
+    TS_ASSERT(dynamic_cast<ReflPasteSelectedCommand *>(commands[22].get()));
+    TS_ASSERT(dynamic_cast<ReflClearSelectedCommand *>(commands[23].get()));
+    TS_ASSERT(dynamic_cast<ReflSeparatorCommand *>(commands[24].get()));
+    TS_ASSERT(dynamic_cast<ReflDeleteRowCommand *>(commands[25].get()));
   }
 };
 

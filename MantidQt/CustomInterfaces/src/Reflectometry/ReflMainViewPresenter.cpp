@@ -106,13 +106,13 @@ void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
 void ReflMainViewPresenter::pushCommands() {
 
   // The expected number of commands
-  const size_t nCommands = 25;
+  const size_t nCommands = 26;
   auto commands = std::move(m_tablePresenter->publishCommands());
   if (commands.size() != nCommands) {
     throw std::runtime_error("Invalid list of commands");
   }
   // The index at which "row" commands start
-  const size_t rowCommStart = 9;
+  const size_t rowCommStart = 10;
   // We want to have two menus
   // Populate the "Reflectometry" menu
   std::vector<ReflCommandBase_uptr> tableCommands;
