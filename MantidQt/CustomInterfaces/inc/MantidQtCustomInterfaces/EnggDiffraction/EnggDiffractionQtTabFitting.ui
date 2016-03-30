@@ -180,9 +180,15 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBox_bank">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
-            <width>111</width>
+            <width>70</width>
             <height>0</height>
            </size>
           </property>
@@ -194,12 +200,12 @@
           </property>
           <item>
            <property name="text">
-            <string>Bank North - 1</string>
+            <string>Bank 1</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Bank South - 2</string>
+            <string>Bank 2</string>
            </property>
           </item>
          </widget>

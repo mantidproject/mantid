@@ -670,6 +670,29 @@ double EnggDiffractionViewQtGUI::rebinningPulsesTime() const {
   return m_uiTabPreproc.doubleSpinBox_step_time->value();
 }
 
+/// shahroz
+QString EnggDiffractionViewQtGUI::bankFullDir(int bank, QString path) {
+  // m_bank_Id
+	QString rPath;
+  std::string dir = path.toStdString();
+  Poco::Path fpath(dir);
+
+  auto fileName = fpath.getFileName();
+
+  if (fpath.isFile()) {
+
+	  if (fileName.find("bank_1") != std::string::npos && (m_bank_Id == 0))
+			  return path;
+
+	  else if (fileName.find("bank_2") != std::string::npos && (m_bank_Id == 1))
+			  return path;
+	  else 
+		  return rPath;
+
+  }
+
+}
+
 std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
   std::string fileData = "";
   std::string line;
@@ -700,6 +723,7 @@ void EnggDiffractionViewQtGUI::setDataVector(
     dataCurvesFactory(data, m_fittedDataVector, focused);
   }
 }
+
 
 void EnggDiffractionViewQtGUI::dataCurvesFactory(
     std::vector<boost::shared_ptr<QwtData>> &data,
@@ -1040,8 +1064,10 @@ void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
   m_uiTabFocus.lineEdit_texture_grouping_file->setText(path);
 }
 
+/// shahroz
 void EnggDiffractionViewQtGUI::browseFitFocusedRun() {
   QString prevPath = QString::fromStdString(m_focusDir);
+  ///m_bank_Id
   if (prevPath.isEmpty()) {
     prevPath =
         MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
@@ -1053,12 +1079,14 @@ void EnggDiffractionViewQtGUI::browseFitFocusedRun() {
       QFileDialog::getOpenFileName(this, tr("Open Focused File "), prevPath,
                                    QString::fromStdString(nexusFormat)));
 
+  auto newPath = bankFullDir(2, path);
+
   if (path.isEmpty()) {
     return;
   }
 
-  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
-  m_uiTabFitting.lineEdit_pushButton_run_num->setText(path);
+  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(newPath);
+  m_uiTabFitting.lineEdit_pushButton_run_num->setText(newPath);
 }
 
 void EnggDiffractionViewQtGUI::browsePeaksToFit() {
