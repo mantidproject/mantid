@@ -1,19 +1,14 @@
-#ifndef MANTID_CUSTOMINTERFACES_WORKSPACERECEIVER_H
-#define MANTID_CUSTOMINTERFACES_WORKSPACERECEIVER_H
+#ifndef MANTID_CUSTOMINTERFACES_REFLWORKSPACECOMMAND_H
+#define MANTID_CUSTOMINTERFACES_REFLWORKSPACECOMMAND_H
 
+#include "MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflCommandBase.h"
-#include <set>
-#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class WorkspaceReceiver
+/** @class ReflWorkspaceCommand
 
-WorkspaceReceiver is an interface that defines the functions needed to receive
-information from a table presenter. IReflTablePresenter uses this interface
-to notify changes to an outer, concrete presenter. Any outer presenter that
-needs to receive information from IReflTablePresenter should inherit from this
-class.
+ReflWorkspaceCommand defines a workspace action
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -36,15 +31,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class WorkspaceReceiver {
+class ReflWorkspaceCommand : public ReflCommandBase {
 public:
-  virtual ~WorkspaceReceiver(){};
+  ReflWorkspaceCommand(IReflTablePresenter *tablePresenter,
+                       const std::string &name)
+      : ReflCommandBase(tablePresenter), m_name(name){};
+  virtual ~ReflWorkspaceCommand(){};
 
-  enum Flag { ADSChangedFlag };
+  void execute() override {
+    // Tell the presenter which of the available workspaces was selected
+    m_tablePresenter->setModel(m_name);
+    // Now notify the presenter
+    m_tablePresenter->notify(IReflTablePresenter::OpenTableFlag);
+  };
+  std::string name() override { return m_name; }
+  std::string icon() override { return std::string("://worksheet.png"); }
 
-  // Notify this receiver that something changed in the ADS
-  virtual void notify(WorkspaceReceiver::Flag flag) = 0;
+private:
+  std::string m_name;
 };
 }
 }
-#endif /*MANTID_CUSTOMINTERFACES_WORKSPACERECEIVER_H*/
+#endif /*MANTID_CUSTOMINTERFACES_REFLWORKSPACECOMMAND_H*/

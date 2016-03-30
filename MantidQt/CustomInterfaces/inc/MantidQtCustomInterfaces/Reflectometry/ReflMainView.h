@@ -59,7 +59,6 @@ public:
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
                                  const std::string &defaultInstrument) = 0;
   virtual void setTransferMethods(const std::set<std::string> &methods) = 0;
-  virtual void setTableList(const std::set<std::string> &tables) = 0;
   virtual void
   setTableCommands(std::vector<ReflCommandBase_uptr> tableCommands) = 0;
   virtual void

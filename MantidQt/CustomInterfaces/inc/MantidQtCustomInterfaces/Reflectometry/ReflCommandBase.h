@@ -37,7 +37,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class ReflCommandBase : public ReflCommand {
 public:
   ReflCommandBase(IReflTablePresenter *tablePresenter)
-      : m_tablePresenter(tablePresenter) {
+      : m_tablePresenter(tablePresenter), m_child() {
     if (!tablePresenter) {
       throw std::invalid_argument("Invalid abstract presenter");
     }
@@ -48,9 +48,19 @@ public:
   virtual std::string name() = 0;
   virtual std::string icon() = 0;
   virtual bool isSeparator() final { return name().empty() && icon().empty(); }
+  virtual bool hasChild() final { return !m_child.empty(); }
+  virtual void
+  setChild(std::vector<std::unique_ptr<ReflCommandBase>> child) final {
+    m_child = std::move(child);
+  }
+  virtual const std::vector<std::unique_ptr<ReflCommandBase>> &
+  getChild() final {
+    return m_child;
+  }
 
 protected:
   IReflTablePresenter *const m_tablePresenter;
+  std::vector<std::unique_ptr<ReflCommandBase>> m_child;
 };
 
 typedef std::unique_ptr<ReflCommandBase> ReflCommandBase_uptr;

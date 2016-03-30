@@ -255,6 +255,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTableViewPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflVectorString.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflWorkspaceCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/TransferResults.h
 	inc/MantidQtCustomInterfaces/Reflectometry/WorkspaceReceiver.h
 	inc/MantidQtCustomInterfaces/SANSBackgroundCorrectionSettings.h

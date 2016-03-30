@@ -243,19 +243,8 @@
     <property name="title">
      <string>&amp;Reflectometry</string>
     </property>
-     <widget class="QMenu" name="menuOpenTable">
-       <property name="title">
-         <string>Open Table</string>
-       </property>
-       <property name="icon">
-         <iconset resource="../../../../MantidPlot/icons/icons.qrc">
-           <normaloff>:/multiload.png</normaloff>:/multiload.png
-         </iconset>
-       </property>
-     </widget>
      <addaction name="actionSlitCalculator"/>
      <addaction name="separator"/>
-     <addaction name="menuOpenTable"/>
    </widget>
    <widget class="QMenu" name="menuRows">
      <property name="title">

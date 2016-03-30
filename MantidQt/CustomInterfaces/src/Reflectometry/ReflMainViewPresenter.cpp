@@ -35,11 +35,6 @@ ReflMainViewPresenter::ReflMainViewPresenter(
 
   // Register this presenter as the m_tablePresenter's outer presenter
   m_tablePresenter->accept(this);
-  // Get the workspace list (i.e. list of workspaces in the ADS the user can
-  // open) from the inner presenter
-  auto tableList = m_tablePresenter->getTableList();
-  // Push the workspace list
-  pushWorkspaceList(tableList);
 
   // TODO. Select strategy.
   /*
@@ -81,25 +76,7 @@ ReflMainViewPresenter::ReflMainViewPresenter(
   }
 
   // Push the list of commands to the view
-  // The expected number of commands
-  const size_t nCommands = 25;
-  auto commands = std::move(m_tablePresenter->publishCommands());
-  if (commands.size() != nCommands) {
-    throw std::runtime_error("Invalid list of commands");
-  }
-  // The index at which "row" commands start
-  const size_t rowCommStart = 9;
-  // We want to have two menus
-  // Populate the "Reflectometry" menu
-  std::vector<ReflCommandBase_uptr> tableCommands;
-  for (size_t i = 0; i < rowCommStart; i++)
-    tableCommands.push_back(std::move(commands[i]));
-  m_view->setTableCommands(std::move(tableCommands));
-  // Populate the "Edit" menu
-  std::vector<ReflCommandBase_uptr> rowCommands;
-  for (size_t i = rowCommStart; i < nCommands; i++)
-    rowCommands.push_back(std::move(commands[i]));
-  m_view->setRowCommands(std::move(rowCommands));
+  pushCommands();
 }
 
 ReflMainViewPresenter::~ReflMainViewPresenter() {}
@@ -126,6 +103,30 @@ void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
+}
+
+/** Pushes the list of commands (actions) */
+void ReflMainViewPresenter::pushCommands() {
+
+  // The expected number of commands
+  const size_t nCommands = 25;
+  auto commands = std::move(m_tablePresenter->publishCommands());
+  if (commands.size() != nCommands) {
+    throw std::runtime_error("Invalid list of commands");
+  }
+  // The index at which "row" commands start
+  const size_t rowCommStart = 9;
+  // We want to have two menus
+  // Populate the "Reflectometry" menu
+  std::vector<ReflCommandBase_uptr> tableCommands;
+  for (size_t i = 0; i < rowCommStart; i++)
+    tableCommands.push_back(std::move(commands[i]));
+  m_view->setTableCommands(std::move(tableCommands));
+  // Populate the "Edit" menu
+  std::vector<ReflCommandBase_uptr> rowCommands;
+  for (size_t i = rowCommStart; i < nCommands; i++)
+    rowCommands.push_back(std::move(commands[i]));
+  m_view->setRowCommands(std::move(rowCommands));
 }
 
 /** Searches for runs that can be used */
@@ -300,12 +301,17 @@ void ReflMainViewPresenter::openTable() {
 }
 
 /**
-* Push the list of workspaces the user is offered to open
-* @param workspaceList : [input] The workspace list
+Used to tell the presenter something has changed in the ADS
 */
-void ReflMainViewPresenter::pushWorkspaceList(
-    const std::set<std::string> &workspaceList) {
-  m_view->setTableList(workspaceList);
+void ReflMainViewPresenter::notify(WorkspaceReceiver::Flag flag) {
+
+  switch (flag) {
+  case WorkspaceReceiver::ADSChangedFlag:
+    pushCommands();
+    break;
+  }
+  // Not having a 'default' case is deliberate. gcc issues a warning if there's
+  // a flag we aren't handling.
 }
 
 const std::string ReflMainViewPresenter::MeasureTransferMethod = "Measurement";

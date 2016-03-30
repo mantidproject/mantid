@@ -55,7 +55,7 @@ public:
                             boost::shared_ptr<IReflSearcher>());
   ~ReflMainViewPresenter() override;
   void notify(IReflPresenter::Flag flag) override;
-  void pushWorkspaceList(const std::set<std::string> &workspaceList) override;
+  void notify(WorkspaceReceiver::Flag flag) override;
 
 protected:
   // the search model
@@ -73,6 +73,7 @@ protected:
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
   void transfer();
   void openTable();
+  void pushCommands();
 
 private:
   static const std::string LegacyTransferMethod;

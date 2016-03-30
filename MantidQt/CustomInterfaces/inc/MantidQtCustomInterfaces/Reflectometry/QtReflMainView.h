@@ -62,7 +62,6 @@ public:
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
   void setTransferMethods(const std::set<std::string> &methods) override;
-  void setTableList(const std::set<std::string> &tables) override;
   void
   setTableCommands(std::vector<ReflCommandBase_uptr> tableCommands) override;
   void setRowCommands(std::vector<ReflCommandBase_uptr> rowCommands) override;

@@ -79,7 +79,6 @@ public:
   virtual std::vector<ReflCommandBase_uptr> publishCommands() = 0;
   virtual void accept(WorkspaceReceiver *workspaceReceiver) = 0;
   virtual void setModel(std::string name) = 0;
-  virtual std::set<std::string> getTableList() const = 0;
 };
 }
 }

@@ -39,17 +39,40 @@ public:
   ReflCommandAdapter(QMenu *menu, ReflCommandBase_sptr adaptee)
       : m_adaptee(adaptee) {
 
-    QAction *action =
-        new QAction(QString::fromStdString(m_adaptee->name()), this);
-    action->setIcon(QIcon(QString::fromStdString(m_adaptee->icon())));
-    action->setSeparator(m_adaptee->isSeparator());
-    menu->addAction(action);
-    connect(action, SIGNAL(triggered()), this, SLOT(call()));
+    if (m_adaptee->hasChild()) {
+      // We are dealing with a submenu
+      // Add the submenu
+      QMenu *submenu =
+          menu->addMenu(QIcon(QString::fromStdString(m_adaptee->icon())),
+                        QString::fromStdString(m_adaptee->name()));
+      // Add the actions
+      auto &child = m_adaptee->getChild();
+      for (auto &ch : child) {
+        ReflCommandAdapter *adapter = new ReflCommandAdapter(
+            submenu, std::shared_ptr<ReflCommandBase>(ch.get()));
+      }
+    } else {
+      // We are dealing with an action
+      addAction(menu, m_adaptee);
+    }
   };
 public slots:
   void call() { m_adaptee->execute(); }
 
 private:
+  /** Adds an action to a menu
+  * @param menu : [input] The menu that will contain the action
+  * @param adaptee : [input] The adaptee
+  */
+  void addAction(QMenu *menu, ReflCommandBase_sptr adaptee) {
+    QAction *action =
+        new QAction(QString::fromStdString(adaptee->name()), this);
+    action->setIcon(QIcon(QString::fromStdString(adaptee->icon())));
+    action->setSeparator(adaptee->isSeparator());
+    menu->addAction(action);
+    connect(action, SIGNAL(triggered()), this, SLOT(call()));
+  };
+  // The adaptee
   ReflCommandBase_sptr m_adaptee;
 };
 }

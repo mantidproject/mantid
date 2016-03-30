@@ -55,7 +55,6 @@ public:
                          const std::string &defaultInstrument) override;
   std::vector<ReflCommandBase_uptr> publishCommands() override;
   void setModel(std::string name) override;
-  std::set<std::string> getTableList() const override;
 
 protected:
   // the workspace the model is currently representing
@@ -151,6 +150,7 @@ protected:
                           Mantid::API::Workspace_sptr workspace) override;
   void saveNotebook(std::map<int, std::set<int>> groups, std::set<int> rows);
   void accept(WorkspaceReceiver *workspaceReceiver) override;
+  std::vector<ReflCommandBase_uptr> getTableList();
 };
 }
 }

@@ -48,6 +48,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSeparatorCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflWorkspaceCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/WorkspaceReceiver.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 
@@ -1233,7 +1234,7 @@ void ReflTableViewPresenter::addHandle(const std::string &name,
 
   m_workspaceList.insert(name);
   m_tableView->setTableList(m_workspaceList);
-  m_workspaceReceiver->pushWorkspaceList(m_workspaceList);
+  m_workspaceReceiver->notify(WorkspaceReceiver::ADSChangedFlag);
 }
 
 /**
@@ -1242,7 +1243,7 @@ Handle ADS remove events
 void ReflTableViewPresenter::postDeleteHandle(const std::string &name) {
   m_workspaceList.erase(name);
   m_tableView->setTableList(m_workspaceList);
-  m_workspaceReceiver->pushWorkspaceList(m_workspaceList);
+  m_workspaceReceiver->notify(WorkspaceReceiver::ADSChangedFlag);
 }
 
 /**
@@ -1251,7 +1252,7 @@ Handle ADS clear events
 void ReflTableViewPresenter::clearADSHandle() {
   m_workspaceList.clear();
   m_tableView->setTableList(m_workspaceList);
-  m_workspaceReceiver->pushWorkspaceList(m_workspaceList);
+  m_workspaceReceiver->notify(WorkspaceReceiver::ADSChangedFlag);
 }
 
 /**
@@ -1268,7 +1269,7 @@ void ReflTableViewPresenter::renameHandle(const std::string &oldName,
   m_workspaceList.erase(oldName);
   m_workspaceList.insert(newName);
   m_tableView->setTableList(m_workspaceList);
-  m_workspaceReceiver->pushWorkspaceList(m_workspaceList);
+  m_workspaceReceiver->notify(WorkspaceReceiver::ADSChangedFlag);
 }
 
 /**
@@ -1652,6 +1653,10 @@ std::vector<ReflCommandBase_uptr> ReflTableViewPresenter::publishCommands() {
   addToCommand(commands, make_unique<ReflSeparatorCommand>(this));
   addToCommand(commands, make_unique<ReflDeleteRowCommand>(this));
 
+  // "Open Table" needs the list of "child" commands, i.e. the list of
+  // available workspaces in the ADS
+  commands.at(0)->setChild(getTableList());
+
   return commands;
 }
 
@@ -1662,11 +1667,19 @@ void ReflTableViewPresenter::accept(WorkspaceReceiver *workspaceReceiver) {
   m_workspaceReceiver = workspaceReceiver;
 }
 
-/** Get the list of table workspaces the user can open
-* @return : The list of table workspaces
+/** Returs the list of valid workspaces currently in the ADS
+* @return : The vector of workspaces (as commands)
 */
-std::set<std::string> ReflTableViewPresenter::getTableList() const {
-  return m_workspaceList;
+std::vector<ReflCommandBase_uptr> ReflTableViewPresenter::getTableList() {
+
+  std::vector<ReflCommandBase_uptr> workspaces;
+
+  // Create a command for each of the workspaces in the ADS
+  for (auto it = m_workspaceList.begin(); it != m_workspaceList.end(); ++it) {
+    addToCommand(workspaces,
+                 Mantid::Kernel::make_unique<ReflWorkspaceCommand>(this, *it));
+  }
+  return workspaces;
 }
 }
 }
