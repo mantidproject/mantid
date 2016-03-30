@@ -221,6 +221,9 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   connect(m_uiTabFitting.listWidget_fitting_bank_preview,
           SIGNAL(currentRowChanged(int)), this, SLOT(setBankIdComboBox(int)));
 
+  connect(m_uiTabFitting.lineEdit_pushButton_run_num, SIGNAL(editingFinished()),
+	  SLOT(fittingRunNoChanged()));
+
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom,
                                         "Time-of-flight (us)");
@@ -1318,28 +1321,36 @@ void EnggDiffractionViewQtGUI::setListWidgetBank(int idx) {
 }
 
 /// shahroz
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::fittingRunNoChanged()
-{
-	auto focusedFile = m_uiTabFitting.lineEdit_pushButton_run_num->text().toStdString();
-	Poco::Path fPath(focusedFile);
-	std::string fName = fPath.getBaseName();
-	std::string fDir = fPath.parent().toString();
-	std::string bankDir;
-	int fileRange = 4;
-	std::vector<std::string> bankWithDir;
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    fittingRunNoChanged() {
+  auto focusedFile = m_uiTabFitting.lineEdit_pushButton_run_num->text();
+  Poco::Path fPath(focusedFile);
+  std::string fName = fPath.getBaseName();
+  auto fDir = fPath.parent().toString();
+  std::string bankDir;
+  int fileRange = 4;
+  std::vector<std::string> bankWithDirVec;
 
-	for (int i = 1; i < fileRange; i++) {
-		bankDir = fittingRunNoFactory(std::to_string(i), fName, bankDir, fDir);
-		Poco::Path bankPath(bankDir);
-		if (bankPath.isDirectory()) {
-			bankWithDir.push_back(bankDir);
-		}
-	}
+  if (fPath.isFile()) {
+    for (int i = 1; i < fileRange; i++) {
+      // bankDir = fittingRunNoFactory(std::to_string(i), fName, bankDir, fDir);
 
-	
+      std::string genDir = fName.substr(0, fName.size() - 1);
+      Poco::Path bankFile(genDir + std::to_string(i) + ".nxs");
+      if (bankFile.isFile()) {
+        bankDir = fDir + genDir + std::to_string(i) + ".nxs";
+        bankWithDirVec.push_back(bankDir);
+      }
+    }
 
-
-
+    if (bankWithDirVec.size() > 1) {
+      for (size_t i = 1; i < bankWithDirVec.size(); i++) {
+        m_uiTabFitting.comboBox_bank->addItem(QString("Bank %1").arg(i+2));
+        m_uiTabFitting.listWidget_fitting_bank_preview->addItem(
+            QString("%1").arg(i+2));
+      }
+    }
+  }
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
