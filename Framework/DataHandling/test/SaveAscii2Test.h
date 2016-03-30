@@ -164,7 +164,7 @@ public:
   }
 
   void test_valid_SpectrumMetaData_values() {
-    Mantid::DataObjects::Workspace2D_sptr wsToSave;
+	MatrixWorkspace_sptr wsToSave;
     writeInelasticWS(wsToSave);
 
     SaveAscii2 save;
@@ -210,6 +210,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // the algorithm will have used a defualt and written a file to disk
+	auto const isThere = Poco::File(filename).exists();
     TS_ASSERT(Poco::File(filename).exists());
     Poco::File(filename).remove();
 
@@ -620,10 +621,6 @@ public:
         save.setPropertyValue("SpectrumMetaData", "NotAValidChoice"));
     TS_ASSERT_THROWS_ANYTHING(save.execute());
 
-    // the algorithm will have used a defualt and written a file to disk
-    TS_ASSERT(Poco::File(filename).exists());
-    Poco::File(filename).remove();
-
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -664,7 +661,7 @@ private:
     AnalysisDataService::Instance().add(m_name, wsToSave);
   }
 
-  void writeInelasticWS(Mantid::DataObjects::Workspace2D_sptr &wsToSave) {
+  void writeInelasticWS(MatrixWorkspace_sptr &wsToSave) {
     const std::vector<double> l2{1, 2, 3, 4, 5};
     const std::vector<double> polar{1, 2, 3, 4, 5};
     const std::vector<double> azimutal{1, 2, 3, 4, 5};
