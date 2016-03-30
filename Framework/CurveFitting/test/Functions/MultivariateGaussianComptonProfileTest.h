@@ -87,8 +87,7 @@ public:
     TS_ASSERT_DELTA(0.0114435282, values.getCalculated(2), tol);
   }
 
-  void test_Build_S2_Cache()
-  {
+  void test_Build_S2_Cache() {
     auto func = createFunctionWithParamsSet();
     func->setAttributeValue("IntegrationSteps", 35);
 
