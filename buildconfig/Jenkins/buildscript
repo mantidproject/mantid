@@ -124,7 +124,7 @@ fi
 # Enable warnings about used Qt3Support functions
 ###############################################################################
 if [[ ${JOB_NAME} == *Qt3-warnings* ]]; then
-  DIST_FLAGS="${DIST_FLAGS} -DWITH_QT3SUPPORT_WARNINGS=ON"
+  DIST_FLAGS="${DIST_FLAGS} -DWITH_QT3_SUPPORT_WARNINGS=ON"
 fi
 
 ###############################################################################
