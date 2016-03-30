@@ -38,11 +38,6 @@ public:
                       product->args, 2);
   }
 
-  void test_no_arrays(){
-
-      //auto product = make_cow<int[]>();
-
-  }
 };
 
 #endif
