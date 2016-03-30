@@ -102,18 +102,17 @@ public:
     delete parent;
   }
 
-  void testCorrectNameComparison()
-  {
-	  //Test allowed names
-	  TS_ASSERT(StructuredDetector::compareName("StructuredDetector"));
-	  TS_ASSERT(StructuredDetector::compareName("structuredDetector"));
-	  TS_ASSERT(StructuredDetector::compareName("structureddetector"));
-	  TS_ASSERT(StructuredDetector::compareName("structured_detector"));
-	  
-	  //Test fail on incorrect names
-	  TS_ASSERT(!StructuredDetector::compareName("Structured Detector"));
-	  TS_ASSERT(!StructuredDetector::compareName("Structured"));
-	  TS_ASSERT(!StructuredDetector::compareName("Detector"));
+  void testCorrectNameComparison() {
+    // Test allowed names
+    TS_ASSERT(StructuredDetector::compareName("StructuredDetector"));
+    TS_ASSERT(StructuredDetector::compareName("structuredDetector"));
+    TS_ASSERT(StructuredDetector::compareName("structureddetector"));
+    TS_ASSERT(StructuredDetector::compareName("structured_detector"));
+
+    // Test fail on incorrect names
+    TS_ASSERT(!StructuredDetector::compareName("Structured Detector"));
+    TS_ASSERT(!StructuredDetector::compareName("Structured"));
+    TS_ASSERT(!StructuredDetector::compareName("Detector"));
   }
 
   void testFullConstructor() {
