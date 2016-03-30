@@ -149,8 +149,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim1", name2));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim2", name3));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim3", name4));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ImplicitFunctionXML", functionXML));
+    if (functionXML != "NO_FUNCTION") {
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setPropertyValue("ImplicitFunctionXML", functionXML));
+    }
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IterateEvents", IterateEvents));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
@@ -177,7 +179,7 @@ public:
         TS_ASSERT_DELTA(out->getSignalAt(i), expected_signal, 1e-5);
         TS_ASSERT_DELTA(out->getNumEventsAt(i), expected_signal, 1e-5);
         TS_ASSERT_DELTA(out->getErrorAt(i), sqrt(expected_signal), 1e-5);
-      } else {
+      } else if (functionXML != "NO_FUNCTION") {
         // All NAN cause of implicit function
         TS_ASSERT(boost::math::isnan(out->getSignalAt(i))); // The implicit
         // function should
@@ -202,6 +204,31 @@ public:
     TSM_ASSERT_EQUALS("Should have num events normalization",
                       out->displayNormalization(), histoNorm);
     AnalysisDataService::Instance().remove("BinMDTest_ws");
+  }
+
+  void test_exec_with_masked_ws() {
+    Mantid::Geometry::QSample frame;
+    IMDEventWorkspace_sptr in_ws =
+        MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<3>, 3>(
+            10, 0.0, 10.0, frame, 1);
+
+    auto eventNorm = Mantid::API::MDNormalization::VolumeNormalization;
+    auto histoNorm = Mantid::API::MDNormalization::NumEventsNormalization;
+    in_ws->setDisplayNormalization(eventNorm);
+    in_ws->setDisplayNormalizationHisto(histoNorm);
+
+    Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
+        Mantid::Kernel::QSample;
+    in_ws->setCoordinateSystem(appliedCoord);
+    AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
+
+    FrameworkManager::Instance().exec("MaskMD", 6, "Workspace", "BinMDTest_ws",
+                                      "Dimensions", "Axis0,Axis1,Axis2",
+                                      "Extents", "0,2,0,10,0,10");
+
+    execute_bin("NO_FUNCTION", "Axis0,0.0,8.0, 4", "Axis1,0.0,8.0, 4",
+                "Axis2,0.0,8.0, 4", "", 1.0, 6 * 8, true, 1.0, VMD(1, 0, 0),
+                VMD(0, 1, 0), VMD(0, 0, 1), in_ws);
   }
 
   void test_exec_3D() {
