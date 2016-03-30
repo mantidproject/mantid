@@ -7,9 +7,9 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 #include <algorithm>
+#include <boost/regex.hpp>
 #include <ostream>
 #include <stdexcept>
-#include <boost/regex.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -678,6 +678,5 @@ std::ostream &operator<<(std::ostream &os, const StructuredDetector &ass) {
   ass.printChildren(os);
   return os;
 }
-
-} // namespace Geometry
-} // namespace Mantid
+}
+}
