@@ -594,7 +594,7 @@ public:
 
     auto foundUnits = findOriginalQUnits(cutMDtestws, m_log);
     TSM_ASSERT_EQUALS("Units should be found to be inverse angstroms",
-                      foundUnits[0], CutMD::InvAngstromSymbol);
+                      foundUnits[0], "a");
     // Clean up
     AnalysisDataService::Instance().remove(ws_name);
   }
@@ -605,7 +605,7 @@ public:
 
     auto foundUnits = findOriginalQUnits(cutMDtestws, m_log);
     TSM_ASSERT_EQUALS("Units should be found to be inverse angstroms",
-                      foundUnits[0], CutMD::InvAngstromSymbol);
+                      foundUnits[0], "a");
     // Clean up
     AnalysisDataService::Instance().remove(ws_name);
   }
@@ -616,8 +616,7 @@ public:
     auto cutMDtestws = makeWorkspaceWithSpecifiedUnits("in 1.11A^-1", ws_name);
 
     auto foundUnits = findOriginalQUnits(cutMDtestws, m_log);
-    TSM_ASSERT_EQUALS("Units should be found to be RLU", foundUnits[0],
-                      CutMD::RLUSymbol);
+    TSM_ASSERT_EQUALS("Units should be found to be RLU", foundUnits[0], "r");
     // Clean up
     AnalysisDataService::Instance().remove(ws_name);
   }
