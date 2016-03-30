@@ -121,16 +121,30 @@ void MultivariateGaussianComptonProfile::massProfile(
 
   const double prefactorJ =
       (1.0 / (sqrt(2.0 * M_PI) * sigmaX * sigmaY * sigmaZ)) * (2.0 / M_PI);
+  const double prefactorFSE =
+      (pow(sigmaX, 4) + pow(sigmaY, 4) + pow(sigmaZ, 4)) /
+      (9.0 * sqrt(2.0 * M_PI) * sigmaX * sigmaY * sigmaZ);
 
   const auto &yspace = ySpace();
+  const auto &modq = modQ();
 
   for (size_t i = 0; i < nData; i++) {
-    double y = yspace[i];
+    const double y(yspace[i]);
+    const double q(modq[i]);
+
     double j = prefactorJ * calculateJ(s2Cache, y);
-    result[i] = amplitude * j;
+    double fse = (prefactorFSE / q) * calculateFSE(s2Cache, y);
+
+    result[i] = amplitude * (j + fse);
   }
 }
 
+/**
+ * @brief Calculates the mass profile
+ * @param s2Cache Cache of S2 values
+ * @param y Y value
+ * @return Mass profile
+ */
 double
 MultivariateGaussianComptonProfile::calculateJ(std::vector<double> s2Cache,
                                                double y) const {
@@ -139,7 +153,7 @@ MultivariateGaussianComptonProfile::calculateJ(std::vector<double> s2Cache,
   for (int i = 0; i < m_integrationSteps; i++) {
     for (int j = 0; j < m_integrationSteps; j++) {
       double s2 = s2Cache[i * m_integrationSteps + j];
-      sum += intervalCoeff(i, j) * calculateJIntegrand(s2, y);
+      sum += intervalCoeff(i, j) * calculateIntegrandJ(s2, y);
     }
   }
 
@@ -148,6 +162,42 @@ MultivariateGaussianComptonProfile::calculateJ(std::vector<double> s2Cache,
   return fact * sum;
 }
 
+/**
+ * @brief Calculates the A3 FSE correction.
+ * @param s2Cache Cache of S2 values
+ * @param y Y value
+ * @return Additive FSE correction
+ */
+double
+MultivariateGaussianComptonProfile::calculateFSE(std::vector<double> s2Cache,
+                                                 double y) const {
+  double sum(0.0);
+
+  for (int i = 0; i < m_integrationSteps; i++) {
+    for (int j = 0; j < m_integrationSteps; j++) {
+      double s2 = s2Cache[i * m_integrationSteps + j];
+      sum += intervalCoeff(i, j) * calculateIntegrandFSE(s2, y);
+    }
+  }
+
+  double fact = (m_thetaStep * m_phiStep) / 9.0;
+
+  return fact * sum;
+}
+
+/**
+ * @brief Obtains a cell of the coefficient grid for Simpson's integration in
+ *        2D.
+ * @param i X index
+ * @param j Y index
+ * @return Coefficient
+ *
+ * [ 1  4 2  4 1 ]
+ * [ 4 16 8 16 4 ]
+ * [ 2  8 4  8 2 ]
+ * [ 4 16 8 16 4 ]
+ * [ 1  4 2  4 1 ]
+ */
 double MultivariateGaussianComptonProfile::intervalCoeff(int i, int j) const {
   double a = 1.0;
   double b = 1.0;

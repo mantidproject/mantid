@@ -68,12 +68,30 @@ private:
                    const double amplitude) const;
 
   double calculateJ(std::vector<double> s2Cache, double y) const;
+  double calculateFSE(std::vector<double> s2Cache, double y) const;
 
-  double intervalCoeff(int i, int j) const;
-
-  inline double calculateJIntegrand(double s2, double y) const {
+  /**
+   * @brief Calculates the integrand of the mass profile.
+   * @param s2 S2 value
+   * @param y Y value
+   * @return Integrand
+   */
+  inline double calculateIntegrandJ(double s2, double y) const {
     return s2 * exp(-(y * y) / (2.0 * s2));
   }
+
+  /**
+   * @brief Calculates the integrand of the A3 FSE correction.
+   * @param s2 S2 value
+   * @param y Y value
+   * @return Integrand
+   */
+  inline double calculateIntegrandFSE(double s2, double y) const {
+    return ((pow(y, 3) / pow(s2, 4)) - ((3 * y) / pow(s2, 2))) *
+           exp(-(y * y) / (2.0 * s2));
+  }
+
+  double intervalCoeff(int i, int j) const;
 
   int m_integrationSteps; //!< Number of steps to perform during integration
   double m_thetaStep;     //!< Delta theta in integration
