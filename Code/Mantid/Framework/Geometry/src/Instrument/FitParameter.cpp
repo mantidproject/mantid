@@ -182,7 +182,7 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
   } catch (boost::bad_lexical_cast &) {
     f.setValue() = 0.0;
 
-    if (!values[0].empty()) {
+    if (!values.at(0).empty()) {
       g_log.warning() << "Could not read " << values[0] << " as double for "
                       << " fitting parameter: " << values[1] << ":" << values[2]
                       << std::endl;
@@ -191,55 +191,55 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
 
   // read remaining required entries
 
-  f.setFunction() = values[1];
-  f.setName() = values[2];
+  f.setFunction() = values.at(1);
+  f.setName() = values.at(2);
 
   // read optional entries
 
   try {
-    f.setConstraintMin() = values[3];
+    f.setConstraintMin() = values.at(3);
   } catch (...) {
     f.setConstraintMin() = "";
   }
 
   try {
-    f.setConstraintMax() = values[4];
+    f.setConstraintMax() = values.at(4);
   } catch (...) {
     f.setConstraintMax() = "";
   }
 
   try {
-    f.setConstraintPenaltyFactor() = values[5];
+    f.setConstraintPenaltyFactor() = values.at(5);
   } catch (...) {
     f.setConstraintPenaltyFactor() = "";
   }
 
   try {
-    f.setTie() = values[6];
+    f.setTie() = values.at(6);
   } catch (...) {
     f.setTie() = "";
   }
 
   try {
-    f.setFormula() = values[7];
+    f.setFormula() = values.at(7);
   } catch (...) {
     f.setFormula() = "";
   }
 
   try {
-    f.setFormulaUnit() = values[8];
+    f.setFormulaUnit() = values.at(8);
   } catch (...) {
     f.setFormulaUnit() = "";
   }
 
   try {
-    f.setResultUnit() = values[9];
+    f.setResultUnit() = values.at(9);
   } catch (...) {
     f.setResultUnit() = "";
   }
 
   if (values.count() > 10) {
-    std::stringstream str(values[10]);
+    std::stringstream str(values.at(10));
     str >> f.setLookUpTable();
   }
 
