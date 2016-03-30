@@ -73,7 +73,7 @@ include ( CommonSetup )
 find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg Qt3Support REQUIRED )
 option(WITH_QT3_SUPPORT_WARNINGS "Enable warnings about used Qt3Support functions" OFF)
 if(WITH_QT3_SUPPORT_WARNINGS)
-  add_defintions(-DQT3_SUPPORT_WARNINGS)
+  add_definitions(-DQT3_SUPPORT_WARNINGS)
 endif()
 
 ###########################################################################
