@@ -72,6 +72,20 @@ public:
     delete parent;
   }
 
+  void testCorrectNameComparison()
+  {
+	  //Test allowed names
+	  TS_ASSERT(RectangularDetector::compareName("RectangularDetector"));
+	  TS_ASSERT(RectangularDetector::compareName("rectangularDetector"));
+	  TS_ASSERT(RectangularDetector::compareName("rectangulardetector"));
+	  TS_ASSERT(RectangularDetector::compareName("rectangular_detector"));
+
+	  //Test fail on incorrect names
+	  TS_ASSERT(!RectangularDetector::compareName("Rectangular Detector"));
+	  TS_ASSERT(!RectangularDetector::compareName("Rectangular"));
+	  TS_ASSERT(!RectangularDetector::compareName("Detector"));
+  }
+
   void testFullConstructor() {
     boost::shared_ptr<Geometry::Object> cuboidShape =
         ComponentCreationHelper::createCuboid(0.5);

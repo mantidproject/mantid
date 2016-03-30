@@ -440,9 +440,9 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   auto yrb = m_yvalues[(y * w) + x + 1];
 
   // calculate midpoint of trapeziod
-  double a = abs(xrf - xlf);
-  double b = abs(xrb - xlb);
-  double h = abs(ylb - ylf);
+  double a = std::abs((double)(xrf - xlf));
+  double b = std::abs((double)(xrb - xlb));
+  double h = std::abs((double)(ylb - ylf));
   auto cx = ((a + b) / 4);
   auto cy = h / 2;
 
@@ -679,5 +679,5 @@ std::ostream &operator<<(std::ostream &os, const StructuredDetector &ass) {
   return os;
 }
 
-} // namespace Geometry
-}
+} /* namespace Geometry */
+} /* namespace Mantid */
