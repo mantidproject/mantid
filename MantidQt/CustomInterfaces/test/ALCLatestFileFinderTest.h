@@ -15,48 +15,51 @@ using MantidQt::CustomInterfaces::ALCLatestFileFinder;
 using ScopedFileHelper::ScopedFile;
 using Mantid::Kernel::DateAndTime;
 
-class ALCLatestFileFinderTest : public CxxTest::TestSuite {
+/**
+ * Extension of ScopedFile used for testing purposes
+ */
+class TestFile {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static ALCLatestFileFinderTest *createSuite() {
-    return new ALCLatestFileFinderTest();
+  /// Constructor which creates valid filename
+  TestFile(const std::string &time, const std::string &instrument,
+           const std::string &run, const std::string &extension = "nxs")
+      : m_file("", createFileName(instrument, run, extension)) {
+    adjustFileTime(m_file.getFileName(), time);
   }
-  static void destroySuite(ALCLatestFileFinderTest *suite) { delete suite; }
-
-  /**
-   * Test finding the most recent file in the directory
-   * Should deal with adding and removing files
-   * Should ignore non-NeXus files
-   */
-  void test_getMostRecentFile() {
-    // 100 years so it won't clash with other files in temp directory
-    auto file0 = ScopedFile("", "0.nxs");
-    adjustFileTime(file0.getFileName(), "2116-03-15T12:00:00");
-    auto file1 = ScopedFile("", "1.nxs");
-    adjustFileTime(file1.getFileName(), "2116-03-15T14:00:00");
-    auto file2 = ScopedFile("", "2.nxs");
-    adjustFileTime(file2.getFileName(), "2116-03-15T13:00:00");
-    ALCLatestFileFinder finder(file0.getFileName());
-    TS_ASSERT_EQUALS(finder.getMostRecentFile(), file1.getFileName());
-    { // file added
-      auto file3 = ScopedFile("", "3.nxs");
-      adjustFileTime(file3.getFileName(), "2116-03-15T15:00:00");
-      TS_ASSERT_EQUALS(finder.getMostRecentFile(), file3.getFileName());
-    }
-    // file removed (file3 went out of scope)
-    TS_ASSERT_EQUALS(finder.getMostRecentFile(), file1.getFileName());
-    auto nonNexus = ScopedFile("", "4.run");
-    adjustFileTime(nonNexus.getFileName(), "2116-03-15T16:00:00");
-    TS_ASSERT_EQUALS(finder.getMostRecentFile(), file1.getFileName());
+  /// Constructor taking any filename
+  TestFile(const std::string &time, const std::string &name)
+      : m_file("", name) {
+    adjustFileTime(m_file.getFileName(), time);
   }
+  std::string getFileName() { return m_file.getFileName(); };
 
 private:
   /**
-   * Set file's last modified time (resolution: nearest second)
-   * @param path :: [input] Path to file
-   * @param time :: [input] ISO8601 formatted time string
-   */
+ * Generate a filename from supplied instrument, run number
+ * @param instrument [input] :: instrument name
+ * @param run [input] :: run number
+ * @param extension [input] :: extension
+ * @returns :: filename
+ */
+  std::string createFileName(const std::string &instrument,
+                             const std::string &run,
+                             const std::string &extension) {
+    static const size_t numberLength = 8;
+    std::ostringstream stream;
+    stream << instrument;
+    const size_t numZeros = numberLength - run.size();
+    for (size_t i = 0; i < numZeros; i++) {
+      stream << "0";
+    }
+    stream << run;
+    stream << "." << extension;
+    return stream.str();
+  }
+  /**
+ * Set file's last modified time (resolution: nearest second)
+ * @param path :: [input] Path to file
+ * @param time :: [input] ISO8601 formatted time string
+ */
   void adjustFileTime(const std::string &path,
                       const std::string &modifiedTime) {
     // Make sure the file exists
@@ -71,6 +74,82 @@ private:
 
     // Set the file's last modified time
     file.setLastModified(pocoTime.timestamp());
+  }
+  ScopedFile m_file;
+};
+
+class ALCLatestFileFinderTest : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ALCLatestFileFinderTest *createSuite() {
+    return new ALCLatestFileFinderTest();
+  }
+  static void destroySuite(ALCLatestFileFinderTest *suite) { delete suite; }
+
+  /**
+   * Test finding the most recent file in the directory
+   * Should deal with adding and removing files
+   */
+  void test_getMostRecentFile() {
+    auto files = generateTestFiles();
+    ALCLatestFileFinder finder(files[0].getFileName());
+    TS_ASSERT_EQUALS(finder.getMostRecentFile(), files[1].getFileName());
+    { // file added
+      auto newFile = TestFile("2116-03-15T15:00:00", "MUSR", "90003");
+      TS_ASSERT_EQUALS(finder.getMostRecentFile(), newFile.getFileName());
+    }
+    // file removed (newFile went out of scope)
+    TS_ASSERT_EQUALS(finder.getMostRecentFile(), files[1].getFileName());
+  }
+
+  /**
+   * Test that the finder ignores non-NeXus files
+   */
+  void test_ignoreNonNeXus() {
+    auto files = generateTestFiles();
+    auto nonNexus = TestFile("2116-03-15T16:00:00", "MUSR", "90004", "run");
+    ALCLatestFileFinder finder(files[0].getFileName());
+    TS_ASSERT_EQUALS(finder.getMostRecentFile(), files[1].getFileName());
+  }
+
+  /**
+   * Test that the finder ignores NeXus files from the wrong instrument
+   */
+  void test_ignoreWrongInstrument() {
+    auto files = generateTestFiles();
+    auto wrongInstrument = TestFile("2116-03-15T16:00:00", "EMU", "80000");
+    ALCLatestFileFinder finder(files[0].getFileName());
+    std::string foundFile;
+    TS_ASSERT_THROWS_NOTHING(foundFile = finder.getMostRecentFile());
+    TS_ASSERT_EQUALS(foundFile, files[1].getFileName());
+  }
+
+  /**
+   * Test that the finder ignores "invalid" NeXus files
+   */
+  void test_ignoreInvalidNeXus() {
+    auto files = generateTestFiles();
+    auto badNexus = TestFile("2116-03-15T16:00:00", "ALCResults.nxs");
+    ALCLatestFileFinder finder(files[0].getFileName());
+    std::string foundFile;
+    TS_ASSERT_THROWS_NOTHING(foundFile = finder.getMostRecentFile());
+    TS_ASSERT_EQUALS(foundFile, files[1].getFileName());
+  }
+
+private:
+  /**
+   * Generate three scoped test files
+   * The second file is the most recent
+   * @returns :: vector containing three files
+   */
+  std::vector<TestFile> generateTestFiles() {
+    std::vector<TestFile> files;
+    // 100 years so it won't clash with other files in temp directory
+    files.emplace_back("2116-03-15T12:00:00", "MUSR", "90000");
+    files.emplace_back("2116-03-15T14:00:00", "MUSR", "90001");
+    files.emplace_back("2116-03-15T13:00:00", "MUSR", "90002");
+    return files;
   }
 };
 
