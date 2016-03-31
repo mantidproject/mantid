@@ -42,8 +42,8 @@ public:
 private:
   // Calls we don't care about
   const std::map<std::string, QVariant> &options() const { return m_options; };
-  std::vector<ReflCommandBase_uptr> publishCommands() {
-    return std::vector<ReflCommandBase_uptr>();
+  std::vector<ReflCommand_uptr> publishCommands() {
+    return std::vector<ReflCommand_uptr>();
   };
   std::set<std::string> getTableList() const {
     return std::set<std::string>();

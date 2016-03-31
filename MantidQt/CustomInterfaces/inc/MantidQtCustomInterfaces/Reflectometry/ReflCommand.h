@@ -1,7 +1,9 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLCOMMAND_H
 #define MANTID_CUSTOMINTERFACES_REFLCOMMAND_H
 
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -33,12 +35,27 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class ReflCommand {
 public:
+  ReflCommand() : m_child(){};
   virtual ~ReflCommand(){};
 
   virtual void execute() = 0;
   virtual std::string name() = 0;
   virtual std::string icon() = 0;
+  virtual bool hasChild() final { return !m_child.empty(); };
+  virtual void setChild(std::vector<std::unique_ptr<ReflCommand>> child) final {
+    m_child = std::move(child);
+  }
+  virtual const std::vector<std::unique_ptr<ReflCommand>> &getChild() final {
+    return m_child;
+  }
+	virtual bool isSeparator() final { return name().empty() && icon().empty(); }
+
+protected:
+  std::vector<std::unique_ptr<ReflCommand>> m_child;
 };
+
+typedef std::unique_ptr<ReflCommand> ReflCommand_uptr;
+typedef std::shared_ptr<ReflCommand> ReflCommand_sptr;
 }
 }
 #endif /*MANTID_CUSTOMINTERFACES_REFLCOMMAND_H*/

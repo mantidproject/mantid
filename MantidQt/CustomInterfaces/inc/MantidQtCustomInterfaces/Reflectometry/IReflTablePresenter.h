@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "MantidKernel/System.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflCommandBase.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCommand.h"
 
 #include <QVariant>
 
@@ -76,7 +76,7 @@ public:
   transfer(const std::vector<std::map<std::string, std::string>> &runs) = 0;
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
                                  const std::string &defaultInstrument) = 0;
-  virtual std::vector<ReflCommandBase_uptr> publishCommands() = 0;
+  virtual std::vector<ReflCommand_uptr> publishCommands() = 0;
   virtual void accept(WorkspaceReceiver *workspaceReceiver) = 0;
   virtual void setModel(std::string name) = 0;
 };

@@ -115,12 +115,12 @@ void ReflMainViewPresenter::pushCommands() {
   const size_t rowCommStart = 10;
   // We want to have two menus
   // Populate the "Reflectometry" menu
-  std::vector<ReflCommandBase_uptr> tableCommands;
+  std::vector<ReflCommand_uptr> tableCommands;
   for (size_t i = 0; i < rowCommStart; i++)
     tableCommands.push_back(std::move(commands[i]));
   m_view->setTableCommands(std::move(tableCommands));
   // Populate the "Edit" menu
-  std::vector<ReflCommandBase_uptr> rowCommands;
+  std::vector<ReflCommand_uptr> rowCommands;
   for (size_t i = rowCommStart; i < nCommands; i++)
     rowCommands.push_back(std::move(commands[i]));
   m_view->setRowCommands(std::move(rowCommands));

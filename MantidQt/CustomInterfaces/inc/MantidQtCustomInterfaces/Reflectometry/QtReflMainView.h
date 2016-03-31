@@ -63,8 +63,8 @@ public:
                          const std::string &defaultInstrument) override;
   void setTransferMethods(const std::set<std::string> &methods) override;
   void
-  setTableCommands(std::vector<ReflCommandBase_uptr> tableCommands) override;
-  void setRowCommands(std::vector<ReflCommandBase_uptr> rowCommands) override;
+  setTableCommands(std::vector<ReflCommand_uptr> tableCommands) override;
+  void setRowCommands(std::vector<ReflCommand_uptr> rowCommands) override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;
@@ -85,7 +85,7 @@ private:
   // initialise the interface
   void initLayout() override;
   // Adds an action (command) to a menu
-  void addToMenu(QMenu *menu, ReflCommandBase_uptr command);
+  void addToMenu(QMenu *menu, ReflCommand_uptr command);
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 

@@ -3,7 +3,7 @@
 
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflCommandBase.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include <gmock/gmock.h>
@@ -18,18 +18,18 @@ public:
 
   // Gmock requires parameters and return values of mocked methods to be
   // copyable
-  // We can't mock setTableCommands(std::vector<ReflCommandBase_uptr>) because
+  // We can't mock setTableCommands(std::vector<ReflCommand_uptr>) because
   // of the vector of unique pointers
   // I will mock a proxy method, setTableCommandsProxy, I just want to test that
   // this method is invoked by the presenter's constructor
   virtual void
-  setTableCommands(std::vector<ReflCommandBase_uptr> tableCommands) override {
+  setTableCommands(std::vector<ReflCommand_uptr> tableCommands) override {
 
     setTableCommandsProxy();
   }
   // The same happens for setRowCommands
   virtual void
-  setRowCommands(std::vector<ReflCommandBase_uptr> tableCommands) override {
+  setRowCommands(std::vector<ReflCommand_uptr> tableCommands) override {
 
     setRowCommandsProxy();
   }

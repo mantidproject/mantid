@@ -53,7 +53,7 @@ public:
       const std::vector<std::map<std::string, std::string>> &runs) override;
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
-  std::vector<ReflCommandBase_uptr> publishCommands() override;
+  std::vector<ReflCommand_uptr> publishCommands() override;
   void setModel(std::string name) override;
 
 protected:
@@ -150,7 +150,7 @@ protected:
                           Mantid::API::Workspace_sptr workspace) override;
   void saveNotebook(std::map<int, std::set<int>> groups, std::set<int> rows);
   void accept(WorkspaceReceiver *workspaceReceiver) override;
-  std::vector<ReflCommandBase_uptr> getTableList();
+  std::vector<ReflCommand_uptr> getTableList();
 };
 }
 }

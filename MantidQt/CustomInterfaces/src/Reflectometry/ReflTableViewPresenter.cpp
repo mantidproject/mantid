@@ -1614,8 +1614,8 @@ void ReflTableViewPresenter::setModel(std::string name) {
 * @param commands : [input] The vector where the new command will be added
 * @param command : [input] The command to add
 */
-void addToCommand(std::vector<ReflCommandBase_uptr> &commands,
-                  ReflCommandBase_uptr command) {
+void addToCommand(std::vector<ReflCommand_uptr> &commands,
+                  ReflCommand_uptr command) {
   commands.push_back(std::move(command));
 }
 
@@ -1623,9 +1623,9 @@ void addToCommand(std::vector<ReflCommandBase_uptr> &commands,
 * Publishes a list of available commands
 * @return : The list of available commands
 */
-std::vector<ReflCommandBase_uptr> ReflTableViewPresenter::publishCommands() {
+std::vector<ReflCommand_uptr> ReflTableViewPresenter::publishCommands() {
 
-  std::vector<ReflCommandBase_uptr> commands;
+  std::vector<ReflCommand_uptr> commands;
 
   addToCommand(commands, make_unique<ReflOpenTableCommand>(this));
   addToCommand(commands, make_unique<ReflNewTableCommand>(this));
@@ -1671,9 +1671,9 @@ void ReflTableViewPresenter::accept(WorkspaceReceiver *workspaceReceiver) {
 /** Returs the list of valid workspaces currently in the ADS
 * @return : The vector of workspaces (as commands)
 */
-std::vector<ReflCommandBase_uptr> ReflTableViewPresenter::getTableList() {
+std::vector<ReflCommand_uptr> ReflTableViewPresenter::getTableList() {
 
-  std::vector<ReflCommandBase_uptr> workspaces;
+  std::vector<ReflCommand_uptr> workspaces;
 
   // Create a command for each of the workspaces in the ADS
   for (auto it = m_workspaceList.begin(); it != m_workspaceList.end(); ++it) {

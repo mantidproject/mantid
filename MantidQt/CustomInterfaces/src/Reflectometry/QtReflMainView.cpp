@@ -73,7 +73,7 @@ void QtReflMainView::initLayout() {
 * @param menu : [input] The menu where actions will be added
 * @param command : [input] The command (action) to add
 */
-void QtReflMainView::addToMenu(QMenu *menu, ReflCommandBase_uptr command) {
+void QtReflMainView::addToMenu(QMenu *menu, ReflCommand_uptr command) {
 
   // cppcheck-suppress unreadVariable
   ReflCommandAdapter *adapter =
@@ -86,7 +86,7 @@ void QtReflMainView::addToMenu(QMenu *menu, ReflCommandBase_uptr command) {
 * "Reflectometry" menu
 */
 void QtReflMainView::setTableCommands(
-    std::vector<ReflCommandBase_uptr> tableCommands) {
+    std::vector<ReflCommand_uptr> tableCommands) {
 
   ui.menuTable->clear();
   for (auto &command : tableCommands) {
@@ -105,7 +105,7 @@ void QtReflMainView::setTableCommands(
 * @param rowCommands : [input] The list of commands to add to the "Edit" menu
 */
 void QtReflMainView::setRowCommands(
-    std::vector<ReflCommandBase_uptr> rowCommands) {
+    std::vector<ReflCommand_uptr> rowCommands) {
 
   ui.menuRows->clear();
   for (auto &command : rowCommands) {

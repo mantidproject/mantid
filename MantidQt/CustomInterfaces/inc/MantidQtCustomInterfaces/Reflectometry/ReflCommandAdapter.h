@@ -1,9 +1,10 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLCOMMANDADAPTER_H
 #define MANTID_CUSTOMINTERFACES_REFLCOMMANDADAPTER_H
 
-#include "MantidQtCustomInterfaces/Reflectometry/ReflCommandBase.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCommand.h"
 #include <QObject>
 #include <qmenu.h>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -36,7 +37,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class ReflCommandAdapter : public QObject {
   Q_OBJECT
 public:
-  ReflCommandAdapter(QMenu *menu, ReflCommandBase_sptr adaptee)
+  ReflCommandAdapter(QMenu *menu, ReflCommand_sptr adaptee)
       : m_adaptee(adaptee) {
 
     if (m_adaptee->hasChild()) {
@@ -49,7 +50,7 @@ public:
       auto &child = m_adaptee->getChild();
       for (auto &ch : child) {
         ReflCommandAdapter *adapter = new ReflCommandAdapter(
-            submenu, std::shared_ptr<ReflCommandBase>(ch.get()));
+            submenu, std::shared_ptr<ReflCommand>(ch.get()));
       }
     } else {
       // We are dealing with an action
@@ -64,7 +65,7 @@ private:
   * @param menu : [input] The menu that will contain the action
   * @param adaptee : [input] The adaptee
   */
-  void addAction(QMenu *menu, ReflCommandBase_sptr adaptee) {
+  void addAction(QMenu *menu, ReflCommand_sptr adaptee) {
     QAction *action =
         new QAction(QString::fromStdString(adaptee->name()), this);
     action->setIcon(QIcon(QString::fromStdString(adaptee->icon())));
@@ -73,7 +74,7 @@ private:
     connect(action, SIGNAL(triggered()), this, SLOT(call()));
   };
   // The adaptee
-  ReflCommandBase_sptr m_adaptee;
+  ReflCommand_sptr m_adaptee;
 };
 }
 }
