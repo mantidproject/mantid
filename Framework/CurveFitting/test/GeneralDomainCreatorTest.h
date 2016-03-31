@@ -47,7 +47,26 @@ public:
   }
 };
 
-}
+class TestFunction2: public IFunctionGeneral, public ParamFunction {
+public:
+  TestFunction2() : IFunctionGeneral(), ParamFunction() {
+    declareParameter("a", 0.0);
+  }
+  std::string name() const override {return "TestFunction2";}
+  size_t getNumberDomainColumns() const override {return 0;}
+  size_t getNumberValuesPerArgument() const override {return 2;}
+  size_t getDefaultValuesSize() const override {return 5;}
+  void functionGeneral(const FunctionDomainGeneral &generalDomain, FunctionValues &values) const override {
+    double a = getParameter(0);
+    auto n = getDefaultValuesSize();
+    for(size_t i = 0; i < n; ++i) {
+      values.setCalculated(i, a * double(i));
+      values.setCalculated(i + n, a * (10.0 - double(i)));
+    }
+  }
+};
+
+} // anonymous namespace
 
 class GeneralDomainCreatorTest : public CxxTest::TestSuite {
 public:
@@ -191,6 +210,86 @@ public:
     TS_ASSERT_DELTA(fun->getParameter(0), 10.01, 2e-3);
   }
 
+  void test_declared_properties_2() {
+    TestFunction2 fun;
+    PropertyManager manager;
+    GeneralDomainCreator creator(fun, manager, "InputWorkspace");
+    creator.declareDatasetProperties();
+    TS_ASSERT(!manager.existsProperty("ArgumentColumn"));
+    TS_ASSERT(!manager.existsProperty("ArgumentColumn_1"));
+
+    TS_ASSERT(manager.existsProperty("DataColumn"));
+    TS_ASSERT(manager.existsProperty("DataColumn_1"));
+    TS_ASSERT(!manager.existsProperty("DataColumn_2"));
+    TS_ASSERT(manager.existsProperty("WeightsColumn"));
+    TS_ASSERT(manager.existsProperty("WeightsColumn_1"));
+    TS_ASSERT(!manager.existsProperty("WeightsColumn_2"));
+  }
+
+  void test_domain_values_2() {
+    TestFunction2 fun;
+    PropertyManager manager;
+    GeneralDomainCreator creator(fun, manager, "InputWorkspace");
+    creator.declareDatasetProperties();
+
+    TableWorkspace_sptr ws = makeData2();
+
+    manager.declareProperty(
+        make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
+        "Name of the input Workspace");
+    manager.setProperty("InputWorkspace", ws);
+    manager.setProperty("DataColumn", "Energies");
+    manager.setProperty("DataColumn_1", "Intensities");
+    manager.setProperty("WeightsColumn", "EnergiesW");
+    manager.setProperty("WeightsColumn_1", "IntensitiesW");
+
+    FunctionDomain_sptr domain;
+    FunctionValues_sptr values;
+    creator.createDomain(domain, values);
+    TS_ASSERT_EQUALS(domain->size(), 0);
+    TS_ASSERT_EQUALS(values->size(), 10);
+
+    TS_ASSERT_EQUALS(values->getFitData(0), 0.0);
+    TS_ASSERT_EQUALS(values->getFitData(1), 1.0);
+    TS_ASSERT_EQUALS(values->getFitData(2), 2.0);
+    TS_ASSERT_EQUALS(values->getFitData(3), 3.0);
+    TS_ASSERT_EQUALS(values->getFitData(4), 4.0);
+    TS_ASSERT_EQUALS(values->getFitData(5), 10.0);
+    TS_ASSERT_EQUALS(values->getFitData(6), 9.0);
+    TS_ASSERT_EQUALS(values->getFitData(7), 8.0);
+    TS_ASSERT_EQUALS(values->getFitData(8), 7.0);
+    TS_ASSERT_EQUALS(values->getFitData(9), 6.0);
+
+    TS_ASSERT_EQUALS(values->getFitWeight(0), 1.0);
+    TS_ASSERT_EQUALS(values->getFitWeight(1), 1.0);
+    TS_ASSERT_EQUALS(values->getFitWeight(2), 1.0);
+    TS_ASSERT_EQUALS(values->getFitWeight(3), 1.0);
+    TS_ASSERT_EQUALS(values->getFitWeight(4), 1.0);
+    TS_ASSERT_EQUALS(values->getFitWeight(5), 0.5);
+    TS_ASSERT_EQUALS(values->getFitWeight(6), 0.5);
+    TS_ASSERT_EQUALS(values->getFitWeight(7), 0.5);
+    TS_ASSERT_EQUALS(values->getFitWeight(8), 0.5);
+    TS_ASSERT_EQUALS(values->getFitWeight(9), 0.5);
+  }
+
+  void test_fit_2() {
+    IFunction_sptr fun(new TestFunction2);
+    TableWorkspace_sptr ws = makeData2();
+
+    Mantid::CurveFitting::Algorithms::Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", fun);
+    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("DataColumn", "Energies");
+    fit.setProperty("DataColumn_1", "Intensities");
+    fit.setProperty("WeightsColumn", "EnergiesW");
+    fit.setProperty("WeightsColumn_1", "IntensitiesW");
+
+    TS_ASSERT_EQUALS(fun->getParameter(0), 0.0);
+    fit.execute();
+    TS_ASSERT_DELTA(fun->getParameter(0), 1.0, 1e-9);
+  }
+
 private:
 
   TableWorkspace_sptr makeData1(double wgt3col = 0.0) {
@@ -213,6 +312,27 @@ private:
     row << 3.0 << "Alpha" << 30.0 << 1.0 << 3.0 << 0.1 << 0.33 << wgt3col;
     row = ws->appendRow();
     row << 3.0 << "Beta" << 60.0 << 1.0 << 6.0 << 0.1 << 0.66 << wgt3col;
+
+    return ws;
+  }
+
+  TableWorkspace_sptr makeData2() {
+    TableWorkspace_sptr ws(new TableWorkspace);
+    ws->addColumn("double", "Energies");
+    ws->addColumn("double", "EnergiesW");
+    ws->addColumn("double", "Intensities");
+    ws->addColumn("double", "IntensitiesW");
+
+    TableRow row = ws->appendRow();
+    row << 0.0 << 1.0 << 10.0 << 0.5;
+    row = ws->appendRow();
+    row << 1.0 << 1.0 << 9.0 << 0.5;
+    row = ws->appendRow();
+    row << 2.0 << 1.0 << 8.0 << 0.5;
+    row = ws->appendRow();
+    row << 3.0 << 1.0 << 7.0 << 0.5;
+    row = ws->appendRow();
+    row << 4.0 << 1.0 << 6.0 << 0.5;
 
     return ws;
   }

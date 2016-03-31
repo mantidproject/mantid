@@ -90,15 +90,20 @@ void GeneralDomainCreator::createDomain(
     throw std::invalid_argument("InputWorkspace must be a TableWorkspace.");
   }
 
-  // Create the domain
+  size_t domainSize = 0;
   domain.reset(new FunctionDomainGeneral);
-  auto &generalDomain = *static_cast<FunctionDomainGeneral*>(domain.get());
-  for(auto &propName : m_domainColumnNames) {
-    std::string columnName = m_manager->getPropertyValue(propName);
-    auto column = tableWorkspace->getColumn(columnName);
-    generalDomain.addColumn(column);
+  // Create the domain
+  if (!m_domainColumnNames.empty()) {
+    auto &generalDomain = *static_cast<FunctionDomainGeneral*>(domain.get());
+    for(auto &propName : m_domainColumnNames) {
+      std::string columnName = m_manager->getPropertyValue(propName);
+      auto column = tableWorkspace->getColumn(columnName);
+      generalDomain.addColumn(column);
+    }
+    domainSize = domain->size();
+  } else {
+    domainSize = m_defaultValuesSize;
   }
-  auto domainSize = domain->size();
 
   // Get the fitting data
   if (!values) {
