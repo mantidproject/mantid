@@ -11,6 +11,8 @@ using namespace MantidQt::CustomInterfaces;
 
 #include <boost/lexical_cast.hpp>
 #include <fstream>
+
+#include "Poco/DirectoryIterator.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
@@ -646,8 +648,7 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabFitting.pushButton_fitting_browse_peaks->setEnabled(enable);
   m_uiTabFitting.lineEdit_fitting_peaks->setEnabled(enable);
   m_uiTabFitting.pushButton_fit->setEnabled(enable);
-  m_uiTabFitting.comboBox_bank->setEnabled(enable);
-  m_uiTabFitting.groupBox_fititng_preview->setEnabled(enable);
+
 }
 
 void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
@@ -1324,48 +1325,72 @@ void EnggDiffractionViewQtGUI::setListWidgetBank(int idx) {
 /// shahroz
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
     fittingRunNoChanged() {
-  auto focusedFile = m_uiTabFitting.lineEdit_pushButton_run_num->text();
-  Poco::Path fPath(focusedFile);
-  std::string fName = fPath.getBaseName();
-  auto fParentDir = fPath.parent(); // parent dir
+  QString focusedFile = m_uiTabFitting.lineEdit_pushButton_run_num->text();
+
+  Poco::Path selectedfPath(focusedFile);
+
   Poco::Path bankDir;
-  int fileRange = 4;
+
   std::vector<std::string> bankWithDirVec;
 
-  if (fPath.isFile()) {
-    for (int i = 1; i < fileRange; i++) {
-      // bankDir = fittingRunNoFactory(std::to_string(i), fName, bankDir, fDir);
+  if (selectedfPath.isFile()) {
 
-      std::string genDir = fName.substr(0, fName.size() - 1);
-      Poco::Path bankFile(genDir + std::to_string(i) + ".nxs");
+    std::string selectedbankfName = selectedfPath.getBaseName();
+    std::vector<std::string> splitBaseName;
+    if (selectedbankfName.find("ENGINX_") != std::string::npos) {
+      boost::split(splitBaseName, selectedbankfName, boost::is_any_of("_"));
+
+      std::string a = splitBaseName[0];
+      std::string b = splitBaseName[1];
+      std::string c = splitBaseName[2];
+
+      std::string av = a + " " + b + " " + c;
+// std::string genDir = fName.substr(0, fName.size() - 1);
+// Poco::Path bankFile(genDir + std::to_string(1) + ".nxs"); // change 1
+
+#ifdef __unix__
 
       Poco::Path home("C:\\");
       bankDir.append(home);
-      bankDir.append(fParentDir);
+      bankDir.append(fPath.parent().toString());
       bankDir.append(bankFile);
+#else
+      bankDir = (bankDir).expand(selectedfPath.parent().toString());
+#endif
 
-      std::string tempValDelete = bankDir.toString();
+      std::string cwd(bankDir.toString());
+      Poco::DirectoryIterator it(cwd);
+      Poco::DirectoryIterator end;
+      while (it != end) {
+        if (it->isFile()) {
+          std::string itFilePath = it->path();
+          Poco::Path itBankfPath(itFilePath);
+          std::string itbankFileName = itBankfPath.getBaseName();
+          if (itbankFileName.find(splitBaseName[0] + "_" + splitBaseName[1] +
+                                  "_" + splitBaseName[2]) !=
+                  std::string::npos &&
+              m_bank_Id == 0) {
 
-      if (Poco::File("C:\\" + tempValDelete).exists()) {
-
-        // if (fDir.isFile()) {
-        // bankDir = fDir + genDir + std::to_string(i) + ".nxs";
-
-        bankWithDirVec.push_back(bankDir.toString());
-
-        // to add all the bank to combo & list
-        if (i == fileRange - 1) {
-          fileRange++;
+            bankWithDirVec.push_back(itFilePath);
+          }
+          ++it;
         }
-        bankDir.clear();
       }
-    }
 
-    if (bankWithDirVec.size() > 1) {
-      for (size_t i = 1; i < bankWithDirVec.size(); i++) {
-        m_uiTabFitting.comboBox_bank->addItem(QString("Bank %1").arg(i + 2));
-        m_uiTabFitting.listWidget_fitting_bank_preview->addItem(
-            QString("%1").arg(i + 2));
+      // delete previous bank added to the list
+      m_uiTabFitting.comboBox_bank->clear();
+      m_uiTabFitting.listWidget_fitting_bank_preview->clear();
+
+      if (bankWithDirVec.size() > 1) {
+
+        for (size_t i = 0; i < bankWithDirVec.size(); i++) {
+          m_uiTabFitting.comboBox_bank->addItem(QString("Bank %1").arg(i + 1));
+          m_uiTabFitting.listWidget_fitting_bank_preview->addItem(
+              QString("%1").arg(i + 1));
+        }
+
+        m_uiTabFitting.comboBox_bank->setEnabled(true);
+        m_uiTabFitting.listWidget_fitting_bank_preview->setEnabled(true);
       }
     }
   }
