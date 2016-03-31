@@ -91,6 +91,9 @@ When we pass the IvsLambda workspace to :ref:`algm-ConvertUnits` to produce an I
 the sample-to-detector vector. When we have the typical setup seen below, :math:`2\theta` will be exactly half the value we wish it to be.
 
 .. figure:: /images/CurrentExperimentSetupForReflectometry.PNG
+    :width: 650px
+    :height: 250px
+    :align: center
 
 We rotate the position of the Source (and therefore the Beam vector) in the Instrument Defintion associated with the IvsLambda workspace
 until the condition :math:`\theta_i = \theta_f` is satisfied. This will achieve the desired result for :math:`2\theta` (see below for rotated source diagram).
@@ -98,7 +101,9 @@ After :ref:`algm-ConvertUnits` has produced our IvsQ workspace, we will rotate t
 algorithms that may need to manipulate/use it.
 
 .. figure:: /images/RotatedExperimentSetupForReflectometry.PNG
-
+    :width: 650px
+    :height: 250px
+    :align: center
 Usage
 -----
 

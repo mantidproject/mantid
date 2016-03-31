@@ -27,7 +27,7 @@ digraph ReflectometryReductionOne {
     checkNormDetMon [label="Normalize by\nIntegrated Monitors?"]
     checkCorrAlg    [label="CorrectionAlgorithm?"]
     checkSourceRotation [label="Is Source in Correct Position?"]
-    checkSourceRotationBack [label = "Is Source in Correct Position?"]
+    checkSourceRotationBack [label = "Was Source Rotated?"]
   }
 
   subgraph algorithms {
@@ -105,8 +105,8 @@ digraph ReflectometryReductionOne {
   sourceRotationAngle -> rotateSource
   rotateSource      -> convertToMT
   convertToMT      -> checkSourceRotationBack
-  checkSourceRotationBack -> rotateSourceBack [label = "No"]
-  checkSourceRotationBack -> outputWorkspaceMT [label="Yes"]
+  checkSourceRotationBack -> rotateSourceBack [label = "Yes"]
+  checkSourceRotationBack -> outputWorkspaceMT [label="No"]
   sourceRotationAngleBack -> rotateSourceBack [label = "Rotate back by Rotation Angle"]
   rotateSourceBack      -> outputWorkspaceMT
 }
