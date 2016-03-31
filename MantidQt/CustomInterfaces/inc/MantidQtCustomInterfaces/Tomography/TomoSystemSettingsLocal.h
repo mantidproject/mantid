@@ -1,19 +1,19 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMORECONPREPROCSETTINGS_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMORECONPREPROCSETTINGS_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOSYSTEMSETTINGSLOCAL_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOSYSTEMSETTINGSLOCAL_H_
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
-#include <cstddef>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 /**
-Settings for pre-processing of the raw input images before
-reconstructing a volume. Note this is in principle not tied to any
-particular tool.
+Settings for the paths and other parameters on the local machine. Most
+of these options could be hardcoded but it is convenient to be able to
+manipulate them, for flexibility and for testing/commissioning.
 
-Copyright &copy; 2015,2016 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -34,25 +34,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-struct MANTIDQT_CUSTOMINTERFACES_DLL TomoReconPreprocSettings {
-  bool normalizeByAirRegion;
-  bool normalizeByProtonCharge;
-  bool normalizeByFlats;
-  bool normalizeByDarks;
+struct MANTIDQT_CUSTOMINTERFACES_DLL TomoSystemSettingsLocal {
+  std::string m_basePathTomoData;
+  std::string m_remoteDriveOrMountPoint;
 
-  // block-size in pixels
-  size_t medianFilterWidth;
-  // rotation to correct raw images, in degrees. Only multiples of 90
-  int rotation;
-  // maximum angle, in degrees
-  double maxAngle;
-  // block size in pixels
-  size_t scaleDownFactor;
+  std::string m_reconScriptsPath;
+  std::string m_externalInterpreterPath;
 
-  TomoReconPreprocSettings();
+  int m_processes;
+  int m_cores;
+
+  static const std::string g_defBasePathTomoData;
+  static const std::string g_defRemoteDriveOrMountPoint;
+  static const std::string g_defReconScriptsPath;
+  static const std::string g_defExternalInterpreterPath;
+
+  TomoSystemSettingsLocal();
 };
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMORECONPREPROCSETTINGS_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOSYSTEMSETTINGSLOCAL_H_
