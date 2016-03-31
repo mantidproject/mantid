@@ -11,6 +11,7 @@ using namespace MantidQt::CustomInterfaces;
 
 #include <boost/lexical_cast.hpp>
 #include <fstream>
+#include <Poco/File.h>
 #include <Poco/Path.h>
 
 #include <QCheckBox>
@@ -1326,8 +1327,8 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
   auto focusedFile = m_uiTabFitting.lineEdit_pushButton_run_num->text();
   Poco::Path fPath(focusedFile);
   std::string fName = fPath.getBaseName();
-  auto fDir = fPath.parent().toString();
-  std::string bankDir;
+  auto fParentDir = fPath.parent(); // parent dir
+  Poco::Path bankDir;
   int fileRange = 4;
   std::vector<std::string> bankWithDirVec;
 
@@ -1337,17 +1338,34 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
 
       std::string genDir = fName.substr(0, fName.size() - 1);
       Poco::Path bankFile(genDir + std::to_string(i) + ".nxs");
-      if (bankFile.isFile()) {
-        bankDir = fDir + genDir + std::to_string(i) + ".nxs";
-        bankWithDirVec.push_back(bankDir);
+
+      Poco::Path home("C:\\");
+      bankDir.append(home);
+      bankDir.append(fParentDir);
+      bankDir.append(bankFile);
+
+      std::string tempValDelete = bankDir.toString();
+
+      if (Poco::File("C:\\" + tempValDelete).exists()) {
+
+        // if (fDir.isFile()) {
+        // bankDir = fDir + genDir + std::to_string(i) + ".nxs";
+
+        bankWithDirVec.push_back(bankDir.toString());
+
+        // to add all the bank to combo & list
+        if (i == fileRange - 1) {
+          fileRange++;
+        }
+        bankDir.clear();
       }
     }
 
     if (bankWithDirVec.size() > 1) {
       for (size_t i = 1; i < bankWithDirVec.size(); i++) {
-        m_uiTabFitting.comboBox_bank->addItem(QString("Bank %1").arg(i+2));
+        m_uiTabFitting.comboBox_bank->addItem(QString("Bank %1").arg(i + 2));
         m_uiTabFitting.listWidget_fitting_bank_preview->addItem(
-            QString("%1").arg(i+2));
+            QString("%1").arg(i + 2));
       }
     }
   }
