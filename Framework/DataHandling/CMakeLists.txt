@@ -26,6 +26,7 @@ set ( SRC_FILES
 	src/GroupDetectors2.cpp
 	src/ISISDataArchive.cpp
 	src/ISISRunLogs.cpp
+	src/ImggAggregateWavelengths.cpp
 	src/Load.cpp
 	src/LoadANSTOHelper.cpp
 	src/LoadAscii.cpp
@@ -193,6 +194,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/GroupDetectors2.h
 	inc/MantidDataHandling/ISISDataArchive.h
 	inc/MantidDataHandling/ISISRunLogs.h
+	inc/MantidDataHandling/ImggAggregateWavelengths.h
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadANSTOHelper.h
 	inc/MantidDataHandling/LoadAscii.h
@@ -358,6 +360,7 @@ set ( TEST_FILES
 	GroupDetectors2Test.h
 	GroupDetectorsTest.h
 	ISISDataArchiveTest.h
+	ImggAggregateWavelengthsTest.h
 	InstrumentRayTracerTest.h
 	LoadAscii2Test.h
 	LoadAsciiTest.h
