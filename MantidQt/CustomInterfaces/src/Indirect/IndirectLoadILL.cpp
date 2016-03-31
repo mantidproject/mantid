@@ -31,7 +31,7 @@ void IndirectLoadILL::setup() {}
 bool IndirectLoadILL::validate() {
   QString filename = m_uiForm.mwRun->getFirstFilename();
   QFileInfo finfo(filename);
-  QString ext = finfo.extension().toLower();
+  QString ext = finfo.suffix().toLower();
 
   bool invalidExt = (ext != "asc" && ext != "inx" && ext != "nxs");
 
@@ -56,7 +56,7 @@ void IndirectLoadILL::run() {
 
   QString filename = m_uiForm.mwRun->getFirstFilename();
   QFileInfo finfo(filename);
-  QString ext = finfo.extension().toLower();
+  QString ext = finfo.suffix().toLower();
 
   QString instrument = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
   QString analyser = m_uiForm.iicInstrumentConfiguration->getAnalyserName();
