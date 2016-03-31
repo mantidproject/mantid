@@ -1,4 +1,4 @@
-#pylint: disable=too-many-public-methods,invalid-name
+#pylint: disable=too-many-public-methods,invalid-name,no-init
 
 """
 Unit test for Vesuvio corrections steps
@@ -15,7 +15,6 @@ import platform
 from mantid.api import *
 from VesuvioTesting import create_test_container_ws, create_test_ws
 import mantid.simpleapi as ms
-import vesuvio.commands as vesuvio
 
 #====================================Helper Functions=======================================
 def setUp():
@@ -82,7 +81,9 @@ def _create_dummy_masses():
 
 
 def _create_dummy_profiles():
-    return "function=GramCharlier,hermite_coeffs=[1, 0, 0],k_free=0,sears_flag=1,width=[2, 5, 7];function=Gaussian,width=10;function=Gaussian,width=13;function=Gaussian,width=30"
+    return "function=GramCharlier,hermite_coeffs=[1, 0, 0],k_free=0,sears_flag=1," \
+           + "width=[2, 5, 7];function=Gaussian,width=10;function=Gaussian,width=13;" \
+           + "function=Gaussian,width=30"
 
 
 #===========================================================================================
