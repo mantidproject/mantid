@@ -317,7 +317,7 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
     file << specNo;
   for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
     auto value = m_metaDataMap[*iter][spectraIndex];
-    file << m_sep << value;
+    file << " " << m_sep << " " << value;
   }
   file << std::endl;
 
@@ -427,9 +427,10 @@ void SaveAscii2::populateAngleMetaData() {
   std::vector<std::string> angles;
   const auto nHist = m_ws->getNumberHistograms();
   for (auto i = 0; i < nHist; i++) {
-
-	  //TODO: implement this 
-    const auto angleStr = "";
+    auto det = m_ws->getDetector(i);
+    const auto two_theta = m_ws->detectorTwoTheta(det);
+    const auto angle = two_theta * (180 / M_PI);
+    const auto angleStr = boost::lexical_cast<std::string>(angle);
     angles.push_back(angleStr);
   }
   m_metaDataMap["Angle"] = angles;
