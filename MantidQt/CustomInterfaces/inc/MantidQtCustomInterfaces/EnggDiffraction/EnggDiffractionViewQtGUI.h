@@ -159,8 +159,6 @@ public:
                              bool focused);
 
 
-  void setBankDir(QString path);
-
   std::vector<std::string> splitFittingDirectory(Poco::Path selectedfPath);
 
   std::string fittingRunNoFactory(std::string bank, std::string fileName,
@@ -246,6 +244,7 @@ private slots:
   void fittingListWidgetBank(int idx);
   void setListWidgetBank(int idx);
   void fittingRunNoChanged();
+  void setBankDir(int idx);
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
