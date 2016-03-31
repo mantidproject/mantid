@@ -39,7 +39,7 @@ public:
     TSM_ASSERT_EQUALS("COW does not hold the expected value", 2, cow->value);
   }
 
-  void testConstructorBySptr() {
+  void testConstructorByTemporarySptr() {
 
     int value = 3;
     auto resource = boost::make_shared<MyType>(value);
@@ -47,6 +47,19 @@ public:
 
     TS_ASSERT_EQUALS(cow->value, value);
     TSM_ASSERT("Resource should have been moved", resource.get() == nullptr);
+  }
+
+  void testConstructorByNamedSptr() {
+
+    int value = 3;
+    auto resource = boost::make_shared<MyType>(value);
+    cow_ptr<MyType> cow{resource};
+
+    TS_ASSERT_EQUALS(cow->value, value);
+    TSM_ASSERT("Resource should NOT have been moved",
+               resource.get() != nullptr);
+    TSM_ASSERT_EQUALS("Two shared_ptr objects in scope", resource.use_count(),
+                      2)
   }
 
   void test_access() {
