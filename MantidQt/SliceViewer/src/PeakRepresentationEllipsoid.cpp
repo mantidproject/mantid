@@ -66,7 +66,8 @@ PeakRepresentationEllipsoid::PeakRepresentationEllipsoid(
       m_backgroundInnerRadii(backgroundInnerRadii),
       m_backgroundOuterRadii(backgroundOuterRadii), m_opacityMax(0.8),
       m_opacityMin(0.0), m_cachedOpacityAtDistance(0.0),
-      m_showBackgroundRadii(false), m_calculator(calculator)
+      m_angleEllipse(-1.0), m_showBackgroundRadii(false),
+      m_calculator(calculator)
 {
     // Get projection lengths onto the xyz axes of the ellipsoid axes
     auto projections = Mantid::SliceViewer::getProjectionLengths(

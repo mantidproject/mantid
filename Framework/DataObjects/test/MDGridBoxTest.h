@@ -431,15 +431,18 @@ public:
     TS_ASSERT_EQUALS(superbox->getNPoints(), 0);
     { // One event in 0th box of the 0th box.
       double centers[2] = {0.05, 0.05};
-      superbox->addEvent(MDLeanEvent<2>(2.0, 2.0, centers));
+      TS_ASSERT_EQUALS(1,
+                       superbox->addEvent(MDLeanEvent<2>(2.0, 2.0, centers)));
     }
     { // One event in 1st box of the 0th box.
       double centers[2] = {0.15, 0.05};
-      superbox->addEvent(MDLeanEvent<2>(2.0, 2.0, centers));
+      TS_ASSERT_EQUALS(1,
+                       superbox->addEvent(MDLeanEvent<2>(2.0, 2.0, centers)));
     }
     { // One event in 99th box.
       double centers[2] = {9.5, 9.5};
-      superbox->addEvent(MDLeanEvent<2>(2.0, 2.0, centers));
+      TS_ASSERT_EQUALS(1,
+                       superbox->addEvent(MDLeanEvent<2>(2.0, 2.0, centers)));
     }
 
     // You must refresh the cache after adding individual events.

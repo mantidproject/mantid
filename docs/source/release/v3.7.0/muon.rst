@@ -25,6 +25,13 @@ Muon Analysis
   - No period number is shown in the case of single-period data, or if the sum of all periods is used.
   - These changes can be combined, e.g. *15189-91: 1+2*
 
+- The "Run Information" box on the Home tab has been corrected for co-added sets of runs. The information shown now applies to all runs, where previously some of it was relevant to the first only: `#15648 <https://github.com/mantidproject/mantid/pull/15648>`_
+
+  - *Runs* label deals with non-consecutive ranges
+  - *Sample Temperature* and *Sample Magnetic Field* are a range if not all the same value
+  - *Average Temperature* is calculated from all logs
+  - *Start* and *End* are the earliest start and latest end
+
 Algorithms
 ----------
 
@@ -38,6 +45,8 @@ Algorithms
   `#15325 <https://github.com/mantidproject/mantid/pull/15325>`_
 - :ref:`AsymmetryCalc <algm-AsymmetryCalc>`: a bug was fixed where the algorithm failed to run on input WorkspaceGroups. `#15404 <https://github.com/mantidproject/mantid/pull/15404>`_
 - :ref:`MaxEnt <algm-MaxEnt>`: MaxEnt now handles positive images `#15494 <https://github.com/mantidproject/mantid/pull/15494>`_
+- :ref:`MaxEnt <algm-MaxEnt>`: Some improvements/fixes were added (output label, X rounding errors, and ability to increase the
+  number of points in the image and reconstructed data) `#15606 <https://github.com/mantidproject/mantid/pull/15606>`
 
 Fit Functions
 -------------

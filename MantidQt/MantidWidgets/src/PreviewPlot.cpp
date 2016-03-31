@@ -6,6 +6,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>
@@ -156,7 +157,7 @@ QColor PreviewPlot::canvasColour() { return m_uiForm.plot->canvasBackground(); }
  * @param colour Plot canvas colour
  */
 void PreviewPlot::setCanvasColour(const QColor &colour) {
-  m_uiForm.plot->setCanvasBackground(QBrush(colour));
+  m_uiForm.plot->setCanvasBackground(colour);
 }
 
 /**
@@ -664,7 +665,14 @@ void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig,
   }
 
   // Create the Qwt data
-  QwtArray<double> dataX = QVector<double>::fromStdVector(ws->readX(wsIndex));
+  std::vector<double> X;
+  if (ws->isHistogramData()){
+    Mantid::Kernel::VectorHelper::convertToBinCentre(ws->readX(wsIndex), X);
+  }
+  else{
+    X=ws->readX(wsIndex);
+  }
+  QwtArray<double> dataX = QVector<double>::fromStdVector(X);
   QwtArray<double> dataY = QVector<double>::fromStdVector(wsDataY);
   QwtArrayData wsData(dataX, dataY);
 

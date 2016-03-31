@@ -83,19 +83,10 @@ namespace VATES
     for (int i = 0; i < 3; ++i)
     {
       std::pair<double, double> minMax(DBL_MAX, -DBL_MAX);
-      for (std::vector<std::vector<double>>::iterator it = frustumPoints.begin(); it != frustumPoints.end(); ++it)
-      {
-        if ((*it)[i] < minMax.first)
-        {
-          minMax.first = (*it)[i];
-        }
-
-        if ((*it)[i] > minMax.second)
-        {
-          minMax.second = (*it)[i];
-        }
+      for (auto &points : frustumPoints) {
+        minMax.first = std::min(minMax.first, points[i]);
+        minMax.second = std::max(minMax.second, points[i]);
       }
-
       extents.push_back(minMax);
     }
 
@@ -111,18 +102,14 @@ namespace VATES
     std::vector<std::pair<double, double>> extents = toExtents();
     
     std::stringstream ss;
-
-    for (std::vector<std::pair<double, double>>::iterator it = extents.begin(); it != extents.end(); ++it)
-    {
-      ss << it->first << "," << it->second;
-
-      if ((it+1)!= extents.end())
-      {
-        ss << ",";
-      }
+    for (const auto &extent : extents) {
+      ss << extent.first << "," << extent.second << ",";
     }
+    auto result = ss.str();
 
-    return ss.str();
+    // remove extra "," at the end of the string.
+    result.pop_back();
+    return result;
   }
 
 }

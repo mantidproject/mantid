@@ -1721,7 +1721,7 @@ QString ConvFit::convertFuncToShort(const QString &original) {
     } else {
       return "SFT";
     }
-    auto pos = original.find("Circle");
+    auto pos = original.indexOf("Circle");
     if (pos != -1) {
       result += "DC";
     } else {

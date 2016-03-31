@@ -591,7 +591,7 @@ QString FitOptionsBrowser::getBoolProperty(QtProperty* prop) const
  */
 void FitOptionsBrowser::setBoolProperty(QtProperty* prop, const QString& value)
 {
-  bool boolValue = (value == "1") || (value.lower() == "true");
+  bool boolValue = (value == "1") || (value.toLower() == "true");
   m_boolManager->setValue( prop, boolValue );
 }
 
