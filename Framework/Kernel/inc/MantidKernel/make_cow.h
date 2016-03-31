@@ -3,7 +3,6 @@
 
 #include "MantidKernel/cow_ptr.h"
 #include <boost/make_shared.hpp>
-#include <type_traits>
 
 /*
  Creates a cow_ptr in-place.
