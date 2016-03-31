@@ -95,23 +95,23 @@ void ContainerSubtraction::run() {
   }
   else {
 	  if (!checkWorkspaceBinningMatches(sampleWs, canCloneWs)) {
-		  QString text =
-			  "Binning on sample and container does not match."
-			  "Would you like to rebin the container to match the sample?";
+            const char *text =
+                "Binning on sample and container does not match."
+                "Would you like to rebin the container to match the sample?";
 
-		  int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
-			  QMessageBox::Yes, QMessageBox::No,
-			  QMessageBox::NoButton);
+            int result = QMessageBox::question(
+                NULL, tr("Rebin sample?"), tr(text), QMessageBox::Yes,
+                QMessageBox::No, QMessageBox::NoButton);
 
-		  if (result == QMessageBox::Yes) {
-			  IAlgorithm_sptr rebin =
-				  AlgorithmManager::Instance().create("RebinToWorkspace");
-			  rebin->initialize();
-			  rebin->setProperty("WorkspaceToRebin", canCloneWs);
-			  rebin->setProperty("WorkspaceToMatch", sampleWs);
-			  rebin->setProperty("OutputWorkspace", canCloneName.toStdString());
-			  rebin->execute();
-		  }
+            if (result == QMessageBox::Yes) {
+              IAlgorithm_sptr rebin =
+                  AlgorithmManager::Instance().create("RebinToWorkspace");
+              rebin->initialize();
+              rebin->setProperty("WorkspaceToRebin", canCloneWs);
+              rebin->setProperty("WorkspaceToMatch", sampleWs);
+              rebin->setProperty("OutputWorkspace", canCloneName.toStdString());
+              rebin->execute();
+                  }
 		  else {
 			  m_batchAlgoRunner->clearQueue();
 			  g_log.error("Cannot apply absorption corrections using a sample and "

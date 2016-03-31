@@ -55,10 +55,6 @@ void JumpFit::setup() {
   connect(m_uiForm.cbWidth, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(handleWidthChange(const QString &)));
 
-  // Connect algorithm runner to completion handler function
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(fitAlgDone(bool)));
-
   // Update fit parameters in browser when function is selected
   connect(m_uiForm.cbFunction, SIGNAL(currentIndexChanged(const QString &)),
           this, SLOT(fitFunctionSelected(const QString &)));
@@ -67,6 +63,13 @@ void JumpFit::setup() {
           SLOT(updateProperties(QtProperty *, double)));
 
   fitFunctionSelected(m_uiForm.cbFunction->currentText());
+
+  // Update plot Guess
+  connect(m_uiForm.ckPlotGuess, SIGNAL(stateChanged(int)), this,
+          SLOT(generatePlotGuess()));
+
+  connect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
+          SLOT(generatePlotGuess()));
 }
 
 /**
@@ -118,38 +121,28 @@ void JumpFit::runImpl(bool plot, bool save) {
     return;
 
   // Fit function to use
-  QString functionName = m_uiForm.cbFunction->currentText();
-  QString functionString = "name=" + functionName;
-
-  // Build function string
-  QStringList parameters = getFunctionParameters(functionName);
-  for (auto it = parameters.begin(); it != parameters.end(); ++it) {
-    QString parameterName = *it;
-
-    // Get the value form double manager
-    QString name = "parameter_" + *it;
-    double value = m_dblManager->value(m_properties[name]);
-    QString parameterValue = QString::number(value);
-
-    functionString += "," + parameterName + "=" + parameterValue;
-  }
+  const QString functionName = m_uiForm.cbFunction->currentText();
+  const auto functionString = generateFunctionName(functionName);
 
   std::string widthText = m_uiForm.cbWidth->currentText().toStdString();
   int width = m_spectraList[widthText];
-  QString sample = m_uiForm.dsSample->getCurrentDataName();
-  QString outputName =
-      getWorkspaceBasename(sample) + "_" + functionName + "_fit";
+  const auto sample = m_uiForm.dsSample->getCurrentDataName().toStdString();
+  QString outputName = getWorkspaceBasename(QString::fromStdString(sample)) +
+                       "_" + functionName + "_fit";
+
+  const auto startX = m_dblManager->value(m_properties["QMin"]);
+  const auto endX = m_dblManager->value(m_properties["QMax"]);
 
   // Setup fit algorithm
   m_fitAlg = AlgorithmManager::Instance().create("Fit");
   m_fitAlg->initialize();
 
-  m_fitAlg->setProperty("Function", functionString.toStdString());
-  m_fitAlg->setProperty("InputWorkspace", sample.toStdString());
+  m_fitAlg->setProperty("Function", functionString);
+  m_fitAlg->setProperty("InputWorkspace", sample);
   m_fitAlg->setProperty("WorkspaceIndex", width);
   m_fitAlg->setProperty("IgnoreInvalidData", true);
-  m_fitAlg->setProperty("StartX", m_dblManager->value(m_properties["QMin"]));
-  m_fitAlg->setProperty("EndX", m_dblManager->value(m_properties["QMax"]));
+  m_fitAlg->setProperty("StartX", startX);
+  m_fitAlg->setProperty("EndX", endX);
   m_fitAlg->setProperty("CreateOutput", true);
   m_fitAlg->setProperty("Output", outputName.toStdString());
 
@@ -160,12 +153,12 @@ void JumpFit::runImpl(bool plot, bool save) {
     QString outWsName = outputName + "_Workspace";
     addSaveWorkspaceToQueue(outWsName);
   }
+  // update plot result state when run
+  m_plotResult = plot;
 
-  // Process plotting in MantidPlot
-  if (plot)
-    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-            SLOT(plotFitResult(bool)));
-
+  // Connect algorithm runner to completion handler function
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(fitAlgDone(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -175,6 +168,8 @@ void JumpFit::runImpl(bool plot, bool save) {
  * @param error True if the algorithm failed, false otherwise
  */
 void JumpFit::fitAlgDone(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(fitAlgDone(bool)));
   // Ignore errors
   if (error)
     return;
@@ -201,7 +196,13 @@ void JumpFit::fitAlgDone(bool error) {
     // Difference curve is green
     if (specName == "Diff")
       m_uiForm.ppPlot->addSpectrum("Diff", outputWorkspace, histIndex,
-                                   Qt::green);
+                                   Qt::blue);
+  }
+
+  // plot result
+  if (m_plotResult) {
+    std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
+    plotSpectrum(QString::fromStdString(outWsName), 0, 2);
   }
 
   // Update parameters in UI
@@ -210,7 +211,10 @@ void JumpFit::fitAlgDone(bool error) {
   ITableWorkspace_sptr paramTable =
       AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
           paramTableName);
-
+  const auto plotResult = m_uiForm.ckPlotGuess->isChecked();
+  if (plotResult) {
+    m_uiForm.ckPlotGuess->setChecked(false);
+  }
   for (auto it = m_properties.begin(); it != m_properties.end(); ++it) {
     QString propName(it.key());
     if (propName.startsWith("parameter_")) {
@@ -221,26 +225,6 @@ void JumpFit::fitAlgDone(bool error) {
       m_dblManager->setValue(m_properties[propName], value);
     }
   }
-}
-
-/**
- * Handles plotting of results within MantidPlot plots
- *
- * @param error If the algorithm failed
- */
-void JumpFit::plotFitResult(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(plotFitResult(bool)));
-
-  // Ignore errors
-  if (error)
-    return;
-
-  // Get output workspace name
-  std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
-
-  // Plot in MantidPlot
-  plotSpectrum(QString::fromStdString(outWsName), 0, 2);
 }
 
 /**
@@ -424,6 +408,10 @@ QStringList JumpFit::getFunctionParameters(const QString &functionName) {
  * @param functionName Name of new fit function
  */
 void JumpFit::fitFunctionSelected(const QString &functionName) {
+  const auto plotGuess = m_uiForm.ckPlotGuess->isChecked();
+  if (plotGuess) {
+    m_uiForm.ckPlotGuess->setChecked(false);
+  }
   // Remove current parameter elements
   for (auto it = m_properties.begin(); it != m_properties.end();) {
     if (it.key().startsWith("parameter_")) {
@@ -444,6 +432,9 @@ void JumpFit::fitFunctionSelected(const QString &functionName) {
   }
 
   clearPlot();
+  if (plotGuess) {
+    m_uiForm.ckPlotGuess->setChecked(true);
+  }
 }
 
 /**
@@ -465,6 +456,105 @@ void JumpFit::clearPlot() {
       m_uiForm.ppPlot->addSpectrum("Sample", sample,
                                    m_spectraList[currentWidth]);
     }
+  }
+}
+
+void JumpFit::generatePlotGuess() {
+  // Do nothing if there is not a sample
+  if (!(m_uiForm.dsSample->isValid()) && m_uiForm.ckPlotGuess->isChecked())
+    return;
+  if (!m_uiForm.ckPlotGuess->isChecked()) {
+    m_uiForm.ppPlot->removeSpectrum("PlotGuess");
+    deletePlotGuessWorkspaces(true);
+    return;
+  }
+
+  // Fit function to use
+  const QString functionName = m_uiForm.cbFunction->currentText();
+  const auto functionString = generateFunctionName(functionName);
+
+  std::string widthText = m_uiForm.cbWidth->currentText().toStdString();
+  int width = m_spectraList[widthText];
+  const auto sample = m_uiForm.dsSample->getCurrentDataName().toStdString();
+  const auto startX = m_dblManager->value(m_properties["QMin"]);
+  const auto endX = m_dblManager->value(m_properties["QMax"]);
+
+  // Setup fit algorithm
+  auto plotGuess = AlgorithmManager::Instance().create("Fit");
+  plotGuess->initialize();
+
+  plotGuess->setProperty("Function", functionString);
+  plotGuess->setProperty("InputWorkspace", sample);
+  plotGuess->setProperty("WorkspaceIndex", width);
+  plotGuess->setProperty("IgnoreInvalidData", true);
+  plotGuess->setProperty("StartX", startX);
+  plotGuess->setProperty("EndX", endX);
+  plotGuess->setProperty("CreateOutput", true);
+  plotGuess->setProperty("Output", "__PlotGuessData");
+
+  m_batchAlgoRunner->addAlgorithm(plotGuess);
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(plotGuess(bool)));
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+void JumpFit::plotGuess(bool error) {
+  if (error)
+    return;
+
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(plotGuess(bool)));
+  m_uiForm.ppPlot->addSpectrum("PlotGuess", "__PlotGuessData_Workspace", 1,
+                               Qt::green);
+  deletePlotGuessWorkspaces(false);
+}
+
+/**
+ * Generates a function string to be used in fitting
+ */
+std::string JumpFit::generateFunctionName(const QString &functionName) {
+  QString functionString = "name=" + functionName;
+
+  // Build function string
+  QStringList parameters = getFunctionParameters(functionName);
+  for (auto it = parameters.begin(); it != parameters.end(); ++it) {
+    QString parameterName = *it;
+
+    // Get the value form double manager
+    QString name = "parameter_" + *it;
+    double value = m_dblManager->value(m_properties[name]);
+    QString parameterValue = QString::number(value);
+
+    functionString += "," + parameterName + "=" + parameterValue;
+  }
+  return functionString.toStdString();
+}
+
+/**
+ * Remove PlotGuess related workspaces from the ADS
+ * @param removePlotGuess :: Removes the plotGuess data and not just the
+ * unwanted workspaces
+ */
+void JumpFit::deletePlotGuessWorkspaces(const bool &removePlotGuess) {
+  auto deleteAlg = AlgorithmManager::Instance().create("DeleteWorkspace");
+  deleteAlg->initialize();
+  deleteAlg->setLogging(false);
+  if (removePlotGuess) {
+    if (AnalysisDataService::Instance().doesExist(
+            "__PlotGuessData_Workspace")) {
+      deleteAlg->setProperty("Workspace", "__PlotGuessData_Workspace");
+      deleteAlg->execute();
+    }
+  }
+  if (AnalysisDataService::Instance().doesExist("__PlotGuessData_Parameters")) {
+    deleteAlg->setProperty("Workspace", "__PlotGuessData_Parameters");
+    deleteAlg->execute();
+  }
+  if (AnalysisDataService::Instance().doesExist(
+          "__PlotGuessData_NormalisedCovarianceMatrix")) {
+    deleteAlg->setProperty("Workspace",
+                           "__PlotGuessData_NormalisedCovarianceMatrix");
+    deleteAlg->execute();
   }
 }
 

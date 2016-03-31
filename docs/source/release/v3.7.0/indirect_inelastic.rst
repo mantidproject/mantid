@@ -53,5 +53,6 @@ Bugfixes
 
 - *BayesQuasi* no longer crashes if the you supply data with trailing or leading zeros
 - :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>` only corrects for detailed balance when one is actually specified as input.
+- :ref:`VesuvioCorrections <algm-VesuvioCorrections>` no longer always fits using only the first spectrum in the input workspace.
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_
