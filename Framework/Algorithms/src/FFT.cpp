@@ -154,8 +154,10 @@ void FFT::exec() {
     }
   }
 
-  // Zero on the x axis is assumed to be in the centre,
-  // at point with index i = ySize/2.
+  // Hardcoded "centerShift == true" means that the zero on the x axis is
+  // assumed to be in the centre, at point with index i = ySize/2.
+  // Set to false to make zero at i = 0.
+  constexpr bool centerShift = true;
 
   auto tAxis = new API::TextAxis(nOut);
   int iRe = 0;
@@ -190,7 +192,7 @@ void FFT::exec() {
      * dataY[j] with j running from 0 to ySize.
      */
     for (int i = 0; i < ySize; i++) {
-      int j = (ySize / 2 + i) % ySize;
+      int j = centerShift ? (ySize / 2 + i) % ySize : i;
       data[2 * i] =
           inWS->dataY(iReal)[j]; // even indexes filled with the real part
       data[2 * i + 1] = isComplex
@@ -259,9 +261,11 @@ void FFT::exec() {
     gsl_fft_complex_inverse(data.get(), 1, ySize, wavetable, workspace);
     for (int i = 0; i < ySize; i++) {
       double x = df * i;
-      x -= df * (ySize / 2);
+      if (centerShift) {
+        x -= df * (ySize / 2);
+      }
       outWS->dataX(0)[i] = x;
-      int j = (ySize / 2 + i + dys) % ySize;
+      int j = centerShift ? (ySize / 2 + i + dys) % ySize : i;
       double re = data[2 * j] / df;
       double im = data[2 * j + 1] / df;
       outWS->dataY(0)[i] = re;                      // real part
