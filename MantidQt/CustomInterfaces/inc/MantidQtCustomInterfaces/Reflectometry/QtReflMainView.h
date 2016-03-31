@@ -8,6 +8,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCommandAdapter.h"
 #include "MantidQtMantidWidgets/SlitCalculator.h"
 #include "ui_ReflMainWidget.h"
 
@@ -62,8 +63,7 @@ public:
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
   void setTransferMethods(const std::set<std::string> &methods) override;
-  void
-  setTableCommands(std::vector<ReflCommand_uptr> tableCommands) override;
+  void setTableCommands(std::vector<ReflCommand_uptr> tableCommands) override;
   void setRowCommands(std::vector<ReflCommand_uptr> rowCommands) override;
 
   // Set the status of the progress bar
@@ -97,6 +97,8 @@ private:
   Ui::reflMainWidget ui;
   // the slit calculator
   MantidWidgets::SlitCalculator *m_calculator;
+  // Command adapters
+  std::vector<ReflCommandAdapter_uptr> m_adapters;
 
 private slots:
   void on_actionSearch_triggered();

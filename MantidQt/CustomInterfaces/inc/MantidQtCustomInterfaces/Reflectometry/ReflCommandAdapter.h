@@ -1,8 +1,10 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLCOMMANDADAPTER_H
 #define MANTID_CUSTOMINTERFACES_REFLCOMMANDADAPTER_H
 
+#include "MantidKernel/make_unique.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflCommand.h"
 #include <QObject>
+#include <memory>
 #include <qmenu.h>
 #include <vector>
 
@@ -49,8 +51,8 @@ public:
       // Add the actions
       auto &child = m_adaptee->getChild();
       for (auto &ch : child) {
-        ReflCommandAdapter *adapter = new ReflCommandAdapter(
-            submenu, std::shared_ptr<ReflCommand>(ch.get()));
+        m_adapter.push_back(Mantid::Kernel::make_unique<ReflCommandAdapter>(
+            submenu, std::shared_ptr<ReflCommand>(ch.get())));
       }
     } else {
       // We are dealing with an action
@@ -75,7 +77,10 @@ private:
   };
   // The adaptee
   ReflCommand_sptr m_adaptee;
+  std::vector<std::unique_ptr<ReflCommandAdapter>> m_adapter;
 };
+
+typedef std::unique_ptr<ReflCommandAdapter> ReflCommandAdapter_uptr;
 }
 }
 #endif /*MANTID_CUSTOMINTERFACES_REFLCOMMANDADAPTER_H*/

@@ -75,9 +75,8 @@ void QtReflMainView::initLayout() {
 */
 void QtReflMainView::addToMenu(QMenu *menu, ReflCommand_uptr command) {
 
-  // cppcheck-suppress unreadVariable
-  ReflCommandAdapter *adapter =
-      new ReflCommandAdapter(menu, std::move(command));
+  m_adapters.push_back(Mantid::Kernel::make_unique<ReflCommandAdapter>(
+      menu, std::move(command)));
 }
 
 /**
@@ -104,8 +103,7 @@ void QtReflMainView::setTableCommands(
 * Adds actions to the "Edit" menu
 * @param rowCommands : [input] The list of commands to add to the "Edit" menu
 */
-void QtReflMainView::setRowCommands(
-    std::vector<ReflCommand_uptr> rowCommands) {
+void QtReflMainView::setRowCommands(std::vector<ReflCommand_uptr> rowCommands) {
 
   ui.menuRows->clear();
   for (auto &command : rowCommands) {
