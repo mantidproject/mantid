@@ -39,6 +39,10 @@ public:
   /// Find most recent file in same directory as first run
   std::string getMostRecentFile() const;
 
+protected:
+  /// Check validity of filename
+  bool isValid(const std::string &path) const;
+
 private:
   /// Filename of first run
   std::string m_firstRunFileName;
