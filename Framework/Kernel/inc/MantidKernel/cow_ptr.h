@@ -65,7 +65,7 @@ private:
 
 public:
   cow_ptr(ptr_type &&resourceSptr);
-  cow_ptr(DataType *resourcePtr);
+  explicit cow_ptr(DataType *resourcePtr);
   cow_ptr();
   cow_ptr(const cow_ptr<DataType> &);
   cow_ptr(cow_ptr<DataType> &&) = default;
