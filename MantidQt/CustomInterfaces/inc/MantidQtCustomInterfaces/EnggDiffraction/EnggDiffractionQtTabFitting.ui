@@ -180,6 +180,9 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBox_bank">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -201,11 +204,6 @@
           <item>
            <property name="text">
             <string>Bank 1</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Bank 2</string>
            </property>
           </item>
          </widget>
@@ -288,6 +286,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <widget class="QListWidget" name="listWidget_fitting_bank_preview">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -303,17 +304,6 @@
           <item>
            <property name="text">
             <string>1</string>
-           </property>
-           <property name="font">
-            <font>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>2</string>
            </property>
            <property name="font">
             <font>
