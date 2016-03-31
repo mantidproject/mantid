@@ -112,8 +112,10 @@ public:
   {
     FakeProgressAction progressUpdate;
 
-    MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
-    vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    MDEventWorkspace3Lean::sptr ws =
+        MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    vtkSplatterPlotFactory factory(
+        boost::make_shared<UserDefinedThresholdRange>(0, 1), "signal");
     factory.initialize(ws);
     vtkSmartPointer<vtkDataSet> product;
 
