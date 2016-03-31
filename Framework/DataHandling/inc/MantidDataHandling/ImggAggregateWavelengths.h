@@ -3,6 +3,7 @@
 
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -43,6 +44,9 @@ public:
 private:
   void init() override final;
   void exec() override final;
+
+  std::map<std::string, std::string> validateInputs() override;
+  Mantid::API::MatrixWorkspace_sptr processDirectory();
 };
 
 } // namespace DataHandling
