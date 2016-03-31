@@ -727,14 +727,15 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
        Qt::darkBlue, Qt::cyan, Qt::darkCyan, Qt::magenta, Qt::darkMagenta,
        Qt::yellow, Qt::darkYellow, Qt::gray, Qt::darkGray, Qt::lightGray}};
 
+  std::mt19937 gen;
+  std::uniform_int_distribution<std::size_t> dis(0, QPenList.size() - 1);
+
   for (size_t i = 0; i < data.size(); i++) {
     auto *peak = data[i].get();
 
     QwtPlotCurve *dataCurve = new QwtPlotCurve();
     dataCurve->setStyle(QwtPlotCurve::Lines);
     if (!focused) {
-      std::mt19937 gen;
-      std::uniform_int_distribution<std::size_t> dis(0, QPenList.size() - 1);
       auto randIndex = dis(gen);
       dataCurve->setPen(QPen(QPenList[randIndex], 1));
     }
