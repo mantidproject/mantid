@@ -48,6 +48,20 @@ def _equal_within_tolerance(expected, actual, tolerance=0.05):
     abs_difference = abs(expected - actual)
     return abs_difference <= abs(tolerance_value)
 
+def skip_due_to_os():
+    """
+    Skip tests on some operating systems
+    Currenty tests are only being run on windows and RHEL7
+    @return true if tests SHOULD be skipped
+    """
+    dist = platform.linux_distribution()
+    is_rhel7 = (('Red Hat' in dist[0]) or ('CentOS' in dist[0])) and (dist[1].startswith('7'))
+    is_windows = (platform.system() == "Windows")
+    if is_rhel7 or is_windows:
+        return False # Tests should not be skipped
+    else:
+        return True # Tests should be skipped
+
 #====================================================================================
 
 class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
@@ -60,14 +74,7 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
         self._fit_results = fit_tof(runs, flags)
 
     def skipTests(self):
-        # Only run tests on Windows and RHEL7
-        dist = platform.linux_distribution()
-        is_rhel7 =  dist[0] == 'Red Hat Enterprise Linux Workstation' and dist[1] == '7.2'
-        if platform.system() == "Windows" or is_rhel7:
-            return False
-        else:
-            return True
-
+        return skip_due_to_os()
 
     def validate(self):
         self.assertTrue(isinstance(self._fit_results, tuple))
@@ -120,13 +127,7 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         self._fit_results = fit_tof(runs, flags)
 
     def skipTests(self):
-        # Only run tests on Windows and RHEL7
-        dist = platform.linux_distribution()
-        is_rhel7 =  dist[0] == 'Red Hat Enterprise Linux Workstation' and dist[1] == '7.2'
-        if platform.system() == "Windows" or is_rhel7:
-            return False
-        else:
-            return True
+        return skip_due_to_os()
 
     def validate(self):
         self.assertTrue(isinstance(self._fit_results, tuple))
@@ -184,13 +185,7 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         self._fit_results = fit_tof(runs, flags)
 
     def skipTests(self):
-        # Only run tests on Windows and RHEL7
-        dist = platform.linux_distribution()
-        is_rhel7 =  dist[0] == 'Red Hat Enterprise Linux Workstation' and dist[1] == '7.2'
-        if platform.system() == "Windows" or is_rhel7:
-            return False
-        else:
-            return True
+        return skip_due_to_os()
 
     def validate(self):
         self.assertTrue(isinstance(self._fit_results, tuple))
@@ -245,13 +240,7 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         self._fit_results = fit_tof(runs, flags)
 
     def skipTests(self):
-        # Only run tests on Windows and RHEL7
-        dist = platform.linux_distribution()
-        is_rhel7 =  dist[0] == 'Red Hat Enterprise Linux Workstation' and dist[1] == '7.2'
-        if platform.system() == "Windows" or is_rhel7:
-            return False
-        else:
-            return True
+        return skip_due_to_os()
 
     def validate(self):
         self.assertTrue(isinstance(self._fit_results, tuple))
