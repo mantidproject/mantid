@@ -15,7 +15,6 @@ using namespace MantidQt::CustomInterfaces;
 #include "Poco/DirectoryIterator.h"
 #include <Poco/File.h>
 
-
 #include <QCheckBox>
 #include <QCloseEvent>
 #include <QFileDialog>
@@ -32,7 +31,8 @@ const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
 int EnggDiffractionViewQtGUI::m_currentType = 0;
 int EnggDiffractionViewQtGUI::m_currentRunMode = 0;
 int EnggDiffractionViewQtGUI::m_currentCropCalibBankName = 0;
-int EnggDiffractionViewQtGUI::m_bank_Id = 0;
+int EnggDiffractionViewQtGUI::m_fitting_bank_Id = 0;
+std::vector<std::string> EnggDiffractionViewQtGUI::m_fitting_runno_dir_vec;
 
 const std::string EnggDiffractionViewQtGUI::g_iparmExtStr =
     "GSAS instrument parameters, IPARM file: PRM, PAR, IPAR, IPARAM "
@@ -225,7 +225,7 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
           SIGNAL(currentRowChanged(int)), this, SLOT(setBankIdComboBox(int)));
 
   connect(m_uiTabFitting.lineEdit_pushButton_run_num, SIGNAL(editingFinished()),
-	  SLOT(fittingRunNoChanged()));
+          SLOT(fittingRunNoChanged()));
 
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom,
@@ -648,7 +648,6 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabFitting.pushButton_fitting_browse_peaks->setEnabled(enable);
   m_uiTabFitting.lineEdit_fitting_peaks->setEnabled(enable);
   m_uiTabFitting.pushButton_fit->setEnabled(enable);
-
 }
 
 void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
@@ -677,7 +676,7 @@ double EnggDiffractionViewQtGUI::rebinningPulsesTime() const {
 
 /// shahroz
 void EnggDiffractionViewQtGUI::setBankDir(QString path) {
-  // m_bank_Id
+  // m_fitting_bank_Id
   QString rPath;
   std::string dir = path.toStdString();
   Poco::Path fpath(dir);
@@ -688,38 +687,40 @@ void EnggDiffractionViewQtGUI::setBankDir(QString path) {
 
   if (fpath.isFile()) {
     std::string fileName = fpath.getBaseName();
-	std::string fileDir = fpath.parent().toString();
+    std::string fileDir = fpath.parent().toString();
 
-    if (fileName.find("bank_1") != std::string::npos && m_bank_Id == 0) {
+    if (fileName.find("bank_1") != std::string::npos && m_fitting_bank_Id == 0) {
       bank1Dir = path;
     } else {
-		bank1Dir =fittingRunNoFactory("1", fileName, bank1Dir, fileDir);
+      bank1Dir = fittingRunNoFactory("1", fileName, bank1Dir, fileDir);
     }
 
-    if (fileName.find("bank_2") != std::string::npos && m_bank_Id == 1) {
+    if (fileName.find("bank_2") != std::string::npos && m_fitting_bank_Id == 1) {
       bank2Dir = path;
     } else {
-		bank2Dir = fittingRunNoFactory("2", fileName, bank2Dir, fileDir);
+      bank2Dir = fittingRunNoFactory("2", fileName, bank2Dir, fileDir);
     }
 
-    if (fileName.find("bank_3") != std::string::npos && m_bank_Id == 2) {
+    if (fileName.find("bank_3") != std::string::npos && m_fitting_bank_Id == 2) {
       bank3Dir = path;
     } else {
-		bank3Dir = fittingRunNoFactory("3", fileName, bank3Dir, fileDir);
+      bank3Dir = fittingRunNoFactory("3", fileName, bank3Dir, fileDir);
     }
   }
 
-  if (m_bank_Id == 0) {
+  if (m_fitting_bank_Id == 0) {
     setfittingRunNo(QString::fromUtf8(bank1Dir.c_str()));
-  } else if (m_bank_Id == 1) {
+  } else if (m_fitting_bank_Id == 1) {
     setfittingRunNo(QString::fromUtf8(bank2Dir.c_str()));
-  } else if (m_bank_Id == 2) {
+  } else if (m_fitting_bank_Id == 2) {
     setfittingRunNo(QString::fromUtf8(bank3Dir.c_str()));
   }
 }
 
-std::string EnggDiffractionViewQtGUI::fittingRunNoFactory(
-    std::string bank, std::string fileName, std::string &bankDir, std::string fileDir) {
+std::string EnggDiffractionViewQtGUI::fittingRunNoFactory(std::string bank,
+                                                          std::string fileName,
+                                                          std::string &bankDir,
+                                                          std::string fileDir) {
 
   std::string genDir = fileName.substr(0, fileName.size() - 1);
   Poco::Path bankFile(genDir + bank + ".nxs");
@@ -1118,7 +1119,7 @@ void EnggDiffractionViewQtGUI::browseFitFocusedRun() {
     return;
   }
   /// shahroz
- // setBankDir(path);
+  // setBankDir(path);
 
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
   m_uiTabFitting.lineEdit_pushButton_run_num->setText(path);
@@ -1271,7 +1272,7 @@ void EnggDiffractionViewQtGUI::fittingBankIdChanged(int /*idx*/) {
   QComboBox *BankName = m_uiTabFitting.comboBox_bank;
   if (!BankName)
     return;
-  m_bank_Id = BankName->currentIndex();
+  m_fitting_bank_Id = BankName->currentIndex();
 }
 
 void EnggDiffractionViewQtGUI::setBankIdComboBox(int idx) {
@@ -1313,7 +1314,7 @@ void EnggDiffractionViewQtGUI::fittingListWidgetBank(int /*idx*/) {
   QListWidget *BankSelected = m_uiTabFitting.listWidget_fitting_bank_preview;
   if (!BankSelected)
     return;
-  m_bank_Id = BankSelected->currentRow();
+  m_fitting_bank_Id = BankSelected->currentRow();
 }
 
 void EnggDiffractionViewQtGUI::setListWidgetBank(int idx) {
@@ -1331,6 +1332,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
 
   Poco::Path bankDir;
 
+  m_fitting_runno_dir_vec.clear();
   std::vector<std::string> bankWithDirVec;
 
   if (selectedfPath.isFile()) {
@@ -1338,20 +1340,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
     std::vector<std::string> splitBaseName =
         splitFittingDirectory(selectedfPath);
 
-    std::string a = splitBaseName[0];
-    std::string b = splitBaseName[1];
-    std::string c = splitBaseName[2];
-    std::string d = splitBaseName[3];
-    std::string e = splitBaseName[4];
-    std::string f = splitBaseName[splitBaseName.size()];
-
-    std::string vrf = a + b + c + d + e + f;
-
-// std::string genDir = fName.substr(0, fName.size() - 1);
-// Poco::Path bankFile(genDir + std::to_string(1) + ".nxs"); // change 1
-
 #ifdef __unix__
-
     Poco::Path home("C:\\");
     bankDir.append(home);
     bankDir.append(fPath.parent().toString());
@@ -1369,32 +1358,45 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
         Poco::Path itBankfPath(itFilePath);
 
         std::string itbankFileName = itBankfPath.getBaseName();
-        if (itbankFileName.find(splitBaseName[0] + "_" + splitBaseName[1] +
-                                "_" + splitBaseName[2]) != std::string::npos &&
-            m_bank_Id == 0) {
 
-          bankWithDirVec.push_back(itFilePath);
+        if (itbankFileName.find(splitBaseName[0] + "_" + splitBaseName[1] +
+                                "_" + splitBaseName[2] + "_" +
+                                splitBaseName[3]) != std::string::npos &&
+            m_fitting_bank_Id == 0) {
+
+			m_fitting_runno_dir_vec.push_back(itFilePath);
         }
-        ++it;
       }
+      ++it;
     }
 
     // delete previous bank added to the list
     m_uiTabFitting.comboBox_bank->clear();
     m_uiTabFitting.listWidget_fitting_bank_preview->clear();
 
-    if (bankWithDirVec.size() > 1) {
+    if (m_fitting_runno_dir_vec.size() > 1) {
 
-      for (size_t i = 0; i < bankWithDirVec.size(); i++) {
-        Poco::Path vecFile(bankWithDirVec[i]);
+      for (size_t i = 0; i < m_fitting_runno_dir_vec.size(); i++) {
+        Poco::Path vecFile(m_fitting_runno_dir_vec[i]);
         std::vector<std::string> vecFileSplit = splitFittingDirectory(vecFile);
         std::string bankID = (vecFileSplit[vecFileSplit.size() - 1]);
-        if (bankID.find("0123456789") != std::string::npos) {
+        std::string bankNo;
+        bool isDigit = false;
+
+        for (size_t i = 0; i < bankID.size(); i++) {
+          char *str = &bankID[i];
+          if (std::isdigit(*str)) {
+            bankNo += bankID[i];
+            isDigit = true;
+          }
+        }
+
+        if (isDigit) {
           m_uiTabFitting.comboBox_bank->addItem(QString::fromStdString(bankID));
           m_uiTabFitting.listWidget_fitting_bank_preview->addItem(
               QString::fromStdString(bankID));
         } else {
-			auto maxTots = m_uiTabFitting.comboBox_bank->maximumSize();
+          auto maxTots = m_uiTabFitting.comboBox_bank->maximumSize();
           m_uiTabFitting.comboBox_bank->addItem(QString("Bank %1").arg(i + 1));
           m_uiTabFitting.listWidget_fitting_bank_preview->addItem(
               QString("%1").arg(i + 1));
@@ -1414,7 +1416,7 @@ EnggDiffractionViewQtGUI::splitFittingDirectory(Poco::Path selectedfPath) {
   std::vector<std::string> splitBaseName;
   if (selectedbankfName.find("ENGINX_") != std::string::npos) {
     boost::split(splitBaseName, selectedbankfName, boost::is_any_of("_."));
-	std::sort(splitBaseName.begin(), splitBaseName.end());
+    // std::sort(splitBaseName.begin(), splitBaseName.end());
   }
   return splitBaseName;
 }

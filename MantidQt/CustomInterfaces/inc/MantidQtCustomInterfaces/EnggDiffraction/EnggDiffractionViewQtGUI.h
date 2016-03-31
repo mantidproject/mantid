@@ -14,6 +14,7 @@
 #include "ui_EnggDiffractionQtTabSettings.h"
 
 #include <boost/scoped_ptr.hpp>
+#include <Poco/Path.h>
 #include <qwt_plot_curve.h>
 
 // Qt classes forward declarations
@@ -153,10 +154,14 @@ public:
 
   virtual std::string fittingPeaksData() const override;
 
+
   virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                              bool focused);
 
+
   void setBankDir(QString path);
+
+  std::vector<std::string> splitFittingDirectory(Poco::Path selectedfPath);
 
   std::string fittingRunNoFactory(std::string bank, std::string fileName,
                                   std::string &bankDir, std::string fileDir);
@@ -305,7 +310,10 @@ private:
   // multi-run focus mode type selected
   int static m_currentRunMode;
 
-  int static m_bank_Id;
+  // fitting bankID
+  int static m_fitting_bank_Id;
+
+  std::vector<std::string> static m_fitting_runno_dir_vec;
 
   /// current calibration produced in the 'Calibration' tab
   std::string m_currentCalibFilename;
