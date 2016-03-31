@@ -271,24 +271,12 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         :return:
         """
         p = plt.Polygon(vertex_array, fill=False, color='w')
-        self._myCanvas.axes.add_artist(p)
-
-        # register
-        self._myPolygon = p
+        self.axes.add_artist(p)
 
         # Flush...
         self._flush()
 
-        return
-
-    def remove_polygon(self):
-        """ Remove the current polygon
-        :return:
-        """
-        if self._myPolygon is not None:
-            self._myPolygon.remove()
-
-        return
+        return p
 
     @property
     def x_min(self):

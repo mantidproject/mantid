@@ -102,6 +102,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_add_peak_no_index)
         self.connect(self.ui.pushButton_addROI, QtCore.SIGNAL('clicked()'),
                      self.do_add_roi)
+        self.connect(self.ui.pushButton_saveROI, QtCore.SIGNAL('clicked()'),
+                     self.do_save_roi)
         self.connect(self.ui.pushButton_cancelROI, QtCore.SIGNAL('clicked()'),
                      self.do_del_roi)
 
@@ -1468,6 +1470,22 @@ class MainWindow(QtGui.QMainWindow):
             h, k, l = peak_info.get_user_hkl()
             self.ui.tableWidget_peaksCalUB.update_hkl(i_row, h, k, l)
         # END-FOR
+
+        return
+
+    def do_save_roi(self):
+        """ Save current selection of region of interest
+        :return:
+        """
+        lower_left_c, upper_right_c = self.ui.graphicsView.get_roi()
+        print '[DB-BAT] Save RIO as [%s, %s]' % (str(lower_left_c), str(upper_right_c))
+
+        status, par_val_list = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run])
+        assert status
+        exp_number = par_val_list[0]
+        scan_number = par_val_list[1]
+
+        self._myControl.set_roi(exp_number, scan_number, lower_left_c, upper_right_c)
 
         return
 

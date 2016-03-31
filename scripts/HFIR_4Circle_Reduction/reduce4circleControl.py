@@ -81,6 +81,9 @@ class CWSCDReductionControl(object):
         # Record for merged scans
         self._mergedWSManager = list()
 
+        # Region of interest: key = (experiment, scan), value = 2-tuple of 2-tuple: ( (lx, ly), (ux, uy))
+        self._roiDict = dict()
+
         # A dictionary to manage all loaded and processed MDEventWorkspaces
         # self._expDataDict = {}
 
@@ -1125,6 +1128,22 @@ class CWSCDReductionControl(object):
             raise RuntimeError('Target frame %s is not supported.' % target_frame)
 
         return True, ''
+
+    def set_roi(self, exp_number, scan_number, lower_left_corner, upper_right_corner):
+        """
+
+        :param exp_number:
+        :param scan_number:
+        :param lower_left_corner:
+        :param upper_right_corner:
+        :return:
+        """
+        # TODO/NOW : check validity...
+
+        # Add
+        self._roiDict[(exp_number, scan_number)] = (lower_left_corner, upper_right_corner)
+
+        return
 
     def set_server_url(self, server_url, check_link=True):
         """

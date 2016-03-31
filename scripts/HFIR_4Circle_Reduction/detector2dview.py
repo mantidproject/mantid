@@ -26,7 +26,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         self._myCanvas.mpl_connect('motion_notify_event', self.on_mouse_motion)
 
         # class variables
-        self._myPolygon = None
+        self._myPolygon = None  # matplotlib.patches.Polygon
 
         # class status variables
         self._roiSelectMode = False
@@ -74,7 +74,8 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         vertex_array[3][0] = self._roiStart[0]
         vertex_array[3][1] = self._roiEnd[1]
 
-        self._myCanvas.plot_polygon(vertex_array, fill=False, color='w')
+        # register
+        self._myPolygon = self._myCanvas.plot_polygon(vertex_array, fill=False, color='w')
 
         return
 
@@ -94,7 +95,11 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         Remove the rectangular for region of interest
         :return:
         """
-        self._myPolygon.remove()
+        if self._myPolygon is not None:
+            # polygon is of type matplotlib.patches.Polygon
+            print 'My polygon is of type %s.' % str(type(self._myPolygon))
+            print dir(self._myPolygon)
+            self._myPolygon.remove()
 
         self._myCanvas._flush()
 
@@ -104,7 +109,14 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         """
         :return: A list for polygon0
         """
-        return
+        assert self._roiStart is not None
+        assert self._roiEnd is not None
+
+        # rio start is upper left, roi end is lower right
+        lower_left = (self._roiStart[0], self._roiEnd[1])
+        upper_right = (self._roiEnd[0], self._roiStart[1])
+
+        return (lower_left, upper_right)
 
     def on_mouse_motion(self, event):
         """
@@ -112,6 +124,13 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         :param event:
         :return:
         """
+        # skip if the mouse cursor is still outside of the canvas
+        if event.xdata is None or event.ydata is None:
+            return
+
+        # check: _currX and _currY must be specified
+        assert self._currX is not None and self._currY is not None
+
         # operation if the displacement is too small
         if abs(event.xdata - self._currX) < self.resolutionX() and abs(event.ydata - self._currY) < self.resolutionY():
             return
@@ -141,6 +160,10 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         :param event:
         :return:
         """
+        # return if the cursor position is out of canvas
+        if event.xdata is None or event.ydata is None:
+            return
+
         # update mouse' position
         self._currX = event.xdata
         self._currY = event.ydata
@@ -164,6 +187,10 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         :param event:
         :return:
         """
+        # return without any operation if mouse cursor is out side of canvas
+        if event.xdata is None or event.ydata is None:
+            return
+
         # update mouse' position
         self._currX = event.xdata
         self._currY = event.ydata
@@ -171,8 +198,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         # do something
         if self._roiSelectMode is True and self._mousePressed == Detector2DView.MousePress.LEFT:
             # end the ROI selection mode
-            self._roiEnd = (self._currX, self._currY)
-            self.update_roi_poly()
+            self.update_roi_poly(self._currX, self._currY)
 
             # release the mode
             self._roiStart = self._roiEnd = None
@@ -203,6 +229,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         # remove the original polygon
         if self._myPolygon is not None:
             self._myPolygon.remove()
+            self.canvas._flush()
 
         # set RIO end
         self._roiEnd = [cursor_x, cursor_y]
