@@ -17,6 +17,14 @@ New
    minimizes the difference between the *DIFC* of the instrument and
    calibration by moving and rotating instrument components.
 
+Renamed
+#######
+
+- The following Vesuvio specific algorithms have been updated to have their name prefixed by Vesuvio:
+    - :ref:`VesuvioCalculateGammaBackground <algm-VesuvioCalculateGammaBackground>` previously ``CalculateGammaBackground``
+    - :ref:`VesuvioCalculateMS <algm-VesuvioCalculateMS>` previously ``CalculateMSVesuvio``
+    - :ref:`VesuvioDiffractionReduction <algm-VesuvioDiffractionReduction>` previously ``EVSDiffractionReduction``
+
 Improved
 ########
 

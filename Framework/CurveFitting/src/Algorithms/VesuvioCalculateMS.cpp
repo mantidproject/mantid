@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidCurveFitting/Algorithms/CalculateMSVesuvio.h"
+#include "MantidCurveFitting/Algorithms/VesuvioCalculateMS.h"
 // Use helpers for storing detector/resolution parameters
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidCurveFitting/MSVesuvioHelpers.h"
@@ -50,10 +50,10 @@ const double MASS_TO_MEV =
 //-------------------------------------------------------------------------
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(CalculateMSVesuvio)
+DECLARE_ALGORITHM(VesuvioCalculateMS)
 
 /// Constructor
-CalculateMSVesuvio::CalculateMSVesuvio()
+VesuvioCalculateMS::VesuvioCalculateMS()
     : Algorithm(), m_randgen(nullptr), m_acrossIdx(0), m_upIdx(1), m_beamIdx(3),
       m_beamDir(), m_srcR2(0.0), m_halfSampleHeight(0.0),
       m_halfSampleWidth(0.0), m_halfSampleThick(0.0), m_sampleShape(nullptr),
@@ -63,7 +63,7 @@ CalculateMSVesuvio::CalculateMSVesuvio()
       m_progress(nullptr), m_inputWS() {}
 
 /// Destructor
-CalculateMSVesuvio::~CalculateMSVesuvio() {
+VesuvioCalculateMS::~VesuvioCalculateMS() {
   delete m_randgen;
   delete m_progress;
   delete m_sampleProps;
@@ -72,7 +72,7 @@ CalculateMSVesuvio::~CalculateMSVesuvio() {
 /**
  * Initialize the algorithm's properties.
  */
-void CalculateMSVesuvio::init() {
+void VesuvioCalculateMS::init() {
   // Inputs
   auto inputWSValidator = boost::make_shared<CompositeValidator>();
   inputWSValidator->add<WorkspaceUnitValidator>("TOF");
@@ -136,7 +136,7 @@ void CalculateMSVesuvio::init() {
 /**
  * Execute the algorithm.
  */
-void CalculateMSVesuvio::exec() {
+void VesuvioCalculateMS::exec() {
   m_inputWS = getProperty("InputWorkspace");
   cacheInputs();
 
@@ -185,7 +185,7 @@ void CalculateMSVesuvio::exec() {
 /**
  * Caches inputs insuitable form for speed in later calculations
  */
-void CalculateMSVesuvio::cacheInputs() {
+void VesuvioCalculateMS::cacheInputs() {
   // Algorithm
   int nscatters = getProperty("NumScatters");
   m_nscatters = static_cast<size_t>(nscatters);
@@ -321,7 +321,7 @@ void CalculateMSVesuvio::cacheInputs() {
  * @param multsc A non-const reference to the spectrum that will contain the
  * multiple scattering contribution
  */
-void CalculateMSVesuvio::calculateMS(const size_t wsIndex,
+void VesuvioCalculateMS::calculateMS(const size_t wsIndex,
                                      API::ISpectrum &totalsc,
                                      API::ISpectrum &multsc) const {
   // Detector information
@@ -362,7 +362,7 @@ void CalculateMSVesuvio::calculateMS(const size_t wsIndex,
  * @param simulCounts Simulation object used to storing the calculated number of
  * counts
  */
-void CalculateMSVesuvio::simulate(
+void VesuvioCalculateMS::simulate(
     const DetectorParams &detpar, const ResolutionParams &respar,
     CurveFitting::MSVesuvioHelper::Simulation &simulCounts) const {
   for (size_t i = 0; i < m_nevents; ++i) {
@@ -378,7 +378,7 @@ void CalculateMSVesuvio::simulate(
  * @param multsc A non-const reference to the spectrum for the multiple
  * scattering contribution
  */
-void CalculateMSVesuvio::assignToOutput(
+void VesuvioCalculateMS::assignToOutput(
     const CurveFitting::MSVesuvioHelper::SimulationWithErrors &avgCounts,
     API::ISpectrum &totalsc, API::ISpectrum &multsc) const {
   // Sum up all multiple scatter events
@@ -412,7 +412,7 @@ void CalculateMSVesuvio::assignToOutput(
  * @param simulation [Output] Store the calculated counts here
  * @return The sum of the weights for all scatters
  */
-double CalculateMSVesuvio::calculateCounts(
+double VesuvioCalculateMS::calculateCounts(
     const DetectorParams &detpar, const ResolutionParams &respar,
     CurveFitting::MSVesuvioHelper::Simulation &simulation) const {
   double weightSum(0.0);
@@ -532,7 +532,7 @@ double CalculateMSVesuvio::calculateCounts(
   * @param l1 Src-sample distance (m)
   * @returns Position on the moderator of the generated point
   */
-V3D CalculateMSVesuvio::generateSrcPos(const double l1) const {
+V3D VesuvioCalculateMS::generateSrcPos(const double l1) const {
   double radius(-1.0), widthPos(0.0), heightPos(0.0);
   do {
     widthPos = -m_srcR2 + 2.0 * m_srcR2 * m_randgen->flat();
@@ -557,7 +557,7 @@ V3D CalculateMSVesuvio::generateSrcPos(const double l1) const {
  * @param weight [Out] Weight factor to modify for the generated energy value
  * @return
  */
-double CalculateMSVesuvio::generateE0(const double l1, const double t2,
+double VesuvioCalculateMS::generateE0(const double l1, const double t2,
                                       double &weight) const {
   const double tof = m_tmin + (m_tmax - m_tmin) * m_randgen->flat();
   const double t1 = (tof - t2);
@@ -579,7 +579,7 @@ double CalculateMSVesuvio::generateE0(const double l1, const double t2,
  * @param dl1 S.d of moderator to sample distance
  * @return tof Guass TOF modified for asymmetric pulse
  */
-double CalculateMSVesuvio::generateTOF(const double en0, const double dtof,
+double VesuvioCalculateMS::generateTOF(const double en0, const double dtof,
                                        const double dl1) const {
   const double vel1 = sqrt(en0 / MASS_TO_MEV);
   const double dt1 = (dl1 / vel1) * 1e6;
@@ -618,7 +618,7 @@ double CalculateMSVesuvio::generateTOF(const double en0, const double dtof,
  * @param scatterPt [Out] Generated scattering point
  * @return True if the scatter event was generated, false otherwise
  */
-bool CalculateMSVesuvio::generateScatter(const Kernel::V3D &startPos,
+bool VesuvioCalculateMS::generateScatter(const Kernel::V3D &startPos,
                                          const Kernel::V3D &direc,
                                          double &weight, V3D &scatterPt) const {
   Track scatterTrack(startPos, direc);
@@ -649,7 +649,7 @@ bool CalculateMSVesuvio::generateScatter(const Kernel::V3D &startPos,
  * @return The range of allowed final energies for the neutron
  */
 std::pair<double, double>
-CalculateMSVesuvio::calculateE1Range(const double theta,
+VesuvioCalculateMS::calculateE1Range(const double theta,
                                      const double en0) const {
   const double k0 = sqrt(en0 / PhysicalConstants::E_mev_toNeutronWavenumberSq);
   const double sth(sin(theta)), cth(cos(theta));
@@ -686,7 +686,7 @@ CalculateMSVesuvio::calculateE1Range(const double theta,
  * @param theta Scattering angle
  * @return Value of differential cross section
  */
-double CalculateMSVesuvio::partialDiffXSec(const double en0, const double en1,
+double VesuvioCalculateMS::partialDiffXSec(const double en0, const double en1,
                                            const double theta) const {
   const double rt2pi = sqrt(2.0 * M_PI);
 
@@ -734,7 +734,7 @@ double CalculateMSVesuvio::partialDiffXSec(const double en0, const double en1,
  * scatter to exit
  * @return A new position in the detector
  */
-V3D CalculateMSVesuvio::generateDetectorPos(
+V3D VesuvioCalculateMS::generateDetectorPos(
     const V3D &nominalPos, const double energy, const V3D &scatterPt,
     const V3D &direcBeforeSc, double &scang, double &distToExit) const {
   // Inverse attenuation length (m-1) for vesuvio det.
@@ -787,7 +787,7 @@ V3D CalculateMSVesuvio::generateDetectorPos(
  * @param e1res The resoltion in energy of the analyser
  * @return A value for the final energy of the neutron
  */
-double CalculateMSVesuvio::generateE1(const double angle, const double e1nom,
+double VesuvioCalculateMS::generateE1(const double angle, const double e1nom,
                                       const double e1res) const {
   if (e1res == 0.0)
     return e1nom;
