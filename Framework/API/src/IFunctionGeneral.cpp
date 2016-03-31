@@ -26,12 +26,12 @@ void IFunctionGeneral::functionDeriv(const FunctionDomain &domain,
 
 size_t IFunctionGeneral::getValuesSize(const FunctionDomain &domain) const {
   if (domain.size() == 0 || getNumberDomainColumns() == 0) {
-    return getDefaultValuesSize() * getNumberValuesPerArgument();
+    return getDefaultDomainSize() * getNumberValuesPerArgument();
   }
   return domain.size() * getNumberValuesPerArgument();
 }
 
-size_t IFunctionGeneral::getDefaultValuesSize() const { return 0; }
+size_t IFunctionGeneral::getDefaultDomainSize() const { return 0; }
 
 } // namespace API
 } // namespace Mantid

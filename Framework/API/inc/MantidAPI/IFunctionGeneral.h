@@ -3,8 +3,8 @@
 
 #include "MantidAPI/DllConfig.h"
 
-#include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionDomainGeneral.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidKernel/Logger.h"
 
 namespace Mantid {
@@ -17,7 +17,7 @@ namespace API {
 
     The domain and the values object can have different sizes.
     In particular the domain can be empty.
-    
+
 
     Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
     National Laboratory & European Spallation Source
@@ -51,7 +51,7 @@ public:
   /// Provide a concrete function in an implementation that operates on a
   /// FunctionDomainGeneral.
   virtual void functionGeneral(const FunctionDomainGeneral &domain,
-                                  FunctionValues &values) const = 0;
+                               FunctionValues &values) const = 0;
 
   /// Get number of columns that the domain must have.
   /// If consider the collection of these columns as a table
@@ -61,11 +61,12 @@ public:
   /// Get number of values per argument in the domain.
   virtual size_t getNumberValuesPerArgument() const = 0;
 
-  /// Get the default size of an output FunctionValues object.
-  /// It is a number of values the function will produce if it is 
-  /// given an empty domain.
+  /// Get the default size of a domain.
+  /// If a function is given an empty domain then it must output
+  /// a values object of the size:
+  ///     getDefaultDomainSize() * getNumberValuesPerArgument()
   /// The default size must not be infinite (max of size_t).
-  virtual size_t getDefaultValuesSize() const;
+  virtual size_t getDefaultDomainSize() const;
 
 protected:
   static Kernel::Logger g_log;

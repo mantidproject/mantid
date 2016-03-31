@@ -55,10 +55,10 @@ public:
   std::string name() const override {return "TestFunction2";}
   size_t getNumberDomainColumns() const override {return 0;}
   size_t getNumberValuesPerArgument() const override {return 2;}
-  size_t getDefaultValuesSize() const override {return 5;}
+  size_t getDefaultDomainSize() const override {return 5;}
   void functionGeneral(const FunctionDomainGeneral &generalDomain, FunctionValues &values) const override {
     double a = getParameter(0);
-    auto n = getDefaultValuesSize();
+    auto n = getDefaultDomainSize();
     for(size_t i = 0; i < n; ++i) {
       values.setCalculated(i, a * double(i));
       values.setCalculated(i + n, a * (10.0 - double(i)));
@@ -288,6 +288,11 @@ public:
     TS_ASSERT_EQUALS(fun->getParameter(0), 0.0);
     fit.execute();
     TS_ASSERT_DELTA(fun->getParameter(0), 1.0, 1e-9);
+  }
+
+  void test_create_output() {
+    TableWorkspace_sptr ws = makeData2();
+    auto copy = ws->clone();
   }
 
 private:

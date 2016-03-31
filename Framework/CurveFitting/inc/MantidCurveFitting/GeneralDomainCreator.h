@@ -10,6 +10,7 @@ namespace Mantid {
 namespace API {
 class IFunctionGeneral;
 class Column;
+class ITableWorkspace;
 }
 
 namespace CurveFitting {
@@ -61,6 +62,8 @@ public:
   void declareDatasetProperties(const std::string &suffix = "",
                                 bool addProp = true) override;
 private:
+  /// Retrive the input workspace from the property manager.
+  boost::shared_ptr<API::ITableWorkspace> getInputWorkspace();
   // Names of additional properties
   /// Property names for columns in a TableWorkspace to be passed to
   /// the domain.

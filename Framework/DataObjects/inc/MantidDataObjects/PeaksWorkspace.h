@@ -185,6 +185,7 @@ protected:
 
 private:
   PeaksWorkspace *doClone() const override { return new PeaksWorkspace(*this); }
+  ITableWorkspace *doCloneColumns(const std::vector<std::string> &colNames) const override;
 
   /// Initialize the table structure
   void initColumns();
