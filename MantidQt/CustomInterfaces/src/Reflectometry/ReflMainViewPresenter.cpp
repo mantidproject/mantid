@@ -33,7 +33,9 @@ ReflMainViewPresenter::ReflMainViewPresenter(
     : m_view(mainView), m_tablePresenter(tablePresenter),
       m_progressView(progressView), m_searcher(searcher) {
 
-  // Register this presenter as the m_tablePresenter's outer presenter
+  // Register this presenter as the workspace receiver
+  // When doing so, the inner presenter will notify this
+  // presenter with the list of commands
   m_tablePresenter->accept(this);
 
   // TODO. Select strategy.
@@ -74,9 +76,6 @@ ReflMainViewPresenter::ReflMainViewPresenter(
     m_view->setInstrumentList(instruments, "INTER");
     m_tablePresenter->setInstrumentList(instruments, "INTER");
   }
-
-  // Push the list of commands to the view
-  pushCommands();
 }
 
 ReflMainViewPresenter::~ReflMainViewPresenter() {}
