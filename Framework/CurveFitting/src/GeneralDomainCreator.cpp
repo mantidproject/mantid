@@ -73,7 +73,7 @@ void GeneralDomainCreator::declareDatasetProperties(const std::string &suffix,
 }
 
 /// Retrive the input workspace from the property manager.
-boost::shared_ptr<API::ITableWorkspace> GeneralDomainCreator::getInputWorkspace() {
+boost::shared_ptr<API::ITableWorkspace> GeneralDomainCreator::getInputWorkspace() const {
   auto workspacePropertyName = m_workspacePropertyNames.front();
   API::Workspace_sptr ws = m_manager->getProperty(workspacePropertyName);
   auto tableWorkspace = boost::dynamic_pointer_cast<API::ITableWorkspace>(ws);
@@ -155,20 +155,45 @@ Workspace_sptr GeneralDomainCreator::createOutputWorkspace(
                              "values object don't match.");
   }
   auto inputWorkspace = getInputWorkspace();
-  ITableWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().createTable();
+
   size_t rowCount = domain->size();
   if (rowCount == 0) {
     auto &generalFunction = dynamic_cast<IFunctionGeneral&>(*function);
     rowCount = generalFunction.getDefaultDomainSize();
   }
-  outputWorkspace->setRowCount(rowCount);
+
+  // Clone the data and domain columns from inputWorkspace to outputWorkspace.
   auto &generalDomain = *static_cast<FunctionDomainGeneral *>(domain.get());
-  for(size_t col = 0; col < generalDomain.columnCount(); ++col) {
-    auto column = generalDomain.getColumn(col);
-    auto outColumn = outputWorkspace->addColumn(column->type(), column->name());
-    for(size_t row = 0; row < rowCount; ++row) {
-    }
+
+  // Collect the names of columns to clone
+  std::vector<std::string> columnsToClone;
+  for(auto &propName: m_domainColumnNames) {
+    auto columnName = m_manager->getPropertyValue(propName);
+    columnsToClone.push_back(columnName);
   }
+  for(auto &propName: m_dataColumnNames) {
+    auto columnName = m_manager->getPropertyValue(propName);
+    columnsToClone.push_back(columnName);
+  }
+
+  ITableWorkspace_sptr outputWorkspace = inputWorkspace->clone(columnsToClone);
+  if (rowCount != outputWorkspace->rowCount()) {
+    throw std::runtime_error("Cloned workspace has wrong number of rows.");
+  }
+
+  // Add columns with the calculated data
+  size_t i0 = 0;
+  for(auto &propName: m_dataColumnNames) {
+    auto dataColumnName = m_manager->getPropertyValue(propName);
+    auto calcColumnName = dataColumnName + "_calc";
+    auto column = outputWorkspace->addColumn("double", calcColumnName);
+    for(size_t row = 0; row < rowCount; ++row) {
+      auto value = values->getCalculated(i0 + row);
+      column->fromDouble(row, value);
+    }
+    i0 += rowCount;
+  }
+
   return outputWorkspace;
 }
 
@@ -177,7 +202,16 @@ Workspace_sptr GeneralDomainCreator::createOutputWorkspace(
  *
  * @return Total domain size.
  */
-size_t GeneralDomainCreator::getDomainSize() const { return 0; }
+size_t GeneralDomainCreator::getDomainSize() const {
+  size_t domainSize = 0;
+  if (!m_domainColumnNames.empty()) {
+    auto inputWorkspace = getInputWorkspace();
+    domainSize = inputWorkspace->rowCount();
+  } else {
+    domainSize = m_defaultValuesSize;
+  }
+  return domainSize;
+}
 
 } // namespace CurveFitting
 } // namespace Mantid

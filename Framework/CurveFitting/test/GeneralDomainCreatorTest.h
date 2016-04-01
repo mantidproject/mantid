@@ -5,6 +5,7 @@
 
 #include "MantidCurveFitting/GeneralDomainCreator.h"
 
+#include "MantidAPI/Column.h"
 #include "MantidAPI/FunctionDomainGeneral.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunctionGeneral.h"
@@ -14,6 +15,8 @@
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/PropertyManager.h"
+
+#include <algorithm>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -116,6 +119,7 @@ public:
     manager.setProperty("WeightsColumn_1", "NotSoGoodDataW");
     manager.setProperty("WeightsColumn_2", "IgnoredDataW");
 
+    TS_ASSERT_EQUALS(creator.getDomainSize(), 4);
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
     creator.createDomain(domain, values);
@@ -243,6 +247,7 @@ public:
     manager.setProperty("WeightsColumn", "EnergiesW");
     manager.setProperty("WeightsColumn_1", "IntensitiesW");
 
+    TS_ASSERT_EQUALS(creator.getDomainSize(), 5);
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
     creator.createDomain(domain, values);
@@ -291,8 +296,121 @@ public:
   }
 
   void test_create_output() {
+    auto fun = boost::shared_ptr<TestFunction1>(new TestFunction1);
+    PropertyManager manager;
+    GeneralDomainCreator creator(*fun, manager, "InputWorkspace");
+    creator.declareDatasetProperties();
+
+    TableWorkspace_sptr ws = makeData1();
+
+    manager.declareProperty(
+        make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
+        "Name of the input Workspace");
+    manager.setProperty("InputWorkspace", ws);
+    manager.setProperty("ArgumentColumn", "X");
+    manager.setProperty("ArgumentColumn_1", "Name");
+    manager.setProperty("DataColumn", "GoodData");
+    manager.setProperty("DataColumn_1", "NotSoGoodData");
+    manager.setProperty("DataColumn_2", "IgnoredData");
+    manager.setProperty("WeightsColumn", "GoodDataW");
+    manager.setProperty("WeightsColumn_1", "NotSoGoodDataW");
+    manager.setProperty("WeightsColumn_2", "IgnoredDataW");
+
+    FunctionDomain_sptr domain;
+    FunctionValues_sptr values;
+    creator.createDomain(domain, values);
+
+    fun->setParameter(0, 5.0);
+    fun->function(*domain, *values);
+
+    auto result = boost::static_pointer_cast<ITableWorkspace>(
+        creator.createOutputWorkspace("out", fun, domain, values));
+
+    TS_ASSERT_EQUALS(result->columnCount(), 8);
+    TS_ASSERT_EQUALS(result->rowCount(), 4);
+
+    auto column = result->getColumn("X");
+    TS_ASSERT_EQUALS(column->cell<double>(0), 1.0);
+    TS_ASSERT_EQUALS(column->cell<double>(2), 3.0);
+
+    column = result->getColumn("Name");
+    TS_ASSERT_EQUALS(column->cell<std::string>(0), "Alpha");
+    TS_ASSERT_EQUALS(column->cell<std::string>(2), "Alpha");
+
+    column = result->getColumn("GoodData");
+    TS_ASSERT_EQUALS(column->cell<double>(0), 10.0);
+    TS_ASSERT_EQUALS(column->cell<double>(2), 30.0);
+
+    column = result->getColumn("NotSoGoodData");
+    TS_ASSERT_EQUALS(column->cell<double>(0), 1.0);
+    TS_ASSERT_EQUALS(column->cell<double>(2), 3.0);
+
+    column = result->getColumn("IgnoredData");
+    TS_ASSERT_EQUALS(column->cell<double>(0), 0.11);
+    TS_ASSERT_EQUALS(column->cell<double>(2), 0.33);
+
+    column = result->getColumn("GoodData_calc");
+    TS_ASSERT_EQUALS(column->cell<double>(0), 5.0);
+    TS_ASSERT_EQUALS(column->cell<double>(2), 15.0);
+
+    column = result->getColumn("NotSoGoodData_calc");
+    TS_ASSERT_EQUALS(column->cell<double>(0), 0.5);
+    TS_ASSERT_EQUALS(column->cell<double>(2), 1.5);
+
+    column = result->getColumn("IgnoredData_calc");
+    TS_ASSERT_EQUALS(column->cell<double>(0), 0.05);
+    TS_ASSERT_EQUALS(column->cell<double>(2), 0.15);
+  }
+
+
+  void test_create_output_2() {
+    auto fun = boost::shared_ptr<TestFunction2>(new TestFunction2);
+    PropertyManager manager;
+    GeneralDomainCreator creator(*fun, manager, "InputWorkspace");
+    creator.declareDatasetProperties();
+
     TableWorkspace_sptr ws = makeData2();
-    auto copy = ws->clone();
+    manager.declareProperty(
+        make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
+        "Name of the input Workspace");
+    manager.setProperty("InputWorkspace", ws);
+    manager.setProperty("DataColumn", "Energies");
+    manager.setProperty("DataColumn_1", "Intensities");
+    manager.setProperty("WeightsColumn", "EnergiesW");
+    manager.setProperty("WeightsColumn_1", "IntensitiesW");
+
+    FunctionDomain_sptr domain;
+    FunctionValues_sptr values;
+    creator.createDomain(domain, values);
+
+    fun->setParameter(0, 2.0);
+    fun->function(*domain, *values);
+
+    auto result = boost::static_pointer_cast<ITableWorkspace>(
+        creator.createOutputWorkspace("out", fun, domain, values));
+
+    TS_ASSERT_EQUALS(result->columnCount(), 4);
+    TS_ASSERT_EQUALS(result->rowCount(), 5);
+
+    auto column = result->getColumn("Energies");
+    TS_ASSERT_EQUALS(column->cell<double>(0), 0.0);
+    TS_ASSERT_EQUALS(column->cell<double>(1), 1.0);
+    TS_ASSERT_EQUALS(column->cell<double>(2), 2.0);
+
+    column = result->getColumn("Intensities");
+    TS_ASSERT_EQUALS(column->cell<double>(0), 10.0);
+    TS_ASSERT_EQUALS(column->cell<double>(1), 9.0);
+    TS_ASSERT_EQUALS(column->cell<double>(2), 8.0);
+
+    column = result->getColumn("Energies_calc");
+    TS_ASSERT_EQUALS(column->cell<double>(0), 0.0);
+    TS_ASSERT_EQUALS(column->cell<double>(1), 2.0);
+    TS_ASSERT_EQUALS(column->cell<double>(2), 4.0);
+
+    column = result->getColumn("Intensities_calc");
+    TS_ASSERT_EQUALS(column->cell<double>(0), 20.0);
+    TS_ASSERT_EQUALS(column->cell<double>(1), 18.0);
+    TS_ASSERT_EQUALS(column->cell<double>(2), 16.0);
   }
 
 private:
