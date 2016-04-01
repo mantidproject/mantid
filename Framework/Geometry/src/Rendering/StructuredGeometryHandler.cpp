@@ -75,8 +75,8 @@ void StructuredGeometryHandler::Render() {
 
   glBegin(GL_QUADS);
 
-  for (auto iy = 0; iy < h - 1; iy++) {
-    for (auto ix = 0; ix < w - 1; ix++) {
+  for (size_t iy = 0; iy < h - 1; iy++) {
+    for (size_t ix = 0; ix < w - 1; ix++) {
 
       glColor3ub((GLubyte)r[(iy * (w - 1)) + ix],
                  (GLubyte)g[(iy * (w - 1)) + ix],

@@ -151,8 +151,8 @@ private:
 
   void createDetectors();
 
-  Detector *addDetector(CompAssembly *parent, const std::string &name, int x,
-                        int y, int id);
+  Detector *addDetector(CompAssembly *parent, const std::string &name, size_t x,
+                        size_t y, detid_t id);
   /// Pointer to the base RectangularDetector, for parametrized
   /// instruments
   const StructuredDetector *m_base;
