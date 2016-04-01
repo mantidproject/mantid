@@ -92,7 +92,6 @@ private:
   std::vector<std::string> m_metaData;
   std::map<std::string, std::vector<std::string>> m_metaDataMap;
   spec2index_map m_specToIndexMap;
-
 };
 } // namespace DataHandling
 } // namespace Mantid
