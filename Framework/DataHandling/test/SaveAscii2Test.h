@@ -203,8 +203,8 @@ public:
   }
 
   void test_input_success_with_valid_SpectrumMetaData_list() {
-    /*Mantid::DataObjects::Workspace2D_sptr wsToSave;
-    writeSampleWS(wsToSave);
+    MatrixWorkspace_sptr wsToSave;
+    writeInelasticWS(wsToSave);
 
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
@@ -214,11 +214,27 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // the algorithm will have used a defualt and written a file to disk
-	auto const isThere = Poco::File(filename).exists();
     TS_ASSERT(Poco::File(filename).exists());
     Poco::File(filename).remove();
 
-    AnalysisDataService::Instance().remove(m_name);*/
+    AnalysisDataService::Instance().remove(m_name);
+  }
+
+  void test_fail_with_spectrum_meta_data_Q_for_non_Q_workspace() {
+    Mantid::DataObjects::Workspace2D_sptr wsToSave;
+    writeSampleWS(wsToSave);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+
+    TS_ASSERT_THROWS_NOTHING(
+        save.setPropertyValue("SpectrumMetaData", "Q"));
+    TS_ASSERT_THROWS_ANYTHING(save.execute());
+
+    // the algorithm will have used a defualt and written a file to disk
+    TS_ASSERT(!Poco::File(filename).exists());
+
+    AnalysisDataService::Instance().remove(m_name);
   }
 
   void testExec_no_header() {
