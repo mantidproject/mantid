@@ -32,9 +32,9 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.InOut,
                                                           optional = mantid.api.PropertyMode.Optional), "Input workspace (optional)")
         allowedInstrumentList=mantid.kernel.StringListValidator(["","ARCS","CNCS","CORELLI","HYSPEC","MANDI","NOMAD",
-                                                                 "POWGEN","SEQUOIA","SNAP","SXD","TOPAZ","WISH"])
+                                                                 "POWGEN","REF_M","SEQUOIA","SNAP","SXD","TOPAZ","WISH"])
         self.declareProperty("Instrument","",validator=allowedInstrumentList,doc="One of the following instruments: ARCS, CNCS, "+\
-                             "CORELLI, HYSPEC, MANDI, NOMAD, POWGEN, SNAP, SEQUOIA, SXD, TOPAZ, WISH")
+                             "CORELLI, HYSPEC, MANDI, NOMAD, POWGEN, REF_M, SNAP, SEQUOIA, SXD, TOPAZ, WISH")
         self.declareProperty("Bank","",doc="Bank(s) to be masked. If empty, will apply to all banks")
         self.declareProperty("Tube","",doc="Tube(s) to be masked. If empty, will apply to all tubes")
         self.declareProperty("Pixel","",doc="Pixel(s) to be masked. If empty, will apply to all pixels")
@@ -58,19 +58,19 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             self.instname = self.instrument.getName()
 
         instrumentList=["ARCS","CNCS","CORELLI","HYSPEC",
-                        "MANDI","NOMAD","POWGEN","SEQUOIA","SNAP","SXD","TOPAZ","WISH"]
+                        "MANDI","NOMAD","POWGEN","REF_M","SEQUOIA","SNAP","SXD","TOPAZ","WISH"]
         self.bankmin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"MANDI":10,
-                      "NOMAD":1,"POWGEN":1,"SEQUOIA":38,"SNAP":1,"SXD":1,"TOPAZ":10,"WISH":1}
+                      "NOMAD":1,"POWGEN":1,"REF_M":1,"SEQUOIA":38,"SNAP":1,"SXD":1,"TOPAZ":10,"WISH":1}
         self.bankmax={"ARCS":115,"CNCS":50,"CORELLI":91,"HYSPEC":20,"MANDI":59,"NOMAD":99,"POWGEN":300,
-                      "SEQUOIA":150,"SNAP":18,"SXD":11,"TOPAZ":59,"WISH":10}
+                      "REF_M":1,"SEQUOIA":150,"SNAP":18,"SXD":11,"TOPAZ":59,"WISH":10}
         tubemin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"MANDI":0,"NOMAD":1,
-                 "POWGEN":0,"SEQUOIA":1,"SNAP":0,"SXD":0,"TOPAZ":0,"WISH":1}
+                 "POWGEN":0,"REF_M":0,"SEQUOIA":1,"SNAP":0,"SXD":0,"TOPAZ":0,"WISH":1}
         tubemax={"ARCS":8,"CNCS":8,"CORELLI":16,"HYSPEC":8,"MANDI":255,"NOMAD":8,
-                 "POWGEN":153,"SEQUOIA":8,"SNAP":255,"SXD":63,"TOPAZ":255,"WISH":152}
+                 "POWGEN":153,"REF_M":303,"SEQUOIA":8,"SNAP":255,"SXD":63,"TOPAZ":255,"WISH":152}
         pixmin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"MANDI":0,"NOMAD":1,"POWGEN":0,
-                "SEQUOIA":1,"SNAP":0,"SXD":0,"TOPAZ":0,"WISH":1}
+                "REF_M":0,"SEQUOIA":1,"SNAP":0,"SXD":0,"TOPAZ":0,"WISH":1}
         pixmax={"ARCS":128,"CNCS":128,"CORELLI":256,"HYSPEC":128,"MANDI":255,
-                "NOMAD":128,"POWGEN":6,"SEQUOIA":128,"SNAP":255,"SXD":63,"TOPAZ":255,"WISH":512}
+                "NOMAD":128,"POWGEN":6,"REF_M":255,"SEQUOIA":128,"SNAP":255,"SXD":63,"TOPAZ":255,"WISH":512}
 
         try:
             instrumentList.index(self.instname)
@@ -200,6 +200,12 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                     return None
             else:
                 raise ValueError("Out of range index for "+str(self.instname)+" instrument bank numbers")
+        elif self.instname=="REF_M":
+            if self.bankmin[self.instname]<=banknum<= self.bankmax[self.instname]:
+                return self.instrument.getComponentByName("detector"+"%1d" % banknum)
+            else:
+                raise ValueError("Out of range index for "+str(self.instname)+" instrument bank numbers")
+
         else:
             if self.bankmin[self.instname]<=banknum<= self.bankmax[self.instname]:
                 return self.instrument.getComponentByName("bank"+str(banknum))

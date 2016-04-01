@@ -324,18 +324,18 @@ namespace Mantid
 
         pqServer *server = pqActiveObjects::instance().activeServer();
         pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-        QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
+        const QList<pqPipelineSource *> sources =
+            smModel->findItems<pqPipelineSource *>(server);
 
-        for (QList<pqPipelineSource*>::Iterator source = sources.begin(); source != sources.end(); ++source)
-        {
-          pqPipelineFilter* filter = qobject_cast<pqPipelineFilter*>(*source);
+        foreach (pqPipelineSource *source, sources) {
+          pqPipelineFilter *filter = qobject_cast<pqPipelineFilter *>(source);
           if (!filter)
           {
-            std::string sourceName((*source)->getProxy()->GetGlobalIDAsString());
+            std::string sourceName(source->getProxy()->GetGlobalIDAsString());
 
             if (doesSourceNeedToBeDeleted(sourceName, linkedSources))
             {
-              sourcesToBeDeleted.push_back(*source);
+              sourcesToBeDeleted.push_back(source);
             }
           }
         }
@@ -348,17 +348,14 @@ namespace Mantid
        * @param sourceName the name of the source which we want to check
        * @param trackedSources a list of tracked sources which need to be deleted
        */
-      bool RebinnedSourcesManager::doesSourceNeedToBeDeleted(std::string sourceName, std::vector<std::string> trackedSources)
-      {
-        for (std::vector<std::string>::iterator it = trackedSources.begin(); it != trackedSources.end(); ++it)
-        {
-          if (!sourceName.empty() && *it == sourceName)
-          {
-            return true;
-          }
-        }
+      bool RebinnedSourcesManager::doesSourceNeedToBeDeleted(
+          const std::string &sourceName,
+          const std::vector<std::string> &trackedSources) {
+        if (sourceName.empty())
+          return false;
 
-        return false;
+        return std::find(trackedSources.cbegin(), trackedSources.cend(),
+                         sourceName) != trackedSources.cend();
       }
 
       /**
@@ -399,11 +396,13 @@ namespace Mantid
             inputWorkspace = m_rebinnedWorkspaceAndSourceToOriginalWorkspace[createKeyPairForSource(source)];
             outputWorkspace = m_tempPrefix + inputWorkspace + algorithmType + m_tempPostfix;
             // Keep track of the old rebinned workspace and source
-            m_newRebinnedWorkspacePairBuffer.insert(std::pair<std::string, std::pair<std::string, pqPipelineSource*>>(workspaceName, std::pair<std::string, pqPipelineSource*>(outputWorkspace, source)));
+            m_newRebinnedWorkspacePairBuffer.emplace(
+                workspaceName, std::make_pair(outputWorkspace, source));
           }
         }
         // Record the workspaces
-        m_newWorkspacePairBuffer.insert(std::pair<std::string, std::pair<std::string, pqPipelineSource*>>(inputWorkspace, std::pair<std::string, pqPipelineSource*>(outputWorkspace, source)));
+        m_newWorkspacePairBuffer.emplace(
+            inputWorkspace, std::make_pair(outputWorkspace, source));
         m_inputSource= source;
       }
 
@@ -578,11 +577,15 @@ namespace Mantid
             throw std::runtime_error("Original source for rebinned source could not be found.");
           }
 
-          std::string originalWorkspaceName = m_newWorkspacePairBuffer.begin()->first;
-          std::string rebinnedWorkspaceName = m_newWorkspacePairBuffer.begin()->second.first;
+          const std::string &originalWorkspaceName =
+              m_newWorkspacePairBuffer.begin()->first;
+          const std::string &rebinnedWorkspaceName =
+              m_newWorkspacePairBuffer.begin()->second.first;
 
-          std::pair<std::string, std::string> key = std::pair<std::string, std::string>(rebinnedWorkspaceName, getSourceName(source));
-          m_rebinnedWorkspaceAndSourceToOriginalWorkspace.insert(std::pair<std::pair<std::string, std::string>, std::string>(key, originalWorkspaceName));
+          std::pair<std::string, std::string> key(rebinnedWorkspaceName,
+                                                  getSourceName(source));
+          m_rebinnedWorkspaceAndSourceToOriginalWorkspace.emplace(
+              key, originalWorkspaceName);
 
           // Record the rebinned source
           m_rebinnedSource = source;
@@ -608,34 +611,26 @@ namespace Mantid
         std::vector<std::pair<std::string, std::string>> toBeUntracked;
 
         // Compare all registered sources to all loaded sources,
-        for (std::map<std::pair<std::string, std::string>, std::string>::iterator it = m_rebinnedWorkspaceAndSourceToOriginalWorkspace.begin();
-             it != m_rebinnedWorkspaceAndSourceToOriginalWorkspace.end(); ++it)
-        {
-          std::string registeredSourceName = it->first.second;
+        for (const auto &wsPair :
+             m_rebinnedWorkspaceAndSourceToOriginalWorkspace) {
+          const std::string &registeredSourceName = wsPair.first.second;
 
-          QList<pqPipelineSource*>::Iterator source = sources.begin();
-
-          // Find the source which matches the registered source
-          while(source != sources.end())
-          {
-            if (registeredSourceName == getSourceName(*source))
-            {
-              break;
-            }
-            ++source;
-          }
+          auto source = std::find_if(
+              sources.begin(), sources.end(),
+              [this, &registeredSourceName](pqPipelineSource *src) {
+                return registeredSourceName == getSourceName(src);
+              });
 
           // If there was no matching source then mark it to be untracked
           if (source == sources.end())
           {
-            toBeUntracked.push_back(it->first);
+            toBeUntracked.push_back(wsPair.first);
           }
         }
 
         // Finally untrack all sources which need it
-        for (std::vector<std::pair<std::string, std::string>>::iterator key = toBeUntracked.begin(); key != toBeUntracked.end(); ++key)
-        {
-          untrackWorkspaces(*key);
+        for (const auto &key : toBeUntracked) {
+          untrackWorkspaces(key);
         }
       }
 

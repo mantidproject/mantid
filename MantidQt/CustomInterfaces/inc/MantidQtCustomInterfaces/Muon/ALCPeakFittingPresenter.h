@@ -61,17 +61,23 @@ namespace CustomInterfaces
     void onDataChanged();
 
     /// Executed when user clicks "Plot guess"
-    void onPlotGuess();
-
-    // Remove plots from graph
-    void removePlots();
+    void onPlotGuessClicked();
 
   private:
+    /// Plot guess on graph
+    bool plotGuessOnGraph();
+
+    /// Remove plots from graph
+    void removePlots();
+
     /// Associated view
     IALCPeakFittingView* const m_view;
 
     /// Associated model
     IALCPeakFittingModel* const m_model;
+
+    /// Whether guess is currently plotted
+    bool m_guessPlotted;
   };
 
 

@@ -30,7 +30,14 @@ Vesuvio
     - :ref:`VesuvioPreFit <algm-VesuvioPreFit>`
     - :ref:`VesuvioTOFFit <algm-VesuvioTOFFit>`
     - :ref:`VesuvioCorrections <algm-VesuvioCorrections>`
-- The script used to process data for Vesuvio has also been added. This used to be called ``VesuvioWorkflow.py``, but is now named``VesuvioCommands.py``
+
+- The script used to process data for Vesuvio has also been added. This used to be called ``VesuvioWorkflow.py``, but is now named ``VesuvioCommands.py``.
+
+- The following Vesuvio specific algorithms have been updated to have their name prefixed by Vesuvio:
+    - :ref:`VesuvioCalculateGammaBackground <algm-VesuvioCalculateGammaBackground>` previously ``CalculateGammaBackground``
+    - :ref:`VesuvioCalculateMS <algm-VesuvioCalculateMS>` previously ``CalculateMSVesuvio``
+    - :ref:`VesuvioDiffractionReduction <algm-VesuvioDiffractionReduction>` previously ``EVSDiffractionReduction``
+
 
 Improvements
 ------------
@@ -42,11 +49,17 @@ Improvements
 
 - :ref:`BASISReduction <algm-BASISReduction>` now accepts Vanadium runs for normalization.
 
+- :ref:`QECoverage <Interfaces>` planning tool has now been updated, There is now an Emin option included for direct tab,
+    If Emin or Emax are left empty; appropriate values are set automatically, the negative values of Ei are treated as
+    positive, appropriate informative pop-up messages displayed for invalid values and minor calculations updates.
+
+
 
 Bugfixes
 --------
 
 - *BayesQuasi* no longer crashes if the you supply data with trailing or leading zeros
 - :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>` only corrects for detailed balance when one is actually specified as input.
+- :ref:`VesuvioCorrections <algm-VesuvioCorrections>` no longer always fits using only the first spectrum in the input workspace.
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_

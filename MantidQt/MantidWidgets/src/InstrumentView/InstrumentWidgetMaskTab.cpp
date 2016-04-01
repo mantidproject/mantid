@@ -349,13 +349,13 @@ void InstrumentWidgetMaskTab::initSurface() {
 void InstrumentWidgetMaskTab::setMode(Mode mode) {
   switch (mode) {
   case Mask:
-    m_masking_on->setOn(true);
+    m_masking_on->setChecked(true);
     break;
   case Group:
-    m_grouping_on->setOn(true);
+    m_grouping_on->setChecked(true);
     break;
   case ROI:
-    m_roi_on->setOn(true);
+    m_roi_on->setChecked(true);
     break;
   default:
     throw std::invalid_argument("Invalid Mask tab mode. Use Mask/Group.");
@@ -1061,11 +1061,11 @@ void InstrumentWidgetMaskTab::setSelectActivity() {
 * It tab in masking, ROI or grouping mode?
 */
 InstrumentWidgetMaskTab::Mode InstrumentWidgetMaskTab::getMode() const {
-  if (m_masking_on->isOn())
+  if (m_masking_on->isChecked())
     return Mode::Mask;
-  if (m_roi_on->isOn())
+  if (m_roi_on->isChecked())
     return Mode::ROI;
-  if (m_grouping_on->isOn())
+  if (m_grouping_on->isChecked())
     return Mode::Group;
 
   throw std::logic_error("Invalid mode");

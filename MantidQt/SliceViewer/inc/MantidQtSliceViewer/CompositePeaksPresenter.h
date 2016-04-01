@@ -47,13 +47,13 @@ public:
     /*Do nothing*/
   }
   /// Get the foreground colour. This should never be used on the composite
-  PeakViewColor getForegroundPeakViewColor( ) const {
+  PeakViewColor getForegroundPeakViewColor() const override {
     std::runtime_error("Error: Trying to access getForegroundPeaViewColor on a"
                        "composite presenter");
     return PeakViewColor();
   }
   /// Get the background colour corresponding to the workspace
-  PeakViewColor getBackgroundPeakViewColor() const {
+  PeakViewColor getBackgroundPeakViewColor() const override {
     std::runtime_error("Error: Trying to access getBackgroundPeaViewColor on a"
                        "composite presenter");
     return PeakViewColor();

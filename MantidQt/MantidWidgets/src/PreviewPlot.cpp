@@ -157,7 +157,7 @@ QColor PreviewPlot::canvasColour() { return m_uiForm.plot->canvasBackground(); }
  * @param colour Plot canvas colour
  */
 void PreviewPlot::setCanvasColour(const QColor &colour) {
-  m_uiForm.plot->setCanvasBackground(QBrush(colour));
+  m_uiForm.plot->setCanvasBackground(colour);
 }
 
 /**

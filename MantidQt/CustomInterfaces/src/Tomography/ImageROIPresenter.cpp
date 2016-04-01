@@ -11,8 +11,14 @@ using namespace MantidQt::CustomInterfaces;
 namespace MantidQt {
 namespace CustomInterfaces {
 
+namespace {
+Mantid::Kernel::Logger g_log("ImageROI");
+}
+
+bool ImageROIPresenter::g_warnIfUnexpectedFileExtensions = false;
+
 ImageROIPresenter::ImageROIPresenter(IImageROIView *view)
-    : m_view(view), m_model(new ImageStackPreParams()) {
+    : m_stackPath(), m_view(view), m_model(new ImageStackPreParams()) {
   if (!m_view) {
     throw std::runtime_error("Severe inconsistency found. Presenter created "
                              "with an empty/null view (tomography interface). "
@@ -113,7 +119,7 @@ void ImageROIPresenter::processBrowseImg() {
  * necessarily correct (check with isValid())
  */
 StackOfImagesDirs ImageROIPresenter::checkInputStack(const std::string &path) {
-  StackOfImagesDirs soid(path);
+  StackOfImagesDirs soid(path, true);
 
   const std::string soiPath = soid.sampleImagesDir();
   if (soiPath.empty()) {
@@ -151,25 +157,11 @@ void ImageROIPresenter::processNewStack() {
   std::vector<std::string> imgs = soid.sampleFiles();
   if (0 >= imgs.size()) {
     m_view->userWarning(
-        "Error trying to find image/projection files in the stack directories",
-        "Could not find any image file in the samples subdirectory: " +
+        "Error while trying to find image/projection files in the stack "
+        "directories",
+        "Could not find any (image) file in the samples subdirectory: " +
             soid.sampleImagesDir());
     return;
-  }
-
-  for (size_t i = 0; i < imgs.size(); i++) {
-    const std::string extShort = imgs[i].substr(imgs[i].size() - 3);
-    const std::string extLong = imgs[i].substr(imgs[i].size() - 4);
-    const std::string expectedShort = "fit";
-    const std::string expectedLong = "fits";
-    if (extShort != expectedShort && extLong != expectedLong) {
-      m_view->userWarning("Invalid files found in the stack of images",
-                          "Found files with unrecognized extension. Expected "
-                          "files with extension '" +
-                              expectedShort + "' or '" + expectedLong +
-                              "' but found: " + imgs[i]);
-      return;
-    }
   }
 
   Mantid::API::WorkspaceGroup_sptr wsg = loadFITSStack(imgs);
@@ -246,8 +238,18 @@ ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
 
   const std::string wsName = "__stack_fits_viewer_tomography_gui";
   auto &ads = Mantid::API::AnalysisDataService::Instance();
-  if (ads.doesExist(wsName)) {
-    ads.remove(wsName);
+  try {
+    if (ads.doesExist(wsName)) {
+      ads.remove(wsName);
+    }
+  } catch (std::runtime_error &exc) {
+    m_view->userError(
+        "Error accessing the analysis data service",
+        "There was an error while accessing the Mantid analysis data service "
+        "to check for the presence of (and remove if present) workspace '" +
+            wsName + "'. This is a severe inconsistency . Error details:: " +
+            std::string(exc.what()));
+    return Mantid::API::WorkspaceGroup_sptr();
   }
 
   // This would be the alternative that loads images one by one (one
@@ -256,15 +258,17 @@ ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
   //  loadFITSImage(imgs[i], wsName);
   // }
 
-  // Load all image files using a list with their names
-  std::string allPaths;
-  size_t i = 0;
-  allPaths = imgs[i];
-  i++;
-  while (i < imgs.size()) {
-    allPaths.append(", " + imgs[i++]);
+  // Load all requested/supported image files using a list with their names
+  try {
+    const std::string allPaths = filterImagePathsForFITSStack(imgs);
+    loadFITSImage(allPaths, wsName);
+  } catch (std::runtime_error &exc) {
+    m_view->userWarning("Error trying to open FITS file(s)",
+                        "There was an error which prevented the file(s) from "
+                        "being loaded. Details: " +
+                            std::string(exc.what()));
+    return Mantid::API::WorkspaceGroup_sptr();
   }
-  loadFITSImage(allPaths, wsName);
 
   Mantid::API::WorkspaceGroup_sptr wsg;
   try {
@@ -278,11 +282,66 @@ ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
 
   if (wsg &&
       Mantid::API::AnalysisDataService::Instance().doesExist(wsg->name()) &&
-      imgs.size() == wsg->size()) {
+      wsg->size() > 0 && imgs.size() >= wsg->size()) {
     return wsg;
   } else {
     return Mantid::API::WorkspaceGroup_sptr();
   }
+}
+
+/**
+ * Produces a string with paths separated by commas. Takes the patsh from the
+ * input paths string but selects only the ones that look consistent with the
+ * supported format / extension.
+ *
+ * @param paths of the supposedly image files
+ *
+ * @return string with comma separated value (paths) ready to be passed as input
+ * to LoadFITS or similar algorithms
+ */
+std::string ImageROIPresenter::filterImagePathsForFITSStack(
+    const std::vector<std::string> &paths) {
+  std::string allPaths = "";
+
+  // Let's take only the ones that we can effectively load
+  const std::string expectedShort = "fit";
+  const std::string expectedLong = "fits";
+  std::vector<std::string> unexpectedFiles;
+  for (size_t i = 0; i < paths.size(); i++) {
+    const std::string extShort = paths[i].substr(paths[i].size() - 3);
+    const std::string extLong = paths[i].substr(paths[i].size() - 4);
+    if (extShort == expectedShort || extLong == expectedLong) {
+      if (allPaths.empty()) {
+        allPaths = paths[i];
+      } else {
+        allPaths.append(", " + paths[i]);
+      }
+    } else {
+      unexpectedFiles.push_back(paths[i]);
+    }
+  }
+
+  // If needed, give a warning once, at the end
+  if (!unexpectedFiles.empty()) {
+    std::string filesStrMsg = "";
+    for (auto path : unexpectedFiles) {
+      filesStrMsg += path + "\n";
+    }
+
+    const std::string msg =
+        "Found files with unrecognized or unsupported extension in this "
+        "stack ( " +
+        m_stackPath + "). Expected files with extension '" + expectedShort +
+        "' or '" + expectedLong +
+        "' the following file(s) were found (and not loaded):" + filesStrMsg;
+
+    if (g_warnIfUnexpectedFileExtensions) {
+      m_view->userWarning("Invalid files found in the stack of images", msg);
+    }
+    g_log.warning(msg);
+  }
+
+  return allPaths;
 }
 
 void ImageROIPresenter::loadFITSImage(const std::string &path,
@@ -306,8 +365,8 @@ void ImageROIPresenter::loadFITSImage(const std::string &path,
   } catch (std::exception &e) {
     throw std::runtime_error(
         "Failed to load image. Could not load this file as a "
-        "FITS image: " +
-        std::string(e.what()));
+        "FITS image. Trying to load from this path: " +
+        path + ". Error details: " + std::string(e.what()));
   }
 
   if (!alg->isExecuted()) {

@@ -84,33 +84,10 @@ private:
     }
 
     // Create the coordinate transformation information
-    std::vector<Mantid::coord_t> affMatVals;
-    affMatVals.push_back(1);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(1);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(1);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(1);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(1);
-                      
+    std::vector<Mantid::coord_t> affMatVals{1, 0, 0, 0, 0, 0, 0, 1, 0,
+                                            0, 0, 0, 0, 1, 0, 0, 1, 0,
+                                            0, 0, 0, 0, 0, 0, 1};
+
     CoordTransformAffine affMat(4, 4);
     affMat.setMatrix(Matrix<Mantid::coord_t>(affMatVals));
     if (!forgetAffmat)
@@ -128,15 +105,7 @@ private:
     }
     else
     {
-      wMat.push_back(1);
-      wMat.push_back(1);
-      wMat.push_back(0);
-      wMat.push_back(1);
-      wMat.push_back(-1);
-      wMat.push_back(0);
-      wMat.push_back(0);
-      wMat.push_back(0);
-      wMat.push_back(1);
+      wMat = {1, 1, 0, 1, -1, 0, 0, 0, 1};
     }
 
     if (!forgetWmat)
