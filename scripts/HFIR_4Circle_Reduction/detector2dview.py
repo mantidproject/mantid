@@ -47,7 +47,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         return
 
     def add_roi(self):
-        """ Add region of interest
+        """ Add region of interest to the canvas
         :return:
         """
         # check
@@ -81,7 +81,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
     def enter_roi_mode(self, state):
         """
-        Enter the region of interest (ROI) selection mode
+        Enter or leave the region of interest (ROI) selection mode
         :return:
         """
         assert isinstance(state, bool)
@@ -100,6 +100,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
             print 'My polygon is of type %s.' % str(type(self._myPolygon))
             print dir(self._myPolygon)
             self._myPolygon.remove()
+            self._myCanvas = None
 
         self._myCanvas._flush()
 
@@ -116,7 +117,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         lower_left = (self._roiStart[0], self._roiEnd[1])
         upper_right = (self._roiEnd[0], self._roiStart[1])
 
-        return (lower_left, upper_right)
+        return lower_left, upper_right
 
     def on_mouse_motion(self, event):
         """
@@ -223,12 +224,19 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         return (self.y_max - self.y_min) * self._resolutionY
 
     def update_roi_poly(self, cursor_x, cursor_y):
-        """ Update region of interest
+        """ Update region of interest.  It is to
+        (1) remove the original polygon
+        (2) draw a new polygon
         :return:
         """
+        # check
+        assert isinstance(cursor_x, float)
+        assert isinstance(cursor_y, float)
+
         # remove the original polygon
         if self._myPolygon is not None:
             self._myPolygon.remove()
+            self._myPolygon = None
             self.canvas._flush()
 
         # set RIO end

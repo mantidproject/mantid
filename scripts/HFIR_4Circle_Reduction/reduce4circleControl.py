@@ -284,6 +284,24 @@ class CWSCDReductionControl(object):
 
         return True, error_message
 
+    def create_mask_roi(self, exp_number, scan_number):
+        """ Create a mask workspace for region of interest
+        :param exp_number:
+        :param scan_number:
+        :return:
+        """
+        # check
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+        assert (exp_number, scan_number) in self._roiDict
+
+        # get the coordinates
+        ll_corner, ur_corner = self._roiDict[(exp_number, scan_number)]
+
+        mask_detector()
+
+        return
+
     def does_file_exist(self, exp_number, scan_number, pt_number=None):
         """
         Check whether data file for a scan or pt number exists on the
@@ -1138,10 +1156,20 @@ class CWSCDReductionControl(object):
         :param upper_right_corner:
         :return:
         """
-        # TODO/NOW : check validity...
+        # Check
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+        assert not isinstance(lower_left_corner, str) and len(lower_left_corner) == 2
+        assert not isinstance(upper_right_corner, str) and len(upper_right_corner) == 2
+
+        ll_x = int(lower_left_corner[0])
+        ll_y = int(lower_left_corner[1])
+        ur_x = int(upper_right_corner[0])
+        ur_y = int(upper_right_corner[1])
+        assert ll_x < ur_x and ll_y < ur_y
 
         # Add
-        self._roiDict[(exp_number, scan_number)] = (lower_left_corner, upper_right_corner)
+        self._roiDict[(exp_number, scan_number)] = ((ll_x, ll_y), (ur_x, ur_y))
 
         return
 
