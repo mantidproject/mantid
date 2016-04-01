@@ -1,15 +1,15 @@
 #ifndef STRUCTURED_DETECTOR_TEST_H
 #define STRUCTURED_DETECTOR_TEST_H
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include <string>
 #include "MantidGeometry/Instrument/StructuredDetector.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidKernel/Quat.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <string>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -172,10 +172,10 @@ public:
   * repeated on an un-moved parametrized version.
   */
   void do_test_on(StructuredDetector *det) {
-    TS_ASSERT_EQUALS(det->xpixels(), 2);
-    TS_ASSERT_EQUALS(det->ypixels(), 2);
+    TS_ASSERT_EQUALS(det->xPixels(), 2);
+    TS_ASSERT_EQUALS(det->yPixels(), 2);
 
-    auto size = (det->xpixels() + 1) * (det->ypixels() + 1);
+    auto size = (det->xPixels() + 1) * (det->yPixels() + 1);
 
     TS_ASSERT_EQUALS(det->getXValues().size(), size);
     TS_ASSERT_EQUALS(det->getYValues().size(), size);
@@ -191,9 +191,9 @@ public:
     TS_ASSERT_EQUALS(det->getAtXY(0, 1)->getID(), 1);
     TS_ASSERT_EQUALS(det->getAtXY(1, 1)->getID(), 3);
 
-    std::pair<int, int> xy;
-    int x;
-    int y;
+    std::pair<size_t, size_t> xy;
+    size_t x;
+    size_t y;
 
     TS_ASSERT_THROWS_NOTHING(xy = det->getXYForDetectorID(0));
     x = xy.first;

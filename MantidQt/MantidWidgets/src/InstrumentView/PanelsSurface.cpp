@@ -550,8 +550,8 @@ void PanelsSurface::addStructuredDetector(
       boost::dynamic_pointer_cast<const Mantid::Geometry::StructuredDetector>(
           instr->getComponentByID(bankId));
 
-  int nx = structDetector->xpixels();
-  int ny = structDetector->ypixels();
+  auto nx = structDetector->xPixels();
+  auto ny = structDetector->yPixels();
   Mantid::Kernel::V3D pos0 = structDetector->getAtXY(0, 0)->getPos();
   Mantid::Kernel::V3D pos1 = structDetector->getAtXY(nx - 1, 0)->getPos();
   Mantid::Kernel::V3D pos2 = structDetector->getAtXY(nx - 1, ny - 1)->getPos();

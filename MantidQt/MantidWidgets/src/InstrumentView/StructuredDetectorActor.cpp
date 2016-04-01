@@ -41,12 +41,12 @@ StructuredDetectorActor::StructuredDetectorActor(
 
   BoundingBox compBox;
   m_det->getBoundingBox(compBox);
-  mNumberOfDetectors = m_det->xpixels() * m_det->ypixels();
+  mNumberOfDetectors = m_det->xPixels() * m_det->yPixels();
   this->AppendBoundingBox(compBox.minPoint(), compBox.maxPoint());
 
   
-  for (int y = 0; y < m_det->ypixels(); y++) {
-    for (int x = 0; x < m_det->xpixels(); x++) {
+  for (int y = 0; y < m_det->yPixels(); y++) {
+    for (int x = 0; x < m_det->xPixels(); x++) {
       // Getting the detector is slow. Get the ID directly
       detid_t id = m_det->getDetectorIDAtXY(x, y);
       size_t pickID = instrActor.pushBackDetid(id);

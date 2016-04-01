@@ -60,14 +60,14 @@ bool StructuredDetector::compareName(const std::string &proposedMatch) {
 }
 
 void StructuredDetector::init() {
-  m_xpixels = 0;
-  m_ypixels = 0;
+  m_xPixels = 0;
+  m_yPixels = 0;
   m_minDetId = 0;
   m_maxDetId = 0;
-  m_idstart = 0;
-  m_idfillbyfirst_y = false;
-  m_idstepbyrow = 0;
-  m_idstep = 0;
+  m_idStart = 0;
+  m_idFillByFirstY = false;
+  m_idStepByRow = 0;
+  m_idStep = 0;
 
   setGeometryHandler(new StructuredGeometryHandler(this));
 }
@@ -84,50 +84,48 @@ IComponent *StructuredDetector::clone() const {
 /** Return a pointer to the component in the assembly at the
 * (X,Y) pixel position.
 *
-* @param X :: index from 0..m_xpixels-1
-* @param Y :: index from 0..m_ypixels-1
+* @param x :: index from 0..m_xPixels-1
+* @param y :: index from 0..m_yPixels-1
 * @return a pointer to the component in the assembly at the (X,Y) pixel
 *position
 * @throw runtime_error if the x/y pixel width is not set, or X/Y are out of
 *range
 */
-boost::shared_ptr<Detector> StructuredDetector::getAtXY(const int X,
-                                                        const int Y) const {
-  if ((xpixels() <= 0) || (ypixels() <= 0))
-    throw std::runtime_error("StructuredDetector::getAtXY: invalid X or Y "
-                             "width set in the object.");
-  if ((X < 0) || (X >= xpixels()))
+boost::shared_ptr<Detector> StructuredDetector::getAtXY(const size_t x,
+                                                        const size_t y) const {
+  if (x >= xPixels())
     throw std::runtime_error(
         "StructuredDetector::getAtXY: X specified is out of range.");
-  if ((Y < 0) || (Y >= ypixels()))
+  if (y >= yPixels())
     throw std::runtime_error(
         "StructuredDetector::getAtXY: Y specified is out of range.");
 
   // Get to column
   ICompAssembly_sptr xCol =
-      boost::dynamic_pointer_cast<ICompAssembly>(this->getChild(X));
+      boost::dynamic_pointer_cast<ICompAssembly>(this->getChild(x));
   if (!xCol)
     throw std::runtime_error(
         "StructuredDetector::getAtXY: X specified is out of range.");
-  return boost::dynamic_pointer_cast<Detector>(xCol->getChild(Y));
+  return boost::dynamic_pointer_cast<Detector>(xCol->getChild(y));
 }
 
 /** Return the detector ID corresponding to the component in the assembly at the
 * (X,Y) pixel position. No bounds check is made!
 *
-* @param X :: index from 0..m_xpixels-1
-* @param Y :: index from 0..m_ypixels-1
+* @param x :: index from 0..m_xPixels-1
+* @param y :: index from 0..m_yPixels-1
 * @return detector ID int
 * @throw runtime_error if the x/y pixel width is not set, or X/Y are out of
 *range
 */
-detid_t StructuredDetector::getDetectorIDAtXY(const int X, const int Y) const {
+detid_t StructuredDetector::getDetectorIDAtXY(const size_t x,
+                                              const size_t y) const {
   const StructuredDetector *me = m_map == nullptr ? this : this->m_base;
 
-  if (me->m_idfillbyfirst_y)
-    return me->m_idstart + X * me->m_idstepbyrow + Y * me->m_idstep;
+  if (me->m_idFillByFirstY)
+    return me->m_idStart + x * me->m_idStepByRow + y * me->m_idStep;
   else
-    return me->m_idstart + Y * me->m_idstepbyrow + X * me->m_idstep;
+    return me->m_idStart + x * me->m_idStepByRow + y * me->m_idStep;
 }
 
 /** Given a detector ID, return the X,Y coords into the structured detector
@@ -135,21 +133,21 @@ detid_t StructuredDetector::getDetectorIDAtXY(const int X, const int Y) const {
 * @param detectorID :: detectorID
 * @return pair of (x,y)
 */
-std::pair<int, int>
-StructuredDetector::getXYForDetectorID(const int detectorID) const {
+std::pair<size_t, size_t>
+StructuredDetector::getXYForDetectorID(const detid_t detectorID) const {
   const StructuredDetector *me = this;
   if (m_map)
     me = this->m_base;
 
-  int id = detectorID - me->m_idstart;
+  int id = detectorID - me->m_idStart;
 
-  if ((me->m_idstepbyrow == 0) || (me->m_idstep == 0))
+  if ((me->m_idStepByRow == 0) || (me->m_idStep == 0))
     return std::pair<int, int>(-1, -1);
 
-  int row = id / me->m_idstepbyrow;
-  int col = (id % me->m_idstepbyrow) / me->m_idstep;
+  int row = id / me->m_idStepByRow;
+  int col = (id % me->m_idStepByRow) / me->m_idStep;
 
-  if (me->m_idfillbyfirst_y) // x is the fast-changing axis
+  if (me->m_idFillByFirstY) // x is the fast-changing axis
     return std::pair<int, int>(row, col);
   else
     return std::pair<int, int>(col, row);
@@ -157,11 +155,11 @@ StructuredDetector::getXYForDetectorID(const int detectorID) const {
 
 /// Returns the number of pixels in the X direction.
 /// @return number of X pixels
-int StructuredDetector::xpixels() const {
+size_t StructuredDetector::xPixels() const {
   if (m_map)
-    return m_base->m_xpixels;
+    return m_base->m_xPixels;
   else
-    return this->m_xpixels;
+    return this->m_xPixels;
 }
 
 /** Sets the colours for detector IDs based on color maps created by instrument
@@ -211,43 +209,43 @@ std::vector<int> const &StructuredDetector::getB() const {
 
 /// Returns the number of pixels in the Y direction.
 /// @return number of Y pixels
-int StructuredDetector::ypixels() const {
+size_t StructuredDetector::yPixels() const {
   if (m_map)
-    return m_base->m_ypixels;
+    return m_base->m_yPixels;
   else
-    return this->m_ypixels;
+    return this->m_yPixels;
 }
 
-/// Returns the idstart
-int StructuredDetector::idstart() const {
+/// Returns the idStart
+detid_t StructuredDetector::idStart() const {
   if (m_map)
-    return m_base->m_idstart;
+    return m_base->m_idStart;
   else
-    return this->m_idstart;
+    return this->m_idStart;
 }
 
-/// Returns the idfillbyfirst_y
-bool StructuredDetector::idfillbyfirst_y() const {
+/// Returns the idFillByFirstY
+bool StructuredDetector::idFillByFirstY() const {
   if (m_map)
-    return m_base->m_idfillbyfirst_y;
+    return m_base->m_idFillByFirstY;
   else
-    return this->m_idfillbyfirst_y;
+    return this->m_idFillByFirstY;
 }
 
-/// Returns the idstepbyrow
-int StructuredDetector::idstepbyrow() const {
+/// Returns the idStepByRow
+int StructuredDetector::idStepByRow() const {
   if (m_map)
-    return m_base->m_idstepbyrow;
+    return m_base->m_idStepByRow;
   else
-    return this->m_idstepbyrow;
+    return this->m_idStepByRow;
 }
 
-/// Returns the idstep
-int StructuredDetector::idstep() const {
+/// Returns the idStep
+int StructuredDetector::idStep() const {
   if (m_map)
-    return m_base->m_idstep;
+    return m_base->m_idStep;
   else
-    return this->m_idstep;
+    return this->m_idStep;
 }
 
 std::vector<double> const &StructuredDetector::getXValues() const {
@@ -267,58 +265,58 @@ std::vector<double> const &StructuredDetector::getYValues() const {
 /** Initialize a StructuredDetector by creating all of the pixels
 * contained within it. You should have set the name, position
 * and rotation and facing of this object BEFORE calling this.
-* NB xpixels and ypixels requires (xpixels+1)*(ypixels+1) vertices
+* NB xPixels and yPixels requires (xPixels+1)*(yPixels+1) vertices
 *
-* @param xpixels :: number of pixels in X
-* @param ypixels :: number of pixels in Y
+* @param xPixels :: number of pixels in X
+* @param yPixels :: number of pixels in Y
 * @param x :: X vertices
 * @param y :: Y vertices
-* @param idstart :: detector ID of the first pixel
-* @param idfillbyfirst_y :: set to true if ID numbers increase with Y indices
+* @param idStart :: detector ID of the first pixel
+* @param idFillByFirstY :: set to true if ID numbers increase with Y indices
 *first. That is: (0,0)=0; (0,1)=1, (0,2)=2 and so on.
-* @param idstepbyrow :: amount to increase the ID number on each row. e.g, if
+* @param idStepByRow :: amount to increase the ID number on each row. e.g, if
 *you fill by Y first,
-*            and set  idstepbyrow = 100, and have 50 Y pixels, you would get:
+*            and set  idStepByRow = 100, and have 50 Y pixels, you would get:
 *            (0,0)=0; (0,1)=1; ... (0,49)=49; (1,0)=100; (1,1)=101; etc.
-* @param idstep :: amount to increase each individual ID number with a row.
+* @param idStep :: amount to increase each individual ID number with a row.
 *e.g, if you fill by Y first,
-*            and idstep=100 and idstart=1 then (0,0)=1; (0,1)=101; and so on
+*            and idStep=100 and idStart=1 then (0,0)=1; (0,1)=101; and so on
 *
 */
-void StructuredDetector::initialize(int xpixels, int ypixels,
+void StructuredDetector::initialize(size_t xPixels, size_t yPixels,
                                     const std::vector<double> &x,
-                                    const std::vector<double> &y, int idstart,
-                                    bool idfillbyfirst_y, int idstepbyrow,
-                                    int idstep) {
+                                    const std::vector<double> &y,
+                                    detid_t idStart, bool idFillByFirstY,
+                                    int idStepByRow, int idStep) {
   if (m_map)
     throw std::runtime_error("StructuredDetector::initialize() called for a "
                              "parametrized StructuredDetector");
 
-  m_xpixels = xpixels;
-  m_ypixels = ypixels;
+  m_xPixels = xPixels;
+  m_yPixels = yPixels;
 
   /// IDs start here
-  m_idstart = idstart;
+  m_idStart = idStart;
   /// IDs are filled in Y fastest
-  m_idfillbyfirst_y = idfillbyfirst_y;
+  m_idFillByFirstY = idFillByFirstY;
   /// Step size in ID in each row
-  m_idstepbyrow = idstepbyrow;
+  m_idStepByRow = idStepByRow;
   /// Step size in ID in each col
-  m_idstep = idstep;
+  m_idStep = idStep;
 
   // Some safety checks
-  if (m_xpixels <= 0)
+  if (m_xPixels <= 0)
     throw std::invalid_argument(
-        "StructuredDetector::initialize(): xpixels should be > 0");
-  if (m_ypixels <= 0)
+        "StructuredDetector::initialize(): xPixels should be > 0");
+  if (m_yPixels <= 0)
     throw std::invalid_argument(
-        "StructuredDetector::initialize(): ypixels should be > 0");
+        "StructuredDetector::initialize(): yPixels should be > 0");
   if (x.size() != y.size())
     throw std::invalid_argument(
         "StructuredDetector::initialize(): x.size() should be = y.size()");
-  if (x.size() != (size_t)((m_xpixels + 1) * (m_ypixels + 1)))
+  if (x.size() != (size_t)((m_xPixels + 1) * (m_yPixels + 1)))
     throw std::invalid_argument("StructuredDetector::initialize(): x.size() "
-                                "should be = (xpixels+1)*(ypixels+1)");
+                                "should be = (xPixels+1)*(yPixels+1)");
 
   // Store vertices
   m_xvalues = x;
@@ -330,17 +328,17 @@ void StructuredDetector::initialize(int xpixels, int ypixels,
 /** Creates all detector pixels within the StructuredDetector.
 */
 void StructuredDetector::createDetectors() {
-  auto minDetId = m_idstart;
-  auto maxDetId = m_idstart;
+  auto minDetId = m_idStart;
+  auto maxDetId = m_idStart;
 
-  for (auto ix = 0; ix < m_xpixels; ix++) {
+  for (auto ix = 0; ix < m_xPixels; ix++) {
     // Create an ICompAssembly for each x-column
     std::ostringstream oss_col;
 
     oss_col << this->getName() << "(x=" << ix << ")";
     CompAssembly *xColumn = new CompAssembly(oss_col.str(), this);
 
-    for (auto iy = 0; iy < m_ypixels; iy++) {
+    for (auto iy = 0; iy < m_yPixels; iy++) {
       std::ostringstream oss;
       oss << this->getName() << "(" << ix << "," << iy << ")";
 
@@ -428,7 +426,7 @@ streamShape(const std::string &name, double xlb, double xlf, double xrf,
 Detector *StructuredDetector::addDetector(CompAssembly *parent,
                                           const std::string &name, int x, int y,
                                           int id) {
-  auto w = m_xpixels + 1;
+  auto w = m_xPixels + 1;
 
   // Store hexahedral vertices for detector shape
   auto xlb = m_xvalues[(y * w) + x];
@@ -567,13 +565,13 @@ void StructuredDetector::getBoundingBox(BoundingBox &assemblyBox) const {
     boost::shared_ptr<Detector> det = getAtXY(0, 0);
     det->getBoundingBox(compBox);
     m_cachedBoundingBox->grow(compBox);
-    det = getAtXY(this->xpixels() - 1, 0);
+    det = getAtXY(this->xPixels() - 1, 0);
     det->getBoundingBox(compBox);
     m_cachedBoundingBox->grow(compBox);
-    det = getAtXY(this->xpixels() - 1, this->ypixels() - 1);
+    det = getAtXY(this->xPixels() - 1, this->yPixels() - 1);
     det->getBoundingBox(compBox);
     m_cachedBoundingBox->grow(compBox);
-    det = getAtXY(0, this->ypixels() - 1);
+    det = getAtXY(0, this->yPixels() - 1);
     det->getBoundingBox(compBox);
     m_cachedBoundingBox->grow(compBox);
   }
@@ -611,14 +609,14 @@ void StructuredDetector::initDraw() const {
 /// Returns the shape of the Object
 const boost::shared_ptr<const Object> StructuredDetector::shape() const {
   // --- Create a hexahedral shape for your pixels ----
-  auto w = this->xpixels() + 1;
+  auto w = this->xPixels() + 1;
   auto xlb = m_xvalues[0];
-  auto xlf = m_xvalues[w * m_ypixels];
-  auto xrf = m_xvalues[(w * m_ypixels) + m_xpixels];
+  auto xlf = m_xvalues[w * m_yPixels];
+  auto xrf = m_xvalues[(w * m_yPixels) + m_xPixels];
   auto xrb = m_xvalues[w];
   auto ylb = m_yvalues[0];
-  auto ylf = m_yvalues[(w * m_ypixels)];
-  auto yrf = m_yvalues[(w * m_ypixels) + m_xpixels];
+  auto ylf = m_yvalues[(w * m_yPixels)];
+  auto yrf = m_yvalues[(w * m_yPixels) + m_xPixels];
   auto yrb = m_yvalues[w];
 
   std::ostringstream xmlShapeStream;

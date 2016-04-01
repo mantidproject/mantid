@@ -70,8 +70,8 @@ void StructuredGeometryHandler::Render() {
   if (xVerts.size() != yVerts.size())
     return;
 
-  auto w = m_Det->xpixels() + 1;
-  auto h = m_Det->ypixels() + 1;
+  auto w = m_Det->xPixels() + 1;
+  auto h = m_Det->yPixels() + 1;
 
   glBegin(GL_QUADS);
 

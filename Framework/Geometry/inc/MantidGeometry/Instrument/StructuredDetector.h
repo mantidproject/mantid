@@ -1,14 +1,14 @@
 #ifndef STRUCTUREDDETECTOR_H
 #define STRUCTUREDDETECTOR_H
 
+#include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Objects/Object.h"
 #include <string>
 #include <vector>
-#include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/Component.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Objects/Object.h"
-#include "MantidGeometry/IObjComponent.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -63,17 +63,17 @@ public:
   StructuredDetector(const StructuredDetector *base, const ParameterMap *map);
 
   /// Create all the detector pixels of this rectangular detector.
-  void initialize(int xpixels, int ypixels, const std::vector<double> &x,
-                  const std::vector<double> &y, int idstart,
-                  bool idfillbyfirst_y, int idstepbyrow, int idstep = 1);
+  void initialize(size_t xPixels, size_t yPixels, const std::vector<double> &x,
+                  const std::vector<double> &y, detid_t idStart,
+                  bool idFillByFirstY, int idStepByRow, int idStep = 1);
 
   //! Make a clone of the present component
   IComponent *clone() const override;
 
-  boost::shared_ptr<Detector> getAtXY(const int X, const int Y) const;
+  boost::shared_ptr<Detector> getAtXY(const size_t x, const size_t y) const;
 
-  detid_t getDetectorIDAtXY(const int X, const int Y) const;
-  std::pair<int, int> getXYForDetectorID(const int detectorID) const;
+  detid_t getDetectorIDAtXY(const size_t X, const size_t Y) const;
+  std::pair<size_t, size_t> getXYForDetectorID(const detid_t detectorID) const;
 
   std::vector<double> const &getXValues() const;
   std::vector<double> const &getYValues() const;
@@ -85,17 +85,17 @@ public:
   std::vector<int> const &getG() const;
   std::vector<int> const &getB() const;
 
-  int xpixels() const;
-  int ypixels() const;
-  int idstart() const;
-  bool idfillbyfirst_y() const;
-  int idstepbyrow() const;
-  int idstep() const;
+  size_t xPixels() const;
+  size_t yPixels() const;
+  detid_t idStart() const;
+  bool idFillByFirstY() const;
+  int idStepByRow() const;
+  int idStep() const;
 
   /// minimum detector id
-  int minDetectorID();
+  detid_t minDetectorID();
   /// maximum detector id
-  int maxDetectorID();
+  detid_t maxDetectorID();
 
   boost::shared_ptr<const IComponent>
   getComponentByName(const std::string &cname, int nlevels = 0) const override;
@@ -160,23 +160,23 @@ private:
   StructuredDetector &operator=(const ICompAssembly &);
 
   /// The number of pixels in the X (horizontal) direction;
-  int m_xpixels;
+  size_t m_xPixels;
   /// The number of pixels in the Y (vertical) direction;
-  int m_ypixels;
+  size_t m_yPixels;
 
   /// minimum detector id
-  int m_minDetId;
+  detid_t m_minDetId;
   /// maximum detector id
-  int m_maxDetId;
+  detid_t m_maxDetId;
 
   /// IDs start here
-  int m_idstart;
+  detid_t m_idStart;
   /// IDs are filled in Y fastest
-  bool m_idfillbyfirst_y;
+  bool m_idFillByFirstY;
   /// Step size in ID in each row
-  int m_idstepbyrow;
+  int m_idStepByRow;
   /// Step size in ID in each col
-  int m_idstep;
+  int m_idStep;
 
   std::vector<double> m_xvalues;
   std::vector<double> m_yvalues;
