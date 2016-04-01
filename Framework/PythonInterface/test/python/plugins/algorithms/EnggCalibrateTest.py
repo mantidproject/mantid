@@ -79,10 +79,10 @@ class EnggCalibrateTest(unittest.TestCase):
         Checks normal operation.
         """
         try:
-            difc, zero, peaks = sapi.EnggCalibrate(InputWorkspace=self.__class__._data_ws,
-                                                   VanIntegrationWorkspace=self.__class__._van_integ_tbl,
-                                                   VanCurvesWorkspace=self.__class__._van_curves_ws,
-                                                   ExpectedPeaks=[1.6, 1.1, 1.8], Bank='2')
+            difa, difc, zero, peaks = sapi.EnggCalibrate(InputWorkspace=self.__class__._data_ws,
+                                                         VanIntegrationWorkspace=self.__class__._van_integ_tbl,
+                                                         VanCurvesWorkspace=self.__class__._van_curves_ws,
+                                                         ExpectedPeaks=[1.6, 1.1, 1.8], Bank='2')
         except RuntimeError as ere:
             pass
 
@@ -93,17 +93,19 @@ class EnggCalibrateTest(unittest.TestCase):
         # This file has: 1.6, 1.1, 1.8 (as the test above)
         filename = 'EnginX_3_expected_peaks_unittest.csv'
         try:
-            difc, zero, peaks = sapi.EnggCalibrate(InputWorkspace=self.__class__._data_ws,
-                                                   VanIntegrationWorkspace=self.__class__._van_integ_tbl,
-                                                   VanCurvesWorkspace=self.__class__._van_curves_ws,
-                                                   # nonsense, but FromFile should prevail
-                                                   ExpectedPeaks=[-4, 40, 323],
-                                                   ExpectedPeaksFromFile=filename,
-                                                   Bank='2')
+            difa, difc, zero, peaks = sapi.EnggCalibrate(InputWorkspace=self.__class__._data_ws,
+                                                         VanIntegrationWorkspace=self.__class__._van_integ_tbl,
+                                                         VanCurvesWorkspace=self.__class__._van_curves_ws,
+                                                         # nonsense, but FromFile should prevail
+                                                         ExpectedPeaks=[-4, 40, 323],
+                                                         ExpectedPeaksFromFile=filename,
+                                                         Bank='2')
         except RuntimeError as ere:
             pass
 
-    def check_3peaks_values(self, difc, zero):
+    def check_3peaks_values(self, difa, difc, zero):
+        self.assertEquals(difa, 0)
+
         # There are platform specific differences in final parameter values
         # For example in earlier versions, debian: 369367.57492582797; win7: 369242.28850305633
         # osx were ~0.995% different (18920.539474 instead of 18485.223143) in the best case but can
@@ -118,7 +120,7 @@ class EnggCalibrateTest(unittest.TestCase):
 
         # assertLess would be nice, but only available in unittest >= 2.7
         self.assertTrue(abs((expected_difc-difc)/expected_difc) < difc_err_epsilon,
-                        "Difc (%f) is too far from its expected value (%f)" %(difc, expected_difc))
+                        "DIFC (%f) is too far from its expected value (%f)" %(difc, expected_difc))
 
         # especially this zero parameter is extremely platform dependent/sensitive
         # Examples:
@@ -130,7 +132,7 @@ class EnggCalibrateTest(unittest.TestCase):
         zero_err_epsilon = 0.2
 
         self.assertTrue(abs((expected_zero-zero)/expected_zero) < zero_err_epsilon,
-                        "Zero (%f) is too far from its expected value (%f)" %(zero, expected_zero))
+                        "TZERO (%f) is too far from its expected value (%f)" %(zero, expected_zero))
 
 
 if __name__ == '__main__':

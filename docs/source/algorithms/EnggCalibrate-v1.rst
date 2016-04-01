@@ -23,19 +23,21 @@ also perform corrections with Vanadium data.
 
 Then this algorithm calls :ref:`algm-EnggFitPeaks` (as a child
 algorithm) which through a sequence of peak fits determines a linear
-relationship between dSpacing and measured TOF values in terms of DIFC
-and ZERO values and provides the these parameters to the Calibrate
-algorithm.
+relationship between dSpacing and measured TOF values in terms of
+DIFA, DIFC and TZERO values and provides the these parameters to the
+Calibrate algorithm.
 
 This algorithm provides an indirect calibration of the sample
-position, that is, a calibration returned in terms of Difc and Zero
-rather than an actual new sample position (hence the reason for
+position, that is, a calibration returned in terms of DIFA, DIFC and
+ZERO rather than an actual new sample position (hence the reason for
 'indirect').
 
-The parameters DIFC and ZERO are returned and can be retrieved as
-output properties as well. If a name is given in
+The parameters DIFA, DIFC and ZERO are returned and can be retrieved
+as output properties as well. If a name is given in
 OutputParametersTableName the algorithm also produces a table
 workspace with that name, containing the two output parameters.
+Presently the DIFA parameter is always set to zero (see
+:ref:`algm-EnggFitDIFCFromPeaks`).
 
 The script EnggUtils included with Mantid can produce a GSAS
 parameters file for the ENGIN-X instrument, given the DIFC and ZERO

@@ -89,11 +89,17 @@ class EnggCalibrate(PythonAlgorithm):
                              'are added as two columns in a single row. If not given, no table is '
                              'generated.')
 
-        self.declareProperty("Difc", 0.0, direction = Direction.Output,
-                             doc = "Calibrated Difc value for the bank or range of pixels/detectors given")
+        self.declareProperty("DIFA", 0.0, direction = Direction.Output,
+                             doc = "Calibration parameter DIFA for the bank or range of pixels/detectors "
+                             "given")
 
-        self.declareProperty("Zero", 0.0, direction = Direction.Output,
-                             doc = "Calibrated Zero value for the bank or range of pixels/detectors given")
+        self.declareProperty("DIFC", 0.0, direction = Direction.Output,
+                             doc = "Calibration parameter DIFC for the bank or range of pixels/detectors "
+                             "given")
+
+        self.declareProperty("TZERO", 0.0, direction = Direction.Output,
+                             doc = "Calibration parameter TZERO for the bank or range of pixels/detectors "
+                             "given")
 
         self.declareProperty(ITableWorkspaceProperty("FittedPeaks", "", Direction.Output),
                              doc = "Information on fitted peaks as produced by the (child) algorithm "
@@ -102,8 +108,9 @@ class EnggCalibrate(PythonAlgorithm):
         out_grp = 'Outputs'
         self.setPropertyGroup('DetectorPositions', out_grp)
         self.setPropertyGroup('OutputParametersTableName', out_grp)
-        self.setPropertyGroup('Difc', out_grp)
-        self.setPropertyGroup('Zero', out_grp)
+        self.setPropertyGroup('DIFA', out_grp)
+        self.setPropertyGroup('DIFC', out_grp)
+        self.setPropertyGroup('TZERO', out_grp)
         self.setPropertyGroup('FittedPeaks', out_grp)
 
     def PyExec(self):
@@ -126,19 +133,19 @@ class EnggCalibrate(PythonAlgorithm):
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
         prog.report('Fitting parameters for the focused run')
-        difc, zero, fitted_peaks = self._fit_params(focussed_ws, expectedPeaksD)
+        difa, difc, zero, fitted_peaks = self._fit_params(focussed_ws, expectedPeaksD)
 
-        self.log().information("Fitted {0} peaks. Resulting difc: {1}, tzero: {2}".
-                               format(fitted_peaks.rowCount(), difc, zero))
+        self.log().information("Fitted {0} peaks. Resulting DIFA: {1}, DIFC: {2}, TZERO: {3}".
+                               format(fitted_peaks.rowCount(), difa, difc, zero))
         self.log().information("Peaks fitted: {0}, centers in ToF: {1}".
                                format(fitted_peaks.column("dSpacing"),
                                       fitted_peaks.column("X0")))
 
-        self._produce_outputs(difc, zero, fitted_peaks)
+        self._produce_outputs(difa, difc, zero, fitted_peaks)
 
     def _fit_params(self, focused_ws, expected_peaks_d):
         """
-        Fit the GSAS parameters that this algorithm produces: difc and zero. Fits a
+        Fit the GSAS parameters that this algorithm produces: DIFC and TZERO. Fits a
         number of peaks starting from the expected peak positions. Then it fits a line
         on the peak positions to produce the DIFC and TZERO as used in GSAS.
 
@@ -146,7 +153,8 @@ class EnggCalibrate(PythonAlgorithm):
         @param expected_peaks_d :: expected peaks, used as intial peak positions for the
         fitting, in d-spacing units
 
-        @returns a tuple of parameters: difc, zero, and a list of peak centers as fitted
+        @returns a tuple with three GSAS calibration parameters (DIFA, DIFC, ZERO),
+        and a list of peak centers as fitted
         """
 
         fit_alg = self.createChildAlgorithm('EnggFitPeaks')
@@ -157,11 +165,17 @@ class EnggCalibrate(PythonAlgorithm):
         # EnggFitPaks, but better to check inputs early, before this
         fit_alg.execute()
 
-        difc = fit_alg.getProperty('Difc').value
-        zero = fit_alg.getProperty('Zero').value
         fitted_peaks = fit_alg.getProperty('FittedPeaks').value
 
-        return difc, zero, fitted_peaks
+        difc_alg = self.createChildAlgorithm('EnggFitDIFCFromPeaks')
+        difc_alg.setProperty('FittedPeaks', fitted_peaks)
+        difc_alg.execute()
+
+        difa = difc_alg.getProperty('DIFA').value
+        difc = difc_alg.getProperty('DIFC').value
+        zero = difc_alg.getProperty('TZERO').value
+
+        return (difa, difc, zero, fitted_peaks)
 
     def _focus_run(self, ws, vanWS, bank, indices):
         """
@@ -201,25 +215,27 @@ class EnggCalibrate(PythonAlgorithm):
 
         return alg.getProperty('OutputWorkspace').value
 
-    def _produce_outputs(self, difc, zero, fitted_peaks):
+    def _produce_outputs(self, difa, difc, zero, fitted_peaks):
         """
         Just fills in the output properties as requested
 
-        @param difc :: the difc GSAS parameter as fitted here
-        @param zero :: the zero GSAS parameter as fitted here
+        @param difa :: the DIFA GSAS parameter as fitted here
+        @param difc :: the DIFC GSAS parameter as fitted here
+        @param zero :: the TZERO GSAS parameter as fitted here
         @param fitted_peaks :: table workspace with peak parameters (one peak per row)
         """
 
         import EnggUtils
 
-        self.setProperty('Difc', difc)
-        self.setProperty('Zero', zero)
+        self.setProperty('DIFA', difa)
+        self.setProperty('DIFC', difc)
+        self.setProperty('TZERO', zero)
         self.setProperty('FittedPeaks', fitted_peaks)
 
         # make output table if requested
         tblName = self.getPropertyValue("OutputParametersTableName")
         if '' != tblName:
-            EnggUtils.generateOutputParTable(tblName, difc, zero)
+            EnggUtils.generateOutputParTable(tblName, difa, difc, zero)
             self.log().information("Output parameters added into a table workspace: %s" % tblName)
 
 
