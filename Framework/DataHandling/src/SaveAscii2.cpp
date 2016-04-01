@@ -71,12 +71,9 @@ void SaveAscii2::init() {
                   "Character(s) to put in front of comment lines.");
 
   // For the ListValidator
-  std::string spacers[6][2] = {{"CSV", ","},
-                               {"Tab", "\t"},
-                               {"Space", " "},
-                               {"Colon", ":"},
-                               {"SemiColon", ";"},
-                               {"UserDefined", "UserDefined"}};
+  std::string spacers[6][2] = {
+      {"CSV", ","},   {"Tab", "\t"},      {"Space", " "},
+      {"Colon", ":"}, {"SemiColon", ";"}, {"UserDefined", "UserDefined"}};
   std::vector<std::string> sepOptions;
   for (auto &spacer : spacers) {
     std::string option = spacer[0];
@@ -130,7 +127,7 @@ void SaveAscii2::exec() {
   m_writeID = getProperty("WriteSpectrumID");
   const auto metaDataString = getPropertyValue("SpectrumMetaData");
   if (metaDataString.size() != 0) {
-	  m_metaData = stringListToVector(metaDataString);
+    m_metaData = stringListToVector(metaDataString);
   }
   if (m_writeID) {
     auto containsSpectrumNumber = false;
@@ -282,11 +279,11 @@ void SaveAscii2::writeSpectra(const std::set<int>::const_iterator &spectraItr,
   const auto specNo = spec->getSpectrumNo();
   const auto workspaceIndex = m_ws->getSpectrumToWorkspaceIndexMap()[specNo];
   for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
-	  auto value = m_metaDataMap[*iter][workspaceIndex];
-	  file << value;
-	  if (iter != m_metaData.end() - 1) {
-		  file << " " << m_sep << " ";
-	  }
+    auto value = m_metaDataMap[*iter][workspaceIndex];
+    file << value;
+    if (iter != m_metaData.end() - 1) {
+      file << " " << m_sep << " ";
+    }
   }
   file << std::endl;
 
@@ -400,7 +397,8 @@ SaveAscii2::stringListToVector(const std::string &inputString) {
 }
 
 /**
- * Populate the map with the Q values associated with each spectrum in the workspace
+ * Populate the map with the Q values associated with each spectrum in the
+ * workspace
  */
 void SaveAscii2::populateQMetaData() {
   std::vector<std::string> qValues;
@@ -410,19 +408,18 @@ void SaveAscii2::populateQMetaData() {
     double twoTheta(0.0), efixed(0.0);
     if (!detector->isMonitor()) {
       twoTheta = m_ws->detectorTwoTheta(detector) / 2.0;
-	  try {
-		  efixed = m_ws->getEFixed(detector);
-	  }
-	  catch (std::runtime_error error) {
-		  throw error;
-	  }
+      try {
+        efixed = m_ws->getEFixed(detector);
+      } catch (std::runtime_error error) {
+        throw error;
+      }
     } else {
       twoTheta = 0.0;
       efixed = DBL_MIN;
     }
     // Convert to MomentumTransfer
-	auto qValue = Kernel::UnitConversion::run(twoTheta, efixed);
-	auto qValueStr = boost::lexical_cast<std::string>(qValue);
+    auto qValue = Kernel::UnitConversion::run(twoTheta, efixed);
+    auto qValueStr = boost::lexical_cast<std::string>(qValue);
     qValues.push_back(qValueStr);
   }
   m_metaDataMap["Q"] = qValues;
@@ -463,13 +460,13 @@ void SaveAscii2::populateAngleMetaData() {
  */
 void SaveAscii2::populateAllMetaData() {
   for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
-	auto metaDataType = *iter;
-	if (metaDataType.compare("SpectrumNumber") == 0)
-		populateSpectrumNumberMetaData();
-	if (metaDataType.compare("Q") == 0)
-		populateQMetaData();
-	if (metaDataType.compare("Angle") == 0)
-		populateAngleMetaData();
+    auto metaDataType = *iter;
+    if (metaDataType.compare("SpectrumNumber") == 0)
+      populateSpectrumNumberMetaData();
+    if (metaDataType.compare("Q") == 0)
+      populateQMetaData();
+    if (metaDataType.compare("Angle") == 0)
+      populateAngleMetaData();
   }
 }
 
