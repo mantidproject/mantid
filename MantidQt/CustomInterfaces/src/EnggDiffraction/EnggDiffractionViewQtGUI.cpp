@@ -212,15 +212,15 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
           SLOT(setListWidgetBank(int)));
 
   connect(m_uiTabFitting.listWidget_fitting_bank_preview,
-	  SIGNAL(currentRowChanged(int)), this,
-	  SLOT(fittingListWidgetBank(int)));
+          SIGNAL(currentRowChanged(int)), this,
+          SLOT(fittingListWidgetBank(int)));
 
   connect(m_uiTabFitting.listWidget_fitting_bank_preview,
-	  SIGNAL(currentRowChanged(int)), this, SLOT(setBankIdComboBox(int)));
+          SIGNAL(currentRowChanged(int)), this, SLOT(setBankIdComboBox(int)));
 
   /// shahroz
   connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)), this,
-	  SLOT(setBankDir(int)));
+          SLOT(setBankDir(int)));
 
   connect(m_uiTabFitting.pushButton_fitting_browse_peaks, SIGNAL(released()),
           this, SLOT(browsePeaksToFit()));
@@ -1297,9 +1297,7 @@ void EnggDiffractionViewQtGUI::setListWidgetBank(int idx) {
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
     fittingRunNoChanged() {
   QString focusedFile = m_uiTabFitting.lineEdit_pushButton_run_num->text();
-
   Poco::Path selectedfPath(focusedFile);
-
   Poco::Path bankDir;
 
   m_fitting_runno_dir_vec.clear();
@@ -1308,7 +1306,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
   if (selectedfPath.isFile()) {
 
 #ifdef __unix__
-    Poco::Path home("C:\\");
+    auto home = Poco::Path().home();
     bankDir.append(home);
     bankDir.append(fPath.parent().toString());
     bankDir.append(bankFile);
@@ -1316,8 +1314,8 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
     bankDir = (bankDir).expand(selectedfPath.parent().toString());
 #endif
 
-	std::vector<std::string> splitBaseName =
-		splitFittingDirectory(selectedfPath);
+    std::vector<std::string> splitBaseName =
+        splitFittingDirectory(selectedfPath);
 
     std::string cwd(bankDir.toString());
     Poco::DirectoryIterator it(cwd);
@@ -1328,10 +1326,9 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
         Poco::Path itBankfPath(itFilePath);
 
         std::string itbankFileName = itBankfPath.getBaseName();
-		// check if it not any other file.. e.g: texture
-		std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] +
-			"_" + splitBaseName[2] + "_" +
-			splitBaseName[3];
+        // check if it not any other file.. e.g: texture
+        std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] + "_" +
+                               splitBaseName[2] + "_" + splitBaseName[3];
         if (itbankFileName.find(foc_file) != std::string::npos) {
 
           m_fitting_runno_dir_vec.push_back(itFilePath);
@@ -1339,47 +1336,8 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
       }
       ++it;
     }
-
-    // delete previous bank added to the list
-    m_uiTabFitting.comboBox_bank->clear();
-    m_uiTabFitting.listWidget_fitting_bank_preview->clear();
-
-    if (m_fitting_runno_dir_vec.size() > 1) {
-
-      for (size_t i = 0; i < m_fitting_runno_dir_vec.size(); i++) {
-        Poco::Path vecFile(m_fitting_runno_dir_vec[i]);
-		// split the directory from m_fitting_runno_dir_vec
-        std::vector<std::string> vecFileSplit = splitFittingDirectory(vecFile);
-		// assign the file bank id
-        std::string bankID = (vecFileSplit[vecFileSplit.size() - 1]);
-      
-		std::string bankNo;
-        bool isDigit = false;
-        for (size_t i = 0; i < bankID.size(); i++) {
-          char *str = &bankID[i];
-          if (std::isdigit(*str)) {
-            bankNo += bankID[i];
-            isDigit = true;
-          }
-        }
-
-        if (isDigit) {
-          m_uiTabFitting.comboBox_bank->addItem(QString::fromStdString(bankID));
-          m_uiTabFitting.listWidget_fitting_bank_preview->addItem(
-              QString::fromStdString(bankID));
-        } else {
-          auto maxTots = m_uiTabFitting.comboBox_bank->maximumSize();
-          m_uiTabFitting.comboBox_bank->addItem(QString("Bank %1").arg(i + 1));
-          m_uiTabFitting.listWidget_fitting_bank_preview->addItem(
-              QString("%1").arg(i + 1));
-        }
-      }
-      m_uiTabFitting.comboBox_bank->setEnabled(true);
-      m_uiTabFitting.listWidget_fitting_bank_preview->setEnabled(true);
-    } else {
-      m_uiTabFitting.comboBox_bank->setEnabled(false);
-      m_uiTabFitting.listWidget_fitting_bank_preview->setEnabled(false);
-    }
+	// add bank to the combo-box and list view
+    addBankItems();
   }
 }
 
@@ -1393,6 +1351,52 @@ EnggDiffractionViewQtGUI::splitFittingDirectory(Poco::Path selectedfPath) {
     // std::sort(splitBaseName.begin(), splitBaseName.end());
   }
   return splitBaseName;
+}
+
+void EnggDiffractionViewQtGUI::addBankItems() {
+
+  // delete previous bank added to the list
+	if (sizeof(m_uiTabFitting.comboBox_bank->size()) > 0) {
+		m_uiTabFitting.comboBox_bank->clear();
+		m_uiTabFitting.listWidget_fitting_bank_preview->clear();
+	}
+
+  if (m_fitting_runno_dir_vec.size() > 1) {
+
+    for (size_t i = 0; i < m_fitting_runno_dir_vec.size(); i++) {
+      Poco::Path vecFile(m_fitting_runno_dir_vec[i]);
+      // split the directory from m_fitting_runno_dir_vec
+      std::vector<std::string> vecFileSplit = splitFittingDirectory(vecFile);
+      // assign the file bank id
+      std::string bankID = (vecFileSplit[vecFileSplit.size() - 1]);
+
+      std::string bankNo;
+      bool isDigit = false;
+      for (size_t i = 0; i < bankID.size(); i++) {
+        char *str = &bankID[i];
+        if (std::isdigit(*str)) {
+          bankNo += bankID[i];
+          isDigit = true;
+        }
+      }
+
+      if (isDigit) {
+        m_uiTabFitting.comboBox_bank->addItem(QString::fromStdString(bankID));
+        m_uiTabFitting.listWidget_fitting_bank_preview->addItem(
+            QString::fromStdString(bankID));
+      } else {
+        auto maxTots = m_uiTabFitting.comboBox_bank->maximumSize();
+        m_uiTabFitting.comboBox_bank->addItem(QString("Bank %1").arg(i + 1));
+        m_uiTabFitting.listWidget_fitting_bank_preview->addItem(
+            QString("%1").arg(i + 1));
+      }
+    }
+    m_uiTabFitting.comboBox_bank->setEnabled(true);
+    m_uiTabFitting.listWidget_fitting_bank_preview->setEnabled(true);
+  } else {
+    m_uiTabFitting.comboBox_bank->setEnabled(false);
+    m_uiTabFitting.listWidget_fitting_bank_preview->setEnabled(false);
+  }
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
