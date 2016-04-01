@@ -172,6 +172,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(
         save.setProperty("SpectrumMetaData", "SpectrumNumber,Q,Angle"));
+	TS_ASSERT_THROWS_NOTHING(save.setProperty("WriteSpectrumID", false));
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
@@ -200,6 +201,46 @@ public:
 
     Poco::File(filename).remove();
     AnalysisDataService::Instance().remove(m_name);
+  }
+
+  void test_Spectrum_Number_and_spec_ID_does_not_print_spec_num_twice() {
+	  MatrixWorkspace_sptr wsToSave;
+	  writeInelasticWS(wsToSave);
+
+	  SaveAscii2 save;
+	  std::string filename = initSaveAscii2(save);
+
+	  TS_ASSERT_THROWS_NOTHING(
+		  save.setProperty("SpectrumMetaData", "SpectrumNumber"));
+	  TS_ASSERT_THROWS_NOTHING(save.setProperty("WriteSpectrumID", true));
+	  TS_ASSERT_THROWS_NOTHING(save.execute());
+
+	  // has the algorithm written a file to disk?
+	  TS_ASSERT(Poco::File(filename).exists());
+
+	  // Now make some checks on the content of the file
+	  std::ifstream in(filename.c_str());
+	  int specID;
+	  double firstData;
+	  std::string header1, header2, header3, separator, comment;
+
+	  // Test that the first few column headers, separator and first two bins are
+	  // as expected
+	  in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
+		  specID >> firstData;
+	  TS_ASSERT_EQUALS(comment, "#");
+	  TS_ASSERT_EQUALS(separator, ",");
+	  TS_ASSERT_EQUALS(header1, "X");
+	  TS_ASSERT_EQUALS(header2, "Y");
+	  TS_ASSERT_EQUALS(header3, "E");
+	  TS_ASSERT_EQUALS(specID, 1);
+	  TS_ASSERT_EQUALS(firstData, -6.66667);
+
+
+	  in.close();
+
+	  Poco::File(filename).remove();
+	  AnalysisDataService::Instance().remove(m_name);
   }
 
   void test_input_success_with_valid_SpectrumMetaData_list() {
