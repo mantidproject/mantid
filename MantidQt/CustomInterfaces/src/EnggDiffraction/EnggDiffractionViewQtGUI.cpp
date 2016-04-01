@@ -681,10 +681,13 @@ double EnggDiffractionViewQtGUI::rebinningPulsesTime() const {
 /// shahroz
 void EnggDiffractionViewQtGUI::setBankDir(int idx) {
 
-  std::string bankDir = m_fitting_runno_dir_vec[idx];
-  Poco::Path fpath(bankDir);
+	if (m_fitting_runno_dir_vec.size() >= idx) {
 
-  setfittingRunNo(QString::fromUtf8(bankDir.c_str()));
+		std::string bankDir = m_fitting_runno_dir_vec[idx];
+		Poco::Path fpath(bankDir);
+
+		setfittingRunNo(QString::fromUtf8(bankDir.c_str()));
+	}
 }
 
 std::string EnggDiffractionViewQtGUI::fittingRunNoFactory(std::string bank,
@@ -1359,13 +1362,11 @@ EnggDiffractionViewQtGUI::splitFittingDirectory(Poco::Path selectedfPath) {
 void EnggDiffractionViewQtGUI::addBankItems(
     std::vector<std::string> splittedBaseName, QString selectedFile) {
 
-  if (m_fitting_runno_dir_vec.size() > 1) {
+  if (!m_fitting_runno_dir_vec.empty()) {
 
     // delete previous bank added to the list
-    if (sizeof(m_uiTabFitting.comboBox_bank->size()) > 1) {
-      m_uiTabFitting.comboBox_bank->clear();
-      m_uiTabFitting.listWidget_fitting_bank_preview->clear();
-    }
+    m_uiTabFitting.comboBox_bank->clear();
+    m_uiTabFitting.listWidget_fitting_bank_preview->clear(); // causing problems
 
     for (size_t i = 0; i < m_fitting_runno_dir_vec.size(); i++) {
       Poco::Path vecFile(m_fitting_runno_dir_vec[i]);
@@ -1398,9 +1399,13 @@ void EnggDiffractionViewQtGUI::addBankItems(
     m_uiTabFitting.comboBox_bank->setEnabled(true);
     m_uiTabFitting.listWidget_fitting_bank_preview->setEnabled(true);
   } else {
+    // upon invalid file
     // disable the widgets when only one related file found
     m_uiTabFitting.comboBox_bank->setEnabled(false);
     m_uiTabFitting.listWidget_fitting_bank_preview->setEnabled(false);
+
+    m_uiTabFitting.comboBox_bank->clear();
+    m_uiTabFitting.listWidget_fitting_bank_preview->clear();
   }
 
   setDefaultBank(splittedBaseName, selectedFile);
@@ -1412,16 +1417,16 @@ void EnggDiffractionViewQtGUI::setDefaultBank(
   if (!splittedBaseName.empty()) {
 
     std::string bankID = (splittedBaseName[splittedBaseName.size() - 1]);
-	auto bankNo = std::stoi(bankID);
-		auto QData = QVariant(bankNo);
-	auto combo_data = m_uiTabFitting.comboBox_bank->findText(QString::fromStdString(bankID));
-	
-	if (combo_data > -1) {
-		setBankIdComboBox(combo_data);
-	}
-	else {
-		setfittingRunNo(selectedFile);
-	}
+    auto combo_data =
+        m_uiTabFitting.comboBox_bank->findText(QString::fromStdString(bankID));
+
+    if (combo_data > -1) {
+      setBankIdComboBox(combo_data);
+    } else {
+      setfittingRunNo(selectedFile);
+    }
+  } else {
+    setfittingRunNo(selectedFile);
   }
 }
 
