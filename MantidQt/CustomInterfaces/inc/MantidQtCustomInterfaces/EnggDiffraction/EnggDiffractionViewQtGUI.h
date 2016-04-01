@@ -161,6 +161,10 @@ public:
 
   std::vector<std::string> splitFittingDirectory(Poco::Path selectedfPath);
 
+  void addBankItems(std::vector<std::string> splittedBaseName, QString selectedFile);
+
+  void setDefaultBank(std::vector<std::string> splittedBaseName, QString selectedFile);
+
   std::string fittingRunNoFactory(std::string bank, std::string fileName,
                                   std::string &bankDir, std::string fileDir);
 
@@ -186,6 +190,7 @@ public:
   int currentPlotType() const override { return m_currentType; }
 
   int currentMultiRunMode() const override { return m_currentRunMode; }
+
 
 private slots:
   /// for buttons, do calibrate, focus, event->histo rebin, and similar

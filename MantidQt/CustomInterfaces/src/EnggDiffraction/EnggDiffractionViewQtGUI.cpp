@@ -1340,7 +1340,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
       }
     }
     // add bank to the combo-box and list view
-    addBankItems();
+    addBankItems(splitBaseName, focusedFile);
   }
 }
 
@@ -1356,7 +1356,8 @@ EnggDiffractionViewQtGUI::splitFittingDirectory(Poco::Path selectedfPath) {
   return splitBaseName;
 }
 
-void EnggDiffractionViewQtGUI::addBankItems() {
+void EnggDiffractionViewQtGUI::addBankItems(
+    std::vector<std::string> splittedBaseName, QString selectedFile) {
 
   if (m_fitting_runno_dir_vec.size() > 1) {
 
@@ -1397,8 +1398,30 @@ void EnggDiffractionViewQtGUI::addBankItems() {
     m_uiTabFitting.comboBox_bank->setEnabled(true);
     m_uiTabFitting.listWidget_fitting_bank_preview->setEnabled(true);
   } else {
+    // disable the widgets when only one related file found
     m_uiTabFitting.comboBox_bank->setEnabled(false);
     m_uiTabFitting.listWidget_fitting_bank_preview->setEnabled(false);
+  }
+
+  setDefaultBank(splittedBaseName, selectedFile);
+}
+
+void EnggDiffractionViewQtGUI::setDefaultBank(
+    std::vector<std::string> splittedBaseName, QString selectedFile) {
+
+  if (!splittedBaseName.empty()) {
+
+    std::string bankID = (splittedBaseName[splittedBaseName.size() - 1]);
+	auto bankNo = std::stoi(bankID);
+		auto QData = QVariant(bankNo);
+	auto combo_data = m_uiTabFitting.comboBox_bank->findText(QString::fromStdString(bankID));
+	
+	if (combo_data > -1) {
+		setBankIdComboBox(combo_data);
+	}
+	else {
+		setfittingRunNo(selectedFile);
+	}
   }
 }
 
