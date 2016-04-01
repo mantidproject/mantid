@@ -12,7 +12,6 @@
 #include <boost/scoped_array.hpp>
 
 #include <Poco/BinaryReader.h>
-#include <Poco/FileStream.h>
 #include <Poco/Path.h>
 
 using namespace Mantid::DataHandling;
@@ -926,7 +925,7 @@ void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY,
 void LoadFITS::readInBuffer(const FITSInfo &fileInfo, std::vector<char> &buffer,
                             size_t len) {
   std::string filename = fileInfo.filePath;
-  Poco::FileStream file(filename, std::ios::in);
+  std::ifstream file(filename, std::ios::in | std::ios::binary);
   file.seekg(g_BASE_HEADER_SIZE * fileInfo.headerSizeMultiplier);
   file.read(&buffer[0], len);
   if (!file) {

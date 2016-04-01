@@ -18,7 +18,7 @@ that define where the data for a particular dataset can be found, and
 that are normally required to run reconstruction tools but also pre-
 and post- processing steps.
 
-Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2015,2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -69,23 +69,47 @@ public:
   void updatePathSamples(const std::string &p) { m_pathFITS = p; }
 
   /**
-   * Path to the open beam file(s) (sample images, typically FITS files)
-   * Note: open bean a.k.a. 'flat' or 'white'
+   * Path to the open beam / flat file(s) (sample images, typically
+   * FITS files) Note: open bean a.k.a. 'flat' or 'white'
    *
    * @return path (full or relative, directory or file) as a string.
    */
   std::string pathOpenBeam() const { return m_pathFlat; }
 
-  void updatePathOpenBeam(const std::string &p) { m_pathFlat = p; }
+  /**
+   * Set a new path to open beam/flat images, and whether it is
+   * enabled.
+   *
+   * @param p new path string
+   *
+   * @param enable whether to effectively use the path for the
+   * "normalize by flats" option with the current setup
+   */
+  void updatePathOpenBeam(const std::string &p, bool enable) {
+    m_pathFlat = p;
+    m_pathOpenBeamEnabled = enable;
+  }
 
   /**
    * Path to the dark image file(s)
    *
    * @return path (full or relative, directory or file) as a string.
    */
-  std::string pathDark() const { return m_pathDark; }
+  std::string pathDarks() const { return m_pathDark; }
 
-  void updatePathDark(const std::string &p) { m_pathDark = p; }
+  /**
+   * Set a new path to dark images, and whether it is
+   * enabled.
+   *
+   * @param p new path string
+   *
+   * @param enable whether to effectively use the path for the
+   * "normalize by dark images" option with the current setup
+   */
+  void updatePathDarks(const std::string &p, bool enable) {
+    m_pathDark = p;
+    m_pathDarkEnabled = enable;
+  }
 
   /**
    * Path to a base directory (for data usually). All other paths
@@ -99,9 +123,10 @@ public:
 
   std::string pathSavuConfig() const;
 
-  std::string pathScriptsTools() const { return m_pathScriptsTools; }
-
-  void updatePathScriptsTools(const std::string &p) { m_pathScriptsTools = p; }
+  /// Whether the flat/open beam option is enabled by the user
+  bool m_pathOpenBeamEnabled;
+  /// Whether the "use dark images" option is enabled for this setup
+  bool m_pathDarkEnabled;
 
 private:
   /// file paths, base dir on scarf
@@ -112,9 +137,6 @@ private:
   std::string m_pathFlat;
   /// path to dark image
   std::string m_pathDark;
-
-  /// path to scripts/binaries
-  std::string m_pathScriptsTools;
 };
 
 } // namespace CustomInterfaces

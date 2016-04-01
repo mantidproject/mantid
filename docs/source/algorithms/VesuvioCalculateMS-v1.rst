@@ -46,7 +46,7 @@ Usage
                  16.00000, 3.2587662E-02, 13.92299,
                  27.50000, 4.0172841E-02, 15.07701]
    tot_scatter, ms_scatter = \
-       CalculateMSVesuvio(data, NoOfMasses=3, SampleDensity=241, AtomicProperties=atom_props,
+       VesuvioCalculateMS(data, NoOfMasses=3, SampleDensity=241, AtomicProperties=atom_props,
                           BeamRadius=2.5)
 
 References

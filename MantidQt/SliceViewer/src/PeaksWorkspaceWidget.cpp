@@ -161,12 +161,26 @@ void PeaksWorkspaceWidget::populate() {
   ui.lblWorkspaceCoordinates->setToolTip(coordinateText);
 
   // Set the default colors
-  ui.btnPeakColor->setBackgroundColor(m_foregroundPeakViewColor.colorCross);
-  ui.btnPeakColorSphere->setBackgroundColor(m_foregroundPeakViewColor.colorSphere);
-  ui.btnPeakColorEllipsoid->setBackgroundColor(m_foregroundPeakViewColor.colorEllipsoid);
+  QPalette palette;
+  palette.setColor(ui.btnPeakColor->backgroundRole(),
+                   m_foregroundPeakViewColor.colorCross);
+  ui.btnPeakColor->setPalette(palette);
 
-  ui.btnBackgroundColorSphere->setBackgroundColor(m_backgroundPeakViewColor.colorSphere);
-  ui.btnBackgroundColorEllipsoid->setBackgroundColor(m_backgroundPeakViewColor.colorEllipsoid);
+  palette.setColor(ui.btnPeakColorSphere->backgroundRole(),
+                   m_foregroundPeakViewColor.colorSphere);
+  ui.btnPeakColorSphere->setPalette(palette);
+
+  palette.setColor(ui.btnPeakColorEllipsoid->backgroundRole(),
+                   m_foregroundPeakViewColor.colorEllipsoid);
+  ui.btnPeakColorEllipsoid->setPalette(palette);
+
+  palette.setColor(ui.btnBackgroundColorSphere->backgroundRole(),
+                   m_backgroundPeakViewColor.colorSphere);
+  ui.btnBackgroundColorSphere->setPalette(palette);
+
+  palette.setColor(ui.btnBackgroundColorEllipsoid->backgroundRole(),
+                   m_backgroundPeakViewColor.colorSphere);
+  ui.btnBackgroundColorEllipsoid->setPalette(palette);
 
   // Setup table
   createTableMVC();
