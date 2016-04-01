@@ -40,6 +40,7 @@ void GenerateIPythonNotebook::init() {
   declareProperty("NotebookText", std::string(""),
                   "Saves the history of the workspace to a variable.",
                   Direction::Output);
+  getPointerToProperty("NotebookText")->setAutoTrim(false);
 
   declareProperty("UnrollAll", false,
                   "Unroll all algorithms to show just their child algorithms.",

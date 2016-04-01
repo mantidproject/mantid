@@ -5,7 +5,7 @@
 
 #include "boost/version.hpp"
 
-#include "MantidCurveFitting/Algorithms/CalculateMSVesuvio.h"
+#include "MantidCurveFitting/Algorithms/VesuvioCalculateMS.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -15,22 +15,22 @@
 
 #include "../Functions/ComptonProfileTestHelpers.h"
 
-using Mantid::CurveFitting::Algorithms::CalculateMSVesuvio;
+using Mantid::CurveFitting::Algorithms::VesuvioCalculateMS;
 
-class CalculateMSVesuvioTest : public CxxTest::TestSuite {
+class VesuvioCalculateMSTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CalculateMSVesuvioTest *createSuite() {
-    return new CalculateMSVesuvioTest();
+  static VesuvioCalculateMSTest *createSuite() {
+    return new VesuvioCalculateMSTest();
   }
-  static void destroySuite(CalculateMSVesuvioTest *suite) { delete suite; }
+  static void destroySuite(VesuvioCalculateMSTest *suite) { delete suite; }
 
   // ------------------------ Success Cases
   // -----------------------------------------
 
   void test_init() {
-    CalculateMSVesuvio alg;
+    VesuvioCalculateMS alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
   }
@@ -63,7 +63,7 @@ public:
   // -----------------------------------------
 
   void test_setting_input_workspace_not_in_tof_throws_invalid_argument() {
-    CalculateMSVesuvio alg;
+    VesuvioCalculateMS alg;
     alg.initialize();
 
     auto testWS = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
@@ -72,7 +72,7 @@ public:
   }
 
   void test_setting_workspace_with_no_sample_shape_throws_invalid_argument() {
-    CalculateMSVesuvio alg;
+    VesuvioCalculateMS alg;
     alg.initialize();
 
     auto testWS = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
@@ -82,7 +82,7 @@ public:
   }
 
   void test_setting_nmasses_zero_or_negative_throws_invalid_argument() {
-    CalculateMSVesuvio alg;
+    VesuvioCalculateMS alg;
     alg.initialize();
 
     TS_ASSERT_THROWS(alg.setProperty("NoOfMasses", -1), std::invalid_argument);
@@ -90,7 +90,7 @@ public:
   }
 
   void test_setting_sampledensity_zero_or_negative_throws_invalid_argument() {
-    CalculateMSVesuvio alg;
+    VesuvioCalculateMS alg;
     alg.initialize();
 
     TS_ASSERT_THROWS(alg.setProperty("SampleDensity", -1),
@@ -114,7 +114,7 @@ public:
 
   void
   test_setting_zero_or_negative_beam_radius_values_throws_invalid_argument() {
-    CalculateMSVesuvio alg;
+    VesuvioCalculateMS alg;
     alg.initialize();
 
     TS_ASSERT_THROWS(alg.setProperty("BeamRadius", -1.5),
@@ -131,7 +131,7 @@ public:
 private:
   Mantid::API::IAlgorithm_sptr
   createTestAlgorithm(const Mantid::API::MatrixWorkspace_sptr &inputWS) {
-    Mantid::API::IAlgorithm_sptr alg = boost::make_shared<CalculateMSVesuvio>();
+    Mantid::API::IAlgorithm_sptr alg = boost::make_shared<VesuvioCalculateMS>();
     alg->initialize();
     alg->setRethrows(true);
     alg->setChild(true);
