@@ -164,7 +164,7 @@ public:
   }
 
   void test_valid_SpectrumMetaData_values() {
-	MatrixWorkspace_sptr wsToSave;
+    MatrixWorkspace_sptr wsToSave;
     writeInelasticWS(wsToSave);
 
     SaveAscii2 save;
@@ -192,9 +192,14 @@ public:
     TS_ASSERT_EQUALS(header1, "X");
     TS_ASSERT_EQUALS(header2, "Y");
     TS_ASSERT_EQUALS(header3, "E");
-	TS_ASSERT_EQUALS(specID, 1);
-	TS_ASSERT_EQUALS(qVal, 2.2092);
-	TS_ASSERT_EQUALS(angle, 10.0);
+    TS_ASSERT_EQUALS(specID, 1);
+    TS_ASSERT_EQUALS(qVal, 2.2092230401788049);
+    TS_ASSERT_EQUALS(angle, 57.295779513082316);
+
+    in.close();
+
+    Poco::File(filename).remove();
+    AnalysisDataService::Instance().remove(m_name);
   }
 
   void test_input_success_with_valid_SpectrumMetaData_list() {
