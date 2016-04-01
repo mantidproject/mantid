@@ -279,9 +279,16 @@ be saved
 void SaveAscii2::writeSpectra(const std::set<int>::const_iterator &spectraItr,
                               std::ofstream &file) {
   auto spec = m_ws->getSpectrum(*spectraItr);
-  auto specNo = spec->getSpectrumNo();
-  if (m_writeID)
-    file << specNo << std::endl;
+  const auto specNo = spec->getSpectrumNo();
+  const auto workspaceIndex = m_ws->getSpectrumToWorkspaceIndexMap()[specNo];
+  for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
+	  auto value = m_metaDataMap[*iter][workspaceIndex];
+	  file << value;
+	  if (iter != m_metaData.end() - 1) {
+		  file << " " << m_sep << " ";
+	  }
+  }
+  file << std::endl;
 
   for (int bin = 0; bin < m_nBins; bin++) {
     if (!m_isCommonBins) // checking for ragged workspace
@@ -325,9 +332,10 @@ void SaveAscii2::writeSpectra(const std::set<int>::const_iterator &spectraItr,
 */
 void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
   auto spec = m_ws->getSpectrum(spectraIndex);
-  auto specNo = spec->getSpectrumNo();
+  const auto specNo = spec->getSpectrumNo();
+  const auto workspaceIndex = m_ws->getSpectrumToWorkspaceIndexMap()[specNo];
   for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
-    auto value = m_metaDataMap[*iter][spectraIndex];
+    auto value = m_metaDataMap[*iter][workspaceIndex];
     file << value;
     if (iter != m_metaData.end() - 1) {
       file << " " << m_sep << " ";
