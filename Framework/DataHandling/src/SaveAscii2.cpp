@@ -134,13 +134,13 @@ void SaveAscii2::exec() {
     auto containsSpectrumNumber = false;
     for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
       const auto metaDataType = *iter;
-      if (metaDataType.compare("SpectrumNumber") == 0) {
+      if (metaDataType.compare("spectrumnumber") == 0) {
         containsSpectrumNumber = true;
       }
     }
     if (containsSpectrumNumber == false) {
       auto firstIter = m_metaData.begin();
-      m_metaData.insert(firstIter, "SpectrumNumber");
+      m_metaData.insert(firstIter, "spectrumnumber");
     }
   }
 
@@ -383,10 +383,13 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
 std::vector<std::string>
 SaveAscii2::stringListToVector(const std::string &inputString) {
   std::vector<std::string> stringVector;
-  const std::vector<std::string> validMetaData{"SpectrumNumber", "Q", "Angle"};
+  const std::vector<std::string> validMetaData{"spectrumnumber", "q", "angle"};
+  std::string lowerCaseInput = inputString;
+  boost::to_lower(lowerCaseInput);
   stringVector =
-      Kernel::VectorHelper::splitStringIntoVector<std::string>(inputString);
+      Kernel::VectorHelper::splitStringIntoVector<std::string>(lowerCaseInput);
   for (auto iter = stringVector.begin(); iter != stringVector.end(); ++iter) {
+
     if (std::find(validMetaData.begin(), validMetaData.end(), *iter) ==
         validMetaData.end()) {
       throw std::runtime_error(*iter + " is not recognised as a possible input "
@@ -394,6 +397,7 @@ SaveAscii2::stringListToVector(const std::string &inputString) {
                                        "are: SpectrumNumber, Q, Angle.");
     }
   }
+
   return stringVector;
 }
 
@@ -425,7 +429,7 @@ void SaveAscii2::populateQMetaData() {
     auto qValueStr = boost::lexical_cast<std::string>(qValue);
     qValues.push_back(qValueStr);
   }
-  m_metaDataMap["Q"] = qValues;
+  m_metaDataMap["q"] = qValues;
 }
 
 /**
@@ -439,7 +443,7 @@ void SaveAscii2::populateSpectrumNumberMetaData() {
     const auto specNumStr = boost::lexical_cast<std::string>(specNum);
     spectrumNumbers.push_back(specNumStr);
   }
-  m_metaDataMap["SpectrumNumber"] = spectrumNumbers;
+  m_metaDataMap["spectrumnumber"] = spectrumNumbers;
 }
 
 /**
@@ -457,7 +461,7 @@ void SaveAscii2::populateAngleMetaData() {
     const auto angleStr = boost::lexical_cast<std::string>(angle);
     angles.push_back(angleStr);
   }
-  m_metaDataMap["Angle"] = angles;
+  m_metaDataMap["angle"] = angles;
 }
 
 /**
@@ -466,11 +470,11 @@ void SaveAscii2::populateAngleMetaData() {
 void SaveAscii2::populateAllMetaData() {
   for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
     auto metaDataType = *iter;
-    if (metaDataType.compare("SpectrumNumber") == 0)
+    if (metaDataType.compare("spectrumnumber") == 0)
       populateSpectrumNumberMetaData();
-    if (metaDataType.compare("Q") == 0)
+    if (metaDataType.compare("q") == 0)
       populateQMetaData();
-    if (metaDataType.compare("Angle") == 0)
+    if (metaDataType.compare("angle") == 0)
       populateAngleMetaData();
   }
 }
