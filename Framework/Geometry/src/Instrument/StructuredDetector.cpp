@@ -125,7 +125,7 @@ detid_t StructuredDetector::getDetectorIDAtXY(const size_t x,
   if (me->m_idFillByFirstY)
     return me->m_idStart + x * me->m_idStepByRow + y * me->m_idStep;
   else
-    return me->m_idStart + x * me->m_idStepByRow + y * me->m_idStep;
+    return me->m_idStart + y * me->m_idStepByRow + x * me->m_idStep;
 }
 
 /** Given a detector ID, return the X,Y coords into the structured detector
