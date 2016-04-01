@@ -205,6 +205,9 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   connect(m_uiTabFitting.pushButton_fitting_browse_run_num, SIGNAL(released()),
           this, SLOT(browseFitFocusedRun()));
 
+  connect(m_uiTabFitting.lineEdit_pushButton_run_num, SIGNAL(editingFinished()),
+          SLOT(fittingRunNoChanged()));
+
   connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)), this,
           SLOT(fittingBankIdChanged(int)));
 
@@ -227,9 +230,6 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
 
   connect(m_uiTabFitting.pushButton_fit, SIGNAL(released()), this,
           SLOT(fitClicked()));
-
-  connect(m_uiTabFitting.lineEdit_pushButton_run_num, SIGNAL(editingFinished()),
-          SLOT(fittingRunNoChanged()));
 
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom,
@@ -1317,26 +1317,29 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
     std::vector<std::string> splitBaseName =
         splitFittingDirectory(selectedfPath);
 
-    std::string cwd(bankDir.toString());
-    Poco::DirectoryIterator it(cwd);
-    Poco::DirectoryIterator end;
-    while (it != end) {
-      if (it->isFile()) {
-        std::string itFilePath = it->path();
-        Poco::Path itBankfPath(itFilePath);
+    if (!splitBaseName.empty()) {
+      std::string cwd(bankDir.toString());
+      Poco::DirectoryIterator it(cwd);
+      Poco::DirectoryIterator end;
+      while (it != end) {
+        if (it->isFile()) {
+          std::string itFilePath = it->path();
+          Poco::Path itBankfPath(itFilePath);
 
-        std::string itbankFileName = itBankfPath.getBaseName();
-        // check if it not any other file.. e.g: texture
-        std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] + "_" +
-                               splitBaseName[2] + "_" + splitBaseName[3];
-        if (itbankFileName.find(foc_file) != std::string::npos) {
+          std::string itbankFileName = itBankfPath.getBaseName();
+          // check if it not any other file.. e.g: texture
+          std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] +
+                                 "_" + splitBaseName[2] + "_" +
+                                 splitBaseName[3];
+          if (itbankFileName.find(foc_file) != std::string::npos) {
 
-          m_fitting_runno_dir_vec.push_back(itFilePath);
+            m_fitting_runno_dir_vec.push_back(itFilePath);
+          }
         }
+        ++it;
       }
-      ++it;
     }
-	// add bank to the combo-box and list view
+    // add bank to the combo-box and list view
     addBankItems();
   }
 }
@@ -1355,13 +1358,13 @@ EnggDiffractionViewQtGUI::splitFittingDirectory(Poco::Path selectedfPath) {
 
 void EnggDiffractionViewQtGUI::addBankItems() {
 
-  // delete previous bank added to the list
-	if (sizeof(m_uiTabFitting.comboBox_bank->size()) > 0) {
-		m_uiTabFitting.comboBox_bank->clear();
-		m_uiTabFitting.listWidget_fitting_bank_preview->clear();
-	}
-
   if (m_fitting_runno_dir_vec.size() > 1) {
+
+    // delete previous bank added to the list
+    if (sizeof(m_uiTabFitting.comboBox_bank->size()) > 1) {
+      m_uiTabFitting.comboBox_bank->clear();
+      m_uiTabFitting.listWidget_fitting_bank_preview->clear();
+    }
 
     for (size_t i = 0; i < m_fitting_runno_dir_vec.size(); i++) {
       Poco::Path vecFile(m_fitting_runno_dir_vec[i]);
