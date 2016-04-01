@@ -132,18 +132,31 @@ void SaveAscii2::exec() {
   if (metaDataString.size() != 0) {
 	  m_metaData = stringListToVector(metaDataString);
   }
+  if (m_writeID) {
+    auto containsSpectrumNumber = false;
+    for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
+      const auto metaDataType = *iter;
+      if (metaDataType.compare("SpectrumNumber") == 0) {
+        containsSpectrumNumber = true;
+      }
+    }
+    if (containsSpectrumNumber == false) {
+      auto firstIter = m_metaData.begin();
+      m_metaData.insert(firstIter, "SpectrumNumber");
+    }
+  }
 
   // Get the properties
   std::vector<int> spec_list = getProperty("SpectrumList");
-  int spec_min = getProperty("WorkspaceIndexMin");
-  int spec_max = getProperty("WorkspaceIndexMax");
-  bool writeHeader = getProperty("ColumnHeader");
-  bool appendToFile = getProperty("AppendToFile");
+  const int spec_min = getProperty("WorkspaceIndexMin");
+  const int spec_max = getProperty("WorkspaceIndexMax");
+  const bool writeHeader = getProperty("ColumnHeader");
+  const bool appendToFile = getProperty("AppendToFile");
 
   // Check whether we need to write the fourth column
   m_writeDX = getProperty("WriteXError");
-  std::string choice = getPropertyValue("Separator");
-  std::string custom = getPropertyValue("CustomSeparator");
+  const std::string choice = getPropertyValue("Separator");
+  const std::string custom = getPropertyValue("CustomSeparator");
   // If the custom separator property is not empty, then we use that under any
   // circumstance.
   if (custom != "") {
@@ -313,11 +326,12 @@ void SaveAscii2::writeSpectra(const std::set<int>::const_iterator &spectraItr,
 void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
   auto spec = m_ws->getSpectrum(spectraIndex);
   auto specNo = spec->getSpectrumNo();
-  if (m_writeID)
-    file << specNo;
   for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
     auto value = m_metaDataMap[*iter][spectraIndex];
-    file << " " << m_sep << " " << value;
+    file << value;
+    if (iter != m_metaData.end() - 1) {
+      file << " " << m_sep << " ";
+    }
   }
   file << std::endl;
 
@@ -442,11 +456,11 @@ void SaveAscii2::populateAngleMetaData() {
 void SaveAscii2::populateAllMetaData() {
   for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
 	auto metaDataType = *iter;
-	if (metaDataType.compare("SpectrumNumber"))
+	if (metaDataType.compare("SpectrumNumber") == 0)
 		populateSpectrumNumberMetaData();
-	if (metaDataType.compare("Q"))
+	if (metaDataType.compare("Q") == 0)
 		populateQMetaData();
-	if (metaDataType.compare("Angle"))
+	if (metaDataType.compare("Angle") == 0)
 		populateAngleMetaData();
   }
 }
