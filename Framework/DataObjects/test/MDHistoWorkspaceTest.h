@@ -964,7 +964,7 @@ public:
   void test_boolean_operatorNot_maskedWorkspace() {
     // 4x4x4 histoWorkspace
     MDHistoWorkspace_sptr ws =
-      MDEventsTestHelper::makeFakeMDHistoWorkspace(1., 3, 4, 10.0);
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1., 3, 4, 10.0);
 
     std::vector<coord_t> min;
     std::vector<coord_t> max;
