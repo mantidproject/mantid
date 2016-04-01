@@ -1666,6 +1666,9 @@ std::vector<ReflCommand_uptr> ReflTableViewPresenter::publishCommands() {
 */
 void ReflTableViewPresenter::accept(WorkspaceReceiver *workspaceReceiver) {
   m_workspaceReceiver = workspaceReceiver;
+  // Notify workspace receiver with the list of valid workspaces as soon as it
+  // is registered
+  m_workspaceReceiver->notify(WorkspaceReceiver::ADSChangedFlag);
 }
 
 /** Returs the list of valid workspaces currently in the ADS
