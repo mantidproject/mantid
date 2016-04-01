@@ -98,8 +98,6 @@ class MainWindow(QtGui.QMainWindow):
                      self.show_scan_pt_list)
         self.connect(self.ui.pushButton_usePt4UB, QtCore.SIGNAL('clicked()'),
                      self.do_add_peak_to_find)
-        self.connect(self.ui.pushButton_addPeakNoIndex, QtCore.SIGNAL('clicked()'),
-                     self.do_add_peak_no_index)
         self.connect(self.ui.pushButton_addROI, QtCore.SIGNAL('clicked()'),
                      self.do_add_roi)
         self.connect(self.ui.pushButton_saveROI, QtCore.SIGNAL('clicked()'),
@@ -338,38 +336,6 @@ class MainWindow(QtGui.QMainWindow):
         """
         exp_number = int(str(self.ui.lineEdit_exp))
         self._myControl.set_ub_matrix(exp_number, self.ui.tableWidget_ubMatrix.get_matrix())
-
-        return
-
-    def do_add_peak_no_index(self):
-        """
-        Purpose: add a peak from 'View Raw Data' tab to the UB peak table
-        without indexing it
-        :return:
-        """
-        # Get exp, scan and Pt information
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                        self.ui.lineEdit_run,
-                                                        self.ui.lineEdit_rawDataPtNo])
-        if not status:
-            err_msg = ret_obj
-            self.pop_one_button_dialog(err_msg)
-            return
-        else:
-            int_list = ret_obj
-            exp_no, scan_no, pt_no = int_list
-
-        # Switch tab
-        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['Calculate UB'])
-
-        # Find and index peak
-        self._myControl.find_peak(exp_no, scan_no, [pt_no])
-        try:
-            peak_info = self._myControl.get_peak_info(exp_no, scan_no, pt_no)
-            self.set_ub_peak_table(peak_info)
-        except AssertionError as ass_err:
-            self.pop_one_button_dialog(str(ass_err))
-            return
 
         return
 

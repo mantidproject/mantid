@@ -298,9 +298,14 @@ class CWSCDReductionControl(object):
         # get the coordinates
         ll_corner, ur_corner = self._roiDict[(exp_number, scan_number)]
 
-        mask_detector()
+        # create an XML roi file
+        generate_mask_file(mask_file_name, ll_corner, ur_corner, rectagular=True)
 
-        return
+        # load back
+        api.LoadMask(Instrument='HB3A', InputFile='/home/wzz/Projects/MantidTests/Tickets/HB3A_GUI/Results/hb3a_roi.xml', OutputWorkspace='Z_Mask')
+        api.InvertMask(InputWorkspace='Z_Mask', OutputWorkspace='Z_ROI')
+
+        return mask_ws_name
 
     def does_file_exist(self, exp_number, scan_number, pt_number=None):
         """
