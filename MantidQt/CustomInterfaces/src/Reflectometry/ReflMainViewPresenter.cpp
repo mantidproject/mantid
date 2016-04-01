@@ -105,6 +105,8 @@ void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
 /** Pushes the list of commands (actions) */
 void ReflMainViewPresenter::pushCommands() {
 
+  m_view->clearCommands();
+
   // The expected number of commands
   const size_t nCommands = 26;
   auto commands = std::move(m_tablePresenter->publishCommands());

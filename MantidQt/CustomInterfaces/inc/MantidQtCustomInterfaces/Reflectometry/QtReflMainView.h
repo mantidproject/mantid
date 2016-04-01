@@ -6,9 +6,9 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCommandAdapter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflCommandAdapter.h"
 #include "MantidQtMantidWidgets/SlitCalculator.h"
 #include "ui_ReflMainWidget.h"
 
@@ -65,6 +65,7 @@ public:
   void setTransferMethods(const std::set<std::string> &methods) override;
   void setTableCommands(std::vector<ReflCommand_uptr> tableCommands) override;
   void setRowCommands(std::vector<ReflCommand_uptr> rowCommands) override;
+  void clearCommands() override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;
@@ -98,7 +99,7 @@ private:
   // the slit calculator
   MantidWidgets::SlitCalculator *m_calculator;
   // Command adapters
-  std::vector<ReflCommandAdapter_uptr> m_adapters;
+  std::vector<ReflCommandAdapter_uptr> m_commands;
 
 private slots:
   void on_actionSearch_triggered();

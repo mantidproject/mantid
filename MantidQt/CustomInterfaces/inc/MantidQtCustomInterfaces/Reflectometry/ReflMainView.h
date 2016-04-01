@@ -62,6 +62,7 @@ public:
   virtual void
   setTableCommands(std::vector<ReflCommand_uptr> tableCommands) = 0;
   virtual void setRowCommands(std::vector<ReflCommand_uptr> rowCommands) = 0;
+  virtual void clearCommands() = 0;
 
   // Accessor methods
   virtual std::set<int> getSelectedSearchRows() const = 0;

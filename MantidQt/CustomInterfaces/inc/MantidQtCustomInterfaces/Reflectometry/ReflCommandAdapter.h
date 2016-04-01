@@ -59,6 +59,7 @@ public:
       addAction(menu, m_adaptee);
     }
   };
+
 public slots:
   void call() { m_adaptee->execute(); }
 

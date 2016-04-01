@@ -75,7 +75,7 @@ void QtReflMainView::initLayout() {
 */
 void QtReflMainView::addToMenu(QMenu *menu, ReflCommand_uptr command) {
 
-  m_adapters.push_back(Mantid::Kernel::make_unique<ReflCommandAdapter>(
+  m_commands.push_back(Mantid::Kernel::make_unique<ReflCommandAdapter>(
       menu, std::move(command)));
 }
 
@@ -110,6 +110,15 @@ void QtReflMainView::setRowCommands(std::vector<ReflCommand_uptr> rowCommands) {
     addToMenu(ui.menuRows, std::move(command));
   }
 }
+
+/**
+* Clears all the actions (commands)
+*/
+void QtReflMainView::clearCommands() {
+
+	m_commands.clear();
+}
+
 /**
 * Set all possible tranfer methods
 * @param methods : All possible transfer methods.
