@@ -55,19 +55,19 @@ Improved
 -  :ref:`SumSpectra <algm-SumSpectra>` fixed broken scaling of bins for the `WeightedSum=true` case.
 -  :ref:`LoadISISNexus <algm-LoadISISNexus>`now works correctly for data with non-contiguous detector IDs for either monitors or detectors. `#15562 <https://github.com/mantidproject/mantid/pull/15562>`_
 -  A bug has been fixed in several algorithms where they would crash when given a :ref:`WorkspaceGroup <WorkspaceGroup>` as input (if run in the GUI). These algorithms are: `#15584 <https://github.com/mantidproject/mantid/pull/15584>`_
-
    - :ref:`AsymmetryCalc <algm-AsymmetryCalc>`
    - :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>`
    - :ref:`ConvertToDistribution <algm-ConvertToDistribution>`
    - :ref:`ChangeTimeZero <algm-ChangeTimeZero>`
    - :ref:`FFT <algm-FFT>`
    - :ref:`MaxEnt <algm-MaxEnt>`
-- :ref:`LoadNexusMonitors <algm-LoadNexusMonitors>` 
+- :ref:`LoadNexusMonitors <algm-LoadNexusMonitors>`
   now allow user to choose to load either histogram monitor or event monitor only with 2 new
   properties (``LoadEventMonitor`` and ``LoadHistogramMonitor``).
   `#15667 <https://github.com/mantidproject/mantid/pull/15667>`_
 - :ref:`CreateSimulationWorkspace <algm-CreateSimulationWorkspace>` now matches the IDF of the simulation workspace to the IDF of a reference workspace (either Nexus or Raw).
-- :ref:`LoadNexusLogs <algm-LoadNexusLogs>` allows now to load logs from an entry other than the first. :ref:`LoadEventNexus <algm-LoadEventNexus>` now loads the correct logs when an *NXentry* is given 
+- :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` now correctly reads in event data that does not have a common x-axis. `#15746 <https://github.com/mantidproject/mantid/pull/15746>`
+- :ref:`LoadNexusLogs <algm-LoadNexusLogs>` allows now to load logs from an entry other than the first. :ref:`LoadEventNexus <algm-LoadEventNexus>` now loads the correct logs when an *NXentry* is given
 - :ref:`FFT <algm-FFT>`: added property *AutoShift* to enable automatic phase correction for workspaces not centred at zero.
 
 Deprecated
@@ -96,7 +96,7 @@ Performance
 CurveFitting
 ------------
 
-- Concept page for :ref:`Mantid Fitting <Fitting>` has been added. 
+- Concept page for :ref:`Mantid Fitting <Fitting>` has been added.
 
 Improved
 ########
