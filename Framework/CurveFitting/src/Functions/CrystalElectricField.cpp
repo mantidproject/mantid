@@ -565,8 +565,8 @@ double c_occupation_factor(const DoubleFortranVector &energy, double dimj,
 
 /// Calculate eigenvalues and eigenvectors of the crystal field hamiltonian.
 /// @param eigenvalues :: Output. The eigenvalues in ascending order. The
-/// smallest
-///   value is subtracted from all eigenvalues so they always start with 0.
+/// smallest value is subtracted from all eigenvalues so they always
+/// start with 0.
 /// @param eigenvectors :: Output. The matrix of eigenvectors. The eigenvectors
 ///    are in columns with indices corresponding to the indices of eigenvalues.
 /// @param hamiltonian  :: Output. The hamiltonian.
@@ -786,6 +786,81 @@ calculateIntensities(int nre, const DoubleFortranVector &energies,
           temperature);
 
   return intensity;
+}
+
+//-------------------------
+// transforms the indices
+//-------------------------
+int no(int i, const std::vector<int> &d, int n)  {
+	//implicit none
+	//integer i,d(17*17),n,up,lo
+	int up = 0;
+  for(int nno = 1; nno <= n; ++nno) { // do no=1,n
+	   int lo = up+1;
+	   up = lo+d[nno-1]-1;
+	   if(i >= lo && i <= up) return nno;
+  }
+  return n;
+}
+
+/// Find out how many degenerated energy levels exists.
+/// Store the intensities of the degenarated levels.
+/// @param energy :: The energies.
+/// @param mat :: The transition matrix elements. (Intensities without
+///    considering degeneracy).
+/// @param dimj :: Number of energies as a double.
+/// @param degeneration :: Degeneration number for each transition.
+/// @param e_energies :: Energy values of the degenerated energy levels.
+/// @param i_energies :: Intensities of the degenerated energy levels.
+/// @param n_energies :: Number of degenerated energy levels.
+/// @param de :: Energy levels which are closer than de are assumed to be
+///              degenerated.
+/// @param di :: Only those excitations are taken into account whose intensities
+///              are greater or equal than di.
+void deg_on(const DoubleFortranVector &energy, const DoubleFortranMatrix &mat,
+            double dimj, std::vector<int> &degeneration,
+            DoubleFortranVector &e_energies, DoubleFortranMatrix &i_energies,
+            int n_energies, double de, double di) {
+  //  real*8  energy(17)           ! already defined in CF_FABI.INC
+  //  real*8  mat(17,17)
+  //  real*8  dimj
+  //	integer degeneration(17*17)  ! stores the degeneration of a level
+  // 	integer n_energies           ! no. of degenerated energy levels
+  //	real*8  e_energies(17*17)    ! energy values of the degenerated energy
+  //                                 levels
+  //	real*8  i_energies(17,17)    ! intensities of the degenerated energy
+  //                                 levels
+  //  real*8 de,di
+
+  //	energy levels which are closer than de are assumed to be degenerated
+  //	only those excitations are taken into account whose intensities are
+  //	greater equal than di
+
+  // find out how many degenerated energy levels exists
+  e_energies(1) = 0.0;
+  degeneration[1 - 1] = 1;
+  int k = 1;
+  int dim = dimj;
+  for (int i = 2; i <= dim; ++i) { // do i=2,dim
+    if (std::fabs(e_energies(k) - energy(i)) >= de) {
+      k = k + 1;
+      e_energies(k) = energy(i);
+      degeneration[k - 1] = 1;
+    } else {
+      degeneration[k - 1] = degeneration[k - 1] + 1;
+    }
+  }
+  n_energies = k;
+
+  // store the intensities of the degenarated levels
+  i_energies.zero();
+  for (int i = 1; i <= dim; ++i) { // do i=1,dim
+    int ii = no(i, degeneration, n_energies);
+    for (int k = 1; k <= dim; ++k) { // do k=1,dim
+      int kk = no(k, degeneration, n_energies);
+      i_energies(ii, kk) = i_energies(ii, kk) + mat(i, k);
+    }
+  }
 }
 
 } // namespace Functions
