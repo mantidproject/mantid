@@ -104,7 +104,7 @@ class EnggFitDIFCFromPeaks(PythonAlgorithm):
 
         tzero = param_table.cell('Value', 0) # A0
         difc = param_table.cell('Value', 1) # A1
-        difa = 0 # Not fitted, we may add an option for this later on
+        difa = 0.0 # Not fitted, we may add an option for this later on
 
         return (difa, difc, tzero)
 
