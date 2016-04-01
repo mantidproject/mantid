@@ -35,13 +35,7 @@ class DLLExport FrustumPlane
 
     std::vector<T> getPlaneCoefficients()
     {
-      std::vector<T> coefficients;
-      coefficients.push_back(m_paramA);
-      coefficients.push_back(m_paramB);
-      coefficients.push_back(m_paramC);
-      coefficients.push_back(m_paramD);
-
-      return coefficients;
+      return {m_paramA, m_paramB, m_paramC, m_paramD};
     }
 
 private:
@@ -100,27 +94,16 @@ class DLLExport ViewFrustum
   {
     const size_t dim = 3;
 
-    std::vector<T> aVec;
-    aVec.push_back(plane1.A());
-    aVec.push_back(plane2.A());
-    aVec.push_back(plane3.A());
+    std::vector<T> aVec{plane1.A(), plane2.A(), plane3.A()};
 
-    std::vector<T> bVec;
-    bVec.push_back(plane1.B());
-    bVec.push_back(plane2.B());
-    bVec.push_back(plane3.B());
+    std::vector<T> bVec{plane1.B(), plane2.B(), plane3.B()};
 
-    std::vector<T> cVec;
-    cVec.push_back(plane1.C());
-    cVec.push_back(plane2.C());
-    cVec.push_back(plane3.C());
+    std::vector<T> cVec{plane1.C(), plane2.C(), plane3.C()};
 
     // The input is Ax+By+Cz+D=0 but we need the form Ax+By+Cz=D
-    std::vector<T> dVec;
     const T factor = -1;
-    dVec.push_back(factor*plane1.D());
-    dVec.push_back(factor*plane2.D());
-    dVec.push_back(factor*plane3.D());
+    std::vector<T> dVec{factor * plane1.D(), factor * plane2.D(),
+                        factor * plane3.D()};
 
     // Get the different matrix permutations
     Mantid::Kernel::Matrix<T> abcMatrix(dim, dim);
@@ -143,10 +126,8 @@ class DLLExport ViewFrustum
     T adcDet = adcMatrix.determinant();
     T abdDet = abdMatrix.determinant();
 
-    std::vector<T> intersection;
-    intersection.push_back(dbcDet/abcDet);
-    intersection.push_back(adcDet/abcDet);
-    intersection.push_back(abdDet/abcDet);
+    std::vector<T> intersection{dbcDet / abcDet, adcDet / abcDet,
+                                abdDet / abcDet};
 
     return intersection;
   }

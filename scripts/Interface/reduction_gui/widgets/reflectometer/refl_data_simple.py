@@ -1,16 +1,13 @@
-#pylint: disable=too-many-lines
-#pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
-import reduction_gui.widgets.util as util
+# pylint: disable=too-many-lines, invalid-name, too-many-arguments
 import math
-import os
 import time
 import sys
 from functools import partial
+import reduction_gui.widgets.util as util
+from PyQt4 import QtGui, QtCore
 from reduction_gui.reduction.reflectometer.refl_data_script import DataSets as REFLDataSets
 from reduction_gui.reduction.reflectometer.refm_data_script import DataSets as REFMDataSets
 from reduction_gui.reduction.reflectometer.refl_data_series import DataSeries
-from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.reflectometer.ui_data_refl_simple
 
@@ -19,16 +16,15 @@ try:
     import mantidplot
     from mantid.simpleapi import *
     from reduction.instruments.reflectometer import data_manipulation
-
     IS_IN_MANTIDPLOT = True
-except:
-    pass
+except ImportError, e:
+    logger.error(e.message())
 
 class DataReflWidget(BaseWidget):
     """
         Widget that present instrument details to the user
     """
-    ## Widget name
+    # Widget name
     name = "Data"
     instrument_name = 'REF_L'
     short_name = 'REFL'
@@ -169,8 +165,8 @@ class DataReflWidget(BaseWidget):
         call_back = partial(self._edit_event, ctrl=self._summary.data_run_number_edit)
         self.connect(self._summary.data_run_number_edit, QtCore.SIGNAL("textChanged(QString)"), self._run_number_changed)
         self._run_number_first_edit = True
-        #call_back = partial(self._edit_event, ctrl=self._summary.log_scale_chk)
-        #self.connect(self._summary.log_scale_chk, QtCore.SIGNAL("clicked()"), call_back)
+        # call_back = partial(self._edit_event, ctrl=self._summary.log_scale_chk)
+        # self.connect(self._summary.log_scale_chk, QtCore.SIGNAL("clicked()"), call_back)
 
         call_back = partial(self._edit_event, ctrl=self._summary.det_angle_edit)
         self.connect(self._summary.det_angle_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
@@ -246,8 +242,9 @@ class DataReflWidget(BaseWidget):
         self._edit_event(ctrl=self._summary.data_run_number_edit)
 
     def _edit_event(self, text=None, ctrl=None):
+        _text = text
         self._summary.edited_warning_label.show()
-        util.set_edited(ctrl,True)
+        util.set_edited(ctrl, True)
 
     def _reset_warnings(self):
         self._summary.edited_warning_label.hide()
@@ -345,14 +342,15 @@ class DataReflWidget(BaseWidget):
 
     def _update_scattering_angle(self):
         if not self._summary.angle_radio.isChecked():
+
             dangle = util._check_and_get_float_line_edit(self._summary.det_angle_edit)
             dangle0 = util._check_and_get_float_line_edit(self._summary.det_angle_offset_edit)
             direct_beam_pix = util._check_and_get_float_line_edit(self._summary.direct_pixel_edit)
             ref_pix = util._check_and_get_float_line_edit(self._summary.center_pix_edit)
-            PIXEL_SIZE = 0.0007 # m
+            PIXEL_SIZE = 0.0007  # m
 
             delta = (dangle-dangle0)*math.pi/180.0/2.0\
-                + ((direct_beam_pix-ref_pix)*PIXEL_SIZE)/ (2.0*self._detector_distance)
+                + ((direct_beam_pix-ref_pix)*PIXEL_SIZE) / (2.0*self._detector_distance)
 
             scattering_angle = delta*180.0/math.pi
             scattering_angle_str = "%4.3g" % scattering_angle
@@ -404,7 +402,7 @@ class DataReflWidget(BaseWidget):
             self._summary.q_min_label.hide()
             self._summary.q_min_unit_label.hide()
 
-            #TODO: allow log binning
+            # to-do: allow log binning
             self._summary.log_scale_chk.hide()
 
     def _create_auto_reduce_template(self):
@@ -418,9 +416,9 @@ class DataReflWidget(BaseWidget):
         content += "if (os.environ.has_key(\"MANTIDPATH\")):\n"
         content += "    del os.environ[\"MANTIDPATH\"]\n"
         content += "sys.path.insert(0,'/opt/mantidnightly/bin')\n"
-        script += "import mantid\n"
-        script += "from mantid.simpleapi import *\n"
-        script += "from mantid.kernel import ConfigService\n"
+        reduce_script += "import mantid\n"
+        reduce_script += "from mantid.simpleapi import *\n"
+        reduce_script += "from mantid.kernel import ConfigService\n"
 
         content += "eventFileAbs=sys.argv[1]\n"
         content += "outputDir=sys.argv[2]\n\n"
@@ -435,7 +433,7 @@ class DataReflWidget(BaseWidget):
         content += "# Place holder for python script\n"
         content += "file_path = os.path.join(outputDir, '%s_'+runNumber+'.py')\n" % self.instrument_name
         content += "f=open(file_path,'w')\n"
-        content += "f.write(\"runNumber=\%s \% runNumber\\n\")\n"
+        content += r"f.write(\"runNumber=\%s \% runNumber\\n\")\n"
         content += "f.write(\"\"\"%s\"\"\")\n" % reduce_script
         content += "f.close()\n\n"
 
@@ -496,9 +494,9 @@ class DataReflWidget(BaseWidget):
                     f.write(content)
                     f.close()
                     QtGui.QMessageBox.information(self, "Automated reduction script saved",\
-                                           "The automated reduction script has been updated")
-                except:
-                    _report_error()
+                                                        "The automated reduction script has been updated")
+                except IOError, fileError:
+                    _report_error("Failed to open file: " + fileError.filename())
             else:
                 _report_error("You do not have permissions to write to %s." % sns_path)
         else:
@@ -517,7 +515,7 @@ class DataReflWidget(BaseWidget):
             self._summary.auto_reduce_btn.hide()
 
     def _remove_item(self):
-        if self._summary.angle_list.count()==0:
+        if self._summary.angle_list.count() == 0:
             return
         self._summary.angle_list.setEnabled(False)
         self._summary.remove_btn.setEnabled(False)
@@ -633,7 +631,7 @@ class DataReflWidget(BaseWidget):
         self._summary.tof_max_label.setEnabled(is_checked)
         self._summary.data_to_tof.setEnabled(is_checked)
         self._summary.tof_max_label2.setEnabled(is_checked)
-        #self._summary.plot_tof_btn.setEnabled(is_checked)
+        # self._summary.plot_tof_btn.setEnabled(is_checked)
         self._edit_event(None, self._summary.tof_range_switch)
 
     def _geometry_correction_clicked(self, is_checked):
@@ -649,13 +647,13 @@ class DataReflWidget(BaseWidget):
             For REFM, this is X
             For REFL, this is Y
         """
-        min, max = self._integrated_plot(True,
-                                         self._summary.data_run_number_edit,
-                                         self._summary.data_peak_from_pixel,
-                                         self._summary.data_peak_to_pixel)
-        self._summary.data_peak_from_pixel_estimate.setText(str(int(math.ceil(min))))
-        self._summary.data_peak_to_pixel_estimate.setText(str(int(math.ceil(max))))
-        self._summary.ref_pix_estimate.setText("%4.1f" % ((max+min)/2.0))
+        _is_peak = is_peak
+        minimum, maximum = self._integrated_plot(True, self._summary.data_run_number_edit,\
+                                                self._summary.data_peak_from_pixel,\
+                                                self._summary.data_peak_to_pixel)
+        self._summary.data_peak_from_pixel_estimate.setText(str(int(math.ceil(minimum))))
+        self._summary.data_peak_to_pixel_estimate.setText(str(int(math.ceil( maximum))))
+        self._summary.ref_pix_estimate.setText("%4.1f" % ((maximum+minimum)/2.0))
         util.set_tiny(self._summary.data_peak_from_pixel_estimate)
         util.set_tiny(self._summary.data_peak_to_pixel_estimate)
         util.set_tiny(self._summary.ref_pix_estimate)
@@ -678,38 +676,38 @@ class DataReflWidget(BaseWidget):
             For REFM, this is Y
             For REFL, this is X
         """
-        min, max = self._integrated_plot(False,
-                                         self._summary.data_run_number_edit,
-                                         self._summary.x_min_edit,
+        minimum, maximum = self._integrated_plot(False,\
+                                         self._summary.data_run_number_edit,\
+                                         self._summary.x_min_edit,\
                                          self._summary.x_max_edit)
-        self._summary.x_min_estimate.setText(str(int(math.ceil(min))))
-        self._summary.x_max_estimate.setText(str(int(math.ceil(max))))
+        self._summary.x_min_estimate.setText(str(int(math.ceil(minimum))))
+        self._summary.x_max_estimate.setText(str(int(math.ceil(maximum))))
         util.set_tiny(self._summary.x_min_estimate)
         util.set_tiny(self._summary.x_max_estimate)
 
     def _norm_count_vs_y(self):
-        min, max = self._integrated_plot(True,
-                                         self._summary.norm_run_number_edit,
-                                         self._summary.norm_peak_from_pixel,
+        minimum, maximum = self._integrated_plot(True,\
+                                         self._summary.norm_run_number_edit,\
+                                         self._summary.norm_peak_from_pixel,\
                                          self._summary.norm_peak_to_pixel)
-        self._summary.norm_peak_from_pixel_estimate.setText(str(int(math.ceil(min))))
-        self._summary.norm_peak_to_pixel_estimate.setText(str(int(math.ceil(max))))
+        self._summary.norm_peak_from_pixel_estimate.setText(str(int(math.ceil(minimum))))
+        self._summary.norm_peak_to_pixel_estimate.setText(str(int(math.ceil(maximum))))
         util.set_tiny(self._summary.norm_peak_from_pixel_estimate)
         util.set_tiny(self._summary.norm_peak_to_pixel_estimate)
 
     def _norm_count_vs_y_bck(self):
-        self._integrated_plot(True,
-                              self._summary.norm_run_number_edit,
-                              self._summary.norm_background_from_pixel1,
+        self._integrated_plot(True,\
+                              self._summary.norm_run_number_edit,\
+                              self._summary.norm_background_from_pixel1,\
                               self._summary.norm_background_to_pixel1)
 
     def _norm_count_vs_x(self):
-        min, max = self._integrated_plot(False,
-                                         self._summary.norm_run_number_edit,
-                                         self._summary.norm_x_min_edit,
+        minimum, maximum = self._integrated_plot(False,\
+                                         self._summary.norm_run_number_edit,\
+                                         self._summary.norm_x_min_edit,\
                                          self._summary.norm_x_max_edit)
-        self._summary.norm_xmin_estimate.setText(str(int(math.ceil(min))))
-        self._summary.norm_xmax_estimate.setText(str(int(math.ceil(max))))
+        self._summary.norm_xmin_estimate.setText(str(int(math.ceil(minimum))))
+        self._summary.norm_xmax_estimate.setText(str(int(math.ceil(maximum))))
         util.set_tiny(self._summary.norm_xmin_estimate)
         util.set_tiny(self._summary.norm_xmax_estimate)
 
@@ -731,7 +729,7 @@ class DataReflWidget(BaseWidget):
             @param max_ctrl: control widget containing the range maximum
         """
         if not IS_IN_MANTIDPLOT:
-            return
+            return None, None
 
         try:
             f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(file_ctrl.text())))[0]
@@ -749,14 +747,14 @@ class DataReflWidget(BaseWidget):
             if self.short_name == "REFM":
                 is_pixel_y = not is_pixel_y
 
-            min, max = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
-                                                                      callback=call_back,
-                                                                      range_min=range_min,
-                                                                      range_max=range_max,
-                                                                      high_res=is_high_res,
-                                                                      instrument=self.short_name)
-            return min, max
-        except:
+            minimum, maximum = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
+                                                                              callback=call_back,
+                                                                              range_min=range_min,
+                                                                              range_max=range_max,
+                                                                              high_res=is_high_res,
+                                                                              instrument=self.short_name)
+            return minimum, maximum
+        except IOError:
             pass
 
     def _plot_tof(self):
@@ -775,7 +773,7 @@ class DataReflWidget(BaseWidget):
             data_manipulation.tof_distribution(f, call_back,
                                                range_min=range_min,
                                                range_max=range_max)
-        except:
+        except IOError:
             pass
 
     def _add_data(self):
@@ -826,7 +824,7 @@ class DataReflWidget(BaseWidget):
 
                 self._sangle_parameter = logs["SANGLE"]
                 self._detector_distance = logs["DET_DISTANCE"]
-            except:
+            except IOError:
                 # Could not read in the parameters, skip.
                 msg = "No data set was found for run %s\n\n" % run_entry
                 msg += "Make sure that your data directory was added to the "
@@ -837,11 +835,11 @@ class DataReflWidget(BaseWidget):
             self._summary.waiting_label.hide()
 
     def _angle_changed(self):
-        if self._summary.angle_list.count()==0:
+        if self._summary.angle_list.count() == 0:
             return
         self._summary.angle_list.setEnabled(False)
         self._summary.remove_btn.setEnabled(False)
-        current_item =  self._summary.angle_list.currentItem()
+        current_item = self._summary.angle_list.currentItem()
         if current_item is not None:
             state = current_item.data(QtCore.Qt.UserRole)
             self.set_editing_state(state)
@@ -892,31 +890,31 @@ class DataReflWidget(BaseWidget):
 
     def set_editing_state(self, state):
 
-        #Peak from/to pixels
+        # Peak from/to pixels
         self._summary.data_peak_from_pixel.setText(str(state.DataPeakPixels[0]))
         self._summary.data_peak_to_pixel.setText(str(state.DataPeakPixels[1]))
 
-        #data low resolution range
+        # data low resolution range
         self._summary.data_low_res_range_switch.setChecked(state.data_x_range_flag)
         self._summary.x_min_edit.setText(str(state.data_x_range[0]))
         self._summary.x_max_edit.setText(str(state.data_x_range[1]))
         self._data_low_res_clicked(state.data_x_range_flag)
 
-        #norm low resolution range
+        # norm low resolution range
         self._summary.norm_low_res_range_switch.setChecked(state.norm_x_range_flag)
         self._summary.norm_x_min_edit.setText(str(state.norm_x_range[0]))
         self._summary.norm_x_max_edit.setText(str(state.norm_x_range[1]))
         self._norm_low_res_clicked(state.data_x_range_flag)
 
-        #Background flag
+        # Background flag
         self._summary.data_background_switch.setChecked(state.DataBackgroundFlag)
         self._data_background_clicked(state.DataBackgroundFlag)
 
-        #Background from/to pixels
+        # Background from/to pixels
         self._summary.data_background_from_pixel1.setText(str(state.DataBackgroundRoi[0]))
         self._summary.data_background_to_pixel1.setText(str(state.DataBackgroundRoi[1]))
 
-        #from TOF and to TOF
+        # from TOF and to TOF
         self._summary.data_from_tof.setText(str(int(state.DataTofRange[0])))
         self._summary.data_to_tof.setText(str(int(state.DataTofRange[1])))
         self._summary.tof_range_switch.setChecked(state.TofRangeFlag)
@@ -947,7 +945,7 @@ class DataReflWidget(BaseWidget):
         self._summary.norm_background_from_pixel1.setText(str(state.NormBackgroundRoi[0]))
         self._summary.norm_background_to_pixel1.setText(str(state.NormBackgroundRoi[1]))
 
-        #normalization flag
+        # normalization flag
         self._summary.norm_switch.setChecked(state.NormFlag)
         self._norm_clicked(state.NormFlag)
 
@@ -1032,7 +1030,7 @@ class DataReflWidget(BaseWidget):
         else:
             m = REFMDataSets()
 
-        #Peak from/to pixels
+        # Peak from/to pixels
         m.DataPeakPixels = [int(self._summary.data_peak_from_pixel.text()),
                             int(self._summary.data_peak_to_pixel.text())]
 
@@ -1044,15 +1042,15 @@ class DataReflWidget(BaseWidget):
                           int(self._summary.norm_x_max_edit.text())]
         m.norm_x_range_flag = self._summary.norm_low_res_range_switch.isChecked()
 
-        #Background flag
+        # Background flag
         m.DataBackgroundFlag = self._summary.data_background_switch.isChecked()
 
-        #Background from/to pixels
+        # Background from/to pixels
         roi1_from = int(self._summary.data_background_from_pixel1.text())
         roi1_to = int(self._summary.data_background_to_pixel1.text())
         m.DataBackgroundRoi = [roi1_from, roi1_to, 0, 0]
 
-        #from TOF and to TOF
+        # from TOF and to TOF
         from_tof = float(self._summary.data_from_tof.text())
         to_tof = float(self._summary.data_to_tof.text())
         m.DataTofRange = [from_tof, to_tof]
@@ -1069,17 +1067,17 @@ class DataReflWidget(BaseWidget):
         m.NormPeakPixels = [int(self._summary.norm_peak_from_pixel.text()),
                             int(self._summary.norm_peak_to_pixel.text())]
 
-        #Background flag
+        # Background flag
         m.NormBackgroundFlag = self._summary.norm_background_switch.isChecked()
 
-        #Background from/to pixels
+        # Background from/to pixels
         roi1_from = int(self._summary.norm_background_from_pixel1.text())
         roi1_to = int(self._summary.norm_background_to_pixel1.text())
         m.NormBackgroundRoi = [roi1_from, roi1_to]
 
-        #m.q_min = float(self._summary.q_min_edit.text())
-        #m.q_step = float(self._summary.q_step_edit.text())
-        #if self._summary.log_scale_chk.isChecked():
+        # m.q_min = float(self._summary.q_min_edit.text())
+        # m.q_step = float(self._summary.q_step_edit.text())
+        # if self._summary.log_scale_chk.isChecked():
         #    m.q_step = -m.q_step
 
         # Scattering angle

@@ -92,24 +92,6 @@ if [[ $USE_CLANG ]]; then
 fi
 
 ###############################################################################
-# OS X 10.8 setup steps
-###############################################################################
-if [[ $(uname) == 'Darwin' ]] && [[ ! $USE_CLANG ]]; then
-  # Assuming we are using the Intel compiler
-  cd $WORKSPACE
-  ./fetch_Third_Party.sh
-  cd $WORKSPACE
-  # Setup environment variables
-  source /opt/intel/bin/iccvars.sh intel64
-  export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$WORKSPACE/Third_Party/lib/mac64:/Library/Frameworks
-  # Make sure we pick up the Intel compiler
-  export CC=icc
-  export CXX=icpc
-  echo "Using Intel compiler."
-  icpc --version
-fi
-
-###############################################################################
 # Set up the location for the local object store outside of the build and
 # source tree, which can be shared by multiple builds.
 # It defaults to a MantidExternalData directory within the HOME directory.
@@ -136,6 +118,13 @@ fi
 
 if [[ ${NODE_LABELS} == *ubuntu* ]]; then
   ON_UBUNTU=true
+fi
+
+###############################################################################
+# Enable warnings about used Qt3Support functions
+###############################################################################
+if [[ ${JOB_NAME} == *Qt3-warnings* ]]; then
+  DIST_FLAGS="${DIST_FLAGS} -DWITH_QT3_SUPPORT_WARNINGS=ON"
 fi
 
 ###############################################################################

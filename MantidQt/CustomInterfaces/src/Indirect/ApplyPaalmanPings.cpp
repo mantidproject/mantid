@@ -128,7 +128,7 @@ void ApplyPaalmanPings::run() {
     } else {
       // Check for same binning across sample and container
       if (!checkWorkspaceBinningMatches(sampleWs, canCloneWs)) {
-        QString text =
+        const char *text =
             "Binning on sample and container does not match."
             "Would you like to rebin the container to match the sample?";
 
@@ -165,15 +165,14 @@ void ApplyPaalmanPings::run() {
         if (interpolateAll) {
           result = QMessageBox::Yes;
         } else {
-          QString text = "Number of bins on sample and " +
-                         QString::fromStdString(factorWs->name()) +
-                         " workspace does not match.\n" +
-                         "Would you like to interpolate this workspace to "
-                         "match the sample?";
+          std::string text = "Number of bins on sample and " +
+                             factorWs->name() + " workspace does not match.\n" +
+                             "Would you like to interpolate this workspace to "
+                             "match the sample?";
 
-          result = QMessageBox::question(NULL, tr("Interpolate corrections?"),
-                                         tr(text), QMessageBox::YesToAll,
-                                         QMessageBox::Yes, QMessageBox::No);
+          result = QMessageBox::question(
+              NULL, tr("Interpolate corrections?"), tr(text.c_str()),
+              QMessageBox::YesToAll, QMessageBox::Yes, QMessageBox::No);
         }
 
         switch (result) {

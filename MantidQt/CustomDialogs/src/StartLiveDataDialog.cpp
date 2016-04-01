@@ -327,7 +327,7 @@ void StartLiveDataDialog::setDefaultAccumulationMethod(const QString& inst)
       // If 'Add' is currently selected, select 'Replace' instead
       if ( ui.cmbAccumulationMethod->currentIndex() == addIndex )
       {
-        ui.cmbAccumulationMethod->setCurrentText("Replace");
+        ui.cmbAccumulationMethod->setItemText(-1, "Replace");
       }
       // Disable the 'Add' option in the combobox. It just wouldn't make sense.
       ui.cmbAccumulationMethod->setItemData(addIndex, false, Qt::UserRole - 1);
@@ -389,7 +389,7 @@ void StartLiveDataDialog::initListenerPropLayout(const QString& inst)
     QString propName = QString::fromStdString((**prop).name());
     if ( m_algProperties.contains( propName ) )
     {
-      m_algProperties.remove( propName );
+      m_algProperties.removeAll(propName);
     }
   }
 

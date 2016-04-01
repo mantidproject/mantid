@@ -338,7 +338,7 @@ void ScriptEditor::keyPressEvent(QKeyEvent *event) {
  *
  */
 void ScriptEditor::wheelEvent(QWheelEvent *e) {
-  if (e->state() == Qt::ControlButton) {
+  if (e->modifiers() == Qt::ControlModifier) {
     if (e->delta() > 0) {
       zoomIn();
       emit textZoomedIn(); // allows tracking

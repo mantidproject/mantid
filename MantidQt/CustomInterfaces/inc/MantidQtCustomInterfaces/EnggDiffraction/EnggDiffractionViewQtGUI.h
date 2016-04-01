@@ -10,9 +10,11 @@
 #include "ui_EnggDiffractionQtTabCalib.h"
 #include "ui_EnggDiffractionQtTabFocus.h"
 #include "ui_EnggDiffractionQtTabPreproc.h"
+#include "ui_EnggDiffractionQtTabFitting.h"
 #include "ui_EnggDiffractionQtTabSettings.h"
 
 #include <boost/scoped_ptr.hpp>
+#include <qwt_plot_curve.h>
 
 // Qt classes forward declarations
 class QMutex;
@@ -145,6 +147,18 @@ public:
 
   double rebinningPulsesTime() const override;
 
+  std::string fittingRunNo() const override;
+
+  std::string fittingPeaksData() const override;
+
+  void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
+                     bool focused) override;
+
+  std::string readPeaksFile(std::string fileDir);
+
+  void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data,
+                         std::vector<QwtPlotCurve *> &dataVector, bool focused);
+
   void plotFocusedSpectrum(const std::string &wsName) override;
 
   void plotWaterfallSpectrum(const std::string &wsName) override;
@@ -171,9 +185,10 @@ private slots:
   void focusClicked();
   void focusCroppedClicked();
   void focusTextureClicked();
+  void focusStopClicked();
   void rebinTimeClicked();
   void rebinMultiperiodClicked();
-  void focusStopClicked();
+  void fitClicked();
 
   // slots of the settings tab/section of the interface
   void browseInputDirCalib();
@@ -211,6 +226,14 @@ private slots:
   // enables the text field when appropriate bank name is selected
   void enableSpecNos();
 
+  // slot of the fitting peaks per part of the interface
+  void browseFitFocusedRun();
+  void fittingBankIdChanged(int idx);
+  void setBankIdComboBox(int idx);
+  void browsePeaksToFit();
+  void fittingListWidgetBank(int idx);
+  void setListWidgetBank(int idx);
+
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
 
@@ -221,6 +244,7 @@ private:
   void doSetupTabCalib();
   void doSetupTabFocus();
   void doSetupTabPreproc();
+  void doSetupTabFitting();
   void doSetupTabSettings();
 
   std::string guessGSASTemplatePath() const;
@@ -248,6 +272,7 @@ private:
   Ui::EnggDiffractionQtTabCalib m_uiTabCalib;
   Ui::EnggDiffractionQtTabFocus m_uiTabFocus;
   Ui::EnggDiffractionQtTabPreproc m_uiTabPreproc;
+  Ui::EnggDiffractionQtTabFitting m_uiTabFitting;
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
 
   /// converts QList to a vector
@@ -272,6 +297,8 @@ private:
   // multi-run focus mode type selected
   int static m_currentRunMode;
 
+  int static m_bank_Id;
+
   /// current calibration produced in the 'Calibration' tab
   std::string m_currentCalibFilename;
   /// calibration settings - from/to the 'settings' tab
@@ -292,6 +319,12 @@ private:
   /// supported/suggested file extensions for the detector groups file
   /// (focusing)
   static const std::string g_DetGrpExtStr;
+
+  /// Loaded focused workspace
+  std::vector<QwtPlotCurve *> m_focusedDataVector;
+
+  /// Loaded data curves
+  std::vector<QwtPlotCurve *> m_fittedDataVector;
 
   /// presenter as in the model-view-presenter
   boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;
