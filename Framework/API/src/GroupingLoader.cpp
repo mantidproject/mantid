@@ -275,9 +275,9 @@ ITableWorkspace_sptr Grouping::toTable() const {
 
   newTable->addColumn("vector_int", "Detectors");
 
-  for (auto it = this->groups.begin(); it != this->groups.end(); ++it) {
+  for (const auto &group : this->groups) {
     TableRow newRow = newTable->appendRow();
-    newRow << Kernel::Strings::parseRange(*it);
+    newRow << Kernel::Strings::parseRange(group);
   }
 
   return newTable;

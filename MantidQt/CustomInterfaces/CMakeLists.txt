@@ -1,8 +1,8 @@
 set ( SRC_FILES
 	src/DataComparison.cpp
 	src/DirectConvertToEnergy.cpp
-        src/DynamicPDF/DisplayCurveFitTest.cpp
-        src/DynamicPDF/SliceSelector.cpp
+	src/DynamicPDF/DisplayCurveFitTest.cpp
+	src/DynamicPDF/SliceSelector.cpp
 	src/EnggDiffraction/EnggDiffractionPresenter.cpp
 	src/EnggDiffraction/EnggDiffractionViewQtGUI.cpp
 	src/Homer.cpp
@@ -65,6 +65,7 @@ set ( SRC_FILES
 	src/Muon/ALCDataLoadingView.cpp
 	src/Muon/ALCHelper.cpp
 	src/Muon/ALCInterface.cpp
+	src/Muon/ALCLatestFileFinder.cpp
 	src/Muon/ALCPeakFittingModel.cpp
 	src/Muon/ALCPeakFittingPresenter.cpp
 	src/Muon/ALCPeakFittingView.cpp
@@ -90,28 +91,31 @@ set ( SRC_FILES
 	src/Reflectometry/ReflTableSchema.cpp
 	src/Reflectometry/ReflTableViewPresenter.cpp
 	src/Reflectometry/TransferResults.cpp
+	src/SANSAddFiles.cpp
 	src/SANSBackgroundCorrectionSettings.cpp
 	src/SANSBackgroundCorrectionWidget.cpp
-	src/SANSAddFiles.cpp
 	src/SANSConstants.cpp
 	src/SANSDiagnostics.cpp
 	src/SANSEventSlicing.cpp
 	src/SANSPlotSpecial.cpp
 	src/SANSRunWindow.cpp
-        src/SampleTransmission.cpp
+	src/SampleTransmission.cpp
 	src/StepScan.cpp
 	src/Tomography/ImageROIPresenter.cpp
 	src/Tomography/ImageROIViewQtWidget.cpp
 	src/Tomography/ImageStackPreParams.cpp
 	src/Tomography/SavuConfigDialog.cpp
 	src/Tomography/StackOfImagesDirs.cpp
-	src/Tomography/TomographyIfaceModel.cpp
-	src/Tomography/TomographyIfacePresenter.cpp
-	src/Tomography/TomographyIfaceViewQtGUI.cpp
 	src/Tomography/TomoPathsConfig.cpp
 	src/Tomography/TomoReconPostprocSettings.cpp
 	src/Tomography/TomoReconPreprocSettings.cpp
+	src/Tomography/TomoSystemSettings.cpp
+	src/Tomography/TomoSystemSettingsLocal.cpp
+	src/Tomography/TomoSystemSettingsRemote.cpp
 	src/Tomography/TomoToolConfigDialog.cpp
+	src/Tomography/TomographyIfaceModel.cpp
+	src/Tomography/TomographyIfacePresenter.cpp
+	src/Tomography/TomographyIfaceViewQtGUI.cpp
 	src/Tomography/ToolConfig.cpp
 	src/UserInputValidator.cpp
 	src/background.cpp
@@ -124,9 +128,9 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Background.h
 	inc/MantidQtCustomInterfaces/DataComparison.h
 	inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
-        inc/MantidQtCustomInterfaces/DynamicPDF/DisplayCurveFitTest.h
-        inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h
 	inc/MantidQtCustomInterfaces/DllConfig.h
+	inc/MantidQtCustomInterfaces/DynamicPDF/DisplayCurveFitTest.h
+	inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h
@@ -149,7 +153,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectBayesTab.h
-        inc/MantidQtCustomInterfaces/Indirect/IndirectCorrections.h
+	inc/MantidQtCustomInterfaces/Indirect/IndirectCorrections.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectDataAnalysis.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectDataAnalysisTab.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectDataReduction.h
@@ -193,6 +197,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingView.h
 	inc/MantidQtCustomInterfaces/Muon/ALCHelper.h
 	inc/MantidQtCustomInterfaces/Muon/ALCInterface.h
+	inc/MantidQtCustomInterfaces/Muon/ALCLatestFileFinder.h
 	inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingModel.h
 	inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingPresenter.h
 	inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingView.h
@@ -258,9 +263,9 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflWorkspaceCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/TransferResults.h
 	inc/MantidQtCustomInterfaces/Reflectometry/WorkspaceReceiver.h
+	inc/MantidQtCustomInterfaces/SANSAddFiles.h
 	inc/MantidQtCustomInterfaces/SANSBackgroundCorrectionSettings.h
 	inc/MantidQtCustomInterfaces/SANSBackgroundCorrectionWidget.h
-	inc/MantidQtCustomInterfaces/SANSAddFiles.h
 	inc/MantidQtCustomInterfaces/SANSConstants.h
 	inc/MantidQtCustomInterfaces/SANSDiagnostics.h
 	inc/MantidQtCustomInterfaces/SANSEventSlicing.h
@@ -276,15 +281,18 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h
 	inc/MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h
 	inc/MantidQtCustomInterfaces/Tomography/StackOfImagesDirs.h
-	inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h
-	inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
-	inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoReconPostprocSettings.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoReconPreprocSettings.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoSystemSettingsLocal.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoSystemSettingsRemote.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h
+	inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h
+	inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
+	inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
 	inc/MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h
 	inc/MantidQtCustomInterfaces/Tomography/ToolConfigCustom.h
 	inc/MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h
@@ -396,6 +404,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtTabCalib.ui
                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtTabFocus.ui
                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtTabPreproc.ui
+               inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtTabFitting.ui
                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtTabSettings.ui
                inc/MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.ui
                inc/MantidQtCustomInterfaces/Indirect/ApplyPaalmanPings.ui
@@ -458,6 +467,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabRun.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabSetup.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabVisualize.ui
+               inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabSystemSettings.ui
                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigAstra.ui
                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigCustom.ui
                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigSavu.ui
@@ -468,6 +478,7 @@ set ( TEST_FILES
 	ALCBaselineModellingModelTest.h
 	ALCBaselineModellingPresenterTest.h
 	ALCDataLoadingPresenterTest.h
+	ALCLatestFileFinderTest.h
 	ALCPeakFittingModelTest.h
 	ALCPeakFittingPresenterTest.h
 	EnggDiffractionPresenterTest.h

@@ -5,6 +5,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 
@@ -20,8 +23,6 @@
 #include <algorithm>
 #include <functional>
 #include <cmath>
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -60,10 +61,18 @@ void FFT::init() {
                   "Direction of the transform: forward or backward");
   declareProperty("Shift", 0.0, "Apply an extra phase equal to this quantity "
                                 "times 2*pi to the transform");
+  declareProperty("AutoShift", false,
+                  "Automatically calculate and apply phase shift. Zero on the "
+                  "X axis is assumed to be in the centre - if it is not, "
+                  "setting this property will automatically correct for this.");
   declareProperty(
       "AcceptXRoundingErrors", false,
       "Continue to process the data even if X values are not evenly spaced",
       Direction::Input);
+
+  // "Shift" should only be enabled if "AutoShift" is turned off
+  setPropertySettings(
+      "Shift", make_unique<EnabledWhenProperty>("AutoShift", IS_DEFAULT));
 }
 
 /** Executes the algorithm
@@ -145,10 +154,10 @@ void FFT::exec() {
     }
   }
 
-  // centerShift == true means that the zero on the x axis is assumed to be in
-  // the data centre
-  // at point with index i = ySize/2. If shift == false the zero is at i = 0
-  const bool centerShift = true;
+  // Hardcoded "centerShift == true" means that the zero on the x axis is
+  // assumed to be in the centre, at point with index i = ySize/2.
+  // Set to false to make zero at i = 0.
+  constexpr bool centerShift = true;
 
   auto tAxis = new API::TextAxis(nOut);
   int iRe = 0;
@@ -192,8 +201,7 @@ void FFT::exec() {
     }
 
     double shift =
-        getProperty("Shift"); // extra phase to be applied to the transform
-    shift *= 2 * M_PI;
+        getPhaseShift(X); // extra phase to be applied to the transform
 
     gsl_fft_complex_forward(data.get(), 1, ySize, wavetable, workspace);
     /* The Fourier transform overwrites array 'data'. Recall that the Fourier
@@ -253,8 +261,9 @@ void FFT::exec() {
     gsl_fft_complex_inverse(data.get(), 1, ySize, wavetable, workspace);
     for (int i = 0; i < ySize; i++) {
       double x = df * i;
-      if (centerShift)
+      if (centerShift) {
         x -= df * (ySize / 2);
+      }
       outWS->dataX(0)[i] = x;
       int j = centerShift ? (ySize / 2 + i + dys) % ySize : i;
       double re = data[2 * j] / df;
@@ -293,37 +302,41 @@ std::map<std::string, std::string> FFT::validateInputs() {
   std::map<std::string, std::string> errors;
 
   MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
-  const int iReal = getProperty("Real");
-  const int iImag = getProperty("Imaginary");
-  const MantidVec &X = inWS->readX(iReal);
+  if (inWS) {
+    const int iReal = getProperty("Real");
+    const int iImag = getProperty("Imaginary");
+    const MantidVec &X = inWS->readX(iReal);
 
-  // check that the workspace isn't empty
-  if (X.size() < 2) {
-    errors["InputWorkspace"] = "Input workspace must have at least two values";
-  } else {
-    // Check that the x values are evenly spaced
-    // If accepting rounding errors, just give a warning if bins are different.
-    if (areBinWidthsUneven(X)) {
+    // check that the workspace isn't empty
+    if (X.size() < 2) {
       errors["InputWorkspace"] =
-          "X axis must be linear (all bins have same width)";
-    }
-  }
-
-  // check real, imaginary spectrum numbers and workspace sizes
-  int nHist = static_cast<int>(inWS->getNumberHistograms());
-  if (iReal >= nHist) {
-    errors["Real"] = "Real out of range";
-  }
-  if (iImag != EMPTY_INT()) {
-    MatrixWorkspace_const_sptr inImagWS = getProperty("InputImagWorkspace");
-    if (inImagWS) {
-      if (inWS->blocksize() != inImagWS->blocksize()) {
-        errors["Imaginary"] = "Real and Imaginary sizes do not match";
+          "Input workspace must have at least two values";
+    } else {
+      // Check that the x values are evenly spaced
+      // If accepting rounding errors, just give a warning if bins are
+      // different.
+      if (areBinWidthsUneven(X)) {
+        errors["InputWorkspace"] =
+            "X axis must be linear (all bins have same width)";
       }
-      nHist = static_cast<int>(inImagWS->getNumberHistograms());
     }
-    if (iImag >= nHist) {
-      errors["Imaginary"] = "Imaginary out of range";
+
+    // check real, imaginary spectrum numbers and workspace sizes
+    int nHist = static_cast<int>(inWS->getNumberHistograms());
+    if (iReal >= nHist) {
+      errors["Real"] = "Real out of range";
+    }
+    if (iImag != EMPTY_INT()) {
+      MatrixWorkspace_const_sptr inImagWS = getProperty("InputImagWorkspace");
+      if (inImagWS) {
+        if (inWS->blocksize() != inImagWS->blocksize()) {
+          errors["Imaginary"] = "Real and Imaginary sizes do not match";
+        }
+        nHist = static_cast<int>(inImagWS->getNumberHistograms());
+      }
+      if (iImag >= nHist) {
+        errors["Imaginary"] = "Imaginary out of range";
+      }
     }
   }
 
@@ -383,6 +396,26 @@ bool FFT::areBinWidthsUneven(const MantidVec &xValues) const {
   }
 
   return widthsUneven;
+}
+
+/**
+ * Returns the phase shift to apply
+ * If "AutoShift" is set, calculates this automatically as -X[N/2]
+ * Otherwise, returns user-supplied "Shift" (or zero if none set)
+ * @param xValues :: [input] Reference to X values of input workspace
+ * @returns :: Phase shift
+ */
+double FFT::getPhaseShift(const MantidVec &xValues) {
+  double shift = 0.0;
+  const bool autoshift = getProperty("AutoShift");
+  if (autoshift) {
+    const size_t mid = xValues.size() / 2;
+    shift = -xValues[mid];
+  } else {
+    shift = getProperty("Shift");
+  }
+  shift *= 2 * M_PI;
+  return shift;
 }
 
 } // namespace Algorithm

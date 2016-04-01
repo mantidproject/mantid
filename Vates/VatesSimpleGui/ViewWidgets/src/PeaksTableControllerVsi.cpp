@@ -189,13 +189,11 @@ std::map<std::string, QColor> PeaksTableControllerVsi::getColors() {
 
   std::vector<Mantid::API::IPeaksWorkspace_sptr> peakWs =
       m_presenter->getPeaksWorkspaces();
-  for (std::vector<Mantid::API::IPeaksWorkspace_sptr>::iterator it =
-           peakWs.begin();
-       it != peakWs.end(); ++it) {
+  for (auto it = peakWs.begin(); it != peakWs.end(); ++it) {
     const int pos = static_cast<int>(std::distance(peakWs.begin(), it));
     QColor color = m_peakPalette.foregroundIndexToColour(pos);
     const std::string name = (*it)->getName();
-    colors.insert(std::pair<std::string, QColor>(name, color));
+    colors.emplace(name, color);
   }
 
   return colors;
@@ -207,9 +205,7 @@ std::map<std::string, QColor> PeaksTableControllerVsi::getColors() {
 void PeaksTableControllerVsi::updatePeakWorkspaceColor() {
   std::vector<Mantid::API::IPeaksWorkspace_sptr> peakWs =
       m_presenter->getPeaksWorkspaces();
-  for (std::vector<Mantid::API::IPeaksWorkspace_sptr>::iterator it =
-           peakWs.begin();
-       it != peakWs.end(); ++it) {
+  for (auto it = peakWs.begin(); it != peakWs.end(); ++it) {
     const int pos = static_cast<int>(std::distance(peakWs.begin(), it));
     QColor color = m_peakPalette.foregroundIndexToColour(pos);
     const std::string name = (*it)->getName();
@@ -219,16 +215,14 @@ void PeaksTableControllerVsi::updatePeakWorkspaceColor() {
     pqServer *server = pqActiveObjects::instance().activeServer();
     pqServerManagerModel *smModel =
         pqApplicationCore::instance()->getServerManagerModel();
-    QList<pqPipelineSource *> sources =
+    const QList<pqPipelineSource *> sources =
         smModel->findItems<pqPipelineSource *>(server);
-    for (QList<pqPipelineSource *>::iterator src = sources.begin();
-         src != sources.end(); ++src) {
+    foreach (pqPipelineSource *src, sources) {
       // Make sure that the source is a peak workspace
-
-      std::string xmlName((*src)->getProxy()->GetXMLName());
+      std::string xmlName(src->getProxy()->GetXMLName());
       if ((xmlName.find("Peaks Source") != std::string::npos)) {
         std::string workspaceName(
-            vtkSMPropertyHelper((*src)->getProxy(), "WorkspaceName")
+            vtkSMPropertyHelper(src->getProxy(), "WorkspaceName")
                 .GetAsString());
         if (workspaceName == name) {
           int r = color.red();
@@ -240,10 +234,9 @@ void PeaksTableControllerVsi::updatePeakWorkspaceColor() {
           double blue = static_cast<double>(b) / 255.0;
 
           pqDataRepresentation *rep =
-              (*src)
-                  ->getRepresentation(pqActiveObjects::instance().activeView());
-           pqPipelineRepresentation *pipelineRepresentation =
-               qobject_cast<pqPipelineRepresentation *>(rep);
+              src->getRepresentation(pqActiveObjects::instance().activeView());
+          pqPipelineRepresentation *pipelineRepresentation =
+              qobject_cast<pqPipelineRepresentation *>(rep);
           pipelineRepresentation->getProxy()->UpdatePropertyInformation();
 
           vtkSMDoubleVectorProperty *prop =
@@ -552,7 +545,7 @@ PeaksTableControllerVsi::getConcatenatedWorkspaceNames(std::string delimiter) {
  * @param splatSource The splatterplot source
  */
 void PeaksTableControllerVsi::updatePeaksWorkspaces(
-    QList<QPointer<pqPipelineSource>> peakSources,
+    const QList<QPointer<pqPipelineSource>> &peakSources,
     pqPipelineSource *splatSource) {
   // Check if the presenters exist and which need to be added
   std::vector<std::string> peaksWorkspaceNames;
@@ -560,28 +553,24 @@ void PeaksTableControllerVsi::updatePeaksWorkspaces(
   std::vector<pqPipelineSource *> nonTrackedWorkspaces;
   std::vector<std::string> trackedWorkspaceNames =
       m_presenter->getPeaksWorkspaceNames();
-  for (QList<QPointer<pqPipelineSource>>::Iterator it = peakSources.begin();
-       it != peakSources.end(); ++it) {
+  foreach (QPointer<pqPipelineSource> source, peakSources) {
     std::string workspaceName(
-        vtkSMPropertyHelper((*it)->getProxy(), "WorkspaceName").GetAsString());
+        vtkSMPropertyHelper(source->getProxy(), "WorkspaceName").GetAsString());
 
     peaksWorkspaceNames.push_back(workspaceName);
 
-    int count = static_cast<int>(std::count(trackedWorkspaceNames.begin(),
-                                            trackedWorkspaceNames.end(),
-                                            workspaceName));
+    auto count = std::count(trackedWorkspaceNames.begin(),
+                            trackedWorkspaceNames.end(), workspaceName);
 
     if (count == 0) {
-      nonTrackedWorkspaces.push_back(*it);
+      nonTrackedWorkspaces.push_back(source);
     }
   }
 
   if (splatSource) {
     // Add the workspaces which are missing in the presenter
-    for (std::vector<pqPipelineSource *>::iterator it =
-             nonTrackedWorkspaces.begin();
-         it != nonTrackedWorkspaces.end(); ++it) {
-      addWorkspace(*it, splatSource);
+    for (pqPipelineSource *ws : nonTrackedWorkspaces) {
+      addWorkspace(ws, splatSource);
     }
   }
 
@@ -620,7 +609,7 @@ void PeaksTableControllerVsi::setPeakSourceColorToDefault() {
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
   QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
-  for (QList<pqPipelineSource *>::iterator src = sources.begin(); src != sources.end(); ++src) {
+  for (auto src = sources.begin(); src != sources.end(); ++src) {
 
     std::string xmlName((*src)->getProxy()->GetXMLName());
     if ((xmlName.find("Peaks Source") != std::string::npos)) {

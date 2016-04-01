@@ -7,6 +7,7 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconFiltersSettings.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -17,7 +18,7 @@ Tomography GUI. Base class / interface for the view of the tomo GUI
 specific functionality/dependencies are added in a class derived from
 this.
 
-Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014-2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -102,6 +103,18 @@ public:
   virtual std::vector<std::string> logMsgs() const = 0;
 
   /**
+   * Reference or ID of the experiment entered/selected by the
+   * user. The ID is effectively the RBNumber (defined at ISIS as the
+   * "experiment reference number from the proposal"). The RBNumber
+   * identifies one experiment or a set of experiments from an
+   * approved experiment proposal. See for example:
+   * www.isis.stfc.ac.uk/groups/computing/data/problems-finding-your-data11691.html
+   *
+   * @return identifier as a string
+   */
+  virtual std::string experimentReference() const = 0;
+
+  /**
    * Username entered by the user
    *
    * @return username to log in to the compute resource
@@ -116,6 +129,16 @@ public:
   virtual std::string getPassword() const = 0;
 
   virtual std::vector<std::string> processingJobsIDs() const = 0;
+
+  /**
+   * Get the current system settings. This includes several
+   * parameters. Most of them are paths or path components them, but
+   * there are also some naming conventions and other parameters.
+   *
+   * @return Settings with current values (possibly modified by the
+   * user).
+   */
+  virtual TomoSystemSettings systemSettings() const = 0;
 
   /**
    * Get the current reconstruction tool settings set by the
@@ -245,6 +268,15 @@ public:
   virtual TomoPathsConfig currentPathsConfig() const = 0;
 
   /**
+   * Takes paths produces programmatically and displays them to the
+   * user. This can be used for example when modifying the paths based
+   * on some logic/consistency checks outside of this view.
+   *
+   * @param cfg configuration to use from now on
+   */
+  virtual void updatePathsConfig(const TomoPathsConfig &cfg) = 0;
+
+  /**
    * Regions and center of rotation, normally defined by the user with
    * a graphical rectangle selection tool.
    *
@@ -260,22 +292,6 @@ public:
   virtual void showToolConfig(const std::string &name) = 0;
 
   /**
-   * Path to local scripts (reconstruction). Normally set to the
-   * installation path, but user modifyable
-   *
-   * @return path to the scrtips as a string
-   */
-  virtual std::string pathLocalReconScripts() const = 0;
-
-  /**
-   * User choice of external (Python) interpreter for third party
-   * tools
-   *
-   * @return path to the interpreter as a string
-   */
-  virtual std::string externalInterpreterPath() const = 0;
-
-  /**
    * Refresh the table, tree etc. that displays info on the running/finished
    *jobs.
    *
@@ -286,8 +302,8 @@ public:
    */
   virtual void updateJobsInfoDisplay(
       const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
-          &localStatus) = 0;
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
+          localStatus) = 0;
 
   /**
    * Save settings (normally when closing the interface). This refers

@@ -70,28 +70,30 @@ std::map<std::string, std::string> CalMuonDetectorPhases::validateInputs() {
 
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
-  // Check units, should be microseconds
-  Unit_const_sptr unit = inputWS->getAxis(0)->unit();
-  if ((unit->label().ascii() != "Microseconds") &&
-      (unit->label().ascii() != "microsecond")) {
-    result["InputWorkspace"] = "InputWorkspace units must be microseconds";
-  }
+  if (inputWS) {
+    // Check units, should be microseconds
+    Unit_const_sptr unit = inputWS->getAxis(0)->unit();
+    if ((unit->label().ascii() != "Microseconds") &&
+        (unit->label().ascii() != "microsecond")) {
+      result["InputWorkspace"] = "InputWorkspace units must be microseconds";
+    }
 
-  // Check spectra numbers are valid, if specified
-  int nspec = static_cast<int>(inputWS->getNumberHistograms());
-  std::vector<int> forward = getProperty("ForwardSpectra");
-  std::vector<int> backward = getProperty("BackwardSpectra");
-  for (int spec : forward) {
-    if (spec < 1 || spec > nspec) {
-      result["ForwardSpectra"] = "Invalid spectrum numbers in ForwardSpectra";
+    // Check spectra numbers are valid, if specified
+    int nspec = static_cast<int>(inputWS->getNumberHistograms());
+    std::vector<int> forward = getProperty("ForwardSpectra");
+    std::vector<int> backward = getProperty("BackwardSpectra");
+    for (int spec : forward) {
+      if (spec < 1 || spec > nspec) {
+        result["ForwardSpectra"] = "Invalid spectrum numbers in ForwardSpectra";
+      }
+    }
+    for (int spec : backward) {
+      if (spec < 1 || spec > nspec) {
+        result["BackwardSpectra"] =
+            "Invalid spectrum numbers in BackwardSpectra";
+      }
     }
   }
-  for (int spec : backward) {
-    if (spec < 1 || spec > nspec) {
-      result["BackwardSpectra"] = "Invalid spectrum numbers in BackwardSpectra";
-    }
-  }
-
   return result;
 }
 //----------------------------------------------------------------------------------------------
@@ -170,6 +172,7 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
     if (!fit->isExecuted() || status != success) {
       std::ostringstream error;
       error << "Fit failed for spectrum " << ispec;
+      error << ": " << status;
       throw std::runtime_error(error.str());
     }
 
@@ -351,17 +354,25 @@ void CalMuonDetectorPhases::getGroupingFromInstrument(
   backward.clear();
 
   const auto instrument = ws->getInstrument();
+  auto loader = Kernel::make_unique<API::GroupingLoader>(instrument);
+
   if (instrument->getName() == "MUSR") {
-    // Two possibilities for grouping, but we have no way of knowing which
-    throw new std::invalid_argument(
-        "Cannot use default instrument grouping for MUSR "
-        "as main field direction is unknown");
+    // Two possibilities for grouping - use workspace log
+    auto fieldDir = ws->run().getLogData("main_field_direction");
+    if (fieldDir) {
+      loader = Kernel::make_unique<API::GroupingLoader>(instrument,
+                                                        fieldDir->value());
+    }
+    if (!fieldDir) {
+      throw std::invalid_argument(
+          "Cannot use default instrument grouping for MUSR "
+          "as main field direction is unknown");
+    }
   }
 
   // Load grouping and find forward, backward groups
   std::string fwdRange, bwdRange;
-  API::GroupingLoader loader(instrument);
-  const auto grouping = loader.getGroupingFromIDF();
+  const auto grouping = loader->getGroupingFromIDF();
   size_t nGroups = grouping->groups.size();
   for (size_t iGroup = 0; iGroup < nGroups; iGroup++) {
     const std::string name = grouping->groupNames[iGroup];

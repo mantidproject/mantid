@@ -270,11 +270,18 @@ def CheckAnalysers(in1WS, in2WS):
       @exception Valuerror - workspaces have different reflections
     """
     ws1 = mtd[in1WS]
-    analyser_1 = ws1.getInstrument().getStringParameter('analyser')[0]
-    reflection_1 = ws1.getInstrument().getStringParameter('reflection')[0]
+    try:
+        analyser_1 = ws1.getInstrument().getStringParameter('analyser')[0]
+        reflection_1 = ws1.getInstrument().getStringParameter('reflection')[0]
+    except IndexError:
+        raise RuntimeError('Could not find analyser or reflection for workspace %s' % in1WS)
     ws2 = mtd[in2WS]
-    analyser_2 = ws2.getInstrument().getStringParameter('analyser')[0]
-    reflection_2 = ws2.getInstrument().getStringParameter('reflection')[0]
+    try:
+        analyser_2 = ws2.getInstrument().getStringParameter('analyser')[0]
+        reflection_2 = ws2.getInstrument().getStringParameter('reflection')[0]
+    except:
+        raise RuntimeError('Could not find analyser or reflection for workspace %s' % in2WS)
+
     if analyser_1 != analyser_2:
         raise ValueError('Workspace %s and %s have different analysers' % (ws1, ws2))
     elif reflection_1 != reflection_2:

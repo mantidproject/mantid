@@ -3,13 +3,26 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAlgorithms/MaxEnt.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using Mantid::MantidVec;
+
+/**
+ * This is a test class that exists to test the method validateInputs()
+ */
+class TestMaxEnt : public Mantid::Algorithms::MaxEnt {
+public:
+  std::map<std::string, std::string> wrapValidateInputs() {
+    return this->validateInputs();
+  }
+};
 
 class MaxEntTest : public CxxTest::TestSuite {
 public:
@@ -240,6 +253,146 @@ public:
     TS_ASSERT_DELTA(data->readY(1)[35], 0.3266, 0.0001);
     TS_ASSERT_DELTA(data->readY(1)[36], 0.6101, 0.0001);
     TS_ASSERT_DELTA(data->readY(1)[37], 0.8074, 0.0001);
+  }
+
+  void test_density_factor() {
+    // Real signal: cos(w * x)
+
+    size_t npoints = 50;
+
+    auto ws = createWorkspaceReal(npoints, 0.0);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("A", 0.1);
+    alg->setProperty("ChiTarget", 50.);
+    alg->setProperty("DensityFactor", "3");
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
+    MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
+
+    TS_ASSERT(data);
+    TS_ASSERT(image);
+
+    TS_ASSERT_EQUALS(data->blocksize(), npoints * 3);
+    TS_ASSERT_EQUALS(image->blocksize(), npoints * 3);
+    TS_ASSERT_EQUALS(data->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(image->getNumberHistograms(), 2);
+
+    // Test some values
+    TS_ASSERT_DELTA(image->readY(0)[70], 6.7631, 0.0001);
+    // Fails on RHEL and Ubuntu with delta 0.0001
+    TS_ASSERT_DELTA(image->readY(0)[71], 1.3452, 0.001);
+    TS_ASSERT_DELTA(image->readY(1)[78], 0.2293, 0.0001);
+    TS_ASSERT_DELTA(image->readY(1)[79], 0.8566, 0.0001);
+  }
+
+  void test_output_label() {
+    // Test the output label
+
+    size_t npoints = 2;
+
+    auto ws = createWorkspaceReal(npoints, 0.0);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("A", 0.1);
+    alg->setProperty("ChiTarget", 50.);
+    alg->setProperty("MaxIterations", "1");
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
+        Mantid::Kernel::UnitFactory::Instance().create("Label"));
+
+    // 1. From (Time, s) to (Frequency, Hz)
+    label->setLabel("Time", "s");
+    ws->getAxis(0)->unit() = label;
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->caption(), "Frequency");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->label().ascii(), "Hz");
+
+    // 2. From (Time, ms) to (Frequency, MHz)
+    label->setLabel("Time", "microsecond");
+    ws->getAxis(0)->unit() = label;
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    image = alg->getProperty("ReconstructedImage");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->caption(), "Frequency");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->label().ascii(), "MHz");
+
+    // 3. From (Frequency, Hz) to (Time, s)
+    label->setLabel("Frequency", "Hz");
+    ws->getAxis(0)->unit() = label;
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    image = alg->getProperty("ReconstructedImage");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->caption(), "Time");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->label().ascii(), "s");
+
+    // 4. From (Frequency, MHz) to (Time, ms)
+    label->setLabel("Frequency", "MHz");
+    ws->getAxis(0)->unit() = label;
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    image = alg->getProperty("ReconstructedImage");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->caption(), "Time");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->label().ascii(), "microsecond");
+
+    // 5. From (d-Spacing, Angstrom) to (q, Angstrom^-1)
+    label->setLabel("d-Spacing", "Angstrom");
+    ws->getAxis(0)->unit() = label;
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    image = alg->getProperty("ReconstructedImage");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->caption(), "q");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->label().ascii(), "Angstrom^-1");
+
+    // 6. From (q, Angstrom^-1) to (d-Spacing, Angstrom)
+    label->setLabel("q", "Angstrom^-1");
+    ws->getAxis(0)->unit() = label;
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    image = alg->getProperty("ReconstructedImage");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->caption(), "d-Spacing");
+    TS_ASSERT_EQUALS(image->getAxis(0)->unit()->label().ascii(), "Angstrom");
+  }
+
+  /**
+   * Test that the algorithm can handle a WorkspaceGroup as input without
+   * crashing
+   * We have to use the ADS to test WorkspaceGroups
+   */
+  void testValidateInputsWithWSGroup() {
+    auto ws1 = boost::static_pointer_cast<Workspace>(
+        WorkspaceCreationHelper::Create2DWorkspace(5, 10));
+    auto ws2 = boost::static_pointer_cast<Workspace>(
+        WorkspaceCreationHelper::Create2DWorkspace(5, 10));
+    AnalysisDataService::Instance().add("workspace1", ws1);
+    AnalysisDataService::Instance().add("workspace2", ws2);
+    auto group = boost::make_shared<WorkspaceGroup>();
+    AnalysisDataService::Instance().add("group", group);
+    group->add("workspace1");
+    group->add("workspace2");
+    TestMaxEnt alg;
+    alg.initialize();
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "group"));
+    alg.setPropertyValue("MaxIterations", "1");
+    alg.setPropertyValue("ReconstructedImage", "image");
+    alg.setPropertyValue("ReconstructedData", "data");
+    alg.setPropertyValue("EvolChi", "evolChi");
+    alg.setPropertyValue("EvolAngle", "evolAngle");
+    TS_ASSERT_THROWS_NOTHING(alg.wrapValidateInputs());
+    AnalysisDataService::Instance().clear();
   }
 
   MatrixWorkspace_sptr createWorkspaceReal(size_t maxt, double phase) {

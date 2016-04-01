@@ -18,7 +18,8 @@ namespace Kernel {
 Property::Property(const std::string &name, const std::type_info &type,
                    const unsigned int direction)
     : m_name(name), m_documentation(""), m_typeinfo(&type),
-      m_direction(direction), m_units(""), m_group(""), m_remember(true) {
+      m_direction(direction), m_units(""), m_group(""), m_remember(true),
+      m_autotrim(true) {
   // Make sure a random int hasn't been passed in for the direction
   // Property & PropertyWithValue destructors will be called in this case
   if (m_direction > 2)
@@ -31,7 +32,7 @@ Property::Property(const Property &right)
     : m_name(right.m_name), m_documentation(right.m_documentation),
       m_typeinfo(right.m_typeinfo), m_direction(right.m_direction),
       m_units(right.m_units), m_group(right.m_group),
-      m_remember(right.m_remember) {
+      m_remember(right.m_remember), m_autotrim(right.m_autotrim) {
   if (right.m_settings)
     m_settings.reset(right.m_settings->clone());
 }
@@ -383,6 +384,19 @@ std::string getUnmangledTypeName(const std::type_info &type) {
   return type.name();
 }
 
+/**
+* Returns if the property is set to  automatically trim string unput values of
+* whitespace
+* @returns True/False
+*/
+bool Property::autoTrim() const { return m_autotrim; }
+
+/**
+* Sets if the property is set to  automatically trim string unput values of
+* whitespace
+* @param setting The new setting value
+*/
+void Property::setAutoTrim(const bool &setting) { m_autotrim = setting; }
 } // namespace Kernel
 
 } // namespace Mantid

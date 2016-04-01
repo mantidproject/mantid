@@ -8,6 +8,9 @@ set ( SRC_FILES
 	src/CreateModeratorModel.cpp
 	src/CreateSampleShape.cpp
 	src/CreateSimulationWorkspace.cpp
+	src/DataBlock.cpp
+	src/DataBlockComposite.cpp
+	src/DataBlockGenerator.cpp
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
@@ -108,8 +111,8 @@ set ( SRC_FILES
 	src/ModifyDetectorDotDatFile.cpp
 	src/MoveInstrumentComponent.cpp
 	src/NexusTester.cpp
-	src/PatchBBY.cpp
 	src/PDLoadCharacterizations.cpp
+	src/PatchBBY.cpp
 	src/ProcessDasNexusLog.cpp
 	src/RawFileInfo.cpp
 	src/RemoveLogs.cpp
@@ -157,6 +160,7 @@ set ( SRC_FILES
 	src/SetSampleMaterial.cpp
 	src/SetScalingPSD.cpp
 	src/SortTableWorkspace.cpp
+	src/StartAndEndTimeFromNexusFileExtractor.cpp
 	src/UpdateInstrumentFromFile.cpp
 	src/XmlHandler.cpp
 )
@@ -171,6 +175,9 @@ set ( INC_FILES
 	inc/MantidDataHandling/CreateModeratorModel.h
 	inc/MantidDataHandling/CreateSampleShape.h
 	inc/MantidDataHandling/CreateSimulationWorkspace.h
+	inc/MantidDataHandling/DataBlock.h
+	inc/MantidDataHandling/DataBlockComposite.h
+	inc/MantidDataHandling/DataBlockGenerator.h
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
@@ -266,8 +273,8 @@ set ( INC_FILES
 	inc/MantidDataHandling/ModifyDetectorDotDatFile.h
 	inc/MantidDataHandling/MoveInstrumentComponent.h
 	inc/MantidDataHandling/NexusTester.h
-	inc/MantidDataHandling/PatchBBY.h
 	inc/MantidDataHandling/PDLoadCharacterizations.h
+	inc/MantidDataHandling/PatchBBY.h
 	inc/MantidDataHandling/ProcessDasNexusLog.h
 	inc/MantidDataHandling/RawFileInfo.h
 	inc/MantidDataHandling/RemoveLogs.h
@@ -315,6 +322,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SetSampleMaterial.h
 	inc/MantidDataHandling/SetScalingPSD.h
 	inc/MantidDataHandling/SortTableWorkspace.h
+	inc/MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
 	inc/MantidDataHandling/XmlHandler.h
 	src/LoadRaw/byte_rel_comp.h
@@ -333,6 +341,9 @@ set ( TEST_FILES
 	CreateModeratorModelTest.h
 	CreateSampleShapeTest.h
 	CreateSimulationWorkspaceTest.h
+	DataBlockCompositeTest.h
+	DataBlockGeneratorTest.h
+	DataBlockTest.h
 	DefineGaugeVolumeTest.h
 	DeleteTableRowsTest.h
 	DetermineChunkingTest.h
@@ -465,6 +476,7 @@ set ( TEST_FILES
 	SetSampleMaterialTest.h
 	SetScalingPSDTest.h
 	SortTableWorkspaceTest.h
+	StartAndEndTimeFromNexusFileExtractorTest.h
 	UpdateInstrumentFromFileTest.h
 	XMLInstrumentParameterTest.h
 )
