@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/SpectraDetectorTypes.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -91,6 +92,7 @@ private:
   std::vector<std::string> m_metaData;
   std::map<std::string, std::vector<std::string>> m_metaDataMap;
   spec2index_map m_specToIndexMap;
+
 };
 } // namespace DataHandling
 } // namespace Mantid
