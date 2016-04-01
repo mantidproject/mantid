@@ -73,7 +73,7 @@ private:
   */
   void writeSpectra(const std::set<int>::const_iterator &spectraItr,
                     std::ofstream &file);
-  std::vector<std::string> stringListToVector(const std::string &inputString);
+  std::vector<std::string> stringListToVector(std::string &inputString);
   void populateQMetaData();
   void populateSpectrumNumberMetaData();
   void populateAngleMetaData();

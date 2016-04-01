@@ -129,7 +129,7 @@ void SaveAscii2::exec() {
   m_isHistogram = m_ws->isHistogramData();
   m_isCommonBins = m_ws->isCommonBins(); // checking for ragged workspace
   m_writeID = getProperty("WriteSpectrumID");
-  const auto metaDataString = getPropertyValue("SpectrumMetaData");
+  std::string metaDataString = getPropertyValue("SpectrumMetaData");
   if (metaDataString.size() != 0) {
     m_metaData = stringListToVector(metaDataString);
   }
@@ -141,7 +141,7 @@ void SaveAscii2::exec() {
         containsSpectrumNumber = true;
       }
     }
-    if (containsSpectrumNumber == false) {
+    if (!containsSpectrumNumber) {
       auto firstIter = m_metaData.begin();
       m_metaData.insert(firstIter, "spectrumnumber");
     }
@@ -384,13 +384,12 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
  * @return A vector of valid meta data strings
  */
 std::vector<std::string>
-SaveAscii2::stringListToVector(const std::string &inputString) {
+SaveAscii2::stringListToVector(std::string &inputString) {
   std::vector<std::string> stringVector;
   const std::vector<std::string> validMetaData{"spectrumnumber", "q", "angle"};
-  std::string lowerCaseInput = inputString;
-  boost::to_lower(lowerCaseInput);
+  boost::to_lower(inputString);
   stringVector =
-      Kernel::VectorHelper::splitStringIntoVector<std::string>(lowerCaseInput);
+      Kernel::VectorHelper::splitStringIntoVector<std::string>(inputString);
   for (auto iter = stringVector.begin(); iter != stringVector.end(); ++iter) {
 
     if (std::find(validMetaData.begin(), validMetaData.end(), *iter) ==
@@ -420,8 +419,8 @@ void SaveAscii2::populateQMetaData() {
       twoTheta = m_ws->detectorTwoTheta(detector) / 2.0;
       try {
         efixed = m_ws->getEFixed(detector);
-      } catch (std::runtime_error error) {
-        throw error;
+      } catch (std::runtime_error) {
+        throw;
       }
     } else {
       twoTheta = 0.0;
@@ -460,9 +459,9 @@ void SaveAscii2::populateAngleMetaData() {
     const auto workspaceIndex = m_specToIndexMap[specNo];
     auto det = m_ws->getDetector(workspaceIndex);
     const auto two_theta = m_ws->detectorTwoTheta(det);
-    const auto angle = two_theta * (180 / M_PI);
-    const auto angleStr = boost::lexical_cast<std::string>(angle);
-    angles.push_back(angleStr);
+    const auto angleInDeg = two_theta * (180 / M_PI);
+    const auto angleInDegStr = boost::lexical_cast<std::string>(angleInDeg);
+    angles.push_back(angleInDegStr);
   }
   m_metaDataMap["angle"] = angles;
 }
