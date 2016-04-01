@@ -33,8 +33,8 @@ try:
 except ImportError:
     raise ImportError("Could not find the subpackage scipy.ndimage, required for image pre-/post-processing")
 
-import IMAT.tomorec.io as tomoio
-import IMAT.tomorec.configs as tomocfg
+from . import io as tomoio
+from . import configs as tomocfg
 
 class ReconstructionCommand(object):
     """
@@ -45,7 +45,7 @@ class ReconstructionCommand(object):
     """
 
     def __init__(self):
-        self._PREPROC_IMGS_SUBDIR_NAME = 'preproc_images'
+        self._PREPROC_IMGS_SUBDIR_NAME = 'pre_processed'
         self._OUT_README_FNAME = '0.README_reconstruction.txt'
         self._OUT_SLICES_FILENAME_PREFIX='out_recon_slice'
         self._OUT_HORIZ_SLICES_SUBDIR='out_recon_horiz_slice'
@@ -107,6 +107,8 @@ class ReconstructionCommand(object):
 
         self.gen_readme_summary_end(readme_fullpath, (data, preproc_data, recon_data), tstart,
                                     t_recon_end - t_recon_start)
+
+        print "Finished reconstruction."
 
     def gen_readme_summary_begin(self, filename, cfg, cmd_line):
         """
@@ -356,10 +358,15 @@ class ReconstructionCommand(object):
                 raise ValueError("Wrong air region coordinates when trying to use them to normalize images: {0}".
                                  format(pre_cfg.normalize_air_region))
 
+            # skip if for example: 0, 0, 0, 0 (empty selection)
+            if pre_cfg.normalize_air_region[1] >= pre_cfg.normalize_air_region[3] or\
+               pre_cfg.normalize_air_region[0] >= pre_cfg.normalize_air_region[2]:
+                return data
+
             air_sums = []
             for idx in range(0, data.shape[0]):
-                air_data_sum = data[idx, cfg.normalize_air_region[1]:cfg.normalize_air_region[3],
-                                    cfg.normalize_air_region[0]:cfg.normalize_air_region[2]].sum()
+                air_data_sum = data[idx, pre_cfg.normalize_air_region[1]:pre_cfg.normalize_air_region[3],
+                                    pre_cfg.normalize_air_region[0]:pre_cfg.normalize_air_region[2]].sum()
                 air_sums.append(air_data_sum)
 
             too_verbose = True
@@ -534,8 +541,8 @@ class ReconstructionCommand(object):
 
         verbosity = 1
         if 'astra' == alg_cfg.tool:
-            #run_reconstruct_3d_astra(proj_data, algorithm, cor, proj_angles=proj_angles)
-            return run_reconstruct_3d_astra_simple(proj_data, proj_angles, alg_cfg, preproc_cfg.cor)
+            # run_reconstruct_3d_astra(proj_data, algorithm, cor, proj_angles=proj_angles)
+            return self.run_reconstruct_3d_astra_simple(proj_data, proj_angles, alg_cfg, preproc_cfg.cor)
 
         for slice_idx in [200]: # examples to check: [30, 130, 230, 330, 430]:
             print " > Finding center with tomopy find_center, slice_idx: {0}...".format(slice_idx)
@@ -561,8 +568,8 @@ class ReconstructionCommand(object):
             # 'sirt' with num_iter=30 => 698.119 ~= 11.63
             if verbosity >= 1:
                 print("Running iterative method with tomopy. Algorithm: {0}, "
-                      "number of iterations: {1}".format(algorithm, alg_cfg.num_iter))
-            rec = tomopy.recon(tomo=proj_data, theta=proj_angles, center=cor,
+                      "number of iterations: {1}".format(alg_cfg.algorithm, alg_cfg.num_iter))
+            rec = tomopy.recon(tomo=proj_data, theta=proj_angles, center=preproc_cfg.cor,
                                algorithm=alg_cfg.algorithm, num_iter=alg_cfg.num_iter) #, filter_name='parzen')
         else:
             if verbosity >= 1:
@@ -588,7 +595,7 @@ class ReconstructionCommand(object):
         algs_avail = "[FP3D_CUDA], [BP3D_CUDA]], [FDK_CUDA], [SIRT3D_CUDA], [CGLS3D_CUDA]"
 
 
-        if not alg_cfg.algorithm.upper() in algs_avail:
+        if alg_cfg.algorithm.upper() not in algs_avail:
             raise ValueError("Invalid algorithm requested for the Astra package: {0}. "
                              "Supported algorithms: {1}".format(alg_cfg.algorithm, algs_avail))
         det_rows = sinogram.shape[0]
@@ -683,6 +690,8 @@ class ReconstructionCommand(object):
         @param cor :: center of rotation
         @param proj_angles :: angles corresponding to the projection images
         """
+        import tomorec.tool_imports as tti
+        astra = tti.import_tomo_tool('astra')
         sinograms = proj_data
 
         sinograms = np.swapaxes(sinograms, 0, 1)
@@ -850,6 +859,6 @@ class ReconstructionCommand(object):
         if not isinstance(data, np.ndarray):
             raise ValueError("Invalid stack of images data. It is not a numpy array: {0}".format(data))
 
-        if not 3 == len(data.shape):
+        if 3 != len(data.shape):
             raise ValueError("Invalid stack of images data. It does not have 3 dimensions. Shape: {0}".
                              format(data.shape))

@@ -109,6 +109,9 @@ set ( SRC_FILES
 	src/Tomography/TomoPathsConfig.cpp
 	src/Tomography/TomoReconPostprocSettings.cpp
 	src/Tomography/TomoReconPreprocSettings.cpp
+	src/Tomography/TomoSystemSettings.cpp
+	src/Tomography/TomoSystemSettingsLocal.cpp
+	src/Tomography/TomoSystemSettingsRemote.cpp
 	src/Tomography/TomoToolConfigDialog.cpp
 	src/Tomography/ToolConfig.cpp
 	src/UserInputValidator.cpp
@@ -251,6 +254,9 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Tomography/TomoReconPostprocSettings.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoReconPreprocSettings.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoSystemSettingsLocal.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoSystemSettingsRemote.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h
 	inc/MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h
@@ -424,6 +430,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabRun.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabSetup.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabVisualize.ui
+               inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabSystemSettings.ui
                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigAstra.ui
                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigCustom.ui
                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigSavu.ui

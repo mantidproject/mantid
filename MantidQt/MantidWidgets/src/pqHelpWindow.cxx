@@ -280,11 +280,14 @@ pqHelpWindow::~pqHelpWindow()
  */
 void pqHelpWindow::errorMissingPage(const QUrl& url)
 {
-  QString htmlDoc = QString(QLatin1String("<html><head><title>Invalid Url - %1</title></head><body>"))
-      .arg(url);
+  QString htmlDoc =
+      QString(QLatin1String(
+                  "<html><head><title>Invalid Url - %1</title></head><body>"))
+          .arg(url.toString());
 
-  htmlDoc += QString(QLatin1String("<center><h1>Missing page - %1</h1></center>"))
-      .arg(url);
+  htmlDoc +=
+      QString(QLatin1String("<center><h1>Missing page - %1</h1></center>"))
+          .arg(url.toString());
 
   htmlDoc += QLatin1String("</body></html>");
 

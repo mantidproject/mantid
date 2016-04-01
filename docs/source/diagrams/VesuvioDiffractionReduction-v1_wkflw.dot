@@ -1,5 +1,5 @@
-digraph EVSDiffractionReduction {
-  label="EVSDiffractionReduction Flowchart"
+digraph VesuvioDiffractionReduction {
+  label="VesuvioDiffractionReduction Flowchart"
   $global_style
 
   subgraph process {
