@@ -26,6 +26,13 @@ public:
     out = BinaryOperationMDTestHelper::doTest("XorMD", "histo_A", "histo_B",
                                               "out");
     TS_ASSERT_DELTA(out->getSignalAt(0), 0.0, 1e-5);
+  }
+
+  void test_histo_histo_masked() {
+    MDHistoWorkspace_sptr out;
+    out = BinaryOperationMDTestHelper::doTest("XorMD", "histo_masked",
+                                              "histo_masked", "out");
+    TS_ASSERT_DELTA(out->getSignalAt(0), 0.0, 1e-5);
     out = BinaryOperationMDTestHelper::doTest("XorMD", "histo_A",
                                               "histo_masked", "out");
     TS_ASSERT_DELTA(out->getSignalAt(0), 1.0, 1e-5);
