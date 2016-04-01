@@ -88,11 +88,17 @@ MD Algorithms (VATES CLI)
 -  The size of densely populated, multidimensional MDEventWorkspace slices produced by SliceMD has been greatly reduced by using more sensible box splitting parameters.
 -  MergeMD now does not add masked events to its output workspace.
 
+Geometry
+--------
+
+The Instrument Definition File syntax has been extended to provide support for a new type of topologically regular, but geometrically irregular form of 2D detectors. This new type of detector available in the IDF is known as a Structured Detector. Information on how to use this new detector type can be found in the :ref:`IDF <InstrumentDefinitionFile>` documentation. 
+
 Performance
 -----------
 
 - :ref:`ChangeBinOffset <algm-ChangeBinOffset>` should now run faster for a :ref:`MatrixWorkspace <MatrixWorkspace>` (not EventWorkspaces).
 - Applying ParameterMaps to Detectors now about 30% faster. Algorithms that involve applying ParameterMaps will see performance improvements.
+- This release saw the introduction of the StructuredDetector. This change has reduced load times via :ref:`LoadInstrument <algm-LoadInstrument>` from ~10minutes down to ~1second for the prospective ESS LOKI instrument. 
 
 CurveFitting
 ------------
