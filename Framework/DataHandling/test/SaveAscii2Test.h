@@ -260,22 +260,6 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_with_spectrum_meta_data_Q_for_non_Q_workspace() {
-    Mantid::DataObjects::Workspace2D_sptr wsToSave;
-    writeSampleWS(wsToSave);
-
-    SaveAscii2 save;
-    std::string filename = initSaveAscii2(save);
-
-    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("SpectrumMetaData", "Q"));
-    TS_ASSERT_THROWS_ANYTHING(save.execute());
-
-    // the algorithm will have used a defualt and written a file to disk
-    TS_ASSERT(!Poco::File(filename).exists());
-
-    AnalysisDataService::Instance().remove(m_name);
-  }
-
   void testExec_no_header() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);

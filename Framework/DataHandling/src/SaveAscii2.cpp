@@ -120,6 +120,7 @@ void SaveAscii2::init() {
 void SaveAscii2::exec() {
   // Get the workspace
   m_ws = getProperty("InputWorkspace");
+  m_specToIndexMap = m_ws->getSpectrumToWorkspaceIndexMap();
   int nSpectra = static_cast<int>(m_ws->getNumberHistograms());
   m_nBins = static_cast<int>(m_ws->blocksize());
   m_isHistogram = m_ws->isHistogramData();
@@ -277,7 +278,7 @@ void SaveAscii2::writeSpectra(const std::set<int>::const_iterator &spectraItr,
                               std::ofstream &file) {
   auto spec = m_ws->getSpectrum(*spectraItr);
   const auto specNo = spec->getSpectrumNo();
-  const auto workspaceIndex = m_ws->getSpectrumToWorkspaceIndexMap()[specNo];
+  const auto workspaceIndex = m_specToIndexMap[specNo];
   for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
     auto value = m_metaDataMap[*iter][workspaceIndex];
     file << value;
@@ -330,7 +331,7 @@ void SaveAscii2::writeSpectra(const std::set<int>::const_iterator &spectraItr,
 void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
   auto spec = m_ws->getSpectrum(spectraIndex);
   const auto specNo = spec->getSpectrumNo();
-  const auto workspaceIndex = m_ws->getSpectrumToWorkspaceIndexMap()[specNo];
+  const auto workspaceIndex = m_specToIndexMap[specNo];
   for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
     auto value = m_metaDataMap[*iter][workspaceIndex];
     file << value;
@@ -404,7 +405,9 @@ void SaveAscii2::populateQMetaData() {
   std::vector<std::string> qValues;
   const auto nHist = m_ws->getNumberHistograms();
   for (size_t i = 0; i < nHist; i++) {
-    const auto detector = m_ws->getDetector(i);
+    const auto specNo = m_ws->getSpectrum(i)->getSpectrumNo();
+    const auto workspaceIndex = m_specToIndexMap[specNo];
+    const auto detector = m_ws->getDetector(workspaceIndex);
     double twoTheta(0.0), efixed(0.0);
     if (!detector->isMonitor()) {
       twoTheta = m_ws->detectorTwoTheta(detector) / 2.0;
@@ -446,7 +449,9 @@ void SaveAscii2::populateAngleMetaData() {
   std::vector<std::string> angles;
   const auto nHist = m_ws->getNumberHistograms();
   for (auto i = 0; i < nHist; i++) {
-    auto det = m_ws->getDetector(i);
+    const auto specNo = m_ws->getSpectrum(i)->getSpectrumNo();
+    const auto workspaceIndex = m_specToIndexMap[specNo];
+    auto det = m_ws->getDetector(workspaceIndex);
     const auto two_theta = m_ws->detectorTwoTheta(det);
     const auto angle = two_theta * (180 / M_PI);
     const auto angleStr = boost::lexical_cast<std::string>(angle);
