@@ -103,12 +103,13 @@ boost::shared_ptr<Detector> StructuredDetector::getAtXY(const size_t x,
         "StructuredDetector::getAtXY: Y specified is out of range.");
 
   // Get to column
-  ICompAssembly_sptr xCol =
-      boost::dynamic_pointer_cast<ICompAssembly>(this->getChild(x));
+  ICompAssembly_sptr xCol = boost::dynamic_pointer_cast<ICompAssembly>(
+      this->getChild(static_cast<int>(x)));
   if (!xCol)
     throw std::runtime_error(
         "StructuredDetector::getAtXY: X specified is out of range.");
-  return boost::dynamic_pointer_cast<Detector>(xCol->getChild(y));
+  return boost::dynamic_pointer_cast<Detector>(
+      xCol->getChild(static_cast<int>(y)));
 }
 
 /** Return the detector ID corresponding to the component in the assembly at the
@@ -125,9 +126,11 @@ detid_t StructuredDetector::getDetectorIDAtXY(const size_t x,
   const StructuredDetector *me = m_map == nullptr ? this : this->m_base;
 
   if (me->m_idFillByFirstY)
-    return me->m_idStart + x * me->m_idStepByRow + y * me->m_idStep;
+    return static_cast<detid_t>(me->m_idStart + x * me->m_idStepByRow +
+                                y * me->m_idStep);
   else
-    return me->m_idStart + y * me->m_idStepByRow + x * me->m_idStep;
+    return static_cast<detid_t>(me->m_idStart + y * me->m_idStepByRow +
+                                x * me->m_idStep);
 }
 
 /** Given a detector ID, return the X,Y coords into the structured detector
@@ -333,14 +336,14 @@ void StructuredDetector::createDetectors() {
   auto minDetId = m_idStart;
   auto maxDetId = m_idStart;
 
-  for (auto ix = 0; ix < m_xPixels; ix++) {
+  for (size_t ix = 0; ix < m_xPixels; ix++) {
     // Create an ICompAssembly for each x-column
     std::ostringstream oss_col;
 
     oss_col << this->getName() << "(x=" << ix << ")";
     CompAssembly *xColumn = new CompAssembly(oss_col.str(), this);
 
-    for (auto iy = 0; iy < m_yPixels; iy++) {
+    for (size_t iy = 0; iy < m_yPixels; iy++) {
       std::ostringstream oss;
       oss << this->getName() << "(" << ix << "," << iy << ")";
 
@@ -424,8 +427,8 @@ createDetectorShape(double xlb, double xlf, double xrf, double xrb, double ylb,
 * @return newly created detector.
 */
 Detector *StructuredDetector::addDetector(CompAssembly *parent,
-                                          const std::string &name, int x, int y,
-                                          int id) {
+                                          const std::string &name, size_t x,
+                                          size_t y, detid_t id) {
   auto w = m_xPixels + 1;
 
   // Store hexahedral vertices for detector shape

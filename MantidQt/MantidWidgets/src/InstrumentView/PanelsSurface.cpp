@@ -597,8 +597,8 @@ void PanelsSurface::addStructuredDetector(
   int nelem = structDetector->nelements();
   m_unwrappedDetectors.reserve(m_unwrappedDetectors.size() + nelem);
 
-  for (int i = 0; i < nx; ++i)
-    for (int j = 0; j < ny; ++j) {
+  for (size_t i = 0; i < nx; ++i)
+    for (size_t j = 0; j < ny; ++j) {
       Mantid::Geometry::IDetector_const_sptr det =
           structDetector->getAtXY(i, j);
       addDetector(det, pos0, index, info->rotation);
