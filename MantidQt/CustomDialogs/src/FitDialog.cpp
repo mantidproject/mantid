@@ -381,15 +381,15 @@ void FitDialog::tieStaticWidgets(const bool readHistory) {
   QStringList allowedDomainTypes = getAllowedPropertyValues("DomainType");
   // Disable some domain types in the GUI until their imlpementations have been
   // finished
-  allowedDomainTypes.remove("Sequential");
-  allowedDomainTypes.remove("Parallel");
+  allowedDomainTypes.removeAll("Sequential");
+  allowedDomainTypes.removeAll("Parallel");
   m_form.cbDomainType->addItems(allowedDomainTypes);
   // tie(m_form.cbDomainType, "DomainType", m_form.staticLayout, readHistory);
   connect(m_form.cbDomainType, SIGNAL(currentIndexChanged(int)), this,
           SLOT(domainTypeChanged()));
   QString domainTypeValue = getStoredPropertyValue("DomainType");
   if (!domainTypeValue.isEmpty()) {
-    m_form.cbDomainType->setCurrentText(domainTypeValue);
+    m_form.cbDomainType->setItemText(-1, domainTypeValue);
   }
 
   // this creates input workspace widgets and adjusts minimizers list
@@ -411,14 +411,14 @@ void FitDialog::domainTypeChanged() {
                                    getDomainTypeString().toStdString());
   auto minimizerList = getAllowedPropertyValues("Minimizer");
   if (getDomainType() != 0) {
-    minimizerList.remove("Levenberg-Marquardt");
+    minimizerList.removeAll("Levenberg-Marquardt");
   }
   QString currentMinimizer = m_form.cbMinimizer->currentText();
   m_form.cbMinimizer->clear();
   m_form.cbMinimizer->addItems(minimizerList);
   int index = m_form.cbMinimizer->findText(currentMinimizer);
   if (index >= 0) {
-    m_form.cbMinimizer->setCurrentText(currentMinimizer);
+    m_form.cbMinimizer->setItemText(-1, currentMinimizer);
   }
   createInputWorkspaceWidgets();
 }

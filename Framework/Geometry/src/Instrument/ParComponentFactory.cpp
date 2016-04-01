@@ -6,6 +6,7 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 #include <boost/make_shared.hpp>
 
@@ -74,6 +75,11 @@ ParComponentFactory::create(boost::shared_ptr<const IComponent> base,
   // Everything gets created on the fly. Note that the order matters here
   // @todo Really could do with a better system than this. Virtual function
   // maybe?
+  const StructuredDetector *sd =
+      dynamic_cast<const StructuredDetector *>(base.get());
+  if (sd)
+    return boost::make_shared<StructuredDetector>(sd, map);
+
   const RectangularDetector *rd =
       dynamic_cast<const RectangularDetector *>(base.get());
   if (rd)

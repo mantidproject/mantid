@@ -1,6 +1,5 @@
 #include "MantidQtMantidWidgets/InstrumentView/RectangularDetectorActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/ObjComponentActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/RectangularDetectorActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/GLActorVisitor.h"
 
@@ -41,8 +40,6 @@ namespace MantidQt
 			pick_data(NULL) {
 			mNumberOfDetectors = 0;
 			mDet = boost::dynamic_pointer_cast<const RectangularDetector>(getComponent());
-			image_data = NULL;
-			pick_data = NULL;
 
 			if (!mDet) return;
 

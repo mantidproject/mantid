@@ -1074,6 +1074,11 @@ void LoadEventNexus::init() {
       "The name of the output EventWorkspace or WorkspaceGroup in which to "
       "load the EventNexus file.");
 
+  declareProperty(
+      make_unique<PropertyWithValue<string>>("NXentryName", "",
+                                             Direction::Input),
+      "Optional: Name of the NXentry to load if it's not the default.");
+
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "FilterByTofMin", EMPTY_DBL(), Direction::Input),
                   "Optional: To exclude events that do not fall within a range "
@@ -1103,11 +1108,6 @@ void LoadEventNexus::init() {
   setPropertyGroup("FilterByTofMax", grp1);
   setPropertyGroup("FilterByTimeStart", grp1);
   setPropertyGroup("FilterByTimeStop", grp1);
-
-  declareProperty(
-      make_unique<PropertyWithValue<string>>("NXentryName", "",
-                                             Direction::Input),
-      "Optional: Name of the NXentry to load if it's not the default.");
 
   declareProperty(
       make_unique<ArrayProperty<string>>("BankName", Direction::Input),
@@ -1550,6 +1550,12 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     loadLogs->setPropertyValue("Filename", nexusfilename);
     loadLogs->setProperty<API::MatrixWorkspace_sptr>("Workspace",
                                                      localWorkspace);
+    try {
+      loadLogs->setPropertyValue("NXentryName",
+                                 alg.getPropertyValue("NXentryName"));
+    } catch (...) {
+    }
+
     loadLogs->execute();
 
     const Run &run = localWorkspace->run();

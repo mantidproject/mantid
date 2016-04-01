@@ -13,7 +13,7 @@ namespace MantidQt
 namespace MantidWidgets
 {
 const double PeakPicker::DRAG_SENSITIVITY = 5.0;
-const QCursorShape PeakPicker::DEFAULT_CURSOR = Qt::PointingHandCursor;
+const Qt::CursorShape PeakPicker::DEFAULT_CURSOR = Qt::PointingHandCursor;
 
 /**
  * @param plot :: A plot this peak picker should operate on

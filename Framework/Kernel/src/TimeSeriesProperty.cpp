@@ -5,10 +5,7 @@
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/make_unique.h"
 
-#if !(defined __APPLE__ && defined __INTEL_COMPILER)
-#else
-#include <boost/range/algorithm_ext/is_sorted.hpp>
-#endif
+#include <boost/regex.hpp>
 
 using namespace std;
 
@@ -1705,37 +1702,8 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::countSize() const {
  */
 template <typename TYPE>
 bool TimeSeriesProperty<TYPE>::isTimeString(const std::string &str) {
-  if (str.size() < 19)
-    return false;
-  if (!isdigit(str[0]))
-    return false;
-  if (!isdigit(str[1]))
-    return false;
-  if (!isdigit(str[2]))
-    return false;
-  if (!isdigit(str[3]))
-    return false;
-  if (!isdigit(str[5]))
-    return false;
-  if (!isdigit(str[6]))
-    return false;
-  if (!isdigit(str[8]))
-    return false;
-  if (!isdigit(str[9]))
-    return false;
-  if (!isdigit(str[11]))
-    return false;
-  if (!isdigit(str[12]))
-    return false;
-  if (!isdigit(str[14]))
-    return false;
-  if (!isdigit(str[15]))
-    return false;
-  if (!isdigit(str[17]))
-    return false;
-  if (!isdigit(str[18]))
-    return false;
-  return true;
+  boost::regex re("^[0-9]{4}.[0-9]{2}.[0-9]{2}.[0-9]{2}.[0-9]{2}.[0-9]{2}");
+  return boost::regex_search(str.begin(), str.end(), re);
 }
 
 /**
@@ -1852,12 +1820,7 @@ std::string TimeSeriesProperty<TYPE>::toString() const {
  */
 template <typename TYPE> void TimeSeriesProperty<TYPE>::sort() const {
   if (m_propSortedFlag == TimeSeriesSortStatus::TSUNKNOWN) {
-// Check whether it is sorted or not
-#if !(defined __APPLE__ && defined __INTEL_COMPILER)
     bool sorted = is_sorted(m_values.begin(), m_values.end());
-#else
-    bool sorted = boost::is_sorted(m_values);
-#endif
     if (sorted)
       m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
     else

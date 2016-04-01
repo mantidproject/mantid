@@ -82,9 +82,10 @@ bool ISISEnergyTransfer::validate() {
       double rebinWidth = m_uiForm.spRebinWidth->value();
       if (rebinWidth < 0) {
         // Ensure negative bin width is intentionally logarithmic
-        QString text = "The Binning width is currently negative, this suggests "
-                       "you wish to use logarithmic binning.\n"
-                       " Do you want to use Logarithmic Binning?";
+        const char *text =
+            "The Binning width is currently negative, this suggests "
+            "you wish to use logarithmic binning.\n"
+            " Do you want to use Logarithmic Binning?";
         int result = QMessageBox::question(
             NULL, tr("Logarithmic Binning"), tr(text), QMessageBox::Yes,
             QMessageBox::No, QMessageBox::NoButton);

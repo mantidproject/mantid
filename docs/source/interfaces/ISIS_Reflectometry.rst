@@ -108,7 +108,7 @@ The **Reflectometry** menu provides access to the following functionality:
 | Open Table       | Opens a valid *TableWorkspace* in the `Processing Table`_|
 |                  | for processing.                                          |
 +------------------+----------------------------------------------------------+
-| New Table        | Discards the current contents of the `Processing Table`_,|
+| New Table        | Discards the current contents of the `Processing Table`_ |
 |                  | presenting a blank table.                                |
 +------------------+----------------------------------------------------------+
 | Save Table       | Saves the current contents of the `Processing Table`_ to |
@@ -126,12 +126,12 @@ The **Reflectometry** menu provides access to the following functionality:
 |                  | enabling you to save a *TableWorkspace* to a ``.tbl``    |
 |                  | file.                                                    |
 +------------------+----------------------------------------------------------+
+| Options          | Opens the `Options`_                             menu.   |
++------------------+----------------------------------------------------------+
 | Slit Calculator  | Opens the slit calculator: a tool to help calculate the  |
 |                  | correct geometry for the instruments' slits. It's powered|
 |                  | by the :ref:`CalculateSlits <algm-CalculateSlits>`       |
 |                  | algorithm.                                               |
-+------------------+----------------------------------------------------------+
-| Options          | Opens the `Options <ISIS_Reflectomety-Options>`_ menu.   |
 +------------------+----------------------------------------------------------+
 
 The **Edit** menu provides access to the same actions found in the tool bar.
@@ -271,7 +271,12 @@ Columns
 | dQ/Q                | No        | Contains the resolution used when rebinning   |
 |                     |           | output workspaces. If left blank, this is     |
 |                     |           | calculated for you using the                  |
-|                     |           | CalculateResolution algorithm.                |
+|                     |           | CalculateResolution algorithm. This value is  |
+|                     |           | negated so that Logarithmic binning can be    |
+|                     |           | applied for the IvsQ workspace.               |
+|                     |           | If you desire linear binning then you         |
+|                     |           | may negate the value in the processing table  |
+|                     |           | and a linear binning will be applied.         |
 |                     |           |                                               |
 |                     |           | Example: ``0.9``                              |
 +---------------------+-----------+-----------------------------------------------+
@@ -446,5 +451,13 @@ rows you want stitched, and then in the menu bar select **Edit -> Expand Selecti
 All the rows in that group will be selected. If you have another row that you
 would like to add to the group, you can do this easily by adding it to the
 selection, and then in the menu bar selecting **Edit -> Group Selected**.
+
+The *Save Table* option does not output a .TBL file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In the old interface (ISIS Reflectometry) the "Save Table" and "Save Table as.." options
+were used to output a .TBL file into a directory of your choice. This functionality is now
+provided by the "Export .TBL" option in the Options Menu. This will allow you to save a .TBL file
+to a directory of your choice. The "Save Table" option in the Options menu now provides a way for you
+to save the processing table in a TableWorkspace where the name of the TableWorkspace is provided by the user.
 
 .. categories:: Interfaces Reflectometry

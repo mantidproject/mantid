@@ -169,6 +169,40 @@ public:
                       uniquePeriods.size());
   }
 
+  void test_log_non_default_entry() {
+    auto testWS = createTestWorkspace();
+    LoadNexusLogs loader;
+
+    // default entry Off-Off
+    loader.setChild(true);
+    loader.initialize();
+    loader.setProperty("Workspace", testWS);
+    loader.setPropertyValue("Filename", "REF_M_9709_event.nxs");
+    loader.execute();
+    auto run = testWS->run();
+    TimeSeriesProperty<double> *pclog =
+        dynamic_cast<TimeSeriesProperty<double> *>(
+            run.getLogData("proton_charge"));
+    TS_ASSERT(pclog);
+    TS_ASSERT_EQUALS(pclog->size(), 23806);
+    TS_ASSERT(pclog->getStatistics().duration > 4e9);
+
+    // 3rd entry On-Off
+    testWS = createTestWorkspace();
+    loader.setChild(true);
+    loader.initialize();
+    loader.setProperty("Workspace", testWS);
+    loader.setPropertyValue("Filename", "REF_M_9709_event.nxs");
+    loader.setProperty("NXentryName", "entry-On_Off");
+    loader.execute();
+    run = testWS->run();
+    pclog = dynamic_cast<TimeSeriesProperty<double> *>(
+        run.getLogData("proton_charge"));
+    TS_ASSERT(pclog);
+    TS_ASSERT_EQUALS(pclog->size(), 24150);
+    TS_ASSERT(pclog->getStatistics().duration < 3e9);
+  }
+
 private:
   API::MatrixWorkspace_sptr createTestWorkspace() {
     return WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
