@@ -45,7 +45,7 @@ public:
   virtual void setChild(std::vector<std::unique_ptr<ReflCommand>> child) final {
     m_child = std::move(child);
   }
-  virtual const std::vector<std::unique_ptr<ReflCommand>> &getChild() final {
+  virtual std::vector<std::unique_ptr<ReflCommand>> &getChild() final {
     return m_child;
   }
 	virtual bool isSeparator() final { return name().empty() && icon().empty(); }

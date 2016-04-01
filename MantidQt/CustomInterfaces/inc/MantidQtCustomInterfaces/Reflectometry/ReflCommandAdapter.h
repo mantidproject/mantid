@@ -39,8 +39,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class ReflCommandAdapter : public QObject {
   Q_OBJECT
 public:
-  ReflCommandAdapter(QMenu *menu, ReflCommand_sptr adaptee)
-      : m_adaptee(adaptee) {
+  ReflCommandAdapter(QMenu *menu, ReflCommand_uptr adaptee)
+      : m_adaptee(std::move(adaptee)) {
 
     if (m_adaptee->hasChild()) {
       // We are dealing with a submenu
@@ -52,11 +52,16 @@ public:
       auto &child = m_adaptee->getChild();
       for (auto &ch : child) {
         m_adapter.push_back(Mantid::Kernel::make_unique<ReflCommandAdapter>(
-            submenu, std::shared_ptr<ReflCommand>(ch.get())));
+            submenu, std::move(ch)));
       }
     } else {
       // We are dealing with an action
-      addAction(menu, m_adaptee);
+      QAction *action =
+          new QAction(QString::fromStdString(m_adaptee->name()), this);
+      action->setIcon(QIcon(QString::fromStdString(m_adaptee->icon())));
+      action->setSeparator(m_adaptee->isSeparator());
+      menu->addAction(action);
+      connect(action, SIGNAL(triggered()), this, SLOT(call()));
     }
   };
 
@@ -64,20 +69,8 @@ public slots:
   void call() { m_adaptee->execute(); }
 
 private:
-  /** Adds an action to a menu
-  * @param menu : [input] The menu that will contain the action
-  * @param adaptee : [input] The adaptee
-  */
-  void addAction(QMenu *menu, ReflCommand_sptr adaptee) {
-    QAction *action =
-        new QAction(QString::fromStdString(adaptee->name()), this);
-    action->setIcon(QIcon(QString::fromStdString(adaptee->icon())));
-    action->setSeparator(adaptee->isSeparator());
-    menu->addAction(action);
-    connect(action, SIGNAL(triggered()), this, SLOT(call()));
-  };
   // The adaptee
-  ReflCommand_sptr m_adaptee;
+  ReflCommand_uptr m_adaptee;
   std::vector<std::unique_ptr<ReflCommandAdapter>> m_adapter;
 };
 
