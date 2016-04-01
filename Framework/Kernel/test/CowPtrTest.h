@@ -65,11 +65,10 @@ public:
   void test_access() {
 
     int value = 3;
-    cow_ptr<MyType> original{ boost::make_shared<MyType>(value)};
+    cow_ptr<MyType> original{boost::make_shared<MyType>(value)};
     auto copy = original; // Now internal shared_ptr count should be at 2
 
-    MyType &copyResource =
-        copy.access(); // The resource should now be copied.
+    MyType &copyResource = copy.access(); // The resource should now be copied.
 
     TSM_ASSERT_EQUALS("Value should NOT have changed", original->value,
                       copyResource.value);
