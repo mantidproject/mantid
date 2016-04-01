@@ -56,7 +56,7 @@ CrystalFieldPeaks::CrystalFieldPeaks()
 
 std::string CrystalFieldPeaks::name() const { return "CrystalFieldPeaks"; }
 
-size_t CrystalFieldPeaks::getNumberDomainColumns() const {}
+size_t CrystalFieldPeaks::getNumberDomainColumns() const {return 0;}
 
 size_t CrystalFieldPeaks::getNumberValuesPerArgument() const { return 2; }
 

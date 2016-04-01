@@ -791,14 +791,16 @@ calculateIntensities(int nre, const DoubleFortranVector &energies,
 //-------------------------
 // transforms the indices
 //-------------------------
-int no(int i, const std::vector<int> &d, int n)  {
-	//implicit none
-	//integer i,d(17*17),n,up,lo
-	int up = 0;
-  for(int nno = 1; nno <= n; ++nno) { // do no=1,n
-	   int lo = up+1;
-	   up = lo+d[nno-1]-1;
-	   if(i >= lo && i <= up) return nno;
+int no(int i, const IntFortranVector &d, int n) {
+  // implicit none
+  // integer i,d(17*17),n,up,lo
+  int up = 0;
+  for (int nno = 1; nno <= n; ++nno) { // do no=1,n
+    int lo = up + 1;
+    up = lo + d(nno) - 1;
+    if (i >= lo && i <= up) {
+      return nno;
+    }
   }
   return n;
 }
@@ -818,7 +820,7 @@ int no(int i, const std::vector<int> &d, int n)  {
 /// @param di :: Only those excitations are taken into account whose intensities
 ///              are greater or equal than di.
 void deg_on(const DoubleFortranVector &energy, const DoubleFortranMatrix &mat,
-            double dimj, std::vector<int> &degeneration,
+            double dimj, IntFortranVector &degeneration,
             DoubleFortranVector &e_energies, DoubleFortranMatrix &i_energies,
             int n_energies, double de, double di) {
   //  real*8  energy(17)           ! already defined in CF_FABI.INC
@@ -836,18 +838,23 @@ void deg_on(const DoubleFortranVector &energy, const DoubleFortranMatrix &mat,
   //	only those excitations are taken into account whose intensities are
   //	greater equal than di
 
+  int dim = static_cast<int>(std::floor(dimj));
+  // Resize the output arrays
+  degeneration.allocate(dim * dim);
+  e_energies.allocate(dim * dim);
+  i_energies.allocate(dim, dim);
+
   // find out how many degenerated energy levels exists
   e_energies(1) = 0.0;
-  degeneration[1 - 1] = 1;
+  degeneration(1) = 1;
   int k = 1;
-  int dim = dimj;
   for (int i = 2; i <= dim; ++i) { // do i=2,dim
     if (std::fabs(e_energies(k) - energy(i)) >= de) {
       k = k + 1;
       e_energies(k) = energy(i);
-      degeneration[k - 1] = 1;
+      degeneration(k) = 1;
     } else {
-      degeneration[k - 1] = degeneration[k - 1] + 1;
+      degeneration(k) = degeneration(k) + 1;
     }
   }
   n_energies = k;
