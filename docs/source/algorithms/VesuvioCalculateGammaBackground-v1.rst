@@ -54,7 +54,7 @@ Usage
    ###########################################################################
 
    mass_function = "name=GaussianComptonProfile,Mass=1.0079,Width=0.4,Intensity=1.1"
-   corrected, background = CalculateGammaBackground(tof_ws, ComptonFunction=mass_function,
+   corrected, background = VesuvioCalculateGammaBackground(tof_ws, ComptonFunction=mass_function,
                                                     WorkspaceIndexList=0)
 
    print "First 5 values of input:", tof_ws.readY(0)[0:4]
@@ -87,7 +87,7 @@ Output:
    ###########################################################################
 
    mass_function = "name=GaussianComptonProfile,Mass=1.0079,Width=0.4,Intensity=1.1"
-   corrected, background = CalculateGammaBackground(tof_ws, ComptonFunction=mass_function)
+   corrected, background = VesuvioCalculateGammaBackground(tof_ws, ComptonFunction=mass_function)
 
    print "Number of background spectra:", background.getNumberHistograms()
    print "Number of corrected spectra:", corrected.getNumberHistograms()

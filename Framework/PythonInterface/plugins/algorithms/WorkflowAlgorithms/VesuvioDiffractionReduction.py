@@ -1,4 +1,4 @@
-#pylint: disable=no-init
+#pylint: disable=no-init, too-many-instance-attributes
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -6,7 +6,7 @@ from mantid import config
 
 import os
 
-class EVSDiffractionReduction(DataProcessorAlgorithm):
+class VesuvioDiffractionReduction(DataProcessorAlgorithm):
 
     _workspace_names = None
     _chopped_data = None
@@ -53,7 +53,7 @@ class EVSDiffractionReduction(DataProcessorAlgorithm):
                              doc='Selects the type of detector grouping to be used.')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
-                             direction=Direction.Output),
+                                                    direction=Direction.Output),
                              doc='Group name for the result workspaces.')
 
 
@@ -216,4 +216,4 @@ class EVSDiffractionReduction(DataProcessorAlgorithm):
                 logger.information('SumFiles options is ignored when only one file is provided')
 
 
-AlgorithmFactory.subscribe(EVSDiffractionReduction)
+AlgorithmFactory.subscribe(VesuvioDiffractionReduction)

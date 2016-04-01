@@ -8,6 +8,10 @@ Framework Changes
 Algorithms
 ----------
 
+Properties
+##########
+-  String properties of algoithms are now trimmed of whitespace by default before being used by the algorithm.  So "  My filename   " will be trimmed to "My filename".
+
 New
 ###
 
@@ -16,6 +20,14 @@ New
    :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`, :ref:`CalibrateRectangularDetectors <algm-CalibrateRectangularDetectors>`, *et al* and
    minimizes the difference between the *DIFC* of the instrument and
    calibration by moving and rotating instrument components.
+
+Renamed
+#######
+
+- The following Vesuvio specific algorithms have been updated to have their name prefixed by Vesuvio:
+    - :ref:`VesuvioCalculateGammaBackground <algm-VesuvioCalculateGammaBackground>` previously ``CalculateGammaBackground``
+    - :ref:`VesuvioCalculateMS <algm-VesuvioCalculateMS>` previously ``CalculateMSVesuvio``
+    - :ref:`VesuvioDiffractionReduction <algm-VesuvioDiffractionReduction>` previously ``EVSDiffractionReduction``
 
 Improved
 ########
@@ -56,6 +68,7 @@ Improved
 - :ref:`CreateSimulationWorkspace <algm-CreateSimulationWorkspace>` now matches the IDF of the simulation workspace to the IDF of a reference workspace (either Nexus or Raw).
 - :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` now correctly reads in event data that does not have a common x-axis. `#15746 <https://github.com/mantidproject/mantid/pull/15746>`
 - :ref:`LoadNexusLogs <algm-LoadNexusLogs>` allows now to load logs from an entry other than the first. :ref:`LoadEventNexus <algm-LoadEventNexus>` now loads the correct logs when an *NXentry* is given
+- :ref:`FFT <algm-FFT>`: added property *AutoShift* to enable automatic phase correction for workspaces not centred at zero.
 
 Deprecated
 ##########
@@ -72,6 +85,7 @@ MD Algorithms (VATES CLI)
 -  PlotMD now plots points at bin centres for MDEventWorkspaces as well as MDHistoWorkspaces.
 -  SliceMD now reports the correct number of events in the output workspace.
 -  The size of densely populated, multidimensional MDEventWorkspace slices produced by SliceMD has been greatly reduced by using more sensible box splitting parameters.
+-  MergeMD now does not add masked events to its output workspace.
 
 Performance
 -----------
@@ -81,6 +95,8 @@ Performance
 
 CurveFitting
 ------------
+
+- Concept page for :ref:`Mantid Fitting <Fitting>` has been added.
 
 Improved
 ########

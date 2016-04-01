@@ -207,7 +207,7 @@ void SortTableWorkspaceDialog::addColumn()
   {
     if ( !m_sortColumns.contains(name) )
     {
-      columnName->setCurrentText( name );
+      columnName->setItemText(-1, name);
       break;
     }
   }
