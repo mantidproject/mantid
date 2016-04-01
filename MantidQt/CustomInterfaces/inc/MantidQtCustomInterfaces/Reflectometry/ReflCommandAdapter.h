@@ -10,6 +10,9 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+using ReflCommand_uptr = std::unique_ptr<ReflCommand>;
+
 /** @class ReflCommandAdapter
 
 ReflCommandAdapter is an adapter that allows ReflCommands to be treated as

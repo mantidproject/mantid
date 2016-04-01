@@ -13,7 +13,10 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+// Forward decs
 class WorkspaceReceiver;
+class ReflCommand;
+using ReflCommand_uptr = std::unique_ptr<ReflCommand>;
 
 /** @class IReflTablePresenter
 

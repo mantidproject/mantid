@@ -6,7 +6,6 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflCommandAdapter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtMantidWidgets/SlitCalculator.h"
@@ -14,6 +13,9 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+// Forward dec
+class ReflCommandAdapter;
+using ReflCommandAdapter_uptr = std::unique_ptr<ReflCommandAdapter>;
 
 /** QtReflMainView : Provides an interface for processing reflectometry data.
 

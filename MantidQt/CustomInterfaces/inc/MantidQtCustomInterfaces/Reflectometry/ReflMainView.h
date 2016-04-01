@@ -4,7 +4,6 @@
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 
 #include <set>
@@ -12,6 +11,10 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+// Forward decs
+class ReflCommand;
+using ReflCommand_uptr = std::unique_ptr<ReflCommand>;
+
 /** @class ReflMainView
 
 ReflMainView is the base view class for the Reflectometry Interface. It contains

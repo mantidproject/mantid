@@ -53,9 +53,6 @@ public:
 protected:
   std::vector<std::unique_ptr<ReflCommand>> m_child;
 };
-
-typedef std::unique_ptr<ReflCommand> ReflCommand_uptr;
-typedef std::shared_ptr<ReflCommand> ReflCommand_sptr;
 }
 }
 #endif /*MANTID_CUSTOMINTERFACES_REFLCOMMAND_H*/
