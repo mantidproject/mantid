@@ -271,7 +271,12 @@ Columns
 | dQ/Q                | No        | Contains the resolution used when rebinning   |
 |                     |           | output workspaces. If left blank, this is     |
 |                     |           | calculated for you using the                  |
-|                     |           | CalculateResolution algorithm.                |
+|                     |           | CalculateResolution algorithm. This value is  |
+|                     |           | negated so that Logarithmic binning can be    |
+|                     |           | applied for the IvsQ workspace.               |
+|                     |           | If you desire linear binning then you         |
+|                     |           | may negate the value in the processing table  |
+|                     |           | and a linear binning will be applied.         |
 |                     |           |                                               |
 |                     |           | Example: ``0.9``                              |
 +---------------------+-----------+-----------------------------------------------+
@@ -446,5 +451,13 @@ rows you want stitched, and then in the menu bar select **Edit -> Expand Selecti
 All the rows in that group will be selected. If you have another row that you
 would like to add to the group, you can do this easily by adding it to the
 selection, and then in the menu bar selecting **Edit -> Group Selected**.
+
+The *Save Table* option does not output a .TBL file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In the old interface (ISIS Reflectometry) the "Save Table" and "Save Table as.." options
+were used to output a .TBL file into a directory of your choice. This functionality is now
+provided by the "Export .TBL" option in the Options Menu. This will allow you to save a .TBL file
+to a directory of your choice. The "Save Table" option in the Options menu now provides a way for you
+to save the processing table in a TableWorkspace where the name of the TableWorkspace is provided by the user.
 
 .. categories:: Interfaces Reflectometry
