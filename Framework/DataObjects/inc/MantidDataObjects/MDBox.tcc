@@ -770,12 +770,15 @@ TMDE(void MDBox)::buildAndAddEventUnsafe(const signal_t Signal,
 //-----------------------------------------------------------------------------------------------
 /** Add a MDLeanEvent to the box.
  * @param Evnt :: reference to a MDEvent to add.
- * @return Always returns 1
+ * @return Returns 1 if event was added
  * */
 TMDE(size_t MDBox)::addEvent(const MDE &Evnt) {
-  std::lock_guard<std::mutex> _lock(this->m_dataMutex);
-  this->data.push_back(Evnt);
-  return 1;
+  if (!getIsMasked()) {
+    std::lock_guard<std::mutex> _lock(this->m_dataMutex);
+    this->data.push_back(Evnt);
+    return 1;
+  }
+  return 0;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -784,11 +787,14 @@ TMDE(size_t MDBox)::addEvent(const MDE &Evnt) {
  * try to add to the same box at the same time.
  *
  * @param Evnt :: reference to a MDEvent to add.
- * @return Always returns 1
+ * @return Returns 1 if event was added
  * */
 TMDE(size_t MDBox)::addEventUnsafe(const MDE &Evnt) {
-  this->data.push_back(Evnt);
-  return 1;
+  if (!getIsMasked()) {
+    this->data.push_back(Evnt);
+    return 1;
+  }
+  return 0;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -796,15 +802,16 @@ TMDE(size_t MDBox)::addEventUnsafe(const MDE &Evnt) {
  *
  * @param events :: vector of events to be copied.
  *
- * @return the number of events that were rejected (because of being out of
- *bounds)
+ * @return always returns 0
  */
 TMDE(size_t MDBox)::addEvents(const std::vector<MDE> &events) {
-  std::lock_guard<std::mutex> _lock(this->m_dataMutex);
-  typename std::vector<MDE>::const_iterator start = events.begin();
-  typename std::vector<MDE>::const_iterator end = events.end();
-  // Copy all the events
-  this->data.insert(this->data.end(), start, end);
+  if (!getIsMasked()) {
+    std::lock_guard<std::mutex> _lock(this->m_dataMutex);
+    typename std::vector<MDE>::const_iterator start = events.begin();
+    typename std::vector<MDE>::const_iterator end = events.end();
+    // Copy all the events
+    this->data.insert(this->data.end(), start, end);
+  }
   return 0;
 }
 
