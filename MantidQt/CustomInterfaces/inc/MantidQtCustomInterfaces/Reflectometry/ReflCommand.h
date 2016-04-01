@@ -1,12 +1,16 @@
-#ifndef MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
+#ifndef MANTID_CUSTOMINTERFACES_REFLCOMMAND_H
+#define MANTID_CUSTOMINTERFACES_REFLCOMMAND_H
+
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class IReflPresenter
+/** @class ReflCommand
 
-IReflPresenter is an interface which defines the functions any reflectometry
-interface presenter needs to support.
+ReflCommand is an interface which defines the functions any data processor
+action needs to support.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -29,15 +33,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IReflPresenter {
+class ReflCommand {
 public:
-  virtual ~IReflPresenter(){};
+  ReflCommand() : m_child(){};
+  virtual ~ReflCommand(){};
 
-  enum Flag { SearchFlag, ICATSearchCompleteFlag, TransferFlag };
+  virtual void execute() = 0;
+  virtual std::string name() = 0;
+  virtual std::string icon() = 0;
+  virtual bool hasChild() final { return !m_child.empty(); };
+  virtual void setChild(std::vector<std::unique_ptr<ReflCommand>> child) final {
+    m_child = std::move(child);
+  }
+  virtual std::vector<std::unique_ptr<ReflCommand>> &getChild() final {
+    return m_child;
+  }
+	virtual bool isSeparator() final { return name().empty() && icon().empty(); }
 
-  // Tell the presenter something happened
-  virtual void notify(IReflPresenter::Flag flag) = 0;
+protected:
+  std::vector<std::unique_ptr<ReflCommand>> m_child;
 };
 }
 }
-#endif
+#endif /*MANTID_CUSTOMINTERFACES_REFLCOMMAND_H*/

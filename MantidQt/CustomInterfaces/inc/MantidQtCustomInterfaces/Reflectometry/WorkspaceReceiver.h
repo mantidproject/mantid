@@ -1,12 +1,19 @@
-#ifndef MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
+#ifndef MANTID_CUSTOMINTERFACES_WORKSPACERECEIVER_H
+#define MANTID_CUSTOMINTERFACES_WORKSPACERECEIVER_H
+
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCommandBase.h"
+#include <set>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class IReflPresenter
+/** @class WorkspaceReceiver
 
-IReflPresenter is an interface which defines the functions any reflectometry
-interface presenter needs to support.
+WorkspaceReceiver is an interface that defines the functions needed to receive
+information from a table presenter. IReflTablePresenter uses this interface
+to notify changes to an outer, concrete presenter. Any outer presenter that
+needs to receive information from IReflTablePresenter should inherit from this
+class.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -29,15 +36,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IReflPresenter {
+class WorkspaceReceiver {
 public:
-  virtual ~IReflPresenter(){};
+  virtual ~WorkspaceReceiver(){};
 
-  enum Flag { SearchFlag, ICATSearchCompleteFlag, TransferFlag };
+  enum Flag { ADSChangedFlag };
 
-  // Tell the presenter something happened
-  virtual void notify(IReflPresenter::Flag flag) = 0;
+  // Notify this receiver that something changed in the ADS
+  virtual void notify(WorkspaceReceiver::Flag flag) = 0;
 };
 }
 }
-#endif
+#endif /*MANTID_CUSTOMINTERFACES_WORKSPACERECEIVER_H*/

@@ -1,12 +1,15 @@
-#ifndef MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
+#ifndef MANTID_CUSTOMINTERFACES_REFLSEPARATORCOMMAND_H
+#define MANTID_CUSTOMINTERFACES_REFLSEPARATORCOMMAND_H
+
+#include "MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCommandBase.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class IReflPresenter
+/** @class ReflSeparatorCommand
 
-IReflPresenter is an interface which defines the functions any reflectometry
-interface presenter needs to support.
+ReflSeparatorCommand defines a separator. It has no name, no icon and empty
+execute() method
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -29,15 +32,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IReflPresenter {
+class ReflSeparatorCommand : public ReflCommandBase {
 public:
-  virtual ~IReflPresenter(){};
+  ReflSeparatorCommand(IReflTablePresenter *tablePresenter)
+      : ReflCommandBase(tablePresenter){};
+  virtual ~ReflSeparatorCommand(){};
 
-  enum Flag { SearchFlag, ICATSearchCompleteFlag, TransferFlag };
-
-  // Tell the presenter something happened
-  virtual void notify(IReflPresenter::Flag flag) = 0;
+  void execute() override{};
+  std::string name() override { return std::string(); }
+  std::string icon() override { return std::string(); }
 };
 }
 }
-#endif
+#endif /*MANTID_CUSTOMINTERFACES_REFLSEPARATORCOMMAND_H*/

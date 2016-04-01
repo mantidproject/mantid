@@ -1,12 +1,14 @@
-#ifndef MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
+#ifndef MANTID_CUSTOMINTERFACES_REFLPLOTGROUPCOMMAND_H
+#define MANTID_CUSTOMINTERFACES_REFLPLOTGROUPCOMMAND_H
+
+#include "MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCommandBase.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class IReflPresenter
+/** @class ReflPlotGroupCommand
 
-IReflPresenter is an interface which defines the functions any reflectometry
-interface presenter needs to support.
+ReflPlotGroupCommand defines the action "Plot Selected Groups"
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -29,15 +31,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IReflPresenter {
+class ReflPlotGroupCommand : public ReflCommandBase {
 public:
-  virtual ~IReflPresenter(){};
+  ReflPlotGroupCommand(IReflTablePresenter *tablePresenter)
+      : ReflCommandBase(tablePresenter){};
+  virtual ~ReflPlotGroupCommand(){};
 
-  enum Flag { SearchFlag, ICATSearchCompleteFlag, TransferFlag };
-
-  // Tell the presenter something happened
-  virtual void notify(IReflPresenter::Flag flag) = 0;
+  void execute() override {
+    m_tablePresenter->notify(IReflTablePresenter::PlotGroupFlag);
+  };
+  std::string name() override { return std::string("Plot Selected Groups"); }
+  std::string icon() override { return std::string("://trajectory.png"); }
 };
 }
 }
-#endif
+#endif /*MANTID_CUSTOMINTERFACES_REFLPLOTGROUPCOMMAND_H*/

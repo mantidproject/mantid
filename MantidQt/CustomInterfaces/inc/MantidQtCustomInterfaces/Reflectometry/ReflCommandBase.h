@@ -1,12 +1,15 @@
-#ifndef MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
+#ifndef MANTID_CUSTOMINTERFACES_REFLCOMMANDBASE_H
+#define MANTID_CUSTOMINTERFACES_REFLCOMMANDBASE_H
+
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCommand.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class IReflPresenter
+class IReflTablePresenter;
+/** @class ReflCommandBase
 
-IReflPresenter is an interface which defines the functions any reflectometry
-interface presenter needs to support.
+ReflCommandBase is an interface which defines the functions any data processor
+action needs to support. Defines a IReflTablePresenter that will be notified.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -29,15 +32,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IReflPresenter {
+class ReflCommandBase : public ReflCommand {
 public:
-  virtual ~IReflPresenter(){};
+  ReflCommandBase(IReflTablePresenter *tablePresenter)
+      : m_tablePresenter(tablePresenter) {
+    if (!tablePresenter) {
+      throw std::invalid_argument("Invalid abstract presenter");
+    }
+  };
+  virtual ~ReflCommandBase(){};
 
-  enum Flag { SearchFlag, ICATSearchCompleteFlag, TransferFlag };
+  virtual void execute() = 0;
+  virtual std::string name() = 0;
+  virtual std::string icon() = 0;
 
-  // Tell the presenter something happened
-  virtual void notify(IReflPresenter::Flag flag) = 0;
+protected:
+  IReflTablePresenter *const m_tablePresenter;
 };
 }
 }
-#endif
+#endif /*MANTID_CUSTOMINTERFACES_REFLCOMMANDBASE_H*/

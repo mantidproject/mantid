@@ -1,12 +1,14 @@
-#ifndef MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
+#ifndef MANTID_CUSTOMINTERFACES_REFLCUTSELECTEDCOMMAND_H
+#define MANTID_CUSTOMINTERFACES_REFLCUTSELECTEDCOMMAND_H
+
+#include "MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCommandBase.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class IReflPresenter
+/** @class ReflCutSelectedCommand
 
-IReflPresenter is an interface which defines the functions any reflectometry
-interface presenter needs to support.
+ReflCutSelectedCommand defines the action "Cut Selected"
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -29,15 +31,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IReflPresenter {
+class ReflCutSelectedCommand : public ReflCommandBase {
 public:
-  virtual ~IReflPresenter(){};
+  ReflCutSelectedCommand(IReflTablePresenter *tablePresenter)
+      : ReflCommandBase(tablePresenter){};
+  virtual ~ReflCutSelectedCommand(){};
 
-  enum Flag { SearchFlag, ICATSearchCompleteFlag, TransferFlag };
-
-  // Tell the presenter something happened
-  virtual void notify(IReflPresenter::Flag flag) = 0;
+  void execute() override {
+    m_tablePresenter->notify(IReflTablePresenter::CutSelectedFlag);
+  };
+  std::string name() override { return std::string("Cut Selected"); }
+  std::string icon() override { return std::string("://cut.png"); }
 };
 }
 }
-#endif
+#endif /*MANTID_CUSTOMINTERFACES_REFLCUTSELECTEDCOMMAND_H*/

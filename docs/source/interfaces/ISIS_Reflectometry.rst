@@ -108,7 +108,7 @@ The **Reflectometry** menu provides access to the following functionality:
 | Open Table       | Opens a valid *TableWorkspace* in the `Processing Table`_|
 |                  | for processing.                                          |
 +------------------+----------------------------------------------------------+
-| New Table        | Discards the current contents of the `Processing Table`_,|
+| New Table        | Discards the current contents of the `Processing Table`_ |
 |                  | presenting a blank table.                                |
 +------------------+----------------------------------------------------------+
 | Save Table       | Saves the current contents of the `Processing Table`_ to |
@@ -126,12 +126,12 @@ The **Reflectometry** menu provides access to the following functionality:
 |                  | enabling you to save a *TableWorkspace* to a ``.tbl``    |
 |                  | file.                                                    |
 +------------------+----------------------------------------------------------+
+| Options          | Opens the `Options`_                             menu.   |
++------------------+----------------------------------------------------------+
 | Slit Calculator  | Opens the slit calculator: a tool to help calculate the  |
 |                  | correct geometry for the instruments' slits. It's powered|
 |                  | by the :ref:`CalculateSlits <algm-CalculateSlits>`       |
 |                  | algorithm.                                               |
-+------------------+----------------------------------------------------------+
-| Options          | Opens the `Options <ISIS_Reflectomety-Options>`_ menu.   |
 +------------------+----------------------------------------------------------+
 
 The **Edit** menu provides access to the same actions found in the tool bar.

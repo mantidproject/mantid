@@ -1,12 +1,13 @@
-#ifndef MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
+#ifndef MANTID_CUSTOMINTERFACES_REFLEXPANDCOMMAND_H
+#define MANTID_CUSTOMINTERFACES_REFLEXPANDCOMMAND_H
+
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCommandBase.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class IReflPresenter
+/** @class ReflExpandCommand
 
-IReflPresenter is an interface which defines the functions any reflectometry
-interface presenter needs to support.
+ReflExpandCommand defines the action "Expand Selection"
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -29,15 +30,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IReflPresenter {
+class ReflExpandCommand : public ReflCommandBase {
 public:
-  virtual ~IReflPresenter(){};
+  ReflExpandCommand(IReflTablePresenter *tablePresenter)
+      : ReflCommandBase(tablePresenter){};
+  virtual ~ReflExpandCommand(){};
 
-  enum Flag { SearchFlag, ICATSearchCompleteFlag, TransferFlag };
-
-  // Tell the presenter something happened
-  virtual void notify(IReflPresenter::Flag flag) = 0;
+  void execute() override {
+    m_tablePresenter->notify(IReflTablePresenter::ExpandSelectionFlag);
+  };
+  std::string name() override { return std::string("Expand Selection"); }
+  std::string icon() override { return std::string("://fit_frame.png"); }
 };
 }
 }
-#endif
+#endif /*MANTID_CUSTOMINTERFACES_REFLEXPANDCOMMAND_H*/
