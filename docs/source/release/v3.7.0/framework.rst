@@ -86,6 +86,7 @@ MD Algorithms (VATES CLI)
 -  SliceMD now reports the correct number of events in the output workspace.
 -  The size of densely populated, multidimensional MDEventWorkspace slices produced by SliceMD has been greatly reduced by using more sensible box splitting parameters.
 -  MergeMD now does not add masked events to its output workspace.
+-  XorMD, OrMD and AndMD treat masked bins as zero.
 
 Performance
 -----------
