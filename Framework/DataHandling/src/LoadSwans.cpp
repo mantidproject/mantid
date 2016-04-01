@@ -151,8 +151,9 @@ void LoadSwans::placeDetectorInSpace() {
       m_ws->getInstrument()->getNumberParameter("detector-sample-distance")[0]);
   const double angle = m_ws->run().getPropertyValueAsType<double>("angle");
 
-  g_log.information() << "Moving detector " << componentName << " " << distance
-                      << " meters and " << angle << " degrees." << std::endl;
+  g_log.information() << "LoadSwans::placeDetectorInSpace: Moving detector "
+                      << componentName << " " << distance << " meters and "
+                      << angle << " degrees." << std::endl;
 
   LoadHelper helper;
   constexpr double deg2rad = M_PI / 180.0;

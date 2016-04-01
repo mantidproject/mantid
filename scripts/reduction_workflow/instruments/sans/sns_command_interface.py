@@ -30,7 +30,7 @@ from hfir_command_interface import SetSampleDetectorOffset, SetSampleDetectorDis
 from hfir_command_interface import Mask, MaskRectangle, MaskDetectors, MaskDetectorSide
 from hfir_command_interface import SetAbsoluteScale, SetDirectBeamAbsoluteScale
 from hfir_command_interface import Stitch
-
+# For Swans
 from hfir_command_interface import AzimuthalAverage as HFIRAzimuthalAverage
 #from mantid.api import AlgorithmManager
 #from mantid.kernel import Logger
@@ -51,6 +51,7 @@ def EQSANS(keep_events=False, property_manager=None):
 def SWANS(keep_events=False, property_manager=None):
     '''
     Copied from EQSANS with respective changes
+    Note that SWANS uses AzimuthalAverage from HFIR!
     '''
     Clear()
     ReductionSingleton().set_instrument("SWANS",
