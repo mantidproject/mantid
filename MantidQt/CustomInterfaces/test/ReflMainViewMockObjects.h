@@ -22,15 +22,11 @@ public:
   // of the vector of unique pointers
   // I will mock a proxy method, setTableCommandsProxy, I just want to test that
   // this method is invoked by the presenter's constructor
-  virtual void
-  setTableCommands(std::vector<ReflCommand_uptr> tableCommands) override {
-
+  virtual void setTableCommands(std::vector<ReflCommand_uptr>) override {
     setTableCommandsProxy();
   }
   // The same happens for setRowCommands
-  virtual void
-  setRowCommands(std::vector<ReflCommand_uptr> tableCommands) override {
-
+  virtual void setRowCommands(std::vector<ReflCommand_uptr>) override {
     setRowCommandsProxy();
   }
 
@@ -52,6 +48,7 @@ public:
   MOCK_METHOD1(setTransferMethods, void(const std::set<std::string> &));
   MOCK_METHOD0(setTableCommandsProxy, void());
   MOCK_METHOD0(setRowCommandsProxy, void());
+  MOCK_METHOD0(clearCommands, void());
   MOCK_METHOD2(setInstrumentList,
                void(const std::vector<std::string> &, const std::string &));
 

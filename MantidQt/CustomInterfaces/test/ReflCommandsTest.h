@@ -49,11 +49,11 @@ private:
     return std::set<std::string>();
   };
   // Calls we don't care about
-  void setOptions(const std::map<std::string, QVariant> &options){};
-  void transfer(const std::vector<std::map<std::string, std::string>> &runs){};
-  void setInstrumentList(const std::vector<std::string> &instruments,
-                         const std::string &defaultInstrument){};
-  void accept(WorkspaceReceiver *workspaceReceiver){};
+  void setOptions(const std::map<std::string, QVariant> &){};
+  void transfer(const std::vector<std::map<std::string, std::string>> &){};
+  void setInstrumentList(const std::vector<std::string> &,
+                         const std::string &){};
+  void accept(WorkspaceReceiver *){};
 
   std::map<std::string, QVariant> m_options;
 };

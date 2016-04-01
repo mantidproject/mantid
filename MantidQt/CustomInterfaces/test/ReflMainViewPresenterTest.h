@@ -44,6 +44,8 @@ public:
     EXPECT_CALL(mockView, setTransferMethods(_)).Times(Exactly(1));
     // Expect that the view is populated with the instrument list
     EXPECT_CALL(mockTableView, setInstrumentList(_, _)).Times(Exactly(1));
+    // Expect that the view clears the list of commands
+    EXPECT_CALL(mockView, clearCommands()).Times(Exactly(1));
     // Expect that the view is populated with the list of table commands
     EXPECT_CALL(mockView, setTableCommandsProxy()).Times(Exactly(1));
     // Expect that the view is populated with the list of row commands
@@ -65,6 +67,8 @@ public:
 
     ReflMainViewPresenter presenter(&mockView, &tablePresenter, &mockProgress);
 
+    // Expect that the view clears the list of commands
+    EXPECT_CALL(mockView, clearCommands()).Times(Exactly(1));
     // Expect that the view is populated with the list of table commands
     EXPECT_CALL(mockView, setTableCommandsProxy()).Times(Exactly(1));
     // Expect that the view is populated with the list of row commands
