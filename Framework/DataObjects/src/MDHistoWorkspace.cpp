@@ -1089,7 +1089,7 @@ MDHistoWorkspace &MDHistoWorkspace::operator^=(const MDHistoWorkspace &b) {
 /** A boolean not operation, performed in-place.
  * All errors are set to 0.
  *
- * 0 or masked is "true", all other values are "false". All errors are set to 0.
+ * 0.0 is "false", all other values are "true". All errors are set to 0.
  */
 void MDHistoWorkspace::operatorNot() {
   for (size_t i = 0; i < m_length; ++i) {
