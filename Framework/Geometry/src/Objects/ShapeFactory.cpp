@@ -813,19 +813,15 @@ ShapeFactory::parseCone(Poco::XML::Element *pElem,
   return retAlgebraMatch.str();
 }
 
-namespace // anonymous
-    {
-
 /**
  * The "tapered-guide" shape is actually a special case of hexahedron; once we
  * have
  * the 8 points that make up either shape, the process of parsing them can be
  * exactly the same in both cases.
  */
-std::string
-parseHexahedronFromStruct(Hexahedron &hex,
-                          std::map<int, boost::shared_ptr<Surface>> &prim,
-                          int &l_id) {
+std::string ShapeFactory::parseHexahedronFromStruct(
+    Hexahedron &hex, std::map<int, boost::shared_ptr<Surface>> &prim,
+    int &l_id) {
   V3D pointTowardBack = hex.lbb - hex.lfb;
   pointTowardBack.normalize();
 
@@ -896,7 +892,6 @@ parseHexahedronFromStruct(Hexahedron &hex,
 
   return retAlgebraMatch.str();
 }
-} // anonymous namespace
 
 /**
 * Get all corners of a hexahedron from an XML element.

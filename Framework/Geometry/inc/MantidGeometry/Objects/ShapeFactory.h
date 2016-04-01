@@ -86,6 +86,10 @@ public:
   boost::shared_ptr<Object> createShape(Poco::XML::Element *pElem);
   boost::shared_ptr<Object> createShape(std::string shapeXML,
                                         bool addTypeTag = true);
+  static std::string
+  parseHexahedronFromStruct(Hexahedron &hex,
+                            std::map<int, boost::shared_ptr<Surface>> &prim,
+                            int &l_id);
 
 private:
   std::string parseSphere(Poco::XML::Element *pElem,
