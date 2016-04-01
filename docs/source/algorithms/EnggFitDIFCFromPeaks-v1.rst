@@ -68,11 +68,12 @@ Usage
 
    peaks_tbl = EnggFitPeaks(ws, 0, [0.8, 1.9])
    out_tbl_name = 'difc_from_peaks'
-   difa, difc, zero = EnggFitDIFCFromPeaks(FittedPeaks=peaks_tbl, OutParametersTable=out_tbl_name)
+   difa, difc, tzero = EnggFitDIFCFromPeaks(FittedPeaks=peaks_tbl, OutParametersTable=out_tbl_name)
 
    # Print the results
-   print "Difc: %.1f" % difc
-   print "Zero: %.1f" % zero
+   print "DIFA: %.1f" % difa
+   print "DIFC: %.1f" % difc
+   print "TZERO: %.1f" % tzero
    tbl = mtd[out_tbl_name]
    print "The output table has %d row(s)" % tbl.rowCount()
    print "Parameters from the table, DIFA: %.1f, DIFC: %.1f, TZERO: %.1f" % (tbl.cell(0,0), tbl.cell(0,1), tbl.cell(0,2))
@@ -90,8 +91,9 @@ Output:
 
 .. testoutput:: ExTwoPeaks
 
-   Difc: 18181.8
-   Zero: 460.5
+   DIFA: 0.0
+   DIFC: 18181.8
+   TZERO: 460.5
    The output table has 1 row(s)
    Parameters from the table, DIFA: 0.0, DIFC: 18181.8, TZERO: 460.5
    Number of peaks fitted: 2

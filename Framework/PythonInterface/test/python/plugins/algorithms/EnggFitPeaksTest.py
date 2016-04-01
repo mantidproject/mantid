@@ -67,12 +67,12 @@ class EnggFitPeaksTest(unittest.TestCase):
 
         return approx_comp
 
-    def _check_outputs_ok(self, tblName, numPeaks, cell00, cell01, cell10, cell14):
+    def _check_outputs_ok(self, tbl_name, num_peaks, cell00, cell01, cell10, cell14):
         """
         Checks that we get the expected types and values in the outputs.
 
-        @param tblName :: name of the table of peaks that should have been created
-        @param numPeaks :: number of peaks that should be found in the table
+        @param tbl_name :: name of the table of peaks that should have been created
+        @param num_peaks :: number of peaks that should be found in the table
         @param cell00 :: expected (good) value for cell(0,0)
         @param cell11 :: expected (good) value for cell(0,1)
         @param cell11 :: expected (good) value for cell(1,0)
@@ -80,22 +80,22 @@ class EnggFitPeaksTest(unittest.TestCase):
         """
 
         # it has ben created
-        tbl = mtd[tblName]
-        self.assertEquals(tbl.getName(), tblName)
+        tbl = mtd[tbl_name]
+        self.assertEquals(tbl.getName(), tbl_name)
         self.assertTrue(isinstance(tbl, ITableWorkspace),
                         'The output workspace of fitted peaks should be a table workspace.')
 
         # number of peaks
-        self.assertEquals(tbl.rowCount(), numPeaks)
+        self.assertEquals(tbl.rowCount(), num_peaks)
         # number of parameters for every peak
-        colNames = ['dSpacing',
+        col_names = ['dSpacing',
                     'A0', 'A0_Err', 'A1', 'A1_Err', 'X0', 'X0_Err', 'A', 'A_Err',
                     'B', 'B_Err', 'S', 'S_Err', 'I', 'I_Err',
                     'Chi']
-        self.assertEquals(tbl.columnCount(), len(colNames))
+        self.assertEquals(tbl.columnCount(), len(col_names))
 
         # expected columns
-        self.assertEquals(tbl.getColumnNames(), colNames)
+        self.assertEquals(tbl.getColumnNames(), col_names)
 
         # some values
         # note approx comparison - fitting results differences of ~5% between glinux/win/osx
