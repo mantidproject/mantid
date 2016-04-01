@@ -209,7 +209,7 @@ def  generateOutputParTable(name, difa, difc, tzero):
     tbl.addColumn('double', 'DIFA')
     tbl.addColumn('double', 'DIFZ')
     tbl.addColumn('double', 'TZERO')
-    tbl.addRow([float(difc), float(zero)])
+    tbl.addRow([float(difa), float(difc), float(tzero)])
 
 def applyVanadiumCorrections(parent, ws, indices, vanWS, vanIntegWS, vanCurvesWS):
     """

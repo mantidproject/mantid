@@ -75,7 +75,7 @@ Usage
    print "Zero: %.1f" % zero
    tbl = mtd[out_tbl_name]
    print "The output table has %d row(s)" % tbl.rowCount()
-   print "Parameters from the table, Difc: %.1f, Zero: %.1f" % (tbl.cell(0,0), tbl.cell(0,1))
+   print "Parameters from the table, DIFA: %.1f, DIFC: %.1f, TZERO: %.1f" % (tbl.cell(0,0), tbl.cell(0,1), tbl.cell(0,2))
    print "Number of peaks fitted: {0}".format(peaks_tbl.rowCount())
    print "First peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[0])
    print "First fitted peak center (ToF): {0:.1f}".format(peaks_tbl.column('X0')[0])
@@ -93,7 +93,7 @@ Output:
    Difc: 18181.8
    Zero: 460.5
    The output table has 1 row(s)
-   Parameters from the table, Difc: 18181.8, Zero: 460.5
+   Parameters from the table, DIFA: 0.0, DIFC: 18181.8, TZERO: 460.5
    Number of peaks fitted: 2
    First peak expected (dSpacing): 0.8
    First fitted peak center (ToF): 15006.0
