@@ -1,8 +1,8 @@
 #pylint: disable=no-init,invalid-name
+import math
+
 from mantid.kernel import *
 from mantid.api import *
-
-import math
 
 class EnggFitPeaks(PythonAlgorithm):
     EXPECTED_DIM_TYPE = 'Time-of-flight'
@@ -144,9 +144,7 @@ class EnggFitPeaks(PythonAlgorithm):
         @returns a table with parameters for every fitted peak.
 
         """
-        if 2 != len(peaks):
-            raise RuntimeError("Unexpected inconsistency found. This method requires a tuple with the list "
-                               "of found peaks and the list of expected peaks.")
+
         found_peaks = peaks[0]
         fitted_peaks = self._create_fitted_peaks_table(peaks_table_name)
 
@@ -482,9 +480,9 @@ class EnggFitPeaks(PythonAlgorithm):
                 and not math.isnan(fitted_params['B_Err'])
                 and fitted_params['X0_Err'] < (fitted_params['X0'] * 100.0 / self.CENTER_ERROR_LIMIT)
                 and
-                (not 0 == fitted_params['X0_Err'] and not 0 == fitted_params['A_Err'] and
-                 not 0 == fitted_params['B_Err'] and not 0 == fitted_params['S_Err'] and
-                 not 0 == fitted_params['I_Err'])
+                (0 != fitted_params['X0_Err'] and 0 != fitted_params['A_Err'] and
+                 0 != fitted_params['B_Err'] and 0 != fitted_params['S_Err'] and
+                 0 != fitted_params['I_Err'])
                )
 
     def _add_parameters_to_map(self, param_map, param_table):

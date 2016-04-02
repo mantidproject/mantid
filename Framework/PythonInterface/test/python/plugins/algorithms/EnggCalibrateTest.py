@@ -1,8 +1,7 @@
+import sys
 import unittest
 from mantid.api import *
 import mantid.simpleapi as sapi
-
-import sys
 
 class EnggCalibrateTest(unittest.TestCase):
 
@@ -83,7 +82,12 @@ class EnggCalibrateTest(unittest.TestCase):
                                                          VanIntegrationWorkspace=self.__class__._van_integ_tbl,
                                                          VanCurvesWorkspace=self.__class__._van_curves_ws,
                                                          ExpectedPeaks=[1.6, 1.1, 1.8], Bank='2')
-        except RuntimeError as ere:
+            self.assertEquals(difa, 0)
+            self.assertGreater(difc, 0)
+            self.assertLess(abs(zero), 1000)
+            self.assertEquals(peaks.rowCount(), 3)
+
+        except RuntimeError:
             pass
 
     def test_runs_ok_with_bad_peaks_file(self):
@@ -100,7 +104,12 @@ class EnggCalibrateTest(unittest.TestCase):
                                                          ExpectedPeaks=[-4, 40, 323],
                                                          ExpectedPeaksFromFile=filename,
                                                          Bank='2')
-        except RuntimeError as ere:
+            self.assertEquals(difa, 0)
+            self.assertGreater(difc, 0)
+            self.assertLess(abs(zero), 1000)
+            self.assertEquals(peaks.rowCount(), 3)
+
+        except RuntimeError:
             pass
 
     def check_3peaks_values(self, difa, difc, zero):

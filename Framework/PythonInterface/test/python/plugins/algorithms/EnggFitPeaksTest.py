@@ -67,18 +67,17 @@ class EnggFitPeaksTest(unittest.TestCase):
 
         return approx_comp
 
-    def _check_outputs_ok(self, tbl_name, num_peaks, cell00, cell01, cell10, cell14):
+    def _check_outputs_ok(self, tbl_name, num_peaks, cells):
         """
         Checks that we get the expected types and values in the outputs.
 
         @param tbl_name :: name of the table of peaks that should have been created
         @param num_peaks :: number of peaks that should be found in the table
-        @param cell00 :: expected (good) value for cell(0,0)
-        @param cell11 :: expected (good) value for cell(0,1)
-        @param cell11 :: expected (good) value for cell(1,0)
-        @param cell14 :: expected (good) value for cell(1,4)
+        @param cells :: list of expected (good) values for several cells:
+        cell(0,0), cell(0,1), cell(1,0), cell(1,4)
         """
 
+        cell00, cell01, cell10, cell14 = cells
         # it has ben created
         tbl = mtd[tbl_name]
         self.assertEquals(tbl.getName(), tbl_name)
@@ -89,9 +88,9 @@ class EnggFitPeaksTest(unittest.TestCase):
         self.assertEquals(tbl.rowCount(), num_peaks)
         # number of parameters for every peak
         col_names = ['dSpacing',
-                    'A0', 'A0_Err', 'A1', 'A1_Err', 'X0', 'X0_Err', 'A', 'A_Err',
-                    'B', 'B_Err', 'S', 'S_Err', 'I', 'I_Err',
-                    'Chi']
+                     'A0', 'A0_Err', 'A1', 'A1_Err', 'X0', 'X0_Err', 'A', 'A_Err',
+                     'B', 'B_Err', 'S', 'S_Err', 'I', 'I_Err',
+                     'Chi']
         self.assertEquals(tbl.columnCount(), len(col_names))
 
         # expected columns
@@ -181,6 +180,7 @@ class EnggFitPeaksTest(unittest.TestCase):
             test_fit_peaks_table = EnggFitPeaks(sws,
                                                 WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2],
                                                 OutFittedPeaksTable=peaksTblName)
+            self.assertEquals(test_fit_peaks_table.rowCount(), 1)
         except RuntimeError as rex:
             print ("Failed (as expected) to fit the first peak (too far off the initial "
                    "guess), with RuntimeError: {0}".format(str(rex)))
@@ -208,8 +208,8 @@ class EnggFitPeaksTest(unittest.TestCase):
         self.assertEquals(test_fit_peaks_table.rowCount(), 2)
 
         # check 'OutFittedPeaksTable' table workspace
-        self._check_outputs_ok(peaksTblName, 2, ep1, -1.5602448495e-06,
-                               ep2, 1.723902507582676e-07)
+        self._check_outputs_ok(peaksTblName, 2, [ep1, -1.5602448495e-06,
+                                                 ep2, 1.723902507582676e-07])
 
     def test_runs_ok_3peaks(self):
         """
@@ -241,8 +241,8 @@ class EnggFitPeaksTest(unittest.TestCase):
         self.assertEquals(3, len(test_fit_peaks_table.column('S')))
 
         # check 'OutFittedPeaksTable' table workspace
-        self._check_outputs_ok(peaksTblName, 3, ep1, -0.000162978436217,
-                               ep2, 3.94317157133e-05)
+        self._check_outputs_ok(peaksTblName, 3, [ep1, -0.000162978436217,
+                                                 ep2, 3.94317157133e-05])
 
 
 if __name__ == '__main__':

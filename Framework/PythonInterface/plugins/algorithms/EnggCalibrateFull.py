@@ -1,7 +1,8 @@
 #pylint: disable=no-init,invalid-name
+import math
+
 from mantid.kernel import *
 from mantid.api import *
-import math
 import EnggUtils
 
 class EnggCalibrateFull(PythonAlgorithm):
@@ -139,7 +140,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         rebin_alg.execute()
         result = rebin_alg.getProperty('OutputWorkspace').value
 
-        if result.isDistribution()==False:
+        if not result.isDistribution():
             convert_alg = self.createChildAlgorithm('ConvertToDistribution')
             convert_alg.setProperty('Workspace', result)
             convert_alg.execute()

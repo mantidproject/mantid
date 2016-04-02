@@ -84,7 +84,7 @@ class EnggFitDIFCFromPeaksTest(unittest.TestCase):
         ep2 = 1.09
         ep3 = 1.4
         test_fit_peaks_table = EnggFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2, ep3],
-                                                              OutFittedPeaksTable=peaksTblName)
+                                            OutFittedPeaksTable=peaksTblName)
 
         paramsTblName = 'test_difc_zero_table'
         difa, difc, zero = EnggFitDIFCFromPeaks(FittedPeaks=test_fit_peaks_table,

@@ -2,8 +2,6 @@
 from mantid.kernel import *
 from mantid.api import *
 
-import math
-
 class EnggFitDIFCFromPeaks(PythonAlgorithm):
 
     def category(self):
