@@ -76,6 +76,7 @@ void SaveAscii::init() {
       make_unique<PropertyWithValue<std::string>>("CustomSeparator", "",
                                                   Direction::Input),
       "If present, will override any specified choice given to Separator.");
+  getPointerToProperty("CustomSeparator")->setAutoTrim(false);
 
   setPropertySettings("CustomSeparator",
                       make_unique<VisibleWhenProperty>("Separator", IS_EQUAL_TO,

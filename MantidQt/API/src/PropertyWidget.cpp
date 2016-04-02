@@ -199,7 +199,8 @@ PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent,
 
   if (!m_gridLayout) {
     // Create a LOCAL grid layout
-    m_gridLayout = new QGridLayout(this, 1, 5);
+    m_gridLayout = new QGridLayout(this);
+      
     m_gridLayout->setSpacing(5);
     this->setLayout(m_gridLayout);
     m_row = 0;

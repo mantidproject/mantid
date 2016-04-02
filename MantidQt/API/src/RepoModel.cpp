@@ -1009,9 +1009,7 @@ QString RepoModel::UploadForm::email(){
 QString RepoModel::UploadForm::author(){
   return author_le->text(); 
 }
-QString RepoModel::UploadForm::comment(){
-  return comment_te->text(); 
-}
+QString RepoModel::UploadForm::comment() { return comment_te->toPlainText(); }
 bool RepoModel::UploadForm::saveInfo(){
    return save_ck->isChecked();
 }
@@ -1057,7 +1055,7 @@ RepoModel::DeleteQueryBox::~DeleteQueryBox(){
 } 
 QString RepoModel::DeleteQueryBox::comment(){
   if (comment_te)
-    return comment_te->text(); 
+    return comment_te->toPlainText();
   else
     return QString(); 
 

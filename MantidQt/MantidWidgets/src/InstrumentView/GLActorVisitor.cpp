@@ -6,6 +6,7 @@
 #include "MantidQtMantidWidgets/InstrumentView/ObjCompAssemblyActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/RectangularDetectorActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/StructuredDetectorActor.h"
 
 namespace MantidQt
 {
@@ -42,6 +43,11 @@ namespace MantidQt
 		{
 			return this->visit(static_cast<GLActor*>(actor));
 		}
+		
+		bool GLActorVisitor::visit(StructuredDetectorActor* actor)
+		{
+			return this->visit(static_cast<GLActor*>(actor));
+		}
 
 		bool GLActorConstVisitor::visit(const GLActorCollection* actor)
 		{
@@ -69,6 +75,11 @@ namespace MantidQt
 		}
 
 		bool GLActorConstVisitor::visit(const RectangularDetectorActor* actor)
+		{
+			return this->visit(static_cast<const GLActor*>(actor));
+		}
+
+		bool GLActorConstVisitor::visit(const StructuredDetectorActor* actor)
 		{
 			return this->visit(static_cast<const GLActor*>(actor));
 		}
