@@ -641,7 +641,7 @@ CreateEventWorkspaceWithStartTime(int numPixels, int numBins, int numEvents,
  */
 EventWorkspace_sptr
 CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
-                            double binDelta) {
+                            double binDelta, double xOffset) {
 
   auto retVal = boost::make_shared<EventWorkspace>();
   retVal->initialize(1, 2, 1);
@@ -655,17 +655,32 @@ CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
       retVal->getOrAddEventList(g).addDetectorID(det);
     }
   }
-  // Create the x-axis for histogramming.
-  MantidVecPtr x1;
-  MantidVec &xRef = x1.access();
-  double x0 = 0;
-  xRef.resize(numBins);
-  for (int i = 0; i < numBins; ++i) {
-    xRef[i] = x0 + i * binDelta;
-  }
 
-  // Set all the histograms at once.
-  retVal->setAllX(x1);
+  if (xOffset == 0.) {
+    // Create the x-axis for histogramming.
+    MantidVecPtr x1;
+    MantidVec &xRef = x1.access();
+    const double x0 = 0.;
+    xRef.resize(numBins);
+    for (int i = 0; i < numBins; ++i) {
+      xRef[i] = x0 + static_cast<double>(i) * binDelta;
+    }
+
+    // Set all the histograms at once.
+    retVal->setAllX(x1);
+  } else {
+    for (size_t g = 0; g < groups.size(); g++) {
+      // Create the x-axis for histogramming.
+      MantidVecPtr x1;
+      MantidVec &xRef = x1.access();
+      const double x0 = xOffset * static_cast<double>(g);
+      xRef.resize(numBins);
+      for (int i = 0; i < numBins; ++i) {
+        xRef[i] = x0 + static_cast<double>(i) * binDelta;
+      }
+      retVal->setX(g, x1);
+    }
+  }
 
   return retVal;
 }
