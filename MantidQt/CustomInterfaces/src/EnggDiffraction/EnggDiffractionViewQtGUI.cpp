@@ -205,8 +205,12 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   connect(m_uiTabFitting.pushButton_fitting_browse_run_num, SIGNAL(released()),
           this, SLOT(browseFitFocusedRun()));
 
+  // signal upon the text editting finished in the fitting run number text-field
   connect(m_uiTabFitting.lineEdit_pushButton_run_num, SIGNAL(editingFinished()),
-          SLOT(fittingRunNoChanged()));
+          this, SLOT(fittingRunNoChanged()));
+
+  // this signal will emit signal once there is a file selected
+  connect(this, SIGNAL(getBanks()), this, SLOT(fittingRunNoChanged()));
 
   connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)), this,
           SLOT(fittingBankIdChanged(int)));
@@ -221,7 +225,6 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   connect(m_uiTabFitting.listWidget_fitting_bank_preview,
           SIGNAL(currentRowChanged(int)), this, SLOT(setBankIdComboBox(int)));
 
-  /// shahroz
   connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)), this,
           SLOT(setBankDir(int)));
 
@@ -681,13 +684,13 @@ double EnggDiffractionViewQtGUI::rebinningPulsesTime() const {
 /// shahroz
 void EnggDiffractionViewQtGUI::setBankDir(int idx) {
 
-	if (m_fitting_runno_dir_vec.size() >= idx) {
+  if (m_fitting_runno_dir_vec.size() >= idx) {
 
-		std::string bankDir = m_fitting_runno_dir_vec[idx];
-		Poco::Path fpath(bankDir);
+    std::string bankDir = m_fitting_runno_dir_vec[idx];
+    Poco::Path fpath(bankDir);
 
-		setfittingRunNo(QString::fromUtf8(bankDir.c_str()));
-	}
+    setfittingRunNo(QString::fromUtf8(bankDir.c_str()));
+  }
 }
 
 std::string EnggDiffractionViewQtGUI::fittingRunNoFactory(std::string bank,
@@ -1084,6 +1087,7 @@ void EnggDiffractionViewQtGUI::browseFitFocusedRun() {
   std::string nexusFormat = "Nexus file with calibration table: NXS, NEXUS"
                             "(*.nxs *.nexus);;";
 
+  // shahroz
   QString path(
       QFileDialog::getOpenFileName(this, tr("Open Focused File "), prevPath,
                                    QString::fromStdString(nexusFormat)));
@@ -1091,11 +1095,10 @@ void EnggDiffractionViewQtGUI::browseFitFocusedRun() {
   if (path.isEmpty()) {
     return;
   }
-  /// shahroz
-  // setBankDir(path);
 
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
-  m_uiTabFitting.lineEdit_pushButton_run_num->setText(path);
+  setfittingRunNo(path);
+  getBanks();
 }
 
 void EnggDiffractionViewQtGUI::browsePeaksToFit() {
@@ -1306,44 +1309,59 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
   m_fitting_runno_dir_vec.clear();
   std::vector<std::string> bankWithDirVec;
 
-  if (selectedfPath.isFile()) {
+  try {
+
+    if (selectedfPath.isFile()) {
 
 #ifdef __unix__
-    auto home = Poco::Path().home();
-    bankDir.append(home);
-    bankDir.append(fPath.parent().toString());
-    bankDir.append(bankFile);
+      auto home = Poco::Path().home();
+      bankDir.append(home);
+      bankDir.append(fPath.parent().toString());
+      bankDir.append(bankFile);
 #else
-    bankDir = (bankDir).expand(selectedfPath.parent().toString());
+      bankDir = (bankDir).expand(selectedfPath.parent().toString());
 #endif
 
-    std::vector<std::string> splitBaseName =
-        splitFittingDirectory(selectedfPath);
+      std::vector<std::string> splitBaseName =
+          splitFittingDirectory(selectedfPath);
 
-    if (!splitBaseName.empty()) {
-      std::string cwd(bankDir.toString());
-      Poco::DirectoryIterator it(cwd);
-      Poco::DirectoryIterator end;
-      while (it != end) {
-        if (it->isFile()) {
-          std::string itFilePath = it->path();
-          Poco::Path itBankfPath(itFilePath);
+      if (!splitBaseName.empty()) {
+        std::string cwd(bankDir.toString());
+        Poco::DirectoryIterator it(cwd);
+        Poco::DirectoryIterator end;
+        while (it != end) {
+          if (it->isFile()) {
+            std::string itFilePath = it->path();
+            Poco::Path itBankfPath(itFilePath);
 
-          std::string itbankFileName = itBankfPath.getBaseName();
-          // check if it not any other file.. e.g: texture
-          std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] +
-                                 "_" + splitBaseName[2] + "_" +
-                                 splitBaseName[3];
-          if (itbankFileName.find(foc_file) != std::string::npos) {
+            std::string itbankFileName = itBankfPath.getBaseName();
+            // check if it not any other file.. e.g: texture
+            std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] +
+                                   "_" + splitBaseName[2] + "_" +
+                                   splitBaseName[3];
+            if (itbankFileName.find(foc_file) != std::string::npos) {
 
-            m_fitting_runno_dir_vec.push_back(itFilePath);
+              m_fitting_runno_dir_vec.push_back(itFilePath);
+            }
           }
+          ++it;
         }
-        ++it;
+      }
+
+      try {
+        // add bank to the combo-box and list view
+        addBankItems(splitBaseName, focusedFile);
+      } catch (...) {
+        userWarning("Unable to insert items: ", "Could not add banks to "
+                                                "combo-box or list widget. "
+                                                "Please try again");
+        return;
       }
     }
-    // add bank to the combo-box and list view
-    addBankItems(splitBaseName, focusedFile);
+  } catch (...) {
+    userWarning("Unable to select the file: ",
+                "Unable to select the file. Please try again");
+    return;
   }
 }
 

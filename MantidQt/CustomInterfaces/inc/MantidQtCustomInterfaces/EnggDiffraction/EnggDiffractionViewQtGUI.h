@@ -154,16 +154,16 @@ public:
 
   virtual std::string fittingPeaksData() const override;
 
-
   virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                              bool focused);
 
-
   std::vector<std::string> splitFittingDirectory(Poco::Path selectedfPath);
 
-  void addBankItems(std::vector<std::string> splittedBaseName, QString selectedFile);
+  void addBankItems(std::vector<std::string> splittedBaseName,
+                    QString selectedFile);
 
-  void setDefaultBank(std::vector<std::string> splittedBaseName, QString selectedFile);
+  void setDefaultBank(std::vector<std::string> splittedBaseName,
+                      QString selectedFile);
 
   std::string fittingRunNoFactory(std::string bank, std::string fileName,
                                   std::string &bankDir, std::string fileDir);
@@ -191,6 +191,8 @@ public:
 
   int currentMultiRunMode() const override { return m_currentRunMode; }
 
+signals:
+  void getBanks();
 
 private slots:
   /// for buttons, do calibrate, focus, event->histo rebin, and similar
