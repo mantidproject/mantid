@@ -38,6 +38,8 @@ Vesuvio
     - :ref:`VesuvioCalculateMS <algm-VesuvioCalculateMS>` previously ``CalculateMSVesuvio``
     - :ref:`VesuvioDiffractionReduction <algm-VesuvioDiffractionReduction>` previously ``EVSDiffractionReduction``
 
+- :ref:`LoadVesuvio <algm-LoadVesuvio>` now has the option to load the monitor data in addition to its normal operation. This is  loaded as an additional separate workspace.
+
 
 Improvements
 ------------
