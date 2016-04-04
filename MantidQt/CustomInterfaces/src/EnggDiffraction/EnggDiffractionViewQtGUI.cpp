@@ -1311,7 +1311,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
     // handling of vectors
     m_fitting_runno_dir_vec.clear();
     std::vector<std::string> splitBaseName =
-        splitFittingDirectory(selectedfPath);
+        splitFittingDirectory(selectedfPath.toString());
 
     if (selectedfPath.isFile() && !splitBaseName.empty()) {
 
@@ -1334,9 +1334,8 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
       // if given a run number instead
       updateFittingDirVec(m_focusDir, focusedFile.toStdString());
     } else {
-      userWarning("Invalid Input",
-                  "Invalid directory or run number given. "
-                  "Please try again");
+      userWarning("Invalid Input", "Invalid directory or run number given. "
+                                   "Please try again");
     }
 
     try {
@@ -1376,9 +1375,10 @@ void EnggDiffractionViewQtGUI::updateFittingDirVec(std::string &bankDir,
 }
 
 std::vector<std::string>
-EnggDiffractionViewQtGUI::splitFittingDirectory(Poco::Path selectedfPath) {
+EnggDiffractionViewQtGUI::splitFittingDirectory(std::string selectedfPath) {
 
-  std::string selectedbankfName = selectedfPath.getBaseName();
+  Poco::Path PocofPath(selectedfPath);
+  std::string selectedbankfName = PocofPath.getBaseName();
   std::vector<std::string> splitBaseName;
   if (selectedbankfName.find("ENGINX_") != std::string::npos) {
     boost::split(splitBaseName, selectedbankfName, boost::is_any_of("_."));
@@ -1398,16 +1398,15 @@ void EnggDiffractionViewQtGUI::addBankItems(
     for (size_t i = 0; i < m_fitting_runno_dir_vec.size(); i++) {
       Poco::Path vecFile(m_fitting_runno_dir_vec[i]);
       // split the directory from m_fitting_runno_dir_vec
-      std::vector<std::string> vecFileSplit = splitFittingDirectory(vecFile);
+      std::vector<std::string> vecFileSplit =
+          splitFittingDirectory(vecFile.toString());
       // assign the file bank id
       std::string bankID = (vecFileSplit[vecFileSplit.size() - 1]);
 
-      std::string bankNo;
       bool isDigit = false;
       for (size_t i = 0; i < bankID.size(); i++) {
         char *str = &bankID[i];
         if (std::isdigit(*str)) {
-          bankNo += bankID[i];
           isDigit = true;
         }
       }

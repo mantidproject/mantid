@@ -14,8 +14,6 @@
 #include "ui_EnggDiffractionQtTabSettings.h"
 
 #include <boost/scoped_ptr.hpp>
-#include <Poco/Path.h>
-#include <qwt_plot_curve.h>
 
 // Qt classes forward declarations
 class QMutex;
@@ -159,7 +157,7 @@ public:
 
   void updateFittingDirVec(std::string &bankDir, std::string &focusedFile);
 
-  std::vector<std::string> splitFittingDirectory(Poco::Path selectedfPath);
+  std::vector<std::string> splitFittingDirectory(std::string selectedfPath);
 
   void addBankItems(std::vector<std::string> splittedBaseName,
                     QString selectedFile);
