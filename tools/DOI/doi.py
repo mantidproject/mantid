@@ -7,7 +7,7 @@ to the DataCite DOI API.
 
 A special one-time "main" landing page DOI will be created using:
 
-python doi.py --major=3 --minor=0 --patch=0 --username=[] --password=[] --main
+python doi.py --username=[] --password=[] --main 3.0.0
 
 Then at every release, the script will run again without the "--main" flag to
 generate a DOI pointing to the release notes for that particular version.
@@ -328,7 +328,7 @@ def check_for_curl():
         raise Exception('This script requires that cURL be installed and ' + \
                         'available on the PATH.')
 
-def run(options):
+def run(args):
     '''Creating a usable DOI is (for our purposes at least) a two step
     process: metadata has to be constructed and then sent to the server, and
     then the DOI itself has to be sent once the metadata is in place.
@@ -340,64 +340,62 @@ def run(options):
     so that we can set up a IsPreviousVersionOf/IsNewVersionOf relationship
     between the two DOIs.
     '''
-    # Get the git tag and "version string" of this version as well as the
-    # version before it if this is an incremental release.
-    version = options.major, options.minor, options.patch
-    version_str = authors.get_version_string(options.major,
-                                             options.minor,
-                                             options.patch)
-    tag = authors.find_tag(*version)
-    if not options.main:
+    # Get the git tag as well as the version before it if this is an incremental release.
+    version_str = args.version
+    shortened_version_str = authors.get_shortened_version_string(version_str)
+
+    tag = authors.find_tag(version_str)
+    if not args.main:
         prev_tag = authors.get_previous_tag(tag)
-        prev_version = authors.get_version_from_git_tag(prev_tag)
-        prev_version_str = authors.get_version_string(*prev_version)
+        prev_version_str = authors.get_version_from_git_tag(prev_tag)
+        shortened_prev_version_str = authors.get_shortened_version_string(prev_version_str)
 
     main_doi = '10.5286/Software/Mantid'
 
-    if options.main:
+    if args.main:
         doi = main_doi
         prev_doi = ''
         has_previous_version = False
     else: # Incremental release DOI.
-        prev_doi = '10.5286/Software/Mantid' + prev_version_str
-        doi = '10.5286/Software/Mantid' + version_str
+        prev_doi = '10.5286/Software/Mantid' + shortened_prev_version_str
+        doi = '10.5286/Software/Mantid' + shortened_version_str
 
-    if options.main:
+    if args.main:
         destination = 'http://www.mantidproject.org'
     else:
         destination = 'http://www.mantidproject.org/Release_Notes_' + \
                       version_str
         prev_destination = 'http://www.mantidproject.org/Release_Notes_' +\
-                               prev_version_str
+                               shortened_prev_version_str
 
     # Use the test server if running in test mode.
-    if options.test:
+    if args.test:
         server_url_base = 'https://test.datacite.org/mds/'
     else:
         server_url_base = 'https://mds.datacite.org/'
 
-    if options.delete:
-        delete_doi(server_url_base, doi, options)
+    if args.delete:
+        delete_doi(server_url_base, doi, args)
         quit()
 
     # If the user ran this script with the --main flag, then all we need to do
     # is create a single, unlinked DOI to the main project page.
-    if options.main:
+    if args.main:
         creator_name_list = authors.authors_up_to_git_tag(tag)
         # In the case of the main DOI we need to add the whitelisted names too.
         creator_name_list = sorted(set(creator_name_list + authors.whitelist))
 
         xml_form = build_xml_form(doi, {}, creator_name_list, None)
 
-        create_or_update_metadata(xml_form, server_url_base, doi, options)
-        create_or_update_doi(server_url_base, doi, destination, options)
+        create_or_update_metadata(xml_form, server_url_base, doi, args)
+        create_or_update_doi(server_url_base, doi, destination, args)
     # Else it's an incremental-release DOI that we need to make.
     else:
         has_previous_version = check_if_doi_exists(
             server_url_base,
             prev_doi,
             prev_destination,
-            options
+            args
         )
 
         relationships = { main_doi : 'IsPartOf' }
@@ -413,8 +411,8 @@ def run(options):
         )
 
         # Create/update the metadata and DOI.
-        create_or_update_metadata(xml_form, server_url_base, doi, options)
-        create_or_update_doi(server_url_base, doi, destination, options)
+        create_or_update_metadata(xml_form, server_url_base, doi, args)
+        create_or_update_doi(server_url_base, doi, destination, args)
 
         # Create/update the metadata and DOI of the previous version, if it
         # was found to have a DOI.
@@ -436,11 +434,11 @@ def run(options):
                 prev_xml_form,
                 server_url_base,
                 prev_doi,
-                options
+                args
             )
 
     # Print out a custom success message, depending on the initial options.
-    if not options.test:
+    if not args.test:
         method        = "resolved"
         doi_add       = 'http://dx.doi.org/' + doi
         meta_add      = 'https://mds.datacite.org/metadata/' + doi
@@ -474,25 +472,9 @@ if __name__ == "__main__":
 
     # REQUIRED
     parser.add_argument(
-        '--major',
-        type=int,
-        required=True,
-        help='The major version number of this Mantid release.'
-    )
-    parser.add_argument(
-        '--minor',
-        type=int,
-        required=True,
-        help='The minor version number of this Mantid release.'
-    )
-    parser.add_argument(
-        '--patch',
-        type=int,
-        required=True,
-        help='The patch version number of this Mantid release.  Note: this' + \
-             ' is NOT the SHA1 or the commit number from Git.  The patch ' + \
-             'number for v3.0 (or v3.0.0) is 0, and the patch number for ' + \
-             'v3.0.1 is 1.'
+        'version',
+        type=str,
+        help='Version of Mantid whose DOI is to be created/updated in the form "major.minor.patch"'
     )
     parser.add_argument(
         '--password',

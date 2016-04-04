@@ -222,21 +222,14 @@ def _authors_from_tag_info(tag_info):
     authors = subprocess.check_output(args).replace('"', '').split('\n')
     return _clean_up_author_list(authors)
 
-def find_tag(major, minor, patch):
-    '''Return the Git tag, if it actually exists.  Where the patch number is
-    zero, check for "v[major].[minor].[patch]" as well as "v[major].[minor]".
+def find_tag(version_str):
+    '''Return the Git tag, if it actually exists, for a given version".
     '''
-    suggested_tags = []
-    if patch == 0:
-        suggested_tags.append('v%d.%d' % (major, minor))
-    suggested_tags.append('v%d.%d.%d' % (major, minor, patch))
-
-    for tag in suggested_tags:
-        if tag in _get_all_git_tags():
-            return tag
-
-    raise Exception(
-        "Could not find the following tag(s): " + str(suggested_tags))
+    tag_title = 'v' + version_str
+    if tag_title in _get_all_git_tags():
+        return tag_title
+    else:
+        raise RuntimeError("Cannot find expected git tag '{0}'".format(tag_title))
 
 def get_previous_tag(tag):
     '''Given an existing git tag, will return the tag that is found before it.
@@ -247,14 +240,18 @@ def get_previous_tag(tag):
 
     return all_tags[all_tags.index(tag) - 1]
 
-def get_version_string(major, minor, patch):
+def get_shortened_version_string(version_str):
     '''We use the convention whereby the patch number is ignored if it is zero,
     i.e. "3.0.0" becomes "3.0".
     '''
+    version_components = version_str.split('.')
+    if len(version_components) != 3:
+        raise RuntimeError("Invalid format for version string. Expected X.Y.Z")
+    major, minor, patch = version_components
     if patch == 0:
-        return '%d.%d' % (major, minor)
+        return '{0}.{1}'.format(major, minor)
     else:
-        return '%d.%d.%d' % (major, minor, patch)
+        return '{0}.{1}.{2}'.format(major, minor, patch)
 
 def get_version_from_git_tag(tag):
     '''Given a tag from Git, extract the major, minor and patch version
@@ -271,7 +268,7 @@ def get_version_from_git_tag(tag):
     else:
         raise Exception(
             "Unable to parse version information from \"" + tag + "\"")
-    return a, b, c
+    return '{0}.{1}.{2}'.format(a, b, c)
 
 def authors_up_to_git_tag(tag):
     '''Get a list of all authors who have made a commit, up to and including
