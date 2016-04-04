@@ -142,13 +142,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
     def PyExec(self):
         self._load_common_inst_parameters()
         self._retrieve_input()
-        # Add OutputWorkspace property for Monitors
-        if self._load_monitors:
-            # Check property is not being re-decalred
-            if not self.existsProperty(WKSP_PROP_LOAD_MON):
-                mon_out_name = self.getPropertyValue(WKSP_PROP) + '_monitors'
-                self.declareProperty(WorkspaceProperty(WKSP_PROP_LOAD_MON, mon_out_name, Direction.Output),
-                             doc="The output workspace that contains the monitor spectra.")
 
         if "Difference" in self._diff_opt:
             self._exec_difference_mode()
@@ -318,6 +311,10 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
+    def _filter_monitors(self, item):
+        # This is correct based on the assumption in the idf monitors are ascending
+        return item <= self._mon_spectra[-1]
+
     def _exec_single_foil_state_mode(self):
         """
         Execution path when a single foil state is requested
@@ -338,7 +335,8 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self._raise_error_period_scatter(run_str, self._back_scattering)
         all_spectra = [item for sublist in self._spectra for item in sublist]
         # Check if the monitors are trying to be loaded twice
-        if self._mon_spectra in all_spectra and self._load_monitors:
+        filtered_spectra = filter(self._filter_monitors, all_spectra)
+        if filtered_spectra == self._mon_spectra and self._load_monitors:
             # Load monitors in workspace if defined by user
             self._load_monitors = False
             logger.warning("LoadMonitors is true while monitor spectra are defined in the spectra list.")
@@ -1048,7 +1046,13 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 self._load_monitors_workspace = crop.getProperty("OutputWorkspace").value
 
         self.setProperty(WKSP_PROP, self.foil_out)
+        # Add OutputWorkspace property for Monitors
         if self._load_monitors:
+            # Check property is not being re-decalred
+            if not self.existsProperty(WKSP_PROP_LOAD_MON):
+                mon_out_name = self.getPropertyValue(WKSP_PROP) + '_monitors'
+                self.declareProperty(WorkspaceProperty(WKSP_PROP_LOAD_MON, mon_out_name, Direction.Output),
+                             doc="The output workspace that contains the monitor spectra.")
             self.setProperty(WKSP_PROP_LOAD_MON, self._load_monitors_workspace)
 
     def _cleanup_raw(self):
