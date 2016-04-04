@@ -157,7 +157,7 @@ public:
 
   void updateFittingDirVec(std::string &bankDir, std::string &focusedFile);
 
-  std::vector<std::string> splitFittingDirectory(std::string selectedfPath);
+  std::vector<std::string> splitFittingDirectory(std::string &selectedfPath);
 
   void addBankItems(std::vector<std::string> splittedBaseName,
                     QString selectedFile);

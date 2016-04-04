@@ -1375,7 +1375,7 @@ void EnggDiffractionViewQtGUI::updateFittingDirVec(std::string &bankDir,
 }
 
 std::vector<std::string>
-EnggDiffractionViewQtGUI::splitFittingDirectory(std::string selectedfPath) {
+EnggDiffractionViewQtGUI::splitFittingDirectory(std::string &selectedfPath) {
 
   Poco::Path PocofPath(selectedfPath);
   std::string selectedbankfName = PocofPath.getBaseName();
@@ -1393,7 +1393,7 @@ void EnggDiffractionViewQtGUI::addBankItems(
 
     // delete previous bank added to the list
     m_uiTabFitting.comboBox_bank->clear();
-    m_uiTabFitting.listWidget_fitting_bank_preview->clear(); // causing problems
+    m_uiTabFitting.listWidget_fitting_bank_preview->clear();
 
     for (size_t i = 0; i < m_fitting_runno_dir_vec.size(); i++) {
       Poco::Path vecFile(m_fitting_runno_dir_vec[i]);
