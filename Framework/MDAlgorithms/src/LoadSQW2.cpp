@@ -60,7 +60,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadSQW2)
 /// Default constructor
 LoadSQW2::LoadSQW2()
     : API::IFileLoader<Kernel::FileDescriptor>(), m_file(), m_reader(),
-      m_outputWS(), m_nspe(0), m_uToRLU(), m_rluToU(), m_outputFrame() {}
+      m_outputWS(), m_nspe(0), m_uToRLU(), m_outputFrame() {}
 
 /// Default destructor
 LoadSQW2::~LoadSQW2() {}
@@ -248,12 +248,13 @@ boost::shared_ptr<API::ExperimentInfo> LoadSQW2::readSingleSPEHeader() {
   // lattice - alatt, angdeg, cu, cv = 12 values
   std::vector<float> floats;
   m_reader->read(floats, 12);
-  auto lattice = new OrientedLattice(floats[0], floats[1], floats[2], floats[3],
-                                     floats[4], floats[5]);
+  auto lattice = Kernel::make_unique<OrientedLattice>(
+      floats[0], floats[1], floats[2], floats[3], floats[4], floats[5]);
   V3D uVec(floats[6], floats[7], floats[8]),
       vVec(floats[9], floats[10], floats[11]);
   lattice->setUFromVectors(uVec, vVec);
-  sample.setOrientedLattice(lattice);
+  // Lattice is copied into the Sample object
+  sample.setOrientedLattice(lattice.get());
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
     std::stringstream os;
     os << "Lattice:"
@@ -317,7 +318,6 @@ boost::shared_ptr<API::ExperimentInfo> LoadSQW2::readSingleSPEHeader() {
  */
 void LoadSQW2::cacheFrameTransforms(const Geometry::OrientedLattice &lattice) {
   m_uToRLU = lattice.getBinv() * INV_TWO_PI;
-  m_rluToU = lattice.getB() * 2.0 * M_PI;
 }
 
 /**

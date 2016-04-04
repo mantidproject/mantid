@@ -386,6 +386,8 @@ public:
     // Testing the number of histograms
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 5);
 
+    TS_ASSERT_EQUALS(ws->readX(0).size(), 100);
+
     for (size_t wi = 0; wi < 5; wi++) {
       const EventList &el = ws->getEventList(wi);
       TS_ASSERT_EQUALS(el.getEventType(), type);

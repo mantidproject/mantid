@@ -131,7 +131,7 @@ void DimensionSliceWidget::setShownDim(int dim)
     if (ui.horizontalSpacer != NULL)
     {
       // Remove the 3rd item (if it's not gone already) = the spacer
-      QLayoutIterator it = ui.horizontalLayout->iterator();
+      auto it = QLayoutIterator(ui.horizontalLayout);
       ++it; ++it; ++it;
       ui.horizontalLayout->removeItem(it.current());
       delete ui.horizontalSpacer;

@@ -319,7 +319,7 @@ class VesuvioCorrections(VesuvioBase):
         fit.setChild(True)
         fit.setLogging(True)
         fit.setProperty("Function", ";".join(functions))
-        fit.setProperty("InputWorkspace", self._input_ws)
+        fit.setProperty("InputWorkspace", self._output_ws)
         fit.setProperty("Output", param_table_name)
         fit.setProperty("CreateOutput", True)
         fit.execute()
@@ -362,10 +362,10 @@ class VesuvioCorrections(VesuvioBase):
         params_dict = TableWorkspaceDictionaryFacade(mtd[params_ws_name])
         func_str = fit_opts.create_function_str(params_dict)
 
-        ms.CalculateGammaBackground(InputWorkspace=self._output_ws,
-                                    ComptonFunction=func_str,
-                                    BackgroundWorkspace=correction_background_ws,
-                                    CorrectedWorkspace='__corrected_dummy')
+        ms.VesuvioCalculateGammaBackground(InputWorkspace=self._output_ws,
+                                           ComptonFunction=func_str,
+                                           BackgroundWorkspace=correction_background_ws,
+                                           CorrectedWorkspace='__corrected_dummy')
         ms.DeleteWorkspace('__corrected_dummy')
 
         return correction_background_ws
@@ -441,19 +441,19 @@ class VesuvioCorrections(VesuvioBase):
         # 1-exp(-n*dens*sigma) = measured scattering power of the sample.
         # For this, a program like THICK must be used.
         # The program THICK also uses sigma/int_sum to be consistent with the prgram DINSMS_BATCH
-        # The algorithm CalculateMsVesuvio called by the algorithm VesuvioCorrections takes the
+        # The algorithm VesuvioCalculateMs called by the algorithm VesuvioCorrections takes the
         # parameter AtomicProperties with the absolute intensities, contraty to DINSMS_BATCH which
         # takes in relative intensities.
         # To compensate for this, the thickness parameter, dens (SampleDensity),  is divided in by
         # the sum of absolute intensities in VesuvioCorrections before being passed to
-        # CalculateMsVesuvio.
+        # VesuvioCalculateMs.
         # Then, for the modified VesuvioCorrection algorithm one can use the thickenss parameter is
         # as is from the THICK command, i.e. 43.20552
         # This works, however, only in the thin sample limit, contrary to the THICK program. Thus,
         # for some detectors (detector banks) the SampleDensiy parameter may be over(under)
         # estimated.
 
-        ms.CalculateMSVesuvio(InputWorkspace=self._output_ws,
+        ms.VesuvioCalculateMS(InputWorkspace=self._output_ws,
                               NoOfMasses=len(atom_props)/3,
                               SampleDensity=self.getProperty("SampleDensity").value/intensity_sum,
                               AtomicProperties=atom_props,

@@ -43,21 +43,21 @@ namespace MDAlgorithms {
 class DLLExport LoadSQW2 : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   LoadSQW2();
-  ~LoadSQW2();
+  ~LoadSQW2() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
-  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
   /// Local typedef for
   typedef DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4>
       SQWWorkspace;
 
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void cacheInputs();
   void initFileReader();
   int32_t readMainHeader();
@@ -91,7 +91,6 @@ private:
   boost::shared_ptr<SQWWorkspace> m_outputWS;
   uint16_t m_nspe;
   Kernel::DblMatrix m_uToRLU;
-  Kernel::DblMatrix m_rluToU;
   std::string m_outputFrame;
 };
 

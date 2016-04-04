@@ -616,7 +616,7 @@ def _check_mandatory_args(algorithm, _algm_object, error, *args, **kwargs):
         raise RuntimeError("%s argument(s) not supplied to %s" % (missing_arg_list,algorithm))
     # If the error was not caused by missing property the algorithm specific error should suffice
     else:
-        raise RuntimeError(error.message)
+        raise RuntimeError(str(error))
 
 #------------------------ General simple function calls ----------------------
 

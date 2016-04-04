@@ -97,6 +97,9 @@ Algorithm Toolbox
 Scripting Window
 ################
 
+- If `MantidPlot` was launched with the `-x` option but the script was already opened by the recent files list then
+  the wrong script would be executed. This bug has been fixed. `#15682 <https://github.com/mantidproject/mantid/issue/15682>`_
+
 Documentation
 #############
 
@@ -112,6 +115,8 @@ Bugs Resolved
 -  VSI: Fix Mantid crash when pressing :ref:`Scale <algm-Scale>` or Cut when "builtin" node
    is selected in Pipeline Browser
 
+-  VSI: The TECHNIQUE-DEPENDENT initial view now checks for Spectroscopy before Neutron Diffraction.
+
 SliceViewer Improvements
 ------------------------
 
@@ -125,10 +130,19 @@ SliceViewer Improvements
 VSI Improvements
 ----------------
 
-- The sphere and ellipse wireframes have been simplified so that it is easier to see the enclosed points. 
+-  The representation of points in the splatter plot was changed from opaque cubes to translucent spheres.
+
+.. figure::  ../../images/VSIPointGaussianRepresentation.png
+   :align: center
+
+- The sphere and ellipse wireframes have been simplified so that it is easier to see the enclosed points.
 
 .. figure:: ../../images/VSIEllipses.png
-    :align: center  
+    :align: center
+
+- Removed the error-prone right-click option to view peaks workspaces in the VSI. One should load a MDWorkspace,
+  then drag the corresponding peaks workspace into the VSI window.
+
 |
 
 Full list of

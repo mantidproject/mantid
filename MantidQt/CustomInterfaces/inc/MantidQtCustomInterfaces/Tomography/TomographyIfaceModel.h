@@ -9,6 +9,7 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconFiltersSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 // Qt classes forward declarations
 class QMutex;
@@ -22,7 +23,7 @@ Tomography GUI. Model for the interface (as in the MVP
 signals from this model should always be handled through the presenter
 and never go directly to the view.
 
-Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014,2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -107,7 +108,18 @@ public:
   /// Get fresh status information on running/recent jobs
   void doRefreshJobsInfo(const std::string &compRes);
 
+  void refreshLocalJobsInfo();
+
   void doRunReconstructionJobLocal();
+
+  void updateExperimentReference(const std::string ref) {
+    m_experimentRef = ref;
+  }
+
+  /// Update to the current setings given by the user
+  void updateSystemSettings(const TomoSystemSettings &settings) {
+    m_systemSettings = settings;
+  }
 
   /// Update to the current setings given by the user
   void updateReconToolsSettings(const TomoReconToolsUserSettings &ts) {
@@ -119,14 +131,6 @@ public:
   }
 
   void updateAstraMethod(const std::string &method) { m_astraMethod = method; }
-
-  void updateExternalInterpreterPath(const std::string &interp) {
-    m_externalInterpreterPath = interp;
-  }
-
-  void updatePathLocalReconScripts(const std::string &path) {
-    m_pathLocalReconScripts = path;
-  }
 
   void updatePrePostProcSettings(const TomoReconFiltersSettings &filters) {
     m_prePostProcSettings = filters;
@@ -164,32 +168,51 @@ private:
 
   /// makes the command line string to run on the remote/local
   void makeRunnableWithOptions(const std::string &comp, std::string &run,
-                               std::string &opt) const;
+                               std::vector<std::string> &opt) const;
 
   void checkWarningToolNotSetup(const std::string &tool,
                                 const std::string &settings,
                                 const std::string &cmd,
                                 const std::string &opt) const;
 
-  std::string makeTomoRecScriptOptions() const;
+  std::vector<std::string> makeTomoRecScriptOptions(bool local) const;
 
-  std::string filtersCfgToCmdOpts(const TomoReconFiltersSettings &filters,
-                                  const ImageStackPreParams &corRegions) const;
+  void filtersCfgToCmdOpts(const TomoReconFiltersSettings &filters,
+                           const ImageStackPreParams &corRegions, bool local,
+                           std::vector<std::string> &opts) const;
 
   void splitCmdLine(const std::string &cmd, std::string &run,
                     std::string &opts) const;
 
   void checkDataPathsSet() const;
 
-  /// username last logged in (empty if not in login status), from local
-  /// perspective
-  std::string m_loggedInUser;
-  std::string m_loggedInComp;
+  std::string adaptInputPathForExecution(const std::string &path,
+                                         bool local) const;
+
+  std::string buildOutReconstructionDir(const std::string &samplesDir,
+                                        bool) const;
+
+  bool processIsRunning(int pid);
+
+  std::string
+  buildOutReconstructionDirFromSystemRoot(const std::string &samplesDir,
+                                          bool local) const;
+
+  std::string
+  buildOutReconstructionDirFromSamplesDir(const std::string &samplesDir) const;
 
   /// facility for the remote compute resource
   const std::string m_facility;
   /// display name of the "local" compute resource
   const std::string m_localCompName;
+
+  /// Experiment reference (RBNumber for example)
+  std::string m_experimentRef;
+
+  /// username last logged in (empty if not in login status), from local
+  /// perspective
+  std::string m_loggedInUser;
+  std::string m_loggedInComp;
 
   /// compute resources suppoted by this GUI (remote ones, clusters, etc.)
   std::vector<std::string> m_computeRes;
@@ -214,14 +237,14 @@ private:
 
   TomoPathsConfig m_pathsConfig;
 
+  // System settting including several paths and parameters (local and remote)
+  TomoSystemSettings m_systemSettings;
+
   // Settings for the third party (tomographic reconstruction) tools
   TomoReconToolsUserSettings m_toolsSettings;
 
   std::string m_tomopyMethod;
   std::string m_astraMethod;
-
-  std::string m_externalInterpreterPath;
-  std::string m_pathLocalReconScripts;
 
   // Settings for the pre-/post-processing filters
   TomoReconFiltersSettings m_prePostProcSettings;

@@ -673,6 +673,9 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
   numspec = calculateWorkspaceSize(numspec, true);
 
   int num_xbins = xbins.dim0();
+  if (xbins.rank() == 2) {
+    num_xbins = xbins.dim1();
+  }
   if (num_xbins < 2)
     num_xbins = 2;
   EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(
@@ -766,8 +769,8 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
         el.setX(this->m_xbins);
       else {
         MantidVec x;
-        x.resize(xbins.dim0());
-        for (int i = 0; i < xbins.dim0(); i++)
+        x.resize(xbins.dim1());
+        for (int i = 0; i < xbins.dim1(); i++)
           x[i] = xbins(static_cast<int>(wi), i);
         el.setX(x);
       }

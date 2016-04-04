@@ -78,6 +78,13 @@ private:
 
   void loadFITSImage(const std::string &path, const std::string &wsName);
 
+  std::string
+  filterImagePathsForFITSStack(const std::vector<std::string> &paths);
+
+  /// whether to show (potentially too many and too annoying) warning pop-ups or
+  /// messages
+  static bool g_warnIfUnexpectedFileExtensions;
+
   /// path to the image stack being visualized
   std::string m_stackPath;
 

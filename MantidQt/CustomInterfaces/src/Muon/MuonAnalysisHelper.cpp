@@ -2,6 +2,7 @@
 
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -174,24 +175,20 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream& out)
   }
 
   // Add sample temperature
+  // Could be stored as a double or as a string (range e.g. "1000.0 - 1020.0")
   out << "\nSample Temperature: ";
-  if ( run.hasProperty("sample_temp") )
-  {
-    out << run.getPropertyValueAsType<double>("sample_temp");
-  }
-  else
-  {
+  if (run.hasProperty("sample_temp")) {
+    out << run.getProperty("sample_temp")->value();
+  } else {
     out << "Not found";
   }
 
   // Add sample magnetic field
+  // Could be stored as a double or as a string (range e.g. "1000.0 - 1020.0")
   out << "\nSample Magnetic Field: ";
-  if ( run.hasProperty("sample_magn_field") )
-  {
-    out << run.getPropertyValueAsType<double>("sample_magn_field");
-  }
-  else
-  {
+  if (run.hasProperty("sample_magn_field")) {
+    out << run.getProperty("sample_magn_field")->value();
+  } else {
     out << "Not found";
   }
 }
@@ -385,36 +382,92 @@ std::string getRunLabel(const Workspace_sptr& ws)
 
 /**
  * Get a run label for a list of workspaces.
- * E.g. for MUSR data of runs 15189, 15190, 15191 it will look like MUSR00015189-91.
+ * E.g. for MUSR data of runs 15189, 15190, 15191 it will look like
+ * MUSR00015189-91.
  * @param wsList
  * @return
  */
-std::string getRunLabel(std::vector<Workspace_sptr> wsList)
-{
+std::string getRunLabel(std::vector<Workspace_sptr> wsList) {
   if (wsList.empty())
     throw std::invalid_argument("Unable to run on an empty list");
 
-  // Sort by run numbers, in case of non-sequential list of runs
-  std::sort(wsList.begin(), wsList.end(), compareByRunNumber);
-
-  // Get string representation of the first and last run numbers
-  auto firstRun = boost::lexical_cast<std::string>(firstPeriod(wsList.front())->getRunNumber());
-  auto lastRun = boost::lexical_cast<std::string>(firstPeriod(wsList.back())->getRunNumber());
-
-  // Remove the common part of the first and last run, so we get e.g. "12345-56" instead of "12345-12356"
-  for (size_t i = 0; i < firstRun.size() && i < lastRun.size(); ++i)
-  {
-    if (firstRun[i] != lastRun[i])
-    {
-      lastRun.erase(0,i);
-      break;
+  // Extract the run numbers and find the first run in the list
+  std::vector<int> runNumbers;
+  int firstRunIndex = 0;
+  int firstRunNumber = firstPeriod(wsList.front())->getRunNumber();
+  int numWorkspaces = static_cast<int>(wsList.size());
+  for (int i = 0; i < numWorkspaces; i++) {
+    int runNumber = firstPeriod(wsList[i])->getRunNumber();
+    runNumbers.push_back(runNumber);
+    if (runNumber < firstRunNumber) {
+      firstRunNumber = runNumber;
+      firstRunIndex = i;
     }
   }
 
+  // Find ranges of consecutive runs
+  auto ranges = findConsecutiveRuns(runNumbers);
+
+  // Begin string output with full label of first run
   std::ostringstream label;
-  label << getRunLabel(wsList.front());
-  label << '-' << lastRun;
+  label << getRunLabel(wsList[firstRunIndex]);
+
+  for (auto range : ranges) {
+    std::string firstRun = std::to_string(range.first);
+    std::string lastRun = std::to_string(range.second);
+    if (range != ranges.front()) {
+      label << firstRun;
+    }
+    if (range.second != range.first) {
+      // Remove the common part of the first and last run, so we get e.g.
+      // "12345-56" instead of "12345-12356"
+      for (size_t i = 0; i < firstRun.size() && i < lastRun.size(); ++i) {
+        if (firstRun[i] != lastRun[i]) {
+          lastRun.erase(0, i);
+          break;
+        }
+      }
+      label << "-" << lastRun;
+    }
+    if (range != ranges.back()) {
+      label << ", ";
+    }
+  }
+
   return label.str();
+}
+
+/**
+ * Given a vector of run numbers, returns the consecutive ranges of runs.
+ * e.g. 1,2,3,5,6,8 -> (1,3), (5,6), (8,8)
+ * @param runs :: [input] Vector of run numbers - need not be sorted
+ * @returns Vector of pairs of (start, end) of consecutive runs
+ */
+std::vector<std::pair<int, int>>
+findConsecutiveRuns(const std::vector<int> &runs) {
+  // Groups to output
+  std::vector<std::pair<int, int>> ranges;
+  // Sort the vector to begin with
+  std::vector<int> runNumbers(runs); // local copy
+  std::sort(runNumbers.begin(), runNumbers.end());
+
+  // Iterate through vector looking for consecutive groups
+  auto a = runNumbers.begin();
+  auto start = a;
+  auto b = a + 1;
+  while (b != runNumbers.end()) {
+    if (*b - 1 == *a) { // Still consecutive
+      a++;
+      b++;
+    } else { // Reached end of consecutive group
+      ranges.emplace_back(*start, *a);
+      start = b++;
+      a = start;
+    }
+  }
+  // Reached end of last consecutive group
+  ranges.emplace_back(*start, *(runNumbers.end() - 1));
+  return ranges;
 }
 
 /**
@@ -430,7 +483,29 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
   ScopedWorkspace firstEntry(workspaces.front());
   ScopedWorkspace accumulatorEntry;
 
-  // Create accumulator workspace, by cloning the first one from the list
+  // Comparison function for dates
+  auto dateCompare = [](const std::string &first, const std::string &second) {
+    return DateAndTime(first) < DateAndTime(second);
+  };
+
+  // Comparison function for doubles
+  auto numericalCompare = [](const std::string &first,
+                             const std::string &second) {
+    try {
+      return boost::lexical_cast<double>(first) <
+             boost::lexical_cast<double>(second);
+    } catch (boost::bad_lexical_cast & /*e*/) {
+      return false;
+    }
+  };
+
+  // Range of log values
+  auto startRange = findLogRange(workspaces, "run_start", dateCompare);
+  auto endRange = findLogRange(workspaces, "run_end", dateCompare);
+  auto tempRange = findLogRange(workspaces, "sample_temp", numericalCompare);
+  auto fieldRange = findLogRange(workspaces, "sample_magn_field", numericalCompare);
+
+  // Create accumulator workspace by cloning the first one from the list
   IAlgorithm_sptr cloneAlg = AlgorithmManager::Instance().create("CloneWorkspace");
   cloneAlg->setLogging(false);
   cloneAlg->setRethrows(true);
@@ -438,8 +513,8 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
   cloneAlg->setPropertyValue("OutputWorkspace", accumulatorEntry.name());
   cloneAlg->execute();
 
-  for ( auto it = (workspaces.begin() + 1); it != workspaces.end(); ++it )
-  {
+  for (auto it = (workspaces.begin() + 1); it != workspaces.end(); ++it) {
+    // Add this workspace on to the sum
     ScopedWorkspace wsEntry(*it);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Plus");
@@ -449,7 +524,28 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
     alg->setPropertyValue("RHSWorkspace", wsEntry.name());
     alg->setPropertyValue("OutputWorkspace", accumulatorEntry.name());
     alg->execute();
+
+    appendTimeSeriesLogs(wsEntry.retrieve(), accumulatorEntry.retrieve(),
+                         "Temp_Sample");
   }
+
+  // Replace the start and end times with the earliest start and latest end
+  replaceLogValue(accumulatorEntry.name(), "run_start", startRange.first);
+  replaceLogValue(accumulatorEntry.name(), "run_end", endRange.second);
+
+  // Put in range of temperatures and magnetic fields
+  auto rangeString = [](const std::pair<std::string, std::string> &range) {
+    std::ostringstream oss;
+    oss << range.first;
+    if (range.second != range.first) {
+      oss << " to " << range.second;
+    }
+    return oss.str();
+  };
+  replaceLogValue(accumulatorEntry.name(), "sample_temp",
+                  rangeString(tempRange));
+  replaceLogValue(accumulatorEntry.name(), "sample_magn_field",
+                  rangeString(fieldRange));
 
   return accumulatorEntry.retrieve();
 }
@@ -489,16 +585,6 @@ double getValidatedDouble(QLineEdit* field, const QString& defaultValue,
 }
 
 /**
- * @param ws1 :: First workspace to compare
- * @param ws2 :: Second workspace to compare
- * @return True if ws1 < ws2, false otherwise
- */
-bool compareByRunNumber(Workspace_sptr ws1, Workspace_sptr ws2)
-{
-  return firstPeriod(ws1)->getRunNumber() < firstPeriod(ws2)->getRunNumber();
-}
-
-/**
  * Makes sure the specified workspaces are in specified group. If group exists already - missing
  * workspaces are added to it, otherwise new group is created. If ws exists in ADS under groupName,
  * and it is not a group - it's overwritten.
@@ -533,6 +619,181 @@ void groupWorkspaces(const std::string& groupName, const std::vector<std::string
     groupingAlg->setProperty("InputWorkspaces", inputWorkspaces);
     groupingAlg->setPropertyValue("OutputWorkspace", groupName);
     groupingAlg->execute();
+  }
+}
+
+/**
+ * Replaces the named log value in the given workspace with the given value
+ * @param wsName :: [input] Name of workspace
+ * @param logName :: [input] Name of log to replace
+ * @param logValue :: [input] Name of value to replace it with
+ */
+void replaceLogValue(const std::string &wsName, const std::string &logName,
+                     const std::string &logValue) {
+  IAlgorithm_sptr removeAlg = AlgorithmManager::Instance().create("DeleteLog");
+  removeAlg->setLogging(false);
+  removeAlg->setRethrows(true);
+  removeAlg->setPropertyValue("Workspace", wsName);
+  removeAlg->setPropertyValue("Name", logName);
+  removeAlg->execute();
+  IAlgorithm_sptr addAlg = AlgorithmManager::Instance().create("AddSampleLog");
+  addAlg->setLogging(false);
+  addAlg->setRethrows(true);
+  addAlg->setPropertyValue("Workspace", wsName);
+  addAlg->setPropertyValue("LogName", logName);
+  addAlg->setPropertyValue("LogText", logValue);
+  addAlg->execute();
+}
+
+/**
+ * Returns the range of values for the given log in the workspace given, which
+ * could be a group. If it isn't a group, the vector will have only one entry
+ * (or none, if log not present).
+ * @param ws :: [input] Workspace (could be group)
+ * @param logName :: [input] Name of log
+ * @returns All values found for the given log
+ */
+std::vector<std::string> findLogValues(const Workspace_sptr ws,
+                                       const std::string &logName) {
+  std::vector<std::string> values;
+  MatrixWorkspace_sptr matrixWS;
+
+  // Try casting input to a MatrixWorkspace_sptr directly
+  matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  if (matrixWS) {
+    if (matrixWS->run().hasProperty(logName)) {
+      values.push_back(matrixWS->run().getProperty(logName)->value());
+    }
+  } else {
+    // It could be a workspace group
+    auto groupWS = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+    if (groupWS && groupWS->getNumberOfEntries() > 0) {
+      for (int index = 0; index < groupWS->getNumberOfEntries(); index++) {
+        matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+            groupWS->getItem(index));
+        if (matrixWS) {
+          if (matrixWS->run().hasProperty(logName)) {
+            values.push_back(matrixWS->run().getProperty(logName)->value());
+          }
+        }
+      }
+    }
+  }
+  return values;
+}
+
+/**
+ * Finds the range of values for the given log in the supplied workspace.
+ * @param ws :: [input] Workspace (can be group)
+ * @param logName :: [input] Name of log
+ * @param isLessThan :: [input] Function to sort values (<)
+ * @returns :: Pair of (smallest, largest) values
+ */
+std::pair<std::string, std::string> findLogRange(
+    const Workspace_sptr ws, const std::string &logName,
+    bool (*isLessThan)(const std::string &first, const std::string &second)) {
+  auto values = findLogValues(ws, logName);
+  if (!values.empty()) {
+    auto minmax = std::minmax_element(values.begin(), values.end(), isLessThan);
+    return std::make_pair(*(minmax.first), *(minmax.second));
+  } else {
+    return std::make_pair("", "");
+  }
+}
+
+/**
+ * Finds the range of values for the given log in the supplied vector of
+ * workspaces.
+ * @param workspaces :: [input] Vector of workspaces
+ * @param logName :: [input] Name of log
+ * @param isLessThan :: [input] Function to sort values (<)
+ * @returns :: Pair of (smallest, largest) values
+ */
+std::pair<std::string, std::string> findLogRange(
+    const std::vector<Workspace_sptr> &workspaces, const std::string &logName,
+    bool (*isLessThan)(const std::string &first, const std::string &second)) {
+  std::string smallest, largest;
+  for (auto ws : workspaces) {
+    auto range = findLogRange(ws, logName, isLessThan);
+    if (smallest.empty() || isLessThan(range.first, smallest)) {
+      smallest = range.first;
+    }
+    if (largest.empty() || isLessThan(largest, range.second)) {
+      largest = range.second;
+    }
+  }
+  return std::make_pair(smallest, largest);
+}
+
+/**
+ * Takes the values in the named time series log of the first workspace
+ * and appends them to the same log in the second.
+ * Silently fails if either workspace is missing the named log.
+ * @param toAppend :: [input] Workspace with log to append to the other
+ * @param resultant :: [input, output] Workspace whose log will be appended to
+ * @param logName :: [input] Name of time series log
+ * @throws std::invalid_argument if the named log is of the incorrect type
+ * @throws std::invalid_argument if the workspaces supplied are null or have
+ * different number of periods
+ */
+void appendTimeSeriesLogs(Workspace_sptr toAppend, Workspace_sptr resultant,
+                          const std::string &logName) {
+  // check input
+  if (!toAppend || !resultant) {
+    throw std::invalid_argument(
+        "Cannot append logs: workspaces supplied are null");
+  }
+
+  // Cast the inputs to MatrixWorkspace (could be a group)
+  auto getWorkspaces = [](const Workspace_sptr ws) {
+    std::vector<MatrixWorkspace_sptr> workspaces;
+    MatrixWorkspace_sptr matrixWS =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    if (matrixWS) {
+      workspaces.push_back(matrixWS);
+    } else { // it's a workspace group
+      auto groupWS = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+      if (groupWS && groupWS->getNumberOfEntries() > 0) {
+        for (int index = 0; index < groupWS->getNumberOfEntries(); index++) {
+          matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+              groupWS->getItem(index));
+          if (matrixWS) {
+            workspaces.push_back(matrixWS);
+          }
+        }
+      }
+    }
+    return workspaces;
+  };
+
+  // Extract time series log from workspace
+  auto getTSLog = [&logName](const MatrixWorkspace_sptr ws) {
+    const Mantid::API::Run &run = ws->run();
+    TimeSeriesProperty<double> *prop = nullptr;
+    if (run.hasProperty(logName)) {
+      prop =
+          dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData(logName));
+      if (!prop) {
+        throw std::invalid_argument("Property" + logName + " of wrong type");
+      }
+    }
+    return prop;
+  };
+
+  auto firstWorkspaces = getWorkspaces(toAppend);
+  auto secondWorkspaces = getWorkspaces(resultant);
+  if (firstWorkspaces.size() == secondWorkspaces.size()) {
+    for (size_t i = 0; i < firstWorkspaces.size(); i++) {
+      TimeSeriesProperty<double> *firstProp = getTSLog(firstWorkspaces[i]);
+      TimeSeriesProperty<double> *secondProp = getTSLog(secondWorkspaces[i]);
+      if (firstProp && secondProp) {
+        secondProp->operator+=(
+            static_cast<const Property *>(firstProp)); // adds the values
+        secondProp->eliminateDuplicates();
+      }
+    }
+  } else {
+    throw std::invalid_argument("Workspaces have different number of periods");
   }
 }
 

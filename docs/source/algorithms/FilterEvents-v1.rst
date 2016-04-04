@@ -9,29 +9,34 @@
 Description
 -----------
 
-This algorithm filters events from an
-:ref:`EventWorkspace <EventWorkspace>` to one or multiple
-:ref:`EventWorkspaces <EventWorkspace>` according to an input
-`SplittersWorkspace <http://www.mantidproject.org/SplittersWorkspace>`_ containing a series of
-splitters (i.e., `SplittingIntervals <http://www.mantidproject.org/SplittingInterval>`_).
+This algorithm filters events from an :ref:`EventWorkspace` to one or
+multiple :ref:`EventWorkspaces <EventWorkspace>` according to an input
+:ref:`SplittersWorkspace` containing a series of splitters (i.e.,
+:ref:`splitting intervals <SplittingInterval>`).
 
 Inputs
 ######
-Algorithm *FilterEvents* takes 2 mandatory input Workspaces and 1 optional Workspace.
-One of mandatory workspace is the EventWorkspace where the events are filtered from.
-The other mandatory workspace is workspace containing splitters. 
-It can be either a MatrixWorkspace or a SplittersWorkspace.
 
-The optional workspace is a TableWorkspace for information of splitters.
+FilterEvents takes 2 mandatory input Workspaces and 1 optional
+Workspace.  One of mandatory workspace is the :ref:`EventWorkspace`
+where the events are filtered from.  The other mandatory workspace is
+workspace containing splitters.  It can be either a MatrixWorkspace or
+a :ref:`SplittersWorkspace <SplittersWorkspace>`.
 
-Algorithm *GenerateEventsFilter* creates both the splitters' workspace and splitter information workspace.
+The optional workspace is a :ref:`TableWorkspace <Table Workspaces>`
+for information of splitters.
+
+Algorithm :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>`
+creates both the :ref:`SplittersWorkspace <SplittersWorkspace>` and
+splitter information workspace.
 
 
 Splitters in relative time
 ==========================
 
-As the splitters' workspace is in format of MatrixWorkspace,
-its time, i.e., the value in X vector, can be relative time.
+As the SplittersWorkspace is in format of :ref:`MatrixWorkspace
+<MatrixWorkspace>`, its time, i.e., the value in X vector, can be
+relative time.
 
 Property *RelativeTime* flags that the splitters' time is relative.
 Property *FilterStartTime* specifies the starting time of the filter.
@@ -86,30 +91,30 @@ Therefore, FilterByLogValue is not suitable for fast log filtering.
 Comparing with other event filtering algorithms
 ###############################################
 
-Wiki page `EventFiltering <http://www.mantidproject.org/EventFiltering>`__ has a detailed
-introduction on event filtering in MantidPlot.
+Wiki page :ref:`EventFiltering` has a detailed introduction on event
+filtering in MantidPlot.
 
 Usage
 -----
 
-**Example - Filtering event without correction on TOF**  
+**Example - Filtering event without correction on TOF**
 
 .. testcode:: FilterEventNoCorrection
 
     ws = Load(Filename='CNCS_7860_event.nxs')
-    splitws, infows = GenerateEventsFilter(InputWorkspace=ws, UnitOfTime='Nanoseconds', LogName='SampleTemp', 
+    splitws, infows = GenerateEventsFilter(InputWorkspace=ws, UnitOfTime='Nanoseconds', LogName='SampleTemp',
             MinimumLogValue=279.9,  MaximumLogValue=279.98, LogValueInterval=0.01)
-    
+
     FilterEvents(InputWorkspace=ws, SplitterWorkspace=splitws, InformationWorkspace=infows,
-            OutputWorkspaceBaseName='tempsplitws',  GroupWorkspaces=True, 
+            OutputWorkspaceBaseName='tempsplitws',  GroupWorkspaces=True,
             FilterByPulseTime = False, OutputWorkspaceIndexedFrom1 = False,
             CorrectionToSample = "None", SpectrumWithoutDetector = "Skip", SplitSampleLogs = False,
             OutputTOFCorrectionWorkspace='mock')
-   
+
     # Print result
     wsgroup = mtd["tempsplitws"]
     wsnames = wsgroup.getNames()
-    for name in sorted(wsnames): 
+    for name in sorted(wsnames):
         tmpws = mtd[name]
         print "workspace %s has %d events" % (name, tmpws.getNumberEvents())
 
@@ -127,30 +132,30 @@ Output:
     workspace tempsplitws_unfiltered has 50603 events
 
 
-**Example - Filtering event by pulse time**  
+**Example - Filtering event by pulse time**
 
 .. testcode:: FilterEventByPulseTime
 
     ws = Load(Filename='CNCS_7860_event.nxs')
-    splitws, infows = GenerateEventsFilter(InputWorkspace=ws, UnitOfTime='Nanoseconds', LogName='SampleTemp', 
+    splitws, infows = GenerateEventsFilter(InputWorkspace=ws, UnitOfTime='Nanoseconds', LogName='SampleTemp',
             MinimumLogValue=279.9,  MaximumLogValue=279.98, LogValueInterval=0.01)
-    
-    FilterEvents(InputWorkspace=ws, 
-        SplitterWorkspace=splitws, 
+
+    FilterEvents(InputWorkspace=ws,
+        SplitterWorkspace=splitws,
         InformationWorkspace=infows,
-        OutputWorkspaceBaseName='tempsplitws',  
-        GroupWorkspaces=True, 
-        FilterByPulseTime = True, 
+        OutputWorkspaceBaseName='tempsplitws',
+        GroupWorkspaces=True,
+        FilterByPulseTime = True,
         OutputWorkspaceIndexedFrom1 = True,
-        CorrectionToSample = "None", 
-        SpectrumWithoutDetector = "Skip", 
+        CorrectionToSample = "None",
+        SpectrumWithoutDetector = "Skip",
         SplitSampleLogs = False,
-        OutputTOFCorrectionWorkspace='mock') 
+        OutputTOFCorrectionWorkspace='mock')
 
     # Print result
     wsgroup = mtd["tempsplitws"]
     wsnames = wsgroup.getNames()
-    for name in sorted(wsnames): 
+    for name in sorted(wsnames):
         tmpws = mtd[name]
         print "workspace %s has %d events" % (name, tmpws.getNumberEvents())
 
@@ -167,29 +172,29 @@ Output:
     workspace tempsplitws_6 has 5067 events
 
 
-**Example - Filtering event with correction on TOF**  
+**Example - Filtering event with correction on TOF**
 
 .. testcode:: FilterEventTOFCorrection
 
     ws = Load(Filename='CNCS_7860_event.nxs')
-    splitws, infows = GenerateEventsFilter(InputWorkspace=ws, UnitOfTime='Nanoseconds', LogName='SampleTemp', 
+    splitws, infows = GenerateEventsFilter(InputWorkspace=ws, UnitOfTime='Nanoseconds', LogName='SampleTemp',
             MinimumLogValue=279.9,  MaximumLogValue=279.98, LogValueInterval=0.01)
 
     FilterEvents(InputWorkspace=ws, SplitterWorkspace=splitws, InformationWorkspace=infows,
-        OutputWorkspaceBaseName='tempsplitws',  
-        GroupWorkspaces=True, 
-        FilterByPulseTime = False, 
+        OutputWorkspaceBaseName='tempsplitws',
+        GroupWorkspaces=True,
+        FilterByPulseTime = False,
         OutputWorkspaceIndexedFrom1 = False,
-        CorrectionToSample = "Direct", 
+        CorrectionToSample = "Direct",
         IncidentEnergy=3,
-        SpectrumWithoutDetector = "Skip", 
+        SpectrumWithoutDetector = "Skip",
         SplitSampleLogs = False,
         OutputTOFCorrectionWorkspace='mock')
-    
+
     # Print result
     wsgroup = mtd["tempsplitws"]
     wsnames = wsgroup.getNames()
-    for name in sorted(wsnames): 
+    for name in sorted(wsnames):
         tmpws = mtd[name]
         print "workspace %s has %d events" % (name, tmpws.getNumberEvents())
 

@@ -54,7 +54,7 @@ namespace MantidQt
         Mantid::API::AnalysisDataService::Instance().retrieve(wsName)
         );
       if (!tws) return; // just in case
-      m_form.cbColumnE->insertItem(""); // the default value
+      m_form.cbColumnE->insertItem(-1, ""); // the default value
       std::vector<std::string> columns = tws->getColumnNames();
       if (columns.empty()) return;
       QString defaultXColumn;
@@ -63,9 +63,9 @@ namespace MantidQt
       for(std::vector<std::string>::const_iterator column = columns.begin(); column != columns.end(); ++column)
       {
         QString qName = QString::fromStdString(*column);
-        m_form.cbColumnX->insertItem(qName);
-        m_form.cbColumnY->insertItem(qName);
-        m_form.cbColumnE->insertItem(qName);
+        m_form.cbColumnX->insertItem(-1, qName);
+        m_form.cbColumnY->insertItem(-1, qName);
+        m_form.cbColumnE->insertItem(-1, qName);
         Mantid::API::Column_sptr col = tws->getColumn(*column);
         if (col->getPlotType() == 1 && defaultXColumn.isEmpty()) // type X
         {

@@ -128,16 +128,15 @@ namespace SimpleGui
 
     bool initialSetting = true;
 
-    QList<pqPipelineSource *> sources = getAllPVSources();
+    const QList<pqPipelineSource *> sources = getAllPVSources();
 
     pqView* activeView = pqActiveObjects::instance().activeView();
 
     // Check all sources for the maximum and minimum value
-    for (QList<pqPipelineSource *>::iterator source = sources.begin();
-         source != sources.end(); ++source)
-    {
+    foreach (pqPipelineSource *source, sources) {
       // Check if the pipeline representation of the source for the active view is visible
-      pqDataRepresentation* representation = (*source)->getRepresentation(activeView);
+      pqDataRepresentation *representation =
+          source->getRepresentation(activeView);
 
       if (representation)
       {
@@ -145,7 +144,7 @@ namespace SimpleGui
 
         if (isVisible)
         {
-          setMinBufferAndMaxBuffer((*source), minValueBuffer, maxValueBuffer);
+          setMinBufferAndMaxBuffer(source, minValueBuffer, maxValueBuffer);
 
           if (initialSetting || maxValueBuffer > maxValue)
           {
