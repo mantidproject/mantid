@@ -75,6 +75,13 @@ class VesuvioTests(unittest.TestCase):
         self._run_load("14188", "135-198", diff_mode, load_mon=False)
         self.assertFalse(mtd.doesExist('evs_raw_monitors'))
 
+    def test_monitor_loaded_in_ws_when_mon_in_spectra_input_and_LoadMonitor_is_true(self):
+        diff_mode = "FoilOut"
+        self._run_load("14188", "1-198", diff_mode, load_mon=True)
+        self.assertTrue(mtd.doesExist('evs_raw'))
+        self.assertEquals(mtd['evs_raw'].getNumberHistograms(), 198)
+        self.assertFalse(mtd.doesExist('evs_raw_monitors'))
+
     def test_load_with_back_scattering_spectra_produces_correct_workspace_using_single_difference(self):
         diff_mode = "SingleDifference"
         self._run_load("14188", "3-134", diff_mode)
