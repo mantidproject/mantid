@@ -752,42 +752,6 @@ void calculateEigesystem(DoubleFortranVector &eigenvalues,
   eigenvalues += -eshift;
 }
 
-/// Calculate the intensities of transitions.
-/// @param nre :: Ion number.
-/// @param energies :: The energies.
-/// @param wavefunctions :: The wavefunctions.
-/// @param temperature :: The temperature.
-DoubleFortranMatrix
-calculateIntensities(int nre, const DoubleFortranVector &energies,
-                     const ComplexFortranMatrix &wavefunctions,
-                     double temperature) {
-  int dim = static_cast<int>(energies.size());
-  auto dimj = ddimj[nre - 1];
-  if (static_cast<double>(dim) != dimj) {
-    throw std::runtime_error("calculateIntensities was called for a wrong ion");
-  }
-
-  // calculates the transition matrixelements for a single crystal and
-  // a powdered sample
-  DoubleFortranMatrix jx2mat(1, dim, 1, dim);
-  DoubleFortranMatrix jy2mat(1, dim, 1, dim);
-  DoubleFortranMatrix jz2mat(1, dim, 1, dim);
-  DoubleFortranMatrix jt2mat(1, dim, 1, dim);
-  matcalc(wavefunctions, dim, jx2mat, jy2mat, jz2mat, jt2mat);
-
-  // calculates the sum over all occupation_factor
-  auto occupation_factor = c_occupation_factor(energies, dimj, temperature);
-
-  // calculates the transition intensities for a powdered sample
-  auto r0 = c_r0();
-  auto gj = ggj[nre - 1];
-  DoubleFortranMatrix intensity(1, dim, 1, dim);
-  intcalc(pi, r0, gj, occupation_factor, jt2mat, energies, intensity, dim,
-          temperature);
-
-  return intensity;
-}
-
 //-------------------------
 // transforms the indices
 //-------------------------
@@ -810,22 +774,19 @@ int no(int i, const IntFortranVector &d, int n) {
 /// @param energy :: The energies.
 /// @param mat :: The transition matrix elements. (Intensities without
 ///    considering degeneracy).
-/// @param dimj :: Number of energies as a double.
 /// @param degeneration :: Degeneration number for each transition.
 /// @param e_energies :: Energy values of the degenerated energy levels.
 /// @param i_energies :: Intensities of the degenerated energy levels.
-/// @param n_energies :: Number of degenerated energy levels.
 /// @param de :: Energy levels which are closer than de are assumed to be
 ///              degenerated.
 /// @param di :: Only those excitations are taken into account whose intensities
 ///              are greater or equal than di.
 void deg_on(const DoubleFortranVector &energy, const DoubleFortranMatrix &mat,
-            double dimj, IntFortranVector &degeneration,
+            IntFortranVector &degeneration,
             DoubleFortranVector &e_energies, DoubleFortranMatrix &i_energies,
-            int n_energies, double de, double di) {
+            double de, double di) {
   //  real*8  energy(17)           ! already defined in CF_FABI.INC
   //  real*8  mat(17,17)
-  //  real*8  dimj
   //	integer degeneration(17*17)  ! stores the degeneration of a level
   // 	integer n_energies           ! no. of degenerated energy levels
   //	real*8  e_energies(17*17)    ! energy values of the degenerated energy
@@ -838,36 +799,86 @@ void deg_on(const DoubleFortranVector &energy, const DoubleFortranMatrix &mat,
   //	only those excitations are taken into account whose intensities are
   //	greater equal than di
 
-  int dim = static_cast<int>(std::floor(dimj));
-  // Resize the output arrays
-  degeneration.allocate(dim * dim);
-  e_energies.allocate(dim * dim);
-  i_energies.allocate(dim, dim);
+  int dim = static_cast<int>(energy.size());
+  IntFortranVector tempDegeneration(dim);
+  DoubleFortranVector tempEnergies(dim);
 
   // find out how many degenerated energy levels exists
-  e_energies(1) = 0.0;
-  degeneration(1) = 1;
+  tempEnergies(1) = 0.0;
+  tempDegeneration(1) = 1;
   int k = 1;
   for (int i = 2; i <= dim; ++i) { // do i=2,dim
-    if (std::fabs(e_energies(k) - energy(i)) >= de) {
+    if (std::fabs(tempEnergies(k) - energy(i)) >= de) {
       k = k + 1;
-      e_energies(k) = energy(i);
-      degeneration(k) = 1;
+      tempEnergies(k) = energy(i);
+      tempDegeneration(k) = 1;
     } else {
-      degeneration(k) = degeneration(k) + 1;
+      tempDegeneration(k) = tempDegeneration(k) + 1;
     }
   }
-  n_energies = k;
+  int n_energies = k;
+
+  // Resize the output arrays
+  degeneration.allocate(n_energies);
+  e_energies.allocate(n_energies);
+  i_energies.allocate(n_energies, n_energies);
 
   // store the intensities of the degenarated levels
   i_energies.zero();
   for (int i = 1; i <= dim; ++i) { // do i=1,dim
-    int ii = no(i, degeneration, n_energies);
+    int ii = no(i, tempDegeneration, n_energies);
+    degeneration(ii) = tempDegeneration(ii);
+    e_energies(ii) = tempEnergies(ii);
     for (int k = 1; k <= dim; ++k) { // do k=1,dim
-      int kk = no(k, degeneration, n_energies);
+      int kk = no(k, tempDegeneration, n_energies);
       i_energies(ii, kk) = i_energies(ii, kk) + mat(i, k);
     }
   }
+}
+
+/// Calculate the intensities of transitions.
+/// @param nre :: Ion number.
+/// @param energies :: The energies.
+/// @param wavefunctions :: The wavefunctions.
+/// @param temperature :: The temperature.
+/// @param de :: Energy levels which are closer than de are assumed to be
+///              degenerated.
+/// @param di :: Only those excitations are taken into account whose intensities
+///              are greater or equal than di.
+/// @param degeneration :: Degeneration number for each transition.
+/// @param e_energies :: Energy values of the degenerated energy levels.
+/// @param i_energies :: Intensities of the degenerated energy levels.
+void calculateIntensities(int nre, const DoubleFortranVector &energies,
+                          const ComplexFortranMatrix &wavefunctions,
+                          double temperature, double de, double di,
+                          IntFortranVector &degeneration,
+                          DoubleFortranVector &e_energies,
+                          DoubleFortranMatrix &i_energies) {
+  int dim = static_cast<int>(energies.size());
+  auto dimj = ddimj[nre - 1];
+  if (static_cast<double>(dim) != dimj) {
+    throw std::runtime_error("calculateIntensities was called for a wrong ion");
+  }
+
+  // calculates the transition matrixelements for a single crystal and
+  // a powdered sample
+  DoubleFortranMatrix jx2mat(1, dim, 1, dim);
+  DoubleFortranMatrix jy2mat(1, dim, 1, dim);
+  DoubleFortranMatrix jz2mat(1, dim, 1, dim);
+  DoubleFortranMatrix jt2mat(1, dim, 1, dim);
+  matcalc(wavefunctions, dim, jx2mat, jy2mat, jz2mat, jt2mat);
+
+  // calculates the sum over all occupation_factor
+  auto occupation_factor = c_occupation_factor(energies, dimj, temperature);
+
+  // calculates the transition intensities for a powdered sample
+  auto r0 = c_r0();
+  auto gj = ggj[nre - 1];
+  DoubleFortranMatrix mat(1, dim, 1, dim);
+  intcalc(pi, r0, gj, occupation_factor, jt2mat, energies, mat, dim,
+          temperature);
+
+  deg_on(energies, mat, degeneration, e_energies, i_energies, de, di);
 }
 
 } // namespace Functions

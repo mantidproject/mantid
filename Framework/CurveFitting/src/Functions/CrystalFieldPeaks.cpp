@@ -12,6 +12,8 @@ CrystalFieldPeaks::CrystalFieldPeaks()
     : API::IFunctionGeneral(), API::ParamFunction() {
   declareAttribute("Nre", Attribute(0));
   declareAttribute("Temperature", Attribute(1.0));
+  declareAttribute("ToleranceEnergy", Attribute(1.0e-10));
+  declareAttribute("ToleranceIntensity", Attribute(1.0e-10));
 
   declareParameter("Bmol_x", 0.0, "The x-component of the molecular field.");
   declareParameter("Bmol_y", 0.0, "The y-component of the molecular field.");
@@ -130,16 +132,19 @@ void CrystalFieldPeaks::functionGeneral(
   ComplexFortranMatrix ham;
   calculateEigesystem(en, wf, ham, nre, bmol, bext, bkq);
 
-  size_t n = en.size();
-  if (n * 2 != values.size()) {
-    std::ostringstream msg;
-    msg << "Values object has wrong size (" << values.size() << "). Expected "
-        << n * 2;
-    throw std::runtime_error(msg.str());
+  auto temperature = getAttribute("Temperature").asDouble();
+  IntFortranVector degeneration;
+  DoubleFortranVector eEnergies;
+  DoubleFortranMatrix iEnergies;
+  const double de = getAttribute("ToleranceEnergy").asDouble();
+  const double di = getAttribute("ToleranceIntensity").asDouble();
+  calculateIntensities(nre, en, wf, temperature, de, di, degeneration, eEnergies, iEnergies);
+
+  size_t n = eEnergies.size();
+  if (2 * n > values.size()) {
+    values.expand(2 * n);
   }
 
-  auto temperature = getAttribute("Temperature").asDouble();
-  DoubleFortranMatrix intensities = calculateIntensities(nre, en, wf, temperature);
 }
 
 } // namespace Functions
