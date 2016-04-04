@@ -5,15 +5,16 @@
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
-#include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
-#include "MantidQtMantidWidgets/HintStrategy.h"
 
-#include <map>
 #include <set>
 #include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
+// Forward decs
+class ReflCommand;
+using ReflCommand_uptr = std::unique_ptr<ReflCommand>;
+
 /** @class ReflMainView
 
 ReflMainView is the base view class for the Reflectometry Interface. It contains
@@ -47,54 +48,34 @@ public:
   virtual ~ReflMainView(){};
 
   // Connect the model
-  virtual void showTable(QReflTableModel_sptr model) = 0;
   virtual void showSearch(ReflSearchModel_sptr model) = 0;
 
   // Dialog/Prompt methods
   virtual std::string askUserString(const std::string &prompt,
                                     const std::string &title,
                                     const std::string &defaultValue) = 0;
-  virtual bool askUserYesNo(std::string prompt, std::string title) = 0;
   virtual void giveUserInfo(std::string prompt, std::string title) = 0;
-  virtual void giveUserWarning(std::string prompt, std::string title) = 0;
   virtual void giveUserCritical(std::string prompt, std::string title) = 0;
   virtual void showAlgorithmDialog(const std::string &algorithm) = 0;
-  virtual void showImportDialog() = 0;
-  virtual std::string requestNotebookPath() = 0;
-
-  // Settings
-  virtual void saveSettings(const std::map<std::string, QVariant> &options) = 0;
-  virtual void loadSettings(std::map<std::string, QVariant> &options) = 0;
-
-  // Plotting
-  virtual void plotWorkspaces(const std::set<std::string> &workspaces) = 0;
-
-  // Get status of the checkbox which dictates whether an ipython notebook is
-  // produced
-  virtual bool getEnableNotebook() = 0;
 
   // Setter methods
-  virtual void setSelection(const std::set<int> &rows) = 0;
-  virtual void setTableList(const std::set<std::string> &tables) = 0;
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
                                  const std::string &defaultInstrument) = 0;
-  virtual void setOptionsHintStrategy(
-      MantidQt::MantidWidgets::HintStrategy *hintStrategy) = 0;
-  virtual void setClipboard(const std::string &text) = 0;
   virtual void setTransferMethods(const std::set<std::string> &methods) = 0;
+  virtual void
+  setTableCommands(std::vector<ReflCommand_uptr> tableCommands) = 0;
+  virtual void setRowCommands(std::vector<ReflCommand_uptr> rowCommands) = 0;
+  virtual void clearCommands() = 0;
 
   // Accessor methods
-  virtual std::set<int> getSelectedRows() const = 0;
   virtual std::set<int> getSelectedSearchRows() const = 0;
   virtual std::string getSearchInstrument() const = 0;
-  virtual std::string getProcessInstrument() const = 0;
-  virtual std::string getWorkspaceToOpen() const = 0;
-  virtual std::string getClipboard() const = 0;
   virtual std::string getSearchString() const = 0;
   virtual std::string getTransferMethod() const = 0;
 
   virtual boost::shared_ptr<IReflPresenter> getPresenter() const = 0;
-  virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner> getAlgorithmRunner() const = 0;
+  virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+  getAlgorithmRunner() const = 0;
 };
 }
 }

@@ -9,17 +9,19 @@
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
-#include <boost/lexical_cast.hpp>
+#include <array>
 #include <fstream>
+#include <random>
 
+#include <boost/lexical_cast.hpp>
 #include "Poco/DirectoryIterator.h"
-#include <Poco/File.h>
 
 #include <QCheckBox>
 #include <QCloseEvent>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
+
 #include <qwt_symbol.h>
 
 namespace MantidQt {
@@ -753,11 +755,13 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
     dataVector.clear();
 
   // dark colours could be removed so the colored peaks stand out more
-  const QColor QPenList[16] = {
-      Qt::white,      Qt::red,     Qt::darkRed,     Qt::green,
-      Qt::darkGreen,  Qt::blue,    Qt::darkBlue,    Qt::cyan,
-      Qt::darkCyan,   Qt::magenta, Qt::darkMagenta, Qt::yellow,
-      Qt::darkYellow, Qt::gray,    Qt::darkGray,    Qt::lightGray};
+  const std::array<QColor, 16> QPenList{
+      {Qt::white, Qt::red, Qt::darkRed, Qt::green, Qt::darkGreen, Qt::blue,
+       Qt::darkBlue, Qt::cyan, Qt::darkCyan, Qt::magenta, Qt::darkMagenta,
+       Qt::yellow, Qt::darkYellow, Qt::gray, Qt::darkGray, Qt::lightGray}};
+
+  std::mt19937 gen;
+  std::uniform_int_distribution<std::size_t> dis(0, QPenList.size() - 1);
 
   for (size_t i = 0; i < data.size(); i++) {
     auto *peak = data[i].get();
@@ -765,7 +769,7 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
     QwtPlotCurve *dataCurve = new QwtPlotCurve();
     dataCurve->setStyle(QwtPlotCurve::Lines);
     if (!focused) {
-      auto randIndex = std::rand() % 15;
+      auto randIndex = dis(gen);
       dataCurve->setPen(QPen(QPenList[randIndex], 1));
     }
     dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);

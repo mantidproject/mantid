@@ -150,12 +150,12 @@ public:
 
   void setfittingRunNo(QString path);
 
-  virtual std::string fittingRunNo() const override;
+  std::string fittingRunNo() const override;
 
-  virtual std::string fittingPeaksData() const override;
+  std::string fittingPeaksData() const override;
 
-  virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
-                             bool focused);
+  void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
+                     bool focused) override;
 
   void updateFittingDirVec(std::string &bankDir, std::string &focusedFile);
 
