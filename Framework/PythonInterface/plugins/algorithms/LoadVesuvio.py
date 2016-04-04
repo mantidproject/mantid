@@ -311,10 +311,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
-    def _filter_monitors(self, item):
-        # This is correct based on the assumption in the idf monitors are ascending
-        return item <= self._mon_spectra[-1]
-
     def _exec_single_foil_state_mode(self):
         """
         Execution path when a single foil state is requested
@@ -334,31 +330,8 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         self._raise_error_period_scatter(run_str, self._back_scattering)
         all_spectra = [item for sublist in self._spectra for item in sublist]
-        # Check if the monitors are trying to be loaded twice
-        filtered_spectra = filter(self._filter_monitors, all_spectra)
-        if filtered_spectra == self._mon_spectra and self._load_monitors:
-            # Load monitors in workspace if defined by user
-            self._load_monitors = False
-            logger.warning("LoadMonitors is true while monitor spectra are defined in the spectra list.")
-            logger.warning("Monitors have been loaded into the data workspace not separately.")
-        if not self._load_monitors:
-            ms.LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spectra,
-                       EnableLogging=_LOGGING_)
-        else:
-            all_spec_inc_mon = self._mon_spectra
-            all_spec_inc_mon.extend(all_spectra)
-            ms.LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spec_inc_mon,
-                       LoadMonitors='Separate', EnableLogging=_LOGGING_)
-            monitor_group = mtd[SUMMED_WS +'_monitors']
-            mon_out_name = self.getPropertyValue(WKSP_PROP) + "_monitors"
-            clone = self.createChildAlgorithm("CloneWorkspace", False)
-            clone.setProperty("InputWorkspace", monitor_group.getItem(0))
-            clone.setProperty("OutputWorkspace", mon_out_name)
-            clone.execute()
-            self._load_monitors_workspace = clone.getProperty("OutputWorkspace").value
-            self._load_monitors_workspace = self._sum_monitors_in_group(monitor_group,
-                                                                        self._load_monitors_workspace)
-            ms.DeleteWorkspace(Workspace=monitor_group)
+
+        self._load_single_run_spectra_and_monitor_data(all_spectra, run_str)
 
         raw_group = mtd[SUMMED_WS]
         self._nperiods = raw_group.size()
@@ -400,6 +373,36 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         ms.DeleteWorkspace(Workspace=SUMMED_WS)
         self._store_results()
+
+#----------------------------------------------------------------------------------------
+
+    def _load_single_run_spectra_and_monitor_data(self, all_spectra, run_str):
+        # check if the monitor spectra are already in the spectra list
+        filtered_spectra = [i for i in all_spectra if i <= self._mon_spectra[-1]]
+        filtered_spectra.sort()
+        if filtered_spectra == self._mon_spectra and self._load_monitors:
+            # Load monitors in workspace if defined by user
+            self._load_monitors = False
+            logger.warning("LoadMonitors is true while monitor spectra are defined in the spectra list.")
+            logger.warning("Monitors have been loaded into the data workspace not separately.")
+        if not self._load_monitors:
+            ms.LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spectra,
+                       EnableLogging=_LOGGING_)
+        else:
+            all_spec_inc_mon = self._mon_spectra
+            all_spec_inc_mon.extend(all_spectra)
+            ms.LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spec_inc_mon,
+                       LoadMonitors='Separate', EnableLogging=_LOGGING_)
+            monitor_group = mtd[SUMMED_WS +'_monitors']
+            mon_out_name = self.getPropertyValue(WKSP_PROP) + "_monitors"
+            clone = self.createChildAlgorithm("CloneWorkspace", False)
+            clone.setProperty("InputWorkspace", monitor_group.getItem(0))
+            clone.setProperty("OutputWorkspace", mon_out_name)
+            clone.execute()
+            self._load_monitors_workspace = clone.getProperty("OutputWorkspace").value
+            self._load_monitors_workspace = self._sum_monitors_in_group(monitor_group,
+                                                                        self._load_monitors_workspace)
+            ms.DeleteWorkspace(Workspace=monitor_group)
 
 #----------------------------------------------------------------------------------------
 
@@ -1052,7 +1055,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
             if not self.existsProperty(WKSP_PROP_LOAD_MON):
                 mon_out_name = self.getPropertyValue(WKSP_PROP) + '_monitors'
                 self.declareProperty(WorkspaceProperty(WKSP_PROP_LOAD_MON, mon_out_name, Direction.Output),
-                             doc="The output workspace that contains the monitor spectra.")
+                                     doc="The output workspace that contains the monitor spectra.")
             self.setProperty(WKSP_PROP_LOAD_MON, self._load_monitors_workspace)
 
     def _cleanup_raw(self):
