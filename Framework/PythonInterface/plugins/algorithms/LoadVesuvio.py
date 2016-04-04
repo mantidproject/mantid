@@ -337,12 +337,20 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         self._raise_error_period_scatter(run_str, self._back_scattering)
         all_spectra = [item for sublist in self._spectra for item in sublist]
-        all_spec_inc_mon = self._mon_spectra
-        all_spec_inc_mon.extend(all_spectra)
-        ms.LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spec_inc_mon,
-                   LoadMonitors='Separate', EnableLogging=_LOGGING_)
-        # assign load_monitor_spectra
-        if self._load_monitors:
+        # Check if the monitors are trying to be loaded twice
+        if self._mon_spectra in all_spectra and self._load_monitors:
+            # Load monitors in workspace if defined by user
+            self._load_monitors = False
+            logger.warning("LoadMonitors is true while monitor spectra are defined in the spectra list.")
+            logger.warning("Monitors have been loaded into the data workspace not separately.")
+        if not self._load_monitors:
+            ms.LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spectra,
+                       EnableLogging=_LOGGING_)
+        else:
+            all_spec_inc_mon = self._mon_spectra
+            all_spec_inc_mon.extend(all_spectra)
+            ms.LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spec_inc_mon,
+                       LoadMonitors='Separate', EnableLogging=_LOGGING_)
             monitor_group = mtd[SUMMED_WS +'_monitors']
             mon_out_name = self.getPropertyValue(WKSP_PROP) + "_monitors"
             clone = self.createChildAlgorithm("CloneWorkspace", False)
