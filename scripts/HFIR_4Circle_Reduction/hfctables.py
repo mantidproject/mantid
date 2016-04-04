@@ -408,16 +408,26 @@ class ProcessTableWidget(tableBase.NTableWidget):
         return
 
     def append_scans(self, scans):
-        """ Append rows
+        """ Append rows for merge in future
         :param scans:
         :return:
         """
         # Check
         assert isinstance(scans, list)
 
+        # set value as default
+        num_pt = None
+        red_status = 'In Queue'
+        counts = None
+        intensity = None
+        select = False
+        merged_ws = None
+        group_name = None
+
         # Append rows
         for scan in scans:
-            row_value_list = [scan, 0, 'In Queue', '', '', False]
+            # set the list
+            row_value_list = [scan, num_pt, red_status, counts, intensity, select, merged_ws, group_name]
             status, err = self.append_row(row_value_list)
             if status is False:
                 raise RuntimeError(err)

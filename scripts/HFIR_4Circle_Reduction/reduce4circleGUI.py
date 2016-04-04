@@ -149,8 +149,6 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_show_ub_in_box)
         self.connect(self.ui.pushButton_syncUB, QtCore.SIGNAL('clicked()'),
                      self.do_sync_ub)
-        self.connect(self.ui.pushButton_setUBSliceView, QtCore.SIGNAL('clicked()'),
-                     self.do_set_ub_from_text)
 
         # Tab 'Merge'
         self.connect(self.ui.pushButton_addScanSliceView, QtCore.SIGNAL('clicked()'),
@@ -334,7 +332,12 @@ class MainWindow(QtGui.QMainWindow):
     def do_accept_ub(self):
         """ Accept the calculated UB matrix and thus put to controller
         """
-        exp_number = int(str(self.ui.lineEdit_exp))
+        exp_number = int(str(self.ui.lineEdit_exp.text()))
+
+        # TODO/NOW ...
+        # synchronize UB matrix to tableWidget_ubInUse
+
+        # set UB matrix to system
         self._myControl.set_ub_matrix(exp_number, self.ui.tableWidget_ubMatrix.get_matrix())
 
         return
@@ -454,6 +457,8 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(int_list)
             return
         exp_no, scan_no = int_list
+        print '[DB] Experiment number = ', exp_no
+        print '[DB] Scan numbers = ', str(scan_no), 'of type ', type(scan_no)
 
         # Get HKL from GUI
         status, float_list = gutil.parse_float_editors([self.ui.lineEdit_H,
@@ -1316,24 +1321,25 @@ class MainWindow(QtGui.QMainWindow):
                     self.pop_one_button_dialog(err_msg)
 
             self.ui.tableWidget_mergeScans.set_status_by_row(i_row, 'In Processing')
-            merge_status = 'UNKNOWN'
-            merged_name = '???'
-            group_name = '???'
 
             status, ret_tup = self._myControl.merge_pts_in_scan(exp_no=None, scan_no=scan_no,
                                                                 pt_num_list=[], target_frame=frame)
-            merge_status = 'Done'
-            merged_name = ret_tup[0]
-            group_name = ret_tup[1]
 
-            if status is False:
-                merge_status = 'Failed. Reason: %s' % str(e)
-                merged_name = ''
-                group_name = ''
-                print merge_status
+            # process output
+            if status:
+                assert len(ret_tup) == 2
+                merge_status = 'Done'
+                merged_name = ret_tup[0]
+                group_name = ret_tup[1]
             else:
-                self.ui.tableWidget_mergeScans.set_status_by_row(i_row, merge_status)
-                self.ui.tableWidget_mergeScans.set_ws_names_by_row(i_row, merged_name, group_name)
+                merge_status = 'Failed. Reason: %s' % ret_tup
+                merged_name = 'x'
+                group_name = 'x'
+                print merge_status
+
+            # update table
+            self.ui.tableWidget_mergeScans.set_status_by_row(i_row, merge_status)
+            self.ui.tableWidget_mergeScans.set_ws_names_by_row(i_row, merged_name, group_name)
 
             # Sleep for a while
             time.sleep(0.1)
@@ -1536,6 +1542,7 @@ class MainWindow(QtGui.QMainWindow):
         Guarantees: the matrix will be set up the UB matrix in use
         :return:
         """
+        # TODO/NOW - Rename!
         ub_str = str(self.ui.plainTextEdit_ubInput.toPlainText())
         status, ret_obj = gutil.parse_float_array(ub_str)
         if status is False:
@@ -1629,7 +1636,18 @@ class MainWindow(QtGui.QMainWindow):
         """ Purpose: synchronize UB matrix in use with UB matrix calculated.
         :return:
         """
-        self.ui.tableWidget_ubInUse.set_from_matrix(self.ui.tableWidget_ubMatrix.get_matrix())
+        # TODO/NOW
+        # get the radio button
+
+        #
+        if 1:
+            self.ui.tableWidget_ubInUse.set_from_matrix(self.ui.tableWidget_ubMatrix.get_matrix())
+        elif 2:
+            self.do_load_ub()
+        elif 3:
+            self.do_set_ub_from_text()
+        else:
+            raise
 
         return
 

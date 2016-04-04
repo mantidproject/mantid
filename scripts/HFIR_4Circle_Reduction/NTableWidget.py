@@ -60,7 +60,11 @@ class NTableWidget(QtGui.QTableWidget):
         # Set values
         for i_col in xrange(min(len(row_value_list), self.columnCount())):
             item = QtGui.QTableWidgetItem()
-            item.setText(_fromUtf8(str(row_value_list[i_col])))
+            if row_value_list[i_col] is None:
+                item_value = ''
+            else:
+                item_value = str(row_value_list[i_col])
+            item.setText(_fromUtf8(item_value))
             item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)
             # Set editable flag! item.setFlags(item.flags() | ~QtCore.Qt.ItemIsEditable)
             if type_list[i_col] == 'checkbox':

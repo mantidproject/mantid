@@ -1068,7 +1068,7 @@ class CWSCDReductionControl(object):
         :param scan_no:
         :param pt_num_list: If empty, then merge all Pt. in the scan
         :param target_frame: string, either 'hkl' or 'q-sample'
-        :return: (merged workspace name, workspace group name)
+        :return: (boolean, error message) # (merged workspace name, workspace group name)
         """
         # Check
         if exp_no is None:
@@ -1123,14 +1123,15 @@ class CWSCDReductionControl(object):
 
         # Convert to Q-sample
         out_q_name = get_merged_md_name(self._instrumentName, exp_no, scan_no, pt_num_list)
-        try:
-            api.ConvertCWSDExpToMomentum(InputWorkspace=scan_info_ws_name,
-                                         CreateVirtualInstrument=False,
-                                         OutputWorkspace=out_q_name,
-                                         Directory=self._dataDir)
-        except RuntimeError as e:
-            err_msg += 'Unable to convert scan %d data to Q-sample MDEvents due to %s' % (scan_no, str(e))
-            return False, err_msg
+        if AnalysisDataService.doesExist(out_q_name) is False:
+            try:
+                api.ConvertCWSDExpToMomentum(InputWorkspace=scan_info_ws_name,
+                                             CreateVirtualInstrument=False,
+                                             OutputWorkspace=out_q_name,
+                                             Directory=self._dataDir)
+            except RuntimeError as e:
+                err_msg += 'Unable to convert scan %d data to Q-sample MDEvents due to %s' % (scan_no, str(e))
+                return False, err_msg
 
         # Optionally converted to HKL space # Target frame
         if target_frame.lower().startswith('hkl'):
@@ -1147,10 +1148,19 @@ class CWSCDReductionControl(object):
             except RuntimeError as e:
                 err_msg += 'Failed to reduce scan %d due to %s' % (scan_no, str(e))
                 return False, err_msg
-        elif target_frame.lower().startswith('q-sample') is False:
+
+            # set up output
+            out_ws_name = out_hkl_name
+
+        elif target_frame.lower().startswith('q-sample'):
+            # Q-sample
+            out_ws_name = out_q_name
+
+        else:
+            # Unsupported
             raise RuntimeError('Target frame %s is not supported.' % target_frame)
 
-        return True, ''
+        return True, (out_ws_name, '')
 
     def set_roi(self, exp_number, scan_number, lower_left_corner, upper_right_corner):
         """
