@@ -440,7 +440,7 @@ void SaveAscii2::populateQMetaData() {
 void SaveAscii2::populateSpectrumNumberMetaData() {
   std::vector<std::string> spectrumNumbers;
   const auto nHist = m_ws->getNumberHistograms();
-  for (auto i = 0; i < nHist; i++) {
+  for (size_t i = 0; i < nHist; i++) {
     const auto specNum = m_ws->getSpectrum(i)->getSpectrumNo();
     const auto specNumStr = boost::lexical_cast<std::string>(specNum);
     spectrumNumbers.push_back(specNumStr);
@@ -454,7 +454,7 @@ void SaveAscii2::populateSpectrumNumberMetaData() {
 void SaveAscii2::populateAngleMetaData() {
   std::vector<std::string> angles;
   const auto nHist = m_ws->getNumberHistograms();
-  for (auto i = 0; i < nHist; i++) {
+  for (size_t i = 0; i < nHist; i++) {
     const auto specNo = m_ws->getSpectrum(i)->getSpectrumNo();
     const auto workspaceIndex = m_specToIndexMap[specNo];
     auto det = m_ws->getDetector(workspaceIndex);
