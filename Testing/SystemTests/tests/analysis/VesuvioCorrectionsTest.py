@@ -13,7 +13,7 @@ import platform
 
 
 from mantid.api import *
-import VesuvioTesting as testing
+import vesuvio.testing as testing
 import mantid.simpleapi as ms
 
 #====================================Helper Functions=======================================
