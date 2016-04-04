@@ -21,6 +21,11 @@ void MANTID_CURVEFITTING_DLL calculateIntensities(
     double di, IntFortranVector &degeneration, DoubleFortranVector &e_energies,
     DoubleFortranMatrix &i_energies);
 
+void MANTID_CURVEFITTING_DLL calculateExcitations(
+    const DoubleFortranVector &e_energies,
+    const DoubleFortranMatrix &i_energies, double de, double di,
+    DoubleFortranVector &e_excitations, DoubleFortranVector &i_excitations);
+
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

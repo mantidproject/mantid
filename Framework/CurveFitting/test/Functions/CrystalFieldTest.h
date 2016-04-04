@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Functions/CrystalElectricField.h"
 #include "MantidCurveFitting/FortranDefs.h"
+#include "MantidCurveFitting/Functions/CrystalElectricField.h"
 
 using Mantid::CurveFitting::DoubleFortranMatrix;
 using Mantid::CurveFitting::DoubleFortranVector;
@@ -122,7 +122,8 @@ public:
     DoubleFortranMatrix i_energies;
     const double de = 1e-10;
     const double di = 1e-10;
-    calculateIntensities(nre, en, wf, 25.0, de, di, degeneration, e_energies, i_energies);
+    calculateIntensities(nre, en, wf, 25.0, de, di, degeneration, e_energies,
+                         i_energies);
 
     int n_energies = int(e_energies.size());
     TS_ASSERT_EQUALS(n_energies, 3);
@@ -135,6 +136,46 @@ public:
     TS_ASSERT_DELTA(e_energies(2), en(4), 1e-10);
     TS_ASSERT_DELTA(e_energies(3), en(5), 1e-10);
     TS_ASSERT_DELTA(e_energies(3), en(6), 1e-10);
+  }
+
+  void test_calculateExcitations() {
+    int nre = 1;
+    DoubleFortranVector bmol(1, 3);
+    DoubleFortranVector bext(1, 3);
+    ComplexFortranMatrix bkq(0, 6, 0, 6);
+
+    bkq(2, 0) = 0.37737;
+    bkq(2, 2) = 3.9770;
+    bkq(4, 0) = -0.031787;
+    bkq(4, 2) = -0.11611;
+    bkq(4, 4) = -0.12544;
+    double temperature = 44.0;
+
+    DoubleFortranVector en;
+    ComplexFortranMatrix wf;
+    ComplexFortranMatrix ham;
+    calculateEigesystem(en, wf, ham, nre, bmol, bext, bkq);
+
+    IntFortranVector degeneration;
+    DoubleFortranVector e_energies;
+    DoubleFortranMatrix i_energies;
+    const double de = 1e-10;
+    const double di = 1e-3;
+    calculateIntensities(nre, en, wf, temperature, de, di, degeneration,
+                         e_energies, i_energies);
+
+    DoubleFortranVector e_excitations;
+    DoubleFortranVector i_excitations;
+    calculateExcitations(e_energies, i_energies, de, di, e_excitations,
+                         i_excitations);
+    TS_ASSERT_EQUALS(e_excitations.size(), 3);
+    TS_ASSERT_EQUALS(i_excitations.size(), 3);
+    TS_ASSERT_DELTA(e_excitations(1), 0.0, 1e-10);
+    TS_ASSERT_DELTA(e_excitations(2), 29.33, 0.01);
+    TS_ASSERT_DELTA(e_excitations(3), 44.34, 0.01);
+    TS_ASSERT_DELTA(i_excitations(1), 2.75, 0.01);
+    TS_ASSERT_DELTA(i_excitations(2), 0.72, 0.01);
+    TS_ASSERT_DELTA(i_excitations(3), 0.43, 0.01);
   }
 
 private:

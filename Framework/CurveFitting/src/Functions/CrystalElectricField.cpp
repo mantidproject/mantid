@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <iostream>
@@ -534,6 +535,9 @@ void intcalc(double pi, double r0, double gj, double z,
   if (temp == 0.0) {
     temp = 1.0;
   }
+  // convert temperature to meV
+  temp /= c_fmevkelvin;
+
   for (int i = 1; i <= dim; ++i) { // do 10 i=1,dim
     auto coeff = exp_(-e(i) / temp) / z * constant;
     for (int k = 1; k <= dim; ++k) { // do 20 k=1,dim
@@ -551,6 +555,8 @@ double c_occupation_factor(const DoubleFortranVector &energy, double dimj,
   if (temp == 0.0) {
     temp = 1.0;
   }
+  // convert temperature to meV
+  temp /= c_fmevkelvin;
   for (int s = 1; s <= dim; ++s) { // do 10 s=1,dim
     occupation_factor += exp_(-energy(s) / temp);
   }
@@ -574,7 +580,8 @@ double c_occupation_factor(const DoubleFortranVector &energy, double dimj,
 ///  |1=Ce|2=Pr|3=Nd|4=Pm|5=Sm|6=Eu|7=Gd|8=Tb|9=Dy|10=Ho|11=Er|12=Tm|13=Yb|
 /// @param bmol :: Parameters of the molecular field. TODO: ref. frame, units.
 /// @param bext :: Parameters of the external field. TODO: ref. frame, units.
-/// @param bkq :: The crystal field parameters. TODO: units.
+/// @param bkq :: The crystal field parameters. TODO: confirm units. It look
+/// like in meV.
 /// @param alpha_euler :: The alpha Euler angle. TOD: units.
 /// @param beta_euler :: The beta Euler angle. TOD: units.
 /// @param gamma_euler :: The gamma Euler angle. TOD: units.
@@ -782,9 +789,8 @@ int no(int i, const IntFortranVector &d, int n) {
 /// @param di :: Only those excitations are taken into account whose intensities
 ///              are greater or equal than di.
 void deg_on(const DoubleFortranVector &energy, const DoubleFortranMatrix &mat,
-            IntFortranVector &degeneration,
-            DoubleFortranVector &e_energies, DoubleFortranMatrix &i_energies,
-            double de, double di) {
+            IntFortranVector &degeneration, DoubleFortranVector &e_energies,
+            DoubleFortranMatrix &i_energies, double de, double di) {
   //  real*8  energy(17)           ! already defined in CF_FABI.INC
   //  real*8  mat(17,17)
   //	integer degeneration(17*17)  ! stores the degeneration of a level
@@ -879,6 +885,94 @@ void calculateIntensities(int nre, const DoubleFortranVector &energies,
           temperature);
 
   deg_on(energies, mat, degeneration, e_energies, i_energies, de, di);
+}
+
+/// Calculate the excitations (transition energies) and their intensities.
+/// Take account of any degeneracy.
+/// @param e_energies :: Energy values of the degenerated energy levels.
+/// @param i_energies :: Intensities of the degenerated energy levels.
+/// @param de :: Excitations which are closer than de are assumed to be
+///              degenerated.
+/// @param di :: Only those excitations are taken into account whose intensities
+///              are greater or equal than di.
+/// @param e_excitations :: The output excitation energies.
+/// @param i_excitations :: The output excitation intensities.
+void calculateExcitations(const DoubleFortranVector &e_energies,
+                          const DoubleFortranMatrix &i_energies, double de,
+                          double di, DoubleFortranVector &e_excitations,
+                          DoubleFortranVector &i_excitations) {
+  int n_energies = static_cast<int>(e_energies.size());
+  auto dimj = n_energies;
+  // Calculate transition energies (excitations) and corresponding
+  // intensities.
+  DoubleFortranVector eex(n_energies * n_energies);
+  DoubleFortranVector iex(n_energies * n_energies);
+  int nex = 0;
+  for (int i = 1; i <= n_energies; ++i) {   // do i=1,n_energies
+    for (int k = 1; k <= n_energies; ++k) { // do k=1,n_energies
+      nex = nex + 1;
+      eex(nex) = e_energies(k) - e_energies(i);
+      iex(nex) = i_energies(i, k); // !I(i->k)
+      ifnull(eex(nex));
+    }
+  }
+  // nex at this point is the largest possible number
+  // of transitions
+
+  // Sort excitations in ascending order.
+  std::vector<size_t> ind = eex.sortIndices();
+  eex.sort(ind);
+
+  // Define lambda that transforms C++ indices to fortran indices
+  auto index = [&ind](int i) { return static_cast<int>(ind[i - 1] + 1); };
+
+  DoubleFortranVector tempEex(nex);
+  IntFortranVector degeneration(nex);
+  tempEex(1) = eex(1);
+  degeneration(1) = 1;
+
+  int k = 1;
+  // Check if there are any overlapping (degenerate) excitations
+  for (int i = 2; i <= nex; ++i) { // do i=2,nex
+    if (std::fabs(tempEex(k) - eex(i)) >= de) {
+      k = k + 1;
+      tempEex(k) = eex(i);
+      degeneration(k) = 1;
+    } else {
+      degeneration(k) = degeneration(k) + 1;
+    }
+  }
+  // Number of non-overlapping transitions
+  int n_excitation = k;
+
+  DoubleFortranVector tempIex(n_excitation);
+  for (int i = 1; i <= nex; ++i) { // do i=1,nex
+    auto ii = no(i, degeneration, n_excitation);
+    tempIex(ii) = tempIex(ii) + iex(index(i));
+  }
+
+  ind = tempIex.sortIndices(false);
+  tempIex.sort(ind);
+
+  // Keep only transitions that are strong enough
+  // i >= di
+  e_excitations.allocate(n_excitation);
+  i_excitations.allocate(n_excitation);
+  k = 0;
+  for (int i = 1; i <= n_excitation; ++i) { // do i=1,n_excitation
+    if (tempIex(i) >= di || dimj == 1) {
+      k = k + 1;
+      i_excitations(k) = tempIex(i);
+      e_excitations(k) = tempEex(index(i));
+    }
+  }
+  // nex now is the actual number of excitations that will
+  // be outputted.
+  nex = k;
+  if (nex != n_excitation) {
+    e_excitations.allocate(nex);
+    i_excitations.allocate(nex);
+  }
 }
 
 } // namespace Functions
