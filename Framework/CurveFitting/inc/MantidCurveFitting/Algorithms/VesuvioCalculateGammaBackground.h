@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_CALCULATEGAMMABACKGROUND_H_
-#define MANTID_CURVEFITTING_CALCULATEGAMMABACKGROUND_H_
+#ifndef MANTID_CURVEFITTING_VESUVIOCALCULATEGAMMABACKGROUND_H_
+#define MANTID_CURVEFITTING_VESUVIOCALCULATEGAMMABACKGROUND_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/IComponent.h"
@@ -46,10 +46,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport CalculateGammaBackground : public API::Algorithm {
+class DLLExport VesuvioCalculateGammaBackground : public API::Algorithm {
 public:
-  CalculateGammaBackground();
-  ~CalculateGammaBackground() override;
+  VesuvioCalculateGammaBackground();
+  ~VesuvioCalculateGammaBackground() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -147,4 +147,4 @@ private:
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /* MANTID_CURVEFITTING_CALCULATEGAMMABACKGROUND_H_ */
+#endif /* MANTID_CURVEFITTING_VESUVIOCALCULATEGAMMABACKGROUND_H_ */

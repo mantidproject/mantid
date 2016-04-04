@@ -30,7 +30,14 @@ Vesuvio
     - :ref:`VesuvioPreFit <algm-VesuvioPreFit>`
     - :ref:`VesuvioTOFFit <algm-VesuvioTOFFit>`
     - :ref:`VesuvioCorrections <algm-VesuvioCorrections>`
-- The script used to process data for Vesuvio has also been added. This used to be called ``VesuvioWorkflow.py``, but is now named``VesuvioCommands.py``
+
+- The script used to process data for Vesuvio has also been added. This used to be called ``VesuvioWorkflow.py``, but is now named ``VesuvioCommands.py``.
+
+- The following Vesuvio specific algorithms have been updated to have their name prefixed by Vesuvio:
+    - :ref:`VesuvioCalculateGammaBackground <algm-VesuvioCalculateGammaBackground>` previously ``CalculateGammaBackground``
+    - :ref:`VesuvioCalculateMS <algm-VesuvioCalculateMS>` previously ``CalculateMSVesuvio``
+    - :ref:`VesuvioDiffractionReduction <algm-VesuvioDiffractionReduction>` previously ``EVSDiffractionReduction``
+
 
 Improvements
 ------------

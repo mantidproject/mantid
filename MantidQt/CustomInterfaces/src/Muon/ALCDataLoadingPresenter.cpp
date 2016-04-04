@@ -6,9 +6,10 @@
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtCustomInterfaces/Muon/ALCLatestFileFinder.h"
 
 #include <Poco/ActiveResult.h>
-#include <Poco/DirectoryIterator.h>
+#include <Poco/Path.h>
 
 #include <QApplication>
 #include <QFileInfo>
@@ -19,40 +20,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 using namespace MantidQt::API;
-
-// free functions
-namespace {
-/**
- * Gets the most recently modified Nexus file in the given directory
- * @param path :: [input] Path to any file in the directory
- * @returns Path to most recently modified file
- */
-std::string getMostRecentFile(const std::string &path) {
-  Poco::Path givenPath(path);
-  Poco::File latestFile(givenPath);
-  try {
-    // Directory iterator - check if we were passed a file or a directory
-    Poco::DirectoryIterator iter(latestFile.isDirectory() ? givenPath
-                                                          : givenPath.parent());
-    Poco::DirectoryIterator end; // the end iterator
-    Poco::Timestamp lastModified = iter->getLastModified();
-    while (iter != end) {
-      if (Poco::Path(iter->path()).getExtension() == "nxs") {
-        if (iter->getLastModified() > lastModified) {
-          latestFile = *iter;
-          lastModified = iter->getLastModified();
-        }
-        ++iter;
-      }
-    }
-  } catch (const Poco::Exception &) {
-    // There was some problem iterating through the directory.
-    // Return the file we were given.
-    return givenPath.toString();
-  }
-  return latestFile.path();
-}
-}
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -84,7 +51,8 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
     // Add path to watcher
     changeWatchState(true);
     // and get the most recent file in the directory to be lastFile
-    lastFile = getMostRecentFile(m_view->firstRun());
+    ALCLatestFileFinder finder(m_view->firstRun());
+    lastFile = finder.getMostRecentFile();
     m_view->setCurrentAutoFile(lastFile);
   }
   // Now perform the load
@@ -111,8 +79,8 @@ void ALCDataLoadingPresenter::timerEvent(QTimerEvent *timeup) {
   // Check flag for changes
   if (m_directoryChanged.load()) {
     // Most recent file in directory
-    Poco::Path filePath(m_view->firstRun());
-    std::string lastFile = getMostRecentFile(filePath.parent().toString());
+    ALCLatestFileFinder finder(m_view->firstRun());
+    std::string lastFile = finder.getMostRecentFile();
     // Load file and update view
     load(lastFile);
     m_view->setCurrentAutoFile(lastFile);

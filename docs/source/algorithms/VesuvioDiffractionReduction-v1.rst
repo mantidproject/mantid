@@ -17,17 +17,17 @@ option to load a PAR file.
 Workflow
 --------
 
-.. diagram:: EVSDiffractionReduction-v1_wkflw.dot
+.. diagram:: VesuvioDiffractionReduction-v1_wkflw.dot
 
 
 Usage
 -----
 
-**Example - Running EVSDiffractionReduction.**
+**Example - Running VesuvioDiffractionReduction.**
 
-.. testcode:: ExEVSDiffractionReductionSimple
+.. testcode:: ExVesuvioDiffractionReductionSimple
 
-    EVSDiffractionReduction(InputFiles='EVS15289.raw',
+    VesuvioDiffractionReduction(InputFiles='EVS15289.raw',
                             OutputWorkspace='DiffractionReductions',
                             InstrumentParFile='IP0005.dat')
 
@@ -39,7 +39,7 @@ Usage
 
 Output:
 
-.. testoutput:: ExEVSDiffractionReductionSimple
+.. testoutput:: ExVesuvioDiffractionReductionSimple
 
     Workspace name: vesuvio15289_diffspec_red
     Number of spectra: 1

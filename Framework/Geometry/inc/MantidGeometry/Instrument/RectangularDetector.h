@@ -59,6 +59,9 @@ public:
   //! Parametrized constructor
   RectangularDetector(const RectangularDetector *base, const ParameterMap *map);
 
+  /// Matches name to Structured Detector
+  static bool compareName(const std::string &proposedMatch);
+
   /// Create all the detector pixels of this rectangular detector.
   void initialize(boost::shared_ptr<Object> shape, int xpixels, double xstart,
                   double xstep, int ypixels, double ystart, double ystep,

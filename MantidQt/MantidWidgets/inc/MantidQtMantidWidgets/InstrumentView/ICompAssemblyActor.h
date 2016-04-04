@@ -17,7 +17,8 @@
 
   This class has the interface Comp assembly actors.
 
-  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -36,52 +37,41 @@
 
   File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-namespace Mantid
-{
-namespace Kernel
-{
-  class V3D;
+namespace Mantid {
+namespace Kernel {
+class V3D;
 }
 
-namespace Geometry
-{
-  class ICompAssembly;
-  class Object;
+namespace Geometry {
+class ICompAssembly;
+class Object;
+}
 }
 
-}
+namespace MantidQt {
+namespace MantidWidgets {
+class InstrumentActor;
+class ObjComponentActor;
 
-namespace MantidQt
-{
-	namespace MantidWidgets
-	{
-		class InstrumentActor;
-		class ObjComponentActor;
+class ICompAssemblyActor : public ComponentActor {
+public:
+  ICompAssemblyActor(
+      const InstrumentActor &instrActor,
+      const Mantid::Geometry::ComponentID &compID); ///< Constructor
+  void getBoundingBox(Mantid::Kernel::V3D &minBound,
+                      Mantid::Kernel::V3D &maxBound) const override;
 
-		class ICompAssemblyActor : public ComponentActor
-		{
-		public:
-			ICompAssemblyActor(const InstrumentActor &instrActor, const Mantid::Geometry::ComponentID &compID); ///< Constructor
-                        void getBoundingBox(
-                            Mantid::Kernel::V3D &minBound,
-                            Mantid::Kernel::V3D &maxBound) const override;
+  std::string type() const override {
+    return "ICompAssemblyActor";
+  } ///< Type of the GL object
+  size_t getNumberOfDetectors() const { return mNumberOfDetectors; }
 
-                        std::string type() const override {
-                          return "ICompAssemblyActor";
-                        } ///< Type of the GL object
-                        int getNumberOfDetectors() const { return mNumberOfDetectors; }
-
-		protected:
-			int mNumberOfDetectors;
-			Mantid::Kernel::V3D minBoundBox;
-			Mantid::Kernel::V3D maxBoundBox;
-		};
-	}//MantidWidgets
-}//MantidQt
-
-
-
-
+protected:
+  size_t mNumberOfDetectors;
+  Mantid::Kernel::V3D minBoundBox;
+  Mantid::Kernel::V3D maxBoundBox;
+};
+} // MantidWidgets
+} // MantidQt
 
 #endif /*GLTRIANGLE_H_*/
-

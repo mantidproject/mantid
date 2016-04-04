@@ -1,7 +1,7 @@
 set ( SRC_FILES
 	src/Algorithms/CalculateChiSquared.cpp
-	src/Algorithms/CalculateGammaBackground.cpp
-	src/Algorithms/CalculateMSVesuvio.cpp
+	src/Algorithms/VesuvioCalculateGammaBackground.cpp
+	src/Algorithms/VesuvioCalculateMS.cpp
 	src/Algorithms/ConvertToYSpace.cpp
 	src/Algorithms/ConvolveWorkspaces.cpp
 	src/Algorithms/CrystalFieldEnergies.cpp
@@ -123,8 +123,8 @@ set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
 
 set ( INC_FILES
 	inc/MantidCurveFitting/Algorithms/CalculateChiSquared.h
-	inc/MantidCurveFitting/Algorithms/CalculateGammaBackground.h
-	inc/MantidCurveFitting/Algorithms/CalculateMSVesuvio.h
+	inc/MantidCurveFitting/Algorithms/VesuvioCalculateGammaBackground.h
+	inc/MantidCurveFitting/Algorithms/VesuvioCalculateMS.h
 	inc/MantidCurveFitting/Algorithms/ConvertToYSpace.h
 	inc/MantidCurveFitting/Algorithms/ConvolveWorkspaces.h
 	inc/MantidCurveFitting/Algorithms/CrystalFieldEnergies.h
@@ -254,8 +254,8 @@ set ( TEST_FILES
 	# RefinePowderInstrumentParametersTest.h
 	#SCDPanelErrorsTest.h
 	Algorithms/CalculateChiSquaredTest.h
-	Algorithms/CalculateGammaBackgroundTest.h
-	Algorithms/CalculateMSVesuvioTest.h
+	Algorithms/VesuvioCalculateGammaBackgroundTest.h
+	Algorithms/VesuvioCalculateMSTest.h
 	Algorithms/ConvertToYSpaceTest.h
 	Algorithms/ConvolveWorkspacesTest.h
 	Algorithms/EstimatePeakErrorsTest.h

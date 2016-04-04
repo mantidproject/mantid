@@ -29,7 +29,7 @@ set ( TEST_PY_FILES
   EnggFitPeaksTest.py
   EnggFocusTest.py
   EnggVanadiumCorrectionsTest.py
-  EVSDiffractionReductionTest.py
+  VesuvioDiffractionReductionTest.py
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
   FlatPlatePaalmanPingsCorrectionTest.py

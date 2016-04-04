@@ -5,14 +5,14 @@ from mantid.simpleapi import *
 from mantid.api import *
 
 
-class EVDDiffractionReductionTest(unittest.TestCase):
+class VesuvioDiffractionReductionTest(unittest.TestCase):
 
     def test_basic_reduction_completes(self):
         """
         Sanity test to ensure the most basic reduction actually completes.
         """
 
-        wks = EVSDiffractionReduction(InputFiles=['EVS15289.raw'],
+        wks = VesuvioDiffractionReduction(InputFiles=['EVS15289.raw'],
                                       InstrumentParFIle='IP0005.dat')
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
@@ -29,7 +29,7 @@ class EVDDiffractionReductionTest(unittest.TestCase):
         Test setting individual grouping, one spectrum per detector.
         """
 
-        wks = EVSDiffractionReduction(InputFiles=['EVS15289.raw'],
+        wks = VesuvioDiffractionReduction(InputFiles=['EVS15289.raw'],
                                       GroupingPolicy='Individual',
                                       InstrumentParFIle='IP0005.dat')
 
