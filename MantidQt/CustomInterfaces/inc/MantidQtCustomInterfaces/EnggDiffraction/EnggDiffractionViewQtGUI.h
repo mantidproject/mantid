@@ -157,6 +157,8 @@ public:
   virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                              bool focused);
 
+  void updateFittingDirVec(std::string &bankDir, std::string &focusedFile);
+
   std::vector<std::string> splitFittingDirectory(Poco::Path selectedfPath);
 
   void addBankItems(std::vector<std::string> splittedBaseName,
