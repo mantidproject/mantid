@@ -3,9 +3,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflCommandAdapter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorCommandAdapter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
@@ -52,18 +50,20 @@ void QtReflMainView::initLayout() {
           SLOT(showSearchContextMenu(const QPoint &)));
   // Synchronize the two instrument selection widgets
   connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)),
-          ui.qReflTableView,
+          ui.qDataProcessorAlgorithmWidget,
           SLOT(on_comboProcessInstrument_currentIndexChanged(int)));
-  connect(ui.qReflTableView,
+  connect(ui.qDataProcessorAlgorithmWidget,
           SIGNAL(comboProcessInstrument_currentIndexChanged(int)),
           ui.comboSearchInstrument, SLOT(setCurrentIndex(int)));
 
   // Needed to Import/Export TBL, plot row and plot group
-  connect(ui.qReflTableView, SIGNAL(runAsPythonScript(const QString &, bool)),
-          this, SIGNAL(runAsPythonScript(const QString &, bool)));
+  connect(ui.qDataProcessorAlgorithmWidget,
+          SIGNAL(runAsPythonScript(const QString &, bool)), this,
+          SIGNAL(runAsPythonScript(const QString &, bool)));
 
   m_presenter = boost::make_shared<ReflMainViewPresenter>(
-      this /*main view*/, ui.qReflTableView->getTablePresenter().get(),
+      this /*main view*/,
+      ui.qDataProcessorAlgorithmWidget->getTablePresenter().get(),
       this /*currently this concrete view is also responsibile for prog reporting*/);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 }
@@ -73,9 +73,9 @@ void QtReflMainView::initLayout() {
 * @param menu : [input] The menu where actions will be added
 * @param command : [input] The command (action) to add
 */
-void QtReflMainView::addToMenu(QMenu *menu, ReflCommand_uptr command) {
+void QtReflMainView::addToMenu(QMenu *menu, DataProcessorCommand_uptr command) {
 
-  m_commands.push_back(Mantid::Kernel::make_unique<ReflCommandAdapter>(
+  m_commands.push_back(Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(
       menu, std::move(command)));
 }
 
@@ -85,7 +85,7 @@ void QtReflMainView::addToMenu(QMenu *menu, ReflCommand_uptr command) {
 * "Reflectometry" menu
 */
 void QtReflMainView::setTableCommands(
-    std::vector<ReflCommand_uptr> tableCommands) {
+    std::vector<DataProcessorCommand_uptr> tableCommands) {
 
   ui.menuTable->clear();
   for (auto &command : tableCommands) {
@@ -103,7 +103,8 @@ void QtReflMainView::setTableCommands(
 * Adds actions to the "Edit" menu
 * @param rowCommands : [input] The list of commands to add to the "Edit" menu
 */
-void QtReflMainView::setRowCommands(std::vector<ReflCommand_uptr> rowCommands) {
+void QtReflMainView::setRowCommands(
+    std::vector<DataProcessorCommand_uptr> rowCommands) {
 
   ui.menuRows->clear();
   for (auto &command : rowCommands) {
@@ -114,10 +115,7 @@ void QtReflMainView::setRowCommands(std::vector<ReflCommand_uptr> rowCommands) {
 /**
 * Clears all the actions (commands)
 */
-void QtReflMainView::clearCommands() {
-
-	m_commands.clear();
-}
+void QtReflMainView::clearCommands() { m_commands.clear(); }
 
 /**
 * Set all possible tranfer methods

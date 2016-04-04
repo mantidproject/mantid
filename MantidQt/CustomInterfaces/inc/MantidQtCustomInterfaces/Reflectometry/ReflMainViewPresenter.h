@@ -16,7 +16,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 // Forward decs
 class ProgressableView;
-class IReflTablePresenter;
+class DataProcessorPresenter;
 
 /** @class ReflMainViewPresenter
 
@@ -49,7 +49,7 @@ class MANTIDQT_CUSTOMINTERFACES_DLL ReflMainViewPresenter
       public WorkspaceReceiver {
 public:
   ReflMainViewPresenter(ReflMainView *mainView,
-                        IReflTablePresenter *tablePresenter,
+                        DataProcessorPresenter *tablePresenter,
                         ProgressableView *progressView,
                         boost::shared_ptr<IReflSearcher> searcher =
                             boost::shared_ptr<IReflSearcher>());
@@ -63,7 +63,7 @@ protected:
   // the main view we're managing
   ReflMainView *m_view;
   // The table view's presenter
-  IReflTablePresenter *m_tablePresenter;
+  DataProcessorPresenter *m_tablePresenter;
   // The progress view
   ProgressableView *m_progressView;
   // the search implementation

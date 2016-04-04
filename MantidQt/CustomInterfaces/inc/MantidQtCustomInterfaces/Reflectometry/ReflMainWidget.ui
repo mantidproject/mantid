@@ -218,7 +218,7 @@
              <number>1</number>
            </property>
            <item>
-             <widget class="MantidQt::CustomInterfaces::QReflTableView" name="qReflTableView">
+             <widget class="MantidQt::CustomInterfaces::QDataProcessorAlgorithmWidget" name="qDataProcessorAlgorithmWidget">
              </widget>
            </item>
          </layout>
@@ -283,9 +283,9 @@
  </tabstops>
   <customwidgets>
     <customwidget>
-      <class>MantidQt:CustomInterfaces::QReflTableView</class>
+      <class>MantidQt:CustomInterfaces::QDataProcessorAlgorithmWidget</class>
       <extends>QWidget</extends>
-      <header>MantidQtCustomInterfaces/Reflectometry/QReflTableView.h</header>
+      <header>MantidQtCustomInterfaces/Reflectometry/QDataProcessorAlgorithmWidget.h</header>
     </customwidget>
   </customwidgets>
   <resources>

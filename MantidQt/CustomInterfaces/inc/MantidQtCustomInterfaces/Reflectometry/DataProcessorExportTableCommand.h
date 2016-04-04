@@ -1,15 +1,15 @@
-#ifndef MANTID_CUSTOMINTERFACES_WORKSPACERECEIVER_H
-#define MANTID_CUSTOMINTERFACES_WORKSPACERECEIVER_H
+#ifndef MANTID_CUSTOMINTERFACES_DATAPROCESSOREXPORTTABLECOMMAND_H
+#define MANTID_CUSTOMINTERFACES_DATAPROCESSOREXPORTTABLECOMMAND_H
+
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorCommandBase.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class WorkspaceReceiver
+/** @class DataProcessorExportTableCommand
 
-WorkspaceReceiver is an interface that defines the functions needed to receive
-information from a table presenter. IReflTablePresenter uses this interface
-to notify changes to an outer, concrete presenter. Any outer presenter that
-needs to receive information from IReflTablePresenter should inherit from this
-class.
+DataProcessorExportTableCommand defines the action "Export .TBL"
+
+processor interface presenter needs to support.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -32,15 +32,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class WorkspaceReceiver {
+class DataProcessorExportTableCommand : public DataProcessorCommandBase {
 public:
-  virtual ~WorkspaceReceiver(){};
+  DataProcessorExportTableCommand(DataProcessorPresenter *tablePresenter)
+      : DataProcessorCommandBase(tablePresenter){};
+  virtual ~DataProcessorExportTableCommand(){};
 
-  enum Flag { ADSChangedFlag };
-
-  // Notify this receiver that something changed in the ADS
-  virtual void notify(WorkspaceReceiver::Flag flag) = 0;
+  void execute() override {
+    m_presenter->notify(DataProcessorPresenter::ExportTableFlag);
+  };
+  std::string name() override { return std::string("Export .TBL"); }
+  std::string icon() override { return std::string("://save_template.png"); }
 };
 }
 }
-#endif /*MANTID_CUSTOMINTERFACES_WORKSPACERECEIVER_H*/
+#endif /*MANTID_CUSTOMINTERFACES_DATAPROCESSOREXPORTTABLECOMMAND_H*/

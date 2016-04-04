@@ -6,12 +6,12 @@
 #include <gtest/gtest.h>
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidQtCustomInterfaces/Reflectometry/GenericDataProcessorPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflTableViewPresenter.h"
 
+#include "DataProcessorAlgorithmViewMockObjects.h"
 #include "ProgressableViewMockObject.h"
 #include "ReflMainViewMockObjects.h"
-#include "ReflTableViewMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
@@ -36,14 +36,16 @@ public:
 
   void test_constructor_sets_possible_transfer_methods() {
     NiceMock<MockView> mockView;
-    NiceMock<MockTableView> mockTableView;
+    NiceMock<MockDataProcessorView> MockDataProcessorView;
     MockProgressableView mockProgress;
-    ReflTableViewPresenter tablePresenter(&mockTableView, &mockProgress);
+    GenericDataProcessorPresenter tablePresenter(&MockDataProcessorView,
+                                                 &mockProgress);
 
     // Expect that the transfer methods get initialized on the view
     EXPECT_CALL(mockView, setTransferMethods(_)).Times(Exactly(1));
     // Expect that the view is populated with the instrument list
-    EXPECT_CALL(mockTableView, setInstrumentList(_, _)).Times(Exactly(1));
+    EXPECT_CALL(MockDataProcessorView, setInstrumentList(_, _))
+        .Times(Exactly(1));
     // Expect that the view clears the list of commands
     EXPECT_CALL(mockView, clearCommands()).Times(Exactly(1));
     // Expect that the view is populated with the list of table commands
@@ -56,14 +58,15 @@ public:
 
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&MockDataProcessorView));
   }
 
   void test_presenter_sets_commands_when_notified() {
     NiceMock<MockView> mockView;
-    NiceMock<MockTableView> mockTableView;
+    NiceMock<MockDataProcessorView> MockDataProcessorView;
     MockProgressableView mockProgress;
-    ReflTableViewPresenter tablePresenter(&mockTableView, &mockProgress);
+    GenericDataProcessorPresenter tablePresenter(&MockDataProcessorView,
+                                                 &mockProgress);
 
     ReflMainViewPresenter presenter(&mockView, &tablePresenter, &mockProgress);
 

@@ -14,8 +14,9 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 // Forward dec
-class ReflCommandAdapter;
-using ReflCommandAdapter_uptr = std::unique_ptr<ReflCommandAdapter>;
+class DataProcessorCommandAdapter;
+using DataProcessorCommandAdapter_uptr =
+    std::unique_ptr<DataProcessorCommandAdapter>;
 
 /** QtReflMainView : Provides an interface for processing reflectometry data.
 
@@ -65,8 +66,10 @@ public:
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
   void setTransferMethods(const std::set<std::string> &methods) override;
-  void setTableCommands(std::vector<ReflCommand_uptr> tableCommands) override;
-  void setRowCommands(std::vector<ReflCommand_uptr> rowCommands) override;
+  void setTableCommands(
+      std::vector<DataProcessorCommand_uptr> tableCommands) override;
+  void
+  setRowCommands(std::vector<DataProcessorCommand_uptr> rowCommands) override;
   void clearCommands() override;
 
   // Set the status of the progress bar
@@ -88,7 +91,7 @@ private:
   // initialise the interface
   void initLayout() override;
   // Adds an action (command) to a menu
-  void addToMenu(QMenu *menu, ReflCommand_uptr command);
+  void addToMenu(QMenu *menu, DataProcessorCommand_uptr command);
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 
@@ -101,7 +104,7 @@ private:
   // the slit calculator
   MantidWidgets::SlitCalculator *m_calculator;
   // Command adapters
-  std::vector<ReflCommandAdapter_uptr> m_commands;
+  std::vector<DataProcessorCommandAdapter_uptr> m_commands;
 
 private slots:
   void on_actionSearch_triggered();

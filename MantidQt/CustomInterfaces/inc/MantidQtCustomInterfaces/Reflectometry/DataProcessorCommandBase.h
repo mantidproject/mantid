@@ -1,15 +1,15 @@
-#ifndef MANTID_CUSTOMINTERFACES_WORKSPACERECEIVER_H
-#define MANTID_CUSTOMINTERFACES_WORKSPACERECEIVER_H
+#ifndef MANTID_CUSTOMINTERFACES_DATAPROCESSORCOMMANDBASE_H
+#define MANTID_CUSTOMINTERFACES_DATAPROCESSORCOMMANDBASE_H
+
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorCommand.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class WorkspaceReceiver
+class DataProcessorPresenter;
+/** @class ReflCommandBase
 
-WorkspaceReceiver is an interface that defines the functions needed to receive
-information from a table presenter. IReflTablePresenter uses this interface
-to notify changes to an outer, concrete presenter. Any outer presenter that
-needs to receive information from IReflTablePresenter should inherit from this
-class.
+ReflCommandBase is an interface which defines the functions any data processor
+action needs to support. Defines a IReflTablePresenter that will be notified.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -32,15 +32,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class WorkspaceReceiver {
+class DataProcessorCommandBase : public DataProcessorCommand {
 public:
-  virtual ~WorkspaceReceiver(){};
+  DataProcessorCommandBase(DataProcessorPresenter *tablePresenter)
+      : m_presenter(tablePresenter) {
+    if (!tablePresenter) {
+      throw std::invalid_argument("Invalid abstract presenter");
+    }
+  };
+  virtual ~DataProcessorCommandBase(){};
 
-  enum Flag { ADSChangedFlag };
+  virtual void execute() = 0;
+  virtual std::string name() = 0;
+  virtual std::string icon() = 0;
 
-  // Notify this receiver that something changed in the ADS
-  virtual void notify(WorkspaceReceiver::Flag flag) = 0;
+protected:
+  DataProcessorPresenter *const m_presenter;
 };
 }
 }
-#endif /*MANTID_CUSTOMINTERFACES_WORKSPACERECEIVER_H*/
+#endif /*MANTID_CUSTOMINTERFACES_DATAPROCESSORCOMMANDBASE_H*/
