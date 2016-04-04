@@ -170,6 +170,9 @@ void PlusMD::execEvent() {
   // Now we add m_operand_event into m_out_event.
   CALL_MDEVENT_FUNCTION(this->doPlus, m_out_event);
 
+  // Clear masking (box flags) from the output workspace
+  m_out_event->clearMDMasking();
+
   // Set to the output
   setProperty("OutputWorkspace", m_out_event);
 }

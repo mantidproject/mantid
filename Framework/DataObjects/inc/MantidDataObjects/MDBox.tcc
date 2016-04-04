@@ -770,15 +770,12 @@ TMDE(void MDBox)::buildAndAddEventUnsafe(const signal_t Signal,
 //-----------------------------------------------------------------------------------------------
 /** Add a MDLeanEvent to the box.
  * @param Evnt :: reference to a MDEvent to add.
- * @return Returns 1 if event was added
+ * @return Always returns 1
  * */
 TMDE(size_t MDBox)::addEvent(const MDE &Evnt) {
-  if (!getIsMasked()) {
-    std::lock_guard<std::mutex> _lock(this->m_dataMutex);
-    this->data.push_back(Evnt);
-    return 1;
-  }
-  return 0;
+  std::lock_guard<std::mutex> _lock(this->m_dataMutex);
+  this->data.push_back(Evnt);
+  return 1;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -787,14 +784,11 @@ TMDE(size_t MDBox)::addEvent(const MDE &Evnt) {
  * try to add to the same box at the same time.
  *
  * @param Evnt :: reference to a MDEvent to add.
- * @return Returns 1 if event was added
+ * @return Always returns 1
  * */
 TMDE(size_t MDBox)::addEventUnsafe(const MDE &Evnt) {
-  if (!getIsMasked()) {
-    this->data.push_back(Evnt);
-    return 1;
-  }
-  return 0;
+  this->data.push_back(Evnt);
+  return 1;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -805,13 +799,11 @@ TMDE(size_t MDBox)::addEventUnsafe(const MDE &Evnt) {
  * @return always returns 0
  */
 TMDE(size_t MDBox)::addEvents(const std::vector<MDE> &events) {
-  if (!getIsMasked()) {
-    std::lock_guard<std::mutex> _lock(this->m_dataMutex);
-    typename std::vector<MDE>::const_iterator start = events.begin();
-    typename std::vector<MDE>::const_iterator end = events.end();
-    // Copy all the events
-    this->data.insert(this->data.end(), start, end);
-  }
+  std::lock_guard<std::mutex> _lock(this->m_dataMutex);
+  typename std::vector<MDE>::const_iterator start = events.begin();
+  typename std::vector<MDE>::const_iterator end = events.end();
+  // Copy all the events
+  this->data.insert(this->data.end(), start, end);
   return 0;
 }
 
