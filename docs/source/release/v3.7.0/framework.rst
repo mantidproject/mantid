@@ -72,6 +72,7 @@ Improved
 - :ref:`SaveAscii <algm-SaveAscii2>` now has a SpectrumMetaData property that allows for addition information to be displayed along with the SpectrumNumber. Currently the supported MetaData is SpectrumNumber, Q and Angle.
 - :ref:`SaveMD <algm-SaveMD>` now writes MDHisto signal arrays as compressed data.
 
+
 Deprecated
 ##########
 
