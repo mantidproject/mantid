@@ -240,14 +240,19 @@ def get_previous_tag(tag):
 
     return all_tags[all_tags.index(tag) - 1]
 
-def get_shortened_version_string(version_str):
-    '''We use the convention whereby the patch number is ignored if it is zero,
-    i.e. "3.0.0" becomes "3.0".
+def get_major_minor_patch(version_str):
+    '''Return the major, minor & patch revision numbers as integers
     '''
     version_components = version_str.split('.')
     if len(version_components) != 3:
         raise RuntimeError("Invalid format for version string. Expected X.Y.Z")
-    major, minor, patch = version_components
+    return map(int, version_components)
+
+def get_shortened_version_string(version_str):
+    '''We use the convention whereby the patch number is ignored if it is zero,
+    i.e. "3.0.0" becomes "3.0".
+    '''
+    major, minor, patch = get_major_minor_patch(version_str)
     if patch == 0:
         return '{0}.{1}'.format(major, minor)
     else:

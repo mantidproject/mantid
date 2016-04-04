@@ -328,6 +328,42 @@ def check_for_curl():
         raise Exception('This script requires that cURL be installed and ' + \
                         'available on the PATH.')
 
+
+def get_urls_for_doi(version_str,  shortened_version_str,
+                     prev_version_str, shortened_prev_version_str):
+    # Beginning with v3.6.0 the release notes moved to docs.mantidproject.org but
+    # the transition happened after the release so the following rules apply
+    #  - all versions 3.7.0 & above have release notes on a versioned url at docs.mantidproject.org
+    #  - 3.5.2, 3.6.0, 3.6.1 have been manually inserted but the notes only exist in nightly builds
+    #  - 3.5.1 and before all point to the wiki
+    major, minor, patch = authors.get_major_minor_patch(version_str)
+    sphinx_rel_notes_url = 'http://docs.mantidproject.org/{0}/release/{1}/index.html'
+    wiki_rel_notes_url = 'http://www.mantidproject.org/Release_Notes_{0}'
+
+    if major > 3 or (major == 3 and minor >= 7):
+        destination = sphinx_rel_notes_url.format('v' + version_str, 'v'+ version_str)
+        prev_destination = sphinx_rel_notes_url.format('v' + prev_version_str, 'v'+ prev_version_str)
+    elif major == 3:
+        if minor == 5:
+            if patch >= 2:
+                destination = sphinx_rel_notes_url.format('nightly', 'v'+ version_str)
+            if patch == 2:
+                prev_destination = wiki_rel_notes_url.format(shortened_prev_version_str)
+            else:
+                prev_destination = sphinx_rel_notes_url.format('nightly', 'v'+ prev_version_str)
+        elif minor == 6:
+            destination = sphinx_rel_notes_url.format('nightly', 'v'+ version_str)
+            prev_destination = sphinx_rel_notes_url.format('nightly', 'v'+ prev_version_str)
+        else:
+            destination = wiki_rel_notes_url.format(shortened_version_str)
+            prev_destination = wiki_rel_notes_url.format(shortened_prev_version_str)
+    else:
+        destination = wiki_rel_notes_url.format(shortened_version_str)
+        prev_destination = wiki_rel_notes_url.format(shortened_prev_version_str)
+
+    return destination, prev_destination
+
+
 def run(args):
     '''Creating a usable DOI is (for our purposes at least) a two step
     process: metadata has to be constructed and then sent to the server, and
@@ -363,12 +399,9 @@ def run(args):
     if args.main:
         destination = 'http://www.mantidproject.org'
     else:
-        destination = 'http://www.mantidproject.org/Release_Notes_' + \
-                      version_str
-        prev_destination = 'http://www.mantidproject.org/Release_Notes_' +\
-                               shortened_prev_version_str
+        destination, prev_destination = get_urls_for_doi(version_str, shortened_version_str,
+                                                         prev_version_str, shortened_prev_version_str)
 
-    # Use the test server if running in test mode.
     if args.test:
         server_url_base = 'https://test.datacite.org/mds/'
     else:
