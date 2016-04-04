@@ -55,7 +55,7 @@ def read_in_expected_peaks(filename, expectedGiven):
 
         if not exPeakArray:
             # "File could not be read. Defaults in alternative option used."
-            if [] == expectedGiven:
+            if not expectedGiven:
                 raise ValueError("Could not read any peaks from the file given in 'ExpectedPeaksFromFile: '" +
                                  filename + "', and no expected peaks were given in the property "
                                  "'ExpectedPeaks' either. Cannot continue without a list of expected peaks.")

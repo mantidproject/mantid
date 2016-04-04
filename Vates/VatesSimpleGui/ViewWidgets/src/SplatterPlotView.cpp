@@ -162,7 +162,7 @@ void SplatterPlotView::render()
     return;
   }
 
-  QString renderType = "Points";
+  const char *renderType = "Point Gaussian";
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
   // Do not allow overplotting of MDWorkspaces
@@ -213,16 +213,19 @@ void SplatterPlotView::render()
   src->updatePipeline();
   pqDataRepresentation *drep = builder->createDataRepresentation(\
            src->getOutputPort(0), this->m_view);
-  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(renderType.toStdString().c_str());
+  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(renderType);
   if (!isPeaksWorkspace)
   {
-    vtkSMPropertyHelper(drep->getProxy(), "PointSize").Set(1);
+    vtkSMPropertyHelper(drep->getProxy(), "Opacity").Set(0.5);
+    vtkSMPropertyHelper(drep->getProxy(), "GaussianRadius").Set(0.005);
+  } else {
+    vtkSMPropertyHelper(drep->getProxy(), "LineWidth").Set(2);
   }
   drep->getProxy()->UpdateVTKObjects();
   if (!isPeaksWorkspace)
   {
-    vtkSMPVRepresentationProxy::SetScalarColoring(drep->getProxy(), "signal",
-                                                  vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    vtkSMPVRepresentationProxy::SetScalarColoring(
+        drep->getProxy(), "signal", vtkDataObject::FIELD_ASSOCIATION_POINTS);
     drep->getProxy()->UpdateVTKObjects();
   }
 
@@ -372,15 +375,12 @@ void SplatterPlotView::destroyPeakSources()
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources;
-  QList<pqPipelineSource *>::Iterator source;
-  sources = smModel->findItems<pqPipelineSource *>(server);
+  const QList<pqPipelineSource *> sources =
+      smModel->findItems<pqPipelineSource *>(server);
 
-  for (source = sources.begin(); source != sources.end(); ++source)
-  {
-    if (this->isPeaksWorkspace(*source))
-    {
-      builder->destroy(*source);
+  foreach (pqPipelineSource *source, sources) {
+    if (this->isPeaksWorkspace(source)) {
+      builder->destroy(source);
     }
   }
 
@@ -516,16 +516,19 @@ void SplatterPlotView::createPeaksFilter()
     updatePeaksFilter(m_peaksFilter);
 
     // Create point representation of the source and set the point size 
-    const double pointSize = 2;
     pqDataRepresentation *dataRepresentation  = m_peaksFilter->getRepresentation(this->m_view);
-    vtkSMPropertyHelper(dataRepresentation->getProxy(), "Representation").Set("Points");
-    vtkSMPropertyHelper(dataRepresentation->getProxy(), "PointSize").Set(pointSize);
+    vtkSMPropertyHelper(dataRepresentation->getProxy(), "Representation")
+        .Set("Point Gaussian");
+    vtkSMPropertyHelper(dataRepresentation->getProxy(), "GaussianRadius")
+        .Set(0.005);
+    vtkSMPropertyHelper(dataRepresentation->getProxy(), "Opacity").Set(0.5);
     dataRepresentation->getProxy()->UpdateVTKObjects();
 
     if (!this->isPeaksWorkspace(this->origSrc))
     {
-      vtkSMPVRepresentationProxy::SetScalarColoring(dataRepresentation->getProxy(), "signal",
-                                                  vtkDataObject::FIELD_ASSOCIATION_CELLS);
+      vtkSMPVRepresentationProxy::SetScalarColoring(
+          dataRepresentation->getProxy(), "signal",
+          vtkDataObject::FIELD_ASSOCIATION_POINTS);
       dataRepresentation->getProxy()->UpdateVTKObjects();
     }
     this->resetDisplay();
@@ -549,23 +552,17 @@ void SplatterPlotView::onPeakSourceDestroyed()
 {
   // For each peak Source check if there is a "true" source available.
   // If it is not availble then remove it from the peakSource storage.
-  for (QList<QPointer<pqPipelineSource>>::Iterator it = m_peaksSource.begin(); it != m_peaksSource.end();) {
+  for (auto it = m_peaksSource.begin(); it != m_peaksSource.end();) {
     pqServer *server = pqActiveObjects::instance().activeServer();
     pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-    QList<pqPipelineSource *> sources;
-    sources = smModel->findItems<pqPipelineSource *>(server);
+    const QList<pqPipelineSource *> sources =
+        smModel->findItems<pqPipelineSource *>(server);
 
-    bool foundSource = false;
-    for (QList<pqPipelineSource *>::iterator src = sources.begin(); src != sources.end(); ++src) {
-      if ((*src) == (*it)) {
-        foundSource = true;
-      }
-    }
+    auto foundSource = std::find(sources.begin(), sources.end(), *it);
 
-    if (!foundSource) {
-      it = m_peaksSource.erase(it); 
-    } 
-    else {
+    if (foundSource == sources.end()) {
+      it = m_peaksSource.erase(it);
+    } else {
       ++it;
     }
   }

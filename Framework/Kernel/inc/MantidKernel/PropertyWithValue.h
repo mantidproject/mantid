@@ -13,10 +13,12 @@
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #endif
 
 #include <MantidKernel/StringTokenizer.h>
 #include <vector>
+#include <type_traits>
 #include "MantidKernel/IPropertySettings.h"
 
 namespace Mantid {
@@ -155,10 +157,9 @@ void toValue(const std::string &strvalue, std::vector<T> &value) {
 
   value.clear();
   value.reserve(values.count());
-
-  for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it) {
-    value.push_back(boost::lexical_cast<T>(*it));
-  }
+  std::transform(
+      values.cbegin(), values.cend(), std::back_inserter(value),
+      [](const std::string &str) { return boost::lexical_cast<T>(str); });
 }
 
 template <typename T>
@@ -172,15 +173,15 @@ void toValue(const std::string &strvalue, std::vector<std::vector<T>> &value,
   value.clear();
   value.reserve(tokens.count());
 
-  for (tokenizer::Iterator oIt = tokens.begin(); oIt != tokens.end(); ++oIt) {
-    tokenizer values(*oIt, innerDelimiter,
+  for (const auto &token : tokens) {
+    tokenizer values(token, innerDelimiter,
                      tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
     std::vector<T> vect;
-
-    for (tokenizer::Iterator iIt = values.begin(); iIt != values.end(); ++iIt)
-      vect.push_back(boost::lexical_cast<T>(*iIt));
-
-    value.push_back(vect);
+    vect.reserve(values.count());
+    std::transform(
+        values.begin(), values.end(), std::back_inserter(vect),
+        [](const std::string &str) { return boost::lexical_cast<T>(str); });
+    value.push_back(std::move(vect));
   }
 }
 
@@ -270,9 +271,11 @@ inline std::vector<std::string> determineAllowedValues(const OptionalBool &,
                                                        const IValidator &) {
   auto enumMap = OptionalBool::enumToStrMap();
   std::vector<std::string> values;
-  for (auto it = enumMap.begin(); it != enumMap.end(); ++it) {
-    values.push_back(it->second);
-  }
+  values.reserve(enumMap.size());
+  std::transform(enumMap.cbegin(), enumMap.cend(), std::back_inserter(values),
+                 [](const std::pair<OptionalBool::Value, std::string> &str) {
+                   return str.second;
+                 });
   return values;
 }
 }
@@ -390,7 +393,11 @@ public:
   std::string setValue(const std::string &value) override {
     try {
       TYPE result = m_value;
-      toValue(value, result);
+      std::string valueCopy = value;
+      if (autoTrim()) {
+        boost::trim(valueCopy);
+      }
+      toValue(valueCopy, result);
       // Uses the assignment operator defined below which runs isValid() and
       // throws based on the result
       *this = result;
@@ -462,7 +469,15 @@ public:
    */
   virtual TYPE &operator=(const TYPE &value) {
     TYPE oldValue = m_value;
-    m_value = value;
+    if (std::is_same<TYPE, std::string>::value) {
+      std::string valueCopy = toString(value);
+      if (autoTrim()) {
+        boost::trim(valueCopy);
+      }
+      toValue(valueCopy, m_value);
+    } else {
+      m_value = value;
+    }
     std::string problem = this->isValid();
     if (problem == "") {
       return m_value;

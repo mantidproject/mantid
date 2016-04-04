@@ -638,10 +638,6 @@ void MantidDockWidget::addPeaksWorkspaceMenuItems(
     QMenu *menu, const Mantid::API::IPeaksWorkspace_const_sptr &WS) const {
   Q_UNUSED(WS);
   menu->addAction(m_showData);
-  menu->addAction(m_showVatesGui); // Show the Vates simple interface
-  if (!MantidQt::API::InterfaceManager::hasVatesLibraries()) {
-    m_showVatesGui->setEnabled(false);
-  }
   menu->addSeparator();
   menu->addAction(m_showDetectors);
   menu->addAction(m_showHist);

@@ -208,6 +208,9 @@ public:
   */
   std::string setValue(const std::string &value) override {
     m_workspaceName = value;
+    if (Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::autoTrim()) {
+      boost::trim(m_workspaceName);
+    }
     // Try and get the workspace from the ADS, but don't worry if we can't
     try {
       Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value =
@@ -399,8 +402,7 @@ private:
     std::string error;
 
     // Cycle through each workspace in the group ...
-    for (auto it = wsGroupNames.begin(); it != wsGroupNames.end(); ++it) {
-      std::string memberWsName = *it;
+    for (const auto &memberWsName : wsGroupNames) {
       boost::shared_ptr<Workspace> memberWs =
           AnalysisDataService::Instance().retrieve(memberWsName);
 

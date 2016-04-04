@@ -280,11 +280,11 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
     }
   }
   try {
-    for (auto itr = dMap.begin(); itr != dMap.end(); ++itr) {
-      run.addLogData(itr->second.release());
+    for (auto &itr : dMap) {
+      run.addLogData(itr.second.release());
     }
-    for (auto sitr = sMap.begin(); sitr != sMap.end(); ++sitr) {
-      run.addLogData(sitr->second.release());
+    for (auto &sitr : sMap) {
+      run.addLogData(sitr.second.release());
     }
   } catch (std::invalid_argument &e) {
     g_log.warning() << e.what();

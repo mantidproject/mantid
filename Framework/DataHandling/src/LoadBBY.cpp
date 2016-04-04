@@ -514,16 +514,12 @@ LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
 
   // extract log and hdf file
   const std::vector<std::string> &files = tarFile.files();
-
-  int64_t fileSize = 0;
-  for (auto itr = files.begin(); itr != files.end(); ++itr)
-    if (itr->rfind(".hdf") == itr->length() - 4) {
-      tarFile.select(itr->c_str());
-      fileSize = tarFile.selected_size();
-      break;
-    }
-
-  if (fileSize != 0) {
+  auto file_it =
+      std::find_if(files.cbegin(), files.cend(), [](const std::string &file) {
+        return file.rfind(".hdf") == file.length() - 4;
+      });
+  if (file_it != files.end()) {
+    tarFile.select(file_it->c_str());
     // extract hdf file into tmp file
     Poco::TemporaryFile hdfFile;
     boost::shared_ptr<FILE> handle(fopen(hdfFile.path().c_str(), "wb"), fclose);
@@ -583,16 +579,12 @@ LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
   }
 
   // patching
-  std::string logContent;
-  for (auto itr = files.begin(); itr != files.end(); ++itr)
-    if (itr->compare("History.log") == 0) {
-      tarFile.select(itr->c_str());
-      logContent.resize(tarFile.selected_size());
-      tarFile.read(&logContent[0], logContent.size());
-      break;
-    }
-
-  if (logContent.size() > 0) {
+  file_it = std::find(files.cbegin(), files.cend(), "History.log");
+  if (file_it != files.cend()) {
+    tarFile.select(file_it->c_str());
+    std::string logContent;
+    logContent.resize(tarFile.selected_size());
+    tarFile.read(&logContent[0], logContent.size());
     std::istringstream data(logContent);
     Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> conf(
         new Poco::Util::PropertyFileConfiguration(data));

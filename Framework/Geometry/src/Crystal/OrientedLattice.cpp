@@ -139,7 +139,7 @@ V3D OrientedLattice::qFromHKL(const V3D &hkl) const {
   vector is not unique, but
   all vectors can be obtaineb by multiplying with a scalar
   @return u :: V3D vector along beam direction*/
-Kernel::V3D OrientedLattice::getuVector() {
+Kernel::V3D OrientedLattice::getuVector() const {
   V3D z(0, 0, 1);
   DblMatrix UBinv = UB;
   UBinv.Invert();
@@ -152,7 +152,7 @@ Kernel::V3D OrientedLattice::getuVector() {
   obtaineb by multiplying with a scalar
   @return v :: V3D vector perpendicular to the beam direction, in the horizontal
   plane*/
-Kernel::V3D OrientedLattice::getvVector() {
+Kernel::V3D OrientedLattice::getvVector() const {
   V3D x(1, 0, 0);
   DblMatrix UBinv = UB;
   UBinv.Invert();

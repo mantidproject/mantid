@@ -1,9 +1,12 @@
 #include "MantidAlgorithms/MaxEnt.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/MaxEnt/MaxentEntropyNegativeValues.h"
 #include "MantidAlgorithms/MaxEnt/MaxentEntropyPositiveValues.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitFactory.h"
 #include <boost/make_shared.hpp>
 #include <boost/shared_array.hpp>
 #include <gsl/gsl_linalg.h>
@@ -19,6 +22,27 @@ using namespace Kernel;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MaxEnt)
+
+namespace {
+
+// Maps defining the inverse caption and label for the reconstructed image
+// Example:
+// The input workspaces (X axis) is in (Time, s)
+// The output image should be in (Frequency, Hz)
+
+// Defines the new caption
+std::map<std::string, std::string> inverseCaption = {{"Time", "Frequency"},
+                                                     {"Frequency", "Time"},
+                                                     {"d-Spacing", "q"},
+                                                     {"q", "d-Spacing"}};
+// Defines the new label
+std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
+                                                   {"microsecond", "MHz"},
+                                                   {"Hz", "s"},
+                                                   {"MHz", "microsecond"},
+                                                   {"Angstrom", "Angstrom^-1"},
+                                                   {"Angstrom^-1", "Angstrom"}};
+}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -68,6 +92,14 @@ void MaxEnt::init() {
                                           "must be positive. It can take "
                                           "negative values otherwise");
 
+  auto mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
+  mustBePositive->setLower(0);
+  declareProperty(make_unique<PropertyWithValue<size_t>>(
+                      "DensityFactor", 1, mustBePositive, Direction::Input),
+                  "An integer number indicating the factor by which the number "
+                  "of points will be increased in the image and reconstructed "
+                  "data");
+
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<double>>();
   mustBeNonNegative->setLower(1E-12);
   declareProperty(make_unique<PropertyWithValue<double>>(
@@ -91,8 +123,8 @@ void MaxEnt::init() {
                       "MaxAngle", 0.05, mustBeNonNegative, Direction::Input),
                   "Maximum degree of non-parallelism between S and C");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
-  mustBePositive->setLower(0);
+  mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
+  mustBePositive->setLower(1);
   declareProperty(make_unique<PropertyWithValue<size_t>>(
                       "MaxIterations", 20000, mustBePositive, Direction::Input),
                   "Maximum number of iterations");
@@ -124,22 +156,48 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
 
   std::map<std::string, std::string> result;
 
-  // X values in input workspace must be equally spaced
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
-  const MantidVec &X = inWS->readX(0);
-  const double dx = X[1] - X[0];
-  for (size_t i = 1; i < X.size() - 2; i++) {
-    if (std::abs(dx - X[i + 1] + X[i]) / dx > 1e-7) {
-      result["InputWorkspace"] =
-          "X axis must be linear (all bins must have the same width)";
-    }
-  }
 
-  size_t nhistograms = inWS->getNumberHistograms();
-  bool complex = getProperty("ComplexData");
-  if (complex && (nhistograms % 2))
-    result["InputWorkspace"] = "The number of histograms in the input "
-                               "workspace must be even for complex data";
+  if (inWS) {
+
+    // 1. X values in input workspace must be (almost) equally spaced
+
+    const double warningLevel = 0.01;
+    const double errorLevel = 0.5;
+    bool printWarning = false;
+    // Average spacing
+    const MantidVec &X = inWS->readX(0);
+    const double dx =
+        (X[X.size() - 1] - X[0]) / static_cast<double>(X.size() - 1);
+    for (size_t i = 1; i < X.size() - 1; i++) {
+      // 1% accuracy exceeded, but data still usable
+      if (std::abs(X[i] - X[0] - static_cast<double>(i) * dx) / dx >
+          warningLevel) {
+        printWarning = true;
+        if (std::abs(X[i] - X[0] - static_cast<double>(i) * dx) / dx >
+            errorLevel) {
+          // 50% accuracy exceeded, data not usable
+          printWarning = false;
+          result["InputWorkspace"] =
+              "X axis must be linear (all bins have same width)";
+          break;
+        }
+      }
+    }
+    if (printWarning) {
+      g_log.warning() << "Bin widths differ by more than " << warningLevel * 100
+                      << "% of average\n";
+    }
+
+    // 2. If the input signal is complex, we expect an even number of histograms
+    // in the input workspace
+
+    size_t nhistograms = inWS->getNumberHistograms();
+    bool complex = getProperty("ComplexData");
+    if (complex && (nhistograms % 2))
+      result["InputWorkspace"] = "The number of histograms in the input "
+                                 "workspace must be even for complex data";
+  }
 
   return result;
 }
@@ -154,6 +212,8 @@ void MaxEnt::exec() {
   bool complex = getProperty("ComplexData");
   // Image must be positive?
   bool positiveImage = getProperty("PositiveImage");
+  // Increase the number of points in the image by this factor
+  size_t densityFactor = getProperty("DensityFactor");
   // Background (default level, sky background, etc)
   double background = getProperty("A");
   // Chi target
@@ -174,7 +234,7 @@ void MaxEnt::exec() {
   // Number of spectra
   size_t nspec = inWS->getNumberHistograms();
   // Number of data points
-  size_t npoints = inWS->blocksize();
+  size_t npoints = inWS->blocksize() * densityFactor;
   // Number of X bins
   size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
 
@@ -549,9 +609,11 @@ void MaxEnt::populateOutputWS(const MatrixWorkspace_sptr &inWS, size_t spec,
   MantidVec YI(npoints);
   MantidVec E(npoints, 0.);
 
+  double x0 = inWS->readX(spec)[0];
+  double dx = inWS->readX(spec)[1] - x0;
+
   if (isImage) {
 
-    double dx = inWS->readX(spec)[1] - inWS->readX(spec)[0];
     double delta = 1. / dx / npoints;
     int isOdd = (inWS->blocksize() % 2) ? 1 : 0;
 
@@ -563,16 +625,31 @@ void MaxEnt::populateOutputWS(const MatrixWorkspace_sptr &inWS, size_t spec,
     }
     if (npointsX == npoints + 1)
       X[npoints] = X[npoints - 1] + delta;
+
+    // Caption & label
+    auto inputUnit = inWS->getAxis(0)->unit();
+    if (inputUnit) {
+      boost::shared_ptr<Kernel::Units::Label> lblUnit =
+          boost::dynamic_pointer_cast<Kernel::Units::Label>(
+              UnitFactory::Instance().create("Label"));
+      if (lblUnit) {
+
+        lblUnit->setLabel(
+            inverseCaption[inWS->getAxis(0)->unit()->caption()],
+            inverseLabel[inWS->getAxis(0)->unit()->label().ascii()]);
+        outWS->getAxis(0)->unit() = lblUnit;
+      }
+    }
+
   } else {
     for (int i = 0; i < npoints; i++) {
-      X[i] = inWS->readX(spec)[i];
+      X[i] = x0 + i * dx;
       YR[i] = result[2 * i];
       YI[i] = result[2 * i + 1];
     }
     if (npointsX == npoints + 1)
-      X[npoints] = inWS->readX(spec)[npoints];
+      X[npoints] = x0 + npoints * dx;
   }
-  // Reconstructed image
 
   outWS->dataX(spec).assign(X.begin(), X.end());
   outWS->dataY(spec).assign(YR.begin(), YR.end());

@@ -421,7 +421,7 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
     QString wsNameQ = QString::fromStdString(wsName);
 
     // Plot the workspace
-    plotSpectrum(wsNameQ, (plotType == Logorithm));
+    plotSpectrum(wsNameQ, (plotType == Logarithm));
     setCurrentDataName(wsNameQ);
   } catch (std::exception &e) {
     g_log.error(e.what());
@@ -434,6 +434,7 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
 
 /**
  * Finds a name for new analysis workspace.
+ * Format: "INST00012345; Pair; long; Asym; 1[; #1]"
  * @param itemType :: Whether it's a group or pair
  * @param tableRow :: Row in the group/pair table which contains the item
  * @param plotType :: What kind of plot we want to analyse
@@ -441,45 +442,53 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
  */
 std::string MuonAnalysis::getNewAnalysisWSName(ItemType itemType, int tableRow,
                                                PlotType plotType) {
-  std::string plotTypeName;
+  std::ostringstream workspaceName;
+  const static std::string sep("; ");
 
+  // Instrument and run number
+  workspaceName << m_currentLabel << sep;
+
+  // Pair/group and name of pair/group
+  if (itemType == Pair) {
+    workspaceName << "Pair" << sep;
+    workspaceName << m_uiForm.pairTable->item(tableRow, 0)->text().toStdString()
+                  << sep;
+  } else if (itemType == Group) {
+    workspaceName << "Group" << sep;
+    workspaceName
+        << m_uiForm.groupTable->item(tableRow, 0)->text().toStdString() << sep;
+  }
+
+  // Type of plot
   switch (plotType) {
   case Asymmetry:
-    plotTypeName = "Asym";
+    workspaceName << "Asym";
     break;
   case Counts:
-    plotTypeName = "Counts";
+    workspaceName << "Counts";
     break;
-  case Logorithm:
-    plotTypeName = "Logs";
+  case Logarithm:
+    workspaceName << "Logs";
     break;
   }
+  
+  // Period(s)
+  workspaceName << sep << getPeriodLabels();
 
-  std::string itemTypeName;
-  std::string itemName;
-
-  if (itemType == Pair) {
-    itemTypeName = "Pair";
-    itemName = m_uiForm.pairTable->item(tableRow, 0)->text().toStdString();
-  } else if (itemType == Group) {
-    itemTypeName = "Group";
-    itemName = m_uiForm.groupTable->item(tableRow, 0)->text().toStdString();
-  }
-
-  const std::string firstPart = (m_currentLabel + "; " + itemTypeName + "; " +
-                                 itemName + "; " + plotTypeName + "; #");
-
+  // Construct workspace name
   std::string newName;
-
   if (isOverwriteEnabled()) {
-    // If ovewrite is enabled, can use the same name again and again
-    newName = firstPart + "1";
+    newName = workspaceName.str();
   } else {
     // If overwrite is disabled, need to find unique name for the new workspace
+    workspaceName << sep << "#";
+    newName = workspaceName.str();
+    std::string uniqueName;
     int plotNum(1);
     do {
-      newName = firstPart + boost::lexical_cast<std::string>(plotNum++);
-    } while (AnalysisDataService::Instance().doesExist(newName));
+      uniqueName = newName + std::to_string(plotNum++);
+    } while (AnalysisDataService::Instance().doesExist(uniqueName));
+    newName = uniqueName;
   }
 
   return newName;
@@ -497,8 +506,8 @@ MuonAnalysis::PlotType MuonAnalysis::parsePlotType(QComboBox *selector) {
     return Asymmetry;
   } else if (plotTypeName == "Counts") {
     return Counts;
-  } else if (plotTypeName == "Logorithm") {
-    return Logorithm;
+  } else if (plotTypeName == "Logarithm") {
+    return Logarithm;
   } else {
     throw std::runtime_error("Unknown plot type name: " + plotTypeName);
   }
@@ -533,12 +542,8 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
       inputGroup->addWorkspace(ws);
     }
     // Parse selected operation
-    const std::string summedPeriods =
-        m_uiForm.homePeriodBox1->text().toStdString();
-    const std::string subtractedPeriods =
-        m_uiForm.homePeriodBox2->text().toStdString();
-    alg->setProperty("SummedPeriodSet", summedPeriods);
-    alg->setProperty("SubtractedPeriodSet", subtractedPeriods);
+    alg->setProperty("SummedPeriodSet", getSummedPeriods());
+    alg->setProperty("SubtractedPeriodSet", getSubtractedPeriods());
   } else if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS)) {
     // Put this single WS into a group and set it as the input property
     inputGroup->addWorkspace(ws);
@@ -573,7 +578,7 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
 
     switch (plotType) {
     case Counts:
-    case Logorithm:
+    case Logarithm:
       outputType = "GroupCounts";
       break;
     case Asymmetry:
@@ -1767,21 +1772,34 @@ void MuonAnalysis::clearLoadedRun() {
 
 /**
  * Get period labels for the periods selected in the GUI
- * @return Return empty string if no periods (well just one period). If more
- *         one period then return "_#" string for the periods selected by user
+ * Return an empty string for single-period data or all periods
+ * @return String for the period(s) selected by user
  */
-QStringList MuonAnalysis::getPeriodLabels() const {
-  QStringList retVal;
-  if (m_uiForm.homePeriodBox2->isEnabled() &&
-      m_uiForm.homePeriodBox2->text() != "") {
-    retVal.append("_" + m_uiForm.homePeriodBox1->text());
-    retVal.append("_" + m_uiForm.homePeriodBox2->text());
-  } else if (m_uiForm.homePeriodBox2->isEnabled()) {
-    retVal.append("_" + m_uiForm.homePeriodBox1->text());
-  } else
-    retVal.append("");
+std::string MuonAnalysis::getPeriodLabels() const {
+  std::ostringstream retVal;
 
-  return retVal;
+  // Change input comma-separated to more readable format
+  auto summed = getSummedPeriods();
+  std::replace(summed.begin(), summed.end(), ',', '+');
+  auto subtracted = getSubtractedPeriods();
+  if (!subtracted.empty()) {
+    std::replace(subtracted.begin(), subtracted.end(), ',', '+');
+  }
+
+  // If single period, or all (1,2,3,...) then leave blank
+  // All periods => size of string is 2n-1
+  const bool isSinglePeriod = m_numPeriods == 1;
+  const bool isAllPeriods =
+      summed.size() == 2 * m_numPeriods - 1 && subtracted.empty();
+
+  if (!isSinglePeriod && !isAllPeriods) {
+    retVal << summed;
+    if (!subtracted.empty()) {
+      retVal << "-" << subtracted;
+    }
+  }
+
+  return retVal.str();
 }
 
 /**
@@ -3036,12 +3054,11 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm() {
 
   // -- Period options --------------------------------------------------------
 
-  QString periodLabel1 = m_uiForm.homePeriodBox1->text();
-  loadAlg->setProperty("SummedPeriodSet", periodLabel1.toStdString());
+  loadAlg->setProperty("SummedPeriodSet", getSummedPeriods());
 
-  QString periodLabel2 = m_uiForm.homePeriodBox2->text();
-  if (periodLabel2 != "None") {
-    loadAlg->setProperty("SubtractedPeriodSet", periodLabel2.toStdString());
+  const auto subtracted = getSubtractedPeriods();
+  if (subtracted != "None") {
+    loadAlg->setProperty("SubtractedPeriodSet", subtracted);
   }
 
   return loadAlg;
@@ -3103,6 +3120,26 @@ int MuonAnalysis::getGroupOrPairToPlot() const {
 void MuonAnalysis::fillGroupingTable(const Grouping &grouping) {
   int defaultIndex = m_groupingHelper.fillGroupingTable(grouping);
   setGroupOrPairAndReplot(defaultIndex);
+}
+
+/**
+ * Returns the set of summed period numbers
+ * @returns :: period number string
+ */
+std::string MuonAnalysis::getSummedPeriods() const {
+  auto summed = m_uiForm.homePeriodBox1->text().toStdString();
+  summed.erase(std::remove(summed.begin(), summed.end(), ' '));
+  return summed;
+}
+
+/**
+ * Returns the set of subtracted period numbers
+ * @returns :: period number string
+ */
+std::string MuonAnalysis::getSubtractedPeriods() const {
+  auto subtracted = m_uiForm.homePeriodBox2->text().toStdString();
+  subtracted.erase(std::remove(subtracted.begin(), subtracted.end(), ' '));
+  return subtracted;
 }
 
 } // namespace MantidQT

@@ -96,7 +96,7 @@ void SaveAscii2::init() {
   setPropertySettings("CustomSeparator",
                       make_unique<VisibleWhenProperty>("Separator", IS_EQUAL_TO,
                                                        "UserDefined"));
-
+  getPointerToProperty("CustomSeparator")->setAutoTrim(false);
   declareProperty("ColumnHeader", true,
                   "If true, put column headers into file. ");
 
