@@ -23,12 +23,11 @@ Using the "--delete" flag will the DOI metadata with the given details
 
 NOTES:
 
-- This script is tailored for use at RAL, where the internet must be accessed
-  via the "wwwcache.rl.ac.uk" proxy.  Making it work off site will require some
-  tweaking.
-
 - A requirement for the script to run is for cURL to be installed and its
   executable to be on the PATH.
+
+- If your connection requires a proxy to be manually configured then ensure the
+  http_proxy environment variable is set when the script is executed.
 
 - The "www.mantidproject.org" domain had to be registered with DataCite (on
   both the test server and the main server) before a valid DOI could be
@@ -56,7 +55,7 @@ USEFUL LINKS:
 """
 
 import argparse
-
+import os
 import xml.etree.ElementTree as ET
 
 import subprocess
@@ -202,12 +201,13 @@ def _http_request(body, method, url, options):
     args = [
         'curl',
         '--user',    options.username + ':' + options.password,
-        '--proxy',   'wwwcache.rl.ac.uk:8080',
         '--header',  'Content-Type:text/plain;charset=UTF-8',
         # The bodies of HTTP messages must be encoded:
         '--data',    body.encode('utf-8'),
         '--request', method,
     ]
+    if 'http_proxy' in os.environ:
+        args.extend(['--proxy', os.environ['http_proxy']])
 
     # Set how loud cURL should be while running.
     if options.debug:
