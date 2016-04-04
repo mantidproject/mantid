@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataHandling/H5Util.h"
 #include "MantidDataHandling/LoadCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -110,47 +111,6 @@ void LoadDiffCal::init() {
 
 namespace { // anonymous
 
-std::string readString(H5File &file, const std::string &path) {
-  try {
-    DataSet data = file.openDataSet(path);
-    std::string value;
-    data.read(value, data.getDataType(), data.getSpace());
-    return value;
-  } catch (H5::FileIException &e) {
-    UNUSED_ARG(e);
-    return "";
-  } catch (H5::GroupIException &e) {
-    UNUSED_ARG(e);
-    return "";
-  }
-}
-
-template <typename NumT>
-std::vector<NumT> readArrayCoerce(DataSet &dataset,
-                                  const DataType &desiredDataType) {
-  std::vector<NumT> result;
-  DataType dataType = dataset.getDataType();
-  DataSpace dataSpace = dataset.getSpace();
-
-  if (desiredDataType == dataType) {
-    result.resize(dataSpace.getSelectNpoints());
-    dataset.read(&result[0], dataType, dataSpace);
-  } else if (PredType::NATIVE_UINT32 == dataType) {
-    std::vector<uint32_t> temp(dataSpace.getSelectNpoints());
-    dataset.read(&temp[0], dataType, dataSpace);
-    result.assign(temp.begin(), temp.end());
-  } else if (PredType::NATIVE_FLOAT == dataType) {
-    std::vector<float> temp(dataSpace.getSelectNpoints());
-    dataset.read(&temp[0], dataType, dataSpace);
-    for (float value : temp)
-      result.push_back(static_cast<NumT>(value));
-  } else {
-    throw DataTypeIException();
-  }
-
-  return result;
-}
-
 bool endswith(const std::string &str, const std::string &ending) {
   if (ending.size() > str.size()) {
     return false;
@@ -195,7 +155,7 @@ std::vector<double> LoadDiffCal::readDoubleArray(Group &group,
 
   try {
     DataSet dataset = group.openDataSet(name);
-    result = readArrayCoerce<double>(dataset, PredType::NATIVE_DOUBLE);
+    result = H5Util::readArrayCoerce<double>(dataset, PredType::NATIVE_DOUBLE);
   } catch (H5::GroupIException &e) {
     UNUSED_ARG(e);
     g_log.information() << "Failed to open dataset \"" << name << "\"\n";
@@ -222,7 +182,7 @@ std::vector<int32_t> LoadDiffCal::readInt32Array(Group &group,
 
   try {
     DataSet dataset = group.openDataSet(name);
-    result = readArrayCoerce<int32_t>(dataset, PredType::NATIVE_INT32);
+    result = H5Util::readArrayCoerce<int32_t>(dataset, PredType::NATIVE_INT32);
   } catch (H5::GroupIException &e) {
     UNUSED_ARG(e);
     g_log.information() << "Failed to open dataset \"" << name << "\"\n";
@@ -249,8 +209,8 @@ void LoadDiffCal::getInstrument(H5File &file) {
   }
 
   std::string idf =
-      readString(file, "/calibration/instrument/instrument_source");
-  std::string instrumentName = readString(file, "/calibration/instrument/name");
+      H5Util::readString(file, "/calibration/instrument/instrument_source");
+  std::string instrumentName = H5Util::readString(file, "/calibration/instrument/name");
 
   g_log.debug() << "IDF : " << idf << "\n"
                 << "NAME: " << instrumentName << "\n";

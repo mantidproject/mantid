@@ -6,10 +6,14 @@
 #include <string>
 #include <vector>
 
+// forward declarations
 namespace H5 {
 class DataSpace;
+class DataSet;
 class DSetCreatPropList;
+class DataType;
 class Group;
+class H5File;
 }
 
 namespace Mantid {
@@ -65,6 +69,12 @@ MANTID_DATAHANDLING_DLL void writeArray(H5::Group &group, const std::string &nam
 
 MANTID_DATAHANDLING_DLL void writeArray(H5::Group &group, const std::string &name,
                 const std::vector<int32_t> &values);
+
+MANTID_DATAHANDLING_DLL std::string readString(H5::H5File &file, const std::string &path);
+
+template <typename NumT>
+std::vector<NumT> readArrayCoerce(H5::DataSet &dataset,
+                                  const H5::DataType &desiredDataType);
 
 } // namespace H5Util
 } // namespace DataHandling

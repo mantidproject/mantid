@@ -8,6 +8,10 @@ namespace Mantid {
 namespace DataHandling {
 namespace H5Util {
 
+// -------------------------------------------------------------------
+// write methods
+// -------------------------------------------------------------------
+
 DataSpace getDataSpace(const size_t length) {
   hsize_t dims[] = {length};
   return DataSpace(1, dims);
@@ -64,6 +68,51 @@ void writeArray(H5::Group &group, const std::string &name,
 }
 
 // -------------------------------------------------------------------
+// read methods
+// -------------------------------------------------------------------
+
+std::string readString(H5::H5File &file, const std::string &path) {
+  try {
+    DataSet data = file.openDataSet(path);
+    std::string value;
+    data.read(value, data.getDataType(), data.getSpace());
+    return value;
+  } catch (H5::FileIException &e) {
+    UNUSED_ARG(e);
+    return "";
+  } catch (H5::GroupIException &e) {
+    UNUSED_ARG(e);
+    return "";
+  }
+}
+
+template <typename NumT>
+std::vector<NumT> readArrayCoerce(DataSet &dataset,
+                                  const DataType &desiredDataType) {
+  std::vector<NumT> result;
+  DataType dataType = dataset.getDataType();
+  DataSpace dataSpace = dataset.getSpace();
+
+  if (desiredDataType == dataType) {
+    result.resize(dataSpace.getSelectNpoints());
+    dataset.read(&result[0], dataType, dataSpace);
+  } else if (PredType::NATIVE_UINT32 == dataType) {
+    std::vector<uint32_t> temp(dataSpace.getSelectNpoints());
+    dataset.read(&temp[0], dataType, dataSpace);
+    result.assign(temp.begin(), temp.end());
+  } else if (PredType::NATIVE_FLOAT == dataType) {
+    std::vector<float> temp(dataSpace.getSelectNpoints());
+    dataset.read(&temp[0], dataType, dataSpace);
+    for (float value : temp)
+      result.push_back(static_cast<NumT>(value));
+  } else {
+    throw DataTypeIException();
+  }
+
+  return result;
+}
+
+// -------------------------------------------------------------------
 // instantiations for getDataSpace
 // -------------------------------------------------------------------
 template
@@ -79,6 +128,27 @@ MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<int64_t> &data)
 template
 MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<uint64_t> &data);
 
+// -------------------------------------------------------------------
+// instantiations for readArrayCoerce
+// -------------------------------------------------------------------
+template
+MANTID_DATAHANDLING_DLL std::vector<float> readArrayCoerce(DataSet &dataset,
+                                  const DataType &desiredDataType);
+template
+MANTID_DATAHANDLING_DLL std::vector<double> readArrayCoerce(DataSet &dataset,
+                                  const DataType &desiredDataType);
+template
+MANTID_DATAHANDLING_DLL std::vector<int32_t> readArrayCoerce(DataSet &dataset,
+                                  const DataType &desiredDataType);
+template
+MANTID_DATAHANDLING_DLL std::vector<uint32_t> readArrayCoerce(DataSet &dataset,
+                                  const DataType &desiredDataType);
+template
+MANTID_DATAHANDLING_DLL std::vector<int64_t> readArrayCoerce(DataSet &dataset,
+                                  const DataType &desiredDataType);
+template
+MANTID_DATAHANDLING_DLL std::vector<uint64_t> readArrayCoerce(DataSet &dataset,
+                                  const DataType &desiredDataType);
 } // namespace H5Util
 } // namespace DataHandling
 } // namespace Mantid
