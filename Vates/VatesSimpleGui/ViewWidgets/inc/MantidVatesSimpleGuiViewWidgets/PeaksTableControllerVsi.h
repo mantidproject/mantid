@@ -33,8 +33,9 @@ public:
   void showFullTable();
   void removeTable();
   std::string getConcatenatedWorkspaceNames(std::string delimiter);
-  void updatePeaksWorkspaces(QList<QPointer<pqPipelineSource>> peakSources,
-                             pqPipelineSource *splatSource);
+  void
+  updatePeaksWorkspaces(const QList<QPointer<pqPipelineSource>> &peakSources,
+                        pqPipelineSource *splatSource);
 signals:
   void setRotationToPoint(double x, double y, double z);
 public slots:

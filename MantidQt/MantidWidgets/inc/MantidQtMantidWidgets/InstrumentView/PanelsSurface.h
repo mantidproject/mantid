@@ -77,6 +77,8 @@ namespace MantidQt
 			void addCompAssembly(Mantid::Geometry::ComponentID bankId);
 			// Add a rectangular detector
 			void addRectangularDetector(Mantid::Geometry::ComponentID bankId);
+			//Add a structured detector
+			void addStructuredDetector(Mantid::Geometry::ComponentID bankId);
 			// Calculate bank rotation
 			Mantid::Kernel::Quat calcBankRotation(const Mantid::Kernel::V3D &detPos, Mantid::Kernel::V3D normal) const;
 			// Add a detector from an assembly

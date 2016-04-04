@@ -8,12 +8,18 @@ Reflectometry Changes
 Reflectometry Instruments
 --------------------------
 
-An updated version of the OFFSPEC IDF is now being used in mantid `#15561 <https://github.com/mantidproject/mantid/pull/15561>_`
+An updated version of the OFFSPEC IDF is now being used in mantid `#15561 <https://github.com/mantidproject/mantid/pull/15561>`_
    
 ConvertToReflectometryQ
 -----------------------
 
 - A bug producing dark regions in *QxQz* maps was fixed `#15321 <https://github.com/mantidproject/mantid/pull/15321>`_
+
+ReflectometryReductionOne
+-------------------------
+
+- Transmission corrections options are now applicable with both PointDetectorAnalysis and MultiDetectorAnalysis modes as long as a first 
+  transmission workspace has been provided. `#15683 <https://github.com/mantidproject/mantid/pull/15683>`_
 
 Reflectometry Reduction Interface
 ---------------------------------
@@ -24,6 +30,12 @@ ISIS Reflectometry (Polref)
 - Bugfix: When using the ICAT search in the interface, if the wrong user credentials were entered or the login dialog
   was closed before the details had been entered then mantid crashed. This has been fixed.
   `#15410 <https://github.com/mantidproject/mantid/pull/15410>`_
+- Some changes were made to the interface as part of a code refactoring (functional behaviour remains the same). 
+  The only change visible to user is a new progress bar that has been added to the *Search Runs* section. It show the progress when
+  transferring runs. The progress bar that existed before will only indicate the progress of processing that is
+  in progress. `#15670 <https://github.com/mantidproject/mantid/pull/15670>`_
+
+.. figure:: /images/ISISReflectometryPolref_newTableView.png
 
 - User can now specific stitching parameters (StartOverlaps, EndOverlaps, ScaleLHSWorkspace and Rebinning-Parameters)
   from the new stitching tab in the Options dialog for the interface `#15677 <https://github.com/mantidproject/mantid/pull/15677>`_

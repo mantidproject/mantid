@@ -439,6 +439,28 @@ public:
     TS_ASSERT_DELTA(binSizes[1], 1.0, 1e-6);
   }
 
+  //-------------------------------------------------------------------------------------
+  void test_estimateResolution_with_top_level_splitting() {
+    MDEventWorkspace2Lean::sptr b =
+        MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
+    std::vector<coord_t> binSizes;
+    // First, before any splitting
+    binSizes = b->estimateResolution();
+    TS_ASSERT_EQUALS(binSizes.size(), 2);
+    TS_ASSERT_DELTA(binSizes[0], 10.0, 1e-6);
+    TS_ASSERT_DELTA(binSizes[1], 10.0, 1e-6);
+
+    auto bc = b->getBoxController();
+    bc->setSplitTopInto(0, 5);
+
+    // Resolution is smaller after splitting
+    b->splitBox();
+    binSizes = b->estimateResolution();
+    TS_ASSERT_EQUALS(binSizes.size(), 2);
+    TS_ASSERT_DELTA(binSizes[0], 2.0, 1e-6);
+    TS_ASSERT_DELTA(binSizes[1], 10.0, 1e-6);
+  }
+
   ////-------------------------------------------------------------------------------------
 
   void

@@ -5,6 +5,7 @@
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 
 using namespace Mantid;
@@ -53,8 +54,9 @@ namespace MantidQt
 		}
 
 		/**
-		* An component is a non-detector if it's an ObjComponent (has a shape) and not an ObjCompAssembly
-		* (a single object) and not a RectangularDetector (which is an assembly).
+		* A component is a non-detector if it's an ObjComponent (has a shape) and not an ObjCompAssembly
+		* (a single object) and not a RectangularDetector (which is an assembly) or a StructuredDetector
+		(which is an assembly).
 		*/
 		bool ComponentActor::isNonDetector() const
 		{
@@ -62,7 +64,8 @@ namespace MantidQt
 			return  obj &&
 				!getObjCompAssembly() &&
 				!getDetector() &&
-				!boost::dynamic_pointer_cast<const Mantid::Geometry::RectangularDetector>(obj);
+				!boost::dynamic_pointer_cast<const Mantid::Geometry::RectangularDetector>(obj) &&
+				!boost::dynamic_pointer_cast<const Mantid::Geometry::StructuredDetector>(obj);
 		}
 
 	}//MantidWidgets

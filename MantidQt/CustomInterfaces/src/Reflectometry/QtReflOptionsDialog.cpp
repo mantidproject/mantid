@@ -5,7 +5,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 /** Constructor */
 QtReflOptionsDialog::QtReflOptionsDialog(
-    ReflMainView *view, boost::shared_ptr<IReflPresenter> presenter)
+
+    ReflTableView *view, boost::shared_ptr<IReflTablePresenter> presenter)
     : QDialog(dynamic_cast<QtReflMainView *>(view)), m_presenter(presenter) {
   initLayout();
   initBindings();
@@ -29,7 +30,6 @@ void QtReflOptionsDialog::initBindings() {
   // Check all the widgets for the "reflOptionName" property.
   // If it exists, bind the named option to that widget.
   QList<QWidget *> widgets = findChildren<QWidget *>();
-  auto widgetsVec = widgets.toVector();
   for (auto it = widgets.begin(); it != widgets.end(); ++it) {
     QVariant binding = (*it)->property("reflOptionName");
     if (binding.isValid())
@@ -95,7 +95,6 @@ void QtReflOptionsDialog::loadOptions() {
     QLineEdit *lineEdit = findChild<QLineEdit *>(widgetName);
     if (lineEdit) {
       lineEdit->setText(it->second.toString());
-      continue;
     }
   }
 }
