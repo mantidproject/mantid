@@ -7,7 +7,7 @@ are configured to find the Vesuvio data
 import unittest
 import platform
 from mantid.api import AlgorithmManager
-from VesuvioTesting import create_test_ws
+import VesuvioTesting as testing
 import vesuvio.commands as vesuvio
 
 class VesuvioTOFFitTest(unittest.TestCase):
@@ -18,7 +18,7 @@ class VesuvioTOFFitTest(unittest.TestCase):
         if self._test_ws is not None:
             return
         # Cache a TOF workspace
-        self.__class__._test_ws = create_test_ws()
+        self.__class__._test_ws = testing.create_test_ws()
 
     # -------------- Success cases ------------------
 

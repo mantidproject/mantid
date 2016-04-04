@@ -13,13 +13,13 @@ import platform
 
 
 from mantid.api import *
-from VesuvioTesting import create_test_container_ws, create_test_ws
+import VesuvioTesting as testing
 import mantid.simpleapi as ms
 
 #====================================Helper Functions=======================================
 def setUp():
-    test_ws = create_test_ws()
-    test_container_ws = create_test_container_ws()
+    test_ws = testing.create_test_ws()
+    test_container_ws = testing.create_test_container_ws()
     return test_ws, test_container_ws
 
 def tearDown():
