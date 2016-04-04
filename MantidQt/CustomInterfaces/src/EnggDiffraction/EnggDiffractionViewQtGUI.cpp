@@ -1320,7 +1320,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
       bankDir = (bankDir).expand(selectedfPath.parent().toString());
 #endif
 
-      if (!splitBaseName.empty()) {
+      if (!splitBaseName.empty() && splitBaseName.size() > 3) {
         std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] + "_" +
                                splitBaseName[2] + "_" + splitBaseName[3];
         updateFittingDirVec(bankDir.toString(), foc_file);
@@ -1330,8 +1330,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
       // if given a run number instead
       updateFittingDirVec(m_focusDir, focusedFile.toStdString());
     } else {
-
-      userWarning("Invalid directory or run number: ",
+      userWarning("Invalid Input",
                   "Invalid directory or run number given. "
                   "Please try again");
     }
