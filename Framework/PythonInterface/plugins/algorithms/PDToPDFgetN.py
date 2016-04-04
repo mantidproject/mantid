@@ -148,7 +148,7 @@ class PDToPDFgetN(DataProcessorAlgorithm):
             wksp.getRun()['iparm_file'] = self._iparmFile
 
         wksp = SetUncertainties(InputWorkspace=wksp, OutputWorkspace=wksp,
-                                SetError="sqrt")
+                                SetError="sqrtOrOne")
         SaveGSS(InputWorkspace=wksp,
                 Filename=self.getProperty("PDFgetNFile").value,
                 SplitFiles=False, Append=False,

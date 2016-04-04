@@ -22,25 +22,38 @@ namespace {
 /// Used to compare signal to zero
 const double TOLERANCE = 1.e-10;
 
-struct oneifzeroerror {
+const std::string ZERO("zero");
+const std::string SQRT("sqrt");
+const std::string ONE_IF_ZERO("oneIfZero");
+const std::string SQRT_OR_ONE("sqrtOrOne");
+
+struct resetzeroerror {
+  explicit resetzeroerror(const double constant) : zeroErrorValue(constant) {}
+
   double operator()(const double error) {
     if (error < TOLERANCE) {
-      return 1.;
+      return zeroErrorValue;
     } else {
       return error;
     }
   }
+
+  double zeroErrorValue;
 };
 
 struct sqrterror {
+  explicit sqrterror(const double constant) : zeroSqrtValue(constant) {}
+
   double operator()(const double intensity) {
     const double localIntensity = fabs(intensity);
     if (localIntensity > TOLERANCE) {
       return sqrt(localIntensity);
     } else {
-      return 0.;
+      return zeroSqrtValue;
     }
   }
+
+  double zeroSqrtValue;
 };
 }
 
@@ -56,16 +69,12 @@ const std::string SetUncertainties::name() const { return "SetUncertainties"; }
 /// Algorithm's version
 int SetUncertainties::version() const { return (1); }
 
-const std::string ZERO("zero");
-const std::string SQRT("sqrt");
-const std::string ONEIFZERO("oneifzero");
-
 void SetUncertainties::init() {
   declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
       "InputWorkspace", "", Direction::Input));
   declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
       "OutputWorkspace", "", Direction::Output));
-  std::vector<std::string> errorTypes = {ZERO, SQRT, ONEIFZERO};
+  std::vector<std::string> errorTypes = {ZERO, SQRT, SQRT_OR_ONE, ONE_IF_ZERO};
   declareProperty("SetError", ZERO,
                   boost::make_shared<StringListValidator>(errorTypes),
                   "How to reset the uncertainties");
@@ -75,7 +84,10 @@ void SetUncertainties::exec() {
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   std::string errorType = getProperty("SetError");
   bool zeroError = (errorType.compare(ZERO) == 0);
-  bool oneIfZeroError = (errorType.compare(ONEIFZERO) == 0);
+  bool takeSqrt =
+      ((errorType.compare(SQRT) == 0) || (errorType.compare(SQRT_OR_ONE) == 0));
+  bool resetOne = ((errorType.compare(ONE_IF_ZERO) == 0) ||
+                   (errorType.compare(SQRT_OR_ONE) == 0));
 
   // Create the output workspace. This will copy many aspects from the input
   // one.
@@ -94,20 +106,22 @@ void SetUncertainties::exec() {
     outputWorkspace->setX(i, inputWorkspace->refX(i));
     outputWorkspace->dataY(i) = inputWorkspace->readY(i);
     // copy the E or set to zero depending on the mode
-    if (oneIfZeroError) {
+    if (errorType.compare(ONE_IF_ZERO) == 0) {
       outputWorkspace->dataE(i) = inputWorkspace->readE(i);
     } else {
       outputWorkspace->dataE(i) =
           std::vector<double>(inputWorkspace->readE(i).size(), 0.);
     }
 
+    // ZERO mode doesn't calculate anything further
     if (!zeroError) {
       MantidVec &E = outputWorkspace->dataE(i);
-      if (oneIfZeroError) {
-        std::for_each(E.begin(), E.end(), oneifzeroerror());
-      } else {
+      if (takeSqrt) {
         const MantidVec &Y = outputWorkspace->readY(i);
-        std::transform(Y.begin(), Y.end(), E.begin(), sqrterror());
+        std::transform(Y.begin(), Y.end(), E.begin(),
+                       sqrterror(resetOne ? 1. : 0.));
+      } else {
+        std::for_each(E.begin(), E.end(), resetzeroerror(1.));
       }
     }
 
