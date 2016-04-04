@@ -21,8 +21,8 @@ Engineering Diffraction
 - The Fitting tab provides a graphical interface which fits an expected diffraction pattern and visualises them.
   The pastern is specified by providing a list of dSpacing values where Bragg peaks are expected. The algorithm
   :ref:`EnggFitPeaks<algm-EnggFitPeaks>` used in the background fit peaks in those areas using a peak fitting function.
-
-|
+- Fitting tab will automatically select and import all the focused bank files found within working directory and user
+  can also select file now by providing a run-number.
 
 Full list of `diffraction <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Diffraction%22>`_
 and

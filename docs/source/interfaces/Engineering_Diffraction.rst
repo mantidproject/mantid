@@ -286,7 +286,8 @@ These parameters are required to process Fitting successfully:
 
 Focused Run #:
   Focused workspace directory or selected with the help of browse button.
-  User may also select the file by simply entering the file run number.
+  User may also select the file by simply entering the file run number,
+  which is located within the focused output directory.
   Focused workspace can be generated with the help of
   :ref:`focus-Engineering_Diffraction-ref` tab, the output folder
   directory can be set in the :ref:`setting-Engineering_Diffraction-ref`
