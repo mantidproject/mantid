@@ -207,7 +207,7 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
   auto iterators = toSmooth->createIterators(nThreads, nullptr);
 
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int it = 0; it < int(iterators.size()); ++it) {
+  for (int it = 0; it < int(iterators.size()); ++it) { // NOLINT
 
     PARALLEL_START_INTERUPT_REGION
     boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(
@@ -404,7 +404,7 @@ SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
 /** Initialize the algorithm's properties.
  */
 void SmoothMD::init() {
-  declareProperty(new WorkspaceProperty<API::IMDHistoWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDHistoWorkspace to smooth.");
 
@@ -416,7 +416,7 @@ void SmoothMD::init() {
       boost::make_shared<MandatoryValidator<WidthVector>>());
 
   declareProperty(
-      new ArrayProperty<double>("WidthVector", widthVectorValidator,
+      make_unique<ArrayProperty<double>>("WidthVector", widthVectorValidator,
                                 Direction::Input),
       "Width vector. Either specify the width in n-pixels for each "
       "dimension, or provide a single entry (n-pixels) for all "
@@ -428,18 +428,18 @@ void SmoothMD::init() {
   std::stringstream docBuffer;
   docBuffer << "Smoothing function. Defaults to " << first;
   declareProperty(
-      new PropertyWithValue<std::string>(
+      Kernel::make_unique<PropertyWithValue<std::string>>(
           "Function", first,
           boost::make_shared<ListValidator<std::string>>(allFunctionTypes),
           Direction::Input),
       docBuffer.str());
 
-  declareProperty(new WorkspaceProperty<API::IMDHistoWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
                       "InputNormalizationWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "Multidimensional weighting workspace. Optional.");
 
-  declareProperty(new WorkspaceProperty<API::IMDHistoWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output smoothed MDHistoWorkspace.");
 }

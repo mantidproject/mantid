@@ -61,11 +61,11 @@ const std::string AlignAndFocusPowder::category() const {
 /** Initialisation method. Declares properties to be used in algorithm.
  */
 void AlignAndFocusPowder::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
   // declareProperty(
   //   new WorkspaceProperty<MatrixWorkspace>("LowResTOFWorkspace", "",
@@ -73,33 +73,34 @@ void AlignAndFocusPowder::init() {
   //   "The name of the workspace containing the filtered low resolution TOF
   //   data.");
   declareProperty(
-      new FileProperty("CalFileName", "", FileProperty::OptionalLoad,
-                       {".h5", ".hd5", ".hdf", ".cal"}),
+      Kernel::make_unique<FileProperty>(
+          "CalFileName", "", FileProperty::OptionalLoad,
+          std::vector<std::string>{".h5", ".hd5", ".hdf", ".cal"}),
       "The name of the CalFile with offset, masking, and grouping data");
   declareProperty(
-      new WorkspaceProperty<GroupingWorkspace>(
+      make_unique<WorkspaceProperty<GroupingWorkspace>>(
           "GroupingWorkspace", "", Direction::InOut, PropertyMode::Optional),
       "Optional: A GroupingWorkspace giving the grouping info.");
 
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>(
+      make_unique<WorkspaceProperty<ITableWorkspace>>(
           "CalibrationWorkspace", "", Direction::InOut, PropertyMode::Optional),
       "Optional: A Workspace containing the calibration information. Either "
       "this or CalibrationFile needs to be specified.");
   declareProperty(
-      new WorkspaceProperty<OffsetsWorkspace>(
+      make_unique<WorkspaceProperty<OffsetsWorkspace>>(
           "OffsetsWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An OffsetsWorkspace giving the detector calibration values.");
-  declareProperty(new WorkspaceProperty<MaskWorkspace>("MaskWorkspace", "",
-                                                       Direction::InOut,
-                                                       PropertyMode::Optional),
-                  "Optional: A workspace giving which detectors are masked.");
-  declareProperty(new WorkspaceProperty<TableWorkspace>("MaskBinTable", "",
-                                                        Direction::Input,
-                                                        PropertyMode::Optional),
-                  "Optional: A workspace giving pixels and bins to mask.");
   declareProperty(
-      new ArrayProperty<double>(
+      make_unique<WorkspaceProperty<MaskWorkspace>>(
+          "MaskWorkspace", "", Direction::InOut, PropertyMode::Optional),
+      "Optional: A workspace giving which detectors are masked.");
+  declareProperty(
+      make_unique<WorkspaceProperty<TableWorkspace>>(
+          "MaskBinTable", "", Direction::Input, PropertyMode::Optional),
+      "Optional: A workspace giving pixels and bins to mask.");
+  declareProperty(
+      make_unique<ArrayProperty<double>>(
           "Params" /*, boost::make_shared<RebinParamsValidator>()*/),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "Optionally\n"
@@ -108,15 +109,15 @@ void AlignAndFocusPowder::init() {
       "Negative width values indicate logarithmic binning.");
   declareProperty("ResampleX", 0, "Number of bins in x-axis. Non-zero value "
                                   "overrides \"Params\" property. Negative "
-                                  "value means logorithmic binning.");
-  setPropertySettings("Params",
-                      new EnabledWhenProperty("ResampleX", IS_DEFAULT));
+                                  "value means logarithmic binning.");
+  setPropertySettings(
+      "Params", make_unique<EnabledWhenProperty>("ResampleX", IS_DEFAULT));
   declareProperty("Dspacing", true,
                   "Bin in Dspace. (True is Dspace; False is TOF)");
-  declareProperty(new ArrayProperty<double>("DMin"),
+  declareProperty(make_unique<ArrayProperty<double>>("DMin"),
                   "Minimum for Dspace axis. (Default 0.) ");
   mapPropertyName("DMin", "d_min");
-  declareProperty(new ArrayProperty<double>("DMax"),
+  declareProperty(make_unique<ArrayProperty<double>>("DMax"),
                   "Maximum for Dspace axis. (Default 0.) ");
   mapPropertyName("DMax", "d_max");
   declareProperty("TMin", EMPTY_DBL(), "Minimum for TOF axis. Defaults to 0. ");
@@ -147,14 +148,14 @@ void AlignAndFocusPowder::init() {
                   "CropWavelengthMin.");
   declareProperty("PrimaryFlightPath", -1.0,
                   "If positive, focus positions are changed.  (Default -1) ");
-  declareProperty(new ArrayProperty<int32_t>("SpectrumIDs"),
+  declareProperty(make_unique<ArrayProperty<int32_t>>("SpectrumIDs"),
                   "Optional: Spectrum IDs (note that it is not detector ID or "
                   "workspace indices).");
-  declareProperty(new ArrayProperty<double>("L2"),
+  declareProperty(make_unique<ArrayProperty<double>>("L2"),
                   "Optional: Secondary flight (L2) paths for each detector");
-  declareProperty(new ArrayProperty<double>("Polar"),
+  declareProperty(make_unique<ArrayProperty<double>>("Polar"),
                   "Optional: Polar angles (two thetas) for detectors");
-  declareProperty(new ArrayProperty<double>("Azimuthal"),
+  declareProperty(make_unique<ArrayProperty<double>>("Azimuthal"),
                   "Azimuthal angles (out-of-plain) for detectors");
 
   declareProperty("LowResSpectrumOffset", -1,
@@ -170,32 +171,35 @@ void AlignAndFocusPowder::init() {
   declareProperty("ReductionProperties", "__powdereduction", Direction::Input);
 }
 
+template <typename NumT> struct RegLowVectorPair {
+  std::vector<NumT> reg;
+  std::vector<NumT> low;
+};
+
 template <typename NumT>
-void splitVectors(const std::vector<NumT> &orig, const size_t numVal,
-                  const std::string &label, std::vector<NumT> &left,
-                  std::vector<NumT> &right) {
-  // clear the outputs
-  left.clear();
-  right.clear();
+RegLowVectorPair<NumT> splitVectors(const std::vector<NumT> &orig,
+                                    const size_t numVal,
+                                    const std::string &label) {
+  RegLowVectorPair<NumT> out;
 
   // check that there is work to do
-  if (orig.empty())
-    return;
-
-  // do the spliting
-  if (orig.size() == numVal) {
-    left.assign(orig.begin(), orig.end());
-    right.assign(orig.begin(), orig.end());
-  } else if (orig.size() == 2 * numVal) {
-    left.assign(orig.begin(), orig.begin() + numVal);
-    right.assign(orig.begin() + numVal, orig.begin());
-  } else {
-    std::stringstream msg;
-    msg << "Input number of " << label << " ids is not equal to "
-        << "the number of histograms or empty (" << orig.size() << " != 0 or "
-        << numVal << " or " << (2 * numVal) << ")";
-    throw std::runtime_error(msg.str());
+  if (!orig.empty()) {
+    // do the spliting
+    if (orig.size() == numVal) {
+      out.reg.assign(orig.begin(), orig.end());
+      out.low.assign(orig.begin(), orig.end());
+    } else if (orig.size() == 2 * numVal) {
+      out.reg.assign(orig.begin(), orig.begin() + numVal);
+      out.low.assign(orig.begin() + numVal, orig.begin());
+    } else {
+      std::stringstream msg;
+      msg << "Input number of " << label << " ids is not equal to "
+          << "the number of histograms or empty (" << orig.size() << " != 0 or "
+          << numVal << " or " << (2 * numVal) << ")";
+      throw std::runtime_error(msg.str());
+    }
   }
+  return out;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -317,29 +321,14 @@ void AlignAndFocusPowder::exec() {
 
   // Now setup the output workspace
   m_outputW = getProperty("OutputWorkspace");
-  if (m_outputW == m_inputW) {
-    if (m_inputEW) {
-      m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+  if (m_inputEW) {
+    if (m_outputW != m_inputW) {
+      m_outputEW = EventWorkspace_sptr(m_inputEW->clone().release());
     }
+    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   } else {
-    if (m_inputEW) {
-      // Make a brand new EventWorkspace
-      m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(
-          WorkspaceFactory::Instance().create(
-              "EventWorkspace", m_inputEW->getNumberHistograms(), 2, 1));
-      // Copy geometry over.
-      WorkspaceFactory::Instance().initializeFromParent(m_inputEW, m_outputEW,
-                                                        false);
-      // You need to copy over the data as well.
-      m_outputEW->copyDataFrom((*m_inputEW));
-
-      // Cast to the matrixOutputWS and save it
-      m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
-      // m_outputW->setName(getProperty("OutputWorkspace"));
-    } else {
-      // Not-an-event workspace
+    if (m_outputW != m_inputW) {
       m_outputW = WorkspaceFactory::Instance().create(m_inputW);
-      // m_outputW->setName(getProperty("OutputWorkspace"));
     }
   }
 
@@ -604,25 +593,18 @@ void AlignAndFocusPowder::exec() {
     size_t numreg = m_outputW->getNumberHistograms();
 
     // set up the vectors for doing everything
-    std::vector<int32_t> specidsReg;
-    std::vector<int32_t> specidsLow;
-    splitVectors(specids, numreg, "specids", specidsReg, specidsLow);
-    std::vector<double> tthsReg;
-    std::vector<double> tthsLow;
-    splitVectors(tths, numreg, "two-theta", tthsReg, tthsLow);
-    std::vector<double> l2sReg;
-    std::vector<double> l2sLow;
-    splitVectors(l2s, numreg, "L2", l2sReg, l2sLow);
-    std::vector<double> phisReg;
-    std::vector<double> phisLow;
-    splitVectors(phis, numreg, "phi", phisReg, phisLow);
+    auto specidsSplit = splitVectors(specids, numreg, "specids");
+    auto tthsSplit = splitVectors(tths, numreg, "two-theta");
+    auto l2sSplit = splitVectors(l2s, numreg, "L2");
+    auto phisSplit = splitVectors(phis, numreg, "phi");
 
     // Edit instrument
-    m_outputW = editInstrument(m_outputW, tthsReg, specidsReg, l2sReg, phisReg);
+    m_outputW = editInstrument(m_outputW, tthsSplit.reg, specidsSplit.reg,
+                               l2sSplit.reg, phisSplit.reg);
 
     if (m_processLowResTOF) {
-      m_lowResW =
-          editInstrument(m_lowResW, tthsLow, specidsLow, l2sLow, phisLow);
+      m_lowResW = editInstrument(m_lowResW, tthsSplit.low, specidsSplit.low,
+                                 l2sSplit.low, phisSplit.low);
     }
   }
   m_progress->report();
@@ -677,7 +659,7 @@ void AlignAndFocusPowder::exec() {
   */
 API::MatrixWorkspace_sptr AlignAndFocusPowder::editInstrument(
     API::MatrixWorkspace_sptr ws, std::vector<double> polars,
-    std::vector<specid_t> specids, std::vector<double> l2s,
+    std::vector<specnum_t> specids, std::vector<double> l2s,
     std::vector<double> phis) {
   g_log.information() << "running EditInstrumentGeometry\n";
 
@@ -797,10 +779,10 @@ AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
   // Get information from ws1: maximum spectrum number, and store original
   // spectrum IDs
   size_t nspec1 = ws1->getNumberHistograms();
-  specid_t maxspecid1 = 0;
-  std::vector<specid_t> origspecids;
+  specnum_t maxspecid1 = 0;
+  std::vector<specnum_t> origspecids;
   for (size_t i = 0; i < nspec1; ++i) {
-    specid_t tmpspecid = ws1->getSpectrum(i)->getSpectrumNo();
+    specnum_t tmpspecid = ws1->getSpectrum(i)->getSpectrumNo();
     origspecids.push_back(tmpspecid);
     if (tmpspecid > maxspecid1)
       maxspecid1 = tmpspecid;
@@ -827,7 +809,7 @@ AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
 
   // FIXED : Restore the original spectrum IDs to spectra from ws1
   for (size_t i = 0; i < nspec1; ++i) {
-    specid_t tmpspecid = outws->getSpectrum(i)->getSpectrumNo();
+    specnum_t tmpspecid = outws->getSpectrum(i)->getSpectrumNo();
     outws->getSpectrum(i)->setSpectrumNo(origspecids[i]);
 
     g_log.information() << "[DBx540] Conjoined spectrum " << i
@@ -839,7 +821,7 @@ AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
   // Rename spectrum number
   if (offset >= 1) {
     for (size_t i = 0; i < nspec2; ++i) {
-      specid_t newspecid = maxspecid1 + static_cast<specid_t>((i) + offset);
+      specnum_t newspecid = maxspecid1 + static_cast<specnum_t>((i) + offset);
       outws->getSpectrum(nspec1 + i)->setSpectrumNo(newspecid);
       // ISpectrum* spec = outws->getSpectrum(nspec1+i);
       // if (spec)
@@ -935,6 +917,8 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
   alg->setProperty<bool>("MakeCalWorkspace", loadCalibration);
   alg->setProperty<bool>("MakeGroupingWorkspace", loadGrouping);
   alg->setProperty<bool>("MakeMaskWorkspace", loadMask);
+  alg->setProperty<double>("TofMin", getProperty("TMin"));
+  alg->setProperty<double>("TofMax", getProperty("TMax"));
   alg->setPropertyValue("WorkspaceName", m_instName);
   alg->executeAsChildAlg();
 

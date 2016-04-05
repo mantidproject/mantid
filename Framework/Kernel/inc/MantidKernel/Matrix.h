@@ -111,11 +111,11 @@ public:
     return tmp;
   }
   //
-  void setColumn(const size_t nCol, const std::vector<T> &newColumn);
+  void setColumn(const size_t nCol, const std::vector<T> &newCol);
   void setRow(const size_t nRow, const std::vector<T> &newRow);
   void zeroMatrix(); ///< Set the matrix to zero
   void identityMatrix();
-  void setRandom(size_t seedValue = 0, double rMin = -1,
+  void setRandom(size_t seed = 0, double rMin = -1,
                  double rMax = 1); ///< initialize random matrix;
   void normVert();                 ///< Vertical normalisation
   T Trace() const;                 ///< Trace of the matrix

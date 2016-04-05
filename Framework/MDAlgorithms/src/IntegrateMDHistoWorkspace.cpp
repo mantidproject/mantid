@@ -164,8 +164,8 @@ void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax,
   pMax = snappedPMax;
 
   // Bins
-  numberOfBins = static_cast<size_t>(
-      (pMax - pMin) / width + 0.5); // round up to a whole number of bins.
+  numberOfBins =
+      std::lround((pMax - pMin) / width); // round up to a whole number of bins.
 }
 }
 
@@ -275,23 +275,28 @@ const std::string IntegrateMDHistoWorkspace::summary() const {
 /** Initialize the algorithm's properties.
  */
 void IntegrateMDHistoWorkspace::init() {
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
   const std::vector<double> defaultBinning;
-  declareProperty(new ArrayProperty<double>("P1Bin", defaultBinning),
-                  "Projection 1 binning.");
-  declareProperty(new ArrayProperty<double>("P2Bin", defaultBinning),
-                  "Projection 2 binning.");
-  declareProperty(new ArrayProperty<double>("P3Bin", defaultBinning),
-                  "Projection 3 binning.");
-  declareProperty(new ArrayProperty<double>("P4Bin", defaultBinning),
-                  "Projection 4 binning.");
-  declareProperty(new ArrayProperty<double>("P5Bin", defaultBinning),
-                  "Projection 5 binning.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("P1Bin", defaultBinning),
+      "Projection 1 binning.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("P2Bin", defaultBinning),
+      "Projection 2 binning.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("P3Bin", defaultBinning),
+      "Projection 3 binning.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("P4Bin", defaultBinning),
+      "Projection 4 binning.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("P5Bin", defaultBinning),
+      "Projection 5 binning.");
 
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -357,7 +362,7 @@ void IntegrateMDHistoWorkspace::exec() {
     auto outIterators = outWS->createIterators(nThreads, nullptr);
 
     PARALLEL_FOR_NO_WSP_CHECK()
-    for (int i = 0; i < int(outIterators.size()); ++i) {
+    for (int i = 0; i < int(outIterators.size()); ++i) { // NOLINT
       PARALLEL_START_INTERUPT_REGION
       boost::scoped_ptr<MDHistoWorkspaceIterator> outIterator(
           dynamic_cast<MDHistoWorkspaceIterator *>(outIterators[i]));

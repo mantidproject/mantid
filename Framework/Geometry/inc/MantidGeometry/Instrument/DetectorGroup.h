@@ -49,11 +49,13 @@ public:
   DetectorGroup();
   DetectorGroup(const std::vector<IDetector_const_sptr> &dets,
                 bool warnAboutMasked = false);
-  ~DetectorGroup() override;
 
   void addDetector(IDetector_const_sptr det, bool &warn);
 
   // IDetector methods
+  IDetector *cloneParameterized(const ParameterMap *) const override {
+    return nullptr;
+  }
   detid_t getID() const override;
   std::size_t nDets() const override;
   Kernel::V3D getPos() const override;
@@ -202,12 +204,12 @@ protected:
   mutable Kernel::V3D groupCentre;
 
   // functions inherited from IComponent
-  Component *clone() const override { return NULL; }
-  ComponentID getComponentID(void) const override { return NULL; }
+  Component *clone() const override { return nullptr; }
+  ComponentID getComponentID(void) const override { return nullptr; }
   boost::shared_ptr<const IComponent> getParent() const override {
     return boost::shared_ptr<const IComponent>();
   }
-  const IComponent *getBareParent() const override { return NULL; }
+  const IComponent *getBareParent() const override { return nullptr; }
   std::vector<boost::shared_ptr<const IComponent>>
   getAncestors() const override {
     return std::vector<boost::shared_ptr<const IComponent>>();
@@ -238,11 +240,11 @@ protected:
   // functions inherited from IObjComponent
 
   void getBoundingBox(double &, double &, double &, double &, double &,
-                      double &) const {};
+                      double &) const {}
 
-  void draw() const override{};
-  void drawObject() const override{};
-  void initDraw() const override{};
+  void draw() const override {}
+  void drawObject() const override {}
+  void initDraw() const override {}
 
   /// Returns the shape of the Object
   const boost::shared_ptr<const Object> shape() const override {

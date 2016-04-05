@@ -134,8 +134,8 @@ public:
                      size_t &nColumns) const override;
   void setEventsData(const std::vector<coord_t> &coordTable) override;
 
-  void addEvent(const MDE &Evnt) override;
-  void addEventUnsafe(const MDE &Evnt) override;
+  size_t addEvent(const MDE &Evnt) override;
+  size_t addEventUnsafe(const MDE &Evnt) override;
 
   // add range of events
   size_t addEvents(const std::vector<MDE> &events) override;
@@ -160,14 +160,14 @@ public:
   void
   generalBin(MDBin<MDE, nd> &bin,
              Mantid::Geometry::MDImplicitFunction &function) const override;
-  void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL)
+  void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr)
       override { /* Do nothing with a box default. */
   }
 
   //---------------------------------------------------------------------------------------------------------------------------------
   /** Recalculate signal and various averages dependent on signal and the signal
    * coordinates */
-  void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL) override;
+  void refreshCache(Kernel::ThreadScheduler * /*ts*/ = nullptr) override;
   void calculateCentroid(coord_t *centroid) const override;
   void calculateCentroid(coord_t *centroid, const int runindex) const override;
   coord_t *getCentroid() const override;
@@ -221,7 +221,7 @@ private:
   /// one with the boxController;
   MDBox(const MDBox &);
   /// common part of mdBox constructor
-  void initMDBox(const size_t numEvents);
+  void initMDBox(const size_t nBoxEvents);
 
 public:
   /// Typedef for a shared pointer to a MDBox

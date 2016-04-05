@@ -34,9 +34,9 @@ namespace Crystal {
  */
 class DLLExport CompositeCluster : public ICluster {
 public:
-  CompositeCluster();
-  ~CompositeCluster() override;
-
+  CompositeCluster() = default;
+  CompositeCluster(const CompositeCluster &) = delete;
+  CompositeCluster &operator=(const CompositeCluster &) = delete;
   /// integrate the cluster
   ICluster::ClusterIntegratedValues
   integrate(boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws)
@@ -76,12 +76,6 @@ public:
 private:
   /// Helper method to find the minimum label.
   void findMinimum() const;
-
-  /// Disabled copy construction
-  CompositeCluster(const CompositeCluster &);
-
-  /// Disabled assignement
-  CompositeCluster &operator=(const CompositeCluster &);
 
   // void validateNoRepeat(CompositeCluster*const other) const;
 

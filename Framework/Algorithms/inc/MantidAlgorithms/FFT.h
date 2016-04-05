@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -54,10 +55,18 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Arithmetic\\FFT"; }
 
+protected:
+  /// Perform validation of inputs
+  std::map<std::string, std::string> validateInputs() override;
+
 private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
+  /// Check whether supplied values are evenly spaced
+  bool areBinWidthsUneven(const MantidVec &xValues) const;
+  /// Get phase shift - user supplied or auto-calculated
+  double getPhaseShift(const MantidVec &xValues);
 };
 
 } // namespace Algorithm

@@ -39,7 +39,7 @@ public:
   enum MagneticFFDirection { NormalTo_a, NormalTo_b, NormalTo_c, Isotropic };
 
   /// Calculates the intensity for the model for the current parameters.
-  double scatteringIntensity(const API::ExperimentInfo &exptDescr,
+  double scatteringIntensity(const API::ExperimentInfo &exptSetup,
                              const std::vector<double> &point) const override;
   /// Called when an attribute is set
   void setAttribute(const std::string &name,

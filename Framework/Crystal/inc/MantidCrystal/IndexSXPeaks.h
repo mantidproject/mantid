@@ -90,9 +90,8 @@ public:
   }
   size_t candidateHKLSize() const { return _hkls.size(); }
   void delHKL(int h, int k, int l) {
-    std::set<index>::const_iterator it =
-        std::find(_hkls.begin(), _hkls.end(), index(h, k, l));
-    if (it != _hkls.end())
+    auto it = std::find(_hkls.cbegin(), _hkls.cend(), index(h, k, l));
+    if (it != _hkls.cend())
       _hkls.erase(it);
   }
   const Mantid::Kernel::V3D &getQ() const { return _Q; }
@@ -102,8 +101,8 @@ public:
     _hkls = s;
   }
   void setFirst() {
-    if (_hkls.size() > 0) {
-      std::set<index>::iterator it = _hkls.begin(); // Take the first possiblity
+    if (!_hkls.empty()) {
+      auto it = _hkls.begin(); // Take the first possiblity
       it++;
       _hkls.erase(it, _hkls.end()); // Erase all others!
     }
@@ -174,7 +173,7 @@ public:
 
 private:
   // Helper method to cull potential hkls off each peak.
-  void cullHKLs(std::vector<PeakCandidate> &peaksCandidates,
+  void cullHKLs(std::vector<PeakCandidate> &peakCandidates,
                 Mantid::Geometry::UnitCell &unitcell);
   // Helper method used to check that not all peaks are colinear.
   void validateNotColinear(std::vector<PeakCandidate> &peakCandidates) const;

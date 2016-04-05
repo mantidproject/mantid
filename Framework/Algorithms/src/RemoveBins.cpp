@@ -36,12 +36,12 @@ void RemoveBins::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>();
   wsValidator->add<HistogramValidator>();
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name of the output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name of the output workspace.");
 
   auto mustHaveValue = boost::make_shared<MandatoryValidator<double>>();
   declareProperty("XMin", Mantid::EMPTY_DBL(), mustHaveValue,
@@ -227,7 +227,7 @@ void RemoveBins::crop(const double &start, const double &end) {
 }
 
 /** Convert the X range given into the unit of the input workspace
- *  @param index ::  The current spectrum index
+ *  @param index ::  The current workspace index
  *  @param startX :: Returns the start of the range in the workspace's unit
  *  @param endX ::   Returns the end of the range in the workspace's unit
  */

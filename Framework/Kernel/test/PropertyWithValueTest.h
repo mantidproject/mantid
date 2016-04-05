@@ -27,7 +27,7 @@ public:
     bProp = new PropertyWithValue<OptionalBool>("boolProp", bool(true));
   }
 
-  ~PropertyWithValueTest() {
+  ~PropertyWithValueTest() override {
     delete iProp;
     delete dProp;
     delete sProp;
@@ -164,17 +164,17 @@ public:
 
 private:
   class DataObjectOne : public DataItem {
-    virtual const std::string name() const { return "MyName1"; };
-    virtual const std::string id() const { return "DataObjectOne"; }
-    virtual bool threadSafe() const { return true; }
-    virtual const std::string toString() const { return name(); }
+    const std::string name() const override { return "MyName1"; };
+    const std::string id() const override { return "DataObjectOne"; }
+    bool threadSafe() const override { return true; }
+    const std::string toString() const override { return name(); }
   };
 
   class DataObjectTwo : public DataItem {
-    virtual const std::string name() const { return "MyName2"; };
-    virtual const std::string id() const { return "DataObjectTwo"; }
-    virtual bool threadSafe() const { return true; }
-    virtual const std::string toString() const { return name(); }
+    const std::string name() const override { return "MyName2"; };
+    const std::string id() const override { return "DataObjectTwo"; }
+    bool threadSafe() const override { return true; }
+    const std::string toString() const override { return name(); }
   };
 
 public:
@@ -683,6 +683,56 @@ public:
       TSM_ASSERT("value not a known state",
                  possibilities.find(*it) != possibilities.end());
     }
+  }
+
+  void test_trimming_string_property() {
+    std::string stringWithWhitespace = "  value with whitespace\t\t \r\n";
+    std::string trimmedStringWithWhitespace = "value with whitespace";
+    sProp->setValue(stringWithWhitespace);
+    TSM_ASSERT_EQUALS("Input value has not been trimmed", sProp->value(),
+                      trimmedStringWithWhitespace);
+
+    // turn trimming off
+    sProp->setAutoTrim(false);
+    TSM_ASSERT_EQUALS("Auto trim is not turned off", sProp->autoTrim(), false);
+
+    sProp->setValue(stringWithWhitespace);
+    TSM_ASSERT_EQUALS("Input value has been trimmed when it should not",
+                      sProp->value(), stringWithWhitespace);
+
+    // turn trimming on
+    sProp->setAutoTrim(true);
+    TSM_ASSERT_EQUALS("Auto trim is not turned on", sProp->autoTrim(), true);
+
+    // test assignment
+    *sProp = stringWithWhitespace;
+    TSM_ASSERT_EQUALS("Assignment input value has not been trimmed",
+                      sProp->value(), trimmedStringWithWhitespace);
+
+    // test assignment with string literal
+    *sProp = "  value with whitespace\t\t \r\n";
+    TSM_ASSERT_EQUALS("Assignment string literal has not been trimmed",
+                      sProp->value(), trimmedStringWithWhitespace);
+  }
+
+  void test_trimming_integer_property() {
+    std::string stringWithWhitespace = "  1243\t\t \r\n";
+    std::string trimmedStringWithWhitespace = "1243";
+    iProp->setValue(stringWithWhitespace);
+    TSM_ASSERT_EQUALS("Input value has not been trimmed", iProp->value(),
+                      trimmedStringWithWhitespace);
+
+    // turn trimming off
+    iProp->setAutoTrim(false);
+    TSM_ASSERT_EQUALS("Auto trim is not turned off", iProp->autoTrim(), false);
+
+    iProp->setValue(stringWithWhitespace);
+    TSM_ASSERT_EQUALS("Input value should still appear trimmed for an integer",
+                      iProp->value(), trimmedStringWithWhitespace);
+
+    // turn trimming on
+    iProp->setAutoTrim(true);
+    TSM_ASSERT_EQUALS("Auto trim is not turned on", iProp->autoTrim(), true);
   }
 
 private:

@@ -55,7 +55,7 @@ private:
   bool
   pointOutsideAnyExtents(const Mantid::Kernel::V3D &testPoint) const override;
   bool
-  pointInsideAllExtents(const Mantid::Kernel::V3D &testPoints,
+  pointInsideAllExtents(const Mantid::Kernel::V3D &testPoint,
                         const Mantid::Kernel::V3D &peakCenter) const override;
   void checkTouchPoint(const Mantid::Kernel::V3D &touchPoint,
                        const Mantid::Kernel::V3D &normal,

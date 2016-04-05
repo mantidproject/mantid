@@ -68,6 +68,8 @@ private:
   void applyDetectorMapping();
   /// Apply any instrument adjustments from the file
   void adjustInstrument(const std::string &filename);
+  /// Set start date for dummy workspace
+  void setStartDate(API::MatrixWorkspace_sptr workspace);
 
   /// Pointer to a progress object
   boost::shared_ptr<API::Progress> m_progress;
@@ -76,7 +78,7 @@ private:
   /// Pointer to the new workspace
   API::MatrixWorkspace_sptr m_outputWS;
   /// List of detector groupings
-  std::map<specid_t, std::set<detid_t>> m_detGroups;
+  std::map<specnum_t, std::set<detid_t>> m_detGroups;
 };
 
 } // namespace DataHandling

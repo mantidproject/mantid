@@ -16,9 +16,9 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-//#include "MantidGeometry/Surfaces/Surface.h"
 
-//#include <boost/random/poisson_distribution.hpp>
+#include <boost/math/special_functions/round.hpp>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -142,17 +142,17 @@ double SQRT(double v) {
 IntegratePeakTimeSlices::~IntegratePeakTimeSlices() { delete[] m_NeighborIDs; }
 
 void IntegratePeakTimeSlices::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "A 2D workspace with X values of time of flight");
 
-  declareProperty(new WorkspaceProperty<TableWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output table workspace with Log info");
 
-  declareProperty(
-      new WorkspaceProperty<PeaksWorkspace>("Peaks", "", Direction::Input),
-      "Workspace of Peaks");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "Peaks", "", Direction::Input),
+                  "Workspace of Peaks");
 
   declareProperty("PeakIndex", 0,
                   "Index of peak in PeaksWorkspace to integrate");
@@ -329,10 +329,6 @@ void IntegratePeakTimeSlices::exec() {
           MatrixWorkspace_sptr Data = WorkspaceFactory::Instance().create(
               std::string("Workspace2D"), 3, NN, NN);
 
-          Kernel::V3D CentPos = m_center +
-                                m_yvec * (Centy - m_ROW) * m_cellHeight +
-                                m_xvec * (Centx - m_COL) * m_cellWidth;
-
           auto XXX = boost::make_shared<DataModeHandler>(
               R, R, Centy, Centx, m_cellWidth, m_cellHeight,
               getProperty("CalculateVariances"), NBadEdgeCells,
@@ -498,7 +494,7 @@ void IntegratePeakTimeSlices::exec() {
               auto XXX =
                   boost::make_shared<DataModeHandler>(*m_AttributeValues);
               m_AttributeValues = XXX;
-              if (X.size() > 0)
+              if (!X.empty())
                 m_AttributeValues->setTime((X[chanMax] + X[chanMin]) / 2.0);
 
             } else // lastAttributeList exists
@@ -820,7 +816,6 @@ int IntegratePeakTimeSlices::CalculateTimeChannelSpan(
   UNUSED_ARG(specNum);
   double Q = peak.getQLabFrame().norm(); // getQ( peak)/2/M_PI;
 
-  V3D pos = peak.getDetPos();
   double time = peak.getTOF();
   double dtime = dQ / Q * time;
   int chanCenter = find(X, time);
@@ -934,8 +929,8 @@ void IntegratePeakTimeSlices::FindPlane(V3D &center, V3D &xvec, V3D &yvec,
 
   panel1->getBoundingBox(B);
 
-  NROWS = static_cast<int>((B.yMax() - B.yMin()) / pixHeighty + .5);
-  NCOLS = static_cast<int>((B.xMax() - B.xMin()) / pixWidthx + .5);
+  NROWS = boost::math::iround((B.yMax() - B.yMin()) / pixHeighty);
+  NCOLS = boost::math::iround((B.xMax() - B.xMin()) / pixWidthx);
 }
 
 /**
@@ -1004,7 +999,7 @@ std::vector<double> DataModeHandler::InitValues(double Varx, double Vary,
   double x = 1;
   if (sigy * NstdY < 7 && sigy * NstdY >= 0) // is close to row edge
   {
-    x = probs[static_cast<int>(sigy * NstdY + .5)];
+    x = probs[std::lround(sigy * NstdY)];
     if (sigy < 0)
       x = 1 - x;
     double My2 = StatBase[IStartRow];
@@ -1015,7 +1010,7 @@ std::vector<double> DataModeHandler::InitValues(double Varx, double Vary,
   double x1 = 1;
   if (sigx * NstdX < 7 && sigx * NstdX > 0) // is close to x edge
   {
-    x1 = probs[static_cast<int>(sigx * NstdX + .5)];
+    x1 = probs[std::lround(sigx * NstdX)];
     if (sigx < 0)
       x1 = 1 - x1;
     double Mx2 = StatBase[IStartCol];
@@ -1730,12 +1725,12 @@ int IntegratePeakTimeSlices::find(Mantid::MantidVec const &X,
   if (sgn * (X[0] - time) >= 0)
     return 0;
 
-  if (sgn * (time - X[X.size() - 1]) >= 0)
+  if (sgn * (time - X[X.size() - 1u]) >= 0)
     return static_cast<int>(X.size()) - 1;
 
-  for (size_t i = 0; i < (size_t)X.size() - static_cast<size_t>(1); i++) {
-    if (sgn * (time - X[i]) >= 0 &&
-        sgn * (X[i + static_cast<size_t>(1)] - time) >= 0)
+  size_t end = X.size() - 1u;
+  for (size_t i = 0; i < end; i++) {
+    if (sgn * (time - X[i]) >= 0 && sgn * (X[i + 1u] - time) >= 0)
       return static_cast<int>(i);
   }
 
@@ -2102,12 +2097,12 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,
   {
     done = true;
     g_log.error() << "Bivariate Error for PeakNum="
-                  << (int)getProperty("PeakIndex") << ":"
+                  << static_cast<int>(getProperty("PeakIndex")) << ":"
                   << std::string(Ex1.what()) << std::endl;
   } catch (...) {
     done = true;
     g_log.error() << "Bivariate Error A for peakNum="
-                  << (int)getProperty("PeakIndex") << std::endl;
+                  << static_cast<int>(getProperty("PeakIndex")) << std::endl;
   }
   if (!done) // Bivariate error happened
   {
@@ -2396,7 +2391,7 @@ bool DataModeHandler::IsEnoughData(const double *ParameterValues,
   // Check if flat
   double Varx, Vary, Cov;
 
-  if (StatBase.size() <= 0)
+  if (StatBase.empty())
     return false;
 
   double ncells = static_cast<int>(StatBase[IIntensities]);

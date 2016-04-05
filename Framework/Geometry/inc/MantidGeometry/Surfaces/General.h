@@ -45,8 +45,8 @@ private:
   General *doClone() const override;
 
 protected:
-  General(const General &);
-  General &operator=(const General &);
+  General(const General &) = default;
+  General &operator=(const General &) = default;
 
 public:
   General();

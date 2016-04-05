@@ -40,7 +40,6 @@ class DLLExport TimeAtSampleStrategyDirect : public TimeAtSampleStrategy {
 public:
   TimeAtSampleStrategyDirect(
       boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws, double ei);
-  ~TimeAtSampleStrategyDirect() override;
   Correction calculate(const size_t &workspace_index) const override;
 
 private:

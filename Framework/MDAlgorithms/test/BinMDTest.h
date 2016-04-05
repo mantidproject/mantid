@@ -11,9 +11,12 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidMDAlgorithms/BinMD.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
+#include "MantidMDAlgorithms/LoadMD.h"
+#include "MantidMDAlgorithms/SaveMD2.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -37,17 +40,17 @@ private:
   public:
     using MDImplicitFunction::isPointContained; // Avoids Intel compiler
                                                 // warning.
-    virtual bool isPointContained(const Mantid::coord_t *) { return false; }
-    virtual std::string getName() const { return "MockImplicitFunction"; }
+    bool isPointContained(const Mantid::coord_t *) override { return false; }
+    std::string getName() const override { return "MockImplicitFunction"; }
     MOCK_CONST_METHOD0(toXMLString, std::string());
-    ~MockImplicitFunction() { ; }
+    ~MockImplicitFunction() override { ; }
   };
 
   // Helper class. Builds mock implicit functions.
   class MockImplicitFunctionBuilder
       : public Mantid::API::ImplicitFunctionBuilder {
   public:
-    Mantid::Geometry::MDImplicitFunction *create() const {
+    Mantid::Geometry::MDImplicitFunction *create() const override {
       return new MockImplicitFunction;
     }
   };
@@ -58,13 +61,13 @@ private:
   public:
     MockImplicitFunctionParser() : Mantid::API::ImplicitFunctionParser(NULL) {}
     Mantid::API::ImplicitFunctionBuilder *
-    createFunctionBuilder(Poco::XML::Element * /*functionElement*/) {
+    createFunctionBuilder(Poco::XML::Element * /*functionElement*/) override {
       return new MockImplicitFunctionBuilder;
     }
-    void
-    setSuccessorParser(Mantid::API::ImplicitFunctionParser * /*successor*/) {}
+    void setSuccessorParser(
+        Mantid::API::ImplicitFunctionParser * /*successor*/) override {}
     void setParameterParser(
-        Mantid::API::ImplicitFunctionParameterParser * /*parser*/) {}
+        Mantid::API::ImplicitFunctionParameterParser * /*parser*/) override {}
   };
   // helper ws creator
   Mantid::API::Workspace_sptr createSimple3DWorkspace() {
@@ -313,13 +316,13 @@ public:
     TS_ASSERT_EQUALS(out->getNEvents(), 1000);
 
     double expected_signal(2.);
-    std::vector<size_t> nBins(3), indexes(3);
+    std::vector<size_t> nBins(3);
     nBins[0] = 40;
     nBins[1] = 5;
     nBins[2] = 20;
 
     for (size_t i = 0; i < out->getNPoints(); i++) {
-      Utils::getIndicesFromLinearIndex(i, nBins, indexes);
+      auto indexes = Utils::getIndicesFromLinearIndex(i, nBins);
       if (etta(int(indexes[0]), 4) && etta(int(indexes[2]), 2)) {
         TS_ASSERT_DELTA(out->getSignalAt(i), expected_signal, 1e-5);
         TS_ASSERT_DELTA(out->getNumEventsAt(i), expected_signal, 1e-5);
@@ -951,6 +954,98 @@ public:
     TSM_ASSERT("All basis vectors should have been normalized",
                binned->allBasisNormalized());
   }
+
+  void test_filebackend_and_unrecognised_instrument() {
+    // The algorithm should still successfully execute, even if the workspace is
+    // file-backed and the named instrument doesn't exist
+
+    // Create workspace with non-existent instrument
+    Mantid::Geometry::QSample frame;
+    IMDEventWorkspace_sptr in_ws =
+        MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<3>, 3>(
+            10, 0.0, 10.0, frame, 10);
+
+    auto eventNorm = Mantid::API::MDNormalization::VolumeNormalization;
+    auto histoNorm = Mantid::API::MDNormalization::NumEventsNormalization;
+    in_ws->setDisplayNormalization(eventNorm);
+    in_ws->setDisplayNormalizationHisto(histoNorm);
+
+    // Use an instrument name which does not match any actual instrument
+    auto inst = boost::make_shared<Mantid::Geometry::Instrument>();
+    inst->setName("TestName");
+
+    auto exp_info = in_ws->getExperimentInfo(0);
+    exp_info->setInstrument(inst);
+    in_ws->setExperimentInfo(0, exp_info);
+
+    auto filename = saveWorkspace(in_ws);
+    auto outWSName = loadFileBackWorkspace(filename);
+    runBinMDOnFileBackWorkspace(outWSName);
+  }
+
+  void runBinMDOnFileBackWorkspace(const std::string &outWSName) {
+    BinMD alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("AlignedDim0", "Axis0,2.0,8.0, 6"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("AlignedDim1", "Axis1,2.0,8.0, 6"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim2", ""));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim3", ""));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IterateEvents", true));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws_binned"));
+
+    TSM_ASSERT_THROWS_NOTHING("Instrument name in experiment info will not be "
+                              "recognised, but the algorithm should "
+                              "still execute",
+                              alg.execute();)
+    TS_ASSERT(alg.isExecuted());
+  }
+
+  std::string loadFileBackWorkspace(const std::string &filename) {
+    // Name of the output workspace.
+    std::string outWSName("BinMDTest_filebackWS");
+
+    LoadMD loader;
+    loader.setRethrows(true);
+    loader.initialize();
+    TS_ASSERT(loader.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("FileBackEnd", true));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("MetadataOnly", false));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("BoxStructureOnly", false));
+    TS_ASSERT_THROWS_NOTHING(loader.execute(););
+    TS_ASSERT(loader.isExecuted());
+
+    return outWSName;
+  }
+
+  std::string saveWorkspace(IMDEventWorkspace_sptr in_ws) {
+    SaveMD2 saver;
+    saver.setChild(true);
+    saver.setRethrows(true);
+    saver.initialize();
+    TS_ASSERT(saver.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("InputWorkspace", in_ws));
+    TS_ASSERT_THROWS_NOTHING(
+        saver.setPropertyValue("Filename", "BinMDTestFileBack.nxs"));
+
+    // Retrieve the full path; delete any pre-existing file
+    std::string filename = saver.getPropertyValue("Filename");
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
+
+    TS_ASSERT_THROWS_NOTHING(saver.execute(););
+    TS_ASSERT(saver.isExecuted());
+
+    return filename;
+  }
 };
 
 class BinMDTestPerformance : public CxxTest::TestSuite {
@@ -977,7 +1072,7 @@ public:
     TS_ASSERT_EQUALS(in_ws->getBoxController()->getMaxId(), 1001);
   }
 
-  ~BinMDTestPerformance() {
+  ~BinMDTestPerformance() override {
     AnalysisDataService::Instance().remove("BinMDTest_ws");
   }
 

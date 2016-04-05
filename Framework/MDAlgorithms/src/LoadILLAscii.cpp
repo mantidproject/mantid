@@ -102,9 +102,10 @@ const std::string LoadILLAscii::summary() const {
 /** Initialize the algorithm's properties.
  */
 void LoadILLAscii::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, ""),
-                  "Name of the data file to load.");
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, ""),
+      "Name of the data file to load.");
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name to use for the output workspace.");
 }
@@ -294,7 +295,7 @@ IMDEventWorkspace_sptr LoadILLAscii::mergeWorkspaces(
             "coords" << std::endl;
   myfile << "MDEVENTS" << std::endl;
 
-  if (workspaceList.size() > 0) {
+  if (!workspaceList.empty()) {
     Progress progress(this, 0, 1, workspaceList.size());
     for (auto it = workspaceList.begin(); it < workspaceList.end(); ++it) {
       std::size_t pos = std::distance(workspaceList.begin(), it);

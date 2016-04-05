@@ -78,11 +78,11 @@ private:
   void exec() override;
 
   /// expand our search out to the next neighbours along
-  bool expandNet(std::map<specid_t, Mantid::Kernel::V3D> &nearest,
-                 specid_t spec, const size_t &noNeighbours,
+  bool expandNet(std::map<specnum_t, Mantid::Kernel::V3D> &nearest,
+                 specnum_t spec, const size_t &noNeighbours,
                  const Mantid::Geometry::BoundingBox &bbox);
   /// sort by distance
-  void sortByDistance(std::map<specid_t, Mantid::Kernel::V3D> &nearest,
+  void sortByDistance(std::map<specnum_t, Mantid::Kernel::V3D> &nearest,
                       const size_t &noNeighbours);
   /// create expanded bounding box for our purposes
   void createBox(boost::shared_ptr<const Geometry::IDetector> det,
@@ -91,9 +91,9 @@ private:
   void growBox(double &min, double &max, const double &factor);
 
   /// map of detectors in the instrument
-  std::map<specid_t, boost::shared_ptr<const Geometry::IDetector>> m_detectors;
+  std::map<specnum_t, boost::shared_ptr<const Geometry::IDetector>> m_detectors;
   /// flag which detectors are included in a group already
-  std::set<specid_t> m_included;
+  std::set<specnum_t> m_included;
   /// first and last values for each group
   std::vector<std::vector<int>> m_groups;
 

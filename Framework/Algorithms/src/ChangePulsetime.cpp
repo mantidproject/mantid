@@ -31,17 +31,18 @@ ChangePulsetime::~ChangePulsetime() {}
 /** Initialize the algorithm's properties.
  */
 void ChangePulsetime::init() {
-  declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input event workspace.");
-  declareProperty(new PropertyWithValue<double>("TimeOffset", Direction::Input),
-                  "Number of seconds (a float) to add to each event's pulse "
-                  "time. Required.");
-  declareProperty(new ArrayProperty<int>("WorkspaceIndexList", ""),
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("TimeOffset", Direction::Input),
+      "Number of seconds (a float) to add to each event's pulse "
+      "time. Required.");
+  declareProperty(make_unique<ArrayProperty<int>>("WorkspaceIndexList", ""),
                   "An optional list of workspace indices to change. If blank, "
                   "all spectra in the workspace are modified.");
-  declareProperty(new WorkspaceProperty<EventWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output event workspace.");
 }
 
@@ -52,15 +53,7 @@ void ChangePulsetime::exec() {
   EventWorkspace_const_sptr in_ws = getProperty("InputWorkspace");
   EventWorkspace_sptr out_ws = getProperty("OutputWorkspace");
   if (!out_ws) {
-    // Make a brand new EventWorkspace
-    out_ws = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "EventWorkspace", in_ws->getNumberHistograms(), 2, 1));
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(in_ws, out_ws,
-                                                           false);
-    // You need to copy over the data as well.
-    out_ws->copyDataFrom((*in_ws));
+    out_ws = EventWorkspace_sptr(in_ws->clone().release());
   }
 
   // Either use the given list or use all spectra

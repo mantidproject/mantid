@@ -47,7 +47,7 @@ public:
 
   MDGridBox(MDBox<MDE, nd> *box);
 
-  MDGridBox(const MDGridBox<MDE, nd> &box,
+  MDGridBox(const MDGridBox<MDE, nd> &other,
             Mantid::API::BoxController *const otherBC);
 
   ~MDGridBox() override;
@@ -56,11 +56,11 @@ public:
   /**get object responsible for saving the box to a file.
     *@return the const pointer to the object. The GridBox is not saveable at the
     *moment so it is always NULL */
-  Kernel::ISaveable *getISaveable() override { return NULL; }
+  Kernel::ISaveable *getISaveable() override { return nullptr; }
   /**get const object responsible for saving the box to a file.
     *@return the const pointer the const object. The GridBox is not saveable at
     *the moment so it is always NULL */
-  Kernel::ISaveable *getISaveable() const override { return NULL; }
+  Kernel::ISaveable *getISaveable() const override { return nullptr; }
   /**Recursively make all underlaying boxes file-backed*/
   void setFileBacked(const uint64_t /*fileLocation*/, const size_t /*fileSize*/,
                      const bool /*markSaved*/) override;
@@ -109,12 +109,12 @@ public:
   API::IMDNode *getChild(size_t index) override;
   void setChild(size_t index, MDGridBox<MDE, nd> *newChild);
 
-  void setChildren(const std::vector<API::IMDNode *> &boxes,
+  void setChildren(const std::vector<API::IMDNode *> &otherBoxes,
                    const size_t indexStart, const size_t indexEnd) override;
 
-  void getBoxes(std::vector<API::IMDNode *> &boxes, size_t maxDepth,
+  void getBoxes(std::vector<API::IMDNode *> &outBoxes, size_t maxDepth,
                 bool leafOnly) override;
-  void getBoxes(std::vector<API::IMDNode *> &boxes, size_t maxDepth,
+  void getBoxes(std::vector<API::IMDNode *> &outBoxes, size_t maxDepth,
                 bool leafOnly,
                 Mantid::Geometry::MDImplicitFunction *function) override;
 
@@ -127,8 +127,8 @@ public:
   std::vector<MDE> *getEventsCopy() override;
 
   //----------------------------------------------------------------------------------------------------------------------
-  void addEvent(const MDE &event) override;
-  void addEventUnsafe(const MDE &event) override;
+  size_t addEvent(const MDE &event) override;
+  size_t addEventUnsafe(const MDE &event) override;
 
   /*--------------->  EVENTS from event data
    * <-------------------------------------------------------------*/
@@ -163,11 +163,11 @@ public:
                          signal_t &signal, signal_t &errorSquared,
                          std::vector<signal_t> &signal_fit) const override;
 
-  void splitContents(size_t index, Kernel::ThreadScheduler *ts = NULL);
+  void splitContents(size_t index, Kernel::ThreadScheduler *ts = nullptr);
 
-  void splitAllIfNeeded(Kernel::ThreadScheduler *ts = NULL) override;
+  void splitAllIfNeeded(Kernel::ThreadScheduler *ts = nullptr) override;
 
-  void refreshCache(Kernel::ThreadScheduler *ts = NULL) override;
+  void refreshCache(Kernel::ThreadScheduler *ts = nullptr) override;
 
   bool getIsMasked() const override;
   /// Setter for masking the box
@@ -242,12 +242,12 @@ private:
   size_t getLinearIndex(size_t *indices) const;
 
   size_t computeSizesFromSplit();
-  void fillBoxShell(const size_t tot, const coord_t inverseVolume);
+  void fillBoxShell(const size_t tot, const coord_t ChildInverseVolume);
   /**private default copy constructor as the only correct constructor is the one
    * with box controller */
   MDGridBox(const MDGridBox<MDE, nd> &box);
   /**Private constructor as it does not work without box controller */
-  MDGridBox() {}
+  MDGridBox() = default;
   /// common part of MDGridBox contstructor;
   size_t initGridBox();
 };

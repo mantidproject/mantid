@@ -93,7 +93,7 @@ void calculatePeakValues(IPeakFunction &peak, ITableWorkspace &results,
   GSLMatrix J = makeJacobian(peak, centre, height, fwhm, intensity);
   // CHECK_OUT_GSL_MATRIX("J=", J);
 
-  GSLMatrix JCJ = J * covariance * Tr(J);
+  GSLMatrix JCJ = J * covariance * J.tr();
   // CHECK_OUT_GSL_MATRIX("JCJ=", JCJ);
 
   TableRow row = results.appendRow();
@@ -110,12 +110,12 @@ void calculatePeakValues(IPeakFunction &peak, ITableWorkspace &results,
 /// Initialize
 void EstimatePeakErrors::init() {
 
-  declareProperty(new FunctionProperty("Function"),
+  declareProperty(make_unique<FunctionProperty>("Function"),
                   "Fitting function containing peaks. Must have a covariance "
                   "matrix attached.");
 
   declareProperty(
-      new API::WorkspaceProperty<API::ITableWorkspace>(
+      make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
       "The name of the TableWorkspace with the output values and errors.");
 }

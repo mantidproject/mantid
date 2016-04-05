@@ -143,7 +143,7 @@ void CostFuncFitting::calCovarianceMatrix(GSLMatrix &covar, double epsrel) {
     // else do the transformation
     GSLMatrix tm;
     calTransformationMatrixNumerically(tm);
-    covar = Tr(tm) * c * tm;
+    covar = tm.tr() * c * tm;
   }
 }
 

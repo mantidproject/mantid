@@ -95,7 +95,6 @@ class MANTID_GEOMETRY_DLL IsotropicAtomBraggScatterer
     : public BraggScattererInCrystalStructure {
 public:
   IsotropicAtomBraggScatterer();
-  ~IsotropicAtomBraggScatterer() override {}
 
   std::string name() const override { return "IsotropicAtomBraggScatterer"; }
   BraggScatterer_sptr clone() const override;

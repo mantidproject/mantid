@@ -56,11 +56,11 @@ const std::string IntegratePeaksUsingClusters::category() const {
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksUsingClusters::init() {
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Input md workspace.");
-  declareProperty(new WorkspaceProperty<IPeaksWorkspace>("PeaksWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+                      "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
   auto positiveValidator = boost::make_shared<BoundedValidator<double>>();
@@ -71,7 +71,7 @@ void IntegratePeaksUsingClusters::init() {
   compositeValidator->add(positiveValidator);
   compositeValidator->add(boost::make_shared<MandatoryValidator<double>>());
 
-  declareProperty(new PropertyWithValue<double>(
+  declareProperty(make_unique<PropertyWithValue<double>>(
                       "Threshold", 0, compositeValidator, Direction::Input),
                   "Threshold signal above which to consider peaks");
 
@@ -86,10 +86,10 @@ void IntegratePeaksUsingClusters::init() {
                   "Normalization to use with Threshold. Defaults to "
                   "VolumeNormalization to account for different binning.");
 
-  declareProperty(new WorkspaceProperty<IPeaksWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output integrated peaks workspace.");
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspaceMD", "", Direction::Output),
                   "MDHistoWorkspace containing the labeled clusters used by "
                   "the algorithm.");

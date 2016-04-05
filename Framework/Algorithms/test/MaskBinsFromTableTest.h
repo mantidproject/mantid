@@ -279,16 +279,16 @@ public:
              << ".\n";
         return;
       } else {
-        std::set<detid_t> detidset = spec->getDetectorIDs();
-        set<detid_t>::iterator setiter;
-        for (setiter = detidset.begin(); setiter != detidset.end(); ++setiter)
+        auto detidset = spec->getDetectorIDs();
+        for (auto setiter = detidset.begin(); setiter != detidset.end();
+             ++setiter)
           cout << "WorkspaceIndex = " << i << ":  Detector ID = " << *setiter
                << ".\n";
       }
     }
 
     // Generate a TableWorksapce
-    TableWorkspace_sptr tablews(new TableWorkspace());
+    auto tablews = boost::make_shared<TableWorkspace>();
     tablews->addColumn("str", "DetectorIDsList");
     tablews->addColumn("double", "XMin");
     tablews->addColumn("double", "XMax");

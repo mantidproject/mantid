@@ -80,12 +80,11 @@ class MANTID_DATAOBJECTS_DLL TableWorkspace : public API::ITableWorkspace {
 public:
   /// Constructor.
   TableWorkspace(size_t nrows = 0);
-  /// Virtual destructor.
-  ~TableWorkspace() override;
   /// Returns a clone of the workspace
   std::unique_ptr<TableWorkspace> clone() const {
     return std::unique_ptr<TableWorkspace>(doClone());
   }
+  TableWorkspace &operator=(const TableWorkspace &other) = delete;
   /// Return the workspace typeID
   const std::string id() const override { return "TableWorkspace"; }
   /// Get the footprint in memory in KB.
@@ -187,12 +186,12 @@ public:
   template <class T> T *getColDataArray(const std::string &name) {
     auto ci = std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
     if (ci == m_columns.end())
-      return NULL;
+      return nullptr;
     auto pTableCol = dynamic_cast<TableColumn<T> *>(ci->get());
     if (pTableCol)
       return pTableCol->dataArray();
     else
-      return NULL;
+      return nullptr;
   }
   /**Non-throwing const access to the pointer to the column data array for the
    * column with given name. Returns null on error or if the coulmn has not been
@@ -204,12 +203,12 @@ public:
   template <class T> T *getColDataArray(const std::string &name) const {
     auto ci = std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
     if (ci == m_columns.end())
-      return NULL;
+      return nullptr;
     auto pTableCol = dynamic_cast<TableColumn<T> *>(ci->get());
     if (pTableCol)
       return pTableCol->dataArray();
     else
-      return NULL;
+      return nullptr;
   }
 
   /// Resizes the workspace.
@@ -295,8 +294,6 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   TableWorkspace(const TableWorkspace &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  TableWorkspace &operator=(const TableWorkspace &other);
 
 private:
   TableWorkspace *doClone() const override { return new TableWorkspace(*this); }

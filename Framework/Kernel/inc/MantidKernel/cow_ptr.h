@@ -5,8 +5,10 @@
 
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 #endif
 
+#include <mutex>
 #include <vector>
 
 namespace Mantid {
@@ -59,13 +61,18 @@ public:
 
 private:
   ptr_type Data; ///< Real object Ptr
+  std::mutex copyMutex;
 
 public:
+  cow_ptr(ptr_type &&resourceSptr);
+  cow_ptr(const ptr_type &resourceSptr);
+  explicit cow_ptr(DataType *resourcePtr);
   cow_ptr();
   cow_ptr(const cow_ptr<DataType> &);
+  cow_ptr(cow_ptr<DataType> &&) = default;
   cow_ptr<DataType> &operator=(const cow_ptr<DataType> &);
+  cow_ptr<DataType> &operator=(cow_ptr<DataType> &&) = default;
   cow_ptr<DataType> &operator=(const ptr_type &);
-  ~cow_ptr();
 
   const DataType &operator*() const {
     return *Data;
@@ -80,16 +87,29 @@ public:
 };
 
 /**
+ Constructor : creates a new cow_ptr around the resource
+ resource is a sink.
+ */
+template <typename DataType>
+cow_ptr<DataType>::cow_ptr(DataType *resourcePtr)
+    : Data(resourcePtr) {
+  if (resourcePtr == nullptr) {
+    throw std::invalid_argument("cow_ptr source pointer cannot be null");
+  }
+}
+
+/**
   Constructor : creates new data() object
 */
 template <typename DataType>
 cow_ptr<DataType>::cow_ptr()
-    : Data(new DataType()) {}
+    : Data(boost::make_shared<DataType>()) {}
 
 /**
   Copy constructor : double references the data object
   @param A :: object to copy
 */
+// Note: Need custom implementation, since std::mutex is not copyable.
 template <typename DataType>
 cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType> &A)
     : Data(A.Data) {}
@@ -100,6 +120,7 @@ cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType> &A)
   @param A :: object to copy
   @return *this
 */
+// Note: Need custom implementation, since std::mutex is not copyable.
 template <typename DataType>
 cow_ptr<DataType> &cow_ptr<DataType>::operator=(const cow_ptr<DataType> &A) {
   if (this != &A) {
@@ -123,33 +144,45 @@ cow_ptr<DataType> &cow_ptr<DataType>::operator=(const ptr_type &A) {
 }
 
 /**
-  Destructor : No work is required since Data is
-  a shared_ptr.
-*/
-template <typename DataType> cow_ptr<DataType>::~cow_ptr() {}
-
-/**
   Access function.
   If data is shared, creates a copy of Data so that it can be modified.
+
+  In certain situations this function is not thread safe. Specifically it is not
+  thread
+  safe in the presence of a simultaneous cow_ptr copy. Copies of the underlying
+  data are only
+  made when the reference count > 1.
 
   @return new copy of *this, if required
 */
 template <typename DataType> DataType &cow_ptr<DataType>::access() {
-  // Use a double-check for sharing so that we only
-  // enter the critical region if absolutely necessary
+  // Use a double-check for sharing so that we only acquire the lock if
+  // absolutely necessary
   if (!Data.unique()) {
-    PARALLEL_CRITICAL(cow_ptr_access) {
-      // Check again because another thread may have taken copy
-      // and dropped reference count since previous check
-      if (!Data.unique()) {
-        ptr_type oldData = Data;
-        Data.reset();
-        Data = ptr_type(new DataType(*oldData));
-      }
-    }
+    std::lock_guard<std::mutex> lock{copyMutex};
+    // Check again because another thread may have taken copy and dropped
+    // reference count since previous check
+    if (!Data.unique())
+      Data = boost::make_shared<DataType>(*Data);
   }
 
   return *Data;
+}
+
+template <typename DataType>
+cow_ptr<DataType>::cow_ptr(ptr_type &&resourceSptr) {
+  if (resourceSptr.get() == nullptr) {
+    throw std::invalid_argument("cow_ptr source pointer cannot be null");
+  }
+  this->Data = std::move(resourceSptr);
+}
+
+template <typename DataType>
+cow_ptr<DataType>::cow_ptr(const ptr_type &resourceSptr) {
+  if (resourceSptr.get() == nullptr) {
+    throw std::invalid_argument("cow_ptr source pointer cannot be null");
+  }
+  this->Data = resourceSptr;
 }
 
 } // NAMESPACE Kernel

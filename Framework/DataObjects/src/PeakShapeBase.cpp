@@ -10,33 +10,6 @@ PeakShapeBase::PeakShapeBase(Kernel::SpecialCoordinateSystem frame,
     : m_frame(frame), m_algorithmName(algorithmName),
       m_algorithmVersion(algorithmVersion) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeakShapeBase::~PeakShapeBase() {}
-
-/**
- * @brief Copy constructor
- * @param other : source of the copy
- */
-PeakShapeBase::PeakShapeBase(const PeakShapeBase &other)
-    : m_frame(other.frame()), m_algorithmName(other.algorithmName()),
-      m_algorithmVersion(other.algorithmVersion()) {}
-
-/**
- * @brief Assignment operator
- * @param other : source of the assignment
- * @return Ref to assigned object.
- */
-PeakShapeBase &PeakShapeBase::operator=(const PeakShapeBase &other) {
-  if (this != &other) {
-    m_algorithmName = other.algorithmName();
-    m_algorithmVersion = other.algorithmVersion();
-    m_frame = other.frame();
-  }
-  return *this;
-}
-
 /**
  * @brief PeakShapeBase::frame
  * @return The coordinate frame used

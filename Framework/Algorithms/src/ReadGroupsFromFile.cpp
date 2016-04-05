@@ -45,7 +45,7 @@ ReadGroupsFromFile::ReadGroupsFromFile() : API::Algorithm(), calibration() {}
 void ReadGroupsFromFile::init() {
 
   // The name of the instrument
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InstrumentWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "A workspace that refers to the instrument of interest. You "
@@ -53,9 +53,10 @@ void ReadGroupsFromFile::init() {
                   "workspace.");
 
   // The calibration file that contains the grouping information
+  const std::vector<std::string> exts{".cal", ".xml"};
   declareProperty(
-      new FileProperty("GroupingFileName", "", FileProperty::Load,
-                       {".cal", ".xml"}),
+      Kernel::make_unique<FileProperty>("GroupingFileName", "",
+                                        FileProperty::Load, exts),
       "Either as a XML grouping file (see [[GroupDetectors]]) or as a "
       "[[CalFile]] (.cal extension).");
   // Flag to consider unselected detectors in the cal file
@@ -64,7 +65,7 @@ void ReadGroupsFromFile::init() {
                   boost::make_shared<StringListValidator>(select),
                   "Whether to show detectors that are not in any group");
   // The output workspace (2D) that will contain the group information
-  declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>(
+  declareProperty(make_unique<API::WorkspaceProperty<DataObjects::Workspace2D>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace");
 }
@@ -112,7 +113,7 @@ void ReadGroupsFromFile::exec() {
 
   for (int64_t i = 0; i < nHist; i++) {
     ISpectrum *spec = localWorkspace->getSpectrum(i);
-    const std::set<detid_t> &dets = spec->getDetectorIDs();
+    const auto &dets = spec->getDetectorIDs();
     if (dets.empty()) // Nothing
     {
       spec->dataY()[0] = 0.0;
@@ -221,7 +222,8 @@ void ReadGroupsFromFile::readXMLGroupingFile(const std::string &filename) {
 
     std::string ids = group->getAttribute("val");
 
-    Poco::StringTokenizer data(ids, ",", Poco::StringTokenizer::TOK_TRIM);
+    Mantid::Kernel::StringTokenizer data(
+        ids, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
 
     if (data.begin() != data.end()) {
       for (const auto &value : data) {

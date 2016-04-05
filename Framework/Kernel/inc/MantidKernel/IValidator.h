@@ -67,10 +67,10 @@ struct IsPtrType<boost::shared_ptr<T>> : public boost::true_type {};
 class DLLExport IValidator {
 public:
   /// Constructor
-  IValidator() {}
+  IValidator() = default;
 
   /// virtual Destructor
-  virtual ~IValidator() {}
+  virtual ~IValidator() = default;
 
   //------------------------------------------------------------------------------------------------------------
   /** Calls the validator

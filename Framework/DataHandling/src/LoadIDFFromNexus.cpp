@@ -38,12 +38,14 @@ void LoadIDFFromNexus::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("Workspace", "Anonymous",
-                                             Direction::InOut),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
+                                                      Direction::InOut),
       "The name of the workspace in which to attach the imported instrument");
 
+  const std::vector<std::string> exts{".nxs", ".nxs.h5"};
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".nxs", ".nxs.h5"}),
+      Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
+                                        exts),
       "The name (including its full or relative path) of the Nexus file to "
       "attempt to load the instrument from.");
 
@@ -241,13 +243,20 @@ void LoadIDFFromNexus::readParameterCorrectionFile(
       pRootElem->getElementsByTagName("correction");
   for (unsigned long i = 0; i < correctionNodeList->length(); ++i) {
     // For each correction element
-    Element *corr = (Element *)correctionNodeList->item(i);
-    DateAndTime start(corr->getAttribute("valid-from"));
-    DateAndTime end(corr->getAttribute("valid-to"));
-    if (start <= externalDate && externalDate <= end) {
-      parameter_file = corr->getAttribute("file");
-      append = (corr->getAttribute("append") == "true");
-      break;
+    Element *corr = dynamic_cast<Element *>(correctionNodeList->item(i));
+    if (corr) {
+      DateAndTime start(corr->getAttribute("valid-from"));
+      DateAndTime end(corr->getAttribute("valid-to"));
+      if (start <= externalDate && externalDate <= end) {
+        parameter_file = corr->getAttribute("file");
+        append = (corr->getAttribute("append") == "true");
+        break;
+      }
+    } else {
+      g_log.error("Parameter correction file: " + correction_file +
+                  "contains an invalid correction element.");
+      throw Kernel::Exception::InstrumentDefinitionError(
+          "Invalid element in XML parameter correction file", correction_file);
     }
   }
 }
@@ -281,7 +290,7 @@ void LoadIDFFromNexus::LoadParameters(
         ConfigService::Instance().getInstrumentDirectories();
     const std::string instrumentName =
         localWorkspace->getInstrument()->getName();
-    for (auto directoryName : directoryNames) {
+    for (const auto &directoryName : directoryNames) {
       // This will iterate around the directories from user ->etc ->install, and
       // find the first appropriate file
       const std::string paramFile =

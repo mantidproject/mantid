@@ -41,35 +41,6 @@ Kernel::Logger g_log("Run");
 //----------------------------------------------------------------------
 // Public member functions
 //----------------------------------------------------------------------
-/**
- * Default constructor
- */
-Run::Run() : m_goniometer(), m_histoBins() {}
-
-/**
- * Destructor
- */
-Run::~Run() {}
-
-/**
- * Copy constructor
- * @param copy :: The object to initialize the copy from
- */
-Run::Run(const Run &copy) : LogManager(copy), m_goniometer(copy.m_goniometer) {}
-
-//-----------------------------------------------------------------------------------------------
-/**
- * Assignment operator
- * @param rhs :: The object whose properties should be copied into this
- * @returns A cont reference to the copied object
- */
-const Run &Run::operator=(const Run &rhs) {
-  if (this == &rhs)
-    return *this;
-  m_manager = rhs.m_manager;
-  m_goniometer = rhs.m_goniometer;
-  return *this;
-}
 
 //-----------------------------------------------------------------------------------------------
 /**
@@ -114,7 +85,8 @@ Run &Run::operator+=(const Run &rhs) {
       } else
         // no property on the left-hand side, create one and copy the
         // right-hand side across verbatim
-        m_manager.declareProperty(right->clone(), "");
+        m_manager.declareProperty(std::unique_ptr<Property>(right->clone()),
+                                  "");
     }
   }
   return *this;
@@ -461,7 +433,8 @@ void Run::calculateGoniometerMatrix() {
     const double maxAngle =
         getLogAsSingleValue(axisName, Kernel::Math::Maximum);
     const double angle = getLogAsSingleValue(axisName, Kernel::Math::Mean);
-    if (minAngle != maxAngle) {
+    if (minAngle != maxAngle &&
+        !(boost::math::isnan(minAngle) && boost::math::isnan(maxAngle))) {
       const double lastAngle =
           getLogAsSingleValue(axisName, Kernel::Math::LastValue);
       g_log.warning("Goniometer angle changed in " + axisName + " log from " +
@@ -511,9 +484,9 @@ void Run::mergeMergables(Mantid::Kernel::PropertyManager &sum,
       lhs_prop->merge(ptr);
     } catch (Exception::NotFoundError &) {
       // copy any properties that aren't already on the left hand side
-      Property *copy = ptr->clone();
+      auto copy = std::unique_ptr<Property>(ptr->clone());
       // And we add a copy of that property to *this
-      sum.declareProperty(copy, "");
+      sum.declareProperty(std::move(copy), "");
     }
   }
 }

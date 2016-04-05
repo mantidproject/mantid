@@ -4,6 +4,7 @@
 
 set ( TEST_PY_FILES
   AddSampleLogMultipleTest.py
+  AlignComponentsTest.py
   ApplyPaalmanPingsCorrectionTest.py
   BayesQuasiTest.py
   CalculateSampleTransmissionTest.py
@@ -28,7 +29,7 @@ set ( TEST_PY_FILES
   EnggFitPeaksTest.py
   EnggFocusTest.py
   EnggVanadiumCorrectionsTest.py
-  EVSDiffractionReductionTest.py
+  VesuvioDiffractionReductionTest.py
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
@@ -41,6 +42,7 @@ set ( TEST_PY_FILES
   IndirectTransmissionTest.py
   IndirectTransmissionMonitorTest.py
   ILLIN16BCalibrationTest.py
+  IqtFitMultipleTest.py
   ISISIndirectDiffractionReductionTest.py
   ISISIndirectEnergyTransferTest.py
   LoadDNSLegacyTest.py
@@ -59,12 +61,14 @@ set ( TEST_PY_FILES
   MolDynTest.py
   MSDFitTest.py
   MuscatSofQWTest.py
+  NormaliseSpectraTest.py
   OSIRISDiffractionReductionTest.py
   ResNorm2Test.py
   RetrieveRunInfoTest.py
   SANSFitShiftScaleTest.py
   SANSWideAngleCorrectionTest.py
   SavePlot1DTest.py
+  SavePlot1DAsJsonTest.py
   SaveVulcanGSSTest.py
   SimulatedDensityOfStatesTest.py
   SortByQVectorsTest.py
@@ -90,7 +94,9 @@ set ( TEST_PY_FILES
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py
   PoldiMergeTest.py
+  VesuvioPreFitTest.py
   VesuvioResolutionTest.py
+  VesuvioTOFFitTest.py
   PoldiCreatePeaksFromFileTest.py
   LoadCIFTest.py
 )

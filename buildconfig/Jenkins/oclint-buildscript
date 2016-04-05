@@ -1,0 +1,27 @@
+#!/bin/bash -ex
+SCRIPT_DIR=$(dirname "$0")
+
+cmake --version
+echo "SHA1=${sha1}"
+BUILD_DIR=$WORKSPACE/build
+if [ $(command -v oclint-json-compilation-database) ]; then
+   OCLINT=$(which oclint-json-compilation-database)
+else
+   OCLINT=$HOME/oclint-0.10.2/bin/oclint-json-compilation-database
+fi
+
+if [ -d $BUILD_DIR ]; then
+  rm -rf $BUILD_DIR/bin $BUILD_DIR/ExternalData
+else
+  mkdir $BUILD_DIR
+fi
+
+cd $BUILD_DIR
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON ..
+cd $WORKSPACE
+if [ ! -e compile_commands.json ]; then
+  ln -s $BUILD_DIR/compile_commands.json
+fi
+
+$SCRIPT_DIR/oclint.py --oclint $OCLINT $WORKSPACE/compile_commands.json
+echo Finished

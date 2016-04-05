@@ -74,7 +74,7 @@ private:
   void writeHists(const API::MatrixWorkspace_const_sptr WS,
                   FILE *const outFile);
   void writeHist(const API::MatrixWorkspace_const_sptr WS, FILE *const outFile,
-                 const int specIn) const;
+                 const int wsIn) const;
   void writeMaskFlags(FILE *const outFile) const;
   void writeBins(const MantidVec &Vs, FILE *const outFile) const;
   void writeValue(const double value, FILE *const outFile) const;

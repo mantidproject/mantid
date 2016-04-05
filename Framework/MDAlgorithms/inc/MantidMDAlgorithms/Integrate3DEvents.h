@@ -64,8 +64,6 @@ public:
       std::vector<std::pair<double, Mantid::Kernel::V3D>> const &peak_q_list,
       Kernel::DblMatrix const &UBinv, double radius);
 
-  ~Integrate3DEvents();
-
   /// Add event Q's to lists of events near peaks
   void
   addEvents(std::vector<std::pair<double, Mantid::Kernel::V3D>> const &event_qs,
@@ -110,7 +108,7 @@ private:
 
   /// Form a map key for the specified q_vector.
   int64_t getHklKey(Mantid::Kernel::V3D const &q_vector);
-  int64_t getHklKey2(Mantid::Kernel::V3D const &q_vector);
+  int64_t getHklKey2(Mantid::Kernel::V3D const &hkl);
 
   /// Add an event to the vector of events for the closest h,k,l
   void addEvent(std::pair<double, Mantid::Kernel::V3D> event_Q, bool hkl_integ);

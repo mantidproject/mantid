@@ -51,11 +51,6 @@ BSpline::BSpline() : m_bsplineWorkspace(), m_bsplineDerivWorkspace() {
   resetKnots();
 }
 
-/**
- * Destructor
- */
-BSpline::~BSpline() {}
-
 /** Execute the function
  *
  * @param out :: The array to store the calculated y values

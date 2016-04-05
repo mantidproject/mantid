@@ -44,11 +44,11 @@ namespace CustomInterfaces
 
   public:
     IndirectMoments(IndirectDataReduction * idrUI, QWidget * parent = 0);
-    virtual ~IndirectMoments();
+    ~IndirectMoments() override;
 
-    virtual void setup();
-    virtual void run();
-    virtual bool validate();
+    void setup() override;
+    void run() override;
+    bool validate() override;
 
   protected slots:
     // Handle when a file/workspace is ready for plotting

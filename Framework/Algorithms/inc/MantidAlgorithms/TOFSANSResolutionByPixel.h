@@ -54,7 +54,7 @@ private:
   void checkInput(Mantid::API::MatrixWorkspace_sptr inWS);
   /// Get the moderator workspace
   Mantid::API::MatrixWorkspace_sptr
-  getModeratorWorkspace(Mantid::API::MatrixWorkspace_sptr inWS);
+  getModeratorWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
   /// Create an output workspace
   Mantid::API::MatrixWorkspace_sptr
   setupOutputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);

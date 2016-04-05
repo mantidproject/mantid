@@ -51,9 +51,6 @@ public:
         m_max(other->getMaximum()), m_numBins(other->getNBins()),
         m_binWidth(other->getBinWidth()) {}
 
-  /// Destructor
-  ~MDHistoDimension() override {}
-
   /// Return the name of the dimension as can be displayed along the axis
   std::string getName() const override { return m_name; }
 

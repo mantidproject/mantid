@@ -113,7 +113,8 @@ createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet = 4,
  */
 boost::shared_ptr<Mantid::Geometry::DetectorGroup>
 createRingOfCylindricalDetectors(const double R_min = 4.5,
-                                 const double R_max = 5, const double z = 4);
+                                 const double R_max = 5,
+                                 const double z000000000000000 = 4);
 /**
  * Create a group of two monitors
  */
@@ -160,6 +161,12 @@ Mantid::Geometry::Instrument_sptr
 createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
                         const Mantid::Kernel::V3D &samplePos,
                         const Mantid::Kernel::V3D &detectorPos);
+
+Mantid::Geometry::Instrument_sptr
+sansInstrument(const Mantid::Kernel::V3D &sourcePos,
+               const Mantid::Kernel::V3D &samplePos,
+               const Mantid::Kernel::V3D &trolley1Pos,
+               const Mantid::Kernel::V3D &trolley2Pos);
 }
 
 #endif // COMPONENTCREATIONHELPERS_H_

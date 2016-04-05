@@ -67,7 +67,8 @@ namespace MantidQt
     MessageDisplay::~MessageDisplay()
     {
       QSettings settings;
-      settings.writeEntry("MessageDisplayPriority", static_cast <int>(m_filterChannel->getPriority()));
+      settings.setValue("MessageDisplayPriority",
+                        static_cast<int>(m_filterChannel->getPriority()));
       // The Channel class is ref counted and will
       // delete itself when required
       m_filterChannel->release();
@@ -96,7 +97,10 @@ namespace MantidQt
       m_filterChannel->addChannel(m_logChannel);
       
       QSettings settings;
-      int priority = settings.readNumEntry("MessageDisplayPriority", Message::Priority::PRIO_NOTICE);
+      int priority =
+          settings
+              .value("MessageDisplayPriority", Message::Priority::PRIO_NOTICE)
+              .toInt();
       m_filterChannel->setPriority(priority);
 
       connect(m_logChannel, SIGNAL(messageReceived(const Message&)),

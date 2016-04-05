@@ -56,8 +56,8 @@ ChangeTimeZero::~ChangeTimeZero() {}
 /** Initialize the algorithm's properties.
  */
 void ChangeTimeZero::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
   declareProperty<double>("RelativeTimeOffset", m_defaultTimeShift,
                           "A relative time offset in seconds.");
@@ -66,8 +66,8 @@ void ChangeTimeZero::init() {
                   "An absolute time offset as an ISO8601 string "
                   "(YYYY-MM-DDTHH:MM::SS, eg 2013-10-25T13:58:03).");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -282,10 +282,10 @@ std::map<std::string, std::string> ChangeTimeZero::validateInputs() {
   // If both inputs are being used, then return straight away.
   if (isRelative && absoluteTimeInput) {
     invalidProperties.emplace("RelativeTimeOffset",
-                              "You can either sepcify a relative time shift or "
+                              "You can either specify a relative time shift or "
                               "an absolute time shift.");
     invalidProperties.emplace("AbsoluteTimeOffset",
-                              "You can either sepcify a relative time shift or "
+                              "You can either specify a relative time shift or "
                               "an absolute time shift.");
 
     return invalidProperties;
@@ -304,15 +304,17 @@ std::map<std::string, std::string> ChangeTimeZero::validateInputs() {
   // proton_charge entry exists
   if (isAbsolute) {
     MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
-    auto run = ws->run();
-    try {
-      run.getTimeSeriesProperty<double>("proton_charge");
-    } catch (...) {
-      invalidProperties.insert(
-          std::make_pair("InputWorkspace",
-                         "A TimeOffset with an absolute time, requires the "
-                         "input workspace to have a proton_charge property in "
-                         "its log."));
+    if (ws) {
+      auto run = ws->run();
+      try {
+        run.getTimeSeriesProperty<double>("proton_charge");
+      } catch (...) {
+        invalidProperties.insert(std::make_pair(
+            "InputWorkspace",
+            "A TimeOffset with an absolute time requires the "
+            "input workspace to have a proton_charge property in "
+            "its log."));
+      }
     }
   }
 

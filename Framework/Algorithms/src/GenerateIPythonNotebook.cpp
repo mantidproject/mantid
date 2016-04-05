@@ -27,19 +27,20 @@ DECLARE_ALGORITHM(GenerateIPythonNotebook)
 /** Initialize the algorithm's properties.
 */
 void GenerateIPythonNotebook::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "InputWorkspace", "", Direction::Input),
+                  "An input workspace.");
 
   std::vector<std::string> exts{".ipynb"};
 
-  declareProperty(new API::FileProperty("Filename", "",
-                                        API::FileProperty::OptionalSave, exts),
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::OptionalSave, exts),
                   "The name of the file into which the workspace history will "
                   "be generated.");
   declareProperty("NotebookText", std::string(""),
                   "Saves the history of the workspace to a variable.",
                   Direction::Output);
+  getPointerToProperty("NotebookText")->setAutoTrim(false);
 
   declareProperty("UnrollAll", false,
                   "Unroll all algorithms to show just their child algorithms.",

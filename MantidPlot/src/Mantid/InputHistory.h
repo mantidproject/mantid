@@ -55,6 +55,8 @@ struct PropertyData
 class InputHistoryImpl
 {
 public:
+  InputHistoryImpl(const InputHistoryImpl &) = delete;
+  InputHistoryImpl &operator=(const InputHistoryImpl &) = delete;
     void updateAlgorithm(Mantid::API::IAlgorithm_sptr alg);
     /// The name:value map of non-default properties with which algorithm algName was called last time.
     QMap< QString, QString > algorithmProperties(const QString& algName);
@@ -75,12 +77,8 @@ private:
 
 	///Private Constructor
 	InputHistoryImpl();
-	/// Private copy constructor - NO COPY ALLOWED
-	InputHistoryImpl(const InputHistoryImpl&);
-	/// Private assignment operator - NO ASSIGNMENT ALLOWED
-	InputHistoryImpl& operator = (const InputHistoryImpl&);
 	///Private Destructor
-	virtual ~InputHistoryImpl();
+        virtual ~InputHistoryImpl() = default;
 
   /// For debugging
   // cppcheck-suppress unusedPrivateFunction

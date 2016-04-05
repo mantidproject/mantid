@@ -44,19 +44,19 @@ DiffractionFocussing2::~DiffractionFocussing2() {}
 void DiffractionFocussing2::init() {
 
   auto wsValidator = boost::make_shared<API::RawCountValidator>();
-  declareProperty(new API::WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "A 2D workspace with X values of d-spacing/Q-spacing");
-  declareProperty(
-      new API::WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The result of diffraction focussing of InputWorkspace");
+  declareProperty(make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
+                  "The result of diffraction focussing of InputWorkspace");
 
-  declareProperty(new FileProperty("GroupingFileName", "",
-                                   FileProperty::OptionalLoad, ".cal"),
+  declareProperty(make_unique<FileProperty>("GroupingFileName", "",
+                                            FileProperty::OptionalLoad, ".cal"),
                   "Optional: The name of the CalFile with grouping data.");
 
   declareProperty(
-      new WorkspaceProperty<GroupingWorkspace>(
+      make_unique<WorkspaceProperty<GroupingWorkspace>>(
           "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: GroupingWorkspace to use instead of a grouping file.");
 
@@ -301,7 +301,7 @@ void DiffractionFocussing2::exec() {
 
     // Take the square root of the errors
     std::transform(Eout.begin(), Eout.end(), Eout.begin(),
-                   static_cast<double (*)(double)>(std::sqrt));
+                   static_cast<double (*)(double)>(sqrt));
 
     // Multiply the data and errors by the bin widths because the rebin
     // function, when used
@@ -493,7 +493,7 @@ void DiffractionFocussing2::execEvent() {
     }
 
     // Now you set the X axis to the X you saved before.
-    if (group2xvector.size() > 0) {
+    if (!group2xvector.empty()) {
       auto git = group2xvector.find(group);
       if (git != group2xvector.end())
         out->setX(workspaceIndex, (git->second));

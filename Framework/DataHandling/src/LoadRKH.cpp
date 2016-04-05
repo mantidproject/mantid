@@ -17,8 +17,7 @@
 #include <boost/date_time/date_parsing.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
-
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 #include <istream>
 
@@ -134,11 +133,12 @@ int LoadRKH::confidence(Kernel::FileDescriptor &descriptor) const {
  * Initialise the algorithm
  */
 void LoadRKH::init() {
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
-                                        {".txt", ".q", ".dat"}),
+  const std::vector<std::string> exts{".txt", ".q", ".dat"};
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, exts),
                   "Name of the RKH file to load");
-  declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
-                                               Kernel::Direction::Output),
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name to use for the output workspace");
   // Get the units registered with the UnitFactory
   std::vector<std::string> propOptions =
@@ -414,8 +414,9 @@ Progress LoadRKH::read2DHeader(const std::string &initalLine,
   if (fileLine.size() < 5) {
     std::getline(m_fileIn, fileLine);
   }
-  Poco::StringTokenizer wsDimensions(fileLine, " ",
-                                     Poco::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer wsDimensions(
+      fileLine, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                         Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   if (wsDimensions.count() < 2) {
     throw Exception::NotFoundError("Input file", "dimensions");
   }
@@ -463,7 +464,9 @@ void LoadRKH::readNumEntrys(const int nEntries, MantidVec &output) {
 */
 const std::string LoadRKH::readUnit(const std::string &line) {
   // split the line into words
-  const Poco::StringTokenizer codes(line, " ", Poco::StringTokenizer::TOK_TRIM);
+  const Mantid::Kernel::StringTokenizer codes(
+      line, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   if (codes.count() < 1) {
     return "C++ no unit found";
   }
@@ -471,14 +474,13 @@ const std::string LoadRKH::readUnit(const std::string &line) {
   // the symbol for the quantity q = MomentumTransfer, etc.
   const std::string symbol(codes[0]);
   // this is units used to measure the quantity e.g. angstroms, counts, ...
-  const std::string unit(*(codes.end() - 1));
+  auto itUnitsToken = codes.cend() - 1;
+  const std::string unit(*itUnitsToken);
 
   // theQuantity will contain the name of the unit, which can be many words long
   std::string theQuantity;
-  for (auto current = codes.begin() + 1; current != codes.end(); ++current) {
-    if (current != codes.end() - 1) {
-      theQuantity += *current;
-    }
+  for (auto current = codes.cbegin() + 1; current != itUnitsToken; ++current) {
+    theQuantity += *current;
   }
 
   // this is a syntax check the line before returning its data

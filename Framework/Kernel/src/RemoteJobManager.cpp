@@ -79,7 +79,7 @@ std::istream &RemoteJobManager::httpGet(const std::string &path,
   // session cookie.
   std::vector<Poco::Net::HTTPCookie> newCookies;
   m_response.getCookies(newCookies);
-  if (newCookies.size() > 0) {
+  if (!newCookies.empty()) {
     m_cookies = newCookies;
   }
 
@@ -168,7 +168,7 @@ std::istream &RemoteJobManager::httpPost(const std::string &path,
   // session cookie.
   std::vector<Poco::Net::HTTPCookie> newCookies;
   m_response.getCookies(newCookies);
-  if (newCookies.size() > 0) {
+  if (!newCookies.empty()) {
     m_cookies = newCookies;
   }
 

@@ -54,9 +54,6 @@ public:
       : IPropertySettings(), m_otherPropName(otherPropName),
         m_enabledSetting(enabledSetting) {}
 
-  /// Destructor
-  ~EnabledWhenWorkspaceIsType() override {}
-
   //--------------------------------------------------------------------------------------------
   /** Does the validator fulfill the criterion based on the
    * other property values?
@@ -65,9 +62,9 @@ public:
    */
   virtual bool fulfillsCriterion(const Kernel::IPropertyManager *algo) const {
     // Find the property
-    if (algo == NULL)
+    if (!algo)
       return true;
-    Mantid::Kernel::Property *prop = NULL;
+    Mantid::Kernel::Property *prop = nullptr;
     try {
       prop = algo->getPointerToProperty(m_otherPropName);
     } catch (Mantid::Kernel::Exception::NotFoundError &) {

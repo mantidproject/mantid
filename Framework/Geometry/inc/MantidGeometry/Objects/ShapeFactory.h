@@ -35,6 +35,16 @@ struct CuboidCorners {
   Kernel::V3D rfb;
 };
 
+struct Hexahedron {
+  Kernel::V3D lfb; // left front bottom
+  Kernel::V3D lft; // left front top
+  Kernel::V3D lbb; // left back bottom
+  Kernel::V3D lbt; // left back top
+  Kernel::V3D rfb; // right front bottom
+  Kernel::V3D rft; // right front top
+  Kernel::V3D rbb; // right back bottom
+  Kernel::V3D rbt; // right back top
+};
 /**
 
 Class originally intended to be used with the DataHandling 'LoadInstrument'
@@ -73,10 +83,6 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class MANTID_GEOMETRY_DLL ShapeFactory {
 public:
-  ShapeFactory();
-  /// Destructor
-  ~ShapeFactory() {}
-
   boost::shared_ptr<Object> createShape(Poco::XML::Element *pElem);
   boost::shared_ptr<Object> createShape(std::string shapeXML,
                                         bool addTypeTag = true);
@@ -111,6 +117,8 @@ private:
   std::string parseCone(Poco::XML::Element *pElem,
                         std::map<int, boost::shared_ptr<Surface>> &prim,
                         int &l_id);
+
+  Hexahedron parseHexahedron(Poco::XML::Element *pElem);
   std::string parseHexahedron(Poco::XML::Element *pElem,
                               std::map<int, boost::shared_ptr<Surface>> &prim,
                               int &l_id);

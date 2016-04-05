@@ -9,7 +9,14 @@
 
 #include <boost/scoped_ptr.hpp>
 
+#include <QObject>
+
 namespace MantidQt {
+
+namespace API {
+class BatchAlgorithmRunner;
+}
+
 namespace CustomInterfaces {
 
 /**
@@ -39,7 +46,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ImageROIPresenter : public IImageROIPresenter {
+class MANTIDQT_CUSTOMINTERFACES_DLL ImageROIPresenter
+    : public QObject,
+      public IImageROIPresenter {
+  // Q_OBJECT for the 'algorithm runner' signals
+  // TODO: move the AlgorithmRunner to the view? Have a different, non-Qt
+  // runner?
+  // Remove Q_OBJECT and take this file out out MOC_FILES in CMakeLists.txt
+  Q_OBJECT
 
 public:
   /// Default constructor - normally used from the concrete view
@@ -54,9 +68,13 @@ protected:
   /// clean shut down of model, view, etc.
   void cleanup();
 
+  // Methods that process notifications from view->presenter
   void processInit();
   void processBrowseImg();
   void processNewStack();
+  void processChangeImageType();
+  void processChangeRotation();
+  void processPlayStartStop();
   void processUpdateImgIndex();
   void processSelectCoR();
   void processSelectROI();
@@ -69,17 +87,45 @@ protected:
   void processResetNormalization();
   void processShutDown();
 
+private slots:
+  void finishedLoadStack(bool error);
+
 private:
   StackOfImagesDirs checkInputStack(const std::string &path);
 
   /// loads a list of images from a stack, from their individual paths
-  Mantid::API::WorkspaceGroup_sptr
-  loadFITSStack(const std::vector<std::string> &imgs);
+  void loadFITSStack(const StackOfImagesDirs &soid, const std::string &wsgName,
+                     const std::string &wsgFlatsName,
+                     const std::string &wsgDarksName);
+
+  void loadFITSList(const std::vector<std::string> &imgs,
+                    const std::string &wsName);
 
   void loadFITSImage(const std::string &path, const std::string &wsName);
 
+  std::string
+  filterImagePathsForFITSStack(const std::vector<std::string> &paths);
+
+  /// the workspaces being visualized
+  Mantid::API::WorkspaceGroup_sptr m_stackSamples, m_stackFlats, m_stackDarks;
+
+  /// whether 'playing' the current stack of images
+  bool m_playStatus;
+
+  /// whether to show (potentially too many and too annoying) warning pop-ups or
+  /// messages
+  static bool g_warnIfUnexpectedFileExtensions;
+
   /// path to the image stack being visualized
   std::string m_stackPath;
+
+  /// To run sequences of algorithms in a separate thread
+  std::unique_ptr<MantidQt::API::BatchAlgorithmRunner> m_algRunner;
+
+  /// Names used by the widget to store workspace groups
+  static const std::string g_wsgName;
+  static const std::string g_wsgFlatsName;
+  static const std::string g_wsgDarksName;
 
   /// Associated view for this presenter (MVP pattern)
   IImageROIView *const m_view;

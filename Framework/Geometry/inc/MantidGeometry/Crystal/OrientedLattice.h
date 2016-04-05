@@ -38,8 +38,6 @@ public:
   // Default constructor. a = b = c = 1, alpha = beta = gamma = 90 degrees
   OrientedLattice(const Kernel::DblMatrix &Umatrix = Kernel::DblMatrix(3, 3,
                                                                        true));
-  // Copy constructor
-  OrientedLattice(const OrientedLattice &other);
   // a,b,c constructor
   OrientedLattice(const double _a, const double _b, const double _c,
                   const Kernel::DblMatrix &Umatrix = Kernel::DblMatrix(3, 3,
@@ -54,12 +52,6 @@ public:
   OrientedLattice(const UnitCell &uc,
                   const Kernel::DblMatrix &Umatrix = Kernel::DblMatrix(3, 3,
                                                                        true));
-  // UnitCell constructor
-  OrientedLattice(const UnitCell *uc,
-                  const Kernel::DblMatrix &Umatrix = Kernel::DblMatrix(3, 3,
-                                                                       true));
-  // Destructor
-  ~OrientedLattice() override;
 
   // Access private variables
   const Kernel::DblMatrix &getU() const;
@@ -67,8 +59,8 @@ public:
   void setU(const Kernel::DblMatrix &newU, const bool force = false);
   void setUB(const Kernel::DblMatrix &newUB);
   // get u and v vectors for Horace/Mslice
-  Kernel::V3D getuVector();
-  Kernel::V3D getvVector();
+  Kernel::V3D getuVector() const;
+  Kernel::V3D getvVector() const;
   /// Return hkl from the Q-sample coordinates
   Kernel::V3D hklFromQ(const Kernel::V3D &Q) const;
   /// Return Q-sample coordinates from hkl

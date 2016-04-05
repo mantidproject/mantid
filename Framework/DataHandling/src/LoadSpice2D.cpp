@@ -18,7 +18,7 @@
 #include <boost/regex.hpp>
 #include <boost/shared_array.hpp>
 #include <Poco/Path.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
@@ -126,10 +126,10 @@ LoadSpice2D::~LoadSpice2D() {}
 
 /// Overwrites Algorithm Init method.
 void LoadSpice2D::init() {
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, ".xml"),
-      "The name of the input xml file to load");
-  declareProperty(new API::WorkspaceProperty<API::Workspace>(
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, ".xml"),
+                  "The name of the input xml file to load");
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name of the Output workspace");
 

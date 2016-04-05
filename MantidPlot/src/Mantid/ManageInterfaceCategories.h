@@ -53,15 +53,18 @@ public:
   /// Required overloaded methods for an editable Qt data model:
 
   /// The total number of categories.
-  virtual int rowCount(const QModelIndex & parent) const;
+  int rowCount(const QModelIndex &parent) const override;
   /// Returns the information to be displayed in the column header.
-  virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+  QVariant headerData(int section, Qt::Orientation orientation,
+                      int role = Qt::DisplayRole) const override;
   /// Returns the data used to fill each item in the model.
-  virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+  QVariant data(const QModelIndex &index,
+                int role = Qt::DisplayRole) const override;
   /// Used to set the data for each item in the model.
-  virtual bool setData(const QModelIndex &index, const QVariant &value, int role);
+  bool setData(const QModelIndex &index, const QVariant &value,
+               int role) override;
   /// Flagging up the fact that this model contains checkable items.
-  virtual Qt::ItemFlags flags ( const QModelIndex & index ) const;
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
 
 public slots:
   /// Persist this model's data to the user preferences file.

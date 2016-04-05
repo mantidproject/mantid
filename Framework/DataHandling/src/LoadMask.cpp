@@ -71,15 +71,15 @@ void LoadMask::init() {
   declareProperty("Instrument", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the instrument to apply the mask.");
+  const std::vector<std::string> maskExts{".xml", ".msk"};
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "InputFile", "", FileProperty::Load, maskExts),
+                  "Masking file for masking. Supported file format is XML and "
+                  "ISIS ASCII. ");
   declareProperty(
-      new FileProperty("InputFile", "", FileProperty::Load, {".xml", ".msk"}),
-      "Masking file for masking. Supported file format is XML and "
-      "ISIS ASCII. ");
-  declareProperty(new WorkspaceProperty<DataObjects::MaskWorkspace>(
-                      "OutputWorkspace", "Masking", Direction::Output),
-                  "Output Masking Workspace");
-
-  return;
+      Kernel::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
+          "OutputWorkspace", "Masking", Direction::Output),
+      "Output Masking Workspace");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -240,7 +240,7 @@ void LoadMask::componentToDetectors(std::vector<std::string> componentnames,
     int32_t id_min = 1000000;
     int32_t id_max = 0;
 
-    for (auto child : children) {
+    for (const auto &child : children) {
       // c) convert component to detector
       Geometry::IDetector_const_sptr det =
           boost::dynamic_pointer_cast<const Geometry::IDetector>(child);
@@ -304,7 +304,7 @@ void LoadMask::bankToDetectors(std::vector<std::string> singlebanks,
                     << "DetID: " << detid_first << ", " << detid_last
                     << std::endl;
 
-      for (auto det : idetectors) {
+      for (const auto &det : idetectors) {
         int32_t detid = det->getID();
         detectors.push_back(detid);
       }
@@ -322,7 +322,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
                                            std::vector<int32_t> pairslow,
                                            std::vector<int32_t> pairsup) {
   // 1. Check
-  if (pairslow.size() == 0)
+  if (pairslow.empty())
     return;
   if (pairslow.size() != pairsup.size()) {
     g_log.error() << "Input spectrum IDs are not paired.  Size(low) = "
@@ -612,7 +612,7 @@ void LoadMask::parseDetectorIDs(std::string inputstr, bool tomask) {
 
   // 2. Set to data storage
   if (tomask) {
-    mask_detid_single.insert(unmask_detid_single.end(), singles.begin(),
+    mask_detid_single.insert(mask_detid_single.end(), singles.begin(),
                              singles.end());
     for (size_t i = 0; i < pairs.size() / 2; i++) {
       mask_detid_pair_low.push_back(pairs[2 * i]);

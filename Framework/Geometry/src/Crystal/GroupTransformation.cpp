@@ -63,7 +63,7 @@ SymmetryOperation GroupTransformation::transformOperation(
                                     operation.vector()) *
       m_matrixVectorPair;
 
-  return SymmetryOperation(op.getMatrix(), op.getVector());
+  return SymmetryOperation(op.getMatrix(), getWrappedVector(op.getVector()));
 }
 
 void GroupTransformation::setInverseFromPair() {

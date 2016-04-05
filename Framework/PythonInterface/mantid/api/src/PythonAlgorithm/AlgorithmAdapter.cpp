@@ -244,7 +244,7 @@ void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(
   // We need to clone the property so that python doesn't own the object that
   // gets inserted
   // into the manager
-  caller.declareProperty(prop->clone(), doc);
+  caller.declareProperty(std::unique_ptr<Kernel::Property>(prop->clone()), doc);
 }
 
 /**
@@ -265,9 +265,10 @@ void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(
     const boost::python::object &validator, const std::string &doc,
     const int direction) {
   BaseAlgorithm &caller = extract<BaseAlgorithm &>(self);
-  caller.declareProperty(Registry::PropertyWithValueFactory::create(
-                             name, defaultValue, validator, direction),
-                         doc);
+  auto prop = std::unique_ptr<Kernel::Property>(
+      Registry::PropertyWithValueFactory::create(name, defaultValue, validator,
+                                                 direction));
+  caller.declareProperty(std::move(prop), doc);
 }
 
 /**
@@ -286,9 +287,10 @@ void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(
     const boost::python::object &defaultValue, const std::string &doc,
     const int direction) {
   BaseAlgorithm &caller = extract<BaseAlgorithm &>(self);
-  caller.declareProperty(
-      Registry::PropertyWithValueFactory::create(name, defaultValue, direction),
-      doc);
+  auto prop = std::unique_ptr<Kernel::Property>(
+      Registry::PropertyWithValueFactory::create(name, defaultValue,
+                                                 direction));
+  caller.declareProperty(std::move(prop), doc);
 }
 
 /**

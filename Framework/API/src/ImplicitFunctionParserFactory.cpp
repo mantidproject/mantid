@@ -7,9 +7,6 @@
 
 namespace Mantid {
 namespace API {
-ImplicitFunctionParserFactoryImpl::ImplicitFunctionParserFactoryImpl() {}
-
-ImplicitFunctionParserFactoryImpl::~ImplicitFunctionParserFactoryImpl() {}
 
 boost::shared_ptr<ImplicitFunctionParser>
 ImplicitFunctionParserFactoryImpl::create(const std::string &xmlString) const {
@@ -46,13 +43,9 @@ ImplicitFunctionParserFactoryImpl::createImplicitFunctionParserFromXML(
       functionElement->getElementsByTagName("Function");
   ImplicitFunctionParser *childParser = nullptr;
   for (unsigned long i = 0; i < childFunctions->length(); i++) {
-    Poco::XML::Node *childFunctionNode = childFunctions->item(i);
-
     // Recursive call to handle nested parameters.
-    Poco::XML::Element *childFunctionElement =
-        (Poco::XML::Element *)childFunctionNode;
-    ImplicitFunctionParser *tempParser =
-        createImplicitFunctionParserFromXML(childFunctionElement);
+    ImplicitFunctionParser *tempParser = createImplicitFunctionParserFromXML(
+        dynamic_cast<Poco::XML::Element *>(childFunctions->item(i)));
     if (i == 0) {
       childParser = tempParser;
       // Add the first child function parser to the parent (composite) directly.

@@ -40,8 +40,6 @@ class IObjComponent;
 */
 class MANTID_GEOMETRY_DLL CacheGeometryRenderer {
 public:
-  CacheGeometryRenderer();  ///< Constructor
-  ~CacheGeometryRenderer(); ///< Destructor
   /// Render using an object component
   void Render(IObjComponent *ObjComp) const;
   /// Render using triangulation information

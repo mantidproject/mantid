@@ -50,7 +50,7 @@ void IDomainCreator::declareProperty(Kernel::Property *prop,
   if (!m_manager) {
     throw std::runtime_error("IDomainCreator: property manager isn't defined.");
   }
-  m_manager->declareProperty(prop, doc);
+  m_manager->declareProperty(std::unique_ptr<Kernel::Property>(prop), doc);
 }
 
 /**

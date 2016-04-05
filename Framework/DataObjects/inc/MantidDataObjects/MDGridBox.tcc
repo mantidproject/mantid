@@ -14,10 +14,6 @@
 #include <ostream>
 #include "MantidKernel/Strings.h"
 
-using namespace Mantid;
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
-
 // These pragmas ignores the warning in the ctor where "d<nd-1" for nd=1.
 // This is okay (though would be better if it were for only that function
 #if (defined(__INTEL_COMPILER))
@@ -39,7 +35,7 @@ namespace DataObjects {
  * @param extentsVector :: size of the box
  */
 TMDE(MDGridBox)::MDGridBox(
-    BoxController *const bc, const uint32_t depth,
+    API::BoxController *const bc, const uint32_t depth,
     const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
         extentsVector)
     : MDBoxBase<MDE, nd>(bc, depth, UNDEF_SIZET, extentsVector), numBoxes(0),
@@ -246,8 +242,8 @@ TMDE(size_t MDGridBox)::computeSizesFromSplit() {
     splitCumul[d] = tot;
     tot *= split[d];
     // Length of the side of a box in this dimension
-    m_SubBoxSize[d] =
-        double(this->extents[d].getSize()) / static_cast<double>(split[d]);
+    m_SubBoxSize[d] = static_cast<double>(this->extents[d].getSize()) /
+                      static_cast<double>(split[d]);
     // Accumulate the squared diagonal length.
     diagSum += m_SubBoxSize[d] * m_SubBoxSize[d];
   }
@@ -363,7 +359,7 @@ TMDE(inline size_t MDGridBox)::getLinearIndex(size_t *indices) const {
  * @param ts :: ThreadScheduler pointer to perform the caching
  *  in parallel. If NULL, it will be performed in series.
  */
-TMDE(void MDGridBox)::refreshCache(ThreadScheduler *ts) {
+TMDE(void MDGridBox)::refreshCache(Kernel::ThreadScheduler *ts) {
   // Clear your total
   nPoints = 0;
   this->m_signal = 0;
@@ -417,10 +413,10 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
   if (!leafOnly)
     outBoxes.push_back(this);
 
-  if (this->getDepth() + 1 <= maxDepth) {
-    for (size_t i = 0; i < numBoxes; i++) {
+  if (this->getDepth() < maxDepth) {
+    for(API::IMDNode * child: m_Children){
       // Recursively go deeper, if needed
-      m_Children[i]->getBoxes(outBoxes, maxDepth, leafOnly);
+      child->getBoxes(outBoxes, maxDepth, leafOnly);
     }
   } else {
     // Oh, we reached the max depth and want only leaves.
@@ -454,13 +450,13 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
   if (!leafOnly)
     outBoxes.push_back(this);
 
-  if (this->getDepth() + 1 <= maxDepth) {
+  if (this->getDepth() < maxDepth) {
     // OK, let's look for children that are either touching or completely
     // contained by the implicit function.
 
     // The number of vertices in each dimension is the # split[d] + 1
     size_t vertices_max[nd];
-    Utils::NestedForLoop::SetUp(nd, vertices_max, 0);
+    Kernel::Utils::NestedForLoop::SetUp(nd, vertices_max, 0);
 
     // Total number of vertices for all the boxes
     size_t numVertices = 1;
@@ -477,19 +473,20 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
 
     // The index to the vertex in each dimension
     size_t vertexIndex[nd];
-    Utils::NestedForLoop::SetUp(nd, vertexIndex, 0);
+    Kernel::Utils::NestedForLoop::SetUp(nd, vertexIndex, 0);
     // To get indexes in the array of vertexes
     size_t vertexIndexMaker[nd];
-    Utils::NestedForLoop::SetUpIndexMaker(nd, vertexIndexMaker, vertices_max);
+    Kernel::Utils::NestedForLoop::SetUpIndexMaker(nd, vertexIndexMaker,
+                                                  vertices_max);
     // To get indexes in the array of BOXES
     size_t boxIndexMaker[nd];
-    Utils::NestedForLoop::SetUpIndexMaker(nd, boxIndexMaker, split);
+    Kernel::Utils::NestedForLoop::SetUpIndexMaker(nd, boxIndexMaker, split);
 
     size_t linearVertexIndex = 0;
     for (linearVertexIndex = 0; linearVertexIndex < numVertices;
          linearVertexIndex++) {
       // Get the nd-dimensional index
-      Utils::NestedForLoop::GetIndicesFromLinearIndex(
+      Kernel::Utils::NestedForLoop::GetIndicesFromLinearIndex(
           nd, linearVertexIndex, vertexIndexMaker, vertices_max, vertexIndex);
 
       // Coordinates of this vertex
@@ -525,20 +522,20 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
         if (i & mask)
           vertIndex[d] = 1;
       }
-      size_t linIndex =
-          Utils::NestedForLoop::GetLinearIndex(nd, vertIndex, vertexIndexMaker);
+      size_t linIndex = Kernel::Utils::NestedForLoop::GetLinearIndex(
+          nd, vertIndex, vertexIndexMaker);
       vertexNeighborsOffsets[i] = linIndex;
     }
 
     // Go through all the boxes
     size_t boxIndex[nd];
-    Utils::NestedForLoop::SetUp(nd, boxIndex, 0);
+    Kernel::Utils::NestedForLoop::SetUp(nd, boxIndex, 0);
 
     bool allDone = false;
     while (!allDone) {
       // Find the linear index into the BOXES array.
-      size_t boxLinearIndex =
-          Utils::NestedForLoop::GetLinearIndex(nd, boxIndex, boxIndexMaker);
+      size_t boxLinearIndex = Kernel::Utils::NestedForLoop::GetLinearIndex(
+          nd, boxIndex, boxIndexMaker);
       API::IMDNode *box = m_Children[boxLinearIndex];
 
       //        std::cout << "Box at " << Strings::join(boxIndex, boxIndex+nd,
@@ -548,8 +545,8 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
       // Find the linear index of the upper left vertex of the box.
       // (note that we're using the VERTEX index maker to find the linear index
       // in that LARGER array)
-      size_t vertLinearIndex =
-          Utils::NestedForLoop::GetLinearIndex(nd, boxIndex, vertexIndexMaker);
+      size_t vertLinearIndex = Kernel::Utils::NestedForLoop::GetLinearIndex(
+          nd, boxIndex, vertexIndexMaker);
 
       // OK, now its time to see if the box is touching or contained or out of
       // it.
@@ -604,7 +601,7 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
       }
 
       // Move on to the next box in the list
-      allDone = Utils::NestedForLoop::Increment(nd, boxIndex, split);
+      allDone = Kernel::Utils::NestedForLoop::Increment(nd, boxIndex, split);
     }
 
     // Clean up.
@@ -640,7 +637,7 @@ const API::IMDNode *MDGridBox<MDE, nd>::getBoxAtCoord(const coord_t *coords) {
   if (index < numBoxes) // avoid segfaults for floating point round-off errors.
     return m_Children[index]->getBoxAtCoord(coords);
   else
-    return NULL;
+    return nullptr;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -654,7 +651,7 @@ const API::IMDNode *MDGridBox<MDE, nd>::getBoxAtCoord(const coord_t *coords) {
  * @param ts :: optional ThreadScheduler * that will be used to parallelize
  *        recursive splitting. Set to NULL for no recursive splitting.
  */
-TMDE(void MDGridBox)::splitContents(size_t index, ThreadScheduler *ts) {
+TMDE(void MDGridBox)::splitContents(size_t index, Kernel::ThreadScheduler *ts) {
   // You can only split it if it is a MDBox (not MDGridBox).
   MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(m_Children[index]);
   if (!box)
@@ -671,10 +668,10 @@ TMDE(void MDGridBox)::splitContents(size_t index, ThreadScheduler *ts) {
 
   if (ts) {
     // Create a task to split the newly created MDGridBox.
-    ts->push(new FunctionTask(
+    ts->push(new Kernel::FunctionTask(
         boost::bind(&MDGridBox<MDE, nd>::splitAllIfNeeded, &*gridbox, ts)));
   } else {
-    gridbox->splitAllIfNeeded(NULL);
+    gridbox->splitAllIfNeeded(nullptr);
   }
 }
 
@@ -700,7 +697,7 @@ TMDE(size_t MDGridBox)::getChildIndexFromID(size_t childId) const {
  * @param ts :: optional ThreadScheduler * that will be used to parallelize
  *        recursive splitting. Set to NULL to do it serially.
  */
-TMDE(void MDGridBox)::splitAllIfNeeded(ThreadScheduler *ts) {
+TMDE(void MDGridBox)::splitAllIfNeeded(Kernel::ThreadScheduler *ts) {
   for (size_t i = 0; i < numBoxes; ++i) {
     MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(m_Children[i]);
     if (box) {
@@ -719,12 +716,12 @@ TMDE(void MDGridBox)::splitAllIfNeeded(ThreadScheduler *ts) {
           delete box;
           // Now recursively check if this NEW grid box's contents should be
           // split too
-          gridBox->splitAllIfNeeded(NULL);
+          gridBox->splitAllIfNeeded(nullptr);
         } else {
           // ------ Perform split in parallel (using ThreadPool) ------
           // So we create a task to split this MDBox,
           // Task is : this->splitContents(i, ts);
-          ts->push(new FunctionTask(
+          ts->push(new Kernel::FunctionTask(
               boost::bind(&MDGridBox<MDE, nd>::splitContents, &*this, i, ts)));
         }
       } else {
@@ -753,7 +750,7 @@ TMDE(void MDGridBox)::splitAllIfNeeded(ThreadScheduler *ts) {
         else
           // Go parallel if this is a big enough gridbox.
           // Task is : gridBox->splitAllIfNeeded(ts);
-          ts->push(new FunctionTask(boost::bind(
+          ts->push(new Kernel::FunctionTask(boost::bind(
               &MDGridBox<MDE, nd>::splitAllIfNeeded, &*gridBox, ts)));
       }
     }
@@ -860,8 +857,8 @@ TMDE(void MDGridBox)::centerpointBin(MDBin<MDE, nd> &bin,
     }
 
     // Increment the counter(s) in the nested for loops.
-    allDone = Utils::NestedForLoop::Increment(nd, counters, counters_max,
-                                              counters_min);
+    allDone = Kernel::Utils::NestedForLoop::Increment(
+        nd, counters, counters_max, counters_min);
   }
 }
 
@@ -1093,7 +1090,7 @@ TMDE(void MDGridBox)::centerpointBin(MDBin<MDE, nd> &bin,
  * @param signal [out] :: set to the integrated signal
  * @param errorSquared [out] :: set to the integrated squared error.
  */
-TMDE(void MDGridBox)::integrateSphere(CoordTransform &radiusTransform,
+TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform,
                                       const coord_t radiusSquared,
                                       signal_t &signal,
                                       signal_t &errorSquared) const {
@@ -1119,7 +1116,7 @@ TMDE(void MDGridBox)::integrateSphere(CoordTransform &radiusTransform,
 
   // The number of vertices in each dimension is the # split[d] + 1
   size_t vertices_max[nd];
-  Utils::NestedForLoop::SetUp(nd, vertices_max, 0);
+  Kernel::Utils::NestedForLoop::SetUp(nd, vertices_max, 0);
   for (size_t d = 0; d < nd; ++d) {
     vertices_max[d] = split[d] + 1;
     // cache box sizes and min box valyes for performance
@@ -1129,11 +1126,11 @@ TMDE(void MDGridBox)::integrateSphere(CoordTransform &radiusTransform,
 
   // The index to the vertex in each dimension
   size_t vertexIndex[nd];
-  Utils::NestedForLoop::SetUp(nd, vertexIndex, 0);
+  Kernel::Utils::NestedForLoop::SetUp(nd, vertexIndex, 0);
   size_t boxIndex[nd];
-  Utils::NestedForLoop::SetUp(nd, boxIndex, 0);
+  Kernel::Utils::NestedForLoop::SetUp(nd, boxIndex, 0);
   size_t indexMaker[nd];
-  Utils::NestedForLoop::SetUpIndexMaker(nd, indexMaker, split);
+  Kernel::Utils::NestedForLoop::SetUpIndexMaker(nd, indexMaker, split);
 
   bool allDone = false;
   while (!allDone) {
@@ -1173,8 +1170,8 @@ TMDE(void MDGridBox)::integrateSphere(CoordTransform &radiusTransform,
         }
         if (!badIndex) {
           // Convert to linear index
-          size_t linearIndex =
-              Utils::NestedForLoop::GetLinearIndex(nd, boxIndex, indexMaker);
+          size_t linearIndex = Kernel::Utils::NestedForLoop::GetLinearIndex(
+              nd, boxIndex, indexMaker);
           // So we have one more vertex touching this box that is contained in
           // the integration volume. Whew!
           verticesContained[linearIndex]++;
@@ -1185,7 +1182,8 @@ TMDE(void MDGridBox)::integrateSphere(CoordTransform &radiusTransform,
     }
 
     // Increment the counter(s) in the nested for loops.
-    allDone = Utils::NestedForLoop::Increment(nd, vertexIndex, vertices_max);
+    allDone =
+        Kernel::Utils::NestedForLoop::Increment(nd, vertexIndex, vertices_max);
   }
 
   // OK, we've done all the vertices. Now we go through and check each box.
@@ -1265,7 +1263,7 @@ TMDE(void MDGridBox)::integrateSphere(CoordTransform &radiusTransform,
  * @param[out] centroid :: array of size [nd]; its centroid will be added
  * @param[out] signal :: set to the integrated signal
  */
-TMDE(void MDGridBox)::centroidSphere(CoordTransform &radiusTransform,
+TMDE(void MDGridBox)::centroidSphere(API::CoordTransform &radiusTransform,
                                      const coord_t radiusSquared,
                                      coord_t *centroid,
                                      signal_t &signal) const {
@@ -1335,7 +1333,7 @@ TMDE(void MDGridBox)::integrateCylinder(
 
   // The number of vertices in each dimension is the # split[d] + 1
   size_t vertices_max[nd];
-  Utils::NestedForLoop::SetUp(nd, vertices_max, 0);
+  Kernel::Utils::NestedForLoop::SetUp(nd, vertices_max, 0);
   for (size_t d = 0; d < nd; ++d) {
     vertices_max[d] = split[d] + 1;
     // cache box sizes and min box valyes for performance
@@ -1345,11 +1343,11 @@ TMDE(void MDGridBox)::integrateCylinder(
 
   // The index to the vertex in each dimension
   size_t vertexIndex[nd];
-  Utils::NestedForLoop::SetUp(nd, vertexIndex, 0);
+  Kernel::Utils::NestedForLoop::SetUp(nd, vertexIndex, 0);
   size_t boxIndex[nd];
-  Utils::NestedForLoop::SetUp(nd, boxIndex, 0);
+  Kernel::Utils::NestedForLoop::SetUp(nd, boxIndex, 0);
   size_t indexMaker[nd];
-  Utils::NestedForLoop::SetUpIndexMaker(nd, indexMaker, split);
+  Kernel::Utils::NestedForLoop::SetUpIndexMaker(nd, indexMaker, split);
 
   size_t numSteps = signal_fit.size();
   double deltaQ = length / static_cast<double>(numSteps - 1);
@@ -1391,8 +1389,8 @@ TMDE(void MDGridBox)::integrateCylinder(
         }
         if (!badIndex) {
           // Convert to linear index
-          size_t linearIndex =
-              Utils::NestedForLoop::GetLinearIndex(nd, boxIndex, indexMaker);
+          size_t linearIndex = Kernel::Utils::NestedForLoop::GetLinearIndex(
+              nd, boxIndex, indexMaker);
           // So we have one more vertex touching this box that is contained in
           // the integration volume. Whew!
           verticesContained[linearIndex]++;
@@ -1403,7 +1401,8 @@ TMDE(void MDGridBox)::integrateCylinder(
     }
 
     // Increment the counter(s) in the nested for loops.
-    allDone = Utils::NestedForLoop::Increment(nd, vertexIndex, vertices_max);
+    allDone =
+        Kernel::Utils::NestedForLoop::Increment(nd, vertexIndex, vertices_max);
   }
 
   // OK, we've done all the vertices. Now we go through and check each box.
@@ -1640,11 +1639,20 @@ TMDE(void MDGridBox)::buildAndAddEventUnsafe(const signal_t Signal,
  * after all events have been added.
  *
  * @param event :: reference to a MDLeanEvent to add.
+ * @return 1 if the event was added, 0 otherwise
  * */
-TMDE(inline void MDGridBox)::addEvent(const MDE &event) {
+TMDE(inline size_t MDGridBox)::addEvent(const MDE &event) {
   size_t cindex = calculateChildIndex(event);
+
+  // We can erroneously get cindex == numBoxes for events which fall on the
+  // upper boundary of the last child box, so add these events to the last box
+  if (cindex == numBoxes)
+    cindex = numBoxes - 1;
+
   if (cindex < numBoxes)
-    m_Children[cindex]->addEvent(event);
+    return m_Children[cindex]->addEvent(event);
+  else
+    return 0;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -1662,11 +1670,20 @@ TMDE(inline void MDGridBox)::addEvent(const MDE &event) {
  * after all events have been added.
  *
  * @param event :: reference to a MDEvent to add.
+ * @return 1 if the event was added, 0 otherwise
  * */
-TMDE(inline void MDGridBox)::addEventUnsafe(const MDE &event) {
+TMDE(inline size_t MDGridBox)::addEventUnsafe(const MDE &event) {
   size_t cindex = calculateChildIndex(event);
+
+  // We can erroneously get cindex == numBoxes for events which fall on the
+  // upper boundary of the last child box, so add these events to the last box
+  if (cindex == numBoxes)
+    cindex = numBoxes - 1;
+
   if (cindex < numBoxes)
-    m_Children[cindex]->addEventUnsafe(event);
+    return m_Children[cindex]->addEventUnsafe(event);
+  else
+    return 0;
 }
 
 /**Sets particular child MDgridBox at the index, specified by the input
@@ -1726,7 +1743,7 @@ TMDE(size_t MDGridBox)::calculateChildIndex(const MDE &event) const {
   for (size_t d = 0; d < nd; d++) {
     // Accumulate the index
     auto offset = event.getCenter(d) - this->extents[d].getMin();
-    cindex += int(offset / (m_SubBoxSize[d])) * splitCumul[d];
+    cindex += static_cast<int>(offset / (m_SubBoxSize[d])) * splitCumul[d];
   }
   return cindex;
 }

@@ -19,15 +19,15 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite {
 
   class Workspace1DTest : public WorkspaceTester {
   public:
-    const std::string id() const { return "Workspace1DTest"; }
+    const std::string id() const override { return "Workspace1DTest"; }
   };
 
   class Workspace2DTest : public WorkspaceTester {
   public:
-    const std::string id() const { return "Workspace2DTest"; }
+    const std::string id() const override { return "Workspace2DTest"; }
 
     void init(const size_t &NVectors, const size_t &XLength,
-              const size_t &YLength) {
+              const size_t &YLength) override {
       size.push_back(NVectors);
       size.push_back(XLength);
       size.push_back(YLength);
@@ -38,7 +38,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite {
 
   class NotInFactory : public WorkspaceTester {
   public:
-    const std::string id() const { return "NotInFactory"; }
+    const std::string id() const override { return "NotInFactory"; }
   };
 
   // Now the testing class itself
