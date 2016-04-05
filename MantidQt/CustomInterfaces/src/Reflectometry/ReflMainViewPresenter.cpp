@@ -245,6 +245,7 @@ void ReflMainViewPresenter::transfer() {
       }
     }
   }
+  m_tablePresenter->transfer(results.getTransferRuns());
 }
 /**
 * Select and make a transfer strategy on demand based. Pick up the
