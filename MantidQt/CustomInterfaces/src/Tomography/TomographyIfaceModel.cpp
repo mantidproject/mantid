@@ -906,14 +906,14 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
 
   // Filters:
 
-  // TODO: (we require here IMAT specific headers to become available soon)
+  // TODO: (we'd require here IMAT specific headers to become available soon)
   // if (filters.prep.normalizeByProtonCharge)
 
   double cor = 0;
   cor = corRegions.cor.X();
   opts.emplace_back("--cor=" + std::to_string(cor));
 
-  int rotationIdx = filters.prep.rotation / 90;
+  int rotationIdx = static_cast<int>(corRegions.rotation / 90);
   // filters.prep.rotation
   opts.emplace_back("--rotation=" + std::to_string(rotationIdx));
 
