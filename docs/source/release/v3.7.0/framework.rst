@@ -20,6 +20,9 @@ New
    :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`, :ref:`CalibrateRectangularDetectors <algm-CalibrateRectangularDetectors>`, *et al* and
    minimizes the difference between the *DIFC* of the instrument and
    calibration by moving and rotating instrument components.
+- :ref:`EnggFitDIFCFromPeaks <algm-AlignComponents>` fits GSAS calibration
+  parameters (DIFA, DIFC, TZERO) from peaks fitted using
+  :ref:`EnggFitPeaks <algm-EnggFitPeaks>`.
 
 Renamed
 #######

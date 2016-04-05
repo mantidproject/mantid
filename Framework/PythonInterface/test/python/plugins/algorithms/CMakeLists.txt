@@ -26,6 +26,7 @@ set ( TEST_PY_FILES
   DSFinterpTest.py
   EnggCalibrateFullTest.py
   EnggCalibrateTest.py
+  EnggFitDIFCFromPeaksTest.py
   EnggFitPeaksTest.py
   EnggFocusTest.py
   EnggVanadiumCorrectionsTest.py

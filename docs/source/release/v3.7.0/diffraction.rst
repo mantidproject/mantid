@@ -15,6 +15,11 @@ Crystal Improvements
 Engineering Diffraction
 -----------------------
 
+- New algorithm added: EnggFitDIFCFromPeaks, which forks from the old EnggFitPeaks. EnggFitPeaks modified to
+  fit peaks but not calibration parameters.
+
+Graphical user interface:
+
 - Vanadium Curves and Ceria Peaks graphs are plotted once basic and cropped calibration process has been carried out
 - Customise Bank Name text-field will set the workspace and .his file name according to this Bank Name
   provided by the user for Cropped Calibration
