@@ -15,6 +15,7 @@ import platform
 from mantid.api import *
 import vesuvio.testing as testing
 import mantid.simpleapi as ms
+from mantid import *
 
 #====================================Helper Functions=======================================
 def setUp():
@@ -89,7 +90,7 @@ def _create_dummy_profiles():
 #===========================================================================================
 #========================================Success cases======================================
 
-class GammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
+class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
 
     _algorithm = None
     _is_linux = None
@@ -157,7 +158,7 @@ class GammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         _validate_table_values_top_to_bottom(self, linear_params, expected_values)
         tearDown()
 
-
+'''
 class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
 
     _algorithm = None
@@ -225,6 +226,7 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
         if self._is_linux and not self._is_rhel6:
             expected_values = [1.550200e-04, 0.0, 1.0, 2.390063, 0.0, 1.0, 10.055330]
         _validate_table_values_top_to_bottom(self, linear_params, expected_values)
+        logger.warning(str(linear_params.column(0)))
         tearDown()
 
 
@@ -335,7 +337,7 @@ class TestGammaAndMsCorrectWithContainerFixedScaling(stresstesting.MantidStressT
 
 #========================================Failure cases======================================
 
-class RunningWithoutFitParamsRaisesError(stresstesting.MantidStressTest):
+class TestRunningWithoutFitParamsRaisesError(stresstesting.MantidStressTest):
 
     _algorithm = None
 
@@ -347,7 +349,7 @@ class RunningWithoutFitParamsRaisesError(stresstesting.MantidStressTest):
     def validate(self):
         self.assertRaises(RuntimeError, self._algorithm.execute)
 
-class RunningWithoutMassesRaisesError(stresstesting.MantidStressTest):
+class TestRunningWithoutMassesRaisesError(stresstesting.MantidStressTest):
 
     _algorithm = None
 
@@ -360,7 +362,7 @@ class RunningWithoutMassesRaisesError(stresstesting.MantidStressTest):
         self.assertRaises(RuntimeError, self._algorithm.execute)
 
 
-class RunningWithoutProfilesRaisesError(stresstesting.MantidStressTest):
+class TestRunningWithoutProfilesRaisesError(stresstesting.MantidStressTest):
 
     _algorithm = None
 
@@ -371,7 +373,7 @@ class RunningWithoutProfilesRaisesError(stresstesting.MantidStressTest):
                                             Masses=_create_dummy_masses())
     def validate(self):
         self.assertRaises(RuntimeError, self._algorithm.execute)
-
+'''
 
 #=========================================Validation======================================
 #=========================================Structure=======================================

@@ -313,16 +313,27 @@ class VesuvioCorrections(VesuvioBase):
             functions.append(function_str)
 
             logger.notice('Corrections scale fit index %d is %s' % (idx, wsn))
-
+        save = AlgorithmManager.createUnmanaged("SaveNexus")
+        save.initialize()
+        save.setProperty("InputWorkspace", self._output_ws)
+        save.setProperty("Filename", mtd[self._output_ws].getName()+'_pre_fit.nxs')
+        save.execute()
+        function_str = ";".join(functions)
         fit = AlgorithmManager.create("Fit")
         fit.initialize()
         fit.setChild(True)
         fit.setLogging(True)
-        fit.setProperty("Function", ";".join(functions))
+        fit.setProperty("Function", function_str)
         fit.setProperty("InputWorkspace", self._output_ws)
         fit.setProperty("Output", param_table_name)
         fit.setProperty("CreateOutput", True)
         fit.execute()
+        out_par = fit.getProperty('OutputParameters').value
+        save = AlgorithmManager.createUnmanaged("SaveNexus")
+        save.initialize()
+        save.setProperty("InputWorkspace", out_par)
+        save.setProperty("Filename", out_par.getName()+'_post_fit.nxs')
+        save.execute()
 
         return fit.getProperty('OutputParameters').value
 
