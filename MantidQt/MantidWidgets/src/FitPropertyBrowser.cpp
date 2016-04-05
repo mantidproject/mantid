@@ -1171,7 +1171,7 @@ void FitPropertyBrowser::boolChanged(QtProperty *prop) {
     settings.beginGroup("Mantid/FitBrowser");
     settings.setValue(prop->propertyName(), val);
 
-    if (m_showParamErrors) {
+    if (prop == m_showParamErrors) {
       m_parameterManager->setErrorsEnabled(val);
     }
   } else { // it could be an attribute
