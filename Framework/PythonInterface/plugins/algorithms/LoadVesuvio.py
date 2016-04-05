@@ -331,7 +331,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self._raise_error_period_scatter(run_str, self._back_scattering)
         all_spectra = [item for sublist in self._spectra for item in sublist]
 
-        self._load_single_run_spectra_and_monitor_data(all_spectra, run_str)
+        self._load_single_run_spec_and_mon(all_spectra, run_str)
 
         raw_group = mtd[SUMMED_WS]
         self._nperiods = raw_group.size()
@@ -376,7 +376,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
-    def _load_single_run_spectra_and_monitor_data(self, all_spectra, run_str):
+    def _load_single_run_spec_and_mon(self, all_spectra, run_str):
         # check if the monitor spectra are already in the spectra list
         filtered_spectra = [i for i in all_spectra if i <= self._mon_spectra[-1]]
         filtered_spectra.sort()
