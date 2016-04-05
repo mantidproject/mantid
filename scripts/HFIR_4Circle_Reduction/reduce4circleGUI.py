@@ -104,6 +104,10 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_save_roi)
         self.connect(self.ui.pushButton_cancelROI, QtCore.SIGNAL('clicked()'),
                      self.do_del_roi)
+        self.connect(self.ui.pushButton_nextScanNumber, QtCore.SIGNAL('clicked()'),
+                     self.do_plot_next_scan)
+        self.connect(self.ui.pushButton_prevScanNumber, QtCore.SIGNAL('clicked()'),
+                     self.do_plot_prev_scan)
 
         # Tab 'calculate ub matrix'
         self.connect(self.ui.pushButton_findPeak, QtCore.SIGNAL('clicked()'),
@@ -2218,6 +2222,8 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.graphicsView.clear_canvas()
         self.ui.graphicsView.add_plot_2d(raw_det_data, x_min=0, x_max=256, y_min=0, y_max=256,
                                          hold_prev_image=False)
+        if self.ui.checkBox_keppRoi.isChecked():
+            raise NotImplementedError('Implement: get RIO from control and plot!')
 
         # Information
         info = '%-10s: %d\n%-10s: %d\n%-10s: %d\n' % ('Exp', exp_no,

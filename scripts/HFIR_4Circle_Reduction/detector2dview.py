@@ -90,22 +90,6 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
         return
 
-    def remove_roi(self):
-        """
-        Remove the rectangular for region of interest
-        :return:
-        """
-        if self._myPolygon is not None:
-            # polygon is of type matplotlib.patches.Polygon
-            print 'My polygon is of type %s.' % str(type(self._myPolygon))
-            print dir(self._myPolygon)
-            self._myPolygon.remove()
-            self._myCanvas = None
-
-        self._myCanvas._flush()
-
-        return
-
     def get_roi(self):
         """
         :return: A list for polygon0
@@ -118,6 +102,22 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         upper_right = (self._roiEnd[0], self._roiStart[1])
 
         return lower_left, upper_right
+
+    def remove_roi(self):
+        """
+        Remove the rectangular for region of interest
+        :return:
+        """
+        if self._myPolygon is not None:
+            # polygon is of type matplotlib.patches.Polygon
+            # print 'My polygon is of type %s.' % str(type(self._myPolygon))
+            # print dir(self._myPolygon)
+            self._myPolygon.remove()
+            self._myPolygon = None
+
+            self._myCanvas._flush()
+
+        return
 
     def on_mouse_motion(self, event):
         """
@@ -179,6 +179,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         if self._roiSelectMode is True and self._mousePressed == Detector2DView.MousePress.LEFT:
             # start to select a region
             self._roiStart = (self._currX, self._currY)
+            print '[DB] Set RIO start to ', self._roiStart
 
         return
 
@@ -202,7 +203,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
             self.update_roi_poly(self._currX, self._currY)
 
             # release the mode
-            self._roiStart = self._roiEnd = None
+            # self._roiStart = self._roiEnd = None
 
         # update button
         self._mousePressed = Detector2DView.MousePress.RELEASED
@@ -237,7 +238,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         if self._myPolygon is not None:
             self._myPolygon.remove()
             self._myPolygon = None
-            self.canvas._flush()
+            # self.canvas._flush()
 
         # set RIO end
         self._roiEnd = [cursor_x, cursor_y]
