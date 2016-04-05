@@ -1,0 +1,71 @@
+#!/bin/bash
+# Wrapper script to launch the system tests for a development build.
+#
+# It uses the mantidpython launch script to run the tests. All arguments to
+# this script are forwarded to the test runner.
+
+PYTHON_EXE=@PYTHON_EXECUTABLE@
+RUNNER_SCRIPT=@SYSTEMTESTS_RUNNER_SCRIPT@
+MULTI_CONFIG_GENERATOR=@MULTI_CONFIG_GENERATOR@
+BIN_DIR=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@
+MANTIDPYTHON_ARGS="--classic"
+
+function usage() {
+  if [ "$MULTI_CONFIG_GENERATOR" == "true" ]; then
+    echo "systemtest -C <cfg> [arg1] [arg2] ..."
+    echo
+    echo "<cfg> is one [Release|Debug|RelWithDebInfo|MinSizeRelease]"
+    echo "All arguments after <cfg> are passed to the runSystemTest.py script"
+  else
+    echo "systemtest [arg1] [arg2] ..."
+    echo
+    echo "All arguments are passed to the runSystemTest.py script"
+  fi
+  $PYTHON_EXE $RUNNER_SCRIPT -h
+}
+
+# Sets the MANTIDPYTHON variable
+function setup_mantidpython_path() {
+  if [ "$MULTI_CONFIG_GENERATOR" == "true" ]; then
+    if [ "$1" == "-C" ]; then
+      if [ -n "$2" ]; then
+        MANTIDPYTHON=$BIN_DIR/$2/mantidpython
+      else
+        echo "-C requires a config argument"
+        usage
+        exit 1
+      fi
+    else
+      echo "Multi-configuration build requires -C <cfg> to specify test configuration"
+      usage
+      exit 1
+    fi
+  else
+    MANTIDPYTHON=$BIN_DIR/mantidpython
+  fi
+}
+
+if [ "$1" == "-h" ]; then
+  usage
+  exit 0
+fi
+
+# For multi-config generators mantidpython is in a config-dependent subdirectory, otherwise it's just in bin
+MANTIDPYTHON=""
+setup_mantidpython_path $1 $2
+CMAKE_TARGET_ARG=""
+if [ "$MULTI_CONFIG_GENERATOR" == "true" ]; then
+  shift 2
+  CMAKE_TARGET_ARG="-target"
+fi
+
+# Update test data targets
+echo "Updating testing data..."
+cmake --build . $CMAKE_TARGET_ARG -- StandardTestData
+cmake --build . $CMAKE_TARGET_ARG -- SystemTestData
+
+# Execute
+echo
+echo "Running tests..."
+$MANTIDPYTHON $MANTIDPYTHON_ARGS $RUNNER_SCRIPT \
+  --executable="${MANTIDPYTHON}" --exec-args="${MANTIDPYTHON_ARGS}" "$@"

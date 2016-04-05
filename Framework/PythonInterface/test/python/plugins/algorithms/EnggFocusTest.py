@@ -28,8 +28,8 @@ class EnggFocusTest(unittest.TestCase):
             # Note the pre-calculated file instead of the too big vanadium run
             # self.__class__._van_ws = LoadNexus("ENGINX00236516.nxs", OutputWorkspace='ENGIN-X_test_vanadium_ws')
             self.__class__._van_curves_ws = LoadNexus(Filename=
-                                               'ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs',
-                                               OutputWorkspace='ENGIN-X_vanadium_curves_test_ws')
+                                                      'ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs',
+                                                      OutputWorkspace='ENGIN-X_vanadium_curves_test_ws')
         if not self.__class__._van_integ_tbl:
             self.__class__._van_integ_tbl = LoadNexus(Filename=
                                                       'ENGINX_precalculated_vanadium_run000236516_integration.nxs',
@@ -79,38 +79,38 @@ class EnggFocusTest(unittest.TestCase):
                           InputWorkspace=self.__class__._data_ws, DetectorPositions=tbl,
                           SpectrumNumbers='999999999999999', OutputWorkspace='nop')
 
-    def _check_output_ok(self, ws, ws_name='', y_dim_max=1, yvalues=None):
+    def _check_output_ok(self, wks, ws_name='', y_dim_max=1, yvalues=None):
         """
         Checks expected types, values, etc. of an output workspace from EnggFocus.
         """
 
-        self.assertTrue(isinstance(ws, MatrixWorkspace),
+        self.assertTrue(isinstance(wks, MatrixWorkspace),
                         'Output workspace should be a matrix workspace.')
-        self.assertEqual(ws.name(), ws_name)
-        self.assertEqual(ws.getTitle(), 'yscan;y=250.210')
-        self.assertEqual(ws.isHistogramData(), True)
-        self.assertEqual(ws.isDistribution(), True)
-        self.assertEqual(ws.getNumberHistograms(), 1)
-        self.assertEqual(ws.blocksize(), 98)
-        self.assertEqual(ws.getNEvents(), 98)
-        self.assertEqual(ws.getNumDims(), 2)
-        self.assertEqual(ws.YUnit(), 'Counts')
-        dimX = ws.getXDimension()
+        self.assertEqual(wks.name(), ws_name)
+        self.assertEqual(wks.getTitle(), 'yscan;y=250.210')
+        self.assertEqual(wks.isHistogramData(), True)
+        self.assertEqual(wks.isDistribution(), True)
+        self.assertEqual(wks.getNumberHistograms(), 1)
+        self.assertEqual(wks.blocksize(), 98)
+        self.assertEqual(wks.getNEvents(), 98)
+        self.assertEqual(wks.getNumDims(), 2)
+        self.assertEqual(wks.YUnit(), 'Counts')
+        dimX = wks.getXDimension()
         self.assertAlmostEqual( dimX.getMaximum(), 36938.078125)
         self.assertEqual(dimX.getName(), 'Time-of-flight')
         self.assertEqual(dimX.getUnits(), 'microsecond')
-        dimY = ws.getYDimension()
+        dimY = wks.getYDimension()
         self.assertEqual(dimY.getMaximum(), y_dim_max)
         self.assertEqual(dimY.getName(), 'Spectrum')
         self.assertEqual(dimY.getUnits(), '')
 
-        if None == yvalues:
+        if yvalues is None:
             raise ValueError("No y-vals provided for test")
         xvals = [10861.958645540433, 12192.372902418168, 13522.787159295902,
                  14853.201416173637, 24166.101214317776, 34809.415269339654]
-        for i, bin in enumerate([0, 5, 10, 15, 50, 90]):
-            self.assertAlmostEqual( ws.readX(0)[bin], xvals[i])
-            self.assertAlmostEqual( ws.readY(0)[bin], yvalues[i])
+        for i, bin_idx in enumerate([0, 5, 10, 15, 50, 90]):
+            self.assertAlmostEqual(wks.readX(0)[bin_idx], xvals[i])
+            self.assertAlmostEqual(wks.readY(0)[bin_idx], yvalues[i])
 
 
     def test_runs_ok(self):
@@ -124,7 +124,7 @@ class EnggFocusTest(unittest.TestCase):
                         VanCurvesWorkspace=self.__class__._van_curves_ws,
                         Bank='1', OutputWorkspace=out_name)
 
-        self._check_output_ok(ws=out, ws_name=out_name, y_dim_max=1, yvalues=self._expected_yvals_bank1)
+        self._check_output_ok(wks=out, ws_name=out_name, y_dim_max=1, yvalues=self._expected_yvals_bank1)
 
     def test_runs_ok_north(self):
         """
@@ -137,7 +137,7 @@ class EnggFocusTest(unittest.TestCase):
                         VanCurvesWorkspace=self.__class__._van_curves_ws,
                         Bank='North', OutputWorkspace=out_name)
 
-        self._check_output_ok(ws=out, ws_name=out_name, y_dim_max=1, yvalues=self._expected_yvals_bank1)
+        self._check_output_ok(wks=out, ws_name=out_name, y_dim_max=1, yvalues=self._expected_yvals_bank1)
 
     def test_runs_ok_indices(self):
         """
@@ -150,7 +150,7 @@ class EnggFocusTest(unittest.TestCase):
                             SpectrumNumbers='1-1200',
                             OutputWorkspace=out_idx_name)
 
-        self._check_output_ok(ws=out_idx, ws_name=out_idx_name, y_dim_max=1,
+        self._check_output_ok(wks=out_idx, ws_name=out_idx_name, y_dim_max=1,
                               yvalues=self._expected_yvals_bank1)
 
     def test_runs_ok_indices_split3(self):
@@ -163,7 +163,7 @@ class EnggFocusTest(unittest.TestCase):
                             VanCurvesWorkspace=self.__class__._van_curves_ws,
                             SpectrumNumbers='1-100, 101-500, 400-1200',
                             OutputWorkspace=out_idx_name)
-        self._check_output_ok(ws=out_idx, ws_name=out_idx_name, y_dim_max=1,
+        self._check_output_ok(wks=out_idx, ws_name=out_idx_name, y_dim_max=1,
                               yvalues=self._expected_yvals_bank1)
 
     def test_runs_ok_bank2(self):
@@ -177,7 +177,7 @@ class EnggFocusTest(unittest.TestCase):
                               VanIntegrationWorkspace=self.__class__._van_integ_tbl,
                               OutputWorkspace=out_name)
 
-        self._check_output_ok(ws=out_bank2, ws_name=out_name, y_dim_max=1201,
+        self._check_output_ok(wks=out_bank2, ws_name=out_name, y_dim_max=1201,
                               yvalues=self._expected_yvals_bank2)
 
     def test_runs_ok_bank_south(self):
@@ -190,7 +190,7 @@ class EnggFocusTest(unittest.TestCase):
                                    VanCurvesWorkspace=self.__class__._van_curves_ws,
                                    Bank='South', OutputWorkspace=out_name)
 
-        self._check_output_ok(ws=out_bank_south, ws_name=out_name, y_dim_max=1201,
+        self._check_output_ok(wks=out_bank_south, ws_name=out_name, y_dim_max=1201,
                               yvalues=self._expected_yvals_bank2)
 
 

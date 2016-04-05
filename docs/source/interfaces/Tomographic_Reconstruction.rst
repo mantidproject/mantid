@@ -248,6 +248,12 @@ the tool and/or reconstruction method used.
    :align: center
    :scale: 60%
 
+Stacks of images can be opened by using the browse button located at
+the top of the interface. You can point the interface to a folder
+(directory) containing directories for sample, dark, and flat images,
+or alternatively to a folder containing images. The interface will
+pick all the files recognized as images.
+
 At any stage during the process of selecting the regions it is also
 possible to see how the selections fit different images by sliding
 through the images of the stack (using the slider or scroll bar).
@@ -264,7 +270,7 @@ can be selected again by pushing the respective "Select" buttons
 and/or editing their coordinates manually.
 
 The default values, set in principle when a new stack of images is
-loaded, is as follows. The region of intererest is set to cover all
+loaded, are as follows. The region of intererest is set to cover all
 the images. The regions of normalization is not set (empty), and the
 center of rotation is set to the center of the image. The option to
 find the center of rotation automatically is disabled at present.
@@ -273,6 +279,14 @@ If when selection a region the mouse is moved outside of the images,
 it is possible to continue the selection of the region (second corner)
 by clicking again inside the image. Alternatively, any selection can
 be reset at any point by using the "reset" buttons.
+
+When loading a stack of images, note that when the images are loaded
+from the folder(s) (directorie(s)) any files with unrecognized
+extension or type (for example .txt) will be ignored. Normally a
+warning about this will be shown in the Mantid logs. Image files with
+the string **_SummedImg** at the end of their names will be skipped as
+well, as this is a convention used by some detectors/control software
+to generate summed images
 
 Pre-/post-processing
 ~~~~~~~~~~~~~~~~~~~~
