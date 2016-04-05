@@ -82,9 +82,8 @@ class VesuvioTOFFitTest(unittest.TestCase):
 
         self.assertAlmostEqual(0.0279822, output_ws.readY(0)[0])
         self.assertAlmostEqual(0.0063585, output_ws.readY(0)[-1])
-        # Small difference in fitting between windows and other platforms
         self.assertAlmostEqual(-0.012, output_ws.readY(1)[0],delta=0.002)
-        self.assertAlmostEqual(0.00554965, output_ws.readY(1)[-1])
+        self.assertAlmostEqual(0.0057, output_ws.readY(1)[-1],delta=0.0002)
 
     # -------------- Failure cases ------------------
 
