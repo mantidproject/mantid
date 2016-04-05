@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,too-many-branches
 """A script for generating DataCite DOI's for Mantid releases, to be called by
 a Jenkins job during the release process.  When given a major, minor and patch
 release number along with username and password credentials, it will build a
@@ -237,7 +237,7 @@ def delete_doi(base, doi, options):
     )
 
     if not re.match(SUCCESS_RESPONSE, result[0]):
-        raise Exception('Deleting metadata unsuccessful.  Quitting.')
+        raise RuntimeError('Deleting metadata unsuccessful.  Quitting.')
 
     print "\nAttempting to point " + doi + " to invalid page."
     result = _http_request(
@@ -248,7 +248,7 @@ def delete_doi(base, doi, options):
     )
 
     if not re.match(SUCCESS_RESPONSE, result[0]):
-        raise Exception('Pointing DOI to invalid page was unsuccessful.')
+        raise RuntimeError('Pointing DOI to invalid page was unsuccessful.')
 
 def create_or_update_metadata(xml_form, base, doi, options):
     '''Attempts to create some new metadata for the doi of the given address.
@@ -264,7 +264,7 @@ def create_or_update_metadata(xml_form, base, doi, options):
     )
 
     if not re.match(SUCCESS_RESPONSE, result[0]):
-        raise Exception('Creation/updating metadata unsuccessful.  Quitting.')
+        raise RuntimeError('Creation/updating metadata unsuccessful.  Quitting.')
 
 def create_or_update_doi(base, doi, destination, options):
     '''Attempts to create a new DOI of the given address.  Metadata must be
@@ -282,7 +282,7 @@ def create_or_update_doi(base, doi, destination, options):
     )
 
     if not re.match(SUCCESS_RESPONSE, result[0]):
-        raise Exception('Creation/updating DOI unsuccessful.  Quitting.')
+        raise RuntimeError('Creation/updating DOI unsuccessful.  Quitting.')
 
 def check_if_doi_exists(base, doi, destination, options):
     '''Attempts to check if the given doi exists by querying the server and
@@ -306,7 +306,7 @@ def check_if_doi_exists(base, doi, destination, options):
         print "DOI found."
         return True
     else:
-        raise Exception(
+        raise RuntimeError(
             "Unexpected result back from server: \"" + result[0] + "\"")
 
 def check_for_curl():
@@ -321,11 +321,11 @@ def check_for_curl():
             found = True
         else:
             found = False
-    except:
+    except OSError:
         found = False
 
     if not found:
-        raise Exception('This script requires that cURL be installed and ' + \
+        raise RuntimeError('This script requires that cURL be installed and ' + \
                         'available on the PATH.')
 
 

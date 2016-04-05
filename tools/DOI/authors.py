@@ -1,6 +1,7 @@
 #pylint: disable=invalid-name
-from itertools import chain, ifilterfalse
-import string, os, re
+from itertools import ifilterfalse
+import os
+import re
 
 # Authors in Git that do not have a translation listed here or that have not
 # been blacklisted will cause the DOI script to fail.
@@ -183,7 +184,7 @@ def _clean_up_author_list(author_list):
     '''Apply translations and blacklist, and get rid of duplicates.
     '''
     # Double check that all names have no leading or trailing whitespace.
-    result = map(string.strip, author_list)
+    result = map(str.strip, author_list)
 
     # Remove any blacklisted names.
     result = set(ifilterfalse(_blacklist.__contains__, result))
@@ -262,16 +263,16 @@ def get_version_from_git_tag(tag):
     '''Given a tag from Git, extract the major, minor and patch version
     numbers.
     '''
-    short_regexp = '^v(\d+).(\d+)$'
-    long_regexp  = '^v(\d+).(\d+).(\d+)$'
+    short_regexp = r'^v(\d+).(\d+)$'
+    long_regexp  = r'^v(\d+).(\d+).(\d+)$'
 
     if re.match(short_regexp, tag):
-        a, b = [int(x) for x in re.findall('\d+', tag)]
+        a, b = [int(x) for x in re.findall(r'\d+', tag)]
         c = 0
     elif re.match(long_regexp, tag):
-        a, b, c = [int(x) for x in re.findall('\d+', tag)]
+        a, b, c = [int(x) for x in re.findall(r'\d+', tag)]
     else:
-        raise Exception(
+        raise RuntimeError(
             "Unable to parse version information from \"" + tag + "\"")
     return '{0}.{1}.{2}'.format(a, b, c)
 
