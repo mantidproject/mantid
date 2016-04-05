@@ -9,6 +9,10 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h"
 
+/// @shahroz
+#include "MantidQtMantidWidgets/PeakPicker.h"
+#include "MantidAPI/IPeakFunction.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -425,6 +429,16 @@ public:
   virtual void plotReplacingWindow(const std::string &wsName,
                                    const std::string &spectrum,
                                    const std::string &type) = 0;
+
+  /// @shahroz
+
+  virtual Mantid::API::IPeakFunction_const_sptr peakPicker() const = 0;
+
+  virtual void setPeakPickerEnabled(bool enabled) = 0;
+
+  //virtual void setPeakPicker(const IPeakFunction_const_sptr &peak) = 0;
+
+
 };
 
 } // namespace CustomInterfaces

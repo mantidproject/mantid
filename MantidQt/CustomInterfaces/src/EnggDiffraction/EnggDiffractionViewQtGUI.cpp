@@ -66,7 +66,7 @@ const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGINX"),
       m_currentCalibFilename(""), m_focusedDataVector(), m_fittedDataVector(),
-      m_presenter(NULL) {}
+      m_peakPicker(NULL), m_presenter(NULL) {}
 
 EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {
   for (auto curves : m_focusedDataVector) {
@@ -233,6 +233,9 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   QFont font("MS Shell Dlg 2", 8);
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::xBottom, font);
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::yLeft, font);
+
+  m_peakPicker = new MantidWidgets::PeakPicker(m_uiTabFitting.dataPlot, Qt::red);
+
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -892,6 +895,26 @@ void EnggDiffractionViewQtGUI::loadCalibrationClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::LoadExistingCalib);
 }
 
+
+Mantid::API::IPeakFunction_const_sptr EnggDiffractionViewQtGUI::peakPicker() const
+{
+	return m_peakPicker->peak();
+}
+
+void EnggDiffractionViewQtGUI::setPeakPickerEnabled(bool enabled)
+{
+	m_peakPicker->setEnabled(enabled);
+	m_peakPicker->setVisible(enabled);
+	m_uiTabFitting.dataPlot->replot(); // PeakPicker might get hidden/shown
+}
+
+/*
+void EnggDiffractionViewQtGUI::setPeakPicker(const IPeakFunction_const_sptr &peak)
+{
+	m_peakPicker->setPeak(peak);
+	m_uiTabFitting.dataPlot->replot();
+}
+*/
 void EnggDiffractionViewQtGUI::calibrateClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::CalcCalib);
 }

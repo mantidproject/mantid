@@ -16,6 +16,11 @@
 #include <boost/scoped_ptr.hpp>
 #include <qwt_plot_curve.h>
 
+/// shahroz
+#include "MantidQtMantidWidgets/PeakPicker.h"
+#include "MantidAPI/IPeakFunction.h"
+
+
 // Qt classes forward declarations
 class QMutex;
 
@@ -177,6 +182,14 @@ public:
 
   int currentMultiRunMode() const override { return m_currentRunMode; }
 
+  Mantid::API::IPeakFunction_const_sptr peakPicker() const override;
+
+  /// @shahroz
+  void setPeakPickerEnabled(bool enabled) override;
+
+  // void setPeakPicker(const IPeakFunction_const_sptr &peak) override;
+
+
 private slots:
   /// for buttons, do calibrate, focus, event->histo rebin, and similar
   void loadCalibrationClicked();
@@ -233,6 +246,7 @@ private slots:
   void browsePeaksToFit();
   void fittingListWidgetBank(int idx);
   void setListWidgetBank(int idx);
+
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
@@ -325,6 +339,10 @@ private:
 
   /// Loaded data curves
   std::vector<QwtPlotCurve *> m_fittedDataVector;
+
+  /// shahroz
+  /// Peak picker tool - only one on the plot at any given moment
+  MantidWidgets::PeakPicker *m_peakPicker;
 
   /// presenter as in the model-view-presenter
   boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;
