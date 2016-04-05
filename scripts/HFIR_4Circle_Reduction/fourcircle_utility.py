@@ -329,13 +329,20 @@ def get_raw_data_workspace_name(exp_number, scan_number, pt_number):
 
 def get_integrated_peak_ws_name(exp_number, scan_number, pt_list):
     """
-
+    Get/form the integrated peak workspace's name
     :param exp_number:
     :param scan_number:
-    :param pt_list:
+    :param pt_list: a list OR None
     :return:
     """
-    # TODO/NOW - doc & check
+    # check
+    assert isinstance(exp_number, int)
+    assert isinstance(scan_number, int)
+    assert isinstance(pt_list, list) or pt_list is None
+    if isinstance(pt_list, list):
+        assert len(pt_list) > 0
+
+    # form the name
     ws_name = 'Integrated_exp%d_scan%d' % (exp_number, scan_number)
     if pt_list is not None:
         ws_name += 'Pt%d_%d' % (pt_list[0], pt_list[-1])

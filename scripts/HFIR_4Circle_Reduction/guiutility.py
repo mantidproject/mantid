@@ -6,6 +6,40 @@ import numpy
 from PyQt4 import QtGui
 
 
+def convert_str_to_matrix(matrix_str, matrix_shape):
+    """
+    Convert a string to matrix, which is a numpy ndarray
+    Requirements:
+    1. a string that can be converted to a matrix (2d array)
+    2. shape must be a tuple of integer
+    example: ub_str, (3, 3)
+    :param matrix_str:
+    :param matrix_shape:
+    :return: numpy.ndarray, len(shape) == 2
+    """
+    # check
+    assert isinstance(matrix_str, str)
+    assert isinstance(matrix_shape, tuple) and len(matrix_shape) == 2
+
+    # split matrix string to 9 elements and check
+    matrix_str = matrix_str.replace(',', ' ')
+    matrix_str = matrix_str.replace('\n', ' ')
+    matrix_terms = matrix_str.split()
+    assert len(matrix_terms) == 9, 'Matrix string split into %s with %d terms.' % (str(matrix_terms),
+                                                                                   len(matrix_terms))
+
+    # create matrix/ndarray and check dimension
+    assert matrix_shape[0] * matrix_shape[1] == len(matrix_terms)
+    matrix = numpy.ndarray(shape=matrix_shape, dtype='float')
+    term_index = 0
+    for i_row in xrange(len(matrix_shape[0])):
+        for j_col in xrange(len(matrix_shape[1])):
+            matrix_shape[i_row][j_col] = matrix_terms[term_index]
+            term_index += 1
+
+    return matrix
+
+
 def map_to_color(data_array, base_color, change_color_flag):
     """ Map 1-D data to color list
     :param data_array:

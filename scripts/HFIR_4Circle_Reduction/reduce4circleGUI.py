@@ -149,6 +149,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_show_ub_in_box)
         self.connect(self.ui.pushButton_syncUB, QtCore.SIGNAL('clicked()'),
                      self.do_sync_ub)
+        self.connect(self.ui.pushButton_saveUB, QtCore.SIGNAL('clicked()'),
+                     self.do_save_ub)
 
         # Tab 'Merge'
         self.connect(self.ui.pushButton_addScanSliceView, QtCore.SIGNAL('clicked()'),
@@ -332,13 +334,17 @@ class MainWindow(QtGui.QMainWindow):
     def do_accept_ub(self):
         """ Accept the calculated UB matrix and thus put to controller
         """
+        # get the experiment number
         exp_number = int(str(self.ui.lineEdit_exp.text()))
 
-        # TODO/NOW ...
+        # get matrix
+        curr_ub = self.ui.tableWidget_ubMatrix.get_matrix()
+
         # synchronize UB matrix to tableWidget_ubInUse
+        self.ui.tableWidget_ubInUse.set_from_matrix(curr_ub)
 
         # set UB matrix to system
-        self._myControl.set_ub_matrix(exp_number, self.ui.tableWidget_ubMatrix.get_matrix())
+        self._myControl.set_ub_matrix(exp_number, curr_ub)
 
         return
 
@@ -1476,6 +1482,38 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_save_ub(self):
+        """ Save the in-use Matrix to an ASCII file
+        :return:
+        """
+        # get file name
+        file_filter = 'Data Files (*.dat);;All Files (*.*)'
+        ub_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'ASCII File To Save UB Matrix', self._homeDir,
+                                                             file_filter))
+
+        # early return if user cancels selecting a file name to save
+        if ub_file_name is None:
+            return
+
+        # get UB matrix
+        in_use_ub = self.ui.tableWidget_ubInUse.get_matrix()
+        ub_shape = in_use_ub.shape
+        assert len(ub_shape) == 2 and ub_shape[0] == ub_shape[1] == 3
+
+        # construct string
+        ub_str = '# UB matrix\n# %s\n' % str(self.ui.label_ubInfoLabel.text())
+        for i_row in xrange(3):
+            for j_col in xrange(3):
+                ub_str += '%.15f  ' % in_use_ub[i_row][j_col]
+            ub_str += '\n'
+
+        # write to file
+        ub_file = open(ub_file_name, 'w')
+        ub_file.write(ub_str)
+        ub_file.close()
+
+        return
+
     def do_select_all_peaks(self):
         """
         Purpose: select all peaks in table tableWidget_peaksCalUB
@@ -1535,21 +1573,58 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_set_ub_from_text(self):
+    def set_ub_from_file(self):
+        """ Get UB matrix from an Ascii file
+        :return:
+        """
+        file_filter = 'Data Files (*.dat);;Text Files (*.txt);;All Files (*.*)'
+        file_name = QtGui.QFileDialog.getOpenFileName(self, 'Open UB ASCII File', self._homeDir,
+                                                      file_filter)
+        # quit if cancelled
+        if file_name is None:
+            return
+
+        # parse file
+        ub_file = open(file_name, 'r')
+        raw_lines = ub_file.readlines()
+        ub_file.close()
+
+        # convert to ub string
+        ub_str = ''
+        for line in raw_lines:
+            line = line.strip()
+            if len(line) == 0:
+                # empty line
+                continue
+            elif line[0] == '#':
+                # comment line
+                continue
+            else:
+                # regular line
+                ub_str += '%s ' % line
+
+        # convert to matrix
+        ub_matrix = gutil.convert_str_to_matrix(ub_str, (3, 3))
+
+        return ub_matrix
+
+    def set_ub_from_text(self):
         """ Purpose: Set UB matrix in use from plain text edit plainTextEdit_ubInput.
         Requirements:
           1. the string in the plain text edit must be able to be split to 9 floats by ',', ' ', '\t' and '\n'
         Guarantees: the matrix will be set up the UB matrix in use
         :return:
         """
-        # TODO/NOW - Rename!
+        # get the string for ub matrix
         ub_str = str(self.ui.plainTextEdit_ubInput.toPlainText())
         status, ret_obj = gutil.parse_float_array(ub_str)
+
+        # check whether the ub matrix in text editor is valid
+        # FIXME - This is somehow a redundant check!
         if status is False:
             # unable to parse to float arrays
             self.pop_one_button_dialog(ret_obj)
             return
-
         elif len(ret_obj) != 9:
             # number of floats is not 9
             self.pop_one_button_dialog('Requiring 9 floats for UB matrix.  Only %d are given.' % len(ret_obj))
@@ -1559,19 +1634,19 @@ class MainWindow(QtGui.QMainWindow):
         ub_str = ret_obj
         if self.ui.radioButton_ubMantidStyle.isChecked():
             # UB matrix in mantid style
-            self.ui.tableWidget_ubInUse.set_from_list(ub_str)
+            mantid_ub = gutil.convert_str_to_matrix(ub_str, (3, 3))
 
         elif self.ui.radioButton_ubSpiceStyle.isChecked():
             # UB matrix in SPICE style
             spice_ub = gutil.convert_str_to_matrix(ub_str, (3, 3))
             mantid_ub = r4c.convert_spice_ub_to_mantid(spice_ub)
-            self.ui.tableWidget_ubInUse.set_from_matrix(mantid_ub)
 
         else:
             # not defined
             self.pop_one_button_dialog('Neither Mantid or SPICE-styled UB is checked!')
+            return
 
-        return
+        return mantid_ub
 
     def do_show_ub_in_box(self):
         """ Get UB matrix in table tableWidget_ubMergeScan and write to plain text edit plainTextEdit_ubInput
@@ -1634,20 +1709,33 @@ class MainWindow(QtGui.QMainWindow):
 
     def do_sync_ub(self):
         """ Purpose: synchronize UB matrix in use with UB matrix calculated.
+        Requirements: One of these must be given
+        1. a valid UB matrix from tableWidget_ubMatrix
+        2. an ascii file that contains 9 float
+        3. from text edit
         :return:
         """
-        # TODO/NOW
-        # get the radio button
+        # get the radio button that is checked
+        if self.ui.radioButton_ubFromTab1.isChecked():
+            # get ub matrix from tab 'Calculate UB Matrix'
+            ub_matrix = self.ui.tableWidget_ubMatrix.get_matrix()
 
-        #
-        if 1:
-            self.ui.tableWidget_ubInUse.set_from_matrix(self.ui.tableWidget_ubMatrix.get_matrix())
-        elif 2:
-            self.do_load_ub()
-        elif 3:
-            self.do_set_ub_from_text()
+        elif self.ui.radioButton_loadUBmatrix.isChecked():
+            # load ub matrix from a file
+            ub_matrix = set_ub_from_file()
+
+        elif self.ui.radioButton_ubFromList.isChecked():
+            # load ub matrix from text editor
+            ub_matrix = self.set_ub_from_text()
+
         else:
             raise
+
+        # set to in-use UB matrix and control
+        self.ui.tableWidget_ubInUse.set_from_matrix(ub_matrix)
+
+        exp_no = int(str(self.ui.lineEdit_exp.text()))
+        self._myControl.set_ub_matrix(exp_number=exp_no, ub_matrix=ub_matrix)
 
         return
 
