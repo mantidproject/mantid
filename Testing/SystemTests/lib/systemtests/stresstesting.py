@@ -567,8 +567,9 @@ sys.path.append('{1}')
 from {2} import {3}
 systest = {3}()
 systest.execute()
+exitcode = systest.returnValidationCode({4})
 systest.cleanup()
-sys.exit(systest.returnValidationCode({4}))'''
+sys.exit(exitcode)'''
         return code.format(TESTING_FRAMEWORK_DIR, self._test_dir, self._modname,
                            self._test_cls_name, TestRunner.VALIDATION_FAIL_CODE)
 
