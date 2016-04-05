@@ -122,10 +122,22 @@ ITableWorkspace_sptr createDefaultWorkspace() {
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+/**
+* Constructor
+* @param tableView : [input] The view this presenter is going to handle
+* @param progressView : [input] The progress view this presenter is going to
+* handle
+* @param dataProcessorAlgorithm : [input] The data processor algorithm's name as
+* a string
+* @param blacklist : [input] The set of blacklisted properties
+*/
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    DataProcessorAlgorithmView *tableView, ProgressableView *progressView)
+    DataProcessorAlgorithmView *tableView, ProgressableView *progressView,
+    const std::string &dataProcessorAlgorithm,
+    const std::set<std::string> &blacklist)
     : WorkspaceObserver(), m_view(tableView), m_progressView(progressView),
-      m_tableDirty(false) {
+      m_dataProcessorAlg(dataProcessorAlgorithm), m_tableDirty(false) {
 
   // Initialise options
   initOptions();
@@ -154,15 +166,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
   // those we blacklist. We blacklist any useless properties or ones we're
   // handling that the user
   // should'nt touch.
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
-  std::set<std::string> blacklist{"ThetaIn",
-                                  "ThetaOut",
-                                  "InputWorkspace",
-                                  "OutputWorkspace",
-                                  "OutputWorkspaceWavelength",
-                                  "FirstTransmissionRun",
-                                  "SecondTransmissionRun"};
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_dataProcessorAlg);
   m_view->setOptionsHintStrategy(new AlgorithmHintStrategy(alg, blacklist));
 
   // Start with a blank table
@@ -837,7 +841,7 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
     transWS = makeTransWS(transStr);
 
   IAlgorithm_sptr algReflOne =
-      AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+      AlgorithmManager::Instance().create(m_dataProcessorAlg);
   algReflOne->initialize();
   algReflOne->setProperty("InputWorkspace", runWS->name());
   if (transWS)

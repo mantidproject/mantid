@@ -21,6 +21,23 @@ QDataProcessorAlgorithmWidget::QDataProcessorAlgorithmWidget(QWidget *parent)
     : MantidWidget(parent), m_openMap(new QSignalMapper(this)) {
 
   createTable();
+
+  // Create the presenters to do the thinking for us
+  // The data processor algorithm's name
+  std::string dataProcessorAlgorithm = "ReflectometryReductionOneAuto";
+  // Properties blacklisted from Options column
+  std::set<std::string> blacklist{"ThetaIn",
+                                  "ThetaOut",
+                                  "InputWorkspace",
+                                  "OutputWorkspace",
+                                  "OutputWorkspaceWavelength",
+                                  "FirstTransmissionRun",
+                                  "SecondTransmissionRun"};
+  m_presenter = boost::make_shared<GenericDataProcessorPresenter>(
+      this /*table view*/,
+      this /*currently this concrete view is also responsibile for prog reporting*/,
+      dataProcessorAlgorithm /*the algorithm responsible for the processing*/,
+      blacklist /*Properties we don't want to show in the Options column*/);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -49,10 +66,6 @@ void QDataProcessorAlgorithmWidget::createTable() {
   // Custom context menu for table
   connect(ui.viewTable, SIGNAL(customContextMenuRequested(const QPoint &)),
           this, SLOT(showContextMenu(const QPoint &)));
-  // Finally, create the presenters to do the thinking for us
-  m_presenter = boost::make_shared<GenericDataProcessorPresenter>(
-      this /*table view*/,
-      this /*currently this concrete view is also responsibile for prog reporting*/);
 }
 
 /**

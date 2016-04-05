@@ -45,7 +45,9 @@ class MANTIDQT_CUSTOMINTERFACES_DLL GenericDataProcessorPresenter
       public MantidQt::API::WorkspaceObserver {
 public:
   GenericDataProcessorPresenter(DataProcessorAlgorithmView *tableView,
-                                ProgressableView *progressView);
+                                ProgressableView *progressView,
+                                const std::string &dataProcessorAlgorithm,
+                                const std::set<std::string> &blacklist);
   ~GenericDataProcessorPresenter() override;
   void notify(DataProcessorPresenter::Flag flag) override;
   const std::map<std::string, QVariant> &options() const override;
@@ -68,6 +70,8 @@ protected:
   DataProcessorAlgorithmView *m_view;
   // The progress view
   ProgressableView *m_progressView;
+  // The data processor algorithm
+  std::string m_dataProcessorAlg;
   // A workspace receiver we want to notify
   WorkspaceReceiver *m_workspaceReceiver;
   // stores whether or not the table has changed since it was last saved
