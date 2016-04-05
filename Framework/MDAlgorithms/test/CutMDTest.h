@@ -470,12 +470,12 @@ public:
     const std::string wsName = "__CutMDTest_MaxRecursionDepth_one";
 
     FrameworkManager::Instance().exec(
-      "CreateMDWorkspace", 10, "OutputWorkspace", wsName.c_str(),
-      "Dimensions", "3", "Extents", "-1,1,-1,1,-1,1", "Names", "H,K,L",
-      "Units", "U,U,U");
+        "CreateMDWorkspace", 10, "OutputWorkspace", wsName.c_str(),
+        "Dimensions", "3", "Extents", "-1,1,-1,1,-1,1", "Names", "H,K,L",
+        "Units", "U,U,U");
     FrameworkManager::Instance().exec(
-      "FakeMDEventData", 6, "InputWorkspace", wsName.c_str(),
-      "PeakParams", "2000,-0.5,-0.5,-0.5,0.1", "RandomizeSignal", "0");
+        "FakeMDEventData", 6, "InputWorkspace", wsName.c_str(), "PeakParams",
+        "2000,-0.5,-0.5,-0.5,0.1", "RandomizeSignal", "0");
 
     FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(),
                                       "a", "1", "b", "1", "c", "1", "alpha",
@@ -514,7 +514,7 @@ public:
     TS_ASSERT(algCutMD->isExecuted());
 
     IMDEventWorkspace_sptr outWS =
-      AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(wsName);
+        AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(wsName);
     TS_ASSERT(outWS.get());
 
     auto bc = outWS->getBoxController();
