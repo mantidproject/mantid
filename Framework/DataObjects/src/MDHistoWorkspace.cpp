@@ -205,7 +205,7 @@ void MDHistoWorkspace::initVertexesArray() {
   size_t nd = numDimensions;
   // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd
   // bits
-  size_t numVertices = 1 << numDimensions;
+  size_t numVertices = size_t{ 1 } << numDimensions;
 
   // Allocate the array of the right size
   m_vertexesArray = new coord_t[nd * numVertices];
@@ -219,7 +219,7 @@ void MDHistoWorkspace::initVertexesArray() {
     for (size_t d = 0; d < nd; d++) {
       // Use a bit mask to look at each bit of the integer we are iterating
       // through.
-      size_t mask = 1 << d;
+		size_t mask = size_t{ 1 } << d;
       if ((i & mask) > 0) {
         // Bit is 1, use the max of the dimension
         m_vertexesArray[outIndex + d] = m_dimensions[d]->getX(1);

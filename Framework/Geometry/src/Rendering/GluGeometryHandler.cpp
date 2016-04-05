@@ -138,7 +138,7 @@ void GluGeometryHandler::GetObjectGeom(int &mytype,
       break;
     case SEGMENTED_CYLINDER:
       mytype = 5;
-      vectors.reserve(2);
+      vectors.resize(2);
       vectors[0] = center;
       vectors[1] = axis;
       myradius = radius;
