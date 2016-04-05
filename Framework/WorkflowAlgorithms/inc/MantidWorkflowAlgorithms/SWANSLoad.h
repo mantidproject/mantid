@@ -46,6 +46,7 @@ private:
   void moveToBeamCenter();
   void setSourceSlitSize();
   void rotateMainDetector(const double &angle);
+  void offsetMainDetector(const double &x, const double &y);
 
   double m_center_x;
   double m_center_y;

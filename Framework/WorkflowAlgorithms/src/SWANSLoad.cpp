@@ -314,6 +314,29 @@ void SWANSLoad::exec() {
   g_log.information() << m_output_message << std::endl;
 }
 
+/**
+ * Offsets (moves) sideways the detector
+ */
+void SWANSLoad::offsetMainDetector(const double &x, const double &y) {
+  std::string componentName =
+      dataWS->getInstrument()->getStringParameter("detector-name")[0];
+
+  IAlgorithm_sptr mvAlg =
+      createChildAlgorithm("MoveInstrumentComponent", 0.5, 0.50);
+  mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
+  mvAlg->setProperty("ComponentName", componentName);
+  mvAlg->setProperty("X", x);
+  mvAlg->setProperty("Y", y);
+  mvAlg->setProperty("RelativePosition", true);
+  mvAlg->executeAsChildAlg();
+}
+
+/**
+ * This will rotate the detector named in the instrument parameters by:
+ * "detector-name".
+ * Note that it allso needs the property "sample_detector_distance".
+ * @param angle in degrees
+ */
 void SWANSLoad::rotateMainDetector(const double &angle) {
 
   std::string componentName =
@@ -329,8 +352,8 @@ void SWANSLoad::rotateMainDetector(const double &angle) {
       instrument->getComponentByName(componentName);
   V3D pos = component->getPos();
 
-  g_log.debug() << "Moving " << componentName << "; Pos = " << pos << "; distance = " << distance << "." << std::endl;
-
+  g_log.debug() << "Moving " << componentName << "; Pos = " << pos
+                << "; distance = " << distance << "." << std::endl;
 
   double angle_rad = angle * deg2rad;
   V3D newPos(distance * sin(angle_rad), pos.Y(), distance * cos(angle_rad));
@@ -345,18 +368,11 @@ void SWANSLoad::rotateMainDetector(const double &angle) {
       *component, pmap, rotation, Geometry::ComponentHelper::Relative);
 }
 
-/// Move the detector according to the beam center
 /**
- * TODO:
- * const double angle = m_ws->run().getPropertyValueAsType<double>("angle");
- * If angle == 0:
- *   move detector to the right pixel
- * else:
- *   old_angle = angle
- *   angle = 0
- *   move detector to the right pixel
- *   rotate to old_angle
+ * Move the detector according to the beam center
  *
+ * This offsets the detector to the beam center. The (0,0,0) is not
+ * the centre of the detector anymore
  *
  */
 void SWANSLoad::moveToBeamCenter() {
@@ -374,57 +390,38 @@ void SWANSLoad::moveToBeamCenter() {
   // default beam center
   if (isEmpty(m_center_x) || isEmpty(m_center_y)) {
     EQSANSInstrument::getDefaultBeamCenter(dataWS, m_center_x, m_center_y);
-    dataWS->mutableRun().addProperty("beam_center_x", m_center_x, "pixel",
-                                     true);
-    dataWS->mutableRun().addProperty("beam_center_y", m_center_y, "pixel",
-                                     true);
+
     g_log.information()
         << "SWANSLoad::moveToBeamCenter Setting beam center to Default: ["
         << m_center_x << ", " << m_center_y << "] (pixel coordinates)"
         << std::endl;
-    return;
+
+  } else {
+
+    double beam_ctr_x = 0.0;
+    double beam_ctr_y = 0.0;
+    EQSANSInstrument::getCoordinateFromPixel(m_center_x, m_center_y, dataWS,
+                                             beam_ctr_x, beam_ctr_y);
+    offsetMainDetector(beam_ctr_x, beam_ctr_y);
+
+    g_log.information()
+        << "SWANSLoad::moveToBeamCenter Moving beam center to : [" << m_center_x
+        << ", " << m_center_y << "] (pixel coordinates)" << std::endl;
   }
-
-  // Check that the center of the detector really is at (0,0)
-  int nx_pixels = static_cast<int>(
-      dataWS->getInstrument()->getNumberParameter("number-of-x-pixels")[0]);
-  int ny_pixels = static_cast<int>(
-      dataWS->getInstrument()->getNumberParameter("number-of-y-pixels")[0]);
-  V3D pixel_first = dataWS->getInstrument()->getDetector(0)->getPos();
-  int detIDx = EQSANSInstrument::getDetectorFromPixel(nx_pixels - 1, 0, dataWS);
-  int detIDy = EQSANSInstrument::getDetectorFromPixel(0, ny_pixels - 1, dataWS);
-
-  V3D pixel_last_x = dataWS->getInstrument()->getDetector(detIDx)->getPos();
-  V3D pixel_last_y = dataWS->getInstrument()->getDetector(detIDy)->getPos();
-  double x_offset = (pixel_first.X() + pixel_last_x.X()) / 2.0;
-  double y_offset = (pixel_first.Y() + pixel_last_y.Y()) / 2.0;
-  double beam_ctr_x = 0.0;
-  double beam_ctr_y = 0.0;
-  EQSANSInstrument::getCoordinateFromPixel(m_center_x, m_center_y, dataWS,
-                                           beam_ctr_x, beam_ctr_y);
-
-  IAlgorithm_sptr mvAlg =
-      createChildAlgorithm("MoveInstrumentComponent", 0.5, 0.50);
-  mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
-  mvAlg->setProperty("ComponentName", "DetectorArm");
-  mvAlg->setProperty("X", -x_offset - beam_ctr_x);
-  mvAlg->setProperty("Y", -y_offset - beam_ctr_y);
-  mvAlg->setProperty("RelativePosition", true);
-  mvAlg->executeAsChildAlg();
-  m_output_message += "   Beam center offset: " +
-                      Poco::NumberFormatter::format(x_offset) + ", " +
-                      Poco::NumberFormatter::format(y_offset) + " m\n";
-  // m_output_message += "   Beam center in real-space: " +
-  // Poco::NumberFormatter::format(-x_offset-beam_ctr_x)
-  //    + ", " + Poco::NumberFormatter::format(-y_offset-beam_ctr_y) + " m\n";
-  g_log.information() << "SWANSLoad::moveToBeamCenter Moving beam center to "
-                      << m_center_x << " " << m_center_y << std::endl;
 
   dataWS->mutableRun().addProperty("beam_center_x", m_center_x, "pixel", true);
   dataWS->mutableRun().addProperty("beam_center_y", m_center_y, "pixel", true);
+
   m_output_message += "   Beam center: " +
                       Poco::NumberFormatter::format(m_center_x) + ", " +
                       Poco::NumberFormatter::format(m_center_y) + "\n";
+
+  if (angle != 0) {
+    g_log.debug() << "Beam center offset DONE!" << std::endl;
+    g_log.debug() << "Let's move it back to the starting angle = " << angle
+                  << std::endl;
+    rotateMainDetector(angle);
+  }
 }
 
 /// Get the source slit size from the slit information of the run properties

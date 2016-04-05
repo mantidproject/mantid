@@ -5,6 +5,7 @@
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidAPI/RegisterFileLoader.h"
 
 #include <map>
 #include <iostream>
@@ -13,6 +14,8 @@
 #include <boost/tokenizer.hpp>
 #include <boost/foreach.hpp>
 #include <boost/range/combine.hpp>
+#include <boost/algorithm/string/predicate.hpp> //starts_with
+#include <Poco/Path.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -23,7 +26,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadSwans)
+DECLARE_FILELOADER_ALGORITHM(LoadSwans)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -53,10 +56,12 @@ const std::string LoadSwans::summary() const { return "Loads SNS SWANS Data"; }
  * be used
  */
 int LoadSwans::confidence(Kernel::FileDescriptor &descriptor) const {
-  // since this is a test loader, the confidence will always be 0!
-  // I don't want the Load algorithm to pick this one!
-  if (descriptor.extension().compare(".dat") != 0)
-    return 1;
+
+  std::string filename = Poco::Path(descriptor.filename()).getFileName();
+
+  if (descriptor.extension().compare(".dat") == 0 &&
+      boost::starts_with(filename, "RUN"))
+    return 100;
   else
     return 0;
 }
