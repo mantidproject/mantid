@@ -686,7 +686,7 @@ double EnggDiffractionViewQtGUI::rebinningPulsesTime() const {
 
 void EnggDiffractionViewQtGUI::setBankDir(int idx) {
 
-  if (m_fitting_runno_dir_vec.size() >= idx) {
+  if (m_fitting_runno_dir_vec.size() >= size_t(idx)) {
 
     std::string bankDir = m_fitting_runno_dir_vec[idx];
     Poco::Path fpath(bankDir);
@@ -1304,21 +1304,22 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
     fittingRunNoChanged() {
   try {
     QString focusedFile = m_uiTabFitting.lineEdit_pushButton_run_num->text();
+    std::string strFocusedFile = focusedFile.toStdString();
     // file name
-    Poco::Path selectedfPath(focusedFile);
+    Poco::Path selectedfPath(strFocusedFile);
     Poco::Path bankDir;
 
     // handling of vectors
     m_fitting_runno_dir_vec.clear();
-    std::vector<std::string> splitBaseName =
-        splitFittingDirectory(selectedfPath.toString());
+    std::string strFPath = selectedfPath.toString();
+    std::vector<std::string> splitBaseName = splitFittingDirectory(strFPath);
 
     if (selectedfPath.isFile() && !splitBaseName.empty()) {
 
 #ifdef __unix__
       auto home = Poco::Path().home();
       bankDir.append(home);
-      bankDir.append(fPath.parent().toString());
+      bankDir.append(selectedfPath.parent().toString());
       bankDir.append(selectedfPath);
 #else
       bankDir = (bankDir).expand(selectedfPath.parent().toString());
@@ -1327,12 +1328,13 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
       if (!splitBaseName.empty() && splitBaseName.size() > 3) {
         std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] + "_" +
                                splitBaseName[2] + "_" + splitBaseName[3];
-        updateFittingDirVec(bankDir.toString(), foc_file);
+        std::string strBankDir = bankDir.toString();
+        updateFittingDirVec(strBankDir, foc_file);
       }
       // if run number length greater
     } else if (focusedFile.count() > 4) {
       // if given a run number instead
-      updateFittingDirVec(m_focusDir, focusedFile.toStdString());
+      updateFittingDirVec(m_focusDir, strFocusedFile);
     } else {
       userWarning("Invalid Input", "Invalid directory or run number given. "
                                    "Please try again");
@@ -1397,9 +1399,9 @@ void EnggDiffractionViewQtGUI::addBankItems(
 
     for (size_t i = 0; i < m_fitting_runno_dir_vec.size(); i++) {
       Poco::Path vecFile(m_fitting_runno_dir_vec[i]);
+      std::string strVecFile = vecFile.toString();
       // split the directory from m_fitting_runno_dir_vec
-      std::vector<std::string> vecFileSplit =
-          splitFittingDirectory(vecFile.toString());
+      std::vector<std::string> vecFileSplit = splitFittingDirectory(strVecFile);
       // assign the file bank id
       std::string bankID = (vecFileSplit[vecFileSplit.size() - 1]);
 
@@ -1416,7 +1418,6 @@ void EnggDiffractionViewQtGUI::addBankItems(
         m_uiTabFitting.listWidget_fitting_bank_preview->addItem(
             QString::fromStdString(bankID));
       } else {
-        auto maxTots = m_uiTabFitting.comboBox_bank->maximumSize();
         m_uiTabFitting.comboBox_bank->addItem(QString("Bank %1").arg(i + 1));
         m_uiTabFitting.listWidget_fitting_bank_preview->addItem(
             QString("%1").arg(i + 1));
