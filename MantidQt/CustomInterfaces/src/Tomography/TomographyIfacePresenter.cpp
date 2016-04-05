@@ -162,7 +162,7 @@ void TomographyIfacePresenter::processSetupResourcesAndTools() {
 
     m_view->enableLoggedActions(false);
     // This would ideally be shown to the user as a "fatal error" pop-up, as
-    // itis an unrecoverable error. But in facilities other than ISIS this
+    // it is an unrecoverable error. But in facilities other than ISIS this
     // would block the builds (docs-qthelp).
     // m_view->userError("Fatal error", msg);
     m_model->logMsg(msg);
@@ -369,7 +369,7 @@ void TomographyIfacePresenter::processSetupReconTool() {
 
 void TomographyIfacePresenter::processRunRecon() {
   // m_model->checkDataPathsSet();
-  // TODO: validate data path:
+  // TODO: validate data path with additional rules/constraints?
   TomoPathsConfig paths = m_view->currentPathsConfig();
   if (paths.pathSamples().empty()) {
     m_view->userWarning("Sample images path not set!",
