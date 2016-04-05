@@ -228,6 +228,7 @@ public:
     const std::string maskedWSName("SaveMDTest_maskedWS");
     MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<2>, 2>(10, 0., 20., 1,
                                                        maskedWSName);
+    // Mask half of the workspace (and thus half of the events)
     FrameworkManager::Instance().exec("MaskMD", 6, "Workspace",
                                       "SaveMDTest_maskedWS", "Dimensions",
                                       "Axis0,Axis1", "Extents", "0,10,0,20");
@@ -271,7 +272,7 @@ public:
 
     // Test that number of events in the workspace is original events minus the
     // masked ones
-    TS_ASSERT_EQUALS(iws->getNPoints(), 200 - 100);
+    TS_ASSERT_EQUALS(iws->getNPoints(), 100 - 50);
 
     // Clean up
     const std::string this_filename = saveAlg.getProperty("Filename");
