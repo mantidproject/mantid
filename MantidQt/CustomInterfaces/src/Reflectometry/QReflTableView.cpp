@@ -359,7 +359,7 @@ std::string QReflTableView::askUserString(const std::string &prompt,
                                           const std::string &defaultValue) {
   bool ok;
   QString text = QInputDialog::getText(
-      QString::fromStdString(title), QString::fromStdString(prompt),
+      this, QString::fromStdString(title), QString::fromStdString(prompt),
       QLineEdit::Normal, QString::fromStdString(defaultValue), &ok);
   if (ok)
     return text.toStdString();
