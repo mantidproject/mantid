@@ -2,6 +2,17 @@
 // Class LoadBankFromDiskTask
 //==============================================================================================
 #include "MantidKernel/Task.h"
+#include "MantidAPI/Progress.h"
+#include "MantidKernel/ThreadScheduler.h"
+#include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/Logger.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+
+#include <boost/lexical_cast.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
+
+using namespace Mantid;
 
 /** This task does the disk IO from loading the NXS file,
 * and so will be on a disk IO mutex */
@@ -21,12 +32,13 @@ public:
   * @param scheduler :: the ThreadScheduler that runs this task.
   * @param framePeriodNumbers :: Period numbers corresponding to each frame
   */
-  LoadBankFromDiskTask(LoadEventNexus *alg, const std::string &entry_name,
+  LoadBankFromDiskTask(const std::string &entry_name,
                        const std::string &entry_type,
                        const std::size_t numEvents,
-                       const bool oldNeXusFileNames, Progress *prog,
+                       const bool oldNeXusFileNames,
+                       Mantid::API::Progress *prog,
                        boost::shared_ptr<std::mutex> ioMutex,
-                       ThreadScheduler *scheduler,
+                       Mantid::Kernel::ThreadScheduler *scheduler,
                        const std::vector<int> &framePeriodNumbers)
       : Task(), entry_name(entry_name), entry_type(entry_type),
         // prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL),
@@ -53,7 +65,7 @@ public:
     } catch (::NeXus::Exception &) {
       // Field not found error is most likely.
       // Use the "proton_charge" das logs.
-      thisBankPulseTimes = alg->m_allBanksPulseTimes;
+      thisBankPulseTimes = alg->m_allBanksPulseTimes; // alg->m_allBanksPulseTimes;
       return;
     }
     std::string thisStartTime = "";
@@ -65,7 +77,7 @@ public:
 
     // Now, we look through existing ones to see if it is already loaded
     // thisBankPulseTimes = NULL;
-    for (auto &bankPulseTime : alg->m_bankPulseTimes) {
+    for (auto &bankPulseTime : alg->m_bankPulseTimes ) { // alg.m_bankPulseTimes
       if (bankPulseTime->equals(thisNumPulses, thisStartTime)) {
         thisBankPulseTimes = bankPulseTime;
         return;
@@ -73,9 +85,10 @@ public:
     }
 
     // Not found? Need to load and add it
-    thisBankPulseTimes = boost::make_shared<BankPulseTimes>(
+    thisBankPulseTimes = boost::make_shared<Mantid::DataHandling::BankPulseTimes>(
         boost::ref(file), m_framePeriodNumbers);
-    alg->m_bankPulseTimes.push_back(thisBankPulseTimes);
+    // alg->m_bankPulseTimes.push_back(thisBankPulseTimes);
+    alg->bankPulsetimes.push_back(thisBankPulseTimes);
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -94,7 +107,7 @@ public:
     if (file.getInfo().type == ::NeXus::UINT64)
       file.getData(event_index);
     else {
-      alg->getLogger().warning()
+      alg_Logger.warning() // alg->getLogger()
           << "Entry " << entry_name
           << "'s event_index field is not UINT64! It will be skipped.\n";
       m_loadError = true;
@@ -106,7 +119,7 @@ public:
       if (event_index[0] == 0) {
         // One entry, only zero. This means NO events in this bank.
         m_loadError = true;
-        alg->getLogger().debug() << "Bank " << entry_name << " is empty.\n";
+        alg_Logger.debug() << "Bank " << entry_name << " is empty.\n";
       }
     }
 
@@ -140,7 +153,7 @@ public:
 
     // Handle the time filtering by changing the start/end offsets.
     for (size_t i = 0; i < thisBankPulseTimes->numPulses; i++) {
-      if (thisBankPulseTimes->pulseTimes[i] >= alg->filter_time_start) {
+      if (thisBankPulseTimes->pulseTimes[i] >= alg_filter_time_start) { // alg->filter_time_start
         start_event = event_index[i];
         break; // stop looking
       }
@@ -150,7 +163,7 @@ public:
       // If the frame indexes are bad then we can't construct the times of the
       // events properly and filtering by time
       // will not work on this data
-      alg->getLogger().warning()
+      alg_Logger.warning()
           << this->entry_name
           << "'s field 'event_index' seems to be invalid (start_index > than "
              "the number of events in the bank)."
@@ -167,18 +180,18 @@ public:
       }
     }
     // We are loading part - work out the event number range
-    if (alg->chunk != EMPTY_INT()) {
-      start_event = (alg->chunk - alg->firstChunkForBank) * alg->eventsPerChunk;
+    if (alg->chunk != Mantid::EMPTY_INT()) {
+      start_event = (alg_chunk - alg_firstChunkForBank) * alg_eventsPerChunk;
       // Don't change stop_event for the final chunk
-      if (start_event + alg->eventsPerChunk < stop_event)
-        stop_event = start_event + alg->eventsPerChunk;
+      if (start_event + alg_eventsPerChunk < stop_event)
+        stop_event = start_event + alg_eventsPerChunk;
     }
 
     // Make sure it is within range
     if (stop_event > static_cast<size_t>(dim0))
       stop_event = dim0;
 
-    alg->getLogger().debug() << entry_name << ": start_event " << start_event
+    alg_Logger.debug() << entry_name << ": start_event " << start_event
                              << " stop_event " << stop_event << "\n";
 
     return;
@@ -197,7 +210,7 @@ public:
 
     // Check that the required space is there in the file.
     if (dim0 < m_loadSize[0] + m_loadStart[0]) {
-      alg->getLogger().warning() << "Entry " << entry_name
+      alg_Logger.warning() << "Entry " << entry_name
                                  << "'s event_id field is too small (" << dim0
                                  << ") to load the desired data size ("
                                  << m_loadSize[0] + m_loadStart[0] << ").\n";
@@ -444,7 +457,7 @@ public:
     const auto bank_size = m_max_id - m_min_id;
     const uint32_t minSpectraToLoad = static_cast<uint32_t>(alg->m_specMin);
     const uint32_t maxSpectraToLoad = static_cast<uint32_t>(alg->m_specMax);
-    const uint32_t emptyInt = static_cast<uint32_t>(EMPTY_INT());
+    const uint32_t emptyInt = static_cast<uint32_t>(Mantid::EMPTY_INT());
     // check that if a range of spectra were requested that these fit within
     // this bank
     if (minSpectraToLoad != emptyInt && m_min_id < minSpectraToLoad) {
@@ -518,17 +531,17 @@ public:
 
 private:
   /// Algorithm being run
-  LoadEventNexus *alg;
+  // LoadEventNexus *alg;
   /// NXS path to bank
   std::string entry_name;
   /// NXS type
   std::string entry_type;
   /// Progress reporting
-  Progress *prog;
+  Mantid::API::Progress *prog;
   /// ThreadScheduler running this task
-  ThreadScheduler *scheduler;
+  Mantid::Kernel::ThreadScheduler *scheduler;
   /// Object with the pulse times for this bank
-  boost::shared_ptr<BankPulseTimes> thisBankPulseTimes;
+  boost::shared_ptr<Mantid::DataHandling::BankPulseTimes> thisBankPulseTimes;
   /// Did we get an error in loading
   bool m_loadError;
   /// Old names in the file?
@@ -551,5 +564,13 @@ private:
   float *m_event_weight;
   /// Frame period numbers
   const std::vector<int> m_framePeriodNumbers;
+
+  /// TODO-FIXME: NEW CLASS VARIABLES! NOT INITIALIZED IN CONSTRUCTOR YET!
+  Mantid::Kernel::Logger &alg_Logger;
+  int alg_chunk;
+  int alg_firstChunkForBank;
+  int alg_eventsPerChunk;
+  // Mantid::API::Algorithm *alg;
+  Mantid::DataHandling::LoadEventNexus *alg;
 }; // END-DEF-CLASS LoadBankFromDiskTask
 
