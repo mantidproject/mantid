@@ -63,6 +63,7 @@ MANTID_DATAHANDLING_DLL H5::Group createGroupNXS(H5::Group &group,
 /**
  * Sets up the chunking and compression rate.
  * @param length
+ * @param deflateLevel
  * @return The configured property list
  */
 MANTID_DATAHANDLING_DLL H5::DSetCreatPropList
