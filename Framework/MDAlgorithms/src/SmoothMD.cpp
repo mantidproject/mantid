@@ -435,6 +435,21 @@ void SmoothMD::init() {
           Direction::Input),
       docBuffer.str());
 
+  std::vector<std::string> unitOptions = {"pixels"};
+
+  std::stringstream docUnits;
+  docUnits << "The units that WidthVector has been specified in. Allowed "
+              "values are: ";
+  for (auto const &unitOption : unitOptions) {
+    docUnits << unitOption << ", ";
+  }
+  declareProperty(
+      Kernel::make_unique<PropertyWithValue<std::string>>(
+          "Units", "pixels",
+          boost::make_shared<ListValidator<std::string>>(unitOptions),
+          Direction::Input),
+      docUnits.str());
+
   declareProperty(make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
                       "InputNormalizationWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
