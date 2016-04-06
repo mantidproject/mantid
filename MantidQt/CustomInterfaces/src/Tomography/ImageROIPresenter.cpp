@@ -270,10 +270,10 @@ ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
   try {
     wsg = ads.retrieveWS<Mantid::API::WorkspaceGroup>(wsName);
   } catch (std::exception &e) {
-    throw std::runtime_error(
-        "Could not produce a workspace group for the stack images. Cannot "
-        "display it. Error details: " +
-        std::string(e.what()));
+    throw std::runtime_error("Could not load images to produce a workspace "
+                             "group for the stack images. Cannot "
+                             "display it. Error details: " +
+                             std::string(e.what()));
   }
 
   if (wsg &&

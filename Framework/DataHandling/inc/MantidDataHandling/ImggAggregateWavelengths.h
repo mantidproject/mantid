@@ -5,6 +5,10 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
+namespace Poco {
+class Path;
+}
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -46,7 +50,49 @@ private:
   void exec() override final;
 
   std::map<std::string, std::string> validateInputs() override;
-  Mantid::API::MatrixWorkspace_sptr processDirectory();
+
+  void aggUniformBands(const std::string &inputPath,
+                       const std::string &outputPath, size_t bands);
+
+  void aggIndexBands(const std::string &inputPath,
+                     const std::string &outputPath,
+                     const std::string &rangesSpec);
+
+  void aggToFBands(const std::string & /*inputPath*/,
+                   const std::string & /*outputPath*/,
+                   const std::string & /*ranges*/);
+
+  void processDirectory(const Poco::Path &inDir, size_t bands,
+                        const std::string outDir, const std::string prefix);
+
+  void processDirectory(const Poco::Path &inDir,
+                        const std::vector<std::pair<size_t, size_t>> &ranges,
+                        const std::string outDir, const std::string prefix);
+
+  std::vector<std::pair<size_t, size_t>>
+  rangesFromStringProperty(const std::string &rangesSpec,
+                           const std::string &propName);
+
+  std::vector<Poco::Path> findInputSubdirs(const Poco::Path &path);
+
+  std::vector<Poco::Path> findInputImages(const Poco::Path &path);
+
+  bool isSupportedExtension(const std::string &extShort,
+                            const std::string &extLong);
+
+  API::MatrixWorkspace_sptr loadFITS(const Poco::Path &imgPath);
+
+  void aggImage(API::MatrixWorkspace_sptr accum,
+                const API::MatrixWorkspace_sptr toAdd);
+
+  void saveFITS(const API::MatrixWorkspace_sptr accum,
+                const std::string &outDir, const std::string &prefix);
+
+  static const std::vector<std::string> formatExtensionsShort;
+  static const std::vector<std::string> formatExtensionsLong;
+  static const std::string outPrefix;
+  static const std::string indexRangesPrefix;
+  static const std::string tofRangesPrefix;
 };
 
 } // namespace DataHandling

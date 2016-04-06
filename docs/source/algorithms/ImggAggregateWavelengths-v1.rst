@@ -23,8 +23,11 @@ Description
    (FITS) files and it is not enabled. At the moment, trying to use
    this property will produce an error.
 
-This algorithm aggregates (sums counts) multiple energy bands or
-wavelengths for energy selective imaging data.
+This algorithm aggregates images from multiple energy bands or
+wavelengths into one or more output wavelength bands. This algorithm
+applies to energy selective imaging data. It aggregates images by
+summing up counts, and assumes that the image pixel values represent
+neutron counts.
 
 Given an input path (directory) and an output path (directory) the
 algorithm with combine images from the input path and write the result
@@ -33,16 +36,19 @@ radiography and tomography. The image format supported is FITS (using
 the algorithm :ref:`algm-LoadFITS`).
 
 The algorithm produces its main outputs as files on disk. It also
-outputs two values: the number of angles or projections processed
+outputs two values: the number of projections (or angles) processed
 successfully (which will be always one for neutron radiography), and
-the number of wavelength bands aggregated.
+the number of wavelength bands aggregated. One and only one of the
+options **UniformBands**, **IndexRanges** or **ToFRanges** must be
+specified. This defines the number of output bands and how the input
+bands are aggregated or combined into the output bands.
 
 For the sake of simplicity let us explain first the files that the
 algorithm produces when a single output band is generated. This single
-output band could correspond to all or a subset of the input bands
-aggregated. This is the case when the property UniformBands is set to
-1, or the properties **IndexRanges** or **ToFRanges** are set to a
-single range (and not multiple ranges separated by commas).
+output band could correspond to the aggregation of all or a subset of
+the input bands. This is the case when the property UniformBands is
+set to 1, or the properties **IndexRanges** or **ToFRanges** are set
+to a single range (and not multiple ranges separated by commas).
 
 For neutron radiography data the input path points to a set of image
 files where every file is assumed to correspond to a different
@@ -67,7 +73,7 @@ generated in a separate subdirectory created under the output path
 given to the algorithm. These subdirectories are named as follows. For
 the uniform bands (**UniformBands** property) or the index ranges
 (**IndexRanges**) the subdirectories will be named
-**wavelengths_indices_from_<start>_to_<end>**, where **<start>** and
+**wavelength_indices_from_<start>_to_<end>**, where **<start>** and
 **<end>** are the limits of the range(s).
 
 A relevant consideration is how to use the range options to generate
@@ -94,7 +100,7 @@ Usage
 
    # Create an image combining all energy bands
    projections, bands = ImggAggregateWavelengths(InputPath='D:\Data\RB000000\SampleA\',
-                                                 OutputPath='D:\Data\RB000000\SampleA\all_wavelenghts'
+                                                 OutputPath='D:\Data\RB000000\SampleA_all_wavelenghts'
                                                  UniformBands=1)
 
    if 1 != projections:
