@@ -20,6 +20,9 @@ New
    :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`, :ref:`CalibrateRectangularDetectors <algm-CalibrateRectangularDetectors>`, *et al* and
    minimizes the difference between the *DIFC* of the instrument and
    calibration by moving and rotating instrument components.
+- :ref:`EnggFitDIFCFromPeaks <algm-AlignComponents>` fits GSAS calibration
+  parameters (DIFA, DIFC, TZERO) from peaks fitted using
+  :ref:`EnggFitPeaks <algm-EnggFitPeaks>`.
 
 Renamed
 #######
@@ -69,7 +72,9 @@ Improved
 - :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` now correctly reads in event data that does not have a common x-axis. `#15746 <https://github.com/mantidproject/mantid/pull/15746>`
 - :ref:`LoadNexusLogs <algm-LoadNexusLogs>` allows now to load logs from an entry other than the first. :ref:`LoadEventNexus <algm-LoadEventNexus>` now loads the correct logs when an *NXentry* is given
 - :ref:`FFT <algm-FFT>`: added property *AutoShift* to enable automatic phase correction for workspaces not centred at zero.
+- :ref:`SaveAscii <algm-SaveAscii2>` now has a SpectrumMetaData property that allows for addition information to be displayed along with the SpectrumNumber. Currently the supported MetaData is SpectrumNumber, Q and Angle.
 - :ref:`SaveMD <algm-SaveMD>` now writes MDHisto signal arrays as compressed data.
+
 
 Deprecated
 ##########
@@ -86,6 +91,7 @@ MD Algorithms (VATES CLI)
 -  PlotMD now plots points at bin centres for MDEventWorkspaces as well as MDHistoWorkspaces.
 -  SliceMD now reports the correct number of events in the output workspace.
 -  The size of densely populated, multidimensional MDEventWorkspace slices produced by SliceMD has been greatly reduced by using more sensible box splitting parameters.
+-  Slicing algorithms (SliceMD and BinMD) do not add masked data to their output workspaces.
 -  MergeMD now does not add masked events to its output workspace.
 
 Geometry

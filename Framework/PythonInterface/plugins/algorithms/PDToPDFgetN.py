@@ -5,6 +5,7 @@ from mantid.kernel import Direction, FloatArrayProperty
 import mantid
 
 COMPRESS_TOL_TOF = .01
+EVENT_WORKSPACE_ID = "EventWorkspace"
 
 
 class PDToPDFgetN(DataProcessorAlgorithm):
@@ -23,7 +24,7 @@ class PDToPDFgetN(DataProcessorAlgorithm):
     def PyInit(self):
         group = "Input"
         self.declareProperty(FileProperty(name="Filename",
-                                          defaultValue="", action=FileAction.Load,
+                                          defaultValue="", action=FileAction.OptionalLoad,
                                           extensions=["_event.nxs", ".nxs.h5"]),
                              "Event file")
         self.declareProperty("MaxChunkSize", 0.0,
@@ -71,6 +72,22 @@ class PDToPDFgetN(DataProcessorAlgorithm):
                              "Number of bins in x-axis. Non-zero value overrides \"Params\" property. " +
                              "Negative value means logorithmic binning.")
 
+    def validateInputs(self):
+        issues = {}
+
+        if self.getProperty("InputWorkspace").value is None:
+            filename = self.getProperty("Filename").value
+            if filename is None or len(filename) <= 0:
+                msg = "Must supply a Filename or InputWorkspace"
+                issues["Filename"] = msg
+                issues["InputWorkspace"] = msg
+        else:
+            if self.getProperty("InputWorkspace").value.id() == EVENT_WORKSPACE_ID:
+                if self.getProperty("InputWorkspace").value.getNumberEvents() <= 0:
+                    issues["InputWorkspace"] = "Workspace contains no events"
+
+        return issues
+
     def _loadCharacterizations(self):
         self._focusPos = {}
         self._iparmFile = None
@@ -99,6 +116,8 @@ class PDToPDFgetN(DataProcessorAlgorithm):
                                         MaxChunkSize=self.getProperty("MaxChunkSize").value,
                                         FilterBadPulses=self.getProperty("FilterBadPulses").value,
                                         CompressTOFTolerance=COMPRESS_TOL_TOF)
+            if wksp.getNumberEvents() <= 0: # checked InputWorkspace during validateInputs
+                raise RuntimeError("Workspace contains no events")
         else:
             self.log().information("Using input workspace. Ignoring properties 'Filename', " +
                                    "'OutputWorkspace', 'MaxChunkSize', and 'FilterBadPulses'")
