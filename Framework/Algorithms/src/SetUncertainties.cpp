@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/SetUncertainties.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ListValidator.h"
 
 #include <algorithm>
@@ -80,6 +81,12 @@ void SetUncertainties::init() {
                   "How to reset the uncertainties");
 }
 
+namespace {
+inline bool isMasked(MatrixWorkspace_const_sptr wksp, const size_t index) {
+  return wksp->getDetector(index)->isMasked();
+}
+} // anonymous namespace
+
 void SetUncertainties::exec() {
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   std::string errorType = getProperty("SetError");
@@ -114,7 +121,7 @@ void SetUncertainties::exec() {
     }
 
     // ZERO mode doesn't calculate anything further
-    if (!zeroError) {
+    if ((!zeroError) && (!isMasked(inputWorkspace, i))) {
       MantidVec &E = outputWorkspace->dataE(i);
       if (takeSqrt) {
         const MantidVec &Y = outputWorkspace->readY(i);
