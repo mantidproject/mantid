@@ -8,6 +8,10 @@ namespace Mantid {
 namespace DataHandling {
 namespace H5Util {
 
+namespace {
+const std::string NX_ATTR_CLASS("NX_class");
+} // anonymous
+
 // -------------------------------------------------------------------
 // convert primitives to HDF5 enum
 // -------------------------------------------------------------------
@@ -41,6 +45,20 @@ template <> MANTID_DATAHANDLING_DLL DataType getType<uint64_t>() {
 // -------------------------------------------------------------------
 // write methods
 // -------------------------------------------------------------------
+
+Group createGroupNXS(H5File &file, const std::string &name,
+                     const std::string &nxtype) {
+  auto group = file.createGroup(name);
+  writeStrAttribute(group, NX_ATTR_CLASS, nxtype);
+  return group;
+}
+
+Group createGroupNXS(Group &group, const std::string &name,
+                     const std::string &nxtype) {
+  auto outGroup = group.createGroup(name);
+  writeStrAttribute(outGroup, NX_ATTR_CLASS, nxtype);
+  return outGroup;
+}
 
 DataSpace getDataSpace(const size_t length) {
   hsize_t dims[] = {length};
@@ -93,9 +111,34 @@ void writeArray1D(Group &group, const std::string &name,
 
 std::string readString(H5::H5File &file, const std::string &path) {
   try {
-    DataSet data = file.openDataSet(path);
+    auto data = file.openDataSet(path);
+    return readString(data);
+  } catch (H5::FileIException &e) {
+    UNUSED_ARG(e);
+    return "";
+  } catch (H5::GroupIException &e) {
+    UNUSED_ARG(e);
+    return "";
+  }
+}
+
+std::string readString(H5::Group &group, const std::string &name) {
+  try {
+    auto data = group.openDataSet(name);
+    return readString(data);
+  } catch (H5::FileIException &e) {
+    UNUSED_ARG(e);
+    return "";
+  } catch (H5::GroupIException &e) {
+    UNUSED_ARG(e);
+    return "";
+  }
+}
+
+std::string readString(H5::DataSet &dataset) {
+  try {
     std::string value;
-    data.read(value, data.getDataType(), data.getSpace());
+    dataset.read(value, dataset.getDataType(), dataset.getSpace());
     return value;
   } catch (H5::FileIException &e) {
     UNUSED_ARG(e);

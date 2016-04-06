@@ -53,6 +53,13 @@ H5::DataSpace getDataSpace(const std::vector<NumT> &data);
 /// Convert a primitive type to the appropriate H5::DataType.
 template <typename NumT> H5::DataType getType();
 
+MANTID_DATAHANDLING_DLL H5::Group createGroupNXS(H5::H5File &file,
+                                                 const std::string &name,
+                                                 const std::string &nxtype);
+
+MANTID_DATAHANDLING_DLL H5::Group createGroupNXS(H5::Group &group,
+                                                 const std::string &name,
+                                                 const std::string &nxtype);
 /**
  * Sets up the chunking and compression rate.
  * @param length
@@ -74,6 +81,11 @@ void writeArray1D(H5::Group &group, const std::string &name,
 
 MANTID_DATAHANDLING_DLL std::string readString(H5::H5File &file,
                                                const std::string &path);
+
+MANTID_DATAHANDLING_DLL std::string readString(H5::Group &group,
+                                               const std::string &name);
+
+MANTID_DATAHANDLING_DLL std::string readString(H5::DataSet &dataset);
 
 template <typename NumT>
 std::vector<NumT> readArray1DCoerce(H5::DataSet &dataset,
