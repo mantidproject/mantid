@@ -15,6 +15,11 @@ Crystal Improvements
 Engineering Diffraction
 -----------------------
 
+- New algorithm added: EnggFitDIFCFromPeaks, which forks from the old EnggFitPeaks.
+  EnggFitPeaks modified to fit peaks but not calibration parameters.
+
+Graphical user interface:
+
 - Vanadium Curves and Ceria Peaks graphs are plotted once basic and cropped
   calibration process has been carried out
 - Customise Bank Name text-field will set the workspace and .his file name
@@ -32,6 +37,12 @@ Imaging
 -------
 
 Improvements in the tomographic reconstruction graphical user interface:
+
+- New capabilities added when visualizing stacks of images:
+
+  - Handle the rotation of all the images in the stack
+  - "Play" the stack or sequence of images as a movie
+  - Visualize sample, flat, and dark images separately
 
 - Previously existing parameters to set up local and remote paths have
   been moved into a new section of the interface. New options have

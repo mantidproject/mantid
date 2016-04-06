@@ -12,45 +12,39 @@ Description
 .. warning::
 
    This algorithm is being developed for a specific instrument. It
-   might get changed or even removed without a notification, should
-   instrument scientists decide to do so.
+   might undergo significant changes, should instrument scientists
+   decide to do so.
 
+Finds the calibration parameters DIFC and TZERO (as defined in GSAS)
+from a list of peaks fitted to a diffraction pattern. The peaks can be
+fitted to a Mantid workspace spectrum using the algorithm
+:ref:`EnggFitPeaks <algm-EnggFitPeaks>` which produces a table with
+parameter values for peaks in time-of-flight (TOF, see
+:ref:`UnitFactory <algm-UnitFactory>`). The table is the essential
+input to this algorithm.
 
-Fits a series of single peaks to a spectrum with an expected
-diffraction pattern.  The pattern is specified by providing a list of
-dSpacing values where Bragg peaks are expected. These expected values
-are used as initial peak positions when fitting the peaks. The
-expected dSpacing values can be given as an input string or in a file
-with values separated by commas.
+This algorithm fits the adjusted peak time-of-fligth value positions
+that are fitted against expected dSpacing values (d) according to the
+expression:
 
-The peaks are fitted one at a time. The dSpacing values given in the
-property ExpectedPeaks are then converted to time-of-flight (TOF) (as
-in the Mantid :ref:`ConvertUnits <algm-ConvertUnits>` algorithm).
-After the conversion of units, the algorithm tries to fit (in
-time-of-flight) a peak in the neighborhood of every expected peak
-using a peak shape or function.
+.. math:: TOF = DIFC*d + TZERO
 
-This algorithm currently fits (single) peaks of type
-:ref:`Back2BackExponential <func-Back2BackExponential>`. Other
-alternatives might be added as optional in the future (for example the
-simpler :ref:`Gaussian <func-Gaussian>` or the more complex
-:ref:`Bk2BkExpConvPV <func-Bk2BkExpConvPV` or :ref:`IkedaCarpenterPV
-<func-IkedaCarpenterPV>`). To produce an initial guess for the peak
-function parameters this algorithm uses the :ref:`FindPeaks
-<algm-FindPeaks>` algorithm starting from the expected peaks list
-given in the inputs.
+The calibration parameters TZERO and DIFC can then be used within the
+GSAS program or in other Mantid algorithms (see :ref:`EnggCalibrate
+<algm-EnggCalibrate>` and :ref:`EnggCalibrateFull
+<algm-EnggCalibrateFull>`).  These parameters are returned and can be
+retrieved as output properties as well. The DIFA coefficient
+(quadratic term on d) is not considered and is fixed to zero in this
+version of the algorithm.
 
-The algorithm produces an output table workspace with information
-about the peaks fitted. The table has one row per peak and several
-columns for the different fitted parameters (and the errors of these
-parameters). If a name is given in the input OutFittedPeaksTable, the
-table will be available in the "analysis data service" (workspaces
-window) with that name.
+If a name is given in OutParametersTable this algorithm also produces
+a table workspace with that name, containing the parameters fitted
+(DIFA, DIFC, TZERO).
 
 Usage
 -----
 
-**Example - Fitting two peaks:**
+**Example - Fitting DIFC parameter with two peaks:**
 
 .. testcode:: ExTwoPeaks
 
@@ -73,9 +67,16 @@ Usage
    # Run the algorithm. Defaults are shown below. Files entered must be in .csv format and if both ExpectedPeaks and ExpectedPeaksFromFile are entered, the latter will be used.
 
    peaks_tbl = EnggFitPeaks(ws, 0, [0.8, 1.9])
-
+   out_tbl_name = 'difc_from_peaks'
+   difa, difc, tzero = EnggFitDIFCFromPeaks(FittedPeaks=peaks_tbl, OutParametersTable=out_tbl_name)
 
    # Print the results
+   print "DIFA: %.1f" % difa
+   print "DIFC: %.1f" % difc
+   print "TZERO: %.1f" % tzero
+   tbl = mtd[out_tbl_name]
+   print "The output table has %d row(s)" % tbl.rowCount()
+   print "Parameters from the table, DIFA: %.1f, DIFC: %.1f, TZERO: %.1f" % (tbl.cell(0,0), tbl.cell(0,1), tbl.cell(0,2))
    print "Number of peaks fitted: {0}".format(peaks_tbl.rowCount())
    print "First peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[0])
    print "First fitted peak center (ToF): {0:.1f}".format(peaks_tbl.column('X0')[0])
@@ -86,10 +87,15 @@ Output:
 
 .. testcleanup:: ExTwoPeaks
 
-   DeleteWorkspace(peaks_tbl)
+   DeleteWorkspace(out_tbl_name)
 
 .. testoutput:: ExTwoPeaks
 
+   DIFA: 0.0
+   DIFC: 18181.8
+   TZERO: 460.5
+   The output table has 1 row(s)
+   Parameters from the table, DIFA: 0.0, DIFC: 18181.8, TZERO: 460.5
    Number of peaks fitted: 2
    First peak expected (dSpacing): 0.8
    First fitted peak center (ToF): 15006.0
