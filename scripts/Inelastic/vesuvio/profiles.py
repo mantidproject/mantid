@@ -68,7 +68,7 @@ class MassProfile(object):
         return value
 
     @classmethod
-    def _parse_float(cls, func_str, prop_name):
+    def _parse_float(cls, func_str, prop_name, default=None):
         """
         :param prop_name: The string on the lhs of the equality
         :return: The parsed float
@@ -80,7 +80,10 @@ class MassProfile(object):
             if not isinstance(value, float):
                 raise ValueError("Unexpected format for {0} value. Expected e.g. {0}=0".format(prop_name))
         else:
-            raise ValueError("Cannot find {0}= in function_str (float) ({1})".format(prop_name, func_str))
+            if default is None:
+                raise ValueError("Cannot find {0}= in function_str (float) ({1})".format(prop_name, func_str))
+            else:
+                value = default
 
         return value
 
@@ -169,6 +172,90 @@ class GaussianMassProfile(MassProfile):
             constraints += ","
         constraints += "{0}Intensity > 0.0".format(param_prefix)
         return constraints
+
+# --------------------------------------------------------------------------------
+# MultivariateGaussian profile
+# --------------------------------------------------------------------------------
+
+class MultivariateGaussianMassProfile(MassProfile):
+
+    cfunction = "MultivariateGaussianComptonProfile"
+    integration_steps = 64
+
+    def __init__(self, width, mass, sigma_x = 1.0, sigma_y = 1.0, sigma_z = 1.0):
+        super(MultivariateGaussianMassProfile, self).__init__(width, mass)
+
+        self._sigma_x = sigma_x
+        self._sigma_y = sigma_y
+        self._sigma_z = sigma_z
+
+    @classmethod
+    def from_str(cls, func_str, mass):
+        """Attempt to create an object of this type from a string.
+        Raises a TypeError if parsing fails
+
+        Sigma values are taken as the initial value of the parameter, not the
+        fixed value of the parameter.
+        """
+        profile_prefix = "function=MultivariateGaussian"
+        if not func_str.startswith(profile_prefix):
+            raise TypeError("Multivariate Gaussian function string should start with 'function=MultivariateGaussian'")
+
+        params = {
+            'width': 0.0,
+            'mass': mass,
+            'sigma_x': cls._parse_float(func_str, "SigmaX", 1.0),
+            'sigma_y': cls._parse_float(func_str, "SigmaY", 1.0),
+            'sigma_z': cls._parse_float(func_str, "SigmaZ", 1.0)
+        }
+
+        return MultivariateGaussianMassProfile(**params)
+
+    def create_fit_function_str(self, param_vals=None, param_prefix=""):
+        """Creates a string used by the Fit algorithm for this profile
+
+        :param param_vals: A table of values for the parameters that override those set
+        on the object already. Default=None
+        :param param_prefix: A string prefix for the parameter as seen by the Mantid Fit algorithm
+        """
+        vals_provided = (param_vals is not None)
+
+        intensity = None
+
+        if vals_provided:
+            intensity = param_vals[param_prefix + "Intensity"]
+            sig_x = param_vals[param_prefix + "SigmaX"]
+            sig_y = param_vals[param_prefix + "SigmaY"]
+            sig_z = param_vals[param_prefix + "SigmaZ"]
+        else:
+            intensity = self.intensity
+            sig_x = self._sigma_x
+            sig_y = self._sigma_y
+            sig_z = self._sigma_z
+
+        fitting_str = "name={0},IntegrationSteps={1},Mass={2:f},SigmaX={3:f},SigmaY={4:f},SigmaZ={5:f}"
+        fitting_str = fitting_str.format(self.cfunction, self.integration_steps, self.mass, sig_x, sig_y, sig_z)
+
+        if intensity is not None:
+            fitting_str += ",Intensity={0:f}".format(intensity)
+
+        logger.debug("Multivariate Gaussian profile fit function string: {0}".format(fitting_str))
+        return fitting_str + ";"
+
+    def create_constraint_str(self, param_prefix=""):
+        """Returns a constraints string for the Fit algorithm
+
+        :param param_prefix: An optional prefix for the parameter name
+        """
+        constraints = "{0}Intensity > 0.0,".format(param_prefix) \
+                    + "{0}SigmaX > 0.0,".format(param_prefix) \
+                    + "{0}SigmaY > 0.0,".format(param_prefix) \
+                    + "{0}SigmaZ > 0.0".format(param_prefix)
+        return constraints
+
+    def create_ties_str(self, param_prefix=""):
+        ties_str = "{0}Mass={1:f}".format(param_prefix, self.mass)
+        return ties_str
 
 # --------------------------------------------------------------------------------
 # GramCharlier profile
@@ -321,7 +408,7 @@ def create_from_str(func_str, mass):
         :param func_str: A string of the form 'function=Name,attr1=val1,attr2=val2'
         :param mass: The value of the mass for the profile
     """
-    known_types = [GaussianMassProfile, GramCharlierMassProfile]
+    known_types = [GaussianMassProfile, MultivariateGaussianMassProfile, GramCharlierMassProfile]
     logger.debug("Profile factory string: {0}".format(func_str))
     errors = dict()
     for cls in known_types:
