@@ -13,7 +13,7 @@ def create_test_ws():
                            EndWorkspaceIndex=135)
     tof_ws = ConvertToPointData(tof_ws)
     SetInstrumentParameter(tof_ws, ParameterName='t0',
-                           ParameterType='Number',Value='0.5')
+                           ParameterType='Number',Value='-0.32')
     SetInstrumentParameter(tof_ws, ParameterName='sigma_l1',
                            ParameterType='Number', Value='0.021')
     SetInstrumentParameter(tof_ws, ParameterName='sigma_l2',
