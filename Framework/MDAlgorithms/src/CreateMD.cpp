@@ -4,7 +4,6 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include <Poco/Path.h>
 
 using namespace Mantid::Kernel;
