@@ -3,6 +3,8 @@
 #include <algorithm>
 
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
@@ -16,6 +18,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
 
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 
@@ -92,6 +95,20 @@ void ConvertToMD::init() {
                                            Direction::Input),
       "This option causes a split of the top level, i.e. level0, of 50 for the "
       "first four dimensions.");
+
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+                                ".nxs"),
+      "The name of the Nexus file to write, as a full or relative path.\n"
+      "Only used if FileBackEnd is true.");
+  setPropertySettings("Filename", make_unique<EnabledWhenProperty>(
+                                      "CreateFileBackEnd", IS_EQUAL_TO, "1"));
+
+  declareProperty("FileBackEnd", false,
+                  "If true, Filename must also be specified. The algorithm "
+                  "will create the specified file in addition to an output "
+                  "workspace. The workspace will load data from the file on "
+                  "demand in order to reduce memory use.");
 }
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -104,6 +121,13 @@ int ConvertToMD::version() const { return 1; }
 
 std::map<std::string, std::string> ConvertToMD::validateInputs() {
   std::map<std::string, std::string> result;
+
+  const std::string filename = this->getProperty("Filename");
+  const bool fileBackEnd = this->getProperty("FileBackEnd");
+
+  if (fileBackEnd && filename.empty()) {
+    result["Filename"] = "Filename must be given if FileBackEnd is required.";
+  }
 
   std::vector<double> minVals = this->getProperty("MinValues");
   std::vector<double> maxVals = this->getProperty("MaxValues");
@@ -149,6 +173,9 @@ void ConvertToMD::exec() {
   // -------- get Input workspace
   m_InWS2D = getProperty("InputWorkspace");
 
+  const std::string out_filename = this->getProperty("Filename");
+  const bool fileBackEnd = this->getProperty("FileBackEnd");
+
   // get the output workspace
   API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
 
@@ -182,7 +209,7 @@ void ConvertToMD::exec() {
 
   // create and initiate new workspace or set up existing workspace as a target.
   if (createNewTargetWs) // create new
-    spws = this->createNewMDWorkspace(targWSDescr);
+    spws = this->createNewMDWorkspace(targWSDescr, fileBackEnd, out_filename);
   else // setup existing MD workspace as workspace target.
     m_OutWSWrapper->setMDWS(spws);
 
@@ -462,7 +489,9 @@ bool ConvertToMD::buildTargetWSDescription(
 * @return
 */
 API::IMDEventWorkspace_sptr
-ConvertToMD::createNewMDWorkspace(const MDWSDescription &targWSDescr) {
+ConvertToMD::createNewMDWorkspace(const MDWSDescription &targWSDescr,
+                                  const bool filebackend,
+                                  const std::string &filename) {
   // create new md workspace and set internal shared pointer of m_OutWSWrapper
   // to this workspace
   API::IMDEventWorkspace_sptr spws =
@@ -478,6 +507,9 @@ ConvertToMD::createNewMDWorkspace(const MDWSDescription &targWSDescr) {
   // Build up the box controller, using the properties in
   // BoxControllerSettingsAlgorithm
   this->setBoxController(bc, m_InWS2D->getInstrument());
+  if (filebackend) {
+    setupFileBackend(filename, m_OutWSWrapper->pWorkspace());
+  }
 
   // Check if the user want sto force a top level split or not
   bool topLevelSplittingChecked = this->getProperty("TopLevelSplitting");
@@ -655,6 +687,30 @@ void ConvertToMD::findMinMax(
         maxVal[i] = maxAlgValues[i];
     }
   }
+}
+
+/**
+ * Setup the filebackend for the output workspace. It assumes that the
+ * box controller has already been initialized
+ * @param filebackPath Path to the file used for backend storage
+ */
+void ConvertToMD::setupFileBackend(
+    std::string filebackPath, Mantid::API::IMDEventWorkspace_sptr outputWS) {
+  using DataObjects::BoxControllerNeXusIO;
+  auto savemd = this->createChildAlgorithm("SaveMD", 0.01, 0.05, true);
+  savemd->setProperty("InputWorkspace", outputWS);
+  savemd->setPropertyValue("Filename", filebackPath);
+  savemd->setProperty("UpdateFileBackEnd", false);
+  savemd->setProperty("MakeFileBacked", false);
+  savemd->executeAsChildAlg();
+
+  // create file-backed box controller
+  auto boxControllerMem = outputWS->getBoxController();
+  auto boxControllerIO =
+      boost::make_shared<BoxControllerNeXusIO>(boxControllerMem.get());
+  boxControllerMem->setFileBacked(boxControllerIO, filebackPath);
+  outputWS->setFileBacked();
+  boxControllerMem->getFileIO()->setWriteBufferSize(1000000);
 }
 
 } // namespace Mantid
