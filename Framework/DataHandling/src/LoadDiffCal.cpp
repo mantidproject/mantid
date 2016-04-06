@@ -155,8 +155,7 @@ std::vector<double> LoadDiffCal::readDoubleArray(Group &group,
 
   try {
     DataSet dataset = group.openDataSet(name);
-    result =
-        H5Util::readArray1DCoerce<double>(dataset, PredType::NATIVE_DOUBLE);
+    result = H5Util::readArray1DCoerce<double>(dataset);
   } catch (H5::GroupIException &e) {
     UNUSED_ARG(e);
     g_log.information() << "Failed to open dataset \"" << name << "\"\n";
@@ -183,8 +182,7 @@ std::vector<int32_t> LoadDiffCal::readInt32Array(Group &group,
 
   try {
     DataSet dataset = group.openDataSet(name);
-    result =
-        H5Util::readArray1DCoerce<int32_t>(dataset, PredType::NATIVE_INT32);
+    result = H5Util::readArray1DCoerce<int32_t>(dataset);
   } catch (H5::GroupIException &e) {
     UNUSED_ARG(e);
     g_log.information() << "Failed to open dataset \"" << name << "\"\n";

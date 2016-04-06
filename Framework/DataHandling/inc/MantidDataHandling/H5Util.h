@@ -88,8 +88,10 @@ MANTID_DATAHANDLING_DLL std::string readString(H5::Group &group,
 MANTID_DATAHANDLING_DLL std::string readString(H5::DataSet &dataset);
 
 template <typename NumT>
-std::vector<NumT> readArray1DCoerce(H5::DataSet &dataset,
-                                    const H5::DataType &desiredDataType);
+std::vector<NumT> readArray1DCoerce(H5::Group &group, const std::string &name);
+
+template <typename NumT>
+std::vector<NumT> readArray1DCoerce(H5::DataSet &dataset);
 
 } // namespace H5Util
 } // namespace DataHandling

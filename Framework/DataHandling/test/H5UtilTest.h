@@ -64,29 +64,57 @@ public:
 
   void test_array1d() {
     const std::string FILENAME("H5UtilTest_array1d.h5");
+    const std::string GRP_NAME("array1d");
+    const std::vector<float> array1d_float = {0, 1, 2, 3, 4};
+    const std::vector<double> array1d_double = {0, 1, 2, 3, 4};
+    const std::vector<int32_t> array1d_int32 = {0, 1, 2, 3, 4};
+    const std::vector<uint32_t> array1d_uint32 = {0, 1, 2, 3, 4};
 
     // HDF doesn't like opening existing files in write mode
     removeFile(FILENAME);
 
     { // write tests
       H5File file(FILENAME, H5F_ACC_EXCL);
+      auto group = H5Util::createGroupNXS(file, GRP_NAME, "NXentry");
+      H5Util::writeArray1D(group, "array1d_float", array1d_float);
+      H5Util::writeArray1D(group, "array1d_double", array1d_double);
+      H5Util::writeArray1D(group, "array1d_int32", array1d_int32);
+      H5Util::writeArray1D(group, "array1d_uint32", array1d_uint32);
+      file.close();
     }
 
     TS_ASSERT(Poco::File(FILENAME).exists());
 
     { // read tests
       H5File file(FILENAME, H5F_ACC_RDONLY);
+      auto group = file.openGroup(GRP_NAME);
+
+      // without conversion
+      TS_ASSERT_EQUALS(H5Util::readArray1DCoerce<float>(group, "array1d_float"),
+                       array1d_float);
+      TS_ASSERT_EQUALS(
+          H5Util::readArray1DCoerce<double>(group, "array1d_double"),
+          array1d_double);
+      TS_ASSERT_EQUALS(
+          H5Util::readArray1DCoerce<int32_t>(group, "array1d_int32"),
+          array1d_int32);
+      TS_ASSERT_EQUALS(
+          H5Util::readArray1DCoerce<uint32_t>(group, "array1d_uint32"),
+          array1d_uint32);
+
+      //  with conversion
+      TS_ASSERT_EQUALS(
+          H5Util::readArray1DCoerce<double>(group, "array1d_float"),
+          array1d_double);
+      TS_ASSERT_EQUALS(
+          H5Util::readArray1DCoerce<int32_t>(group, "array1d_uint32"),
+          array1d_int32);
+      TS_ASSERT_EQUALS(
+          H5Util::readArray1DCoerce<uint32_t>(group, "array1d_int32"),
+          array1d_uint32);
+
       file.close();
     }
-
-    //    template <typename NumT>
-    //    void writeArray1D(H5::Group &group, const std::string &name,
-    //                    const std::vector<NumT> &values);
-
-    //    template <typename NumT>
-    //    std::vector<NumT> readArray1DCoerce(H5::DataSet &dataset,
-    //                                      const H5::DataType
-    //                                      &desiredDataType);
 
     // cleanup
     removeFile(FILENAME);

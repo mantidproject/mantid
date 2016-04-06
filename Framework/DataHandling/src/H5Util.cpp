@@ -1,4 +1,6 @@
 #include "MantidDataHandling/H5Util.h"
+#include "MantidKernel/Logger.h"
+#include "MantidAPI/LogManager.h"
 
 #include <H5Cpp.h>
 
@@ -9,6 +11,9 @@ namespace DataHandling {
 namespace H5Util {
 
 namespace {
+/// static logger object
+Mantid::Kernel::Logger g_log("H5Util");
+
 const std::string NX_ATTR_CLASS("NX_class");
 } // anonymous
 
@@ -126,9 +131,6 @@ std::string readString(H5::Group &group, const std::string &name) {
   try {
     auto data = group.openDataSet(name);
     return readString(data);
-  } catch (H5::FileIException &e) {
-    UNUSED_ARG(e);
-    return "";
   } catch (H5::GroupIException &e) {
     UNUSED_ARG(e);
     return "";
@@ -136,27 +138,36 @@ std::string readString(H5::Group &group, const std::string &name) {
 }
 
 std::string readString(H5::DataSet &dataset) {
-  try {
-    std::string value;
-    dataset.read(value, dataset.getDataType(), dataset.getSpace());
-    return value;
-  } catch (H5::FileIException &e) {
-    UNUSED_ARG(e);
-    return "";
-  } catch (H5::GroupIException &e) {
-    UNUSED_ARG(e);
-    return "";
-  }
+  std::string value;
+  dataset.read(value, dataset.getDataType(), dataset.getSpace());
+  return value;
 }
 
 template <typename NumT>
-std::vector<NumT> readArray1DCoerce(DataSet &dataset,
-                                    const DataType &desiredDataType) {
+std::vector<NumT> readArray1DCoerce(H5::Group &group, const std::string &name) {
+  std::vector<NumT> result;
+
+  try {
+    DataSet dataset = group.openDataSet(name);
+    result = readArray1DCoerce<NumT>(dataset);
+  } catch (H5::GroupIException &e) {
+    UNUSED_ARG(e);
+    g_log.information() << "Failed to open dataset \"" << name << "\"\n";
+  } catch (H5::DataTypeIException &e) {
+    UNUSED_ARG(e);
+    g_log.information() << "DataSet \"" << name << "\" should be double"
+                        << "\n";
+  }
+
+  return result;
+}
+
+template <typename NumT> std::vector<NumT> readArray1DCoerce(DataSet &dataset) {
   std::vector<NumT> result;
   DataType dataType = dataset.getDataType();
   DataSpace dataSpace = dataset.getSpace();
 
-  if (desiredDataType == dataType) {
+  if (getType<NumT>() == dataType) {
     result.resize(dataSpace.getSelectNpoints());
     dataset.read(&result[0], dataType, dataSpace);
   } else if (PredType::NATIVE_UINT32 == dataType) {
@@ -216,17 +227,30 @@ getDataSpace(const std::vector<uint64_t> &data);
 // instantiations for readArray1DCoerce
 // -------------------------------------------------------------------
 template MANTID_DATAHANDLING_DLL std::vector<float>
-readArray1DCoerce(DataSet &dataset, const DataType &desiredDataType);
+readArray1DCoerce(H5::Group &group, const std::string &name);
 template MANTID_DATAHANDLING_DLL std::vector<double>
-readArray1DCoerce(DataSet &dataset, const DataType &desiredDataType);
+readArray1DCoerce(H5::Group &group, const std::string &name);
 template MANTID_DATAHANDLING_DLL std::vector<int32_t>
-readArray1DCoerce(DataSet &dataset, const DataType &desiredDataType);
+readArray1DCoerce(H5::Group &group, const std::string &name);
 template MANTID_DATAHANDLING_DLL std::vector<uint32_t>
-readArray1DCoerce(DataSet &dataset, const DataType &desiredDataType);
+readArray1DCoerce(H5::Group &group, const std::string &name);
 template MANTID_DATAHANDLING_DLL std::vector<int64_t>
-readArray1DCoerce(DataSet &dataset, const DataType &desiredDataType);
+readArray1DCoerce(H5::Group &group, const std::string &name);
 template MANTID_DATAHANDLING_DLL std::vector<uint64_t>
-readArray1DCoerce(DataSet &dataset, const DataType &desiredDataType);
+readArray1DCoerce(H5::Group &group, const std::string &name);
+
+template MANTID_DATAHANDLING_DLL std::vector<float>
+readArray1DCoerce<float>(DataSet &dataset);
+template MANTID_DATAHANDLING_DLL std::vector<double>
+readArray1DCoerce<double>(DataSet &dataset);
+template MANTID_DATAHANDLING_DLL std::vector<int32_t>
+readArray1DCoerce<int32_t>(DataSet &dataset);
+template MANTID_DATAHANDLING_DLL std::vector<uint32_t>
+readArray1DCoerce<uint32_t>(DataSet &dataset);
+template MANTID_DATAHANDLING_DLL std::vector<int64_t>
+readArray1DCoerce<int64_t>(DataSet &dataset);
+template MANTID_DATAHANDLING_DLL std::vector<uint64_t>
+readArray1DCoerce<uint64_t>(DataSet &dataset);
 } // namespace H5Util
 } // namespace DataHandling
 } // namespace Mantid
