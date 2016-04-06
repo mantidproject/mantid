@@ -35,6 +35,7 @@ int EnggDiffractionViewQtGUI::m_currentType = 0;
 int EnggDiffractionViewQtGUI::m_currentRunMode = 0;
 int EnggDiffractionViewQtGUI::m_currentCropCalibBankName = 0;
 int EnggDiffractionViewQtGUI::m_bank_Id = 0;
+QPoint EnggDiffractionViewQtGUI::m_plotPos = QPoint(0, 0);
 
 const std::string EnggDiffractionViewQtGUI::g_iparmExtStr =
     "GSAS instrument parameters, IPARM file: PRM, PAR, IPAR, IPARAM "
@@ -204,6 +205,10 @@ void EnggDiffractionViewQtGUI::doSetupTabPreproc() {
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabFitting() {
+  // constructor of the peakPicker
+  m_peakPicker =
+      new MantidWidgets::PeakPicker(m_uiTabFitting.dataPlot, Qt::red);
+
   connect(m_uiTabFitting.pushButton_fitting_browse_run_num, SIGNAL(released()),
           this, SLOT(browseFitFocusedRun()));
 
@@ -233,9 +238,6 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   QFont font("MS Shell Dlg 2", 8);
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::xBottom, font);
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::yLeft, font);
-
-  m_peakPicker = new MantidWidgets::PeakPicker(m_uiTabFitting.dataPlot, Qt::red);
-
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -895,26 +897,28 @@ void EnggDiffractionViewQtGUI::loadCalibrationClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::LoadExistingCalib);
 }
 
-
-Mantid::API::IPeakFunction_const_sptr EnggDiffractionViewQtGUI::peakPicker() const
-{
-	return m_peakPicker->peak();
+Mantid::API::IPeakFunction_const_sptr
+EnggDiffractionViewQtGUI::peakPicker() const {
+  return m_peakPicker->peak();
 }
 
-void EnggDiffractionViewQtGUI::setPeakPickerEnabled(bool enabled)
-{
-	m_peakPicker->setEnabled(enabled);
-	m_peakPicker->setVisible(enabled);
-	m_uiTabFitting.dataPlot->replot(); // PeakPicker might get hidden/shown
+void EnggDiffractionViewQtGUI::setPeakPickerEnabled(bool enabled) {
+  m_peakPicker->setEnabled(enabled);
+  m_peakPicker->setVisible(enabled);
+  m_uiTabFitting.dataPlot->replot(); // PeakPicker might get hidden/shown
 }
 
-/*
-void EnggDiffractionViewQtGUI::setPeakPicker(const IPeakFunction_const_sptr &peak)
-{
-	m_peakPicker->setPeak(peak);
-	m_uiTabFitting.dataPlot->replot();
+void EnggDiffractionViewQtGUI::setPeakPicker(
+    const IPeakFunction_const_sptr &peak) {
+  m_peakPicker->setPeak(peak);
+  m_uiTabFitting.dataPlot->replot();
 }
-*/
+
+QPoint EnggDiffractionViewQtGUI::getQPoint() {
+  auto pos = m_uiTabFitting.dataPlot->pos();
+  return pos;
+}
+
 void EnggDiffractionViewQtGUI::calibrateClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::CalcCalib);
 }
@@ -1282,6 +1286,14 @@ void EnggDiffractionViewQtGUI::setListWidgetBank(int idx) {
 
   QListWidget *selectBank = m_uiTabFitting.listWidget_fitting_bank_preview;
   selectBank->setCurrentRow(idx);
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::warningWithXY() {
+  auto x = getFittingPlotX();
+  auto y = getFittingPlotY();
+
+  userWarning("X and Y value: ", "the X value is:" + std::to_string(x) +
+                                     ". the Y value is: " + std::to_string(y));
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {

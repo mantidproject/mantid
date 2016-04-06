@@ -18,6 +18,7 @@
 
 /// shahroz
 #include "MantidQtMantidWidgets/PeakPicker.h"
+
 #include "MantidAPI/IPeakFunction.h"
 
 
@@ -187,8 +188,9 @@ public:
   /// @shahroz
   void setPeakPickerEnabled(bool enabled) override;
 
-  // void setPeakPicker(const IPeakFunction_const_sptr &peak) override;
+  void setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) override;
 
+  QPoint getQPoint();
 
 private slots:
   /// for buttons, do calibrate, focus, event->histo rebin, and similar
@@ -247,6 +249,8 @@ private slots:
   void fittingListWidgetBank(int idx);
   void setListWidgetBank(int idx);
 
+  /// @shahroz
+  void warningWithXY();
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
@@ -312,6 +316,9 @@ private:
   int static m_currentRunMode;
 
   int static m_bank_Id;
+
+  /// @shahroz
+  QPoint static m_plotPos;
 
   /// current calibration produced in the 'Calibration' tab
   std::string m_currentCalibFilename;

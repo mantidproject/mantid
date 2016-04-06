@@ -436,8 +436,7 @@ public:
 
   virtual void setPeakPickerEnabled(bool enabled) = 0;
 
-  //virtual void setPeakPicker(const IPeakFunction_const_sptr &peak) = 0;
-
+  virtual void setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) = 0;
 
 };
 
