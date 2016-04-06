@@ -1118,9 +1118,16 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   for (size_t i = bank0; i < bankn; i++) {
     // We make tasks for loading
     if (bankNumEvents[i] > 0)
-      pool.schedule(new LoadBankFromDiskTask(
-          this, bankNames[i], classType, bankNumEvents[i], oldNeXusFileNames,
-          prog2, diskIOMutex, scheduler, periodLogVec, this->getLogger()));
+    {
+      LoadBankFromDiskTask *task = new LoadBankFromDiskTask(
+            this, bankNames[i], classType, bankNumEvents[i], oldNeXusFileNames,
+            prog2, diskIOMutex, scheduler, periodLogVec, this->getLogger());
+      task->run();
+
+      // pool.schedule(new LoadBankFromDiskTask(
+      // this, bankNames[i], classType, bankNumEvents[i], oldNeXusFileNames,
+      // prog2, diskIOMutex, scheduler, periodLogVec, this->getLogger()));
+    }
   }
   // Start and end all threads
   pool.joinAll();

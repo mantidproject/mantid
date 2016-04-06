@@ -21,7 +21,7 @@ using namespace Mantid;
 //==============================================================================================
 /** This task does the disk IO from loading the NXS file,
 * and so will be on a disk IO mutex */
-class ProcessBankData : public Mantid::Kernel::Task {
+class ProcessBankData { // : public Mantid::Kernel::Task {
 public:
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -51,7 +51,8 @@ public:
                   boost::shared_ptr<Mantid::DataHandling::BankPulseTimes> thisBankPulseTimes,
                   bool have_weight, boost::shared_array<float> event_weight,
                   detid_t min_event_id, detid_t max_event_id)
-      : Mantid::Kernel::Task(), alg(alg), entry_name(entry_name),
+      : // Mantid::Kernel::Task(),
+        alg(alg), entry_name(entry_name),
         pixelID_to_wi_vector(alg->pixelID_to_wi_vector),
         pixelID_to_wi_offset(alg->pixelID_to_wi_offset), prog(prog),
         event_id(event_id), event_time_of_flight(event_time_of_flight),
@@ -66,7 +67,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Run the data processing
   */
-  void run() override {
+  void run() { // override {
     // Local tof limits
     double my_shortest_tof =
         static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
@@ -330,12 +331,15 @@ private:
   detid_t m_max_id;
   /// timer for performance
   Mantid::Kernel::Timer m_timer;
+
+  ///
+  double m_cost;
 }; // END-DEF-CLASS ProcessBankData
 
 
 /** This task does the disk IO from loading the NXS file,
 * and so will be on a disk IO mutex */
-class LoadBankFromDiskTask : public Mantid::Kernel::Task {
+class LoadBankFromDiskTask { // : public Mantid::Kernel::Task {
 
 public:
   //---------------------------------------------------------------------------------------------------
@@ -361,7 +365,8 @@ public:
                        Mantid::Kernel::ThreadScheduler *scheduler,
                        const std::vector<int> &framePeriodNumbers,
                        Mantid::Kernel::Logger &logger)
-      : Task(), alg(input_alg), entry_name(entry_name), entry_type(entry_type),
+      : // Task(),
+        alg(input_alg), entry_name(entry_name), entry_type(entry_type),
         // prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL),
         // m_loadError(false),
         prog(prog), scheduler(scheduler), m_loadError(false),
@@ -370,7 +375,7 @@ public:
         m_have_weight(false), m_event_weight(nullptr),
         m_framePeriodNumbers(framePeriodNumbers),
         alg_Logger(logger){
-    setMutex(ioMutex);
+    // setMutex(ioMutex);
     m_cost = static_cast<double>(numEvents);
     m_min_id = std::numeric_limits<uint32_t>::max();
     m_max_id = 0;
@@ -675,7 +680,7 @@ public:
   }
 
   //---------------------------------------------------------------------------------------------------
-  void run() override {
+  void run() { // override {
     // The vectors we will be filling
     auto event_index_ptr = new std::vector<uint64_t>();
     std::vector<uint64_t> &event_index = *event_index_ptr;
@@ -826,13 +831,15 @@ public:
         alg, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
         numEvents, startAt, event_index_shrd, thisBankPulseTimes, m_have_weight,
         event_weight_shrd, m_min_id, mid_id);
-    scheduler->push(newTask1);
+    // scheduler->push(newTask1);
+    newTask1->run();;
     if (alg->splitProcessing && (mid_id < m_max_id)) {
       ProcessBankData *newTask2 = new ProcessBankData(
           alg, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
           numEvents, startAt, event_index_shrd, thisBankPulseTimes,
           m_have_weight, event_weight_shrd, (mid_id + 1), m_max_id);
-      scheduler->push(newTask2);
+      // scheduler->push(newTask2);
+      newTask2->run();
     }
   }
 
@@ -891,6 +898,8 @@ private:
   /// TODO-FIXME: NEW CLASS VARIABLES! NOT INITIALIZED IN CONSTRUCTOR YET!
 
   Mantid::Kernel::Logger &alg_Logger;
+
+  double m_cost;
 
 }; // END-DEF-CLASS LoadBankFromDiskTask
 
