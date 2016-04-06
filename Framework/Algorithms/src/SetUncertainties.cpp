@@ -5,6 +5,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
 
 #include <algorithm>
@@ -83,7 +84,18 @@ void SetUncertainties::init() {
 
 namespace {
 inline bool isMasked(MatrixWorkspace_const_sptr wksp, const size_t index) {
-  return wksp->getDetector(index)->isMasked();
+  if (!bool(wksp->getInstrument()))
+    return false;
+
+  try {
+  const auto det = wksp->getDetector(index);
+  if (bool(det))
+    return det->isMasked();
+  } catch (Kernel::Exception::NotFoundError &e) {
+    UNUSED_ARG(e);
+  }
+
+  return false;
 }
 } // anonymous namespace
 
