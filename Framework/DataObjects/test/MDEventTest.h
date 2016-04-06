@@ -247,7 +247,7 @@ public:
   std::vector<MDLeanEvent<4>> lean_events4;
   size_t num;
 
-  void setUp() {
+  void setUp() override {
     num = 1000000;
     events3.clear();
     events3.reserve(num);

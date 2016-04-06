@@ -333,19 +333,15 @@ void StandardView::setRebinAndUnbinButtons()
 
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
+  const QList<pqPipelineSource *> sources =
+      smModel->findItems<pqPipelineSource *>(server);
 
-  for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
-  {
-    if (isInternallyRebinnedWorkspace(*source))
-    {
+  foreach (pqPipelineSource *source, sources) {
+    if (isInternallyRebinnedWorkspace(source)) {
       ++numberOfInternallyRebinnedWorkspaces;
-    } else if (isMDHistoWorkspace(*source))
-    {
+    } else if (isMDHistoWorkspace(source)) {
       ++numberOfTrueMDHistoWorkspaces;
-    }
-    else if (isPeaksWorkspace(*source))
-    {
+    } else if (isPeaksWorkspace(source)) {
       ++numberOfPeakWorkspaces;
     }
   }

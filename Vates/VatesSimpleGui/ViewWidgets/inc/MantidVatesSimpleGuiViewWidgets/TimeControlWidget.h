@@ -46,7 +46,7 @@ public:
   /// Default constructor.
   TimeControlWidget(QWidget *parent = 0);
   /// Default destructor.
-  virtual ~TimeControlWidget();
+  ~TimeControlWidget() override;
 
 public slots:
   /// Enable/disable the animation controls.

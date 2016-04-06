@@ -51,7 +51,7 @@ public:
   ParameterTie(IFunction *funct, const std::string &parName,
                const std::string &expr = "", bool isDefault = false);
   /// Destructor
-  virtual ~ParameterTie();
+  ~ParameterTie() override;
   /// Set the tie expression
   virtual void set(const std::string &expr);
   /// Evaluate the expression

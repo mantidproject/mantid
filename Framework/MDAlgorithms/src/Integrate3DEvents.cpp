@@ -376,7 +376,7 @@ int64_t Integrate3DEvents::getHklKey(int h, int k, int l) {
  *  h,k,l by UBinv and the map key is then formed from those rounded h,k,l
  *  values.
  *
- *  @param q_vector  The q_vector to be mapped to h,k,l
+ *  @param hkl  The q_vector to be mapped to h,k,l
  */
 int64_t Integrate3DEvents::getHklKey2(V3D const &hkl) {
   int h = boost::math::iround<double>(hkl[0]);

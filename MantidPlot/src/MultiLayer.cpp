@@ -1742,25 +1742,28 @@ void MultiLayer::loadFromProject(const std::string &lines,
   }
 
   if (tsv.selectLine("Margins")) {
-    int left, right, top, bottom;
+    int left = 0, right = 0, top = 0, bottom = 0;
     tsv >> left >> right >> top >> bottom;
     setMargins(left, right, top, bottom);
   }
 
-  if (tsv.selectLine("Spacing")) {
-    int rowSpace, colSpace;
+  if(tsv.selectLine("Spacing"))
+  {
+    int rowSpace = 0, colSpace = 0;
     tsv >> rowSpace >> colSpace;
     setSpacing(rowSpace, colSpace);
   }
 
-  if (tsv.selectLine("LayerCanvasSize")) {
-    int width, height;
+  if(tsv.selectLine("LayerCanvasSize"))
+  {
+    int width = 0, height = 0;
     tsv >> width >> height;
     setLayerCanvasSize(width, height);
   }
 
-  if (tsv.selectLine("Alignement")) {
-    int hor, vert;
+  if(tsv.selectLine("Alignement"))
+  {
+    int hor = 0, vert = 0;
     tsv >> hor >> vert;
     setAlignement(hor, vert);
   }
@@ -1781,8 +1784,9 @@ void MultiLayer::loadFromProject(const std::string &lines,
 
       TSVSerialiser gtsv(graphLines);
 
-      if (gtsv.selectLine("ggeometry")) {
-        int x, y, w, h;
+      if(gtsv.selectLine("ggeometry"))
+      {
+        int x = 0, y = 0, w = 0, h = 0;
         gtsv >> x >> y >> w >> h;
 
         Graph *g = dynamic_cast<Graph *>(addLayer(x, y, w, h));

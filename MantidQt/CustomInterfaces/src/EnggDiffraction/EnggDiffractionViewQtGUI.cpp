@@ -9,6 +9,10 @@
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
+#include <array>
+#include <fstream>
+#include <random>
+
 #include <boost/lexical_cast.hpp>
 
 #include <Poco/Path.h>
@@ -19,6 +23,8 @@ using namespace MantidQt::CustomInterfaces;
 #include <QMessageBox>
 #include <QSettings>
 
+#include <qwt_symbol.h>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -28,6 +34,7 @@ const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
 int EnggDiffractionViewQtGUI::m_currentType = 0;
 int EnggDiffractionViewQtGUI::m_currentRunMode = 0;
 int EnggDiffractionViewQtGUI::m_currentCropCalibBankName = 0;
+int EnggDiffractionViewQtGUI::m_bank_Id = 0;
 
 const std::string EnggDiffractionViewQtGUI::g_iparmExtStr =
     "GSAS instrument parameters, IPARM file: PRM, PAR, IPAR, IPARAM "
@@ -58,9 +65,20 @@ const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
 */
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGINX"),
-      m_currentCalibFilename(""), m_presenter(NULL) {}
+      m_currentCalibFilename(""), m_focusedDataVector(), m_fittedDataVector(),
+      m_presenter(NULL) {}
 
-EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {}
+EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {
+  for (auto curves : m_focusedDataVector) {
+    curves->detach();
+    delete curves;
+  }
+
+  for (auto curves : m_fittedDataVector) {
+    curves->detach();
+    delete curves;
+  }
+}
 
 void EnggDiffractionViewQtGUI::initLayout() {
   // setup container ui
@@ -78,6 +96,10 @@ void EnggDiffractionViewQtGUI::initLayout() {
   m_uiTabPreproc.setupUi(wPreproc);
   m_ui.tabMain->addTab(wPreproc, QString("Pre-processing"));
 
+  QWidget *wFitting = new QWidget(m_ui.tabMain);
+  m_uiTabFitting.setupUi(wFitting);
+  m_ui.tabMain->addTab(wFitting, QString("Fitting"));
+
   QWidget *wSettings = new QWidget(m_ui.tabMain);
   m_uiTabSettings.setupUi(wSettings);
   m_ui.tabMain->addTab(wSettings, QString("Settings"));
@@ -93,6 +115,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
   doSetupTabCalib();
   doSetupTabFocus();
   doSetupTabPreproc();
+  doSetupTabFitting();
   doSetupTabSettings();
 
   // presenter that knows how to handle a IEnggDiffractionView should take care
@@ -131,13 +154,13 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
 
   connect(m_uiTabCalib.comboBox_calib_cropped_bank_name,
           SIGNAL(currentIndexChanged(int)), this,
-          SLOT(calibSpecIdChanged(int)));
+          SLOT(calibspecNoChanged(int)));
 
   connect(m_uiTabCalib.lineEdit_new_ceria_num, SIGNAL(fileTextChanged(QString)),
           this, SLOT(updateCroppedCalibRun()));
 
   connect(m_uiTabCalib.comboBox_calib_cropped_bank_name,
-          SIGNAL(currentIndexChanged(int)), this, SLOT(enableSpecIds()));
+          SIGNAL(currentIndexChanged(int)), this, SLOT(enableSpecNos()));
 
   enableCalibrateAndFocusActions(true);
 }
@@ -178,6 +201,38 @@ void EnggDiffractionViewQtGUI::doSetupTabPreproc() {
 
   connect(m_uiTabPreproc.pushButton_rebin_multiperiod, SIGNAL(released()), this,
           SLOT(rebinMultiperiodClicked()));
+}
+
+void EnggDiffractionViewQtGUI::doSetupTabFitting() {
+  connect(m_uiTabFitting.pushButton_fitting_browse_run_num, SIGNAL(released()),
+          this, SLOT(browseFitFocusedRun()));
+
+  connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(fittingBankIdChanged(int)));
+
+  connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(setListWidgetBank(int)));
+
+  connect(m_uiTabFitting.pushButton_fitting_browse_peaks, SIGNAL(released()),
+          this, SLOT(browsePeaksToFit()));
+
+  connect(m_uiTabFitting.pushButton_fit, SIGNAL(released()), this,
+          SLOT(fitClicked()));
+
+  connect(m_uiTabFitting.listWidget_fitting_bank_preview,
+          SIGNAL(currentRowChanged(int)), this,
+          SLOT(fittingListWidgetBank(int)));
+
+  connect(m_uiTabFitting.listWidget_fitting_bank_preview,
+          SIGNAL(currentRowChanged(int)), this, SLOT(setBankIdComboBox(int)));
+
+  m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
+  m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom,
+                                        "Time-of-flight (us)");
+  m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::yLeft, "Counts (us)^-1");
+  QFont font("MS Shell Dlg 2", 8);
+  m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::xBottom, font);
+  m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::yLeft, font);
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -260,6 +315,13 @@ void EnggDiffractionViewQtGUI::readSettings() {
 
   m_uiTabCalib.comboBox_calib_cropped_bank_name->setCurrentIndex(0);
 
+  m_uiTabCalib.lineEdit_cropped_spec_nos->setText(
+      qs.value("user-params-calib-cropped-spectrum-nos", "").toString());
+
+  m_uiTabCalib.lineEdit_cropped_customise_bank_name->setText(
+      qs.value("user-params-calib-cropped-customise-name", "cropped")
+          .toString());
+
   m_uiTabCalib.checkBox_PlotData_Calib->setChecked(
       qs.value("user-param-calib-plot-data", true).toBool());
 
@@ -279,7 +341,7 @@ void EnggDiffractionViewQtGUI::readSettings() {
   m_uiTabFocus.lineEdit_cropped_run_num->setUserInput(
       qs.value("user-params-focus-cropped-runno", "").toString());
 
-  m_uiTabFocus.lineEdit_cropped_spec_ids->setText(
+  m_uiTabFocus.lineEdit_cropped_spec_nos->setText(
       qs.value("user-params-focus-cropped-spectrum-nos", "").toString());
 
   m_uiTabFocus.lineEdit_texture_run_num->setUserInput(
@@ -314,6 +376,14 @@ void EnggDiffractionViewQtGUI::readSettings() {
 
   m_uiTabPreproc.doubleSpinBox_step_time->setValue(
       qs.value("user-params-step-time", 1).toDouble());
+
+  // user params - fitting
+  m_uiTabFitting.lineEdit_pushButton_run_num->setText(
+      qs.value("user-params-fitting-focused-file", "").toString());
+  m_uiTabFitting.comboBox_bank->setCurrentIndex(0);
+  m_uiTabFitting.lineEdit_fitting_peaks->setText(
+      qs.value("user-params-fitting-peaks-to-fit", "").toString());
+  m_uiTabFitting.listWidget_fitting_bank_preview->setCurrentRow(0);
 
   // settings
   QString lastPath =
@@ -368,6 +438,12 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
   qs.setValue("user-params-calib-cropped-group-checkbox",
               m_uiTabCalib.groupBox_calib_cropped->isChecked());
 
+  qs.setValue("user-params-calib-cropped-spectrum-nos",
+              m_uiTabCalib.lineEdit_cropped_spec_nos->text());
+
+  qs.setValue("user-params-calib-cropped-customise-name",
+              m_uiTabCalib.lineEdit_cropped_customise_bank_name->text());
+
   qs.setValue("user-param-calib-plot-data",
               m_uiTabCalib.checkBox_PlotData_Calib->isChecked());
 
@@ -385,7 +461,7 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
   qs.setValue("user-params-focus-cropped-runno",
               m_uiTabFocus.lineEdit_cropped_run_num->getText());
   qs.setValue("user-params-focus-cropped-spectrum-nos",
-              m_uiTabFocus.lineEdit_cropped_spec_ids->text());
+              m_uiTabFocus.lineEdit_cropped_spec_nos->text());
 
   qs.setValue("user-params-focus-texture-runno",
               m_uiTabFocus.lineEdit_texture_run_num->getText());
@@ -411,6 +487,13 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
 
   qs.value("user-params-step-time",
            m_uiTabPreproc.doubleSpinBox_step_time->value());
+
+  // fitting tab
+
+  qs.setValue("user-params-fitting-focused-file",
+              m_uiTabFitting.lineEdit_pushButton_run_num->text());
+  qs.setValue("user-params-fitting-peaks-to-fit",
+              m_uiTabFitting.lineEdit_fitting_peaks->text());
 
   // TODO: this should become << >> operators on EnggDiffCalibSettings
   qs.setValue("input-dir-calib-files",
@@ -557,6 +640,15 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabPreproc.MWRunFiles_preproc_run_num->setEnabled(enable);
   m_uiTabPreproc.pushButton_rebin_time->setEnabled(enable);
   m_uiTabPreproc.pushButton_rebin_multiperiod->setEnabled(enable);
+
+  // fitting
+  m_uiTabFitting.pushButton_fitting_browse_run_num->setEnabled(enable);
+  m_uiTabFitting.lineEdit_pushButton_run_num->setEnabled(enable);
+  m_uiTabFitting.pushButton_fitting_browse_peaks->setEnabled(enable);
+  m_uiTabFitting.lineEdit_fitting_peaks->setEnabled(enable);
+  m_uiTabFitting.pushButton_fit->setEnabled(enable);
+  m_uiTabFitting.comboBox_bank->setEnabled(enable);
+  m_uiTabFitting.groupBox_fititng_preview->setEnabled(enable);
 }
 
 void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
@@ -581,6 +673,82 @@ size_t EnggDiffractionViewQtGUI::rebinningPulsesNumberPeriods() const {
 
 double EnggDiffractionViewQtGUI::rebinningPulsesTime() const {
   return m_uiTabPreproc.doubleSpinBox_step_time->value();
+}
+
+std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
+  std::string fileData = "";
+  std::string line;
+  std::string comma = ", ";
+
+  std::ifstream peakFile(fileDir);
+
+  if (peakFile.is_open()) {
+    while (std::getline(peakFile, line)) {
+      fileData += line;
+      if (!peakFile.eof())
+        fileData += comma;
+    }
+    peakFile.close();
+  }
+
+  else
+    fileData = "";
+
+  return fileData;
+}
+
+void EnggDiffractionViewQtGUI::setDataVector(
+    std::vector<boost::shared_ptr<QwtData>> &data, bool focused) {
+  if (focused) {
+    dataCurvesFactory(data, m_focusedDataVector, focused);
+  } else {
+    dataCurvesFactory(data, m_fittedDataVector, focused);
+  }
+}
+
+void EnggDiffractionViewQtGUI::dataCurvesFactory(
+    std::vector<boost::shared_ptr<QwtData>> &data,
+    std::vector<QwtPlotCurve *> &dataVector, bool focused) {
+
+  // clear vector
+  for (auto curves : dataVector) {
+    if (curves) {
+      curves->detach();
+      delete curves;
+    }
+  }
+
+  if (dataVector.size() > 0)
+    dataVector.clear();
+
+  // dark colours could be removed so the colored peaks stand out more
+  const std::array<QColor, 16> QPenList{
+      {Qt::white, Qt::red, Qt::darkRed, Qt::green, Qt::darkGreen, Qt::blue,
+       Qt::darkBlue, Qt::cyan, Qt::darkCyan, Qt::magenta, Qt::darkMagenta,
+       Qt::yellow, Qt::darkYellow, Qt::gray, Qt::darkGray, Qt::lightGray}};
+
+  std::mt19937 gen;
+  std::uniform_int_distribution<std::size_t> dis(0, QPenList.size() - 1);
+
+  for (size_t i = 0; i < data.size(); i++) {
+    auto *peak = data[i].get();
+
+    QwtPlotCurve *dataCurve = new QwtPlotCurve();
+    dataCurve->setStyle(QwtPlotCurve::Lines);
+    if (!focused) {
+      auto randIndex = dis(gen);
+      dataCurve->setPen(QPen(QPenList[randIndex], 1));
+    }
+    dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+
+    dataVector.push_back(dataCurve);
+
+    dataVector[i]->setData(*peak);
+    dataVector[i]->attach(m_uiTabFitting.dataPlot);
+  }
+
+  m_uiTabFitting.dataPlot->replot();
+  data.clear();
 }
 
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
@@ -652,7 +820,7 @@ void EnggDiffractionViewQtGUI::resetFocus() {
   m_uiTabFocus.checkBox_focus_bank2->setChecked(true);
 
   m_uiTabFocus.lineEdit_cropped_run_num->setText("");
-  m_uiTabFocus.lineEdit_cropped_spec_ids->setText("");
+  m_uiTabFocus.lineEdit_cropped_spec_nos->setText("");
 
   m_uiTabFocus.groupBox_cropped->setChecked(false);
   m_uiTabFocus.groupBox_texture->setChecked(false);
@@ -758,6 +926,10 @@ void EnggDiffractionViewQtGUI::rebinTimeClicked() {
 
 void EnggDiffractionViewQtGUI::rebinMultiperiodClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::RebinMultiperiod);
+}
+
+void EnggDiffractionViewQtGUI::fitClicked() {
+  m_presenter->notify(IEnggDiffractionPresenter::FitPeaks);
 }
 
 void EnggDiffractionViewQtGUI::browseInputDirCalib() {
@@ -875,6 +1047,57 @@ void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
   m_uiTabFocus.lineEdit_texture_grouping_file->setText(path);
 }
 
+void EnggDiffractionViewQtGUI::browseFitFocusedRun() {
+  QString prevPath = QString::fromStdString(m_focusDir);
+  if (prevPath.isEmpty()) {
+    prevPath =
+        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  }
+  std::string nexusFormat = "Nexus file with calibration table: NXS, NEXUS"
+                            "(*.nxs *.nexus);;";
+
+  QString path(
+      QFileDialog::getOpenFileName(this, tr("Open Focused File "), prevPath,
+                                   QString::fromStdString(nexusFormat)));
+
+  if (path.isEmpty()) {
+    return;
+  }
+
+  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
+  m_uiTabFitting.lineEdit_pushButton_run_num->setText(path);
+}
+
+void EnggDiffractionViewQtGUI::browsePeaksToFit() {
+
+  try {
+    QString prevPath = QString::fromStdString(m_focusDir);
+    if (prevPath.isEmpty()) {
+      prevPath = MantidQt::API::AlgorithmInputHistory::Instance()
+                     .getPreviousDirectory();
+    }
+
+    QString path(
+        QFileDialog::getOpenFileName(this, tr("Open Peaks To Fit"), prevPath,
+                                     QString::fromStdString(g_DetGrpExtStr)));
+
+    if (path.isEmpty()) {
+      return;
+    }
+
+    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
+
+    std::string peaksData = readPeaksFile(path.toStdString());
+
+    m_uiTabFitting.lineEdit_fitting_peaks->setText(
+        QString::fromStdString(peaksData));
+  } catch (...) {
+    userWarning("Unable to import the peaks from a file: ",
+                "File corrupted or could not be opened. Please try again");
+    return;
+  }
+}
+
 std::vector<std::string> EnggDiffractionViewQtGUI::focusingRunNo() const {
   return qListToVector(m_uiTabFocus.lineEdit_run_num->getFilenames(),
                        m_uiTabFocus.lineEdit_run_num->isValid());
@@ -915,8 +1138,8 @@ std::vector<bool> EnggDiffractionViewQtGUI::focusingBanks() const {
   return res;
 }
 
-std::string EnggDiffractionViewQtGUI::focusingCroppedSpectrumIDs() const {
-  return m_uiTabFocus.lineEdit_cropped_spec_ids->text().toStdString();
+std::string EnggDiffractionViewQtGUI::focusingCroppedSpectrumNos() const {
+  return m_uiTabFocus.lineEdit_cropped_spec_nos->text().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::focusingTextureGroupingFile() const {
@@ -948,22 +1171,30 @@ void EnggDiffractionViewQtGUI::updateCroppedCalibRun() {
   m_uiTabCalib.lineEdit_cropped_run_num->setText(ceria);
 }
 
-void EnggDiffractionViewQtGUI::calibSpecIdChanged(int /*idx*/) {
+void EnggDiffractionViewQtGUI::calibspecNoChanged(int /*idx*/) {
   QComboBox *BankName = m_uiTabCalib.comboBox_calib_cropped_bank_name;
   if (!BankName)
     return;
   m_currentCropCalibBankName = BankName->currentIndex();
 }
 
-void EnggDiffractionViewQtGUI::enableSpecIds() {
-  if (m_currentCropCalibBankName == 0)
-    m_uiTabCalib.lineEdit_cropped_spec_ids->setEnabled(true);
-  else
-    m_uiTabCalib.lineEdit_cropped_spec_ids->setDisabled(true);
+void EnggDiffractionViewQtGUI::enableSpecNos() {
+  if (m_currentCropCalibBankName == 0) {
+    m_uiTabCalib.lineEdit_cropped_spec_nos->setEnabled(true);
+    m_uiTabCalib.lineEdit_cropped_customise_bank_name->setEnabled(true);
+  } else {
+    m_uiTabCalib.lineEdit_cropped_spec_nos->setDisabled(true);
+    m_uiTabCalib.lineEdit_cropped_customise_bank_name->setDisabled(true);
+  }
 }
 
 std::string EnggDiffractionViewQtGUI::currentCalibSpecNos() const {
-  return m_uiTabCalib.lineEdit_cropped_spec_ids->text().toStdString();
+  return m_uiTabCalib.lineEdit_cropped_spec_nos->text().toStdString();
+}
+
+std::string EnggDiffractionViewQtGUI::currentCalibCustomisedBankName() const {
+  return m_uiTabCalib.lineEdit_cropped_customise_bank_name->text()
+      .toStdString();
 }
 
 void EnggDiffractionViewQtGUI::multiRunModeChanged(int /*idx*/) {
@@ -978,6 +1209,56 @@ void EnggDiffractionViewQtGUI::plotRepChanged(int /*idx*/) {
   if (!plotType)
     return;
   m_currentType = plotType->currentIndex();
+}
+
+void EnggDiffractionViewQtGUI::fittingBankIdChanged(int /*idx*/) {
+  QComboBox *BankName = m_uiTabFitting.comboBox_bank;
+  if (!BankName)
+    return;
+  m_bank_Id = BankName->currentIndex();
+}
+
+void EnggDiffractionViewQtGUI::setBankIdComboBox(int idx) {
+  QComboBox *bankName = m_uiTabFitting.comboBox_bank;
+  bankName->setCurrentIndex(idx);
+}
+
+std::string EnggDiffractionViewQtGUI::fittingRunNo() const {
+  return m_uiTabFitting.lineEdit_pushButton_run_num->text().toStdString();
+}
+
+std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {
+  // this should be moved to Helper or could use the poco string tokenizers
+  std::string exptPeaks =
+      m_uiTabFitting.lineEdit_fitting_peaks->text().toStdString();
+  size_t strLength = exptPeaks.length() - 1;
+
+  if (!exptPeaks.empty()) {
+
+    if (exptPeaks.at(size_t(0)) == ',') {
+      exptPeaks.erase(size_t(0), 1);
+      strLength -= size_t(1);
+    }
+
+    if (exptPeaks.at(strLength) == ',') {
+      exptPeaks.erase(strLength, 1);
+    }
+  }
+  return exptPeaks;
+}
+
+void EnggDiffractionViewQtGUI::fittingListWidgetBank(int /*idx*/) {
+
+  QListWidget *BankSelected = m_uiTabFitting.listWidget_fitting_bank_preview;
+  if (!BankSelected)
+    return;
+  m_bank_Id = BankSelected->currentRow();
+}
+
+void EnggDiffractionViewQtGUI::setListWidgetBank(int idx) {
+
+  QListWidget *selectBank = m_uiTabFitting.listWidget_fitting_bank_preview;
+  selectBank->setCurrentRow(idx);
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {

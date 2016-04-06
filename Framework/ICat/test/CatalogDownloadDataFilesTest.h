@@ -23,7 +23,7 @@ public:
   /** Ping the  download.mantidproject.org and
    * skip all tests if internet/server is down.
    */
-  bool skipTests() {
+  bool skipTests() override {
 #ifdef WIN32
     // I don't know how to get exit status from windows.
     return false;

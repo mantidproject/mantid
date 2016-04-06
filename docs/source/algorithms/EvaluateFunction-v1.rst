@@ -22,7 +22,7 @@ Usage
     # Load a workspace
     ws = Load('MUSR00015189')
     # Evaluate a function
-    out = EvaluateFunction('name=ExpDecay,Height=56','ws_1')
+    EvaluateFunction('name=ExpDecay,Height=56', 'ws_1', StartX=0, EndX=30, OutputWorkspace='out')
 
 **Example - 2D function and a MD workspace.**
 
@@ -35,7 +35,7 @@ Usage
         NumberOfBins='%s,%s' % (nx,ny),
         SignalInput=[0] * nx * ny, ErrorInput=[0] * nx * ny)
     # Evaluate a function
-    out = EvaluateFunction('name=UserFunctionMD,Formula=sin(x)*sin(y)','ws')
+    EvaluateFunction('name=UserFunctionMD,Formula=sin(x)*sin(y)','ws', OutputWorkspace='out')
 
 .. categories::
 

@@ -371,10 +371,16 @@ bool ExportTimeSeriesLog::calculateTimeSeriesRangeByTime(
 
   // Check existence of proton_charge as run start
   Kernel::DateAndTime run_start(0);
-  if (m_inputWS->run().hasProperty("proton_charge"))
-    run_start = dynamic_cast<TimeSeriesProperty<double> *>(
-                    m_inputWS->run().getProperty("proton_charge"))->nthTime(0);
-  else {
+  if (m_inputWS->run().hasProperty("proton_charge")) {
+    auto ts = dynamic_cast<TimeSeriesProperty<double> *>(
+        m_inputWS->run().getProperty("proton_charge"));
+    if (nullptr == ts) {
+      throw std::runtime_error(
+          "Found the run property proton_charge but failed to interpret it "
+          "as a time series property of double values (failed dynamic cast).");
+    }
+    run_start = ts->nthTime(0);
+  } else {
     g_log.warning("Property proton_charge does not exist so it is unable to "
                   "determine run start time. "
                   "StartTime and StopTime are ignored.  TimeSeriesProperty is "

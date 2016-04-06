@@ -24,7 +24,7 @@ namespace MantidQt
 
     public:
       UserFunctionDialog(QWidget *parent=NULL,const QString& formula = "");
-      ~UserFunctionDialog();
+      ~UserFunctionDialog() override;
       QStringList categories()const;
       QString getFormula()const{return m_uiForm.teUserFunction->toPlainText();}
 
@@ -39,7 +39,7 @@ namespace MantidQt
       void helpClicked();
 
     private:
-      bool eventFilter(QObject *obj, QEvent *ev);
+      bool eventFilter(QObject *obj, QEvent *ev) override;
 
       void loadFunctions();
       void checkParameters(QString& expr);

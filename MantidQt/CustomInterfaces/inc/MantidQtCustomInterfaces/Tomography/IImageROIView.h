@@ -46,7 +46,7 @@ public:
 
   // Selection states
   enum SelectionState {
-    SelectNone,          ///< Init, or after any reset
+    SelectNone, ///< Init, or after any reset
     SelectCoR,
     SelectROIFirst,
     SelectROISecond,
@@ -86,7 +86,7 @@ public:
    *
    * @param state new state we're transitioning into.
    */
-  virtual void changeSelectionState(const SelectionState& state) = 0;
+  virtual void changeSelectionState(const SelectionState &state) = 0;
 
   /**
    * Display a special case of stack of images: individual image, from
@@ -107,20 +107,26 @@ public:
    * LoadFITS loads FITS images (or spectrum per row, all of them with
    * the same number of data points (columns)).
    *
-   * @param ws Workspace group where every workspace is a FITS or
+   * @param wsg Workspace group where every workspace is a FITS or
    * similar image that has been loaded with LoadFITS or similar
-   * algorithm.
+   * algorithm. This holds the sample images.
+   *
+   * @param wsgFlats Workspace group with flat (open beam) images.
+   *
+   * @param wsgDarks Workspace group with dark images.
    */
-  virtual void showStack(Mantid::API::WorkspaceGroup_sptr &ws) = 0;
+  virtual void showStack(const Mantid::API::WorkspaceGroup_sptr &wsg,
+                         const Mantid::API::WorkspaceGroup_sptr &wsgFlats,
+                         const Mantid::API::WorkspaceGroup_sptr &wsgDarks) = 0;
 
   /**
-   * Get the stack of images currently being displayed (it has been
-   * shown using showStack()), as a workspace group.
+   * Get the stack of (sample) images currently being displayed (it
+   * has been shown using showStack()), as a workspace group.
    *
    * @return workspace group containing the individual images, which
    * can be empty if no stack has been loaded.
    */
-  virtual const Mantid::API::WorkspaceGroup_sptr stack() const = 0;
+  virtual const Mantid::API::WorkspaceGroup_sptr stackSamples() const = 0;
 
   /**
    * Normally one image (projection for tomography stacks) will be
@@ -147,6 +153,15 @@ public:
                            const std::string &description) = 0;
 
   /**
+   * To enable/disable all actions in the view. Useful when it is
+   * necessary to prevent the user from requesting actions. For
+   * example, during a lenghty execution of a process, drawing, etc.
+   *
+   * @param enable whether to enable or disable actions.
+   */
+  virtual void enableActions(bool enable) = 0;
+
+  /**
    * Display an error message (for example as a pop-up window).
    *
    * @param err Error title, should be short and would normally be
@@ -156,6 +171,20 @@ public:
    */
   virtual void userError(const std::string &err,
                          const std::string &description) = 0;
+
+  /**
+   * The images of the type selected by the user (samples/flats/darks).
+   *
+   * @return a workspace group with the images of the current type
+   */
+  virtual Mantid::API::WorkspaceGroup_sptr currentImageTypeStack() const = 0;
+
+  /**
+   * Sets the type of image (sample/flat/dark).
+   *
+   * @param wsg workspace group that contains the type of image
+   */
+  virtual void updateImageType(const Mantid::API::WorkspaceGroup_sptr wsg) = 0;
 
   /**
    * The index of the image currently shown (from the current stack if there's
@@ -173,6 +202,32 @@ public:
    * @param idx index of the image to display.
    */
   virtual void updateImgWithIndex(size_t idx) = 0;
+
+  /**
+   * Start to play/animate the stack currently displayed.
+   */
+  virtual void playStart() = 0;
+
+  /**
+   * Stop playing/animating the stack currently displayed, and goes
+   * back to the default status.
+   */
+  virtual void playStop() = 0;
+
+  /**
+   * The rotation angle selected.
+   *
+   * @return angle in degrees.
+   */
+  virtual float currentRotationAngle() const = 0;
+
+  /**
+   * Modify the rotation angle selection and update the image display
+   * to match the new rotation.
+   *
+   * @param angle rotation angle in degrees
+   */
+  virtual void updateRotationAngle(float angle) = 0;
 
   /**
    * Get the path/location of a stack of images (or single image as a

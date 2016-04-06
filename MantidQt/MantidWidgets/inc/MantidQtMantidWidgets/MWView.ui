@@ -26,7 +26,7 @@
     <item>
      <widget class="MantidQt::MantidWidgets::SafeQwtPlot" name="plot2D">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -36,7 +36,7 @@
     <item>
      <widget class="MantidQt::MantidWidgets::ColorBarWidget" name="colorBar" native="true">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+       <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -54,15 +54,15 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>MantidQt::MantidWidgets::ColorBarWidget</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/ColorBarWidget.h</header>
+  </customwidget>
+  <customwidget>
    <class>MantidQt::MantidWidgets::SafeQwtPlot</class>
    <extends>QwtPlot</extends>
    <header>MantidQtMantidWidgets/SafeQwtPlot.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>MantidQt::MantidWidgets::ColorBarWidget</class>
-   <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/ColorBarWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -139,7 +139,7 @@ public:
   }
 
   //------------------------------------------------------------------------------
-  void setUp() { ew = createEventWorkspace(1, 1); }
+  void setUp() override { ew = createEventWorkspace(1, 1); }
 
   //------------------------------------------------------------------------------
   void test_constructor() {

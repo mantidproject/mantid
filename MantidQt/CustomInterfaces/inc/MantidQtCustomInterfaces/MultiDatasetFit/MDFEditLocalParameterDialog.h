@@ -43,7 +43,7 @@ public:
   void copy();
   void paste();
 private:
-  bool eventFilter(QObject * obj, QEvent * ev);
+  bool eventFilter(QObject *obj, QEvent *ev) override;
   void showContextMenu();
   void redrawCells();
   void updateRoleColumn(int index);

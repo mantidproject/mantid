@@ -38,32 +38,25 @@ private:
     ConcreteMDHWLoadingPresenter(std::unique_ptr<MDLoadingView> view)
         : MDHWLoadingPresenter(std::move(view)) {}
 
-    virtual void extractMetadata(Mantid::API::IMDHistoWorkspace_sptr histoWs)
-    {
+    void extractMetadata(Mantid::API::IMDHistoWorkspace_sptr histoWs) override {
       MDHWLoadingPresenter::extractMetadata(histoWs);
     }
 
-    virtual vtkSmartPointer<vtkDataSet>
-    execute(vtkDataSetFactory *, ProgressAction &, ProgressAction &) {
+    vtkSmartPointer<vtkDataSet> execute(vtkDataSetFactory *, ProgressAction &,
+                                        ProgressAction &) override {
       return vtkSmartPointer<vtkUnstructuredGrid>::New();
     }
 
-    virtual void executeLoadMetadata()
-    {
-    }
+    void executeLoadMetadata() override {}
 
-    virtual bool canReadFile() const
-    {
-      return true;
-    }
+    bool canReadFile() const override { return true; }
 
-    virtual bool shouldLoad()
-    {
+    bool shouldLoad() override {
       //Forwarding method
       return BaseClass::shouldLoad();
     }
 
-    ~ConcreteMDHWLoadingPresenter(){}
+    ~ConcreteMDHWLoadingPresenter() override {}
   };
 
 

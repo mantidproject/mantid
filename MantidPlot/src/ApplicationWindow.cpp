@@ -5225,6 +5225,13 @@ void ApplicationWindow::readSettings() {
   defaultCurveLineWidth = settings.value("/LineWidth", 1).toDouble();
   defaultSymbolSize = settings.value("/SymbolSize", 3).toInt();
   applyCurveStyleToMantid = settings.value("/ApplyMantid", true).toBool();
+  // Once only for DrawAllErrors set to true, by SSC request
+  bool setDrawAllErrorsSetToTrueOnce =
+    settings.value("/DrawAllErrorsSetToTrueOnce", false).toBool();
+  if (!setDrawAllErrorsSetToTrueOnce) {
+    settings.setValue("/DrawAllErrors", true);
+    settings.setValue("/DrawAllErrorsSetToTrueOnce", true);
+  }
   drawAllErrors = settings.value("/DrawAllErrors", false).toBool();
   settings.endGroup(); // Curves
 
@@ -8686,7 +8693,8 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
     nw = newTable(caption, t->numRows(), t->numCols());
 
     Table *nt = dynamic_cast<Table *>(nw);
-
+    if (!nt)
+      return NULL;
     nt->setHeader(t->colNames());
 
     for (auto i = 0; i < nt->numCols(); i++) {
@@ -15757,8 +15765,8 @@ void ApplicationWindow::scriptsDirPathChanged(const QString &path) {
 }
 
 void ApplicationWindow::makeToolbarsMenu()
-// cppcheck-suppress publicAllocationError
 {
+  // cppcheck-suppress publicAllocationError
   actionFileTools = new QAction(standardTools->windowTitle(), toolbarsMenu);
   actionFileTools->setCheckable(true);
   toolbarsMenu->addAction(actionFileTools);
@@ -16066,6 +16074,7 @@ void ApplicationWindow::showUserDirectoryDialog() {
   ad->setAttribute(Qt::WA_DeleteOnClose);
   ad->show();
   ad->setFocus();
+  // cppcheck-suppress memleak
 }
 
 void ApplicationWindow::addCustomAction(QAction *action,

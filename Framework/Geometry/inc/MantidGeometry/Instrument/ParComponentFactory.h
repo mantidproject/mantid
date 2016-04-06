@@ -49,9 +49,10 @@ class MANTID_GEOMETRY_DLL ParComponentFactory {
 public:
   /// Create a parameterized detector from the given base component and
   /// ParameterMap and
-  /// return a shared_ptr<Detector>
-  static boost::shared_ptr<Detector> createDetector(const IDetector *base,
-                                                    const ParameterMap *map);
+  /// return a shared_ptr<IDetector>
+  static boost::shared_ptr<IDetector> createDetector(const IDetector *base,
+                                                     const ParameterMap *map);
+
   /// Create a parameterized instrument from the given base and ParameterMap
   static boost::shared_ptr<Instrument>
   createInstrument(boost::shared_ptr<const Instrument> base,

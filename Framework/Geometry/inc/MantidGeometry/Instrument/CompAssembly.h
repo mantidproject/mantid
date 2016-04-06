@@ -96,7 +96,7 @@ public:
   const Kernel::Quat getRotation() const override;
 
   /// Get the bounding box for this component and store it in the given argument
-  void getBoundingBox(BoundingBox &boundingBox) const override;
+  void getBoundingBox(BoundingBox &assemblyBox) const override;
 
   //! Print information about all children
   void printChildren(std::ostream &) const override;

@@ -394,12 +394,9 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis()
         bool atLeastOneDimNotIntegrated = false;
         for(size_t i = 0; i < mdew->getNumDims(); ++i)
         {
-          if( mdew->getDimension(i)->getNBins() ==  controller->getSplitInto(i))
+          if(!mdew->getDimension(i)->getIsIntegrated())
           {
-            if(!mdew->getDimension(i)->getIsIntegrated())
-            {
-              atLeastOneDimNotIntegrated = true;
-            }
+            atLeastOneDimNotIntegrated = true;
           }
         }
         regularBinnedMDWorkspace = atLeastOneDimNotIntegrated;

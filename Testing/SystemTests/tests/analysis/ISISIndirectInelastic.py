@@ -265,7 +265,7 @@ class OSIRISMultiFileReduction(ISISIndirectInelasticReduction):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'OSIRIS'
         self.detector_range = [963, 1004]
-        self.data_files = ['OSIRIS00106550.raw',' OSIRIS00106551.raw']
+        self.data_files = ['OSIRIS00106550.raw','OSIRIS00106551.raw']
         self.rebin_string = None
 
     def get_reference_files(self):
