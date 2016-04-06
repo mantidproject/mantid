@@ -1288,14 +1288,6 @@ void EnggDiffractionViewQtGUI::setListWidgetBank(int idx) {
   selectBank->setCurrentRow(idx);
 }
 
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::warningWithXY() {
-  auto x = getFittingPlotX();
-  auto y = getFittingPlotY();
-
-  userWarning("X and Y value: ", "the X value is:" + std::to_string(x) +
-                                     ". the Y value is: " + std::to_string(y));
-}
-
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
   QComboBox *inst = m_ui.comboBox_instrument;
   if (!inst)

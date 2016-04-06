@@ -250,7 +250,7 @@ private slots:
   void setListWidgetBank(int idx);
 
   /// @shahroz
-  void warningWithXY();
+ // void warningWithXY();
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
