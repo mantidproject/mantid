@@ -486,6 +486,7 @@ class CWSCDReductionControl(object):
         """
         # check
         assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int) or scan_number is None
 
         if (exp_number, scan_number) in self._roiDict:
             # able to find region of interest for this scan

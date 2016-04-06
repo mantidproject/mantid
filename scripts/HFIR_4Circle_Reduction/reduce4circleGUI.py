@@ -2289,7 +2289,7 @@ class MainWindow(QtGui.QMainWindow):
                                          hold_prev_image=False)
         if self.ui.checkBox_keppRoi.isChecked():
             # get region of interest from control
-            status, roi = self._myControl.get_region_of_interest(exp_no)
+            status, roi = self._myControl.get_region_of_interest(exp_no, scan_number=None)
             if status:
                 self.ui.graphicsView.add_roi(roi[0], roi[1])
             else:
