@@ -478,7 +478,7 @@ void ReflTableViewPresenter::validateRow(int rowNo) const {
   if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_RUNS))
           .toString()
           .isEmpty())
-    throw std::invalid_argument("Run column may not be empty.");
+    throw std::invalid_argument("Run column may be empty.");
 }
 
 /**
@@ -625,7 +625,6 @@ ReflTableViewPresenter::prepareRunWorkspace(const std::string &runStr) {
 
   std::vector<std::string> runs;
   boost::split(runs, runStr, boost::is_any_of("+"));
-
   if (runs.empty())
     throw std::runtime_error("No runs given");
 
@@ -705,7 +704,6 @@ ReflTableViewPresenter::loadRun(const std::string &run,
     if (AnalysisDataService::Instance().doesExist(wsName))
       return AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
   }
-
   // We'll just have to load it ourselves
   const std::string filename = instrument + run;
   IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create("Load");
@@ -713,7 +711,6 @@ ReflTableViewPresenter::loadRun(const std::string &run,
   algLoadRun->setProperty("Filename", filename);
   algLoadRun->setProperty("OutputWorkspace", "TOF_" + run);
   algLoadRun->execute();
-
   if (!algLoadRun->isExecuted())
     throw std::runtime_error("Could not open " + filename);
 
@@ -1468,7 +1465,8 @@ void ReflTableViewPresenter::plotRow() {
 
   if (selectedRows.empty())
     return;
-
+  if (!rowsValid(selectedRows))
+    return;
   std::set<std::string> workspaces, notFound;
   for (auto row = selectedRows.begin(); row != selectedRows.end(); ++row) {
     const std::string wsName =
@@ -1500,6 +1498,9 @@ void ReflTableViewPresenter::plotGroup() {
   auto selectedRows = m_tableView->getSelectedRows();
 
   if (selectedRows.empty())
+    return;
+
+  if (!rowsValid(selectedRows))
     return;
 
   std::set<int> selectedGroups;
