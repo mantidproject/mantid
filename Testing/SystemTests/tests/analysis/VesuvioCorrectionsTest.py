@@ -13,14 +13,16 @@ import platform
 
 
 from mantid.api import *
-import vesuvio.testing as testing
 import mantid.simpleapi as ms
 from mantid import *
 
 #====================================Helper Functions=======================================
 def setUp():
-    test_ws = testing.create_test_ws()
-    test_container_ws = testing.create_test_container_ws()
+    test_ws = ms.LoadVesuvio(Filename="15039-15045", InstrumentParFile="IP0004_10.par",
+                             Mode="SingleDifference", SpectrumList="135-136")
+    test_container_ws = ms.LoadVesuvio(Filename="15036", InstrumentParFile="IP0004_10.par",
+                                       Mode="SingleDifference", SpectrumList="135-136")
+
     return test_ws, test_container_ws
 
 def tearDown():
@@ -114,9 +116,9 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         # Test Corrections Workspaces
         corrections_wsg = self._algorithm.getProperty("CorrectionWorkspaces").value
         _validate_group_structure(self, corrections_wsg, 3)
-        corrections_gb_peak = 4.22729680e-07
-        corrections_ts_peak = 0.083994253007
-        corrections_ms_peak = 8.64757253e-05
+        corrections_gb_peak = 0.0118244020545
+        corrections_ts_peak = 0.156089032093
+        corrections_ms_peak = 0.000186585471573
         if self._is_linux and not self._is_rhel6:
             corrections_gb_peak = 6.170476e-07
             corrections_ts_peak = 8.545568e-02
@@ -129,9 +131,9 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         # Test Corrected Workspaces
         corrected_wsg = self._algorithm.getProperty("CorrectedWorkspaces").value
         _validate_group_structure(self, corrected_wsg, 3)
-        corrected_gb_peak = 0.46638088
-        corrected_ts_peak = 0.46593182
-        corrected_ms_peak = 0.46635277
+        corrected_gb_peak = 0.636368426621
+        corrected_ts_peak = 0.583392102971
+        corrected_ms_peak = 0.626625155835
         if self._is_linux and not self._is_rhel6:
             corrected_gb_peak = 4.663811e-01
             corrected_ts_peak = 4.659339e-01
@@ -144,7 +146,7 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         # Test OutputWorkspace
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
         _validate_matrix_structure(self, output_ws, 1, self._input_bins)
-        output_expected_peak = 0.46635315
+        output_expected_peak = 0.63627031354
         if self._is_linux and not self._is_rhel6:
             output_expected_peak = 4.663559e-01
         _validate_matrix_peak_height(self, output_ws, output_expected_peak)
@@ -152,13 +154,13 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
         _validate_table_workspace(self, linear_params, 7, 3)
-        expected_values = [4.17063e-05, 0.0, 1.0, 2.026619013, 0.0, 1.0, 11.799966]
+        expected_values = [1.72262062129, 0.0, 1.0, 14.1669920974, 0.0, 1.0, 3.13525438914]
         if self._is_linux and not self._is_rhel6:
             expected_values = [6.087759e-05, 0.0, 1.0, 2.019595, 0.0, 1.0, 11.80356]
         _validate_table_values_top_to_bottom(self, linear_params, expected_values)
         tearDown()
 
-'''
+
 class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
 
     _algorithm = None
@@ -184,9 +186,9 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
         # Test Corrections Workspaces
         corrections_wsg = self._algorithm.getProperty("CorrectionWorkspaces").value
         _validate_group_structure(self, corrections_wsg, 3)
-        corrections_gb_peak = 1.2250951e-06
-        corrections_ts_peak = 0.09844847237
-        corrections_ms_peak = 9.9243003e-05
+        corrections_gb_peak = 0.011110763631
+        corrections_ts_peak = 0.158240514579
+        corrections_ms_peak = 0.000212168054
         if self._is_linux and not self._is_rhel6:
             corrections_gb_peak = 1.605327e-06
             corrections_ts_peak = 9.994254e-02
@@ -199,9 +201,9 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
         # Test Corrected Workspaces
         corrected_wsg = self._algorithm.getProperty("CorrectedWorkspaces").value
         _validate_group_structure(self, corrected_wsg, 3)
-        corrected_gb_peak = 0.52350495
-        corrected_ts_peak = 0.52341546
-        corrected_ms_peak = 0.52344493
+        corrected_gb_peak = 0.711364869812
+        corrected_ts_peak = 0.650854231772
+        corrected_ms_peak = 0.702027039501
         if self._is_linux and not self._is_rhel6:
             corrected_gb_peak = 5.235046e-01
             corrected_ts_peak = 5.234076e-01
@@ -214,7 +216,7 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
         # Test OutputWorkspace
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
         _validate_matrix_structure(self, output_ws, 1, self._input_bins)
-        output_expected_peak = 0.5234438813082305
+        output_expected_peak = 0.711302498911
         if self._is_linux and not self._is_rhel6:
             output_expected_peak = 0.5234463
         _validate_matrix_peak_height(self, output_ws, output_expected_peak)
@@ -222,11 +224,10 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
         # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
         _validate_table_workspace(self, linear_params, 7, 3)
-        expected_values = [0.0001183, 0.0, 1.0, 2.4028667, 0.0, 1.0, 10.5412496]
+        expected_values = [1.44047654413, 0.0, 1.0, 14.3674713432, 0.0, 1.0, 2.92294783926]
         if self._is_linux and not self._is_rhel6:
             expected_values = [1.550200e-04, 0.0, 1.0, 2.390063, 0.0, 1.0, 10.055330]
         _validate_table_values_top_to_bottom(self, linear_params, expected_values)
-        logger.warning(str(linear_params.column(0)))
         tearDown()
 
 
@@ -373,7 +374,7 @@ class TestRunningWithoutProfilesRaisesError(stresstesting.MantidStressTest):
                                             Masses=_create_dummy_masses())
     def validate(self):
         self.assertRaises(RuntimeError, self._algorithm.execute)
-'''
+
 
 #=========================================Validation======================================
 #=========================================Structure=======================================
@@ -428,6 +429,7 @@ def _validate_table_values_top_to_bottom(self, table_ws, expected_values, tolera
         if expected_values[i] != 'skip':
             tolerance_value = expected_values[i] * tolerance
             abs_difference = abs(expected_values[i] - table_ws.cell(i,1))
+            #logger.warning('table cell = ' + str(table_ws.cell(i,1)))
             self.assertTrue(abs_difference <= abs(tolerance_value))
 
 def _validate_matrix_peak_height(self, matrix_ws, expected_height, ws_index=0, tolerance=0.05):
@@ -441,6 +443,7 @@ def _validate_matrix_peak_height(self, matrix_ws, expected_height, ws_index=0, t
     peak_height = np.amax(y_data)
     tolerance_value = expected_height * tolerance
     abs_difference = abs(expected_height - peak_height)
+    #logger.warning('peak height = '+str(peak_height))
     self.assertTrue(abs_difference <= abs(tolerance_value))
 
 
