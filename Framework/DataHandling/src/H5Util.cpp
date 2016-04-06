@@ -12,38 +12,29 @@ namespace H5Util {
 // convert primitives to HDF5 enum
 // -------------------------------------------------------------------
 
-template <typename NumT>
-DataType getType() {
-  throw DataTypeIException();
-}
+template <typename NumT> DataType getType() { throw DataTypeIException(); }
 
-template <>
-MANTID_DATAHANDLING_DLL DataType getType<float>() {
+template <> MANTID_DATAHANDLING_DLL DataType getType<float>() {
   return PredType::NATIVE_FLOAT;
 }
 
-template <>
-MANTID_DATAHANDLING_DLL DataType getType<double>() {
+template <> MANTID_DATAHANDLING_DLL DataType getType<double>() {
   return PredType::NATIVE_DOUBLE;
 }
 
-template <>
-MANTID_DATAHANDLING_DLL DataType getType<int32_t>() {
+template <> MANTID_DATAHANDLING_DLL DataType getType<int32_t>() {
   return PredType::NATIVE_INT32;
 }
 
-template <>
-MANTID_DATAHANDLING_DLL DataType getType<uint32_t>() {
+template <> MANTID_DATAHANDLING_DLL DataType getType<uint32_t>() {
   return PredType::NATIVE_UINT32;
 }
 
-template <>
-MANTID_DATAHANDLING_DLL DataType getType<int64_t>() {
+template <> MANTID_DATAHANDLING_DLL DataType getType<int64_t>() {
   return PredType::NATIVE_INT64;
 }
 
-template <>
-MANTID_DATAHANDLING_DLL DataType getType<uint64_t>() {
+template <> MANTID_DATAHANDLING_DLL DataType getType<uint64_t>() {
   return PredType::NATIVE_UINT64;
 }
 
@@ -60,7 +51,8 @@ template <typename NumT> DataSpace getDataSpace(const std::vector<NumT> &data) {
   return H5Util::getDataSpace(data.size());
 }
 
-DSetCreatPropList setCompressionAttributes(const std::size_t length, const int deflateLevel) {
+DSetCreatPropList setCompressionAttributes(const std::size_t length,
+                                           const int deflateLevel) {
   DSetCreatPropList propList;
   hsize_t chunk_dims[1] = {length};
   propList.setChunk(1, chunk_dims);
@@ -76,8 +68,7 @@ void writeStrAttribute(Group &location, const std::string &name,
   groupAttr.write(attrType, value);
 }
 
-void write(Group &group, const std::string &name,
-                const std::string &value) {
+void write(Group &group, const std::string &name, const std::string &value) {
   StrType dataType(0, value.length() + 1);
   DataSpace dataSpace = getDataSpace(1);
   H5::DataSet data = group.createDataSet(name, dataType, dataSpace);
@@ -86,7 +77,7 @@ void write(Group &group, const std::string &name,
 
 template <typename NumT>
 void writeArray1D(Group &group, const std::string &name,
-                const std::vector<NumT> &values) {
+                  const std::vector<NumT> &values) {
   DataType dataType(getType<NumT>());
   DataSpace dataSpace = getDataSpace(values);
 
@@ -117,7 +108,7 @@ std::string readString(H5::H5File &file, const std::string &path) {
 
 template <typename NumT>
 std::vector<NumT> readArray1DCoerce(DataSet &dataset,
-                                  const DataType &desiredDataType) {
+                                    const DataType &desiredDataType) {
   std::vector<NumT> result;
   DataType dataType = dataset.getDataType();
   DataSpace dataSpace = dataset.getSpace();
@@ -143,56 +134,56 @@ std::vector<NumT> readArray1DCoerce(DataSet &dataset,
 // -------------------------------------------------------------------
 // instantiations for writeArray1D
 // -------------------------------------------------------------------
-template
-MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name, const std::vector<float> &values);
-template
-MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name, const std::vector<double> &values);
-template
-MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name, const std::vector<int32_t> &values);
-template
-MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name, const std::vector<uint32_t> &values);
-template
-MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name, const std::vector<int64_t> &values);
-template
-MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name, const std::vector<uint64_t> &values);
+template MANTID_DATAHANDLING_DLL void
+writeArray1D(H5::Group &group, const std::string &name,
+             const std::vector<float> &values);
+template MANTID_DATAHANDLING_DLL void
+writeArray1D(H5::Group &group, const std::string &name,
+             const std::vector<double> &values);
+template MANTID_DATAHANDLING_DLL void
+writeArray1D(H5::Group &group, const std::string &name,
+             const std::vector<int32_t> &values);
+template MANTID_DATAHANDLING_DLL void
+writeArray1D(H5::Group &group, const std::string &name,
+             const std::vector<uint32_t> &values);
+template MANTID_DATAHANDLING_DLL void
+writeArray1D(H5::Group &group, const std::string &name,
+             const std::vector<int64_t> &values);
+template MANTID_DATAHANDLING_DLL void
+writeArray1D(H5::Group &group, const std::string &name,
+             const std::vector<uint64_t> &values);
 
 // -------------------------------------------------------------------
 // instantiations for getDataSpace
 // -------------------------------------------------------------------
-template
-MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<float> &data);
-template
-MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<double> &data);
-template
-MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<int32_t> &data);
-template
-MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<uint32_t> &data);
-template
-MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<int64_t> &data);
-template
-MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<uint64_t> &data);
+template MANTID_DATAHANDLING_DLL DataSpace
+getDataSpace(const std::vector<float> &data);
+template MANTID_DATAHANDLING_DLL DataSpace
+getDataSpace(const std::vector<double> &data);
+template MANTID_DATAHANDLING_DLL DataSpace
+getDataSpace(const std::vector<int32_t> &data);
+template MANTID_DATAHANDLING_DLL DataSpace
+getDataSpace(const std::vector<uint32_t> &data);
+template MANTID_DATAHANDLING_DLL DataSpace
+getDataSpace(const std::vector<int64_t> &data);
+template MANTID_DATAHANDLING_DLL DataSpace
+getDataSpace(const std::vector<uint64_t> &data);
 
 // -------------------------------------------------------------------
 // instantiations for readArray1DCoerce
 // -------------------------------------------------------------------
-template
-MANTID_DATAHANDLING_DLL std::vector<float> readArray1DCoerce(DataSet &dataset,
-                                  const DataType &desiredDataType);
-template
-MANTID_DATAHANDLING_DLL std::vector<double> readArray1DCoerce(DataSet &dataset,
-                                  const DataType &desiredDataType);
-template
-MANTID_DATAHANDLING_DLL std::vector<int32_t> readArray1DCoerce(DataSet &dataset,
-                                  const DataType &desiredDataType);
-template
-MANTID_DATAHANDLING_DLL std::vector<uint32_t> readArray1DCoerce(DataSet &dataset,
-                                  const DataType &desiredDataType);
-template
-MANTID_DATAHANDLING_DLL std::vector<int64_t> readArray1DCoerce(DataSet &dataset,
-                                  const DataType &desiredDataType);
-template
-MANTID_DATAHANDLING_DLL std::vector<uint64_t> readArray1DCoerce(DataSet &dataset,
-                                  const DataType &desiredDataType);
+template MANTID_DATAHANDLING_DLL std::vector<float>
+readArray1DCoerce(DataSet &dataset, const DataType &desiredDataType);
+template MANTID_DATAHANDLING_DLL std::vector<double>
+readArray1DCoerce(DataSet &dataset, const DataType &desiredDataType);
+template MANTID_DATAHANDLING_DLL std::vector<int32_t>
+readArray1DCoerce(DataSet &dataset, const DataType &desiredDataType);
+template MANTID_DATAHANDLING_DLL std::vector<uint32_t>
+readArray1DCoerce(DataSet &dataset, const DataType &desiredDataType);
+template MANTID_DATAHANDLING_DLL std::vector<int64_t>
+readArray1DCoerce(DataSet &dataset, const DataType &desiredDataType);
+template MANTID_DATAHANDLING_DLL std::vector<uint64_t>
+readArray1DCoerce(DataSet &dataset, const DataType &desiredDataType);
 } // namespace H5Util
 } // namespace DataHandling
 } // namespace Mantid

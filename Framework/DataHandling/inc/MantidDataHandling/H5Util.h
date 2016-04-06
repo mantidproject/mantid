@@ -47,7 +47,8 @@ namespace H5Util {
 MANTID_DATAHANDLING_DLL H5::DataSpace getDataSpace(const size_t length);
 
 /// Create a 1D data-space that will hold the supplied vector.
-template <typename NumT> H5::DataSpace getDataSpace(const std::vector<NumT> &data);
+template <typename NumT>
+H5::DataSpace getDataSpace(const std::vector<NumT> &data);
 
 /// Convert a primitive type to the appropriate H5::DataType.
 template <typename NumT> H5::DataType getType();
@@ -57,25 +58,26 @@ template <typename NumT> H5::DataType getType();
  * @param length
  * @return The configured property list
  */
-MANTID_DATAHANDLING_DLL H5::DSetCreatPropList setCompressionAttributes(const std::size_t length,
-                                                                       const int deflateLevel=6);
+MANTID_DATAHANDLING_DLL H5::DSetCreatPropList
+setCompressionAttributes(const std::size_t length, const int deflateLevel = 6);
 
 MANTID_DATAHANDLING_DLL void writeStrAttribute(H5::Group &location,
                                                const std::string &name,
                                                const std::string &value);
 
 MANTID_DATAHANDLING_DLL void write(H5::Group &group, const std::string &name,
-                const std::string &value);
+                                   const std::string &value);
 
 template <typename NumT>
 void writeArray1D(H5::Group &group, const std::string &name,
-                const std::vector<NumT> &values);
+                  const std::vector<NumT> &values);
 
-MANTID_DATAHANDLING_DLL std::string readString(H5::H5File &file, const std::string &path);
+MANTID_DATAHANDLING_DLL std::string readString(H5::H5File &file,
+                                               const std::string &path);
 
 template <typename NumT>
 std::vector<NumT> readArray1DCoerce(H5::DataSet &dataset,
-                                  const H5::DataType &desiredDataType);
+                                    const H5::DataType &desiredDataType);
 
 } // namespace H5Util
 } // namespace DataHandling
