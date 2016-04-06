@@ -88,9 +88,9 @@ inline bool isMasked(MatrixWorkspace_const_sptr wksp, const size_t index) {
     return false;
 
   try {
-  const auto det = wksp->getDetector(index);
-  if (bool(det))
-    return det->isMasked();
+    const auto det = wksp->getDetector(index);
+    if (bool(det))
+      return det->isMasked();
   } catch (Kernel::Exception::NotFoundError &e) {
     UNUSED_ARG(e);
   }
