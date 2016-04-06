@@ -43,22 +43,22 @@ namespace H5Util {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-
+/// Create a 1D data-space to hold data of length.
 MANTID_DATAHANDLING_DLL H5::DataSpace getDataSpace(const size_t length);
 
+/// Create a 1D data-space that will hold the supplied vector.
 template <typename NumT> H5::DataSpace getDataSpace(const std::vector<NumT> &data);
 
-
+/// Convert a primitive type to the appropriate H5::DataType.
 template <typename NumT> H5::DataType getType();
 
 /**
  * Sets up the chunking and compression rate.
  * @param length
  * @return The configured property list
- * TODO needs a better name
  */
-MANTID_DATAHANDLING_DLL H5::DSetCreatPropList getPropList(const std::size_t length,
-                                                          const int deflateLevel=6);
+MANTID_DATAHANDLING_DLL H5::DSetCreatPropList setCompressionAttributes(const std::size_t length,
+                                                                       const int deflateLevel=6);
 
 MANTID_DATAHANDLING_DLL void writeStrAttribute(H5::Group &location,
                                                const std::string &name,

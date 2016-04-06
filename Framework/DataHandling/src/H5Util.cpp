@@ -60,7 +60,7 @@ template <typename NumT> DataSpace getDataSpace(const std::vector<NumT> &data) {
   return H5Util::getDataSpace(data.size());
 }
 
-DSetCreatPropList getPropList(const std::size_t length, const int deflateLevel) {
+DSetCreatPropList setCompressionAttributes(const std::size_t length, const int deflateLevel) {
   DSetCreatPropList propList;
   hsize_t chunk_dims[1] = {length};
   propList.setChunk(1, chunk_dims);
@@ -90,7 +90,7 @@ void writeArray1D(Group &group, const std::string &name,
   DataType dataType(getType<NumT>());
   DataSpace dataSpace = getDataSpace(values);
 
-  DSetCreatPropList propList = getPropList(values.size());
+  DSetCreatPropList propList = setCompressionAttributes(values.size());
 
   auto data = group.createDataSet(name, dataType, dataSpace, propList);
   data.write(&(values[0]), dataType);
