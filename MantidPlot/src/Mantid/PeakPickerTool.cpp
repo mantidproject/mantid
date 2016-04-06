@@ -42,34 +42,17 @@ m_shouldBeNormalised(false)
 {
   d_graph->plotWidget()->canvas()->setCursor(Qt::pointingHandCursor);
 
-  if (d_graph->plotWidget()->curves().size() > 0)
-  {
-    // Can we use a different curve? (not the first one). RT.
-    PlotCurve* curve = dynamic_cast<PlotCurve*>(d_graph->plotWidget()->curves().begin().value());
-    if (!curve) return;
-    DataCurve* dcurve = dynamic_cast<DataCurve*>(curve);
-    if (dcurve)
-    {
-      m_wsName = dcurve->table()->name().section('-',0,0);
-      m_spec = dcurve->table()->colName(0).section('_',1,1).mid(2).toInt();
-    }
-    else
-    {
-      MantidMatrixCurve* mcurve = dynamic_cast<MantidMatrixCurve*>(curve);
-      if (mcurve)
-      {
-        m_wsName = mcurve->workspaceName();
-        m_spec = mcurve->workspaceIndex();
-        m_shouldBeNormalised = mcurve->isDistribution() && mcurve->isNormalizable();
-      }
-      else
-      {
-        return;
+  if (d_graph->plotWidget()->curves().size() > 0) {
+    // Initialize from the first curve that will work
+    auto curvesMap = d_graph->plotWidget()->curves();
+    for (auto curveIter = curvesMap.begin(); curveIter != curvesMap.end();
+         ++curveIter) {
+      auto curve = dynamic_cast<PlotCurve *>(curveIter.value());
+      if (initializeFromCurve(curve)) {
+        break;
       }
     }
-  }
-  else
-  {
+  } else {
     return;
   }
   m_fitPropertyBrowser->normaliseData(m_shouldBeNormalised);
@@ -1080,4 +1063,32 @@ void PeakPickerTool::removeFitCurves()
     graph()->removeCurve(itr.next());
   }
   m_curveNames.clear();
+}
+
+/**
+ * Called from constructor.
+ * Sets up tool based on curves in graph.
+ * @param curve :: [input] Curve to use for initialization
+ * @returns :: success or failure
+ */
+bool PeakPickerTool::initializeFromCurve(PlotCurve *curve) {
+  if (!curve) {
+    return false;
+  }
+  DataCurve *dcurve = dynamic_cast<DataCurve *>(curve);
+  if (dcurve) {
+    m_wsName = dcurve->table()->name().section('-', 0, 0);
+    m_spec = dcurve->table()->colName(0).section('_', 1, 1).mid(2).toInt();
+  } else {
+    MantidMatrixCurve *mcurve = dynamic_cast<MantidMatrixCurve *>(curve);
+    if (mcurve) {
+      m_wsName = mcurve->workspaceName();
+      m_spec = mcurve->workspaceIndex();
+      m_shouldBeNormalised =
+          mcurve->isDistribution() && mcurve->isNormalizable();
+    } else {
+      return false;
+    }
+  }
+  return true;
 }

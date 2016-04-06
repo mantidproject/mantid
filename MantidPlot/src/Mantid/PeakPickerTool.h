@@ -187,6 +187,9 @@ private:
   // Set the tool tip text
   void setToolTip(const QString& txt);
 
+  // Set up member variables from curve
+  bool initializeFromCurve(PlotCurve *curve);
+
   /// Creates a pointer to fitPropertyBrowser
   MantidQt::MantidWidgets::FitPropertyBrowser* m_fitPropertyBrowser;
 
