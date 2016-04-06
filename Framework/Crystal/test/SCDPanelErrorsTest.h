@@ -57,7 +57,15 @@ public:
     alg->setPropertyValue("OutputWorkspace", "TOPAZ_3007");
 
     alg->execute();
+    FrameworkManager::Instance();
+    boost::shared_ptr<Algorithm> algUB =
+        AlgorithmFactory::Instance().create("LoadIsawUB", 1);
 
+    algUB->initialize();
+    algUB->setPropertyValue("Filename", "TOPAZ_3007.mat");
+    algUB->setPropertyValue("InputWorkspace", "TOPAZ_3007");
+
+    algUB->execute();
     PeaksWorkspace_sptr Peakws = boost::dynamic_pointer_cast<PeaksWorkspace>(
         AnalysisDataService::Instance().retrieve("TOPAZ_3007"));
 

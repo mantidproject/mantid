@@ -585,8 +585,16 @@ static inline void constrain(IFunction_sptr &iFunc, const string &parName,
 void SCDCalibratePanels::exec() {
   PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
   int nPeaks = peaksWs->getNumberPeaks();
-  double a, b, c, alpha, beta, gamma;
-  if (peaksWs->sample().hasOrientedLattice()) {
+
+  double a = getProperty("a");
+  double b = getProperty("b");
+  double c = getProperty("c");
+  double alpha = getProperty("alpha");
+  double beta = getProperty("beta");
+  double gamma = getProperty("gamma");
+  if ((a == EMPTY_DBL() || b == EMPTY_DBL() || c == EMPTY_DBL() ||
+       alpha == EMPTY_DBL() || beta == EMPTY_DBL() || gamma == EMPTY_DBL()) &&
+      peaksWs->sample().hasOrientedLattice()) {
     OrientedLattice latt = peaksWs->mutableSample().getOrientedLattice();
     a = latt.a();
     b = latt.b();
@@ -595,7 +603,21 @@ void SCDCalibratePanels::exec() {
     beta = latt.beta();
     gamma = latt.gamma();
   }
-  else throw std::runtime_error("PeaksWorkspace must have UB matrix.");
+  else
+  {
+    boost::shared_ptr<Algorithm> alg =
+        createChildAlgorithm("FindUBUsingLatticeParameters", .2, .9, true);
+    alg->setProperty("PeaksWorkspace", peaksWs);
+    alg->setProperty("a", a);
+    alg->setProperty("b", b);
+    alg->setProperty("c", c);
+    alg->setProperty("alpha", alpha);
+    alg->setProperty("beta", beta);
+    alg->setProperty("gamma", gamma);
+    alg->setProperty("NumInitial", 15);
+    alg->setProperty("Tolerance", 0.12);
+    alg->executeAsChildAlg();
+  }
   double tolerance = getProperty("tolerance");
 
   string DetCalFileName = getProperty("DetCalFilename");
@@ -1411,6 +1433,27 @@ void SCDCalibratePanels::init() {
   declareProperty("Grouping", "[ 1:20,22],[3,5,7]",
                   "A bracketed([]) list of groupings( comma or :(for range) "
                   "separated list of bank numbers");
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  mustBePositive->setLower(0.0);
+
+  declareProperty("a", EMPTY_DBL(), mustBePositive,
+                  "Lattice Parameter a (Leave empty to use lattice constants "
+                  "in peaks workspace)");
+  declareProperty("b", EMPTY_DBL(), mustBePositive,
+                  "Lattice Parameter b (Leave empty to use lattice constants "
+                  "in peaks workspace)");
+  declareProperty("c", EMPTY_DBL(), mustBePositive,
+                  "Lattice Parameter c (Leave empty to use lattice constants "
+                  "in peaks workspace)");
+  declareProperty("alpha", EMPTY_DBL(), mustBePositive,
+                  "Lattice Parameter alpha in degrees (Leave empty to use "
+                  "lattice constants in peaks workspace)");
+  declareProperty("beta", EMPTY_DBL(), mustBePositive,
+                  "Lattice Parameter beta in degrees (Leave empty to use "
+                  "lattice constants in peaks workspace)");
+  declareProperty("gamma", EMPTY_DBL(), mustBePositive,
+                  "Lattice Parameter gamma in degrees (Leave empty to use "
+                  "lattice constants in peaks workspace)");
 
   declareProperty("useL0", false, "Fit the L0(source to sample) distance");
   declareProperty("usetimeOffset", false, "Fit the time offset value");
@@ -1492,8 +1535,6 @@ void SCDCalibratePanels::init() {
 
   //------------------------------------ Tolerance
   // settings-------------------------
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
-  mustBePositive->setLower(0.0);
 
   declareProperty("tolerance", .12, mustBePositive,
                   "offset of hkl values from integer for GOOD Peaks");
@@ -1580,14 +1621,14 @@ void SCDCalibratePanels::CreateFxnGetValues(
       FunctionFactory::Instance().createFunction("SCDPanelErrors"));
   if (!fit)
     cout << "Could not create fit function" << endl;
-  PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
-  OrientedLattice latt = peaksWs->mutableSample().getOrientedLattice();
-  fit->setAttribute("a", IFunction::Attribute(latt.a()));
-  fit->setAttribute("b", IFunction::Attribute(latt.b()));
-  fit->setAttribute("c", IFunction::Attribute(latt.c()));
-  fit->setAttribute("alpha", IFunction::Attribute(latt.alpha()));
-  fit->setAttribute("beta", IFunction::Attribute(latt.beta()));
-  fit->setAttribute("gamma", IFunction::Attribute(latt.gamma()));
+   PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
+   OrientedLattice latt = peaksWs->mutableSample().getOrientedLattice();
+   fit->setAttribute("a", IFunction::Attribute(latt.a()));
+   fit->setAttribute("b", IFunction::Attribute(latt.b()));
+   fit->setAttribute("c", IFunction::Attribute(latt.c()));
+   fit->setAttribute("alpha", IFunction::Attribute(latt.alpha()));
+   fit->setAttribute("beta", IFunction::Attribute(latt.beta()));
+   fit->setAttribute("gamma", IFunction::Attribute(latt.gamma()));
   string PeakWSName = getPropertyValue("PeakWorkspace");
   if (PeakWSName.length() < 1)
     PeakWSName = "xxx";
