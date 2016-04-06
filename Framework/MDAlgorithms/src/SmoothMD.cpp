@@ -65,10 +65,11 @@ std::vector<std::string> functions() {
  * @return function map
  */
 SmoothFunctionMap makeFunctionMap(Mantid::MDAlgorithms::SmoothMD *instance) {
-  return {{"Hat", boost::bind(&Mantid::MDAlgorithms::SmoothMD::hatSmooth,
-                              instance, _1, _2, _3)},
-          {"Gaussian", boost::bind(&Mantid::MDAlgorithms::SmoothMD::gaussianSmooth,
-                              instance, _1, _2, _3)}};
+  return {
+      {"Hat", boost::bind(&Mantid::MDAlgorithms::SmoothMD::hatSmooth, instance,
+                          _1, _2, _3)},
+      {"Gaussian", boost::bind(&Mantid::MDAlgorithms::SmoothMD::gaussianSmooth,
+                               instance, _1, _2, _3)}};
 }
 }
 
@@ -417,7 +418,7 @@ void SmoothMD::init() {
 
   declareProperty(
       make_unique<ArrayProperty<double>>("WidthVector", widthVectorValidator,
-                                Direction::Input),
+                                         Direction::Input),
       "Width vector. Either specify the width in n-pixels for each "
       "dimension, or provide a single entry (n-pixels) for all "
       "dimensions. Must be odd integers if Hat function is chosen.");
