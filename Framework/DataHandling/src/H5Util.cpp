@@ -76,7 +76,7 @@ void writeStrAttribute(Group &location, const std::string &name,
   groupAttr.write(attrType, value);
 }
 
-void writeArray(Group &group, const std::string &name,
+void write(Group &group, const std::string &name,
                 const std::string &value) {
   StrType dataType(0, value.length() + 1);
   DataSpace dataSpace = getDataSpace(1);
@@ -85,7 +85,7 @@ void writeArray(Group &group, const std::string &name,
 }
 
 template <typename NumT>
-void writeArray(Group &group, const std::string &name,
+void writeArray1D(Group &group, const std::string &name,
                 const std::vector<NumT> &values) {
   DataType dataType(getType<NumT>());
   DataSpace dataSpace = getDataSpace(values);
@@ -116,7 +116,7 @@ std::string readString(H5::H5File &file, const std::string &path) {
 }
 
 template <typename NumT>
-std::vector<NumT> readArrayCoerce(DataSet &dataset,
+std::vector<NumT> readArray1DCoerce(DataSet &dataset,
                                   const DataType &desiredDataType) {
   std::vector<NumT> result;
   DataType dataType = dataset.getDataType();
@@ -132,8 +132,7 @@ std::vector<NumT> readArrayCoerce(DataSet &dataset,
   } else if (PredType::NATIVE_FLOAT == dataType) {
     std::vector<float> temp(dataSpace.getSelectNpoints());
     dataset.read(&temp[0], dataType, dataSpace);
-    for (float value : temp)
-      result.push_back(static_cast<NumT>(value));
+    result.assign(temp.begin(), temp.end());
   } else {
     throw DataTypeIException();
   }
@@ -142,20 +141,20 @@ std::vector<NumT> readArrayCoerce(DataSet &dataset,
 }
 
 // -------------------------------------------------------------------
-// instantiations for writeArray
+// instantiations for writeArray1D
 // -------------------------------------------------------------------
 template
-MANTID_DATAHANDLING_DLL void writeArray(H5::Group &group, const std::string &name, const std::vector<float> &values);
+MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name, const std::vector<float> &values);
 template
-MANTID_DATAHANDLING_DLL void writeArray(H5::Group &group, const std::string &name, const std::vector<double> &values);
+MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name, const std::vector<double> &values);
 template
-MANTID_DATAHANDLING_DLL void writeArray(H5::Group &group, const std::string &name, const std::vector<int32_t> &values);
+MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name, const std::vector<int32_t> &values);
 template
-MANTID_DATAHANDLING_DLL void writeArray(H5::Group &group, const std::string &name, const std::vector<uint32_t> &values);
+MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name, const std::vector<uint32_t> &values);
 template
-MANTID_DATAHANDLING_DLL void writeArray(H5::Group &group, const std::string &name, const std::vector<int64_t> &values);
+MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name, const std::vector<int64_t> &values);
 template
-MANTID_DATAHANDLING_DLL void writeArray(H5::Group &group, const std::string &name, const std::vector<uint64_t> &values);
+MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name, const std::vector<uint64_t> &values);
 
 // -------------------------------------------------------------------
 // instantiations for getDataSpace
@@ -174,25 +173,25 @@ template
 MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<uint64_t> &data);
 
 // -------------------------------------------------------------------
-// instantiations for readArrayCoerce
+// instantiations for readArray1DCoerce
 // -------------------------------------------------------------------
 template
-MANTID_DATAHANDLING_DLL std::vector<float> readArrayCoerce(DataSet &dataset,
+MANTID_DATAHANDLING_DLL std::vector<float> readArray1DCoerce(DataSet &dataset,
                                   const DataType &desiredDataType);
 template
-MANTID_DATAHANDLING_DLL std::vector<double> readArrayCoerce(DataSet &dataset,
+MANTID_DATAHANDLING_DLL std::vector<double> readArray1DCoerce(DataSet &dataset,
                                   const DataType &desiredDataType);
 template
-MANTID_DATAHANDLING_DLL std::vector<int32_t> readArrayCoerce(DataSet &dataset,
+MANTID_DATAHANDLING_DLL std::vector<int32_t> readArray1DCoerce(DataSet &dataset,
                                   const DataType &desiredDataType);
 template
-MANTID_DATAHANDLING_DLL std::vector<uint32_t> readArrayCoerce(DataSet &dataset,
+MANTID_DATAHANDLING_DLL std::vector<uint32_t> readArray1DCoerce(DataSet &dataset,
                                   const DataType &desiredDataType);
 template
-MANTID_DATAHANDLING_DLL std::vector<int64_t> readArrayCoerce(DataSet &dataset,
+MANTID_DATAHANDLING_DLL std::vector<int64_t> readArray1DCoerce(DataSet &dataset,
                                   const DataType &desiredDataType);
 template
-MANTID_DATAHANDLING_DLL std::vector<uint64_t> readArrayCoerce(DataSet &dataset,
+MANTID_DATAHANDLING_DLL std::vector<uint64_t> readArray1DCoerce(DataSet &dataset,
                                   const DataType &desiredDataType);
 } // namespace H5Util
 } // namespace DataHandling

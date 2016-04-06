@@ -64,17 +64,17 @@ MANTID_DATAHANDLING_DLL void writeStrAttribute(H5::Group &location,
                                                const std::string &name,
                                                const std::string &value);
 
-MANTID_DATAHANDLING_DLL void writeArray(H5::Group &group, const std::string &name,
+MANTID_DATAHANDLING_DLL void write(H5::Group &group, const std::string &name,
                 const std::string &value);
 
 template <typename NumT>
-void writeArray(H5::Group &group, const std::string &name,
+void writeArray1D(H5::Group &group, const std::string &name,
                 const std::vector<NumT> &values);
 
 MANTID_DATAHANDLING_DLL std::string readString(H5::H5File &file, const std::string &path);
 
 template <typename NumT>
-std::vector<NumT> readArrayCoerce(H5::DataSet &dataset,
+std::vector<NumT> readArray1DCoerce(H5::DataSet &dataset,
                                   const H5::DataType &desiredDataType);
 
 } // namespace H5Util

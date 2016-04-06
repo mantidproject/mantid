@@ -115,7 +115,7 @@ void SaveDiffCal::writeDoubleFieldFromTable(H5::Group &group,
   std::vector<double> data;
   column->numeric_fill(data);
   data.erase(data.begin() + m_numValues, data.end());
-  H5Util::writeArray(group, name, std::vector<double>(data));
+  H5Util::writeArray1D(group, name, std::vector<double>(data));
 }
 
 void SaveDiffCal::writeIntFieldFromTable(H5::Group &group,
@@ -124,7 +124,7 @@ void SaveDiffCal::writeIntFieldFromTable(H5::Group &group,
   std::vector<int32_t> data;
   column->numeric_fill(data);
   data.erase(data.begin() + m_numValues, data.end());
-  H5Util::writeArray(group, name, std::vector<int32_t>(data));
+  H5Util::writeArray1D(group, name, std::vector<int32_t>(data));
 }
 
 // TODO should flip for mask
@@ -158,7 +158,7 @@ void SaveDiffCal::writeIntFieldFromSVWS(
     }
   }
 
-  H5Util::writeArray(group, name, values);
+  H5Util::writeArray1D(group, name, values);
 }
 
 void SaveDiffCal::generateDetidToIndex() {
@@ -253,10 +253,10 @@ void SaveDiffCal::exec() {
   auto instrumentGroup = calibrationGroup.createGroup("instrument");
   H5Util::writeStrAttribute(instrumentGroup, "NX_class", "NXinstrument");
   if (!instrumentName.empty()) {
-    H5Util::writeArray(instrumentGroup, "name", instrumentName);
+    H5Util::write(instrumentGroup, "name", instrumentName);
   }
   if (!instrumentSource.empty()) {
-    H5Util::writeArray(instrumentGroup, "instrument_source", instrumentSource);
+    H5Util::write(instrumentGroup, "instrument_source", instrumentSource);
   }
 
   file.close();
