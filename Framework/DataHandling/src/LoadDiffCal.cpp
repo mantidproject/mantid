@@ -149,52 +149,6 @@ void setCalWSProperty(API::Algorithm *alg, const std::string &prefix,
 
 } // anonymous namespace
 
-std::vector<double> LoadDiffCal::readDoubleArray(Group &group,
-                                                 const std::string &name) {
-  std::vector<double> result;
-
-  try {
-    DataSet dataset = group.openDataSet(name);
-    result = H5Util::readArray1DCoerce<double>(dataset);
-  } catch (H5::GroupIException &e) {
-    UNUSED_ARG(e);
-    g_log.information() << "Failed to open dataset \"" << name << "\"\n";
-  } catch (H5::DataTypeIException &e) {
-    UNUSED_ARG(e);
-    g_log.information() << "DataSet \"" << name << "\" should be double"
-                        << "\n";
-  }
-
-  for (double &value : result) {
-    if (std::abs(value) < 1.e-10) {
-      value = 0.;
-    } else if (value != value) { // check for NaN
-      value = 0.;
-    }
-  }
-
-  return result;
-}
-
-std::vector<int32_t> LoadDiffCal::readInt32Array(Group &group,
-                                                 const std::string &name) {
-  std::vector<int32_t> result;
-
-  try {
-    DataSet dataset = group.openDataSet(name);
-    result = H5Util::readArray1DCoerce<int32_t>(dataset);
-  } catch (H5::GroupIException &e) {
-    UNUSED_ARG(e);
-    g_log.information() << "Failed to open dataset \"" << name << "\"\n";
-  } catch (H5::DataTypeIException &e) {
-    UNUSED_ARG(e);
-    g_log.information() << "DataSet \"" << name << "\" should be int32"
-                        << "\n";
-  }
-
-  return result;
-}
-
 void LoadDiffCal::getInstrument(H5File &file) {
   // don't bother if there isn't a mask or grouping requested
   bool makeMask = getProperty("MakeMaskWorkspace");
@@ -490,22 +444,30 @@ void LoadDiffCal::exec() {
   }
 
   progress.report("Reading detid");
-  std::vector<int32_t> detids = readInt32Array(calibrationGroup, "detid");
+  std::vector<int32_t> detids =
+      H5Util::readArray1DCoerce<int32_t>(calibrationGroup, "detid");
   progress.report("Reading dasid");
-  std::vector<int32_t> dasids = readInt32Array(calibrationGroup, "dasid");
+  std::vector<int32_t> dasids =
+      H5Util::readArray1DCoerce<int32_t>(calibrationGroup, "dasid");
   progress.report("Reading group");
-  std::vector<int32_t> groups = readInt32Array(calibrationGroup, "group");
+  std::vector<int32_t> groups =
+      H5Util::readArray1DCoerce<int32_t>(calibrationGroup, "group");
   progress.report("Reading use");
-  std::vector<int32_t> use = readInt32Array(calibrationGroup, "use");
+  std::vector<int32_t> use =
+      H5Util::readArray1DCoerce<int32_t>(calibrationGroup, "use");
 
   progress.report("Reading difc");
-  std::vector<double> difc = readDoubleArray(calibrationGroup, "difc");
+  std::vector<double> difc =
+      H5Util::readArray1DCoerce<double>(calibrationGroup, "difc");
   progress.report("Reading difa");
-  std::vector<double> difa = readDoubleArray(calibrationGroup, "difa");
+  std::vector<double> difa =
+      H5Util::readArray1DCoerce<double>(calibrationGroup, "difa");
   progress.report("Reading tzero");
-  std::vector<double> tzero = readDoubleArray(calibrationGroup, "tzero");
+  std::vector<double> tzero =
+      H5Util::readArray1DCoerce<double>(calibrationGroup, "tzero");
   progress.report("Reading offset");
-  std::vector<double> offset = readDoubleArray(calibrationGroup, "offset");
+  std::vector<double> offset =
+      H5Util::readArray1DCoerce<double>(calibrationGroup, "offset");
 
   file.close();
 

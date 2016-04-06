@@ -209,8 +209,8 @@ void SaveDiffCal::exec() {
 
   H5File file(filename, H5F_ACC_EXCL);
 
-  auto calibrationGroup = file.createGroup("calibration");
-  H5Util::writeStrAttribute(calibrationGroup, "NX_class", "NXentry");
+  auto calibrationGroup =
+      H5Util::createGroupNXS(file, "calibration", "NXentry");
 
   this->writeDoubleFieldFromTable(calibrationGroup, "difc");
   this->writeDoubleFieldFromTable(calibrationGroup, "difa");
