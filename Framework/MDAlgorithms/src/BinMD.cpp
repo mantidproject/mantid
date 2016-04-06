@@ -335,7 +335,7 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       for (auto &boxe : boxes) {
         MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxe);
         // Perform the binning in this separate method.
-        if (box)
+        if (box && !box->getIsMasked())
           this->binMDBox(box, chunkMin.data(), chunkMax.data());
 
         // Progress reporting

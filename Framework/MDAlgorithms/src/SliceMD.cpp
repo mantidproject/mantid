@@ -211,7 +211,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   for (int i = 0; i < int(boxes.size()); i++) {
     MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
     // Perform the binning in this separate method.
-    if (box) {
+    if (box && !box->getIsMasked()) {
       // An array to hold the rotated/transformed coordinates
       coord_t outCenter[ond];
 
