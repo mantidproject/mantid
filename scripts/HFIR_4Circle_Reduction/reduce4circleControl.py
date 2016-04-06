@@ -478,6 +478,31 @@ class CWSCDReductionControl(object):
 
         return self._refinedUBTup[1], self._refinedUBTup[2], self._refinedUBTup[3]
 
+    def get_region_of_interest(self, exp_number, scan_number):
+        """ Get region of interest
+        :param exp_number:
+        :param scan_number:
+        :return:
+        """
+        # check
+        assert isinstance(exp_number, int)
+
+        if (exp_number, scan_number) in self._roiDict:
+            # able to find region of interest for this scan
+            ret_status = True
+            ret_value = self._roiDict[(exp_number, scan_number)]
+        elif exp_number in self._roiDict:
+            # able to find region of interest for this experiment
+            ret_status = True
+            ret_value = self._roiDict[exp_number]
+        else:
+            # region of interest of experiment is not defined
+            ret_status = False
+            ret_value = 'Unable to find ROI for experiment %d. Existing includes %s.' % (exp_number,
+                                                                                         str(self._roiDict.keys()))
+
+        return ret_status, ret_value
+
     def get_sample_log_value(self, exp_number, scan_number, pt_number, log_name):
         """
         Get sample log's value
@@ -1183,8 +1208,11 @@ class CWSCDReductionControl(object):
         ur_y = int(upper_right_corner[1])
         assert ll_x < ur_x and ll_y < ur_y
 
-        # Add
+        # Add to dictionary.  Because usually one ROI is defined for all scans in an experiment,
+        # then it is better and easier to support client to search this ROI by experiment number
+        # and only the latest is saved by this key
         self._roiDict[(exp_number, scan_number)] = ((ll_x, ll_y), (ur_x, ur_y))
+        self._roiDict[exp_number] = ((ll_x, ll_y), (ur_x, ur_y))
 
         return
 

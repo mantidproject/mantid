@@ -46,8 +46,51 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
         return
 
-    def add_roi(self):
-        """ Add region of interest to the canvas
+    def add_roi(self, roi_start, roi_end):
+        """ Add region of interest
+        :param roi_start:
+        :param roi_end:
+        :return:
+        """
+        # check
+        assert isinstance(roi_start, tuple) and len(roi_start) == 2
+        assert isinstance(roi_end, tuple) and len(roi_end) == 2
+
+        # set
+        self._roiStart = roi_start
+        self._roiEnd = roi_end
+
+        # plot
+        self.plot_roi()
+
+        return
+
+    def enter_roi_mode(self, state):
+        """
+        Enter or leave the region of interest (ROI) selection mode
+        :return:
+        """
+        assert isinstance(state, bool)
+
+        self._roiSelectMode = state
+
+        return
+
+    def get_roi(self):
+        """
+        :return: A list for polygon0
+        """
+        assert self._roiStart is not None
+        assert self._roiEnd is not None
+
+        # rio start is upper left, roi end is lower right
+        lower_left = (self._roiStart[0], self._roiEnd[1])
+        upper_right = (self._roiEnd[0], self._roiStart[1])
+
+        return lower_left, upper_right
+
+    def plot_roi(self):
+        """ Plot region of interest (as rectangular) to the canvas from the region set from
         :return:
         """
         # check
@@ -78,30 +121,6 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         self._myPolygon = self._myCanvas.plot_polygon(vertex_array, fill=False, color='w')
 
         return
-
-    def enter_roi_mode(self, state):
-        """
-        Enter or leave the region of interest (ROI) selection mode
-        :return:
-        """
-        assert isinstance(state, bool)
-
-        self._roiSelectMode = state
-
-        return
-
-    def get_roi(self):
-        """
-        :return: A list for polygon0
-        """
-        assert self._roiStart is not None
-        assert self._roiEnd is not None
-
-        # rio start is upper left, roi end is lower right
-        lower_left = (self._roiStart[0], self._roiEnd[1])
-        upper_right = (self._roiEnd[0], self._roiStart[1])
-
-        return lower_left, upper_right
 
     def remove_roi(self):
         """
@@ -244,7 +263,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         self._roiEnd = [cursor_x, cursor_y]
 
         # plot the new polygon
-        self.add_roi()
+        self.plot_roi()
 
         return
 

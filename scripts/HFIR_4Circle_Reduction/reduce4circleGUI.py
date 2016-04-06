@@ -1234,6 +1234,40 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_plot_prev_scan(self):
+        """ Plot the previous scan while keeping the same Pt.
+        :return:
+        """
+        # get current exp number, scan number and pt number
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
+                                                        self.ui.lineEdit_run,
+                                                        self.ui.lineEdit_rawDataPtNo])
+        if status is False:
+            error_msg = ret_obj
+            self.pop_one_button_dialog(error_msg)
+            return
+
+        exp_number, scan_number, pt_number = ret_obj
+
+        # get next scan
+        scan_number -= 1
+        if scan_number < 0:
+            self.pop_one_button_dialog('Scan number cannot be negative!')
+            return
+
+        # plot
+        try:
+            self._plot_raw_xml_2d(exp_number, scan_number, pt_number)
+        except RuntimeError as err:
+            error_msg = 'Unable to plot next scan %d due to %s.' % (scan_number, str(err))
+            self.pop_one_button_dialog(error_msg)
+            return
+
+        # update line edits
+        self.ui.lineEdit_run.setText(str(scan_number))
+
+        return
+
     def do_plot_next_pt_raw(self):
         """ Plot the Pt.
         """
@@ -1249,7 +1283,7 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(ret_obj)
             return
 
-        # Previous one
+        # Next Pt
         pt_no += 1
         # get last Pt. number
         status, last_pt_no = self._myControl.get_pt_numbers(exp_no, scan_no)
@@ -1265,6 +1299,37 @@ class MainWindow(QtGui.QMainWindow):
 
         # Plot
         self._plot_raw_xml_2d(exp_no, scan_no, pt_no)
+
+        return
+
+    def do_plot_next_scan(self):
+        """ Plot the next scan while keeping the same Pt.
+        :return:
+        """
+        # get current exp number, scan number and pt number
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
+                                                        self.ui.lineEdit_run,
+                                                        self.ui.lineEdit_rawDataPtNo])
+        if status is False:
+            error_msg = ret_obj
+            self.pop_one_button_dialog(error_msg)
+            return
+
+        exp_number, scan_number, pt_number = ret_obj
+
+        # get next scan
+        scan_number += 1
+
+        # plot
+        try:
+            self._plot_raw_xml_2d(exp_number, scan_number, pt_number)
+        except RuntimeError as err:
+            error_msg = 'Unable to plot next scan %d due to %s.' % (scan_number, str(err))
+            self.pop_one_button_dialog(error_msg)
+            return
+
+        # update line edits
+        self.ui.lineEdit_run.setText(str(scan_number))
 
         return
 
@@ -2223,7 +2288,14 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.graphicsView.add_plot_2d(raw_det_data, x_min=0, x_max=256, y_min=0, y_max=256,
                                          hold_prev_image=False)
         if self.ui.checkBox_keppRoi.isChecked():
-            raise NotImplementedError('Implement: get RIO from control and plot!')
+            # get region of interest from control
+            status, roi = self._myControl.get_region_of_interest(exp_no)
+            if status:
+                self.ui.graphicsView.add_roi(roi[0], roi[1])
+            else:
+                error_msg = roi
+                self.pop_one_button_dialog(error_msg)
+        # END-IF
 
         # Information
         info = '%-10s: %d\n%-10s: %d\n%-10s: %d\n' % ('Exp', exp_no,
