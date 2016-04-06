@@ -15,7 +15,7 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static H5UtilTest *createSuite() { return new H5UtilTest(); }
-  static void destroySuite( H5UtilTest *suite ) { delete suite; }
+  static void destroySuite(H5UtilTest *suite) { delete suite; }
 
   void removeFile(const std::string &filename) {
     if (Poco::File(filename).exists())
@@ -119,9 +119,6 @@ public:
     // cleanup
     removeFile(FILENAME);
   }
-
-
 };
-
 
 #endif /* MANTID_DATAHANDLING_H5UTILTEST_H_ */
