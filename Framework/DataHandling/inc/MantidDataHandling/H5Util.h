@@ -48,6 +48,9 @@ MANTID_DATAHANDLING_DLL H5::DataSpace getDataSpace(const size_t length);
 
 template <typename NumT> H5::DataSpace getDataSpace(const std::vector<NumT> &data);
 
+
+template <typename NumT> H5::DataType getType();
+
 /**
  * Sets up the chunking and compression rate.
  * @param length
@@ -64,11 +67,9 @@ MANTID_DATAHANDLING_DLL void writeStrAttribute(H5::Group &location,
 MANTID_DATAHANDLING_DLL void writeArray(H5::Group &group, const std::string &name,
                 const std::string &value);
 
-MANTID_DATAHANDLING_DLL void writeArray(H5::Group &group, const std::string &name,
-                const std::vector<double> &values);
-
-MANTID_DATAHANDLING_DLL void writeArray(H5::Group &group, const std::string &name,
-                const std::vector<int32_t> &values);
+template <typename NumT>
+void writeArray(H5::Group &group, const std::string &name,
+                const std::vector<NumT> &values);
 
 MANTID_DATAHANDLING_DLL std::string readString(H5::H5File &file, const std::string &path);
 

@@ -9,6 +9,45 @@ namespace DataHandling {
 namespace H5Util {
 
 // -------------------------------------------------------------------
+// convert primitives to HDF5 enum
+// -------------------------------------------------------------------
+
+template <typename NumT>
+DataType getType() {
+  throw DataTypeIException();
+}
+
+template <>
+MANTID_DATAHANDLING_DLL DataType getType<float>() {
+  return PredType::NATIVE_FLOAT;
+}
+
+template <>
+MANTID_DATAHANDLING_DLL DataType getType<double>() {
+  return PredType::NATIVE_DOUBLE;
+}
+
+template <>
+MANTID_DATAHANDLING_DLL DataType getType<int32_t>() {
+  return PredType::NATIVE_INT32;
+}
+
+template <>
+MANTID_DATAHANDLING_DLL DataType getType<uint32_t>() {
+  return PredType::NATIVE_UINT32;
+}
+
+template <>
+MANTID_DATAHANDLING_DLL DataType getType<int64_t>() {
+  return PredType::NATIVE_INT64;
+}
+
+template <>
+MANTID_DATAHANDLING_DLL DataType getType<uint64_t>() {
+  return PredType::NATIVE_UINT64;
+}
+
+// -------------------------------------------------------------------
 // write methods
 // -------------------------------------------------------------------
 
@@ -37,7 +76,7 @@ void writeStrAttribute(Group &location, const std::string &name,
   groupAttr.write(attrType, value);
 }
 
-void writeArray(H5::Group &group, const std::string &name,
+void writeArray(Group &group, const std::string &name,
                 const std::string &value) {
   StrType dataType(0, value.length() + 1);
   DataSpace dataSpace = getDataSpace(1);
@@ -45,20 +84,10 @@ void writeArray(H5::Group &group, const std::string &name,
   data.write(value, dataType);
 }
 
-void writeArray(H5::Group &group, const std::string &name,
-                const std::vector<double> &values) {
-  DataType dataType(PredType::NATIVE_DOUBLE);
-  DataSpace dataSpace = getDataSpace(values);
-
-  DSetCreatPropList propList = getPropList(values.size());
-
-  auto data = group.createDataSet(name, dataType, dataSpace, propList);
-  data.write(&(values[0]), dataType);
-}
-
-void writeArray(H5::Group &group, const std::string &name,
-                const std::vector<int32_t> &values) {
-  DataType dataType(PredType::NATIVE_INT32);
+template <typename NumT>
+void writeArray(Group &group, const std::string &name,
+                const std::vector<NumT> &values) {
+  DataType dataType(getType<NumT>());
   DataSpace dataSpace = getDataSpace(values);
 
   DSetCreatPropList propList = getPropList(values.size());
@@ -111,6 +140,22 @@ std::vector<NumT> readArrayCoerce(DataSet &dataset,
 
   return result;
 }
+
+// -------------------------------------------------------------------
+// instantiations for writeArray
+// -------------------------------------------------------------------
+template
+MANTID_DATAHANDLING_DLL void writeArray(H5::Group &group, const std::string &name, const std::vector<float> &values);
+template
+MANTID_DATAHANDLING_DLL void writeArray(H5::Group &group, const std::string &name, const std::vector<double> &values);
+template
+MANTID_DATAHANDLING_DLL void writeArray(H5::Group &group, const std::string &name, const std::vector<int32_t> &values);
+template
+MANTID_DATAHANDLING_DLL void writeArray(H5::Group &group, const std::string &name, const std::vector<uint32_t> &values);
+template
+MANTID_DATAHANDLING_DLL void writeArray(H5::Group &group, const std::string &name, const std::vector<int64_t> &values);
+template
+MANTID_DATAHANDLING_DLL void writeArray(H5::Group &group, const std::string &name, const std::vector<uint64_t> &values);
 
 // -------------------------------------------------------------------
 // instantiations for getDataSpace
