@@ -107,29 +107,42 @@ public:
   * @param expected_signal :: how many events in each resulting bin
   * @param expected_numBins :: how many points/bins in the output
   */
-  void do_test_exec(std::string functionXML, std::string name1,
-                    std::string name2, std::string name3, std::string name4,
-                    double expected_signal, size_t expected_numBins,
-                    bool IterateEvents = true, size_t numEventsPerBox = 1,
-                    VMD expectBasisX = VMD(1, 0, 0),
+  void do_test_exec(const std::string &functionXML, const std::string &name1,
+                    const std::string &name2, const std::string &name3,
+                    const std::string &name4, const double expected_signal,
+                    const size_t expected_numBins, bool IterateEvents = true,
+                    size_t numEventsPerBox = 1, VMD expectBasisX = VMD(1, 0, 0),
                     VMD expectBasisY = VMD(0, 1, 0),
                     VMD expectBasisZ = VMD(0, 0, 1)) {
-    BinMD alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-
     Mantid::Geometry::QSample frame;
     IMDEventWorkspace_sptr in_ws =
         MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<3>, 3>(
             10, 0.0, 10.0, frame, numEventsPerBox);
-    Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
-        Mantid::Kernel::QSample;
 
     auto eventNorm = Mantid::API::MDNormalization::VolumeNormalization;
     auto histoNorm = Mantid::API::MDNormalization::NumEventsNormalization;
     in_ws->setDisplayNormalization(eventNorm);
     in_ws->setDisplayNormalizationHisto(histoNorm);
     AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
+
+    execute_bin(functionXML, name1, name2, name3, name4, expected_signal,
+                expected_numBins, IterateEvents, numEventsPerBox, expectBasisX,
+                expectBasisY, expectBasisZ, in_ws);
+  }
+
+  MDHistoWorkspace_sptr
+  execute_bin(const std::string &functionXML, const std::string &name1,
+              const std::string &name2, const std::string &name3,
+              const std::string &name4, const double expected_signal,
+              const size_t expected_numBins, bool IterateEvents,
+              size_t numEventsPerBox, VMD expectBasisX, VMD expectBasisY,
+              VMD expectBasisZ, IMDEventWorkspace_sptr in_ws) {
+    BinMD alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
+        Mantid::Kernel::QSample;
+    auto histoNorm = Mantid::API::MDNormalization::NumEventsNormalization;
 
     // 1000 boxes with 1 event each
     TS_ASSERT_EQUALS(in_ws->getNPoints(), 1000 * numEventsPerBox);
@@ -140,8 +153,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim1", name2));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim2", name3));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim3", name4));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ImplicitFunctionXML", functionXML));
+    if (functionXML != "NO_FUNCTION") {
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setPropertyValue("ImplicitFunctionXML", functionXML));
+    }
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IterateEvents", IterateEvents));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
@@ -156,7 +171,7 @@ public:
             AnalysisDataService::Instance().retrieve("BinMDTest_ws"));)
     TS_ASSERT(out);
     if (!out)
-      return;
+      return out;
 
     TS_ASSERT_EQUALS(appliedCoord, out->getSpecialCoordinateSystem());
     // Took 6x6x6 bins in the middle of the box
@@ -168,13 +183,13 @@ public:
         TS_ASSERT_DELTA(out->getSignalAt(i), expected_signal, 1e-5);
         TS_ASSERT_DELTA(out->getNumEventsAt(i), expected_signal, 1e-5);
         TS_ASSERT_DELTA(out->getErrorAt(i), sqrt(expected_signal), 1e-5);
-      } else {
+      } else if (functionXML != "NO_FUNCTION") {
         // All NAN cause of implicit function
         TS_ASSERT(boost::math::isnan(out->getSignalAt(i))); // The implicit
-                                                            // function should
-                                                            // have ensured that
-                                                            // no bins were
-                                                            // present.
+        // function should
+        // have ensured that
+        // no bins were
+        // present.
       }
     }
     // check basis vectors
@@ -193,6 +208,39 @@ public:
     TSM_ASSERT_EQUALS("Should have num events normalization",
                       out->displayNormalization(), histoNorm);
     AnalysisDataService::Instance().remove("BinMDTest_ws");
+
+    return out;
+  }
+
+  void test_exec_with_masked_ws() {
+    Mantid::Geometry::QSample frame;
+    IMDEventWorkspace_sptr in_ws =
+        MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<3>, 3>(
+            10, 0.0, 10.0, frame, 1);
+
+    auto eventNorm = Mantid::API::MDNormalization::VolumeNormalization;
+    auto histoNorm = Mantid::API::MDNormalization::NumEventsNormalization;
+    in_ws->setDisplayNormalization(eventNorm);
+    in_ws->setDisplayNormalizationHisto(histoNorm);
+
+    Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
+        Mantid::Kernel::QSample;
+    in_ws->setCoordinateSystem(appliedCoord);
+    AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
+
+    FrameworkManager::Instance().exec("MaskMD", 6, "Workspace", "BinMDTest_ws",
+                                      "Dimensions", "Axis0,Axis1,Axis2",
+                                      "Extents", "0,2,0,10,0,10");
+
+    auto out_ws =
+        execute_bin("NO_FUNCTION", "Axis0,0.0,8.0, 8", "Axis1,0.0,8.0, 8",
+                    "Axis2,0.0,8.0, 8", "", 1.0, 8 * 8 * 8, true, 1,
+                    VMD(1, 0, 0), VMD(0, 1, 0), VMD(0, 0, 1), in_ws);
+
+    TSM_ASSERT_DELTA("Data was masked bin should have a signal of 0",
+                     out_ws->getSignalAt(0), 0.0, 1e-5);
+    TSM_ASSERT_DELTA("Data was unmasked bin should have a signal of 1",
+                     out_ws->getSignalAt(3), 1.0, 1e-5);
   }
 
   void test_exec_3D() {
