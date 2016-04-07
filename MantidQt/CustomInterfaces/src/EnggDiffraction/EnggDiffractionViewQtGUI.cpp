@@ -25,6 +25,9 @@ using namespace MantidQt::CustomInterfaces;
 
 #include <qwt_symbol.h>
 
+/// shahroz
+
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -205,9 +208,6 @@ void EnggDiffractionViewQtGUI::doSetupTabPreproc() {
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabFitting() {
-  // constructor of the peakPicker
-  m_peakPicker =
-      new MantidWidgets::PeakPicker(m_uiTabFitting.dataPlot, Qt::red);
 
   connect(m_uiTabFitting.pushButton_fitting_browse_run_num, SIGNAL(released()),
           this, SLOT(browseFitFocusedRun()));
@@ -231,6 +231,12 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   connect(m_uiTabFitting.listWidget_fitting_bank_preview,
           SIGNAL(currentRowChanged(int)), this, SLOT(setBankIdComboBox(int)));
 
+  // add peak by clicking the button
+  connect(m_uiTabFitting.pushButton_add_peak, SIGNAL(released()),
+	  SLOT(enablePeakPick()));
+
+  //connect(m_peakPicker, SIGNAL(changed()), 
+
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom,
                                         "Time-of-flight (us)");
@@ -238,6 +244,12 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   QFont font("MS Shell Dlg 2", 8);
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::xBottom, font);
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::yLeft, font);
+
+  // constructor of the peakPicker
+  // XXX: Being a QwtPlotItem, should get deleted when m_ui.plot gets deleted (auto-delete option)
+  m_peakPicker = new MantidWidgets::PeakPicker(m_uiTabFitting.dataPlot, Qt::red);
+  /// shahroz : causing crash
+  setPeakPickerEnabled(true);
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -919,6 +931,7 @@ QPoint EnggDiffractionViewQtGUI::getQPoint() {
   return pos;
 }
 
+
 void EnggDiffractionViewQtGUI::calibrateClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::CalcCalib);
 }
@@ -1286,6 +1299,15 @@ void EnggDiffractionViewQtGUI::setListWidgetBank(int idx) {
 
   QListWidget *selectBank = m_uiTabFitting.listWidget_fitting_bank_preview;
   selectBank->setCurrentRow(idx);
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enablePeakPick()
+{
+	auto ourFunc = FunctionFactory::Instance().createFunction("BackToBackExponential");
+	auto backtoback = boost::dynamic_pointer_cast<IPeakFunction>(ourFunc);
+	
+	setPeakPicker(backtoback);
+	setPeakPickerEnabled(true);
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
