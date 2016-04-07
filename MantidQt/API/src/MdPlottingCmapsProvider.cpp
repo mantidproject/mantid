@@ -96,7 +96,7 @@ namespace MantidQt{
       for (QFileInfoList::iterator it = info.begin(); it != info.end(); ++it)
       {
         colorMapNames.append(it->baseName());
-        colorMapFiles.append(it->absFilePath());
+        colorMapFiles.append(it->absoluteFilePath());
       }
     }
 

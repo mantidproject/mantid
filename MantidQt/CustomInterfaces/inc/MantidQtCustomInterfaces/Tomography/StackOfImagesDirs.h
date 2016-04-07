@@ -6,6 +6,11 @@
 #include <string>
 #include <vector>
 
+// forward declarations
+namespace Poco {
+class File;
+}
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -37,7 +42,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport StackOfImagesDirs {
 public:
   /// constructor from a path (to a directory)
-  StackOfImagesDirs(const std::string &path);
+  StackOfImagesDirs(const std::string &path, bool allowSimpleLayout = true);
 
   /// The current (simple) concept of valid is: there at least a
   /// sample/data directory with at least one file in it.
@@ -59,7 +64,14 @@ public:
 
 private:
   /// tries to find the expected data_/dark_/flat_ directories
-  void findStackDirs(const std::string &path);
+  void findStackDirs(const std::string &path, bool allowSimpleLayout);
+
+  /// simple version: just files (sample data)
+  bool findStackFilesSimple(Poco::File &dir);
+
+  /// complex version: sample (data), flat, and dark
+  bool findStackDirsComplex(Poco::File &dir);
+
   /// finds images in a directory
   std::vector<std::string> findImgFiles(const std::string &path) const;
 
@@ -72,7 +84,11 @@ private:
   std::string m_flatDir;
   std::string m_darkDir;
 
-  static const std::string g_descr;
+  std::string m_descr;
+
+  static const std::string g_descrComplex;
+  static const std::string g_descrSimple;
+  static const std::string g_descrBoth;
   static const std::string g_sampleNamePrefix;
   static const std::string g_flatNamePrefix;
   static const std::string g_darkNamePrefix;

@@ -13,6 +13,7 @@ namespace MantidQt
 		class CompAssemblyActor;
 		class ObjCompAssemblyActor;
 		class RectangularDetectorActor;
+		class StructuredDetectorActor;
 		class InstrumentActor;
 
 
@@ -32,6 +33,7 @@ namespace MantidQt
 			virtual bool visit(ComponentActor*);
 			virtual bool visit(InstrumentActor*);
 			virtual bool visit(RectangularDetectorActor*);
+			virtual bool visit(StructuredDetectorActor*);
 		};
 
 		/**
@@ -50,6 +52,7 @@ namespace MantidQt
 			virtual bool visit(const ComponentActor*);
 			virtual bool visit(const InstrumentActor*);
 			virtual bool visit(const RectangularDetectorActor*);
+			virtual bool visit(const StructuredDetectorActor *);
 		};
 
 

@@ -4,10 +4,12 @@
 #include "MantidCurveFitting/GSLVector.h"
 
 #include <gsl/gsl_blas.h>
-#include <stdexcept>
-#include <iomanip>
-#include <sstream>
+#include <algorithm>
 #include <cmath>
+#include <iomanip>
+#include <stdexcept>
+#include <sstream>
+#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -42,10 +44,26 @@ GSLVector::GSLVector(const gsl_vector *v)
   }
 }
 
+/// Move constructor.
+GSLVector::GSLVector(std::vector<double> &&v)
+    : m_data(std::move(v)),
+      m_view(gsl_vector_view_array(m_data.data(), m_data.size())) {}
+
 /// Copy assignment operator
 /// @param v :: The other vector
 GSLVector &GSLVector::operator=(const GSLVector &v) {
   m_data = v.m_data;
+  m_view = gsl_vector_view_array(m_data.data(), m_data.size());
+  return *this;
+}
+
+/// Assignment operator
+GSLVector &GSLVector::operator=(const std::vector<double> &v) {
+  if (v.empty()) {
+    m_data.resize(1, 0);
+  } else {
+    m_data = v;
+  }
   m_view = gsl_vector_view_array(m_data.data(), m_data.size());
   return *this;
 }
@@ -119,7 +137,18 @@ GSLVector &GSLVector::operator-=(const GSLVector &v) {
 /// Multiply by a number
 /// @param d :: The number
 GSLVector &GSLVector::operator*=(const double d) {
-  gsl_vector_scale(gsl(), d);
+  for (auto &x : m_data) {
+    x *= d;
+  }
+  return *this;
+}
+
+/// Add a number
+/// @param d :: The number
+GSLVector &GSLVector::operator+=(const double d) {
+  for (auto &x : m_data) {
+    x += d;
+  }
   return *this;
 }
 
@@ -154,6 +183,55 @@ double GSLVector::dot(const GSLVector &v) const {
   gsl_blas_ddot(gsl(), v.gsl(), &res);
   return res;
 }
+
+/// Get index of the smallest element
+size_t GSLVector::indexOfMinElement() const {
+  if (m_data.empty()) {
+    throw std::runtime_error("Cannot find min element of empty vector.");
+  }
+  auto it = std::min_element(m_data.begin(), m_data.end());
+  if (it == m_data.end()) {
+    // can it ever happen?
+    throw std::runtime_error("Cannot find min element of vector.");
+  }
+  return static_cast<size_t>(std::distance(m_data.begin(), it));
+}
+
+/// Create an index array that would sort this vector
+/// @param ascending :: If true sort in ascending order. Otherwise
+///     sort in descending order.
+std::vector<size_t> GSLVector::sortIndices(bool ascending) const {
+  std::vector<size_t> indices(size());
+  for (size_t i = 0; i < size(); ++i) {
+    indices[i] = i;
+  }
+  if (ascending) {
+    std::sort(indices.begin(), indices.end(), [this](size_t i, size_t j) {
+      return this->m_data[i] < m_data[j];
+    });
+  } else {
+    std::sort(indices.begin(), indices.end(), [this](size_t i, size_t j) {
+      return this->m_data[i] > m_data[j];
+    });
+  }
+  return indices;
+}
+
+/// Sort this vector in order defined by an index array
+/// @param indices :: Indices defining the order of elements in sorted vector.
+void GSLVector::sort(const std::vector<size_t> &indices) {
+  std::vector<double> data(size());
+  for (size_t i = 0; i < size(); ++i) {
+    data[i] = m_data[indices[i]];
+  }
+  std::swap(m_data, data);
+}
+
+/// Create a new GSLVector and move all data to it. Destroys this vector.
+GSLVector GSLVector::move() { return GSLVector(std::move(m_data)); }
+
+/// Copy the values to an std vector of doubles
+std::vector<double> GSLVector::toStdVector() const { return m_data; }
 
 /// The << operator.
 std::ostream &operator<<(std::ostream &ostr, const GSLVector &v) {

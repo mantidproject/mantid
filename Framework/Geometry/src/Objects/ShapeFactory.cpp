@@ -70,7 +70,6 @@ boost::shared_ptr<Object> ShapeFactory::createShape(std::string shapeXML,
                   " . Empty geometry Object is returned.");
 
     return boost::make_shared<Object>();
-    ;
   }
   // Get pointer to root element
   Element *pRootElem = pDoc->documentElement();
@@ -198,6 +197,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element *pElem) {
             idMatching[idFromUser] = parseCone(pE, primitives, l_id);
             numPrimitives++;
           } else if (!primitiveName.compare("hexahedron")) {
+            lastElement = pE;
             idMatching[idFromUser] = parseHexahedron(pE, primitives, l_id);
             numPrimitives++;
           } else if (!primitiveName.compare("tapered-guide")) {
@@ -815,16 +815,6 @@ ShapeFactory::parseCone(Poco::XML::Element *pElem,
 
 namespace // anonymous
     {
-struct Hexahedron {
-  V3D lfb; // left front bottom
-  V3D lft; // left front top
-  V3D lbb; // left back bottom
-  V3D lbt; // left back top
-  V3D rfb; // right front bottom
-  V3D rft; // right front top
-  V3D rbb; // right back bottom
-  V3D rbt; // right back top
-};
 
 /**
  * The "tapered-guide" shape is actually a special case of hexahedron; once we
@@ -908,6 +898,65 @@ parseHexahedronFromStruct(Hexahedron &hex,
 }
 } // anonymous namespace
 
+/**
+* Get all corners of a hexahedron from an XML element.
+*
+* @param pElem :: XML 'hexahedron' element from instrument definition file.
+* @return All corners of the hexahedron.
+*
+* @throw std::invalid_argument if XML string is invalid.
+*/
+Hexahedron ShapeFactory::parseHexahedron(Poco::XML::Element *pElem) {
+  Element *pElem_lfb = getShapeElement(pElem, "left-front-bottom-point");
+  Element *pElem_lft = getShapeElement(pElem, "left-front-top-point");
+  Element *pElem_lbb = getShapeElement(pElem, "left-back-bottom-point");
+  Element *pElem_lbt = getShapeElement(pElem, "left-back-top-point");
+  Element *pElem_rfb = getShapeElement(pElem, "right-front-bottom-point");
+  Element *pElem_rft = getShapeElement(pElem, "right-front-top-point");
+  Element *pElem_rbb = getShapeElement(pElem, "right-back-bottom-point");
+  Element *pElem_rbt = getShapeElement(pElem, "right-back-top-point");
+
+  const bool isValid = pElem_lfb && pElem_lft && pElem_lbb && pElem_lbt &&
+                       pElem_rfb && pElem_rft && pElem_rbb && pElem_rbt;
+
+  std::ostringstream ERROR_MSG;
+  ERROR_MSG << "XML element: <" + pElem->tagName() + ""
+            << "> contains invalid syntax for defining hexahedron. The "
+               "following points have not been defined:\n\n";
+
+  if (!pElem_lfb)
+    ERROR_MSG << "left-front-bottom-point\n";
+  if (!pElem_lft)
+    ERROR_MSG << "left-front-top-point\n";
+  if (!pElem_lbb)
+    ERROR_MSG << "left-back-bottom-point\n";
+  if (!pElem_lbt)
+    ERROR_MSG << "left-back-top-point\n";
+  if (!pElem_rfb)
+    ERROR_MSG << "right-front-bottom-point\n";
+  if (!pElem_rft)
+    ERROR_MSG << "right-front-top-point\n";
+  if (!pElem_rbb)
+    ERROR_MSG << "right-back-bottom-point\n";
+  if (!pElem_rbt)
+    ERROR_MSG << "right-back-top-point\n";
+
+  if (!isValid)
+    throw std::invalid_argument(ERROR_MSG.str());
+
+  Hexahedron hex;
+  hex.lfb = parsePosition(pElem_lfb);
+  hex.lft = parsePosition(pElem_lft);
+  hex.lbb = parsePosition(pElem_lbb);
+  hex.lbt = parsePosition(pElem_lbt);
+  hex.rfb = parsePosition(pElem_rfb);
+  hex.rft = parsePosition(pElem_rft);
+  hex.rbb = parsePosition(pElem_rbb);
+  hex.rbt = parsePosition(pElem_rbt);
+
+  return hex;
+}
+
 /** Parse XML 'hexahedron' element
  *
  *  @param pElem :: XML 'hexahedron' element from instrument def. file
@@ -923,24 +972,7 @@ std::string
 ShapeFactory::parseHexahedron(Poco::XML::Element *pElem,
                               std::map<int, boost::shared_ptr<Surface>> &prim,
                               int &l_id) {
-  Element *pElem_lfb = getShapeElement(pElem, "left-front-bottom-point");
-  Element *pElem_lft = getShapeElement(pElem, "left-front-top-point");
-  Element *pElem_lbb = getShapeElement(pElem, "left-back-bottom-point");
-  Element *pElem_lbt = getShapeElement(pElem, "left-back-top-point");
-  Element *pElem_rfb = getShapeElement(pElem, "right-front-bottom-point");
-  Element *pElem_rft = getShapeElement(pElem, "right-front-top-point");
-  Element *pElem_rbb = getShapeElement(pElem, "right-back-bottom-point");
-  Element *pElem_rbt = getShapeElement(pElem, "right-back-top-point");
-
-  Hexahedron hex;
-  hex.lfb = parsePosition(pElem_lfb);
-  hex.lft = parsePosition(pElem_lft);
-  hex.lbb = parsePosition(pElem_lbb);
-  hex.lbt = parsePosition(pElem_lbt);
-  hex.rfb = parsePosition(pElem_rfb);
-  hex.rft = parsePosition(pElem_rft);
-  hex.rbb = parsePosition(pElem_rbb);
-  hex.rbt = parsePosition(pElem_rbt);
+  Hexahedron hex = parseHexahedron(pElem);
 
   return parseHexahedronFromStruct(hex, prim, l_id);
 }
@@ -1278,57 +1310,53 @@ V3D ShapeFactory::parsePosition(Poco::XML::Element *pElem) {
 /// create a special geometry handler for the known finite primitives
 void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
                                          boost::shared_ptr<Object> Obj) {
+
+  boost::shared_ptr<GeometryHandler> handler =
+      boost::make_shared<GluGeometryHandler>(Obj);
+
+  Obj->setGeometryHandler(handler);
+
+  GluGeometryHandler *geomHandler =
+      dynamic_cast<GluGeometryHandler *>(handler.get());
+
   if (pElem->tagName() == "cuboid") {
-    boost::shared_ptr<GeometryHandler> handler =
-        boost::make_shared<GluGeometryHandler>(Obj);
-    Obj->setGeometryHandler(handler);
     auto corners = parseCuboid(pElem);
-    ((GluGeometryHandler *)(handler.get()))
-        ->setCuboid(corners.lfb, corners.lft, corners.lbb, corners.rfb);
+    geomHandler->setCuboid(corners.lfb, corners.lft, corners.lbb, corners.rfb);
+  } else if (pElem->tagName() == "hexahedron") {
+    auto corners = parseHexahedron(pElem);
+    geomHandler->setHexahedron(corners.lbb, corners.lfb, corners.rfb,
+                               corners.rbb, corners.lbt, corners.lft,
+                               corners.rft, corners.rbt);
   } else if (pElem->tagName() == "sphere") {
-    boost::shared_ptr<GeometryHandler> handler =
-        boost::make_shared<GluGeometryHandler>(Obj);
-    Obj->setGeometryHandler(handler);
     Element *pElemCentre = getOptionalShapeElement(pElem, "centre");
     Element *pElemRadius = getShapeElement(pElem, "radius");
     V3D centre;
     if (pElemCentre)
       centre = parsePosition(pElemCentre);
-    ((GluGeometryHandler *)(handler.get()))
-        ->setSphere(centre, atof((pElemRadius->getAttribute("val")).c_str()));
+    geomHandler->setSphere(centre,
+                           atof((pElemRadius->getAttribute("val")).c_str()));
   } else if (pElem->tagName() == "cylinder") {
-    boost::shared_ptr<GeometryHandler> handler =
-        boost::make_shared<GluGeometryHandler>(Obj);
-    Obj->setGeometryHandler(handler);
     Element *pElemCentre = getShapeElement(pElem, "centre-of-bottom-base");
     Element *pElemAxis = getShapeElement(pElem, "axis");
     Element *pElemRadius = getShapeElement(pElem, "radius");
     Element *pElemHeight = getShapeElement(pElem, "height");
     V3D normVec = parsePosition(pElemAxis);
     normVec.normalize();
-    ((GluGeometryHandler *)(handler.get()))
-        ->setCylinder(parsePosition(pElemCentre), normVec,
-                      atof((pElemRadius->getAttribute("val")).c_str()),
-                      atof((pElemHeight->getAttribute("val")).c_str()));
+    geomHandler->setCylinder(parsePosition(pElemCentre), normVec,
+                             atof((pElemRadius->getAttribute("val")).c_str()),
+                             atof((pElemHeight->getAttribute("val")).c_str()));
   } else if (pElem->tagName() == "segmented-cylinder") {
-    boost::shared_ptr<GeometryHandler> handler =
-        boost::make_shared<GluGeometryHandler>(Obj);
-    Obj->setGeometryHandler(handler);
     Element *pElemCentre = getShapeElement(pElem, "centre-of-bottom-base");
     Element *pElemAxis = getShapeElement(pElem, "axis");
     Element *pElemRadius = getShapeElement(pElem, "radius");
     Element *pElemHeight = getShapeElement(pElem, "height");
     V3D normVec = parsePosition(pElemAxis);
     normVec.normalize();
-    ((GluGeometryHandler *)(handler.get()))
-        ->setSegmentedCylinder(
-            parsePosition(pElemCentre), normVec,
-            atof((pElemRadius->getAttribute("val")).c_str()),
-            atof((pElemHeight->getAttribute("val")).c_str()));
+    geomHandler->setSegmentedCylinder(
+        parsePosition(pElemCentre), normVec,
+        atof((pElemRadius->getAttribute("val")).c_str()),
+        atof((pElemHeight->getAttribute("val")).c_str()));
   } else if (pElem->tagName() == "cone") {
-    boost::shared_ptr<GeometryHandler> handler =
-        boost::make_shared<GluGeometryHandler>(Obj);
-    Obj->setGeometryHandler(handler);
     Element *pElemTipPoint = getShapeElement(pElem, "tip-point");
     Element *pElemAxis = getShapeElement(pElem, "axis");
     Element *pElemAngle = getShapeElement(pElem, "angle");
@@ -1340,8 +1368,7 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
     double radius =
         height *
         tan(M_PI * atof((pElemAngle->getAttribute("val")).c_str()) / 180.0);
-    ((GluGeometryHandler *)(handler.get()))
-        ->setCone(parsePosition(pElemTipPoint), normVec, radius, height);
+    geomHandler->setCone(parsePosition(pElemTipPoint), normVec, radius, height);
   }
 }
 

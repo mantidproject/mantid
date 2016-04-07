@@ -157,21 +157,68 @@ Data locations
 
 This is dependent on the facility and instrument.
 
-TODO: this is work in progress. At ISIS In principle data will be
-replicated in the ISIS archive, the SCARF imat disk space, and
-possibly an analysis machine located in R3.
+.. warning:: This is work in progress. At ISIS, in principle data will
+             be replicated in the ISIS archive, the IMAT disk space on
+             the cluster SCARF (remote compute resource), and possibly
+             an IMAT analysis machine.
+
+The path to the files of a particular tomographic reconstruction
+consists of several components. An example path would be (on a Windows
+system where the input/output data is on the drive "D":
+
+* D:/data/RB987654321/experiment_foo/
+
+where:
+
+* *data* is the root or base path for all tomography data. This folder
+  or directory is synchronized (at least partially) between the remote
+  compute resource and the (local) instrument analysis machine.
+
+* *RB987654321* is the experiment reference number (or so-called RB
+number) which usually starts with the prefix "RB".
+
+* *experiment_foo* is a name given by the user to the particular
+  experiment the data comes from. This is specified in free form.
+
+* inside the path there will normally be at least three folders or
+subdirectories for the sample, flat, and dark images:
+
+  - data
+  - flat
+  - dark
+
+As the files are mirrored on the remote computer cluster, if a network
+drive have been added (or mapped) in the local system, for example
+using the drive "S:", then the following path would contain a similar
+tree of image files:
+
+* D:/data/RB987654321/experiment_foo/
+
+The equivalent on a non-Windows system would be for example:
+
+* /media/scarf/data/RB987654321/experiment_foo/
+
+These and related parameters can be inspected and modified in the
+sytem settings section (or **System** tab). Their default values are
+set for the current setup of the IMAT analysis machine. The "Reset
+all" button resets all these settings to their factory defaults.  Note
+that the **System** section of the interface is currently work in
+progress and it may change significantly as required during
+commissioning of IMAT.
 
 The tab *Visualization* has simple push buttons to browse the files
 available from the local and remote locations, as well as any other
-directory or folder selected by the user.
+directory or folder selected by the user. The data for the different
+experiments can be found under these locations.
 
 Running jobs remotely
 ---------------------
 
 To be able to run jobs on a remote compute resource (cluster, supercomputer, etc.)
 
-* Log into the resource
-* Select it and setup one reconstruction tool
+* Log into the resource (in **Setup**)
+* Then in **Run** select the compute resource and setup one
+  reconstruction tool
 * Use the **reconstruct** button in the **Run** tab of the interface
 
 You can monitor the status of the jobs currently running (and recently
@@ -201,6 +248,12 @@ the tool and/or reconstruction method used.
    :align: center
    :scale: 60%
 
+Stacks of images can be opened by using the browse button located at
+the top of the interface. You can point the interface to a folder
+(directory) containing directories for sample, dark, and flat images,
+or alternatively to a folder containing images. The interface will
+pick all the files recognized as images.
+
 At any stage during the process of selecting the regions it is also
 possible to see how the selections fit different images by sliding
 through the images of the stack (using the slider or scroll bar).
@@ -217,7 +270,7 @@ can be selected again by pushing the respective "Select" buttons
 and/or editing their coordinates manually.
 
 The default values, set in principle when a new stack of images is
-loaded, is as follows. The region of intererest is set to cover all
+loaded, are as follows. The region of intererest is set to cover all
 the images. The regions of normalization is not set (empty), and the
 center of rotation is set to the center of the image. The option to
 find the center of rotation automatically is disabled at present.
@@ -226,6 +279,14 @@ If when selection a region the mouse is moved outside of the images,
 it is possible to continue the selection of the region (second corner)
 by clicking again inside the image. Alternatively, any selection can
 be reset at any point by using the "reset" buttons.
+
+When loading a stack of images, note that when the images are loaded
+from the folder(s) (directorie(s)) any files with unrecognized
+extension or type (for example .txt) will be ignored. Normally a
+warning about this will be shown in the Mantid logs. Image files with
+the string **_SummedImg** at the end of their names will be skipped as
+well, as this is a convention used by some detectors/control software
+to generate summed images
 
 Pre-/post-processing
 ~~~~~~~~~~~~~~~~~~~~
@@ -240,6 +301,11 @@ applied on the reconstructed volume produced by the algorithm.
 .. figure:: /images/tomo_tab4_pre_post_proc_filters.png
    :align: center
    :scale: 60%
+
+Among other options, normalization by flat and/or dark images can be
+enabled here. Note that this setting is global and will be effective
+for any input dataset. In the **Setup** section it is possible to
+enable or disable them specifically for the dataset being processed.
 
 The tab also shows options to define what outputs should be produced
 in addition to the reconstructed volume.

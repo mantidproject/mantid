@@ -463,7 +463,6 @@ size_t MDHistoWorkspace::getMemorySize() const {
 //----------------------------------------------------------------------------------------------
 /// @return a vector containing a copy of the signal data in the workspace.
 std::vector<signal_t> MDHistoWorkspace::getSignalDataVector() const {
-  // TODO: Make this more efficient if needed.
   std::vector<signal_t> out;
   out.resize(m_length, 0.0);
   for (size_t i = 0; i < m_length; ++i)
@@ -474,7 +473,6 @@ std::vector<signal_t> MDHistoWorkspace::getSignalDataVector() const {
 
 /// @return a vector containing a copy of the error data in the workspace.
 std::vector<signal_t> MDHistoWorkspace::getErrorDataVector() const {
-  // TODO: Make this more efficient if needed.
   std::vector<signal_t> out;
   out.resize(m_length, 0.0);
   for (size_t i = 0; i < m_length; ++i)
@@ -1048,7 +1046,10 @@ void MDHistoWorkspace::power(double exponent) {
 MDHistoWorkspace &MDHistoWorkspace::operator&=(const MDHistoWorkspace &b) {
   checkWorkspaceSize(b, "&= (and)");
   for (size_t i = 0; i < m_length; ++i) {
-    m_signals[i] = ((m_signals[i] != 0) && (b.m_signals[i] != 0)) ? 1.0 : 0.0;
+    m_signals[i] = ((m_signals[i] != 0 && !m_masks[i]) &&
+                    (b.m_signals[i] != 0 && !b.m_masks[i]))
+                       ? 1.0
+                       : 0.0;
     m_errorsSquared[i] = 0;
   }
   return *this;
@@ -1064,7 +1065,10 @@ MDHistoWorkspace &MDHistoWorkspace::operator&=(const MDHistoWorkspace &b) {
 MDHistoWorkspace &MDHistoWorkspace::operator|=(const MDHistoWorkspace &b) {
   checkWorkspaceSize(b, "|= (or)");
   for (size_t i = 0; i < m_length; ++i) {
-    m_signals[i] = ((m_signals[i] != 0) || (b.m_signals[i] != 0)) ? 1.0 : 0.0;
+    m_signals[i] = ((m_signals[i] != 0 && !m_masks[i]) ||
+                    (b.m_signals[i] != 0 && !b.m_masks[i]))
+                       ? 1.0
+                       : 0.0;
     m_errorsSquared[i] = 0;
   }
   return *this;
@@ -1081,7 +1085,10 @@ MDHistoWorkspace &MDHistoWorkspace::operator|=(const MDHistoWorkspace &b) {
 MDHistoWorkspace &MDHistoWorkspace::operator^=(const MDHistoWorkspace &b) {
   checkWorkspaceSize(b, "^= (xor)");
   for (size_t i = 0; i < m_length; ++i) {
-    m_signals[i] = ((m_signals[i] != 0) ^ (b.m_signals[i] != 0)) ? 1.0 : 0.0;
+    m_signals[i] = ((m_signals[i] != 0 && !m_masks[i]) ^
+                    (b.m_signals[i] != 0 && !b.m_masks[i]))
+                       ? 1.0
+                       : 0.0;
     m_errorsSquared[i] = 0;
   }
   return *this;
@@ -1095,7 +1102,7 @@ MDHistoWorkspace &MDHistoWorkspace::operator^=(const MDHistoWorkspace &b) {
  */
 void MDHistoWorkspace::operatorNot() {
   for (size_t i = 0; i < m_length; ++i) {
-    m_signals[i] = (m_signals[i] == 0.0);
+    m_signals[i] = (m_signals[i] == 0.0 || m_masks[i]);
     m_errorsSquared[i] = 0;
   }
 }

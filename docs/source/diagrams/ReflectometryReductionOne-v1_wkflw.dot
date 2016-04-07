@@ -1,21 +1,23 @@
 digraph ReflectometryReductionOne {
   label = "ReflectometryReductionOne Flowchart"
-  $global_style
+ $global_style
 
   subgraph params {
-    $param_style
+   $param_style
     inputWorkspace    [label="InputWorkspace"]
     firstTransRun     [label="FirstTransmissionRun"]
     secondTransRun    [label="SecondTransmissionRun"]
     outputWorkspaceWL [label="OutputWorkspaceWavelength"]
     outputWorkspaceMT [label="OutputWorkspace"]
     thetaIn           [label="ThetaIn"]
+    sourceRotationAngle  [label = "Rotation Angle"] 
+   sourceRotationAngleBack [label = "-Rotation Angle"]
     thetaOut          [label="ThetaOut"]
     corrAlg           [label="CorrectionAlgorithm"]
   }
 
   subgraph decisions {
-    $decision_style
+   $decision_style
     checkXUnit      [label="X axis in &lambda;?"]
     checkMultDet    [label="Multidetector?"]
     checkTransRun   [label="FirstTransmissionRun\ngiven?"]
@@ -24,6 +26,8 @@ digraph ReflectometryReductionOne {
     checkCorDetPos  [label="Correct Detector Positions?"]
     checkNormDetMon [label="Normalize by\nIntegrated Monitors?"]
     checkCorrAlg    [label="CorrectionAlgorithm?"]
+    checkSourceRotation [label="Is Source in Correct Position?"]
+    checkSourceRotationBack [label = "Was Source Rotated?"]
   }
 
   subgraph algorithms {
@@ -38,16 +42,18 @@ digraph ReflectometryReductionOne {
     specRefPosCor   [label="SpecularReflectionPositionCorrect"]
     polyCorr        [label="PolynomialCorrection"]
     expCorr         [label="ExponentialCorrection"]
+    rotateSource [label = "RotateSource"]
+    rotateSourceBack [label="RotateSource"]
   }
 
   subgraph processes {
-    $process_style
+   $process_style
     directBeamNorm  [label="Perform Direct\nBeam Normalisation"]
-    rotateSource       [label="Rotate Source by ThetaIn"]
+    getSourceRotationAngle [label="Get Angle for Source Rotation"]
   }
 
   subgraph values {
-    $value_style
+  $value_style
     valMon          [label="I&#8320;(&lambda;)"]
     valDet          [label="I(&lambda;)"]
     valIntegrated   [label="&Sigma; I&#8320;(&lambda;)"]
@@ -55,7 +61,7 @@ digraph ReflectometryReductionOne {
   }
 
   inputWorkspace    -> checkXUnit
-  checkXUnit        -> checkThetaIn     [label="Yes"]
+  checkXUnit        -> checkTransRun    [label="Yes"]
   checkXUnit        -> convertToWL      [label="No"]
   convertToWL       -> valMon           [label="Monitors"]
   convertToWL       -> valDet           [label="Detectors"]
@@ -92,7 +98,15 @@ digraph ReflectometryReductionOne {
   checkCorDetPos    -> specRefPosCor    [label="Yes"]
   checkCorDetPos    -> outputWorkspaceWL[label="No"]
   specRefPosCor     -> outputWorkspaceWL
-  outputWorkspaceWL -> rotateSource
-  rotateSource        -> convertToMT
-  convertToMT       -> outputWorkspaceMT
+  outputWorkspaceWL -> checkSourceRotation
+  checkSourceRotation -> convertToMT [label="Yes"]
+  checkSourceRotation -> getSourceRotationAngle [label="No"]
+  getSourceRotationAngle -> sourceRotationAngle
+  sourceRotationAngle -> rotateSource
+  rotateSource      -> convertToMT
+  convertToMT      -> checkSourceRotationBack
+  checkSourceRotationBack -> rotateSourceBack [label = "Yes"]
+  checkSourceRotationBack -> outputWorkspaceMT [label="No"]
+  sourceRotationAngleBack -> rotateSourceBack [label = "Rotate back by Rotation Angle"]
+  rotateSourceBack      -> outputWorkspaceMT
 }

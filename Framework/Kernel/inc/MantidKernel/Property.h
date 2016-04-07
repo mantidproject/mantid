@@ -182,6 +182,9 @@ public:
   /// @return the group this property belongs to
   const std::string &getGroup() { return m_group; }
 
+  bool autoTrim() const;
+  void setAutoTrim(const bool &setting);
+
 protected:
   /// Constructor
   Property(const std::string &name, const std::type_info &type,
@@ -217,6 +220,10 @@ private:
 
   /// Flag whether to save input values
   bool m_remember;
+
+  /// Flag to determine if string inputs to the property should be automatically
+  /// trimmed of whitespace
+  bool m_autotrim;
 };
 
 /// Compares this to another property for equality

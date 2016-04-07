@@ -64,6 +64,9 @@ private:
   std::mutex copyMutex;
 
 public:
+  cow_ptr(ptr_type &&resourceSptr);
+  cow_ptr(const ptr_type &resourceSptr);
+  explicit cow_ptr(DataType *resourcePtr);
   cow_ptr();
   cow_ptr(const cow_ptr<DataType> &);
   cow_ptr(cow_ptr<DataType> &&) = default;
@@ -82,6 +85,18 @@ public:
   } ///< Based on ptr equality
   DataType &access();
 };
+
+/**
+ Constructor : creates a new cow_ptr around the resource
+ resource is a sink.
+ */
+template <typename DataType>
+cow_ptr<DataType>::cow_ptr(DataType *resourcePtr)
+    : Data(resourcePtr) {
+  if (resourcePtr == nullptr) {
+    throw std::invalid_argument("cow_ptr source pointer cannot be null");
+  }
+}
 
 /**
   Constructor : creates new data() object
@@ -132,6 +147,12 @@ cow_ptr<DataType> &cow_ptr<DataType>::operator=(const ptr_type &A) {
   Access function.
   If data is shared, creates a copy of Data so that it can be modified.
 
+  In certain situations this function is not thread safe. Specifically it is not
+  thread
+  safe in the presence of a simultaneous cow_ptr copy. Copies of the underlying
+  data are only
+  made when the reference count > 1.
+
   @return new copy of *this, if required
 */
 template <typename DataType> DataType &cow_ptr<DataType>::access() {
@@ -146,6 +167,22 @@ template <typename DataType> DataType &cow_ptr<DataType>::access() {
   }
 
   return *Data;
+}
+
+template <typename DataType>
+cow_ptr<DataType>::cow_ptr(ptr_type &&resourceSptr) {
+  if (resourceSptr.get() == nullptr) {
+    throw std::invalid_argument("cow_ptr source pointer cannot be null");
+  }
+  this->Data = std::move(resourceSptr);
+}
+
+template <typename DataType>
+cow_ptr<DataType>::cow_ptr(const ptr_type &resourceSptr) {
+  if (resourceSptr.get() == nullptr) {
+    throw std::invalid_argument("cow_ptr source pointer cannot be null");
+  }
+  this->Data = resourceSptr;
 }
 
 } // NAMESPACE Kernel
