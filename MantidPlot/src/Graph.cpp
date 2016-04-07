@@ -3026,8 +3026,20 @@ void Graph::updateScale() {
     setXAxisTitle(mantidCurve->mantidData()->getXAxisLabel());
     setYAxisTitle(mantidCurve->mantidData()->getYAxisLabel());
   } else if (dataCurve && dataCurve->table()) {
-    setXAxisTitle(dataCurve->table()->colLabel(0));
-    setYAxisTitle(dataCurve->table()->colLabel(1).section(".", 0, 0));
+    auto xTitle = dataCurve->xColumnName();
+    auto yTitle = dataCurve->title().text();
+    // X, Y labels in form "Table-1_axisTitle" so split on '_'
+    auto cleanTitle = [](const QString &title) {
+      if (title.contains(QRegExp("^Table")) && title.contains('_')) {
+        return title.section('_', 1);
+      } else {
+        return title;
+      }
+    };
+    xTitle = cleanTitle(xTitle);
+    yTitle = cleanTitle(yTitle);
+    setXAxisTitle(xTitle);
+    setYAxisTitle(yTitle);
   }
 
   Spectrogram *spec = spectrogram();
