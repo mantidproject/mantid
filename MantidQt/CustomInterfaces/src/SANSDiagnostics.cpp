@@ -1113,7 +1113,7 @@ void SANSDiagnostics::secondDetectorTimeIntegralClicked() {
   std::vector<specnum_t> specList;
   // get spectrum list from detector ids
   getSpectraList(mws_sptr, detNum, specList);
-  // get maximum and minimum spectrum ids
+  // get maximum and minimum spectrum Nos
   minandMaxSpectrumNos(specList, minSpec, maxSpec);
   QString wsStartIndex, wsEndIndex;
   //
