@@ -12,6 +12,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/Histogram/Histogram.h"
 #include <cstddef>
 #include <iosfwd>
 #include <set>
@@ -364,8 +365,8 @@ public:
   void convertUnitsQuickly(const double &factor, const double &power);
 
 private:
-  /// Copy-on-write pointer to the X data vector.
-  MantidVecPtr refX;
+  /// Histogram object holding the histogram data. Currently only X.
+  Kernel::Histogram m_histogram;
 
   /// List of TofEvent (no weights).
   mutable std::vector<TofEvent> events;

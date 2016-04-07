@@ -286,7 +286,7 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
  * */
 EventList &EventList::operator=(const EventList &rhs) {
   IEventList::operator=(rhs);
-  refX = rhs.refX;
+  m_histogram = rhs.m_histogram;
   events = rhs.events;
   weightedEvents = rhs.weightedEvents;
   weightedEventsNoTime = rhs.weightedEventsNoTime;
@@ -1350,9 +1350,8 @@ EventSortType EventList::getSortType() const { return this->order; }
  * */
 void EventList::reverse() {
   // reverse the histogram bin parameters
-  MantidVec x = this->refX.access();
+  MantidVec &x = dataX();
   std::reverse(x.begin(), x.end());
-  this->refX.access() = x;
 
   // flip the events if they are tof sorted
   if (this->isSortedByTof()) {
@@ -1433,7 +1432,7 @@ size_t EventList::getMemorySize() const {
 /** Return the size of the histogram data.
  * @return the size of the histogram representation of the data (size of Y) **/
 size_t EventList::histogram_size() const {
-  size_t x_size = refX->size();
+  size_t x_size = readX().size();
   if (x_size > 1)
     return x_size - 1;
   else
@@ -1450,7 +1449,7 @@ size_t EventList::histogram_size() const {
  * @param X :: The vector of doubles to set as the histogram limits.
  */
 void EventList::setX(const MantidVecPtr::ptr_type &X) {
-  this->refX = X;
+  m_histogram.setX(X);
   if (mru)
     mru->deleteIndex(this->m_specNo);
 }
@@ -1460,7 +1459,7 @@ void EventList::setX(const MantidVecPtr::ptr_type &X) {
  * @param X :: The vector of doubles to set as the histogram limits.
  */
 void EventList::setX(const MantidVecPtr &X) {
-  this->refX = X;
+  m_histogram.setX(X);
   if (mru)
     mru->deleteIndex(this->m_specNo);
 }
@@ -1470,7 +1469,7 @@ void EventList::setX(const MantidVecPtr &X) {
  * @param X :: The vector of doubles to set as the histogram limits.
  */
 void EventList::setX(const MantidVec &X) {
-  this->refX.access() = X;
+  m_histogram.setX(X);
   if (mru)
     mru->deleteIndex(this->m_specNo);
 }
@@ -1481,23 +1480,25 @@ void EventList::setX(const MantidVec &X) {
 MantidVec &EventList::dataX() {
   if (mru)
     mru->deleteIndex(this->m_specNo);
-  return this->refX.access();
+  return m_histogram.dataX();
 }
 
 /** Returns a const reference to the x data.
  *  @return a reference to the X (bin) vector. */
-const MantidVec &EventList::dataX() const { return *this->refX; }
+const MantidVec &EventList::dataX() const { return m_histogram.dataX(); }
 
 /** Returns a reference to the x data.
  *  @return a reference to the X (bin) vector.
  */
-const MantidVec &EventList::constDataX() const { return *this->refX; }
+const MantidVec &EventList::constDataX() const {
+  return m_histogram.constDataX();
+}
 
 /// Returns the x data const
-const MantidVec &EventList::readX() const { return *refX; }
+const MantidVec &EventList::readX() const { return m_histogram.constDataX(); }
 
 /// Returns a pointer to the x data
-MantidVecPtr EventList::ptrX() const { return refX; }
+MantidVecPtr EventList::ptrX() const { return m_histogram.ptrX(); }
 
 // ==============================================================================================
 // --- Return Data Vectors --------------------------------------------------
@@ -1512,7 +1513,7 @@ MantidVec *EventList::makeDataY() const {
   auto Y = new MantidVec();
   MantidVec E;
   // Generate the Y histogram while skipping the E if possible.
-  generateHistogram(*this->refX, *Y, E, true);
+  generateHistogram(constDataX(), *Y, E, true);
   return Y;
 }
 
@@ -1524,7 +1525,7 @@ MantidVec *EventList::makeDataY() const {
 MantidVec *EventList::makeDataE() const {
   MantidVec Y;
   auto E = new MantidVec();
-  generateHistogram(*this->refX, Y, *E);
+  generateHistogram(constDataX(), Y, *E);
   // Y is unused.
   return E;
 }
@@ -1559,7 +1560,7 @@ const MantidVec &EventList::constDataY() const {
     bool skipErrors = (eventType == TOF);
 
     // Set the Y data in it
-    this->generateHistogram(*refX, yData->m_data, eData->m_data, skipErrors);
+    this->generateHistogram(constDataX(), yData->m_data, eData->m_data, skipErrors);
 
     // Lets save it in the MRU
     mru->insertY(thread, yData);
@@ -1595,7 +1596,7 @@ const MantidVec &EventList::constDataE() const {
 
     // Now use that to get E -- Y values are generated from another function
     MantidVec Y_ignored;
-    this->generateHistogram(*refX, Y_ignored, eData->m_data);
+    this->generateHistogram(constDataX(), Y_ignored, eData->m_data);
 
     // Lets save it in the MRU
     mru->insertE(thread, eData);
@@ -2515,7 +2516,7 @@ void EventList::integrate(const double minX, const double maxX,
 void EventList::convertTof(std::function<double(double)> func,
                            const int sorting) {
   // fix the histogram parameter
-  MantidVec &x = this->refX.access();
+  MantidVec &x = dataX();
   transform(x.begin(), x.end(), x.begin(), func);
 
   // do nothing if sorting > 0
@@ -2564,10 +2565,9 @@ void EventList::convertTofHelper(std::vector<T> &events,
  */
 void EventList::convertTof(const double factor, const double offset) {
   // fix the histogram parameter
-  MantidVec &x = this->refX.access();
+  MantidVec &x = dataX();
   for (double &iter : x)
     iter = iter * factor + offset;
-  // this->refX.access() = x;
 
   if ((factor < 0.) && (this->getSortType() == TOF_SORT))
     this->reverse();
@@ -3748,7 +3748,7 @@ void EventList::filterByPulseTime(DateAndTime start, DateAndTime stop,
   output.switchTo(eventType);
   // Copy the detector IDs
   output.detectorIDs = this->detectorIDs;
-  output.refX = this->refX;
+  output.setX(this->ptrX());
 
   // Iterate through all events (sorted by pulse time)
   switch (eventType) {
@@ -3782,7 +3782,7 @@ void EventList::filterByTimeAtSample(Kernel::DateAndTime start,
   output.switchTo(eventType);
   // Copy the detector IDs
   output.detectorIDs = this->detectorIDs;
-  output.refX = this->refX;
+  output.setX(this->ptrX());
 
   // Iterate through all events (sorted by pulse time)
   switch (eventType) {
@@ -3988,7 +3988,7 @@ void EventList::splitByTime(Kernel::TimeSplitterType &splitter,
   for (size_t i = 0; i < numOutputs; i++) {
     outputs[i]->clear();
     outputs[i]->detectorIDs = this->detectorIDs;
-    outputs[i]->refX = this->refX;
+    outputs[i]->setX(this->ptrX());
     // Match the output event type.
     outputs[i]->switchTo(eventType);
   }
@@ -4133,7 +4133,7 @@ void EventList::splitByFullTime(Kernel::TimeSplitterType &splitter,
     EventList *opeventlist = outiter->second;
     opeventlist->clear();
     opeventlist->detectorIDs = this->detectorIDs;
-    opeventlist->refX = this->refX;
+    opeventlist->setX(this->ptrX());
     // Match the output event type.
     opeventlist->switchTo(eventType);
   }
@@ -4263,7 +4263,7 @@ std::string EventList::splitByFullTimeMatrixSplitter(
     EventList *opeventlist = outiter->second;
     opeventlist->clear();
     opeventlist->detectorIDs = this->detectorIDs;
-    opeventlist->refX = this->refX;
+    opeventlist->setX(this->ptrX());
     // Match the output event type.
     opeventlist->switchTo(eventType);
   }
@@ -4385,7 +4385,7 @@ void EventList::splitByPulseTime(Kernel::TimeSplitterType &splitter,
     EventList *opeventlist = outiter->second;
     opeventlist->clear();
     opeventlist->detectorIDs = this->detectorIDs;
-    opeventlist->refX = this->refX;
+    opeventlist->setX(this->ptrX());
     // Match the output event type.
     opeventlist->switchTo(eventType);
   }

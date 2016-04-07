@@ -4,6 +4,7 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Histogram/Histogram.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -33,8 +34,8 @@ namespace DataObjects {
 */
 class DLLExport Histogram1D : public Mantid::API::ISpectrum {
 private:
-  /// Copy-on-write pointer to the X data vector.
-  MantidVecPtr refX;
+  /// Histogram object holding the histogram data. Currently only X.
+  Kernel::Histogram m_histogram;
 
 protected:
   MantidVecPtr refY; ///< RefCounted Y
@@ -95,7 +96,7 @@ public:
 
   /// Gets the memory size of the histogram
   size_t getMemorySize() const override {
-    return ((refX->size() + refY->size() + refE->size()) * sizeof(double));
+    return ((readX().size() + refY->size() + refE->size()) * sizeof(double));
   }
 };
 
