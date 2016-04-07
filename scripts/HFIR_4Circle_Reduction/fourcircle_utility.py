@@ -7,6 +7,9 @@ import numpy
 __author__ = 'wzz'
 
 
+NUM_DET_ROW = 256
+
+
 def check_url(url, read_lines=False):
     """ Check whether a URL is valid
     :param url:
@@ -46,21 +49,57 @@ def check_url(url, read_lines=False):
     return url_good, error_message
 
 
-def generate_mask_file(file_path, ll_corner, ur_corner, rectagular=True):
+def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True):
     """ Generate a Mantid RIO/Mask XML file
     :param ll_corner:
     :param ur_corner:
-    :param rectagular:
+    :param rectangular:
     :return:
     """
-    """
-   <?xml version="1.0"?>
-   <detector-masking>
-	    <group>
-		    <detids>17499-17593,17755-17849,18011-18105,18267-18361,18523-18617,18779-18873,19035-19129,19291-19385,19547-19641,19803-19897,20059-20153,20315-20409,20571-20665,20827-20921,21083-21177,21339-21433,21595-21689,21851-21945,22107-22201,22363-22457,22619-22713,22875-22969,23131-23225,23387-23481,23643-23737,23899-23993,24155-24249,24411-24505,24667-24761,24923-25017,25179-25273,25435-25529,25691-25785,25947-26041,26203-26297,26459-26553,26715-26809,26971-27065,27227-27321,27483-27577,27739-27833,27995-28089,28251-28345,28507-28601,28763-28857,29019-29113,29275-29369,29531-29625,29787-29881,30043-30137,30299-30393,30555-30649,30811-30905,31067-31161,31323-31417,31579-31673,31835-31929,32091-32185,32347-32441,32603-32697,32859-32953,33115-33209,33371-33465,33627-33721,33883-33977,34139-34233,34395-34489,34651-34745,34907-35001,35163-35257,35419-35513,35675-35769,35931-36025,36187-36281,36443-36537,36699-36793,36955-37049,37211-37305,37467-37561,37723-37817,37979-38073,38235-38329,38491-38585,38747-38841,39003-39097,39259-39353,39515-39609,39771-39865,40027-40121,40283-40377,40539-40633,40795-40889,41051-41145,41307-41401,41563-41657,41819-41913,42075-42169,42331-42425</detids>
-	    </group>
-   </detector-masking>
-    """
+    # TODO/NOW - Doc and check
+    # assert ... ...
+
+    if rectangular is False:
+        raise RuntimeError('... ...')
+
+    print '[INFO] Mask from %s to %s.' % (str(ll_corner), str(ur_corner))
+
+    # part 1
+    xml_str = '<?xml version="1.0"?>\n'
+    xml_str += '<detector-masking>\n'
+    xml_str += '     <group>\n'
+    xml_str += '          <detids>'
+
+    # part 2: all the masked detectors
+    start_row = int(ll_corner[0])
+    start_col = int(ll_corner[1])
+
+    end_row = int(ur_corner[0])
+    end_col = int(ur_corner[1])
+
+    assert start_col < end_col
+
+    det_sub_xml = ''
+    for col_number in xrange(start_col, end_col+1):
+        start_det_id = 1 + col_number * NUM_DET_ROW + start_row
+        end_det_id = 1 + col_number * NUM_DET_ROW + end_row
+        det_sub_xml += '%d-%d,' % (start_det_id, end_det_id)
+        print '[DB] Detector %d - %d' % (start_det_id, end_det_id)
+    # END-FOR
+    # remove last ','
+    det_sub_xml = det_sub_xml[:-1]
+    # add to xml string
+    xml_str += det_sub_xml
+
+    # part 3
+    xml_str += '</detids>\n'
+    xml_str += '     </group>\n'
+    xml_str += '</detector-masking>'
+
+    # write to file
+    xml_file = open(file_path, 'w')
+    xml_file.write(xml_str)
+    xml_file.close()
 
     return
 
@@ -85,6 +124,37 @@ def get_hb3a_wavelength(m1_motor_pos):
     # END-FOR
 
     return None
+
+
+def get_mask_ws_name(exp_number, scan_number):
+    """
+
+    :param exp_number:
+    :param scan_number:
+    :return:
+    """
+    # TODO/NOW - Doc and check
+    # assert ...
+
+    mask_ws_name = 'Mask_Exp%d_Scan%d' % (exp_number, scan_number)
+
+    return mask_ws_name
+
+
+def get_mask_xml_temp(work_dir, exp_number, scan_number):
+    """
+
+    :param work_dir:
+    :param exp_number:
+    :param scan_number:
+    :return:
+    """
+    # TODO/NOW Doc and check
+    # assert ...
+
+    file_name = os.path.join(work_dir, 'temp_mask_%d_%d.xml' % (exp_number, scan_number))
+
+    return file_name
 
 
 def get_scans_list(server_url, exp_no, return_list=False):

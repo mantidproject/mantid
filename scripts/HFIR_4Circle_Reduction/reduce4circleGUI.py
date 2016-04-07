@@ -108,6 +108,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_plot_next_scan)
         self.connect(self.ui.pushButton_prevScanNumber, QtCore.SIGNAL('clicked()'),
                      self.do_plot_prev_scan)
+        self.connect(self.ui.pushButton_makeScanPt, QtCore.SIGNAL('clicked()'),
+                     self.do_mask_pt_2d)
 
         # Tab 'calculate ub matrix'
         self.connect(self.ui.pushButton_findPeak, QtCore.SIGNAL('clicked()'),
@@ -1358,6 +1360,41 @@ class MainWindow(QtGui.QMainWindow):
         else:
             raise RuntimeError('Push button in state %s is not supported.' %
                                str(self.ui.pushButton_handPickBkgd.text()))
+
+        return
+
+    def do_mask_pt_2d(self):
+        """ Mask a Pt and re-plot
+        :return:
+        """
+        # get experiment, scan
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run,
+                                                        self.ui.lineEdit_rawDataPtNo],
+                                                       allow_blank=False)
+        if status:
+            exp, scan, pt = ret_obj
+        else:
+            self.pop_one_button_dialog(ret_obj)
+            return
+
+        # get the mask
+        status, ret_obj = self._myControl.get_region_of_interest(exp, scan)
+        if status is False:
+            self.pop_one_button_dialog(ret_obj)
+            return
+
+        # create mask workspace
+        status, error = self._myControl.generate_mask_workspace(exp, scan, ret_obj[0], ret_obj[1])
+        if status is False:
+            self.pop_one_button_dialog(error)
+            return
+
+        # re-load data file and mask
+        self._myControl.load_spice_xml_file(exp, scan, pt)
+        self._myControl.apply_mask(exp, scan, pt)
+
+        # plot
+        self._plot_raw_xml_2d(exp, scan, pt)
 
         return
 

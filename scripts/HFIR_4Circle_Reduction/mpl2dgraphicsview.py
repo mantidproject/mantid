@@ -182,7 +182,9 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         self.axes.hold(hold_prev)
 
         # show image
-        img_plot = self.axes.imshow(array2d, extent=[x_min, x_max, y_min, y_max], interpolation='none')
+        img_plot = self.axes.imshow(array2d,
+                                    extent=[x_min, x_max, y_min, y_max],
+                                    interpolation='none')
 
         # set y ticks as an option:
         if yticklabels is not None:

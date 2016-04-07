@@ -110,6 +110,29 @@ class CWSCDReductionControl(object):
 
         return
 
+    @staticmethod
+    def apply_mask(exp_number, scan_number, pt_number):
+        """
+
+        :param exp_number:
+        :param scan_number:
+        :param pt_number:
+        :return:
+        """
+        # TODO/NOW - Doc and check
+        # assert ... ...
+
+        # get workspaces' names
+        raw_pt_ws_name = get_raw_data_workspace_name(exp_number, scan_number, pt_number)
+        mask_ws_name = get_mask_ws_name(exp_number, scan_number)
+
+        # TODO/NOW - check workspace existing
+        # if ... raise
+
+        api.MaskDetectors(Workspace=raw_pt_ws_name, MaskedWorkspace=mask_ws_name)
+
+        return
+
     def calculate_ub_matrix(self, peak_info_list, a, b, c, alpha, beta, gamma):
         """
         Calculate UB matrix
@@ -284,29 +307,6 @@ class CWSCDReductionControl(object):
 
         return True, error_message
 
-    def create_mask_roi(self, exp_number, scan_number):
-        """ Create a mask workspace for region of interest
-        :param exp_number:
-        :param scan_number:
-        :return:
-        """
-        # check
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
-        assert (exp_number, scan_number) in self._roiDict
-
-        # get the coordinates
-        ll_corner, ur_corner = self._roiDict[(exp_number, scan_number)]
-
-        # create an XML roi file
-        generate_mask_file(mask_file_name, ll_corner, ur_corner, rectagular=True)
-
-        # load back
-        api.LoadMask(Instrument='HB3A', InputFile='/home/wzz/Projects/MantidTests/Tickets/HB3A_GUI/Results/hb3a_roi.xml', OutputWorkspace='Z_Mask')
-        api.InvertMask(InputWorkspace='Z_Mask', OutputWorkspace='Z_ROI')
-
-        return mask_ws_name
-
     def does_file_exist(self, exp_number, scan_number, pt_number=None):
         """
         Check whether data file for a scan or pt number exists on the
@@ -465,6 +465,8 @@ class CWSCDReductionControl(object):
 
         # Rotate the output matrix
         # array2d = numpy.rot90(array2d, 1)
+        # FIXME - Later
+        array2d = numpy.flipud(array2d)
 
         return array2d
 
@@ -595,7 +597,7 @@ class CWSCDReductionControl(object):
 
         if pt_list is None:
             status, pt_list = self.get_pt_numbers(exp_number, scan_number)
-        assert status
+            assert status
         int_peak_ws_name = get_integrated_peak_ws_name(exp_number, scan_number, pt_list)
 
         assert AnalysisDataService.doesExist(int_peak_ws_name)
@@ -614,6 +616,63 @@ class CWSCDReductionControl(object):
         # END-FOR
 
         return vec_x, vec_y
+
+    def generate_mask_workspace(self, exp_number, scan_number, roi_start, roi_end):
+        """ Generate a mask workspace
+        :param exp_number:
+        :param scan_number:
+        :param roi_start:
+        :param roi_end:
+        :return:
+        """
+        # TODO/NOW : check ...
+        # assert ...
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+
+        # create an xml file
+        mask_file_name = get_mask_xml_temp(self._workDir, exp_number, scan_number)
+        generate_mask_file(file_path=mask_file_name,
+                           ll_corner=roi_start,
+                           ur_corner=roi_end)
+
+        # load the mask workspace
+        mask_ws_name = get_mask_ws_name(exp_number, scan_number)
+        api.LoadMask(Instrument='HB3A',
+                     InputFile=mask_file_name,
+                     OutputWorkspace=mask_ws_name)
+        api.InvertMask(InputWorkspace=mask_ws_name,
+                       OutputWorkspace=mask_ws_name)
+
+        return True, mask_ws_name
+
+    def group_workspaces(self, exp_number, group_name):
+        """
+
+        :return:
+        """
+        # Find out the input workspace name
+        ws_names_str = ''
+        for key in self._myRawDataWSDict.keys():
+            if key[0] == exp_number:
+                ws_names_str += '%s,' % self._myRawDataWSDict[key].name()
+
+        for key in self._mySpiceTableDict.keys():
+            if key[0] == exp_number:
+                ws_names_str += '%s,' % self._mySpiceTableDict[key].name()
+
+        # Check
+        if len(ws_names_str) == 0:
+            return False, 'No workspace is found for experiment %d.' % exp_number
+
+        # Remove last ','
+        ws_names_str = ws_names_str[:-1]
+
+        # Group
+        api.GroupWorkspaces(InputWorkspaces=ws_names_str,
+                            OutputWorkspace=group_name)
+
+        return
 
     def has_merged_data(self, exp_number, scan_number, pt_number_list=None):
         """
@@ -1053,34 +1112,6 @@ class CWSCDReductionControl(object):
         self._add_raw_workspace(exp_no, scan_no, pt_no, raw_matrix_ws)
 
         return True, pt_ws_name
-
-    def group_workspaces(self, exp_number, group_name):
-        """
-
-        :return:
-        """
-        # Find out the input workspace name
-        ws_names_str = ''
-        for key in self._myRawDataWSDict.keys():
-            if key[0] == exp_number:
-                ws_names_str += '%s,' % self._myRawDataWSDict[key].name()
-
-        for key in self._mySpiceTableDict.keys():
-            if key[0] == exp_number:
-                ws_names_str += '%s,' % self._mySpiceTableDict[key].name()
-
-        # Check
-        if len(ws_names_str) == 0:
-            return False, 'No workspace is found for experiment %d.' % exp_number
-
-        # Remove last ','
-        ws_names_str = ws_names_str[:-1]
-
-        # Group
-        api.GroupWorkspaces(InputWorkspaces=ws_names_str,
-                            OutputWorkspace=group_name)
-
-        return
 
     def merge_pts_in_scan(self, exp_no, scan_no, pt_num_list, target_frame):
         """
