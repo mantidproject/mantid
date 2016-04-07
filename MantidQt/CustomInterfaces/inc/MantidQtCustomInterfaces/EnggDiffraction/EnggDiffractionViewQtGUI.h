@@ -18,9 +18,7 @@
 
 /// shahroz
 #include "MantidQtMantidWidgets/PeakPicker.h"
-
 #include "MantidAPI/IPeakFunction.h"
-
 
 // Qt classes forward declarations
 class QMutex;
@@ -250,7 +248,8 @@ private slots:
   void setListWidgetBank(int idx);
 
   /// @shahroz
- // void warningWithXY();
+  void setPeakPick();
+
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();

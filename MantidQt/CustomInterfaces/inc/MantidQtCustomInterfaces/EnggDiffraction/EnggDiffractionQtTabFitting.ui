@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>655</width>
-    <height>671</height>
+    <width>664</width>
+    <height>683</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -360,6 +360,13 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_select_peak">
+          <property name="text">
+           <string>Select Peak</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_add_peak">

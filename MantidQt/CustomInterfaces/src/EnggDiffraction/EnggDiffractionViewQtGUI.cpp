@@ -26,7 +26,7 @@ using namespace MantidQt::CustomInterfaces;
 #include <qwt_symbol.h>
 
 /// shahroz
-
+#include "MantidAPI/FunctionFactory.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -232,10 +232,9 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
           SIGNAL(currentRowChanged(int)), this, SLOT(setBankIdComboBox(int)));
 
   // add peak by clicking the button
-  connect(m_uiTabFitting.pushButton_add_peak, SIGNAL(released()),
-	  SLOT(enablePeakPick()));
+  connect(m_uiTabFitting.pushButton_select_peak, SIGNAL(released()),
+	  SLOT(setPeakPick()));
 
-  //connect(m_peakPicker, SIGNAL(changed()), 
 
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom,
@@ -248,8 +247,6 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   // constructor of the peakPicker
   // XXX: Being a QwtPlotItem, should get deleted when m_ui.plot gets deleted (auto-delete option)
   m_peakPicker = new MantidWidgets::PeakPicker(m_uiTabFitting.dataPlot, Qt::red);
-  /// shahroz : causing crash
-  setPeakPickerEnabled(true);
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -1301,12 +1298,12 @@ void EnggDiffractionViewQtGUI::setListWidgetBank(int idx) {
   selectBank->setCurrentRow(idx);
 }
 
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enablePeakPick()
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setPeakPick()
 {
-	auto ourFunc = FunctionFactory::Instance().createFunction("BackToBackExponential");
-	auto backtoback = boost::dynamic_pointer_cast<IPeakFunction>(ourFunc);
+	auto bk2bk = FunctionFactory::Instance().createFunction("BackToBackExponential");
+	auto bk2bkFunc = boost::dynamic_pointer_cast<IPeakFunction>(bk2bk);
 	
-	setPeakPicker(backtoback);
+	setPeakPicker(bk2bkFunc);
 	setPeakPickerEnabled(true);
 }
 
