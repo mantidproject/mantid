@@ -238,6 +238,9 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   connect(m_uiTabFitting.pushButton_add_peak, SIGNAL(released()),
           SLOT(addPeakToList()));
 
+  connect(m_uiTabFitting.pushButton_save_peak_list, SIGNAL(released()),
+          SLOT(savePeakList()));
+
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom,
                                         "Time-of-flight (us)");
@@ -793,6 +796,12 @@ double EnggDiffractionViewQtGUI::getPeakCentre() {
   return centre;
 }
 
+void EnggDiffractionViewQtGUI::fittingWriteFile(std::string &fileDir) {
+  auto outfile = std::ofstream(fileDir);
+  auto expPeaks = m_uiTabFitting.lineEdit_fitting_peaks->text();
+  outfile << expPeaks.toStdString();
+}
+
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
   std::string pyCode =
       "win=plotSpectrum('" + wsName + "', 0, error_bars=False, type=0)";
@@ -1334,6 +1343,28 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addPeakToList() {
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::savePeakList() {
   // call function in EnggPresenter..
+
+  try {
+    QString prevPath = QString::fromStdString(m_focusDir);
+    if (prevPath.isEmpty()) {
+      prevPath = MantidQt::API::AlgorithmInputHistory::Instance()
+                     .getPreviousDirectory();
+    }
+
+    QString path(QFileDialog::getSaveFileName(
+        this, tr("Save Expected Peaks List"), prevPath,
+        QString::fromStdString(g_DetGrpExtStr)));
+
+    if (path.isEmpty()) {
+      return;
+    }
+    std::string strPath = path.toStdString();
+    fittingWriteFile(strPath);
+  } catch (...) {
+    userWarning("Unable to save the peaks file: ",
+                "Invalid file path or or could not be saved. Please try again");
+    return;
+  }
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {

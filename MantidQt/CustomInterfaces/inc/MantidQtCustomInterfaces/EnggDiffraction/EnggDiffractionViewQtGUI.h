@@ -174,6 +174,8 @@ public:
 
   double getPeakCentre();
 
+  void fittingWriteFile(std::string &fileDir);
+
   void plotFocusedSpectrum(const std::string &wsName) override;
 
   void plotWaterfallSpectrum(const std::string &wsName) override;
