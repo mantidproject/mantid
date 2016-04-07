@@ -32,11 +32,23 @@ namespace DataObjects {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport Histogram1D : public Mantid::API::ISpectrum {
+private:
+  /// Copy-on-write pointer to the X data vector.
+  MantidVecPtr refX;
+
 protected:
   MantidVecPtr refY; ///< RefCounted Y
   MantidVecPtr refE; ///< RefCounted Error
 
 public:
+  void setX(const MantidVec &X) override;
+  void setX(const MantidVecPtr &X) override;
+  void setX(const MantidVecPtr::ptr_type &X) override;
+  MantidVec &dataX() override;
+  const MantidVec &dataX() const override;
+  const MantidVec &readX() const override;
+  MantidVecPtr ptrX() const override;
+
   /// Sets the data.
   void setData(const MantidVec &Y) override { refY.access() = Y; };
   /// Sets the data and errors

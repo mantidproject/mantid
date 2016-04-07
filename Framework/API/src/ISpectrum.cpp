@@ -8,13 +8,13 @@ namespace API {
 /** Constructor
  */
 ISpectrum::ISpectrum()
-    : m_specNo(0), detectorIDs(), refX(), refDx(), m_hasDx(false) {}
+    : m_specNo(0), detectorIDs(), refDx(), m_hasDx(false) {}
 
 /** Constructor with spectrum number
  * @param specNo :: spectrum # of the spectrum
  */
 ISpectrum::ISpectrum(const specnum_t specNo)
-    : m_specNo(specNo), detectorIDs(), refX(), refDx(), m_hasDx(false) {}
+    : m_specNo(specNo), detectorIDs(), refDx(), m_hasDx(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Copy spectrum number and detector IDs, but not X vector, from another
@@ -33,14 +33,9 @@ void ISpectrum::copyInfoFrom(const ISpectrum &other) {
  *          and the second the maximum
 */
 std::pair<double, double> ISpectrum::getXDataRange() const {
-  const auto &xdata = *refX;
+  const auto &xdata = readX();
   return std::pair<double, double>(xdata.front(), xdata.back());
 }
-
-// =============================================================================================
-/// Sets the x data.
-/// @param X :: vector of X data
-void ISpectrum::setX(const MantidVec &X) { refX.access() = X; }
 
 /// Sets the x error data.
 /// @param Dx :: vector of X error data
@@ -49,10 +44,6 @@ void ISpectrum::setDx(const MantidVec &Dx) {
   m_hasDx = true;
 }
 
-/// Sets the x data.
-/// @param X :: vector of X data
-void ISpectrum::setX(const MantidVecPtr &X) { refX = X; }
-
 /// Sets the x error data.
 /// @param Dx :: vector of X error data
 void ISpectrum::setDx(const MantidVecPtr &Dx) {
@@ -60,20 +51,12 @@ void ISpectrum::setDx(const MantidVecPtr &Dx) {
   m_hasDx = true;
 }
 
-/// Sets the x data
-/// @param X :: vector of X data
-void ISpectrum::setX(const MantidVecPtr::ptr_type &X) { refX = X; }
-
 /// Sets the x data error
 /// @param Dx :: vector of X error data
 void ISpectrum::setDx(const MantidVecPtr::ptr_type &Dx) {
   refDx = Dx;
   m_hasDx = true;
 }
-
-// =============================================================================================
-/// Returns the x data
-MantidVec &ISpectrum::dataX() { return refX.access(); }
 
 /** Returns the x error data
  *  BE VERY CAUTIOUS about using this method (when, e.g., just copying
@@ -86,14 +69,8 @@ MantidVec &ISpectrum::dataDx() {
   return refDx.access();
 }
 
-/// Returns the x data const
-const MantidVec &ISpectrum::dataX() const { return *refX; }
-
 /// Returns the x error data const
 const MantidVec &ISpectrum::dataDx() const { return *refDx; }
-
-/// Returns the x data const
-const MantidVec &ISpectrum::readX() const { return *refX; }
 
 /// Returns the x error data const
 const MantidVec &ISpectrum::readDx() const { return *refDx; }
@@ -103,9 +80,6 @@ const MantidVec &ISpectrum::readY() const { return this->dataY(); }
 
 /// Returns the y error data const
 const MantidVec &ISpectrum::readE() const { return this->dataE(); }
-
-/// Returns a pointer to the x data
-MantidVecPtr ISpectrum::ptrX() const { return refX; }
 
 /// Returns a pointer to the x data
 MantidVecPtr ISpectrum::ptrDx() const {

@@ -286,6 +286,7 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
  * */
 EventList &EventList::operator=(const EventList &rhs) {
   IEventList::operator=(rhs);
+  refX = rhs.refX;
   events = rhs.events;
   weightedEvents = rhs.weightedEvents;
   weightedEventsNoTime = rhs.weightedEventsNoTime;
@@ -1491,6 +1492,12 @@ const MantidVec &EventList::dataX() const { return *this->refX; }
  *  @return a reference to the X (bin) vector.
  */
 const MantidVec &EventList::constDataX() const { return *this->refX; }
+
+/// Returns the x data const
+const MantidVec &EventList::readX() const { return *refX; }
+
+/// Returns a pointer to the x data
+MantidVecPtr EventList::ptrX() const { return refX; }
 
 // ==============================================================================================
 // --- Return Data Vectors --------------------------------------------------
