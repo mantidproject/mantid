@@ -6,7 +6,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidCrystal/AnvredCorrection.h"
-
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <fstream>
 
 #include <Poco/File.h>
@@ -104,6 +104,9 @@ void SaveHKL::init() {
   declareProperty(
       "HKLDecimalPlaces", EMPTY_INT(),
       "Number of decimal places for fractional HKL.  Default is integer HKL.");
+  declareProperty("DirectionCosines", false,
+                  "Extra columns (22 total) in file if true for direction cosines.\n"
+                  "If false, original 14 columns (default).");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -113,7 +116,7 @@ void SaveHKL::exec() {
 
   std::string filename = getPropertyValue("Filename");
   ws = getProperty("InputWorkspace");
-  // HKL will be overwritten by equivalent HKL but never seen by user
+
   PeaksWorkspace_sptr peaksW = getProperty("OutputWorkspace");
   if (peaksW != ws)
     peaksW.reset(ws->clone().release());
@@ -126,6 +129,15 @@ void SaveHKL::exec() {
   double minIntensity = getProperty("MinIntensity");
   int widthBorder = getProperty("WidthBorder");
   int decimalHKL = getProperty("HKLDecimalPlaces");
+  bool cosines = getProperty("DirectionCosines");
+  OrientedLattice lat;
+  if (cosines) {
+    // Find OrientedLattice
+    IAlgorithm_sptr childAlg = createChildAlgorithm("FindUBUsingIndexedPeaks");
+    childAlg->setProperty<PeaksWorkspace_sptr>("PeaksWorkspace", ws);
+    childAlg->executeAsChildAlg();
+    lat = ws->mutableSample().getOrientedLattice();
+  }
 
   // Sequence and run number
   int seqNum = 1;
@@ -418,22 +430,73 @@ void SaveHKL::exec() {
 
     out << std::setw(8) << std::fixed << std::setprecision(4) << lambda;
 
-    out << std::setw(7) << std::fixed << std::setprecision(4) << tbar;
 
-    out << std::setw(7) << run;
+    if (cosines) {
+      out << std::setw(8) << std::fixed << std::setprecision(5) << tbar;
+      // Determine goniometer angles by calculating from the goniometer matrix
+      // of a peak in the list
+      Goniometer gon(p.getGoniometerMatrix());
+      std::vector<double> angles = gon.getEulerAngles("yzy");
 
-    out << std::setw(7) << wi + seqNum;
+      double phi = angles[2];
+      double chi = angles[1];
+      double omega = angles[0];
 
-    out << std::setw(7) << std::fixed << std::setprecision(4) << transmission;
+;
 
-    out << std::setw(4) << std::right << bank;
-    bankold = bank;
-    runold = run;
+      out << std::setw(9) << std::fixed << std::setprecision(4) << lat.astar();
+      out << std::setw(9) << std::fixed << std::setprecision(4) << lat.bstar();
+      out << std::setw(9) << std::fixed << std::setprecision(4) << lat.cstar();
 
-    out << std::setw(9) << std::fixed << std::setprecision(5)
-        << scattering; // two-theta scattering
+/*# Begin loop through a-star, b-star and c-star
+dir_cos_2 = [ 0, 0, 0 ]   # dir_cos_2 is the scattered beam with a*, b*, c*
+for i in range(3):
+    abc = [ 0, 0, 0 ]
+    abc[i] = 1
+    q_abc_star = huq( abc[0], abc[1], abc[2], newmat )
+    len_q_abc_star = math.sqrt( numpy.dot( q_abc_star, q_abc_star) )
+    dir_cos_2[i] = numpy.dot( R_IPNS, q_abc_star ) / ( L2 * len_q_abc_star )*/
 
-    out << std::setw(9) << std::fixed << std::setprecision(4) << dsp;
+      for (int i = 0; i < 3; ++i)
+      out << std::setw(9) << std::fixed << std::setprecision(4) << 0.0;
+
+      out << std::setw(6) << run;
+
+      out << std::setw(6) << wi + seqNum;
+
+      out << std::setw(7) << std::fixed << std::setprecision(4) << transmission;
+
+      out << std::setw(4) << std::right << bank;
+      bankold = bank;
+      runold = run;
+
+      out << std::setw(9) << std::fixed << std::setprecision(5)
+          << scattering; // two-theta scattering
+
+      out << std::setw(8) << std::fixed << std::setprecision(4) << dsp;
+      out << std::setw(7) << std::fixed << std::setprecision(2) << p.getCol();
+      out << std::setw(7) << std::fixed << std::setprecision(2) << p.getRow();
+    }
+    else {
+      out << std::setw(7) << std::fixed << std::setprecision(4) << tbar;
+
+      out << std::setw(7) << run;
+
+      out << std::setw(7) << wi + seqNum;
+
+      out << std::setw(7) << std::fixed << std::setprecision(4) << transmission;
+
+      out << std::setw(4) << std::right << bank;
+      bankold = bank;
+      runold = run;
+
+      out << std::setw(9) << std::fixed << std::setprecision(5)
+          << scattering; // two-theta scattering
+
+      out << std::setw(9) << std::fixed << std::setprecision(4) << dsp;
+    }
+
+
 
     out << std::endl;
   }
