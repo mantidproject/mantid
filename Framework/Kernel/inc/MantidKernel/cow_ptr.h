@@ -77,7 +77,7 @@ public:
   cow_ptr<DataType> &operator=(const ptr_type &);
 
   /// Returns the stored pointer.
-  DataType *get() const noexcept { return Data.get(); }
+  const DataType *get() const noexcept { return Data.get(); }
 
   /// Checks if *this stores a non-null pointer, i.e. whether get() != nullptr.
   explicit operator bool() const noexcept { return bool(Data); }
