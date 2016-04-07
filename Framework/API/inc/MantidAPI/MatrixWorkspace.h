@@ -8,6 +8,7 @@
 #include <boost/scoped_ptr.hpp>
 #endif
 
+#include "MantidKernel/Histogram/Histogram.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"

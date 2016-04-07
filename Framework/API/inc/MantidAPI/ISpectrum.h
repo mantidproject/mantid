@@ -4,12 +4,15 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidKernel/Histogram/Histogram.h"
 
 #include <set>
 
 namespace Mantid {
+namespace Kernel {
+class Histogram;
+}
 namespace API {
+
 
 /** A "spectrum" is an object that holds the data for a particular spectrum,
  * in particular:
@@ -124,7 +127,8 @@ public:
   virtual bool hasDx() const;
   virtual void resetHasDx();
 
-  virtual void setXMode(Kernel::Histogram::XMode mode) = 0;
+  virtual const Kernel::Histogram &histogram() const = 0;
+  virtual Kernel::Histogram &histogram() = 0;
 
 protected:
   /// The spectrum number of this spectrum
