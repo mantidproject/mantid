@@ -172,9 +172,7 @@ public:
   void
   setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) override;
 
-  QPoint getQPoint();
-
-  double getPeakFwhm();
+  double getPeakCentre();
 
   void plotFocusedSpectrum(const std::string &wsName) override;
 

@@ -235,6 +235,9 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   connect(m_uiTabFitting.pushButton_select_peak, SIGNAL(released()),
           SLOT(setPeakPick()));
 
+  connect(m_uiTabFitting.pushButton_add_peak, SIGNAL(released()),
+          SLOT(addPeakToList()));
+
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom,
                                         "Time-of-flight (us)");
@@ -784,15 +787,10 @@ void EnggDiffractionViewQtGUI::setPeakPicker(
   m_uiTabFitting.dataPlot->replot();
 }
 
-QPoint EnggDiffractionViewQtGUI::getQPoint() {
-  auto pos = m_uiTabFitting.dataPlot->pos();
-  return pos;
-}
-
-double EnggDiffractionViewQtGUI::getPeakFwhm() {
+double EnggDiffractionViewQtGUI::getPeakCentre() {
   auto peak = m_peakPicker->peak();
-  auto fwhm = peak->fwhm();
-  3 return fwhm;
+  auto centre = peak->centre();
+  return centre;
 }
 
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
@@ -1314,7 +1312,25 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setPeakPick() {
   setPeakPickerEnabled(true);
 }
 
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addPeakToList() {}
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addPeakToList() {
+
+  auto peakCentre = getPeakCentre();
+
+  auto strPeakCentre = boost::lexical_cast<std::string>(peakCentre);
+
+  auto curExpPeaksList = m_uiTabFitting.lineEdit_fitting_peaks->text();
+
+  std::string expPeakStr = curExpPeaksList.toStdString();
+
+  std::size_t found = expPeakStr.find_last_of(", ");
+  if (found) {
+    QString comma = ", ";
+    curExpPeaksList.append(comma + QString::fromStdString(strPeakCentre));
+  } else {
+    curExpPeaksList.append(QString::fromStdString(strPeakCentre));
+  }
+  m_uiTabFitting.lineEdit_fitting_peaks->setText(curExpPeaksList);
+}
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::savePeakList() {
   // call function in EnggPresenter..
