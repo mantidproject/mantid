@@ -556,7 +556,7 @@ PlotPeakByLogValue::makeNames() const {
         } else {
           wi = -2;
         }
-      } else { 
+      } else {
         wi = default_wi;
       }
     }

@@ -55,17 +55,19 @@ void EditInstrumentGeometry::init() {
                   "Primary flight path L1 of the powder diffractometer. ");
 
   // Spectrum Number for the spectrum to have instrument geometry edited
-  declareProperty(Kernel::make_unique<ArrayProperty<int32_t>>("SpectrumIDs"),
-                  "Spectrum Numbers (note that it is not detector ID or workspace "
-                  "indices). The list must be either empty or have a size "
-                  "equal to input workspace's histogram number. ");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<int32_t>>("SpectrumIDs"),
+      "Spectrum Numbers (note that it is not detector ID or workspace "
+      "indices). The list must be either empty or have a size "
+      "equal to input workspace's histogram number. ");
 
   auto required = boost::make_shared<MandatoryValidator<std::vector<double>>>();
 
   // Vector for L2
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("L2", required),
-                  "Secondary flight (L2) paths for each detector.  Number of L2 "
-                  "given must be same as number of histogram.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("L2", required),
+      "Secondary flight (L2) paths for each detector.  Number of L2 "
+      "given must be same as number of histogram.");
 
   // Vector for 2Theta
   declareProperty(Kernel::make_unique<ArrayProperty<double>>("Polar", required),
@@ -342,9 +344,10 @@ void EditInstrumentGeometry::exec() {
       delete detector;
 
       stringstream errss;
-      errss << "Spectrum Number " << specids[i] << " does not exist!  Skip setting "
-                                               "detector parameters to this "
-                                               "spectrum. ";
+      errss << "Spectrum Number " << specids[i]
+            << " does not exist!  Skip setting "
+               "detector parameters to this "
+               "spectrum. ";
       g_log.error(errss.str());
       throw runtime_error(errss.str());
     } else {
