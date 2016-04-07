@@ -52,11 +52,11 @@ void EditInstrumentGeometry::init() {
 
   // L1
   declareProperty("PrimaryFlightPath", EMPTY_DBL(),
-                  "Primary flight path L1 of the powder diffractomer. ");
+                  "Primary flight path L1 of the powder diffractometer. ");
 
-  // Spectrum ID for the spectrum to have instrument geometry edited
+  // Spectrum Number for the spectrum to have instrument geometry edited
   declareProperty(Kernel::make_unique<ArrayProperty<int32_t>>("SpectrumIDs"),
-                  "Spectrum IDs (note that it is not detector ID or workspace "
+                  "Spectrum Numbers (note that it is not detector ID or workspace "
                   "indices). The list must be either empty or have a size "
                   "equal to input workspace's histogram number. ");
 
@@ -64,7 +64,7 @@ void EditInstrumentGeometry::init() {
 
   // Vector for L2
   declareProperty(Kernel::make_unique<ArrayProperty<double>>("L2", required),
-                  "Seconary flight (L2) paths for each detector.  Number of L2 "
+                  "Secondary flight (L2) paths for each detector.  Number of L2 "
                   "given must be same as number of histogram.");
 
   // Vector for 2Theta
@@ -203,7 +203,7 @@ void EditInstrumentGeometry::exec() {
   const vector<int> vec_detids = getProperty("DetectorIDs");
   const bool renameDetID(!vec_detids.empty());
 
-  // Get individual detector geometries ordered by input spectrum IDs
+  // Get individual detector geometries ordered by input spectrum Numbers
   const std::vector<double> l2s = this->getProperty("L2");
   const std::vector<double> tths = this->getProperty("Polar");
   std::vector<double> phis = this->getProperty("Azimuthal");
@@ -226,7 +226,7 @@ void EditInstrumentGeometry::exec() {
     g_log.information() << "Detector " << specids[ib] << "  L2 = " << l2s[ib]
                         << "  2Theta = " << tths[ib] << std::endl;
     if (specids[ib] < 0) {
-      // Invalid spectrum ID : less than 0.
+      // Invalid spectrum Number : less than 0.
       stringstream errmsgss;
       errmsgss << "Detector ID = " << specids[ib] << " cannot be less than 0.";
       throw std::invalid_argument(errmsgss.str());
@@ -249,13 +249,13 @@ void EditInstrumentGeometry::exec() {
   std::vector<double> storPhis(nspec, 0.);
   vector<int> storDetIDs(nspec, 0);
 
-  // Map the properties from spectrum ID to workspace index
+  // Map the properties from spectrum Number to workspace index
   for (size_t i = 0; i < specids.size(); i++) {
     // Find spectrum's workspace index
     auto it = spec2indexmap.find(specids[i]);
     if (it == spec2indexmap.end()) {
       stringstream errss;
-      errss << "Spectrum ID " << specids[i] << " is not found. "
+      errss << "Spectrum Number " << specids[i] << " is not found. "
             << "Instrument won't be edited for this spectrum. " << std::endl;
       g_log.error(errss.str());
       throw std::runtime_error(errss.str());
@@ -342,7 +342,7 @@ void EditInstrumentGeometry::exec() {
       delete detector;
 
       stringstream errss;
-      errss << "Spectrum ID " << specids[i] << " does not exist!  Skip setting "
+      errss << "Spectrum Number " << specids[i] << " does not exist!  Skip setting "
                                                "detector parameters to this "
                                                "spectrum. ";
       g_log.error(errss.str());

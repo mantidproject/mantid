@@ -60,7 +60,7 @@ void SaveAscii2::init() {
       "WriteXError", false,
       "If true, the error on X will be written as the fourth column.");
   declareProperty("WriteSpectrumID", true,
-                  "If false, the spectrum ID will not be written for "
+                  "If false, the spectrum No will not be written for "
                   "single-spectrum workspaces. "
                   "It is always written for workspaces with multiple spectra.");
 

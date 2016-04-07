@@ -1296,7 +1296,7 @@ class DarkRunSubtraction(object):
         @param workspace: a transmission workspace (histogram!). We need to have a separate method
                           for transmission since we the format slightly different to the scattering
                           workspaces.
-        @param transmission_ids: a list of transmission spectrum ids
+        @param transmission_ids: a list of transmission workspace indexes
         @returns a subtracted transmission workspace
         '''
         if not self.has_dark_runs():
