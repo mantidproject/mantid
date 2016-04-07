@@ -61,6 +61,7 @@ const std::string PROP_TOF_RANGES = "ToFRanges";
 const std::string PROP_OUTPUT_PREFIX = "OutputBandPrefix";
 const std::string PROP_INPUT_FORMAT = "InputImageFormat";
 const std::string PROP_OUTPUT_IMAGE_FORMAT = "OutputImageFormat";
+const std::string PROP_OUTPUT_BIT_DEPTH = "OutputBitDepth";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -86,14 +87,16 @@ void ImggAggregateWavelengths::init() {
       "The number of output bands. The input bands are divided into uniform "
       "non-overlapping blocks and each of the output bands correspond to one "
       "block. This is a convenience particular case of the property " +
-          PROP_INDEX_RANGES);
+          PROP_INDEX_RANGES,
+      Direction::Input);
 
   declareProperty(
       PROP_INDEX_RANGES, "",
       "A comma separated list of ranges of indices, where the "
       "indices refer to the input images, counting from 1. For "
       "example: 1-100, 101-200, 201-300. The number of ranges "
-      "given will set the number of output bands. If you just need a certain"
+      "given will set the number of output bands. If you just need a "
+      "certain"
       "number of bands split uniformly you can alternatively use "
       "the simple property " +
           PROP_UNIFORM_BANDS);
@@ -126,18 +129,29 @@ void ImggAggregateWavelengths::init() {
           outPrefix + tofRangesPrefix +
           "10000_50000' (where the 10000 and 50000 are the time of flight "
           "boundaries of the output band, using the same units as in the image "
-          "headers).");
+          "headers).",
+      Direction::Input);
 
   std::vector<std::string> imgFormat{"FITS"};
   declareProperty(
       PROP_INPUT_FORMAT, "FITS", "From the input directory(ies) use "
                                  "images in this format and ignore any "
                                  "other files",
-      boost::make_shared<Mantid::Kernel::StringListValidator>(imgFormat));
+      boost::make_shared<Mantid::Kernel::StringListValidator>(imgFormat),
+      Direction::Input);
 
   declareProperty(
       PROP_OUTPUT_IMAGE_FORMAT, "FITS", "Produce output images in this format",
-      boost::make_shared<Mantid::Kernel::StringListValidator>(imgFormat));
+      boost::make_shared<Mantid::Kernel::StringListValidator>(imgFormat),
+      Direction::Input);
+
+  const std::vector<int> bitDepths{16};
+  declareProperty(PROP_OUTPUT_BIT_DEPTH, 16,
+                  boost::make_shared<Kernel::ListValidator<int>>(bitDepths),
+                  "The bit depth or number of bits per pixel to use for the "
+                  "output image(s). Only 16 bits is supported at the "
+                  "moment.",
+                  Direction::Input);
 }
 
 std::map<std::string, std::string> ImggAggregateWavelengths::validateInputs() {
@@ -479,7 +493,8 @@ ImggAggregateWavelengths::loadFITS(const Poco::Path &imgPath,
     Mantid::API::WorkspaceGroup_sptr wsg;
     const auto &ads = Mantid::API::AnalysisDataService::Instance();
     wsg = ads.retrieveWS<Mantid::API::WorkspaceGroup>(outName);
-    ws = ads.retrieveWS<Mantid::API::MatrixWorkspace>(wsg->getNames()[0]);
+    ws = ads.retrieveWS<Mantid::API::MatrixWorkspace>(
+        wsg->getNames()[wsg->size() - 1]);
   } catch (std::exception &e) {
     throw std::runtime_error(
         "Could not load image contents for file '" + imgPath.toString() +
@@ -492,8 +507,44 @@ ImggAggregateWavelengths::loadFITS(const Poco::Path &imgPath,
   return ws;
 }
 
+/**
+ * Add a workspace into an accumulator workspace ('toAdd' into
+ * 'accum'). This method blatantly ignores the X values and the E
+ * (error) values. We're only interested in the Y values (pixels,
+ * counts).
+ *
+ * @param accum workspace where to add a new workspace
+ * @param toAdd workspace to add
+ */
 void ImggAggregateWavelengths::aggImage(API::MatrixWorkspace_sptr accum,
                                         const API::MatrixWorkspace_sptr toAdd) {
+  const size_t sizeX = accum->blocksize();
+  const size_t sizeY = accum->getNumberHistograms();
+
+  const size_t sizeXIn = accum->blocksize();
+  const size_t sizeYIn = accum->getNumberHistograms();
+
+  if (sizeX != sizeXIn || sizeY != sizeYIn) {
+    throw std::runtime_error(
+        "Cannot add images of different dimensions. The first image has "
+        "dimensions " +
+        std::to_string(sizeY) + " rows by " + std::to_string(sizeX) +
+        " columns whereas the second image has dimensions " +
+        std::to_string(sizeYIn) + " rows by " + std::to_string(sizeXIn) +
+        " columns.");
+  }
+
+  for (size_t row = 0; row < sizeY; row++) {
+    Mantid::API::ISpectrum *spectrum = accum->getSpectrum(row);
+    Mantid::API::ISpectrum *specIn = toAdd->getSpectrum(row);
+    auto &dataY = spectrum->dataY();
+    const auto &dataYIn = specIn->readY();
+    std::transform(dataY.begin(), dataY.end(), dataYIn.cbegin(), dataY.begin(),
+                   std::plus<double>());
+    // for (size_t col = 0; col < sizeX; col++) {
+    //  dataY[col] += dataYIn[col];
+    //}
+  }
 }
 
 void ImggAggregateWavelengths::saveAggImage(
@@ -595,7 +646,27 @@ void writeFITSHeaderBlock(const API::MatrixWorkspace_sptr img,
 }
 
 void writeFITSImageMatrix(const API::MatrixWorkspace_sptr img,
-                          std::ofstream &file) {}
+                          std::ofstream &file) {
+  const size_t sizeX = img->blocksize();
+  const size_t sizeY = img->getNumberHistograms();
+
+  for (size_t row = 0; row < sizeY; row++) {
+    Mantid::API::ISpectrum *spectrum = img->getSpectrum(row);
+    const auto &dataY = spectrum->readY();
+    for (size_t col = 0; col < sizeX; col++) {
+      const size_t bytespp = 2;
+      int16_t pixelVal = static_cast<uint16_t>(dataY[col]);
+
+      // change endianness: to sequence of bytes in big-endian
+      uint8_t bytesPixel[bytespp];
+      uint8_t *iter = reinterpret_cast<uint8_t *>(&pixelVal);
+      std::reverse_copy(iter, iter + bytespp, bytesPixel);
+
+      file.write(reinterpret_cast<const char *>(&bytesPixel[0]),
+                 sizeof(bytesPixel));
+    }
+  }
+}
 }
 
 // TODO: this is a very early version of what should become an
@@ -616,13 +687,14 @@ void ImggAggregateWavelengths::processDirectory(
   auto imgFiles = findInputImages(inDir);
 
   auto it = std::begin(imgFiles);
-  const std::string wsName = "__ImggAggregateWavelengths_fits";
-  API::MatrixWorkspace_sptr accum = loadFITS(*it, wsName);
+  const std::string wsName = "__ImggAggregateWavelengths_fits_seq";
+  const std::string wsNameFirst = wsName + "_first";
+  API::MatrixWorkspace_sptr accum = loadFITS(*it, wsNameFirst);
   ++it;
 
   for (auto end = std::end(imgFiles); it != end; ++it) {
     // load one more
-    API::MatrixWorkspace_sptr img = loadFITS(*it, wsName);
+    const API::MatrixWorkspace_sptr img = loadFITS(*it, wsName);
 
     // add
     aggImage(accum, img);
@@ -631,9 +703,9 @@ void ImggAggregateWavelengths::processDirectory(
     // allocations/deallocations
     Mantid::API::AnalysisDataService::Instance().remove(wsName);
   }
-
   // save
   saveAggImage(accum, outDir, prefix, outImgIndex);
+  Mantid::API::AnalysisDataService::Instance().remove(wsNameFirst);
 }
 
 } // namespace DataHandling
