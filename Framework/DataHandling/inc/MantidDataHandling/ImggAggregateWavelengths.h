@@ -80,7 +80,8 @@ private:
   bool isSupportedExtension(const std::string &extShort,
                             const std::string &extLong);
 
-  API::MatrixWorkspace_sptr loadFITS(const Poco::Path &imgPath);
+  API::MatrixWorkspace_sptr loadFITS(const Poco::Path &imgPath,
+                                     const std::string &outName);
 
   void aggImage(API::MatrixWorkspace_sptr accum,
                 const API::MatrixWorkspace_sptr toAdd);

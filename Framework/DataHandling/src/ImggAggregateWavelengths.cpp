@@ -1,4 +1,5 @@
 #include "MantidDataHandling/ImggAggregateWavelengths.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -127,18 +128,19 @@ void ImggAggregateWavelengths::init() {
 
   std::vector<std::string> imgFormat{"FITS"};
   declareProperty(
-      "InputImageFormat", "From the input directory(ies) use "
-                          "images in this format and ignore any "
-                          "other files",
+      PROP_INPUT_FORMAT, "FITS", "From the input directory(ies) use "
+                                 "images in this format and ignore any "
+                                 "other files",
       boost::make_shared<Mantid::Kernel::StringListValidator>(imgFormat));
 
   declareProperty(
-      "OutputImageFormat", "Produce output images in this format",
+      PROP_OUTPUT_IMAGE_FORMAT, "FITS", "Produce output images in this format",
       boost::make_shared<Mantid::Kernel::StringListValidator>(imgFormat));
 }
 
 std::map<std::string, std::string> ImggAggregateWavelengths::validateInputs() {
   std::map<std::string, std::string> result;
+
   size_t optCount = 0;
   const int uniformBands = getProperty(PROP_UNIFORM_BANDS);
   if (uniformBands > 0)
@@ -153,6 +155,12 @@ std::map<std::string, std::string> ImggAggregateWavelengths::validateInputs() {
   result[PROP_UNIFORM_BANDS] = "One and only one of the options " +
                                PROP_UNIFORM_BANDS + ", " + PROP_INDEX_RANGES +
                                ", " + PROP_TOF_RANGES + " has to be set.";
+
+  const std::string inputPath = getPropertyValue(PROP_INPUT_PATH);
+  const std::string outputPath = getPropertyValue(PROP_OUTPUT_PATH);
+  if (inputPath == outputPath)
+    result[PROP_INPUT_PATH] = "The input and output paths should be different.";
+
   return result;
 }
 
@@ -412,14 +420,61 @@ void ImggAggregateWavelengths::processDirectory(const Poco::Path &inDir,
 }
 
 API::MatrixWorkspace_sptr
-ImggAggregateWavelengths::loadFITS(const Poco::Path &imgPath) {
+ImggAggregateWavelengths::loadFITS(const Poco::Path &imgPath,
+                                   const std::string &outName) {
   imgPath.toString();
+
+  auto loader = Mantid::API::AlgorithmManager::Instance().create("LoadFITS");
+  try {
+    loader->initialize();
+    loader->setPropertyValue("Filename", imgPath.toString());
+    loader->setProperty("OutputWorkspace", outName);
+    // this is way faster when loading into a MatrixWorkspace
+    loader->setProperty("LoadAsRectImg", true);
+  } catch (std::exception &e) {
+    throw std::runtime_error("Failed to initialize the algorithm to "
+                             "load images. Error description: " +
+                             std::string(e.what()));
+  }
+
+  try {
+    loader->execute();
+  } catch (std::exception &e) {
+    throw std::runtime_error(
+        "Failed to load image. Could not load this file as a "
+        "FITS image: " +
+        std::string(e.what()));
+  }
+
+  if (!loader->isExecuted()) {
+    throw std::runtime_error(
+        "Failed to load image correctly. Note that even though "
+        "the image file has been loaded it seems to contain errors.");
+  }
+
+  Mantid::API::MatrixWorkspace_sptr ws;
+  try {
+    Mantid::API::WorkspaceGroup_sptr wsg;
+    const auto &ads = Mantid::API::AnalysisDataService::Instance();
+    wsg = ads.retrieveWS<Mantid::API::WorkspaceGroup>(outName);
+    ws = ads.retrieveWS<Mantid::API::MatrixWorkspace>(wsg->getNames()[0]);
+  } catch (std::exception &e) {
+    throw std::runtime_error(
+        "Could not load image contents for file '" + imgPath.toString() +
+        "'. An unrecoverable error "
+        "happened when trying to load the image contents. Cannot "
+        "display it. Error details: " +
+        std::string(e.what()));
+  }
+
+  return ws;
 }
 
 void ImggAggregateWavelengths::aggImage(API::MatrixWorkspace_sptr accum,
                                         const API::MatrixWorkspace_sptr toAdd) {
 }
 
+// TODO: this is a very early version of what should become an algorithm
 void ImggAggregateWavelengths::saveFITS(const API::MatrixWorkspace_sptr accum,
                                         const std::string &outDir,
                                         const std::string &prefix) {}
@@ -432,17 +487,20 @@ void ImggAggregateWavelengths::processDirectory(
   auto imgFiles = findInputImages(inDir);
 
   auto it = std::begin(imgFiles);
-  API::MatrixWorkspace_sptr accum = loadFITS(*it);
+  const std::string wsName = "__ImggAggregateWavelengths_fits";
+  API::MatrixWorkspace_sptr accum = loadFITS(*it, wsName);
   ++it;
 
   for (auto end = std::end(imgFiles); it != end; ++it) {
     // LoadFITS
-    API::MatrixWorkspace_sptr img = loadFITS(*it);
+    API::MatrixWorkspace_sptr img = loadFITS(*it, wsName);
 
     // add
     aggImage(accum, img);
 
-    // clear image/ws
+    // clear image/workspace. TODO: This is a big waste of
+    // allocations/deallocations
+    Mantid::API::AnalysisDataService::Instance().remove(wsName);
   }
 
   // save
