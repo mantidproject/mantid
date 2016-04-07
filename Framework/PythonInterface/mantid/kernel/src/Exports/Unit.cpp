@@ -30,6 +30,14 @@ const std::string deprecatedLabel(Unit &self) {
 }
 
 void export_Unit() {
+  // Function pointer typedef
+  // Unit version
+  typedef bool (Unit::*UnitVersion)(const Unit &destination, double &factor,
+                                    double &power) const;
+  // String version
+  typedef bool (Unit::*StringVersion)(std::string destUnitName, double &factor,
+                                      double &power) const;
+
   register_ptr_to_python<boost::shared_ptr<Unit>>();
 
   class_<Unit, boost::noncopyable>("Unit", no_init)
@@ -44,7 +52,15 @@ void export_Unit() {
       .def("symbol", &Unit::label, arg("self"),
            "Returns a UnitLabel object that holds "
            "information on the symbol to use for unit")
-      .def(
-          "unitID", &Unit::unitID, arg("self"),
-          "Returns the string ID of the unit. This may/may not match its name");
+      .def("unitID", &Unit::unitID, arg("self"),
+           "Returns the string ID of the unit. This may/may not match "
+           "its name")
+      .def("quickConversion", (StringVersion)&Unit::quickConversion,
+           (arg("destUnitName"), arg("factor"), arg("power")),
+           "Check whether the unit can be converted to another via a "
+           "simple factor")
+      .def("quickConversion", (UnitVersion)&Unit::quickConversion,
+           (arg("destination"), arg("factor"), arg("power")),
+           "Check whether the unit can be converted to another via a "
+           "simple factor");
 }
