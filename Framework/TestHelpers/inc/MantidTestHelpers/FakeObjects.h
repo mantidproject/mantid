@@ -31,6 +31,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/INearestNeighbours.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidKernel/Histogram/Histogram.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -43,13 +44,13 @@ public:
   SpectrumTester() : ISpectrum() {}
   SpectrumTester(const specnum_t specNo) : ISpectrum(specNo) {}
 
-  void setX(const MantidVec &X) override { refX.access() = X; }
-  void setX(const MantidVecPtr &X) override { refX = X; }
-  void setX(const MantidVecPtr::ptr_type &X) override { refX = X; }
-  MantidVec &dataX() override { return refX.access(); }
-  const MantidVec &dataX() const override { return *refX; }
-  const MantidVec &readX() const override { return *refX; }
-  MantidVecPtr ptrX() const override { return refX; }
+  void setX(const MantidVec &X) override { m_histogram.setX(X); }
+  void setX(const MantidVecPtr &X) override { m_histogram.setX(X); }
+  void setX(const MantidVecPtr::ptr_type &X) override { m_histogram.setX(X); }
+  MantidVec &dataX() override { return m_histogram.dataX(); }
+  const MantidVec &dataX() const override { return m_histogram.dataX(); }
+  const MantidVec &readX() const override { return m_histogram.constDataX(); }
+  MantidVecPtr ptrX() const override { return m_histogram.ptrX(); }
 
   void setData(const MantidVec &Y) override { data = Y; }
   void setData(const MantidVec &Y, const MantidVec &E) override {
@@ -94,7 +95,7 @@ public:
   }
 
 protected:
-  MantidVecPtr refX;
+  Kernel::Histogram m_histogram;
   MantidVec data;
   MantidVec data_E;
 };
