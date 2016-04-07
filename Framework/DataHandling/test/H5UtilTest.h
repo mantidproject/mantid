@@ -2,10 +2,12 @@
 #define MANTID_DATAHANDLING_H5UTILTEST_H_
 
 #include <cxxtest/TestSuite.h>
+
+#include "MantidKernel/System.h"
+#include "MantidDataHandling/H5Util.h"
+
 #include <H5Cpp.h>
 #include <Poco/File.h>
-
-#include "MantidDataHandling/H5Util.h"
 
 using namespace H5;
 using namespace Mantid::DataHandling;

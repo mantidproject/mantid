@@ -1,5 +1,5 @@
 #include "MantidDataHandling/H5Util.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
 #include "MantidAPI/LogManager.h"
 
 #include <H5Cpp.h>
