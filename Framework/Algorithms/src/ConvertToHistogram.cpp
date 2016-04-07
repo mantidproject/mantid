@@ -86,5 +86,9 @@ void ConvertToHistogram::calculateXPoints(const MantidVec &inputX,
   outputX[numPoints] =
       inputX.back() + (inputX.back() - outputX[numBoundaries - 2]);
 }
+
+Kernel::Histogram::XMode ConvertToHistogram::getNewXMode() const {
+  return Kernel::Histogram::XMode::BinEdges;
+}
 }
 }

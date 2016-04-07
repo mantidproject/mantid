@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidKernel/Histogram/Histogram.h"
 
 #include <set>
 
@@ -122,6 +123,8 @@ public:
   //-------------------------------------------------------
   virtual bool hasDx() const;
   virtual void resetHasDx();
+
+  virtual void setXMode(Kernel::Histogram::XMode mode) = 0;
 
 protected:
   /// The spectrum number of this spectrum
