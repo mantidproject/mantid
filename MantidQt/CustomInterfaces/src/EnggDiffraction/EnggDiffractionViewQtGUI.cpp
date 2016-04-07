@@ -784,6 +784,8 @@ void EnggDiffractionViewQtGUI::setPeakPickerEnabled(bool enabled) {
   m_peakPicker->setEnabled(enabled);
   m_peakPicker->setVisible(enabled);
   m_uiTabFitting.dataPlot->replot(); // PeakPicker might get hidden/shown
+  m_uiTabFitting.pushButton_add_peak->setEnabled(enabled);
+  m_uiTabFitting.pushButton_select_peak->setEnabled(!enabled);
 }
 
 void EnggDiffractionViewQtGUI::setPeakPicker(
@@ -1325,29 +1327,30 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setPeakPick() {
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addPeakToList() {
 
-	if (m_peakPicker->isEnabled()) {
-		auto peakCentre = getPeakCentre();
+  if (m_peakPicker->isEnabled()) {
+    auto peakCentre = getPeakCentre();
 
-		std::stringstream stream;
-		stream << std::fixed << std::setprecision(4) << peakCentre;
-		auto strPeakCentre = stream.str();
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(4) << peakCentre;
+    auto strPeakCentre = stream.str();
 
-		auto curExpPeaksList = m_uiTabFitting.lineEdit_fitting_peaks->text();
+    auto curExpPeaksList = m_uiTabFitting.lineEdit_fitting_peaks->text();
 
-		if (!curExpPeaksList.isEmpty()) {
+    if (!curExpPeaksList.isEmpty()) {
 
-			std::string expPeakStr = curExpPeaksList.toStdString();
-			std::size_t found = (expPeakStr.find_last_of(", ") || expPeakStr.find_last_of(","));
-			if (found) {
-				QString comma = ", ";
-				curExpPeaksList.append(comma + QString::fromStdString(strPeakCentre));
-			}
-			else {
-				curExpPeaksList.append(QString::fromStdString(strPeakCentre));
-			}
-			m_uiTabFitting.lineEdit_fitting_peaks->setText(curExpPeaksList);
-		}
-	}
+      std::string expPeakStr = curExpPeaksList.toStdString();
+      std::string lastTwoChr = expPeakStr.substr(expPeakStr.size() - 2);
+      auto lastChr = expPeakStr.back();
+      char comma = ',';
+      if (lastChr == comma || lastTwoChr == ", ") {
+        curExpPeaksList.append(QString::fromStdString(" " + strPeakCentre));
+      } else {
+        QString comma = ", ";
+        curExpPeaksList.append(comma + QString::fromStdString(strPeakCentre));
+      }
+      m_uiTabFitting.lineEdit_fitting_peaks->setText(curExpPeaksList);
+    }
+  }
 }
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::savePeakList() {

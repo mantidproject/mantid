@@ -370,6 +370,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_add_peak">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Add Peak</string>
           </property>
@@ -377,6 +380,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_save_peak_list">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="text">
            <string>Save Peaks List</string>
           </property>
