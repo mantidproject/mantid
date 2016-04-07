@@ -8,6 +8,8 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 
+#include <fstream>
+
 #include <Poco/File.h>
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
@@ -152,9 +154,11 @@ std::map<std::string, std::string> ImggAggregateWavelengths::validateInputs() {
   if (!tofRanges.empty())
     optCount++;
 
-  result[PROP_UNIFORM_BANDS] = "One and only one of the options " +
-                               PROP_UNIFORM_BANDS + ", " + PROP_INDEX_RANGES +
-                               ", " + PROP_TOF_RANGES + " has to be set.";
+  if (1 != optCount) {
+    result[PROP_UNIFORM_BANDS] = "One and only one of the options " +
+                                 PROP_UNIFORM_BANDS + ", " + PROP_INDEX_RANGES +
+                                 ", " + PROP_TOF_RANGES + " has to be set.";
+  }
 
   const std::string inputPath = getPropertyValue(PROP_INPUT_PATH);
   const std::string outputPath = getPropertyValue(PROP_OUTPUT_PATH);
@@ -172,8 +176,7 @@ void ImggAggregateWavelengths::exec() {
   const std::string outputPath = getPropertyValue(PROP_OUTPUT_PATH);
   const std::string indexRanges = getPropertyValue(PROP_INDEX_RANGES);
   const std::string tofRanges = getPropertyValue(PROP_TOF_RANGES);
-  const size_t uniformBands =
-      static_cast<size_t>(getProperty(PROP_UNIFORM_BANDS));
+  const int uniformBands = getProperty(PROP_UNIFORM_BANDS);
 
   if (uniformBands > 0)
     aggUniformBands(inputPath, outputPath, uniformBands);
@@ -197,8 +200,10 @@ void ImggAggregateWavelengths::aggUniformBands(const std::string &inputPath,
                     << std::endl;
   }
 
+  size_t count = 0;
   for (const auto &subdir : inputSubDirs) {
-    processDirectory(subdir, bands, outputPath, outPrefix + indexRangesPrefix);
+    processDirectory(subdir, bands, outputPath, outPrefix + indexRangesPrefix,
+                     count++);
   }
 }
 
@@ -218,8 +223,10 @@ void ImggAggregateWavelengths::aggIndexBands(const std::string &inputPath,
                     << std::endl;
   }
 
+  size_t count = 0;
   for (const auto &subdir : inputSubDirs) {
-    processDirectory(subdir, ranges, outputPath, outPrefix + indexRangesPrefix);
+    processDirectory(subdir, ranges, outputPath, outPrefix + indexRangesPrefix,
+                     count++);
   }
 }
 
@@ -279,12 +286,13 @@ struct PocoPathComp
 bool ImggAggregateWavelengths::isSupportedExtension(
     const std::string &extShort, const std::string &extLong) {
 
-  return (formatExtensionsShort.end() !=
-          std::find(formatExtensionsShort.cbegin(),
-                    formatExtensionsShort.cend(), extShort)) ||
-         (formatExtensionsLong.end() != std::find(formatExtensionsLong.cbegin(),
-                                                  formatExtensionsLong.cend(),
-                                                  extShort));
+  bool found = (formatExtensionsShort.end() !=
+                std::find(formatExtensionsShort.cbegin(),
+                          formatExtensionsShort.cend(), extShort)) ||
+               (formatExtensionsLong.end() !=
+                std::find(formatExtensionsLong.cbegin(),
+                          formatExtensionsLong.cend(), extLong));
+  return found;
 }
 
 /**
@@ -322,6 +330,7 @@ ImggAggregateWavelengths::findInputSubdirs(const Poco::Path &path) {
       const std::string extLong = name.substr(name.size() - 4);
 
       if (isSupportedExtension(extShort, extLong)) {
+        // the input path contiains image files, take it
         dirsFound = {path};
         break;
       }
@@ -362,12 +371,17 @@ ImggAggregateWavelengths::findInputImages(const Poco::Path &path) {
   while (it != end) {
 
     if (it->isFile()) {
+      const std::string summedSkipStr = "_SummedImg.";
       const std::string name = it.name();
-      const std::string extShort = name.substr(name.size() - 3);
-      const std::string extLong = name.substr(name.size() - 4);
+      if (std::string::npos != name.find(summedSkipStr)) {
+        ++it;
+        continue;
+      }
 
       const std::string expectedShort = "fit";
       const std::string expectedLong = "fits";
+      const std::string extShort = name.substr(name.size() - 3);
+      const std::string extLong = name.substr(name.size() - 4);
       if (isSupportedExtension(extShort, extLong)) {
         imgsFound.emplace_back(it.path());
       }
@@ -406,25 +420,33 @@ ImggAggregateWavelengths::findInputImages(const Poco::Path &path) {
  */
 void ImggAggregateWavelengths::processDirectory(const Poco::Path &inDir,
                                                 size_t bands,
-                                                const std::string outDir,
-                                                const std::string prefix) {
+                                                const std::string &outDir,
+                                                const std::string &prefix,
+                                                size_t outImgIndex) {
   Mantid::API::MatrixWorkspace_sptr aggImg;
 
   size_t max = 0;
   // TODO: get max from directory (subdirs) listing
   auto images = findInputImages(inDir);
 
+  if (images.empty()) {
+    g_log.warning()
+        << "Could not find any input image files in the subdirectory '"
+        << inDir.toString() << "'. It will be ignored." << std::endl;
+    return;
+  }
+
   // TODO call the 'ranges' version with the convenient range
   const std::vector<std::pair<size_t, size_t>> ranges{std::make_pair(1, max)};
-  processDirectory(inDir, ranges, outDir, prefix);
+  processDirectory(inDir, ranges, outDir, prefix, outImgIndex);
 }
 
 API::MatrixWorkspace_sptr
 ImggAggregateWavelengths::loadFITS(const Poco::Path &imgPath,
                                    const std::string &outName) {
-  imgPath.toString();
 
-  auto loader = Mantid::API::AlgorithmManager::Instance().create("LoadFITS");
+  auto loader =
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadFITS");
   try {
     loader->initialize();
     loader->setPropertyValue("Filename", imgPath.toString());
@@ -474,15 +496,122 @@ void ImggAggregateWavelengths::aggImage(API::MatrixWorkspace_sptr accum,
                                         const API::MatrixWorkspace_sptr toAdd) {
 }
 
-// TODO: this is a very early version of what should become an algorithm
+void ImggAggregateWavelengths::saveAggImage(
+    const API::MatrixWorkspace_sptr accum, const std::string &outDir,
+    const std::string &prefix, size_t outImgIndex) {
+  // for example 'bands_sum_00030'
+  std::ostringstream sstr;
+  sstr << std::setw(5) << std::setfill('0') << outImgIndex;
+  const std::string outName = prefix + "sum_" + sstr.str();
+
+  Poco::Path outPath(outDir);
+  Poco::File dirFile(outPath);
+  if (!dirFile.isDirectory() || !dirFile.exists()) {
+    g_log.information() << "Cannot save output image into '"
+                        << outPath.toString()
+                        << "'. It is not an existing directory." << std::endl;
+    return;
+  }
+
+  outPath.append(outName);
+  // only FITS support for now
+  const std::string fullName = outPath.toString();
+  saveFITS(accum, fullName);
+  g_log.information() << "Saved output aggregated image into: " << fullName
+                      << std::endl;
+}
+
+namespace {
+// minimalistic. At a very least we should add ToF, time bin, counts, triggers,
+// etc.
+const size_t maxLenHdr = 80;
+const std::string FITSHdrFirst =
+    "SIMPLE  =                    T / file does conform to FITS standard";
+const std::string FITSHdrBitDepth =
+    "BITPIX  =                   16 / number of bits per data pixel";
+const std::string FITSHdrAxes =
+    "NAXIS   =                    2 / number of data axes";
+const std::string FITSHdrExtensions =
+    "EXTEND  =                    T / FITS dataset may contain extensions";
+const std::string FITSHdrRefComment1 = "COMMENT   FITS (Flexible Image "
+                                       "Transport System) format is defined in "
+                                       "'Astronomy";
+const std::string FITSHdrRefComment2 =
+    "COMMENT   and Astrophysics', volume 376, page 359; bibcode: "
+    "2001A&A...376..359H";
+const std::string FITSHdrEnd = "END";
+
+void writeFITSHeaderEntry(const std::string &hdr, std::ofstream &file) {
+  static const std::array<char, maxLenHdr> zeros{};
+
+  size_t count = hdr.size();
+  if (count >= maxLenHdr)
+    count = maxLenHdr;
+
+  file.write(hdr.c_str(), sizeof(char) * count);
+  file.write(&zeros[0], maxLenHdr - count);
+}
+
+void writeFITSHeaderAxesSizes(const API::MatrixWorkspace_sptr img,
+                              std::ofstream &file) {
+  const std::string sizeX = std::to_string(img->blocksize());
+  const std::string sizeY = std::to_string(img->getNumberHistograms());
+
+  const size_t fieldWidth = 20;
+  std::stringstream axis1;
+  axis1 << "NAXIS1  = " << std::setw(fieldWidth) << sizeX
+        << " / length of data axis 1";
+  writeFITSHeaderEntry(axis1.str(), file);
+
+  std::stringstream axis2;
+  axis2 << "NAXIS2  = " << std::setw(fieldWidth) << sizeY
+        << " / length of data axis 2";
+  writeFITSHeaderEntry(axis2.str(), file);
+}
+
+// FITS headers consist of subblocks of 36 entries/lines. This method
+// is to write the "padding" lines required to have 36 in a block
+void writePaddingFITSHeaders(size_t count, std::ofstream &file) {
+  static const std::array<char, maxLenHdr> zeros{};
+
+  for (size_t i = 0; i < count; ++i) {
+    file.write(&zeros[0], maxLenHdr);
+  }
+}
+
+void writeFITSHeaderBlock(const API::MatrixWorkspace_sptr img,
+                          std::ofstream &file) {
+  writeFITSHeaderEntry(FITSHdrFirst, file);
+  writeFITSHeaderEntry(FITSHdrBitDepth, file);
+  writeFITSHeaderEntry(FITSHdrAxes, file);
+  writeFITSHeaderAxesSizes(img, file);
+  writeFITSHeaderEntry(FITSHdrExtensions, file);
+  writeFITSHeaderEntry(FITSHdrRefComment1, file);
+  writeFITSHeaderEntry(FITSHdrRefComment2, file);
+  writeFITSHeaderEntry(FITSHdrEnd, file);
+
+  const size_t entriesPerHDU = 36;
+  writePaddingFITSHeaders(entriesPerHDU - 9, file);
+}
+
+void writeFITSImageMatrix(const API::MatrixWorkspace_sptr img,
+                          std::ofstream &file) {}
+}
+
+// TODO: this is a very early version of what should become an
+// algorithm of its own
 void ImggAggregateWavelengths::saveFITS(const API::MatrixWorkspace_sptr accum,
-                                        const std::string &outDir,
-                                        const std::string &prefix) {}
+                                        const std::string &filename) {
+  std::ofstream outfile(filename + ".fits", std::ofstream::binary);
+
+  writeFITSHeaderBlock(accum, outfile);
+  writeFITSImageMatrix(accum, outfile);
+}
 
 void ImggAggregateWavelengths::processDirectory(
     const Poco::Path &inDir,
     const std::vector<std::pair<size_t, size_t>> &ranges,
-    const std::string outDir, const std::string prefix) {
+    const std::string outDir, const std::string prefix, size_t outImgIndex) {
 
   auto imgFiles = findInputImages(inDir);
 
@@ -492,7 +621,7 @@ void ImggAggregateWavelengths::processDirectory(
   ++it;
 
   for (auto end = std::end(imgFiles); it != end; ++it) {
-    // LoadFITS
+    // load one more
     API::MatrixWorkspace_sptr img = loadFITS(*it, wsName);
 
     // add
@@ -504,7 +633,7 @@ void ImggAggregateWavelengths::processDirectory(
   }
 
   // save
-  saveFITS(accum, outDir, prefix);
+  saveAggImage(accum, outDir, prefix, outImgIndex);
 }
 
 } // namespace DataHandling

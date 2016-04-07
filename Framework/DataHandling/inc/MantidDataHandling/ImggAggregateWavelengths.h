@@ -63,11 +63,13 @@ private:
                    const std::string & /*ranges*/);
 
   void processDirectory(const Poco::Path &inDir, size_t bands,
-                        const std::string outDir, const std::string prefix);
+                        const std::string &outDir, const std::string &prefix,
+                        size_t outImgIndex);
 
   void processDirectory(const Poco::Path &inDir,
                         const std::vector<std::pair<size_t, size_t>> &ranges,
-                        const std::string outDir, const std::string prefix);
+                        const std::string outDir, const std::string prefix,
+                        size_t outImgIndex);
 
   std::vector<std::pair<size_t, size_t>>
   rangesFromStringProperty(const std::string &rangesSpec,
@@ -86,8 +88,12 @@ private:
   void aggImage(API::MatrixWorkspace_sptr accum,
                 const API::MatrixWorkspace_sptr toAdd);
 
+  void saveAggImage(const API::MatrixWorkspace_sptr accum,
+                    const std::string &outDir, const std::string &prefix,
+                    size_t outImgIndex);
+
   void saveFITS(const API::MatrixWorkspace_sptr accum,
-                const std::string &outDir, const std::string &prefix);
+                const std::string &filename);
 
   static const std::vector<std::string> formatExtensionsShort;
   static const std::vector<std::string> formatExtensionsLong;
