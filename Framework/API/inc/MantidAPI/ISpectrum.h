@@ -52,25 +52,25 @@ public:
 
   void copyInfoFrom(const ISpectrum &other);
 
-  virtual void setX(const MantidVec &X);
+  virtual void setX(const MantidVec &X) = 0;
   virtual void setDx(const MantidVec &Dx);
 
-  virtual void setX(const MantidVecPtr &X);
+  virtual void setX(const MantidVecPtr &X) = 0;
   virtual void setDx(const MantidVecPtr &Dx);
 
-  virtual void setX(const MantidVecPtr::ptr_type &X);
+  virtual void setX(const MantidVecPtr::ptr_type &X) = 0;
   virtual void setDx(const MantidVecPtr::ptr_type &Dx);
 
-  virtual MantidVec &dataX();
+  virtual MantidVec &dataX() = 0;
   virtual MantidVec &dataDx();
 
-  virtual const MantidVec &dataX() const;
+  virtual const MantidVec &dataX() const = 0;
   virtual const MantidVec &dataDx() const;
 
-  virtual const MantidVec &readX() const;
+  virtual const MantidVec &readX() const = 0;
   virtual const MantidVec &readDx() const;
 
-  virtual MantidVecPtr ptrX() const;
+  virtual MantidVecPtr ptrX() const = 0;
   virtual MantidVecPtr ptrDx() const;
 
   virtual void setData(const MantidVec &Y) = 0;
@@ -129,9 +129,6 @@ protected:
 
   /// Set of the detector IDs associated with this spectrum
   std::set<detid_t> detectorIDs;
-
-  /// Copy-on-write pointer to the X data vector.
-  MantidVecPtr refX;
 
   /// Copy-on-write pointer to the Dx (X error) vector.
   MantidVecPtr refDx;

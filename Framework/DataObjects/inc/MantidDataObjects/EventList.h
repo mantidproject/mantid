@@ -195,6 +195,9 @@ public:
   const MantidVec &dataX() const override;
   const MantidVec &constDataX() const;
 
+  const MantidVec &readX() const override;
+  MantidVecPtr ptrX() const override;
+
   // TODO: This overload will probably be needed in a future to work with Event
   // data properly
   // std::pair<double,double> getXDataRange()const;
@@ -361,6 +364,9 @@ public:
   void convertUnitsQuickly(const double &factor, const double &power);
 
 private:
+  /// Copy-on-write pointer to the X data vector.
+  MantidVecPtr refX;
+
   /// List of TofEvent (no weights).
   mutable std::vector<TofEvent> events;
 
