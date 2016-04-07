@@ -135,6 +135,7 @@ void MonteCarloAbsorption::exec() {
 
     MantidVec &yValues = correctionFactors->dataY(i);
     MantidVec &eValues = correctionFactors->dataE(i);
+    const auto & detRef = *detector;
     // Simulation for each requested wavelength point
     for (int bin = 0; bin < numBins; bin += m_xStepSize) {
       prog.report("Computing corrections for bin " +
@@ -142,7 +143,8 @@ void MonteCarloAbsorption::exec() {
       const double lambda = isHistogram
                                 ? (0.5 * (xValues[bin] + xValues[bin + 1]))
                                 : xValues[bin];
-      doSimulation(detector.get(), lambda, yValues[bin], eValues[bin]);
+      doSimulation(detRef, lambda, yValues[bin], eValues[bin]);
+
       // Ensure we have the last point for the interpolation
       if (m_xStepSize > 1 && bin + m_xStepSize >= numBins &&
           bin + 1 != numBins) {
@@ -172,7 +174,7 @@ void MonteCarloAbsorption::exec() {
  * wavelength
  * @param error :: [Output] The value of the error on the factor
  */
-void MonteCarloAbsorption::doSimulation(const IDetector *const detector,
+void MonteCarloAbsorption::doSimulation(const IDetector &detector,
                                         const double lambda,
                                         double &attenFactor, double &error) {
   /**
@@ -184,7 +186,7 @@ void MonteCarloAbsorption::doSimulation(const IDetector *const detector,
    directional vector to the detector
    */
   // Absolute detector position
-  const V3D detectorPos(detector->getPos());
+  const V3D detPos(detector.getPos());
 
   int numDetected(0);
   attenFactor = 0.0;
@@ -193,7 +195,7 @@ void MonteCarloAbsorption::doSimulation(const IDetector *const detector,
     V3D startPos = sampleBeamProfile();
     V3D scatterPoint = selectScatterPoint();
     double eventFactor(0.0);
-    if (attenuationFactor(startPos, scatterPoint, detectorPos, lambda,
+    if (attenuationFactor(startPos, scatterPoint, detPos, lambda,
                           eventFactor)) {
       attenFactor += eventFactor;
       ++numDetected;

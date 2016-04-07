@@ -84,7 +84,7 @@ private:
   void exec() override;
 
   /// Do the simulation for the given detector and wavelength
-  void doSimulation(const Geometry::IDetector *const detector,
+  void doSimulation(const Geometry::IDetector & detector,
                     const double lambda, double &attenFactor, double &error);
   /// Randomly select the location initial point within the beam from a square
   /// distribution
