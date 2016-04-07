@@ -38,7 +38,7 @@ namespace DataObjects {
 class DLLExport SkippingPolicy {
 public:
   virtual bool keepGoing() const = 0;
-  virtual ~SkippingPolicy(){};
+  virtual ~SkippingPolicy() = default;
 };
 
 /// Policy that indicates skipping of masked bins.
@@ -54,7 +54,6 @@ public:
   @return True to keep going.
   */
   bool keepGoing() const override { return m_iterator->getIsMasked(); };
-  ~SkipMaskedBins() override {}
 };
 
 /// Policy that indicates no skipping should be applied.
@@ -65,7 +64,6 @@ public:
   @return false to cancel continuation
   */
   bool keepGoing() const override { return false; }
-  ~SkipNothing() override {}
 };
 
 typedef boost::scoped_ptr<SkippingPolicy> SkippingPolicy_scptr;

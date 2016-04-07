@@ -85,10 +85,10 @@ namespace MantidQt
 
     private:
       /// Initialize the layout
-      void initLayout();
+      void initLayout() override;
       /// Save the input history
-      void saveInput();
-      virtual void parseInput();
+      void saveInput() override;
+      void parseInput() override;
       /// Tie static widgets to their properties
       void tieStaticWidgets(const bool readHistory);
       /// Get the domain type: Simple, Sequential, or Parallel
@@ -195,9 +195,10 @@ namespace MantidQt
     public:
       MWPropertiesWidget(InputWorkspaceWidget* parent);
       /// Initialize the child widgets with stored and allowed values
-      virtual void init();
+      void init() override;
       /// Set all workspace properties
-      void setProperties();
+      void setProperties() override;
+
     protected:
       QSpinBox *m_workspaceIndex;
       QLineEdit *m_startX;
@@ -213,9 +214,10 @@ namespace MantidQt
     public:
       MDPropertiesWidget(InputWorkspaceWidget* parent);
       /// Initialize the child widgets with stored and allowed values
-      void init() {}
+      void init() override {}
       /// Set all workspace properties
-      void setProperties();
+      void setProperties() override;
+
     protected:
       QSpinBox *m_maxSize;
     };

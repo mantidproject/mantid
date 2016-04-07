@@ -59,7 +59,7 @@ public:
   /// Constructor for parametrized version
   CompAssembly(const IComponent *base, const ParameterMap *map);
   //! Constructor with a name and parent reference
-  CompAssembly(const std::string &, IComponent *reference = 0);
+  CompAssembly(const std::string &, IComponent *reference = nullptr);
   //! Copy constructor
   CompAssembly(const CompAssembly &);
   ~CompAssembly() override;
@@ -96,7 +96,7 @@ public:
   const Kernel::Quat getRotation() const override;
 
   /// Get the bounding box for this component and store it in the given argument
-  void getBoundingBox(BoundingBox &boundingBox) const override;
+  void getBoundingBox(BoundingBox &assemblyBox) const override;
 
   //! Print information about all children
   void printChildren(std::ostream &) const override;

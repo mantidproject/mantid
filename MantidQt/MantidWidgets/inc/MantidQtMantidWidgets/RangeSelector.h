@@ -72,21 +72,31 @@ namespace MantidWidgets
     // MEMBER ATTRIBUTES
     SelectType m_type; ///< type of selection widget is for
 
+    /// current position of the line marking the minimum
     double m_min;
+    /// current position of the line marking the maximum
     double m_max;
-    double m_lower; ///< lowest allowed value for range
-    double m_higher; ///< highest allowed value for range
-
-    QwtPlotCanvas* m_canvas;
-    QwtPlot* m_plot;
-
+    /// lowest allowed position of the line marking the minimum
+    double m_lower;
+    /// highest allowed position of the line marking the maximum
+    double m_higher;
+    /// the line object in the plot marking the position of the minimum
     QwtPlotMarker* m_mrkMin;
+    /// the line object in the plot marking the position of the maximum
     QwtPlotMarker* m_mrkMax;
 
+    /// widget receiving the  marker lines to be plotted
+    QwtPlot* m_plot;
+    /// the actual area of m_plot where the marker lines are plotted
+    QwtPlotCanvas* m_canvas;
+
+    /// signals the position of the line marking the minimum is to be changed
     bool m_minChanging;
+    /// signals the position of the line marking the maximum is to be changed
     bool m_maxChanging;
 
     bool m_infoOnly;
+    /// whether the lines should be visible
     bool m_visible;
 
     /** Strictly UI options and settings below this point **/

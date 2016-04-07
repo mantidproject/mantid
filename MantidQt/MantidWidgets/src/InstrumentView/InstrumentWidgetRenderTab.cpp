@@ -299,13 +299,20 @@ namespace MantidQt
 				QString groupName = m_instrWidget->getInstrumentSettingsGroupName();
 				QSettings settings;
 				settings.beginGroup(groupName);
-				bool isManualUCorrection = settings.value(EntryManualUCorrection, false).asBool();
-				if (isManualUCorrection)
-				{
-					double ucorrMin = settings.value(EntryUCorrectionMin, 0.0).asDouble();
-					double ucorrMax = settings.value(EntryUCorrectionMax, 0.0).asDouble();
-					rotSurface->setUCorrection(ucorrMin, ucorrMax);
-				}
+                                bool isManualUCorrection =
+                                    settings
+                                        .value(EntryManualUCorrection, false)
+                                        .toBool();
+                                if (isManualUCorrection) {
+                                  double ucorrMin =
+                                      settings.value(EntryUCorrectionMin, 0.0)
+                                          .toDouble();
+                                  double ucorrMax =
+                                      settings.value(EntryUCorrectionMax, 0.0)
+                                          .toDouble();
+                                  rotSurface->setUCorrection(ucorrMin,
+                                                             ucorrMax);
+                                }
 			}
 			else
 			{
@@ -722,11 +729,11 @@ namespace MantidQt
 				{
 					rotSurface->setAutomaticUCorrection(); // switch to automatic correction
 					rotSurface->requestRedraw();         // redraw the view
-					settings.removeEntry(EntryManualUCorrection);
-					settings.removeEntry(EntryUCorrectionMin);
-					settings.removeEntry(EntryUCorrectionMax);
-				}
-			}
+                                        settings.remove(EntryManualUCorrection);
+                                        settings.remove(EntryUCorrectionMin);
+                                        settings.remove(EntryUCorrectionMax);
+                                }
+                        }
 		}
 
 		/**

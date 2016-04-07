@@ -24,11 +24,34 @@
   <type is="SamplePos" name="sample-position"/>
 
   <!--DETECTOR-->
-  
-<component type="panel"  idstart="0" idfillbyfirst="y">
-  <location z="2.5505" y="0" x="0" name="detector1">
-  </location>
-</component>  
+  <component type="DetectorArm">
+    <location>
+      <parameter name="r-position">
+        <value val="0"/>
+      </parameter>
+      <parameter name="t-position">
+        <logfile id="DANGLE"  eq="0.0+value"/>
+      </parameter>
+      <parameter name="p-position">
+        <value val="0"/>
+      </parameter>
+      <parameter name="rotx">
+        <value val="0"/>
+      </parameter>
+      <parameter name="roty">
+        <logfile id="DANGLE"  eq="0.0+value"/>
+      </parameter>
+      <parameter name="rotz">
+        <value val="0"/>
+      </parameter>
+    </location>
+  </component> 
+
+  <type name="DetectorArm">
+    <component type="panel" idstart="0" idfillbyfirst="y">
+        <location name="detector1" x="0" y="0" z="2.5505"/>
+    </component>
+  </type>
   
 <!-- Rectangular Detector Panel. Position 256 "pixel" along x 
      and 304 "pixel" along y  (relative to the coordinate system of the bank) -->

@@ -96,6 +96,24 @@ configure_file ( ${WINDOWS_BUILDCONFIG}/command-prompt.bat ${PROJECT_BINARY_DIR}
 configure_file ( ${WINDOWS_BUILDCONFIG}/visual-studio.bat ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY )
 
 ###########################################################################
+# Configure Mantid startup scripts
+###########################################################################
+set ( PACKAGING_DIR ${PROJECT_SOURCE_DIR}/buildconfig/CMake/Packaging )
+# build version
+set ( MANTIDPYTHON_PREAMBLE "call %~dp0..\\..\\buildenv.bat\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\PVPlugins\\PVPlugins;%PATH%" )
+configure_file ( ${PACKAGING_DIR}/mantidpython.bat.in
+    ${PROJECT_BINARY_DIR}/mantidpython.bat @ONLY )
+# build-time rule to place it in the appropriate directory
+add_custom_target ( mantidpython ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_BINARY_DIR}/mantidpython.bat
+    ${PROJECT_BINARY_DIR}/bin/${CMAKE_CFG_INTDIR}/mantidpython.bat
+    COMMENT "Generating mantidpython" )
+# install version
+set ( MANTIDPYTHON_PREAMBLE "set PYTHONHOME=%_BIN_DIR%\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\..\\plugins;%_BIN_DIR%\\..\\PVPlugins;%PATH%" )
+configure_file ( ${PACKAGING_DIR}/mantidpython.bat.in 
+    ${PROJECT_BINARY_DIR}/mantidpython.bat.install @ONLY )
+
+###########################################################################
 # (Fake) installation variables to keep windows sweet
 ###########################################################################
 set ( BIN_DIR bin )

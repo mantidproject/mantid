@@ -14,20 +14,20 @@ using namespace Mantid::API;
 class ToyAlgorithm2 : public Algorithm {
 public:
   ToyAlgorithm2() {}
-  virtual ~ToyAlgorithm2() {}
-  virtual const std::string name() const {
+  ~ToyAlgorithm2() override {}
+  const std::string name() const override {
     return "ToyAlgorithm2";
   }; ///< Algorithm's name for identification
-  virtual int version() const {
+  int version() const override {
     return 1;
   }; ///< Algorithm's version for identification
-  virtual const std::string summary() const { return "Test summary"; }
-  void init() {
+  const std::string summary() const override { return "Test summary"; }
+  void init() override {
     declareProperty("Prop", "");
     declareProperty("P2", "");
     declareProperty("Filename", "");
   }
-  void exec() {}
+  void exec() override {}
   void final() {}
 };
 

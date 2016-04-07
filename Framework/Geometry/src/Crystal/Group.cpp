@@ -25,20 +25,6 @@ Group::Group(const std::vector<SymmetryOperation> &symmetryOperations)
   setSymmetryOperations(symmetryOperations);
 }
 
-/// Copy constructor.
-Group::Group(const Group &other)
-    : m_allOperations(other.m_allOperations),
-      m_operationSet(other.m_operationSet), m_axisSystem(other.m_axisSystem) {}
-
-/// Assignment operator.
-Group &Group::operator=(const Group &other) {
-  m_allOperations = other.m_allOperations;
-  m_operationSet = other.m_operationSet;
-  m_axisSystem = other.m_axisSystem;
-
-  return *this;
-}
-
 /// Returns the order of the group, which is the number of symmetry operations.
 size_t Group::order() const { return m_allOperations.size(); }
 
@@ -142,12 +128,15 @@ bool Group::isGroup() const {
 /// empty.
 void Group::setSymmetryOperations(
     const std::vector<SymmetryOperation> &symmetryOperations) {
-  if (symmetryOperations.size() < 1) {
+  if (symmetryOperations.empty()) {
     throw std::invalid_argument("Group needs at least one element.");
   }
 
-  m_operationSet = std::set<SymmetryOperation>(symmetryOperations.begin(),
-                                               symmetryOperations.end());
+  m_operationSet.clear();
+  std::transform(symmetryOperations.cbegin(), symmetryOperations.cend(),
+                 std::inserter(m_operationSet, m_operationSet.begin()),
+                 &getUnitCellIntervalOperation);
+
   m_allOperations = std::vector<SymmetryOperation>(m_operationSet.begin(),
                                                    m_operationSet.end());
   m_axisSystem = getCoordinateSystemFromOperations(m_allOperations);
@@ -197,7 +186,7 @@ bool Group::hasIdentity() const {
 bool Group::eachElementHasInverse() const {
   // Iterate through all operations, check that the inverse is in the group.
   for (const auto &operation : m_allOperations) {
-    if (!containsOperation(operation.inverse())) {
+    if (!containsOperation(getUnitCellIntervalOperation(operation.inverse()))) {
       return false;
     }
   }

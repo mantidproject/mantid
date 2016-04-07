@@ -101,9 +101,9 @@ public:
     ew3.initialize();
     ew3.getBoxController()->setSplitThreshold(1);
     const coord_t centers[3] = {1.0f, 2.0f, 3.0f};
-    ew3.addEvent(MDLeanEvent<3>(1.0, 1.0, centers));
-    ew3.addEvent(MDLeanEvent<3>(2.0, 2.0, centers));
-    ew3.addEvent(MDLeanEvent<3>(3.0, 3.0, centers));
+    TS_ASSERT_EQUALS(1, ew3.addEvent(MDLeanEvent<3>(1.0, 1.0, centers)));
+    TS_ASSERT_EQUALS(1, ew3.addEvent(MDLeanEvent<3>(2.0, 2.0, centers)));
+    TS_ASSERT_EQUALS(1, ew3.addEvent(MDLeanEvent<3>(3.0, 3.0, centers)));
     ew3.splitBox();
 
     ExperimentInfo_sptr ei(new ExperimentInfo);
@@ -294,6 +294,100 @@ public:
                    coords4, Mantid::API::NoNormalization)));
   }
 
+  void test_getBoxBoundaryBisectsOnLine() {
+    MDEventWorkspace3Lean::sptr ew =
+        MDEventsTestHelper::makeMDEW<3>(8, 0.0, 4.0, 1);
+
+    // Create a diagonal line through the workspace
+    Mantid::Kernel::VMD start(0.0, 0, 0);
+    Mantid::Kernel::VMD end(4.0, 4.0, 0);
+    Mantid::Kernel::VMD dir = end - start;
+    const auto length = dir.normalize();
+
+    auto box_mid_points =
+        ew->getBoxBoundaryBisectsOnLine(start, end, 3, dir, length);
+
+    // Copy set to vector for test
+    TSM_ASSERT_EQUALS("8 box boundary bisections should be found",
+                      box_mid_points.size(), 8);
+    std::vector<double> mid_points_vect(box_mid_points.begin(),
+                                        box_mid_points.end());
+
+    // Each box (cube) has edges 0.5 long, so a face diagonal is sqrt(2)/2
+    for (size_t i = 0; i < mid_points_vect.size(); ++i) {
+      TS_ASSERT_DELTA(mid_points_vect[i],
+                      (static_cast<double>(i) + 0.5) * 0.5 * sqrt(2.0), 1e-5);
+    }
+  }
+
+  void test_getBoxBoundaryBisectsOnLine_crossing_zero() {
+    MDEventWorkspace3Lean::sptr ew =
+        MDEventsTestHelper::makeMDEW<3>(8, -4.0, 4.0, 1);
+
+    // Create a diagonal line through the workspace
+    Mantid::Kernel::VMD start(-4.0, 0, 0);
+    Mantid::Kernel::VMD end(4.0, 0, 0);
+    Mantid::Kernel::VMD dir = end - start;
+    const auto length = dir.normalize();
+
+    auto box_mid_points =
+        ew->getBoxBoundaryBisectsOnLine(start, end, 3, dir, length);
+
+    // Copy set to vector for test
+    TSM_ASSERT_EQUALS("8 box boundary bisections should be found",
+                      box_mid_points.size(), 8);
+    std::vector<double> mid_points_vect(box_mid_points.begin(),
+                                        box_mid_points.end());
+
+    // Each box (cube) has edges 1.0 long
+    for (size_t i = 0; i < mid_points_vect.size(); ++i) {
+      TS_ASSERT_DELTA(mid_points_vect[i], static_cast<double>(i) + 0.5, 1e-5);
+    }
+  }
+
+  void test_getBoxBoundaryBisectsOnLine_with_variable_box_size() {
+    MDEventWorkspace3Lean::sptr ew =
+        MDEventsTestHelper::makeMDEW<3>(8, 0.0, 4.0, 1);
+
+    // Distribute some events so that one of the boxes will split into 8
+    // along each dimension
+    MDLeanEvent<3> ev(1.0, 1.0);
+    ev.setCenter(0, 1.1);
+    ev.setCenter(1, 0.01);
+    ev.setCenter(2, 0.01);
+    for (size_t i = 0; i < 50; i++) {
+      ew->addEvent(ev);
+    }
+    ev.setCenter(0, 1.4);
+    for (size_t i = 0; i < 50; i++) {
+      ew->addEvent(ev);
+    }
+    ew->splitAllIfNeeded(NULL);
+    ew->refreshCache();
+
+    // Create dimension-aligned line through the workspace
+    Mantid::Kernel::VMD start(0.0, 0, 0);
+    Mantid::Kernel::VMD end(4.0, 0, 0);
+    Mantid::Kernel::VMD dir = end - start;
+    const auto length = dir.normalize();
+
+    auto box_mid_points =
+        ew->getBoxBoundaryBisectsOnLine(start, end, 3, dir, length);
+
+    // Copy set to vector for test
+    TSM_ASSERT_EQUALS("15 box boundary bisections should be found",
+                      box_mid_points.size(), 15);
+    std::vector<double> mid_points_vect(box_mid_points.begin(),
+                                        box_mid_points.end());
+
+    TS_ASSERT_DELTA(mid_points_vect[0], 0.25, 1e-4);
+    TS_ASSERT_DELTA(mid_points_vect[1], 0.75, 1e-4);
+    TS_ASSERT_DELTA(mid_points_vect[2], 1.0312, 1e-4);
+    TS_ASSERT_DELTA(mid_points_vect[3], 1.0937, 1e-4);
+    TS_ASSERT_DELTA(mid_points_vect[4], 1.1562, 1e-4);
+    TS_ASSERT_DELTA(mid_points_vect[10], 1.75, 1e-4);
+  }
+
   //-------------------------------------------------------------------------------------
   /** Get the signal at a given coord or 0 if masked */
   void test_getSignalWithMaskAtCoord() {
@@ -319,8 +413,8 @@ public:
     ew->refreshCache();
 
     TSM_ASSERT_DELTA(
-        "Value ignoring mask is 1.0",
-        ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization), 1.0, 1e-5);
+        "Value ignoring mask is 0.0 as masking deletes the events",
+        ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization), 0.0, 1e-5);
     TSM_ASSERT("Masked returns NaN",
                boost::math::isnan(ew->getSignalWithMaskAtCoord(
                    coords1, Mantid::API::NoNormalization)));
@@ -343,6 +437,28 @@ public:
     TS_ASSERT_EQUALS(binSizes.size(), 2);
     TS_ASSERT_DELTA(binSizes[0], 1.0, 1e-6);
     TS_ASSERT_DELTA(binSizes[1], 1.0, 1e-6);
+  }
+
+  //-------------------------------------------------------------------------------------
+  void test_estimateResolution_with_top_level_splitting() {
+    MDEventWorkspace2Lean::sptr b =
+        MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
+    std::vector<coord_t> binSizes;
+    // First, before any splitting
+    binSizes = b->estimateResolution();
+    TS_ASSERT_EQUALS(binSizes.size(), 2);
+    TS_ASSERT_DELTA(binSizes[0], 10.0, 1e-6);
+    TS_ASSERT_DELTA(binSizes[1], 10.0, 1e-6);
+
+    auto bc = b->getBoxController();
+    bc->setSplitTopInto(0, 5);
+
+    // Resolution is smaller after splitting
+    b->splitBox();
+    binSizes = b->estimateResolution();
+    TS_ASSERT_EQUALS(binSizes.size(), 2);
+    TS_ASSERT_DELTA(binSizes[0], 2.0, 1e-6);
+    TS_ASSERT_DELTA(binSizes[1], 10.0, 1e-6);
   }
 
   ////-------------------------------------------------------------------------------------
@@ -544,38 +660,37 @@ public:
 
   void test_getLinePlot() {
     MDEventWorkspace3Lean::sptr ew =
-        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
+        MDEventsTestHelper::makeMDEW<3>(12, 0.0, 8.0, 3);
 
-    double volume = pow(7.0 / 4.0, 3);
+    double volume = pow(8.0 / 12.0, 3);
     double signal = 3.0;
 
     Mantid::Kernel::VMD start(0, 0, 0);
-    Mantid::Kernel::VMD end(2, 0, 0);
-    std::vector<coord_t> x;
-    std::vector<signal_t> y, e;
-    ew->getLinePlot(start, end, NoNormalization, x, y, e);
-    TS_ASSERT_EQUALS(y.size(), 500);
-    TS_ASSERT_EQUALS(x.size(), 500);
-    for (size_t i = 0; i < y.size(); i += 10) {
-      TS_ASSERT_EQUALS(y[i], signal);
+    Mantid::Kernel::VMD end(6.0, 0, 0);
+    auto line = ew->getLinePlot(start, end, NoNormalization);
+    TS_ASSERT_EQUALS(line.y.size(), 9);
+    TS_ASSERT_EQUALS(line.x.size(), 9);
+    TS_ASSERT_EQUALS(line.e.size(), 9);
+    for (size_t i = 0; i < line.y.size(); ++i) {
+      TS_ASSERT_EQUALS(line.y[i], signal);
     }
-    ew->getLinePlot(start, end, VolumeNormalization, x, y, e);
-    for (size_t i = 0; i < y.size(); i += 10) {
-      TS_ASSERT_DELTA(y[i], signal / volume, 1e-7);
+    line = ew->getLinePlot(start, end, VolumeNormalization);
+    for (size_t i = 0; i < line.y.size(); ++i) {
+      TS_ASSERT_DELTA(line.y[i], signal / volume, 1e-7);
     }
-    ew->getLinePlot(start, end, NumEventsNormalization, x, y, e);
-    for (size_t i = 0; i < y.size(); i += 10) {
-      TS_ASSERT_EQUALS(y[i], 1.0);
+    line = ew->getLinePlot(start, end, NumEventsNormalization);
+    for (size_t i = 0; i < line.y.size(); ++i) {
+      TS_ASSERT_EQUALS(line.y[i], 1.0);
     }
   }
 
   void test_getLinePlotWithMaskedData() {
     MDEventWorkspace3Lean::sptr ew =
-        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
+        MDEventsTestHelper::makeMDEW<3>(12, 0.0, 8.0, 3);
 
     // Mask some of the workspace
     std::vector<coord_t> min{0, 0, 0};
-    std::vector<coord_t> max{0.5, 0.5, 0.5};
+    std::vector<coord_t> max{3.0, 3.0, 3.0};
 
     // Create an function to mask some of the workspace.
     MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
@@ -583,15 +698,13 @@ public:
     ew->refreshCache();
 
     Mantid::Kernel::VMD start(0, 0, 0);
-    Mantid::Kernel::VMD end(5, 0, 0);
-    std::vector<coord_t> x;
-    std::vector<signal_t> y, e;
-    ew->getLinePlot(start, end, NoNormalization, x, y, e);
+    Mantid::Kernel::VMD end(6.0, 0, 0);
+    auto line = ew->getLinePlot(start, end, NoNormalization);
     // Masked data is omitted from line
-    TS_ASSERT_EQUALS(y.size(), 325);
-    TS_ASSERT_EQUALS(x.size(), 325);
+    TS_ASSERT_EQUALS(line.y.size(), 4);
+    TS_ASSERT_EQUALS(line.x.size(), 4);
     // Unmasked data
-    TS_ASSERT_EQUALS(y[300], 3.0);
+    TS_ASSERT_EQUALS(line.y[1], 3.0);
   }
 
   void test_that_sets_default_normalization_flags_to_volume_normalization() {
@@ -692,7 +805,7 @@ private:
   size_t nBoxes;
 
 public:
-  void setUp() {
+  void setUp() override {
     size_t dim_size = 20;
     size_t sq_dim_size = dim_size * dim_size;
     m_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, (Mantid::coord_t)dim_size,

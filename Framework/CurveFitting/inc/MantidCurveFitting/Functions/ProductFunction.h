@@ -41,11 +41,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport ProductFunction : public API::CompositeFunction {
 public:
-  /// Constructor
-  ProductFunction(){};
-  /// Destructor
-  ~ProductFunction() override{};
-
   /// overwrite IFunction base class methods
   std::string name() const override { return "ProductFunction"; }
   /// Function you want to fit to.

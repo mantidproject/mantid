@@ -79,21 +79,22 @@ LoadILL::LoadILL() : API::IFileLoader<Kernel::NexusDescriptor>() {
  * Initialise the algorithm
  */
 void LoadILL::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
-                  "File path of the Data file to load");
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
+      "File path of the Data file to load");
 
-  declareProperty(new FileProperty("FilenameVanadium", "",
-                                   FileProperty::OptionalLoad, ".nxs"),
+  declareProperty(make_unique<FileProperty>("FilenameVanadium", "",
+                                            FileProperty::OptionalLoad, ".nxs"),
                   "File path of the Vanadium file to load (Optional)");
 
   declareProperty(
-      new WorkspaceProperty<API::MatrixWorkspace>(
+      make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           "WorkspaceVanadium", "", Direction::Input, PropertyMode::Optional),
       "Vanadium Workspace file to load (Optional)");
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the output workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the output workspace");
 }
 
 /**

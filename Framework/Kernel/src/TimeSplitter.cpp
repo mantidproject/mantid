@@ -12,10 +12,6 @@ SplittingInterval::SplittingInterval(const DateAndTime &start,
                                      const DateAndTime &stop, const int index)
     : m_start(start), m_stop(stop), m_index(index) {}
 
-/// Copy Constructor
-SplittingInterval::SplittingInterval(const SplittingInterval &other)
-    : m_start(other.m_start), m_stop(other.m_stop), m_index(other.m_index) {}
-
 /// Return the start time
 DateAndTime SplittingInterval::start() const { return m_start; }
 
@@ -143,7 +139,7 @@ TimeSplitterType operator&(const TimeSplitterType &a,
   TimeSplitterType out;
   // If either is empty, then no entries in the filter (aka everything is
   // removed)
-  if ((a.size() == 0) || (b.size() == 0))
+  if ((a.empty()) || (b.empty()))
     return out;
 
   TimeSplitterType::const_iterator ait;
@@ -182,7 +178,7 @@ TimeSplitterType removeFilterOverlap(const TimeSplitterType &a) {
 
     // Keep looking for the next interval where there is a gap (start > old
     // stop);
-    while ((it != a.end()) && (it->start() <= stop)) {
+    while ((it != a.cend()) && (it->start() <= stop)) {
       // Extend the stop point (the start cannot be extended since the list is
       // sorted)
       if (it->stop() > stop)
@@ -245,7 +241,7 @@ TimeSplitterType operator~(const TimeSplitterType &a) {
   temp = removeFilterOverlap(a);
 
   // No entries: then make a "filter" that keeps everything
-  if ((temp.size() == 0)) {
+  if ((temp.empty())) {
     out.push_back(
         SplittingInterval(DateAndTime::minimum(), DateAndTime::maximum(), 0));
     return out;

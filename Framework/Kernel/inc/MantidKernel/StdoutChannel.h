@@ -37,8 +37,6 @@ class MANTID_KERNEL_DLL StdoutChannel : public ConsoleChannel {
 public:
   /// Constructor for StdChannel
   StdoutChannel();
-  /// destructor
-  ~StdoutChannel() override;
 };
 }
 #endif // STDOUTCHANNEL_H

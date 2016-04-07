@@ -2419,7 +2419,7 @@ void MantidEV::restore( QSettings *state, QString name, QComboBox *cmbx )
   int val = state->value(name, -1).toInt();
   if ( val > 0 )
   {
-    cmbx->setCurrentItem( val );
+    cmbx->setCurrentIndex(val);
   }
 }
 

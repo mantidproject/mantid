@@ -17,11 +17,13 @@ imaginary part is not set the data is considered real. The "Transform"
 property defines the direction of the transform: direct ("Forward") or
 inverse ("Backward").
 
-Note that the input data is shifted before the transform along the x
-axis to place the origin in the middle of the x-value range. It means
-that for the data defined on an interval [A,B] the output
-:math:`F(\xi_k)` must be multiplied by :math:`e^{-2\pi ix_0\xi_k}`,
-where :math:`x_0=\tfrac{1}{2}(A+B)`, :math:`\xi_k` is the frequency.
+Note that it is assumed that the input data has the x origin in the
+middle of the x-value range. It means that for the data defined on
+an interval [A,B] the output :math:`F(\xi_k)` must be multiplied by 
+:math:`e^{-2\pi ix_0\xi_k}`, where :math:`x_0=\tfrac{1}{2}(A+B)` and
+:math:`\xi_k` is the frequency. This can be achieved by using the 
+input parameter *Shift*, which applies a phase shift to the transform,
+or by setting *AutoShift* on to do this automatically.
 
 Details
 -------
@@ -65,10 +67,23 @@ The Mantid FFT algorithm returns the complex array :math:`\bar{F}_K` as
 Y values of two spectra in the output workspace, one for the real and
 the other for the imaginary part of the transform. The X values are set
 to the transform frequencies and have the range approximately equal to
-:math:`[-N/L,N/L]`. The actual limits depend sllightly on whether
+:math:`[-N/L,N/L]`. The actual limits depend slightly on whether
 :math:`N` is even or odd and whether the input spectra are histograms or
 point data. The variations are of the order of :math:`\Delta\xi`. The
 zero frequency is always in the bin with index :math:`k=int(N/2)`.
+
+The X values of the input data must be evenly spaced for the FFT algorithm
+to work (all bin widths must be the same). If they contain small rounding
+errors, this requirement can be relaxed by setting the *AcceptXRoundingErrors*
+property, which will continue to process the data even if the spacings between
+different X values are unequal. Large differences in the bin widths will still
+produce a warning.
+
+If the X values are not centred on zero, the calculated phase will be wrong.
+The *Shift* property can be used to correct this - the value supplied is the value
+that should be added to the X values to centre the X axis. Setting the *AutoShift*
+property will automatically apply the correct shift (overriding any manually supplied
+*Shift*).
 
 Example 1
 #########
@@ -106,7 +121,7 @@ In this example the input data were calculated using function
 
 Because the :math:`x=0` is not in the middle of the data array the
 transform shown includes a shifting factor of :math:`\exp(2\pi i\xi)`.
-To remove it the output must be mulitplied by :math:`\exp(-2\pi i\xi)`.
+To remove it the output must be multiplied by :math:`\exp(-2\pi i\xi)`.
 The corrected transform will be:
 
 .. figure:: /images/FFTGaussian2FFT.png

@@ -143,7 +143,6 @@ private:
     xmlShape += "<algebra val=\"shape\" /> ";
 
     // convert into a Geometry object
-    ShapeFactory sFactory;
     bool addTypeTag = true;
     boost::shared_ptr<Object> shape =
         ShapeFactory().createShape(xmlShape, addTypeTag);

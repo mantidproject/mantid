@@ -204,7 +204,7 @@ void SNSLiveEventDataListener::start(Kernel::DateAndTime startTime) {
 /// a temporary workspace.
 void SNSLiveEventDataListener::run() {
   try {
-    if (m_isConnected == false) // sanity check
+    if (!m_isConnected) // sanity check
     {
       throw std::runtime_error(std::string(
           "SNSLiveEventDataListener::run(): No connection to SMS server."));
@@ -237,11 +237,10 @@ void SNSLiveEventDataListener::run() {
       m_stopThread = true;
     }
 
-    while (m_stopThread ==
-           false) // loop until the foreground thread tells us to stop
+    while (!m_stopThread) // loop until the foreground thread tells us to stop
     {
 
-      while (m_pauseNetRead && m_stopThread == false) {
+      while (m_pauseNetRead && !m_stopThread) {
         // foreground thread doesn't want us to process any more packets until
         // it's ready.  See comments in rxPacket( const ADARA::RunStatusPkt
         // &pkt)
@@ -389,7 +388,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BankedEventPkt &pkt) {
   // First, check to see if the run has been paused.  We don't process
   // the events if we're paused unless the user has specifically overridden
   // this behavior with the livelistener.keeppausedevents property.
-  if (m_runPaused && m_keepPausedEvents == false) {
+  if (m_runPaused && m_keepPausedEvents == 0) {
     return false;
   }
 
@@ -397,7 +396,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BankedEventPkt &pkt) {
   g_log.debug() << "----- Pulse ID: " << pkt.pulseId() << " -----\n";
   // Scope braces
   {
-    Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+    std::lock_guard<std::mutex> scopedLock(m_mutex);
 
     // Timestamp for the events
     Mantid::Kernel::DateAndTime eventTime = timeFromPacket(pkt);
@@ -468,7 +467,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
   // We'll likely be modifying m_eventBuffer (specifically,
   // m_eventBuffer->m_monitorWorkspace),
   // so lock the mutex
-  Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+  std::lock_guard<std::mutex> scopedLock(m_mutex);
 
   auto monitorBuffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
       m_eventBuffer->monitorWorkspace());
@@ -506,6 +505,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
       m_eventBuffer->mutableRun().addProperty<int>(monName, events, true);
 
       auto it = m_monitorIndexMap.find(
+          // cppcheck-suppress signConversion
           -1 * monitorID); // Monitor IDs are negated in Mantid IDFs
       if (it != m_monitorIndexMap.end()) {
         bool risingEdge;
@@ -540,7 +540,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::GeometryPkt &pkt) {
 
   // TODO: For now, I'm assuming that we only need to process one of these
   // packets the first time it comes in and we can ignore any others.
-  if (m_workspaceInitialized == false) {
+  if (!m_workspaceInitialized) {
     m_instrumentXML = pkt.info(); // save the xml so we can pass it to the
                                   // LoadInstrument algorithm
 
@@ -607,7 +607,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamlineInfoPkt &pkt) {
   // these packets
 
   // We only need to process a beamlineinfo packet once
-  if (m_workspaceInitialized == false) {
+  if (!m_workspaceInitialized) {
     // We need the instrument name
     m_instrumentName = pkt.longName();
   }
@@ -642,7 +642,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
     return false;
   }
 
-  Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+  std::lock_guard<std::mutex> scopedLock(m_mutex);
 
   const bool haveRunNumber = m_eventBuffer->run().hasProperty("run_number");
 
@@ -869,7 +869,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableU32Pkt &pkt) {
           << std::endl;
     } else {
       {
-        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+        std::lock_guard<std::mutex> scopedLock(m_mutex);
         m_eventBuffer->mutableRun()
             .getTimeSeriesProperty<int>((*it).second)
             ->addValue(timeFromPacket(pkt), pkt.value());
@@ -920,7 +920,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableDoublePkt &pkt) {
           << std::endl;
     } else {
       {
-        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+        std::lock_guard<std::mutex> scopedLock(m_mutex);
         m_eventBuffer->mutableRun()
             .getTimeSeriesProperty<double>((*it).second)
             ->addValue(timeFromPacket(pkt), pkt.value());
@@ -974,7 +974,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableStringPkt &pkt) {
           << std::endl;
     } else {
       {
-        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+        std::lock_guard<std::mutex> scopedLock(m_mutex);
         m_eventBuffer->mutableRun()
             .getTimeSeriesProperty<std::string>((*it).second)
             ->addValue(timeFromPacket(pkt), pkt.value());
@@ -1125,7 +1125,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
               // of a run (after the call to initWorkspacePart2), so we really
               // do need to
               // the lock the mutex here.
-              Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+              std::lock_guard<std::mutex> scopedLock(m_mutex);
               m_eventBuffer->mutableRun().addLogData(prop);
             }
 
@@ -1162,7 +1162,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::AnnotationPkt &pkt) {
   }
 
   {
-    Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+    std::lock_guard<std::mutex> scopedLock(m_mutex);
     // We have to lock the mutex prior to calling mutableRun()
     switch (pkt.marker_type()) {
     case ADARA::MarkerType::GENERIC:
@@ -1414,7 +1414,7 @@ boost::shared_ptr<Workspace> SNSLiveEventDataListener::extractData() {
 
   // Lock the mutex and swap the workspaces
   {
-    Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+    std::lock_guard<std::mutex> scopedLock(m_mutex);
     std::swap(m_eventBuffer, temp);
   } // mutex automatically unlocks here
 
@@ -1436,7 +1436,7 @@ ILiveListener::RunStatus SNSLiveEventDataListener::runStatus() {
   // Need to protect against m_status and m_deferredRunDetailsPkt
   // getting out of sync in the (currently only one) case where the
   // background thread has not been paused...
-  Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+  std::lock_guard<std::mutex> scopedLock(m_mutex);
 
   // The MonitorLiveData algorithm calls this function *after* the call to
   // extract data, which means the value we return should reflect the

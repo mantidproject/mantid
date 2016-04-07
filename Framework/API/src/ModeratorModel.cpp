@@ -13,9 +13,6 @@ namespace API {
 /// Default constructor required by the factory
 ModeratorModel::ModeratorModel() : m_tiltAngle(0.0) {}
 
-/// Virtual destructor
-ModeratorModel::~ModeratorModel() {}
-
 /**
  * Initialize the object from a string of parameters
  * @param params :: A string containing the parameter names & values

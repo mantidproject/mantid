@@ -79,6 +79,8 @@ struct RPB_STRUCT {
   int r_prop;         ///< RB (proposal) number
   int spare[10];      ///< to pad out to 32*4 bytes
                       /// constructor
+
+  // cppcheck-suppress memsetClassFloat
   RPB_STRUCT() { memset(this, 0, sizeof(RPB_STRUCT)); }
 };
 
@@ -121,6 +123,7 @@ struct IVPB_STRUCT {
   float i_aofi;       ///< angle of incidence (CRISP)
   int spare[29];      ///< to pad out to 64*4 bytes
                       /// constructor
+  // cppcheck-suppress memsetClassFloat
   IVPB_STRUCT() { memset(this, 0, sizeof(IVPB_STRUCT)); }
 };
 
@@ -150,6 +153,7 @@ struct SPB_STRUCT {
   int e_eqname;      ///< dunno
   int spare[33];     ///< to bring up to 64*4 bytes
                      /// constructor
+  // cppcheck-suppress memsetClassFloat
   SPB_STRUCT() { memset(this, 0, sizeof(SPB_STRUCT)); }
 };
 
@@ -175,6 +179,7 @@ struct SE_STRUCT {
   int sep_pre_proc;     ///< pre process routine number
   int sep_cam_vals[12]; ///< camac values
                         /// constructor
+  // cppcheck-suppress memsetClassFloat
   SE_STRUCT() { memset(this, 0, sizeof(SE_STRUCT)); }
 };
 
@@ -228,6 +233,7 @@ struct DHDR_STRUCT {
   int unused[26];     ///< to bring size to 32*4 bytes
   /// constructor
   DHDR_STRUCT() {
+    // cppcheck-suppress memsetClassFloat
     memset(this, 0, sizeof(DHDR_STRUCT));
     d_comp = 1;
     d_offset = 1 + 32;
@@ -247,7 +253,7 @@ struct LOG_LINE {
   int len;    ///< real length of data
   char *data; ///< padded to multiple of 4 bytes
   /// constructor
-  LOG_LINE() : len(0), data(0) {}
+  LOG_LINE() : len(0), data(nullptr) {}
 };
 
 /// log line entry
@@ -256,7 +262,7 @@ struct LOG_STRUCT {
   int nlines;      ///< number of lines
   LOG_LINE *lines; ///< size nlines
   /// constructor
-  LOG_STRUCT() : ver(2), nlines(0), lines(0) {}
+  LOG_STRUCT() : ver(2), nlines(0), lines(nullptr) {}
 };
 
 /// isis raw file.
@@ -347,7 +353,7 @@ public:
   ISISRAW(ISISCRPT_STRUCT *crpt, bool doUpdateFromCRPT);
   int updateFromCRPT();
 
-  virtual int ioRAW(FILE *file, bool from_file, bool do_data = true);
+  virtual int ioRAW(FILE *file, bool from_file, bool read_data = true);
   int ioRAW(FILE *file, HDR_STRUCT *s, int len, bool from_file);
   int ioRAW(FILE *file, ADD_STRUCT *s, int len, bool from_file);
   int ioRAW(FILE *file, USER_STRUCT *s, int len, bool from_file);
@@ -360,15 +366,15 @@ public:
   int ioRAW(FILE *file, DDES_STRUCT *s, int len, bool from_file);
   int ioRAW(FILE *file, LOG_STRUCT *s, int len, bool from_file);
   int ioRAW(FILE *file, LOG_LINE *s, int len, bool from_file);
-  int ioRAW(FILE *file, char *val, int len, bool from_file);
-  int ioRAW(FILE *file, int *val, int len, bool from_file);
-  int ioRAW(FILE *file, uint32_t *val, int len, bool from_file);
-  int ioRAW(FILE *file, float *val, int len, bool from_file);
+  int ioRAW(FILE *file, char *s, int len, bool from_file);
+  int ioRAW(FILE *file, int *s, int len, bool from_file);
+  int ioRAW(FILE *file, uint32_t *s, int len, bool from_file);
+  int ioRAW(FILE *file, float *s, int len, bool from_file);
   // allocate
-  int ioRAW(FILE *file, char **val, int len, bool from_file);
-  int ioRAW(FILE *file, int **val, int len, bool from_file);
-  int ioRAW(FILE *file, uint32_t **val, int len, bool from_file);
-  int ioRAW(FILE *file, float **val, int len, bool from_file);
+  int ioRAW(FILE *file, char **s, int len, bool from_file);
+  int ioRAW(FILE *file, int **s, int len, bool from_file);
+  int ioRAW(FILE *file, uint32_t **s, int len, bool from_file);
+  int ioRAW(FILE *file, float **s, int len, bool from_file);
   int ioRAW(FILE *file, SE_STRUCT **s, int len, bool from_file);
   int ioRAW(FILE *file, DDES_STRUCT **s, int len, bool from_file);
   int ioRAW(FILE *file, LOG_LINE **s, int len, bool from_file);

@@ -155,7 +155,7 @@ void MantidHelpWindow::showPage(const QUrl &url)
     if (url.isEmpty())
       this->showHelp(DEFAULT_URL);
     else
-      this->showHelp(url);
+      this->showHelp(url.toString());
   }
   else // qt-assistant disabled
   {

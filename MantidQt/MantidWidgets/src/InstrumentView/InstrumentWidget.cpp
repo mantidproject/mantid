@@ -96,9 +96,9 @@ namespace MantidQt
 			QSplitter *controlPanelLayout = new QSplitter(Qt::Horizontal);
 
 			// Add Tab control panel
-			mControlsTab = new QTabWidget(this, 0);
-			controlPanelLayout->addWidget(mControlsTab);
-			controlPanelLayout->setSizePolicy(QSizePolicy::Expanding,
+                        mControlsTab = new QTabWidget(this);
+                        controlPanelLayout->addWidget(mControlsTab);
+                        controlPanelLayout->setSizePolicy(QSizePolicy::Expanding,
 				QSizePolicy::Expanding);
 
 			// Create the display widget
@@ -1281,6 +1281,45 @@ namespace MantidQt
 					}
 				}
 			}
+		}
+
+		/**
+		* Closes the window if the associated workspace is deleted.
+		* @param ws_name :: Name of the deleted workspace.
+		* @param workspace_ptr :: Pointer to the workspace to be deleted
+		*/
+		void InstrumentWidget::preDeleteHandle(
+			const std::string &ws_name,
+			const boost::shared_ptr<Workspace> workspace_ptr) {
+			if (hasWorkspace(ws_name)) {
+				emit preDeletingHandle();
+				close();
+				return;
+			}
+			Mantid::API::IPeaksWorkspace_sptr pws =
+				boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(workspace_ptr);
+			if (pws) {
+				deletePeaksWorkspace(pws);
+				return;
+			}
+		}
+
+		void InstrumentWidget::afterReplaceHandle(
+			const std::string &wsName, const boost::shared_ptr<Workspace> workspace) {
+			handleWorkspaceReplacement(wsName, workspace);
+		}
+
+		void InstrumentWidget::renameHandle(const std::string &oldName,
+			const std::string &newName) {
+			if (hasWorkspace(oldName)) {
+				renameWorkspace(newName);
+				setWindowTitle(QString("Instrument - ") + getWorkspaceName());
+			}
+		}
+
+		void InstrumentWidget::clearADSHandle() {
+			emit clearingHandle();
+			close();
 		}
 	}//MantidWidgets
 }//MantidQt

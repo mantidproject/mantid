@@ -38,12 +38,12 @@ void AbsorptionCorrection::init() {
   wsValidator->add<InstrumentValidator>();
 
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              wsValidator),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                       wsValidator),
       "The X values for the input workspace must be in units of wavelength");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Output workspace name");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Output workspace name");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);

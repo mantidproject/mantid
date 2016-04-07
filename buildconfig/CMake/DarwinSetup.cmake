@@ -59,43 +59,14 @@ else ()
   set ( PY_VER 2.7 )
 endif ()
 
-###########################################################################
-# Force 64-bit compiler as that's all we support
-###########################################################################
-
-set ( CLANG_WARNINGS "-Wall -Wextra -pedantic -Wconversion -Wno-sign-conversion -Winit-self -Wpointer-arith -Wcast-qual -fno-common -Wno-deprecated-declarations")
-
-set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64 ${CLANG_WARNINGS}" )
-if(${CMAKE_VERSION} VERSION_GREATER 3.1.0 OR ${CMAKE_VERSION} VERSION_EQUAL 3.1.0)
-  set(CMAKE_CXX_STANDARD 14)
-  set(CXX_STANDARD_REQUIRED 11)
-else()
-  include(CheckCXXCompilerFlag)
-  CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
-  CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-  if(COMPILER_SUPPORTS_CXX14)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
-  elseif(COMPILER_SUPPORTS_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-  endif()
-endif()
-
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64 -stdlib=libc++ ${CLANG_WARNINGS}" )
-endif()
-# XCode isn't picking up the standard set above.
-if(CMAKE_GENERATOR STREQUAL Xcode)
-  set ( CMAKE_XCODE_ATTRIBUTE_OTHER_CPLUSPLUSFLAGS "${CLANG_WARNINGS}")
-  set ( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++" )
-  set ( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++14")
-endif()
-
-if( ${CMAKE_C_COMPILER} MATCHES "icc.*$" )
-  set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -no-intel-extensions" )
-endif()
-if( ${CMAKE_CXX_COMPILER} MATCHES "icpc.*$" )
-  set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-intel-extensions" )
-endif()
+# Generate a target to put a mantidpython wrapper in the appropriate directory
+if ( NOT TARGET mantidpython )
+  add_custom_target ( mantidpython ALL
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx
+      ${PROJECT_BINARY_DIR}/bin/${CMAKE_CFG_INTDIR}/mantidpython
+      COMMENT "Generating mantidpython" )
+endif ()
 
 ###########################################################################
 # Mac-specific installation setup
@@ -122,39 +93,33 @@ set ( PLUGINS_DIR MantidPlot.app/plugins )
 set ( PVPLUGINS_DIR MantidPlot.app/pvplugins )
 set ( PVPLUGINS_SUBDIR pvplugins ) # Need to tidy these things up!
 
-if (OSX_VERSION VERSION_LESS 10.9)
- set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR};${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR} )
- set ( PYQT4_PYTHONPATH /Library/Python/${PY_VER}/site-packages/PyQt4 )
- set ( SITEPACKAGES /Library/Python/${PY_VER}/site-packages )
-else()
- set(CMAKE_MACOSX_RPATH 1)
- # Assume we are using homebrew for now
- # Follow symlinks so cmake copies the file
- # PYQT4_PATH, SITEPACKAGES_PATH, OPENSSL_ROOT_DIR may be defined externally (cmake -D)
- # it would be good do not overwrite them (important for the compilation with macports)
- if (NOT PYQT4_PATH)
+set(CMAKE_MACOSX_RPATH 1)
+# Assume we are using homebrew for now
+# Follow symlinks so cmake copies the file
+# PYQT4_PATH, SITEPACKAGES_PATH, OPENSSL_ROOT_DIR may be defined externally (cmake -D)
+# it would be good do not overwrite them (important for the compilation with macports)
+if (NOT PYQT4_PATH)
   set ( PYQT4_PATH /usr/local/lib/python${PY_VER}/site-packages/PyQt4 )
- endif(NOT PYQT4_PATH)
- execute_process(COMMAND readlink ${PYQT4_PATH}/Qt.so OUTPUT_VARIABLE PYQT4_SYMLINK_Qtso)
- string(FIND "${PYQT4_SYMLINK_Qtso}" "Qt.so" STOPPOS)
- string(SUBSTRING "${PYQT4_SYMLINK_Qtso}" 0 ${STOPPOS} PYQT4_SYMLINK)
- set  ( PYQT4_PYTHONPATH ${PYQT4_PATH}/${PYQT4_SYMLINK} )
- string(REGEX REPLACE "/$" "" PYQT4_PYTHONPATH "${PYQT4_PYTHONPATH}")
+endif(NOT PYQT4_PATH)
+execute_process(COMMAND readlink ${PYQT4_PATH}/Qt.so OUTPUT_VARIABLE PYQT4_SYMLINK_Qtso)
+string(FIND "${PYQT4_SYMLINK_Qtso}" "Qt.so" STOPPOS)
+string(SUBSTRING "${PYQT4_SYMLINK_Qtso}" 0 ${STOPPOS} PYQT4_SYMLINK)
+set( PYQT4_PYTHONPATH ${PYQT4_PATH}/${PYQT4_SYMLINK} )
+string(REGEX REPLACE "/$" "" PYQT4_PYTHONPATH "${PYQT4_PYTHONPATH}")
 
- if (NOT SITEPACKAGES_PATH)
-   set ( SITEPACKAGES_PATH /usr/local/lib/python${PY_VER}/site-packages )
- endif(NOT SITEPACKAGES_PATH)
- execute_process(COMMAND readlink ${SITEPACKAGES_PATH}/sip.so OUTPUT_VARIABLE SITEPACKAGES_SYMLINK_sipso)
- string(FIND "${SITEPACKAGES_SYMLINK_sipso}" "sip.so" STOPPOS)
- string(SUBSTRING "${SITEPACKAGES_SYMLINK_sipso}" 0 ${STOPPOS} SITEPACKAGES_SYMLINK)
- set  ( SITEPACKAGES ${SITEPACKAGES_PATH}/${SITEPACKAGES_SYMLINK} )
- string(REGEX REPLACE "/$" "" SITEPACKAGES "${SITEPACKAGES}")
+if (NOT SITEPACKAGES_PATH)
+  set ( SITEPACKAGES_PATH /usr/local/lib/python${PY_VER}/site-packages )
+endif(NOT SITEPACKAGES_PATH)
+execute_process(COMMAND readlink ${SITEPACKAGES_PATH}/sip.so OUTPUT_VARIABLE SITEPACKAGES_SYMLINK_sipso)
+string(FIND "${SITEPACKAGES_SYMLINK_sipso}" "sip.so" STOPPOS)
+string(SUBSTRING "${SITEPACKAGES_SYMLINK_sipso}" 0 ${STOPPOS} SITEPACKAGES_SYMLINK)
+set  ( SITEPACKAGES ${SITEPACKAGES_PATH}/${SITEPACKAGES_SYMLINK} )
+string(REGEX REPLACE "/$" "" SITEPACKAGES "${SITEPACKAGES}")
 
- # use homebrew OpenSSL package
- if (NOT OPENSSL_ROOT_DIR)
-   set ( OPENSSL_ROOT_DIR /usr/local/opt/openssl )
- endif(NOT OPENSSL_ROOT_DIR)
-endif()
+# use homebrew OpenSSL package
+if (NOT OPENSSL_ROOT_DIR)
+  set ( OPENSSL_ROOT_DIR /usr/local/opt/openssl )
+endif(NOT OPENSSL_ROOT_DIR)
 
 # Python packages
 
@@ -162,7 +127,7 @@ install ( PROGRAMS ${SITEPACKAGES}/sip.so DESTINATION ${BIN_DIR} )
 
 # Explicitly specify which PyQt libraries we want because just taking the whole
 #directory will swell the install kit unnecessarily.
- install ( FILES ${PYQT4_PYTHONPATH}/Qt.so
+install ( FILES ${PYQT4_PYTHONPATH}/Qt.so
                 ${PYQT4_PYTHONPATH}/QtCore.so
                 ${PYQT4_PYTHONPATH}/QtGui.so
                 ${PYQT4_PYTHONPATH}/QtOpenGL.so
@@ -180,18 +145,6 @@ endif ()
 install ( DIRECTORY ${PYQT4_PYTHONPATH}/uic DESTINATION ${BIN_DIR}/PyQt4 )
 
 # done as part of packaging step in 10.9+ builds.
-if (OSX_VERSION VERSION_LESS 10.9)
-  # Python packages in Third_Party need copying to build directory and the final package
-  file ( GLOB THIRDPARTY_PYTHON_PACKAGES ${CMAKE_LIBRARY_PATH}/Python/* )
-  foreach ( PYPACKAGE ${THIRDPARTY_PYTHON_PACKAGES} )
-    if ( IS_DIRECTORY ${PYPACKAGE} )
-      install ( DIRECTORY ${PYPACKAGE} DESTINATION ${BIN_DIR} USE_SOURCE_PERMISSIONS )
-    else()
-      install ( FILES ${PYPACKAGE} DESTINATION ${BIN_DIR} )
-    endif()
-    file ( COPY ${PYPACKAGE} DESTINATION ${PROJECT_BINARY_DIR}/bin )
-  endforeach( PYPACKAGE )
-endif ()
 
 install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPlot.icns
           DESTINATION MantidPlot.app/Contents/Resources/

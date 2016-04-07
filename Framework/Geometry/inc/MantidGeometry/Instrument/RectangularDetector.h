@@ -54,10 +54,13 @@ public:
   RectangularDetector();
 
   //! Constructor with a name and parent reference
-  RectangularDetector(const std::string &, IComponent *reference = 0);
+  RectangularDetector(const std::string &, IComponent *reference = nullptr);
 
   //! Parametrized constructor
   RectangularDetector(const RectangularDetector *base, const ParameterMap *map);
+
+  /// Matches name to Structured Detector
+  static bool compareName(const std::string &proposedMatch);
 
   /// Create all the detector pixels of this rectangular detector.
   void initialize(boost::shared_ptr<Object> shape, int xpixels, double xstart,
@@ -65,9 +68,6 @@ public:
                   int idstart, bool idfillbyfirst_y, int idstepbyrow,
                   int idstep = 1);
 
-  //  //! Copy constructor
-  //  RectangularDetector(const RectangularDetector&);
-  ~RectangularDetector() override;
   //! Make a clone of the present component
   IComponent *clone() const override;
 

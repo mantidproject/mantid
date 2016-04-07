@@ -69,26 +69,29 @@ void LoadDiffCal::init() {
   // 3 properties for getting the right instrument
   LoadCalFile::getInstrument3WaysInit(this);
 
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
-                                   {".h5", ".hd5", ".hdf", ".cal"}),
+  const std::vector<std::string> exts{".h5", ".hd5", ".hdf", ".cal"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
                   "Path to the .h5 file.");
 
-  declareProperty(new PropertyWithValue<bool>("MakeGroupingWorkspace", true,
-                                              Direction::Input),
+  declareProperty(Kernel::make_unique<PropertyWithValue<bool>>(
+                      "MakeGroupingWorkspace", true, Direction::Input),
                   "Set to true to create a GroupingWorkspace with called "
                   "WorkspaceName_group.");
 
-  declareProperty(
-      new PropertyWithValue<bool>("MakeCalWorkspace", true, Direction::Input),
-      "Set to true to create a CalibrationWorkspace with called "
-      "WorkspaceName_cal.");
+  declareProperty(Kernel::make_unique<PropertyWithValue<bool>>(
+                      "MakeCalWorkspace", true, Direction::Input),
+                  "Set to true to create a CalibrationWorkspace with called "
+                  "WorkspaceName_cal.");
 
   declareProperty(
-      new PropertyWithValue<bool>("MakeMaskWorkspace", true, Direction::Input),
+      Kernel::make_unique<PropertyWithValue<bool>>("MakeMaskWorkspace", true,
+                                                   Direction::Input),
       "Set to true to create a MaskWorkspace with called WorkspaceName_mask.");
 
   declareProperty(
-      new PropertyWithValue<std::string>("WorkspaceName", "", Direction::Input),
+      Kernel::make_unique<PropertyWithValue<std::string>>("WorkspaceName", "",
+                                                          Direction::Input),
       "The base of the output workspace names. Names will have '_group', "
       "'_cal', '_mask' appended to them.");
 
@@ -96,8 +99,13 @@ void LoadDiffCal::init() {
   declareProperty("TofMin", 0., "Minimum for TOF axis. Defaults to 0.");
   declareProperty("TofMax", EMPTY_DBL(),
                   "Maximum for TOF axis. Defaults to Unused.");
+  declareProperty(Kernel::make_unique<PropertyWithValue<bool>>(
+                      "FixConversionIssues", true, Direction::Input),
+                  "Set DIFA and TZERO to zero if there is an error and the "
+                  "pixel is masked");
   setPropertyGroup("TofMin", grpName);
   setPropertyGroup("TofMax", grpName);
+  setPropertyGroup("FixConversionIssues", grpName);
 }
 
 namespace { // anonymous
@@ -155,7 +163,7 @@ bool endswith(const std::string &str, const std::string &ending) {
 void setGroupWSProperty(API::Algorithm *alg, const std::string &prefix,
                         GroupingWorkspace_sptr wksp) {
   alg->declareProperty(
-      new WorkspaceProperty<DataObjects::GroupingWorkspace>(
+      Kernel::make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
           "OutputGroupingWorkspace", prefix + "_group", Direction::Output),
       "Set the the output GroupingWorkspace, if any.");
   alg->setProperty("OutputGroupingWorkspace", wksp);
@@ -164,7 +172,7 @@ void setGroupWSProperty(API::Algorithm *alg, const std::string &prefix,
 void setMaskWSProperty(API::Algorithm *alg, const std::string &prefix,
                        MaskWorkspace_sptr wksp) {
   alg->declareProperty(
-      new WorkspaceProperty<DataObjects::MaskWorkspace>(
+      Kernel::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
           "OutputMaskWorkspace", prefix + "_mask", Direction::Output),
       "Set the the output MaskWorkspace, if any.");
   alg->setProperty("OutputMaskWorkspace", wksp);
@@ -173,7 +181,7 @@ void setMaskWSProperty(API::Algorithm *alg, const std::string &prefix,
 void setCalWSProperty(API::Algorithm *alg, const std::string &prefix,
                       ITableWorkspace_sptr wksp) {
   alg->declareProperty(
-      new WorkspaceProperty<ITableWorkspace>(
+      Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "OutputCalWorkspace", prefix + "_cal", Direction::Output),
       "Set the output Diffraction Calibration workspace, if any.");
   alg->setProperty("OutputCalWorkspace", wksp);
@@ -355,7 +363,8 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
                                    const std::vector<double> &difa,
                                    const std::vector<double> &tzero,
                                    const std::vector<int32_t> &dasids,
-                                   const std::vector<double> &offsets) {
+                                   const std::vector<double> &offsets,
+                                   const std::vector<int32_t> &use) {
   bool makeWS = getProperty("MakeCalWorkspace");
   if (!makeWS) {
     g_log.information("Not making a calibration workspace");
@@ -367,6 +376,7 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
 
   bool haveDasids = !dasids.empty();
   bool haveOffsets = !offsets.empty();
+  bool fixIssues = getProperty("FixConversionIssues");
 
   double tofMin = getProperty("TofMin");
   double tofMax = getProperty("TofMax");
@@ -423,6 +433,27 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
       if (haveDasids)
         longMsg << ", dasid=" << dasids[i];
       longMsg << "] " << msg.str();
+
+      // to fix issues for masked pixels, just zero difa and tzero
+      if (fixIssues && (!use[i])) {
+        longMsg << " pixel is masked, ";
+        longMsg << " changing difa (" << wksp->cell<double>(i, 2) << " to 0.)";
+        wksp->cell<double>(i, 2) = 0.;
+
+        longMsg << " and tzero (" << wksp->cell<double>(i, 3) << " to 0.)";
+        wksp->cell<double>(i, 3) = 0.;
+
+        // restore valid tof range
+        size_t index = 4; // where tofmin natively is
+        if (haveDasids)
+          index += 1;
+        if (haveOffsets)
+          index += 1;
+        wksp->cell<double>(i, index) = tofMin;
+        if (useTofMax)
+          wksp->cell<double>(i, index + 1) = tofMax;
+      }
+
       this->g_log.warning(longMsg.str());
     }
 
@@ -540,7 +571,7 @@ void LoadDiffCal::exec() {
   // create the appropriate output workspaces
   makeGroupingWorkspace(detids, groups);
   makeMaskWorkspace(detids, use);
-  makeCalWorkspace(detids, difc, difa, tzero, dasids, offset);
+  makeCalWorkspace(detids, difc, difa, tzero, dasids, offset, use);
 }
 
 } // namespace DataHandling

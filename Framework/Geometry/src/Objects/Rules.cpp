@@ -467,12 +467,6 @@ Rule &Rule::operator=(const Rule &)
   return *this;
 }
 
-Rule::~Rule()
-/**
-  Destructor
-*/
-{}
-
 void Rule::setParent(Rule *A)
 /**
   Sets the parent object (not check for A==this)

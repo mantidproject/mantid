@@ -178,7 +178,7 @@ public:
     TS_ASSERT_EQUALS(outPeaksWS->getNumberPeaks(), peaksWS->getNumberPeaks());
     TS_ASSERT_EQUALS(nBins * nBins * nBins, outClustersWS->getNPoints());
     // Check clusters by extracting unique label ids.
-    std::set<Mantid::signal_t> labelIds;
+    std::unordered_set<Mantid::signal_t> labelIds;
     for (size_t i = 0; i < outClustersWS->getNPoints(); ++i) {
       labelIds.insert(outClustersWS->getSignalAt(i));
     }
@@ -270,7 +270,7 @@ public:
     TS_ASSERT_EQUALS(nBins * nBins * nBins, outClustersWS1->getNPoints());
     TS_ASSERT_EQUALS(nBins * nBins * nBins, outClustersWS2->getNPoints());
     // Check clusters by extracting unique label ids.
-    std::set<Mantid::signal_t> labelIds1;
+    std::unordered_set<Mantid::signal_t> labelIds1;
     for (size_t i = 0; i < outClustersWS1->getNPoints(); ++i) {
       labelIds1.insert(outClustersWS1->getSignalAt(i));
     }
@@ -278,7 +278,7 @@ public:
                       "have two unique label ids",
                       2, labelIds1.size());
 
-    std::set<Mantid::signal_t> labelIds2;
+    std::unordered_set<Mantid::signal_t> labelIds2;
     for (size_t i = 0; i < outClustersWS2->getNPoints(); ++i) {
       labelIds2.insert(outClustersWS2->getSignalAt(i));
     }
@@ -347,7 +347,7 @@ public:
     TS_ASSERT_EQUALS(nBins * nBins * nBins, outClustersWS1->getNPoints());
     TS_ASSERT_EQUALS(nBins * nBins * nBins, outClustersWS2->getNPoints());
     // Check clusters by extracting unique label ids.
-    std::set<Mantid::signal_t> labelIds1;
+    std::unordered_set<Mantid::signal_t> labelIds1;
     for (size_t i = 0; i < outClustersWS1->getNPoints(); ++i) {
       labelIds1.insert(outClustersWS1->getSignalAt(i));
     }
@@ -355,7 +355,7 @@ public:
                       "have two unique label ids",
                       2, labelIds1.size());
 
-    std::set<Mantid::signal_t> labelIds2;
+    std::unordered_set<Mantid::signal_t> labelIds2;
     for (size_t i = 0; i < outClustersWS2->getNPoints(); ++i) {
       labelIds2.insert(outClustersWS2->getSignalAt(i));
     }

@@ -99,8 +99,6 @@ public:
 
   // Default constructor, copy constructor & assignment operator are fine
 
-  ~JSONException() throw() override {}
-
 private:
   std::string m_msg;
 };

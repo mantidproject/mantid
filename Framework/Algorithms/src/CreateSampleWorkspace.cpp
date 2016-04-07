@@ -58,9 +58,9 @@ const std::string CreateSampleWorkspace::category() const {
 /** Initialize the algorithm's properties.
  */
 void CreateSampleWorkspace::init() {
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "An output workspace.");
   std::vector<std::string> typeOptions{"Histogram", "Event"};
   declareProperty("WorkspaceType", "Histogram",
                   boost::make_shared<StringListValidator>(typeOptions),
@@ -306,7 +306,7 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
   std::transform(y.access().begin(), y.access().end(), e.access().begin(),
                  dblSqrt);
 
-  MatrixWorkspace_sptr retVal(new DataObjects::Workspace2D);
+  MatrixWorkspace_sptr retVal = boost::make_shared<DataObjects::Workspace2D>();
   retVal->initialize(numPixels, numBins + 1, numBins);
   retVal->setInstrument(inst);
 
@@ -314,7 +314,7 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
     retVal->setX(wi, x);
     retVal->setData(wi, y, e);
     retVal->getSpectrum(wi)->setDetectorID(detid_t(start_at_pixelID + wi));
-    retVal->getSpectrum(wi)->setSpectrumNo(specid_t(wi + 1));
+    retVal->getSpectrum(wi)->setSpectrumNo(specnum_t(wi + 1));
   }
 
   return retVal;
@@ -331,7 +331,7 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
   // add one to the number of bins as this is histogram
   int numXBins = numBins + 1;
 
-  EventWorkspace_sptr retVal(new EventWorkspace);
+  auto retVal = boost::make_shared<EventWorkspace>();
   retVal->initialize(numPixels, 1, 1);
 
   retVal->setInstrument(inst);

@@ -87,6 +87,31 @@ public:
   void doRebinningPulses(const std::string &runNo, size_t nperiods, double bin,
                          const std::string &outWSName);
 
+  /// the fitting hard work that a worker / thread will run
+  void doFitting(const std::string &focusedRunNo,
+                 const std::string &ExpectedPeaks);
+
+  void runFittingAlgs(std::string FocusedFitPeaksTableName,
+                      std::string FocusedWSName);
+
+  std::string
+  functionStrFactory(Mantid::API::ITableWorkspace_sptr &paramTableWS,
+                     std::string tableName, size_t row, std::string &startX,
+                     std::string &endX);
+
+  void plotFitPeaksCurves();
+
+  void runEvaluateFunctionAlg(std::string bk2BkExpFunction,
+                              std::string InputName, std::string OutputName,
+                              std::string startX, std::string endX);
+
+  void runCropWorkspaceAlg(std::string workspaceName);
+
+  void runAppendSpectraAlg(std::string workspace1Name,
+                           std::string workspace2Name);
+
+  void runRebinToWorkspaceAlg(std::string workspaceName);
+
 protected:
   void initialize();
 
@@ -103,6 +128,7 @@ protected:
   void processResetFocus();
   void processRebinTime();
   void processRebinMultiperiod();
+  void processFitPeaks();
   void processLogMsg();
   void processInstChange();
   void processRBNumberChange();
@@ -113,6 +139,7 @@ protected slots:
   void calibrationFinished();
   void focusingFinished();
   void rebinningFinished();
+  void fittingFinished();
 
 private:
   bool validateRBNumber(const std::string &rbn) const;
@@ -140,6 +167,7 @@ private:
 
   std::string buildCalibrateSuggestedFilename(const std::string &vanNo,
                                               const std::string &ceriaNo) const;
+
   //@}
 
   /// @name Focusing related private methods
@@ -188,10 +216,12 @@ private:
                   size_t bank, const std::string &specNos,
                   const std::string &dgFile);
 
-  void loadOrCalcVanadiumWorkspaces(
-      const std::string &vanNo, const std::string &inputDirCalib,
-      Mantid::API::ITableWorkspace_sptr &vanIntegWS,
-      Mantid::API::MatrixWorkspace_sptr &vanCurvesWS, bool forceRecalc);
+  void
+  loadOrCalcVanadiumWorkspaces(const std::string &vanNo,
+                               const std::string &inputDirCalib,
+                               Mantid::API::ITableWorkspace_sptr &vanIntegWS,
+                               Mantid::API::MatrixWorkspace_sptr &vanCurvesWS,
+                               bool forceRecalc, const std::string specNos);
 
   void findPrecalcVanadiumCorrFilenames(const std::string &vanNo,
                                         const std::string &inputDirCalib,
@@ -202,7 +232,8 @@ private:
   void loadVanadiumPrecalcWorkspaces(
       const std::string &preIntegFilename, const std::string &preCurvesFilename,
       Mantid::API::ITableWorkspace_sptr &vanIntegWS,
-      Mantid::API::MatrixWorkspace_sptr &vanCurvesWS, const std::string &vanNo);
+      Mantid::API::MatrixWorkspace_sptr &vanCurvesWS, const std::string &vanNo,
+      const std::string specNos);
 
   void calcVanadiumWorkspaces(const std::string &vanNo,
                               Mantid::API::ITableWorkspace_sptr &vanIntegWS,
@@ -228,8 +259,18 @@ private:
                                                const std::string &outWSName);
   //@}
 
+  // Methods related single peak fits
+  virtual void startAsyncFittingWorker(const std::string &focusedRunNo,
+                                       const std::string &ExpectedPeaks);
+
+  void inputChecksBeforeFitting(const std::string &focusedRunNo,
+                                const std::string &ExpectedPeaks);
+
   // plots workspace according to the user selection
   void plotFocusedWorkspace(std::string outWSName);
+
+  void plotCalibWorkspace(std::vector<double> difc, std::vector<double> tzero,
+                          std::string specNos);
 
   // algorithms to save the generated workspace
   void saveGSS(std::string inputWorkspace, std::string bank, std::string runNo);
@@ -244,6 +285,17 @@ private:
 
   // generates a directory if not found and handles the path
   Poco::Path outFilesDir(std::string addToDir);
+
+  // generates appropriate names for table workspaces
+  std::string outFitParamsTblNameGenerator(const std::string specNos,
+                                           size_t bank_i) const;
+
+  std::string DifcZeroWorkspaceFactory(
+      const std::vector<double> &difc, const std::vector<double> &tzero,
+      const std::string &specNo, const std::string &customisedBankName) const;
+
+  std::string
+  plotDifcZeroWorkspace(const std::string &customisedBankName) const;
 
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;
@@ -263,7 +315,7 @@ private:
   /// saves the last valid run number
   static std::string g_lastValidRun;
 
-  /// bank name use or specIds for cropped calibration
+  /// bank name use or SpecNos for cropped calibration
   static std::string g_calibCropIdentifier;
 
   // name of the workspace with the vanadium integration (of spectra)
@@ -277,6 +329,8 @@ private:
   bool m_focusFinishedOK;
   /// true if the last pre-processing/re-binning completed successfully
   bool m_rebinningFinishedOK;
+  /// true if the last fitting completed successfully
+  bool m_fittingFinishedOK;
 
   /// Counter for the cropped output files
   static int g_croppedCounter;

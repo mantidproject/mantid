@@ -46,17 +46,18 @@ public:
   /**
      * Constructor
      * @param pwk       - The PeaksWorkspace
-     * @param BankNames - The comma separated list of bank names for which this
+     * @param Component_name - The comma separated list of bank names for which
+    *this
     *Function
      *                     this Function calculates the associated errors in
     *qx,qy,qz
-     * @param a         - The a lattice parameter
-     * @param b         - The b lattice parameter
-     * @param c         - The c lattice parameter
-     * @param alpha     - The alpha lattice parameter in degrees
-     * @param beta      - The beta lattice parameter in degrees
-     * @param gamma     - The gamma lattice parameter in degrees
-     * @param tolerance - The maximum distance a peak's h value, k value and
+     * @param ax         - The a lattice parameter
+     * @param bx         - The b lattice parameter
+     * @param cx         - The c lattice parameter
+     * @param alphax     - The alpha lattice parameter in degrees
+     * @param betax      - The beta lattice parameter in degrees
+     * @param gammax     - The gamma lattice parameter in degrees
+     * @param tolerance1 - The maximum distance a peak's h value, k value and
     *lvalue are
      *                    from an integer to be considered indexed. Outside of
     *this
@@ -64,9 +65,9 @@ public:
      *
      *
      */
-  SCDPanelErrors(DataObjects::PeaksWorkspace_sptr &pwk, std::string &BankNames,
-                 double a, double b, double c, double alpha, double beta,
-                 double gamma, double tolerance);
+  SCDPanelErrors(DataObjects::PeaksWorkspace_sptr &pwk,
+                 std::string &Component_name, double ax, double bx, double cx,
+                 double alphax, double betax, double gammax, double tolerance1);
 
   ~SCDPanelErrors() override;
 

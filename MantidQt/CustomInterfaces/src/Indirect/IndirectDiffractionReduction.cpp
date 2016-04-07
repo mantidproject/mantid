@@ -596,11 +596,10 @@ bool IndirectDiffractionReduction::validateRebin() {
     m_uiForm.valRebinEnd->setText("");
   } else {
 #define CHECK_VALID(text, validator)                                           \
-  if (text.isEmpty()) {                                                        \
-    rebinValid = false;                                                        \
+  rebinValid = !text.isEmpty();                                                \
+  if (!rebinValid) {                                                           \
     validator->setText("*");                                                   \
   } else {                                                                     \
-    rebinValid = true;                                                         \
     validator->setText("");                                                    \
   }
 

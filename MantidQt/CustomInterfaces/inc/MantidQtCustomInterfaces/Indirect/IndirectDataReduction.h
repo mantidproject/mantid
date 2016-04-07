@@ -62,16 +62,16 @@ namespace MantidQt
       /// Default Constructor
       IndirectDataReduction(QWidget *parent = 0);
       ///Destructor
-      ~IndirectDataReduction();
+      ~IndirectDataReduction() override;
       /// Interface name
       static std::string name() { return "Data Reduction"; }
       // This interface's categories.
       static QString categoryInfo() { return "Indirect"; }
 
       /// Initialize the layout
-      virtual void initLayout();
+      void initLayout() override;
       /// Run Python-based initialisation commands
-      virtual void initLocalPython();
+      void initLocalPython() override;
 
       /// Handled configuration changes
       void handleConfigChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
@@ -116,7 +116,7 @@ namespace MantidQt
       void saveSettings();
 
       /// Set and show an instrument-specific widget
-      virtual void closeEvent(QCloseEvent* close);
+      void closeEvent(QCloseEvent *close) override;
 
       /**
        * Adds a tab to the cache of tabs that can be shown.

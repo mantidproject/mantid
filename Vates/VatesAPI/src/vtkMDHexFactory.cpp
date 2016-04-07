@@ -4,6 +4,7 @@
 #include "MantidAPI/IMDNode.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
@@ -11,10 +12,13 @@
 #include <vtkCellData.h>
 #include <vtkFloatArray.h>
 #include <vtkHexahedron.h>
+#include <vtkNew.h>
 #include <vtkPoints.h>
 #include <vtkUnstructuredGrid.h>
 #include "MantidKernel/ReadLock.h"
 #include "MantidKernel/make_unique.h"
+
+#include <iterator>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -77,14 +81,14 @@ void vtkMDHexFactory::doCreate(
 
   // Create 8 points per box.
   vtkNew<vtkPoints> points;
-  points->Allocate(numBoxes * 8);
-  points->SetNumberOfPoints(numBoxes * 8);
+  vtkFloatArray *pointsArray = vtkFloatArray::SafeDownCast(points->GetData());
+  float *pointsPtr = pointsArray->WritePointer(0, numBoxes * 8 * 3);
 
   // One scalar per box
   vtkNew<vtkFloatArray> signals;
-  signals->Allocate(numBoxes);
   signals->SetName(ScalarName.c_str());
   signals->SetNumberOfComponents(1);
+  float *signalsPtr = signals->WritePointer(0, numBoxes);
 
   // To cache the signal
   std::vector<float> signalCache(numBoxes, 0);
@@ -102,48 +106,41 @@ void vtkMDHexFactory::doCreate(
 
   vtkNew<vtkIdList> hexPointList;
   hexPointList->SetNumberOfIds(8);
+  auto hexPointList_ptr = hexPointList->WritePointer(0, 8);
 
-  NormFuncIMDNodePtr normFunction = makeMDEventNormalizationFunction(
-      m_normalizationOption, ws.get());
+  NormFuncIMDNodePtr normFunction =
+      makeMDEventNormalizationFunction(m_normalizationOption, ws.get());
 
   // This can be parallelized
   // cppcheck-suppress syntaxError
     PRAGMA_OMP( parallel for schedule (dynamic) )
     for (int ii = 0; ii < int(boxes.size()); ii++) {
       // Get the box here
-      size_t i = size_t(ii);
+      size_t i = static_cast<size_t>(ii);
       API::IMDNode *box = boxes[i];
       Mantid::signal_t signal_normalized = (box->*normFunction)();
 
       if (!isSpecial(signal_normalized) &&
           m_thresholdRange->inRange(signal_normalized)) {
         // Cache the signal and using of it
-        signalCache[i] = float(signal_normalized);
+        signalCache[i] = static_cast<float>(signal_normalized);
         useBox[i] = true;
 
         // Get the coordinates.
         size_t numVertexes = 0;
-        std::unique_ptr<coord_t> coords;
+        std::unique_ptr<coord_t[]> coords;
 
         // If slicing down to 3D, specify which dimensions to keep.
         if (this->slice) {
-          coords = std::unique_ptr<coord_t>(
+          coords = std::unique_ptr<coord_t[]>(
               box->getVertexesArray(numVertexes, 3, this->sliceMask.get()));
         } else {
           coords =
-              std::unique_ptr<coord_t>(box->getVertexesArray(numVertexes));
+              std::unique_ptr<coord_t[]>(box->getVertexesArray(numVertexes));
         }
-
         if (numVertexes == 8) {
-          // Iterate through all coordinates. Candidate for speed improvement.
-          for (size_t v = 0; v < numVertexes; v++) {
-            coord_t *coord = coords.get() + v * 3;
-            // Set the point at that given ID
-            points->SetPoint(i * 8 + v, coord[0], coord[1], coord[2]);
-            std::string msg;
-          }
-
-        } // valid number of vertexes returned
+          std::copy_n(coords.get(), 24, std::next(pointsPtr, i * 24));
+        }
       } else {
         useBox[i] = false;
       }
@@ -157,36 +154,28 @@ void vtkMDHexFactory::doCreate(
     for (size_t i = 0; i < boxes.size(); i++) {
       if (useBox[i]) {
         // The bare point ID
-        vtkIdType pointIds = i * 8;
+        vtkIdType pointId = i * 8;
 
         // Add signal
-        signals->InsertNextValue(signalCache[i]);
+        *signalsPtr = signalCache[i];
+        std::advance(signalsPtr, 1);
 
-        hexPointList->SetId(0, pointIds + 0); // xyx
-        hexPointList->SetId(1, pointIds + 1); // dxyz
-        hexPointList->SetId(2, pointIds + 3); // dxdyz
-        hexPointList->SetId(3, pointIds + 2); // xdyz
-        hexPointList->SetId(4, pointIds + 4); // xydz
-        hexPointList->SetId(5, pointIds + 5); // dxydz
-        hexPointList->SetId(6, pointIds + 7); // dxdydz
-        hexPointList->SetId(7, pointIds + 6); // xdydz
+        const std::array<vtkIdType, 8> idList{{0, 1, 3, 2, 4, 5, 7, 6}};
+
+        std::transform(
+            idList.begin(), idList.end(), hexPointList_ptr,
+            std::bind(std::plus<vtkIdType>(), std::placeholders::_1, pointId));
 
         // Add cells
         visualDataSet->InsertNextCell(VTK_HEXAHEDRON,
                                       hexPointList.GetPointer());
 
-        double bounds[6];
-
-        visualDataSet->GetCellBounds(imageSizeActual, bounds);
-
-        if (bounds[0] < -10 || bounds[2] < -10 || bounds[4] < -10) {
-          std::string msg = "";
-        }
         imageSizeActual++;
       }
     } // for each box.
 
     // Shrink to fit
+    signals->Resize(imageSizeActual);
     signals->Squeeze();
     visualDataSet->Squeeze();
 
@@ -231,14 +220,11 @@ vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
       this->sliceImplicitFunction = boost::make_shared<MDImplicitFunction>();
 
       // Make the mask of dimensions
-      // TODO: Smarter mapping
       for (size_t d = 0; d < nd; d++)
         this->sliceMask[d] = (d < 3);
 
       // Define where the slice is in 4D
-      // TODO: Where to slice? Right now is just 0
       std::vector<coord_t> point(nd, 0);
-      point[3] = coord_t(m_time); // Specifically for 4th/time dimension.
 
       // Define two opposing planes that point in all higher dimensions
       std::vector<coord_t> normal1(nd, 0);
@@ -247,12 +233,14 @@ vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
         normal1[d] = +1.0;
         normal2[d] = -1.0;
       }
-      // This creates a 0-thickness region to slice in.
+      // This creates a slice which is one bin thick in the 4th dimension
+      // m_time assumed to satisfy: dim_min <= m_time < dim_max
+      // but does not have to be a bin centre
+      point[3] = getPreviousBinBoundary(imdws);
       sliceImplicitFunction->addPlane(MDPlane(normal1, point));
+      point[3] = getNextBinBoundary(imdws);
       sliceImplicitFunction->addPlane(MDPlane(normal2, point));
 
-      // coord_t pointA[4] = {0, 0, 0, -1.0};
-      // coord_t pointB[4] = {0, 0, 0, +2.0};
     } else {
       // Direct 3D, so no slicing
       this->slice = false;
@@ -265,6 +253,44 @@ vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
     // The macro does not allow return calls, so we used a member variable.
     return this->dataSet;
   }
+}
+
+/*
+ * Get the next highest bin boundary
+ */
+coord_t
+vtkMDHexFactory::getNextBinBoundary(IMDEventWorkspace_sptr imdws) const {
+  auto t_dim = imdws->getTDimension();
+  coord_t bin_width = t_dim->getBinWidth();
+  coord_t dim_min = t_dim->getMinimum();
+  return roundUp(coord_t(m_time) - dim_min, bin_width) + dim_min;
+}
+
+/*
+ * Get the previous bin boundary, or the current one if m_time is on a boundary
+ */
+coord_t
+vtkMDHexFactory::getPreviousBinBoundary(IMDEventWorkspace_sptr imdws) const {
+  auto t_dim = imdws->getTDimension();
+  coord_t bin_width = t_dim->getBinWidth();
+  coord_t dim_min = t_dim->getMinimum();
+  return roundDown(coord_t(m_time) - dim_min, bin_width) + dim_min;
+}
+
+/*
+ * Round up to next multiple of factor
+ * Where "up" means towards +ve infinity
+ */
+coord_t roundUp(const coord_t num_to_round, const coord_t factor) {
+  return (std::floor(num_to_round / factor) + 1) * factor;
+}
+
+/*
+ * Round down to next multiple of factor
+ * Where "down" means towards -ve infinity
+ */
+coord_t roundDown(const coord_t num_to_round, const coord_t factor) {
+  return std::floor(num_to_round / factor) * factor;
 }
 
 /*

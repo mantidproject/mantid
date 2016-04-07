@@ -44,7 +44,7 @@ namespace Poldi {
 
 class MANTID_SINQ_DLL PoldiAbstractDetector {
 public:
-  virtual ~PoldiAbstractDetector() {}
+  virtual ~PoldiAbstractDetector() = default;
 
   virtual void
   loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) = 0;
@@ -63,7 +63,7 @@ public:
                                             double lambdaMax) = 0;
 
 protected:
-  PoldiAbstractDetector() {}
+  PoldiAbstractDetector() = default;
 };
 
 typedef boost::shared_ptr<PoldiAbstractDetector> PoldiAbstractDetector_sptr;

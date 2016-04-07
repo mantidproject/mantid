@@ -224,7 +224,7 @@ void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors) {
       // The detector ID
       const detid_t detId = *it;
       // By default: Spectrum number = index +  1
-      const specid_t specNo = specid_t(index + 1);
+      const specnum_t specNo = specnum_t(index + 1);
 
       if (index < this->getNumberHistograms()) {
         ISpectrum *spec = getSpectrum(index);
@@ -288,7 +288,7 @@ void MatrixWorkspace::rebuildNearestNeighbours() {
 *be ignored. True to ignore detectors.
 * @return map of DetectorID to distance for the nearest neighbours
 */
-std::map<specid_t, V3D>
+std::map<specnum_t, V3D>
 MatrixWorkspace::getNeighbours(const Geometry::IDetector *comp,
                                const double radius,
                                const bool ignoreMaskedDetectors) const {
@@ -296,16 +296,15 @@ MatrixWorkspace::getNeighbours(const Geometry::IDetector *comp,
     buildNearestNeighbours(ignoreMaskedDetectors);
   }
   // Find the spectrum number
-  std::vector<specid_t> spectra;
-  this->getSpectraFromDetectorIDs(std::vector<detid_t>(1, comp->getID()),
-                                  spectra);
+  std::vector<specnum_t> spectra =
+      this->getSpectraFromDetectorIDs(std::vector<detid_t>(1, comp->getID()));
   if (spectra.empty()) {
     throw Kernel::Exception::NotFoundError("MatrixWorkspace::getNeighbours - "
                                            "Cannot find spectrum number for "
                                            "detector",
                                            comp->getID());
   }
-  std::map<specid_t, V3D> neighbours =
+  std::map<specnum_t, V3D> neighbours =
       m_nearestNeighbours->neighboursInRadius(spectra[0], radius);
   return neighbours;
 }
@@ -319,13 +318,13 @@ MatrixWorkspace::getNeighbours(const Geometry::IDetector *comp,
 *be ignored. True to ignore detectors.
 * @return map of DetectorID to distance for the nearest neighbours
 */
-std::map<specid_t, V3D>
-MatrixWorkspace::getNeighbours(specid_t spec, const double radius,
+std::map<specnum_t, V3D>
+MatrixWorkspace::getNeighbours(specnum_t spec, const double radius,
                                bool ignoreMaskedDetectors) const {
   if (!m_nearestNeighbours) {
     buildNearestNeighbours(ignoreMaskedDetectors);
   }
-  std::map<specid_t, V3D> neighbours =
+  std::map<specnum_t, V3D> neighbours =
       m_nearestNeighbours->neighboursInRadius(spec, radius);
   return neighbours;
 }
@@ -339,8 +338,8 @@ MatrixWorkspace::getNeighbours(specid_t spec, const double radius,
 *be ignored. True to ignore detectors.
 * @return map of DetectorID to distance for the nearest neighbours
 */
-std::map<specid_t, V3D>
-MatrixWorkspace::getNeighboursExact(specid_t spec, const int nNeighbours,
+std::map<specnum_t, V3D>
+MatrixWorkspace::getNeighboursExact(specnum_t spec, const int nNeighbours,
                                     bool ignoreMaskedDetectors) const {
   if (!m_nearestNeighbours) {
     SpectrumDetectorMapping spectraMap(this);
@@ -348,7 +347,7 @@ MatrixWorkspace::getNeighboursExact(specid_t spec, const int nNeighbours,
         nNeighbours, this->getInstrument(), spectraMap.getMapping(),
         ignoreMaskedDetectors));
   }
-  std::map<specid_t, V3D> neighbours = m_nearestNeighbours->neighbours(spec);
+  std::map<specnum_t, V3D> neighbours = m_nearestNeighbours->neighbours(spec);
   return neighbours;
 }
 
@@ -363,14 +362,13 @@ spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const {
     throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: "
                              "axis[1] is not a SpectraAxis, so I cannot "
                              "generate a map.");
-  spec2index_map map;
   try {
-    ax->getSpectraIndexMap(map);
+    return ax->getSpectraIndexMap();
   } catch (std::runtime_error &) {
-    throw std::runtime_error(
-        "MatrixWorkspace::getSpectrumToWorkspaceIndexMap: no elements!");
+    g_log.error()
+        << "MatrixWorkspace::getSpectrumToWorkspaceIndexMap: no elements!";
+    throw;
   }
-  return map;
 }
 
 //---------------------------------------------------------------------------------------
@@ -378,12 +376,12 @@ spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const {
 *    The index into the vector = spectrum number + offset
 *    The value at that index = the corresponding Workspace Index
 *
-*  @param out :: vector set to above definition
+*  @returns :: vector set to above definition
 *  @param offset :: add this to the detector ID to get the index into the
 *vector.
 */
-void MatrixWorkspace::getSpectrumToWorkspaceIndexVector(
-    std::vector<size_t> &out, specid_t &offset) const {
+std::vector<size_t>
+MatrixWorkspace::getSpectrumToWorkspaceIndexVector(specnum_t &offset) const {
   SpectraAxis *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1]);
   if (!ax)
     throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: "
@@ -391,14 +389,14 @@ void MatrixWorkspace::getSpectrumToWorkspaceIndexVector(
                              "generate a map.");
 
   // Find the min/max spectra IDs
-  specid_t min = std::numeric_limits<specid_t>::max(); // So that any number
-                                                       // will be less than this
-  specid_t max = -std::numeric_limits<specid_t>::max(); // So that any number
-                                                        // will be greater than
-                                                        // this
+  specnum_t min = std::numeric_limits<specnum_t>::max(); // So that any number
+  // will be less than this
+  specnum_t max = -std::numeric_limits<specnum_t>::max(); // So that any number
+  // will be greater than
+  // this
   size_t length = ax->length();
   for (size_t i = 0; i < length; i++) {
-    specid_t spec = ax->spectraNo(i);
+    specnum_t spec = ax->spectraNo(i);
     if (spec < min)
       min = spec;
     if (spec > max)
@@ -408,14 +406,16 @@ void MatrixWorkspace::getSpectrumToWorkspaceIndexVector(
   // Offset so that the "min" value goes to index 0
   offset = -min;
 
-  // Resize correctly
-  out.resize(max - min + 1, 0);
+  // Size correctly
+  std::vector<size_t> out(max - min + 1, 0);
 
   // Make the vector
   for (size_t i = 0; i < length; i++) {
-    specid_t spec = ax->spectraNo(i);
+    specnum_t spec = ax->spectraNo(i);
     out[spec + offset] = i;
   }
+
+  return out;
 }
 
 //---------------------------------------------------------------------------------------
@@ -486,19 +486,18 @@ detid2index_map MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(
 *    The index into the vector = DetectorID (pixel ID) + offset
 *    The value at that index = the corresponding Workspace Index
 *
-*  @param out :: vector set to above definition
 *  @param offset :: add this to the detector ID to get the index into the
 *vector.
 *  @param throwIfMultipleDets :: set to true to make the algorithm throw an
-*error
-*         if there is more than one detector for a specific workspace index.
+*error if there is more than one detector for a specific workspace index.
 *  @throw runtime_error if there is more than one detector per spectrum (if
 *throwIfMultipleDets is true)
+*  @returns :: vector set to above definition
 */
-void MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
-    std::vector<size_t> &out, detid_t &offset, bool throwIfMultipleDets) const {
+std::vector<size_t> MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
+    detid_t &offset, bool throwIfMultipleDets) const {
   // Make a correct initial size
-  out.clear();
+  std::vector<size_t> out;
   detid_t minId = 0;
   detid_t maxId = 0;
   this->getInstrument()->getMinMaxDetectorIDs(minId, maxId);
@@ -534,6 +533,7 @@ void MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
     }
 
   } // (for each workspace index)
+  return out;
 }
 
 //---------------------------------------------------------------------------------------
@@ -541,14 +541,12 @@ void MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
 *  Not a very efficient operation, but unfortunately it's sometimes required.
 *
 *  @param spectraList :: The list of spectrum numbers required
-*  @param indexList ::   Returns a reference to the vector of indices (empty if
-*not a Workspace2D)
+*  @returns :: the vector of indices (empty if not a Workspace2D)
 */
-void MatrixWorkspace::getIndicesFromSpectra(
-    const std::vector<specid_t> &spectraList,
-    std::vector<size_t> &indexList) const {
+std::vector<size_t> MatrixWorkspace::getIndicesFromSpectra(
+    const std::vector<specnum_t> &spectraList) const {
   // Clear the output index list
-  indexList.clear();
+  std::vector<size_t> indexList;
   indexList.reserve(this->getNumberHistograms());
 
   auto iter = spectraList.cbegin();
@@ -561,6 +559,7 @@ void MatrixWorkspace::getIndicesFromSpectra(
     }
     ++iter;
   }
+  return indexList;
 }
 
 //---------------------------------------------------------------------------------------
@@ -571,7 +570,7 @@ void MatrixWorkspace::getIndicesFromSpectra(
 * @throw runtime_error if not found.
 */
 size_t
-MatrixWorkspace::getIndexFromSpectrumNumber(const specid_t specNo) const {
+MatrixWorkspace::getIndexFromSpectrumNumber(const specnum_t specNo) const {
   for (size_t i = 0; i < this->getNumberHistograms(); ++i) {
     if (this->getSpectrum(i)->getSpectrumNo() == specNo)
       return i;
@@ -589,11 +588,10 @@ MatrixWorkspace::getIndexFromSpectrumNumber(const specid_t specNo) const {
      *  effectively a set (i.e. there are no duplicates).
      *
 *  @param detIdList :: The list of detector IDs required
-*  @param indexList :: Returns a reference to the vector of indices
+*  @returns :: a vector of indices
 */
-void MatrixWorkspace::getIndicesFromDetectorIDs(
-    const std::vector<detid_t> &detIdList,
-    std::vector<size_t> &indexList) const {
+std::vector<size_t> MatrixWorkspace::getIndicesFromDetectorIDs(
+    const std::vector<detid_t> &detIdList) const {
   std::map<detid_t, std::set<size_t>> detectorIDtoWSIndices;
   for (size_t i = 0; i < getNumberHistograms(); ++i) {
     auto detIDs = getSpectrum(i)->getDetectorIDs();
@@ -602,7 +600,7 @@ void MatrixWorkspace::getIndicesFromDetectorIDs(
     }
   }
 
-  indexList.clear();
+  std::vector<size_t> indexList;
   indexList.reserve(detIdList.size());
   for (const auto detId : detIdList) {
     auto wsIndices = detectorIDtoWSIndices.find(detId);
@@ -612,6 +610,7 @@ void MatrixWorkspace::getIndicesFromDetectorIDs(
       }
     }
   }
+  return indexList;
 }
 
 //---------------------------------------------------------------------------------------
@@ -619,19 +618,17 @@ void MatrixWorkspace::getIndicesFromDetectorIDs(
 *be slow!
 *
 * @param detIdList :: The list of detector IDs required
-* @param spectraList :: Returns a reference to the vector of spectrum numbers.
+* @returns :: a reference to the vector of spectrum numbers.
 *                       0 for not-found detectors
 */
-void MatrixWorkspace::getSpectraFromDetectorIDs(
-    const std::vector<detid_t> &detIdList,
-    std::vector<specid_t> &spectraList) const {
-
-  spectraList.clear();
+std::vector<specnum_t> MatrixWorkspace::getSpectraFromDetectorIDs(
+    const std::vector<detid_t> &detIdList) const {
+  std::vector<specnum_t> spectraList;
 
   // Try every detector in the list
   for (auto detId : detIdList) {
     bool foundDet = false;
-    specid_t foundSpecNum = 0;
+    specnum_t foundSpecNum = 0;
 
     // Go through every histogram
     for (size_t i = 0; i < this->getNumberHistograms(); i++) {
@@ -645,6 +642,7 @@ void MatrixWorkspace::getSpectraFromDetectorIDs(
     if (foundDet)
       spectraList.push_back(foundSpecNum);
   } // for each detector ID in the list
+  return spectraList;
 }
 
 double MatrixWorkspace::getXMin() const {
@@ -709,7 +707,7 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out,
     const Mantid::MantidVec &x = this->readX(wksp_index);
     const Mantid::MantidVec &y = this->readY(wksp_index);
     // If it is a 1D workspace, no need to integrate
-    if ((x.size() <= 2) && (y.size() >= 1)) {
+    if ((x.size() <= 2) && (!y.empty())) {
       out[wksp_index] = y[0];
     } else {
       // Iterators for limits - whole range by default
@@ -761,7 +759,7 @@ MatrixWorkspace::getDetector(const size_t workspaceIndex) const {
                                            "workspace index.",
                                            "");
 
-  const std::set<detid_t> &dets = spec->getDetectorIDs();
+  const auto &dets = spec->getDetectorIDs();
   Instrument_const_sptr localInstrument = getInstrument();
   if (!localInstrument) {
     g_log.debug() << "No instrument defined.\n";
@@ -1012,7 +1010,7 @@ void MatrixWorkspace::maskWorkspaceIndex(const std::size_t index) {
   // Virtual method clears the spectrum as appropriate
   spec->clearData();
 
-  const std::set<detid_t> dets = spec->getDetectorIDs();
+  const auto dets = spec->getDetectorIDs();
   for (auto detId : dets) {
     try {
       if (const Geometry::Detector *det =
@@ -1039,7 +1037,7 @@ void MatrixWorkspace::maskWorkspaceIndex(const std::size_t index) {
 * on the same spectrum. Writing to
 *  the mask set is marked parrallel critical so different spectra can be
 * analysised in parallel
-*  @param workspaceIndex :: The workspace spectrum index of the bin
+*  @param workspaceIndex :: The workspace index of the bin
 *  @param binIndex ::      The index of the bin in the spectrum
 *  @param weight ::        'How heavily' the bin is to be masked. =1 for full
 * masking (the default).
@@ -1067,20 +1065,20 @@ void MatrixWorkspace::maskBin(const size_t &workspaceIndex,
 }
 
 /** Writes the masking weight to m_masks (doesn't alter y-values). Contains a
-* parrallel critical section
+* parallel critical section
 *  and so is thread safe
-*  @param spectrumIndex :: The workspace spectrum index of the bin
+*  @param index :: The workspace index of the spectrum
 *  @param binIndex ::      The index of the bin in the spectrum
 *  @param weight ::        'How heavily' the bin is to be masked. =1 for full
 * masking (the default).
 */
-void MatrixWorkspace::flagMasked(const size_t &spectrumIndex,
-                                 const size_t &binIndex, const double &weight) {
+void MatrixWorkspace::flagMasked(const size_t &index, const size_t &binIndex,
+                                 const double &weight) {
   // Writing to m_masks is not thread-safe, so put in some protection
   PARALLEL_CRITICAL(maskBin) {
     // First get a reference to the list for this spectrum (or create a new
     // list)
-    MaskList &binList = m_masks[spectrumIndex];
+    MaskList &binList = m_masks[index];
     auto it = binList.find(binIndex);
     if (it != binList.end()) {
       binList.erase(it);
@@ -1090,7 +1088,7 @@ void MatrixWorkspace::flagMasked(const size_t &spectrumIndex,
 }
 
 /** Does this spectrum contain any masked bins
-*  @param workspaceIndex :: The workspace spectrum index to test
+*  @param workspaceIndex :: The workspace index to test
 *  @return True if there are masked bins for this spectrum
 */
 bool MatrixWorkspace::hasMaskedBins(const size_t &workspaceIndex) const {
@@ -1347,8 +1345,6 @@ public:
   }
   const Geometry::MDFrame &getMDFrame() const override { return *m_frame; }
 
-  ~MWDimension() override {}
-
 private:
   const Axis &m_axis;
   const std::string m_dimensionId;
@@ -1368,8 +1364,6 @@ public:
                                            m_ws->getAxis(0)->unit()->label())) {
     m_X = ws->readX(0);
   }
-
-  ~MWXDimension() override {}
 
   /// the name of the dimennlsion as can be displayed along the axis
   std::string getName() const override {
@@ -1508,20 +1502,16 @@ std::vector<IMDIterator *> MatrixWorkspace::createIterators(
 * @param start :: coordinates of the start point of the line
 * @param end :: coordinates of the end point of the line
 * @param normalize :: how to normalize the signal
-* @param x :: is set to the boundaries of the bins, relative to start of the
-*line.
-* @param y :: is set to the normalized signal for each bin. Length = length(x) -
-*1
-* @param e :: is set to the normalized errors for each bin. Length = length(x) -
-*1
+* @returns :: a LinePlot in which x is set to the boundaries of the bins,
+* relative to start of the line, y is set to the normalized signal for
+* each bin with Length = length(x) - 1 and e is set to the normalized
+* errors for each bin with Length = length(x) - 1.
 */
-void MatrixWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
-                                  const Mantid::Kernel::VMD &end,
-                                  Mantid::API::MDNormalization normalize,
-                                  std::vector<coord_t> &x,
-                                  std::vector<signal_t> &y,
-                                  std::vector<signal_t> &e) const {
-  IMDWorkspace::getLinePlot(start, end, normalize, x, y, e);
+IMDWorkspace::LinePlot
+MatrixWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
+                             const Mantid::Kernel::VMD &end,
+                             Mantid::API::MDNormalization normalize) const {
+  return IMDWorkspace::getLinePlot(start, end, normalize);
 }
 
 //------------------------------------------------------------------------------------
@@ -1661,7 +1651,7 @@ void MatrixWorkspace::saveSpectraMapNexus(
     spectra[i] = int32_t(spectrum->getSpectrumNo());
 
     // The detectors in this spectrum
-    const std::set<detid_t> &detectorgroup = spectrum->getDetectorIDs();
+    const auto &detectorgroup = spectrum->getDetectorIDs();
     const int ndet1 = static_cast<int>(detectorgroup.size());
 
     detector_index[i + 1] = int32_t(

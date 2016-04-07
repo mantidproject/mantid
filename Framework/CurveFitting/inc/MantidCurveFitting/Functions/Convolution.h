@@ -115,8 +115,6 @@ public:
 
   /// Constructor
   Convolution();
-  /// Destructor
-  ~Convolution() override;
 
   /// overwrite IFunction base class methods
   std::string name() const override { return "Convolution"; }

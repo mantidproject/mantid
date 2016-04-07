@@ -35,7 +35,6 @@ class MANTID_SINQ_DLL PoldiSpectrumPawleyFunction
     : public PoldiSpectrumDomainFunction {
 public:
   PoldiSpectrumPawleyFunction();
-  ~PoldiSpectrumPawleyFunction() override {}
 
   std::string name() const override { return "PoldiSpectrumPawleyFunction"; }
 

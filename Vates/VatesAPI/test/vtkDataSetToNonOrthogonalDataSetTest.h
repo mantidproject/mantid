@@ -2,6 +2,7 @@
 #define MANTID_VATES_VTKDATASETTONONORTHOGONALDATASETTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <MantidVatesAPI/ADSWorkspaceProvider.h>
 #include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -83,33 +84,10 @@ private:
     }
 
     // Create the coordinate transformation information
-    std::vector<Mantid::coord_t> affMatVals;
-    affMatVals.push_back(1);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(1);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(1);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(1);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(0);
-    affMatVals.push_back(1);
-                      
+    std::vector<Mantid::coord_t> affMatVals{1, 0, 0, 0, 0, 0, 0, 1, 0,
+                                            0, 0, 0, 0, 1, 0, 0, 1, 0,
+                                            0, 0, 0, 0, 0, 0, 1};
+
     CoordTransformAffine affMat(4, 4);
     affMat.setMatrix(Matrix<Mantid::coord_t>(affMatVals));
     if (!forgetAffmat)
@@ -127,15 +105,7 @@ private:
     }
     else
     {
-      wMat.push_back(1);
-      wMat.push_back(1);
-      wMat.push_back(0);
-      wMat.push_back(1);
-      wMat.push_back(-1);
-      wMat.push_back(0);
-      wMat.push_back(0);
-      wMat.push_back(0);
-      wMat.push_back(1);
+      wMat = {1, 1, 0, 1, -1, 0, 0, 0, 1};
     }
 
     if (!forgetWmat)
@@ -229,20 +199,23 @@ public:
   void testThrowIfVtkDatasetNull()
   {
     vtkDataSet *dataset = NULL;
-    TS_ASSERT_THROWS(vtkDataSetToNonOrthogonalDataSet temp(dataset, ""),
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    TS_ASSERT_THROWS(vtkDataSetToNonOrthogonalDataSet temp(dataset, "", std::move(workspaceProvider)),
                      std::runtime_error);
   }
 
-  void testThrowsIfWorkspaceNameEmpty() {
+  void testThrowsIfWorkspaceNameEmptyAndUsingADSWorkspaceProvider() {
     vtkNew<vtkUnstructuredGrid> dataset;
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
     TS_ASSERT_THROWS(
-        vtkDataSetToNonOrthogonalDataSet temp(dataset.GetPointer(), ""),
+        vtkDataSetToNonOrthogonalDataSet temp(dataset.GetPointer(), "", std::move(workspaceProvider)),
         std::runtime_error);
   }
 
   void testThrowIfVtkDatasetWrongType() {
     vtkNew<vtkRectilinearGrid> grid;
-    vtkDataSetToNonOrthogonalDataSet converter(grid.GetPointer(), "name");
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    vtkDataSetToNonOrthogonalDataSet converter(grid.GetPointer(), "name", std::move(workspaceProvider));
     TS_ASSERT_THROWS(converter.execute(), std::runtime_error);
   }
 
@@ -251,7 +224,8 @@ public:
     std::string wsName = createMantidWorkspace(false);
     vtkSmartPointer<vtkUnstructuredGrid> ds;
     ds.TakeReference(createSingleVoxelPoints());
-    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName, std::move(workspaceProvider));
     TS_ASSERT_THROWS_NOTHING(converter.execute());
     this->checkUnityTransformation(ds);
   }
@@ -261,7 +235,8 @@ public:
     std::string wsName = createMantidWorkspace(false, true);
     vtkSmartPointer<vtkUnstructuredGrid> ds;
     ds.TakeReference(createSingleVoxelPoints());
-    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName, std::move(workspaceProvider));
     TS_ASSERT_THROWS(converter.execute(), std::invalid_argument);
   }
 
@@ -270,7 +245,8 @@ public:
     std::string wsName = createMantidWorkspace(false, false, true);
     vtkSmartPointer<vtkUnstructuredGrid> ds;
     ds.TakeReference(createSingleVoxelPoints());
-    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName, std::move(workspaceProvider));
     TS_ASSERT_THROWS(converter.execute(), std::invalid_argument);
   }
 
@@ -279,7 +255,8 @@ public:
     std::string wsName = createMantidWorkspace(false, false, false, true);
     vtkSmartPointer<vtkUnstructuredGrid> ds;
     ds.TakeReference(createSingleVoxelPoints());
-    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName, std::move(workspaceProvider));
     TS_ASSERT_THROWS(converter.execute(), std::invalid_argument);
   }
 
@@ -288,7 +265,8 @@ public:
     std::string wsName = createMantidWorkspace(false, false, false, false, true);
     vtkSmartPointer<vtkUnstructuredGrid> ds;
     ds.TakeReference(createSingleVoxelPoints());
-    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName, std::move(workspaceProvider));
     TS_ASSERT_THROWS_NOTHING(converter.execute());
   }
 
@@ -297,8 +275,9 @@ public:
     std::string wsName = createMantidWorkspace(false);
     vtkSmartPointer<vtkUnstructuredGrid> ds;
     ds.TakeReference(createSingleVoxelPoints());
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
     TS_ASSERT_THROWS_NOTHING(
-        vtkDataSetToNonOrthogonalDataSet::exec(ds, wsName));
+        vtkDataSetToNonOrthogonalDataSet::exec(ds, wsName, std::move(workspaceProvider)));
   }
 
   void testNonUnitySimpleDataset()
@@ -306,7 +285,8 @@ public:
     std::string wsName = createMantidWorkspace(true);
     vtkSmartPointer<vtkUnstructuredGrid> ds;
     ds.TakeReference(createSingleVoxelPoints());
-    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName, std::move(workspaceProvider));
     TS_ASSERT_THROWS_NOTHING(converter.execute());
     // Now, check some values
     /// Get the (1,1,1) point
@@ -351,7 +331,8 @@ public:
     std::string wsName = createMantidWorkspace(false, false, false, false, false, 2.0);
     vtkSmartPointer<vtkUnstructuredGrid> ds;
     ds.TakeReference(createSingleVoxelPoints());
-    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName, std::move(workspaceProvider));
     TS_ASSERT_THROWS_NOTHING(converter.execute());
     this->checkUnityTransformation(ds);
   }
@@ -361,7 +342,8 @@ public:
     std::string wsName = createMantidWorkspace(true, false, false, false, false, 2.0);
     vtkSmartPointer<vtkUnstructuredGrid> ds;
     ds.TakeReference(createSingleVoxelPoints());
-    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName, std::move(workspaceProvider));
     TS_ASSERT_THROWS_NOTHING(converter.execute());
     // Now, check some values
     /// Get the (1,1,1) point

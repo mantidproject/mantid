@@ -54,9 +54,9 @@ LoadVulcanCalFile::~LoadVulcanCalFile() {}
 void LoadVulcanCalFile::init() {
   // LoadVulcanCalFile::getInstrument3WaysInit(this);
 
-  declareProperty(
-      new FileProperty("OffsetFilename", "", FileProperty::Load, ".dat"),
-      "Path to the VULCAN offset file. ");
+  declareProperty(Kernel::make_unique<FileProperty>("OffsetFilename", "",
+                                                    FileProperty::Load, ".dat"),
+                  "Path to the VULCAN offset file. ");
 
   vector<string> groupoptions{"6Modules", "2Banks", "1Bank"};
 
@@ -65,31 +65,34 @@ void LoadVulcanCalFile::init() {
       boost::make_shared<ListValidator<string>>(groupoptions),
       "Choices to output group workspace for 1 bank, 2 banks or 6 modules. ");
 
-  declareProperty(new FileProperty("BadPixelFilename", "",
-                                   FileProperty::OptionalLoad, ".dat"),
+  declareProperty(Kernel::make_unique<FileProperty>("BadPixelFilename", "",
+                                                    FileProperty::OptionalLoad,
+                                                    ".dat"),
                   "Path to the VULCAN bad pixel file. ");
 
   declareProperty(
-      new PropertyWithValue<std::string>("WorkspaceName", "", Direction::Input),
+      Kernel::make_unique<PropertyWithValue<std::string>>("WorkspaceName", "",
+                                                          Direction::Input),
       "The base of the output workspace names. Names will have '_group', "
       "'_offsets', '_mask' appended to them.");
 
   // Effective geometry: bank IDs
-  declareProperty(new ArrayProperty<int>("BankIDs"),
+  declareProperty(Kernel::make_unique<ArrayProperty<int>>("BankIDs"),
                   "Bank IDs for the effective detectors. "
                   "Must cover all banks in the definition. ");
 
   // Effective geometry: DIFCs
-  declareProperty(new ArrayProperty<double>("EffectiveDIFCs"),
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("EffectiveDIFCs"),
                   "DIFCs for effective detectors. ");
 
   // Effective geometry: 2theta
-  declareProperty(new ArrayProperty<double>("Effective2Thetas"),
-                  "2 thetas for effective detectors. ");
-
-  // These is the properties for testing purpose only!
   declareProperty(
-      new WorkspaceProperty<EventWorkspace>(
+      Kernel::make_unique<ArrayProperty<double>>("Effective2Thetas"),
+      "2 thetas for effective detectors. ");
+
+  // This is the property for testing purpose only!
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<EventWorkspace>>(
           "EventWorkspace", "", Direction::InOut, PropertyMode::Optional),
       "Optional input/output EventWorkspace to get aligned by offset file. "
       "It serves as a verifying tool, and will be removed after test. ");
@@ -183,24 +186,24 @@ void LoadVulcanCalFile::processInOutProperites() {
   // Set properties for these file
   m_offsetsWS->mutableRun().addProperty("Filename", m_offsetFilename);
 
-  declareProperty(new WorkspaceProperty<OffsetsWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
                       "OutputOffsetsWorkspace", WorkspaceName + "_offsets",
                       Direction::Output),
                   "Set the the output OffsetsWorkspace. ");
   setProperty("OutputOffsetsWorkspace", m_offsetsWS);
 
   m_tofOffsetsWS->mutableRun().addProperty("Filename", m_offsetFilename);
-  declareProperty(new WorkspaceProperty<OffsetsWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
                       "OutputTOFOffsetsWorkspace",
                       WorkspaceName + "_TOF_offsets", Direction::Output),
                   "Set the the (TOF) output OffsetsWorkspace. ");
   setProperty("OutputTOFOffsetsWorkspace", m_tofOffsetsWS);
 
   // mask workspace
-  declareProperty(new WorkspaceProperty<MaskWorkspace>("OutputMaskWorkspace",
-                                                       WorkspaceName + "_mask",
-                                                       Direction::Output),
-                  "Set the output MaskWorkspace. ");
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<MaskWorkspace>>(
+          "OutputMaskWorkspace", WorkspaceName + "_mask", Direction::Output),
+      "Set the output MaskWorkspace. ");
   m_maskWS->mutableRun().addProperty("Filename", m_badPixFilename);
   setProperty("OutputMaskWorkspace", m_maskWS);
 
@@ -257,7 +260,7 @@ void LoadVulcanCalFile::setupGroupingWorkspace() {
 
   // Output
   string WorkspaceName = getPropertyValue("WorkspaceName");
-  declareProperty(new WorkspaceProperty<GroupingWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<GroupingWorkspace>>(
                       "OutputGroupingWorkspace", WorkspaceName + "_group",
                       Direction::Output),
                   "Set the output GroupingWorkspace. ");
@@ -435,15 +438,12 @@ void LoadVulcanCalFile::processOffsets(
   }
 
   // Get the global correction
-  std::set<int>::iterator biter;
   g_log.information() << "Number of bankds to process = " << set_bankID.size()
                       << "\n";
   map<int, double> map_bankLogCorr;
-  for (biter = set_bankID.begin(); biter != set_bankID.end(); ++biter) {
+  for (const auto bankid : set_bankID) {
     // Locate inter bank and inter pack correction (log)
-    int bankid = *biter;
     double globalfactor = 0.;
-    map<detid_t, double>::iterator offsetiter;
 
     // Inter-bank correction
     if (m_groupingType != VULCAN_OFFSET_BANK) {
@@ -453,7 +453,7 @@ void LoadVulcanCalFile::processOffsets(
       g_log.information() << "Find inter-bank correction for bank " << bankid
                           << " for special detid " << interbank_detid << ".\n";
 
-      offsetiter = map_detoffset.find(interbank_detid);
+      const auto offsetiter = map_detoffset.find(interbank_detid);
       if (offsetiter == map_detoffset.end())
         throw runtime_error("It cannot happen!");
       double interbanklogcorr = offsetiter->second;
@@ -468,7 +468,7 @@ void LoadVulcanCalFile::processOffsets(
 
       detid_t intermodule_detid =
           static_cast<detid_t>((bankid + 1) * NUMBERRESERVEDPERMODULE) - 1;
-      offsetiter = map_detoffset.find(intermodule_detid);
+      const auto offsetiter = map_detoffset.find(intermodule_detid);
       if (offsetiter == map_detoffset.end())
         throw runtime_error("It cannot happen!");
       double intermodulelogcorr = offsetiter->second;
@@ -614,7 +614,7 @@ Geometry::Instrument_const_sptr LoadVulcanCalFile::getInstrument() {
   Instrument_const_sptr inst;
 
   Algorithm_sptr childAlg = createChildAlgorithm("LoadInstrument", 0.0, 0.2);
-  MatrixWorkspace_sptr tempWS(new Workspace2D());
+  MatrixWorkspace_sptr tempWS = boost::make_shared<Workspace2D>();
   childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
   childAlg->setPropertyValue("InstrumentName", InstrumentName);
   childAlg->setProperty("RewriteSpectraMap",

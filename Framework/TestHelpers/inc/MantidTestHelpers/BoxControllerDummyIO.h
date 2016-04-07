@@ -14,6 +14,7 @@
 #include "MantidAPI/IBoxControllerIO.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidKernel/DiskBuffer.h"
+#include <mutex>
 
 namespace MantidTestHelpers {
 
@@ -47,14 +48,13 @@ namespace MantidTestHelpers {
 */
 class DLLExport BoxControllerDummyIO : public Mantid::API::IBoxControllerIO {
 public:
-  BoxControllerDummyIO(const Mantid::API::BoxController *theBC);
-
+  BoxControllerDummyIO(const Mantid::API::BoxController *bc);
   ///@return true if the file to write events is opened and false otherwise
   bool isOpened() const override { return (m_isOpened); }
   /// get the full file name of the file used for IO operations
   const std::string &getFileName() const override { return m_fileName; }
   /**Return the size of the NeXus data block used in NeXus data array*/
-  size_t getDataChunk() const { return 1; }
+  size_t getDataChunk() const override { return 1; }
 
   bool openFile(const std::string &fileName, const std::string &mode) override;
   void saveBlock(const std::vector<float> & /* DataBlock */,
@@ -80,9 +80,9 @@ public:
   ~BoxControllerDummyIO() override;
   // Auxiliary functions. Used to change default state of this object which is
   // not fully supported. Should be replaced by some IBoxControllerIO factory
-  void setDataType(const size_t coordSize,
+  void setDataType(const size_t blockSize,
                    const std::string &typeName) override;
-  void getDataType(size_t &coordSize, std::string &typeName) const override;
+  void getDataType(size_t &CoordSize, std::string &typeName) const override;
 
   // Auxiliary functions (non-virtual, used at testing)
   int64_t getNDataColums() const { return 2; }
@@ -97,7 +97,7 @@ private:
   /// shared pointer to the box controller, which is repsoponsible for this IO
   const Mantid::API::BoxController *m_bc;
 
-  mutable Mantid::Kernel::Mutex m_fileMutex;
+  mutable std::mutex m_fileMutex;
   /// number of bytes in the event coorinates (coord_t length). Set by
   /// setDataType but can be defined statically with coord_t
   unsigned int m_CoordSize;

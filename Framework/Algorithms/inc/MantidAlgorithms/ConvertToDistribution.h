@@ -59,13 +59,15 @@ public:
     return "Transforms\\Distribution";
   }
 
+protected:
+  /// Validate inputs
+  std::map<std::string, std::string> validateInputs() override;
+
 private:
   /// Initialisation code
   void init() override;
   /// Execution code
   void exec() override;
-  /// Validate inputs
-  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace Algorithms

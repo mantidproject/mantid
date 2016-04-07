@@ -36,23 +36,24 @@ bool SassenaFFT::processGroups() {
  * read from after the execution (output).
  */
 void SassenaFFT::init() {
-  this->declareProperty(new API::WorkspaceProperty<API::WorkspaceGroup>(
-                            "InputWorkspace", "", Kernel::Direction::InOut),
-                        "The name of the input group workspace");
+  this->declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(
+          "InputWorkspace", "", Kernel::Direction::InOut),
+      "The name of the input group workspace");
   // properties for the detailed balance condition
   this->declareProperty(
-      new Kernel::PropertyWithValue<bool>("FFTonlyRealPart", false,
-                                          Kernel::Direction::Input),
+      Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+          "FFTonlyRealPart", false, Kernel::Direction::Input),
       "Do we FFT only the real part of I(Q,t)? (optional, default is False)");
   this->declareProperty(
-      new Kernel::PropertyWithValue<bool>("DetailedBalance", false,
-                                          Kernel::Direction::Input),
+      Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+          "DetailedBalance", false, Kernel::Direction::Input),
       "Do we apply detailed balance condition? (optional, default is False)");
   this->declareProperty("Temp", 300.0,
                         "Multiply structure factor by exp(E/(2*kT)");
-  this->setPropertySettings(
-      "Temp", new Kernel::EnabledWhenProperty("DetailedBalance",
-                                              Kernel::IS_EQUAL_TO, "1"));
+  this->setPropertySettings("Temp",
+                            Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                                "DetailedBalance", Kernel::IS_EQUAL_TO, "1"));
 }
 
 /// Execute the algorithm

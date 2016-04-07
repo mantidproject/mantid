@@ -82,7 +82,7 @@ public:
   /// Default Constructor
   SANSRunWindow(QWidget *parent = 0);
   /// Destructor
-  ~SANSRunWindow();
+  ~SANSRunWindow() override;
 
 signals:
   /// Indicate the state of the loaded data.
@@ -113,9 +113,9 @@ private:
   enum QResoluationAperture { CIRCULAR, RECTANGULAR };
 
   /// Initialize the layout
-  virtual void initLayout();
+  void initLayout() override;
   /// Init Python environment
-  virtual void initLocalPython();
+  void initLocalPython() override;
   /**@name Utility functions */
   //@{
   /// Initialise some of the data and signal connections in the save box
@@ -511,6 +511,8 @@ private:
   bool hasUserFileValidFileExtension();
   /// Check if the user file is valid
   bool isValidUserFile();
+  /// Update IDF file path
+  void updateIDFFilePath();
 
       
   UserSubWindow *slicingWindow;

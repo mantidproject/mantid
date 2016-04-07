@@ -15,18 +15,25 @@
 
 using Mantid::DataObjects::MDEventWorkspace;
 
-namespace Mantid
-{
-namespace VATES
-{
+namespace Mantid {
+namespace VATES {
 
-/** Class is used to generate vtkUnstructuredGrids from IMDEventWorkspaces. Utilises the non-uniform nature of the underlying workspace grid/box structure
-as the basis for generating visualisation cells. The recursion depth through the box structure is configurable.
+/// Round up to next multiple of factor
+coord_t DLLExport roundUp(const coord_t num_to_round, const coord_t factor);
+
+/// Round down to previous multiple of factor
+coord_t DLLExport roundDown(const coord_t num_to_round, const coord_t factor);
+
+/** Class is used to generate vtkUnstructuredGrids from IMDEventWorkspaces.
+Utilises the non-uniform nature of the underlying workspace grid/box structure
+as the basis for generating visualisation cells. The recursion depth through the
+box structure is configurable.
 
  @author Owen Arnold, Tessella plc
  @date 27/July/2011
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -47,13 +54,13 @@ as the basis for generating visualisation cells. The recursion depth through the
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class DLLExport vtkMDHexFactory : public vtkDataSetFactory
-{
+class DLLExport vtkMDHexFactory : public vtkDataSetFactory {
 
 public:
-
   /// Constructor
-  vtkMDHexFactory(ThresholdRange_scptr thresholdRange, const VisualNormalization normalizationOption, const size_t maxDepth = 1000);
+  vtkMDHexFactory(ThresholdRange_scptr thresholdRange,
+                  const VisualNormalization normalizationOption,
+                  const size_t maxDepth = 1000);
 
   /// Destructor
   ~vtkMDHexFactory() override;
@@ -74,8 +81,12 @@ public:
   void setTime(double timeStep);
 
 private:
+  coord_t getNextBinBoundary(Mantid::API::IMDEventWorkspace_sptr imdws) const;
 
-  template<typename MDE, size_t nd>
+  coord_t
+  getPreviousBinBoundary(Mantid::API::IMDEventWorkspace_sptr imdws) const;
+
+  template <typename MDE, size_t nd>
   void doCreate(typename MDEventWorkspace<MDE, nd>::sptr ws) const;
 
   /// Template Method pattern to validate the factory before use.
@@ -108,12 +119,8 @@ private:
 
   /// Time value.
   double m_time;
-
 };
-
-
 }
 }
-
 
 #endif

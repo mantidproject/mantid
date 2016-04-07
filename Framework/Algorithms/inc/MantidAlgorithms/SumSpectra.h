@@ -91,14 +91,14 @@ private:
   void exec() override;
   void execEvent(DataObjects::EventWorkspace_const_sptr localworkspace,
                  std::set<int> &indices);
-  specid_t getOutputSpecId(API::MatrixWorkspace_const_sptr localworkspace);
+  specnum_t getOutputSpecId(API::MatrixWorkspace_const_sptr localworkspace);
 
   /// The output spectrum id
-  specid_t m_outSpecId;
+  specnum_t m_outSpecId;
   /// The spectrum to start the integration from
-  int m_minSpec;
+  int m_minWsInd;
   /// The spectrum to finish the integration at
-  int m_maxSpec;
+  int m_maxWsInd;
   /// Set true to keep monitors
   bool m_keepMonitors;
   /// numberOfSpectra in the input

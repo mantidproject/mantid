@@ -70,7 +70,7 @@ private:
   void estimateThreadWork(size_t nThreads, size_t specSize,
                           size_t nPointsToProcess);
   // the function does a chunk of work. Expected to run on a thread.
-  size_t conversionChunk(size_t job_ID) override;
+  size_t conversionChunk(size_t startSpectra) override;
 };
 
 } // endNamespace MDAlgorithms

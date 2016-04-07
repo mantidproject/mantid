@@ -2,7 +2,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include <boost/assign.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -39,26 +38,28 @@ const std::string PeaksInRegion::category() const { return "Crystal\\Peaks"; }
 /** Initialize the algorithm's properties.
  */
 void PeaksInRegion::init() {
-  declareProperty(new PropertyWithValue<bool>("CheckPeakExtents", false),
-                  "Include any peak in the region that has a shape extent "
-                  "extending into that region.");
+  declareProperty(
+      make_unique<PropertyWithValue<bool>>("CheckPeakExtents", false),
+      "Include any peak in the region that has a shape extent "
+      "extending into that region.");
 
   this->initBaseProperties();
 
-  auto manditoryExtents = boost::make_shared<
+  auto mandatoryExtents = boost::make_shared<
       Mantid::Kernel::MandatoryValidator<std::vector<double>>>();
 
   std::vector<double> extents(2, 0);
   extents[0] = -50;
   extents[1] = +50;
   declareProperty(
-      new ArrayProperty<double>("Extents", extents, manditoryExtents),
+      Kernel::make_unique<ArrayProperty<double>>("Extents", extents,
+                                                 mandatoryExtents),
       "A comma separated list of min, max for each dimension,\n"
       "specifying the extents of each dimension. Optional, default +-50 in "
       "each dimension.");
 
-  setPropertySettings("PeakRadius", new EnabledWhenProperty("CheckPeakExtents",
-                                                            IS_NOT_DEFAULT));
+  setPropertySettings("PeakRadius", make_unique<EnabledWhenProperty>(
+                                        "CheckPeakExtents", IS_NOT_DEFAULT));
 }
 
 void PeaksInRegion::validateExtentsInput() const {
@@ -141,34 +142,32 @@ VecVecV3D PeaksInRegion::createFaces() const {
   V3D point7(m_extents[maxXIndex], m_extents[maxYIndex], m_extents[maxZIndex]);
   V3D point8(m_extents[maxXIndex], m_extents[minYIndex], m_extents[maxZIndex]);
 
-  using boost::assign::list_of;
   const int numberOfFaces = this->numberOfFaces();
   VecVecV3D faces(numberOfFaces);
   int faceIndex = 0;
-  faces[faceIndex++] = list_of(point1)(point5)(point6)
-                           .convert_to_container<VecV3D>(); // These define a
-                                                            // face normal to x
-                                                            // at xmin.
-  faces[faceIndex++] = list_of(point4)(point7)(point8)
-                           .convert_to_container<VecV3D>(); // These define a
-                                                            // face normal to x
-                                                            // at xmax.
-  faces[faceIndex++] = list_of(point1)(point4)(point8)
-                           .convert_to_container<VecV3D>(); // These define a
-                                                            // face normal to y
-                                                            // at ymin.
-  faces[faceIndex++] = list_of(point2)(point3)(point7)
-                           .convert_to_container<VecV3D>(); // These define a
-                                                            // face normal to y
-                                                            // at ymax.
-  faces[faceIndex++] = list_of(point1)(point2)(point3)
-                           .convert_to_container<VecV3D>(); // These define a
-                                                            // face normal to z
-                                                            // at zmin.
-  faces[faceIndex++] = list_of(point5)(point6)(point7)
-                           .convert_to_container<VecV3D>(); // These define a
-                                                            // face normal to z
-                                                            // at zmax.
+  faces[faceIndex++] = {point1, point5, point6}; // These define a
+                                                 // face normal to x
+                                                 // at xmin.
+
+  faces[faceIndex++] = {point4, point7, point8}; // These define a
+                                                 // face normal to x
+                                                 // at xmax.
+
+  faces[faceIndex++] = {point1, point4, point8}; // These define a
+                                                 // face normal to y
+                                                 // at ymin.
+
+  faces[faceIndex++] = {point2, point3, point7}; // These define a
+                                                 // face normal to y
+                                                 // at ymax.
+
+  faces[faceIndex++] = {point1, point2, point3}; // These define a
+                                                 // face normal to z
+                                                 // at zmin.
+
+  faces[faceIndex++] = {point5, point6, point7}; // These define a
+                                                 // face normal to z
+                                                 // at zmax.
   return faces;
 }
 

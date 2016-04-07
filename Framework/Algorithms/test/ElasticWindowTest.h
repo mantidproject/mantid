@@ -28,7 +28,7 @@ public:
 
   ElasticWindowTest() { FrameworkManager::Instance(); }
 
-  void setUp() {
+  void setUp() override {
     // Create a workspace and format it for the ElasticWindow algorithm
 
     CreateSampleWorkspace createAlg;

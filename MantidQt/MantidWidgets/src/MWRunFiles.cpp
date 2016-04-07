@@ -248,7 +248,8 @@ MWRunFiles::MWRunFiles(QWidget *parent)
     QStringList dataDirs =
         QString::fromStdString(
             Mantid::Kernel::ConfigService::Instance().getString(
-                "datasearch.directories")).split(";", QString::SkipEmptyParts);
+                "datasearch.directories"))
+            .split(";", QString::SkipEmptyParts);
 
     if (!dataDirs.isEmpty())
       m_lastDir = dataDirs[0];
@@ -485,13 +486,7 @@ bool MWRunFiles::liveButtonIsChecked() const {
 * Is the input within the widget valid?
 * @returns True of the file names within the widget are valid, false otherwise
 */
-bool MWRunFiles::isValid() const {
-  if (m_uiForm.valid->isHidden()) {
-    return true;
-  } else {
-    return false;
-  }
-}
+bool MWRunFiles::isValid() const { return m_uiForm.valid->isHidden(); }
 
 /**
  * Is the widget currently searching
@@ -741,11 +736,12 @@ void MWRunFiles::findFiles() {
       // Regex to match a selection of run numbers as defined here:
       // mantidproject.org/MultiFileLoading
       // Also allowing spaces between delimiters as this seems to work fine
-      boost::regex runNumbers("([0-9]+)([:+-] ?[0-9]+)? ?(:[0-9]+)?",
-                              boost::regex::extended);
+      const std::string runNumberString = "([0-9]+)([:+-] ?[0-9]+)? ?(:[0-9]+)?";
+      boost::regex runNumbers(runNumberString, boost::regex::extended);
       // Regex to match a list of run numbers delimited by commas
-      boost::regex runNumberList("([0-9]+)(, ?[0-9]+)*",
-                                 boost::regex::extended);
+      const std::string runListString =
+          "(" + runNumberString + ")(, ?(" + runNumberString + "))*";
+      boost::regex runNumberList(runListString, boost::regex::extended);
 
       // See if we can just prepend the instrument and be done
       if (boost::regex_match(searchText.toStdString(), runNumbers)) {
@@ -837,7 +833,8 @@ void MWRunFiles::readSettings(const QString &group) {
     QStringList datadirs =
         QString::fromStdString(
             Mantid::Kernel::ConfigService::Instance().getString(
-                "datasearch.directories")).split(";", QString::SkipEmptyParts);
+                "datasearch.directories"))
+            .split(";", QString::SkipEmptyParts);
     if (!datadirs.isEmpty())
       m_lastDir = datadirs[0];
   }
@@ -998,10 +995,12 @@ QString MWRunFiles::openFileDialog() {
       filenames.append(file);
   } else if (m_allowMultipleFiles) {
     filenames =
-        QFileDialog::getOpenFileNames(this, "Open file", dir, m_fileFilter, 0, QFileDialog::DontResolveSymlinks);
+        QFileDialog::getOpenFileNames(this, "Open file", dir, m_fileFilter, 0,
+                                      QFileDialog::DontResolveSymlinks);
   } else {
     QString file =
-        QFileDialog::getOpenFileName(this, "Open file", dir, m_fileFilter, 0, QFileDialog::DontResolveSymlinks);
+        QFileDialog::getOpenFileName(this, "Open file", dir, m_fileFilter, 0,
+                                     QFileDialog::DontResolveSymlinks);
     if (!file.isEmpty())
       filenames.append(file);
   }

@@ -42,10 +42,10 @@ private:
 public:
   Jacob(int nparams, int npoints) { M = Matrix<double>(nparams, npoints); }
 
-  ~Jacob() {}
-  void set(size_t iY, size_t iP, double value) { M[iP][iY] = value; }
+  ~Jacob() override {}
+  void set(size_t iY, size_t iP, double value) override { M[iP][iY] = value; }
 
-  double get(size_t iY, size_t iP) { return M[iP][iY]; }
+  double get(size_t iY, size_t iP) override { return M[iP][iY]; }
 };
 
 class BivariateNormalTest : public CxxTest::TestSuite {

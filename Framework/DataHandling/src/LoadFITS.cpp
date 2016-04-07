@@ -12,7 +12,6 @@
 #include <boost/scoped_array.hpp>
 
 #include <Poco/BinaryReader.h>
-#include <Poco/FileStream.h>
 #include <Poco/Path.h>
 
 using namespace Mantid::DataHandling;
@@ -89,16 +88,16 @@ void LoadFITS::init() {
 
   exts2.emplace_back(".*");
 
-  declareProperty(new MultipleFileProperty("Filename", exts),
+  declareProperty(Kernel::make_unique<MultipleFileProperty>("Filename", exts),
                   "The name of the input file (note that you can give "
                   "multiple file names separated by commas).");
 
-  declareProperty(new API::WorkspaceProperty<API::Workspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::Workspace>>(
       "OutputWorkspace", "", Kernel::Direction::Output));
 
   declareProperty(
-      new Kernel::PropertyWithValue<bool>("LoadAsRectImg", false,
-                                          Kernel::Direction::Input),
+      make_unique<Kernel::PropertyWithValue<bool>>("LoadAsRectImg", false,
+                                                   Kernel::Direction::Input),
       "If enabled (not by default), the output Workspace2D will have "
       "one histogram per row and one bin per pixel, such that a 2D "
       "color plot (color fill plot) will display an image.");
@@ -120,8 +119,9 @@ void LoadFITS::init() {
                   Kernel::Direction::Input);
 
   declareProperty(
-      new FileProperty(g_HEADER_MAP_NAME, "", FileProperty::OptionalDirectory,
-                       "", Kernel::Direction::Input),
+      Kernel::make_unique<FileProperty>(g_HEADER_MAP_NAME, "",
+                                        FileProperty::OptionalDirectory, "",
+                                        Kernel::Direction::Input),
       "A file mapping header key names to non-standard names [line separated "
       "values in the format KEY=VALUE, e.g. BitDepthName=BITPIX] - do not use "
       "this if you want to keep compatibility with standard FITS files.");
@@ -925,7 +925,7 @@ void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY,
 void LoadFITS::readInBuffer(const FITSInfo &fileInfo, std::vector<char> &buffer,
                             size_t len) {
   std::string filename = fileInfo.filePath;
-  Poco::FileStream file(filename, std::ios::in);
+  std::ifstream file(filename, std::ios::in | std::ios::binary);
   file.seekg(g_BASE_HEADER_SIZE * fileInfo.headerSizeMultiplier);
   file.read(&buffer[0], len);
   if (!file) {

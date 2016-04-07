@@ -15,11 +15,6 @@ template <typename PeakTransformProduct>
 class DLLExport ConcretePeakTransformFactory : public PeakTransformFactory {
 public:
   /**
-  Constructor
-  */
-  ConcretePeakTransformFactory() {}
-
-  /**
   Overriden Factory Method.
   @param xPlotLabel : X-axis plot label
   @param yPlotLabel : Y-axis plot label
@@ -36,9 +31,6 @@ public:
   PeakTransform_sptr createDefaultTransform() const override {
     return boost::make_shared<PeakTransformProduct>();
   }
-
-  /// Destructor
-  ~ConcretePeakTransformFactory() override {}
 };
 }
 }

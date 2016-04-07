@@ -91,6 +91,10 @@ class DPDFreduction(PythonAlgorithm):
 
     #pylint: disable=too-many-locals, too-many-branches
     def PyExec(self):
+        # Save current configuration
+        facility = config['default.facility']
+        instrument = config['default.instrument']
+        # Allows searching for ARCS run numbers
         config['default.facility'] = 'SNS'
         config['default.instrument'] = 'ARCS'
         self._runs = self.getProperty('RunNumbers').value
@@ -126,18 +130,24 @@ class DPDFreduction(PythonAlgorithm):
         if datasearch != "On":
             config["datasearch.searcharchive"] = "On"
 
-        # Load several event files into a sinle workspace. The nominal incident
-        # energy should be the same to avoid difference in energy resolution
-        api.Load(Filename=self._runs, OutputWorkspace=wn_data)
+        try:
+            # Load several event files into a sinle workspace. The nominal incident
+            # energy should be the same to avoid difference in energy resolution
+            api.Load(Filename=self._runs, OutputWorkspace=wn_data)
 
-        # Load the vanadium file, assume to be preprocessed, meaning that
-        # for every detector all events whithin a particular wide wavelength
-        # range have been rebinned into a single histogram
-        api.Load(Filename=self._vanfile, OutputWorkspace=wn_van)
+            # Load the vanadium file, assume to be preprocessed, meaning that
+            # for every detector all events whithin a particular wide wavelength
+            # range have been rebinned into a single histogram
+            api.Load(Filename=self._vanfile, OutputWorkspace=wn_van)
 
-        # Load empty can event files, if present
-        if self._ecruns:
-            api.Load(Filename=self._ecruns, OutputWorkspace=wn_ec_data)
+            # Load empty can event files, if present
+            if self._ecruns:
+                api.Load(Filename=self._ecruns, OutputWorkspace=wn_ec_data)
+        finally:
+            # Recover the default configuration
+            config['default.facility'] = facility
+            config['default.instrument'] = instrument
+            config["datasearch.searcharchive"] = datasearch
 
         # Retrieve the mask from the vanadium workspace, and apply it to the data
         # (and empty can, if submitted)
@@ -292,6 +302,10 @@ class DPDFreduction(PythonAlgorithm):
         api.ConvertMDHistoToMatrixWorkspace(InputWorkspace=wn_sqeb,
                                             Normalization='NumEventsNormalization', OutputWorkspace=wn_sqes)
 
+        # Ensure correct units
+        api.mtd[wn_sqes].getAxis(0).setUnit("MomentumTransfer")
+        api.mtd[wn_sqes].getAxis(1).setUnit("DeltaE")
+
         # Shift the energy axis, since the reported values should be the center
         # of the bins, instead of the minimum bin boundary
         ws_sqes = api.mtd[wn_sqes]
@@ -308,10 +322,9 @@ class DPDFreduction(PythonAlgorithm):
         # Clean up workspaces from intermediate steps
         if self._clean:
             for name in (wn_van, wn_reduced, wn_ste, wn_van_st, wn_sten,
-                         wn_steni, wn_sqe, wn_sqeb, wn_sqesn):
-                api.DeleteWorkspace(name)
-            if api.mtd.doesExist('PreprocessedDetectorsWS'):
-                api.DeleteWorkspace('PreprocessedDetectorsWS')
+                         wn_steni, wn_sqe, wn_sqeb, wn_sqesn, 'PreprocessedDetectorsWS'):
+                if api.mtd.doesExist(name):
+                    api.DeleteWorkspace(name)
 
         # Ouput some info
         message = '\n******  SOME OUTPUT INFORMATION ***' + \

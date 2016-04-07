@@ -17,7 +17,7 @@ public:
     MyTestProgress(double start, double end, int64_t numSteps)
         : ProgressBase(start, end, numSteps) {}
 
-    void doReport(const std::string &msg = "") {
+    void doReport(const std::string &msg = "") override {
       last_report_message = msg;
       last_report_counter = m_i;
       double p = m_start + m_step * double(m_i - m_ifirst);

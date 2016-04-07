@@ -42,10 +42,10 @@ class Property;
 class DLLExport IPropertySettings {
 public:
   /// Constructor
-  IPropertySettings() {}
+  IPropertySettings() = default;
 
   /// Destructor
-  virtual ~IPropertySettings() {}
+  virtual ~IPropertySettings() = default;
 
   /** Is the property to be shown as "enabled" in the GUI. Default true. */
   virtual bool isEnabled(const IPropertyManager *algo) const {
@@ -90,7 +90,7 @@ public:
 protected:
 private:
   // non-copyable directly
-  IPropertySettings(const IPropertySettings &) {}
+  IPropertySettings(const IPropertySettings &) = default;
 };
 
 } // namespace Kernel

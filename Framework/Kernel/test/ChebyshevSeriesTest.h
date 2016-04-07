@@ -4,7 +4,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/Math/Distributions/ChebyshevSeries.h"
-#include <boost/assign/list_of.hpp>
 
 using Mantid::Kernel::ChebyshevSeries;
 
@@ -18,9 +17,8 @@ public:
   static void destroySuite(ChebyshevSeriesTest *suite) { delete suite; }
 
   void test_expected_values_for_x_in_range() {
-    using namespace boost::assign;
     const double delta(1e-12);
-    std::vector<double> coeffs = list_of(0.5)(2.4)(-3.2)(-1.7)(2.1);
+    std::vector<double> coeffs = {0.5, 2.4, -3.2, -1.7, 2.1};
 
     const double x(0.75);
     // Expected values computed on paper using reccurrence relation

@@ -79,18 +79,15 @@ public:
   //! Create Empty Component at Origin, with no orientation and null parent
   Component();
   //! Create a named component with a parent component (optional)
-  explicit Component(const std::string &name, IComponent *parent = 0);
+  explicit Component(const std::string &name, IComponent *parent = nullptr);
   //! Create a named component with positioning vector, and parent component
   //(optional)
   Component(const std::string &name, const Kernel::V3D &position,
-            IComponent *parent = 0);
+            IComponent *parent = nullptr);
   //! Create a named component with positioning vector, orientation and parent
   // component
   Component(const std::string &name, const Kernel::V3D &position,
-            const Kernel::Quat &rotation, IComponent *parent = 0);
-
-  ///  destructor
-  ~Component() override;
+            const Kernel::Quat &rotation, IComponent *parent = nullptr);
 
   IComponent *clone() const override;
 

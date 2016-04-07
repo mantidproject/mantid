@@ -50,8 +50,8 @@ struct MANTID_SINQ_DLL Poldi2DHelper {
     dFractionalOffsets.clear();
     dOffsets.clear();
 
-    for (auto it = offsets.begin(); it != offsets.end(); ++it) {
-      double dEquivalent = Conversions::TOFtoD(*it, distance, sinTheta);
+    for (const double offset : offsets) {
+      double dEquivalent = Conversions::TOFtoD(offset, distance, sinTheta);
       double rounded = floor(dEquivalent / deltaD + 0.5);
       dOffsets.push_back(static_cast<int>(rounded));
       dFractionalOffsets.push_back(dEquivalent - rounded * deltaD);
@@ -141,9 +141,6 @@ public:
   LocalJacobian(size_t nValues, size_t nParams)
       : Jacobian(), m_nValues(nValues), m_nParams(nParams),
         m_jacobian(nValues * nParams) {}
-
-  /// Destructor
-  ~LocalJacobian() override {}
 
   /// Implementation of API::Jacobian::set. Throws std::out_of_range on invalid
   /// index.
@@ -240,7 +237,6 @@ class MANTID_SINQ_DLL PoldiSpectrumDomainFunction
       public IPoldiFunction1D {
 public:
   PoldiSpectrumDomainFunction();
-  ~PoldiSpectrumDomainFunction() override {}
 
   std::string name() const override { return "PoldiSpectrumDomainFunction"; }
 

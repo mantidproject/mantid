@@ -52,9 +52,9 @@ public:
     clearfiles = !file.exists();
   }
 
-  void setUp() {}
+  void setUp() override {}
 
-  void tearDown() {}
+  void tearDown() override {}
 
   void testInit() {
     SaveNexusProcessed algToBeTested;
@@ -245,7 +245,8 @@ public:
     groups[4].push_back(50);
 
     EventWorkspace_sptr WS =
-        WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 100, 1.0);
+        WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 100, 1.0,
+                                                             1.0);
     WS->getEventList(3).clear(false);
     // Switch the event type
     if (makeDifferentTypes) {

@@ -47,17 +47,8 @@ public:
   void setScaleType(GraphOptions::ScaleType);
   void setViewType(const QString &);
 
-private:
-  /// ADS notification handlers
-  virtual void preDeleteHandle(
-      const std::string &ws_name,
-      const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
-  virtual void afterReplaceHandle(
-      const std::string &wsName,
-      const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
-  virtual void renameHandle(const std::string &oldName,
-                            const std::string &newName);
-  virtual void clearADSHandle();
+public slots:
+  void closeSafely();
 
 private:
 	MantidQt::MantidWidgets::InstrumentWidget *m_instrumentWidget;

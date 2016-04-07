@@ -115,7 +115,7 @@ private:
   std::string stringToLower(std::string strToConvert);
 
   /// Checks if the file is an ASCII file
-  bool isAscii(const std::string &filenamePart);
+  bool isAscii(const std::string &filename);
 
   /// Check if first 19 characters of a string is data-time string according to
   /// yyyy-mm-ddThh:mm:ss
@@ -123,7 +123,7 @@ private:
 
   /// Checks if a log file name was provided (e.g. through setPropertyValue). If
   /// not it creates one based on provided path.
-  std::string extractLogName(const std::vector<std::string> &logFileName);
+  std::string extractLogName(const std::vector<std::string> &logName);
 
   /// Check for SNS-style text file
   bool SNSTextFormatColumns(const std::string &str,

@@ -41,11 +41,6 @@ ThermalNeutronBk2BkExpConvPVoigt::ThermalNeutronBk2BkExpConvPVoigt()
   mHKLSet = false;
 }
 
-//------------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ThermalNeutronBk2BkExpConvPVoigt::~ThermalNeutronBk2BkExpConvPVoigt() {}
-
 //----------------------------------------------------------------------------------------------
 /** Define the fittable parameters
  * Notice that Sig0, Sig1 and Sig2 are NOT the squared value recorded in

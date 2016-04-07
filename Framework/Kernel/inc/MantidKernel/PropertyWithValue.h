@@ -13,10 +13,12 @@
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #endif
 
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <vector>
+#include <type_traits>
 #include "MantidKernel/IPropertySettings.h"
 
 namespace Mantid {
@@ -149,38 +151,37 @@ void toValue(const std::string &, boost::shared_ptr<T> &) {
 template <typename T>
 void toValue(const std::string &strvalue, std::vector<T> &value) {
   // Split up comma-separated properties
-  typedef Poco::StringTokenizer tokenizer;
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
   tokenizer values(strvalue, ",",
                    tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
 
   value.clear();
   value.reserve(values.count());
-
-  for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it) {
-    value.push_back(boost::lexical_cast<T>(*it));
-  }
+  std::transform(
+      values.cbegin(), values.cend(), std::back_inserter(value),
+      [](const std::string &str) { return boost::lexical_cast<T>(str); });
 }
 
 template <typename T>
 void toValue(const std::string &strvalue, std::vector<std::vector<T>> &value,
              const std::string &outerDelimiter = ",",
              const std::string &innerDelimiter = "+") {
-  typedef Poco::StringTokenizer tokenizer;
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
   tokenizer tokens(strvalue, outerDelimiter,
                    tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
 
   value.clear();
   value.reserve(tokens.count());
 
-  for (tokenizer::Iterator oIt = tokens.begin(); oIt != tokens.end(); ++oIt) {
-    tokenizer values(*oIt, innerDelimiter,
+  for (const auto &token : tokens) {
+    tokenizer values(token, innerDelimiter,
                      tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
     std::vector<T> vect;
-
-    for (tokenizer::Iterator iIt = values.begin(); iIt != values.end(); ++iIt)
-      vect.push_back(boost::lexical_cast<T>(*iIt));
-
-    value.push_back(vect);
+    vect.reserve(values.count());
+    std::transform(
+        values.begin(), values.end(), std::back_inserter(vect),
+        [](const std::string &str) { return boost::lexical_cast<T>(str); });
+    value.push_back(std::move(vect));
   }
 }
 
@@ -199,7 +200,7 @@ template <typename T> T extractToValueVector(const std::string &strvalue) {
   template <>                                                                  \
   inline void toValue<type>(const std::string &strvalue,                       \
                             std::vector<type> &value) {                        \
-    typedef Poco::StringTokenizer tokenizer;                                   \
+    typedef Mantid::Kernel::StringTokenizer tokenizer;                         \
     tokenizer values(strvalue, ",",                                            \
                      tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);       \
     value.clear();                                                             \
@@ -270,9 +271,11 @@ inline std::vector<std::string> determineAllowedValues(const OptionalBool &,
                                                        const IValidator &) {
   auto enumMap = OptionalBool::enumToStrMap();
   std::vector<std::string> values;
-  for (auto it = enumMap.begin(); it != enumMap.end(); ++it) {
-    values.push_back(it->second);
-  }
+  values.reserve(enumMap.size());
+  std::transform(enumMap.cbegin(), enumMap.cend(), std::back_inserter(values),
+                 [](const std::pair<OptionalBool::Value, std::string> &str) {
+                   return str.second;
+                 });
   return values;
 }
 }
@@ -346,9 +349,6 @@ public:
     return new PropertyWithValue<TYPE>(*this);
   }
 
-  /// Virtual destructor
-  ~PropertyWithValue() override {}
-
   /** Get the value of the property as a string
    *  @return The property's value
    */
@@ -393,7 +393,11 @@ public:
   std::string setValue(const std::string &value) override {
     try {
       TYPE result = m_value;
-      toValue(value, result);
+      std::string valueCopy = value;
+      if (autoTrim()) {
+        boost::trim(valueCopy);
+      }
+      toValue(valueCopy, result);
       // Uses the assignment operator defined below which runs isValid() and
       // throws based on the result
       *this = result;
@@ -465,7 +469,15 @@ public:
    */
   virtual TYPE &operator=(const TYPE &value) {
     TYPE oldValue = m_value;
-    m_value = value;
+    if (std::is_same<TYPE, std::string>::value) {
+      std::string valueCopy = toString(value);
+      if (autoTrim()) {
+        boost::trim(valueCopy);
+      }
+      toValue(valueCopy, m_value);
+    } else {
+      m_value = value;
+    }
     std::string problem = this->isValid();
     if (problem == "") {
       return m_value;

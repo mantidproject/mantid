@@ -164,24 +164,18 @@ public:
   /// and throws CancelException if needed.
   class CancelException : public std::exception {
   public:
-    CancelException() : outMessage("Algorithm terminated") {}
-    CancelException(const CancelException &A)
-        : outMessage(A.outMessage) {} ///< Copy constructor
-    /// Assignment operator
-    CancelException &operator=(const CancelException &A);
-    /// Destructor
-    ~CancelException() throw() override {}
-
     /// Returns the message string.
     const char *what() const throw() override { return outMessage.c_str(); }
 
   private:
     /// The message returned by what()
-    std::string outMessage;
+    std::string outMessage{"Algorithm terminated"};
   };
 
   //============================================================================
   Algorithm();
+  Algorithm(const Algorithm &) = delete;
+  Algorithm &operator=(const Algorithm &) = delete;
   ~Algorithm() override;
 
   /** @name Algorithm Information */
@@ -388,11 +382,6 @@ protected:
   size_t m_groupSize;
 
 private:
-  /// Private Copy constructor: NO COPY ALLOWED
-  Algorithm(const Algorithm &);
-  /// Private assignment operator: NO ASSIGNMENT ALLOWED
-  Algorithm &operator=(const Algorithm &);
-
   void lockWorkspaces();
   void unlockWorkspaces();
 

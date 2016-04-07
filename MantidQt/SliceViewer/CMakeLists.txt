@@ -1,26 +1,25 @@
 set ( SRC_FILES
-	src/ColorBarWidget.cpp
 	src/CompositePeaksPresenter.cpp
 	src/ConcretePeaksPresenter.cpp
 	src/CustomTools.cpp
 	src/DimensionSliceWidget.cpp
+	src/EllipsoidPlaneSliceCalculator.cpp
 	src/LineOverlay.cpp
 	src/LineViewer.cpp
 	src/PeakBoundingBox.cpp
 	src/PeaksViewerOverlayDialog.cpp
         src/PeakOverlayInteractive.cpp
-	src/PeakOverlayMultiCross.cpp
-	src/PeakOverlayMultiCrossFactory.cpp
-	src/PeakOverlayMultiSphere.cpp
-	src/PeakOverlayMultiSphereFactory.cpp
 	src/PeakOverlayViewFactoryBase.cpp
-	src/PeakOverlayViewFactorySelector.cpp  
 	src/PeakPalette.cpp
+	src/PeakRepresentation.cpp
+	src/PeakRepresentationCross.cpp
+        src/PeakRepresentationEllipsoid.cpp
+        src/PeakRepresentationSphere.cpp
 	src/PeaksTableColumnsDialog.cpp
+	src/PeakView.cpp
+	src/PeakViewFactory.cpp
 	src/PeaksViewer.cpp
 	src/PeaksWorkspaceWidget.cpp
-	src/PhysicalCrossPeak.cpp
-	src/PhysicalSphericalPeak.cpp
 	src/ProxyCompositePeaksPresenter.cpp
 	src/QPeaksTableModel.cpp
 	src/SliceViewer.cpp
@@ -33,11 +32,11 @@ set ( SRC_FILES
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
-	inc/MantidQtSliceViewer/ColorBarWidget.h
 	inc/MantidQtSliceViewer/CompositePeaksPresenter.h
 	inc/MantidQtSliceViewer/ConcretePeaksPresenter.h
 	inc/MantidQtSliceViewer/CustomTools.h
 	inc/MantidQtSliceViewer/DimensionSliceWidget.h
+	inc/MantidQtSliceViewer/EllipsoidPlaneSliceCalculator.h
 	inc/MantidQtSliceViewer/FirstExperimentInfoQuery.h
 	inc/MantidQtSliceViewer/LineOverlay.h
 	inc/MantidQtSliceViewer/LinePlotOptions.h
@@ -46,22 +45,23 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/PeakEditMode.h
         inc/MantidQtSliceViewer/PeakBoundingBox.h
         inc/MantidQtSliceViewer/PeakOverlayInteractive.h
-	inc/MantidQtSliceViewer/PeakOverlayMultiCross.h
-	inc/MantidQtSliceViewer/PeakOverlayMultiCrossFactory.h
-	inc/MantidQtSliceViewer/PeakOverlayMultiSphere.h
-	inc/MantidQtSliceViewer/PeakOverlayMultiSphereFactory.h
 	inc/MantidQtSliceViewer/PeakOverlayView.h
 	inc/MantidQtSliceViewer/PeakOverlayViewFactory.h
 	inc/MantidQtSliceViewer/PeakOverlayViewFactoryBase.h
-	inc/MantidQtSliceViewer/PeakOverlayViewFactorySelector.h
 	inc/MantidQtSliceViewer/PeakPalette.h
 	inc/MantidQtSliceViewer/PeaksPresenter.h
+	inc/MantidQtSliceViewer/PeakPrimitives.h
+        inc/MantidQtSliceViewer/PeakRepresentation.h
+	inc/MantidQtSliceViewer/PeakRepresentationCross.h
+        inc/MantidQtSliceViewer/PeakRepresentationEllipsoid.h
+        inc/MantidQtSliceViewer/PeakRepresentationSphere.h
 	inc/MantidQtSliceViewer/PeaksTableColumnsDialog.h
+	inc/MantidQtSliceViewer/PeakView.h
+	inc/MantidQtSliceViewer/PeakViewColor.h
+	inc/MantidQtSliceViewer/PeakViewFactory.h
 	inc/MantidQtSliceViewer/PeaksViewer.h
 	inc/MantidQtSliceViewer/PeaksViewerOverlayDialog.h
 	inc/MantidQtSliceViewer/PeaksWorkspaceWidget.h
-	inc/MantidQtSliceViewer/PhysicalCrossPeak.h
-	inc/MantidQtSliceViewer/PhysicalSphericalPeak.h
 	inc/MantidQtSliceViewer/ProxyCompositePeaksPresenter.h
 	inc/MantidQtSliceViewer/QPeaksTableModel.h
 	inc/MantidQtSliceViewer/SliceViewer.h
@@ -81,12 +81,9 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/LinePlotOptions.h
         inc/MantidQtSliceViewer/PeakOverlayInteractive.h
- 	inc/MantidQtSliceViewer/PeakOverlayMultiCross.h
-	inc/MantidQtSliceViewer/PeakOverlayMultiSphere.h
 	inc/MantidQtSliceViewer/PeaksTableColumnsDialog.h
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
-	inc/MantidQtSliceViewer/ColorBarWidget.h
 	inc/MantidQtSliceViewer/SnapToGridDialog.h
 	inc/MantidQtSliceViewer/PeaksViewer.h
 	inc/MantidQtSliceViewer/PeaksViewerOverlayDialog.h
@@ -96,11 +93,10 @@ set ( MOC_FILES
 )
 
 set ( UI_FILES 
-	inc/MantidQtSliceViewer/DimensionSliceWidget.ui
+        inc/MantidQtSliceViewer/DimensionSliceWidget.ui
 	inc/MantidQtSliceViewer/SliceViewer.ui
 	inc/MantidQtSliceViewer/LineViewer.ui
 	inc/MantidQtSliceViewer/LinePlotOptions.ui
-	inc/MantidQtSliceViewer/ColorBarWidget.ui
 	inc/MantidQtSliceViewer/SnapToGridDialog.ui
 	inc/MantidQtSliceViewer/PeaksTableColumnsDialog.ui
 	inc/MantidQtSliceViewer/PeaksWorkspaceWidget.ui
@@ -111,10 +107,12 @@ set ( UI_FILES
 set ( TEST_FILES
     test/CompositePeaksPresenterTest.h
     test/ConcretePeaksPresenterTest.h
+    test/EllipsoidPlaneSliceCalculatorTest.h
     test/PeakBoundingBoxTest.h
     test/PeakPaletteTest.h
-    test/PhysicalCrossPeakTest.h
-    test/PhysicalSphericalPeakTest.h
+    test/PeakRepresentationCrossTest.h
+    test/PeakRepresentationSphereTest.h
+    test/PeakRepresentationEllipsoidTest.h
     test/NullPeaksPresenterTest.h
     test/SliceViewerFunctionsTest.h
 )
@@ -177,10 +175,12 @@ endif ()
 if ( CXXTEST_FOUND )
   include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
-  include_directories( ../../Framework/TestHelpers/inc ../../Framework/DataObjects/inc ../../Framework/Crystal/inc )
+  include_directories( ../../Framework/TestHelpers/inc ../../Framework/DataObjects/inc ../../Framework/Crystal/inc)
 
-  set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp 
-  ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
+  set ( TESTHELPER_SRCS
+    ../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+    ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+    ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
   )
 
   cxxtest_add_test ( SliceViewerTest ${TEST_FILES} ${GMOCK_TEST_FILES} )

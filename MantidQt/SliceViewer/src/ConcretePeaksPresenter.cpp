@@ -333,28 +333,28 @@ SetPeaksWorkspaces ConcretePeaksPresenter::presentedWorkspaces() const {
   return workspaces;
 }
 
-QColor ConcretePeaksPresenter::getBackgroundColor() const {
-  return m_viewPeaks->getBackgroundColour();
+PeakViewColor ConcretePeaksPresenter::getBackgroundPeakViewColor() const {
+  return m_viewPeaks->getBackgroundPeakViewColor();
 }
 
-QColor ConcretePeaksPresenter::getForegroundColor() const {
-  return m_viewPeaks->getForegroundColour();
+PeakViewColor ConcretePeaksPresenter::getForegroundPeakViewColor() const {
+  return m_viewPeaks->getForegroundPeakViewColor();
 }
 
-void ConcretePeaksPresenter::setForegroundColor(const QColor colour) {
-  // Change foreground colours
+void ConcretePeaksPresenter::setForegroundColor(const PeakViewColor color) {
+  // Change foreground colors
   if (m_viewPeaks != NULL) {
-    m_viewPeaks->changeForegroundColour(colour);
+    m_viewPeaks->changeForegroundColour(color);
     m_viewPeaks->updateView();
   }
   // For the case that this has been performed outside the GUI.
   informOwnerUpdate();
 }
 
-void ConcretePeaksPresenter::setBackgroundColor(const QColor colour) {
+void ConcretePeaksPresenter::setBackgroundColor(const PeakViewColor color) {
   // Change background colours
   if (m_viewPeaks != NULL) {
-    m_viewPeaks->changeBackgroundColour(colour);
+    m_viewPeaks->changeBackgroundColour(color);
     m_viewPeaks->updateView();
   }
   // For the case that this has been performed outside the GUI.
@@ -580,7 +580,16 @@ bool ConcretePeaksPresenter::addPeakAt(double plotCoordsPointX,
   alg->initialize();
   alg->setProperty("Workspace", peaksWS);
   alg->setProperty("HKL", std::vector<double>(hkl));
-  alg->execute();
+
+
+// Execute the algorithm
+try {
+    alg->execute();
+} catch (...) {
+    g_log.warning("ConcretePeaksPresenter: Could not add the peak. Make sure "
+                  "that it is added within a valid workspace region");
+}
+
 
   // Reproduce the views. Proxy representations recreated for all peaks.
   this->produceViews();
@@ -593,6 +602,7 @@ bool ConcretePeaksPresenter::addPeakAt(double plotCoordsPointX,
   this->informOwnerUpdate();
 
   return alg->isExecuted();
+
 }
 
 bool ConcretePeaksPresenter::hasPeakAddMode() const {

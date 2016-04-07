@@ -50,13 +50,14 @@ void SlicingAlgorithm::initSlicingProps() {
     dim[0] = dimChars[i];
     std::string propName = "AlignedDim" + dim;
     declareProperty(
-        new PropertyWithValue<std::string>(propName, "", Direction::Input),
+        Kernel::make_unique<PropertyWithValue<std::string>>(propName, "",
+                                                            Direction::Input),
         "Binning parameters for the " + Strings::toString(i) +
             "th dimension.\n"
             "Enter it as a comma-separated list of values with the format: "
             "'name,minimum,maximum,number_of_bins'. Leave blank for NONE.");
-    setPropertySettings(
-        propName, new VisibleWhenProperty("AxisAligned", IS_EQUAL_TO, "1"));
+    setPropertySettings(propName, make_unique<VisibleWhenProperty>(
+                                      "AxisAligned", IS_EQUAL_TO, "1"));
     setPropertyGroup(propName, "Axis-Aligned Binning");
   }
 
@@ -64,14 +65,18 @@ void SlicingAlgorithm::initSlicingProps() {
   // ---------------------------------------
   std::string grpName = "Non-Aligned Binning";
 
-  IPropertySettings *ps =
-      new VisibleWhenProperty("AxisAligned", IS_EQUAL_TO, "0");
+  auto ps = [] {
+    std::unique_ptr<IPropertySettings> settings =
+        make_unique<VisibleWhenProperty>("AxisAligned", IS_EQUAL_TO, "0");
+    return settings;
+  };
   for (size_t i = 0; i < dimChars.size(); i++) {
     std::string dim(" ");
     dim[0] = dimChars[i];
     std::string propName = "BasisVector" + dim;
     declareProperty(
-        new PropertyWithValue<std::string>(propName, "", Direction::Input),
+        Kernel::make_unique<PropertyWithValue<std::string>>(propName, "",
+                                                            Direction::Input),
         "Description of the basis vector of the " + Strings::toString(i) +
             "th output dimension."
             "Format: 'name, units, x,y,z,..'.\n"
@@ -80,25 +85,27 @@ void SlicingAlgorithm::initSlicingProps() {
             "  x,y,z,...: vector definining the basis in the input dimensions "
             "space.\n"
             "Leave blank for NONE.");
-    setPropertySettings(propName, ps->clone());
+    setPropertySettings(propName, ps());
     setPropertyGroup(propName, grpName);
   }
-  declareProperty(new ArrayProperty<double>("Translation", Direction::Input),
-                  "Coordinates in the INPUT workspace that corresponds to "
-                  "(0,0,0) in the OUTPUT workspace.\n"
-                  "Enter as a comma-separated string.\n"
-                  "Default: 0 in all dimensions (no translation).");
-
-  declareProperty(new ArrayProperty<double>("OutputExtents", Direction::Input),
-                  "The minimum, maximum edges of space of each dimension of "
-                  "the OUTPUT workspace, as a comma-separated list");
+  declareProperty(
+      make_unique<ArrayProperty<double>>("Translation", Direction::Input),
+      "Coordinates in the INPUT workspace that corresponds to "
+      "(0,0,0) in the OUTPUT workspace.\n"
+      "Enter as a comma-separated string.\n"
+      "Default: 0 in all dimensions (no translation).");
 
   declareProperty(
-      new ArrayProperty<int>("OutputBins", Direction::Input),
+      make_unique<ArrayProperty<double>>("OutputExtents", Direction::Input),
+      "The minimum, maximum edges of space of each dimension of "
+      "the OUTPUT workspace, as a comma-separated list");
+
+  declareProperty(
+      make_unique<ArrayProperty<int>>("OutputBins", Direction::Input),
       "The number of bins for each dimension of the OUTPUT workspace.");
 
-  declareProperty(new PropertyWithValue<bool>("NormalizeBasisVectors", true,
-                                              Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<bool>>("NormalizeBasisVectors",
+                                                       true, Direction::Input),
                   "Normalize the given basis vectors to unity. \n"
                   "If true, then a distance of 1 in the INPUT dimensions = 1 "
                   "in the OUTPUT dimensions.\n"
@@ -106,7 +113,8 @@ void SlicingAlgorithm::initSlicingProps() {
                   "INPUT dimension = 1 in the OUTPUT dimensions.");
 
   declareProperty(
-      new PropertyWithValue<bool>("ForceOrthogonal", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("ForceOrthogonal", false,
+                                           Direction::Input),
       "Force the input basis vectors to form an orthogonal coordinate system. "
       "Only works in 3 dimension!");
 
@@ -116,11 +124,11 @@ void SlicingAlgorithm::initSlicingProps() {
   setPropertyGroup("OutputBins", grpName);
   setPropertyGroup("NormalizeBasisVectors", grpName);
   setPropertyGroup("ForceOrthogonal", grpName);
-  setPropertySettings("Translation", ps->clone());
-  setPropertySettings("OutputExtents", ps->clone());
-  setPropertySettings("OutputBins", ps->clone());
-  setPropertySettings("NormalizeBasisVectors", ps->clone());
-  setPropertySettings("ForceOrthogonal", ps);
+  setPropertySettings("Translation", ps());
+  setPropertySettings("OutputExtents", ps());
+  setPropertySettings("OutputBins", ps());
+  setPropertySettings("NormalizeBasisVectors", ps());
+  setPropertySettings("ForceOrthogonal", ps());
 }
 
 //----------------------------------------------------------------------------------------------
@@ -152,19 +160,19 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
   // Special case: accept dimension names [x,y,z]
   if (input[0] == '[') {
     // Find the name at the closing []
-    size_t n = input.find_first_of("]", 1);
+    size_t n = input.find_first_of(']', 1);
     if (n == std::string::npos)
       throw std::invalid_argument(
           "No closing ] character in the dimension name of : " + str);
     // Find the comma after the name
-    n_first_comma = input.find_first_of(",", n);
+    n_first_comma = input.find_first_of(',', n);
     if (n_first_comma == std::string::npos)
       throw std::invalid_argument(
           "No comma after the closing ] character in the dimension string: " +
           str);
   } else
     // Find the comma after the name
-    n_first_comma = input.find_first_of(",");
+    n_first_comma = input.find_first_of(',');
 
   if (n_first_comma == std::string::npos)
     throw std::invalid_argument("No comma in the dimension string: " + str);
@@ -456,7 +464,7 @@ void SlicingAlgorithm::makeAlignedDimensionFromString(const std::string &str) {
     // Find the 3rd comma from the end
     size_t n = std::string::npos;
     for (size_t i = 0; i < 3; i++) {
-      n = input.find_last_of(",", n);
+      n = input.find_last_of(',', n);
       if (n == std::string::npos)
         throw std::invalid_argument("Wrong number of values (4 are expected) "
                                     "in the dimensions string: " +
@@ -599,9 +607,10 @@ void SlicingAlgorithm::createAlignedTransform() {
   } else {
     // Changed # of dimensions - can't reverse the transform
     m_transformToOriginal = nullptr;
-    g_log.warning("SlicingAlgorithm: Your slice will cause the output "
-                  "workspace to have less dimensions than the input. This will "
-                  "affect your ability to create subsequent slices.");
+    g_log.warning(
+        "SlicingAlgorithm: Your slice will cause the output "
+        "workspace to have fewer dimensions than the input. This will "
+        "affect your ability to create subsequent slices.");
   }
 }
 

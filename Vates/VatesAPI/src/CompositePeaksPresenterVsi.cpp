@@ -7,21 +7,14 @@
 #include <map>
 namespace Mantid {
 namespace VATES {
-/// Constructor
-CompositePeaksPresenterVsi::CompositePeaksPresenterVsi() {}
-
-/// Destructor
-CompositePeaksPresenterVsi::~CompositePeaksPresenterVsi() {}
 
 /**
  * Update the view frustum
  * @param frustum The view frustum
  */
 void CompositePeaksPresenterVsi::updateViewFrustum(ViewFrustum_const_sptr frustum) {
-  for (std::vector<PeaksPresenterVsi_sptr>::iterator it =
-           m_peaksPresenters.begin();
-       it != m_peaksPresenters.end(); ++it) {
-    (*it)->updateViewFrustum(frustum);
+  for (const auto &presenter : m_peaksPresenters) {
+    presenter->updateViewFrustum(frustum);
   }
 }
 
@@ -39,10 +32,8 @@ std::vector<bool> CompositePeaksPresenterVsi::getViewablePeaks() const{
  */
 std::vector<std::string> CompositePeaksPresenterVsi::getPeaksWorkspaceNames() const{
   std::vector<std::string> peaksWorkspaceNames;
-  for (std::vector<PeaksPresenterVsi_sptr>::const_iterator it =
-           m_peaksPresenters.begin();
-       it != m_peaksPresenters.end(); ++it) {
-    peaksWorkspaceNames.push_back((*it)->getPeaksWorkspaceName());
+  for (const auto &presenter : m_peaksPresenters) {
+    peaksWorkspaceNames.push_back(presenter->getPeaksWorkspaceName());
   }
   return peaksWorkspaceNames;
 }
@@ -55,16 +46,14 @@ std::vector<std::string> CompositePeaksPresenterVsi::getPeaksWorkspaceNames() co
  * @param radius A reference to extract the radius.
  * @param specialCoordinateSystem The coordinate system
  */
-void CompositePeaksPresenterVsi::getPeaksInfo (
+void CompositePeaksPresenterVsi::getPeaksInfo(
     Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row,
     Mantid::Kernel::V3D &position, double &radius,
-    Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem) const{
-  for (std::vector<PeaksPresenterVsi_sptr>::const_iterator it =
-           m_peaksPresenters.begin();
-       it != m_peaksPresenters.end(); ++it) {
-    if ((*it)->getPeaksWorkspace() == peaksWorkspace) {
-      (*it)->getPeaksInfo(peaksWorkspace, row, position, radius,
-                          specialCoordinateSystem);
+    Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem) const {
+  for (const auto &presenter : m_peaksPresenters) {
+    if (presenter->getPeaksWorkspace() == peaksWorkspace) {
+      presenter->getPeaksInfo(peaksWorkspace, row, position, radius,
+                              specialCoordinateSystem);
     }
   }
 }
@@ -88,7 +77,7 @@ std::string CompositePeaksPresenterVsi::getFrame() const{
  */
 void CompositePeaksPresenterVsi::addPresenter(
     PeaksPresenterVsi_sptr presenter) {
-  m_peaksPresenters.push_back(presenter);
+  m_peaksPresenters.push_back(std::move(presenter));
 }
 
 /**
@@ -98,10 +87,8 @@ void CompositePeaksPresenterVsi::addPresenter(
 std::vector<Mantid::API::IPeaksWorkspace_sptr>
 CompositePeaksPresenterVsi::getPeaksWorkspaces() const {
   std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces;
-  for (std::vector<PeaksPresenterVsi_sptr>::const_iterator it =
-           m_peaksPresenters.begin();
-       it != m_peaksPresenters.end(); ++it) {
-    peaksWorkspaces.push_back((*it)->getPeaksWorkspace());
+  for (const auto &presenter : m_peaksPresenters) {
+    peaksWorkspaces.push_back(presenter->getPeaksWorkspace());
   }
   return peaksWorkspaces;
 }
@@ -114,12 +101,11 @@ CompositePeaksPresenterVsi::getPeaksWorkspaces() const {
 std::map<std::string, std::vector<bool>>
 CompositePeaksPresenterVsi::getInitializedViewablePeaks() const{
   std::map<std::string, std::vector<bool>> viewablePeaks;
-  for (std::vector<PeaksPresenterVsi_sptr>::const_iterator it =
-           m_peaksPresenters.begin();
-       it != m_peaksPresenters.end(); ++it) {
-    viewablePeaks.insert(std::pair<std::string, std::vector<bool>>(
-        (*it)->getPeaksWorkspace()->getName(),
-        std::vector<bool>((*it)->getPeaksWorkspace()->getNumberPeaks(), true)));
+  for (const auto &presenter : m_peaksPresenters) {
+    viewablePeaks.emplace(
+        presenter->getPeaksWorkspace()->getName(),
+        std::vector<bool>(presenter->getPeaksWorkspace()->getNumberPeaks(),
+                          true));
   }
   return viewablePeaks;
 }
@@ -129,15 +115,14 @@ CompositePeaksPresenterVsi::getInitializedViewablePeaks() const{
  * @param peaksWorkspaceName
  */
 void CompositePeaksPresenterVsi::removePresenter(
-    std::string peaksWorkspaceName) {
-  std::vector<PeaksPresenterVsi_sptr>::iterator it = m_peaksPresenters.begin();
-  for (; it != m_peaksPresenters.end();) {
-    if ((*it)->getPeaksWorkspaceName() == peaksWorkspaceName) {
-      it = m_peaksPresenters.erase(it);
-    } else {
-      ++it;
-    }
-  }
+    const std::string &peaksWorkspaceName) {
+  m_peaksPresenters.erase(
+      std::remove_if(
+          m_peaksPresenters.begin(), m_peaksPresenters.end(),
+          [&peaksWorkspaceName](const PeaksPresenterVsi_sptr &presenter) {
+            return presenter->getPeaksWorkspaceName() == peaksWorkspaceName;
+          }),
+      m_peaksPresenters.end());
 }
 
 /**
@@ -146,14 +131,13 @@ void CompositePeaksPresenterVsi::removePresenter(
  * @param peaksWorkspaceNames The names of all currently active peak sources.
  */
 void CompositePeaksPresenterVsi::updateWorkspaces(
-    std::vector<std::string> peaksWorkspaceNames) {
+    const std::vector<std::string> &peaksWorkspaceNames) {
   std::vector<std::string> storedPeaksWorkspaces = getPeaksWorkspaceNames();
-  for (std::vector<std::string>::iterator it = storedPeaksWorkspaces.begin();
-       it != storedPeaksWorkspaces.end(); ++it) {
+  for (const auto &ws : storedPeaksWorkspaces) {
     size_t count =
-        std::count(peaksWorkspaceNames.begin(), peaksWorkspaceNames.end(), *it);
+        std::count(peaksWorkspaceNames.begin(), peaksWorkspaceNames.end(), ws);
     if (count == 0) {
-      removePresenter(*it);
+      removePresenter(ws);
     }
   }
 }
@@ -163,11 +147,7 @@ void CompositePeaksPresenterVsi::updateWorkspaces(
  * @returns If there are any peaks availbale.
  */
 bool CompositePeaksPresenterVsi::hasPeaks() {
-  if (m_peaksPresenters.size() > 0) {
-    return true;
-  } else {
-    return false;
-  }
+  return m_peaksPresenters.size() > 0;
 }
 
 /**
@@ -180,11 +160,9 @@ bool CompositePeaksPresenterVsi::hasPeaks() {
 void CompositePeaksPresenterVsi::sortPeaksWorkspace(
     const std::string &columnToSortBy, const bool sortedAscending,
     boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) {
-  for (std::vector<PeaksPresenterVsi_sptr>::iterator it =
-           m_peaksPresenters.begin();
-       it != m_peaksPresenters.end(); ++it) {
-    if ((*it)->getPeaksWorkspace() == peaksWS) {
-      (*it)->sortPeaksWorkspace(columnToSortBy, sortedAscending);
+  for (const auto &presenter : m_peaksPresenters) {
+    if (presenter->getPeaksWorkspace() == peaksWS) {
+      presenter->sortPeaksWorkspace(columnToSortBy, sortedAscending);
     }
   }
 }

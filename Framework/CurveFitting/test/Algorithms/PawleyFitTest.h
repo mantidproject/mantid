@@ -151,7 +151,7 @@ private:
 
   public:
     TestablePawleyFit() : PawleyFit() {}
-    ~TestablePawleyFit() {}
+    ~TestablePawleyFit() override {}
   };
 
   class TestableV3DFromHKLColumnExtractor : public V3DFromHKLColumnExtractor {

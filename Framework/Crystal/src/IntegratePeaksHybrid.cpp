@@ -109,20 +109,20 @@ const std::string IntegratePeaksHybrid::category() const {
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksHybrid::init() {
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Input md workspace.");
-  declareProperty(new WorkspaceProperty<IPeaksWorkspace>("PeaksWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+                      "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
   auto positiveIntValidator = boost::make_shared<BoundedValidator<int>>();
   positiveIntValidator->setExclusive(true);
   positiveIntValidator->setLower(0);
 
-  declareProperty(new PropertyWithValue<int>("NumberOfBins", 20,
-                                             positiveIntValidator,
-                                             Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<int>>("NumberOfBins", 20,
+                                                      positiveIntValidator,
+                                                      Direction::Input),
                   "Number of bins to use while creating each local image. "
                   "Defaults to 20. Increase to reduce pixelation");
 
@@ -133,17 +133,17 @@ void IntegratePeaksHybrid::init() {
   compositeValidator->add(positiveDoubleValidator);
   compositeValidator->add(boost::make_shared<MandatoryValidator<double>>());
 
-  declareProperty(new PropertyWithValue<double>("BackgroundOuterRadius", 0.0,
-                                                compositeValidator,
-                                                Direction::Input),
-                  "Background outer radius estimate. Choose liberal value.");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>(
+          "BackgroundOuterRadius", 0.0, compositeValidator, Direction::Input),
+      "Background outer radius estimate. Choose liberal value.");
 
-  declareProperty(new WorkspaceProperty<IPeaksWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output integrated peaks workspace.");
 
-  declareProperty(new WorkspaceProperty<WorkspaceGroup>("OutputWorkspaces", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+                      "OutputWorkspaces", "", Direction::Output),
                   "MDHistoWorkspaces containing the labeled clusters used by "
                   "the algorithm.");
 }

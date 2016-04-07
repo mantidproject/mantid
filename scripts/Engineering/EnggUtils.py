@@ -15,12 +15,11 @@ def default_ceria_expected_peaks():
     """
     _CERIA_EXPECTED_PEAKS = [3.124277511, 2.705702376, 1.913220892, 1.631600313,
                              1.562138267, 1.352851554, 1.241461538, 1.210027059,
-                             1.104598643, 1.04142562, 1.04142562, 0.956610446,
-                             0.914694494, 0.901900955, 0.855618487, 0.825231622,
-                             0.815800156, 0.781069134, 0.757748432, 0.750426918,
-                             0.723129589, 0.704504971, 0.676425777, 0.66110842,
-                             0.656229382, 0.637740216, 0.624855346, 0.620730846,
-                             0.605013529
+                             1.104598643, 1.04142562, 0.956610446, 0.914694494,
+                             0.901900955, 0.855618487, 0.825231622, 0.815800156,
+                             0.781069134, 0.757748432, 0.750426918, 0.723129589,
+                             0.704504971, 0.676425777, 0.66110842, 0.656229382,
+                             0.637740216, 0.624855346, 0.620730846, 0.605013529
                             ]
 
     return _CERIA_EXPECTED_PEAKS
@@ -56,7 +55,7 @@ def read_in_expected_peaks(filename, expectedGiven):
 
         if not exPeakArray:
             # "File could not be read. Defaults in alternative option used."
-            if [] == expectedGiven:
+            if not expectedGiven:
                 raise ValueError("Could not read any peaks from the file given in 'ExpectedPeaksFromFile: '" +
                                  filename + "', and no expected peaks were given in the property "
                                  "'ExpectedPeaks' either. Cannot continue without a list of expected peaks.")
@@ -66,7 +65,7 @@ def read_in_expected_peaks(filename, expectedGiven):
             expectedPeaksD = sorted(exPeakArray)
 
     else:
-        if [] == expectedGiven:
+        if 0 == expectedGiven.size:
             raise ValueError("No expected peaks were given in the property 'ExpectedPeaks', "
                              "could not get default expected peaks, and 'ExpectedPeaksFromFile' "
                              "was not given either. Cannot continout without a list of expected peaks.")
@@ -197,18 +196,20 @@ def getDetIDsForBank(bank):
 
     return detIDs
 
-def  generateOutputParTable(name, difc, zero):
+def  generateOutputParTable(name, difa, difc, tzero):
     """
     Produces a table workspace with the two fitted calibration parameters
 
     @param name :: the name to use for the table workspace that is created here
-    @param difc :: difc calibration parameter
-    @param zero :: zero calibration parameter
+    @param difa :: DIFA calibration parameter (GSAS parameter)
+    @param difc :: DIFC calibration parameter
+    @param tzero :: TZERO calibration parameter
     """
     tbl = sapi.CreateEmptyTableWorkspace(OutputWorkspace=name)
-    tbl.addColumn('double', 'difc')
-    tbl.addColumn('double', 'zero')
-    tbl.addRow([float(difc), float(zero)])
+    tbl.addColumn('double', 'DIFA')
+    tbl.addColumn('double', 'DIFZ')
+    tbl.addColumn('double', 'TZERO')
+    tbl.addRow([float(difa), float(difc), float(tzero)])
 
 def applyVanadiumCorrections(parent, ws, indices, vanWS, vanIntegWS, vanCurvesWS):
     """

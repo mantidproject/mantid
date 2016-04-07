@@ -17,8 +17,8 @@ class DimensionedTable : public TableWorkspaceTester {
 public:
   DimensionedTable(size_t cols, size_t rows)
       : m_numColumns(cols), m_numRows(rows) {}
-  size_t columnCount() const { return m_numColumns; }
-  size_t rowCount() const { return m_numRows; }
+  size_t columnCount() const override { return m_numColumns; }
+  size_t rowCount() const override { return m_numRows; }
 
 private:
   size_t m_numColumns;
@@ -34,10 +34,12 @@ public:
     m_names[1] = "v";
     m_names[2] = "w";
   }
-  size_t size() const { return 3; }
+  size_t size() const override { return 3; }
 
   using ColumnTester::void_pointer;
-  const void *void_pointer(size_t index) const { return &m_names[index]; }
+  const void *void_pointer(size_t index) const override {
+    return &m_names[index];
+  }
 
 private:
   std::string m_names[3];
@@ -50,10 +52,12 @@ public:
     m_values[1] = V3D(-1, 1, 0);
     m_values[2] = V3D(0, 0, 1);
   }
-  size_t size() const { return 3; }
+  size_t size() const override { return 3; }
 
   using ColumnTester::void_pointer;
-  const void *void_pointer(size_t index) const { return &m_values[index]; }
+  const void *void_pointer(size_t index) const override {
+    return &m_values[index];
+  }
 
 private:
   V3D m_values[3];
@@ -66,10 +70,12 @@ public:
     m_offsets[1] = 1.25;
     m_offsets[2] = -10.0;
   }
-  size_t size() const { return 3; }
+  size_t size() const override { return 3; }
 
   using ColumnTester::void_pointer;
-  const void *void_pointer(size_t index) const { return &m_offsets[index]; }
+  const void *void_pointer(size_t index) const override {
+    return &m_offsets[index];
+  }
 
 private:
   double m_offsets[3];
@@ -82,10 +88,12 @@ public:
     m_units[1] = "a";
     m_units[2] = "r";
   }
-  size_t size() const { return 3; }
+  size_t size() const override { return 3; }
 
   using ColumnTester::void_pointer;
-  const void *void_pointer(size_t index) const { return &m_units[index]; }
+  const void *void_pointer(size_t index) const override {
+    return &m_units[index];
+  }
 
 private:
   std::string m_units[3];
@@ -94,13 +102,13 @@ private:
 class GoodTable : public TableWorkspaceTester {
 public:
   GoodTable(){};
-  virtual ~GoodTable(){};
+  ~GoodTable() override{};
 
-  size_t columnCount() const { return 4; }
-  size_t rowCount() const { return 3; }
+  size_t columnCount() const override { return 4; }
+  size_t rowCount() const override { return 3; }
 
   using TableWorkspaceTester::getColumn;
-  Column_const_sptr getColumn(const std::string &name) const {
+  Column_const_sptr getColumn(const std::string &name) const override {
     if (name == "name")
       return Column_const_sptr(new NameColumn());
     else if (name == "value")

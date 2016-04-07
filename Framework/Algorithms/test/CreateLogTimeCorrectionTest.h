@@ -36,7 +36,9 @@ public:
     AnalysisDataService::Instance().add("Vulcan", m_inpws);
   }
 
-  ~CreateLogTimeCorrectionTest() { AnalysisDataService::Instance().clear(); }
+  ~CreateLogTimeCorrectionTest() override {
+    AnalysisDataService::Instance().clear();
+  }
 
   /** Test against a Vulcan run
     */
