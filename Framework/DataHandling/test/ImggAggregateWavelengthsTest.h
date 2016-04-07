@@ -4,9 +4,13 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/ImggAggregateWavelengths.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/Exception.h"
 
 using Mantid::DataHandling::ImggAggregateWavelengths;
 
+// This algorithm is all about I/O. No effective functional testing is
+// done here, but in system tests
 class ImggAggregateWavelengthsTest : public CxxTest::TestSuite {
 
 public:
@@ -33,14 +37,67 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputPath", "."));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
+    TS_ASSERT_THROWS(alg.setPropertyValue("OutputPath", "inexistent_fail"),
+                     std::invalid_argument);
 
-    TS_ASSERT_THROWS_NOTHING(alg.execute(););
-    TS_ASSERT(alg.isExecuted());
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT(!alg.isExecuted());
   }
 
-  void test_Something() { TS_FAIL("You forgot to write a test!"); }
+  void test_errors_options() {
+    auto alg = Mantid::API::AlgorithmManager::Instance().create(
+        "ImggAggregateWavelengths");
+
+    TS_ASSERT_THROWS(
+        alg->setPropertyValue("OutputWorkspace", "_unused_for_child"),
+        Mantid::Kernel::Exception::NotFoundError);
+
+    TS_ASSERT_THROWS(alg->setPropertyValue("UniformBands", "fail"),
+                     std::invalid_argument);
+  }
+
+  void test_too_many_options() {
+    auto alg = Mantid::API::AlgorithmManager::Instance().create(
+        "ImggAggregateWavelengths");
+
+    alg->setPropertyValue("IndexRanges", "1-10");
+    alg->setPropertyValue("ToFRanges", "5000-7000");
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT(!alg->isExecuted());
+
+    auto alg2nd = Mantid::API::AlgorithmManager::Instance().create(
+        "ImggAggregateWavelengths");
+    alg2nd->setPropertyValue("ToFRanges", "5000-7000");
+    alg2nd->setPropertyValue("IndexRanges", "1-10");
+    TS_ASSERT_THROWS(alg2nd->execute(), std::runtime_error);
+    TS_ASSERT(!alg2nd->isExecuted());
+
+    auto alg3rd = Mantid::API::AlgorithmManager::Instance().create(
+        "ImggAggregateWavelengths");
+    alg3rd->setPropertyValue("UniformBands", "3");
+    alg3rd->setPropertyValue("IndexRanges", "1-10");
+    TS_ASSERT_THROWS(alg3rd->execute(), std::runtime_error);
+    TS_ASSERT(!alg3rd->isExecuted());
+  }
+
+  void test_formats() {
+    auto alg = Mantid::API::AlgorithmManager::Instance().create(
+        "ImggAggregateWavelengths");
+
+    alg->setPropertyValue("InputImageFormat", "FITS");
+    TS_ASSERT_THROWS(alg->setPropertyValue("InputImageFormat", "Bla");
+                     , std::invalid_argument);
+    TS_ASSERT_THROWS(alg->setPropertyValue("InputImageFormat", "TIFF");
+                     , std::invalid_argument);
+
+    auto alg2nd = Mantid::API::AlgorithmManager::Instance().create(
+        "ImggAggregateWavelengths");
+    alg2nd->setPropertyValue("OutputImageFormat", "FITS");
+    TS_ASSERT_THROWS(alg2nd->setPropertyValue("OutputImageFormat", "Wrong");
+                     , std::invalid_argument);
+    TS_ASSERT_THROWS(alg2nd->setPropertyValue("OutputImageFormat", "TIFF");
+                     , std::invalid_argument);
+  }
 };
 
 #endif /* MANTID_DATAHANDLING_IMGGAGGREGATEWAVELENGTHSTEST_H_ */
