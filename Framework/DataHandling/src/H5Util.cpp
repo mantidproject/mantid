@@ -3,6 +3,7 @@
 #include "MantidAPI/LogManager.h"
 
 #include <H5Cpp.h>
+#include <algorithm>
 
 using namespace H5;
 
@@ -162,27 +163,53 @@ std::vector<NumT> readArray1DCoerce(H5::Group &group, const std::string &name) {
   return result;
 }
 
-template <typename NumT> std::vector<NumT> readArray1DCoerce(DataSet &dataset) {
-  std::vector<NumT> result;
-  DataType dataType = dataset.getDataType();
+namespace {
+// correct for widening - narrowing should use something else
+template <typename InputNumT, typename OutputNumT>
+std::vector<OutputNumT> wideningRead(DataSet &dataset,
+                                     const DataType &dataType) {
   DataSpace dataSpace = dataset.getSpace();
 
-  if (getType<NumT>() == dataType) {
-    result.resize(dataSpace.getSelectNpoints());
-    dataset.read(&result[0], dataType, dataSpace);
-  } else if (PredType::NATIVE_UINT32 == dataType) {
-    std::vector<uint32_t> temp(dataSpace.getSelectNpoints());
-    dataset.read(&temp[0], dataType, dataSpace);
-    result.assign(temp.begin(), temp.end());
-  } else if (PredType::NATIVE_FLOAT == dataType) {
-    std::vector<float> temp(dataSpace.getSelectNpoints());
-    dataset.read(&temp[0], dataType, dataSpace);
-    result.assign(temp.begin(), temp.end());
-  } else {
-    throw DataTypeIException();
-  }
+  std::vector<InputNumT> temp(dataSpace.getSelectNpoints());
+  dataset.read(&temp[0], dataType, dataSpace);
+
+  std::vector<OutputNumT> result;
+  result.resize(temp.size());
+
+  std::transform(temp.begin(), temp.end(), result.begin(),
+                 [](const InputNumT a) { // lambda
+                   return static_cast<OutputNumT>(a);
+                 });
 
   return result;
+}
+} // anonymous
+
+template <typename NumT> std::vector<NumT> readArray1DCoerce(DataSet &dataset) {
+  DataType dataType = dataset.getDataType();
+
+  if (getType<NumT>() == dataType) { // no conversion necessary
+    std::vector<NumT> result;
+    DataSpace dataSpace = dataset.getSpace();
+    result.resize(dataSpace.getSelectNpoints());
+    dataset.read(&result[0], dataType, dataSpace);
+    return result;
+  } else if (PredType::NATIVE_INT32 == dataType) {
+    return wideningRead<int32_t, NumT>(dataset, dataType);
+  } else if (PredType::NATIVE_UINT32 == dataType) {
+    return wideningRead<uint32_t, NumT>(dataset, dataType);
+  } else if (PredType::NATIVE_INT64 == dataType) {
+    return wideningRead<int64_t, NumT>(dataset, dataType);
+  } else if (PredType::NATIVE_UINT64 == dataType) {
+    return wideningRead<uint64_t, NumT>(dataset, dataType);
+  } else if (PredType::NATIVE_FLOAT == dataType) {
+    return wideningRead<float, NumT>(dataset, dataType);
+  } else if (PredType::NATIVE_DOUBLE == dataType) {
+    return wideningRead<double, NumT>(dataset, dataType);
+  }
+
+  // not a supported type
+  throw DataTypeIException();
 }
 
 // -------------------------------------------------------------------
