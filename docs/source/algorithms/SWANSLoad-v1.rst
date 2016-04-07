@@ -1,4 +1,3 @@
-
 .. algorithm::
 
 .. summary::
@@ -10,37 +9,21 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+Workflow algorithm that loads SWANS event data and applies basic
+corrections to the workspace. The workflow proceeds as follows:
 
+1. Determine the source slit size and store it in the logs.
 
-Usage
------
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
+2. Move the detector according to the correct beam center position, 
+   which is either given as input to the algorithm or pre-determined and stored in the input *ReductionProperties*.
 
-**Example - SWANSLoad**
+3. Convert TOF into wavelength.
 
-.. testcode:: SWANSLoadExample
+4. Rebin the data according to the input *WavelengthStep*.
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
-
-   wsOut = SWANSLoad()
-
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
-
-Output:
-
-.. testoutput:: SWANSLoadExample
-
-  The output workspace has ?? spectra
+This algorithm is rarely called directly. It is called by 
+:ref:`SANSReduction <algm-SANSReduction>`.
 
 .. categories::
 
 .. sourcelink::
-

@@ -1,4 +1,3 @@
-
 .. algorithm::
 
 .. summary::
@@ -10,37 +9,12 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+Create a PropertyManager object setting the reduction options for
+SWANS. The property manager object is then added to the
+PropertyManagerDataService.
 
-
-Usage
------
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
-
-**Example - SetupSWANSReduction**
-
-.. testcode:: SetupSWANSReductionExample
-
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
-
-   wsOut = SetupSWANSReduction()
-
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
-
-Output:
-
-.. testoutput:: SetupSWANSReductionExample
-
-  The output workspace has ?? spectra
+See :ref:`SANSReduction <algm-SANSReduction>` for details.
 
 .. categories::
 
 .. sourcelink::
-

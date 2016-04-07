@@ -52,7 +52,6 @@ private:
   double m_center_y;
   std::string m_mask_as_string;
   std::string m_output_message;
-  double m_moderator_position;
   API::MatrixWorkspace_sptr dataWS;
 };
 
