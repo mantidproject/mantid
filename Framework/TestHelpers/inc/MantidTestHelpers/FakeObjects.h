@@ -94,7 +94,8 @@ public:
     std::fill(eValues.begin(), eValues.end(), 0.0);
   }
 
-  void setXMode(Kernel::Histogram::XMode mode) { m_histogram.setXMode(mode); }
+  const Kernel::Histogram &histogram() const { return m_histogram; }
+  Kernel::Histogram &histogram() { return m_histogram; }
 
 protected:
   Kernel::Histogram m_histogram;

@@ -953,7 +953,7 @@ bool MatrixWorkspace::isHistogramData() const {
 
 void MatrixWorkspace::setXMode(Kernel::Histogram::XMode mode) {
   for (size_t i = 0; i < getNumberHistograms(); ++i)
-    getSpectrum(i)->setXMode(mode);
+    getSpectrum(i)->histogram().setXMode(mode);
 }
 
 /**

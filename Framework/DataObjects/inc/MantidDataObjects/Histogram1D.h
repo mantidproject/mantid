@@ -99,7 +99,8 @@ public:
     return ((readX().size() + refY->size() + refE->size()) * sizeof(double));
   }
 
-  void setXMode(Kernel::Histogram::XMode mode) override;
+  const Kernel::Histogram &histogram() const override;
+  Kernel::Histogram &histogram() override;
 };
 
 } // namespace DataObjects
