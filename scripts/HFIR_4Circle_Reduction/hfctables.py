@@ -12,12 +12,9 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
 
     # UB peak information table
     Table_Setup = [('Pt', 'int'),
-                   ('HKL', 'str'),
-                   ('Q sample', 'str'),
-                   # signal is simple summation of counts  in region of interest
-                   ('Signal', 'float'),
-                   # normalized signals by monitor counts
-                   ('Intensity', 'float')]
+                   ('Raw', 'float'),
+                   ('Masked', 'float'),
+                   ('Selected', 'checkbox')]
 
     def __init__(self, parent):
         """
@@ -27,40 +24,20 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
 
         return
 
-    def append_scan(self, info_tuple):
+    def append_pt(self, pt_number, raw_signal, masked_signal):
         """
         out_ws, target_frame, exp_no, scan_no, None
         :param info_tuple:
         :return: 2-tuple as boolean and error message
         """
-        out_ws_name = info_tuple[0]
-        # target_frame = info_tuple[1]
-        # exp_no = info_tuple[2]
-        scan_no = info_tuple[3]
+        # TODO/NOW - Doc and check
+        # assert ...
 
-        status, msg = self.append_row([scan_no, '', out_ws_name, 0., 0., 0., 0., 0., 0., 0, False])
+        status, msg = self.append_row([pt_number, raw_signal, masked_signal])
         if status is False:
             msg = 'Unable to append row to peak integration table due to %s' % msg
 
         return status, msg
-
-    def get_md_ws_name(self, row_index):
-        """ Get MD workspace name
-        :param row_index:
-        :return:
-        """
-        j_col = self.Table_Setup.index(('Merged Workspace', 'str'))
-
-        return self.get_cell_value(row_index, j_col)
-
-    def get_scan_number(self, row_index):
-        """ Get scan number of the row
-        :param row_index:
-        :return:
-        """
-        j_col = self.Table_Setup.index(('Scan', 'int'))
-
-        return self.get_cell_value(row_index, j_col)
 
     def setup(self):
         """
@@ -70,25 +47,6 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         self.init_setup(self.Table_Setup)
 
         self._statusColName = 'Selected'
-
-        return
-
-    def set_hkl(self, row_index, vec_hkl):
-        """
-        Set up HKL value to table
-        :param row_index:
-        :param vec_hkl:
-        :return:
-        """
-        # check requirement
-        assert isinstance(vec_hkl, list), 'Input HKL must be a list but not %s.' % str(type(vec_hkl))
-        assert len(vec_hkl) == 3
-
-        # locate
-        index_h = self.Table_Setup.index(('H', 'float'))
-        for j in xrange(3):
-            col_index = j + index_h
-            self.update_cell_value(row_index, col_index, vec_hkl[j])
 
         return
 

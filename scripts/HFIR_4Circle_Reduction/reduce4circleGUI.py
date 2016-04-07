@@ -108,7 +108,7 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_plot_next_scan)
         self.connect(self.ui.pushButton_prevScanNumber, QtCore.SIGNAL('clicked()'),
                      self.do_plot_prev_scan)
-        self.connect(self.ui.pushButton_makeScanPt, QtCore.SIGNAL('clicked()'),
+        self.connect(self.ui.pushButton_maskScanPt, QtCore.SIGNAL('clicked()'),
                      self.do_mask_pt_2d)
 
         # Tab 'calculate ub matrix'
@@ -938,10 +938,9 @@ class MainWindow(QtGui.QMainWindow):
 
     def do_integrate_per_pt(self):
         """
-        Use the peak center of the merged scan. Then on each Pt. with specified radius,
-        calculate the integrated peak intensity and number of counts
         :return:
         """
+        # TODO/NOW - Doc
         # get experiment and scan number
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
                                                         self.ui.lineEdit_scanIntegratePeak])
@@ -950,6 +949,32 @@ class MainWindow(QtGui.QMainWindow):
             return
         else:
             exp_number, scan_number = ret_obj
+
+        if self.ui.checkBox_applyMask.isChecked():
+            self._integrate_masked_pt(exp_number, scan_number)
+        else:
+            self._integrate_per_pt(exp_number, scan_number)
+
+        return
+
+    def _integrate_masked_pt(self, exp_number, scan_number):
+        """
+
+        :param exp_number:
+        :param scan_number:
+        :return:
+        """
+        # TODO/NOW - Continue!
+        # ... ...
+
+    def _integrate_per_pt(self, exp_number, scan_number):
+        """
+        Use the peak center of the merged scan. Then on each Pt. with specified radius,
+        calculate the integrated peak intensity and number of counts
+        :return:
+        """
+        # TODO/NOW - Doc and check!
+        # assert ...
 
         # call myController to get peak center from all pt in scans
         if self._myControl.has_peak_info(exp_number, scan_number) is False:
@@ -2324,7 +2349,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.graphicsView.clear_canvas()
         self.ui.graphicsView.add_plot_2d(raw_det_data, x_min=0, x_max=256, y_min=0, y_max=256,
                                          hold_prev_image=False)
-        if self.ui.checkBox_keppRoi.isChecked():
+        if self.ui.checkBox_keepRoi.isChecked():
             # get region of interest from control
             status, roi = self._myControl.get_region_of_interest(exp_no, scan_number=None)
             if status:

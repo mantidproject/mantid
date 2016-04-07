@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1266</width>
-    <height>865</height>
+    <width>1204</width>
+    <height>824</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -193,7 +193,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>5</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1010,10 +1010,17 @@ p, li { white-space: pre-wrap; }
                    <string>Region of Interest</string>
                   </property>
                   <layout class="QGridLayout" name="gridLayout_18">
-                   <item row="0" column="0">
-                    <widget class="QPushButton" name="pushButton_addROI">
+                   <item row="4" column="0">
+                    <widget class="QPushButton" name="pushButton_cancelROI">
                      <property name="text">
-                      <string>Add ROI</string>
+                      <string>Cancel</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="0">
+                    <widget class="QCheckBox" name="checkBox_keepRoi">
+                     <property name="text">
+                      <string>Keep on canvas</string>
                      </property>
                     </widget>
                    </item>
@@ -1024,17 +1031,17 @@ p, li { white-space: pre-wrap; }
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="0">
-                    <widget class="QCheckBox" name="checkBox_keppRoi">
+                   <item row="0" column="0">
+                    <widget class="QPushButton" name="pushButton_addROI">
                      <property name="text">
-                      <string>Keep on canvas</string>
+                      <string>Add ROI</string>
                      </property>
                     </widget>
                    </item>
                    <item row="3" column="0">
-                    <widget class="QPushButton" name="pushButton_cancelROI">
+                    <widget class="QPushButton" name="pushButton_maskScanPt">
                      <property name="text">
-                      <string>Cancel</string>
+                      <string>Mask</string>
                      </property>
                     </widget>
                    </item>
@@ -2644,49 +2651,23 @@ p, li { white-space: pre-wrap; }
            <layout class="QVBoxLayout" name="verticalLayout_11">
             <item>
              <layout class="QGridLayout" name="gridLayout_13">
-              <item row="0" column="12">
-               <widget class="QPushButton" name="pushButton_loadMask">
-                <property name="font">
-                 <font>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Load Mask</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="11">
-               <widget class="QComboBox" name="comboBox_maskWSList">
+              <item row="0" column="10">
+               <widget class="QLineEdit" name="lineEdit_background">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
                </widget>
               </item>
-              <item row="0" column="8">
-               <widget class="QPushButton" name="pushButton_integratePeak">
-                <property name="font">
-                 <font>
-                  <weight>50</weight>
-                  <bold>false</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Integrate Peak</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="7">
+              <item row="0" column="5">
                <spacer name="horizontalSpacer_17">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
                 <property name="sizeType">
-                 <enum>QSizePolicy::Ignored</enum>
+                 <enum>QSizePolicy::Expanding</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -2695,16 +2676,6 @@ p, li { white-space: pre-wrap; }
                  </size>
                 </property>
                </spacer>
-              </item>
-              <item row="0" column="5">
-               <widget class="QLineEdit" name="lineEdit_peakRadius">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-               </widget>
               </item>
               <item row="0" column="1">
                <widget class="QLineEdit" name="lineEdit_scanIntegratePeak">
@@ -2726,33 +2697,6 @@ p, li { white-space: pre-wrap; }
                 </property>
                </widget>
               </item>
-              <item row="0" column="6">
-               <widget class="QPushButton" name="pushButton_integratePt">
-                <property name="text">
-                 <string>Integrate Pt</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="10">
-               <spacer name="horizontalSpacer_9">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="0" column="4">
-               <widget class="QLabel" name="label_34">
-                <property name="text">
-                 <string>Peak Radius</string>
-                </property>
-               </widget>
-              </item>
               <item row="0" column="2">
                <widget class="QPushButton" name="pushButton_nextScanIntegrate">
                 <property name="text">
@@ -2760,21 +2704,42 @@ p, li { white-space: pre-wrap; }
                 </property>
                </widget>
               </item>
-              <item row="0" column="3">
-               <spacer name="horizontalSpacer_19">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+              <item row="0" column="6">
+               <widget class="QLabel" name="label_34">
+                <property name="text">
+                 <string>Peak Radius</string>
                 </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Preferred</enum>
+               </widget>
+              </item>
+              <item row="0" column="11">
+               <widget class="QPushButton" name="pushButton_integratePeak">
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
                 </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
+                <property name="text">
+                 <string>Integrate Peak</string>
                 </property>
-               </spacer>
+               </widget>
+              </item>
+              <item row="0" column="7">
+               <widget class="QLineEdit" name="lineEdit_peakRadius">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="9">
+               <widget class="QLabel" name="label_46">
+                <property name="text">
+                 <string>Background</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -2786,8 +2751,8 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_3">
-              <item>
+             <layout class="QGridLayout" name="gridLayout_15">
+              <item row="0" column="0">
                <widget class="PeakIntegrationTableWidget" name="tableWidget_peakIntegration">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -2796,96 +2761,135 @@ p, li { white-space: pre-wrap; }
                  </sizepolicy>
                 </property>
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Table for integrating 1 scan&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Table for integrating Pts belogned to same scan.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
-              <item>
-               <layout class="QVBoxLayout" name="verticalLayout_12">
-                <item>
-                 <widget class="IntegratedPeakView" name="graphicsView_integratedPeakView">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
+              <item row="1" column="1">
+               <layout class="QGridLayout" name="gridLayout_20">
+                <item row="1" column="3">
+                 <spacer name="horizontalSpacer_20">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Expanding</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QComboBox" name="comboBox_ptCountNormType">
+                  <item>
+                   <property name="text">
+                    <string>Monitor Counts</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Time (second)</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+                <item row="1" column="5">
+                 <widget class="QPushButton" name="pushButton_handPickBkgd">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;User hand-pick background&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="text">
+                   <string>Customize Bkgd</string>
                   </property>
                  </widget>
                 </item>
-                <item>
-                 <layout class="QGridLayout" name="gridLayout_15">
-                  <item row="0" column="1">
-                   <widget class="QComboBox" name="comboBox_ptCountType">
-                    <item>
-                     <property name="text">
-                      <string>Absolute</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>Normalized</string>
-                     </property>
-                    </item>
-                   </widget>
+                <item row="0" column="5">
+                 <widget class="QPushButton" name="pushButton_fitBkgd">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fit by Gaussian for background&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="text">
+                   <string>Fit Background</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QComboBox" name="comboBox_ptCountType">
+                  <item>
+                   <property name="text">
+                    <string>Absolute</string>
+                   </property>
                   </item>
-                  <item row="1" column="2">
-                   <spacer name="horizontalSpacer_20">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeType">
-                     <enum>QSizePolicy::Expanding</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>40</width>
-                      <height>20</height>
-                     </size>
-                    </property>
-                   </spacer>
+                  <item>
+                   <property name="text">
+                    <string>Normalized</string>
+                   </property>
                   </item>
-                  <item row="1" column="1">
-                   <widget class="QComboBox" name="comboBox_ptCountNormType">
-                    <item>
-                     <property name="text">
-                      <string>Monitor Counts</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>Time (second)</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                  <item row="1" column="4">
-                   <widget class="QPushButton" name="pushButton_handPickBkgd">
-                    <property name="font">
-                     <font>
-                      <pointsize>11</pointsize>
-                     </font>
-                    </property>
-                    <property name="toolTip">
-                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;User hand-pick background&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                    </property>
-                    <property name="text">
-                     <string>Customize Bkgd</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="4">
-                   <widget class="QPushButton" name="pushButton_fitBkgd">
-                    <property name="toolTip">
-                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fit by Gaussian for background&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                    </property>
-                    <property name="text">
-                     <string>Fit Background</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
+                 </widget>
                 </item>
                </layout>
+              </item>
+              <item row="1" column="0">
+               <layout class="QGridLayout" name="gridLayout_21">
+                <item row="0" column="0">
+                 <widget class="QPushButton" name="pushButton_integratePt">
+                  <property name="text">
+                   <string>Integrate Pt</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QCheckBox" name="checkBox_applyMask">
+                  <property name="text">
+                   <string>Mask</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QPushButton" name="pushButton_calBkgd">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Calculate Background</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QCheckBox" name="checkBox_selectPt">
+                  <property name="text">
+                   <string>Select</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="0" column="1">
+               <widget class="IntegratedPeakView" name="graphicsView_integratedPeakView">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -3324,7 +3328,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1266</width>
+     <width>1204</width>
      <height>25</height>
     </rect>
    </property>
