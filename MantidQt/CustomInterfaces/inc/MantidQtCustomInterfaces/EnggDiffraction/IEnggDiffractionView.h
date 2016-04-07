@@ -430,12 +430,22 @@ public:
                                    const std::string &spectrum,
                                    const std::string &type) = 0;
 
-  /// @shahroz
-
+  /**
+  * Enables the peak picker tool
+  *
+  * @param enabled the values used to set the peak picker tool
+  */
   virtual void setPeakPickerEnabled(bool enabled) = 0;
 
-  virtual void setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) = 0;
+  /**
+  * Used to set the function to the widget
+  *
+  * @param peak is the function which will be applied to the widget
+  */
+  virtual void
+  setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) = 0;
 
+  virtual void
 };
 
 } // namespace CustomInterfaces

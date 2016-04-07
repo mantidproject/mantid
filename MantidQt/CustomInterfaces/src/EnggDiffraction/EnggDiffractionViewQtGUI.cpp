@@ -1,3 +1,4 @@
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
@@ -25,9 +26,6 @@ using namespace MantidQt::CustomInterfaces;
 
 #include <qwt_symbol.h>
 
-/// shahroz
-#include "MantidAPI/FunctionFactory.h"
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -38,7 +36,6 @@ int EnggDiffractionViewQtGUI::m_currentType = 0;
 int EnggDiffractionViewQtGUI::m_currentRunMode = 0;
 int EnggDiffractionViewQtGUI::m_currentCropCalibBankName = 0;
 int EnggDiffractionViewQtGUI::m_bank_Id = 0;
-QPoint EnggDiffractionViewQtGUI::m_plotPos = QPoint(0, 0);
 
 const std::string EnggDiffractionViewQtGUI::g_iparmExtStr =
     "GSAS instrument parameters, IPARM file: PRM, PAR, IPAR, IPARAM "
@@ -261,10 +258,8 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
       QwtPicker::DragSelection | QwtPicker::CornerToCorner,
       QwtPicker::AlwaysOff, m_uiTabFitting.dataPlot->canvas());
   m_zoomTool->setRubberBandPen(QPen(Qt::black));
-  m_zoomTool->setEnabled(true);
+  setZoomTool(false);
 
-  connect(m_zoomTool, SIGNAL(zoomed(const QwtDoubleRect &)),
-          SLOT(zoomToRange(const QwtDoubleRect &)));
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -752,6 +747,7 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
 
   if (dataVector.size() > 0)
     dataVector.clear();
+	resetView();
 
   // dark colours could be removed so the colored peaks stand out more
   const std::array<QColor, 16> QPenList{
@@ -781,6 +777,8 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
 
   m_uiTabFitting.dataPlot->replot();
   m_zoomTool->setZoomBase();
+  // enable zoom after the plotting on graph
+  setZoomTool(true);
   data.clear();
 }
 
@@ -801,7 +799,7 @@ void EnggDiffractionViewQtGUI::setPeakPicker(
   m_uiTabFitting.dataPlot->replot();
 }
 
-double EnggDiffractionViewQtGUI::getPeakCentre() {
+double EnggDiffractionViewQtGUI::getPeakCentre() const {
   auto peak = m_peakPicker->peak();
   auto centre = peak->centre();
   return centre;
@@ -811,6 +809,22 @@ void EnggDiffractionViewQtGUI::fittingWriteFile(std::string &fileDir) {
   auto outfile = std::ofstream(fileDir);
   auto expPeaks = m_uiTabFitting.lineEdit_fitting_peaks->text();
   outfile << expPeaks.toStdString();
+}
+
+void EnggDiffractionViewQtGUI::setZoomTool(bool enabled)
+{
+	m_zoomTool->setEnabled(enabled);
+}
+
+void EnggDiffractionViewQtGUI::resetView()
+{
+	// Resets the view to a sensible default
+	// Auto scale the axis
+	m_uiTabFitting.dataPlot->setAxisAutoScale(QwtPlot::xBottom);
+	m_uiTabFitting.dataPlot->setAxisAutoScale(QwtPlot::yLeft);
+
+	// Set this as the default zoom level
+	m_zoomTool->setZoomBase(true);
 }
 
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
@@ -1384,12 +1398,6 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::savePeakList() {
                 "Invalid file path or or could not be saved. Please try again");
     return;
   }
-}
-
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::zoomToRange(
-    const QwtDoubleRect &rect) {
-  // Set new zoom level.
-  m_zoomTool->zoom(rect);
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {

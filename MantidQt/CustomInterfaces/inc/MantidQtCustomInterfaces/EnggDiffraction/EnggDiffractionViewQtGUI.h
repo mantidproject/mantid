@@ -170,9 +170,13 @@ public:
   void
   setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) override;
 
-  double getPeakCentre();
+  double getPeakCentre() const override;
 
   void fittingWriteFile(std::string &fileDir);
+
+  void setZoomTool(bool enabled);
+
+  void resetView();
 
   void plotFocusedSpectrum(const std::string &wsName) override;
 
@@ -248,12 +252,9 @@ private slots:
   void browsePeaksToFit();
   void fittingListWidgetBank(int idx);
   void setListWidgetBank(int idx);
-
-  /// @shahroz
   void setPeakPick();
   void addPeakToList();
   void savePeakList();
-  void zoomToRange(const QwtDoubleRect &rect);
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
@@ -320,9 +321,6 @@ private:
 
   int static m_bank_Id;
 
-  /// @shahroz
-  QPoint static m_plotPos;
-
   /// current calibration produced in the 'Calibration' tab
   std::string m_currentCalibFilename;
   /// calibration settings - from/to the 'settings' tab
@@ -350,10 +348,10 @@ private:
   /// Loaded data curves
   std::vector<QwtPlotCurve *> m_fittedDataVector;
 
-  /// shahroz
-  /// Peak picker tool - only one on the plot at any given moment
+  /// Peak picker tool for fitting - only one on the plot at any given moment
   MantidWidgets::PeakPicker *m_peakPicker;
 
+  /// zoom-in/zoom-out tool for fitting
   QwtPlotZoomer *m_zoomTool;
 
   /// presenter as in the model-view-presenter
