@@ -951,6 +951,11 @@ bool MatrixWorkspace::isHistogramData() const {
   return (readX(0).size() != blocksize());
 }
 
+void MatrixWorkspace::setXMode(Kernel::Histogram::XMode mode) {
+  for (size_t i = 0; i < getNumberHistograms(); ++i)
+    getSpectrum(i)->setXMode(mode);
+}
+
 /**
 *  Whether the workspace contains common X bins
 *  @return whether the workspace contains common X bins

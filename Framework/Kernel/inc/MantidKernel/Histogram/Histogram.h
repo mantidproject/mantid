@@ -37,7 +37,10 @@ private:
   MantidVecPtr refX;
 
 public:
-  enum class XDataType { BinEdges, Points, Any };
+  enum class XMode { BinEdges, Points, Any, Uninitialized };
+
+  XMode xMode() const noexcept { return m_xMode; }
+  void setXMode(XMode mode) noexcept { m_xMode = mode; }
 
   // Temporary legacy interface to X
   void setX(const MantidVec &X) { refX.access() = X; }
@@ -47,6 +50,9 @@ public:
   const MantidVec &dataX() const { return *refX; }
   const MantidVec &constDataX() const { return *refX; }
   MantidVecPtr ptrX() const { return refX; }
+
+private:
+  XMode m_xMode = XMode::Uninitialized;
 };
 
 } // namespace Kernel

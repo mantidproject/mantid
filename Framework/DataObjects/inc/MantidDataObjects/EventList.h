@@ -364,6 +364,8 @@ public:
                           Mantid::Kernel::Unit *toUnit);
   void convertUnitsQuickly(const double &factor, const double &power);
 
+  void setXMode(Kernel::Histogram::XMode mode) override;
+
 private:
   /// Histogram object holding the histogram data. Currently only X.
   Kernel::Histogram m_histogram;

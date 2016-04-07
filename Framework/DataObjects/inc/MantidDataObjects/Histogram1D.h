@@ -98,6 +98,8 @@ public:
   size_t getMemorySize() const override {
     return ((readX().size() + refY->size() + refE->size()) * sizeof(double));
   }
+
+  void setXMode(Kernel::Histogram::XMode mode) override;
 };
 
 } // namespace DataObjects

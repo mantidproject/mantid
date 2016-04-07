@@ -6,6 +6,7 @@
 //------------------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidKernel/Histogram/Histogram.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -62,6 +63,7 @@ protected:
   /// Calculate the X point values. Implement in an inheriting class.
   virtual void calculateXPoints(const MantidVec &inputX,
                                 MantidVec &outputX) const = 0;
+  virtual Kernel::Histogram::XMode getNewXMode() const = 0;
 
 private:
   /// Override init

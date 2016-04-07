@@ -94,6 +94,8 @@ public:
     std::fill(eValues.begin(), eValues.end(), 0.0);
   }
 
+  void setXMode(Kernel::Histogram::XMode mode) { m_histogram.setXMode(mode); }
+
 protected:
   Kernel::Histogram m_histogram;
   MantidVec data;

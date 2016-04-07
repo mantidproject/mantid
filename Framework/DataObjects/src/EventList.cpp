@@ -4557,5 +4557,9 @@ void EventList::convertUnitsQuickly(const double &factor, const double &power) {
   }
 }
 
+void EventList::setXMode(Kernel::Histogram::XMode mode) {
+  m_histogram.setXMode(mode);
+}
+
 } /// namespace DataObjects
 } /// namespace Mantid
