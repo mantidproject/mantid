@@ -93,7 +93,7 @@ void calculatePeakValues(IPeakFunction &peak, ITableWorkspace &results,
   GSLMatrix J = makeJacobian(peak, centre, height, fwhm, intensity);
   // CHECK_OUT_GSL_MATRIX("J=", J);
 
-  GSLMatrix JCJ = J * covariance * Tr(J);
+  GSLMatrix JCJ = J * covariance * J.tr();
   // CHECK_OUT_GSL_MATRIX("JCJ=", JCJ);
 
   TableRow row = results.appendRow();

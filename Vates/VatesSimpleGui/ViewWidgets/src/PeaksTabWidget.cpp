@@ -42,15 +42,12 @@ PeaksTabWidget::~PeaksTabWidget() {}
  */
 void PeaksTabWidget::setupMvc(
     std::map<std::string, std::vector<bool>> visiblePeaks) {
-  for (std::vector<Mantid::API::IPeaksWorkspace_sptr>::iterator it =
-           m_ws.begin();
-       it != m_ws.end(); ++it) {
+  for (const auto &ws : m_ws) {
     // Create new tab
-    std::string name((*it)->getName().c_str());
-
+    const std::string &name = ws->getName();
     // Get visible peaks
-    if (visiblePeaks.count((*it)->getName()) > 0) {
-      addNewTab(*it, name, visiblePeaks[(*it)->getName()]);
+    if (visiblePeaks.count(name) > 0) {
+      addNewTab(ws, name, visiblePeaks[name]);
     }
   }
 }

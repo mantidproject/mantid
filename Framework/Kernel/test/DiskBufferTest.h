@@ -32,15 +32,15 @@ public:
   // this is testing/special routine
   void setSaved(bool On = true) { this->m_wasSaved = On; }
 
-  virtual ~SaveableTesterWithFile() {}
+  ~SaveableTesterWithFile() override {}
 
-  virtual void clearDataFromMemory() {
+  void clearDataFromMemory() override {
     this->setLoaded(false);
     m_memory = 0;
   }
 
   uint64_t m_memory;
-  virtual uint64_t getTotalDataSize() const {
+  uint64_t getTotalDataSize() const override {
     if (this->wasSaved()) {
       if (this->isLoaded())
         return m_memory;
@@ -49,7 +49,7 @@ public:
     } else
       return m_memory;
   };
-  virtual size_t getDataMemorySize() const { return size_t(m_memory); }
+  size_t getDataMemorySize() const override { return size_t(m_memory); }
 
   void AddNewObjects(uint64_t nNewObj) {
     if (this->wasSaved()) {
@@ -63,7 +63,7 @@ public:
   }
 
   char m_ch;
-  virtual void save() const {
+  void save() const override {
     // Fake writing to a file
     streamMutex.lock();
     uint64_t mPos = this->getFilePosition();
@@ -80,7 +80,7 @@ public:
     this->m_wasSaved = true;
   }
 
-  virtual void load() {
+  void load() override {
     if (this->wasSaved() && !this->isLoaded()) {
       m_memory += this->getFileSize();
     }
@@ -88,7 +88,7 @@ public:
     // function
     this->setLoaded(true);
   }
-  virtual void flushData() const {}
+  void flushData() const override {}
 
   static std::string fakeFile;
   static std::mutex streamMutex;
@@ -104,7 +104,7 @@ public:
   std::vector<SaveableTesterWithFile *> data;
   size_t num;
 
-  void setUp() {
+  void setUp() override {
     // Create the ISaveables
     num = 10;
     SaveableTesterWithFile::fakeFile = "";
@@ -114,7 +114,7 @@ public:
           new SaveableTesterWithFile(uint64_t(2 * i), 2, char(i + 0x41)));
   }
 
-  void tearDown() {
+  void tearDown() override {
     for (size_t i = 0; i < data.size(); i++) {
       delete data[i];
       data[i] = NULL;
@@ -684,7 +684,7 @@ public:
   }
 
   /// Method to flush the data to disk and ensure it is written.
-  virtual void flushData() const {};
+  void flushData() const override{};
   /** @return the amount of memory that the object takes as a whole.
       For filebased objects it should be the amount the object occupies in
      memory plus the size it occupies in file if the object has not been fully
@@ -693,9 +693,9 @@ public:
      * If the object has never been loaded, this should be equal to number of
      data points in the file
      */
-  virtual uint64_t getTotalDataSize() const { return m_memory; }
+  uint64_t getTotalDataSize() const override { return m_memory; }
   /// the data size kept in memory
-  virtual size_t getDataMemorySize() const { return m_memory; };
+  size_t getDataMemorySize() const override { return m_memory; };
 
   virtual void load(DiskBuffer & /*dbuf*/) {
     uint64_t myFilePos = this->getFilePosition();
@@ -705,14 +705,14 @@ public:
     this->setLoaded(true);
   }
 
-  virtual void save() const {
+  void save() const override {
     // Pretend to seek to the point and write
     uint64_t myFilePos = this->getFilePosition();
     // std::cout << "Block " << getFileId() << " saving at " << myFilePos <<
     // std::endl;
     fakeSeekAndWrite(myFilePos);
   }
-  virtual void clearDataFromMemory() {
+  void clearDataFromMemory() override {
     m_memory = 0;
     this->setLoaded(false);
   }
@@ -749,7 +749,7 @@ public:
     }
     filePos = newPos;
   }
-  virtual void load() {
+  void load() override {
     if (this->wasSaved() && !this->isLoaded()) {
       m_memory += this->getFileSize();
     }
@@ -785,7 +785,7 @@ public:
     for (size_t i = 0; i < 200; i++)
       dataSeek.push_back(new SaveableTesterWithSeek(i));
   }
-  void setUp() { SaveableTesterWithSeek::fakeFile = ""; }
+  void setUp() override { SaveableTesterWithSeek::fakeFile = ""; }
 
   void xest_nothing() {
     TS_WARN("Tests here were disabled for the time being");

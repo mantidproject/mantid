@@ -9,7 +9,24 @@
 #include <algorithm>
 #include <ostream>
 #include <stdexcept>
+#include <boost/regex.hpp>
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
+
+namespace {
+/**
+* Return the number of pixels to make a texture in, given the
+* desired pixel size. A texture has to have 2^n pixels per side.
+* @param desired :: the requested pixel size
+* @return number of pixels for texture
+*/
+int getOneTextureSize(int desired) {
+  int size = 2;
+  while (desired > size) {
+    size = size * 2;
+  }
+  return size;
+}
+} // namespace
 
 namespace Mantid {
 namespace Geometry {
@@ -56,6 +73,14 @@ RectangularDetector::RectangularDetector(const std::string &n,
   init();
   this->setName(n);
   setGeometryHandler(new BitmapGeometryHandler(this));
+}
+
+bool RectangularDetector::compareName(const std::string &proposedMatch) {
+  boost::regex exp(
+      "(RectangularDetector)|(rectangularDetector)|(rectangulardetector)|"
+      "(rectangular_detector)");
+
+  return boost::regex_match(proposedMatch, exp);
 }
 
 void RectangularDetector::init() {
@@ -460,16 +485,12 @@ RectangularDetector::getComponentByName(const std::string &cname,
   // and this prevents Bank11 matching Bank 1
   const std::string MEMBER_NAME = this->getName() + "(";
 
-  // if the component name is too short, just return
-  if (cname.length() <= MEMBER_NAME.length())
-    return boost::shared_ptr<const IComponent>();
-
   // check that the searched for name starts with the detector's
   // name as they are generated
-  if (cname.substr(0, MEMBER_NAME.length()).compare(MEMBER_NAME) == 0) {
-    return CompAssembly::getComponentByName(cname, nlevels);
-  } else {
+  if (cname.substr(0, MEMBER_NAME.length()).compare(MEMBER_NAME) != 0) {
     return boost::shared_ptr<const IComponent>();
+  } else {
+    return CompAssembly::getComponentByName(cname, nlevels);
   }
 }
 
@@ -555,27 +576,21 @@ void RectangularDetector::testIntersectionWithChildren(
 
 //-------------------------------------------------------------------------------------------------
 /// Does the point given lie within this object component?
-bool RectangularDetector::isValid(const V3D &point) const {
-  // Avoid compiler warning
-  (void)point;
+bool RectangularDetector::isValid(const V3D &) const {
   throw Kernel::Exception::NotImplementedError(
       "RectangularDetector::isValid() is not implemented.");
 }
 
 //-------------------------------------------------------------------------------------------------
 /// Does the point given lie on the surface of this object component?
-bool RectangularDetector::isOnSide(const V3D &point) const {
-  // Avoid compiler warning
-  (void)point;
+bool RectangularDetector::isOnSide(const V3D &) const {
   throw Kernel::Exception::NotImplementedError(
       "RectangularDetector::isOnSide() is not implemented.");
 }
 
 //-------------------------------------------------------------------------------------------------
 /// Checks whether the track given will pass through this Component.
-int RectangularDetector::interceptSurface(Track &track) const {
-  // Avoid compiler warning
-  (void)track;
+int RectangularDetector::interceptSurface(Track &) const {
   throw Kernel::Exception::NotImplementedError(
       "RectangularDetector::interceptSurface() is not implemented.");
 }
@@ -583,18 +598,14 @@ int RectangularDetector::interceptSurface(Track &track) const {
 //-------------------------------------------------------------------------------------------------
 /// Finds the approximate solid angle covered by the component when viewed from
 /// the point given
-double RectangularDetector::solidAngle(const V3D &observer) const {
-  // Avoid compiler warning
-  (void)observer;
+double RectangularDetector::solidAngle(const V3D &) const {
   throw Kernel::Exception::NotImplementedError(
       "RectangularDetector::solidAngle() is not implemented.");
 }
 
 //-------------------------------------------------------------------------------------------------
 /// Try to find a point that lies within (or on) the object
-int RectangularDetector::getPointInObject(V3D &point) const {
-  // Avoid compiler warning
-  (void)point;
+int RectangularDetector::getPointInObject(V3D &) const {
   throw Kernel::Exception::NotImplementedError(
       "RectangularDetector::getPointInObject() is not implemented.");
 }
@@ -622,20 +633,6 @@ void RectangularDetector::getBoundingBox(BoundingBox &assemblyBox) const {
 
   // Use cached box
   assemblyBox = *m_cachedBoundingBox;
-}
-
-/**
- * Return the number of pixels to make a texture in, given the
- * desired pixel size. A texture has to have 2^n pixels per side.
- * @param desired :: the requested pixel size
- * @return number of pixels for texture
- */
-int getOneTextureSize(int desired) {
-  int size = 2;
-  while (desired > size) {
-    size = size * 2;
-  }
-  return size;
 }
 
 /**

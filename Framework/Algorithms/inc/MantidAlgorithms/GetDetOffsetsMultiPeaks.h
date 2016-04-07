@@ -157,6 +157,7 @@ private:
   /// Peak profile type
   std::string m_peakType;
   /// Criterias for fitting peak
+  std::string m_minimizer;
   double m_maxChiSq;
   double m_minPeakHeight;
   double m_leastMaxObsY;

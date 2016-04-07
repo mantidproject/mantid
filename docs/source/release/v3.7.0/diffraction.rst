@@ -17,11 +17,37 @@ Crystal Improvements
 Engineering Diffraction
 -----------------------
 
+- New algorithm added: EnggFitDIFCFromPeaks, which forks from the old EnggFitPeaks. EnggFitPeaks modified to
+  fit peaks but not calibration parameters.
+
+Graphical user interface:
+
 - Vanadium Curves and Ceria Peaks graphs are plotted once basic and cropped calibration process has been carried out
 - Customise Bank Name text-field will set the workspace and .his file name according to this Bank Name
   provided by the user for Cropped Calibration
+- The Fitting tab provides a graphical interface which fits an expected diffraction pattern and visualises them.
+  The pastern is specified by providing a list of dSpacing values where Bragg peaks are expected. The algorithm
+  :ref:`EnggFitPeaks<algm-EnggFitPeaks>` used in the background fit peaks in those areas using a peak fitting function.
 
-|
+Imaging
+-------
+
+Improvements in the tomographic reconstruction graphical user interface:
+
+- New capabilities added when visualizing stacks of images:
+
+  - Handle the rotation of all the images in the stack
+  - "Play" the stack or sequence of images as a movie
+  - Visualize sample, flat, and dark images separately
+
+- Previously existing parameters to set up local and remote paths have
+  been moved into a new section of the interface. New options have
+  been introduced for better flexibility. These are updated for the
+  current infrastructure and are remembered between sessions.
+
+- Normalization by flat and dark images can be disabled explicitly and
+  separately, which is now supported in the underlying reconstruction
+  scripts.
 
 Full list of `diffraction <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Diffraction%22>`_
 and

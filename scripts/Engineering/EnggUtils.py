@@ -55,7 +55,7 @@ def read_in_expected_peaks(filename, expectedGiven):
 
         if not exPeakArray:
             # "File could not be read. Defaults in alternative option used."
-            if [] == expectedGiven:
+            if not expectedGiven:
                 raise ValueError("Could not read any peaks from the file given in 'ExpectedPeaksFromFile: '" +
                                  filename + "', and no expected peaks were given in the property "
                                  "'ExpectedPeaks' either. Cannot continue without a list of expected peaks.")
@@ -65,7 +65,7 @@ def read_in_expected_peaks(filename, expectedGiven):
             expectedPeaksD = sorted(exPeakArray)
 
     else:
-        if [] == expectedGiven:
+        if 0 == expectedGiven.size:
             raise ValueError("No expected peaks were given in the property 'ExpectedPeaks', "
                              "could not get default expected peaks, and 'ExpectedPeaksFromFile' "
                              "was not given either. Cannot continout without a list of expected peaks.")
@@ -196,18 +196,20 @@ def getDetIDsForBank(bank):
 
     return detIDs
 
-def  generateOutputParTable(name, difc, zero):
+def  generateOutputParTable(name, difa, difc, tzero):
     """
     Produces a table workspace with the two fitted calibration parameters
 
     @param name :: the name to use for the table workspace that is created here
-    @param difc :: difc calibration parameter
-    @param zero :: zero calibration parameter
+    @param difa :: DIFA calibration parameter (GSAS parameter)
+    @param difc :: DIFC calibration parameter
+    @param tzero :: TZERO calibration parameter
     """
     tbl = sapi.CreateEmptyTableWorkspace(OutputWorkspace=name)
-    tbl.addColumn('double', 'difc')
-    tbl.addColumn('double', 'zero')
-    tbl.addRow([float(difc), float(zero)])
+    tbl.addColumn('double', 'DIFA')
+    tbl.addColumn('double', 'DIFZ')
+    tbl.addColumn('double', 'TZERO')
+    tbl.addRow([float(difa), float(difc), float(tzero)])
 
 def applyVanadiumCorrections(parent, ws, indices, vanWS, vanIntegWS, vanCurvesWS):
     """

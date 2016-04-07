@@ -14,7 +14,7 @@ using namespace Mantid::Geometry;
 class TestablePoldiBasicChopper : public PoldiBasicChopper {
   friend class PoldiBasicChopperTest;
 
-  void loadConfiguration(Instrument_const_sptr poldiInstrument) {
+  void loadConfiguration(Instrument_const_sptr poldiInstrument) override {
     UNUSED_ARG(poldiInstrument);
 
     double rawSlitPositions[] = {0.000000, 0.162156, 0.250867, 0.3704,

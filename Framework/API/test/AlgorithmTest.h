@@ -23,13 +23,15 @@ using namespace Mantid::API;
 class StubbedWorkspaceAlgorithm : public Algorithm {
 public:
   StubbedWorkspaceAlgorithm() : Algorithm() {}
-  virtual ~StubbedWorkspaceAlgorithm() {}
+  ~StubbedWorkspaceAlgorithm() override {}
 
-  const std::string name() const { return "StubbedWorkspaceAlgorithm"; }
-  int version() const { return 1; }
-  const std::string category() const { return "Cat;Leopard;Mink"; }
-  const std::string summary() const { return "Test summary"; }
-  void init() {
+  const std::string name() const override {
+    return "StubbedWorkspaceAlgorithm";
+  }
+  int version() const override { return 1; }
+  const std::string category() const override { return "Cat;Leopard;Mink"; }
+  const std::string summary() const override { return "Test summary"; }
+  void init() override {
     declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace1", "",
                                                      Direction::Input));
     declareProperty(make_unique<WorkspaceProperty<>>(
@@ -42,7 +44,7 @@ public:
     declareProperty(make_unique<WorkspaceProperty<>>(
         "OutputWorkspace2", "", Direction::Output, PropertyMode::Optional));
   }
-  void exec() {
+  void exec() override {
     boost::shared_ptr<WorkspaceTester> out1 =
         boost::make_shared<WorkspaceTester>();
     out1->init(10, 10, 10);
@@ -66,13 +68,15 @@ DECLARE_ALGORITHM(StubbedWorkspaceAlgorithm)
 class StubbedWorkspaceAlgorithm2 : public Algorithm {
 public:
   StubbedWorkspaceAlgorithm2() : Algorithm() {}
-  virtual ~StubbedWorkspaceAlgorithm2() {}
+  ~StubbedWorkspaceAlgorithm2() override {}
 
-  const std::string name() const { return "StubbedWorkspaceAlgorithm2"; }
-  int version() const { return 2; }
-  const std::string category() const { return "Cat;Leopard;Mink"; }
-  const std::string summary() const { return "Test summary"; }
-  void init() {
+  const std::string name() const override {
+    return "StubbedWorkspaceAlgorithm2";
+  }
+  int version() const override { return 2; }
+  const std::string category() const override { return "Cat;Leopard;Mink"; }
+  const std::string summary() const override { return "Test summary"; }
+  void init() override {
     declareProperty(make_unique<WorkspaceProperty<>>(
         "NonLockingInputWorkspace", "", Direction::Input,
         PropertyMode::Optional, LockMode::NoLock));
@@ -80,32 +84,36 @@ public:
         "NonLockingOutputWorkspace", "", Direction::Output,
         PropertyMode::Optional, LockMode::NoLock));
   }
-  void exec() {}
+  void exec() override {}
 };
 DECLARE_ALGORITHM(StubbedWorkspaceAlgorithm2)
 
 class AlgorithmWithValidateInputs : public Algorithm {
 public:
   AlgorithmWithValidateInputs() : Algorithm() {}
-  virtual ~AlgorithmWithValidateInputs() {}
-  const std::string name() const { return "StubbedWorkspaceAlgorithm2"; }
-  int version() const { return 1; }
-  const std::string category() const { return "Cat;Leopard;Mink"; }
-  const std::string summary() const { return "Test summary"; }
-  const std::string workspaceMethodName() const { return "methodname"; }
-  const std::string workspaceMethodOnTypes() const {
+  ~AlgorithmWithValidateInputs() override {}
+  const std::string name() const override {
+    return "StubbedWorkspaceAlgorithm2";
+  }
+  int version() const override { return 1; }
+  const std::string category() const override { return "Cat;Leopard;Mink"; }
+  const std::string summary() const override { return "Test summary"; }
+  const std::string workspaceMethodName() const override {
+    return "methodname";
+  }
+  const std::string workspaceMethodOnTypes() const override {
     return "MatrixWorkspace;ITableWorkspace";
   }
-  const std::string workspaceMethodInputProperty() const {
+  const std::string workspaceMethodInputProperty() const override {
     return "InputWorkspace";
   }
 
-  void init() {
+  void init() override {
     declareProperty("PropertyA", 12);
     declareProperty("PropertyB", 12);
   }
-  void exec() {}
-  std::map<std::string, std::string> validateInputs() {
+  void exec() override {}
+  std::map<std::string, std::string> validateInputs() override {
     std::map<std::string, std::string> out;
     int A = getProperty("PropertyA");
     int B = getProperty("PropertyB");
@@ -122,19 +130,19 @@ DECLARE_ALGORITHM(AlgorithmWithValidateInputs)
 class FailingAlgorithm : public Algorithm {
 public:
   FailingAlgorithm() : Algorithm() {}
-  virtual ~FailingAlgorithm() {}
-  const std::string name() const { return "FailingAlgorithm"; }
-  int version() const { return 1; }
-  const std::string summary() const { return "Test summary"; }
+  ~FailingAlgorithm() override {}
+  const std::string name() const override { return "FailingAlgorithm"; }
+  int version() const override { return 1; }
+  const std::string summary() const override { return "Test summary"; }
   static const std::string FAIL_MSG;
 
-  void init() {
+  void init() override {
     declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
                                                      Direction::Input));
     declareProperty("WsNameToFail", "");
   }
 
-  void exec() {
+  void exec() override {
     std::string wsNameToFail = getPropertyValue("WsNameToFail");
     std::string wsName = getPropertyValue("InputWorkspace");
 
@@ -162,7 +170,7 @@ public:
     Mantid::API::AlgorithmFactory::Instance().subscribe<ToyAlgorithmTwo>();
   }
 
-  ~AlgorithmTest() {
+  ~AlgorithmTest() override {
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("ToyAlgorithm", 1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("ToyAlgorithmTwo", 1);
   }

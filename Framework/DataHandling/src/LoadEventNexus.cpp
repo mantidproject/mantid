@@ -912,7 +912,7 @@ public:
       m_min_id = minSpectraToLoad;
     }
     if (maxSpectraToLoad != emptyInt && m_max_id > maxSpectraToLoad) {
-      if (maxSpectraToLoad > m_min_id) {
+      if (maxSpectraToLoad < m_min_id) {
         // the maximum spectra to load is less than the minimum of this bank
         return;
       }
@@ -1074,6 +1074,11 @@ void LoadEventNexus::init() {
       "The name of the output EventWorkspace or WorkspaceGroup in which to "
       "load the EventNexus file.");
 
+  declareProperty(
+      make_unique<PropertyWithValue<string>>("NXentryName", "",
+                                             Direction::Input),
+      "Optional: Name of the NXentry to load if it's not the default.");
+
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "FilterByTofMin", EMPTY_DBL(), Direction::Input),
                   "Optional: To exclude events that do not fall within a range "
@@ -1103,11 +1108,6 @@ void LoadEventNexus::init() {
   setPropertyGroup("FilterByTofMax", grp1);
   setPropertyGroup("FilterByTimeStart", grp1);
   setPropertyGroup("FilterByTimeStop", grp1);
-
-  declareProperty(
-      make_unique<PropertyWithValue<string>>("NXentryName", "",
-                                             Direction::Input),
-      "Optional: Name of the NXentry to load if it's not the default.");
 
   declareProperty(
       make_unique<ArrayProperty<string>>("BankName", Direction::Input),
@@ -1171,6 +1171,12 @@ void LoadEventNexus::init() {
                                            Direction::Input),
       "If present, load the monitors as events. '''WARNING:''' WILL "
       "SIGNIFICANTLY INCREASE MEMORY USAGE (optional, default False). ");
+  declareProperty(make_unique<PropertyWithValue<bool>>("LoadEventMonitors",
+                                                       true, Direction::Input),
+                  "blablabla");
+  declareProperty(make_unique<PropertyWithValue<bool>>("LoadHistoMonitors",
+                                                       true, Direction::Input),
+                  "blablabla");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "FilterMonByTofMin", EMPTY_DBL(), Direction::Input),
@@ -1199,6 +1205,12 @@ void LoadEventNexus::init() {
   setPropertySettings(
       "MonitorsAsEvents",
       make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
+  setPropertySettings(
+      "LoadEventMonitors",
+      make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
+  setPropertySettings(
+      "LoadHistoMonitors",
+      make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
   auto asEventsIsOn = [] {
     std::unique_ptr<IPropertySettings> prop =
         make_unique<VisibleWhenProperty>("MonitorsAsEvents", IS_EQUAL_TO, "1");
@@ -1212,6 +1224,8 @@ void LoadEventNexus::init() {
   std::string grp4 = "Monitors";
   setPropertyGroup("LoadMonitors", grp4);
   setPropertyGroup("MonitorsAsEvents", grp4);
+  setPropertyGroup("LoadEventMonitors", grp4);
+  setPropertyGroup("LoadHistoMonitors", grp4);
   setPropertyGroup("FilterMonByTofMin", grp4);
   setPropertyGroup("FilterMonByTofMax", grp4);
   setPropertyGroup("FilterMonByTimeStart", grp4);
@@ -1536,6 +1550,12 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     loadLogs->setPropertyValue("Filename", nexusfilename);
     loadLogs->setProperty<API::MatrixWorkspace_sptr>("Workspace",
                                                      localWorkspace);
+    try {
+      loadLogs->setPropertyValue("NXentryName",
+                                 alg.getPropertyValue("NXentryName"));
+    } catch (...) {
+    }
+
     loadLogs->execute();
 
     const Run &run = localWorkspace->run();
@@ -2380,6 +2400,10 @@ void LoadEventNexus::runLoadMonitors() {
     loadMonitors->setPropertyValue("OutputWorkspace", mon_wsname);
     loadMonitors->setPropertyValue("MonitorsAsEvents",
                                    this->getProperty("MonitorsAsEvents"));
+    loadMonitors->setPropertyValue("LoadEventMonitors",
+                                   this->getProperty("LoadEventMonitors"));
+    loadMonitors->setPropertyValue("LoadHistoMonitors",
+                                   this->getProperty("LoadHistoMonitors"));
     loadMonitors->execute();
     Workspace_sptr monsOut = loadMonitors->getProperty("OutputWorkspace");
     this->declareProperty(

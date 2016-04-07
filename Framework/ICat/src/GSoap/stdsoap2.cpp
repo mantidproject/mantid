@@ -1,3 +1,8 @@
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-align"
+#endif
+
 /*
   stdsoap2.c[pp] 2.8.15
 
@@ -17002,3 +17007,7 @@ soap::~soap() {
 #endif
 
 /******************************************************************************/
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif

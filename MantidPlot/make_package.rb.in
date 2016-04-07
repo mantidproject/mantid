@@ -66,6 +66,11 @@ library_filenames = ["libboost_regex-mt.dylib",
                      "libssl.dylib",
                      "libcrypto.dylib"]
 
+poco_version = "@POCO_VERSION@".split(".").map(&:to_i)
+if(poco_version[0] > 1 || (poco_version[0] == 1 && poco_version[1] >= 6))
+  library_filenames << "libPocoJSON.dylib"
+end
+
 #This copies the libraries over, then changes permissions and the id from /usr/local/lib to @rpath
 library_filenames.each do |filename|
   if filename.include? "libssl.dylib"

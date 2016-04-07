@@ -207,11 +207,11 @@ public slots:
   //! \name Sorting
   //@{
   /**\brief Sort the current column in ascending order.
-   * \sa sortColDesc(), sortColumn(), Q3Table::currentColumn()
+   * \sa sortColDesc(), sortColumn()
    */
   void sortColAsc();
   /**\brief Sort the current column in descending order.
-   * \sa sortColAsc(), sortColumn(), Q3Table::currentColumn()
+   * \sa sortColAsc(), sortColumn()
    */
   void sortColDesc();
 

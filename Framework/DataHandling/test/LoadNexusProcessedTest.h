@@ -56,7 +56,7 @@ public:
       : testFile("GEM38370_Focussed_Legacy.nxs"), output_ws("nxstest"),
         m_savedTmpEventFile("") {}
 
-  ~LoadNexusProcessedTest() {
+  ~LoadNexusProcessedTest() override {
     AnalysisDataService::Instance().clear();
     clearTmpEventNexus();
   }
@@ -385,6 +385,8 @@ public:
 
     // Testing the number of histograms
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 5);
+
+    TS_ASSERT_EQUALS(ws->readX(0).size(), 100);
 
     for (size_t wi = 0; wi < 5; wi++) {
       const EventList &el = ws->getEventList(wi);

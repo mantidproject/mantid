@@ -57,6 +57,7 @@ public:
   MOCK_METHOD0(help, void());
   MOCK_METHOD1(checkBoxAutoChanged, void(int));
   MOCK_METHOD1(setCurrentAutoFile, void(const std::string &));
+  MOCK_METHOD0(handleFirstFileChanged, void());
 
   void requestLoading() { emit loadRequested(); }
   void selectFirstRun() { emit firstRunSelected(); }
@@ -82,8 +83,7 @@ public:
     FrameworkManager::Instance(); // To make sure everything is initialized
   }
 
-  void setUp()
-  {
+  void setUp() override {
     m_view = new NiceMock<MockALCDataLoadingView>();
     m_presenter = new ALCDataLoadingPresenter(m_view);
     m_presenter->initialize();
@@ -101,8 +101,7 @@ public:
     ON_CALL(*m_view, subtractIsChecked()).WillByDefault(Return(false));
   }
 
-  void tearDown()
-  {
+  void tearDown() override {
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_view));
     delete m_presenter;
     delete m_view;
@@ -176,7 +175,7 @@ public:
   {
     EXPECT_CALL(*m_view, firstRun()).WillRepeatedly(Return("MUSR00015189.nxs"));
     // Test logs
-    EXPECT_CALL(*m_view, setAvailableLogs(AllOf(Property(&std::vector<std::string>::size, 38),
+    EXPECT_CALL(*m_view, setAvailableLogs(AllOf(Property(&std::vector<std::string>::size, 39),
                                                 Contains("run_number"),
                                                 Contains("sample_magn_field"),
                                                 Contains("Field_Danfysik")))).Times(1);

@@ -16,7 +16,7 @@ using std::vector;
 class EventsTest : public CxxTest::TestSuite {
 
 public:
-  void setUp() {}
+  void setUp() override {}
 
   void test_Compare() {
     // tof event

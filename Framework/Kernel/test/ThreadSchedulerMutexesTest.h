@@ -24,9 +24,9 @@ public:
     }
 
     /// Count # of times destructed in the destructor
-    ~TaskWithMutex() { ThreadSchedulerMutexesTest_timesDeleted++; }
+    ~TaskWithMutex() override { ThreadSchedulerMutexesTest_timesDeleted++; }
 
-    void run() {
+    void run() override {
       // TaskTestNamespace::my_check_value = 123;
     }
   };

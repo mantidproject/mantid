@@ -634,7 +634,7 @@ DetectorDiagnostic::calculateMedian(const API::MatrixWorkspace_sptr input,
     }
 
     PARALLEL_FOR1(input)
-    for (int i = 0; i < static_cast<int>(hists.size()); ++i) {
+    for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
       PARALLEL_START_INTERUPT_REGION
 
       if (checkForMask) {

@@ -46,44 +46,43 @@ namespace API
     {
     public:
       RepoDelegate(QObject *parent = 0);
-      
-      void paint(QPainter *painter,
-                 const QStyleOptionViewItem &option,
-                 const QModelIndex &index) const;
-      bool editorEvent(QEvent *event,
-                       QAbstractItemModel *model,
+
+      void paint(QPainter *painter, const QStyleOptionViewItem &option,
+                 const QModelIndex &index) const override;
+      bool editorEvent(QEvent *event, QAbstractItemModel *model,
                        const QStyleOptionViewItem &option,
-                       const QModelIndex &index);
-      QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const ;
+                       const QModelIndex &index) override;
+      QSize sizeHint(const QStyleOptionViewItem &option,
+                     const QModelIndex &index) const override;
     };
     /// Delegate to show the checkbox for configuring the auto update
     class CheckBoxDelegate : public QStyledItemDelegate
     {
     public:
-      CheckBoxDelegate(QObject * parent = 0); 
-      void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-      bool editorEvent(QEvent *event,
-                       QAbstractItemModel *model,
+      CheckBoxDelegate(QObject * parent = 0);
+      void paint(QPainter *painter, const QStyleOptionViewItem &option,
+                 const QModelIndex &index) const override;
+      bool editorEvent(QEvent *event, QAbstractItemModel *model,
                        const QStyleOptionViewItem &option,
-                       const QModelIndex &index);
+                       const QModelIndex &index) override;
     };
     /// Delegate to show the icon to remove the entry from the local and central repository
     class RemoveEntryDelegate : public QStyledItemDelegate
     {
     public:
-      RemoveEntryDelegate(QObject * parent = 0); 
-      void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-      bool editorEvent(QEvent *event,
-                       QAbstractItemModel *model,
+      RemoveEntryDelegate(QObject * parent = 0);
+      void paint(QPainter *painter, const QStyleOptionViewItem &option,
+                 const QModelIndex &index) const override;
+      bool editorEvent(QEvent *event, QAbstractItemModel *model,
                        const QStyleOptionViewItem &option,
-                       const QModelIndex &index);
+                       const QModelIndex &index) override;
     };
 
    public:
     // constuctor 
     ScriptRepositoryView(QWidget * parent=0);
     // destructor - not virtual, because this is not intended to be base
-    ~ScriptRepositoryView();
+    ~ScriptRepositoryView() override;
 
   signals:
     // allow Mantid Plot to open a python file to be seen 

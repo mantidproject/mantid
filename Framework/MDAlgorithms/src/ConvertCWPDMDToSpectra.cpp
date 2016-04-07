@@ -640,7 +640,7 @@ void ConvertCWPDMDToSpectra::linearInterpolation(
     }
     g_log.debug() << "iMinNonZero = " << minNonZeroIndex
                   << ", iMaxNonZero = " << maxNonZeroIndex
-                  << " Spectrum index = " << i
+                  << " Workspace index = " << i
                   << ", Y size = " << matrixws->readY(i).size() << "\n";
     if (minNonZeroIndex >= maxNonZeroIndex)
       throw std::runtime_error("It is not right!");

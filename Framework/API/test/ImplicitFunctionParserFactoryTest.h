@@ -17,12 +17,12 @@ private:
   class MockImplicitFunctionParameterParser
       : public Mantid::API::ImplicitFunctionParameterParser {
   public:
-    virtual Mantid::API::ImplicitFunctionParameter *
-    createParameter(Poco::XML::Element *) {
+    Mantid::API::ImplicitFunctionParameter *
+    createParameter(Poco::XML::Element *) override {
       return NULL;
     }
-    virtual void
-    setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser *) {}
+    void setSuccessorParser(
+        Mantid::API::ImplicitFunctionParameterParser *) override {}
   };
 
   class MockImplicitFunctionParserA
@@ -32,13 +32,13 @@ private:
         : Mantid::API::ImplicitFunctionParser(
               new MockImplicitFunctionParameterParser) {}
 
-    virtual Mantid::API::ImplicitFunctionBuilder *
-    createFunctionBuilder(Poco::XML::Element *) {
+    Mantid::API::ImplicitFunctionBuilder *
+    createFunctionBuilder(Poco::XML::Element *) override {
       return NULL;
     }
-    virtual void setSuccessorParser(Mantid::API::ImplicitFunctionParser *) {}
-    virtual void
-    setParameterParser(Mantid::API::ImplicitFunctionParameterParser *) {}
+    void setSuccessorParser(Mantid::API::ImplicitFunctionParser *) override {}
+    void setParameterParser(
+        Mantid::API::ImplicitFunctionParameterParser *) override {}
   };
 
   class MockImplicitFunctionParserB
@@ -48,13 +48,13 @@ private:
         : Mantid::API::ImplicitFunctionParser(
               new MockImplicitFunctionParameterParser) {}
 
-    virtual Mantid::API::ImplicitFunctionBuilder *
-    createFunctionBuilder(Poco::XML::Element *) {
+    Mantid::API::ImplicitFunctionBuilder *
+    createFunctionBuilder(Poco::XML::Element *) override {
       return NULL;
     }
-    virtual void setSuccessorParser(Mantid::API::ImplicitFunctionParser *) {}
-    virtual void
-    setParameterParser(Mantid::API::ImplicitFunctionParameterParser *) {}
+    void setSuccessorParser(Mantid::API::ImplicitFunctionParser *) override {}
+    void setParameterParser(
+        Mantid::API::ImplicitFunctionParameterParser *) override {}
   };
 
 public:

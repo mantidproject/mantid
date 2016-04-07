@@ -22,9 +22,15 @@ public:
     SetPeaksWorkspaces empty;
     return empty;
   }
-  void setForegroundColor(const QColor) override { /*Do nothing*/
+  void setForegroundColor(const PeakViewColor) override { /*Do nothing*/
   }
-  void setBackgroundColor(const QColor) override { /*Do nothing*/
+  void setBackgroundColor(const PeakViewColor) override { /*Do nothing*/
+  }
+  PeakViewColor getBackgroundPeakViewColor() const override {
+    return PeakViewColor();
+  }
+  PeakViewColor getForegroundPeakViewColor() const override {
+    return PeakViewColor();
   }
   std::string getTransformName() const override { return ""; }
   void showBackgroundRadius(const bool) override { /*Do nothing*/

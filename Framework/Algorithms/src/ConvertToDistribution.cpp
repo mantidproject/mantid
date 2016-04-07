@@ -33,9 +33,10 @@ std::map<std::string, std::string> ConvertToDistribution::validateInputs() {
   std::map<std::string, std::string> errors;
 
   MatrixWorkspace_sptr workspace = getProperty("Workspace");
-  if (workspace->id() == "EventWorkspace")
+  if (workspace && workspace->id() == "EventWorkspace") {
     errors["Workspace"] = "Event workspaces cannot be directly converted to "
                           "distributions.";
+  }
 
   return errors;
 }

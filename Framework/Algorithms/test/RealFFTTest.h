@@ -61,7 +61,7 @@ public:
     AnalysisDataService::Instance().add("RealFFT_WS", ws);
     AnalysisDataService::Instance().add("RealFFT_WS_hist", ws1);
   }
-  ~RealFFTTest() {
+  ~RealFFTTest() override {
     FrameworkManager::Instance().deleteWorkspace("RealFFT_WS");
     FrameworkManager::Instance().deleteWorkspace("RealFFT_WS_hist");
     FrameworkManager::Instance().deleteWorkspace("RealFFT_WS_forward");

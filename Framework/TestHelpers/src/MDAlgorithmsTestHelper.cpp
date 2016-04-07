@@ -23,7 +23,7 @@ namespace MDAlgorithmsTestHelper {
 /** Make a (optionally) file backed MDEventWorkspace with nEvents fake data
  *points
  * the points are randomly distributed within the box (nEvents>0) or
- *homoheneously and regularly spread through the box (nEvents<0)
+ *homogeneously and regularly spread through the box (nEvents<0)
  *
  * @param wsName :: name of the workspace in ADS
  * @param fileBacked :: true for file-backed
@@ -63,7 +63,7 @@ makeFileBackedMDEW(const std::string &wsName, bool fileBacked, long numEvents,
 /** Make a (optionally) file backed MDEventWorkspace with nEvents fake data
  *points
  * the points are randomly distributed within the box (nEvents>0) or
- *homoheneously and regularly spread through the box (nEvents<0)
+ *homogeneously and regularly spread through the box (nEvents<0)
  *
  * @param wsName :: name of the workspace in ADS
  * @param fileBacked :: true for file-backed

@@ -60,10 +60,6 @@ namespace CustomInterfaces
     IPeakFunction_const_sptr peakPicker() const override;
     void emitFitRequested();
 
-  public:
-    /// Clear guess when a fit is ready
-    void clearGuess() override;
-
   public slots:
 
     void initialize() override;
@@ -78,6 +74,7 @@ namespace CustomInterfaces
     void displayError(const QString &message) override;
     void help() override;
     void plotGuess() override;
+    void changePlotGuessState(bool plotted) override;
 
     // -- End of IALCPeakFitting interface ---------------------------------------------------------
   private:
@@ -95,9 +92,6 @@ namespace CustomInterfaces
 
     /// Peak picker tool - only one on the plot at any given moment
     MantidWidgets::PeakPicker* m_peakPicker;
-
-    /// Whether the guess is currently plotted on the graph
-    bool m_guessPlotted;
   };
 
 

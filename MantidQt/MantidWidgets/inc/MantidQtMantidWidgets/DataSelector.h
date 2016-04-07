@@ -55,7 +55,7 @@ namespace MantidQt
 
     public:
       DataSelector(QWidget *parent = 0);
-      virtual ~DataSelector();
+      ~DataSelector() override;
 
       /// Get the current file path in the MWRunFiles widget
       QString getFullFilePath() const;

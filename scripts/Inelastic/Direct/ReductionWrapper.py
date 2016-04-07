@@ -8,10 +8,17 @@ from Direct.PropertyManager import PropertyManager
 from Direct.DirectEnergyConversion import DirectEnergyConversion
 import os
 import re
+import time
+try:
+    import h5py
+    h5py_installed = True
+except ImportError:
+    h5py_installed = False
+    pass
 from abc import abstractmethod
 
-#pylint: disable=R0921
-#pylint: disable=too-many-instance-attributes
+# R0921 abstract class not referenced -- wrong, client references it.
+# pylint: disable=too-many-instance-attributes, R0921
 class ReductionWrapper(object):
     """ Abstract class provides interface to direct inelastic reduction
         allowing it to be run  from Mantid, web services, or system tests
@@ -332,8 +339,7 @@ class ReductionWrapper(object):
             return True,'Reference file and reduced workspace are equal with accuracy {0:<3.2f}'\
                         .format(TOLL)
         else:
-#pylint: disable=unused-variable
-            fname,ext = os.path.splitext(fileName)
+            fname,_ = os.path.splitext(fileName)
             filename = fname+'-mismatch.nxs'
             self.reducer.prop_man.log("***WARNING: can not get results matching the reference file.\n"\
                                       "   Saving new results to file {0}".format(filename),'warning')
@@ -368,12 +374,53 @@ class ReductionWrapper(object):
         """
 
         if not self._debug_wait_for_files_operation is None:
-# it is callable and the idea is that it is callable
+# it is callable and the main point of this method is that it is callable
 #pylint: disable=E1102
             self._debug_wait_for_files_operation()
         else:
             Pause(timeToWait)
     #
+    def _check_access_granted(self,input_file):
+        """ Check if the access to the found nxs file is granted
+
+            Created to fix issue on ISIS archive, when file
+            is copied through the network for ~2min and become available
+            2 minutes after it has been found.
+        """
+
+        _,found_ext=os.path.splitext(input_file)
+        if found_ext != '.nxs': # problem solution for nxs files only. Others are seems ok
+            return
+        if not h5py_installed: # well this check is not available. Sad, but it available on
+            # all our working systems. Inform user about the problem
+            self.reducer.prop_man.log \
+            ('*** Can not verify if file is accessible. Install h5py to be able to check file access in waiting mode',\
+            'notice')
+            return
+        ic=0
+        #ok = os.access(input_file,os.R_OK) # does not work in this case
+        try:
+            f = h5py.File(input_file,'r')
+            ok = True
+        except IOError:
+            ok = False
+            while not ok:
+                self.reducer.prop_man.log \
+                ('*** File found but access can not be gained. Waiting for 10 sec','notice')
+                time.sleep(10)
+                ic = ic+1
+                try:
+                    f = h5py.File(input_file,'r')
+                    ok = True
+                except IOError:
+                    ok = False
+                    if ic>24:
+                        raise IOError\
+                        ("Can not get read access to input file: "+input_file+" after 4 min of trying")
+        if ok:
+            f.close()
+
+
     def reduce(self,input_file=None,output_directory=None):
         """ The method performs all main reduction operations over
             single run file
@@ -382,7 +429,8 @@ class ReductionWrapper(object):
             reduction properties between script and web variables
         """
         if input_file:
-#pylint: disable=attribute-defined-outside-init
+# attribute-defined-outside-init -- wrong, it is not
+#pylint: disable=W0201
             self.reducer.sample_run = str(input_file)
         if output_directory:
             config['defaultsave.directory'] = str(output_directory)
@@ -399,8 +447,7 @@ class ReductionWrapper(object):
                 self._run_pause(timeToWait)
                 Found,input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man,file_hint=file_hint,be_quet=True)
                 if Found:
-#pylint: disable=unused-variable
-                    file_name,found_ext=os.path.splitext(input_file)
+                    _,found_ext=os.path.splitext(input_file)
                     if found_ext != fext:
                         wait_counter+=1
                         if wait_counter<2:
@@ -411,9 +458,14 @@ class ReductionWrapper(object):
                             Found = False
                         else:
                             wait_counter = 0
+                    else:
+                        pass
                 else:
                     pass # not found, wait more
             #endWhile
+            # found but let's give it some time to finish possible IO operations
+            self._check_access_granted(input_file)
+            #
             converted_to_energy_transfer_ws = self.reducer.convert_to_energy(None,input_file)
 
         else:
@@ -464,8 +516,18 @@ class ReductionWrapper(object):
                 n_found = len(found)
           #end not(ok)
             if n_found > 0:
-            # cash sum can be dropped now if it has not been done before
+                # cash sum can be dropped now if it has not been done before
                 self.reducer.prop_man.cashe_sum_ws = False
+                for run in found:
+                    # here we have run numbers. Let's get real file names
+                    prop_man = self.reducer.prop_man
+                    instr_name = prop_man.short_instr_name
+                    is_found,fname = PropertyManager.sample_run.find_file(prop_man,instr_name,run);
+                    if not is_found:
+                        raise RuntimeError("File has been found earlier but can not been retrieved now. Logical bug")
+                    else:
+                        # found but let's give it some time to finish possible IO operations
+                        self._check_access_granted(fname)
                 ws = self.reduce()
         else:
             ws = self.reduce()
@@ -479,8 +541,10 @@ class ReductionWrapper(object):
             data search path
         """
         try:
-            n,r = funcreturns.lhs_info('both')
+            _,r = funcreturns.lhs_info('both')
             out_ws_name = r[0]
+# no-exception-type(s) specified. Who knows what exception this internal procedure rises...
+#pylint: disable=W0702
         except:
             out_ws_name = None
 
@@ -593,6 +657,8 @@ def iliad(reduce):
         try:
             _,r = funcreturns.lhs_info('both')
             out_ws_name = r[0]
+# no-exception-type(s) specified. Who knows what exception this internal procedure rises...
+#pylint: disable=W0702
         except:
             out_ws_name = None
 

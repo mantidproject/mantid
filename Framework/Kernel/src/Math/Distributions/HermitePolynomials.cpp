@@ -13,11 +13,11 @@ namespace Math {
  * @param x Value of x to evaluate the polynomial
  */
 double hermitePoly(const unsigned int n, const double x) {
-  if (n == 0)
+  if (n == 0) {
     return 1.0;
-  else if (n == 1)
+  } else if (n == 1) {
     return 2 * x;
-  else {
+  } else {
     return 2.0 * x * hermitePoly(n - 1, x) -
            2.0 * (n - 1) * hermitePoly(n - 2, x);
   }
@@ -39,6 +39,6 @@ std::vector<double> hermitePoly(const unsigned int n,
 
   return result;
 }
-}
+} // namespace Math
 } // namespace Kernel
 } // namespace Mantid

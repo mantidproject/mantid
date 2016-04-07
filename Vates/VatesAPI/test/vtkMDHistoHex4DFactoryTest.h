@@ -259,9 +259,7 @@ private:
   Mantid::API::IMDWorkspace_sptr m_ws_sptr;
 
 public:
-
-  void setUp()
-  {
+  void setUp() override {
     //Create a 4D workspace 50 ^ 4
     m_ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4, 50);
     m_ws_sptr->setTransformFromOriginal(new NullCoordTransform);
