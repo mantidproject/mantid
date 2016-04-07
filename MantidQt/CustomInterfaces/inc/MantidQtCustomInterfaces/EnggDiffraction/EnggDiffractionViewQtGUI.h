@@ -19,6 +19,7 @@
 /// shahroz
 #include "MantidQtMantidWidgets/PeakPicker.h"
 #include "MantidAPI/IPeakFunction.h"
+#include <qwt_plot_zoomer.h>
 
 // Qt classes forward declarations
 class QMutex;
@@ -164,9 +165,6 @@ public:
                          std::vector<QwtPlotCurve *> &dataVector, bool focused);
 
   /// @shahroz
-
-  Mantid::API::IPeakFunction_const_sptr peakPicker() const override;
-
   void setPeakPickerEnabled(bool enabled) override;
 
   void
@@ -255,6 +253,7 @@ private slots:
   void setPeakPick();
   void addPeakToList();
   void savePeakList();
+  void zoomToRange(const QwtDoubleRect &rect);
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
@@ -354,6 +353,8 @@ private:
   /// shahroz
   /// Peak picker tool - only one on the plot at any given moment
   MantidWidgets::PeakPicker *m_peakPicker;
+
+  QwtPlotZoomer *m_zoomTool;
 
   /// presenter as in the model-view-presenter
   boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;

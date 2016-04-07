@@ -70,7 +70,7 @@ const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGINX"),
       m_currentCalibFilename(""), m_focusedDataVector(), m_fittedDataVector(),
-      m_peakPicker(NULL), m_presenter(NULL) {}
+      m_peakPicker(NULL), m_zoomTool(NULL), m_presenter(NULL) {}
 
 EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {
   for (auto curves : m_focusedDataVector) {
@@ -254,8 +254,17 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   // (auto-delete option)
   m_peakPicker =
       new MantidWidgets::PeakPicker(m_uiTabFitting.dataPlot, Qt::red);
-
   setPeakPickerEnabled(false);
+
+  m_zoomTool = new QwtPlotZoomer(
+      QwtPlot::xBottom, QwtPlot::yLeft,
+      QwtPicker::DragSelection | QwtPicker::CornerToCorner,
+      QwtPicker::AlwaysOff, m_uiTabFitting.dataPlot->canvas());
+  m_zoomTool->setRubberBandPen(QPen(Qt::black));
+  m_zoomTool->setEnabled(true);
+
+  connect(m_zoomTool, SIGNAL(zoomed(const QwtDoubleRect &)),
+          SLOT(zoomToRange(const QwtDoubleRect &)));
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -771,13 +780,8 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
   }
 
   m_uiTabFitting.dataPlot->replot();
+  m_zoomTool->setZoomBase();
   data.clear();
-}
-
-/// @shahroz
-Mantid::API::IPeakFunction_const_sptr
-EnggDiffractionViewQtGUI::peakPicker() const {
-  return m_peakPicker->peak();
 }
 
 void EnggDiffractionViewQtGUI::setPeakPickerEnabled(bool enabled) {
@@ -785,7 +789,10 @@ void EnggDiffractionViewQtGUI::setPeakPickerEnabled(bool enabled) {
   m_peakPicker->setVisible(enabled);
   m_uiTabFitting.dataPlot->replot(); // PeakPicker might get hidden/shown
   m_uiTabFitting.pushButton_add_peak->setEnabled(enabled);
-  m_uiTabFitting.pushButton_select_peak->setEnabled(!enabled);
+  if (enabled) {
+    QString btnText = "Reset Peak Selector";
+    m_uiTabFitting.pushButton_select_peak->setText(btnText);
+  }
 }
 
 void EnggDiffractionViewQtGUI::setPeakPicker(
@@ -1377,6 +1384,12 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::savePeakList() {
                 "Invalid file path or or could not be saved. Please try again");
     return;
   }
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::zoomToRange(
+    const QwtDoubleRect &rect) {
+  // Set new zoom level.
+  m_zoomTool->zoom(rect);
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
