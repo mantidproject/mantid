@@ -163,6 +163,19 @@ public:
   void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data,
                          std::vector<QwtPlotCurve *> &dataVector, bool focused);
 
+  /// @shahroz
+
+  Mantid::API::IPeakFunction_const_sptr peakPicker() const override;
+
+  void setPeakPickerEnabled(bool enabled) override;
+
+  void
+  setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) override;
+
+  QPoint getQPoint();
+
+  double getPeakFwhm();
+
   void plotFocusedSpectrum(const std::string &wsName) override;
 
   void plotWaterfallSpectrum(const std::string &wsName) override;
@@ -180,15 +193,6 @@ public:
   int currentPlotType() const override { return m_currentType; }
 
   int currentMultiRunMode() const override { return m_currentRunMode; }
-
-  Mantid::API::IPeakFunction_const_sptr peakPicker() const override;
-
-  /// @shahroz
-  void setPeakPickerEnabled(bool enabled) override;
-
-  void setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) override;
-
-  QPoint getQPoint();
 
 private slots:
   /// for buttons, do calibrate, focus, event->histo rebin, and similar
@@ -249,7 +253,8 @@ private slots:
 
   /// @shahroz
   void setPeakPick();
-
+  void addPeakToList();
+  void savePeakList();
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();

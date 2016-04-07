@@ -233,8 +233,7 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
 
   // add peak by clicking the button
   connect(m_uiTabFitting.pushButton_select_peak, SIGNAL(released()),
-	  SLOT(setPeakPick()));
-
+          SLOT(setPeakPick()));
 
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom,
@@ -245,8 +244,10 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::yLeft, font);
 
   // constructor of the peakPicker
-  // XXX: Being a QwtPlotItem, should get deleted when m_ui.plot gets deleted (auto-delete option)
-  m_peakPicker = new MantidWidgets::PeakPicker(m_uiTabFitting.dataPlot, Qt::red);
+  // XXX: Being a QwtPlotItem, should get deleted when m_ui.plot gets deleted
+  // (auto-delete option)
+  m_peakPicker =
+      new MantidWidgets::PeakPicker(m_uiTabFitting.dataPlot, Qt::red);
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -765,6 +766,35 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
   data.clear();
 }
 
+/// @shahroz
+Mantid::API::IPeakFunction_const_sptr
+EnggDiffractionViewQtGUI::peakPicker() const {
+  return m_peakPicker->peak();
+}
+
+void EnggDiffractionViewQtGUI::setPeakPickerEnabled(bool enabled) {
+  m_peakPicker->setEnabled(enabled);
+  m_peakPicker->setVisible(enabled);
+  m_uiTabFitting.dataPlot->replot(); // PeakPicker might get hidden/shown
+}
+
+void EnggDiffractionViewQtGUI::setPeakPicker(
+    const IPeakFunction_const_sptr &peak) {
+  m_peakPicker->setPeak(peak);
+  m_uiTabFitting.dataPlot->replot();
+}
+
+QPoint EnggDiffractionViewQtGUI::getQPoint() {
+  auto pos = m_uiTabFitting.dataPlot->pos();
+  return pos;
+}
+
+double EnggDiffractionViewQtGUI::getPeakFwhm() {
+  auto peak = m_peakPicker->peak();
+  auto fwhm = peak->fwhm();
+  3 return fwhm;
+}
+
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
   std::string pyCode =
       "win=plotSpectrum('" + wsName + "', 0, error_bars=False, type=0)";
@@ -905,29 +935,6 @@ std::string EnggDiffractionViewQtGUI::askExistingCalibFilename() {
 void EnggDiffractionViewQtGUI::loadCalibrationClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::LoadExistingCalib);
 }
-
-Mantid::API::IPeakFunction_const_sptr
-EnggDiffractionViewQtGUI::peakPicker() const {
-  return m_peakPicker->peak();
-}
-
-void EnggDiffractionViewQtGUI::setPeakPickerEnabled(bool enabled) {
-  m_peakPicker->setEnabled(enabled);
-  m_peakPicker->setVisible(enabled);
-  m_uiTabFitting.dataPlot->replot(); // PeakPicker might get hidden/shown
-}
-
-void EnggDiffractionViewQtGUI::setPeakPicker(
-    const IPeakFunction_const_sptr &peak) {
-  m_peakPicker->setPeak(peak);
-  m_uiTabFitting.dataPlot->replot();
-}
-
-QPoint EnggDiffractionViewQtGUI::getQPoint() {
-  auto pos = m_uiTabFitting.dataPlot->pos();
-  return pos;
-}
-
 
 void EnggDiffractionViewQtGUI::calibrateClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::CalcCalib);
@@ -1298,13 +1305,19 @@ void EnggDiffractionViewQtGUI::setListWidgetBank(int idx) {
   selectBank->setCurrentRow(idx);
 }
 
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setPeakPick()
-{
-	auto bk2bk = FunctionFactory::Instance().createFunction("BackToBackExponential");
-	auto bk2bkFunc = boost::dynamic_pointer_cast<IPeakFunction>(bk2bk);
-	
-	setPeakPicker(bk2bkFunc);
-	setPeakPickerEnabled(true);
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setPeakPick() {
+  auto bk2bk =
+      FunctionFactory::Instance().createFunction("BackToBackExponential");
+  auto bk2bkFunc = boost::dynamic_pointer_cast<IPeakFunction>(bk2bk);
+  // set the peak to BackToBackExponential function
+  setPeakPicker(bk2bkFunc);
+  setPeakPickerEnabled(true);
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addPeakToList() {}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::savePeakList() {
+  // call function in EnggPresenter..
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
