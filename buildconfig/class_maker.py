@@ -24,7 +24,7 @@ def write_header(subproject, classname, filename, args):
     f = open(filename, 'w')
 
     subproject_upper = subproject.upper()
-    guard = "MANTID_%s_%s_H_" % (subproject_upper, classname.upper())
+    guard = "MANTID_%s_%s%s_H_" % (subproject_upper, args.subfolder.replace('/', '_').upper(), classname.upper())
 
     # Create an Algorithm header; will not use it if not an algo
     algorithm_header = """
@@ -177,7 +177,8 @@ def write_test(subproject, classname, filename, args):
     print "Writing test file to %s" % filename
     f = open(filename, 'w')
 
-    guard = "MANTID_%s_%sTEST_H_" % (subproject.upper(), classname.upper())
+    guard = "MANTID_%s_%s%sTEST_H_" % (subproject.upper(), args.subfolder.replace('/', '_').upper(), classname.upper())
+    testclassname = args.subfolder.translate(None, '/') + classname
     algorithm_test = """
   void test_Init()
   {
@@ -241,7 +242,7 @@ public:
 
 #endif /* %s */""" % (
           guard, guard, subproject, args.subfolder, classname,
-          subproject, classname, classname, classname, classname, classname,
+          subproject, classname, testclassname, testclassname, testclassname, testclassname,
           algorithm_test, guard)
     f.write(s)
     f.close()
@@ -317,7 +318,7 @@ def generate(subproject, classname, overwrite, args):
 
     headerfile = os.path.join(basedir, "inc", header_folder, args.subfolder + classname + ".h")
     sourcefile = os.path.join(basedir, "src", args.subfolder + classname + ".cpp")
-    testfile = os.path.join(basedir, "test", classname + "Test.h")
+    testfile = os.path.join(basedir, "test", args.subfolder + classname + "Test.h")
     #up two from the subproject basedir and then docs\source\algorithms
     mantiddir = os.path.dirname(os.path.dirname(basedir))
     rstfile = os.path.join(mantiddir, "docs", "source", "algorithms", classname + "-v1.rst")
