@@ -4,6 +4,7 @@
 
 #include <H5Cpp.h>
 #include <algorithm>
+#include <boost/numeric/conversion/cast.hpp>
 
 using namespace H5;
 
@@ -183,6 +184,26 @@ std::vector<OutputNumT> wideningRead(DataSet &dataset,
 
   return result;
 }
+
+// should be correct for widening too
+template <typename InputNumT, typename OutputNumT>
+std::vector<OutputNumT> narrowingRead(DataSet &dataset,
+                                      const DataType &dataType) {
+  DataSpace dataSpace = dataset.getSpace();
+
+  std::vector<InputNumT> temp(dataSpace.getSelectNpoints());
+  dataset.read(&temp[0], dataType, dataSpace);
+
+  std::vector<OutputNumT> result;
+  result.resize(temp.size());
+
+  std::transform(temp.begin(), temp.end(), result.begin(),
+                 [](const InputNumT a) { // lambda
+                   return boost::numeric_cast<OutputNumT>(a);
+                 });
+
+  return result;
+}
 } // anonymous
 
 template <typename NumT> std::vector<NumT> readArray1DCoerce(DataSet &dataset) {
@@ -194,18 +215,20 @@ template <typename NumT> std::vector<NumT> readArray1DCoerce(DataSet &dataset) {
     result.resize(dataSpace.getSelectNpoints());
     dataset.read(&result[0], dataType, dataSpace);
     return result;
-  } else if (PredType::NATIVE_INT32 == dataType) {
+  }
+
+  if (PredType::NATIVE_INT32 == dataType) {
     return wideningRead<int32_t, NumT>(dataset, dataType);
   } else if (PredType::NATIVE_UINT32 == dataType) {
     return wideningRead<uint32_t, NumT>(dataset, dataType);
   } else if (PredType::NATIVE_INT64 == dataType) {
-    return wideningRead<int64_t, NumT>(dataset, dataType);
+    return narrowingRead<int64_t, NumT>(dataset, dataType);
   } else if (PredType::NATIVE_UINT64 == dataType) {
-    return wideningRead<uint64_t, NumT>(dataset, dataType);
+    return narrowingRead<uint64_t, NumT>(dataset, dataType);
   } else if (PredType::NATIVE_FLOAT == dataType) {
     return wideningRead<float, NumT>(dataset, dataType);
   } else if (PredType::NATIVE_DOUBLE == dataType) {
-    return wideningRead<double, NumT>(dataset, dataType);
+    return narrowingRead<double, NumT>(dataset, dataType);
   }
 
   // not a supported type
