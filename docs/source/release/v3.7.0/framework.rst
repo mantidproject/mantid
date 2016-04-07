@@ -93,6 +93,7 @@ MD Algorithms (VATES CLI)
 -  The size of densely populated, multidimensional MDEventWorkspace slices produced by SliceMD has been greatly reduced by using more sensible box splitting parameters.
 -  Slicing algorithms (SliceMD and BinMD) do not add masked data to their output workspaces.
 -  MergeMD now does not add masked events to its output workspace.
+-  XorMD, OrMD and AndMD treat masked bins as zero.
 
 Geometry
 --------
