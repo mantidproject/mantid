@@ -36,7 +36,7 @@ tuple quickConversionWrapper(Unit &self, const T &destUnitName) {
   bool converted =
       self.quickConversion(destUnitName, wavelengthFactor, wavelengthPower);
   if (!converted) {
-    throw std::runtime_error("Quick conversion is not possible for " +
+    throw std::runtime_error("Quick conversion is not possible from unit:" +
                              std::string(self.unitID()) +
                              " to the desired unit.");
   }
