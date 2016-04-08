@@ -71,9 +71,12 @@ public:
   /// Constructs a cow_ptr with no managed object, i.e. empty cow_ptr.
   constexpr cow_ptr(std::nullptr_t) : Data(nullptr) {}
   cow_ptr(const cow_ptr<DataType> &);
-  cow_ptr(cow_ptr<DataType> &&) = default;
+  cow_ptr(cow_ptr<DataType> &&other) : Data(std::move(other.Data)) {}
   cow_ptr<DataType> &operator=(const cow_ptr<DataType> &);
-  cow_ptr<DataType> &operator=(cow_ptr<DataType> &&) = default;
+  cow_ptr<DataType> &operator=(cow_ptr<DataType> &&other) {
+    Data = std::move(other.Data);
+    return *this;
+  }
   cow_ptr<DataType> &operator=(const ptr_type &);
 
   /// Returns the stored pointer.
