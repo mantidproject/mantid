@@ -2,9 +2,11 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEWQTGUI_H_
 
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
+#include "MantidQtMantidWidgets/PeakPicker.h"
 
 #include "ui_EnggDiffractionQtGUI.h"
 #include "ui_EnggDiffractionQtTabCalib.h"
@@ -15,10 +17,6 @@
 
 #include <boost/scoped_ptr.hpp>
 #include <qwt_plot_curve.h>
-
-/// shahroz
-#include "MantidQtMantidWidgets/PeakPicker.h"
-#include "MantidAPI/IPeakFunction.h"
 #include <qwt_plot_zoomer.h>
 
 // Qt classes forward declarations
@@ -164,7 +162,6 @@ public:
   void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data,
                          std::vector<QwtPlotCurve *> &dataVector, bool focused);
 
-  /// @shahroz
   void setPeakPickerEnabled(bool enabled) override;
 
   void
@@ -172,11 +169,11 @@ public:
 
   double getPeakCentre() const override;
 
-  void fittingWriteFile(std::string &fileDir);
+  void fittingWriteFile(std::string &fileDir) override;
 
-  void setZoomTool(bool enabled);
+  void setZoomTool(bool enabled) override;
 
-  void resetView();
+  void resetView() override;
 
   void plotFocusedSpectrum(const std::string &wsName) override;
 
