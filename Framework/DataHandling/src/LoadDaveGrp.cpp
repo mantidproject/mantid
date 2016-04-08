@@ -143,8 +143,8 @@ void LoadDaveGrp::exec() {
   // Create workspace
   API::MatrixWorkspace_sptr outputWorkspace =
       boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-          API::WorkspaceFactory::Instance().create("Workspace2D", this->nGroups,
-                                                   this->xLength, this->xLength));
+          API::WorkspaceFactory::Instance().create(
+              "Workspace2D", this->nGroups, this->xLength, this->xLength));
   // Force the workspace to be a distribution
   outputWorkspace->setDistribution(true);
 

@@ -13,7 +13,6 @@ class Histogram;
 }
 namespace API {
 
-
 /** A "spectrum" is an object that holds the data for a particular spectrum,
  * in particular:
  *  - The X/Y/E arrays

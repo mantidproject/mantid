@@ -1567,7 +1567,8 @@ const MantidVec &EventList::constDataY() const {
     bool skipErrors = (eventType == TOF);
 
     // Set the Y data in it
-    this->generateHistogram(constDataX(), yData->m_data, eData->m_data, skipErrors);
+    this->generateHistogram(constDataX(), yData->m_data, eData->m_data,
+                            skipErrors);
 
     // Lets save it in the MRU
     mru->insertY(thread, yData);

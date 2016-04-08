@@ -42,7 +42,8 @@ protected:
   MantidVecPtr refE; ///< RefCounted Error
 
 public:
-  Histogram1D(Kernel::Histogram::XMode mode) : API::ISpectrum(), m_histogram(mode) {}
+  Histogram1D(Kernel::Histogram::XMode mode)
+      : API::ISpectrum(), m_histogram(mode) {}
 
   void setX(const MantidVec &X) override;
   void setX(const MantidVecPtr &X) override;

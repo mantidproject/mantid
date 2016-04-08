@@ -7,8 +7,7 @@ namespace API {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ISpectrum::ISpectrum()
-    : m_specNo(0), detectorIDs(), refDx(), m_hasDx(false) {}
+ISpectrum::ISpectrum() : m_specNo(0), detectorIDs(), refDx(), m_hasDx(false) {}
 
 /** Constructor with spectrum number
  * @param specNo :: spectrum # of the spectrum

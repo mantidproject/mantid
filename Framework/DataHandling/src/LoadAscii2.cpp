@@ -506,7 +506,8 @@ void LoadAscii2::newSpectra() {
       delete m_curSpectra;
     }
 
-    m_curSpectra = new DataObjects::Histogram1D(Kernel::Histogram::XMode::Points);
+    m_curSpectra =
+        new DataObjects::Histogram1D(Kernel::Histogram::XMode::Points);
     m_spectraStart = true;
   }
 }
