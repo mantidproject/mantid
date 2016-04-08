@@ -42,6 +42,8 @@ m_shouldBeNormalised(false)
 {
   d_graph->plotWidget()->canvas()->setCursor(Qt::pointingHandCursor);
 
+  addExistingFits(d_graph->curvesList());
+
   if (d_graph->plotWidget()->curves().size() > 0) {
     // Initialize from the first curve that will work
     auto curvesMap = d_graph->plotWidget()->curves();
@@ -1091,4 +1093,22 @@ bool PeakPickerTool::initializeFromCurve(PlotCurve *curve) {
     }
   }
   return true;
+}
+
+/**
+ * Setup function called from constructor.
+ * Adds any existing fit curves to the list so that
+ * "clear fit curves" will clear *all* fits, including old ones.
+ * Also finds out if a guess is already plotted and updates so
+ * that "plot/remove guess" will work correctly
+ * @param curvesList :: [input] List of names of curves on graph
+ */
+void PeakPickerTool::addExistingFits(const QStringList &curvesList) {
+  for (const auto curveName : curvesList) {
+    if (curveName.contains(QRegExp("Workspace-[Calc|Diff]"))) { // fit
+      m_curveNames.append(curveName);
+    } else if (curveName == "CompositeFunction") { // guess
+      // deal with this
+    }
+  }
 }
