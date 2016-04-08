@@ -948,7 +948,18 @@ void MatrixWorkspace::setDistribution(bool newValue) {
 *  @return whether the workspace contains histogram data
 */
 bool MatrixWorkspace::isHistogramData() const {
-  return (readX(0).size() != blocksize());
+  bool isHist = (readX(0).size() != blocksize());
+  // TODOHIST temporary sanity check
+  if(isHist) {
+    if(getSpectrum(0)->histogram().xMode() != Kernel::Histogram::XMode::BinEdges) {
+      throw std::logic_error("In MatrixWorkspace::isHistogramData(): Histogram::Xmode is not BinEdges");
+    }
+  } else {
+    if(getSpectrum(0)->histogram().xMode() != Kernel::Histogram::XMode::Points) {
+      throw std::logic_error("In MatrixWorkspace::isHistogramData(): Histogram::Xmode is not Points");
+    }
+  }
+  return isHist;
 }
 
 void MatrixWorkspace::setXMode(Kernel::Histogram::XMode mode) {

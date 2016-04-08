@@ -41,8 +41,10 @@ using namespace Mantid;
 /** Helper class that implements ISpectrum */
 class SpectrumTester : public ISpectrum {
 public:
-  SpectrumTester() : ISpectrum() {}
-  SpectrumTester(const specnum_t specNo) : ISpectrum(specNo) {}
+  SpectrumTester(Kernel::Histogram::XMode mode)
+      : ISpectrum(), m_histogram(mode) {}
+  SpectrumTester(const specnum_t specNo, Kernel::Histogram::XMode mode)
+      : ISpectrum(specNo), m_histogram(mode) {}
 
   void setX(const MantidVec &X) override { m_histogram.setX(X); }
   void setX(const MantidVecPtr &X) override { m_histogram.setX(X); }
@@ -116,7 +118,7 @@ public:
   const std::string id() const override { return "WorkspaceTester"; }
   void init(const size_t &numspec, const size_t &j, const size_t &k) override {
     spec = numspec;
-    vec.resize(spec);
+    vec.resize(spec, Kernel::getHistogramXMode(j, k));
     for (size_t i = 0; i < spec; i++) {
       vec[i].dataX().resize(j, 1.0);
       vec[i].dataY().resize(k, 1.0);

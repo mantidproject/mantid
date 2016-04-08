@@ -86,7 +86,7 @@ private:
             const std::size_t &YLength) override;
 
   /// Instance of Histogram1D that holds the "spectrum" (AKA the single value);
-  Histogram1D data;
+  Histogram1D data{Kernel::Histogram::XMode::Points};
 };
 
 /// shared pointer to the WorkspaceSingleValue class

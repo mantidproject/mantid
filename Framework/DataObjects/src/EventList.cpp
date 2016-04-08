@@ -5,6 +5,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Histogram/Histogram.h"
 #include <cfloat>
 
 #include <cmath>
@@ -119,21 +120,24 @@ bool compareEventPulseTimeTOF(const TofEvent &e1, const TofEvent &e2) {
 // -------------------------------------------------------------------
 
 /// Constructor (empty)
+// EventWorkspace is always histogram data and so is thus EventList
 EventList::EventList()
-    : eventType(TOF), order(UNSORTED), mru(nullptr), m_lockedMRU(false) {}
+    : m_histogram(Kernel::Histogram::XMode::BinEdges), eventType(TOF),
+      order(UNSORTED), mru(nullptr), m_lockedMRU(false) {}
 
 /** Constructor with a MRU list
  * @param mru :: pointer to the MRU of the parent EventWorkspace
  * @param specNo :: the spectrum number for the event list
  */
 EventList::EventList(EventWorkspaceMRU *mru, specnum_t specNo)
-    : IEventList(specNo), eventType(TOF), order(UNSORTED), mru(mru),
-      m_lockedMRU(false) {}
+    : IEventList(specNo), m_histogram(Kernel::Histogram::XMode::BinEdges),
+      eventType(TOF), order(UNSORTED), mru(mru), m_lockedMRU(false) {}
 
 /** Constructor copying from an existing event list
  * @param rhs :: EventList object to copy*/
 EventList::EventList(const EventList &rhs)
-    : IEventList(rhs), mru(rhs.mru), m_lockedMRU(false) {
+    : IEventList(rhs), m_histogram(Kernel::Histogram::XMode::BinEdges),
+      mru(rhs.mru), m_lockedMRU(false) {
   // Call the copy operator to do the job,
   this->operator=(rhs);
 }
@@ -141,7 +145,8 @@ EventList::EventList(const EventList &rhs)
 /** Constructor, taking a vector of events.
  * @param events :: Vector of TofEvent's */
 EventList::EventList(const std::vector<TofEvent> &events)
-    : mru(nullptr), m_lockedMRU(false) {
+    : m_histogram(Kernel::Histogram::XMode::BinEdges), eventType(TOF),
+      mru(nullptr), m_lockedMRU(false) {
   this->events.assign(events.begin(), events.end());
   this->eventType = TOF;
   this->order = UNSORTED;
@@ -150,7 +155,8 @@ EventList::EventList(const std::vector<TofEvent> &events)
 /** Constructor, taking a vector of events.
  * @param events :: Vector of WeightedEvent's */
 EventList::EventList(const std::vector<WeightedEvent> &events)
-    : mru(nullptr), m_lockedMRU(false) {
+    : m_histogram(Kernel::Histogram::XMode::BinEdges), mru(nullptr),
+      m_lockedMRU(false) {
   this->weightedEvents.assign(events.begin(), events.end());
   this->eventType = WEIGHTED;
   this->order = UNSORTED;
@@ -159,7 +165,8 @@ EventList::EventList(const std::vector<WeightedEvent> &events)
 /** Constructor, taking a vector of events.
  * @param events :: Vector of WeightedEventNoTime's */
 EventList::EventList(const std::vector<WeightedEventNoTime> &events)
-    : mru(nullptr), m_lockedMRU(false) {
+    : m_histogram(Kernel::Histogram::XMode::BinEdges), mru(nullptr),
+      m_lockedMRU(false) {
   this->weightedEventsNoTime.assign(events.begin(), events.end());
   this->eventType = WEIGHTED_NOTIME;
   this->order = UNSORTED;

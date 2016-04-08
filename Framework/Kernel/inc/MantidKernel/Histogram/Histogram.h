@@ -38,6 +38,7 @@ private:
 
 public:
   enum class XMode { BinEdges, Points, Any, Uninitialized };
+  Histogram(XMode mode) : m_xMode(mode) {}
 
   XMode xMode() const noexcept { return m_xMode; }
   void setXMode(XMode mode) noexcept { m_xMode = mode; }
@@ -54,6 +55,8 @@ public:
 private:
   XMode m_xMode = XMode::Uninitialized;
 };
+
+Histogram::XMode getHistogramXMode(size_t xLength, size_t yLength);
 
 } // namespace Kernel
 } // namespace Mantid
