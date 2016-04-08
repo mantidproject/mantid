@@ -14,22 +14,22 @@ using namespace Mantid::Kernel;
 class ISpectrumTest : public CxxTest::TestSuite {
 public:
   void test_empty_constructor() {
-    SpectrumTester s;
+    SpectrumTester s(Kernel::Histogram::XMode::Points);
     TS_ASSERT_EQUALS(s.getDetectorIDs().size(), 0);
     TS_ASSERT_EQUALS(s.getSpectrumNo(), 0);
   }
 
   void test_constructor() {
-    SpectrumTester s(1234);
+    SpectrumTester s(1234, Kernel::Histogram::XMode::Points);
     TS_ASSERT_EQUALS(s.getDetectorIDs().size(), 0);
     TS_ASSERT_EQUALS(s.getSpectrumNo(), 1234);
   }
 
   void test_copyInfoFrom() {
-    SpectrumTester a(1234);
+    SpectrumTester a(1234, Kernel::Histogram::XMode::Points);
     a.addDetectorID(678);
     a.addDetectorID(789);
-    SpectrumTester b(456);
+    SpectrumTester b(456, Kernel::Histogram::XMode::Points);
 
     TS_ASSERT_EQUALS(b.getDetectorIDs().size(), 0);
     b.copyInfoFrom(a);
@@ -38,14 +38,14 @@ public:
   }
 
   void test_setSpectrumNo() {
-    SpectrumTester s;
+    SpectrumTester s(Kernel::Histogram::XMode::Points);
     TS_ASSERT_EQUALS(s.getSpectrumNo(), 0);
     s.setSpectrumNo(1234);
     TS_ASSERT_EQUALS(s.getSpectrumNo(), 1234);
   }
 
   void test_detectorID_handling() {
-    SpectrumTester s;
+    SpectrumTester s(Kernel::Histogram::XMode::Points);
     TS_ASSERT(s.getDetectorIDs().empty());
     s.addDetectorID(123);
     TS_ASSERT_EQUALS(s.getDetectorIDs().size(), 1);
@@ -88,29 +88,29 @@ public:
 
   void test_use_dx_flag_being_set_when_accessing_dx_with_non_const() {
     // non-const dataDx()
-    SpectrumTester s;
+    SpectrumTester s(Kernel::Histogram::XMode::Points);
     s.dataDx();
     TS_ASSERT(s.hasDx());
 
     // non-const ptrDx()
-    SpectrumTester s2;
+    SpectrumTester s2(Kernel::Histogram::XMode::Points);
     s2.ptrDx();
     TS_ASSERT(s2.hasDx());
 
     // setDX vesion 1
-    SpectrumTester s3;
+    SpectrumTester s3(Kernel::Histogram::XMode::Points);
     Mantid::MantidVec Dx;
     s3.setDx(Dx);
     TS_ASSERT(s3.hasDx());
 
     // setDX vesion 2
-    SpectrumTester s4;
+    SpectrumTester s4(Kernel::Histogram::XMode::Points);
     Mantid::MantidVecPtr::ptr_type Dx_vec_ptr_type;
     s4.setDx(Dx_vec_ptr_type);
     TS_ASSERT(s4.hasDx());
 
     // setDX version 3
-    SpectrumTester s5;
+    SpectrumTester s5(Kernel::Histogram::XMode::Points);
     Mantid::MantidVecPtr Dx_vec_ptr;
     s5.setDx(Dx_vec_ptr);
     TS_ASSERT(s5.hasDx());
@@ -118,14 +118,14 @@ public:
 
   void test_use_dx_flag_not_being_set_when_accessing_dx_with_const() {
     // const dataDx()
-    const SpectrumTester s;
+    const SpectrumTester s(Kernel::Histogram::XMode::Points);
     s.dataDx();
     TS_ASSERT(!s.hasDx());
   }
 
   void test_use_dx_flag_is_copied_during_copy_construction() {
     // Copy spectrum which had the flag set
-    SpectrumTester s;
+    SpectrumTester s(Kernel::Histogram::XMode::Points);
     s.dataDx();
     TS_ASSERT(s.hasDx());
 
@@ -133,7 +133,7 @@ public:
     TS_ASSERT(s2.hasDx());
 
     // Copy spectrum which did not have the flag set
-    SpectrumTester s3;
+    SpectrumTester s3(Kernel::Histogram::XMode::Points);
     SpectrumTester s4(s);
     TS_ASSERT(!s3.hasDx());
   }
