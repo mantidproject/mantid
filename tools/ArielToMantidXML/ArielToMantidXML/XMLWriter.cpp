@@ -70,8 +70,8 @@ void XMLWriter::writeDetectors()
 
       // Need to see if the type is the same for all children (in which case we can compactise the output)
       types.insert( (*it)->type() );
-      compsByType.insert( std::pair<std::string, Component*>( (*it)->type(), *it ) );
-  	}
+      compsByType.emplace((*it)->type(), *it);
+        }
 
     // Now do the output for the current component (if it has children)
     if ( current != m_startPoint )
