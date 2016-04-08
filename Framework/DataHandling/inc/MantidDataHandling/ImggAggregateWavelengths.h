@@ -37,8 +37,7 @@ namespace DataHandling {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ImggAggregateWavelengths final
-    : public API::Algorithm {
+class DLLExport ImggAggregateWavelengths final : public API::Algorithm {
 public:
   const std::string name() const override final;
   int version() const override final;
