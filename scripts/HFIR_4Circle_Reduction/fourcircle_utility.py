@@ -51,16 +51,21 @@ def check_url(url, read_lines=False):
 
 def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True):
     """ Generate a Mantid RIO/Mask XML file
+    Requirements:
+    1. file_path is writable;
+    2. ll_corner and ur_corner are both 2-tuples
+    3. ll_corner is to the left-lower to ur corner
     :param ll_corner:
     :param ur_corner:
     :param rectangular:
     :return:
     """
-    # TODO/NOW - Doc and check
-    # assert ... ...
+    # check
+    assert isinstance(file_path, str), 'File path must be a string but not a %s.' % str(type(file_path))
+    assert len(ll_corner) == 2 and len(ur_corner) == 2
 
     if rectangular is False:
-        raise RuntimeError('... ...')
+        raise RuntimeError('Non-rectangular detector is not supported yet.')
 
     print '[INFO] Mask from %s to %s.' % (str(ll_corner), str(ur_corner))
 
@@ -128,13 +133,16 @@ def get_hb3a_wavelength(m1_motor_pos):
 
 def get_mask_ws_name(exp_number, scan_number):
     """
-
+    Generate a standard mask workspace's name based on the experiment number and scan number
+    It is assumed that a mask workspace will be applied to a scan; and
+    all Pts belonged to the same scan will use the same mask workspace
     :param exp_number:
     :param scan_number:
     :return:
     """
-    # TODO/NOW - Doc and check
-    # assert ...
+    # check
+    assert isinstance(exp_number, int)
+    assert isinstance(scan_number, int)
 
     mask_ws_name = 'Mask_Exp%d_Scan%d' % (exp_number, scan_number)
 
@@ -143,14 +151,16 @@ def get_mask_ws_name(exp_number, scan_number):
 
 def get_mask_xml_temp(work_dir, exp_number, scan_number):
     """
-
+    Generate a temporary mask file in xml format that is conformed to Mantid's format.
     :param work_dir:
     :param exp_number:
     :param scan_number:
     :return:
     """
-    # TODO/NOW Doc and check
-    # assert ...
+    # check
+    assert isinstance(work_dir, str) and os.path.exists(work_dir)
+    assert isinstance(exp_number, int)
+    assert isinstance(scan_number, int)
 
     file_name = os.path.join(work_dir, 'temp_mask_%d_%d.xml' % (exp_number, scan_number))
 
@@ -397,7 +407,7 @@ def get_raw_data_workspace_name(exp_number, scan_number, pt_number):
     return ws_name
 
 
-def get_integrated_peak_ws_name(exp_number, scan_number, pt_list):
+def get_integrated_peak_ws_name(exp_number, scan_number, pt_list, mask=False):
     """
     Get/form the integrated peak workspace's name
     :param exp_number:
@@ -416,6 +426,9 @@ def get_integrated_peak_ws_name(exp_number, scan_number, pt_list):
     ws_name = 'Integrated_exp%d_scan%d' % (exp_number, scan_number)
     if pt_list is not None:
         ws_name += 'Pt%d_%d' % (pt_list[0], pt_list[-1])
+
+    if mask:
+        ws_name += '_Masked'
 
     return ws_name
 

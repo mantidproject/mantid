@@ -113,22 +113,33 @@ class CWSCDReductionControl(object):
     @staticmethod
     def apply_mask(exp_number, scan_number, pt_number):
         """
-
+        Apply mask on a Pt./run.
+        Requirements:
+        1. exp number, scan number, and pt number are integers
+        2. mask workspace for this can must exist!
+        Guarantees:
+            the detector-xml data file is loaded to workspace2D with detectors being masked
         :param exp_number:
         :param scan_number:
         :param pt_number:
         :return:
         """
-        # TODO/NOW - Doc and check
-        # assert ... ...
+        # check
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+        assert isinstance(pt_number, int)
 
         # get workspaces' names
         raw_pt_ws_name = get_raw_data_workspace_name(exp_number, scan_number, pt_number)
         mask_ws_name = get_mask_ws_name(exp_number, scan_number)
 
-        # TODO/NOW - check workspace existing
-        # if ... raise
+        # check workspace existing
+        if AnalysisDataService.doesExist(raw_pt_ws_name) is False:
+            raise RuntimeError('Raw data workspace for exp %d scan %d pt %d does not exist.' % (
+                exp_number, scan_number, pt_number
+            ))
 
+        # mask detectors
         api.MaskDetectors(Workspace=raw_pt_ws_name, MaskedWorkspace=mask_ws_name)
 
         return
@@ -587,14 +598,22 @@ class CWSCDReductionControl(object):
 
     def get_peaks_integrated_intensities(self, exp_number, scan_number, pt_list):
         """
-
+        Get the integrated intensities for a peak
+        Requirements:
+        1. the Pts in the scan must have been merged and intensity is calculated.
+        2. experiment number and scan number must be integers
+        Guarantees: get the x-y plot for intensities of all Pts. X is pt number, Y is for intensity
         :param exp_number:
         :param scan_number:
         :param pt_list:
         :return:
         """
-        # TODO/NOW: doc & check
+        # check
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+        assert isinstance(pt_list, list) or pt_list is None
 
+        # deal with pt list if it is None
         if pt_list is None:
             status, pt_list = self.get_pt_numbers(exp_number, scan_number)
             assert status
@@ -609,6 +628,8 @@ class CWSCDReductionControl(object):
         vec_y = numpy.ndarray(shape=(array_size,))
         for index in xrange(array_size):
             peak_i = int_peak_ws.getPeak(index)
+            # Note: run number in merged workspace is a combination of pt number and scan number
+            #       so it should have 1000 divided for the correct pt number
             pt_number = peak_i.getRunNumber() % 1000
             intensity = peak_i.getIntensity()
             vec_x[index] = pt_number
@@ -625,7 +646,6 @@ class CWSCDReductionControl(object):
         :param roi_end:
         :return:
         """
-        # TODO/NOW : check ...
         # assert ...
         assert isinstance(exp_number, int)
         assert isinstance(scan_number, int)
@@ -788,6 +808,8 @@ class CWSCDReductionControl(object):
         :param peak_radius:
         :return: 3-tuple as peak workspace name, intensity and counts
         """
+        raise NotImplementedError('I am not supposed to use but integrate_peak_scan instead')
+
         # Check
         assert isinstance(exp_num, int) and isinstance(scan_num, int) and isinstance(pt_num, int)
 
@@ -821,16 +843,23 @@ class CWSCDReductionControl(object):
         return peak_ws_name, intensity, counts
 
     def integrate_scan_peaks(self, exp, scan, peak_radius, peak_centre,
-                             merge=True):
+                             merge=True, mask=False):
         """
-
+        Integrate peaks in a merged scan
+        Requirements:
         :param exp:
         :param scan:
-        :param peak_centre:
-        :param merge:
+        :param peak_centre: a float radius or None for not using
+        :param merge: If selected, merged all the Pts can return 1 integrated peak's value;
+                      otherwise, integrate peak for each Pt.
         :return:
         """
-        # TODO/NOW - documentation and check
+        # check
+        assert isinstance(exp, int)
+        assert isinstance(scan, int)
+        assert isinstance(peak_radius, float) or peak_radius is None
+        assert len(peak_centre) == 3
+        assert isinstance(merge, bool)
 
         # FIXME - combine the download and naming for common use
         # get spice file
@@ -847,14 +876,24 @@ class CWSCDReductionControl(object):
         peak_centre_str = '%f, %f, %f' % (peak_centre[0], peak_centre[1],
                                           peak_centre[2])
 
-        integrated_peak_ws_name = get_integrated_peak_ws_name(exp, scan, pt_list)
+        # mask workspace
+        if mask:
+            mask_ws_name = get_mask_ws_name(exp, scan)
+            assert AnalysisDataService.doesExist(mask_ws_name), 'MaskWorkspace does not exist'
+
+            integrated_peak_ws_name = get_integrated_peak_ws_name(exp, scan, pt_list, mask)
+        else:
+            mask_ws_name = ''
+            integrated_peak_ws_name = get_integrated_peak_ws_name(exp, scan, pt_list)
+
         api.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
                                OutputWorkspace=integrated_peak_ws_name,
                                PeakRadius=peak_radius,
                                PeakCentre=peak_centre_str,
                                MergePeaks=merge,
                                NormalizeByMonitor=True,
-                               NormalizeByTime=False)
+                               NormalizeByTime=False,
+                               MaskWorkspace=mask_ws_name)
 
         return
 
