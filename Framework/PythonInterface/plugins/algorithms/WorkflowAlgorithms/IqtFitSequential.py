@@ -7,7 +7,19 @@ import os.path
 
 class IqtFitSequential(PythonAlgorithm):
 
-
+    _input_ws = None
+    _function = None
+    _fit_type = None
+    _start_x = None
+    _end_x = None
+    _spec_min = None
+    _spec_max = None
+    _intensities_constrained = None
+    _minimizer = None
+    _max_iterations = None
+    _result_name = None
+    _parameter_name = None
+    _fit_group_name = None
 
 
     def category(self):
@@ -65,10 +77,24 @@ class IqtFitSequential(PythonAlgorithm):
 
 
     def validateInputs(self):
-
+        self._get_properties()
+        issues = dict()
+        return issues
 
     def _get_properties(self):
-
+        self._input_ws = self.getProperty('InputWorkspace').value
+        self._function = self.getProperty('Function').value
+        self._fit_type = self.getProperty('FitType').value
+        self._start_x = self.getProperty('StartX').value
+        self._end_x = self.getProperty('EndX').value
+        self._spec_min = self.getProperty('SpecMin').value
+        self._spec_max = self.getProperty('SpecMax').value
+        self._intensities_constrained = self.getProperty('ConstrainIntensities').value
+        self._minimizer = self.getProperty('Minimizer').value
+        self._max_iterations = self.getProperty('MaxIterations').value
+        self._result_name = self.getPropertyValue('OutputResultWorkspace')
+        self._parameter_name = self.getPropertyValue('OutputParameterWorkspace')
+        self._fit_group_name = self.getPropertyValue('OutputWorkspaceGroup')
 
     def PyExec(self):
 
