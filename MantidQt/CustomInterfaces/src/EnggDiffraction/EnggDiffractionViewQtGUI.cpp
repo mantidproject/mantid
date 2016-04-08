@@ -1302,6 +1302,7 @@ void EnggDiffractionViewQtGUI::setListWidgetBank(int idx) {
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
     fittingRunNoChanged() {
+  // TODO: much of this should be moved to presenter
   try {
     QString focusedFile = m_uiTabFitting.lineEdit_pushButton_run_num->text();
     std::string strFocusedFile = focusedFile.toStdString();
@@ -1317,10 +1318,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
     if (selectedfPath.isFile() && !splitBaseName.empty()) {
 
 #ifdef __unix__
-      auto home = Poco::Path().home();
-      bankDir.append(home);
-      bankDir.append(selectedfPath.parent().toString());
-      bankDir.append(selectedfPath);
+      bankDir = selectedfPath.parent();
 #else
       bankDir = (bankDir).expand(selectedfPath.parent().toString());
 #endif
@@ -1343,14 +1341,15 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
     try {
       // add bank to the combo-box and list view
       addBankItems(splitBaseName, focusedFile);
-    } catch (...) {
-      userWarning("Unable to insert items: ", "Could not add banks to "
-                                              "combo-box or list widget. "
-                                              "Please try again");
+    } catch (std::runtime_error &re) {
+      userWarning("Unable to insert items: ",
+                  "Could not add banks to "
+                  "combo-box or list widget; " +
+                      static_cast<std::string>(re.what()) + ". Please try again");
     }
-  } catch (...) {
-    userWarning("Invalid file", "Unable to select the file, please check the "
-                                "directory or the file name and try again");
+  } catch (std::runtime_error &re) {
+    userWarning("Invalid file", "Unable to select the file; " +
+                                    static_cast<std::string>(re.what()));
     return;
   }
 }
@@ -1358,21 +1357,28 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
 void EnggDiffractionViewQtGUI::updateFittingDirVec(std::string &bankDir,
                                                    std::string &focusedFile) {
 
-  std::string cwd(bankDir);
-  Poco::DirectoryIterator it(cwd);
-  Poco::DirectoryIterator end;
-  while (it != end) {
-    if (it->isFile()) {
-      std::string itFilePath = it->path();
-      Poco::Path itBankfPath(itFilePath);
+  try {
 
-      std::string itbankFileName = itBankfPath.getBaseName();
-      // check if it not any other file.. e.g: texture
-      if (itbankFileName.find(focusedFile) != std::string::npos) {
-        m_fitting_runno_dir_vec.push_back(itFilePath);
+    std::string cwd(bankDir);
+    Poco::DirectoryIterator it(cwd);
+    Poco::DirectoryIterator end;
+    while (it != end) {
+      if (it->isFile()) {
+        std::string itFilePath = it->path();
+        Poco::Path itBankfPath(itFilePath);
+
+        std::string itbankFileName = itBankfPath.getBaseName();
+        // check if it not any other file.. e.g: texture
+        if (itbankFileName.find(focusedFile) != std::string::npos) {
+          m_fitting_runno_dir_vec.push_back(itFilePath);
+        }
       }
+      ++it;
     }
-    ++it;
+  } catch (std::runtime_error &re) {
+    userWarning("Invalid file", "File not found in the following directory; " +
+                                    bankDir + ". " +
+                                    static_cast<std::string>(re.what()));
   }
 }
 
