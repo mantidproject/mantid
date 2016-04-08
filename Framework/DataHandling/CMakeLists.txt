@@ -142,6 +142,7 @@ set ( SRC_FILES
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
 	src/SaveNXTomo.cpp
+	src/SaveNXcanSAS.cpp
 	src/SaveNexus.cpp
 	src/SaveNexusProcessed.cpp
 	src/SaveOpenGenieAscii.cpp
@@ -304,6 +305,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveNISTDAT.h
 	inc/MantidDataHandling/SaveNXSPE.h
 	inc/MantidDataHandling/SaveNXTomo.h
+	inc/MantidDataHandling/SaveNXcanSAS.h
 	inc/MantidDataHandling/SaveNexus.h
 	inc/MantidDataHandling/SaveNexusProcessed.h
 	inc/MantidDataHandling/SaveOpenGenieAscii.h
@@ -460,6 +462,7 @@ set ( TEST_FILES
 	SaveNISTDATTest.h
 	SaveNXSPETest.h
 	SaveNXTomoTest.h
+	SaveNXcanSASTest.h
 	SaveNexusProcessedTest.h
 	SaveNexusTest.h
 	SavePARTest.h
