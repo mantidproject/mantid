@@ -207,7 +207,7 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
     if (m_view->currentCalibSpecNos().empty() &&
         specNoNum == BankMode::SPECNOS) {
       throw std::invalid_argument(
-          "The Spectrum IDs cannot be empty, must be a"
+          "The Spectrum Nos cannot be empty, must be a"
           "valid range or a Bank Name can be selected instead");
     }
   } catch (std::invalid_argument &ia) {
@@ -1458,7 +1458,7 @@ void EnggDiffractionPresenter::inputChecksBeforeFocusCropped(
   }
 
   if (specNos.empty()) {
-    throw std::invalid_argument("The list of spectrum IDs cannot be empty when "
+    throw std::invalid_argument("The list of spectrum Nos cannot be empty when "
                                 "focusing in 'cropped' mode.");
   }
 
@@ -1679,7 +1679,7 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
       // Cropped focusing
       // just to iterate once, but there's no real bank here
       bankIDs.push_back(0);
-      specs.push_back(specNos); // one spectrum IDs list given by the user
+      specs.push_back(specNos); // one spectrum Nos list given by the user
       effectiveFilenames.push_back(outputFocusCroppedFilename(runNo));
     } else {
       if (dgFile.empty()) {
@@ -1761,7 +1761,7 @@ void EnggDiffractionPresenter::loadDetectorGroupingCSV(
       throw std::runtime_error(
           "In file '" + dgFile + "', wrong format in line: " +
           boost::lexical_cast<std::string>(li) +
-          " which does not containe any delimiters (comma, etc.)");
+          " which does not contain any delimiters (comma, etc.)");
     }
 
     try {
@@ -1777,7 +1777,7 @@ void EnggDiffractionPresenter::loadDetectorGroupingCSV(
         throw std::runtime_error("In file '" + dgFile +
                                  "', wrong format in line: " +
                                  boost::lexical_cast<std::string>(li) +
-                                 ", the list of spectrum IDs is empty!");
+                                 ", the list of spectrum Nos is empty!");
       }
 
       size_t bankID = boost::lexical_cast<size_t>(bstr);

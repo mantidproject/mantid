@@ -146,9 +146,9 @@ void MaskMD::exec() {
   // instead get the string and parse it here
   std::vector<std::string> dimensions = parseDimensionNames(dimensions_string);
   // Report what dimension names were found
-  g_log.notice() << "Dimension names parsed as: " << std::endl;
+  g_log.debug() << "Dimension names parsed as: " << std::endl;
   for (const auto &name : dimensions) {
-    g_log.notice() << name << std::endl;
+    g_log.debug() << name << std::endl;
   }
 
   size_t nDims = ws->getNumDims();

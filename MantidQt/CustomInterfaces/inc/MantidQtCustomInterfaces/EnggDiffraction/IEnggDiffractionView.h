@@ -279,9 +279,9 @@ public:
   virtual std::vector<bool> focusingBanks() const = 0;
 
   /**
-   * Specification of spectrum IDs for focus in "cropped" mode.
+   * Specification of spectrum Nos for focus in "cropped" mode.
    *
-   * @return spectrum IDs, expected as a comma separated list of
+   * @return spectrum Nos, expected as a comma separated list of
    * integers or ranges of integers.
    */
   virtual std::string focusingCroppedSpectrumNos() const = 0;

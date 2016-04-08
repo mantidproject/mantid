@@ -23,8 +23,8 @@ between source and sample in the original instrument. Otherwise, L1 is
 read from input. The source position of the modified instrument is (0,
 0, -L1);
 
-2. SpectrumIDs: If not specified (empty list), then SpectrumIDs will be
-set up to any array such that SpectrumIDs[wsindex] is the spectrum ID of
+2. SpectrumIDs: If not specified (empty list), then Spectrum Numbers will be
+set up to any array such that SpectrumNos[wsindex] is the spectrum Number of
 workspace index 'wsindex';
 
 3. L2 and Polar cannot be empty list;
@@ -37,7 +37,7 @@ Limitations
 
 There are some limitations of this algorithm.
 
-1. The key to locate the detector is via spectrum ID;
+1. The key to locate the detector is via spectrum Number;
 
 2. For each spectrum, there is only one and only one new detector. Thus,
 if one spectrum is associated with a group of detectors previously, the

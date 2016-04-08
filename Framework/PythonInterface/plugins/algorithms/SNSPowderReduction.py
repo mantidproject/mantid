@@ -874,7 +874,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 # logging (ignorable)
                 for iws in xrange(out_ws_c_s.getNumberHistograms()):
                     spec = out_ws_c_s.getSpectrum(iws)
-                    self.log().debug("[DBx131] ws %d: spectrum ID = %d. " % (iws, spec.getSpectrumNo()))
+                    self.log().debug("[DBx131] ws %d: spectrum No = %d. " % (iws, spec.getSpectrumNo()))
                 if out_ws_c_s.id() == EVENT_WORKSPACE_ID:
                     self.log().information('After being aligned and focused, workspace %s: Number of events = %d '
                                            'of chunk %d ' % (out_ws_c_s.name(), out_ws_c_s.getNumberEvents(),
