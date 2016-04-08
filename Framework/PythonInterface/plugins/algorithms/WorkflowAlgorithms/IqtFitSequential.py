@@ -97,6 +97,10 @@ class IqtFitSequential(PythonAlgorithm):
         self._fit_group_name = self.getPropertyValue('OutputWorkspaceGroup')
 
     def PyExec(self):
+        from IndirectDataAnalysis import (convertToElasticQ,
+                                          createFuryMultiDomainFunction,
+                                          transposeFitParametersTable)
+
         fit_type = ftype[:-2]
         logger.information('Option: ' + fit_type)
         logger.information(func)
