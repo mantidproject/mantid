@@ -252,7 +252,7 @@ private:
       h = 0.5;
 
     Workspace2D_sptr ws2D(new Workspace2D);
-    ws2D->initialize(nspecs, nbins + 1, nbins);
+    ws2D->initialize(nspecs, isHistogram ? nbins + 1 : nbins, nbins);
     ws2D->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
 
     Mantid::MantidVecPtr xv, yv, ev;
