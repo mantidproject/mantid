@@ -97,5 +97,79 @@ class IqtFitSequential(PythonAlgorithm):
         self._fit_group_name = self.getPropertyValue('OutputWorkspaceGroup')
 
     def PyExec(self):
+        fit_type = ftype[:-2]
+        logger.information('Option: ' + fit_type)
+        logger.information(func)
+
+        tmp_fit_workspace = "__furyfit_fit_ws"
+        CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx)
+
+        num_hist = mtd[inputWS].getNumberHistograms()
+        if spec_max is None:
+            spec_max = num_hist - 1
+
+        # Name stem for generated workspace
+        output_workspace = '%sfury_%s%d_to_%d' % (getWSprefix(inputWS), ftype, spec_min, spec_max)
+
+        ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
+        convertToElasticQ(tmp_fit_workspace)
+
+        # Build input string for PlotPeakByLogValue
+        input_str = [tmp_fit_workspace + ',i%d' % i for i in range(spec_min, spec_max + 1)]
+        input_str = ';'.join(input_str)
+
+        PlotPeakByLogValue(Input=input_str,
+                           OutputWorkspace=output_workspace,
+                           Function=func,
+                           Minimizer=minimizer,
+                           MaxIterations=max_iterations,
+                           StartX=startx,
+                           EndX=endx,
+                           FitType='Sequential',
+                           CreateOutput=True)
+
+        # Remove unsused workspaces
+        DeleteWorkspace(output_workspace + '_NormalisedCovarianceMatrices')
+        DeleteWorkspace(output_workspace + '_Parameters')
+
+        fit_group = output_workspace + '_Workspaces'
+        params_table = output_workspace + '_Parameters'
+        RenameWorkspace(output_workspace, OutputWorkspace=params_table)
+
+        # Create *_Result workspace
+        result_workspace = output_workspace + "_Result"
+        parameter_names = ['A0', 'Intensity', 'Tau', 'Beta']
+        convertParametersToWorkspace(params_table, "axis-1", parameter_names, result_workspace)
+
+        # Set x units to be momentum transfer
+        axis = mtd[result_workspace].getAxis(0)
+        axis.setUnit("MomentumTransfer")
+
+        # Process generated workspaces
+        wsnames = mtd[fit_group].getNames()
+        for i, workspace in enumerate(wsnames):
+            output_ws = output_workspace + '_%d_Workspace' % i
+            RenameWorkspace(workspace, OutputWorkspace=output_ws)
+
+        sample_logs  = {'start_x': startx, 'end_x': endx, 'fit_type': fit_type,
+                        'intensities_constrained': intensities_constrained, 'beta_constrained': False}
+
+        CopyLogs(InputWorkspace=inputWS, OutputWorkspace=fit_group)
+        CopyLogs(InputWorkspace=inputWS, OutputWorkspace=result_workspace)
+
+        log_names = [item[0] for item in sample_logs]
+        log_values = [item[1] for item in sample_logs]
+        AddSampleLogMultiple(Workspace=result_workspace, LogNames=log_names, LogValues=log_values)
+        AddSampleLogMultiple(Workspace=fit_group, LogNames=log_names, LogValues=log_values)
+
+        if Save:
+            save_workspaces = [result_workspace, fit_group]
+            furyFitSaveWorkspaces(save_workspaces)
+
+        if Plot != 'None' :
+            furyfitPlotSeq(result_workspace, Plot)
+
+
+        return result_workspace
 
 AlgorithmFactory.subscribe(IqtFitSequential)
