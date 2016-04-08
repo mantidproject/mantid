@@ -101,34 +101,34 @@ class IqtFitSequential(PythonAlgorithm):
                                           createFuryMultiDomainFunction,
                                           transposeFitParametersTable)
 
-        fit_type = ftype[:-2]
-        logger.information('Option: ' + fit_type)
-        logger.information(func)
+        self._fit_type = ftype[:-2]
+        logger.information('Option: ' + self._fit_type)
+        logger.information(self._function)
 
         tmp_fit_workspace = "__furyfit_fit_ws"
-        CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx)
+        CropWorkspace(InputWorkspace=self._input_ws, OutputWorkspace=tmp_fit_workspace, XMin=self._start_x, XMax=endx)
 
         num_hist = mtd[inputWS].getNumberHistograms()
-        if spec_max is None:
-            spec_max = num_hist - 1
+        if self._spec_max is None:
+            self._spec_max = num_hist - 1
 
         # Name stem for generated workspace
-        output_workspace = '%sfury_%s%d_to_%d' % (getWSprefix(inputWS), ftype, spec_min, spec_max)
+        output_workspace = '%sfury_%s%d_to_%d' % (getWSprefix(inputWS), ftype, self._spec_min, self._spec_max)
 
         ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
         convertToElasticQ(tmp_fit_workspace)
 
         # Build input string for PlotPeakByLogValue
-        input_str = [tmp_fit_workspace + ',i%d' % i for i in range(spec_min, spec_max + 1)]
+        input_str = [tmp_fit_workspace + ',i%d' % i for i in range(self._spec_min, self._spec_max + 1)]
         input_str = ';'.join(input_str)
 
         PlotPeakByLogValue(Input=input_str,
                            OutputWorkspace=output_workspace,
-                           Function=func,
-                           Minimizer=minimizer,
-                           MaxIterations=max_iterations,
-                           StartX=startx,
-                           EndX=endx,
+                           Function=self._function,
+                           Minimizer=self._minimizer,
+                           MaxIterations=self._max_iterations,
+                           StartX=self._start_x,
+                           EndX=self._end_x,
                            FitType='Sequential',
                            CreateOutput=True)
 
@@ -155,8 +155,8 @@ class IqtFitSequential(PythonAlgorithm):
             output_ws = output_workspace + '_%d_Workspace' % i
             RenameWorkspace(workspace, OutputWorkspace=output_ws)
 
-        sample_logs  = {'start_x': startx, 'end_x': endx, 'fit_type': fit_type,
-                        'intensities_constrained': intensities_constrained, 'beta_constrained': False}
+        sample_logs  = {'start_x': self._start_x, 'end_x': self._end_x, 'fit_type': self._fit_type,
+                        'intensities_constrained': self._intensities_constrained, 'beta_constrained': False}
 
         CopyLogs(InputWorkspace=inputWS, OutputWorkspace=fit_group)
         CopyLogs(InputWorkspace=inputWS, OutputWorkspace=result_workspace)
