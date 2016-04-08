@@ -129,7 +129,18 @@ class IqtFitSequentialTest(unittest.TestCase):
 #---------------------------------------Success cases--------------------------------------
 
     def test_basic(self):
-
+        """
+        Tests a basic run of IqtfitSequential.
+        """
+        result, params, fit_group = IqtFitSequential(InputWorkspace=self._iqt_ws,
+                                                     Function=self._function,
+                                                     FitType='1E_s',
+                                                     StartX=0,
+                                                     EndX=0.24,
+                                                     SpecMin=0,
+                                                     SpecMax=16,
+                                                     ConstrainIntensities=True)
+        self._validate_output(params, result, fit_group)
 
 #----------------------------------------Failure cases-------------------------------------
 
