@@ -167,7 +167,7 @@ std::vector<NumT> readArray1DCoerce(H5::Group &group, const std::string &name) {
 namespace {
 template <typename InputNumT, typename OutputNumT>
 std::vector<OutputNumT> convertingingRead(DataSet &dataset,
-                                      const DataType &dataType) {
+                                          const DataType &dataType) {
   DataSpace dataSpace = dataset.getSpace();
 
   std::vector<InputNumT> temp(dataSpace.getSelectNpoints());
