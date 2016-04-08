@@ -463,6 +463,7 @@ ImggAggregateWavelengths::loadFITS(const Poco::Path &imgPath,
       Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadFITS");
   try {
     loader->initialize();
+    loader->setChild(true);
     loader->setPropertyValue("Filename", imgPath.toString());
     loader->setProperty("OutputWorkspace", outName);
     // this is way faster when loading into a MatrixWorkspace
@@ -488,13 +489,13 @@ ImggAggregateWavelengths::loadFITS(const Poco::Path &imgPath,
         "the image file has been loaded it seems to contain errors.");
   }
 
-  Mantid::API::MatrixWorkspace_sptr ws;
+  API::MatrixWorkspace_sptr ws;
   try {
-    Mantid::API::WorkspaceGroup_sptr wsg;
-    const auto &ads = Mantid::API::AnalysisDataService::Instance();
-    wsg = ads.retrieveWS<Mantid::API::WorkspaceGroup>(outName);
-    ws = ads.retrieveWS<Mantid::API::MatrixWorkspace>(
-        wsg->getNames()[wsg->size() - 1]);
+    API::Workspace_sptr outWS = loader->getProperty("OutputWorkspace");
+    API::WorkspaceGroup_sptr wsg =
+        boost::dynamic_pointer_cast<API::WorkspaceGroup>(outWS);
+    ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        wsg->getItem(wsg->size() - 1));
   } catch (std::exception &e) {
     throw std::runtime_error(
         "Could not load image contents for file '" + imgPath.toString() +
@@ -686,12 +687,16 @@ void ImggAggregateWavelengths::processDirectory(
 
   auto imgFiles = findInputImages(inDir);
 
-  auto it = std::begin(imgFiles);
+  const size_t maxProgress = imgFiles.size() + 1;
+  API::Progress prog(this, 0, 1, maxProgress);
+  prog.report(0, "Loading input image files");
+
   const std::string wsName = "__ImggAggregateWavelengths_fits_seq";
   const std::string wsNameFirst = wsName + "_first";
+  auto it = std::begin(imgFiles);
   API::MatrixWorkspace_sptr accum = loadFITS(*it, wsNameFirst);
   ++it;
-
+  prog.report(1);
   for (auto end = std::end(imgFiles); it != end; ++it) {
     // load one more
     const API::MatrixWorkspace_sptr img = loadFITS(*it, wsName);
@@ -702,10 +707,14 @@ void ImggAggregateWavelengths::processDirectory(
     // clear image/workspace. TODO: This is a big waste of
     // allocations/deallocations
     Mantid::API::AnalysisDataService::Instance().remove(wsName);
+    prog.reportIncrement(1);
   }
+
+  prog.report("Saving output image file");
   // save
   saveAggImage(accum, outDir, prefix, outImgIndex);
   Mantid::API::AnalysisDataService::Instance().remove(wsNameFirst);
+  prog.reportIncrement(1, "Finished");
 }
 
 } // namespace DataHandling
