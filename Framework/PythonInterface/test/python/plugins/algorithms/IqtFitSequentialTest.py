@@ -145,7 +145,7 @@ class IqtFitSequentialTest(unittest.TestCase):
 #----------------------------------------Failure cases-------------------------------------
 
     def test_minimum_spectra_number_less_than_0(self):
-        self.assertRaises(ValueError, IqtFitMultiple,
+        self.assertRaises(ValueError, IqtFitSequential,
                           InputWorkspace=self._iqt_ws,
                           Function=self._function,
                           FitType='1S_s',
@@ -157,7 +157,7 @@ class IqtFitSequentialTest(unittest.TestCase):
                           OutputWorkspaceGroup='fit_group')
 
     def test_maximum_spectra_more_than_workspace_spectra(self):
-        self.assertRaises(RuntimeError, IqtFitMultiple, InputWorkspace=self._iqt_ws,
+        self.assertRaises(RuntimeError, IqtFitSequential, InputWorkspace=self._iqt_ws,
                           Function=self._function,
                           FitType='1S_s',
                           EndX=0.2,
@@ -168,7 +168,7 @@ class IqtFitSequentialTest(unittest.TestCase):
                           OutputWorkspaceGroup='fit_group')
 
     def test_minimum_spectra_more_than_maximum_spectra(self):
-        self.assertRaises(RuntimeError, IqtFitMultiple, InputWorkspace=self._iqt_ws,
+        self.assertRaises(RuntimeError, IqtFitSequential, InputWorkspace=self._iqt_ws,
                           Function=self._function,
                           FitType='1S_s',
                           EndX=0.2,
@@ -179,7 +179,7 @@ class IqtFitSequentialTest(unittest.TestCase):
                           OutputWorkspaceGroup='fit_group')
 
     def test_minimum_x_less_than_0(self):
-        self.assertRaises(ValueError, IqtFitMultiple, InputWorkspace=self._iqt_ws,
+        self.assertRaises(ValueError, IqtFitSequential, InputWorkspace=self._iqt_ws,
                           Function=self._function,
                           FitType='1S_s',
                           StartX=-0.2,
@@ -191,7 +191,7 @@ class IqtFitSequentialTest(unittest.TestCase):
                           OutputWorkspaceGroup='fit_group')
 
     def test_maximum_x_more_than_workspace_max_x(self):
-        self.assertRaises(RuntimeError, IqtFitMultiple, InputWorkspace=self._iqt_ws,
+        self.assertRaises(RuntimeError, IqtFitSequential, InputWorkspace=self._iqt_ws,
                           Function=self._function,
                           FitType='1S_s',
                           StartX=0,
@@ -203,13 +203,13 @@ class IqtFitSequentialTest(unittest.TestCase):
                           OutputWorkspaceGroup='fit_group')
 
     def test_minimum_spectra_more_than_maximum_spectra(self):
-        self.assertRaises(RuntimeError, IqtFitMultiple, InputWorkspace=self._iqt_ws,
+        self.assertRaises(RuntimeError, IqtFitSequential, InputWorkspace=self._iqt_ws,
                           Function=self._function,
                           FitType='1S_s',
                           StartX=0.2,
                           EndX=0.1,
-                          SpecMin=0,
-                          SpecMax=16,
+                          SpecMin=16,
+                          SpecMax=0,
                           OutputResultWorkspace='result',
                           OutputParameterWorkspace='table',
                           OutputWorkspaceGroup='fit_group')
