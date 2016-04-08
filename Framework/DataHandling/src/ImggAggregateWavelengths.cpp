@@ -669,7 +669,7 @@ const std::string FITSHdrRefComment2 =
 const std::string FITSHdrEnd = "END";
 
 void writeFITSHeaderEntry(const std::string &hdr, std::ofstream &file) {
-  static const std::array<char, maxLenHdr> zeros{0};
+  static const std::vector<char> zeros(maxLenHdr, 0);
 
   size_t count = hdr.size();
   if (count >= maxLenHdr)
@@ -699,7 +699,7 @@ void writeFITSHeaderAxesSizes(const API::MatrixWorkspace_sptr img,
 // FITS headers consist of subblocks of 36 entries/lines. This method
 // is to write the "padding" lines required to have 36 in a block
 void writePaddingFITSHeaders(size_t count, std::ofstream &file) {
-  static const std::array<char, maxLenHdr> zeros{0};
+  static const std::vector<char> zeros(maxLenHdr, 0);
 
   for (size_t i = 0; i < count; ++i) {
     file.write(zeros.data(), maxLenHdr);
