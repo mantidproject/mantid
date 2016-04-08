@@ -6,6 +6,7 @@ from mantid.api import MatrixWorkspace, WorkspaceGroup, ITableWorkspace
 class IqtFitSequentialTest(unittest.TestCase):
 
     _iqt_ws = None
+    _function = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)),Intensity=1,Tau=0.0247558;ties=(f1.Intensity=1-f0.A0)'
 
     def setUp(self):
         self._iqt_ws = Load(Filename='iris26176_graphite002_iqt.nxs',
@@ -80,12 +81,49 @@ class IqtFitSequentialTest(unittest.TestCase):
 
 
     def _validate_table_values(self, tableWS):
+        # Check column data
+        column = tableWS.column(0)
+        self.assertEquals(round(column[0], 6), 0.483619)
+        self.assertEquals(round(column[1], 6), 0.607871)
+        self.assertEquals(round(column[-1], 5), 1.84519)
 
+        # Check row data
+        row = tableWS.row(0)
+        self.assertEquals(round(row['axis-1'], 6),  0.483619)
+        self.assertEquals(round(row['f1.Intensity'], 6), 0.966343)
+        self.assertEquals(round(row['f1.Tau'], 7), 0.0287487)
 
     def _validate_matrix_values(self, matrixWS):
+        # Check f0.A0
+        a0 = matrixWS.readY(0)
+        self.assertEquals(round(a0[0], 7), 0.0336568)
+        self.assertEquals(round(a0[-1],7), 0.0182410)
+
+        # Check f1.Intensity
+        intensity = matrixWS.readY(1)
+        self.assertEquals(round(intensity[0], 6), 0.966343)
+        self.assertEquals(round(intensity[-1],6), 0.981759)
+
+        # Check f1.Tau
+        tau = matrixWS.readY(2)
+        self.assertEquals(round(tau[0], 7), 0.0287487)
+        self.assertEquals(round(tau[-1],8), 0.0034430)
 
 
     def _validate_group_values(self, groupWS):
+        sub_ws = groupWS.getItem(0)
+        # Check Data
+        data = sub_ws.readY(0)
+        self.assertEquals(round(data[0], 5), 0.797069)
+        self.assertEquals(round(data[-1],5), 0.039049)
+        # Check Calc
+        calc = sub_ws.readY(1)
+        self.assertEquals(round(calc[0], 5), 0.870523)
+        self.assertEquals(round(calc[-1],5), 0.033887)
+        # Check Diff
+        diff = sub_ws.readY(2)
+        self.assertEquals(round(diff[0], 5),-0.073454)
+        self.assertEquals(round(diff[-1],5), 0.005157)
 
 
 #---------------------------------------Success cases--------------------------------------
