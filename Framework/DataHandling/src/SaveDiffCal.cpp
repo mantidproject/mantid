@@ -115,7 +115,7 @@ void SaveDiffCal::writeDoubleFieldFromTable(H5::Group &group,
   std::vector<double> data;
   column->numeric_fill(data);
   data.erase(data.begin() + m_numValues, data.end());
-  H5Util::writeArray1D(group, name, std::vector<double>(data));
+  H5Util::writeArray1D(group, name, data);
 }
 
 void SaveDiffCal::writeIntFieldFromTable(H5::Group &group,
@@ -124,7 +124,7 @@ void SaveDiffCal::writeIntFieldFromTable(H5::Group &group,
   std::vector<int32_t> data;
   column->numeric_fill(data);
   data.erase(data.begin() + m_numValues, data.end());
-  H5Util::writeArray1D(group, name, std::vector<int32_t>(data));
+  H5Util::writeArray1D(group, name, data);
 }
 
 // TODO should flip for mask

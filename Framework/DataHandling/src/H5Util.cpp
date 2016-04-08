@@ -165,34 +165,13 @@ std::vector<NumT> readArray1DCoerce(H5::Group &group, const std::string &name) {
 }
 
 namespace {
-// correct for widening - narrowing should use something else
 template <typename InputNumT, typename OutputNumT>
-std::vector<OutputNumT> wideningRead(DataSet &dataset,
-                                     const DataType &dataType) {
-  DataSpace dataSpace = dataset.getSpace();
-
-  std::vector<InputNumT> temp(dataSpace.getSelectNpoints());
-  dataset.read(&temp[0], dataType, dataSpace);
-
-  std::vector<OutputNumT> result;
-  result.resize(temp.size());
-
-  std::transform(temp.begin(), temp.end(), result.begin(),
-                 [](const InputNumT a) { // lambda
-                   return static_cast<OutputNumT>(a);
-                 });
-
-  return result;
-}
-
-// should be correct for widening too
-template <typename InputNumT, typename OutputNumT>
-std::vector<OutputNumT> narrowingRead(DataSet &dataset,
+std::vector<OutputNumT> convertingingRead(DataSet &dataset,
                                       const DataType &dataType) {
   DataSpace dataSpace = dataset.getSpace();
 
   std::vector<InputNumT> temp(dataSpace.getSelectNpoints());
-  dataset.read(&temp[0], dataType, dataSpace);
+  dataset.read(temp.data(), dataType, dataSpace);
 
   std::vector<OutputNumT> result;
   result.resize(temp.size());
@@ -213,22 +192,22 @@ template <typename NumT> std::vector<NumT> readArray1DCoerce(DataSet &dataset) {
     std::vector<NumT> result;
     DataSpace dataSpace = dataset.getSpace();
     result.resize(dataSpace.getSelectNpoints());
-    dataset.read(&result[0], dataType, dataSpace);
+    dataset.read(result.data(), dataType, dataSpace);
     return result;
   }
 
   if (PredType::NATIVE_INT32 == dataType) {
-    return wideningRead<int32_t, NumT>(dataset, dataType);
+    return convertingingRead<int32_t, NumT>(dataset, dataType);
   } else if (PredType::NATIVE_UINT32 == dataType) {
-    return wideningRead<uint32_t, NumT>(dataset, dataType);
+    return convertingingRead<uint32_t, NumT>(dataset, dataType);
   } else if (PredType::NATIVE_INT64 == dataType) {
-    return narrowingRead<int64_t, NumT>(dataset, dataType);
+    return convertingingRead<int64_t, NumT>(dataset, dataType);
   } else if (PredType::NATIVE_UINT64 == dataType) {
-    return narrowingRead<uint64_t, NumT>(dataset, dataType);
+    return convertingingRead<uint64_t, NumT>(dataset, dataType);
   } else if (PredType::NATIVE_FLOAT == dataType) {
-    return wideningRead<float, NumT>(dataset, dataType);
+    return convertingingRead<float, NumT>(dataset, dataType);
   } else if (PredType::NATIVE_DOUBLE == dataType) {
-    return narrowingRead<double, NumT>(dataset, dataType);
+    return convertingingRead<double, NumT>(dataset, dataType);
   }
 
   // not a supported type
