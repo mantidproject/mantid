@@ -782,7 +782,7 @@ bool LoadNexusMonitors2::createOutputWorkspace(
       numSpec = m_monitor_count;
 
     m_workspace =
-        API::WorkspaceFactory::Instance().create("Workspace2D", numSpec, 1, 1);
+        API::WorkspaceFactory::Instance().create("Workspace2D", numSpec, 2, 1);
     // if there is a distinct monitor number for each monitor sort them by that
     // number
     if (monitorNumber2Name.size() == monitorNames.size()) {
