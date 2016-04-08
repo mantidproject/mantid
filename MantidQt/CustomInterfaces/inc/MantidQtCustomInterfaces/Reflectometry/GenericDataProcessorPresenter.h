@@ -44,10 +44,11 @@ class MANTIDQT_CUSTOMINTERFACES_DLL GenericDataProcessorPresenter
     : public DataProcessorPresenter,
       public MantidQt::API::WorkspaceObserver {
 public:
-  GenericDataProcessorPresenter(DataProcessorAlgorithmView *tableView,
-                                ProgressableView *progressView,
-                                const std::string &dataProcessorAlgorithm,
-                                const std::set<std::string> &blacklist);
+  GenericDataProcessorPresenter(
+      DataProcessorAlgorithmView *tableView, ProgressableView *progressView,
+      const std::string &dataProcessorAlgorithm,
+      const std::set<std::string> &blacklist,
+      const std::vector<std::pair<std::string, std::string>> &whitelist);
   ~GenericDataProcessorPresenter() override;
   void notify(DataProcessorPresenter::Flag flag) override;
   const std::map<std::string, QVariant> &options() const override;
@@ -72,6 +73,8 @@ protected:
   ProgressableView *m_progressView;
   // The data processor algorithm
   std::string m_dataProcessorAlg;
+  // The whitelist
+  std::vector<std::pair<std::string, std::string>> m_whitelist;
   // A workspace receiver we want to notify
   WorkspaceReceiver *m_workspaceReceiver;
   // stores whether or not the table has changed since it was last saved
@@ -156,6 +159,11 @@ protected:
   void saveNotebook(std::map<int, std::set<int>> groups, std::set<int> rows);
   void accept(WorkspaceReceiver *workspaceReceiver) override;
   std::vector<DataProcessorCommand_uptr> getTableList();
+
+  void validateModel(Mantid::API::ITableWorkspace_sptr model);
+  bool isValidModel(Mantid::API::Workspace_sptr model);
+  Mantid::API::ITableWorkspace_sptr createWorkspace();
+  Mantid::API::ITableWorkspace_sptr createDefaultWorkspace();
 };
 }
 }

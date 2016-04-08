@@ -33,11 +33,22 @@ QDataProcessorAlgorithmWidget::QDataProcessorAlgorithmWidget(QWidget *parent)
                                   "OutputWorkspaceWavelength",
                                   "FirstTransmissionRun",
                                   "SecondTransmissionRun"};
+  // The whitelist
+  std::vector<std::pair<std::string, std::string>> whitelist = {
+      std::pair<std::string, std::string>("Run(s)", "InputWorkspace"),
+      std::pair<std::string, std::string>("Angle", "ThetaIn"),
+      std::pair<std::string, std::string>("Transmission Run(s)",
+                                          "FirstTransmissionRun"),
+      std::pair<std::string, std::string>("Q min", "Qmin"),
+      std::pair<std::string, std::string>("Q max", "Qmax"),
+      std::pair<std::string, std::string>("dQ/Q", "dq/q"),
+      std::pair<std::string, std::string>("Scale", "Scale")};
   m_presenter = boost::make_shared<GenericDataProcessorPresenter>(
       this /*table view*/,
       this /*currently this concrete view is also responsibile for prog reporting*/,
       dataProcessorAlgorithm /*the algorithm responsible for the processing*/,
-      blacklist /*Properties we don't want to show in the Options column*/);
+      blacklist /*Properties we don't want to show in the Options column*/,
+      whitelist /*Properties we want to show as columns in the table*/);
 }
 
 //----------------------------------------------------------------------------------------------

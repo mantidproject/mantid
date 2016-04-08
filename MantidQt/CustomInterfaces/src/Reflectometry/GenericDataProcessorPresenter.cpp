@@ -51,75 +51,6 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
 
-namespace {
-void validateModel(ITableWorkspace_sptr model) {
-  if (!model)
-    throw std::runtime_error("Null pointer");
-
-  if (model->columnCount() != 9)
-    throw std::runtime_error("Selected table has the incorrect number of "
-                             "columns (9) to be used as a reflectometry "
-                             "table.");
-
-  try {
-    model->String(0, 0);
-    model->String(0, 1);
-    model->String(0, 2);
-    model->String(0, 3);
-    model->String(0, 4);
-    model->String(0, 5);
-    model->Double(0, 6);
-    model->Int(0, 7);
-    model->String(0, 8);
-  } catch (const std::runtime_error &) {
-    throw std::runtime_error("Selected table does not meet the specifications "
-                             "to become a model for this interface.");
-  }
-}
-
-bool isValidModel(Workspace_sptr model) {
-  try {
-    validateModel(boost::dynamic_pointer_cast<ITableWorkspace>(model));
-  } catch (...) {
-    return false;
-  }
-  return true;
-}
-
-ITableWorkspace_sptr createWorkspace() {
-  ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
-  auto colRuns = ws->addColumn("str", "Run(s)");
-  auto colTheta = ws->addColumn("str", "ThetaIn");
-  auto colTrans = ws->addColumn("str", "TransRun(s)");
-  auto colQmin = ws->addColumn("str", "Qmin");
-  auto colQmax = ws->addColumn("str", "Qmax");
-  auto colDqq = ws->addColumn("str", "dq/q");
-  auto colScale = ws->addColumn("double", "Scale");
-  auto colStitch = ws->addColumn("int", "StitchGroup");
-  auto colOptions = ws->addColumn("str", "Options");
-
-  colRuns->setPlotType(0);
-  colTheta->setPlotType(0);
-  colTrans->setPlotType(0);
-  colQmin->setPlotType(0);
-  colQmax->setPlotType(0);
-  colDqq->setPlotType(0);
-  colScale->setPlotType(0);
-  colStitch->setPlotType(0);
-  colOptions->setPlotType(0);
-
-  return ws;
-}
-
-ITableWorkspace_sptr createDefaultWorkspace() {
-  // Create a blank workspace with one line and set the scale column to 1
-  auto ws = createWorkspace();
-  ws->appendRow();
-  ws->Double(0, MantidQt::CustomInterfaces::ReflTableSchema::COL_SCALE) = 1.0;
-  return ws;
-}
-}
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -131,16 +62,25 @@ namespace CustomInterfaces {
 * @param dataProcessorAlgorithm : [input] The data processor algorithm's name as
 * a string
 * @param blacklist : [input] The set of blacklisted properties
+* @param whitelist : [input] The set of properties we want to show as columns,
+* as a vector of pairs
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     DataProcessorAlgorithmView *tableView, ProgressableView *progressView,
     const std::string &dataProcessorAlgorithm,
-    const std::set<std::string> &blacklist)
+    const std::set<std::string> &blacklist,
+    const std::vector<std::pair<std::string, std::string>> &whitelist)
     : WorkspaceObserver(), m_view(tableView), m_progressView(progressView),
-      m_dataProcessorAlg(dataProcessorAlgorithm), m_tableDirty(false) {
+      m_dataProcessorAlg(dataProcessorAlgorithm), m_whitelist(whitelist),
+      m_tableDirty(false) {
 
   // Initialise options
   initOptions();
+
+  // Columns Group and Options must be added to the whitelist
+  m_whitelist.push_back(std::pair<std::string, std::string>("Group", "Group"));
+  m_whitelist.push_back(
+      std::pair<std::string, std::string>("Options", "Options"));
 
   // Populate an initial list of valid tables to open, and subscribe to the ADS
   // to keep it up to date
@@ -173,7 +113,86 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
   newTable();
 }
 
+/**
+* Destructor
+*/
 GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
+
+/**
+* Validates a table workspace
+* @param model : [input] The table workspace to validate
+* @throws std::runtime_error if the model is not valid
+*/
+void GenericDataProcessorPresenter::validateModel(ITableWorkspace_sptr model) {
+  if (!model)
+    throw std::runtime_error("Null pointer");
+
+  if (model->columnCount() != m_whitelist.size())
+    throw std::runtime_error("Selected table has the incorrect number of "
+                             "columns to be used as a data processor table.");
+
+  try {
+    // All columns must be strings
+    size_t ncols = model->columnCount();
+    for (size_t i = 0; i < ncols - 2; i++)
+      model->String(0, i);
+    // Except Group, which must be int
+    model->Int(0, ncols - 2);
+    // Options column must be string too
+    model->String(0, ncols - 1);
+  } catch (const std::runtime_error &) {
+    throw std::runtime_error("Selected table does not meet the specifications "
+                             "to become a model for this interface.");
+  }
+}
+
+/**
+* Checks if a model is valid
+* @param model : [input] The table workspace to validate
+* @returns : True if the model is valid. False otherwise
+*/
+bool GenericDataProcessorPresenter::isValidModel(Workspace_sptr model) {
+  try {
+    validateModel(boost::dynamic_pointer_cast<ITableWorkspace>(model));
+  } catch (...) {
+    return false;
+  }
+  return true;
+}
+
+/**
+* Creates a model using the whitelist supplied to this presenter
+* @returns : The new model
+*/
+ITableWorkspace_sptr GenericDataProcessorPresenter::createWorkspace() {
+  ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
+
+  size_t ncols = m_whitelist.size();
+
+  for (size_t i = 0; i < ncols - 2; i++) {
+    // The columns provided to this presenter
+    auto col = ws->addColumn("str", m_whitelist[i].first);
+    col->setPlotType(0);
+  }
+  // The Group column, must be int
+  auto colGroup = ws->addColumn("int", "Group");
+  colGroup->setPlotType(0);
+  auto colOptions = ws->addColumn("str", "Options");
+  colOptions->setPlotType(0);
+
+  return ws;
+}
+
+/**
+* Creates a default model using the whitelist supplied to this presenter
+* @returns : The new model
+*/
+ITableWorkspace_sptr GenericDataProcessorPresenter::createDefaultWorkspace() {
+  auto ws = createWorkspace();
+  ws->appendRow();
+  ws->String(0, MantidQt::CustomInterfaces::ReflTableSchema::COL_SCALE) = "1";
+  return ws;
+}
 
 /**
 * Finds the first unused group id
@@ -951,7 +970,7 @@ void GenericDataProcessorPresenter::insertRow(int index) {
   if (!m_model->insertRow(index))
     return;
   // Set the default scale to 1.0
-  m_model->setData(m_model->index(index, ReflTableSchema::COL_SCALE), 1.0);
+  m_model->setData(m_model->index(index, ReflTableSchema::COL_SCALE), "1");
   // Set the group id of the new row
   m_model->setData(m_model->index(index, ReflTableSchema::COL_GROUP), groupId);
 }
@@ -1320,7 +1339,7 @@ void GenericDataProcessorPresenter::clearSelected() {
                      "");
     m_model->setData(m_model->index(*row, ReflTableSchema::COL_QMIN), "");
     m_model->setData(m_model->index(*row, ReflTableSchema::COL_QMAX), "");
-    m_model->setData(m_model->index(*row, ReflTableSchema::COL_SCALE), 1.0);
+    m_model->setData(m_model->index(*row, ReflTableSchema::COL_SCALE), "1");
     m_model->setData(m_model->index(*row, ReflTableSchema::COL_DQQ), "");
     m_model->setData(m_model->index(*row, ReflTableSchema::COL_GROUP),
                      getUnusedGroup(ignore));
@@ -1417,7 +1436,7 @@ void GenericDataProcessorPresenter::transfer(
     otherwise,
     it will be overwritten below.
     */
-    m_model->setData(m_model->index(rowIndex, ReflTableSchema::COL_SCALE), 1.0);
+    m_model->setData(m_model->index(rowIndex, ReflTableSchema::COL_SCALE), "1");
     auto colIndexLookup = ReflTableSchema::makeColumnNameMap();
 
     // Loop over the map (each row with column heading keys to cell values)
