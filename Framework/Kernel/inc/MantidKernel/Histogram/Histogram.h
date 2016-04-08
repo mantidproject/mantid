@@ -56,7 +56,8 @@ private:
   XMode m_xMode = XMode::Uninitialized;
 };
 
-Histogram::XMode getHistogramXMode(size_t xLength, size_t yLength);
+MANTID_KERNEL_DLL Histogram::XMode getHistogramXMode(size_t xLength,
+                                                     size_t yLength);
 
 } // namespace Kernel
 } // namespace Mantid
