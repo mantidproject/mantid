@@ -176,7 +176,8 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
   // potentially there
   // could be blank lines and comment lines
   int numBins(0), lineNo(0);
-  std::vector<DataObjects::Histogram1D> spectra(numSpectra);
+  std::vector<DataObjects::Histogram1D> spectra(
+      numSpectra, Kernel::Histogram::XMode::Points);
   std::vector<double> values(numCols, 0.);
   do {
     ++lineNo;
