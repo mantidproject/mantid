@@ -67,7 +67,8 @@ class PDToPDFgetN(DataProcessorAlgorithm):
                              "Crop the data at this maximum wavelength.")
 
         self.declareProperty(FloatArrayProperty("Binning", values=[0., 0., 0.],
-                             direction=Direction.Input), "Positive is linear bins, negative is logorithmic")
+                                                direction=Direction.Input),
+                             "Positive is linear bins, negative is logorithmic")
         self.declareProperty("ResampleX", 0,
                              "Number of bins in x-axis. Non-zero value overrides \"Params\" property. " +
                              "Negative value means logorithmic binning.")
@@ -148,7 +149,7 @@ class PDToPDFgetN(DataProcessorAlgorithm):
             wksp.getRun()['iparm_file'] = self._iparmFile
 
         wksp = SetUncertainties(InputWorkspace=wksp, OutputWorkspace=wksp,
-                                SetError="sqrt")
+                                SetError="sqrtOrOne")
         SaveGSS(InputWorkspace=wksp,
                 Filename=self.getProperty("PDFgetNFile").value,
                 SplitFiles=False, Append=False,
