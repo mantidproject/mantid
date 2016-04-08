@@ -273,6 +273,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/MergeLogs.h
 	inc/MantidDataHandling/ModifyDetectorDotDatFile.h
 	inc/MantidDataHandling/MoveInstrumentComponent.h
+  inc/MantidDataHandling/NXcanSASDefinitions.h
 	inc/MantidDataHandling/NexusTester.h
 	inc/MantidDataHandling/PDLoadCharacterizations.h
 	inc/MantidDataHandling/PatchBBY.h

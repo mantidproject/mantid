@@ -52,11 +52,19 @@ public:
 
   std::map<std::string, std::string> validateInputs() override;
 
+  // Some NXcanSAS definitions
+  const static std::string qTag;
+  const static std::string qDevTag;
+  const static std::string iTag;
+  const static std::string iDevTag;
+  const static std::string unitTag;
+  const static std::string uncertaintyTag;
+
 private:
   /// Initialisation code
   void init() override;
   /// Execution code
-  void exec() override;  
+  void exec() override;
 };
 
 } // namespace DataHandling
