@@ -32,7 +32,9 @@ set ( SRC_FILES
 	src/FloatingPointComparison.cpp
 	src/FreeBlock.cpp
 	src/Glob.cpp
+	src/Histogram/BinEdges.cpp
 	src/Histogram/Histogram.cpp
+	src/Histogram/Points.cpp
 	src/ICatalogInfo.cpp
 	src/IPropertyManager.cpp
 	src/ISaveable.cpp
@@ -179,7 +181,11 @@ set ( INC_FILES
 	inc/MantidKernel/FreeBlock.h
 	inc/MantidKernel/FunctionTask.h
 	inc/MantidKernel/Glob.h
+	inc/MantidKernel/Histogram/BinEdges.h
+	inc/MantidKernel/Histogram/ConstIterable.h
 	inc/MantidKernel/Histogram/Histogram.h
+	inc/MantidKernel/Histogram/Points.h
+	inc/MantidKernel/Histogram/VectorOf.h
 	inc/MantidKernel/ICatalogInfo.h
 	inc/MantidKernel/IPropertyManager.h
 	inc/MantidKernel/IPropertySettings.h
@@ -335,6 +341,10 @@ set ( TEST_FILES
 	FreeBlockTest.h
 	FunctionTaskTest.h
 	GlobTest.h
+	HistogramBinEdgesTest.h
+	HistogramConstIterableTest.h
+	HistogramPointsTest.h
+	HistogramVectorOfTest.h
 	HistogramTest.h
 	IPropertySettingsTest.h
 	ISaveableTest.h
