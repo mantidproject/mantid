@@ -119,6 +119,9 @@ Improved
 Python
 ------
 
+- It is now possible to use the unit.quickConversion(destinationUnit) functionality in python. If it is possible to convert one unit to another using a multiplication by a constant, this will return the factor and power required for the multiplication.
+
+
 Python Algorithms
 #################
 
