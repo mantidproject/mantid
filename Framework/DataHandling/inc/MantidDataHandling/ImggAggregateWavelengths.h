@@ -68,7 +68,7 @@ private:
 
   void processDirectory(const Poco::Path &inDir,
                         const std::vector<std::pair<size_t, size_t>> &ranges,
-                        const std::string outDir, const std::string prefix,
+                        const std::string outDir, const std::string &prefix,
                         size_t outImgIndex);
 
   std::vector<std::pair<size_t, size_t>>
@@ -95,11 +95,15 @@ private:
   void saveFITS(const API::MatrixWorkspace_sptr accum,
                 const std::string &filename);
 
+  std::vector<std::pair<size_t, size_t>>
+  splitSizeIntoRanges(size_t availableCount, size_t bands);
+
   static const std::vector<std::string> formatExtensionsShort;
   static const std::vector<std::string> formatExtensionsLong;
   static const std::string outPrefix;
   static const std::string indexRangesPrefix;
   static const std::string tofRangesPrefix;
+  static const std::string outPrefixProjections;
 };
 
 } // namespace DataHandling

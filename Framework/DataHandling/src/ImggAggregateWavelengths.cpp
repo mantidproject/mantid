@@ -23,6 +23,8 @@ const std::vector<std::string> ImggAggregateWavelengths::formatExtensionsLong{
     "fits"};
 
 const std::string ImggAggregateWavelengths::outPrefix = "bands_";
+const std::string ImggAggregateWavelengths::outPrefixProjections =
+    "sum_projection_";
 const std::string ImggAggregateWavelengths::indexRangesPrefix = "indices_";
 const std::string ImggAggregateWavelengths::tofRangesPrefix = "tof_";
 
@@ -59,6 +61,7 @@ const std::string PROP_UNIFORM_BANDS = "UniformBands";
 const std::string PROP_INDEX_RANGES = "IndexRanges";
 const std::string PROP_TOF_RANGES = "ToFRanges";
 const std::string PROP_OUTPUT_PREFIX = "OutputBandPrefix";
+const std::string PROP_OUTPUT_PREFIXPROJECTIONS = "OutputBandPrefixProjections";
 const std::string PROP_INPUT_FORMAT = "InputImageFormat";
 const std::string PROP_OUTPUT_IMAGE_FORMAT = "OutputImageFormat";
 const std::string PROP_OUTPUT_BIT_DEPTH = "OutputBitDepth";
@@ -130,6 +133,16 @@ void ImggAggregateWavelengths::init() {
           "10000_50000' (where the 10000 and 50000 are the time of flight "
           "boundaries of the output band, using the same units as in the image "
           "headers).",
+      Direction::Input);
+
+  declareProperty(
+      PROP_OUTPUT_PREFIXPROJECTIONS, outPrefixProjections,
+      Kernel::make_unique<Kernel::MandatoryValidator<std::string>>(),
+      "In addition to the prefix that specifies the band indices (or, "
+      "alternatively the time of flight values) this prefix "
+      "is added to precede the projection (or angle, or simply the input "
+      "directory index). The names of the output files then look like: " +
+          outPrefix + indexRangesPrefix + "1_1200" + outPrefixProjections,
       Direction::Input);
 
   std::vector<std::string> imgFormat{"FITS"};
@@ -216,8 +229,7 @@ void ImggAggregateWavelengths::aggUniformBands(const std::string &inputPath,
 
   size_t count = 0;
   for (const auto &subdir : inputSubDirs) {
-    processDirectory(subdir, bands, outputPath, outPrefix + indexRangesPrefix,
-                     count++);
+    processDirectory(subdir, bands, outputPath, outPrefix, count++);
   }
 }
 
@@ -239,8 +251,7 @@ void ImggAggregateWavelengths::aggIndexBands(const std::string &inputPath,
 
   size_t count = 0;
   for (const auto &subdir : inputSubDirs) {
-    processDirectory(subdir, ranges, outputPath, outPrefix + indexRangesPrefix,
-                     count++);
+    processDirectory(subdir, ranges, outputPath, outPrefix, count++);
   }
 }
 
@@ -419,7 +430,9 @@ ImggAggregateWavelengths::findInputImages(const Poco::Path &path) {
  * Aggregate the images found in an input directory (can be all the
  * images from a radiography experiment, or all the images
  * corresponding to a single projection angle from a tomography
- * experiment).
+ * experiment). This is the version that processed the "UniformBands"
+ * property, splitting the input images into uniform bands or blocks
+ * (as many as given in the property).
  *
  * @param inDir where to find the input images.
  *
@@ -431,6 +444,9 @@ ImggAggregateWavelengths::findInputImages(const Poco::Path &path) {
  *
  * @param prefix prefix for the image names. The indices will be
  * appended to the prefix
+ *
+ * @param outImgIndex index of the directory/angle/projection, for
+ * file naming purposes
  */
 void ImggAggregateWavelengths::processDirectory(const Poco::Path &inDir,
                                                 size_t bands,
@@ -439,8 +455,6 @@ void ImggAggregateWavelengths::processDirectory(const Poco::Path &inDir,
                                                 size_t outImgIndex) {
   Mantid::API::MatrixWorkspace_sptr aggImg;
 
-  size_t max = 0;
-  // TODO: get max from directory (subdirs) listing
   auto images = findInputImages(inDir);
 
   if (images.empty()) {
@@ -450,9 +464,48 @@ void ImggAggregateWavelengths::processDirectory(const Poco::Path &inDir,
     return;
   }
 
-  // TODO call the 'ranges' version with the convenient range
-  const std::vector<std::pair<size_t, size_t>> ranges{std::make_pair(1, max)};
+  std::vector<std::pair<size_t, size_t>> ranges =
+      splitSizeIntoRanges(images.size(), bands);
   processDirectory(inDir, ranges, outDir, prefix, outImgIndex);
+}
+
+/**
+ * Split into uniform blocks, for when producing multiple output bands
+ * from the input images/bands. If the division is not exact, a few
+ * images at the end will be ignored, so the number of input bands
+ * that will go into every output band is the same for all of
+ * them. For example, if 1000 input images/bands are aggregated into 3
+ * output bands, From 1000/3: 333 (output band 1), 333 (output band
+ * 2), 333 (output band 3), and 1 last image is not considered.
+ *
+ * @param availableCount how many input elements there are @param
+ * bands into how many uniform blocks they should be split
+ *
+ * @returns pairs of min-max for the output blocks
+ */
+std::vector<std::pair<size_t, size_t>>
+ImggAggregateWavelengths::splitSizeIntoRanges(size_t availableCount,
+                                              size_t bands) {
+  std::vector<std::pair<size_t, size_t>> ranges;
+  size_t inc = availableCount / bands;
+  if (inc < 1) {
+    throw std::runtime_error(
+        "The number of output bands requested (" + std::to_string(bands) +
+        ") is bigger than the number of available input images (" +
+        std::to_string(availableCount) + ". It should be equal or smaller, and "
+                                         "normally it is much smaller. Please "
+                                         "check that you are providing the "
+                                         "correct input parameters");
+  }
+
+  for (size_t count = 0; count < availableCount; count += inc) {
+    size_t max =
+        ((count + inc) > availableCount) ? availableCount : count + inc;
+    // TODO call the 'ranges' version with the convenient range
+    ranges.emplace_back(std::make_pair(count, max));
+  }
+
+  return ranges;
 }
 
 API::MatrixWorkspace_sptr
@@ -548,13 +601,22 @@ void ImggAggregateWavelengths::aggImage(API::MatrixWorkspace_sptr accum,
   }
 }
 
+/**
+ * Save an image workspace into an image file.
+ *
+ * @param accum workspace with image data
+ * @param outDir where the file goes
+ * @param prefix prefix to use in the file name
+ * @param outImgIndex index of the directory/angle/projection which
+ * will be used in the filename
+ */
 void ImggAggregateWavelengths::saveAggImage(
     const API::MatrixWorkspace_sptr accum, const std::string &outDir,
     const std::string &prefix, size_t outImgIndex) {
   // for example 'bands_sum_00030'
   std::ostringstream sstr;
   sstr << std::setw(5) << std::setfill('0') << outImgIndex;
-  const std::string outName = prefix + "sum_" + sstr.str();
+  const std::string outName = prefix + "_sum_projection_" + sstr.str();
 
   Poco::Path outPath(outDir);
   Poco::File dirFile(outPath);
@@ -566,8 +628,9 @@ void ImggAggregateWavelengths::saveAggImage(
   }
 
   outPath.append(outName);
+  std::string fullName = outPath.toString();
   // only FITS support for now
-  const std::string fullName = outPath.toString();
+  fullName += ".fits";
   saveFITS(accum, fullName);
   g_log.information() << "Saved output aggregated image into: " << fullName
                       << std::endl;
@@ -601,7 +664,7 @@ void writeFITSHeaderEntry(const std::string &hdr, std::ofstream &file) {
     count = maxLenHdr;
 
   file.write(hdr.c_str(), sizeof(char) * count);
-  file.write(&zeros[0], maxLenHdr - count);
+  file.write(zeros.data(), maxLenHdr - count);
 }
 
 void writeFITSHeaderAxesSizes(const API::MatrixWorkspace_sptr img,
@@ -627,7 +690,7 @@ void writePaddingFITSHeaders(size_t count, std::ofstream &file) {
   static const std::array<char, maxLenHdr> zeros{};
 
   for (size_t i = 0; i < count; ++i) {
-    file.write(&zeros[0], maxLenHdr);
+    file.write(zeros.data(), maxLenHdr);
   }
 }
 
@@ -655,15 +718,15 @@ void writeFITSImageMatrix(const API::MatrixWorkspace_sptr img,
     Mantid::API::ISpectrum *spectrum = img->getSpectrum(row);
     const auto &dataY = spectrum->readY();
     for (size_t col = 0; col < sizeX; col++) {
-      const size_t bytespp = 2;
       int16_t pixelVal = static_cast<uint16_t>(dataY[col]);
 
       // change endianness: to sequence of bytes in big-endian
+      const size_t bytespp = 2;
       uint8_t bytesPixel[bytespp];
       uint8_t *iter = reinterpret_cast<uint8_t *>(&pixelVal);
       std::reverse_copy(iter, iter + bytespp, bytesPixel);
 
-      file.write(reinterpret_cast<const char *>(&bytesPixel[0]),
+      file.write(reinterpret_cast<const char *>(&bytesPixel),
                  sizeof(bytesPixel));
     }
   }
@@ -674,35 +737,66 @@ void writeFITSImageMatrix(const API::MatrixWorkspace_sptr img,
 // algorithm of its own
 void ImggAggregateWavelengths::saveFITS(const API::MatrixWorkspace_sptr accum,
                                         const std::string &filename) {
-  std::ofstream outfile(filename + ".fits", std::ofstream::binary);
+  std::ofstream outfile(filename, std::ofstream::binary);
 
   writeFITSHeaderBlock(accum, outfile);
   writeFITSImageMatrix(accum, outfile);
 }
 
+/**
+ * Produces the output images (bands) from a directory. The directory
+ * may hold the images for radiography data, or one projection angle
+ * from tomography data. Multiple output bands (images) can be
+ * produced as specified in ranges.
+ *
+ * This passes through the images one by one (only once), but every
+ * images can be aggregated into multiple output bands (as the bands
+ * or min-max ranges can overlap)
+ *
+ * @param inDir where to load images from
+ * @param ranges min-max pairs that define the limits of the output bands
+ * @prefix prefix to prepend to all the file names
+ * @param outDir where to write the output images/bands
+ * @param outImgIndex an index in the sequence of directories being
+ * processed
+ */
 void ImggAggregateWavelengths::processDirectory(
     const Poco::Path &inDir,
     const std::vector<std::pair<size_t, size_t>> &ranges,
-    const std::string outDir, const std::string prefix, size_t outImgIndex) {
+    const std::string outDir, const std::string &prefix, size_t outImgIndex) {
 
   auto imgFiles = findInputImages(inDir);
 
   const size_t maxProgress = imgFiles.size() + 1;
   API::Progress prog(this, 0, 1, maxProgress);
-  prog.report(0, "Loading input image files");
 
   const std::string wsName = "__ImggAggregateWavelengths_fits_seq";
   const std::string wsNameFirst = wsName + "_first";
+
+  prog.report(0, "Loading first input image file");
   auto it = std::begin(imgFiles);
-  API::MatrixWorkspace_sptr accum = loadFITS(*it, wsNameFirst);
+  std::vector<API::MatrixWorkspace_sptr> outAccums;
+  outAccums.resize(ranges.size());
+  outAccums[0] = loadFITS(*it, wsNameFirst);
+
+  prog.report(1, "Preparing workspaces for the output images");
+  for (size_t idx = 1; idx < ranges.size(); ++idx) {
+    outAccums[idx] = outAccums[0]->clone();
+  }
   ++it;
-  prog.report(1);
-  for (auto end = std::end(imgFiles); it != end; ++it) {
+
+  prog.report(1, "Loading input image files");
+  size_t inputIdx = 1;
+  for (auto end = std::end(imgFiles); it != end; ++it, ++inputIdx) {
     // load one more
     const API::MatrixWorkspace_sptr img = loadFITS(*it, wsName);
 
-    // add
-    aggImage(accum, img);
+    // add into output
+    for (size_t idx = 0; idx < outAccums.size(); ++idx) {
+      if (idx >= ranges[idx].first && idx <= ranges[idx].second) {
+        aggImage(outAccums[idx], img);
+      }
+    }
 
     // clear image/workspace. TODO: This is a big waste of
     // allocations/deallocations
@@ -710,10 +804,17 @@ void ImggAggregateWavelengths::processDirectory(
     prog.reportIncrement(1);
   }
 
-  prog.report("Saving output image file");
   // save
-  saveAggImage(accum, outDir, prefix, outImgIndex);
+  prog.report("Saving output image file(s)");
+  for (size_t idx = 0; idx < outAccums.size(); ++idx) {
+    // call the file like: bands_indices_0_1000...
+    const std::string extendedPrefix = prefix + indexRangesPrefix +
+                                       std::to_string(ranges[idx].first) + "_" +
+                                       std::to_string(ranges[idx].second);
+    saveAggImage(outAccums[idx], outDir, extendedPrefix, outImgIndex);
+  }
   Mantid::API::AnalysisDataService::Instance().remove(wsNameFirst);
+
   prog.reportIncrement(1, "Finished");
 }
 
