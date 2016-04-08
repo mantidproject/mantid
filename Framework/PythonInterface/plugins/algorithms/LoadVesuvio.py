@@ -132,7 +132,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         self.declareProperty(LOAD_MON, False,
                              doc="If true then the monitor data is loaded and will be output by the "
-                                 "algorithm.")
+                                 "algorithm into a separate workspace.")
 
         self.declareProperty(WorkspaceProperty(WKSP_PROP, "", Direction.Output),
                              doc="The name of the output workspace.")
