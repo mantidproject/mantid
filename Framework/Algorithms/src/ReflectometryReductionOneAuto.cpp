@@ -116,6 +116,15 @@ void ReflectometryReductionOneAuto::init() {
                   "Wavelength Max in angstroms", Direction::Input);
   declareProperty("WavelengthStep", Mantid::EMPTY_DBL(),
                   "Wavelength step in angstroms", Direction::Input);
+  declareProperty("QMin", Mantid::EMPTY_DBL(), "Momentum Min in angstroms-1",
+                  Direction::Input);
+  declareProperty("QMax", Mantid::EMPTY_DBL(), "Momentum Max in angstroms-1",
+                  Direction::Input);
+  declareProperty("QStep", Mantid::EMPTY_DBL(), "Momentum step in angstroms",
+                  Direction::Input);
+  declareProperty("Scale", Mantid::EMPTY_DBL(),
+                  "The factor by which to scale the OutputWorkspace",
+                  Direction::Input);
   declareProperty("MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
                   "Monitor wavelength background min in angstroms",
                   Direction::Input);
