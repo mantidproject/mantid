@@ -219,6 +219,10 @@ void ImggAggregateWavelengths::exec() {
     aggIndexBands(inputPath, outputPath, indexRanges);
   else if (!tofRanges.empty())
     aggToFBands(inputPath, outputPath, tofRanges);
+
+  g_log.notice() << "Saved output aggregated images into: " << outputPath
+                 << ". They are now ready for further processing. "
+                 << std::endl;
 }
 
 void ImggAggregateWavelengths::aggUniformBands(const std::string &inputPath,
@@ -665,7 +669,7 @@ const std::string FITSHdrRefComment2 =
 const std::string FITSHdrEnd = "END";
 
 void writeFITSHeaderEntry(const std::string &hdr, std::ofstream &file) {
-  static const std::array<char, maxLenHdr> zeros{};
+  static const std::array<char, maxLenHdr> zeros{0};
 
   size_t count = hdr.size();
   if (count >= maxLenHdr)
@@ -695,7 +699,7 @@ void writeFITSHeaderAxesSizes(const API::MatrixWorkspace_sptr img,
 // FITS headers consist of subblocks of 36 entries/lines. This method
 // is to write the "padding" lines required to have 36 in a block
 void writePaddingFITSHeaders(size_t count, std::ofstream &file) {
-  static const std::array<char, maxLenHdr> zeros{};
+  static const std::array<char, maxLenHdr> zeros{0};
 
   for (size_t i = 0; i < count; ++i) {
     file.write(zeros.data(), maxLenHdr);
@@ -763,7 +767,7 @@ void ImggAggregateWavelengths::saveFITS(const API::MatrixWorkspace_sptr accum,
  *
  * @param inDir where to load images from
  * @param ranges min-max pairs that define the limits of the output bands
- * @prefix prefix to prepend to all the file names
+ * @param prefix to prepend to all the file names
  * @param outDir where to write the output images/bands
  * @param outImgIndex an index in the sequence of directories being
  * processed
@@ -823,9 +827,6 @@ void ImggAggregateWavelengths::processDirectory(
   }
   Mantid::API::AnalysisDataService::Instance().remove(wsNameFirst);
 
-  g_log.notice() << "Saved output aggregated images into: " << outDir
-                 << ". They are now ready for further processing. "
-                 << std::endl;
   prog.reportIncrement(1, "Finished");
 }
 

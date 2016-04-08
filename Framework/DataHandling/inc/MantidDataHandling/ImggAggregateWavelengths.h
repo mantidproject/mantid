@@ -37,7 +37,7 @@ namespace DataHandling {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_DATAHANDLING_DLL ImggAggregateWavelengths final
+class DLLExport ImggAggregateWavelengths final
     : public API::Algorithm {
 public:
   const std::string name() const override final;
@@ -98,8 +98,6 @@ private:
   std::vector<std::pair<size_t, size_t>>
   splitSizeIntoRanges(size_t availableCount, size_t bands);
 
-  static const std::vector<std::string> formatExtensionsShort;
-  static const std::vector<std::string> formatExtensionsLong;
   static const std::string outPrefixProjections;
   static const std::string outPrefixBands;
   static const std::string indexRangesPrefix;
