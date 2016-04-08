@@ -17,11 +17,6 @@
 namespace Mantid {
 namespace DataHandling {
 
-const std::vector<std::string> ImggAggregateWavelengths::formatExtensionsShort{
-    "fit"};
-const std::vector<std::string> ImggAggregateWavelengths::formatExtensionsLong{
-    "fits"};
-
 const std::string ImggAggregateWavelengths::outPrefixProjections =
     "sum_projection_";
 const std::string ImggAggregateWavelengths::outPrefixBands = "bands_";
@@ -323,6 +318,8 @@ struct PocoPathComp
 
 bool ImggAggregateWavelengths::isSupportedExtension(
     const std::string &extShort, const std::string &extLong) {
+  const std::vector<std::string> formatExtensionsShort{"fit"};
+  const std::vector<std::string> formatExtensionsLong{"fits"};
 
   bool found = (formatExtensionsShort.end() !=
                 std::find(formatExtensionsShort.cbegin(),
@@ -416,8 +413,6 @@ ImggAggregateWavelengths::findInputImages(const Poco::Path &path) {
         continue;
       }
 
-      const std::string expectedShort = "fit";
-      const std::string expectedLong = "fits";
       const std::string extShort = name.substr(name.size() - 3);
       const std::string extLong = name.substr(name.size() - 4);
       if (isSupportedExtension(extShort, extLong)) {
