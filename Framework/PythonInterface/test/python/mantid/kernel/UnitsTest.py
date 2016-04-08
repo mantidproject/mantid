@@ -27,10 +27,14 @@ class UnitsTest(unittest.TestCase):
         self.assertEquals(power, -0.5)
 
 # -------------  Failure cases  -------------------
-    def test_failure_quick_conversion_failure_with_bad_input(self):
+    def test_failure_quick_conversion_failure_with_same_input(self):
         energy = UnitFactory.Instance().create("Energy")
-        self.assertRaises(RuntimeError, energy.quickConversion(100))
-
+        try:
+            energy.quickConversion("Energy")
+        except RuntimeError:
+            pass
+        except:
+            self.fail('unexpected error.')
 
 if __name__ == '__main__':
     unittest.main()
