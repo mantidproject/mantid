@@ -363,6 +363,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_select_peak">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Select Peak</string>
           </property>

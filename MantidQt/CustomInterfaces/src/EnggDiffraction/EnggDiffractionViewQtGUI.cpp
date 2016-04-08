@@ -777,8 +777,9 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
 
   m_uiTabFitting.dataPlot->replot();
   m_zoomTool->setZoomBase();
-  // enable zoom after the plotting on graph
+  // enable zoom & select peak btn after the plotting on graph
   setZoomTool(true);
+  m_uiTabFitting.pushButton_select_peak->setEnabled(true);
   data.clear();
 }
 
