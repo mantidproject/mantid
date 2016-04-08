@@ -189,8 +189,8 @@ private:
 
   // Set up member variables from curve
   bool initializeFromCurve(PlotCurve *curve);
-  // Set up - add names of existing fit curves
-  void addExistingFits(const QStringList &curvesList);
+  // Set up - add names of existing fit curves and plot guess status
+  void addExistingFitsAndGuess(const QStringList &curvesList);
 
   /// Creates a pointer to fitPropertyBrowser
   MantidQt::MantidWidgets::FitPropertyBrowser* m_fitPropertyBrowser;

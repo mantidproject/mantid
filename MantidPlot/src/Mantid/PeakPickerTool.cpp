@@ -42,7 +42,7 @@ m_shouldBeNormalised(false)
 {
   d_graph->plotWidget()->canvas()->setCursor(Qt::pointingHandCursor);
 
-  addExistingFits(d_graph->curvesList());
+  addExistingFitsAndGuess(d_graph->curvesList());
 
   if (d_graph->plotWidget()->curves().size() > 0) {
     // Initialize from the first curve that will work
@@ -1103,12 +1103,20 @@ bool PeakPickerTool::initializeFromCurve(PlotCurve *curve) {
  * that "plot/remove guess" will work correctly
  * @param curvesList :: [input] List of names of curves on graph
  */
-void PeakPickerTool::addExistingFits(const QStringList &curvesList) {
+void PeakPickerTool::addExistingFitsAndGuess(const QStringList &curvesList) {
+  bool hasGuess = false;
   for (const auto curveName : curvesList) {
     if (curveName.contains(QRegExp("Workspace-[Calc|Diff]"))) { // fit
       m_curveNames.append(curveName);
     } else if (curveName == "CompositeFunction") { // guess
-      // deal with this
+      hasGuess = true;
     }
+  }
+  // Set status of plot guess in fit property browser
+  auto handler = m_fitPropertyBrowser->getHandler();
+  if (handler) {
+    handler->hasPlot() = hasGuess;
+    m_fitPropertyBrowser->setTextPlotGuess(hasGuess ? "Remove guess"
+                                                    : "Plot guess");
   }
 }
