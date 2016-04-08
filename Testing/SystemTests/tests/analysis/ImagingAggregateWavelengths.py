@@ -78,7 +78,7 @@ class ImagingAggregateWavelengths(stresstesting.MantidStressTest):
                                'wavelength_dependent_images/angle5/LARMOR00005333_Metals_000_00690.fits',
                                'wavelength_dependent_images/angle5/bogus.txt',
                                'wavelength_dependent_images/angle5/more_bogus',
-                              ]
+                             ]
 
     def requiredFiles(self):
         return set(self._raw_in_files)
