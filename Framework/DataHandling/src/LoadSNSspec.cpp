@@ -132,7 +132,7 @@ void LoadSNSspec::exec() {
     }
   }
 
-  spectra.resize(spectra_nbr);
+  spectra.resize(spectra_nbr, Kernel::Histogram::XMode::BinEdges);
   file.clear(); // end of file has been reached so we need to clear file state
   file.seekg(0, std::ios::beg); // go back to beginning of file
 

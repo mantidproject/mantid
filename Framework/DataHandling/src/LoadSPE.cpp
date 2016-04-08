@@ -9,7 +9,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <cstdio>
