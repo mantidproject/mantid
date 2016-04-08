@@ -169,7 +169,7 @@ public:
 
   double getPeakCentre() const;
 
-  void fittingWriteFile(std::string &fileDir);
+  void fittingWriteFile(const std::string &fileDir);
 
   void setZoomTool(bool enabled);
 

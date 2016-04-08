@@ -805,10 +805,16 @@ double EnggDiffractionViewQtGUI::getPeakCentre() const {
   return centre;
 }
 
-void EnggDiffractionViewQtGUI::fittingWriteFile(std::string &fileDir) {
-  auto outfile = std::ofstream(fileDir.c_str());
-  auto expPeaks = m_uiTabFitting.lineEdit_fitting_peaks->text();
-  outfile << expPeaks.toStdString();
+void EnggDiffractionViewQtGUI::fittingWriteFile(const std::string &fileDir) {
+  auto *stream_c_str = fileDir.c_str();
+  auto outfile = std::ofstream(stream_c_str);
+  if (!outfile) {
+    userWarning("File not found",
+                "File " + fileDir + " , could not be found. Please try again!");
+  } else {
+    auto expPeaks = m_uiTabFitting.lineEdit_fitting_peaks->text();
+    outfile << expPeaks.toStdString();
+  }
 }
 
 void EnggDiffractionViewQtGUI::setZoomTool(bool enabled) {
@@ -1389,7 +1395,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::savePeakList() {
     if (path.isEmpty()) {
       return;
     }
-    std::string strPath = path.toStdString();
+    const std::string strPath = path.toStdString();
     fittingWriteFile(strPath);
   } catch (...) {
     userWarning("Unable to save the peaks file: ",
