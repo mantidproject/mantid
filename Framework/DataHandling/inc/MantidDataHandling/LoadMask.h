@@ -77,8 +77,8 @@ private:
   void parseComponent(std::string valuetext, bool tomask);
   /// Convert value to detector ids
   void parseDetectorIDs(std::string inputstr, bool tomask);
-  /// Convert value to spectrum ids
-  void parseSpectrumIDs(std::string inputstr, bool tomask);
+  /// Convert value to spectrum Nos
+  void parseSpectrumNos(std::string inputstr, bool tomask);
   /// Split a string
   void splitString(std::string inputstr, std::vector<std::string> &strings,
                    std::string sep);

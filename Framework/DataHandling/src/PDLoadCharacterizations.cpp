@@ -75,7 +75,7 @@ void PDLoadCharacterizations::init() {
                   Direction::Output);
   declareProperty(
       make_unique<ArrayProperty<int32_t>>("SpectrumIDs", Direction::Output),
-      "Spectrum IDs (note that it is not detector ID or workspace "
+      "Spectrum Nos (note that it is not detector ID or workspace "
       "indices). The list must be either empty or have a size "
       "equal to input workspace's histogram number. ");
   declareProperty(
