@@ -9,7 +9,7 @@
 
 #include <QMutex>
 
-#ifndef WIN32
+#ifndef _WIN32
 // This is exclusively for kill/waitpid (interim solution, see below)
 #include <signal.h>
 #include <sys/wait.h>
@@ -514,7 +514,7 @@ void TomographyIfaceModel::checkDataPathsSet() const {
  * @return running status
  */
 bool TomographyIfaceModel::processIsRunning(int pid) {
-#ifdef WIN32
+#ifdef _WIN32
   HANDLE handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
   DWORD code;
   BOOL rc = GetExitCodeProcess(handle, &code);

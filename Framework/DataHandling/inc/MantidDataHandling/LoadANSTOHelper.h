@@ -123,7 +123,7 @@ public:
 
 class FastReadOnlyFile {
 private:
-#ifdef WIN32
+#ifdef _WIN32
   HANDLE m_handle;
 #else
   FILE *m_handle;
