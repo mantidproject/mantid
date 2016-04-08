@@ -100,10 +100,10 @@ private:
 
   static const std::vector<std::string> formatExtensionsShort;
   static const std::vector<std::string> formatExtensionsLong;
-  static const std::string outPrefix;
+  static const std::string outPrefixProjections;
+  static const std::string outPrefixBands;
   static const std::string indexRangesPrefix;
   static const std::string tofRangesPrefix;
-  static const std::string outPrefixProjections;
 };
 
 } // namespace DataHandling

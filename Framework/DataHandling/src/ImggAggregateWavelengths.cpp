@@ -22,9 +22,9 @@ const std::vector<std::string> ImggAggregateWavelengths::formatExtensionsShort{
 const std::vector<std::string> ImggAggregateWavelengths::formatExtensionsLong{
     "fits"};
 
-const std::string ImggAggregateWavelengths::outPrefix = "bands_";
 const std::string ImggAggregateWavelengths::outPrefixProjections =
     "sum_projection_";
+const std::string ImggAggregateWavelengths::outPrefixBands = "bands_";
 const std::string ImggAggregateWavelengths::indexRangesPrefix = "indices_";
 const std::string ImggAggregateWavelengths::tofRangesPrefix = "tof_";
 
@@ -60,8 +60,8 @@ const std::string PROP_OUTPUT_PATH = "OutputPath";
 const std::string PROP_UNIFORM_BANDS = "UniformBands";
 const std::string PROP_INDEX_RANGES = "IndexRanges";
 const std::string PROP_TOF_RANGES = "ToFRanges";
-const std::string PROP_OUTPUT_PREFIX = "OutputBandPrefix";
-const std::string PROP_OUTPUT_PREFIXPROJECTIONS = "OutputBandPrefixProjections";
+const std::string PROP_OUTPUT_PREFIX_PROJECTIONS = "OutputProjectionsPrefix";
+const std::string PROP_OUTPUT_PREFIX_BANDS = "OutputBandPrefix";
 const std::string PROP_INPUT_FORMAT = "InputImageFormat";
 const std::string PROP_OUTPUT_IMAGE_FORMAT = "OutputImageFormat";
 const std::string PROP_OUTPUT_BIT_DEPTH = "OutputBitDepth";
@@ -115,34 +115,42 @@ void ImggAggregateWavelengths::init() {
       "given in this property. The ranges can overlap");
 
   declareProperty(
-      PROP_OUTPUT_PREFIX, outPrefix,
+      PROP_OUTPUT_PREFIX_PROJECTIONS, outPrefixProjections,
       Kernel::make_unique<Kernel::MandatoryValidator<std::string>>(),
-      "The output bands will be written into subdirectories with names where "
-      "the prefix is prepended. In addition to this prefix, a second prefix "
-      "that specifies whether the input bands were aggregated by indices or by "
-      "time of flight is also appended. For example when running this "
-      "algorithm using the property " +
-          PROP_UNIFORM_BANDS + " or " + PROP_INDEX_RANGES +
-          " the output subdirectoy names will look like '" + outPrefix +
-          indexRangesPrefix + "1_1200' (where the 1 and 1200 derive from the "
-                              "division into uniform non-overlaping blocks of "
-                              "input bands, or the index ranges given. When "
-                              "running the algorithm using the property " +
-          PROP_TOF_RANGES + " sthe output subdirectory names will look like '" +
-          outPrefix + tofRangesPrefix +
-          "10000_50000' (where the 10000 and 50000 are the time of flight "
-          "boundaries of the output band, using the same units as in the image "
-          "headers).",
+      "This prefix is added in the output file names to precede the projection "
+      "sequence number (or angle, or simply the input directory index). The "
+      "names of the output files then look like: " +
+          outPrefixProjections + outPrefixBands + indexRangesPrefix + "1_1200" +
+          ", as in addition to this prefix, another prefix is added with the "
+          "indices of the input images included (see option " +
+          PROP_OUTPUT_PREFIX_BANDS,
       Direction::Input);
 
   declareProperty(
-      PROP_OUTPUT_PREFIXPROJECTIONS, outPrefixProjections,
+      PROP_OUTPUT_PREFIX_BANDS, outPrefixBands,
       Kernel::make_unique<Kernel::MandatoryValidator<std::string>>(),
-      "In addition to the prefix that specifies the band indices (or, "
-      "alternatively the time of flight values) this prefix "
-      "is added to precede the projection (or angle, or simply the input "
-      "directory index). The names of the output files then look like: " +
-          outPrefix + indexRangesPrefix + "1_1200" + outPrefixProjections,
+      "This prefix is used for the output file names in addition to the prefix "
+      "that specifies the projection or input "
+      "directory sequence number, (" +
+          PROP_OUTPUT_PREFIX_PROJECTIONS +
+          "). "
+          "The output bands will be written into subdirectories with names "
+          "where the prefix is prepended. In addition to this prefix, a second "
+          "prefix that specifies whether the input bands were aggregated by "
+          "indices or by time of flight is also appended. For example when "
+          "running this algorithm using the property " +
+          PROP_UNIFORM_BANDS + " or " + PROP_INDEX_RANGES +
+          " the output subdirectoy names will look like '" +
+          outPrefixProjections + outPrefixBands + indexRangesPrefix +
+          "1_1200' (where the 1 and 1200 derive from the "
+          "division into uniform non-overlaping blocks of "
+          "input bands, or the index ranges given. When "
+          "running the algorithm using the property " +
+          PROP_TOF_RANGES + " the output names will look like '" +
+          outPrefixBands + tofRangesPrefix +
+          "10000_50000' (where the 10000 and 50000 are the time of flight "
+          "boundaries of the output band, using the same units as in the image "
+          "headers).",
       Direction::Input);
 
   std::vector<std::string> imgFormat{"FITS"};
@@ -180,6 +188,11 @@ std::map<std::string, std::string> ImggAggregateWavelengths::validateInputs() {
   const std::string tofRanges = getPropertyValue(PROP_TOF_RANGES);
   if (!tofRanges.empty())
     optCount++;
+
+  // Prevent for now. When we enable this option, remove this if
+  if (!tofRanges.empty())
+    result[PROP_TOF_RANGES] =
+        "This property is not supported in this version of the algorithm";
 
   if (1 != optCount) {
     result[PROP_UNIFORM_BANDS] = "One and only one of the options " +
@@ -229,7 +242,7 @@ void ImggAggregateWavelengths::aggUniformBands(const std::string &inputPath,
 
   size_t count = 0;
   for (const auto &subdir : inputSubDirs) {
-    processDirectory(subdir, bands, outputPath, outPrefix, count++);
+    processDirectory(subdir, bands, outputPath, outPrefixBands, count++);
   }
 }
 
@@ -251,7 +264,7 @@ void ImggAggregateWavelengths::aggIndexBands(const std::string &inputPath,
 
   size_t count = 0;
   for (const auto &subdir : inputSubDirs) {
-    processDirectory(subdir, ranges, outputPath, outPrefix, count++);
+    processDirectory(subdir, ranges, outputPath, outPrefixBands, count++);
   }
 }
 
@@ -613,10 +626,10 @@ void ImggAggregateWavelengths::aggImage(API::MatrixWorkspace_sptr accum,
 void ImggAggregateWavelengths::saveAggImage(
     const API::MatrixWorkspace_sptr accum, const std::string &outDir,
     const std::string &prefix, size_t outImgIndex) {
-  // for example 'bands_sum_00030'
+  // for example 'sum_projection_00003_bands_indices_0_1000'
   std::ostringstream sstr;
   sstr << std::setw(5) << std::setfill('0') << outImgIndex;
-  const std::string outName = prefix + "_sum_projection_" + sstr.str();
+  const std::string outName = outPrefixProjections + sstr.str() + "_" + prefix;
 
   Poco::Path outPath(outDir);
   Poco::File dirFile(outPath);
@@ -815,6 +828,9 @@ void ImggAggregateWavelengths::processDirectory(
   }
   Mantid::API::AnalysisDataService::Instance().remove(wsNameFirst);
 
+  g_log.notice() << "Saved output aggregated images into: " << outDir
+                 << ". They are now ready for further processing. "
+                 << std::endl;
   prog.reportIncrement(1, "Finished");
 }
 
