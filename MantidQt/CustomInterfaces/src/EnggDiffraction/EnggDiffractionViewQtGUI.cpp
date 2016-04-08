@@ -806,8 +806,7 @@ double EnggDiffractionViewQtGUI::getPeakCentre() const {
 }
 
 void EnggDiffractionViewQtGUI::fittingWriteFile(const std::string &fileDir) {
-  auto *stream_c_str = fileDir.c_str();
-  auto outfile = std::ofstream(stream_c_str);
+  std::ofstream outfile(fileDir.c_str());
   if (!outfile) {
     userWarning("File not found",
                 "File " + fileDir + " , could not be found. Please try again!");
