@@ -162,18 +162,18 @@ public:
   void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data,
                          std::vector<QwtPlotCurve *> &dataVector, bool focused);
 
-  void setPeakPickerEnabled(bool enabled) override;
+  void setPeakPickerEnabled(bool enabled);
 
   void
-  setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) override;
+  setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak);
 
-  double getPeakCentre() const override;
+  double getPeakCentre() const;
 
-  void fittingWriteFile(std::string &fileDir) override;
+  void fittingWriteFile(std::string &fileDir);
 
-  void setZoomTool(bool enabled) override;
+  void setZoomTool(bool enabled);
 
-  void resetView() override;
+  void resetView();
 
   void plotFocusedSpectrum(const std::string &wsName) override;
 

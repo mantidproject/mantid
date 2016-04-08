@@ -427,51 +427,9 @@ public:
                                    const std::string &spectrum,
                                    const std::string &type) = 0;
 
-  /**
-  * Enables the peak picker tool
-  *
-  * @param enabled the values used to set the peak picker tool
-  */
-  virtual void setPeakPickerEnabled(bool enabled) = 0;
 
-  /**
-  * Used to set the function to the widget
-  *
-  * @param peak is the function which will be applied to the widget
-  */
-  virtual void
-  setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) = 0;
 
-  /**
-  * The value will be returned when the add peaks button will be
-  * clicked on the GUI
-  *
-  * @return centre value of the peak selected
-  */
-  virtual double getPeakCentre() const = 0;
 
-  /**
-  * The function will take a directory which will be used to
-  * write out a file with expected peaks
-  *
-  * @param fileDir is the directory of the file to write in
-  */
-  virtual void fittingWriteFile(std::string &fileDir) = 0;
-
-  /**
-  * Will be used to enable the zoom in/out feature to
-  * maintain the handling of the GUI
-  *
-  * @param enabled is a bool used to enable or disable GUI
-  */
-  virtual void setZoomTool(bool enabled) = 0;
-
-  /**
-  * Used to reset the view when a plot is fitted on the
-  * the GUI
-  *
-  */
-  virtual void resetView() = 0;
 };
 
 } // namespace CustomInterfaces
