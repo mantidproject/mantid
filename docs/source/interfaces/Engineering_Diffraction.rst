@@ -323,7 +323,7 @@ workspaces window:
 
 Preview
 ^^^^^^^
-Once the fitting process has completed and the you are able to view a
+Once the fitting process has completed and you are able to view a
 focused workspace with listed expected peaks on the data plot, Select
 Peak button should should also be enabled.
 By clicking Select Peak button the peak picker tool can be activated.

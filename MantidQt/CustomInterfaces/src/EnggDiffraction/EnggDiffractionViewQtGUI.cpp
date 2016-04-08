@@ -259,7 +259,6 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
       QwtPicker::AlwaysOff, m_uiTabFitting.dataPlot->canvas());
   m_zoomTool->setRubberBandPen(QPen(Qt::black));
   setZoomTool(false);
-
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -747,7 +746,7 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
 
   if (dataVector.size() > 0)
     dataVector.clear();
-	resetView();
+  resetView();
 
   // dark colours could be removed so the colored peaks stand out more
   const std::array<QColor, 16> QPenList{
@@ -807,25 +806,23 @@ double EnggDiffractionViewQtGUI::getPeakCentre() const {
 }
 
 void EnggDiffractionViewQtGUI::fittingWriteFile(std::string &fileDir) {
-  auto outfile = std::ofstream(fileDir);
+  auto outfile = std::ofstream(fileDir.c_str());
   auto expPeaks = m_uiTabFitting.lineEdit_fitting_peaks->text();
   outfile << expPeaks.toStdString();
 }
 
-void EnggDiffractionViewQtGUI::setZoomTool(bool enabled)
-{
-	m_zoomTool->setEnabled(enabled);
+void EnggDiffractionViewQtGUI::setZoomTool(bool enabled) {
+  m_zoomTool->setEnabled(enabled);
 }
 
-void EnggDiffractionViewQtGUI::resetView()
-{
-	// Resets the view to a sensible default
-	// Auto scale the axis
-	m_uiTabFitting.dataPlot->setAxisAutoScale(QwtPlot::xBottom);
-	m_uiTabFitting.dataPlot->setAxisAutoScale(QwtPlot::yLeft);
+void EnggDiffractionViewQtGUI::resetView() {
+  // Resets the view to a sensible default
+  // Auto scale the axis
+  m_uiTabFitting.dataPlot->setAxisAutoScale(QwtPlot::xBottom);
+  m_uiTabFitting.dataPlot->setAxisAutoScale(QwtPlot::yLeft);
 
-	// Set this as the default zoom level
-	m_zoomTool->setZoomBase(true);
+  // Set this as the default zoom level
+  m_zoomTool->setZoomBase(true);
 }
 
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
