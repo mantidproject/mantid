@@ -55,6 +55,8 @@ const std::string PROP_OUTPUT_PATH = "OutputPath";
 const std::string PROP_UNIFORM_BANDS = "UniformBands";
 const std::string PROP_INDEX_RANGES = "IndexRanges";
 const std::string PROP_TOF_RANGES = "ToFRanges";
+const std::string PROP_NUM_PROJECTIONS_PROCESSED = "NumProjections";
+const std::string PROP_NUM_BANDS_PROCESSED = "NumBands";
 const std::string PROP_OUTPUT_PREFIX_PROJECTIONS = "OutputProjectionsPrefix";
 const std::string PROP_OUTPUT_PREFIX_BANDS = "OutputBandPrefix";
 const std::string PROP_INPUT_FORMAT = "InputImageFormat";
@@ -116,6 +118,17 @@ void ImggAggregateWavelengths::init() {
       "metainformation (normally units of microseconds). The algorithm will "
       "produce as many output bands as ranges are "
       "given in this property. The ranges can overlap");
+
+  declareProperty(PROP_NUM_PROJECTIONS_PROCESSED, 0,
+                  "The number of projections (subdirectories with images) "
+                  "found in the input path and successfully processed",
+                  Direction::Output);
+
+  declareProperty(PROP_NUM_BANDS_PROCESSED, 0,
+                  "The number of wavelength or energy bands found in the "
+                  "inputs and successfully processed (aggregated) into the "
+                  "output(s)",
+                  Direction::Output);
 
   declareProperty(
       PROP_OUTPUT_PREFIX_PROJECTIONS, outPrefixProjections,
@@ -243,14 +256,16 @@ void ImggAggregateWavelengths::aggUniformBands(const std::string &inputPath,
   if (inputSubDirs.empty()) {
     g_log.warning() << "Could not find any input files or directories in "
                     << inputPath
-                    << ". Nothing will be produced in the output path."
-                    << std::endl;
+                    << " when trying to split the input bands into a uniform "
+                       "number of output bands. Nothing will be produced in "
+                       "the output path." << std::endl;
   }
 
   size_t count = 0;
   for (const auto &subdir : inputSubDirs) {
     processDirectory(subdir, bands, outputPath, outPrefixBands, count++);
   }
+  setProperty(PROP_NUM_PROJECTIONS_PROCESSED, static_cast<int>(count));
 }
 
 void ImggAggregateWavelengths::aggIndexBands(const std::string &inputPath,
@@ -264,8 +279,8 @@ void ImggAggregateWavelengths::aggIndexBands(const std::string &inputPath,
 
   if (inputSubDirs.empty()) {
     g_log.warning() << "Could not find any input files or directories in "
-                    << inputPath
-                    << ". Nothing will be produced in the output path."
+                    << inputPath << " when looking for input bands. Nothing "
+                                    "will be produced in the output path."
                     << std::endl;
   }
 
@@ -273,6 +288,7 @@ void ImggAggregateWavelengths::aggIndexBands(const std::string &inputPath,
   for (const auto &subdir : inputSubDirs) {
     processDirectory(subdir, ranges, outputPath, outPrefixBands, count++);
   }
+  setProperty(PROP_NUM_PROJECTIONS_PROCESSED, static_cast<int>(count));
 }
 
 void ImggAggregateWavelengths::aggToFBands(const std::string & /*inputPath*/,
@@ -398,7 +414,12 @@ void ImggAggregateWavelengths::processDirectory(
   }
   Mantid::API::AnalysisDataService::Instance().remove(wsNameFirst);
 
-  prog.reportIncrement(1, "Finished");
+  // output just the number of bands founds for the first subdirectory
+  int nBands = getProperty(PROP_NUM_BANDS_PROCESSED);
+  if (0 == nBands) {
+    setProperty(PROP_NUM_BANDS_PROCESSED, static_cast<int>(imgFiles.size()));
+  }
+  prog.reportIncrement(1, "Finished processing input subdirectory/projection");
 }
 
 std::vector<std::pair<size_t, size_t>>

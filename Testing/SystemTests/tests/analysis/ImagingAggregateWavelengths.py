@@ -47,9 +47,12 @@ class ImagingAggregateTests(unittest.TestCase):
     def test_run_ok(self):
         if not os.path.exists(self._out_dir):
             os.mkdir(self._out_dir)
-        ImggAggregateWavelengths(InputPath = self._raw_files_dir,
-                                 OutputPath = self._out_dir)
 
+        num_proj, num_bands = ImggAggregateWavelengths(InputPath = self._raw_files_dir,
+                                                       OutputPath = self._out_dir)
+
+        self.assertEquals(num_proj, 4)
+        self.assertEquals(num_bands, 6)
         self._cleanup_dirs_files()
 
 # Runs the unittest tests defined above in the mantid stress testing framework

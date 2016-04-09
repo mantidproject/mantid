@@ -24,16 +24,17 @@ Description
    this property will produce an error.
 
 This algorithm aggregates images from multiple energy bands or
-wavelengths into one or more output wavelength bands. This algorithm
+wavelengths into one or more output wavelength bands. The algorithm
 applies to energy selective imaging data. It aggregates images by
 summing up counts, and assumes that the image pixel values represent
 neutron counts.
 
 Given an input path (directory) and an output path (directory) the
-algorithm with combine images from the input path and write the result
+algorithm will combine images from the input path and write the result
 into the output path. Two different uses are considered: neutron
-radiography and tomography. The image format supported is FITS (using
-the algorithm :ref:`algm-LoadFITS`).
+radiography (single projection angle) and tomography (multiple
+projection angles). The image format supported is FITS (using the
+algorithm :ref:`algm-LoadFITS`).
 
 The algorithm produces its main outputs as files on disk. It also
 outputs two values: the number of projections (or angles) processed

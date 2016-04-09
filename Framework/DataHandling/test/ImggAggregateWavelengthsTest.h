@@ -26,8 +26,14 @@ public:
 
   void test_init() {
     ImggAggregateWavelengths alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+
+    int numProjs, numBands;
+    TS_ASSERT_THROWS_NOTHING(numProjs = alg.getProperty("NumProjections"));
+    TS_ASSERT_THROWS_NOTHING(numBands = alg.getProperty("NumBands"));
+    TS_ASSERT_EQUALS(numProjs, 0);
+    TS_ASSERT_EQUALS(numBands, 0);
   }
 
   void test_exec_fail() {
