@@ -217,8 +217,8 @@ void ImggAggregateWavelengths::init() {
   std::vector<std::string> imgFormat{"FITS"};
   declareProperty(
       PROP_INPUT_IMAGE_FORMAT, "FITS", "From the input directory(ies) use "
-                                 "images in this format and ignore any "
-                                 "other files",
+                                       "images in this format and ignore any "
+                                       "other files",
       boost::make_shared<Mantid::Kernel::StringListValidator>(imgFormat),
       Direction::Input);
 
