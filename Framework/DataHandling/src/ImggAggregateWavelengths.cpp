@@ -300,9 +300,8 @@ ImggAggregateWavelengths::rangesFromStringProperty(
     }
 
     try {
-      ranges.emplace_back(
-          std::make_pair(boost::lexical_cast<size_t>(minMaxTokens[0]),
-                         boost::lexical_cast<size_t>(minMaxTokens[1])));
+      ranges.emplace_back(boost::lexical_cast<size_t>(minMaxTokens[0]),
+                          boost::lexical_cast<size_t>(minMaxTokens[1]));
     } catch (std::runtime_error &rexc) {
       throw std::runtime_error("Failed to parse this index range: " + str +
                                " . Details: " + std::string(rexc.what()));
@@ -513,8 +512,7 @@ ImggAggregateWavelengths::splitSizeIntoRanges(size_t availableCount,
   for (size_t count = 0; count < availableCount; count += inc) {
     size_t max =
         ((count + inc) > availableCount) ? availableCount : count + inc;
-    // TODO call the 'ranges' version with the convenient range
-    ranges.emplace_back(std::make_pair(count, max));
+    ranges.emplace_back(count, max);
   }
 
   return ranges;
