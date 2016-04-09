@@ -65,17 +65,29 @@ output path as subdirectories are found in the input path a single
 image in the output path by combining the energy bands selected,
 separately for every input subdirectory, i.e., projection angle
 (selecting the bands as specified in the algorithm options, and using
-all the input bands as default).
+all the input bands as default). The images are written in a
+subdirectory that is named depending on the type of aggregation
+used. For the uniform bands (**UniformBands** property) the
+subdirectory will be named **bands_uniform_idx_<start>_to_<end>**,
+where **<start>** and **<end>** are the limits of the range(s). When
+the index ranges option (**IndexRanges**) is used the names of the
+output subdirectory will be named
+**bands_index_idx_<start>_to_<end>**. And when the time of flight
+range option (**ToFRanges**) is used the names will be
+**bands_tof_idx_<start>_to_<end>**. The initial prefix
+(bands_uniform_, bands_index_, bands_tof_) can be mofified via the
+input properties **OutputSubdirsPrefixUniformBands**,
+**OutputSubdirsPrefixIndexBands**, **OutputSubdirsPrefixToFBands**,
+respectively.
 
 The output images are created as described above when there is a
-single output band or stack of images. When multiple ranges are
+single output band or stack of images. When multiple output ranges are
 specified the outputs are produced similarly but every range will be
 generated in a separate subdirectory created under the output path
-given to the algorithm. These subdirectories are named as follows. For
-the uniform bands (**UniformBands** property) or the index ranges
-(**IndexRanges**) the subdirectories will be named
-**wavelength_indices_from_<start>_to_<end>**, where **<start>** and
-**<end>** are the limits of the range(s).
+given to the algorithm. For example the algorithm would produce
+subdirectories named bands_by_index_idx_0_99,
+bands_by_index_idx_50_149, and bands_by_index_idx_99_149, or
+bands_uniform_idx_0_49, bands_uniform_idx_50_99.
 
 A relevant consideration is how to use the range options to generate
 multiple output stacks of images. This is very important for
@@ -91,6 +103,18 @@ individual call. This can make a big different in terms of run time,
 given that this algorithm is meant to process large sets of images
 which can take of the order of tens of minutes or hours to read and/or
 write depending on the disk resources available.
+
+
+As the algorithm tries to find images and subdirectories with images
+from the input path, to decide whether to process the data as a single
+projection (radiography) or multiple projections (tomography), there
+can be ambiguities.  When an input path is given that contains both
+image files and subdirectories with image files, the algorithm
+processes the image files and does not try to process the
+subdirectories. That is, it is assumed that the input path given
+contains data for a single projection, and that the subdirectories do
+not necessarily contain images for different projections (tomography
+data).
 
 Usage
 -----

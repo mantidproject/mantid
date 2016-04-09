@@ -282,71 +282,6 @@ void ImggAggregateWavelengths::exec() {
                  << std::endl;
 }
 
-/**
- * Builds the names of the output subdirectories (bands) given the
- * input subdirectories, when splitting the input bands/images into
- * uniform blocks. It has to look for the number of available input
- * images from the first input subdirectory that has any images.
- *
- * @param inputSubDirs input subdirectories (one or more)
- * @param bands how many output bands will be produced
- *
- * @returns list of names that can be used to create subdirectories
- * for the outputs, derived from the ranges that split the input bands
- * into uniform blocks. For example
- */
-std::vector<std::string>
-ImggAggregateWavelengths::buildOutputSubdirNamesFromUniformBands(
-    const std::vector<Poco::Path> &inputSubDirs, size_t bands) {
-  std::vector<std::string> outputSubdirs;
-  // get number of available images from first effective subdirectory
-  std::vector<Poco::Path> images;
-  for (size_t idx = 0; idx < inputSubDirs.size() && 0 == images.size(); ++idx) {
-    images = findInputImages(inputSubDirs[idx]);
-  }
-  auto outRanges = splitSizeIntoRanges(images.size(), bands);
-
-  const std::string subdirsPrefix =
-      getProperty(PROP_OUTPUT_SUBDIRS_PREFIX_UNIFORM_BANDS);
-  for (const auto &range : outRanges) {
-    // one different subdirectory for every output band
-    outputSubdirs.emplace_back(subdirsPrefix + indexRangesPrefix +
-                               std::to_string(range.first) + "_to_" +
-                               std::to_string(range.second));
-  }
-
-  return outputSubdirs;
-}
-
-/**
- * Builds the names of the output subdirectories (bands) given a
- * sequence of image index ranges, when splitting the input
- * bands/images into a sequence of ranges. It has to look for the
- * number of available input images from the first input subdirectory
- * that has any images.
- *
- * @param outRanges min-max pairs with ranges of image indices to use
- * for the output bands
- *
- * @returns list of names that can be used to create subdirectories
- * for the outputs, derived from the ranges
- */
-std::vector<std::string>
-ImggAggregateWavelengths::buildOutputSubdirNamesFromIndexRangesBands(
-    const std::vector<std::pair<size_t, size_t>> &outRanges) {
-  std::vector<std::string> outputSubdirs;
-  const std::string subdirsPrefix =
-      getProperty(PROP_OUTPUT_SUBDIRS_PREFIX_INDEX_BANDS);
-  for (const auto &range : outRanges) {
-    // one different subdirectory for every output band
-    outputSubdirs.emplace_back(subdirsPrefix + indexRangesPrefix +
-                               std::to_string(range.first) + "_to_" +
-                               std::to_string(range.second));
-  }
-
-  return outputSubdirs;
-}
-
 void ImggAggregateWavelengths::aggUniformBands(const std::string &inputPath,
                                                const std::string &outputPath,
                                                size_t bands) {
@@ -723,6 +658,71 @@ ImggAggregateWavelengths::splitSizeIntoRanges(size_t availableCount,
   }
 
   return ranges;
+}
+
+/**
+ * Builds the names of the output subdirectories (bands) given the
+ * input subdirectories, when splitting the input bands/images into
+ * uniform blocks. It has to look for the number of available input
+ * images from the first input subdirectory that has any images.
+ *
+ * @param inputSubDirs input subdirectories (one or more)
+ * @param bands how many output bands will be produced
+ *
+ * @returns list of names that can be used to create subdirectories
+ * for the outputs, derived from the ranges that split the input bands
+ * into uniform blocks. For example
+ */
+std::vector<std::string>
+ImggAggregateWavelengths::buildOutputSubdirNamesFromUniformBands(
+    const std::vector<Poco::Path> &inputSubDirs, size_t bands) {
+  std::vector<std::string> outputSubdirs;
+  // get number of available images from first effective subdirectory
+  std::vector<Poco::Path> images;
+  for (size_t idx = 0; idx < inputSubDirs.size() && 0 == images.size(); ++idx) {
+    images = findInputImages(inputSubDirs[idx]);
+  }
+  auto outRanges = splitSizeIntoRanges(images.size(), bands);
+
+  const std::string subdirsPrefix =
+      getProperty(PROP_OUTPUT_SUBDIRS_PREFIX_UNIFORM_BANDS);
+  for (const auto &range : outRanges) {
+    // one different subdirectory for every output band
+    outputSubdirs.emplace_back(subdirsPrefix + indexRangesPrefix +
+                               std::to_string(range.first) + "_to_" +
+                               std::to_string(range.second));
+  }
+
+  return outputSubdirs;
+}
+
+/**
+ * Builds the names of the output subdirectories (bands) given a
+ * sequence of image index ranges, when splitting the input
+ * bands/images into a sequence of ranges. It has to look for the
+ * number of available input images from the first input subdirectory
+ * that has any images.
+ *
+ * @param outRanges min-max pairs with ranges of image indices to use
+ * for the output bands
+ *
+ * @returns list of names that can be used to create subdirectories
+ * for the outputs, derived from the ranges
+ */
+std::vector<std::string>
+ImggAggregateWavelengths::buildOutputSubdirNamesFromIndexRangesBands(
+    const std::vector<std::pair<size_t, size_t>> &outRanges) {
+  std::vector<std::string> outputSubdirs;
+  const std::string subdirsPrefix =
+      getProperty(PROP_OUTPUT_SUBDIRS_PREFIX_INDEX_BANDS);
+  for (const auto &range : outRanges) {
+    // one different subdirectory for every output band
+    outputSubdirs.emplace_back(subdirsPrefix + indexRangesPrefix +
+                               std::to_string(range.first) + "_to_" +
+                               std::to_string(range.second));
+  }
+
+  return outputSubdirs;
 }
 
 bool ImggAggregateWavelengths::isSupportedExtension(

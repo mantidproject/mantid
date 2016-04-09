@@ -80,14 +80,14 @@ private:
 
   std::vector<Poco::Path> findInputImages(const Poco::Path &path);
 
+  std::vector<std::pair<size_t, size_t>>
+  splitSizeIntoRanges(size_t availableCount, size_t bands);
+
   std::vector<std::string> buildOutputSubdirNamesFromUniformBands(
       const std::vector<Poco::Path> &inputSubDirs, size_t bands);
 
   std::vector<std::string> buildOutputSubdirNamesFromIndexRangesBands(
       const std::vector<std::pair<size_t, size_t>> &outRanges);
-
-  std::vector<std::pair<size_t, size_t>>
-  splitSizeIntoRanges(size_t availableCount, size_t bands);
 
   bool isSupportedExtension(const std::string &extShort,
                             const std::string &extLong);
