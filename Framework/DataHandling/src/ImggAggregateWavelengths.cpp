@@ -71,7 +71,7 @@ const std::string PROP_OUTPUT_SUBDIRS_PREFIX_INDEX_BANDS =
     "OutputSubdirsPrefixIndexBands";
 const std::string PROP_OUTPUT_SUBDIRS_PREFIX_TOF_BANDS =
     "OutputSubdirsPrefixToFBands";
-const std::string PROP_INPUT_FORMAT = "InputImageFormat";
+const std::string PROP_INPUT_IMAGE_FORMAT = "InputImageFormat";
 const std::string PROP_OUTPUT_IMAGE_FORMAT = "OutputImageFormat";
 const std::string PROP_OUTPUT_BIT_DEPTH = "OutputBitDepth";
 
@@ -142,6 +142,7 @@ void ImggAggregateWavelengths::init() {
                   "output(s)",
                   Direction::Output);
 
+  const std::string grpPrefixes = "Naming (prefixes for the outputs)";
   declareProperty(
       PROP_OUTPUT_PREFIX_PROJECTIONS, outPrefixProjections,
       Kernel::make_unique<Kernel::MandatoryValidator<std::string>>(),
@@ -205,9 +206,17 @@ void ImggAggregateWavelengths::init() {
           PROP_TOF_RANGES + ")",
       Direction::Input);
 
+  setPropertyGroup(PROP_OUTPUT_PREFIX_PROJECTIONS, grpPrefixes);
+  setPropertyGroup(PROP_OUTPUT_PREFIX_BANDS, grpPrefixes);
+  setPropertyGroup(PROP_OUTPUT_SUBDIRS_PREFIX_UNIFORM_BANDS, grpPrefixes);
+  setPropertyGroup(PROP_OUTPUT_SUBDIRS_PREFIX_INDEX_BANDS, grpPrefixes);
+  setPropertyGroup(PROP_OUTPUT_SUBDIRS_PREFIX_TOF_BANDS, grpPrefixes);
+
+  const std::string grpImgFormat = "Image format";
+
   std::vector<std::string> imgFormat{"FITS"};
   declareProperty(
-      PROP_INPUT_FORMAT, "FITS", "From the input directory(ies) use "
+      PROP_INPUT_IMAGE_FORMAT, "FITS", "From the input directory(ies) use "
                                  "images in this format and ignore any "
                                  "other files",
       boost::make_shared<Mantid::Kernel::StringListValidator>(imgFormat),
@@ -225,6 +234,10 @@ void ImggAggregateWavelengths::init() {
                   "output image(s). Only 16 bits is supported at the "
                   "moment.",
                   Direction::Input);
+
+  setPropertyGroup(PROP_INPUT_IMAGE_FORMAT, grpImgFormat);
+  setPropertyGroup(PROP_OUTPUT_IMAGE_FORMAT, grpImgFormat);
+  setPropertyGroup(PROP_OUTPUT_BIT_DEPTH, grpImgFormat);
 }
 
 std::map<std::string, std::string> ImggAggregateWavelengths::validateInputs() {
