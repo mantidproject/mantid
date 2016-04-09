@@ -78,11 +78,11 @@ private:
 
   std::vector<Poco::Path> findInputImages(const Poco::Path &path);
 
+  std::vector<std::pair<size_t, size_t>>
+  splitSizeIntoRanges(size_t availableCount, size_t bands);
+
   bool isSupportedExtension(const std::string &extShort,
                             const std::string &extLong);
-
-  API::MatrixWorkspace_sptr loadFITS(const Poco::Path &imgPath,
-                                     const std::string &outName);
 
   void aggImage(API::MatrixWorkspace_sptr accum,
                 const API::MatrixWorkspace_sptr toAdd);
@@ -91,11 +91,11 @@ private:
                     const std::string &outDir, const std::string &prefix,
                     size_t outImgIndex);
 
+  API::MatrixWorkspace_sptr loadFITS(const Poco::Path &imgPath,
+                                     const std::string &outName);
+
   void saveFITS(const API::MatrixWorkspace_sptr accum,
                 const std::string &filename);
-
-  std::vector<std::pair<size_t, size_t>>
-  splitSizeIntoRanges(size_t availableCount, size_t bands);
 
   static const std::string outPrefixProjections;
   static const std::string outPrefixBands;

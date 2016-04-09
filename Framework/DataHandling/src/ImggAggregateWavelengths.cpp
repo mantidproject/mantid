@@ -60,6 +60,14 @@ const std::string PROP_OUTPUT_PREFIX_BANDS = "OutputBandPrefix";
 const std::string PROP_INPUT_FORMAT = "InputImageFormat";
 const std::string PROP_OUTPUT_IMAGE_FORMAT = "OutputImageFormat";
 const std::string PROP_OUTPUT_BIT_DEPTH = "OutputBitDepth";
+
+// just to compare two Poco::Path objects, used for std algorithms
+struct PocoPathComp
+    : public std::binary_function<Poco::Path, Poco::Path, bool> {
+  bool operator()(const Poco::Path &lhs, const Poco::Path &rhs) const {
+    return lhs.toString() < rhs.toString();
+  }
+};
 }
 
 //----------------------------------------------------------------------------------------------
@@ -275,6 +283,124 @@ void ImggAggregateWavelengths::aggToFBands(const std::string & /*inputPath*/,
                            "is not supported at the moment");
 }
 
+/**
+ * Aggregate the images found in an input directory (can be all the
+ * images from a radiography experiment, or all the images
+ * corresponding to a single projection angle from a tomography
+ * experiment). This is the version that processed the "UniformBands"
+ * property, splitting the input images into uniform bands or blocks
+ * (as many as given in the property).
+ *
+ * @param inDir where to find the input images.
+ *
+ * @param bands number of output bands, or number of bands into
+ * which the input bands should be aggregated, non-overlapping and
+ * uniformly distributed.
+ *
+ * @param outDir where to write the output image(s).
+ *
+ * @param prefix prefix for the image names. The indices will be
+ * appended to the prefix
+ *
+ * @param outImgIndex index of the directory/angle/projection, for
+ * file naming purposes
+ */
+void ImggAggregateWavelengths::processDirectory(const Poco::Path &inDir,
+                                                size_t bands,
+                                                const std::string &outDir,
+                                                const std::string &prefix,
+                                                size_t outImgIndex) {
+  Mantid::API::MatrixWorkspace_sptr aggImg;
+
+  auto images = findInputImages(inDir);
+
+  if (images.empty()) {
+    g_log.warning()
+        << "Could not find any input image files in the subdirectory '"
+        << inDir.toString() << "'. It will be ignored." << std::endl;
+    return;
+  }
+
+  std::vector<std::pair<size_t, size_t>> ranges =
+      splitSizeIntoRanges(images.size(), bands);
+  processDirectory(inDir, ranges, outDir, prefix, outImgIndex);
+}
+
+/**
+ * Produces the output images (bands) from a directory. The directory
+ * may hold the images for radiography data, or one projection angle
+ * from tomography data. Multiple output bands (images) can be
+ * produced as specified in ranges.
+ *
+ * This passes through the images one by one (only once), but every
+ * images can be aggregated into multiple output bands (as the bands
+ * or min-max ranges can overlap)
+ *
+ * @param inDir where to load images from
+ * @param ranges min-max pairs that define the limits of the output bands
+ * @param prefix to prepend to all the file names
+ * @param outDir where to write the output images/bands
+ * @param outImgIndex an index in the sequence of directories being
+ * processed
+ */
+void ImggAggregateWavelengths::processDirectory(
+    const Poco::Path &inDir,
+    const std::vector<std::pair<size_t, size_t>> &ranges,
+    const std::string outDir, const std::string &prefix, size_t outImgIndex) {
+
+  auto imgFiles = findInputImages(inDir);
+
+  const size_t maxProgress = imgFiles.size() + 1;
+  API::Progress prog(this, 0, 1, maxProgress);
+
+  const std::string wsName = "__ImggAggregateWavelengths_fits_seq";
+  const std::string wsNameFirst = wsName + "_first";
+
+  prog.report(0, "Loading first input image file");
+  auto it = std::begin(imgFiles);
+  std::vector<API::MatrixWorkspace_sptr> outAccums;
+  outAccums.resize(ranges.size());
+  outAccums[0] = loadFITS(*it, wsNameFirst);
+
+  prog.report(1, "Preparing workspaces for the output images");
+  for (size_t idx = 1; idx < ranges.size(); ++idx) {
+    outAccums[idx] = outAccums[0]->clone();
+  }
+  ++it;
+
+  prog.report(1, "Loading input image files");
+  size_t inputIdx = 1;
+  for (auto end = std::end(imgFiles); it != end; ++it, ++inputIdx) {
+    // load one more
+    const API::MatrixWorkspace_sptr img = loadFITS(*it, wsName);
+
+    // add into output
+    for (size_t idx = 0; idx < outAccums.size(); ++idx) {
+      if (idx >= ranges[idx].first && idx <= ranges[idx].second) {
+        aggImage(outAccums[idx], img);
+      }
+    }
+
+    // clear image/workspace. TODO: This is a big waste of
+    // allocations/deallocations
+    Mantid::API::AnalysisDataService::Instance().remove(wsName);
+    prog.reportIncrement(1);
+  }
+
+  // save
+  prog.report("Saving output image file(s)");
+  for (size_t idx = 0; idx < outAccums.size(); ++idx) {
+    // call the file like: bands_indices_0_1000...
+    const std::string extendedPrefix = prefix + indexRangesPrefix +
+                                       std::to_string(ranges[idx].first) + "_" +
+                                       std::to_string(ranges[idx].second);
+    saveAggImage(outAccums[idx], outDir, extendedPrefix, outImgIndex);
+  }
+  Mantid::API::AnalysisDataService::Instance().remove(wsNameFirst);
+
+  prog.reportIncrement(1, "Finished");
+}
+
 std::vector<std::pair<size_t, size_t>>
 ImggAggregateWavelengths::rangesFromStringProperty(
     const std::string &rangesSpec, const std::string &propName) {
@@ -309,28 +435,6 @@ ImggAggregateWavelengths::rangesFromStringProperty(
   }
 
   return ranges;
-}
-
-// just to compare two Poco::Path objects
-struct PocoPathComp
-    : public std::binary_function<Poco::Path, Poco::Path, bool> {
-  bool operator()(const Poco::Path &lhs, const Poco::Path &rhs) const {
-    return lhs.toString() < rhs.toString();
-  }
-};
-
-bool ImggAggregateWavelengths::isSupportedExtension(
-    const std::string &extShort, const std::string &extLong) {
-  const std::vector<std::string> formatExtensionsShort{"fit"};
-  const std::vector<std::string> formatExtensionsLong{"fits"};
-
-  bool found = (formatExtensionsShort.end() !=
-                std::find(formatExtensionsShort.cbegin(),
-                          formatExtensionsShort.cend(), extShort)) ||
-               (formatExtensionsLong.end() !=
-                std::find(formatExtensionsLong.cbegin(),
-                          formatExtensionsLong.cend(), extLong));
-  return found;
 }
 
 /**
@@ -438,49 +542,6 @@ ImggAggregateWavelengths::findInputImages(const Poco::Path &path) {
 }
 
 /**
- * Aggregate the images found in an input directory (can be all the
- * images from a radiography experiment, or all the images
- * corresponding to a single projection angle from a tomography
- * experiment). This is the version that processed the "UniformBands"
- * property, splitting the input images into uniform bands or blocks
- * (as many as given in the property).
- *
- * @param inDir where to find the input images.
- *
- * @param bands number of output bands, or number of bands into
- * which the input bands should be aggregated, non-overlapping and
- * uniformly distributed.
- *
- * @param outDir where to write the output image(s).
- *
- * @param prefix prefix for the image names. The indices will be
- * appended to the prefix
- *
- * @param outImgIndex index of the directory/angle/projection, for
- * file naming purposes
- */
-void ImggAggregateWavelengths::processDirectory(const Poco::Path &inDir,
-                                                size_t bands,
-                                                const std::string &outDir,
-                                                const std::string &prefix,
-                                                size_t outImgIndex) {
-  Mantid::API::MatrixWorkspace_sptr aggImg;
-
-  auto images = findInputImages(inDir);
-
-  if (images.empty()) {
-    g_log.warning()
-        << "Could not find any input image files in the subdirectory '"
-        << inDir.toString() << "'. It will be ignored." << std::endl;
-    return;
-  }
-
-  std::vector<std::pair<size_t, size_t>> ranges =
-      splitSizeIntoRanges(images.size(), bands);
-  processDirectory(inDir, ranges, outDir, prefix, outImgIndex);
-}
-
-/**
  * Split into uniform blocks, for when producing multiple output bands
  * from the input images/bands. If the division is not exact, a few
  * images at the end will be ignored, so the number of input bands
@@ -518,57 +579,18 @@ ImggAggregateWavelengths::splitSizeIntoRanges(size_t availableCount,
   return ranges;
 }
 
-API::MatrixWorkspace_sptr
-ImggAggregateWavelengths::loadFITS(const Poco::Path &imgPath,
-                                   const std::string &outName) {
+bool ImggAggregateWavelengths::isSupportedExtension(
+    const std::string &extShort, const std::string &extLong) {
+  const std::vector<std::string> formatExtensionsShort{"fit"};
+  const std::vector<std::string> formatExtensionsLong{"fits"};
 
-  auto loader =
-      Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadFITS");
-  try {
-    loader->initialize();
-    loader->setChild(true);
-    loader->setPropertyValue("Filename", imgPath.toString());
-    loader->setProperty("OutputWorkspace", outName);
-    // this is way faster when loading into a MatrixWorkspace
-    loader->setProperty("LoadAsRectImg", true);
-  } catch (std::exception &e) {
-    throw std::runtime_error("Failed to initialize the algorithm to "
-                             "load images. Error description: " +
-                             std::string(e.what()));
-  }
-
-  try {
-    loader->execute();
-  } catch (std::exception &e) {
-    throw std::runtime_error(
-        "Failed to load image. Could not load this file as a "
-        "FITS image: " +
-        std::string(e.what()));
-  }
-
-  if (!loader->isExecuted()) {
-    throw std::runtime_error(
-        "Failed to load image correctly. Note that even though "
-        "the image file has been loaded it seems to contain errors.");
-  }
-
-  API::MatrixWorkspace_sptr ws;
-  try {
-    API::Workspace_sptr outWS = loader->getProperty("OutputWorkspace");
-    API::WorkspaceGroup_sptr wsg =
-        boost::dynamic_pointer_cast<API::WorkspaceGroup>(outWS);
-    ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-        wsg->getItem(wsg->size() - 1));
-  } catch (std::exception &e) {
-    throw std::runtime_error(
-        "Could not load image contents for file '" + imgPath.toString() +
-        "'. An unrecoverable error "
-        "happened when trying to load the image contents. Cannot "
-        "display it. Error details: " +
-        std::string(e.what()));
-  }
-
-  return ws;
+  bool found = (formatExtensionsShort.end() !=
+                std::find(formatExtensionsShort.cbegin(),
+                          formatExtensionsShort.cend(), extShort)) ||
+               (formatExtensionsLong.end() !=
+                std::find(formatExtensionsLong.cbegin(),
+                          formatExtensionsLong.cend(), extLong));
+  return found;
 }
 
 /**
@@ -646,9 +668,64 @@ void ImggAggregateWavelengths::saveAggImage(
                       << std::endl;
 }
 
+API::MatrixWorkspace_sptr
+ImggAggregateWavelengths::loadFITS(const Poco::Path &imgPath,
+                                   const std::string &outName) {
+
+  auto loader =
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadFITS");
+  try {
+    loader->initialize();
+    loader->setChild(true);
+    loader->setPropertyValue("Filename", imgPath.toString());
+    loader->setProperty("OutputWorkspace", outName);
+    // this is way faster when loading into a MatrixWorkspace
+    loader->setProperty("LoadAsRectImg", true);
+  } catch (std::exception &e) {
+    throw std::runtime_error("Failed to initialize the algorithm to "
+                             "load images. Error description: " +
+                             std::string(e.what()));
+  }
+
+  try {
+    loader->execute();
+  } catch (std::exception &e) {
+    throw std::runtime_error(
+        "Failed to load image. Could not load this file as a "
+        "FITS image: " +
+        std::string(e.what()));
+  }
+
+  if (!loader->isExecuted()) {
+    throw std::runtime_error(
+        "Failed to load image correctly. Note that even though "
+        "the image file has been loaded it seems to contain errors.");
+  }
+
+  API::MatrixWorkspace_sptr ws;
+  try {
+    API::Workspace_sptr outWS = loader->getProperty("OutputWorkspace");
+    API::WorkspaceGroup_sptr wsg =
+        boost::dynamic_pointer_cast<API::WorkspaceGroup>(outWS);
+    ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        wsg->getItem(wsg->size() - 1));
+  } catch (std::exception &e) {
+    throw std::runtime_error(
+        "Could not load image contents for file '" + imgPath.toString() +
+        "'. An unrecoverable error "
+        "happened when trying to load the image contents. Cannot "
+        "display it. Error details: " +
+        std::string(e.what()));
+  }
+
+  return ws;
+}
+
 namespace {
-// minimalistic. At a very least we should add ToF, time bin, counts, triggers,
-// etc.
+// Minimalistic SaveFITS.  At a very least we should add headers for
+// ToF, time bin, counts, triggers, etc.
+// TODO: this is a very early version of what should become an
+// algorithm of its own
 const size_t maxLenHdr = 80;
 const std::string FITSHdrFirst =
     "SIMPLE  =                    T / file does conform to FITS standard";
@@ -743,89 +820,12 @@ void writeFITSImageMatrix(const API::MatrixWorkspace_sptr img,
 }
 }
 
-// TODO: this is a very early version of what should become an
-// algorithm of its own
 void ImggAggregateWavelengths::saveFITS(const API::MatrixWorkspace_sptr accum,
                                         const std::string &filename) {
   std::ofstream outfile(filename, std::ofstream::binary);
 
   writeFITSHeaderBlock(accum, outfile);
   writeFITSImageMatrix(accum, outfile);
-}
-
-/**
- * Produces the output images (bands) from a directory. The directory
- * may hold the images for radiography data, or one projection angle
- * from tomography data. Multiple output bands (images) can be
- * produced as specified in ranges.
- *
- * This passes through the images one by one (only once), but every
- * images can be aggregated into multiple output bands (as the bands
- * or min-max ranges can overlap)
- *
- * @param inDir where to load images from
- * @param ranges min-max pairs that define the limits of the output bands
- * @param prefix to prepend to all the file names
- * @param outDir where to write the output images/bands
- * @param outImgIndex an index in the sequence of directories being
- * processed
- */
-void ImggAggregateWavelengths::processDirectory(
-    const Poco::Path &inDir,
-    const std::vector<std::pair<size_t, size_t>> &ranges,
-    const std::string outDir, const std::string &prefix, size_t outImgIndex) {
-
-  auto imgFiles = findInputImages(inDir);
-
-  const size_t maxProgress = imgFiles.size() + 1;
-  API::Progress prog(this, 0, 1, maxProgress);
-
-  const std::string wsName = "__ImggAggregateWavelengths_fits_seq";
-  const std::string wsNameFirst = wsName + "_first";
-
-  prog.report(0, "Loading first input image file");
-  auto it = std::begin(imgFiles);
-  std::vector<API::MatrixWorkspace_sptr> outAccums;
-  outAccums.resize(ranges.size());
-  outAccums[0] = loadFITS(*it, wsNameFirst);
-
-  prog.report(1, "Preparing workspaces for the output images");
-  for (size_t idx = 1; idx < ranges.size(); ++idx) {
-    outAccums[idx] = outAccums[0]->clone();
-  }
-  ++it;
-
-  prog.report(1, "Loading input image files");
-  size_t inputIdx = 1;
-  for (auto end = std::end(imgFiles); it != end; ++it, ++inputIdx) {
-    // load one more
-    const API::MatrixWorkspace_sptr img = loadFITS(*it, wsName);
-
-    // add into output
-    for (size_t idx = 0; idx < outAccums.size(); ++idx) {
-      if (idx >= ranges[idx].first && idx <= ranges[idx].second) {
-        aggImage(outAccums[idx], img);
-      }
-    }
-
-    // clear image/workspace. TODO: This is a big waste of
-    // allocations/deallocations
-    Mantid::API::AnalysisDataService::Instance().remove(wsName);
-    prog.reportIncrement(1);
-  }
-
-  // save
-  prog.report("Saving output image file(s)");
-  for (size_t idx = 0; idx < outAccums.size(); ++idx) {
-    // call the file like: bands_indices_0_1000...
-    const std::string extendedPrefix = prefix + indexRangesPrefix +
-                                       std::to_string(ranges[idx].first) + "_" +
-                                       std::to_string(ranges[idx].second);
-    saveAggImage(outAccums[idx], outDir, extendedPrefix, outImgIndex);
-  }
-  Mantid::API::AnalysisDataService::Instance().remove(wsNameFirst);
-
-  prog.reportIncrement(1, "Finished");
 }
 
 } // namespace DataHandling
