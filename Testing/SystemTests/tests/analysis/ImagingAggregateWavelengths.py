@@ -21,12 +21,16 @@ class ImagingAggregateTests(unittest.TestCase):
                                   ]
 
         self._out_dir = os.path.join(os.getcwd(), 'summed_wavelengths_metals')
+
+        self._expected_out_dir = 'bands_uniform_idx_0_to_6'
         self._expected_out_fnames = [
-            'sum_projection_00000_bands_indices_0_6.fits',
-            'sum_projection_00001_bands_indices_0_3.fits',
-            'sum_projection_00002_bands_indices_0_2.fits',
-            'sum_projection_00003_bands_indices_0_1.fits'
+            'sum_projection_00000_bands_idx_0_to_6.fits',
+            'sum_projection_00001_bands_idx_0_to_3.fits',
+            'sum_projection_00002_bands_idx_0_to_2.fits',
+            'sum_projection_00003_bands_idx_0_to_1.fits'
             ]
+        self._expected_out_fnames = [os.path.join(self._expected_out_dir, exp)\
+                                     for exp in self._expected_out_fnames]
 
     def tearDown(self):
         pass
@@ -36,6 +40,7 @@ class ImagingAggregateTests(unittest.TestCase):
         for fname in self._expected_out_fnames:
             fpath = os.path.join(self._out_dir, fname)
             os.remove(fpath)
+        os.rmdir(os.path.join(self._out_dir, self._expected_out_dir))
         os.rmdir(self._out_dir)
 
     def test_input_output_path_errors(self):

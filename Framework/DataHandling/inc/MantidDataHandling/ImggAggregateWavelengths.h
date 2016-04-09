@@ -62,13 +62,15 @@ private:
                    const std::string & /*ranges*/);
 
   void processDirectory(const Poco::Path &inDir, size_t bands,
-                        const std::string &outDir, const std::string &prefix,
-                        size_t outImgIndex);
+                        const std::string &outDir,
+                        const std::vector<std::string> &outSubdirs,
+                        const std::string &prefix, size_t outImgIndex);
 
   void processDirectory(const Poco::Path &inDir,
                         const std::vector<std::pair<size_t, size_t>> &ranges,
-                        const std::string outDir, const std::string &prefix,
-                        size_t outImgIndex);
+                        const std::string outDir,
+                        const std::vector<std::string> &outSubdirs,
+                        const std::string &prefix, size_t outImgIndex);
 
   std::vector<std::pair<size_t, size_t>>
   rangesFromStringProperty(const std::string &rangesSpec,
@@ -77,6 +79,12 @@ private:
   std::vector<Poco::Path> findInputSubdirs(const Poco::Path &path);
 
   std::vector<Poco::Path> findInputImages(const Poco::Path &path);
+
+  std::vector<std::string> buildOutputSubdirNamesFromUniformBands(
+      const std::vector<Poco::Path> &inputSubDirs, size_t bands);
+
+  std::vector<std::string> buildOutputSubdirNamesFromIndexRangesBands(
+      const std::vector<std::pair<size_t, size_t>> &outRanges);
 
   std::vector<std::pair<size_t, size_t>>
   splitSizeIntoRanges(size_t availableCount, size_t bands);
@@ -101,6 +109,9 @@ private:
   static const std::string outPrefixBands;
   static const std::string indexRangesPrefix;
   static const std::string tofRangesPrefix;
+  static const std::string outSubdirsPrefixUniformBands;
+  static const std::string outSubdirsPrefixIndexBands;
+  static const std::string outSubdirsPrefixToFBands;
 };
 
 } // namespace DataHandling

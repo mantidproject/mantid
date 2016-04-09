@@ -20,8 +20,14 @@ namespace DataHandling {
 const std::string ImggAggregateWavelengths::outPrefixProjections =
     "sum_projection_";
 const std::string ImggAggregateWavelengths::outPrefixBands = "bands_";
-const std::string ImggAggregateWavelengths::indexRangesPrefix = "indices_";
+const std::string ImggAggregateWavelengths::indexRangesPrefix = "idx_";
 const std::string ImggAggregateWavelengths::tofRangesPrefix = "tof_";
+const std::string ImggAggregateWavelengths::outSubdirsPrefixUniformBands =
+    "bands_uniform_";
+const std::string ImggAggregateWavelengths::outSubdirsPrefixIndexBands =
+    "bands_by_index_";
+const std::string ImggAggregateWavelengths::outSubdirsPrefixToFBands =
+    "bands_by_tof_";
 
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
@@ -59,6 +65,12 @@ const std::string PROP_NUM_PROJECTIONS_PROCESSED = "NumProjections";
 const std::string PROP_NUM_BANDS_PROCESSED = "NumBands";
 const std::string PROP_OUTPUT_PREFIX_PROJECTIONS = "OutputProjectionsPrefix";
 const std::string PROP_OUTPUT_PREFIX_BANDS = "OutputBandPrefix";
+const std::string PROP_OUTPUT_SUBDIRS_PREFIX_UNIFORM_BANDS =
+    "OutputSubdirsPrefixUniformBands";
+const std::string PROP_OUTPUT_SUBDIRS_PREFIX_INDEX_BANDS =
+    "OutputSubdirsPrefixIndexBands";
+const std::string PROP_OUTPUT_SUBDIRS_PREFIX_TOF_BANDS =
+    "OutputSubdirsPrefixToFBands";
 const std::string PROP_INPUT_FORMAT = "InputImageFormat";
 const std::string PROP_OUTPUT_IMAGE_FORMAT = "OutputImageFormat";
 const std::string PROP_OUTPUT_BIT_DEPTH = "OutputBitDepth";
@@ -169,6 +181,30 @@ void ImggAggregateWavelengths::init() {
           "headers).",
       Direction::Input);
 
+  declareProperty(PROP_OUTPUT_SUBDIRS_PREFIX_UNIFORM_BANDS,
+                  outSubdirsPrefixUniformBands,
+                  "This prefix will be "
+                  "used for the name of the output subdirectories of every "
+                  "output band when producing uniform output bands (property " +
+                      PROP_UNIFORM_BANDS + ")",
+                  Direction::Input);
+
+  declareProperty(
+      PROP_OUTPUT_SUBDIRS_PREFIX_INDEX_BANDS, outSubdirsPrefixIndexBands,
+      "This prefix will be "
+      "used for the name of the output subdirectories of every "
+      "output band when producing output bands using index ranges (property  " +
+          PROP_INDEX_RANGES + ")",
+      Direction::Input);
+
+  declareProperty(
+      PROP_OUTPUT_SUBDIRS_PREFIX_TOF_BANDS, outSubdirsPrefixToFBands,
+      "This prefix will be "
+      "used for the name of the output subdirectories of every "
+      "output band when producing output bands using ToF ranges (property  " +
+          PROP_TOF_RANGES + ")",
+      Direction::Input);
+
   std::vector<std::string> imgFormat{"FITS"};
   declareProperty(
       PROP_INPUT_FORMAT, "FITS", "From the input directory(ies) use "
@@ -246,6 +282,71 @@ void ImggAggregateWavelengths::exec() {
                  << std::endl;
 }
 
+/**
+ * Builds the names of the output subdirectories (bands) given the
+ * input subdirectories, when splitting the input bands/images into
+ * uniform blocks. It has to look for the number of available input
+ * images from the first input subdirectory that has any images.
+ *
+ * @param inputSubDirs input subdirectories (one or more)
+ * @param bands how many output bands will be produced
+ *
+ * @returns list of names that can be used to create subdirectories
+ * for the outputs, derived from the ranges that split the input bands
+ * into uniform blocks. For example
+ */
+std::vector<std::string>
+ImggAggregateWavelengths::buildOutputSubdirNamesFromUniformBands(
+    const std::vector<Poco::Path> &inputSubDirs, size_t bands) {
+  std::vector<std::string> outputSubdirs;
+  // get number of available images from first effective subdirectory
+  std::vector<Poco::Path> images;
+  for (size_t idx = 0; idx < inputSubDirs.size() && 0 == images.size(); ++idx) {
+    images = findInputImages(inputSubDirs[idx]);
+  }
+  auto outRanges = splitSizeIntoRanges(images.size(), bands);
+
+  const std::string subdirsPrefix =
+      getProperty(PROP_OUTPUT_SUBDIRS_PREFIX_UNIFORM_BANDS);
+  for (const auto &range : outRanges) {
+    // one different subdirectory for every output band
+    outputSubdirs.emplace_back(subdirsPrefix + indexRangesPrefix +
+                               std::to_string(range.first) + "_to_" +
+                               std::to_string(range.second));
+  }
+
+  return outputSubdirs;
+}
+
+/**
+ * Builds the names of the output subdirectories (bands) given a
+ * sequence of image index ranges, when splitting the input
+ * bands/images into a sequence of ranges. It has to look for the
+ * number of available input images from the first input subdirectory
+ * that has any images.
+ *
+ * @param outRanges min-max pairs with ranges of image indices to use
+ * for the output bands
+ *
+ * @returns list of names that can be used to create subdirectories
+ * for the outputs, derived from the ranges
+ */
+std::vector<std::string>
+ImggAggregateWavelengths::buildOutputSubdirNamesFromIndexRangesBands(
+    const std::vector<std::pair<size_t, size_t>> &outRanges) {
+  std::vector<std::string> outputSubdirs;
+  const std::string subdirsPrefix =
+      getProperty(PROP_OUTPUT_SUBDIRS_PREFIX_INDEX_BANDS);
+  for (const auto &range : outRanges) {
+    // one different subdirectory for every output band
+    outputSubdirs.emplace_back(subdirsPrefix + indexRangesPrefix +
+                               std::to_string(range.first) + "_to_" +
+                               std::to_string(range.second));
+  }
+
+  return outputSubdirs;
+}
+
 void ImggAggregateWavelengths::aggUniformBands(const std::string &inputPath,
                                                const std::string &outputPath,
                                                size_t bands) {
@@ -261,9 +362,13 @@ void ImggAggregateWavelengths::aggUniformBands(const std::string &inputPath,
                        "the output path." << std::endl;
   }
 
+  auto outputSubdirs =
+      buildOutputSubdirNamesFromUniformBands(inputSubDirs, bands);
+
   size_t count = 0;
   for (const auto &subdir : inputSubDirs) {
-    processDirectory(subdir, bands, outputPath, outPrefixBands, count++);
+    processDirectory(subdir, bands, outputPath, outputSubdirs, outPrefixBands,
+                     count++);
   }
   setProperty(PROP_NUM_PROJECTIONS_PROCESSED, static_cast<int>(count));
 }
@@ -271,8 +376,6 @@ void ImggAggregateWavelengths::aggUniformBands(const std::string &inputPath,
 void ImggAggregateWavelengths::aggIndexBands(const std::string &inputPath,
                                              const std::string &outputPath,
                                              const std::string &rangesSpec) {
-
-  auto ranges = rangesFromStringProperty(rangesSpec, PROP_INDEX_RANGES);
 
   Poco::Path path(inputPath);
   auto inputSubDirs = findInputSubdirs(path);
@@ -284,9 +387,14 @@ void ImggAggregateWavelengths::aggIndexBands(const std::string &inputPath,
                     << std::endl;
   }
 
+  auto outRanges = rangesFromStringProperty(rangesSpec, PROP_INDEX_RANGES);
+
+  auto outputSubdirs = buildOutputSubdirNamesFromIndexRangesBands(outRanges);
+
   size_t count = 0;
   for (const auto &subdir : inputSubDirs) {
-    processDirectory(subdir, ranges, outputPath, outPrefixBands, count++);
+    processDirectory(subdir, outRanges, outputPath, outputSubdirs,
+                     outPrefixBands, count++);
   }
   setProperty(PROP_NUM_PROJECTIONS_PROCESSED, static_cast<int>(count));
 }
@@ -315,17 +423,19 @@ void ImggAggregateWavelengths::aggToFBands(const std::string & /*inputPath*/,
  *
  * @param outDir where to write the output image(s).
  *
+ * @param outSubdirs subdirectories for every output range (given in the
+ * input parameter rages)
+ *
  * @param prefix prefix for the image names. The indices will be
  * appended to the prefix
  *
  * @param outImgIndex index of the directory/angle/projection, for
  * file naming purposes
  */
-void ImggAggregateWavelengths::processDirectory(const Poco::Path &inDir,
-                                                size_t bands,
-                                                const std::string &outDir,
-                                                const std::string &prefix,
-                                                size_t outImgIndex) {
+void ImggAggregateWavelengths::processDirectory(
+    const Poco::Path &inDir, size_t bands, const std::string &outDir,
+    const std::vector<std::string> &outSubdirs, const std::string &prefix,
+    size_t outImgIndex) {
   Mantid::API::MatrixWorkspace_sptr aggImg;
 
   auto images = findInputImages(inDir);
@@ -337,9 +447,9 @@ void ImggAggregateWavelengths::processDirectory(const Poco::Path &inDir,
     return;
   }
 
-  std::vector<std::pair<size_t, size_t>> ranges =
-      splitSizeIntoRanges(images.size(), bands);
-  processDirectory(inDir, ranges, outDir, prefix, outImgIndex);
+  auto ranges = splitSizeIntoRanges(images.size(), bands);
+
+  processDirectory(inDir, ranges, outDir, outSubdirs, prefix, outImgIndex);
 }
 
 /**
@@ -356,13 +466,18 @@ void ImggAggregateWavelengths::processDirectory(const Poco::Path &inDir,
  * @param ranges min-max pairs that define the limits of the output bands
  * @param prefix to prepend to all the file names
  * @param outDir where to write the output images/bands
+ *
+ * @param outSubdirs subdirectories for every output range (given in the
+ * input parameter rages)
+ *
  * @param outImgIndex an index in the sequence of directories being
  * processed
  */
 void ImggAggregateWavelengths::processDirectory(
     const Poco::Path &inDir,
     const std::vector<std::pair<size_t, size_t>> &ranges,
-    const std::string outDir, const std::string &prefix, size_t outImgIndex) {
+    const std::string outDir, const std::vector<std::string> &outSubdirs,
+    const std::string &prefix, size_t outImgIndex) {
 
   auto imgFiles = findInputImages(inDir);
 
@@ -403,14 +518,23 @@ void ImggAggregateWavelengths::processDirectory(
     prog.reportIncrement(1);
   }
 
-  // save
   prog.report("Saving output image file(s)");
   for (size_t idx = 0; idx < outAccums.size(); ++idx) {
-    // call the file like: bands_indices_0_1000...
-    const std::string extendedPrefix = prefix + indexRangesPrefix +
-                                       std::to_string(ranges[idx].first) + "_" +
-                                       std::to_string(ranges[idx].second);
-    saveAggImage(outAccums[idx], outDir, extendedPrefix, outImgIndex);
+    // call the file like: bands_idx_0_1000...
+    const std::string indicesName = indexRangesPrefix +
+                                    std::to_string(ranges[idx].first) + "_to_" +
+                                    std::to_string(ranges[idx].second);
+
+    Poco::Path outPath(outDir);
+    outPath.append(outSubdirs[idx]);
+    Poco::File fileOutDir(outPath);
+    if (!fileOutDir.exists()) {
+      fileOutDir.createDirectory();
+    }
+
+    const std::string extendedPrefix = prefix + indicesName;
+    saveAggImage(outAccums[idx], outPath.toString(), extendedPrefix,
+                 outImgIndex);
   }
   Mantid::API::AnalysisDataService::Instance().remove(wsNameFirst);
 
@@ -585,10 +709,11 @@ ImggAggregateWavelengths::splitSizeIntoRanges(size_t availableCount,
     throw std::runtime_error(
         "The number of output bands requested (" + std::to_string(bands) +
         ") is bigger than the number of available input images (" +
-        std::to_string(availableCount) + ". It should be equal or smaller, and "
-                                         "normally it is much smaller. Please "
-                                         "check that you are providing the "
-                                         "correct input parameters");
+        std::to_string(availableCount) +
+        "). It should be equal or smaller, and "
+        "normally it is much smaller. Please "
+        "check that you are providing the "
+        "correct input parameters");
   }
 
   for (size_t count = 0; count < availableCount; count += inc) {
