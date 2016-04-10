@@ -23,6 +23,9 @@ New
 - :ref:`EnggFitDIFCFromPeaks <algm-AlignComponents>` fits GSAS calibration
   parameters (DIFA, DIFC, TZERO) from peaks fitted using
   :ref:`EnggFitPeaks <algm-EnggFitPeaks>`.
+- :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>`
+   aggregates stacks of images from wavelength dependent imaging
+   into one or more output bands.
 
 Renamed
 #######
