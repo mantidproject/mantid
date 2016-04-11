@@ -180,6 +180,16 @@ public:
   /// index.
   virtual const ISpectrum *getSpectrum(const size_t index) const = 0;
 
+  /// Return reference to Histogram at the given workspace index.
+  Kernel::Histogram &histogram(const size_t index) {
+    return getSpectrum(index)->histogram();
+  }
+
+  /// Return const reference to Histogram at the given workspace index.
+  const Kernel::Histogram &histogram(const size_t index) const {
+    return getSpectrum(index)->histogram();
+  }
+
   // Methods for getting read-only access to the data.
   // Just passes through to the virtual dataX/Y/E function (const version)
   /// Returns a read-only (i.e. const) reference to the specified X array
