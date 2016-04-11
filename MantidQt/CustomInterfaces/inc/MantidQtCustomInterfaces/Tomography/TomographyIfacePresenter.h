@@ -88,6 +88,7 @@ protected:
   void processVisualizeJobs();
   void processViewImg();
   void processLogMsg();
+  void processAggregateEnergyBands();
   void processShutDown();
 
   void doVisualize(const std::vector<std::string> &ids);
