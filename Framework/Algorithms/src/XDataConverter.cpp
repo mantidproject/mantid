@@ -63,6 +63,7 @@ void XDataConverter::exec() {
   // Copy over the 'vertical' axis
   if (inputWS->axes() > 1)
     outputWS->replaceAxis(1, inputWS->getAxis(1)->clone(outputWS.get()));
+  outputWS->setXMode(getNewXMode());
 
   Progress prog(this, 0.0, 1.0, numSpectra);
   PARALLEL_FOR2(inputWS, outputWS)
