@@ -1,3 +1,4 @@
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
@@ -66,7 +67,7 @@ const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGINX"),
       m_currentCalibFilename(""), m_focusedDataVector(), m_fittedDataVector(),
-      m_presenter(NULL) {}
+      m_peakPicker(NULL), m_zoomTool(NULL), m_presenter(NULL) {}
 
 EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {
   for (auto curves : m_focusedDataVector) {
@@ -204,6 +205,7 @@ void EnggDiffractionViewQtGUI::doSetupTabPreproc() {
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabFitting() {
+
   connect(m_uiTabFitting.pushButton_fitting_browse_run_num, SIGNAL(released()),
           this, SLOT(browseFitFocusedRun()));
 
@@ -226,6 +228,16 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   connect(m_uiTabFitting.listWidget_fitting_bank_preview,
           SIGNAL(currentRowChanged(int)), this, SLOT(setBankIdComboBox(int)));
 
+  // add peak by clicking the button
+  connect(m_uiTabFitting.pushButton_select_peak, SIGNAL(released()),
+          SLOT(setPeakPick()));
+
+  connect(m_uiTabFitting.pushButton_add_peak, SIGNAL(released()),
+          SLOT(addPeakToList()));
+
+  connect(m_uiTabFitting.pushButton_save_peak_list, SIGNAL(released()),
+          SLOT(savePeakList()));
+
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom,
                                         "Time-of-flight (us)");
@@ -233,6 +245,20 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   QFont font("MS Shell Dlg 2", 8);
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::xBottom, font);
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::yLeft, font);
+
+  // constructor of the peakPicker
+  // XXX: Being a QwtPlotItem, should get deleted when m_ui.plot gets deleted
+  // (auto-delete option)
+  m_peakPicker =
+      new MantidWidgets::PeakPicker(m_uiTabFitting.dataPlot, Qt::red);
+  setPeakPickerEnabled(false);
+
+  m_zoomTool = new QwtPlotZoomer(
+      QwtPlot::xBottom, QwtPlot::yLeft,
+      QwtPicker::DragSelection | QwtPicker::CornerToCorner,
+      QwtPicker::AlwaysOff, m_uiTabFitting.dataPlot->canvas());
+  m_zoomTool->setRubberBandPen(QPen(Qt::black));
+  setZoomTool(false);
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -720,6 +746,7 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
 
   if (dataVector.size() > 0)
     dataVector.clear();
+  resetView();
 
   // dark colours could be removed so the colored peaks stand out more
   const std::array<QColor, 16> QPenList{
@@ -748,7 +775,59 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
   }
 
   m_uiTabFitting.dataPlot->replot();
+  m_zoomTool->setZoomBase();
+  // enable zoom & select peak btn after the plotting on graph
+  setZoomTool(true);
+  m_uiTabFitting.pushButton_select_peak->setEnabled(true);
   data.clear();
+}
+
+void EnggDiffractionViewQtGUI::setPeakPickerEnabled(bool enabled) {
+  m_peakPicker->setEnabled(enabled);
+  m_peakPicker->setVisible(enabled);
+  m_uiTabFitting.dataPlot->replot(); // PeakPicker might get hidden/shown
+  m_uiTabFitting.pushButton_add_peak->setEnabled(enabled);
+  if (enabled) {
+    QString btnText = "Reset Peak Selector";
+    m_uiTabFitting.pushButton_select_peak->setText(btnText);
+  }
+}
+
+void EnggDiffractionViewQtGUI::setPeakPicker(
+    const IPeakFunction_const_sptr &peak) {
+  m_peakPicker->setPeak(peak);
+  m_uiTabFitting.dataPlot->replot();
+}
+
+double EnggDiffractionViewQtGUI::getPeakCentre() const {
+  auto peak = m_peakPicker->peak();
+  auto centre = peak->centre();
+  return centre;
+}
+
+void EnggDiffractionViewQtGUI::fittingWriteFile(const std::string &fileDir) {
+  std::ofstream outfile(fileDir.c_str());
+  if (!outfile) {
+    userWarning("File not found",
+                "File " + fileDir + " , could not be found. Please try again!");
+  } else {
+    auto expPeaks = m_uiTabFitting.lineEdit_fitting_peaks->text();
+    outfile << expPeaks.toStdString();
+  }
+}
+
+void EnggDiffractionViewQtGUI::setZoomTool(bool enabled) {
+  m_zoomTool->setEnabled(enabled);
+}
+
+void EnggDiffractionViewQtGUI::resetView() {
+  // Resets the view to a sensible default
+  // Auto scale the axis
+  m_uiTabFitting.dataPlot->setAxisAutoScale(QwtPlot::xBottom);
+  m_uiTabFitting.dataPlot->setAxisAutoScale(QwtPlot::yLeft);
+
+  // Set this as the default zoom level
+  m_zoomTool->setZoomBase(true);
 }
 
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
@@ -1259,6 +1338,69 @@ void EnggDiffractionViewQtGUI::setListWidgetBank(int idx) {
 
   QListWidget *selectBank = m_uiTabFitting.listWidget_fitting_bank_preview;
   selectBank->setCurrentRow(idx);
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setPeakPick() {
+  auto bk2bk =
+      FunctionFactory::Instance().createFunction("BackToBackExponential");
+  auto bk2bkFunc = boost::dynamic_pointer_cast<IPeakFunction>(bk2bk);
+  // set the peak to BackToBackExponential function
+  setPeakPicker(bk2bkFunc);
+  setPeakPickerEnabled(true);
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addPeakToList() {
+
+  if (m_peakPicker->isEnabled()) {
+    auto peakCentre = getPeakCentre();
+
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(4) << peakCentre;
+    auto strPeakCentre = stream.str();
+
+    auto curExpPeaksList = m_uiTabFitting.lineEdit_fitting_peaks->text();
+
+    if (!curExpPeaksList.isEmpty()) {
+
+      std::string expPeakStr = curExpPeaksList.toStdString();
+      std::string lastTwoChr = expPeakStr.substr(expPeakStr.size() - 2);
+      auto lastChr = expPeakStr.back();
+      char comma = ',';
+      if (lastChr == comma || lastTwoChr == ", ") {
+        curExpPeaksList.append(QString::fromStdString(" " + strPeakCentre));
+      } else {
+        QString comma = ", ";
+        curExpPeaksList.append(comma + QString::fromStdString(strPeakCentre));
+      }
+      m_uiTabFitting.lineEdit_fitting_peaks->setText(curExpPeaksList);
+    }
+  }
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::savePeakList() {
+  // call function in EnggPresenter..
+
+  try {
+    QString prevPath = QString::fromStdString(m_focusDir);
+    if (prevPath.isEmpty()) {
+      prevPath = MantidQt::API::AlgorithmInputHistory::Instance()
+                     .getPreviousDirectory();
+    }
+
+    QString path(QFileDialog::getSaveFileName(
+        this, tr("Save Expected Peaks List"), prevPath,
+        QString::fromStdString(g_DetGrpExtStr)));
+
+    if (path.isEmpty()) {
+      return;
+    }
+    const std::string strPath = path.toStdString();
+    fittingWriteFile(strPath);
+  } catch (...) {
+    userWarning("Unable to save the peaks file: ",
+                "Invalid file path or or could not be saved. Please try again");
+    return;
+  }
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
