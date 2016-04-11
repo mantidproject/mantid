@@ -484,35 +484,9 @@ void TomographyIfacePresenter::processAggregateEnergyBands() {
     return;
   }
 
-  try {
-    const std::string name = algParams["InputPath"];
-    Poco::File inPath(name);
-    if (!inPath.canRead() || !inPath.isDirectory()) {
-      m_view->userError("Invalid input path",
-                        "The input path must be a readable directory: " + name);
-      return;
-    }
-  } catch (Poco::FileNotFoundException &rexc) {
-    m_view->userError("Invalid input path",
-                      "The input path must exist on disk. Details: " +
-                          std::string(rexc.what()));
+  // check the paths are usable
+  if (!usableEnergyBandsPaths(algParams))
     return;
-  }
-  try {
-    const std::string name = algParams["OutputPath"];
-    Poco::File outPath(name);
-    if (!outPath.canRead() || !outPath.isDirectory()) {
-      m_view->userError("Invalid output path",
-                        "The output path must be a readable directory: " +
-                            name);
-      return;
-    }
-  } catch (Poco::FileNotFoundException &rexc) {
-    m_view->userError("Invalid output path",
-                      "The output path must exist on disk. Details: " +
-                          std::string(rexc.what()));
-    return;
-  }
 
   const std::string algName = "ImggAggregateWavelengths";
   auto alg = Mantid::API::AlgorithmManager::Instance().create(algName);
@@ -534,6 +508,51 @@ void TomographyIfacePresenter::processAggregateEnergyBands() {
   m_model->logMsg(" The energy/wavelength bands are being aggregated in the "
                   "background. You can check the log messages and the "
                   "algorithms window to track its progress. ");
+}
+
+/**
+ * Checks that the input/output directories exists and are readable
+ *
+ * @param algParams parameters to be passed to the bands aggregation
+ * algorithm
+ *
+ * @return whether it is safe to use the path properties/options given
+ */
+bool TomographyIfacePresenter::usableEnergyBandsPaths(
+    const std::map<std::string, std::string> &algParams) {
+  bool usable = false;
+  try {
+    const std::string name = algParams.at("InputPath");
+    Poco::File inPath(name);
+    if (!inPath.canRead() || !inPath.isDirectory()) {
+      m_view->userError("Invalid input path",
+                        "The input path must be a readable directory: " + name);
+      return usable;
+    }
+  } catch (Poco::FileNotFoundException &rexc) {
+    m_view->userError("Invalid input path",
+                      "The input path must exist on disk. Details: " +
+                          std::string(rexc.what()));
+    return usable;
+  }
+  try {
+    const std::string name = algParams.at("OutputPath");
+    Poco::File outPath(name);
+    if (!outPath.canRead() || !outPath.isDirectory()) {
+      m_view->userError("Invalid output path",
+                        "The output path must be a readable directory: " +
+                            name);
+      return usable;
+    }
+  } catch (Poco::FileNotFoundException &rexc) {
+    m_view->userError("Invalid output path",
+                      "The output path must exist on disk. Details: " +
+                          std::string(rexc.what()));
+    return usable;
+  }
+
+  usable = true;
+  return usable;
 }
 
 void TomographyIfacePresenter::processShutDown() {
