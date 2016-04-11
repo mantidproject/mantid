@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MuonFitDataSelector</class>
+ <widget class="QWidget" name="MuonFitDataSelector">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>923</width>
+    <height>224</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MuonFitDataSelector</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayoutAll">
+   <item row="0" column="0">
+    <widget class="QGroupBox" name="groupBoxDataSelector">
+     <property name="title">
+      <string>Data</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayoutGroupBoxes">
+      <item>
+       <widget class="QGroupBox" name="groupBoxWorkspaces">
+        <property name="title">
+         <string>Workspaces</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayoutWorkspaces">
+         <item row="0" column="0">
+          <widget class="QLabel" name="lblRuns">
+           <property name="text">
+            <string>Runs:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1" colspan="2">
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="runs" native="true">
+           <property name="label" stdset="0">
+            <string/>
+           </property>
+           <property name="multipleFiles" stdset="0">
+            <bool>true</bool>
+           </property>
+           <property name="findRunFiles" stdset="0">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0" colspan="2">
+          <widget class="QLabel" name="lblWSIndex">
+           <property name="text">
+            <string>Workspace index:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QLineEdit" name="txtWSIndex"/>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="lblStart">
+           <property name="text">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Start (us):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QLineEdit" name="txtStart"/>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="lblEnd">
+           <property name="text">
+            <string>End (us):</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="2">
+          <widget class="QLineEdit" name="txtEnd"/>
+         </item>
+         <item row="3" column="1">
+          <spacer name="horizontalSpacerEnd">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="2" column="1">
+          <spacer name="horizontalSpacerStart">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBoxGroups">
+        <property name="title">
+         <string>Groups</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayoutGroups">
+         <item>
+          <widget class="QCheckBox" name="chkFwd">
+           <property name="text">
+            <string>fwd</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="chkBwd">
+           <property name="text">
+            <string>bwd</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBoxPeriods">
+        <property name="title">
+         <string>Periods</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayoutPeriods">
+         <item>
+          <widget class="QCheckBox" name="chk1">
+           <property name="text">
+            <string>1</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="chk2">
+           <property name="text">
+            <string>2</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayoutPeriodsCombine">
+           <item>
+            <widget class="QCheckBox" name="chkCombine">
+             <property name="text">
+              <string>Combine</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtFirst">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="lblMinus">
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;-&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtSecond">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

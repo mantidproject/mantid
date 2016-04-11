@@ -22,6 +22,7 @@
 #include "MantidQtMantidWidgets/MessageDisplay.h"
 #include "MantidQtMantidWidgets/PreviewPlot.h"
 #include "MantidQtMantidWidgets/DisplayCurveFit.h"
+#include "MantidQtMantidWidgets/MuonFitDataSelector.h"
 
 /** 
 The PluginCollectionInterface implements the interface for the plugin library and holds a 
@@ -162,5 +163,9 @@ DECLARE_WIDGET_PLUGIN(PreviewPlotPlugin,
 DECLARE_WIDGET_PLUGIN(DisplayCurveFitPlugin,
     MantidQt::MantidWidgets::DisplayCurveFit,
     "Curve plots for workspace spectra");
+
+DECLARE_WIDGET_PLUGIN(MuonFitDataSelectorPlugin,
+                      MantidQt::MantidWidgets::MuonFitDataSelector,
+                      "Data selection for muon fits");
 
 #endif
