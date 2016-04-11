@@ -124,8 +124,10 @@ public:
 
   // virtual std::map<std::string, std::string>
   // currentAggregateBandsParams() const
+  typedef std::map<std::string, std::string>
+      workaroundForMSVCIssueWithVariadicMacros;
   MOCK_CONST_METHOD0(currentAggregateBandsParams,
-                     std::map<std::string, std::string>());
+                     workaroundForMSVCIssueWithVariadicMacros());
 
   // virtual void runAggregateBands(Mantid::API::IAlgorithm_sptr alg)
   MOCK_METHOD1(runAggregateBands, void(Mantid::API::IAlgorithm_sptr alg));
