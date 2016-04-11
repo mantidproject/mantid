@@ -75,6 +75,7 @@ public:
   const std::vector<double> &data() const { return *m_data; }
   const std::vector<double> &constData() const { return *m_data; }
   std::vector<double> &data() { return m_data.access(); }
+  cow_ptr<std::vector<double>> cowData() const { return m_data; }
 
 protected:
   // This is used as base class only, cannot delete polymorphically, so
