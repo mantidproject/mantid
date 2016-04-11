@@ -326,7 +326,7 @@ public:
    * Get parameters for wavelength/energy bands aggregation. Provides
    * all the parameters needed to run the aggregation algorithm.
    *
-   * @param return parameters for an algorithm, as key-value strings
+   * @return parameters for an algorithm, as key-value strings
    * for every required parameter and optinal parameter set to
    * non-default values.
    */

@@ -29,9 +29,9 @@ void TomographyIfaceViewQtGUI::readSettingsEnergy() {
   m_uiTabEnergy.spinBox_uniform_bands->setValue(
       qs.value("uniform-bands-value", 1).toInt());
   m_uiTabEnergy.lineEdit_index_ranges->setText(
-      qs.value("index-ranges-value", 1).toString());
+      qs.value("index-ranges-value", "").toString());
   m_uiTabEnergy.lineEdit_tof_ranges->setText(
-      qs.value("tof-ranges-value", 1).toString());
+      qs.value("tof-ranges-value", "").toString());
 
   m_uiTabEnergy.comboBox_input_format->setCurrentIndex(
       qs.value("input-image-format", 0).toInt());
