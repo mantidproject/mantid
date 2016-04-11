@@ -9,6 +9,10 @@ namespace DataHandling {
 namespace NXcanSAS {
   // NXcanSAS Tag Definitions
   const std::string sasUnitAttr = "unit";
+  const std::string sasUncertaintyAttr = "uncertainty";
+  const std::string sasSignal = "signal";
+  const std::string sasSeparator = ",";
+
 
   // SASentry
   const std::string sasEntryClassAttr = "SASentry";
@@ -22,24 +26,26 @@ namespace NXcanSAS {
 
   // SASdata
   const std::string sasDataClassAttr = "SASdata";
-  const std::string sasDataClassGroupName = "SASdata";
+  const std::string sasDataClassGroupName = "sasdata";
   const std::string sasDataIAxesAttr = "I_axes";
+  const std::string sasDataIUncertaintyAttr = "I_uncertainty";
   const std::string sasDataQIndicesAttr = "Q_indices";
+  const std::string sasDataQUncertaintyAttr = "Q_uncertainty";
   const std::string sasDataMaskIndicesAttr = "Mask_indices";
-  const std::string sasDataUncertaintyAttr = "uncertainty";
+
   const std::string sasDataQ = "Q";
   const std::string sasDataQdev = "Qdev";
+
   const std::string sasDataI = "I";
   const std::string sasDataIdev = "Idev";
   const std::string sasDataMask = "Mask";
 
-
   // SASinstrument
   const std::string sasInstrumentClassAttr = "SASinstrument";
-  const std::string sasInstrumentGroupName = "SASinstrument";
+  const std::string sasInstrumentGroupName = "sasinstrument";
   const std::string sasInstrumentName = "name";
 
-  const std::string sasInstrumentSourceClassAttr = "SASSource";
+  const std::string sasInstrumentSourceClassAttr = "SASsource";
   const std::string sasInstrumentSourceGroupName = "sassource";
   const std::string sasInstrumentSourceRadiation = "radiation";
 
@@ -56,27 +62,29 @@ namespace NXcanSAS {
   const std::string sasInstrumentSampleGroupAttr = "sassample";
   const std::string sasInstrumentSampleId = "ID";
 
+  const std::string sasInstrumentIDF = "idf";
+
   // SASprocess
   const std::string sasProcessClassAttr = "SASprocess";
   const std::string sasProcessGroupName = "sasprocess";
   const std::string sasProcessName = "name";
+  const std::string sasProcessNameValue = "Mantid_generated_NXcanSAS";
   const std::string sasProcessDate = "date";
-  const std::string sasProcessTerm = "term";
   const std::string sasProcessTermSvn = "svn";
-  const std::string sasProcessTermUserFile = "UserFile";
+  const std::string sasProcessTermUserFile = "user_file";
+  const std::string sasProcessUserFileInLogs = "UserFile";
 
   //SAStransmission_spectrum
   const std::string sasTransmissionSpectrumClassAttr = "SAStransmission_spectrum";
   const std::string sasTransmissionSpectrumGroupName = "sastransmission_spectrum";
+  const std::string sasTransmissionSpectrumTIndies = "T_indices";
+  const std::string sasTransmissionSpectrumTUncertainty = "T_uncertainty";
   const std::string sasTransmissionSpectrumNameAttr = "name";
   const std::string sasTransmissionSpectrumNameSampleAttrValue = "sample";
   const std::string sasTransmissionSpectrumNameCanAttrValue = "can";
   const std::string sasTransmissionSpectrumTimeStampAttr = "timestamp";
   const std::string sasTransmissionSpectrumLambda = "lambda";
   const std::string sasTransmissionSpectrumT = "T";
-  const std::string sasTransmissionSpectrumTSignalAttr = "1";
-  const std::string sasTransmissionSpectrumTAxesAttr = "T";
-  const std::string sasTransmissionSpectrumTUncertaintyAttr = "uncertainty";
   const std::string sasTransmissionSpectrumTdev = "Tdev";
 
 }
