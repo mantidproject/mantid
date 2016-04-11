@@ -112,6 +112,8 @@ public:
 
   void runRebinToWorkspaceAlg(std::string workspaceName);
 
+  void runConvetUnitAlg(std::string workspaceName);
+
 protected:
   void initialize();
 

@@ -788,6 +788,24 @@ void EnggDiffractionPresenter::runRebinToWorkspaceAlg(
   }
 }
 
+void EnggDiffractionPresenter::runConvetUnitAlg(std::string workspaceName) {
+  auto ConvertUnits =
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged("ConvertUnits");
+  std::string targetUnit = "dSpacing";
+  try {
+    ConvertUnits->initialize();
+    ConvertUnits->setProperty("InputWorkspace", workspaceName);
+    ConvertUnits->setProperty("OutputWorkspace", workspaceName);
+    ConvertUnits->setProperty("Target", targetUnit);
+    ConvertUnits->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Could not run the algorithm ConvertUnits, "
+                     "Error description: " +
+                         static_cast<std::string>(re.what())
+                  << std::endl;
+  }
+}
+
 void EnggDiffractionPresenter::plotFitPeaksCurves() {
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   std::string singlePeaksWs = "engggui_fitting_single_peaks";
