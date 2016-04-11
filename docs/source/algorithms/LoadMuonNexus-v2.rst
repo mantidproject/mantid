@@ -48,22 +48,6 @@ Errors
 The error for each histogram count is set as the square root of the
 number of counts.
 
-Time bin data
-#############
-
-The *corrected\_times* field of the Nexus file is used to provide time
-bin data and the bin edge values are calculated from these bin centre
-times.
-
-Multiperiod data
-################
-
-To determine if a file contains data from more than one period the field
-*switching\_states* is read from the Nexus file. If this value is
-greater than one it is taken to be the number of periods, :math:`N_p` of
-the data. In this case the :math:`N_s` spectra in the *histogram\_data*
-field are split with :math:`N_s/N_p` assigned to each period.
-
 Details of data loaded
 ######################
 
