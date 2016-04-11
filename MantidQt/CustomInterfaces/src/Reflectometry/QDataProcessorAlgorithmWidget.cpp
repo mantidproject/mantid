@@ -2,6 +2,8 @@
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/MantidWidget.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataPreprocessorAlgorithm.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorWhiteList.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 
@@ -33,22 +35,38 @@ QDataProcessorAlgorithmWidget::QDataProcessorAlgorithmWidget(QWidget *parent)
                                   "OutputWorkspaceWavelength",
                                   "FirstTransmissionRun",
                                   "SecondTransmissionRun"};
+
+  // Output instructions
+  std::map<std::string, std::string> outputInstructions = {
+      {"OutputWorkspace", "IvsQ"}, {"OutputWorkspaceWavelength", "IvsLam"}};
+
+  // Pre-processing instructions
+  std::map<std::string, DataPreprocessorAlgorithm> preprocessor = {
+      {"Run(s)", DataPreprocessorAlgorithm("Plus", "LHSWorkspace",
+                                           "RHSWorkspace", "OutputWorkspace", false)},
+      {"Transmission Run(s)",
+       DataPreprocessorAlgorithm("CreateTransmissionWorkspaceAuto",
+                                 "FirstTransmissionRun",
+                                 "SecondTransmissionRun", "OutputWorkspace", true)}};
+
   // The whitelist
-  std::vector<std::pair<std::string, std::string>> whitelist = {
-      std::pair<std::string, std::string>("Run(s)", "InputWorkspace"),
-      std::pair<std::string, std::string>("Angle", "ThetaIn"),
-      std::pair<std::string, std::string>("Transmission Run(s)",
-                                          "FirstTransmissionRun"),
-      std::pair<std::string, std::string>("Q min", "Qmin"),
-      std::pair<std::string, std::string>("Q max", "Qmax"),
-      std::pair<std::string, std::string>("dQ/Q", "dq/q"),
-      std::pair<std::string, std::string>("Scale", "Scale")};
+  DataProcessorWhiteList whitelist;
+  whitelist.addElement("Run(s)", "InputWorkspace");
+  whitelist.addElement("Angle", "ThetaIn");
+  whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun");
+  whitelist.addElement("Q min", "Qmin");
+  whitelist.addElement("Q max", "Qmax");
+  whitelist.addElement("dQ/Q", "Qstep");
+  whitelist.addElement("Scale", "Scale");
+
   m_presenter = boost::make_shared<GenericDataProcessorPresenter>(
       this /*table view*/,
       this /*currently this concrete view is also responsibile for prog reporting*/,
+      preprocessor /*Pre-processing instructions*/,
       dataProcessorAlgorithm /*the algorithm responsible for the processing*/,
       blacklist /*Properties we don't want to show in the Options column*/,
-      whitelist /*Properties we want to show as columns in the table*/);
+      whitelist /*Properties we want to show as columns in the table*/,
+      outputInstructions /*Names of the outputs produced by the reduction algorithm*/);
 }
 
 //----------------------------------------------------------------------------------------------

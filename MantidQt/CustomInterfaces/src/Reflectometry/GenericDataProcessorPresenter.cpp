@@ -56,31 +56,40 @@ namespace CustomInterfaces {
 
 /**
 * Constructor
-* @param tableView : [input] The view this presenter is going to handle
-* @param progressView : [input] The progress view this presenter is going to
-* handle
-* @param dataProcessorAlgorithm : [input] The data processor algorithm's name as
-* a string
-* @param blacklist : [input] The set of blacklisted properties
-* @param whitelist : [input] The set of properties we want to show as columns,
-* as a vector of pairs
+* @param tableView : The view this presenter is going to handle
+* @param progressView : The progress view this presenter is going to handle
+* @param preprocessor : A map containing instructions for pre-processing
+* @param dataProcessorAlgorithm : The data processor algorithm's name
+* @param blacklist : The set of blacklisted properties
+* @param whitelist : The set of properties we want to show as columns
+* @param outputInstructions : A map indicating the name of each of the output
+* workspaces
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     DataProcessorAlgorithmView *tableView, ProgressableView *progressView,
+    const std::map<std::string, DataPreprocessorAlgorithm> &preprocessor,
     const std::string &dataProcessorAlgorithm,
     const std::set<std::string> &blacklist,
-    const std::vector<std::pair<std::string, std::string>> &whitelist)
+    const DataProcessorWhiteList &whitelist,
+    const std::map<std::string, std::string> &outputInstructions)
     : WorkspaceObserver(), m_view(tableView), m_progressView(progressView),
-      m_dataProcessorAlg(dataProcessorAlgorithm), m_whitelist(whitelist),
+      m_preprocessor(preprocessor), m_dataProcessorAlg(dataProcessorAlgorithm),
+      m_whitelist(whitelist), m_outputInstructions(outputInstructions),
       m_tableDirty(false) {
 
   // Initialise options
   initOptions();
 
+  for (size_t i = 0; i < m_whitelist.size(); i++) {
+    std::string colName = m_whitelist.algPropFromColIndex(static_cast<int>(i));
+    if (!m_preprocessor.count(
+            m_whitelist.colNameFromColIndex(static_cast<int>(i))))
+      m_propToReadFromTable[colName] = static_cast<int>(i);
+  }
+
   // Columns Group and Options must be added to the whitelist
-  m_whitelist.push_back(std::pair<std::string, std::string>("Group", "Group"));
-  m_whitelist.push_back(
-      std::pair<std::string, std::string>("Options", "Options"));
+  m_whitelist.addElement("Group", "Group");
+  m_whitelist.addElement("Options", "Options");
 
   // Populate an initial list of valid tables to open, and subscribe to the ADS
   // to keep it up to date
@@ -171,7 +180,8 @@ ITableWorkspace_sptr GenericDataProcessorPresenter::createWorkspace() {
 
   for (size_t i = 0; i < ncols - 2; i++) {
     // The columns provided to this presenter
-    auto col = ws->addColumn("str", m_whitelist[i].first);
+    auto col = ws->addColumn(
+        "str", m_whitelist.colNameFromColIndex(static_cast<int>(i)));
     col->setPlotType(0);
   }
   // The Group column, must be int
@@ -320,78 +330,83 @@ void GenericDataProcessorPresenter::stitchRows(std::set<int> rows) {
   if (rows.size() < 2)
     return;
 
-  // Properties for Stitch1DMany
-  std::vector<std::string> workspaceNames;
-  std::vector<std::string> runs;
+  // TODO: REMOVE
+  return;
 
-  std::vector<double> params;
-  std::vector<double> startOverlaps;
-  std::vector<double> endOverlaps;
+  //// Properties for Stitch1DMany
+  // std::vector<std::string> workspaceNames;
+  // std::vector<std::string> runs;
 
-  // Go through each row and prepare the properties
-  for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
-    const std::string runStr =
-        m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_RUNS))
-            .toString()
-            .toStdString();
-    const double qmin =
-        m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_QMIN))
-            .toDouble();
-    const double qmax =
-        m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_QMAX))
-            .toDouble();
+  // std::vector<double> params;
+  // std::vector<double> startOverlaps;
+  // std::vector<double> endOverlaps;
 
-    Workspace_sptr runWS = prepareRunWorkspace(runStr);
-    if (runWS) {
-      const std::string runNo = getRunNumber(runWS);
-      if (AnalysisDataService::Instance().doesExist("IvsQ_" + runNo)) {
-        runs.push_back(runNo);
-        workspaceNames.emplace_back("IvsQ_" + runNo);
-      }
-    }
+  //// Go through each row and prepare the properties
+  // for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
+  //  const std::string runStr =
+  //      m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_RUNS))
+  //          .toString()
+  //          .toStdString();
+  //  const double qmin =
+  //      m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_QMIN))
+  //          .toDouble();
+  //  const double qmax =
+  //      m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_QMAX))
+  //          .toDouble();
 
-    startOverlaps.push_back(qmin);
-    endOverlaps.push_back(qmax);
-  }
+  //  Workspace_sptr runWS = prepareRunWorkspace(runStr, "");
+  //  if (runWS) {
+  //    const std::string runNo = getRunNumber(runWS);
+  //    if (AnalysisDataService::Instance().doesExist("IvsQ_" + runNo)) {
+  //      runs.push_back(runNo);
+  //      workspaceNames.emplace_back("IvsQ_" + runNo);
+  //    }
+  //  }
 
-  double dqq =
-      m_model->data(m_model->index(*(rows.begin()), ReflTableSchema::COL_DQQ))
-          .toDouble();
+  //  startOverlaps.push_back(qmin);
+  //  endOverlaps.push_back(qmax);
+  //}
 
-  // params are qmin, -dqq, qmax for the final output
-  params.push_back(
-      *std::min_element(startOverlaps.begin(), startOverlaps.end()));
-  params.push_back(-dqq);
-  params.push_back(*std::max_element(endOverlaps.begin(), endOverlaps.end()));
+  // double dqq =
+  //    m_model->data(m_model->index(*(rows.begin()), ReflTableSchema::COL_DQQ))
+  //        .toDouble();
 
-  // startOverlaps and endOverlaps need to be slightly offset from each other
-  // See usage examples of Stitch1DMany to see why we discard first qmin and
-  // last qmax
-  startOverlaps.erase(startOverlaps.begin());
-  endOverlaps.pop_back();
+  //// params are qmin, -dqq, qmax for the final output
+  // params.push_back(
+  //    *std::min_element(startOverlaps.begin(), startOverlaps.end()));
+  // params.push_back(-dqq);
+  // params.push_back(*std::max_element(endOverlaps.begin(),
+  // endOverlaps.end()));
 
-  std::string outputWSName = "IvsQ_" + boost::algorithm::join(runs, "_");
+  //// startOverlaps and endOverlaps need to be slightly offset from each other
+  //// See usage examples of Stitch1DMany to see why we discard first qmin and
+  //// last qmax
+  // startOverlaps.erase(startOverlaps.begin());
+  // endOverlaps.pop_back();
 
-  // If the previous stitch result is in the ADS already, we'll need to remove
-  // it.
-  // If it's a group, we'll get an error for trying to group into a used group
-  // name
-  if (AnalysisDataService::Instance().doesExist(outputWSName))
-    AnalysisDataService::Instance().remove(outputWSName);
+  // std::string outputWSName = "IvsQ_" + boost::algorithm::join(runs, "_");
 
-  IAlgorithm_sptr algStitch =
-      AlgorithmManager::Instance().create("Stitch1DMany");
-  algStitch->initialize();
-  algStitch->setProperty("InputWorkspaces", workspaceNames);
-  algStitch->setProperty("OutputWorkspace", outputWSName);
-  algStitch->setProperty("Params", params);
-  algStitch->setProperty("StartOverlaps", startOverlaps);
-  algStitch->setProperty("EndOverlaps", endOverlaps);
+  //// If the previous stitch result is in the ADS already, we'll need to remove
+  //// it.
+  //// If it's a group, we'll get an error for trying to group into a used group
+  //// name
+  // if (AnalysisDataService::Instance().doesExist(outputWSName))
+  //  AnalysisDataService::Instance().remove(outputWSName);
 
-  algStitch->execute();
+  // IAlgorithm_sptr algStitch =
+  //    AlgorithmManager::Instance().create("Stitch1DMany");
+  // algStitch->initialize();
+  // algStitch->setProperty("InputWorkspaces", workspaceNames);
+  // algStitch->setProperty("OutputWorkspace", outputWSName);
+  // algStitch->setProperty("Params", params);
+  // algStitch->setProperty("StartOverlaps", startOverlaps);
+  // algStitch->setProperty("EndOverlaps", endOverlaps);
 
-  if (!algStitch->isExecuted())
-    throw std::runtime_error("Failed to run Stitch1DMany on IvsQ workspaces.");
+  // algStitch->execute();
+
+  // if (!algStitch->isExecuted())
+  //  throw std::runtime_error("Failed to run Stitch1DMany on IvsQ
+  //  workspaces.");
 }
 
 /**
@@ -491,88 +506,91 @@ Autofill a row
 @throws std::runtime_error if the row could not be auto-filled
 */
 void GenericDataProcessorPresenter::autofillRow(int rowNo) {
-  if (rowNo >= m_model->rowCount())
-    throw std::runtime_error("Invalid row");
+  // TODO: what do we want to do with this??
+  // if (rowNo >= m_model->rowCount())
+  //  throw std::runtime_error("Invalid row");
 
-  const std::string runStr =
-      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_RUNS))
-          .toString()
-          .toStdString();
-  auto runWS = prepareRunWorkspace(runStr);
-  auto runMWS = boost::dynamic_pointer_cast<MatrixWorkspace>(runWS);
-  auto runWSG = boost::dynamic_pointer_cast<WorkspaceGroup>(runWS);
+  // const std::string runStr =
+  //    m_model->data(m_model->index(rowNo, ReflTableSchema::COL_RUNS))
+  //        .toString()
+  //        .toStdString();
+  // auto runWS = prepareRunWorkspace(runStr, "");
+  // auto runMWS = boost::dynamic_pointer_cast<MatrixWorkspace>(runWS);
+  // auto runWSG = boost::dynamic_pointer_cast<WorkspaceGroup>(runWS);
 
-  // If we've got a workspace group, use the first workspace in it
-  if (!runMWS && runWSG)
-    runMWS = boost::dynamic_pointer_cast<MatrixWorkspace>(runWSG->getItem(0));
+  //// If we've got a workspace group, use the first workspace in it
+  // if (!runMWS && runWSG)
+  //  runMWS = boost::dynamic_pointer_cast<MatrixWorkspace>(runWSG->getItem(0));
 
-  if (!runMWS)
-    throw std::runtime_error("Could not convert " + runWS->name() +
-                             " to a MatrixWorkspace.");
+  // if (!runMWS)
+  //  throw std::runtime_error("Could not convert " + runWS->name() +
+  //                           " to a MatrixWorkspace.");
 
-  // Fetch two theta from the log if needed
-  if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_ANGLE))
-          .toString()
-          .isEmpty()) {
-    Property *logData = NULL;
+  //// Fetch two theta from the log if needed
+  // if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_ANGLE))
+  //        .toString()
+  //        .isEmpty()) {
+  //  Property *logData = NULL;
 
-    // First try TwoTheta
-    try {
-      logData = runMWS->mutableRun().getLogData("Theta");
-    } catch (std::exception &) {
-      throw std::runtime_error(
-          "Value for two theta could not be found in log.");
-    }
+  //  // First try TwoTheta
+  //  try {
+  //    logData = runMWS->mutableRun().getLogData("Theta");
+  //  } catch (std::exception &) {
+  //    throw std::runtime_error(
+  //        "Value for two theta could not be found in log.");
+  //  }
 
-    auto logPWV = dynamic_cast<const PropertyWithValue<double> *>(logData);
-    auto logTSP = dynamic_cast<const TimeSeriesProperty<double> *>(logData);
+  //  auto logPWV = dynamic_cast<const PropertyWithValue<double> *>(logData);
+  //  auto logTSP = dynamic_cast<const TimeSeriesProperty<double> *>(logData);
 
-    double thetaVal;
-    if (logPWV)
-      thetaVal = *logPWV;
-    else if (logTSP && logTSP->realSize() > 0)
-      thetaVal = logTSP->lastValue();
-    else
-      throw std::runtime_error(
-          "Value for two theta could not be found in log.");
+  //  double thetaVal;
+  //  if (logPWV)
+  //    thetaVal = *logPWV;
+  //  else if (logTSP && logTSP->realSize() > 0)
+  //    thetaVal = logTSP->lastValue();
+  //  else
+  //    throw std::runtime_error(
+  //        "Value for two theta could not be found in log.");
 
-    // Update the model
-    if (m_options["RoundAngle"].toBool())
-      thetaVal =
-          Utils::roundToDP(thetaVal, m_options["RoundAnglePrecision"].toInt());
+  //  // Update the model
+  //  if (m_options["RoundAngle"].toBool())
+  //    thetaVal =
+  //        Utils::roundToDP(thetaVal,
+  //        m_options["RoundAnglePrecision"].toInt());
 
-    m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_ANGLE),
-                     thetaVal);
-    m_tableDirty = true;
-  }
+  //  m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_ANGLE),
+  //                   thetaVal);
+  //  m_tableDirty = true;
+  //}
 
-  // If we need to calculate the resolution, do.
-  if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_DQQ))
-          .toString()
-          .isEmpty()) {
-    IAlgorithm_sptr calcResAlg =
-        AlgorithmManager::Instance().create("CalculateResolution");
-    calcResAlg->setProperty("Workspace", runMWS);
-    calcResAlg->setProperty(
-        "TwoTheta",
-        m_model->data(m_model->index(rowNo, ReflTableSchema::COL_ANGLE))
-            .toString()
-            .toStdString());
-    calcResAlg->execute();
+  //// If we need to calculate the resolution, do.
+  // if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_DQQ))
+  //        .toString()
+  //        .isEmpty()) {
+  //  IAlgorithm_sptr calcResAlg =
+  //      AlgorithmManager::Instance().create("CalculateResolution");
+  //  calcResAlg->setProperty("Workspace", runMWS);
+  //  calcResAlg->setProperty(
+  //      "TwoTheta",
+  //      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_ANGLE))
+  //          .toString()
+  //          .toStdString());
+  //  calcResAlg->execute();
 
-    if (!calcResAlg->isExecuted())
-      throw std::runtime_error("CalculateResolution failed. Please manually "
-                               "enter a value in the dQ/Q column.");
+  //  if (!calcResAlg->isExecuted())
+  //    throw std::runtime_error("CalculateResolution failed. Please manually "
+  //                             "enter a value in the dQ/Q column.");
 
-    // Update the model
-    double dqqVal = calcResAlg->getProperty("Resolution");
+  //  // Update the model
+  //  double dqqVal = calcResAlg->getProperty("Resolution");
 
-    if (m_options["RoundDQQ"].toBool())
-      dqqVal = Utils::roundToDP(dqqVal, m_options["RoundDQQPrecision"].toInt());
+  //  if (m_options["RoundDQQ"].toBool())
+  //    dqqVal = Utils::roundToDP(dqqVal,
+  //    m_options["RoundDQQPrecision"].toInt());
 
-    m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_DQQ), dqqVal);
-    m_tableDirty = true;
-  }
+  //  m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_DQQ), dqqVal);
+  //  m_tableDirty = true;
+  //}
 }
 
 /**
@@ -599,8 +617,8 @@ GenericDataProcessorPresenter::getRunNumber(const Workspace_sptr &ws) {
   // Okay, let's see what we can get from the workspace's name
   const std::string wsName = ws->name();
 
-  // Matches TOF_13460 -> 13460
-  boost::regex outputRegex("(TOF|IvsQ|IvsLam)_([0-9]+)");
+  // Matches IvsQ_13460 -> 13460
+  boost::regex outputRegex("(IvsQ|IvsLam)_([0-9]+)");
 
   // Matches INTER13460 -> 13460
   boost::regex instrumentRegex("[a-zA-Z]{3,}([0-9]{3,})");
@@ -608,13 +626,13 @@ GenericDataProcessorPresenter::getRunNumber(const Workspace_sptr &ws) {
   boost::smatch matches;
 
   if (boost::regex_match(wsName, matches, outputRegex)) {
-    return matches[2].str();
+    return "_" + matches[2].str();
   } else if (boost::regex_match(wsName, matches, instrumentRegex)) {
-    return matches[1].str();
+    return "_" + matches[1].str();
   }
 
   // Resort to using the workspace name
-  return wsName;
+  return "_" + wsName;
 }
 
 /**
@@ -624,8 +642,9 @@ desired TOF workspace
 @throws std::runtime_error if the workspace could not be prepared
 @returns a shared pointer to the workspace
 */
-Workspace_sptr
-GenericDataProcessorPresenter::prepareRunWorkspace(const std::string &runStr) {
+Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
+    const std::string &runStr, const DataPreprocessorAlgorithm &preprocessor,
+    const std::map<std::string, std::string> &optionsMap) {
   const std::string instrument = m_view->getProcessInstrument();
 
   std::vector<std::string> runs;
@@ -642,7 +661,7 @@ GenericDataProcessorPresenter::prepareRunWorkspace(const std::string &runStr) {
   if (runs.size() == 1)
     return loadRun(runs[0], instrument);
 
-  const std::string outputName = "TOF_" + boost::algorithm::join(runs, "_");
+  const std::string outputName = boost::algorithm::join(runs, "_");
 
   // Check if we've already prepared it
   if (AnalysisDataService::Instance().doesExist(outputName))
@@ -654,10 +673,12 @@ GenericDataProcessorPresenter::prepareRunWorkspace(const std::string &runStr) {
   * in
   * the event of failure.
   */
-  IAlgorithm_sptr algPlus = AlgorithmManager::Instance().create("Plus");
-  algPlus->initialize();
-  algPlus->setProperty("LHSWorkspace", loadRun(runs[0], instrument)->name());
-  algPlus->setProperty("OutputWorkspace", outputName);
+  IAlgorithm_sptr alg =
+      AlgorithmManager::Instance().create(preprocessor.name());
+  alg->initialize();
+  alg->setProperty(preprocessor.firstInputProperty(),
+                   loadRun(runs[0], instrument)->name());
+  alg->setProperty(preprocessor.outputProperty(), outputName);
 
   // Drop the first run from the runs list
   runs.erase(runs.begin());
@@ -665,11 +686,26 @@ GenericDataProcessorPresenter::prepareRunWorkspace(const std::string &runStr) {
   try {
     // Iterate through all the remaining runs, adding them to the first run
     for (auto runIt = runs.begin(); runIt != runs.end(); ++runIt) {
-      algPlus->setProperty("RHSWorkspace", loadRun(*runIt, instrument)->name());
-      algPlus->execute();
 
-      // After the first execution we replace the LHS with the previous output
-      algPlus->setProperty("LHSWorkspace", outputName);
+      if (preprocessor.applyOptions()) {
+        for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
+          try {
+            alg->setProperty(kvp->first, kvp->second);
+          } catch (Mantid::Kernel::Exception::NotFoundError &) {
+            // We can't apply this option to this pre-processing alg
+            // This is totally OK, just continue with the next option
+          }
+        }
+      }
+
+      alg->setProperty(preprocessor.secondInputProperty(),
+                       loadRun(*runIt, instrument)->name());
+      alg->execute();
+
+      if (runIt != --runs.end()) {
+        // After the first execution we replace the LHS with the previous output
+        alg->setProperty(preprocessor.firstInputProperty(), outputName);
+      }
     }
   } catch (...) {
     // If we're unable to create the full workspace, discard the partial version
@@ -700,8 +736,8 @@ GenericDataProcessorPresenter::loadRun(const std::string &run,
   if (boost::regex_match(run, boost::regex("\\d+"))) {
     std::string wsName;
 
-    // Look for "TOF_<run_number>" in the ADS
-    wsName = "TOF_" + run;
+    // Look for "<run_number>" in the ADS
+    wsName = run;
     if (AnalysisDataService::Instance().doesExist(wsName))
       return AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
 
@@ -716,13 +752,13 @@ GenericDataProcessorPresenter::loadRun(const std::string &run,
   IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create("Load");
   algLoadRun->initialize();
   algLoadRun->setProperty("Filename", filename);
-  algLoadRun->setProperty("OutputWorkspace", "TOF_" + run);
+  algLoadRun->setProperty("OutputWorkspace", run);
   algLoadRun->execute();
 
   if (!algLoadRun->isExecuted())
     throw std::runtime_error("Could not open " + filename);
 
-  return AnalysisDataService::Instance().retrieveWS<Workspace>("TOF_" + run);
+  return AnalysisDataService::Instance().retrieveWS<Workspace>(run);
 }
 
 /**
@@ -769,196 +805,75 @@ std::vector<double> GenericDataProcessorPresenter::calcQRange(Workspace_sptr ws,
 }
 
 /**
-Create a transmission workspace
-@param transString : the numbers of the transmission runs to use
-*/
-Workspace_sptr
-GenericDataProcessorPresenter::makeTransWS(const std::string &transString) {
-  const size_t maxTransWS = 2;
-
-  std::vector<std::string> transVec;
-  std::vector<Workspace_sptr> transWSVec;
-
-  // Take the first two run numbers
-  boost::split(transVec, transString, boost::is_any_of(","));
-  if (transVec.size() > maxTransWS)
-    transVec.resize(maxTransWS);
-
-  if (transVec.size() == 0)
-    throw std::runtime_error("Failed to parse the transmission run list.");
-
-  for (auto it = transVec.begin(); it != transVec.end(); ++it)
-    transWSVec.push_back(loadRun(*it, m_view->getProcessInstrument()));
-
-  // If the transmission workspace is already in the ADS, re-use it
-  std::string lastName = "TRANS_" + boost::algorithm::join(transVec, "_");
-  if (AnalysisDataService::Instance().doesExist(lastName))
-    return AnalysisDataService::Instance().retrieveWS<Workspace>(lastName);
-
-  // We have the runs, so we can create a TransWS
-  IAlgorithm_sptr algCreateTrans =
-      AlgorithmManager::Instance().create("CreateTransmissionWorkspaceAuto");
-  algCreateTrans->initialize();
-  algCreateTrans->setProperty("FirstTransmissionRun", transWSVec[0]->name());
-  if (transWSVec.size() > 1)
-    algCreateTrans->setProperty("SecondTransmissionRun", transWSVec[1]->name());
-
-  std::string wsName = "TRANS_" + getRunNumber(transWSVec[0]);
-  if (transWSVec.size() > 1)
-    wsName += "_" + getRunNumber(transWSVec[1]);
-
-  algCreateTrans->setProperty("OutputWorkspace", wsName);
-
-  if (!algCreateTrans->isInitialized())
-    throw std::runtime_error(
-        "Could not initialize CreateTransmissionWorkspaceAuto");
-
-  algCreateTrans->execute();
-
-  if (!algCreateTrans->isExecuted())
-    throw std::runtime_error(
-        "CreateTransmissionWorkspaceAuto failed to execute");
-
-  return AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
-}
-
-/**
 Reduce a row
 @param rowNo : The row in the model to reduce
 @throws std::runtime_error if reduction fails
 */
 void GenericDataProcessorPresenter::reduceRow(int rowNo) {
-  const std::string runStr =
-      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_RUNS))
-          .toString()
-          .toStdString();
-  const std::string transStr =
-      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_TRANSMISSION))
-          .toString()
-          .toStdString();
+
+  /* Create the processing algorithm */
+
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_dataProcessorAlg);
+  alg->initialize();
+
+  /* Deal with columns that do not need pre-processing */
+  /* In Reflectometry those are 'Angle', 'Q min', 'Q max', etc */
+
+  int ncols = static_cast<int>(m_whitelist.size());
+  for (auto it = m_propToReadFromTable.begin();
+       it != m_propToReadFromTable.end(); ++it) {
+
+    alg->setPropertyValue(it->first,
+                          m_model->data(m_model->index(rowNo, it->second))
+                              .toString()
+                              .toStdString());
+  }
+
+  /* Deal with Options column */
+
   const std::string options =
-      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_OPTIONS))
+      m_model->data(m_model->index(rowNo, m_model->columnCount() - 1))
           .toString()
           .toStdString();
-
-  double theta = 0;
-
-  bool thetaGiven =
-      !m_model->data(m_model->index(rowNo, ReflTableSchema::COL_ANGLE))
-           .toString()
-           .isEmpty();
-
-  if (thetaGiven)
-    theta = m_model->data(m_model->index(rowNo, ReflTableSchema::COL_ANGLE))
-                .toDouble();
-
-  auto runWS = prepareRunWorkspace(runStr);
-  const std::string runNo = getRunNumber(runWS);
-
-  Workspace_sptr transWS;
-  if (!transStr.empty())
-    transWS = makeTransWS(transStr);
-
-  IAlgorithm_sptr algReflOne =
-      AlgorithmManager::Instance().create(m_dataProcessorAlg);
-  algReflOne->initialize();
-  algReflOne->setProperty("InputWorkspace", runWS->name());
-  if (transWS)
-    algReflOne->setProperty("FirstTransmissionRun", transWS->name());
-  algReflOne->setProperty("OutputWorkspace", "IvsQ_" + runNo);
-  algReflOne->setProperty("OutputWorkspaceWaveLength", "IvsLam_" + runNo);
-
-  if (thetaGiven)
-    algReflOne->setProperty("ThetaIn", theta);
 
   // Parse and set any user-specified options
   auto optionsMap = parseKeyValueString(options);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
-      algReflOne->setProperty(kvp->first, kvp->second);
+      alg->setProperty(kvp->first, kvp->second);
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       throw std::runtime_error("Invalid property in options column: " +
                                kvp->first);
     }
   }
 
-  algReflOne->execute();
+  /* Deal with columns that need pre-processing */
+  /* In Reflectometry those are 'Run(s)' and 'Transmission Run(s)' */
 
-  if (!algReflOne->isExecuted())
-    throw std::runtime_error("Failed to run ReflectometryReductionOneAuto.");
+  std::string runNo;
 
-  const double scale =
-      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_SCALE))
-          .toDouble();
-  if (scale != 1.0) {
-    IAlgorithm_sptr algScale = AlgorithmManager::Instance().create("Scale");
-    algScale->initialize();
-    algScale->setProperty("InputWorkspace", "IvsQ_" + runNo);
-    algScale->setProperty("OutputWorkspace", "IvsQ_" + runNo);
-    algScale->setProperty("Factor", 1.0 / scale);
-    algScale->execute();
+  for (auto it = m_preprocessor.begin(); it != m_preprocessor.end(); ++it) {
+    const std::string runStr =
+        m_model
+            ->data(m_model->index(rowNo,
+                                  m_whitelist.colIndexFromColName(it->first)))
+            .toString()
+            .toStdString();
 
-    if (!algScale->isExecuted())
-      throw std::runtime_error("Failed to run Scale algorithm");
+    auto runWS = prepareRunWorkspace(runStr, it->second, optionsMap);
+    runNo.append(getRunNumber(runWS));
+    alg->setProperty(m_whitelist.algPropFromColName(it->first), runWS->name());
   }
 
-  // Reduction has completed. Put Qmin and Qmax into the table if needed, for
-  // stitching.
-  if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMIN))
-          .toString()
-          .isEmpty() ||
-      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMAX))
-          .toString()
-          .isEmpty()) {
-    Workspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<Workspace>("IvsQ_" + runNo);
-    std::vector<double> qrange = calcQRange(ws, theta);
+  /* We need to give a name to the output workspaces */
 
-    if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMIN))
-            .toString()
-            .isEmpty())
-      m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_QMIN),
-                       qrange[0]);
-
-    if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMAX))
-            .toString()
-            .isEmpty())
-      m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_QMAX),
-                       qrange[1]);
-
-    m_tableDirty = true;
+  for (auto it = m_outputInstructions.begin(); it != m_outputInstructions.end();
+       ++it) {
+    alg->setProperty(it->first, it->second + runNo);
   }
 
-  // We need to make sure that qmin and qmax are respected, so we rebin to
-  // those limits here.
-  IAlgorithm_sptr algCrop = AlgorithmManager::Instance().create("Rebin");
-  algCrop->initialize();
-  algCrop->setProperty("InputWorkspace", "IvsQ_" + runNo);
-  algCrop->setProperty("OutputWorkspace", "IvsQ_" + runNo);
-  const double qmin =
-      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMIN))
-          .toDouble();
-  const double qmax =
-      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMAX))
-          .toDouble();
-  const double dqq =
-      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_DQQ)).toDouble();
-  std::vector<double> params;
-  params.push_back(qmin);
-  params.push_back(-dqq);
-  params.push_back(qmax);
-  algCrop->setProperty("Params", params);
-  algCrop->execute();
-
-  if (!algCrop->isExecuted())
-    throw std::runtime_error("Failed to run Rebin algorithm");
-
-  // Also fill in theta if needed
-  if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_ANGLE))
-          .toString()
-          .isEmpty() &&
-      thetaGiven)
-    m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_ANGLE), theta);
+  /* Now run the processing algorithm */
+  alg->execute();
 }
 
 /**
@@ -1468,87 +1383,93 @@ void GenericDataProcessorPresenter::setInstrumentList(
 
 /** Plots any currently selected rows */
 void GenericDataProcessorPresenter::plotRow() {
-  auto selectedRows = m_view->getSelectedRows();
+  // TODO
+  // auto selectedRows = m_view->getSelectedRows();
 
-  if (selectedRows.empty())
-    return;
+  // if (selectedRows.empty())
+  //  return;
 
-  std::set<std::string> workspaces, notFound;
-  for (auto row = selectedRows.begin(); row != selectedRows.end(); ++row) {
-    const std::string wsName =
-        "IvsQ_" +
-        getRunNumber(prepareRunWorkspace(
-            m_model->data(m_model->index(*row, ReflTableSchema::COL_RUNS))
-                .toString()
-                .toStdString()));
-    if (AnalysisDataService::Instance().doesExist(wsName))
-      workspaces.insert(wsName);
-    else
-      notFound.insert(wsName);
-  }
+  // std::set<std::string> workspaces, notFound;
+  // for (auto row = selectedRows.begin(); row != selectedRows.end(); ++row) {
+  //  const std::string wsName =
+  //      "IvsQ_" +
+  //      getRunNumber(prepareRunWorkspace(
+  //          m_model->data(m_model->index(*row, ReflTableSchema::COL_RUNS))
+  //              .toString()
+  //              .toStdString()));
+  //  if (AnalysisDataService::Instance().doesExist(wsName))
+  //    workspaces.insert(wsName);
+  //  else
+  //    notFound.insert(wsName);
+  //}
 
-  if (!notFound.empty())
-    m_view->giveUserWarning("The following workspaces were not plotted because "
-                            "they were not found:\n" +
-                                boost::algorithm::join(notFound, "\n") +
-                                "\n\nPlease check that the rows you are trying "
-                                "to plot have been fully processed.",
-                            "Error plotting rows.");
+  // if (!notFound.empty())
+  //  m_view->giveUserWarning("The following workspaces were not plotted because
+  //  "
+  //                          "they were not found:\n" +
+  //                              boost::algorithm::join(notFound, "\n") +
+  //                              "\n\nPlease check that the rows you are trying
+  //                              "
+  //                              "to plot have been fully processed.",
+  //                          "Error plotting rows.");
 
-  m_view->plotWorkspaces(workspaces);
+  // m_view->plotWorkspaces(workspaces);
 }
 
 /** Plots any currently selected groups */
 void GenericDataProcessorPresenter::plotGroup() {
-  auto selectedRows = m_view->getSelectedRows();
+  // TODO
+  // auto selectedRows = m_view->getSelectedRows();
 
-  if (selectedRows.empty())
-    return;
+  // if (selectedRows.empty())
+  //  return;
 
-  std::set<int> selectedGroups;
-  for (auto row = selectedRows.begin(); row != selectedRows.end(); ++row)
-    selectedGroups.insert(
-        m_model->data(m_model->index(*row, ReflTableSchema::COL_GROUP))
-            .toInt());
+  // std::set<int> selectedGroups;
+  // for (auto row = selectedRows.begin(); row != selectedRows.end(); ++row)
+  //  selectedGroups.insert(
+  //      m_model->data(m_model->index(*row, ReflTableSchema::COL_GROUP))
+  //          .toInt());
 
-  // Now, get the names of the stitched workspace, one per group
-  std::map<int, std::vector<std::string>> runsByGroup;
-  const int numRows = m_model->rowCount();
-  for (int row = 0; row < numRows; ++row) {
-    int group =
-        m_model->data(m_model->index(row, ReflTableSchema::COL_GROUP)).toInt();
+  //// Now, get the names of the stitched workspace, one per group
+  // std::map<int, std::vector<std::string>> runsByGroup;
+  // const int numRows = m_model->rowCount();
+  // for (int row = 0; row < numRows; ++row) {
+  //  int group =
+  //      m_model->data(m_model->index(row,
+  //      ReflTableSchema::COL_GROUP)).toInt();
 
-    // Skip groups we don't care about
-    if (selectedGroups.find(group) == selectedGroups.end())
-      continue;
+  //  // Skip groups we don't care about
+  //  if (selectedGroups.find(group) == selectedGroups.end())
+  //    continue;
 
-    // Add this to the list of runs
-    runsByGroup[group].push_back(getRunNumber(prepareRunWorkspace(
-        m_model->data(m_model->index(row, ReflTableSchema::COL_RUNS))
-            .toString()
-            .toStdString())));
-  }
+  //  // Add this to the list of runs
+  //  runsByGroup[group].push_back(getRunNumber(prepareRunWorkspace(
+  //      m_model->data(m_model->index(row, ReflTableSchema::COL_RUNS))
+  //          .toString()
+  //          .toStdString())));
+  //}
 
-  std::set<std::string> workspaces, notFound;
-  for (auto runsMap = runsByGroup.begin(); runsMap != runsByGroup.end();
-       ++runsMap) {
-    const std::string wsName =
-        "IvsQ_" + boost::algorithm::join(runsMap->second, "_");
-    if (AnalysisDataService::Instance().doesExist(wsName))
-      workspaces.insert(wsName);
-    else
-      notFound.insert(wsName);
-  }
+  // std::set<std::string> workspaces, notFound;
+  // for (auto runsMap = runsByGroup.begin(); runsMap != runsByGroup.end();
+  //     ++runsMap) {
+  //  const std::string wsName =
+  //      "IvsQ_" + boost::algorithm::join(runsMap->second, "_");
+  //  if (AnalysisDataService::Instance().doesExist(wsName))
+  //    workspaces.insert(wsName);
+  //  else
+  //    notFound.insert(wsName);
+  //}
 
-  if (!notFound.empty())
-    m_view->giveUserWarning("The following workspaces were not plotted because "
-                            "they were not found:\n" +
-                                boost::algorithm::join(notFound, "\n") +
-                                "\n\nPlease check that the groups you are "
-                                "trying to plot have been fully processed.",
-                            "Error plotting groups.");
+  // if (!notFound.empty())
+  //  m_view->giveUserWarning("The following workspaces were not plotted because
+  //  "
+  //                          "they were not found:\n" +
+  //                              boost::algorithm::join(notFound, "\n") +
+  //                              "\n\nPlease check that the groups you are "
+  //                              "trying to plot have been fully processed.",
+  //                          "Error plotting groups.");
 
-  m_view->plotWorkspaces(workspaces);
+  // m_view->plotWorkspaces(workspaces);
 }
 
 /** Shows the Refl Options dialog */

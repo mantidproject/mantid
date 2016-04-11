@@ -214,6 +214,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
 	inc/MantidQtCustomInterfaces/ParseKeyValueString.h
 	inc/MantidQtCustomInterfaces/ProgressableView.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataPreprocessorAlgorithm.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithmView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorAppendRowCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorClearSelectedCommand.h
@@ -239,6 +240,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorProcessCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorSaveTableAsCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorSaveTableCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorWhiteList.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorWorkspaceCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/GenericDataProcessorPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h

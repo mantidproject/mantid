@@ -4,8 +4,10 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataPreprocessorAlgorithm.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithmView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorWhiteList.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h"
 
 namespace MantidQt {
@@ -46,9 +48,11 @@ class MANTIDQT_CUSTOMINTERFACES_DLL GenericDataProcessorPresenter
 public:
   GenericDataProcessorPresenter(
       DataProcessorAlgorithmView *tableView, ProgressableView *progressView,
+      const std::map<std::string, DataPreprocessorAlgorithm> &preprocess,
       const std::string &dataProcessorAlgorithm,
       const std::set<std::string> &blacklist,
-      const std::vector<std::pair<std::string, std::string>> &whitelist);
+      const DataProcessorWhiteList &whitelist,
+      const std::map<std::string, std::string> &outputInstructions);
   ~GenericDataProcessorPresenter() override;
   void notify(DataProcessorPresenter::Flag flag) override;
   const std::map<std::string, QVariant> &options() const override;
@@ -71,18 +75,22 @@ protected:
   DataProcessorAlgorithmView *m_view;
   // The progress view
   ProgressableView *m_progressView;
+  // The pre-processing instructions
+  std::map<std::string, DataPreprocessorAlgorithm> m_preprocessor;
   // The data processor algorithm
   std::string m_dataProcessorAlg;
   // The whitelist
-  std::vector<std::pair<std::string, std::string>> m_whitelist;
+  DataProcessorWhiteList m_whitelist;
+  // The output instructions
+  std::map<std::string, std::string> m_outputInstructions;
+  // The algorithm's properties we want to read from the table
+  std::map<std::string, int> m_propToReadFromTable;
   // A workspace receiver we want to notify
   WorkspaceReceiver *m_workspaceReceiver;
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
-  // make a transmission workspace
-  Mantid::API::Workspace_sptr makeTransWS(const std::string &transString);
   // calculates qmin and qmax
   std::vector<double> calcQRange(Mantid::API::Workspace_sptr ws, double theta);
   // Stitch some rows
@@ -94,7 +102,10 @@ protected:
   // Reduce a row
   void reduceRow(int rowNo);
   // prepare a run or list of runs for processing
-  Mantid::API::Workspace_sptr prepareRunWorkspace(const std::string &run);
+  Mantid::API::Workspace_sptr
+  prepareRunWorkspace(const std::string &run,
+                      const DataPreprocessorAlgorithm &alg,
+                      const std::map<std::string, std::string> &optionsMap);
   // load a run into the ADS, or re-use one in the ADS if possible
   Mantid::API::Workspace_sptr loadRun(const std::string &run,
                                       const std::string &instrument); // change
