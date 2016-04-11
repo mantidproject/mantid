@@ -71,6 +71,13 @@ public:
     }
   }
 
+  Points points() const {
+    if (xMode() == XMode::BinEdges)
+      return Points(m_binEdges);
+    else
+      return Points(m_points);
+  }
+
   // Temporary legacy interface to X
   void setX(const MantidVec &X) {
     if (xMode() == XMode::BinEdges)
