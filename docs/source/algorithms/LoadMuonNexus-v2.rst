@@ -26,6 +26,15 @@ loaded.
 -  TODO load the spectra detector mapping. This may be very simple for
    Muon instruments.
 
+Version Identification
+######################
+
+To be identified as a version 2 muon nexus file, the nexus file must have a
+``IDF_version`` or ``idf_version`` item in its main group 
+with an integer value of ``2`` and also a
+``definition`` item with string value ``"muonTD"`` or ``"pulsedTD"``,
+else it will be identified as version 1.
+
 Time series data
 ################
 
