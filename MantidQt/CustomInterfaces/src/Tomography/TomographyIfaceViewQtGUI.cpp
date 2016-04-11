@@ -166,7 +166,7 @@ TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
       m_processingJobsIDs(), m_currentComputeRes(""), m_currentReconTool(""),
       m_imgPath(""), m_logMsgs(), m_systemSettings(), m_toolsSettings(),
       m_settings(), m_settingsGroup("CustomInterfaces/Tomography"),
-      m_availPlugins(), m_currPlugins(), m_currentParamPath(),
+      m_aggAlgRunner(), m_availPlugins(), m_currPlugins(), m_currentParamPath(),
       m_presenter(NULL) {
 
   // defaults from the tools
@@ -429,14 +429,6 @@ void TomographyIfaceViewQtGUI::doSetupSectionConvert() {
 
   connect(m_uiTabConvertFormats.pushButton_browse_output, SIGNAL(released()),
           this, SLOT(browseImgOutputConvertClicked()));
-}
-
-void TomographyIfaceViewQtGUI::doSetupSectionEnergy() {
-  connect(m_uiTabEnergy.pushButton_browse_input, SIGNAL(released()), this,
-          SLOT(browseEnergyInputClicked()));
-
-  connect(m_uiTabEnergy.pushButton_browse_input, SIGNAL(released()), this,
-          SLOT(browseEnergyOutputClicked()));
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionSystemSettings() {
@@ -2018,14 +2010,6 @@ void TomographyIfaceViewQtGUI::browseImgOutputConvertClicked() {
   checkUserBrowseDir(m_uiTabConvertFormats.lineEdit_output);
   // m_pathsConfig.updatePathDarks(str, );
   // m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
-}
-
-void TomographyIfaceViewQtGUI::browseEnergyInputClicked() {
-  checkUserBrowseDir(m_uiTabEnergy.lineEdit_input_path);
-}
-
-void TomographyIfaceViewQtGUI::browseEnergyOutputClicked() {
-  checkUserBrowseDir(m_uiTabEnergy.lineEdit_output_path);
 }
 
 /**

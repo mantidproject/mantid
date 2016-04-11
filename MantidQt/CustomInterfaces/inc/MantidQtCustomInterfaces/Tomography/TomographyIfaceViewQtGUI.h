@@ -5,6 +5,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidQtAPI/BatchAlgorithmRunner.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
@@ -33,6 +34,11 @@ class ImageROIViewQtWidget;
 class QMutex;
 
 namespace MantidQt {
+
+namespace API {
+class BatchAlgorithmRunner;
+}
+
 namespace CustomInterfaces {
 
 /**
@@ -156,6 +162,13 @@ public:
     return m_tabROIW->userSelection();
   }
 
+  std::map<std::string, std::string>
+  currentAggregateBandsParams() const override {
+    return grabCurrentAggParams();
+  }
+
+  void runAggregateBands(Mantid::API::IAlgorithm_sptr alg) override;
+
 private slots:
   /// for buttons, run tab, and similar
   void reconstructClicked();
@@ -219,6 +232,11 @@ private slots:
 
   // reset all system / advanced settings
   void resetSystemSettings();
+
+  // start aggregation of energy/wavelength bands
+  void pushButtonAggClicked();
+  // aggregation run finished
+  void finishedAggBands(bool error);
 
   // for the savu functionality - waiting for Savu
   void menuSaveClicked();
@@ -285,6 +303,8 @@ private:
 
   void sendToVisTool(const std::string &toolName, const std::string &pathString,
                      const std::string &appendBin);
+
+  std::map<std::string, std::string> grabCurrentAggParams() const;
 
   void sendLog(const std::string &msg);
 
@@ -427,6 +447,9 @@ private:
 
   // path name for persistent settings
   std::string m_settingsGroup;
+
+  // To run aggregation of wavelength/energy bands
+  std::unique_ptr<MantidQt::API::BatchAlgorithmRunner> m_aggAlgRunner;
 
   // TODO? move to TomographyIfaceModel or TomographyIfaceSavuModel.h
   // plugins for Savu config files
