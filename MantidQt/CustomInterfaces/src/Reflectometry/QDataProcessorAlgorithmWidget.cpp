@@ -40,14 +40,18 @@ QDataProcessorAlgorithmWidget::QDataProcessorAlgorithmWidget(QWidget *parent)
   std::map<std::string, std::string> outputInstructions = {
       {"OutputWorkspace", "IvsQ"}, {"OutputWorkspaceWavelength", "IvsLam"}};
 
+  // Specifies what we want to plot
+  std::string plotInstructions = "IvsQ";
+
   // Pre-processing instructions
   std::map<std::string, DataPreprocessorAlgorithm> preprocessor = {
-      {"Run(s)", DataPreprocessorAlgorithm("Plus", "LHSWorkspace",
-                                           "RHSWorkspace", "OutputWorkspace", false)},
+      {"Run(s)",
+       DataPreprocessorAlgorithm("Plus", "LHSWorkspace", "RHSWorkspace",
+                                 "OutputWorkspace", false)},
       {"Transmission Run(s)",
-       DataPreprocessorAlgorithm("CreateTransmissionWorkspaceAuto",
-                                 "FirstTransmissionRun",
-                                 "SecondTransmissionRun", "OutputWorkspace", true)}};
+       DataPreprocessorAlgorithm(
+           "CreateTransmissionWorkspaceAuto", "FirstTransmissionRun",
+           "SecondTransmissionRun", "OutputWorkspace", true)}};
 
   // The whitelist
   DataProcessorWhiteList whitelist;
@@ -66,7 +70,8 @@ QDataProcessorAlgorithmWidget::QDataProcessorAlgorithmWidget(QWidget *parent)
       dataProcessorAlgorithm /*the algorithm responsible for the processing*/,
       blacklist /*Properties we don't want to show in the Options column*/,
       whitelist /*Properties we want to show as columns in the table*/,
-      outputInstructions /*Names of the outputs produced by the reduction algorithm*/);
+      outputInstructions /*Names of the outputs produced by the reduction algorithm*/,
+      plotInstructions /*The suffix of the ws we want to plot*/);
 }
 
 //----------------------------------------------------------------------------------------------

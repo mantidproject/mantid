@@ -71,11 +71,12 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const std::string &dataProcessorAlgorithm,
     const std::set<std::string> &blacklist,
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, std::string> &outputInstructions)
+    const std::map<std::string, std::string> &outputInstructions,
+    const std::string &plotInstructions)
     : WorkspaceObserver(), m_view(tableView), m_progressView(progressView),
       m_preprocessor(preprocessor), m_dataProcessorAlg(dataProcessorAlgorithm),
       m_whitelist(whitelist), m_outputInstructions(outputInstructions),
-      m_tableDirty(false) {
+      m_plotInstructions(plotInstructions), m_tableDirty(false) {
 
   // Initialise options
   initOptions();
@@ -716,6 +717,32 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
   }
 
   return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
+}
+
+/**
+Returns the name of the workspace to plot for a given row
+@param row : The row to plot
+@throws std::runtime_error if the workspace could not be prepared
+@returns : The name of the workspace
+*/
+std::string GenericDataProcessorPresenter::getWorkspaceName(int row) {
+
+  std::string wsname = m_plotInstructions;
+  for (auto it = m_preprocessor.begin(); it != m_preprocessor.end(); ++it) {
+
+    auto colName = it->first;
+    int colIndex = m_whitelist.colIndexFromColName(colName);
+    auto runStr =
+        m_model->data(m_model->index(row, colIndex)).toString().toStdString();
+
+    std::vector<std::string> runs;
+    boost::split(runs, runStr, boost::is_any_of("+"));
+
+    for (auto &run : runs) {
+      wsname = wsname + "_" + run;
+    }
+  }
+  return wsname;
 }
 
 /**
@@ -1383,37 +1410,29 @@ void GenericDataProcessorPresenter::setInstrumentList(
 
 /** Plots any currently selected rows */
 void GenericDataProcessorPresenter::plotRow() {
-  // TODO
-  // auto selectedRows = m_view->getSelectedRows();
+  auto selectedRows = m_view->getSelectedRows();
 
-  // if (selectedRows.empty())
-  //  return;
+  if (selectedRows.empty())
+    return;
 
-  // std::set<std::string> workspaces, notFound;
-  // for (auto row = selectedRows.begin(); row != selectedRows.end(); ++row) {
-  //  const std::string wsName =
-  //      "IvsQ_" +
-  //      getRunNumber(prepareRunWorkspace(
-  //          m_model->data(m_model->index(*row, ReflTableSchema::COL_RUNS))
-  //              .toString()
-  //              .toStdString()));
-  //  if (AnalysisDataService::Instance().doesExist(wsName))
-  //    workspaces.insert(wsName);
-  //  else
-  //    notFound.insert(wsName);
-  //}
+  std::set<std::string> workspaces, notFound;
+  for (auto row = selectedRows.begin(); row != selectedRows.end(); ++row) {
+    const std::string wsName = getWorkspaceName(*row);
+    if (AnalysisDataService::Instance().doesExist(wsName))
+      workspaces.insert(wsName);
+    else
+      notFound.insert(wsName);
+  }
 
-  // if (!notFound.empty())
-  //  m_view->giveUserWarning("The following workspaces were not plotted because
-  //  "
-  //                          "they were not found:\n" +
-  //                              boost::algorithm::join(notFound, "\n") +
-  //                              "\n\nPlease check that the rows you are trying
-  //                              "
-  //                              "to plot have been fully processed.",
-  //                          "Error plotting rows.");
+  if (!notFound.empty())
+    m_view->giveUserWarning("The following workspaces were not plotted because"
+                            "they were not found:\n" +
+                                boost::algorithm::join(notFound, "\n") +
+                                "\n\nPlease check that the rows you are trying"
+                                "to plot have been fully processed.",
+                            "Error plotting rows.");
 
-  // m_view->plotWorkspaces(workspaces);
+  m_view->plotWorkspaces(workspaces);
 }
 
 /** Plots any currently selected groups */

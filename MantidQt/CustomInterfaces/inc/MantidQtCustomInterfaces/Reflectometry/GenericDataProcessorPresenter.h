@@ -52,7 +52,8 @@ public:
       const std::string &dataProcessorAlgorithm,
       const std::set<std::string> &blacklist,
       const DataProcessorWhiteList &whitelist,
-      const std::map<std::string, std::string> &outputInstructions);
+      const std::map<std::string, std::string> &outputInstructions,
+      const std::string &plotInstructions);
   ~GenericDataProcessorPresenter() override;
   void notify(DataProcessorPresenter::Flag flag) override;
   const std::map<std::string, QVariant> &options() const override;
@@ -83,6 +84,8 @@ protected:
   DataProcessorWhiteList m_whitelist;
   // The output instructions
   std::map<std::string, std::string> m_outputInstructions;
+  // Plot instructions
+  std::string m_plotInstructions;
   // The algorithm's properties we want to read from the table
   std::map<std::string, int> m_propToReadFromTable;
   // A workspace receiver we want to notify
@@ -106,6 +109,8 @@ protected:
   prepareRunWorkspace(const std::string &run,
                       const DataPreprocessorAlgorithm &alg,
                       const std::map<std::string, std::string> &optionsMap);
+  // Get the workspace name for a given row
+  std::string getWorkspaceName(int row);
   // load a run into the ADS, or re-use one in the ADS if possible
   Mantid::API::Workspace_sptr loadRun(const std::string &run,
                                       const std::string &instrument); // change
