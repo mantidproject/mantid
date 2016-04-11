@@ -3,6 +3,8 @@
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidKernel/Histogram/BinEdges.h"
+#include "MantidKernel/Histogram/Points.h"
 
 #include <vector>
 
@@ -34,23 +36,84 @@ namespace Kernel {
 */
 class MANTID_KERNEL_DLL Histogram {
 private:
-  MantidVecPtr refX;
+  // MantidVecPtr refX;
+  BinEdges m_binEdges;
+  Points m_points;
 
 public:
   enum class XMode { BinEdges, Points, Any, Uninitialized };
-  Histogram(XMode mode) : m_xMode(mode) {}
+  Histogram(XMode mode) : m_xMode(mode) {
+    switch (mode) {
+    case XMode::BinEdges:
+      m_binEdges = BinEdges(0);
+      break;
+    case XMode::Points:
+      m_points = Points(0);
+      break;
+    default:
+      throw std::logic_error("Histogram: XMode must be BinEdges or Points");
+    }
+  }
 
   XMode xMode() const noexcept { return m_xMode; }
-  void setXMode(XMode mode) noexcept { m_xMode = mode; }
+  void setXMode(XMode mode) {
+    if (mode != XMode::BinEdges || mode != XMode::Points)
+      throw std::logic_error("Histogram: XMode must be BinEdges or Points");
+    if (m_xMode == mode)
+      return;
+    m_xMode = mode;
+    if (mode == XMode::Points) {
+      m_points = Points(m_binEdges);
+      m_binEdges = BinEdges();
+    } else {
+      m_binEdges = BinEdges(m_points);
+      m_points = Points();
+    }
+  }
 
   // Temporary legacy interface to X
-  void setX(const MantidVec &X) { refX.access() = X; }
-  void setX(const MantidVecPtr &X) { refX = X; }
-  void setX(const MantidVecPtr::ptr_type &X) { refX = X; }
-  MantidVec &dataX() { return refX.access(); }
-  const MantidVec &dataX() const { return *refX; }
-  const MantidVec &constDataX() const { return *refX; }
-  MantidVecPtr ptrX() const { return refX; }
+  void setX(const MantidVec &X) {
+    if (xMode() == XMode::BinEdges)
+      m_binEdges = X;
+    else
+      m_points = X;
+  }
+  void setX(const MantidVecPtr &X) {
+    if (xMode() == XMode::BinEdges)
+      m_binEdges = X;
+    else
+      m_points = X;
+  }
+  void setX(const MantidVecPtr::ptr_type &X) {
+    if (xMode() == XMode::BinEdges)
+      m_binEdges = X;
+    else
+      m_points = X;
+  }
+  MantidVec &dataX() {
+    if (xMode() == XMode::BinEdges)
+      return m_binEdges.data();
+    else
+      return m_points.data();
+  }
+  const MantidVec &dataX() const {
+    if (xMode() == XMode::BinEdges)
+      return m_binEdges.data();
+    else
+      return m_points.data();
+  }
+  const MantidVec &constDataX() const {
+    if (xMode() == XMode::BinEdges)
+      return m_binEdges.constData();
+    else
+      return m_points.constData();
+  }
+  MantidVecPtr ptrX() const {
+    if (xMode() == XMode::BinEdges)
+      return m_binEdges.cowData();
+    else
+      return m_points.cowData();
+  }
 
 private:
   XMode m_xMode = XMode::Uninitialized;
