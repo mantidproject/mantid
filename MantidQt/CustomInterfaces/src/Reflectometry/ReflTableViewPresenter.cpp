@@ -625,13 +625,20 @@ ReflTableViewPresenter::prepareRunWorkspace(const std::string &runStr) {
 
   std::vector<std::string> runs;
   boost::split(runs, runStr, boost::is_any_of("+"));
-  if (runs.empty())
-    throw std::runtime_error("No runs given");
-
   // Remove leading/trailing whitespace from each run
-  for (auto runIt = runs.begin(); runIt != runs.end(); ++runIt)
-    boost::trim(*runIt);
-
+  for (auto runIt = runs.begin(); runIt != runs.end();) {
+    if (runIt->compare("") == 0) {
+      runIt = runs.erase(runIt);
+    } else {
+      boost::trim(*runIt);
+      ++runIt;
+    }
+  }
+  if (runs.empty())
+    throw std::runtime_error(
+        "The processing table contains a row that has no "
+        "run number given.\n Please enter a run number for "
+        "this row to continue with processing.");
   // If we're only given one run, just return that
   if (runs.size() == 1)
     return loadRun(runs[0], instrument);
