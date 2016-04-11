@@ -89,6 +89,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
   }
 
   // Columns Group and Options must be added to the whitelist
+  m_colGroup = static_cast<int>(m_whitelist.size());
   m_whitelist.addElement("Group", "Group");
   m_whitelist.addElement("Options", "Options");
 
@@ -331,83 +332,74 @@ void GenericDataProcessorPresenter::stitchRows(std::set<int> rows) {
   if (rows.size() < 2)
     return;
 
-  // TODO: REMOVE
-  return;
+  // Properties for Stitch1DMany
+  std::vector<std::string> workspaceNames;
+  std::string runs;
 
-  //// Properties for Stitch1DMany
-  // std::vector<std::string> workspaceNames;
-  // std::vector<std::string> runs;
+  std::vector<double> params;
+  std::vector<double> startOverlaps;
+  std::vector<double> endOverlaps;
 
-  // std::vector<double> params;
-  // std::vector<double> startOverlaps;
-  // std::vector<double> endOverlaps;
+  // Go through each row and prepare the properties
+  for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
 
-  //// Go through each row and prepare the properties
-  // for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
-  //  const std::string runStr =
-  //      m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_RUNS))
-  //          .toString()
-  //          .toStdString();
-  //  const double qmin =
-  //      m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_QMIN))
-  //          .toDouble();
-  //  const double qmax =
-  //      m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_QMAX))
-  //          .toDouble();
+    const double qmin =
+        m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_QMIN))
+            .toDouble();
+    const double qmax =
+        m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_QMAX))
+            .toDouble();
 
-  //  Workspace_sptr runWS = prepareRunWorkspace(runStr, "");
-  //  if (runWS) {
-  //    const std::string runNo = getRunNumber(runWS);
-  //    if (AnalysisDataService::Instance().doesExist("IvsQ_" + runNo)) {
-  //      runs.push_back(runNo);
-  //      workspaceNames.emplace_back("IvsQ_" + runNo);
-  //    }
-  //  }
+    const std::string runStr = getWorkspaceName(*rowIt, false);
 
-  //  startOverlaps.push_back(qmin);
-  //  endOverlaps.push_back(qmax);
-  //}
+    if (AnalysisDataService::Instance().doesExist(m_plotInstructions +
+                                                  runStr)) {
+      runs += runStr;
+      workspaceNames.emplace_back(m_plotInstructions + runStr);
+    }
 
-  // double dqq =
-  //    m_model->data(m_model->index(*(rows.begin()), ReflTableSchema::COL_DQQ))
-  //        .toDouble();
+    startOverlaps.push_back(qmin);
+    endOverlaps.push_back(qmax);
+  }
 
-  //// params are qmin, -dqq, qmax for the final output
-  // params.push_back(
-  //    *std::min_element(startOverlaps.begin(), startOverlaps.end()));
-  // params.push_back(-dqq);
-  // params.push_back(*std::max_element(endOverlaps.begin(),
-  // endOverlaps.end()));
+  double dqq =
+      m_model->data(m_model->index(*(rows.begin()), ReflTableSchema::COL_DQQ))
+          .toDouble();
 
-  //// startOverlaps and endOverlaps need to be slightly offset from each other
-  //// See usage examples of Stitch1DMany to see why we discard first qmin and
-  //// last qmax
-  // startOverlaps.erase(startOverlaps.begin());
-  // endOverlaps.pop_back();
+  // params are qmin, -dqq, qmax for the final output
+  params.push_back(
+      *std::min_element(startOverlaps.begin(), startOverlaps.end()));
+  params.push_back(-dqq);
+  params.push_back(*std::max_element(endOverlaps.begin(), endOverlaps.end()));
 
-  // std::string outputWSName = "IvsQ_" + boost::algorithm::join(runs, "_");
+  // startOverlaps and endOverlaps need to be slightly offset from each other
+  // See usage examples of Stitch1DMany to see why we discard first qmin and
+  // last qmax
+  startOverlaps.erase(startOverlaps.begin());
+  endOverlaps.pop_back();
 
-  //// If the previous stitch result is in the ADS already, we'll need to remove
-  //// it.
-  //// If it's a group, we'll get an error for trying to group into a used group
-  //// name
-  // if (AnalysisDataService::Instance().doesExist(outputWSName))
-  //  AnalysisDataService::Instance().remove(outputWSName);
+  std::string outputWSName = m_plotInstructions + runs;
 
-  // IAlgorithm_sptr algStitch =
-  //    AlgorithmManager::Instance().create("Stitch1DMany");
-  // algStitch->initialize();
-  // algStitch->setProperty("InputWorkspaces", workspaceNames);
-  // algStitch->setProperty("OutputWorkspace", outputWSName);
-  // algStitch->setProperty("Params", params);
-  // algStitch->setProperty("StartOverlaps", startOverlaps);
-  // algStitch->setProperty("EndOverlaps", endOverlaps);
+  // If the previous stitch result is in the ADS already, we'll need to remove
+  // it.
+  // If it's a group, we'll get an error for trying to group into a used group
+  // name
+  if (AnalysisDataService::Instance().doesExist(outputWSName))
+    AnalysisDataService::Instance().remove(outputWSName);
 
-  // algStitch->execute();
+  IAlgorithm_sptr algStitch =
+      AlgorithmManager::Instance().create("Stitch1DMany");
+  algStitch->initialize();
+  algStitch->setProperty("InputWorkspaces", workspaceNames);
+  algStitch->setProperty("OutputWorkspace", outputWSName);
+  algStitch->setProperty("Params", params);
+  algStitch->setProperty("StartOverlaps", startOverlaps);
+  algStitch->setProperty("EndOverlaps", endOverlaps);
 
-  // if (!algStitch->isExecuted())
-  //  throw std::runtime_error("Failed to run Stitch1DMany on IvsQ
-  //  workspaces.");
+  algStitch->execute();
+
+  if (!algStitch->isExecuted())
+    throw std::runtime_error("Failed to run Stitch1DMany on IvsQ workspaces.");
 }
 
 /**
@@ -722,12 +714,18 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
 /**
 Returns the name of the workspace to plot for a given row
 @param row : The row to plot
+@param prefix : Whether to add the specified prefix or not
 @throws std::runtime_error if the workspace could not be prepared
 @returns : The name of the workspace
 */
-std::string GenericDataProcessorPresenter::getWorkspaceName(int row) {
+std::string GenericDataProcessorPresenter::getWorkspaceName(int row,
+                                                            bool prefix) {
 
-  std::string wsname = m_plotInstructions;
+  std::string wsname;
+
+  if (prefix)
+    wsname = wsname + m_plotInstructions;
+
   for (auto it = m_preprocessor.begin(); it != m_preprocessor.end(); ++it) {
 
     auto colName = it->first;
@@ -1442,58 +1440,50 @@ void GenericDataProcessorPresenter::plotRow() {
 
 /** Plots any currently selected groups */
 void GenericDataProcessorPresenter::plotGroup() {
-  // TODO
-  // auto selectedRows = m_view->getSelectedRows();
+  auto selectedRows = m_view->getSelectedRows();
 
-  // if (selectedRows.empty())
-  //  return;
+  if (selectedRows.empty())
+    return;
 
-  // std::set<int> selectedGroups;
-  // for (auto row = selectedRows.begin(); row != selectedRows.end(); ++row)
-  //  selectedGroups.insert(
-  //      m_model->data(m_model->index(*row, ReflTableSchema::COL_GROUP))
-  //          .toInt());
+  std::set<int> selectedGroups;
+  for (auto row = selectedRows.begin(); row != selectedRows.end(); ++row)
+    selectedGroups.insert(
+        m_model->data(m_model->index(*row, m_colGroup)).toInt());
 
-  //// Now, get the names of the stitched workspace, one per group
-  // std::map<int, std::vector<std::string>> runsByGroup;
-  // const int numRows = m_model->rowCount();
-  // for (int row = 0; row < numRows; ++row) {
-  //  int group =
-  //      m_model->data(m_model->index(row,
-  //      ReflTableSchema::COL_GROUP)).toInt();
+  // Now, get the names of the stitched workspace, one per group
+  std::map<int, std::vector<std::string>> runsByGroup;
+  const int numRows = m_model->rowCount();
+  for (int row = 0; row < numRows; ++row) {
+    int group = m_model->data(m_model->index(row, m_colGroup)).toInt();
 
-  //  // Skip groups we don't care about
-  //  if (selectedGroups.find(group) == selectedGroups.end())
-  //    continue;
+    // Skip groups we don't care about
+    if (selectedGroups.find(group) == selectedGroups.end())
+      continue;
 
-  //  // Add this to the list of runs
-  //  runsByGroup[group].push_back(getRunNumber(prepareRunWorkspace(
-  //      m_model->data(m_model->index(row, ReflTableSchema::COL_RUNS))
-  //          .toString()
-  //          .toStdString())));
-  //}
+    // Add this to the list of runs
+    runsByGroup[group].push_back(getWorkspaceName(row, false));
+  }
 
-  // std::set<std::string> workspaces, notFound;
-  // for (auto runsMap = runsByGroup.begin(); runsMap != runsByGroup.end();
-  //     ++runsMap) {
-  //  const std::string wsName =
-  //      "IvsQ_" + boost::algorithm::join(runsMap->second, "_");
-  //  if (AnalysisDataService::Instance().doesExist(wsName))
-  //    workspaces.insert(wsName);
-  //  else
-  //    notFound.insert(wsName);
-  //}
+  std::set<std::string> workspaces, notFound;
+  for (auto runsMap = runsByGroup.begin(); runsMap != runsByGroup.end();
+       ++runsMap) {
+    const std::string wsName =
+        m_plotInstructions + boost::algorithm::join(runsMap->second, "");
+    if (AnalysisDataService::Instance().doesExist(wsName))
+      workspaces.insert(wsName);
+    else
+      notFound.insert(wsName);
+  }
 
-  // if (!notFound.empty())
-  //  m_view->giveUserWarning("The following workspaces were not plotted because
-  //  "
-  //                          "they were not found:\n" +
-  //                              boost::algorithm::join(notFound, "\n") +
-  //                              "\n\nPlease check that the groups you are "
-  //                              "trying to plot have been fully processed.",
-  //                          "Error plotting groups.");
+  if (!notFound.empty())
+    m_view->giveUserWarning("The following workspaces were not plotted because"
+                            "they were not found:\n" +
+                                boost::algorithm::join(notFound, "\n") +
+                                "\n\nPlease check that the groups you are "
+                                "trying to plot have been fully processed.",
+                            "Error plotting groups.");
 
-  // m_view->plotWorkspaces(workspaces);
+  m_view->plotWorkspaces(workspaces);
 }
 
 /** Shows the Refl Options dialog */

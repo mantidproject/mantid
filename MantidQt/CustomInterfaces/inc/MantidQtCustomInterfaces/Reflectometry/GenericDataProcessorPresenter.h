@@ -86,6 +86,8 @@ protected:
   std::map<std::string, std::string> m_outputInstructions;
   // Plot instructions
   std::string m_plotInstructions;
+  // Index of column "Group"
+  int m_colGroup;
   // The algorithm's properties we want to read from the table
   std::map<std::string, int> m_propToReadFromTable;
   // A workspace receiver we want to notify
@@ -110,7 +112,7 @@ protected:
                       const DataPreprocessorAlgorithm &alg,
                       const std::map<std::string, std::string> &optionsMap);
   // Get the workspace name for a given row
-  std::string getWorkspaceName(int row);
+  std::string getWorkspaceName(int row, bool prefix = true);
   // load a run into the ADS, or re-use one in the ADS if possible
   Mantid::API::Workspace_sptr loadRun(const std::string &run,
                                       const std::string &instrument); // change
