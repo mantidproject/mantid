@@ -62,9 +62,10 @@ void SetSampleMaterial::init() {
   declareProperty("UnitCellVolume", EMPTY_DBL(), mustBePositive,
                   "Unit cell volume in Angstoms^3. Will be calculated from the "
                   "OrientedLattice if not supplied.");
-  declareProperty("SampleMassDensity", EMPTY_DBL(), mustBePositive,
-                  "Measured mass density in g/cubic cm of the sample to be used "
-                  "to calculate the number density.");
+  declareProperty(
+      "SampleMassDensity", EMPTY_DBL(), mustBePositive,
+      "Measured mass density in g/cubic cm of the sample to be used "
+      "to calculate the number density.");
   declareProperty("CoherentXSection", EMPTY_DBL(), mustBePositive,
                   "Optional:  This coherent cross-section for the sample "
                   "material in barns will be used instead of tabulated");
@@ -244,7 +245,8 @@ void SetSampleMaterial::exec() {
 
     NeutronAtom neutron(0, 0., 0., 0., 0., 0.,
                         0.); // starting thing for neutronic information
-    if (CF.atoms.size() == 1 && isEmpty(zParameter) && isEmpty(rho) && isEmpty(rho_m)) {
+    if (CF.atoms.size() == 1 && isEmpty(zParameter) && isEmpty(rho) &&
+        isEmpty(rho_m)) {
       mat.reset(new Material(chemicalSymbol, CF.atoms[0]->neutron,
                              CF.atoms[0]->number_density));
       // can be directly calculated from the one atom
@@ -288,8 +290,8 @@ void SetSampleMaterial::exec() {
         if ((!isEmpty(zParameter)) && (!isEmpty(unitCellVolume)))
           rho = numAtoms * zParameter / unitCellVolume;
         // or from the relative molecular mass if the mass density is specified
-        else if(!isEmpty(rho_m)) {
-          rho = (rho_m / rmm) * N_A / 1e24;  // measured density in g/cm^3
+        else if (!isEmpty(rho_m)) {
+          rho = (rho_m / rmm) * N_A / 1e24; // measured density in g/cm^3
         }
       }
 
@@ -323,12 +325,12 @@ void SetSampleMaterial::exec() {
       if ((!isEmpty(zParameter)) && (!isEmpty(unitCellVolume)))
         rho = zParameter / unitCellVolume;
       // or from the relative molecular mass if the mass density is specified
-      else if(!isEmpty(rho_m)) {
-        rho = (rho_m / atom.mass) * N_A / 1e24;  // measured density in g/cm^3
+      else if (!isEmpty(rho_m)) {
+        rho = (rho_m / atom.mass) * N_A / 1e24; // measured density in g/cm^3
       }
     }
     char symbolname[20];
-    sprintf(symbolname,"(%s%i)",atom.symbol.c_str(),a_number);
+    sprintf(symbolname, "(%s%i)", atom.symbol.c_str(), a_number);
     mat.reset(new Material(symbolname, neutron, rho));
   }
 

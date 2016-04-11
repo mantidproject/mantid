@@ -14,7 +14,7 @@ namespace PhysicalConstants {
  * is generated using the DANSE project's periodictable python module.
  */
 class MANTID_KERNEL_DLL Atom {
-  public:
+public:
   /// Standard constructor
   Atom(const std::string &symbol, const uint16_t z, const uint16_t a,
        const double abundance, const double mass, const double density);

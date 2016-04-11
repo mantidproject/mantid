@@ -21,7 +21,8 @@ namespace {
  */
 tuple chemicalFormula(Material &self) {
   std::string chemicalSymbols = self.name();
-  Material::ChemicalFormula CF = Material::parseChemicalFormula(chemicalSymbols);
+  Material::ChemicalFormula CF =
+      Material::parseChemicalFormula(chemicalSymbols);
   list atoms, numberAtoms;
   for (size_t i = 0; i < CF.atoms.size(); i++) {
     atoms.append(CF.atoms[i]);
@@ -37,7 +38,8 @@ tuple chemicalFormula(Material &self) {
  */
 double relativeMolecularMass(Material &self) {
   std::string chemicalSymbols = self.name();
-  Material::ChemicalFormula CF = Material::parseChemicalFormula(chemicalSymbols);
+  Material::ChemicalFormula CF =
+      Material::parseChemicalFormula(chemicalSymbols);
   double retval = 0.;
   for (size_t i = 0; i < CF.atoms.size(); i++) {
     retval += CF.atoms[i]->mass * CF.numberAtoms[i];
@@ -78,10 +80,7 @@ void export_Material() {
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
            "Absorption Cross-Section")
-      .def("chemicalFormula", &chemicalFormula,
-           arg("self"),
-           "Chemical Formula")
-      .def("relativeMolecularMass", &relativeMolecularMass,
-           arg("self"),
+      .def("chemicalFormula", &chemicalFormula, arg("self"), "Chemical Formula")
+      .def("relativeMolecularMass", &relativeMolecularMass, arg("self"),
            "Relative Molecular Mass");
 }
