@@ -575,6 +575,80 @@ public:
                       def.outputPreprocImages, true);
   }
 
+  void test_aggregateBandsFailsMissingPaths() {
+    testing::NiceMock<MockTomographyIfaceView> mockView;
+    MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
+
+    // Empty params, missing the required ones for sure
+    EXPECT_CALL(mockView, currentAggregateBandsParams())
+        .Times(1)
+        .WillOnce(Return(std::map<std::string, std::string>()));
+
+    // Error
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(1);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(ITomographyIfacePresenter::AggregateEnergyBands);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
+  }
+
+  void test_aggregateBandsFailsWrongPaths() {
+    testing::NiceMock<MockTomographyIfaceView> mockView;
+    MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
+
+    std::map<std::string, std::string> params;
+    params["InputPath"] = "I_cannot_be_found_fail_";
+    params["OutputPath"] = "fail_for_sure_i_m_not_found";
+    params["UniformBands"] = "2";
+    params["OutPrefixBands"] = "band_prefix_";
+    params["InuptImageFormat"] = "FITS";
+    params["OutputImageFormat"] = "FITS";
+
+    // Will contain wrong values in the required paths
+    EXPECT_CALL(mockView, currentAggregateBandsParams())
+        .Times(1)
+        .WillOnce(Return(params));
+
+    // Error
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(1);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(ITomographyIfacePresenter::AggregateEnergyBands);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
+  }
+
+  // disabled as this is I/O intensive and uses the algorithm runner (Qt)
+  void disabled_test_aggregateBandsRuns() {
+    testing::NiceMock<MockTomographyIfaceView> mockView;
+    MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
+
+    std::map<std::string, std::string> params;
+    params["InputPath"] = "here_some_valid_input_images_path_";
+    params["OutputPath"] = "here_some_valid_existing_output_path";
+    params["UniformBands"] = "1";
+    params["OutPrefixBands"] = "band_prefix_";
+    params["InputImageFormat"] = "FITS";
+    params["OutputImageFormat"] = "FITS";
+
+    EXPECT_CALL(mockView, runAggregateBands(testing::_)).Times(1);
+
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(ITomographyIfacePresenter::AggregateEnergyBands);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
+  }
+
   // An attempt at testing a sequence of steps from the user.
   // TODO: more interesting sessions should follow, but how to do it
   // without loading too many and too big files?
