@@ -735,11 +735,13 @@ std::string GenericDataProcessorPresenter::getWorkspaceName(int row) {
     auto runStr =
         m_model->data(m_model->index(row, colIndex)).toString().toStdString();
 
-    std::vector<std::string> runs;
-    boost::split(runs, runStr, boost::is_any_of("+"));
+    if (!runStr.empty()) {
+      std::vector<std::string> runs;
+      boost::split(runs, runStr, boost::is_any_of("+"));
 
-    for (auto &run : runs) {
-      wsname = wsname + "_" + run;
+      for (auto &run : runs) {
+        wsname = wsname + "_" + run;
+      }
     }
   }
   return wsname;
@@ -887,9 +889,12 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
             .toString()
             .toStdString();
 
-    auto runWS = prepareRunWorkspace(runStr, it->second, optionsMap);
-    runNo.append(getRunNumber(runWS));
-    alg->setProperty(m_whitelist.algPropFromColName(it->first), runWS->name());
+    if (!runStr.empty()) {
+      auto runWS = prepareRunWorkspace(runStr, it->second, optionsMap);
+      runNo.append(getRunNumber(runWS));
+      alg->setProperty(m_whitelist.algPropFromColName(it->first),
+                       runWS->name());
+    }
   }
 
   /* We need to give a name to the output workspaces */
