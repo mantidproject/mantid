@@ -166,6 +166,7 @@ TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
       m_processingJobsIDs(), m_currentComputeRes(""), m_currentReconTool(""),
       m_imgPath(""), m_logMsgs(), m_systemSettings(), m_toolsSettings(),
       m_settings(), m_settingsGroup("CustomInterfaces/Tomography"),
+      m_settingsSubGroupEnergy(m_settingsGroup + "/EnergyBands"),
       m_aggAlgRunner(), m_availPlugins(), m_currPlugins(), m_currentParamPath(),
       m_presenter(NULL) {
 
@@ -821,6 +822,8 @@ void TomographyIfaceViewQtGUI::readSettings() {
 
   restoreGeometry(qs.value("interface-win-geometry").toByteArray());
 
+  readSettingsEnergy();
+
   qs.endGroup();
 }
 
@@ -921,6 +924,9 @@ QDataStream &operator<<(QDataStream &stream, TomoPathsConfig const &cfg) {
 void TomographyIfaceViewQtGUI::saveSettings() const {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
+
+  saveSettingsEnergy();
+
   qs.setValue("on-close-ask-for-confirmation",
               m_settings.onCloseAskForConfirmation);
   qs.setValue("use-keep-alive", m_settings.useKeepAlive);

@@ -235,6 +235,7 @@ private slots:
 
   // start aggregation of energy/wavelength bands
   void pushButtonAggClicked();
+  void browseAggScriptClicked();
   // aggregation run finished
   void finishedAggBands(bool error);
 
@@ -268,8 +269,12 @@ private:
 
   /// Load default interface settings for each tab, normally on startup
   void readSettings();
+  /// for the energy bands tab/widget
+  void readSettingsEnergy();
   /// save settings (before closing)
   void saveSettings() const override;
+  /// for the energy bands tab/widget
+  void saveSettingsEnergy() const;
 
   void updateSystemSettings(const TomoSystemSettings &setts);
 
@@ -447,6 +452,7 @@ private:
 
   // path name for persistent settings
   std::string m_settingsGroup;
+  std::string m_settingsSubGroupEnergy;
 
   // To run aggregation of wavelength/energy bands
   std::unique_ptr<MantidQt::API::BatchAlgorithmRunner> m_aggAlgRunner;
