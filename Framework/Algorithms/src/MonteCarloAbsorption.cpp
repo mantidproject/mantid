@@ -45,7 +45,7 @@ inline double toWavelength(double energy) {
 
 struct EFixedProvider {
   EFixedProvider(const ExperimentInfo &expt)
-      : m_expt(expt), m_emode(DeltaEMode::Elastic), m_value(0.0) {
+      : m_expt(expt), m_emode(expt.getEMode()), m_value(0.0) {
     if (m_emode == DeltaEMode::Direct) {
       m_value = m_expt.getEFixed();
     }
@@ -56,7 +56,7 @@ struct EFixedProvider {
       return m_value;
     else
       return m_expt.getEFixed(det);
-  }
+    }
 
 private:
   const ExperimentInfo &m_expt;
