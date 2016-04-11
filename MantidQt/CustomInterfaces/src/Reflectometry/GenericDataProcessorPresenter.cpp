@@ -460,7 +460,6 @@ bool GenericDataProcessorPresenter::rowsValid(std::set<int> rows) {
   for (auto it = rows.begin(); it != rows.end(); ++it) {
     try {
       validateRow(*it);
-      autofillRow(*it);
     } catch (std::exception &ex) {
       // Allow two theta to be blank
       if (ex.what() ==
@@ -491,99 +490,6 @@ void GenericDataProcessorPresenter::validateRow(int rowNo) const {
           .toString()
           .isEmpty())
     throw std::invalid_argument("Run column may not be empty.");
-}
-
-/**
-Autofill a row
-@param rowNo : The row in the model to autofill
-@throws std::runtime_error if the row could not be auto-filled
-*/
-void GenericDataProcessorPresenter::autofillRow(int rowNo) {
-  // TODO: what do we want to do with this??
-  // if (rowNo >= m_model->rowCount())
-  //  throw std::runtime_error("Invalid row");
-
-  // const std::string runStr =
-  //    m_model->data(m_model->index(rowNo, ReflTableSchema::COL_RUNS))
-  //        .toString()
-  //        .toStdString();
-  // auto runWS = prepareRunWorkspace(runStr, "");
-  // auto runMWS = boost::dynamic_pointer_cast<MatrixWorkspace>(runWS);
-  // auto runWSG = boost::dynamic_pointer_cast<WorkspaceGroup>(runWS);
-
-  //// If we've got a workspace group, use the first workspace in it
-  // if (!runMWS && runWSG)
-  //  runMWS = boost::dynamic_pointer_cast<MatrixWorkspace>(runWSG->getItem(0));
-
-  // if (!runMWS)
-  //  throw std::runtime_error("Could not convert " + runWS->name() +
-  //                           " to a MatrixWorkspace.");
-
-  //// Fetch two theta from the log if needed
-  // if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_ANGLE))
-  //        .toString()
-  //        .isEmpty()) {
-  //  Property *logData = NULL;
-
-  //  // First try TwoTheta
-  //  try {
-  //    logData = runMWS->mutableRun().getLogData("Theta");
-  //  } catch (std::exception &) {
-  //    throw std::runtime_error(
-  //        "Value for two theta could not be found in log.");
-  //  }
-
-  //  auto logPWV = dynamic_cast<const PropertyWithValue<double> *>(logData);
-  //  auto logTSP = dynamic_cast<const TimeSeriesProperty<double> *>(logData);
-
-  //  double thetaVal;
-  //  if (logPWV)
-  //    thetaVal = *logPWV;
-  //  else if (logTSP && logTSP->realSize() > 0)
-  //    thetaVal = logTSP->lastValue();
-  //  else
-  //    throw std::runtime_error(
-  //        "Value for two theta could not be found in log.");
-
-  //  // Update the model
-  //  if (m_options["RoundAngle"].toBool())
-  //    thetaVal =
-  //        Utils::roundToDP(thetaVal,
-  //        m_options["RoundAnglePrecision"].toInt());
-
-  //  m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_ANGLE),
-  //                   thetaVal);
-  //  m_tableDirty = true;
-  //}
-
-  //// If we need to calculate the resolution, do.
-  // if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_DQQ))
-  //        .toString()
-  //        .isEmpty()) {
-  //  IAlgorithm_sptr calcResAlg =
-  //      AlgorithmManager::Instance().create("CalculateResolution");
-  //  calcResAlg->setProperty("Workspace", runMWS);
-  //  calcResAlg->setProperty(
-  //      "TwoTheta",
-  //      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_ANGLE))
-  //          .toString()
-  //          .toStdString());
-  //  calcResAlg->execute();
-
-  //  if (!calcResAlg->isExecuted())
-  //    throw std::runtime_error("CalculateResolution failed. Please manually "
-  //                             "enter a value in the dQ/Q column.");
-
-  //  // Update the model
-  //  double dqqVal = calcResAlg->getProperty("Resolution");
-
-  //  if (m_options["RoundDQQ"].toBool())
-  //    dqqVal = Utils::roundToDP(dqqVal,
-  //    m_options["RoundDQQPrecision"].toInt());
-
-  //  m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_DQQ), dqqVal);
-  //  m_tableDirty = true;
-  //}
 }
 
 /**

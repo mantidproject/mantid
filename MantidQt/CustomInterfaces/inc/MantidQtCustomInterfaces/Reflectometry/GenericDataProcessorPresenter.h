@@ -126,8 +126,6 @@ protected:
   bool rowsValid(std::set<int> rows);
   // Validate a row
   void validateRow(int rowNo) const;
-  // Autofill a row with sensible values
-  void autofillRow(int rowNo);
   // insert a row in the model before the given index
   void insertRow(int index);
   // add row(s) to the model
