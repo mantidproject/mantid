@@ -6,7 +6,9 @@
 #include "MantidKernel/System.h"
 #include "MantidDataHandling/H5Util.h"
 
+#include <boost/numeric/conversion/cast.hpp>
 #include <H5Cpp.h>
+#include <limits>
 #include <Poco/File.h>
 
 using namespace H5;
@@ -69,8 +71,10 @@ public:
     const std::string GRP_NAME("array1d");
     const std::vector<float> array1d_float = {0, 1, 2, 3, 4};
     const std::vector<double> array1d_double = {0, 1, 2, 3, 4};
-    const std::vector<int32_t> array1d_int32 = {0, 1, 2, 3, 4};
-    const std::vector<uint32_t> array1d_uint32 = {0, 1, 2, 3, 4};
+    const std::vector<int32_t> array1d_int32 = {
+        0, 1, 2, 3, 4, std::numeric_limits<int32_t>::max()};
+    const std::vector<uint32_t> array1d_uint32 = {
+        0, 1, 2, 3, 4, std::numeric_limits<uint32_t>::max()};
 
     // HDF doesn't like opening existing files in write mode
     removeFile(FILENAME);
@@ -108,14 +112,11 @@ public:
       TS_ASSERT_EQUALS(
           H5Util::readArray1DCoerce<double>(group, "array1d_float"),
           array1d_double);
-      TS_ASSERT_EQUALS(
+      TS_ASSERT_THROWS(
           H5Util::readArray1DCoerce<int32_t>(group, "array1d_uint32"),
-          array1d_int32);
-      /* need to do smarter casting/assign
-      TS_ASSERT_EQUALS(
-          H5Util::readArray1DCoerce<uint32_t>(group, "array1d_int32"),
-          array1d_uint32);
-          */
+          boost::numeric::positive_overflow);
+      TS_ASSERT_THROWS_NOTHING(
+          H5Util::readArray1DCoerce<uint32_t>(group, "array1d_int32"));
 
       file.close();
     }
