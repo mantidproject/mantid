@@ -876,26 +876,37 @@ void ReflTableViewPresenter::reduceRow(int rowNo) {
                                kvp->first);
     }
   }
+  const double scale =
+      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_SCALE))
+          .toDouble();
+  // set scale factor for RROA here
+  /*
+  IAlgorithm_sptr algScale = AlgorithmManager::Instance().create("Scale");
+  algScale->initialize();
+  algScale->setProperty("InputWorkspace", "IvsQ_" + runNo);
+  algScale->setProperty("OutputWorkspace", "IvsQ_" + runNo);
+  algScale->setProperty("Factor", 1.0 / scale);
+  algScale->execute();
 
+  if (!algScale->isExecuted())
+  throw std::runtime_error("Failed to run Scale algorithm");
+  */
+  algReflOne->setProperty("ScaleFactor", scale);
+  const double qmin =
+      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMIN))
+          .toDouble();
+  const double qmax =
+      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMAX))
+          .toDouble();
+  const double dqq =
+      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_DQQ)).toDouble();
+  algReflOne->setProperty("QMin", qmin);
+  algReflOne->setProperty("DQQ", dqq);
+  algReflOne->setProperty("QMax", qmax);
   algReflOne->execute();
 
   if (!algReflOne->isExecuted())
     throw std::runtime_error("Failed to run ReflectometryReductionOneAuto.");
-
-  const double scale =
-      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_SCALE))
-          .toDouble();
-  if (scale != 1.0) {
-    IAlgorithm_sptr algScale = AlgorithmManager::Instance().create("Scale");
-    algScale->initialize();
-    algScale->setProperty("InputWorkspace", "IvsQ_" + runNo);
-    algScale->setProperty("OutputWorkspace", "IvsQ_" + runNo);
-    algScale->setProperty("Factor", 1.0 / scale);
-    algScale->execute();
-
-    if (!algScale->isExecuted())
-      throw std::runtime_error("Failed to run Scale algorithm");
-  }
 
   // Reduction has completed. Put Qmin and Qmax into the table if needed, for
   // stitching.
@@ -926,6 +937,7 @@ void ReflTableViewPresenter::reduceRow(int rowNo) {
 
   // We need to make sure that qmin and qmax are respected, so we rebin to
   // those limits here.
+  /*
   IAlgorithm_sptr algCrop = AlgorithmManager::Instance().create("Rebin");
   algCrop->initialize();
   algCrop->setProperty("InputWorkspace", "IvsQ_" + runNo);
@@ -947,7 +959,7 @@ void ReflTableViewPresenter::reduceRow(int rowNo) {
 
   if (!algCrop->isExecuted())
     throw std::runtime_error("Failed to run Rebin algorithm");
-
+    */
   // Also fill in theta if needed
   if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_ANGLE))
           .toString()

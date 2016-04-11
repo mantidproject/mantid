@@ -99,7 +99,8 @@ void ReflectometryReductionOneAuto::init() {
 
   declareProperty("EndOverlap", Mantid::EMPTY_DBL(), "End overlap in Q.",
                   Direction::Input);
-
+  declareProperty("ScaleFactor", Mantid::EMPTY_DBL(),
+                  "Factor you wish to scale Q workspace by.", Direction::Input);
   auto index_bounds = boost::make_shared<BoundedValidator<int>>();
   index_bounds->setLower(0);
 
@@ -116,6 +117,20 @@ void ReflectometryReductionOneAuto::init() {
                   "Wavelength Max in angstroms", Direction::Input);
   declareProperty("WavelengthStep", Mantid::EMPTY_DBL(),
                   "Wavelength step in angstroms", Direction::Input);
+  declareProperty("QMin", Mantid::EMPTY_DBL(), "Minimum Q value in IvsQ "
+                                               "Workspace. Used for Rebinning "
+                                               "the IvsQ Workspace",
+                  Direction::Input);
+  declareProperty("DQQ", Mantid::EMPTY_DBL(),
+                  "Resolution value in IvsQ Workspace. Used for Rebinning the "
+                  "IvsQ Workspace. This value will be made minus to apply "
+                  "logarithmic rebinning. If you wish to have linear "
+                  "bin-widths then please provide a negative DQQ",
+                  Direction::Input);
+  declareProperty("QMax", Mantid::EMPTY_DBL(), "Maximum Q value in IvsQ "
+                                               "Workspace. Used for Rebinning "
+                                               "the IvsQ Workspace",
+                  Direction::Input);
   declareProperty("MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
                   "Monitor wavelength background min in angstroms",
                   Direction::Input);
@@ -412,7 +427,8 @@ void ReflectometryReductionOneAuto::exec() {
       } catch (std::runtime_error &e) {
         g_log.warning() << "Could not autodetect polynomial correction method. "
                            "Polynomial correction will not be performed. "
-                           "Reason for failure: " << e.what() << std::endl;
+                           "Reason for failure: "
+                        << e.what() << std::endl;
         refRedOne->setProperty("CorrectionAlgorithm", "None");
       }
 
@@ -470,6 +486,39 @@ void ReflectometryReductionOneAuto::exec() {
     } else {
       MatrixWorkspace_sptr new_IvsQ1 =
           refRedOne->getProperty("OutputWorkspace");
+      // scale IvsQ here based on scale property
+      auto qMin = isSet<double>("QMin");
+      auto dQQ = isSet<double>("DQQ");
+      auto qMax = isSet<double>("QMax");
+      if (qMin.is_initialized() && qMax.is_initialized() &&
+          dQQ.is_initialized()) {
+        MantidVec QParams;
+        QParams.push_back(qMin.get());
+        QParams.push_back(-dQQ.get());
+        QParams.push_back(qMax.get());
+        IAlgorithm_sptr algRebin = this->createChildAlgorithm("Rebin");
+        algRebin->initialize();
+        algRebin->setProperty("InputWorkspace", new_IvsQ1);
+        algRebin->setProperty("OutputWorkspace", new_IvsQ1);
+        algRebin->setProperty("Params", QParams);
+        algRebin->execute();
+        if (!algRebin->isExecuted())
+          throw std::runtime_error("Failed to run Rebin algorithm");
+        new_IvsQ1 = algRebin->getProperty("OutputWorkspace");
+      }
+      auto scaleFactor = isSet<double>("ScaleFactor");
+      if (scaleFactor.is_initialized() && scaleFactor.get() != 1.0) {
+        IAlgorithm_sptr algScale = this->createChildAlgorithm("Scale");
+        algScale->initialize();
+        algScale->setProperty("InputWorkspace", new_IvsQ1);
+        algScale->setProperty("OutputWorkspace", new_IvsQ1);
+        algScale->setProperty("Factor", 1.0 / scaleFactor.get());
+        algScale->execute();
+        if (!algScale->isExecuted())
+          throw std::runtime_error("Failed to run Scale algorithm");
+        new_IvsQ1 = algScale->getProperty("OutputWorkspace");
+      }
+
       MatrixWorkspace_sptr new_IvsLam1 =
           refRedOne->getProperty("OutputWorkspaceWavelength");
       double thetaOut1 = refRedOne->getProperty("ThetaOut");
