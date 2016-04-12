@@ -26,7 +26,7 @@ namespace NXcanSAS {
 
   // SASdata
   const std::string sasDataClassAttr = "SASdata";
-  const std::string sasDataClassGroupName = "sasdata";
+  const std::string sasDataGroupName = "sasdata";
   const std::string sasDataIAxesAttr = "I_axes";
   const std::string sasDataIUncertaintyAttr = "I_uncertainty";
   const std::string sasDataQIndicesAttr = "Q_indices";
