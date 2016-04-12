@@ -117,6 +117,9 @@ public:
   void runCloneWorkspaceAlg(std::string inputWorkspace,
 	  std::string outputWorkspace);
 
+  void setDataToClonedWS(std::string inputWorkspace,
+	  std::string outputWorkspace);
+
 
 protected:
   void initialize();
