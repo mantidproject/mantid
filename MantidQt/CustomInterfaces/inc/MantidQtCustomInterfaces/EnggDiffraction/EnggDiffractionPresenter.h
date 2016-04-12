@@ -114,6 +114,10 @@ public:
 
   void runConvetUnitsAlg(std::string workspaceName);
 
+  void runCloneWorkspaceAlg(std::string inputWorkspace,
+	  std::string outputWorkspace);
+
+
 protected:
   void initialize();
 

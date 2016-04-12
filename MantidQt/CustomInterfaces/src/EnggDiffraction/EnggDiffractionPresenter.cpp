@@ -685,9 +685,7 @@ void EnggDiffractionPresenter::runFittingAlgs(
     auto focusedPeaksWS = ADS.retrieveWS<MatrixWorkspace>(FocusedWSName);
     auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(single_peak_out_WS);
 
-	// Geometry::Instrument_sptr instrument(new Geometry::Instrument("ENGIN-X"));
-    auto instrument = focusedPeaksWS->getInstrument();
-	
+	auto instrument = focusedPeaksWS->getInstrument();
 	singlePeaksWS->setInstrument(instrument);
 
     // convert units for both workspaces to dSpacing from ToF
@@ -818,6 +816,24 @@ void EnggDiffractionPresenter::runConvetUnitsAlg(std::string workspaceName) {
     ConvertUnits->execute();
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm ConvertUnits, "
+                     "Error description: " +
+                         static_cast<std::string>(re.what())
+                  << std::endl;
+  }
+}
+
+void runCloneWorkspaceAlg(std::string inputWorkspace,
+                          std::string outputWorkspace) {
+
+  auto cloneWorkspace =
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+          "CloneWorkspace");
+  try {
+    cloneWorkspace->initialize();
+    cloneWorkspace->setProperty("InputWorkspace", inputWorkspace);
+    cloneWorkspace->setProperty("OutputWorkspace", outputWorkspace);
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Could not run the algorithm CreateWorkspace, "
                      "Error description: " +
                          static_cast<std::string>(re.what())
                   << std::endl;
