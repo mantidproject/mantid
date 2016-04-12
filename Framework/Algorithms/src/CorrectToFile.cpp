@@ -87,7 +87,7 @@ void CorrectToFile::exec() {
 
     for (int64_t i = 0; i < nOutSpec; ++i) {
       const auto xIn = toCorrect->histogram(i).points();
-      outputWS->setX(i, xIn.cowData());
+      outputWS->setX(i, toCorrect->refX(i));
 
       MantidVec &yOut = outputWS->dataY(i);
       MantidVec &eOut = outputWS->dataE(i);
