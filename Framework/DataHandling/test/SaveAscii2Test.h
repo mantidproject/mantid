@@ -6,6 +6,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/Axis.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <fstream>
 #include <Poco/File.h>
@@ -257,6 +258,40 @@ public:
     TS_ASSERT(Poco::File(filename).exists());
     Poco::File(filename).remove();
 
+    AnalysisDataService::Instance().remove(m_name);
+  }
+
+  void test_non_spectrum_axisworkspace() {
+    Mantid::DataObjects::Workspace2D_sptr wsToSave;
+    writeSampleWS(wsToSave, false);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+
+    TS_ASSERT_THROWS_NOTHING(save.setProperty("WriteSpectrumID", true));
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    // has the algorithm written a file to disk?
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // Now make some checks on the content of the file
+    std::ifstream in(filename.c_str());
+    int specID;
+    double qVal, angle;
+    std::string header1, header2, header3, separator, comment;
+
+    // Test that the first few column headers, separator and first two bins are
+    // as expected
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3;
+    TS_ASSERT_EQUALS(comment, "#");
+    TS_ASSERT_EQUALS(separator, ",");
+    TS_ASSERT_EQUALS(header1, "X");
+    TS_ASSERT_EQUALS(header2, "Y");
+    TS_ASSERT_EQUALS(header3, "E");
+
+    in.close();
+
+    Poco::File(filename).remove();
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -687,7 +722,8 @@ public:
   }
 
 private:
-  void writeSampleWS(Mantid::DataObjects::Workspace2D_sptr &wsToSave) {
+  void writeSampleWS(Mantid::DataObjects::Workspace2D_sptr &wsToSave,
+                     const bool &isSpectra = true) {
     wsToSave = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
         WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
@@ -699,6 +735,11 @@ private:
         Y[j] = (i + 1) * (2. + 4. * X[j]);
         E[j] = 1.;
       }
+    }
+
+    if (!isSpectra) {
+      auto axis = wsToSave->getAxis(1);
+      axis->setUnit("Degrees");
     }
 
     AnalysisDataService::Instance().add(m_name, wsToSave);
