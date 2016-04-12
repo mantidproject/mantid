@@ -54,16 +54,28 @@ public:
   }
 
   // TODO figure out if we want all these overloads.
-  VectorOf(const cow_ptr<std::vector<double>> &other) { m_data = other; }
-  VectorOf(const boost::shared_ptr<std::vector<double>> &other) {
-    m_data = other;
-  }
+  explicit VectorOf(const cow_ptr<std::vector<double>> &other)
+      : m_data(other) {}
+  explicit VectorOf(const boost::shared_ptr<std::vector<double>> &other)
+      : m_data(other) {}
   // TODO cow_ptr is not movable, can we implement move?
-  VectorOf(const std::vector<double> &data) {
-    m_data = make_cow<std::vector<double>>(data);
-  }
+  explicit VectorOf(const std::vector<double> &data)
+      : m_data(make_cow<std::vector<double>>(data)) {}
   // VectorOf(std::vector<double> &&data) { m_data =
   // make_cow<std::vector<double>>(std::move(data)); }
+
+  VectorOf &operator=(const cow_ptr<std::vector<double>> &other) {
+    m_data = other;
+    return *this;
+  }
+  VectorOf &operator=(const boost::shared_ptr<std::vector<double>> &other) {
+    m_data = other;
+    return *this;
+  }
+  VectorOf &operator=(const std::vector<double> &data) {
+    m_data.access() = data;
+    return *this;
+  }
 
   explicit operator bool() const { return m_data.operator bool(); }
 

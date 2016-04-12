@@ -13,11 +13,8 @@ class VectorOfTester : public VectorOf<VectorOfTester>,
                        public ConstIterable<VectorOfTester> {
 public:
   using VectorOf<VectorOfTester>::VectorOf;
+  using VectorOf<VectorOfTester>::operator=;
   VectorOfTester() = default;
-  VectorOfTester(const VectorOfTester &other) = default;
-  VectorOfTester(VectorOfTester &&other) = default;
-  VectorOfTester &operator=(const VectorOfTester &other) = default;
-  VectorOfTester &operator=(VectorOfTester &&other) = default;
 };
 
 class HistogramVectorOfTest : public CxxTest::TestSuite {
@@ -111,6 +108,19 @@ public:
     TS_ASSERT_EQUALS(values[0], 0.1);
     TS_ASSERT_EQUALS(values[1], 0.2);
     TS_ASSERT_EQUALS(values[2], 0.3);
+  }
+
+  test_vector_assignment() {
+    std::vector<double> raw { 0.1, 0.2, 0.3 };
+    VectorOfTester values;
+    TS_ASSERT(!values);
+    TS_ASSERT_THROWS_NOTHING(values = raw);
+    TS_ASSERT(values);
+    TS_ASSERT_DIFFERS(&(values.constData()) &raw);
+    TS_ASSERT_EQUALS(raw.size(), 3);
+    TS_ASSERT_EQUALS(raw[0], 0.1);
+    TS_ASSERT_EQUALS(values.size(), 3);
+    TS_ASSERT_EQUALS(values[0], 0.1);
   }
 
   void test_size() {

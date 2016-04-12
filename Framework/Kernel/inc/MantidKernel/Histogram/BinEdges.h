@@ -37,6 +37,7 @@ class MANTID_KERNEL_DLL BinEdges : public VectorOf<BinEdges>,
                                    public ConstIterable<BinEdges> {
 public:
   using VectorOf<BinEdges>::VectorOf;
+  using VectorOf<BinEdges>::operator=;
   BinEdges() = default;
   explicit BinEdges(const Points &points);
 };

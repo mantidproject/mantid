@@ -33,10 +33,11 @@ class BinEdges;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_KERNEL_DLL Points : public VectorOf<BinEdges>,
-                                 public ConstIterable<BinEdges> {
+class MANTID_KERNEL_DLL Points : public VectorOf<Points>,
+                                 public ConstIterable<Points> {
 public:
-  using VectorOf<BinEdges>::VectorOf;
+  using VectorOf<Points>::VectorOf;
+  using VectorOf<Points>::operator=;
   Points() = default;
   Points(const BinEdges &edges);
 };
