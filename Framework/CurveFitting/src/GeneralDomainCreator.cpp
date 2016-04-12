@@ -58,6 +58,7 @@ GeneralDomainCreator::GeneralDomainCreator(
 /// other stuff if needed
 void GeneralDomainCreator::declareDatasetProperties(const std::string &suffix,
                                                     bool addProp) {
+  UNUSED_ARG(suffix);
   for (auto &propName : m_domainColumnNames) {
     declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""),
                     "A name of a domain column.");
@@ -75,6 +76,9 @@ void GeneralDomainCreator::declareDatasetProperties(const std::string &suffix,
 /// Retrive the input workspace from the property manager.
 boost::shared_ptr<API::ITableWorkspace> GeneralDomainCreator::getInputWorkspace() const {
   auto workspacePropertyName = m_workspacePropertyNames.front();
+  if (!m_manager->existsProperty(workspacePropertyName)) {
+    return API::ITableWorkspace_sptr();
+  }
   API::Workspace_sptr ws = m_manager->getProperty(workspacePropertyName);
   auto tableWorkspace = boost::dynamic_pointer_cast<API::ITableWorkspace>(ws);
   if (!tableWorkspace) {
@@ -95,13 +99,18 @@ void GeneralDomainCreator::createDomain(
     boost::shared_ptr<FunctionDomain> &domain,
     boost::shared_ptr<FunctionValues> &values, size_t i0) {
 
+  // Create the values object
+  if (!values) {
+    values.reset(new FunctionValues);
+  }
+
   // get the workspace
   auto tableWorkspace = getInputWorkspace();
 
   size_t domainSize = 0;
   domain.reset(new FunctionDomainGeneral);
   // Create the domain
-  if (!m_domainColumnNames.empty()) {
+  if (!m_domainColumnNames.empty() && tableWorkspace) {
     auto &generalDomain = *static_cast<FunctionDomainGeneral *>(domain.get());
     for (auto &propName : m_domainColumnNames) {
       std::string columnName = m_manager->getPropertyValue(propName);
@@ -113,21 +122,42 @@ void GeneralDomainCreator::createDomain(
     domainSize = m_defaultValuesSize;
   }
 
-  // Get the fitting data
-  if (!values) {
-    values.reset(new FunctionValues);
+  // No workspace - no data
+  if (!tableWorkspace) {
+    return;
   }
+
+  if (domainSize == 0) {
+    domainSize = tableWorkspace->rowCount();
+  }
+
+  // If domain size is 0 - there are no fitting data
+  if (domainSize == 0) {
+    return;
+  }
+
+  // Get the fitting data
   auto nDataColumns = m_dataColumnNames.size();
   // Append each column to values' fitting data
   for (size_t i = 0; i < nDataColumns; ++i) {
+    // Set the data
     std::string columnName = m_manager->getPropertyValue(m_dataColumnNames[i]);
     auto dataColumn = tableWorkspace->getColumn(columnName);
-    columnName = m_manager->getPropertyValue(m_weightsColumnNames[i]);
-    auto weightsColumn = tableWorkspace->getColumn(columnName);
     values->expand(i0 + domainSize);
     for (size_t j = 0; j < domainSize; ++j) {
       values->setFitData(i0 + j, dataColumn->toDouble(j));
-      values->setFitWeight(i0 + j, weightsColumn->toDouble(j));
+    }
+    // Set the weights
+    columnName = m_manager->getPropertyValue(m_weightsColumnNames[i]);
+    if (!columnName.empty()) {
+      auto weightsColumn = tableWorkspace->getColumn(columnName);
+      for (size_t j = 0; j < domainSize; ++j) {
+        values->setFitWeight(i0 + j, weightsColumn->toDouble(j));
+      }
+    } else {
+      for (size_t j = 0; j < domainSize; ++j) {
+        values->setFitWeight(i0 + j, 1.0);
+      }
     }
     i0 += domainSize;
   }
@@ -154,8 +184,6 @@ Workspace_sptr GeneralDomainCreator::createOutputWorkspace(
     throw std::runtime_error("Failed to create output workspace: domain and "
                              "values object don't match.");
   }
-  auto inputWorkspace = getInputWorkspace();
-
   size_t rowCount = domain->size();
   if (rowCount == 0) {
     auto &generalFunction = dynamic_cast<IFunctionGeneral&>(*function);
@@ -163,35 +191,65 @@ Workspace_sptr GeneralDomainCreator::createOutputWorkspace(
   }
 
   // Clone the data and domain columns from inputWorkspace to outputWorkspace.
-  auto &generalDomain = *static_cast<FunctionDomainGeneral *>(domain.get());
+  //auto &generalDomain = *static_cast<FunctionDomainGeneral *>(domain.get());
 
-  // Collect the names of columns to clone
-  std::vector<std::string> columnsToClone;
-  for(auto &propName: m_domainColumnNames) {
-    auto columnName = m_manager->getPropertyValue(propName);
-    columnsToClone.push_back(columnName);
-  }
-  for(auto &propName: m_dataColumnNames) {
-    auto columnName = m_manager->getPropertyValue(propName);
-    columnsToClone.push_back(columnName);
-  }
+  ITableWorkspace_sptr outputWorkspace;
 
-  ITableWorkspace_sptr outputWorkspace = inputWorkspace->clone(columnsToClone);
-  if (rowCount != outputWorkspace->rowCount()) {
-    throw std::runtime_error("Cloned workspace has wrong number of rows.");
-  }
-
-  // Add columns with the calculated data
-  size_t i0 = 0;
-  for(auto &propName: m_dataColumnNames) {
-    auto dataColumnName = m_manager->getPropertyValue(propName);
-    auto calcColumnName = dataColumnName + "_calc";
-    auto column = outputWorkspace->addColumn("double", calcColumnName);
-    for(size_t row = 0; row < rowCount; ++row) {
-      auto value = values->getCalculated(i0 + row);
-      column->fromDouble(row, value);
+  auto inputWorkspace = getInputWorkspace();
+  if (inputWorkspace) {
+    // Collect the names of columns to clone
+    std::vector<std::string> columnsToClone;
+    for (auto &propName : m_domainColumnNames) {
+      auto columnName = m_manager->getPropertyValue(propName);
+      columnsToClone.push_back(columnName);
     }
-    i0 += rowCount;
+    for (auto &propName : m_dataColumnNames) {
+      auto columnName = m_manager->getPropertyValue(propName);
+      columnsToClone.push_back(columnName);
+    }
+    outputWorkspace = inputWorkspace->clone(columnsToClone);
+    if (rowCount != outputWorkspace->rowCount()) {
+      throw std::runtime_error("Cloned workspace has wrong number of rows.");
+    }
+
+    // Add columns with the calculated data
+    size_t i0 = 0;
+    for (auto &propName : m_dataColumnNames) {
+      auto dataColumnName = m_manager->getPropertyValue(propName);
+      auto calcColumnName = dataColumnName + "_calc";
+      auto column = outputWorkspace->addColumn("double", calcColumnName);
+      for (size_t row = 0; row < rowCount; ++row) {
+        auto value = values->getCalculated(i0 + row);
+        column->fromDouble(row, value);
+      }
+      i0 += rowCount;
+    }
+  } else {
+    outputWorkspace = API::WorkspaceFactory::Instance().createTable();
+    outputWorkspace->setRowCount(rowCount);
+    size_t i0 = 0;
+    for (auto &propName : m_dataColumnNames) {
+      auto calcColumnName = m_manager->getPropertyValue(propName);
+      if (calcColumnName.empty()) {
+        calcColumnName = propName;
+      }
+      auto column = outputWorkspace->addColumn("double", calcColumnName);
+      for (size_t row = 0; row < rowCount; ++row) {
+        auto value = values->getCalculated(i0 + row);
+        column->fromDouble(row, value);
+      }
+      i0 += rowCount;
+    }
+  }
+
+  if (!outputWorkspacePropertyName.empty()) {
+    declareProperty(
+        new API::WorkspaceProperty<API::ITableWorkspace>(outputWorkspacePropertyName,
+                                                    "", Kernel::Direction::Output),
+        "Name of the output Workspace holding resulting simulated values");
+    m_manager->setPropertyValue(outputWorkspacePropertyName,
+                                baseName + "Workspace");
+    m_manager->setProperty(outputWorkspacePropertyName, outputWorkspace);
   }
 
   return outputWorkspace;

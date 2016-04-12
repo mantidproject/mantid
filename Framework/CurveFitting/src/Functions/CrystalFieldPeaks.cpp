@@ -1,3 +1,4 @@
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
 #include "MantidCurveFitting/Functions/CrystalFieldPeaks.h"
 
@@ -7,10 +8,12 @@ namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
 
+DECLARE_FUNCTION(CrystalFieldPeaks)
+
 /// Constructor
 CrystalFieldPeaks::CrystalFieldPeaks()
-    : API::IFunctionGeneral(), API::ParamFunction() {
-  declareAttribute("Nre", Attribute(0));
+    : API::IFunctionGeneral(), API::ParamFunction(), m_defaultDomainSize(0) {
+  declareAttribute("Nre", Attribute(0)); // Ion (string) Ce3+, ...
   declareAttribute("Temperature", Attribute(1.0));
   declareAttribute("ToleranceEnergy", Attribute(1.0e-10));
   declareAttribute("ToleranceIntensity", Attribute(1.0e-10));
@@ -58,9 +61,13 @@ CrystalFieldPeaks::CrystalFieldPeaks()
 
 std::string CrystalFieldPeaks::name() const { return "CrystalFieldPeaks"; }
 
-size_t CrystalFieldPeaks::getNumberDomainColumns() const {return 0;}
+size_t CrystalFieldPeaks::getNumberDomainColumns() const { return 0; }
 
 size_t CrystalFieldPeaks::getNumberValuesPerArgument() const { return 2; }
+
+size_t CrystalFieldPeaks::getDefaultDomainSize() const {
+  return m_defaultDomainSize;
+}
 
 void CrystalFieldPeaks::functionGeneral(
     const API::FunctionDomainGeneral &generalDomain,
@@ -138,13 +145,25 @@ void CrystalFieldPeaks::functionGeneral(
   DoubleFortranMatrix iEnergies;
   const double de = getAttribute("ToleranceEnergy").asDouble();
   const double di = getAttribute("ToleranceIntensity").asDouble();
-  calculateIntensities(nre, en, wf, temperature, de, di, degeneration, eEnergies, iEnergies);
+  calculateIntensities(nre, en, wf, temperature, de, di, degeneration,
+                       eEnergies, iEnergies);
 
-  size_t n = eEnergies.size();
+  DoubleFortranVector eExcitations;
+  DoubleFortranVector iExcitations;
+  calculateExcitations(eEnergies, iEnergies, de, di, eExcitations,
+                       iExcitations);
+
+  size_t n = eExcitations.size();
   if (2 * n > values.size()) {
     values.expand(2 * n);
   }
 
+  m_defaultDomainSize = n;
+
+  for (size_t i = 0; i < n; ++i) {
+    values.setCalculated(i, eExcitations.get(i));
+    values.setCalculated(i + n, iExcitations.get(i));
+  }
 }
 
 } // namespace Functions

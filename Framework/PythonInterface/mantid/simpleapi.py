@@ -195,7 +195,10 @@ def fitting_algorithm(f):
         algm = _create_algorithm_object(function_name)
         _set_logging_option(algm, kwargs)
         algm.setProperty('Function', Function) # Must be set first
-        algm.setProperty('InputWorkspace', InputWorkspace)
+        if InputWorkspace is not None:
+            algm.setProperty('InputWorkspace', InputWorkspace)
+        else:
+            del algm['InputWorkspace']
 
         # Set all workspace properties before others
         for key in kwargs.keys():

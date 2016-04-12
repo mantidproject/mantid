@@ -7,8 +7,12 @@ Kernel::Logger IFunctionGeneral::g_log("IFunctionGeneral");
 
 void IFunctionGeneral::function(const FunctionDomain &domain,
                                 FunctionValues &values) const {
-  if (values.size() != getValuesSize(domain)) {
-    throw std::runtime_error("IFunctionGeneral: values object doesn't match domain.");
+  auto actualValuesSize = values.size();
+  auto requiredValuesSize = getValuesSize(domain);
+  if (actualValuesSize > 0 && requiredValuesSize > 0 &&
+      actualValuesSize != requiredValuesSize) {
+    throw std::runtime_error(
+        "IFunctionGeneral: values object doesn't match domain.");
   }
   try {
     auto &generalDomain = dynamic_cast<const FunctionDomainGeneral &>(domain);

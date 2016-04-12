@@ -44,6 +44,12 @@ public:
   size_t getNumberValuesPerArgument() const override;
   void functionGeneral(const API::FunctionDomainGeneral &generalDomain,
                        API::FunctionValues &values) const override;
+  size_t getDefaultDomainSize() const override;
+
+private:
+  /// Store the default domain size after first
+  /// function evaluation
+  mutable size_t m_defaultDomainSize;
 };
 
 } // namespace Functions
