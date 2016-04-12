@@ -8,7 +8,32 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
+/**
+ * Interface for MuonFitDataSelector
+ */
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IMuonFitDataView {
+public:
+  virtual QString getRunsText() const = 0;
+  virtual void setRunsText(const QString &text) = 0;
+  virtual unsigned int getWorkspaceIndex() const = 0;
+  virtual void setWorkspaceIndex(unsigned int index) = 0;
+  virtual double getStartTime() const = 0;
+  virtual void setStartTime(double start) = 0;
+  virtual double getEndTime() const = 0;
+  virtual void setEndTime(double end) = 0;
+  virtual void setAvailableGroups(const QStringList &groupNames) = 0;
+  virtual QStringList getChosenGroups() const = 0;
+  virtual void setNumPeriods(size_t numPeriods) = 0;
+  virtual void setPeriodVisibility(bool visible) = 0;
+  virtual QStringList getChosenPeriods() const = 0;
+};
+
 /** MuonFitDataSelector : Selects runs, groups, periods for fit
+
+  This is the lightweight view for the widget. All the work is done by
+  the presenter MuonFitDataPresenter.
+
+  Implements IMuonFitDataView
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -32,7 +57,8 @@ namespace MantidWidgets {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonFitDataSelector
-    : public MantidQt::API::MantidWidget {
+    : public MantidQt::API::MantidWidget,
+      IMuonFitDataView {
   Q_OBJECT
 public:
   /// Constructor

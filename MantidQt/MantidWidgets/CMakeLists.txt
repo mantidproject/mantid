@@ -75,6 +75,7 @@ set ( SRC_FILES
 	src/MantidHelpWindow.cpp
 	src/MessageDisplay.cpp
 	src/MultifitSetupDialog.cpp
+	src/MuonFitDataPresenter.cpp
 	src/MuonFitDataSelector.cpp
 	src/MuonFitPropertyBrowser.cpp
 	src/MuonSequentialFitDialog.cpp
@@ -234,6 +235,7 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h
 	inc/MantidQtMantidWidgets/InstrumentView/Viewport.h
 	inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
+	inc/MantidQtMantidWidgets/MuonFitDataModel.h
 	inc/MantidQtMantidWidgets/MuonFitDataSelector.h
 	inc/MantidQtMantidWidgets/WidgetDllOption.h
 )
@@ -272,7 +274,7 @@ set ( TEST_PY_FILES
 
 set ( TEST_FILES
 	AlgorithmHintStrategyTest.h
-	MuonFitDataSelectorTest.h
+	MuonFitDataPresenterTest.h
 )
 
 find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)
