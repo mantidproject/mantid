@@ -190,7 +190,8 @@ void NormaliseToMonitor::init() {
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "Name to use for the output workspace");
-  // should be any spectrum ID, but named this property MonitorSpectrum to keep
+  // should be any spectrum number, but named this property MonitorSpectrum to
+  // keep
   // compatibility with previous scripts
   // Can either set a spectrum within the workspace to be the monitor
   // spectrum.....

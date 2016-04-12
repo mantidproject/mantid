@@ -23,8 +23,20 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
+  void mask_workspace(const int mask_workspace) {
+    if (mask_workspace == 1) {
+      FrameworkManager::Instance().exec(
+          "MaskMD", 6, "Workspace", "PlusMDTest_lhs", "Dimensions",
+          "Axis0,Axis1,Axis2", "Extents", "0,10,0,10,0,10");
+    } else if (mask_workspace == 2) {
+      FrameworkManager::Instance().exec(
+          "MaskMD", 6, "Workspace", "PlusMDTest_rhs", "Dimensions",
+          "Axis0,Axis1,Axis2", "Extents", "0,10,0,10,0,10");
+    }
+  }
+
   void do_test(bool lhs_file, bool rhs_file, int inPlace,
-               bool deleteFile = true) {
+               bool deleteFile = true, int mask_ws_num = 0) {
     AnalysisDataService::Instance().clear();
     // Make two input workspaces
     MDEventWorkspace3Lean::sptr lhs =
@@ -36,6 +48,8 @@ public:
       outWSName = "PlusMDTest_lhs";
     else if (inPlace == 2)
       outWSName = "PlusMDTest_rhs";
+
+    mask_workspace(mask_ws_num);
 
     PlusMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -70,10 +84,16 @@ public:
           "If either input WS is file backed, then the output should be too.",
           ws->getBoxController()->isFileBacked());
     }
-    TS_ASSERT_EQUALS(ws->getNPoints(), 20000);
+    if (mask_ws_num == 0) {
+      TS_ASSERT_EQUALS(ws->getNPoints(), 20000);
+    } else {
+      TS_ASSERT_EQUALS(ws->getNPoints(), 10000);
+    }
 
-    TSM_ASSERT("If the workspace is file-backed, then it needs updating.",
-               ws->fileNeedsUpdating());
+    if (mask_ws_num == 0) {
+      TSM_ASSERT("If the workspace is file-backed, then it needs updating.",
+                 ws->fileNeedsUpdating());
+    }
 
     if (ws->isFileBacked()) {
 
@@ -100,7 +120,11 @@ public:
       ::NeXus::File *file = loader->getFile();
       // The file should have an entry of 20000 points too (with some error due
       // to the free space blocks). This means the file back-end was updated
-      TS_ASSERT_EQUALS(file->getInfo().dims[0], 20000 + freeSpace);
+      if (mask_ws_num == 0) {
+        TS_ASSERT_EQUALS(file->getInfo().dims[0], 20000 + freeSpace);
+      } else {
+        TS_ASSERT_EQUALS(file->getInfo().dims[0], 10000 + freeSpace);
+      }
 
       // Close the file so you can delete it. Otherwise the following test gets
       // confused.
@@ -150,6 +174,12 @@ public:
   void test_file_plus_file_inPlace() { do_test(true, true, 1); }
 
   void test_file_plus_file_inPlace_ofRHS() { do_test(true, true, 2); }
+
+  void test_mem_masked_plus_mem() { do_test(false, false, 0, true, 1); }
+
+  void test_mem_masked_plus_file() { do_test(false, true, 0, true, 1); }
+
+  void test_masked_file_plus_file_inPlace() { do_test(true, true, 1, true, 1); }
 
   void test_histo_histo() {
     MDHistoWorkspace_sptr out;

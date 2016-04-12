@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,too-many-branches
 """A script for generating DataCite DOI's for Mantid releases, to be called by
 a Jenkins job during the release process.  When given a major, minor and patch
 release number along with username and password credentials, it will build a
@@ -7,7 +7,7 @@ to the DataCite DOI API.
 
 A special one-time "main" landing page DOI will be created using:
 
-python doi.py --major=3 --minor=0 --patch=0 --username=[] --password=[] --main
+python doi.py --username=[] --password=[] --main 3.0.0
 
 Then at every release, the script will run again without the "--main" flag to
 generate a DOI pointing to the release notes for that particular version.
@@ -23,12 +23,11 @@ Using the "--delete" flag will the DOI metadata with the given details
 
 NOTES:
 
-- This script is tailored for use at RAL, where the internet must be accessed
-  via the "wwwcache.rl.ac.uk" proxy.  Making it work off site will require some
-  tweaking.
-
 - A requirement for the script to run is for cURL to be installed and its
   executable to be on the PATH.
+
+- If your connection requires a proxy to be manually configured then ensure the
+  http_proxy environment variable is set when the script is executed.
 
 - The "www.mantidproject.org" domain had to be registered with DataCite (on
   both the test server and the main server) before a valid DOI could be
@@ -56,7 +55,7 @@ USEFUL LINKS:
 """
 
 import argparse
-
+import os
 import xml.etree.ElementTree as ET
 
 import subprocess
@@ -202,12 +201,13 @@ def _http_request(body, method, url, options):
     args = [
         'curl',
         '--user',    options.username + ':' + options.password,
-        '--proxy',   'wwwcache.rl.ac.uk:8080',
         '--header',  'Content-Type:text/plain;charset=UTF-8',
         # The bodies of HTTP messages must be encoded:
         '--data',    body.encode('utf-8'),
         '--request', method,
     ]
+    if 'http_proxy' in os.environ:
+        args.extend(['--proxy', os.environ['http_proxy']])
 
     # Set how loud cURL should be while running.
     if options.debug:
@@ -237,7 +237,7 @@ def delete_doi(base, doi, options):
     )
 
     if not re.match(SUCCESS_RESPONSE, result[0]):
-        raise Exception('Deleting metadata unsuccessful.  Quitting.')
+        raise RuntimeError('Deleting metadata unsuccessful.  Quitting.')
 
     print "\nAttempting to point " + doi + " to invalid page."
     result = _http_request(
@@ -248,7 +248,7 @@ def delete_doi(base, doi, options):
     )
 
     if not re.match(SUCCESS_RESPONSE, result[0]):
-        raise Exception('Pointing DOI to invalid page was unsuccessful.')
+        raise RuntimeError('Pointing DOI to invalid page was unsuccessful.')
 
 def create_or_update_metadata(xml_form, base, doi, options):
     '''Attempts to create some new metadata for the doi of the given address.
@@ -264,7 +264,7 @@ def create_or_update_metadata(xml_form, base, doi, options):
     )
 
     if not re.match(SUCCESS_RESPONSE, result[0]):
-        raise Exception('Creation/updating metadata unsuccessful.  Quitting.')
+        raise RuntimeError('Creation/updating metadata unsuccessful.  Quitting.')
 
 def create_or_update_doi(base, doi, destination, options):
     '''Attempts to create a new DOI of the given address.  Metadata must be
@@ -282,7 +282,7 @@ def create_or_update_doi(base, doi, destination, options):
     )
 
     if not re.match(SUCCESS_RESPONSE, result[0]):
-        raise Exception('Creation/updating DOI unsuccessful.  Quitting.')
+        raise RuntimeError('Creation/updating DOI unsuccessful.  Quitting.')
 
 def check_if_doi_exists(base, doi, destination, options):
     '''Attempts to check if the given doi exists by querying the server and
@@ -306,7 +306,7 @@ def check_if_doi_exists(base, doi, destination, options):
         print "DOI found."
         return True
     else:
-        raise Exception(
+        raise RuntimeError(
             "Unexpected result back from server: \"" + result[0] + "\"")
 
 def check_for_curl():
@@ -321,14 +321,50 @@ def check_for_curl():
             found = True
         else:
             found = False
-    except:
+    except OSError:
         found = False
 
     if not found:
-        raise Exception('This script requires that cURL be installed and ' + \
+        raise RuntimeError('This script requires that cURL be installed and ' + \
                         'available on the PATH.')
 
-def run(options):
+
+def get_urls_for_doi(version_str,  shortened_version_str,
+                     prev_version_str, shortened_prev_version_str):
+    # Beginning with v3.6.0 the release notes moved to docs.mantidproject.org but
+    # the transition happened after the release so the following rules apply
+    #  - all versions 3.7.0 & above have release notes on a versioned url at docs.mantidproject.org
+    #  - 3.5.2, 3.6.0, 3.6.1 have been manually inserted but the notes only exist in nightly builds
+    #  - 3.5.1 and before all point to the wiki
+    major, minor, patch = authors.get_major_minor_patch(version_str)
+    sphinx_rel_notes_url = 'http://docs.mantidproject.org/{0}/release/{1}/index.html'
+    wiki_rel_notes_url = 'http://www.mantidproject.org/Release_Notes_{0}'
+
+    if major > 3 or (major == 3 and minor >= 7):
+        destination = sphinx_rel_notes_url.format('v' + version_str, 'v'+ version_str)
+        prev_destination = sphinx_rel_notes_url.format('v' + prev_version_str, 'v'+ prev_version_str)
+    elif major == 3:
+        if minor == 5:
+            if patch >= 2:
+                destination = sphinx_rel_notes_url.format('nightly', 'v'+ version_str)
+            if patch == 2:
+                prev_destination = wiki_rel_notes_url.format(shortened_prev_version_str)
+            else:
+                prev_destination = sphinx_rel_notes_url.format('nightly', 'v'+ prev_version_str)
+        elif minor == 6:
+            destination = sphinx_rel_notes_url.format('nightly', 'v'+ version_str)
+            prev_destination = sphinx_rel_notes_url.format('nightly', 'v'+ prev_version_str)
+        else:
+            destination = wiki_rel_notes_url.format(shortened_version_str)
+            prev_destination = wiki_rel_notes_url.format(shortened_prev_version_str)
+    else:
+        destination = wiki_rel_notes_url.format(shortened_version_str)
+        prev_destination = wiki_rel_notes_url.format(shortened_prev_version_str)
+
+    return destination, prev_destination
+
+
+def run(args):
     '''Creating a usable DOI is (for our purposes at least) a two step
     process: metadata has to be constructed and then sent to the server, and
     then the DOI itself has to be sent once the metadata is in place.
@@ -340,64 +376,59 @@ def run(options):
     so that we can set up a IsPreviousVersionOf/IsNewVersionOf relationship
     between the two DOIs.
     '''
-    # Get the git tag and "version string" of this version as well as the
-    # version before it if this is an incremental release.
-    version = options.major, options.minor, options.patch
-    version_str = authors.get_version_string(options.major,
-                                             options.minor,
-                                             options.patch)
-    tag = authors.find_tag(*version)
-    if not options.main:
+    # Get the git tag as well as the version before it if this is an incremental release.
+    version_str = args.version
+    shortened_version_str = authors.get_shortened_version_string(version_str)
+
+    tag = authors.find_tag(version_str)
+    if not args.main:
         prev_tag = authors.get_previous_tag(tag)
-        prev_version = authors.get_version_from_git_tag(prev_tag)
-        prev_version_str = authors.get_version_string(*prev_version)
+        prev_version_str = authors.get_version_from_git_tag(prev_tag)
+        shortened_prev_version_str = authors.get_shortened_version_string(prev_version_str)
 
     main_doi = '10.5286/Software/Mantid'
 
-    if options.main:
+    if args.main:
         doi = main_doi
         prev_doi = ''
         has_previous_version = False
     else: # Incremental release DOI.
-        prev_doi = '10.5286/Software/Mantid' + prev_version_str
-        doi = '10.5286/Software/Mantid' + version_str
+        prev_doi = '10.5286/Software/Mantid' + shortened_prev_version_str
+        doi = '10.5286/Software/Mantid' + shortened_version_str
 
-    if options.main:
+    if args.main:
         destination = 'http://www.mantidproject.org'
     else:
-        destination = 'http://www.mantidproject.org/Release_Notes_' + \
-                      version_str
-        prev_destination = 'http://www.mantidproject.org/Release_Notes_' +\
-                               prev_version_str
+        destination, prev_destination = get_urls_for_doi(version_str, shortened_version_str,
+                                                         prev_version_str, shortened_prev_version_str)
 
-    # Use the test server if running in test mode.
-    if options.test:
+    if args.test:
         server_url_base = 'https://test.datacite.org/mds/'
     else:
         server_url_base = 'https://mds.datacite.org/'
 
-    if options.delete:
-        delete_doi(server_url_base, doi, options)
+    if args.delete:
+        delete_doi(server_url_base, doi, args)
         quit()
 
     # If the user ran this script with the --main flag, then all we need to do
     # is create a single, unlinked DOI to the main project page.
-    if options.main:
+    if args.main:
         creator_name_list = authors.authors_up_to_git_tag(tag)
         # In the case of the main DOI we need to add the whitelisted names too.
         creator_name_list = sorted(set(creator_name_list + authors.whitelist))
 
         xml_form = build_xml_form(doi, {}, creator_name_list, None)
 
-        create_or_update_metadata(xml_form, server_url_base, doi, options)
-        create_or_update_doi(server_url_base, doi, destination, options)
+        create_or_update_metadata(xml_form, server_url_base, doi, args)
+        create_or_update_doi(server_url_base, doi, destination, args)
     # Else it's an incremental-release DOI that we need to make.
     else:
         has_previous_version = check_if_doi_exists(
             server_url_base,
             prev_doi,
             prev_destination,
-            options
+            args
         )
 
         relationships = { main_doi : 'IsPartOf' }
@@ -413,8 +444,8 @@ def run(options):
         )
 
         # Create/update the metadata and DOI.
-        create_or_update_metadata(xml_form, server_url_base, doi, options)
-        create_or_update_doi(server_url_base, doi, destination, options)
+        create_or_update_metadata(xml_form, server_url_base, doi, args)
+        create_or_update_doi(server_url_base, doi, destination, args)
 
         # Create/update the metadata and DOI of the previous version, if it
         # was found to have a DOI.
@@ -436,11 +467,11 @@ def run(options):
                 prev_xml_form,
                 server_url_base,
                 prev_doi,
-                options
+                args
             )
 
     # Print out a custom success message, depending on the initial options.
-    if not options.test:
+    if not args.test:
         method        = "resolved"
         doi_add       = 'http://dx.doi.org/' + doi
         meta_add      = 'https://mds.datacite.org/metadata/' + doi
@@ -474,25 +505,9 @@ if __name__ == "__main__":
 
     # REQUIRED
     parser.add_argument(
-        '--major',
-        type=int,
-        required=True,
-        help='The major version number of this Mantid release.'
-    )
-    parser.add_argument(
-        '--minor',
-        type=int,
-        required=True,
-        help='The minor version number of this Mantid release.'
-    )
-    parser.add_argument(
-        '--patch',
-        type=int,
-        required=True,
-        help='The patch version number of this Mantid release.  Note: this' + \
-             ' is NOT the SHA1 or the commit number from Git.  The patch ' + \
-             'number for v3.0 (or v3.0.0) is 0, and the patch number for ' + \
-             'v3.0.1 is 1.'
+        'version',
+        type=str,
+        help='Version of Mantid whose DOI is to be created/updated in the form "major.minor.patch"'
     )
     parser.add_argument(
         '--password',

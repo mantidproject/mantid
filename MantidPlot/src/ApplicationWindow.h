@@ -431,6 +431,8 @@ public slots:
   void customizeTables(const QColor& bgColor,const QColor& textColor,
     const QColor& headerColor,const QFont& textFont,
     const QFont& headerFont, bool showComments);
+  /// Turn on/off auto-update of curves from table
+  void setUpdateCurvesFromTable(Table *table, bool on);
 
   void importASCII();
   void importASCII(const QStringList& files, int import_mode, const QString& local_column_separator, int local_ignored_lines, bool local_rename_columns,

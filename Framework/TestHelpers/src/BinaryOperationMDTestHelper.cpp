@@ -23,6 +23,7 @@ namespace BinaryOperationMDTestHelper {
 void setUpBinaryOperationMDTestHelper() {
   MDHistoWorkspace_sptr histo_A;
   MDHistoWorkspace_sptr histo_B;
+  MDHistoWorkspace_sptr histo_masked;
   MDHistoWorkspace_sptr histo_zero;
   IMDEventWorkspace_sptr event_A;
   IMDEventWorkspace_sptr event_B;
@@ -31,6 +32,8 @@ void setUpBinaryOperationMDTestHelper() {
 
   histo_A = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 1.0);
   histo_B = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 1.0);
+  histo_masked =
+      MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 1.0);
   histo_zero =
       MDEventsTestHelper::makeFakeMDHistoWorkspace(0.0, 2, 5, 10.0, 0.0);
   event_A = MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
@@ -38,10 +41,15 @@ void setUpBinaryOperationMDTestHelper() {
   scalar = WorkspaceCreationHelper::CreateWorkspaceSingleValue(3.0);
   AnalysisDataService::Instance().addOrReplace("histo_A", histo_A);
   AnalysisDataService::Instance().addOrReplace("histo_B", histo_B);
+  AnalysisDataService::Instance().addOrReplace("histo_masked", histo_masked);
   AnalysisDataService::Instance().addOrReplace("histo_zero", histo_zero);
   AnalysisDataService::Instance().addOrReplace("event_A", event_A);
   AnalysisDataService::Instance().addOrReplace("event_B", event_B);
   AnalysisDataService::Instance().addOrReplace("scalar", scalar);
+
+  FrameworkManager::Instance().exec("MaskMD", 6, "Workspace", "histo_masked",
+                                    "Dimensions", "x,y", "Extents",
+                                    "0,10,0,10");
 }
 
 /// Run a binary algorithm.
