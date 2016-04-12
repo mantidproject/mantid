@@ -560,6 +560,7 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
   }
 
   // run the algorithm EnggFitPeaks with workspace loaded above
+  // requires unit in Time of Flight
   auto enggFitPeaks =
       Mantid::API::AlgorithmManager::Instance().createUnmanaged("EnggFitPeaks");
   const std::string FocusedFitPeaksTableName =
@@ -626,6 +627,7 @@ void EnggDiffractionPresenter::runFittingAlgs(
   std::string endX = "";
 
   if (rowCount > size_t(0)) {
+
     for (size_t i = 0; i < rowCount; i++) {
 
       // get the functionStrFactory to generate the string for function
@@ -677,6 +679,20 @@ void EnggDiffractionPresenter::runFittingAlgs(
         ADS.remove(current_peak_out_WS);
       }
     }
+
+    // set the default instrument for single peak fitting workspace
+    AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+    auto focusedPeaksWS = ADS.retrieveWS<MatrixWorkspace>(FocusedWSName);
+    auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(single_peak_out_WS);
+
+	// Geometry::Instrument_sptr instrument(new Geometry::Instrument("ENGIN-X"));
+    auto instrument = focusedPeaksWS->getInstrument();
+	
+	singlePeaksWS->setInstrument(instrument);
+
+    // convert units for both workspaces to dSpacing from ToF
+   // runConvetUnitsAlg(single_peak_out_WS);
+   // runConvetUnitsAlg(FocusedWSName);
   }
 
   m_fittingFinishedOK = true;
@@ -788,15 +804,17 @@ void EnggDiffractionPresenter::runRebinToWorkspaceAlg(
   }
 }
 
-void EnggDiffractionPresenter::runConvetUnitAlg(std::string workspaceName) {
+void EnggDiffractionPresenter::runConvetUnitsAlg(std::string workspaceName) {
+
   auto ConvertUnits =
       Mantid::API::AlgorithmManager::Instance().createUnmanaged("ConvertUnits");
-  std::string targetUnit = "dSpacing";
   try {
     ConvertUnits->initialize();
     ConvertUnits->setProperty("InputWorkspace", workspaceName);
     ConvertUnits->setProperty("OutputWorkspace", workspaceName);
+    std::string targetUnit = "dSpacing";
     ConvertUnits->setProperty("Target", targetUnit);
+    ConvertUnits->setPropertyValue("EMode", "Elastic");
     ConvertUnits->execute();
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm ConvertUnits, "
