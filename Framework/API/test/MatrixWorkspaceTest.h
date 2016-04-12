@@ -357,7 +357,7 @@ public:
 
   void testBinIndexOf() {
     WorkspaceTester wkspace;
-    wkspace.initialize(1, 4, 2);
+    wkspace.initialize(1, 4, 3);
     // Data is all 1.0s
     wkspace.dataX(0)[1] = 2.0;
     wkspace.dataX(0)[2] = 3.0;

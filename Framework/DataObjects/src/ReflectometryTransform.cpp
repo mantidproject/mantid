@@ -427,7 +427,7 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
     boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
     bool dumpVertexes, std::string outputDimensions) const {
   MatrixWorkspace_sptr temp = WorkspaceFactory::Instance().create(
-      "RebinnedOutput", m_d1NumBins, m_d0NumBins, m_d0NumBins);
+      "RebinnedOutput", m_d1NumBins, m_d0NumBins + 1, m_d0NumBins);
   RebinnedOutput_sptr outWS = boost::static_pointer_cast<RebinnedOutput>(temp);
 
   const double widthD0 = (m_d0Max - m_d0Min) / double(m_d0NumBins);
