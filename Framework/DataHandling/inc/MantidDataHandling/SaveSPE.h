@@ -5,6 +5,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -43,18 +44,18 @@ public:
   /// Constructor
   SaveSPE();
   /// Virtual destructor
-  virtual ~SaveSPE() {}
+  ~SaveSPE() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "SaveSPE"; }
+  const std::string name() const override { return "SaveSPE"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Writes a workspace into a file the spe format.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\SPE;Inelastic\\DataHandling";
   }
 
@@ -64,16 +65,16 @@ public:
 
 private:
   /// Initialization code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   void writeSPEFile(FILE *outSPEFile,
                     const API::MatrixWorkspace_const_sptr &inputWS);
   void writeHists(const API::MatrixWorkspace_const_sptr WS,
                   FILE *const outFile);
   void writeHist(const API::MatrixWorkspace_const_sptr WS, FILE *const outFile,
-                 const int specIn) const;
+                 const int wsIn) const;
   void writeMaskFlags(FILE *const outFile) const;
   void writeBins(const MantidVec &Vs, FILE *const outFile) const;
   void writeValue(const double value, FILE *const outFile) const;

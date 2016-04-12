@@ -51,27 +51,27 @@ public:
   /// (Empty) Constructor
   Scale() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~Scale() {}
+  ~Scale() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "Scale"; }
+  const std::string name() const override { return "Scale"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Scales an input workspace by the given factor, which can be either "
            "multiplicative or additive.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Arithmetic;CorrectionFunctions";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

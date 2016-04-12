@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -41,23 +42,31 @@ public:
   /// Default constructor
   FFT() : API::Algorithm(){};
   /// Destructor
-  virtual ~FFT(){};
+  ~FFT() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FFT"; }
+  const std::string name() const override { return "FFT"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Performs complex Fast Fourier Transform";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Arithmetic\\FFT"; }
+  const std::string category() const override { return "Arithmetic\\FFT"; }
+
+protected:
+  /// Perform validation of inputs
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
+  /// Check whether supplied values are evenly spaced
+  bool areBinWidthsUneven(const MantidVec &xValues) const;
+  /// Get phase shift - user supplied or auto-calculated
+  double getPhaseShift(const MantidVec &xValues);
 };
 
 } // namespace Algorithm

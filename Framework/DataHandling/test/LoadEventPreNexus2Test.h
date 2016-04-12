@@ -10,12 +10,17 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidDataHandling/LoadEventPreNexus2.h"
+
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidDataHandling/LoadEventPreNexus2.h"
+
 #include <sys/stat.h>
 
 using namespace Mantid;
@@ -44,7 +49,7 @@ public:
 
   LoadEventPreNexus2Test() {}
 
-  void setUp() {
+  void setUp() override {
     eventLoader = new LoadEventPreNexus2();
     eventLoader->initialize();
   }
@@ -249,7 +254,7 @@ public:
 
     // Are the pixel IDs ok?
     TS_ASSERT_EQUALS(ew->getSpectrum(0)->getSpectrumNo(), 46);
-    std::set<detid_t> dets = ew->getSpectrum(0)->getDetectorIDs();
+    auto dets = ew->getSpectrum(0)->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
     TS_ASSERT_EQUALS(*dets.begin(), 45);
 

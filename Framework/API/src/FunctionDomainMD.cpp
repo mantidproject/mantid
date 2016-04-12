@@ -58,7 +58,7 @@ const IMDIterator *FunctionDomainMD::getNextIterator() const {
   ++m_currentIndex;
   if (!m_iterator->next() || m_currentIndex >= m_size) {
     m_currentIndex = m_size;
-    return NULL;
+    return nullptr;
   }
   return m_iterator;
 }

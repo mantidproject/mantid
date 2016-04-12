@@ -56,8 +56,6 @@ bool PeakShapeEllipsoid::operator==(const PeakShapeEllipsoid &other) const {
          other.abcRadiiBackgroundOuter() == this->abcRadiiBackgroundOuter();
 }
 
-PeakShapeEllipsoid::~PeakShapeEllipsoid() {}
-
 std::vector<double> PeakShapeEllipsoid::abcRadii() const { return m_abc_radii; }
 
 std::vector<double> PeakShapeEllipsoid::abcRadiiBackgroundInner() const {
@@ -82,8 +80,8 @@ std::vector<Kernel::V3D> PeakShapeEllipsoid::getDirectionInSpecificFrame(
                                 "compatible with the direction vector");
   }
 
-  for (auto it = m_directions.cbegin(); it != m_directions.cend(); ++it) {
-    directionsInFrame.push_back(invertedGoniometerMatrix * (*it));
+  for (const auto &direction : m_directions) {
+    directionsInFrame.push_back(invertedGoniometerMatrix * direction);
   }
 
   return directionsInFrame;

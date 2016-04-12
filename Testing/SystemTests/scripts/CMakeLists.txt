@@ -13,6 +13,7 @@ list(APPEND DATA_DIRS ${SYSTEM_TEST_DATA_DIR})
 list(APPEND DATA_DIRS ${SYSTEM_TEST_DATA_DIR}/LOQ)
 list(APPEND DATA_DIRS ${SYSTEM_TEST_DATA_DIR}/SANS2D)
 list(APPEND DATA_DIRS ${SYSTEM_TEST_DATA_DIR}/PEARL)
+list(APPEND DATA_DIRS ${SYSTEM_TEST_DATA_DIR}/LARMOR)
 # Reference results
 list(APPEND DATA_DIRS ${ExternalData_BINARY_ROOT}/Testing/SystemTests/tests/analysis/reference)
 
@@ -26,3 +27,18 @@ file(WRITE ${DATA_DIRS_FILE} "${DATA_DIRS}")
 set(SAVE_DIR ${CMAKE_CURRENT_BINARY_DIR} )
 set(SAVE_DIR_FILE ${CMAKE_CURRENT_LIST_DIR}/defaultsave-directory.txt)
 file(WRITE ${SAVE_DIR_FILE} "${SAVE_DIR}")
+
+# Configure files for developers running tests
+set (SYSTEMTESTS_RUNNER_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/runSystemTests.py)
+if (MSVC OR XCODE_VERSION)
+  set (MULTI_CONFIG_GENERATOR "true")
+else ()
+  set (MULTI_CONFIG_GENERATOR "false")
+endif ()
+if (MSVC)
+  configure_file(${CMAKE_CURRENT_LIST_DIR}/systemtest.bat.in ${CMAKE_BINARY_DIR}/systemtest.bat
+      @ONLY)
+else ()
+  configure_file(${CMAKE_CURRENT_LIST_DIR}/systemtest.in ${CMAKE_BINARY_DIR}/systemtest
+      @ONLY)
+endif()

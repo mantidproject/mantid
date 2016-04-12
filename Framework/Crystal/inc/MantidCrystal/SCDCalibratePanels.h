@@ -47,21 +47,21 @@ class SCDCalibratePanels : public Mantid::API::Algorithm {
 public:
   SCDCalibratePanels();
 
-  virtual ~SCDCalibratePanels();
+  ~SCDCalibratePanels() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Panel parameters, sample position,L0 and T0 are optimized to "
            "minimize errors between theoretical and actual q values for the "
            "peaks";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const;
+  int version() const override;
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const;
+  const std::string category() const override;
 
   /**
    *  Refactors a rotation Q as a Rotation in x dir by Rotx * a Rotation in the
@@ -106,7 +106,7 @@ public:
    *the
    *                        NewInstrument's parameter map.
    *
-   *   @param RotateCenters Rotate the centers of the panels(the same amount)
+   *   @param RotCenters Rotate the centers of the panels(the same amount)
    *with the
    *                        rotation of panels around their center
    */
@@ -116,7 +116,7 @@ public:
       Kernel::V3D const pos, Kernel::Quat const rot, double const DetWScale,
       double const DetHtScale,
       boost::shared_ptr<const Geometry::ParameterMap> const pmapOld,
-      bool RotateCenters);
+      bool RotCenters);
 
   /**
    * *  Updates the ParameterMap for NewInstrument to reflect the position of
@@ -251,9 +251,9 @@ private:
                              const std::vector<double> &params,
                              const std::vector<double> &errs);
 
-  void exec();
+  void exec() override;
 
-  void init();
+  void init() override;
 
   API::ITableWorkspace_sptr Result;
 

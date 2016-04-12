@@ -23,7 +23,7 @@ public:
 public:
   /// Default Constructor
   IndirectDiffractionReduction(QWidget *parent = 0);
-  ~IndirectDiffractionReduction();
+  ~IndirectDiffractionReduction() override;
 
 public slots:
   void instrumentSelected(const QString &instrumentName,
@@ -39,8 +39,8 @@ public slots:
   void individualGroupingToggled(int state);
 
 private:
-  virtual void initLayout();
-  void initLocalPython();
+  void initLayout() override;
+  void initLocalPython() override;
 
   void loadSettings();
   void saveSettings();

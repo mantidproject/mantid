@@ -49,24 +49,24 @@ public:
   /// (Empty) Constructor
   AddSampleLog() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~AddSampleLog() {}
+  ~AddSampleLog() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "AddSampleLog"; }
+  const std::string name() const override { return "AddSampleLog"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Used to insert a value into the sample logs in a workspace.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "DataHandling\\Logs"; }
+  const std::string category() const override { return "DataHandling\\Logs"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

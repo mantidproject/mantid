@@ -968,6 +968,10 @@ void Graph::enableAutoscaling(bool yes) {
       d_plot->setAxisScaleDiv(i, *d_plot->axisScaleDiv(i));
     }
   }
+  // Propagate this to spectrogram
+  if (spectrogram()) {
+    spectrogram()->setColorMapAutoScale(yes);
+  }
 }
 
 void Graph::setAutoScale() {
@@ -1991,7 +1995,7 @@ QString Graph::saveCurveLayout(int index) {
     else
       s += QString::number(-1) + "\t";
 
-    bool filled = c->brush().style() == Qt::NoBrush ? false : true;
+    bool filled = c->brush().style() != Qt::NoBrush;
     s += QString::number(filled) + "\t";
 
     s += QString::number(ColorBox::colorIndex(c->brush().color())) + "\t";
@@ -2089,7 +2093,7 @@ LegendWidget *Graph::insertText(const std::string &type,
                                 const std::string &line) {
   const QStringList list = QString::fromUtf8(line.c_str()).split("\t");
   QStringList fList = list;
-  bool pieLabel = (type == "PieLabel") ? true : false;
+  bool pieLabel = (type == "PieLabel");
   LegendWidget *l = NULL;
   if (pieLabel)
     l = new PieLabel(d_plot);
@@ -3022,8 +3026,20 @@ void Graph::updateScale() {
     setXAxisTitle(mantidCurve->mantidData()->getXAxisLabel());
     setYAxisTitle(mantidCurve->mantidData()->getYAxisLabel());
   } else if (dataCurve && dataCurve->table()) {
-    setXAxisTitle(dataCurve->table()->colLabel(0));
-    setYAxisTitle(dataCurve->table()->colLabel(1).section(".", 0, 0));
+    auto xTitle = dataCurve->xColumnName();
+    auto yTitle = dataCurve->title().text();
+    // X, Y labels in form "Table-1_axisTitle" so split on '_'
+    auto cleanTitle = [](const QString &title) {
+      if (title.contains(QRegExp("^Table")) && title.contains('_')) {
+        return title.section('_', 1);
+      } else {
+        return title;
+      }
+    };
+    xTitle = cleanTitle(xTitle);
+    yTitle = cleanTitle(yTitle);
+    setXAxisTitle(xTitle);
+    setYAxisTitle(yTitle);
   }
 
   Spectrogram *spec = spectrogram();
@@ -3315,12 +3331,9 @@ bool Graph::zoomOn() {
 
 void Graph::zoomed(const QwtDoubleRect &) { emit modifiedGraph(); }
 bool Graph::hasActiveTool() {
-  if (zoomOn() || drawLineActive() || d_active_tool || d_peak_fit_tool ||
-      d_magnifier || d_panner ||
-      (d_range_selector && d_range_selector->isVisible()))
-    return true;
-
-  return false;
+  return (zoomOn() || drawLineActive() || d_active_tool || d_peak_fit_tool ||
+          d_magnifier || d_panner ||
+          (d_range_selector && d_range_selector->isVisible()));
 }
 
 void Graph::zoom(bool on) {
@@ -4341,8 +4354,10 @@ void Graph::copy(Graph *g) {
       if (pie)
         pie->addLabel(dynamic_cast<PieLabel *>(t), true);
       else
+        // cppcheck-suppress leakReturnValNotUsed
         insertText(t);
     } else
+      // cppcheck-suppress leakReturnValNotUsed
       insertText(t);
   }
 

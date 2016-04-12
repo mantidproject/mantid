@@ -59,22 +59,21 @@ public:
   vtkMDHistoHex4DFactory(const vtkMDHistoHex4DFactory<TimeMapper>& other);
 
   /// Destructor
-  ~vtkMDHistoHex4DFactory();
+  ~vtkMDHistoHex4DFactory() override;
 
   /// Initialize the object with a workspace.
-  virtual void initialize(Mantid::API::Workspace_sptr workspace);
+  void initialize(Mantid::API::Workspace_sptr workspace) override;
 
   /// Factory method
-  vtkSmartPointer<vtkDataSet> create(ProgressAction &progressUpdating) const;
+  vtkSmartPointer<vtkDataSet>
+  create(ProgressAction &progressUpdating) const override;
 
-  virtual std::string getFactoryTypeName() const
-  {
+  std::string getFactoryTypeName() const override {
     return "vtkMDHistoHex4DFactory";
   }
 
 protected:
-
-  virtual void validate() const;
+  void validate() const override;
 
 private:
 

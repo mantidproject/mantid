@@ -22,11 +22,6 @@ DECLARE_FUNCTION(Polynomial)
 Polynomial::Polynomial() : m_n(0) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-Polynomial::~Polynomial() {}
-
-//----------------------------------------------------------------------------------------------
 /** Function to calcualte polynomial
  */
 void Polynomial::function1D(double *out, const double *xValues,
@@ -104,11 +99,7 @@ void Polynomial::functionDeriv1D(API::Jacobian *out, const double *xValues,
 /** Get Attribute names
  * @return A list of attribute names (identical to Polynomial)
 */
-std::vector<std::string> Polynomial::getAttributeNames() const {
-  std::vector<std::string> res;
-  res.push_back("n");
-  return res;
-}
+std::vector<std::string> Polynomial::getAttributeNames() const { return {"n"}; }
 
 //----------------------------------------------------------------------------------------------
 /** Get Attribute

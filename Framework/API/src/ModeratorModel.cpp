@@ -13,9 +13,6 @@ namespace API {
 /// Default constructor required by the factory
 ModeratorModel::ModeratorModel() : m_tiltAngle(0.0) {}
 
-/// Virtual destructor
-ModeratorModel::~ModeratorModel() {}
-
 /**
  * Initialize the object from a string of parameters
  * @param params :: A string containing the parameter names & values
@@ -36,8 +33,8 @@ void ModeratorModel::initialize(const std::string &params) {
         "could be parsed. Check it has the key=value format.");
   }
 
-  for (auto iter = keyValues.begin(); iter != keyValues.end(); ++iter) {
-    setParameterValue(iter->first, iter->second);
+  for (auto &keyValue : keyValues) {
+    setParameterValue(keyValue.first, keyValue.second);
   }
 
   /// Any custom setup

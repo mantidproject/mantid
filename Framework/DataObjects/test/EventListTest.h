@@ -42,7 +42,7 @@ public:
     NUMEVENTS = 100;
   }
 
-  void setUp() {
+  void setUp() override {
     // Make a little event list with 3 events
     vector<TofEvent> mylist;
     mylist.push_back(TofEvent(100, 200));
@@ -66,10 +66,7 @@ public:
   void test_AssignmentOperator() {
     // Modify EventList such that is does not contain default values.
     el.setSpectrumNo(42);
-    MantidVec x;
-    x.push_back(0.1);
-    x.push_back(0.2);
-    x.push_back(0.3);
+    MantidVec x{0.1, 0.2, 0.3};
     el.setX(x);
     el.setDx(x);
 
@@ -89,10 +86,7 @@ public:
   //==================================================================================
 
   void test_PlusOperator() {
-    vector<TofEvent> mylist;
-    mylist.push_back(TofEvent(45, 67));
-    mylist.push_back(TofEvent(89, 12));
-    mylist.push_back(TofEvent(34, 56));
+    vector<TofEvent> mylist{{45, 67}, {89, 12}, {34, 56}};
     el += mylist;
     vector<TofEvent> rel = el.getEvents();
     TS_ASSERT_EQUALS(rel.size(), 6);
@@ -120,12 +114,8 @@ public:
   }
 
   template <class T>
-  void do_test_memory_handling(EventList &el2,
-                               typename std::vector<T> &events) {
-    typename std::vector<T> mylist;
-    mylist.push_back(T(45));
-    mylist.push_back(T(89));
-    mylist.push_back(T(34));
+  void do_test_memory_handling(EventList &el2, std::vector<T> &events) {
+    std::vector<T> mylist{{45}, {89}, {34}};
     el2 += mylist;
     TS_ASSERT_EQUALS(events.size(), 3);
     TS_ASSERT_EQUALS(events.capacity(), 3);
@@ -1349,14 +1339,14 @@ public:
 
   /// Dummy unit for testing conversion
   class DummyUnit1 : public Mantid::Kernel::Units::Degrees {
-    virtual double singleToTOF(const double x) const { return x * 10.; }
-    virtual double singleFromTOF(const double tof) const { return tof / 10.; }
+    double singleToTOF(const double x) const override { return x * 10.; }
+    double singleFromTOF(const double tof) const override { return tof / 10.; }
   };
 
   /// Dummy unit for testing conversion
   class DummyUnit2 : public Mantid::Kernel::Units::Degrees {
-    virtual double singleToTOF(const double x) const { return x / 20.; }
-    virtual double singleFromTOF(const double tof) const { return tof * 20.; }
+    double singleToTOF(const double x) const override { return x / 20.; }
+    double singleFromTOF(const double tof) const override { return tof * 20.; }
   };
 
   //-----------------------------------------------------------------------------------------------
@@ -1480,9 +1470,51 @@ public:
       for (size_t i = 1; i < el.getNumberEvents(); i++) {
         auto tAtSample1 = el.getEvent(i - 1).pulseTime().totalNanoseconds() +
                           static_cast<int64_t>(el.getEvent(i - 1).tof() * 1e3);
-        auto tAtSample2 = el.getEvent(i - 1).pulseTime().totalNanoseconds() +
-                          static_cast<int64_t>(el.getEvent(i - 1).tof() * 1e3);
+        auto tAtSample2 = el.getEvent(i).pulseTime().totalNanoseconds() +
+                          static_cast<int64_t>(el.getEvent(i).tof() * 1e3);
         TSM_ASSERT_LESS_THAN_EQUALS(this_type, tAtSample1, tAtSample2);
+      }
+    }
+  }
+
+  void test_sortByPulseTime_random_tof_and_pulse_time() {
+    for (int this_type = 0; this_type < 3; this_type++) {
+      EventType curType = static_cast<EventType>(this_type);
+      EventList el = this->fake_data();
+      el.switchTo(curType);
+
+      if (curType == WEIGHTED_NOTIME) {
+        continue;
+      }
+
+      TS_ASSERT_THROWS_NOTHING(el.sortPulseTime());
+
+      for (size_t i = 1; i < el.getNumberEvents(); i++) {
+        auto tAtSample1 = el.getEvent(i - 1).pulseTime().totalNanoseconds();
+        auto tAtSample2 = el.getEvent(i).pulseTime().totalNanoseconds();
+        TSM_ASSERT_LESS_THAN_EQUALS(this_type, tAtSample1, tAtSample2);
+      }
+    }
+  }
+
+  void test_sortByPulseTimeTOF_random_tof_and_pulse_time() {
+    for (int this_type = 0; this_type < 3; this_type++) {
+      EventType curType = static_cast<EventType>(this_type);
+      EventList el = this->fake_data();
+      el.switchTo(curType);
+
+      if (curType == WEIGHTED_NOTIME) {
+        continue;
+      }
+
+      TS_ASSERT_THROWS_NOTHING(el.sortPulseTimeTOF());
+
+      for (size_t i = 1; i < el.getNumberEvents(); i++) {
+        TSM_ASSERT_LESS_THAN_EQUALS(this_type, el.getEvent(i - 1).pulseTime(),
+                                    el.getEvent(i).pulseTime());
+        if (el.getEvent(i - 1).pulseTime() == el.getEvent(i).pulseTime())
+          TSM_ASSERT_LESS_THAN_EQUALS(this_type, el.getEvent(i - 1).tof(),
+                                      el.getEvent(i).tof());
       }
     }
   }
@@ -1672,8 +1704,8 @@ public:
     // Output will be 10 event lists
     std::map<int, EventList *> outputs;
     for (int i = 0; i < 10; i++)
-      outputs.insert(std::make_pair(i, new EventList()));
-    outputs.insert(std::make_pair(-1, new EventList()));
+      outputs.emplace(i, new EventList());
+    outputs.emplace(-1, new EventList());
 
     // Generate time splitters
     TimeSplitterType split;
@@ -1727,22 +1759,14 @@ public:
     // Output will be 10 event lists
     std::map<int, EventList *> outputs;
     for (int i = 0; i < 10; i++)
-      outputs.insert(std::make_pair(i, new EventList()));
-    outputs.insert(std::make_pair(-1, new EventList()));
+      outputs.emplace(i, new EventList());
+    outputs.emplace(-1, new EventList());
 
     // Generate time splitters
-    std::vector<int64_t> vec_splitTimes;
-    std::vector<int> vec_splitGroup;
-
-    // Start only at 100
-    for (int i = 1; i <= 10; i++) {
-      vec_splitTimes.push_back(i * 1000000);
-    }
-    vec_splitGroup.assign(vec_splitTimes.size(), -1);
-    vec_splitGroup[1] = 2;
-    vec_splitGroup[3] = 4;
-    vec_splitGroup[5] = 6;
-    vec_splitGroup[7] = 8;
+    std::vector<int64_t> vec_splitTimes{1000000, 2000000, 3000000, 4000000,
+                                        5000000, 6000000, 7000000, 8000000,
+                                        9000000, 10000000};
+    std::vector<int> vec_splitGroup{-1, 2, -1, 4, -1, 6, -1, 8, -1, -1};
 
     for (size_t i = 0; i < vec_splitTimes.size() - 1; ++i) {
       std::cout << "F " << vec_splitTimes[i] << ", " << vec_splitTimes[i + 1]
@@ -2137,8 +2161,8 @@ public:
     // Output will be 10 event lists
     std::map<int, EventList *> outputs;
     for (int i = 0; i < 10; i++)
-      outputs.insert(std::make_pair(i, new EventList()));
-    outputs.insert(std::make_pair(-1, new EventList()));
+      outputs.emplace(i, new EventList());
+    outputs.emplace(-1, new EventList());
 
     // Generate time splitters
     std::vector<int64_t> vec_splitTimes(11);
@@ -2228,8 +2252,8 @@ public:
     // Output will be 10 event lists
     std::map<int, EventList *> outputs;
     for (int i = 0; i < 10; i++)
-      outputs.insert(std::make_pair(i, new EventList()));
-    outputs.insert(std::make_pair(-1, new EventList()));
+      outputs.emplace(i, new EventList());
+    outputs.emplace(-1, new EventList());
 
     // Generate time splitters
     std::vector<int64_t> vec_splitTimes(11);
@@ -2494,7 +2518,7 @@ public:
   MantidVec fineX;
   MantidVec coarseX;
 
-  void setUp() {
+  void setUp() override {
     // Reset the random event list
     el_random.clear();
     el_random += el_random_source;
@@ -2504,7 +2528,7 @@ public:
     el_sorted.setSortOrder(TOF_SORT);
   }
 
-  void tearDown() {}
+  void tearDown() override {}
 
   void test_sort_tof() { el_random.sortTof(); }
 

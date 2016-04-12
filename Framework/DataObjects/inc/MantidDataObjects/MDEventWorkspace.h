@@ -43,8 +43,9 @@ public:
                        Mantid::API::MDNormalization::VolumeNormalization,
                    Mantid::API::MDNormalization preferredNormalizationHisto =
                        Mantid::API::MDNormalization::VolumeNormalization);
-
-  virtual ~MDEventWorkspace();
+  MDEventWorkspace<MDE, nd> &
+  operator=(const MDEventWorkspace<MDE, nd> &other) = delete;
+  ~MDEventWorkspace() override;
 
   /// Returns a clone of the workspace
   std::unique_ptr<MDEventWorkspace> clone() const {
@@ -52,35 +53,35 @@ public:
   }
 
   /// Perform initialization after dimensions (and others) have been set.
-  virtual void initialize();
+  void initialize() override;
 
-  virtual const std::string id() const;
+  const std::string id() const override;
 
   //------------------------ IMDWorkspace Methods
   //-----------------------------------------
 
   /** @returns the number of dimensions in this workspace */
-  virtual size_t getNumDims() const;
+  size_t getNumDims() const override;
 
   /** @returns the total number of points (events) in this workspace */
-  virtual uint64_t getNPoints() const;
-  virtual uint64_t getNEvents() const { return getNPoints(); }
+  uint64_t getNPoints() const override;
+  uint64_t getNEvents() const override { return getNPoints(); }
 
   /// Creates a new iterator pointing to the first cell (box) in the workspace
-  virtual std::vector<Mantid::API::IMDIterator *>
-  createIterators(size_t suggestedNumCores = 1,
-                  Mantid::Geometry::MDImplicitFunction *function = NULL) const;
+  std::vector<Mantid::API::IMDIterator *> createIterators(
+      size_t suggestedNumCores = 1,
+      Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 
   /// Returns the (normalized) signal at a given coordinates
-  virtual signal_t
-  getSignalAtCoord(const coord_t *coords,
-                   const Mantid::API::MDNormalization &normalization) const;
+  signal_t getSignalAtCoord(
+      const coord_t *coords,
+      const Mantid::API::MDNormalization &normalization) const override;
 
   /// Returns the (normalized) signal at a given coordinates
   // or 0 if masked
-  virtual signal_t getSignalWithMaskAtCoord(
+  signal_t getSignalWithMaskAtCoord(
       const coord_t *coords,
-      const Mantid::API::MDNormalization &normalization) const;
+      const Mantid::API::MDNormalization &normalization) const override;
 
   bool isInBounds(const coord_t *coords) const;
 
@@ -88,69 +89,81 @@ public:
   getNormalizedSignal(const API::IMDNode *box,
                       const Mantid::API::MDNormalization &normalization) const;
 
-  virtual void getLinePlot(const Mantid::Kernel::VMD &start,
-                           const Mantid::Kernel::VMD &end,
-                           API::MDNormalization normalize,
-                           std::vector<coord_t> &x, std::vector<signal_t> &y,
-                           std::vector<signal_t> &e) const;
+  signal_t
+  getNormalizedError(const API::IMDNode *box,
+                     const Mantid::API::MDNormalization &normalization) const;
+
+  LinePlot getLinePlot(const Mantid::Kernel::VMD &start,
+                       const Mantid::Kernel::VMD &end,
+                       API::MDNormalization normalize) const override;
+
+  // Get ordered list of boundaries in position-along-the-line coordinates
+  std::set<coord_t> getBoxBoundaryBisectsOnLine(const Kernel::VMD &start,
+                                                const Kernel::VMD &end,
+                                                const size_t num_d,
+                                                const Kernel::VMD &dir,
+                                                const coord_t length) const;
 
   //------------------------ (END) IMDWorkspace Methods
   //-----------------------------------------
 
   /** @returns the number of bytes of memory used by the workspace. */
-  virtual size_t getMemorySize() const;
+  size_t getMemorySize() const override;
 
   //------------------------ IMDEventWorkspace Methods
   //-----------------------------------------
 
   /// Returns the BoxController used in this workspace
-  Mantid::API::BoxController_sptr getBoxController() { return m_BoxController; }
-
-  /// Returns the BoxController used in this workspace
-  Mantid::API::BoxController_const_sptr getBoxController() const {
+  Mantid::API::BoxController_sptr getBoxController() override {
     return m_BoxController;
   }
 
-  virtual std::vector<std::string> getBoxControllerStats() const;
+  /// Returns the BoxController used in this workspace
+  Mantid::API::BoxController_const_sptr getBoxController() const override {
+    return m_BoxController;
+  }
+
+  std::vector<std::string> getBoxControllerStats() const override;
 
   /// @return true if the workspace is file-backed
-  virtual bool isFileBacked() const { return m_BoxController->isFileBacked(); }
+  bool isFileBacked() const override { return m_BoxController->isFileBacked(); }
 
-  std::vector<coord_t> estimateResolution() const;
+  std::vector<coord_t> estimateResolution() const override;
 
-  virtual void splitAllIfNeeded(Kernel::ThreadScheduler *ts);
+  void splitAllIfNeeded(Kernel::ThreadScheduler *ts) override;
 
   void splitTrackedBoxes(Kernel::ThreadScheduler *ts);
 
-  virtual void splitBox();
+  void splitBox() override;
 
-  virtual void refreshCache();
+  void refreshCache() override;
 
-  std::string getEventTypeName() const;
+  std::string getEventTypeName() const override;
   /// return the size (in bytes) of an event, this workspace contains
-  size_t sizeofEvent() const { return sizeof(MDE); }
+  size_t sizeofEvent() const override { return sizeof(MDE); }
 
-  virtual void setMinRecursionDepth(size_t minDepth);
+  void setMinRecursionDepth(size_t minDepth) override;
 
-  Mantid::API::ITableWorkspace_sptr makeBoxTable(size_t start, size_t num);
+  Mantid::API::ITableWorkspace_sptr makeBoxTable(size_t start,
+                                                 size_t num) override;
   //------------------------ (END) IMDEventWorkspace Methods
   //-----------------------------------------
 
-  virtual void getBoxes(std::vector<API::IMDNode *> &boxes, size_t maxDepth,
-                        bool leafOnly) {
+  void getBoxes(std::vector<API::IMDNode *> &boxes, size_t maxDepth,
+                bool leafOnly) override {
     this->getBox()->getBoxes(boxes, maxDepth, leafOnly);
   }
 
-  void addEvent(const MDE &event);
+  size_t addEvent(const MDE &event);
 
   size_t addEvents(const std::vector<MDE> &events);
 
   std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-  getMinimumExtents(size_t depth = 2);
+  getMinimumExtents(size_t depth = 2) override;
 
   /// Return true if the underlying box is a MDGridBox.
   bool isGridBox() {
-    return (dynamic_cast<MDGridBox<MDE, nd> *>(data) != NULL);
+    return dynamic_cast<MDGridBox<MDE, nd> *>(data) != nullptr;
   }
 
   /** @returns a pointer to the box (MDBox or MDGridBox) contained within, */
@@ -167,45 +180,46 @@ public:
   }
 
   /// Apply masking
-  void setMDMasking(Mantid::Geometry::MDImplicitFunction *maskingRegion);
+  void
+  setMDMasking(Mantid::Geometry::MDImplicitFunction *maskingRegion) override;
 
   /// Clear masking
-  void clearMDMasking();
+  void clearMDMasking() override;
 
   /// Get the coordinate system.
-  Kernel::SpecialCoordinateSystem getSpecialCoordinateSystem() const;
+  Kernel::SpecialCoordinateSystem getSpecialCoordinateSystem() const override;
   /// Set the coordinate system.
-  void setCoordinateSystem(const Kernel::SpecialCoordinateSystem coordSystem);
+  void setCoordinateSystem(
+      const Kernel::SpecialCoordinateSystem coordSystem) override;
   /// make the workspace file backed if it has not been already file backed;
   virtual void setFileBacked(const std::string &fileName);
   /// if workspace was file-backed, this should clear file-backed information
   /// and close back-up files.
-  virtual void clearFileBacked(bool LoadFileBackedData);
+  void clearFileBacked(bool LoadFileBackedData) override;
 
   /// Preferred visual normalizaiton method for any histo workspaces created
   /// from this.
-  virtual void setDisplayNormalizationHisto(
-      Mantid::API::MDNormalization preferredNormalizationHisto);
-  virtual Mantid::API::MDNormalization displayNormalizationHisto() const;
+  void setDisplayNormalizationHisto(
+      Mantid::API::MDNormalization preferredNormalizationHisto) override;
+  Mantid::API::MDNormalization displayNormalizationHisto() const override;
 
   /// Preferred visual normalization method.
-  virtual void
-  setDisplayNormalization(Mantid::API::MDNormalization preferredNormalization);
-  virtual Mantid::API::MDNormalization displayNormalization() const;
+  void setDisplayNormalization(
+      Mantid::API::MDNormalization preferredNormalization) override;
+  Mantid::API::MDNormalization displayNormalization() const override;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  /// Windows Visual Studio 2012 has trouble with declaration without definition
-  /// so we provide one that throws an error. This seems template related.
-  /// TODO: clean this up.
-  MDEventWorkspace<MDE, nd> &operator=(const MDEventWorkspace<MDE, nd> &other) {
-    throw std::runtime_error("MDEventWorkspace::operator= not implemented.");
-    // this codepath should never be reached, prevent unused parameter warning:
-    setTitle(other.getTitle());
-    return *this;
-  }
+
+  /// Insert box bisects in position-along-line coords in a single dimension
+  void getBoundariesInDimension(const Mantid::Kernel::VMD &start,
+                                const Mantid::Kernel::VMD &dir,
+                                const size_t num_boundaries,
+                                const coord_t length,
+                                const coord_t dir_current_dim,
+                                const coord_t box_size,
+                                std::set<coord_t> &mid_points) const;
 
   /** MDBox containing all of the events in the workspace. */
   MDBoxBase<MDE, nd> *data;
@@ -219,7 +233,7 @@ protected:
   Mantid::API::MDNormalization m_displayNormalizationHisto;
 
 private:
-  virtual MDEventWorkspace *doClone() const {
+  MDEventWorkspace *doClone() const override {
     return new MDEventWorkspace(*this);
   }
 

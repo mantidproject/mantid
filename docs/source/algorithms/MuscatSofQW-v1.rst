@@ -23,6 +23,12 @@ present when using ConvFit to fit either one or two Lorentzians:
 - program="ConvFit"
 - 'lorenztians'
 
+Workflow
+--------
+
+.. diagram:: MuscatSofQW-v1_wkflw.dot
+
+
 Usage
 -----
 

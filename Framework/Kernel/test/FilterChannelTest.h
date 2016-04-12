@@ -10,6 +10,7 @@
 #include <Poco/Message.h>
 #include <Poco/LoggingFactory.h>
 #include <Poco/LoggingRegistry.h>
+#include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <map>
 #include <string>
@@ -95,7 +96,7 @@ public:
   }
 
   void testAddChannel() {
-    boost::shared_ptr<TestChannel> tChannel(new TestChannel);
+    boost::shared_ptr<TestChannel> tChannel = boost::make_shared<TestChannel>();
     Poco::FilterChannel a;
     TestChannel *empty = 0;
 
@@ -105,7 +106,7 @@ public:
   }
 
   void testLogMessage() {
-    boost::shared_ptr<TestChannel> tChannel(new TestChannel);
+    boost::shared_ptr<TestChannel> tChannel = boost::make_shared<TestChannel>();
     Poco::FilterChannel a;
     a.addChannel(tChannel.get());
     Poco::Message msg;
@@ -114,7 +115,7 @@ public:
   }
   void testSimpleLogMessagesByPriority() {
     // initialise the channel
-    boost::shared_ptr<TestChannel> tChannel(new TestChannel);
+    boost::shared_ptr<TestChannel> tChannel = boost::make_shared<TestChannel>();
     Poco::FilterChannel a;
     a.addChannel(tChannel.get());
     Poco::Message msg;
@@ -134,7 +135,7 @@ public:
   }
   void testLogMessagesByPriority() {
     // initialise the channel
-    boost::shared_ptr<TestChannel> tChannel(new TestChannel);
+    boost::shared_ptr<TestChannel> tChannel = boost::make_shared<TestChannel>();
     Poco::FilterChannel a;
     a.addChannel(tChannel.get());
 

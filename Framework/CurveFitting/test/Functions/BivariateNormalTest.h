@@ -42,10 +42,10 @@ private:
 public:
   Jacob(int nparams, int npoints) { M = Matrix<double>(nparams, npoints); }
 
-  ~Jacob() {}
-  void set(size_t iY, size_t iP, double value) { M[iP][iY] = value; }
+  ~Jacob() override {}
+  void set(size_t iY, size_t iP, double value) override { M[iP][iY] = value; }
 
-  double get(size_t iY, size_t iP) { return M[iP][iY]; }
+  double get(size_t iY, size_t iP) override { return M[iP][iY]; }
 };
 
 class BivariateNormalTest : public CxxTest::TestSuite {
@@ -121,7 +121,7 @@ public:
     double xx[nCells];
     for (int i = 0; i < nCells; i++) {
       xx[i] = i;
-      x_vec_ptr.access().push_back((double)i);
+      x_vec_ptr.access().push_back(static_cast<double>(i));
     }
     NormalFit.setAttributeValue("CalcVariances", CalcVariances);
 
@@ -145,7 +145,7 @@ public:
 
     std::vector<double> out(nCells);
 
-    boost::shared_ptr<Jacob> Jac(new Jacob(7, nCells));
+    boost::shared_ptr<Jacob> Jac = boost::make_shared<Jacob>(7, nCells);
 
     NormalFit.functionDeriv1D(Jac.get(), xx, nCells);
 

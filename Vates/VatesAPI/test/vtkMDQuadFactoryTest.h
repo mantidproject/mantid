@@ -35,27 +35,31 @@ public:
 
   void testInitializeDelegatesToSuccessor()
   {
-    auto mockSuccessor = Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
+    auto mockSuccessor = new MockvtkDataSetFactory();
+    auto uniqueSuccessor =
+        std::unique_ptr<MockvtkDataSetFactory>(mockSuccessor);
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
     vtkMDQuadFactory factory(boost::make_shared<NoThresholdRange>(),
                              Mantid::VATES::VolumeNormalization);
-    factory.SetSuccessor(std::move(mockSuccessor));
+    factory.setSuccessor(std::move(uniqueSuccessor));
 
     ITableWorkspace_sptr ws =
         boost::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
 
     TSM_ASSERT("Successor has not been used properly.",
-               Mock::VerifyAndClearExpectations(mockSuccessor.get()));
+               Mock::VerifyAndClearExpectations(mockSuccessor));
   }
 
   void testCreateDelegatesToSuccessor()
   {
     FakeProgressAction progressUpdate;
 
-    auto mockSuccessor = Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
+    auto mockSuccessor = new MockvtkDataSetFactory();
+    auto uniqueSuccessor =
+        std::unique_ptr<MockvtkDataSetFactory>(mockSuccessor);
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
     EXPECT_CALL(*mockSuccessor, create(Ref(progressUpdate)))
         .Times(1)
@@ -64,7 +68,7 @@ public:
 
     vtkMDQuadFactory factory(boost::make_shared<NoThresholdRange>(),
                              Mantid::VATES::VolumeNormalization);
-    factory.SetSuccessor(std::move(mockSuccessor));
+    factory.setSuccessor(std::move(uniqueSuccessor));
 
     ITableWorkspace_sptr ws =
         boost::make_shared<Mantid::DataObjects::TableWorkspace>();
@@ -72,7 +76,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdate));
 
     TSM_ASSERT("Successor has not been used properly.",
-               Mock::VerifyAndClearExpectations(mockSuccessor.get()));
+               Mock::VerifyAndClearExpectations(mockSuccessor));
   }
 
   void testOnInitaliseCannotDelegateToSuccessor()
@@ -142,9 +146,7 @@ class vtkMDQuadFactoryTestPerformance : public CxxTest::TestSuite
 {
 
 public:
-
-  void setUp()
-  {
+  void setUp() override {
     boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<2>,2> > input 
       = MDEventsTestHelper::makeMDEWFull<2>(10, 10, 10, 1000);
     //Rebin it to make it possible to compare cells to bins.
@@ -158,10 +160,7 @@ public:
     slice->execute();
   }
 
-  void tearDown()
-  {
-    AnalysisDataService::Instance().remove("binned");
-  }
+  void tearDown() override { AnalysisDataService::Instance().remove("binned"); }
 
   void testCreationOnLargeWorkspace()
   {

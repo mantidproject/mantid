@@ -1,10 +1,12 @@
-#include "MantidLiveData/MonitorLiveData.h"
-#include "MantidKernel/System.h"
-#include "MantidLiveData/LoadLiveData.h"
-#include <Poco/Thread.h>
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/WriteLock.h"
+#include "MantidLiveData/LoadLiveData.h"
+#include "MantidLiveData/MonitorLiveData.h"
+
+#include <Poco/Thread.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -41,9 +43,9 @@ int MonitorLiveData::version() const { return 1; }
 /** Initialize the algorithm's properties.
  */
 void MonitorLiveData::init() {
-  declareProperty(
-      new PropertyWithValue<double>("UpdateEvery", 60.0, Direction::Input),
-      "Frequency of updates, in seconds. Default 60.");
+  declareProperty(make_unique<PropertyWithValue<double>>("UpdateEvery", 60.0,
+                                                         Direction::Input),
+                  "Frequency of updates, in seconds. Default 60.");
 
   this->initProps();
 }

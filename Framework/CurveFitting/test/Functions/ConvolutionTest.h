@@ -48,10 +48,10 @@ public:
     declareParameter("s", 1.);
   }
 
-  std::string name() const { return "ConvolutionTest_Gauss"; }
+  std::string name() const override { return "ConvolutionTest_Gauss"; }
 
   void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const {
+                     const size_t nData) const override {
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
@@ -61,7 +61,7 @@ public:
     }
   }
   void functionDerivLocal(Jacobian *out, const double *xValues,
-                          const size_t nData) {
+                          const size_t nData) override {
     // throw Mantid::Kernel::Exception::NotImplementedError("");
     double c = getParameter("c");
     double h = getParameter("h");
@@ -75,16 +75,16 @@ public:
     }
   }
 
-  double centre() const { return getParameter(0); }
+  double centre() const override { return getParameter(0); }
 
-  double height() const { return getParameter(1); }
+  double height() const override { return getParameter(1); }
 
-  double fwhm() const { return getParameter(2); }
+  double fwhm() const override { return getParameter(2); }
 
-  void setCentre(const double c) { setParameter(0, c); }
-  void setHeight(const double h) { setParameter(1, h); }
+  void setCentre(const double c) override { setParameter(0, c); }
+  void setHeight(const double h) override { setParameter(1, h); }
 
-  void setFwhm(const double w) { setParameter(2, w); }
+  void setFwhm(const double w) override { setParameter(2, w); }
 };
 
 class ConvolutionTest_Lorentz : public IPeakFunction {
@@ -95,10 +95,10 @@ public:
     declareParameter("w", 1.);
   }
 
-  std::string name() const { return "ConvolutionTest_Lorentz"; }
+  std::string name() const override { return "ConvolutionTest_Lorentz"; }
 
   void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const {
+                     const size_t nData) const override {
     const double height = getParameter("h");
     const double peakCentre = getParameter("c");
     const double hwhm = getParameter("w");
@@ -110,7 +110,7 @@ public:
   }
 
   void functionDerivLocal(Jacobian *out, const double *xValues,
-                          const size_t nData) {
+                          const size_t nData) override {
     const double height = getParameter("h");
     const double peakCentre = getParameter("c");
     const double hwhm = getParameter("w");
@@ -126,13 +126,13 @@ public:
     }
   }
 
-  double centre() const { return getParameter(0); }
-  double height() const { return getParameter(1); }
-  double fwhm() const { return getParameter(2); }
+  double centre() const override { return getParameter(0); }
+  double height() const override { return getParameter(1); }
+  double fwhm() const override { return getParameter(2); }
 
-  void setCentre(const double c) { setParameter(0, c); }
-  void setHeight(const double h) { setParameter(1, h); }
-  void setFwhm(const double w) { setParameter(2, w); }
+  void setCentre(const double c) override { setParameter(0, c); }
+  void setHeight(const double h) override { setParameter(1, h); }
+  void setFwhm(const double w) override { setParameter(2, w); }
 };
 
 class ConvolutionTest_Linear : public ParamFunction, public IFunction1D {
@@ -142,10 +142,10 @@ public:
     declareParameter("b");
   }
 
-  std::string name() const { return "ConvolutionTest_Linear"; }
+  std::string name() const override { return "ConvolutionTest_Linear"; }
 
   void function1D(double *out, const double *xValues,
-                  const size_t nData) const {
+                  const size_t nData) const override {
     double a = getParameter("a");
     double b = getParameter("b");
     for (size_t i = 0; i < nData; i++) {
@@ -153,7 +153,7 @@ public:
     }
   }
   void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) {
+                       const size_t nData) override {
     // throw Mantid::Kernel::Exception::NotImplementedError("");
     for (size_t i = 0; i < nData; i++) {
       out->set(i, 0, 1.);
@@ -266,7 +266,8 @@ public:
 
     double a = 1.3;
     double h = 3.;
-    boost::shared_ptr<ConvolutionTest_Gauss> res(new ConvolutionTest_Gauss);
+    boost::shared_ptr<ConvolutionTest_Gauss> res =
+        boost::make_shared<ConvolutionTest_Gauss>();
     res->setParameter("c", 0);
     res->setParameter("h", h);
     res->setParameter("s", a);
@@ -315,7 +316,8 @@ public:
     double c1 = 0.;
     double h1 = 3;
     double s1 = pi / 2;
-    boost::shared_ptr<ConvolutionTest_Gauss> res(new ConvolutionTest_Gauss);
+    boost::shared_ptr<ConvolutionTest_Gauss> res =
+        boost::make_shared<ConvolutionTest_Gauss>();
     res->setParameter("c", c1);
     res->setParameter("h", h1);
     res->setParameter("s", s1);
@@ -332,7 +334,8 @@ public:
     double c2 = x0 + Dx / 2;
     double h2 = 10.;
     double s2 = pi / 3;
-    boost::shared_ptr<ConvolutionTest_Gauss> fun(new ConvolutionTest_Gauss);
+    boost::shared_ptr<ConvolutionTest_Gauss> fun =
+        boost::make_shared<ConvolutionTest_Gauss>();
     fun->setParameter("c", c2);
     fun->setParameter("h", h2);
     fun->setParameter("s", s2);
@@ -370,22 +373,25 @@ public:
 
   void testConvolution_fit_resolution() {
 
-    boost::shared_ptr<WorkspaceTester> data(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> data =
+        boost::make_shared<WorkspaceTester>();
     data->init(1, 100, 100);
     for (size_t i = 0; i < data->blocksize(); i++) {
       data->dataX(0)[i] = -10.0 + 0.2 * double(i);
     }
 
-    boost::shared_ptr<Convolution> conv(new Convolution);
+    boost::shared_ptr<Convolution> conv = boost::make_shared<Convolution>();
 
-    boost::shared_ptr<ConvolutionTest_Gauss> res(new ConvolutionTest_Gauss);
+    boost::shared_ptr<ConvolutionTest_Gauss> res =
+        boost::make_shared<ConvolutionTest_Gauss>();
     res->setParameter("c", 0);
     res->setParameter("h", 1);
     res->setParameter("s", 2);
 
     conv->addFunction(res);
 
-    boost::shared_ptr<ConvolutionTest_Lorentz> fun(new ConvolutionTest_Lorentz);
+    boost::shared_ptr<ConvolutionTest_Lorentz> fun =
+        boost::make_shared<ConvolutionTest_Lorentz>();
     fun->setParameter("c", 0);
     fun->setParameter("h", 2);
     fun->setParameter("w", 0.5);

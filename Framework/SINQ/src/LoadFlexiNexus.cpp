@@ -1,13 +1,17 @@
 #include "MantidSINQ/LoadFlexiNexus.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Utils.h"
+
+#include <boost/algorithm/string.hpp>
+
 #include <fstream>
 #include <sstream>
-#include <boost/algorithm/string.hpp>
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadFlexiNexus)
@@ -24,14 +28,16 @@ using namespace ::NeXus;
 
 void LoadFlexiNexus::init() {
 
-  declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".hdf", ".h5", ""}),
-      "A NeXus file");
-  declareProperty(new FileProperty("Dictionary", "", FileProperty::Load,
-                                   {".txt", ".dic", ""}),
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::Load,
+                      std::vector<std::string>{".hdf", ".h5", ""}),
+                  "A NeXus file");
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "Dictionary", "", FileProperty::Load,
+                      std::vector<std::string>{".txt", ".dic", ""}),
                   "A Dictionary for controlling NeXus loading");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output));
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+      "OutputWorkspace", "", Direction::Output));
 }
 
 void LoadFlexiNexus::exec() {
@@ -128,7 +134,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
   if ((it = dictionary.find("x-axis")) == dictionary.end()) {
     xData.resize(spectraLength);
     for (int i = 0; i < spectraLength; i++) {
-      xData[i] = (double)i;
+      xData[i] = static_cast<double>(i);
     }
   } else {
     if (safeOpenpath(fin, it->second)) {
@@ -141,7 +147,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
   if ((it = dictionary.find("y-axis")) == dictionary.end()) {
     yData.resize(nSpectra);
     for (int i = 0; i < nSpectra; i++) {
-      yData[i] = (double)i;
+      yData[i] = static_cast<double>(i);
     }
   } else {
     if (safeOpenpath(fin, it->second)) {
@@ -164,7 +170,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
     ws->setX(wsIndex, xData);
     // Xtof		ws->getAxis(1)->spectraNo(i)= i;
     ws->getSpectrum(wsIndex)
-        ->setSpectrumNo(static_cast<specid_t>(yData[wsIndex]));
+        ->setSpectrumNo(static_cast<specnum_t>(yData[wsIndex]));
     ws->getSpectrum(wsIndex)
         ->setDetectorID(static_cast<detid_t>(yData[wsIndex]));
   }
@@ -203,7 +209,7 @@ void LoadFlexiNexus::loadMD(NeXus::File *fin) {
     dimensions.push_back(makeDimension(fin, k, static_cast<int>(inf.dims[k])));
   }
 
-  MDHistoWorkspace_sptr ws(new MDHistoWorkspace(dimensions));
+  auto ws = boost::make_shared<MDHistoWorkspace>(dimensions);
 
   signal_t *dd = ws->getSignalArray();
   signal_t *ddE = ws->getErrorSquaredArray();
@@ -223,14 +229,14 @@ void LoadFlexiNexus::loadMD(NeXus::File *fin) {
   setProperty("OutputWorkspace", ws);
 }
 int LoadFlexiNexus::calculateCAddress(int *pos, int *dim, int rank) {
-  int result = (int)pos[rank - 1];
+  int result = pos[rank - 1];
   for (int i = 0; i < rank - 1; i++) {
     int mult = 1;
     for (int j = rank - 1; j > i; j--) {
       mult *= dim[j];
     }
-    if ((int)pos[i] < dim[i] && (int)pos[i] > 0) {
-      result += mult * (int)pos[i];
+    if (pos[i] < dim[i] && pos[i] > 0) {
+      result += mult * pos[i];
     }
   }
   return result;
@@ -269,7 +275,7 @@ MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index,
   if ((it = dictionary.find(dataName)) == dictionary.end()) {
     dData.resize(length);
     for (int i = 0; i < length; i++) {
-      dData[i] = (double)i;
+      dData[i] = static_cast<double>(i);
     }
   } else {
     if (safeOpenpath(fin, it->second)) {
@@ -277,7 +283,7 @@ MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index,
     } else {
       dData.resize(length);
       for (int i = 0; i < length; i++) {
-        dData[i] = (double)i;
+        dData[i] = static_cast<double>(i);
       }
     }
   }
@@ -335,7 +341,7 @@ void LoadFlexiNexus::addMetaData(NeXus::File *fin, Workspace_sptr ws,
   * load all the extras into the Run information
   */
   Run &r = info->mutableRun();
-  std::set<std::string> specialMap = populateSpecialMap();
+  auto specialMap = populateSpecialMap();
   for (it = dictionary.begin(); it != dictionary.end(); ++it) {
     if (specialMap.find(it->first) == specialMap.end()) {
       // not in specials!
@@ -362,8 +368,8 @@ void LoadFlexiNexus::addMetaData(NeXus::File *fin, Workspace_sptr ws,
     }
   }
 }
-std::set<std::string> LoadFlexiNexus::populateSpecialMap() {
-  std::set<std::string> specialMap;
+std::unordered_set<std::string> LoadFlexiNexus::populateSpecialMap() {
+  std::unordered_set<std::string> specialMap;
 
   specialMap.insert("title");
   specialMap.insert("data");

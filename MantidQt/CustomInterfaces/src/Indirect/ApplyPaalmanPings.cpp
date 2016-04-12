@@ -128,7 +128,7 @@ void ApplyPaalmanPings::run() {
     } else {
       // Check for same binning across sample and container
       if (!checkWorkspaceBinningMatches(sampleWs, canCloneWs)) {
-        QString text =
+        const char *text =
             "Binning on sample and container does not match."
             "Would you like to rebin the container to match the sample?";
 
@@ -165,15 +165,14 @@ void ApplyPaalmanPings::run() {
         if (interpolateAll) {
           result = QMessageBox::Yes;
         } else {
-          QString text = "Number of bins on sample and " +
-                         QString::fromStdString(factorWs->name()) +
-                         " workspace does not match.\n" +
-                         "Would you like to interpolate this workspace to "
-                         "match the sample?";
+          std::string text = "Number of bins on sample and " +
+                             factorWs->name() + " workspace does not match.\n" +
+                             "Would you like to interpolate this workspace to "
+                             "match the sample?";
 
-          result = QMessageBox::question(NULL, tr("Interpolate corrections?"),
-                                         tr(text), QMessageBox::YesToAll,
-                                         QMessageBox::Yes, QMessageBox::No);
+          result = QMessageBox::question(
+              NULL, tr("Interpolate corrections?"), tr(text.c_str()),
+              QMessageBox::YesToAll, QMessageBox::Yes, QMessageBox::No);
         }
 
         switch (result) {
@@ -487,21 +486,21 @@ void ApplyPaalmanPings::handleGeometryChange(int index) {
 /**
  * Replots the preview plot.
  *
- * @param specIndex Spectrum index to plot
+ * @param wsIndex Spectrum index to plot
  */
-void ApplyPaalmanPings::plotPreview(int specIndex) {
+void ApplyPaalmanPings::plotPreview(int wsIndex) {
   bool useCan = m_uiForm.ckUseCan->isChecked();
 
   m_uiForm.ppPreview->clear();
 
   // Plot sample
   m_uiForm.ppPreview->addSpectrum(
-      "Sample", m_uiForm.dsSample->getCurrentDataName(), specIndex, Qt::black);
+      "Sample", m_uiForm.dsSample->getCurrentDataName(), wsIndex, Qt::black);
 
   // Plot result
   if (!m_pythonExportWsName.empty())
     m_uiForm.ppPreview->addSpectrum(
-        "Corrected", QString::fromStdString(m_pythonExportWsName), specIndex,
+        "Corrected", QString::fromStdString(m_pythonExportWsName), wsIndex,
         Qt::green);
 
   // Scale can
@@ -523,16 +522,16 @@ void ApplyPaalmanPings::plotPreview(int specIndex) {
     // Plot container
     if (m_uiForm.ckScaleCan->isChecked()) {
       m_uiForm.ppPreview->addSpectrum("Container", "__container_corrected",
-                                      specIndex, Qt::red);
+                                      wsIndex, Qt::red);
     } else {
       if (m_uiForm.ckShiftCan->isChecked()) {
         m_uiForm.ppPreview->addSpectrum(
             "Container",
             (m_uiForm.dsContainer->getCurrentDataName() + "_Shifted"),
-            specIndex, Qt::red);
+            wsIndex, Qt::red);
       } else {
         m_uiForm.ppPreview->addSpectrum(
-            "Container", m_uiForm.dsContainer->getCurrentDataName(), specIndex,
+            "Container", m_uiForm.dsContainer->getCurrentDataName(), wsIndex,
             Qt::red);
       }
     }

@@ -6,6 +6,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
@@ -63,8 +64,8 @@ const std::string MDNormSCD::name() const { return "MDNormSCD"; }
   * Initialize the algorithm's properties.
   */
 void MDNormSCD::init() {
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDWorkspace.");
 
   std::string dimChars = getDimensionChars();
@@ -75,7 +76,8 @@ void MDNormSCD::init() {
     dim[0] = dimChars[i];
     std::string propName = "AlignedDim" + dim;
     declareProperty(
-        new PropertyWithValue<std::string>(propName, "", Direction::Input),
+        Kernel::make_unique<PropertyWithValue<std::string>>(propName, "",
+                                                            Direction::Input),
         "Binning parameters for the " + Strings::toString(i) +
             "th dimension.\n"
             "Enter it as a comma-separated list of values with the format: "
@@ -88,19 +90,19 @@ void MDNormSCD::init() {
   fluxValidator->add<CommonBinsValidator>();
   auto solidAngleValidator = fluxValidator->clone();
 
-  declareProperty(new WorkspaceProperty<>("FluxWorkspace", "", Direction::Input,
-                                          fluxValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "FluxWorkspace", "", Direction::Input, fluxValidator),
                   "An input workspace containing momentum dependent flux.");
-  declareProperty(new WorkspaceProperty<>("SolidAngleWorkspace", "",
-                                          Direction::Input,
-                                          solidAngleValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>("SolidAngleWorkspace", "",
+                                                   Direction::Input,
+                                                   solidAngleValidator),
                   "An input workspace containing momentum integrated vanadium "
                   "(a measure of the solid angle).");
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "A name for the output data MDHistoWorkspace.");
-  declareProperty(new WorkspaceProperty<Workspace>(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputNormalizationWorkspace", "", Direction::Output),
                   "A name for the output normalization MDHistoWorkspace.");
 }
@@ -112,6 +114,7 @@ void MDNormSCD::init() {
 void MDNormSCD::exec() {
   cacheInputs();
   auto outputWS = binInputWS();
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   setProperty<Workspace_sptr>("OutputWorkspace", outputWS);
   createNormalizationWS(*outputWS);
   setProperty("OutputNormalizationWorkspace", m_normWS);
@@ -155,7 +158,7 @@ void MDNormSCD::cacheInputs() {
   const auto &exptInfoZero = *(m_inputWS->getExperimentInfo(0));
   auto source = exptInfoZero.getInstrument()->getSource();
   auto sample = exptInfoZero.getInstrument()->getSample();
-  if (source == NULL || sample == NULL) {
+  if (source == nullptr || sample == nullptr) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Instrument not sufficiently defined: failed to get source and/or "
         "sample");
@@ -183,9 +186,9 @@ std::string MDNormSCD::inputEnergyMode() const {
     // get dEAnalysisMode
     PropertyHistories histvec =
         hist.getAlgorithmHistory(nalgs - 2)->getProperties();
-    for (auto it = histvec.begin(); it != histvec.end(); ++it) {
-      if ((*it)->name() == "dEAnalysisMode") {
-        emode = (*it)->value();
+    for (auto &hist : histvec) {
+      if (hist->name() == "dEAnalysisMode") {
+        emode = hist->value();
         break;
       }
     }
@@ -205,11 +208,11 @@ MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
   const auto &props = getProperties();
   IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", 0.0, 0.3);
   binMD->setPropertyValue("AxisAligned", "1");
-  for (auto it = props.begin(); it != props.end(); ++it) {
-    const auto &propName = (*it)->name();
+  for (auto prop : props) {
+    const auto &propName = prop->name();
     if (propName != "FluxWorkspace" && propName != "SolidAngleWorkspace" &&
         propName != "OutputNormalizationWorkspace") {
-      binMD->setPropertyValue(propName, (*it)->value());
+      binMD->setPropertyValue(propName, prop->value());
     }
   }
   binMD->executeAsChildAlg();
@@ -399,7 +402,7 @@ void MDNormSCD::calculateNormalization(
   const detid2index_map solidAngDetToIdx =
       solidAngleWS->getDetectorIDToWorkspaceIndexMap();
 
-  auto *prog = new API::Progress(this, 0.3, 1.0, ndets);
+  auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
   PARALLEL_FOR1(integrFlux)
   for (int64_t i = 0; i < ndets; i++) {
     PARALLEL_START_INTERUPT_REGION
@@ -491,8 +494,6 @@ void MDNormSCD::calculateNormalization(
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
-  delete prog;
 }
 
 /**
@@ -588,8 +589,7 @@ MDNormSCD::removeGroupedIDs(const ExperimentInfo &exptInfo,
                                  // double to the correct size once
   std::set<detid_t> groupedIDs;
 
-  for (auto iter = detIDs.begin(); iter != detIDs.end(); ++iter) {
-    detid_t curID = *iter;
+  for (auto curID : detIDs) {
     if (groupedIDs.count(curID) == 1)
       continue; // Already been processed
 
@@ -642,6 +642,10 @@ std::vector<Kernel::VMD> MDNormSCD::calculateIntersections(const double theta,
                                                            const double phi) {
   V3D q(-sin(theta) * cos(phi), -sin(theta) * sin(phi), 1. - cos(theta));
   q = m_rubw * q;
+  if (convention == "Crystallography") {
+    q *= -1;
+  }
+
   double hStart = q.X() * m_kiMin, hEnd = q.X() * m_kiMax;
   double kStart = q.Y() * m_kiMin, kEnd = q.Y() * m_kiMax;
   double lStart = q.Z() * m_kiMin, lEnd = q.Z() * m_kiMax;

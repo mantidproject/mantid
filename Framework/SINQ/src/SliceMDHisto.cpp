@@ -24,13 +24,13 @@ using namespace Mantid;
 SliceMDHisto::SliceMDHisto() : Mantid::API::Algorithm(), m_rank(0), m_dim() {}
 
 void SliceMDHisto::init() {
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
-                                                           Direction::Input));
-  declareProperty(new ArrayProperty<int>("Start"),
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+      "InputWorkspace", "", Direction::Input));
+  declareProperty(make_unique<ArrayProperty<int>>("Start"),
                   "A comma separated list of min,for each dimension");
-  declareProperty(new ArrayProperty<int>("End"),
+  declareProperty(make_unique<ArrayProperty<int>>("End"),
                   "A comma separated list of max for each dimension");
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
       "OutputWorkspace", "", Direction::Output));
 }
 
@@ -78,10 +78,12 @@ void SliceMDHisto::exec() {
         arDim->getName(), arDim->getName(), arDim->getMDFrame(),
         arDim->getX(start[k]), arDim->getX(end[k]), end[k] - start[k])));
   }
-  MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(dimensions));
+  auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
 
-  coord_t *sourceDim = (coord_t *)malloc(m_rank * sizeof(coord_t));
-  coord_t *targetDim = (coord_t *)malloc(m_rank * sizeof(coord_t));
+  coord_t *sourceDim =
+      reinterpret_cast<coord_t *>(malloc(m_rank * sizeof(coord_t)));
+  coord_t *targetDim =
+      reinterpret_cast<coord_t *>(malloc(m_rank * sizeof(coord_t)));
   cutData(inWS, outWS, sourceDim, targetDim, start, end, 0);
   free(sourceDim);
   free(targetDim);

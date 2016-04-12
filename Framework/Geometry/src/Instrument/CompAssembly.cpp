@@ -1,5 +1,6 @@
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
@@ -16,14 +17,14 @@ using Kernel::Quat;
 /** Empty constructor
  */
 CompAssembly::CompAssembly()
-    : Component(), m_children(), m_cachedBoundingBox(NULL) {}
+    : Component(), m_children(), m_cachedBoundingBox(nullptr) {}
 
 /** Constructor for a parametrized CompAssembly
  * @param base: the base (un-parametrized) IComponent
  * @param map: pointer to the ParameterMap
  * */
 CompAssembly::CompAssembly(const IComponent *base, const ParameterMap *map)
-    : Component(base, map), m_children(), m_cachedBoundingBox(NULL) {}
+    : Component(base, map), m_children(), m_cachedBoundingBox(nullptr) {}
 
 /** Valued constructor
  *  @param n :: name of the assembly
@@ -35,7 +36,7 @@ CompAssembly::CompAssembly(const IComponent *base, const ParameterMap *map)
  *  this is registered as a children of reference.
  */
 CompAssembly::CompAssembly(const std::string &n, IComponent *reference)
-    : Component(n, reference), m_children(), m_cachedBoundingBox(NULL) {
+    : Component(n, reference), m_children(), m_cachedBoundingBox(nullptr) {
   if (reference) {
     ICompAssembly *test = dynamic_cast<ICompAssembly *>(reference);
     if (test) {
@@ -48,7 +49,7 @@ CompAssembly::CompAssembly(const std::string &n, IComponent *reference)
  *  @param assem :: assembly to copy
  */
 CompAssembly::CompAssembly(const CompAssembly &assem)
-    : Component(assem), m_children(assem.m_children),
+    : ICompAssembly(assem), Component(assem), m_children(assem.m_children),
       m_cachedBoundingBox(assem.m_cachedBoundingBox) {
   // Need to do a deep copy
   comp_it it;
@@ -65,8 +66,8 @@ CompAssembly::~CompAssembly() {
   if (m_cachedBoundingBox)
     delete m_cachedBoundingBox;
   // Iterate over pointers in m_children, deleting them
-  for (auto it = m_children.begin(); it != m_children.end(); ++it) {
-    delete *it;
+  for (auto &child : m_children) {
+    delete child;
   }
   m_children.clear();
 }
@@ -287,9 +288,7 @@ CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
   // are higher-level components
   // I found some useful info here
   // http://www.cs.bu.edu/teaching/c/tree/breadth-first/
-  std::deque<boost::shared_ptr<const ICompAssembly>> nodeQueue;
-  // Need to be able to enter the while loop
-  nodeQueue.push_back(thisNode);
+  std::deque<boost::shared_ptr<const ICompAssembly>> nodeQueue{thisNode};
   const bool limitSearch(nlevels > 0);
   while (!nodeQueue.empty()) {
     // get the next node in the queue
@@ -307,12 +306,19 @@ CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
     }
 
     auto rectDet = boost::dynamic_pointer_cast<const RectangularDetector>(node);
+    auto structDet =
+        boost::dynamic_pointer_cast<const StructuredDetector>(node);
+
     if (bool(rectDet) && (node != thisNode)) {
       // for rectangular detectors search the depth rather than siblings
       // as there
       // is a specific naming convention to speed things along
       auto child = rectDet->getComponentByName(cname, nlevels);
       if (child)
+        return child;
+    } else if (bool(structDet) && (node != thisNode)) {
+      auto child = rectDet->getComponentByName(cname, nlevels);
+      if (child != nullptr)
         return child;
     } else {
       // loop over the children
@@ -324,7 +330,8 @@ CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
         } else {
           // only add things if max-recursion depth hasn't been reached
           if ((!limitSearch) || (depth + 1 < nlevels)) {
-            // don't bother adding things to the queue that aren't assemblies
+            // don't bother adding things to the queue that aren't
+            // assemblies
             boost::shared_ptr<const ICompAssembly> compAssembly =
                 boost::dynamic_pointer_cast<const ICompAssembly>(comp);
             if (bool(compAssembly)) {
@@ -371,10 +378,10 @@ void CompAssembly::getBoundingBox(BoundingBox &assemblyBox) const {
     if (!m_cachedBoundingBox) {
       m_cachedBoundingBox = new BoundingBox();
       // Loop over the children and define a box large enough for all of them
-      for (auto it = m_children.cbegin(); it != m_children.cend(); ++it) {
+      for (auto child : m_children) {
         BoundingBox compBox;
-        if (*it) {
-          (*it)->getBoundingBox(compBox);
+        if (child) {
+          child->getBoundingBox(compBox);
           m_cachedBoundingBox->grow(compBox);
         }
       }

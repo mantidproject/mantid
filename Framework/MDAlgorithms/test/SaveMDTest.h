@@ -157,8 +157,7 @@ public:
     gon.pushAxis("Psi", 0, 1, 0);
     // add experiment infos
     for (int i = 0; i < 80; i++) {
-      ExperimentInfo_sptr ei =
-          boost::shared_ptr<ExperimentInfo>(new ExperimentInfo());
+      ExperimentInfo_sptr ei = boost::make_shared<ExperimentInfo>();
       ei->mutableRun().addProperty("Psi", double(i));
       ei->mutableRun().addProperty("Ei", 400.);
       ei->mutableRun().setGoniometer(gon, true);
@@ -251,7 +250,7 @@ public:
 class SaveMDTestPerformance : public CxxTest::TestSuite {
 public:
   MDEventWorkspace3Lean::sptr ws;
-  void setUp() {
+  void setUp() override {
     // Make a 1D MDEventWorkspace
     ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
     ws->getBoxController()->setSplitInto(5);

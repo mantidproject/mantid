@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/ConvertTableToMatrixWorkspace.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -122,7 +123,7 @@ public:
     TS_ASSERT_THROWS(m_converter->execute(), std::runtime_error);
   }
 
-  void setUp() {
+  void setUp() override {
     tws = WorkspaceFactory::Instance().createTable();
     tws->addColumn("double", "A");
     tws->addColumn("double", "B");

@@ -5,6 +5,7 @@
 
 #include "MantidCurveFitting/Algorithms/PawleyFit.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -150,7 +151,7 @@ private:
 
   public:
     TestablePawleyFit() : PawleyFit() {}
-    ~TestablePawleyFit() {}
+    ~TestablePawleyFit() override {}
   };
 
   class TestableV3DFromHKLColumnExtractor : public V3DFromHKLColumnExtractor {

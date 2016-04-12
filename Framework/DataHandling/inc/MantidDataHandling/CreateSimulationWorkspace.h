@@ -2,6 +2,7 @@
 #define MANTID_DATAHANDLING_CREATESIMULATIONWORKSPACE_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/cow_ptr.h"
 #include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
@@ -32,18 +33,18 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport CreateSimulationWorkspace : public API::Algorithm {
 public:
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Create a blank workspace for a given instrument.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// Create the instrument
   void createInstrument();
@@ -67,6 +68,8 @@ private:
   void applyDetectorMapping();
   /// Apply any instrument adjustments from the file
   void adjustInstrument(const std::string &filename);
+  /// Set start date for dummy workspace
+  void setStartDate(API::MatrixWorkspace_sptr workspace);
 
   /// Pointer to a progress object
   boost::shared_ptr<API::Progress> m_progress;
@@ -75,7 +78,7 @@ private:
   /// Pointer to the new workspace
   API::MatrixWorkspace_sptr m_outputWS;
   /// List of detector groupings
-  std::map<specid_t, std::set<detid_t>> m_detGroups;
+  std::map<specnum_t, std::set<detid_t>> m_detGroups;
 };
 
 } // namespace DataHandling

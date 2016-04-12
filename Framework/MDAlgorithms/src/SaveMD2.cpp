@@ -14,14 +14,9 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/MDBoxFlatTree.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
+#include "MantidKernel/ConfigService.h"
 
-// clang-format off
-#if defined(__GLIBCXX__) && __GLIBCXX__ >= 20100121 // libstdc++-4.4.3
-typedef std::unique_ptr< ::NeXus::File> file_holder_type;
-#else
-typedef std::auto_ptr< ::NeXus::File> file_holder_type;
-#endif
-// clang-format on
+typedef std::unique_ptr<::NeXus::File> file_holder_type;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -50,17 +45,18 @@ SaveMD2::~SaveMD2() {}
 /** Initialize the algorithm's properties.
  */
 void SaveMD2::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace or MDHistoWorkspace.");
 
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::OptionalSave, {".nxs"}),
+      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+                                ".nxs"),
       "The name of the Nexus file to write, as a full or relative path.\n"
       "Optional if UpdateFileBackEnd is checked.");
   // Filename is NOT used if UpdateFileBackEnd
-  setPropertySettings("Filename", new EnabledWhenProperty("UpdateFileBackEnd",
-                                                          IS_EQUAL_TO, "0"));
+  setPropertySettings("Filename", make_unique<EnabledWhenProperty>(
+                                      "UpdateFileBackEnd", IS_EQUAL_TO, "0"));
 
   declareProperty(
       "UpdateFileBackEnd", false,
@@ -69,7 +65,7 @@ void SaveMD2::init() {
       "to reflect the current data structure. Filename parameter is ignored.");
   setPropertySettings(
       "UpdateFileBackEnd",
-      new EnabledWhenProperty("MakeFileBacked", IS_EQUAL_TO, "0"));
+      make_unique<EnabledWhenProperty>("MakeFileBacked", IS_EQUAL_TO, "0"));
 
   declareProperty("MakeFileBacked", false,
                   "For an MDEventWorkspace that was created in memory:\n"
@@ -77,7 +73,7 @@ void SaveMD2::init() {
                   "file-backed one.");
   setPropertySettings(
       "MakeFileBacked",
-      new EnabledWhenProperty("UpdateFileBackEnd", IS_EQUAL_TO, "0"));
+      make_unique<EnabledWhenProperty>("UpdateFileBackEnd", IS_EQUAL_TO, "0"));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -104,6 +100,12 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
   // Write out the coordinate system
   file->writeData("coordinate_system",
                   static_cast<uint32_t>(ws->getSpecialCoordinateSystem()));
+
+  // Write out the Qconvention
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string m_QConvention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
+  file->putAttr("QConvention", m_QConvention);
 
   // Write out the visual normalization
   file->writeData("visual_normalization",
@@ -165,21 +167,28 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
     size[numDims - 1 - d] = int(dim->getNBins());
   }
 
-  file->makeData("signal", ::NeXus::FLOAT64, size, true);
+  std::vector<int> chunks = size;
+  chunks[0] = 1; // Drop the largest stride for chunking, I don't know
+                 // if this is the best but appears to work
+
+  file->makeCompData("signal", ::NeXus::FLOAT64, size, ::NeXus::LZW, chunks,
+                     true);
   file->putData(ws->getSignalArray());
   file->putAttr("signal", 1);
   file->putAttr("axes", axes_label);
   file->closeData();
 
-  file->makeData("errors_squared", ::NeXus::FLOAT64, size, true);
+  file->makeCompData("errors_squared", ::NeXus::FLOAT64, size, ::NeXus::LZW,
+                     chunks, true);
   file->putData(ws->getErrorSquaredArray());
   file->closeData();
 
-  file->makeData("num_events", ::NeXus::FLOAT64, size, true);
+  file->makeCompData("num_events", ::NeXus::FLOAT64, size, ::NeXus::LZW, chunks,
+                     true);
   file->putData(ws->getNumEventsArray());
   file->closeData();
 
-  file->makeData("mask", ::NeXus::INT8, size, true);
+  file->makeCompData("mask", ::NeXus::INT8, size, ::NeXus::LZW, chunks, true);
   file->putData(ws->getMaskArray());
   file->closeData();
 

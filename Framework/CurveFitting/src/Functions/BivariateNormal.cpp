@@ -56,7 +56,7 @@ BivariateNormal::BivariateNormal()
     : API::ParamFunction(), CalcVxx(false), CalcVyy(false), CalcVxy(false),
       NCells(0), CalcVariances(false), mIx(0.0), mx(0.0), mIy(0.0), my(0.0),
       SIxx(0.0), SIyy(0.0), SIxy(0.0), Sxx(0.0), Syy(0.0), Sxy(0.0), TotI(0.0),
-      TotN(0.0), Varx0(-1.0), Vary0(-1.0), expVals(NULL), uu(0.0),
+      TotN(0.0), Varx0(-1.0), Vary0(-1.0), expVals(nullptr), uu(0.0),
       coefNorm(0.0), expCoeffx2(0.0), expCoeffy2(0.0), expCoeffxy(0.0) {
   LastParams[IVXX] = -1;
   Varx0 = -1;
@@ -106,7 +106,7 @@ void BivariateNormal::function1D(double *out, const double *xValues,
     inf << "," << Varxx << "," << Varyy << "," << Varxy;
   inf << std::endl;
 
-  NCells = std::min<int>((int)nData, NCells);
+  NCells = std::min<int>(static_cast<int>(nData), NCells);
 
   double Background = getParameter(IBACK);
   double Intensity = getParameter(ITINTENS);
@@ -149,7 +149,7 @@ void BivariateNormal::function1D(double *out, const double *xValues,
   }
   inf << "Constr:";
   for (size_t i = 0; i < nParams(); i++) {
-    IConstraint *constr = getConstraint((size_t)i);
+    IConstraint *constr = getConstraint(i);
     if (constr)
       inf << i << "=" << constr->check() << ";";
   }
@@ -163,7 +163,7 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
                                       const size_t nData) {
   UNUSED_ARG(xValues);
   UNUSED_ARG(nData);
-  if (nData <= (size_t)0)
+  if (nData <= static_cast<size_t>(0))
     return;
   double penDeriv = initCommon();
 
@@ -406,8 +406,8 @@ double BivariateNormal::initCommon() {
   MantidVec Y = ws->dataY(2);
 
   if (NCells < 0) {
-    NCells =
-        (int)std::min<size_t>(D.size(), std::min<size_t>(X.size(), Y.size()));
+    NCells = static_cast<int>(
+        std::min<size_t>(D.size(), std::min<size_t>(X.size(), Y.size())));
     CommonsOK = false;
   }
 
@@ -471,7 +471,7 @@ double BivariateNormal::initCommon() {
 
     // CommonsOK = false;
 
-    if (getConstraint(0) == NULL) {
+    if (getConstraint(0) == nullptr) {
 
       addConstraint((new BoundaryConstraint(this, "Background", 0,
                                             Attrib[S_int] / Attrib[S_1])));
@@ -482,20 +482,20 @@ double BivariateNormal::initCommon() {
     if (maxIntensity < 100)
       maxIntensity = 100;
 
-    if (getConstraint(1) == NULL) {
+    if (getConstraint(1) == nullptr) {
       addConstraint(new BoundaryConstraint(this, "Intensity", 0, maxIntensity));
     }
 
     double minMeany = MinY * .9 + .1 * MaxY;
     double maxMeany = MinY * .1 + .9 * MaxY;
 
-    if (getConstraint(3) == NULL) {
+    if (getConstraint(3) == nullptr) {
       addConstraint(new BoundaryConstraint(this, "Mrow", minMeany, maxMeany));
     }
 
     double minMeanx = MinX * .9 + .1 * MaxX;
     double maxMeanx = MinX * .1 + .9 * MaxX;
-    if (getConstraint(2) == NULL) {
+    if (getConstraint(2) == nullptr) {
       addConstraint(new BoundaryConstraint(this, "Mcol", minMeanx, maxMeanx));
     }
 
@@ -508,7 +508,7 @@ double BivariateNormal::initCommon() {
            << Attrib[S_1] << ")/(" << (Attrib[S_int]) << "-Background*"
            << (Attrib[S_1]) << ")";
 
-      if (getTie(IVYY) == NULL) {
+      if (getTie(IVYY) == nullptr) {
         tie("SSrow", ssyy.str());
         CalcVxx = true;
       }
@@ -519,7 +519,7 @@ double BivariateNormal::initCommon() {
            << Attrib[S_1] << ")/(" << (Attrib[S_int]) << "-Background*"
            << (Attrib[S_1]) << ")";
 
-      if (getTie(IVXX) == NULL) {
+      if (getTie(IVXX) == nullptr) {
         tie("SScol", ssxx.str());
         CalcVyy = true;
       }
@@ -530,7 +530,7 @@ double BivariateNormal::initCommon() {
            << Attrib[S_1] << ")/(" << (Attrib[S_int]) << "-Background*"
            << (Attrib[S_1]) << ")";
 
-      if (getTie(IVXY) == NULL) {
+      if (getTie(IVXY) == nullptr) {
         tie("SSrc", ssxy.str());
         CalcVxy = true;
       }
@@ -662,8 +662,8 @@ double BivariateNormal::initCoeff(const MantidVec &D, const MantidVec &X,
       uu = .01;
   }
 
-  NCells =
-      (int)std::min<size_t>(D.size(), std::min<size_t>(X.size(), Y.size()));
+  NCells = static_cast<int>(
+      std::min<size_t>(D.size(), std::min<size_t>(X.size(), Y.size())));
   if (zeroDenom) {
     coefNorm = expCoeffx2 = expCoeffy2 = 1;
     expCoeffxy = 0;

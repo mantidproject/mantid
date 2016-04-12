@@ -52,7 +52,7 @@ private:
    *  @returns An error message to display to users or an empty string on no
    * error
    */
-  std::string check(const boost::any &value) const {
+  std::string check(const boost::any &value) const override {
     try {
       const HeldType *dataPtr = boost::any_cast<const HeldType *>(value);
       return checkValidity(*dataPtr);
@@ -93,7 +93,7 @@ private:
    * @returns An error message to display to users or an empty string on no
    * error
    */
-  std::string check(const boost::any &value) const {
+  std::string check(const boost::any &value) const override {
     try {
       const ElementType_sptr typedValue = extractValue(value);
       return checkValidity(typedValue);

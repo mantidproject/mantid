@@ -2,14 +2,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadSNSspec.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/RegisterFileLoader.h"
-#include <fstream>
-#include <cstring>
+
 #include <boost/tokenizer.hpp>
+
+#include <cstring>
+#include <fstream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -79,12 +83,14 @@ LoadSNSspec::LoadSNSspec() {}
 
 /// Initialisation method.
 void LoadSNSspec::init() {
+  const std::vector<std::string> exts{".dat", ".txt"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
+                  "The name of the text file to read, including its full or "
+                  "relative path. The file extension must be .txt or .dat.");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".dat", ".txt"}),
-      "The name of the text file to read, including its full or "
-      "relative path. The file extension must be .txt or .dat.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                       Direction::Output),
       "The name of the workspace that will be created, filled with the read-in "
       "data and stored in the [[Analysis Data Service]].");
 

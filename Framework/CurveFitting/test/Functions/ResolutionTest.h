@@ -8,6 +8,9 @@
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/cow_ptr.h"
 #include <Poco/File.h>
 
 #include <fstream>
@@ -24,10 +27,10 @@ public:
     declareParameter("s", 1.);
   }
 
-  std::string name() const { return "ResolutionTest_Gauss"; }
+  std::string name() const override { return "ResolutionTest_Gauss"; }
 
   void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const {
+                     const size_t nData) const override {
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
@@ -37,7 +40,7 @@ public:
     }
   }
   void functionDerivLocal(Jacobian *out, const double *xValues,
-                          const size_t nData) {
+                          const size_t nData) override {
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
@@ -50,25 +53,25 @@ public:
     }
   }
 
-  double centre() const { return getParameter(0); }
+  double centre() const override { return getParameter(0); }
 
-  double height() const { return getParameter(1); }
+  double height() const override { return getParameter(1); }
 
-  double fwhm() const { return getParameter(2); }
+  double fwhm() const override { return getParameter(2); }
 
-  void setCentre(const double c) { setParameter(0, c); }
-  void setHeight(const double h) { setParameter(1, h); }
+  void setCentre(const double c) override { setParameter(0, c); }
+  void setHeight(const double h) override { setParameter(1, h); }
 
-  void setFwhm(const double w) { setParameter(2, w); }
+  void setFwhm(const double w) override { setParameter(2, w); }
 };
 
 class ResolutionTest_Jacobian : public Jacobian {
 public:
-  void set(size_t, size_t, double) {
+  void set(size_t, size_t, double) override {
     throw std::runtime_error("Set method shouldn't be called.");
   }
 
-  double get(size_t, size_t) {
+  double get(size_t, size_t) override {
     throw std::runtime_error("Get method shouldn't be called.");
   }
 };
@@ -86,7 +89,7 @@ public:
       : resH(3), resS(acos(0.)), N(117), DX(10), X0(-DX / 2), dX(DX / (N - 1)),
         yErr(0), resFileName("ResolutionTestResolution.res") {}
 
-  void setUp() {
+  void setUp() override {
     std::ofstream fil(resFileName.c_str());
 
     double y0 = 0;
@@ -101,7 +104,7 @@ public:
     }
   }
 
-  void tearDown() {
+  void tearDown() override {
     Poco::File phandle(resFileName);
     if (phandle.exists()) {
       phandle.remove();

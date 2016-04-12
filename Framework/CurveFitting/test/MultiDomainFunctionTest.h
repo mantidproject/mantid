@@ -32,13 +32,13 @@ public:
     this->declareParameter("A", 0);
     this->declareParameter("B", 0);
   }
-  virtual std::string name() const {
+  std::string name() const override {
     return "MultiDomainFunctionTest_Function";
   }
 
 protected:
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const {
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override {
     const double A = getParameter(0);
     const double B = getParameter(1);
 
@@ -47,8 +47,8 @@ protected:
       out[i] = A + B * x;
     }
   }
-  virtual void functionDeriv1D(Jacobian *out, const double *xValues,
-                               const size_t nData) {
+  void functionDeriv1D(Jacobian *out, const double *xValues,
+                       const size_t nData) override {
     for (size_t i = 0; i < nData; ++i) {
       double x = xValues[i];
       out->set(i, 1, x);
@@ -159,7 +159,8 @@ public:
     ii[1] = 2;
     multi->setDomainIndices(2, ii);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(multi, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 6);
 
@@ -232,8 +233,7 @@ public:
     // middle part has
     // constant value A1
 
-    MatrixWorkspace_sptr ws =
-        boost::shared_ptr<MatrixWorkspace>(new WorkspaceTester);
+    MatrixWorkspace_sptr ws = boost::make_shared<WorkspaceTester>();
     ws->initialize(1, 30, 30);
     {
       const double dx = 1.0;

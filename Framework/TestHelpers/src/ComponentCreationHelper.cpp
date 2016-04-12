@@ -108,7 +108,7 @@ Object_sptr createCuboid(double x_side_length, double y_side_length,
 */
 boost::shared_ptr<CompAssembly> createTestAssemblyOfFourCylinders() {
   boost::shared_ptr<CompAssembly> bank =
-      boost::shared_ptr<CompAssembly>(new CompAssembly("BankName"));
+      boost::make_shared<CompAssembly>("BankName");
   // One object
   Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
       0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
@@ -159,14 +159,12 @@ createDetectorGroupWith5CylindricalDetectors() {
   for (int i = 0; i < ndets; ++i) {
     std::ostringstream os;
     os << "d" << i;
-    boost::shared_ptr<Detector> det(
-        new Detector(os.str(), i + 1, detShape, NULL));
-    det->setPos((double)(i + 1), 2.0, 2.0);
+    auto det = boost::make_shared<Detector>(os.str(), i + 1, detShape, nullptr);
+    det->setPos(static_cast<double>(i + 1), 2.0, 2.0);
     groupMembers[i] = det;
   }
 
-  return boost::shared_ptr<DetectorGroup>(
-      new DetectorGroup(groupMembers, false));
+  return boost::make_shared<DetectorGroup>(groupMembers, false);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -184,14 +182,12 @@ createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet,
   for (unsigned int i = 0; i < nDet; ++i) {
     std::ostringstream os;
     os << "d" << i;
-    boost::shared_ptr<Detector> det(
-        new Detector(os.str(), i + 1, detShape, NULL));
+    auto det = boost::make_shared<Detector>(os.str(), i + 1, detShape, nullptr);
     det->setPos(double(-0.5 * nDet + i) + gap, 2.0, 2.0);
     groupMembers[i] = det;
   }
 
-  return boost::shared_ptr<DetectorGroup>(
-      new DetectorGroup(groupMembers, false));
+  return boost::make_shared<DetectorGroup>(groupMembers, false);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -225,8 +221,8 @@ createRingOfCylindricalDetectors(const double R_min, const double R_max,
       if (Rsq >= Rmin2 && Rsq < Rmax2) {
         std::ostringstream os;
         os << "d" << ic;
-        boost::shared_ptr<Detector> det(
-            new Detector(os.str(), ic + 1, detShape, NULL));
+        auto det =
+            boost::make_shared<Detector>(os.str(), ic + 1, detShape, nullptr);
         det->setPos(x, y, z0);
         groupMembers.push_back(det);
       }
@@ -234,8 +230,7 @@ createRingOfCylindricalDetectors(const double R_min, const double R_max,
       ic++;
     }
   }
-  return boost::shared_ptr<DetectorGroup>(
-      new DetectorGroup(groupMembers, false));
+  return boost::make_shared<DetectorGroup>(groupMembers, false);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -248,13 +243,12 @@ boost::shared_ptr<DetectorGroup> createGroupOfTwoMonitors() {
   for (int i = 0; i < ndets; ++i) {
     std::ostringstream os;
     os << "m" << i;
-    boost::shared_ptr<Detector> det(new Detector(os.str(), i + 1, NULL));
-    det->setPos((double)(i + 1), 2.0, 2.0);
+    auto det = boost::make_shared<Detector>(os.str(), i + 1, nullptr);
+    det->setPos(static_cast<double>(i + 1), 2.0, 2.0);
     det->markAsMonitor();
     groupMembers[i] = det;
   }
-  return boost::shared_ptr<DetectorGroup>(
-      new DetectorGroup(groupMembers, false));
+  return boost::make_shared<DetectorGroup>(groupMembers, false);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -262,7 +256,7 @@ Instrument_sptr createTestInstrumentCylindrical(
     int num_banks, const Mantid::Kernel::V3D &sourcePos,
     const Mantid::Kernel::V3D &samplePos, const double cylRadius,
     const double cylHeight) {
-  boost::shared_ptr<Instrument> testInst(new Instrument("basic"));
+  auto testInst = boost::make_shared<Instrument>("basic");
 
   // One object
   Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
@@ -333,8 +327,8 @@ Mantid::Geometry::Instrument_sptr
 createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
                                            const std::vector<double> &polar,
                                            const std::vector<double> &azim) {
-  boost::shared_ptr<Instrument> testInst(new Instrument("processed"));
 
+  auto testInst = boost::make_shared<Instrument>("processed");
   double cylRadius(0.004);
   double cylHeight(0.0002);
   // find characteristic sizes of the detectors;
@@ -427,7 +421,7 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
 Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
                                                 double pixelSpacing,
                                                 double bankDistanceFromSample) {
-  boost::shared_ptr<Instrument> testInst(new Instrument("basic_rect"));
+  auto testInst = boost::make_shared<Instrument>("basic_rect");
 
   const double cylRadius(pixelSpacing / 2);
   const double cylHeight(0.0002);
@@ -492,7 +486,7 @@ Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
  */
 Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
                                                  double pixelSpacing) {
-  boost::shared_ptr<Instrument> testInst(new Instrument("basic_rect"));
+  auto testInst = boost::make_shared<Instrument>("basic_rect");
 
   const double cylRadius(pixelSpacing / 2);
   const double cylHeight(0.0002);
@@ -584,12 +578,90 @@ createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
   instrument->markAsSamplePos(sample);
 
   // A detector
-  Detector *det = new Detector("point-detector", 1 /*detector id*/, NULL);
+  Detector *det = new Detector("point-detector", 1 /*detector id*/, nullptr);
   det->setPos(detectorPos);
   det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
   instrument->add(det);
   instrument->markAsDetector(det);
 
+  return instrument;
+}
+
+CompAssembly *makeBank(size_t width, size_t height, Instrument *instrument) {
+
+  double width_d = double(width);
+  double height_d = double(height);
+  static int bankNo = 1;
+  auto bank = new CompAssembly("Bank" + std::to_string(bankNo++));
+  static size_t id = 1;
+  for (size_t i = 0; i < width; ++i) {
+    for (size_t j = 0; j < height; ++j) {
+      Detector *det = new Detector("pixel", int(id++) /*detector id*/, bank);
+      det->setPos(V3D{double(i), double(j), double(0)});
+      det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+      bank->add(det);
+      instrument->markAsDetector(det);
+    }
+  }
+  bank->setPos(V3D{width_d / 2, height_d / 2, 0});
+
+  return bank;
+}
+
+Instrument_sptr sansInstrument(const Mantid::Kernel::V3D &sourcePos,
+                               const Mantid::Kernel::V3D &samplePos,
+                               const Mantid::Kernel::V3D &trolley1Pos,
+                               const Mantid::Kernel::V3D &trolley2Pos) {
+
+  /*
+  This has been generated for comparison with newer Instrument designs. It is
+  therefore not
+  an exact representation of an instrument one might expect to create for SANS.
+   */
+  auto instrument = boost::make_shared<Instrument>();
+
+  instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+      Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left,
+      "0,0,0"));
+
+  // A source
+  ObjComponent *source = new ObjComponent("source");
+  source->setPos(sourcePos);
+  source->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  instrument->add(source);
+  instrument->markAsSource(source);
+
+  // A sample
+  ObjComponent *sample = new ObjComponent("some-surface-holder");
+  sample->setPos(samplePos);
+  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  instrument->add(sample);
+  instrument->markAsSamplePos(sample);
+
+  size_t width = 100;
+  size_t height = 100;
+
+  CompAssembly *trolley1 = new CompAssembly("Trolley1");
+  trolley1->setPos(trolley1Pos);
+  CompAssembly *trolley2 = new CompAssembly("Trolley2");
+  trolley2->setPos(trolley2Pos);
+
+  CompAssembly *N = makeBank(width, height, instrument.get());
+  trolley1->add(N);
+  CompAssembly *E = makeBank(width, height, instrument.get());
+  trolley1->add(E);
+  CompAssembly *S = makeBank(width, height, instrument.get());
+  trolley1->add(S);
+  CompAssembly *W = makeBank(width, height, instrument.get());
+  trolley1->add(W);
+
+  CompAssembly *l_curtain = makeBank(width, height, instrument.get());
+  trolley2->add(l_curtain);
+  CompAssembly *r_curtain = makeBank(width, height, instrument.get());
+  trolley2->add(r_curtain);
+
+  instrument->add(trolley1);
+  instrument->add(trolley2);
   return instrument;
 }
 }

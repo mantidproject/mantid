@@ -40,7 +40,7 @@ set ( TESTING_TIMEOUT 300 CACHE INTEGER
 ###########################################################################
 
 set ( Boost_NO_BOOST_CMAKE TRUE )
-find_package ( Boost REQUIRED date_time regex )
+find_package ( Boost 1.53.0 REQUIRED date_time regex )
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 add_definitions ( -DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB )
 # Need this defined globally for our log time values
@@ -54,7 +54,7 @@ include_directories ( SYSTEM ${NEXUS_INCLUDE_DIR} )
 
 find_package ( MuParser REQUIRED )
 
-find_package ( JsonCPP REQUIRED )
+find_package ( JsonCPP 0.7.0 REQUIRED )
 include_directories ( SYSTEM ${JSONCPP_INCLUDE_DIR} )
 
 set ( ENABLE_OPENCASCADE ON CACHE BOOL "Enable OpenCascade-based 3D visualisation" )
@@ -247,10 +247,7 @@ endif ()
 if ( CMAKE_COMPILER_IS_GNUCXX )
   include ( GNUSetup )
 elseif ( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" )
-  # Remove once clang warnings have been fixed.
-  if ( NOT APPLE)
-    include ( GNUSetup )
-  endif ()
+  include ( GNUSetup )
 endif ()
 
 ###########################################################################

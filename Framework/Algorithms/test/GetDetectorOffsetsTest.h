@@ -3,6 +3,7 @@
 
 #include "MantidAlgorithms/GetDetectorOffsets.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -210,7 +211,7 @@ public:
 
   GetDetectorOffsetsTestPerformance() { FrameworkManager::Instance(); }
 
-  void setUp() {
+  void setUp() override {
     numpixels = 10000;
     WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
         numpixels, 200, false);

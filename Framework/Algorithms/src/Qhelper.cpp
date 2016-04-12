@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Qhelper.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -116,7 +117,7 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
 
     size_t num_histograms = dataWS->getNumberHistograms();
     for (size_t i = 0; i < num_histograms; i++) {
-      double adj = (double)detectAdj->readY(i)[0];
+      double adj = static_cast<double>(detectAdj->readY(i)[0]);
       if (adj <= 0.0) {
         bool det_is_masked;
 
@@ -143,12 +144,12 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
 *  @param RCut the radius cut off, should be value of the property RadiusCut
 * (unit is mm)
 *  @param WCut this wavelength cut off, should be equal to the value WaveCut
-*  @param specInd spectrum that is being analysed
+*  @param wsInd spectrum that is being analysed
 *  @return index number of the first bin to include in the calculation
 */
 size_t Qhelper::waveLengthCutOff(API::MatrixWorkspace_const_sptr dataWS,
                                  const double RCut, const double WCut,
-                                 const size_t specInd) const {
+                                 const size_t wsInd) const {
   double l_WCutOver = 0.0;
   double l_RCut = 0.0; // locally we store RCut in units of meters
   if (RCut > 0 && WCut > 0) {
@@ -162,12 +163,12 @@ size_t Qhelper::waveLengthCutOff(API::MatrixWorkspace_const_sptr dataWS,
   }
   // get the distance of between this detector and the origin, which should be
   // the along the beam center
-  const V3D posOnBank = dataWS->getDetector(specInd)->getPos();
+  const V3D posOnBank = dataWS->getDetector(wsInd)->getPos();
   double R = (posOnBank.X() * posOnBank.X()) + (posOnBank.Y() * posOnBank.Y());
   R = std::sqrt(R);
 
   const double WMin = l_WCutOver * (l_RCut - R);
-  const MantidVec &Xs = dataWS->readX(specInd);
+  const MantidVec &Xs = dataWS->readX(wsInd);
   return std::lower_bound(Xs.begin(), Xs.end(), WMin) - Xs.begin();
 }
 
@@ -186,7 +187,7 @@ void Qhelper::outputParts(API::Algorithm *alg,
   std::string baseName = alg->getPropertyValue("OutputWorkspace");
 
   alg->declareProperty(
-      new API::WorkspaceProperty<API::MatrixWorkspace>(
+      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "SumOfCounts", "", Kernel::Direction::Output),
       "The name of the MatrixWorkspace to store sum of counts");
   alg->setPropertyValue("SumOfCounts", baseName + "_sumOfCounts");
@@ -194,7 +195,7 @@ void Qhelper::outputParts(API::Algorithm *alg,
   alg->setProperty("SumOfCounts", sumOfCounts);
 
   alg->declareProperty(
-      new API::WorkspaceProperty<API::MatrixWorkspace>(
+      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "sumOfNormFactors", "", Kernel::Direction::Output),
       "The name of the MatrixWorkspace to store sum of normalising factors");
   alg->setPropertyValue("sumOfNormFactors", baseName + "_sumOfNormFactors");

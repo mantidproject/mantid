@@ -113,11 +113,11 @@ public:
   virtual std::string isValid() const;
 
   /// Set the PropertySettings object
-  void setSettings(IPropertySettings *settings);
+  void setSettings(std::unique_ptr<IPropertySettings> settings);
   /** @return the PropertySettings for this property */
   IPropertySettings *getSettings();
   /** Deletes the PropertySettings object contained */
-  void deleteSettings();
+  void clearSettings();
 
   /// Overriden function that returns if property has the same value that it was
   /// initialised with, if applicable
@@ -182,6 +182,9 @@ public:
   /// @return the group this property belongs to
   const std::string &getGroup() { return m_group; }
 
+  bool autoTrim() const;
+  void setAutoTrim(const bool &setting);
+
 protected:
   /// Constructor
   Property(const std::string &name, const std::type_info &type,
@@ -207,7 +210,7 @@ private:
   std::string m_units;
 
   /// Property settings (enabled/visible)
-  IPropertySettings *m_settings;
+  std::unique_ptr<IPropertySettings> m_settings;
 
   /// Name of the "group" of this property, for grouping in the GUI. Default ""
   std::string m_group;
@@ -217,6 +220,10 @@ private:
 
   /// Flag whether to save input values
   bool m_remember;
+
+  /// Flag to determine if string inputs to the property should be automatically
+  /// trimmed of whitespace
+  bool m_autotrim;
 };
 
 /// Compares this to another property for equality

@@ -16,28 +16,28 @@ namespace MDAlgorithms {
 class DLLExport OneStepMDEW : public API::Algorithm, API::DeprecatedAlgorithm {
 public:
   OneStepMDEW();
-  ~OneStepMDEW();
+  ~OneStepMDEW() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "OneStepMDEW"; };
+  const std::string name() const override { return "OneStepMDEW"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Create a MDEventWorkspace in one step from a EventNexus file. For "
            "use by Paraview loader.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "MDAlgorithms\\Creation";
   }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 };
 
 } // namespace Mantid

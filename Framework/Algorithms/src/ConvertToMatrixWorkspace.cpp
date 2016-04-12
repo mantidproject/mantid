@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertToMatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -17,11 +18,11 @@ using std::size_t;
 
 void ConvertToMatrixWorkspace::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input EventWorkspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output Workspace2D.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "An output Workspace2D.");
 }
 
 void ConvertToMatrixWorkspace::exec() {
@@ -48,7 +49,7 @@ void ConvertToMatrixWorkspace::exec() {
 
     // ...but not the data, so do that here.
     PARALLEL_FOR2(inputWorkspace, outputWorkspace)
-    for (int64_t i = 0; i < (int64_t)numHists; ++i) {
+    for (int64_t i = 0; i < static_cast<int64_t>(numHists); ++i) {
       PARALLEL_START_INTERUPT_REGION
       const ISpectrum *inSpec = inputWorkspace->getSpectrum(i);
       ISpectrum *outSpec = outputWorkspace->getSpectrum(i);

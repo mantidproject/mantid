@@ -45,11 +45,11 @@ namespace CustomInterfaces
 
   public:
     IndirectTransmission(IndirectDataReduction * idrUI, QWidget * parent = 0);
-    virtual ~IndirectTransmission();
+    ~IndirectTransmission() override;
 
-    virtual void setup();
-    virtual void run();
-    virtual bool validate();
+    void setup() override;
+    void run() override;
+    bool validate() override;
 
   private slots:
     void dataLoaded();

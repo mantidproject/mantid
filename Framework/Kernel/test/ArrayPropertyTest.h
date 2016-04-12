@@ -9,13 +9,13 @@ using namespace Mantid::Kernel;
 
 class ArrayPropertyTest : public CxxTest::TestSuite {
 public:
-  void setUp() {
+  void setUp() override {
     iProp = new ArrayProperty<int>("intProp");
     dProp = new ArrayProperty<double>("doubleProp");
     sProp = new ArrayProperty<std::string>("stringProp");
   }
 
-  void tearDown() {
+  void tearDown() override {
     delete iProp;
     delete dProp;
     delete sProp;
@@ -67,10 +67,10 @@ public:
     delete a;
 
     // Test vector of vector.
-    std::vector<std::vector<int>> input;
-    input.push_back(std::vector<int>(10)); // Make it 10 elements long, but
-                                           // should only be the size of the
-                                           // parent vector that is counted.
+    // Make it 10 elements long, but
+    // should only be the size of the
+    // parent vector that is counted.
+    std::vector<std::vector<int>> input{{10}};
     Property *b = new ArrayProperty<std::vector<int>>("vec_property", input);
     TS_ASSERT_EQUALS(1, b->size());
     delete b;

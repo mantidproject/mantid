@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "MantidAlgorithms/ReflectometryReductionOne.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -43,9 +44,9 @@ public:
     size_t workspaceIndexToKeep1 = 1;
     const int monitorIndex = 0;
 
-    specid_t specId1 =
+    specnum_t specId1 =
         toConvert->getSpectrum(workspaceIndexToKeep1)->getSpectrumNo();
-    specid_t monitorSpecId =
+    specnum_t monitorSpecId =
         toConvert->getSpectrum(monitorIndex)->getSpectrumNo();
 
     // Define one spectra to keep
@@ -84,7 +85,7 @@ public:
     TS_ASSERT_EQUALS(1, detectorWS->getNumberHistograms());
 
     auto map = detectorWS->getSpectrumToWorkspaceIndexMap();
-    // Check the spectrum ids retained.
+    // Check the spectrum Nos retained.
     TS_ASSERT_EQUALS(map[specId1], 0);
 
     // Check the cropped x range
@@ -101,7 +102,7 @@ public:
     TS_ASSERT_EQUALS(1, monitorWS->getNumberHistograms());
 
     map = monitorWS->getSpectrumToWorkspaceIndexMap();
-    // Check the spectrum ids retained.
+    // Check the spectrum Nos retained.
     TS_ASSERT_EQUALS(map[monitorSpecId], 0);
   }
 
@@ -205,8 +206,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspace");
 
-    TS_ASSERT_DIFFERS(m_tinyReflWS->getInstrument()->getSource()->getPos(),
-                      outLam->getInstrument()->getSource()->getPos());
+    TS_ASSERT_EQUALS(m_tinyReflWS->getInstrument()->getSource()->getPos(),
+                     outLam->getInstrument()->getSource()->getPos());
     TS_ASSERT_EQUALS(outLam->getInstrument()->getSource()->getPos(),
                      outQ->getInstrument()->getSource()->getPos());
   }
@@ -270,8 +271,8 @@ public:
     double outTheta = alg->getProperty("ThetaOut");
 
     TS_ASSERT_DELTA(45.0, outTheta, 0.00001);
-    TS_ASSERT_DIFFERS(source->getPos(),
-                      inQ->getInstrument()->getSource()->getPos())
+    TS_ASSERT_EQUALS(source->getPos(),
+                     inQ->getInstrument()->getSource()->getPos());
     // convert from degrees to radians for sin() function
     double outThetaInRadians = outTheta * M_PI / 180;
 

@@ -43,9 +43,8 @@ public:
   explicit FileValidator(
       const std::vector<std::string> &extensions = std::vector<std::string>(),
       bool testFileExists = true, bool testCanWrite = false);
-  virtual ~FileValidator();
-  virtual std::vector<std::string> allowedValues() const;
-  IValidator_sptr clone() const;
+  std::vector<std::string> allowedValues() const override;
+  IValidator_sptr clone() const override;
 
 protected:
   /// The list of permitted extensions
@@ -56,7 +55,7 @@ protected:
   bool m_testCanWrite;
 
 private:
-  virtual std::string checkValidity(const std::string &value) const;
+  std::string checkValidity(const std::string &value) const override;
   bool endswith(const std::string &value) const;
 };
 

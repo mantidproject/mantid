@@ -5,7 +5,7 @@
 #include <limits>
 #include <boost/make_shared.hpp>
 
-using NeXus::File;
+//using NeXus::File;
 
 namespace Mantid {
 namespace DataObjects {
@@ -18,7 +18,7 @@ TMDE(MDBoxBase)::MDBoxBase(Mantid::API::BoxController *const boxController,
     : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
       m_BoxController(boxController),
       m_inverseVolume(std::numeric_limits<coord_t>::quiet_NaN()),
-      m_depth(depth), m_parent(NULL), m_fileID(boxID) {
+      m_depth(depth), m_parent(nullptr), m_fileID(boxID) {
   if (boxController) {
     // Give it a fresh ID from the controller.
     if (boxID == std::numeric_limits<size_t>::max()) // Give it a fresh ID from
@@ -36,7 +36,7 @@ TMDE(MDBoxBase)::MDBoxBase(
         extentsVector)
     : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
       m_BoxController(boxController), m_inverseVolume(UNDEF_COORDT),
-      m_depth(depth), m_parent(NULL), m_fileID(boxID) {
+      m_depth(depth), m_parent(nullptr), m_fileID(boxID) {
   if (boxController) {
     // Give it a fresh ID from the controller.
     if (boxID == UNDEF_SIZET) // Give it a fresh ID from the controller.
@@ -112,7 +112,7 @@ TMDE(std::vector<Mantid::Kernel::VMD> MDBoxBase)::getVertexes() const {
     for (size_t d = 0; d < nd; d++) {
       // Use a bit mask to look at each bit of the integer we are iterating
       // through.
-      size_t mask = 1 << d;
+      size_t mask = size_t{1} << d;
       if ((i & mask) > 0) {
         // Bit is 1, use the max of the dimension
         coords[d] = extents[d].getMax();
@@ -153,7 +153,7 @@ TMDE(coord_t *MDBoxBase)::getVertexesArray(size_t &numVertices) const {
     for (size_t d = 0; d < nd; d++) {
       // Use a bit mask to look at each bit of the integer we are iterating
       // through.
-      size_t mask = 1 << d;
+      size_t mask = size_t{1} << d;
       if ((i & mask) > 0) {
         // Bit is 1, use the max of the dimension
         out[outIndex + d] = extents[d].getMax();

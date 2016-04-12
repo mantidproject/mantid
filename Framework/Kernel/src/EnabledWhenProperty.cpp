@@ -10,14 +10,12 @@ EnabledWhenProperty::EnabledWhenProperty(std::string otherPropName,
     : IPropertySettings(), m_otherPropName(otherPropName), m_when(when),
       m_value(value) {}
 
-EnabledWhenProperty::~EnabledWhenProperty() {}
-
 bool EnabledWhenProperty::fulfillsCriterion(
     const IPropertyManager *algo) const {
   // Find the property
-  if (algo == NULL)
+  if (algo == nullptr)
     return true;
-  Property *prop = NULL;
+  Property *prop = nullptr;
   try {
     prop = algo->getPointerToProperty(m_otherPropName);
   } catch (Exception::NotFoundError &) {

@@ -6,6 +6,7 @@
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CropWorkspace.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/LoadRKH.h"
 #include "MantidDataHandling/MaskDetectors.h"
@@ -518,13 +519,13 @@ public:
   Mantid::API::MatrixWorkspace_sptr m_inputWS, m_wavNorm, m_pixel;
   std::string m_outputWS;
 
-  void setUp() {
+  void setUp() override {
     // load all the spectra from the LOQ workspace
     createInputWorkspaces(1, 17792, m_inputWS, m_wavNorm, m_pixel);
     m_outputWS = "Q1D2Test_result";
   }
 
-  void tearDown() {
+  void tearDown() override {
     Mantid::API::AnalysisDataService::Instance().remove(m_outputWS);
   }
 

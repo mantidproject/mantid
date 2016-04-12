@@ -13,6 +13,7 @@
 #include "vtkBox.h"
 #include "vtkUnstructuredGrid.h"
 
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
@@ -22,7 +23,7 @@
 
 vtkStandardNewMacro(vtkMDHWNexusReader)
 
-using namespace Mantid::VATES;
+    using namespace Mantid::VATES;
 using Mantid::Geometry::IMDDimension_sptr;
 
 vtkMDHWNexusReader::vtkMDHWNexusReader()
@@ -35,46 +36,34 @@ vtkMDHWNexusReader::vtkMDHWNexusReader()
 
 vtkMDHWNexusReader::~vtkMDHWNexusReader() { this->SetFileName(0); }
 
-void vtkMDHWNexusReader::SetDepth(int depth)
-{
+void vtkMDHWNexusReader::SetDepth(int depth) {
   size_t temp = depth;
-  if(m_depth != temp)
-  {
-   this->m_depth = temp;
-   this->Modified();
+  if (m_depth != temp) {
+    this->m_depth = temp;
+    this->Modified();
   }
 }
 
-size_t vtkMDHWNexusReader::getRecursionDepth() const
-{
-  return this->m_depth;
-}
+size_t vtkMDHWNexusReader::getRecursionDepth() const { return this->m_depth; }
 
-bool vtkMDHWNexusReader::getLoadInMemory() const
-{
-  return m_loadInMemory;
-}
+bool vtkMDHWNexusReader::getLoadInMemory() const { return m_loadInMemory; }
 
-double vtkMDHWNexusReader::getTime() const
-{
-  return m_time;
-}
+double vtkMDHWNexusReader::getTime() const { return m_time; }
 
 /**
  * Sets algorithm in-memory property. If this is changed, the file is reloaded.
  * @param inMemory : true if the entire file should be loaded into memory.
  */
-void vtkMDHWNexusReader::SetInMemory(bool inMemory)
-{
-  if(m_loadInMemory != inMemory)
-  {
-    this->Modified(); 
+void vtkMDHWNexusReader::SetInMemory(bool inMemory) {
+  if (m_loadInMemory != inMemory) {
+    this->Modified();
   }
   m_loadInMemory = inMemory;
 }
 
 /**
- * Gets the geometry xml from the workspace. Allows object panels to configure themeselves.
+ * Gets the geometry xml from the workspace. Allows object panels to configure
+ * themeselves.
  * @return geometry xml const * char reference.
  */
 const char *vtkMDHWNexusReader::GetInputGeometryXML() {
@@ -89,57 +78,58 @@ const char *vtkMDHWNexusReader::GetInputGeometryXML() {
 }
 
 /**
-Set the normalization option. This is how the signal data will be normalized before viewing.
+Set the normalization option. This is how the signal data will be normalized
+before viewing.
 @param option : Normalization option
 */
-void vtkMDHWNexusReader::SetNormalization(int option)
-{
-  m_normalizationOption = static_cast<Mantid::VATES::VisualNormalization>(option);
+void vtkMDHWNexusReader::SetNormalization(int option) {
+  m_normalizationOption =
+      static_cast<Mantid::VATES::VisualNormalization>(option);
   this->Modified();
 }
 
-int vtkMDHWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
-{
+int vtkMDHWNexusReader::RequestData(
+    vtkInformation *vtkNotUsed(request),
+    vtkInformationVector **vtkNotUsed(inputVector),
+    vtkInformationVector *outputVector) {
 
   using namespace Mantid::VATES;
   // get the info objects
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
-
-  if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
-  {
+  if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP())) {
     // usually only one actual step requested
-    m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP());
+    m_time = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP());
   }
 
-  FilterUpdateProgressAction<vtkMDHWNexusReader> loadingProgressAction(this, "Loading...");
-  FilterUpdateProgressAction<vtkMDHWNexusReader> drawingProgressAction(this, "Drawing...");
+  FilterUpdateProgressAction<vtkMDHWNexusReader> loadingProgressAction(
+      this, "Loading...");
+  FilterUpdateProgressAction<vtkMDHWNexusReader> drawingProgressAction(
+      this, "Drawing...");
 
   ThresholdRange_scptr thresholdRange =
       boost::make_shared<IgnoreZerosThresholdRange>();
 
   // Will attempt to handle drawing in 4D case and then in 3D case
   // if that fails.
-  auto successor = Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
-      thresholdRange, m_normalizationOption);
   auto factory =
       Mantid::Kernel::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
           thresholdRange, m_normalizationOption, m_time);
-  factory->SetSuccessor(std::move(successor));
+  factory->setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
+      thresholdRange, m_normalizationOption));
 
   auto product = m_presenter->execute(factory.get(), loadingProgressAction,
                                       drawingProgressAction);
 
-  vtkDataSet* output = vtkDataSet::GetData(outInfo);
+  vtkDataSet *output = vtkDataSet::GetData(outInfo);
   output->ShallowCopy(product);
 
-  try
-  {
-    m_presenter->makeNonOrthogonal(output);
-  }
-  catch (std::invalid_argument &e)
-  {
-	std::string error = e.what();
+  try {
+    auto workspaceProvider = Mantid::Kernel::make_unique<
+        ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    m_presenter->makeNonOrthogonal(output, std::move(workspaceProvider));
+  } catch (std::invalid_argument &e) {
+    std::string error = e.what();
     vtkDebugMacro(<< "Workspace does not have correct information to "
                   << "plot non-orthogonal axes. " << error);
   }
@@ -179,13 +169,11 @@ int vtkMDHWNexusReader::RequestInformation(
   return 1;
 }
 
-void vtkMDHWNexusReader::PrintSelf(ostream& os, vtkIndent indent)
-{
-  this->Superclass::PrintSelf(os,indent);
+void vtkMDHWNexusReader::PrintSelf(ostream &os, vtkIndent indent) {
+  this->Superclass::PrintSelf(os, indent);
 }
 
-int vtkMDHWNexusReader::CanReadFile(const char* fname)
-{
+int vtkMDHWNexusReader::CanReadFile(const char *fname) {
   std::unique_ptr<MDLoadingView> view =
       Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDHWNexusReader>>(
           this);
@@ -193,37 +181,31 @@ int vtkMDHWNexusReader::CanReadFile(const char* fname)
   return temp.canReadFile();
 }
 
-unsigned long vtkMDHWNexusReader::GetMTime()
-{
-  return Superclass::GetMTime();
-}
+unsigned long vtkMDHWNexusReader::GetMTime() { return Superclass::GetMTime(); }
 
 /**
   Update/Set the progress.
   @param progress : progress increment.
   @param message : progress message.
 */
-void vtkMDHWNexusReader::updateAlgorithmProgress(double progress, const std::string& message)
-{
-  progressMutex.lock();
+void vtkMDHWNexusReader::updateAlgorithmProgress(double progress,
+                                                 const std::string &message) {
+  std::lock_guard<std::mutex> lockGuard(progressMutex);
   this->SetProgressText(message.c_str());
   this->UpdateProgress(progress);
-  progressMutex.unlock();
 }
 
 /** Helper function to setup the time range.
 @param outputVector : vector onto which the time range will be set.
 */
-void vtkMDHWNexusReader::setTimeRange(vtkInformationVector* outputVector)
-{
-  if(m_presenter->hasTDimensionAvailable())
-  {
+void vtkMDHWNexusReader::setTimeRange(vtkInformationVector *outputVector) {
+  if (m_presenter->hasTDimensionAvailable()) {
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
     outInfo->Set(vtkPVInformationKeys::TIME_LABEL_ANNOTATION(),
                  m_presenter->getTimeStepLabel().c_str());
     std::vector<double> timeStepValues = m_presenter->getTimeStepValues();
-    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],
-      static_cast<int> (timeStepValues.size()));
+    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(),
+                 &timeStepValues[0], static_cast<int>(timeStepValues.size()));
     double timeRange[2];
     timeRange[0] = timeStepValues.front();
     timeRange[1] = timeStepValues.back();
@@ -235,9 +217,8 @@ void vtkMDHWNexusReader::setTimeRange(vtkInformationVector* outputVector)
 /*
 Getter for the workspace type name.
 */
-char* vtkMDHWNexusReader::GetWorkspaceTypeName()
-{
-  //Forward request on to MVP presenter
+char *vtkMDHWNexusReader::GetWorkspaceTypeName() {
+  // Forward request on to MVP presenter
   typeName = m_presenter->getWorkspaceTypeName();
-  return const_cast<char*>(typeName.c_str());
+  return const_cast<char *>(typeName.c_str());
 }

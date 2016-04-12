@@ -27,15 +27,14 @@ DECLARE_ALGORITHM(GeneratePythonScript)
 /** Initialize the algorithm's properties.
 */
 void GeneratePythonScript::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "InputWorkspace", "", Direction::Input),
+                  "An input workspace.");
 
-  std::vector<std::string> exts;
-  exts.push_back(".py");
+  std::vector<std::string> exts{".py"};
 
-  declareProperty(new API::FileProperty("Filename", "",
-                                        API::FileProperty::OptionalSave, exts),
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::OptionalSave, exts),
                   "The name of the file into which the workspace history will "
                   "be generated.");
   declareProperty("ScriptText", std::string(""),
@@ -53,10 +52,8 @@ void GeneratePythonScript::init() {
                   "The filter end time in the format YYYY-MM-DD HH:mm:ss",
                   Direction::Input);
 
-  std::vector<std::string> saveVersions;
-  saveVersions.push_back("Specify Old");
-  saveVersions.push_back("Specify All");
-  saveVersions.push_back("Specify None");
+  std::vector<std::string> saveVersions{"Specify Old", "Specify All",
+                                        "Specify None"};
   declareProperty(
       "SpecifyAlgorithmVersions", "Specify Old",
       boost::make_shared<StringListValidator>(saveVersions),

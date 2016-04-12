@@ -47,15 +47,15 @@ namespace Mantid
     {
     public:
       MDEWLoadingPresenter(std::unique_ptr<MDLoadingView> view);
-      const std::string &getGeometryXML() const;
-      virtual bool hasTDimensionAvailable() const;
-      virtual std::vector<double> getTimeStepValues() const;
-      virtual std::string getTimeStepLabel() const;
-      virtual void setAxisLabels(vtkDataSet* visualDataSet);
-      virtual ~MDEWLoadingPresenter();
-      virtual const std::string& getInstrument();
-      virtual double getMinValue();
-      virtual double getMaxValue();
+      const std::string &getGeometryXML() const override;
+      bool hasTDimensionAvailable() const override;
+      std::vector<double> getTimeStepValues() const override;
+      std::string getTimeStepLabel() const override;
+      void setAxisLabels(vtkDataSet *visualDataSet) override;
+      ~MDEWLoadingPresenter() override;
+      const std::string &getInstrument() override;
+      double getMinValue() override;
+      double getMaxValue() override;
 
     protected:
       /*---------------------------------------------------------------------------

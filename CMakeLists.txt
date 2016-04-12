@@ -10,6 +10,13 @@ else()
   cmake_minimum_required ( VERSION 2.8.12 )
 endif()
 
+if(POLICY CMP0053)
+  #Simplify variable reference and escape sequence evaluation.
+  #Claims to dramatically improve CMake configure and generate time
+  #requires CMake 3.1 or later
+  cmake_policy(SET CMP0053 NEW)
+endif()
+
 # Define the project name.
 project ( Mantid )
 
@@ -51,6 +58,11 @@ if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
 endif ()
 
 ###########################################################################
+# Set working Python versions
+###########################################################################
+set ( Python_ADDITIONAL_VERSIONS 2.7 2.6 )
+
+###########################################################################
 # Cross-platform setup
 ###########################################################################
 include ( CommonSetup )
@@ -59,6 +71,10 @@ include ( CommonSetup )
 # Check for Qt (DarwinSetup below needs a variable from this)
 ###########################################################################
 find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg Qt3Support REQUIRED )
+option(WITH_QT3_SUPPORT_WARNINGS "Enable warnings about used Qt3Support functions" OFF)
+if(WITH_QT3_SUPPORT_WARNINGS)
+  add_definitions(-DQT3_SUPPORT_WARNINGS)
+endif()
 
 ###########################################################################
 # Find OpenGL
@@ -137,11 +153,6 @@ add_dependencies ( check GUITests )
 add_custom_target ( AllTests )
 add_dependencies ( AllTests FrameworkTests GUITests )
 
-if ( MSVC )
-  add_definitions ( -DQWT_DLL )
-endif ()
-add_subdirectory ( MantidQt )
-
 if ( UNIX )
   #Experimental feature. Unix only at this point.
   set ( UNITY_BUILD OFF CACHE BOOL "Switch for utilising unity builds. Faster builds for selected components.")
@@ -151,8 +162,11 @@ endif ( UNIX )
 set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
 
 if ( MAKE_VATES )
+  find_package( ParaView )
   add_subdirectory ( Vates )
-
+  if(ParaView_FOUND)
+    add_definitions ( -DMAKE_VATES )
+  endif()
   if (NOT APPLE)
     LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
           "${ParaView_DIR}" "ParaView Runtime Libs" "Runtime" "${INBUNDLE}/"
@@ -169,6 +183,11 @@ if ( MAKE_VATES )
   endif()
 
 endif ( MAKE_VATES )
+
+if ( MSVC )
+  add_definitions ( -DQWT_DLL )
+endif ()
+add_subdirectory ( MantidQt )
 
 add_subdirectory ( MantidPlot )
 
@@ -236,22 +255,22 @@ if ( ENABLE_CPACK )
       message ( STATUS " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
 
       # rhel requirements
-      set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus >= 4.3.1,nexus-python >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "qt4 >= 4.2,nexus >= 4.3.1,nexus-python >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy" )
       # OCE
       set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization")
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4,sip" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-ipython >= 1.1.0,python-ipython-notebook" )
       # scipy & matplotlib
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy,python-matplotlib" )
-      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5,jsoncpp" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5,jsoncpp >= 0.7.0" )
 
       if( "${UNIX_CODENAME}" MATCHES "Santiago" )
         # On RHEL6 we have to use an updated qscintilla to fix an auto complete bug
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla >= 2.4.6" )
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla >= 2.4.6, boost157" )
         # On RHEL6 we are using SCL packages for Qt
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scl-utils,mantidlibs34,mantidlibs34-runtime,mantidlibs34-qt,mantidlibs34-qt-x11,mantidlibs34-qt-webkit,mantidlibs34-qwt5-qt4" )
       else()
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla,qwt5-qt4,python-matplotlib-qt4" )
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla,qwt5-qt4,python-matplotlib-qt4,boost >= 1.53.0" )
       endif()
 
       # Add software collections for RHEL
@@ -279,7 +298,7 @@ if ( ENABLE_CPACK )
                            "python-sip,"
                            "python-qt4,"
                            "python-nxs (>= 4.3),"
-                           "libjsoncpp0,"
+                           "libjsoncpp0 (>=0.7.0),"
                            "libqscintilla2-11,"
                            "liboce-foundation8,liboce-modeling8,"
                            "libmuparser2,"
@@ -290,8 +309,8 @@ if ( ENABLE_CPACK )
                            "libpocofoundation11,libpocoutil11,libpoconet11,libpoconetssl11,libpococrypto11,libpocoxml11" )
         set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )
         if( "${UNIX_CODENAME}" STREQUAL "wily"  OR "${UNIX_CODENAME}" STREQUAL "xenial")
-            list ( APPEND DEPENDS_LIST ", libnexus0v5 (>= 4.3),libjsoncpp0v5,libqscintilla2-12v5, libmuparser2v5,libqwtplot3d-qt4-0v5")
-            list (REMOVE_ITEM DEPENDS_LIST "libjsoncpp0," "libqscintilla2-11," "libmuparser2," "libnexus0 (>= 4.3)," "libqwtplot3d-qt4-0,")
+            list ( APPEND DEPENDS_LIST ", libnexus0v5 (>= 4.3),libjsoncpp0v5 (>= 0.7.0),libqscintilla2-12v5, libmuparser2v5,libqwtplot3d-qt4-0v5")
+            list (REMOVE_ITEM DEPENDS_LIST "libjsoncpp0 (>=0.7.0)," "libqscintilla2-11," "libmuparser2," "libnexus0 (>= 4.3)," "libqwtplot3d-qt4-0,")
         endif()
         # parse list to string required for deb package
         string ( REPLACE ";" "" CPACK_DEBIAN_PACKAGE_DEPENDS ${DEPENDS_LIST} )

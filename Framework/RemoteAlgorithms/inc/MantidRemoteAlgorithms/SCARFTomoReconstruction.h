@@ -43,18 +43,18 @@ public:
   /// Constructor
   SCARFTomoReconstruction();
   /// Virtual destructor
-  virtual ~SCARFTomoReconstruction() {}
+  ~SCARFTomoReconstruction() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "SCARFTomoReconstruction"; }
+  const std::string name() const override { return "SCARFTomoReconstruction"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Perform a control action on jobs running on the SCARF computer "
            "cluster at RAL, STFC (http://www.scarf.rl.ac.uk/)";
   }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Remote"; }
+  const std::string category() const override { return "Remote"; }
 
 protected:
   /// different methods (HTTP requests) to process reconstruction job commands
@@ -79,19 +79,19 @@ protected:
   /// method that deals with the actual HTTP(S) connection (convenient to
   /// mock up all inet messaging)
   virtual int doSendRequestGetResponse(
-      const std::string &url, std::ostream &response,
+      const std::string &url, std::ostream &rss,
       const StringToStringMap &headers = StringToStringMap(),
       const std::string &method = std::string(), const std::string &body = "");
 
 private:
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   // helper for the submit request
   std::string buildSubmitBody(const std::string &appName,
                               const std::string &boundary,
-                              const std::string &inputFiles,
+                              const std::string &inputFile,
                               const std::string &inputArgs,
                               const std::string &jobName);
 
@@ -106,7 +106,7 @@ private:
 
   /// fill in output properties with job status and info
   void genOutputStatusInfo(const std::string &resp,
-                           const std::string &jobID = std::string());
+                           const std::string &jobIDFilter = std::string());
 
   /// Job sequence number (from here, nothing to do with the job id on the
   /// cluster)

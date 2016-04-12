@@ -12,6 +12,8 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 
+#include <boost/math/special_functions/round.hpp>
+
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -28,7 +30,7 @@ DECLARE_ALGORITHM(GenerateEventsFilter)
 GenerateEventsFilter::GenerateEventsFilter()
     : API::Algorithm(), m_dataWS(), m_splitWS(), m_filterWS(), m_filterInfoWS(),
       m_startTime(), m_stopTime(), m_runEndTime(),
-      m_timeUnitConvertFactorToNS(0.), m_dblLog(NULL), m_intLog(NULL),
+      m_timeUnitConvertFactorToNS(0.), m_dblLog(nullptr), m_intLog(nullptr),
       m_logAtCentre(false), m_logTimeTolerance(0.), m_forFastLog(false),
       m_splitters(), m_vecSplitterTime(), m_vecSplitterGroup(),
       m_useParallel(false), m_vecSplitterTimeSet(), m_vecGroupIndexSet() {}
@@ -43,28 +45,29 @@ GenerateEventsFilter::~GenerateEventsFilter() {}
  */
 void GenerateEventsFilter::init() {
   // Input/Output Workspaces
-  declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>(
-                      "InputWorkspace", "", Direction::Input),
-                  "An input event workspace");
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
+      "An input event workspace");
 
-  declareProperty(new API::WorkspaceProperty<API::Workspace>(
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output SplittersWorkspace object, "
                   "i.e., the filter.");
 
   declareProperty(
-      new API::WorkspaceProperty<API::ITableWorkspace>("InformationWorkspace",
-                                                       "", Direction::Output),
+      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "InformationWorkspace", "", Direction::Output),
       "Optional output for the information of each splitter workspace index");
 
   declareProperty(
       "FastLog", false,
-      "Fast log will make output workspace to be a maxtrix workspace. ");
+      "Fast log will make output workspace to be a matrix workspace. ");
 
   // Time (general) range
   declareProperty(
       "StartTime", "",
-      "The start time, such that all event before this time are filtered out. "
+      "The start time, such that all events before this time are filtered out. "
       "It could be (1) relative time to run start time "
       "in unit as specified property 'UnitOfTime' or "
       "(2) absolute time. "
@@ -81,7 +84,7 @@ void GenerateEventsFilter::init() {
       "while the relative time takes integer or float. ");
 
   // Split by time (only) in steps
-  declareProperty(new ArrayProperty<double>("TimeInterval"),
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("TimeInterval"),
                   "Array for lengths of time intervals for splitters.  "
                   "If the array is empty, then there will be one splitter "
                   "created from StartTime and StopTime. "
@@ -89,13 +92,10 @@ void GenerateEventsFilter::init() {
                   "same time intervals. "
                   "If the size of the array is larger than one, then the "
                   "splitters can have various time interval values.");
-  setPropertySettings("TimeInterval",
-                      new VisibleWhenProperty("LogName", IS_EQUAL_TO, ""));
+  setPropertySettings("TimeInterval", Kernel::make_unique<VisibleWhenProperty>(
+                                          "LogName", IS_EQUAL_TO, ""));
 
-  std::vector<std::string> timeoptions;
-  timeoptions.push_back("Seconds");
-  timeoptions.push_back("Nanoseconds");
-  timeoptions.push_back("Percent");
+  std::vector<std::string> timeoptions{"Seconds", "Nanoseconds", "Percent"};
   declareProperty(
       "UnitOfTime", "Seconds",
       boost::make_shared<Kernel::StringListValidator>(timeoptions),
@@ -111,25 +111,25 @@ void GenerateEventsFilter::init() {
 
   declareProperty("MinimumLogValue", EMPTY_DBL(),
                   "Minimum log value for which to keep events.");
-  setPropertySettings("MinimumLogValue",
-                      new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings(
+      "MinimumLogValue",
+      Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("MaximumLogValue", EMPTY_DBL(),
                   "Maximum log value for which to keep events.");
-  setPropertySettings("MaximumLogValue",
-                      new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings(
+      "MaximumLogValue",
+      Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("LogValueInterval", EMPTY_DBL(),
                   "Delta of log value to be sliced into from min log value and "
                   "max log value.\n"
                   "If not given, then only value ");
-  setPropertySettings("LogValueInterval",
-                      new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings(
+      "LogValueInterval",
+      Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
-  std::vector<std::string> filteroptions;
-  filteroptions.push_back("Both");
-  filteroptions.push_back("Increase");
-  filteroptions.push_back("Decrease");
+  std::vector<std::string> filteroptions{"Both", "Increase", "Decrease"};
   declareProperty(
       "FilterLogValueByChangingDirection", "Both",
       boost::make_shared<Kernel::StringListValidator>(filteroptions),
@@ -138,32 +138,31 @@ void GenerateEventsFilter::init() {
       "There are 3 options, 'Both', 'Increase' and 'Decrease' corresponding to "
       "d(log value)/dt can be any value, positive only and negative only "
       "respectively.");
-  setPropertySettings("FilterLogValueByChangingDirection",
-                      new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings(
+      "FilterLogValueByChangingDirection",
+      Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("TimeTolerance", 0.0,
                   "Tolerance in time for the event times to keep. "
                   "It is used in the case to filter by single value.");
-  setPropertySettings("TimeTolerance",
-                      new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings("TimeTolerance", Kernel::make_unique<VisibleWhenProperty>(
+                                           "LogName", IS_NOT_EQUAL_TO, ""));
 
-  vector<string> logboundoptions;
-  logboundoptions.push_back("Centre");
-  logboundoptions.push_back("Left");
-  logboundoptions.push_back("Other");
+  vector<string> logboundoptions{"Centre", "Left", "Other"};
   auto logvalidator = boost::make_shared<StringListValidator>(logboundoptions);
   declareProperty(
       "LogBoundary", "Centre", logvalidator,
       "How to treat log values as being measured in the centre of time. "
       "There are three options, 'Centre', 'Left' and 'Other'. ");
-  setPropertySettings("LogBoundary",
-                      new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings("LogBoundary", Kernel::make_unique<VisibleWhenProperty>(
+                                         "LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("LogValueTolerance", EMPTY_DBL(),
                   "Tolerance of the log value to be included in filter.  It is "
                   "used in the case to filter by multiple values.");
-  setPropertySettings("LogValueTolerance",
-                      new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings(
+      "LogValueTolerance",
+      Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   // Output workspaces' title and name
   declareProperty(
@@ -171,9 +170,7 @@ void GenerateEventsFilter::init() {
       "Title of output splitters workspace and information workspace.");
 
   // Linear or parallel
-  vector<string> processoptions;
-  processoptions.push_back("Serial");
-  processoptions.push_back("Parallel");
+  vector<string> processoptions{"Serial", "Parallel"};
   auto procvalidator = boost::make_shared<StringListValidator>(processoptions);
   declareProperty(
       "UseParallelProcessing", "Serial", procvalidator,
@@ -385,7 +382,7 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
   vector<double> vec_timeintervals = this->getProperty("TimeInterval");
 
   bool singleslot = false;
-  if (vec_timeintervals.size() == 0)
+  if (vec_timeintervals.empty())
     singleslot = true;
 
   // Progress
@@ -612,13 +609,13 @@ void GenerateEventsFilter::setFilterByLogValue(std::string logname) {
       minvaluei = m_intLog->minValue();
       minvalue = static_cast<double>(minvaluei);
     } else
-      minvaluei = static_cast<int>(minvalue + 0.5);
+      minvaluei = boost::math::iround(minvalue);
 
     if (maxvalue == EMPTY_DBL()) {
       maxvaluei = m_intLog->maxValue();
       maxvalue = static_cast<double>(maxvaluei);
     } else
-      maxvaluei = static_cast<int>(maxvalue + 0.5);
+      maxvaluei = boost::math::iround(maxvalue);
 
     if (minvalue > maxvalue) {
       stringstream errmsg;
@@ -729,7 +726,7 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue,
 
   double curvalue = minvalue;
   while (curvalue - valuetolerance < maxvalue) {
-    indexwsindexmap.insert(std::make_pair(index, wsindex));
+    indexwsindexmap.emplace(index, wsindex);
 
     // Log interval/value boundary
     double lowbound = curvalue - valuetolerance;
@@ -759,11 +756,10 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue,
   // Debug print
   stringstream dbsplitss;
   dbsplitss << "Index map size = " << indexwsindexmap.size() << "\n";
-  for (auto mit = indexwsindexmap.begin(); mit != indexwsindexmap.end();
-       ++mit) {
-    dbsplitss << "Index " << mit->first << ":  WS-group = " << mit->second
-              << ". Log value range: [" << logvalueranges[mit->first * 2]
-              << ", " << logvalueranges[mit->first * 2 + 1] << ").\n";
+  for (auto &mit : indexwsindexmap) {
+    dbsplitss << "Index " << mit.first << ":  WS-group = " << mit.second
+              << ". Log value range: [" << logvalueranges[mit.first * 2] << ", "
+              << logvalueranges[mit.first * 2 + 1] << ").\n";
   }
   g_log.information(dbsplitss.str());
 
@@ -1426,7 +1422,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
   // To fill the blanks at the end of log to make last entry of splitter is stop
   // time
   // To make it non-empty
-  if (vecSplitTime.size() == 0) {
+  if (vecSplitTime.empty()) {
     start = m_dblLog->nthTime(istart);
     stop = m_dblLog->nthTime(iend);
     lastindex = -1;
@@ -1461,7 +1457,7 @@ void GenerateEventsFilter::processIntegerValueFilter(int minvalue, int maxvalue,
     if (isEmpty(deltadbl))
       delta = maxvalue - minvalue + 1;
     else
-      delta = static_cast<int>(deltadbl + 0.5);
+      delta = boost::math::iround(deltadbl);
 
     if (delta <= 0) {
       stringstream errss;
@@ -1692,7 +1688,7 @@ void GenerateEventsFilter::addNewTimeFilterSplitter(
   if (m_forFastLog) {
     // For MatrixWorkspace splitter
     // Start of splitter
-    if (m_vecSplitterTime.size() == 0) {
+    if (m_vecSplitterTime.empty()) {
       // First splitter
       m_vecSplitterTime.push_back(starttime);
     } else if (m_vecSplitterTime.back() < starttime) {

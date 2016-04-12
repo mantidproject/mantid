@@ -1,12 +1,13 @@
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/VMD.h"
-#include "MantidKernel/Utils.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Utils.h"
+#include "MantidKernel/VMD.h"
 #include <algorithm>
-#include <utility>
+#include <boost/math/special_functions/round.hpp>
 #include <functional>
 #include <numeric>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -155,7 +156,7 @@ void MDHistoWorkspaceIterator::init(
     Mantid::Geometry::MDImplicitFunction *function, size_t beginPos,
     size_t endPos) {
   m_ws = workspace;
-  if (m_ws == NULL)
+  if (m_ws == nullptr)
     throw std::invalid_argument(
         "MDHistoWorkspaceIterator::ctor(): NULL workspace given.");
 
@@ -245,7 +246,7 @@ MDHistoWorkspaceIterator::~MDHistoWorkspaceIterator() {
 
   if (m_function)
     delete m_function;
-  m_function = NULL;
+  m_function = nullptr;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -276,7 +277,7 @@ MDHistoWorkspaceIterator::jumpToNearest(const VMD &fromLocation) {
   coord_t sqDiff = 0;
   for (size_t d = 0; d < m_nd; ++d) {
     coord_t dExact = getDExact(fromLocation[d], m_origin[d], m_binWidth[d]);
-    size_t dRound = size_t(dExact + 0.5); // Round to nearest bin edge.
+    size_t dRound = std::lround(dExact); // Round to nearest bin edge.
     sqDiff += (dExact - coord_t(dRound)) * (dExact - coord_t(dRound)) *
               m_binWidth[d] * m_binWidth[d];
     indexes[d] = dRound;
@@ -526,12 +527,12 @@ MDHistoWorkspaceIterator::findNeighbourIndexesFaceTouching() const {
   std::vector<size_t> neighbourIndexes; // Accumulate neighbour indexes.
   std::vector<int> widths(
       m_nd, 3); // Face touching width is always 3 in each dimension
-  for (size_t i = 0; i < m_permutationsFaceTouching.size(); ++i) {
-    if (m_permutationsFaceTouching[i] == 0) {
+  for (auto permutation : m_permutationsFaceTouching) {
+    if (permutation == 0) {
       continue;
     }
 
-    size_t neighbour_index = m_pos + m_permutationsFaceTouching[i];
+    size_t neighbour_index = m_pos + permutation;
     if (neighbour_index < m_ws->getNPoints() &&
         Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
                                     m_indexMaker, m_indexMax, widths)) {
@@ -655,12 +656,12 @@ std::vector<size_t> MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(
   // Accumulate neighbour indexes.
   std::vector<size_t> neighbourIndexes(permutationsVertexTouching.size());
   size_t nextFree = 0;
-  for (size_t i = 0; i < permutationsVertexTouching.size(); ++i) {
-    if (permutationsVertexTouching[i] == 0) {
+  for (auto permutation : permutationsVertexTouching) {
+    if (permutation == 0) {
       continue;
     }
 
-    size_t neighbour_index = m_pos + permutationsVertexTouching[i];
+    size_t neighbour_index = m_pos + permutation;
     if (neighbour_index < m_ws->getNPoints() &&
         Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
                                     m_indexMaker, m_indexMax, widths)) {

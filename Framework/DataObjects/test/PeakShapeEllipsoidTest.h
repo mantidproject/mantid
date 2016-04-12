@@ -8,14 +8,12 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
 #include <vector>
-#include <boost/assign/list_of.hpp>
 #include <json/json.h>
 
 using Mantid::DataObjects::PeakShapeEllipsoid;
 using Mantid::Kernel::SpecialCoordinateSystem;
 using namespace Mantid;
 using namespace Mantid::Kernel;
-using namespace boost::assign;
 
 class PeakShapeEllipsoidTest : public CxxTest::TestSuite {
 public:
@@ -27,11 +25,10 @@ public:
   static void destroySuite(PeakShapeEllipsoidTest *suite) { delete suite; }
 
   void test_constructor() {
-    auto directions = list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
-                          .convert_to_container<std::vector<V3D>>();
-    const MantidVec abcRadii = list_of(2)(3)(4);
-    const MantidVec abcInnerRadii = list_of(5)(6)(7);
-    const MantidVec abcOuterRadii = list_of(8)(9)(10);
+    auto directions = {(V3D(1, 0, 0)), (V3D(0, 1, 0)), (V3D(0, 0, 1))};
+    const MantidVec abcRadii = {2, 3, 4};
+    const MantidVec abcInnerRadii = {5, 6, 7};
+    const MantidVec abcOuterRadii = {8, 9, 10};
     const SpecialCoordinateSystem frame = Mantid::Kernel::HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
@@ -50,16 +47,14 @@ public:
   }
 
   void test_constructor_throws() {
-    auto directions = list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
-                          .convert_to_container<std::vector<V3D>>();
-    auto bad_directions =
-        list_of(V3D(1, 0, 0)).convert_to_container<std::vector<V3D>>();
-    const MantidVec abcRadii = list_of(2)(3)(4);
-    const MantidVec bad_abcRadii = list_of(2)(3)(4)(5);
-    const MantidVec abcInnerRadii = list_of(5)(6)(7);
-    const MantidVec bad_abcInnerRadii = list_of(5)(6);
-    const MantidVec abcOuterRadii = list_of(8)(9)(10);
-    const MantidVec bad_abcOuterRadii = list_of(8)(9)(10)(11);
+    auto directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    auto bad_directions = {V3D(1, 0, 0)};
+    const MantidVec abcRadii = {2, 3, 4};
+    const MantidVec bad_abcRadii = {2, 3, 4, 5};
+    const MantidVec abcInnerRadii = {5, 6, 7};
+    const MantidVec bad_abcInnerRadii = {5, 6};
+    const MantidVec abcOuterRadii = {8, 9, 10};
+    const MantidVec bad_abcOuterRadii = {8, 9, 10, 11};
     const SpecialCoordinateSystem frame = Mantid::Kernel::HKL;
 
     TSM_ASSERT_THROWS("Should throw, bad directions",
@@ -82,11 +77,10 @@ public:
   }
 
   void test_copy_constructor() {
-    auto directions = list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
-                          .convert_to_container<std::vector<V3D>>();
-    const MantidVec abcRadii = list_of(2)(3)(4);
-    const MantidVec abcInnerRadii = list_of(5)(6)(7);
-    const MantidVec abcOuterRadii = list_of(8)(9)(10);
+    auto directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const MantidVec abcRadii = {2, 3, 4};
+    const MantidVec abcInnerRadii = {5, 6, 7};
+    const MantidVec abcOuterRadii = {8, 9, 10};
     const SpecialCoordinateSystem frame = Mantid::Kernel::HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
@@ -106,15 +100,11 @@ public:
   }
 
   void test_assignment() {
-    PeakShapeEllipsoid a(list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
-                             .convert_to_container<std::vector<V3D>>(),
-                         list_of(2)(3)(4), list_of(5)(6)(7), list_of(8)(9)(10),
-                         Mantid::Kernel::HKL, "foo", 1);
+    PeakShapeEllipsoid a({V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)}, {2, 3, 4},
+                         {5, 6, 7}, {8, 9, 10}, Mantid::Kernel::HKL, "foo", 1);
 
-    PeakShapeEllipsoid b(list_of(V3D(0, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
-                             .convert_to_container<std::vector<V3D>>(),
-                         list_of(1)(3)(4), list_of(1)(6)(7), list_of(8)(9)(10),
-                         QLab, "bar", 2);
+    PeakShapeEllipsoid b({V3D(0, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)}, {1, 3, 4},
+                         {1, 6, 7}, {8, 9, 10}, QLab, "bar", 2);
 
     b = a;
 
@@ -129,11 +119,10 @@ public:
 
   void test_radius() {
 
-    std::vector<double> radius = list_of(1)(2)(3);
+    std::vector<double> radius = {1, 2, 3};
 
-    PeakShapeEllipsoid shape(list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
-                                 .convert_to_container<std::vector<V3D>>(),
-                             radius, radius, radius, Mantid::Kernel::HKL);
+    PeakShapeEllipsoid shape({V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)}, radius,
+                             radius, radius, Mantid::Kernel::HKL);
 
     TSM_ASSERT_EQUALS("Radius should be taken to be the max of the ABC radii",
                       3.0, shape.radius());
@@ -142,21 +131,19 @@ public:
   void test_shape_name() {
 
     // Construct it.
-    PeakShapeEllipsoid shape(list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
-                                 .convert_to_container<std::vector<V3D>>(),
-                             list_of(2)(3)(4), list_of(5)(6)(7),
-                             list_of(8)(9)(10), Mantid::Kernel::HKL, "foo", 1);
+    PeakShapeEllipsoid shape({V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)},
+                             {2, 3, 4}, {5, 6, 7}, {8, 9, 10},
+                             Mantid::Kernel::HKL, "foo", 1);
 
     TS_ASSERT_EQUALS("ellipsoid", shape.shapeName());
   }
 
   void test_toJSON() {
 
-    auto directions = list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
-                          .convert_to_container<std::vector<V3D>>();
-    const MantidVec abcRadii = list_of(2)(3)(4);
-    const MantidVec abcInnerRadii = list_of(5)(6)(7);
-    const MantidVec abcOuterRadii = list_of(8)(9)(10);
+    std::vector<V3D> directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const MantidVec abcRadii = {2, 3, 4};
+    const MantidVec abcInnerRadii = {5, 6, 7};
+    const MantidVec abcOuterRadii = {8, 9, 10};
     const SpecialCoordinateSystem frame = Mantid::Kernel::HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
@@ -189,11 +176,10 @@ public:
   }
 
   void test_directionsInSpecificFrameThrowsForMatrixWithInvalidDimensions() {
-    auto directions = list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
-                          .convert_to_container<std::vector<V3D>>();
-    const MantidVec abcRadii = list_of(2)(3)(4);
-    const MantidVec abcInnerRadii = list_of(5)(6)(7);
-    const MantidVec abcOuterRadii = list_of(8)(9)(10);
+    auto directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const MantidVec abcRadii = {2, 3, 4};
+    const MantidVec abcInnerRadii = {5, 6, 7};
+    const MantidVec abcOuterRadii = {8, 9, 10};
     const SpecialCoordinateSystem frame = Mantid::Kernel::QLab;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
@@ -220,11 +206,10 @@ public:
   }
 
   void test_directionsInSepcificFrame() {
-    auto directions = list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
-                          .convert_to_container<std::vector<V3D>>();
-    const MantidVec abcRadii = list_of(2)(3)(4);
-    const MantidVec abcInnerRadii = list_of(5)(6)(7);
-    const MantidVec abcOuterRadii = list_of(8)(9)(10);
+    auto directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const MantidVec abcRadii = {2, 3, 4};
+    const MantidVec abcInnerRadii = {5, 6, 7};
+    const MantidVec abcOuterRadii = {8, 9, 10};
     const SpecialCoordinateSystem frame = Mantid::Kernel::QLab;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;

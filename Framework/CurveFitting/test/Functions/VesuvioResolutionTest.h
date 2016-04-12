@@ -67,7 +67,8 @@ private:
     // Test names as they are used in scripts
     if (nattrs <= func.nAttributes()) {
       const char *attrAarr[nattrs] = {"Mass"};
-      std::set<std::string> expectedAttrs(attrAarr, attrAarr + nattrs);
+      std::unordered_set<std::string> expectedAttrs(attrAarr,
+                                                    attrAarr + nattrs);
       std::vector<std::string> actualNames = func.getAttributeNames();
 
       for (size_t i = 0; i < nattrs; ++i) {

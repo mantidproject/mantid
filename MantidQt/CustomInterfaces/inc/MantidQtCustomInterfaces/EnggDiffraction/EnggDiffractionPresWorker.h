@@ -43,17 +43,17 @@ public:
                  const std::string &vanNo, const std::string &ceriaNo,
                  const std::string &specNos)
       : m_pres(pres), m_outFilenames(), m_outCalibFilename(outFilename),
-        m_vanNo(vanNo), m_ceriaNo(ceriaNo), m_CalibSpecIDs(specNos), m_banks(),
-        m_bin(.0), m_nperiods(0) {}
+        m_vanNo(vanNo), m_ceriaNo(ceriaNo), m_CalibSpectrumNos(specNos),
+        m_banks(), m_bin(.0), m_nperiods(0) {}
 
   /// for focusing
   EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &outDir,
                  const std::vector<std::string> &runNo,
-                 const std::vector<bool> &banks, const std::string &specIDs,
+                 const std::vector<bool> &banks, const std::string &SpectrumNos,
                  const std::string &dgFile)
       : m_pres(pres), m_outCalibFilename(), m_multiRunNo(runNo),
-        m_outDir(outDir), m_banks(banks), m_specIDs(specIDs), m_dgFile(dgFile),
-        m_bin(.0), m_nperiods(0) {}
+        m_outDir(outDir), m_banks(banks), m_SpectrumNos(SpectrumNos),
+        m_dgFile(dgFile), m_bin(.0), m_nperiods(0) {}
 
   // for rebinning (ToF)
   EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &runNo,
@@ -67,6 +67,13 @@ public:
       : m_pres(pres), m_runNo(runNo), m_bin(timeStep), m_nperiods(nperiods),
         m_outWSName(outWSName) {}
 
+  // for fitting (single peak fits)
+  EnggDiffWorker(EnggDiffractionPresenter *pres,
+                 const std::string &focusedRunNo,
+                 const std::string &ExpectedPeaks)
+      : m_pres(pres), m_runNo(focusedRunNo), m_expectedPeaks(ExpectedPeaks),
+        m_bin(.0), m_nperiods(0) {}
+
 private slots:
 
   /**
@@ -75,7 +82,7 @@ private slots:
    */
   void calibrate() {
     m_pres->doNewCalibration(m_outCalibFilename, m_vanNo, m_ceriaNo,
-                             m_CalibSpecIDs);
+                             m_CalibSpectrumNos);
     emit finished();
   }
 
@@ -88,7 +95,7 @@ private slots:
     for (size_t i = 0; i < m_multiRunNo.size(); ++i) {
 
       auto runNo = m_multiRunNo[i];
-      m_pres->doFocusRun(m_outDir, runNo, m_banks, m_specIDs, m_dgFile);
+      m_pres->doFocusRun(m_outDir, runNo, m_banks, m_SpectrumNos, m_dgFile);
     }
     emit finished();
   }
@@ -103,6 +110,11 @@ private slots:
     emit finished();
   }
 
+  void fitting() {
+    m_pres->doFitting(m_runNo, m_expectedPeaks);
+    emit finished();
+  }
+
 signals:
   void finished();
 
@@ -113,7 +125,7 @@ private:
   const std::vector<std::string> m_outFilenames;
   const std::string m_outCalibFilename, m_vanNo, m_ceriaNo;
   // parameters for specific types of calibration: "cropped"
-  const std::string m_CalibSpecIDs;
+  const std::string m_CalibSpectrumNos;
   /// sample run to process
   const std::string m_runNo;
   // sample multi-run to process
@@ -124,9 +136,11 @@ private:
   /// instrument banks: do focus/don't
   const std::vector<bool> m_banks;
   // parameters for specific types of focusing: "cropped"
-  const std::string m_specIDs;
+  const std::string m_SpectrumNos;
   // for focusing "texture"
   const std::string m_dgFile;
+  // parameters for fitting
+  const std::string m_expectedPeaks;
   // parameters for pre-processing/rebinning
   const double m_bin;
   const size_t m_nperiods;

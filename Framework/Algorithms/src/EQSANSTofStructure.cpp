@@ -30,7 +30,7 @@ EQSANSTofStructure::EQSANSTofStructure()
       low_tof_cut(0.), high_tof_cut(0.) {}
 
 void EQSANSTofStructure::init() {
-  declareProperty(new WorkspaceProperty<EventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("TOF")),
                   "Workspace to apply the TOF correction to");
@@ -105,7 +105,8 @@ void EQSANSTofStructure::exec() {
       frame_skipping ? tof_frame_width * 2.0 : tof_frame_width;
   double frame_offset = 0.0;
   if (frame_tof0 >= tmp_frame_width)
-    frame_offset = tmp_frame_width * ((int)(frame_tof0 / tmp_frame_width));
+    frame_offset =
+        tmp_frame_width * (static_cast<int>(frame_tof0 / tmp_frame_width));
 
   this->execEvent(inputWS, frame_tof0, frame_offset, tof_frame_width,
                   tmp_frame_width, frame_skipping);
@@ -135,7 +136,7 @@ void EQSANSTofStructure::execEvent(
     try {
       det = inputWS->getDetector(ispec);
     } catch (Exception::NotFoundError &) {
-      g_log.warning() << "Spectrum index " << ispec
+      g_log.warning() << "Workspace index " << ispec
                       << " has no detector assigned to it - discarding"
                       << std::endl;
       // 'continue' statement moved outside catch block because Mac Intel
@@ -186,6 +187,7 @@ void EQSANSTofStructure::execEvent(
       clean_events.push_back(TofEvent(newtof, it->pulseTime()));
     }
     events.clear();
+    events.reserve(clean_events.size());
     for (it = clean_events.begin(); it < clean_events.end(); ++it) {
       events.push_back(*it);
     }

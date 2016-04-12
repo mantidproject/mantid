@@ -37,12 +37,12 @@ namespace MDAlgorithms {
 class DLLExport UnaryOperationMD : public API::Algorithm {
 public:
   UnaryOperationMD();
-  ~UnaryOperationMD();
+  ~UnaryOperationMD() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const {
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override {
     return "Abstract base class for unary operations on MDWorkspaces.";
   }
 
@@ -52,9 +52,9 @@ protected:
   /// The name of the output workspace property
   virtual const std::string outputPropName() const { return "OutputWorkspace"; }
 
-  void init();
+  void init() override;
   virtual void initExtraProperties();
-  void exec();
+  void exec() override;
 
   /// Check the inputs and throw if the algorithm cannot be run
   virtual void checkInputs() = 0;

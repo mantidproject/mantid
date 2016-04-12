@@ -44,17 +44,17 @@ public:
   /// (default=0.01)
   SimplexMinimizer(const double epsabs = 1e-2);
   /// Destructor
-  ~SimplexMinimizer();
+  ~SimplexMinimizer() override;
 
   /// Overloading base class methods
-  std::string name() const { return "Simplex"; }
+  std::string name() const override { return "Simplex"; }
   /// Do one iteration
-  bool iterate(size_t);
+  bool iterate(size_t) override;
   /// Return current value of the cost function
-  double costFunctionVal();
+  double costFunctionVal() override;
   /// Initialize minimizer, i.e. pass a function to minimize.
-  virtual void initialize(API::ICostFunction_sptr function,
-                          size_t maxIterations = 0);
+  void initialize(API::ICostFunction_sptr function,
+                  size_t maxIterations = 0) override;
 
 protected:
   void resetSize(const double &size);

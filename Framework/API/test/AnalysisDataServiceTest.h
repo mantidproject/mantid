@@ -11,12 +11,12 @@ using namespace Mantid::API;
 
 namespace {
 class MockWorkspace : public Workspace {
-  virtual const std::string id() const { return "MockWorkspace"; }
-  virtual const std::string toString() const { return ""; }
-  virtual size_t getMemorySize() const { return 1; }
+  const std::string id() const override { return "MockWorkspace"; }
+  const std::string toString() const override { return ""; }
+  size_t getMemorySize() const override { return 1; }
 
 private:
-  virtual MockWorkspace *doClone() const {
+  MockWorkspace *doClone() const override {
     throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
   }
 };
@@ -35,7 +35,7 @@ public:
 
   AnalysisDataServiceTest() : ads(AnalysisDataService::Instance()) {}
 
-  void setUp() { ads.clear(); }
+  void setUp() override { ads.clear(); }
 
   void
   test_IsValid_Returns_An_Empty_String_For_A_Valid_Name_When_All_CharsAre_Allowed() {

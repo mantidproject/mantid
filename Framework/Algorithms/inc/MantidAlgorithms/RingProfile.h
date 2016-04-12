@@ -39,23 +39,25 @@ namespace Algorithms {
 class DLLExport RingProfile : public API::Algorithm {
 public:
   RingProfile();
-  virtual ~RingProfile();
+  ~RingProfile() override;
 
-  virtual const std::string name() const { return "RingProfile"; };
+  const std::string name() const override { return "RingProfile"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculates the sum of the counts against a circular ring.";
   }
 
-  virtual int version() const { return 1; };
-  virtual const std::string category() const { return "Transforms\\Grouping"; };
+  int version() const override { return 1; };
+  const std::string category() const override {
+    return "Transforms\\Grouping";
+  };
 
 protected:
   boost::shared_ptr<API::Progress> m_progress;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   /// get the bin position for the given angle
   int fromAngleToBin(double angle, bool degree = true);
   /// validate the inputs of the algorithm for instrument based workspace

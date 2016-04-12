@@ -1,9 +1,11 @@
 #ifndef MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO_H_
 #define MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/System.h"
+
 #include <boost/optional.hpp>
 
 namespace Mantid {
@@ -36,20 +38,20 @@ class DLLExport ReflectometryReductionOneAuto
     : public API::DataProcessorAlgorithm {
 public:
   ReflectometryReductionOneAuto();
-  virtual ~ReflectometryReductionOneAuto();
+  ~ReflectometryReductionOneAuto() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
   // For (multiperiod) workspace groups
-  virtual bool checkGroups();
-  virtual bool processGroups();
+  bool checkGroups() override;
+  bool processGroups() override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   template <typename T> boost::optional<T> isSet(std::string propName) const;
 
   double checkForDefault(std::string propName,

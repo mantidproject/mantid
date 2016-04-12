@@ -24,7 +24,7 @@ public:
     p->addValue("2007-11-30T16:17:40", 5);
   }
 
-  ~LogFilterTest() { delete p; }
+  ~LogFilterTest() override { delete p; }
 
   void testnthValue() {
 

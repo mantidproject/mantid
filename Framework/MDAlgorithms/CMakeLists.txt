@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/CalculateCoverageDGS.cpp
 	src/CentroidPeaksMD.cpp
 	src/CentroidPeaksMD2.cpp
+	src/ChangeQConvention.cpp
 	src/CloneMDWorkspace.cpp
 	src/CompactMD.cpp
 	src/CompareMDWorkspaces.cpp
@@ -63,6 +64,7 @@ set ( SRC_FILES
 	src/LoadILLAsciiHelper.cpp
 	src/LoadMD.cpp
 	src/LoadSQW.cpp
+	src/LoadSQW2.cpp
 	src/LogarithmMD.cpp
 	src/MDEventWSWrapper.cpp
 	src/MDNormDirectSC.cpp
@@ -120,7 +122,6 @@ set ( SRC_FILES
 	src/UnaryOperationMD.cpp
 	src/UnitsConversionHelper.cpp
 	src/UserFunctionMD.cpp
-	src/Vector3DParameterParser.cpp
 	src/WeightedMeanMD.cpp
 	src/XorMD.cpp
 )
@@ -139,6 +140,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CalculateCoverageDGS.h
 	inc/MantidMDAlgorithms/CentroidPeaksMD.h
 	inc/MantidMDAlgorithms/CentroidPeaksMD2.h
+	inc/MantidMDAlgorithms/ChangeQConvention.h
 	inc/MantidMDAlgorithms/CloneMDWorkspace.h
 	inc/MantidMDAlgorithms/CompactMD.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
@@ -189,12 +191,14 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/LoadILLAsciiHelper.h
 	inc/MantidMDAlgorithms/LoadMD.h
 	inc/MantidMDAlgorithms/LoadSQW.h
+	inc/MantidMDAlgorithms/LoadSQW2.h
 	inc/MantidMDAlgorithms/LogarithmMD.h
 	inc/MantidMDAlgorithms/MDEventWSWrapper.h
 	inc/MantidMDAlgorithms/MDNormDirectSC.h
 	inc/MantidMDAlgorithms/MDNormSCD.h
 	inc/MantidMDAlgorithms/MDTransfAxisNames.h
 	inc/MantidMDAlgorithms/MDTransfFactory.h
+	inc/MantidMDAlgorithms/MDTransfInterface.h
 	inc/MantidMDAlgorithms/MDTransfModQ.h
 	inc/MantidMDAlgorithms/MDTransfNoQ.h
 	inc/MantidMDAlgorithms/MDTransfQ3D.h
@@ -264,6 +268,7 @@ set ( TEST_FILES
 	CalculateCoverageDGSTest.h
 	CentroidPeaksMD2Test.h
 	CentroidPeaksMDTest.h
+	ChangeQConventionTest.h
 	CloneMDWorkspaceTest.h
 	CompactMDTest.h
 	CompareMDWorkspacesTest.h
@@ -311,6 +316,7 @@ set ( TEST_FILES
 	LessThanMDTest.h
 	LoadMDTest.h
 	LoadSQWTest.h
+	LoadSQW2Test.h
 	LogarithmMDTest.h
 	MDEventWSWrapperTest.h
 	MDNormDirectSCTest.h

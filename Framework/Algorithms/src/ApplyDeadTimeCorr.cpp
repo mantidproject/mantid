@@ -2,12 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ApplyDeadTimeCorr.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/PropertyWithValue.h"
+
 #include "boost/lexical_cast.hpp"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/TableRow.h"
 
 #include <cmath>
 
@@ -26,17 +28,17 @@ DECLARE_ALGORITHM(ApplyDeadTimeCorr)
    */
 void ApplyDeadTimeCorr::init() {
 
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The name of the input workspace containing measured counts");
 
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
                       "DeadTimeTable", "", Direction::Input),
                   "Name of the Dead Time Table");
 
   declareProperty(
-      new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "",
-                                                       Direction::Output),
+      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "The name of the output workspace containing corrected counts");
 }
 
@@ -126,6 +128,44 @@ void ApplyDeadTimeCorr::exec() {
     throw std::invalid_argument(
         "Row count was bigger than the Number of Histograms.");
   }
+}
+
+/**
+ * Validates input properties:
+ * - input workspace must have all bins the same size (within reasonable error)
+ * @returns :: map of property names to error strings (empty if no error)
+ */
+std::map<std::string, std::string> ApplyDeadTimeCorr::validateInputs() {
+  std::map<std::string, std::string> errors;
+  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  if (inputWS) { // in case input was a WorkspaceGroup
+    const MantidVec &xValues = inputWS->readX(0);
+    const size_t xSize = xValues.size();
+    if (xSize < 2) {
+      errors["InputWorkspace"] = "Input workspace cannot be empty";
+    } else {
+      // average bin width
+      const double dx =
+          (xValues[xSize - 1] - xValues[0]) / static_cast<double>(xSize - 1);
+
+      // Use cumulative errors
+      auto difference = [&xValues, &dx](size_t i) {
+        return std::abs((xValues[i] - xValues[0] - (double)i * dx) / dx);
+      };
+
+      // Check each width against dx
+      constexpr double tolerance = 0.5;
+      for (size_t i = 1; i < xValues.size() - 2; i++) {
+        if (difference(i) > tolerance) {
+          g_log.error() << "dx=" << xValues[i + 1] - xValues[i] << ' ' << dx
+                        << ' ' << i << std::endl;
+          errors["InputWorkspace"] = "Uneven bin widths in input workspace";
+          break;
+        }
+      }
+    }
+  }
+  return errors;
 }
 
 } // namespace Mantid

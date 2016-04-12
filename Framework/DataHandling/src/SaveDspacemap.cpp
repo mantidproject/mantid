@@ -31,13 +31,13 @@ SaveDspacemap::~SaveDspacemap() {}
 /** Initialize the algorithm's properties.
  */
 void SaveDspacemap::init() {
-  declareProperty(new WorkspaceProperty<OffsetsWorkspace>("InputWorkspace", "",
-                                                          Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input OffsetsWorkspace to save.");
 
-  declareProperty(
-      new FileProperty("DspacemapFile", "", FileProperty::Save, ".dat"),
-      "The DspacemapFile on output contains the d-space mapping");
+  declareProperty(make_unique<FileProperty>("DspacemapFile", "",
+                                            FileProperty::Save, ".dat"),
+                  "The DspacemapFile on output contains the d-space mapping");
 
   declareProperty("PadDetID", 300000, "Pad Data to this number of pixels");
 }

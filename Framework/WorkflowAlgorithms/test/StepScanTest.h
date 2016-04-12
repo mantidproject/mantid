@@ -5,6 +5,7 @@
 
 #include "MantidWorkflowAlgorithms/StepScan.h"
 #include "MantidAlgorithms/FilterByXValue.h"
+#include "MantidAPI/Axis.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -23,7 +24,7 @@ public:
 
   StepScanTest() : outWSName("outTable") {}
 
-  void setUp() {
+  void setUp() override {
     // I'm not sure why, but this trick seems to be needed to force linking to
     // the Algorithms
     // library on Ubuntu (otherwise it says the child algorithms are not

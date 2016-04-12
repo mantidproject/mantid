@@ -33,11 +33,11 @@ public:
   ScriptingWindow(ScriptingEnv *env, bool capturePrint = true,
                   QWidget *parent = 0, Qt::WindowFlags flags = 0);
   /// Destructor
-  ~ScriptingWindow();
+  ~ScriptingWindow() override;
   /// Override the closeEvent
-  void closeEvent(QCloseEvent *event);
+  void closeEvent(QCloseEvent *event) override;
   /// Override the showEvent
-  void showEvent(QShowEvent *event);
+  void showEvent(QShowEvent *event) override;
   /// Is a script running?
   bool isExecuting() const;
   /// Save the current state of the script window for next time
@@ -56,7 +56,7 @@ public:
   /// Set whether to accept/reject close events
   void acceptCloseEvent(const bool value);
   /// Opens a script providing a copy is not already open
-  void openUnique(const QString &);
+  void openUnique(QString filename);
 
 signals:
   /// Show the scripting language dialog
@@ -68,10 +68,10 @@ signals:
 
 protected:
   /// Accept a custom defined event
-  void customEvent(QEvent *event);
-  void dragEnterEvent(QDragEnterEvent *de);
-  void dragMoveEvent(QDragMoveEvent *de);
-  void dropEvent(QDropEvent *de);
+  void customEvent(QEvent *event) override;
+  void dragEnterEvent(QDragEnterEvent *de) override;
+  void dragMoveEvent(QDragMoveEvent *de) override;
+  void dropEvent(QDropEvent *de) override;
 
 private slots:
   /// Populate file menu

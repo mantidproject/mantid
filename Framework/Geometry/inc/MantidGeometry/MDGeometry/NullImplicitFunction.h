@@ -44,13 +44,11 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport NullImplicitFunction
     : public Mantid::Geometry::MDImplicitFunction {
 public:
-  NullImplicitFunction();
-  virtual ~NullImplicitFunction();
-  virtual std::string getName() const;
-  virtual std::string toXMLString() const;
+  std::string getName() const override;
+  std::string toXMLString() const override;
   //----------------------MDImplicit function methods ------------
-  virtual bool isPointContained(const coord_t *) { return true; }
-  virtual bool isPointContained(const std::vector<coord_t> &) { return true; }
+  bool isPointContained(const coord_t *) override { return true; }
+  bool isPointContained(const std::vector<coord_t> &) override { return true; }
   // Unhide base class methods (avoids Intel compiler warning)
   using MDImplicitFunction::isPointContained;
   //---------------------------------------------------------------

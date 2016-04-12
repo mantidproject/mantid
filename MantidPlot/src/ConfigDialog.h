@@ -78,10 +78,10 @@ public:
   void gotoMantidDirectories();
 
   private slots:
-    virtual void languageChange();
+    void languageChange() override;
     void insertLanguagesList();
 
-    void accept();
+    void accept() override;
     void apply();
 
     void setCurrentPage(int index);
@@ -188,6 +188,7 @@ private:
   QComboBox *facility;
   MantidQt::MantidWidgets::InstrumentSelector  *defInstr;
   QCheckBox* ckIgnoreParaView;
+  QCheckBox* ckQconvention;
 
   /// Mantid tab for setting directories
   QWidget *directoriesPage;

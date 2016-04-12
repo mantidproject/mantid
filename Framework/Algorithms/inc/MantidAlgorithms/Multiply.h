@@ -49,49 +49,48 @@ public:
   /// Default constructor
   Multiply() : CommutativeBinaryOperation(){};
   /// Destructor
-  virtual ~Multiply(){};
+  ~Multiply() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "Multiply"; }
+  const std::string name() const override { return "Multiply"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The Multiply algorithm will multiply the data values and calculate "
            "the corresponding error values of two compatible workspaces.  ";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
 private:
   // Overridden BinaryOperation methods
   void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
                               const MantidVec &lhsE, const MantidVec &rhsY,
                               const MantidVec &rhsE, MantidVec &YOut,
-                              MantidVec &EOut);
+                              MantidVec &EOut) override;
   void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
                               const MantidVec &lhsE, const double rhsY,
                               const double rhsE, MantidVec &YOut,
-                              MantidVec &EOut);
+                              MantidVec &EOut) override;
 
-  virtual void setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,
-                              const API::MatrixWorkspace_const_sptr rhs,
-                              API::MatrixWorkspace_sptr out);
+  void setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,
+                      const API::MatrixWorkspace_const_sptr rhs,
+                      API::MatrixWorkspace_sptr out) override;
 
-  virtual void performEventBinaryOperation(DataObjects::EventList &lhs,
-                                           const DataObjects::EventList &rhs);
+  void performEventBinaryOperation(DataObjects::EventList &lhs,
+                                   const DataObjects::EventList &rhs) override;
 
-  virtual void performEventBinaryOperation(DataObjects::EventList &lhs,
-                                           const MantidVec &rhsX,
-                                           const MantidVec &rhsY,
-                                           const MantidVec &rhsE);
+  void performEventBinaryOperation(DataObjects::EventList &lhs,
+                                   const MantidVec &rhsX, const MantidVec &rhsY,
+                                   const MantidVec &rhsE) override;
 
-  virtual void performEventBinaryOperation(DataObjects::EventList &lhs,
-                                           const double &rhsY,
-                                           const double &rhsE);
+  void performEventBinaryOperation(DataObjects::EventList &lhs,
+                                   const double &rhsY,
+                                   const double &rhsE) override;
 
-  void checkRequirements();
-  virtual std::string
-  checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                         const API::MatrixWorkspace_const_sptr rhs) const;
+  void checkRequirements() override;
+  std::string checkSizeCompatibility(
+      const API::MatrixWorkspace_const_sptr lhs,
+      const API::MatrixWorkspace_const_sptr rhs) const override;
 };
 
 } // namespace Algorithm

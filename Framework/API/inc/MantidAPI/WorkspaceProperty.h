@@ -169,8 +169,8 @@ public:
    * @param value :: The value to set to
    * @return assigned PropertyWithValue
    */
-  virtual boost::shared_ptr<TYPE> &
-  operator=(const boost::shared_ptr<TYPE> &value) {
+  boost::shared_ptr<TYPE> &
+  operator=(const boost::shared_ptr<TYPE> &value) override {
     std::string wsName = value->name();
     if (this->direction() == Kernel::Direction::Input && !wsName.empty()) {
       m_workspaceName = wsName;
@@ -180,37 +180,37 @@ public:
 
   //--------------------------------------------------------------------------------------
   /// Add the value of another property
-  virtual WorkspaceProperty &operator+=(Kernel::Property const *) {
+  WorkspaceProperty &operator+=(Kernel::Property const *) override {
     throw Kernel::Exception::NotImplementedError(
         "+= operator is not implemented for WorkspaceProperty.");
     return *this;
   }
 
   /// 'Virtual copy constructor'
-  WorkspaceProperty<TYPE> *clone() const {
+  WorkspaceProperty<TYPE> *clone() const override {
     return new WorkspaceProperty<TYPE>(*this);
   }
-
-  /// Virtual destructor
-  virtual ~WorkspaceProperty() {}
 
   /** Get the name of the workspace
   *  @return The workspace's name
   */
-  virtual std::string value() const { return m_workspaceName; }
+  std::string value() const override { return m_workspaceName; }
 
   /** Get the value the property was initialised with -its default value
   *  @return The default value
   */
-  virtual std::string getDefault() const { return m_initialWSName; }
+  std::string getDefault() const override { return m_initialWSName; }
 
   /** Set the name of the workspace.
   *  Also tries to retrieve it from the AnalysisDataService.
   *  @param value :: The new name for the workspace
   *  @return
   */
-  virtual std::string setValue(const std::string &value) {
+  std::string setValue(const std::string &value) override {
     m_workspaceName = value;
+    if (Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::autoTrim()) {
+      boost::trim(m_workspaceName);
+    }
     // Try and get the workspace from the ADS, but don't worry if we can't
     try {
       Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value =
@@ -229,8 +229,8 @@ public:
    *  type it will set validated, if not the property's value will be cleared.
    *  @return
    */
-  virtual std::string
-  setDataItem(const boost::shared_ptr<Kernel::DataItem> value) {
+  std::string
+  setDataItem(const boost::shared_ptr<Kernel::DataItem> value) override {
     boost::shared_ptr<TYPE> typed = boost::dynamic_pointer_cast<TYPE>(value);
     if (typed) {
       std::string wsName = typed->name();
@@ -251,7 +251,7 @@ public:
   *  a workspace of the correct type.
   *  @returns A user level description of the problem or "" if it is valid.
   */
-  std::string isValid() const {
+  std::string isValid() const override {
     // start with the no error condition
     std::string error = "";
 
@@ -302,26 +302,27 @@ public:
   *  @return true if the value is the same as the initial value or false
   * otherwise
   */
-  bool isDefault() const { return m_initialWSName == m_workspaceName; }
+  bool isDefault() const override { return m_initialWSName == m_workspaceName; }
 
   /** Is the workspace property optional
    * @return true if the workspace can be blank   */
-  bool isOptional() const { return (m_optional == PropertyMode::Optional); }
+  bool isOptional() const override {
+    return (m_optional == PropertyMode::Optional);
+  }
   /** Does the workspace need to be locked before starting an algorithm?
    * @return true (default) if the workspace will be locked */
-  bool isLocking() const { return (m_locking == LockMode::Lock); }
+  bool isLocking() const override { return (m_locking == LockMode::Lock); }
 
   /** Returns the current contents of the AnalysisDataService for input
    * workspaces.
    *  For output workspaces, an empty set is returned
    *  @return set of objects in AnalysisDataService
    */
-  virtual std::vector<std::string> allowedValues() const {
+  std::vector<std::string> allowedValues() const override {
     if (this->direction() == Kernel::Direction::Input ||
         this->direction() == Kernel::Direction::InOut) {
       // If an input workspace, get the list of workspaces currently in the ADS
-      std::set<std::string> vals =
-          AnalysisDataService::Instance().getObjectNames();
+      auto vals = AnalysisDataService::Instance().getObjectNames();
       if (isOptional()) // Insert an empty option
       {
         vals.insert("");
@@ -329,8 +330,7 @@ public:
       // Copy-construct a temporary workspace property to test the validity of
       // each workspace
       WorkspaceProperty<TYPE> tester(*this);
-      std::set<std::string>::iterator it;
-      for (it = vals.begin(); it != vals.end();) {
+      for (auto it = vals.begin(); it != vals.end();) {
         // Remove any workspace that's not valid for this algorithm
         if (!tester.setValue(*it).empty()) {
           vals.erase(
@@ -347,7 +347,7 @@ public:
 
   /// Create a history record
   /// @return A populated PropertyHistory for this class
-  virtual const Kernel::PropertyHistory createHistory() const {
+  const Kernel::PropertyHistory createHistory() const override {
     std::string wsName = m_workspaceName;
     bool isdefault = this->isDefault();
 
@@ -366,7 +366,7 @@ public:
   *  @return True if the workspace is an output workspace and has been stored
   *  @throw std::runtime_error if unable to store the workspace successfully
   */
-  virtual bool store() {
+  bool store() override {
     bool result = false;
     if (!this->operator()() && isOptional())
       return result;
@@ -387,7 +387,7 @@ public:
     return result;
   }
 
-  Workspace_sptr getWorkspace() const { return this->operator()(); }
+  Workspace_sptr getWorkspace() const override { return this->operator()(); }
 
 private:
   /** Checks whether the entered workspace group is valid.
@@ -399,13 +399,10 @@ private:
     g_log.debug() << " Input WorkspaceGroup found " << std::endl;
 
     std::vector<std::string> wsGroupNames = wsGroup->getNames();
-    std::vector<std::string>::iterator it = wsGroupNames.begin();
-
     std::string error;
 
     // Cycle through each workspace in the group ...
-    for (; it != wsGroupNames.end(); ++it) {
-      std::string memberWsName = *it;
+    for (const auto &memberWsName : wsGroupNames) {
       boost::shared_ptr<Workspace> memberWs =
           AnalysisDataService::Instance().retrieve(memberWsName);
 
@@ -419,7 +416,7 @@ private:
       } else {
         // ... and if it is a workspace of incorrect type, exclude the group by
         // returning an error.
-        if (NULL == boost::dynamic_pointer_cast<TYPE>(memberWs)) {
+        if (!boost::dynamic_pointer_cast<TYPE>(memberWs)) {
           error = "Workspace " + memberWsName + " is not of type " +
                   Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::type() +
                   ".";
@@ -485,7 +482,7 @@ private:
   }
 
   /// Reset the pointer to the workspace
-  void clear() {
+  void clear() override {
     Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value =
         boost::shared_ptr<TYPE>();
   }

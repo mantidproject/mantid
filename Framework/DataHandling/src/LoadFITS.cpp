@@ -2,6 +2,7 @@
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadFITS.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -11,7 +12,6 @@
 #include <boost/scoped_array.hpp>
 
 #include <Poco/BinaryReader.h>
-#include <Poco/FileStream.h>
 #include <Poco/Path.h>
 
 using namespace Mantid::DataHandling;
@@ -83,21 +83,21 @@ void LoadFITS::init() {
   // Declare the Filename algorithm property. Mandatory. Sets the path to the
   // file to load.
   exts.clear();
-  exts.push_back(".fits");
-  exts.push_back(".fit");
+  exts.emplace_back(".fits");
+  exts.emplace_back(".fit");
 
-  exts2.push_back(".*");
+  exts2.emplace_back(".*");
 
-  declareProperty(new MultipleFileProperty("Filename", exts),
+  declareProperty(Kernel::make_unique<MultipleFileProperty>("Filename", exts),
                   "The name of the input file (note that you can give "
                   "multiple file names separated by commas).");
 
-  declareProperty(new API::WorkspaceProperty<API::Workspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::Workspace>>(
       "OutputWorkspace", "", Kernel::Direction::Output));
 
   declareProperty(
-      new Kernel::PropertyWithValue<bool>("LoadAsRectImg", false,
-                                          Kernel::Direction::Input),
+      make_unique<Kernel::PropertyWithValue<bool>>("LoadAsRectImg", false,
+                                                   Kernel::Direction::Input),
       "If enabled (not by default), the output Workspace2D will have "
       "one histogram per row and one bin per pixel, such that a 2D "
       "color plot (color fill plot) will display an image.");
@@ -119,8 +119,9 @@ void LoadFITS::init() {
                   Kernel::Direction::Input);
 
   declareProperty(
-      new FileProperty(g_HEADER_MAP_NAME, "", FileProperty::OptionalDirectory,
-                       "", Kernel::Direction::Input),
+      Kernel::make_unique<FileProperty>(g_HEADER_MAP_NAME, "",
+                                        FileProperty::OptionalDirectory, "",
+                                        Kernel::Direction::Input),
       "A file mapping header key names to non-standard names [line separated "
       "values in the format KEY=VALUE, e.g. BitDepthName=BITPIX] - do not use "
       "this if you want to keep compatibility with standard FITS files.");
@@ -754,11 +755,10 @@ void LoadFITS::addAxesInfoAndLogs(Workspace2D_sptr ws, bool loadAsRectImg,
   ws->setYUnitLabel("brightness");
 
   // Add all header info to log.
-  for (auto it = fileInfo.headerKeys.begin(); it != fileInfo.headerKeys.end();
-       ++it) {
-    ws->mutableRun().removeLogData(it->first, true);
+  for (const auto &headerKey : fileInfo.headerKeys) {
+    ws->mutableRun().removeLogData(headerKey.first, true);
     ws->mutableRun().addLogData(
-        new PropertyWithValue<std::string>(it->first, it->second));
+        new PropertyWithValue<std::string>(headerKey.first, headerKey.second));
   }
 
   // Add rotational data to log. Clear first from copied WS
@@ -925,7 +925,7 @@ void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY,
 void LoadFITS::readInBuffer(const FITSInfo &fileInfo, std::vector<char> &buffer,
                             size_t len) {
   std::string filename = fileInfo.filePath;
-  Poco::FileStream file(filename, std::ios::in);
+  std::ifstream file(filename, std::ios::in | std::ios::binary);
   file.seekg(g_BASE_HEADER_SIZE * fileInfo.headerSizeMultiplier);
   file.read(&buffer[0], len);
   if (!file) {
@@ -981,9 +981,9 @@ void LoadFITS::doFilterNoise(double thresh, MantidImage &imageY,
 
   for (size_t j = 1; j < (imageY.size() - 1); ++j) {
     for (size_t i = 1; i < (imageY[0].size() - 1); ++i) {
-      if (!goodY[j][i]) {
-        if (goodY[j - 1][i] || goodY[j + 1][i] || goodY[j][i - 1] ||
-            goodY[j][i + 1]) {
+      if (goodY[j][i] == 0.0) {
+        if (goodY[j - 1][i] != 0.0 || goodY[j + 1][i] != 0.0 ||
+            goodY[j][i - 1] != 0.0 || goodY[j][i + 1] != 0.0) {
           imageY[j][i] = goodY[j - 1][i] * imageY[j - 1][i] +
                          goodY[j + 1][i] * imageY[j + 1][i] +
                          goodY[j][i - 1] * imageY[j][i - 1] +
@@ -991,9 +991,9 @@ void LoadFITS::doFilterNoise(double thresh, MantidImage &imageY,
         }
       }
 
-      if (!goodE[j][i]) {
-        if (goodE[j - 1][i] || goodE[j + 1][i] || goodE[j][i - 1] ||
-            goodE[j][i + 1]) {
+      if (goodE[j][i] == 0.0) {
+        if (goodE[j - 1][i] != 0.0 || goodE[j + 1][i] != 0.0 ||
+            goodE[j][i - 1] != 0.0 || goodE[j][i + 1] != 0.0) {
           imageE[j][i] = goodE[j - 1][i] * imageE[j - 1][i] +
                          goodE[j + 1][i] * imageE[j + 1][i] +
                          goodE[j][i - 1] * imageE[j][i - 1] +
@@ -1084,8 +1084,8 @@ void LoadFITS::setupDefaultKeywordNames() {
   m_headerRotationKey = "ROTATION";
 
   m_headerNAxisNameKey = "NAXIS";
-  m_headerAxisNameKeys.push_back("NAXIS1");
-  m_headerAxisNameKeys.push_back("NAXIS2");
+  m_headerAxisNameKeys.emplace_back("NAXIS1");
+  m_headerAxisNameKeys.emplace_back("NAXIS2");
 
   m_mapFile = "";
 

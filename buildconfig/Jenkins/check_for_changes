@@ -1,0 +1,44 @@
+#!/bin/bash -ex
+# return 1 if have matches
+# return 0 if no matches
+FOUND=1
+NOTFOUND=0
+
+TYPE=${1}
+BASE_BRANCH="origin/master"
+if [ $2 ]; then
+    BASE_BRANCH=$2
+fi
+SHA=$(git rev-parse HEAD)
+echo "SHA=${SHA}"
+
+case "$TYPE" in
+    py)
+        exit $(git diff --quiet ${BASE_BRANCH} ${SHA} -- \*\.py)
+    ;;
+    cpp)
+        if $(! git diff --quiet ${BASE_BRANCH} ${SHA} -- \*\.h)
+        then
+            exit $FOUND
+        fi
+        if $(! git diff --quiet ${BASE_BRANCH} ${SHA} -- \*\.cpp)
+        then
+            exit $FOUND
+        fi
+        if $(! git diff --quiet ${BASE_BRANCH} ${SHA} -- \*\.cxx)
+        then
+            exit $FOUND
+        fi
+        if $(! git diff --quiet ${BASE_BRANCH} ${SHA} -- \*\.tcc)
+        then
+            exit $FOUND
+        fi
+        exit $NOTFOUND
+    ;;
+    *)
+        echo "do not have case for type \"$TYPE\""
+    ;;
+esac
+
+# fall-through behavior is that it matches
+exit $FOUND

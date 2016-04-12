@@ -43,9 +43,10 @@ namespace MantidQt
       Q_OBJECT
     public:
       HintingLineEdit(QWidget *parent, const std::map<std::string,std::string> &hints);
-      virtual ~HintingLineEdit();
+      ~HintingLineEdit() override;
+
     protected:
-      virtual void keyPressEvent(QKeyEvent* e);
+      void keyPressEvent(QKeyEvent *e) override;
       void updateMatches();
       void showToolTip();
       void insertSuggestion();

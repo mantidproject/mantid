@@ -53,20 +53,24 @@ private:
 public:
   FakeIMDDimension(std::string id, unsigned int nbins = 10)
       : m_id(id), m_nbins(nbins) {}
-  std::string getName() const { throw std::runtime_error("Not implemented"); }
-  const Mantid::Kernel::UnitLabel getUnits() const {
+  std::string getName() const override {
     throw std::runtime_error("Not implemented");
   }
-  std::string getDimensionId() const { return m_id; }
-  coord_t getMaximum() const { return 10; }
-  coord_t getMinimum() const { return 0; };
-  size_t getNBins() const { return m_nbins; };
-  std::string toXMLString() const {
+  const Mantid::Kernel::UnitLabel getUnits() const override {
+    throw std::runtime_error("Not implemented");
+  }
+  std::string getDimensionId() const override { return m_id; }
+  coord_t getMaximum() const override { return 10; }
+  coord_t getMinimum() const override { return 0; };
+  size_t getNBins() const override { return m_nbins; };
+  std::string toXMLString() const override {
     throw std::runtime_error("Not implemented");
   };
-  coord_t getX(size_t) const { throw std::runtime_error("Not implemented"); };
-  virtual void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/){};
-  virtual ~FakeIMDDimension() {}
+  coord_t getX(size_t) const override {
+    throw std::runtime_error("Not implemented");
+  };
+  void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/) override{};
+  ~FakeIMDDimension() override {}
 };
 
 //=================================================================================================
@@ -93,37 +97,37 @@ public:
   MOCK_CONST_METHOD0(getSpecialCoordinateSystem,
                      Mantid::Kernel::SpecialCoordinateSystem());
 
-  virtual void getLinePlot(const Mantid::Kernel::VMD &,
-                           const Mantid::Kernel::VMD &,
-                           Mantid::API::MDNormalization,
-                           std::vector<Mantid::coord_t> &,
-                           std::vector<Mantid::signal_t> &,
-                           std::vector<Mantid::signal_t> &) const {}
+  Mantid::API::IMDWorkspace::LinePlot
+  getLinePlot(const Mantid::Kernel::VMD &, const Mantid::Kernel::VMD &,
+              Mantid::API::MDNormalization) const override {
+    LinePlot line;
+    return line;
+  }
 
-  virtual std::vector<Mantid::API::IMDIterator *>
-      createIterators(size_t = 1,
-                      Mantid::Geometry::MDImplicitFunction * = NULL) const {
+  std::vector<Mantid::API::IMDIterator *> createIterators(
+      size_t = 1,
+      Mantid::Geometry::MDImplicitFunction * = NULL) const override {
     throw std::runtime_error("Not Implemented");
   }
 
-  virtual Mantid::signal_t
+  Mantid::signal_t
   getSignalAtCoord(const Mantid::coord_t *,
-                   const Mantid::API::MDNormalization &) const {
+                   const Mantid::API::MDNormalization &) const override {
     return 0;
   }
 
-  virtual Mantid::signal_t
-  getSignalWithMaskAtCoord(const Mantid::coord_t *,
-                           const Mantid::API::MDNormalization &) const {
+  Mantid::signal_t getSignalWithMaskAtCoord(
+      const Mantid::coord_t *,
+      const Mantid::API::MDNormalization &) const override {
     return 0;
   }
 
   MockIMDWorkspace() : IMDWorkspace() {}
 
-  virtual ~MockIMDWorkspace() {}
+  ~MockIMDWorkspace() override {}
 
 private:
-  virtual MockIMDWorkspace *doClone() const {
+  MockIMDWorkspace *doClone() const override {
     throw std::runtime_error("Cloning of MockIMDWorkspace is not implemented.");
   }
 };
@@ -139,16 +143,12 @@ public:
   }
   MOCK_CONST_METHOD1(
       create, vtkSmartPointer<vtkDataSet>(Mantid::VATES::ProgressAction &));
-  MOCK_CONST_METHOD0(createMeshOnly,
-    vtkDataSet*());
-  MOCK_CONST_METHOD0(createScalarArray,
-    vtkFloatArray*());
-  MOCK_METHOD1(initialize,
-    void(Mantid::API::Workspace_sptr));
+  MOCK_CONST_METHOD0(createMeshOnly, vtkDataSet *());
+  MOCK_CONST_METHOD0(createScalarArray, vtkFloatArray *());
+  MOCK_METHOD1(initialize, void(Mantid::API::Workspace_sptr));
   MOCK_METHOD1(setSuccessorProxy, void(vtkDataSetFactory *));
   MOCK_CONST_METHOD0(hasSuccessor, bool());
-  MOCK_CONST_METHOD0(validate,
-    void());
+  MOCK_CONST_METHOD0(validate, void());
   MOCK_CONST_METHOD0(getFactoryTypeName, std::string());
   MOCK_METHOD1(setRecursionDepth, void(size_t));
 };
@@ -161,7 +161,7 @@ public:
   MOCK_CONST_METHOD0(getRecursionDepth, size_t());
   MOCK_CONST_METHOD0(getLoadInMemory, bool());
   MOCK_METHOD2(updateAlgorithmProgress, void(double, const std::string &));
-  ~MockMDLoadingView() {}
+  ~MockMDLoadingView() override {}
 };
 
 class MockWorkspaceProvider : public Mantid::VATES::WorkspaceProvider {
@@ -169,7 +169,7 @@ public:
   MOCK_CONST_METHOD1(canProvideWorkspace, bool(std::string));
   MOCK_CONST_METHOD1(fetchWorkspace, Mantid::API::Workspace_sptr(std::string));
   MOCK_CONST_METHOD1(disposeWorkspace, void(std::string));
-  ~MockWorkspaceProvider() {}
+  ~MockWorkspaceProvider() override {}
 };
 
 class MockProgressAction : public Mantid::VATES::ProgressAction {
@@ -178,7 +178,7 @@ public:
 };
 
 class FakeProgressAction : public Mantid::VATES::ProgressAction {
-  virtual void eventRaised(double) {}
+  void eventRaised(double) override {}
 };
 
 /**

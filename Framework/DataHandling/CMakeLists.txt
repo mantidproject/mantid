@@ -8,6 +8,9 @@ set ( SRC_FILES
 	src/CreateModeratorModel.cpp
 	src/CreateSampleShape.cpp
 	src/CreateSimulationWorkspace.cpp
+	src/DataBlock.cpp
+	src/DataBlockComposite.cpp
+	src/DataBlockGenerator.cpp
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
@@ -21,6 +24,7 @@ set ( SRC_FILES
 	src/GenerateGroupingPowder.cpp
 	src/GroupDetectors.cpp
 	src/GroupDetectors2.cpp
+	src/H5Util.cpp
 	src/ISISDataArchive.cpp
 	src/ISISRunLogs.cpp
 	src/Load.cpp
@@ -71,7 +75,7 @@ set ( SRC_FILES
 	src/LoadNexus.cpp
 	src/LoadNexusLogs.cpp
 	src/LoadNexusMonitors.cpp
-        src/LoadNexusMonitors2.cpp
+	src/LoadNexusMonitors2.cpp
 	src/LoadNexusProcessed.cpp
 	src/LoadPDFgetNFile.cpp
 	src/LoadParameterFile.cpp
@@ -99,6 +103,7 @@ set ( SRC_FILES
 	src/LoadSpice2D.cpp
 	src/LoadSpiceAscii.cpp
 	src/LoadSpiceXML2DDet.cpp
+	src/LoadSwans.cpp
 	src/LoadTOFRawNexus.cpp
 	src/LoadVulcanCalFile.cpp
 	src/MaskDetectors.cpp
@@ -108,6 +113,7 @@ set ( SRC_FILES
 	src/MoveInstrumentComponent.cpp
 	src/NexusTester.cpp
 	src/PDLoadCharacterizations.cpp
+	src/PatchBBY.cpp
 	src/ProcessDasNexusLog.cpp
 	src/RawFileInfo.cpp
 	src/RemoveLogs.cpp
@@ -155,6 +161,7 @@ set ( SRC_FILES
 	src/SetSampleMaterial.cpp
 	src/SetScalingPSD.cpp
 	src/SortTableWorkspace.cpp
+	src/StartAndEndTimeFromNexusFileExtractor.cpp
 	src/UpdateInstrumentFromFile.cpp
 	src/XmlHandler.cpp
 )
@@ -169,6 +176,9 @@ set ( INC_FILES
 	inc/MantidDataHandling/CreateModeratorModel.h
 	inc/MantidDataHandling/CreateSampleShape.h
 	inc/MantidDataHandling/CreateSimulationWorkspace.h
+	inc/MantidDataHandling/DataBlock.h
+	inc/MantidDataHandling/DataBlockComposite.h
+	inc/MantidDataHandling/DataBlockGenerator.h
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
@@ -182,6 +192,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/GenerateGroupingPowder.h
 	inc/MantidDataHandling/GroupDetectors.h
 	inc/MantidDataHandling/GroupDetectors2.h
+	inc/MantidDataHandling/H5Util.h
 	inc/MantidDataHandling/ISISDataArchive.h
 	inc/MantidDataHandling/ISISRunLogs.h
 	inc/MantidDataHandling/Load.h
@@ -232,7 +243,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadNexus.h
 	inc/MantidDataHandling/LoadNexusLogs.h
 	inc/MantidDataHandling/LoadNexusMonitors.h
-        inc/MantidDataHandling/LoadNexusMonitors2.h
+	inc/MantidDataHandling/LoadNexusMonitors2.h
 	inc/MantidDataHandling/LoadNexusProcessed.h
 	inc/MantidDataHandling/LoadPDFgetNFile.h
 	inc/MantidDataHandling/LoadParameterFile.h
@@ -255,6 +266,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/LoadSpiceAscii.h
 	inc/MantidDataHandling/LoadSpiceXML2DDet.h
+	inc/MantidDataHandling/LoadSwans.h
 	inc/MantidDataHandling/LoadTOFRawNexus.h
 	inc/MantidDataHandling/LoadVulcanCalFile.h
 	inc/MantidDataHandling/MaskDetectors.h
@@ -264,6 +276,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/MoveInstrumentComponent.h
 	inc/MantidDataHandling/NexusTester.h
 	inc/MantidDataHandling/PDLoadCharacterizations.h
+	inc/MantidDataHandling/PatchBBY.h
 	inc/MantidDataHandling/ProcessDasNexusLog.h
 	inc/MantidDataHandling/RawFileInfo.h
 	inc/MantidDataHandling/RemoveLogs.h
@@ -311,6 +324,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SetSampleMaterial.h
 	inc/MantidDataHandling/SetScalingPSD.h
 	inc/MantidDataHandling/SortTableWorkspace.h
+	inc/MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
 	inc/MantidDataHandling/XmlHandler.h
 	src/LoadRaw/byte_rel_comp.h
@@ -329,6 +343,9 @@ set ( TEST_FILES
 	CreateModeratorModelTest.h
 	CreateSampleShapeTest.h
 	CreateSimulationWorkspaceTest.h
+	DataBlockCompositeTest.h
+	DataBlockGeneratorTest.h
+	DataBlockTest.h
 	DefineGaugeVolumeTest.h
 	DeleteTableRowsTest.h
 	DetermineChunkingTest.h
@@ -342,6 +359,7 @@ set ( TEST_FILES
 	GenerateGroupingPowderTest.h
 	GroupDetectors2Test.h
 	GroupDetectorsTest.h
+	H5UtilTest.h
 	ISISDataArchiveTest.h
 	InstrumentRayTracerTest.h
 	LoadAscii2Test.h
@@ -406,6 +424,7 @@ set ( TEST_FILES
 	LoadSpice2dTest.h
 	LoadSpiceAsciiTest.h
 	LoadSpiceXML2DDetTest.h
+	LoadSwansTest.h
 	LoadTOFRawNexusTest.h
 	LoadTest.h
 	LoadVulcanCalFileTest.h
@@ -460,6 +479,7 @@ set ( TEST_FILES
 	SetSampleMaterialTest.h
 	SetScalingPSDTest.h
 	SortTableWorkspaceTest.h
+	StartAndEndTimeFromNexusFileExtractorTest.h
 	UpdateInstrumentFromFileTest.h
 	XMLInstrumentParameterTest.h
 )
@@ -480,11 +500,12 @@ enable_precompiled_headers( inc/MantidDataHandling/PrecompiledHeader.h SRC_FILES
 # Add the target for this directory
 add_library ( DataHandling ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling )
+set_target_properties ( DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling
+                        COMPILE_DEFINITIONS "IN_MANTID_DATAHANDLING")
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( DataHandling PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
-endif () 
+endif ()
 
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )

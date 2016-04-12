@@ -5,6 +5,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/ModeratorModel.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -23,9 +24,6 @@ ModeratorChopperResolution::ModeratorChopperResolution(
     : m_observation(observation), m_modChopDist(0.0), m_chopSampleDist(0.0) {
   initCaches();
 }
-
-/// Destructor
-ModeratorChopperResolution::~ModeratorChopperResolution() {}
 
 /**
  * Returns the width, i.e the standard-deviation, in energy that the

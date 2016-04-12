@@ -1,7 +1,4 @@
 set ( SRC_FILES
-	#	src/Q1DTOF.cpp
-	# src/CountEventsInPulses.cpp
-	# src/UpdatePeakParameterTable.cpp
 	src/AbsorptionCorrection.cpp
 	src/AddLogDerivative.cpp
 	src/AddNote.cpp
@@ -99,6 +96,7 @@ set ( SRC_FILES
 	src/EditInstrumentGeometry.cpp
 	src/ElasticWindow.cpp
 	src/EstimateResolutionDiffraction.cpp
+	src/EventWorkspaceAccess.cpp
 	src/Exponential.cpp
 	src/ExponentialCorrection.cpp
 	src/ExportTimeSeriesLog.cpp
@@ -107,6 +105,7 @@ set ( SRC_FILES
 	src/ExtractMaskToTable.cpp
 	src/ExtractSingleSpectrum.cpp
 	src/ExtractSpectra.cpp
+	src/ExtractUnmaskedSpectra.cpp
 	src/FFT.cpp
 	src/FFTDerivative.cpp
 	src/FFTSmooth.cpp
@@ -152,8 +151,12 @@ set ( SRC_FILES
 	src/MaskBins.cpp
 	src/MaskBinsFromTable.cpp
 	src/MaskDetectorsIf.cpp
+	src/MatrixWorkspaceAccess.cpp
 	src/Max.cpp
 	src/MaxEnt.cpp
+	src/MaxEnt/MaxentData.cpp
+	src/MaxEnt/MaxentEntropyNegativeValues.cpp
+	src/MaxEnt/MaxentEntropyPositiveValues.cpp
 	src/MaxMin.cpp
 	src/MedianDetectorTest.cpp
 	src/MergeRuns.cpp
@@ -242,6 +245,7 @@ set ( SRC_FILES
 	src/SolidAngle.cpp
 	src/SortEvents.cpp
 	src/SpatialGrouping.cpp
+	src/SpectrumAlgorithm.cpp
 	src/SpecularReflectionAlgorithm.cpp
 	src/SpecularReflectionCalculateTheta.cpp
 	src/SpecularReflectionPositionCorrect.cpp
@@ -277,9 +281,6 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES
-	#	inc/MantidAlgorithms/Q1DTOF.h
-	# inc/MantidAlgorithms/CountEventsInPulses.h
-	# inc/MantidAlgorithms/UpdatePeakParameterTable.h
 	inc/MantidAlgorithms/AbsorptionCorrection.h
 	inc/MantidAlgorithms/AddLogDerivative.h
 	inc/MantidAlgorithms/AddNote.h
@@ -377,6 +378,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/EditInstrumentGeometry.h
 	inc/MantidAlgorithms/ElasticWindow.h
 	inc/MantidAlgorithms/EstimateResolutionDiffraction.h
+	inc/MantidAlgorithms/EventWorkspaceAccess.h
 	inc/MantidAlgorithms/Exponential.h
 	inc/MantidAlgorithms/ExponentialCorrection.h
 	inc/MantidAlgorithms/ExportTimeSeriesLog.h
@@ -385,6 +387,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ExtractMaskToTable.h
 	inc/MantidAlgorithms/ExtractSingleSpectrum.h
 	inc/MantidAlgorithms/ExtractSpectra.h
+	inc/MantidAlgorithms/ExtractUnmaskedSpectra.h
 	inc/MantidAlgorithms/FFT.h
 	inc/MantidAlgorithms/FFTDerivative.h
 	inc/MantidAlgorithms/FFTSmooth.h
@@ -431,8 +434,13 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MaskBins.h
 	inc/MantidAlgorithms/MaskBinsFromTable.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
+	inc/MantidAlgorithms/MatrixWorkspaceAccess.h
 	inc/MantidAlgorithms/Max.h
 	inc/MantidAlgorithms/MaxEnt.h
+	inc/MantidAlgorithms/MaxEnt/MaxentData.h
+	inc/MantidAlgorithms/MaxEnt/MaxentEntropy.h
+	inc/MantidAlgorithms/MaxEnt/MaxentEntropyNegativeValues.h
+	inc/MantidAlgorithms/MaxEnt/MaxentEntropyPositiveValues.h
 	inc/MantidAlgorithms/MaxMin.h
 	inc/MantidAlgorithms/MedianDetectorTest.h
 	inc/MantidAlgorithms/MergeRuns.h
@@ -521,6 +529,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SolidAngle.h
 	inc/MantidAlgorithms/SortEvents.h
 	inc/MantidAlgorithms/SpatialGrouping.h
+	inc/MantidAlgorithms/SpectrumAlgorithm.h
 	inc/MantidAlgorithms/SpecularReflectionAlgorithm.h
 	inc/MantidAlgorithms/SpecularReflectionCalculateTheta.h
 	inc/MantidAlgorithms/SpecularReflectionPositionCorrect.h
@@ -671,6 +680,7 @@ set ( TEST_FILES
 	ExtractMaskToTableTest.h
 	ExtractSingleSpectrumTest.h
 	ExtractSpectraTest.h
+	ExtractUnmaskedSpectraTest.h
 	FFTDerivativeTest.h
 	FFTSmooth2Test.h
 	FFTTest.h
@@ -713,6 +723,9 @@ set ( TEST_FILES
 	MaskBinsFromTableTest.h
 	MaskBinsTest.h
 	MaxEntTest.h
+	MaxEnt/MaxentDataTest.h
+	MaxEnt/MaxentEntropyNegativeValuesTest.h
+	MaxEnt/MaxentEntropyPositiveValuesTest.h
 	MaxMinTest.h
 	MayersSampleCorrectionStrategyTest.h
 	MayersSampleCorrectionTest.h
@@ -780,6 +793,7 @@ set ( TEST_FILES
 	ScaleTest.h
 	ScaleXTest.h
 	SetInstrumentParameterTest.h
+        SetUncertaintiesTest.h
 	ShiftLogTimeTest.h
 	SignalOverErrorTest.h
 	SmoothDataTest.h
@@ -833,7 +847,8 @@ enable_precompiled_headers ( inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES 
 # Add the target for this directory
 add_library ( Algorithms ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms )
+set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms
+						           COMPILE_DEFINITIONS "IN_MANTID_ALGORITHMS" )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( Algorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")

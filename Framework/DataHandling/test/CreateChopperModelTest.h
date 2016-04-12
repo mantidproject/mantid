@@ -22,11 +22,11 @@ public:
       : m_inputName("CreateChopperModelTest"), m_testWS(createTestWorkspace()) {
   }
 
-  void setUp() {
+  void setUp() override {
     Mantid::API::AnalysisDataService::Instance().add(m_inputName, m_testWS);
   }
 
-  void tearDown() {
+  void tearDown() override {
     clearInstrumentFromTestWorkspace();
     Mantid::API::AnalysisDataService::Instance().remove(m_inputName);
   }
@@ -96,7 +96,7 @@ private:
   Mantid::API::IAlgorithm_sptr
   createAlgorithm(const std::string &workspace = "",
                   const std::string &model = "") {
-    auto alg = boost::shared_ptr<CreateChopperModel>(new CreateChopperModel);
+    auto alg = boost::make_shared<CreateChopperModel>();
     alg->setRethrows(true);
     alg->initialize();
 

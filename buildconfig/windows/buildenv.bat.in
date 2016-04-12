@@ -16,5 +16,8 @@ set QT4_BIN=%THIRD_PARTY_DIR%\lib\qt4\bin;%THIRD_PARTY_DIR%\lib\qt4\lib
 :: Python - 
 set PYTHONHOME=%THIRD_PARTY_DIR%\lib\python2.7
 
+:: Misc bin -
+set MISC_BIN=%THIRD_PARTY_DIR%\bin;%THIRD_PARTY_DIR%\bin\mingw
+
 :: Update PATH
-set PATH=%THIRD_PARTY_DIR%\bin;%PYTHONHOME%;%QT4_BIN%;%PATH%
+set PATH=%MISC_BIN%;%PYTHONHOME%;%QT4_BIN%;%PATH%

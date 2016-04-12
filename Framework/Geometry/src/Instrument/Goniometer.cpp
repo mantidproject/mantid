@@ -51,11 +51,6 @@ void GoniometerAxis::loadNexus(::NeXus::File *file, const std::string &group) {
 /// The rotation matrix is initialized to identity
 Goniometer::Goniometer() : R(3, 3, true), initFromR(false) {}
 
-/// Copy constructor
-/// @param other :: Goniometer from which to copy information
-Goniometer::Goniometer(const Goniometer &other)
-    : R(other.R), motors(other.motors), initFromR(other.initFromR) {}
-
 /// Constructor from a rotation matrix
 /// @param rot :: DblMatrix matrix that is going to be the internal rotation
 /// matrix of the goniometer. Cannot push additional axes
@@ -69,9 +64,6 @@ Goniometer::Goniometer(DblMatrix rot) {
   } else
     throw std::invalid_argument("rot is not a rotation matrix");
 }
-
-/// Default destructor
-Goniometer::~Goniometer() {}
 
 /// Return global rotation matrix
 /// @return R :: 3x3 rotation matrix
@@ -90,7 +82,7 @@ bool Goniometer::isDefined() const { return initFromR || (!motors.empty()); }
 /// name, direction, sense, angle)
 /// The angle units shown is degrees
 std::string Goniometer::axesInfo() {
-  if (initFromR == true) {
+  if (initFromR) {
     return std::string("Goniometer was initialized from a rotation matrix. No "
                        "information about axis is available.\n");
   } else {
@@ -98,7 +90,7 @@ std::string Goniometer::axesInfo() {
     std::vector<GoniometerAxis>::iterator it;
     std::string strCW("CW"), strCCW("CCW"), sense;
 
-    if (motors.size() == 0) {
+    if (motors.empty()) {
       info << "No axis is found\n";
     } else {
       info << "Name \t Direction \t Sense \t Angle \n";
@@ -126,7 +118,7 @@ std::string Goniometer::axesInfo() {
 */
 void Goniometer::pushAxis(std::string name, double axisx, double axisy,
                           double axisz, double angle, int sense, int angUnit) {
-  if (initFromR == true) {
+  if (initFromR) {
     throw std::runtime_error(
         "Initialized from a rotation matrix, so no axes can be pushed.");
   } else {
@@ -155,7 +147,7 @@ void Goniometer::setRotationAngle(std::string name, double value) {
       changed = true;
     }
   }
-  if (changed == false) {
+  if (!changed) {
     throw std::invalid_argument("Motor name " + name + " not found");
   }
   recalculateR();

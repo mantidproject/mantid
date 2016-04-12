@@ -1,5 +1,5 @@
 Name:           mantid-developer
-Version:        1.13
+Version:        1.14
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -11,8 +11,12 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %{?fc20:Requires: rpmfusion-nonfree-release}
 Requires: clang
 Requires: cmake-gui >= 2.8.12
-Requires: boost-devel
 %{?el6:Requires: epel-release}
+%if 0%{?el6}
+Requires: boost157-devel
+%else
+Requires: boost-devel
+%endif
 Requires: doxygen
 Requires: gperftools-devel
 Requires: gperftools-libs
@@ -21,7 +25,7 @@ Requires: git-all
 Requires: gsl-devel
 Requires: hdf-devel
 Requires: hdf5-devel
-Requires: jsoncpp-devel
+Requires: jsoncpp-devel >= 0.7.0
 Requires: muParser-devel
 Requires: mxml-devel
 Requires: nexus >= 4.2
@@ -90,6 +94,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Mon Nov 30 2015 Steven Hahn <hahnse@ornl.gov>
+- Require jsoncpp-devel >= 0.7.0
+
 * Wed Jul 01 2015 Steven Hahn <hahnse@ornl.gov>
 - Added python-matplotlib dependency
 

@@ -1,6 +1,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/VMD.h"
 
 #include <sstream>
@@ -11,15 +12,9 @@ namespace Mantid {
 namespace API {
 //-----------------------------------------------------------------------------------------------
 /** Default constructor */
-IMDWorkspace::IMDWorkspace() : Workspace(), Mantid::API::MDGeometry() {}
-
-//-----------------------------------------------------------------------------------------------
-/** Copy constructor */
-IMDWorkspace::IMDWorkspace(const IMDWorkspace &other)
-    : Workspace(other), Mantid::API::MDGeometry(other) {}
-
-/// Destructor
-IMDWorkspace::~IMDWorkspace() {}
+IMDWorkspace::IMDWorkspace() : Workspace(), Mantid::API::MDGeometry() {
+  m_convention = Kernel::ConfigService::Instance().getString("Q.convention");
+}
 
 /** Creates a single iterator and returns it.
  *
@@ -38,6 +33,29 @@ IMDIterator *IMDWorkspace::createIterator(
                              "returned by " +
                              this->id());
   return iterators[0];
+}
+
+//---------------------------------------------------------------------------------------------
+/** @return the convention
+ */
+std::string IMDWorkspace::getConvention() const { return m_convention; }
+
+//---------------------------------------------------------------------------------------------
+/** @return the convention
+ */
+void IMDWorkspace::setConvention(std::string convention) {
+  m_convention = convention;
+}
+
+//---------------------------------------------------------------------------------------------
+/** @return the convention
+ */
+std::string IMDWorkspace::changeQConvention() {
+  if (this->getConvention() == "Crystallography")
+    m_convention = "Inelastic";
+  else
+    m_convention = "Crystallography";
+  return m_convention;
 }
 
 //-------------------------------------------------------------------------------------------
@@ -88,7 +106,29 @@ const std::string IMDWorkspace::toString() const {
     os << "Binned from '" << getOriginalWorkspace()->getName();
   }
   os << "\n";
+  if (this->getConvention() == "Crystallography")
+    os << "Crystallography: kf-ki";
+  else
+    os << "Inelastic: ki-kf";
+  os << "\n";
+
   return os.str();
+}
+
+//----------------------------------------------------------------------------------------------
+/**
+ * Make a single point with NaN as the signal and error
+ * This can be returned when there would otherwise be nothing to plot
+ * @param x :: position on the line
+ * @param y :: signal value
+ * @param e :: error value
+ */
+void IMDWorkspace::makeSinglePointWithNaN(std::vector<coord_t> &x,
+                                          std::vector<signal_t> &y,
+                                          std::vector<signal_t> &e) const {
+  x.push_back(0);
+  y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
+  e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -100,41 +140,36 @@ const std::string IMDWorkspace::toString() const {
  * @param start :: coordinates of the start point of the line
  * @param end :: coordinates of the end point of the line
  * @param normalize :: how to normalize the signal
- * @param x :: is set to the boundaries of the bins, relative to start of the
- *line.
- * @param y :: is set to the normalized signal for each bin. Length = length(x)
- *- 1
- * @param e :: is set to the normalized errors for each bin. Length = length(x)
- *- 1
+ * @returns :: a LinePlot in which x is set to the boundaries of the bins,
+ * relative to start of the line, y is set to the normalized signal for
+ * each bin with Length = length(x) - 1 and e is set to the normalized
+ * errors for each bin with Length = length(x) - 1.
  */
-void IMDWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
-                               const Mantid::Kernel::VMD &end,
-                               Mantid::API::MDNormalization normalize,
-                               std::vector<coord_t> &x,
-                               std::vector<signal_t> &y,
-                               std::vector<signal_t> &e) const {
+IMDWorkspace::LinePlot
+IMDWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
+                          const Mantid::Kernel::VMD &end,
+                          Mantid::API::MDNormalization normalize) const {
   // TODO: Don't use a fixed number of points later
   size_t numPoints = 200;
 
   VMD step = (end - start) / double(numPoints);
   double stepLength = step.norm();
 
-  // These will be the curve as plotted
-  x.clear();
-  y.clear();
-  e.clear();
+  // This will be the curve as plotted
+  LinePlot line;
   for (size_t i = 0; i < numPoints; i++) {
     // Coordinate along the line
     VMD coord = start + step * double(i);
     // Record the position along the line
-    x.push_back(static_cast<coord_t>(stepLength * double(i)));
+    line.x.push_back(static_cast<coord_t>(stepLength * double(i)));
 
     signal_t yVal = this->getSignalAtCoord(coord.getBareArray(), normalize);
-    y.push_back(yVal);
-    e.push_back(0.0);
+    line.y.push_back(yVal);
+    line.e.push_back(0.0);
   }
   // And the last point
-  x.push_back((end - start).norm());
+  line.x.push_back((end - start).norm());
+  return line;
 }
 
 /**

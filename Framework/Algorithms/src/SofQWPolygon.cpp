@@ -60,7 +60,7 @@ void SofQWPolygon::exec() {
   const MantidVec &X = inputWS->readX(0);
 
   // Holds the spectrum-detector mapping
-  std::vector<specid_t> specNumberMapping;
+  std::vector<specnum_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
 
   // Select the calculate Q method based on the mode
@@ -199,7 +199,7 @@ void SofQWPolygon::initThetaCache(API::MatrixWorkspace_const_sptr workspace) {
   size_t ndets(0);
   double minTheta(DBL_MAX), maxTheta(-DBL_MAX);
 
-  for (int64_t i = 0; i < (int64_t)nhist; ++i) // signed for OpenMP
+  for (int64_t i = 0; i < static_cast<int64_t>(nhist); ++i) // signed for OpenMP
   {
 
     m_progress->report("Calculating detector angles");

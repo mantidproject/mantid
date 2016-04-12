@@ -5,6 +5,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtAPI/BatchAlgorithmRunner.h"
 
 using namespace Mantid::API;
@@ -27,8 +28,7 @@ class BatchAlgorithmRunnerTest : public CxxTest::TestSuite
     /**
      * Configures some algorithms and their runtime properties to be used in tests.
      */
-    void setUp()
-    {
+    void setUp() override {
       // Create some algorithms
       // Each algorithm depends on the output workspace of the previous
       createWsAlg = AlgorithmManager::Instance().create("CreateSampleWorkspace", -1);

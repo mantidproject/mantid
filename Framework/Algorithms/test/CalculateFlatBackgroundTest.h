@@ -5,6 +5,7 @@
 #include "MantidAlgorithms/CalculateFlatBackground.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -145,7 +146,7 @@ public:
                                         WS2D);
   }
 
-  ~CalculateFlatBackgroundTest() {
+  ~CalculateFlatBackgroundTest() override {
     AnalysisDataService::Instance().remove("calculateflatbackgroundtest_ramp");
   }
 

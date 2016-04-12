@@ -30,7 +30,6 @@
 #include <pqServerManagerModel.h>
 #include <pqView.h>
 #include <QVTKWidget.h>
-#include <vtkEventQtSlotConnect.h>
 #include <vtkRendererCollection.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
@@ -66,13 +65,11 @@ namespace SimpleGui
  * @param parent the parent widget for the view
  * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
  */
-ViewBase::ViewBase(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) :
-  QWidget(parent), m_rebinnedSourcesManager(rebinnedSourcesManager),
-  m_currentColorMapModel(NULL), m_internallyRebinnedWorkspaceIdentifier("rebinned_vsi"),
-  m_vtkConnections(vtkSmartPointer<vtkEventQtSlotConnect>::New()),
-  m_pythonGIL(), m_colorScaleLock(NULL)
-{
-}
+ViewBase::ViewBase(QWidget *parent,
+                   RebinnedSourcesManager *rebinnedSourcesManager)
+    : QWidget(parent), m_rebinnedSourcesManager(rebinnedSourcesManager),
+      m_internallyRebinnedWorkspaceIdentifier("rebinned_vsi"),
+      m_colorScaleLock(NULL) {}
 
 /**
  * This function creates a single standard ParaView view instance.
@@ -99,9 +96,6 @@ pqRenderView* ViewBase::createRenderView(QWidget* widget, QString viewName)
 
   // Place the widget for the render view in the frame provided.
   hbox->addWidget(view->widget());
-
-  this->setupVTKEventConnections(view);
-
   return view;
 }
 
@@ -113,16 +107,14 @@ void ViewBase::destroyFilter(const QString &name)
 {
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources;
-  QList<pqPipelineSource *>::Iterator source;
-  sources = smModel->findItems<pqPipelineSource *>(server);
+  const QList<pqPipelineSource *> sources =
+      smModel->findItems<pqPipelineSource *>(server);
+
   QSet<pqPipelineSource*> toDelete;
-  for (source = sources.begin(); source != sources.end(); ++source)
-  {
-    const QString sourceName = (*source)->getSMName();
-    if (sourceName.startsWith(name))
-    {
-    toDelete.insert(*source);
+  foreach (pqPipelineSource *source, sources) {
+    const QString sourceName = source->getSMName();
+    if (sourceName.startsWith(name)) {
+      toDelete.insert(source);
     }
   }
   pqDeleteReaction::deleteSources(toDelete);
@@ -168,101 +160,10 @@ void ViewBase::setAutoColorScale()
 }
 
 /**
- * Connect the relevant VTK signals to the appropriate slots
- * @param view A pointer to the view to connect
- */
-void ViewBase::setupVTKEventConnections(pqRenderView* view) {
-  // @todo This needs factoring out to put the widget specfic stuff in the
-  // right class.
-  // Python locks
-  QObject::connect(view, SIGNAL(beginRender()), this, SLOT(lockPyGIL()),
-                   Qt::DirectConnection);
-  QObject::connect(view, SIGNAL(endRender()), this, SLOT(releasePyGIL()),
-                   Qt::DirectConnection);
-  vtkRenderWindow *renderWindow = view->getViewProxy()->GetRenderWindow();
-  m_vtkConnections->Connect(renderWindow,
-                            vtkCommand::StartEvent,
-                            this,
-                            SLOT(lockPyGIL()),
-                            NULL, 1.0f, Qt::DirectConnection);
-  m_vtkConnections->Connect(renderWindow,
-                            vtkCommand::EndEvent,
-                            this,
-                            SLOT(releasePyGIL()),
-                            NULL, 1.0f, Qt::DirectConnection);
-    QGridLayout *layout = dynamic_cast<QGridLayout*>(view->widget()->layout());
-    if(layout) {
-      for(int i = 0; i < layout->count(); ++i) {
-        if(auto *axisWidget = qobject_cast<pqMultiSliceAxisWidget*>(layout->itemAt(i)->widget())) {
-          renderWindow = axisWidget->getVTKWidget()->GetRenderWindow();
-          m_vtkConnections->Connect(renderWindow,
-                                    vtkCommand::StartEvent,
-                                    this,
-                                    SLOT(lockPyGIL()),
-                                    NULL, 1.0f, Qt::DirectConnection);
-          m_vtkConnections->Connect(renderWindow,
-                                    vtkCommand::EndEvent,
-                                    this,
-                                    SLOT(releasePyGIL()),
-                                    NULL, 1.0f, Qt::DirectConnection);
-        }
-      }
-    }
-
-   m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
-                             vtkCommand::StartEvent,
-                             this,
-                             SLOT(lockPyGIL()),
-                             NULL, 1.0f, Qt::DirectConnection);
-   m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
-                             vtkCommand::EndEvent,
-                             this,
-                             SLOT(releasePyGIL()),
-                             NULL, 1.0f, Qt::DirectConnection);
-  m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
-                            vtkCommand::LeftButtonPressEvent,
-                            this,
-                            SLOT(lockPyGIL()),
-                            NULL, 1.0f, Qt::DirectConnection);
-  m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
-                            vtkCommand::LeftButtonReleaseEvent,
-                            this,
-                            SLOT(releasePyGIL()),
-                            NULL, 1.0f, Qt::DirectConnection);
-  // get right mouse pressed with high priority
-  m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
-                            vtkCommand::RightButtonPressEvent,
-                            this,
-                            SLOT(lockPyGIL()),
-                            NULL, 1.0f, Qt::DirectConnection);
-  m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
-                            vtkCommand::RightButtonReleaseEvent,
-                            this,
-                            SLOT(releasePyGIL()),
-                            NULL, 1.0f, Qt::DirectConnection);
-
-  // Make a connection to the view's endRender signal for later checking.
-  QObject::connect(view, SIGNAL(endRender()),
-                   this, SIGNAL(renderingDone()));
-  
-}
-
-/// Called when the rendering begins
-void ViewBase::lockPyGIL() {
-  m_pythonGIL.acquire();
-}
-
-/// Called when the rendering finishes
-void ViewBase::releasePyGIL() {
-  m_pythonGIL.release();
-}
-
-/**
  * This function sets the requested color map on the data.
  * @param model the color map to use
  */
-void ViewBase::onColorMapChange(const pqColorMapModel *model)
-{
+void ViewBase::onColorMapChange(const Json::Value &model) {
   pqPipelineRepresentation *rep = this->getRep();
   if (NULL == rep)
   {
@@ -413,7 +314,8 @@ pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName, 
   // We are setting the recursion depth to 1 when we are dealing with MDEvent workspaces
   // with top level splitting, but this is not updated in the plugin line edit field.
   // We do this here.
-  if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(wsName.toStdString())) {
+  auto workspaceProvider = Mantid::Kernel::make_unique<Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
+  if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(wsName.toStdString(), std::move(workspaceProvider))) {
     vtkSMPropertyHelper(src->getProxy(),
               "Recursion Depth").Set(split.get());
   }
@@ -505,7 +407,7 @@ void ViewBase::checkViewOnSwitch()
 void ViewBase::updateAnimationControls()
 {
   pqPipelineSource *src = this->getPvActiveSrc();
-  unsigned int numSrcs = this->getNumSources();
+  long long numSrcs = this->getNumSources();
   if (this->isPeaksWorkspace(src))
   {
     if (1 == numSrcs)
@@ -532,23 +434,16 @@ void ViewBase::updateAnimationControls()
  * returns the total count of those present;
  * @return the number of true pipeline sources
  */
-unsigned int ViewBase::getNumSources()
-{
-  unsigned int count = 0;
+long long ViewBase::getNumSources() {
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources;
-  QList<pqPipelineSource *>::Iterator source;
-  sources = smModel->findItems<pqPipelineSource *>(server);
-  for (source = sources.begin(); source != sources.end(); ++source)
-  {
-    const QString srcProxyName = (*source)->getProxy()->GetXMLGroup();
-    if (srcProxyName == QString("sources"))
-    {
-      count++;
-    }
-  }
-  return count;
+  const QList<pqPipelineSource *> sources =
+      smModel->findItems<pqPipelineSource *>(server);
+
+  return std::count_if(
+      sources.begin(), sources.end(), [](const pqPipelineSource *source) {
+        return strcmp(source->getProxy()->GetXMLGroup(), "sources") == 0;
+      });
 }
 
 /**
@@ -821,12 +716,10 @@ bool ViewBase::hasFilter(const QString &name)
 {
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources;
-  QList<pqPipelineSource *>::Iterator source;
-  sources = smModel->findItems<pqPipelineSource *>(server);
-  for (source = sources.begin(); source != sources.end(); ++source)
-  {
-    const QString sourceName = (*source)->getSMName();
+  const QList<pqPipelineSource *> sources =
+      smModel->findItems<pqPipelineSource *>(server);
+  foreach (pqPipelineSource *source, sources) {
+    const QString sourceName = source->getSMName();
     if (sourceName.startsWith(name))
     {
       return true;
@@ -845,18 +738,17 @@ pqPipelineSource *ViewBase::hasWorkspace(const QString &name)
 {
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources;
-  QList<pqPipelineSource *>::Iterator source;
-  sources = smModel->findItems<pqPipelineSource *>(server);
-  for (source = sources.begin(); source != sources.end(); ++source)
-  {
-    QString wsName(vtkSMPropertyHelper((*source)->getProxy(),
-                                       "WorkspaceName", true).GetAsString());
+  QList<pqPipelineSource *> sources =
+      smModel->findItems<pqPipelineSource *>(server);
+  foreach (pqPipelineSource *source, sources) {
+    QString wsName(
+        vtkSMPropertyHelper(source->getProxy(), "WorkspaceName", true)
+            .GetAsString());
     if (!wsName.isEmpty())
     {
       if (wsName == name)
       {
-        return (*source);
+        return source;
       }
     }
   }
@@ -873,18 +765,17 @@ bool ViewBase::hasWorkspaceType(const QString &wsTypeName)
 {
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources;
-  QList<pqPipelineSource *>::Iterator source;
-  sources = smModel->findItems<pqPipelineSource *>(server);
+  const QList<pqPipelineSource *> sources =
+      smModel->findItems<pqPipelineSource *>(server);
   bool hasWsType = false;
-  for (source = sources.begin(); source != sources.end(); ++source)
-  {
-    QString wsType(vtkSMPropertyHelper((*source)->getProxy(),
-                                       "WorkspaceTypeName", true).GetAsString());
+  foreach (pqPipelineSource *source, sources) {
+    QString wsType(
+        vtkSMPropertyHelper(source->getProxy(), "WorkspaceTypeName", true)
+            .GetAsString());
 
     if (wsType.isEmpty())
     {
-      wsType = (*source)->getSMName();
+      wsType = source->getSMName();
     }
     hasWsType = wsType.contains(wsTypeName);
     if (hasWsType)
@@ -928,7 +819,7 @@ void ViewBase::onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)
   if (colorUpdater.isAutoScale())
   {
     // Workaround: A ParaView bug requires us to reload the ColorMap when the visibility changes.
-    if (m_currentColorMapModel) {
+    if (!m_currentColorMapModel.empty()) {
       onColorMapChange(m_currentColorMapModel);
     }
     this->setAutoColorScale();
@@ -956,21 +847,22 @@ void ViewBase::onSourceDestroyed()
 void ViewBase::destroyAllSourcesInView() {
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
+  const QList<pqPipelineSource *> sources =
+      smModel->findItems<pqPipelineSource *>(server);
 
   // Out of all pqPipelineSources, find the "true" sources, which were
   // created by a Source Plugin, i.e. MDEW Source, MDHW Source, PeakSource
   QList<pqPipelineSource*> trueSources;
-  for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source) {
-    if (!qobject_cast<pqPipelineFilter*>(*source)) {
-      trueSources.push_back(*source);
+  foreach (pqPipelineSource *source, sources) {
+    if (!qobject_cast<pqPipelineFilter *>(source)) {
+      trueSources.push_back(source);
     }
   }
 
   // For each true source, go to the end of the pipeline and destroy it on the way back
   // to the start. This assumes linear pipelines.
-  for (QList<pqPipelineSource *>::iterator trueSource = trueSources.begin(); trueSource != trueSources.end(); ++trueSource) {
-    destroySinglePipeline(*trueSource);
+  foreach (pqPipelineSource *trueSource, trueSources) {
+    destroySinglePipeline(trueSource);
   }
 }
 
@@ -1008,15 +900,17 @@ void ViewBase::setVisibilityListener()
   // Set the connection to listen to a visibility change of the representation.
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources;
-  sources = smModel->findItems<pqPipelineSource *>(server);
+  const QList<pqPipelineSource *> sources =
+      smModel->findItems<pqPipelineSource *>(server);
 
   // Attach the visibilityChanged signal for all sources.
-  for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
-  {
-    QObject::connect((*source), SIGNAL(visibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
-                     this, SLOT(onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
-                     Qt::UniqueConnection);
+  foreach (pqPipelineSource *source, sources) {
+    QObject::connect(
+        source,
+        SIGNAL(visibilityChanged(pqPipelineSource *, pqDataRepresentation *)),
+        this,
+        SLOT(onVisibilityChanged(pqPipelineSource *, pqDataRepresentation *)),
+        Qt::UniqueConnection);
   }
 }
 
@@ -1027,14 +921,16 @@ void ViewBase::removeVisibilityListener() {
     // Set the connection to listen to a visibility change of the representation.
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources;
-  sources = smModel->findItems<pqPipelineSource *>(server);
+  const QList<pqPipelineSource *> sources =
+      smModel->findItems<pqPipelineSource *>(server);
 
   // Attach the visibilityChanged signal for all sources.
-  for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
-  {
-    QObject::disconnect((*source), SIGNAL(visibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
-                         this, SLOT(onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)));
+  foreach (pqPipelineSource *source, sources) {
+    QObject::disconnect(
+        source,
+        SIGNAL(visibilityChanged(pqPipelineSource *, pqDataRepresentation *)),
+        this,
+        SLOT(onVisibilityChanged(pqPipelineSource *, pqDataRepresentation *)));
   }
 }
 
@@ -1051,6 +947,13 @@ void ViewBase::setAxesGrid(bool on) {
   }
 }
 
+/**
+ * Check if there is an active source available
+ * @returns true if there is an active source else false
+ */
+bool ViewBase::hasActiveSource() {
+  return this->getPvActiveSrc() != nullptr;
+}
 
 } // namespace SimpleGui
 } // namespace Vates

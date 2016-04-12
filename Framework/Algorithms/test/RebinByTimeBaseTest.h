@@ -10,12 +10,12 @@
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidAlgorithms/RebinByTimeAtSample.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/make_shared.hpp>
-#include <boost/assign/list_of.hpp>
 #include <gmock/gmock.h>
 
 using namespace Mantid::Algorithms;
@@ -96,10 +96,10 @@ public:
   MOCK_METHOD3(init, void(const size_t &, const size_t &, const size_t &));
   MOCK_CONST_METHOD0(getSpecialCoordinateSystem,
                      Mantid::Kernel::SpecialCoordinateSystem());
-  virtual ~MockIEventWorkspace() {}
+  ~MockIEventWorkspace() override {}
 
 private:
-  virtual MockIEventWorkspace *doClone() const {
+  MockIEventWorkspace *doClone() const override {
     throw std::runtime_error(
         "Cloning of MockIEventWorkspace is not implemented.");
   }
@@ -134,8 +134,9 @@ private:
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
-    Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(pulseTimeMin)(
-        step)(pulseTimeMax); // Provide rebin arguments.
+    auto rebinArgsList = {double(pulseTimeMin), double(step),
+                          double(pulseTimeMax)};
+    Mantid::MantidVec rebinArgs = rebinArgsList; // Provide rebin arguments.
     alg.setProperty("Params", rebinArgs);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
@@ -193,7 +194,8 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
-    Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(1);
+    auto rebinArgsList = {double(1)};
+    Mantid::MantidVec rebinArgs = rebinArgsList;
     alg.setProperty("Params", rebinArgs);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     try {
@@ -217,8 +219,8 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
-    Mantid::MantidVec rebinArgs1 =
-        boost::assign::list_of<double>(badStep); // Step is zero!.
+    auto rebinArgs1List = {double(badStep)};
+    Mantid::MantidVec rebinArgs1 = rebinArgs1List; // Step is zero!.
     alg.setProperty("Params", rebinArgs1);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     try {
@@ -359,8 +361,9 @@ public:
     AlgorithmType alg;
     alg.setRethrows(true);
     alg.initialize();
-    Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(pulseTimeMin)(
-        step)(pulseTimeMax); // Provide rebin arguments.
+    auto rebinArgsList = {double(pulseTimeMin), double(step),
+                          double(pulseTimeMax)};
+    Mantid::MantidVec rebinArgs = rebinArgsList; // Provide rebin arguments.
 
     try {
       alg.setProperty("Params", rebinArgs);
@@ -387,9 +390,11 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
-    Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(
-        step); // Provide rebin arguments. Note we are only providing the step,
-               // xmin and xmax are calculated internally!
+    auto rebinArgsList = {double(step)};
+    Mantid::MantidVec rebinArgs = rebinArgsList; // Provide rebin arguments.
+                                                 // Note we are only providing
+                                                 // the step,
+    // xmin and xmax are calculated internally!
     alg.setProperty("Params", rebinArgs);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
@@ -441,8 +446,9 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
-    Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(pulseTimeMin)(
-        step)(pulseTimeMax); // Provide rebin arguments.
+    auto rebinArgsList = {double(pulseTimeMin), double(step),
+                          double(pulseTimeMax)};
+    Mantid::MantidVec rebinArgs = rebinArgsList; // Provide rebin arguments.
     alg.setProperty("Params", rebinArgs);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
@@ -498,8 +504,9 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", m_ws);
-    Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(dPulseTimeMin)(
-        step)(dPulseTimeMax); // Provide rebin arguments.
+    auto rebinArgsList = {double(dPulseTimeMin), double(step),
+                          double(dPulseTimeMax)};
+    Mantid::MantidVec rebinArgs = rebinArgsList; // Provide rebin arguments.
     alg.setProperty("Params", rebinArgs);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     TS_ASSERT_THROWS_NOTHING(alg.execute());

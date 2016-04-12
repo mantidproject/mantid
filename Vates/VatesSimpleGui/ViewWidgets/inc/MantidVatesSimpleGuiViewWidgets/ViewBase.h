@@ -1,7 +1,6 @@
 #ifndef VIEWBASE_H_
 #define VIEWBASE_H_
 
-#include "MantidQtAPI/PythonThreading.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
@@ -9,15 +8,14 @@
 #include "MantidVatesAPI/ColorScaleGuard.h"
 #include <QPointer>
 #include <QWidget>
+#include "vtk_jsoncpp.h"
 
-class pqColorMapModel;
 class pqDataRepresentation;
 class pqObjectBuilder;
 class pqPipelineSource;
 class pqPipelineRepresentation;
 class pqRenderView;
 class vtkSMDoubleVectorProperty;
-class vtkEventQtSlotConnect;
 
 class QString;
 
@@ -65,7 +63,7 @@ public:
   ViewBase(QWidget *parent = 0, RebinnedSourcesManager* rebinnedSourcesManager = 0);
 
   /// Default destructor.
-  virtual ~ViewBase() {}
+  ~ViewBase() override {}
 
   /// Poll the view to set status for mode control buttons.
   virtual void checkView(ModeControlWidget::Views initialView);
@@ -83,7 +81,7 @@ public:
   /// Retrieve the current time step.
   virtual double getCurrentTimeStep();
   /// Find the number of true sources in the pipeline.
-  unsigned int getNumSources();
+  long long getNumSources();
   /// Get the active ParaView source.
   pqPipelineSource *getPvActiveSrc();
   /**
@@ -147,12 +145,14 @@ public:
   void setColorScaleLock(Mantid::VATES::ColorScaleLock* colorScaleLock);
   QPointer<pqPipelineSource> origSrc; ///< The original source
   QPointer<pqPipelineRepresentation> origRep; ///< The original source representation
+  /// Has active source
+  bool hasActiveSource();
 
 public slots:
   /// Set the color scale back to the original bounds.
   void onAutoScale(ColorSelectionWidget* colorSelectionWidget);
   /// Set the requested color map on the data.
-  void onColorMapChange(const pqColorMapModel *model);
+  void onColorMapChange(const Json::Value &model);
   /// Set the data color scale range to the requested bounds.
   void onColorScaleChange(double min, double max);
   /// Set the view to use a LOD threshold.
@@ -240,13 +240,6 @@ protected:
   /// Set the Axes Grid
   void setAxesGrid();
 
-private slots:
-  void setupVTKEventConnections(pqRenderView* view);
-  /// Called when the rendering begins
-  void lockPyGIL();
-  /// Called when the rendering finishes
-  void releasePyGIL();
-
 private:
   Q_DISABLE_COPY(ViewBase)
 
@@ -262,12 +255,10 @@ private:
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
   BackgroundRgbProvider backgroundRgbProvider; /// < Holds the manager for background color related tasks.
   RebinnedSourcesManager* m_rebinnedSourcesManager;
-  const pqColorMapModel* m_currentColorMapModel;
+  Json::Value m_currentColorMapModel;
 
   QString m_internallyRebinnedWorkspaceIdentifier;
 
-  vtkSmartPointer<vtkEventQtSlotConnect> m_vtkConnections;
-  RecursivePythonGIL m_pythonGIL;
   Mantid::VATES::ColorScaleLock* m_colorScaleLock;
 
 };

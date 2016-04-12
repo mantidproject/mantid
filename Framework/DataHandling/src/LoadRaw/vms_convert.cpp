@@ -272,7 +272,7 @@ static int vax_to_ieee_float(float *fp) {
   struct vax_single vs;
   struct sgl_limits_struct;
   maybe_flip_bytes(fp, sizeof(float));
-  vs = *((struct vax_single *)fp);
+  vs = *(reinterpret_cast<struct vax_single *>(fp));
   switch (vs.exp) {
   case 0:
     /* all vax float with zero exponent map to zero */
@@ -299,7 +299,7 @@ static int vax_to_ieee_float(float *fp) {
   }
 
   is.sign = vs.sign;
-  *fp = *((float *)&is);
+  *fp = *(reinterpret_cast<float *>(&is));
   return 0;
 }
 
@@ -308,7 +308,7 @@ static int ieee_to_vax_float(float *fp) {
   struct ieee_single is;
   struct vax_single vs;
   struct sgl_limits_struct;
-  is = *((struct ieee_single *)fp);
+  is = *(reinterpret_cast<struct ieee_single *>(fp));
   switch (is.exp) {
   case 0:
     if (is.mantissa == mmin.ieee.mantissa) {
@@ -340,7 +340,7 @@ static int ieee_to_vax_float(float *fp) {
   }
 
   vs.sign = is.sign;
-  *fp = *((float *)&vs);
+  *fp = *(reinterpret_cast<float *>(&vs));
   maybe_flip_bytes(fp, sizeof(float)); /* Make little endian */
   return 0;
 }

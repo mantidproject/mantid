@@ -43,16 +43,16 @@ namespace Poldi {
 class MANTID_SINQ_DLL PoldiFitPeaks1D : public API::Algorithm {
 public:
   PoldiFitPeaks1D();
-  virtual ~PoldiFitPeaks1D();
+  ~PoldiFitPeaks1D() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "PoldiPeakFit1D fits peak profiles to POLDI auto-correlation data.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 protected:
   void setPeakFunction(const std::string &peakFunction);
@@ -78,8 +78,8 @@ protected:
   double m_fwhmMultiples;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Poldi

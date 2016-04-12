@@ -5,6 +5,7 @@
 #include "MantidQtAPI/MantidDialog.h"
 
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/UsageService.h"
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -20,6 +21,13 @@ namespace
 /// Constructor
 MantidApplication::MantidApplication(int &argc, char ** argv ) : QApplication(argc, argv)
 {
+   try {
+     Mantid::Kernel::UsageService::Instance().setApplication("mantidplot");
+   } catch(std::runtime_error &rexc) {
+     g_log.error() << "Failed to initialize the Mantid usage service. This "
+       "is probably a sign that this Mantid is not fully or correctly set up. "
+       "Error details: " + std::string(rexc.what()) << std::endl;
+   }
 }
 
 bool MantidApplication::notify( QObject * receiver, QEvent * event )

@@ -12,18 +12,6 @@ namespace DataHandling {
 
 Saves a workspace or selected spectra in a coma-separated ascii file. Spectra
 are saved in columns.
-Properties:
-<ul>
-      <li>Filename - the name of the file to write to.  </li>
-      <li>Workspace - the workspace name to be saved.</li>
-      <li>SpectrumMin - the starting spectrum index to save (optional) </li>
-      <li>SpectrumMax - the ending spectrum index to save (optional) </li>
-      <li>SpectrumList - a list of comma-separated spectra indeces to save
-(optional) </li>
-      <li>Precision - the numeric precision - the number of significant digits
-for the saved data (optional) </li>
-</ul>
-
 
 @author Roman Tolchenov, Tessella plc
 @date 3/07/09
@@ -54,24 +42,24 @@ public:
   /// Default constructor
   SaveAscii();
   /// Destructor
-  ~SaveAscii() {}
+  ~SaveAscii() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SaveAscii"; }
+  const std::string name() const override { return "SaveAscii"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Saves a 2D workspace to a ascii file.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Text"; }
+  const std::string category() const override { return "DataHandling\\Text"; }
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 
   /// Map the separator options to their string equivalents
   std::map<std::string, std::string> m_separatorIndex;

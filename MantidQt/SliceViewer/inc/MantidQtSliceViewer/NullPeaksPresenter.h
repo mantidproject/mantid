@@ -14,48 +14,59 @@ PeaksPresenter pointer before using it.
 ----------------------------------------------------------*/
 class DLLExport NullPeaksPresenter : public PeaksPresenter {
 public:
-  virtual void update() {}
-  virtual void updateWithSlicePoint(const PeakBoundingBox &) {}
-  virtual bool changeShownDim() { return false; }
-  virtual bool isLabelOfFreeAxis(const std::string &) const { return false; }
-  SetPeaksWorkspaces presentedWorkspaces() const {
+  void update() override {}
+  void updateWithSlicePoint(const PeakBoundingBox &) override {}
+  bool changeShownDim() override { return false; }
+  bool isLabelOfFreeAxis(const std::string &) const override { return false; }
+  SetPeaksWorkspaces presentedWorkspaces() const override {
     SetPeaksWorkspaces empty;
     return empty;
   }
-  void setForegroundColor(const QColor) { /*Do nothing*/
+  void setForegroundColor(const PeakViewColor) override { /*Do nothing*/
   }
-  void setBackgroundColor(const QColor) { /*Do nothing*/
+  void setBackgroundColor(const PeakViewColor) override { /*Do nothing*/
   }
-  std::string getTransformName() const { return ""; }
-  void showBackgroundRadius(const bool) { /*Do nothing*/
+  PeakViewColor getBackgroundPeakViewColor() const override {
+    return PeakViewColor();
   }
-  void setShown(const bool) { /*Do nothing*/
+  PeakViewColor getForegroundPeakViewColor() const override {
+    return PeakViewColor();
   }
-  virtual PeakBoundingBox getBoundingBox(const int) const {
+  std::string getTransformName() const override { return ""; }
+  void showBackgroundRadius(const bool) override { /*Do nothing*/
+  }
+  void setShown(const bool) override { /*Do nothing*/
+  }
+  PeakBoundingBox getBoundingBox(const int) const override {
     return PeakBoundingBox();
   }
-  virtual void sortPeaksWorkspace(const std::string &,
-                                  const bool) { /*Do Nothing*/
+  void sortPeaksWorkspace(const std::string &,
+                          const bool) override { /*Do Nothing*/
   }
-  virtual void setPeakSizeOnProjection(const double) { /*Do Nothing*/
+  void setPeakSizeOnProjection(const double) override { /*Do Nothing*/
   }
-  virtual void setPeakSizeIntoProjection(const double) { /*Do Nothing*/
+  void setPeakSizeIntoProjection(const double) override { /*Do Nothing*/
   }
-  virtual double getPeakSizeOnProjection() const { return 0; }
-  virtual double getPeakSizeIntoProjection() const { return 0; }
-  virtual bool getShowBackground() const { return false; }
-  virtual void registerOwningPresenter(UpdateableOnDemand *){}
-  virtual void zoomToPeak(const int){}
-  virtual bool isHidden() const { return true; }
-  virtual void reInitialize(
-      boost::shared_ptr<Mantid::API::IPeaksWorkspace> ) { /*Do nothing*/
+  double getPeakSizeOnProjection() const override { return 0; }
+  double getPeakSizeIntoProjection() const override { return 0; }
+  bool getShowBackground() const override { return false; }
+  void registerOwningPresenter(UpdateableOnDemand *) override {}
+  void zoomToPeak(const int) override {}
+  bool isHidden() const override { return true; }
+  void reInitialize(
+      boost::shared_ptr<Mantid::API::IPeaksWorkspace>) override { /*Do nothing*/
   }
-  virtual bool contentsDifferent(const PeaksPresenter * ) const { return true; }
+  bool contentsDifferent(const PeaksPresenter *) const override { return true; }
 
-  void peakEditMode(EditMode){/*Do nothing*/}
-  bool deletePeaksIn(PeakBoundingBox){return false;/*Do nothing. Delete nothing.*/}
-  bool addPeakAt(double, double){return false;/*Do nothing. Add nothing.*/}
-  bool hasPeakAddMode() const {return false; /*Do nothing.*/}
+  void peakEditMode(EditMode) override { /*Do nothing*/
+  }
+  bool deletePeaksIn(PeakBoundingBox) override {
+    return false; /*Do nothing. Delete nothing.*/
+  }
+  bool addPeakAt(double, double) override {
+    return false; /*Do nothing. Add nothing.*/
+  }
+  bool hasPeakAddMode() const override { return false; /*Do nothing.*/ }
 };
 
 }

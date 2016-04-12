@@ -61,7 +61,7 @@
 
   <!-- Normalisation by foil out -->
   <parameter name="backward_foil_out_norm" type="string">
-    <value val="410-430"/>
+    <value val="600-700"/>
   </parameter>
 
   <!-- ====================================================== -->
@@ -157,5 +157,35 @@
 
 </component-link>
 <!-- End VESUVIO link -->
+
+<!-- ======================= Energy widths for foils ================================= -->
+
+<component-link name = "foil-pos0">
+  <!-- Lorentzian HWHM of the foil energy (meV) -->
+  <parameter name="hwhm_lorentz">
+    <value val="144"/>
+  </parameter>
+
+  <!-- Gaussian standard deviation of the foil energy (meV)
+       Note that this is not the HWHM but the standard deviation unlike the
+       Lorentzian parameter -->
+  <parameter name="sigma_gauss">
+    <value val="20"/>
+  </parameter>
+</component-link>
+
+<component-link name = "foil-pos1">
+  <!-- Lorentzian HWHM of the foil energy (meV) -->
+  <parameter name="hwhm_lorentz">
+    <value val="144"/>
+  </parameter>
+
+  <!-- Gaussian standard deviation of the foil energy (meV)
+       Note that this is not the HWHM but the standard deviation unlike the
+       Lorentzian parameter -->
+  <parameter name="sigma_gauss">
+    <value val="20"/>
+  </parameter>
+</component-link>
 
 </parameter-file>

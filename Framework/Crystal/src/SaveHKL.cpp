@@ -10,7 +10,6 @@
 #include <fstream>
 
 #include <Poco/File.h>
-#include <boost/assign.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid::Geometry;
@@ -18,11 +17,19 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::PhysicalConstants;
-using namespace boost::assign;
-std::map<int, double> detScale = map_list_of(17, 1.092114823)(18, 0.869105443)(
-    22, 1.081377685)(26, 1.055199489)(27, 1.070308725)(28, 0.886157884)(
-    36, 1.112773972)(37, 1.012894506)(38, 1.049384146)(39, 0.890313805)(
-    47, 1.068553893)(48, 0.900566426)(58, 0.911249203);
+std::map<int, double> detScale = {{17, 1.092114823},
+                                  {18, 0.869105443},
+                                  {22, 1.081377685},
+                                  {26, 1.055199489},
+                                  {27, 1.070308725},
+                                  {28, 0.886157884},
+                                  {36, 1.112773972},
+                                  {37, 1.012894506},
+                                  {38, 1.049384146},
+                                  {39, 0.890313805},
+                                  {47, 1.068553893},
+                                  {48, 0.900566426},
+                                  {58, 0.911249203}};
 
 namespace Mantid {
 namespace Crystal {
@@ -46,8 +53,8 @@ SaveHKL::~SaveHKL() {}
 /** Initialize the algorithm's properties.
  */
 void SaveHKL::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
@@ -72,19 +79,17 @@ void SaveHKL::init() {
                   "not set with SetSampleMaterial");
   declareProperty("Radius", EMPTY_DBL(), mustBePositive,
                   "Radius of the sample in centimeters");
-  declareProperty("PowerLambda", 4.0, "Power of lamda ");
-  declareProperty(new FileProperty("SpectraFile", "",
-                                   API::FileProperty::OptionalLoad, ".dat"),
+  declareProperty("PowerLambda", 4.0, "Power of lambda ");
+  declareProperty(make_unique<FileProperty>("SpectraFile", "",
+                                            API::FileProperty::OptionalLoad,
+                                            ".dat"),
                   " Spectrum data read from a spectrum file.");
 
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Save, {".hkl"}),
+      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".hkl"),
       "Path to an hkl file to save.");
 
-  std::vector<std::string> histoTypes;
-  histoTypes.push_back("Bank");
-  histoTypes.push_back("RunNumber");
-  histoTypes.push_back("");
+  std::vector<std::string> histoTypes{"Bank", "RunNumber", ""};
   declareProperty("SortBy", histoTypes[2],
                   boost::make_shared<StringListValidator>(histoTypes),
                   "Sort the histograms by bank, run number or both (default).");
@@ -93,7 +98,7 @@ void SaveHKL::init() {
   declareProperty("WidthBorder", EMPTY_INT(), "Width of border of detectors");
   declareProperty("MinIntensity", EMPTY_DBL(), mustBePositive,
                   "The minimum Intensity");
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "SaveHKLOutput", Direction::Output),
                   "Output PeaksWorkspace");
   declareProperty(
@@ -128,6 +133,12 @@ void SaveHKL::exec() {
   int runSequence = 0;
   int bankold = -1;
   int runold = -1;
+  // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
+  // Default for kf-ki has -q
+  double qSign = -1.0;
+  std::string convention = ConfigService::Instance().getString("Q.convention");
+  if (convention == "Crystallography")
+    qSign = 1.0;
 
   std::fstream out;
   bool append = getProperty("AppendFile");
@@ -310,14 +321,14 @@ void SaveHKL::exec() {
     // hklFile.write('%4d%4d%4d%8.2f%8.2f%4d%8.4f%7.4f%7d%7d%7.4f%4d%9.5f%9.4f\n'
     //    % (H, K, L, FSQ, SIGFSQ, hstnum, WL, TBAR, CURHST, SEQNUM,
     //    TRANSMISSION, DN, TWOTH, DSP))
-    // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
     if (p.getH() == 0 && p.getK() == 0 && p.getL() == 0) {
       banned.push_back(wi);
       continue;
     }
     if (decimalHKL == EMPTY_INT())
-      out << std::setw(4) << Utils::round(-p.getH()) << std::setw(4)
-          << Utils::round(-p.getK()) << std::setw(4) << Utils::round(-p.getL());
+      out << std::setw(4) << Utils::round(qSign * p.getH()) << std::setw(4)
+          << Utils::round(qSign * p.getK()) << std::setw(4)
+          << Utils::round(qSign * p.getL());
     else
       out << std::setw(5 + decimalHKL) << std::fixed
           << std::setprecision(decimalHKL) << -p.getH()
@@ -496,7 +507,7 @@ double SaveHKL::absor_sphere(double &twoth, double &wl, double &tbar) {
   //  using the polymial coefficients, calulate astar (= 1/transmission) at
   //  theta values below and above the actual theta value.
 
-  i = (int)(theta / 5.);
+  i = static_cast<int>(theta / 5.);
   astar1 = pc[0][i] + mur * (pc[1][i] + mur * (pc[2][i] + pc[3][i] * mur));
 
   i = i + 1;
@@ -516,7 +527,7 @@ double SaveHKL::absor_sphere(double &twoth, double &wl, double &tbar) {
   if (std::fabs(mu) < 1e-300)
     tbar = 0.0;
   else
-    tbar = -(double)std::log(trans) / mu;
+    tbar = -std::log(trans) / mu;
 
   return trans;
 }

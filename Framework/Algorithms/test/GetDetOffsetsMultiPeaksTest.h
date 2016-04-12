@@ -2,16 +2,19 @@
 #define GetDetOffsetsMultiPeaksTEST_H_
 
 #include "MantidAlgorithms/GetDetOffsetsMultiPeaks.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include <cxxtest/TestSuite.h>
+
 #include <Poco/File.h>
-#include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/TableRow.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -453,7 +456,7 @@ public:
 
   GetDetOffsetsMultiPeaksTestPerformance() { FrameworkManager::Instance(); }
 
-  void setUp() {
+  void setUp() override {
     numpixels = 10000;
     WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
         numpixels, 200, false);

@@ -89,7 +89,7 @@ public:
   createParameter(Poco::XML::Element *parameterElement) = 0;
   virtual void
   setSuccessorParser(ImplicitFunctionParameterParser *paramParser) = 0;
-  virtual ~ImplicitFunctionParameterParser() {}
+  virtual ~ImplicitFunctionParameterParser() = default;
 
 protected:
   SuccessorType m_successor;

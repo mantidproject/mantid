@@ -33,33 +33,33 @@ namespace Crystal {
 class DLLExport PeaksOnSurface : public PeaksIntersection {
 public:
   PeaksOnSurface();
-  virtual ~PeaksOnSurface();
+  ~PeaksOnSurface() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Find peaks intersecting a single surface region.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   // Overriden base class methods.
-  virtual void validateExtentsInput() const;
-  virtual int numberOfFaces() const;
-  virtual VecVecV3D createFaces() const;
-  virtual bool
-  pointOutsideAnyExtents(const Mantid::Kernel::V3D &testPoint) const;
-  virtual bool
-  pointInsideAllExtents(const Mantid::Kernel::V3D &testPoints,
-                        const Mantid::Kernel::V3D &peakCenter) const;
-  virtual void checkTouchPoint(const Mantid::Kernel::V3D &touchPoint,
-                               const Mantid::Kernel::V3D &normal,
-                               const Mantid::Kernel::V3D &faceVertex) const;
+  void validateExtentsInput() const override;
+  int numberOfFaces() const override;
+  VecVecV3D createFaces() const override;
+  bool
+  pointOutsideAnyExtents(const Mantid::Kernel::V3D &testPoint) const override;
+  bool
+  pointInsideAllExtents(const Mantid::Kernel::V3D &testPoint,
+                        const Mantid::Kernel::V3D &peakCenter) const override;
+  void checkTouchPoint(const Mantid::Kernel::V3D &touchPoint,
+                       const Mantid::Kernel::V3D &normal,
+                       const Mantid::Kernel::V3D &faceVertex) const override;
 
   /// Extents.
   std::vector<double> m_extents;
@@ -80,7 +80,7 @@ private:
 bool DLLExport lineIntersectsSphere(const Mantid::Kernel::V3D &line,
                                     const Mantid::Kernel::V3D &lineStart,
                                     const Mantid::Kernel::V3D &peakCenter,
-                                    const double peakRadiusSQ);
+                                    const double peakRadius);
 
 } // namespace Crystal
 } // namespace Mantid

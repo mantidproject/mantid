@@ -33,7 +33,7 @@ public:
     if (intensity < 0) {
       throw std::invalid_argument("SXPeak: Cannot have an intensity < 0");
     }
-    if (spectral.size() == 0) {
+    if (spectral.empty()) {
       throw std::invalid_argument(
           "SXPeak: Cannot have zero sized spectral list");
     }
@@ -92,8 +92,8 @@ public:
     _intensity += rhs._intensity;
     _Ltot += rhs._Ltot;
     npixels += 1;
-    for (std::size_t i = 0; i < rhs._spectral.size(); i++)
-      _spectral.push_back(rhs._spectral[i]);
+    _spectral.insert(_spectral.end(), rhs._spectral.cbegin(),
+                     rhs._spectral.cend());
     return *this;
   }
   /// Normalise by number of pixels
@@ -194,28 +194,28 @@ public:
   /// Default constructor
   FindSXPeaks();
   /// Destructor
-  virtual ~FindSXPeaks(){};
+  ~FindSXPeaks() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FindSXPeaks"; }
+  const std::string name() const override { return "FindSXPeaks"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Takes a 2D workspace as input and find the FindSXPeaksimum in each "
            "1D spectrum. This is used in particular for single crystal as a "
            "quick way to find strong peaks.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Crystal\\Peaks;Optimization\\PeakFinding";
   }
 
 private:
   // Overridden Algorithm methods
-  void init();
+  void init() override;
   //
-  void exec();
+  void exec() override;
   //
   void reducePeakList(const peakvector &);
   /// The value in X to start the search from

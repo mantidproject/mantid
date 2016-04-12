@@ -166,7 +166,7 @@ bool MDTransfModQ::calcMatrixCoordInelastic(const double &E_tr,
                                             std::vector<coord_t> &Coord) const {
   if (E_tr < m_DimMin[1] || E_tr >= m_DimMax[1])
     return false;
-  Coord[1] = (coord_t)E_tr;
+  Coord[1] = static_cast<coord_t>(E_tr);
   double k_tr;
   // get module of the wavevector for scattered neutrons
   if (this->m_Emode == Kernel::DeltaEMode::Direct) {
@@ -187,7 +187,7 @@ bool MDTransfModQ::calcMatrixCoordInelastic(const double &E_tr,
   double Qsq = Qx * Qx + Qy * Qy + Qz * Qz;
   if (Qsq < m_DimMin[0] || Qsq >= m_DimMax[0])
     return false;
-  Coord[0] = (coord_t)sqrt(Qsq);
+  Coord[0] = static_cast<coord_t>(sqrt(Qsq));
 
   return true;
 }
@@ -220,7 +220,7 @@ bool MDTransfModQ::calcMatrixCoordElastic(const double &k0,
   double Qsq = Qx * Qx + Qy * Qy + Qz * Qz;
   if (Qsq < m_DimMin[0] || Qsq >= m_DimMax[0])
     return false;
-  Coord[0] = (coord_t)sqrt(Qsq);
+  Coord[0] = static_cast<coord_t>(sqrt(Qsq));
   return true;
 }
 /** method returns the vector of input coordinates values where the transformed
@@ -278,7 +278,7 @@ void MDTransfModQ::initialize(const MDWSDescription &ConvParams) {
   //   pHost      = &Conv;
   // get transformation matrix (needed for CrystalAsPoder mode)
   m_RotMat = ConvParams.getTransfMatrix();
-  m_pEfixedArray = NULL;
+  m_pEfixedArray = nullptr;
   if (!ConvParams.m_PreprDetTable)
     throw(std::runtime_error("The detectors have not been preprocessed but "
                              "they have to before running initialize"));
@@ -332,9 +332,8 @@ void MDTransfModQ::initialize(const MDWSDescription &ConvParams) {
 
     // the wave vector of incident neutrons;
     m_Ki = sqrt(m_Ei / PhysicalConstants::E_mev_toNeutronWavenumberSq);
-
-    m_pEfixedArray = NULL;
-    if (m_Emode == (int)Kernel::DeltaEMode::Indirect)
+    m_pEfixedArray = nullptr;
+    if (m_Emode == static_cast<int>(Kernel::DeltaEMode::Indirect))
       m_pEfixedArray =
           ConvParams.m_PreprDetTable->getColDataArray<float>("eFixed");
   } else if (m_Emode != Kernel::DeltaEMode::Elastic)
@@ -402,10 +401,10 @@ MDTransfModQ::outputUnitID(Kernel::DeltaEMode::Type dEmode,
 
 /// constructor;
 MDTransfModQ::MDTransfModQ()
-    : m_ex(0), m_ey(0), m_ez(1), m_DetDirecton(NULL), //,m_NMatrixDim(-1)
-      m_NMatrixDim(0),                                // uninitialized
-      m_Emode(Kernel::DeltaEMode::Undefined),         // uninitialized
-      m_Ki(1.), m_Ei(1.), m_pEfixedArray(NULL), m_pDetMasks(NULL) {}
+    : m_ex(0), m_ey(0), m_ez(1), m_DetDirecton(nullptr), //,m_NMatrixDim(-1)
+      m_NMatrixDim(0),                                   // uninitialized
+      m_Emode(Kernel::DeltaEMode::Undefined),            // uninitialized
+      m_Ki(1.), m_Ei(1.), m_pEfixedArray(nullptr), m_pDetMasks(nullptr) {}
 
 std::vector<std::string> MDTransfModQ::getEmodes() const {
   return Kernel::DeltaEMode::availableTypes();

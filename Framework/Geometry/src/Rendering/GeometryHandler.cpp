@@ -19,7 +19,7 @@ GeometryHandler::GeometryHandler(IObjComponent *comp) : Obj() {
  */
 GeometryHandler::GeometryHandler(boost::shared_ptr<Object> obj)
     : Obj(obj.get()) {
-  ObjComp = NULL;
+  ObjComp = nullptr;
   boolTriangulated = false;
   boolIsInitialized = false;
 }
@@ -29,12 +29,12 @@ GeometryHandler::GeometryHandler(boost::shared_ptr<Object> obj)
  *  This geometry handler will be Object's geometry handler
  */
 GeometryHandler::GeometryHandler(Object *obj) : Obj(obj) {
-  ObjComp = NULL;
+  ObjComp = nullptr;
   boolTriangulated = false;
   boolIsInitialized = false;
 }
 
 /// Destructor
-GeometryHandler::~GeometryHandler() { ObjComp = NULL; }
+GeometryHandler::~GeometryHandler() { ObjComp = nullptr; }
 }
 }

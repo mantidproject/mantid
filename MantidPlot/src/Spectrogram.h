@@ -42,7 +42,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtAPI/MantidColorMap.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
-#include "Mantid/InstrumentWidget/GLColor.h"
+#include <MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h>
 
 #include <fstream>
 #include <float.h>
@@ -71,24 +71,24 @@ public:
   Spectrogram(const QString &wsName, const Mantid::API::IMDWorkspace_const_sptr & workspace);
   Spectrogram(Function2D *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz);//Mantid
   Spectrogram(Function2D *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz);//Mantid
-  ~Spectrogram();
+  ~Spectrogram() override;
 
   void loadFromProject(const std::string& lines);
   std::string saveToProject();
 
   /// Handles delete notification
-  void postDeleteHandle(const std::string& wsName);
+  void postDeleteHandle(const std::string &wsName) override;
   /// Handles afterReplace notification
-  void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
+  void afterReplaceHandle(
+      const std::string &wsName,
+      const boost::shared_ptr<Mantid::API::Workspace> ws) override;
   /// Handle an ADS clear notificiation
-  void clearADSHandle();
+  void clearADSHandle() override;
 
   enum ColorMapPolicy{GrayScale, Default, Custom};
 
-  virtual QImage renderImage(
-      const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-      const QwtDoubleRect &rect) const;
-
+  QImage renderImage(const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+                     const QwtDoubleRect &rect) const override;
 
   Spectrogram* copy();
   Matrix * matrix(){return d_matrix;};
@@ -114,12 +114,18 @@ public:
   void setMantidColorMap(const MantidColorMap &map);
   void updateData(Matrix *m);
   void updateData(const Mantid::API::IMDWorkspace_const_sptr & workspace);
-  MantidQt::API::QwtRasterDataMD *dataFromWorkspace(const Mantid::API::IMDWorkspace_const_sptr & workspace);
+  MantidQt::API::QwtRasterDataMD *
+  dataFromWorkspace(const Mantid::API::IMDWorkspace_const_sptr &workspace,
+                    const QwtDoubleInterval *range = nullptr);
   void postDataUpdate();
+  /// Set autoscale on/off for color scale (default: on)
+  void setColorMapAutoScale(bool autoscale = true) {
+    d_color_map_autoscale = autoscale;
+  }
 
   ColorMapPolicy colorMapPolicy()const{return color_map_policy;};
 
-  virtual QwtDoubleRect boundingRect() const;
+  QwtDoubleRect boundingRect() const override;
   double getMinPositiveValue()const;
   void setContourPenList(QList<QPen> lst);
   void setContourLinePen(int index, const QPen &pen);
@@ -171,7 +177,10 @@ signals:
   void removeMe(Spectrogram*);
 
 protected:
-  virtual void drawContourLines (QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
+  void
+  drawContourLines(QPainter *p, const QwtScaleMap &xMap,
+                   const QwtScaleMap &yMap,
+                   const QwtRasterData::ContourLines &lines) const override;
   void updateLabels(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
   void createLabels();
 
@@ -220,6 +229,8 @@ protected:
   std::vector<unsigned char> mScaledValues;
   /// boolean flag to indicate intensity changed
   bool m_bIntensityChanged;
+  /// Flag for whether we autoscale color bar
+  bool d_color_map_autoscale;
 };
 
 class SpectrogramData: public QwtRasterData
@@ -254,32 +265,26 @@ public:
     dy = d_matrix->dy();
   }
 
-  ~MatrixData()
-  {
+  ~MatrixData() override {
     for (int i = 0; i < n_rows; i++)
       delete [] d_m[i];
 
     delete [] d_m;
   };
 
-  virtual QwtRasterData *copy() const
-  {
-    return new MatrixData(d_matrix);
-  }
+  QwtRasterData *copy() const override { return new MatrixData(d_matrix); }
 
-  virtual QwtDoubleInterval range() const
-  {
+  QwtDoubleInterval range() const override {
     return QwtDoubleInterval(min_z, max_z);
   }
 
-  virtual QSize rasterHint (const QwtDoubleRect &) const
-  {
+  QSize rasterHint(const QwtDoubleRect &) const override {
     return QSize(n_cols, n_rows);
   }
 
-  virtual double value(double x, double y) const;
+  double value(double x, double y) const override;
 
-  double getMinPositiveValue()const;
+  double getMinPositiveValue() const override;
 
 private:
   //! Pointer to the source data matrix
@@ -320,33 +325,29 @@ public:
   {
   }
 
-  ~FunctionData()
-  {
-  };
+  ~FunctionData() override{};
 
-  virtual QwtRasterData *copy() const
-  {
+  QwtRasterData *copy() const override {
     return new FunctionData(d_funct, n_rows, n_cols,boundingRect(),min_z,max_z);
   }
 
-  virtual QwtDoubleInterval range() const
-  {
+  QwtDoubleInterval range() const override {
     return QwtDoubleInterval(min_z, max_z);
   }
 
-  virtual QSize rasterHint (const QwtDoubleRect &) const
-  {
+  QSize rasterHint(const QwtDoubleRect &) const override {
     return QSize(n_cols, n_rows);
   }
 
-  virtual double value(double x, double y) const
-  {
+  double value(double x, double y) const override {
     //static std::ofstream f("funct.txt");
     //f<<x<<' '<<y<<' '<<d_funct->operator()(x,y)<<'\n';
     return d_funct->operator()(x,y);
   }
 
-  double getMinPositiveValue()const{return d_funct->getMinPositiveValue();}
+  double getMinPositiveValue() const override {
+    return d_funct->getMinPositiveValue();
+  }
 
 private:
   Function2D *d_funct;

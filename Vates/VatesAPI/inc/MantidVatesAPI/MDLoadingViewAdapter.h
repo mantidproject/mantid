@@ -45,23 +45,17 @@ namespace Mantid
       {
       }
 
-      virtual double getTime() const
-      {
-        return m_adaptee->getTime();
-      }
+      double getTime() const override { return m_adaptee->getTime(); }
 
-      virtual size_t getRecursionDepth() const
-      {
+      size_t getRecursionDepth() const override {
         return m_adaptee->getRecursionDepth();
       }
 
-      virtual bool getLoadInMemory() const
-      {
+      bool getLoadInMemory() const override {
         return m_adaptee->getLoadInMemory();
       }
 
-      virtual ~MDLoadingViewAdapter()
-      {
+      ~MDLoadingViewAdapter() override {
         //Do not delete adaptee.
       }
     };

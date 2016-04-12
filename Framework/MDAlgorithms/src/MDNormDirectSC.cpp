@@ -5,9 +5,11 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/ConfigService.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -63,8 +65,8 @@ const std::string MDNormDirectSC::name() const { return "MDNormDirectSC"; }
   * Initialize the algorithm's properties.
   */
 void MDNormDirectSC::init() {
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDWorkspace.");
 
   std::string dimChars = getDimensionChars();
@@ -75,7 +77,8 @@ void MDNormDirectSC::init() {
     dim[0] = dimChars[i];
     std::string propName = "AlignedDim" + dim;
     declareProperty(
-        new PropertyWithValue<std::string>(propName, "", Direction::Input),
+        Kernel::make_unique<PropertyWithValue<std::string>>(propName, "",
+                                                            Direction::Input),
         "Binning parameters for the " + Strings::toString(i) +
             "th dimension.\n"
             "Enter it as a comma-separated list of values with the format: "
@@ -87,15 +90,16 @@ void MDNormDirectSC::init() {
   solidAngleValidator->add<CommonBinsValidator>();
 
   declareProperty(
-      new WorkspaceProperty<>("SolidAngleWorkspace", "", Direction::Input,
-                              PropertyMode::Optional, solidAngleValidator),
+      make_unique<WorkspaceProperty<>>("SolidAngleWorkspace", "",
+                                       Direction::Input, PropertyMode::Optional,
+                                       solidAngleValidator),
       "An input workspace containing integrated vanadium (a measure of the "
       "solid angle).");
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "A name for the output data MDHistoWorkspace.");
-  declareProperty(new WorkspaceProperty<Workspace>(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputNormalizationWorkspace", "", Direction::Output),
                   "A name for the output normalization MDHistoWorkspace.");
 }
@@ -107,6 +111,7 @@ void MDNormDirectSC::init() {
 void MDNormDirectSC::exec() {
   cacheInputs();
   auto outputWS = binInputWS();
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   setProperty<Workspace_sptr>("OutputWorkspace", outputWS);
   createNormalizationWS(*outputWS);
   setProperty("OutputNormalizationWorkspace", m_normWS);
@@ -155,7 +160,7 @@ void MDNormDirectSC::cacheInputs() {
   const auto &exptInfoZero = *(m_inputWS->getExperimentInfo(0));
   auto source = exptInfoZero.getInstrument()->getSource();
   auto sample = exptInfoZero.getInstrument()->getSample();
-  if (source == NULL || sample == NULL) {
+  if (source == nullptr || sample == nullptr) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Instrument not sufficiently defined: failed to get source and/or "
         "sample");
@@ -212,9 +217,9 @@ std::string MDNormDirectSC::inputEnergyMode() const {
     // get dEAnalysisMode
     PropertyHistories histvec =
         hist.getAlgorithmHistory(nalgs - 2)->getProperties();
-    for (auto it = histvec.begin(); it != histvec.end(); ++it) {
-      if ((*it)->name() == "dEAnalysisMode") {
-        emode = (*it)->value();
+    for (auto &hist : histvec) {
+      if (hist->name() == "dEAnalysisMode") {
+        emode = hist->value();
         break;
       }
     }
@@ -234,11 +239,11 @@ MDHistoWorkspace_sptr MDNormDirectSC::binInputWS() {
   const auto &props = getProperties();
   IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", 0.0, 0.3);
   binMD->setPropertyValue("AxisAligned", "1");
-  for (auto it = props.begin(); it != props.end(); ++it) {
-    const auto &propName = (*it)->name();
+  for (auto prop : props) {
+    const auto &propName = prop->name();
     if (propName != "SolidAngleWorkspace" &&
         propName != "OutputNormalizationWorkspace") {
-      binMD->setPropertyValue(propName, (*it)->value());
+      binMD->setPropertyValue(propName, prop->value());
     }
   }
   binMD->executeAsChildAlg();
@@ -449,12 +454,12 @@ void MDNormDirectSC::calculateNormalization(
   API::MatrixWorkspace_const_sptr solidAngleWS =
       getProperty("SolidAngleWorkspace");
   detid2index_map solidAngDetToIdx;
-  if (solidAngleWS != NULL) {
+  if (solidAngleWS != nullptr) {
     haveSA = true;
     solidAngDetToIdx = solidAngleWS->getDetectorIDToWorkspaceIndexMap();
   }
 
-  auto *prog = new API::Progress(this, 0.3, 1.0, ndets);
+  auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < ndets; i++) {
     PARALLEL_START_INTERUPT_REGION
@@ -531,8 +536,6 @@ void MDNormDirectSC::calculateNormalization(
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
-  delete prog;
 }
 
 /**
@@ -552,8 +555,7 @@ MDNormDirectSC::removeGroupedIDs(const ExperimentInfo &exptInfo,
                                  // double to the correct size once
   std::set<detid_t> groupedIDs;
 
-  for (auto iter = detIDs.begin(); iter != detIDs.end(); ++iter) {
-    detid_t curID = *iter;
+  for (auto curID : detIDs) {
     if (groupedIDs.count(curID) == 1)
       continue; // Already been processed
 
@@ -606,8 +608,13 @@ std::vector<Kernel::VMD>
 MDNormDirectSC::calculateIntersections(const double theta, const double phi) {
   V3D qout(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)),
       qin(0., 0., m_ki);
+
   qout = m_rubw * qout;
   qin = m_rubw * qin;
+  if (convention == "Crystallography") {
+    qout *= -1;
+    qin *= -1;
+  }
   double hStart = qin.X() - qout.X() * m_kfmin,
          hEnd = qin.X() - qout.X() * m_kfmax;
   double kStart = qin.Y() - qout.Y() * m_kfmin,

@@ -35,17 +35,14 @@ namespace Functions {
 */
 class DLLExport FlatBackground : public BackgroundFunction {
 public:
-  FlatBackground();
-  virtual ~FlatBackground();
-
-  std::string name() const;
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
-  virtual void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                               const size_t nData);
+  std::string name() const override;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues,
+                       const size_t nData) override;
 
 private:
-  void init();
+  void init() override;
 };
 
 } // namespace Functions

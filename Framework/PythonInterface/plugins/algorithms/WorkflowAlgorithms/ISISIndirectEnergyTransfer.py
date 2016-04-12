@@ -233,7 +233,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                                 num_bins)
 
                 # Detailed balance
-                if self._detailed_balance is not Property.EMPTY_DBL:
+                if self._detailed_balance != Property.EMPTY_DBL:
                     corr_factor = 11.606 / (2 * self._detailed_balance)
                     ExponentialCorrection(InputWorkspace=ws_name,
                                           OutputWorkspace=ws_name,
@@ -243,7 +243,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
                 # Scale
                 if self._scale_factor != 1.0:
-                    Scale(InputWorkspaces=ws_name,
+                    Scale(InputWorkspace=ws_name,
                           OutputWorkspace=ws_name,
                           Factor=self._scale_factor,
                           Operation='Multiply')

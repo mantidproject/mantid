@@ -5,6 +5,8 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/cow_ptr.h"
+
 #include <fstream>
 
 namespace Mantid {
@@ -48,36 +50,36 @@ public:
   /// Constructor
   LoadRKH() : m_unitKeys(), m_RKHKeys() {}
   /// Virtual destructor
-  virtual ~LoadRKH() {}
+  ~LoadRKH() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "LoadRKH"; }
+  const std::string name() const override { return "LoadRKH"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load a file written in the RKH format";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Text;SANS\\DataHandling";
   }
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
   /// Store the units known to the UnitFactory
-  std::set<std::string> m_unitKeys;
+  std::unordered_set<std::string> m_unitKeys;
   /// Store the units added as options for this algorithm
-  std::set<std::string> m_RKHKeys;
+  std::unordered_set<std::string> m_RKHKeys;
   /// the input stream for the file being loaded
   std::ifstream m_fileIn;
 
   // Initialisation code
-  void init();
+  void init() override;
   // Execution code
-  void exec();
+  void exec() override;
 
   bool is2D(const std::string &testLine);
   const API::MatrixWorkspace_sptr read1D();

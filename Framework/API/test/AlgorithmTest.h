@@ -23,29 +23,33 @@ using namespace Mantid::API;
 class StubbedWorkspaceAlgorithm : public Algorithm {
 public:
   StubbedWorkspaceAlgorithm() : Algorithm() {}
-  virtual ~StubbedWorkspaceAlgorithm() {}
+  ~StubbedWorkspaceAlgorithm() override {}
 
-  const std::string name() const { return "StubbedWorkspaceAlgorithm"; }
-  int version() const { return 1; }
-  const std::string category() const { return "Cat;Leopard;Mink"; }
-  const std::string summary() const { return "Test summary"; }
-  void init() {
-    declareProperty(
-        new WorkspaceProperty<>("InputWorkspace1", "", Direction::Input));
-    declareProperty(new WorkspaceProperty<>(
+  const std::string name() const override {
+    return "StubbedWorkspaceAlgorithm";
+  }
+  int version() const override { return 1; }
+  const std::string category() const override { return "Cat;Leopard;Mink"; }
+  const std::string summary() const override { return "Test summary"; }
+  void init() override {
+    declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace1", "",
+                                                     Direction::Input));
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "InputWorkspace2", "", Direction::Input, PropertyMode::Optional));
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "InOutWorkspace", "", Direction::InOut, PropertyMode::Optional));
     declareProperty("Number", 0.0);
-    declareProperty(
-        new WorkspaceProperty<>("OutputWorkspace1", "", Direction::Output));
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace1", "",
+                                                     Direction::Output));
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "OutputWorkspace2", "", Direction::Output, PropertyMode::Optional));
   }
-  void exec() {
-    boost::shared_ptr<WorkspaceTester> out1(new WorkspaceTester());
+  void exec() override {
+    boost::shared_ptr<WorkspaceTester> out1 =
+        boost::make_shared<WorkspaceTester>();
     out1->init(10, 10, 10);
-    boost::shared_ptr<WorkspaceTester> out2(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> out2 =
+        boost::make_shared<WorkspaceTester>();
     out2->init(10, 10, 10);
     std::string outName = getPropertyValue("InputWorkspace1") + "+" +
                           getPropertyValue("InputWorkspace2") + "+" +
@@ -64,46 +68,52 @@ DECLARE_ALGORITHM(StubbedWorkspaceAlgorithm)
 class StubbedWorkspaceAlgorithm2 : public Algorithm {
 public:
   StubbedWorkspaceAlgorithm2() : Algorithm() {}
-  virtual ~StubbedWorkspaceAlgorithm2() {}
+  ~StubbedWorkspaceAlgorithm2() override {}
 
-  const std::string name() const { return "StubbedWorkspaceAlgorithm2"; }
-  int version() const { return 2; }
-  const std::string category() const { return "Cat;Leopard;Mink"; }
-  const std::string summary() const { return "Test summary"; }
-  void init() {
-    declareProperty(new WorkspaceProperty<>(
+  const std::string name() const override {
+    return "StubbedWorkspaceAlgorithm2";
+  }
+  int version() const override { return 2; }
+  const std::string category() const override { return "Cat;Leopard;Mink"; }
+  const std::string summary() const override { return "Test summary"; }
+  void init() override {
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "NonLockingInputWorkspace", "", Direction::Input,
         PropertyMode::Optional, LockMode::NoLock));
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "NonLockingOutputWorkspace", "", Direction::Output,
         PropertyMode::Optional, LockMode::NoLock));
   }
-  void exec() {}
+  void exec() override {}
 };
 DECLARE_ALGORITHM(StubbedWorkspaceAlgorithm2)
 
 class AlgorithmWithValidateInputs : public Algorithm {
 public:
   AlgorithmWithValidateInputs() : Algorithm() {}
-  virtual ~AlgorithmWithValidateInputs() {}
-  const std::string name() const { return "StubbedWorkspaceAlgorithm2"; }
-  int version() const { return 1; }
-  const std::string category() const { return "Cat;Leopard;Mink"; }
-  const std::string summary() const { return "Test summary"; }
-  const std::string workspaceMethodName() const { return "methodname"; }
-  const std::string workspaceMethodOnTypes() const {
+  ~AlgorithmWithValidateInputs() override {}
+  const std::string name() const override {
+    return "StubbedWorkspaceAlgorithm2";
+  }
+  int version() const override { return 1; }
+  const std::string category() const override { return "Cat;Leopard;Mink"; }
+  const std::string summary() const override { return "Test summary"; }
+  const std::string workspaceMethodName() const override {
+    return "methodname";
+  }
+  const std::string workspaceMethodOnTypes() const override {
     return "MatrixWorkspace;ITableWorkspace";
   }
-  const std::string workspaceMethodInputProperty() const {
+  const std::string workspaceMethodInputProperty() const override {
     return "InputWorkspace";
   }
 
-  void init() {
+  void init() override {
     declareProperty("PropertyA", 12);
     declareProperty("PropertyB", 12);
   }
-  void exec() {}
-  std::map<std::string, std::string> validateInputs() {
+  void exec() override {}
+  std::map<std::string, std::string> validateInputs() override {
     std::map<std::string, std::string> out;
     int A = getProperty("PropertyA");
     int B = getProperty("PropertyB");
@@ -120,19 +130,19 @@ DECLARE_ALGORITHM(AlgorithmWithValidateInputs)
 class FailingAlgorithm : public Algorithm {
 public:
   FailingAlgorithm() : Algorithm() {}
-  virtual ~FailingAlgorithm() {}
-  const std::string name() const { return "FailingAlgorithm"; }
-  int version() const { return 1; }
-  const std::string summary() const { return "Test summary"; }
+  ~FailingAlgorithm() override {}
+  const std::string name() const override { return "FailingAlgorithm"; }
+  int version() const override { return 1; }
+  const std::string summary() const override { return "Test summary"; }
   static const std::string FAIL_MSG;
 
-  void init() {
-    declareProperty(
-        new WorkspaceProperty<>("InputWorkspace", "", Direction::Input));
+  void init() override {
+    declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                     Direction::Input));
     declareProperty("WsNameToFail", "");
   }
 
-  void exec() {
+  void exec() override {
     std::string wsNameToFail = getPropertyValue("WsNameToFail");
     std::string wsName = getPropertyValue("InputWorkspace");
 
@@ -160,7 +170,7 @@ public:
     Mantid::API::AlgorithmFactory::Instance().subscribe<ToyAlgorithmTwo>();
   }
 
-  ~AlgorithmTest() {
+  ~AlgorithmTest() override {
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("ToyAlgorithm", 1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("ToyAlgorithmTwo", 1);
   }
@@ -190,11 +200,10 @@ public:
   }
 
   void testCategories() {
-    std::vector<std::string> result;
-    result.push_back("Cat");
+    std::vector<std::string> result{"Cat"};
     TS_ASSERT_EQUALS(alg.categories(), result);
-    result.push_back("Leopard");
-    result.push_back("Mink");
+    result.emplace_back("Leopard");
+    result.emplace_back("Mink");
     TS_ASSERT_EQUALS(algv2.categories(), result);
     TS_ASSERT_EQUALS(algv3.categories(), result);
   }
@@ -439,7 +448,8 @@ public:
   void do_test_locking(std::string in1, std::string in2, std::string inout,
                        std::string out1, std::string out2) {
     for (size_t i = 0; i < 6; i++) {
-      boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+      boost::shared_ptr<WorkspaceTester> ws =
+          boost::make_shared<WorkspaceTester>();
       AnalysisDataService::Instance().addOrReplace("ws" + Strings::toString(i),
                                                    ws);
     }
@@ -475,7 +485,8 @@ public:
   /** Have a workspace property that does NOT lock the workspace.
    * The failure mode of this test is HANGING. */
   void test_workspace_notLocking() {
-    boost::shared_ptr<WorkspaceTester> ws1(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> ws1 =
+        boost::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("ws1", ws1);
 
     {
@@ -512,7 +523,8 @@ public:
     if (contents1.empty()) {
       if (group1.empty())
         return;
-      boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+      boost::shared_ptr<WorkspaceTester> ws =
+          boost::make_shared<WorkspaceTester>();
       AnalysisDataService::Instance().addOrReplace(group1, ws);
       return;
     }
@@ -525,7 +537,8 @@ public:
       AnalysisDataService::Instance().addOrReplace(group1, wsGroup);
       std::vector<std::string>::iterator it = names.begin();
       for (; it != names.end(); it++) {
-        boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+        boost::shared_ptr<WorkspaceTester> ws =
+            boost::make_shared<WorkspaceTester>();
         ws->init(10, 10, 10);
         AnalysisDataService::Instance().addOrReplace(*it, ws);
         wsGroup->add(*it);

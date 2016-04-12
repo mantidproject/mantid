@@ -3,6 +3,7 @@
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ThreadScheduler.h"
+#include <mutex>
 #include <set>
 
 namespace Mantid {
@@ -28,42 +29,41 @@ class DLLExport ThreadSchedulerMutexes : public ThreadScheduler {
 public:
   ThreadSchedulerMutexes() : ThreadScheduler() {}
 
-  virtual ~ThreadSchedulerMutexes() { clear(); }
+  ~ThreadSchedulerMutexes() override { clear(); }
 
   //-------------------------------------------------------------------------------
-  void push(Task *newTask) {
+  void push(Task *newTask) override {
     // Cache the total cost
-    m_queueLock.lock();
+    std::lock_guard<std::mutex> lock(m_queueLock);
     m_cost += newTask->cost();
 
-    boost::shared_ptr<Mutex> mut = newTask->getMutex();
-    m_supermap[mut].insert(std::pair<double, Task *>(newTask->cost(), newTask));
-    m_queueLock.unlock();
+    boost::shared_ptr<std::mutex> mut = newTask->getMutex();
+    m_supermap[mut].emplace(newTask->cost(), newTask);
   }
 
   //-------------------------------------------------------------------------------
-  virtual Task *pop(size_t threadnum) {
+  Task *pop(size_t threadnum) override {
     UNUSED_ARG(threadnum);
 
-    Task *temp = NULL;
+    Task *temp = nullptr;
 
-    m_queueLock.lock();
+    std::lock_guard<std::mutex> lock(m_queueLock);
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.
-    if (m_supermap.size() > 0) {
+    if (!m_supermap.empty()) {
       // We iterate in reverse as to take the NULL mutex last, even if no mutex
       // is busy
       SuperMap::iterator it = m_supermap.begin();
       SuperMap::iterator it_end = m_supermap.end();
       for (; it != it_end; ++it) {
         // The key is the mutex associated with the inner map
-        boost::shared_ptr<Mutex> mapMutex = it->first;
+        boost::shared_ptr<std::mutex> mapMutex = it->first;
         if ((!mapMutex) || (m_mutexes.empty()) ||
             (m_mutexes.find(mapMutex) == m_mutexes.end())) {
           // The mutex of this map is free!
           InnerMap &map = it->second;
 
-          if (map.size() > 0) {
+          if (!map.empty()) {
             // Look for the largest cost item in it.
             InnerMap::iterator it2 = it->second.end();
             it2--;
@@ -75,13 +75,13 @@ public:
           }
         }
       }
-      if (temp == NULL) {
+      if (temp == nullptr) {
         // Nothing was found, meaning all mutexes are in use
         // Try the first non-empty map
         SuperMap::iterator it = m_supermap.begin();
         SuperMap::iterator it_end = m_supermap.end();
         for (; it != it_end; it++) {
-          if (it->second.size() > 0) {
+          if (!it->second.empty()) {
             InnerMap &map = it->second;
             // Use the first one
             temp = map.begin()->second;
@@ -96,12 +96,11 @@ public:
 
     // --- Add the mutex (if any) to the list of "busy" ones ---
     if (temp) {
-      boost::shared_ptr<Mutex> mut = temp->getMutex();
+      boost::shared_ptr<std::mutex> mut = temp->getMutex();
       if (mut)
         m_mutexes.insert(mut);
     }
 
-    m_queueLock.unlock();
     return temp;
   }
 
@@ -111,34 +110,32 @@ public:
    * @param task :: the Task that was completed.
    * @param threadnum :: unused argument
    */
-  virtual void finished(Task *task, size_t threadnum) {
+  void finished(Task *task, size_t threadnum) override {
     UNUSED_ARG(threadnum);
-    boost::shared_ptr<Mutex> mut = task->getMutex();
+    boost::shared_ptr<std::mutex> mut = task->getMutex();
     if (mut) {
-      m_queueLock.lock();
+      std::lock_guard<std::mutex> lock(m_queueLock);
       // We take this mutex off the list of used ones.
       m_mutexes.erase(mut);
-      m_queueLock.unlock();
     }
   }
 
   //-------------------------------------------------------------------------------
-  size_t size() {
-    m_queueLock.lock();
+  size_t size() override {
+    std::lock_guard<std::mutex> lock(m_queueLock);
     // Add up the sizes of all contained maps.
     size_t total = 0;
     SuperMap::iterator it = m_supermap.begin();
     SuperMap::iterator it_end = m_supermap.end();
     for (; it != it_end; it++)
       total += it->second.size();
-    m_queueLock.unlock();
     return total;
   }
 
   //-------------------------------------------------------------------------------
   /// @return true if the queue is empty
-  bool empty() {
-    Mutex::ScopedLock _lock(m_queueLock);
+  bool empty() override {
+    std::lock_guard<std::mutex> lock(m_queueLock);
     SuperMap::iterator it = m_supermap.begin();
     SuperMap::iterator it_end = m_supermap.end();
     for (; it != it_end; it++)
@@ -148,8 +145,8 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  void clear() {
-    m_queueLock.lock();
+  void clear() override {
+    std::lock_guard<std::mutex> lock(m_queueLock);
 
     // Empty out the queue and delete the pointers!
     SuperMap::iterator it = m_supermap.begin();
@@ -165,21 +162,20 @@ public:
     m_supermap.clear();
     m_cost = 0;
     m_costExecuted = 0;
-    m_queueLock.unlock();
   }
 
 protected:
   /// Map to tasks, sorted by cost
   typedef std::multimap<double, Task *> InnerMap;
   /// Map to maps, sorted by Mutex*
-  typedef std::map<boost::shared_ptr<Mutex>, InnerMap> SuperMap;
+  typedef std::map<boost::shared_ptr<std::mutex>, InnerMap> SuperMap;
 
   /** A super map; first key = a Mutex *
    * Inside it: second key = the cost. */
   SuperMap m_supermap;
 
   /// Vector of currently used mutexes.
-  std::set<boost::shared_ptr<Mutex>> m_mutexes;
+  std::set<boost::shared_ptr<std::mutex>> m_mutexes;
 };
 
 } // namespace Mantid

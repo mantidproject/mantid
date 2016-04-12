@@ -74,7 +74,7 @@ class AxesDialog: public QDialog
 
   public:
     AxesDialog(ApplicationWindow* app, Graph* g, Qt::WFlags fl = 0);
-    virtual ~AxesDialog();
+    ~AxesDialog() override;
 
   public slots:
     void setCurrentScale(int axisPos);
@@ -86,7 +86,7 @@ class AxesDialog: public QDialog
   private slots:
     bool pressToGraph();
     void apply();
-    void accept();
+    void accept() override;
     void updateGrid();
     void changeMinorTicksLength(int minLength);
     void changeMajorTicksLength(int majLength);

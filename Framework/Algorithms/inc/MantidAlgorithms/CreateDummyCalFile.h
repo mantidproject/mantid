@@ -61,11 +61,11 @@ public:
   /// (Empty) Constructor
   CreateDummyCalFile();
   /// Virtual destructor
-  virtual ~CreateDummyCalFile() {}
+  ~CreateDummyCalFile() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "CreateDummyCalFile"; }
+  const std::string name() const override { return "CreateDummyCalFile"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Create a calibration file (extension .cal) from a workspace by "
            "harvesting the detector ids from the instrument. All of the "
            "offsets will be zero, and the pixels will be all grouped into "
@@ -75,9 +75,9 @@ public:
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\DataHandling\\CalFiles";
   }
 
@@ -85,9 +85,9 @@ private:
   /// Calibration entries map
   typedef std::map<int, std::pair<int, int>> instrcalmap;
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   /// The name and path of the input file
   std::string m_filename;
   /// Determine whether the grouping file already exists.

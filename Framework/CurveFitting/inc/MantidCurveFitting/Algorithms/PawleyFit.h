@@ -67,12 +67,12 @@ protected:
 class DLLExport PawleyFit : public API::Algorithm {
 public:
   PawleyFit();
-  virtual ~PawleyFit() {}
+  ~PawleyFit() override {}
 
-  const std::string name() const { return "PawleyFit"; }
-  int version() const { return 1; }
-  const std::string summary() const;
-  const std::string category() const { return "Diffraction\\Fitting"; }
+  const std::string name() const override { return "PawleyFit"; }
+  int version() const override { return 1; }
+  const std::string summary() const override;
+  const std::string category() const override { return "Diffraction\\Fitting"; }
 
 protected:
   double getTransformedCenter(double d, const Kernel::Unit_sptr &unit) const;
@@ -90,8 +90,8 @@ protected:
   API::IFunction_sptr
   getCompositeFunction(const Functions::PawleyFunction_sptr &pawleyFn) const;
 
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   Kernel::Unit_sptr m_dUnit;
 };

@@ -40,25 +40,27 @@ namespace Algorithms {
 class DLLExport DeleteWorkspace : public API::Algorithm {
 public:
   /// Algorithm's name
-  virtual const std::string name() const { return "DeleteWorkspace"; }
+  const std::string name() const override { return "DeleteWorkspace"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Removes a workspace from memory.";
   }
 
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Utility\\Workspaces"; }
+  const std::string category() const override { return "Utility\\Workspaces"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
 private:
   /// Overridden init
-  void init();
+  void init() override;
   /// Overridden exec
-  void exec();
+  void exec() override;
 
-  const std::string workspaceMethodName() const { return "delete"; }
-  const std::string workspaceMethodInputProperty() const { return "Workspace"; }
+  const std::string workspaceMethodName() const override { return "delete"; }
+  const std::string workspaceMethodInputProperty() const override {
+    return "Workspace";
+  }
 };
 
 } // namespace Algorithm

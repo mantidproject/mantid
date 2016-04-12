@@ -81,7 +81,7 @@ public:
     sendOK();
   }
   /// Destructor.
-  ~TestServerConnection() {
+  ~TestServerConnection() override {
     // std::cerr << "Test connection deleted" << std::endl;
   }
   /// Sends an OK message when there is nothing to send or an error occured
@@ -100,13 +100,13 @@ public:
   void sendString(const std::string &str) {
     isisds_command_header_t comm;
     memset(&comm, 0, sizeof(comm));
-    comm.len = (int)sizeof(comm) + (int)str.size();
+    comm.len = static_cast<int>(sizeof(comm)) + static_cast<int>(str.size());
     comm.type = ISISDSChar;
     comm.ndims = 1;
-    comm.dims_array[0] = (int)str.size();
+    comm.dims_array[0] = static_cast<int>(str.size());
     strncpy(comm.command, "OK", sizeof(comm.command));
     socket().sendBytes(&comm, sizeof(comm));
-    socket().sendBytes(str.c_str(), (int)str.size());
+    socket().sendBytes(str.c_str(), static_cast<int>(str.size()));
   }
   /**
    * Send an int value
@@ -148,14 +148,14 @@ public:
     }
     isisds_command_header_t comm;
     memset(&comm, 0, sizeof(comm));
-    comm.len = (int)(sizeof(comm) + sizeof(int) * ndata);
+    comm.len = static_cast<int>(sizeof(comm) + sizeof(int) * ndata);
     comm.type = ISISDSInt32;
     comm.ndims = 2;
     comm.dims_array[0] = nos;
     comm.dims_array[1] = m_nBins + 1;
     strncpy(comm.command, "OK", sizeof(comm.command));
     socket().sendBytes(&comm, sizeof(comm));
-    socket().sendBytes(data.data(), (int)sizeof(int) * ndata);
+    socket().sendBytes(data.data(), static_cast<int>(sizeof(int)) * ndata);
   }
   /**
    * Send an array of float numbers
@@ -164,13 +164,14 @@ public:
   void sendFloatArray(const std::vector<float> &arr) {
     isisds_command_header_t comm;
     memset(&comm, 0, sizeof(comm));
-    comm.len = (int)(sizeof(comm) + sizeof(float) * arr.size());
+    comm.len = static_cast<int>(sizeof(comm) + sizeof(float) * arr.size());
     comm.type = ISISDSReal32;
     comm.ndims = 1;
-    comm.dims_array[0] = (int)arr.size();
+    comm.dims_array[0] = static_cast<int>(arr.size());
     strncpy(comm.command, "OK", sizeof(comm.command));
     socket().sendBytes(&comm, sizeof(comm));
-    socket().sendBytes(arr.data(), (int)(sizeof(float) * arr.size()));
+    socket().sendBytes(arr.data(),
+                       static_cast<int>(sizeof(float) * arr.size()));
   }
   /**
    * Send an array of int numbers
@@ -179,18 +180,18 @@ public:
   void sendIntArray(const std::vector<int> &arr) {
     isisds_command_header_t comm;
     memset(&comm, 0, sizeof(comm));
-    comm.len = (int)(sizeof(comm) + sizeof(int) * arr.size());
+    comm.len = static_cast<int>(sizeof(comm) + sizeof(int) * arr.size());
     comm.type = ISISDSInt32;
     comm.ndims = 1;
-    comm.dims_array[0] = (int)arr.size();
+    comm.dims_array[0] = static_cast<int>(arr.size());
     strncpy(comm.command, "OK", sizeof(comm.command));
     socket().sendBytes(&comm, sizeof(comm));
-    socket().sendBytes(arr.data(), (int)(sizeof(int) * arr.size()));
+    socket().sendBytes(arr.data(), static_cast<int>(sizeof(int) * arr.size()));
   }
   /**
    * Main method that reads commands from the socket and send out the data.
    */
-  void run() {
+  void run() override {
     for (;;) {
       char buffer[1024];
       isisds_command_header_t comm;
@@ -245,19 +246,19 @@ public:
         } else if (command == "UDET") {
           std::vector<int> udet(m_nSpectra + m_nMonitors);
           for (int i = 0; i < static_cast<int>(udet.size()); ++i) {
-            udet[i] = (int)(1000 + i + 1);
+            udet[i] = (i + 1);
           }
           sendIntArray(udet);
         } else if (command == "SPEC") {
           std::vector<int> spec(m_nSpectra + m_nMonitors);
           for (int i = 0; i < static_cast<int>(spec.size()); ++i) {
-            spec[i] = (int)(i + 1);
+            spec[i] = (i + 1);
           }
           sendIntArray(spec);
         } else if (command == "MDET") {
           std::vector<int> mdet(m_nMonitors);
           for (int i = 0; i < m_nMonitors; ++i) {
-            mdet[i] = (int)(m_nSpectra + i + 1);
+            mdet[i] = (m_nSpectra + i + 1);
           }
           sendIntArray(mdet);
         } else {
@@ -301,7 +302,7 @@ public:
    * @param socket :: The socket.
    */
   Poco::Net::TCPServerConnection *
-  createConnection(const Poco::Net::StreamSocket &socket) {
+  createConnection(const Poco::Net::StreamSocket &socket) override {
     return new TestServerConnection(socket, m_nPeriods, m_nSpectra, m_nBins);
   }
 };
@@ -310,7 +311,7 @@ using namespace Kernel;
 using namespace API;
 
 /// (Empty) Constructor
-FakeISISHistoDAE::FakeISISHistoDAE() : m_server(NULL) {}
+FakeISISHistoDAE::FakeISISHistoDAE() : m_server(nullptr) {}
 
 /// Destructor
 FakeISISHistoDAE::~FakeISISHistoDAE() {
@@ -324,14 +325,18 @@ FakeISISHistoDAE::~FakeISISHistoDAE() {
  * Declare the algorithm properties
  */
 void FakeISISHistoDAE::init() {
-  declareProperty(new PropertyWithValue<int>("NPeriods", 1, Direction::Input),
-                  "Number of periods.");
-  declareProperty(new PropertyWithValue<int>("NSpectra", 100, Direction::Input),
-                  "Number of spectra.");
-  declareProperty(new PropertyWithValue<int>("NBins", 30, Direction::Input),
-                  "Number of bins.");
-  declareProperty(new PropertyWithValue<int>("Port", 56789, Direction::Input),
-                  "The port to broadcast on (default 56789, ISISDAE 6789).");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("NPeriods", 1, Direction::Input),
+      "Number of periods.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("NSpectra", 100, Direction::Input),
+      "Number of spectra.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("NBins", 30, Direction::Input),
+      "Number of bins.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("Port", 56789, Direction::Input),
+      "The port to broadcast on (default 56789, ISISDAE 6789).");
 }
 
 /**
@@ -343,7 +348,7 @@ void FakeISISHistoDAE::exec() {
   int nbins = getProperty("NBins");
   int port = getProperty("Port");
 
-  Mutex::ScopedLock lock(m_mutex);
+  std::lock_guard<std::mutex> lock(m_mutex);
   Poco::Net::ServerSocket socket(static_cast<Poco::UInt16>(port));
   socket.listen();
 
@@ -367,7 +372,7 @@ void FakeISISHistoDAE::exec() {
   }
   if (m_server) {
     m_server->stop();
-    m_server = NULL;
+    m_server = nullptr;
   }
   socket.close();
 }

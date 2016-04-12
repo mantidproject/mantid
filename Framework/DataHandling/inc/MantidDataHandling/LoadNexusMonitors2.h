@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidGeometry/IDTypes.h"
 #include <boost/scoped_array.hpp>
 #include <nexus/NeXusException.hpp>
 #include <nexus/NeXusFile.hpp>
@@ -49,37 +50,34 @@ public:
   LoadNexusMonitors2();
 
   /// Destructor
-  virtual ~LoadNexusMonitors2();
+  ~LoadNexusMonitors2() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const override {
-    return "LoadNexusMonitors";
-  }
+  const std::string name() const override { return "LoadNexusMonitors"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const override {
+  const std::string summary() const override {
     return "Load all monitors from a NeXus file into a workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const override { return 2; }
+  int version() const override { return 2; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const override {
-    return "DataHandling\\Nexus";
-  }
+  const std::string category() const override { return "DataHandling\\Nexus"; }
 
 protected:
   /// Initialise algorithm
-  virtual void init() override;
+  void init() override;
 
   /// Execute algorithm
-  virtual void exec() override;
+  void exec() override;
 
 private:
   /// Fix the detector numbers if the defaults are not correct
-  void fixUDets(boost::scoped_array<detid_t> &det_ids, ::NeXus::File &file,
-                const boost::scoped_array<specid_t> &spec_ids,
+  void fixUDets(boost::scoped_array<Mantid::detid_t> &det_ids,
+                ::NeXus::File &file,
+                const boost::scoped_array<Mantid::specnum_t> &spec_ids,
                 const size_t nmonitors) const;
 
   /// Load the logs
@@ -95,11 +93,32 @@ private:
   /// split multi period histogram workspace into a workspace group
   void splitMutiPeriodHistrogramData(const size_t numPeriods);
 
+  size_t getMonitorInfo(NeXus::File &file,
+                        std::vector<std::string> &monitorNames,
+                        size_t &numHistMon, size_t &numEventMon,
+                        size_t &numPeriods,
+                        std::map<int, std::string> &monitorNumber2Name,
+                        std::vector<bool> &isEventMonitors);
+
+  bool
+  createOutputWorkspace(size_t numHistMon, size_t numEventMon,
+                        bool monitorsAsEvents,
+                        std::vector<std::string> &monitorNames,
+                        std::vector<bool> &isEventMonitors,
+                        const std::map<int, std::string> &monitorNumber2Name,
+                        std::vector<bool> &loadMonitorFlags);
+
+  void readEventMonitorEntry(NeXus::File &file, size_t i);
+
+  void readHistoMonitorEntry(NeXus::File &file, size_t i);
+
 private:
   std::string m_filename; ///< The name and path of the input file
   API::MatrixWorkspace_sptr m_workspace; ///< The workspace being filled out
   size_t m_monitor_count;                ///< Number of monitors
   std::string m_top_entry_name;          ///< name of top level NXentry to use
+  bool m_allMonitorsHaveHistoData; ///< Flag that all monitors have histogram
+  /// data in the entry
 };
 
 } // namespace DataHandling

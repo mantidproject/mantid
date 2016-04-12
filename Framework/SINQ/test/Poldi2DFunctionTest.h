@@ -2,6 +2,7 @@
 #define MANTID_SINQ_POLDI2DFUNCTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <boost/make_shared.hpp>
 
 #include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -20,14 +21,16 @@ public:
   static void destroySuite(Poldi2DFunctionTest *suite) { delete suite; }
 
   void testTypes() {
-    boost::shared_ptr<Poldi2DFunction> function2D(new Poldi2DFunction);
+    boost::shared_ptr<Poldi2DFunction> function2D =
+        boost::make_shared<Poldi2DFunction>();
 
     TS_ASSERT(boost::dynamic_pointer_cast<CompositeFunction>(function2D));
     TS_ASSERT(boost::dynamic_pointer_cast<IFunction1DSpectrum>(function2D));
   }
 
   void testSummation() {
-    boost::shared_ptr<Poldi2DFunction> function2D(new Poldi2DFunction);
+    boost::shared_ptr<Poldi2DFunction> function2D =
+        boost::make_shared<Poldi2DFunction>();
 
     IFunction_sptr first(new SummingFunction);
     IFunction_sptr second(new SummingFunction);
@@ -55,7 +58,8 @@ public:
   }
 
   void testIterationBehavior() {
-    boost::shared_ptr<Poldi2DFunction> function2D(new Poldi2DFunction);
+    boost::shared_ptr<Poldi2DFunction> function2D =
+        boost::make_shared<Poldi2DFunction>();
 
     IFunction_sptr first(new SummingFunction);
     IFunction_sptr second(new SummingFunction);
@@ -87,7 +91,8 @@ public:
   }
 
   void testPoldiFunction1D() {
-    boost::shared_ptr<Poldi2DFunction> function2D(new Poldi2DFunction);
+    boost::shared_ptr<Poldi2DFunction> function2D =
+        boost::make_shared<Poldi2DFunction>();
 
     IFunction_sptr first(new SummingFunction);
     IFunction_sptr second(new TestPoldiFunction1D);
@@ -114,10 +119,10 @@ private:
    */
   class SummingFunction : public IFunction1DSpectrum, public ParamFunction {
   public:
-    std::string name() const { return "SummingFunction"; }
+    std::string name() const override { return "SummingFunction"; }
 
     void function1DSpectrum(const FunctionDomain1DSpectrum &domain,
-                            FunctionValues &values) const {
+                            FunctionValues &values) const override {
       values.zeroCalculated();
 
       for (size_t i = 0; i < domain.size(); ++i) {
@@ -126,7 +131,7 @@ private:
     }
 
     void functionDeriv1DSpectrum(const FunctionDomain1DSpectrum &domain,
-                                 Jacobian &jacobian) {
+                                 Jacobian &jacobian) override {
       UNUSED_ARG(domain);
       UNUSED_ARG(jacobian);
     }
@@ -136,7 +141,7 @@ private:
   public:
     void poldiFunction1D(const std::vector<int> &indices,
                          const FunctionDomain1D &domain,
-                         FunctionValues &values) const {
+                         FunctionValues &values) const override {
       double totalSize = static_cast<double>(indices.size());
 
       for (size_t i = 0; i < values.size(); ++i) {

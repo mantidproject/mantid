@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/ConvertToEventWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -31,8 +32,8 @@ ConvertToEventWorkspace::~ConvertToEventWorkspace() {}
 /** Initialize the algorithm's properties.
  */
 void ConvertToEventWorkspace::init() {
-  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace", "",
-                                                     Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<Workspace2D>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input Workspace2D.");
   declareProperty("GenerateZeros", false,
                   "Generate an event even for empty bins\n"
@@ -46,8 +47,8 @@ void ConvertToEventWorkspace::init() {
       "If GenerateMultipleEvents is true, specifies a maximum number of events "
       "to generate in a single bin.\n"
       "Use a value that matches your instrument's TOF resolution. Default 10.");
-  declareProperty(new WorkspaceProperty<EventWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output EventWorkspace.");
 }
 

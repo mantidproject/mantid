@@ -16,10 +16,10 @@ public:
   ConvFit(QWidget *parent = 0);
 
 private:
-  virtual void setup();
-  virtual void run();
-  virtual bool validate();
-  virtual void loadSettings(const QSettings &settings);
+  void setup() override;
+  void run() override;
+  bool validate() override;
+  void loadSettings(const QSettings &settings) override;
 
 private slots:
   void typeSelection(int index);
@@ -73,11 +73,16 @@ private:
   bool m_confitResFileType;
   Mantid::API::IAlgorithm_sptr m_singleFitAlg;
   QString m_singleFitOutputName;
-  QStringList m_fitStrings;
   QString m_previousFit;
   QString m_baseName;
   int m_runMin;
   int m_runMax;
+
+  // ShortHand Naming for fit functions
+  QStringList m_fitStrings;
+
+  // Used in auto generating defaults for parameters
+  QStringList m_defaultParams;
 
 };
 } // namespace IDA

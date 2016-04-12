@@ -2,10 +2,14 @@
 #define LOADSAVEASCIITEST_H_
 
 #include <cxxtest/TestSuite.h>
+
 #include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataHandling/SaveAscii.h"
-#include "MantidDataObjects/Workspace2D.h"
+
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <Poco/File.h>
 
 using namespace Mantid::API;
@@ -19,7 +23,7 @@ public:
   static void destroySuite(LoadSaveAsciiTest *suite) { delete suite; }
 
   LoadSaveAsciiTest() {}
-  ~LoadSaveAsciiTest() {
+  ~LoadSaveAsciiTest() override {
     FrameworkManager::Instance().deleteWorkspace("LoadSaveAsciiWS_0");
     FrameworkManager::Instance().deleteWorkspace("LoadSaveAsciiWS_1");
   }

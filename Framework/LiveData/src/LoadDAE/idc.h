@@ -37,11 +37,11 @@ extern "C" {
 #endif
 
 /** Open a DAE connection on host*/
-int IDCopen(const char *host, int mode, int options, idc_handle_t *fh,
+int IDCopen(const char *host, int mode, int options, idc_handle_t *pfh,
             uint16_t port = ISISDS_PORT);
 
 /** Close a DAE connection */
-int IDCclose(idc_handle_t *fh);
+int IDCclose(idc_handle_t *pfh);
 
 /* The A versions of the functions allocate memory, the other need to be passed
  * a pre-allocated array */

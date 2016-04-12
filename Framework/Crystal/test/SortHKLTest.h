@@ -149,9 +149,8 @@ public:
   }
 
   void test_PeaksStatisticsOneObservation() {
-    std::map<V3D, UniqueReflection> uniques;
-    uniques.insert(std::make_pair(V3D(1, 1, 1),
-                                  getReflectionWithPeaks({56.0}, {4.5}, 1.0)));
+    std::map<V3D, UniqueReflection> uniques{
+        {{1, 1, 1}, getReflectionWithPeaks({56.0}, {4.5}, 1.0)}};
 
     PeaksStatistics statistics(uniques, 1);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 1);
@@ -166,11 +165,9 @@ public:
   }
 
   void test_PeaksStatisticsOneObservationTwoUnique() {
-    std::map<V3D, UniqueReflection> uniques;
-    uniques.insert(std::make_pair(V3D(1, 1, 1),
-                                  getReflectionWithPeaks({56.0}, {4.5}, 1.0)));
-    uniques.insert(
-        std::make_pair(V3D(1, 1, 2), UniqueReflection(V3D(1, 1, 2))));
+    std::map<V3D, UniqueReflection> uniques{
+        {{1, 1, 1}, getReflectionWithPeaks({56.0}, {4.5}, 1.0)},
+        {{1, 1, 2}, UniqueReflection(V3D(1, 1, 2))}};
 
     PeaksStatistics statistics(uniques, 1);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 1);
@@ -186,11 +183,9 @@ public:
 
   void test_PeaksStatisticsTwoObservationTwoUnique() {
 
-    std::map<V3D, UniqueReflection> uniques;
-    uniques.insert(std::make_pair(V3D(1, 1, 1),
-                                  getReflectionWithPeaks({10.0}, {1.0}, 1.0)));
-    uniques.insert(std::make_pair(V3D(1, 1, 2),
-                                  getReflectionWithPeaks({20.0}, {1.0}, 2.0)));
+    std::map<V3D, UniqueReflection> uniques{
+        {{1, 1, 1}, getReflectionWithPeaks({10.0}, {1.0}, 1.0)},
+        {{1, 1, 2}, getReflectionWithPeaks({20.0}, {1.0}, 2.0)}};
 
     PeaksStatistics statistics(uniques, 2);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 2);
@@ -205,9 +200,8 @@ public:
   }
 
   void test_PeaksStatisticsTwoObservationOneUnique() {
-    std::map<V3D, UniqueReflection> uniques;
-    uniques.insert(std::make_pair(
-        V3D(1, 1, 1), getReflectionWithPeaks({10.0, 20.0}, {0.1, 0.1}, 1.0)));
+    std::map<V3D, UniqueReflection> uniques{
+        {{1, 1, 1}, getReflectionWithPeaks({10.0, 20.0}, {0.1, 0.1}, 1.0)}};
 
     PeaksStatistics statistics(uniques, 2);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 2);
@@ -224,10 +218,9 @@ public:
   }
 
   void test_PeaksStatisticsThreeObservationOneUnique() {
-    std::map<V3D, UniqueReflection> uniques;
-    uniques.insert(std::make_pair(
-        V3D(1, 1, 1),
-        getReflectionWithPeaks({10.0, 20.0, 15.0}, {0.1, 0.1, 0.1}, 1.0)));
+    std::map<V3D, UniqueReflection> uniques{
+        {{1, 1, 1},
+         getReflectionWithPeaks({10.0, 20.0, 15.0}, {0.1, 0.1, 0.1}, 1.0)}};
 
     PeaksStatistics statistics(uniques, 3);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 3);

@@ -22,11 +22,11 @@ public:
   }
 
   /// Overloading base class methods
-  std::string name() const { return "Boevs"; }
-  bool iterate(size_t) { return true; }
+  std::string name() const override { return "Boevs"; }
+  bool iterate(size_t) override { return true; }
   int hasConverged() { return 101; }
-  double costFunctionVal() { return 5.0; }
-  void initialize(API::ICostFunction_sptr, size_t) {}
+  double costFunctionVal() override { return 5.0; }
+  void initialize(API::ICostFunction_sptr, size_t) override {}
 };
 
 DECLARE_FUNCMINIMIZER(FuncMinimizerFactoryTest_A, nedtur)

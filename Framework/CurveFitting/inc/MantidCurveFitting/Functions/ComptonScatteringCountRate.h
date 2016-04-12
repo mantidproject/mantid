@@ -43,30 +43,29 @@ public:
 
 private:
   /// String identifier
-  std::string name() const { return "ComptonScatteringCountRate"; }
+  std::string name() const override { return "ComptonScatteringCountRate"; }
   /// Set an attribute value (and possibly cache its value)
-  void setAttribute(const std::string &name, const Attribute &value);
+  void setAttribute(const std::string &name, const Attribute &value) override;
   /// Takes the string & constructs the constraint matrix
   void parseIntensityConstraintMatrix(const std::string &value);
 
   /// Called by the framework just before an iteration is starting
-  void iterationStarting();
+  void iterationStarting() override;
   /// Set the fixed parameters to the given values
   void setFixedParameterValues(const std::vector<double> &values);
   /// Refresh the values of the C matrix for this evaluation
   void updateCMatrixValues() const;
 
   /// Cache reference to workspace for use in setupForFit
-  void
-  setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX);
+  void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> matrix,
+                          size_t wsIndex, double startX, double endX) override;
   /// Cache ptrs to the individual profiles and their parameters
   void cacheFunctions();
   /// Cache ptr to the individual profile and its parameters
   void cacheComptonProfile(const boost::shared_ptr<ComptonProfile> &profile,
                            const size_t paramsOffset);
   /// Cache parameters positions for background function
-  void cacheBackground(const API::IFunction1D_sptr &profile,
+  void cacheBackground(const API::IFunction1D_sptr &function1D,
                        const size_t paramsOffset);
   /// Set up the constraint matrices
   void createConstraintMatrices(const std::vector<double> &xValues);

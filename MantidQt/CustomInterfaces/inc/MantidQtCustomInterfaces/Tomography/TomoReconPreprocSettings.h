@@ -1,7 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMORECONPREPROCSETTINGS_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMORECONPREPROCSETTINGS_H_
 
-#include "MantidKernel/System.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
 
 #include <cstddef>
 
@@ -13,7 +13,7 @@ Settings for pre-processing of the raw input images before
 reconstructing a volume. Note this is in principle not tied to any
 particular tool.
 
-Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2015,2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -34,9 +34,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-struct DLLExport TomoReconPreprocSettings {
+struct MANTIDQT_CUSTOMINTERFACES_DLL TomoReconPreprocSettings {
+  bool normalizeByAirRegion;
   bool normalizeByProtonCharge;
-  bool normalizeByFlatDark;
+  bool normalizeByFlats;
+  bool normalizeByDarks;
 
   // block-size in pixels
   size_t medianFilterWidth;

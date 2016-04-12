@@ -80,17 +80,22 @@ LoadNexusLogs::LoadNexusLogs() {}
 /// Initialisation method.
 void LoadNexusLogs::init() {
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("Workspace", "Anonymous",
-                                             Direction::InOut),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
+                                                      Direction::InOut),
       "The name of the workspace that will be filled with the logs.");
+  const std::vector<std::string> exts{".nxs", ".n*"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
+                  "Path to the .nxs file to load. Can be an EventNeXus or a "
+                  "histogrammed NeXus.");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".nxs", ".n*"}),
-      "Path to the .nxs file to load. Can be an EventNeXus or a "
-      "histogrammed NeXus.");
-  declareProperty(
-      new PropertyWithValue<bool>("OverwriteLogs", true, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("OverwriteLogs", true,
+                                           Direction::Input),
       "If true then existing logs will be overwritten, if false they will "
       "not.");
+  declareProperty(make_unique<PropertyWithValue<std::string>>("NXentryName", "",
+                                                              Direction::Input),
+                  "Entry in the nexus file from which to read the logs");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -104,17 +109,20 @@ void LoadNexusLogs::exec() {
   std::string filename = getPropertyValue("Filename");
   MatrixWorkspace_sptr workspace = getProperty("Workspace");
 
+  std::string entry_name = getPropertyValue("NXentryName");
   // Find the entry name to use (normally "entry" for SNS, "raw_data_1" for
-  // ISIS)
-  std::string entry_name = LoadTOFRawNexus::getEntryName(filename);
-
+  // ISIS) if entry name is empty
+  if (entry_name.empty()) {
+    entry_name = LoadTOFRawNexus::getEntryName(filename);
+  }
   ::NeXus::File file(filename);
   // Find the root entry
   try {
     file.openGroup(entry_name, "NXentry");
   } catch (::NeXus::Exception &) {
     throw std::invalid_argument("Unknown NeXus file format found in file '" +
-                                filename + "'");
+                                filename + "', or '" + entry_name +
+                                "' is not a valid NXentry");
   }
 
   /// Use frequency start for Monitor19 and Special1_19 logs with "No Time" for
@@ -229,9 +237,9 @@ void LoadNexusLogs::exec() {
       ptime.reserve(event_frame_number.size());
       std::vector<Mantid::Kernel::DateAndTime> plogt = plog->timesAsVector();
       std::vector<double> plogv = plog->valuesAsVector();
-      for (size_t i = 0; i < event_frame_number.size(); ++i) {
-        ptime.push_back(plogt[event_frame_number[i]]);
-        pval.push_back(plogv[event_frame_number[i]]);
+      for (auto number : event_frame_number) {
+        ptime.push_back(plogt[number]);
+        pval.push_back(plogv[number]);
       }
       pcharge->create(ptime, pval);
       pcharge->setUnits("uAh");
@@ -431,7 +439,7 @@ void LoadNexusLogs::loadSELog(
   //   value_log - A time series entry. This can contain a corrupt value entry
   //   so if it does use the value one
   //   value - A single value float entry
-  Kernel::Property *logValue(NULL);
+  Kernel::Property *logValue(nullptr);
   std::map<std::string, std::string> entries = file.getEntries();
   if (entries.find("value_log") != entries.end()) {
     try {

@@ -39,25 +39,25 @@ public:
   /// Default constructor
   LoadReflTBL();
   /// The name of the algorithm
-  virtual const std::string name() const { return "LoadReflTBL"; }
+  const std::string name() const override { return "LoadReflTBL"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads data from a reflectometry table file and stores it in a "
            "table workspace (TableWorkspace class).";
   }
 
   /// The version number
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// The category
-  virtual const std::string category() const { return "DataHandling\\Text"; }
+  const std::string category() const override { return "DataHandling\\Text"; }
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
   /// Declare properties
-  void init();
+  void init() override;
   /// Execute the algorithm
-  void exec();
+  void exec() override;
   /// Split into columns with respect to the comma delimiters
   size_t getCells(std::string line, std::vector<std::string> &cols) const;
   /// count the number of commas in the line

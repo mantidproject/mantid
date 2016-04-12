@@ -8,7 +8,7 @@ setlocal enableextensions enabledelayedexpansion
 :: BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each slave.
 :: CMake, git & git-lfs should be on the PATH
 ::
-:: All nodes currently have PARAVIEW_DIR=4.3.b40280, PARAVIEW_NEXT_DIR=4.3.1
+:: All nodes currently have PARAVIEW_DIR=4.3.b40280, PARAVIEW_NEXT_DIR=5.0.0
 :: and PARAVIEW_MSVC2015_DIR=4.3.b40280-msvc2015
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 call cmake.exe --version
@@ -28,7 +28,7 @@ echo %sha1%
 set VS_VERSION=14
 call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" amd64
 set CM_GENERATOR=Visual Studio 14 2015 Win64
-set PARAVIEW_DIR=%PARAVIEW_MSVC2015_DIR%
+set PARAVIEW_DIR=%PARAVIEW_NEXT_DIR%
 
 :: While we transition between VS 2012 & 2015 we need to be able to clean the build directory
 :: if the previous build was not with the same compiler

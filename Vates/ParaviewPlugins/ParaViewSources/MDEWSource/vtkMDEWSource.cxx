@@ -13,6 +13,7 @@
 
 #include "MantidVatesAPI/BoxInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
@@ -176,17 +177,15 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
 
     ThresholdRange_scptr thresholdRange =
         boost::make_shared<IgnoreZerosThresholdRange>();
-    auto zeroDFactory = Mantid::Kernel::make_unique<vtkMD0DFactory>();
     auto hexahedronFactory = Mantid::Kernel::make_unique<vtkMDHexFactory>(
         thresholdRange, m_normalization);
-    auto quadFactory = Mantid::Kernel::make_unique<vtkMDQuadFactory>(
-        thresholdRange, m_normalization);
-    auto lineFactory = Mantid::Kernel::make_unique<vtkMDLineFactory>(
-        thresholdRange, m_normalization);
 
-    hexahedronFactory->SetSuccessor(std::move(quadFactory));
-    quadFactory->SetSuccessor(std::move(lineFactory));
-    lineFactory->SetSuccessor(std::move(zeroDFactory));
+    hexahedronFactory->setSuccessor(
+                         Mantid::Kernel::make_unique<vtkMDQuadFactory>(
+                             thresholdRange, m_normalization))
+        .setSuccessor(Mantid::Kernel::make_unique<vtkMDLineFactory>(
+            thresholdRange, m_normalization))
+        .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
 
     hexahedronFactory->setTime(m_time);
     vtkSmartPointer<vtkDataSet> product;
@@ -194,15 +193,14 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
         hexahedronFactory.get(), loadingProgressUpdate, drawingProgressUpdate);
 
     //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.
-    vtkNew<vtkBox> box;
+    auto box = vtkSmartPointer<vtkBox>::New();
     box->SetBounds(product->GetBounds());
-    vtkNew<vtkPVClipDataSet> clipper;
+    auto clipper = vtkSmartPointer<vtkPVClipDataSet>::New();
     clipper->SetInputData(product);
-    clipper->SetClipFunction(box.GetPointer());
+    clipper->SetClipFunction(box);
     clipper->SetInsideOut(true);
     clipper->Update();
-    auto clipperOutput =
-        vtkSmartPointer<vtkDataSet>::Take(clipper->GetOutput());
+    auto clipperOutput = clipper->GetOutput();
     //--------------------------------------------------------
 
     vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(
@@ -211,7 +209,8 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
 
     try
     {
-      m_presenter->makeNonOrthogonal(output);
+      auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+      m_presenter->makeNonOrthogonal(output, std::move(workspaceProvider));
     }
     catch (std::invalid_argument &e)
     {
@@ -243,9 +242,10 @@ int vtkMDEWSource::RequestInformation(
       vtkErrorMacro(<< "Cannot fetch the specified workspace from Mantid ADS.");
     } else {
       // If the MDEvent workspace has had top level splitting applied to it,
-      // then use the a depth of 1
+      // then use the a deptgit stah of 1
+      auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
       if (auto split =
-              Mantid::VATES::findRecursionDepthForTopLevelSplitting(m_wsName)) {
+              Mantid::VATES::findRecursionDepthForTopLevelSplitting(m_wsName, std::move(workspaceProvider))) {
         SetDepth(split.get());
       }
 

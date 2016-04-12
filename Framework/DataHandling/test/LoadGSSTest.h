@@ -4,6 +4,8 @@
 #include "cxxtest/TestSuite.h"
 #include "MantidDataHandling/LoadGSS.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 
 using namespace Mantid;
@@ -77,7 +79,7 @@ public:
     checkWorkspace(loader->getProperty("OutputWorkspace"), 1, 6);
   }
 
-  /** Test LoadGSS with setting spectrum ID as bank ID
+  /** Test LoadGSS with setting spectrum No as bank ID
     */
   void test_load_gss_use_spec() {
     // Set property and execute

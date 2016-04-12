@@ -79,7 +79,7 @@ private:
 
   public:
     TestableProductOfCyclicGroups() : ProductOfCyclicGroups("x,y,z") {}
-    ~TestableProductOfCyclicGroups() {}
+    ~TestableProductOfCyclicGroups() override {}
   };
 };
 

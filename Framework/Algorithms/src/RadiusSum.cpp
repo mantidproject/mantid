@@ -1,16 +1,21 @@
 #include "MantidAlgorithms/RadiusSum.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidGeometry/IObjComponent.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
-#include <numeric>
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/IObjComponent.h"
+
+#include <boost/foreach.hpp>
+
 #include <limits>
 #include <math.h>
+#include <numeric>
 #include <sstream>
-#include <boost/foreach.hpp>
 
 using namespace Mantid::Kernel;
 
@@ -47,28 +52,28 @@ const std::string RadiusSum::category() const { return "Transforms\\Grouping"; }
 /** Initialize the algorithm's properties.
  */
 void RadiusSum::init() {
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
-  declareProperty(
-      new API::WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+  declareProperty(make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
+                  "An output workspace.");
 
   auto twoOrThreeElements =
       boost::make_shared<ArrayLengthValidator<double>>(2, 3);
   std::vector<double> myInput(3, 0);
-  declareProperty(
-      new ArrayProperty<double>("Centre", myInput, twoOrThreeElements),
-      "Coordinate of the centre of the ring");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "Centre", myInput, twoOrThreeElements),
+                  "Coordinate of the centre of the ring");
 
   auto nonNegative = boost::make_shared<BoundedValidator<double>>();
   nonNegative->setLower(0);
   declareProperty("MinRadius", 0.0, nonNegative,
-                  "Lenght of the inner ring. Default=0");
+                  "Length of the inner ring. Default=0");
   declareProperty(
-      new PropertyWithValue<double>(
+      make_unique<PropertyWithValue<double>>(
           "MaxRadius", std::numeric_limits<double>::max(), nonNegative),
-      "Lenght of the outer ring. Default=ImageSize.");
+      "Length of the outer ring. Default=ImageSize.");
 
   auto nonNegativeInt = boost::make_shared<BoundedValidator<int>>();
   nonNegativeInt->setLower(1);
@@ -83,8 +88,8 @@ void RadiusSum::init() {
   declareProperty(normOrder, 1.0, "If 2, the normalization will be divided by "
                                   "the quadratic value of the ring for each "
                                   "radius.");
-  setPropertySettings(normOrder,
-                      new VisibleWhenProperty(normBy, IS_EQUAL_TO, "1"));
+  setPropertySettings(normOrder, Kernel::make_unique<VisibleWhenProperty>(
+                                     normBy, IS_EQUAL_TO, "1"));
 
   const char *groupNorm = "Normalization";
   setPropertyGroup(normBy, groupNorm);
@@ -375,10 +380,10 @@ std::vector<double>
 RadiusSum::getBoundariesOfInstrument(API::MatrixWorkspace_sptr inWS) {
 
   // This function is implemented based in the following assumption:
-  //   - The workspace is composed by spectrum with associated spectrum ID which
+  //   - The workspace is composed by spectrum with associated spectrum No which
   //   is associated to one detector or monitor
-  //   - The first spectrum ID (non monitor) is associated with one detector
-  //   while the last spectrum ID (non monitor)
+  //   - The first spectrum No (non monitor) is associated with one detector
+  //   while the last spectrum No (non monitor)
   //     is associated with one detector.
   //   - They are in complete oposite direction.
   //
@@ -527,8 +532,8 @@ void RadiusSum::numBinsIsReasonable() {
                     << "It corresponds to a separation smaller than the image "
                        "resolution (detector size). "
                     << "A resonable number is smaller than "
-                    << (int)((max_radius - min_radius) / min_bin_size)
-                    << std::endl;
+                    << static_cast<int>((max_radius - min_radius) /
+                                        min_bin_size) << std::endl;
 }
 
 double RadiusSum::getMinBinSizeForInstrument(API::MatrixWorkspace_sptr inWS) {
@@ -570,8 +575,8 @@ double RadiusSum::getMinBinSizeForNumericImage(API::MatrixWorkspace_sptr inWS) {
 
   std::vector<double> boundaries = getBoundariesOfNumericImage(inWS);
   const MantidVec &refX = inWS->readX(inputWS->getNumberHistograms() / 2);
-  int nX = (int)(refX.size());
-  int nY = (int)(inWS->getAxis(1)->length());
+  int nX = static_cast<int>(refX.size());
+  int nY = static_cast<int>(inWS->getAxis(1)->length());
 
   // remembering boundaries is defined as { xMin, xMax, yMin, yMax}
   return std::min(((boundaries[1] - boundaries[0]) / nX),
@@ -592,11 +597,11 @@ void RadiusSum::normalizeOutputByRadius(std::vector<double> &values,
   g_log.debug() << "Calculate Output[i] = Counts[i] / (Radius[i] ^ "
                 << exp_power << ") << " << std::endl;
   if (exp_power > 1.00001 || exp_power < 0.99999) {
-    for (int i = 0; i < (int)values.size(); i++) {
+    for (int i = 0; i < static_cast<int>(values.size()); i++) {
       values[i] = values[i] / pow(first_radius + i * bin_size, exp_power);
     }
   } else { // avoid calling pow because exp_power == 1 (for performance)
-    for (int i = 0; i < (int)values.size(); i++) {
+    for (int i = 0; i < static_cast<int>(values.size()); i++) {
       values[i] = values[i] / (first_radius + i * bin_size);
     }
   }
@@ -605,14 +610,9 @@ void RadiusSum::normalizeOutputByRadius(std::vector<double> &values,
 double RadiusSum::getMaxDistance(const V3D &centre,
                                  const std::vector<double> &boundary_limits) {
 
-  std::vector<double> Xs;       //  = {boundary_limits[0], boundary_limits[1]};
-  std::vector<double> Ys;       // = {boundary_limits[2], boundary_limits[3]};
-  std::vector<double> Zs(2, 0); //  = {0, 0};
-
-  Xs.push_back(boundary_limits[0]);
-  Xs.push_back(boundary_limits[1]);
-  Ys.push_back(boundary_limits[2]);
-  Ys.push_back(boundary_limits[3]);
+  std::array<double, 2> Xs = {{boundary_limits[0], boundary_limits[1]}};
+  std::array<double, 2> Ys = {{boundary_limits[2], boundary_limits[3]}};
+  std::array<double, 2> Zs = {{0., 0.}};
 
   if (boundary_limits.size() == 6) {
     Zs[0] = boundary_limits[4];
@@ -620,12 +620,12 @@ double RadiusSum::getMaxDistance(const V3D &centre,
   }
 
   double max_distance = 0;
-  for (size_t x = 0; x < 2; x++)
-    for (size_t y = 0; y < 2; y++)
-      for (size_t z = 0; z < 2;
-           z++) { // define all the possible combinations for the limits
+  for (auto &x : Xs)
+    for (auto &y : Ys)
+      for (auto &z : Zs) {
+        // define all the possible combinations for the limits
 
-        double curr_distance = centre.distance(V3D(Xs[x], Ys[y], Zs[z]));
+        double curr_distance = centre.distance(V3D(x, y, z));
 
         if (curr_distance > max_distance)
           max_distance = curr_distance; // keep the maximum distance.
@@ -649,7 +649,7 @@ void RadiusSum::setUpOutputWorkspace(std::vector<double> &values) {
   MantidVec &refX = outputWS->dataX(0);
   double bin_size = (max_radius - min_radius) / num_bins;
 
-  for (int i = 0; i < ((int)refX.size()) - 1; i++)
+  for (int i = 0; i < (static_cast<int>(refX.size())) - 1; i++)
     refX[i] = min_radius + i * bin_size;
   refX[refX.size() - 1] = max_radius;
 

@@ -57,7 +57,7 @@ void IFunction1DAdapter::function1D(double *out, const double *xValues,
     Environment::throwRuntimeError(true);
   }
 
-  PyArrayObject *nparray = (PyArrayObject *)(result);
+  PyArrayObject *nparray = reinterpret_cast<PyArrayObject *>(result);
   if (PyArray_TYPE(nparray) ==
       NPY_DOUBLE) // dtype matches so use memcpy for speed
   {

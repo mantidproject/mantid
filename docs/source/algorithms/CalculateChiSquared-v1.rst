@@ -80,24 +80,28 @@ Usage
     func = 'name=LinearBackground,A0=1.1,A1=1.9'
 
     # Calculate the chi squared
-    chi2,chi2dof,chi2W,chi2Wdof = CalculateChiSquared(func,ws)
+    chi2,chi2dof,chi2ndata,chi2W,chi2Wdof,chi2Wndata = CalculateChiSquared(func,ws)
 
     print 'Chi squared is %s' % chi2
     print 'Chi squared / DOF is %s' % chi2dof
+    print 'Chi squared / NDATA is %s' % chi2ndata
     print 'Chi squared weighted is %s' % chi2W
     print 'Chi squared weighted / DOF is %s' % chi2Wdof
-    print 
+    print 'Chi squared weighted / NDATA is %s' % chi2Wndata
+    print
 
     # Define a function that models the data exactly
     func = 'name=LinearBackground,A0=1.0,A1=2.0'
 
     # Calculate the chi squared
-    chi2,chi2dof,chi2W,chi2Wdof = CalculateChiSquared(func,ws)
+    chi2,chi2dof,chi2ndata,chi2W,chi2Wdof,chi2Wndata = CalculateChiSquared(func,ws)
 
     print 'Chi squared is %s' % chi2
     print 'Chi squared / DOF is %s' % chi2dof
+    print 'Chi squared / NDATA is %s' % chi2ndata
     print 'Chi squared weighted is %s' % chi2W
     print 'Chi squared weighted / DOF is %s' % chi2Wdof
+    print 'Chi squared weighted / NDATA is %s' % chi2Wndata
 
 Output:
 
@@ -105,18 +109,22 @@ Output:
 
     Chi squared is 0.0351851851852
     Chi squared / DOF is 0.00439814814815
+    Chi squared / NDATA is 0.00351851851852
     Chi squared weighted is 0.0266028783977
     Chi squared weighted / DOF is 0.00332535979971
+    Chi squared weighted / NDATA is 0.00266028783977
 
     Chi squared is 0.0
     Chi squared / DOF is 0.0
+    Chi squared / NDATA is 0.0
     Chi squared weighted is 0.0
     Chi squared weighted / DOF is 0.0
-    
+    Chi squared weighted / NDATA is 0.0
+
 **Example 2**
 
 .. testcode::
-    
+
     import numpy as np
     # Create a workspace and fill it with some gaussian data and some noise
     n = 100
@@ -125,7 +133,7 @@ Output:
     e = [1] * n
     ws = CreateWorkspace(x,y,e)
 
-    # Gefine a Gaussian with exactly the same parameters that were used to 
+    # Gefine a Gaussian with exactly the same parameters that were used to
     # generate the data
     fun_t = 'name=Gaussian,Height=%s,PeakCentre=%s,Sigma=%s'
     fun = fun_t % (1, 0, 1)
@@ -143,9 +151,8 @@ Output:
     # Test the chi squared.
     CalculateChiSquared(fun,ws,Output='Test1')
     # Check the Test1_errors table and see that the parameters are at minimum now
-    
-    
+
+
 .. categories::
 
 .. sourcelink::
-

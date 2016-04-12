@@ -56,6 +56,9 @@ public:
   // std::string currentCalibSpecNos
   MOCK_CONST_METHOD0(currentCalibSpecNos, std::string());
 
+  // std::string currentCalibCustomisedBankName
+  MOCK_CONST_METHOD0(currentCalibCustomisedBankName, std::string());
+
   // int currentPlotType
   MOCK_CONST_METHOD0(currentPlotType, int());
 
@@ -104,8 +107,8 @@ public:
   // virtual int focusingBank() const;
   MOCK_CONST_METHOD0(focusingBanks, std::vector<bool>());
 
-  // virtual std::string focusingCroppedSpectrumIDs() const;
-  MOCK_CONST_METHOD0(focusingCroppedSpectrumIDs, std::string());
+  // virtual std::string focusingCroppedSpectrumNos() const;
+  MOCK_CONST_METHOD0(focusingCroppedSpectrumNos, std::string());
 
   // virtual std::string focusingTextureGroupingFile() const;
   MOCK_CONST_METHOD0(focusingTextureGroupingFile, std::string());
@@ -113,8 +116,8 @@ public:
   // virtual void resetFocus();
   MOCK_METHOD0(resetFocus, void());
 
-  // virtual std::string currentPreprocRunNo() const;
-  MOCK_CONST_METHOD0(currentPreprocRunNo, std::string());
+  // virtual std::vector<std::string> currentPreprocRunNo() const;
+  MOCK_CONST_METHOD0(currentPreprocRunNo, std::vector<std::string>());
 
   // virtual double rebinningTimeBin() const;
   MOCK_CONST_METHOD0(rebinningTimeBin, double());
@@ -125,17 +128,23 @@ public:
   // virtual double rebinningPulsesPerPeriod() const;
   MOCK_CONST_METHOD0(rebinningPulsesTime, double());
 
+  // virtual std::string fittingRunNo() const;
+  MOCK_CONST_METHOD0(fittingRunNo, std::string());
+
+  // virtual std::string fittingPeaksData() const;
+  MOCK_CONST_METHOD0(fittingPeaksData, std::string());
+
   // virtual bool focusedOutWorkspace() const;
   MOCK_CONST_METHOD0(focusedOutWorkspace, bool());
+
+  // virtual bool plotCalibWorkspace
+  MOCK_CONST_METHOD0(plotCalibWorkspace, bool());
 
   // void saveSettings() const;
   MOCK_CONST_METHOD0(saveSettings, void());
 
-  // std::string saveOutputFiles
-  MOCK_CONST_METHOD0(saveOutputFiles, bool());
-
-  // virtual void plotFocusedSpectrum();
-  MOCK_METHOD1(plotFocusedSpectrum, void(const std::string &));
+  // virtual bool saveFocusedOutputFiles
+  MOCK_CONST_METHOD0(saveFocusedOutputFiles, bool());
 
   // void plotFocusStatus();
   MOCK_METHOD0(plotFocusStatus, void());
@@ -143,11 +152,26 @@ public:
   // void plotRepChanged();
   MOCK_METHOD1(plotRepChanged, void(int idx));
 
+  // virtual void plotFocusedSpectrum();
+  MOCK_METHOD1(plotFocusedSpectrum, void(const std::string &));
+
   // virtual void plotWaterfallSpectrum
   MOCK_METHOD1(plotWaterfallSpectrum, void(const std::string &wsName));
 
   // virtual void plotReplacingWindow
-  MOCK_METHOD1(plotReplacingWindow, void(const std::string &wsName));
+  MOCK_METHOD3(plotReplacingWindow,
+               void(const std::string &wsName, const std::string &spectrum,
+                    const std::string &type));
+
+  // virtual void setDataVector
+  MOCK_METHOD2(setDataVector,
+	  void(std::vector<boost::shared_ptr<QwtData>> &data, bool focused));
+
+  // virtual void plotVanCurvesCalibOutput();
+  MOCK_METHOD0(plotVanCurvesCalibOutput, void());
+
+  // virtual void plotDifcZeroCalibOutput();
+  MOCK_METHOD1(plotDifcZeroCalibOutput, void(const std::string &pyCode));
 };
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H

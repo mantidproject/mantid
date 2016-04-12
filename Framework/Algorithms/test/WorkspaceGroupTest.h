@@ -5,11 +5,13 @@
 #include <cmath>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAlgorithms/FindDeadDetectors.h"
 #include "MantidAlgorithms/Plus.h"
+#include "MantidAlgorithms/PolynomialCorrection.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAlgorithms/FindDeadDetectors.h"
-#include "MantidAlgorithms/PolynomialCorrection.h"
+#include "MantidGeometry/Instrument.h"
+
 #include <fstream>
 #include <Poco/File.h>
 
@@ -181,7 +183,8 @@ public:
     work_in2->setInstrument(instr);
 
     // set some dead detectors
-    boost::shared_ptr<Mantid::MantidVec> yDead(new Mantid::MantidVec(nHist, 0));
+    boost::shared_ptr<Mantid::MantidVec> yDead =
+        boost::make_shared<Mantid::MantidVec>(nHist, 0);
     for (int i = 0; i < nBins; i++) {
       if (i % 2 == 0) {
         work_in1->setData(i, yDead, yDead);

@@ -40,7 +40,7 @@ void DataController::addWorkspace()
   AddWorkspaceDialog dialog(owner());
   if ( dialog.exec() == QDialog::Accepted )
   {
-    QString wsName = dialog.workspaceName().stripWhiteSpace();
+    QString wsName = dialog.workspaceName().trimmed();
     // if name is empty assume that there are no workspaces in the ADS
     if ( wsName.isEmpty() ) return;
     if ( Mantid::API::AnalysisDataService::Instance().doesExist( wsName.toStdString()) )

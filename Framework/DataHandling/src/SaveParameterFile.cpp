@@ -2,7 +2,7 @@
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
-
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -54,13 +54,14 @@ const std::string SaveParameterFile::category() const {
 /** Initialize the algorithm's properties.
  */
 void SaveParameterFile::init() {
-  declareProperty(
-      new WorkspaceProperty<>("Workspace", "", Direction::Input,
-                              boost::make_shared<InstrumentValidator>()),
-      "Workspace to save the instrument parameters from.");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "Workspace", "", Direction::Input,
+                      boost::make_shared<InstrumentValidator>()),
+                  "Workspace to save the instrument parameters from.");
 
   declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Save, {".xml"}),
+      make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save,
+                                     ".xml"),
       "The name of the file into which the instrument parameters will be "
       "saved.");
 
@@ -90,14 +91,14 @@ void SaveParameterFile::exec() {
   Progress prog(this, 0.0, 0.3, params->size());
 
   // Build a list of parameters to save;
-  for (auto paramsIt = params->begin(); paramsIt != params->end(); ++paramsIt) {
+  for (auto &paramsIt : *params) {
     if (prog.hasCancellationBeenRequested())
       break;
     prog.report("Generating parameters");
-    const ComponentID cID = (*paramsIt).first;
-    const std::string pName = (*paramsIt).second->name();
-    const std::string pType = (*paramsIt).second->type();
-    const std::string pValue = (*paramsIt).second->asString();
+    const ComponentID cID = paramsIt.first;
+    const std::string pName = paramsIt.second->name();
+    const std::string pType = paramsIt.second->type();
+    const std::string pValue = paramsIt.second->asString();
 
     if (pName == "x" || pName == "y" || pName == "z" || pName == "r-position" ||
         pName == "t-position" || pName == "p-position" || pName == "rotx" ||
@@ -140,7 +141,7 @@ void SaveParameterFile::exec() {
         // With fitting parameters we do something special (i.e. silly)
         // We create an entire XML element to be inserted into the output,
         // instead of just giving a single fixed value
-        const FitParameter &fitParam = paramsIt->second->value<FitParameter>();
+        const FitParameter &fitParam = paramsIt.second->value<FitParameter>();
         const std::string fpName =
             fitParam.getFunction() + ":" + fitParam.getName();
         std::stringstream fpValue;
@@ -163,15 +164,15 @@ void SaveParameterFile::exec() {
   file << " valid-from=\"" << instrument->getValidFromDate().toISO8601String()
        << "\">\n";
 
-  prog.resetNumSteps((int64_t)toSave.size(), 0.6, 1.0);
+  prog.resetNumSteps(static_cast<int64_t>(toSave.size()), 0.6, 1.0);
   // Iterate through all the parameters we want to save and build an XML
   // document out of them.
-  for (auto compIt = toSave.begin(); compIt != toSave.end(); ++compIt) {
+  for (const auto &comp : toSave) {
     if (prog.hasCancellationBeenRequested())
       break;
     prog.report("Saving parameters");
     // Component data
-    const ComponentID cID = compIt->first;
+    const ComponentID cID = comp.first;
     const std::string cFullName = cID->getFullName();
     const IDetector *cDet = dynamic_cast<IDetector *>(cID);
     const detid_t cDetID = (cDet) ? cDet->getID() : 0;
@@ -180,11 +181,10 @@ void SaveParameterFile::exec() {
     if (cDetID != 0)
       file << " id=\"" << cDetID << "\"";
     file << " name=\"" << cFullName << "\">\n";
-    for (auto paramIt = compIt->second.begin(); paramIt != compIt->second.end();
-         ++paramIt) {
-      const std::string pName = paramIt->get<0>();
-      const std::string pType = paramIt->get<1>();
-      const std::string pValue = paramIt->get<2>();
+    for (const auto &param : comp.second) {
+      const std::string pName = param.get<0>();
+      const std::string pType = param.get<1>();
+      const std::string pValue = param.get<2>();
 
       // With fitting parameters, we're actually inserting an entire element, as
       // constructed above

@@ -5,6 +5,8 @@
 
 #include "MantidCurveFitting/Functions/IkedaCarpenterPV.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
+#include "MantidAPI/Axis.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -19,14 +21,14 @@ public:
   }
   static void destroySuite(IkedaCarpenterPVTest *suite) { delete suite; }
 
-  void setUp() {
+  void setUp() override {
     using Mantid::Kernel::ConfigService;
     m_preSetupPeakRadius =
         ConfigService::Instance().getString("curvefitting.peakRadius");
     ConfigService::Instance().setString("curvefitting.peakRadius", "100");
   }
 
-  void tearDown() {
+  void tearDown() override {
     using Mantid::Kernel::ConfigService;
     ConfigService::Instance().setString("curvefitting.peakRadius",
                                         m_preSetupPeakRadius);
@@ -270,7 +272,7 @@ private:
     icpv.setParameter("Gamma", 0.1);
     icpv.setParameter("X0", 50.0);
 
-    auto alg = boost::shared_ptr<IAlgorithm>(new Algorithms::Fit);
+    auto alg = boost::make_shared<Algorithms::Fit>();
     alg->initialize();
     alg->setPropertyValue("Function", icpv.asString());
     // Set general Fit parameters

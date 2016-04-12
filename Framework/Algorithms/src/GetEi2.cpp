@@ -4,6 +4,7 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/muParser_Silent.h"
@@ -48,8 +49,8 @@ void GetEi2::init()
   validator->add<InstrumentValidator>();
 
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::InOut,
-                              validator),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::InOut,
+                                       validator),
       "The X units of this workspace must be time of flight with times in\n"
       "microseconds");
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
@@ -89,7 +90,7 @@ void GetEi2::init()
 
   declareProperty(
       "FirstMonitorIndex", 0,
-      "The spectrum index of the first montitor in the input workspace.",
+      "The workspace index of the first monitor in the input workspace.",
       Direction::Output);
 
   declareProperty("Tzero", 0.0, "", Direction::Output);
@@ -147,9 +148,9 @@ void GetEi2::exec() {
  *  @return The calculated incident energy
  */
 double GetEi2::calculateEi(const double initial_guess) {
-  const specid_t monitor1_spec = getProperty("Monitor1Spec");
-  const specid_t monitor2_spec = getProperty("Monitor2Spec");
-  specid_t mon1 = monitor1_spec, mon2 = monitor2_spec;
+  const specnum_t monitor1_spec = getProperty("Monitor1Spec");
+  const specnum_t monitor2_spec = getProperty("Monitor2Spec");
+  specnum_t mon1 = monitor1_spec, mon2 = monitor2_spec;
 
   const ParameterMap &pmap = m_input_ws->constInstrumentParameters();
   Instrument_const_sptr instrument = m_input_ws->getInstrument();
@@ -186,13 +187,13 @@ double GetEi2::calculateEi(const double initial_guess) {
   if (mon1 == EMPTY_INT()) {
     par = pmap.getRecursive(instrument->getChild(0).get(), "ei-mon1-spec");
     if (par) {
-      mon1 = boost::lexical_cast<specid_t>(par->asString());
+      mon1 = boost::lexical_cast<specnum_t>(par->asString());
     }
   }
   if (mon2 == EMPTY_INT()) {
     par = pmap.getRecursive(instrument->getChild(0).get(), "ei-mon2-spec");
     if (par) {
-      mon2 = boost::lexical_cast<specid_t>(par->asString());
+      mon2 = boost::lexical_cast<specnum_t>(par->asString());
     }
   }
   if ((mon1 == EMPTY_INT()) || (mon2 == EMPTY_INT())) {
@@ -200,12 +201,10 @@ double GetEi2::calculateEi(const double initial_guess) {
         "Could not determine spectrum number to use. Try to set it explicitly");
   }
   // Covert spectrum numbers to workspace indices
-  std::vector<specid_t> spec_nums(2, mon1);
+  std::vector<specnum_t> spec_nums(2, mon1);
   spec_nums[1] = mon2;
-  std::vector<size_t> mon_indices;
-  mon_indices.reserve(2);
   // get the index number of the histogram for the first monitor
-  m_input_ws->getIndicesFromSpectra(spec_nums, mon_indices);
+  auto mon_indices = m_input_ws->getIndicesFromSpectra(spec_nums);
 
   if (mon_indices.size() != 2) {
     g_log.error() << "Error retrieving monitor spectra from input workspace. "
@@ -345,7 +344,7 @@ double GetEi2::calculatePeakPosition(size_t ws_index, double t_min,
  *  @param end :: the number of the last bin to include (starts counting bins at
  * 0)
  *  @return The cropped workspace
- *  @throw out_of_range if start, end or specInd are set outside of the vaild
+ *  @throw out_of_range if start, end or ws_index are set outside of the valid
  * range for the workspace
  *  @throw runtime_error if the algorithm just falls over
  *  @throw invalid_argument if the input workspace does not have common binning
@@ -678,9 +677,10 @@ void GetEi2::integrate(double &integral_val, double &integral_err,
   MantidVec::size_type nx(x.size());
   if (mu < ml) {
     // special case of no data points in the integration range
-    unsigned int ilo = std::max<unsigned int>((unsigned int)ml - 1, 0);
-    unsigned int ihi =
-        std::min<unsigned int>((unsigned int)mu + 1, (unsigned int)nx);
+    unsigned int ilo =
+        std::max<unsigned int>(static_cast<unsigned int>(ml) - 1, 0);
+    unsigned int ihi = std::min<unsigned int>(static_cast<unsigned int>(mu) + 1,
+                                              static_cast<unsigned int>(nx));
     double fraction = (xmax - xmin) / (x[ihi] - x[ilo]);
     integral_val =
         0.5 * fraction * (s[ihi] * ((xmax - x[ilo]) + (xmin - x[ilo])) +
@@ -733,7 +733,7 @@ void GetEi2::integrate(double &integral_val, double &integral_err,
     double err_hi = e[mu] * (x[mu - 1] - xneff);
     integral_err += err_lo * err_lo + err_hi * err_hi;
   } else {
-    for (int i = (int)ml; i < mu; ++i) {
+    for (int i = static_cast<int>(ml); i < mu; ++i) {
       integral_val += (s[i + 1] + s[i]) * (x[i + 1] - x[i]);
       if (i < mu - 1) {
         double ierr = e[i + 1] * (x[i + 2] - x[i]);

@@ -46,18 +46,18 @@ const std::string BinaryOperationMD::category() const {
 /** Initialize the algorithm's properties.
  */
 void BinaryOperationMD::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>(inputPropName1(), "",
-                                                      Direction::Input),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      inputPropName1(), "", Direction::Input),
                   "An MDEventWorkspace, MDHistoWorkspace or "
                   "WorkspaceSingleValue as the left-hand side of the "
                   "operation.");
-  declareProperty(new WorkspaceProperty<IMDWorkspace>(inputPropName2(), "",
-                                                      Direction::Input),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      inputPropName2(), "", Direction::Input),
                   "An MDEventWorkspace, MDHistoWorkspace or "
                   "WorkspaceSingleValue as the right-hand side of the "
                   "operation.");
-  declareProperty(new WorkspaceProperty<IMDWorkspace>(outputPropName(), "",
-                                                      Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      outputPropName(), "", Direction::Output),
                   "Name of the output MDEventWorkspace or MDHistoWorkspace.");
   this->initExtraProperties();
 }
@@ -85,6 +85,15 @@ void BinaryOperationMD::exec() {
     Mantid::API::IMDWorkspace_sptr temp = m_lhs;
     m_lhs = m_rhs;
     m_rhs = temp;
+  }
+
+  // Do not compare conventions if one is single value
+  if (!boost::dynamic_pointer_cast<WorkspaceSingleValue>(m_rhs)) {
+    if (m_lhs->getConvention() != m_rhs->getConvention()) {
+      throw std::runtime_error(
+          "Workspaces have different conventions for Q. "
+          "Use algorithm ChangeQConvention on one workspace. ");
+    }
   }
 
   // Can't do A = 1 / B
@@ -177,6 +186,11 @@ void BinaryOperationMD::exec() {
           "Unexpected operand workspace type. Expected MDHistoWorkspace or "
           "WorkspaceSingleValue, got " +
           m_rhs->id());
+
+    // Clear any masking flags from the output workspace
+    if (m_out) {
+      m_out->clearMDMasking();
+    }
 
     // When operating on MDHistoWorkspaces, add a simple flag
     // that will be checked in BinMD to avoid binning a modified workspace

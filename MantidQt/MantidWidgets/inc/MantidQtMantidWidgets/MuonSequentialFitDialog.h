@@ -45,7 +45,7 @@ namespace MantidWidgets
 
   public:
     MuonSequentialFitDialog(MuonFitPropertyBrowser* fitPropBrowser, Algorithm_sptr loadAlg);
-    virtual ~MuonSequentialFitDialog();
+    ~MuonSequentialFitDialog() override;
 
     enum DialogState 
     {

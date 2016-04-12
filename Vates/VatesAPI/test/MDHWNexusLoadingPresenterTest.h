@@ -7,6 +7,7 @@
 #include <vtkMatrix4x4.h>
 #include <vtkPVChangeOfBasisHelper.h>
 #include <vtkDataArray.h>
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/vtkMD0DFactory.h"
 #include "MantidVatesAPI/vtkMDHistoLineFactory.h"
 #include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
@@ -161,20 +162,16 @@ public:
     auto normalizationOption = Mantid::VATES::VisualNormalization::AutoSelect;
     MDHWNexusLoadingPresenter presenter(std::move(view), filename);
     const double time = 0.0;
-    auto zeroDFactory = Mantid::Kernel::make_unique<vtkMD0DFactory>();
-    auto lineFactory = Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(
-        thresholdRange, normalizationOption);
-    auto quadFactory = Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(
-        thresholdRange, normalizationOption);
-    auto hexFactory = Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
-        thresholdRange, normalizationOption);
     auto factory = boost::make_shared<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
         thresholdRange, normalizationOption, time);
 
-    lineFactory->SetSuccessor(std::move(zeroDFactory));
-    quadFactory->SetSuccessor(std::move(lineFactory));
-    hexFactory->SetSuccessor(std::move(quadFactory));
-    factory->SetSuccessor(std::move(hexFactory));
+    factory->setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
+                              thresholdRange, normalizationOption))
+        .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(
+            thresholdRange, normalizationOption))
+        .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(
+            thresholdRange, normalizationOption))
+        .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
 
     presenter.executeLoadMetadata();
     auto product = presenter.execute(factory.get(), mockLoadingProgressAction,
@@ -182,7 +179,8 @@ public:
 
     // Set the COB
     try {
-      presenter.makeNonOrthogonal(product);
+      auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+      presenter.makeNonOrthogonal(product, std::move(workspaceProvider));
     } catch (...) {
       // Add the standard change of basis matrix and set the boundaries
       presenter.setDefaultCOBandBoundaries(product);

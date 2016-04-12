@@ -3,11 +3,15 @@
 //---------------------------------------------------
 #include "MantidDataHandling/LoadSPE.h"
 #include "MantidDataHandling/SaveSPE.h"
-#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/UnitFactory.h"
+
 #include <cstdio>
 #include <limits>
 #include <fstream>
@@ -64,11 +68,12 @@ int LoadSPE::confidence(Kernel::FileDescriptor &descriptor) const {
  * Initialise the algorithm
  */
 void LoadSPE::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".spe"),
-                  "The name of the SPE file to load.");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the output workspace");
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".spe"),
+      "The name of the SPE file to load.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the output workspace");
 }
 
 /**
@@ -108,7 +113,7 @@ void LoadSPE::exec() {
   if (comment[4] == 'Q' || comment[4] == 'q') {
     phiAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
   } else {
-    phiAxis->unit() = boost::shared_ptr<Unit>(new Units::Phi);
+    phiAxis->unit() = boost::make_shared<Units::Phi>();
   }
 
   // Read in phi grid

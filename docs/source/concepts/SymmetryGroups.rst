@@ -40,7 +40,7 @@ For a coordinate :math:`\mathbf{x}` in three dimensions, any transformation can 
     
 :math:`\mathbf{W}` is a :math:`3\times3`-matrix and for affine transformations, the determinant of the matrix is always equal to 1 or -1 (except for hexagonal coordinates, which are handled transparently in Mantid so this is not covered here).
 
-Coordinates :math:`x` are assumed to be fractional in terms of a unit cell, which defines the smallest unit of an infinite lattice that is repeated over and over. For this case, coordinates :math:`x` and :math:`x + 1`, :math:`x + 2`, :math:`-x`, :math:`-x - 1` and so forth are equivalent. That means that translation vectors can be limited to have it's elements on the interval :math:`[0, 1)` - this will be important later on.
+Coordinates :math:`x` are assumed to be fractional in terms of a unit cell, which defines the smallest unit of an infinite lattice that is repeated over and over.
 
 Of course it is also possible to transform vectors (such as reciprocal vectors :math:`\mathbf{h}` described by Miller indices h, k and l), in which case the translation does not apply and the matrix needs to be inverted and transposed:
 
@@ -219,7 +219,7 @@ In this case, it's a mirror plane perpendicular to the :math:`z`-axis:
 Symmetry groups
 ---------------
 
-In the previous section, symmetry operations and a binary operation combining them were introduced, which is finally sufficient to define symmetry groups. The most simple group possible contains only one element, the identity:
+In the previous section, symmetry operations and a binary operation combining them were introduced, which is finally sufficient to define symmetry groups. For the purpose of defining groups, it is assumed that coordinates :math:`x` and :math:`x + 1`, :math:`x + 2`, :math:`x - 1` and so forth are equivalent. That means that translation vectors are limited to have it's elements on the interval :math:`[0, 1)`. The most simple group possible contains only one element, the identity:
 
 .. math::
     G = \left\{1\right\}

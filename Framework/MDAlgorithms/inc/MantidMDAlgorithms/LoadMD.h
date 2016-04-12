@@ -41,30 +41,33 @@ namespace MDAlgorithms {
 class DLLExport LoadMD : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadMD();
-  ~LoadMD();
+  ~LoadMD() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "LoadMD"; };
+  const std::string name() const override { return "LoadMD"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load a MDEventWorkspace in .nxs format.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "MDAlgorithms\\DataHandling";
   }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
+
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string convention;
 
   /// Helper method
   template <typename MDE, size_t nd>
@@ -83,6 +86,8 @@ private:
   void loadDimensions2();
 
   void loadCoordinateSystem();
+
+  void loadQConvention();
 
   void loadVisualNormalization(
       const std::string &key,
@@ -114,6 +119,8 @@ private:
   std::vector<Mantid::Geometry::IMDDimension_sptr> m_dims;
   /// Coordinate system
   Kernel::SpecialCoordinateSystem m_coordSystem;
+  /// QConvention
+  std::string m_QConvention;
   /// load only the box structure with empty boxes but do not tload boxes events
   bool m_BoxStructureAndMethadata;
 

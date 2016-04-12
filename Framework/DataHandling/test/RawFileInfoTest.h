@@ -38,9 +38,7 @@ private:
 
     // Check the output parameters are what we expect
     std::string title = alg.getProperty("RunTitle");
-    TS_ASSERT_EQUALS(title,
-                     std::string("direct beam                                  "
-                                 "                                   "));
+    TS_ASSERT_EQUALS(title, std::string("direct beam"));
     std::string header = alg.getProperty("RunHeader");
     TS_ASSERT_EQUALS(header,
                      std::string("LOQ 48127 LOQ team & SANS Xpre direct beam   "

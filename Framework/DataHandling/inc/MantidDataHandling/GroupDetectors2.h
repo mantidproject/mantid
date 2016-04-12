@@ -110,12 +110,12 @@ namespace DataHandling {
 class DLLExport GroupDetectors2 : public API::Algorithm {
 public:
   GroupDetectors2();
-  virtual ~GroupDetectors2();
+  ~GroupDetectors2() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "GroupDetectors"; };
+  const std::string name() const override { return "GroupDetectors"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Sums spectra bin-by-bin, equivalent to grouping the data from a "
            "set of detectors.  Individual groups can be specified by passing "
            "the algorithm a list of spectrum numbers, detector IDs or "
@@ -124,12 +124,12 @@ public:
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 2; };
+  int version() const override { return 2; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Transforms\\Grouping"; }
+  const std::string category() const override { return "Transforms\\Grouping"; }
 
   /// Validate inputs
-  virtual std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   /// provides a function that expands pairs of integers separated with a hyphen
@@ -144,26 +144,28 @@ private:
     RangeHelper(){};
     /// give an enum from poco a better name here
     enum {
-      IGNORE_SPACES = Poco::StringTokenizer::TOK_TRIM ///< equal to
-      /// Poco::StringTokenizer::TOK_TRIM but
+      IGNORE_SPACES =
+          Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY ///< equal to
+      /// Mantid::Kernel::StringTokenizer::TOK_TRIM but
       /// saves some typing
     };
   };
 
   /// used to store the lists of WORKSPACE INDICES that will be grouped, the
   /// keys are not used
-  typedef std::map<specid_t, std::vector<size_t>> storage_map;
+  typedef std::map<specnum_t, std::vector<size_t>> storage_map;
 
   /// An estimate of the percentage of the algorithm runtimes that has been
   /// completed
   double m_FracCompl;
   /// stores lists of spectra indexes to group, although we never do an index
   /// search on it
-  storage_map m_GroupSpecInds;
+  storage_map m_GroupWsInds;
 
   // Implement abstract Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void execEvent();
 
   /// read in the input parameters and see what findout what will be to grouped
@@ -239,8 +241,8 @@ private:
     /// spectrum number to the this
     EMPTY_LINE = 1001 - INT_MAX, ///< when reading from the input file this
     /// value means that we found any empty line
-    IGNORE_SPACES = Poco::StringTokenizer::TOK_TRIM ///< equal to
-    /// Poco::StringTokenizer::TOK_TRIM but
+    IGNORE_SPACES = Mantid::Kernel::StringTokenizer::TOK_TRIM ///< equal to
+    /// Mantid::Kernel::StringTokenizer::TOK_TRIM but
     /// saves some typing
   };
 

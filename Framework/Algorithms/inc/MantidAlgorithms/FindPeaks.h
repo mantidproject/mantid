@@ -10,6 +10,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -63,30 +64,30 @@ public:
   /// Constructor
   FindPeaks();
   /// Virtual destructor
-  virtual ~FindPeaks() {
+  ~FindPeaks() override {
     if (m_progress)
       delete m_progress;
-    m_progress = NULL;
+    m_progress = nullptr;
   }
   /// Algorithm's name
-  virtual const std::string name() const { return "FindPeaks"; }
+  const std::string name() const override { return "FindPeaks"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Searches for peaks in a dataset.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Optimization\\PeakFinding";
   }
   /// needed by FindPeaksBackground
   int getVectorIndex(const MantidVec &vecX, double x);
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// Process algorithm's properties
   void processAlgorithmProperties();
@@ -109,7 +110,7 @@ private:
 
   /// Fit peak confined in a given window (x-min, x-max)
   void fitPeakInWindow(const API::MatrixWorkspace_sptr &input,
-                       const int spectrum, const double centre,
+                       const int spectrum, const double centre_guess,
                        const double xmin, const double xmax);
 
   /// Fit peak by given/guessed FWHM
@@ -162,7 +163,7 @@ private:
   void estimatePeakRange(const MantidVec &vecX, size_t i_centre, size_t i_min,
                          size_t i_max, const double &leftfwhm,
                          const double &rightfwhm,
-                         std::vector<double> &vecpeakrang);
+                         std::vector<double> &vecpeakrange);
 
   /// Estimate peak parameters
   std::string estimatePeakParameters(
@@ -181,8 +182,8 @@ private:
                      const API::IPeakFunction_sptr peakfunction,
                      const API::IBackgroundFunction_sptr backgroundfunction,
                      const std::vector<double> &vec_fitwindow,
-                     const std::vector<double> &vec_peakrange,
-                     int minGuessedFWHM, int maxGuessFWHM, int guessedFWHMStep,
+                     const std::vector<double> &vec_peakrange, int minGuessFWHM,
+                     int maxGuessFWHM, int guessedFWHMStep,
                      int estBackResult = 0);
 
   std::vector<std::string> m_peakParameterNames;
