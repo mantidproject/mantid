@@ -12,6 +12,7 @@ using Mantid::Kernel::VectorOf;
 class ConstIterableTester : public VectorOf<ConstIterableTester>,
                             public ConstIterable<ConstIterableTester> {
   using VectorOf<ConstIterableTester>::VectorOf;
+  using VectorOf<ConstIterableTester>::operator=;
 };
 
 class HistogramConstIterableTest : public CxxTest::TestSuite {
@@ -31,13 +32,14 @@ public:
   }
 
   void test_cbegin() {
-    TS_ASSERT_THROWS_NOTHING(cbegin(ConstIterableTester{}));
+    ConstIterableTester test{};
+    TS_ASSERT_THROWS_NOTHING(cbegin(ConstIterableTester(0)));
     TS_ASSERT_THROWS_NOTHING(cbegin(ConstIterableTester{2}));
     TS_ASSERT_THROWS_NOTHING(cbegin(ConstIterableTester{2, 0.1}));
   }
 
   void test_cend() {
-    TS_ASSERT_THROWS_NOTHING(cend(ConstIterableTester{}));
+    TS_ASSERT_THROWS_NOTHING(cend(ConstIterableTester(0)));
     TS_ASSERT_THROWS_NOTHING(cend(ConstIterableTester{2}));
     TS_ASSERT_THROWS_NOTHING(cend(ConstIterableTester{2, 0.1}));
   }
