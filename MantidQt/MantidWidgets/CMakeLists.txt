@@ -76,7 +76,7 @@ set ( SRC_FILES
 	src/MessageDisplay.cpp
 	src/MultifitSetupDialog.cpp
 	src/MuonFitDataPresenter.cpp
-	src/MuonFitDataSelector.cpp
+	src/MuonFitDataView.cpp
 	src/MuonFitPropertyBrowser.cpp
 	src/MuonSequentialFitDialog.cpp
 	src/PeakPicker.cpp
@@ -129,7 +129,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/MantidHelpWindow.h
     inc/MantidQtMantidWidgets/MessageDisplay.h
     inc/MantidQtMantidWidgets/MultifitSetupDialog.h
-    inc/MantidQtMantidWidgets/MuonFitDataSelector.h
+    inc/MantidQtMantidWidgets/MuonFitDataView.h
     inc/MantidQtMantidWidgets/MuonFitPropertyBrowser.h
     inc/MantidQtMantidWidgets/MuonSequentialFitDialog.h
     inc/MantidQtMantidWidgets/MWDiag.h
@@ -235,8 +235,9 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h
 	inc/MantidQtMantidWidgets/InstrumentView/Viewport.h
 	inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
-	inc/MantidQtMantidWidgets/MuonFitDataModel.h
-	inc/MantidQtMantidWidgets/MuonFitDataSelector.h
+	inc/MantidQtMantidWidgets/IMuonFitDataView.h
+	inc/MantidQtMantidWidgets/MuonFitDataPresenter.h
+	inc/MantidQtMantidWidgets/MuonFitDataView.h
 	inc/MantidQtMantidWidgets/WidgetDllOption.h
 )
 
@@ -252,7 +253,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/MWRunFiles.ui
     inc/MantidQtMantidWidgets/MWView.ui
     inc/MantidQtMantidWidgets/MultifitSetupDialog.ui
-    inc/MantidQtMantidWidgets/MuonFitDataSelector.ui
+    inc/MantidQtMantidWidgets/MuonFitDataView.ui
     inc/MantidQtMantidWidgets/MuonSequentialFitDialog.ui
     inc/MantidQtMantidWidgets/ProcessingAlgoWidget.ui
     inc/MantidQtMantidWidgets/RenameParDialog.ui

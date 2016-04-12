@@ -2,11 +2,13 @@
 #define MANTID_MANTIDWIDGETS_MUONFITDATAPRESENTER_H_
 
 #include "WidgetDllOption.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidQtMantidWidgets/IMuonFitDataView.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
 
-/** MuonFitDataPresenter : TODO: DESCRIPTION
+/** MuonFitDataPresenter : Select runs, periods, groups to fit
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -29,8 +31,22 @@ namespace MantidWidgets {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonFitDataPresenter {
-public:};
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonFitDataPresenter
+    {
+public:
+  /// constructor
+  explicit MuonFitDataPresenter(IMuonFitDataView *view);
+  void setAvailableGroups(const QStringList &groupNames);
+  QStringList getChosenGroups() const;
+  void setNumPeriods(size_t numPeriods);
+  QStringList getChosenPeriods() const;
+
+private:
+  /// Pointer to view
+  IMuonFitDataView *m_view;
+  /// Number of periods
+  size_t m_numPeriods;
+};
 
 } // namespace MantidWidgets
 } // namespace MantidQt
