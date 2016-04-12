@@ -56,7 +56,7 @@ struct EFixedProvider {
       return m_value;
     else
       return m_expt.getEFixed(det);
-    }
+  }
 
 private:
   const ExperimentInfo &m_expt;

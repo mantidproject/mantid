@@ -84,7 +84,7 @@ private:
   void exec() override;
 
   /// Do the simulation for the given detector position and wavelength
-  void doSimulation(const Kernel::V3D & detPos, const double lambdaIn,
+  void doSimulation(const Kernel::V3D &detPos, const double lambdaIn,
                     const double lambdaOut, double &attenFactor, double &error);
   /// Randomly select the location initial point within the beam from a square
   /// distribution
@@ -94,10 +94,8 @@ private:
   /// Calculate the attenuation factor for the given single scatter setup
   bool attenuationFactor(const Kernel::V3D &startPos,
                          const Kernel::V3D &scatterPoint,
-                         const Kernel::V3D &finalPos,
-                         const double lamdaIn,
-                         const double lambdaOut,
-                         double &factor);
+                         const Kernel::V3D &finalPos, const double lamdaIn,
+                         const double lambdaOut, double &factor);
   /// Calculate the attenuation for a given length, material and wavelength
   double attenuation(const double length, const Kernel::Material &material,
                      const double lambda) const;
