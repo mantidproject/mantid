@@ -72,9 +72,5 @@ void ConvertToPointData::calculateXPoints(const MantidVec &inputX,
                                           MantidVec &outputX) const {
   Kernel::VectorHelper::convertToBinCentre(inputX, outputX);
 }
-
-Kernel::Histogram::XMode ConvertToPointData::getNewXMode() const {
-  return Kernel::Histogram::XMode::Points;
-}
 }
 }
