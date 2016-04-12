@@ -19,8 +19,10 @@ public:
   //---------------------------------------------------------------------------
   // Success cases
   //---------------------------------------------------------------------------
-  void test_Workspace_With_Just_Sample() {
-    TestWorkspaceDescriptor wsProps = {5, 10, Environment::SampleOnly};
+  void test_Workspace_With_Just_Sample_For_Elastic() {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {5, 10, Environment::SampleOnly,
+                                       DeltaEMode::Elastic};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
@@ -37,8 +39,38 @@ public:
     TS_ASSERT_DELTA(outputWS->readY(4).back(), 0.000019473169, delta);
   }
 
+  void test_Workspace_With_Just_Sample_For_Direct() {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
+                                       DeltaEMode::Direct};
+    auto outputWS = runAlgorithm(wsProps);
+
+    verifyDimensions(wsProps, outputWS);
+    const double delta(1e-08);
+    const size_t middle_index(4);
+    TS_ASSERT_DELTA(outputWS->readY(0).front(), 0.00259928, delta);
+    TS_ASSERT_DELTA(outputWS->readY(0)[middle_index], 0.00023240, delta);
+    TS_ASSERT_DELTA(outputWS->readY(0).back(), 0.00010952, delta);
+  }
+
+  void test_Workspace_With_Just_Sample_For_Indirect() {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
+                                       DeltaEMode::Indirect};
+    auto outputWS = runAlgorithm(wsProps);
+
+    verifyDimensions(wsProps, outputWS);
+    const double delta(1e-08);
+    const size_t middle_index(4);
+    TS_ASSERT_DELTA(outputWS->readY(0).front(), 0.00067034, delta);
+    TS_ASSERT_DELTA(outputWS->readY(0)[middle_index], 3.877336011e-05, delta);
+    TS_ASSERT_DELTA(outputWS->readY(0).back(), 6.604792751e-06, delta);
+  }
+
   void test_Workspace_With_Sample_And_Container() {
-    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SamplePlusCan};
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SamplePlusCan,
+                                       DeltaEMode::Elastic};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
@@ -83,6 +115,7 @@ private:
     int nspectra;
     int nbins;
     Environment environ;
+    Mantid::Kernel::DeltaEMode::Type emode;
   };
 
   Mantid::API::MatrixWorkspace_const_sptr
@@ -106,7 +139,18 @@ private:
         wsProps.nspectra, wsProps.nbins);
     // Needs to have units of wavelength
     space->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+    auto inst = space->getInstrument();
+    auto &pmap = space->instrumentParameters();
 
+    if (wsProps.emode == DeltaEMode::Direct) {
+      pmap.addString(inst.get(), "deltaE-mode", "Direct");
+      const double efixed(12.0);
+      space->mutableRun().addProperty<double>("Ei", efixed);
+    } else if (wsProps.emode == DeltaEMode::Indirect) {
+      const double efixed(1.845);
+      pmap.addString(inst.get(), "deltaE-mode", "Indirect");
+      pmap.addDouble(inst.get(), "Efixed", efixed);
+    }
     // Define a sample shape
     Object_sptr sampleShape =
         ComponentCreationHelper::createSphere(0.1, V3D(), "sample-sphere");
