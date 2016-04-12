@@ -2787,6 +2787,11 @@ p, li { white-space: pre-wrap; }
                  <widget class="QComboBox" name="comboBox_ptCountNormType">
                   <item>
                    <property name="text">
+                    <string/>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
                     <string>Monitor Counts</string>
                    </property>
                   </item>

@@ -14,7 +14,7 @@ import random
 import numpy
 
 from fourcircle_utility import *
-from peakinfo import PeakInfo
+from peakprocesshelper import PeakProcessHelper
 
 import mantid
 import mantid.simpleapi as api
@@ -144,6 +144,48 @@ class CWSCDReductionControl(object):
 
         return
 
+    def calculate_peak_center(self, exp_number, scan_number, pt_numbers=None):
+        """
+
+        :param exp_number:
+        :param scan_number:
+        :param pt_numbers:
+        :return: 3-tuple
+        """
+        # TODO/NOW - Doc and check
+        # Check & set pt. numbers
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+        if pt_numbers is None:
+            status, pt_number_list = self.get_pt_numbers(exp_number, scan_number)
+            assert status
+        else:
+            pt_number_list = pt_numbers
+        assert isinstance(pt_number_list, list) and len(pt_number_list) > 0
+
+        # Check whether the MDEventWorkspace used to find peaks exists
+        if self.has_merged_data(exp_number, scan_number, pt_number_list):
+            pass
+        else:
+            raise RuntimeError('Data must be merged before')
+
+        # Find peak in Q-space
+        merged_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_number_list)
+        peak_ws_name = get_peak_ws_name(exp_number, scan_number, pt_number_list)
+        api.FindPeaksMD(InputWorkspace=merged_ws_name,
+                        MaxPeaks=10,
+                        PeakDistanceThreshold=5.,
+                        DensityThresholdFactor=0.1,
+                        OutputWorkspace=peak_ws_name)
+        assert AnalysisDataService.doesExist(peak_ws_name)
+
+        # calculate the peaks with weight
+        helper = PeakProcessHelper(exp_number, scan_number, peak_ws_name)
+        helper.calculate_peak_center()
+        peak_center = helper.get_peak_centre()
+
+        return True, peak_center
+
     def calculate_ub_matrix(self, peak_info_list, a, b, c, alpha, beta, gamma):
         """
         Calculate UB matrix
@@ -164,9 +206,9 @@ class CWSCDReductionControl(object):
         if num_peak_info < 2:
             return False, 'Too few peaks are input to calculate UB matrix.  Must be >= 2.'
         for peak_info in peak_info_list:
-            if isinstance(peak_info, PeakInfo) is False:
+            if isinstance(peak_info, PeakProcessHelper) is False:
                 raise NotImplementedError('Input PeakList is of type %s.' % str(type(peak_info_list[0])))
-            assert isinstance(peak_info, PeakInfo)
+            assert isinstance(peak_info, PeakProcessHelper)
 
         # Construct a new peak workspace by combining all single peak
         ub_peak_ws_name = 'Temp_UB_Peak'
@@ -798,59 +840,16 @@ class CWSCDReductionControl(object):
 
         return True, (hkl, error)
 
-    def integrate_peak(self, exp_num, scan_num, pt_num, peak_center, peak_radius):
-        """
-        Integrate a peak from an individual pt number and with a given peak centre in Q
-        :param exp_num:
-        :param scan_num:
-        :param pt_num:
-        :param peak_center:
-        :param peak_radius:
-        :return: 3-tuple as peak workspace name, intensity and counts
-        """
-        raise NotImplementedError('I am not supposed to use but integrate_peak_scan instead')
-
-        # Check
-        assert isinstance(exp_num, int) and isinstance(scan_num, int) and isinstance(pt_num, int)
-
-        # Merge
-        merged_ws_name = get_merged_md_name(self._instrumentName, exp_num, scan_num, [pt_num])
-        if AnalysisDataService.doesExist(merged_ws_name) is False:
-            self.merge_pts_in_scan(exp_num, scan_num, [pt_num], 'q-sample')
-        assert AnalysisDataService.doesExist(merged_ws_name)
-
-        # Build peak workspace
-        peak_ws_name = get_peak_ws_name(exp_num, scan_num, [pt_num])
-        peak_info = PeakInfo(exp_num, scan_num, peak_ws_name)
-        zero_hkl = True
-        hkl_to_int = False
-        self._build_peaks_workspace([peak_info], peak_ws_name, zero_hkl, hkl_to_int)
-        assert AnalysisDataService.doesExist(peak_ws_name)
-
-        # Integrate by rewriting the temporary input peak workspace
-        api.IntegratePeaksCWSD(InputWorkspace=merged_ws_name,
-                               PeaksWorkspace=peak_ws_name,
-                               OutputWorkspace=peak_ws_name,
-                               PeakCentre=peak_center,
-                               PeakRadius=peak_radius,
-                               MergePeaks=False)
-
-        # Get integrated value
-        peak_ws = AnalysisDataService.retrieve(peak_ws_name)
-        intensity = peak_ws.getPeak(0).getIntensity()
-        counts = peak_ws.getPeak(0).getBinCounts()
-
-        return peak_ws_name, intensity, counts
-
     def integrate_scan_peaks(self, exp, scan, peak_radius, peak_centre,
-                             merge=True, mask=False):
+                             merge_peaks=True, use_mask=False,
+                             normalization=''):
         """
         Integrate peaks in a merged scan
         Requirements:
         :param exp:
         :param scan:
         :param peak_centre: a float radius or None for not using
-        :param merge: If selected, merged all the Pts can return 1 integrated peak's value;
+        :param merge_peaks: If selected, merged all the Pts can return 1 integrated peak's value;
                       otherwise, integrate peak for each Pt.
         :return:
         """
@@ -859,7 +858,7 @@ class CWSCDReductionControl(object):
         assert isinstance(scan, int)
         assert isinstance(peak_radius, float) or peak_radius is None
         assert len(peak_centre) == 3
-        assert isinstance(merge, bool)
+        assert isinstance(merge_peaks, bool)
 
         # FIXME - combine the download and naming for common use
         # get spice file
@@ -877,25 +876,45 @@ class CWSCDReductionControl(object):
                                           peak_centre[2])
 
         # mask workspace
-        if mask:
+        if use_mask:
             mask_ws_name = get_mask_ws_name(exp, scan)
             assert AnalysisDataService.doesExist(mask_ws_name), 'MaskWorkspace does not exist'
 
-            integrated_peak_ws_name = get_integrated_peak_ws_name(exp, scan, pt_list, mask)
+            integrated_peak_ws_name = get_integrated_peak_ws_name(exp, scan, pt_list, use_mask)
         else:
             mask_ws_name = ''
             integrated_peak_ws_name = get_integrated_peak_ws_name(exp, scan, pt_list)
+
+        # normalization
+        norm_by_mon = False
+        norm_by_time = False
+        if normalization == 'time':
+            norm_by_time = True
+        elif normalization == 'monitor':
+            norm_by_mon = True
 
         api.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
                                OutputWorkspace=integrated_peak_ws_name,
                                PeakRadius=peak_radius,
                                PeakCentre=peak_centre_str,
-                               MergePeaks=merge,
-                               NormalizeByMonitor=True,
-                               NormalizeByTime=False,
-                               MaskWorkspace=mask_ws_name)
+                               MergePeaks=merge_peaks,
+                               NormalizeByMonitor=norm_by_mon,
+                               NormalizeByTime=norm_by_time,
+                               MaskWorkspace=mask_ws_name,
+                               ScaleFactor=1)
 
-        return
+        # process the output workspace
+        pt_dict = dict()
+        out_peak_ws = AnalysisDataService.retrieve(integrated_peak_ws_name)
+        num_peaks = out_peak_ws.rowCount()
+        print '[DB....BAT] There are %d peaks to export!' % num_peaks
+        for i_peak in xrange(num_peaks):
+            peak_i = out_peak_ws.getPeak(i_peak)
+            run_number_i = peak_i.getRunNumber() % 1000
+            intensity_i = peak_i.getIntensity()
+            pt_dict[run_number_i] = intensity_i
+
+        return True, pt_dict
 
     def integrate_peaks_q(self, exp_no, scan_no):
         """
@@ -1662,7 +1681,7 @@ class CWSCDReductionControl(object):
         assert isinstance(md_ws_name, str)
 
         # create a PeakInfo instance if it does not exist
-        peak_info = PeakInfo(exp_number, scan_number, peak_ws_name)
+        peak_info = PeakProcessHelper(exp_number, scan_number, peak_ws_name)
         self._myPeakInfoDict[(exp_number, scan_number)] = peak_info
 
         # set the other information

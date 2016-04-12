@@ -250,6 +250,16 @@ void IntegratePeaksCWSD::simplePeakIntegration(
   // signal_t total_signal = 0;
   double min_distance = 10000000;
   double max_distance = -1;
+
+  /*
+  signal_t total_signal = 0.;
+  signal_t total_unmasked_signal = 0;
+  size_t num_masked_det = 0;
+  size_t num_unmasked_det = 0;
+  size_t num_det = 0;
+  int testrunnumber = 13;
+  */
+
   while (scancell) {
     // Go through all the MDEvents in one cell.
     size_t numeventincell = mditer->getNumEvents();
@@ -260,6 +270,17 @@ void IntegratePeaksCWSD::simplePeakIntegration(
       if (signal <= THRESHOLD_SIGNAL)
         continue;
 
+      uint16_t run_number = mditer->getInnerRunIndex(iev);
+      int run_number_i = static_cast<int>(run_number);
+
+      /* debug: record raw signals
+      if (run_number_i % 1000 == testrunnumber)
+      {
+        total_signal += signal;
+        ++ num_det;
+      }
+      // ... debug */
+
       // Check whether this detector is masked
       if (vecMaskedDetID.size() > 0) {
         detid_t detid = mditer->getInnerDetectorID(iev);
@@ -269,13 +290,25 @@ void IntegratePeaksCWSD::simplePeakIntegration(
         if (it != vecMaskedDetID.end()) {
           // The detector ID is found among masked detector IDs
           // Skip this event and move to next
+
+          /* debug: record masked detectors
+          if (run_number_i % 1000 == testrunnumber)
+          {
+            num_masked_det += 1;
+            g_log.warning() << "Masked detector ID = " << detid << ", Signal = " << signal << "\n";
+          }
+          // ... debug */
+
           continue;
         }
       }
 
+      /* debug: record unmasked detectors
+      if (run_number_i % 1000 == testrunnumber)
+        num_unmasked_det += 1;
+      // ... debug */
+
       // Check whether to update monitor counts and peak center
-      uint16_t run_number = mditer->getInnerRunIndex(iev);
-      int run_number_i = static_cast<int>(run_number);
       if (current_run_number != run_number_i) {
         // update run number
         current_run_number = run_number_i;
@@ -309,6 +342,14 @@ void IntegratePeaksCWSD::simplePeakIntegration(
       float tempz = mditer->getInnerPosition(iev, 2);
       Kernel::V3D pixel_pos(tempx, tempy, tempz);
       double distance = current_peak_center.distance(pixel_pos);
+
+      /* debug: record unmasked signal
+      if (run_number_i % 1000 == testrunnumber)
+      {
+        total_unmasked_signal += signal;
+      }
+      // ... debug */
+
       if (distance < m_peakRadius) {
         // FIXME - Is it very costly to use map each time???
         // total_signal += signal/current_monitor_counts;
@@ -342,6 +383,14 @@ void IntegratePeaksCWSD::simplePeakIntegration(
   g_log.notice() << "Distance range is " << min_distance << ", " << max_distance
                  << "\n";
 
+  /*
+  g_log.warning() << "Debug output: run 13: Number masked detectors = " << num_masked_det
+                  << ", Total signal = " << total_signal << "\n";
+  g_log.warning() << "  Number of unmasked detectors = " << num_unmasked_det
+                  << ", Total unmasked signal = " << total_unmasked_signal << "\n";
+  g_log.warning() << "  Number of total detectors = " << num_det << "\n";
+  */
+
   return;
 }
 
@@ -360,7 +409,9 @@ std::vector<detid_t> IntegratePeaksCWSD::processMaskWorkspace(
   size_t numspec = maskws->getNumberHistograms();
   for (size_t iws = 0; iws < numspec; ++iws) {
     Geometry::IDetector_const_sptr detector = maskws->getDetector(iws);
-    if (detector->isMasked()) {
+    const MantidVec & vecY = maskws->readY(iws);
+    if (vecY[0] > 0.1) {
+      // vecY[] > 0 is masked.  det->isMasked() may not be reliable.
       detid_t detid = detector->getID();
       vecMaskedDetID.push_back(detid);
     }
@@ -369,6 +420,8 @@ std::vector<detid_t> IntegratePeaksCWSD::processMaskWorkspace(
   // Sort the vector for future lookup
   if (vecMaskedDetID.size() > 1)
     std::sort(vecMaskedDetID.begin(), vecMaskedDetID.end());
+
+  g_log.warning() << "[DB] There are " << vecMaskedDetID.size() << " detectors masked." << "\n";
 
   return vecMaskedDetID;
 }

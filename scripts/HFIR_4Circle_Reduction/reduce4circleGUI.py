@@ -24,7 +24,7 @@ else:
 
 import reduce4circleControl as r4c
 import guiutility as gutil
-from peakinfo import PeakInfo
+from peakprocesshelper import PeakProcessHelper
 import fourcircle_utility as fcutil
 import plot3dwindow
 
@@ -177,6 +177,7 @@ class MainWindow(QtGui.QMainWindow):
         # Tab 'Integrate Peaks'
         self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
                      self.do_integrate_per_pt)
+        # FIXME/TODO/NOW : it makes the same call to method do_integrate_peaks!
         self.connect(self.ui.pushButton_integratePeak, QtCore.SIGNAL('clicked()'),
                      self.do_integrate_peaks)
         self.connect(self.ui.comboBox_ptCountType, QtCore.SIGNAL('currentIndexChanged(int)'),
@@ -291,7 +292,7 @@ class MainWindow(QtGui.QMainWindow):
                 peak_info = self._myControl.get_peak_info(exp_number, scan_num, pt_num)
             except AssertionError as ass_err:
                 raise RuntimeError('Unable to retrieve PeakInfo due to %s.' % str(ass_err))
-            assert isinstance(peak_info, r4c.PeakInfo)
+            assert isinstance(peak_info, r4c.PeakProcessHelper)
             peak_info_list.append(peak_info)
         # END-FOR
 
@@ -401,7 +402,7 @@ class MainWindow(QtGui.QMainWindow):
 
             # get PeakInfo
             peak_info = self._myControl.get_peak_info(exp_number, scan_number)
-            assert isinstance(peak_info, r4c.PeakInfo)
+            assert isinstance(peak_info, r4c.PeakProcessHelper)
 
             # retrieve and set HKL from spice table
             peak_info.retrieve_hkl_from_spice_table()
@@ -488,7 +489,7 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(str(ass_err))
             return
 
-        assert isinstance(peak_info_obj, r4c.PeakInfo)
+        assert isinstance(peak_info_obj, r4c.PeakProcessHelper)
         if self.ui.checkBox_roundHKLInt.isChecked():
             h = math.copysign(1, h)*int(abs(h)+0.5)
             k = math.copysign(1, k)*int(abs(k)+0.5)
@@ -638,7 +639,7 @@ class MainWindow(QtGui.QMainWindow):
                 if pt_num < 0:
                     pt_num = None
                 peak_info = self._myControl.get_peak_info(exp_number, scan_num, pt_num)
-                assert isinstance(peak_info, r4c.PeakInfo)
+                assert isinstance(peak_info, r4c.PeakProcessHelper)
                 peak_info_list.append(peak_info)
         # END-FOR
 
@@ -950,22 +951,54 @@ class MainWindow(QtGui.QMainWindow):
         else:
             exp_number, scan_number = ret_obj
 
-        if self.ui.checkBox_applyMask.isChecked():
-            self._integrate_masked_pt(exp_number, scan_number)
+        # mask workspace?
+        mask_dets = self.ui.checkBox_applyMask.isChecked()
+
+        normalization = str(self.ui.comboBox_ptCountNormType.currentText())
+        if normalization.lower().count('time') > 0:
+            norm_type = 'time'
+        elif normalization.lower().count('monitor') > 0:
+            norm_type = 'monitor'
         else:
-            self._integrate_per_pt(exp_number, scan_number)
+            norm_type = ''
+
+        # get peak center (weighted)
+        status, ret_obj = self._myControl.calculate_peak_center(exp_number, scan_number)
+        if status is False:
+            error_message = ret_obj
+            self.pop_one_button_dialog(error_message)
+            return
+        else:
+            this_peak_centre = ret_obj
+
+        # get masked workspace
+        status, ret_obj = self._myControl.integrate_scan_peaks(exp=exp_number,
+                                                               scan=scan_number,
+                                                               peak_radius=1.0,
+                                                               peak_centre=this_peak_centre,
+                                                               merge_peaks=False,
+                                                               use_mask=mask_dets,
+                                                               normalization=norm_type)
+
+        # result due to error
+        if status is False:
+            error_message = ret_obj
+            self.pop_one_button_dialog(error_message)
+            return
+
+        # process result
+        pt_dict = ret_obj
+        assert isinstance(pt_dict, dict)
+
+        print pt_dict
+
+        # TODO/FIXME/NOW: there must be something wrong here!
+        pt_list = sorted(pt_dict.keys())
+        for pt in pt_list:
+            pt_intensity = pt_dict[pt]
+            self.ui.tableWidget_peakIntegration.append_pt(pt, -1, pt_intensity)
 
         return
-
-    def _integrate_masked_pt(self, exp_number, scan_number):
-        """
-
-        :param exp_number:
-        :param scan_number:
-        :return:
-        """
-        # TODO/NOW - Continue!
-        # ... ...
 
     def _integrate_per_pt(self, exp_number, scan_number):
         """
@@ -1006,7 +1039,7 @@ class MainWindow(QtGui.QMainWindow):
         # call myController to integrate on each individual Pt.
         self._myControl.integrate_scan_peaks(exp_number, scan_number, peak_radius,
                                              peak_centre=weighted_peak_center,
-                                             merge=False)
+                                             merge_peaks=False)
 
         # plot all the result to the table
         vec_x, vec_y = self._myControl.get_peaks_integrated_intensities(exp_number, scan_number, None)
@@ -1028,6 +1061,8 @@ class MainWindow(QtGui.QMainWindow):
         Integrate peaks
         :return:
         """
+        raise NotImplementedError('Unfinished!')
+
         # get rows to merge
         row_number_list = self.ui.tableWidget_mergeScans.get_selected_rows(True)
         if len(row_number_list) == 0:
@@ -2202,7 +2237,7 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # Check requirements
-        assert isinstance(peak_info, r4c.PeakInfo)
+        assert isinstance(peak_info, r4c.PeakProcessHelper)
 
         # Get data
         exp_number, scan_number = peak_info.get_experiment_info()
