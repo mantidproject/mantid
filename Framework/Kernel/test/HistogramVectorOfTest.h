@@ -27,7 +27,7 @@ public:
   static void destroySuite(HistogramVectorOfTest *suite) { delete suite; }
 
   void test_empty_constructor() {
-    const VectorOfTester values;
+    const VectorOfTester values{};
     TS_ASSERT(!values);
   }
 
