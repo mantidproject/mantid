@@ -63,7 +63,6 @@ private:
   /// Calculate the X point values. Implement in an inheriting class.
   void calculateXPoints(const MantidVec &inputX,
                         MantidVec &outputX) const override;
-  Kernel::Histogram::XMode getNewXMode() const override;
 };
 
 } // namespace Algorithm
