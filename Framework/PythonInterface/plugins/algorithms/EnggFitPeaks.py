@@ -22,13 +22,13 @@ class EnggFitPeaks(PythonAlgorithm):
                 "by fitting one peak at a time (single peak fits).")
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),\
-                             "Workspace to fit peaks in. ToF is expected X unit.")
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
+                             "Workspace to fit peaks in. The X units must be time of flight (TOF).")
 
-        self.declareProperty("WorkspaceIndex", 0,\
+        self.declareProperty("WorkspaceIndex", 0,
                              "Index of the spectra to fit peaks in")
 
-        self.declareProperty(FloatArrayProperty("ExpectedPeaks", (self._get_default_peaks())),\
+        self.declareProperty(FloatArrayProperty("ExpectedPeaks", (self._get_default_peaks())),
                              "A list of dSpacing values to be translated into TOF to find expected peaks.")
 
         self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",
