@@ -656,37 +656,35 @@ void EnggDiffractionPresenter::runFittingAlgs(
 
       // if the first peak
       if (i == size_t(0)) {
-        auto renameWs =
-            Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-                "RenameWorkspace");
-        g_log.notice() << "EvaluateFunction algorithm has started" << std::endl;
-        try {
-          renameWs->initialize();
 
-          renameWs->setProperty("InputWorkspace",
-                                "engggui_fitting_single_peaks0");
-          renameWs->setProperty("OutputWorkspace", single_peak_out_WS);
-          renameWs->execute();
-        } catch (std::runtime_error &re) {
-          g_log.error() << "Could not run the algorithm EvaluateFunction, "
-                           "Error description: " +
-                               static_cast<std::string>(re.what())
-                        << std::endl;
-        }
+		  /// shahroz
+		  // create a workspace clone of bank focus file
+		  // this will import all information of the previous file
+		  runCloneWorkspaceAlg(FocusedWSName, single_peak_out_WS);
+
+		  auto currentPeakWS = ADS.retrieveWS<MatrixWorkspace>(current_peak_out_WS);
+		  auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(single_peak_out_WS);
+
+		  singlePeaksWS->setX(i, currentPeakWS->readX(0));
+		  singlePeaksWS->getSpectrum(i)->setData(currentPeakWS->readY(0), currentPeakWS->readE(0));
+
+		  
       } else {
-        // append all peaks in to single workspace & remove
-        runAppendSpectraAlg(single_peak_out_WS, current_peak_out_WS);
-        ADS.remove(current_peak_out_WS);
+
+
+		  runCloneWorkspaceAlg(FocusedWSName, single_peak_out_WS);
+
+		  auto currentPeakWS = ADS.retrieveWS<MatrixWorkspace>(current_peak_out_WS);
+		  auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(single_peak_out_WS);
+
+		  singlePeaksWS->setX(i, currentPeakWS->readX(0));
+		  singlePeaksWS->getSpectrum(i)->setData(currentPeakWS->readY(0), currentPeakWS->readE(0));
+		
+		  // append all peaks in to single workspace & remove
+		//runAppendSpectraAlg(single_peak_out_WS, current_peak_out_WS);
+       // ADS.remove(current_peak_out_WS);
       }
     }
-
-    // set the default instrument for single peak fitting workspace
-    AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-    auto focusedPeaksWS = ADS.retrieveWS<MatrixWorkspace>(FocusedWSName);
-    auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(single_peak_out_WS);
-
-	auto instrument = focusedPeaksWS->getInstrument();
-	singlePeaksWS->setInstrument(instrument);
 
     // convert units for both workspaces to dSpacing from ToF
    // runConvetUnitsAlg(single_peak_out_WS);
@@ -774,6 +772,7 @@ void EnggDiffractionPresenter::runAppendSpectraAlg(std::string workspace1Name,
     appendSpec->initialize();
     appendSpec->setProperty("InputWorkspace1", workspace1Name);
     appendSpec->setProperty("InputWorkspace2", workspace2Name);
+	//appendSpec->setProperty("ValidateInputs", false);
     appendSpec->setProperty("OutputWorkspace", workspace1Name);
     appendSpec->execute();
   } catch (std::runtime_error &re) {
@@ -822,7 +821,7 @@ void EnggDiffractionPresenter::runConvetUnitsAlg(std::string workspaceName) {
   }
 }
 
-void runCloneWorkspaceAlg(std::string inputWorkspace,
+void EnggDiffractionPresenter::runCloneWorkspaceAlg(std::string inputWorkspace,
                           std::string outputWorkspace) {
 
   auto cloneWorkspace =
@@ -832,6 +831,7 @@ void runCloneWorkspaceAlg(std::string inputWorkspace,
     cloneWorkspace->initialize();
     cloneWorkspace->setProperty("InputWorkspace", inputWorkspace);
     cloneWorkspace->setProperty("OutputWorkspace", outputWorkspace);
+	cloneWorkspace->execute();
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm CreateWorkspace, "
                      "Error description: " +
