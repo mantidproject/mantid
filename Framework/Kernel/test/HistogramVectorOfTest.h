@@ -110,13 +110,13 @@ public:
     TS_ASSERT_EQUALS(values[2], 0.3);
   }
 
-  test_vector_assignment() {
-    std::vector<double> raw { 0.1, 0.2, 0.3 };
+  void test_vector_assignment() {
+    std::vector<double> raw{0.1, 0.2, 0.3};
     VectorOfTester values;
     TS_ASSERT(!values);
     TS_ASSERT_THROWS_NOTHING(values = raw);
     TS_ASSERT(values);
-    TS_ASSERT_DIFFERS(&(values.constData()) &raw);
+    TS_ASSERT_DIFFERS(&(values.constData()), &raw);
     TS_ASSERT_EQUALS(raw.size(), 3);
     TS_ASSERT_EQUALS(raw[0], 0.1);
     TS_ASSERT_EQUALS(values.size(), 3);

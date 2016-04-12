@@ -73,7 +73,10 @@ public:
     return *this;
   }
   VectorOf &operator=(const std::vector<double> &data) {
-    m_data.access() = data;
+    if (!m_data)
+      m_data = make_cow<std::vector<double>>(data);
+    else
+      m_data.access() = data;
     return *this;
   }
 
