@@ -76,7 +76,7 @@ public:
   virtual void setOptionsHintStrategy(
       MantidQt::MantidWidgets::HintStrategy *hintStrategy) = 0;
   virtual void setClipboard(const std::string &text) = 0;
-  virtual void setModel(std::string name) = 0;
+  virtual void setModel(const std::string &name) = 0;
 
   // Accessor methods
   virtual std::set<int> getSelectedRows() const = 0;

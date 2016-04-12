@@ -50,9 +50,9 @@ class MANTID_GEOMETRY_DLL GluGeometryHandler : public GeometryHandler {
   enum GEOMETRY_TYPE {
     CUBOID,            ///< CUBOID
     HEXAHEDRON,        ///< HEXAHEDRON
+    SPHERE,            ///< SPHERE
     CYLINDER,          ///< CYLINDER
     CONE,              ///< CONE
-    SPHERE,            ///< SPHERE
     SEGMENTED_CYLINDER ///< Cylinder with 1 or more segments (along the axis).
     /// Sizes of segments are important.
   };

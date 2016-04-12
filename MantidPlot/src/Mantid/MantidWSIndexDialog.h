@@ -264,10 +264,10 @@ private:
   void generateWsIndexIntervals();
   /// Generates an IntervalList which defines which spectra IDs the user can ask
   /// to plot.
-  void generateSpectraIdIntervals();
+  void generateSpectraNumIntervals();
 
   /// Whether or not there are any common spectra IDs between workspaces.
-  bool usingSpectraIDs() const;
+  bool usingSpectraNumbers() const;
 
   /// Do we allow the user to ask for a range of spectra IDs or not?
   bool m_spectra;
@@ -285,7 +285,7 @@ private:
   /// A list of names of workspaces which are to be plotted.
   QList<QString> m_wsNames;
   /// IntervalLists for the range of indices/IDs AVAILABLE to the user.
-  IntervalList m_wsIndexIntervals, m_spectraIdIntervals;
+  IntervalList m_wsIndexIntervals, m_spectraNumIntervals;
   /// IntervalLists for the range of indices/IDs CHOSEN by the user.
   IntervalList m_wsIndexChoice, m_spectraIdChoice;
 };
