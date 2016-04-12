@@ -7,6 +7,7 @@
 #include "MantidAPI/FunctionDomainGeneral.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidCurveFitting/Algorithms/EvaluateFunction.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
@@ -36,7 +37,7 @@ public:
     fun.setParameter("B40", -0.031787);
     fun.setParameter("B42", -0.11611);
     fun.setParameter("B44", -0.12544);
-    fun.setAttributeValue("Nre", 1);
+    fun.setAttributeValue("Ion", "Ce");
     fun.setAttributeValue("Temperature", 44.0);
     fun.setAttributeValue("ToleranceIntensity", 0.001);
     fun.function(domain, values);
@@ -65,7 +66,7 @@ public:
     fun->unfixParameter("B40");
     fun->unfixParameter("B42");
     fun->unfixParameter("B44");
-    fun->setAttributeValue("Nre", 1);
+    fun->setAttributeValue("Ion", "Ce");
     fun->setAttributeValue("Temperature", 44.0);
     fun->setAttributeValue("ToleranceIntensity", 0.001);
 
@@ -133,22 +134,22 @@ public:
   }
 
   void test_factory() {
-    std::string ini = "name=CrystalFieldPeaks,Nre=1,Temperature=25.0,B20=1,B22="
+    std::string ini = "name=CrystalFieldPeaks,Ion=Ce,Temperature=25.0,B20=1,B22="
                       "2,B40=3,B44=4,ties=(B42=B44/2)";
     auto fun = FunctionFactory::Instance().createInitialized(ini);
     TS_ASSERT(fun);
-    TS_ASSERT_EQUALS(fun->nParams(), 36);
-    TS_ASSERT_EQUALS(fun->nAttributes(), 4);
+    TS_ASSERT_EQUALS(fun->nParams(), 33);
+    TS_ASSERT_EQUALS(fun->nAttributes(), 5);
     fun->applyTies();
     TS_ASSERT_DELTA(fun->getParameter("B20"), 1.0, 1e-10);
     TS_ASSERT_DELTA(fun->getParameter("B22"), 2.0, 1e-10);
     TS_ASSERT_DELTA(fun->getParameter("B40"), 3.0, 1e-10);
     TS_ASSERT_DELTA(fun->getParameter("B42"), 2.0, 1e-10);
     TS_ASSERT_DELTA(fun->getParameter("B44"), 4.0, 1e-10);
-    TS_ASSERT_EQUALS(fun->getAttribute("Nre").asInt(), 1);
+    TS_ASSERT_EQUALS(fun->getAttribute("Ion").asString(), "Ce");
     TS_ASSERT_EQUALS(fun->getAttribute("Temperature").asDouble(), 25.0);
     TS_ASSERT_EQUALS(fun->getAttribute("ToleranceEnergy").asDouble(), 1e-10);
-    TS_ASSERT_EQUALS(fun->getAttribute("ToleranceIntensity").asDouble(), 1e-10);
+    TS_ASSERT_EQUALS(fun->getAttribute("ToleranceIntensity").asDouble(), 1e-3);
   }
 
   void test_evaluate_alg_no_input_workspace() {
@@ -161,7 +162,7 @@ public:
     fun->setParameter("B40", -0.031787);
     fun->setParameter("B42", -0.11611);
     fun->setParameter("B44", -0.12544);
-    fun->setAttributeValue("Nre", 1);
+    fun->setAttributeValue("Ion", "Ce");
     fun->setAttributeValue("Temperature", 44.0);
     fun->setAttributeValue("ToleranceIntensity", 0.001);
 
@@ -200,7 +201,7 @@ public:
     fun->setParameter("B40", -0.03);
     fun->setParameter("B42", -0.11);
     fun->setParameter("B44", -0.12);
-    fun->setAttributeValue("Nre", 1);
+    fun->setAttributeValue("Ion", "Ce");
     fun->setAttributeValue("Temperature", 44.0);
     fun->setAttributeValue("ToleranceIntensity", 0.001);
 
@@ -248,6 +249,313 @@ public:
     TS_ASSERT_DELTA(column->toDouble(2), 0.4116, 0.0001);
 
     AnalysisDataService::Instance().clear();
+  }
+
+  void test_symmetry() {
+    CrystalFieldPeaks fun;
+    fun.setAttributeValue("Ion", "Ce");
+    TS_ASSERT( ! isFixed(fun, "B20"));
+    TS_ASSERT( ! isFixed(fun, "B21"));
+    TS_ASSERT(   isFixed(fun, "IB21"));
+    TS_ASSERT( ! isFixed(fun, "B22"));
+    TS_ASSERT( ! isFixed(fun, "IB22"));
+
+    TS_ASSERT( ! isFixed(fun, "B40"));
+    TS_ASSERT( ! isFixed(fun, "B41"));
+    TS_ASSERT( ! isFixed(fun, "IB41"));
+    TS_ASSERT( ! isFixed(fun, "B42"));
+    TS_ASSERT( ! isFixed(fun, "IB42"));
+    TS_ASSERT( ! isFixed(fun, "B43"));
+    TS_ASSERT( ! isFixed(fun, "IB43"));
+    TS_ASSERT( ! isFixed(fun, "B44"));
+    TS_ASSERT( ! isFixed(fun, "IB44"));
+
+    TS_ASSERT( ! isFixed(fun, "B60"));
+    TS_ASSERT( ! isFixed(fun, "B61"));
+    TS_ASSERT( ! isFixed(fun, "IB61"));
+    TS_ASSERT( ! isFixed(fun, "B62"));
+    TS_ASSERT( ! isFixed(fun, "IB62"));
+    TS_ASSERT( ! isFixed(fun, "B63"));
+    TS_ASSERT( ! isFixed(fun, "IB63"));
+    TS_ASSERT( ! isFixed(fun, "B64"));
+    TS_ASSERT( ! isFixed(fun, "IB64"));
+    TS_ASSERT( ! isFixed(fun, "B65"));
+    TS_ASSERT( ! isFixed(fun, "IB65"));
+    TS_ASSERT( ! isFixed(fun, "B66"));
+    TS_ASSERT( ! isFixed(fun, "IB66"));
+
+    setSymmetry(fun, "C2");
+    TS_ASSERT( ! isFixed(fun, "B20"));
+    TS_ASSERT(   isFixed(fun, "B21"));
+    TS_ASSERT(   isFixed(fun, "IB21"));
+    TS_ASSERT( ! isFixed(fun, "B22"));
+    TS_ASSERT(   isFixed(fun, "IB22"));
+
+    TS_ASSERT( ! isFixed(fun, "B40"));
+    TS_ASSERT(   isFixed(fun, "B41"));
+    TS_ASSERT(   isFixed(fun, "IB41"));
+    TS_ASSERT( ! isFixed(fun, "B42"));
+    TS_ASSERT( ! isFixed(fun, "IB42"));
+    TS_ASSERT(   isFixed(fun, "B43"));
+    TS_ASSERT(   isFixed(fun, "IB43"));
+    TS_ASSERT( ! isFixed(fun, "B44"));
+    TS_ASSERT( ! isFixed(fun, "IB44"));
+
+    TS_ASSERT( ! isFixed(fun, "B60"));
+    TS_ASSERT(   isFixed(fun, "B61"));
+    TS_ASSERT(   isFixed(fun, "IB61"));
+    TS_ASSERT( ! isFixed(fun, "B62"));
+    TS_ASSERT( ! isFixed(fun, "IB62"));
+    TS_ASSERT(   isFixed(fun, "B63"));
+    TS_ASSERT(   isFixed(fun, "IB63"));
+    TS_ASSERT( ! isFixed(fun, "B64"));
+    TS_ASSERT( ! isFixed(fun, "IB64"));
+    TS_ASSERT(   isFixed(fun, "B65"));
+    TS_ASSERT(   isFixed(fun, "IB65"));
+    TS_ASSERT( ! isFixed(fun, "B66"));
+    TS_ASSERT( ! isFixed(fun, "IB66"));
+
+    setSymmetry(fun, "C2v");
+    TS_ASSERT( ! isFixed(fun, "B20"));
+    TS_ASSERT(   isFixed(fun, "B21"));
+    TS_ASSERT(   isFixed(fun, "IB21"));
+    TS_ASSERT( ! isFixed(fun, "B22"));
+    TS_ASSERT(   isFixed(fun, "IB22"));
+
+    TS_ASSERT( ! isFixed(fun, "B40"));
+    TS_ASSERT(   isFixed(fun, "B41"));
+    TS_ASSERT(   isFixed(fun, "IB41"));
+    TS_ASSERT( ! isFixed(fun, "B42"));
+    TS_ASSERT(   isFixed(fun, "IB42"));
+    TS_ASSERT(   isFixed(fun, "B43"));
+    TS_ASSERT(   isFixed(fun, "IB43"));
+    TS_ASSERT( ! isFixed(fun, "B44"));
+    TS_ASSERT(   isFixed(fun, "IB44"));
+
+    TS_ASSERT( ! isFixed(fun, "B60"));
+    TS_ASSERT(   isFixed(fun, "B61"));
+    TS_ASSERT(   isFixed(fun, "IB61"));
+    TS_ASSERT( ! isFixed(fun, "B62"));
+    TS_ASSERT(   isFixed(fun, "IB62"));
+    TS_ASSERT(   isFixed(fun, "B63"));
+    TS_ASSERT(   isFixed(fun, "IB63"));
+    TS_ASSERT( ! isFixed(fun, "B64"));
+    TS_ASSERT(   isFixed(fun, "IB64"));
+    TS_ASSERT(   isFixed(fun, "B65"));
+    TS_ASSERT(   isFixed(fun, "IB65"));
+    TS_ASSERT( ! isFixed(fun, "B66"));
+    TS_ASSERT(   isFixed(fun, "IB66"));
+
+    setSymmetry(fun, "C4");
+    TS_ASSERT( ! isFixed(fun, "B20"));
+    TS_ASSERT(   isFixed(fun, "B21"));
+    TS_ASSERT(   isFixed(fun, "IB21"));
+    TS_ASSERT(   isFixed(fun, "B22"));
+    TS_ASSERT(   isFixed(fun, "IB22"));
+
+    TS_ASSERT( ! isFixed(fun, "B40"));
+    TS_ASSERT(   isFixed(fun, "B41"));
+    TS_ASSERT(   isFixed(fun, "IB41"));
+    TS_ASSERT(   isFixed(fun, "B42"));
+    TS_ASSERT(   isFixed(fun, "IB42"));
+    TS_ASSERT(   isFixed(fun, "B43"));
+    TS_ASSERT(   isFixed(fun, "IB43"));
+    TS_ASSERT( ! isFixed(fun, "B44"));
+    TS_ASSERT(   isFixed(fun, "IB44"));
+
+    TS_ASSERT( ! isFixed(fun, "B60"));
+    TS_ASSERT(   isFixed(fun, "B61"));
+    TS_ASSERT(   isFixed(fun, "IB61"));
+    TS_ASSERT(   isFixed(fun, "B62"));
+    TS_ASSERT(   isFixed(fun, "IB62"));
+    TS_ASSERT(   isFixed(fun, "B63"));
+    TS_ASSERT(   isFixed(fun, "IB63"));
+    TS_ASSERT( ! isFixed(fun, "B64"));
+    TS_ASSERT( ! isFixed(fun, "IB64"));
+    TS_ASSERT(   isFixed(fun, "B65"));
+    TS_ASSERT(   isFixed(fun, "IB65"));
+    TS_ASSERT(   isFixed(fun, "B66"));
+    TS_ASSERT(   isFixed(fun, "IB66"));
+
+    setSymmetry(fun, "D4");
+    TS_ASSERT( ! isFixed(fun, "B20"));
+    TS_ASSERT(   isFixed(fun, "B21"));
+    TS_ASSERT(   isFixed(fun, "IB21"));
+    TS_ASSERT(   isFixed(fun, "B22"));
+    TS_ASSERT(   isFixed(fun, "IB22"));
+
+    TS_ASSERT( ! isFixed(fun, "B40"));
+    TS_ASSERT(   isFixed(fun, "B41"));
+    TS_ASSERT(   isFixed(fun, "IB41"));
+    TS_ASSERT(   isFixed(fun, "B42"));
+    TS_ASSERT(   isFixed(fun, "IB42"));
+    TS_ASSERT(   isFixed(fun, "B43"));
+    TS_ASSERT(   isFixed(fun, "IB43"));
+    TS_ASSERT( ! isFixed(fun, "B44"));
+    TS_ASSERT(   isFixed(fun, "IB44"));
+
+    TS_ASSERT( ! isFixed(fun, "B60"));
+    TS_ASSERT(   isFixed(fun, "B61"));
+    TS_ASSERT(   isFixed(fun, "IB61"));
+    TS_ASSERT(   isFixed(fun, "B62"));
+    TS_ASSERT(   isFixed(fun, "IB62"));
+    TS_ASSERT(   isFixed(fun, "B63"));
+    TS_ASSERT(   isFixed(fun, "IB63"));
+    TS_ASSERT( ! isFixed(fun, "B64"));
+    TS_ASSERT(   isFixed(fun, "IB64"));
+    TS_ASSERT(   isFixed(fun, "B65"));
+    TS_ASSERT(   isFixed(fun, "IB65"));
+    TS_ASSERT(   isFixed(fun, "B66"));
+    TS_ASSERT(   isFixed(fun, "IB66"));
+
+    setSymmetry(fun, "C3");
+    TS_ASSERT( ! isFixed(fun, "B20"));
+    TS_ASSERT(   isFixed(fun, "B21"));
+    TS_ASSERT(   isFixed(fun, "IB21"));
+    TS_ASSERT(   isFixed(fun, "B22"));
+    TS_ASSERT(   isFixed(fun, "IB22"));
+
+    TS_ASSERT( ! isFixed(fun, "B40"));
+    TS_ASSERT(   isFixed(fun, "B41"));
+    TS_ASSERT(   isFixed(fun, "IB41"));
+    TS_ASSERT(   isFixed(fun, "B42"));
+    TS_ASSERT(   isFixed(fun, "IB42"));
+    TS_ASSERT( ! isFixed(fun, "B43"));
+    TS_ASSERT(   isFixed(fun, "IB43"));
+    TS_ASSERT(   isFixed(fun, "B44"));
+    TS_ASSERT(   isFixed(fun, "IB44"));
+
+    TS_ASSERT( ! isFixed(fun, "B60"));
+    TS_ASSERT(   isFixed(fun, "B61"));
+    TS_ASSERT(   isFixed(fun, "IB61"));
+    TS_ASSERT(   isFixed(fun, "B62"));
+    TS_ASSERT(   isFixed(fun, "IB62"));
+    TS_ASSERT( ! isFixed(fun, "B63"));
+    TS_ASSERT( ! isFixed(fun, "IB63"));
+    TS_ASSERT(   isFixed(fun, "B64"));
+    TS_ASSERT(   isFixed(fun, "IB64"));
+    TS_ASSERT(   isFixed(fun, "B65"));
+    TS_ASSERT(   isFixed(fun, "IB65"));
+    TS_ASSERT( ! isFixed(fun, "B66"));
+    TS_ASSERT( ! isFixed(fun, "IB66"));
+
+    setSymmetry(fun, "D3");
+    TS_ASSERT( ! isFixed(fun, "B20"));
+    TS_ASSERT(   isFixed(fun, "B21"));
+    TS_ASSERT(   isFixed(fun, "IB21"));
+    TS_ASSERT(   isFixed(fun, "B22"));
+    TS_ASSERT(   isFixed(fun, "IB22"));
+
+    TS_ASSERT( ! isFixed(fun, "B40"));
+    TS_ASSERT(   isFixed(fun, "B41"));
+    TS_ASSERT(   isFixed(fun, "IB41"));
+    TS_ASSERT(   isFixed(fun, "B42"));
+    TS_ASSERT(   isFixed(fun, "IB42"));
+    TS_ASSERT( ! isFixed(fun, "B43"));
+    TS_ASSERT(   isFixed(fun, "IB43"));
+    TS_ASSERT(   isFixed(fun, "B44"));
+    TS_ASSERT(   isFixed(fun, "IB44"));
+
+    TS_ASSERT( ! isFixed(fun, "B60"));
+    TS_ASSERT(   isFixed(fun, "B61"));
+    TS_ASSERT(   isFixed(fun, "IB61"));
+    TS_ASSERT(   isFixed(fun, "B62"));
+    TS_ASSERT(   isFixed(fun, "IB62"));
+    TS_ASSERT( ! isFixed(fun, "B63"));
+    TS_ASSERT(   isFixed(fun, "IB63"));
+    TS_ASSERT(   isFixed(fun, "B64"));
+    TS_ASSERT(   isFixed(fun, "IB64"));
+    TS_ASSERT(   isFixed(fun, "B65"));
+    TS_ASSERT(   isFixed(fun, "IB65"));
+    TS_ASSERT( ! isFixed(fun, "B66"));
+    TS_ASSERT(   isFixed(fun, "IB66"));
+
+    setSymmetry(fun, "C6");
+    TS_ASSERT( ! isFixed(fun, "B20"));
+    TS_ASSERT(   isFixed(fun, "B21"));
+    TS_ASSERT(   isFixed(fun, "IB21"));
+    TS_ASSERT(   isFixed(fun, "B22"));
+    TS_ASSERT(   isFixed(fun, "IB22"));
+
+    TS_ASSERT( ! isFixed(fun, "B40"));
+    TS_ASSERT(   isFixed(fun, "B41"));
+    TS_ASSERT(   isFixed(fun, "IB41"));
+    TS_ASSERT(   isFixed(fun, "B42"));
+    TS_ASSERT(   isFixed(fun, "IB42"));
+    TS_ASSERT(   isFixed(fun, "B43"));
+    TS_ASSERT(   isFixed(fun, "IB43"));
+    TS_ASSERT(   isFixed(fun, "B44"));
+    TS_ASSERT(   isFixed(fun, "IB44"));
+
+    TS_ASSERT( ! isFixed(fun, "B60"));
+    TS_ASSERT(   isFixed(fun, "B61"));
+    TS_ASSERT(   isFixed(fun, "IB61"));
+    TS_ASSERT(   isFixed(fun, "B62"));
+    TS_ASSERT(   isFixed(fun, "IB62"));
+    TS_ASSERT(   isFixed(fun, "B63"));
+    TS_ASSERT(   isFixed(fun, "IB63"));
+    TS_ASSERT(   isFixed(fun, "B64"));
+    TS_ASSERT(   isFixed(fun, "IB64"));
+    TS_ASSERT(   isFixed(fun, "B65"));
+    TS_ASSERT(   isFixed(fun, "IB65"));
+    TS_ASSERT( ! isFixed(fun, "B66"));
+    TS_ASSERT(   isFixed(fun, "IB66"));
+
+    fun.setAttributeValue("Symmetry", "T");
+    TS_ASSERT(   isFixed(fun, "B20"));
+    TS_ASSERT(   isFixed(fun, "B21"));
+    TS_ASSERT(   isFixed(fun, "IB21"));
+    TS_ASSERT(   isFixed(fun, "B22"));
+    TS_ASSERT(   isFixed(fun, "IB22"));
+
+    TS_ASSERT( ! isFixed(fun, "B40"));
+    TS_ASSERT(   isFixed(fun, "B41"));
+    TS_ASSERT(   isFixed(fun, "IB41"));
+    TS_ASSERT(   isFixed(fun, "B42"));
+    TS_ASSERT(   isFixed(fun, "IB42"));
+    TS_ASSERT(   isFixed(fun, "B43"));
+    TS_ASSERT(   isFixed(fun, "IB43"));
+    auto i = fun.parameterIndex("B44");
+    TS_ASSERT(   fun.isFixed(i));
+    TS_ASSERT(   isFixed(fun, "IB44"));
+
+    TS_ASSERT( ! isFixed(fun, "B60"));
+    TS_ASSERT(   isFixed(fun, "B61"));
+    TS_ASSERT(   isFixed(fun, "IB61"));
+    TS_ASSERT(   isFixed(fun, "B62"));
+    TS_ASSERT(   isFixed(fun, "IB62"));
+    TS_ASSERT(   isFixed(fun, "B63"));
+    TS_ASSERT(   isFixed(fun, "IB63"));
+    i = fun.parameterIndex("B64");
+    TS_ASSERT(   fun.isFixed(i));
+    TS_ASSERT(   isFixed(fun, "IB64"));
+    TS_ASSERT(   isFixed(fun, "B65"));
+    TS_ASSERT(   isFixed(fun, "IB65"));
+    TS_ASSERT(   isFixed(fun, "B66"));
+    TS_ASSERT(   isFixed(fun, "IB66"));
+
+    i = fun.parameterIndex("B44");
+    auto tie = fun.getTie(i);
+    TS_ASSERT_EQUALS(tie->asString(), "B44=5*B40");
+
+    i = fun.parameterIndex("B64");
+    tie = fun.getTie(i);
+    TS_ASSERT_EQUALS(tie->asString(), "B64=-21*B60");
+
+  }
+
+private:
+
+  bool isFixed(const IFunction& fun, const std::string& par) {
+    auto i = fun.parameterIndex(par);
+    return fun.isFixed(i) && fun.getParameter(i) == 0.0;
+  }
+
+  void setSymmetry(IFunction& fun, const std::string& symm) {
+    for(size_t i = 0; i < fun.nParams(); ++i) {
+      fun.setParameter(i, 1.0);
+    }
+    fun.setAttributeValue("Symmetry", symm);
   }
 };
 

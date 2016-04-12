@@ -45,6 +45,7 @@ public:
   void functionGeneral(const API::FunctionDomainGeneral &generalDomain,
                        API::FunctionValues &values) const override;
   size_t getDefaultDomainSize() const override;
+  void setAttribute(const std::string &name, const Attribute &) override;
 
 private:
   /// Store the default domain size after first
