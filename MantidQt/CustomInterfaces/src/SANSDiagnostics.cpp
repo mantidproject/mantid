@@ -459,12 +459,12 @@ void SANSDiagnostics::getSpectraList(
   specList.push_back(mws_sptr->getSpectrum(min_spec_index)->getSpectrumNo());
   specList.push_back(mws_sptr->getSpectrum(max_spec_index)->getSpectrumNo());
 }
-/** This method returns the minimum and maximum spectrum ids
+/** This method returns the minimum and maximum spectrum Nos
   * @param specList - list of spectra.
   * @param minSpec - minimum spectrum number
   * @param maxSpec - maximum spectrum number
   */
-void SANSDiagnostics::minandMaxSpectrumIds(
+void SANSDiagnostics::minandMaxSpectrumNos(
     const std::vector<specnum_t> &specList, QString &minSpec,
     QString &maxSpec) {
   specnum_t spec_min = *std::min_element(specList.begin(), specList.end());
@@ -634,7 +634,7 @@ void SANSDiagnostics::firstDetectorHorizontalIntegralClicked() {
   }
   std::vector<specnum_t> specList;
   getSpectraList(mws_sptr, detNum, specList);
-  minandMaxSpectrumIds(specList, minSpec, maxSpec);
+  minandMaxSpectrumNos(specList, minSpec, maxSpec);
   if (!isValidSpectra(minSpec, maxSpec)) {
     m_SANSForm->groupBox_Detector1->setDisabled(true);
     return;
@@ -678,7 +678,7 @@ void SANSDiagnostics::firstDetectorVerticalIntegralClicked() {
 
   std::vector<specnum_t> specList;
   getSpectraList(mws_sptr, detNum, specList);
-  minandMaxSpectrumIds(specList, minSpec, maxSpec);
+  minandMaxSpectrumNos(specList, minSpec, maxSpec);
 
   if (!isValidSpectra(minSpec, maxSpec)) {
     m_SANSForm->groupBox_Detector1->setDisabled(true);
@@ -720,7 +720,7 @@ void SANSDiagnostics::firstDetectorTimeIntegralClicked() {
 
   std::vector<specnum_t> specList;
   getSpectraList(mws_sptr, detNum, specList);
-  minandMaxSpectrumIds(specList, minSpec, maxSpec);
+  minandMaxSpectrumNos(specList, minSpec, maxSpec);
   QString wsStartIndex, wsEndIndex;
 
   if (!isValidSpectra(minSpec, maxSpec)) {
@@ -1030,7 +1030,7 @@ void SANSDiagnostics::secondDetectorHorizontalIntegralClicked() {
 
   std::vector<specnum_t> specList;
   getSpectraList(mws_sptr, detNum, specList);
-  minandMaxSpectrumIds(specList, minSpec, maxSpec);
+  minandMaxSpectrumNos(specList, minSpec, maxSpec);
 
   if (!isValidSpectra(minSpec, maxSpec)) {
     m_SANSForm->groupBox_Detector2->setDisabled(true);
@@ -1071,7 +1071,7 @@ void SANSDiagnostics::secondDetectorVerticalIntegralClicked() {
 
   std::vector<specnum_t> specList;
   getSpectraList(mws_sptr, detNum, specList);
-  minandMaxSpectrumIds(specList, minSpec, maxSpec);
+  minandMaxSpectrumNos(specList, minSpec, maxSpec);
   if (!isValidSpectra(minSpec, maxSpec)) {
     m_SANSForm->groupBox_Detector2->setDisabled(true);
     return;
@@ -1113,8 +1113,8 @@ void SANSDiagnostics::secondDetectorTimeIntegralClicked() {
   std::vector<specnum_t> specList;
   // get spectrum list from detector ids
   getSpectraList(mws_sptr, detNum, specList);
-  // get maximum and minimum spectrum ids
-  minandMaxSpectrumIds(specList, minSpec, maxSpec);
+  // get maximum and minimum spectrum Nos
+  minandMaxSpectrumNos(specList, minSpec, maxSpec);
   QString wsStartIndex, wsEndIndex;
   //
   if (!isValidSpectra(minSpec, maxSpec)) {

@@ -341,7 +341,7 @@ class DetectorBank(object):
 
     def spectrum_block(self, ylow, xlow, ydim, xdim):
         """
-            Compile a list of spectrum IDs for rectangular block of size xdim by ydim
+            Compile a list of spectrum Numbers for rectangular block of size xdim by ydim
         """
         if ydim == 'all':
             ydim = self._shape.height()

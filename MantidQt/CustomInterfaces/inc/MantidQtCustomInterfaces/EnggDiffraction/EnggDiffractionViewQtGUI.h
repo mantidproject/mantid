@@ -2,9 +2,11 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEWQTGUI_H_
 
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
+#include "MantidQtMantidWidgets/PeakPicker.h"
 
 #include "ui_EnggDiffractionQtGUI.h"
 #include "ui_EnggDiffractionQtTabCalib.h"
@@ -14,6 +16,7 @@
 #include "ui_EnggDiffractionQtTabSettings.h"
 
 #include <boost/scoped_ptr.hpp>
+#include <qwt_plot_zoomer.h>
 
 // Qt classes forward declarations
 class QMutex;
@@ -155,8 +158,6 @@ public:
   void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                      bool focused) override;
 
-  void updateFittingDirVec(std::string &bankDir, std::string &focusedFile);
-
   std::vector<std::string> splitFittingDirectory(std::string &selectedfPath);
 
   void addBankItems(std::vector<std::string> splittedBaseName,
@@ -168,10 +169,24 @@ public:
   std::string fittingRunNoFactory(std::string bank, std::string fileName,
                                   std::string &bankDir, std::string fileDir);
 
+  void updateFittingDirVec(std::string &bankDir, std::string &focusedFile);
+
   std::string readPeaksFile(std::string fileDir);
 
   void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data,
                          std::vector<QwtPlotCurve *> &dataVector, bool focused);
+
+  void setPeakPickerEnabled(bool enabled);
+
+  void setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak);
+
+  double getPeakCentre() const;
+
+  void fittingWriteFile(const std::string &fileDir);
+
+  void setZoomTool(bool enabled);
+
+  void resetView();
 
   void plotFocusedSpectrum(const std::string &wsName) override;
 
@@ -206,6 +221,8 @@ private slots:
   void rebinTimeClicked();
   void rebinMultiperiodClicked();
   void fitClicked();
+  void fittingRunNoChanged();
+  void setBankDir(int idx);
 
   // slots of the settings tab/section of the interface
   void browseInputDirCalib();
@@ -250,8 +267,9 @@ private slots:
   void browsePeaksToFit();
   void fittingListWidgetBank(int idx);
   void setListWidgetBank(int idx);
-  void fittingRunNoChanged();
-  void setBankDir(int idx);
+  void setPeakPick();
+  void addPeakToList();
+  void savePeakList();
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
@@ -319,6 +337,7 @@ private:
   // fitting bankID
   int static m_fitting_bank_Id;
 
+  // vector holding directory of focused bank file
   std::vector<std::string> static m_fitting_runno_dir_vec;
 
   /// current calibration produced in the 'Calibration' tab
@@ -347,6 +366,12 @@ private:
 
   /// Loaded data curves
   std::vector<QwtPlotCurve *> m_fittedDataVector;
+
+  /// Peak picker tool for fitting - only one on the plot at any given moment
+  MantidWidgets::PeakPicker *m_peakPicker;
+
+  /// zoom-in/zoom-out tool for fitting
+  QwtPlotZoomer *m_zoomTool;
 
   /// presenter as in the model-view-presenter
   boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;

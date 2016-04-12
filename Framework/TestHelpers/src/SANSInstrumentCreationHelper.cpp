@@ -117,7 +117,7 @@ void SANSInstrumentCreationHelper::runLoadMappingTable(
     throw std::invalid_argument("number of y-bins < 0");
   }
 
-  // Generate mapping of detector/channel IDs to spectrum ID
+  // Generate mapping of detector/channel IDs to spectrum No
 
   // Detector/channel counter
   size_t wi = 0;

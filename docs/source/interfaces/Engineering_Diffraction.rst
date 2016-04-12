@@ -296,6 +296,8 @@ Focused Run #:
   same run-number and update the Plot Bank combo-box and Bank list
   accordingly.
 
+.. _ExpectedPeaks-Engineering_Diffraction-ref:
+
 Peaks:
   A list of dSpacing values to be translated into TOF to find expected
   peaks. These peaks can be manually written or imported by selecting a
@@ -316,6 +318,9 @@ tab plots the focused workspace in the background in black, whereas the
 expected peaks plotted in various colours over lapping the focused
 workspace peaks.
 
+Within the :ref:`Preview-Engineering_Diffraction-ref` section user is
+able to zoom-in or zoom-out as well as select, add and save peaks.
+
 The interface will also generate workspaces that can be inspected in the
 workspaces window:
 
@@ -325,6 +330,29 @@ workspaces window:
    so the fitted data can be compared with focused data
 3. The *engggui_fitting_single_peaks* workspace within each workspace
    index representing individual expected peak.
+
+.. _Preview-Engineering_Diffraction-ref:
+
+Preview
+^^^^^^^
+Once the fitting process has completed and you are able to view a
+focused workspace with listed expected peaks on the data plot, Select
+Peak button should should also be enabled.
+By clicking Select Peak button the peak picker tool can be activated.
+To select a peak simply hold *Shift* key and left-click on the graph
+near the peak's center.
+
+To get help selecting the center of the peak, you may set the peak
+width by left-click and drag horizontally, while holding *Ctrl* key
+as well. User may also zoom-in to the graph by holding left-click
+and dragging on the plot, whereas zoom-out by simple left-click on
+the plot.
+
+When user is satisfied with the center position of the peak, you may
+add the selected peak to :ref:`ExpectedPeaks-Engineering_Diffraction-ref`
+list by clicking Add Peak button. User may rerun Fit process with
+the new selected peaks or save the peaks list as *CSV* file by clicking
+Save Peak List button.
 
 .. _setting-Engineering_Diffraction-ref:
 
