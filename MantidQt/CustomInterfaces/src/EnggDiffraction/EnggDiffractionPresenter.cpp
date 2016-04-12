@@ -640,6 +640,7 @@ void EnggDiffractionPresenter::runFittingAlgs(
       g_log.debug() << "startX: " + startX + " . endX: " + endX << std::endl;
 
       current_peak_out_WS = "engggui_fitting_single_peaks" + std::to_string(i);
+	  std::string current_peak_cloned_WS;
 
       // run EvaluateFunction algorithm with focused workspace to produce
       // the correct fit function
@@ -665,30 +666,30 @@ void EnggDiffractionPresenter::runFittingAlgs(
 		  auto currentPeakWS = ADS.retrieveWS<MatrixWorkspace>(current_peak_out_WS);
 		  auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(single_peak_out_WS);
 
-		  singlePeaksWS->setX(i, currentPeakWS->readX(0));
-		  singlePeaksWS->getSpectrum(i)->setData(currentPeakWS->readY(0), currentPeakWS->readE(0));
+		  singlePeaksWS->setX(0, currentPeakWS->readX(0));
+		  singlePeaksWS->getSpectrum(0)->setData(currentPeakWS->readY(0), currentPeakWS->readE(0));
 
 		  
       } else {
+		  current_peak_cloned_WS = "engggui_fitting_cloned_peaks" + std::to_string(i) +"__";
 
-
-		  runCloneWorkspaceAlg(FocusedWSName, single_peak_out_WS);
+		  runCloneWorkspaceAlg(FocusedWSName, current_peak_cloned_WS);
 
 		  auto currentPeakWS = ADS.retrieveWS<MatrixWorkspace>(current_peak_out_WS);
-		  auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(single_peak_out_WS);
+		  auto currentClonedWS = ADS.retrieveWS<MatrixWorkspace>(current_peak_cloned_WS);
 
-		  singlePeaksWS->setX(i, currentPeakWS->readX(0));
-		  singlePeaksWS->getSpectrum(i)->setData(currentPeakWS->readY(0), currentPeakWS->readE(0));
+		  currentClonedWS->setX(0, currentPeakWS->readX(0));
+		  currentClonedWS->getSpectrum(0)->setData(currentPeakWS->readY(0), currentPeakWS->readE(0));
 		
 		  // append all peaks in to single workspace & remove
-		//runAppendSpectraAlg(single_peak_out_WS, current_peak_out_WS);
+		runAppendSpectraAlg(single_peak_out_WS, current_peak_cloned_WS);
        // ADS.remove(current_peak_out_WS);
       }
     }
 
     // convert units for both workspaces to dSpacing from ToF
-   // runConvetUnitsAlg(single_peak_out_WS);
-   // runConvetUnitsAlg(FocusedWSName);
+   runConvetUnitsAlg(single_peak_out_WS);
+   runConvetUnitsAlg(FocusedWSName);
   }
 
   m_fittingFinishedOK = true;
