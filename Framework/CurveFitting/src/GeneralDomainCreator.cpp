@@ -17,7 +17,7 @@ using namespace API;
 
 /**
  * Constructor.
- *
+ * @param fun :: A function for which a domain is required.
  * @param manager :: Pointer to IPropertyManager (Algorithm) instance.
  * @param workspacePropertyName :: Name of the output property for a created
  * workspace in case a PropertyManager is used.
@@ -190,12 +190,10 @@ Workspace_sptr GeneralDomainCreator::createOutputWorkspace(
     rowCount = generalFunction.getDefaultDomainSize();
   }
 
-  // Clone the data and domain columns from inputWorkspace to outputWorkspace.
-  // auto &generalDomain = *static_cast<FunctionDomainGeneral *>(domain.get());
-
   ITableWorkspace_sptr outputWorkspace;
 
   auto inputWorkspace = getInputWorkspace();
+  // Clone the data and domain columns from inputWorkspace to outputWorkspace.
   if (inputWorkspace) {
     // Collect the names of columns to clone
     std::vector<std::string> columnsToClone;
