@@ -1,6 +1,6 @@
 from mantid.api import AlgorithmFactory, ITableWorkspaceProperty, FileAction, FileProperty, \
     MatrixWorkspaceProperty, Progress, PropertyMode, PythonAlgorithm
-from mantid.kernel import Direction, FloatArrayProperty, StringListValidator
+from mantid.kernel import Direction, FloatArrayProperty, Property, StringListValidator
 
 class GSASIIFitPeaks(PythonAlgorithm):
     """
@@ -28,6 +28,8 @@ class GSASIIFitPeaks(PythonAlgorithm):
         return ("Uses GSAS-II (powder diffraction module) to fit peaks to one "
                 "or more spectra from a workspace")
 
+    # Too many properties!
+    #pylint: disable=too-many-locals
     def PyInit(self):
         PROP_INPUT_WORKSPACE = 'InputWorkspace'
         PROP_WORKSPACE_INDEX = 'WorkspaceIndex'
@@ -35,10 +37,13 @@ class GSASIIFitPeaks(PythonAlgorithm):
         PROP_PHASE_INFO_FILE = 'PhaseInfoFile'
         PROP_PATH_TO_GSASII = 'PathToGSASII'
         PROP_BACKGROUND_TYPE = 'BackgroundType'
+        PROP_MINX = 'MinX'
+        PROP_MAXX = 'MaxX'
         PROP_EXPECTED_PEAKS = "ExpectedPeaks"
         PROP_EXPECTED_PEAKS_FROM_FILE = "ExpectedPeaksFromFile"
         PROP_OUT_FITTED_PARAMS = 'FittedPeakParameters'
-        PROP_OUT_PROJECT_FILE = 'SaveProjectFile'
+        PROP_OUT_LATTICE_PARAMS_FILE = 'SaveLatticeParametersFile'
+        PROP_OUT_PROJECT_FILE = 'SaveGSASIIProjectFile'
         PROP_OUT_GOF = 'GoF'
         PROP_OUT_RWP = 'Rwp'
         PROP_REFINE_CENTER = 'RefineCenter'
@@ -58,15 +63,11 @@ class GSASIIFitPeaks(PythonAlgorithm):
                              'the first spectrum will be processed (that is, the only spectrum '
                              'for focussed data workspaces.', direction = Direction.Input)
 
+
         self.declareProperty(FileProperty(name = PROP_INSTR_FILE, defaultValue = '',
                                           action = FileAction.Load,
                                           extensions = [".par", ".prm", ".ipar", ".iparm"]),
                              doc = 'File with instrument parameters (in GSAS format).')
-
-        background_types = ["Chebyshev", "None"]
-        self.declareProperty(name = PROP_BACKGROUND_TYPE, defaultValue = background_types[0],
-                             validator = StringListValidator(background_types),
-                             doc = 'Type of background for the peak fitting.')
 
         # Phase information: TODO
         self.declareProperty(FileProperty(name = PROP_PHASE_INFO_FILE, defaultValue = '',
@@ -75,9 +76,32 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
         self.declareProperty(FileProperty(name = PROP_PATH_TO_GSASII, defaultValue = '',
                                           action = FileAction.OptionalDirectory),
-                             doc = 'Optional path to GSAS-II software installation.')
+                             doc = 'Optional path to GSAS-II software installation. '
+                             'This will be used to import several Python modules from GSAS-II.')
 
-        GRP_PEAKS = "Expected peaks (leave empty to auto-find)"
+        GRP_FITTING_OPTS = "Fitting options"
+        background_types = ["Chebyshev", "None"]
+        self.declareProperty(PROP_BACKGROUND_TYPE, defaultValue = background_types[0],
+                             validator = StringListValidator(background_types),
+                             doc = 'Type of background for the peak fitting.')
+
+        self.declareProperty(PROP_MINX, Property.EMPTY_DBL,
+                             direction = Direction.Input,
+                             doc = "Minimum x value for the fitting, in the same units as the input "
+                             "workspace (TOF). Defines the range or domain of fitting together "
+                             "with the property {0}. ".format(PROP_MAXX))
+
+        self.declareProperty(PROP_MAXX, Property.EMPTY_DBL,
+                             direction = Direction.Input,
+                             doc = "Maximum x value for the fitting, in the same units as the input "
+                             "workspace (TOF). Defines the range or domain of fitting together "
+                             "with the property {0}.".format(PROP_MINX))
+
+        self.setPropertyGroup(PROP_BACKGROUND_TYPE, GRP_FITTING_OPTS)
+        self.setPropertyGroup(PROP_MINX, GRP_FITTING_OPTS)
+        self.setPropertyGroup(PROP_MAXX, GRP_FITTING_OPTS)
+
+        GRP_PEAKS = "Expected peaks (phase information takes precedence)"
 
         self.declareProperty(FloatArrayProperty(PROP_EXPECTED_PEAKS, [],
                                                 direction = Direction.Input),
@@ -107,6 +131,11 @@ class GSASIIFitPeaks(PythonAlgorithm):
         self.declareProperty(ITableWorkspaceProperty(PROP_OUT_FITTED_PARAMS, "", Direction.Output),
                              doc = "Fitted parameters. One row per peak found.")
 
+        self.declareProperty(FileProperty(name = PROP_OUT_LATTICE_PARAMS_FILE, defaultValue = '',
+                                          direction = Direction.Input,
+                                          action = FileAction.OptionalSave, extensions = [".gpx"]),
+                             doc = 'File where to write the lattice parameters fitted.')
+
         self.declareProperty(FileProperty(name = PROP_OUT_PROJECT_FILE, defaultValue = '',
                                           direction = Direction.Input,
                                           action = FileAction.OptionalSave, extensions = [".gpx"]),
@@ -115,6 +144,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
         self.setPropertyGroup(PROP_OUT_GOF, GRP_RESULTS)
         self.setPropertyGroup(PROP_OUT_RWP, GRP_RESULTS)
         self.setPropertyGroup(PROP_OUT_FITTED_PARAMS, GRP_RESULTS)
+        self.setPropertyGroup(PROP_OUT_LATTICE_PARAMS_FILE, GRP_RESULTS)
         self.setPropertyGroup(PROP_OUT_PROJECT_FILE, GRP_RESULTS)
 
         self.declareProperty(name = PROP_REFINE_CENTER, defaultValue = False,
@@ -183,6 +213,11 @@ class GSASIIFitPeaks(PythonAlgorithm):
         out_proj_file = self.getProperty(PROP_OUT_PROJECT_FILE)
         if proj_file:
             self._save_gsas2_project(gs2, out_proj_file)
+        out_lattice_file = self.getProperty(PROP_OUT_LATTICE_PARAMS_FILE)
+        if out_lattice_file:
+            self._save_lattice_params_file(gs2_rd, out_lattice_file)
+
+        self.log().notice('Lattice parameters fitted:')
         self._produce_outputs(gof_estimates, parm_dict)
 
     def _load_prepare_data_for_fit(self, gs2_focused_wks, inst_file):
@@ -208,6 +243,9 @@ class GSASIIFitPeaks(PythonAlgorithm):
         background_def = self._build_background_definition()
         self.log().information("Using background function: {0}".format(background_def))
 
+        # PROP_PHASE_INFO_FILE - phase information into rd
+        # As in GSASII.GetPhaseData - TODO
+
         # Assumes peaks of type back-to-back exponential convoluted with pseudo-Voigt
         # That is true in ENGIN-X instrument parameters file
         peaks_init = self._init_peaks_list()
@@ -222,7 +260,14 @@ class GSASIIFitPeaks(PythonAlgorithm):
         @returns a tuple with: 1) a tuple with the Rwp and GoF values (weighted profile
         R-factor, goodness of fit), 2) the parameters dictionary
         """
-        limits = [powderdata[0].min(), powderdata[0].max()]
+        min_x = getProperty(PROP_MINX)
+        if Property.EMPTY_DBL == minx:
+            min_x = powderdata[0].min()
+        max_x = getProperty(PROP_MAXX)
+        if Property.EMPTY_DBL == max_x:
+            max_x = powderdata[0].max()
+
+        limits = [min_x, max_x]
         self.log().notice("Fitting loaded histogram data, with limits: {0}".format(limits))
 
         # peaks: ['pos','int','alp','bet','sig','gam'] / with the refine flag each
@@ -307,7 +352,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
         return gs2_rd
 
     def _build_background_definition(self):
-        # Note: blatantly ignores self.getProperty(PROP_PHASE_INFO_FILE)
+        # Note: blatantly ignores self.getProperty(PROP_BACKGROUND_TYPE)
         backg_def = [['chebyschev', True, 3, 1.0, 0.0, 0.0],
                      {'peaksList': [], 'debyeTerms': [], 'nPeaks': 0, 'nDebye': 0}]
 
@@ -386,6 +431,23 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
     def _build_output_table(self, parm_dict):
         # build the table property - TODO
+        par_names = ['Center', 'Intensity', 'Alpha', 'Beta', 'Sigma', 'Gamma']
+        par_prefixes = ['pos','int','alp','bet','sig','gam']
+
+        alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
+        alg.execute()
+        table = alg.getProperty('OutputWorkspace').value
+
+        num_peaks = 0
+        while par_prefixes[0] + str(num_peaks+1) in parm_dict:
+            num_peaks += 1
+
+        for name in par_names:
+            table.addColumn('str', name)
+        for i in range(1, num_peaks+1):
+            par_values = [ parm_dict[par_prefix + str(i)] for par_prefix in par_prefixes]
+            table.addRow(par_values)
+
         for parm in parm_dict:
             self.log().debug("Parameters for output table: {0}".format(parm))
 
@@ -393,6 +455,15 @@ class GSASIIFitPeaks(PythonAlgorithm):
         self.notice("Saving GSAS-II project file into: {0}".format(filename))
         self.debug("Saving GSAS-II project: {0}".format(gsas2))
         # implement save as in GSASII.OnFileSave - TODO
+
+    def _save_lattice_params_file(self, _gs2, out_lattice_file):
+        (latt_a, latt_b, latt_c, latt_alpha, latt_beta, latt_gamma) = 6*[0]
+        # grab parameters from gs2 - TODO
+        # G2gd.GetPatternTreeItemId(self,self.root,'Phases')
+        with open(out_lattice_file, 'wt') as lattice_txt:
+            print >>lattice_txt, "a, b, c, alpha, beta, gamma"
+            print >>lattice_txt, ("{0}, {1}, {2}, {3}, {4}, {5}".
+                                  format(latt_a, latt_b, latt_c, latt_alpha, latt_beta, latt_gamma))
 
 # Need GSAS-II _init_Imports()
 #pylint: disable=protected-access
