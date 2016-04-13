@@ -161,8 +161,8 @@ public:
     DoubleFortranMatrix i_energies;
     const double de = 1e-10;
     const double di = 1e-3;
-    calculateIntensities(nre, en, wf, temperature, de, degeneration,
-                         e_energies, i_energies);
+    calculateIntensities(nre, en, wf, temperature, de, degeneration, e_energies,
+                         i_energies);
 
     DoubleFortranVector e_excitations;
     DoubleFortranVector i_excitations;

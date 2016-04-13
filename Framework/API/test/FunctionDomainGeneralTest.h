@@ -46,17 +46,11 @@ public:
 
 protected:
   /// Sets the new column size.
-  virtual void resize(size_t) {
-    throw std::logic_error("Not implemented");
-  }
+  virtual void resize(size_t) { throw std::logic_error("Not implemented"); }
   /// Inserts an item.
-  virtual void insert(size_t) {
-    throw std::logic_error("Not implemented");
-  }
+  virtual void insert(size_t) { throw std::logic_error("Not implemented"); }
   /// Removes an item.
-  virtual void remove(size_t) {
-    throw std::logic_error("Not implemented");
-  }
+  virtual void remove(size_t) { throw std::logic_error("Not implemented"); }
   /// Pointer to a data element
   virtual void *void_pointer(size_t index) { return &m_data[index]; }
   /// Pointer to a data element
