@@ -4,9 +4,10 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/SaveAscii2.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <fstream>
 #include <Poco/File.h>
@@ -276,8 +277,6 @@ public:
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
-    int specID;
-    double qVal, angle;
     std::string header1, header2, header3, separator, comment;
 
     // Test that the first few column headers, separator and first two bins are
@@ -738,8 +737,10 @@ private:
     }
 
     if (!isSpectra) {
-      auto axis = wsToSave->getAxis(1);
-      axis->setUnit("Degrees");
+      auto textAxis = new TextAxis(2);
+      textAxis->setLabel(0, "Test Axis 1");
+      textAxis->setLabel(1, "Test Axis 2");
+      wsToSave->replaceAxis(1, textAxis);
     }
 
     AnalysisDataService::Instance().add(m_name, wsToSave);
