@@ -6,12 +6,11 @@
 #include "MantidKernel/Histogram/ConstIterable.h"
 #include "MantidKernel/Histogram/VectorOf.h"
 
-using Mantid::Kernel::ConstIterable;
-using Mantid::Kernel::VectorOf;
+using namespace Mantid;
+using namespace Kernel;
 
-class MANTID_KERNEL_DLL ConstIterableTester
-    : public VectorOf<ConstIterableTester>,
-      public ConstIterable<ConstIterableTester> {
+class ConstIterableTester : public VectorOf<ConstIterableTester>,
+                            public ConstIterable<ConstIterableTester> {
   using VectorOf<ConstIterableTester>::VectorOf;
   using VectorOf<ConstIterableTester>::operator=;
 };
