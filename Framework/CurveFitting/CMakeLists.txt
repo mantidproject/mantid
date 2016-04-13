@@ -115,6 +115,8 @@ set ( SRC_FILES
 	src/MultiDomainCreator.cpp
 	src/ParDomain.cpp
 	src/ParameterEstimator.cpp
+	src/RalNlls/DTRS.cpp
+	src/RalNlls/Internal.cpp
 	src/SeqDomain.cpp
 	src/SeqDomainSpectrumCreator.cpp
 	src/SpecialFunctionHelper.cpp
@@ -233,6 +235,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/UserFunction1D.h
 	inc/MantidCurveFitting/Functions/VesuvioResolution.h
 	inc/MantidCurveFitting/Functions/Voigt.h
+	inc/MantidCurveFitting/RalNlls/DTRS.h
 	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GSLJacobian.h
 	inc/MantidCurveFitting/GSLMatrix.h
@@ -361,6 +364,7 @@ set ( TEST_FILES
 	Functions/UserFunctionTest.h
 	Functions/VesuvioResolutionTest.h
 	Functions/VoigtTest.h
+	RalNlls/DTRSTest.h
 	GSLMatrixTest.h
 	GSLVectorTest.h
 	IPeakFunctionCentreParameterNameTest.h
