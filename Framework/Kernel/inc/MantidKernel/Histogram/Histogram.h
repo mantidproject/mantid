@@ -41,7 +41,7 @@ private:
   Points m_points;
 
 public:
-  enum class XMode { BinEdges, Points, Any, Uninitialized };
+  enum class XMode { BinEdges, Points, Uninitialized };
   Histogram(XMode mode) : m_xMode(mode) {
     switch (mode) {
     case XMode::BinEdges:
