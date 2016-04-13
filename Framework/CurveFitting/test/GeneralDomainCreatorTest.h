@@ -60,7 +60,7 @@ public:
   size_t getNumberDomainColumns() const override { return 0; }
   size_t getNumberValuesPerArgument() const override { return 2; }
   size_t getDefaultDomainSize() const override { return 5; }
-  void functionGeneral(const FunctionDomainGeneral &generalDomain,
+  void functionGeneral(const FunctionDomainGeneral &,
                        FunctionValues &values) const override {
     double a = getParameter(0);
     auto n = getDefaultDomainSize();

@@ -331,7 +331,7 @@ size_t CrystalFieldPeaks::getDefaultDomainSize() const {
 }
 
 void CrystalFieldPeaks::functionGeneral(
-    const API::FunctionDomainGeneral &generalDomain,
+    const API::FunctionDomainGeneral &,
     API::FunctionValues &values) const {
 
   auto ion = getAttribute("Ion").asString();
@@ -413,7 +413,7 @@ void CrystalFieldPeaks::functionGeneral(
   DoubleFortranMatrix iEnergies;
   const double de = getAttribute("ToleranceEnergy").asDouble();
   const double di = getAttribute("ToleranceIntensity").asDouble();
-  calculateIntensities(nre, en, wf, temperature, de, di, degeneration,
+  calculateIntensities(nre, en, wf, temperature, de, degeneration,
                        eEnergies, iEnergies);
 
   DoubleFortranVector eExcitations;

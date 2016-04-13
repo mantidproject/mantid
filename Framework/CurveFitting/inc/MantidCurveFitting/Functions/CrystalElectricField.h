@@ -20,7 +20,7 @@ calculateEigesystem(DoubleFortranVector &eigenvalues,
 void MANTID_CURVEFITTING_DLL
 calculateIntensities(int nre, const DoubleFortranVector &energies,
                      const ComplexFortranMatrix &wavefunctions,
-                     double temperature, double de, double di,
+                     double temperature, double de,
                      IntFortranVector &degeneration,
                      DoubleFortranVector &e_energies,
                      DoubleFortranMatrix &i_energies);

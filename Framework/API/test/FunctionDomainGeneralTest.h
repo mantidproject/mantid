@@ -24,7 +24,7 @@ public:
     return typeid(T *);
   }
   /// Prints out the value to a stream
-  virtual void print(size_t index, std::ostream &s) const {
+  virtual void print(size_t index, std::ostream &) const {
     throw std::logic_error("Not implemented");
   }
   /// Specialized type check
@@ -36,25 +36,25 @@ public:
   /// Virtual constructor. Fully clone any column.
   virtual Column *clone() const { throw std::logic_error("Not implemented"); }
   /// Cast an element to double if possible
-  virtual double toDouble(size_t index) const {
+  virtual double toDouble(size_t) const {
     throw std::logic_error("Not implemented");
   }
   /// Assign an element from double if possible
-  virtual void fromDouble(size_t index, double value) {
+  virtual void fromDouble(size_t, double) {
     throw std::logic_error("Not implemented");
   }
 
 protected:
   /// Sets the new column size.
-  virtual void resize(size_t count) {
+  virtual void resize(size_t) {
     throw std::logic_error("Not implemented");
   }
   /// Inserts an item.
-  virtual void insert(size_t index) {
+  virtual void insert(size_t) {
     throw std::logic_error("Not implemented");
   }
   /// Removes an item.
-  virtual void remove(size_t index) {
+  virtual void remove(size_t) {
     throw std::logic_error("Not implemented");
   }
   /// Pointer to a data element

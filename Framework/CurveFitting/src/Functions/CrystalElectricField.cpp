@@ -786,11 +786,9 @@ int no(int i, const IntFortranVector &d, int n) {
 /// @param i_energies :: Intensities of the degenerated energy levels.
 /// @param de :: Energy levels which are closer than de are assumed to be
 ///              degenerated.
-/// @param di :: Only those excitations are taken into account whose intensities
-///              are greater or equal than di.
 void deg_on(const DoubleFortranVector &energy, const DoubleFortranMatrix &mat,
             IntFortranVector &degeneration, DoubleFortranVector &e_energies,
-            DoubleFortranMatrix &i_energies, double de, double di) {
+            DoubleFortranMatrix &i_energies, double de) {
   //  real*8  energy(17)           ! already defined in CF_FABI.INC
   //  real*8  mat(17,17)
   //	integer degeneration(17*17)  ! stores the degeneration of a level
@@ -849,14 +847,12 @@ void deg_on(const DoubleFortranVector &energy, const DoubleFortranMatrix &mat,
 /// @param temperature :: The temperature.
 /// @param de :: Energy levels which are closer than de are assumed to be
 ///              degenerated.
-/// @param di :: Only those excitations are taken into account whose intensities
-///              are greater or equal than di.
 /// @param degeneration :: Degeneration number for each transition.
 /// @param e_energies :: Energy values of the degenerated energy levels.
 /// @param i_energies :: Intensities of the degenerated energy levels.
 void calculateIntensities(int nre, const DoubleFortranVector &energies,
                           const ComplexFortranMatrix &wavefunctions,
-                          double temperature, double de, double di,
+                          double temperature, double de,
                           IntFortranVector &degeneration,
                           DoubleFortranVector &e_energies,
                           DoubleFortranMatrix &i_energies) {
@@ -884,7 +880,7 @@ void calculateIntensities(int nre, const DoubleFortranVector &energies,
   intcalc(pi, r0, gj, occupation_factor, jt2mat, energies, mat, dim,
           temperature);
 
-  deg_on(energies, mat, degeneration, e_energies, i_energies, de, di);
+  deg_on(energies, mat, degeneration, e_energies, i_energies, de);
 }
 
 /// Calculate the excitations (transition energies) and their intensities.
