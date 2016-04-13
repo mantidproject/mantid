@@ -34,6 +34,7 @@ set ( TEST_PY_FILES
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
+  GSASIIFitPeaksTest.py
   GetEiT0atSNSTest.py
   GetNegMuMuonicXRDTest.py
   IndirectAnnulusAbsorptionTest.py
