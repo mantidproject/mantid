@@ -9,8 +9,9 @@
 using Mantid::Kernel::ConstIterable;
 using Mantid::Kernel::VectorOf;
 
-class ConstIterableTester : public VectorOf<ConstIterableTester>,
-                            public ConstIterable<ConstIterableTester> {
+class MANTID_KERNEL_DLL ConstIterableTester
+    : public VectorOf<ConstIterableTester>,
+      public ConstIterable<ConstIterableTester> {
   using VectorOf<ConstIterableTester>::VectorOf;
   using VectorOf<ConstIterableTester>::operator=;
 };
