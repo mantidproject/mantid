@@ -844,7 +844,7 @@ API::LogManager_sptr PeaksWorkspace::logs() {
 }
 
 ITableWorkspace *
-PeaksWorkspace::doCloneColumns(const std::vector<std::string> &colNames) const {
+PeaksWorkspace::doCloneColumns(const std::vector<std::string> &) const {
   throw Kernel::Exception::NotImplementedError(
       "PeaksWorkspace cannot clone columns.");
 }

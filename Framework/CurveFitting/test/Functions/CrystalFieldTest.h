@@ -121,7 +121,6 @@ public:
     DoubleFortranVector e_energies;
     DoubleFortranMatrix i_energies;
     const double de = 1e-10;
-    const double di = 1e-10;
     calculateIntensities(nre, en, wf, 25.0, de, degeneration, e_energies,
                          i_energies);
 

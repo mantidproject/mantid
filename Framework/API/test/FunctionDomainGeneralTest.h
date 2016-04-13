@@ -24,7 +24,7 @@ public:
     return typeid(T *);
   }
   /// Prints out the value to a stream
-  virtual void print(size_t index, std::ostream &) const {
+  virtual void print(size_t, std::ostream &) const {
     throw std::logic_error("Not implemented");
   }
   /// Specialized type check
