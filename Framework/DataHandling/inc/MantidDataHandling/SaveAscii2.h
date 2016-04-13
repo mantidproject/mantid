@@ -78,6 +78,9 @@ private:
   void populateSpectrumNumberMetaData();
   void populateAngleMetaData();
   void populateAllMetaData();
+  bool
+  findElementInUnorderedStringVector(const std::vector<std::string> &vector,
+                                     const std::string &toFind);
 
   /// Map the separator options to their string equivalents
   std::map<std::string, std::string> m_separatorIndex;
@@ -92,6 +95,7 @@ private:
   std::vector<std::string> m_metaData;
   std::map<std::string, std::vector<std::string>> m_metaDataMap;
   spec2index_map m_specToIndexMap;
+
 };
 } // namespace DataHandling
 } // namespace Mantid
