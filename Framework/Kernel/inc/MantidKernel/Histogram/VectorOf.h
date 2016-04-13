@@ -83,7 +83,6 @@ public:
   explicit operator bool() const { return m_data.operator bool(); }
 
   size_t size() const { return m_data->size(); }
-  void resize(size_t size) { m_data.access().resize(size); }
 
   // Note that this function returns the internal data of VectorOf, i.e., does
   // not forward to std::vector::data().
