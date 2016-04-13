@@ -277,16 +277,19 @@ public:
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
+    int specID;
     std::string header1, header2, header3, separator, comment;
 
     // Test that the first few column headers, separator and first two bins are
     // as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3;
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
+        specID;
     TS_ASSERT_EQUALS(comment, "#");
     TS_ASSERT_EQUALS(separator, ",");
     TS_ASSERT_EQUALS(header1, "X");
     TS_ASSERT_EQUALS(header2, "Y");
     TS_ASSERT_EQUALS(header3, "E");
+    TS_ASSERT_EQUALS(specID, 1);
 
     in.close();
 
@@ -455,6 +458,19 @@ public:
     TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
+  }
+
+  void test_fail_spectrum_number_in_meta_data_for_non_spectrum_axis_ws() {
+	  Mantid::DataObjects::Workspace2D_sptr wsToSave;
+	  writeSampleWS(wsToSave, false);
+
+	  SaveAscii2 save;
+	  std::string filename = initSaveAscii2(save);
+
+	  TS_ASSERT_THROWS_NOTHING(save.setProperty("SpectrumMetaData", "SpectrumNumber"));
+	  TS_ASSERT_THROWS_ANYTHING(save.execute());
+
+	  AnalysisDataService::Instance().remove(m_name);
   }
 
   void test_fail_invalid_IndexMin_Max_Overlap() {
