@@ -71,12 +71,9 @@ void SaveAscii2::init() {
                   "Character(s) to put in front of comment lines.");
 
   // For the ListValidator
-  std::string spacers[6][2] = {{"CSV", ","},
-                               {"Tab", "\t"},
-                               {"Space", " "},
-                               {"Colon", ":"},
-                               {"SemiColon", ";"},
-                               {"UserDefined", "UserDefined"}};
+  std::string spacers[6][2] = {
+      {"CSV", ","},   {"Tab", "\t"},      {"Space", " "},
+      {"Colon", ":"}, {"SemiColon", ";"}, {"UserDefined", "UserDefined"}};
   std::vector<std::string> sepOptions;
   for (auto &spacer : spacers) {
     std::string option = spacer[0];
@@ -488,14 +485,14 @@ void SaveAscii2::populateAllMetaData() {
 
 bool SaveAscii2::findElementInUnorderedStringVector(
     const std::vector<std::string> &vector, const std::string &toFind) {
-	auto containsElement = false;
-	for (auto iter = vector.begin(); iter != vector.end(); ++iter) {
-		const auto vectorElement = *iter;
-		if (vectorElement.compare(toFind) == 0) {
-			containsElement = true;
-		}
-	}
-	return containsElement;
+  auto containsElement = false;
+  for (auto iter = vector.begin(); iter != vector.end(); ++iter) {
+    const auto vectorElement = *iter;
+    if (vectorElement.compare(toFind) == 0) {
+      containsElement = true;
+    }
+  }
+  return containsElement;
 }
 
 } // namespace DataHandling

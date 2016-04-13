@@ -461,16 +461,17 @@ public:
   }
 
   void test_fail_spectrum_number_in_meta_data_for_non_spectrum_axis_ws() {
-	  Mantid::DataObjects::Workspace2D_sptr wsToSave;
-	  writeSampleWS(wsToSave, false);
+    Mantid::DataObjects::Workspace2D_sptr wsToSave;
+    writeSampleWS(wsToSave, false);
 
-	  SaveAscii2 save;
-	  std::string filename = initSaveAscii2(save);
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
 
-	  TS_ASSERT_THROWS_NOTHING(save.setProperty("SpectrumMetaData", "SpectrumNumber"));
-	  TS_ASSERT_THROWS_ANYTHING(save.execute());
+    TS_ASSERT_THROWS_NOTHING(
+        save.setProperty("SpectrumMetaData", "SpectrumNumber"));
+    TS_ASSERT_THROWS_ANYTHING(save.execute());
 
-	  AnalysisDataService::Instance().remove(m_name);
+    AnalysisDataService::Instance().remove(m_name);
   }
 
   void test_fail_invalid_IndexMin_Max_Overlap() {
