@@ -274,7 +274,8 @@ void TableWorkspace::sort(std::vector<std::pair<std::string, bool>> &criteria) {
 
 /// Clone the workspace keeping only selected columns.
 /// @param colNames :: Names of columns to clone.
-API::ITableWorkspace *TableWorkspace::doCloneColumns(const std::vector<std::string> &colNames) const {
+API::ITableWorkspace *
+TableWorkspace::doCloneColumns(const std::vector<std::string> &colNames) const {
   if (colNames.empty()) {
     return new TableWorkspace(*this);
   }
@@ -282,7 +283,8 @@ API::ITableWorkspace *TableWorkspace::doCloneColumns(const std::vector<std::stri
   ws->setRowCount(rowCount());
   auto it = m_columns.cbegin();
   while (it != m_columns.cend()) {
-    if (colNames.end() != std::find(colNames.begin(), colNames.end(), (**it).name())) {
+    if (colNames.end() !=
+        std::find(colNames.begin(), colNames.end(), (**it).name())) {
       ws->addColumn(boost::shared_ptr<API::Column>((*it)->clone()));
     }
     ++it;

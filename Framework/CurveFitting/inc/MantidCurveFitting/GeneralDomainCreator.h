@@ -61,6 +61,7 @@ public:
 
   void declareDatasetProperties(const std::string &suffix = "",
                                 bool addProp = true) override;
+
 private:
   /// Retrive the input workspace from the property manager.
   boost::shared_ptr<API::ITableWorkspace> getInputWorkspace() const;

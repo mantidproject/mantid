@@ -74,7 +74,8 @@ void GeneralDomainCreator::declareDatasetProperties(const std::string &suffix,
 }
 
 /// Retrive the input workspace from the property manager.
-boost::shared_ptr<API::ITableWorkspace> GeneralDomainCreator::getInputWorkspace() const {
+boost::shared_ptr<API::ITableWorkspace>
+GeneralDomainCreator::getInputWorkspace() const {
   auto workspacePropertyName = m_workspacePropertyNames.front();
   if (!m_manager->existsProperty(workspacePropertyName)) {
     return API::ITableWorkspace_sptr();
@@ -86,7 +87,6 @@ boost::shared_ptr<API::ITableWorkspace> GeneralDomainCreator::getInputWorkspace(
   }
   return tableWorkspace;
 }
-
 
 /**
  * Creates a domain corresponding to the assigned MatrixWorkspace
@@ -186,12 +186,12 @@ Workspace_sptr GeneralDomainCreator::createOutputWorkspace(
   }
   size_t rowCount = domain->size();
   if (rowCount == 0) {
-    auto &generalFunction = dynamic_cast<IFunctionGeneral&>(*function);
+    auto &generalFunction = dynamic_cast<IFunctionGeneral &>(*function);
     rowCount = generalFunction.getDefaultDomainSize();
   }
 
   // Clone the data and domain columns from inputWorkspace to outputWorkspace.
-  //auto &generalDomain = *static_cast<FunctionDomainGeneral *>(domain.get());
+  // auto &generalDomain = *static_cast<FunctionDomainGeneral *>(domain.get());
 
   ITableWorkspace_sptr outputWorkspace;
 
@@ -244,8 +244,8 @@ Workspace_sptr GeneralDomainCreator::createOutputWorkspace(
 
   if (!outputWorkspacePropertyName.empty()) {
     declareProperty(
-        new API::WorkspaceProperty<API::ITableWorkspace>(outputWorkspacePropertyName,
-                                                    "", Kernel::Direction::Output),
+        new API::WorkspaceProperty<API::ITableWorkspace>(
+            outputWorkspacePropertyName, "", Kernel::Direction::Output),
         "Name of the output Workspace holding resulting simulated values");
     m_manager->setPropertyValue(outputWorkspacePropertyName,
                                 baseName + "Workspace");

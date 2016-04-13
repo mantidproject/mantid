@@ -208,7 +208,7 @@ public:
 
   void test_int_array() {
     typedef FortranVector<std::vector<int>> FortranIntVector;
-    FortranIntVector ivec(1,3);
+    FortranIntVector ivec(1, 3);
     ivec(1) = 11;
     ivec(2) = 22;
     ivec(3) = 33;

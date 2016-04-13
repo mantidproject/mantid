@@ -329,8 +329,11 @@ protected:
   void removeFromColumn(Column *c, size_t index) { c->remove(index); }
 
 private:
-  ITableWorkspace *doClone() const override {return doCloneColumns(std::vector<std::string>());}
-  virtual ITableWorkspace *doCloneColumns(const std::vector<std::string> &colNames) const = 0;
+  ITableWorkspace *doClone() const override {
+    return doCloneColumns(std::vector<std::string>());
+  }
+  virtual ITableWorkspace *
+  doCloneColumns(const std::vector<std::string> &colNames) const = 0;
 };
 
 // =====================================================================================

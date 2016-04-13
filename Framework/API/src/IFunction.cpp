@@ -1122,14 +1122,14 @@ void IFunction::unfixParameter(const std::string &name) {
 
 /// Fix all parameters
 void IFunction::fixAll() {
-  for(size_t i = 0; i < nParams(); ++i) {
+  for (size_t i = 0; i < nParams(); ++i) {
     fix(i);
   }
 }
 
 /// Free all parameters
 void IFunction::unfixAll() {
-  for(size_t i = 0; i < nParams(); ++i) {
+  for (size_t i = 0; i < nParams(); ++i) {
     fix(i);
   }
 }

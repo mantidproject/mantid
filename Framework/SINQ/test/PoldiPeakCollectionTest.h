@@ -167,7 +167,8 @@ public:
     ITableWorkspace_sptr newDummy(m_dummyData->clone().release());
     newDummy->logs()->addProperty<std::string>("IntensityType", "Integral");
 
-    PoldiPeakCollection otherCollection(boost::static_pointer_cast<TableWorkspace>(newDummy));
+    PoldiPeakCollection otherCollection(
+        boost::static_pointer_cast<TableWorkspace>(newDummy));
     TS_ASSERT_EQUALS(otherCollection.intensityType(),
                      PoldiPeakCollection::Integral);
   }
@@ -176,7 +177,8 @@ public:
     ITableWorkspace_sptr newDummy(m_dummyData->clone().release());
     newDummy->logs()->addProperty<std::string>("IntensityType", "Integral");
 
-    PoldiPeakCollection collection(boost::static_pointer_cast<TableWorkspace>(newDummy));
+    PoldiPeakCollection collection(
+        boost::static_pointer_cast<TableWorkspace>(newDummy));
 
     TableWorkspace_sptr compare = collection.asTableWorkspace();
 
@@ -228,7 +230,8 @@ public:
     UnitCell cell(1, 2, 3, 90, 91, 92);
     newDummy->logs()->addProperty<std::string>("UnitCell", unitCellToStr(cell));
 
-    PoldiPeakCollection collection(boost::static_pointer_cast<TableWorkspace>(newDummy));
+    PoldiPeakCollection collection(
+        boost::static_pointer_cast<TableWorkspace>(newDummy));
     TS_ASSERT_EQUALS(unitCellToStr(collection.unitCell()), unitCellToStr(cell));
   }
 

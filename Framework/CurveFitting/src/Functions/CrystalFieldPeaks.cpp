@@ -14,23 +14,21 @@ DECLARE_FUNCTION(CrystalFieldPeaks)
 namespace {
 
 // Maps ion name to its int code.
-std::map<std::string, int> ion2nre{
-  {"Ce", 1},
-  {"Pr", 2},
-  {"Nd", 3},
-  {"Pm", 4},
-  {"Sm", 5},
-  {"Eu", 6},
-  {"Gd", 7},
-  {"Tb", 8},
-  {"Dy", 9},
-  {"Ho", 10},
-  {"Er", 11},
-  {"Tm", 12},
-  {"Yb", 13}
-};
+std::map<std::string, int> ion2nre{{"Ce", 1},
+                                   {"Pr", 2},
+                                   {"Nd", 3},
+                                   {"Pm", 4},
+                                   {"Sm", 5},
+                                   {"Eu", 6},
+                                   {"Gd", 7},
+                                   {"Tb", 8},
+                                   {"Dy", 9},
+                                   {"Ho", 10},
+                                   {"Er", 11},
+                                   {"Tm", 12},
+                                   {"Yb", 13}};
 
-void fixx(API::IFunction& fun, const std::string& par) {
+void fixx(API::IFunction &fun, const std::string &par) {
   fun.setParameter(par, 0.0);
   fun.fixParameter(par);
   const std::string ipar = "I" + par;
@@ -38,7 +36,7 @@ void fixx(API::IFunction& fun, const std::string& par) {
   fun.fixParameter(ipar);
 }
 
-void free(API::IFunction& fun, const std::string& par, bool realOnly) {
+void free(API::IFunction &fun, const std::string &par, bool realOnly) {
   fun.unfixParameter(par);
   const std::string ipar = "I" + par;
   if (realOnly) {
@@ -53,10 +51,10 @@ const bool real = true;
 const bool cmplx = false;
 
 // Set symmetry C1 or Ci
-void setSymmetryC1(API::IFunction& fun) {
+void setSymmetryC1(API::IFunction &fun) {
   fun.clearTies();
   auto i = fun.parameterIndex("B20");
-  for(;i < fun.nParams(); ++i) {
+  for (; i < fun.nParams(); ++i) {
     fun.unfix(i);
   }
   fun.setParameter("IB21", 0.0);
@@ -64,7 +62,7 @@ void setSymmetryC1(API::IFunction& fun) {
 }
 
 // Set symmetry C2, Cs or C2h
-void setSymmetryC2(API::IFunction& fun) {
+void setSymmetryC2(API::IFunction &fun) {
   fun.clearTies();
   fun.unfixParameter("B20");
   fun.unfixParameter("B40");
@@ -84,7 +82,7 @@ void setSymmetryC2(API::IFunction& fun) {
 }
 
 // Set symmetry C2v, D2 or D2h
-void setSymmetryC2v(API::IFunction& fun) {
+void setSymmetryC2v(API::IFunction &fun) {
   fun.clearTies();
   fun.unfixParameter("B20");
   fun.unfixParameter("B40");
@@ -104,7 +102,7 @@ void setSymmetryC2v(API::IFunction& fun) {
 }
 
 // Set symmetry C4, S4 or C4h
-void setSymmetryC4(API::IFunction& fun) {
+void setSymmetryC4(API::IFunction &fun) {
   fun.clearTies();
   fun.unfixParameter("B20");
   fun.unfixParameter("B40");
@@ -124,7 +122,7 @@ void setSymmetryC4(API::IFunction& fun) {
 }
 
 // Set symmetry D4, C4v, D2d or D4h
-void setSymmetryD4(API::IFunction& fun) {
+void setSymmetryD4(API::IFunction &fun) {
   fun.clearTies();
   fun.unfixParameter("B20");
   fun.unfixParameter("B40");
@@ -144,7 +142,7 @@ void setSymmetryD4(API::IFunction& fun) {
 }
 
 // Set symmetry C3 or S6
-void setSymmetryC3(API::IFunction& fun) {
+void setSymmetryC3(API::IFunction &fun) {
   fun.clearTies();
   fun.unfixParameter("B20");
   fun.unfixParameter("B40");
@@ -164,7 +162,7 @@ void setSymmetryC3(API::IFunction& fun) {
 }
 
 // Set symmetry D3, C3v or D3d
-void setSymmetryD3(API::IFunction& fun) {
+void setSymmetryD3(API::IFunction &fun) {
   fun.clearTies();
   fun.unfixParameter("B20");
   fun.unfixParameter("B40");
@@ -184,7 +182,7 @@ void setSymmetryD3(API::IFunction& fun) {
 }
 
 // Set symmetry C6, C3h, C6h, D6, C6v, D3h, or D6h
-void setSymmetryC6(API::IFunction& fun) {
+void setSymmetryC6(API::IFunction &fun) {
   fun.clearTies();
   fun.unfixParameter("B20");
   fun.unfixParameter("B40");
@@ -204,7 +202,7 @@ void setSymmetryC6(API::IFunction& fun) {
 }
 
 // Set symmetry T, Td, Th, O, or Oh
-void setSymmetryT(API::IFunction& fun) {
+void setSymmetryT(API::IFunction &fun) {
   fun.clearTies();
   fun.setParameter("B20", 0.0);
   fun.fixParameter("B20");
@@ -227,49 +225,48 @@ void setSymmetryT(API::IFunction& fun) {
 }
 
 /// Maps symmetry group names to the symmetry setting functions
-std::map<std::string, std::function<void(API::IFunction&)>> symmetryMap{
-// Set symmetry C1 or Ci
-  {"C1", setSymmetryC1},
-  {"Ci", setSymmetryC1},
-// Set symmetry C2, Cs or C2h
-  {"C2", setSymmetryC2},
-  {"Cs", setSymmetryC2},
-  {"C2h", setSymmetryC2},
-// Set symmetry C2v, D2 or D2h
-  {"C2v", setSymmetryC2v},
-  {"D2", setSymmetryC2v},
-  {"D2h", setSymmetryC2v},
-// Set symmetry C4, S4 or C4h
-  {"C4", setSymmetryC4},
-  {"S4", setSymmetryC4},
-  {"C4h", setSymmetryC4},
-// Set symmetry D4, C4v, D2d or D4h
-  {"D4", setSymmetryD4},
-  {"C4v", setSymmetryD4},
-  {"D2d", setSymmetryD4},
-  {"D4h", setSymmetryD4},
-// Set symmetry C3 or S6
-  {"C3", setSymmetryC3},
-  {"S6", setSymmetryC3},
-// Set symmetry D3, C3v or D3d
-  {"D3", setSymmetryD3},
-  {"C3v", setSymmetryD3},
-  {"D3d", setSymmetryD3},
-// Set symmetry C6, C3h, C6h, D6, C6v, D3h, or D6h
-  {"C6", setSymmetryC6},
-  {"C3h", setSymmetryC6},
-  {"C6h", setSymmetryC6},
-  {"D6", setSymmetryC6},
-  {"C6v", setSymmetryC6},
-  {"D3h", setSymmetryC6},
-  {"D6h", setSymmetryC6},
-// Set symmetry T, Td, Th, O, or Oh
-  {"T", setSymmetryT},
-  {"Td", setSymmetryT},
-  {"Th", setSymmetryT},
-  {"O", setSymmetryT},
-  {"Oh", setSymmetryT}
-};
+std::map<std::string, std::function<void(API::IFunction &)>> symmetryMap{
+    // Set symmetry C1 or Ci
+    {"C1", setSymmetryC1},
+    {"Ci", setSymmetryC1},
+    // Set symmetry C2, Cs or C2h
+    {"C2", setSymmetryC2},
+    {"Cs", setSymmetryC2},
+    {"C2h", setSymmetryC2},
+    // Set symmetry C2v, D2 or D2h
+    {"C2v", setSymmetryC2v},
+    {"D2", setSymmetryC2v},
+    {"D2h", setSymmetryC2v},
+    // Set symmetry C4, S4 or C4h
+    {"C4", setSymmetryC4},
+    {"S4", setSymmetryC4},
+    {"C4h", setSymmetryC4},
+    // Set symmetry D4, C4v, D2d or D4h
+    {"D4", setSymmetryD4},
+    {"C4v", setSymmetryD4},
+    {"D2d", setSymmetryD4},
+    {"D4h", setSymmetryD4},
+    // Set symmetry C3 or S6
+    {"C3", setSymmetryC3},
+    {"S6", setSymmetryC3},
+    // Set symmetry D3, C3v or D3d
+    {"D3", setSymmetryD3},
+    {"C3v", setSymmetryD3},
+    {"D3d", setSymmetryD3},
+    // Set symmetry C6, C3h, C6h, D6, C6v, D3h, or D6h
+    {"C6", setSymmetryC6},
+    {"C3h", setSymmetryC6},
+    {"C6h", setSymmetryC6},
+    {"D6", setSymmetryC6},
+    {"C6v", setSymmetryC6},
+    {"D3h", setSymmetryC6},
+    {"D6h", setSymmetryC6},
+    // Set symmetry T, Td, Th, O, or Oh
+    {"T", setSymmetryT},
+    {"Td", setSymmetryT},
+    {"Th", setSymmetryT},
+    {"O", setSymmetryT},
+    {"Oh", setSymmetryT}};
 
 } // anonymous namespace
 
@@ -438,7 +435,8 @@ void CrystalFieldPeaks::functionGeneral(
 }
 
 /// Perform a castom action when an attribute is set.
-void CrystalFieldPeaks::setAttribute(const std::string &name, const IFunction::Attribute &attr) {
+void CrystalFieldPeaks::setAttribute(const std::string &name,
+                                     const IFunction::Attribute &attr) {
   if (name == "Symmetry") {
     auto symmIter = symmetryMap.find(attr.asString());
     if (symmIter == symmetryMap.end()) {

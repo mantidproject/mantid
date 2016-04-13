@@ -293,8 +293,10 @@ protected:
   TableWorkspace(const TableWorkspace &other);
 
 private:
-  //TableWorkspace *doClone() const override { return new TableWorkspace(*this); }
-  ITableWorkspace *doCloneColumns(const std::vector<std::string> &colNames) const override;
+  // TableWorkspace *doClone() const override { return new
+  // TableWorkspace(*this); }
+  ITableWorkspace *
+  doCloneColumns(const std::vector<std::string> &colNames) const override;
 
   /// template method to find a given value in a table.
   template <typename Type>

@@ -11,7 +11,7 @@ namespace API {
 class Column;
 
 /**
-    Represent a domain of a very general type. 
+    Represent a domain of a very general type.
 
     Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
     National Laboratory & European Spallation Source
@@ -44,6 +44,7 @@ public:
   void addColumn(boost::shared_ptr<Column> column);
   /// Get i-th column
   boost::shared_ptr<Column> getColumn(size_t i) const;
+
 private:
   /// Columns containing function arguments
   std::vector<boost::shared_ptr<Column>> m_columns;

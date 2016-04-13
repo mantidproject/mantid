@@ -11,40 +11,58 @@ using namespace Mantid::API;
 
 namespace {
 
-template<typename T>
-class TestColumn: public Column {
+template <typename T> class TestColumn : public Column {
 public:
   /// Constructor
   TestColumn(size_t n) : m_data(n) {}
   /// Number of individual elements in the column.
-  virtual size_t size() const {return m_data.size();}
+  virtual size_t size() const { return m_data.size(); }
   /// Returns typeid for the data in the column
-  virtual const std::type_info &get_type_info() const {return typeid(T);}
+  virtual const std::type_info &get_type_info() const { return typeid(T); }
   /// Returns typeid for the pointer type to the data element in the column
-  virtual const std::type_info &get_pointer_type_info() const {return typeid(T*);}
+  virtual const std::type_info &get_pointer_type_info() const {
+    return typeid(T *);
+  }
   /// Prints out the value to a stream
-  virtual void print(size_t index, std::ostream &s) const {throw std::logic_error("Not implemented");}
+  virtual void print(size_t index, std::ostream &s) const {
+    throw std::logic_error("Not implemented");
+  }
   /// Specialized type check
-  virtual bool isBool() const {return false;}
+  virtual bool isBool() const { return false; }
   /// Must return overall memory size taken by the column.
-  virtual long int sizeOfData() const {throw std::logic_error("Not implemented");}
+  virtual long int sizeOfData() const {
+    throw std::logic_error("Not implemented");
+  }
   /// Virtual constructor. Fully clone any column.
-  virtual Column *clone() const {throw std::logic_error("Not implemented");}
+  virtual Column *clone() const { throw std::logic_error("Not implemented"); }
   /// Cast an element to double if possible
-  virtual double toDouble(size_t index) const {throw std::logic_error("Not implemented");}
+  virtual double toDouble(size_t index) const {
+    throw std::logic_error("Not implemented");
+  }
   /// Assign an element from double if possible
-  virtual void fromDouble(size_t index, double value) {throw std::logic_error("Not implemented");}
+  virtual void fromDouble(size_t index, double value) {
+    throw std::logic_error("Not implemented");
+  }
+
 protected:
   /// Sets the new column size.
-  virtual void resize(size_t count) {throw std::logic_error("Not implemented");}
+  virtual void resize(size_t count) {
+    throw std::logic_error("Not implemented");
+  }
   /// Inserts an item.
-  virtual void insert(size_t index) {throw std::logic_error("Not implemented");}
+  virtual void insert(size_t index) {
+    throw std::logic_error("Not implemented");
+  }
   /// Removes an item.
-  virtual void remove(size_t index) {throw std::logic_error("Not implemented");}
+  virtual void remove(size_t index) {
+    throw std::logic_error("Not implemented");
+  }
   /// Pointer to a data element
-  virtual void *void_pointer(size_t index) {return &m_data[index];}
+  virtual void *void_pointer(size_t index) { return &m_data[index]; }
   /// Pointer to a data element
-  virtual const void *void_pointer(size_t index) const {return &m_data[index];}
+  virtual const void *void_pointer(size_t index) const {
+    return &m_data[index];
+  }
   /// Data storage
   std::vector<T> m_data;
 };
@@ -53,7 +71,9 @@ protected:
 
 class FunctionDomainGeneralTest : public CxxTest::TestSuite {
 public:
-  static FunctionDomainGeneralTest *createSuite() { return new FunctionDomainGeneralTest(); }
+  static FunctionDomainGeneralTest *createSuite() {
+    return new FunctionDomainGeneralTest();
+  }
   static void destroySuite(FunctionDomainGeneralTest *suite) { delete suite; }
 
   void test_sizes() {
@@ -91,7 +111,6 @@ public:
     TS_ASSERT_EQUALS(strCol->cell<std::string>(1), "General");
     TS_ASSERT_EQUALS(strCol->cell<std::string>(2), "Domain");
   }
-
 };
 
 #endif /*FUNCTIONDOMAINGENERALTEST_H_*/

@@ -25,44 +25,46 @@ using Mantid::CurveFitting::GeneralDomainCreator;
 
 namespace {
 
-class TestFunction1: public IFunctionGeneral, public ParamFunction {
+class TestFunction1 : public IFunctionGeneral, public ParamFunction {
 public:
   TestFunction1() : IFunctionGeneral(), ParamFunction() {
     declareParameter("a", 1.0);
   }
-  std::string name() const override {return "TestFunction1";}
-  size_t getNumberDomainColumns() const override {return 2;}
-  size_t getNumberValuesPerArgument() const override {return 3;}
-  void functionGeneral(const FunctionDomainGeneral &generalDomain, FunctionValues &values) const override {
+  std::string name() const override { return "TestFunction1"; }
+  size_t getNumberDomainColumns() const override { return 2; }
+  size_t getNumberValuesPerArgument() const override { return 3; }
+  void functionGeneral(const FunctionDomainGeneral &generalDomain,
+                       FunctionValues &values) const override {
     double a = getParameter(0);
     auto x = generalDomain.getColumn(0);
     auto nam = generalDomain.getColumn(1);
     auto n = x->size();
-    for(size_t i = 0; i < n; ++i) {
+    for (size_t i = 0; i < n; ++i) {
       double v = a * x->toDouble(i);
       if (nam->cell<std::string>(i) == "Beta") {
         v *= 2.0;
       }
       values.setCalculated(i, v);
       values.setCalculated(i + n, v / 10.);
-      values.setCalculated(i + 2*n, v / 100.);
+      values.setCalculated(i + 2 * n, v / 100.);
     }
   }
 };
 
-class TestFunction2: public IFunctionGeneral, public ParamFunction {
+class TestFunction2 : public IFunctionGeneral, public ParamFunction {
 public:
   TestFunction2() : IFunctionGeneral(), ParamFunction() {
     declareParameter("a", 0.0);
   }
-  std::string name() const override {return "TestFunction2";}
-  size_t getNumberDomainColumns() const override {return 0;}
-  size_t getNumberValuesPerArgument() const override {return 2;}
-  size_t getDefaultDomainSize() const override {return 5;}
-  void functionGeneral(const FunctionDomainGeneral &generalDomain, FunctionValues &values) const override {
+  std::string name() const override { return "TestFunction2"; }
+  size_t getNumberDomainColumns() const override { return 0; }
+  size_t getNumberValuesPerArgument() const override { return 2; }
+  size_t getDefaultDomainSize() const override { return 5; }
+  void functionGeneral(const FunctionDomainGeneral &generalDomain,
+                       FunctionValues &values) const override {
     double a = getParameter(0);
     auto n = getDefaultDomainSize();
-    for(size_t i = 0; i < n; ++i) {
+    for (size_t i = 0; i < n; ++i) {
       values.setCalculated(i, a * double(i));
       values.setCalculated(i + n, a * (10.0 - double(i)));
     }
@@ -106,9 +108,9 @@ public:
 
     TableWorkspace_sptr ws = makeData1();
 
-    manager.declareProperty(
-        make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
-        "Name of the input Workspace");
+    manager.declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                                "InputWorkspace", "", Direction::Input),
+                            "Name of the input Workspace");
     manager.setProperty("InputWorkspace", ws);
     manager.setProperty("ArgumentColumn", "X");
     manager.setProperty("ArgumentColumn_1", "Name");
@@ -126,7 +128,7 @@ public:
     TS_ASSERT_EQUALS(domain->size(), 4);
     TS_ASSERT_EQUALS(values->size(), 12);
 
-    auto &generalDomain = static_cast<FunctionDomainGeneral&>(*domain);
+    auto &generalDomain = static_cast<FunctionDomainGeneral &>(*domain);
     TS_ASSERT_EQUALS(generalDomain.size(), 4);
     TS_ASSERT_EQUALS(generalDomain.columnCount(), 2);
     auto column = generalDomain.getColumn(0);
@@ -238,9 +240,9 @@ public:
 
     TableWorkspace_sptr ws = makeData2();
 
-    manager.declareProperty(
-        make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
-        "Name of the input Workspace");
+    manager.declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                                "InputWorkspace", "", Direction::Input),
+                            "Name of the input Workspace");
     manager.setProperty("InputWorkspace", ws);
     manager.setProperty("DataColumn", "Energies");
     manager.setProperty("DataColumn_1", "Intensities");
@@ -303,9 +305,9 @@ public:
 
     TableWorkspace_sptr ws = makeData1();
 
-    manager.declareProperty(
-        make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
-        "Name of the input Workspace");
+    manager.declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                                "InputWorkspace", "", Direction::Input),
+                            "Name of the input Workspace");
     manager.setProperty("InputWorkspace", ws);
     manager.setProperty("ArgumentColumn", "X");
     manager.setProperty("ArgumentColumn_1", "Name");
@@ -362,7 +364,6 @@ public:
     TS_ASSERT_EQUALS(column->cell<double>(2), 0.15);
   }
 
-
   void test_create_output_2() {
     auto fun = boost::shared_ptr<TestFunction2>(new TestFunction2);
     PropertyManager manager;
@@ -370,9 +371,9 @@ public:
     creator.declareDatasetProperties();
 
     TableWorkspace_sptr ws = makeData2();
-    manager.declareProperty(
-        make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
-        "Name of the input Workspace");
+    manager.declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                                "InputWorkspace", "", Direction::Input),
+                            "Name of the input Workspace");
     manager.setProperty("InputWorkspace", ws);
     manager.setProperty("DataColumn", "Energies");
     manager.setProperty("DataColumn_1", "Intensities");
@@ -414,7 +415,6 @@ public:
   }
 
 private:
-
   TableWorkspace_sptr makeData1(double wgt3col = 0.0) {
     TableWorkspace_sptr ws(new TableWorkspace);
     ws->addColumn("double", "X");

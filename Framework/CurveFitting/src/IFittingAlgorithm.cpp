@@ -181,8 +181,8 @@ void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
   IFunction_sptr fun = getProperty("Function");
   setDomainType();
 
-  IDomainCreator *creator = createDomainCreator(
-      fun.get(), workspacePropertyName, this, m_domainType);
+  IDomainCreator *creator =
+      createDomainCreator(fun.get(), workspacePropertyName, this, m_domainType);
 
   if (!m_domainCreator) {
     if (m_workspacePropertyNames.empty()) {
@@ -234,9 +234,8 @@ void IFittingAlgorithm::addWorkspaces() {
     if ((*prop).direction() == Kernel::Direction::Input &&
         dynamic_cast<API::IWorkspaceProperty *>(prop)) {
       const std::string workspacePropertyName = (*prop).name();
-      IDomainCreator *creator =
-          createDomainCreator(m_function.get(), workspacePropertyName,
-                              this, m_domainType);
+      IDomainCreator *creator = createDomainCreator(
+          m_function.get(), workspacePropertyName, this, m_domainType);
 
       const size_t n = std::string("InputWorkspace").size();
       const std::string suffix = (workspacePropertyName.size() > n)
