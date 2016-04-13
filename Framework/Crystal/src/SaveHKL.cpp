@@ -301,7 +301,7 @@ void SaveHKL::exec() {
   }
   // ============================== Save all Peaks
   // =========================================
-  std::vector<long unsigned int> banned;
+  std::set<size_t> banned;
   // Go through each peak at this run / bank
 
   // Go in order of run numbers
@@ -324,16 +324,16 @@ void SaveHKL::exec() {
     Peak &p = peaks[wi];
     if (p.getIntensity() == 0.0 || boost::math::isnan(p.getIntensity()) ||
         boost::math::isnan(p.getSigmaIntensity())) {
-      banned.push_back(wi);
+      banned.insert(wi);
       continue;
     }
     if (minIsigI != EMPTY_DBL() &&
         p.getIntensity() < std::abs(minIsigI * p.getSigmaIntensity())) {
-      banned.push_back(wi);
+      banned.insert(wi);
       continue;
     }
     if (minIntensity != EMPTY_DBL() && p.getIntensity() < minIntensity) {
-      banned.push_back(wi);
+      banned.insert(wi);
       continue;
     }
     int run = p.getRunNumber();
@@ -346,7 +346,7 @@ void SaveHKL::exec() {
         (p.getCol() < widthBorder || p.getRow() < widthBorder ||
          p.getCol() > (nCols - widthBorder) ||
          p.getRow() > (nRows - widthBorder))) {
-      banned.push_back(wi);
+      banned.insert(wi);
       continue;
     }
     // Take out the "bank" part of the bank name and convert to an int
@@ -363,7 +363,7 @@ void SaveHKL::exec() {
     double lambda = p.getWavelength();
     double dsp = p.getDSpacing();
     if (dsp < dMin || lambda < wlMin || lambda > wlMax) {
-      banned.push_back(wi);
+      banned.insert(wi);
       continue;
     }
     double transmission = 0;
@@ -376,7 +376,7 @@ void SaveHKL::exec() {
     //    % (H, K, L, FSQ, SIGFSQ, hstnum, WL, TBAR, CURHST, SEQNUM,
     //    TRANSMISSION, DN, TWOTH, DSP))
     if (p.getH() == 0 && p.getK() == 0 && p.getL() == 0) {
-      banned.push_back(wi);
+      banned.insert(wi);
       continue;
     }
     if (decimalHKL == EMPTY_INT())
@@ -392,8 +392,8 @@ void SaveHKL::exec() {
           << std::setprecision(decimalHKL) << -p.getL();
     double correc = scaleFactor;
     double relSigSpect = 0.0;
-    bankSequence = std::distance(uniqueBanks.begin(), uniqueBanks.find(bank));
-    runSequence = std::distance(uniqueRuns.begin(), uniqueRuns.find(run));
+    bankSequence = static_cast<int>(std::distance(uniqueBanks.begin(), uniqueBanks.find(bank)));
+    runSequence = static_cast<int>(std::distance(uniqueRuns.begin(), uniqueRuns.find(run)));
     if (correctPeaks) {
       // correct for the slant path throught the scintillator glass
       double mu = (9.614 * lambda) + 0.266; // mu for GS20 glass
@@ -448,8 +448,7 @@ void SaveHKL::exec() {
       }
       correc = scaleFactor * sinsqt * cmonx * sp_ratio /
                (wl4 * spect * transmission);
-      std::cout << scaleFactor <<"  "<< sinsqt <<"  "<< cmonx <<"  "<< sp_ratio<<"  "<<
-          wl4 <<"  "<< spect <<"  "<< transmission<<"  "<<p.getIntensity()<<"\n";
+
       if (inst->getName() == "TOPAZ" &&
           detScale.find(bank) != detScale.end())
         correc *= detScale[bank];
@@ -571,10 +570,10 @@ for i in range(3):
   out.flush();
   out.close();
   // delete banned peaks
-  /*for (std::vector<long unsigned int>::const_reverse_iterator it = banned.rbegin();
+  for (std::set<size_t>::const_reverse_iterator it = banned.rbegin();
        it != banned.rend(); ++it) {
     peaksW->removePeak(static_cast<int>(*it));
-  }*/
+  }
   setProperty("OutputWorkspace", peaksW);
 }
 /**
