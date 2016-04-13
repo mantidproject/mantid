@@ -1986,8 +1986,10 @@ bool MuonAnalysis::plotExists(const QString &wsName) {
 void MuonAnalysis::selectMultiPeak(const QString &wsName) {
   disableAllTools();
 
-  if (!plotExists(wsName))
+  if (!plotExists(wsName)) {
     plotSpectrum(wsName);
+    setCurrentDataName(wsName);
+  }
 
   QString code;
 
