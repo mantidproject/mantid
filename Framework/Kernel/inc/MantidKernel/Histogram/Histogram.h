@@ -78,6 +78,13 @@ public:
       return Points(m_points);
   }
 
+  template <typename T> void setPoints(T &&data) {
+    if (m_binEdges)
+      m_binEdges = BinEdges{};
+    m_xMode = XMode::Points;
+    m_points = std::forward<T>(data);
+  }
+
   // Temporary legacy interface to X
   void setX(const MantidVec &X) {
     if (xMode() == XMode::BinEdges)
