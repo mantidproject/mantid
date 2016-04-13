@@ -11,10 +11,18 @@ Description
 
 .. warning::
 
-   This algorithm is experimental and at the moemtn is being developed
+   This algorithm is experimental and at the moment is being developed
    for a specific technique. It might be changed, renamed or even
-   removed without a notification, should instrument scientists decide to do so.
+   removed without a notification, should instrument scientists decide
+   to do so.
 
+.. warning::
+
+   This algorithm requires GSAS-II, with custom modifications to
+   enable it to be used from Mantid. Please contact the Mantid
+   developers for details. The GSAS-II installation instructions are
+   available from the `GSAS-II websize
+   <https://subversion.xray.aps.anl.gov/trac/pyGSAS>`_.
 
 Uses `GSAS-II <https://subversion.xray.aps.anl.gov/trac/pyGSAS>`_
 (Toby & Von Dreele, 2013) as external software to fit peaks to a
