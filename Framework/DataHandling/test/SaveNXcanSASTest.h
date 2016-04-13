@@ -21,6 +21,45 @@ namespace
 const std::string nxclass = "NX_class";
 const std::string suffix = "01";
 
+struct NXcanSASTestParameters {
+    NXcanSASTestParameters() { initParameters(); }
+
+    void initParameters()
+    {
+        filename = "SaveNXcanSASTestFile.h5";
+        size = 100;
+        value = 10.23;
+        error = 3.45;
+        xerror = 2.3759 / 3.6;
+        hasDx = true;
+        xmin = 1.0;
+        xmax = 100.0;
+        runNumber = "1234";
+        userFile = "my_user_file";
+        workspaceTitle = "sample_worksapce";
+        instrumentName = "SANS2D";
+        radiationSource = "Spallation Neutron Source";
+        invalidDetectors = false;
+    }
+
+    std::string filename;
+    int size;
+    double value;
+    double error;
+    double xerror;
+    bool hasDx;
+    double xmin;
+    double xmax;
+    std::string runNumber;
+    std::string userFile;
+    std::string workspaceTitle;
+    std::string instrumentName;
+    std::string radiationSource;
+    std::vector<std::string> detectors;
+    bool invalidDetectors;
+    std::string idf;
+};
+
 std::string concatenateStringVector(std::vector<std::string> stringVector)
 {
     std::ostringstream os;
@@ -41,12 +80,14 @@ std::string getIDFfromWorkspace(Mantid::API::MatrixWorkspace_sptr workspace)
 }
 
 void setXValuesOn1DWorkspaceWithPointData(
-    Mantid::API::MatrixWorkspace_sptr workspace, double xmin, double xmax)
+    Mantid::API::MatrixWorkspace_sptr workspace,
+    NXcanSASTestParameters &parameters)
 {
     auto &xValues = workspace->dataX(0);
     auto size = xValues.size();
-    double binWidth = (xmax - xmin) / static_cast<double>(size - 1);
-
+    double binWidth = (parameters.xmax - parameters.xmin)
+                      / static_cast<double>(size - 1);
+    double xmin = parameters.xmin;
     for (size_t index = 0; index < size; ++index) {
         xValues[index] = xmin;
         xmin += binWidth;
@@ -107,78 +148,86 @@ public:
     void test_that_1D_workspace_without_transmissions_is_saved_correctly()
     {
         // Arrange
-        const std::string filename = "SaveNXcanSASTestFile.h5";
-        removeFile(filename);
-        const int size = 100;
-        const double value = 10.23;
-        const double error = 3.45;
-        const double xerror = 2.3759 / 3.6;
-        const double xmin = 1.0;
-        const double xmax = 100.0;
-        const std::string runNumber = "1234";
-        const std::string userFile("sdkfsdlfkjsdlfksjdlfksdjf");
-        const std::string workspaceTitle("sample_worksapce");
-        const std::string instrumentName = "SANS2D";
-        const std::string radiationSource("Spallation Neutron Source");
-        const std::vector<std::string> detectors
-            = {"front-detector", "rear-detector"};
-        auto ws = provide1DWorkspaceWithXError(size, value, error, xerror,
-                                               runNumber, userFile,
-                                               workspaceTitle, instrumentName);
+        NXcanSASTestParameters parameters;
+        removeFile(parameters.filename);
 
-        setXValuesOn1DWorkspaceWithPointData(ws, xmin, xmax);
+        parameters.detectors.push_back("front-detector");
+        parameters.detectors.push_back("rear-detector");
+        parameters.invalidDetectors = false;
 
-        auto idf = getIDFfromWorkspace(ws);
+        auto ws = provide1DWorkspace(parameters);
+        setXValuesOn1DWorkspaceWithPointData(ws, parameters);
+
+        parameters.idf = getIDFfromWorkspace(ws);
 
         // Act
-        save_file_no_issues(ws, filename, radiationSource, detectors);
+        save_file_no_issues(ws, parameters);
 
         // Assert
-        do_assert_that_entries_exist(size, value, error, xmin, xmax, xerror,
-                                     filename, runNumber, workspaceTitle,
-                                     instrumentName, idf, userFile,
-                                     radiationSource, detectors);
+        do_assert(parameters);
 
         // Clean up
-        removeFile(filename);
+        removeFile(parameters.filename);
     }
 
-    void test_that_unknown_detector_names_are_not_saved() {
-      // Arrange
-      const std::string filename = "SaveNXcanSASTestFile.h5";
-      removeFile(filename);
-      const int size = 100;
-      const double value = 10.23;
-      const double error = 3.45;
-      const double xerror = 2.3759 / 3.6;
-      const std::string runNumber = "1234";
-      const std::string userFile("sdkfsdlfkjsdlfksjdlfksdjf");
-      const std::string workspaceTitle("sample_worksapce");
-      const std::string instrumentName = "SANS2D";
-      const std::string radiationSource("Spallation Neutron Source");
-      const std::vector<std::string> detectors
-          = {"wrong-detector1", "wrong-detector2"};
-      auto ws = provide1DWorkspaceWithXError(size, value, error, xerror,
-                                             runNumber, userFile,
-                                             workspaceTitle, instrumentName);
+    void test_that_unknown_detector_names_are_not_saved()
+    {
+        // Arrange
+        NXcanSASTestParameters parameters;
+        removeFile(parameters.filename);
 
-      // Act
-      save_file_no_issues(ws, filename, radiationSource, detectors);
+        parameters.detectors.push_back("wrong-detector1");
+        parameters.detectors.push_back("wrong-detector2");
+        parameters.invalidDetectors = true;
 
-      // Assert
+        auto ws = provide1DWorkspace(parameters);
 
+        setXValuesOn1DWorkspaceWithPointData(ws, parameters);
 
+        parameters.idf = getIDFfromWorkspace(ws);
+
+        // Act
+        save_file_no_issues(ws, parameters);
+
+        // Assert
+        do_assert(parameters);
+
+        // Clean up
+        removeFile(parameters.filename);
     }
 
     void
     test_that_1D_workspace_without_transmissions_and_without_xerror_is_saved_correctly()
     {
+        // Arrange
+        NXcanSASTestParameters parameters;
+        removeFile(parameters.filename);
+
+        parameters.detectors.push_back("front-detector");
+        parameters.detectors.push_back("rear-detector");
+        parameters.invalidDetectors = false;
+
+        parameters.hasDx = false;
+
+        auto ws = provide1DWorkspace(parameters);
+        setXValuesOn1DWorkspaceWithPointData(ws, parameters);
+
+        parameters.idf = getIDFfromWorkspace(ws);
+
+        // Act
+        save_file_no_issues(ws, parameters);
+
+        // Assert
+        do_assert(parameters);
+
+        // Clean up
+        removeFile(parameters.filename);
     }
 
-    void tset_that_1D_workspace_with_transmissions_is_saved_correctly() {}
+    void test_that_1D_workspace_with_transmissions_is_saved_correctly() {}
 
 private:
-    void removeFile(const std::string &filename)
+    void removeFile(std::string filename)
     {
         if (Poco::File(filename).exists())
             Poco::File(filename).remove();
@@ -223,42 +272,45 @@ private:
         instAlg->execute();
     }
 
-    Mantid::API::MatrixWorkspace_sptr provide1DWorkspaceWithXError(
-        int size, double value, double error, double xerror,
-        const std::string &runNumber, const std::string &userFile,
-        const std::string &workspaceTitle, const std::string &instrumentName)
+    Mantid::API::MatrixWorkspace_sptr
+    provide1DWorkspace(NXcanSASTestParameters &parameters)
     {
-        // Create a sample 1D workspace
-        auto ws = WorkspaceCreationHelper::Create1DWorkspaceConstantWithXerror(
-            size, value, error, xerror);
-        ws->setTitle(workspaceTitle);
+        Mantid::API::MatrixWorkspace_sptr ws;
+        if (parameters.hasDx) {
+            ws = WorkspaceCreationHelper::Create1DWorkspaceConstantWithXerror(
+                parameters.size, parameters.value, parameters.error,
+                parameters.xerror);
+        } else {
+            ws = WorkspaceCreationHelper::Create1DWorkspaceConstant(
+                parameters.size, parameters.value, parameters.error);
+        }
+
+        ws->setTitle(parameters.workspaceTitle);
         ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create(
             "MomentumTransfer");
 
         // Add sample logs
-        set_logs(ws, runNumber, userFile);
+        set_logs(ws, parameters.runNumber, parameters.userFile);
 
         // Set instrument
-        set_instrument(ws, instrumentName);
+        set_instrument(ws, parameters.instrumentName);
 
         return ws;
     }
 
     void save_file_no_issues(Mantid::API::MatrixWorkspace_sptr workspace,
-                             const std::string &filename,
-                             const std::string &radiationSource,
-                             const std::vector<std::string> &detectors
-                             = std::vector<std::string>())
+                             NXcanSASTestParameters &parameters)
     {
         auto saveAlg
             = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
                 "SaveNXcanSAS");
         saveAlg->initialize();
-        saveAlg->setProperty("Filename", filename);
+        saveAlg->setProperty("Filename", parameters.filename);
         saveAlg->setProperty("InputWorkspace", workspace);
-        saveAlg->setProperty("RadiationSource", radiationSource);
-        if (!detectors.empty()) {
-            std::string detectorsAsString = concatenateStringVector(detectors);
+        saveAlg->setProperty("RadiationSource", parameters.radiationSource);
+        if (!parameters.detectors.empty()) {
+            std::string detectorsAsString
+                = concatenateStringVector(parameters.detectors);
             saveAlg->setProperty("DetectorNames", detectorsAsString);
         }
         TSM_ASSERT_THROWS_NOTHING("Should not throw anything",
@@ -360,6 +412,24 @@ private:
         }
     }
 
+    void do_assert_no_detectors(H5::Group &instrument)
+    {
+        // iterate over all groups and confirm that no SASdetecor is present
+        auto numObjects = instrument.getNumObjs();
+        for (hsize_t index = 0; index < numObjects; ++index) {
+            auto objectType = instrument.getObjTypeByIdx(index);
+            if (objectType == H5G_GROUP) {
+                auto subGroupName = instrument.getObjnameByIdx(index);
+                auto subGroup = instrument.openGroup(subGroupName);
+                auto classAttribute
+                    = Mantid::DataHandling::H5Util::readAttributeAsString(
+                        subGroup, nxclass);
+                TSM_ASSERT("Should not be a detector",
+                           classAttribute != sasInstrumentDetectorClassAttr);
+            }
+        }
+    }
+
     void do_assert_instrument(H5::Group &instrument,
                               const std::string &instrumentName,
                               const std::string &idf,
@@ -398,8 +468,8 @@ private:
         if (!invalidDetectors) {
             do_assert_detector(instrument, detectors);
         } else {
-          // Make sure that no SASdetector group exists
-          do_assert_no_detectors(instrument);
+            // Make sure that no SASdetector group exists
+            do_assert_no_detectors(instrument);
         }
     }
 
@@ -461,12 +531,49 @@ private:
         }
     }
 
-    void do_assert_data(H5::Group &data, int size, double value, double error,
-                        double xmin, double xmax, double xerror)
-    {
+    void do_assert_that_Q_dev_information_is_not_present(H5::Group& data) {
+      // Check that Q_uncertainty attribute is not saved
+      bool missingQUncertaintyAttribute = false;
+      try {
+        data.openAttribute(sasDataQUncertaintyAttr);
+      } catch(H5::AttributeIException&) {
+        missingQUncertaintyAttribute = true;
+      }
+      TSM_ASSERT("Should not have a Q_uncertainty attribute", missingQUncertaintyAttribute);
 
+      // Check that Qdev data set does not exist
+      bool missingQDevDataSet = false;
+      try {
+        data.openDataSet(sasDataQdev);
+      } catch(H5::GroupIException&) {
+        missingQDevDataSet = true;
+      } catch(H5::FileIException&) {
+        missingQDevDataSet = true;
+      }
+      TSM_ASSERT("Should not have a Qdev data set", missingQDevDataSet);
+
+      // Check that Q does not have an uncertainty set
+      bool missingQUncertaintyOnQDataSet = false;
+      try {
+        auto qDataSet = data.openDataSet(sasDataQ);
+        auto uncertainty = qDataSet.openAttribute(sasUncertaintyAttr);
+      } catch(H5::AttributeIException&) {
+        missingQUncertaintyOnQDataSet = true;
+      }
+      TSM_ASSERT("Data set should not have an uncertainty", missingQUncertaintyOnQDataSet);
+    }
+
+    void do_assert_data(H5::Group &data, int size, double value, double error,
+                        double xmin, double xmax, double xerror, bool hasDx)
+    {
         auto numAttributes = data.getNumAttrs();
-        TSM_ASSERT_EQUALS("Should have 6 attribute", 6, numAttributes);
+        if (hasDx) {
+            TSM_ASSERT_EQUALS("Should have 6 attribute", 6, numAttributes);
+        } else {
+            TSM_ASSERT_EQUALS(
+                "Should have 5 attribute, since Q_uncertainty is not present",
+                5, numAttributes);
+        }
 
         // NX_class attribute
         auto classAttribute
@@ -491,8 +598,6 @@ private:
         auto qAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(
             data, sasDataQIndicesAttr);
         TSM_ASSERT_EQUALS("Should be just 0", qAttribute, "0");
-
-        // Q_uncertainty attribute
 
         // Signal attribute
         auto signalAttribute
@@ -521,45 +626,53 @@ private:
         do_assert_1D_vector_with_increasing_entries(qDataSet, xmin, increment,
                                                     size);
 
-        // Q data set uncertainty attribute
-        auto uncertaintyQAttribute
-            = Mantid::DataHandling::H5Util::readAttributeAsString(
-                qDataSet, sasUncertaintyAttr);
-        TSM_ASSERT_EQUALS("Should be just Qdev", uncertaintyQAttribute,
-                          sasDataQdev);
+        if (hasDx) {
+            // Q data set uncertainty attribute
+            auto uncertaintyQAttribute
+                = Mantid::DataHandling::H5Util::readAttributeAsString(
+                    qDataSet, sasUncertaintyAttr);
+            TSM_ASSERT_EQUALS("Should be just Qdev", uncertaintyQAttribute,
+                              sasDataQdev);
 
-        // Q error data set
-        auto xErrorDataSet = data.openDataSet(sasDataQdev);
-        do_assert_1D_vector_with_same_entries(xErrorDataSet, xerror, size);
+            // Q error data set
+            auto xErrorDataSet = data.openDataSet(sasDataQdev);
+            do_assert_1D_vector_with_same_entries(xErrorDataSet, xerror, size);
+
+            // Q_uncertainty attribute on the SASdata group
+            auto qErrorAttribute
+                = Mantid::DataHandling::H5Util::readAttributeAsString(
+                    data, sasDataQUncertaintyAttr);
+            TSM_ASSERT_EQUALS("Should be just Qdev", qErrorAttribute,
+                              sasDataQdev);
+        } else {
+            do_assert_that_Q_dev_information_is_not_present(data);
+        }
     }
 
-    void do_assert_that_entries_exist(
-        int size, double value, double error, double xmin, double xmax,
-        double xerror, const std::string &filename, const std::string &run,
-        const std::string &title, const std::string &instrumentName,
-        const std::string &idf, const std::string &userFile,
-        const std::string &radiationSource,
-        const std::vector<std::string> &detectors,
-        bool invalidDetectors = false)
+    void do_assert(NXcanSASTestParameters &parameters)
     {
-        H5::H5File file(filename, H5F_ACC_RDONLY);
+        H5::H5File file(parameters.filename, H5F_ACC_RDONLY);
 
         // Check sasentry
         auto entry = file.openGroup(sasEntryGroupName + suffix);
-        do_assert_sasentry(entry, run, title);
+        do_assert_sasentry(entry, parameters.runNumber,
+                           parameters.workspaceTitle);
 
         // Check instrument
         auto instrument = entry.openGroup(sasInstrumentGroupName + suffix);
-        do_assert_instrument(instrument, instrumentName, idf, radiationSource,
-                             detectors, invalidDetectors);
+        do_assert_instrument(instrument, parameters.instrumentName,
+                             parameters.idf, parameters.radiationSource,
+                             parameters.detectors, parameters.invalidDetectors);
 
         // Check process
         auto process = entry.openGroup(sasProcessGroupName + suffix);
-        do_assert_process(process, userFile);
+        do_assert_process(process, parameters.userFile);
 
         // Check data
         auto data = entry.openGroup(sasDataGroupName + suffix);
-        do_assert_data(data, size, value, error, xmin, xmax, xerror);
+        do_assert_data(data, parameters.size, parameters.value,
+                       parameters.error, parameters.xmin, parameters.xmax,
+                       parameters.xerror, parameters.hasDx);
 
         file.close();
     }
