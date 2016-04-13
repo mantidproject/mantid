@@ -123,7 +123,6 @@ void SaveAscii2::init() {
 void SaveAscii2::exec() {
   // Get the workspace
   m_ws = getProperty("InputWorkspace");
-  m_specToIndexMap = m_ws->getSpectrumToWorkspaceIndexMap();
   int nSpectra = static_cast<int>(m_ws->getNumberHistograms());
   m_nBins = static_cast<int>(m_ws->blocksize());
   m_isHistogram = m_ws->isHistogramData();
@@ -132,15 +131,21 @@ void SaveAscii2::exec() {
   std::string metaDataString = getPropertyValue("SpectrumMetaData");
   if (metaDataString.size() != 0) {
     m_metaData = stringListToVector(metaDataString);
-  }
-  if (m_writeID) {
-    auto containsSpectrumNumber = false;
-    for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
-      const auto metaDataType = *iter;
-      if (metaDataType.compare("spectrumnumber") == 0) {
-        containsSpectrumNumber = true;
+    auto containsSpectrumNumber =
+        findElementInUnorderedStringVector(m_metaData, "spectrumnumber");
+    if (containsSpectrumNumber) {
+      try {
+        m_specToIndexMap = m_ws->getSpectrumToWorkspaceIndexMap();
+      } catch (std::runtime_error e) {
+        throw std::runtime_error("SpectrumNumber is present in "
+                                 "SpectrumMetaData but the workspace does not "
+                                 "have a SpectrumAxis.");
       }
     }
+  }
+  if (m_writeID) {
+    auto containsSpectrumNumber =
+        findElementInUnorderedStringVector(m_metaData, "spectrumnumber");
     if (!containsSpectrumNumber) {
       auto firstIter = m_metaData.begin();
       m_metaData.insert(firstIter, "spectrumnumber");
@@ -479,6 +484,18 @@ void SaveAscii2::populateAllMetaData() {
     if (metaDataType.compare("angle") == 0)
       populateAngleMetaData();
   }
+}
+
+bool SaveAscii2::findElementInUnorderedStringVector(
+    const std::vector<std::string> &vector, const std::string &toFind) {
+	auto containsElement = false;
+	for (auto iter = vector.begin(); iter != vector.end(); ++iter) {
+		const auto vectorElement = *iter;
+		if (vectorElement.compare(toFind) == 0) {
+			containsElement = true;
+		}
+	}
+	return containsElement;
 }
 
 } // namespace DataHandling
