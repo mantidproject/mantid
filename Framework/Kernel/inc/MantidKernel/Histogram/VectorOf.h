@@ -43,10 +43,10 @@ public:
   VectorOf(std::initializer_list<double> init) {
     m_data = make_cow<std::vector<double>>(init);
   }
-  VectorOf(const VectorOf &other) = default;
-  VectorOf(VectorOf &&other) = default;
-  VectorOf &operator=(const VectorOf &other) = default;
-  VectorOf &operator=(VectorOf &&other) = default;
+  VectorOf(const VectorOf &) = default;
+  VectorOf(VectorOf &&) = default;
+  VectorOf &operator=(const VectorOf &) = default;
+  VectorOf &operator=(VectorOf &&) = default;
 
   VectorOf &operator=(std::initializer_list<double> ilist) {
     m_data = make_cow<std::vector<double>>(ilist);
