@@ -17,19 +17,19 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::PhysicalConstants;
-std::map<int, double> detScale = {{17, 1.092114823},
-                                  {18, 0.869105443},
-                                  {22, 1.081377685},
-                                  {26, 1.055199489},
-                                  {27, 1.070308725},
-                                  {28, 0.886157884},
-                                  {36, 1.112773972},
-                                  {37, 1.012894506},
-                                  {38, 1.049384146},
-                                  {39, 0.890313805},
-                                  {47, 1.068553893},
-                                  {48, 0.900566426},
-                                  {58, 0.911249203}};
+std::map<int, double> detScale = {{17, 1.115862021},
+                                  {18, 0.87451341},
+                                  {22, 1.079102931},
+                                  {26,1.087379072},
+                                  {27, 1.064563992},
+                                  {28, 0.878683269},
+                                  {36, 1.15493377},
+                                  {37, 1.010047685},
+                                  {38, 1.046416037},
+                                  {39, 0.83264528},
+                                  {47, 1.06806776},
+                                  {48, 0.872542083},
+                                  {58, 0.915242691}};
 
 namespace Mantid {
 namespace Crystal {
@@ -120,6 +120,8 @@ void SaveHKL::exec() {
   PeaksWorkspace_sptr peaksW = getProperty("OutputWorkspace");
   if (peaksW != ws)
     peaksW.reset(ws->clone().release());
+  auto inst = peaksW->getInstrument();
+  std::vector<Peak> peaks = peaksW->getPeaks();
   double scaleFactor = getProperty("ScalePeaks");
   double dMin = getProperty("MinDSpacing");
   double wlMin = getProperty("MinWavelength");
@@ -130,21 +132,21 @@ void SaveHKL::exec() {
   int widthBorder = getProperty("WidthBorder");
   int decimalHKL = getProperty("HKLDecimalPlaces");
   bool cosines = getProperty("DirectionCosines");
-  OrientedLattice lat;
+  Mantid::Geometry::OrientedLattice lat;
+  Kernel::DblMatrix UB;
   if (cosines) {
     // Find OrientedLattice
     IAlgorithm_sptr childAlg = createChildAlgorithm("FindUBUsingIndexedPeaks");
     childAlg->setProperty<PeaksWorkspace_sptr>("PeaksWorkspace", ws);
     childAlg->executeAsChildAlg();
     lat = ws->mutableSample().getOrientedLattice();
+    UB = lat.getUB();
   }
 
   // Sequence and run number
   int seqNum = 1;
   int bankSequence = 0;
   int runSequence = 0;
-  int bankold = -1;
-  int runold = -1;
   // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
   // Default for kf-ki has -q
   double qSign = -1.0;
@@ -162,7 +164,7 @@ void SaveHKL::exec() {
     // Get back the result
     DataObjects::PeaksWorkspace_sptr ws2 =
         load_alg->getProperty("OutputWorkspace");
-    ws2->setInstrument(peaksW->getInstrument());
+    ws2->setInstrument(inst);
 
     IAlgorithm_sptr plus_alg = createChildAlgorithm("CombinePeaksWorkspaces");
     plus_alg->setProperty("LHSWorkspace", peaksW);
@@ -175,21 +177,45 @@ void SaveHKL::exec() {
     out.open(filename.c_str(), std::ios::out);
   }
 
-  // We must sort the peaks by bank #
-  std::vector<std::pair<std::string, bool>> criteria;
-  if (type.compare(0, 2, "Ba") == 0)
-    criteria.push_back(std::pair<std::string, bool>("BankName", true));
-  else if (type.compare(0, 2, "Ru") == 0)
-    criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
-  else
-    criteria.push_back(std::pair<std::string, bool>("BankName", true));
-  criteria.push_back(std::pair<std::string, bool>("h", true));
-  criteria.push_back(std::pair<std::string, bool>("k", true));
-  criteria.push_back(std::pair<std::string, bool>("l", true));
-  peaksW->sort(criteria);
+  // We cannot assume the peaks have bank type detector modules, so we have a
+  // string to check this
+  std::string bankPart = "?";
+  // We must sort the peaks first by run, then bank #, and save the list of
+  // workspace indices of it
+  typedef std::map<int, std::vector<size_t>> bankMap_t;
+  typedef std::map<int, bankMap_t> runMap_t;
+  std::set<int> uniqueBanks;
+  std::set<int> uniqueRuns;
+  runMap_t runMap;
+  for (size_t i = 0; i < peaks.size(); ++i) {
+    Peak &p = peaks[i];
+    int run = p.getRunNumber();
+    int bank = 0;
+    std::string bankName = p.getBankName();
+    if (bankName.size() <= 4) {
+      g_log.information() << "Could not interpret bank number of peak " << i
+                          << "(" << bankName << ")\n";
+      continue;
+    }
+    // Save the "bank" part once to check whether it really is a bank
+    if (bankPart == "?")
+      bankPart = bankName.substr(0, 4);
+    // Take out the "bank" part of the bank name and convert to an int
+    if (bankPart == "bank")
+      bankName = bankName.substr(4, bankName.size() - 4);
+    else if (bankPart == "WISH")
+      bankName = bankName.substr(9, bankName.size() - 9);
+    Strings::convert(bankName, bank);
+
+    // Save in the map
+    if (type.compare(0, 2, "Ba") == 0) runMap[bank][run].push_back(i);
+    else runMap[run][bank].push_back(i);
+    // Track unique bank numbers
+    uniqueBanks.insert(bank);
+    uniqueRuns.insert(run);
+  }
 
   bool correctPeaks = getProperty("ApplyAnvredCorrections");
-  std::vector<Peak> &peaks = peaksW->getPeaks();
   std::vector<std::vector<double>> spectra;
   std::vector<std::vector<double>> time;
   int iSpec = 0;
@@ -275,9 +301,25 @@ void SaveHKL::exec() {
   }
   // ============================== Save all Peaks
   // =========================================
-  std::vector<int> banned;
+  std::vector<long unsigned int> banned;
   // Go through each peak at this run / bank
-  for (int wi = 0; wi < peaksW->getNumberPeaks(); wi++) {
+
+  // Go in order of run numbers
+  runMap_t::iterator runMap_it;
+  for (runMap_it = runMap.begin(); runMap_it != runMap.end(); ++runMap_it) {
+    // Start of a new run
+    //int run = runMap_it->first;
+    bankMap_t &bankMap = runMap_it->second;
+
+    bankMap_t::iterator bankMap_it;
+    for (bankMap_it = bankMap.begin(); bankMap_it != bankMap.end();
+         ++bankMap_it) {
+      // Start of a new bank.
+      //int bank = bankMap_it->first;
+      std::vector<size_t> &ids = bankMap_it->second;
+
+        // Go through each peak at this run / bank
+        for (auto wi : ids) {
 
     Peak &p = peaks[wi];
     if (p.getIntensity() == 0.0 || boost::math::isnan(p.getIntensity()) ||
@@ -350,25 +392,35 @@ void SaveHKL::exec() {
           << std::setprecision(decimalHKL) << -p.getL();
     double correc = scaleFactor;
     double relSigSpect = 0.0;
-    if (bank != bankold)
-      bankSequence++;
-    if (run != runold)
-      runSequence++;
+    bankSequence = std::distance(uniqueBanks.begin(), uniqueBanks.find(bank));
+    runSequence = std::distance(uniqueRuns.begin(), uniqueRuns.find(run));
     if (correctPeaks) {
       // correct for the slant path throught the scintillator glass
       double mu = (9.614 * lambda) + 0.266; // mu for GS20 glass
       double depth = 0.2;
       double eff_center =
           1.0 - std::exp(-mu * depth); // efficiency at center of detector
-      IComponent_const_sptr sample = peaksW->getInstrument()->getSample();
-      double cosA = peaksW->getInstrument()
-                        ->getComponentByName(p.getBankName())
-                        ->getDistance(*sample) /
+
+
+      // Distance to center of detector
+      boost::shared_ptr<const IComponent> det0 =
+          inst->getComponentByName(p.getBankName());
+      if (inst->getName().compare("CORELLI") ==
+          0) // for Corelli with sixteenpack under bank
+      {
+        std::vector<Geometry::IComponent_const_sptr> children;
+        boost::shared_ptr<const Geometry::ICompAssembly> asmb =
+            boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+                inst->getComponentByName(p.getBankName()));
+        asmb->getChildren(children, false);
+        det0 = children[0];
+      }
+      IComponent_const_sptr sample = inst->getSample();
+      double cosA = det0->getDistance(*sample) /
                     p.getL2();
       double pathlength = depth / cosA;
       double eff_R = 1.0 - exp(-mu * pathlength); // efficiency at point R
       double sp_ratio = eff_center / eff_R;       // slant path efficiency ratio
-
       double sinsqt = std::pow(lambda / (2.0 * dsp), 2);
       double wl4 = std::pow(lambda, m_power_th);
       double cmonx = 1.0;
@@ -396,7 +448,9 @@ void SaveHKL::exec() {
       }
       correc = scaleFactor * sinsqt * cmonx * sp_ratio /
                (wl4 * spect * transmission);
-      if (peaksW->getInstrument()->getName() == "TOPAZ" &&
+      std::cout << scaleFactor <<"  "<< sinsqt <<"  "<< cmonx <<"  "<< sp_ratio<<"  "<<
+          wl4 <<"  "<< spect <<"  "<< transmission<<"  "<<p.getIntensity()<<"\n";
+      if (inst->getName() == "TOPAZ" &&
           detScale.find(bank) != detScale.end())
         correc *= detScale[bank];
     }
@@ -428,21 +482,20 @@ void SaveHKL::exec() {
     else
       out << std::setw(4) << runSequence;
 
-    out << std::setw(8) << std::fixed << std::setprecision(4) << lambda;
-
-
     if (cosines) {
+      out << std::setw(8) << std::fixed << std::setprecision(5) << lambda;
       out << std::setw(8) << std::fixed << std::setprecision(5) << tbar;
       // Determine goniometer angles by calculating from the goniometer matrix
       // of a peak in the list
-      Goniometer gon(p.getGoniometerMatrix());
+     /* Goniometer gon(p.getGoniometerMatrix());
       std::vector<double> angles = gon.getEulerAngles("yzy");
 
       double phi = angles[2];
       double chi = angles[1];
-      double omega = angles[0];
+      double omega = angles[0];*/
+      Kernel::DblMatrix mat = p.getGoniometerMatrix() * UB;
 
-;
+      lat.setUB(mat);
 
       out << std::setw(9) << std::fixed << std::setprecision(4) << lat.astar();
       out << std::setw(9) << std::fixed << std::setprecision(4) << lat.bstar();
@@ -467,17 +520,17 @@ for i in range(3):
       out << std::setw(7) << std::fixed << std::setprecision(4) << transmission;
 
       out << std::setw(4) << std::right << bank;
-      bankold = bank;
-      runold = run;
 
       out << std::setw(9) << std::fixed << std::setprecision(5)
           << scattering; // two-theta scattering
 
       out << std::setw(8) << std::fixed << std::setprecision(4) << dsp;
-      out << std::setw(7) << std::fixed << std::setprecision(2) << p.getCol();
-      out << std::setw(7) << std::fixed << std::setprecision(2) << p.getRow();
+      out << std::setw(7) << std::fixed << std::setprecision(2) << static_cast<double>(p.getCol());
+      out << std::setw(7) << std::fixed << std::setprecision(2) << static_cast<double>(p.getRow());
     }
     else {
+      out << std::setw(8) << std::fixed << std::setprecision(4) << lambda;
+
       out << std::setw(7) << std::fixed << std::setprecision(4) << tbar;
 
       out << std::setw(7) << run;
@@ -487,8 +540,6 @@ for i in range(3):
       out << std::setw(7) << std::fixed << std::setprecision(4) << transmission;
 
       out << std::setw(4) << std::right << bank;
-      bankold = bank;
-      runold = run;
 
       out << std::setw(9) << std::fixed << std::setprecision(5)
           << scattering; // two-theta scattering
@@ -499,7 +550,7 @@ for i in range(3):
 
 
     out << std::endl;
-  }
+  } } }
   if (decimalHKL == EMPTY_INT())
     out << std::setw(4) << 0 << std::setw(4) << 0 << std::setw(4) << 0;
   else
@@ -508,17 +559,22 @@ for i in range(3):
         << std::fixed << std::setprecision(decimalHKL) << 0.0
         << std::setw(5 + decimalHKL) << std::fixed
         << std::setprecision(decimalHKL) << 0.0;
-  out << "    0.00    0.00   0  0.0000 0.0000      0      0 0.0000 "
-         "  0";
+  if (cosines) {
+    out << "    0.00    0.00   0 0.00000 0.00000  0.00000  0.00000  0.00000"
+        "  0.00000  0.00000  0.00000     0     0 0.0000   0  0.00000  0.0000   0.00   0.00";
+  }
+  else {
+    out << "    0.00    0.00   0  0.0000 0.0000      0      0 0.0000 "
+         "  0  0.00000   0.0000";
+  }
   out << std::endl;
-
   out.flush();
   out.close();
   // delete banned peaks
-  for (std::vector<int>::const_reverse_iterator it = banned.rbegin();
+  /*for (std::vector<long unsigned int>::const_reverse_iterator it = banned.rbegin();
        it != banned.rend(); ++it) {
-    peaksW->removePeak(*it);
-  }
+    peaksW->removePeak(static_cast<int>(*it));
+  }*/
   setProperty("OutputWorkspace", peaksW);
 }
 /**

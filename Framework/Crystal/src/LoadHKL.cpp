@@ -100,7 +100,7 @@ void LoadHKL::exec() {
     int run, bank;
     if (cosines) {
        tbar = atof(line.substr(40, 8).c_str()); // tbar
-       run = atoi(line.substr(48, 6).c_str());
+       run = atoi(line.substr(102, 6).c_str());
        trans = atof(line.substr(114, 7).c_str());     // transmission
        bank = atoi(line.substr(121, 4).c_str());
        scattering = atof(line.substr(125, 9).c_str());
