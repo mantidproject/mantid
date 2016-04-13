@@ -766,7 +766,6 @@ void EnggDiffractionPresenter::runAppendSpectraAlg(std::string workspace1Name,
     appendSpec->initialize();
     appendSpec->setProperty("InputWorkspace1", workspace1Name);
     appendSpec->setProperty("InputWorkspace2", workspace2Name);
-    // appendSpec->setProperty("ValidateInputs", false);
     appendSpec->setProperty("OutputWorkspace", workspace1Name);
     appendSpec->execute();
   } catch (std::runtime_error &re) {

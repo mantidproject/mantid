@@ -32,6 +32,11 @@ Graphical user interface:
   is enabled. As well as option to select peak, add peak or save peaks
   from the data plot is now supported.
 
+- :ref:`Preview-Engineering_Diffraction-ref` under Fitting tab, you can
+  now view the plot in `dSpacing` instead `ToF`, which enables you to
+  rerun the fitting process after selecting peaks from the interface.
+
+
 Imaging
 -------
 
