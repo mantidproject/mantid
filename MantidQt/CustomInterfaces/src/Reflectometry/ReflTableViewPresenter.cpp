@@ -136,7 +136,7 @@ namespace CustomInterfaces {
 ReflTableViewPresenter::ReflTableViewPresenter(ReflTableView *tableView,
                                                ProgressableView *progressView)
     : WorkspaceObserver(), m_tableView(tableView), m_progressView(progressView),
-      m_tableDirty(false) {
+      m_workspaceReceiver(), m_tableDirty(false) {
 
   // TODO. Select strategy.
   /*
@@ -145,7 +145,7 @@ ReflTableViewPresenter::ReflTableViewPresenter(ReflTableView *tableView,
   UserCatalogInfo catalogInfo(
   ConfigService::Instance().getFacility().catalogInfo(), *catConfigService);
   */
-
+  // Initialise m_workspaceReceiver
   // Initialise options
   initOptions();
 
