@@ -136,6 +136,8 @@ detects that it has been asked to load a previous version muon nexus
 file it will call the previous version of the algorithm to perform the
 task.
 
+See :ref:`algm-LoadMuonNexus-v1` for more details about version 1.
+
 Usage
 -----
 
