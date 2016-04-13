@@ -18,9 +18,14 @@ public:
   }
   static void destroySuite(HistogramBinEdgesTest *suite) { delete suite; }
 
+  void test_default_constructor() {
+    const BinEdges edges{};
+    TS_ASSERT(!edges);
+  }
+
   void test_construct_from_null_Points() {
-    Points points;
-    BinEdges edges(points);
+    const Points points{};
+    const BinEdges edges(points);
     TS_ASSERT(!edges);
   }
 
@@ -30,10 +35,9 @@ public:
     TS_ASSERT_EQUALS(edges.size(), 0);
   }
 
-  // TODO Is this the correct behavior?
   void test_construct_from_length1_Points() {
-    Points points = {1.0};
-    BinEdges edges(points);
+    const Points points = {1.0};
+    const BinEdges edges(points);
     TS_ASSERT_EQUALS(edges.size(), 2);
     TS_ASSERT_DELTA(edges[0], 0.5, 1e-14);
     TS_ASSERT_DELTA(edges[1], 1.5, 1e-14);

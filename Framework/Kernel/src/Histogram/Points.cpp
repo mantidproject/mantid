@@ -5,6 +5,8 @@ namespace Mantid {
 namespace Kernel {
 
 Points::Points(const BinEdges &edges) {
+  if (!edges)
+    return;
   m_data = make_cow<std::vector<double>>();
   if (edges.size() < 2)
     return;
