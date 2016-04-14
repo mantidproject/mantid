@@ -63,6 +63,7 @@ set ( SRC_FILES
 	src/Instrument/RectangularDetector.cpp
 	src/Instrument/RectangularDetectorPixel.cpp
 	src/Instrument/ReferenceFrame.cpp
+	src/Instrument/StructuredDetector.cpp
 	src/Instrument/XMLInstrumentParameter.cpp
 	src/MDGeometry/CompositeImplicitFunction.cpp
 	src/MDGeometry/GeneralFrame.cpp
@@ -108,6 +109,7 @@ set ( SRC_FILES
 	src/Rendering/GeometryHandler.cpp
 	src/Rendering/GluGeometryHandler.cpp
 	src/Rendering/GluGeometryRenderer.cpp
+    src/Rendering/StructuredGeometryHandler.cpp
 	src/Rendering/vtkGeometryCacheReader.cpp
 	src/Rendering/vtkGeometryCacheWriter.cpp
 	src/Surfaces/Cone.cpp
@@ -214,6 +216,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/RectangularDetector.h
 	inc/MantidGeometry/Instrument/RectangularDetectorPixel.h
 	inc/MantidGeometry/Instrument/ReferenceFrame.h
+	inc/MantidGeometry/Instrument/StructuredDetector.h
 	inc/MantidGeometry/Instrument/XMLInstrumentParameter.h
 	inc/MantidGeometry/MDGeometry/CompositeImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/GeneralFrame.h
@@ -257,6 +260,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Objects/ShapeFactory.h
 	inc/MantidGeometry/Objects/Track.h
 	inc/MantidGeometry/Rendering/BitmapGeometryHandler.h
+    inc/MantidGeometry/Rendering/StructuredGeometryHandler.h
 	inc/MantidGeometry/Rendering/CacheGeometryGenerator.h
 	inc/MantidGeometry/Rendering/CacheGeometryHandler.h
 	inc/MantidGeometry/Rendering/CacheGeometryRenderer.h
@@ -388,6 +392,7 @@ set ( TEST_FILES
 	SpaceGroupFactoryTest.h
 	SpaceGroupTest.h
 	SphereTest.h
+	StructuredDetectorTest.h
 	StructureFactorCalculatorSummationTest.h
 	StructureFactorCalculatorTest.h
 	SurfaceFactoryTest.h
@@ -422,7 +427,6 @@ endif(UNITY_BUILD)
 
 # ===================== Open Cascade ===================
 if (ENABLE_OPENCASCADE)
-  include_directories ( system ${OPENCASCADE_INCLUDE_DIR} )
   set (SRC_FILES ${SRC_FILES} ${OPENCASCADE_SRC} )
 endif ()
 
@@ -446,6 +450,11 @@ set_target_properties ( Geometry PROPERTIES OUTPUT_NAME MantidGeometry
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( Geometry PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
+
+if (ENABLE_OPENCASCADE)
+  target_include_directories(Geometry SYSTEM PRIVATE ${OPENCASCADE_INCLUDE_DIR})
+endif ()
+
 
 # Add to the 'Framework' group in VS
 set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )

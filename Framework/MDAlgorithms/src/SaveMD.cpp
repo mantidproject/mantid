@@ -160,8 +160,8 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         auto saveableTag = boxe->getISaveable();
         if (saveableTag) // only boxes can be saveable
         {
-          // do not spend time on empty boxes
-          if (boxe->getDataInMemorySize() == 0)
+          // do not spend time on empty or masked boxes
+          if (boxe->getDataInMemorySize() == 0 || boxe->getIsMasked())
             continue;
           // save boxes directly using the boxes file postion, precalculated in
           // boxFlatStructure.
@@ -187,7 +187,7 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       std::vector<uint64_t> &eventIndex = BoxFlatStruct.getEventIndex();
       prog->resetNumSteps(boxes.size(), 0.06, 0.90);
       for (size_t i = 0; i < boxes.size(); i++) {
-        if (eventIndex[2 * i + 1] == 0)
+        if (eventIndex[2 * i + 1] == 0 || boxes[i]->getIsMasked())
           continue;
         boxes[i]->saveAt(Saver.get(), eventIndex[2 * i]);
         prog->report("Saving Box");

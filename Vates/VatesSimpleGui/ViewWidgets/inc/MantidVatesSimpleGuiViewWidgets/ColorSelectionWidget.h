@@ -56,7 +56,7 @@ public:
   /// Default constructor.
   ColorSelectionWidget(QWidget *parent = 0);
   /// Default destructor.
-  virtual ~ColorSelectionWidget() {}
+  ~ColorSelectionWidget() override {}
 
   /// Get the auto color scaling state
   bool getAutoScaleState();

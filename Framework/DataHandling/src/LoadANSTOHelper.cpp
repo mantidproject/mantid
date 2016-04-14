@@ -139,7 +139,7 @@ void EventAssigner::addEventImpl(size_t id, double tof) {
 }
 
 // FastReadOnlyFile
-#ifdef WIN32
+#ifdef _WIN32
 FastReadOnlyFile::FastReadOnlyFile(const char *filename) {
   m_handle = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, NULL,
                          OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -431,7 +431,7 @@ bool File::append(const std::string &path, const std::string &name,
     return false;
 
   if (targetPosition < 0)
-    targetPosition = lastHeaderPosition;
+    targetPosition = (lastHeaderPosition >= 0) ? lastHeaderPosition : 0;
 
   // empty buffer
   char padding[512];

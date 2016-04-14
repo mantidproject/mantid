@@ -237,7 +237,7 @@ private:
   public:
     TestableSpaceGroup() : SpaceGroup(0, "", Group()) {}
 
-    ~TestableSpaceGroup() {}
+    ~TestableSpaceGroup() override {}
   };
 };
 

@@ -40,7 +40,7 @@ using Mantid::Kernel::V3D;
 class IntegratePeaksMD2Test : public CxxTest::TestSuite {
 public:
   IntegratePeaksMD2Test() { Mantid::API::FrameworkManager::Instance(); }
-  ~IntegratePeaksMD2Test() {}
+  ~IntegratePeaksMD2Test() override {}
 
   void test_Init() {
     IntegratePeaksMD2 alg;
@@ -513,14 +513,14 @@ public:
     AnalysisDataService::Instance().add("IntegratePeaksMD2Test_peaks", peakWS);
   }
 
-  ~IntegratePeaksMD2TestPerformance() {
+  ~IntegratePeaksMD2TestPerformance() override {
     AnalysisDataService::Instance().remove("IntegratePeaksMD2Test_MDEWS");
     AnalysisDataService::Instance().remove("IntegratePeaksMD2Test_peaks");
   }
 
-  void setUp() {}
+  void setUp() override {}
 
-  void tearDown() {}
+  void tearDown() override {}
 
   void test_performance_NoBackground() {
     for (size_t i = 0; i < 10; i++) {

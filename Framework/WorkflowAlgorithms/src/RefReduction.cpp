@@ -139,6 +139,10 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
   m_output_message += "Processing " + polarization + '\n';
   const std::string dataRun = getPropertyValue("DataRun");
   IEventWorkspace_sptr evtWS = loadData(dataRun, polarization);
+  // wrong entry name
+  if (!evtWS) {
+    return nullptr;
+  }
   MatrixWorkspace_sptr dataWS =
       boost::dynamic_pointer_cast<MatrixWorkspace>(evtWS);
   MatrixWorkspace_sptr dataWSTof =
@@ -503,7 +507,13 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
       loadAlg->setProperty("Filename", path);
       if (polarization.compare(PolStateNone) != 0)
         loadAlg->setProperty("NXentryName", polarization);
-      loadAlg->executeAsChildAlg();
+      try {
+        loadAlg->executeAsChildAlg();
+      } catch (...) {
+        g_log.notice() << "Could not load polarization " << polarization;
+        return nullptr;
+      }
+
       Workspace_sptr temp = loadAlg->getProperty("OutputWorkspace");
       rawWS = boost::dynamic_pointer_cast<IEventWorkspace>(temp);
       if (rawWS->getNumberEvents() == 0) {

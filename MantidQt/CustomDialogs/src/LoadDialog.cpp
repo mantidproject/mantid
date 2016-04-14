@@ -253,7 +253,7 @@ namespace MantidQt
       if( !m_form.fileWidget->isValid() ) return;
       // First step is the get the specific loader that is responsible
       auto loadAlg = getAlgorithm();
-      const QString filenames = m_form.fileWidget->getUserInput().asString();
+      const QString filenames = m_form.fileWidget->getUserInput().toString();
       if( filenames == m_currentFiles ) return;
       m_currentFiles = filenames;
       removeOldInputWidgets(m_form.propertyLayout); // The new file might be invalid

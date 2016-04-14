@@ -27,7 +27,7 @@ public:
     SymmetryOperationFactory::Instance().subscribeSymOp("x,y,z");
   }
 
-  ~SymmetryOperationFactoryTest() {
+  ~SymmetryOperationFactoryTest() override {
     SymmetryOperationFactory::Instance().unsubscribeSymOp("x,y,z");
   }
 

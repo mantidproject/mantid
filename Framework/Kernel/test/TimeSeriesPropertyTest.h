@@ -39,13 +39,13 @@ class TimeSeriesPropertyTest : public CxxTest::TestSuite {
   }
 
 public:
-  void setUp() {
+  void setUp() override {
     iProp = new TimeSeriesProperty<int>("intProp");
     dProp = new TimeSeriesProperty<double>("doubleProp");
     sProp = new TimeSeriesProperty<std::string>("stringProp");
   }
 
-  void tearDown() {
+  void tearDown() override {
     delete iProp;
     delete dProp;
     delete sProp;

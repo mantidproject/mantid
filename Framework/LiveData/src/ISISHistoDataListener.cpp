@@ -407,7 +407,7 @@ void ISISHistoDataListener::calculateIndicesForReading(
 /**
  * Read spectra from the DAE
  * @param period :: Current period index
- * @param index :: First spectrum index
+ * @param index :: First spectrum number
  * @param count :: Number of spectra to read
  * @param workspace :: Workspace to store the data
  * @param workspaceIndex :: index in workspace to store data

@@ -175,7 +175,7 @@ protected:
   // The test class will handle everything from there.
   using ADARA::Parser::rxPacket;
 #define DEFINE_RX_PACKET(PktType)                                              \
-  virtual bool rxPacket(const PktType &pkt) {                                  \
+  bool rxPacket(const PktType &pkt) override {                                 \
     m_pkt.reset(new PktType(pkt));                                             \
     return false;                                                              \
   }
@@ -203,7 +203,7 @@ protected:
   // Call the base class rxPacket(const ADARA::Packet &pkt) which will
   // eventually result
   // in the execution of one of the rxPacket() functions defined above
-  virtual bool rxPacket(const ADARA::Packet &pkt) {
+  bool rxPacket(const ADARA::Packet &pkt) override {
     return ADARA::Parser::rxPacket(pkt);
   }
 

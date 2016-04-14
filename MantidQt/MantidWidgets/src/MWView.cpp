@@ -66,13 +66,13 @@ void MWView::loadColorMap(QString filename) {
 void MWView::setWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
   m_workspace = ws;
   this->checkRangeLimits();
-  this->setVectorDimensions();
-  findRangeFull(); // minimum and maximum intensities in ws
-  m_uiForm.colorBar->setViewRange(m_colorRangeFull);
-  m_uiForm.colorBar->updateColorMap();
   m_data->setWorkspace(ws);
   m_normalization = ws->displayNormalization();
   m_data->setNormalization(m_normalization);
+  this->setVectorDimensions();
+  this->findRangeFull(); // minimum and maximum intensities in ws
+  m_uiForm.colorBar->setViewRange(m_colorRangeFull);
+  m_uiForm.colorBar->updateColorMap();
   m_uiForm.plot2D->setWorkspace(ws);
   m_spect->setColorMap(m_uiForm.colorBar->getColorMap());
   emit workspaceChanged();
@@ -98,6 +98,10 @@ void MWView::updateDisplay() {
   m_spect->setData(*m_data);
   m_spect->itemChanged();
   m_uiForm.plot2D->replot();
+}
+
+SafeQwtPlot* MWView::getPlot2D(){
+  return m_uiForm.plot2D;
 }
 
 //               ++++++++++++++++++++++++++++++++

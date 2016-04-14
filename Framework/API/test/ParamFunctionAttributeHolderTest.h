@@ -6,21 +6,23 @@
 
 class FakeParamFunctionAttributeHolder : public Mantid::API::ParamFunction {
 public:
-  std::string name() const { return "FakeParamFunctionAttributeHolder"; }
+  std::string name() const override {
+    return "FakeParamFunctionAttributeHolder";
+  }
 
-  void declareAttributes() {
+  void declareAttributes() override {
     declareAttribute("Att1", Mantid::API::IFunction::Attribute(3));
     declareAttribute("Att2", Mantid::API::IFunction::Attribute(2));
     declareAttribute("Att3", Mantid::API::IFunction::Attribute(1));
   }
-  void declareParameters() {
+  void declareParameters() override {
     declareParameter("Par1", 1.0);
     declareParameter("Par2", 9.1);
     declareParameter("Par3", 10.0);
     declareParameter("Par4", 6.5);
   }
   void function(const Mantid::API::FunctionDomain &,
-                Mantid::API::FunctionValues &) const {}
+                Mantid::API::FunctionValues &) const override {}
 };
 
 class ParamFunctionAttributeHolderTest : public CxxTest::TestSuite {

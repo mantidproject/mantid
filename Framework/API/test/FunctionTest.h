@@ -20,26 +20,26 @@ class MocSpectrum : public ISpectrum {
 public:
   MocSpectrum(size_t nx, size_t ny) : m_x(nx), m_y(ny), m_e(ny) {}
 
-  void clearData() {}
-  void setData(const MantidVec &) {}
-  void setData(const MantidVec &, const MantidVec &) {}
+  void clearData() override {}
+  void setData(const MantidVec &) override {}
+  void setData(const MantidVec &, const MantidVec &) override {}
 
-  void setData(const MantidVecPtr &) {}
-  void setData(const MantidVecPtr &, const MantidVecPtr &) {}
+  void setData(const MantidVecPtr &) override {}
+  void setData(const MantidVecPtr &, const MantidVecPtr &) override {}
 
-  void setData(const MantidVecPtr::ptr_type &) {}
-  void setData(const MantidVecPtr::ptr_type &, const MantidVecPtr::ptr_type &) {
-  }
+  void setData(const MantidVecPtr::ptr_type &) override {}
+  void setData(const MantidVecPtr::ptr_type &,
+               const MantidVecPtr::ptr_type &) override {}
 
-  virtual MantidVec &dataX() { return m_x; }
-  virtual MantidVec &dataY() { return m_y; }
-  virtual MantidVec &dataE() { return m_e; }
+  MantidVec &dataX() override { return m_x; }
+  MantidVec &dataY() override { return m_y; }
+  MantidVec &dataE() override { return m_e; }
 
-  virtual const MantidVec &dataX() const { return m_x; }
-  virtual const MantidVec &dataY() const { return m_y; }
-  virtual const MantidVec &dataE() const { return m_e; }
+  const MantidVec &dataX() const override { return m_x; }
+  const MantidVec &dataY() const override { return m_y; }
+  const MantidVec &dataE() const override { return m_e; }
 
-  virtual size_t getMemorySize() const { return 0; }
+  size_t getMemorySize() const override { return 0; }
 
   MantidVec m_x, m_y, m_e;
 };
@@ -53,28 +53,28 @@ public:
     }
   }
 
-  ~MocMatrixWorkspace() {}
+  ~MocMatrixWorkspace() override {}
 
   // Section required for iteration
   /// Returns the number of single indexable items in the workspace
-  virtual std::size_t size() const { return m_spectra.size() * m_blocksize; }
+  std::size_t size() const override { return m_spectra.size() * m_blocksize; }
   /// Returns the size of each block of data returned by the dataY accessors
-  virtual std::size_t blocksize() const { return m_blocksize; }
+  std::size_t blocksize() const override { return m_blocksize; }
   /// Returns the number of histograms in the workspace
-  virtual std::size_t getNumberHistograms() const { return m_spectra.size(); }
+  std::size_t getNumberHistograms() const override { return m_spectra.size(); }
 
   /// Return the underlying ISpectrum ptr at the given workspace index.
-  virtual ISpectrum *getSpectrum(const size_t index) {
+  ISpectrum *getSpectrum(const size_t index) override {
     return &m_spectra[index];
   }
 
   /// Return the underlying ISpectrum ptr (const version) at the given workspace
   /// index.
-  virtual const ISpectrum *getSpectrum(const size_t index) const {
+  const ISpectrum *getSpectrum(const size_t index) const override {
     return &m_spectra[index];
   }
-  const std::string id(void) const { return ""; }
-  void init(const size_t &, const size_t &, const size_t &) {}
+  const std::string id(void) const override { return ""; }
+  void init(const size_t &, const size_t &, const size_t &) override {}
 
 private:
   std::vector<MocSpectrum> m_spectra;
@@ -90,10 +90,10 @@ public:
     declareParameter("c3");
   }
 
-  std::string name() const { return "IFT_Funct"; }
+  std::string name() const override { return "IFT_Funct"; }
 
   void function1D(double *out, const double *xValues,
-                  const size_t nData) const {
+                  const size_t nData) const override {
     double c0 = getParameter("c0");
     double c1 = getParameter("c1");
     double c2 = getParameter("c2");
@@ -104,7 +104,7 @@ public:
     }
   }
   void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) {
+                       const size_t nData) override {
     for (size_t i = 0; i < nData; i++) {
       double x = xValues[i];
       out->set(i, 0, 1.);

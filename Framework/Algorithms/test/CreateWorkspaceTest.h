@@ -148,7 +148,7 @@ public:
 
 class CreateWorkspaceTestPerformance : public CxxTest::TestSuite {
 public:
-  void setUp() {
+  void setUp() override {
     Mantid::Kernel::MemoryStats memInfo;
     // 100,000,000 doubles takes ~760Mb.
     // Copying this vector into the 3 properties then requires about 3Gb of
@@ -161,7 +161,7 @@ public:
     vec = new std::vector<double>(nelements, 1.0);
   }
 
-  void tearDown() { delete vec; }
+  void tearDown() override { delete vec; }
 
   void testBigWorkspace() {
     Mantid::Algorithms::CreateWorkspace creator;

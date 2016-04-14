@@ -56,8 +56,10 @@ def allEventWorkspaces(*args):
     result = True
 
     for arg in args:
-        assert isinstance(arg, str)
-        workspace = AnalysisDataService.retrieve(arg)
+        if isinstance(arg, str):
+            workspace = AnalysisDataService.retrieve(arg)
+        else:
+            workspace = arg
         result = result and (workspace.id() == EVENT_WORKSPACE_ID)
 
     return result
@@ -381,14 +383,16 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             # the final bit of math to remove container run and vanadium run
             if can_run_ws_name is not None:
-                can_run_ws = self.get_workspace(can_run_ws_name)
                 # must convert the sample to a matrix workspace if the can run isn't one
-                if can_run_ws.id() != EVENT_WORKSPACE_ID and sam_ws_.id() == EVENT_WORKSPACE_ID:
+                if allEventWorkspaces(can_run_ws_name, sam_ws_name):
                     sam_ws = api.ConvertToMatrixWorkspace(InputWorkspace=sam_ws_name,
                                                           OutputWorkspace=sam_ws_name)
                     assert sam_ws is not None
 
                 # remove container run
+                api.RebinToWorkspace(WorkspaceToRebin=can_run_ws_name,
+                                     WorkspaceToMatch=sam_ws_name,
+                                     OutputWorkspace=can_run_ws_name)
                 sam_ws = api.Minus(LHSWorkspace=sam_ws_name,
                                    RHSWorkspace=can_run_ws_name,
                                    OutputWorkspace=sam_ws_name)
@@ -751,7 +755,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 self.checkInfoMatch(info, tempinfo)
                 # add current workspace to sub sum
                 temp_ws = api.Plus(LHSWorkspace=sumRun, RHSWorkspace=out_ws_name, OutputWorkspace=sumRun,
-                                  ClearRHSWorkspace=allEventWorkspaces(sumRun, out_ws_name))
+                                   ClearRHSWorkspace=allEventWorkspaces(sumRun, out_ws_name))
                 if temp_ws.id() == EVENT_WORKSPACE_ID:
                     temp_ws = api.CompressEvents(InputWorkspace=sumRun, OutputWorkspace=sumRun,
                                                  Tolerance=self.COMPRESS_TOL_TOF) # 10ns
@@ -870,7 +874,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 # logging (ignorable)
                 for iws in xrange(out_ws_c_s.getNumberHistograms()):
                     spec = out_ws_c_s.getSpectrum(iws)
-                    self.log().debug("[DBx131] ws %d: spectrum ID = %d. " % (iws, spec.getSpectrumNo()))
+                    self.log().debug("[DBx131] ws %d: spectrum No = %d. " % (iws, spec.getSpectrumNo()))
                 if out_ws_c_s.id() == EVENT_WORKSPACE_ID:
                     self.log().information('After being aligned and focused, workspace %s: Number of events = %d '
                                            'of chunk %d ' % (out_ws_c_s.name(), out_ws_c_s.getNumberEvents(),

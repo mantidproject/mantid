@@ -58,11 +58,11 @@ class DLLExport ISISDiagnostics : public IndirectDataReductionTab {
 
 public:
   ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent = 0);
-  virtual ~ISISDiagnostics();
+  ~ISISDiagnostics() override;
 
-  virtual void setup();
-  virtual void run();
-  virtual bool validate();
+  void setup() override;
+  void run() override;
+  bool validate() override;
 
 private slots:
   void algorithmComplete(bool error);

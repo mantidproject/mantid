@@ -2,6 +2,8 @@
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/operators.hpp>
+#include <boost/python/return_value_policy.hpp>
+#include <boost/python/return_arg.hpp>
 
 using namespace boost::python;
 using Mantid::Kernel::V3D;
@@ -60,10 +62,12 @@ void export_V3D() {
            "Calculates the length of the vector")
       .def("norm2", &V3D::norm2, arg("self"),
            "Calculates the squared length of the vector")
-      .def(self + self)
-      .def(self += self)
-      .def(self - self)
-      .def(self -= self)
+      .def("__add__", &V3D::operator+, (arg("left"), arg("right")))
+      .def("__iadd__", &V3D::operator+=, return_self<>(),
+           (arg("self"), arg("other")))
+      .def("__sub__", &V3D::operator-, (arg("left"), arg("right")))
+      .def("__isub__", &V3D::operator-=, return_self<>(),
+           (arg("self"), arg("other")))
       .def(self * self)
       .def(self *= self)
       .def(self / self)
@@ -72,7 +76,6 @@ void export_V3D() {
       .def(self *= int())
       .def(self * double())
       .def(self *= double())
-      // cppcheck-suppress duplicateExpression
       .def(self < self)
       .def(self == self)
       .def(self != self) // must define != as Python's default is to compare

@@ -161,7 +161,7 @@ private:
   double m_FracCompl;
   /// stores lists of spectra indexes to group, although we never do an index
   /// search on it
-  storage_map m_GroupSpecInds;
+  storage_map m_GroupWsInds;
 
   // Implement abstract Algorithm methods
   void init() override;

@@ -47,10 +47,11 @@ Fitting Sample/Source
 #####################
 
 When fitting the sample or source position it uses the entire
-instrument and only moves the *Z* position (*i.e.* along the
-beam). You can use a masking workspace to mask part of the instrument
-you don't want to use to align the sample/source position (*e.g.* in
-the *Align sample position in POWGEN* usage example below).
+instrument and moves in the directions that you select. All rotation
+options are ignored. You can use a masking workspace to mask part of
+the instrument you don't want to use to align the sample/source
+position (*e.g.* in the *Align sample position in POWGEN* usage
+example below).
 
 The source and sample positions (in that order) are aligned before an
 components are aligned.
@@ -141,7 +142,8 @@ Output:
       AlignComponents(CalibrationTable="PG3_cal",
             Workspace=ws,
             MaskWorkspace="PG3_mask",
-            FitSamplePosition=True)
+            FitSamplePosition=True,
+	    Zposition=True)
       print "Final sample position is {:.5f}".format(mtd['ws'].getInstrument().getSample().getPos().getZ())
 
 Output:

@@ -53,7 +53,7 @@ private:
     MOCK_CONST_METHOD0(getIsMasked, bool());
     MOCK_METHOD0(mask, void());
     MOCK_METHOD0(unmask, void());
-    ~MockMDBox() { delete pBC; }
+    ~MockMDBox() override { delete pBC; }
   };
 
   // the sp to a box controller used as general reference to all tested
@@ -431,15 +431,18 @@ public:
     TS_ASSERT_EQUALS(superbox->getNPoints(), 0);
     { // One event in 0th box of the 0th box.
       double centers[2] = {0.05, 0.05};
-      superbox->addEvent(MDLeanEvent<2>(2.0, 2.0, centers));
+      TS_ASSERT_EQUALS(1,
+                       superbox->addEvent(MDLeanEvent<2>(2.0, 2.0, centers)));
     }
     { // One event in 1st box of the 0th box.
       double centers[2] = {0.15, 0.05};
-      superbox->addEvent(MDLeanEvent<2>(2.0, 2.0, centers));
+      TS_ASSERT_EQUALS(1,
+                       superbox->addEvent(MDLeanEvent<2>(2.0, 2.0, centers)));
     }
     { // One event in 99th box.
       double centers[2] = {9.5, 9.5};
-      superbox->addEvent(MDLeanEvent<2>(2.0, 2.0, centers));
+      TS_ASSERT_EQUALS(1,
+                       superbox->addEvent(MDLeanEvent<2>(2.0, 2.0, centers)));
     }
 
     // You must refresh the cache after adding individual events.
@@ -1642,14 +1645,14 @@ public:
     recursiveParent2 = MDEventsTestHelper::makeRecursiveMDGridBox<1>(10, 5);
   }
 
-  ~MDGridBoxTestPerformance() { delete box3b; }
+  ~MDGridBoxTestPerformance() override { delete box3b; }
 
-  void setUp() {
+  void setUp() override {
     // Make a fresh box.
     box3 = MDEventsTestHelper::makeRecursiveMDGridBox<3>(5, 1);
   }
 
-  void tearDown() { delete box3; }
+  void tearDown() override { delete box3; }
 
   void test_refreshCache() { box3b->refreshCache(); }
 

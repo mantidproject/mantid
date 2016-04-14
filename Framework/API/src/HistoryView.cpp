@@ -70,7 +70,7 @@ void HistoryView::unroll(std::vector<HistoryItem>::iterator &it) {
       tmpHistory.emplace_back(item);
     }
 // since we are using a std::vector, do all insertions at the same time.
-#if !defined(GCC_VERSION) || GCC_VERSION >= 409000
+#if !defined(GCC_VERSION) || GCC_VERSION >= 40900
     ++it; // move iterator forward to insertion position
     it = m_historyItems.insert(it, tmpHistory.begin(), tmpHistory.end());
 #else

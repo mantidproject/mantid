@@ -69,7 +69,7 @@ namespace MantidWidgets
     static const double DRAG_SENSITIVITY;
 
     /// Default cursor to use when not dragging
-    static const QCursorShape DEFAULT_CURSOR;
+    static const Qt::CursorShape DEFAULT_CURSOR;
 
     /// Event filter installed for the plot
     bool eventFilter(QObject *object, QEvent *event) override;

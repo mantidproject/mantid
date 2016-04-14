@@ -25,7 +25,7 @@ public:
   static void destroySuite(SaveAsciiTest *suite) { delete suite; }
 
   SaveAsciiTest() {}
-  ~SaveAsciiTest() {
+  ~SaveAsciiTest() override {
     FrameworkManager::Instance().deleteWorkspace("SaveAsciiWS");
   }
 

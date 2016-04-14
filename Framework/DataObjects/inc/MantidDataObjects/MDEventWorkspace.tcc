@@ -187,8 +187,8 @@ TMDE(void MDEventWorkspace)::setMinRecursionDepth(size_t minDepth) {
     std::vector<API::IMDNode *> boxes;
     boxes.clear();
     this->getBox()->getBoxes(boxes, depth - 1, false);
-    for (size_t i = 0; i < boxes.size(); i++) {
-      MDGridBox<MDE, nd> *gbox = dynamic_cast<MDGridBox<MDE, nd> *>(boxes[i]);
+    for (const auto box : boxes) {
+      MDGridBox<MDE, nd> *gbox = dynamic_cast<MDGridBox<MDE, nd> *>(box);
       if (gbox) {
         // Split ALL the contents.
         for (size_t j = 0; j < gbox->getNumChildren(); j++)
@@ -207,10 +207,16 @@ TMDE(std::vector<coord_t> MDEventWorkspace)::estimateResolution() const {
     if (numMD[i] > 0)
       realDepth = i;
 
+  auto splitTop = m_BoxController->getSplitTopInto();
   std::vector<coord_t> out;
   for (size_t d = 0; d < nd; d++) {
     size_t finestSplit = 1;
-    for (size_t i = 0; i < realDepth; i++)
+    size_t i = 0;
+    if (splitTop) {
+      finestSplit *= splitTop.get()[d];
+      i = 1;
+    }
+    for (; i < realDepth; i++)
       finestSplit *= m_BoxController->getSplitInto(d);
     Geometry::IMDDimension_const_sptr dim = this->getDimension(d);
     // Calculate the bin size at the smallest split amount
@@ -289,10 +295,29 @@ TMDE(signal_t MDEventWorkspace)::getNormalizedSignal(
     case API::VolumeNormalization:
       return box->getSignal() * box->getInverseVolume();
     case API::NumEventsNormalization:
-      return box->getSignal() / double(box->getNPoints());
+      return box->getSignal() / static_cast<double>(box->getNPoints());
+    default:
+      return box->getSignal();
     }
-    // Should not reach here
-    return box->getSignal();
+  } else
+    return std::numeric_limits<signal_t>::quiet_NaN();
+}
+
+TMDE(signal_t MDEventWorkspace)::getNormalizedError(
+    const API::IMDNode *box,
+    const Mantid::API::MDNormalization &normalization) const {
+  if (box) {
+    // What is our normalization factor?
+    switch (normalization) {
+    case Mantid::API::NoNormalization:
+      return box->getError();
+    case Mantid::API::VolumeNormalization:
+      return box->getError() * box->getInverseVolume();
+    case Mantid::API::NumEventsNormalization:
+      return box->getError() / static_cast<double>(box->getNPoints());
+    default:
+      return box->getError();
+    }
   } else
     return std::numeric_limits<signal_t>::quiet_NaN();
 }
@@ -456,9 +481,8 @@ TMDE(Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(
   this->getBox()->getBoxes(boxes, 1000, false);
   boxes_filtered.reserve(boxes.size());
 
-  for (size_t i = 0; i < boxes.size(); i++) {
-    MDBoxBase<MDE, nd> *box = dynamic_cast<MDBoxBase<MDE, nd> *>(boxes[i]);
-    boxes_filtered.push_back(box);
+  for (const auto box : boxes) {
+    boxes_filtered.push_back(dynamic_cast<MDBoxBase<MDE, nd> *>(box));
   }
 
   // Now sort by ID
@@ -546,8 +570,8 @@ TMDE(size_t MDEventWorkspace)::getMemorySize() const {
  *
  * @param event :: event to add.
  */
-TMDE(void MDEventWorkspace)::addEvent(const MDE &event) {
-  data->addEvent(event);
+TMDE(size_t MDEventWorkspace)::addEvent(const MDE &event) {
+  return data->addEvent(event);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -719,76 +743,179 @@ TMDE(void MDEventWorkspace)::refreshCache() {
 //    this->refreshCache();
 //  }
 
+//----------------------------------------------------------------------------------------------
+/** Get ordered list of positions-along-the-line that lie halfway between points
+ *where the line crosses box boundaries
+ *
+ * @param start :: coords of the start of the line
+ * @param end :: coords of the end of the line
+ * @param num_d :: number of dimensions
+ * @param dir :: vector of the direction of the line
+ * @param length :: the length of the line
+ * @returns :: ordered set of halfway points between box crossings
+ */
+TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
+    const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &end,
+    const size_t num_d, const Mantid::Kernel::VMD &dir,
+    const coord_t length) const {
+  std::set<coord_t> mid_points;
+
+  // Get the smallest box size along each dimension
+  // We'll assume all boxes are this size and filter out any boundaries
+  // which are not real later (by checking for unique box IDs)
+  std::vector<coord_t> smallest_box_sizes = this->estimateResolution();
+
+  // Next, we go through each dimension and see where the box boundaries
+  // intersect the line.
+  for (size_t d = 0; d < num_d; d++) {
+    auto line_start = start[d];
+    auto line_end = end[d];
+    auto box_size = smallest_box_sizes[d];
+    auto dir_current_dim = dir[d];
+
+    // +1 to get the last box
+    size_t num_boundaries =
+        static_cast<size_t>(ceil(std::abs(line_end - line_start) / box_size)) +
+        1;
+
+    // If the line has some component in this dimension then look for boundaries
+    // it crosses
+    if (dir_current_dim != 0.0) {
+      getBoundariesInDimension(start, dir, num_boundaries, length,
+                               dir_current_dim, box_size, mid_points);
+    }
+  }
+  return mid_points;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Insert positions-along-the-line that lie halfway between points
+ * where the line crosses box boundaries in a single dimension of the workspace
+ * into ordered set
+ *
+ * @param start :: coords of the start of the line
+ * @param dir :: vector of the direction of the line
+ * @param num_boundaries :: maximum number of boundary crossings possible if all
+ *boxes are the size of the smallest box
+ * @param length :: the length of the line
+ * @param dir_current_dim :: component of the line direction in this dimension
+ * @param box_size :: the minimum box size in this dimension
+ * @param mid_points :: ordered set of halfway points between box crossings
+ */
+TMDE(void MDEventWorkspace)::getBoundariesInDimension(
+    const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &dir,
+    const size_t num_boundaries, const coord_t length,
+    const coord_t dir_current_dim, const coord_t box_size,
+    std::set<coord_t> &mid_points) const {
+  auto lastPos = start;
+  coord_t lastLinePos = 0;
+  coord_t previousLinePos = 0;
+  coord_t line_pos_of_box_centre = 0;
+  const API::IMDNode *box = nullptr;
+  auto last_id = std::numeric_limits<size_t>::max();
+
+  for (size_t i = 1; i <= num_boundaries; i++) {
+    size_t current_id = std::numeric_limits<size_t>::max();
+    // Position along the line
+    coord_t this_x = i * box_size;
+    auto linePos = static_cast<coord_t>(this_x / fabs(dir_current_dim));
+    // Full position
+    auto pos = start + (dir * linePos);
+
+    // Get box using midpoint as using boundary would be ambiguous
+    auto middle = (pos + lastPos) * 0.5;
+    box = this->data->getBoxAtCoord(middle.getBareArray());
+    lastPos = pos;
+    if (box != nullptr) {
+      current_id = box->getID();
+      // Make sure we get the last box
+    } else if (i == num_boundaries) {
+      current_id = std::numeric_limits<size_t>::max();
+    } else
+      continue;
+    // If we haven't already a point for this box...
+    // This filters out the extra boundaries that don't really exist that
+    // we gained by assuming all boxes are the size of the smallest box
+    if ((current_id != last_id && i != 1)) {
+      // Check line position is within limits of the line and not too close to
+      // previous position
+      if (line_pos_of_box_centre >= 0 && line_pos_of_box_centre <= length &&
+          fabs(linePos - lastLinePos) > 1e-5) {
+        mid_points.insert(line_pos_of_box_centre);
+      }
+      lastLinePos = previousLinePos;
+    }
+    line_pos_of_box_centre =
+        static_cast<coord_t>((linePos + lastLinePos) * 0.5);
+    previousLinePos = linePos;
+
+    last_id = current_id;
+  }
+}
+
 //-----------------------------------------------------------------------------------------------
 /** Obtain coordinates for a line plot through a MDWorkspace.
  * Cross the workspace from start to end points, recording the signal along the
- *line.
- * Sets the x,y vectors to the histogram bin boundaries and counts
+ * line halfway between each bin boundary that the line crosses
  *
  * @param start :: coordinates of the start point of the line
  * @param end :: coordinates of the end point of the line
  * @param normalize :: how to normalize the signal
- * @param x :: is set to the boundaries of the bins, relative to start of the
- *line.
- * @param y :: is set to the normalized signal for each bin. Length = length(x)
- *- 1
- * @param e :: vector of errors for each bin.
+ * @param x :: mid points between positions where the line crosses box
+ *boundaries
+ * @param y :: signal of the box in which corresponding x position lies
+ * @param e :: error of the box in which corresponding x position lies
  */
 TMDE(API::IMDWorkspace::LinePlot MDEventWorkspace)
 ::getLinePlot(const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &end,
               Mantid::API::MDNormalization normalize) const {
-  // TODO: Don't use a fixed number of points later
-  size_t numPoints = 500;
+  auto num_dims = this->getNumDims();
+  if (start.getNumDims() != num_dims)
+    throw std::runtime_error("Start point must have the same number of "
+                             "dimensions as the workspace.");
+  if (end.getNumDims() != num_dims)
+    throw std::runtime_error(
+        "End point must have the same number of dimensions as the workspace.");
 
-  Kernel::VMD step = (end - start) / double(numPoints - 1);
-  double stepLength = step.norm();
+  // Unit-vector of the direction
+  Mantid::Kernel::VMD dir = end - start;
+  const auto length = dir.normalize();
 
-  // This will be the curve as plotted
+  const std::set<coord_t> mid_points =
+      getBoxBoundaryBisectsOnLine(start, end, num_dims, dir, length);
+
   LinePlot line;
-  for (size_t i = 0; i < numPoints; i++) {
-    // Coordinate along the line
-    Kernel::VMD coord = start + step * double(i);
 
-    // Look for the box at this coordinate
-    // const MDBoxBase<MDE,nd> * box = NULL;
-    const API::IMDNode *box = nullptr;
+  if (mid_points.empty()) {
+    makeSinglePointWithNaN(line.x, line.y, line.e);
+    return line;
+  } else {
 
-    if (isInBounds(coord.getBareArray())) {
-      box = this->data->getBoxAtCoord(coord.getBareArray());
+    for (const auto &line_pos : mid_points) {
+      // This position in coordinates of the workspace is
+      Mantid::Kernel::VMD ws_pos = start + (dir * line_pos);
 
-      if (box) {
+      if (isInBounds(ws_pos.getBareArray())) {
+        auto box = this->data->getBoxAtCoord(ws_pos.getBareArray());
+
+        // If the box is not masked then record the signal and error here
         if (!box->getIsMasked()) {
-          // What is our normalization factor?
-          signal_t normalizer = 1.0;
-          switch (normalize) {
-          case API::NoNormalization:
-            break;
-          case API::VolumeNormalization:
-            normalizer = box->getInverseVolume();
-            break;
-          case API::NumEventsNormalization:
-            normalizer = 1.0 / double(box->getNPoints());
-            break;
+          line.x.push_back(line_pos);
+          signal_t signal = this->getNormalizedSignal(box, normalize);
+          if (boost::math::isinf(signal)) {
+            // The plotting library (qwt) doesn't like infs.
+            signal = std::numeric_limits<signal_t>::quiet_NaN();
           }
-          // Record the position along the line
-          line.x.push_back(static_cast<coord_t>(stepLength * double(i)));
-          // And add the normalized signal/error to the list
-          line.y.push_back(box->getSignal() * normalizer);
-          line.e.push_back(box->getError() * normalizer);
+          line.y.push_back(signal);
+          line.e.push_back(this->getNormalizedError(box, normalize));
         }
-      } else {
-        // Record the position along the line
-        line.x.push_back(static_cast<coord_t>(stepLength * double(i)));
-        line.y.push_back(std::numeric_limits<double>::quiet_NaN());
-        line.e.push_back(std::numeric_limits<double>::quiet_NaN());
       }
-    } else {
-      // Record the position along the line
-      line.x.push_back(static_cast<coord_t>(stepLength * double(i)));
-      // Point is outside the workspace. Add NANs
-      line.y.push_back(std::numeric_limits<double>::quiet_NaN());
-      line.e.push_back(std::numeric_limits<double>::quiet_NaN());
     }
+  }
+
+  // If everything was masked
+  if (line.x.size() == 0) {
+    makeSinglePointWithNaN(line.x, line.y, line.e);
   }
   return line;
 }
@@ -804,8 +931,10 @@ TMDE(void MDEventWorkspace)::setMDMasking(
 
     // Apply new masks
     this->data->getBoxes(toMaskBoxes, 10000, true, maskingRegion);
-    for (size_t i = 0; i < toMaskBoxes.size(); ++i) {
-      toMaskBoxes[i]->mask();
+    for (const auto box : toMaskBoxes) {
+      box->clear();
+      box->clearFileBacked(false);
+      box->mask();
     }
 
     delete maskingRegion;
@@ -819,8 +948,8 @@ TMDE(void MDEventWorkspace)::clearMDMasking() {
   std::vector<API::IMDNode *> allBoxes;
   // Clear old masks
   this->data->getBoxes(allBoxes, 10000, true);
-  for (size_t i = 0; i < allBoxes.size(); ++i) {
-    allBoxes[i]->unmask();
+  for (const auto box : allBoxes) {
+    box->unmask();
   }
 }
 

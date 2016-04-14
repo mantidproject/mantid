@@ -121,6 +121,12 @@ public:
                                    const int64_t period, bool bmonitors,
                                    API::Algorithm *const pAlg);
 
+  /// Extract the start time from a raw file
+  static Kernel::DateAndTime extractStartTime(ISISRAW *isisRaw);
+
+  /// Extract the end time from a raw file
+  static Kernel::DateAndTime extractEndTime(ISISRAW *isisRaw);
+
 protected:
   /// Overwrites Algorithm method.
   void init() override;
@@ -223,7 +229,7 @@ private:
   /// Overwrites Algorithm method
   void exec() override;
   /// convert month label to int string
-  std::string convertMonthLabelToIntStr(std::string month) const;
+  static std::string convertMonthLabelToIntStr(std::string month);
 
   /// Allowed values for the cache property
   std::vector<std::string> m_cache_options;

@@ -72,6 +72,19 @@ public:
     delete parent;
   }
 
+  void testCorrectNameComparison() {
+    // Test allowed names
+    TS_ASSERT(RectangularDetector::compareName("RectangularDetector"));
+    TS_ASSERT(RectangularDetector::compareName("rectangularDetector"));
+    TS_ASSERT(RectangularDetector::compareName("rectangulardetector"));
+    TS_ASSERT(RectangularDetector::compareName("rectangular_detector"));
+
+    // Test fail on incorrect names
+    TS_ASSERT(!RectangularDetector::compareName("Rectangular Detector"));
+    TS_ASSERT(!RectangularDetector::compareName("Rectangular"));
+    TS_ASSERT(!RectangularDetector::compareName("Detector"));
+  }
+
   void testFullConstructor() {
     boost::shared_ptr<Geometry::Object> cuboidShape =
         ComponentCreationHelper::createCuboid(0.5);
@@ -229,49 +242,6 @@ public:
     delete det;
     delete parDet;
   }
-
-  // void test_sizex_with_negative_xstep()
-  //{
-  //  RectangularDetector det;
-
-  //  const int xpixels = 10;
-  //  const double xstart = 1;
-  //  const double xstep = -0.1; // Step is negative
-  //  const int ypixels = 10;
-  //  const double ystart = 1;
-  //  const double ystep = 0.1;
-  //  const int idstart = 0;
-  //  const bool idfillbyfirst_y = true;
-  //  const int idstepbyrow = 10;
-  //  const int idstep=1;
-
-  //  det.initialize(ComponentCreationHelper::createCuboid(1), xpixels, xstart,
-  //  xstep, ypixels, ystart, ystep, idstart, idfillbyfirst_y, idstepbyrow,
-  //  idstep);
-  //  TS_ASSERT_EQUALS(std::abs(xpixels * xstep), det.xsize());
-
-  //}
-
-  // void test_sizey_with_negative_ystep()
-  //{
-  //  RectangularDetector det;
-
-  //  const int xpixels = 10;
-  //  const double xstart = 1;
-  //  const double xstep = 0.1;
-  //  const int ypixels = 10;
-  //  const double ystart = 1;
-  //  const double ystep = -0.1; // Step is negative
-  //  const int idstart = 0;
-  //  const bool idfillbyfirst_y = true;
-  //  const int idstepbyrow = 10;
-  //  const int idstep=1;
-
-  //  det.initialize(ComponentCreationHelper::createCuboid(1), xpixels, xstart,
-  //  xstep, ypixels, ystart, ystep, idstart, idfillbyfirst_y, idstepbyrow,
-  //  idstep);
-  //  TS_ASSERT_EQUALS(std::abs(ypixels * ystep), det.ysize());
-  //}
 };
 
 #endif

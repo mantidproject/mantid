@@ -105,8 +105,6 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}/../QtWidgets
   ${CMAKE_SOURCE_DIR}/MantidPlot/src
-  ${QWT_INCLUDE_DIR}
-  ${PYTHON_INCLUDE_PATH}
 )
 
 set( ALL_FILES
@@ -131,8 +129,7 @@ set_target_properties( VatesSimpleGuiViewWidgets PROPERTIES OUTPUT_NAME MantidVa
 # Add to the 'VatesSimpleGui' group in VS
 set_property( TARGET VatesSimpleGuiViewWidgets PROPERTY FOLDER MantidVatesSimpleGui )
 
-
-include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
+include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} ${QWT_INCLUDE_DIR} ${PYTHON_INCLUDE_DIR} )
 
 target_link_libraries( VatesSimpleGuiViewWidgets LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 pqApplicationComponents

@@ -27,14 +27,15 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS PeaksTableControllerVsi
 public:
   PeaksTableControllerVsi(boost::shared_ptr<CameraManager> cameraManager,
                           QWidget *parent = 0);
-  ~PeaksTableControllerVsi();
+  ~PeaksTableControllerVsi() override;
   std::vector<bool> getViewablePeaks();
   bool hasPeaks();
   void showFullTable();
   void removeTable();
   std::string getConcatenatedWorkspaceNames(std::string delimiter);
-  void updatePeaksWorkspaces(QList<QPointer<pqPipelineSource>> peakSources,
-                             pqPipelineSource *splatSource);
+  void
+  updatePeaksWorkspaces(const QList<QPointer<pqPipelineSource>> &peakSources,
+                        pqPipelineSource *splatSource);
 signals:
   void setRotationToPoint(double x, double y, double z);
 public slots:

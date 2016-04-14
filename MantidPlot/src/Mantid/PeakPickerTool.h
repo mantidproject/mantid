@@ -86,7 +86,7 @@ public:
   bool eventFilter(QObject *obj, QEvent *event) override;
   /// Workspace name
   const QString& workspaceName()const{return m_wsName;}
-  /// Spectrum index
+  /// workspace index
   int spec()const{return m_spec;}
   /// The parent graph
   Graph* graph()const{return d_graph;}
@@ -187,6 +187,11 @@ private:
   // Set the tool tip text
   void setToolTip(const QString& txt);
 
+  // Set up member variables from curve
+  bool initializeFromCurve(PlotCurve *curve);
+  // Set up - add names of existing fit curves and plot guess status
+  void addExistingFitsAndGuess(const QStringList &curvesList);
+
   /// Creates a pointer to fitPropertyBrowser
   MantidQt::MantidWidgets::FitPropertyBrowser* m_fitPropertyBrowser;
 
@@ -194,7 +199,7 @@ private:
 
   /// Workspace name
   QString m_wsName;
-  /// Spectrum index
+  /// Workspace index
   int m_spec;
   /// Pointer to the workspace
   boost::shared_ptr<Mantid::API::MatrixWorkspace> m_ws;

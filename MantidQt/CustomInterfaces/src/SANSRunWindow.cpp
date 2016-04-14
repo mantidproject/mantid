@@ -485,9 +485,7 @@ void SANSRunWindow::saveWorkspacesDialog() {
   // Connect the request for a zero-error-free workspace
   // cpp-check does not understand that the input are two references
   connect(m_saveWorkspaces,
-          // cppcheck-suppress duplicateExpression
           SIGNAL(createZeroErrorFreeWorkspace(QString &, QString &)),
-          // cppcheck-suppress duplicateExpression
           this, SLOT(createZeroErrorFreeClone(QString &, QString &)));
   // Connect the request for deleting a zero-error-free workspace
   connect(m_saveWorkspaces, SIGNAL(deleteZeroErrorFreeWorkspace(QString &)),
@@ -1107,6 +1105,9 @@ bool SANSRunWindow::loadUserFile() {
   m_uiForm.tabWidget->setTabEnabled(1, true);
   m_uiForm.tabWidget->setTabEnabled(2, true);
   m_uiForm.tabWidget->setTabEnabled(3, true);
+
+  // Display which IDf is currently being used by the reducer
+  updateIDFFilePath();
 
   return true;
 }
@@ -2148,6 +2149,10 @@ bool SANSRunWindow::handleLoadButtonClick() {
   updateBeamCenterCoordinates();
   // Set the beam finder specific settings
   setBeamFinderDetails();
+
+  // Display which IDF is currently being used by the reducer
+  updateIDFFilePath();
+
   return true;
 }
 
@@ -5089,5 +5094,17 @@ bool SANSRunWindow::isValidUserFile() {
   return true;
 }
 
+void SANSRunWindow::updateIDFFilePath() {
+  QString getIdf = "i.get_current_idf_path_in_reducer()\n";
+  QString resultIdf(runPythonCode(getIdf, false));
+  auto teset1 = resultIdf.toStdString();
+  resultIdf = resultIdf.simplified();
+  auto test2 = resultIdf.toStdString();
+  if (resultIdf != m_constants.getPythonEmptyKeyword() &&
+      !resultIdf.isEmpty()) {
+    auto test = resultIdf.toStdString();
+    m_uiForm.current_idf_path->setText(resultIdf);
+  }
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

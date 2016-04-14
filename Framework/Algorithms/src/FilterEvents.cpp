@@ -766,8 +766,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
   // Apply to m_detTofOffsets and m_detTofShifts
   if (usedetid) {
     // Get vector IDs
-    vector<detid_t> vecDetIDs;
-    vecDetIDs.resize(numhist, 0);
+    vector<detid_t> vecDetIDs(numhist, 0);
     // Set up the detector IDs to vecDetIDs and set up the initial value
     for (size_t i = 0; i < numhist; ++i) {
       // It is assumed that there is one detector per spectra.
@@ -784,10 +783,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
               << detids.size() << " detectors.";
         throw runtime_error(errss.str());
       }
-      detid_t detid = 0;
-      for (auto detit = detids.begin(); detit != detids.end(); ++detit)
-        detid = *detit;
-      vecDetIDs[i] = detid;
+      vecDetIDs[i] = *detids.begin();
     }
 
     // Map correction map to list
@@ -812,7 +808,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
         m_detTofOffsets[i] = fiter->second;
     } // ENDFOR (each spectrum i)
   } else {
-    // It is spectrum ID already
+    // It is spectrum Number already
     map<detid_t, double>::iterator fiter;
     // correction factor
     for (fiter = toffactormap.begin(); fiter != toffactormap.end(); ++fiter) {

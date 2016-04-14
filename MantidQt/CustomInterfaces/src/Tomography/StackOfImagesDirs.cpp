@@ -8,11 +8,21 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-const std::string StackOfImagesDirs::g_descr =
+const std::string StackOfImagesDirs::g_descrComplex =
     "A directory (folder) that contains subdirectories with names "
     "starting with:\n- 'Data' (for sample images),\n- 'Flat' (for white "
     "bean images),\n- 'Dark' (for dark images)\nThe first one is "
     "mandatory whereas the other two are optional.";
+
+const std::string StackOfImagesDirs::g_descrSimple =
+    "A directory containing (readable) image files.";
+
+const std::string StackOfImagesDirs::g_descrBoth = "Two alternatives: \n\n"
+                                                   "Simple: " +
+                                                   g_descrSimple +
+                                                   "\n\n"
+                                                   "Or Full:\n\n" +
+                                                   g_descrComplex + "\n";
 
 const std::string StackOfImagesDirs::g_sampleNamePrefix = "data";
 const std::string StackOfImagesDirs::g_flatNamePrefix = "flat";
@@ -20,12 +30,13 @@ const std::string StackOfImagesDirs::g_darkNamePrefix = "dark";
 const std::string StackOfImagesDirs::g_processedNamePrefix = "processed";
 const std::string StackOfImagesDirs::g_prefilteredNamePrefix = "pre_filtered";
 
-StackOfImagesDirs::StackOfImagesDirs(const std::string &path)
+StackOfImagesDirs::StackOfImagesDirs(const std::string &path,
+                                     bool allowSimpleLayout)
     : m_valid(false), m_statusDescStr("Constructed, no checks done yet.") {
-  findStackDirs(path);
+  findStackDirs(path, allowSimpleLayout);
 }
 
-std::string StackOfImagesDirs::description() const { return g_descr; }
+std::string StackOfImagesDirs::description() const { return m_descr; }
 
 std::string StackOfImagesDirs::status() const {
   if (m_valid)
@@ -45,7 +56,14 @@ std::vector<std::string> StackOfImagesDirs::darkFiles() const {
   return findImgFiles(m_darkDir);
 }
 
-void StackOfImagesDirs::findStackDirs(const std::string &path) {
+void StackOfImagesDirs::findStackDirs(const std::string &path,
+                                      bool allowSimpleLayout) {
+  if (allowSimpleLayout) {
+    m_descr = g_descrBoth;
+  } else {
+    m_descr = g_descrComplex;
+  }
+
   if (path.empty())
     return;
 
@@ -53,6 +71,55 @@ void StackOfImagesDirs::findStackDirs(const std::string &path) {
   if (!dir.isDirectory() || !dir.exists())
     return;
 
+  bool found = false;
+  // go for the simple layout first (just image files in a flat tree).
+  if (allowSimpleLayout) {
+    found = findStackFilesSimple(dir);
+  }
+
+  if (!found) {
+    findStackDirsComplex(dir);
+  }
+}
+
+/**
+ * Tries to find a stack of images with the simple layout: all sample
+ * files are in the directory given.
+ *
+ * @param dir directory which is the base path for the stack of images, that is,
+ * which contains image files.
+ *
+ * @return whether the stack has been found succesfully
+ */
+bool StackOfImagesDirs::findStackFilesSimple(Poco::File &dir) {
+  Poco::DirectoryIterator end;
+  for (Poco::DirectoryIterator it(dir); it != end; ++it) {
+    // presence of one regular file is enough
+    if (it->isFile()) {
+      m_sampleDir = dir.path();
+      m_flatDir = "";
+      m_darkDir = "";
+      m_valid = true;
+    }
+  }
+
+  return m_valid;
+}
+
+/**
+ * Tries to find a stack of images with the full or complex
+ * layout. Assumes that the path given has been checked. In a full
+ * layout the files are arranged in up to three subdirectories:
+ *
+ * - path/data*: sample images
+ * - path/flat*: flat images
+ * - path/dark*: dark images
+ *
+ * @param dir directory to use as base path for the stack of images
+ *
+ * @return whether the stack has been found succesfully
+ */
+bool StackOfImagesDirs::findStackDirsComplex(Poco::File &dir) {
   Poco::DirectoryIterator end;
   for (Poco::DirectoryIterator it(dir); it != end; ++it) {
     if (!it->isDirectory()) {
@@ -68,17 +135,17 @@ void StackOfImagesDirs::findStackDirs(const std::string &path) {
       m_sampleDir = it.path().toString();
     } else if (boost::iequals(name.substr(0, g_flatNamePrefix.length()),
                               g_flatNamePrefix)) {
-      m_flatDir = name;
+      m_flatDir = it.path().toString();
     } else if (boost::iequals(name.substr(0, g_darkNamePrefix.length()),
                               g_darkNamePrefix)) {
-      m_darkDir = name;
+      m_darkDir = it.path().toString();
     }
   }
 
   if (m_sampleDir.empty()) {
     m_statusDescStr = "The the sample images directory (" + g_sampleNamePrefix +
                       "...) has not been found.";
-    return;
+    return false;
   }
 
   // can be valid only if we get here. There must be at least one entry that is
@@ -97,31 +164,43 @@ void StackOfImagesDirs::findStackDirs(const std::string &path) {
     m_statusDescStr = "No files were found in the sample images directory (" +
                       g_sampleNamePrefix + "...).";
   }
+
+  return m_valid;
 }
 
 std::vector<std::string>
 StackOfImagesDirs::findImgFiles(const std::string &path) const {
   std::vector<std::string> fnames;
-  Poco::File dir(path);
-  if (!dir.isDirectory() || !dir.exists())
+  if (path.empty()) {
     return fnames;
-
-  // as an alternative could also use Poco::Glob to find the files
-  Poco::DirectoryIterator it(dir);
-  Poco::DirectoryIterator end;
-  while (it != end) {
-    // TODO: filter names by extension?
-    // const std::string name = it.name();
-    if (it->isFile()) {
-      fnames.push_back(it.path().toString());
-    }
-
-    ++it;
   }
 
-  // this assumes the usual sorting of images of a stack (directory): a prefix,
-  // and a sequence number (with a fixed number of digits).
-  std::sort(fnames.begin(), fnames.end());
+  try {
+    Poco::File dir(path);
+    if (!dir.isDirectory() || !dir.exists())
+      return fnames;
+
+    // as an alternative could also use Poco::Glob to find the files
+    Poco::DirectoryIterator it(dir);
+    Poco::DirectoryIterator end;
+    while (it != end) {
+      // TODO: filter names by extension?
+      // const std::string name = it.name();
+      if (it->isFile()) {
+        fnames.push_back(it.path().toString());
+      }
+
+      ++it;
+    }
+
+    // this assumes the usual sorting of images of a stack (directory): a
+    // prefix,
+    // and a sequence number (with a fixed number of digits).
+    std::sort(fnames.begin(), fnames.end());
+  } catch (std::runtime_error &) {
+    // it's fine if the files are not found, not readable, etc.
+  }
+
   return fnames;
 }
 

@@ -14,10 +14,10 @@ namespace MantidWidgets
  */
 void FormulaDialogEditor::runDialog()
 {
-    MantidQt::MantidWidgets::UserFunctionDialog *dlg = new MantidQt::MantidWidgets::UserFunctionDialog((QWidget*)parent(),getText());
-    if (dlg->exec() == QDialog::Accepted)
+    MantidQt::MantidWidgets::UserFunctionDialog dlg((QWidget*)parent(),getText());
+    if (dlg.exec() == QDialog::Accepted)
     {
-      setText(dlg->getFormula());
+      setText(dlg.getFormula());
       updateProperty();
     }
 }

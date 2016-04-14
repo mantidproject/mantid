@@ -92,7 +92,7 @@ map<string, string> ResampleX::validateInputs() {
       stringstream msg;
       msg << "XMin and XMax do not define same number of spectra ("
           << xmins.size() << " != " << xmaxs.size() << ")";
-      errors.insert(pair<string, string>("XMax", msg.str()));
+      errors.emplace("XMax", msg.str());
     } else {
       size_t size = xmins.size();
       for (size_t i = 0; i < size; ++i) {
@@ -100,7 +100,7 @@ map<string, string> ResampleX::validateInputs() {
           stringstream msg;
           msg << "XMin (" << xmins[i] << ") cannot be greater than XMax ("
               << xmaxs[i] << ")";
-          errors.insert(pair<string, string>("XMax", msg.str()));
+          errors.emplace("XMax", msg.str());
         }
       }
     }

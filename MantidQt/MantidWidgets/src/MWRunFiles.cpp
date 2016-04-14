@@ -736,11 +736,12 @@ void MWRunFiles::findFiles() {
       // Regex to match a selection of run numbers as defined here:
       // mantidproject.org/MultiFileLoading
       // Also allowing spaces between delimiters as this seems to work fine
-      boost::regex runNumbers("([0-9]+)([:+-] ?[0-9]+)? ?(:[0-9]+)?",
-                              boost::regex::extended);
+      const std::string runNumberString = "([0-9]+)([:+-] ?[0-9]+)? ?(:[0-9]+)?";
+      boost::regex runNumbers(runNumberString, boost::regex::extended);
       // Regex to match a list of run numbers delimited by commas
-      boost::regex runNumberList("([0-9]+)(, ?[0-9]+)*",
-                                 boost::regex::extended);
+      const std::string runListString =
+          "(" + runNumberString + ")(, ?(" + runNumberString + "))*";
+      boost::regex runNumberList(runListString, boost::regex::extended);
 
       // See if we can just prepend the instrument and be done
       if (boost::regex_match(searchText.toStdString(), runNumbers)) {

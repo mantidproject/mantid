@@ -433,7 +433,8 @@ void Run::calculateGoniometerMatrix() {
     const double maxAngle =
         getLogAsSingleValue(axisName, Kernel::Math::Maximum);
     const double angle = getLogAsSingleValue(axisName, Kernel::Math::Mean);
-    if (minAngle != maxAngle) {
+    if (minAngle != maxAngle &&
+        !(boost::math::isnan(minAngle) && boost::math::isnan(maxAngle))) {
       const double lastAngle =
           getLogAsSingleValue(axisName, Kernel::Math::LastValue);
       g_log.warning("Goniometer angle changed in " + axisName + " log from " +

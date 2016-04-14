@@ -82,9 +82,11 @@ private:
   void init() override;
   void exec() override;
 
+  /// Process inputs
+  void processInputs();
+
   /// Parse SPICE XML file
-  void parseSpiceXML(const std::string &xmlfilename,
-                     std::vector<SpiceXMLNode> &vecspicenode);
+  std::vector<SpiceXMLNode> parseSpiceXML(const std::string &xmlfilename);
 
   /// Create output MatrixWorkspace
   API::MatrixWorkspace_sptr
@@ -99,6 +101,9 @@ private:
                                     API::ITableWorkspace_sptr spicetablews,
                                     int ptnumber);
 
+  /// Set up sample logs in the output workspace
+  bool setupSampleLogs(API::MatrixWorkspace_sptr outws);
+
   /// Load instrument
   void loadInstrument(API::MatrixWorkspace_sptr matrixws,
                       const std::string &idffilename);
@@ -106,7 +111,28 @@ private:
   /// Get wavelength from workspace
   bool getHB3AWavelength(API::MatrixWorkspace_sptr dataws, double &wavelength);
 
+  /// Set output workspace's X-axs as lab-frame Q space
   void setXtoLabQ(API::MatrixWorkspace_sptr dataws, const double &wavelength);
+
+  /// SPICE detector XML file
+  std::string m_detXMLFileName;
+  /// XML node name in detector counts file
+  std::string m_detXMLNodeName;
+  /// Pixel size at X direction
+  size_t m_numPixelX;
+  /// Pixel size at Y direction
+  size_t m_numPixelY;
+  /// Flag to show whether instrument is required to load
+  bool m_loadInstrument;
+  /// shift distance from sample to detector center
+  double m_detSampleDistanceShift;
+  /// Flag to show whether the SPICE scan table workspace is given
+  bool m_hasScanTable;
+  /// Pt number for the sample logs to load with presense of Spice scan table
+  /// workspace
+  int m_ptNumber4Log;
+  /// IDF file name to override Mantid's
+  std::string m_idfFileName;
 };
 
 } // namespace DataHandling

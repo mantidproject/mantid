@@ -28,14 +28,14 @@ def write_header(subproject, classname, filename, args):
 
     # Create an Algorithm header; will not use it if not an algo
     algorithm_header = """
-  const std::string name() const final;
-  int version() const final;
-  const std::string category() const final;
-  const std::string summary() const final;
+  const std::string name() const override final;
+  int version() const override final;
+  const std::string category() const override final;
+  const std::string summary() const override final;
 
 private:
-  void init() final;
-  void exec() final;
+  void init() override final;
+  void exec() override final;
 """
 
     alg_class_declare = " final : public API::Algorithm"
@@ -134,10 +134,12 @@ const std::string %s::summary() const {
  */
 void %s::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<API::Workspace>>("InputWorkspace", "",
+                                                             Direction::Input),
       "An input workspace.");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "",
+                                                             Direction::Output),
       "An output workspace.");
 }
 
