@@ -36,7 +36,7 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber,
                                          const QStringList &groups)
     : MuonFitDataSelector(parent) {
   this->setWorkspaceDetails(runNumber, instName);
-  this->setNumPeriodCheckboxes(numPeriods);
+  this->setNumPeriods(numPeriods);
   this->setAvailableGroups(groups);
   // TODO: connect signals and slots here
 }
@@ -194,21 +194,6 @@ void MuonFitDataSelector::clearGroupCheckboxes() {
 }
 
 /**
- * Checks if the given group has been selected or not
- * @param name :: [input] Name of group to test
- * @returns :: Whether checkbox was selected by user
- */
-bool MuonFitDataSelector::isGroupSelected(const QString &name) const {
-  if (m_groupBoxes.contains(name)) {
-    return m_groupBoxes.value(name)->isChecked();
-  } else {
-    g_log.warning() << "No group called " << name.toStdString()
-                    << ": cannot get selection state";
-    return false;
-  }
-}
-
-/**
  * Set selection state of given group
  * @param name :: [input] Name of group to select/deselect
  * @param selected :: [input] True to select, false to deselect
@@ -223,11 +208,11 @@ void MuonFitDataSelector::setGroupSelected(const QString &name, bool selected) {
 }
 
 /**
- * Called by presenter. Sets checkboxes on UI for given number
+ * Sets checkboxes on UI for given number
  * of periods plus "combination" boxes.
  * @param numPeriods :: [input] Number of periods
  */
-void MuonFitDataSelector::setNumPeriodCheckboxes(size_t numPeriods) {
+void MuonFitDataSelector::setNumPeriods(size_t numPeriods) {
   this->setPeriodVisibility(numPeriods > 1);
   // TODO: add checkboxes code
   throw std::runtime_error("Not implemented yet");
@@ -264,9 +249,10 @@ QStringList MuonFitDataSelector::getPeriodSelections() const {
  */
 QStringList MuonFitDataSelector::getChosenGroups() const {
   QStringList chosen;
-  for (const auto group : m_groupBoxes.keys()) {
-    if (isGroupSelected(group)) {
-      chosen.append(group);
+  for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+       ++iter) {
+    if (iter.value()->isChecked()) {
+      chosen.append(iter.key());
     }
   }
   return chosen;

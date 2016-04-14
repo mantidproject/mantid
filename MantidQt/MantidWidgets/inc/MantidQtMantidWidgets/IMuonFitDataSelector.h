@@ -17,18 +17,13 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IMuonFitDataSelector {
 public:
   virtual QStringList getRuns() const = 0;
   virtual unsigned int getWorkspaceIndex() const = 0;
-  virtual void setWorkspaceIndex(unsigned int index) = 0;
   virtual double getStartTime() const = 0;
-  virtual void setStartTime(double start) = 0;
   virtual double getEndTime() const = 0;
-  virtual void setEndTime(double end) = 0;
-  virtual void setPeriodVisibility(bool visible) = 0;
-  virtual void addGroupCheckbox(const QString &name) = 0;
-  virtual void clearGroupCheckboxes() = 0;
-  virtual bool isGroupSelected(const QString &name) const = 0;
-  virtual void setGroupSelected(const QString &name, bool selected) = 0;
-  virtual void setNumPeriodCheckboxes(size_t numPeriods) = 0;
+  virtual void setNumPeriods(size_t numPeriods) = 0;
   virtual QStringList getPeriodSelections() const = 0;
+  virtual void setWorkspaceDetails(int runNumber, const QString &instName) = 0;
+  virtual void setAvailableGroups(const QStringList &groupNames) = 0;
+  virtual QStringList getChosenGroups() const = 0;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

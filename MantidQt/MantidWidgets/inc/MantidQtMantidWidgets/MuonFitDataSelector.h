@@ -46,38 +46,47 @@ public:
   explicit MuonFitDataSelector(QWidget *parent);
   /// Constructor with more options
   MuonFitDataSelector(QWidget *parent, int runNumber, const QString &instName,
-                  size_t numPeriods, const QStringList &groups);
+                      size_t numPeriods, const QStringList &groups);
   // --- MantidWidget methods ---
   /// Get user input through a common interface
   QVariant getUserInput() const override;
   /// Set user input through a common interface
   void setUserInput(const QVariant &value) override;
-  // --- end ---
   // --- IMuonFitDataSelector methods
+  /// Get selected run numbers
   QStringList getRuns() const override;
+  /// Get selected workspace index
   unsigned int getWorkspaceIndex() const override;
-  void setWorkspaceIndex(unsigned int index) override;
+  /// Get selected start time
   double getStartTime() const override;
-  void setStartTime(double start) override;
+  /// Get selected end time
   double getEndTime() const override;
-  void setEndTime(double end) override;
-  void addGroupCheckbox(const QString &name) override;
-  void clearGroupCheckboxes() override;
-  bool isGroupSelected(const QString &name) const override;
-  void setGroupSelected(const QString &name, bool selected) override;
-  void setNumPeriodCheckboxes(size_t numPeriods) override;
+  /// Set number of periods in data
+  void setNumPeriods(size_t numPeriods) override;
+  /// Get selected periods
   QStringList getPeriodSelections() const override;
-  // --- end ---
   /// Set starting run number and instrument
-  void setWorkspaceDetails(int runNumber, const QString &instName);
+  void setWorkspaceDetails(int runNumber, const QString &instName) override;
+  /// Set names of available groups
+  void setAvailableGroups(const QStringList &groupNames) override;
+  /// Get names of chosen groups
+  QStringList getChosenGroups() const override;
 
 private:
+  /// Set selected workspace index
+  void setWorkspaceIndex(unsigned int index);
+  /// Set start time for fit
+  void setStartTime(double start);
+  /// Set end time for fit
+  void setEndTime(double end);
+  /// Add a checkbox to Groups section
+  void addGroupCheckbox(const QString &name);
+  /// Clear all checkboxes from Groups section
+  void clearGroupCheckboxes();
+  /// Set selection status of a checkbox
+  void setGroupSelected(const QString &name, bool selected);
   /// Set visibility of "Periods" section
-  void setPeriodVisibility(bool visible) override;
-  /// Set names of available groups
-  void setAvailableGroups(const QStringList &groupNames);
-  /// Get names of chosen groups
-  QStringList getChosenGroups() const;
+  void setPeriodVisibility(bool visible);
   /// Set default values in some input controls
   void setDefaultValues();
   /// Set up validators for input
