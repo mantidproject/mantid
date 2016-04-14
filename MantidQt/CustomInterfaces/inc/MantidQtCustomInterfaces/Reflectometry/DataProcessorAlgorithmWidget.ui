@@ -82,6 +82,10 @@
                </widget>
              </item>
              <item>
+               <layout class="QGridLayout" name="processLayout">
+               </layout>
+             </item>
+             <item>
                <layout class="QHBoxLayout" name="layoutRowButtons">
                  <property name="margin">
                    <number>1</number>

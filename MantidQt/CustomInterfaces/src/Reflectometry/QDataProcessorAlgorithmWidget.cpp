@@ -63,6 +63,9 @@ QDataProcessorAlgorithmWidget::QDataProcessorAlgorithmWidget(QWidget *parent)
   whitelist.addElement("dQ/Q", "Qstep");
   whitelist.addElement("Scale", "Scale");
 
+  // The post-processor algorithm's name
+  std::string dataPostprocessorAlgorithm = "Stitch1DMany";
+
   m_presenter = boost::make_shared<GenericDataProcessorPresenter>(
       this /*table view*/,
       this /*currently this concrete view is also responsibile for prog reporting*/,
@@ -71,7 +74,8 @@ QDataProcessorAlgorithmWidget::QDataProcessorAlgorithmWidget(QWidget *parent)
       blacklist /*Properties we don't want to show in the Options column*/,
       whitelist /*Properties we want to show as columns in the table*/,
       outputInstructions /*Names of the outputs produced by the reduction algorithm*/,
-      plotInstructions /*The suffix of the ws we want to plot*/);
+      plotInstructions /*The suffix of the ws we want to plot*/,
+      dataPostprocessorAlgorithm /*The name of the post-processing algorithm*/);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -602,6 +606,26 @@ void QDataProcessorAlgorithmWidget::setOptionsHintStrategy(
 }
 
 /**
+TODO
+*/
+void QDataProcessorAlgorithmWidget::addHintingLineEdit(
+    const std::string &title, const std::string &name,
+    const std::map<std::string, std::string> &hints) {
+
+  int lastRow = ui.processLayout->rowCount();
+
+	// The title
+	QLabel *titleLabel = new QLabel(QString::fromStdString(title), this);
+	titleLabel->setMinimumSize(100,10);
+	ui.processLayout->addWidget(titleLabel, lastRow, 0);
+	// The name
+	ui.processLayout->addWidget(new QLabel(QString::fromStdString(name), this),
+                              lastRow, 1);
+	// The content
+  ui.processLayout->addWidget(new HintingLineEdit(this, hints), lastRow, 2);
+}
+
+/**
 Sets the contents of the system's clipboard
 @param text The contents of the clipboard
 */
@@ -661,6 +685,16 @@ std::string QDataProcessorAlgorithmWidget::getClipboard() const {
 * Clear the progress
 */
 void QDataProcessorAlgorithmWidget::clearProgress() { ui.progressBar->reset(); }
+
+/** 
+TODO
+*/
+std::string QDataProcessorAlgorithmWidget::getPostprocessingInstructions() const {
+
+	const int lastRow = ui.processLayout->rowCount();
+	auto widget = ui.processLayout->itemAtPosition(lastRow-1, 1)->widget();
+	return dynamic_cast<QLineEdit*>(widget)->text().toStdString();
+}
 
 } // namespace CustomInterfaces
 } // namespace Mantid

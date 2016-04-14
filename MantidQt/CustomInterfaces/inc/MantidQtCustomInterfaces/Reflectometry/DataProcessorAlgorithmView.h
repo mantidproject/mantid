@@ -5,6 +5,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h"
 #include "MantidQtMantidWidgets/HintStrategy.h"
+#include "MantidQtMantidWidgets/HintingLineEdit.h"
 
 #include <set>
 #include <string>
@@ -78,12 +79,16 @@ public:
       MantidQt::MantidWidgets::HintStrategy *hintStrategy) = 0;
   virtual void setClipboard(const std::string &text) = 0;
   virtual void setModel(std::string name) = 0;
+  virtual void
+  addHintingLineEdit(const std::string &title, const std::string &name,
+                     const std::map<std::string, std::string> &hints) = 0;
 
   // Accessor methods
   virtual std::set<int> getSelectedRows() const = 0;
   virtual std::string getWorkspaceToOpen() const = 0;
   virtual std::string getClipboard() const = 0;
   virtual std::string getProcessInstrument() const = 0;
+  virtual std::string getPostprocessingInstructions() const = 0;
 
   virtual boost::shared_ptr<DataProcessorPresenter>
   getTablePresenter() const = 0;

@@ -85,10 +85,14 @@ public:
   void setOptionsHintStrategy(
       MantidQt::MantidWidgets::HintStrategy *hintStrategy) override;
   void setClipboard(const std::string &text) override;
+  void
+  addHintingLineEdit(const std::string &title, const std::string &name,
+                     const std::map<std::string, std::string> &hints) override;
 
   // Accessor methods
   std::set<int> getSelectedRows() const override;
   std::string getProcessInstrument() const override;
+  std::string getPostprocessingInstructions() const override;
   std::string getWorkspaceToOpen() const override;
   std::string getClipboard() const override;
 

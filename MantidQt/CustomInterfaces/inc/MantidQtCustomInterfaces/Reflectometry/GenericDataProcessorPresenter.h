@@ -53,7 +53,8 @@ public:
       const std::set<std::string> &blacklist,
       const DataProcessorWhiteList &whitelist,
       const std::map<std::string, std::string> &outputInstructions,
-      const std::string &plotInstructions);
+      const std::string &plotInstructions,
+      const std::string &postprocessorAlgorithm);
   ~GenericDataProcessorPresenter() override;
   void notify(DataProcessorPresenter::Flag flag) override;
   const std::map<std::string, QVariant> &options() const override;
@@ -80,12 +81,16 @@ protected:
   std::map<std::string, DataPreprocessorAlgorithm> m_preprocessor;
   // The data processor algorithm
   std::string m_dataProcessorAlg;
+  // The blacklist
+  std::set<std::string> m_blacklist;
   // The whitelist
   DataProcessorWhiteList m_whitelist;
   // The output instructions
   std::map<std::string, std::string> m_outputInstructions;
   // Plot instructions
   std::string m_plotInstructions;
+  // Post-processing algorithm
+  std::string m_postprocessor;
   // Index of column "Group"
   int m_colGroup;
   // The algorithm's properties we want to read from the table
@@ -98,8 +103,8 @@ protected:
   std::map<std::string, QVariant> m_options;
   // calculates qmin and qmax
   std::vector<double> calcQRange(Mantid::API::Workspace_sptr ws, double theta);
-  // Stitch some rows
-  void stitchRows(std::set<int> rows);
+  // Post-process some rows
+  void postProcessRows(std::set<int> rows);
   // process selected rows
   void process();
   // process groups of rows
@@ -160,6 +165,8 @@ protected:
   // options
   void showOptionsDialog();
   void initOptions();
+  // algorithms' hints
+  void createProcessLayout();
 
   // List of workspaces the user can open
   std::set<std::string> m_workspaceList;

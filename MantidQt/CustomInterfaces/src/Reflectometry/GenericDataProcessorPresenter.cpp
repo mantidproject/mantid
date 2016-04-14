@@ -72,14 +72,18 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const std::set<std::string> &blacklist,
     const DataProcessorWhiteList &whitelist,
     const std::map<std::string, std::string> &outputInstructions,
-    const std::string &plotInstructions)
+    const std::string &plotInstructions, const std::string &postprocessor)
     : WorkspaceObserver(), m_view(tableView), m_progressView(progressView),
       m_preprocessor(preprocessor), m_dataProcessorAlg(dataProcessorAlgorithm),
-      m_whitelist(whitelist), m_outputInstructions(outputInstructions),
-      m_plotInstructions(plotInstructions), m_tableDirty(false) {
+      m_blacklist(blacklist), m_whitelist(whitelist),
+      m_outputInstructions(outputInstructions),
+      m_plotInstructions(plotInstructions), m_postprocessor(postprocessor),
+      m_tableDirty(false) {
 
   // Initialise options
   initOptions();
+  // Create the process layout
+  createProcessLayout();
 
   for (size_t i = 0; i < m_whitelist.size(); i++) {
     std::string colName = m_whitelist.algPropFromColIndex(static_cast<int>(i));
@@ -118,7 +122,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
   // handling that the user
   // should'nt touch.
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_dataProcessorAlg);
-  m_view->setOptionsHintStrategy(new AlgorithmHintStrategy(alg, blacklist));
+  m_view->setOptionsHintStrategy(new AlgorithmHintStrategy(alg, m_blacklist));
 
   // Start with a blank table
   newTable();
@@ -128,6 +132,45 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 * Destructor
 */
 GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
+
+/**
+TODO
+*/
+void GenericDataProcessorPresenter::createProcessLayout() {
+
+  // Pre-process
+  // Depends on the number of algorithms needed for pre-processing the data
+  for (auto it = m_preprocessor.begin(); it != m_preprocessor.end(); ++it) {
+
+    IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create(it->second.name());
+    AlgorithmHintStrategy strategy(alg, std::set<std::string>());
+    if (it == m_preprocessor.begin())
+      m_view->addHintingLineEdit("<b>Pre-process:</b>", alg->name(),
+                                 strategy.createHints());
+    else
+      m_view->addHintingLineEdit("", alg->name(), strategy.createHints());
+  }
+
+  // Process
+  // Only one algorithm
+  {
+    IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create(m_dataProcessorAlg);
+    AlgorithmHintStrategy strategy(alg, m_blacklist);
+    m_view->addHintingLineEdit("<b>Process:</b>", alg->name(),
+                               strategy.createHints());
+  }
+
+  // Post-process
+  // Only one algorithm
+  {
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_postprocessor);
+    AlgorithmHintStrategy strategy(alg, std::set<std::string>());
+    m_view->addHintingLineEdit("<b>Post-process:</b>", alg->name(),
+                               strategy.createHints());
+  }
+}
 
 /**
 * Validates a table workspace
@@ -327,28 +370,16 @@ void GenericDataProcessorPresenter::saveNotebook(
 Stitches the workspaces created by the given rows together.
 @param rows : the list of rows
 */
-void GenericDataProcessorPresenter::stitchRows(std::set<int> rows) {
+void GenericDataProcessorPresenter::postProcessRows(std::set<int> rows) {
   // If we can get away with doing nothing, do.
   if (rows.size() < 2)
     return;
 
-  // Properties for Stitch1DMany
   std::vector<std::string> workspaceNames;
   std::string runs;
 
-  std::vector<double> params;
-  std::vector<double> startOverlaps;
-  std::vector<double> endOverlaps;
-
   // Go through each row and prepare the properties
   for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
-
-    const double qmin =
-        m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_QMIN))
-            .toDouble();
-    const double qmax =
-        m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_QMAX))
-            .toDouble();
 
     const std::string runStr = getWorkspaceName(*rowIt, false);
 
@@ -357,48 +388,35 @@ void GenericDataProcessorPresenter::stitchRows(std::set<int> rows) {
       runs += runStr;
       workspaceNames.emplace_back(m_plotInstructions + runStr);
     }
-
-    startOverlaps.push_back(qmin);
-    endOverlaps.push_back(qmax);
   }
+  const std::string outputWSName = m_plotInstructions + runs;
 
-  double dqq =
-      m_model->data(m_model->index(*(rows.begin()), ReflTableSchema::COL_DQQ))
-          .toDouble();
-
-  // params are qmin, -dqq, qmax for the final output
-  params.push_back(
-      *std::min_element(startOverlaps.begin(), startOverlaps.end()));
-  params.push_back(-dqq);
-  params.push_back(*std::max_element(endOverlaps.begin(), endOverlaps.end()));
-
-  // startOverlaps and endOverlaps need to be slightly offset from each other
-  // See usage examples of Stitch1DMany to see why we discard first qmin and
-  // last qmax
-  startOverlaps.erase(startOverlaps.begin());
-  endOverlaps.pop_back();
-
-  std::string outputWSName = m_plotInstructions + runs;
-
-  // If the previous stitch result is in the ADS already, we'll need to remove
-  // it.
+  // If the previous result is in the ADS already, we'll need to remove it.
   // If it's a group, we'll get an error for trying to group into a used group
   // name
   if (AnalysisDataService::Instance().doesExist(outputWSName))
     AnalysisDataService::Instance().remove(outputWSName);
 
-  IAlgorithm_sptr algStitch =
-      AlgorithmManager::Instance().create("Stitch1DMany");
-  algStitch->initialize();
-  algStitch->setProperty("InputWorkspaces", workspaceNames);
-  algStitch->setProperty("OutputWorkspace", outputWSName);
-  algStitch->setProperty("Params", params);
-  algStitch->setProperty("StartOverlaps", startOverlaps);
-  algStitch->setProperty("EndOverlaps", endOverlaps);
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_postprocessor);
+  alg->initialize();
+  alg->setProperty("InputWorkspaces", workspaceNames);
+  alg->setProperty("OutputWorkspace", outputWSName);
 
-  algStitch->execute();
+  // Read the post-processing instructions from the view
+  const std::string options = m_view->getPostprocessingInstructions();
+  auto optionsMap = parseKeyValueString(options);
+  for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
+    try {
+      alg->setProperty(kvp->first, kvp->second);
+    } catch (Mantid::Kernel::Exception::NotFoundError &) {
+      throw std::runtime_error("Invalid property in options column: " +
+                               kvp->first);
+    }
+  }
 
-  if (!algStitch->isExecuted())
+  alg->execute();
+
+  if (!alg->isExecuted())
     throw std::runtime_error("Failed to run Stitch1DMany on IvsQ workspaces.");
 }
 
@@ -436,7 +454,7 @@ bool GenericDataProcessorPresenter::processGroups(
     }
 
     try {
-      stitchRows(groupRows);
+      postProcessRows(groupRows);
       progressReporter.report();
     } catch (std::exception &ex) {
       const std::string groupNo =
@@ -800,6 +818,10 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
                        runWS->name());
     }
   }
+
+	auto vec = alg->getProperties();
+	vec[0]->direction();
+	vec[0]->type();
 
   /* We need to give a name to the output workspaces */
 
