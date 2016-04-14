@@ -33,13 +33,13 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMLZ)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-//LoadMLZ::LoadMLZ() : API::IFileLoader<Kernel::NexusDescriptor>()
 LoadMLZ::LoadMLZ()
-  : m_instrumentName(""), m_instrumentPath(""), m_numberOfTubes(0),
-    m_numberOfPixelsPerTube(0), m_numberOfChannels(0),m_numberOfHistograms(0),
-    m_monitorElasticPeakPosition(0), m_wavelength(0.0), m_channelWidth(0.0),
-    m_timeOfFlightDelay(0.0), m_monitorCounts(0), m_chopper_speed(0.0),
-    m_chopper_ratio(0), m_l1(0.0), m_l2(0.0), m_t1(0.0) {
+    : m_instrumentName(""), m_instrumentPath(""), m_numberOfTubes(0),
+      m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
+      m_numberOfHistograms(0), m_monitorElasticPeakPosition(0),
+      m_wavelength(0.0), m_channelWidth(0.0), m_timeOfFlightDelay(0.0),
+      m_monitorCounts(0), m_chopper_speed(0.0), m_chopper_ratio(0), m_l1(0.0),
+      m_l2(0.0), m_t1(0.0) {
   m_supportedInstruments.emplace_back("TOFTOF");
   m_supportedInstruments.emplace_back("DNS");
 }
@@ -259,7 +259,6 @@ void LoadMLZ::loadTimeDetails(NeXus::NXEntry &entry) {
 
   m_monitorElasticPeakPosition = entry.getInt(monitorName + "/elastic_peak");
 
-
   NXFloat time_of_flight_data =
       entry.openNXFloat(monitorName + "/time_of_flight");
   time_of_flight_data.load();
@@ -285,7 +284,6 @@ void LoadMLZ::loadTimeDetails(NeXus::NXEntry &entry) {
 
   g_log.debug() << " ChopperSpeed: " << m_chopper_speed << std::endl;
   g_log.debug() << " ChopperRatio: " << m_chopper_ratio << std::endl;
-
 }
 
 /**
@@ -395,7 +393,7 @@ void LoadMLZ::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
   NXInt data = dataGroup.openIntData();
   data.load();
 
-  m_t1 = m_mlzloader.calculateTOF(m_l1, m_wavelength)*1.0e+6;
+  m_t1 = m_mlzloader.calculateTOF(m_l1, m_wavelength) * 1.0e+6;
   g_log.debug() << " t1 (microseconds): " << m_t1 << std::endl;
 
   std::vector<double> detectorTofBins(m_numberOfChannels + 1);
