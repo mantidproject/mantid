@@ -16,6 +16,7 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent)
   m_ui.setupUi(this);
   this->setUpValidators();
   this->setDefaultValues();
+  this->setUpConnections();
   m_groupBoxes.insert("fwd", m_ui.chkFwd);
   m_groupBoxes.insert("bwd", m_ui.chkBwd);
   m_periodBoxes.insert("1", m_ui.chk1);
@@ -38,7 +39,25 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber,
   this->setWorkspaceDetails(runNumber, instName);
   this->setNumPeriods(numPeriods);
   this->setAvailableGroups(groups);
-  // TODO: connect signals and slots here
+}
+
+/**
+ * Connect signals from UI elements to re-emit a signal that "user has changed
+ * something" i.e. workspacePropertiesChanged, selectedGroupsChanged,
+ * selectedPeriodsChanged
+ */
+void MuonFitDataSelector::setUpConnections() {
+  throw std::runtime_error("TODO: implement function!");
+  connect(m_ui.runs, SIGNAL(filesFound()), this,
+          SIGNAL(workspacePropertiesChanged()));
+  connect(m_ui.txtWSIndex, SIGNAL(editingFinished()), this,
+          SIGNAL(workspacePropertiesChanged()));
+  connect(m_ui.txtStart, SIGNAL(editingFinished()), this,
+          SIGNAL(workspacePropertiesChanged()));
+  connect(m_ui.txtEnd, SIGNAL(editingFinished()), this,
+          SIGNAL(workspacePropertiesChanged()));
+  connect(m_ui.chkCombine, SIGNAL(stateChanged(int)), this,
+          SIGNAL(selectedPeriodsChanged()));
 }
 
 /**
@@ -71,6 +90,7 @@ unsigned int MuonFitDataSelector::getWorkspaceIndex() const {
  */
 void MuonFitDataSelector::setWorkspaceIndex(unsigned int index) {
   m_ui.txtWSIndex->setText(QString::number(index));
+  emit workspacePropertiesChanged();
 }
 
 /**
@@ -89,6 +109,7 @@ double MuonFitDataSelector::getStartTime() const {
  */
 void MuonFitDataSelector::setStartTime(double start) {
   m_ui.txtStart->setText(QString::number(start));
+  emit workspacePropertiesChanged();
 }
 
 /**
@@ -107,6 +128,7 @@ double MuonFitDataSelector::getEndTime() const {
  */
 void MuonFitDataSelector::setEndTime(double end) {
   m_ui.txtEnd->setText(QString::number(end));
+  emit workspacePropertiesChanged();
 }
 
 /**
@@ -178,6 +200,8 @@ void MuonFitDataSelector::addGroupCheckbox(const QString &name) {
   auto checkBox = new QCheckBox(name);
   m_groupBoxes.insert(name, checkBox);
   m_ui.verticalLayoutGroups->add(checkBox);
+  connect(checkBox, SIGNAL(stateChanged(int)), this,
+          SIGNAL(selectedGroupsChanged()));
 }
 
 /**
@@ -188,7 +212,7 @@ void MuonFitDataSelector::clearGroupCheckboxes() {
   for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
        ++iter) {
     m_ui.verticalLayoutGroups->remove(iter.data());
-    delete iter.data();
+    iter.data()->deleteLater(); // will disconnect signal automatically
   }
   m_groupBoxes.clear();
 }
@@ -201,6 +225,7 @@ void MuonFitDataSelector::clearGroupCheckboxes() {
 void MuonFitDataSelector::setGroupSelected(const QString &name, bool selected) {
   if (m_groupBoxes.contains(name)) {
     m_groupBoxes.value(name)->setChecked(selected);
+    emit selectedGroupsChanged();
   } else {
     g_log.warning() << "No group called " << name.toStdString()
                     << ": cannot set selection state";
@@ -221,6 +246,8 @@ void MuonFitDataSelector::setNumPeriods(size_t numPeriods) {
       auto checkbox = new QCheckBox(name);
       m_periodBoxes.insert(name, checkbox);
       m_ui.verticalLayoutPeriods->add(checkbox);
+      connect(checkbox, SIGNAL(stateChanged(int)), this,
+              SIGNAL(selectedPeriodsChanged()));
     }
   } else if (numPeriods < currentPeriods) {
     // delete the excess
@@ -229,7 +256,7 @@ void MuonFitDataSelector::setNumPeriods(size_t numPeriods) {
       const size_t periodNum = static_cast<size_t>(name.toInt());
       if (periodNum > numPeriods) {
         m_ui.verticalLayoutPeriods->remove(m_periodBoxes.value(name));
-        delete m_periodBoxes.value(name);
+        m_periodBoxes.value(name)->deleteLater(); // will disconnect signal
         toRemove.append(name);
       }
     }

@@ -74,6 +74,14 @@ public slots:
   /// Set names of available groups
   void setAvailableGroups(const QStringList &groupNames) override;
 
+signals:
+  /// Edited the runs, ws index, start or end fields
+  void workspacePropertiesChanged();
+  /// Changed the groups selection
+  void selectedGroupsChanged();
+  /// Changed the periods selection
+  void selectedPeriodsChanged();
+
 private:
   /// Set selected workspace index
   void setWorkspaceIndex(unsigned int index);
@@ -93,6 +101,8 @@ private:
   void setDefaultValues();
   /// Set up validators for input
   void setUpValidators();
+  /// Set up connections for signals/slots
+  void setUpConnections();
   /// Member - user interface
   Ui::MuonFitDataSelector m_ui;
   /// Map of group names to checkboxes
