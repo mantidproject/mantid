@@ -11,7 +11,7 @@ namespace MantidWidgets {
 /**
  * Interface for MuonFitDataSelector
  *
- * This abstract base class is used for mocking purposes
+ * This abstract base class can be used for mocking purposes
  */
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IMuonFitDataSelector {
 public:

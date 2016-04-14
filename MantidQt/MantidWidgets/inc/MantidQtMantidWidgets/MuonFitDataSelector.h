@@ -61,16 +61,18 @@ public:
   double getStartTime() const override;
   /// Get selected end time
   double getEndTime() const override;
-  /// Set number of periods in data
-  void setNumPeriods(size_t numPeriods) override;
+  /// Get names of chosen groups
+  QStringList getChosenGroups() const override;
   /// Get selected periods
   QStringList getPeriodSelections() const override;
+
+public slots:
+  /// Set number of periods in data
+  void setNumPeriods(size_t numPeriods) override;
   /// Set starting run number and instrument
   void setWorkspaceDetails(int runNumber, const QString &instName) override;
   /// Set names of available groups
   void setAvailableGroups(const QStringList &groupNames) override;
-  /// Get names of chosen groups
-  QStringList getChosenGroups() const override;
 
 private:
   /// Set selected workspace index
