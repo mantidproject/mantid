@@ -1,20 +1,20 @@
-#ifndef MANTID_CUSTOMINTERFACES_QDATAPROCESSORALGORITHMWIDGET_H_
-#define MANTID_CUSTOMINTERFACES_QDATAPROCESSORALGORITHMWIDGET_H_
+#ifndef MANTID_CUSTOMINTERFACES_QDATAPROCESSORWIDGET_H_
+#define MANTID_CUSTOMINTERFACES_QDATAPROCESSORWIDGET_H_
 
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/MantidWidget.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithmView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/GenericDataProcessorPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h"
-#include "ui_DataProcessorAlgorithmWidget.h"
+#include "ui_DataProcessorWidget.h"
 #include <QSignalMapper>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** QDataProcessorAlgorithmWidget : Provides an interface for processing table
+/** QDataProcessorWidget : Provides an interface for processing table
 data.
 
 Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -38,15 +38,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport QDataProcessorAlgorithmWidget
-    : public MantidQt::API::MantidWidget,
-      public DataProcessorAlgorithmView,
-      public ProgressableView {
+class DLLExport QDataProcessorWidget : public MantidQt::API::MantidWidget,
+                                       public DataProcessorView,
+                                       public ProgressableView {
 
   Q_OBJECT
 public:
-  QDataProcessorAlgorithmWidget(QWidget *parent = 0);
-  ~QDataProcessorAlgorithmWidget() override;
+  QDataProcessorWidget(QWidget *parent = 0);
+  ~QDataProcessorWidget() override;
 
   // Connect the model
   void showTable(QDataProcessorTableModel_sptr model) override;
@@ -109,7 +108,7 @@ private:
   // the models
   QDataProcessorTableModel_sptr m_model;
   // the interface
-  Ui::DataProcessorAlgorithmWidget ui;
+  Ui::DataProcessorWidget ui;
   // the workspace the user selected to open
   std::string m_toOpen;
   QSignalMapper *m_openMap;
@@ -149,4 +148,4 @@ private slots:
 } // namespace Mantid
 } // namespace CustomInterfaces
 
-#endif /* MANTID_CUSTOMINTERFACES_QDATAPROCESSORALGORITHMWIDGET_H_ */
+#endif /* MANTID_CUSTOMINTERFACES_QDATAPROCESSORWIDGET_H_ */

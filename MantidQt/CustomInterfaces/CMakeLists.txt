@@ -78,8 +78,8 @@ set ( SRC_FILES
 	src/ParseKeyValueString.cpp
 	src/Reflectometry/GenericDataProcessorPresenter.cpp
 	src/Reflectometry/MeasurementItem.cpp
-	src/Reflectometry/QDataProcessorAlgorithmWidget.cpp
 	src/Reflectometry/QDataProcessorTableModel.cpp
+	src/Reflectometry/QDataProcessorWidget.cpp
 	src/Reflectometry/QtReflMainView.cpp
 	src/Reflectometry/QtDataProcessorOptionsDialog.cpp
 	src/Reflectometry/ReflCatalogSearcher.cpp
@@ -215,7 +215,6 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/ParseKeyValueString.h
 	inc/MantidQtCustomInterfaces/ProgressableView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataPreprocessorAlgorithm.h
-	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithmView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorAppendRowCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorClearSelectedCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorCommand.h
@@ -240,6 +239,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorProcessCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorSaveTableAsCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorSaveTableCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorWhiteList.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorWorkspaceCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/GenericDataProcessorPresenter.h
@@ -247,8 +247,8 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h
 	inc/MantidQtCustomInterfaces/Reflectometry/MeasurementItem.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ProgressPresenter.h
-	inc/MantidQtCustomInterfaces/Reflectometry/QDataProcessorAlgorithmWidget.h
 	inc/MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h
+	inc/MantidQtCustomInterfaces/Reflectometry/QDataProcessorWidget.h
 	inc/MantidQtCustomInterfaces/Reflectometry/QtReflMainView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/QtDataProcessorOptionsDialog.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h
@@ -380,8 +380,8 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
                 inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorCommandAdapter.h
                 inc/MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h
-                inc/MantidQtCustomInterfaces/Reflectometry/QDataProcessorAlgorithmWidget.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h
+                inc/MantidQtCustomInterfaces/Reflectometry/QDataProcessorWidget.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtReflMainView.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtDataProcessorOptionsDialog.h
                 inc/MantidQtCustomInterfaces/SampleTransmission.h
@@ -452,7 +452,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingView.ui
                inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.ui
                inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorOptionsDialog.ui
-               inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithmWidget.ui
+               inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorWidget.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflMainWidget.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflWindow.ui
                inc/MantidQtCustomInterfaces/SampleTransmission.ui

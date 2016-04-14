@@ -5,7 +5,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 /** Constructor */
 QtDataProcessorOptionsDialog::QtDataProcessorOptionsDialog(
-    DataProcessorAlgorithmView *view,
+    DataProcessorView *view,
     boost::shared_ptr<DataProcessorPresenter> presenter)
     : QDialog(dynamic_cast<QWidget *>(view)), m_presenter(presenter) {
   initLayout();

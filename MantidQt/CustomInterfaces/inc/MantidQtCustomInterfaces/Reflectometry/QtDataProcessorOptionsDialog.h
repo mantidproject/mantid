@@ -2,7 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_QTDATAPROCESSOROPTIONSDIALOG_H
 
 #include "MantidKernel/System.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithmView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorPresenter.h"
 
 #include <QDialog>
@@ -42,7 +42,7 @@ class DLLExport QtDataProcessorOptionsDialog : public QDialog {
   Q_OBJECT
 public:
   QtDataProcessorOptionsDialog(
-      DataProcessorAlgorithmView *view,
+      DataProcessorView *view,
       boost::shared_ptr<DataProcessorPresenter> presenter);
   ~QtDataProcessorOptionsDialog() override;
 

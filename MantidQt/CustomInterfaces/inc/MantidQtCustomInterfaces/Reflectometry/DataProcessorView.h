@@ -1,5 +1,5 @@
-#ifndef MANTID_CUSTOMINTERFACES_DATAPROCESSORALGORITHMVIEW_H
-#define MANTID_CUSTOMINTERFACES_DATAPROCESSORALGORITHMVIEW_H
+#ifndef MANTID_CUSTOMINTERFACES_DATAPROCESSORVIEW_H
+#define MANTID_CUSTOMINTERFACES_DATAPROCESSORVIEW_H
 
 #include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorPresenter.h"
@@ -12,11 +12,11 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class DataProcessorAlgorithmView
+/** @class DataProcessorView
 
-DataProcessorAlgorithmView is the base view class for the Data Processor User
-Interface. It
-contains no QT specific functionality as that should be handled by a subclass.
+DataProcessorView is the base view class for the Data Processor User
+Interface. It contains no QT specific functionality as that should be handled by
+a subclass.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -40,10 +40,10 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport DataProcessorAlgorithmView {
+class DLLExport DataProcessorView {
 public:
-  DataProcessorAlgorithmView(){};
-  virtual ~DataProcessorAlgorithmView(){};
+  DataProcessorView(){};
+  virtual ~DataProcessorView(){};
 
   // Connect the model
   virtual void showTable(QDataProcessorTableModel_sptr model) = 0;
@@ -95,4 +95,4 @@ public:
 };
 }
 }
-#endif /*MANTID_CUSTOMINTERFACES_DATAPROCESSORALGORITHMVIEW_H*/
+#endif /*MANTID_CUSTOMINTERFACES_DATAPROCESSORVIEW_H*/

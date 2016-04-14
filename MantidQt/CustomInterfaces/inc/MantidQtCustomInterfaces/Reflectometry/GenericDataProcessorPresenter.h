@@ -5,8 +5,8 @@
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataPreprocessorAlgorithm.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithmView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorWhiteList.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h"
 
@@ -47,7 +47,7 @@ class MANTIDQT_CUSTOMINTERFACES_DLL GenericDataProcessorPresenter
       public MantidQt::API::WorkspaceObserver {
 public:
   GenericDataProcessorPresenter(
-      DataProcessorAlgorithmView *tableView, ProgressableView *progressView,
+      DataProcessorView *tableView, ProgressableView *progressView,
       const std::map<std::string, DataPreprocessorAlgorithm> &preprocess,
       const std::string &dataProcessorAlgorithm,
       const std::set<std::string> &blacklist,
@@ -74,7 +74,7 @@ protected:
   // the name of the workspace/table/model in the ADS, blank if unsaved
   std::string m_wsName;
   // the table view we're managing
-  DataProcessorAlgorithmView *m_view;
+  DataProcessorView *m_view;
   // The progress view
   ProgressableView *m_progressView;
   // The pre-processing instructions

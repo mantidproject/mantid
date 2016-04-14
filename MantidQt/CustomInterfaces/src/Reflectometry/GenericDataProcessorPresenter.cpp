@@ -12,7 +12,6 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidQtCustomInterfaces/ParseKeyValueString.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithmView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorAppendRowCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorClearSelectedCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorCopySelectedCommand.h"
@@ -34,6 +33,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorSaveTableAsCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorSaveTableCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorSeparatorCommand.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorWorkspaceCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ProgressPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h"
@@ -66,7 +66,7 @@ namespace CustomInterfaces {
 * workspaces
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    DataProcessorAlgorithmView *tableView, ProgressableView *progressView,
+    DataProcessorView *tableView, ProgressableView *progressView,
     const std::map<std::string, DataPreprocessorAlgorithm> &preprocessor,
     const std::string &dataProcessorAlgorithm,
     const std::set<std::string> &blacklist,
@@ -819,9 +819,9 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
     }
   }
 
-	auto vec = alg->getProperties();
-	vec[0]->direction();
-	vec[0]->type();
+  auto vec = alg->getProperties();
+  vec[0]->direction();
+  vec[0]->type();
 
   /* We need to give a name to the output workspaces */
 

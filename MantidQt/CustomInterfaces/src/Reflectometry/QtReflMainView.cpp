@@ -50,20 +50,20 @@ void QtReflMainView::initLayout() {
           SLOT(showSearchContextMenu(const QPoint &)));
   // Synchronize the two instrument selection widgets
   connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)),
-          ui.qDataProcessorAlgorithmWidget,
+          ui.qDataProcessorWidget,
           SLOT(on_comboProcessInstrument_currentIndexChanged(int)));
-  connect(ui.qDataProcessorAlgorithmWidget,
+  connect(ui.qDataProcessorWidget,
           SIGNAL(comboProcessInstrument_currentIndexChanged(int)),
           ui.comboSearchInstrument, SLOT(setCurrentIndex(int)));
 
   // Needed to Import/Export TBL, plot row and plot group
-  connect(ui.qDataProcessorAlgorithmWidget,
+  connect(ui.qDataProcessorWidget,
           SIGNAL(runAsPythonScript(const QString &, bool)), this,
           SIGNAL(runAsPythonScript(const QString &, bool)));
 
   m_presenter = boost::make_shared<ReflMainViewPresenter>(
       this /*main view*/,
-      ui.qDataProcessorAlgorithmWidget->getTablePresenter().get(),
+      ui.qDataProcessorWidget->getTablePresenter().get(),
       this /*currently this concrete view is also responsibile for prog reporting*/);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 }
