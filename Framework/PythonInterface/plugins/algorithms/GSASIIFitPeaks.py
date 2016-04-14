@@ -83,7 +83,8 @@ class GSASIIFitPeaks(PythonAlgorithm):
         background_types = ["Chebyshev", "None"]
         self.declareProperty(PROP_BACKGROUND_TYPE, defaultValue = background_types[0],
                              validator = StringListValidator(background_types),
-                             doc = 'Type of background for the peak fitting.')
+                             doc = 'Type of background for the peak fitting. Currently only the '
+                             'default option of GSAS-II (chebyshev) is supported.')
 
         self.declareProperty(PROP_MINX, Property.EMPTY_DBL,
                              direction = Direction.Input,
@@ -203,16 +204,18 @@ class GSASIIFitPeaks(PythonAlgorithm):
         else:
             gs2_focused_wks = in_wks
 
-        (peaks_init, background_def, gs2_rd) = self._load_prepare_data_for_fit(gs2_focused_wks, inst_file)
+        (gs2_rd, limits, peaks_init, background_def) = self._load_prepare_data_for_fit(gs2_focused_wks,
+                                                                                       inst_file)
 
         # No obvious way to provide proper progress report from inside the fitting routines
         prog.report('Running refinement. This may take some times')
-        (gof_estimates, parm_dict) = self._run_peak_fit(peaks_init, background_def, gs2_rd.powderdata)
+        (gof_estimates, parm_dict) = self._run_peak_fit(gs2_rd.powderdata, limits, peaks_init,
+                                                        background_def)
 
         prog.report('Producing outputs')
         out_proj_file = self.getProperty(PROP_OUT_PROJECT_FILE)
         if proj_file:
-            self._save_gsas2_project(gs2, out_proj_file)
+            self._save_gsas2_project(gs2, gs2_rd, out_proj_file)
         out_lattice_file = self.getProperty(PROP_OUT_LATTICE_PARAMS_FILE)
         if out_lattice_file:
             self._save_lattice_params_file(gs2_rd, out_lattice_file)
@@ -230,8 +233,9 @@ class GSASIIFitPeaks(PythonAlgorithm):
         @param gs2_focused_wks :: a focused (single spectrum) workspace
         @param inst_file :: GSAS instrument parameters file (.par / .prm / .iparm, etc.)
 
-        @returns a tuple with: 1) list of peaks, 2) background definition, 3) GSAS-II "rd"
-        object. These are ready to be passed to the peak fitting functions
+        @returns a tuple with: 1) 3) GSAS-II "rd" object. 2) limits for fitting,
+        3) list of peaks, 4) background definition, These are ready to be passed to the
+        peak fitting functions
         """
         gs2_rd = self._build_gsas2_reader_with_data(gs2_focused_wks)
         self.log().information("Loaded histogram data in GSAS-II data object: {0}".
@@ -240,8 +244,11 @@ class GSASIIFitPeaks(PythonAlgorithm):
         gs2_rd = self._add_instrument_info(gs2_rd, inst_file)
         self.log().information("Parameters from instrument file: {0}".format(gs2_rd.pwdparms))
 
-        background_def = self._build_background_definition()
+        background_def = self._build_add_background_def(gs2_rd)
         self.log().information("Using background function: {0}".format(background_def))
+
+        limits = self._build_add_limits(gs2_rd)
+        self.log().information("Fitting loaded histogram data, with limits: {0}".format(limits))
 
         # PROP_PHASE_INFO_FILE - phase information into rd
         # As in GSASII.GetPhaseData - TODO
@@ -251,25 +258,15 @@ class GSASIIFitPeaks(PythonAlgorithm):
         peaks_init = self._init_peaks_list()
         self.log().information("Peaks parameters initialized as: {0}".format(peaks_init))
 
-        return (peaks_init, background_def, gs2_rd)
+        return (gs2_rd, limits, peaks_init, background_def)
 
-    def _run_peak_fit(self, peaks_list, background_def, powderdata):
+    def _run_peak_fit(self, powderdata, limits, peaks_list, background_def):
         """
         Explain parameters! TODO
 
         @returns a tuple with: 1) a tuple with the Rwp and GoF values (weighted profile
         R-factor, goodness of fit), 2) the parameters dictionary
         """
-        min_x = getProperty(PROP_MINX)
-        if Property.EMPTY_DBL == minx:
-            min_x = powderdata[0].min()
-        max_x = getProperty(PROP_MAXX)
-        if Property.EMPTY_DBL == max_x:
-            max_x = powderdata[0].max()
-
-        limits = [min_x, max_x]
-        self.log().notice("Fitting loaded histogram data, with limits: {0}".format(limits))
-
         # peaks: ['pos','int','alp','bet','sig','gam'] / with the refine flag each
         sig_dict, result, sig, Rvals, vary_list, parm_dict, full_vary_list, bad_vary = \
             GSASIIpwd.DoPeakFit(FitPgm = 'LSQ', Peaks = peaks_list,
@@ -347,16 +344,32 @@ class GSASIIFitPeaks(PythonAlgorithm):
             if not inst_parm1: # or not inst_parm2:  # (note inst_parm2 is commonly an empty dict)
                 raise RuntimeError('Failed to import the instrument parameter structure')
 
-        gs2_rd.pwdparms = (inst_parm1, inst_parm2)
+        gs2_rd.pwdparms['Instrument Parameters'] = (inst_parm1, inst_parm2)
 
         return gs2_rd
 
-    def _build_background_definition(self):
+    def _build_add_background_def(self, gs2_rd):
         # Note: blatantly ignores self.getProperty(PROP_BACKGROUND_TYPE)
         backg_def = [['chebyschev', True, 3, 1.0, 0.0, 0.0],
                      {'peaksList': [], 'debyeTerms': [], 'nPeaks': 0, 'nDebye': 0}]
 
+        gs2_rd.pwdparms['Background'] = backg_def
+
         return backg_def
+
+    def _build_add_limits(self, gs2_rd):
+
+        min_x = getProperty(PROP_MINX)
+        if Property.EMPTY_DBL == minx:
+            min_x = powderdata[0].min()
+        max_x = getProperty(PROP_MAXX)
+        if Property.EMPTY_DBL == max_x:
+            max_x = powderdata[0].max()
+
+        limits = [min_x, max_x]
+        gs2_rd.pwdparms['Limits'] = limits
+
+        return limits
 
     def _get_histo_data_reader(self, gs2, histo_data_file):
         readers_list = self._init_histo_data_readers(gs2)
@@ -404,7 +417,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
         # Bring the auto-search code out of that file! - TODO
         import GSASIIpwdGUI
 
-        peaks_init = GSASIIpwdGUI.DoPeaksAutoSearch(gs2_rd.powderdata, limits, inst_parm1, inst_parm2)
+        peaks_init = GSASIIpwdGUI.DoPeaksAutoSearch(gs2_rd.powderdata, inst_parm1, inst_parm2)
         # Note this sets as default: refine intensity, and no other parameters
         for peak in peaks_init:
             peak[1] = getProperty(PROP_REFINE_CENTER)
@@ -451,11 +464,6 @@ class GSASIIFitPeaks(PythonAlgorithm):
         for parm in parm_dict:
             self.log().debug("Parameters for output table: {0}".format(parm))
 
-    def _save_gsas2_project(self, gsas2, filename):
-        self.notice("Saving GSAS-II project file into: {0}".format(filename))
-        self.debug("Saving GSAS-II project: {0}".format(gsas2))
-        # implement save as in GSASII.OnFileSave - TODO
-
     def _save_lattice_params_file(self, _gs2, out_lattice_file):
         (latt_a, latt_b, latt_c, latt_alpha, latt_beta, latt_gamma) = 6*[0]
         # grab parameters from gs2 - TODO
@@ -464,6 +472,101 @@ class GSASIIFitPeaks(PythonAlgorithm):
             print >>lattice_txt, "a, b, c, alpha, beta, gamma"
             print >>lattice_txt, ("{0}, {1}, {2}, {3}, {4}, {5}".
                                   format(latt_a, latt_b, latt_c, latt_alpha, latt_beta, latt_gamma))
+
+    def _prepare_save_gsas2_project(self, gs2, gs2_rd):
+        """
+        GSAS-II projects are saved/loaded from/to the tree of the main window.
+        This populates the GSAS-II GUI tree, getting it ready for saving.
+
+        It needs to save at least all the elements save here even if we are not
+        using effectively (for example 'Sample Parameters'). Otherwise the code
+        will fail in various places (for example at the end of DoPeakFit).
+        This is based on GSASII.OnDummyPowder, GSASII.GetPWDRdatafromTree,
+        GSASII.OnImportPowder
+
+        Assumes that the (two) instrument parameter objects have been added in
+        gs2_rd.pwdparms['Instrument Parameters']
+        that the limits have been initialized in
+        gs2_rd.pwdparms['Limits']
+        and that the background has been initialized in
+        gs2_rd.pwdparms['Background']
+        as it would be done in GSAS-II (sometimes).
+
+        @param gs2 :: the main GSAS-II object
+        @param gs2_rd :: the GSAS-II "rd" object with powder data
+        """
+
+        import random
+        import sys
+        import GSASIIgrid
+
+        # set GUI tree items
+        histo_name = 'PWDR ' + gs2_rd.idstring
+        tree_id = gs2.PatternTree.AppendItem(parent=gs2.root, text=histo_name)
+        valuesdict = {
+            'wtFactor':1.0,
+            'Dummy':True,
+            'ranId':random.randint(0,sys.maxint),
+            'Offset':[0.0,0.0],'delOffset':0.02,'refOffset':-1.0,'refDelt':0.01,
+            'qPlot':False,'dPlot':False,'sqrtPlot':False
+        }
+        # Warning: with the comment "this should be removed someday"
+        gs2_rd.Sample['ranId'] = valuesdict['ranId']
+        gs2.PatternTree.SetItemPyData(tree_id, [valuesdict, gs2_rd.powderdata])
+
+        gs2.PatternTree.SetItemPyData(
+            gs2.PatternTree.AppendItem(tree_id, text='Comments'),
+            gs2_rd.comments)
+
+        gs2.PatternTree.SetItemPyData(
+            gs2.PatternTree.AppendItem(tree_id, text='Limits'),
+            [gs2_rd.pwdparms['Limits'], [gs2_rd.powderdata[0].min(),
+                                         gs2_rd.powderdata[0].max()]])
+        gs2.PatternId = GSASIIgrid.GetPatternTreeItemId(gs2, tree_id, 'Limits')
+
+        gs2.PatternTree.SetItemPyData(
+            gs2.PatternTree.AppendItem(tree_id, text='Background'),
+            gs2_rd.pwdparms['Background'])
+
+        gs2.PatternTree.SetItemPyData(
+            gs2.PatternTree.AppendItem(tree_id, text='Instrument Parameters'),
+            gs2_rd.pwdparms['Instrument Parameters'])
+
+        gs2.PatternTree.SetItemPyData(
+            gs2.PatternTree.AppendItem(tree_id, text='Sample Parameters'),
+            gs2_rd.Sample)
+
+        gs2.PatternTree.SetItemPyData(
+            gs2.PatternTree.AppendItem(tree_id, text='Peak List')
+            ,{'peaks':[],'sigDict':{}})
+
+        gs2.PatternTree.SetItemPyData(
+            gs2.PatternTree.AppendItem(tree_id, text='Index Peak List'),
+            [[],[]])
+        gs2.PatternTree.SetItemPyData(
+            gs2.PatternTree.AppendItem(tree_id, text='Unit Cells List'),
+            [])
+        gs2.PatternTree.SetItemPyData(
+            gs2.PatternTree.AppendItem(tree_id, text='Reflection Lists'),
+            {})
+
+    def _save_gsas2_project(self, gsas2, gs2_rd, filename):
+        """
+        Saves all the information loaded into a GSAS-II project file that can be loaded
+        in the GSAS-II GUI (.gpx files).
+
+        @param gsas2 :: the main GSAS-II object
+        @param gs2_rd :: the GSAS-II "rd" object with powder data
+        @param filename :: name of the output project file
+        """
+        self.notice("Preparing GSAS-II project tree to save into: {0}".format(filename))
+        self._prepare_save_gsas2_project(gs2, gs2_rd)
+
+        import GSASIIIO
+        self.debug("Saving GSAS-II project: {0}".format(gsas2))
+        gs2.GSASprojectfile = proj_filename
+        gs2.CheckNotebook()
+        GSASIIIO.ProjFileSave(gs2)
 
 # Need GSAS-II _init_Imports()
 #pylint: disable=protected-access
