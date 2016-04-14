@@ -31,7 +31,7 @@ namespace Kernel {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <class T> class MANTID_KERNEL_DLL VectorOf {
+template <class T> class VectorOf {
 public:
   VectorOf() = default;
   VectorOf(size_t count, const double &value) {
