@@ -29,7 +29,7 @@ namespace Kernel {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <class T> class MANTID_KERNEL_DLL ConstIterable {
+template <class T> class ConstIterable {
 public:
   const double &operator[](size_t pos) const {
     return static_cast<const T *>(this)->constData()[pos];
