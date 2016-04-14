@@ -5,7 +5,7 @@ from mantid.simpleapi import VesuvioThickness
 from mantid.api import ITableWorkspace
 
 
-class VesuvioThickness(unittest.TestCase):
+class VesuvioThicknessTest(unittest.TestCase):
 
     # Original test values from fortran routines
     _masses = "1.0079,27.0,91.0"
@@ -21,7 +21,7 @@ class VesuvioThickness(unittest.TestCase):
                                                    Amplitudes=self._amplitudes,
                                                    TransmissionGuess=self._trans_guess,
                                                    Thickness=self._thickness,
-                                                   NumbereDensity=self._number_density)
+                                                   NumberDensity=self._number_density)
         # Validate shape
         self._validate_shape(dens_table)
         self._validate_shape(trans_table)
