@@ -281,7 +281,6 @@ public:
     alg->setProperty("SampleComponentName", "made-up");
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
-
   void test_exec() {
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
