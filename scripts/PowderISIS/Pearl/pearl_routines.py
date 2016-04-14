@@ -1,10 +1,11 @@
-from mantid.simpleapi import *
+﻿from mantid.simpleapi import *
 import numpy as n
 import os.path
 import sys
 
 
 def PEARL_startup(usern="matt", thiscycle='11_1'):
+    global pearl_file_dir
     global attenfile
     global currentdatadir
     global livedatadir
@@ -25,15 +26,18 @@ def PEARL_startup(usern="matt", thiscycle='11_1'):
     # The lines below set the default value for the rest of the focussing routines
     # currentdatadir="C:\PEARL\RAW\\"
     # currentdatadir="X:\data\cycle_11_1\\"
+
+    # directory where the files are going to be found
+    pearl_file_dir = "P:\Mantid\\"
     currentdatadir = "I:\\"
     livedatadir = "I:\\"
     # calfile="C:\PEARL\\pearl_offset_11_2.cal"
-    calfile = "P:\Mantid\\Calibration\\pearl_offset_11_2.cal"
-    groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT88.cal"
-    # groupfile="P:\Mantid\\Calibration\\test_cal_group_mods_11_1.cal"
-    vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst_long.nxs"
-    vanfile = "P:\Mantid\\Calibration\\van_spline_all_cycle_11_1.nxs"
-    attenfile = "P:\Mantid\\Attentuation\\PRL985_WC_HOYBIDE_NK_10MM_FF.OUT"
+    calfile = pearl_file_dir + "Calibration\\pearl_offset_11_2.cal"
+    groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT88.cal"
+    # groupfile=pearl_file_dir + "Calibration\\test_cal_group_mods_11_1.cal"
+    vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst_long.nxs"
+    vanfile = pearl_file_dir + "Calibration\\van_spline_all_cycle_11_1.nxs"
+    attenfile = pearl_file_dir + "Attentuation\\PRL985_WC_HOYBIDE_NK_10MM_FF.OUT"
     mode = "all"
     tt_mode = "TT88"
     tofbinning = "1500,-0.0006,19900"
@@ -41,6 +45,7 @@ def PEARL_startup(usern="matt", thiscycle='11_1'):
     print "Raw Data in :   ", currentdatadir
     cycle = thiscycle
     instver = "new2"
+    # userdataprocessed is the data output directory 
     userdataprocessed = "P:\users\\" + "Cycle_" + thiscycle + "\\" + usern + "\\"
     # sys.path.append(userdataprocessed)
     # userdataprocessed="C:\PEARL\\"
@@ -250,417 +255,438 @@ def PEARL_getcalibfiles():
 
     if (cycle == "15_4"):
         instver = "new2"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_15_3.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_15_3.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
 
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_15_4.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_15_4.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_15_4.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_15_4.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_15_4.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_15_4.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_15_4.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_15_4.nxs"
     elif (cycle == "15_3"):
         instver = "new2"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_15_3.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_15_3.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
 
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_15_3.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_15_3.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_15_3.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_15_3.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_15_3.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_15_3.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_15_3.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_15_3.nxs"
     elif (cycle == "15_2"):
         instver = "new2"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_15_2.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_15_2.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
 
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_15_2.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_15_2.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_15_2.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_15_2.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_15_2.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_15_2.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_15_2.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_15_2.nxs"
     elif (cycle == "15_1"):
         instver = "new2"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_15_1.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_15_1.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
 
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_15_1.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_15_1.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_15_1.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_15_1.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_15_1.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_15_1.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_15_1.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_15_1.nxs"
     elif (cycle == "14_3"):
         instver = "new2"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_14_3.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_14_3.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
 
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_14_3.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_14_3.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_14_3.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_14_3.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_14_3.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_14_3.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_14_3.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_14_3.nxs"
     elif (cycle == "14_2"):
         instver = "new2"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_14_2.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_14_2.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
 
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_14_2.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_14_2.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_14_2.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_14_2.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_14_2.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_14_2.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_14_2.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_14_2.nxs"
     elif (cycle == "14_1"):
         instver = "new2"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_14_1.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_14_1.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
 
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_14_1.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_14_1.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_14_1.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_14_1.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_14_1.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_14_1.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_14_1.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_14_1.nxs"
     elif (cycle == "13_5"):
         instver = "new2"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_13_5.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_13_5.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
 
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_13_5.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_13_5.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_13_5.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_13_5.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_13_5.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_13_5.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_13_5.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_13_5.nxs"
     elif (cycle == "13_4"):
         instver = "new2"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_13_4.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_13_4.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
 
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_13_4.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_13_4.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_13_4.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_13_4.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_13_4.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_13_4.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_13_4.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_13_4.nxs"
     elif (cycle == "13_3"):
         instver = "new2"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_13_3.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_13_3.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
 
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_13_3.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_13_3.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_13_3.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_13_3.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_13_3.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_13_3.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_13_3.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_13_3.nxs"
     elif (cycle == "13_2"):
         instver = "new2"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_13_2.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_13_2.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
 
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_13_2.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_13_2.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_13_2.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_13_2.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_13_2.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_13_2.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_13_2.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_13_2.nxs"
     elif (cycle == "13_1"):
         instver = "new2"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_13_1.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_13_1.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
 
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_13_1.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_13_1.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_13_1.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_13_1.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_13_1.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_13_1.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_13_1.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_13_1.nxs"
     elif (cycle == "12_5"):
         instver = "new2"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_12_5.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_12_5.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
 
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_12_5.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_12_5.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_12_5.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_12_5.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_12_5.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_12_5.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_12_5.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_12_5.nxs"
     elif (cycle == "12_4"):
         instver = "new2"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_12_4.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_12_4.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
 
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_12_4.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_12_4.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_12_4.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_12_4.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_12_4.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_12_4.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_12_4.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_12_4.nxs"
     elif (cycle == "12_3"):
         instver = "new2"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_12_3.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_12_3.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
 
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_12_3.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_12_3.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_12_3.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_12_3.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_12_3.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_12_3.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_12_3.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_12_3.nxs"
     elif (cycle == "12_2"):
         instver = "new2"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_12_2.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_12_2.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
 
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_12_2.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_12_2.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_12_2.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_12_2.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_12_2.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_12_2.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_12_2.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_12_2.nxs"
     elif (cycle == "12_1"):
         instver = "new2"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_12_1.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_12_1.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst2_long.nxs"
 
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_12_1.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_12_1.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_12_1.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_12_1.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_12_1.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_12_1.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_12_1_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_12_1.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_12_1_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_12_1.nxs"
     elif (cycle == "11_5"):
         instver = "new"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_11_5.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst_long.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_11_5.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst_long.nxs"
 
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_11_5.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_11_5.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_11_5.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_11_5.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_11_5.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_11_5.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_11_5.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_11_5.nxs"
     elif (cycle == "11_4"):
         instver = "new"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_11_4.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst_long.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_11_4.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst_long.nxs"
 
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_11_4.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_11_4.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_11_4.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_11_4.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_11_4.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_11_4.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_11_4.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_11_4.nxs"
     elif (cycle == "11_3"):
         instver = "new"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_11_3.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst_long.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_11_3.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst_long.nxs"
 
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_11_3.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_11_3.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_11_3.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_11_3.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_11_3.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_11_3.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_11_3.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_11_3.nxs"
     elif (cycle == "11_2"):
         instver = "new"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_11_2.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst.nxs"
-        vanfile = "P:\Mantid\\Calibration\\van_spline_mods_cycle_11_2.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_11_2.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst.nxs"
+        vanfile = pearl_file_dir + "Calibration\\van_spline_mods_cycle_11_2.nxs"
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_11_2.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_11_2.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_11_2.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_11_2.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_11_2.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_11_2.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_11_2.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_11_2.nxs"
     elif (cycle == "11_1"):
         instver = "new"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_11_2.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_newinst_11_1.nxs"
-        vanfile = "P:\Mantid\\Calibration\\van_spline_mods_cycle_11_1.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_11_2.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst_11_1.nxs"
+        vanfile = pearl_file_dir + "Calibration\\van_spline_mods_cycle_11_1.nxs"
         if (tt_mode == "TT88"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_11_1.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_11_1.nxs"
         elif (tt_mode == "TT70"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT70.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT70_cycle_11_1.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT70.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT70_cycle_11_1.nxs"
         elif (tt_mode == "TT35"):
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT35.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT35_cycle_11_1.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT35.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT35_cycle_11_1.nxs"
         else:
             print "Sorry I don't know that Two Theta mode so assuming T88"
-            groupfile = "P:\Mantid\\Calibration\\pearl_group_11_2_TT88.cal"
-            vanfile = "P:\Mantid\\Calibration\\van_spline_TT88_cycle_11_1.nxs"
+            groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT88.cal"
+            vanfile = pearl_file_dir + "Calibration\\van_spline_TT88_cycle_11_1.nxs"
     elif (cycle == "10_2"):
         instver = "old"
-        calfile = "P:\Mantid\\Calibration\\pearl_offset_10_2.cal"
-        groupfile = "P:\Mantid\\Calibration\\pearl_group_10_2.cal"
-        vabsorbfile = "P:\Mantid\\Calibration\\pearl_absorp_sphere_10mm_all.nxs"
-        vanfile = "P:\Mantid\\Calibration\\test_van_new_cycle_10_2.nxs"
+        calfile = pearl_file_dir + "Calibration\\pearl_offset_10_2.cal"
+        groupfile = pearl_file_dir + "Calibration\\pearl_group_10_2.cal"
+        vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_all.nxs"
+        vanfile = pearl_file_dir + "Calibration\\test_van_new_cycle_10_2.nxs"
     else:
         print "Sorry that cycle has not been defined yet"
     return
 
+# sets the intial directory for all calibration files
+def pearl_initial_dir(directory='P:\Mantid\\'):
+    global pearl_file_dir
+    pearl_file_dir = directory
+    print "Set pearl_file_dir directory to ", directory
+    return
+
+# sets the current raw data files directory
+def pearl_set_currentdatadir(directory = "I:\\"):
+    global currentdatadir
+    currentdatadir = directory
+    print "Set currentdatadir directory to ", directory
+    return
+
+# sets the user data output directory
+def pearl_set_userdataoutput_dir(directory = "P:\users\\MantidOutput\\"):
+    global userdataprocessed
+    userdataprocessed = directory
+    print "Set userdataprocessed directory to ", directory
+    return
 
 def PEARL_setdatadir(directory="C:\PEARL\RAW\\"):
     global pearl_datadir
     pearl_datadir = directory
+    print "Set pearl_datadir directory to ", directory
     return
 
-
+# sets the atten file's directory
 def PEARL_setattenfile(new_atten="P:\Mantid\\Attentuation\\PRL985_WC_HOYBIDE_NK_10MM_FF.OUT"):
     global attenfile
     attenfile = new_atten
