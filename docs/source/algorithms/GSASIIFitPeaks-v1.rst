@@ -58,6 +58,15 @@ been found. The columns of the table give the parameters fitted,
 similarly to the information found in the "Peaks List" window of the
 GSAS-II GUI. These results are printed in the log messages as well.
 
+When phase information is available and the Rietveld/Pawley method is
+used the algorithm will output the lattice parameters in a table
+workspace. The values are given for the the full set of lattice
+parameters (three lattice constants, three angles, and volume: a, b,
+c, alpha, beta, gamma, volume). The GSAS-II Rietveld/Pawley refinement
+process writes this and additional information in an output file with
+the same name as the output GSAS-II project file but with extension
+".lst".
+
 The algorithm also provides goodness-of-fit estimates in the outputs
 "GoF" and "Rwp" (Toby 2008).
 

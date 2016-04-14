@@ -41,8 +41,8 @@ class GSASIIFitPeaks(PythonAlgorithm):
         PROP_MAXX = 'MaxX'
         PROP_EXPECTED_PEAKS = "ExpectedPeaks"
         PROP_EXPECTED_PEAKS_FROM_FILE = "ExpectedPeaksFromFile"
+        PROP_OUT_LATTICE_PARAMS = 'LatticeParameters'
         PROP_OUT_FITTED_PARAMS = 'FittedPeakParameters'
-        PROP_OUT_LATTICE_PARAMS_FILE = 'SaveLatticeParametersFile'
         PROP_OUT_PROJECT_FILE = 'SaveGSASIIProjectFile'
         PROP_OUT_GOF = 'GoF'
         PROP_OUT_RWP = 'Rwp'
@@ -52,6 +52,18 @@ class GSASIIFitPeaks(PythonAlgorithm):
         PROP_REFINE_BETA = 'RefineBeta'
         PROP_REFINE_SIGMA = 'RefineSigma'
         PROP_REFINE_GAMMA = 'RefineGamma'
+
+        PROP_METHOD = "Method"
+        refine_methods = ["Rietveld/Pawley refinement", "Peak fitting"]
+        self.declareProperty(PROP_METHOD, defaultValue = refine_methods[0],
+                             validator = StringListValidator(refine_methods),
+                             doc = 'Rietveld corresponds to the Calculate/Refine option of the '
+                             'GSAS-II GUI. Peak fitting is single peak (does not use phase '
+                             'information  and corresponds to the option '
+                             'Peaks List/Peak Fitting/PeakFitType of the GSAS-II GUI. This '
+                             'second alternative requires a list of peaks which can be bassed in '
+                             'the properties ' + PROP_EXPECTED_PEAKS + ' and ' +
+                             PROP_EXPECTED_PEAKS_FROM_FILES + '.')
 
         self.declareProperty(MatrixWorkspaceProperty(PROP_INPUT_WORKSPACE, '',
                                                      optional = PropertyMode.Mandatory,
@@ -129,13 +141,11 @@ class GSASIIFitPeaks(PythonAlgorithm):
                              doc = 'Weighted profile R-factor (Rwp) discrepancy index for the '
                              'goodness of fit.')
 
+        self.declareProperty(ITableWorkspaceProperty(PROP_OUT_LATTICE_PARAMS, Direction.Output),
+                             doc = 'Table to output the the lattice parameters (refined).')
+
         self.declareProperty(ITableWorkspaceProperty(PROP_OUT_FITTED_PARAMS, "", Direction.Output),
                              doc = "Fitted parameters. One row per peak found.")
-
-        self.declareProperty(FileProperty(name = PROP_OUT_LATTICE_PARAMS_FILE, defaultValue = '',
-                                          direction = Direction.Input,
-                                          action = FileAction.OptionalSave, extensions = [".gpx"]),
-                             doc = 'File where to write the lattice parameters fitted.')
 
         self.declareProperty(FileProperty(name = PROP_OUT_PROJECT_FILE, defaultValue = '',
                                           direction = Direction.Input,
@@ -144,8 +154,8 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
         self.setPropertyGroup(PROP_OUT_GOF, GRP_RESULTS)
         self.setPropertyGroup(PROP_OUT_RWP, GRP_RESULTS)
+        self.setPropertyGroup(PROP_OUT_LATTICE_PARAMS, GRP_RESULTS)
         self.setPropertyGroup(PROP_OUT_FITTED_PARAMS, GRP_RESULTS)
-        self.setPropertyGroup(PROP_OUT_LATTICE_PARAMS_FILE, GRP_RESULTS)
         self.setPropertyGroup(PROP_OUT_PROJECT_FILE, GRP_RESULTS)
 
         self.declareProperty(name = PROP_REFINE_CENTER, defaultValue = False,
@@ -181,6 +191,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
         self.setPropertyGroup(PROP_REFINE_GAMMA, GRP_PARAMS)
 
     def validateInputs(self):
+        # This could check if the required inputs for different methods have been provided
         pass
 
     def PyExec(self):
@@ -214,14 +225,13 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
         prog.report('Producing outputs')
         out_proj_file = self.getProperty(PROP_OUT_PROJECT_FILE)
+        lattice_params = []
         if proj_file:
             self._save_gsas2_project(gs2, gs2_rd, out_proj_file)
-        out_lattice_file = self.getProperty(PROP_OUT_LATTICE_PARAMS_FILE)
-        if out_lattice_file:
-            self._save_lattice_params_file(gs2_rd, out_lattice_file)
+            lattice_params = self._parse_lattice_params_refined(out_proj_file)
+            self.log().notice("Lattice parameters fitted: {0}".format(lattice_params))
 
-        self.log().notice('Lattice parameters fitted:')
-        self._produce_outputs(gof_estimates, parm_dict)
+        self._produce_outputs(gof_estimates, lattice_params, parm_dict)
 
     def _load_prepare_data_for_fit(self, gs2_focused_wks, inst_file):
         """
@@ -262,7 +272,14 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
     def _run_peak_fit(self, powderdata, limits, peaks_list, background_def):
         """
-        Explain parameters! TODO
+        This performs peak fitting as in GSAS-II "Peaks List/Peak Fitting/PeakFitType".
+        Does not require/use phase information. Requires histogram data, instrument parameters
+        and background.
+
+        @param powderdata :: histogram data as used in GSAS-II. a list of vectors (X, Y vectors)
+        @param limits :: tuple with the min X and max X values for the fitting
+        @param peaks_list :: list of peaks to fit
+        @param background_def :: background function as defined in GSAS-II, a list of parameters
 
         @returns a tuple with: 1) a tuple with the Rwp and GoF values (weighted profile
         R-factor, goodness of fit), 2) the parameters dictionary
@@ -437,19 +454,22 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
         return peaks_init
 
-    def _produce_outputs(self, gof_estimates, parm_dict):
+    def _produce_outputs(self, gof_estimates, lattice_params, parm_dict):
         (result_rwp, result_gof) = gof_estimates
         self.setProperty(PROP_OUT_RWP, result_rwp)
         self.setProperty(PROP_OUT_GOF, result_gof)
 
-        _build_output_table(parm_dict)
+        self._build_output_table(parm_dict)
+        self._build_output_lattice_table(lattice_params)
 
     def _build_output_table(self, parm_dict):
         # build the table property - TODO
         par_names = ['Center', 'Intensity', 'Alpha', 'Beta', 'Sigma', 'Gamma']
         par_prefixes = ['pos','int','alp','bet','sig','gam']
 
+        tbl_name = self.getProperty(PROP_OUT_FITTED_PARAMS)
         alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
+        alg.setProperty('OutputWorkspace', tbl_name)
         alg.execute()
         table = alg.getProperty('OutputWorkspace').value
 
@@ -465,6 +485,46 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
         for parm in parm_dict:
             self.log().debug("Parameters for output table: {0}".format(parm))
+
+    def _parse_lattice_params_refined(self, out_proj_file):
+        """
+        Parses lattice parameters from the output .lst file (refinement results)
+        corresponding to the project file given as input
+
+        @param out_proj_file : GSAS-II project file name
+
+        @Returns a tuple with the lattice parameter values refined. 7 parameters:
+        (a, b, c, alpha, beta, gamma, Volume)
+        """
+        import os
+        import re
+        lst_filename = os.path.splitext(out_proj_file)[0] + 'lst'
+        with open(lst_filename) as results_file:
+            results_lst = results_file.read()
+            re_lattice_params = (r"Unit\s+cell:\s+a\s+=\s+(\d+.\d+)\s+b\s+=\s+(\d+.\d+)\s+c\s+=\s+(\d+.\d+)"
+                                 r"\s+alpha\s+=\s+(\d+.\d+)\s+beta\s+=\s+(\d+.\d+)\s+gamma\s+=\s+(\d+.\d+)"
+                                 r"\s+volume\s+=\s+(\d+.\d+)")
+            pattern = re.compile(re_lattice_params)
+            params = pattern.findall(results_lst)[0]
+
+        return params
+
+    def _build_output_lattice_table(self, lattice_params):
+        tbl_name = self.getProperty(PROP_OUT_LATTICE_PARAMS)
+        alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
+        alg.setProperty('OutputWorkspace', tbl_name)
+        alg.execute()
+        table = alg.getProperty('OutputWorkspace').value
+
+        table.addColumn('double', 'a')
+        table.addColumn('double', 'b')
+        table.addColumn('double', 'c')
+        table.addColumn('double', 'alpha')
+        table.addColumn('double', 'beta')
+        table.addColumn('double', 'gamma')
+        table.addColumn('double', 'volume')
+
+        table.addRow([double(par) for par in lattice_params])
 
     def _save_lattice_params_file(self, _gs2, out_lattice_file):
         (latt_a, latt_b, latt_c, latt_alpha, latt_beta, latt_gamma) = 6*[0]
