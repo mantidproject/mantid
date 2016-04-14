@@ -630,18 +630,6 @@ void ReflectometryReductionOne::exec() {
   }
 
   IvsQ = this->toIvsQ(IvsLam, correctDetectorPositions, theta, isPointDetector);
-  double scaleFactor = getProperty("ScaleFactor");
-  if (!isDefault("ScaleFactor")) {
-    IAlgorithm_sptr algScale = this->createChildAlgorithm("Scale");
-    algScale->initialize();
-    algScale->setProperty("InputWorkspace", IvsQ);
-    algScale->setProperty("OutputWorkspace", IvsQ);
-    algScale->setProperty("Factor", 1.0 / scaleFactor);
-    algScale->execute();
-    if (!algScale->isExecuted())
-      throw std::runtime_error("Failed to run Scale algorithm");
-    IvsQ = algScale->getProperty("OutputWorkspace");
-  }
   double momentumTransferMinimum = getProperty("MomentumTransferMinimum");
   double momentumTransferStep = getProperty("MomentumTransferStep");
   double momentumTransferMaximum = getProperty("MomentumTransferMaximum");
@@ -661,6 +649,18 @@ void ReflectometryReductionOne::exec() {
     if (!algRebin->isExecuted())
       throw std::runtime_error("Failed to run Rebin algorithm");
     IvsQ = algRebin->getProperty("OutputWorkspace");
+  }
+  double scaleFactor = getProperty("ScaleFactor");
+  if (!isDefault("ScaleFactor")) {
+    IAlgorithm_sptr algScale = this->createChildAlgorithm("Scale");
+    algScale->initialize();
+    algScale->setProperty("InputWorkspace", IvsQ);
+    algScale->setProperty("OutputWorkspace", IvsQ);
+    algScale->setProperty("Factor", 1.0 / scaleFactor);
+    algScale->execute();
+    if (!algScale->isExecuted())
+      throw std::runtime_error("Failed to run Scale algorithm");
+    IvsQ = algScale->getProperty("OutputWorkspace");
   }
   setProperty("ThetaOut", theta.get());
   setProperty("OutputWorkspaceWavelength", IvsLam);
