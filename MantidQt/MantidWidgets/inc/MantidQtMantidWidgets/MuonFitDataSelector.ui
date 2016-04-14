@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MuonFitDataView</class>
- <widget class="QWidget" name="MuonFitDataView">
+ <class>MuonFitDataSelector</class>
+ <widget class="QWidget" name="MuonFitDataSelector">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MuonFitDataView</string>
+   <string>MuonFitDataSelector</string>
   </property>
   <layout class="QGridLayout" name="gridLayoutAll">
    <item row="0" column="0">

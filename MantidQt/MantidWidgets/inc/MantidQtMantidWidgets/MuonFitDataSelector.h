@@ -1,21 +1,20 @@
-#ifndef MANTID_MANTIDWIDGETS_MUONFITDATAVIEW_H_
-#define MANTID_MANTIDWIDGETS_MUONFITDATAVIEW_H_
+#ifndef MANTID_MANTIDWIDGETS_MUONFITDATASELECTOR_H_
+#define MANTID_MANTIDWIDGETS_MUONFITDATASELECTOR_H_
 
-#include "ui_MuonFitDataView.h"
+#include "ui_MuonFitDataSelector.h"
 #include "WidgetDllOption.h"
-#include "MantidQtMantidWidgets/IMuonFitDataView.h"
+#include "MantidQtMantidWidgets/IMuonFitDataSelector.h"
 #include "MantidQtAPI/MantidWidget.h"
-#include "MantidQtMantidWidgets/MuonFitDataPresenter.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
 
-/** MuonFitDataView : Selects runs, groups, periods for fit
+/** MuonFitDataSelector : Selects runs, groups, periods for fit
 
   This is the lightweight view for the widget. All the work is done by
   the presenter MuonFitDataPresenter.
 
-  Implements IMuonFitDataView
+  Implements IMuonFitDataSelector
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -38,13 +37,15 @@ namespace MantidWidgets {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonFitDataView
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonFitDataSelector
     : public MantidQt::API::MantidWidget,
-      public IMuonFitDataView {
+      public IMuonFitDataSelector {
   Q_OBJECT
 public:
-  /// Constructor
-  MuonFitDataView(QWidget *parent, int runNumber, const QString &instName,
+  /// Basic constructor
+  explicit MuonFitDataSelector(QWidget *parent);
+  /// Constructor with more options
+  MuonFitDataSelector(QWidget *parent, int runNumber, const QString &instName,
                   size_t numPeriods, const QStringList &groups);
   // --- MantidWidget methods ---
   /// Get user input through a common interface
@@ -52,7 +53,7 @@ public:
   /// Set user input through a common interface
   void setUserInput(const QVariant &value) override;
   // --- end ---
-  // --- IMuonFitDataView methods
+  // --- IMuonFitDataSelector methods
   QStringList getRuns() const override;
   unsigned int getWorkspaceIndex() const override;
   void setWorkspaceIndex(unsigned int index) override;
@@ -60,7 +61,6 @@ public:
   void setStartTime(double start) override;
   double getEndTime() const override;
   void setEndTime(double end) override;
-  void setPeriodVisibility(bool visible) override;
   void addGroupCheckbox(const QString &name) override;
   void clearGroupCheckboxes() override;
   bool isGroupSelected(const QString &name) const override;
@@ -72,14 +72,18 @@ public:
   void setWorkspaceDetails(int runNumber, const QString &instName);
 
 private:
+  /// Set visibility of "Periods" section
+  void setPeriodVisibility(bool visible) override;
+  /// Set names of available groups
+  void setAvailableGroups(const QStringList &groupNames);
+  /// Get names of chosen groups
+  QStringList getChosenGroups() const;
   /// Set default values in some input controls
   void setDefaultValues();
   /// Set up validators for input
   void setUpValidators();
   /// Member - user interface
-  Ui::MuonFitDataView m_ui;
-  /// Presenter
-  std::unique_ptr<MuonFitDataPresenter> m_presenter;
+  Ui::MuonFitDataSelector m_ui;
   /// Map of group names to checkboxes
   QMap<QString, QCheckBox *> m_groupBoxes;
   /// Map of period names to checkboxes
@@ -89,4 +93,4 @@ private:
 } // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif /* MANTID_MANTIDWIDGETS_MUONFITDATAVIEW_H_ */
+#endif /* MANTID_MANTIDWIDGETS_MUONFITDATASELECTOR_H_ */

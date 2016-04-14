@@ -1,5 +1,5 @@
-#ifndef MANTID_MANTIDWIDGETS_IMUONFITDATAVIEW_H_
-#define MANTID_MANTIDWIDGETS_IMUONFITDATAVIEW_H_
+#ifndef MANTID_MANTIDWIDGETS_IMUONFITDATASELECTOR_H_
+#define MANTID_MANTIDWIDGETS_IMUONFITDATASELECTOR_H_
 
 #include "WidgetDllOption.h"
 #include <QString>
@@ -9,11 +9,11 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 /**
- * Interface for MuonFitDataView
+ * Interface for MuonFitDataSelector
  *
  * This abstract base class is used for mocking purposes
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IMuonFitDataView {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IMuonFitDataSelector {
 public:
   virtual QStringList getRuns() const = 0;
   virtual unsigned int getWorkspaceIndex() const = 0;
@@ -33,4 +33,4 @@ public:
 } // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif /* MANTID_MANTIDWIDGETS_IMUONFITDATAVIEW_H_ */
+#endif /* MANTID_MANTIDWIDGETS_IMUONFITDATASELECTOR_H_ */

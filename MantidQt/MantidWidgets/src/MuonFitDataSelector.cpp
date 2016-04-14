@@ -1,11 +1,26 @@
-#include "MantidQtMantidWidgets/MuonFitDataView.h"
+#include "MantidQtMantidWidgets/MuonFitDataSelector.h"
 
 namespace {
-Mantid::Kernel::Logger g_log("MuonFitDataView");
+Mantid::Kernel::Logger g_log("MuonFitDataSelector");
 }
 
 namespace MantidQt {
 namespace MantidWidgets {
+
+/**
+ * Basic constructor
+ * @param parent :: [input] Parent dialog for the widget
+ */
+MuonFitDataSelector::MuonFitDataSelector(QWidget *parent)
+    : MantidWidget(parent) {
+  m_ui.setupUi(this);
+  this->setUpValidators();
+  this->setDefaultValues();
+  m_groupBoxes.insert("fwd", m_ui.chkFwd);
+  m_groupBoxes.insert("bwd", m_ui.chkBwd);
+  m_periodBoxes.insert("1", m_ui.chk1);
+  m_periodBoxes.insert("2", m_ui.chk2);
+}
 
 /**
  * Constructor for the widget
@@ -15,22 +30,28 @@ namespace MantidWidgets {
  * @param numPeriods :: [input] Number of periods from initial workspace
  * @param groups :: [input] Group names from initial workspace
  */
-MuonFitDataView::MuonFitDataView(QWidget *parent, int runNumber,
-                                 const QString &instName, size_t numPeriods,
-                                 const QStringList &groups)
-    : MantidWidget(parent) {
-  m_ui.setupUi(this);
-  this->setUpValidators();
-  this->setDefaultValues();
+MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber,
+                                         const QString &instName,
+                                         size_t numPeriods,
+                                         const QStringList &groups)
+    : MuonFitDataSelector(parent) {
   this->setWorkspaceDetails(runNumber, instName);
-  m_groupBoxes.insert("fwd", m_ui.chkFwd);
-  m_groupBoxes.insert("bwd", m_ui.chkBwd);
-  m_periodBoxes.insert("1", m_ui.chk1);
-  m_periodBoxes.insert("2", m_ui.chk2);
-  m_presenter = Mantid::Kernel::make_unique<MuonFitDataPresenter>(this);
-  m_presenter->setNumPeriods(numPeriods);
-  m_presenter->setAvailableGroups(groups);
+  this->setNumPeriodCheckboxes(numPeriods);
+  this->setAvailableGroups(groups);
   // TODO: connect signals and slots here
+}
+
+/**
+ * Sets group names and updates checkboxes on UI
+ * By default sets all checked
+ * @param groups :: [input] List of group names
+ */
+void MuonFitDataSelector::setAvailableGroups(const QStringList &groups) {
+  clearGroupCheckboxes();
+  for (const auto group : groups) {
+    addGroupCheckbox(group);
+    setGroupSelected(group, true);
+  }
 }
 
 /**
@@ -38,7 +59,7 @@ MuonFitDataView::MuonFitDataView(QWidget *parent, int runNumber,
  * Returns an unsigned int so it can be put into a QVariant
  * @returns :: Workspace index input by user
  */
-unsigned int MuonFitDataView::getWorkspaceIndex() const {
+unsigned int MuonFitDataSelector::getWorkspaceIndex() const {
   // Validator ensures this can be cast to a positive integer
   const QString index = m_ui.txtWSIndex->text();
   return index.toUInt();
@@ -48,7 +69,7 @@ unsigned int MuonFitDataView::getWorkspaceIndex() const {
  * Set the workspace index in the UI
  * @param index :: [input] Workspace index to set
  */
-void MuonFitDataView::setWorkspaceIndex(unsigned int index) {
+void MuonFitDataSelector::setWorkspaceIndex(unsigned int index) {
   m_ui.txtWSIndex->setText(QString::number(index));
 }
 
@@ -56,7 +77,7 @@ void MuonFitDataView::setWorkspaceIndex(unsigned int index) {
  * Get the user's supplied start time (default 0)
  * @returns :: start time input by user in microseconds
  */
-double MuonFitDataView::getStartTime() const {
+double MuonFitDataSelector::getStartTime() const {
   // Validator ensures cast to double will succeed
   const QString start = m_ui.txtStart->text();
   return start.toDouble();
@@ -66,7 +87,7 @@ double MuonFitDataView::getStartTime() const {
  * Set the start time in the UI
  * @param start :: [input] Start time in microseconds
  */
-void MuonFitDataView::setStartTime(double start) {
+void MuonFitDataSelector::setStartTime(double start) {
   m_ui.txtStart->setText(QString::number(start));
 }
 
@@ -74,7 +95,7 @@ void MuonFitDataView::setStartTime(double start) {
  * Get the user's supplied end time (default 10)
  * @returns :: start time input by user in microseconds
  */
-double MuonFitDataView::getEndTime() const {
+double MuonFitDataSelector::getEndTime() const {
   // Validator ensures cast to double will succeed
   const QString end = m_ui.txtEnd->text();
   return end.toDouble();
@@ -84,7 +105,7 @@ double MuonFitDataView::getEndTime() const {
  * Set the end time in the UI
  * @param end :: [input] End time in microseconds
  */
-void MuonFitDataView::setEndTime(double end) {
+void MuonFitDataSelector::setEndTime(double end) {
   m_ui.txtEnd->setText(QString::number(end));
 }
 
@@ -92,7 +113,7 @@ void MuonFitDataView::setEndTime(double end) {
  * Get the filenames of the supplied run numbers
  * @returns :: list of run filenames
  */
-QStringList MuonFitDataView::getRuns() const {
+QStringList MuonFitDataSelector::getRuns() const {
   // Run file search in case anything's changed
   m_ui.runs->findFiles();
   // Wait for file search to finish.
@@ -106,7 +127,7 @@ QStringList MuonFitDataView::getRuns() const {
  * Set up input validation on UI controls
  * e.g. some boxes should only accept numeric input
  */
-void MuonFitDataView::setUpValidators() {
+void MuonFitDataSelector::setUpValidators() {
   // WS index: non-negative integers only
   m_ui.txtWSIndex->setValidator(new QIntValidator(0, 1000, this));
   // Start/end times: numeric values only
@@ -119,7 +140,7 @@ void MuonFitDataView::setUpValidators() {
  * @param runNumber :: [input] Run number from loaded workspace
  * @param instName :: [input] Instrument name from loaded workspace
  */
-void MuonFitDataView::setWorkspaceDetails(int runNumber,
+void MuonFitDataSelector::setWorkspaceDetails(int runNumber,
                                           const QString &instName) {
   // Set initial run to be run number of the workspace loaded in Home tab
   m_ui.runs->setText(QString::number(runNumber) + "-");
@@ -131,7 +152,7 @@ void MuonFitDataView::setWorkspaceDetails(int runNumber,
  * Set default values in some input controls
  * Defaults copy those previously used in muon fit property browser
  */
-void MuonFitDataView::setDefaultValues() {
+void MuonFitDataSelector::setDefaultValues() {
   m_ui.lblStart->setText(QString("Start (%1s)").arg(QChar(0x03BC)));
   m_ui.lblEnd->setText(QString("End (%1s)").arg(QChar(0x03BC)));
   this->setWorkspaceIndex(0);
@@ -145,7 +166,7 @@ void MuonFitDataView::setDefaultValues() {
  * (if single-period, hide to not confuse the user)
  * @param visible :: [input] Whether to show or hide the options
  */
-void MuonFitDataView::setPeriodVisibility(bool visible) {
+void MuonFitDataSelector::setPeriodVisibility(bool visible) {
   m_ui.groupBoxPeriods->setVisible(visible);
 }
 
@@ -153,7 +174,7 @@ void MuonFitDataView::setPeriodVisibility(bool visible) {
  * Add a new checkbox to the list of groups with given name
  * @param name :: [input] Name of group to add
  */
-void MuonFitDataView::addGroupCheckbox(const QString &name) {
+void MuonFitDataSelector::addGroupCheckbox(const QString &name) {
   auto checkBox = new QCheckBox(name);
   m_groupBoxes.insert(name, checkBox);
   m_ui.verticalLayoutGroups->add(checkBox);
@@ -163,7 +184,7 @@ void MuonFitDataView::addGroupCheckbox(const QString &name) {
  * Clears all group names and checkboxes
  * (ready to add new ones)
  */
-void MuonFitDataView::clearGroupCheckboxes() {
+void MuonFitDataSelector::clearGroupCheckboxes() {
   for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
        ++iter) {
     m_ui.verticalLayoutGroups->remove(iter.data());
@@ -177,7 +198,7 @@ void MuonFitDataView::clearGroupCheckboxes() {
  * @param name :: [input] Name of group to test
  * @returns :: Whether checkbox was selected by user
  */
-bool MuonFitDataView::isGroupSelected(const QString &name) const {
+bool MuonFitDataSelector::isGroupSelected(const QString &name) const {
   if (m_groupBoxes.contains(name)) {
     return m_groupBoxes.value(name)->isChecked();
   } else {
@@ -192,7 +213,7 @@ bool MuonFitDataView::isGroupSelected(const QString &name) const {
  * @param name :: [input] Name of group to select/deselect
  * @param selected :: [input] True to select, false to deselect
  */
-void MuonFitDataView::setGroupSelected(const QString &name, bool selected) {
+void MuonFitDataSelector::setGroupSelected(const QString &name, bool selected) {
   if (m_groupBoxes.contains(name)) {
     m_groupBoxes.value(name)->setChecked(selected);
   } else {
@@ -206,8 +227,9 @@ void MuonFitDataView::setGroupSelected(const QString &name, bool selected) {
  * of periods plus "combination" boxes.
  * @param numPeriods :: [input] Number of periods
  */
-void MuonFitDataView::setNumPeriodCheckboxes(size_t numPeriods) {
-  Q_UNUSED(numPeriods)
+void MuonFitDataSelector::setNumPeriodCheckboxes(size_t numPeriods) {
+  this->setPeriodVisibility(numPeriods > 1);
+  // TODO: add checkboxes code
   throw std::runtime_error("Not implemented yet");
 }
 
@@ -215,7 +237,7 @@ void MuonFitDataView::setNumPeriodCheckboxes(size_t numPeriods) {
  * Returns a list of periods and combinations chosen in UI
  * @returns :: list of periods e.g. "1", "3", "1+2-3+4"
  */
-QStringList MuonFitDataView::getPeriodSelections() const {
+QStringList MuonFitDataSelector::getPeriodSelections() const {
   QStringList checked;
   for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
        ++iter) {
@@ -237,6 +259,20 @@ QStringList MuonFitDataView::getPeriodSelections() const {
 }
 
 /**
+ * Returns a list of the selected groups (checked boxes)
+ * @returns :: list of selected groups
+ */
+QStringList MuonFitDataSelector::getChosenGroups() const {
+  QStringList chosen;
+  for (const auto group : m_groupBoxes.keys()) {
+    if (isGroupSelected(group)) {
+      chosen.append(group);
+    }
+  }
+  return chosen;
+}
+
+/**
 *Gets user input in the form of a QVariant
 *
 *This is implemented as the "standard" way of getting input from a
@@ -246,15 +282,15 @@ QStringList MuonFitDataView::getPeriodSelections() const {
 *The returned QVariant is a QVariantMap of (parameter, value) pairs.
 *@returns :: QVariant containing a QVariantMap
 */
-QVariant MuonFitDataView::getUserInput() const {
+QVariant MuonFitDataSelector::getUserInput() const {
   QVariant ret;
   auto map = ret.asMap();
   map.insert("Workspace index", getWorkspaceIndex());
   map.insert("Start", getStartTime());
   map.insert("End", getEndTime());
   map.insert("Runs", getRuns());
-  map.insert("Groups", m_presenter->getChosenGroups());
-  map.insert("Periods", m_presenter->getChosenPeriods());
+  map.insert("Groups", getChosenGroups());
+  map.insert("Periods", getPeriodSelections());
   return map;
 }
 
@@ -271,7 +307,7 @@ QVariant MuonFitDataView::getUserInput() const {
  * The input QVariant is a QVariantMap of (parameter, value) pairs.
  * @param value :: [input] QVariant containing a QVariantMap
  */
-void MuonFitDataView::setUserInput(const QVariant &value) {
+void MuonFitDataSelector::setUserInput(const QVariant &value) {
   if (value.canConvert(QVariant::Map)) {
     const auto map = value.toMap();
     if (map.contains("Workspace index")) {
