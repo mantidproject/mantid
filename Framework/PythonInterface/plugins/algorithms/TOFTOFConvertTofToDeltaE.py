@@ -139,7 +139,7 @@ class TOFTOFConvertTofToDeltaE(PythonAlgorithm):
                 tof_elastic[idx] = t_el_default
 
         instrument = outws.getInstrument()
-        sample = instrument.getSample()
+        source = instrument.getSource()
         factor = sp.constants.m_n*1e+15/sp.constants.eV
 
         # calculate new values for dataX and data Y
@@ -148,7 +148,7 @@ class TOFTOFConvertTofToDeltaE(PythonAlgorithm):
             det = instrument.getDetector(outws.getSpectrum(idx).getDetectorIDs()[0])
             xbins = input_ws.readX(idx)                   # take bin boundaries
             tof = xbins[:-1] + 0.5*channel_width          # take middle of each bin
-            sdd = det.getDistance(sample)
+            sdd = det.getDistance(source)
             # calculate new I = t^3*I(t)/(factor*sdd^2*dt)
             dataY = input_ws.readY(idx)*tof**3/(factor*channel_width*sdd*sdd)
             dataE = input_ws.readE(idx)*tof**3/(factor*channel_width*sdd*sdd)
