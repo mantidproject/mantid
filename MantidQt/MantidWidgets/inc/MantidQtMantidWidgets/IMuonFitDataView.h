@@ -27,7 +27,7 @@ public:
   virtual void clearGroupCheckboxes() = 0;
   virtual bool isGroupSelected(const QString &name) const = 0;
   virtual void setGroupSelected(const QString &name, bool selected) = 0;
-  virtual void setNumPeriods(size_t numPeriods) = 0;
+  virtual void setNumPeriodCheckboxes(size_t numPeriods) = 0;
   virtual QStringList getPeriodSelections() const = 0;
 };
 } // namespace MantidWidgets

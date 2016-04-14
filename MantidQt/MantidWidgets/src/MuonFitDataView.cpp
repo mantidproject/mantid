@@ -1,5 +1,8 @@
 #include "MantidQtMantidWidgets/MuonFitDataView.h"
-#include <stdexcept>
+
+namespace {
+Mantid::Kernel::Logger g_log("MuonFitDataView");
+}
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -20,6 +23,10 @@ MuonFitDataView::MuonFitDataView(QWidget *parent, int runNumber,
   this->setUpValidators();
   this->setDefaultValues();
   this->setWorkspaceDetails(runNumber, instName);
+  m_groupBoxes.insert("fwd", m_ui.chkFwd);
+  m_groupBoxes.insert("bwd", m_ui.chkBwd);
+  m_periodBoxes.insert("1", m_ui.chk1);
+  m_periodBoxes.insert("2", m_ui.chk2);
   m_presenter = Mantid::Kernel::make_unique<MuonFitDataPresenter>(this);
   m_presenter->setNumPeriods(numPeriods);
   m_presenter->setAvailableGroups(groups);
@@ -130,6 +137,7 @@ void MuonFitDataView::setDefaultValues() {
   this->setWorkspaceIndex(0);
   this->setStartTime(0.0);
   this->setEndTime(0.0);
+  m_ui.chkCombine->setChecked(false);
 }
 
 /**
@@ -146,8 +154,9 @@ void MuonFitDataView::setPeriodVisibility(bool visible) {
  * @param name :: [input] Name of group to add
  */
 void MuonFitDataView::addGroupCheckbox(const QString &name) {
-  Q_UNUSED(name)
-  throw std::runtime_error("Not implemented yet");
+  auto checkBox = new QCheckBox(name);
+  m_groupBoxes.insert(name, checkBox);
+  m_ui.verticalLayoutGroups->add(checkBox);
 }
 
 /**
@@ -155,7 +164,12 @@ void MuonFitDataView::addGroupCheckbox(const QString &name) {
  * (ready to add new ones)
  */
 void MuonFitDataView::clearGroupCheckboxes() {
-  throw std::runtime_error("Not implemented yet");
+  for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+       ++iter) {
+    m_ui.verticalLayoutGroups->remove(iter.data());
+    delete iter.data();
+  }
+  m_groupBoxes.clear();
 }
 
 /**
@@ -164,8 +178,13 @@ void MuonFitDataView::clearGroupCheckboxes() {
  * @returns :: Whether checkbox was selected by user
  */
 bool MuonFitDataView::isGroupSelected(const QString &name) const {
-  Q_UNUSED(name)
-  throw std::runtime_error("Not implemented yet");
+  if (m_groupBoxes.contains(name)) {
+    return m_groupBoxes.value(name)->isChecked();
+  } else {
+    g_log.warning() << "No group called " << name.toStdString()
+                    << ": cannot get selection state";
+    return false;
+  }
 }
 
 /**
@@ -174,9 +193,12 @@ bool MuonFitDataView::isGroupSelected(const QString &name) const {
  * @param selected :: [input] True to select, false to deselect
  */
 void MuonFitDataView::setGroupSelected(const QString &name, bool selected) {
-  Q_UNUSED(name)
-  Q_UNUSED(selected)
-  throw std::runtime_error("Not implemented yet");
+  if (m_groupBoxes.contains(name)) {
+    m_groupBoxes.value(name)->setChecked(selected);
+  } else {
+    g_log.warning() << "No group called " << name.toStdString()
+                    << ": cannot set selection state";
+  }
 }
 
 /**
@@ -184,7 +206,7 @@ void MuonFitDataView::setGroupSelected(const QString &name, bool selected) {
  * of periods plus "combination" boxes.
  * @param numPeriods :: [input] Number of periods
  */
-void MuonFitDataView::setNumPeriods(size_t numPeriods) {
+void MuonFitDataView::setNumPeriodCheckboxes(size_t numPeriods) {
   Q_UNUSED(numPeriods)
   throw std::runtime_error("Not implemented yet");
 }
@@ -194,7 +216,24 @@ void MuonFitDataView::setNumPeriods(size_t numPeriods) {
  * @returns :: list of periods e.g. "1", "3", "1+2-3+4"
  */
 QStringList MuonFitDataView::getPeriodSelections() const {
-  throw std::runtime_error("Not implemented yet");
+  QStringList checked;
+  for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
+       ++iter) {
+    if (iter.value()->isChecked()) {
+      checked.append(iter.key());
+    }
+  }
+
+  // combination
+  if (m_ui.chkCombine->isChecked()) {
+    QString combination = m_ui.txtFirst->text();
+    combination.append("-").append(m_ui.txtSecond->text());
+    combination.replace(" ", "");
+    combination.replace(",", "+");
+    checked.append(combination);
+  }
+
+  return checked;
 }
 
 /**

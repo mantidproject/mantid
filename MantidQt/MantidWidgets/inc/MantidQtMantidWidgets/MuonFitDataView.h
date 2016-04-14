@@ -65,7 +65,7 @@ public:
   void clearGroupCheckboxes() override;
   bool isGroupSelected(const QString &name) const override;
   void setGroupSelected(const QString &name, bool selected) override;
-  void setNumPeriods(size_t numPeriods) override;
+  void setNumPeriodCheckboxes(size_t numPeriods) override;
   QStringList getPeriodSelections() const override;
   // --- end ---
   /// Set starting run number and instrument
@@ -80,6 +80,10 @@ private:
   Ui::MuonFitDataView m_ui;
   /// Presenter
   std::unique_ptr<MuonFitDataPresenter> m_presenter;
+  /// Map of group names to checkboxes
+  QMap<QString, QCheckBox *> m_groupBoxes;
+  /// Map of period names to checkboxes
+  QMap<QString, QCheckBox *> m_periodBoxes;
 };
 
 } // namespace MantidWidgets

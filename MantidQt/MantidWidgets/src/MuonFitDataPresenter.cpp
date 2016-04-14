@@ -16,12 +16,13 @@ MuonFitDataPresenter::MuonFitDataPresenter(IMuonFitDataView *view)
 
 /**
  * Sets number of periods and updates checkboxes on UI
+ * Hide "Periods" section if single-period data
  * @param numPeriods :: [input] Number of periods in data
  */
 void MuonFitDataPresenter::setNumPeriods(size_t numPeriods) {
   m_numPeriods = numPeriods;
-  // TODO: UI code here, add/remove checkboxes, hide if = 0 (in presenter)
-  throw std::runtime_error("TODO: implement this function");
+  m_view->setNumPeriodCheckboxes(numPeriods);
+  m_view->setPeriodVisibility(numPeriods > 1);
 }
 
 /**
@@ -31,19 +32,21 @@ void MuonFitDataPresenter::setNumPeriods(size_t numPeriods) {
  * @returns :: String list of period numbers / combinations
  */
 QStringList MuonFitDataPresenter::getChosenPeriods() const {
-  throw std::runtime_error("TODO: implement this function");
+  return m_view->getPeriodSelections();
 }
 
 /**
  * Sets group names and updates checkboxes on UI
+ * By default sets all checked
  * @param groups :: [input] List of group names
  */
 void MuonFitDataPresenter::setAvailableGroups(const QStringList &groups) {
-  // TODO: something here inc. UI code with checkboxes
-  // Set them all checked by default
-  // m_ui.verticalLayoutGroups->count();
-  Q_UNUSED(groups)
-  throw std::runtime_error("TODO: implement this function");
+  m_view->clearGroupCheckboxes();
+  for (const auto group : groups) {
+    m_view->addGroupCheckbox(group);
+    m_view->setGroupSelected(group, true);
+    m_groups.append(group);
+  }
 }
 
 /**
@@ -51,8 +54,13 @@ void MuonFitDataPresenter::setAvailableGroups(const QStringList &groups) {
  * @returns :: list of selected groups
  */
 QStringList MuonFitDataPresenter::getChosenGroups() const {
-  // TODO: implement this function
-  throw std::runtime_error("TODO: implement this function");
+  QStringList chosen;
+  for (const auto group : m_groups) {
+    if (m_view->isGroupSelected(group)) {
+      chosen.append(group);
+    }
+  }
+  return chosen;
 }
 
 } // namespace MantidWidgets

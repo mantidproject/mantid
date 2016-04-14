@@ -46,6 +46,8 @@ private:
   IMuonFitDataView *m_view;
   /// Number of periods
   size_t m_numPeriods;
+  /// List of group names
+  QStringList m_groups;
 };
 
 } // namespace MantidWidgets

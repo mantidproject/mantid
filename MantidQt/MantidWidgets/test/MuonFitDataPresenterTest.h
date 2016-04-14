@@ -26,7 +26,7 @@ public:
   MOCK_METHOD0(clearGroupCheckboxes, void());
   MOCK_CONST_METHOD1(isGroupSelected, bool(const QString &));
   MOCK_METHOD2(setGroupSelected, void(const QString &, bool));
-  MOCK_METHOD1(setNumPeriods, void(size_t));
+  MOCK_METHOD1(setNumPeriodCheckboxes, void(size_t));
   MOCK_CONST_METHOD0(getPeriodSelections, QStringList());
 };
 
