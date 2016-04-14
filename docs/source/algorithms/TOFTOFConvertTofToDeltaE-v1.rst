@@ -14,7 +14,7 @@ Converts X-axis units of the given workspace or group of workspaces from time-of
 
 :math:`\Delta E = \frac{1}{2} C m_n L^2\cdot\left(\frac{1}{t_{el}^2} - \frac{1}{t^2}\right)`
 
-where :math:`L` is the sample-detector distance, :math:`m_n` is the neutron mass, :math:`t_{el}` is the time-of-flight corresponding to the elastic peak, :math:`t` is the time-of-flight corresponding to the bin boundaries of the X data in the input workspace. Coefficient :math:`C` is related to the unit conversion and calculated as
+where :math:`L` is the source-detector distance, :math:`m_n` is the neutron mass, :math:`t_{el}` is the time-of-flight corresponding to the elastic peak, :math:`t` is the time-of-flight corresponding to the bin boundaries of the X data in the input workspace. Coefficient :math:`C` is related to the unit conversion and calculated as
 
 :math:`C = \frac{10^{12}\cdot 10^3}{1.6\cdot 10^{-19}}`
 
