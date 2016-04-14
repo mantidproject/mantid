@@ -141,7 +141,7 @@ void MuonFitDataSelector::setUpValidators() {
  * @param instName :: [input] Instrument name from loaded workspace
  */
 void MuonFitDataSelector::setWorkspaceDetails(int runNumber,
-                                          const QString &instName) {
+                                              const QString &instName) {
   // Set initial run to be run number of the workspace loaded in Home tab
   m_ui.runs->setText(QString::number(runNumber) + "-");
   // Set the file finder to the correct instrument (not Mantid's default)
@@ -213,9 +213,31 @@ void MuonFitDataSelector::setGroupSelected(const QString &name, bool selected) {
  * @param numPeriods :: [input] Number of periods
  */
 void MuonFitDataSelector::setNumPeriods(size_t numPeriods) {
+  const size_t currentPeriods = static_cast<size_t>(m_periodBoxes.size());
+  if (numPeriods > currentPeriods) {
+    // create more boxes
+    for (size_t i = currentPeriods; i != numPeriods; i++) {
+      QString name = QString::number(i + 1);
+      auto checkbox = new QCheckBox(name);
+      m_periodBoxes.insert(name, checkbox);
+      m_ui.verticalLayoutPeriods->add(checkbox);
+    }
+  } else if (numPeriods < currentPeriods) {
+    // delete the excess
+    QStringList toRemove;
+    for (const QString name : m_periodBoxes.keys()) {
+      const size_t periodNum = static_cast<size_t>(name.toInt());
+      if (periodNum > numPeriods) {
+        m_ui.verticalLayoutPeriods->remove(m_periodBoxes.value(name));
+        delete m_periodBoxes.value(name);
+        toRemove.append(name);
+      }
+    }
+    for (const QString name : toRemove) {
+      m_periodBoxes.remove(name);
+    }
+  }
   this->setPeriodVisibility(numPeriods > 1);
-  // TODO: add checkboxes code
-  throw std::runtime_error("Not implemented yet");
 }
 
 /**
