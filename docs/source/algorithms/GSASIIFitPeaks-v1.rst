@@ -27,7 +27,9 @@ Description
 Uses `GSAS-II <https://subversion.xray.aps.anl.gov/trac/pyGSAS>`_
 (Toby & Von Dreele, 2013) as external software to fit peaks to a
 powder / engineering diffraction pattern. Here the process of peak
-fitting is in the sense of Rietveld fitting or Rietveld refinement.
+fitting is in the context of Rietveld / Pawley / Le Bail analysis (Le
+Bail 2005).
+
 This algorithm uses the peak fitting (or "Peaks List") functionality
 included in the `powder calculation module
 <https://subversion.xray.aps.anl.gov/pyGSAS/sphinxdocs/build/html/GSASIIpwd.html>`_
@@ -43,16 +45,16 @@ available for importing from the Mantid Python interpreter. This
 algorithm requires a modified version of GSAS-II. Please contact the
 developers for details.
 
-The main inputs required by this algorithm are a instrument definition
-parameter (in GSAS format, readable by GSAS-II), histogram data, and
-various parameters for the fitting/refinement process.  The algorithm
-only supports peaks with shape of type back-to-back exponential
-convoluted with pseudo-voigt (BackToBackExponentialPV). It is possible
-to enable the refinement of the different function parameters via
-several properties (RefineAlpha, RefineSigma, etc.).
+The main inputs required are an instrument definition parameter (in
+GSAS format, readable by GSAS-II), histogram data, and various
+parameters for the fitting/refinement process.  The algorithm only
+supports peaks with shape of type back-to-back exponential convoluted
+with pseudo-voigt (BackToBackExponentialPV). It is possible to enable
+the refinement of the different function parameters via several
+properties (RefineAlpha, RefineSigma, etc.).
 
-This algorithm produces an output table with as many rows as peaks
-have been found. The columns of the table give the parameters fitted,
+The algorithm produces an output table with as many rows as peaks have
+been found. The columns of the table give the parameters fitted,
 similarly to the information found in the "Peaks List" window of the
 GSAS-II GUI. These results are printed in the log messages as well.
 
@@ -63,6 +65,9 @@ For fitting single peaks, one at a time, see also :ref:`EnggFitPeaks
 <algm-EnggFitPeaks>`.
 
 References:
+
+Le Bail, A (2005). "Whole Powder Pattern Decomposition Methods and
+Applications: A Retrospection". Powder Diffraction 20(4): 316-326.
 
 Toby, B. H., & Von Dreele, R. B. (2013). "GSAS-II: the genesis of a
 modern open-source all purpose crystallography software

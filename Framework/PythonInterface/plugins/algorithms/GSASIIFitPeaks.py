@@ -292,11 +292,13 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
     def _import_gsas2(self, additional_path_prop):
         try:
-            import GSASIIIO
-            import GSASIIpwd
             import GSASII
+            # It will be needed for save project
+            import GSASIIIO
+            # For powder diffraction data fitting routines
+            import GSASIIpwd
         except ImportError as ierr:
-            raise ImportError("Failed to import the GSASII and GSASIIpwd modules "
+            raise ImportError("Failed to import the GSASII and its required sub-modules "
                               "from GSAS-II. Please make sure that it is available in the "
                               "Mantid Python path and/or the path to GSAS-II given in the "
                               "input property " + getProperty(additional_path_prop) +
