@@ -8,8 +8,8 @@ from mantid.api import ITableWorkspace
 class VesuvioThickness(unittest.TestCase):
 
     # Original test values from fortran routines
-    _masses = [1.0079, 27.0, 91.0]
-    _amplitudes = [0.9301589, 2.9496644e-02, 4.0345035e-02]
+    _masses = "1.0079,27.0,91.0"
+    _amplitudes = "0.9301589,2.9496644e-02,4.0345035e-02"
     _trans_guess = 241
     _thickness = 5.0
     _number_density = 1.0
