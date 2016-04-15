@@ -71,7 +71,12 @@ are given in Angstrom. The angles are given in degrees, and the volume
 in Angstrom^3.
 
 The algorithm provides goodness-of-fit estimates in the outputs *GoF*
-and *Rwp* (Toby 2008). The *Rwp* is given as a percentage value.
+and *Rwp* or weighted profile R-factor (Toby 2008). The *Rwp* is given
+as a percentage value.
+
+Note that the option to save the GSAS-II project file
+(*SaveGSASIIProjectFile*) is mandatory. This is a requirement of
+GSAS-II.
 
 When Pawley refinement is selected as refinement method the flag for
 histogram scale factor refinement is disabled, as recommended in the
