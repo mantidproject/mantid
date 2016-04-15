@@ -36,6 +36,8 @@ class GSASIIFitPeaks(PythonAlgorithm):
         PROP_INSTR_FILE = 'InstrumentFile'
         PROP_PHASE_INFO_FILE = 'PhaseInfoFile'
         PROP_PATH_TO_GSASII = 'PathToGSASII'
+        PROP_PAWLEY_DMIN = "PawleyDmin"
+        PROP_PAWLEY_NEG_WEIGHT = "PawleyNegativeWeight"
         PROP_BACKGROUND_TYPE = 'BackgroundType'
         PROP_MINX = 'MinX'
         PROP_MAXX = 'MaxX'
@@ -54,16 +56,16 @@ class GSASIIFitPeaks(PythonAlgorithm):
         PROP_REFINE_GAMMA = 'RefineGamma'
 
         PROP_METHOD = "Method"
-        refine_methods = ["Rietveld/Pawley refinement", "Peak fitting"]
+        refine_methods = ["Rietveld refinement", "Pawley refinement", "Peak fitting"]
         self.declareProperty(PROP_METHOD, defaultValue = refine_methods[0],
                              validator = StringListValidator(refine_methods),
                              doc = 'Rietveld corresponds to the Calculate/Refine option of the '
                              'GSAS-II GUI. Peak fitting is single peak (does not use phase '
                              'information  and corresponds to the option '
-                             'Peaks List/Peak Fitting/PeakFitType of the GSAS-II GUI. This '
-                             'second alternative requires a list of peaks which can be bassed in '
+                             'Peaks List/Peak Fitting/PeakFitType of the GSAS-II GUI. The '
+                             'third alternative requires a list of peaks which can be bassed in '
                              'the properties ' + PROP_EXPECTED_PEAKS + ' and ' +
-                             PROP_EXPECTED_PEAKS_FROM_FILES + '.')
+                             PROP_EXPECTED_PEAKS_FROM_FILE + '.')
 
         self.declareProperty(MatrixWorkspaceProperty(PROP_INPUT_WORKSPACE, '',
                                                      optional = PropertyMode.Mandatory,
@@ -114,6 +116,22 @@ class GSASIIFitPeaks(PythonAlgorithm):
         self.setPropertyGroup(PROP_MINX, GRP_FITTING_OPTS)
         self.setPropertyGroup(PROP_MAXX, GRP_FITTING_OPTS)
 
+
+        GRP_PAWLEY_OPTIONS = "Pawley refinement options"
+
+        self.declareProperty(PROP_PAWLEY_DMIN, 1.0, direction = Direction.Input,
+                             doc = "For Pawley refiment. As defined in GSAS-II, the minimum d-spacing "
+                             "to be used in a Pawley refinement. Please refer to the GSAS-II "
+                             "documentation for full details.")
+
+        self.declareProperty(PROP_PAWLEY_NEG_WEIGHT, 0.0, direction = Direction.Input,
+                             doc = "For Pawley refinement. As defined in GSAS-II, the weight for a "
+                             "penalty function applied during a Pawley refinement on resulting negative "
+                             "intensities. Please refer to the GSAS-II documentation for full details.")
+
+        self.setPropertyGroup(PROP_PAWLEY_DMIN, GRP_PAWLEY_OPTIONS)
+        self.setPropertyGroup(PROP_PAWLEY_NEG_WEIGHT, GRP_PAWLEY_OPTIONS)
+
         GRP_PEAKS = "Expected peaks (phase information takes precedence)"
 
         self.declareProperty(FloatArrayProperty(PROP_EXPECTED_PEAKS, [],
@@ -141,7 +159,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
                              doc = 'Weighted profile R-factor (Rwp) discrepancy index for the '
                              'goodness of fit.')
 
-        self.declareProperty(ITableWorkspaceProperty(PROP_OUT_LATTICE_PARAMS, Direction.Output),
+        self.declareProperty(ITableWorkspaceProperty(PROP_OUT_LATTICE_PARAMS, "", Direction.Output),
                              doc = 'Table to output the the lattice parameters (refined).')
 
         self.declareProperty(ITableWorkspaceProperty(PROP_OUT_FITTED_PARAMS, "", Direction.Output),
@@ -206,30 +224,29 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
         prog.report('Loading and preparing input data')
         in_wks = self.getProperty(PROP_INPUT_WORKSPACE).value
-        in_idx = self.getProperty(PROP_WORKSPACE_INDEX)
-        inst_file = self.getProperty(PROP_INSTR_FILE)
+        in_idx = self.getProperty(PROP_WORKSPACE_INDEX).value
+        inst_file = self.getProperty(PROP_INSTR_FILE).value
 
         if in_wks.getNumberHistograms() > 1 or 0 != in_idx:
-            gs2_focused_wks = sapi.ExtractSpectra(InputWorkspace = in_wks, StartWorkspaceIndex = in_idx,
-                                                  EndworkspaceIndex = in_idx)
+            focused_wks = sapi.ExtractSpectra(InputWorkspace = in_wks, StartWorkspaceIndex = in_idx,
+                                              EndworkspaceIndex = in_idx)
         else:
-            gs2_focused_wks = in_wks
+            focused_wks = in_wks
 
-        (gs2_rd, limits, peaks_init, background_def) = self._load_prepare_data_for_fit(gs2_focused_wks,
+        (gs2_rd, limits, peaks_init, background_def) = self._load_prepare_data_for_fit(focused_wks,
                                                                                        inst_file)
 
         # No obvious way to provide proper progress report from inside the fitting routines
         prog.report('Running refinement. This may take some times')
-        (gof_estimates, parm_dict) = self._run_peak_fit(gs2_rd.powderdata, limits, peaks_init,
-                                                        background_def)
+        (gof_estimates, lattice_params, parm_dict) = self._run_refinement(gs2, gs2_rd, (limits, peaks_init,
+                                                                                        background_def))
 
         prog.report('Producing outputs')
-        out_proj_file = self.getProperty(PROP_OUT_PROJECT_FILE)
-        lattice_params = []
+        out_proj_file = self.getProperty(PROP_OUT_PROJECT_FILE).value
         if proj_file:
             self._save_gsas2_project(gs2, gs2_rd, out_proj_file)
-            lattice_params = self._parse_lattice_params_refined(out_proj_file)
-            self.log().notice("Lattice parameters fitted: {0}".format(lattice_params))
+            file_lattice_params = self._parse_lattice_params_refined(out_proj_file)
+            self.log().notice("Lattice parameters found in output file: {0}".format(file_lattice_params))
 
         self._produce_outputs(gof_estimates, lattice_params, parm_dict)
 
@@ -260,8 +277,8 @@ class GSASIIFitPeaks(PythonAlgorithm):
         limits = self._build_add_limits(gs2_rd)
         self.log().information("Fitting loaded histogram data, with limits: {0}".format(limits))
 
-        # PROP_PHASE_INFO_FILE - phase information into rd
-        # As in GSASII.GetPhaseData - TODO
+        # PROP_PHASE_INFO_FILE - phase information into rd, this is loaded elsewhere when
+        # doing Pawley/Rietveld refinement
 
         # Assumes peaks of type back-to-back exponential convoluted with pseudo-Voigt
         # That is true in ENGIN-X instrument parameters file
@@ -269,6 +286,163 @@ class GSASIIFitPeaks(PythonAlgorithm):
         self.log().information("Peaks parameters initialized as: {0}".format(peaks_init))
 
         return (gs2_rd, limits, peaks_init, background_def)
+
+    def _run_refinement(self, gs2, gs2_rd, fit_inputs):
+        """
+        Run the different refinement/fitting methods
+
+        @param gs2 :: the main GSAS-II object
+        @param gs2_rd :: the GSAS-II "rd" object with powder data in it
+        @param fit_inputs :: a tuple with inputs for the fitting process. 3 elements:
+        limits, peaks_list, background_def. 1) limits is a tuple with the min X and max X values
+        for the fitting. 2) peaks_list is a list of peaks to fit. 3) background_def is the
+        background function as defined in GSAS-II (a list of parameters)
+
+        @return a tuple with 1) the two goodness-of-fit estimates, 2) lattice params (list with
+        7 values), 3) parameters fitted (when doing peak fitting)
+        """
+        method = self.getProperty(PROP_METHOD).value
+        gof_estimates = [0, 0]
+        lattice_params = 7*[0.0]
+        parm_dict = {}
+        if "Pawley refinement" == method:
+            (gof_estimates, lattice_params) = self.run_rietveld_pawley_refinement(gs2, gs2_rd, True)
+        elif "Rietveld refinement" == method:
+            (gof_estimates, lattice_params) = self._run_rietveld_pawley(gs2, gs2_rd, False)
+        elif "Peak fitting" == method:
+            (limits, peaks_list, background_def) = fit_inputs
+            (gof_estimates, parm_dict) = self._run_peak_fit(gs2_rd.powderdata, limits, peaks_list,
+                                                            background_def)
+        else:
+            raise RuntimeError("Inconsistency found. Unknown refinement method: {0}".format(method))
+
+        return (gof_estimates, lattice_params, parm_dict)
+
+    def _run_rietveld_pawley_refinement(self, gs2, gs2_rd, do_pawley):
+        """
+        Run Rietveld or Pawley refinement
+
+        @param do_pawley :: Select Pawley (True) or Rietveld (False)
+        @param gs2 :: the main GSAS-II object
+        @param gs2_rd :: the GSAS-II "rd" object with powder data in it. Phase information will be
+        connected to it
+
+        @return a tuple with 1) the two goodness-of-fit estimates, 2) lattice params (list with
+        7 values)
+        """
+        general_phase_data = self._load_prepare_phase_data(gs2, gs2_rd,
+                                                           getProperty(PROP_PHASE_INFO_FILE).value)
+
+        # Enable / tick on "Refine unit cell"
+        general_phase_data['Cell'][0] = True
+        if do_pawley:
+            # Note from GSAS-II doc: "you probably should clear the Histogram scale factor refinement
+            # flag (found in Sample parameters for the powder data set) as it cannot be refined
+            # simultaneously with the Pawley reflection intensities"
+            gs2_rd.Sample['Scale'] = [1.0, False]
+
+            # Flag for Pawley intensity extraction (bool)
+            general_phase_data['doPawley'] = True
+            # maximum Q (as d-space) to use for Pawley extraction
+            general_phase_data['Pawley dmin'] = self.getProperty(PROP_PAWLEY_DMIN).value
+            # Restraint value for negative Pawley intensities
+            general_phase_data['Pawley neg wt'] = self.getProperty(PROP_PAWLEY_NEG_WEIGHT).value
+
+        proj_filename = self.getProperty(PROP_OUT_PROJECT_FILE).value
+        self.log().notice("Saving GSAS-II project file before starting refinement, into: {0}".
+                          format(proj_filename))
+
+        # Save project with phase data imported and connected now
+        self._save_gsas2_project(gs2, gs2_rd, proj_filename)
+
+        do_refinement(gs2)
+        import os
+        self.log().notice("GSAS-II refinement details produced in file: {0}".
+                          format(os.path.splitext(gs2.GSASprojectfile)[0]) + '.lst')
+
+        lattice_params = general_phase_data['Cell']
+        residual_vals = general_phase_data['Covariance']['Rvals']
+        gof_estimates = (residual_vals['Rwp'], residual_vals['GOF'], residual_vals['chisq'])
+        return (gof_estimates, lattice_params, {})
+
+    def  _do_refinement(self, gs2):
+        # assume gs2.GSASprojectfile == proj_filename which should be true because
+        # The project file always needs to be saved before running refine
+        import GSASIIstrIO
+        import GSASIIstrMain
+        err_msg, warn_msg = GSASIIstrIO.ReadCheckConstraints(gs2.GSASprojectfile)
+        if err_msg:
+            raise RuntimeError("Error in refinement: {0}".format(err_msg))
+        if warn_msg:
+            raise RuntimeError("Conflict between refinement flag settings "
+                               "and constraints: {0}".format(err_msg))
+
+        result_ok, user_msg = GSASIIstrMain.Refine(gs2.GSASprojectfile, dlg=None, useDlg=False)
+        if not result_ok or user_msg:
+            raise RuntimeError("There was a problem while running the core refinement routine. "
+                               "Error description: {0}".format(user_msg))
+
+    def _load_prepare_phase_data(self, gs2, gs2_rd, phase_filename):
+        """
+        @return phase data object as defined in GSAS-II GSASIIobj.py, with the imported phase
+        information and other fields set up to defaults.
+        """
+        import GSASIIphsGUI
+
+        # Import phase data from (CIF) file
+        phase_readers_list = gs2.ImportPhaseReaderlist
+        # 3 is G2phase_CIF.CIFPhaseReader
+        phase_readers_list = [phase_readers_list[3]]
+
+        _success, _rd_list, err_msg = gs2.ImportDataGeneric(phasefile, phase_readers_list, [],
+                                                            usedRanIdList=['noGUI'], Start=False)
+        if err_msg:
+            raise RuntimeError("There was a problem while importing the phase information file ({0}. "
+                               "Error details: {1}".format(phase_filename, errm_msg))
+
+        phase_reader = phase_readers_list[0]
+        SASIIphsGUI.SetupGeneralWithoutGUI(gs2, phase_reader.Phase)
+
+        import os
+        import GSASIIgrid
+
+        # Register phase data and add it to the histo data
+        phase_reader.Phase['General']['Name'] = os.path.basename(phase_filename)
+        phase_name = os.path.basename(phasefile)
+        print " * phase name: ", phase_name
+        if not GSASIIgrid.GetPatternTreeItemId(gs2, gs2.root, 'Phases'):
+            sub = gs2.PatternTree.AppendItem(parent=gs2.root, text='Phases')
+        else:
+            sub = GSASIIgrid.GetPatternTreeItemId(gs2, gs2.root, 'Phases')
+        psub = gs2.PatternTree.AppendItem(parent=sub, text=phase_name)
+        gs2.PatternTree.SetItemPyData(psub, phase_reader.Phase)
+
+        # Connect the phase information to the histogram data
+        import GSASIIspc
+        sub = GSASIIgrid.GetPatternTreeItemId(gs2, gs2.root, 'Phases')
+        item, cookie = gs2.PatternTree.GetFirstChild(sub)
+        phase_name = gs2.PatternTree.GetItemText(item)
+        self.log().debug("Connecting phase information (name {0} to histogram data, with item: {1}, "
+                         "cookie: {2}".format(phase_name, item, cookie))
+        # the histo data is in for example 'PWDR ENGINX_ceria_1000_spectrum-0.txt'
+        data = gs2.PatternTree.GetItemPyData(item)
+        general_phase_data = data['General']
+
+        # Setup additional phase data
+        SGData = general_phase_data['SGData']
+        use_list = data['Histograms']
+        NShkl = len(GSASIIspc.MustrainNames(SGData))
+        NDij = len(GSASIIspc.HStrainNames(SGData))
+        # like 'PWDR ENGINX_ceria_1000_spectrum-0.txt'
+        histo_name = 'PWDR ' + gs2_rd.idstring
+        # 'Reflection Lists' is not defined at this point:
+        # item_id = GSASIIgrid.GetPatternTreeItemId(gs2, gs2.root, histo_name)
+        # refList = gs2.PatternTree.GetItemPyData(
+        #     GSASIIgrid.GetPatternTreeItemId(gs2, item_id, 'Reflection Lists'))
+        # refList[general_phase_data['Name']] = {}
+        use_list[histo_name] = GSASII.SetDefaultDData('PWDR', histo_name, NShkl=NShkl, NDij=NDij)
+
+        return general_phase_data
 
     def _run_peak_fit(self, powderdata, limits, peaks_list, background_def):
         """
@@ -281,7 +455,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
         @param peaks_list :: list of peaks to fit
         @param background_def :: background function as defined in GSAS-II, a list of parameters
 
-        @returns a tuple with: 1) a tuple with the Rwp and GoF values (weighted profile
+        @return a tuple with: 1) a tuple with the Rwp and GoF values (weighted profile
         R-factor, goodness of fit), 2) the parameters dictionary
         """
         # peaks: ['pos','int','alp','bet','sig','gam'] / with the refine flag each
@@ -305,7 +479,9 @@ class GSASIIFitPeaks(PythonAlgorithm):
         self.log().information("Parameters for which issues were found when refining: {0}".
                                format(bad_vary))
 
-        return (Rvals, parm_dict)
+        # chisq value (the 3rd) is not returned by DoPeakFit - TODO?
+        gof_estimates = (Rvals['Rwp'], Rvals['GOF'], 0)
+        return (gof_estimates, parm_dict)
 
     def _import_gsas2(self, additional_path_prop):
         try:
@@ -314,11 +490,18 @@ class GSASIIFitPeaks(PythonAlgorithm):
             import GSASIIIO
             # For powder diffraction data fitting routines
             import GSASIIpwd
+            import GSASIIgrid
+            # For phase data loading (yes, GUI)
+            import GSASIIphsGUI
+            import GSASIIspc
+            # for Rietveld/Pawley refinement
+            import GSASIIstrIO
+            import GSASIIstrMain
         except ImportError as ierr:
             raise ImportError("Failed to import the GSASII and its required sub-modules "
                               "from GSAS-II. Please make sure that it is available in the "
                               "Mantid Python path and/or the path to GSAS-II given in the "
-                              "input property " + getProperty(additional_path_prop) +
+                              "input property " + getProperty(additional_path_prop).value +
                               ". More error details: " + ierr)
 
     def _init_gs2(self):
@@ -378,10 +561,10 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
     def _build_add_limits(self, gs2_rd):
 
-        min_x = getProperty(PROP_MINX)
+        min_x = getProperty(PROP_MINX).value
         if Property.EMPTY_DBL == minx:
             min_x = powderdata[0].min()
-        max_x = getProperty(PROP_MAXX)
+        max_x = getProperty(PROP_MAXX).value
         if Property.EMPTY_DBL == max_x:
             max_x = powderdata[0].max()
 
@@ -439,14 +622,14 @@ class GSASIIFitPeaks(PythonAlgorithm):
         peaks_init = GSASIIpwdGUI.DoPeaksAutoSearch(gs2_rd.powderdata, inst_parm1, inst_parm2)
         # Note this sets as default: refine intensity, and no other parameters
         for peak in peaks_init:
-            peak[1] = getProperty(PROP_REFINE_CENTER)
-            peak[3] = getProperty(PROP_REFINE_INTENSITY)
-            peak[5] = getProperty(PROP_REFINE_ALPHA)
-            peak[7] = getProperty(PROP_REFINE_BETA)
+            peak[1] = getProperty(PROP_REFINE_CENTER).value
+            peak[3] = getProperty(PROP_REFINE_INTENSITY).value
+            peak[5] = getProperty(PROP_REFINE_ALPHA).value
+            peak[7] = getProperty(PROP_REFINE_BETA).value
             # sigma (Gaussian)
-            peak[9] = getProperty(PROP_REFINE_SIGMA)
+            peak[9] = getProperty(PROP_REFINE_SIGMA).value
             # gamma (Lorentzian)
-            peak[11] = getProperty(PROP_REFINE_GAMMA)
+            peak[11] = getProperty(PROP_REFINE_GAMMA).value
 
         # Just to have the same sequence as GSAS-II in its tables/standard output
         peaks_init.sort()
@@ -455,7 +638,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
         return peaks_init
 
     def _produce_outputs(self, gof_estimates, lattice_params, parm_dict):
-        (result_rwp, result_gof) = gof_estimates
+        (result_rwp, result_gof, _result_chisq) = gof_estimates
         self.setProperty(PROP_OUT_RWP, result_rwp)
         self.setProperty(PROP_OUT_GOF, result_gof)
 
@@ -467,7 +650,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
         par_names = ['Center', 'Intensity', 'Alpha', 'Beta', 'Sigma', 'Gamma']
         par_prefixes = ['pos','int','alp','bet','sig','gam']
 
-        tbl_name = self.getProperty(PROP_OUT_FITTED_PARAMS)
+        tbl_name = self.getProperty(PROP_OUT_FITTED_PARAMS).value
         alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
         alg.setProperty('OutputWorkspace', tbl_name)
         alg.execute()
@@ -498,19 +681,31 @@ class GSASIIFitPeaks(PythonAlgorithm):
         """
         import os
         import re
-        lst_filename = os.path.splitext(out_proj_file)[0] + 'lst'
+        lst_filename = os.path.splitext(out_proj_file)[0] + '.lst'
         with open(lst_filename) as results_file:
             results_lst = results_file.read()
+
             re_lattice_params = (r"Unit\s+cell:\s+a\s+=\s+(\d+.\d+)\s+b\s+=\s+(\d+.\d+)\s+c\s+=\s+(\d+.\d+)"
                                  r"\s+alpha\s+=\s+(\d+.\d+)\s+beta\s+=\s+(\d+.\d+)\s+gamma\s+=\s+(\d+.\d+)"
                                  r"\s+volume\s+=\s+(\d+.\d+)")
             pattern = re.compile(re_lattice_params)
-            params = pattern.findall(results_lst)[0]
+            lines_match = pattern.findall(results_lst)
+
+            # Depending on what refinement options are enabled the cell info is produced in different
+            # places and formats. Alternatively look for something like
+            # values:    2.470000    2.470000    6.790000     90.0000     90.0000    120.0000      35.875
+            if not lines_match:
+                more_re_lattice_params = (r"\s+values:\s+(\d+.\d+)\s+(\d+.\d+)\s+(\d+.\d+)\s+(\d+.\d+)"
+                                          r"\s+(\d+.\d+)\s+(\d+.\d+)\s+(\d+.\d+)")
+                pattern = re.compile(more_re_lattice_params)
+                lines_match = pattern.findall(results_lst)
+
+            params = lines_match[0]
 
         return params
 
     def _build_output_lattice_table(self, lattice_params):
-        tbl_name = self.getProperty(PROP_OUT_LATTICE_PARAMS)
+        tbl_name = self.getProperty(PROP_OUT_LATTICE_PARAMS).value
         alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
         alg.setProperty('OutputWorkspace', tbl_name)
         alg.execute()

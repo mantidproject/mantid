@@ -30,45 +30,70 @@ powder / engineering diffraction pattern. Here the process of peak
 fitting is in the context of Rietveld / Pawley / Le Bail analysis (Le
 Bail 2005).
 
-This algorithm uses the peak fitting (or "Peaks List") functionality
+The algorithm supports three methods: Pawley refinement, Rietveld
+refinement, and the peak fitting (or "Peaks List") functionality
 included in the `powder calculation module
 <https://subversion.xray.aps.anl.gov/pyGSAS/sphinxdocs/build/html/GSASIIpwd.html>`_
-of GSAS-II. The use of this algorithm is very close to the examples
-described in these two GSAS-II tutorials: `Getting started / Fitting
-individual peaks & autoindexing
+of GSAS-II. The first two methods implement whole powder pattern
+fitting (Le Bail 2005) whereas the third method fits peaks
+individually.  The use of this algorithm is very close to the examples
+described in these two GSAS-II tutorials: `Rietveld fitting / CW
+Neutron Powder fit for Yttrium-Iron Garnet
+<https://subversion.xray.aps.anl.gov/pyGSAS/Tutorials/CWNeutron/Neutron%20CW%20Powder%20Data.htm>`_,
+and `Getting started / Fitting individual peaks & autoindexing
 <https://subversion.xray.aps.anl.gov/pyGSAS/Tutorials/FitPeaks/Fit%20Peaks.htm>`_,
-and `Rietveld fitting / CW Neutron Powder fit for Yttrium-Iron Garnet
-<https://subversion.xray.aps.anl.gov/pyGSAS/Tutorials/CWNeutron/Neutron%20CW%20Powder%20Data.htm>`_
 
 To run this algorithm GSAS-II must be installed and it must be
 available for importing from the Mantid Python interpreter. This
 algorithm requires a modified version of GSAS-II. Please contact the
 developers for details.
 
-The main inputs required are an instrument definition parameter (in
-GSAS format, readable by GSAS-II), histogram data, and various
-parameters for the fitting/refinement process.  The algorithm only
-supports peaks with shape of type back-to-back exponential convoluted
-with pseudo-voigt (BackToBackExponentialPV). It is possible to enable
-the refinement of the different function parameters via several
-properties (RefineAlpha, RefineSigma, etc.).
+The methods "Pawley refinement" and "Rietveld refinement" of this
+algorithm are equivalent to the function "Calculate / Refine" from the
+main menu of the GSAS-II GUI.  The method "Peak fitting" is equivalent
+to the "Peak Fitting / Peak fit" action of the "Peaks List" window
+menu of the GSAS-II GUI.
 
-The algorithm produces an output table with as many rows as peaks have
-been found. The columns of the table give the parameters fitted,
-similarly to the information found in the "Peaks List" window of the
-GSAS-II GUI. These results are printed in the log messages as well.
+The main inputs required are histogram data, an instrument definition
+parameter (in GSAS format, readable by GSAS-II), and various
+parameters for the fitting/refinement process. Phase information is
+also required to use the Pawley and Rietveld refinement.
 
+The phase information must be provided in `CIF format
+(Crystallographic Information File)
+<https://en.wikipedia.org/wiki/Crystallographic_Information_File>`_.
 When phase information is available and the Rietveld/Pawley method is
 used the algorithm will output the lattice parameters in a table
 workspace. The values are given for the the full set of lattice
 parameters (three lattice constants, three angles, and volume: a, b,
-c, alpha, beta, gamma, volume). The GSAS-II Rietveld/Pawley refinement
-process writes this and additional information in an output file with
-the same name as the output GSAS-II project file but with extension
-".lst".
+c, alpha, beta, gamma, volume). The a,b, and c values are given in
+Angstrom. The angles are given in degrees, and the volume in
+Angstrom^3.
 
-The algorithm also provides goodness-of-fit estimates in the outputs
-"GoF" and "Rwp" (Toby 2008).
+The algorithm provides goodness-of-fit estimates in the outputs *GoF*
+and *Rwp* (Toby 2008). The Rwp is given as a percentage value.
+
+When Pawley refinement is selected as refinement method the flag for
+histogram scale factor refinement is disabled, as recommended in the
+GSAS-II documentation, as this cannot be refined simultaenously with
+the Pawley reflection intensities.
+
+The GSAS-II Rietveld/Pawley refinement process writes lattice
+parameters and extensive additional information in an output file with
+the same name as the output GSAS-II project file but with extension
+".lst". This is noted in a log message that specifies where the file
+has been written (next to the output project file).
+
+When fitting individual peaks using the peak fitting method (not using
+Rietveld/Pawley refinement), the algorithm only supports peaks with
+shape of type back-to-back exponential convoluted with pseudo-voigt
+(BackToBackExponentialPV). It is possible to enable the refinement of
+the different function parameters via several properties (RefineAlpha,
+RefineSigma, etc.). The fitted peak parameters are given in an output
+table with as many rows as peaks have been found. The columns of the
+table give the parameters fitted, similarly to the information found
+in the "Peaks List" window of the GSAS-II GUI. These results are
+printed in the log messages as well.
 
 For fitting single peaks, one at a time, see also :ref:`EnggFitPeaks
 <algm-EnggFitPeaks>`.
