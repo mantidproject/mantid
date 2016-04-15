@@ -33,6 +33,37 @@ public:
     TS_ASSERT_THROWS(HistogramX{binEdges}, std::logic_error);
   }
 
+  void test_assignment() {
+    const HistogramX src(Points(1));
+    HistogramX dest(Points(1));
+    TS_ASSERT_THROWS_NOTHING(dest = src);
+    const auto &constDest = static_cast<const HistogramX>(dest);
+    TS_ASSERT_EQUALS(&constDest[0], &src[0]);
+  }
+
+  void test_assignment_mutating() {
+    const HistogramX src(Points(1));
+    HistogramX dest(BinEdges(2));
+    TS_ASSERT_THROWS_NOTHING(dest = src);
+    const auto &constDest = static_cast<const HistogramX>(dest);
+    TS_ASSERT_EQUALS(&constDest[0], &src[0]);
+  }
+
+  void test_assignment_failures() {
+    HistogramX src1(Points(1));
+    HistogramX dest1(Points(2));
+    TS_ASSERT_THROWS(dest1 = src1, std::logic_error);
+    HistogramX src2(Points(1));
+    HistogramX dest2(BinEdges(3));
+    TS_ASSERT_THROWS(dest2 = src2, std::logic_error);
+    HistogramX src3(BinEdges(2));
+    HistogramX dest3(Points(2));
+    TS_ASSERT_THROWS(dest3 = src3, std::logic_error);
+    HistogramX src4(BinEdges(2));
+    HistogramX dest4(BinEdges(3));
+    TS_ASSERT_THROWS(dest4 = src4, std::logic_error);
+  }
+
   void test_points_from_edges() {
     BinEdges binEdges{0.1, 0.2, 0.4};
     const HistogramX histX(binEdges);
