@@ -70,9 +70,9 @@ include_directories (Kernel/inc)
 add_subdirectory (Kernel)
 set ( MANTIDLIBS ${MANTIDLIBS} Kernel )
 
-include_directories (Histogram/inc)
-add_subdirectory (Histogram)
-set ( MANTIDLIBS ${MANTIDLIBS} Histogram )
+include_directories (HistogramData/inc)
+add_subdirectory (HistogramData)
+set ( MANTIDLIBS ${MANTIDLIBS} HistogramData )
 
 include_directories (Geometry/inc)
 # muParser needed by Geometry and subsequent packages

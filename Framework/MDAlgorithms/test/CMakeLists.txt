@@ -21,7 +21,7 @@ if ( CXXTEST_FOUND )
             DataObjects
             CurveFitting
             Geometry
-            Histogram
+            HistogramData
             Kernel
             MDAlgorithms
             Nexus

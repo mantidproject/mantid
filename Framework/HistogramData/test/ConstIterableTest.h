@@ -1,13 +1,13 @@
-#ifndef MANTID_HISTOGRAM_CONSTITERABLETEST_H_
-#define MANTID_HISTOGRAM_CONSTITERABLETEST_H_
+#ifndef MANTID_HISTOGRAMDATA_CONSTITERABLETEST_H_
+#define MANTID_HISTOGRAMDATA_CONSTITERABLETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidHistogram/ConstIterable.h"
-#include "MantidHistogram/VectorOf.h"
+#include "MantidHistogramData/ConstIterable.h"
+#include "MantidHistogramData/VectorOf.h"
 
 using namespace Mantid;
-using namespace Histogram;
+using namespace HistogramData;
 
 class ConstIterableTester : public VectorOf<ConstIterableTester>,
                             public ConstIterable<ConstIterableTester> {
@@ -66,4 +66,4 @@ public:
   }
 };
 
-#endif /* MANTID_HISTOGRAM_CONSTITERABLETEST_H_ */
+#endif /* MANTID_HISTOGRAMDATA_CONSTITERABLETEST_H_ */

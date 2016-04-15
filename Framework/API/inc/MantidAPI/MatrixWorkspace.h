@@ -8,7 +8,7 @@
 #include <boost/scoped_ptr.hpp>
 #endif
 
-#include "MantidHistogram/Histogram.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -181,12 +181,12 @@ public:
   virtual const ISpectrum *getSpectrum(const size_t index) const = 0;
 
   /// Return reference to Histogram at the given workspace index.
-  Histogram::Histogram &histogram(const size_t index) {
+  HistogramData::Histogram &histogram(const size_t index) {
     return getSpectrum(index)->histogram();
   }
 
   /// Return const reference to Histogram at the given workspace index.
-  const Histogram::Histogram &histogram(const size_t index) const {
+  const HistogramData::Histogram &histogram(const size_t index) const {
     return getSpectrum(index)->histogram();
   }
 
@@ -357,7 +357,7 @@ public:
   /// to point-like)
   virtual bool isHistogramData() const;
 
-  void setXMode(Histogram::Histogram::XMode mode);
+  void setXMode(HistogramData::Histogram::XMode mode);
 
   /// Returns true if the workspace contains has common X bins
   virtual bool isCommonBins() const;

@@ -8,7 +8,7 @@
 #include <set>
 
 namespace Mantid {
-namespace Histogram {
+namespace HistogramData {
 class Histogram;
 }
 namespace API {
@@ -126,8 +126,8 @@ public:
   virtual bool hasDx() const;
   virtual void resetHasDx();
 
-  virtual const Histogram::Histogram &histogram() const = 0;
-  virtual Histogram::Histogram &histogram() = 0;
+  virtual const HistogramData::Histogram &histogram() const = 0;
+  virtual HistogramData::Histogram &histogram() = 0;
 
 protected:
   /// The spectrum number of this spectrum

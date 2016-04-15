@@ -1,15 +1,15 @@
-#ifndef MANTID_HISTOGRAM_HISTOGRAM_H_
-#define MANTID_HISTOGRAM_HISTOGRAM_H_
+#ifndef MANTID_HISTOGRAMDATA_HISTOGRAM_H_
+#define MANTID_HISTOGRAMDATA_HISTOGRAM_H_
 
-#include "MantidHistogram/DllConfig.h"
+#include "MantidHistogramData/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidHistogram/BinEdges.h"
-#include "MantidHistogram/Points.h"
+#include "MantidHistogramData/BinEdges.h"
+#include "MantidHistogramData/Points.h"
 
 #include <vector>
 
 namespace Mantid {
-namespace Histogram {
+namespace HistogramData {
 
 /** Histogram : TODO: DESCRIPTION
 
@@ -34,7 +34,7 @@ namespace Histogram {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_HISTOGRAM_DLL Histogram {
+class MANTID_HISTOGRAMDATA_DLL Histogram {
 private:
   // MantidVecPtr refX;
   BinEdges m_binEdges;
@@ -133,10 +133,10 @@ private:
   XMode m_xMode = XMode::Uninitialized;
 };
 
-MANTID_HISTOGRAM_DLL Histogram::XMode getHistogramXMode(size_t xLength,
-                                                        size_t yLength);
+MANTID_HISTOGRAMDATA_DLL Histogram::XMode getHistogramXMode(size_t xLength,
+                                                            size_t yLength);
 
-} // namespace Histogram
+} // namespace HistogramData
 } // namespace Mantid
 
-#endif /* MANTID_HISTOGRAM_HISTOGRAM_H_ */
+#endif /* MANTID_HISTOGRAMDATA_HISTOGRAM_H_ */

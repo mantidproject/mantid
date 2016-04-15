@@ -1,8 +1,8 @@
-#include "MantidHistogram/Points.h"
-#include "MantidHistogram/BinEdges.h"
+#include "MantidHistogramData/Points.h"
+#include "MantidHistogramData/BinEdges.h"
 
 namespace Mantid {
-namespace Histogram {
+namespace HistogramData {
 
 Points::Points(const BinEdges &edges) {
   if (!edges)
@@ -19,5 +19,5 @@ Points::Points(const BinEdges &edges) {
   }
 }
 
-} // namespace Histogram
+} // namespace HistogramData
 } // namespace Mantid

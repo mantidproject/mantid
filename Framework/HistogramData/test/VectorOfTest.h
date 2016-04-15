@@ -1,14 +1,14 @@
-#ifndef MANTID_HISTOGRAM_VECTOROFTEST_H_
-#define MANTID_HISTOGRAM_VECTOROFTEST_H_
+#ifndef MANTID_HISTOGRAMDATA_VECTOROFTEST_H_
+#define MANTID_HISTOGRAMDATA_VECTOROFTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/make_cow.h"
-#include "MantidHistogram/VectorOf.h"
-#include "MantidHistogram/ConstIterable.h"
+#include "MantidHistogramData/VectorOf.h"
+#include "MantidHistogramData/ConstIterable.h"
 
 using namespace Mantid;
-using namespace Histogram;
+using namespace HistogramData;
 using Mantid::Kernel::cow_ptr;
 using Mantid::Kernel::make_cow;
 
@@ -334,4 +334,4 @@ public:
   }
 };
 
-#endif /* MANTID_HISTOGRAM_VECTOROFTEST_H_ */
+#endif /* MANTID_HISTOGRAMDATA_VECTOROFTEST_H_ */

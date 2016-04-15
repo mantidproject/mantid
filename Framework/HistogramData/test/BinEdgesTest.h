@@ -1,13 +1,13 @@
-#ifndef MANTID_HISTOGRAM_BINEDGESTEST_H_
-#define MANTID_HISTOGRAM_BINEDGESTEST_H_
+#ifndef MANTID_HISTOGRAMDATA_BINEDGESTEST_H_
+#define MANTID_HISTOGRAMDATA_BINEDGESTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidHistogram/BinEdges.h"
-#include "MantidHistogram/Points.h"
+#include "MantidHistogramData/BinEdges.h"
+#include "MantidHistogramData/Points.h"
 
-using Mantid::Histogram::BinEdges;
-using Mantid::Histogram::Points;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Points;
 
 class BinEdgesTest : public CxxTest::TestSuite {
 public:
@@ -53,4 +53,4 @@ public:
   }
 };
 
-#endif /* MANTID_HISTOGRAM_BINEDGESTEST_H_ */
+#endif /* MANTID_HISTOGRAMDATA_BINEDGESTEST_H_ */

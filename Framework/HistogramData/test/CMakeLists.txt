@@ -1,16 +1,16 @@
 if ( CXXTEST_FOUND )
   include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
-  cxxtest_add_test ( HistogramTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-  target_link_libraries( HistogramTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
-    Histogram
+  cxxtest_add_test ( HistogramDataTest ${TEST_FILES} ${GMOCK_TEST_FILES})
+  target_link_libraries( HistogramDataTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+    HistogramData
     Kernel
     ${Boost_LIBRARIES}
     ${POCO_LIBRARIES}
     ${GMOCK_LIBRARIES}
     ${GTEST_LIBRARIES} )
   
-  add_dependencies ( FrameworkTests HistogramTest )
+  add_dependencies ( FrameworkTests HistogramDataTest )
   # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET HistogramTest PROPERTY FOLDER "UnitTests" )
+  set_property ( TARGET HistogramDataTest PROPERTY FOLDER "UnitTests" )
 endif ()

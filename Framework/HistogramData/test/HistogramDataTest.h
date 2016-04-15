@@ -1,12 +1,12 @@
-#ifndef MANTID_HISTOGRAM_HISTOGRAMDATATEST_H_
-#define MANTID_HISTOGRAM_HISTOGRAMDATATEST_H_
+#ifndef MANTID_HISTOGRAMDATA_HISTOGRAMDATATEST_H_
+#define MANTID_HISTOGRAMDATA_HISTOGRAMDATATEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidHistogram/HistogramData.h"
+#include "MantidHistogramData/HistogramData.h"
 #include "MantidKernel/make_cow.h"
 
-using Mantid::Histogram::HistogramData;
+using Mantid::HistogramData::HistogramData;
 using Mantid::Kernel::make_cow;
 
 struct HistogramDataTester : public HistogramData<HistogramDataTester> {
@@ -60,4 +60,4 @@ public:
   }
 };
 
-#endif /* MANTID_HISTOGRAM_HISTOGRAMDATATEST_H_ */
+#endif /* MANTID_HISTOGRAMDATA_HISTOGRAMDATATEST_H_ */

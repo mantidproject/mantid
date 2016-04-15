@@ -1,7 +1,7 @@
-#include "MantidHistogram/HistogramX.h"
+#include "MantidHistogramData/HistogramX.h"
 
 namespace Mantid {
-namespace Histogram {
+namespace HistogramData {
 
 HistogramX::HistogramX(const Points &points)
     : HistogramData<HistogramX>(points.cowData()), m_xMode(XMode::Points) {}
@@ -46,5 +46,5 @@ void HistogramX::checkSize(const BinEdges &binEdges) const {
     throw std::logic_error("HistogramX: size mismatch of BinEdges\n");
 }
 
-} // namespace Histogram
+} // namespace HistogramData
 } // namespace Mantid
