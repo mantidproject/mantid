@@ -15,6 +15,7 @@
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
+using namespace Mantid::Kernel::Strings;
 using namespace Mantid::API;
 using namespace Mantid::PhysicalConstants;
 std::map<int, double> detScale = {{17, 1.115862021},
@@ -107,6 +108,11 @@ void SaveHKL::init() {
   declareProperty("DirectionCosines", false,
                   "Extra columns (22 total) in file if true for direction cosines.\n"
                   "If false, original 14 columns (default).");
+  const std::vector<std::string> exts{".mat", ".ub", ".txt"};
+  declareProperty(Kernel::make_unique<FileProperty>("UBFilename", "",
+                                                    FileProperty::OptionalLoad, exts),
+                  "Path to an ISAW-style UB matrix text file only needed for DirectionCosines.");
+
 }
 
 //----------------------------------------------------------------------------------------------
@@ -133,18 +139,30 @@ void SaveHKL::exec() {
   int decimalHKL = getProperty("HKLDecimalPlaces");
   bool cosines = getProperty("DirectionCosines");
   Mantid::Geometry::OrientedLattice lat;
-  Kernel::DblMatrix UB;
+  Kernel::DblMatrix UB(3,3);
   if (cosines) {
     // Find OrientedLattice
-    IAlgorithm_sptr childAlg = createChildAlgorithm("FindUBUsingIndexedPeaks");
-    childAlg->setProperty<PeaksWorkspace_sptr>("PeaksWorkspace", ws);
-    childAlg->executeAsChildAlg();
-    lat = ws->mutableSample().getOrientedLattice();
-    UB = lat.getUB();
+    std::string fileUB = getProperty("UBFilename");
+    // Open the file
+    std::ifstream in(fileUB.c_str());
+    std::string s;
+    double val;
+
+    // Read the ISAW UB matrix
+    for (size_t row = 0; row < 3; row++) {
+      for (size_t col = 0; col < 3; col++) {
+        s = getWord(in, true);
+        if (!convert(s, val))
+          throw std::runtime_error(
+              "The string '" + s +
+              "' in the file was not understood as a number.");
+        UB[row][col] = val;
+      }
+      readToEndOfLine(in, true);
+    }
   }
 
   // Sequence and run number
-  int seqNum = 1;
   int bankSequence = 0;
   int runSequence = 0;
   // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
@@ -208,8 +226,8 @@ void SaveHKL::exec() {
     Strings::convert(bankName, bank);
 
     // Save in the map
-    if (type.compare(0, 2, "Ba") == 0) runMap[bank][run].push_back(i);
-    else runMap[run][bank].push_back(i);
+    if (type.compare(0, 2, "Ru") == 0) runMap[run][bank].push_back(i);
+    else runMap[bank][run].push_back(i);
     // Track unique bank numbers
     uniqueBanks.insert(bank);
     uniqueRuns.insert(run);
@@ -477,44 +495,57 @@ void SaveHKL::exec() {
           << p.getSigmaIntensity();
     }
     if (type.compare(0, 2, "Ba") == 0)
-      out << std::setw(4) << bankSequence;
+      out << std::setw(4) << bankSequence + 1;
     else
-      out << std::setw(4) << runSequence;
+      out << std::setw(4) << runSequence + 1;
 
     if (cosines) {
       out << std::setw(8) << std::fixed << std::setprecision(5) << lambda;
       out << std::setw(8) << std::fixed << std::setprecision(5) << tbar;
-      // Determine goniometer angles by calculating from the goniometer matrix
-      // of a peak in the list
-     /* Goniometer gon(p.getGoniometerMatrix());
-      std::vector<double> angles = gon.getEulerAngles("yzy");
+      Kernel::DblMatrix oriented = p.getGoniometerMatrix();
+      Kernel::DblMatrix orientedIPNS(3,3);
+      V3D dir_cos_1, dir_cos_2;
 
-      double phi = angles[2];
-      double chi = angles[1];
-      double omega = angles[0];*/
-      Kernel::DblMatrix mat = p.getGoniometerMatrix() * UB;
+      orientedIPNS[0][0] = oriented[0][0];
+      orientedIPNS[0][1] = oriented[0][2];
+      orientedIPNS[0][2] = oriented[0][1];
+      orientedIPNS[1][0] = oriented[2][0];
+      orientedIPNS[1][1] = oriented[2][2];
+      orientedIPNS[1][2] = oriented[2][1];
+      orientedIPNS[2][0] = oriented[1][0];
+      orientedIPNS[2][1] = oriented[1][2];
+      orientedIPNS[2][2] = oriented[1][1];
+      Kernel::DblMatrix orientedUB = UB * orientedIPNS;
+      double l2 = p.getL2();
+      V3D R_reverse_incident = V3D(-l2, 0., 0.);
+      V3D R_IPNS;
+      double twoth = p.getScattering();
+      // This is the scattered beam direction
+      V3D dir = p.getDetPos() - inst->getSample()->getPos();
 
-      lat.setUB(mat);
+      // "Azimuthal" angle: project the scattered beam direction onto the XY
+      // plane,
+      // and calculate the angle between that and the +X axis (right-handed)
+      double az = atan2(dir.Y(), dir.X());
+      R_IPNS[0] = std::cos(twoth) * l2;
+      R_IPNS[1] = std::cos(az) * std::sin(twoth) * l2;
+      R_IPNS[2] = std::sin(az) * std::sin(twoth) * l2;
 
-      out << std::setw(9) << std::fixed << std::setprecision(4) << lat.astar();
-      out << std::setw(9) << std::fixed << std::setprecision(4) << lat.bstar();
-      out << std::setw(9) << std::fixed << std::setprecision(4) << lat.cstar();
+      for (int k = 0; k < 3; ++k) {
+        V3D q_abc_star = V3D(orientedUB[k][0],orientedUB[k][1],orientedUB[k][2]);
+        double length_q_abc_star =q_abc_star.norm();
+        dir_cos_1[k] = R_reverse_incident.scalar_prod(q_abc_star) / (l2 * length_q_abc_star);
+        dir_cos_2[k] = R_IPNS.scalar_prod(q_abc_star) / (l2 * length_q_abc_star);
+      }
 
-/*# Begin loop through a-star, b-star and c-star
-dir_cos_2 = [ 0, 0, 0 ]   # dir_cos_2 is the scattered beam with a*, b*, c*
-for i in range(3):
-    abc = [ 0, 0, 0 ]
-    abc[i] = 1
-    q_abc_star = huq( abc[0], abc[1], abc[2], newmat )
-    len_q_abc_star = math.sqrt( numpy.dot( q_abc_star, q_abc_star) )
-    dir_cos_2[i] = numpy.dot( R_IPNS, q_abc_star ) / ( L2 * len_q_abc_star )*/
-
-      for (int i = 0; i < 3; ++i)
-      out << std::setw(9) << std::fixed << std::setprecision(4) << 0.0;
+    for (int k = 0; k < 3; ++k) {
+        out << std::setw(9) << std::fixed << std::setprecision(5) << dir_cos_1[k];
+        out << std::setw(9) << std::fixed << std::setprecision(5) << dir_cos_2[k];
+      }
 
       out << std::setw(6) << run;
 
-      out << std::setw(6) << wi + seqNum;
+      out << std::setw(6) << wi + 1;
 
       out << std::setw(7) << std::fixed << std::setprecision(4) << transmission;
 
@@ -534,7 +565,7 @@ for i in range(3):
 
       out << std::setw(7) << run;
 
-      out << std::setw(7) << wi + seqNum;
+      out << std::setw(7) << wi + 1;
 
       out << std::setw(7) << std::fixed << std::setprecision(4) << transmission;
 
