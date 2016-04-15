@@ -1,3 +1,6 @@
+# pylint: disable=anomalous-backslash-in-string, global-variable-undefined, global-variable-not-assigned
+# pylint: disable=invalid-name, too-many-arguments, unidiomatic-typecheck, too-many-branches, redefined-builtin
+
 from mantid.simpleapi import *
 import numpy as n
 import os.path
@@ -49,7 +52,7 @@ def PEARL_startup(usern="matt", thiscycle='11_1'):
     cycle = thiscycle
     instver = "new2"
     # userdataprocessed is the data output directory 
-    userdataprocessed = "P:\users\\" + "Cycle_" + thiscycle + "\\" + usern + "\\"
+    userdataprocessed = "P:\\users\\" + "Cycle_" + thiscycle + "\\" + usern + "\\"
     # sys.path.append(userdataprocessed)
     # userdataprocessed="C:\PEARL\\"
     # PEARL_setuserdir(directory=userdataprocessed)
@@ -103,7 +106,7 @@ def PEARL_getcycle(number):
 
     return
 
-
+# pylint: disable=unused-variable, too-many-locals, too-many-statements, undefined-loop-variable, redefined-outer-name
 def PEARL_getcalibfiles():
     global calfile
     global groupfile
@@ -131,7 +134,7 @@ def pearl_set_currentdatadir(directory = "I:\\"):
     return
 
 # sets the user data output directory
-def pearl_set_userdataoutput_dir(directory = "P:\users\\MantidOutput\\"):
+def pearl_set_userdataoutput_dir(directory = "P:\\users\\MantidOutput\\"):
     global userdataprocessed
     userdataprocessed = directory
     print "Set userdataprocessed directory to ", directory
@@ -865,8 +868,8 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     wvan = "wvan"
     wempty = "wempty"
     print "Creating ", nvanfile
-    PEARL_read(van, "raw", wvan)
-    PEARL_read(empty, "raw", wempty)
+    PEARL_read(van, ext, wvan)
+    PEARL_read(empty, ext, wempty)
     Minus(LHSWorkspace=wvan, RHSWorkspace=wempty, OutputWorkspace=wvan)
     print "read van and empty"
     if (debug != True):

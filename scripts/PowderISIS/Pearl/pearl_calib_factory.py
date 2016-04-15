@@ -1,3 +1,5 @@
+# pylint: disable=too-many-branches,too-many-statements
+
 from mantid.simpleapi import *
 
 
