@@ -65,13 +65,13 @@ The phase information must be provided in `CIF format
 When phase information is available and the Rietveld/Pawley method is
 used the algorithm will output the lattice parameters in a table
 workspace. The values are given for the the full set of lattice
-parameters (three lattice constants, three angles, and volume: a, b,
-c, alpha, beta, gamma, volume). The a,b, and c values are given in
-Angstrom. The angles are given in degrees, and the volume in
-Angstrom^3.
+parameters (three lattice constants, three angles, and volume in this
+sequence: a, b, c, alpha, beta, gamma, volume). The a,b, and c values
+are given in Angstrom. The angles are given in degrees, and the volume
+in Angstrom^3.
 
 The algorithm provides goodness-of-fit estimates in the outputs *GoF*
-and *Rwp* (Toby 2008). The Rwp is given as a percentage value.
+and *Rwp* (Toby 2008). The *Rwp* is given as a percentage value.
 
 When Pawley refinement is selected as refinement method the flag for
 histogram scale factor refinement is disabled, as recommended in the
@@ -98,7 +98,7 @@ printed in the log messages as well.
 For fitting single peaks, one at a time, see also :ref:`EnggFitPeaks
 <algm-EnggFitPeaks>`.
 
-References:
+*References*:
 
 Le Bail, A (2005). "Whole Powder Pattern Decomposition Methods and
 Applications: A Retrospection". Powder Diffraction 20(4): 316-326.

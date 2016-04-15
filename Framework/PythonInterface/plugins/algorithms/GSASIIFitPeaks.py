@@ -2,6 +2,8 @@ from mantid.api import AlgorithmFactory, ITableWorkspaceProperty, FileAction, Fi
     MatrixWorkspaceProperty, Progress, PropertyMode, PythonAlgorithm
 from mantid.kernel import Direction, FloatArrayProperty, Property, StringListValidator
 
+# Too many properties!
+#pylint: disable=too-many-instance-attributes
 class GSASIIFitPeaks(PythonAlgorithm):
     """
     Mantid algorithm to use the powder diffraction and related data
@@ -25,70 +27,71 @@ class GSASIIFitPeaks(PythonAlgorithm):
         """
         Override required for Mantid algorithms
         """
-        return ("Uses GSAS-II (powder diffraction module) to fit peaks to one "
+        return ("Uses GSAS-II (powder diffraction and structure modules) to fit peaks to one "
                 "or more spectra from a workspace")
 
-    # Too many properties!
-    #pylint: disable=too-many-locals
-    def PyInit(self):
-        PROP_INPUT_WORKSPACE = 'InputWorkspace'
-        PROP_WORKSPACE_INDEX = 'WorkspaceIndex'
-        PROP_INSTR_FILE = 'InstrumentFile'
-        PROP_PHASE_INFO_FILE = 'PhaseInfoFile'
-        PROP_PATH_TO_GSASII = 'PathToGSASII'
-        PROP_PAWLEY_DMIN = "PawleyDmin"
-        PROP_PAWLEY_NEG_WEIGHT = "PawleyNegativeWeight"
-        PROP_BACKGROUND_TYPE = 'BackgroundType'
-        PROP_MINX = 'MinX'
-        PROP_MAXX = 'MaxX'
-        PROP_EXPECTED_PEAKS = "ExpectedPeaks"
-        PROP_EXPECTED_PEAKS_FROM_FILE = "ExpectedPeaksFromFile"
-        PROP_OUT_LATTICE_PARAMS = 'LatticeParameters'
-        PROP_OUT_FITTED_PARAMS = 'FittedPeakParameters'
-        PROP_OUT_PROJECT_FILE = 'SaveGSASIIProjectFile'
-        PROP_OUT_GOF = 'GoF'
-        PROP_OUT_RWP = 'Rwp'
-        PROP_REFINE_CENTER = 'RefineCenter'
-        PROP_REFINE_INTENSITY = 'RefineIntensity'
-        PROP_REFINE_ALPHA = 'RefineAlpha'
-        PROP_REFINE_BETA = 'RefineBeta'
-        PROP_REFINE_SIGMA = 'RefineSigma'
-        PROP_REFINE_GAMMA = 'RefineGamma'
+    def __init__(self):
+        PythonAlgorithm.__init__(self)
+        self.PROP_INPUT_WORKSPACE = 'InputWorkspace'
+        self.PROP_WORKSPACE_INDEX = 'WorkspaceIndex'
+        self.PROP_INSTR_FILE = 'InstrumentFile'
+        self.PROP_PHASE_INFO_FILE = 'PhaseInfoFile'
+        self.PROP_PATH_TO_GSASII = 'PathToGSASII'
+        self.PROP_PAWLEY_DMIN = "PawleyDmin"
+        self.PROP_PAWLEY_NEG_WEIGHT = "PawleyNegativeWeight"
+        self.PROP_BACKGROUND_TYPE = 'BackgroundType'
+        self.PROP_MINX = 'MinX'
+        self.PROP_MAXX = 'MaxX'
+        self.PROP_EXPECTED_PEAKS = "ExpectedPeaks"
+        self.PROP_EXPECTED_PEAKS_FROM_FILE = "ExpectedPeaksFromFile"
+        self.PROP_OUT_LATTICE_PARAMS = 'LatticeParameters'
+        self.PROP_OUT_FITTED_PARAMS = 'FittedPeakParameters'
+        self.PROP_OUT_PROJECT_FILE = 'SaveGSASIIProjectFile'
+        self.PROP_OUT_GOF = 'GoF'
+        self.PROP_OUT_RWP = 'Rwp'
+        self.PROP_REFINE_CENTER = 'RefineCenter'
+        self.PROP_REFINE_INTENSITY = 'RefineIntensity'
+        self.PROP_REFINE_ALPHA = 'RefineAlpha'
+        self.PROP_REFINE_BETA = 'RefineBeta'
+        self.PROP_REFINE_SIGMA = 'RefineSigma'
+        self.PROP_REFINE_GAMMA = 'RefineGamma'
+        self.PROP_METHOD = "Method"
 
-        PROP_METHOD = "Method"
+    def PyInit(self):
+
         refine_methods = ["Pawley refinement", "Rietveld refinement", "Peak fitting"]
-        self.declareProperty(PROP_METHOD, defaultValue = refine_methods[0],
+        self.declareProperty(self.PROP_METHOD, defaultValue = refine_methods[0],
                              validator = StringListValidator(refine_methods),
                              doc = 'Rietveld corresponds to the Calculate/Refine option of the '
                              'GSAS-II GUI. Peak fitting is single peak (does not use phase '
                              'information  and corresponds to the option '
                              'Peaks List/Peak Fitting/PeakFitType of the GSAS-II GUI. The '
                              'third alternative requires a list of peaks which can be bassed in '
-                             'the properties ' + PROP_EXPECTED_PEAKS + ' and ' +
-                             PROP_EXPECTED_PEAKS_FROM_FILE + '.')
+                             'the properties ' + self.PROP_EXPECTED_PEAKS + ' and ' +
+                             self.PROP_EXPECTED_PEAKS_FROM_FILE + '.')
 
-        self.declareProperty(MatrixWorkspaceProperty(PROP_INPUT_WORKSPACE, '',
+        self.declareProperty(MatrixWorkspaceProperty(self.PROP_INPUT_WORKSPACE, '',
                                                      optional = PropertyMode.Mandatory,
                                                      direction = Direction.Input),
                              doc = 'Workspace with spectra to fit peaks. ToF is expected X unit.')
 
-        self.declareProperty(PROP_WORKSPACE_INDEX, 0,
+        self.declareProperty(self.PROP_WORKSPACE_INDEX, 0,
                              doc = 'Index of the workspace for the spectrum to fit. By default '
                              'the first spectrum will be processed (that is, the only spectrum '
                              'for focussed data workspaces.', direction = Direction.Input)
 
 
-        self.declareProperty(FileProperty(name = PROP_INSTR_FILE, defaultValue = '',
+        self.declareProperty(FileProperty(name = self.PROP_INSTR_FILE, defaultValue = '',
                                           action = FileAction.Load,
                                           extensions = [".par", ".prm", ".ipar", ".iparm"]),
                              doc = 'File with instrument parameters (in GSAS format).')
 
         # Phase information: TODO
-        self.declareProperty(FileProperty(name = PROP_PHASE_INFO_FILE, defaultValue = '',
+        self.declareProperty(FileProperty(name = self.PROP_PHASE_INFO_FILE, defaultValue = '',
                                           action = FileAction.OptionalLoad, extensions = [".cif"]),
                              doc = 'File with phase information for the material.')
 
-        self.declareProperty(FileProperty(name = PROP_PATH_TO_GSASII, defaultValue = '',
+        self.declareProperty(FileProperty(name = self.PROP_PATH_TO_GSASII, defaultValue = '',
                                           action = FileAction.OptionalDirectory),
                              doc = 'Optional path to GSAS-II software installation. '
                              'This will be used to import several Python modules from GSAS-II.')
@@ -102,132 +105,134 @@ class GSASIIFitPeaks(PythonAlgorithm):
                              doc = 'Weighted profile R-factor (Rwp) discrepancy index for the '
                              'goodness of fit.')
 
-        self.declareProperty(ITableWorkspaceProperty(PROP_OUT_LATTICE_PARAMS, "", Direction.Output),
+        self.declareProperty(ITableWorkspaceProperty(self.PROP_OUT_LATTICE_PARAMS, "", Direction.Output),
                              doc = 'Table to output the the lattice parameters (refined).')
 
-        self.declareProperty(PROP_OUT_FITTED_PARAMS, "", direction=Direction.Input,
+        self.declareProperty(self.PROP_OUT_FITTED_PARAMS, "", direction=Direction.Input,
                              doc = "Name for an (output) table of fitted parameters. This is used "
                              "with the peak fitting method. The table will have one row per peak "
                              "found.")
 
-        self.declareProperty(FileProperty(name = PROP_OUT_PROJECT_FILE, defaultValue = '',
+        self.declareProperty(FileProperty(name = self.PROP_OUT_PROJECT_FILE, defaultValue = '',
                                           direction = Direction.Input,
                                           action = FileAction.OptionalSave, extensions = [".gpx"]),
                              doc = 'GSAS-II project file (that can be openened in the GSAS-II GUI).')
 
-        self.setPropertyGroup(PROP_OUT_GOF, GRP_RESULTS)
-        self.setPropertyGroup(PROP_OUT_RWP, GRP_RESULTS)
-        self.setPropertyGroup(PROP_OUT_LATTICE_PARAMS, GRP_RESULTS)
-        self.setPropertyGroup(PROP_OUT_FITTED_PARAMS, GRP_RESULTS)
-        self.setPropertyGroup(PROP_OUT_PROJECT_FILE, GRP_RESULTS)
+        self.setPropertyGroup(self.PROP_OUT_GOF, GRP_RESULTS)
+        self.setPropertyGroup(self.PROP_OUT_RWP, GRP_RESULTS)
+        self.setPropertyGroup(self.PROP_OUT_LATTICE_PARAMS, GRP_RESULTS)
+        self.setPropertyGroup(self.PROP_OUT_FITTED_PARAMS, GRP_RESULTS)
+        self.setPropertyGroup(self.PROP_OUT_PROJECT_FILE, GRP_RESULTS)
 
         GRP_FITTING_OPTS = "Fitting options"
         background_types = ["Chebyshev", "None"]
-        self.declareProperty(PROP_BACKGROUND_TYPE, defaultValue = background_types[0],
+        self.declareProperty(self.PROP_BACKGROUND_TYPE, defaultValue = background_types[0],
                              validator = StringListValidator(background_types),
                              doc = 'Type of background for the peak fitting. Currently only the '
                              'default option of GSAS-II (chebyshev) is supported.')
 
-        self.declareProperty(PROP_MINX, Property.EMPTY_DBL,
+        self.declareProperty(self.PROP_MINX, Property.EMPTY_DBL,
                              direction = Direction.Input,
                              doc = "Minimum x value for the fitting, in the same units as the input "
                              "workspace (TOF). Defines the range or domain of fitting together "
-                             "with the property {0}. ".format(PROP_MAXX))
+                             "with the property {0}. Leave empty to use the whole range".
+                             format(self.PROP_MAXX))
 
-        self.declareProperty(PROP_MAXX, Property.EMPTY_DBL,
+        self.declareProperty(self.PROP_MAXX, Property.EMPTY_DBL,
                              direction = Direction.Input,
                              doc = "Maximum x value for the fitting, in the same units as the input "
                              "workspace (TOF). Defines the range or domain of fitting together "
-                             "with the property {0}.".format(PROP_MINX))
+                             "with the property {0}. Leave empty to use the whole range".
+                             format(self.PROP_MINX))
 
-        self.setPropertyGroup(PROP_BACKGROUND_TYPE, GRP_FITTING_OPTS)
-        self.setPropertyGroup(PROP_MINX, GRP_FITTING_OPTS)
-        self.setPropertyGroup(PROP_MAXX, GRP_FITTING_OPTS)
+        self.setPropertyGroup(self.PROP_BACKGROUND_TYPE, GRP_FITTING_OPTS)
+        self.setPropertyGroup(self.PROP_MINX, GRP_FITTING_OPTS)
+        self.setPropertyGroup(self.PROP_MAXX, GRP_FITTING_OPTS)
 
 
         GRP_PAWLEY_OPTIONS = "Pawley refinement options"
 
-        self.declareProperty(PROP_PAWLEY_DMIN, 1.0, direction = Direction.Input,
+        self.declareProperty(self.PROP_PAWLEY_DMIN, 1.0, direction = Direction.Input,
                              doc = "For Pawley refiment. As defined in GSAS-II, the minimum d-spacing "
                              "to be used in a Pawley refinement. Please refer to the GSAS-II "
                              "documentation for full details.")
 
-        self.declareProperty(PROP_PAWLEY_NEG_WEIGHT, 0.0, direction = Direction.Input,
+        self.declareProperty(self.PROP_PAWLEY_NEG_WEIGHT, 0.0, direction = Direction.Input,
                              doc = "For Pawley refinement. As defined in GSAS-II, the weight for a "
                              "penalty function applied during a Pawley refinement on resulting negative "
                              "intensities. Please refer to the GSAS-II documentation for full details.")
 
-        self.setPropertyGroup(PROP_PAWLEY_DMIN, GRP_PAWLEY_OPTIONS)
-        self.setPropertyGroup(PROP_PAWLEY_NEG_WEIGHT, GRP_PAWLEY_OPTIONS)
+        self.setPropertyGroup(self.PROP_PAWLEY_DMIN, GRP_PAWLEY_OPTIONS)
+        self.setPropertyGroup(self.PROP_PAWLEY_NEG_WEIGHT, GRP_PAWLEY_OPTIONS)
 
         GRP_PEAKS = "Expected peaks (phase information takes precedence)"
 
-        self.declareProperty(FloatArrayProperty(PROP_EXPECTED_PEAKS, [],
+        self.declareProperty(FloatArrayProperty(self.PROP_EXPECTED_PEAKS, [],
                                                 direction = Direction.Input),
                              "A list of dSpacing values for the peak centers. These will be "
                              "converted into TOF to find expected peaks.")
 
-        self.declareProperty(FileProperty(name = PROP_EXPECTED_PEAKS_FROM_FILE, defaultValue = "",
+        self.declareProperty(FileProperty(name = self.PROP_EXPECTED_PEAKS_FROM_FILE, defaultValue = "",
                                           action = FileAction.OptionalLoad, extensions = [".csv"],
                                           direction = Direction.Input),
                              doc = "Load from this file a list of dSpacing values to be converted "
-                             "into TOF . This takes precedence over '" + PROP_EXPECTED_PEAKS + "' "
+                             "into TOF . This takes precedence over '" + self.PROP_EXPECTED_PEAKS + "' "
                              "when both options are given.")
 
-        self.setPropertyGroup(PROP_EXPECTED_PEAKS, GRP_PEAKS)
-        self.setPropertyGroup(PROP_EXPECTED_PEAKS_FROM_FILE, GRP_PEAKS)
+        self.setPropertyGroup(self.PROP_EXPECTED_PEAKS, GRP_PEAKS)
+        self.setPropertyGroup(self.PROP_EXPECTED_PEAKS_FROM_FILE, GRP_PEAKS)
 
         GRP_PARAMS = "Refinement of peak parameters"
 
-        self.declareProperty(name = PROP_REFINE_CENTER, defaultValue = False,
+        self.declareProperty(name = self.PROP_REFINE_CENTER, defaultValue = False,
                              doc = 'Whether to refine the peak centers.')
 
-        self.declareProperty(name = PROP_REFINE_INTENSITY, defaultValue = False,
+        self.declareProperty(name = self.PROP_REFINE_INTENSITY, defaultValue = False,
                              doc = 'Whether to refine the peak function intensity parameters '
                              '(assuming a shape of type back-to-back exponential convoluted '
                              'with pseudo-voigt (BackToBackExponentialPV).')
 
-        self.declareProperty(name = PROP_REFINE_ALPHA, defaultValue = False,
+        self.declareProperty(name = self.PROP_REFINE_ALPHA, defaultValue = False,
                              doc = 'Whether to refine the peak function beta parameters '
                              '(assuming a BackToBackExponentialPV peak shape.')
 
-        self.declareProperty(name = PROP_REFINE_BETA, defaultValue = False,
+        self.declareProperty(name = self.PROP_REFINE_BETA, defaultValue = False,
                              doc = 'Whether to refine the peak function beta parameters '
                              '(assuming a BackToBackExponentialPV peak shape.')
 
-        self.declareProperty(name = PROP_REFINE_SIGMA, defaultValue = True,
+        self.declareProperty(name = self.PROP_REFINE_SIGMA, defaultValue = True,
                              doc = 'Whether to refine the peak function sigma parameters '
                              '(assuming a BackToBackExponentialPV peak shape.')
 
-        self.declareProperty(name = PROP_REFINE_GAMMA, defaultValue = True,
+        self.declareProperty(name = self.PROP_REFINE_GAMMA, defaultValue = True,
                              doc = 'Whether to refine the peak function gamma parameters '
                              '(assuming a BackToBackExponentialPV peak shape.')
 
-        self.setPropertyGroup(PROP_REFINE_CENTER, GRP_PARAMS)
-        self.setPropertyGroup(PROP_REFINE_INTENSITY, GRP_PARAMS)
-        self.setPropertyGroup(PROP_REFINE_ALPHA, GRP_PARAMS)
-        self.setPropertyGroup(PROP_REFINE_BETA, GRP_PARAMS)
-        self.setPropertyGroup(PROP_REFINE_SIGMA, GRP_PARAMS)
-        self.setPropertyGroup(PROP_REFINE_GAMMA, GRP_PARAMS)
+        self.setPropertyGroup(self.PROP_REFINE_CENTER, GRP_PARAMS)
+        self.setPropertyGroup(self.PROP_REFINE_INTENSITY, GRP_PARAMS)
+        self.setPropertyGroup(self.PROP_REFINE_ALPHA, GRP_PARAMS)
+        self.setPropertyGroup(self.PROP_REFINE_BETA, GRP_PARAMS)
+        self.setPropertyGroup(self.PROP_REFINE_SIGMA, GRP_PARAMS)
+        self.setPropertyGroup(self.PROP_REFINE_GAMMA, GRP_PARAMS)
 
     def validateInputs(self):
         # This could check if the required inputs for different methods have been provided
-        pass
+        return {}
 
     def PyExec(self):
         prog = Progress(self, start=0, end=1, nreports=5)
 
         prog.report('Importing GSAS-II ')
-        self._import_gsas2(PROP_PATH_TO_GSASII)
+        self._import_gsas2(self.getProperty(self.PROP_PATH_TO_GSASII).value)
 
         prog.report('Initializing GSAS-II ')
         gs2 = self._init_gs2()
 
 
         prog.report('Loading and preparing input data')
-        in_wks = self.getProperty(PROP_INPUT_WORKSPACE).value
-        in_idx = self.getProperty(PROP_WORKSPACE_INDEX).value
-        inst_file = self.getProperty(PROP_INSTR_FILE).value
+        in_wks = self.getProperty(self.PROP_INPUT_WORKSPACE).value
+        in_idx = self.getProperty(self.PROP_WORKSPACE_INDEX).value
+        inst_file = self.getProperty(self.PROP_INSTR_FILE).value
 
         if in_wks.getNumberHistograms() > 1 or 0 != in_idx:
             focused_wks = sapi.ExtractSpectra(InputWorkspace = in_wks, StartWorkspaceIndex = in_idx,
@@ -244,7 +249,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
                                                                                         background_def))
 
         prog.report('Producing outputs')
-        out_proj_file = self.getProperty(PROP_OUT_PROJECT_FILE).value
+        out_proj_file = self.getProperty(self.PROP_OUT_PROJECT_FILE).value
         if proj_file:
             self._save_gsas2_project(gs2, gs2_rd, out_proj_file)
             file_lattice_params = self._parse_lattice_params_refined(out_proj_file)
@@ -279,7 +284,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
         limits = self._build_add_limits(gs2_rd)
         self.log().information("Fitting loaded histogram data, with limits: {0}".format(limits))
 
-        # PROP_PHASE_INFO_FILE - phase information into rd, this is loaded elsewhere when
+        # self.PROP_PHASE_INFO_FILE - phase information into rd, this is loaded elsewhere when
         # doing Pawley/Rietveld refinement
 
         # Assumes peaks of type back-to-back exponential convoluted with pseudo-Voigt
@@ -303,7 +308,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
         @return a tuple with 1) the two goodness-of-fit estimates, 2) lattice params (list with
         7 values), 3) parameters fitted (when doing peak fitting)
         """
-        method = self.getProperty(PROP_METHOD).value
+        method = self.getProperty(self.PROP_METHOD).value
         gof_estimates = [0, 0]
         lattice_params = 7*[0.0]
         parm_dict = {}
@@ -333,7 +338,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
         7 values)
         """
         general_phase_data = self._load_prepare_phase_data(gs2, gs2_rd,
-                                                           getProperty(PROP_PHASE_INFO_FILE).value)
+                                                           self.getProperty(self.PROP_PHASE_INFO_FILE).value)
 
         # Enable / tick on "Refine unit cell"
         general_phase_data['Cell'][0] = True
@@ -346,11 +351,11 @@ class GSASIIFitPeaks(PythonAlgorithm):
             # Flag for Pawley intensity extraction (bool)
             general_phase_data['doPawley'] = True
             # maximum Q (as d-space) to use for Pawley extraction
-            general_phase_data['Pawley dmin'] = self.getProperty(PROP_PAWLEY_DMIN).value
+            general_phase_data['Pawley dmin'] = self.getProperty(self.PROP_PAWLEY_DMIN).value
             # Restraint value for negative Pawley intensities
-            general_phase_data['Pawley neg wt'] = self.getProperty(PROP_PAWLEY_NEG_WEIGHT).value
+            general_phase_data['Pawley neg wt'] = self.getProperty(self.PROP_PAWLEY_NEG_WEIGHT).value
 
-        proj_filename = self.getProperty(PROP_OUT_PROJECT_FILE).value
+        proj_filename = self.getProperty(self.PROP_OUT_PROJECT_FILE).value
         self.log().notice("Saving GSAS-II project file before starting refinement, into: {0}".
                           format(proj_filename))
 
@@ -487,24 +492,35 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
     def _import_gsas2(self, additional_path_prop):
         try:
-            import GSASII
+
+            import sys
+            import os
+            if additional_path_prop:
+                sys.path.append(additional_path_prop)
+                os.chdir(additional_path_prop)
+            self._import_global("GSASII")
             # It will be needed for save project
-            import GSASIIIO
+            self._import_global("GSASIIIO")
             # For powder diffraction data fitting routines
-            import GSASIIpwd
-            import GSASIIgrid
+            self._import_global("GSASIIpwd")
+            self._import_global("GSASIIgrid")
             # For phase data loading (yes, GUI)
-            import GSASIIphsGUI
-            import GSASIIspc
+            self._import_global("GSASIIphsGUI")
+            self._import_global("GSASIIspc")
             # for Rietveld/Pawley refinement
-            import GSASIIstrIO
-            import GSASIIstrMain
+            self._import_global("GSASIIstrIO")
+            self._import_global("GSASIIstrMain")
+            if additional_path_prop:
+                sys.path.pop()
         except ImportError as ierr:
             raise ImportError("Failed to import the GSASII and its required sub-modules "
                               "from GSAS-II. Please make sure that it is available in the "
                               "Mantid Python path and/or the path to GSAS-II given in the "
-                              "input property " + getProperty(additional_path_prop).value +
-                              ". More error details: " + ierr)
+                              "input property " + additional_path_prop + ". More error "
+                              "details: " + str(ierr))
+
+    def _import_global(self, mod_name):
+        globals()[mod_name] = __import__(mod_name)
 
     def _init_gs2(self):
         _gsas2_app = GSASII.GSASIImain(0)
@@ -553,7 +569,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
         return gs2_rd
 
     def _build_add_background_def(self, gs2_rd):
-        # Note: blatantly ignores self.getProperty(PROP_BACKGROUND_TYPE)
+        # Note: blatantly ignores self.getProperty(self.PROP_BACKGROUND_TYPE)
         backg_def = [['chebyschev', True, 3, 1.0, 0.0, 0.0],
                      {'peaksList': [], 'debyeTerms': [], 'nPeaks': 0, 'nDebye': 0}]
 
@@ -563,10 +579,10 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
     def _build_add_limits(self, gs2_rd):
 
-        min_x = getProperty(PROP_MINX).value
+        min_x = self.getProperty(self.PROP_MINX).value
         if Property.EMPTY_DBL == minx:
             min_x = powderdata[0].min()
-        max_x = getProperty(PROP_MAXX).value
+        max_x = self.getProperty(self.PROP_MAXX).value
         if Property.EMPTY_DBL == max_x:
             max_x = powderdata[0].max()
 
@@ -624,14 +640,14 @@ class GSASIIFitPeaks(PythonAlgorithm):
         peaks_init = GSASIIpwdGUI.DoPeaksAutoSearch(gs2_rd.powderdata, inst_parm1, inst_parm2)
         # Note this sets as default: refine intensity, and no other parameters
         for peak in peaks_init:
-            peak[1] = getProperty(PROP_REFINE_CENTER).value
-            peak[3] = getProperty(PROP_REFINE_INTENSITY).value
-            peak[5] = getProperty(PROP_REFINE_ALPHA).value
-            peak[7] = getProperty(PROP_REFINE_BETA).value
+            peak[1] = self.getProperty(self.PROP_REFINE_CENTER).value
+            peak[3] = self.getProperty(self.PROP_REFINE_INTENSITY).value
+            peak[5] = self.getProperty(self.PROP_REFINE_ALPHA).value
+            peak[7] = self.getProperty(self.PROP_REFINE_BETA).value
             # sigma (Gaussian)
-            peak[9] = getProperty(PROP_REFINE_SIGMA).value
+            peak[9] = self.getProperty(self.PROP_REFINE_SIGMA).value
             # gamma (Lorentzian)
-            peak[11] = getProperty(PROP_REFINE_GAMMA).value
+            peak[11] = self.getProperty(self.PROP_REFINE_GAMMA).value
 
         # Just to have the same sequence as GSAS-II in its tables/standard output
         peaks_init.sort()
@@ -641,8 +657,8 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
     def _produce_outputs(self, gof_estimates, lattice_params, parm_dict):
         (result_rwp, result_gof, _result_chisq) = gof_estimates
-        self.setProperty(PROP_OUT_RWP, result_rwp)
-        self.setProperty(PROP_OUT_GOF, result_gof)
+        self.setProperty(self.PROP_OUT_RWP, result_rwp)
+        self.setProperty(self.PROP_OUT_GOF, result_gof)
 
         self._build_output_table(parm_dict)
         self._build_output_lattice_table(lattice_params)
@@ -652,7 +668,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
         par_names = ['Center', 'Intensity', 'Alpha', 'Beta', 'Sigma', 'Gamma']
         par_prefixes = ['pos','int','alp','bet','sig','gam']
 
-        tbl_name = self.getProperty(PROP_OUT_FITTED_PARAMS).value
+        tbl_name = self.getProperty(self.PROP_OUT_FITTED_PARAMS).value
         alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
         alg.setProperty('OutputWorkspace', tbl_name)
         alg.execute()
@@ -707,7 +723,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
         return params
 
     def _build_output_lattice_table(self, lattice_params):
-        tbl_name = self.getProperty(PROP_OUT_LATTICE_PARAMS).value
+        tbl_name = self.getProperty(self.PROP_OUT_LATTICE_PARAMS).value
         alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
         alg.setProperty('OutputWorkspace', tbl_name)
         alg.execute()
