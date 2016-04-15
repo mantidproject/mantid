@@ -70,6 +70,10 @@ include_directories (Kernel/inc)
 add_subdirectory (Kernel)
 set ( MANTIDLIBS ${MANTIDLIBS} Kernel )
 
+include_directories (Histogram/inc)
+add_subdirectory (Histogram)
+set ( MANTIDLIBS ${MANTIDLIBS} Histogram )
+
 include_directories (Geometry/inc)
 # muParser needed by Geometry and subsequent packages
 include_directories ( ${MUPARSER_INCLUDE_DIR} )
@@ -131,7 +135,7 @@ add_subdirectory (ISISLiveData)
 # Add a custom target to build all of the Framework
 ###########################################################################
 
-set ( FRAMEWORK_LIBS Kernel Geometry API DataObjects
+set ( FRAMEWORK_LIBS Kernel Histogram Geometry API DataObjects
                      PythonKernelModule PythonGeometryModule PythonAPIModule
                      PythonDataObjectsModule
                      DataHandling Nexus Algorithms CurveFitting ICat
