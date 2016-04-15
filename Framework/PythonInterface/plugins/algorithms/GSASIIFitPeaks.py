@@ -56,7 +56,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
         PROP_REFINE_GAMMA = 'RefineGamma'
 
         PROP_METHOD = "Method"
-        refine_methods = ["Rietveld refinement", "Pawley refinement", "Peak fitting"]
+        refine_methods = ["Pawley refinement", "Rietveld refinement", "Peak fitting"]
         self.declareProperty(PROP_METHOD, defaultValue = refine_methods[0],
                              validator = StringListValidator(refine_methods),
                              doc = 'Rietveld corresponds to the Calculate/Refine option of the '
@@ -92,6 +92,34 @@ class GSASIIFitPeaks(PythonAlgorithm):
                                           action = FileAction.OptionalDirectory),
                              doc = 'Optional path to GSAS-II software installation. '
                              'This will be used to import several Python modules from GSAS-II.')
+
+        GRP_RESULTS = "RESULTS"
+
+        self.declareProperty('GoF', 0.0, direction = Direction.Output,
+                             doc = 'Goodness of fit value (Chi squared).')
+
+        self.declareProperty('Rwp', 0.0, direction = Direction.Output,
+                             doc = 'Weighted profile R-factor (Rwp) discrepancy index for the '
+                             'goodness of fit.')
+
+        self.declareProperty(ITableWorkspaceProperty(PROP_OUT_LATTICE_PARAMS, "", Direction.Output),
+                             doc = 'Table to output the the lattice parameters (refined).')
+
+        self.declareProperty(PROP_OUT_FITTED_PARAMS, "", direction=Direction.Input,
+                             doc = "Name for an (output) table of fitted parameters. This is used "
+                             "with the peak fitting method. The table will have one row per peak "
+                             "found.")
+
+        self.declareProperty(FileProperty(name = PROP_OUT_PROJECT_FILE, defaultValue = '',
+                                          direction = Direction.Input,
+                                          action = FileAction.OptionalSave, extensions = [".gpx"]),
+                             doc = 'GSAS-II project file (that can be openened in the GSAS-II GUI).')
+
+        self.setPropertyGroup(PROP_OUT_GOF, GRP_RESULTS)
+        self.setPropertyGroup(PROP_OUT_RWP, GRP_RESULTS)
+        self.setPropertyGroup(PROP_OUT_LATTICE_PARAMS, GRP_RESULTS)
+        self.setPropertyGroup(PROP_OUT_FITTED_PARAMS, GRP_RESULTS)
+        self.setPropertyGroup(PROP_OUT_PROJECT_FILE, GRP_RESULTS)
 
         GRP_FITTING_OPTS = "Fitting options"
         background_types = ["Chebyshev", "None"]
@@ -149,32 +177,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
         self.setPropertyGroup(PROP_EXPECTED_PEAKS, GRP_PEAKS)
         self.setPropertyGroup(PROP_EXPECTED_PEAKS_FROM_FILE, GRP_PEAKS)
 
-
-        GRP_RESULTS = "RESULTS"
-
-        self.declareProperty('GoF', 0.0, direction = Direction.Output,
-                             doc = 'Goodness of fit value (Chi squared).')
-
-        self.declareProperty('Rwp', 0.0, direction = Direction.Output,
-                             doc = 'Weighted profile R-factor (Rwp) discrepancy index for the '
-                             'goodness of fit.')
-
-        self.declareProperty(ITableWorkspaceProperty(PROP_OUT_LATTICE_PARAMS, "", Direction.Output),
-                             doc = 'Table to output the the lattice parameters (refined).')
-
-        self.declareProperty(ITableWorkspaceProperty(PROP_OUT_FITTED_PARAMS, "", Direction.Output),
-                             doc = "Fitted parameters. One row per peak found.")
-
-        self.declareProperty(FileProperty(name = PROP_OUT_PROJECT_FILE, defaultValue = '',
-                                          direction = Direction.Input,
-                                          action = FileAction.OptionalSave, extensions = [".gpx"]),
-                             doc = 'GSAS-II project file (that can be openened in the GSAS-II GUI).')
-
-        self.setPropertyGroup(PROP_OUT_GOF, GRP_RESULTS)
-        self.setPropertyGroup(PROP_OUT_RWP, GRP_RESULTS)
-        self.setPropertyGroup(PROP_OUT_LATTICE_PARAMS, GRP_RESULTS)
-        self.setPropertyGroup(PROP_OUT_FITTED_PARAMS, GRP_RESULTS)
-        self.setPropertyGroup(PROP_OUT_PROJECT_FILE, GRP_RESULTS)
+        GRP_PARAMS = "Refinement of peak parameters"
 
         self.declareProperty(name = PROP_REFINE_CENTER, defaultValue = False,
                              doc = 'Whether to refine the peak centers.')
@@ -200,7 +203,6 @@ class GSASIIFitPeaks(PythonAlgorithm):
                              doc = 'Whether to refine the peak function gamma parameters '
                              '(assuming a BackToBackExponentialPV peak shape.')
 
-        GRP_PARAMS = "Refinement of peak parameters"
         self.setPropertyGroup(PROP_REFINE_CENTER, GRP_PARAMS)
         self.setPropertyGroup(PROP_REFINE_INTENSITY, GRP_PARAMS)
         self.setPropertyGroup(PROP_REFINE_ALPHA, GRP_PARAMS)
