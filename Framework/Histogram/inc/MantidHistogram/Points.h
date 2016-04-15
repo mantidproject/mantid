@@ -1,12 +1,12 @@
-#ifndef MANTID_KERNEL_HISTOGRAM_POINTS_H_
-#define MANTID_KERNEL_HISTOGRAM_POINTS_H_
+#ifndef MANTID_HISTOGRAM_POINTS_H_
+#define MANTID_HISTOGRAM_POINTS_H_
 
-#include "MantidKernel/DllConfig.h"
-#include "MantidKernel/Histogram/VectorOf.h"
-#include "MantidKernel/Histogram/ConstIterable.h"
+#include "MantidHistogram/DllConfig.h"
+#include "MantidHistogram/VectorOf.h"
+#include "MantidHistogram/ConstIterable.h"
 
 namespace Mantid {
-namespace Kernel {
+namespace Histogram {
 
 class BinEdges;
 
@@ -33,8 +33,8 @@ class BinEdges;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_KERNEL_DLL Points : public VectorOf<Points>,
-                                 public ConstIterable<Points> {
+class MANTID_HISTOGRAM_DLL Points : public VectorOf<Points>,
+                                    public ConstIterable<Points> {
 public:
   using VectorOf<Points>::VectorOf;
   using VectorOf<Points>::operator=;
@@ -42,7 +42,7 @@ public:
   Points(const BinEdges &edges);
 };
 
-} // namespace Kernel
+} // namespace Histogram
 } // namespace Mantid
 
-#endif /* MANTID_KERNEL_HISTOGRAM_POINTS_H_ */
+#endif /* MANTID_HISTOGRAM_POINTS_H_ */

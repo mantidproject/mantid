@@ -1,15 +1,15 @@
-#include "MantidKernel/Histogram/Points.h"
-#include "MantidKernel/Histogram/BinEdges.h"
+#include "MantidHistogram/Points.h"
+#include "MantidHistogram/BinEdges.h"
 
 namespace Mantid {
-namespace Kernel {
+namespace Histogram {
 
 Points::Points(const BinEdges &edges) {
   if (!edges)
     return;
   if (edges.size() == 1)
     throw std::logic_error("Points: Cannot construct from BinEdges of size 1");
-  m_data = make_cow<std::vector<double>>();
+  m_data = Kernel::make_cow<std::vector<double>>();
   if (edges.size() < 2)
     return;
   auto &data = m_data.access();
@@ -19,5 +19,5 @@ Points::Points(const BinEdges &edges) {
   }
 }
 
-} // namespace Kernel
+} // namespace Histogram
 } // namespace Mantid

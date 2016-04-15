@@ -1,7 +1,7 @@
-#include "MantidKernel/Histogram/Histogram.h"
+#include "MantidHistogram/Histogram.h"
 
 namespace Mantid {
-namespace Kernel {
+namespace Histogram {
 
 Histogram::XMode getHistogramXMode(size_t xLength, size_t yLength) {
   if (xLength == yLength)
@@ -11,5 +11,5 @@ Histogram::XMode getHistogramXMode(size_t xLength, size_t yLength) {
   return Histogram::XMode::Uninitialized;
 }
 
-} // namespace Kernel
+} // namespace Histogram
 } // namespace Mantid

@@ -1,11 +1,11 @@
-#ifndef MANTID_KERNEL_HISTOGRAM_HISTOGRAMDATA_H_
-#define MANTID_KERNEL_HISTOGRAM_HISTOGRAMDATA_H_
+#ifndef MANTID_HISTOGRAM_HISTOGRAMDATA_H_
+#define MANTID_HISTOGRAM_HISTOGRAMDATA_H_
 
-#include "MantidKernel/DllConfig.h"
+#include "MantidHistogram/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
-namespace Kernel {
+namespace Histogram {
 
 /** HistogramData : TODO: DESCRIPTION
 
@@ -32,7 +32,7 @@ namespace Kernel {
 */
 template <class T> class HistogramData {
 public:
-  explicit HistogramData(const cow_ptr<std::vector<double>> &data)
+  explicit HistogramData(const Kernel::cow_ptr<std::vector<double>> &data)
       : m_data(data) {
     if (!m_data)
       throw std::logic_error("HistogramData: Cannot init with null data");
@@ -50,10 +50,10 @@ protected:
   // destructor is protected.
   ~HistogramData() = default;
 
-  cow_ptr<std::vector<double>> m_data;
+  Kernel::cow_ptr<std::vector<double>> m_data;
 };
 
-} // namespace Kernel
+} // namespace Histogram
 } // namespace Mantid
 
-#endif /* MANTID_KERNEL_HISTOGRAM_HISTOGRAMDATA_H_ */
+#endif /* MANTID_HISTOGRAM_HISTOGRAMDATA_H_ */

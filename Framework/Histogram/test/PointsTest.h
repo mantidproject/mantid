@@ -1,22 +1,20 @@
-#ifndef MANTID_KERNEL_HISTOGRAM_POINTSTEST_H_
-#define MANTID_KERNEL_HISTOGRAM_POINTSTEST_H_
+#ifndef MANTID_HISTOGRAM_POINTSTEST_H_
+#define MANTID_HISTOGRAM_POINTSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/Histogram/Points.h"
-#include "MantidKernel/Histogram/BinEdges.h"
+#include "MantidHistogram/Points.h"
+#include "MantidHistogram/BinEdges.h"
 
-using Mantid::Kernel::Points;
-using Mantid::Kernel::BinEdges;
+using Mantid::Histogram::Points;
+using Mantid::Histogram::BinEdges;
 
-class HistogramPointsTest : public CxxTest::TestSuite {
+class PointsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static HistogramPointsTest *createSuite() {
-    return new HistogramPointsTest();
-  }
-  static void destroySuite(HistogramPointsTest *suite) { delete suite; }
+  static PointsTest *createSuite() { return new PointsTest(); }
+  static void destroySuite(PointsTest *suite) { delete suite; }
 
   void test_construct_default() {
     const Points points{};
@@ -50,4 +48,4 @@ public:
   }
 };
 
-#endif /* MANTID_KERNEL_HISTOGRAM_POINTSTEST_H_ */
+#endif /* MANTID_HISTOGRAM_POINTSTEST_H_ */
