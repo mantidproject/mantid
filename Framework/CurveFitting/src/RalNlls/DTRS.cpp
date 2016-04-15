@@ -1,6 +1,7 @@
 #include "MantidCurveFitting/RalNlls/DTRS.h"
 #include "MantidCurveFitting/FortranDefs.h"
 
+#include <algorithm>
 #include <limits>
 #include <string>
 
@@ -8,6 +9,25 @@ namespace Mantid {
 namespace CurveFitting {
 namespace RalNlls {
 
+namespace {
+
+double smallest(double a, double b, double c, double d) {
+  return std::min( std::min(a, b), std::min(c, d));
+}
+
+double smallest(double a, double b, double c) {
+  return std::min( std::min(a, b), c);
+}
+
+double largest(double a, double b, double c, double d) {
+  return std::max( std::max(a, b), std::max(c, d));
+}
+
+double largest(double a, double b, double c) {
+  return std::max( std::max(a, b), c);
+}
+
+} // anonymous namespace
 
 //! Contains  ral_nlls_roots
 //!             ral_dtrs
@@ -107,7 +127,6 @@ const REAL infinity = HUGE;
 //   CONTAINS
 
 ///-*-*-*-*-*-   R O O T S _ q u a d r a t i c  S U B R O U T I N E   -*-*-*-*-*-
-///
 /// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 ///
 ///  Find the number and values of real roots of the quadratic equation
@@ -117,7 +136,7 @@ const REAL infinity = HUGE;
 ///  where a0, a1 and a2 are real
 ///
 /// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-void roots_quadratic(double a0, double a1, double a2, double tol, int nroots, 
+void roots_quadratic(double a0, double a1, double a2, double tol, int &nroots, 
                      double& root1, double &root2, bool debug ) {
 
 //!  Dummy arguments
@@ -127,6 +146,7 @@ void roots_quadratic(double a0, double a1, double a2, double tol, int nroots,
 //      REAL , INTENT( OUT )  root1, root2
 //      LOGICAL, INTENT( IN )  debug
 
+  UNUSED_ARG(debug);
   auto rhs = tol * a1 * a1;
 if (std::fabs(a0 * a2) > rhs) { // !  really is quadratic
   root2 = a1 * a1 - four * a2 * a0;
@@ -207,319 +227,196 @@ if (nroots >= 1) {
 //
 } //!  End of subroutine ROOTS_quadratic
 
-//!-*-*-*-*-*-*-*-   R O O T S _ c u b i c  S U B R O U T I N E   -*-*-*-*-*-*-*-
-//
-//      SUBROUTINE ROOTS_cubic( a0, a1, a2, a3, tol, nroots, root1, root2,       &
-//                              root3, debug )
-//
-//! =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-//!
-//!  Find the number and values of real roots of the cubicc equation
-//!
-//!                a3 * x**3 + a2 * x**2 + a1 * x + a0 = 0
-//!
-//!  where a0, a1, a2 and a3 are real
-//!
-//! =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-//
-//!  Dummy arguments
-//
-//      INTEGER, INTENT( OUT )  nroots
-//      REAL , INTENT( IN )  a3, a2, a1, a0, tol
-//      REAL , INTENT( OUT )  root1, root2, root3
-//      LOGICAL, INTENT( IN )  debug
-//
-//!  Local variables
-//
-//      INTEGER  info, nroots_q
-//      REAL   a, b, c, d, e, f, p, q, s, t, w, x, y, z
-//      REAL   c0, c1, c2, b0, b1, pprime, u1, u2
-//      REAL   H( 3, 3 ), ER( 3 ), EI( 3 ), ZZ( 1, 3 ), WORK( 33 )
-//
-//!  define method used:
-//!    1 = Nonweiler, 2 = Littlewood, 3 = Viete, other = companion matrix
-//
-//      INTEGER, PARAMETER  method = 1
-//
-//!  Check to see if the quartic is actually a cubic
-//
-//      IF ( a3 == zero ) THEN
-//        CALL ROOTS_quadratic( a0, a1, a2, tol, nroots, root1, root2, debug )
-//        root3 = infinity
-//        RETURN
-//      END IF
-//
-//!  Deflate the polnomial if the trailing coefficient is zero
-//
-//      IF ( a0 == zero ) THEN
-//        root1 = zero
-//        CALL ROOTS_quadratic( a1, a2, a3, tol, nroots, root2, root3, debug )
-//        nroots = nroots + 1
-//        RETURN
-//      END IF
-//
-//!  1. Use Nonweiler's method (CACM 11:4, 1968, pp269)
-//
-//      IF ( method == 1 ) THEN
-//        c0 = a0 / a3
-//        c1 = a1 / a3
-//        c2 = a2 / a3
-//
-//        s = c2 / three
-//        t = s * c2
-//        b = 0.5_wp * ( s * ( twothirds * t - c1 ) + c0 )
-//        t = ( t - c1 ) / three
-//        c = t * t * t ; d = b * b - c
-//
-//! 1 real + 2 equal real or 2 complex roots
-//
-//        IF ( d >= zero ) THEN
-//          d = ( SQRT( d ) + ABS( b ) ) ** onethird
-//          IF ( d != zero ) then
-//            IF ( b > zero ) then
-//              b = - d
-//            ELSE
-//              b = d
-//            END IF
-//            c = t / b
-//          END IF
-//          d = SQRT( threequarters ) * ( b - c )
-//          b = b + c ; c = - 0.5 * b - s
-//          root1 = b - s
-//          IF ( d == zero ) THEN
-//            nroots = 3 ; root2 = c ; root3 = c
-//          ELSE
-//            nroots = 1
-//          END IF
-//
-//! 3 real roots
-//
-//        ELSE
-//          IF ( b == zero ) THEN
-//            d = twothirds * ATAN( one )
-//          ELSE
-//            d = ATAN( SQRT( - d ) / ABS( b ) ) / three
-//          END IF
-//          IF ( b < zero ) THEN
-//            b = two * SQRT( t )
-//          ELSE
-//            b = - two * SQRT( t )
-//          END IF
-//          c = COS( d ) * b
-//          t = - SQRT( threequarters ) * SIN( d ) * b - half * c
-//          d = - t - c - s ; c = c - s ; t = t - s
-//          IF ( ABS( c ) > ABS( t ) ) then
-//            root3 = c
-//          ELSE
-//            root3 = t
-//            t = c
-//          END IF
-//          IF ( ABS( d ) > ABS( t ) ) THEN
-//            root2 = d
-//          ELSE
-//            root2 = t
-//            t = d
-//          END IF
-//          root1 = t ; nroots = 3
-//        END IF
-//
-//!  2. Use Littlewood's method
-//
-//      ELSE IF ( method == 2 ) THEN
-//        c2 = a2 / ( three * a3 ) ; c1 = a1 / ( three * a3 ) ; c0 = a0 / a3
-//        x = c1 - c2 * c2
-//        y = c0 - c2* ( x + x + c1 )
-//        z = y ** 2 + four * x ** 3
-//
-//!  there are three real roots
-//
-//        IF ( z < zero ) THEN
-//          a = - two * SQRT( - x )
-//          b = y / ( a * x )
-//          y = ATAN2( SQRT( one - b ), SQRT( one + b ) ) * twothirds
-//          IF ( c2 < zero ) y = y + magic
-//
-//!  calculate root which does not involve cancellation
-//
-//          nroots = 1 ; root1 = a * COS( y ) - c2
-//
-//!  there may be only one real root
-//
-//        ELSE
-//          a = SQRT( z ) ; b = half * ( ABS( y ) + a ) ; c = b ** onethird
-//          IF ( c <= zero ) THEN
-//            nroots = 3 ; root1 = - c2 ; root2 = - c2 ; root3 = - c2
-//            GO TO 900
-//          ELSE
-//            nroots = 1
-//            c = c - ( c ** 3 - b ) / ( three * c * c )
-//            e = c * c + ABS( x )
-//            f = one / ( ( x / c ) ** 2 + e )
-//            IF ( x >= zero ) THEN
-//              x = e / c ; z = y * f
-//            ELSE
-//              x = a * f ; z = SIGN( one, y ) * e / c
-//            END IF
-//            IF ( z * c2 >= zero ) THEN
-//              root1 = - z - c2
-//            ELSE
-//              root2 = half * z - c2
-//              root3 = half * SQRT( three ) * ABS( x )
-//              root1 = - c0 / ( root2 * root2 + root3 * root3 )
-//              GO TO 900
-//            END IF
-//          END IF
-//        END IF
-//
-//!  deflate cubic
-//
-//        b0 = - c0 / root1
-//        IF ( ABS( root1 ** 3 ) <= ABS( c0 ) ) THEN
-//          b1 = root1 + three * c2
-//        ELSE
-//          b1 = ( b0 - three * c1 ) / root1
-//        END IF
-//        CALL ROOTS_quadratic( b0, b1, one, epsmch, nroots_q,                   &
-//                              root2, root3, debug )
-//        nroots = nroots + nroots_q
-//
-//
-//!  3. Use Viete's method
-//
-//      ELSE IF ( method == 3 ) THEN
-//        w = a2 / ( three * a3 )
-//        p = ( a1 / ( three * a3 ) - w ** 2 ) ** 3
-//        q = - half * ( two * w ** 3 - ( a1 * w - a0 ) / a3 )
-//        d = p + q ** 2
-//
-//!  three real roots
-//
-//        IF ( d < zero ) THEN
-//          s = ACOS( MIN( one, MAX( - one, q / SQRT( - p ) ) ) )
-//          p = two * ( - p ) ** onesixth
-//          nroots = 3
-//          root1 = p * COS( onethird * ( s + two * pi ) ) - w
-//          root2 = p * COS( onethird * ( s + four * pi ) ) - w
-//          root3 = p * COS( onethird * ( s + six * pi ) ) - w
-//
-//!  one real root
-//
-//        ELSE
-//          d = SQRT( d ) ; u1 = q + d ; u2 = q - d
-//          nroots = 1
-//          root1 = SIGN( ABS( u1 ) ** onethird, u1 ) +                          &
-//                  SIGN( ABS( u2 ) ** onethird, u2 ) - w
-//        END IF
-//
-//!  4. Compute the roots as the eigenvalues of the relevant compainion matrix
-//
-//      ELSE
-//        H( 1, 1 ) = zero ; H( 2, 1 ) = one ; H( 3, 1 ) = zero
-//        H( 1, 2 ) = zero ; H( 2, 2 ) = zero ; H( 3, 2 ) = one
-//        H( 1, 3 ) = - a0 / a3 ; H( 2, 3 ) = - a1 / a3 ; H( 3, 3 ) = - a2 / a3
-//        CALL HSEQR( 'E', 'N', 3, 1, 3, H, 3, ER, EI, ZZ, 1, WORK, 33, info )
-//        IF ( info != 0 ) THEN
-//          IF ( debug ) WRITE( out,                                             &
-//         &   "( ' ** error return ', I0, ' from HSEQR in ROOTS_cubic' )" ) info
-//          nroots = 0
-//          RETURN
-//        END IF
-//
-//!  count and record the roots
-//
-//        nroots = COUNT( ABS( EI ) <= epsmch )
-//        IF ( nroots == 1 ) THEN
-//          IF (  ABS( EI( 1 ) ) <= epsmch ) THEN
-//            root1 = ER( 1 )
-//          ELSE IF (  ABS( EI( 2 ) ) <= epsmch ) THEN
-//            root1 = ER( 2 )
-//          ELSE
-//            root1 = ER( 3 )
-//          END IF
-//        ELSE
-//          root1 = ER( 1 ) ;  root2 = ER( 2 ) ;  root3 = ER( 3 )
-//        END IF
-//      END IF
-//
-//!  reorder the roots
-//
-//  900 CONTINUE
-//      IF ( nroots == 3 ) THEN
-//        IF ( root1 > root2 ) THEN
-//          a = root2 ; root2 = root1 ; root1 = a
-//        END IF
-//        IF ( root2 > root3 ) THEN
-//          a = root3
-//          IF ( root1 > root3 ) THEN
-//            a = root1 ; root1 = root3
-//          END IF
-//          root3 = root2 ; root2 = a
-//        END IF
-//        IF ( debug ) WRITE( out, "( ' 3 real roots ' )" )
-//      ELSE IF ( nroots == 2 ) THEN
-//        IF ( debug ) WRITE( out, "( ' 2 real roots ' )" )
-//      ELSE
-//        IF ( debug ) WRITE( out, "( ' 1 real root ' )" )
-//      END IF
-//
-//!  perfom a Newton iteration to ensure that the roots are accurate
-//
-//      p = ( ( a3 * root1 + a2 ) * root1 + a1 ) * root1 + a0
-//      pprime = ( three * a3 * root1 + two * a2 ) * root1 + a1
-//      IF ( pprime != zero ) THEN
-//        IF ( debug ) WRITE( out, 2000 ) 1, root1, p, - p / pprime
-//        root1 = root1 - p / pprime
-//        p = ( ( a3 * root1 + a2 ) * root1 + a1 ) * root1 + a0
-//      END IF
-//      IF ( debug ) WRITE( out, 2010 ) 1, root1, p
-//
-//      IF ( nroots == 3 ) THEN
-//        p = ( ( a3 * root2 + a2 ) * root2 + a1 ) * root2 + a0
-//        pprime = ( three * a3 * root2 + two * a2 ) * root2 + a1
-//        IF ( pprime != zero ) THEN
-//          IF ( debug ) WRITE( out, 2000 ) 2, root2, p, - p / pprime
-//          root2 = root2 - p / pprime
-//          p = ( ( a3 * root2 + a2 ) * root2 + a1 ) * root2 + a0
-//        END IF
-//        IF ( debug ) WRITE( out, 2010 ) 2, root2, p
-//
-//        p = ( ( a3 * root3 + a2 ) * root3 + a1 ) * root3 + a0
-//        pprime = ( three * a3 * root3 + two * a2 ) * root3 + a1
-//        IF ( pprime != zero ) THEN
-//          IF ( debug ) WRITE( out, 2000 ) 3, root3, p, - p / pprime
-//          root3 = root3 - p / pprime
-//          p = ( ( a3 * root3 + a2 ) * root3 + a1 ) * root3 + a0
-//        END IF
-//        IF ( debug ) WRITE( out, 2010 ) 3, root3, p
-//      END IF
-//
-//      RETURN
-//
-//!  Non-executable statements
-//
-// 2000 FORMAT( ' root ', I1, ': value = ', ES12.4, ' cubic = ', ES12.4,         &
-//              ' delta = ', ES12.4 )
-// 2010 FORMAT( ' root ', I1, ': value = ', ES12.4, ' cubic = ', ES12.4 )
-//
-//
-//!  End of subroutine ROOTS_cubic
-//
-//      END SUBROUTINE ROOTS_cubic
-//
-//!-*-*-*-*-*-*-   R O O T S _ q u a r t i c   S U B R O U T I N E   -*-*-*-*-*-*-
-//
-//      SUBROUTINE ROOTS_quartic( a0, a1, a2, a3, a4, tol, nroots, root1, root2, &
-//                                root3, root4, debug )
-//
-//! =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-//!
-//!  Find the number and values of real roots of the quartic equation
-//!
-//!        a4 * x**4 + a3 * x**3 + a2 * x**2 + a1 * x + a0 = 0
-//!
-//!  where a0, a1, a2, a3 and a4 are real
-//!
-//! =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+///-*-*-*-*-*-*-*-   R O O T S _ c u b i c  S U B R O U T I N E   -*-*-*-*-*-*-*-
+/// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+///
+///  Find the number and values of real roots of the cubic equation
+///
+///                a3 * x**3 + a2 * x**2 + a1 * x + a0 = 0
+///
+///  where a0, a1, a2 and a3 are real
+///
+/// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+void roots_cubic(double a0, double a1, double a2, double a3, double tol,
+                 int &nroots, double &root1, double &root2, double &root3,
+                 bool debug) {
+  //
+  //!  Dummy arguments
+  //
+  //      INTEGER, INTENT( OUT )  nroots
+  //      REAL , INTENT( IN )  a3, a2, a1, a0, tol
+  //      REAL , INTENT( OUT )  root1, root2, root3
+  //      LOGICAL, INTENT( IN )  debug
+  UNUSED_ARG(debug);
+
+  //!  define method used:
+  //!    1 = Nonweiler, 2 = Littlewood, 3 = Viete, other = companion matrix
+  //
+  // const INTEGER method = 1;
+
+  //!  Check to see if the cubic is actually a quadratic
+  if (a3 == zero) {
+    roots_quadratic(a0, a1, a2, tol, nroots, root1, root2, debug);
+    root3 = infinity;
+    return;
+  }
+
+  //!  Deflate the polnomial if the trailing coefficient is zero
+  if (a0 == zero) {
+    root1 = zero;
+    roots_quadratic(a1, a2, a3, tol, nroots, root2, root3, debug);
+    nroots = nroots + 1;
+    return;
+  }
+
+  //!  1. Use Nonweiler's method (CACM 11:4, 1968, pp269)
+  //      if ( method == 1 ) then
+
+  double c0 = a0 / a3;
+  double c1 = a1 / a3;
+  double c2 = a2 / a3;
+
+  double s = c2 / three;
+  double t = s * c2;
+  double b = 0.5 * (s * (twothirds * t - c1) + c0);
+  t = (t - c1) / three;
+  double c = t * t * t;
+  double d = b * b - c;
+
+  //! 1 real + 2 equal real or 2 complex roots
+  if (d >= zero) {
+    d = pow(sqrt(d) + fabs(b), onethird);
+    if (d != zero) {
+      if (b > zero) {
+        b = -d;
+      } else {
+        b = d;
+      }
+      c = t / b;
+    }
+    d = sqrt(threequarters) * (b - c);
+    b = b + c;
+    c = -0.5 * b - s;
+    root1 = b - s;
+    if (d == zero) {
+      nroots = 3;
+      root2 = c;
+      root3 = c;
+    } else {
+      nroots = 1;
+    }
+  } else { //! 3 real roots
+    if (b == zero) {
+      d = twothirds * atan(one);
+    } else {
+      d = atan(sqrt(-d) / fabs(b)) / three;
+    }
+    if (b < zero) {
+      b = two * sqrt(t);
+    } else {
+      b = -two * sqrt(t);
+    }
+    c = cos(d) * b;
+    t = -sqrt(threequarters) * sin(d) * b - half * c;
+    d = -t - c - s;
+    c = c - s;
+    t = t - s;
+    if (abs(c) > abs(t)) {
+      root3 = c;
+    } else {
+      root3 = t;
+      t = c;
+    }
+    if (abs(d) > abs(t)) {
+      root2 = d;
+    } else {
+      root2 = t;
+      t = d;
+    }
+    root1 = t;
+    nroots = 3;
+  }
+
+  //!  reorder the roots
+
+  //  900 CONTINUE
+  if (nroots == 3) {
+    if (root1 > root2) {
+      double a = root2;
+      root2 = root1;
+      root1 = a;
+    }
+    if (root2 > root3) {
+      double a = root3;
+      if (root1 > root3) {
+        a = root1;
+        root1 = root3;
+      }
+      root3 = root2;
+      root2 = a;
+    }
+    //        if ( debug ) write( out, "( ' 3 real roots ' )" )
+    //      else if ( nroots == 2 ) then
+    //        if ( debug ) write( out, "( ' 2 real roots ' )" )
+    //      else
+    //        if ( debug ) write( out, "( ' 1 real root ' )" )
+  }
+
+  //!  perfom a Newton iteration to ensure that the roots are accurate
+
+  double p = ((a3 * root1 + a2) * root1 + a1) * root1 + a0;
+  double pprime = (three * a3 * root1 + two * a2) * root1 + a1;
+  if (pprime != zero) {
+    //        if ( debug ) write( out, 2000 ) 1, root1, p, - p / pprime
+    root1 = root1 - p / pprime;
+    p = ((a3 * root1 + a2) * root1 + a1) * root1 + a0;
+  }
+  //      if ( debug ) write( out, 2010 ) 1, root1, p
+
+  if (nroots == 3) {
+    p = ((a3 * root2 + a2) * root2 + a1) * root2 + a0;
+    pprime = (three * a3 * root2 + two * a2) * root2 + a1;
+    if (pprime != zero) {
+      // if ( debug ) write( out, 2000 ) 2, root2, p, - p / pprime
+      root2 = root2 - p / pprime;
+      p = ((a3 * root2 + a2) * root2 + a1) * root2 + a0;
+    }
+    //        if ( debug ) write( out, 2010 ) 2, root2, p
+
+    p = ((a3 * root3 + a2) * root3 + a1) * root3 + a0;
+    pprime = (three * a3 * root3 + two * a2) * root3 + a1;
+    if (pprime != zero) {
+      // if ( debug ) write( out, 2000 ) 3, root3, p, - p / pprime
+      root3 = root3 - p / pprime;
+      p = ((a3 * root3 + a2) * root3 + a1) * root3 + a0;
+    }
+    //        if ( debug ) write( out, 2010 ) 3, root3, p
+  }
+
+  //!  Non-executable statements
+  //
+  // 2000 FORMAT( ' root ', I1, ': value = ', ES12.4, ' cubic = ', ES12.4, &
+  //              ' delta = ', ES12.4 )
+  // 2010 FORMAT( ' root ', I1, ': value = ', ES12.4, ' cubic = ', ES12.4 )
+  //
+  //
+  //!  End of subroutine ROOTS_cubic
+  //
+}
+
+///-*-*-*-*-*-*-   R O O T S _ q u a r t i c   S U B R O U T I N E   -*-*-*-*-*-*-
+///
+/// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+///
+///  Find the number and values of real roots of the quartic equation
+///
+///        a4 * x**4 + a3 * x**3 + a2 * x**2 + a1 * x + a0 = 0
+///
+///  where a0, a1, a2, a3 and a4 are real
+///
+/// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+void roots_quartic(double a0, double a1, double a2, double a3, double a4, double tol, int &nroots, 
+                     double& root1, double &root2, double &root3, double &root4, bool debug) {
 //
 //!  Dummy arguments
 //
@@ -527,208 +424,194 @@ if (nroots >= 1) {
 //      REAL , INTENT( IN )  a4, a3, a2, a1, a0, tol
 //      REAL , INTENT( OUT )  root1, root2, root3, root4
 //      LOGICAL, INTENT( IN )  debug
-//
-//!  Local variables
-//
-//      INTEGER  type_roots, nrootsc
-//      REAL   a, alpha, b, beta, c, d, delta, gamma, r
-//      REAL   x1, xm, xmd, xn, xnd
-//      REAL   d3, d2, d1, d0, b4, b3, b2, b1
-//      REAL   rootc1, rootc2, rootc3, p, pprime
-//
+
 //!  Check to see if the quartic is actually a cubic
-//
-//      IF ( a4 == zero ) THEN
-//        CALL ROOTS_cubic( a0, a1, a2, a3, tol, nroots, root1, root2, root3,    &
-//                          debug )
-//        root4 = infinity
-//        RETURN
-//      END IF
-//
+
+      if ( a4 == zero ) {
+        roots_cubic( a0, a1, a2, a3, tol, nroots, root1, root2, root3, debug );
+        root4 = infinity;
+        return;
+      }
+
 //!  Use Ferrari's algorithm
-//
+
 //!  Initialize
-//
-//      nroots = 0
-//      b1 = a3 / a4
-//      b2 = a2 / a4
-//      b3 = a1 / a4
-//      b4 = a0 / a4
-//      d3 = one
-//      d2 =  - b2
-//      d1 = b1 * b3 - four * b4
-//      d0 = b4 * ( four * b2 - b1 * b1 ) - b3 * b3
-//
+
+      nroots = 0;
+      double b1 = a3 / a4;
+      double b2 = a2 / a4;
+      double b3 = a1 / a4;
+      double b4 = a0 / a4;
+      double d3 = one;
+      double d2 =  - b2;
+      double d1 = b1 * b3 - four * b4;
+      double d0 = b4 * ( four * b2 - b1 * b1 ) - b3 * b3;
+
 //!  Compute the roots of the auxiliary cubic
-//
-//      CALL ROOTS_cubic( d0, d1, d2, d3, tol, nrootsc, rootc1, rootc2, rootc3, &
-//                        debug )
-//      IF ( nrootsc > 1 ) rootc1 = rootc3
-//      x1 = b1 * b1 * quarter - b2 + rootc1
-//      IF ( x1 < zero ) THEN
-//        xmd = SQRT( - x1 )
-//        xnd = quarter * ( two * b3 - b1 * rootc1 ) / xmd
-//        alpha = half * b1 * b1 - rootc1 - b2
-//        beta = four * xnd - b1 * xmd
-//        r = SQRT( alpha * alpha + beta * beta )
-//        gamma = SQRT( half * ( alpha + r ) )
-//        IF ( gamma == zero ) THEN
-//          delta = SQRT( - alpha )
-//        ELSE
-//          delta = beta * half / gamma
-//        END IF
-//        root1 = half * ( - half * b1 + gamma )
-//        root2 = half * ( xmd + delta )
-//        root3 = half * ( - half * b1 - gamma )
-//        root4 = half * ( xmd - delta )
-//        GO TO 900
-//      END IF
-//      IF ( x1 != zero ) THEN
-//        xm = SQRT( x1 )
-//        xn = quarter * ( b1 * rootc1 - two * b3 ) / xm
-//      ELSE
-//        xm = zero
-//        xn = SQRT( quarter * rootc1 * rootc1 - b4 )
-//      END IF
-//      alpha = half * b1 * b1 - rootc1 - b2
-//      beta = four * xn - b1 * xm
-//      gamma = alpha + beta
-//      delta = alpha - beta
-//      a = - half * b1
-//
-//!  Compute how many real roots there are
-//
-//      type_roots = 1
-//      IF ( gamma >= zero ) THEN
-//        nroots = nroots + 2
-//        type_roots = 0
-//        gamma = SQRT( gamma )
-//      ELSE
-//        gamma = SQRT( - gamma )
-//      END IF
-//      IF ( delta >= zero ) THEN
-//        nroots = nroots + 2
-//        delta = SQRT( delta )
-//      ELSE
-//        delta = SQRT( - delta )
-//      END IF
-//      type_roots = nroots + type_roots
-//
-//!  Two real roots
-//
-//      IF ( type_roots == 3 ) THEN
-//        root1 = half * ( a - xm - delta )
-//        root2 = half * ( a - xm + delta )
-//        root3 = half * ( a + xm )
-//        root4 = half * gamma
-//        GO TO 900
-//      ELSE IF ( type_roots != 4 ) THEN
-//        IF ( type_roots == 2 ) THEN
-//          root1 = half * ( a + xm - gamma )
-//          root2 = half * ( a + xm + gamma )
-//        ELSE
-//
-//!  No real roots
-//
-//          root1 = half * ( a + xm )
-//          root2 = half * gamma
-//        END IF
-//        root3 = half * ( a - xm ) * half
-//        root4 = half * delta
-//        GO TO 900
-//      END IF
-//
-//!  Four real roots
-//
-//      b = half * ( a + xm + gamma )
-//      d = half * ( a - xm + delta )
-//      c = half * ( a - xm - delta )
-//      a = half * ( a + xm - gamma )
-//
-//!  Sort the roots
-//
-//      root1 = MIN( a, b, c, d )
-//      root4 = MAX( a, b, c, d )
-//
-//      IF ( a == root1 ) THEN
-//        root2 = MIN( b, c, d )
-//      ELSE IF ( b == root1 ) THEN
-//        root2 = MIN( a, c, d )
-//      ELSE IF ( c == root1 ) THEN
-//        root2 = MIN( a, b, d )
-//      ELSE
-//        root2 = MIN( a, b, c )
-//      END IF
-//
-//      IF ( a == root4 ) THEN
-//        root3 = MAX( b, c, d )
-//      ELSE IF ( b == root4 ) THEN
-//        root3 = MAX( a, c, d )
-//      ELSE IF ( c == root4 ) THEN
-//        root3 = MAX( a, b, d )
-//      ELSE
-//        root3 = MAX( a, b, c )
-//      END IF
-//
-//  900 CONTINUE
-//
+      int nrootsc;
+      double rootc1, rootc2, rootc3;
+      roots_cubic( d0, d1, d2, d3, tol, nrootsc, rootc1, rootc2, rootc3, debug );
+      if ( nrootsc > 1 ) {rootc1 = rootc3;}
+      double x1 = b1 * b1 * quarter - b2 + rootc1;
+      if ( x1 < zero ) {
+        auto xmd = sqrt( - x1 );
+        auto xnd = quarter * ( two * b3 - b1 * rootc1 ) / xmd;
+        auto alpha = half * b1 * b1 - rootc1 - b2;
+        auto beta = four * xnd - b1 * xmd;
+        auto r = sqrt( alpha * alpha + beta * beta );
+        auto gamma = sqrt( half * ( alpha + r ) );
+        double delta = 0.0;
+        if ( gamma == zero ) {
+          delta = sqrt( - alpha );
+        }else{
+          delta = beta * half / gamma;
+       }
+        root1 = half * ( - half * b1 + gamma );
+        root2 = half * ( xmd + delta );
+        root3 = half * ( - half * b1 - gamma );
+        root4 = half * ( xmd - delta );
+        goto Label900;
+      }
+      double xm = 0.0;
+      double xn = 0.0;
+      if ( x1 != zero ) {
+        xm = sqrt( x1 );
+        xn = quarter * ( b1 * rootc1 - two * b3 ) / xm;
+      }else{
+        xm = zero;
+        xn = sqrt( quarter * rootc1 * rootc1 - b4 );
+      }
+      auto alpha = half * b1 * b1 - rootc1 - b2;
+      auto beta = four * xn - b1 * xm;
+      auto gamma = alpha + beta;
+      auto delta = alpha - beta;
+      auto a = - half * b1;
+
+//!  compute how many real roots there are
+
+      int type_roots = 1;
+      if ( gamma >= zero ) {
+        nroots = nroots + 2;
+        type_roots = 0;
+        gamma = sqrt( gamma );
+      }else{
+        gamma = sqrt( - gamma );
+      }
+      if ( delta >= zero ) {
+        nroots = nroots + 2;
+        delta = sqrt( delta );
+      }else{
+        delta = sqrt( - delta );
+      }
+      type_roots = nroots + type_roots;
+
+//!  two real roots
+
+      if ( type_roots == 3 ) {
+        root1 = half * ( a - xm - delta );
+        root2 = half * ( a - xm + delta );
+        root3 = half * ( a + xm );
+        root4 = half * gamma;
+        goto Label900;
+      }else if ( type_roots != 4 ) {
+        if ( type_roots == 2 ) {
+          root1 = half * ( a + xm - gamma );
+          root2 = half * ( a + xm + gamma );
+        }else{
+          //!  no real roots
+          root1 = half * ( a + xm );
+          root2 = half * gamma;
+        }
+        root3 = half * ( a - xm ) * half;
+        root4 = half * delta;
+        goto Label900;
+      }
+
+//!  four real roots
+
+      auto b = half * ( a + xm + gamma );
+      auto d = half * ( a - xm + delta );
+      auto c = half * ( a - xm - delta );
+      a = half * ( a + xm - gamma );
+
+//!  sort the roots
+
+      root1 = smallest( a, b, c, d );
+      root4 = largest( a, b, c, d );
+
+      if ( a == root1 ) {
+        root2 = smallest( b, c, d );
+      }else if ( b == root1 ) {
+        root2 = smallest( a, c, d );
+      }else if ( c == root1 ) {
+        root2 = smallest( a, b, d );
+      }else{
+        root2 = smallest( a, b, c );
+      }
+
+      if ( a == root4 ) {
+        root3 = largest( b, c, d );
+      }else if ( b == root4 ) {
+        root3 = largest( a, c, d );
+      }else if ( c == root4 ) {
+        root3 = largest( a, b, d );
+      }else{
+        root3 = largest( a, b, c );
+      }
+
+Label900: // Oops, a label :(
+
 //!  Perfom a Newton iteration to ensure that the roots are accurate
 //
-//      IF ( debug ) THEN
-//        IF ( nroots == 0 ) THEN
-//          WRITE( out, "( ' no real roots ' )" )
-//        ELSE IF ( nroots == 2 ) THEN
-//          WRITE( out, "( ' 2 real roots ' )" )
-//        ELSE IF ( nroots == 4 ) THEN
-//          WRITE( out, "( ' 4 real roots ' )" )
-//        END IF
-//      END IF
-//      IF ( nroots == 0 ) RETURN
-//
-//      p = ( ( ( a4 * root1 + a3 ) * root1 + a2 ) * root1 + a1 ) * root1 + a0
-//      pprime = ( ( four * a4 * root1 + three * a3 ) * root1 + two * a2 )       &
-//                 * root1 + a1
-//      IF ( pprime != zero ) THEN
-//        IF ( debug ) WRITE( out, 2000 ) 1, root1, p, - p / pprime
-//        root1 = root1 - p / pprime
-//        p = ( ( ( a4 * root1 + a3 ) * root1 + a2 ) * root1 + a1 ) * root1 + a0
-//      END IF
-//      IF ( debug ) WRITE( out, 2010 ) 1, root1, p
-//
-//      p = ( ( ( a4 * root2 + a3 ) * root2 + a2 ) * root2 + a1 ) * root2 + a0
-//      pprime = ( ( four * a4 * root2 + three * a3 ) * root2 + two * a2 )       &
-//                 * root2 + a1
-//      IF ( pprime != zero ) THEN
-//        IF ( debug ) WRITE( out, 2000 ) 2, root2, p, - p / pprime
-//        root2 = root2 - p / pprime
-//        p = ( ( ( a4 * root2 + a3 ) * root2 + a2 ) * root2 + a1 ) * root2 + a0
-//      END IF
-//      IF ( debug ) WRITE( out, 2010 ) 2, root2, p
-//
-//      IF ( nroots == 4 ) THEN
-//        p = ( ( ( a4 * root3 + a3 ) * root3 + a2 ) * root3 + a1 ) * root3 + a0
-//        pprime = ( ( four * a4 * root3 + three * a3 ) * root3 + two * a2 )     &
-//                   * root3 + a1
-//        IF ( pprime != zero ) THEN
-//          IF ( debug ) WRITE( out, 2000 ) 3, root3, p, - p / pprime
-//          root3 = root3 - p / pprime
-//          p = ( ( ( a4 * root3 + a3 ) * root3 + a2 ) * root3 + a1 ) * root3 + a0
-//        END IF
-//        IF ( debug ) WRITE( out, 2010 ) 3, root3, p
-//
-//        p = ( ( ( a4 * root4 + a3 ) * root4 + a2 ) * root4 + a1 ) * root4 + a0
-//        pprime = ( ( four * a4 * root4 + three * a3 ) * root4 + two * a2 )     &
-//                   * root4 + a1
-//        IF ( pprime != zero ) THEN
-//          IF ( debug ) WRITE( out, 2000 ) 4, root4, p, - p / pprime
-//          root4 = root4 - p / pprime
-//          p = ( ( ( a4 * root4 + a3 ) * root4 + a2 ) * root4 + a1 ) * root4 + a0
-//        END IF
-//        IF ( debug ) WRITE( out, 2010 ) 4, root4, p
-//      END IF
-//
-//      RETURN
-//
+//      if ( debug ) {
+//        if ( nroots == 0 ) {
+//          write( out, "( ' no real roots ' )" )
+//        }else if ( nroots == 2 ) {
+//          write( out, "( ' 2 real roots ' )" )
+//        }else if ( nroots == 4 ) {
+//          write( out, "( ' 4 real roots ' )" )
+//        }
+//      }
+      if ( nroots == 0 ) return;
+
+      auto p = ( ( ( a4 * root1 + a3 ) * root1 + a2 ) * root1 + a1 ) * root1 + a0;
+      auto pprime = ( ( four * a4 * root1 + three * a3 ) * root1 + two * a2 ) * root1 + a1;
+      if ( pprime != zero ) {
+//        if ( debug ) write( out, 2000 ) 1, root1, p, - p / pprime
+        root1 = root1 - p / pprime;
+        p = ( ( ( a4 * root1 + a3 ) * root1 + a2 ) * root1 + a1 ) * root1 + a0;
+      }
+//      if ( debug ) write( out, 2010 ) 1, root1, p
+
+      p = ( ( ( a4 * root2 + a3 ) * root2 + a2 ) * root2 + a1 ) * root2 + a0;
+      pprime = ( ( four * a4 * root2 + three * a3 ) * root2 + two * a2 ) * root2 + a1;
+      if ( pprime != zero ) {
+//        if ( debug ) write( out, 2000 ) 2, root2, p, - p / pprime
+        root2 = root2 - p / pprime;
+        p = ( ( ( a4 * root2 + a3 ) * root2 + a2 ) * root2 + a1 ) * root2 + a0;
+      }
+//      if ( debug ) write( out, 2010 ) 2, root2, p
+
+      if ( nroots == 4 ) {
+        p = ( ( ( a4 * root3 + a3 ) * root3 + a2 ) * root3 + a1 ) * root3 + a0;
+        pprime = ( ( four * a4 * root3 + three * a3 ) * root3 + two * a2 ) * root3 + a1;
+        if ( pprime != zero ) {
+          //if ( debug ) write( out, 2000 ) 3, root3, p, - p / pprime
+          root3 = root3 - p / pprime;
+          p = ( ( ( a4 * root3 + a3 ) * root3 + a2 ) * root3 + a1 ) * root3 + a0;
+        }
+        //if ( debug ) write( out, 2010 ) 3, root3, p
+
+        p = ( ( ( a4 * root4 + a3 ) * root4 + a2 ) * root4 + a1 ) * root4 + a0;
+        pprime = ( ( four * a4 * root4 + three * a3 ) * root4 + two * a2 ) * root4 + a1;
+        if ( pprime != zero ) {
+          //if ( debug ) write( out, 2000 ) 4, root4, p, - p / pprime
+          root4 = root4 - p / pprime;
+          p = ( ( ( a4 * root4 + a3 ) * root4 + a2 ) * root4 + a1 ) * root4 + a0;
+        }
+        //if ( debug ) write( out, 2010 ) 4, root4, p
+      }
+
 //!  Non-executable statements
 //
 // 2000 FORMAT( ' root ', I1, ': value = ', ES12.4, ' quartic = ', ES12.4,       &
@@ -737,8 +620,8 @@ if (nroots >= 1) {
 //
 //!  End of subroutine ROOTS_quartic
 //
-//      END SUBROUTINE ROOTS_quartic
-//
+}
+
 //!  End of module ROOTS
 //
 //   END MODULE RAL_NLLS_ROOTS_double
