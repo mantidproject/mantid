@@ -34,6 +34,7 @@ set ( SRC_FILES
 	src/Glob.cpp
 	src/Histogram/BinEdges.cpp
 	src/Histogram/Histogram.cpp
+	src/Histogram/HistogramX.cpp
 	src/Histogram/Points.cpp
 	src/ICatalogInfo.cpp
 	src/IPropertyManager.cpp
@@ -181,6 +182,8 @@ set ( INC_FILES
 	inc/MantidKernel/Histogram/BinEdges.h
 	inc/MantidKernel/Histogram/ConstIterable.h
 	inc/MantidKernel/Histogram/Histogram.h
+	inc/MantidKernel/Histogram/HistogramData.h
+	inc/MantidKernel/Histogram/HistogramX.h
 	inc/MantidKernel/Histogram/Points.h
 	inc/MantidKernel/Histogram/VectorOf.h
 	inc/MantidKernel/ICatalogInfo.h
@@ -335,11 +338,13 @@ set ( TEST_FILES
 	FunctionTaskTest.h
 	GlobTest.h
 	HermitePolynomialsTest.h
+	HistogramHistogramDataTest.h
 	HistogramBinEdgesTest.h
 	HistogramConstIterableTest.h
+	HistogramHistogramXTest.h
 	HistogramPointsTest.h
-	HistogramVectorOfTest.h
 	HistogramTest.h
+	HistogramVectorOfTest.h
 	IPropertySettingsTest.h
 	ISaveableTest.h
 	IValidatorTest.h
