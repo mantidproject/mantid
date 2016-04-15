@@ -242,12 +242,12 @@ public:
   }
   void test_post_processing_rebin_step_with_logarithmic_rebinning() {
     auto alg = construct_standard_algorithm();
-    auto inWS = Create2DWorkspace154(2, 10, true);
+    auto inWS = Create2DWorkspace154(1, 10, true);
     inWS->setInstrument(m_tinyReflWS->getInstrument());
     inWS->getAxis(0)->setUnit("Wavelength");
     alg->setProperty("InputWorkspace", inWS);
     alg->setProperty("MomentumTransferMinimum", 1.0);
-    alg->setProperty("MomentumTransferStep", 0.1);
+    alg->setProperty("MomentumTransferStep", 0.2);
     alg->setProperty("MomentumTransferMaximum", 5.0);
     alg->setProperty("OutputWorkspace", "rebinnedWS");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -255,15 +255,15 @@ public:
     auto xData = rebinnedIvsQWS->readX(0);
     TSM_ASSERT_EQUALS("QMin should be the same as first Param entry (1.0)",
                       xData[0], 1.0);
-    double binWidthFromLogarithmicEquation = abs((xData[1] / xData[0]) - 1);
+    double binWidthFromLogarithmicEquation = fabs((xData[1] / xData[0]) - 1);
     TSM_ASSERT_DELTA("DQQ should be the same as abs(x[1]/x[0] - 1)",
-                     binWidthFromLogarithmicEquation, 0.1, 1e-06);
+                     binWidthFromLogarithmicEquation, 0.2, 1e-06);
     TSM_ASSERT_EQUALS("QMax should be the same as last Param entry",
                       xData[xData.size() - 1], 5.0);
   }
   void test_post_processing_rebin_step_with_linear_rebinning() {
     auto alg = construct_standard_algorithm();
-    auto inWS = Create2DWorkspace154(2, 10, true);
+    auto inWS = Create2DWorkspace154(1, 10, true);
     inWS->setInstrument(m_tinyReflWS->getInstrument());
     inWS->getAxis(0)->setUnit("Wavelength");
     alg->setProperty("InputWorkspace", inWS);
@@ -274,12 +274,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     MatrixWorkspace_sptr rebinnedIvsQWS = alg->getProperty("OutputWorkspace");
     auto xData = rebinnedIvsQWS->readX(0);
-    TSM_ASSERT_DELTA("QMin should be the same as the first Param entry (2.477)",
-                     xData[0], 1.0, 1e-06);
+    TSM_ASSERT_DELTA("QMin should be the same as the first Param entry (1.577)",
+                     xData[0], 1.577, 1e-06);
     TSM_ASSERT_DELTA("DQQ should the same as 0.2", xData[1] - xData[0], 0.2,
                      1e-06);
-    TSM_ASSERT_DELTA("QMax should be the same as the last Param entry (5.833)",
-                     xData[xData.size() - 1], 5.0, 1e-06);
+    TSM_ASSERT_DELTA("QMax should be the same as the last Param entry (5.233)",
+                     xData[xData.size() - 1], 5.233, 1e-06);
   }
   void test_Qrange() {
     // set up the axis for the instrument

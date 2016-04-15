@@ -900,9 +900,9 @@ void ReflTableViewPresenter::reduceRow(int rowNo) {
           .toDouble();
   const double dqq =
       m_model->data(m_model->index(rowNo, ReflTableSchema::COL_DQQ)).toDouble();
-  algReflOne->setProperty("QMin", qmin);
-  algReflOne->setProperty("DQQ", dqq);
-  algReflOne->setProperty("QMax", qmax);
+  algReflOne->setProperty("MomentumTransferMinimum", qmin);
+  algReflOne->setProperty("MomentumTransferStep", dqq);
+  algReflOne->setProperty("MomentumTransferMaximum", qmax);
   algReflOne->execute();
 
   if (!algReflOne->isExecuted())
