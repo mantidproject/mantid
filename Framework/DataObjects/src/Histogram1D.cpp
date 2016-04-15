@@ -36,8 +36,10 @@ const MantidVec &Histogram1D::readX() const { return m_histogram.constDataX(); }
 /// Returns a pointer to the x data
 MantidVecPtr Histogram1D::ptrX() const { return m_histogram.ptrX(); }
 
-const Kernel::Histogram &Histogram1D::histogram() const { return m_histogram; }
-Kernel::Histogram &Histogram1D::histogram() { return m_histogram; }
+const Histogram::Histogram &Histogram1D::histogram() const {
+  return m_histogram;
+}
+Histogram::Histogram &Histogram1D::histogram() { return m_histogram; }
 
 } // namespace DataObjects
 } // namespace Mantid

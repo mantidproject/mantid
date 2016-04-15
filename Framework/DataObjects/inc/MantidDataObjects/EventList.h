@@ -12,7 +12,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/Unit.h"
-#include "MantidKernel/Histogram/Histogram.h"
+#include "MantidHistogram/Histogram.h"
 #include <cstddef>
 #include <iosfwd>
 #include <set>
@@ -364,12 +364,12 @@ public:
                           Mantid::Kernel::Unit *toUnit);
   void convertUnitsQuickly(const double &factor, const double &power);
 
-  const Kernel::Histogram &histogram() const override;
-  Kernel::Histogram &histogram() override;
+  const Histogram::Histogram &histogram() const override;
+  Histogram::Histogram &histogram() override;
 
 private:
   /// Histogram object holding the histogram data. Currently only X.
-  Kernel::Histogram m_histogram;
+  Histogram::Histogram m_histogram;
 
   /// List of TofEvent (no weights).
   mutable std::vector<TofEvent> events;

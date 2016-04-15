@@ -19,7 +19,7 @@ using namespace Mantid::API;
 class CompositeFunctionTest_MocSpectrum : public SpectrumTester {
 public:
   CompositeFunctionTest_MocSpectrum(size_t nx, size_t ny)
-      : SpectrumTester(Kernel::getHistogramXMode(nx, ny)) {
+      : SpectrumTester(Histogram::getHistogramXMode(nx, ny)) {
     dataX().resize(nx);
     dataY().resize(ny);
     dataE().resize(ny);

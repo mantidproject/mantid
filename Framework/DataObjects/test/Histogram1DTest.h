@@ -14,8 +14,8 @@ using Mantid::MantidVec;
 class Histogram1DTest : public CxxTest::TestSuite {
 private:
   int nel; // Number of elements in the array
-  Histogram1D h{Mantid::Kernel::Histogram::XMode::Points};
-  Histogram1D h2{Mantid::Kernel::Histogram::XMode::Points};
+  Histogram1D h{Mantid::Histogram::Histogram::XMode::Points};
+  Histogram1D h2{Mantid::Histogram::Histogram::XMode::Points};
   MantidVec x1, y1, e1; // vectors
   typedef boost::shared_ptr<MantidVec> parray;
   parray pa, pb; // Shared_ptr to vectors

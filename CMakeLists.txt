@@ -140,10 +140,11 @@ set ( CXXTEST_ADD_PERFORMANCE OFF CACHE BOOL "Switch to add Performance tests to
 add_subdirectory ( Framework )
 
 include_directories ( Framework/Kernel/inc )
+include_directories ( Framework/Histogram/inc )
 include_directories ( Framework/Geometry/inc )
 include_directories ( Framework/API/inc )
 
-set ( CORE_MANTIDLIBS Kernel Geometry API )
+set ( CORE_MANTIDLIBS Kernel Histogram Geometry API )
 
 # Add a target for all GUI tests
 add_custom_target ( GUITests )
