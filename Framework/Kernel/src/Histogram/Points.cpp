@@ -7,6 +7,8 @@ namespace Kernel {
 Points::Points(const BinEdges &edges) {
   if (!edges)
     return;
+  if (edges.size() == 1)
+    throw std::logic_error("Points: Cannot construct from BinEdges of size 1");
   m_data = make_cow<std::vector<double>>();
   if (edges.size() < 2)
     return;

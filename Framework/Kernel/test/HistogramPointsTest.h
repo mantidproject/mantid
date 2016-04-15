@@ -35,6 +35,11 @@ public:
     TS_ASSERT_EQUALS(points.size(), 0);
   }
 
+  void test_construct_from_invalid_BinEdges() {
+    const BinEdges edges(1);
+    TS_ASSERT_THROWS(Points points(edges), std::logic_error);
+  }
+
   void test_construct_from_BinEdges() {
     const BinEdges edges{1.0, 3.0, 7.0, 15.0};
     const Points points(edges);
