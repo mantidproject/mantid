@@ -31,7 +31,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/INearestNeighbours.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidHistogram/Histogram.h"
+#include "MantidHistogramData/Histogram.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -41,9 +41,9 @@ using namespace Mantid;
 /** Helper class that implements ISpectrum */
 class SpectrumTester : public ISpectrum {
 public:
-  SpectrumTester(Histogram::Histogram::XMode mode)
+  SpectrumTester(HistogramData::Histogram::XMode mode)
       : ISpectrum(), m_histogram(mode) {}
-  SpectrumTester(const specnum_t specNo, Histogram::Histogram::XMode mode)
+  SpectrumTester(const specnum_t specNo, HistogramData::Histogram::XMode mode)
       : ISpectrum(specNo), m_histogram(mode) {}
 
   void setX(const MantidVec &X) override { m_histogram.setX(X); }
@@ -96,11 +96,11 @@ public:
     std::fill(eValues.begin(), eValues.end(), 0.0);
   }
 
-  const Histogram::Histogram &histogram() const { return m_histogram; }
-  Histogram::Histogram &histogram() { return m_histogram; }
+  const HistogramData::Histogram &histogram() const { return m_histogram; }
+  HistogramData::Histogram &histogram() { return m_histogram; }
 
 protected:
-  Histogram::Histogram m_histogram;
+  HistogramData::Histogram m_histogram;
   MantidVec data;
   MantidVec data_E;
 };
@@ -118,7 +118,7 @@ public:
   const std::string id() const override { return "WorkspaceTester"; }
   void init(const size_t &numspec, const size_t &j, const size_t &k) override {
     spec = numspec;
-    vec.resize(spec, Histogram::getHistogramXMode(j, k));
+    vec.resize(spec, HistogramData::getHistogramXMode(j, k));
     for (size_t i = 0; i < spec; i++) {
       vec[i].dataX().resize(j, 1.0);
       vec[i].dataY().resize(k, 1.0);

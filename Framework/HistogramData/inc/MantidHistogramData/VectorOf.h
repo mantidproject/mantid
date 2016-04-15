@@ -1,12 +1,12 @@
-#ifndef MANTID_HISTOGRAM_VECTOROF_H_
-#define MANTID_HISTOGRAM_VECTOROF_H_
+#ifndef MANTID_HISTOGRAMDATA_VECTOROF_H_
+#define MANTID_HISTOGRAMDATA_VECTOROF_H_
 
-#include "MantidHistogram/DllConfig.h"
+#include "MantidHistogramData/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/make_cow.h"
 
 namespace Mantid {
-namespace Histogram {
+namespace HistogramData {
 
 /** VectorOf : TODO: DESCRIPTION
 
@@ -99,7 +99,7 @@ protected:
   Kernel::cow_ptr<std::vector<double>> m_data{nullptr};
 };
 
-} // namespace Histogram
+} // namespace HistogramData
 } // namespace Mantid
 
-#endif /* MANTID_HISTOGRAM_VECTOROF_H_ */
+#endif /* MANTID_HISTOGRAMDATA_VECTOROF_H_ */

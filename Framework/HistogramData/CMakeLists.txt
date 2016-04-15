@@ -6,13 +6,13 @@ set ( SRC_FILES
   )
 
 set ( INC_FILES
-  inc/MantidHistogram/BinEdges.h
-  inc/MantidHistogram/ConstIterable.h
-  inc/MantidHistogram/Histogram.h
-  inc/MantidHistogram/HistogramData.h
-  inc/MantidHistogram/HistogramX.h
-  inc/MantidHistogram/Points.h
-  inc/MantidHistogram/VectorOf.h
+  inc/MantidHistogramData/BinEdges.h
+  inc/MantidHistogramData/ConstIterable.h
+  inc/MantidHistogramData/Histogram.h
+  inc/MantidHistogramData/HistogramData.h
+  inc/MantidHistogramData/HistogramX.h
+  inc/MantidHistogramData/Points.h
+  inc/MantidHistogramData/VectorOf.h
   )
 
 set ( TEST_FILES
@@ -33,23 +33,23 @@ endif()
 
 if(UNITY_BUILD)
   include(UnityBuild)
-  enable_unity_build(Histogram SRC_FILES SRC_UNITY_IGNORE_FILES 10)
+  enable_unity_build(HistogramData SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
 # Add the target for this directory
-add_library ( Histogram ${SRC_FILES} ${INC_FILES} )
+add_library ( HistogramData ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
-set_target_properties ( Histogram PROPERTIES OUTPUT_NAME MantidHistogram
-  COMPILE_DEFINITIONS IN_MANTID_HISTOGRAM )
+set_target_properties ( HistogramData PROPERTIES OUTPUT_NAME MantidHistogramData
+  COMPILE_DEFINITIONS IN_MANTID_HISTOGRAMDATA )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( Histogram PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties ( HistogramData PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
 
 # Add to the 'Framework' group in VS
-set_property ( TARGET Histogram PROPERTY FOLDER "MantidFramework" )
+set_property ( TARGET HistogramData PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Histogram LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} )
+target_link_libraries ( HistogramData LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} )
 
 # Add the unit tests directory
 add_subdirectory ( test )
@@ -58,4 +58,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Histogram  ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+install ( TARGETS HistogramData ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )

@@ -1,10 +1,10 @@
-#ifndef MANTID_HISTOGRAM_CONSTITERABLE_H_
-#define MANTID_HISTOGRAM_CONSTITERABLE_H_
+#ifndef MANTID_HISTOGRAMDATA_CONSTITERABLE_H_
+#define MANTID_HISTOGRAMDATA_CONSTITERABLE_H_
 
-#include "MantidHistogram/DllConfig.h"
+#include "MantidHistogramData/DllConfig.h"
 
 namespace Mantid {
-namespace Histogram {
+namespace HistogramData {
 
 /** ConstIterable : TODO: DESCRIPTION
 
@@ -51,7 +51,7 @@ auto cend(const ConstIterable<T> &container)
   return static_cast<const T *>(&container)->data().cend();
 }
 
-} // namespace Histogram
+} // namespace HistogramData
 } // namespace Mantid
 
-#endif /* MANTID_HISTOGRAM_CONSTITERABLE_H_ */
+#endif /* MANTID_HISTOGRAMDATA_CONSTITERABLE_H_ */

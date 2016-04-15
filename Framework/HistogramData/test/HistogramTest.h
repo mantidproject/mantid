@@ -1,14 +1,14 @@
-#ifndef MANTID_HISTOGRAM_HISTOGRAMTEST_H_
-#define MANTID_HISTOGRAM_HISTOGRAMTEST_H_
+#ifndef MANTID_HISTOGRAMDATA_HISTOGRAMTEST_H_
+#define MANTID_HISTOGRAMDATA_HISTOGRAMTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidHistogram/Histogram.h"
+#include "MantidHistogramData/Histogram.h"
 
-using Mantid::Histogram::Histogram;
-using Mantid::Histogram::getHistogramXMode;
-using Mantid::Histogram::Points;
-using Mantid::Histogram::BinEdges;
+using Mantid::HistogramData::Histogram;
+using Mantid::HistogramData::getHistogramXMode;
+using Mantid::HistogramData::Points;
+using Mantid::HistogramData::BinEdges;
 
 class HistogramTest : public CxxTest::TestSuite {
 public:
@@ -152,4 +152,4 @@ public:
   }
 };
 
-#endif /* MANTID_HISTOGRAM_HISTOGRAMTEST_H_ */
+#endif /* MANTID_HISTOGRAMDATA_HISTOGRAMTEST_H_ */
