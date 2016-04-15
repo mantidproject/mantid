@@ -1,13 +1,13 @@
-#include "MantidKernel/Histogram/BinEdges.h"
-#include "MantidKernel/Histogram/Points.h"
+#include "MantidHistogram/BinEdges.h"
+#include "MantidHistogram/Points.h"
 
 namespace Mantid {
-namespace Kernel {
+namespace Histogram {
 
 BinEdges::BinEdges(const Points &points) {
   if (!points)
     return;
-  m_data = make_cow<std::vector<double>>();
+  m_data = Kernel::make_cow<std::vector<double>>();
   const size_t numPoints = points.size();
   const size_t numEdges = numPoints + 1;
 
@@ -32,5 +32,5 @@ BinEdges::BinEdges(const Points &points) {
       points[numPoints - 1] + (points[numPoints - 1] - data[numEdges - 2]);
 }
 
-} // namespace Kernel
+} // namespace Histogram
 } // namespace Mantid

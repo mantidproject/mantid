@@ -1,12 +1,12 @@
-#ifndef MANTID_KERNEL_HISTOGRAM_VECTOROF_H_
-#define MANTID_KERNEL_HISTOGRAM_VECTOROF_H_
+#ifndef MANTID_HISTOGRAM_VECTOROF_H_
+#define MANTID_HISTOGRAM_VECTOROF_H_
 
-#include "MantidKernel/DllConfig.h"
+#include "MantidHistogram/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/make_cow.h"
 
 namespace Mantid {
-namespace Kernel {
+namespace Histogram {
 
 /** VectorOf : TODO: DESCRIPTION
 
@@ -35,13 +35,13 @@ template <class T> class VectorOf {
 public:
   VectorOf() = default;
   VectorOf(size_t count, const double &value) {
-    m_data = make_cow<std::vector<double>>(count, value);
+    m_data = Kernel::make_cow<std::vector<double>>(count, value);
   }
   explicit VectorOf(size_t count) {
-    m_data = make_cow<std::vector<double>>(count);
+    m_data = Kernel::make_cow<std::vector<double>>(count);
   }
   VectorOf(std::initializer_list<double> init) {
-    m_data = make_cow<std::vector<double>>(init);
+    m_data = Kernel::make_cow<std::vector<double>>(init);
   }
   VectorOf(const VectorOf &) = default;
   VectorOf(VectorOf &&) = default;
@@ -49,22 +49,22 @@ public:
   VectorOf &operator=(VectorOf &&) = default;
 
   VectorOf &operator=(std::initializer_list<double> ilist) {
-    m_data = make_cow<std::vector<double>>(ilist);
+    m_data = Kernel::make_cow<std::vector<double>>(ilist);
     return *this;
   }
 
   // TODO figure out if we want all these overloads.
-  explicit VectorOf(const cow_ptr<std::vector<double>> &other)
+  explicit VectorOf(const Kernel::cow_ptr<std::vector<double>> &other)
       : m_data(other) {}
   explicit VectorOf(const boost::shared_ptr<std::vector<double>> &other)
       : m_data(other) {}
   // TODO cow_ptr is not movable, can we implement move?
   explicit VectorOf(const std::vector<double> &data)
-      : m_data(make_cow<std::vector<double>>(data)) {}
+      : m_data(Kernel::make_cow<std::vector<double>>(data)) {}
   // VectorOf(std::vector<double> &&data) { m_data =
-  // make_cow<std::vector<double>>(std::move(data)); }
+  // Kernel::make_cow<std::vector<double>>(std::move(data)); }
 
-  VectorOf &operator=(const cow_ptr<std::vector<double>> &other) {
+  VectorOf &operator=(const Kernel::cow_ptr<std::vector<double>> &other) {
     m_data = other;
     return *this;
   }
@@ -74,7 +74,7 @@ public:
   }
   VectorOf &operator=(const std::vector<double> &data) {
     if (!m_data)
-      m_data = make_cow<std::vector<double>>(data);
+      m_data = Kernel::make_cow<std::vector<double>>(data);
     else
       m_data.access() = data;
     return *this;
@@ -89,17 +89,17 @@ public:
   const std::vector<double> &data() const { return *m_data; }
   const std::vector<double> &constData() const { return *m_data; }
   std::vector<double> &data() { return m_data.access(); }
-  cow_ptr<std::vector<double>> cowData() const { return m_data; }
+  Kernel::cow_ptr<std::vector<double>> cowData() const { return m_data; }
 
 protected:
   // This is used as base class only, cannot delete polymorphically, so
   // destructor is protected.
   ~VectorOf() = default;
 
-  cow_ptr<std::vector<double>> m_data{nullptr};
+  Kernel::cow_ptr<std::vector<double>> m_data{nullptr};
 };
 
-} // namespace Kernel
+} // namespace Histogram
 } // namespace Mantid
 
-#endif /* MANTID_KERNEL_HISTOGRAM_VECTOROF_H_ */
+#endif /* MANTID_HISTOGRAM_VECTOROF_H_ */

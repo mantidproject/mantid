@@ -1,14 +1,14 @@
-#ifndef MANTID_KERNEL_HISTOGRAM_HISTOGRAMX_H_
-#define MANTID_KERNEL_HISTOGRAM_HISTOGRAMX_H_
+#ifndef MANTID_HISTOGRAM_HISTOGRAMX_H_
+#define MANTID_HISTOGRAM_HISTOGRAMX_H_
 
-#include "MantidKernel/DllConfig.h"
-#include "MantidKernel/Histogram/HistogramData.h"
-#include "MantidKernel/Histogram/ConstIterable.h"
-#include "MantidKernel/Histogram/Points.h"
-#include "MantidKernel/Histogram/BinEdges.h"
+#include "MantidHistogram/DllConfig.h"
+#include "MantidHistogram/HistogramData.h"
+#include "MantidHistogram/ConstIterable.h"
+#include "MantidHistogram/Points.h"
+#include "MantidHistogram/BinEdges.h"
 
 namespace Mantid {
-namespace Kernel {
+namespace Histogram {
 
 /** HistogramX : TODO: DESCRIPTION
 
@@ -33,7 +33,7 @@ namespace Kernel {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_KERNEL_DLL HistogramX : public HistogramData<HistogramX> {
+class MANTID_HISTOGRAM_DLL HistogramX : public HistogramData<HistogramX> {
 public:
   explicit HistogramX(const Points &points);
   explicit HistogramX(const BinEdges &binEdges);
@@ -67,7 +67,7 @@ template <typename T> void HistogramX::setBinEdges(T &&data) {
   m_data = edges.cowData();
 }
 
-} // namespace Kernel
+} // namespace Histogram
 } // namespace Mantid
 
-#endif /* MANTID_KERNEL_HISTOGRAM_HISTOGRAMX_H_ */
+#endif /* MANTID_HISTOGRAM_HISTOGRAMX_H_ */

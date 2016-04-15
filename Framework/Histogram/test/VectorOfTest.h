@@ -1,14 +1,16 @@
-#ifndef MANTID_KERNEL_HISTOGRAM_VECTOROFTEST_H_
-#define MANTID_KERNEL_HISTOGRAM_VECTOROFTEST_H_
+#ifndef MANTID_HISTOGRAM_VECTOROFTEST_H_
+#define MANTID_HISTOGRAM_VECTOROFTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/make_cow.h"
-#include "MantidKernel/Histogram/VectorOf.h"
-#include "MantidKernel/Histogram/ConstIterable.h"
+#include "MantidHistogram/VectorOf.h"
+#include "MantidHistogram/ConstIterable.h"
 
 using namespace Mantid;
-using namespace Kernel;
+using namespace Histogram;
+using Mantid::Kernel::cow_ptr;
+using Mantid::Kernel::make_cow;
 
 class VectorOfTester : public VectorOf<VectorOfTester>,
                        public ConstIterable<VectorOfTester> {
@@ -18,14 +20,12 @@ public:
   VectorOfTester() = default;
 };
 
-class HistogramVectorOfTest : public CxxTest::TestSuite {
+class VectorOfTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static HistogramVectorOfTest *createSuite() {
-    return new HistogramVectorOfTest();
-  }
-  static void destroySuite(HistogramVectorOfTest *suite) { delete suite; }
+  static VectorOfTest *createSuite() { return new VectorOfTest(); }
+  static void destroySuite(VectorOfTest *suite) { delete suite; }
 
   void test_empty_constructor() {
     const VectorOfTester values{};
@@ -334,4 +334,4 @@ public:
   }
 };
 
-#endif /* MANTID_KERNEL_HISTOGRAM_VECTOROFTEST_H_ */
+#endif /* MANTID_HISTOGRAM_VECTOROFTEST_H_ */

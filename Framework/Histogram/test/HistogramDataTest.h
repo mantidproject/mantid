@@ -1,26 +1,24 @@
-#ifndef MANTID_KERNEL_HISTOGRAM_HISTOGRAMDATATEST_H_
-#define MANTID_KERNEL_HISTOGRAM_HISTOGRAMDATATEST_H_
+#ifndef MANTID_HISTOGRAM_HISTOGRAMDATATEST_H_
+#define MANTID_HISTOGRAM_HISTOGRAMDATATEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/Histogram/HistogramData.h"
+#include "MantidHistogram/HistogramData.h"
 #include "MantidKernel/make_cow.h"
 
-using Mantid::Kernel::HistogramData;
+using Mantid::Histogram::HistogramData;
 using Mantid::Kernel::make_cow;
 
 struct HistogramDataTester : public HistogramData<HistogramDataTester> {
   using HistogramData<HistogramDataTester>::HistogramData;
 };
 
-class HistogramHistogramDataTest : public CxxTest::TestSuite {
+class HistogramDataTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static HistogramHistogramDataTest *createSuite() {
-    return new HistogramHistogramDataTest();
-  }
-  static void destroySuite(HistogramHistogramDataTest *suite) { delete suite; }
+  static HistogramDataTest *createSuite() { return new HistogramDataTest(); }
+  static void destroySuite(HistogramDataTest *suite) { delete suite; }
 
   void test_constructor() {
     TS_ASSERT_THROWS_NOTHING(
@@ -62,4 +60,4 @@ public:
   }
 };
 
-#endif /* MANTID_KERNEL_HISTOGRAM_HISTOGRAMDATATEST_H_ */
+#endif /* MANTID_HISTOGRAM_HISTOGRAMDATATEST_H_ */
