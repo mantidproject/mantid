@@ -154,6 +154,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/HKLGenerator.h
 	inc/MantidGeometry/Crystal/IPeak.h
 	inc/MantidGeometry/Crystal/IndexingUtils.h
+	inc/MantidGeometry/Crystal/IsHKL.h
 	inc/MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h
 	inc/MantidGeometry/Crystal/MatrixVectorPair.h
 	inc/MantidGeometry/Crystal/MatrixVectorPairParser.h
@@ -191,7 +192,6 @@ set ( INC_FILES
 	inc/MantidGeometry/IDetector_fwd.h
 	inc/MantidGeometry/IObjComponent.h
 	inc/MantidGeometry/Instrument.h
-	inc/MantidGeometry/Instrument_fwd.h
 	inc/MantidGeometry/Instrument/CompAssembly.h
 	inc/MantidGeometry/Instrument/Component.h
 	inc/MantidGeometry/Instrument/ComponentHelper.h
@@ -215,6 +215,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/RectangularDetectorPixel.h
 	inc/MantidGeometry/Instrument/ReferenceFrame.h
 	inc/MantidGeometry/Instrument/XMLInstrumentParameter.h
+	inc/MantidGeometry/Instrument_fwd.h
 	inc/MantidGeometry/MDGeometry/CompositeImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/GeneralFrame.h
 	inc/MantidGeometry/MDGeometry/HKL.h
@@ -325,6 +326,7 @@ set ( TEST_FILES
 	InstrumentDefinitionParserTest.h
 	InstrumentRayTracerTest.h
 	InstrumentTest.h
+	IsHKLTest.h
 	IsotropicAtomBraggScattererTest.h
 	LineIntersectVisitTest.h
 	LineTest.h
