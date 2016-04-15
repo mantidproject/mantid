@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -36,14 +37,16 @@ namespace Geometry {
 */
 template <typename NumericType, typename Derived> class IsHKL {
 public:
-  typedef typename std::array<NumericType, 3>::iterator iterator;
-  typedef typename std::array<NumericType, 3>::const_iterator const_iterator;
+  typedef typename std::array<NumericType, 3> storage_type;
+
+  typedef typename storage_type::iterator iterator;
+  typedef typename storage_type::const_iterator const_iterator;
 
   static constexpr NumericType comparison_tolerance =
       std::numeric_limits<NumericType>::epsilon();
 
   IsHKL() : m_data() {}
-  IsHKL(const IsHKL<NumericType, Derived> &other) : m_data(other.m_data) {}
+  IsHKL(const Derived &other) : m_data(other.m_data) {}
   IsHKL(const NumericType &h, const NumericType &k, const NumericType &l)
       : m_data({{h, k, l}}) {}
 
@@ -75,14 +78,23 @@ public:
   }
 
   bool operator==(const Derived &other) const {
-    return (static_cast<const Derived &>(*this) - other).isZero();
+    return std::equal(cbegin(), cend(), other.cbegin(),
+                      [](const NumericType &lhs, const NumericType &rhs) {
+                        return std::abs(lhs - rhs) <=
+                               Derived::comparison_tolerance;
+                      });
   }
 
   bool operator!=(const Derived &other) const { return !(operator==(other)); }
 
   bool operator<(const Derived &other) const {
-    return (static_cast<const Derived &>(*this) - other)
-        .isLessThan(static_cast<NumericType>(0));
+    auto mismatch = std::mismatch(
+        cbegin(), cend(), other.cbegin(),
+        [](const NumericType &lhs, const NumericType &rhs) {
+          return std::abs(lhs - rhs) <= Derived::comparison_tolerance;
+        });
+
+    return mismatch.first != cend() && *(mismatch.first) < *(mismatch.second);
   }
 
   bool operator>(const Derived &other) const {
@@ -98,7 +110,7 @@ public:
   bool isLessThan(const NumericType &scalar) const {
     auto match =
         std::find_if(cbegin(), cend(), [scalar](const NumericType &element) {
-          return std::fabs(element - scalar) > Derived::comparison_tolerance;
+          return std::abs(element - scalar) > Derived::comparison_tolerance;
         });
 
     return match != cend() && *match < scalar;
@@ -126,7 +138,46 @@ public:
 protected:
   ~IsHKL() {}
 
+private:
   std::array<NumericType, 3> m_data;
+};
+
+class ProHKL : public IsHKL<double, ProHKL> {
+public:
+  using IsHKL<double, ProHKL>::IsHKL;
+
+  explicit ProHKL(const Kernel::V3D &hkl) : ProHKL(hkl.X(), hkl.Y(), hkl.Z()) {}
+};
+
+class IntegerHKL : public IsHKL<int, IntegerHKL> {
+public:
+  using IsHKL<int, IntegerHKL>::IsHKL;
+
+  explicit IntegerHKL(const Kernel::V3D &hkl)
+      : IntegerHKL(static_cast<int>(std::round(hkl.X())),
+                   static_cast<int>(std::round(hkl.Y())),
+                   static_cast<int>(std::round(hkl.Z()))) {}
+
+  explicit IntegerHKL(const ProHKL &hkl)
+      : IntegerHKL(static_cast<int>(std::round(hkl.h())),
+                   static_cast<int>(std::round(hkl.k())),
+                   static_cast<int>(std::round(hkl.l()))) {}
+};
+
+class FractionalHKL : public IsHKL<double, FractionalHKL> {
+public:
+  using IsHKL<double, FractionalHKL>::IsHKL;
+
+  explicit FractionalHKL(const Kernel::V3D &hkl)
+      : FractionalHKL(hkl.X(), hkl.Y(), hkl.Z()) {}
+
+  explicit FractionalHKL(const ProHKL &hkl)
+      : FractionalHKL(hkl.h(), hkl.k(), hkl.l()) {}
+
+  explicit FractionalHKL(const IntegerHKL &hkl)
+      : FractionalHKL(static_cast<double>(hkl.h()),
+                      static_cast<double>(hkl.k()),
+                      static_cast<double>(hkl.l())) {}
 };
 
 } // namespace Geometry
