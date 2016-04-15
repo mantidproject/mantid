@@ -432,16 +432,22 @@ void PeakPickerTool::addPeak(double c,double h)
   MantidQt::MantidWidgets::PropertyHandler* handler = m_fitPropertyBrowser->addFunction(fnName);
   if (!handler || !handler->pfun()) return;
   handler->setCentre(c);
-  double width = handler->fwhm();
-  if (width == 0 && m_width != 0.0)
+  //if previous width was set use that
+  if (handler->fwhm() == 0 && m_width != 0.0)
   {
     handler->setFwhm(m_width);
   }
-  if (handler->fwhm() > 0.)
+  handler->calcBase();
+  // if no width still try to estimate
+  if (handler->fwhm() == 0.)
   {
-    handler->calcBase();
+    double w = handler->EstimateFwhm();
+    if (w > 0) {
+      handler->setFwhm(w);
+    }
   }
   handler->setHeight(h);
+
 }
 
 // Give new centre and height to the current peak
