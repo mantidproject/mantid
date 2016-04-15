@@ -1106,8 +1106,8 @@ double PropertyHandler::EstimateFwhm() const
     size_t wi = m_browser->workspaceIndex();
     const Mantid::MantidVec &X = ws->readX(wi);
     const Mantid::MantidVec &Y = ws->readY(wi);
-    int n = static_cast<int>(Y.size()) - 1;
-    if (m_ci < 0 || m_ci > n) {
+    size_t n = Y.size() - 1;
+    if (m_ci < 0 || m_ci > static_cast<int>(n)) {
       fwhm = 0.;
     }
     else {
