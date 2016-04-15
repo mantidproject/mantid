@@ -17,6 +17,7 @@ if ( CXXTEST_FOUND )
             DataHandling
             DataObjects
             Geometry
+            Histogram
             Kernel
             ${GSL_LIBRARIES}
             ${Boost_LIBRARIES}

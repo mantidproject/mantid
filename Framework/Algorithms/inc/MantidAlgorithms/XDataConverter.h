@@ -6,7 +6,6 @@
 //------------------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidKernel/Histogram/Histogram.h"
 
 namespace Mantid {
 namespace Algorithms {

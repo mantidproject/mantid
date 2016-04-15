@@ -4,7 +4,7 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/Histogram/Histogram.h"
+#include "MantidHistogram/Histogram.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -35,14 +35,14 @@ namespace DataObjects {
 class DLLExport Histogram1D : public Mantid::API::ISpectrum {
 private:
   /// Histogram object holding the histogram data. Currently only X.
-  Kernel::Histogram m_histogram;
+  Histogram::Histogram m_histogram;
 
 protected:
   MantidVecPtr refY; ///< RefCounted Y
   MantidVecPtr refE; ///< RefCounted Error
 
 public:
-  Histogram1D(Kernel::Histogram::XMode mode)
+  Histogram1D(Histogram::Histogram::XMode mode)
       : API::ISpectrum(), m_histogram(mode) {}
 
   void setX(const MantidVec &X) override;
@@ -102,8 +102,8 @@ public:
     return ((readX().size() + refY->size() + refE->size()) * sizeof(double));
   }
 
-  const Kernel::Histogram &histogram() const override;
-  Kernel::Histogram &histogram() override;
+  const Histogram::Histogram &histogram() const override;
+  Histogram::Histogram &histogram() override;
 };
 
 } // namespace DataObjects

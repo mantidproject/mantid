@@ -952,13 +952,13 @@ bool MatrixWorkspace::isHistogramData() const {
   // TODOHIST temporary sanity check
   if (isHist) {
     if (getSpectrum(0)->histogram().xMode() !=
-        Kernel::Histogram::XMode::BinEdges) {
+        Histogram::Histogram::XMode::BinEdges) {
       throw std::logic_error("In MatrixWorkspace::isHistogramData(): "
                              "Histogram::Xmode is not BinEdges");
     }
   } else {
     if (getSpectrum(0)->histogram().xMode() !=
-        Kernel::Histogram::XMode::Points) {
+        Histogram::Histogram::XMode::Points) {
       throw std::logic_error("In MatrixWorkspace::isHistogramData(): "
                              "Histogram::Xmode is not Points");
     }
@@ -966,7 +966,7 @@ bool MatrixWorkspace::isHistogramData() const {
   return isHist;
 }
 
-void MatrixWorkspace::setXMode(Kernel::Histogram::XMode mode) {
+void MatrixWorkspace::setXMode(Histogram::Histogram::XMode mode) {
   for (size_t i = 0; i < getNumberHistograms(); ++i)
     getSpectrum(i)->histogram().setXMode(mode);
 }
