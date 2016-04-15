@@ -1,14 +1,17 @@
 # pylint: disable=anomalous-backslash-in-string, global-variable-undefined, global-variable-not-assigned
 # pylint: disable=invalid-name, too-many-arguments, unidiomatic-typecheck, too-many-branches, redefined-builtin
 
-from mantid.simpleapi import *
-import numpy as n
 import os.path
 import sys
+
+from mantid.simpleapi import *
+import numpy as n
+
 
 # directories generator
 import pearl_calib_factory
 import pearl_cycle_factory
+
 
 def PEARL_startup(usern="matt", thiscycle='11_1'):
     global pearl_file_dir
@@ -51,7 +54,7 @@ def PEARL_startup(usern="matt", thiscycle='11_1'):
     print "Raw Data in :   ", currentdatadir
     cycle = thiscycle
     instver = "new2"
-    # userdataprocessed is the data output directory 
+    # userdataprocessed is the data output directory
     userdataprocessed = "P:\\users\\" + "Cycle_" + thiscycle + "\\" + usern + "\\"
     # sys.path.append(userdataprocessed)
     # userdataprocessed="C:\PEARL\\"
@@ -106,6 +109,7 @@ def PEARL_getcycle(number):
 
     return
 
+
 # pylint: disable=unused-variable, too-many-locals, too-many-statements, undefined-loop-variable, redefined-outer-name
 def PEARL_getcalibfiles():
     global calfile
@@ -119,6 +123,7 @@ def PEARL_getcalibfiles():
         pearl_calib_factory.get_calibration_dir(cycle, tt_mode, pearl_file_dir)
     return
 
+
 # sets the intial directory for all calibration files
 def pearl_initial_dir(directory='P:\Mantid\\'):
     global pearl_file_dir
@@ -126,25 +131,29 @@ def pearl_initial_dir(directory='P:\Mantid\\'):
     print "Set pearl_file_dir directory to ", directory
     return
 
+
 # sets the current raw data files directory
-def pearl_set_currentdatadir(directory = "I:\\"):
+def pearl_set_currentdatadir(directory="I:\\"):
     global currentdatadir
     currentdatadir = directory
     print "Set currentdatadir directory to ", directory
     return
 
+
 # sets the user data output directory
-def pearl_set_userdataoutput_dir(directory = "P:\\users\\MantidOutput\\"):
+def pearl_set_userdataoutput_dir(directory="P:\\users\\MantidOutput\\"):
     global userdataprocessed
     userdataprocessed = directory
     print "Set userdataprocessed directory to ", directory
     return
+
 
 def PEARL_setdatadir(directory="C:\PEARL\RAW\\"):
     global pearl_datadir
     pearl_datadir = directory
     print "Set pearl_datadir directory to ", directory
     return
+
 
 # sets the atten file's directory
 def PEARL_setattenfile(new_atten="P:\Mantid\\Attentuation\\PRL985_WC_HOYBIDE_NK_10MM_FF.OUT"):
