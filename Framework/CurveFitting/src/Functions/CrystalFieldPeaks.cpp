@@ -280,13 +280,13 @@ CrystalFieldPeaks::CrystalFieldPeaks()
   declareAttribute("ToleranceEnergy", Attribute(1.0e-10));
   declareAttribute("ToleranceIntensity", Attribute(1.0e-3));
 
-  declareParameter("Bmol_x", 0.0, "The x-component of the molecular field.");
-  declareParameter("Bmol_y", 0.0, "The y-component of the molecular field.");
-  declareParameter("Bmol_z", 0.0, "The z-component of the molecular field.");
+  declareParameter("BmolX", 0.0, "The x-component of the molecular field.");
+  declareParameter("BmolY", 0.0, "The y-component of the molecular field.");
+  declareParameter("BmolZ", 0.0, "The z-component of the molecular field.");
 
-  declareParameter("Bext_x", 0.0, "The x-component of the external field.");
-  declareParameter("Bext_y", 0.0, "The y-component of the external field.");
-  declareParameter("Bext_z", 0.0, "The z-component of the external field.");
+  declareParameter("BextX", 0.0, "The x-component of the external field.");
+  declareParameter("BextY", 0.0, "The y-component of the external field.");
+  declareParameter("BextZ", 0.0, "The z-component of the external field.");
 
   declareParameter("B20", 0.0, "Real part of the B20 field parameter.");
   declareParameter("B21", 0.0, "Real part of the B21 field parameter.");
@@ -346,14 +346,14 @@ void CrystalFieldPeaks::functionGeneral(const API::FunctionDomainGeneral &,
   int nre = ionIter->second;
 
   DoubleFortranVector bmol(1, 3);
-  bmol(1) = getParameter("Bmol_x");
-  bmol(2) = getParameter("Bmol_y");
-  bmol(3) = getParameter("Bmol_z");
+  bmol(1) = getParameter("BmolX");
+  bmol(2) = getParameter("BmolY");
+  bmol(3) = getParameter("BmolZ");
 
   DoubleFortranVector bext(1, 3);
-  bext(1) = getParameter("Bext_x");
-  bext(2) = getParameter("Bext_y");
-  bext(3) = getParameter("Bext_z");
+  bext(1) = getParameter("BextX");
+  bext(2) = getParameter("BextY");
+  bext(3) = getParameter("BextZ");
 
   double B20 = getParameter("B20");
   double B21 = getParameter("B21");
