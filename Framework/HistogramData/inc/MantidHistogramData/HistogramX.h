@@ -38,6 +38,8 @@ public:
   explicit HistogramX(const Points &points);
   explicit HistogramX(const BinEdges &binEdges);
 
+  HistogramX &operator=(const HistogramX &rhs);
+
   Points points() const;
   template <typename T> void setPoints(T &&data);
   BinEdges binEdges() const;

@@ -12,6 +12,17 @@ HistogramX::HistogramX(const BinEdges &binEdges)
     throw std::logic_error("HistogramX: BinEdges size cannot be 1");
 }
 
+HistogramX &HistogramX::operator=(const HistogramX &rhs) {
+  if (rhs.xMode() == XMode::Points) {
+    checkSize(rhs.points());
+  } else {
+    checkSize(rhs.binEdges());
+  }
+  m_xMode = rhs.m_xMode;
+  m_data = rhs.m_data;
+  return *this;
+}
+
 Points HistogramX::points() const {
   if (xMode() == XMode::BinEdges)
     return Points(BinEdges(m_data));
