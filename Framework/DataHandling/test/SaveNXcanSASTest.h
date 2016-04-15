@@ -293,8 +293,33 @@ public:
                   transmissionCanParameters);
 
         // Clean up
-        // removeFile(parameters.filename);
+        removeFile(parameters.filename);
     }
+
+    void test_that_2D_workspace_is_saved_correctly() {
+      // Arrange
+      // Arrange
+      NXcanSASTestParameters parameters;
+      removeFile(parameters.filename);
+
+      parameters.detectors.push_back("front-detector");
+      parameters.detectors.push_back("rear-detector");
+      parameters.invalidDetectors = false;
+
+      auto ws = provide2DWorkspace(parameters);
+      set2DValues(ws);
+
+      // Act
+      save_file_no_issues(ws, parameters);
+
+
+      // Assert
+      //do_assert(parameters);
+
+      // Clean up
+      //removeFile(parameters.filename);
+    }
+
 
 private:
     void removeFile(std::string filename)
@@ -377,6 +402,80 @@ private:
         ws->getAxis(0)->unit()
             = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
         return ws;
+    }
+
+    Mantid::API::MatrixWorkspace_sptr
+    provide2DWorkspace(NXcanSASTestParameters &parameters) {
+      auto ws = provide1DWorkspace(parameters);
+
+      std::string axisBinning = std::to_string(parameters.xmin) + ",1," + std::to_string(parameters.xmax);
+
+
+      // Convert to Histogram data
+      auto toHistAlg
+          = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+              "ConvertToHistogram");
+      std::string toHistoOutputName("toHistOutput");
+      toHistAlg->initialize();
+      toHistAlg->setChild(true);
+      toHistAlg->setProperty("InputWorkspace", ws);
+      toHistAlg->setProperty("OutputWorkspace", toHistoOutputName);
+      toHistAlg->execute();
+      ws = toHistAlg->getProperty("OutputWorkspace");
+
+      // Convert Spectrum Axis
+      auto axisAlg
+          = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+              "ConvertSpectrumAxis");
+      std::string toAxisOutputName("toAxisOutput");
+      axisAlg->initialize();
+      axisAlg->setChild(true);
+      axisAlg->setProperty("InputWorkspace", ws);
+      axisAlg->setProperty("OutputWorkspace", toAxisOutputName);
+      axisAlg->setProperty("Target", "Theta");
+      axisAlg->execute();
+      ws = axisAlg->getProperty("OutputWorkspace");
+
+      // Rebin 2D
+      auto rebin2DAlg
+          = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+              "Rebin2D");
+      std::string rebinOutputName("rebinOutput");
+      rebin2DAlg->initialize();
+      rebin2DAlg->setChild(true);
+      rebin2DAlg->setProperty("InputWorkspace", ws);
+      rebin2DAlg->setProperty("OutputWorkspace", rebinOutputName);
+      rebin2DAlg->setProperty("Axis1Binning", axisBinning);
+      rebin2DAlg->setProperty("Axis2Binning", axisBinning);
+      rebin2DAlg->execute();
+      ws = rebin2DAlg->getProperty("OutputWorkspace");
+
+      // Convert to Point data
+      auto toPointAlg
+          = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+              "ConvertToPointData");
+      std::string toPointOutputName("toPointOutput");
+      toPointAlg->initialize();
+      toPointAlg->setChild(true);
+      toPointAlg->setProperty("InputWorkspace", ws);
+      toPointAlg->setProperty("OutputWorkspace", toPointOutputName);
+      toPointAlg->execute();
+      ws = toPointAlg->getProperty("OutputWorkspace");
+
+      // Set the units to momentum transfer
+      ws->getAxis(1)->unit() = Mantid::Kernel::UnitFactory::Instance().create(
+          "MomentumTransfer");
+
+      return ws;
+    }
+
+    void set2DValues(Mantid::API::MatrixWorkspace_sptr ws) {
+      const auto numberOfHistograms = ws->getNumberHistograms();
+
+      for (size_t index = 0; index < numberOfHistograms; ++index) {
+        auto&data =  ws->dataY(index);
+        data = Mantid::MantidVec(data.size(), static_cast<double>(index));
+      }
     }
 
     void save_file_no_issues(Mantid::API::MatrixWorkspace_sptr workspace,

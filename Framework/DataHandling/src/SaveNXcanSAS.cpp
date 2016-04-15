@@ -62,18 +62,18 @@ void write2DWorkspaceSignal(H5::Group &group,
     // Set the dimension
     const size_t dimension0 = workspace->getNumberHistograms();
     const size_t dimension1 = workspace->readY(0).size();
-    constexpr hsize_t rank = 2;
+    const hsize_t rank = 2;
     hsize_t dimensionArray[rank]
         = {static_cast<hsize_t>(dimension0), static_cast<hsize_t>(dimension1)};
 
     // Start position in the 2D data (indexed) data structure
-    int start[2] = {0, 0};
+    hsize_t start[rank] = {0, 0};
 
     // Size of a slab
     hsize_t sizeOfSingleSlab[rank] = {1, dimensionArray[1]};
 
     // Get the Data Space definition for the 2D Data Set
-    auto dataSpace = H5::DataSpace(rank, dimensionArray);
+    auto fileSpace = H5::DataSpace(rank, dimensionArray);
     H5::DataType dataType(getType<double>());
 
     // Get the proplist with compression settings
@@ -81,13 +81,19 @@ void write2DWorkspaceSignal(H5::Group &group,
 
     // Create the data set
     auto dataSet
-        = group.createDataSet(dataSetName, dataType, dataSpace, propList);
-
-    // Extend the data set
+        = group.createDataSet(dataSetName, dataType, fileSpace, propList);
 
     // Insert each row of the workspace as a slab
-    for (int index = 0; index < dimension0; ++index) {
-        dataSet.write(workspace->dataY(index).data(), dataType);
+    hsize_t memSpaceDimension[1] = {dimension1};
+    H5::DataSpace memSpace(1, memSpaceDimension);
+
+    for (unsigned int index = 0; index < dimension0; ++index) {
+        // Need the data space
+        fileSpace.selectHyperslab(H5S_SELECT_SET, sizeOfSingleSlab, start);
+
+        dataSet.write(workspace->dataY(index).data(), dataType, memSpace, fileSpace);
+        // Step up the write position
+        ++start[0];
     }
 }
 
@@ -501,10 +507,10 @@ void addData2D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace)
                                                     "0,1");
 
     // Store the 2D Qx data
-    write2Ddata(data, workspace, StoreType::Qx);
+   //write2Ddata(data, workspace, StoreType::Qx);
 
     // Get 2D Qy data and store it
-    write2Ddata(data, workspace, StoreType::Qy);
+    //write2Ddata(data, workspace, StoreType::Qy);
 
     // Get 2D I data and store it
     write2Ddata(data, workspace, StoreType::I);
