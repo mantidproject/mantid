@@ -184,7 +184,7 @@ double GSLVector::dot(const GSLVector &v) const {
   return res;
 }
 
-/// Get index of the smallest element
+/// Get index of the minimum element
 size_t GSLVector::indexOfMinElement() const {
   if (m_data.empty()) {
     throw std::runtime_error("Cannot find min element of empty vector.");
@@ -195,6 +195,34 @@ size_t GSLVector::indexOfMinElement() const {
     throw std::runtime_error("Cannot find min element of vector.");
   }
   return static_cast<size_t>(std::distance(m_data.begin(), it));
+}
+
+/// Get index of the maximum element
+size_t GSLVector::indexOfMaxElement() const {
+  if (m_data.empty()) {
+    throw std::runtime_error("Cannot find ax element of empty vector.");
+  }
+  auto it = std::max_element(m_data.begin(), m_data.end());
+  if (it == m_data.end()) {
+    // can it ever happen?
+    throw std::runtime_error("Cannot find max element of vector.");
+  }
+  return static_cast<size_t>(std::distance(m_data.begin(), it));
+}
+
+/// Get indices of both the minimum and maximum elements
+std::pair<size_t,size_t> GSLVector::indicesOfMinMaxElements() const {
+  if (m_data.empty()) {
+    throw std::runtime_error("Cannot find min or max element of empty vector.");
+  }
+  auto pit = std::minmax_element(m_data.begin(), m_data.end());
+  if (pit.first == m_data.end() || pit.second == m_data.end()) {
+    // can it ever happen?
+    throw std::runtime_error("Cannot find min or max element of vector.");
+  }
+  return std::make_pair(
+      static_cast<size_t>(std::distance(m_data.begin(), pit.first)),
+      static_cast<size_t>(std::distance(m_data.begin(), pit.second)));
 }
 
 /// Create an index array that would sort this vector

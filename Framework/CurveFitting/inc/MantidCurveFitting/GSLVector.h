@@ -83,8 +83,12 @@ public:
   double norm2() const;
   /// Calculate the dot product
   double dot(const GSLVector &v) const;
-  /// Get index of the smallest element
+  /// Get index of the minimum element
   size_t indexOfMinElement() const;
+  /// Get index of the maximum element
+  size_t indexOfMaxElement() const;
+  /// Get indices of both the minimum and maximum elements
+  std::pair<size_t,size_t> indicesOfMinMaxElements() const;
   /// Create an index array that would sort this vector
   std::vector<size_t> sortIndices(bool ascending = true) const;
   /// Sort this vector in order defined by an index array

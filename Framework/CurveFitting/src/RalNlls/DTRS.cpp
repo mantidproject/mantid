@@ -11,6 +11,13 @@ namespace RalNlls {
 
 namespace {
 
+typedef double real;
+typedef double REAL;
+typedef int integer;
+typedef int INTEGER;
+typedef bool logical;
+typedef bool LOGICAL;
+
 double smallest(double a, double b, double c, double d) {
   return std::min( std::min(a, b), std::min(c, d));
 }
@@ -19,15 +26,248 @@ double smallest(double a, double b, double c) {
   return std::min( std::min(a, b), c);
 }
 
-double largest(double a, double b, double c, double d) {
+double biggest(double a, double b, double c, double d) {
   return std::max( std::max(a, b), std::max(c, d));
 }
 
-double largest(double a, double b, double c) {
+double biggest(double a, double b, double c) {
   return std::max( std::max(a, b), c);
 }
 
+double maxAbsVal(const DoubleFortranVector& v) {
+  auto p = v.indicesOfMinMaxElements();
+  return std::max(fabs(v.get(p.first)), fabs(v.get(p.second)));
+}
+
+double minAbsVal(const DoubleFortranVector& v) {
+  auto p = v.indicesOfMinMaxElements();
+  return std::min(fabs(v[p.first]), fabs(v[p.second]));
+}
+
+//double maxVal(const DoubleFortranVector& v) {
+//  auto i = v.indicesOfMinMaxElements();
+//  return std::max(fabs(v[p.first]), fabs(v[p.second]));
+//}
+//
+//double minVal(const DoubleFortranVector& v) {
+//  auto p = v.indicesOfMinMaxElements();
+//  return std::min(fabs(v[p.first]), fabs(v[p.second]));
+//}
+
+const double HUGE = std::numeric_limits<double>::max();
+
+const REAL zero = 0.0;
+const REAL one = 1.0;
+const REAL two = 2.0;
+const REAL three = 3.0;
+const REAL four = 4.0;
+const REAL six = 6.0;
+const REAL quarter = 0.25;
+const REAL threequarters = 0.75;
+const REAL onesixth = one / six;
+const REAL onethird = one / three;
+const REAL half = 0.5;
+const REAL twothirds = two / three;
+//!     REAL pi = four * ATAN( 1.0 );
+const REAL pi = 3.1415926535897931;
+//!     REAL magic = twothirds * pi
+const REAL magic = 2.0943951023931953;  //!! 2 pi/3
+const REAL epsmch = std::numeric_limits<double>::epsilon();
+const REAL infinity = HUGE;
+const REAL largest = HUGE;
+const REAL lower_default = - half * largest;
+const REAL upper_default = largest;
+
 } // anonymous namespace
+
+enum class ErrorCode {
+      ral_nlls_ok                      = 0,
+      ral_nlls_error_allocate          = - 1,
+      ral_nlls_error_deallocate        = - 2,
+      ral_nlls_error_restrictions      = - 3,
+      ral_nlls_error_bad_bounds        = - 4,
+      ral_nlls_error_primal_infeasible = - 5,
+      ral_nlls_error_dual_infeasible   = - 6,
+      ral_nlls_error_unbounded         = - 7,
+      ral_nlls_error_no_center         = - 8,
+      ral_nlls_error_analysis          = - 9,
+      ral_nlls_error_factorization     = - 10,
+      ral_nlls_error_solve             = - 11,
+      ral_nlls_error_uls_analysis      = - 12,
+      ral_nlls_error_uls_factorization = - 13,
+      ral_nlls_error_uls_solve         = - 14,
+      ral_nlls_error_preconditioner    = - 15,
+      ral_nlls_error_ill_conditioned   = - 16,
+      ral_nlls_error_tiny_step         = - 17,
+      ral_nlls_error_max_iterations    = - 18,
+      ral_nlls_error_time_limit        = - 19,
+      ral_nlls_error_cpu_limit         =   ral_nlls_error_time_limit,
+      ral_nlls_error_inertia           = - 20,
+      ral_nlls_error_file              = - 21,
+      ral_nlls_error_io                = - 22,
+      ral_nlls_error_upper_entry       = - 23,
+      ral_nlls_error_sort              = - 24,
+      ral_nlls_error_input_status      = - 25,
+      ral_nlls_error_unknown_solver    = - 26,
+      ral_nlls_not_yet_implemented     = - 27,
+      ral_nlls_error_qp_solve          = - 28,
+      ral_nlls_unavailable_option      = - 29,
+      ral_nlls_warning_on_boundary     = - 30,
+      ral_nlls_error_call_order        = - 31,
+      ral_nlls_error_integer_ws        = - 32,
+      ral_nlls_error_real_ws           = - 33,
+      ral_nlls_error_pardiso           = - 34,
+      ral_nlls_error_wsmp              = - 35,
+      ral_nlls_error_mc64              = - 36,
+      ral_nlls_error_mc77              = - 37,
+      ral_nlls_error_lapack            = - 38,
+      ral_nlls_error_permutation       = - 39,
+      ral_nlls_error_alter_diagonal    = - 40,
+      ral_nlls_error_access_pivots     = - 41,
+      ral_nlls_error_access_pert       = - 42,
+      ral_nlls_error_direct_access     = - 43,
+      ral_nlls_error_f_min             = - 44,
+      ral_nlls_error_unknown_precond   = - 45,
+      ral_nlls_error_schur_complement  = - 46,
+      ral_nlls_error_technical         = - 50,
+      ral_nlls_error_reformat          = - 52,
+      ral_nlls_error_ah_unordered      = - 53,
+      ral_nlls_error_y_unallocated     = - 54,
+      ral_nlls_error_z_unallocated     = - 55,
+      ral_nlls_error_scale             = - 61,
+      ral_nlls_error_presolve          = - 62,
+      ral_nlls_error_qpa               = - 63,
+      ral_nlls_error_qpb               = - 64,
+      ral_nlls_error_qpc               = - 65,
+      ral_nlls_error_cqp               = - 66,
+      ral_nlls_error_dqp               = - 67,
+      ral_nlls_error_mc61              = - 69,
+      ral_nlls_error_mc68              = - 70,
+      ral_nlls_error_metis             = - 71,
+      ral_nlls_error_spral             = - 72,
+      ral_nlls_warning_repeated_entry  = - 73,
+      ral_nlls_error_rif               = - 74,
+      ral_nlls_error_ls28              = - 75,
+      ral_nlls_error_ls29              = - 76,
+      ral_nlls_error_cutest            = - 77,
+      ral_nlls_error_evaluation        = - 78,
+      ral_nlls_error_optional          = - 79,
+      ral_nlls_error_mi35              = - 80,
+      ral_nlls_error_spqr              = - 81,
+      ral_nlls_error_alive             = - 82,
+      ral_nlls_error_ccqp              = - 83
+};
+
+
+//!--------------------------
+//!  Derived type definitions
+//!--------------------------
+
+//!  - - - - - - - - - - - - - - - - - - - - - - -
+//!   control derived type with component defaults
+//!  - - - - - - - - - - - - - - - - - - - - - - -
+struct  dtrs_control_type {
+//
+//!  unit for error messages
+// INTEGER  error = 6;
+
+//!  unit for monitor output
+// INTEGER  out = 6
+
+//!  unit to write problem data into file problem_file
+//
+//        INTEGER  problem = 0
+//
+//!  controls level of diagnostic output
+INTEGER  print_level = 0;
+
+//!  maximum degree of Taylor approximant allowed
+INTEGER  taylor_max_degree = 3;
+
+//!  any entry of H that is smaller than h_min * MAXVAL( H ) we be treated as zero
+REAL   h_min = epsmch;
+
+//!  any entry of C that is smaller than c_min * MAXVAL( C ) we be treated as zero
+REAL   c_min = epsmch;
+
+//!  lower and upper bounds on the multiplier, if known
+REAL   lower = lower_default;
+REAL   upper = upper_default;
+
+//!  stop when | ||x|| - radius | <=
+//!     max( stop_normal * radius, stop_absolute_normal )
+REAL   stop_normal = epsmch;
+REAL   stop_absolute_normal = epsmch;
+
+//!  is the solution is REQUIRED to lie on the boundary (i.e., is the constraint
+//!  an equality)?
+LOGICAL  equality_problem= false;
+
+//!  name of file into which to write problem data
+//
+//        CHARACTER ( LEN = 30 )  problem_file =                               &
+//         'trs_problem.data' // REPEAT( ' ', 14 )
+//
+//!  all output lines will be prefixed by
+//!    prefix(2:LEN(TRIM(%prefix))-1)
+//!  where prefix contains the required string enclosed in quotes,
+//!  e.g. "string" or 'string'
+//
+//        CHARACTER ( LEN = 30 )  prefix  = '""                            '
+//
+};
+
+//!  - - - - - - - - - - - - - - - - - - - - - - - -
+//!   history derived type with component defaults
+//!  - - - - - - - - - - - - - - - - - - - - - - - -
+struct dtrs_history_type {
+//
+//!  value of lambda
+REAL lambda = zero;
+
+//!  corresponding value of ||x(lambda)||_M
+REAL x_norm = zero;
+};
+
+//!  - - - - - - - - - - - - - - - - - - - - - - -
+//!   inform derived type with component defaults
+//!  - - - - - - - - - - - - - - - - - - - - - - -
+//
+struct dtrs_inform_type {
+//
+//!   reported return status:
+//!      0 the solution has been found
+//!     -3 n and/or Delta is not positive
+//!    -16 ill-conditioning has prevented furthr progress
+ErrorCode  status = ErrorCode::ral_nlls_ok;
+
+//!  the number of (||x||_M,lambda) pairs in the history
+INTEGER  len_history = 0;
+
+//!  the value of the quadratic function
+REAL obj = HUGE;
+
+//!  the M-norm of x, ||x||_M
+REAL   x_norm = zero;
+
+//!  the Lagrange multiplier corresponding to the trust-region constraint
+REAL   multiplier = zero;
+
+//!  a lower bound max(0,-lambda_1), where lambda_1 is the left-most
+//!  eigenvalue of (H,M)
+REAL   pole = zero;
+
+//!  has the hard case occurred?
+LOGICAL  hard_case = false;
+
+//!  history information
+std::vector<dtrs_history_type> history;
+};
+
+
+void dtrs_solve_main( int n, double radius, double f, const DoubleFortranVector& c, 
+  const DoubleFortranVector& h, DoubleFortranVector& x, const dtrs_control_type& control, dtrs_inform_type& inform );
+
 
 //! Contains  ral_nlls_roots
 //!             ral_dtrs
@@ -70,37 +310,6 @@ double largest(double a, double b, double c) {
 //!----------------------
 //
 //      INTEGER, PARAMETER  out = 6
-
-typedef double real;
-typedef double REAL;
-typedef int integer;
-typedef int INTEGER;
-typedef bool logical;
-typedef bool LOGICAL;
-
-namespace {
-const double HUGE = std::numeric_limits<double>::max();
-
-const REAL zero = 0.0;
-const REAL one = 1.0;
-const REAL two = 2.0;
-const REAL three = 3.0;
-const REAL four = 4.0;
-const REAL six = 6.0;
-const REAL quarter = 0.25;
-const REAL threequarters = 0.75;
-const REAL onesixth = one / six;
-const REAL onethird = one / three;
-const REAL half = 0.5;
-const REAL twothirds = two / three;
-//!     REAL pi = four * ATAN( 1.0 );
-const REAL pi = 3.1415926535897931;
-//!     REAL magic = twothirds * pi
-const REAL magic = 2.0943951023931953;  //!! 2 pi/3
-const REAL epsmch = std::numeric_limits<double>::epsilon();
-const REAL infinity = HUGE;
-
-}
 
 //!  interface to LAPACK: eigenvalues of a Hessenberg matrix
 //
@@ -537,7 +746,7 @@ void roots_quartic(double a0, double a1, double a2, double a3, double a4, double
 //!  sort the roots
 
       root1 = smallest( a, b, c, d );
-      root4 = largest( a, b, c, d );
+      root4 = biggest( a, b, c, d );
 
       if ( a == root1 ) {
         root2 = smallest( b, c, d );
@@ -550,13 +759,13 @@ void roots_quartic(double a0, double a1, double a2, double a3, double a4, double
       }
 
       if ( a == root4 ) {
-        root3 = largest( b, c, d );
+        root3 = biggest( b, c, d );
       }else if ( b == root4 ) {
-        root3 = largest( a, c, d );
+        root3 = biggest( a, c, d );
       }else if ( c == root4 ) {
-        root3 = largest( a, b, d );
+        root3 = biggest( a, b, d );
       }else{
-        root3 = largest( a, b, c );
+        root3 = biggest( a, b, c );
       }
 
 Label900: // Oops, a label :(
@@ -667,7 +876,7 @@ Label900: // Oops, a label :(
 //!----------------------
 //!   P a r a m e t e r s
 //!----------------------
-//
+namespace {
 //      INTEGER, PARAMETER  history_max = 100
 //      INTEGER, PARAMETER  max_degree = 3
 //      REAL , PARAMETER  zero = 0.0_wp
@@ -680,140 +889,12 @@ Label900: // Oops, a label :(
 //      REAL , PARAMETER  sixth = one / six
 //      REAL , PARAMETER  ten = 10.0_wp
 //      REAL , PARAMETER  twentyfour = 24.0_wp
-//      REAL , PARAMETER  largest = HUGE( one )
-//      REAL , PARAMETER  lower_default = - half * largest
-//      REAL , PARAMETER  upper_default = largest
 //      REAL , PARAMETER  epsmch = EPSILON( one )
 //      REAL , PARAMETER  teneps = ten * epsmch
 //      REAL , PARAMETER  roots_tol = teneps
 //      LOGICAL  roots_debug = .FALSE.
-//
-//!--------------------------
-//!  Derived type definitions
-//!--------------------------
-//
-//!  - - - - - - - - - - - - - - - - - - - - - - -
-//!   control derived type with component defaults
-//!  - - - - - - - - - - - - - - - - - - - - - - -
-//
-//      TYPE, PUBLIC  DTRS_control_type
-//
-//!  unit for error messages
-//
-//        INTEGER  error = 6
-//
-//!  unit for monitor output
-//
-//        INTEGER  out = 6
-//
-//!  unit to write problem data into file problem_file
-//
-//        INTEGER  problem = 0
-//
-//!  controls level of diagnostic output
-//
-//        INTEGER  print_level = 0
-//
-//!  maximum degree of Taylor approximant allowed
-//
-//        INTEGER  taylor_max_degree = 3
-//
-//!  any entry of H that is smaller than h_min * MAXVAL( H ) we be treated as zero
-//
-//        REAL   h_min = epsmch
-//
-//!  any entry of C that is smaller than c_min * MAXVAL( C ) we be treated as zero
-//
-//        REAL   c_min = epsmch
-//
-//!  lower and upper bounds on the multiplier, if known
-//
-//        REAL   lower = lower_default
-//        REAL   upper = upper_default
-//
-//!  stop when | ||x|| - radius | <=
-//!     max( stop_normal * radius, stop_absolute_normal )
-//
-//        REAL   stop_normal = epsmch
-//        REAL   stop_absolute_normal = epsmch
-//
-//!  is the solution is REQUIRED to lie on the boundary (i.e., is the constraint
-//!  an equality)?
-//
-//        LOGICAL  equality_problem= .FALSE.
-//
-//!  name of file into which to write problem data
-//
-//        CHARACTER ( LEN = 30 )  problem_file =                               &
-//         'trs_problem.data' // REPEAT( ' ', 14 )
-//
-//!  all output lines will be prefixed by
-//!    prefix(2:LEN(TRIM(%prefix))-1)
-//!  where prefix contains the required string enclosed in quotes,
-//!  e.g. "string" or 'string'
-//
-//        CHARACTER ( LEN = 30 )  prefix  = '""                            '
-//
-//      END TYPE
-//
-//!  - - - - - - - - - - - - - - - - - - - - - - - -
-//!   history derived type with component defaults
-//!  - - - - - - - - - - - - - - - - - - - - - - - -
-//
-//      TYPE, PUBLIC  DTRS_history_type
-//
-//!  value of lambda
-//
-//        REAL   lambda = zero
-//
-//!  corresponding value of ||x(lambda)||_M
-//
-//        REAL   x_norm = zero
-//      END TYPE
-//
-//!  - - - - - - - - - - - - - - - - - - - - - - -
-//!   inform derived type with component defaults
-//!  - - - - - - - - - - - - - - - - - - - - - - -
-//
-//      TYPE, PUBLIC  DTRS_inform_type
-//
-//!   reported return status:
-//!      0 the solution has been found
-//!     -3 n and/or Delta is not positive
-//!    -16 ill-conditioning has prevented furthr progress
-//
-//        INTEGER  status = 0
-//
-//!  the number of (||x||_M,lambda) pairs in the history
-//
-//        INTEGER  len_history = 0
-//
-//!  the value of the quadratic function
-//
-//        REAL   obj = HUGE( one )
-//
-//!  the M-norm of x, ||x||_M
-//
-//        REAL   x_norm = zero
-//
-//!  the Lagrange multiplier corresponding to the trust-region constraint
-//
-//        REAL   multiplier = zero
-//
-//!  a lower bound max(0,-lambda_1), where lambda_1 is the left-most
-//!  eigenvalue of (H,M)
-//
-//        REAL   pole = zero
-//
-//!  has the hard case occurred?
-//
-//        LOGICAL  hard_case = .FALSE.
-//
-//!  history information
-//
-//        TYPE ( DTRS_history_type ), DIMENSION( history_max )  history
-//      END TYPE
-//
+const int ral_nlls_ok = 0;
+} // anonymous namespace 
 //!  interface to BLAS: two norm
 //
 //     INTERFACE NRM2
@@ -833,22 +914,21 @@ Label900: // Oops, a label :(
 //     END INTERFACE
 //
 //    CONTAINS
-//
-//!-*-*-*-*-*-*-  D T R S _ I N I T I A L I Z E   S U B R O U T I N E   -*-*-*-*-
-//
-//      SUBROUTINE DTRS_initialize( control, inform )
-//
-//! =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-//!
-//!  .  Set initial values for the TRS control parameters  .
-//!
-//!  Arguments:
-//!  =========
-//!
-//!   control  a structure containing control information. See DTRS_control_type
-//!   inform   a structure containing information. See DRQS_inform_type
-//!
-//! =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+///-*-*-*-*-*-*-  D T R S _ I N I T I A L I Z E   S U B R O U T I N E   -*-*-*-*-
+///
+/// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+///
+///  .  Set initial values for the TRS control parameters  .
+///
+///  Arguments:
+///  =========
+///
+///   control  a structure containing control information. See DTRS_control_type
+///   inform   a structure containing information. See DRQS_inform_type
+///
+/// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+void dtrs_initialize( dtrs_control_type &control, dtrs_inform_type &inform ) {
 //
 //!-----------------------------------------------
 //!   D u m m y   A r g u m e n t
@@ -856,55 +936,51 @@ Label900: // Oops, a label :(
 //
 //      TYPE ( DTRS_CONTROL_TYPE ), INTENT( OUT )  control
 //      TYPE ( DTRS_inform_type ), INTENT( OUT )  inform
-//
-//      inform%status = RAL_NLLS_ok
-//
+
+inform.status = ErrorCode::ral_nlls_ok;
+
 //!  Set initial control parameter values
+control.stop_normal = pow(epsmch, 0.75);
+control.stop_absolute_normal = pow(epsmch, 0.75);
+
+}
+
+///-*-*-*-*-*-*-*-*-  D T R S _ S O L V E   S U B R O U T I N E  -*-*-*-*-*-*-*-
+///
+/// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+///
+///  Solve the trust-region subproblem
+///
+///      minimize     q(x) = 1/2 <x, H x> + <c, x> + f
+///      subject to   ||x||_2 <= radius  or ||x||_2 = radius
+///
+///  where H is diagonal, using a secular iteration
+///
+/// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+///
+///  Arguments:
+///  =========
+///
+///   n - the number of unknowns
+///
+///   radius - the trust-region radius
+///
+///   f - the value of constant term for the quadratic function
+///
+///   C - a vector of values for the linear term c
+///
+///   H -  a vector of values for the diagonal matrix H
+///
+///   X - the required solution vector x
+///
+///   control - a structure containing control information. See DTRS_control_type
+///
+///   inform - a structure containing information. See DTRS_inform_type
+///
+/// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 //
-//      control%stop_normal = epsmch ** 0.75
-//      control%stop_absolute_normal = epsmch ** 0.75
-//
-//      RETURN
-//
-//!  End of subroutine DTRS_initialize
-//
-//      END SUBROUTINE DTRS_initialize
-//
-//!-*-*-*-*-*-*-*-*-  D T R S _ S O L V E   S U B R O U T I N E  -*-*-*-*-*-*-*-
-//
-//      SUBROUTINE DTRS_solve( n, radius, f, C, H, X, control, inform )
-//
-//! =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-//!
-//!  Solve the trust-region subproblem
-//!
-//!      minimize     q(x) = 1/2 <x, H x> + <c, x> + f
-//!      subject to   ||x||_2 <= radius  or ||x||_2 = radius
-//!
-//!  where H is diagonal, using a secular iteration
-//!
-//! =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-//!
-//!  Arguments:
-//!  =========
-//!
-//!   n - the number of unknowns
-//!
-//!   radius - the trust-region radius
-//!
-//!   f - the value of constant term for the quadratic function
-//!
-//!   C - a vector of values for the linear term c
-//!
-//!   H -  a vector of values for the diagonal matrix H
-//!
-//!   X - the required solution vector x
-//!
-//!   control - a structure containing control information. See DTRS_control_type
-//!
-//!   inform - a structure containing information. See DTRS_inform_type
-//!
-//! =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+void dtrs_solve( int n, double radius, double f, const DoubleFortranVector& c, const DoubleFortranVector& h, 
+  DoubleFortranVector& x, const dtrs_control_type &control, dtrs_inform_type &inform ) {
 //
 //!-----------------------------------------------
 //!   D u m m y   A r g u m e n t s
@@ -945,101 +1021,106 @@ Label900: // Oops, a label :(
 //
 //!  scale H by the largest H and remove relatively tiny H
 //
-//      scale_h = MAXVAL( ABS( H ) )
-//      IF ( scale_h > zero ) THEN
-//        DO i = 1, n
-//          IF ( ABS( H( i ) ) >= control%h_min * scale_h ) THEN
-//            H_scale( i ) = H( i ) / scale_h
-//          ELSE
-//            H_scale( i ) = zero
-//          END IF
-//        END DO
-//      ELSE
-//        scale_h = one
-//        H_scale = zero
-//      END IF
-//
+      DoubleFortranVector h_scale(n);
+      auto scale_h = maxAbsVal(h); // MAXVAL( ABS( H ) )
+      if ( scale_h > zero ) {
+        for(int i=1; i <= n; ++i) { // do i = 1, n
+          if ( fabs( h( i ) ) >= control.h_min * scale_h ) {
+            h_scale( i ) = h( i ) / scale_h;
+          }else{
+            h_scale( i ) = zero;
+          }
+        }
+      }else{
+        scale_h = one;
+        h_scale = zero;
+      }
+
 //!  scale c by the largest c and remove relatively tiny c
-//
-//      scale_c = MAXVAL( ABS( C ) )
-//      IF ( scale_c > zero ) THEN
-//        DO i = 1, n
-//          IF ( ABS( C( i ) ) >= control%h_min * scale_c ) THEN
-//            C_scale( i ) = C( i ) / scale_c
-//          ELSE
-//            C_scale( i ) = zero
-//          END IF
-//        END DO
-//      ELSE
-//        scale_c = one
-//        C_scale = zero
-//      END IF
-//
-//      radius_scale = ( scale_h / scale_c ) * radius
-//      f_scale = ( scale_h / scale_c ** 2 ) * f
-//
-//      control_scale = control
-//      IF ( control_scale%lower != lower_default )                              &
-//        control_scale%lower = control_scale%lower / scale_h
-//      IF ( control_scale%upper != upper_default )                              &
-//        control_scale%upper = control_scale%upper / scale_h
-//
+
+      DoubleFortranVector c_scale(n);
+      auto scale_c = maxAbsVal(c); // maxval( abs( c ) )
+      if ( scale_c > zero ) {
+        for(int i=1; i <= n; ++i) { // do i = 1, n
+          if ( abs( c( i ) ) >= control.h_min * scale_c ) {
+            c_scale( i ) = c( i ) / scale_c;
+          }else{
+            c_scale( i ) = zero;
+          }
+        }
+      }else{
+        scale_c = one;
+        c_scale = zero;
+      }
+
+      double radius_scale = ( scale_h / scale_c ) * radius;
+      double f_scale = ( scale_h / pow(scale_c, 2) ) * f;
+
+      auto control_scale = control;
+      if (control_scale.lower != lower_default) {
+        control_scale.lower = control_scale.lower / scale_h;
+      }
+      if ( control_scale.upper != upper_default ) {
+        control_scale.upper = control_scale.upper / scale_h;
+      }
+
 //!  solve the scaled problem
-//
-//      CALL DTRS_solve_main( n, radius_scale, f_scale, C_scale, H_scale, X,     &
-//                            control_scale, inform )
-//
-//!  unscale the solution, function value, multiplier and related values
-//
-//      X = ( scale_c / scale_h ) * X
-//      inform%obj = ( scale_c ** 2 / scale_h ) * inform%obj
-//      inform%multiplier = scale_h * inform%multiplier
-//      inform%pole = scale_h * inform%pole
-//      DO i = 1, inform%len_history
-//        inform%history( i )%lambda = scale_h * inform%history( i )%lambda
-//        inform%history( i )%x_norm                                             &
-//          = ( scale_c / scale_h ) * inform%history( i )%x_norm
-//      END DO
+
+      dtrs_solve_main(n, radius_scale, f_scale, c_scale, h_scale, x,
+                      control_scale, inform);
+
+      //!  unscale the solution, function value, multiplier and related values
+
+      //  x = ( scale_c / scale_h ) * x
+      x *= scale_c / scale_h;
+      inform.obj *= pow(scale_c, 2) / scale_h;
+      inform.multiplier *= scale_h;
+      inform.pole *= scale_h;
+      for(size_t i = 0; i < inform.history.size(); ++i) { //      do i = 1, inform.len_history
+        inform.history[i].lambda *= scale_h;
+        inform.history[i].x_norm *= scale_c / scale_h;
+      }
 //
 //!  End of subroutine DTRS_solve
 //
-//      END SUBROUTINE DTRS_solve
+}
+
+///-*-*-*-*-*-*-*-*-  D T R S _ S O L V E   S U B R O U T I N E  -*-*-*-*-*-*-*-
+///
+/// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+///
+///  Solve the trust-region subproblem
+///
+///      minimize     1/2 <x, H x> + <c, x> + f
+///      subject to    ||x||_2 <= radius  or ||x||_2 = radius
+///
+///  where H is diagonal, using a secular iteration
+///
+/// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+///
+///  Arguments:
+///  =========
+///
+///   n - the number of unknowns
+///
+///   radius - the trust-region radius
+///
+///   f - the value of constant term for the quadratic function
+///
+///   C - a vector of values for the linear term c
+///
+///   H -  a vector of values for the diagonal matrix H
+///
+///   X - the required solution vector x
+///
+///   control - a structure containing control information. See DTRS_control_type
+///
+///   inform - a structure containing information. See DTRS_inform_type
+///
+/// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 //
-//!-*-*-*-*-*-*-*-*-  D T R S _ S O L V E   S U B R O U T I N E  -*-*-*-*-*-*-*-
-//
-//      SUBROUTINE DTRS_solve_main( n, radius, f, C, H, X, control, inform )
-//
-//! =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-//!
-//!  Solve the trust-region subproblem
-//!
-//!      minimize     1/2 <x, H x> + <c, x> + f
-//!      subject to    ||x||_2 <= radius  or ||x||_2 = radius
-//!
-//!  where H is diagonal, using a secular iteration
-//!
-//! =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-//!
-//!  Arguments:
-//!  =========
-//!
-//!   n - the number of unknowns
-//!
-//!   radius - the trust-region radius
-//!
-//!   f - the value of constant term for the quadratic function
-//!
-//!   C - a vector of values for the linear term c
-//!
-//!   H -  a vector of values for the diagonal matrix H
-//!
-//!   X - the required solution vector x
-//!
-//!   control - a structure containing control information. See DTRS_control_type
-//!
-//!   inform - a structure containing information. See DTRS_inform_type
-//!
-//! =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+void dtrs_solve_main( int n, double radius, double f, const DoubleFortranVector& c, 
+  const DoubleFortranVector& h, DoubleFortranVector& x, const dtrs_control_type& control, dtrs_inform_type& inform ) {
 //
 //!-----------------------------------------------
 //!   D u m m y   A r g u m e n t s
@@ -1105,11 +1186,13 @@ Label900: // Oops, a label :(
 //      END IF
 //
 //!  set initial values
-//
-//      X = zero ; inform%x_norm = zero ; inform%obj = f
-//      inform%hard_case = .FALSE.
-//      delta_lambda = zero
-//
+
+      x = zero;
+      inform.x_norm = zero;
+      inform.obj = f;
+      inform.hard_case = false;
+      double delta_lambda = zero;
+
 //!  record desired output level
 //
 //      out = control%out
@@ -1117,19 +1200,18 @@ Label900: // Oops, a label :(
 //      printi = out > 0 .AND. print_level > 0
 //      printt = out > 0 .AND. print_level > 1
 //      printd = out > 0 .AND. print_level > 2
-//
-//!  check for n < 0 or Delta < 0
-//
-//      IF ( n < 0 .or. radius < 0 ) THEN
-//         inform%status = RAL_NLLS_error_restrictions
-//         RETURN
-//      END IF
-//
+
+//!  check for n < 0 or delta < 0
+      if ( n < 0 || radius < 0 ) {
+         inform.status = ErrorCode::ral_nlls_error_restrictions;
+         return;
+      }
+
 //!  compute the two-norm of c and the extreme eigenvalues of H
-//
-//      c_norm = TWO_NORM( C )
-//      lambda_min = MINVAL( H( : n ) )
-//      lambda_max = MAXVAL( H( : n ) )
+
+      double c_norm = c.norm2(); // two_norm( c )
+      double lambda_min = minAbsVal(h); //  minval( h( : n ) )
+      double lambda_max = maxAbsVal(h); // maxval( h( : n ) )
 //
 //      IF ( printt ) WRITE( out, "( A, ' ||c|| = ', ES10.4, ', ||H|| = ',       &
 //     &                             ES10.4, ', lambda_min = ', ES11.4 )" )      &
@@ -1513,8 +1595,8 @@ Label900: // Oops, a label :(
 //
 //!  End of subroutine DTRS_solve_main
 //
-//      END SUBROUTINE DTRS_solve_main
-//
+} //      END SUBROUTINE DTRS_solve_main
+
 //!-*-*-*-*-*-*-  D T R S _ P I _ D E R I V S   S U B R O U T I N E   -*-*-*-*-*-
 //
 //      SUBROUTINE DTRS_pi_derivs( max_order, beta, x_norm2, pi_beta )
