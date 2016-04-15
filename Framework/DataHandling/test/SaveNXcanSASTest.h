@@ -60,6 +60,27 @@ struct NXcanSASTestParameters {
     std::string idf;
 };
 
+struct NXcanSASTestTransmissionParameters {
+    NXcanSASTestTransmissionParameters() { initParameters(); }
+    void initParameters()
+    {
+        size = 100;
+        value = 12.34;
+        error = 3.2345;
+        xmin = 1.0;
+        xmax = 100.0;
+        usesTransmission = false;
+    }
+
+    int size;
+    double value;
+    double error;
+    double xmin;
+    double xmax;
+    std::string name;
+    bool usesTransmission;
+};
+
 std::string concatenateStringVector(std::vector<std::string> stringVector)
 {
     std::ostringstream os;
@@ -80,14 +101,11 @@ std::string getIDFfromWorkspace(Mantid::API::MatrixWorkspace_sptr workspace)
 }
 
 void setXValuesOn1DWorkspaceWithPointData(
-    Mantid::API::MatrixWorkspace_sptr workspace,
-    NXcanSASTestParameters &parameters)
+    Mantid::API::MatrixWorkspace_sptr workspace, double xmin, double xmax)
 {
     auto &xValues = workspace->dataX(0);
     auto size = xValues.size();
-    double binWidth = (parameters.xmax - parameters.xmin)
-                      / static_cast<double>(size - 1);
-    double xmin = parameters.xmin;
+    double binWidth = (xmax - xmin) / static_cast<double>(size - 1);
     for (size_t index = 0; index < size; ++index) {
         xValues[index] = xmin;
         xmin += binWidth;
@@ -156,7 +174,8 @@ public:
         parameters.invalidDetectors = false;
 
         auto ws = provide1DWorkspace(parameters);
-        setXValuesOn1DWorkspaceWithPointData(ws, parameters);
+        setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin,
+                                             parameters.xmax);
 
         parameters.idf = getIDFfromWorkspace(ws);
 
@@ -182,7 +201,8 @@ public:
 
         auto ws = provide1DWorkspace(parameters);
 
-        setXValuesOn1DWorkspaceWithPointData(ws, parameters);
+        setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin,
+                                             parameters.xmax);
 
         parameters.idf = getIDFfromWorkspace(ws);
 
@@ -210,7 +230,8 @@ public:
         parameters.hasDx = false;
 
         auto ws = provide1DWorkspace(parameters);
-        setXValuesOn1DWorkspaceWithPointData(ws, parameters);
+        setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin,
+                                             parameters.xmax);
 
         parameters.idf = getIDFfromWorkspace(ws);
 
@@ -224,7 +245,56 @@ public:
         removeFile(parameters.filename);
     }
 
-    void test_that_1D_workspace_with_transmissions_is_saved_correctly() {}
+    void test_that_1D_workspace_with_transmissions_is_saved_correctly()
+    {
+        // Arrange
+        NXcanSASTestParameters parameters;
+        removeFile(parameters.filename);
+
+        parameters.detectors.push_back("front-detector");
+        parameters.detectors.push_back("rear-detector");
+        parameters.invalidDetectors = false;
+
+        parameters.hasDx = true;
+
+        auto ws = provide1DWorkspace(parameters);
+        setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin,
+                                             parameters.xmax);
+
+        parameters.idf = getIDFfromWorkspace(ws);
+
+        // Create transmission
+        NXcanSASTestTransmissionParameters transmissionParameters;
+        transmissionParameters.name
+            = sasTransmissionSpectrumNameSampleAttrValue;
+        transmissionParameters.usesTransmission = true;
+
+        NXcanSASTestTransmissionParameters transmissionCanParameters;
+        transmissionCanParameters.name
+            = sasTransmissionSpectrumNameCanAttrValue;
+        transmissionCanParameters.usesTransmission = true;
+
+        auto transmission = getTransmissionWorkspace(transmissionParameters);
+        setXValuesOn1DWorkspaceWithPointData(transmission,
+                                             transmissionParameters.xmin,
+                                             transmissionParameters.xmax);
+
+        auto transmissionCan
+            = getTransmissionWorkspace(transmissionCanParameters);
+        setXValuesOn1DWorkspaceWithPointData(transmissionCan,
+                                             transmissionCanParameters.xmin,
+                                             transmissionCanParameters.xmax);
+
+        // Act
+        save_file_no_issues(ws, parameters, transmission, transmissionCan);
+
+        // Assert
+        do_assert(parameters, transmissionParameters,
+                  transmissionCanParameters);
+
+        // Clean up
+        // removeFile(parameters.filename);
+    }
 
 private:
     void removeFile(std::string filename)
@@ -298,8 +368,23 @@ private:
         return ws;
     }
 
+    Mantid::API::MatrixWorkspace_sptr
+    getTransmissionWorkspace(NXcanSASTestTransmissionParameters &parameters)
+    {
+        auto ws = WorkspaceCreationHelper::Create1DWorkspaceConstant(
+            parameters.size, parameters.value, parameters.error);
+        ws->setTitle(parameters.name);
+        ws->getAxis(0)->unit()
+            = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+        return ws;
+    }
+
     void save_file_no_issues(Mantid::API::MatrixWorkspace_sptr workspace,
-                             NXcanSASTestParameters &parameters)
+                             NXcanSASTestParameters &parameters,
+                             Mantid::API::MatrixWorkspace_sptr transmission
+                             = nullptr,
+                             Mantid::API::MatrixWorkspace_sptr transmissionCan
+                             = nullptr)
     {
         auto saveAlg
             = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
@@ -313,6 +398,14 @@ private:
                 = concatenateStringVector(parameters.detectors);
             saveAlg->setProperty("DetectorNames", detectorsAsString);
         }
+
+        if (transmission) {
+            saveAlg->setProperty("Transmission", transmission);
+        }
+        if (transmissionCan) {
+            saveAlg->setProperty("TransmissionCan", transmissionCan);
+        }
+
         TSM_ASSERT_THROWS_NOTHING("Should not throw anything",
                                   saveAlg->execute());
         TSM_ASSERT("Should have executed", saveAlg->isExecuted());
@@ -531,36 +624,39 @@ private:
         }
     }
 
-    void do_assert_that_Q_dev_information_is_not_present(H5::Group& data) {
-      // Check that Q_uncertainty attribute is not saved
-      bool missingQUncertaintyAttribute = false;
-      try {
-        data.openAttribute(sasDataQUncertaintyAttr);
-      } catch(H5::AttributeIException&) {
-        missingQUncertaintyAttribute = true;
-      }
-      TSM_ASSERT("Should not have a Q_uncertainty attribute", missingQUncertaintyAttribute);
+    void do_assert_that_Q_dev_information_is_not_present(H5::Group &data)
+    {
+        // Check that Q_uncertainty attribute is not saved
+        bool missingQUncertaintyAttribute = false;
+        try {
+            data.openAttribute(sasDataQUncertaintyAttr);
+        } catch (H5::AttributeIException &) {
+            missingQUncertaintyAttribute = true;
+        }
+        TSM_ASSERT("Should not have a Q_uncertainty attribute",
+                   missingQUncertaintyAttribute);
 
-      // Check that Qdev data set does not exist
-      bool missingQDevDataSet = false;
-      try {
-        data.openDataSet(sasDataQdev);
-      } catch(H5::GroupIException&) {
-        missingQDevDataSet = true;
-      } catch(H5::FileIException&) {
-        missingQDevDataSet = true;
-      }
-      TSM_ASSERT("Should not have a Qdev data set", missingQDevDataSet);
+        // Check that Qdev data set does not exist
+        bool missingQDevDataSet = false;
+        try {
+            data.openDataSet(sasDataQdev);
+        } catch (H5::GroupIException &) {
+            missingQDevDataSet = true;
+        } catch (H5::FileIException &) {
+            missingQDevDataSet = true;
+        }
+        TSM_ASSERT("Should not have a Qdev data set", missingQDevDataSet);
 
-      // Check that Q does not have an uncertainty set
-      bool missingQUncertaintyOnQDataSet = false;
-      try {
-        auto qDataSet = data.openDataSet(sasDataQ);
-        auto uncertainty = qDataSet.openAttribute(sasUncertaintyAttr);
-      } catch(H5::AttributeIException&) {
-        missingQUncertaintyOnQDataSet = true;
-      }
-      TSM_ASSERT("Data set should not have an uncertainty", missingQUncertaintyOnQDataSet);
+        // Check that Q does not have an uncertainty set
+        bool missingQUncertaintyOnQDataSet = false;
+        try {
+            auto qDataSet = data.openDataSet(sasDataQ);
+            auto uncertainty = qDataSet.openAttribute(sasUncertaintyAttr);
+        } catch (H5::AttributeIException &) {
+            missingQUncertaintyOnQDataSet = true;
+        }
+        TSM_ASSERT("Data set should not have an uncertainty",
+                   missingQUncertaintyOnQDataSet);
     }
 
     void do_assert_data(H5::Group &data, int size, double value, double error,
@@ -649,7 +745,81 @@ private:
         }
     }
 
-    void do_assert(NXcanSASTestParameters &parameters)
+    void do_assert_transmission(H5::Group &entry,
+                                NXcanSASTestTransmissionParameters &parameters)
+    {
+        if (!parameters.usesTransmission) {
+            return;
+        }
+
+        auto transmission = entry.openGroup(sasTransmissionSpectrumGroupName
+                                            + suffix + "_" + parameters.name);
+
+        // NX_class attribute
+        auto classAttribute
+            = Mantid::DataHandling::H5Util::readAttributeAsString(transmission,
+                                                                  nxclass);
+        TSM_ASSERT_EQUALS("Should be SAStransmission_spectrum class",
+                          classAttribute, sasTransmissionSpectrumClassAttr);
+
+        // Name attribute
+        auto nameAttribute
+            = Mantid::DataHandling::H5Util::readAttributeAsString(
+                transmission, sasTransmissionSpectrumNameAttr);
+        TSM_ASSERT_EQUALS("Should be either can or sample", nameAttribute,
+                          parameters.name);
+
+        // T indices attribute
+        auto tIndicesAttribute
+            = Mantid::DataHandling::H5Util::readAttributeAsString(
+                transmission, sasTransmissionSpectrumTIndices);
+        TSM_ASSERT_EQUALS("Should be T", tIndicesAttribute,
+                          sasTransmissionSpectrumT);
+
+        // T uncertainty attribute
+        auto tUncertaintyIndicesAttribute
+            = Mantid::DataHandling::H5Util::readAttributeAsString(
+                transmission, sasTransmissionSpectrumTUncertainty);
+        TSM_ASSERT_EQUALS("Should be Tdev", tUncertaintyIndicesAttribute,
+                          sasTransmissionSpectrumTdev);
+
+        // Signal attribute
+        auto signalAttribute
+            = Mantid::DataHandling::H5Util::readAttributeAsString(transmission,
+                                                                  sasSignal);
+        TSM_ASSERT_EQUALS("Should be T", signalAttribute,
+                          sasTransmissionSpectrumT);
+
+        // Timestamp attribute
+        TS_ASSERT_THROWS_NOTHING(
+            Mantid::DataHandling::H5Util::readAttributeAsString(
+                transmission, sasTransmissionSpectrumTimeStampAttr));
+
+        // T data set
+        auto tDataSet = transmission.openDataSet(sasTransmissionSpectrumT);
+        do_assert_1D_vector_with_same_entries(tDataSet, parameters.value,
+                                              parameters.size);
+
+        // Tdev data set
+        auto tErrorDataSet
+            = transmission.openDataSet(sasTransmissionSpectrumTdev);
+        do_assert_1D_vector_with_same_entries(tErrorDataSet, parameters.error,
+                                              parameters.size);
+
+        // Lambda data set
+        auto lambdaDataSet
+            = transmission.openDataSet(sasTransmissionSpectrumLambda);
+        double increment = (parameters.xmax - parameters.xmin)
+                           / static_cast<double>(parameters.size - 1);
+        do_assert_1D_vector_with_increasing_entries(
+            lambdaDataSet, parameters.xmin, increment, parameters.size);
+    }
+
+    void do_assert(NXcanSASTestParameters &parameters,
+                   NXcanSASTestTransmissionParameters transmissionParameters
+                   = NXcanSASTestTransmissionParameters(),
+                   NXcanSASTestTransmissionParameters transmissionCanParameters
+                   = NXcanSASTestTransmissionParameters())
     {
         H5::H5File file(parameters.filename, H5F_ACC_RDONLY);
 
@@ -673,6 +843,12 @@ private:
         do_assert_data(data, parameters.size, parameters.value,
                        parameters.error, parameters.xmin, parameters.xmax,
                        parameters.xerror, parameters.hasDx);
+
+        // Check the transmission
+        do_assert_transmission(entry, transmissionParameters);
+
+        // Check the transmission for the can
+        do_assert_transmission(entry, transmissionCanParameters);
 
         file.close();
     }

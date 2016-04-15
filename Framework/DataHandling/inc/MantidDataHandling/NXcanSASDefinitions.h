@@ -77,7 +77,7 @@ namespace NXcanSAS {
   //SAStransmission_spectrum
   const std::string sasTransmissionSpectrumClassAttr = "SAStransmission_spectrum";
   const std::string sasTransmissionSpectrumGroupName = "sastransmission_spectrum";
-  const std::string sasTransmissionSpectrumTIndies = "T_indices";
+  const std::string sasTransmissionSpectrumTIndices = "T_indices";
   const std::string sasTransmissionSpectrumTUncertainty = "T_uncertainty";
   const std::string sasTransmissionSpectrumNameAttr = "name";
   const std::string sasTransmissionSpectrumNameSampleAttrValue = "sample";
