@@ -218,7 +218,7 @@ void Q1DWeighted::exec() {
         // Find the position of this sub-pixel in real space and compute Q
         // For reference - in the case where we don't use sub-pixels, simply
         // use:
-        //     double sinTheta = sin( inputWS->detectorTwoTheta(det)/2.0 );
+        //     double sinTheta = sin( inputWS->detectorTwoTheta(*det)/2.0 );
         V3D pos = det->getPos() - V3D(sub_x, sub_y, 0.0);
         double sinTheta = sin(pos.angle(beamLine) / 2.0);
         double factor = fmp * sinTheta;
