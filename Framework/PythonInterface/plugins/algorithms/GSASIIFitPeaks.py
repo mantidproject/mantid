@@ -91,7 +91,6 @@ class GSASIIFitPeaks(PythonAlgorithm):
                                           extensions = [".par", ".prm", ".ipar", ".iparm"]),
                              doc = 'File with instrument parameters (in GSAS format).')
 
-        # Phase information: TODO
         self.declareProperty(FileProperty(name = self.PROP_PHASE_INFO_FILE, defaultValue = '',
                                           action = FileAction.OptionalLoad, extensions = [".cif"]),
                              doc = 'File with phase information for the material.')
@@ -536,7 +535,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
         self.log().information("Parameters for which issues were found when refining: {0}".
                                format(bad_vary))
 
-        # chisq value (the 3rd) is not returned by DoPeakFit - TODO?
+        # chisq value (the 3rd) is not returned by DoPeakFit - TODO, how?
         gof_estimates = (Rvals['Rwp'], Rvals['GOF'], 0)
         return (gof_estimates, parm_dict)
 
@@ -595,12 +594,15 @@ class GSASIIFitPeaks(PythonAlgorithm):
         data member
         """
 
-        # produce histo_file, to use the reader from GSAS-II which will initialize the
-        # "rd" object - TODO
-        histo_data_filename = './tmp_gsasii_histo_data.xye'
-        SaveFocusedXYE(InputWorkspace=gs2_focused_wks, Filename=histo_data_filename)
-        histo_data_filename = './tmp_gsasii_histo_data-0.xye'
-        gs2_rd = self._get_histo_data_reader(gs2, histo_data_filename)
+        # produce histo_file, to "import" it with the reader from GSAS-II which will initialize
+        # the "rd" object.
+        import os
+        import tempfile
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.xye', delete=False) as histo_data_tmp:
+            # SplitFiles=False is important to get the filename without suffix
+            SaveFocusedXYE(InputWorkspace=gs2_focused_wks, Filename=histo_data_tmp.name,
+                           Format="XYE", SplitFiles=False)
+            gs2_rd = self._get_histo_data_reader(gs2, histo_data_tmp.name)
 
         gs2_rd.powderdata = self._transform_to_centers_bins(gs2_rd.powderdata)
 
@@ -695,7 +697,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
         return (data[0:-1]+data[1:])/2.0
 
     def _init_peaks_list(self, gs2_rd, limits, inst_parms):
-        # Bring the auto-search code out of that file! - TODO
+        # Bring the auto-search code out of that file! - TODO in GSAS
         import GSASIIpwdGUI
 
         (inst_parm1, inst_parm2) = inst_parms
@@ -808,7 +810,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
     def _save_lattice_params_file(self, _gs2, out_lattice_file):
         (latt_a, latt_b, latt_c, latt_alpha, latt_beta, latt_gamma) = 6*[0]
-        # grab parameters from gs2 - TODO
+        # To grab parameters from the gs2 object:
         # G2gd.GetPatternTreeItemId(self,self.root,'Phases')
         with open(out_lattice_file, 'wt') as lattice_txt:
             print >>lattice_txt, "a, b, c, alpha, beta, gamma"
