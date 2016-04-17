@@ -256,13 +256,11 @@ void MDHistoWorkspace::initVertexesArray() {
  */
 void MDHistoWorkspace::setTo(signal_t signal, signal_t errorSquared,
                              signal_t numEvents) {
-  for (size_t i = 0; i < m_length; i++) {
-    m_signals[i] = signal;
-    m_errorsSquared[i] = errorSquared;
-    m_numEvents[i] = numEvents;
-    m_masks[i] = false; // Not masked by default;
-    m_nEventsContributed += uint64_t(numEvents);
-  }
+  std::fill_n(m_signals, m_length, signal);
+  std::fill_n(m_errorsSquared, m_length, errorSquared);
+  std::fill_n(m_numEvents, m_length, numEvents);
+  std::fill_n(m_masks, m_length, false);
+  m_nEventsContributed = static_cast<uint64_t>(numEvents) * m_length;
 }
 
 //----------------------------------------------------------------------------------------------
