@@ -454,86 +454,6 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
         return residuals
 
-    def _load_prepare_phase_data(self, gs2, gs2_rd, phase_filename):
-        """
-        Loads and sets up phase data from a phase information (CIF) file
-
-        @param gs2 :: the main GSAS-II object
-        @param gs2_rd :: the GSAS-II "rd" object with powder data in it
-        @param phase_filename :: name of the CIF file
-
-        @return phase data object as defined in GSAS-II GSASIIobj.py, with the imported phase
-        information and other fields set up to defaults.
-        """
-        import GSASIIphsGUI
-
-        # Import phase data from (CIF) file
-        phase_readers_list = gs2.ImportPhaseReaderlist
-        # 3 is G2phase_CIF.CIFPhaseReader
-        phase_readers_list = [phase_readers_list[3]]
-
-        _success, _rd_list, err_msg = gs2.ImportDataGeneric(phase_filename, phase_readers_list, [],
-                                                            usedRanIdList=['noGUI'], Start=False)
-        if err_msg:
-            raise RuntimeError("There was a problem while importing the phase information file ({0}. "
-                               "Error details: {1}".format(phase_filename, errm_msg))
-
-        phase_reader = phase_readers_list[0]
-        GSASIIphsGUI.SetupGeneralWithoutGUI(gs2, phase_reader.Phase)
-        phase_data = self._register_phase_data_to_histo(gs2, gs2_rd, phase_reader, phase_filename)
-
-        return phase_data
-
-    def _register_phase_data_to_histo(self, gs2, gs2_rd, phase_reader, phase_filename):
-        # Register phase data and add it to the histo data
-        import os
-        import GSASIIgrid
-        phase_name = os.path.basename(phase_filename)
-        phase_reader.Phase['General']['Name'] = phase_name
-        self.log().debug(" Phase information name: {0}".format(phase_name))
-
-        if not GSASIIgrid.GetPatternTreeItemId(gs2, gs2.root, 'Phases'):
-            sub = gs2.PatternTree.AppendItem(parent=gs2.root, text='Phases')
-        else:
-            sub = GSASIIgrid.GetPatternTreeItemId(gs2, gs2.root, 'Phases')
-
-        psub = gs2.PatternTree.AppendItem(parent=sub, text=phase_name)
-        gs2.PatternTree.SetItemPyData(psub, phase_reader.Phase)
-
-        # Connect the phase information to the histogram data
-        sub = GSASIIgrid.GetPatternTreeItemId(gs2, gs2.root, 'Phases')
-        item, cookie = gs2.PatternTree.GetFirstChild(sub)
-        phase_name = gs2.PatternTree.GetItemText(item)
-        self.log().debug("Connecting phase information (name {0} to histogram data, with item: {1}, "
-                         "cookie: {2}".format(phase_name, item, cookie))
-        # the histo data is in for example 'PWDR ENGINX_ceria_1000_spectrum-0.txt'
-        phase_data = gs2.PatternTree.GetItemPyData(item)
-
-        self._setup_additional_phase_data(gs2_rd.idstring, phase_data)
-
-        return phase_data
-
-    def _setup_additional_phase_data(self, powder_histo_name, phase_data):
-        """
-        Setup more phase data parameters in 'Phases' / 'General' and
-        'Phases' / 'Histograms'.
-
-        @param phase_data :: from GSAS-II, the first entry in 'Phases'
-        """
-        import GSASIIspc
-        SGData = phase_data['General']['SGData']
-        use_list = phase_data['Histograms']
-        NShkl = len(GSASIIspc.MustrainNames(SGData))
-        NDij = len(GSASIIspc.HStrainNames(SGData))
-        # like 'PWDR ENGINX_ceria_1000_spectrum-0.txt'
-        histo_name = 'PWDR ' + powder_histo_name
-        # 'Reflection Lists' is not defined at this point:
-        # item_id = GSASIIgrid.GetPatternTreeItemId(gs2, gs2.root, histo_name)
-        # refList = gs2.PatternTree.GetItemPyData(
-        #     GSASIIgrid.GetPatternTreeItemId(gs2, item_id, 'Reflection Lists'))
-        # refList[general_phase_data['Name']] = {}
-        use_list[histo_name] = GSASII.SetDefaultDData('PWDR', histo_name, NShkl=NShkl, NDij=NDij)
-
     def _run_peak_fit(self, powderdata, limits, peaks_list, background_def):
         """
         This performs peak fitting as in GSAS-II "Peaks List/Peak Fitting/PeakFitType".
@@ -645,45 +565,6 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
         return gs2_rd
 
-    def _add_instrument_info(self, gs2, gs2_rd, inst_file):
-        if 'Instrument Parameters' not in gs2_rd.pwdparms:
-            gs2.zipfile = None # init required before GetPowderIparm
-            # Trick: if you pass lastIparmfile (being sure that it exits) it will be
-            # picked up without having to ask via a pop-up dialog
-            # An alternative is to set 'gs2_rd.instparm = inst_file' but that assumes both
-            # the data and instrument files are in the same directory
-            inst_parm1, inst_parm2 = gs2.GetPowderIparm(rd=gs2_rd, prevIparm=None,
-                                                        lastIparmfile=inst_file, lastdatafile='')
-            if not inst_parm1: # or not inst_parm2:  # (note inst_parm2 is commonly an empty dict)
-                raise RuntimeError('Failed to import the instrument parameter structure')
-
-        gs2_rd.pwdparms['Instrument Parameters'] = (inst_parm1, inst_parm2)
-
-        return (gs2_rd, (inst_parm1, inst_parm2))
-
-    def _build_add_background_def(self, gs2_rd):
-        # Note: blatantly ignores self.getProperty(self.PROP_BACKGROUND_TYPE)
-        backg_def = [['chebyschev', True, 3, 1.0, 0.0, 0.0],
-                     {'peaksList': [], 'debyeTerms': [], 'nPeaks': 0, 'nDebye': 0}]
-
-        gs2_rd.pwdparms['Background'] = backg_def
-
-        return backg_def
-
-    def _build_add_limits(self, gs2_rd):
-
-        min_x = self.getProperty(self.PROP_MINX).value
-        if Property.EMPTY_DBL == min_x:
-            min_x = gs2_rd.powderdata[0].min()
-        max_x = self.getProperty(self.PROP_MAXX).value
-        if Property.EMPTY_DBL == max_x:
-            max_x = gs2_rd.powderdata[0].max()
-
-        limits = [min_x, max_x]
-        gs2_rd.pwdparms['Limits'] = limits
-
-        return limits
-
     def _get_histo_data_reader(self, gs2, histo_data_file):
         readers_list = self._init_histo_data_readers(gs2)
         if not isinstance(readers_list, list) or len(readers_list) < 6:
@@ -730,6 +611,45 @@ class GSASIIFitPeaks(PythonAlgorithm):
         """
         return (data[0:-1]+data[1:])/2.0
 
+    def _add_instrument_info(self, gs2, gs2_rd, inst_file):
+        if 'Instrument Parameters' not in gs2_rd.pwdparms:
+            gs2.zipfile = None # init required before GetPowderIparm
+            # Trick: if you pass lastIparmfile (being sure that it exits) it will be
+            # picked up without having to ask via a pop-up dialog
+            # An alternative is to set 'gs2_rd.instparm = inst_file' but that assumes both
+            # the data and instrument files are in the same directory
+            inst_parm1, inst_parm2 = gs2.GetPowderIparm(rd=gs2_rd, prevIparm=None,
+                                                        lastIparmfile=inst_file, lastdatafile='')
+            if not inst_parm1: # or not inst_parm2:  # (note inst_parm2 is commonly an empty dict)
+                raise RuntimeError('Failed to import the instrument parameter structure')
+
+        gs2_rd.pwdparms['Instrument Parameters'] = (inst_parm1, inst_parm2)
+
+        return (gs2_rd, (inst_parm1, inst_parm2))
+
+    def _build_add_background_def(self, gs2_rd):
+        # Note: blatantly ignores self.getProperty(self.PROP_BACKGROUND_TYPE)
+        backg_def = [['chebyschev', True, 3, 1.0, 0.0, 0.0],
+                     {'peaksList': [], 'debyeTerms': [], 'nPeaks': 0, 'nDebye': 0}]
+
+        gs2_rd.pwdparms['Background'] = backg_def
+
+        return backg_def
+
+    def _build_add_limits(self, gs2_rd):
+
+        min_x = self.getProperty(self.PROP_MINX).value
+        if Property.EMPTY_DBL == min_x:
+            min_x = gs2_rd.powderdata[0].min()
+        max_x = self.getProperty(self.PROP_MAXX).value
+        if Property.EMPTY_DBL == max_x:
+            max_x = gs2_rd.powderdata[0].max()
+
+        limits = [min_x, max_x]
+        gs2_rd.pwdparms['Limits'] = limits
+
+        return limits
+
     def _init_peaks_list(self, gs2_rd, limits, inst_parms):
         # Bring the auto-search code out of that file! - TODO in GSAS
         import GSASIIpwdGUI
@@ -752,6 +672,86 @@ class GSASIIFitPeaks(PythonAlgorithm):
         peaks_init.reverse()
 
         return peaks_init
+
+    def _load_prepare_phase_data(self, gs2, gs2_rd, phase_filename):
+        """
+        Loads and sets up phase data from a phase information (CIF) file
+
+        @param gs2 :: the main GSAS-II object
+        @param gs2_rd :: the GSAS-II "rd" object with powder data in it
+        @param phase_filename :: name of the CIF file
+
+        @return phase data object as defined in GSAS-II GSASIIobj.py, with the imported phase
+        information and other fields set up to defaults.
+        """
+        import GSASIIphsGUI
+
+        # Import phase data from (CIF) file
+        phase_readers_list = gs2.ImportPhaseReaderlist
+        # 3 is G2phase_CIF.CIFPhaseReader
+        phase_readers_list = [phase_readers_list[3]]
+
+        _success, _rd_list, err_msg = gs2.ImportDataGeneric(phase_filename, phase_readers_list, [],
+                                                            usedRanIdList=['noGUI'], Start=False)
+        if err_msg:
+            raise RuntimeError("There was a problem while importing the phase information file ({0}. "
+                               "Error details: {1}".format(phase_filename, errm_msg))
+
+        phase_reader = phase_readers_list[0]
+        GSASIIphsGUI.SetupGeneralWithoutGUI(gs2, phase_reader.Phase)
+        phase_data = self._register_phase_data_to_histo(gs2, gs2_rd, phase_reader, phase_filename)
+
+        return phase_data
+
+    def _register_phase_data_to_histo(self, gs2, gs2_rd, phase_reader, phase_filename):
+        # Register phase data and add it to the histo data
+        import os
+        import GSASIIgrid
+        phase_name = os.path.basename(phase_filename)
+        phase_reader.Phase['General']['Name'] = phase_name
+        self.log().debug(" Phase information name: {0}".format(phase_name))
+
+        if not GSASIIgrid.GetPatternTreeItemId(gs2, gs2.root, 'Phases'):
+            sub = gs2.PatternTree.AppendItem(parent=gs2.root, text='Phases')
+        else:
+            sub = GSASIIgrid.GetPatternTreeItemId(gs2, gs2.root, 'Phases')
+
+        psub = gs2.PatternTree.AppendItem(parent=sub, text=phase_name)
+        gs2.PatternTree.SetItemPyData(psub, phase_reader.Phase)
+
+        # Connect the phase information to the histogram data
+        sub = GSASIIgrid.GetPatternTreeItemId(gs2, gs2.root, 'Phases')
+        item, cookie = gs2.PatternTree.GetFirstChild(sub)
+        phase_name = gs2.PatternTree.GetItemText(item)
+        self.log().debug("Connecting phase information (name {0} to histogram data, with item: {1}, "
+                         "cookie: {2}".format(phase_name, item, cookie))
+        # the histo data is in for example 'PWDR ENGINX_ceria_1000_spectrum-0.txt'
+        phase_data = gs2.PatternTree.GetItemPyData(item)
+
+        self._setup_additional_phase_data(gs2_rd.idstring, phase_data)
+
+        return phase_data
+
+    def _setup_additional_phase_data(self, powder_histo_name, phase_data):
+        """
+        Setup more phase data parameters in 'Phases' / 'General' and
+        'Phases' / 'Histograms'.
+
+        @param phase_data :: from GSAS-II, the first entry in 'Phases'
+        """
+        import GSASIIspc
+        SGData = phase_data['General']['SGData']
+        use_list = phase_data['Histograms']
+        NShkl = len(GSASIIspc.MustrainNames(SGData))
+        NDij = len(GSASIIspc.HStrainNames(SGData))
+        # like 'PWDR ENGINX_ceria_1000_spectrum-0.txt'
+        histo_name = 'PWDR ' + powder_histo_name
+        # 'Reflection Lists' is not defined at this point:
+        # item_id = GSASIIgrid.GetPatternTreeItemId(gs2, gs2.root, histo_name)
+        # refList = gs2.PatternTree.GetItemPyData(
+        #     GSASIIgrid.GetPatternTreeItemId(gs2, item_id, 'Reflection Lists'))
+        # refList[general_phase_data['Name']] = {}
+        use_list[histo_name] = GSASII.SetDefaultDData('PWDR', histo_name, NShkl=NShkl, NDij=NDij)
 
     def _produce_outputs(self, gof_estimates, lattice_params, parm_dict):
         (result_rwp, result_gof, _result_chisq) = gof_estimates
