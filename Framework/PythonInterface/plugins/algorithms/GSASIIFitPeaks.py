@@ -33,6 +33,10 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
     def __init__(self):
         PythonAlgorithm.__init__(self)
+
+        # For the wsPython app underlying GSAS-II
+        self._gsas2_app = None
+
         self.PROP_INPUT_WORKSPACE = 'InputWorkspace'
         self.PROP_WORKSPACE_INDEX = 'WorkspaceIndex'
         self.PROP_INSTR_FILE = 'InstrumentFile'
@@ -225,15 +229,12 @@ class GSASIIFitPeaks(PythonAlgorithm):
     def PyExec(self):
         prog = Progress(self, start=0, end=1, nreports=5)
 
-        self.log().error('import')
         prog.report('Importing GSAS-II ')
-        self._import_gsas2(self.getProperty(self.PROP_PATH_TO_GSASII).value)
+        self._run_threadsafe(self._import_gsas2, self.getProperty(self.PROP_PATH_TO_GSASII).value)
 
-        self.log().error('init')
         prog.report('Initializing GSAS-II ')
-        gs2 = self._init_gs2()
+        gs2 = self._run_threadsafe(self._init_gs2)
 
-        self.log().error('loading')
         prog.report('Loading and preparing input data')
         in_wks = self.getProperty(self.PROP_INPUT_WORKSPACE).value
         in_idx = self.getProperty(self.PROP_WORKSPACE_INDEX).value
@@ -245,13 +246,22 @@ class GSASIIFitPeaks(PythonAlgorithm):
         else:
             focused_wks = in_wks
 
-        (gs2_rd, limits, peaks_init, background_def) = self._load_prepare_data_for_fit(gs2, focused_wks,
-                                                                                       inst_file)
+        try:
+            (gs2_rd, limits, peaks_init, background_def) =\
+                self._run_threadsafe(self._load_prepare_data_for_fit, gs2, focused_wks, inst_file)
+        except RuntimeError as rexc:
+            raise RuntimeError("Error in execution of GSAS-II data loading routines: "
+                               "{0}.".format(str(rexc)))
 
         # No obvious way to provide proper progress report from inside the fitting routines
         prog.report('Running refinement. This may take some times')
-        (gof_estimates, lattice_params, parm_dict) = self._run_refinement(gs2, gs2_rd, (limits, peaks_init,
-                                                                                        background_def))
+        try:
+            (gof_estimates, lattice_params, parm_dict) = \
+                self._run_threadsafe(self._run_refinement,
+                                     gs2, gs2_rd, (limits, peaks_init, background_def))
+        except RuntimeError as rexc:
+            raise RuntimeError("Error in execution of GSAS-II refinement routines: "
+                               "{0}".format(str(rexc)))
 
         prog.report('Producing outputs')
         out_proj_file = self.getProperty(self.PROP_OUT_PROJECT_FILE).value
@@ -260,11 +270,26 @@ class GSASIIFitPeaks(PythonAlgorithm):
             # file as compared with the save done from the core refine routines.
             # those routines save information in the project file that is apparently not
             # updated in the project tree (other than loading the saved project file).
-            # self._save_gsas2_project(gs2, gs2_rd, out_proj_file)
+            self._save_gsas2_project(gs2, gs2_rd, out_proj_file)
             file_lattice_params = self._parse_lattice_params_refined(out_proj_file)
             self.log().notice("Lattice parameters found in output file: {0}".format(file_lattice_params))
 
         self._produce_outputs(gof_estimates, lattice_params, parm_dict)
+
+        import time
+        time.sleep(0.1)
+
+    def _run_threadsafe(self, func_call, *args, **kwargs):
+        """
+        GSAS-II is a wx application. When running inside MantidPlot it needs GUI/threadsafe
+        treatment
+        """
+        # if 'mantidplot' in locals() or 'mantidplot' in globals():
+        try:
+            import pymantidplot
+            return pymantidplot.threadsafe_call(func_call, *args, **kwargs)
+        except ImportError:
+            return func_call(*args, **kwargs)
 
     def _load_prepare_data_for_fit(self, gs2, gs2_focused_wks, inst_file):
         """
@@ -548,7 +573,14 @@ class GSASIIFitPeaks(PythonAlgorithm):
         globals()[mod_name] = __import__(mod_name)
 
     def _init_gs2(self):
-        _gsas2_app = GSASII.GSASIImain(0)
+        # Do not feel tempted to create the GSASII wx app in the usual way:
+        # _gsas2_app = GSASII.GSASIImain(0)
+        # This will use Show() and SetTopWindow() and that will cause a crash when the
+        # algorithm finishes and is destroyed!
+        # This seems to destroy/close safely
+        import wx
+        self._gsas2_app = wx.App()
+
         gs2 = GSASII.GSASII(None)
         return gs2
 
@@ -564,7 +596,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
         """
 
         # produce histo_file, to use the reader from GSAS-II which will initialize the
-        # "rd" object
+        # "rd" object - TODO
         histo_data_filename = './tmp_gsasii_histo_data.xye'
         SaveFocusedXYE(InputWorkspace=gs2_focused_wks, Filename=histo_data_filename)
         histo_data_filename = './tmp_gsasii_histo_data-0.xye'
