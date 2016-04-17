@@ -580,8 +580,7 @@ void AnvredCorrection::scale_init(IDetector_const_sptr det,
                     bankNameStr.end());
   Strings::convert(bankNameStr, bank);
   // Distance to center of detector
-  boost::shared_ptr<const IComponent> det0 =
-      inst->getComponentByName(bankName);
+  boost::shared_ptr<const IComponent> det0 = inst->getComponentByName(bankName);
   if (inst->getName().compare("CORELLI") ==
       0) // for Corelli with sixteenpack under bank
   {

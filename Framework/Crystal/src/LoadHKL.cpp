@@ -41,9 +41,10 @@ void LoadHKL::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace.");
 
-  declareProperty("DirectionCosines", false,
-                  "Extra columns (22 total) in file if true for direction cosines.\n"
-                  "If false, original 14 columns (default).");
+  declareProperty(
+      "DirectionCosines", false,
+      "Extra columns (22 total) in file if true for direction cosines.\n"
+      "If false, original 14 columns (default).");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -99,19 +100,17 @@ void LoadHKL::exec() {
     double tbar, trans, scattering;
     int run, bank;
     if (cosines) {
-       tbar = atof(line.substr(40, 8).c_str()); // tbar
-       run = atoi(line.substr(102, 6).c_str());
-       trans = atof(line.substr(114, 7).c_str());     // transmission
-       bank = atoi(line.substr(121, 4).c_str());
-       scattering = atof(line.substr(125, 9).c_str());
-    }
-    else
-    {
-       tbar = atof(line.substr(40, 7).c_str()); // tbar
-       run = atoi(line.substr(47, 7).c_str());
-       trans = atof(line.substr(61, 7).c_str());     // transmission
-       bank = atoi(line.substr(68, 4).c_str());
-       scattering = atof(line.substr(72, 9).c_str());
+      tbar = atof(line.substr(40, 8).c_str()); // tbar
+      run = atoi(line.substr(102, 6).c_str());
+      trans = atof(line.substr(114, 7).c_str()); // transmission
+      bank = atoi(line.substr(121, 4).c_str());
+      scattering = atof(line.substr(125, 9).c_str());
+    } else {
+      tbar = atof(line.substr(40, 7).c_str()); // tbar
+      run = atoi(line.substr(47, 7).c_str());
+      trans = atof(line.substr(61, 7).c_str()); // transmission
+      bank = atoi(line.substr(68, 4).c_str());
+      scattering = atof(line.substr(72, 9).c_str());
     }
 
     if (first) {

@@ -21,7 +21,7 @@ using namespace Mantid::PhysicalConstants;
 std::map<int, double> detScale = {{17, 1.115862021},
                                   {18, 0.87451341},
                                   {22, 1.079102931},
-                                  {26,1.087379072},
+                                  {26, 1.087379072},
                                   {27, 1.064563992},
                                   {28, 0.878683269},
                                   {36, 1.15493377},
@@ -105,14 +105,15 @@ void SaveHKL::init() {
   declareProperty(
       "HKLDecimalPlaces", EMPTY_INT(),
       "Number of decimal places for fractional HKL.  Default is integer HKL.");
-  declareProperty("DirectionCosines", false,
-                  "Extra columns (22 total) in file if true for direction cosines.\n"
-                  "If false, original 14 columns (default).");
+  declareProperty(
+      "DirectionCosines", false,
+      "Extra columns (22 total) in file if true for direction cosines.\n"
+      "If false, original 14 columns (default).");
   const std::vector<std::string> exts{".mat", ".ub", ".txt"};
-  declareProperty(Kernel::make_unique<FileProperty>("UBFilename", "",
-                                                    FileProperty::OptionalLoad, exts),
-                  "Path to an ISAW-style UB matrix text file only needed for DirectionCosines.");
-
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "UBFilename", "", FileProperty::OptionalLoad, exts),
+                  "Path to an ISAW-style UB matrix text file only needed for "
+                  "DirectionCosines.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -139,7 +140,7 @@ void SaveHKL::exec() {
   int decimalHKL = getProperty("HKLDecimalPlaces");
   bool cosines = getProperty("DirectionCosines");
   Mantid::Geometry::OrientedLattice lat;
-  Kernel::DblMatrix UB(3,3);
+  Kernel::DblMatrix UB(3, 3);
   if (cosines) {
     // Find OrientedLattice
     std::string fileUB = getProperty("UBFilename");
@@ -226,8 +227,10 @@ void SaveHKL::exec() {
     Strings::convert(bankName, bank);
 
     // Save in the map
-    if (type.compare(0, 2, "Ru") == 0) runMap[run][bank].push_back(i);
-    else runMap[bank][run].push_back(i);
+    if (type.compare(0, 2, "Ru") == 0)
+      runMap[run][bank].push_back(i);
+    else
+      runMap[bank][run].push_back(i);
     // Track unique bank numbers
     uniqueBanks.insert(bank);
     uniqueRuns.insert(run);
@@ -326,261 +329,272 @@ void SaveHKL::exec() {
   runMap_t::iterator runMap_it;
   for (runMap_it = runMap.begin(); runMap_it != runMap.end(); ++runMap_it) {
     // Start of a new run
-    //int run = runMap_it->first;
+    // int run = runMap_it->first;
     bankMap_t &bankMap = runMap_it->second;
 
     bankMap_t::iterator bankMap_it;
     for (bankMap_it = bankMap.begin(); bankMap_it != bankMap.end();
          ++bankMap_it) {
       // Start of a new bank.
-      //int bank = bankMap_it->first;
+      // int bank = bankMap_it->first;
       std::vector<size_t> &ids = bankMap_it->second;
 
-        // Go through each peak at this run / bank
-        for (auto wi : ids) {
+      // Go through each peak at this run / bank
+      for (auto wi : ids) {
 
-    Peak &p = peaks[wi];
-    if (p.getIntensity() == 0.0 || boost::math::isnan(p.getIntensity()) ||
-        boost::math::isnan(p.getSigmaIntensity())) {
-      banned.insert(wi);
-      continue;
-    }
-    if (minIsigI != EMPTY_DBL() &&
-        p.getIntensity() < std::abs(minIsigI * p.getSigmaIntensity())) {
-      banned.insert(wi);
-      continue;
-    }
-    if (minIntensity != EMPTY_DBL() && p.getIntensity() < minIntensity) {
-      banned.insert(wi);
-      continue;
-    }
-    int run = p.getRunNumber();
-    int bank = 0;
-    std::string bankName = p.getBankName();
-    int nCols, nRows;
-    sizeBanks(bankName, nCols, nRows);
-    // peaks with detectorID=-1 are from LoadHKL
-    if (widthBorder != EMPTY_INT() && p.getDetectorID() != -1 &&
-        (p.getCol() < widthBorder || p.getRow() < widthBorder ||
-         p.getCol() > (nCols - widthBorder) ||
-         p.getRow() > (nRows - widthBorder))) {
-      banned.insert(wi);
-      continue;
-    }
-    // Take out the "bank" part of the bank name and convert to an int
-    bankName.erase(remove_if(bankName.begin(), bankName.end(),
-                             not1(std::ptr_fun(::isdigit))),
-                   bankName.end());
-    Strings::convert(bankName, bank);
+        Peak &p = peaks[wi];
+        if (p.getIntensity() == 0.0 || boost::math::isnan(p.getIntensity()) ||
+            boost::math::isnan(p.getSigmaIntensity())) {
+          banned.insert(wi);
+          continue;
+        }
+        if (minIsigI != EMPTY_DBL() &&
+            p.getIntensity() < std::abs(minIsigI * p.getSigmaIntensity())) {
+          banned.insert(wi);
+          continue;
+        }
+        if (minIntensity != EMPTY_DBL() && p.getIntensity() < minIntensity) {
+          banned.insert(wi);
+          continue;
+        }
+        int run = p.getRunNumber();
+        int bank = 0;
+        std::string bankName = p.getBankName();
+        int nCols, nRows;
+        sizeBanks(bankName, nCols, nRows);
+        // peaks with detectorID=-1 are from LoadHKL
+        if (widthBorder != EMPTY_INT() && p.getDetectorID() != -1 &&
+            (p.getCol() < widthBorder || p.getRow() < widthBorder ||
+             p.getCol() > (nCols - widthBorder) ||
+             p.getRow() > (nRows - widthBorder))) {
+          banned.insert(wi);
+          continue;
+        }
+        // Take out the "bank" part of the bank name and convert to an int
+        bankName.erase(remove_if(bankName.begin(), bankName.end(),
+                                 not1(std::ptr_fun(::isdigit))),
+                       bankName.end());
+        Strings::convert(bankName, bank);
 
-    double tbar = 0;
+        double tbar = 0;
 
-    // Two-theta = polar angle = scattering angle = between +Z vector and the
-    // scattered beam
-    double scattering = p.getScattering();
-    double lambda = p.getWavelength();
-    double dsp = p.getDSpacing();
-    if (dsp < dMin || lambda < wlMin || lambda > wlMax) {
-      banned.insert(wi);
-      continue;
-    }
-    double transmission = 0;
-    if (m_smu != EMPTY_DBL() && m_amu != EMPTY_DBL()) {
-      transmission = absor_sphere(scattering, lambda, tbar);
-    }
+        // Two-theta = polar angle = scattering angle = between +Z vector and
+        // the
+        // scattered beam
+        double scattering = p.getScattering();
+        double lambda = p.getWavelength();
+        double dsp = p.getDSpacing();
+        if (dsp < dMin || lambda < wlMin || lambda > wlMax) {
+          banned.insert(wi);
+          continue;
+        }
+        double transmission = 0;
+        if (m_smu != EMPTY_DBL() && m_amu != EMPTY_DBL()) {
+          transmission = absor_sphere(scattering, lambda, tbar);
+        }
 
-    // Anvred write from Art Schultz/
-    // hklFile.write('%4d%4d%4d%8.2f%8.2f%4d%8.4f%7.4f%7d%7d%7.4f%4d%9.5f%9.4f\n'
-    //    % (H, K, L, FSQ, SIGFSQ, hstnum, WL, TBAR, CURHST, SEQNUM,
-    //    TRANSMISSION, DN, TWOTH, DSP))
-    if (p.getH() == 0 && p.getK() == 0 && p.getL() == 0) {
-      banned.insert(wi);
-      continue;
-    }
-    if (decimalHKL == EMPTY_INT())
-      out << std::setw(4) << Utils::round(qSign * p.getH()) << std::setw(4)
-          << Utils::round(qSign * p.getK()) << std::setw(4)
-          << Utils::round(qSign * p.getL());
-    else
-      out << std::setw(5 + decimalHKL) << std::fixed
-          << std::setprecision(decimalHKL) << -p.getH()
-          << std::setw(5 + decimalHKL) << std::fixed
-          << std::setprecision(decimalHKL) << -p.getK()
-          << std::setw(5 + decimalHKL) << std::fixed
-          << std::setprecision(decimalHKL) << -p.getL();
-    double correc = scaleFactor;
-    double relSigSpect = 0.0;
-    bankSequence = static_cast<int>(std::distance(uniqueBanks.begin(), uniqueBanks.find(bank)));
-    runSequence = static_cast<int>(std::distance(uniqueRuns.begin(), uniqueRuns.find(run)));
-    if (correctPeaks) {
-      // correct for the slant path throught the scintillator glass
-      double mu = (9.614 * lambda) + 0.266; // mu for GS20 glass
-      double depth = 0.2;
-      double eff_center =
-          1.0 - std::exp(-mu * depth); // efficiency at center of detector
+        // Anvred write from Art Schultz/
+        // hklFile.write('%4d%4d%4d%8.2f%8.2f%4d%8.4f%7.4f%7d%7d%7.4f%4d%9.5f%9.4f\n'
+        //    % (H, K, L, FSQ, SIGFSQ, hstnum, WL, TBAR, CURHST, SEQNUM,
+        //    TRANSMISSION, DN, TWOTH, DSP))
+        if (p.getH() == 0 && p.getK() == 0 && p.getL() == 0) {
+          banned.insert(wi);
+          continue;
+        }
+        if (decimalHKL == EMPTY_INT())
+          out << std::setw(4) << Utils::round(qSign * p.getH()) << std::setw(4)
+              << Utils::round(qSign * p.getK()) << std::setw(4)
+              << Utils::round(qSign * p.getL());
+        else
+          out << std::setw(5 + decimalHKL) << std::fixed
+              << std::setprecision(decimalHKL) << -p.getH()
+              << std::setw(5 + decimalHKL) << std::fixed
+              << std::setprecision(decimalHKL) << -p.getK()
+              << std::setw(5 + decimalHKL) << std::fixed
+              << std::setprecision(decimalHKL) << -p.getL();
+        double correc = scaleFactor;
+        double relSigSpect = 0.0;
+        bankSequence = static_cast<int>(
+            std::distance(uniqueBanks.begin(), uniqueBanks.find(bank)));
+        runSequence = static_cast<int>(
+            std::distance(uniqueRuns.begin(), uniqueRuns.find(run)));
+        if (correctPeaks) {
+          // correct for the slant path throught the scintillator glass
+          double mu = (9.614 * lambda) + 0.266; // mu for GS20 glass
+          double depth = 0.2;
+          double eff_center =
+              1.0 - std::exp(-mu * depth); // efficiency at center of detector
 
+          // Distance to center of detector
+          boost::shared_ptr<const IComponent> det0 =
+              inst->getComponentByName(p.getBankName());
+          if (inst->getName().compare("CORELLI") ==
+              0) // for Corelli with sixteenpack under bank
+          {
+            std::vector<Geometry::IComponent_const_sptr> children;
+            boost::shared_ptr<const Geometry::ICompAssembly> asmb =
+                boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+                    inst->getComponentByName(p.getBankName()));
+            asmb->getChildren(children, false);
+            det0 = children[0];
+          }
+          IComponent_const_sptr sample = inst->getSample();
+          double cosA = det0->getDistance(*sample) / p.getL2();
+          double pathlength = depth / cosA;
+          double eff_R = 1.0 - exp(-mu * pathlength); // efficiency at point R
+          double sp_ratio = eff_center / eff_R; // slant path efficiency ratio
+          double sinsqt = std::pow(lambda / (2.0 * dsp), 2);
+          double wl4 = std::pow(lambda, m_power_th);
+          double cmonx = 1.0;
+          if (p.getMonitorCount() > 0)
+            cmonx = 100e6 / p.getMonitorCount();
+          double spect =
+              spectrumCalc(p.getTOF(), iSpec, time, spectra, bankSequence);
+          // Find spectra at wavelength of 1 for normalization
+          std::vector<double> xdata(1, 1.0); // wl = 1
+          std::vector<double> ydata;
+          double theta2 = p.getScattering();
+          double l1 = p.getL1();
+          double l2 = p.getL2();
+          Mantid::Kernel::Unit_sptr unit =
+              UnitFactory::Instance().create("Wavelength");
+          unit->toTOF(xdata, ydata, l1, l2, theta2, 0, 0.0, 0.0);
+          double one = xdata[0];
+          double spect1 = spectrumCalc(one, iSpec, time, spectra, bankSequence);
+          relSigSpect = std::sqrt((1.0 / spect) + (1.0 / spect1));
+          if (spect1 != 0.0) {
+            spect /= spect1;
+          } else {
+            throw std::runtime_error(
+                "Wavelength for normalizing to spectrum is out of range.");
+          }
+          correc = scaleFactor * sinsqt * cmonx * sp_ratio /
+                   (wl4 * spect * transmission);
 
-      // Distance to center of detector
-      boost::shared_ptr<const IComponent> det0 =
-          inst->getComponentByName(p.getBankName());
-      if (inst->getName().compare("CORELLI") ==
-          0) // for Corelli with sixteenpack under bank
-      {
-        std::vector<Geometry::IComponent_const_sptr> children;
-        boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-            boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-                inst->getComponentByName(p.getBankName()));
-        asmb->getChildren(children, false);
-        det0 = children[0];
+          if (inst->getName() == "TOPAZ" &&
+              detScale.find(bank) != detScale.end())
+            correc *= detScale[bank];
+        }
+
+        // SHELX can read data without the space between the l and intensity
+        if (p.getDetectorID() != -1) {
+          double ckIntensity = correc * p.getIntensity();
+          double cksigI =
+              std::sqrt(std::pow(correc * p.getSigmaIntensity(), 2) +
+                        std::pow(relSigSpect * correc * p.getIntensity(), 2));
+          p.setIntensity(ckIntensity);
+          p.setSigmaIntensity(cksigI);
+          if (ckIntensity > 99999.985)
+            g_log.warning()
+                << "Scaled intensity, " << ckIntensity
+                << " is too large for format.  Decrease ScalePeaks.\n";
+          out << std::setw(8) << std::fixed << std::setprecision(2)
+              << ckIntensity;
+
+          out << std::setw(8) << std::fixed << std::setprecision(2) << cksigI;
+        } else {
+          // This is data from LoadHKL which is already corrected
+          out << std::setw(8) << std::fixed << std::setprecision(2)
+              << p.getIntensity();
+
+          out << std::setw(8) << std::fixed << std::setprecision(2)
+              << p.getSigmaIntensity();
+        }
+        if (type.compare(0, 2, "Ba") == 0)
+          out << std::setw(4) << bankSequence + 1;
+        else
+          out << std::setw(4) << runSequence + 1;
+
+        if (cosines) {
+          out << std::setw(8) << std::fixed << std::setprecision(5) << lambda;
+          out << std::setw(8) << std::fixed << std::setprecision(5) << tbar;
+          Kernel::DblMatrix oriented = p.getGoniometerMatrix();
+          Kernel::DblMatrix orientedIPNS(3, 3);
+          V3D dir_cos_1, dir_cos_2;
+
+          orientedIPNS[0][0] = oriented[0][0];
+          orientedIPNS[0][1] = oriented[0][2];
+          orientedIPNS[0][2] = oriented[0][1];
+          orientedIPNS[1][0] = oriented[2][0];
+          orientedIPNS[1][1] = oriented[2][2];
+          orientedIPNS[1][2] = oriented[2][1];
+          orientedIPNS[2][0] = oriented[1][0];
+          orientedIPNS[2][1] = oriented[1][2];
+          orientedIPNS[2][2] = oriented[1][1];
+          Kernel::DblMatrix orientedUB = UB * orientedIPNS;
+          double l2 = p.getL2();
+          V3D R_reverse_incident = V3D(-l2, 0., 0.);
+          V3D R_IPNS;
+          double twoth = p.getScattering();
+          // This is the scattered beam direction
+          V3D dir = p.getDetPos() - inst->getSample()->getPos();
+
+          // "Azimuthal" angle: project the scattered beam direction onto the XY
+          // plane,
+          // and calculate the angle between that and the +X axis (right-handed)
+          double az = atan2(dir.Y(), dir.X());
+          R_IPNS[0] = std::cos(twoth) * l2;
+          R_IPNS[1] = std::cos(az) * std::sin(twoth) * l2;
+          R_IPNS[2] = std::sin(az) * std::sin(twoth) * l2;
+
+          for (int k = 0; k < 3; ++k) {
+            V3D q_abc_star =
+                V3D(orientedUB[k][0], orientedUB[k][1], orientedUB[k][2]);
+            double length_q_abc_star = q_abc_star.norm();
+            dir_cos_1[k] = R_reverse_incident.scalar_prod(q_abc_star) /
+                           (l2 * length_q_abc_star);
+            dir_cos_2[k] =
+                R_IPNS.scalar_prod(q_abc_star) / (l2 * length_q_abc_star);
+          }
+
+          for (int k = 0; k < 3; ++k) {
+            out << std::setw(9) << std::fixed << std::setprecision(5)
+                << dir_cos_1[k];
+            out << std::setw(9) << std::fixed << std::setprecision(5)
+                << dir_cos_2[k];
+          }
+
+          out << std::setw(6) << run;
+
+          out << std::setw(6) << wi + 1;
+
+          out << std::setw(7) << std::fixed << std::setprecision(4)
+              << transmission;
+
+          out << std::setw(4) << std::right << bank;
+
+          out << std::setw(9) << std::fixed << std::setprecision(5)
+              << scattering; // two-theta scattering
+
+          out << std::setw(8) << std::fixed << std::setprecision(4) << dsp;
+          out << std::setw(7) << std::fixed << std::setprecision(2)
+              << static_cast<double>(p.getCol());
+          out << std::setw(7) << std::fixed << std::setprecision(2)
+              << static_cast<double>(p.getRow());
+        } else {
+          out << std::setw(8) << std::fixed << std::setprecision(4) << lambda;
+
+          out << std::setw(7) << std::fixed << std::setprecision(4) << tbar;
+
+          out << std::setw(7) << run;
+
+          out << std::setw(7) << wi + 1;
+
+          out << std::setw(7) << std::fixed << std::setprecision(4)
+              << transmission;
+
+          out << std::setw(4) << std::right << bank;
+
+          out << std::setw(9) << std::fixed << std::setprecision(5)
+              << scattering; // two-theta scattering
+
+          out << std::setw(9) << std::fixed << std::setprecision(4) << dsp;
+        }
+
+        out << std::endl;
       }
-      IComponent_const_sptr sample = inst->getSample();
-      double cosA = det0->getDistance(*sample) /
-                    p.getL2();
-      double pathlength = depth / cosA;
-      double eff_R = 1.0 - exp(-mu * pathlength); // efficiency at point R
-      double sp_ratio = eff_center / eff_R;       // slant path efficiency ratio
-      double sinsqt = std::pow(lambda / (2.0 * dsp), 2);
-      double wl4 = std::pow(lambda, m_power_th);
-      double cmonx = 1.0;
-      if (p.getMonitorCount() > 0)
-        cmonx = 100e6 / p.getMonitorCount();
-      double spect =
-          spectrumCalc(p.getTOF(), iSpec, time, spectra, bankSequence);
-      // Find spectra at wavelength of 1 for normalization
-      std::vector<double> xdata(1, 1.0); // wl = 1
-      std::vector<double> ydata;
-      double theta2 = p.getScattering();
-      double l1 = p.getL1();
-      double l2 = p.getL2();
-      Mantid::Kernel::Unit_sptr unit =
-          UnitFactory::Instance().create("Wavelength");
-      unit->toTOF(xdata, ydata, l1, l2, theta2, 0, 0.0, 0.0);
-      double one = xdata[0];
-      double spect1 = spectrumCalc(one, iSpec, time, spectra, bankSequence);
-      relSigSpect = std::sqrt((1.0 / spect) + (1.0 / spect1));
-      if (spect1 != 0.0) {
-        spect /= spect1;
-      } else {
-        throw std::runtime_error(
-            "Wavelength for normalizing to spectrum is out of range.");
-      }
-      correc = scaleFactor * sinsqt * cmonx * sp_ratio /
-               (wl4 * spect * transmission);
-
-      if (inst->getName() == "TOPAZ" &&
-          detScale.find(bank) != detScale.end())
-        correc *= detScale[bank];
     }
-
-    // SHELX can read data without the space between the l and intensity
-    if (p.getDetectorID() != -1) {
-      double ckIntensity = correc * p.getIntensity();
-      double cksigI =
-          std::sqrt(std::pow(correc * p.getSigmaIntensity(), 2) +
-                    std::pow(relSigSpect * correc * p.getIntensity(), 2));
-      p.setIntensity(ckIntensity);
-      p.setSigmaIntensity(cksigI);
-      if (ckIntensity > 99999.985)
-        g_log.warning() << "Scaled intensity, " << ckIntensity
-                        << " is too large for format.  Decrease ScalePeaks.\n";
-      out << std::setw(8) << std::fixed << std::setprecision(2) << ckIntensity;
-
-      out << std::setw(8) << std::fixed << std::setprecision(2) << cksigI;
-    } else {
-      // This is data from LoadHKL which is already corrected
-      out << std::setw(8) << std::fixed << std::setprecision(2)
-          << p.getIntensity();
-
-      out << std::setw(8) << std::fixed << std::setprecision(2)
-          << p.getSigmaIntensity();
-    }
-    if (type.compare(0, 2, "Ba") == 0)
-      out << std::setw(4) << bankSequence + 1;
-    else
-      out << std::setw(4) << runSequence + 1;
-
-    if (cosines) {
-      out << std::setw(8) << std::fixed << std::setprecision(5) << lambda;
-      out << std::setw(8) << std::fixed << std::setprecision(5) << tbar;
-      Kernel::DblMatrix oriented = p.getGoniometerMatrix();
-      Kernel::DblMatrix orientedIPNS(3,3);
-      V3D dir_cos_1, dir_cos_2;
-
-      orientedIPNS[0][0] = oriented[0][0];
-      orientedIPNS[0][1] = oriented[0][2];
-      orientedIPNS[0][2] = oriented[0][1];
-      orientedIPNS[1][0] = oriented[2][0];
-      orientedIPNS[1][1] = oriented[2][2];
-      orientedIPNS[1][2] = oriented[2][1];
-      orientedIPNS[2][0] = oriented[1][0];
-      orientedIPNS[2][1] = oriented[1][2];
-      orientedIPNS[2][2] = oriented[1][1];
-      Kernel::DblMatrix orientedUB = UB * orientedIPNS;
-      double l2 = p.getL2();
-      V3D R_reverse_incident = V3D(-l2, 0., 0.);
-      V3D R_IPNS;
-      double twoth = p.getScattering();
-      // This is the scattered beam direction
-      V3D dir = p.getDetPos() - inst->getSample()->getPos();
-
-      // "Azimuthal" angle: project the scattered beam direction onto the XY
-      // plane,
-      // and calculate the angle between that and the +X axis (right-handed)
-      double az = atan2(dir.Y(), dir.X());
-      R_IPNS[0] = std::cos(twoth) * l2;
-      R_IPNS[1] = std::cos(az) * std::sin(twoth) * l2;
-      R_IPNS[2] = std::sin(az) * std::sin(twoth) * l2;
-
-      for (int k = 0; k < 3; ++k) {
-        V3D q_abc_star = V3D(orientedUB[k][0],orientedUB[k][1],orientedUB[k][2]);
-        double length_q_abc_star =q_abc_star.norm();
-        dir_cos_1[k] = R_reverse_incident.scalar_prod(q_abc_star) / (l2 * length_q_abc_star);
-        dir_cos_2[k] = R_IPNS.scalar_prod(q_abc_star) / (l2 * length_q_abc_star);
-      }
-
-    for (int k = 0; k < 3; ++k) {
-        out << std::setw(9) << std::fixed << std::setprecision(5) << dir_cos_1[k];
-        out << std::setw(9) << std::fixed << std::setprecision(5) << dir_cos_2[k];
-      }
-
-      out << std::setw(6) << run;
-
-      out << std::setw(6) << wi + 1;
-
-      out << std::setw(7) << std::fixed << std::setprecision(4) << transmission;
-
-      out << std::setw(4) << std::right << bank;
-
-      out << std::setw(9) << std::fixed << std::setprecision(5)
-          << scattering; // two-theta scattering
-
-      out << std::setw(8) << std::fixed << std::setprecision(4) << dsp;
-      out << std::setw(7) << std::fixed << std::setprecision(2) << static_cast<double>(p.getCol());
-      out << std::setw(7) << std::fixed << std::setprecision(2) << static_cast<double>(p.getRow());
-    }
-    else {
-      out << std::setw(8) << std::fixed << std::setprecision(4) << lambda;
-
-      out << std::setw(7) << std::fixed << std::setprecision(4) << tbar;
-
-      out << std::setw(7) << run;
-
-      out << std::setw(7) << wi + 1;
-
-      out << std::setw(7) << std::fixed << std::setprecision(4) << transmission;
-
-      out << std::setw(4) << std::right << bank;
-
-      out << std::setw(9) << std::fixed << std::setprecision(5)
-          << scattering; // two-theta scattering
-
-      out << std::setw(9) << std::fixed << std::setprecision(4) << dsp;
-    }
-
-
-
-    out << std::endl;
-  } } }
+  }
   if (decimalHKL == EMPTY_INT())
     out << std::setw(4) << 0 << std::setw(4) << 0 << std::setw(4) << 0;
   else
@@ -591,11 +605,11 @@ void SaveHKL::exec() {
         << std::setprecision(decimalHKL) << 0.0;
   if (cosines) {
     out << "    0.00    0.00   0 0.00000 0.00000  0.00000  0.00000  0.00000"
-        "  0.00000  0.00000  0.00000     0     0 0.0000   0  0.00000  0.0000   0.00   0.00";
-  }
-  else {
+           "  0.00000  0.00000  0.00000     0     0 0.0000   0  0.00000  "
+           "0.0000   0.00   0.00";
+  } else {
     out << "    0.00    0.00   0  0.0000 0.0000      0      0 0.0000 "
-         "  0  0.00000   0.0000";
+           "  0  0.00000   0.0000";
   }
   out << std::endl;
   out.flush();
