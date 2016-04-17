@@ -60,7 +60,11 @@ public:
   std::vector<double> selectedDataY();
   std::vector<double> selectedDataE();
   double getSelectedEnergy();
-
+  std::string getWorkspaceName();
+  size_t getWorkspaceIndex();
+  bool isSliceSelectedForFitting();
+  std::pair<double,double> getCurrentRange();
+    
 protected:
   void preDeleteHandle(const std::string &workspaceName,
     const boost::shared_ptr<Mantid::API::Workspace> workspace) override;

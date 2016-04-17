@@ -5,12 +5,13 @@
 #include "MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h"
 #include "MantidQtCustomInterfaces/DynamicPDF/DPDFInputDataControl.h"
 #include "MantidQtCustomInterfaces/DynamicPDF/DPDFDisplayControl.h"
-
+#include "MantidQtCustomInterfaces/DynamicPDF/DPDFFitControl.h"
+#include "MantidQtCustomInterfaces/DynamicPDF/DPDFFourierTransform.h"
 // Mantid headers from other projects
 #include "MantidKernel/make_unique.h"
 #include "MantidQtAPI/HelpWindow.h"
 // 3rd party library headers
-// System #includes
+// System includes
 
 namespace {
 Mantid::Kernel::Logger g_log("DynamicPDF");
@@ -31,8 +32,10 @@ BackgroundRemover::BackgroundRemover(QWidget *parent) :
   UserSubWindow{parent},
   m_sliceSelector(),
   m_inputDataControl(),
-  m_displayControl() {
-
+  m_displayControl(),
+  m_fitControl{nullptr},
+  m_fourierTransform{nullptr} {
+  //nothing in the body
 }
 
 /**
@@ -47,9 +50,11 @@ BackgroundRemover::~BackgroundRemover() = default;
 void BackgroundRemover::initLayout() {
   // initialize the components of the form
   m_uiForm.setupUi(this);
+  m_fitControl = m_uiForm.fitControl;
+  m_fourierTransform = m_uiForm.fourier;
   // user wants to load new slices
   connect(m_uiForm.pushButtonSummonSliceSelector, SIGNAL(clicked()), this,
-          SLOT(summonSliceSelector()));
+    SLOT(summonSliceSelector()));
   // user wants help
   connect(m_uiForm.pushButtonHelp, SIGNAL(clicked()), this, SLOT(showHelp()));
 }
@@ -63,7 +68,7 @@ void BackgroundRemover::initLayout() {
  */
 void BackgroundRemover::showHelp() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      NULL, QString("DPDFBackgroundRemover"));
+    NULL, QString("DPDFBackgroundRemover"));
 }
 
 /**
@@ -81,17 +86,30 @@ void BackgroundRemover::summonSliceSelector(){
     m_displayControl = Mantid::Kernel::make_unique<DisplayControl>
       (m_inputDataControl.get(), m_uiForm.displayModelFit);
     m_displayControl->init();
-
+    // Initialize the FitControl object
+    m_fitControl->setInputDataControl(m_inputDataControl.get());
+    m_fitControl->setDisplayControl(m_displayControl.get());
+    // Initialize the FourierTransform object
+    m_fourierTransform->setInputDataControl(m_inputDataControl.get());
+    m_fourierTransform->setFitControl(m_fitControl);
     // Establish SIGNAL/SLOT connections
-    // user loaded a workspace in the SliceSelector (use get() for required raw pointer)
+    // user loaded a workspace in the SliceSelector
+    // (use get() for required raw pointer)
     connect(m_sliceSelector.get(), SIGNAL(signalSlicesLoaded(QString)),
       m_inputDataControl.get(), SLOT(updateWorkspace(QString)));
-    // user selected a slice for fitting in SliceSelector (get() for required raw pointer)
-    connect(m_sliceSelector.get(), SIGNAL(signalSliceForFittingSelected(size_t)),
-      m_inputDataControl.get(), SLOT(updateSliceForFitting(size_t)));
     // user selected a slice for fitting in SliceSelector
+    connect(m_sliceSelector.get(),
+      SIGNAL(signalSliceForFittingSelected(size_t)),
+      m_inputDataControl.get(), SLOT(updateSliceForFitting(size_t)));
+    // slice for fitting updated
     connect(m_inputDataControl.get(), SIGNAL(signalSliceForFittingUpdated()),
       m_displayControl.get(), SLOT(updateSliceForFitting()));
+    m_fitControl->setConnections();
+    m_fourierTransform->setConnections();
+    connect(m_uiForm.pbFourier, SIGNAL(clicked()),
+      m_fourierTransform, SLOT(transform()));
+    connect(m_uiForm.pbClearFourierPlot, SIGNAL(clicked()),
+      m_fourierTransform, SLOT(clearFourierPlot()));
   }
 
   m_sliceSelector->show();

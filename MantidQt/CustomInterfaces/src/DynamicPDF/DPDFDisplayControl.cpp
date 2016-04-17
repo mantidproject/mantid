@@ -37,6 +37,7 @@ DisplayControl::DisplayControl(InputDataControl *inputDataControl,
     MantidQt::MantidWidgets::DisplayCurveFit *displayModelFit) :
   m_inputDataControl{inputDataControl},
   m_displayModelFit{displayModelFit},
+  m_fitRangeSelector{nullptr},
   m_dataShown(),
   m_dataShownName{"__DPDFDataShown"} {
   // nothing in the body
@@ -47,7 +48,15 @@ DisplayControl::DisplayControl(InputDataControl *inputDataControl,
  */
 void DisplayControl::init() {
   m_displayModelFit->addRangeSelector(dcRange::fit);
+  m_fitRangeSelector = m_displayModelFit->m_rangeSelector.at(dcRange::fit);
   m_displayModelFit->addResidualsZeroline();
+
+  // SIGNAL/SLOT connections
+  // user manipulated the fit-range selector
+  connect(m_fitRangeSelector, SIGNAL(minValueChanged(double)),
+    this, SLOT(rangeSelectorFitUpdated(double)));
+  connect(m_fitRangeSelector, SIGNAL(maxValueChanged(double)),
+    this, SLOT(rangeSelectorFitUpdated(double)));
 }
 
 /**
@@ -55,12 +64,34 @@ void DisplayControl::init() {
  */
 DisplayControl::~DisplayControl() = default;
 
+/**
+ * @brief get the current boundaries of the rangeSelectorFit
+ */
+std::pair<double,double> DisplayControl::getFitMinMax() {
+  return std::pair<double,double>(m_fitRangeSelector->getMinimum(),
+    m_fitRangeSelector->getMaximum());
+}
+
+/**
+ * @brief set the low boundary of the rangeSelectorFit
+ */
+void DisplayControl::setFitMin(const double &boundary) {
+  m_fitRangeSelector->setMinimum(boundary);
+}
+
+/**
+ * @brief set the upper boundary of the rangeSelectorFit
+ */
+void DisplayControl::setFitMax(const double &boundary) {
+  m_fitRangeSelector->setMaximum(boundary);
+}
+
 /*              ********************
  *              **  Public Slots  **
  *              ********************/
 
 /*
- * @brief Reset the data to be displayed
+ * @brief Reset the data to be displayed. Remove model evaluation curves
  */
 void DisplayControl::updateSliceForFitting() {
   try{
@@ -75,6 +106,10 @@ void DisplayControl::updateSliceForFitting() {
     deleteWsAlg->setProperty("Workspace", m_dataShownName);
     deleteWsAlg->execute();
   }catch (Mantid::Kernel::Exception::NotFoundError &) {}
+  if(m_displayModelFit->hasCurve(curveType::fit)) {
+    m_displayModelFit->removeSpectrum(curveType::fit);
+    m_displayModelFit->removeSpectrum(curveType::residuals);
+  }
   // create the data workspace to be shown
   auto dataX = m_inputDataControl->selectedDataX();
   auto dataY = m_inputDataControl->selectedDataY();
@@ -96,8 +131,10 @@ void DisplayControl::updateSliceForFitting() {
   createWsAlg->setProperty("VerticalAxisUnit", "DeltaE");
   createWsAlg->setProperty("VerticalAxisValues", energyLabelStream.str());
   createWsAlg->execute();
-  Mantid::API::MatrixWorkspace_sptr m_dataShown = createWsAlg->getProperty("OutputWorkspace");
-  Mantid::API::AnalysisDataService::Instance().add(m_dataShownName, m_dataShown);
+  Mantid::API::MatrixWorkspace_sptr m_dataShown =
+    createWsAlg->getProperty("OutputWorkspace");
+  Mantid::API::AnalysisDataService::Instance()
+    .add(m_dataShownName, m_dataShown);
   // show the workspace with appropriate range selector
   m_displayModelFit->addSpectrum(curveType::data, m_dataShown);
   auto curveRange = m_displayModelFit->getCurveRange(curveType::data);
@@ -105,7 +142,38 @@ void DisplayControl::updateSliceForFitting() {
   rangeSelectorFit->setRange(curveRange.first, curveRange.second);
   rangeSelectorFit->setMinimum(curveRange.first);
   rangeSelectorFit->setMaximum(curveRange.second);
+  //emit signalRangeSelectorFitUpdated();
 }
+
+/**
+ * @brief pass the signal received from the fit-range selector
+ */
+void DisplayControl::rangeSelectorFitUpdated(const double &boundary) {
+  UNUSED_ARG(boundary);
+  emit signalRangeSelectorFitUpdated();
+}
+
+/*
+ * @brief Display the new model evaluation and residuals
+ * @param workspaceName workspace name containing the evaluation of the model
+ */
+void DisplayControl::updateModelEvaluationDisplay(
+  const QString &workspaceName) {
+  auto modelWorkspace = Mantid::API::AnalysisDataService::Instance()
+    .retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName.toStdString());
+  if(!modelWorkspace) {
+    throw std::runtime_error("Unfound workspace containing model evaluation");
+  }
+  if(m_displayModelFit->hasCurve(curveType::fit)) {
+    m_displayModelFit->removeSpectrum(curveType::fit);
+    m_displayModelFit->removeSpectrum(curveType::residuals);
+  }
+  // index = 1 is the model evaluation and index=2 contain the residuals
+  m_displayModelFit->addSpectrum(curveType::fit, modelWorkspace, 1);
+  m_displayModelFit->addSpectrum(curveType::residuals, modelWorkspace, 2);
+}
+
+
 
 }
 }

@@ -46,9 +46,24 @@ std::vector<double> InputDataControl::selectedDataX(){
   auto first = m_domain.at(m_selectedWorkspaceIndex).first;
   auto second = m_domain.at(m_selectedWorkspaceIndex).second;
   auto X = m_workspace->dataX(m_selectedWorkspaceIndex);
-  std::vector<double> x(X.begin() + first, X.begin()+second); // crop the zero signal
+ // crop the zero signal
+  std::vector<double> x(X.begin() + first, X.begin()+second);
   return x;
 }
+
+/*
+ * @brief report the first and last values of Q with non-zero signal
+ * for the current selected slice
+ */
+  std::pair<double,double> InputDataControl::getCurrentRange() {
+    auto domain = m_domain.at(m_selectedWorkspaceIndex);
+    auto X = m_workspace->dataX(m_selectedWorkspaceIndex);
+    auto second = domain.second;
+    if(m_workspace->isHistogramData()){
+      second -= 1;
+    }
+    return std::pair<double,double>(X.at(domain.first),X.at(second));
+  }
 
 /**
  * @brief report the non-zero signal
@@ -83,6 +98,40 @@ std::vector<double> InputDataControl::selectedDataE(){
  */
 double InputDataControl::getSelectedEnergy() {
   return m_workspace->getAxis(1)->getValue(m_selectedWorkspaceIndex);
+}
+
+/**
+ * @brief report the name of the workspace containing the slices
+ * @except attribute m_workspace has not yet been set
+ * @return name of the workspace containing the slices
+ */
+std::string InputDataControl::getWorkspaceName() {
+  if(!m_workspace) {
+    throw std::runtime_error("InpuDataControl has not set m_workspace!");
+  }
+  return m_workspace->name();
+}
+
+/**
+ * @brief report the workspace index of the slice selected
+ * @except attribute m_workspace has not yet been set
+ * @return the workspace index of the slice selected
+ */
+size_t InputDataControl::getWorkspaceIndex() {
+  if(!m_workspace) {
+    throw std::runtime_error("InpuDataControl has not set m_workspace!");
+  }
+  return m_selectedWorkspaceIndex;
+}
+
+/**
+ * @brief Query if user selected a slice for fitting
+ */
+bool InputDataControl::isSliceSelectedForFitting() {
+  if(m_workspace) {
+    return true;
+  }
+  return false;
 }
 
 /*              *************************
@@ -120,6 +169,11 @@ void InputDataControl::updateWorkspace(const QString &workspaceName) {
   emit signalWorkspaceUpdated();
 }
 
+/**
+ * @brief Update attributes when a new workspace index is selected
+ * @param workspaceIndex the newly selected workspace index
+ * @sa emits signalSliceForFittingUpdated
+ */
 void InputDataControl::updateSliceForFitting(const size_t &workspaceIndex) {
   m_selectedWorkspaceIndex = workspaceIndex;
   this->updateDomain();

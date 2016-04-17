@@ -5,6 +5,9 @@ set ( SRC_FILES
 	src/DynamicPDF/SliceSelector.cpp
         src/DynamicPDF/DPDFBackgroundRemover.cpp
 	src/DynamicPDF/DPDFDisplayControl.cpp
+	src/DynamicPDF/DPDFFitControl.cpp
+	src/DynamicPDF/DPDFFitOptionsBrowser.cpp
+	src/DynamicPDF/DPDFFourierTransform.cpp
 	src/DynamicPDF/DPDFInputDataControl.cpp
 	src/EnggDiffraction/EnggDiffractionPresenter.cpp
 	src/EnggDiffraction/EnggDiffractionViewQtGUI.cpp
@@ -138,6 +141,9 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h
         inc/MantidQtCustomInterfaces/DynamicPDF/DPDFBackgroundRemover.h
 	inc/MantidQtCustomInterfaces/DynamicPDF/DPDFDisplayControl.h
+	inc/MantidQtCustomInterfaces/DynamicPDF/DPDFFitControl.h
+	inc/MantidQtCustomInterfaces/DynamicPDF/DPDFFitOptionsBrowser.h
+	inc/MantidQtCustomInterfaces/DynamicPDF/DPDFFourierTransform.h
 	inc/MantidQtCustomInterfaces/DynamicPDF/DPDFInputDataControl.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h
@@ -317,6 +323,9 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/DynamicPDF/DisplayCurveFitTest.h
                 inc/MantidQtCustomInterfaces/DynamicPDF/DPDFBackgroundRemover.h
                 inc/MantidQtCustomInterfaces/DynamicPDF/DPDFDisplayControl.h
+                inc/MantidQtCustomInterfaces/DynamicPDF/DPDFFitControl.h
+                inc/MantidQtCustomInterfaces/DynamicPDF/DPDFFitOptionsBrowser.h
+                inc/MantidQtCustomInterfaces/DynamicPDF/DPDFFourierTransform.h
                 inc/MantidQtCustomInterfaces/DynamicPDF/DPDFInputDataControl.h
                 inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h
                 inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h
@@ -412,6 +421,8 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/DynamicPDF/DisplayCurveFitTest.ui
                inc/MantidQtCustomInterfaces/DynamicPDF/DPDFBackgroundRemover.ui
+               inc/MantidQtCustomInterfaces/DynamicPDF/DPDFFitControl.ui
+               inc/MantidQtCustomInterfaces/DynamicPDF/DPDFFourierTransform.ui
                inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.ui
                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtGUI.ui
                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtTabCalib.ui

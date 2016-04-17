@@ -12,14 +12,15 @@
 
 // Class forward declarations
 namespace MantidQt {
-  namespace MantidWidgets {
-    class DisplayCurveFit;
-  }
-  namespace CustomInterfaces {
-    namespace DynamicPDF {
-      class InputDataControl;
-    }
-  }
+namespace MantidWidgets {
+  class DisplayCurveFit;
+  class RangeSelector;
+}
+namespace CustomInterfaces {
+namespace DynamicPDF {
+  class InputDataControl;
+}
+}
 }
 
 namespace MantidQt {
@@ -59,15 +60,25 @@ public:
     MantidQt::MantidWidgets::DisplayCurveFit *displayModelFit);
   ~DisplayControl();
   void init();
+  std::pair<double,double> getFitMinMax();
+  void setFitMin(const double &);
+  void setFitMax(const double &);
 
 public slots:
   void updateSliceForFitting();
+  void rangeSelectorFitUpdated(const double &boundary);
+  void updateModelEvaluationDisplay(const QString &workspaceName);
+
+signals:
+  void signalRangeSelectorFitUpdated();
 
 private:
   /// object handling all input slices
   InputDataControl *m_inputDataControl;
   /// object handling the display of the data and fits
   MantidQt::MantidWidgets::DisplayCurveFit *m_displayModelFit;
+  /// handy pointer to the fit-range selector
+  MantidQt::MantidWidgets::RangeSelector *m_fitRangeSelector;
   /// workspace holding the cropped slice being displayed
   boost::shared_ptr<Mantid::API::MatrixWorkspace> m_dataShown;
   /// name of the workspace holding the cropped slice being displayed

@@ -15,6 +15,7 @@
 #include "MantidQtAPI/MantidColorMap.h"
 #include <qwt_color_map.h>
 #include <qwt_double_rect.h>
+// system includes
 
 namespace {
 Mantid::Kernel::Logger g_log("MWView");
@@ -35,14 +36,11 @@ MWView::MWView(QWidget *parent) :
   m_wellcomeWorkspace(),
   m_wellcomeName{"__MWViewWellcomeWorkspace"},
   m_dimensions() {
-
   // Watch for the deletion of the associated workspace
   this->observePreDelete(true);
-
   m_spect = new QwtPlotSpectrogram();
   m_data = new MantidQt::API::QwtRasterDataMD();
   m_normalization = Mantid::API::NoNormalization;
-
   this->initLayout();
   this->loadSettings();
   this->updateDisplay();
@@ -280,12 +278,11 @@ void MWView::setVectorDimensions() {
  * @brief Generates a default workspace to be shown, if no workspace
  * is selected
  */
- void MWView::spawnWellcomeWorkspace(){
-  try {
-    //check the workspace is registered in the Analysis Data Service
-    auto workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS
-      <Mantid::API::MatrixWorkspace>(m_wellcomeName);
-  }catch (Mantid::Kernel::Exception::NotFoundError &) {
+void MWView::spawnWellcomeWorkspace() {
+  if(Mantid::API::AnalysisDataService::Instance().doesExist(m_wellcomeName)) {
+    m_wellcomeWorkspace = Mantid::API::AnalysisDataService::Instance()
+      .retrieveWS<Mantid::API::MatrixWorkspace>(m_wellcomeName);
+  } else {
     const int numberSpectra{100};
     const double intensity{10.0};
     auto dataX = std::vector<double>();
