@@ -28,8 +28,9 @@ class GSASIIFitPeaks(PythonAlgorithm):
         """
         Override required for Mantid algorithms
         """
-        return ("Uses GSAS-II (powder diffraction and structure modules) to fit peaks to one "
-                "or more spectra from a workspace")
+        return ("Uses GSAS-II (powder diffraction and structure modules) to perform whole "
+                "pattern refinement of lattice parameters (or fit peaks) on an diffraction "
+                "spectrum")
 
     def __init__(self):
         PythonAlgorithm.__init__(self)
@@ -100,7 +101,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
                              doc = 'Optional path to GSAS-II software installation. '
                              'This will be used to import several Python modules from GSAS-II.')
 
-        GRP_RESULTS = "RESULTS"
+        GRP_RESULTS = "Results"
 
         self.declareProperty('GoF', 0.0, direction = Direction.Output,
                              doc = 'Goodness of fit value (Chi squared).')
@@ -159,12 +160,12 @@ class GSASIIFitPeaks(PythonAlgorithm):
         GRP_PAWLEY_OPTIONS = "Pawley refinement options"
 
         self.declareProperty(self.PROP_PAWLEY_DMIN, 1.0, direction = Direction.Input,
-                             doc = "For Pawley refiment. As defined in GSAS-II, the minimum d-spacing "
+                             doc = "For Pawley refiment: as defined in GSAS-II, the minimum d-spacing "
                              "to be used in a Pawley refinement. Please refer to the GSAS-II "
                              "documentation for full details.")
 
         self.declareProperty(self.PROP_PAWLEY_NEG_WEIGHT, 0.0, direction = Direction.Input,
-                             doc = "For Pawley refinement. As defined in GSAS-II, the weight for a "
+                             doc = "For Pawley refinement: as defined in GSAS-II, the weight for a "
                              "penalty function applied during a Pawley refinement on resulting negative "
                              "intensities. Please refer to the GSAS-II documentation for full details.")
 
@@ -222,8 +223,26 @@ class GSASIIFitPeaks(PythonAlgorithm):
         self.setPropertyGroup(self.PROP_REFINE_GAMMA, GRP_PARAMS)
 
     def validateInputs(self):
+        errors = {}
+        pfm_name = "Peak fitting"
         # This could check if the required inputs for different methods have been provided
-        return {}
+        if pfm_name == self.getPropertyValue(self.PROP_METHOD) and\
+           not self.getPropertyValue(self.PROP_OUT_FITTED_PARAMS):
+            errors[self.PROP_OUT_FITTED_PARAMS] = ("Must be provided when the method is {0}.".
+                                                   format(pfm_name))
+
+        if pfm_name != self.getPropertyValue(self.PROP_METHOD) and\
+           not self.getPropertyValue(self.PROP_PHASE_INFO_FILE):
+            errors[self.PROP_PHASE_INFO_FILE] = ("Must be provided when using cell lattice "
+                                                 "parameters revinement methods")
+
+        min_x = self.getPropertyValue(self.PROP_MINX)
+        max_x = self.getPropertyValue(self.PROP_MAXX)
+        if min_x != Property.EMPTY_DBL and max_x != Property.EMPTY_DBL and min_x > max_x:
+            errors[self.PROP_MINX] = ("The minimum given in {0} must be <= than the maximum "
+                                      "given in {1}".format(self.PROP_MINX, self.PROP_MAXX))
+
+        return errors
 
     def PyExec(self):
         prog = Progress(self, start=0, end=1, nreports=5)
@@ -235,16 +254,9 @@ class GSASIIFitPeaks(PythonAlgorithm):
         gs2 = self._run_threadsafe(self._init_gs2)
 
         prog.report('Loading and preparing input data')
-        in_wks = self.getProperty(self.PROP_INPUT_WORKSPACE).value
-        in_idx = self.getProperty(self.PROP_WORKSPACE_INDEX).value
+        focused_wks = self._get_focused_wks(self.PROP_INPUT_WORKSPACE, self.PROP_WORKSPACE_INDEX)
+
         inst_file = self.getProperty(self.PROP_INSTR_FILE).value
-
-        if in_wks.getNumberHistograms() > 1 or 0 != in_idx:
-            focused_wks = ExtractSpectra(InputWorkspace = in_wks, StartWorkspaceIndex = in_idx,
-                                         EndworkspaceIndex = in_idx)
-        else:
-            focused_wks = in_wks
-
         try:
             (gs2_rd, limits, peaks_init, background_def) =\
                 self._run_threadsafe(self._load_prepare_data_for_fit, gs2, focused_wks, inst_file)
@@ -252,7 +264,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
             raise RuntimeError("Error in execution of GSAS-II data loading routines: "
                                "{0}.".format(str(rexc)))
 
-        # No obvious way to provide proper progress report from inside the fitting routines
+        # No obvious way to provide proper progress report from inside the refinement/fitting routines
         prog.report('Running refinement. This may take some times')
         try:
             (gof_estimates, lattice_params, parm_dict) = \
@@ -263,16 +275,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
                                "{0}".format(str(rexc)))
 
         prog.report('Producing outputs')
-        out_proj_file = self.getProperty(self.PROP_OUT_PROJECT_FILE).value
-        if out_proj_file:
-            # Not totally sure if this save will leave less information in the output
-            # file as compared with the save done from the core refine routines.
-            # those routines save information in the project file that is apparently not
-            # updated in the project tree (other than loading the saved project file).
-            self._save_gsas2_project(gs2, gs2_rd, out_proj_file)
-            file_lattice_params = self._parse_lattice_params_refined(out_proj_file)
-            self.log().notice("Lattice parameters found in output file: {0}".format(file_lattice_params))
-
+        self._save_project_read_lattice(gs2, gs2_rd)
         self._produce_outputs(gof_estimates, lattice_params, parm_dict)
 
         import time
@@ -289,6 +292,18 @@ class GSASIIFitPeaks(PythonAlgorithm):
             return pymantidplot.threadsafe_call(func_call, *args, **kwargs)
         except ImportError:
             return func_call(*args, **kwargs)
+
+    def _get_focused_wks(self, wks_prop_name, index_prop_name):
+        in_wks = self.getProperty(wks_prop_name).value
+        in_idx = self.getProperty(index_prop_name).value
+
+        if in_wks.getNumberHistograms() > 1 or 0 != in_idx:
+            focused_wks = ExtractSpectra(InputWorkspace = in_wks, StartWorkspaceIndex = in_idx,
+                                         EndworkspaceIndex = in_idx)
+        else:
+            focused_wks = in_wks
+
+        return focused_wks
 
     def _load_prepare_data_for_fit(self, gs2, gs2_focused_wks, inst_file):
         """
@@ -371,10 +386,11 @@ class GSASIIFitPeaks(PythonAlgorithm):
         @return a tuple with 1) the two goodness-of-fit estimates, 2) lattice params (list with
         7 values)
         """
-        general_phase_data = self._load_prepare_phase_data(gs2, gs2_rd,
-                                                           self.getProperty(self.PROP_PHASE_INFO_FILE).value)
+        phase_data = self._load_prepare_phase_data(gs2, gs2_rd,
+                                                   self.getProperty(self.PROP_PHASE_INFO_FILE).value)
 
         # Enable / tick on "Refine unit cell"
+        general_phase_data = phase_data['General']
         general_phase_data['Cell'][0] = True
         if do_pawley:
             # Note from GSAS-II doc: "you probably should clear the Histogram scale factor refinement
@@ -440,6 +456,12 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
     def _load_prepare_phase_data(self, gs2, gs2_rd, phase_filename):
         """
+        Loads and sets up phase data from a phase information (CIF) file
+
+        @param gs2 :: the main GSAS-II object
+        @param gs2_rd :: the GSAS-II "rd" object with powder data in it
+        @param phase_filename :: name of the CIF file
+
         @return phase data object as defined in GSAS-II GSASIIobj.py, with the imported phase
         information and other fields set up to defaults.
         """
@@ -458,47 +480,59 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
         phase_reader = phase_readers_list[0]
         GSASIIphsGUI.SetupGeneralWithoutGUI(gs2, phase_reader.Phase)
+        phase_data = self._register_phase_data_to_histo(gs2, gs2_rd, phase_reader, phase_filename)
 
+        return phase_data
+
+    def _register_phase_data_to_histo(self, gs2, gs2_rd, phase_reader, phase_filename):
+        # Register phase data and add it to the histo data
         import os
         import GSASIIgrid
-
-        # Register phase data and add it to the histo data
-        phase_reader.Phase['General']['Name'] = os.path.basename(phase_filename)
         phase_name = os.path.basename(phase_filename)
+        phase_reader.Phase['General']['Name'] = phase_name
         self.log().debug(" Phase information name: {0}".format(phase_name))
+
         if not GSASIIgrid.GetPatternTreeItemId(gs2, gs2.root, 'Phases'):
             sub = gs2.PatternTree.AppendItem(parent=gs2.root, text='Phases')
         else:
             sub = GSASIIgrid.GetPatternTreeItemId(gs2, gs2.root, 'Phases')
+
         psub = gs2.PatternTree.AppendItem(parent=sub, text=phase_name)
         gs2.PatternTree.SetItemPyData(psub, phase_reader.Phase)
 
         # Connect the phase information to the histogram data
-        import GSASIIspc
         sub = GSASIIgrid.GetPatternTreeItemId(gs2, gs2.root, 'Phases')
         item, cookie = gs2.PatternTree.GetFirstChild(sub)
         phase_name = gs2.PatternTree.GetItemText(item)
         self.log().debug("Connecting phase information (name {0} to histogram data, with item: {1}, "
                          "cookie: {2}".format(phase_name, item, cookie))
         # the histo data is in for example 'PWDR ENGINX_ceria_1000_spectrum-0.txt'
-        data = gs2.PatternTree.GetItemPyData(item)
-        general_phase_data = data['General']
+        phase_data = gs2.PatternTree.GetItemPyData(item)
 
-        # Setup additional phase data
-        SGData = general_phase_data['SGData']
-        use_list = data['Histograms']
+        self._setup_additional_phase_data(gs2_rd.idstring, phase_data)
+
+        return phase_data
+
+    def _setup_additional_phase_data(self, powder_histo_name, phase_data):
+        """
+        Setup more phase data parameters in 'Phases' / 'General' and
+        'Phases' / 'Histograms'.
+
+        @param phase_data :: from GSAS-II, the first entry in 'Phases'
+        """
+        import GSASIIspc
+        SGData = phase_data['General']['SGData']
+        use_list = phase_data['Histograms']
         NShkl = len(GSASIIspc.MustrainNames(SGData))
         NDij = len(GSASIIspc.HStrainNames(SGData))
         # like 'PWDR ENGINX_ceria_1000_spectrum-0.txt'
-        histo_name = 'PWDR ' + gs2_rd.idstring
+        histo_name = 'PWDR ' + powder_histo_name
         # 'Reflection Lists' is not defined at this point:
         # item_id = GSASIIgrid.GetPatternTreeItemId(gs2, gs2.root, histo_name)
         # refList = gs2.PatternTree.GetItemPyData(
         #     GSASIIgrid.GetPatternTreeItemId(gs2, item_id, 'Reflection Lists'))
         # refList[general_phase_data['Name']] = {}
         use_list[histo_name] = GSASII.SetDefaultDData('PWDR', histo_name, NShkl=NShkl, NDij=NDij)
-
-        return general_phase_data
 
     def _run_peak_fit(self, powderdata, limits, peaks_list, background_def):
         """
@@ -772,6 +806,24 @@ class GSASIIFitPeaks(PythonAlgorithm):
         table.addColumn('double', 'volume')
 
         table.addRow([float(par) for par in lattice_params])
+
+    def _save_project_read_lattice(self, gs2, gs2_rd):
+        """
+        To save the project at the very end, and parse lattice params from the output .lst
+        file from GSAS.
+
+        @param gs2 :: the main GSAS-II object
+        @param gs2_rd :: the GSAS-II "rd" object with powder data in it
+        """
+        out_proj_file = self.getProperty(self.PROP_OUT_PROJECT_FILE).value
+        if out_proj_file:
+            # Not totally sure if this save will leave less information in the output
+            # file as compared with the save done from the core refine routines.
+            # those routines save information in the project file that is apparently not
+            # updated in the project tree (other than loading the saved project file).
+            self._save_gsas2_project(gs2, gs2_rd, out_proj_file)
+            file_lattice_params = self._parse_lattice_params_refined(out_proj_file)
+            self.log().notice("Lattice parameters found in output file: {0}".format(file_lattice_params))
 
     def _parse_lattice_params_refined(self, out_proj_file):
         """
