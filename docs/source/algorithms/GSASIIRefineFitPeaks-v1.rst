@@ -130,12 +130,12 @@ Usage
 .. code-block:: python
 
    wks=Load('ENGINX00241391')
-   GoF, Rwp, lattice_tbl = GSASIIFitPeaks(InputWorkspace=wks,
-                                          InstrumentFile='ENGINX_241391_236516_North_bank.par',
-                                          PhaseInfoFile='GRAPHITE_P63MC.cif',
-                                          PathToGSASII='/home/user/gsas',
-                                          SaveGSASIIProjectFile='example_gsas2_project',
-                                          LatticeParameters='lattice_tbl')
+   GoF, Rwp, lattice_tbl = GSASIIRefineFitPeaks(InputWorkspace=wks,
+                                                InstrumentFile='ENGINX_241391_236516_North_bank.par',
+                                                PhaseInfoFile='GRAPHITE_P63MC.cif',
+                                                PathToGSASII='/home/user/gsas',
+                                                SaveGSASIIProjectFile='example_gsas2_project',
+                                                LatticeParameters='lattice_tbl')
    print "Goodness of fit coefficient: {0:.5f}".format(GoF)
    print "Weighted profile R-factor (Rwp): {0:.5f}".format(Rwp)
    print ("Lattice parameters, a: {a}, b: {b}, c: {c}, alpha: {alpha}, beta: {beta}, gamma: {gamma}, "
@@ -154,13 +154,13 @@ Output:
 .. code-block:: python
 
    ws=Load('ENGINX00241391')
-   GoF, Rwp, lattice_tbl = GSASIIFitPeaks(InputWorkspace=ws,
-                                          method='Rietveld refinement',
-                                          InstrumentFile='ENGINX_241391_236516_North_bank.par',
-                                          PhaseInfoFile='GRAPHITE_P63MC.cif',
-                                          PathToGSASII='/home/user/gsas',
-                                          SaveGSASIIProjectFile='example_gsas2_project',
-                                          LatticeParameters='lattice_tbl')
+   GoF, Rwp, lattice_tbl = GSASIIRefineFitPeaks(InputWorkspace=ws,
+                                                method='Rietveld refinement',
+                                                InstrumentFile='ENGINX_241391_236516_North_bank.par',
+                                                PhaseInfoFile='GRAPHITE_P63MC.cif',
+                                                PathToGSASII='/home/user/gsas',
+                                                SaveGSASIIProjectFile='example_gsas2_project',
+                                                LatticeParameters='lattice_tbl')
    print "Goodness of fit coefficient: {0:.5f}".format(GoF)
    print "Weighted profile R-factor (Rwp): {0:.5f}".format(Rwp)
    print ("Lattice parameters, a: {a}, b: {b}, c: {c}, alpha: {alpha}, beta: {beta}, gamma: {gamma}, "
@@ -181,12 +181,12 @@ Output:
    ws=Load('ENGINX00241391')
    ws=Load('241391')
    params_tbl_name = 'tbl_fitted_params'
-   GoF, Rwp, lattice_tbl = GSASIIFitPeaks(InputWorkspace=ws, method='Peak fitting',
-                                          InstrumentFile='ENGINX_241391_236516_North_bank.par',
-                                          PhaseInfoFile='GRAPHITE_P63MC.cif',
-                                          PathToGSASII='/home/user/mantid-repos/gsas',
-                                          SaveGSASIIProjectFile='test_gsas2_project',
-                                          FittedPeakParameters=params_tbl_name)
+   GoF, Rwp, lattice_tbl = GSASIIRefineFitPeaks(InputWorkspace=ws, method='Peak fitting',
+                                                InstrumentFile='ENGINX_241391_236516_North_bank.par',
+                                                PhaseInfoFile='GRAPHITE_P63MC.cif',
+                                                PathToGSASII='/home/user/mantid-repos/gsas',
+                                                SaveGSASIIProjectFile='test_gsas2_project',
+                                                FittedPeakParameters=params_tbl_name)
    tbl_fitted_params = mtd[params_tbl_name]
    print "Fitted {0} peaks.".format(tbl_fitted_params.rowCount())
    print ("Parameters of the first peak. Center: {Center:.6g}, intensity: {Intensity:.5f}, "

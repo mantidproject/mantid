@@ -2,10 +2,11 @@ import unittest
 from mantid.simpleapi import *
 from mantid.api import *
 
-class EnggFitPeaksTest(unittest.TestCase):
+class GSASIIRefineFitPeaksTest(unittest.TestCase):
     """
     Very limited test, as executing this algorithm requires a modified
-    version of GSASII.
+    version of GSASII. At least it does some check that the algorithm is
+    registered succesfully and basic sanity checks.
     """
 
     def test_wrong_properties(self):
@@ -21,37 +22,37 @@ class EnggFitPeaksTest(unittest.TestCase):
 
         # No InputWorkspace property (required)
         self.assertRaises(RuntimeError,
-                          GSASIIFitPeaks,
+                          GSASIIRefineFitPeaks,
                           WorkspaceIndex=0, ExpectedPeaks='1.2, 3.1')
 
         # Wrong WorkspaceIndex value
         self.assertRaises(RuntimeError,
-                          GSASIIFitPeaks,
+                          GSASIIRefineFitPeaks,
                           InputWorkspace=ws_name,
                           WorkspaceIndex=-3)
 
         # Wrong property
         self.assertRaises(RuntimeError,
-                          GSASIIFitPeaks,
+                          GSASIIRefineFitPeaks,
                           InputWorkspace=ws_name, BankPixelFoo=33,
                           WorkspaceIndex=0)
 
         # missing instrument file property
         self.assertRaises(RuntimeError,
-                          GSASIIFitPeaks,
+                          GSASIIRefineFitPeaks,
                           InputWorkspace=ws_name,
                           WorkspaceIndex=0)
 
         # Wrong InstrumentFile property name
-        self.assertRaises(RuntimeError,
-                          EnggFitPeaks,
+        self.assertRaises(ValueError,
+                          GSASIIRefineFitPeaks,
                           InputWorkspace=ws_name,
                           InstruMentFile=instr_filename,
                           WorkspaceIndex=0, ExpectedPeaks='a')
 
         # Missing file for InstrumentFile
-        self.assertRaises(RuntimeError,
-                          EnggFitPeaks,
+        self.assertRaises(ValueError,
+                          GSASIIRefineFitPeaks,
                           InputWorkspace=ws_name,
                           InstrumentFile=instr_filename,
                           WorkspaceIndex=0, ExpectedPeaks='a')

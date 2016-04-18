@@ -5,7 +5,7 @@ from mantid.simpleapi import CreateEmptyTableWorkspace, ExtractSpectra, SaveFocu
 
 # Too many properties!
 #pylint: disable=too-many-instance-attributes
-class GSASIIFitPeaks(PythonAlgorithm):
+class GSASIIRefineFitPeaks(PythonAlgorithm):
     """
     Mantid algorithm to use the powder diffraction and related data
     from the powder diffraction module of GSAS-II
@@ -22,7 +22,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
         """
         Override required for Mantid algorithms
         """
-        return "GSASIIFitPeaks"
+        return "GSASIIRefineFitPeaks"
 
     def summary(self):
         """
@@ -974,4 +974,4 @@ class GSASIIFitPeaks(PythonAlgorithm):
         readers_list = gs2.ImportPowderReaderlist
         return readers_list
 
-AlgorithmFactory.subscribe(GSASIIFitPeaks)
+AlgorithmFactory.subscribe(GSASIIRefineFitPeaks)
