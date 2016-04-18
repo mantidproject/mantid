@@ -21,7 +21,7 @@ Description
    This algorithm requires GSAS-II, with custom modifications to
    enable it to be used from Mantid. Please contact the Mantid
    developers for details. The GSAS-II installation instructions are
-   available from the `GSAS-II websize
+   available from the `GSAS-II website
    <https://subversion.xray.aps.anl.gov/trac/pyGSAS>`_.
 
 Uses `GSAS-II <https://subversion.xray.aps.anl.gov/trac/pyGSAS>`_
@@ -30,18 +30,22 @@ powder / engineering diffraction pattern. Here the process of peak
 fitting is in the context of Rietveld / Pawley / Le Bail analysis (Le
 Bail 2005).
 
-The algorithm supports three methods: Pawley refinement, Rietveld
-refinement, and the peak fitting (or "Peaks List") functionality
-included in the `powder calculation module
-<https://subversion.xray.aps.anl.gov/pyGSAS/sphinxdocs/build/html/GSASIIpwd.html>`_
-of GSAS-II. The first two methods implement whole powder pattern
-fitting (Le Bail 2005) whereas the third method fits peaks
-individually.  The use of this algorithm is very close to the examples
-described in these two GSAS-II tutorials: `Rietveld fitting / CW
-Neutron Powder fit for Yttrium-Iron Garnet
+The algorithm supports three refinement or fitting methods: Pawley
+refinement, Rietveld refinement, and single peak fitting (or "Peaks
+List" of GSAS-II). The first two methods of this algorithm implement
+whole powder pattern fitting (Le Bail 2005) whereas the third method
+fits peaks individually.  The use of this algorithm is very close to
+the examples described in these two GSAS-II tutorials: `Rietveld
+fitting / CW Neutron Powder fit for Yttrium-Iron Garnet
 <https://subversion.xray.aps.anl.gov/pyGSAS/Tutorials/CWNeutron/Neutron%20CW%20Powder%20Data.htm>`_,
 and `Getting started / Fitting individual peaks & autoindexing
 <https://subversion.xray.aps.anl.gov/pyGSAS/Tutorials/FitPeaks/Fit%20Peaks.htm>`_,
+The functionality of this algorithm is based on the `powder
+calculation module
+<https://subversion.xray.aps.anl.gov/pyGSAS/sphinxdocs/build/html/GSASIIpwd.html>`_
+and the `structure routines
+<https://subversion.xray.aps.anl.gov/pyGSAS/sphinxdocs/build/html/GSASIIstruc.html>`_
+of GSAS-II.
 
 To run this algorithm GSAS-II must be installed and it must be
 available for importing from the Mantid Python interpreter. This
@@ -67,8 +71,8 @@ used the algorithm will output the lattice parameters in a table
 workspace. The values are given for the the full set of lattice
 parameters (three lattice constants, three angles, and volume in this
 sequence: a, b, c, alpha, beta, gamma, volume). The a,b, and c values
-are given in Angstrom. The angles are given in degrees, and the volume
-in Angstrom^3.
+are given in Angstroms (:math:`\AA`). The angles are given in degrees,
+and the volume in :math:`\AA^3`.
 
 The algorithm provides goodness-of-fit estimates in the outputs *GoF*
 and *Rwp* or weighted profile R-factor (Toby 2008). The *Rwp* is given
@@ -76,12 +80,15 @@ as a percentage value.
 
 Note that the option to save the GSAS-II project file
 (*SaveGSASIIProjectFile*) is mandatory. This is a requirement of
-GSAS-II.
+GSAS-II. These project files can be opened in the GSAS-II GUI for
+further processing and analysis of the data.
 
 When Pawley refinement is selected as refinement method the flag for
 histogram scale factor refinement is disabled, as recommended in the
-GSAS-II documentation, as this cannot be refined simultaenously with
-the Pawley reflection intensities.
+`GSAS-II documentation
+<https://subversion.xray.aps.anl.gov/pyGSAS/trunk/help/gsasII.html>`_,
+as this cannot be refined simultaenously with the Pawley reflection
+intensities.
 
 The GSAS-II Rietveld/Pawley refinement process writes lattice
 parameters and extensive additional information in an output file with
@@ -118,17 +125,80 @@ enough?". Powder Diffraction, 21(1), 67-70.
 Usage
 -----
 
-**Example - Fit several peaks in a spectrum**
+**Example - Pawley refinement of lattice parameters from a diffraction spectrum**
 
 .. code-block:: python
 
-   print 'example'
+   wks=Load('ENGINX00241391')
+   GoF, Rwp, lattice_tbl = GSASIIFitPeaks(InputWorkspace=wks,
+                                          InstrumentFile='ENGINX_241391_236516_North_bank.par',
+                                          PhaseInfoFile='GRAPHITE_P63MC.cif',
+                                          PathToGSASII='/home/user/gsas',
+                                          SaveGSASIIProjectFile='example_gsas2_project',
+                                          LatticeParameters='lattice_tbl')
+   print "Goodness of fit coefficient: {0:.5f}".format(GoF)
+   print "Weighted profile R-factor (Rwp): {0:.5f}".format(Rwp)
+   print ("Lattice parameters, a: {a}, b: {b}, c: {c}, alpha: {alpha}, beta: {beta}, gamma: {gamma}, "
+          "Volume: {volume:.3f}".format(**lattice_tbl.row(0)))
 
 Output:
 
 .. code-block:: none
 
-    example
+    Goodness of fit coefficient: 0.0379312653294
+    Weighted profile R-factor (Rwp): 28.8433213435
+    Lattice parameters, a: 2.47, b: 2.47, c: 6.79, alpha: 90.0, beta: 90.0, gamma: 120.0, Volume: 35.875
+
+**Example - Rietveld refinement of lattice parameters from a diffraction spectrum**
+
+.. code-block:: python
+
+   ws=Load('ENGINX00241391')
+   GoF, Rwp, lattice_tbl = GSASIIFitPeaks(InputWorkspace=ws,
+                                          method='Rietveld refinement',
+                                          InstrumentFile='ENGINX_241391_236516_North_bank.par',
+                                          PhaseInfoFile='GRAPHITE_P63MC.cif',
+                                          PathToGSASII='/home/user/gsas',
+                                          SaveGSASIIProjectFile='example_gsas2_project',
+                                          LatticeParameters='lattice_tbl')
+   print "Goodness of fit coefficient: {0:.5f}".format(GoF)
+   print "Weighted profile R-factor (Rwp): {0:.5f}".format(Rwp)
+   print ("Lattice parameters, a: {a}, b: {b}, c: {c}, alpha: {alpha}, beta: {beta}, gamma: {gamma}, "
+          "Volume: {volume:.3f}".format(**lattice_tbl.row(0)))
+
+Output:
+
+.. code-block:: none
+
+    Goodness of fit coefficient: 0.03785
+    Weighted profile R-factor (Rwp): 28.77990
+    Lattice parameters, a: 2.47, b: 2.47, c: 6.79, alpha: 90.0, beta: 90.0, gamma: 120.0, Volume: 35.875
+
+**Example - Fit several peaks from a diffraction spectrum**
+
+.. code-block:: python
+
+   ws=Load('ENGINX00241391')
+   ws=Load('241391')
+   params_tbl_name = 'tbl_fitted_params'
+   GoF, Rwp, lattice_tbl = GSASIIFitPeaks(InputWorkspace=ws, method='Peak fitting',
+                                          InstrumentFile='ENGINX_241391_236516_North_bank.par',
+                                          PhaseInfoFile='GRAPHITE_P63MC.cif',
+                                          PathToGSASII='/home/user/mantid-repos/gsas',
+                                          SaveGSASIIProjectFile='test_gsas2_project',
+                                          FittedPeakParameters=params_tbl_name)
+   tbl_fitted_params = mtd[params_tbl_name]
+   print "Fitted {0} peaks.".format(tbl_fitted_params.rowCount())
+   print ("Parameters of the first peak. Center: {Center:.6g}, intensity: {Intensity:.5f}, "
+          "alpha: {Alpha:.5f}, beta: {Beta:.5f}, sigma: {Sigma:.5f}, gamma: {Gamma:.5f}".
+          format(**tbl_fitted_params.row(0)))
+
+Output:
+
+.. code-block:: none
+
+    Fitted 60 peaks.
+    Parameters of the first peak. Center: 67555.2, intensity: 1.00000, alpha: 0.07449, beta: 0.01813, sigma: 10885.67571, gamma: 20.51399
 
 .. categories::
 
