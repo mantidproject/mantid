@@ -55,7 +55,7 @@ public:
   /// Equals operator
   bool operator==(const PeakShapeSpherical &other) const;
   /// Peak radius
-  double radius() const override;
+  double radius(RadiusType type = RadiusType::Region) const override;
   /// Peak outer background radius
   boost::optional<double> backgroundOuterRadius() const;
   /// Peak inner background radius

@@ -49,7 +49,9 @@ namespace VATES
           vtkSmartPointer<vtkUnstructuredGrid> output);
       virtual ~vtkDataSetToPeaksFilteredDataSet();
       /// Set the name of the peaks workspace
-      void initialize(std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces, double radiusNoShape, int radiusType, int coordinateSystem);
+      void initialize(
+          const std::vector<Mantid::API::IPeaksWorkspace_sptr> &peaksWorkspaces,
+          double radiusNoShape, int radiusType, int coordinateSystem);
       /// Apply the peak filtering
       void execute(ProgressAction& progressUpdating);
       /// Get radius of no shape
@@ -58,7 +60,9 @@ namespace VATES
       double getRadiusFactor();
     private:
       vtkDataSetToPeaksFilteredDataSet& operator=(const vtkDataSetToPeaksFilteredDataSet& other);
-      std::vector<std::pair<Mantid::Kernel::V3D, double>> getPeaksInfo(std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces);
+      std::vector<std::pair<Mantid::Kernel::V3D, double>>
+      getPeaksInfo(const std::vector<Mantid::API::IPeaksWorkspace_sptr>
+                       &peaksWorkspaces);
       void addSinglePeak(Mantid::Geometry::IPeak* peak, const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem, std::vector<std::pair<Mantid::Kernel::V3D, double>>& peaksInfo);
       vtkSmartPointer<vtkUnstructuredGrid> m_inputData; ///< Data to peak filter
       vtkSmartPointer<vtkUnstructuredGrid> m_outputData; ///< Peak filtered data
