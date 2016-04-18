@@ -2,6 +2,8 @@
 #define MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAHELPER_H_
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtMantidWidgets/IMuonFitDataSelector.h"
+#include "MantidQtMantidWidgets/IWorkspaceFitControl.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -35,6 +37,18 @@ namespace CustomInterfaces {
 */
 class MANTIDQT_CUSTOMINTERFACES_DLL MuonAnalysisFitDataHelper {
 public:
+  /// Constructor
+  MuonAnalysisFitDataHelper(
+      MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
+      MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector);
+  /// Handles "workspace properties changed"
+  void handleWorkspacePropertiesChanged();
+
+private:
+  /// Fit browser to update (non-owning pointer)
+  MantidQt::MantidWidgets::IWorkspaceFitControl *m_fitBrowser;
+  /// Data selector to get input from (non-owning pointer)
+  MantidQt::MantidWidgets::IMuonFitDataSelector *m_dataSelector;
 };
 
 } // namespace CustomInterfaces
