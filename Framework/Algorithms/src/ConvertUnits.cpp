@@ -212,7 +212,7 @@ API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
   // If input and output workspaces are NOT the same, create a new workspace for
   // the output
   if (outputWS != inputWS) {
-    outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
+    outputWS = inputWS->clone();
   }
 
   if (!m_inputEvents && m_distribution) {
