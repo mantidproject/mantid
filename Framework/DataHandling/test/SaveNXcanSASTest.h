@@ -142,6 +142,7 @@ public:
         auto saveAlg
             = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
                 "SaveNXcanSAS");
+        saveAlg->setChild(true);
         saveAlg->initialize();
         saveAlg->setProperty("Filename", filename);
         TSM_ASSERT_THROWS_ANYTHING(
@@ -588,7 +589,7 @@ private:
     {
         for (auto &detector : detectors) {
             auto detectorGroup = instrument.openGroup(
-                sasInstrumentDetectorGroupName + suffix + detector);
+                sasInstrumentDetectorGroupName + detector);
 
             auto numAttributes = detectorGroup.getNumAttrs();
             TSM_ASSERT_EQUALS("Should have 1 attribute", 1, numAttributes);
@@ -662,7 +663,7 @@ private:
 
         // Check source
         auto source
-            = instrument.openGroup(sasInstrumentSourceGroupName + suffix);
+            = instrument.openGroup(sasInstrumentSourceGroupName);
         do_assert_source(source, radiationSource);
 
         // Check detectors
@@ -902,7 +903,7 @@ private:
         }
 
         auto transmission = entry.openGroup(sasTransmissionSpectrumGroupName
-                                            + suffix + "_" + parameters.name);
+                                            +  "_" + parameters.name);
 
         // NX_class attribute
         auto classAttribute
@@ -978,17 +979,17 @@ private:
                            parameters.workspaceTitle);
 
         // Check instrument
-        auto instrument = entry.openGroup(sasInstrumentGroupName + suffix);
+        auto instrument = entry.openGroup(sasInstrumentGroupName);
         do_assert_instrument(instrument, parameters.instrumentName,
                              parameters.idf, parameters.radiationSource,
                              parameters.detectors, parameters.invalidDetectors);
 
         // Check process
-        auto process = entry.openGroup(sasProcessGroupName + suffix);
+        auto process = entry.openGroup(sasProcessGroupName);
         do_assert_process(process, parameters.userFile);
 
         // Check data
-        auto data = entry.openGroup(sasDataGroupName + suffix);
+        auto data = entry.openGroup(sasDataGroupName);
         if (parameters.is2dData) {
           do_assert_2D_data(data, parameters.size, parameters.value,
                             parameters.error, parameters.xmin, parameters.xmax,

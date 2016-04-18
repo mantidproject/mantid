@@ -129,12 +129,10 @@ std::vector<std::string> splitDetectorNames(std::string detectorNames)
  * Add the sasEntry to the sasroot.
  * @param file: Handle to the NXcanSAS file
  * @param workspace: the workspace to store
- * @param suffix: the suffix of the current entry
  * @return the sasEntry
  */
 H5::Group addSasEntry(H5::H5File &file,
-                      Mantid::API::MatrixWorkspace_sptr workspace,
-                      const std::string &suffix)
+                      Mantid::API::MatrixWorkspace_sptr workspace, const std::string& suffix)
 {
     using namespace Mantid::DataHandling::NXcanSAS;
     const std::string sasEntryName = sasEntryGroupName + suffix;
@@ -177,8 +175,7 @@ std::string getIDF(Mantid::API::MatrixWorkspace_sptr workspace)
 }
 
 void addDetectors(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace,
-                  const std::vector<std::string> &detectorNames,
-                  const std::string &suffix)
+                  const std::vector<std::string> &detectorNames)
 {
     // If the group is empty then don't add anything
     if (!detectorNames.empty()) {
@@ -187,8 +184,7 @@ void addDetectors(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace,
                 continue;
             }
 
-            const std::string sasDetectorName = sasInstrumentDetectorGroupName
-                                                + suffix + detectorName;
+            const std::string sasDetectorName = sasInstrumentDetectorGroupName + detectorName;
             auto instrument = workspace->getInstrument();
             auto component = instrument->getComponentByName(detectorName);
 
@@ -217,17 +213,14 @@ void addDetectors(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace,
  * @param workspace: the workspace which is being stored
  * @param radiationSource: the selcted radiation source
  * @param detectorNames: the names of the detectors to store
- * @param suffix: the suffix of the current entry
  */
 void addInstrument(H5::Group &group,
                    Mantid::API::MatrixWorkspace_sptr workspace,
                    const std::string &radiationSource,
-                   const std::vector<std::string> &detectorNames,
-                   const std::string &suffix)
+                   const std::vector<std::string> &detectorNames)
 {
     // Setup instrument
-    const std::string sasInstrumentNameForGroup = sasInstrumentGroupName
-                                                  + suffix;
+    const std::string sasInstrumentNameForGroup = sasInstrumentGroupName;
     auto instrument = Mantid::DataHandling::H5Util::createGroupNXS(
         group, sasInstrumentNameForGroup, sasInstrumentClassAttr);
     auto instrumentName = getInstrumentName(workspace);
@@ -235,10 +228,10 @@ void addInstrument(H5::Group &group,
                                         instrumentName);
 
     // Setup the detector
-    addDetectors(instrument, workspace, detectorNames, suffix);
+    addDetectors(instrument, workspace, detectorNames);
 
     // Setup source
-    const std::string sasSourceName = sasInstrumentSourceGroupName + suffix;
+    const std::string sasSourceName = sasInstrumentSourceGroupName;
     auto source = Mantid::DataHandling::H5Util::createGroupNXS(
         instrument, sasSourceName, sasInstrumentSourceClassAttr);
     Mantid::DataHandling::H5Util::write(source, sasInstrumentSourceRadiation,
@@ -266,13 +259,11 @@ std::string getDate()
  * about the run number, the Mantid version and the user file (if available)
  * @param group: the sasEntry
  * @param workspace: the workspace which is being stored
- * @param suffix: the suffix of the current entry
  */
-void addProcess(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace,
-                const std::string &suffix)
+void addProcess(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace)
 {
     // Setup process
-    const std::string sasProcessNameForGroup = sasProcessGroupName + suffix;
+    const std::string sasProcessNameForGroup = sasProcessGroupName;
     auto process = Mantid::DataHandling::H5Util::createGroupNXS(
         group, sasProcessNameForGroup, sasProcessClassAttr);
 
@@ -297,7 +288,6 @@ void addProcess(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace,
     }
 }
 
-enum class WorkspaceDimensionality { oneD, twoD, other };
 
 WorkspaceDimensionality
 getWorkspaceDimensionality(Mantid::API::MatrixWorkspace_sptr workspace)
@@ -550,10 +540,9 @@ void addData2D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace)
     write2DWorkspace(data, workspace, sasDataIdev, iDevExtractor, eAttributes);
 }
 
-void addData(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace,
-             const std::string &suffix)
+void addData(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace)
 {
-    const std::string sasDataName = sasDataGroupName + suffix;
+    const std::string sasDataName = sasDataGroupName;
     auto data = Mantid::DataHandling::H5Util::createGroupNXS(group, sasDataName,
                                                              sasDataClassAttr);
 
@@ -574,11 +563,11 @@ void addData(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace,
 //------- SAStransmission_spectrum
 void addTransmission(H5::Group &group,
                      Mantid::API::MatrixWorkspace_const_sptr workspace,
-                     std::string transmissionName, std::string suffix)
+                     std::string transmissionName)
 {
     // Setup process
     const std::string sasTransmissionName = sasTransmissionSpectrumGroupName
-                                            + suffix + "_" + transmissionName;
+                                            + "_" + transmissionName;
     auto transmission = Mantid::DataHandling::H5Util::createGroupNXS(
         group, sasTransmissionName, sasTransmissionSpectrumClassAttr);
 
@@ -658,8 +647,8 @@ void SaveNXcanSAS::init()
                 "MomentumTransfer")),
         "The input workspace, which must be in units of Q");
     declareProperty(Mantid::Kernel::make_unique<Mantid::API::FileProperty>(
-                        "Filename", "", API::FileProperty::Save, ".nxs"),
-                    "The name of the .nxs file to save");
+                        "Filename", "", API::FileProperty::Save, ".h5"),
+                    "The name of the .h5 file to save");
 
     std::vector<std::string> radiation_source{
         "Spallation Neutron Source", "Pulsed Reactor Neutron Source",
@@ -774,25 +763,25 @@ void SaveNXcanSAS::exec()
     auto sasEntry = addSasEntry(file, workspace, suffix);
 
     // Add the data
-    addData(sasEntry, workspace, suffix);
+    addData(sasEntry, workspace);
 
     // Add the instrument information
     const auto detectors = splitDetectorNames(detectorNames);
-    addInstrument(sasEntry, workspace, radiationSource, detectors, suffix);
+    addInstrument(sasEntry, workspace, radiationSource, detectors);
 
     // Add the process information
-    addProcess(sasEntry, workspace, suffix);
+    addProcess(sasEntry, workspace);
 
     // Add the transmissions for sample
     if (transmissionSample) {
         addTransmission(sasEntry, transmissionSample,
-                        sasTransmissionSpectrumNameSampleAttrValue, suffix);
+                        sasTransmissionSpectrumNameSampleAttrValue);
     }
 
     // Add the transmissions for can
     if (transmissionCan) {
         addTransmission(sasEntry, transmissionCan,
-                        sasTransmissionSpectrumNameCanAttrValue, suffix);
+                        sasTransmissionSpectrumNameCanAttrValue);
     }
 
     file.close();

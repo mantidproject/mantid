@@ -7,6 +7,9 @@ namespace Mantid {
 namespace DataHandling {
 
 namespace NXcanSAS {
+  // General
+  enum class WorkspaceDimensionality { oneD, twoD, other };
+
   // NXcanSAS Tag Definitions
   const std::string sasUnitAttr = "unit";
   const std::string sasUncertaintyAttr = "uncertainty";
@@ -16,6 +19,7 @@ namespace NXcanSAS {
   const std::string sasNone = "none";
   const std::string sasIntensity = "1/cm";
   const std::string sasMomentumTransfer = "1/A";
+  const std::string sasNxclass = "NX_class";
 
   // SASentry
   const std::string sasEntryClassAttr = "SASentry";
@@ -26,6 +30,7 @@ namespace NXcanSAS {
   const std::string sasEntryDefinitionFormat = "NXcanSAS";
   const std::string sasEntryTitle = "title";
   const std::string sasEntryRun = "run";
+  const std::string sasEntryRunInLogs = "run_number";
 
   // SASdata
   const std::string sasDataClassAttr = "SASdata";
