@@ -5,6 +5,10 @@ Diffraction Changes
 .. contents:: Table of Contents
    :local:
 
+- The new algorithm :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>`
+  can be used to call the GSAS-II software repeatedly to refine lattice
+  parameters (whole pattern refinement) and/or fit peaks.
+
 Crystal Improvements
 --------------------
 

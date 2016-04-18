@@ -23,6 +23,9 @@ New
 - :ref:`EnggFitDIFCFromPeaks <algm-AlignComponents>` fits GSAS calibration
   parameters (DIFA, DIFC, TZERO) from peaks fitted using
   :ref:`EnggFitPeaks <algm-EnggFitPeaks>`.
+- :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>` uses the GSAS-II
+  software to refine lattice parameters (whole pattern refinement) and fit
+  peaks.
 
 Renamed
 #######
