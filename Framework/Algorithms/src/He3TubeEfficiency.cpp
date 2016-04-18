@@ -416,8 +416,7 @@ void He3TubeEfficiency::execEvent() {
   // generate the output workspace pointer
   API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
   if (matrixOutputWS != matrixInputWS) {
-    matrixOutputWS =
-        API::MatrixWorkspace_sptr(matrixInputWS->clone().release());
+    matrixOutputWS = matrixInputWS->clone();
     setProperty("OutputWorkspace", matrixOutputWS);
   }
   auto outputWS =

@@ -169,7 +169,7 @@ void SANSSolidAngleCorrection::execEvent() {
   // generate the output workspace pointer
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (outputWS != inputWS) {
-    outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
+    outputWS = inputWS->clone();
     setProperty("OutputWorkspace", outputWS);
   }
   auto outputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
