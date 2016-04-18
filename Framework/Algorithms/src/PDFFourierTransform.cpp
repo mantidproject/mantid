@@ -216,9 +216,9 @@ void PDFFourierTransform::exec() {
   if (soqType == S_OF_Q_MINUS_ONE) {
     g_log.information() << "Multiplying all values by Q\n";
     // error propagation
-    for (size_t i = 0; i < inputDfOfQ.size(); ++i) {
-      inputDfOfQ[i] = inputQ[i] * inputDfOfQ[i] + inputFOfQ[i] * inputDQ[i];
-    }
+    //for (size_t i = 0; i < inputDfOfQ.size(); ++i) {
+    //  inputDfOfQ[i] = inputQ[i] * inputDfOfQ[i] + inputFOfQ[i] * inputDQ[i];
+    //}
     // convert the function
     std::transform(inputFOfQ.begin(), inputFOfQ.end(), inputQ.begin(),
                    inputFOfQ.begin(), std::multiplies<double>());
@@ -325,7 +325,7 @@ void PDFFourierTransform::exec() {
 
     // put the information into the output
     outputY[r_index] = fs * 2 / M_PI;
-    outputE[r_index] = error * 2 / M_PI; // TODO: Wrong!
+    outputE[r_index] = sqrt(error) * 2 / M_PI; // TODO: Wrong!
   }
 
   // convert to the correct form of PDF
