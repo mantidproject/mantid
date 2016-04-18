@@ -12,7 +12,10 @@ namespace NXcanSAS {
   const std::string sasUncertaintyAttr = "uncertainty";
   const std::string sasSignal = "signal";
   const std::string sasSeparator = ",";
-
+  const std::string sasAngstrom = "A";
+  const std::string sasNone = "none";
+  const std::string sasIntensity = "1/cm";
+  const std::string sasMomentumTransfer = "1/A";
 
   // SASentry
   const std::string sasEntryClassAttr = "SASentry";
@@ -34,6 +37,8 @@ namespace NXcanSAS {
   const std::string sasDataMaskIndicesAttr = "Mask_indices";
 
   const std::string sasDataQ = "Q";
+  const std::string sasDataQx = "Qx";
+  const std::string sasDataQy = "Qy";
   const std::string sasDataQdev = "Qdev";
 
   const std::string sasDataI = "I";

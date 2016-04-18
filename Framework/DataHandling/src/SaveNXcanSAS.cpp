@@ -48,14 +48,16 @@ H5::DSetCreatPropList setCompression2D(const hsize_t *chunkDims,
 {
     H5::DSetCreatPropList propList;
     const int rank = 2;
-    propList.setChunk(rank,chunkDims);
+    propList.setChunk(rank, chunkDims);
     propList.setDeflate(deflateLevel);
     return propList;
 }
 
-void write2DWorkspaceSignal(H5::Group &group,
-                            Mantid::API::MatrixWorkspace_sptr workspace,
-                            const std::string &dataSetName, StoreType type)
+template <typename Functor>
+void write2DWorkspace(H5::Group &group,
+                      Mantid::API::MatrixWorkspace_sptr workspace,
+                      const std::string &dataSetName, Functor func,
+                      const std::map<std::string, std::string> &attributes)
 {
     using namespace Mantid::DataHandling::H5Util;
 
@@ -72,7 +74,7 @@ void write2DWorkspaceSignal(H5::Group &group,
     // Size of a slab
     hsize_t sizeOfSingleSlab[rank] = {1, dimensionArray[1]};
 
-    // Get the Data Space definition for the 2D Data Set
+    // Get the Data Space definition for the 2D Data Set in the file
     auto fileSpace = H5::DataSpace(rank, dimensionArray);
     H5::DataType dataType(getType<double>());
 
@@ -83,17 +85,24 @@ void write2DWorkspaceSignal(H5::Group &group,
     auto dataSet
         = group.createDataSet(dataSetName, dataType, fileSpace, propList);
 
-    // Insert each row of the workspace as a slab
+    // Create Data Spae for 1D entry for each row in memory
     hsize_t memSpaceDimension[1] = {dimension1};
     H5::DataSpace memSpace(1, memSpaceDimension);
 
+    // Insert each row of the workspace as a slab
     for (unsigned int index = 0; index < dimension0; ++index) {
         // Need the data space
         fileSpace.selectHyperslab(H5S_SELECT_SET, sizeOfSingleSlab, start);
 
-        dataSet.write(workspace->dataY(index).data(), dataType, memSpace, fileSpace);
+        // Write the correct data set to file
+        dataSet.write(func(workspace, index), dataType, memSpace, fileSpace);
         // Step up the write position
         ++start[0];
+    }
+
+    // Add attributes to data set
+    for (const auto& attribute : attributes) {
+       writeStrAttribute(dataSet, attribute.first, attribute.second);
     }
 }
 
@@ -308,10 +317,18 @@ getWorkspaceDimensionality(Mantid::API::MatrixWorkspace_sptr workspace)
 std::string getIntensityUnitLabel(std::string intensityUnitLabel)
 {
     if (intensityUnitLabel == "I(q) (cm-1)") {
-        return "1/cm";
+        return sasIntensity;
     } else {
         return intensityUnitLabel;
     }
+}
+
+std::string getMomentumTransferLabel(std::string momentumTransferLabel) {
+  if (momentumTransferLabel == "Angstrom^-1") {
+    return sasMomentumTransfer;
+  } else {
+    return momentumTransferLabel;
+  }
 }
 
 std::string
@@ -341,6 +358,7 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace)
     const auto qValue = workspace->readX(0);
     std::map<std::string, std::string> qAttributes;
     const auto qUnit = getUnitFromMDDimension(workspace->getDimension(0));
+    qUnit = getMomentumTransferLabel(qUnit);
     qAttributes.insert(std::make_pair(sasUnitAttr, qUnit));
     if (workspace->hasDx(0)) {
         qAttributes.insert(std::make_pair(sasUncertaintyAttr, sasDataQdev));
@@ -352,8 +370,7 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace)
     // Add I with units + uncertainty definition
     const auto intensity = workspace->readY(0);
     std::map<std::string, std::string> iAttributes;
-    auto iUnit = getUnitFromMDDimension(workspace->getYDimension());
-    iUnit = getIntensityUnitLabel(iUnit);
+    auto iUnit = workspace->YUnit();
     iAttributes.insert(std::make_pair(sasUnitAttr, iUnit));
     iAttributes.insert(std::make_pair(sasUncertaintyAttr, sasDataIdev));
 
@@ -393,24 +410,43 @@ bool areAxesNumeric(Mantid::API::MatrixWorkspace_sptr workspace)
     return true;
 }
 
-int storeTypeToInt(StoreType type)
+
+class SpectrumAxisValueProvider
 {
-    int value(-1);
-    switch (type) {
-    case (StoreType::Qx):
-        value = 0;
-        break;
-    case (StoreType::Qy):
-        value = 1;
-        break;
-    default:
-        value = -1;
+public:
+    SpectrumAxisValueProvider(Mantid::API::MatrixWorkspace_sptr workspace)
+    {
+        if (workspace->isHistogramData()) {
+            std::invalid_argument("SaveNXcanSAS: Cannot handle 2D histogram "
+                                  "data, make sure you provide 2D point data.");
+        }
+
+        m_workspace = workspace;
+        setSpectrumAxisValues();
     }
 
-    return value;
-}
+    Mantid::MantidVec::value_type *operator()(Mantid::API::MatrixWorkspace_sptr,
+                                              int index)
+    {
+        Mantid::MantidVec tempVec(m_workspace->dataX(index).size(),
+                                  m_spectrumAxisValues[index]);
+        m_currentAxisValues.swap(tempVec);
+        return m_currentAxisValues.data();
+    }
 
+private:
+    void setSpectrumAxisValues()
+    {
+        auto sAxis = m_workspace->getAxis(1);
+        for (size_t index = 0; index < sAxis->length(); ++index) {
+            m_spectrumAxisValues.push_back((*sAxis)(index));
+        }
+    }
 
+    Mantid::API::MatrixWorkspace_sptr m_workspace;
+    Mantid::MantidVec m_spectrumAxisValues;
+    Mantid::MantidVec m_currentAxisValues;
+};
 
 /**
  * Stores the 2D data in the HDF5 file. Qx and Qy values need to be stored as a
@@ -418,7 +454,6 @@ int storeTypeToInt(StoreType type)
  * They should be stored as point data.
  * @param data: the hdf5 group
  * @param workspace: the workspace to store
- * @param type: the type of data we want to store
  *
  * Workspace looks like this in Mantid Matrix
  *    (Qx)  0       1          2     ...   M   (first dimension)
@@ -433,63 +468,26 @@ int storeTypeToInt(StoreType type)
  *  (second dimension)
  *
  * The layout below is how it would look like in the HDFView, ie vertical axis
- *is first dimension
+ * is first dimension. We map the Mantid Matrix layout 1-to-1. Note that this
+ * will swap the matrix indices, but this is how it is done in the other
+ *2Dloaders
  *
  * In HDF5 the Qx would need to be stored as:
- * Qx1 Qx1 ... Qx1 : N times
- * Qx2 Qx2 ... Qx2 : N times
- * Qx3 Qx3 ... Qx3 : N times
+ * Qx1 Qx2 ... QxM
+ * Qx1 Qx2 ... QxM
+ * Qx1 Qx2 ... QxM
  *  .
  *  .
- * QxM QxM ... QxM : N times
+ * Qx1 Qx2 ... QxM
  *
  * In HDF5 the Qy would need to be stored as:
- * Qy1 Qy2 ... QyN
- * Qy1 Qy2 ... QyN
- * Qy1 Qy2 ... QyN
+ * Qy1 Qy1 ... Qy1
+ * Qy2 Qy2 ... Qy2
+ * Qy3 Qy3 ... Qy3
  *  .
  *  .
- * Qx1 Qx2 ... QxN
- * M times
- *
- *
- * In HDF5 the I would need to be stored as:
- * IQx0Qy0 IQx0Qy1 ... IQx0QyN
- * IQx1Qy0 IQx1Qy1 ... IQx1QyN
- * .
- * .
- * .
- * IQxMQy0 IQxMQy1 ... IQxMQyN
- *
+ * QxN QxN ... QxN
  */
-void write2Ddata(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace,
-                 StoreType type)
-{
-    const auto maxDim0 = workspace->blocksize();
-    const auto maxDim1 = workspace->getNumberHistograms();
-
-    auto index = storeTypeToInt(type);
-    switch (type) {
-    case (StoreType::Qx):
-
-        // write2DqValue(data);
-        break;
-    case (StoreType::Qy):
-        // write2DqValue(data);
-        break;
-    case (StoreType::I):
-        write2DWorkspaceSignal(data, workspace, sasDataI, type);
-        break;
-    case (StoreType::Idev):
-        // write2DSignalTypeValue(data, workspace, sasDataIdev);
-        break;
-    default:
-        std::invalid_argument("SaveNXcanSAS: Cannot handle the supplied the "
-                              "data type. Currently only Qx, Qy, I and Idev "
-                              "can be handled for 2D data.");
-    }
-}
-
 void addData2D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace)
 {
     if (!areAxesNumeric(workspace)) {
@@ -506,14 +504,50 @@ void addData2D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace)
     Mantid::DataHandling::H5Util::writeStrAttribute(data, sasDataQIndicesAttr,
                                                     "0,1");
 
-    // Store the 2D Qx data
-   //write2Ddata(data, workspace, StoreType::Qx);
+    // Store the 2D Qx data + units
+    std::map<std::string, std::string> qxAttributes;
+    auto qxUnit = getUnitFromMDDimension(workspace->getXDimension());
+    qxUnit = getMomentumTransferLabel(qxUnit);
+    qxAttributes.insert(std::make_pair(sasUnitAttr, qxUnit));
+
+    auto qxExtractor = [](Mantid::API::MatrixWorkspace_sptr ws, int index) {
+        return ws->dataX(index).data();
+    };
+    write2DWorkspace(data, workspace, sasDataQx, qxExtractor, qxAttributes);
+
 
     // Get 2D Qy data and store it
-    //write2Ddata(data, workspace, StoreType::Qy);
+    std::map<std::string, std::string> qyAttributes;
+    auto qyUnit = getUnitFromMDDimension(workspace->getDimension(1));
+    qyUnit = getMomentumTransferLabel(qyUnit);
+    qyAttributes.insert(std::make_pair(sasUnitAttr, qyUnit));
+
+    SpectrumAxisValueProvider spectrumAxisValueProvider(workspace);
+    write2DWorkspace(data, workspace, sasDataQy, spectrumAxisValueProvider, qyAttributes);
+
 
     // Get 2D I data and store it
-    write2Ddata(data, workspace, StoreType::I);
+    std::map<std::string, std::string> iAttributes;
+    auto iUnit = workspace->YUnit();
+    iUnit = getIntensityUnitLabel(iUnit);
+    iAttributes.insert(std::make_pair(sasUnitAttr, iUnit));
+    iAttributes.insert(std::make_pair(sasUncertaintyAttr, sasDataIdev));
+
+    auto iExtractor = [](Mantid::API::MatrixWorkspace_sptr ws, int index) {
+        return ws->dataY(index).data();
+    };
+    write2DWorkspace(data, workspace, sasDataI, iExtractor, iAttributes);
+
+
+    // Get 2D Idev data and store it
+    std::map<std::string, std::string> eAttributes;
+    eAttributes.insert(
+        std::make_pair(sasUnitAttr, iUnit)); // same units as intensity
+
+    auto iDevExtractor = [](Mantid::API::MatrixWorkspace_sptr ws, int index) {
+        return ws->dataE(index).data();
+    };
+    write2DWorkspace(data, workspace, sasDataIdev, iDevExtractor, eAttributes);
 }
 
 void addData(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace,
@@ -570,6 +604,9 @@ void addTransmission(H5::Group &group,
     const auto transmissionData = workspace->readY(0);
     std::map<std::string, std::string> transmissionAttributes;
     const std::string unit = "";
+    if (unit.empty()) {
+      unit = sasNone;
+    }
     transmissionAttributes.insert(std::make_pair(sasUnitAttr, unit));
     transmissionAttributes.insert(
         std::make_pair(sasUncertaintyAttr, sasTransmissionSpectrumTdev));
@@ -592,6 +629,9 @@ void addTransmission(H5::Group &group,
     const auto lambda = workspace->readX(0);
     std::map<std::string, std::string> lambdaAttributes;
     const auto lambdaUnit = getUnitFromMDDimension(workspace->getDimension(0));
+    if (lambdaUnit.empty() || lambdaUnit == "Angstrom") {
+      lambdaUnit = sasAngstrom;
+     }
     lambdaAttributes.insert(std::make_pair(sasUnitAttr, lambdaUnit));
 
     writeArray1DWithStrAttributes(transmission, sasTransmissionSpectrumLambda,
