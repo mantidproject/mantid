@@ -2,12 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FFTSmooth2.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/ListValidator.h"
+
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/detail/classification.hpp>
-
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -20,22 +23,19 @@ using namespace API;
 
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFTSmooth2::init() {
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The name of the input workspace.");
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex", 0, mustBePositive,
-                  "Spectrum index for smoothing");
+                  "Workspace index for smoothing");
 
-  std::vector<std::string> type;
-  // type.push_back("Truncation");
-  type.push_back("Zeroing");
-  type.push_back("Butterworth");
+  std::vector<std::string> type{"Zeroing", "Butterworth"};
   declareProperty("Filter", "Zeroing",
                   boost::make_shared<StringListValidator>(type),
                   "The type of the applied filter");

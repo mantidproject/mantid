@@ -52,7 +52,7 @@ public:
    */
   ModeControlWidget(QWidget *parent = 0);
   /// Default destructor.
-  virtual ~ModeControlWidget();
+  ~ModeControlWidget() override;
 
   /// Enumeration for the view types
   enum Views {STANDARD, THREESLICE, MULTISLICE, SPLATTERPLOT};

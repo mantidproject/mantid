@@ -133,10 +133,10 @@ void InelasticDiffSphere::initAlphaCoeff() {
  * numerical indeterminacies. To avoid them, we will interpolate linearly.
  */
 void InelasticDiffSphere::initLinJlist() {
-  for (size_t i = 0; i < m_xnl.size(); i++) {
+  for (auto &coeff : m_xnl) {
     linearJ abJ;
-    double x = m_xnl[i].x; // eigenvalue for a (n, l) pair
-    unsigned int l = static_cast<unsigned int>(m_xnl[i].l);
+    double x = coeff.x; // eigenvalue for a (n, l) pair
+    unsigned int l = static_cast<unsigned int>(coeff.l);
     double Qa = x - m_divZone; // left of the numerical divergence point
     double J0 = (Qa * boost::math::sph_bessel(l + 1, Qa) -
                  l * boost::math::sph_bessel(l, Qa)) /
@@ -216,7 +216,7 @@ void InelasticDiffSphere::function1D(double *out, const double *xValues,
 
   double Q;
   if (getAttribute("Q").asDouble() == EMPTY_DBL()) {
-    if (m_qValueCache.size() == 0) {
+    if (m_qValueCache.empty()) {
       throw std::runtime_error(
           "No Q attribute provided and cannot retrieve from worksapce.");
     }

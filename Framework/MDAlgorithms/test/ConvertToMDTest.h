@@ -35,12 +35,7 @@ public:
 };
 // helper function to provide list of names to test:
 std::vector<std::string> dim_availible() {
-  std::string dns_ws[] = {"DeltaE", "T", "alpha", "beta", "gamma"};
-  std::vector<std::string> data_names_in_WS;
-  for (size_t i = 0; i < 5; i++) {
-    data_names_in_WS.push_back(dns_ws[i]);
-  }
-  return data_names_in_WS;
+  return {"DeltaE", "T", "alpha", "beta", "gamma"};
 }
 //
 class ConvertToMDTest : public CxxTest::TestSuite {
@@ -415,7 +410,7 @@ public:
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
   }
-  ~ConvertToMDTest() {
+  ~ConvertToMDTest() override {
     AnalysisDataService::Instance().remove("testWSProcessed");
   }
 
@@ -672,7 +667,7 @@ public:
       throw(
           std::runtime_error("Can not obtain preprocessed events detectors "));
 
-    pTargWS = boost::shared_ptr<MDEventWSWrapper>(new MDEventWSWrapper());
+    pTargWS = boost::make_shared<MDEventWSWrapper>();
 
     Rot.setRandom(100);
     Rot.toRotation();

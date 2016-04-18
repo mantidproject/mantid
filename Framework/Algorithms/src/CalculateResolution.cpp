@@ -54,10 +54,10 @@ const std::string CalculateResolution::summary() const {
 /** Initialize the algorithm's properties.
 */
 void CalculateResolution::init() {
-  declareProperty(
-      new WorkspaceProperty<>("Workspace", "", Direction::Input,
-                              boost::make_shared<InstrumentValidator>()),
-      "Workspace to calculate the instrument resolution of.");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "Workspace", "", Direction::Input,
+                      boost::make_shared<InstrumentValidator>()),
+                  "Workspace to calculate the instrument resolution of.");
 
   declareProperty("TwoTheta", Mantid::EMPTY_DBL(),
                   "Two theta scattering angle in degrees.");
@@ -127,12 +127,12 @@ void CalculateResolution::exec() {
   std::vector<double> slit1VGParam = slit1->getNumberParameter(vGapParam);
   std::vector<double> slit2VGParam = slit2->getNumberParameter(vGapParam);
 
-  if (slit1VGParam.size() < 1)
+  if (slit1VGParam.empty())
     throw std::runtime_error("Could not find a value for the first slit's "
                              "vertical gap with given parameter name: '" +
                              vGapParam + "'.");
 
-  if (slit2VGParam.size() < 1)
+  if (slit2VGParam.empty())
     throw std::runtime_error("Could not find a value for the second slit's "
                              "vertical gap with given parameter name: '" +
                              vGapParam + "'.");

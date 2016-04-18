@@ -63,41 +63,37 @@ public:
   /// Default constructor
   CorrectKiKf();
   /// Virtual destructor
-  virtual ~CorrectKiKf();
+  ~CorrectKiKf() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "CorrectKiKf"; }
+  const std::string name() const override { return "CorrectKiKf"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Performs k_i/k_f multiplication, in order to transform "
            "differential scattering cross section into dynamic structure "
            "factor.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Inelastic\\Corrections;CorrectionFunctions\\SpecialCorrections";
   }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void execEvent();
   /**
    * Execute CorrectKiKf for event lists
-   * @param events the list of events to correct
+   * @param wevector the list of events to correct
    * @param efixed the value of the fixed energy
    * @param emodeStr the energy mode description
    */
   template <class T>
-  void correctKiKfEventHelper(std::vector<T> &events, double efixed,
+  void correctKiKfEventHelper(std::vector<T> &wevector, double efixed,
                               const std::string emodeStr);
-  /// The user selected (input) workspace
-  API::MatrixWorkspace_const_sptr inputWS;
-  /// The output workspace, maybe the same as the input one
-  API::MatrixWorkspace_sptr outputWS;
 };
 
 } // namespace Algorithm

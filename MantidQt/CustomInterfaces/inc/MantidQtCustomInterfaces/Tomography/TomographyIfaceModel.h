@@ -5,8 +5,11 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidKernel/System.h"
+#include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoReconFiltersSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 // Qt classes forward declarations
 class QMutex;
@@ -20,7 +23,7 @@ Tomography GUI. Model for the interface (as in the MVP
 signals from this model should always be handled through the presenter
 and never go directly to the view.
 
-Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014,2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -73,6 +76,11 @@ public:
     return m_jobsStatus;
   }
 
+  const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+  jobsStatusLocal() const {
+    return m_jobsStatusLocal;
+  }
+
   /// Username last logged in, if any.
   std::string loggedIn() const { return m_loggedInUser; }
   // TODO: add companion currentComputeResource where LoggedIn() is in
@@ -100,9 +108,36 @@ public:
   /// Get fresh status information on running/recent jobs
   void doRefreshJobsInfo(const std::string &compRes);
 
+  void refreshLocalJobsInfo();
+
+  void doRunReconstructionJobLocal();
+
+  void updateExperimentReference(const std::string ref) {
+    m_experimentRef = ref;
+  }
+
+  /// Update to the current setings given by the user
+  void updateSystemSettings(const TomoSystemSettings &settings) {
+    m_systemSettings = settings;
+  }
+
   /// Update to the current setings given by the user
   void updateReconToolsSettings(const TomoReconToolsUserSettings &ts) {
     m_toolsSettings = ts;
+  }
+
+  void updateTomopyMethod(const std::string &method) {
+    m_tomopyMethod = method;
+  }
+
+  void updateAstraMethod(const std::string &method) { m_astraMethod = method; }
+
+  void updatePrePostProcSettings(const TomoReconFiltersSettings &filters) {
+    m_prePostProcSettings = filters;
+  }
+
+  void updateImageStackPreParams(const ImageStackPreParams &roiEtc) {
+    m_imageStackPreParams = roiEtc;
   }
 
   /// loads an image/picture in FITS format
@@ -129,30 +164,55 @@ private:
   /// retrieve info from compute resource into status table
   void getJobStatusInfo(const std::string &compRes);
 
-  std::string validateCompResource(const std::string &res);
+  std::string validateCompResource(const std::string &res) const;
 
   /// makes the command line string to run on the remote/local
   void makeRunnableWithOptions(const std::string &comp, std::string &run,
-                               std::string &opt);
+                               std::vector<std::string> &opt) const;
 
   void checkWarningToolNotSetup(const std::string &tool,
                                 const std::string &settings,
-                                const std::string &cmd, const std::string &opt);
+                                const std::string &cmd,
+                                const std::string &opt) const;
+
+  std::vector<std::string> makeTomoRecScriptOptions(bool local) const;
+
+  void filtersCfgToCmdOpts(const TomoReconFiltersSettings &filters,
+                           const ImageStackPreParams &corRegions, bool local,
+                           std::vector<std::string> &opts) const;
 
   void splitCmdLine(const std::string &cmd, std::string &run,
-                    std::string &opts);
+                    std::string &opts) const;
 
-  void checkDataPathsSet();
+  void checkDataPathsSet() const;
 
-  /// username last logged in (empty if not in login status), from local
-  /// perspective
-  std::string m_loggedInUser;
-  std::string m_loggedInComp;
+  std::string adaptInputPathForExecution(const std::string &path,
+                                         bool local) const;
+
+  std::string buildOutReconstructionDir(const std::string &samplesDir,
+                                        bool) const;
+
+  bool processIsRunning(int pid);
+
+  std::string
+  buildOutReconstructionDirFromSystemRoot(const std::string &samplesDir,
+                                          bool local) const;
+
+  std::string
+  buildOutReconstructionDirFromSamplesDir(const std::string &samplesDir) const;
 
   /// facility for the remote compute resource
   const std::string m_facility;
   /// display name of the "local" compute resource
   const std::string m_localCompName;
+
+  /// Experiment reference (RBNumber for example)
+  std::string m_experimentRef;
+
+  /// username last logged in (empty if not in login status), from local
+  /// perspective
+  std::string m_loggedInUser;
+  std::string m_loggedInComp;
 
   /// compute resources suppoted by this GUI (remote ones, clusters, etc.)
   std::vector<std::string> m_computeRes;
@@ -164,6 +224,8 @@ private:
 
   // status of remote jobs
   std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> m_jobsStatus;
+  // status of local runs/jobs
+  std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> m_jobsStatusLocal;
 
   /// reconstruction tools available on SCARF
   std::vector<std::string> m_SCARFtools;
@@ -175,8 +237,20 @@ private:
 
   TomoPathsConfig m_pathsConfig;
 
+  // System settting including several paths and parameters (local and remote)
+  TomoSystemSettings m_systemSettings;
+
   // Settings for the third party (tomographic reconstruction) tools
   TomoReconToolsUserSettings m_toolsSettings;
+
+  std::string m_tomopyMethod;
+  std::string m_astraMethod;
+
+  // Settings for the pre-/post-processing filters
+  TomoReconFiltersSettings m_prePostProcSettings;
+
+  // Parameters set for the ROI, normalization region, etc.
+  ImageStackPreParams m_imageStackPreParams;
 
   // mutex for the job status info update operations
   QMutex *m_statusMutex;

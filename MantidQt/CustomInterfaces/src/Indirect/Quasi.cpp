@@ -127,22 +127,19 @@ bool Quasi::validate() {
 }
 
 /**
- * Collect the settings on the GUI and build a python
- * script that runs Quasi
+* Run the BayesQuasi algorithm
  */
 void Quasi::run() {
-  // Using 1/0 instead of True/False for compatibility with underlying Fortran
-  // code
-  // in some places
 
   auto saveDirectory = Mantid::Kernel::ConfigService::Instance().getString(
       "defaultsave.directory");
   if (saveDirectory.compare("") == 0) {
-    QString textMessage = "BayesQuasi requires a default save directory and "
-                          "one is not currently set."
-                          " If run, the algorithm will default to saving files "
-                          "to the current working directory."
-                          " Would you still like to run the algorithm?";
+    const char *textMessage =
+        "BayesQuasi requires a default save directory and "
+        "one is not currently set."
+        " If run, the algorithm will default to saving files "
+        "to the current working directory."
+        " Would you still like to run the algorithm?";
     int result = QMessageBox::question(NULL, tr("Save Directory"),
                                        tr(textMessage), QMessageBox::Yes,
                                        QMessageBox::No, QMessageBox::NoButton);
@@ -404,7 +401,7 @@ void Quasi::handleProgramChange(int index) {
 /**
  * Handles setting a new preview spectrum on the preview plot.
  *
- * @param value Spectrum index
+ * @param value workspace index
  */
 void Quasi::previewSpecChanged(int value) {
   m_previewSpec = value;

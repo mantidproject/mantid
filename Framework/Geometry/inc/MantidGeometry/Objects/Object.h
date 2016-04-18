@@ -6,8 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Material.h"
-#include "MantidKernel/Quat.h"
-#include "MantidKernel/V3D.h"
+
 #include "BoundingBox.h"
 #include <map>
 
@@ -15,6 +14,11 @@ namespace Mantid {
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
+namespace Kernel {
+class V3D;
+class Material;
+}
+
 namespace Geometry {
 class Rule;
 class CompGrp;
@@ -139,9 +143,9 @@ public:
   /// Return cached value of axis-aligned bounding box
   const BoundingBox &getBoundingBox() const;
   /// Define axis-aligned bounding box
-  void defineBoundingBox(const double &xmax, const double &ymax,
-                         const double &zmax, const double &xmin,
-                         const double &ymin, const double &zmin);
+  void defineBoundingBox(const double &xMax, const double &yMax,
+                         const double &zMax, const double &xMin,
+                         const double &yMin, const double &zMin);
   /// Set a null bounding box for this object
   void setNullBoundingBox();
   // find internal point to object

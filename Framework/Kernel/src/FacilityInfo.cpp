@@ -10,10 +10,11 @@
 #include "MantidKernel/Strings.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/make_shared.hpp>
 
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 using Poco::XML::Element;
 
@@ -71,11 +72,11 @@ void FacilityInfo::fillExtensions(const Poco::XML::Element *elem) {
     g_log.error("No file extensions defined");
     throw std::runtime_error("No file extensions defined");
   }
-  typedef Poco::StringTokenizer tokenizer;
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
   tokenizer exts(extsStr, ",",
                  tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-  for (auto it = exts.begin(); it != exts.end(); ++it) {
-    addExtension(*it);
+  for (const auto &ext : exts) {
+    addExtension(ext);
   }
 }
 
@@ -167,9 +168,8 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element *elem) {
       // TODO: this is a bit of duplicate effort at the moment, until
       // RemoteJobManager goes away from here (then this would be
       // removed), see header for details.
-      m_computeResources.insert(std::make_pair(
-          name,
-          boost::shared_ptr<RemoteJobManager>(new RemoteJobManager(elem))));
+      m_computeResources.emplace(name,
+                                 boost::make_shared<RemoteJobManager>(elem));
     }
   }
 }
@@ -190,22 +190,25 @@ const InstrumentInfo &FacilityInfo::instrument(std::string iName) const {
     }
   }
 
-  for (auto it = m_instruments.cbegin(); it != m_instruments.cend(); ++it) {
-    if (boost::iequals(it->name(), iName)) // Case-insensitive search
+  for (const auto &instrument : m_instruments) {
+    if (boost::iequals(instrument.name(), iName)) // Case-insensitive search
     {
-      g_log.debug() << "Instrument '" << iName << "' found as " << it->name()
-                    << " at " << name() << "." << std::endl;
-      return *it;
+      g_log.debug() << "Instrument '" << iName << "' found as "
+                    << instrument.name() << " at " << name() << "."
+                    << std::endl;
+      return instrument;
     }
   }
 
   // if unsuccessful try shortname
-  for (auto it = m_instruments.begin(); it != m_instruments.end(); ++it) {
-    if (boost::iequals(it->shortName(), iName)) // Case-insensitive search
+  for (const auto &instrument : m_instruments) {
+    if (boost::iequals(instrument.shortName(),
+                       iName)) // Case-insensitive search
     {
-      g_log.debug() << "Instrument '" << iName << "' found as " << it->name()
-                    << " at " << name() << "." << std::endl;
-      return *it;
+      g_log.debug() << "Instrument '" << iName << "' found as "
+                    << instrument.name() << " at " << name() << "."
+                    << std::endl;
+      return instrument;
     }
   }
 

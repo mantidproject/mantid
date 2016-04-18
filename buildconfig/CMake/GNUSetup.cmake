@@ -40,6 +40,14 @@ elseif ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
     set(GNUFLAGS "${GNUFLAGS} -Wno-sign-conversion")
 endif()
 
+# Check if we have a new enough version for these flags
+if ( CMAKE_COMPILER_IS_GNUCXX )
+  if (NOT (GCC_COMPILER_VERSION VERSION_LESS "5.1"))
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wsuggest-override")
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wsuggest-final-types -Wsuggest-final-methods")
+  endif()
+endif()
+
 # Add some options for debug build to help the Zoom profiler
 set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer" )
 set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer" )
@@ -74,19 +82,23 @@ set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GNUFLAGS} -Woverloaded-virtual -fno-o
 
 if(${CMAKE_VERSION} VERSION_GREATER 3.1.0 OR ${CMAKE_VERSION} VERSION_EQUAL 3.1.0)
   set(CMAKE_CXX_STANDARD 14)
-  set(CXX_STANDARD_REQUIRED 11)
+  set(CMAKE_CXX_STANDARD_REQUIRED 11)
 else()
   include(CheckCXXCompilerFlag)
   CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
   CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-  CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
   if(COMPILER_SUPPORTS_CXX14)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
   elseif(COMPILER_SUPPORTS_CXX11)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-  elseif(COMPILER_SUPPORTS_CXX0X)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
   endif()
+endif()
+
+# XCode isn't picking up the standard set above.
+if(CMAKE_GENERATOR STREQUAL Xcode)
+  set ( CMAKE_XCODE_ATTRIBUTE_OTHER_CPLUSPLUSFLAGS "${GNUFLAGS} -Woverloaded-virtual -fno-operator-names")
+  set ( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++14")
+  set ( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
 endif()
 
 if( CMAKE_COMPILER_IS_GNUCXX )

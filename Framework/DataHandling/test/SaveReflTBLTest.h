@@ -8,6 +8,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include <fstream>
 #include <Poco/File.h>
 
@@ -25,7 +26,7 @@ public:
       : m_name("SaveReflTBLTestWS"), m_filename("SaveReflTBLTest.tbl"),
         m_abspath() {}
 
-  ~SaveReflTBLTest() {}
+  ~SaveReflTBLTest() override {}
 
   void testNoQuotes() {
     ITableWorkspace_sptr ws = CreateWorkspace();

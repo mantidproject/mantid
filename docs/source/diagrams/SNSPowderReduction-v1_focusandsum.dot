@@ -1,0 +1,50 @@
+digraph FocusAndSum {
+  label="SNSPowderReduction Focus And Sum Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    RunNumberList
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    alignAndFocusPowder	[label="AlignAndFocusPowder v1"]
+    getRunNumber [label="Get a run number"]
+    plus [label="Plus v1\nsummed workspace"]
+    load [label="Load v1"]
+    split [label="SplitEvents v1"]
+    mergeWorkspace [label="Merge chunked workspaces"]
+    gatherWorkspace [label="Gather workspaces MPI"]
+    normaliseByCurrent [label="NormaliseByCurrent v1"]
+  }
+
+  subgraph decisions{
+    $decision_style
+    isLastRunNumber [label="Is Last Run Number?"]
+  }
+  
+  subgraph values {
+    $value_style
+    RunNumber [label="Run Number"]
+  }
+
+
+  RunNumberList	      -> getRunNumber
+  getRunNumber	      -> RunNumber
+  RunNumber	      -> load
+  load		      -> split
+  split		      -> alignAndFocusPowder
+  alignAndFocusPowder -> mergeWorkspace
+  mergeWorkspace      -> gatherWorkspace
+  gatherWorkspace     -> normaliseByCurrent
+  normaliseByCurrent  -> plus
+  plus                -> isLastRunNumber
+
+
+  isLastRunNumber     -> OutputWorkspace [label="Yes"]
+  isLastRunNumber     -> getRunNumber [label="No"]
+
+}
+

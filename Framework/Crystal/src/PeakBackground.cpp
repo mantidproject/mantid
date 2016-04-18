@@ -33,28 +33,6 @@ PeakBackground::PeakBackground(IPeaksWorkspace_const_sptr peaksWS,
   }
 }
 
-PeakBackground::PeakBackground(const PeakBackground &other)
-    : HardThresholdBackground(other), m_peaksWS(other.m_peaksWS),
-      m_radiusEstimate(other.m_radiusEstimate),
-      m_mdCoordinates(other.m_mdCoordinates),
-      m_coordFunction(other.m_coordFunction) {}
-
-PeakBackground &PeakBackground::operator=(const PeakBackground &other) {
-  if (this != &other) {
-    HardThresholdBackground::operator=(other);
-    m_peaksWS = other.m_peaksWS;
-    m_radiusEstimate = other.m_radiusEstimate;
-    m_mdCoordinates = other.m_mdCoordinates;
-    m_coordFunction = other.m_coordFunction;
-  }
-  return *this;
-}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-PeakBackground::~PeakBackground() {}
-
 /// Virutal constructor
 PeakBackground *PeakBackground::clone() const {
   return new PeakBackground(*this);

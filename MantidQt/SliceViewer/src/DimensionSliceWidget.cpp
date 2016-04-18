@@ -114,6 +114,13 @@ void DimensionSliceWidget::setShownDim(int dim)
   ui.btnY->blockSignals(false);
   /// Slice if dimension is not X or Y AND is not integrated
   bool slicing = (m_shownDim == -1 && !m_dim->getIsIntegrated());
+
+  // Use the minimum slice point for integrated dimensions
+  // otherwise high bin boundary can be selected and no data plotted
+  if (m_dim->getIsIntegrated()) {
+    this->setSlicePoint(m_dim->getMinimum());
+  }
+
   ui.horizontalSlider->setVisible( slicing );
   ui.doubleSpinBox->setVisible( slicing );
   ui.lblUnits->setVisible( slicing );
@@ -124,7 +131,7 @@ void DimensionSliceWidget::setShownDim(int dim)
     if (ui.horizontalSpacer != NULL)
     {
       // Remove the 3rd item (if it's not gone already) = the spacer
-      QLayoutIterator it = ui.horizontalLayout->iterator();
+      auto it = QLayoutIterator(ui.horizontalLayout);
       ++it; ++it; ++it;
       ui.horizontalLayout->removeItem(it.current());
       delete ui.horizontalSpacer;

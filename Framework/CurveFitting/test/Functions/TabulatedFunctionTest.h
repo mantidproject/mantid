@@ -53,7 +53,7 @@ public:
     }
   }
 
-  ~TabulatedFunctionTest() {
+  ~TabulatedFunctionTest() override {
     Poco::File hAscii(m_asciiFileName);
     if (hAscii.exists()) {
       hAscii.remove();

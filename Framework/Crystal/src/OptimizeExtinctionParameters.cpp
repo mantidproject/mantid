@@ -57,20 +57,14 @@ static double gsl_costFunction(const gsl_vector *v, void *params) {
  */
 void OptimizeExtinctionParameters::init() {
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace", "",
-                                                        Direction::InOut),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "InputWorkspace", "", Direction::InOut),
                   "An input PeaksWorkspace with an instrument.");
-  std::vector<std::string> corrOptions;
-  corrOptions.push_back("Type I Zachariasen");
-  corrOptions.push_back("Type I Gaussian");
-  corrOptions.push_back("Type I Lorentzian");
-  corrOptions.push_back("Type II Zachariasen");
-  corrOptions.push_back("Type II Gaussian");
-  corrOptions.push_back("Type II Lorentzian");
-  corrOptions.push_back("Type I&II Zachariasen");
-  corrOptions.push_back("Type I&II Gaussian");
-  corrOptions.push_back("Type I&II Lorentzian");
-  corrOptions.push_back("None, Scaling Only");
+  std::vector<std::string> corrOptions{
+      "Type I Zachariasen",    "Type I Gaussian",    "Type I Lorentzian",
+      "Type II Zachariasen",   "Type II Gaussian",   "Type II Lorentzian",
+      "Type I&II Zachariasen", "Type I&II Gaussian", "Type I&II Lorentzian",
+      "None, Scaling Only"};
   declareProperty("ExtinctionCorrectionType", corrOptions[0],
                   boost::make_shared<StringListValidator>(corrOptions),
                   "Select the type of extinction correction.");
@@ -84,8 +78,8 @@ void OptimizeExtinctionParameters::init() {
                   "Becker-Coppens Crystallite Radius (micron)",
                   Direction::InOut);
   std::vector<std::string> propOptions;
-  for (size_t i = 0; i < m_pointGroups.size(); ++i)
-    propOptions.push_back(m_pointGroups[i]->getName());
+  for (auto &pointGroup : m_pointGroups)
+    propOptions.push_back(pointGroup->getName());
   declareProperty("PointGroup", propOptions[0],
                   boost::make_shared<StringListValidator>(propOptions),
                   "Which point group applies to this crystal?");
@@ -119,7 +113,7 @@ void OptimizeExtinctionParameters::exec() {
   par[3] = strwi.str();
 
   const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
-  gsl_multimin_fminimizer *s = NULL;
+  gsl_multimin_fminimizer *s = nullptr;
   gsl_vector *ss, *x;
   gsl_multimin_function minex_func;
 

@@ -3,8 +3,10 @@
 
 #include <string>
 #include <vector>
+#include <qwt_plot_curve.h>
 #include <QStringList>
 
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h"
 
@@ -125,12 +127,20 @@ public:
   virtual int currentCropCalibBankName() const = 0;
 
   /**
-  * customised spec will be passed via specID text field for the
-  * calibrartion process to be carried out
+  * customised spec will be passed via specNo text field for the
+  * cropped calibrartion process to be carried out
   *
   * @return which format should to applied for plotting data
   */
   virtual std::string currentCalibSpecNos() const = 0;
+
+  /**
+  * customised bank name will be passed with SpectrumNos to
+  * save workspace and file with particular bank name
+  *
+  * @return string which will be used to generate bank name
+  */
+  virtual std::string currentCalibCustomisedBankName() const = 0;
 
   /**
   * Selected plot data representation will be applied, which will
@@ -270,12 +280,12 @@ public:
   virtual std::vector<bool> focusingBanks() const = 0;
 
   /**
-   * Specification of spectrum IDs for focus in "cropped" mode.
+   * Specification of spectrum Nos for focus in "cropped" mode.
    *
-   * @return spectrum IDs, expected as a comma separated list of
+   * @return spectrum Nos, expected as a comma separated list of
    * integers or ranges of integers.
    */
-  virtual std::string focusingCroppedSpectrumIDs() const = 0;
+  virtual std::string focusingCroppedSpectrumNos() const = 0;
 
   /**
    * Detector grouping file, used when focusing in "texture" mode.
@@ -291,6 +301,14 @@ public:
    * @return bool
    */
   virtual bool focusedOutWorkspace() const = 0;
+
+  /**
+  * Check box to consider when calibrating
+  * whether to plot focused workspace
+  *
+  * @return bool
+  */
+  virtual bool plotCalibWorkspace() const = 0;
 
   /**
    * Reset all focus inputs/options
@@ -328,6 +346,30 @@ public:
    * @return the time parameter (bin width) when rebinning by pulses.
    */
   virtual double rebinningPulsesTime() const = 0;
+
+  /**
+  * returns directory of the file name to preform fitting on
+  *
+  * @return directory as std::string
+  */
+  virtual std::string fittingRunNo() const = 0;
+
+  /**
+  * A list of dSpacing values to be translated into TOF
+  * to find expected peaks.
+  *
+  * @return list of dSpacing values as std::string
+  */
+  virtual std::string fittingPeaksData() const = 0;
+
+  /**
+  * generates and sets the curves on the fitting tab
+  * @param data of the workspace to be passed as QwtData
+  * @param focused to check whether focused workspace
+  *
+  */
+  virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
+                             bool focused) = 0;
   //@}
 
   /**
@@ -343,31 +385,51 @@ public:
  *
  * @return bool
  */
-  virtual bool saveOutputFiles() const = 0;
+  virtual bool saveFocusedOutputFiles() const = 0;
 
   /**
-  * Produces a single spectrum graph for focused output. Runs
-  * plotSpectrum function via python.
+  * Produces vanadium curves graph with three spectrum for calib
+  * output.
+  *
+  */
+  virtual void plotVanCurvesCalibOutput() = 0;
+
+  /**
+  * Produces ceria peaks graph with two spectrum for calib
+  * output.
+  *
+  * @param pyCode string which is passed to Mantid via pyScript
+  */
+  virtual void plotDifcZeroCalibOutput(const std::string &pyCode) = 0;
+
+  /**
+  * Produces a single spectrum graph for focused output.
   *
   * @param wsName name of the workspace to plot (must be in the ADS)
   */
   virtual void plotFocusedSpectrum(const std::string &wsName) = 0;
 
   /**
- * Produces a waterfall spectrum graph for focused output. Runs
- * plotSpectrum function via python.
+ * Produces a waterfall spectrum graph for focused output.
  *
  * @param wsName name of the workspace to plot (must be in the ADS)
  */
   virtual void plotWaterfallSpectrum(const std::string &wsName) = 0;
 
   /**
-  * Produces a replaceable spectrum graph for focused output. Runs
-  * plotSpectrum function via python.
+  * Produces a replaceable spectrum graph for focused output.
   *
   * @param wsName name of the workspace to plot (must be in the ADS)
+  * @param spectrum number of the workspace to plot
+  * @param type of the workspace plot
   */
-  virtual void plotReplacingWindow(const std::string &wsName) = 0;
+  virtual void plotReplacingWindow(const std::string &wsName,
+                                   const std::string &spectrum,
+                                   const std::string &type) = 0;
+
+
+
+
 };
 
 } // namespace CustomInterfaces

@@ -5,6 +5,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/IQTransform.h"
+#include "MantidAPI/Axis.h"
 #include "MantidKernel/UnitFactory.h"
 
 class IQTransformTest : public CxxTest::TestSuite {
@@ -28,7 +29,7 @@ public:
     inWS_point->isDistribution(true);
   }
 
-  ~IQTransformTest() {
+  ~IQTransformTest() override {
     // Tidy up
     Mantid::API::AnalysisDataService::Instance().clear();
   }

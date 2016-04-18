@@ -71,25 +71,25 @@ public:
   /// Default constructorMatrix
   GetDetOffsetsMultiPeaks();
   /// Destructor
-  virtual ~GetDetOffsetsMultiPeaks();
+  ~GetDetOffsetsMultiPeaks() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "GetDetOffsetsMultiPeaks"; }
+  const std::string name() const override { return "GetDetOffsetsMultiPeaks"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\Calibration";
   }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Creates an OffsetsWorkspace containing offsets for each detector. "
            "You can then save these to a .cal file using SaveCalFile.";
   }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   void processProperties();
 
@@ -129,7 +129,7 @@ private:
                          double &deltaDovD, double &dev_deltaDovD);
 
   FitPeakOffsetResult
-  calculatePeakOffset(const int wi, std::vector<double> &fittedpeakpositions,
+  calculatePeakOffset(const int wi, std::vector<double> &vec_peakPosFitted,
                       std::vector<double> &vec_peakPosRef);
 
   /// Calculate a spectrum's offset by optimizing offset
@@ -157,6 +157,7 @@ private:
   /// Peak profile type
   std::string m_peakType;
   /// Criterias for fitting peak
+  std::string m_minimizer;
   double m_maxChiSq;
   double m_minPeakHeight;
   double m_leastMaxObsY;

@@ -51,16 +51,16 @@ public:
 class MockAlgorithm : public Mantid::API::Algorithm {
 public:
   MockAlgorithm(size_t nSteps = 100);
-  ~MockAlgorithm(){};
+  ~MockAlgorithm() override{};
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "MockAlgorithm"; };
+  const std::string name() const override { return "MockAlgorithm"; };
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Test"; }
+  const std::string category() const override { return "Test"; }
   /// Algorithm's summary.
-  virtual const std::string summary() const { return "Test summary."; }
+  const std::string summary() const override { return "Test summary."; }
 
   Mantid::Kernel::Logger &getLogger() { return g_log; }
 
@@ -71,8 +71,8 @@ public:
   }
 
 private:
-  void init(){};
-  void exec(){};
+  void init() override{};
+  void exec() override{};
 
   std::unique_ptr<Mantid::API::Progress> m_Progress;
   /// logger -> to provide logging,
@@ -95,11 +95,13 @@ Mantid::DataObjects::Workspace2D_sptr Create1DWorkspaceFib(int size);
 Mantid::DataObjects::Workspace2D_sptr
 Create1DWorkspaceConstantWithXerror(int size, double value, double error,
                                     double xError);
-Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace(int nHist, int nBins);
+Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace(
+    int nhist,
+    int numBoundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundaries);
 Mantid::DataObjects::Workspace2D_sptr
 Create2DWorkspaceWhereYIsWorkspaceIndex(int nhist, int numBoundaries);
 Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace123(
-    int64_t nHist, int64_t nBin, bool isHist = false,
+    int64_t nHist, int64_t nBinsssssssssssss, bool isHist = false,
     const std::set<int64_t> &maskedWorkspaceIndices = std::set<int64_t>());
 Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace154(
     int64_t nHist, int64_t nBins, bool isHist = false,
@@ -121,15 +123,18 @@ Mantid::API::WorkspaceGroup_sptr CreateWorkspaceGroup(int nEntries, int nHist,
  * Filled with Y = 2.0 and E = sqrt(2.0)w
  */
 Mantid::DataObjects::Workspace2D_sptr
-Create2DWorkspaceBinned(int nHist, int nBins, double x0 = 0.0,
+Create2DWorkspaceBinned(int nhist, int nbins, double x0 = 0.0,
                         double deltax = 1.0);
 
 /** Create a 2D workspace with this many histograms and bins. The bins are
  * assumed to be non-uniform and given by the input array
  * Filled with Y = 2.0 and E = sqrt(2.0)w
  */
-Mantid::DataObjects::Workspace2D_sptr
-Create2DWorkspaceBinned(int nHist, const int nBins, const double xBoundaries[]);
+Mantid::DataObjects::Workspace2D_sptr Create2DWorkspaceBinned(
+    int nhist,
+    const int
+        numBoundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundaries,
+    const double xBoundaries[]);
 
 /**
  * Creates a 2D workspace from taking the function values from the input
@@ -184,7 +189,7 @@ void addNoise(Mantid::API::MatrixWorkspace_sptr ws, double noise,
  * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0
  */
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(
-    int nHist, int nBins, bool includeMonitors = false,
+    int nhist, int nbins, bool includeMonitors = false,
     bool startYNegative = false, bool isHistogram = true,
     const std::string &instrumentName = std::string("testInst"));
 
@@ -255,7 +260,7 @@ Mantid::DataObjects::EventWorkspace_sptr CreateEventWorkspaceWithStartTime(
 
 Mantid::DataObjects::EventWorkspace_sptr
 CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
-                            double binDelta = 1.0);
+                            double binDelta = 1., double xOffset = 0.);
 
 Mantid::DataObjects::EventWorkspace_sptr
 CreateRandomEventWorkspace(size_t numbins, size_t numpixels,
@@ -295,7 +300,7 @@ createProcessedWorkspaceWithCylComplexInstrument(
 
 // Create a workspace with all components needed for inelastic analysis;
 Mantid::API::MatrixWorkspace_sptr createProcessedInelasticWS(
-    const std::vector<double> &L2, const std::vector<double> &ploar,
+    const std::vector<double> &L2, const std::vector<double> &polar,
     const std::vector<double> &azimutal, size_t numBins = 4, double Emin = -10,
     double Emax = 10, double Ei = 11);
 

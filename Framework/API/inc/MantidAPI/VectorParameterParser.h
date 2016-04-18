@@ -53,27 +53,19 @@ template <class VectorValueParameterType>
 class DLLExport VectorParameterParser
     : public Mantid::API::ImplicitFunctionParameterParser {
 public:
-  VectorParameterParser();
-
-  VectorValueParameterType *parseVectorParameter(std::string value);
+  VectorValueParameterType *parseVectorParameter(std::string sValue);
 
   Mantid::API::ImplicitFunctionParameter *
-  createParameter(Poco::XML::Element *parameterElement);
+  createParameter(Poco::XML::Element *parameterElement) override;
 
   VectorValueParameterType *
   createWithoutDelegation(Poco::XML::Element *parameterElement);
 
-  void
-  setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser *paramParser);
-
-  ~VectorParameterParser();
+  void setSuccessorParser(
+      Mantid::API::ImplicitFunctionParameterParser *paramParser) override;
 };
 
 ////////////////////////////////////////////////////////////////////
-
-/// Default constructor
-template <typename VectorValueParameterType>
-VectorParameterParser<VectorValueParameterType>::VectorParameterParser() {}
 
 //----------------------------------------------------------------------
 /* Parse the value aspect of the parameter only.
@@ -152,10 +144,6 @@ void VectorParameterParser<VectorValueParameterType>::setSuccessorParser(
   Mantid::API::ImplicitFunctionParameterParser::SuccessorType temp(paramParser);
   m_successor.swap(temp);
 }
-
-/// Destructor
-template <typename VectorValueParameterType>
-VectorParameterParser<VectorValueParameterType>::~VectorParameterParser() {}
 }
 }
 

@@ -389,7 +389,7 @@ private:
 
   public:
     TestableSpaceGroupFactory() : SpaceGroupFactoryImpl() {}
-    ~TestableSpaceGroupFactory() {}
+    ~TestableSpaceGroupFactory() override {}
   };
 
   class MockSpaceGroupGenerator : public AbstractSpaceGroupGenerator {
@@ -397,7 +397,7 @@ private:
     MockSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
                             const std::string &generatorInformation)
         : AbstractSpaceGroupGenerator(number, hmSymbol, generatorInformation) {}
-    ~MockSpaceGroupGenerator() {}
+    ~MockSpaceGroupGenerator() override {}
 
     MOCK_CONST_METHOD0(generateGroup, Group_const_sptr());
   };
@@ -419,7 +419,7 @@ private:
           m_factory(factory) {}
 
   protected:
-    SpaceGroup_const_sptr getBaseSpaceGroup() const {
+    SpaceGroup_const_sptr getBaseSpaceGroup() const override {
       return m_factory.createSpaceGroup(m_baseGroupHMSymbol);
     }
 

@@ -27,7 +27,7 @@ using namespace Mantid::CurveFitting::Functions;
 
 class DiffSphereTest : public CxxTest::TestSuite {
 public:
-  bool skipTests() {
+  bool skipTests() override {
     // Skip this test suite if running under valgrind as the Bessel function
     // calls in DiffSphere sometimes return NaN in this situation.
     // It's something to do with boost using 80 bit precision where valgrind
@@ -135,7 +135,8 @@ public:
                              // of the 99 coefficients to break down
 
     // initialize the elastic part
-    boost::shared_ptr<ElasticDiffSphere> elastic_part(new ElasticDiffSphere());
+    boost::shared_ptr<ElasticDiffSphere> elastic_part =
+        boost::make_shared<ElasticDiffSphere>();
     elastic_part->setParameter("Height", I);
     elastic_part->setParameter("Radius", R);
     elastic_part->setAttributeValue("Q", Q);
@@ -477,9 +478,9 @@ private:
     auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, M);
 
     // Create the instrument
-    boost::shared_ptr<Instrument> inst(new Instrument("BASIS"));
-    inst->setReferenceFrame(
-        boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
+    boost::shared_ptr<Instrument> inst =
+        boost::make_shared<Instrument>("BASIS");
+    inst->setReferenceFrame(boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
     // Add the source position
     ObjComponent *source = new ObjComponent(

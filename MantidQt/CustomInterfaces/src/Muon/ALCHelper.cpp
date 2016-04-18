@@ -1,8 +1,9 @@
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include "QMessageBox"
 
@@ -25,6 +26,31 @@ namespace ALCHelper
     size_t size = ws->blocksize();
 
     return boost::make_shared<QwtArrayData>(x,y,size);
+  }
+
+  /**
+  * Creates a vector of QwtData using X and Y values from every single
+  * workspace index in ws, written for only Engg Diffraction fitting tab
+  * @param ws :: Workspace with X and Y values to use
+  * @return Pointer to created Vector QwtData
+  */
+  std::vector<boost::shared_ptr<QwtData>>
+  curveDataFromWs(MatrixWorkspace_const_sptr ws) {
+
+    std::vector<boost::shared_ptr<QwtData>> dataVector;
+    auto histograms = ws->getNumberHistograms();
+
+    for (size_t wsIndex = 0; wsIndex < histograms; wsIndex++) {
+
+      const double *x = &ws->readX(wsIndex)[0];
+      const double *y = &ws->readY(wsIndex)[0];
+      size_t size = ws->blocksize();
+
+      auto wsIdxData = boost::make_shared<QwtArrayData>(x, y, size);
+
+      dataVector.push_back(wsIdxData);
+    }
+    return dataVector;
   }
 
   /**

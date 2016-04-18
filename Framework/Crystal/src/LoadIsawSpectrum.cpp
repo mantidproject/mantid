@@ -1,11 +1,15 @@
-#include "MantidAPI/FileProperty.h"
 #include "MantidCrystal/LoadIsawSpectrum.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
+
 #include <fstream>
 
 using namespace Mantid::Geometry;
@@ -36,12 +40,12 @@ LoadIsawSpectrum::~LoadIsawSpectrum() {}
 /** Initialize the algorithm's properties.
  */
 void LoadIsawSpectrum::init() {
+  declareProperty(make_unique<FileProperty>("SpectraFile", "",
+                                            API::FileProperty::Load, ".dat"),
+                  "Incident spectrum and detector efficiency correction file.");
   declareProperty(
-      new FileProperty("SpectraFile", "", API::FileProperty::Load, ".dat"),
-      "Incident spectrum and detector efficiency correction file.");
-  declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                             Direction::Output),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
+                                                      Direction::Output),
       "An output Workspace containing spectra for each detector bank.");
   // 3 properties for getting the right instrument
   getInstrument3WaysInit(this);
@@ -238,18 +242,19 @@ void LoadIsawSpectrum::getInstrument3WaysInit(Algorithm *alg) {
   std::string grpName("Specify the Instrument");
 
   alg->declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                       PropertyMode::Optional),
       "Optional: An input workspace with the instrument we want to use.");
 
-  alg->declareProperty(new PropertyWithValue<std::string>("InstrumentName", "",
-                                                          Direction::Input),
+  alg->declareProperty(make_unique<PropertyWithValue<std::string>>(
+                           "InstrumentName", "", Direction::Input),
                        "Optional: Name of the instrument to base the "
                        "GroupingWorkspace on which to base the "
                        "GroupingWorkspace.");
 
-  alg->declareProperty(new FileProperty("InstrumentFilename", "",
-                                        FileProperty::OptionalLoad, ".xml"),
+  alg->declareProperty(make_unique<FileProperty>("InstrumentFilename", "",
+                                                 FileProperty::OptionalLoad,
+                                                 ".xml"),
                        "Optional: Path to the instrument definition file on "
                        "which to base the GroupingWorkspace.");
 

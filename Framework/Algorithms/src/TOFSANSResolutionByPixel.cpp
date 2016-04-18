@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Interpolation.h"
@@ -31,14 +32,14 @@ TOFSANSResolutionByPixel::TOFSANSResolutionByPixel()
     : API::Algorithm(), m_wl_resolution(0.) {}
 
 void TOFSANSResolutionByPixel::init() {
-  declareProperty(new WorkspaceProperty<>(
+  declareProperty(make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
                   "Name the workspace to calculate the resolution for, for "
                   "each pixel and wavelength");
   declareProperty(
-      new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                       Direction::Output),
+      make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
+                                                Direction::Output),
       "Name of the newly created workspace which contains the Q resolution.");
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
@@ -48,7 +49,7 @@ void TOFSANSResolutionByPixel::init() {
                   "Sample aperture radius, R2 (mm).");
   declareProperty("SourceApertureRadius", 0.0, positiveDouble,
                   "Source aperture radius, R1 (mm).");
-  declareProperty(new WorkspaceProperty<>(
+  declareProperty(make_unique<WorkspaceProperty<>>(
                       "SigmaModerator", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
                   "Moderator time spread (microseconds) as a"
@@ -141,7 +142,7 @@ void TOFSANSResolutionByPixel::exec() {
     try {
       det = inWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
-      g_log.information() << "Spectrum index " << i
+      g_log.information() << "Workspace index " << i
                           << " has no detector assigned to it - discarding"
                           << std::endl;
     }

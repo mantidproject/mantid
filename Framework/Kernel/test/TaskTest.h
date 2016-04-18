@@ -2,7 +2,7 @@
 #define TASKTEST_H_
 
 #include <cxxtest/TestSuite.h>
-
+#include <boost/make_shared.hpp>
 #include <MantidKernel/Timer.h>
 #include "MantidKernel/Task.h"
 
@@ -15,7 +15,7 @@ int my_check_value = 0;
 /** A custom implementation of Task */
 class MyTask : public Task {
 public:
-  void run() { TaskTestNamespace::my_check_value = 123; }
+  void run() override { TaskTestNamespace::my_check_value = 123; }
 };
 
 class TaskTest : public CxxTest::TestSuite {
@@ -30,7 +30,7 @@ public:
 
   void test_mutex() {
     MyTask t;
-    boost::shared_ptr<Mutex> mut(new Mutex());
+    auto mut = boost::make_shared<std::mutex>();
     t.setMutex(mut);
     TS_ASSERT_EQUALS(mut, t.getMutex());
   }

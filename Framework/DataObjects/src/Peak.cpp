@@ -4,8 +4,10 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
+
 #include <algorithm>
 #include <cctype>
 #include <string>
@@ -227,11 +229,6 @@ Peak::Peak(const Geometry::IPeak &ipeak)
 }
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-Peak::~Peak() {}
-
-//----------------------------------------------------------------------------------------------
 /** Set the incident wavelength of the neutron. Calculates the energy from this.
  * Assumes elastic scattering.
  *
@@ -353,12 +350,12 @@ void Peak::setInstrument(Geometry::Instrument_const_sptr inst) {
 
   // Cache some positions
   const Geometry::IComponent_const_sptr sourceObj = m_inst->getSource();
-  if (sourceObj == NULL)
+  if (sourceObj == nullptr)
     throw Exception::InstrumentDefinitionError("Peak::setInstrument(): Failed "
                                                "to get source component from "
                                                "instrument");
   const Geometry::IComponent_const_sptr sampleObj = m_inst->getSample();
-  if (sampleObj == NULL)
+  if (sampleObj == nullptr)
     throw Exception::InstrumentDefinitionError("Peak::setInstrument(): Failed "
                                                "to get sample component from "
                                                "instrument");
@@ -606,7 +603,6 @@ void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
 bool Peak::findDetector() {
 
   // Scattered beam direction
-  V3D oldDetPos = detPos;
   V3D beam = detPos - samplePos;
   beam.normalize();
 
@@ -965,7 +961,7 @@ accessing its position. Throws if null.
 */
 Mantid::Kernel::V3D Peak::getDetectorPosition() const {
   auto det = getDetector();
-  if (det == NULL) {
+  if (det == nullptr) {
     throw Mantid::Kernel::Exception::NullPointerException("Peak", "Detector");
   }
   return getDetector()->getPos();

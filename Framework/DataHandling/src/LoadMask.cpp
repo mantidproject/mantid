@@ -45,8 +45,8 @@ DECLARE_ALGORITHM(LoadMask)
 /** Constructor
  */
 LoadMask::LoadMask()
-    : m_maskWS(), m_instrumentPropValue(""), m_pDoc(NULL), m_pRootElem(NULL),
-      m_defaultToUse(true) {}
+    : m_maskWS(), m_instrumentPropValue(""), m_pDoc(nullptr),
+      m_pRootElem(nullptr), m_defaultToUse(true) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -60,8 +60,8 @@ LoadMask::~LoadMask() {
   // actually cause a double free corruption, as
   // Poco::DOM::Document::documentElement() does not require a
   // release(). So just to be explicit that they're gone:
-  m_pDoc = NULL;
-  m_pRootElem = NULL;
+  m_pDoc = nullptr;
+  m_pRootElem = nullptr;
 }
 
 /// Initialise the properties
@@ -71,15 +71,15 @@ void LoadMask::init() {
   declareProperty("Instrument", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the instrument to apply the mask.");
+  const std::vector<std::string> maskExts{".xml", ".msk"};
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "InputFile", "", FileProperty::Load, maskExts),
+                  "Masking file for masking. Supported file format is XML and "
+                  "ISIS ASCII. ");
   declareProperty(
-      new FileProperty("InputFile", "", FileProperty::Load, {".xml", ".msk"}),
-      "Masking file for masking. Supported file format is XML and "
-      "ISIS ASCII. ");
-  declareProperty(new WorkspaceProperty<DataObjects::MaskWorkspace>(
-                      "OutputWorkspace", "Masking", Direction::Output),
-                  "Output Masking Workspace");
-
-  return;
+      Kernel::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
+          "OutputWorkspace", "Masking", Direction::Output),
+      "Output Masking Workspace");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -180,8 +180,7 @@ void LoadMask::processMaskOnDetectors(bool tomask,
                 << "  Final Single IDs Size = " << singledetids.size()
                 << std::endl;
 
-  for (size_t i = 0; i < singledetids.size(); i++) {
-    detid_t detid = singledetids[i];
+  for (auto detid : singledetids) {
     detid2index_map::const_iterator it;
     it = indexmap.find(detid);
     if (it != indexmap.end()) {
@@ -197,7 +196,7 @@ void LoadMask::processMaskOnDetectors(bool tomask,
   }
 
   // 3. Mask pairs
-  for (size_t i = 0; i < pairdetids_low.size(); i++) {
+  for (size_t i = 0; i < pairdetids_low.size(); ++i) {
     g_log.error() << "To Be Implemented Soon For Pair (" << pairdetids_low[i]
                   << ", " << pairdetids_up[i] << "!" << std::endl;
   }
@@ -213,18 +212,18 @@ void LoadMask::componentToDetectors(std::vector<std::string> componentnames,
                                     std::vector<int32_t> &detectors) {
   Geometry::Instrument_const_sptr minstrument = m_maskWS->getInstrument();
 
-  for (size_t i = 0; i < componentnames.size(); i++) {
-    g_log.debug() << "Component name = " << componentnames[i] << std::endl;
+  for (auto &componentname : componentnames) {
+    g_log.debug() << "Component name = " << componentname << std::endl;
 
     // a) get component
     Geometry::IComponent_const_sptr component =
-        minstrument->getComponentByName(componentnames[i]);
+        minstrument->getComponentByName(componentname);
     if (component)
       g_log.debug() << "Component ID = " << component->getComponentID()
                     << std::endl;
     else {
       // A non-exiting component.  Ignore
-      g_log.warning() << "Component " << componentnames[i] << " does not exist!"
+      g_log.warning() << "Component " << componentname << " does not exist!"
                       << std::endl;
       continue;
     }
@@ -241,9 +240,8 @@ void LoadMask::componentToDetectors(std::vector<std::string> componentnames,
     int32_t id_min = 1000000;
     int32_t id_max = 0;
 
-    for (size_t ic = 0; ic < children.size(); ic++) {
+    for (const auto &child : children) {
       // c) convert component to detector
-      Geometry::IComponent_const_sptr child = children[ic];
       Geometry::IDetector_const_sptr det =
           boost::dynamic_pointer_cast<const Geometry::IDetector>(child);
 
@@ -274,18 +272,18 @@ void LoadMask::bankToDetectors(std::vector<std::string> singlebanks,
                                std::vector<int32_t> &detectorpairsup) {
   std::stringstream infoss;
   infoss << "Bank IDs to be converted to detectors: " << endl;
-  for (size_t i = 0; i < singlebanks.size(); i++) {
-    infoss << "Bank: " << singlebanks[i] << std::endl;
+  for (auto &singlebank : singlebanks) {
+    infoss << "Bank: " << singlebank << std::endl;
   }
   g_log.debug(infoss.str());
 
   Geometry::Instrument_const_sptr minstrument = m_maskWS->getInstrument();
 
-  for (size_t ib = 0; ib < singlebanks.size(); ib++) {
+  for (auto &singlebank : singlebanks) {
     std::vector<Geometry::IDetector_const_sptr> idetectors;
 
-    minstrument->getDetectorsInBank(idetectors, singlebanks[ib]);
-    g_log.debug() << "Bank: " << singlebanks[ib] << " has " << idetectors.size()
+    minstrument->getDetectorsInBank(idetectors, singlebank);
+    g_log.debug() << "Bank: " << singlebank << " has " << idetectors.size()
                   << " detectors" << std::endl;
 
     // a) get information
@@ -306,8 +304,7 @@ void LoadMask::bankToDetectors(std::vector<std::string> singlebanks,
                     << "DetID: " << detid_first << ", " << detid_last
                     << std::endl;
 
-      for (size_t i = 0; i < idetectors.size(); i++) {
-        Geometry::IDetector_const_sptr det = idetectors[i];
+      for (const auto &det : idetectors) {
         int32_t detid = det->getID();
         detectors.push_back(detid);
       }
@@ -319,19 +316,19 @@ void LoadMask::bankToDetectors(std::vector<std::string> singlebanks,
 }
 
 //----------------------------------------------------------------------------------------------
-/** Set the mask on the spectrum IDs
+/** Set the mask on the spectrum Nos
  */
 void LoadMask::processMaskOnWorkspaceIndex(bool mask,
                                            std::vector<int32_t> pairslow,
                                            std::vector<int32_t> pairsup) {
   // 1. Check
-  if (pairslow.size() == 0)
+  if (pairslow.empty())
     return;
   if (pairslow.size() != pairsup.size()) {
-    g_log.error() << "Input spectrum IDs are not paired.  Size(low) = "
+    g_log.error() << "Input spectrum Nos are not paired.  Size(low) = "
                   << pairslow.size() << ", Size(up) = " << pairsup.size()
                   << std::endl;
-    throw std::invalid_argument("Input spectrum IDs are not paired. ");
+    throw std::invalid_argument("Input spectrum Nos are not paired. ");
   }
 
   // 2. Get Map
@@ -344,12 +341,12 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
     g_log.debug() << "Mask Spectrum " << pairslow[i] << "  To " << pairsup[i]
                   << std::endl;
 
-    for (int32_t specid = pairslow[i]; specid <= pairsup[i]; specid++) {
-      s2iter = s2imap.find(specid);
+    for (int32_t specNo = pairslow[i]; specNo <= pairsup[i]; specNo++) {
+      s2iter = s2imap.find(specNo);
       if (s2iter == s2imap.end()) {
-        // spectrum not found.  bad brach
+        // spectrum not found.  bad branch
         g_log.error()
-            << "Spectrum " << specid
+            << "Spectrum " << specNo
             << " does not have an entry in GroupWorkspace's spec2index map"
             << std::endl;
         throw std::runtime_error("Logic error");
@@ -359,7 +356,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
           // workspace index is out of range.  bad branch
           g_log.error() << "Group workspace's spec2index map is set wrong: "
                         << " Found workspace index = " << wsindex
-                        << " for spectrum ID " << specid
+                        << " for spectrum No " << specNo
                         << " with workspace size = "
                         << m_maskWS->getNumberHistograms() << std::endl;
         } else {
@@ -369,8 +366,8 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
           else
             m_maskWS->dataY(wsindex)[0] = 0.0;
         } // IF-ELSE: ws index out of range
-      }   // IF-ELSE: spectrum ID has an entry
-    }     // FOR EACH SpecID
+      }   // IF-ELSE: spectrum No has an entry
+    }     // FOR EACH SpecNo
   }       // FOR EACH Pair
 
   return;
@@ -397,9 +394,7 @@ void LoadMask::detectorToDetectors(std::vector<int32_t> singles,
   << std::endl;
   }
   */
-  for (size_t i = 0; i < singles.size(); i++) {
-    detectors.push_back(singles[i]);
-  }
+  detectors.insert(detectors.end(), singles.begin(), singles.end());
   for (size_t i = 0; i < pairslow.size(); i++) {
     for (int32_t j = 0; j < pairsup[i] - pairslow[i] + 1; j++) {
       int32_t detid = pairslow[i] + j;
@@ -497,7 +492,7 @@ void LoadMask::parseXML() {
     } else if (pNode->nodeName().compare("ids") == 0) {
       // Node "ids"
       if (ingroup) {
-        this->parseSpectrumIDs(value, tomask);
+        this->parseSpectrumNos(value, tomask);
       } else {
         g_log.error() << "XML File (ids) heirachial error!"
                       << "  Inner Text = " << pNode->innerText() << std::endl;
@@ -574,9 +569,9 @@ void LoadMask::parseComponent(std::string valuetext, bool tomask) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Parse input string for spectrum ID
+/** Parse input string for spectrum No
  */
-void LoadMask::parseSpectrumIDs(std::string inputstr, bool tomask) {
+void LoadMask::parseSpectrumNos(std::string inputstr, bool tomask) {
 
   // 1. Parse range out
   std::vector<int32_t> singles;
@@ -585,16 +580,15 @@ void LoadMask::parseSpectrumIDs(std::string inputstr, bool tomask) {
 
   // 2. Set to data storage
   if (tomask) {
-    for (size_t i = 0; i < singles.size(); i++) {
-      mask_specid_single.push_back(singles[i]);
-    }
+    mask_specid_single.insert(mask_specid_single.end(), singles.begin(),
+                              singles.end());
     for (size_t i = 0; i < pairs.size() / 2; i++) {
       mask_specid_pair_low.push_back(pairs[2 * i]);
       mask_specid_pair_up.push_back(pairs[2 * i + 1]);
     }
   } else {
-    for (size_t i = 0; i < singles.size(); i++) {
-      unmask_specid_single.push_back(singles[i]);
+    for (auto single : singles) {
+      unmask_specid_single.push_back(single);
     }
     for (size_t i = 0; i < pairs.size() / 2; i++) {
       unmask_specid_pair_low.push_back(pairs[2 * i]);
@@ -606,7 +600,7 @@ void LoadMask::parseSpectrumIDs(std::string inputstr, bool tomask) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Parse input string for spectrum ID
+/** Parse input string for detector ID
  */
 void LoadMask::parseDetectorIDs(std::string inputstr, bool tomask) {
   // g_log.information() << "Detector IDs: " << inputstr << std::endl;
@@ -618,17 +612,15 @@ void LoadMask::parseDetectorIDs(std::string inputstr, bool tomask) {
 
   // 2. Set to data storage
   if (tomask) {
-    for (size_t i = 0; i < singles.size(); i++) {
-      mask_detid_single.push_back(singles[i]);
-    }
+    mask_detid_single.insert(mask_detid_single.end(), singles.begin(),
+                             singles.end());
     for (size_t i = 0; i < pairs.size() / 2; i++) {
       mask_detid_pair_low.push_back(pairs[2 * i]);
       mask_detid_pair_up.push_back(pairs[2 * i + 1]);
     }
   } else {
-    for (size_t i = 0; i < singles.size(); i++) {
-      unmask_detid_single.push_back(singles[i]);
-    }
+    unmask_detid_single.insert(unmask_detid_single.end(), singles.begin(),
+                               singles.end());
     for (size_t i = 0; i < pairs.size() / 2; i++) {
       unmask_detid_pair_low.push_back(pairs[2 * i]);
       unmask_detid_pair_up.push_back(pairs[2 * i + 1]);
@@ -652,35 +644,35 @@ void LoadMask::parseRangeText(std::string inputstr,
   // 2. Filter
   std::vector<std::string> strsingles;
   std::vector<std::string> strpairs;
-  for (size_t i = 0; i < rawstrings.size(); i++) {
+  for (auto &rawstring : rawstrings) {
     // a) Find '-':
     bool containto = false;
-    const char *tempchs = rawstrings[i].c_str();
-    for (size_t j = 0; j < rawstrings[i].size(); j++)
+    const char *tempchs = rawstring.c_str();
+    for (size_t j = 0; j < rawstring.size(); j++)
       if (tempchs[j] == '-') {
         containto = true;
         break;
       }
     // b) Rebin
     if (containto)
-      strpairs.push_back(rawstrings[i]);
+      strpairs.push_back(rawstring);
     else
-      strsingles.push_back(rawstrings[i]);
+      strsingles.push_back(rawstring);
   } // ENDFOR i
 
   // 3. Treat singles
-  for (size_t i = 0; i < strsingles.size(); i++) {
-    int32_t itemp = atoi(strsingles[i].c_str());
+  for (auto &strsingle : strsingles) {
+    int32_t itemp = atoi(strsingle.c_str());
     singles.push_back(itemp);
   }
 
   // 4. Treat pairs
-  for (size_t i = 0; i < strpairs.size(); i++) {
+  for (auto &strpair : strpairs) {
     // a) split and check
     std::vector<std::string> ptemp;
-    this->splitString(strpairs[i], ptemp, "-");
+    this->splitString(strpair, ptemp, "-");
     if (ptemp.size() != 2) {
-      g_log.error() << "Range string " << strpairs[i] << " has a wrong format!"
+      g_log.error() << "Range string " << strpair << " has a wrong format!"
                     << std::endl;
       throw std::invalid_argument("Wrong format");
     }
@@ -689,7 +681,7 @@ void LoadMask::parseRangeText(std::string inputstr,
     int32_t intstart = atoi(ptemp[0].c_str());
     int32_t intend = atoi(ptemp[1].c_str());
     if (intstart >= intend) {
-      g_log.error() << "Range string " << strpairs[i] << " has a reversed order"
+      g_log.error() << "Range string " << strpair << " has a reversed order"
                     << std::endl;
       throw std::invalid_argument("Wrong format");
     }

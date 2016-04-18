@@ -1,8 +1,9 @@
 #ifndef MANTID_CRYSTAL_NormaliseVanadiumTEST_H_
 #define MANTID_CRYSTAL_NormaliseVanadiumTEST_H_
 
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidCrystal/NormaliseVanadium.h"
+#include "MantidAPI/Axis.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -27,7 +28,7 @@ using namespace Mantid::Geometry;
 
 class NormaliseVanadiumImpl : public NormaliseVanadium {
 public:
-  virtual void exec() { NormaliseVanadium::exec(); };
+  void exec() override { NormaliseVanadium::exec(); };
 };
 
 class NormaliseVanadiumTest : public CxxTest::TestSuite {

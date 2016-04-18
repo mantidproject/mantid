@@ -71,20 +71,20 @@ public:
   /// Constructor
   CalculateTransmission();
   /// Virtual destructor
-  virtual ~CalculateTransmission();
+  ~CalculateTransmission() override;
   /// Algorithm's name
-  virtual const std::string name() const { return "CalculateTransmission"; }
+  const std::string name() const override { return "CalculateTransmission"; }
   /// Summary of algorithms purpose
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculates the transmission correction, as a function of "
            "wavelength, for a SANS instrument.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "SANS;CorrectionFunctions\\TransmissionCorrections";
   }
 
@@ -94,9 +94,9 @@ private:
   mutable double m_done;
 
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   /// Pull out a single spectrum from a 2D workspace
   API::MatrixWorkspace_sptr extractSpectra(API::MatrixWorkspace_sptr ws,
@@ -115,7 +115,7 @@ private:
                                           std::vector<double> &coeficients);
   /// Calls the rebin algorithm
   API::MatrixWorkspace_sptr rebin(std::vector<double> &binParams,
-                                  API::MatrixWorkspace_sptr output);
+                                  API::MatrixWorkspace_sptr ws);
   /// Outpus message to log if the detector at the given index is not a monitor
   /// in both input workspaces.
   void logIfNotMonitor(API::MatrixWorkspace_sptr sampleWS,

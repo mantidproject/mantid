@@ -44,22 +44,35 @@ LoadIsawDetCal::~LoadIsawDetCal() {}
 /** Initialisation method
 */
 void LoadIsawDetCal::init() {
-  declareProperty(new WorkspaceProperty<Workspace>(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::InOut,
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace containing the geometry to be calibrated.");
 
   declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, ".DetCal"),
+      make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load,
+                                     ".DetCal"),
       "The input filename of the ISAW DetCal file (East banks for SNAP) ");
 
-  declareProperty(new API::FileProperty("Filename2", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".DetCal"),
-                  "The input filename of the second ISAW DetCal file (West "
-                  "banks for SNAP) ");
+  declareProperty(
+      make_unique<API::FileProperty>(
+          "Filename2", "", API::FileProperty::OptionalLoad, ".DetCal"),
+      "The input filename of the second ISAW DetCal file (West "
+      "banks for SNAP) ");
 
   declareProperty("TimeOffset", 0.0, "Time Offset", Direction::Output);
+}
+
+namespace {
+const constexpr double DegreesPerRadian = 180.0 / M_PI;
+
+std::string getBankName(const std::string &bankPart, int idnum) {
+  if (bankPart == "WISHpanel" && idnum < 10) {
+    return bankPart + "0" + std::to_string(idnum);
+  } else {
+    return bankPart + std::to_string(idnum);
+  }
+}
 }
 
 /** Executes the algorithm
@@ -83,7 +96,7 @@ void LoadIsawDetCal::exec() {
   std::string filename2 = getProperty("Filename2");
 
   // Output summary to log file
-  int idnum = 0, count, id, nrows, ncols;
+  int count, id, nrows, ncols;
   double width, height, depth, detd, x, y, z, base_x, base_y, base_z, up_x,
       up_y, up_z;
   std::ifstream input(filename.c_str(), std::ios_base::in);
@@ -130,7 +143,7 @@ void LoadIsawDetCal::exec() {
       }
     }
   }
-  std::set<int> uniqueBanks; // for CORELLI and WISH
+  std::unordered_set<int> uniqueBanks; // for CORELLI and WISH
   std::string bankPart = "bank";
   if (instname.compare("WISH") == 0)
     bankPart = "WISHpanel";
@@ -139,8 +152,8 @@ void LoadIsawDetCal::exec() {
     std::vector<IComponent_const_sptr> comps;
     inst->getChildren(comps, true);
 
-    for (size_t i = 0; i < comps.size(); i++) {
-      std::string bankName = comps[i]->getName();
+    for (auto &comp : comps) {
+      std::string bankName = comp->getName();
       boost::trim(bankName);
       boost::erase_all(bankName, bankPart);
       int bank = 0;
@@ -210,15 +223,15 @@ void LoadIsawDetCal::exec() {
       }
     }
     boost::shared_ptr<RectangularDetector> det;
-    std::ostringstream Detbank;
-    Detbank << "bank" << id;
-    // Loop through detectors to match names with number from DetCal file
-    idnum = -1;
-    for (int i = 0; i < static_cast<int>(detList.size()); i++)
-      if (detList[i]->getName().compare(Detbank.str()) == 0)
-        idnum = i;
-    if (idnum >= 0)
-      det = detList[idnum];
+    std::string bankName = getBankName(bankPart, id);
+    auto matchingDetector = std::find_if(
+        detList.begin(), detList.end(),
+        [&bankName](const boost::shared_ptr<RectangularDetector> &detector) {
+          return detector->getName() == bankName;
+        });
+    if (matchingDetector != detList.end()) {
+      det = *matchingDetector;
+    }
     if (det) {
       detname = det->getName();
       IAlgorithm_sptr alg1 = createChildAlgorithm("ResizeRectangularDetector");
@@ -245,13 +258,12 @@ void LoadIsawDetCal::exec() {
       // These are the original axes
       V3D oX = V3D(1., 0., 0.);
       V3D oY = V3D(0., 1., 0.);
-      V3D oZ = V3D(0., 0., 1.);
 
       // Axis that rotates X
       V3D ax1 = oX.cross_prod(rX);
       // Rotation angle from oX to rX
       double angle1 = oX.angle(rX);
-      angle1 *= 180.0 / M_PI;
+      angle1 *= DegreesPerRadian;
       // Create the first quaternion
       Quat Q1(angle1, ax1);
 
@@ -261,7 +273,7 @@ void LoadIsawDetCal::exec() {
       // Find the axis that rotates oYr onto rY
       V3D ax2 = roY.cross_prod(rY);
       double angle2 = roY.angle(rY);
-      angle2 *= 180.0 / M_PI;
+      angle2 *= DegreesPerRadian;
       Quat Q2(angle2, ax2);
 
       // Final = those two rotations in succession; Q1 is done first.
@@ -274,13 +286,13 @@ void LoadIsawDetCal::exec() {
       if (parent) {
         Quat rot0 = parent->getRelativeRot();
         rot0.inverse();
-        Rot = Rot * rot0;
+        Rot *= rot0;
       }
       boost::shared_ptr<const IComponent> grandparent = parent->getParent();
       if (grandparent) {
         Quat rot0 = grandparent->getRelativeRot();
         rot0.inverse();
-        Rot = Rot * rot0;
+        Rot *= rot0;
       }
 
       if (inputW) {
@@ -293,21 +305,12 @@ void LoadIsawDetCal::exec() {
         pmap.addQuat(comp.get(), "rot", Rot);
       }
     }
-    // Loop through tube detectors to match names with number from DetCal file
-    idnum = -1;
-    std::set<int>::iterator it;
-    for (it = uniqueBanks.begin(); it != uniqueBanks.end(); ++it)
-      if (*it == id)
-        idnum = *it;
-    if (idnum < 0)
+    auto bank = uniqueBanks.find(id);
+    if (bank == uniqueBanks.end())
       continue;
-    std::ostringstream mess;
-    if (bankPart == "WISHpanel" && idnum < 10)
-      mess << bankPart << "0" << idnum;
-    else
-      mess << bankPart << idnum;
+    int idnum = *bank;
 
-    std::string bankName = mess.str();
+    bankName = getBankName(bankPart, idnum);
     // Retrieve it
     boost::shared_ptr<const IComponent> comp =
         inst->getComponentByName(bankName);
@@ -341,13 +344,12 @@ void LoadIsawDetCal::exec() {
       // These are the original axes
       V3D oX = V3D(1., 0., 0.);
       V3D oY = V3D(0., 1., 0.);
-      V3D oZ = V3D(0., 0., 1.);
 
       // Axis that rotates X
       V3D ax1 = oX.cross_prod(rX);
       // Rotation angle from oX to rX
       double angle1 = oX.angle(rX);
-      angle1 *= 180.0 / M_PI;
+      angle1 *= DegreesPerRadian;
       // TODO: find out why this is needed for WISH
       if (instname == "WISH")
         angle1 += 180.0;
@@ -360,7 +362,7 @@ void LoadIsawDetCal::exec() {
       // Find the axis that rotates oYr onto rY
       V3D ax2 = roY.cross_prod(rY);
       double angle2 = roY.angle(rY);
-      angle2 *= 180.0 / M_PI;
+      angle2 *= DegreesPerRadian;
       Quat Q2(angle2, ax2);
 
       // Final = those two rotations in succession; Q1 is done first.
@@ -406,13 +408,14 @@ void LoadIsawDetCal::exec() {
  * @param ws :: The workspace
  */
 
-void LoadIsawDetCal::center(double x, double y, double z, std::string detname,
+void LoadIsawDetCal::center(double x, double y, double z,
+                            const std::string &detname,
                             API::Workspace_sptr ws) {
 
   Instrument_sptr inst = getCheckInst(ws);
 
   IComponent_const_sptr comp = inst->getComponentByName(detname);
-  if (comp == 0) {
+  if (comp == nullptr) {
     std::ostringstream mess;
     mess << "Component with name " << detname << " was not found.";
     g_log.error(mess.str());

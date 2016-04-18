@@ -5,6 +5,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/CompositeFunction.h"
 
@@ -66,7 +67,9 @@ namespace CustomInterfaces
       QCoreApplication::processEvents();
     }
     if (!result.error().empty()) {
-      throw std::runtime_error(result.error());
+      QString msg =
+          "Fit algorithm failed.\n\n" + QString(result.error().c_str()) + "\n";
+      emit errorInModel(msg);
     }
 
     m_data = fit->getProperty("OutputWorkspace");

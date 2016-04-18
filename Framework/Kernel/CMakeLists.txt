@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/ArrayProperty.cpp
 	src/Atom.cpp
 	src/BinFinder.cpp
+	src/BinaryStreamReader.cpp
 	src/CPUTimer.cpp
 	src/CatalogInfo.cpp
 	src/ChecksumHelper.cpp
@@ -34,6 +35,7 @@ set ( SRC_FILES
 	src/ICatalogInfo.cpp
 	src/IPropertyManager.cpp
 	src/ISaveable.cpp
+	src/IndexSet.cpp
 	src/InstrumentInfo.cpp
 	src/InternetHelper.cpp
 	src/Interpolation.cpp
@@ -90,6 +92,7 @@ set ( SRC_FILES
 	src/StdoutChannel.cpp
 	src/StringContainsValidator.cpp
 	src/Strings.cpp
+	src/StringTokenizer.cpp
 	src/TestChannel.cpp
 	src/ThreadPool.cpp
 	src/ThreadPoolRunnable.cpp
@@ -99,7 +102,6 @@ set ( SRC_FILES
 	src/Timer.cpp
 	src/Unit.cpp
 	src/UnitConversion.cpp
-	src/UnitFactory.cpp
 	src/UnitLabel.cpp
 	src/UnitLabelTypes.cpp
 	src/UsageService.cpp
@@ -135,6 +137,7 @@ set ( INC_FILES
 	inc/MantidKernel/Atom.h
 	inc/MantidKernel/BinFinder.h
 	inc/MantidKernel/BinaryFile.h
+	inc/MantidKernel/BinaryStreamReader.h
 	inc/MantidKernel/BoundedValidator.h
 	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/Cache.h
@@ -142,6 +145,7 @@ set ( INC_FILES
 	inc/MantidKernel/Chainable.h
 	inc/MantidKernel/ChainableFactory.h
 	inc/MantidKernel/ChecksumHelper.h
+        inc/MantidKernel/ClassMacros.h
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ComputeResourceInfo.h
 	inc/MantidKernel/ConfigService.h
@@ -177,6 +181,7 @@ set ( INC_FILES
 	inc/MantidKernel/ISaveable.h
 	inc/MantidKernel/ITimeSeriesProperty.h
 	inc/MantidKernel/IValidator.h
+	inc/MantidKernel/IndexSet.h
 	inc/MantidKernel/Instantiator.h
 	inc/MantidKernel/InstrumentInfo.h
 	inc/MantidKernel/InternetHelper.h
@@ -244,6 +249,7 @@ set ( INC_FILES
 	inc/MantidKernel/StdoutChannel.h
 	inc/MantidKernel/StringContainsValidator.h
 	inc/MantidKernel/Strings.h
+	inc/MantidKernel/StringTokenizer.h
 	inc/MantidKernel/System.h
 	inc/MantidKernel/Task.h
 	inc/MantidKernel/TestChannel.h
@@ -275,6 +281,7 @@ set ( INC_FILES
 	inc/MantidKernel/WriteLock.h
 	inc/MantidKernel/XMLInstantiator.h
 	inc/MantidKernel/cow_ptr.h
+        inc/MantidKernel/make_cow.h
 	inc/MantidKernel/make_unique.h
 )
 
@@ -285,6 +292,7 @@ set ( TEST_FILES
 	AtomTest.h
 	BinFinderTest.h
 	BinaryFileTest.h
+	BinaryStreamReaderTest.h
 	BoseEinsteinDistributionTest.h
 	BoundedValidatorTest.h
 	CPUTimerTest.h
@@ -297,6 +305,7 @@ set ( TEST_FILES
 	CompositeValidatorTest.h
 	ComputeResourceInfoTest.h
 	ConfigServiceTest.h
+        CowPtrTest.h
 	DataServiceTest.h
 	DateAndTimeTest.h
 	DateTimeValidatorTest.h
@@ -321,6 +330,7 @@ set ( TEST_FILES
 	IPropertySettingsTest.h
 	ISaveableTest.h
 	IValidatorTest.h
+	IndexSetTest.h
 	InstrumentInfoTest.h
 	InternetHelperTest.h
 	InterpolationTest.h
@@ -333,7 +343,8 @@ set ( TEST_FILES
 	MDUnitTest.h
 	MRUListTest.h
 	MagneticFormFactorTableTest.h
-	MagneticIonTest.h
+        MagneticIonTest.h
+        MakeCowTest.h
 	MakeUniqueTest.h
 	MandatoryValidatorTest.h
 	MaskedPropertyTest.h
@@ -371,6 +382,7 @@ set ( TEST_FILES
 	StdoutChannelTest.h
 	StringContainsValidatorTest.h
 	StringsTest.h
+        StringTokenizerTest.h
 	TaskTest.h
 	ThreadPoolRunnableTest.h
 	ThreadPoolTest.h

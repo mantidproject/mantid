@@ -3,6 +3,8 @@
 //---------------------------------------------------------
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidKernel/Exception.h"
+
 #include <cfloat>
 
 namespace Mantid {
@@ -24,16 +26,12 @@ bool BoundingBox::isPointInside(const V3D &point) const {
         "this function has not been modified properly"));
   }
 
-  if (point.X() <= xMax() + Kernel::Tolerance &&
-      point.X() >= xMin() - Kernel::Tolerance &&
-      point.Y() <= yMax() + Kernel::Tolerance &&
-      point.Y() >= yMin() - Kernel::Tolerance &&
-      point.Z() <= zMax() + Kernel::Tolerance &&
-      point.Z() >= zMin() - Kernel::Tolerance) {
-    return true;
-  } else {
-    return false;
-  }
+  return point.X() <= xMax() + Kernel::Tolerance &&
+         point.X() >= xMin() - Kernel::Tolerance &&
+         point.Y() <= yMax() + Kernel::Tolerance &&
+         point.Y() >= yMin() - Kernel::Tolerance &&
+         point.Z() <= zMax() + Kernel::Tolerance &&
+         point.Z() >= zMin() - Kernel::Tolerance;
 }
 
 /**

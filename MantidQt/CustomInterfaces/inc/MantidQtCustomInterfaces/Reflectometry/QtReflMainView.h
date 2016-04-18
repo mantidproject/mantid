@@ -5,17 +5,17 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
-#include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 #include "MantidQtMantidWidgets/SlitCalculator.h"
-#include <boost/scoped_ptr.hpp>
-#include <QSignalMapper>
 #include "ui_ReflMainWidget.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
+// Forward dec
+class ReflCommandAdapter;
+using ReflCommandAdapter_uptr = std::unique_ptr<ReflCommandAdapter>;
 
 /** QtReflMainView : Provides an interface for processing reflectometry data.
 
@@ -46,116 +46,70 @@ class DLLExport QtReflMainView : public MantidQt::API::UserSubWindow,
   Q_OBJECT
 public:
   QtReflMainView(QWidget *parent = 0);
-  virtual ~QtReflMainView();
+  ~QtReflMainView() override;
   /// Name of the interface
   static std::string name() { return "ISIS Reflectometry (Polref)"; }
   // This interface's categories.
   static QString categoryInfo() { return "Reflectometry"; }
   // Connect the model
-  virtual void showTable(QReflTableModel_sptr model);
-  virtual void showSearch(ReflSearchModel_sptr model);
+  void showSearch(ReflSearchModel_sptr model) override;
 
   // Dialog/Prompt methods
-  virtual std::string askUserString(const std::string &prompt,
-                                    const std::string &title,
-                                    const std::string &defaultValue);
-  virtual bool askUserYesNo(std::string prompt, std::string title);
-  virtual void giveUserInfo(std::string prompt, std::string title);
-  virtual void giveUserWarning(std::string prompt, std::string title);
-  virtual void giveUserCritical(std::string prompt, std::string title);
-  virtual void showAlgorithmDialog(const std::string &algorithm);
-  virtual void showImportDialog();
-  virtual std::string requestNotebookPath();
+  std::string askUserString(const std::string &prompt, const std::string &title,
+                            const std::string &defaultValue) override;
+  void giveUserInfo(std::string prompt, std::string title) override;
+  void giveUserCritical(std::string prompt, std::string title) override;
+  void showAlgorithmDialog(const std::string &algorithm) override;
 
-  // Settings
-  virtual void saveSettings(const std::map<std::string, QVariant> &options);
-  virtual void loadSettings(std::map<std::string, QVariant> &options);
-
-  // Plotting
-  virtual void plotWorkspaces(const std::set<std::string> &workspaces);
+  // Setter methods
+  void setInstrumentList(const std::vector<std::string> &instruments,
+                         const std::string &defaultInstrument) override;
+  void setTransferMethods(const std::set<std::string> &methods) override;
+  void setTableCommands(std::vector<ReflCommand_uptr> tableCommands) override;
+  void setRowCommands(std::vector<ReflCommand_uptr> rowCommands) override;
+  void clearCommands() override;
 
   // Set the status of the progress bar
-  virtual void setProgressRange(int min, int max);
-  virtual void setProgress(int progress);
-  virtual void clearProgress();
-
-  // Get status of the checkbox which dictates whether an ipython notebook is
-  // produced
-  virtual bool getEnableNotebook();
-
-  // Settor methods
-  virtual void setSelection(const std::set<int> &rows);
-  virtual void setTableList(const std::set<std::string> &tables);
-  virtual void setInstrumentList(const std::vector<std::string> &instruments,
-                                 const std::string &defaultInstrument);
-  virtual void
-  setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy);
-  virtual void setClipboard(const std::string &text);
-  virtual void setTransferMethods(const std::set<std::string> &methods);
+  void setProgressRange(int min, int max) override;
+  void setProgress(int progress) override;
+  void clearProgress() override;
 
   // Accessor methods
-  virtual std::set<int> getSelectedRows() const;
-  virtual std::set<int> getSelectedSearchRows() const;
-  virtual std::string getSearchInstrument() const;
-  virtual std::string getProcessInstrument() const;
-  virtual std::string getWorkspaceToOpen() const;
-  virtual std::string getClipboard() const;
-  virtual std::string getSearchString() const;
-  virtual std::string getTransferMethod() const;
+  std::set<int> getSelectedSearchRows() const override;
+  std::string getSearchInstrument() const override;
+  std::string getSearchString() const override;
+  std::string getTransferMethod() const override;
 
-  virtual boost::shared_ptr<IReflPresenter> getPresenter() const;
-  virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
-  getAlgorithmRunner() const;
+  boost::shared_ptr<IReflPresenter> getPresenter() const override;
+  boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+  getAlgorithmRunner() const override;
 
 private:
   // initialise the interface
-  virtual void initLayout();
+  void initLayout() override;
+  // Adds an action (command) to a menu
+  void addToMenu(QMenu *menu, ReflCommand_uptr command);
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 
   // the presenter
   boost::shared_ptr<IReflPresenter> m_presenter;
-  // the models
-  QReflTableModel_sptr m_model;
+  // the search model
   ReflSearchModel_sptr m_searchModel;
   // the interface
   Ui::reflMainWidget ui;
-  // the workspace the user selected to open
-  std::string m_toOpen;
-  QSignalMapper *m_openMap;
+  // the slit calculator
   MantidWidgets::SlitCalculator *m_calculator;
+  // Command adapters
+  std::vector<ReflCommandAdapter_uptr> m_commands;
 
 private slots:
-  void on_actionNewTable_triggered();
-  void on_actionSaveTable_triggered();
-  void on_actionSaveTableAs_triggered();
-  void on_actionAppendRow_triggered();
-  void on_actionPrependRow_triggered();
-  void on_actionDeleteRow_triggered();
-  void on_actionProcess_triggered();
-  void on_actionGroupRows_triggered();
-  void on_actionClearSelected_triggered();
-  void on_actionCopySelected_triggered();
-  void on_actionCutSelected_triggered();
-  void on_actionPasteSelected_triggered();
-  void on_actionExpandSelection_triggered();
-  void on_actionOptionsDialog_triggered();
   void on_actionSearch_triggered();
   void on_actionTransfer_triggered();
-  void on_actionImportTable_triggered();
-  void on_actionExportTable_triggered();
   void on_actionHelp_triggered();
-  void on_actionPlotRow_triggered();
-  void on_actionPlotGroup_triggered();
-  void on_actionSlitCalculator_triggered();
+  void slitCalculatorTriggered();
   void icatSearchComplete();
 
-  void on_comboSearchInstrument_currentIndexChanged(int index);
-  void on_comboProcessInstrument_currentIndexChanged(int index);
-
-  void setModel(QString name);
-  void tableUpdated(const QModelIndex &topLeft, const QModelIndex &bottomRight);
-  void showContextMenu(const QPoint &pos);
   void showSearchContextMenu(const QPoint &pos);
 };
 

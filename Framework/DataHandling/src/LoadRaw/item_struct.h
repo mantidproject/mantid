@@ -20,7 +20,7 @@ public:
         : value(v), det_average(da), dim0(d0), dim1(d1) {}
   };
 
-  item_struct() : m_items(), m_spec_array(NULL), m_ndet(0){};
+  item_struct() : m_items(), m_spec_array(nullptr), m_ndet(0){};
 
 private:
   typedef std::map<std::string, item_t>
@@ -39,7 +39,7 @@ public:
   @return 0 on success, -1 if it is a duplicate
   */
   int addItem(const std::string &name, const T *value, bool det_average = false,
-              const int *dim0 = NULL, const int *dim1 = NULL) {
+              const int *dim0 = nullptr, const int *dim1 = nullptr) {
     std::pair<typename items_map_t::iterator, bool> insert_ret;
     insert_ret = m_items.insert(typename items_map_t::value_type(
         name, item_t(value, det_average, dim0, dim1)));

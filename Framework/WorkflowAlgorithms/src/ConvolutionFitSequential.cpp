@@ -1,11 +1,13 @@
 #include "MantidWorkflowAlgorithms/ConvolutionFitSequential.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidKernel/MandatoryValidator.h"
@@ -64,23 +66,18 @@ const std::string ConvolutionFitSequential::summary() const {
  */
 void ConvolutionFitSequential::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The input workspace for the fit.");
 
   auto scv = boost::make_shared<StringContainsValidator>();
-  auto requires = std::vector<std::string>();
-  requires.push_back("Convolution");
-  requires.push_back("Resolution");
+  auto requires = std::vector<std::string>{"Convolution", "Resolution"};
   scv->setRequiredStrings(requires);
 
   declareProperty("Function", "", scv,
                   "The function that describes the parameters of the fit.",
                   Direction::Input);
 
-  std::vector<std::string> backType;
-  backType.push_back("Fixed Flat");
-  backType.push_back("Fit Flat");
-  backType.push_back("Fit Linear");
+  std::vector<std::string> backType{"Fixed Flat", "Fit Flat", "Fit Linear"};
 
   declareProperty("BackgroundType", "Fixed Flat",
                   boost::make_shared<StringListValidator>(backType),
@@ -165,7 +162,7 @@ void ConvolutionFitSequential::exec() {
 
   // Output workspace name
   std::string outputWsName = inputWs->getName();
-  pos = outputWsName.rfind("_");
+  pos = outputWsName.rfind('_');
   if (pos != std::string::npos) {
     outputWsName = outputWsName.substr(0, pos + 1);
   }
@@ -185,7 +182,7 @@ void ConvolutionFitSequential::exec() {
 
   // Convert input workspace to get Q axis
   const std::string tempFitWsName = "__convfit_fit_ws";
-  auto tempFitWs = convertInputToElasticQ(inputWs, tempFitWsName);
+  convertInputToElasticQ(inputWs, tempFitWsName);
 
   Progress plotPeakStringProg(this, 0.0, 0.05, specMax - specMin);
   // Construct plotpeak string
@@ -243,11 +240,11 @@ void ConvolutionFitSequential::exec() {
   Progress workflowProg(this, 0.91, 0.94, 4);
   auto paramNames = std::vector<std::string>();
   if (funcName.compare("DeltaFunction") == 0) {
-    paramNames.push_back("Height");
+    paramNames.emplace_back("Height");
   } else {
     auto func = FunctionFactory::Instance().createFunction(funcName);
     if (delta) {
-      paramNames.push_back("Height");
+      paramNames.emplace_back("Height");
     }
     for (size_t i = 0; i < func->nParams(); i++) {
       paramNames.push_back(func->parameterName(i));
@@ -258,7 +255,7 @@ void ConvolutionFitSequential::exec() {
       size_t pos = find(paramNames.begin(), paramNames.end(), "PeakCentre") -
                    paramNames.begin();
       paramNames.erase(paramNames.begin() + pos);
-      paramNames.push_back("EISF");
+      paramNames.emplace_back("EISF");
     }
   }
 
@@ -313,20 +310,20 @@ void ConvolutionFitSequential::exec() {
   Progress logAdderProg(this, 0.96, 0.97, 6);
   // Add String Logs
   auto logAdder = createChildAlgorithm("AddSampleLog");
-  for (auto it = sampleLogStrings.begin(); it != sampleLogStrings.end(); ++it) {
+  for (auto &sampleLogString : sampleLogStrings) {
     logAdder->setProperty("Workspace", resultWs);
-    logAdder->setProperty("LogName", it->first);
-    logAdder->setProperty("LogText", it->second);
+    logAdder->setProperty("LogName", sampleLogString.first);
+    logAdder->setProperty("LogText", sampleLogString.second);
     logAdder->setProperty("LogType", "String");
     logAdder->executeAsChildAlg();
     logAdderProg.report("Add text logs");
   }
 
   // Add Numeric Logs
-  for (auto it = sampleLogNumeric.begin(); it != sampleLogNumeric.end(); it++) {
+  for (auto &logItem : sampleLogNumeric) {
     logAdder->setProperty("Workspace", resultWs);
-    logAdder->setProperty("LogName", it->first);
-    logAdder->setProperty("LogText", it->second);
+    logAdder->setProperty("LogName", logItem.first);
+    logAdder->setProperty("LogText", logItem.second);
     logAdder->setProperty("LogType", "Number");
     logAdder->executeAsChildAlg();
     logAdderProg.report("Adding Numerical logs");
@@ -367,10 +364,7 @@ void ConvolutionFitSequential::exec() {
 bool ConvolutionFitSequential::checkForTwoLorentz(
     const std::string &subFunction) {
   auto pos = subFunction.rfind("Lorentzian");
-  if (pos != std::string::npos) {
-    return true;
-  }
-  return false;
+  return pos != std::string::npos;
 }
 
 /**
@@ -387,13 +381,13 @@ ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
   auto startPos = function.rfind("name=");
   if (startPos != std::string::npos) {
     fitType = function.substr(startPos, function.size());
-    auto nextPos = fitType.find_first_of(",");
+    auto nextPos = fitType.find_first_of(',');
     fitType = fitType.substr(5, nextPos - 5);
     functionName = fitType;
     if (fitType.compare("Lorentzian") == 0) {
       std::string newSub = function.substr(0, startPos);
       bool isTwoL = checkForTwoLorentz(newSub);
-      if (isTwoL == true) {
+      if (isTwoL) {
         fitType = "2";
       } else {
         fitType = "1";
@@ -454,19 +448,17 @@ ConvolutionFitSequential::cloneVector(const std::vector<double> &original) {
 }
 
 /**
- * Converts the input workspaces to get the Elastic Q axis
+ * Converts the input workspaces to spectrum axis to ElasticQ and adds it to the
+ * ADS to be used by PlotPeakBylogValue
  * @param inputWs - The MatrixWorkspace to be converted
  * @param wsName - The desired name of the output workspace
- * @return Shared pointer to the converted workspace
  */
-API::MatrixWorkspace_sptr ConvolutionFitSequential::convertInputToElasticQ(
+void ConvolutionFitSequential::convertInputToElasticQ(
     API::MatrixWorkspace_sptr &inputWs, const std::string &wsName) {
-  auto tempFitWs = WorkspaceFactory::Instance().create(
-      "Workspace2D", inputWs->getNumberHistograms(), 2, 1);
   auto axis = inputWs->getAxis(1);
   if (axis->isSpectra()) {
     auto convSpec = createChildAlgorithm("ConvertSpectrumAxis");
-    // remains in ADS for use in embedded algorithm call
+    // Store in ADS to allow use by PlotPeakByLogValue
     convSpec->setAlwaysStoreInADS(true);
     convSpec->setProperty("InputWorkSpace", inputWs);
     convSpec->setProperty("OutputWorkSpace", wsName);
@@ -479,16 +471,15 @@ API::MatrixWorkspace_sptr ConvolutionFitSequential::convertInputToElasticQ(
       throw std::runtime_error("Input must have axis values of Q");
     }
     auto cloneWs = createChildAlgorithm("CloneWorkspace");
+    // Store in ADS to allow use by PlotPeakByLogValue
+    cloneWs->setAlwaysStoreInADS(true);
     cloneWs->setProperty("InputWorkspace", inputWs);
     cloneWs->setProperty("OutputWorkspace", wsName);
     cloneWs->executeAsChildAlg();
-    tempFitWs = cloneWs->getProperty("OutputWorkspace");
   } else {
     throw std::runtime_error(
         "Input workspace must have either spectra or numeric axis.");
   }
-
-  return tempFitWs;
 }
 
 /**
@@ -562,7 +553,8 @@ void ConvolutionFitSequential::calculateEISF(
     // sqrtESqOverYSq = squareRoot( heightESqOverYSq )
     auto sqrtESqOverYSq = cloneVector(heightESqOverYSq);
     std::transform(sqrtESqOverYSq.begin(), sqrtESqOverYSq.end(),
-                   sqrtESqOverYSq.begin(), (double (*)(double))sqrt);
+                   sqrtESqOverYSq.begin(),
+                   static_cast<double (*)(double)>(sqrt));
     // eisfYSumRoot = eisfY * sqrtESqOverYSq
     auto eisfYSumRoot = cloneVector(eisfY);
     std::transform(eisfYSumRoot.begin(), eisfYSumRoot.end(),
@@ -606,7 +598,7 @@ void ConvolutionFitSequential::calculateEISF(
 std::string
 ConvolutionFitSequential::convertBackToShort(const std::string &original) {
   std::string result = original.substr(0, 3);
-  auto pos = original.find(" ");
+  auto pos = original.find(' ');
   if (pos != std::string::npos) {
     result += original.at(pos + 1);
   }

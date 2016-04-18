@@ -135,32 +135,32 @@ public:
 
 protected:
   /// Create string property
-  QtProperty *apply(const std::string &str) const {
+  QtProperty *apply(const std::string &str) const override {
     QtProperty *prop = NULL;
     prop = m_browser->addStringProperty(m_name);
     m_browser->setStringPropertyValue(prop, QString::fromStdString(str));
     return prop;
   }
   /// Create double property
-  QtProperty *apply(const double &d) const {
+  QtProperty *apply(const double &d) const override {
     QtProperty *prop = m_browser->addDoubleProperty(m_name);
     m_browser->m_doubleManager->setValue(prop, d);
     return prop;
   }
   /// Create int property
-  QtProperty *apply(const int &i) const {
+  QtProperty *apply(const int &i) const override {
     QtProperty *prop = m_browser->m_intManager->addProperty(m_name);
     m_browser->m_intManager->setValue(prop, i);
     return prop;
   }
   /// Create bool property
-  QtProperty *apply(const bool &b) const {
+  QtProperty *apply(const bool &b) const override {
     QtProperty *prop = m_browser->m_boolManager->addProperty(m_name);
     m_browser->m_boolManager->setValue(prop, b);
     return prop;
   }
   /// Create vector property
-  QtProperty *apply(const std::vector<double> &b) const {
+  QtProperty *apply(const std::vector<double> &b) const override {
     // throw std::runtime_error("Vector attribute property not implememted.");
     QtProperty *prop = m_browser->m_vectorManager->addProperty(m_name);
     m_browser->m_vectorSizeManager->blockSignals(true);
@@ -659,18 +659,24 @@ public:
 
 protected:
   /// Create string property
-  void apply(std::string &str) const {
+  void apply(std::string &str) const override {
     QString attName = m_prop->propertyName();
     str = m_browser->getStringPropertyValue(m_prop).toStdString();
   }
   /// Create double property
-  void apply(double &d) const { d = m_browser->m_doubleManager->value(m_prop); }
+  void apply(double &d) const override {
+    d = m_browser->m_doubleManager->value(m_prop);
+  }
   /// Create int property
-  void apply(int &i) const { i = m_browser->m_intManager->value(m_prop); }
+  void apply(int &i) const override {
+    i = m_browser->m_intManager->value(m_prop);
+  }
   /// Create bool property
-  void apply(bool &b) const { b = m_browser->m_boolManager->value(m_prop); }
+  void apply(bool &b) const override {
+    b = m_browser->m_boolManager->value(m_prop);
+  }
   /// Create vector property
-  void apply(std::vector<double> &v) const {
+  void apply(std::vector<double> &v) const override {
     QList<QtProperty *> members = m_prop->subProperties();
     if (members.size() < 1) {
       v.clear();
@@ -704,32 +710,32 @@ public:
 
 protected:
   /// Set string property
-  void apply(const std::string &str) const {
+  void apply(const std::string &str) const override {
     m_browser->m_changeSlotsEnabled = false;
     QString attName = m_prop->propertyName();
     m_browser->setStringPropertyValue(m_prop, QString::fromStdString(str));
     m_browser->m_changeSlotsEnabled = true;
   }
   /// Set double property
-  void apply(const double &d) const {
+  void apply(const double &d) const override {
     m_browser->m_changeSlotsEnabled = false;
     m_browser->m_doubleManager->setValue(m_prop, d);
     m_browser->m_changeSlotsEnabled = true;
   }
   /// Set int property
-  void apply(const int &i) const {
+  void apply(const int &i) const override {
     m_browser->m_changeSlotsEnabled = false;
     m_browser->m_intManager->setValue(m_prop, i);
     m_browser->m_changeSlotsEnabled = true;
   }
   /// Set bool property
-  void apply(const bool &b) const {
+  void apply(const bool &b) const override {
     m_browser->m_changeSlotsEnabled = false;
     m_browser->m_boolManager->setValue(m_prop, b);
     m_browser->m_changeSlotsEnabled = true;
   }
   /// Set vector property
-  void apply(const std::vector<double> &) const {
+  void apply(const std::vector<double> &) const override {
     // this method is supposed to be called when corresponding
     // property value changes but it doesn't have a value because
     // it's a group property

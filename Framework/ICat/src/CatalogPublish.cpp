@@ -29,12 +29,12 @@ DECLARE_ALGORITHM(CatalogPublish)
 
 /// Init method to declare algorithm properties
 void CatalogPublish::init() {
-  declareProperty(new Mantid::API::FileProperty(
-                      "FileName", "", Mantid::API::FileProperty::OptionalLoad),
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "FileName", "", API::FileProperty::OptionalLoad),
                   "The file to publish.");
-  declareProperty(new Mantid::API::WorkspaceProperty<Mantid::API::Workspace>(
-                      "InputWorkspace", "", Mantid::Kernel::Direction::Input,
-                      Mantid::API::PropertyMode::Optional),
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+                      "InputWorkspace", "", Kernel::Direction::Input,
+                      API::PropertyMode::Optional),
                   "The workspace to publish.");
   declareProperty(
       "NameInCatalog", "",
@@ -152,8 +152,8 @@ void CatalogPublish::publish(std::istream &fileContents,
                                Poco::Net::Context::VERIFY_NONE);
     // Create a singleton for holding the default context. E.g. any future
     // requests to publish are made to this certificate and context.
-    Poco::Net::SSLManager::instance().initializeClient(NULL, certificateHandler,
-                                                       context);
+    Poco::Net::SSLManager::instance().initializeClient(
+        nullptr, certificateHandler, context);
     Poco::Net::HTTPSClientSession session(uri.getHost(), uri.getPort(),
                                           context);
 

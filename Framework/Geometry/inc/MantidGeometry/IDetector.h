@@ -5,12 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/Logger.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/IDTypes.h"
-#include <stdexcept>
-#include <map>
 
 namespace Mantid {
 namespace Kernel {
@@ -30,7 +27,7 @@ enum det_topology {
   rect, //< rectangular geometry
   cyl,  //< cylindrical geometry
   undef //< the geometry is yet undefined, if you need to know the geometry, a
-  // method to identify it must be deployed
+        // method to identify it must be deployed
 };
 
 /** Interface class for detector objects.
@@ -61,6 +58,9 @@ enum det_topology {
 */
 class MANTID_GEOMETRY_DLL IDetector : public virtual IObjComponent {
 public:
+  /// Create a cloned instance with a parameter map applied
+  virtual IDetector *cloneParameterized(const ParameterMap *map) const = 0;
+
   /// Get the detector ID
   virtual detid_t getID() const = 0;
 
@@ -71,7 +71,7 @@ public:
    *  @param comp :: The component to give the distance to
    *  @return The distance
    */
-  virtual double getDistance(const IComponent &comp) const = 0;
+  double getDistance(const IComponent &comp) const override = 0;
 
   /** Gives the angle of this detector object with respect to an axis
    *  @param observer :: The point to calculate the angle relative to (typically
@@ -109,10 +109,9 @@ public:
   /// single; returns the centre of a detector
   virtual det_topology getTopology(Kernel::V3D &center) const = 0;
 
-  /// (Empty) Constructor
+  /// (Empty) Constructor.
+  /// prevent Warning C4436
   IDetector() {}
-  /// Virtual destructor
-  virtual ~IDetector() {}
 };
 
 /// Shared pointer to IDetector

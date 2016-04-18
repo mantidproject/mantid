@@ -39,6 +39,9 @@ public:
   // std::string getPassword() const {}
   MOCK_CONST_METHOD0(getUsername, std::string());
 
+  // std::string experimentReference() const {}
+  MOCK_CONST_METHOD0(experimentReference, std::string());
+
   // std::string getPassword() const {}
   MOCK_CONST_METHOD0(getPassword, std::string());
 
@@ -50,6 +53,12 @@ public:
 
   // std::string currentReconTool() const {}
   MOCK_CONST_METHOD0(currentReconTool, std::string());
+
+  // std::string astraMethod() const {}
+  MOCK_CONST_METHOD0(astraMethod, std::string());
+
+  // std::string tomopyMethod() const {}
+  MOCK_CONST_METHOD0(tomopyMethod, std::string());
 
   // void updateLoginControls(bool loggedIn) {}
   MOCK_METHOD1(updateLoginControls, void(bool loggedIn));
@@ -76,17 +85,35 @@ public:
   MOCK_CONST_METHOD0(currentPathsConfig,
                      MantidQt::CustomInterfaces::TomoPathsConfig());
 
+  // void updatePathsConfig(const TomoPathsConfig &cfg)
+  MOCK_METHOD1(updatePathsConfig,
+               void(const MantidQt::CustomInterfaces::TomoPathsConfig &cfg));
+
+  // ImageStackPreParams currentROIEtcParams() const = 0;
+  MOCK_CONST_METHOD0(currentROIEtcParams,
+                     MantidQt::CustomInterfaces::ImageStackPreParams());
+
   // void showToolConfig(const std::string &name) {}
   MOCK_METHOD1(showToolConfig, void(const std::string &name));
 
-  // void updateJobsInfoDisplay(const std::vector<
-  //    Mantid::API::IRemoteJobManager::RemoteJobInfo> &status) {}
-  MOCK_METHOD1(updateJobsInfoDisplay,
-               void(const std::vector<
-                   Mantid::API::IRemoteJobManager::RemoteJobInfo> &status));
+  // virtual void updateJobsInfoDisplay( const
+  //    std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+  //    &status, const
+  //    std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
+  //    localStatus) = 0;
+  MOCK_METHOD2(
+      updateJobsInfoDisplay,
+      void(const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
+               status,
+           const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
+               localStatus));
+
+  // TomoSystemSettings systemSettings() const
+  MOCK_CONST_METHOD0(systemSettings,
+                     MantidQt::CustomInterfaces::TomoSystemSettings());
 
   // MantidQt::CustomInterfaces::TomoReconToolsUserSettings
-  // reconToolsSettings() const {}
+  // reconToolsSettings() const
   MOCK_CONST_METHOD0(reconToolsSettings,
                      MantidQt::CustomInterfaces::TomoReconToolsUserSettings());
 

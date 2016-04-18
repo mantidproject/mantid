@@ -36,26 +36,26 @@ namespace Algorithms {
 class DLLExport EditInstrumentGeometry : public API::Algorithm {
 public:
   EditInstrumentGeometry();
-  ~EditInstrumentGeometry();
-  virtual const std::string name() const;
+  ~EditInstrumentGeometry() override;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The edit or added information will be attached to a Workspace.  "
            "Currently it is in an overwrite mode only.";
   }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const;
+  const std::string category() const override;
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const;
+  int version() const override;
   /// Validate the inputs that must be parallel
-  virtual std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

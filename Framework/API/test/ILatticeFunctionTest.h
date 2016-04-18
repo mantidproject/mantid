@@ -71,18 +71,13 @@ public:
   }
 
 private:
-  std::vector<V3D> getTestHKLs() {
-    std::vector<V3D> hkls;
-    hkls.push_back(V3D(1, 1, 0));
-
-    return hkls;
-  }
+  std::vector<V3D> getTestHKLs() { return {{1, 1, 0}}; }
 
   // Mock function to check whether the correct methods are called
   class MockLatticeFunction : public ILatticeFunction {
   public:
     MockLatticeFunction() : ILatticeFunction() {}
-    ~MockLatticeFunction() {}
+    ~MockLatticeFunction() override {}
 
     MOCK_CONST_METHOD0(name, std::string());
     MOCK_CONST_METHOD2(functionLattice,

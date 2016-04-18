@@ -3,10 +3,6 @@
 namespace Mantid {
 namespace Geometry {
 
-NullImplicitFunction::NullImplicitFunction() {}
-
-NullImplicitFunction::~NullImplicitFunction() {}
-
 std::string NullImplicitFunction::getName() const {
   return NullImplicitFunction::functionName();
 }

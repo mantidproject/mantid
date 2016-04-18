@@ -200,10 +200,8 @@ public:
     V3D sample(L1, 0, 0); // Sample at L1
     V3D source(0, 0, 0);
 
-    std::vector<V3D> detectorPositions;
-    detectorPositions.push_back(V3D(L2_spec1, 0, 0));
-    detectorPositions.push_back(V3D(L2_spec2, 0, 0));
-    detectorPositions.push_back(V3D(L2_spec3, 0, 0));
+    std::vector<V3D> detectorPositions{
+        {L2_spec1, 0, 0}, {L2_spec2, 0, 0}, {L2_spec3, 0, 0}};
 
     auto inWS = createSinglePulseEventWorkspace(source, sample,
                                                 detectorPositions, tofValues);
@@ -224,8 +222,8 @@ public:
     alg.setChild(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
-    Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(0)(1e-3)(
-        6e-3); // Provide rebin arguments. Arguments are in seconds.
+    Mantid::MantidVec rebinArgs = {
+        0, 1e-3, 6e-3}; // Provide rebin arguments. Arguments are in seconds.
     alg.setProperty("Params", rebinArgs);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
@@ -240,7 +238,8 @@ public:
      0e-3    1e-3   2e-3    3e-3    4e-3    5e-3    6e-3
      |       |      |       |       |       |       |         X array
      -----------^      ^                   ^
-     -----------|      |                   |                  TOF pulse times
+     -----------|      |                   |                  TOF pulse
+     times
      ----------5*1/3  5*1/2               5*1/1
      ----------spec3  spec2               spec1
 
@@ -290,7 +289,9 @@ public:
 
   RebinByTimeAtSampleTestPerformance() {}
 
-  void setUp() { RebinByTimeBaseTestPerformance<RebinByTimeAtSample>::setUp(); }
+  void setUp() override {
+    RebinByTimeBaseTestPerformance<RebinByTimeAtSample>::setUp();
+  }
 
   void testExecution() {
     RebinByTimeBaseTestPerformance<RebinByTimeAtSample>::testExecution();

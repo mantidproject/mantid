@@ -81,7 +81,7 @@ public:
     sendOK();
   }
   /// Destructor.
-  ~TestServerConnection() {
+  ~TestServerConnection() override {
     // std::cerr << "Test connection deleted" << std::endl;
   }
   /// Sends an OK message when there is nothing to send or an error occured
@@ -191,7 +191,7 @@ public:
   /**
    * Main method that reads commands from the socket and send out the data.
    */
-  void run() {
+  void run() override {
     for (;;) {
       char buffer[1024];
       isisds_command_header_t comm;
@@ -246,7 +246,7 @@ public:
         } else if (command == "UDET") {
           std::vector<int> udet(m_nSpectra + m_nMonitors);
           for (int i = 0; i < static_cast<int>(udet.size()); ++i) {
-            udet[i] = (1000 + i + 1);
+            udet[i] = (i + 1);
           }
           sendIntArray(udet);
         } else if (command == "SPEC") {
@@ -302,7 +302,7 @@ public:
    * @param socket :: The socket.
    */
   Poco::Net::TCPServerConnection *
-  createConnection(const Poco::Net::StreamSocket &socket) {
+  createConnection(const Poco::Net::StreamSocket &socket) override {
     return new TestServerConnection(socket, m_nPeriods, m_nSpectra, m_nBins);
   }
 };
@@ -311,7 +311,7 @@ using namespace Kernel;
 using namespace API;
 
 /// (Empty) Constructor
-FakeISISHistoDAE::FakeISISHistoDAE() : m_server(NULL) {}
+FakeISISHistoDAE::FakeISISHistoDAE() : m_server(nullptr) {}
 
 /// Destructor
 FakeISISHistoDAE::~FakeISISHistoDAE() {
@@ -325,14 +325,18 @@ FakeISISHistoDAE::~FakeISISHistoDAE() {
  * Declare the algorithm properties
  */
 void FakeISISHistoDAE::init() {
-  declareProperty(new PropertyWithValue<int>("NPeriods", 1, Direction::Input),
-                  "Number of periods.");
-  declareProperty(new PropertyWithValue<int>("NSpectra", 100, Direction::Input),
-                  "Number of spectra.");
-  declareProperty(new PropertyWithValue<int>("NBins", 30, Direction::Input),
-                  "Number of bins.");
-  declareProperty(new PropertyWithValue<int>("Port", 56789, Direction::Input),
-                  "The port to broadcast on (default 56789, ISISDAE 6789).");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("NPeriods", 1, Direction::Input),
+      "Number of periods.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("NSpectra", 100, Direction::Input),
+      "Number of spectra.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("NBins", 30, Direction::Input),
+      "Number of bins.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("Port", 56789, Direction::Input),
+      "The port to broadcast on (default 56789, ISISDAE 6789).");
 }
 
 /**
@@ -344,7 +348,7 @@ void FakeISISHistoDAE::exec() {
   int nbins = getProperty("NBins");
   int port = getProperty("Port");
 
-  Mutex::ScopedLock lock(m_mutex);
+  std::lock_guard<std::mutex> lock(m_mutex);
   Poco::Net::ServerSocket socket(static_cast<Poco::UInt16>(port));
   socket.listen();
 
@@ -368,7 +372,7 @@ void FakeISISHistoDAE::exec() {
   }
   if (m_server) {
     m_server->stop();
-    m_server = NULL;
+    m_server = nullptr;
   }
   socket.close();
 }

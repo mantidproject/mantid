@@ -14,8 +14,8 @@ class SignalRangeTest : public CxxTest::TestSuite {
 private:
   class MockMDWorkspace : public Mantid::API::IMDWorkspace {
   public:
-    const std::string id() const { return "MockMDWorkspace"; }
-    size_t getMemorySize() const { return 0; }
+    const std::string id() const override { return "MockMDWorkspace"; }
+    size_t getMemorySize() const override { return 0; }
     MOCK_CONST_METHOD0(getNPoints, uint64_t());
     MOCK_CONST_METHOD0(getNEvents, uint64_t());
     MOCK_CONST_METHOD2(createIterators,
@@ -27,12 +27,10 @@ private:
     MOCK_CONST_METHOD2(getSignalWithMaskAtCoord,
                        Mantid::signal_t(const Mantid::coord_t *,
                                         const Mantid::API::MDNormalization &));
-    MOCK_CONST_METHOD6(getLinePlot, void(const Mantid::Kernel::VMD &,
-                                         const Mantid::Kernel::VMD &,
-                                         Mantid::API::MDNormalization,
-                                         std::vector<Mantid::coord_t> &,
-                                         std::vector<Mantid::signal_t> &,
-                                         std::vector<Mantid::signal_t> &));
+    MOCK_CONST_METHOD3(getLinePlot, Mantid::API::IMDWorkspace::LinePlot(
+                                        const Mantid::Kernel::VMD &,
+                                        const Mantid::Kernel::VMD &,
+                                        Mantid::API::MDNormalization));
     MOCK_CONST_METHOD1(
         createIterator,
         Mantid::API::IMDIterator *(Mantid::Geometry::MDImplicitFunction *));
@@ -45,7 +43,7 @@ private:
                        Mantid::Kernel::SpecialCoordinateSystem());
 
   private:
-    virtual MockMDWorkspace *doClone() const {
+    MockMDWorkspace *doClone() const override {
       throw std::runtime_error(
           "Cloning of MockMDWorkspace is not implemented.");
     }
@@ -82,7 +80,7 @@ private:
 
   class NormalizableMockIterator : public MockMDIterator {
   public:
-    Mantid::signal_t getNormalizedSignal() const {
+    Mantid::signal_t getNormalizedSignal() const override {
       return this->getSignal() / static_cast<double>(this->getNumEvents());
     }
   };

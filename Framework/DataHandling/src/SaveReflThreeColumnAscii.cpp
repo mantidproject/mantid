@@ -3,7 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SaveReflThreeColumnAscii.h"
 #include "MantidDataHandling/AsciiPointBase.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
+
 #include <fstream>
 
 namespace Mantid {
@@ -16,7 +18,7 @@ using namespace API;
 /// virtual method to set the extra properties required for this algorithm
 void SaveReflThreeColumnAscii::extraProps() {
   declareProperty("Title", "", "Text to be written to the Title field");
-  declareProperty(new ArrayProperty<std::string>("LogList"),
+  declareProperty(make_unique<ArrayProperty<std::string>>("LogList"),
                   "List of logs to write to file.");
 }
 
@@ -34,9 +36,9 @@ void SaveReflThreeColumnAscii::extraHeaders(std::ofstream &file) {
 
   const std::vector<std::string> logList = getProperty("LogList");
   /// logs
-  for (auto log = logList.begin(); log != logList.end(); ++log) {
-    file << boost::lexical_cast<std::string>(*log) << ": "
-         << boost::lexical_cast<std::string>(samp.getLogData(*log)->value())
+  for (const auto &log : logList) {
+    file << boost::lexical_cast<std::string>(log) << ": "
+         << boost::lexical_cast<std::string>(samp.getLogData(log)->value())
          << std::endl;
   }
 }

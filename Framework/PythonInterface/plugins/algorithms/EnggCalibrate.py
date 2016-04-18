@@ -78,9 +78,10 @@ class EnggCalibrate(PythonAlgorithm):
         self.setPropertyGroup('Bank', banks_grp)
         self.setPropertyGroup(self.INDICES_PROP_NAME, banks_grp)
 
-        self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "",\
-                Direction.Input, PropertyMode.Optional),\
-    		"Calibrated detector positions. If not specified, default ones are used.")
+        self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "",
+                                                     Direction.Input, PropertyMode.Optional),
+                             "Calibrated detector positions. If not specified, default ones (from the "
+                             "current instrument definition) are used.")
 
         self.declareProperty('OutputParametersTableName', '', direction=Direction.Input,
                              doc = 'Name for a table workspace with the calibration parameters calculated '
@@ -88,17 +89,29 @@ class EnggCalibrate(PythonAlgorithm):
                              'are added as two columns in a single row. If not given, no table is '
                              'generated.')
 
-        self.declareProperty("Difc", 0.0, direction = Direction.Output,
-                             doc = "Calibrated Difc value for the bank or range of pixels/detectors given")
+        self.declareProperty("DIFA", 0.0, direction = Direction.Output,
+                             doc = "Calibration parameter DIFA for the bank or range of pixels/detectors "
+                             "given")
 
-        self.declareProperty("Zero", 0.0, direction = Direction.Output,
-                             doc = "Calibrated Zero value for the bank or range of pixels/detectors given")
+        self.declareProperty("DIFC", 0.0, direction = Direction.Output,
+                             doc = "Calibration parameter DIFC for the bank or range of pixels/detectors "
+                             "given")
+
+        self.declareProperty("TZERO", 0.0, direction = Direction.Output,
+                             doc = "Calibration parameter TZERO for the bank or range of pixels/detectors "
+                             "given")
+
+        self.declareProperty(ITableWorkspaceProperty("FittedPeaks", "", Direction.Output),
+                             doc = "Information on fitted peaks as produced by the (child) algorithm "
+                             "EnggFitPeaks.")
 
         out_grp = 'Outputs'
         self.setPropertyGroup('DetectorPositions', out_grp)
         self.setPropertyGroup('OutputParametersTableName', out_grp)
-        self.setPropertyGroup('Difc', out_grp)
-        self.setPropertyGroup('Zero', out_grp)
+        self.setPropertyGroup('DIFA', out_grp)
+        self.setPropertyGroup('DIFC', out_grp)
+        self.setPropertyGroup('TZERO', out_grp)
+        self.setPropertyGroup('FittedPeaks', out_grp)
 
     def PyExec(self):
 
@@ -111,43 +124,60 @@ class EnggCalibrate(PythonAlgorithm):
         prog = Progress(self, start=0, end=1, nreports=2)
 
         prog.report('Focusing the input workspace')
-        focussed_ws = self._focusRun(self.getProperty('InputWorkspace').value,
-                                     self.getProperty("VanadiumWorkspace").value,
-                                     self.getProperty('Bank').value,
-                                     self.getProperty(self.INDICES_PROP_NAME).value)
+        focussed_ws = self._focus_run(self.getProperty('InputWorkspace').value,
+                                      self.getProperty("VanadiumWorkspace").value,
+                                      self.getProperty('Bank').value,
+                                      self.getProperty(self.INDICES_PROP_NAME).value)
 
         if len(expectedPeaksD) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
         prog.report('Fitting parameters for the focused run')
-        difc, zero = self._fitParams(focussed_ws, expectedPeaksD)
+        difa, difc, zero, fitted_peaks = self._fit_params(focussed_ws, expectedPeaksD)
 
-        self._produceOutputs(difc, zero)
+        self.log().information("Fitted {0} peaks. Resulting DIFA: {1}, DIFC: {2}, TZERO: {3}".
+                               format(fitted_peaks.rowCount(), difa, difc, zero))
+        self.log().information("Peaks fitted: {0}, centers in ToF: {1}".
+                               format(fitted_peaks.column("dSpacing"),
+                                      fitted_peaks.column("X0")))
 
-    def _fitParams(self, focusedWS, expectedPeaksD):
+        self._produce_outputs(difa, difc, zero, fitted_peaks)
+
+    def _fit_params(self, focused_ws, expected_peaks_d):
         """
-        Fit the GSAS parameters that this algorithm produces: difc and zero
+        Fit the GSAS parameters that this algorithm produces: DIFC and TZERO. Fits a
+        number of peaks starting from the expected peak positions. Then it fits a line
+        on the peak positions to produce the DIFC and TZERO as used in GSAS.
 
-        @param focusedWS :: focused workspace to do the fitting on
-        @param expectedPeaksD :: expected peaks for the fitting, in d-spacing units
+        @param focused_ws :: focused workspace to do the fitting on
+        @param expected_peaks_d :: expected peaks, used as intial peak positions for the
+        fitting, in d-spacing units
 
-        @returns a pair of parameters: difc and zero
+        @returns a tuple with three GSAS calibration parameters (DIFA, DIFC, ZERO),
+        and a list of peak centers as fitted
         """
 
-        fitPeaksAlg = self.createChildAlgorithm('EnggFitPeaks')
-        fitPeaksAlg.setProperty('InputWorkspace', focusedWS)
-        fitPeaksAlg.setProperty('WorkspaceIndex', 0) # There should be only one index anyway
-        fitPeaksAlg.setProperty('ExpectedPeaks', expectedPeaksD)
+        fit_alg = self.createChildAlgorithm('EnggFitPeaks')
+        fit_alg.setProperty('InputWorkspace', focused_ws)
+        fit_alg.setProperty('WorkspaceIndex', 0) # There should be only one index anyway
+        fit_alg.setProperty('ExpectedPeaks', expected_peaks_d)
         # we could also pass raw 'ExpectedPeaks' and 'ExpectedPeaksFromFile' to
         # EnggFitPaks, but better to check inputs early, before this
-        fitPeaksAlg.execute()
+        fit_alg.execute()
 
-        difc = fitPeaksAlg.getProperty('Difc').value
-        zero = fitPeaksAlg.getProperty('Zero').value
+        fitted_peaks = fit_alg.getProperty('FittedPeaks').value
 
-        return difc, zero
+        difc_alg = self.createChildAlgorithm('EnggFitDIFCFromPeaks')
+        difc_alg.setProperty('FittedPeaks', fitted_peaks)
+        difc_alg.execute()
 
-    def _focusRun(self, ws, vanWS, bank, indices):
+        difa = difc_alg.getProperty('DIFA').value
+        difc = difc_alg.getProperty('DIFC').value
+        zero = difc_alg.getProperty('TZERO').value
+
+        return (difa, difc, zero, fitted_peaks)
+
+    def _focus_run(self, ws, vanWS, bank, indices):
         """
         Focuses the input workspace by running EnggFocus as a child algorithm, which will produce a
         single spectrum workspace.
@@ -185,23 +215,27 @@ class EnggCalibrate(PythonAlgorithm):
 
         return alg.getProperty('OutputWorkspace').value
 
-    def _produceOutputs(self, difc, zero):
+    def _produce_outputs(self, difa, difc, zero, fitted_peaks):
         """
         Just fills in the output properties as requested
 
-        @param difc :: the difc GSAS parameter as fitted here
-        @param zero :: the zero GSAS parameter as fitted here
+        @param difa :: the DIFA GSAS parameter as fitted here
+        @param difc :: the DIFC GSAS parameter as fitted here
+        @param zero :: the TZERO GSAS parameter as fitted here
+        @param fitted_peaks :: table workspace with peak parameters (one peak per row)
         """
 
         import EnggUtils
 
-        self.setProperty('Difc', difc)
-        self.setProperty('Zero', zero)
+        self.setProperty('DIFA', difa)
+        self.setProperty('DIFC', difc)
+        self.setProperty('TZERO', zero)
+        self.setProperty('FittedPeaks', fitted_peaks)
 
         # make output table if requested
         tblName = self.getPropertyValue("OutputParametersTableName")
         if '' != tblName:
-            EnggUtils.generateOutputParTable(tblName, difc, zero)
+            EnggUtils.generateOutputParTable(tblName, difa, difc, zero)
             self.log().information("Output parameters added into a table workspace: %s" % tblName)
 
 

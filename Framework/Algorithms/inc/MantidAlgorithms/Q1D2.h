@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAlgorithms/GravitySANSHelper.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -42,19 +42,19 @@ public:
   /// Default constructor
   Q1D2();
   /// Virtual destructor
-  virtual ~Q1D2() {}
+  ~Q1D2() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "Q1D"; }
+  const std::string name() const override { return "Q1D"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "SANS 1D reduction. Converts a workspace in wavelength into a "
            "workspace of momentum transfer, assuming elastic scattering";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (2); }
+  int version() const override { return (2); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "SANS"; }
+  const std::string category() const override { return "SANS"; }
 
 private:
   /// the experimental workspace with counts across the detector
@@ -62,14 +62,14 @@ private:
   bool m_doSolidAngle;
 
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   API::MatrixWorkspace_sptr
   setUpOutputWorkspace(const std::vector<double> &binParams) const;
   // these are the steps that are run on each individual spectrum
-  void calculateNormalization(const size_t wavStart, const size_t specInd,
+  void calculateNormalization(const size_t wavStart, const size_t wsIndex,
                               API::MatrixWorkspace_const_sptr pixelAdj,
                               API::MatrixWorkspace_const_sptr wavePixelAdj,
                               double const *const binNorms,
@@ -77,22 +77,22 @@ private:
                               const MantidVec::iterator norm,
                               const MantidVec::iterator normETo2) const;
   void pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,
-                   const size_t specIndex, double &weight, double &error) const;
+                   const size_t wsIndex, double &weight, double &error) const;
   void addWaveAdj(const double *c, const double *Dc, MantidVec::iterator bInOut,
                   MantidVec::iterator e2InOut) const;
   void addWaveAdj(const double *c, const double *Dc, MantidVec::iterator bInOut,
                   MantidVec::iterator e2InOut, MantidVec::const_iterator,
                   MantidVec::const_iterator) const;
-  void normToMask(const size_t offSet, const size_t specIndex,
+  void normToMask(const size_t offSet, const size_t wsIndex,
                   const MantidVec::iterator theNorms,
                   const MantidVec::iterator errorSquared) const;
-  void convertWavetoQ(const size_t specInd, const bool doGravity,
+  void convertWavetoQ(const size_t wsInd, const bool doGravity,
                       const size_t offset, MantidVec::iterator Qs,
                       const double extraLength) const;
   void getQBinPlus1(const MantidVec &OutQs, const double QToFind,
                     MantidVec::const_iterator &loc) const;
   void normalize(const MantidVec &normSum, const MantidVec &normError2,
-                 MantidVec &YOut, MantidVec &errors) const;
+                 MantidVec &counts, MantidVec &errors) const;
 };
 
 } // namespace Algorithms

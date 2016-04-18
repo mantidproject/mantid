@@ -3,7 +3,6 @@
 
 #include "DllOption.h"
 #include "MantidKernel/System.h"
-#include <q3iconview.h>
 #include <QtCore/QtCore>
 #include <QtGui/qwidget.h>
 #include <qwt_plot.h>
@@ -58,8 +57,8 @@ namespace SliceViewer
 
   public:
     LineOverlay(QwtPlot * plot, QWidget * parent);
-    virtual ~LineOverlay();
-    
+    ~LineOverlay() override;
+
     void reset();
 
     void setPointA(QPointF pointA);
@@ -106,20 +105,20 @@ namespace SliceViewer
     QPointF invTransform(QPoint pixels) const;
     QPointF snap(QPointF original) const;
 
-    QSize sizeHint() const;
+    QSize sizeHint() const override;
     QSize size() const;
     int height() const;
     int width() const;
 
     QRect drawHandle(QPainter & painter, QPointF coords, QColor brush);
-    void paintEvent(QPaintEvent *event);
+    void paintEvent(QPaintEvent *event) override;
 
     eHandleID mouseOverHandle(QPoint pos);
     bool mouseOverCenter(QPoint pos);
     void handleDrag(QMouseEvent * event);
-    void mouseMoveEvent(QMouseEvent * event);
-    void mousePressEvent(QMouseEvent * event);
-    void mouseReleaseEvent(QMouseEvent * event);
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
 
   protected:
     /// Marker that we are just creating the line (with the mouse)

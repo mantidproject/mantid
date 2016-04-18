@@ -4,13 +4,14 @@
 #include "MantidCurveFitting/Functions/TabulatedFunction.h"
 #include "MantidKernel/FileValidator.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <sstream>
-#include <algorithm>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -56,9 +57,9 @@ void TabulatedFunction::eval(double scaling, double xshift, double xscale,
 
   // shift and scale the domain over which the function is defined
   std::vector<double> xData(m_xData);
-  for (auto it = xData.begin(); it != xData.end(); ++it) {
-    *it *= xscale;
-    *it += xshift;
+  for (double &value : xData) {
+    value *= xscale;
+    value += xshift;
   }
 
   const double xStart = xData.front();

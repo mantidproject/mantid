@@ -7,11 +7,10 @@
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidAPI/Axis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
-
-#include <boost/assign/list_of.hpp>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::Algorithms;
@@ -420,7 +419,7 @@ public:
     loadSampleLOQMonitors();
   }
 
-  ~CalculateTransmissionTest() {
+  ~CalculateTransmissionTest() override {
     Mantid::API::AnalysisDataService::Instance().remove(m_dirWS);
     Mantid::API::AnalysisDataService::Instance().remove(m_transWS);
   }

@@ -47,15 +47,15 @@ public:
   /// Constructor
   LevenbergMarquardtMDMinimizer();
   /// Name of the minimizer.
-  std::string name() const { return "Levenberg-MarquardtMD"; }
+  std::string name() const override { return "Levenberg-MarquardtMD"; }
 
   /// Initialize minimizer, i.e. pass a function to minimize.
-  virtual void initialize(API::ICostFunction_sptr function,
-                          size_t maxIterations = 0);
+  void initialize(API::ICostFunction_sptr function,
+                  size_t maxIterations = 0) override;
   /// Do one iteration.
-  virtual bool iterate(size_t iteration);
+  bool iterate(size_t iteration) override;
   /// Return current value of the cost function
-  virtual double costFunctionVal();
+  double costFunctionVal() override;
 
 private:
   /// Pointer to the cost function. Must be the least squares.

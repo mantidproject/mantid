@@ -15,12 +15,6 @@ Axis::Axis()
     : m_title(),
       m_unit(Mantid::Kernel::UnitFactory::Instance().create("Empty")) {}
 
-/// Protected copy constructor
-Axis::Axis(const Axis &right) : m_title(right.m_title), m_unit(right.m_unit) {}
-
-/// Virtual destructor
-Axis::~Axis() {}
-
 /// Returns the user-defined title for this axis
 const std::string &Axis::title() const { return m_title; }
 
@@ -63,7 +57,7 @@ double Axis::getValue(const std::size_t &index,
  *  @return The spectrum number as an int
  *  @throw  domain_error If this method is called on a numeric axis
  */
-specid_t Axis::spectraNo(const std::size_t &index) const {
+specnum_t Axis::spectraNo(const std::size_t &index) const {
   UNUSED_ARG(index)
   throw std::domain_error("Cannot call spectraNo() on a non-spectra axis.");
 }

@@ -286,7 +286,7 @@ public:
   void test_Multiple_Samples() {
     Sample sample;
     sample.setName("test name for test_Multiple_Sample");
-    boost::shared_ptr<Sample> sample2 = boost::shared_ptr<Sample>(new Sample());
+    auto sample2 = boost::make_shared<Sample>();
     sample2->setName("test name for test_Multiple_Sample - 2");
 
     TS_ASSERT_EQUALS(sample.size(), 1);
@@ -315,7 +315,7 @@ public:
     sample.setWidth(1.234);
     OrientedLattice latt(4, 5, 6, 90, 91, 92);
     sample.setOrientedLattice(&latt);
-    boost::shared_ptr<Sample> sample2 = boost::shared_ptr<Sample>(new Sample());
+    auto sample2 = boost::make_shared<Sample>();
     sample2->setName("test name for test_Multiple_Sample - 2");
     sample.addSample(sample2);
     TS_ASSERT(sample.getShape().getShapeXML() != "");

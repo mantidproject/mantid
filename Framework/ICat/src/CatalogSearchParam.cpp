@@ -9,9 +9,6 @@ CatalogSearchParam::CatalogSearchParam()
     : m_startRun(0), m_endRun(0), m_startDate(0), m_endDate(0),
       m_myData(false) {}
 
-/// Destructor
-CatalogSearchParam::~CatalogSearchParam() {}
-
 /**
  * This method sets start date
  * @param startRun :: start run number

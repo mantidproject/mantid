@@ -50,7 +50,7 @@ Q_PROPERTY(QString ChosenStrategy READ getChosenStrategy WRITE setChosenStrategy
 
 ThresholdRangeWidget(double min, double max);
 
-~ThresholdRangeWidget();
+~ThresholdRangeWidget() override;
 
 QString getMaxSignal() const;
 QString getMinSignal() const;

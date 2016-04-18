@@ -70,9 +70,10 @@ public:
   /// Construct a SpectrumView to display data from the specified data source
   SpectrumView( QWidget * parent = 0 );
 
-  ~SpectrumView();
+  ~SpectrumView() override;
   void renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp);
   QList<boost::shared_ptr<SpectrumDisplay>> getSpectrumDisplays() const { return m_spectrumDisplay; }
+  bool isTrackingOn() const;
 
 signals:
   void spectrumDisplayChanged(SpectrumDisplay*);
@@ -81,18 +82,25 @@ protected slots:
   void closeWindow();
   void changeSpectrumDisplay(int tab);
   void respondToTabCloseReqest(int tab);
+  void changeTracking(bool on);
 
 protected:
-  virtual void resizeEvent(QResizeEvent * event);
-  void preDeleteHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws);
-  void afterReplaceHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws);
+  void resizeEvent(QResizeEvent *event) override;
+  void
+  preDeleteHandle(const std::string &wsName,
+                  const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+  void afterReplaceHandle(
+      const std::string &wsName,
+      const boost::shared_ptr<Mantid::API::Workspace> ws) override;
 
-  void dragMoveEvent(QDragMoveEvent *de);
-  void dragEnterEvent(QDragEnterEvent *de);
-  void dropEvent(QDropEvent *de);
+  void dragMoveEvent(QDragMoveEvent *de) override;
+  void dragEnterEvent(QDragEnterEvent *de) override;
+  void dropEvent(QDropEvent *de) override;
 
 private:
   void updateHandlers();
+  void loadSettings();
+  void saveSettings() const;
 
   QList<MatrixWSDataSource_sptr> m_dataSource;
   QList<boost::shared_ptr<SpectrumDisplay>> m_spectrumDisplay;

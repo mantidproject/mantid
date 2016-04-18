@@ -2,10 +2,13 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/SaveSPE.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/CompositeValidator.h"
 
 #include "Poco/File.h"
@@ -88,11 +91,12 @@ void SaveSPE::init() {
   auto wsValidator = boost::make_shared<Kernel::CompositeValidator>();
   wsValidator->add<API::CommonBinsValidator>();
   wsValidator->add<API::HistogramValidator>();
-  declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "",
-                                               Direction::Input, wsValidator),
+  declareProperty(make_unique<API::WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "The input workspace, which must be in Energy Transfer");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, ".spe"),
-                  "The filename to use for the saved data");
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".spe"),
+      "The filename to use for the saved data");
 }
 
 /**
@@ -280,12 +284,11 @@ void SaveSPE::check_and_copy_spectra(const MantidVec &inSignal,
 /** Write the bin values and errors in a single histogram spectra to the file
 *  @param WS :: the workspace to being saved
 *  @param outFile :: the file object to write to
-*  @param specIn :: the index number of the histogram to write
+*  @param wsIn :: the index number of the histogram to write
 */
 void SaveSPE::writeHist(const API::MatrixWorkspace_const_sptr WS,
-                        FILE *const outFile, const int specIn) const {
-  check_and_copy_spectra(WS->readY(specIn), WS->readE(specIn), m_tSignal,
-                         m_tError);
+                        FILE *const outFile, const int wsIn) const {
+  check_and_copy_spectra(WS->readY(wsIn), WS->readE(wsIn), m_tSignal, m_tError);
   FPRINTF_WITH_EXCEPTION(outFile, "%s", Y_HEADER);
   writeBins(m_tSignal, outFile);
 

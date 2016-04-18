@@ -64,11 +64,12 @@ const std::string SetMDFrame::summary() const {
 /** Initialize the algorithm's properties.
  */
 void SetMDFrame::init() {
-  declareProperty(new WorkspaceProperty<Mantid::API::IMDWorkspace>(
-                      "InputWorkspace", "", Direction::InOut),
-                  "The workspace for which the MDFrames are to be changed. "
-                  "Note that only MDHisto and MDEvent workspaces can be "
-                  "altered by this algorithm.");
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<Mantid::API::IMDWorkspace>>(
+          "InputWorkspace", "", Direction::InOut),
+      "The workspace for which the MDFrames are to be changed. "
+      "Note that only MDHisto and MDEvent workspaces can be "
+      "altered by this algorithm.");
 
   // Options for the MDFrames
   std::vector<std::string> mdFrames;
@@ -91,8 +92,8 @@ void SetMDFrame::init() {
   axisValidator->clearUpper();
   axisValidator->setLower(0);
   declareProperty(
-      new Mantid::Kernel::ArrayProperty<int>("Axes", std::vector<int>(0),
-                                             axisValidator, Direction::Input),
+      Kernel::make_unique<Kernel::ArrayProperty<int>>(
+          "Axes", std::vector<int>(0), axisValidator, Direction::Input),
       "Selects the axes which are going to be set to the new MDFrame type.");
 }
 
@@ -109,9 +110,9 @@ void SetMDFrame::exec() {
     return;
   }
 
-  for (auto index = axes.begin(); index != axes.end(); ++index) {
+  for (auto &axe : axes) {
     // Get associated dimension
-    auto dimension = inputWorkspace->getDimension(*index);
+    auto dimension = inputWorkspace->getDimension(axe);
 
     // Provide a new MDFrame
     std::string frameSelection = getProperty(mdFrameSpecifier);
@@ -150,8 +151,8 @@ std::map<std::string, std::string> SetMDFrame::validateInputs() {
   std::vector<int> axesInts = this->getProperty("Axes");
   Kernel::MDAxisValidator axisChecker(axesInts, ws->getNumDims(), true);
   auto axisErrors = axisChecker.validate();
-  for (auto iter = axisErrors.begin(); iter != axisErrors.end(); iter++) {
-    invalidProperties.insert(*iter);
+  for (auto &axisError : axisErrors) {
+    invalidProperties.insert(axisError);
   }
 
   return invalidProperties;

@@ -5,22 +5,25 @@
 
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FileFinder.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidAPI/FileFinder.h"
+#include "MantidKernel/UnitFactory.h"
+
+#include <boost/lexical_cast.hpp>
+#include <nexus/NeXusFile.hpp>
 #include <Poco/Path.h>
 #include <Poco/File.h>
-#include <boost/lexical_cast.hpp>
+
 #include <algorithm>
 #include <fstream>
 #include <vector>
-#include <boost/lexical_cast.hpp>
-#include <nexus/NeXusFile.hpp>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;
@@ -254,7 +257,7 @@ public:
     m_rawFile = RAWFILE;
   }
 
-  ~LoadDetectorInfoTest() {
+  ~LoadDetectorInfoTest() override {
     Poco::File(m_DatFile).remove();
     Poco::File(m_NXSFile).remove();
   }
@@ -440,7 +443,7 @@ public:
       : m_testfile("LoadDetectorInfoTestPerformance_largefile.dat"),
         m_wsName("LoadDetectorInfoTestPerformance") {}
 
-  void setUp() {
+  void setUp() override {
     // 100,000 histograms
     const int ndets(100000);
     writeLargeTestDatFile(m_testfile, ndets);
@@ -448,7 +451,7 @@ public:
     makeTestWorkspace(100000, 1000, m_wsName); // Adds it to the ADS
   }
 
-  void tearDown() {
+  void tearDown() override {
     Poco::File(m_testfile).remove();
     AnalysisDataService::Instance().remove(m_wsName);
   }

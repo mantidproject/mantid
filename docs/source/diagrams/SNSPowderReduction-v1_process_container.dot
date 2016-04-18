@@ -1,0 +1,48 @@
+digraph SNSPowderReductionContainer {
+  label="Process Container Run Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    ContainerRunNumber
+    TimeFilterWall
+    BackgroundSmoothParameter
+    ProcessedCanRun
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    focusAndSum [label="FocusAndSum"]
+    focusChunks [label="FocusChunks"]
+    convertUnits1 [label="ConvertUnits v1\nto T.O.F."]
+    fftSmooth [label="FFTSmooth v1\nButterworth"]
+  }
+
+
+  subgraph decisions{
+    $decision_style
+    isSum [label="Is Sum True?"]
+  }
+  
+  subgraph values {
+    $value_style
+    CanRunWorkspace [label="ContainerRunWorkspace"]
+  }
+
+  ContainerRunNumber	-> isSum
+
+  isSum		    -> focusAndSum  [label="Yes"]
+  TimeFilterWall    -> focusAndSum
+  focusAndSum	    -> CanRunWorkspace
+
+  isSum		    -> focusChunks [label="No"]
+  TimeFilterWall    -> focusChunks
+  focusChunks	    -> CanRunWorkspace
+
+  CanRunWorkspace   -> convertUnits1
+  convertUnits1	    -> fftSmooth
+  BackgroundSmoothParameter -> fftSmooth
+  fftSmooth	    -> ProcessedCanRun
+
+}
+

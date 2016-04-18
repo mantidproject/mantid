@@ -8,6 +8,7 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/FrameworkManager.h"
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::Geometry;
 using Mantid::DataObjects::Workspace2D_sptr;
@@ -54,7 +55,7 @@ public:
         "Workspace", "TOPAZ_2010", "RewriteSpectraMap", "True");
   }
 
-  ~InstrumentRayTracerTestPerformance() {
+  ~InstrumentRayTracerTestPerformance() override {
     AnalysisDataService::Instance().remove("TOPAZ_2010");
   }
 

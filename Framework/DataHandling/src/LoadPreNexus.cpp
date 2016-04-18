@@ -75,13 +75,15 @@ int LoadPreNexus::confidence(Kernel::FileDescriptor &descriptor) const {
 void LoadPreNexus::init() {
   // runfile to read in
   declareProperty(
-      new FileProperty(RUNINFO_PARAM, "", FileProperty::Load, "_runinfo.xml"),
+      Kernel::make_unique<FileProperty>(RUNINFO_PARAM, "", FileProperty::Load,
+                                        "_runinfo.xml"),
       "The name of the runinfo file to read, including its full or relative "
       "path.");
 
   // copied (by hand) from LoadEventPreNexus2
   declareProperty(
-      new FileProperty(MAP_PARAM, "", FileProperty::OptionalLoad, ".dat"),
+      Kernel::make_unique<FileProperty>(MAP_PARAM, "",
+                                        FileProperty::OptionalLoad, ".dat"),
       "File containing the pixel mapping (DAS pixels to pixel IDs) file "
       "(typically INSTRUMENT_TS_YYYY_MM_DD.dat). The filename will be found "
       "automatically if not specified.");
@@ -96,12 +98,9 @@ void LoadPreNexus::init() {
   // TotalChunks is only meaningful if ChunkNumber is set
   // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at
   // validation
-  setPropertySettings("TotalChunks",
-                      new VisibleWhenProperty("ChunkNumber", IS_NOT_DEFAULT));
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Auto");
-  propOptions.push_back("Serial");
-  propOptions.push_back("Parallel");
+  setPropertySettings("TotalChunks", make_unique<VisibleWhenProperty>(
+                                         "ChunkNumber", IS_NOT_DEFAULT));
+  std::vector<std::string> propOptions{"Auto", "Serial", "Parallel"};
   declareProperty("UseParallelProcessing", "Auto",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Use multiple cores for loading the data?\n"
@@ -110,13 +109,13 @@ void LoadPreNexus::init() {
                   "  Serial: Use a single core.\n"
                   "  Parallel: Use all available cores.");
 
-  declareProperty(
-      new PropertyWithValue<bool>("LoadMonitors", true, Direction::Input),
-      "Load the monitors from the file.");
+  declareProperty(make_unique<PropertyWithValue<bool>>("LoadMonitors", true,
+                                                       Direction::Input),
+                  "Load the monitors from the file.");
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "An output workspace.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -259,8 +258,8 @@ void LoadPreNexus::parseRuninfo(const string &runinfo, string &dataDir,
     g_log.debug() << "Found 1 event file: \"" << eventFilenames[0] << "\"\n";
   } else {
     g_log.debug() << "Found " << eventFilenames.size() << " event files:";
-    for (size_t i = 0; i < eventFilenames.size(); i++) {
-      g_log.debug() << "\"" << eventFilenames[i] << "\" ";
+    for (auto &eventFilename : eventFilenames) {
+      g_log.debug() << "\"" << eventFilename << "\" ";
     }
     g_log.debug() << "\n";
   }
@@ -296,20 +295,19 @@ void LoadPreNexus::runLoadNexusLogs(const string &runinfo,
 
   // run the algorithm
   bool loadedLogs = false;
-  for (size_t i = 0; i < possibilities.size(); i++) {
-    if (Poco::File(possibilities[i]).exists()) {
-      g_log.information() << "Loading logs from \"" << possibilities[i]
-                          << "\"\n";
+  for (auto &possibility : possibilities) {
+    if (Poco::File(possibility).exists()) {
+      g_log.information() << "Loading logs from \"" << possibility << "\"\n";
       IAlgorithm_sptr alg =
           this->createChildAlgorithm("LoadNexusLogs", prog_start, prog_stop);
       alg->setProperty("Workspace", m_outputWorkspace);
-      alg->setProperty("Filename", possibilities[i]);
+      alg->setProperty("Filename", possibility);
       alg->setProperty("OverwriteLogs", false);
       alg->executeAsChildAlg();
       loadedLogs = true;
       // Reload instrument so SNAP can use log values
-      std::string entry_name = LoadTOFRawNexus::getEntryName(possibilities[i]);
-      LoadEventNexus::runLoadInstrument(possibilities[i], m_outputWorkspace,
+      std::string entry_name = LoadTOFRawNexus::getEntryName(possibility);
+      LoadEventNexus::runLoadInstrument(possibility, m_outputWorkspace,
                                         entry_name, this);
       break;
     }
@@ -337,10 +335,10 @@ void LoadPreNexus::runLoadMonitors(const double prog_start,
     alg->setPropertyValue("OutputWorkspace", mon_wsname);
     alg->executeAsChildAlg();
     MatrixWorkspace_sptr mons = alg->getProperty("OutputWorkspace");
-    this->declareProperty(new WorkspaceProperty<>("MonitorWorkspace",
-                                                  mon_wsname,
-                                                  Direction::Output),
-                          "Monitors from the Event NeXus file");
+    this->declareProperty(
+        Kernel::make_unique<WorkspaceProperty<>>("MonitorWorkspace", mon_wsname,
+                                                 Direction::Output),
+        "Monitors from the Event NeXus file");
     this->setProperty("MonitorWorkspace", mons);
     // Add an internal pointer to monitor workspace in the 'main' workspace
     m_outputWorkspace->setMonitorWorkspace(mons);

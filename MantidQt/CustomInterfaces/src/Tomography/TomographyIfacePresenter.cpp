@@ -3,11 +3,14 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
-#include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 
 #include <boost/lexical_cast.hpp>
+
+#include <Poco/DirectoryIterator.h>
+#include <Poco/Path.h>
 
 #include <QFileInfo>
 #include <QMutex>
@@ -59,20 +62,28 @@ void TomographyIfacePresenter::notify(
 
   switch (notif) {
 
+  case ITomographyIfacePresenter::SystemSettingsUpdated:
+    processSystemSettingsUpdated();
+    break;
+
   case ITomographyIfacePresenter::SetupResourcesAndTools:
-    processSetup();
+    processSetupResourcesAndTools();
     break;
 
   case ITomographyIfacePresenter::CompResourceChanged:
-    processCompResourceChange();
+    processCompResourceChanged();
     break;
 
   case ITomographyIfacePresenter::ToolChanged:
-    processToolChange();
+    processToolChanged();
     break;
 
   case ITomographyIfacePresenter::TomoPathsChanged:
     processTomoPathsChanged();
+    break;
+
+  case ITomographyIfacePresenter::TomoPathsEditedByUser:
+    processTomoPathsEditedByUser();
     break;
 
   case ITomographyIfacePresenter::LogInRequested:
@@ -117,7 +128,14 @@ void TomographyIfacePresenter::notify(
   }
 }
 
-void TomographyIfacePresenter::processSetup() {
+void TomographyIfacePresenter::processSystemSettingsUpdated() {
+  m_model->updateSystemSettings(m_view->systemSettings());
+}
+
+void TomographyIfacePresenter::processSetupResourcesAndTools() {
+  // first time update, even if not requested by user
+  processSystemSettingsUpdated();
+
   try {
     m_model->setupComputeResource();
     if (m_model->computeResources().size() < 1) {
@@ -144,20 +162,27 @@ void TomographyIfacePresenter::processSetup() {
 
     m_view->enableLoggedActions(false);
     // This would ideally be shown to the user as a "fatal error" pop-up, as
-    // itis an unrecoverable error. But in facilities other than ISIS this
+    // it is an unrecoverable error. But in facilities other than ISIS this
     // would block the builds (docs-qthelp).
     // m_view->userError("Fatal error", msg);
     m_model->logMsg(msg);
   }
 }
 
-void TomographyIfacePresenter::processCompResourceChange() {
+void TomographyIfacePresenter::processCompResourceChanged() {
   const std::string comp = m_view->currentComputeResource();
 
   m_model->setupRunTool(comp);
+
+  if ("Local" == comp) {
+    m_view->enableLoggedActions(true);
+  } else {
+    const bool status = !m_model->loggedIn().empty();
+    m_view->enableLoggedActions(status);
+  }
 }
 
-void TomographyIfacePresenter::processToolChange() {
+void TomographyIfacePresenter::processToolChanged() {
   const std::string tool = m_view->currentReconTool();
 
   // disallow reconstruct on tools that don't run yet: Savu and CCPi
@@ -169,15 +194,76 @@ void TomographyIfacePresenter::processToolChange() {
     m_view->enableRunReconstruct(false);
     m_view->enableConfigTool(true);
   } else {
-    m_view->enableRunReconstruct(!(m_model->loggedIn().empty()));
+    // No need to be logged in anymore when local is selected
+    const bool runningLocally = "Local" == m_view->currentComputeResource();
+    m_view->enableRunReconstruct(runningLocally ||
+                                 !(m_model->loggedIn().empty()));
     m_view->enableConfigTool(true);
   }
 
   m_model->usingTool(tool);
 }
 
+/**
+ * Simply take the paths that the user has provided.
+ */
 void TomographyIfacePresenter::processTomoPathsChanged() {
   m_model->updateTomoPathsConfig(m_view->currentPathsConfig());
+}
+
+/**
+* Updates the model with the new path. In the process it also tries to
+* guess and find a new path for the flats and darks images from the
+* path to the sample images that the user has given. It would normally
+* look one level up in the directory tree to see if it can find
+* 'dark*' and 'flat*'.
+*/
+void TomographyIfacePresenter::processTomoPathsEditedByUser() {
+  TomoPathsConfig cfg = m_view->currentPathsConfig();
+  const std::string samples = cfg.pathSamples();
+  if (samples.empty())
+    return;
+
+  try {
+    findFlatsDarksFromSampleGivenByUser(cfg);
+  } catch (std::exception &exc) {
+    const std::string msg = "There was a problem while trying to guess the "
+                            "location of dark and flat images from this path "
+                            "to sample images: " +
+                            samples + ". Error details: " + exc.what();
+    m_model->logMsg(msg);
+  }
+
+  m_model->updateTomoPathsConfig(cfg);
+  m_view->updatePathsConfig(cfg);
+}
+
+void TomographyIfacePresenter::findFlatsDarksFromSampleGivenByUser(
+    TomoPathsConfig &cfg) {
+  Poco::Path samplesPath(cfg.pathSamples());
+  Poco::DirectoryIterator end;
+  bool foundDark = false;
+  bool foundFlat = false;
+  for (Poco::DirectoryIterator it(samplesPath.parent()); it != end; ++it) {
+    if (!it->isDirectory()) {
+      continue;
+    }
+
+    const std::string name = it.name();
+    const std::string flatsPrefix = "flat";
+    const std::string darksPrefix = "dark";
+
+    if (boost::iequals(name.substr(0, flatsPrefix.length()), flatsPrefix)) {
+      cfg.updatePathOpenBeam(it->path(), cfg.m_pathOpenBeamEnabled);
+      foundFlat = true;
+    } else if (boost::iequals(name.substr(0, darksPrefix.length()),
+                              darksPrefix)) {
+      cfg.updatePathDarks(it->path(), cfg.m_pathDarkEnabled);
+      foundDark = true;
+    }
+    if (foundFlat && foundDark)
+      break;
+  }
 }
 
 void TomographyIfacePresenter::processLogin() {
@@ -185,7 +271,8 @@ void TomographyIfacePresenter::processLogin() {
     m_view->userError(
         "Fatal error",
         "Cannot do any login operation because the current facility is not "
-        "supported by this interface. Please check the log messages for more "
+        "supported by this interface. Please check the log messages for "
+        "more "
         "details.");
     return;
   }
@@ -195,26 +282,43 @@ void TomographyIfacePresenter::processLogin() {
         "Better to logout before logging in again",
         "You're currently logged in. Please, log out before logging in "
         "again if that's what you meant.");
+    return;
   }
 
-  const std::string compRes = m_view->currentComputeResource();
+  std::string compRes = m_view->currentComputeResource();
+  // if local is selected, just take the first remote resource
+  if ("Local" == compRes) {
+    compRes = "SCARF@STFC";
+  }
   try {
     const std::string user = m_view->getUsername();
     if (user.empty()) {
       m_view->userError(
           "Cannot log in",
-          "To log in you need to specify a username (and a password!).");
+          "To log in you need to specify a username (and a password).");
       return;
     }
 
-    m_model->doLogin(compRes, m_view->getUsername(), m_view->getPassword());
+    const std::string passw = m_view->getPassword();
+    if (passw.empty()) {
+      m_view->userError(
+          "Cannot log in with an empty password",
+          "Empty passwords are not allowed. Please provide a password).");
+      return;
+    }
+
+    m_model->doLogin(compRes, user, passw);
   } catch (std::exception &e) {
     throw(std::string("Problem when logging in. Error description: ") +
           e.what());
   }
 
-  m_view->updateLoginControls(true);
-  m_view->enableLoggedActions(!m_model->loggedIn().empty());
+  bool loggedOK = !m_model->loggedIn().empty();
+  m_view->updateLoginControls(loggedOK);
+  m_view->enableLoggedActions(loggedOK);
+
+  if (!loggedOK)
+    return;
 
   try {
     m_model->doRefreshJobsInfo(compRes);
@@ -238,7 +342,12 @@ void TomographyIfacePresenter::processLogout() {
   }
 
   try {
-    m_model->doLogout(m_view->currentComputeResource(), m_view->getUsername());
+    std::string compRes = m_view->currentComputeResource();
+    // if local is selected, just take the first remote resource
+    if ("Local" == compRes) {
+      compRes = "SCARF@STFC";
+    }
+    m_model->doLogout(compRes, m_view->getUsername());
   } catch (std::exception &e) {
     throw(std::string("Problem when logging out. Error description: ") +
           e.what());
@@ -251,38 +360,81 @@ void TomographyIfacePresenter::processSetupReconTool() {
   if (TomographyIfaceModel::g_CCPiTool != m_view->currentReconTool()) {
     m_view->showToolConfig(m_view->currentReconTool());
     m_model->updateReconToolsSettings(m_view->reconToolsSettings());
+
+    // TODO: this would make sense if the reconstruct action/button
+    // was only enabled after setting up at least one tool
+    // m_view->enableToolsSetupsActions(true);
   }
 }
 
 void TomographyIfacePresenter::processRunRecon() {
-  if (m_model->loggedIn().empty())
+  // m_model->checkDataPathsSet();
+  // TODO: validate data path with additional rules/constraints?
+  TomoPathsConfig paths = m_view->currentPathsConfig();
+  if (paths.pathSamples().empty()) {
+    m_view->userWarning("Sample images path not set!",
+                        "The path to the sample images "
+                        "is strictly required to start "
+                        "a reconstruction");
     return;
+  }
 
+  // pre-/post processing steps and filters
+  m_model->updatePrePostProcSettings(m_view->prePostProcSettings());
+  // center of rotation and regions
+  m_model->updateImageStackPreParams(m_view->currentROIEtcParams());
+  m_model->updateTomopyMethod(m_view->tomopyMethod());
+  m_model->updateAstraMethod(m_view->astraMethod());
   const std::string &resource = m_view->currentComputeResource();
+  if (m_model->localComputeResource() == resource) {
+    subprocessRunReconLocal();
+  } else {
+    subprocessRunReconRemote();
+  }
 
-  if (m_model->localComputeResource() != resource) {
-    try {
-      m_model->doSubmitReconstructionJob(resource);
-    } catch (std::exception &e) {
-      m_view->userWarning("Issue when trying to start a job", e.what());
-    }
+  processRefreshJobs();
+}
 
-    processRefreshJobs();
+void TomographyIfacePresenter::subprocessRunReconRemote() {
+  if (m_model->loggedIn().empty()) {
+    m_view->updateJobsInfoDisplay(m_model->jobsStatus(),
+                                  m_model->jobsStatusLocal());
+    return;
+  }
+
+  try {
+
+    m_model->doSubmitReconstructionJob(m_view->currentComputeResource());
+  } catch (std::exception &e) {
+    m_view->userWarning("Issue when trying to start a job", e.what());
   }
 }
 
-void TomographyIfacePresenter::processRefreshJobs() {
-  if (m_model->loggedIn().empty())
-    return;
+void TomographyIfacePresenter::subprocessRunReconLocal() {
+  m_model->doRunReconstructionJobLocal();
+}
 
-  const std::string &comp = m_view->currentComputeResource();
+void TomographyIfacePresenter::processRefreshJobs() {
+  // No need to be logged in, there can be local processes
+  if (m_model->loggedIn().empty()) {
+    m_model->doRefreshJobsInfo("Local");
+    m_view->updateJobsInfoDisplay(m_model->jobsStatus(),
+                                  m_model->jobsStatusLocal());
+    return;
+  }
+
+  std::string comp = m_view->currentComputeResource();
+  if ("Local" == comp) {
+    comp = "SCARF@STFC";
+  }
   m_model->doRefreshJobsInfo(comp);
 
   {
     // update widgets from that info
     QMutexLocker lockit(m_statusMutex);
 
-    m_view->updateJobsInfoDisplay(m_model->jobsStatus());
+    m_view->updateJobsInfoDisplay(m_model->jobsStatus(),
+                                  m_model->jobsStatusLocal());
   }
 }
 
@@ -300,8 +452,8 @@ void TomographyIfacePresenter::processVisualizeJobs() {
   doVisualize(m_view->processingJobsIDs());
 }
 
-void
-TomographyIfacePresenter::doVisualize(const std::vector<std::string> &ids) {
+void TomographyIfacePresenter::doVisualize(
+    const std::vector<std::string> &ids) {
   m_model->logMsg(" Visualizing results from job: " + ids.front());
   // TODO: open dialog, send to Paraview, etc.
 }

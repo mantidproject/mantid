@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/SpectraDetectorTypes.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -13,18 +14,6 @@ namespace DataHandling {
 
 Saves a workspace or selected spectra in a coma-separated ascii file. Spectra
 are saved in columns.
-Properties:
-<ul>
-<li>Filename - the name of the file to write to.  </li>
-<li>Workspace - the workspace name to be saved.</li>
-<li>SpectrumMin - the starting spectrum index to save (optional) </li>
-<li>SpectrumMax - the ending spectrum index to save (optional) </li>
-<li>SpectrumList - a list of comma-separated spectra indeces to save (optional)
-</li>
-<li>Precision - the numeric precision - the number of significant digits for the
-saved data (optional) </li>
-</ul>
-
 
 @author Keith Brown, ISIS, Placement student from the University of Derby
 @date 10/10/13
@@ -55,23 +44,23 @@ public:
   /// Default constructor
   SaveAscii2();
   /// Destructor
-  ~SaveAscii2() {}
+  ~SaveAscii2() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SaveAscii"; }
+  const std::string name() const override { return "SaveAscii"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Saves a 2D workspace to a ascii file.";
   }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 2; }
+  int version() const override { return 2; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Text"; }
+  const std::string category() const override { return "DataHandling\\Text"; }
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
   /**writes a spectra to the file using a workspace ID
   @param spectraIndex :: an integer relating to a workspace ID
   @param file :: the file writer object
@@ -84,6 +73,14 @@ private:
   */
   void writeSpectra(const std::set<int>::const_iterator &spectraItr,
                     std::ofstream &file);
+  std::vector<std::string> stringListToVector(std::string &inputString);
+  void populateQMetaData();
+  void populateSpectrumNumberMetaData();
+  void populateAngleMetaData();
+  void populateAllMetaData();
+  bool
+  findElementInUnorderedStringVector(const std::vector<std::string> &vector,
+                                     const std::string &toFind);
 
   /// Map the separator options to their string equivalents
   std::map<std::string, std::string> m_separatorIndex;
@@ -95,6 +92,9 @@ private:
   bool m_isHistogram;
   bool m_isCommonBins;
   API::MatrixWorkspace_const_sptr m_ws;
+  std::vector<std::string> m_metaData;
+  std::map<std::string, std::vector<std::string>> m_metaDataMap;
+  spec2index_map m_specToIndexMap;
 };
 } // namespace DataHandling
 } // namespace Mantid

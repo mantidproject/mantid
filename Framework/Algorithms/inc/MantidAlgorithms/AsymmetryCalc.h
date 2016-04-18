@@ -54,25 +54,27 @@ public:
   /// Default constructor
   AsymmetryCalc() : API::Algorithm(){};
   /// Destructor
-  virtual ~AsymmetryCalc(){};
+  ~AsymmetryCalc() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "AsymmetryCalc"; }
+  const std::string name() const override { return "AsymmetryCalc"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculates the asymmetry between two groups of detectors for a "
            "muon workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Muon"; }
+  const std::string category() const override { return "Muon"; }
+
+protected:
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
-  std::map<std::string, std::string> validateInputs();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithm

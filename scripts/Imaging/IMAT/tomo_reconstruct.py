@@ -56,7 +56,7 @@ from os import path
 # So insert in the path the directory that contains this file
 sys.path.insert(0, os.path.split(path.dirname(__file__))[0])
 
-import IMAT.tomorec.reconstruction_command as tomocmd
+from IMAT.tomorec import reconstruction_command as tomocmd
 import IMAT.tomorec.configs as tomocfg
 
 def setup_cmd_options():
@@ -92,13 +92,18 @@ def setup_cmd_options():
                            help="Number of iterations (only valid for iterative methods "
                            "(example: SIRT, ART, etc.).")
 
-
-    grp_recon.add_argument("--max-angle", required=False, type=int,
+    grp_recon.add_argument("--max-angle", required=False, type=float,
                            help="Maximum angle (of the last projection), assuming first angle=0, and "
                            "uniform angle increment for every projection (note: this "
                            "is overriden by the angles found in the input FITS headers)")
 
     grp_pre = parser.add_argument_group('Pre-processing of input raw images/projections')
+
+    grp_pre.add_argument("--input-path-flat", required=False, default=None,
+                         type=str, help="Input directory for flat images")
+
+    grp_pre.add_argument("--input-path-dark", required=False, default=None,
+                         type=str, help="Input directory for flat images")
 
     img_formats = ['tiff', 'fits', 'tif', 'fit', 'png']
     grp_pre.add_argument("--in-img-format", required=False, default='fits', type=str,
@@ -116,8 +121,8 @@ def setup_cmd_options():
 
     grp_pre.add_argument("--air-region", required=False, type=str,
                          help="Air region /region for normalization. "
-                         "If not provided, the normalization against beam intensity fluctuations will not be "
-                         "performed")
+                         "If not provided, the normalization against beam intensity fluctuations in this "
+                         "region will not be performed")
 
     grp_pre.add_argument("--median-filter-size", type=int,
                          required=False, help="Size/width of the median filter (pre-processing")
@@ -171,6 +176,8 @@ def grab_preproc_options(args):
 
     pre_config = tomocfg.PreProcConfig()
     pre_config.input_dir = args.input_path
+    pre_config.input_dir_flat = args.input_path_flat
+    pre_config.input_dir_dark = args.input_path_dark
 
     if args.in_img_format:
         pre_config.in_img_format = args.in_img_format
@@ -178,30 +185,36 @@ def grab_preproc_options(args):
     if args.out_img_format:
         pre_config.out_img_format = args.out_img_format
 
-    pre_config.cor = int(args.cor)
+    if args.max_angle:
+        pre_config.max_angle = float(args.max_angle)
+
+    if args.rotation:
+        pre_config.rotation = int(args.rotation)
+
+    if args.air_region:
+        coords = ast.literal_eval(args.air_region)
+        pre_config.normalize_air_region = [int(val) for val in coords]
+
+    if args.air_region:
+        coords = ast.literal_eval(args.air_region)
+        pre_config.normalize_air_region = [int(val) for val in coords]
+
+    if args.region_of_interest:
+        roi_coords = ast.literal_eval(args.region_of_interest)
+        pre_config.crop_coords = [int(val) for val in roi_coords]
 
     if 'yes' == args.mcp_corrections:
         pre_config.mcp_corrections = True
 
-    if 'wf' == args.remove_stripes:
-        pre_config.stripe_removal_method = 'wavelet-fourier'
-
-    if args.region_of_interest:
-        pre_config.crop_coords = ast.literal_eval(args.region_of_interest)
-    else:
-        border_pix = 5
-        pre_config.crop_coords = [0+border_pix, 252, 512-border_pix, 512-border_pix]
-
-    if args.air_region:
-        pre_config.crop_coords = ast.literal_eval(args.air_region)
-
     if args.median_filter_size:
-        if not args.median_filter.isdigit():
+        if isinstance(args.median_filter_size, str) and not args.median_filter_size.isdigit():
             raise RuntimeError("The median filter size/width must be an integer")
         pre_config.median_filter_size = args.median_filter_size
 
-    if args.max_angle:
-        pre_config.max_angle = float(args.max_angle)
+    if 'wf' == args.remove_stripes:
+        pre_config.stripe_removal_method = 'wavelet-fourier'
+
+    pre_config.cor = int(args.cor)
 
     return pre_config
 
@@ -218,7 +231,7 @@ def grab_tool_alg_options(args):
     config.algorithm = args.algorithm
 
     if args.num_iter:
-        if not args.num_iter.isdigit():
+        if isinstance(args.num_iter, str) and not args.num_iter.isdigit():
             raise RuntimeError("The number of iterations must be an integer")
         config.num_iter = int(args.num_iter)
 

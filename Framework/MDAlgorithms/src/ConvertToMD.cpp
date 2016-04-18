@@ -17,12 +17,15 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+#include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
+
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using Mantid::Geometry::MDHistoDimensionBuilder;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -33,18 +36,19 @@ DECLARE_ALGORITHM(ConvertToMD)
 
 void ConvertToMD::init() {
   ConvertToMDParent::init();
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output *MDEventWorkspace*.");
 
   declareProperty(
-      new PropertyWithValue<bool>("OverwriteExisting", true, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("OverwriteExisting", true,
+                                           Direction::Input),
       "By default  (\"1\"), existing Output Workspace will be replaced. Select "
       "false (\"0\") if you want to add new events to the workspace, which "
       "already exist. "
       "\nChoosing \"0\" can be very inefficient for file-based workspaces");
 
-  declareProperty(new ArrayProperty<double>("MinValues"),
+  declareProperty(make_unique<ArrayProperty<double>>("MinValues"),
                   "It has to be N comma separated values, where N is the "
                   "number of dimensions of the target workspace. Values "
                   "smaller then specified here will not be added to "
@@ -56,7 +60,7 @@ void ConvertToMD::init() {
   // TODO:    " If a minimal target workspace range is higher then the one
   // specified here, the target workspace range will be used instead " );
 
-  declareProperty(new ArrayProperty<double>("MaxValues"),
+  declareProperty(make_unique<ArrayProperty<double>>("MaxValues"),
                   "A list of the same size and the same units as MinValues "
                   "list. Values higher or equal to the specified by "
                   "this list will be ignored");
@@ -67,11 +71,12 @@ void ConvertToMD::init() {
   this->initBoxControllerProps("5" /*SplitInto*/, 1000 /*SplitThreshold*/,
                                20 /*MaxRecursionDepth*/);
   // additional box controller settings property.
-  auto mustBeMoreThen1 = boost::make_shared<BoundedValidator<int>>();
-  mustBeMoreThen1->setLower(1);
+  auto mustBeMoreThan1 = boost::make_shared<BoundedValidator<int>>();
+  mustBeMoreThan1->setLower(1);
 
   declareProperty(
-      new PropertyWithValue<int>("MinRecursionDepth", 1, mustBeMoreThen1),
+      make_unique<PropertyWithValue<int>>("MinRecursionDepth", 1,
+                                          mustBeMoreThan1),
       "Optional. If specified, then all the boxes will be split to this "
       "minimum recursion depth. 0 = no splitting, "
       "1 = one level of splitting, etc. \n Be careful using this since it can "
@@ -83,7 +88,8 @@ void ConvertToMD::init() {
   setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 
   declareProperty(
-      new PropertyWithValue<bool>("TopLevelSplitting", 0, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("TopLevelSplitting", false,
+                                           Direction::Input),
       "This option causes a split of the top level, i.e. level0, of 50 for the "
       "first four dimensions.");
 }
@@ -138,8 +144,7 @@ void ConvertToMD::exec() {
   // initiate class which would deal with any dimension workspaces requested by
   // algorithm parameters
   if (!m_OutWSWrapper)
-    m_OutWSWrapper =
-        boost::shared_ptr<MDEventWSWrapper>(new MDEventWSWrapper());
+    m_OutWSWrapper = boost::make_shared<MDEventWSWrapper>();
 
   // -------- get Input workspace
   m_InWS2D = getProperty("InputWorkspace");
@@ -302,8 +307,8 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
 
       UnitsConversionHelper &unitConv = m_Convertor->getUnitConversionHelper();
       unitConv.updateConversion(spectra_index);
-      for (size_t i = 0; i < binBoundaries.size(); i++) {
-        binBoundaries[i] = unitConv.convertUnits(binBoundaries[i]);
+      for (double &binBoundarie : binBoundaries) {
+        binBoundarie = unitConv.convertUnits(binBoundarie);
       }
     }
     // sort bin boundaries in case if unit transformation have swapped them.
@@ -320,9 +325,8 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
   for (size_t i = 0; i < m_InWS2D->getNumberHistograms(); ++i) {
     const auto &dets = m_InWS2D->getSpectrum(i)->getDetectorIDs();
     if (!dets.empty()) {
-      std::vector<detid_t> id_vector;
-      std::copy(dets.begin(), dets.end(), std::back_inserter(id_vector));
-      mapping->insert(std::make_pair(id_vector.front(), id_vector));
+      mapping->emplace(*dets.begin(),
+                       std::vector<detid_t>(dets.begin(), dets.end()));
     }
   }
 
@@ -530,11 +534,7 @@ bool ConvertToMD::doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws) {
     createNewWs = true;
   } else {
     bool shouldOverwrite = getProperty("OverwriteExisting");
-    if (shouldOverwrite) {
-      createNewWs = true;
-    } else {
-      createNewWs = false;
-    }
+    createNewWs = shouldOverwrite;
   }
   return createNewWs;
 }
@@ -633,16 +633,8 @@ void ConvertToMD::findMinMax(
         minVal[i] *= 1.1;
         maxVal[i] *= 0.9;
       }
-    } else // expand min-max values a bit to avoid cutting data on the edges
-    {
-      if (std::fabs(minVal[i]) > FLT_EPSILON)
-        minVal[i] *= (1 + 2 * FLT_EPSILON);
-      else
-        minVal[i] -= 2 * FLT_EPSILON;
-      if (std::fabs(minVal[i]) > FLT_EPSILON)
-        maxVal[i] *= (1 + 2 * FLT_EPSILON);
-      else
-        minVal[i] += 2 * FLT_EPSILON;
+    } else {
+      MDHistoDimensionBuilder::resizeToFitMDBox(minVal[i], maxVal[i]);
     }
   }
 

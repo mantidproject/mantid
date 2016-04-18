@@ -55,8 +55,10 @@ class TranslateCurveTool : public QObject, public PlotToolInterface
 		 */
 		TranslateCurveTool(Graph *graph, ApplicationWindow *app, Direction dir, const QObject *status_target=NULL, const char *status_slot="");
 
-        virtual int rtti() const {return PlotToolInterface::Rtti_TranslateCurveTool;};
-	signals:
+                int rtti() const override {
+                  return PlotToolInterface::Rtti_TranslateCurveTool;
+                };
+        signals:
 		/**\brief Emitted whenever a new message should be presented to the user.
 		 *
 		 * You don't have to connect to this signal if you alreay specified a reciever during initialization.

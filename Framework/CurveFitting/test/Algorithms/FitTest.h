@@ -7,6 +7,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "FitTestHelpers.h"
 
@@ -21,15 +22,16 @@ public:
   /// Constructor setting a value for the relative error acceptance
   /// (default=0.01)
   TestMinimizer() {
-    declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
-                        "SomeOutput", "abc", Kernel::Direction::Output),
-                    "Name of the output Workspace holding some output.");
+    declareProperty(
+        Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+            "SomeOutput", "abc", Kernel::Direction::Output),
+        "Name of the output Workspace holding some output.");
   }
 
   /// Overloading base class methods.
-  std::string name() const { return "TestMinimizer"; }
+  std::string name() const override { return "TestMinimizer"; }
   /// Do one iteration.
-  bool iterate(size_t iter) {
+  bool iterate(size_t iter) override {
     m_data[iter] = iter;
 
     if (iter >= m_data.size() - 1) {
@@ -46,9 +48,9 @@ public:
   }
 
   /// Return current value of the cost function
-  double costFunctionVal() { return 0.0; }
+  double costFunctionVal() override { return 0.0; }
   /// Initialize minimizer.
-  virtual void initialize(API::ICostFunction_sptr, size_t maxIterations = 0) {
+  void initialize(API::ICostFunction_sptr, size_t maxIterations = 0) override {
     m_data.resize(maxIterations);
   }
 

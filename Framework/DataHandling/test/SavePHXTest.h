@@ -14,6 +14,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/VectorHelper.h"
 
 using namespace Mantid;
@@ -158,7 +159,7 @@ public:
   }
 
 private:
-  ~SavePHXTest() {
+  ~SavePHXTest() override {
     // delete test ws from ds after the test ends
     AnalysisDataService::Instance().remove(WSName);
     // delete test output file from the hdd;

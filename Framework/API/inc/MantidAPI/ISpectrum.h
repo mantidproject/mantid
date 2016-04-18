@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/cow_ptr.h"
+
 #include <set>
 
 namespace Mantid {
@@ -46,9 +47,8 @@ namespace API {
 class DLLExport ISpectrum {
 public:
   ISpectrum();
-  ISpectrum(const specid_t specNo);
-  ISpectrum(const ISpectrum &other);
-  virtual ~ISpectrum();
+  ISpectrum(const specnum_t specNo);
+  virtual ~ISpectrum() = default;
 
   void copyInfoFrom(const ISpectrum &other);
 
@@ -111,9 +111,9 @@ public:
   void clearDetectorIDs();
 
   // ---------------------------------------------------------
-  specid_t getSpectrumNo() const;
+  specnum_t getSpectrumNo() const;
 
-  void setSpectrumNo(specid_t num);
+  void setSpectrumNo(specnum_t num);
 
   // ---------------------------------------------------------
   virtual void lockData() const;
@@ -125,7 +125,7 @@ public:
 
 protected:
   /// The spectrum number of this spectrum
-  specid_t m_specNo;
+  specnum_t m_specNo;
 
   /// Set of the detector IDs associated with this spectrum
   std::set<detid_t> detectorIDs;

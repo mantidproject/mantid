@@ -60,42 +60,36 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource: public SpectrumData
     /// Construct a DataSource object around the specifed MatrixWorkspace
     MatrixWSDataSource( Mantid::API::MatrixWorkspace_const_sptr matWs );
 
-    ~MatrixWSDataSource();
+    ~MatrixWSDataSource() override;
 
-    virtual bool hasData(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws);
+    bool hasData(const std::string &wsName,
+                 const boost::shared_ptr<Mantid::API::Workspace> ws) override;
 
-    /// OVERRIDES: Get the smallest 'x' value covered by the data
-    virtual double getXMin();
+    /// Get the smallest 'x' value covered by the data
+    double getXMin() override;
 
-    /// OVERRIDES: Get the largest 'x' value covered by the data
-    virtual double getXMax();
+    /// Get the largest 'x' value covered by the data
+    double getXMax() override;
 
-    /// OVERRIDES: Get the largest 'y' value covered by the data
-    virtual double getYMax();
+    /// Get the largest 'y' value covered by the data
+    double getYMax() override;
 
-    /// OVERRIDES: Get the total number of rows of data
-    virtual size_t getNRows();
+    /// Get the total number of rows of data
+    size_t getNRows() override;
 
     /// Get DataArray covering full range of data in x, and y directions
-    DataArray_const_sptr getDataArray( bool isLogX );
+    DataArray_const_sptr getDataArray(bool isLogX) override;
 
     /// Get DataArray covering restricted range of data
-    DataArray_const_sptr getDataArray( double  xMin,
-                                       double  xMax,
-                                       double  yMin,
-                                       double  yMax,
-                                       size_t  nRows,
-                                       size_t  nCols,
-                                       bool    isLogX );
+    DataArray_const_sptr getDataArray(double xMin, double xMax, double yMin,
+                                      double yMax, size_t nRows, size_t nCols,
+                                      bool isLogX) override;
 
     /// Set the class that gets the emode & efixed info from the user.
     void setEModeHandler( EModeHandler* emodeHandler );
 
     /// Get a list containing pairs of strings with information about x,y
-    void getInfoList( double x,
-                      double y,
-                      std::vector<std::string> &list );
-
+    std::vector<std::string> getInfoList(double x, double y) override;
 
   private:
     Mantid::API::MatrixWorkspace_const_sptr m_matWs;

@@ -36,7 +36,7 @@ public:
   virtual void
   configureIterator(Mantid::API::IMDIterator *const iterator) const = 0;
   virtual BackgroundStrategy *clone() const = 0;
-  virtual ~BackgroundStrategy() {}
+  virtual ~BackgroundStrategy() = default;
 };
 }
 }

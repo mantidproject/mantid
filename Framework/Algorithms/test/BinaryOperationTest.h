@@ -23,20 +23,20 @@ public:
   /// Default constructor
   BinaryOpHelper() : BinaryOperation(){};
   /// Destructor
-  virtual ~BinaryOpHelper(){};
+  ~BinaryOpHelper() override{};
 
   /// function to return a name of the algorithm, must be overridden in all
   /// algorithms
-  virtual const std::string name() const { return "BinaryOpHelper"; }
+  const std::string name() const override { return "BinaryOpHelper"; }
   /// function to return a version of the algorithm, must be overridden in all
   /// algorithms
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// function to return a category of the algorithm. A default implementation
   /// is provided
-  virtual const std::string category() const { return "Helper"; }
+  const std::string category() const override { return "Helper"; }
   /// function to return the summary of the algorithm. A default implementation
   /// is provided.
-  virtual const std::string summary() const { return "Summary of this test."; }
+  const std::string summary() const override { return "Summary of this test."; }
 
   std::string checkSizeCompatibility(const MatrixWorkspace_const_sptr ws1,
                                      const MatrixWorkspace_const_sptr ws2) {
@@ -55,12 +55,12 @@ private:
                               const Mantid::MantidVec &,
                               const Mantid::MantidVec &,
                               const Mantid::MantidVec &, Mantid::MantidVec &,
-                              Mantid::MantidVec &) {}
+                              Mantid::MantidVec &) override {}
   void performBinaryOperation(const Mantid::MantidVec &,
                               const Mantid::MantidVec &,
                               const Mantid::MantidVec &, const double,
                               const double, Mantid::MantidVec &,
-                              Mantid::MantidVec &) {}
+                              Mantid::MantidVec &) override {}
 };
 
 class BinaryOperationTest : public CxxTest::TestSuite {
@@ -232,13 +232,10 @@ public:
 
   void
   test_buildBinaryOperationTable_simpleLHS_by_groupedRHS_mismatched_throws() {
-    std::vector<std::vector<int>> lhs(6), rhs(2);
-    for (int i = 0; i < 6; i++) {
-      // one detector per pixel in lhs, but they start at 3
-      lhs[i].push_back(i + 3);
-      // 3 detectors in each on the rhs
-      rhs[i / 3].push_back(i);
-    }
+    // one detector per pixel in lhs, but they start at 3
+    std::vector<std::vector<int>> lhs{{3}, {4}, {5}, {6}, {7}, {8}};
+    // 3 detectors in each on the rhs
+    std::vector<std::vector<int>> rhs{{0, 1, 2}, {3, 4, 5}};
     auto table = do_test_buildBinaryOperationTable(lhs, rhs, false);
     TS_ASSERT_EQUALS((*table)[0], 1);
     TS_ASSERT_EQUALS((*table)[1], 1);
@@ -249,13 +246,12 @@ public:
   }
 
   void test_buildBinaryOperationTable_groupedLHS_by_groupedRHS() {
-    std::vector<std::vector<int>> lhs(8), rhs(4);
-    for (int i = 0; i < 16; i++) {
-      // two detectors per pixel in lhs
-      lhs[i / 2].push_back(i);
-      // 4 detectors in each on the rhs
-      rhs[i / 4].push_back(i);
-    }
+    // two detectors per pixel in lhs
+    std::vector<std::vector<int>> lhs{
+        {0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10, 11}, {12, 13}, {14, 15}};
+    // 4 detectors in each on the rhs
+    std::vector<std::vector<int>> rhs{
+        {0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}, {12, 13, 14, 15}};
     auto table = do_test_buildBinaryOperationTable(lhs, rhs);
     for (int i = 0; i < 8; i++) {
       TS_ASSERT_EQUALS((*table)[i], i / 2);
@@ -264,13 +260,19 @@ public:
 
   void
   test_buildBinaryOperationTable_groupedLHS_by_groupedRHS_bad_overlap_throws() {
-    std::vector<std::vector<int>> lhs(6), rhs(4);
-    for (int i = 0; i < 24; i++) {
-      // 4 detectors per pixel in lhs
-      lhs[i / 4].push_back(i);
-      // 6 detectors in each on the rhs
-      rhs[i / 6].push_back(i);
-    }
+    // 4 detectors per pixel in lhs
+    std::vector<std::vector<int>> lhs{{0, 1, 2, 3},
+                                      {4, 5, 6, 7},
+                                      {8, 9, 10, 11},
+                                      {12, 13, 14, 15},
+                                      {16, 17, 18, 19},
+                                      {20, 21, 22, 23}};
+    // 6 detectors in each on the rhs
+    std::vector<std::vector<int>> rhs{{0, 1, 2, 3, 4, 5},
+                                      {6, 7, 8, 9, 10, 11},
+                                      {12, 13, 14, 15, 16, 17},
+                                      {18, 19, 20, 21, 22, 23}};
+
     auto table = do_test_buildBinaryOperationTable(lhs, rhs, false);
     TS_ASSERT_EQUALS((*table)[0], 0);  // 0-3 go into 0-5
     TS_ASSERT_EQUALS((*table)[1], -1); // 4-7 fails to go anywhere

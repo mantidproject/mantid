@@ -5,12 +5,14 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument_fwd.h"
+#include "MantidGeometry/IDetector_fwd.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 
 #include "MantidKernel/DeltaEMode.h"
 
 #include <list>
+#include <mutex>
 
 namespace Mantid {
 //---------------------------------------------------------------------------
@@ -18,6 +20,7 @@ namespace Mantid {
 //---------------------------------------------------------------------------
 namespace Geometry {
 class ParameterMap;
+class XMLInstrumentParameter;
 }
 
 namespace API {
@@ -40,7 +43,7 @@ public:
   /// Default constructor
   ExperimentInfo();
   /// Virtual destructor
-  virtual ~ExperimentInfo();
+  virtual ~ExperimentInfo() = default;
   /// Copy constructor
   ExperimentInfo(const ExperimentInfo &);
   /// Copy everything from the given experiment object
@@ -183,20 +186,20 @@ private:
   /// instrument group open.
   void loadEmbeddedInstrumentInfoNexus(::NeXus::File *file,
                                        std::string &instrumentName,
-                                       std::string &instrumentXML);
+                                       std::string &instrumentXml);
 
   /// Set the instrument given the name and XML leading from IDF file if XML
   /// string is empty
   void setInstumentFromXML(const std::string &nxFilename,
                            std::string &instrumentName,
-                           std::string &instrumentXML);
+                           std::string &instrumentXml);
 
   // Loads the xml from an instrument file with some basic error handling
   std::string loadInstrumentXML(const std::string &filename);
   /// Detector grouping information
   det2group_map m_detgroups;
   /// Mutex to protect against cow_ptr copying
-  mutable Poco::Mutex m_mutex;
+  mutable std::recursive_mutex m_mutex;
 };
 
 /// Shared pointer to ExperimentInfo

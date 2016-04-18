@@ -75,24 +75,25 @@ public:
   TabulatedFunction();
 
   /// overwrite IFunction base class methods
-  std::string name() const { return "TabulatedFunction"; }
-  virtual const std::string category() const { return "General"; }
-  void function1D(double *out, const double *xValues, const size_t nData) const;
+  std::string name() const override { return "TabulatedFunction"; }
+  const std::string category() const override { return "General"; }
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
   ///  function derivatives
   void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData);
+                       const size_t nData) override;
 
   /// Returns the number of attributes associated with the function
-  size_t nAttributes() const;
+  size_t nAttributes() const override;
   /// Returns a list of attribute names
-  std::vector<std::string> getAttributeNames() const;
+  std::vector<std::string> getAttributeNames() const override;
   /// Return a value of attribute attName
-  Attribute getAttribute(const std::string &attName) const;
+  Attribute getAttribute(const std::string &attName) const override;
   /// Set a value to attribute attName
   void setAttribute(const std::string &attName,
-                    const IFunction::Attribute &value);
+                    const IFunction::Attribute &value) override;
   /// Check if attribute attName exists
-  bool hasAttribute(const std::string &attName) const;
+  bool hasAttribute(const std::string &attName) const override;
 
 private:
   /// Call the appropriate load function
@@ -111,7 +112,7 @@ private:
   void clear() const;
 
   /// Evaluate the function for a list of arguments and given scaling factor
-  void eval(double scaling, double shift, double xscale, double *out,
+  void eval(double scaling, double xshift, double xscale, double *out,
             const double *xValues, const size_t nData) const;
 
   /// Fill in the x and y value containers (m_xData and m_yData)

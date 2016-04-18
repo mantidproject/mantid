@@ -2,17 +2,22 @@
 #define MANTID_DATAHANDLING_SAVEDAVEGRPTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <fstream>
-#include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataHandling/SaveDaveGrp.h"
-#include "MantidDataHandling/LoadDaveGrp.h"
-#include <Poco/File.h>
-#include <boost/algorithm/string.hpp>
-#include "MantidKernel/UnitFactory.h"
+
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/LoadDaveGrp.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/UnitFactory.h"
+
+#include <boost/algorithm/string.hpp>
+#include <Poco/File.h>
+
+#include <fstream>
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -27,7 +32,7 @@ public:
     saver = FrameworkManager::Instance().createAlgorithm("SaveDaveGrp");
   }
 
-  ~SaveDaveGrpTest() {}
+  ~SaveDaveGrpTest() override {}
 
   void testName() { TS_ASSERT_EQUALS(saver->name(), "SaveDaveGrp"); }
 

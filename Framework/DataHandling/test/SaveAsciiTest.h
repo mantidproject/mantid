@@ -5,6 +5,7 @@
 #include "MantidDataHandling/SaveAscii.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include <fstream>
 #include <Poco/File.h>
 
@@ -24,7 +25,7 @@ public:
   static void destroySuite(SaveAsciiTest *suite) { delete suite; }
 
   SaveAsciiTest() {}
-  ~SaveAsciiTest() {
+  ~SaveAsciiTest() override {
     FrameworkManager::Instance().deleteWorkspace("SaveAsciiWS");
   }
 

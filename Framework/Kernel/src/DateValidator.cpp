@@ -30,7 +30,7 @@ struct tm getTimeValue(const std::string &sDate, std::string &error) {
   timeinfo.tm_isdst = -1;
 #ifndef _WIN32
   timeinfo.tm_gmtoff = 0;
-  timeinfo.tm_zone = 0;
+  timeinfo.tm_zone = nullptr;
 #endif
 
   std::basic_string<char>::size_type index, off = 0;
@@ -85,12 +85,6 @@ struct tm getTimeValue(const std::string &sDate, std::string &error) {
   return timeinfo;
 }
 }
-
-/// constructor
-DateValidator::DateValidator() {}
-
-/// destructor
-DateValidator::~DateValidator() {}
 
 /// create a copy of the the validator
 IValidator_sptr DateValidator::clone() const {

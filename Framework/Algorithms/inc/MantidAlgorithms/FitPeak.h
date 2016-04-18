@@ -7,6 +7,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -22,10 +23,10 @@ public:
   FitOneSinglePeak();
 
   /// Desctructor
-  virtual ~FitOneSinglePeak();
+  ~FitOneSinglePeak() override;
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Fit a single peak with checking mechanism. ";
   }
 
@@ -46,7 +47,7 @@ public:
   void setPeakRange(double xpeakleft, double xpeakright);
 
   /// Set peak width to guess
-  void setupGuessedFWHM(double width, int minfwhm, int maxfwhm, int stepsize,
+  void setupGuessedFWHM(double usrwidth, int minfwhm, int maxfwhm, int stepsize,
                         bool fitwithsteppedfwhm);
 
   void setFitPeakCriteria(bool usepeakpostol, double peakpostol);
@@ -59,36 +60,28 @@ public:
   /// Fit peak first considering high background
   void highBkgdFit();
 
-  /// Get fitting error
-  void getFitError(std::map<std::string, double> &peakerrormap,
-                   std::map<std::string, double> &bkgderrormap);
+  /// Get fitting error for peak function
+  std::map<std::string, double> getPeakError();
+
+  /// Get fitting error for background function
+  std::map<std::string, double> getBackgroundError();
 
   /// Get cost function value from fitting
   double getFitCostFunctionValue();
 
-  /// Get peak
-  // API::IPeakFunction_sptr getPeakFunction();
-
-  /// Get background
-  // API::IBackgroundFunction_sptr getBackgroundFunction();
-
   /// Generate a partial workspace at fit window
   API::MatrixWorkspace_sptr genFitWindowWS();
 
-  // void setPeakParameterValues();
-
-  // void setBackgroundParameterValues();
-
 private:
   /// Name
-  virtual const std::string name() const { return "FitOneSinglePeak"; }
+  const std::string name() const override { return "FitOneSinglePeak"; }
 
   /// Version
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Init
-  void init();
+  void init() override;
   /// Exec
-  void exec();
+  void exec() override;
 
   /// Check whether it is ready to fit
   bool hasSetupToFitPeak(std::string &errmsg);
@@ -135,15 +128,15 @@ private:
   /// Process and store fit result
   void processNStoreFitResult(double rwp, bool storebkgd);
 
-  void push(API::IFunction_const_sptr func,
-            std::map<std::string, double> &funcparammap);
+  /// Back up fit result
+  std::map<std::string, double> backup(API::IFunction_const_sptr func);
 
   void pop(const std::map<std::string, double> &funcparammap,
            API::IFunction_sptr func);
 
   /// Store function fitting error
-  void storeFunctionError(const API::IFunction_const_sptr &func,
-                          std::map<std::string, double> &paramerrormap);
+  std::map<std::string, double>
+  storeFunctionError(const API::IFunction_const_sptr &func);
 
   API::IBackgroundFunction_sptr
   fitBackground(API::IBackgroundFunction_sptr bkgdfunc);
@@ -254,22 +247,22 @@ private:
 class DLLExport FitPeak : public API::Algorithm {
 public:
   FitPeak();
-  virtual ~FitPeak();
+  ~FitPeak() override;
 
   /// Algorithm's name
-  virtual const std::string name() const { return "FitPeak"; }
+  const std::string name() const override { return "FitPeak"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Fit a single peak with checking mechanism. ";
   }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Optimization"; }
+  const std::string category() const override { return "Optimization"; }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// Process input propeties
   void processProperties();
@@ -320,11 +313,6 @@ private:
 
   /// Set up a vector of guessed FWHM
   void setupGuessedFWHM(std::vector<double> &vec_FWHM);
-
-  /// Push/store a fit result
-  void push(API::IFunction_const_sptr func,
-            std::map<std::string, double> &funcparammap,
-            std::map<std::string, double> &paramerrormap);
 
   /// Pop
   void pop(const std::map<std::string, double> &funcparammap,

@@ -61,11 +61,6 @@ class MANTID_GEOMETRY_DLL SpaceGroup : public Group {
 public:
   SpaceGroup(size_t itNumber, const std::string &hmSymbol, const Group &group);
 
-  SpaceGroup(const SpaceGroup &other);
-  SpaceGroup &operator=(const SpaceGroup &other);
-
-  virtual ~SpaceGroup() {}
-
   size_t number() const;
   std::string hmSymbol() const;
 
@@ -75,10 +70,12 @@ public:
         getSymmetryOperations();
 
     std::vector<T> equivalents;
-    for (auto it = symmetryOperations.begin(); it != symmetryOperations.end();
-         ++it) {
-      equivalents.push_back(Geometry::getWrappedVector((*it) * position));
-    }
+    equivalents.reserve(symmetryOperations.size());
+    std::transform(symmetryOperations.cbegin(), symmetryOperations.cend(),
+                   std::back_inserter(equivalents),
+                   [&position](const SymmetryOperation &op) {
+                     return Geometry::getWrappedVector(op * position);
+                   });
 
     // Use fuzzy compare with the same condition as V3D::operator==().
     std::sort(equivalents.begin(), equivalents.end(), AtomPositionsLessThan());

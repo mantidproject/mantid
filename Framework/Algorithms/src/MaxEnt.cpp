@@ -1,9 +1,14 @@
 #include "MantidAlgorithms/MaxEnt.h"
-
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/MaxEnt/MaxentEntropyNegativeValues.h"
+#include "MantidAlgorithms/MaxEnt/MaxentEntropyPositiveValues.h"
 #include "MantidKernel/BoundedValidator.h"
-
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitFactory.h"
+#include <boost/make_shared.hpp>
 #include <boost/shared_array.hpp>
-#include <gsl/gsl_fft_complex.h>
 #include <gsl/gsl_linalg.h>
 
 namespace Mantid {
@@ -17,6 +22,27 @@ using namespace Kernel;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MaxEnt)
+
+namespace {
+
+// Maps defining the inverse caption and label for the reconstructed image
+// Example:
+// The input workspaces (X axis) is in (Time, s)
+// The output image should be in (Frequency, Hz)
+
+// Defines the new caption
+std::map<std::string, std::string> inverseCaption = {{"Time", "Frequency"},
+                                                     {"Frequency", "Time"},
+                                                     {"d-Spacing", "q"},
+                                                     {"q", "d-Spacing"}};
+// Defines the new label
+std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
+                                                   {"microsecond", "MHz"},
+                                                   {"Hz", "s"},
+                                                   {"MHz", "microsecond"},
+                                                   {"Angstrom", "Angstrom^-1"},
+                                                   {"Angstrom^-1", "Angstrom"}};
+}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -54,60 +80,73 @@ const std::string MaxEnt::summary() const {
 void MaxEnt::init() {
 
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
 
   declareProperty("ComplexData", false,
                   "Whether or not the input data are complex. If true, the "
                   "input workspace is expected to have an even number of "
-                  "histograms, with real and imaginary parts arranged in "
-                  "consecutive workspaces");
+                  "histograms.");
 
-  auto mustBeNonNegative = boost::make_shared<BoundedValidator<double>>();
-  mustBeNonNegative->setLower(1E-12);
-  declareProperty(new PropertyWithValue<double>("A", 0.4, mustBeNonNegative,
-                                                Direction::Input),
-                  "A maximum entropy constant");
-
-  declareProperty(new PropertyWithValue<double>(
-                      "ChiTarget", 100.0, mustBeNonNegative, Direction::Input),
-                  "Target value of Chi-square");
-
-  declareProperty(new PropertyWithValue<double>(
-                      "ChiEps", 0.001, mustBeNonNegative, Direction::Input),
-                  "Required precision for Chi-square");
-
-  declareProperty(new PropertyWithValue<double>("DistancePenalty", 0.1,
-                                                mustBeNonNegative,
-                                                Direction::Input),
-                  "Distance penalty applied to the current image");
-
-  declareProperty(new PropertyWithValue<double>(
-                      "MaxAngle", 0.05, mustBeNonNegative, Direction::Input),
-                  "Maximum degree of non-parallelism between S and C");
+  declareProperty("PositiveImage", false, "If true, the reconstructed image "
+                                          "must be positive. It can take "
+                                          "negative values otherwise");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
   mustBePositive->setLower(0);
-  declareProperty(new PropertyWithValue<size_t>(
+  declareProperty(make_unique<PropertyWithValue<size_t>>(
+                      "DensityFactor", 1, mustBePositive, Direction::Input),
+                  "An integer number indicating the factor by which the number "
+                  "of points will be increased in the image and reconstructed "
+                  "data");
+
+  auto mustBeNonNegative = boost::make_shared<BoundedValidator<double>>();
+  mustBeNonNegative->setLower(1E-12);
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "A", 0.4, mustBeNonNegative, Direction::Input),
+                  "A maximum entropy constant");
+
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "ChiTarget", 100.0, mustBeNonNegative, Direction::Input),
+                  "Target value of Chi-square");
+
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "ChiEps", 0.001, mustBeNonNegative, Direction::Input),
+                  "Required precision for Chi-square");
+
+  declareProperty(make_unique<PropertyWithValue<double>>("DistancePenalty", 0.1,
+                                                         mustBeNonNegative,
+                                                         Direction::Input),
+                  "Distance penalty applied to the current image");
+
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "MaxAngle", 0.05, mustBeNonNegative, Direction::Input),
+                  "Maximum degree of non-parallelism between S and C");
+
+  mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
+  mustBePositive->setLower(1);
+  declareProperty(make_unique<PropertyWithValue<size_t>>(
                       "MaxIterations", 20000, mustBePositive, Direction::Input),
                   "Maximum number of iterations");
 
-  declareProperty(new PropertyWithValue<size_t>("AlphaChopIterations", 500,
-                                                mustBePositive,
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<size_t>>("AlphaChopIterations",
+                                                         500, mustBePositive,
+                                                         Direction::Input),
                   "Maximum number of iterations in alpha chop");
 
-  declareProperty(new WorkspaceProperty<>("EvolChi", "", Direction::Output),
-                  "Output workspace containing the evolution of Chi-sq");
-  declareProperty(new WorkspaceProperty<>("EvolAngle", "", Direction::Output),
-                  "Output workspace containing the evolution of "
-                  "non-paralellism between S and C");
   declareProperty(
-      new WorkspaceProperty<>("ReconstructedImage", "", Direction::Output),
-      "The output workspace containing the reconstructed image.");
+      make_unique<WorkspaceProperty<>>("EvolChi", "", Direction::Output),
+      "Output workspace containing the evolution of Chi-sq");
   declareProperty(
-      new WorkspaceProperty<>("ReconstructedData", "", Direction::Output),
-      "The output workspace containing the reconstructed data.");
+      make_unique<WorkspaceProperty<>>("EvolAngle", "", Direction::Output),
+      "Output workspace containing the evolution of "
+      "non-paralellism between S and C");
+  declareProperty(make_unique<WorkspaceProperty<>>("ReconstructedImage", "",
+                                                   Direction::Output),
+                  "The output workspace containing the reconstructed image.");
+  declareProperty(make_unique<WorkspaceProperty<>>("ReconstructedData", "",
+                                                   Direction::Output),
+                  "The output workspace containing the reconstructed data.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -117,22 +156,48 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
 
   std::map<std::string, std::string> result;
 
-  // X values in input workspace must be equally spaced
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
-  const MantidVec &X = inWS->readX(0);
-  const double dx = X[1] - X[0];
-  for (size_t i = 1; i < X.size() - 2; i++) {
-    if (std::abs(dx - X[i + 1] + X[i]) / dx > 1e-7) {
-      result["InputWorkspace"] =
-          "X axis must be linear (all bins must have the same width)";
-    }
-  }
 
-  size_t nhistograms = inWS->getNumberHistograms();
-  bool complex = getProperty("ComplexData");
-  if (complex && (nhistograms % 2))
-    result["InputWorkspace"] = "The number of histograms in the input "
-                               "workspace must be even for complex data";
+  if (inWS) {
+
+    // 1. X values in input workspace must be (almost) equally spaced
+
+    const double warningLevel = 0.01;
+    const double errorLevel = 0.5;
+    bool printWarning = false;
+    // Average spacing
+    const MantidVec &X = inWS->readX(0);
+    const double dx =
+        (X[X.size() - 1] - X[0]) / static_cast<double>(X.size() - 1);
+    for (size_t i = 1; i < X.size() - 1; i++) {
+      // 1% accuracy exceeded, but data still usable
+      if (std::abs(X[i] - X[0] - static_cast<double>(i) * dx) / dx >
+          warningLevel) {
+        printWarning = true;
+        if (std::abs(X[i] - X[0] - static_cast<double>(i) * dx) / dx >
+            errorLevel) {
+          // 50% accuracy exceeded, data not usable
+          printWarning = false;
+          result["InputWorkspace"] =
+              "X axis must be linear (all bins have same width)";
+          break;
+        }
+      }
+    }
+    if (printWarning) {
+      g_log.warning() << "Bin widths differ by more than " << warningLevel * 100
+                      << "% of average\n";
+    }
+
+    // 2. If the input signal is complex, we expect an even number of histograms
+    // in the input workspace
+
+    size_t nhistograms = inWS->getNumberHistograms();
+    bool complex = getProperty("ComplexData");
+    if (complex && (nhistograms % 2))
+      result["InputWorkspace"] = "The number of histograms in the input "
+                                 "workspace must be even for complex data";
+  }
 
   return result;
 }
@@ -142,11 +207,13 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
  */
 void MaxEnt::exec() {
 
-  // Read input workspace
-  MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+  // MaxEnt parameters
   // Complex data?
   bool complex = getProperty("ComplexData");
-
+  // Image must be positive?
+  bool positiveImage = getProperty("PositiveImage");
+  // Increase the number of points in the image by this factor
+  size_t densityFactor = getProperty("DensityFactor");
   // Background (default level, sky background, etc)
   double background = getProperty("A");
   // Chi target
@@ -161,13 +228,26 @@ void MaxEnt::exec() {
   size_t niter = getProperty("MaxIterations");
   // Maximum number of iterations in alpha chop
   size_t alphaIter = getProperty("AlphaChopIterations");
-
+  // Number of spectra and datapoints
+  // Read input workspace
+  MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   // Number of spectra
   size_t nspec = inWS->getNumberHistograms();
   // Number of data points
-  size_t npoints = inWS->blocksize();
+  size_t npoints = inWS->blocksize() * densityFactor;
   // Number of X bins
   size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
+
+  // The type of entropy we are going to use (depends on the type of image,
+  // positive only, or positive and/or negative)
+  MaxentData_sptr maxentData;
+  if (positiveImage) {
+    maxentData = boost::make_shared<MaxentData>(
+        boost::make_shared<MaxentEntropyPositiveValues>());
+  } else {
+    maxentData = boost::make_shared<MaxentData>(
+        boost::make_shared<MaxentEntropyNegativeValues>());
+  }
 
   // Output workspaces
   MatrixWorkspace_sptr outImageWS;
@@ -175,53 +255,36 @@ void MaxEnt::exec() {
   MatrixWorkspace_sptr outEvolChi;
   MatrixWorkspace_sptr outEvolTest;
 
-  if (complex) {
-    outImageWS =
-        WorkspaceFactory::Instance().create(inWS, nspec, npointsX, npoints);
-    outDataWS =
-        WorkspaceFactory::Instance().create(inWS, nspec, npointsX, npoints);
-    outEvolChi =
-        WorkspaceFactory::Instance().create(inWS, nspec / 2, niter, niter);
-    outEvolTest =
-        WorkspaceFactory::Instance().create(inWS, nspec / 2, niter, niter);
-    nspec = nspec / 2;
-  } else {
-    outImageWS =
-        WorkspaceFactory::Instance().create(inWS, 2 * nspec, npointsX, npoints);
-    outDataWS =
-        WorkspaceFactory::Instance().create(inWS, nspec, npointsX, npoints);
-    outEvolChi = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
-    outEvolTest =
-        WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
-  }
+  nspec = complex ? nspec / 2 : nspec;
+  outImageWS =
+      WorkspaceFactory::Instance().create(inWS, 2 * nspec, npointsX, npoints);
+  outDataWS =
+      WorkspaceFactory::Instance().create(inWS, 2 * nspec, npointsX, npoints);
+  outEvolChi = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
+  outEvolTest = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
 
-  // We need to handle complex data
   npoints *= 2;
   for (size_t s = 0; s < nspec; s++) {
 
     // Start distribution (flat background)
     std::vector<double> image(npoints, background);
-    // Read data from the input workspace
-    // Only real part, complex part is zero
-    std::vector<double> data(npoints, 0.);
-    std::vector<double> error(npoints, 0.);
-    for (size_t i = 0; i < npoints / 2; i++) {
-      data[2 * i] = inWS->readY(s)[i];
-      error[2 * i] = inWS->readE(s)[i];
-    }
+
     if (complex) {
-      for (size_t i = 0; i < npoints / 2; i++) {
-        data[2 * i + 1] = inWS->readY(2 * s + 1)[i];
-        error[2 * i + 1] = inWS->readE(2 * s + 1)[i];
-      }
+      auto dataRe = inWS->readY(s);
+      auto dataIm = inWS->readY(s + nspec);
+      auto errorsRe = inWS->readE(s);
+      auto errorsIm = inWS->readE(s + nspec);
+      maxentData->loadComplex(dataRe, dataIm, errorsRe, errorsIm, image,
+                              background);
+    } else {
+      auto data = inWS->readY(s);
+      auto error = inWS->readE(s);
+      maxentData->loadReal(data, error, image, background);
     }
 
     // To record the algorithm's progress
     std::vector<double> evolChi(niter, 0.);
     std::vector<double> evolTest(niter, 0.);
-
-    // Store image in successive iterations
-    std::vector<double> newImage = image;
 
     // Progress
     Progress progress(this, 0, 1, niter);
@@ -229,43 +292,31 @@ void MaxEnt::exec() {
     // Run maxent algorithm
     for (size_t it = 0; it < niter; it++) {
 
-      // Calculate search directions and quadratic model coefficients (SB eq. 21
-      // and 24)
-      SearchDirections dirs =
-          calculateSearchDirections(data, error, newImage, background);
+      // Calculate quadratic model coefficients
+      // (SB eq. 21 and 24)
+      maxentData->calculateQuadraticCoefficients();
+      double currAngle = maxentData->getAngle();
+      double currChisq = maxentData->getChisq();
+      auto coeffs = maxentData->getQuadraticCoefficients();
 
-      // Calculate beta to contruct new image (SB eq. 25)
-      auto beta = move(dirs, chiTarget / dirs.chisq, chiEps, alphaIter);
+      // Calculate delta to construct new image (SB eq. 25)
+      auto delta = move(coeffs, chiTarget / currChisq, chiEps, alphaIter);
 
       // Apply distance penalty (SB eq. 33)
-      double sum = 0.;
-      for (size_t i = 0; i < image.size(); i++)
-        sum += fabs(image[i]);
+      image = maxentData->getImage();
+      delta = applyDistancePenalty(delta, coeffs, image, background, distEps);
 
-      double dist = distance(dirs.s2, beta);
-      if (dist > distEps * sum / background) {
-        for (size_t k = 0; k < beta.size(); k++) {
-          beta[k] *= sqrt(sum / dist / background);
-        }
-      }
-
-      // Calculate the new image
-      for (size_t i = 0; i < npoints; i++) {
-        for (size_t k = 0; k < beta.size(); k++) {
-          newImage[i] = newImage[i] + beta[k] * dirs.xIm[k][i];
-        }
-      }
-
-      // Calculate the new Chi-square
-      auto dataC = transformImageToData(newImage);
-      double chiSq = getChiSq(data, error, dataC);
+      // Update image according to 'delta' and calculate the new Chi-square
+      maxentData->updateImage(delta);
+      currChisq = maxentData->getChisq();
 
       // Record the evolution of Chi-square and angle(S,C)
-      evolChi[it] = chiSq;
-      evolTest[it] = dirs.angle;
+      evolChi[it] = currChisq;
+      evolTest[it] = currAngle;
 
       // Stop condition, solution found
-      if ((std::abs(chiSq / chiTarget - 1.) < chiEps) && (dirs.angle < angle)) {
+      if ((std::abs(currChisq / chiTarget - 1.) < chiEps) &&
+          (currAngle < angle)) {
         break;
       }
 
@@ -279,11 +330,12 @@ void MaxEnt::exec() {
     } // iterations
 
     // Get calculated data
-    std::vector<double> solutionData = transformImageToData(newImage);
+    auto solData = maxentData->getReconstructedData();
+    auto solImage = maxentData->getImage();
 
     // Populate the output workspaces
-    populateOutputWS(inWS, complex, s, nspec, solutionData, newImage, outDataWS,
-                     outImageWS);
+    populateOutputWS(inWS, s, nspec, solData, outDataWS, false);
+    populateOutputWS(inWS, s, nspec, solImage, outImageWS, true);
 
     // Populate workspaces recording the evolution of Chi and Test
     // X values
@@ -306,313 +358,40 @@ void MaxEnt::exec() {
 
 //----------------------------------------------------------------------------------------------
 
-/**
-* Transforms from solution-space to data-space
-* @param input :: [input] An input vector in image space
-* @return :: The input vector transformed to data space
-*/
-std::vector<double>
-MaxEnt::transformImageToData(const std::vector<double> &input) {
-
-  /* Performs backward Fourier transform */
-
-  size_t n = input.size();
-
-  if (n % 2) {
-    throw std::invalid_argument("Cannot transform to data space");
-  }
-
-  /* Prepare the data */
-  boost::shared_array<double> result(new double[n]);
-  for (size_t i = 0; i < n; i++) {
-    result[i] = input[i];
-  }
-
-  /* Backward FT */
-  gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc(n / 2);
-  gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(n / 2);
-  gsl_fft_complex_inverse(result.get(), 1, n / 2, wavetable, workspace);
-  gsl_fft_complex_wavetable_free(wavetable);
-  gsl_fft_complex_workspace_free(workspace);
-
-  std::vector<double> output(n);
-  for (size_t i = 0; i < n; i++) {
-    output[i] = result[i];
-  }
-
-  return output;
-}
-
-/**
-* Transforms from data-space to solution-space
-* @param input :: [input] An input vector in data space
-* @return :: The input vector converted to image space
-*/
-std::vector<double>
-MaxEnt::transformDataToImage(const std::vector<double> &input) {
-
-  /* Performs forward Fourier transform */
-
-  size_t n = input.size();
-
-  if (n % 2) {
-    throw std::invalid_argument("Cannot transform to data space");
-  }
-
-  /* Prepare the data */
-  boost::shared_array<double> result(new double[n]);
-  for (size_t i = 0; i < n; i++) {
-    result[i] = input[i];
-  }
-
-  /*  Fourier transofrm */
-  gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc(n / 2);
-  gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(n / 2);
-  gsl_fft_complex_forward(result.get(), 1, n / 2, wavetable, workspace);
-  gsl_fft_complex_wavetable_free(wavetable);
-  gsl_fft_complex_workspace_free(workspace);
-
-  /* Get the data */
-  std::vector<double> output(n);
-  for (size_t i = 0; i < n; i++) {
-    output[i] = result[i];
-  }
-
-  return output;
-}
-
-/** Calculate the search directions and quadratic coefficients as described in
-* section 3.6 in SB
-* @param data :: [input] The experimental input data
-* @param error :: [input] The experimental input errors
-* @param image :: [input] The current image
-* @param background :: [input] The default or 'sky' background
-* @return :: Search directions as a SearchDirections object
-*/
-SearchDirections MaxEnt::calculateSearchDirections(
-    const std::vector<double> &data, const std::vector<double> &error,
-    const std::vector<double> &image, double background) {
-
-  // Two search directions
-  const size_t dim = 2;
-
-  // Some checks
-  if ((data.size() != error.size()) || (data.size() != image.size())) {
-
-    throw std::invalid_argument("Can't compute quadratic coefficients");
-  }
-
-  size_t npoints = data.size();
-
-  // Calculate data from start image
-  std::vector<double> dataC = transformImageToData(image);
-  // Calculate Chi-square
-  double chiSq = getChiSq(data, error, dataC);
-
-  // Gradient of C (Chi)
-  std::vector<double> cgrad = getCGrad(data, error, dataC);
-  cgrad = transformDataToImage(cgrad);
-  // Gradient of S (Entropy)
-  std::vector<double> sgrad = getSGrad(image, background);
-
-  SearchDirections dirs(dim, npoints);
-
-  dirs.chisq = chiSq;
-
-  double cnorm = 0.;
-  double snorm = 0.;
-  double csnorm = 0.;
-
-  // Here we calculate:
-  // SB. eq 22 -> |grad S|, |grad C|
-  // SB. eq 37 -> test
-  for (size_t i = 0; i < npoints; i++) {
-    cnorm += cgrad[i] * cgrad[i] * image[i] * image[i];
-    snorm += sgrad[i] * sgrad[i] * image[i] * image[i];
-    csnorm += cgrad[i] * sgrad[i] * image[i] * image[i];
-  }
-  cnorm = sqrt(cnorm);
-  snorm = sqrt(snorm);
-
-  dirs.angle = sqrt(0.5 * (1. - csnorm / snorm / cnorm));
-  // csnorm could be greater than snorm * cnorm due to rounding issues
-  // so check for nan
-  if (dirs.angle != dirs.angle)
-    dirs.angle = 0.;
-
-  // Calculate the search directions
-
-  // Temporary vectors (image space)
-  std::vector<double> xIm0(npoints, 0.);
-  std::vector<double> xIm1(npoints, 0.);
-
-  for (size_t i = 0; i < npoints; i++) {
-    xIm0[i] = fabs(image[i]) * cgrad[i] / cnorm;
-    xIm1[i] = fabs(image[i]) * sgrad[i] / snorm;
-    // xi1[i] = image[i] * (sgrad[i] / snorm - cgrad[i] / cnorm);
-  }
-
-  // Temporary vectors (data space)
-  std::vector<double> xDat0 = transformImageToData(xIm0);
-  std::vector<double> xDat1 = transformImageToData(xIm1);
-
-  // Store the search directions
-  dirs.xIm.setRow(0, xIm0);
-  dirs.xIm.setRow(1, xIm1);
-  dirs.xDat.setRow(0, xDat0);
-  dirs.xDat.setRow(1, xDat1);
-
-  // Now compute the quadratic coefficients SB. eq 24
-
-  // First compute s1, c1
-  for (size_t k = 0; k < dim; k++) {
-    dirs.c1[k][0] = dirs.s1[k][0] = 0.;
-    for (size_t i = 0; i < npoints; i++) {
-      dirs.s1[k][0] += dirs.xIm[k][i] * sgrad[i];
-      dirs.c1[k][0] += dirs.xIm[k][i] * cgrad[i];
-    }
-    // Note: the factor chiSQ has to go either here or in calculateChi
-    dirs.c1[k][0] /= chiSq;
-  }
-
-  // Then s2, c2
-  for (size_t k = 0; k < dim; k++) {
-    for (size_t l = 0; l < k + 1; l++) {
-      dirs.s2[k][l] = 0.;
-      dirs.c2[k][l] = 0.;
-      for (size_t i = 0; i < npoints; i++) {
-        if (error[i] != 0.0)
-          dirs.c2[k][l] +=
-              dirs.xDat[k][i] * dirs.xDat[l][i] / error[i] / error[i];
-        dirs.s2[k][l] -= dirs.xIm[k][i] * dirs.xIm[l][i] / fabs(image[i]);
-      }
-      // Note: the factor chiSQ has to go either here or in calculateChi
-      dirs.c2[k][l] *= 2.0 / chiSq;
-      dirs.s2[k][l] *= 1.0 / background;
-    }
-  }
-  // Symmetrise s2, c2: reflect accross the diagonal
-  for (size_t k = 0; k < dim; k++) {
-    for (size_t l = k + 1; l < dim; l++) {
-      dirs.s2[k][l] = dirs.s2[l][k];
-      dirs.c2[k][l] = dirs.c2[l][k];
-    }
-  }
-
-  return dirs;
-}
-
-/** Calculates Chi-square
-* @param data :: [input] Data measured during the experiment
-* @param errors :: [input] Associated errors
-* @param dataCalc :: [input] Data calculated from image
-* @return :: The calculated Chi-square
-*/
-double MaxEnt::getChiSq(const std::vector<double> &data,
-                        const std::vector<double> &errors,
-                        const std::vector<double> &dataCalc) {
-
-  if ((data.size() != errors.size()) || (data.size() != dataCalc.size())) {
-    throw std::invalid_argument("Cannot compute Chi square");
-  }
-
-  size_t npoints = data.size();
-
-  // Calculate
-  // ChiSq = sum_i [ data_i - dataCalc_i ]^2 / [ error_i ]^2
-  double chiSq = 0;
-  for (size_t i = 0; i < npoints; i++) {
-    if (errors[i] != 0.0) {
-      double term = (data[i] - dataCalc[i]) / errors[i];
-      chiSq += term * term;
-    }
-  }
-
-  return chiSq;
-}
-/** Calculates the gradient of C (Chi term)
-* @param data :: [input] Data measured during the experiment
-* @param errors :: [input] Associated errors
-* @param dataCalc :: [input] Data calculated from image
-* @return :: The calculated gradient of C
-*/
-std::vector<double> MaxEnt::getCGrad(const std::vector<double> &data,
-                                     const std::vector<double> &errors,
-                                     const std::vector<double> &dataCalc) {
-
-  if ((data.size() != errors.size()) || (data.size() != dataCalc.size())) {
-    throw std::invalid_argument("Cannot compute gradient of Chi");
-  }
-
-  size_t npoints = data.size();
-
-  // Calculate gradient of Chi
-  // CGrad_i = -2 * [ data_i - dataCalc_i ] / [ error_i ]^2
-  std::vector<double> cgrad(npoints, 0.);
-  for (size_t i = 0; i < npoints; i++) {
-    if (errors[i] != 0.0)
-      cgrad[i] = -2. * (data[i] - dataCalc[i]) / errors[i] / errors[i];
-  }
-
-  return cgrad;
-}
-
-/** Calculates the gradient of S (Entropy)
-* @param image :: [input] The current image
-* @param background :: [input] The background
-* @return :: The calculated gradient of S
-*/
-std::vector<double> MaxEnt::getSGrad(const std::vector<double> &image,
-                                     double background) {
-
-#define S(x) (-log(x + std::sqrt(x * x + 1)))
-  //#define S(x) (-log(x))
-
-  size_t npoints = image.size();
-
-  // Calculate gradient of S
-  std::vector<double> sgrad(npoints, 0.);
-  for (size_t i = 0; i < npoints; i++) {
-    sgrad[i] = S(image[i] / background);
-  }
-
-  return sgrad;
-
-#undef S
-}
-
-/** Bisection method to move beta one step closer towards the solution
-* @param dirs :: [input] The current quadratic coefficients
+/** Bisection method to move delta one step closer towards the solution
+* @param coeffs :: [input] The current quadratic coefficients
 * @param chiTarget :: [input] The requested Chi target
 * @param chiEps :: [input] Precision required for Chi target
 * @param alphaIter :: [input] Maximum number of iterations in the bisection
 * method (alpha chop)
+* @return : The increment length to be added to the current image
 */
-std::vector<double> MaxEnt::move(const SearchDirections &dirs, double chiTarget,
-                                 double chiEps, size_t alphaIter) {
+std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
+                                 double chiTarget, double chiEps,
+                                 size_t alphaIter) {
 
   double aMin = 0.; // Minimum alpha
   double aMax = 1.; // Maximum alpha
 
   // Dimension, number of search directions
-  size_t dim = dirs.c2.size().first;
+  size_t dim = coeffs.c2.size().first;
 
-  std::vector<double> betaMin(dim, 0); // Beta at alpha min
-  std::vector<double> betaMax(dim, 0); // Beta at alpha max
+  std::vector<double> deltaMin(dim, 0); // delta at alpha min
+  std::vector<double> deltaMax(dim, 0); // delta at alpha max
 
-  double chiMin = calculateChi(dirs, aMin, betaMin); // Chi at alpha min
-  double chiMax = calculateChi(dirs, aMax, betaMax); // Chi at alpha max
+  double chiMin = calculateChi(coeffs, aMin, deltaMin); // Chi at alpha min
+  double chiMax = calculateChi(coeffs, aMax, deltaMax); // Chi at alpha max
 
-  double dchiMin = chiMin - chiTarget; // Delta = max - target
-  double dchiMax = chiMax - chiTarget; // Delta = min - target
+  double dchiMin = chiMin - chiTarget; // max - target
+  double dchiMax = chiMax - chiTarget; // min - target
 
   if (dchiMin * dchiMax > 0) {
     // ChiTarget could be outside the range [chiMin, chiMax]
 
     if (fabs(dchiMin) < fabs(dchiMax)) {
-      return betaMin;
+      return deltaMin;
     } else {
-      return betaMax;
+      return deltaMax;
     }
     //    throw std::runtime_error("Error in alpha chop\n");
   }
@@ -623,12 +402,12 @@ std::vector<double> MaxEnt::move(const SearchDirections &dirs, double chiTarget,
 
   // Bisection method
 
-  std::vector<double> beta(dim, 0); // Beta at current alpha
+  std::vector<double> delta(dim, 0); // delta at current alpha
 
   while ((fabs(eps) > chiEps) && (iter < alphaIter)) {
 
     double aMid = 0.5 * (aMin + aMax);
-    double chiMid = calculateChi(dirs, aMid, beta);
+    double chiMid = calculateChi(coeffs, aMid, delta);
 
     eps = chiMid - chiTarget;
 
@@ -652,20 +431,20 @@ std::vector<double> MaxEnt::move(const SearchDirections &dirs, double chiTarget,
                              "image. No convergence in alpha chop.\n");
   }
 
-  return beta;
+  return delta;
 }
 
 /** Calculates Chi given the quadratic coefficients and an alpha value by
 * solving the matrix equation A*b = B
-* @param dirs :: [input] The quadratic coefficients
+* @param coeffs :: [input] The quadratic coefficients
 * @param a :: [input] The alpha value
 * @param b :: [output] The solution
 * @return :: The calculated chi-square
 */
-double MaxEnt::calculateChi(const SearchDirections &dirs, double a,
+double MaxEnt::calculateChi(const QuadraticCoefficients &coeffs, double a,
                             std::vector<double> &b) {
 
-  size_t dim = dirs.c2.size().first;
+  size_t dim = coeffs.c2.size().first;
 
   double ax = a;
   double bx = 1 - ax;
@@ -676,9 +455,9 @@ double MaxEnt::calculateChi(const SearchDirections &dirs, double a,
   // Construct the matrix A and vector B such that Ax=B
   for (size_t k = 0; k < dim; k++) {
     for (size_t l = 0; l < dim; l++) {
-      A[k][l] = bx * dirs.c2[k][l] - ax * dirs.s2[k][l];
+      A[k][l] = bx * coeffs.c2[k][l] - ax * coeffs.s2[k][l];
     }
-    B[k][0] = -bx * dirs.c1[k][0] + ax * dirs.s1[k][0];
+    B[k][0] = -bx * coeffs.c1[k][0] + ax * coeffs.s1[k][0];
   }
 
   // Alternatives I have tried:
@@ -694,9 +473,9 @@ double MaxEnt::calculateChi(const SearchDirections &dirs, double a,
   for (size_t k = 0; k < dim; k++) {
     double z = 0.;
     for (size_t l = 0; l < dim; l++) {
-      z += dirs.c2[k][l] * b[l];
+      z += coeffs.c2[k][l] * b[l];
     }
-    ww += b[k] * (dirs.c1[k][0] + 0.5 * z);
+    ww += b[k] * (coeffs.c1[k][0] + 0.5 * z);
   }
 
   // Return chi
@@ -756,9 +535,9 @@ std::vector<double> MaxEnt::solveSVD(const DblMatrix &A, const DblMatrix &B) {
   gsl_linalg_SV_solve(a, v, s, b, x);
 
   // From gsl_vector to vector
-  std::vector<double> beta(dim);
+  std::vector<double> delta(dim);
   for (size_t k = 0; k < dim; k++)
-    beta[k] = gsl_vector_get(x, k);
+    delta[k] = gsl_vector_get(x, k);
 
   gsl_matrix_free(a);
   gsl_matrix_free(v);
@@ -767,96 +546,117 @@ std::vector<double> MaxEnt::solveSVD(const DblMatrix &A, const DblMatrix &B) {
   gsl_vector_free(x);
   gsl_vector_free(b);
 
-  return beta;
+  return delta;
 }
 
-/** Calculates the distance of the current solution
-* @param s2 :: [input] The current quadratic coefficient for the entropy S
-* @param beta :: [input] The current beta vector
-* @return :: The distance
+/** Applies a distance penalty
+* @param delta :: [input] The current increment
+* @param coeffs :: [input] The quadratic coefficients
+* @param image :: [input] The current image
+* @param background :: [input] The background
+* @param distEps :: [input] The distance constraint
+* @return :: The new increment
 */
-double MaxEnt::distance(const DblMatrix &s2, const std::vector<double> &beta) {
+std::vector<double> MaxEnt::applyDistancePenalty(
+    const std::vector<double> &delta, const QuadraticCoefficients &coeffs,
+    const std::vector<double> &image, double background, double distEps) {
 
-  size_t dim = s2.size().first;
+  double sum = 0.;
+  for (double point : image)
+    sum += fabs(point);
+
+  size_t dim = coeffs.s2.size().first;
 
   double dist = 0.;
 
   for (size_t k = 0; k < dim; k++) {
     double sum = 0.0;
     for (size_t l = 0; l < dim; l++)
-      sum -= s2[k][l] * beta[l];
-    dist += beta[k] * sum;
+      sum -= coeffs.s2[k][l] * delta[l];
+    dist += delta[k] * sum;
   }
-  return dist;
+
+  auto newDelta = delta;
+  if (dist > distEps * sum / background) {
+    for (size_t k = 0; k < delta.size(); k++) {
+      newDelta[k] *= sqrt(sum / dist / background);
+    }
+  }
+  return newDelta;
 }
 
 /** Populates the output workspaces
 * @param inWS :: [input] The input workspace
-* @param complex :: [input] Whether or not the input is complex
 * @param spec :: [input] The current spectrum being analyzed
 * @param nspec :: [input] The total number of histograms in the input workspace
-* @param data :: [input] The reconstructed data
-* @param image :: [input] The reconstructed image
-* @param outData :: [output] The output workspace containing the reconstructed
-* data
-* @param outImage :: [output] The output workspace containing the reconstructed
+* @param result :: [input] The result to be written in the output workspace
+* @param outWS :: [input] The output workspace to populate
+* @param isImage :: [output] Boolean indicating if result corresponds to the
 * image
+* data
 */
-void MaxEnt::populateOutputWS(const MatrixWorkspace_sptr &inWS, bool complex,
-                              size_t spec, size_t nspec,
-                              const std::vector<double> &data,
-                              const std::vector<double> &image,
-                              MatrixWorkspace_sptr &outData,
-                              MatrixWorkspace_sptr &outImage) {
+void MaxEnt::populateOutputWS(const MatrixWorkspace_sptr &inWS, size_t spec,
+                              size_t nspec, const std::vector<double> &result,
+                              MatrixWorkspace_sptr &outWS, bool isImage) {
 
-  if (data.size() % 2)
+  if (result.size() % 2)
     throw std::invalid_argument("Cannot write results to output workspaces");
 
-  int npoints = static_cast<int>(data.size() / 2);
+  int npoints = static_cast<int>(result.size() / 2);
   int npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
   MantidVec X(npointsX);
   MantidVec YR(npoints);
   MantidVec YI(npoints);
   MantidVec E(npoints, 0.);
 
-  // Reconstructed data
+  double x0 = inWS->readX(spec)[0];
+  double dx = inWS->readX(spec)[1] - x0;
 
-  for (int i = 0; i < npoints; i++) {
-    YR[i] = data[2 * i];
-    YI[i] = data[2 * i + 1];
+  if (isImage) {
+
+    double delta = 1. / dx / npoints;
+    int isOdd = (inWS->blocksize() % 2) ? 1 : 0;
+
+    for (int i = 0; i < npoints; i++) {
+      int j = (npoints / 2 + i + isOdd) % npoints;
+      X[i] = delta * (-npoints / 2 + i);
+      YR[i] = result[2 * j] * dx;
+      YI[i] = result[2 * j + 1] * dx;
+    }
+    if (npointsX == npoints + 1)
+      X[npoints] = X[npoints - 1] + delta;
+
+    // Caption & label
+    auto inputUnit = inWS->getAxis(0)->unit();
+    if (inputUnit) {
+      boost::shared_ptr<Kernel::Units::Label> lblUnit =
+          boost::dynamic_pointer_cast<Kernel::Units::Label>(
+              UnitFactory::Instance().create("Label"));
+      if (lblUnit) {
+
+        lblUnit->setLabel(
+            inverseCaption[inWS->getAxis(0)->unit()->caption()],
+            inverseLabel[inWS->getAxis(0)->unit()->label().ascii()]);
+        outWS->getAxis(0)->unit() = lblUnit;
+      }
+    }
+
+  } else {
+    for (int i = 0; i < npoints; i++) {
+      X[i] = x0 + i * dx;
+      YR[i] = result[2 * i];
+      YI[i] = result[2 * i + 1];
+    }
+    if (npointsX == npoints + 1)
+      X[npoints] = x0 + npoints * dx;
   }
-  outData->dataX(spec) = inWS->readX(spec);
-  outData->dataY(spec).assign(YR.begin(), YR.end());
-  outData->dataE(spec).assign(E.begin(), E.end());
-  if (complex) {
-    outData->dataX(nspec + spec) = inWS->readX(spec);
-    outData->dataY(nspec + spec).assign(YI.begin(), YI.end());
-    outData->dataE(nspec + spec).assign(E.begin(), E.end());
-  }
 
-  // Reconstructed image
-
-  double dx = inWS->readX(spec)[1] - inWS->readX(spec)[0];
-  double delta = 1. / dx / npoints;
-  int isOdd = (inWS->blocksize() % 2) ? 1 : 0;
-
-  for (int i = 0; i < npoints; i++) {
-    int j = (npoints / 2 + i + isOdd) % npoints;
-    X[i] = delta * (-npoints / 2 + i);
-    YR[i] = image[2 * j] * dx;
-    YI[i] = image[2 * j + 1] * dx;
-  }
-  if (npointsX == npoints + 1)
-    X[npoints] = X[npoints - 1] + delta;
-
-  // Real part
-  outImage->dataX(spec).assign(X.begin(), X.end());
-  outImage->dataY(spec).assign(YR.begin(), YR.end());
-  outImage->dataE(spec).assign(E.begin(), E.end());
-  // Imaginary part
-  outImage->dataX(nspec + spec).assign(X.begin(), X.end());
-  outImage->dataY(nspec + spec).assign(YI.begin(), YI.end());
-  outImage->dataE(nspec + spec).assign(E.begin(), E.end());
+  outWS->dataX(spec).assign(X.begin(), X.end());
+  outWS->dataY(spec).assign(YR.begin(), YR.end());
+  outWS->dataE(spec).assign(E.begin(), E.end());
+  outWS->dataX(nspec + spec).assign(X.begin(), X.end());
+  outWS->dataY(nspec + spec).assign(YI.begin(), YI.end());
+  outWS->dataE(nspec + spec).assign(E.begin(), E.end());
 }
 
 } // namespace Algorithms

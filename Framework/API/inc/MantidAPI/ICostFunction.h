@@ -40,7 +40,7 @@ namespace API {
 class MANTID_API_DLL ICostFunction {
 public:
   /// Virtual destructor
-  virtual ~ICostFunction() {}
+  virtual ~ICostFunction() = default;
 
   /// Get name of minimizer
   virtual std::string name() const = 0;

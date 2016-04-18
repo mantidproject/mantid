@@ -29,8 +29,6 @@ RefAxis::RefAxis(const RefAxis &right,
                  const MatrixWorkspace *const parentWorkspace)
     : NumericAxis(right), m_parentWS(parentWorkspace), m_size(right.m_size) {}
 
-RefAxis::~RefAxis() {}
-
 /** Virtual constructor
  *  @param parentWorkspace :: A pointer to the workspace that will hold the new
  * axis
@@ -86,10 +84,7 @@ bool RefAxis::operator==(const Axis &axis2) const {
     return false;
   }
   const RefAxis *ra2 = dynamic_cast<const RefAxis *>(&axis2);
-  if (!ra2) {
-    return false;
-  }
-  return true;
+  return ra2 != nullptr;
 }
 
 /** Check if two numeric axis are equivalent to a given tolerance

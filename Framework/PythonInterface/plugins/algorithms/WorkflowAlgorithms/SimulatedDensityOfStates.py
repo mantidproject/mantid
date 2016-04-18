@@ -360,18 +360,18 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             peak_widths = np.repeat(single_val, len(peaks))
 
         if self._peak_func == "Gaussian":
-            n_gauss = int(3.0 * np.max(peak_widths) / self._bin_width)
+            n_gauss = int(3.0 * np.max(peak_widths))
             dos = np.zeros(len(hist) - 1 + n_gauss)
 
             for index, width in zip(peaks, peak_widths.tolist()):
                 sigma = width / 2.354
                 for g in range(-n_gauss, n_gauss):
                     if index + g > 0:
-                        dos[index + g] += hist[index] * math.exp(-(g * self._bin_width) ** 2 / (2 * sigma ** 2)) /\
+                        dos[index + g] += hist[index] * math.exp(-g ** 2 / (2 * sigma ** 2)) /\
                                           (math.sqrt(2 * math.pi) * sigma)
 
         elif self._peak_func == "Lorentzian":
-            n_lorentz = int(25.0 * np.max(peak_widths) / self._bin_width)
+            n_lorentz = int(25.0 * np.max(peak_widths))
             dos = np.zeros(len(hist) - 1 + n_lorentz)
 
             for index, width in zip(peaks, peak_widths.tolist()):
@@ -553,8 +553,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         intensities = intensities * weights
 
         # Create histogram x data
-        xmin, xmax = frequencies[0], frequencies[-1] + self._bin_width
-        bins = np.arange(xmin, xmax, self._bin_width)
+        xmin, xmax = frequencies[0], frequencies[-1] + 1
+        bins = np.arange(xmin, xmax, 1)
 
         # Sum values in each bin
         hist = np.zeros(bins.size)
@@ -572,6 +572,13 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         if self._scale != 1:
             Scale(InputWorkspace=self._out_ws_name, OutputWorkspace=self._out_ws_name, Factor=self._scale)
+
+        if self._bin_width != 1:
+            out_ws = mtd[self._out_ws_name]
+            x_min = out_ws.readX(0)[0] - (self._bin_width/2.0)
+            x_max = out_ws.readX(0)[-1] + (self._bin_width/2.0)
+            rebin_param = "%f, %f, %f" % (x_min, self._bin_width, x_max)
+            Rebin(Inputworkspace=self._out_ws_name, Params=rebin_param, OutputWorkspace=self._out_ws_name)
 
 #----------------------------------------------------------------------------------------
 

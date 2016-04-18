@@ -1,8 +1,5 @@
 ﻿#pylint: disable=invalid-name
 """ Sample MERLIN reduction scrip """
-#import os
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
-
 from Direct.ReductionWrapper import *
 try:
     import reduce_vars as web_var
@@ -59,9 +56,10 @@ class ReduceMERLIN(ReductionWrapper):
         ReductionWrapper.__init__(self,'MER',web_var)
 #----------------------------------------------------------------------------------------------------------------------
 
-
-
 if __name__=="__main__":
+    #import os
+    #os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+
     #maps_dir = 'd:/Data/MantidSystemTests/Data'
     #data_dir ='d:/Data/Mantid_Testing/14_11_27'
     #ref_data_dir = 'd:/Data/MantidSystemTests/SystemTests/AnalysisTests/ReferenceResults'

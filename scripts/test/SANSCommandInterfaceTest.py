@@ -1,5 +1,6 @@
 ﻿import unittest
 import mantid
+import os
 import isis_instrument as instruments
 import ISISCommandInterface as command_iface
 from reducer_singleton import ReductionSingleton
@@ -229,11 +230,8 @@ class TestEventWorkspaceCheck(unittest.TestCase):
         self._clean_up(file_name)
         DeleteWorkspace(ws)
 
-
 class SANSCommandInterfaceGetAndSetQResolutionSettings(unittest.TestCase):
-    '''
-    Test the input and output mechanims for the QResolution settings
-    '''
+    #Test the input and output mechanims for the QResolution settings
     def test_full_setup_for_circular_apertures(self):
         # Arrange
         command_iface.Clean()
@@ -359,6 +357,38 @@ class SANSCommandInterfaceGetAndSetQResolutionSettings(unittest.TestCase):
         delta_r_expected = delta_r/1000.
         self.assertEqual(delta_r_stored, delta_r_expected)
 
+class TestLARMORCommand(unittest.TestCase):
+    def test_that_default_idf_is_being_selected(self):
+        command_iface.Clean()
+        # Act
+        command_iface.LARMOR()
+        # Assert
+        instrument = ReductionSingleton().get_instrument()
+        idf_file_path = instrument.get_idf_file_path()
+        file_name = os.path.basename(idf_file_path)
+
+        expected_name = "LARMOR_Definition.xml"
+        self.assertEqual(file_name, expected_name)
+
+    def test_that_selected_idf_is_being_selectedI(self):
+        command_iface.Clean()
+        selected_idf = "LARMOR_Definition_8tubes.xml"
+        # Act
+        command_iface.LARMOR(selected_idf)
+        # Assert
+        instrument = ReductionSingleton().get_instrument()
+        idf_file_path = instrument.get_idf_file_path()
+        file_name = os.path.basename(idf_file_path)
+
+        expected_name = selected_idf
+        self.assertEqual(file_name, expected_name)
+
+    def test_that_for_non_existing_false_is_returned(self):
+        command_iface.Clean()
+        selected_idf = "LARMOR_Definition_NONEXIST.xml"
+        # Act + Assert
+        self.assertFalse(command_iface.LARMOR(selected_idf),
+                         "A non existant idf path should return false")
 
 class TestMaskFile(unittest.TestCase):
     def test_throws_for_user_file_with_invalid_extension(self):
@@ -369,6 +399,40 @@ class TestMaskFile(unittest.TestCase):
         # Act + Assert
         args = [file_name]
         self.assertRaises(RuntimeError, command_iface.MaskFile, *args)
+
+class SANSCommandInterfaceGetAndSetBackgroundCorrectionSettings(unittest.TestCase):
+    def _do_test_correct_setting(self, run_number, is_time, is_mon, is_mean, mon_numbers):
+        # Assert that settings were set
+        setting = ReductionSingleton().get_dark_run_setting(is_time, is_mon)
+        self.assertEquals(setting.run_number, run_number)
+        self.assertEquals(setting.time, is_time)
+        self.assertEquals(setting.mean, is_mean)
+        self.assertEquals(setting.mon, is_mon)
+        self.assertEquals(setting.mon_numbers, mon_numbers)
+
+        # Assert that other settings are None. Hence set up all combinations and remove the one which
+        # has been set up earlier
+        combinations = [[True, True], [True, False], [False, True], [False, False]]
+        selected_combination = [is_time, is_mon]
+        combinations.remove(selected_combination)
+
+        for combination in combinations:
+            self.assertTrue(ReductionSingleton().get_dark_run_setting(combination[0], combination[1]) is None)
+
+    def test_that_correct_setting_can_be_passed_in(self):
+        # Arrange
+        run_number = "test12345"
+        is_time = True
+        is_mon = True
+        is_mean = False
+        mon_numbers= None
+        command_iface.Clean()
+        command_iface.LOQ()
+        # Act
+        command_iface.set_background_correction(run_number, is_time,
+                                                is_mon, is_mean, mon_numbers)
+        # Assert
+        self._do_test_correct_setting(run_number, is_time, is_mon, is_mean, mon_numbers)
 
 if __name__ == "__main__":
     unittest.main()

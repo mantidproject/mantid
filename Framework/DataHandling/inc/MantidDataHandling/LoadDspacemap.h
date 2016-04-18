@@ -19,26 +19,26 @@ namespace DataHandling {
 class DLLExport LoadDspacemap : public API::Algorithm {
 public:
   LoadDspacemap();
-  ~LoadDspacemap();
+  ~LoadDspacemap() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "LoadDspacemap"; };
+  const std::string name() const override { return "LoadDspacemap"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads a Dspacemap file (POWGEN binary, VULCAN binary or ascii "
            "format) into an OffsetsWorkspace.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "DataHandling\\Text"; }
+  const std::string category() const override { return "DataHandling\\Text"; }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 
   void readVulcanAsciiFile(const std::string &fileName,
                            std::map<detid_t, double> &vulcan);

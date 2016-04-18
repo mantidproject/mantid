@@ -57,13 +57,11 @@ class DataItem;
 class DLLExport WriteLock {
 public:
   WriteLock(const DataItem &item);
+  WriteLock(const WriteLock &) = delete;
+  WriteLock &operator=(const WriteLock &) = delete;
   virtual ~WriteLock();
 
 private:
-  /// Private copy constructor - NO COPY ALLOWED
-  WriteLock(const WriteLock &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  WriteLock &operator=(const WriteLock &);
   /// Disallow creating the object on the heap
   void *operator new(size_t);
   /// Disallow creating the object on the heap

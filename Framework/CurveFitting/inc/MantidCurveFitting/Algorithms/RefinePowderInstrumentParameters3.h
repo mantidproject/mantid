@@ -42,29 +42,29 @@ namespace Algorithms {
 class DLLExport RefinePowderInstrumentParameters3 : public API::Algorithm {
 public:
   RefinePowderInstrumentParameters3();
-  virtual ~RefinePowderInstrumentParameters3();
+  ~RefinePowderInstrumentParameters3() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "RefinePowderInstrumentParameters";
   }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Parameters include Dtt1, Dtt1t, Dtt2t, Zero, Zerot. ";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 3; }
+  int version() const override { return 3; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Diffraction\\Fitting"; }
+  const std::string category() const override { return "Diffraction\\Fitting"; }
 
 private:
   /// Implement abstract Algorithm methods
-  void init();
+  void init() override;
 
   /// Implement abstract Algorithm methods
-  void exec();
+  void exec() override;
 
   /// Fit instrument parameters by non Monte Carlo algorithm
   double execFitParametersNonMC();

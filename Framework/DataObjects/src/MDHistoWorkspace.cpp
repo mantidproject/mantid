@@ -62,7 +62,7 @@ MDHistoWorkspace::MDHistoWorkspace(
 MDHistoWorkspace::MDHistoWorkspace(
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions,
     Mantid::API::MDNormalization displayNormalization)
-    : IMDHistoWorkspace(), numDimensions(0), m_numEvents(NULL),
+    : IMDHistoWorkspace(), numDimensions(0), m_numEvents(nullptr),
       m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN()),
       m_coordSystem(None), m_displayNormalization(displayNormalization) {
   this->init(dimensions);
@@ -77,7 +77,7 @@ MDHistoWorkspace::MDHistoWorkspace(
 MDHistoWorkspace::MDHistoWorkspace(
     std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions,
     Mantid::API::MDNormalization displayNormalization)
-    : IMDHistoWorkspace(), numDimensions(0), m_numEvents(NULL),
+    : IMDHistoWorkspace(), numDimensions(0), m_numEvents(nullptr),
       m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN()),
       m_coordSystem(None), m_displayNormalization(displayNormalization) {
   this->init(dimensions);
@@ -132,8 +132,8 @@ MDHistoWorkspace::~MDHistoWorkspace() {
 void MDHistoWorkspace::init(
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions) {
   std::vector<IMDDimension_sptr> dim2;
-  for (size_t i = 0; i < dimensions.size(); i++)
-    dim2.push_back(boost::dynamic_pointer_cast<IMDDimension>(dimensions[i]));
+  for (auto &dimension : dimensions)
+    dim2.push_back(boost::dynamic_pointer_cast<IMDDimension>(dimension));
   this->init(dim2);
   m_nEventsContributed = 0;
 }
@@ -205,7 +205,8 @@ void MDHistoWorkspace::initVertexesArray() {
   size_t nd = numDimensions;
   // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd
   // bits
-  size_t numVertices = 1 << numDimensions;
+  // cppcheck-suppress constStatement
+  size_t numVertices = size_t{1} << numDimensions;
 
   // Allocate the array of the right size
   m_vertexesArray = new coord_t[nd * numVertices];
@@ -219,7 +220,8 @@ void MDHistoWorkspace::initVertexesArray() {
     for (size_t d = 0; d < nd; d++) {
       // Use a bit mask to look at each bit of the integer we are iterating
       // through.
-      size_t mask = 1 << d;
+      // cppcheck-suppress constStatement
+      size_t mask = size_t{1} << d;
       if ((i & mask) > 0) {
         // Bit is 1, use the max of the dimension
         m_vertexesArray[outIndex + d] = m_dimensions[d]->getX(1);
@@ -463,7 +465,6 @@ size_t MDHistoWorkspace::getMemorySize() const {
 //----------------------------------------------------------------------------------------------
 /// @return a vector containing a copy of the signal data in the workspace.
 std::vector<signal_t> MDHistoWorkspace::getSignalDataVector() const {
-  // TODO: Make this more efficient if needed.
   std::vector<signal_t> out;
   out.resize(m_length, 0.0);
   for (size_t i = 0; i < m_length; ++i)
@@ -474,7 +475,6 @@ std::vector<signal_t> MDHistoWorkspace::getSignalDataVector() const {
 
 /// @return a vector containing a copy of the error data in the workspace.
 std::vector<signal_t> MDHistoWorkspace::getErrorDataVector() const {
-  // TODO: Make this more efficient if needed.
   std::vector<signal_t> out;
   out.resize(m_length, 0.0);
   for (size_t i = 0; i < m_length; ++i)
@@ -497,24 +497,43 @@ bool pointInWorkspace(const MDHistoWorkspace *ws, const VMD &point) {
 //----------------------------------------------------------------------------------------------
 /** Obtain coordinates for a line plot through a MDWorkspace.
  * Cross the workspace from start to end points, recording the signal along the
- *line.
- * Sets the x,y vectors to the histogram bin boundaries and counts
+ *line at bin centres of unmasked bins.
  *
  * @param start :: coordinates of the start point of the line
  * @param end :: coordinates of the end point of the line
  * @param normalize :: how to normalize the signal
- * @param x :: is set to the boundaries of the bins, relative to start of the
- *line.
- * @param y :: is set to the normalized signal for each bin. Length = length(x)
- *- 1
- * @param e :: error vector for each bin.
+ * @returns :: LinePlot with x as linearly spaced points along the line
+ * between start and end, y set to the normalized signal for each bin with
+ * Length = length(x) - 1 and e as the error vector for each bin.
  */
-void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
-                                   const Mantid::Kernel::VMD &end,
-                                   Mantid::API::MDNormalization normalize,
-                                   std::vector<coord_t> &x,
-                                   std::vector<signal_t> &y,
-                                   std::vector<signal_t> &e) const {
+IMDWorkspace::LinePlot
+MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
+                              const Mantid::Kernel::VMD &end,
+                              Mantid::API::MDNormalization normalize) const {
+
+  return this->getLinePoints(start, end, normalize, true);
+}
+
+//----------------------------------------------------------------------------------------------
+/** Obtain coordinates for a line plot through a MDWorkspace.
+ * Cross the workspace from start to end points, recording the signal along the
+ *lin at either bin boundaries, or halfway between bin boundaries (which is bin
+ *centres if the line is dimension aligned). If recording halfway values then
+ *omit points in masked bins.
+ *
+ * @param start :: coordinates of the start point of the line
+ * @param end :: coordinates of the end point of the line
+ * @param normalize :: how to normalize the signal
+ * @returns :: LinePlot with x as the boundaries of the bins, relative
+ * to start of the line, y set to the normalized signal for each bin with
+ * Length = length(x) - 1 and e as the error vector for each bin.
+ * @param bin_centres :: if true then record points halfway between bin
+ *boundaries, otherwise record on bin boundaries
+ */
+IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(
+    const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &end,
+    Mantid::API::MDNormalization normalize, const bool bin_centres) const {
+  LinePlot line;
 
   size_t nd = this->getNumDims();
   if (start.getNumDims() != nd)
@@ -523,13 +542,10 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
   if (end.getNumDims() != nd)
     throw std::runtime_error(
         "End point must have the same number of dimensions as the workspace.");
-  x.clear();
-  y.clear();
-  e.clear();
 
   // Unit-vector of the direction
   VMD dir = end - start;
-  coord_t length = dir.normalize();
+  const auto length = dir.normalize();
 
 // Vector with +1 where direction is positive, -1 where negative
 #define sgn(x) ((x < 0) ? -1.0f : ((x > 0.) ? 1.0f : 0.0f))
@@ -537,7 +553,7 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
   for (size_t d = 0; d < nd; d++) {
     dirSign[d] = sgn(dir[d]);
   }
-  size_t BADINDEX = size_t(-1);
+  const size_t BADINDEX = size_t(-1);
 
   // Dimensions of the workspace
   boost::scoped_array<size_t> index(new size_t[nd]);
@@ -548,32 +564,33 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
     numBins[d] = dim->getNBins();
   }
 
-  std::set<coord_t> boundaries =
+  const std::set<coord_t> boundaries =
       getBinBoundariesOnLine(start, end, nd, dir, length);
 
   if (boundaries.empty()) {
-    // Nothing at all!
-    // Make a single bin with NAN
-    x.push_back(0);
-    x.push_back(length);
-    y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
-    e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
-    return;
+    this->makeSinglePointWithNaN(line.x, line.y, line.e);
+
+    // Require x.size() = y.size()+1 if recording bin boundaries
+    if (!bin_centres)
+      line.x.push_back(length);
+
+    return line;
   } else {
     // Get the first point
     std::set<coord_t>::iterator it;
-    it = boundaries.begin();
+    it = boundaries.cbegin();
 
     coord_t lastLinePos = *it;
     VMD lastPos = start + (dir * lastLinePos);
-    x.push_back(lastLinePos);
+    if (!bin_centres) {
+      line.x.push_back(lastLinePos);
+    }
 
     ++it;
-
-    for (; it != boundaries.end(); ++it) {
+    coord_t linePos = 0;
+    for (; it != boundaries.cend(); ++it) {
       // This is our current position along the line
-      coord_t linePos = *it;
-      x.push_back(linePos);
+      linePos = *it;
 
       // This is the full position at this boundary
       VMD pos = start + (dir * linePos);
@@ -582,33 +599,65 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
       VMD middle = (pos + lastPos) * 0.5;
 
       // Find the signal in this bin
-      size_t linearIndex = this->getLinearIndexAtCoord(middle.getBareArray());
+      const auto linearIndex =
+          this->getLinearIndexAtCoord(middle.getBareArray());
+
+      if (bin_centres && !this->getIsMaskedAt(linearIndex)) {
+        coord_t bin_centrePos =
+            static_cast<coord_t>((linePos + lastLinePos) * 0.5);
+        line.x.push_back(bin_centrePos);
+      } else if (!bin_centres)
+        line.x.push_back(linePos);
+
       if (linearIndex < m_length) {
 
-        // Is the signal here masked?
-        if (this->getIsMaskedAt(linearIndex)) {
-          y.push_back(MDMaskValue);
-          e.push_back(MDMaskValue);
-        } else {
-          signal_t normalizer = getNormalizationFactor(normalize, linearIndex);
-          // And add the normalized signal/error to the list too
-          auto signal = this->getSignalAt(linearIndex) * normalizer;
-          if (boost::math::isinf(signal)) {
-            // The plotting library (qwt) doesn't like infs.
-            signal = std::numeric_limits<signal_t>::quiet_NaN();
-          }
-          y.push_back(signal);
-          e.push_back(this->getErrorAt(linearIndex) * normalizer);
+        auto normalizer = getNormalizationFactor(normalize, linearIndex);
+        // And add the normalized signal/error to the list too
+        auto signal = this->getSignalAt(linearIndex) * normalizer;
+        if (boost::math::isinf(signal)) {
+          // The plotting library (qwt) doesn't like infs.
+          signal = std::numeric_limits<signal_t>::quiet_NaN();
+        }
+        if (!bin_centres || !this->getIsMaskedAt(linearIndex)) {
+          line.y.push_back(signal);
+          line.e.push_back(this->getErrorAt(linearIndex) * normalizer);
         }
         // Save the position for next bin
         lastPos = pos;
       } else {
         // Invalid index. This shouldn't happen
-        y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
-        e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
+        line.y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
+        line.e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
       }
+
+      lastLinePos = linePos;
+
     } // for each unique boundary
-  }   // if there is at least one point
+
+    // If all bins were masked
+    if (line.x.size() == 0) {
+      this->makeSinglePointWithNaN(line.x, line.y, line.e);
+    }
+  }
+  return line;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Obtain coordinates for a line plot through a MDWorkspace.
+ * Cross the workspace from start to end points, recording the signal along the
+ *line.
+ * Sets the x,y vectors to the histogram bin boundaries and counts
+ *
+ * @param start :: coordinates of the start point of the line
+ * @param end :: coordinates of the end point of the line
+ * @param normalize :: how to normalize the signal
+ * @returns :: LinePlot with points at bin boundaries
+ */
+IMDWorkspace::LinePlot
+MDHistoWorkspace::getLineData(const Mantid::Kernel::VMD &start,
+                              const Mantid::Kernel::VMD &end,
+                              Mantid::API::MDNormalization normalize) const {
+  return this->getLinePoints(start, end, normalize, false);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -999,7 +1048,10 @@ void MDHistoWorkspace::power(double exponent) {
 MDHistoWorkspace &MDHistoWorkspace::operator&=(const MDHistoWorkspace &b) {
   checkWorkspaceSize(b, "&= (and)");
   for (size_t i = 0; i < m_length; ++i) {
-    m_signals[i] = ((m_signals[i] != 0) && (b.m_signals[i] != 0)) ? 1.0 : 0.0;
+    m_signals[i] = ((m_signals[i] != 0 && !m_masks[i]) &&
+                    (b.m_signals[i] != 0 && !b.m_masks[i]))
+                       ? 1.0
+                       : 0.0;
     m_errorsSquared[i] = 0;
   }
   return *this;
@@ -1015,7 +1067,10 @@ MDHistoWorkspace &MDHistoWorkspace::operator&=(const MDHistoWorkspace &b) {
 MDHistoWorkspace &MDHistoWorkspace::operator|=(const MDHistoWorkspace &b) {
   checkWorkspaceSize(b, "|= (or)");
   for (size_t i = 0; i < m_length; ++i) {
-    m_signals[i] = ((m_signals[i] != 0) || (b.m_signals[i] != 0)) ? 1.0 : 0.0;
+    m_signals[i] = ((m_signals[i] != 0 && !m_masks[i]) ||
+                    (b.m_signals[i] != 0 && !b.m_masks[i]))
+                       ? 1.0
+                       : 0.0;
     m_errorsSquared[i] = 0;
   }
   return *this;
@@ -1032,7 +1087,10 @@ MDHistoWorkspace &MDHistoWorkspace::operator|=(const MDHistoWorkspace &b) {
 MDHistoWorkspace &MDHistoWorkspace::operator^=(const MDHistoWorkspace &b) {
   checkWorkspaceSize(b, "^= (xor)");
   for (size_t i = 0; i < m_length; ++i) {
-    m_signals[i] = ((m_signals[i] != 0) ^ (b.m_signals[i] != 0)) ? 1.0 : 0.0;
+    m_signals[i] = ((m_signals[i] != 0 && !m_masks[i]) ^
+                    (b.m_signals[i] != 0 && !b.m_masks[i]))
+                       ? 1.0
+                       : 0.0;
     m_errorsSquared[i] = 0;
   }
   return *this;
@@ -1046,7 +1104,7 @@ MDHistoWorkspace &MDHistoWorkspace::operator^=(const MDHistoWorkspace &b) {
  */
 void MDHistoWorkspace::operatorNot() {
   for (size_t i = 0; i < m_length; ++i) {
-    m_signals[i] = (m_signals[i] == 0.0);
+    m_signals[i] = (m_signals[i] == 0.0 || m_masks[i]);
     m_errorsSquared[i] = 0;
   }
 }
@@ -1215,7 +1273,7 @@ Does not perform any clearing. Multiple calls are compounded.
 */
 void MDHistoWorkspace::setMDMasking(
     Mantid::Geometry::MDImplicitFunction *maskingRegion) {
-  if (maskingRegion != NULL) {
+  if (maskingRegion != nullptr) {
     for (size_t i = 0; i < this->getNPoints(); ++i) {
       // If the function masks the point, then mask it, otherwise leave it as it
       // is.

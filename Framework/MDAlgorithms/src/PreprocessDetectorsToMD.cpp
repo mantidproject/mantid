@@ -1,6 +1,8 @@
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 
@@ -25,18 +27,18 @@ void PreprocessDetectorsToMD::init() {
   // the validator which checks if the workspace has axis and any units
   // ws_valid->add<API::WorkspaceUnitValidator>("");
 
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Kernel::Direction::Input, ws_valid),
                   "Name of an input Matrix Workspace with instrument.");
 
-  declareProperty(new WorkspaceProperty<TableWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "Name of the output Table workspace with pre-processed "
                   "detectors data. If the workspace exists, it will be "
                   "replaced.");
 
-  declareProperty(new Kernel::PropertyWithValue<bool>("GetMaskState", true,
-                                                      Kernel::Direction::Input),
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+                      "GetMaskState", true, Kernel::Direction::Input),
                   "Returns masked state of the detectors. If this option is "
                   "false, the masked detectors are just dropped from the "
                   "resulting workspace and spectra-to detectors map has to be "
@@ -44,8 +46,8 @@ void PreprocessDetectorsToMD::init() {
                   "and logic necessary until Mantid masks signal by 0 rather "
                   "then NaN.");
 
-  declareProperty(new Kernel::PropertyWithValue<bool>("UpdateMasksInfo", false,
-                                                      Kernel::Direction::Input),
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+                      "UpdateMasksInfo", false, Kernel::Direction::Input),
                   "If target workspace already exists as the result of "
                   "previous deployment of this algorithm, the algorithm just "
                   "updated masks states column instead of calculating the "
@@ -54,8 +56,8 @@ void PreprocessDetectorsToMD::init() {
                   "parameter and logic necessary until Mantid masks signal by "
                   "0 rather then NaN.");
 
-  declareProperty(new Kernel::PropertyWithValue<bool>("GetEFixed", false,
-                                                      Kernel::Direction::Input),
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+                      "GetEFixed", false, Kernel::Direction::Input),
                   "This option makes sense for Indirect instrument, where each "
                   "detector can have its own energy, defined by correspondent "
                   "crystal-analyzer position.\n"
@@ -127,7 +129,7 @@ PreprocessDetectorsToMD::createTableWorkspace(
   const size_t nHist = inputWS->getNumberHistograms();
 
   // set the target workspace
-  auto targWS = boost::shared_ptr<TableWorkspace>(new TableWorkspace(nHist));
+  auto targWS = boost::make_shared<TableWorkspace>(nHist);
   // detectors positions
   if (!targWS->addColumn("V3D", "DetDirections"))
     throw(std::runtime_error("Can not add column DetDirectrions"));
@@ -223,13 +225,13 @@ void PreprocessDetectorsToMD::processDetectorsPositions(
 
   // Efixed; do we need one and does one exist?
   double Efi = targWS->getLogs()->getPropertyValueAsType<double>("Ei");
-  float *pEfixedArray(NULL);
+  float *pEfixedArray(nullptr);
   const Geometry::ParameterMap &pmap = inputWS->constInstrumentParameters();
   if (m_getEFixed)
     pEfixedArray = targWS->getColDataArray<float>("eFixed");
 
   // check if one needs to generate masked detectors column.
-  int *pMasksArray(NULL);
+  int *pMasksArray(nullptr);
   if (m_getIsMasked)
     pMasksArray = targWS->getColDataArray<int>("detMask");
 
@@ -416,9 +418,7 @@ bool PreprocessDetectorsToMD::isDetInfoLost(
     Mantid::API::MatrixWorkspace_const_sptr inWS2D) const {
   auto pYAxis = dynamic_cast<API::NumericAxis *>(inWS2D->getAxis(1));
   // if this is numeric axis, then the detector's information has been lost:
-  if (pYAxis)
-    return true;
-  return false;
+  return pYAxis != nullptr;
 }
 
 /** Method returns the efixed or Ei value stored in properties of the input

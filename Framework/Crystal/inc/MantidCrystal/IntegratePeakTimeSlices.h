@@ -8,18 +8,18 @@
 #define INTEGRATEPEAKTIMESLICES_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/IAlgorithm.h"
+
+#include <array>
 
 namespace Mantid {
 namespace Crystal {
@@ -115,9 +115,9 @@ public:
       EdgeY = newsize;
   }
 
-  void CalcVariancesFromData(double background, double row, double col,
-                             double &Varx, double &Vary, double &Varxy,
-                             std::vector<double> &ParameterValues);
+  void CalcVariancesFromData(double background, double meanx, double meany,
+                             double &Varxx, double &Varxy, double &Varyy,
+                             std::vector<double> &StatBase);
 
   bool IsEnoughData(const double *ParameterValues, Kernel::Logger &);
 
@@ -143,7 +143,7 @@ public:
 
   bool CalcVariances();
 
-  std::vector<double> GetParams(double background);
+  std::vector<double> GetParams(double b);
 
   double StatBaseVals(int index) {
     if (index < 0 || index >= (int)StatBase.size())
@@ -227,26 +227,26 @@ public:
   IntegratePeakTimeSlices();
 
   /// Destructor
-  virtual ~IntegratePeakTimeSlices();
+  ~IntegratePeakTimeSlices() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "IntegratePeakTimeSlices"; }
+  const std::string name() const override { return "IntegratePeakTimeSlices"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The algorithm uses CurveFitting::BivariateNormal for fitting a "
            "time slice";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Crystal\\Integration"; }
+  const std::string category() const override { return "Crystal\\Integration"; }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   bool m_EdgePeak;
 
@@ -255,7 +255,7 @@ private:
   std::string m_ParameterNames[7];
 
   boost::shared_ptr<DataModeHandler> m_AttributeValues;
-  double m_ParameterValues[7];
+  std::array<double, 7> m_ParameterValues;
 
   Mantid::detid2index_map m_wi_to_detid_map;
 
@@ -308,12 +308,12 @@ private:
   /**
    *  Tests several starting points in the Marquardt algorithm then calls Fit.
    */
-  void PreFit(API::MatrixWorkspace_sptr &Data, double &chisq, bool &done,
+  void PreFit(API::MatrixWorkspace_sptr &Data, double &chisqOverDOF, bool &done,
               std::vector<std::string> &names, std::vector<double> &params,
               std::vector<double> &errs, double lastRow, double lastCol,
               double neighborRadius);
 
-  void Fit(API::MatrixWorkspace_sptr &Data, double &chisq, bool &done,
+  void Fit(API::MatrixWorkspace_sptr &Data, double &chisqOverDOF, bool &done,
            std::vector<std::string> &names, std::vector<double> &params,
            std::vector<double> &errs, double lastRow, double lastCol,
            double neighborRadius);
@@ -322,12 +322,12 @@ private:
 
   bool isGoodFit(std::vector<double> const &params,
                  std::vector<double> const &errs,
-                 std::vector<std::string> const &names, double chisq);
+                 std::vector<std::string> const &names, double chisqOverDOF);
   // returns last row added
   int UpdateOutputWS(DataObjects::TableWorkspace_sptr &TabWS, const int dir,
                      const double chan, std::vector<double> const &params,
                      std::vector<double> const &errs,
-                     std::vector<std::string> const &names, const double chisq,
+                     std::vector<std::string> const &names, const double Chisq,
                      const double time, std::string spec_idList);
 
   void updatePeakInformation(std::vector<double> const &params,
@@ -336,7 +336,7 @@ private:
                              double &TotVariance, double &TotIntensity,
                              double const TotSliceIntensity,
                              double const TotSliceVariance,
-                             double const chisqdivDOF, const int ncelss);
+                             double const chisqdivDOF, const int ncells);
 
   void updateStats(const double intensity, const double variance,
                    const double row, const double col,
@@ -348,7 +348,7 @@ private:
   double CalculateIsawIntegrateError(const double background,
                                      const double backError,
                                      const double ChiSqOverDOF,
-                                     const double TotIntensity,
+                                     const double TotVariance,
                                      const int ncells);
 
   void FindPlane(Kernel::V3D &center, Kernel::V3D &xvec, Kernel::V3D &yvec,

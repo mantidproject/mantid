@@ -48,25 +48,27 @@ public:
   /// (Empty) Constructor
   ExtractSingleSpectrum() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~ExtractSingleSpectrum() {}
+  ~ExtractSingleSpectrum() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "ExtractSingleSpectrum"; }
+  const std::string name() const override { return "ExtractSingleSpectrum"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Extracts the specified spectrum from a workspace and places it in "
            "a new single-spectrum workspace.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Transforms\\Splitting"; }
+  const std::string category() const override {
+    return "Transforms\\Splitting";
+  }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

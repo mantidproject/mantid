@@ -180,7 +180,7 @@ public:
   IntervalListValidator(QObject* parent, const IntervalList& intervals);
 
   /// Overriden method to validate a given QString, at a particular position
-  virtual State validate(QString&, int&) const;
+  State validate(QString &, int &) const override;
 
 private:
   /// The IntervalList against which to validate.
@@ -199,7 +199,7 @@ class MantidWSIndexWidget : public QWidget {
     /// label.
     explicit QLineEditWithErrorMark(QWidget *parent = 0);
     /// virtual destructor to allow Qt to deallocate all objects
-    virtual ~QLineEditWithErrorMark(){};
+    ~QLineEditWithErrorMark() override{};
     /// provide acess to the QLineEdit
     QLineEdit *lineEdit() { return _lineEdit; };
     /// if Error is not empty, it will make the * label visible and set the
@@ -264,10 +264,10 @@ private:
   void generateWsIndexIntervals();
   /// Generates an IntervalList which defines which spectra IDs the user can ask
   /// to plot.
-  void generateSpectraIdIntervals();
+  void generateSpectraNumIntervals();
 
   /// Whether or not there are any common spectra IDs between workspaces.
-  bool usingSpectraIDs() const;
+  bool usingSpectraNumbers() const;
 
   /// Do we allow the user to ask for a range of spectra IDs or not?
   bool m_spectra;
@@ -285,7 +285,7 @@ private:
   /// A list of names of workspaces which are to be plotted.
   QList<QString> m_wsNames;
   /// IntervalLists for the range of indices/IDs AVAILABLE to the user.
-  IntervalList m_wsIndexIntervals, m_spectraIdIntervals;
+  IntervalList m_wsIndexIntervals, m_spectraNumIntervals;
   /// IntervalLists for the range of indices/IDs CHOSEN by the user.
   IntervalList m_wsIndexChoice, m_spectraIdChoice;
 };

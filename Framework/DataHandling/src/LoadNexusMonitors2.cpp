@@ -5,14 +5,18 @@
 
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ISISRunLogs.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
+
+#include <boost/lexical_cast.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <boost/lexical_cast.hpp>
+
 #include <algorithm>
 #include <cmath>
 #include <map>
@@ -73,21 +77,38 @@ LoadNexusMonitors2::~LoadNexusMonitors2() {}
 /// Initialization method.
 void LoadNexusMonitors2::init() {
   declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, ".nxs"),
+      Kernel::make_unique<API::FileProperty>("Filename", "",
+                                             API::FileProperty::Load, ".nxs"),
       "The name (including its full or relative path) of the NeXus file to "
       "attempt to load. The file extension must either be .nxs or .NXS");
 
   declareProperty(
-      new API::WorkspaceProperty<API::Workspace>("OutputWorkspace", "",
-                                                 Kernel::Direction::Output),
+      Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+          "OutputWorkspace", "", Kernel::Direction::Output),
       "The name of the output workspace in which to load the NeXus monitors.");
 
-  declareProperty(new Kernel::PropertyWithValue<bool>("MonitorsAsEvents", true,
-                                                      Kernel::Direction::Input),
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+                      "MonitorsAsEvents", true, Kernel::Direction::Input),
                   "If enabled (by default), load the monitors as events (into "
                   "an EventWorkspace), as long as there is event data. If "
                   "disabled, load monitors as spectra (into a Workspace2D, "
                   "regardless of whether event data is found.");
+
+  declareProperty("LoadEventMonitors", true,
+                  "Load event monitor in NeXus file both event monitor and "
+                  "histogram monitor found in NeXus file."
+                  "If both of LoadEventMonitor and LoadHistoMonitor are true, "
+                  "or both of them are false,"
+                  "then it is in the auto mode such that any existing monitor "
+                  "will be loaded.");
+
+  declareProperty("LoadHistoMonitors", true,
+                  "Load histogram monitor in NeXus file both event monitor and "
+                  "histogram monitor found in NeXus file."
+                  "If both of LoadEventMonitor and LoadHistoMonitor are true, "
+                  "or both of them are false,"
+                  "then it is in the auto mode such that any existing monitor "
+                  "will be loaded.");
 }
 
 //------------------------------------------------------------------------------
@@ -123,71 +144,15 @@ void LoadNexusMonitors2::exec() {
   }
   prog1.report();
 
-  // Now we want to go through and find the monitors
-  entries = file.getEntries();
-  std::vector<std::string> monitorNames;
   size_t numHistMon = 0;
   size_t numEventMon = 0;
   size_t numPeriods = 0;
-  // we want to sort monitors by monitor_number if they are present
+  std::vector<std::string> monitorNames;
   std::map<int, std::string> monitorNumber2Name;
-  prog1.report();
-
-  API::Progress prog2(this, 0.2, 0.6, entries.size());
-
-  it = entries.begin();
-  for (; it != entries.end(); ++it) {
-    std::string entry_name(it->first);
-    std::string entry_class(it->second);
-    if ((entry_class == "NXmonitor")) {
-      monitorNames.push_back(entry_name);
-
-      // check for event/histogram monitor
-      // -> This will prefer event monitors over histogram
-      //    if they are found in the same group.
-      file.openGroup(entry_name, "NXmonitor");
-      int numEventThings =
-          0; // number of things that are eventish - should be 3
-      string_map_t inner_entries = file.getEntries(); // get list of entries
-      for (auto inner = inner_entries.begin(); inner != inner_entries.end();
-           ++inner) {
-        if (inner->first == "event_index") {
-          numEventThings += 1;
-          continue;
-        } else if (inner->first == "event_time_offset") {
-          numEventThings += 1;
-          continue;
-        } else if (inner->first == "event_time_zero") {
-          numEventThings += 1;
-          continue;
-        }
-      }
-
-      if (numEventThings == 3) {
-        numEventMon += 1;
-      } else {
-        numHistMon += 1;
-        if (inner_entries.find("monitor_number") != inner_entries.end()) {
-          specid_t monitorNo;
-          file.openData("monitor_number");
-          file.getData(&monitorNo);
-          file.closeData();
-          monitorNumber2Name[monitorNo] = entry_name;
-        }
-        if ((numPeriods == 0) &&
-            (inner_entries.find("period_index") != inner_entries.end())) {
-          MantidVec period_data;
-          file.openData("period_index");
-          file.getDataCoerce(period_data);
-          file.closeData();
-          numPeriods = period_data.size();
-        }
-      }
-      file.closeGroup(); // close NXmonitor
-    }
-    prog2.report();
-  }
-  m_monitor_count = monitorNames.size();
+  std::vector<bool> isEventMonitors;
+  m_monitor_count =
+      getMonitorInfo(file, monitorNames, numHistMon, numEventMon, numPeriods,
+                     monitorNumber2Name, isEventMonitors);
 
   // Nothing to do
   if (0 == m_monitor_count) {
@@ -207,8 +172,10 @@ void LoadNexusMonitors2::exec() {
   // check if there's histogram data. If not, ignore setting, step back and load
   // monitors as
   // events which is the only possibility left.
+
+  m_allMonitorsHaveHistoData = allMonitorsHaveHistoData(file, monitorNames);
   if (!monitorsAsEvents)
-    if (!allMonitorsHaveHistoData(file, monitorNames)) {
+    if (!m_allMonitorsHaveHistoData) {
       g_log.information() << "Cannot load monitors as histogram data. Loading "
                              "as events even if the opposite was requested by "
                              "disabling the property MonitorsAsEvents"
@@ -217,56 +184,44 @@ void LoadNexusMonitors2::exec() {
     }
 
   // only used if using event monitors
-  EventWorkspace_sptr eventWS;
+  // EventWorkspace_sptr eventWS;
   // Create the output workspace
-  bool useEventMon;
-  if (numHistMon == m_monitor_count || !monitorsAsEvents) {
-    useEventMon = false;
-    if (m_monitor_count == 0)
-      throw std::runtime_error(
-          "Not loading event data. Trying to load histogram data but failed to "
-          "find monitors with histogram data or could not interpret the data. "
-          "This file may be corrupted or it may not be supported");
-
-    m_workspace = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", m_monitor_count, 1, 1);
-    // if there is a distinct monitor number for each monitor sort them by that
-    // number
-    if (monitorNumber2Name.size() == monitorNames.size()) {
-      monitorNames.clear();
-      for (auto it = monitorNumber2Name.begin(); it != monitorNumber2Name.end();
-           ++it) {
-        monitorNames.push_back(it->second);
-      }
-    }
-  } else if (numEventMon == m_monitor_count) {
-    eventWS = EventWorkspace_sptr(new EventWorkspace());
-    useEventMon = true;
-    eventWS->initialize(m_monitor_count, 1, 1);
-
-    // Set the units
-    eventWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("TOF");
-    eventWS->setYUnit("Counts");
-    m_workspace = eventWS;
-  } else {
-    g_log.error() << "Found " << numEventMon << " event monitors and "
-                  << numHistMon << " histogram monitors (" << m_monitor_count
-                  << " total)\n";
-    throw std::runtime_error(
-        "All monitors must be either event or histogram based");
-  }
+  std::vector<bool> loadMonitorFlags;
+  bool useEventMon = createOutputWorkspace(
+      numHistMon, numEventMon, monitorsAsEvents, monitorNames, isEventMonitors,
+      monitorNumber2Name, loadMonitorFlags);
 
   // a temporary place to put the spectra/detector numbers
-  boost::scoped_array<specid_t> spectra_numbers(new specid_t[m_monitor_count]);
+  boost::scoped_array<specnum_t> spectra_numbers(
+      new specnum_t[m_monitor_count]);
   boost::scoped_array<detid_t> detector_numbers(new detid_t[m_monitor_count]);
 
   API::Progress prog3(this, 0.6, 1.0, m_monitor_count);
 
-  for (std::size_t i = 0; i < m_monitor_count; ++i) {
-    g_log.information() << "Loading " << monitorNames[i] << std::endl;
+  // TODO-NEXT: load event monitor if it is required to do so
+  //            load histogram monitor if it is required to do so
+  // Require a tuple: monitorNames[i], loadAsEvent[i], loadAsHistogram[i]
+  size_t ws_index = 0;
+  for (std::size_t i_mon = 0; i_mon < m_monitor_count; ++i_mon) {
+
+    // TODO 1: SKIP if this monitor is not to be loaded!
+    g_log.information() << "Loading " << monitorNames[i_mon];
+    if (loadMonitorFlags[i_mon]) {
+      g_log.information() << "\n";
+    } else {
+      g_log.information() << " is skipped.\n";
+      continue;
+    }
+
+    // TODO 2: CHECK
+    if (ws_index == m_workspace->getNumberHistograms())
+      throw std::runtime_error(
+          "Overcedes the number of histograms in output event "
+          "workspace.");
+
+    // TODO 3: REFACTOR to get spectrumNo and momIndex
     // Do not rely on the order in path list
-    Poco::Path monPath(monitorNames[i]);
+    Poco::Path monPath(monitorNames[i_mon]);
     std::string monitorName = monPath.getBaseName();
 
     // check for monitor name - in our case will be of the form either monitor1
@@ -278,10 +233,10 @@ void LoadNexusMonitors2::exec() {
 
     detid_t monIndex = -1 * boost::lexical_cast<int>(
                                 monitorName.substr(loc + 1)); // SNS default
-    file.openGroup(monitorNames[i], "NXmonitor");
+    file.openGroup(monitorNames[i_mon], "NXmonitor");
 
     // Check if the spectra index is there
-    specid_t spectrumNo(static_cast<specid_t>(i + 1));
+    specnum_t spectrumNo(static_cast<specnum_t>(ws_index + 1));
     try {
       file.openData("spectrum_index");
       file.getData(&spectrumNo);
@@ -293,96 +248,31 @@ void LoadNexusMonitors2::exec() {
     g_log.debug() << "monIndex = " << monIndex << std::endl;
     g_log.debug() << "spectrumNo = " << spectrumNo << std::endl;
 
-    spectra_numbers[i] = spectrumNo;
-    detector_numbers[i] = monIndex;
+    spectra_numbers[ws_index] = spectrumNo;
+    detector_numbers[ws_index] = monIndex;
 
     if (useEventMon) {
-      // setup local variables
-      std::vector<uint64_t> event_index;
-      MantidVec time_of_flight;
-      std::string tof_units;
-      MantidVec seconds;
-
-      // read in the data
-      file.openData("event_index");
-      file.getData(event_index);
-      file.closeData();
-      file.openData("event_time_offset");
-      file.getDataCoerce(time_of_flight);
-      file.getAttr("units", tof_units);
-      file.closeData();
-      file.openData("event_time_zero");
-      file.getDataCoerce(seconds);
-      Mantid::Kernel::DateAndTime pulsetime_offset;
-      {
-        std::string startTime;
-        file.getAttr("offset", startTime);
-        pulsetime_offset = Mantid::Kernel::DateAndTime(startTime);
-      }
-      file.closeData();
-
-      // load up the event list
-      DataObjects::EventList &event_list = eventWS->getEventList(i);
-
-      Mantid::Kernel::DateAndTime pulsetime(0);
-      Mantid::Kernel::DateAndTime lastpulsetime(0);
-      std::size_t numEvents = time_of_flight.size();
-      bool pulsetimesincreasing = true;
-      size_t pulse_index(0);
-      size_t numPulses = seconds.size();
-      for (std::size_t j = 0; j < numEvents; ++j) {
-        while (!((j >= event_index[pulse_index]) &&
-                 (j < event_index[pulse_index + 1]))) {
-          pulse_index += 1;
-          if (pulse_index > (numPulses + 1))
-            break;
-        }
-        if (pulse_index >= (numPulses))
-          pulse_index = numPulses - 1; // fix it
-        pulsetime = pulsetime_offset + seconds[pulse_index];
-        if (pulsetime < lastpulsetime)
-          pulsetimesincreasing = false;
-        lastpulsetime = pulsetime;
-        event_list.addEventQuickly(
-            DataObjects::TofEvent(time_of_flight[j], pulsetime));
-      }
-      if (pulsetimesincreasing)
-        event_list.setSortOrder(DataObjects::PULSETIME_SORT);
-    } else // is a histogram monitor
-    {
-      // Now, actually retrieve the necessary data
-      file.openData("data");
-      MantidVec data;
-      file.getDataCoerce(data);
-      file.closeData();
-      MantidVec error(data.size()); // create vector of correct size
-
-      // Transform errors via square root
-      std::transform(data.begin(), data.end(), error.begin(),
-                     (double (*)(double))sqrt);
-
-      // Get the TOF axis
-      file.openData("time_of_flight");
-      MantidVec tof;
-      file.getDataCoerce(tof);
-      file.closeData();
-
-      m_workspace->dataX(i) = tof;
-      m_workspace->dataY(i) = data;
-      m_workspace->dataE(i) = error;
+      // load as an event monitor
+      readEventMonitorEntry(file, ws_index);
+    } else {
+      // load as a histogram monitor
+      readHistoMonitorEntry(file, ws_index);
     }
 
     file.closeGroup(); // NXmonitor
 
     // Default values, might change later.
-    m_workspace->getSpectrum(i)->setSpectrumNo(spectrumNo);
-    m_workspace->getSpectrum(i)->setDetectorID(monIndex);
+    m_workspace->getSpectrum(ws_index)->setSpectrumNo(spectrumNo);
+    m_workspace->getSpectrum(ws_index)->setDetectorID(monIndex);
 
+    ++ws_index;
     prog3.report();
   }
 
   if (useEventMon) // set the x-range to be the range for min/max events
   {
+    EventWorkspace_sptr eventWS =
+        boost::dynamic_pointer_cast<EventWorkspace>(m_workspace);
     double xmin, xmax;
     eventWS->getEventXMinMax(xmin, xmax);
 
@@ -397,7 +287,9 @@ void LoadNexusMonitors2::exec() {
   }
 
   // Fix the detector numbers if the defaults above are not correct
-  fixUDets(detector_numbers, file, spectra_numbers, m_monitor_count);
+  // fixUDets(detector_numbers, file, spectra_numbers, m_monitor_count);
+  fixUDets(detector_numbers, file, spectra_numbers,
+           m_workspace->getNumberHistograms());
 
   // Check for and ISIS compat block to get the detector IDs for the loaded
   // spectrum numbers
@@ -515,10 +407,10 @@ bool LoadNexusMonitors2::allMonitorsHaveHistoData(
  * @param spec_ids :: An array of spectrum numbers that the monitors have
  * @param nmonitors :: The size of the det_ids and spec_ids arrays
  */
-void LoadNexusMonitors2::fixUDets(boost::scoped_array<detid_t> &det_ids,
-                                  ::NeXus::File &file,
-                                  const boost::scoped_array<specid_t> &spec_ids,
-                                  const size_t nmonitors) const {
+void LoadNexusMonitors2::fixUDets(
+    boost::scoped_array<detid_t> &det_ids, ::NeXus::File &file,
+    const boost::scoped_array<specnum_t> &spec_ids,
+    const size_t nmonitors) const {
   try {
     file.openGroup("isis_vms_compat", "IXvms");
   } catch (::NeXus::Exception &) {
@@ -581,7 +473,7 @@ void LoadNexusMonitors2::runLoadLogs(const std::string filename,
  **/
 bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
   bool res = true;
-  ::NeXus::File *f = NULL;
+  ::NeXus::File *f = nullptr;
   try {
     f = new ::NeXus::File(fname);
     if (f)
@@ -628,7 +520,7 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
   size_t yLength = m_workspace->blocksize() / numPeriods;
   size_t xLength = yLength + 1;
   size_t numSpectra = m_workspace->getNumberHistograms();
-  ISISRunLogs monLogCreator(m_workspace->run(), static_cast<int>(numPeriods));
+  ISISRunLogs monLogCreator(m_workspace->run());
   for (size_t i = 0; i < numPeriods; i++) {
     // create the period workspace
     API::MatrixWorkspace_sptr wsPeriod =
@@ -636,27 +528,27 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
                                                  xLength, yLength);
 
     // assign x values - restart at start for all periods
-    for (size_t specIndex = 0; specIndex < numSpectra; specIndex++) {
-      MantidVec &outputVec = wsPeriod->dataX(specIndex);
-      const MantidVec &inputVec = m_workspace->readX(specIndex);
+    for (size_t wsIndex = 0; wsIndex < numSpectra; wsIndex++) {
+      MantidVec &outputVec = wsPeriod->dataX(wsIndex);
+      const MantidVec &inputVec = m_workspace->readX(wsIndex);
       for (size_t index = 0; index < xLength; index++) {
         outputVec[index] = inputVec[index];
       }
     }
 
     // assign y values - use the values offset by the period number
-    for (size_t specIndex = 0; specIndex < numSpectra; specIndex++) {
-      MantidVec &outputVec = wsPeriod->dataY(specIndex);
-      const MantidVec &inputVec = m_workspace->readY(specIndex);
+    for (size_t wsIndex = 0; wsIndex < numSpectra; wsIndex++) {
+      MantidVec &outputVec = wsPeriod->dataY(wsIndex);
+      const MantidVec &inputVec = m_workspace->readY(wsIndex);
       for (size_t index = 0; index < yLength; index++) {
         outputVec[index] = inputVec[(yLength * i) + index];
       }
     }
 
     // assign E values
-    for (size_t specIndex = 0; specIndex < numSpectra; specIndex++) {
-      MantidVec &outputVec = wsPeriod->dataE(specIndex);
-      const MantidVec &inputVec = m_workspace->readE(specIndex);
+    for (size_t wsIndex = 0; wsIndex < numSpectra; wsIndex++) {
+      MantidVec &outputVec = wsPeriod->dataE(wsIndex);
+      const MantidVec &inputVec = m_workspace->readE(wsIndex);
       for (size_t index = 0; index < yLength; index++) {
         outputVec[index] = inputVec[(yLength * i) + index];
       }
@@ -672,6 +564,316 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
 
   // set the output workspace
   this->setProperty("OutputWorkspace", wsGroup);
+}
+
+size_t LoadNexusMonitors2::getMonitorInfo(
+    ::NeXus::File &file, std::vector<std::string> &monitorNames,
+    size_t &numHistMon, size_t &numEventMon, size_t &numPeriods,
+    std::map<int, std::string> &monitorNumber2Name,
+    std::vector<bool> &isEventMonitors) {
+  typedef std::map<std::string, std::string> string_map_t;
+
+  // Now we want to go through and find the monitors
+  string_map_t entries = file.getEntries();
+  monitorNames.clear();
+  numHistMon = 0;
+  numEventMon = 0;
+  numPeriods = 0;
+  // we want to sort monitors by monitor_number if they are present
+  monitorNumber2Name.clear();
+  // prog1.report();
+
+  API::Progress prog2(this, 0.2, 0.6, entries.size());
+
+  string_map_t::const_iterator it = entries.begin();
+  for (; it != entries.end(); ++it) {
+    std::string entry_name(it->first);
+    std::string entry_class(it->second);
+    if ((entry_class == "NXmonitor")) {
+      monitorNames.push_back(entry_name);
+
+      // check for event/histogram monitor
+      // -> This will prefer event monitors over histogram
+      //    if they are found in the same group.
+      file.openGroup(entry_name, "NXmonitor");
+      int numEventThings =
+          0; // number of things that are eventish - should be 3
+      string_map_t inner_entries = file.getEntries(); // get list of entries
+      for (auto &entry : inner_entries) {
+        if (entry.first == "event_index") {
+          numEventThings += 1;
+          continue;
+        } else if (entry.first == "event_time_offset") {
+          numEventThings += 1;
+          continue;
+        } else if (entry.first == "event_time_zero") {
+          numEventThings += 1;
+          continue;
+        }
+      }
+
+      if (numEventThings == 3) {
+        // it is an event monitor
+        numEventMon += 1;
+        isEventMonitors.push_back(true);
+      } else {
+        // it is a histogram monitor
+        numHistMon += 1;
+        isEventMonitors.push_back(false);
+
+        if (inner_entries.find("monitor_number") != inner_entries.end()) {
+          specnum_t monitorNo;
+          file.openData("monitor_number");
+          file.getData(&monitorNo);
+          file.closeData();
+          monitorNumber2Name[monitorNo] = entry_name;
+        }
+        if ((numPeriods == 0) &&
+            (inner_entries.find("period_index") != inner_entries.end())) {
+          MantidVec period_data;
+          file.openData("period_index");
+          file.getDataCoerce(period_data);
+          file.closeData();
+          numPeriods = period_data.size();
+        }
+      }
+      file.closeGroup(); // close NXmonitor
+    }
+    prog2.report();
+  }
+
+  return monitorNames.size();
+}
+
+/** Create output workspace
+ * @brief LoadNexusMonitors2::createOutputWorkspace
+ * @param numHistMon
+ * @param numEventMon
+ * @param monitorsAsEvents
+ * @param monitorNames
+ * @param isEventMonitors
+ * @param monitorNumber2Name
+ * @param loadMonitorFlags
+ * @return
+ */
+bool LoadNexusMonitors2::createOutputWorkspace(
+    size_t numHistMon, size_t numEventMon, bool monitorsAsEvents,
+    std::vector<std::string> &monitorNames, std::vector<bool> &isEventMonitors,
+    const std::map<int, std::string> &monitorNumber2Name,
+    std::vector<bool> &loadMonitorFlags) {
+
+  // Find out using event monitor or histogram monitor
+  bool loadEventMon = getProperty("LoadEventMonitors");
+  bool loadHistoMon = getProperty("LoadHistoMonitors");
+  if (!loadEventMon && !loadHistoMon) {
+    // both of them are false is equivlanet to both of them are true
+    loadEventMon = true;
+    loadHistoMon = true;
+  }
+  // create vector for flags to load monitor or not
+  loadMonitorFlags.clear();
+  loadMonitorFlags.resize(m_monitor_count);
+
+  bool useEventMon;
+  // Create the output workspace
+  if (numHistMon == m_monitor_count) {
+    // all monitors are histogram monitors
+    useEventMon = false;
+    // with single type of monitor, there is no need to be specified right by
+    // user
+    loadHistoMon = true;
+    loadEventMon = false;
+
+  } else if (numEventMon == m_monitor_count) {
+    // all monitors are event monitors
+    useEventMon = true;
+    // with single type of monitor, there is no need to be specified right by
+    // user
+    loadHistoMon = false;
+    loadEventMon = true;
+
+  } else if (loadEventMon == loadHistoMon && !monitorsAsEvents) {
+    // Both event monitors and histogram monitors exist
+    // while the user wants the result be read from histogram data
+    // in the event monitor
+
+    // check
+    if (!m_allMonitorsHaveHistoData) {
+      std::stringstream errmsg;
+      errmsg << "There are " << numHistMon << " histogram monitors and "
+             << numEventMon << " event monitors.  But not all of the event "
+             << "monitors have 'data' entry to be converted to histogram.";
+      throw std::invalid_argument(errmsg.str());
+    }
+    // set value
+    useEventMon = false;
+  } else if (loadEventMon == loadHistoMon && monitorsAsEvents) {
+    // Both event monitors are histogram monitor exist,
+    // But the user tries to export them as event data.
+    std::stringstream errmsg;
+    errmsg << "There are " << numHistMon << " histogram monitors and "
+           << numEventMon << " event monitors.  It is not allowed to "
+           << "read all of them as event monitor.";
+    throw std::invalid_argument(errmsg.str());
+  } else if (loadEventMon) {
+    // coexistence of event monitor and histo monitor. load event monitor only.
+    useEventMon = true;
+  } else {
+    // coexistence of event monitor and histo monitor. load histo monitor only.
+    useEventMon = false;
+  }
+
+  // set up the flags to load monitor
+  if (useEventMon) {
+    // load event
+    for (size_t i_mon = 0; i_mon < m_monitor_count; ++i_mon) {
+      if (isEventMonitors[i_mon])
+        loadMonitorFlags[i_mon] = true;
+      else
+        loadMonitorFlags[i_mon] = false;
+    }
+  } else {
+    // load histogram
+    for (size_t i_mon = 0; i_mon < m_monitor_count; ++i_mon) {
+      if (!isEventMonitors[i_mon]) {
+        // histo
+        loadMonitorFlags[i_mon] = true;
+      } else if (loadEventMon && loadHistoMon) {
+        // event mode but load both
+        loadMonitorFlags[i_mon] = true;
+      } else {
+        loadMonitorFlags[i_mon] = false;
+      }
+    }
+  }
+
+  // create workspace
+  if (useEventMon) {
+    // Use event monitors and create event workspace
+    // check
+    if (numEventMon == 0)
+      throw std::runtime_error(
+          "Loading event data. Trying to load event data but failed to "
+          "find event monitors."
+          "This file may be corrupted or it may not be supported");
+
+    // only used if using event monitors
+    EventWorkspace_sptr eventWS = EventWorkspace_sptr(new EventWorkspace());
+    eventWS->initialize(numEventMon, 1, 1);
+
+    // Set the units
+    eventWS->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    eventWS->setYUnit("Counts");
+    m_workspace = eventWS;
+  } else {
+    // Use histogram monitors and event monitors' histogram data.
+    // And thus create a Workspace2D.
+    // check
+    if (m_monitor_count == 0)
+      throw std::runtime_error(
+          "Not loading event data. Trying to load histogram data but failed to "
+          "find monitors with histogram data or could not interpret the data. "
+          "This file may be corrupted or it may not be supported");
+
+    // Create
+    size_t numSpec(numHistMon);
+    if (loadEventMon)
+      numSpec = m_monitor_count;
+
+    m_workspace =
+        API::WorkspaceFactory::Instance().create("Workspace2D", numSpec, 1, 1);
+    // if there is a distinct monitor number for each monitor sort them by that
+    // number
+    if (monitorNumber2Name.size() == monitorNames.size()) {
+      monitorNames.clear();
+      for (auto &numberName : monitorNumber2Name) {
+        monitorNames.push_back(numberName.second);
+      }
+    }
+  }
+
+  return useEventMon;
+}
+
+void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file, size_t i) {
+  // setup local variables
+  EventWorkspace_sptr eventWS =
+      boost::dynamic_pointer_cast<EventWorkspace>(m_workspace);
+
+  std::vector<uint64_t> event_index;
+  MantidVec time_of_flight;
+  std::string tof_units;
+  MantidVec seconds;
+
+  // read in the data
+  file.openData("event_index");
+  file.getData(event_index);
+  file.closeData();
+  file.openData("event_time_offset");
+  file.getDataCoerce(time_of_flight);
+  file.getAttr("units", tof_units);
+  file.closeData();
+  file.openData("event_time_zero");
+  file.getDataCoerce(seconds);
+  Mantid::Kernel::DateAndTime pulsetime_offset;
+  {
+    std::string startTime;
+    file.getAttr("offset", startTime);
+    pulsetime_offset = Mantid::Kernel::DateAndTime(startTime);
+  }
+  file.closeData();
+
+  // load up the event list
+  DataObjects::EventList &event_list = eventWS->getEventList(i);
+
+  Mantid::Kernel::DateAndTime pulsetime(0);
+  Mantid::Kernel::DateAndTime lastpulsetime(0);
+  std::size_t numEvents = time_of_flight.size();
+  bool pulsetimesincreasing = true;
+  size_t pulse_index(0);
+  size_t numPulses = seconds.size();
+  for (std::size_t j = 0; j < numEvents; ++j) {
+    while (!((j >= event_index[pulse_index]) &&
+             (j < event_index[pulse_index + 1]))) {
+      pulse_index += 1;
+      if (pulse_index > (numPulses + 1))
+        break;
+    }
+    if (pulse_index >= (numPulses))
+      pulse_index = numPulses - 1; // fix it
+    pulsetime = pulsetime_offset + seconds[pulse_index];
+    if (pulsetime < lastpulsetime)
+      pulsetimesincreasing = false;
+    lastpulsetime = pulsetime;
+    event_list.addEventQuickly(
+        DataObjects::TofEvent(time_of_flight[j], pulsetime));
+  }
+  if (pulsetimesincreasing)
+    event_list.setSortOrder(DataObjects::PULSETIME_SORT);
+}
+
+void LoadNexusMonitors2::readHistoMonitorEntry(NeXus::File &file, size_t i) {
+  // Now, actually retrieve the necessary data
+  file.openData("data");
+  MantidVec data;
+  file.getDataCoerce(data);
+  file.closeData();
+  MantidVec error(data.size()); // create vector of correct size
+
+  // Transform errors via square root
+  std::transform(data.begin(), data.end(), error.begin(),
+                 (double (*)(double))sqrt);
+
+  // Get the TOF axis
+  file.openData("time_of_flight");
+  MantidVec tof;
+  file.getDataCoerce(tof);
+  file.closeData();
+
+  m_workspace->dataX(i) = tof;
+  m_workspace->dataY(i) = data;
+  m_workspace->dataE(i) = error;
 }
 
 } // end DataHandling

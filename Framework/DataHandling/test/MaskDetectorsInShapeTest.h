@@ -5,6 +5,7 @@
 
 #include "MantidDataHandling/MaskDetectorsInShape.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FrameworkManager.h"
 
@@ -19,7 +20,7 @@ public:
 
   MaskDetectorsInShapeTest() { loadTestWS(); }
 
-  ~MaskDetectorsInShapeTest() {
+  ~MaskDetectorsInShapeTest() override {
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 

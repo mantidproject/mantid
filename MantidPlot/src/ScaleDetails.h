@@ -54,7 +54,7 @@ class ScaleDetails: public QWidget
     //details for each axis in the Scale Tab
 public:
   ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis, QWidget *parent = 0); // populate and fill in with existing data
-  virtual ~ScaleDetails();
+  ~ScaleDetails() override;
   void initWidgets();
   bool modified(){return m_modified;}
   void apply();

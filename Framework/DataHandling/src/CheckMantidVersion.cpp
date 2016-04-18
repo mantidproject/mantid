@@ -6,7 +6,7 @@
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeParser.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 // jsoncpp
 #include <json/json.h>
@@ -175,9 +175,10 @@ CheckMantidVersion::cleanVersionTag(const std::string &versionTag) const {
 std::vector<int>
 CheckMantidVersion::splitVersionString(const std::string &versionString) const {
   std::vector<int> retVal;
-  Poco::StringTokenizer tokenizer(versionString, ".",
-                                  Poco::StringTokenizer::TOK_TRIM |
-                                      Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+  Mantid::Kernel::StringTokenizer tokenizer(
+      versionString, ".",
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   auto h = tokenizer.begin();
 
   for (; h != tokenizer.end(); ++h) {
@@ -240,11 +241,11 @@ std::string CheckMantidVersion::getVersionsFromGitHub(const std::string &url) {
   std::ostringstream os;
   int tzd = 0;
 
-  inetHelper.headers().insert(std::make_pair(
+  inetHelper.headers().emplace(
       "if-modified-since",
       Poco::DateTimeFormatter::format(
           Poco::DateTimeParser::parse(MantidVersion::releaseDate(), tzd),
-          Poco::DateTimeFormat::HTTP_FORMAT)));
+          Poco::DateTimeFormat::HTTP_FORMAT));
   inetHelper.sendRequest(url, os);
   std::string retVal = os.str();
 

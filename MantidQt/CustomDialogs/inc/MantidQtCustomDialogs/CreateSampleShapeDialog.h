@@ -68,7 +68,7 @@ public:
   CreateSampleShapeDialog(QWidget *parent = 0);
 
   /// Destructor
-  ~CreateSampleShapeDialog();
+  ~CreateSampleShapeDialog() override;
 
 private slots:
   /// Context menu request
@@ -92,9 +92,9 @@ private slots:
 
 private:
   /// Initialize the layout
-  virtual void initLayout();
+  void initLayout() override;
   /// Get the input out of the dialog
-  virtual void parseInput();
+  void parseInput() override;
   /// Find the parent
   BinaryTreeWidgetItem* getSelectedItem();
   /// Create a details widget based upon the shape name given
@@ -164,7 +164,8 @@ public:
   void traverseInPostOrder(BinaryTreeWidgetItem* node, QList<BinaryTreeWidgetItem*> & expression);
 
   /// Called when the data in the model is changed
-  void dataChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight );
+  void dataChanged(const QModelIndex &topLeft,
+                   const QModelIndex &bottomRight) override;
 
 signals:
   /// Emitted when data has changed
@@ -183,14 +184,15 @@ public:
   ComboBoxDelegate(QWidget *parent = 0);
   /// Create an editor for the item
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
-			const QModelIndex &index) const;
+                        const QModelIndex &index) const override;
   ///Set the data for the editor when it has been created
-  void setEditorData(QWidget *editor, const QModelIndex &index) const;
+  void setEditorData(QWidget *editor, const QModelIndex &index) const override;
   ///Set the data for the model when editing has finished
-  void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
+  void setModelData(QWidget *editor, QAbstractItemModel *model,
+                    const QModelIndex &index) const override;
   /// Ensure that the editor has the correct geometry when it is created
-  void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, 
-			    const QModelIndex &index) const;
+  void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
+                            const QModelIndex &index) const override;
 };
 
 }

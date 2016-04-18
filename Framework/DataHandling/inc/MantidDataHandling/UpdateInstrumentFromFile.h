@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/IDetector.h"
 #include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
@@ -62,32 +63,32 @@ public:
   UpdateInstrumentFromFile();
 
   /// Destructor
-  ~UpdateInstrumentFromFile() {}
+  ~UpdateInstrumentFromFile() override {}
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "UpdateInstrumentFromFile"; }
+  const std::string name() const override { return "UpdateInstrumentFromFile"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Updates detector positions initially loaded in from the Instrument "
            "Definition File (IDF) with information from the provided file.";
   }
 
   /// Algorithm's alias for the old UpdateInstrumentFromRaw
-  virtual const std::string alias() const { return "UpdateInstrumentFromRaw"; }
+  const std::string alias() const override { return "UpdateInstrumentFromRaw"; }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Instrument;DataHandling\\Raw";
   }
 
 private:
   /// Overwrites Algorithm method. Does nothing at present
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 
   /// Assumes the file is a raw file
   void updateFromRaw(const std::string &filename);

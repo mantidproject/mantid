@@ -1,7 +1,11 @@
 #include "MantidDataHandling/LoadSINQFocus.h"
+
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -26,7 +30,7 @@ LoadSINQFocus::LoadSINQFocus()
     : m_instrumentName(""), m_instrumentPath(), m_localWorkspace(),
       m_numberOfTubes(0), m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
       m_numberOfHistograms(0), m_loader() {
-  m_supportedInstruments.push_back("FOCUS");
+  m_supportedInstruments.emplace_back("FOCUS");
   this->useAlgorithm("LoadSINQ");
   this->deprecatedDate("2013-10-28");
 }
@@ -70,12 +74,13 @@ int LoadSINQFocus::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadSINQFocus::init() {
-  declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".nxs", ".hdf"}),
-      "The name of the Nexus file to load");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the output workspace");
+  const std::vector<std::string> exts{".nxs", ".hdf"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
+                  "The name of the Nexus file to load");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the output workspace");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -117,7 +122,7 @@ void LoadSINQFocus::setInstrumentName(NeXus::NXEntry &entry) {
   }
   m_instrumentName =
       m_loader.getStringFromNexusPath(entry, m_instrumentPath + "/name");
-  size_t pos = m_instrumentName.find(" ");
+  size_t pos = m_instrumentName.find(' ');
   m_instrumentName = m_instrumentName.substr(0, pos);
 }
 

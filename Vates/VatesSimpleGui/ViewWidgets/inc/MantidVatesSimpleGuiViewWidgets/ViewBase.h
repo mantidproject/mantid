@@ -63,7 +63,7 @@ public:
   ViewBase(QWidget *parent = 0, RebinnedSourcesManager* rebinnedSourcesManager = 0);
 
   /// Default destructor.
-  virtual ~ViewBase() {}
+  ~ViewBase() override {}
 
   /// Poll the view to set status for mode control buttons.
   virtual void checkView(ModeControlWidget::Views initialView);
@@ -81,7 +81,7 @@ public:
   /// Retrieve the current time step.
   virtual double getCurrentTimeStep();
   /// Find the number of true sources in the pipeline.
-  unsigned int getNumSources();
+  long long getNumSources();
   /// Get the active ParaView source.
   pqPipelineSource *getPvActiveSrc();
   /**
@@ -145,6 +145,8 @@ public:
   void setColorScaleLock(Mantid::VATES::ColorScaleLock* colorScaleLock);
   QPointer<pqPipelineSource> origSrc; ///< The original source
   QPointer<pqPipelineRepresentation> origRep; ///< The original source representation
+  /// Has active source
+  bool hasActiveSource();
 
 public slots:
   /// Set the color scale back to the original bounds.

@@ -36,7 +36,7 @@ SaveIsawPeaks::~SaveIsawPeaks() {}
 /** Initialize the algorithm's properties.
  */
 void SaveIsawPeaks::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "An input PeaksWorkspace with an instrument.");
@@ -44,16 +44,13 @@ void SaveIsawPeaks::init() {
   declareProperty("AppendFile", false, "Append to file if true.\n"
                                        "If false, new file (default).");
 
-  std::vector<std::string> exts;
-  exts.push_back(".peaks");
-  exts.push_back(".integrate");
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save,
-                                   {".peaks", ".integrate"}),
+  const std::vector<std::string> exts{".peaks", ".integrate"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Save, exts),
                   "Path to an ISAW-style peaks or integrate file to save.");
 
   declareProperty(
-      new WorkspaceProperty<Workspace2D>(
+      make_unique<WorkspaceProperty<Workspace2D>>(
           "ProfileWorkspace", "", Direction::Input, PropertyMode::Optional),
       "An optional Workspace2D of profiles from integrating cylinder.");
 }
@@ -80,7 +77,7 @@ void SaveIsawPeaks::exec() {
   // workspace indices of it
   typedef std::map<int, std::vector<size_t>> bankMap_t;
   typedef std::map<int, bankMap_t> runMap_t;
-  std::set<int> uniqueBanks;
+  std::unordered_set<int> uniqueBanks;
   runMap_t runMap;
   for (size_t i = 0; i < peaks.size(); ++i) {
     Peak &p = peaks[i];
@@ -169,10 +166,8 @@ void SaveIsawPeaks::exec() {
              "  CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY "
              "     UpZ" << std::endl;
       // Here would save each detector...
-      std::set<int>::iterator it;
-      for (it = uniqueBanks.begin(); it != uniqueBanks.end(); ++it) {
+      for (const auto bank : uniqueBanks) {
         // Build up the bank name
-        int bank = *it;
         std::ostringstream mess;
         if (bankPart == "bank")
           mess << "bank" << bank;
@@ -302,8 +297,7 @@ void SaveIsawPeaks::exec() {
         out << header << std::endl;
 
         // Go through each peak at this run / bank
-        for (size_t i = 0; i < ids.size(); i++) {
-          size_t wi = ids[i];
+        for (auto wi : ids) {
           Peak &p = peaks[wi];
 
           // Sequence (run) number

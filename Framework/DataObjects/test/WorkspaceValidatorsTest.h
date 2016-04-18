@@ -2,6 +2,7 @@
 #define WORKSPACEVALIDATORSTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -55,7 +56,7 @@ public:
     ws2->isDistribution(true);
   }
 
-  ~WorkspaceValidatorsTest() {
+  ~WorkspaceValidatorsTest() override {
     delete wavUnitVal;
     delete anyUnitVal;
     delete histVal;
