@@ -32,13 +32,13 @@ class VesuvioThickness(PythonAlgorithm):
         self.declareProperty("Amplitudes", "",
                              doc="A string list of the amplitude of the peaks")
 
-        self.declareProperty("TransmissionGuess", 241,
+        self.declareProperty("TransmissionGuess", 1.0,
                              doc="Initial guess for the transmission")
 
-        self.declareProperty("Thickness", 0.5,
+        self.declareProperty("Thickness", 5.0,
                              doc="The thickness of the sample")
 
-        self.declareProperty("NumberDensity", 10.0,
+        self.declareProperty("NumberDensity", 1.0,
                              doc="The Number Density of the sample material")
 
         self.declareProperty(ITableWorkspaceProperty("DensityWorkspace", "",
@@ -54,34 +54,29 @@ class VesuvioThickness(PythonAlgorithm):
 
 
     def _get_properties(self):
-        self._masses =self.getPropertyValue("Masses").split(',')
-        self._masses = [float(mass) for mass in self._masses]
-        self._amplitudes = self.getPropertyValue("Amplitudes").split(',')
-        self._amplitudes = [float(amp) for amp in self._amplitudes]
-        self._transmission_guess = self.getProperty("TransmissionGuess").value
-        self._thickness = self.getProperty("Thickness").value
-        self._number_density = self.getProperty("NumberDensity").value
-
+        i = 0
 
     def validateInputs(self):
         self._get_properties()
         issues = dict()
 
-        num_masses = len(self._masses)
+        '''num_masses = len(self._masses)
         num_amplitudes = len(self._amplitudes)
         if num_masses != num_amplitudes:
             issues['Masses'] = ('The number of masses: %d, ' % num_masses \
-                               + 'is not equal to the number of amplitudes: %d' % num_amplitudes)
+                               + 'is not equal to the number of amplitudes: %d' % num_amplitudes)'''
 
         return issues
 
 
     def PyExec(self):
-        self._thickness /= 200.0 # conversion to meters and then (1/2)
-
-        scatter_length = []
-        for i in range(len(self._amplitudes)):
-            scatter_length.append(math.sqrt((self._amplitudes[i]) / (4.0 * math.pi)))
+        Mass = self.getPropertyValue("Masses").split(',')
+        Mass = np.asarray([float(mass) for mass in Mass])
+        Amplitudes = self.getPropertyValue("Amplitudes").split(',')
+        Amplitudes = np.asarray([float(amp) for amp in Amplitudes])
+        trans = self.getProperty("TransmissionGuess").value
+        d = self.getProperty("Thickness").value
+        dens = self.getProperty("NumberDensity").value
 
         # initialise table workspaces
         density_guesses_tbl_ws = ms.CreateEmptyTableWorkspace()
@@ -91,49 +86,45 @@ class VesuvioThickness(PythonAlgorithm):
         trans_guesses_tbl_ws.addColumn("str","Iteration")
         trans_guesses_tbl_ws.addColumn("double","Transmission")
 
+
+
+        d = d / 200.0
+
+        FOUR_PI = 4.0 * math.pi
+        AMP_OVER_FOUR_PI = np.divide(Amplitudes, FOUR_PI)
+        b = np.sqrt(AMP_OVER_FOUR_PI)
+
+
         for i in range(10):
-            logger.warning("************ITERATION == " + str(i) + "**********************")
-            total_masses = [mass * 1.66054e-24 for mass in self._masses] # conversion of masses to (kg)
-            total_mass = sum(total_masses)
-            logger.warning("total_mass = " + str(total_mass))
-            ndens = self._number_density / (total_mass * 1.0e6)
-            logger.warning("_number_density = " + str(self._number_density))
-            logger.warning("ndens = " + str(ndens))
-            xst = self.free_xst(self._masses, scatter_length) # xst = cross-section_total
-            logger.warning("xst = " + str(xst))
-            attenuation_length = ndens * xst * 1.0e-28
+            TMass = Mass*1.66054e-24
+            TMass = sum(TMass)
+            ndens = dens/TMass*1e6
+            xst = self.free_xst(Mass, b)
+            mu = ndens*xst*1e-28
 
-            logger.warning("attenuation_length = " + str(attenuation_length))
-            logger.warning("_thickness = " + str(self._thickness))
-            dmur = 2.0 * attenuation_length * self._thickness
-            logger.warning("dmur = " +str(dmur))
+            dmur = 2*mu*d
             strans = math.exp(-dmur)
-            logger.warning("strans = " + str(strans))
-            logger.warning("num_dens = " + str(self._number_density))
-
-
-            self._number_density = (1.0-self._transmission_guess) / (1.0-strans) * self._number_density
+            dens = (1-trans)/(1-strans)*dens
 
             # Add guesses to workspaces
-            density_guesses_tbl_ws.addRow([str(i+1), self._number_density])
+            density_guesses_tbl_ws.addRow([str(i+1), dens])
             trans_guesses_tbl_ws.addRow([str(i+1), strans])
+            logger.warning("Iteration %d : dens = %f " % (i, dens))
+            logger.warning("Iteration %d : strans = %f " % (i, strans))
 
         self.setProperty("DensityWorkspace", density_guesses_tbl_ws)
         self.setProperty("TransmissionWorkspace", trans_guesses_tbl_ws)
 
 
-    def free_xst(self, masses, scatter_length):
+    def free_xst(self, Mass, b):
         """
         Analytic expression for integration of PDCS over E1 and solid angle
         """
-        G = [1.00867 / mass for mass in masses]
-        cross_section = [4 * math.pi * scat_len for scat_len in scatter_length]
-        cross_sec_sq = sq(cross_section)
-        G_plus_1 = [g + 1 for g in G]
-        sq_G = sq(G_plus_1)
-        xs = []
-        for i in range(len(sq_G)):
-            xs.append(cross_sec_sq[i]/sq_G[i])
+
+        G = 1.00867/Mass
+        FOUR_PI = 4*math.pi
+        B_SQUARED = np.square(b)
+        xs = np.divide((FOUR_PI * B_SQUARED),(np.square(G+1)))
         xs_sum = sum(xs)
         return xs_sum
 
