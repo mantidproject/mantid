@@ -27,6 +27,7 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/MuonFitDataSelector.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MuonSequentialFitDialog.h"
 
@@ -2232,6 +2233,9 @@ void MuonAnalysis::loadFittings() {
   m_uiForm.fitBrowser->setWindowTitle("Fit Function");
   // Make sure that the window can't be moved or closed within the tab.
   m_uiForm.fitBrowser->setFeatures(QDockWidget::NoDockWidgetFeatures);
+  // Add Data Selector widget to the fit tab
+  m_dataSelector = new MuonFitDataSelector(m_uiForm.fitBrowser);
+  m_uiForm.verticalLayoutFitBrowser->addWidget(m_dataSelector);
 }
 
 /**

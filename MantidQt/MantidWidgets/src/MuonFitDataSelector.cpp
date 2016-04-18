@@ -47,7 +47,6 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber,
  * selectedPeriodsChanged
  */
 void MuonFitDataSelector::setUpConnections() {
-  throw std::runtime_error("TODO: implement function!");
   connect(m_ui.runs, SIGNAL(filesFound()), this,
           SIGNAL(workspacePropertiesChanged()));
   connect(m_ui.txtWSIndex, SIGNAL(editingFinished()), this,

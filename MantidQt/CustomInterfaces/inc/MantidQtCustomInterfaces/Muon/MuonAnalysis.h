@@ -20,10 +20,11 @@
 
 #include <map>
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
+namespace MantidQt {
+namespace MantidWidgets {
+class MuonFitDataSelector;
+}
+namespace CustomInterfaces {
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -524,6 +525,9 @@ private:
 
   /// Get period number string in subtracted set
   std::string getSubtractedPeriods() const;
+
+  /// Data selector widget for fit tab
+  MantidQt::MantidWidgets::MuonFitDataSelector *m_dataSelector;
 };
 }
 }
