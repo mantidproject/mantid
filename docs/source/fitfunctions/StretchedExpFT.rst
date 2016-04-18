@@ -89,7 +89,7 @@ Output:
 
 .. testoutput:: ExampleStretchedExpFT
 
-   The optimal parameters are tau=57.2 and beta=0.68
+   The optimal parameters are tau=57.0 and beta=0.67
 
 .. categories::
 
