@@ -77,6 +77,7 @@ set ( SRC_FILES
 	src/Muon/ALCPeakFittingView.cpp
 	src/Muon/IO_MuonGrouping.cpp
 	src/Muon/MuonAnalysis.cpp
+	src/Muon/MuonAnalysisFitDataHelper.cpp
 	src/Muon/MuonAnalysisFitDataTab.cpp
 	src/Muon/MuonAnalysisHelper.cpp
 	src/Muon/MuonAnalysisOptionTab.cpp
@@ -230,6 +231,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h
 	inc/MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.h
+	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataHelper.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
@@ -280,12 +282,15 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/QtReflMainView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflGenericDataProcessorPresenterFactory.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflCommandBase.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflExportTableCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMainView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMeasurementItemSource.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflOptionsCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h
@@ -538,6 +543,7 @@ set ( TEST_FILES
 	ImageROIPresenterTest.h
 	ImggFormatsConvertPresenterTest.h
 	MeasurementItemTest.h
+	MuonAnalysisFitDataHelperTest.h
 	MuonAnalysisHelperTest.h
 	ParseKeyValueStringTest.h
 	ReflLegacyTransferStrategyTest.h
