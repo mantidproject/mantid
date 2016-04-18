@@ -35,5 +35,20 @@ void MuonAnalysisFitDataHelper::handleWorkspacePropertiesChanged() {
   m_fitBrowser->setEndX(end);
 }
 
+/**
+ * Called when data selector reports "selected groups changed"
+ * Updates WS name
+ */
+void MuonAnalysisFitDataHelper::handleSelectedGroupsChanged() {
+  // TODO: implement this
+}
+
+/**
+ * Called when data selector reports "selected periods changed"
+ * Updates WS name
+ */
+void MuonAnalysisFitDataHelper::handleSelectedPeriodsChanged() {
+  // TODO: implement this
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -43,6 +43,10 @@ public:
       MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector);
   /// Handles "workspace properties changed"
   void handleWorkspacePropertiesChanged();
+  /// Handles "selected groups changed"
+  void handleSelectedGroupsChanged();
+  /// Handles "selected periods changed"
+  void handleSelectedPeriodsChanged();
 
 private:
   /// Fit browser to update (non-owning pointer)

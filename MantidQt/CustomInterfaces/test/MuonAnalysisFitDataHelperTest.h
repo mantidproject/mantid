@@ -81,6 +81,10 @@ public:
     m_helper->handleWorkspacePropertiesChanged();
   }
 
+  void test_handleSelectedGroupsChanged() { TS_FAIL("Test not implemented!"); }
+
+  void test_handleSelectedPeriodsChanged() { TS_FAIL("Test not implemented!"); }
+
 private:
   MockDataSelector *m_dataSelector;
   MockFitBrowser *m_fitBrowser;
