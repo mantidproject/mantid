@@ -11,8 +11,7 @@ namespace MantidWidgets {
 
 /** MuonFitDataSelector : Selects runs, groups, periods for fit
 
-  This is the lightweight view for the widget. All the work is done by
-  the presenter MuonFitDataPresenter.
+  Widget to select data to fit for MuonAnalysis
 
   Implements IMuonFitDataSelector
 

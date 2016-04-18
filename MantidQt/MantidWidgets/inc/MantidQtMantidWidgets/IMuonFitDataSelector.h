@@ -15,6 +15,7 @@ namespace MantidWidgets {
  */
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IMuonFitDataSelector {
 public:
+  virtual ~IMuonFitDataSelector() {}
   virtual QStringList getRuns() const = 0;
   virtual unsigned int getWorkspaceIndex() const = 0;
   virtual double getStartTime() const = 0;

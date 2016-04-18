@@ -235,6 +235,7 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/InstrumentView/Viewport.h
 	inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
 	inc/MantidQtMantidWidgets/IMuonFitDataSelector.h
+	inc/MantidQtMantidWidgets/IWorkspaceFitControl.h
 	inc/MantidQtMantidWidgets/MuonFitDataSelector.h
 	inc/MantidQtMantidWidgets/WidgetDllOption.h
 )

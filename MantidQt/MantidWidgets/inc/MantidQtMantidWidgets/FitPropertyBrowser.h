@@ -16,6 +16,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtMantidWidgets/IWorkspaceFitControl.h"
 
 
     /* Forward declarations */
@@ -54,9 +55,11 @@ class PropertyHandler;
  * @date 13/11/2009
  */
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FitPropertyBrowser: public QDockWidget, public Mantid::API::AlgorithmObserver,
-                          public MantidQt::API::WorkspaceObserver
-{
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FitPropertyBrowser
+    : public QDockWidget,
+      public Mantid::API::AlgorithmObserver,
+      public MantidQt::API::WorkspaceObserver,
+      public IWorkspaceFitControl {
   Q_OBJECT
 public:
   /// Constructor
@@ -124,11 +127,11 @@ public:
   /// Get the input workspace name
   std::string workspaceName()const;
   /// Set the input workspace name
-  virtual void setWorkspaceName(const QString& wsName);
+  virtual void setWorkspaceName(const QString &wsName) override;
   /// Get workspace index
   int workspaceIndex()const;
   /// Set workspace index
-  void setWorkspaceIndex(int i);
+  void setWorkspaceIndex(int i) override;
   /// Get the output name
   std::string outputName()const;
   /// Set the output name
@@ -151,11 +154,11 @@ public:
   /// Get the start X
   double startX()const;
   /// Set the start X
-  void setStartX(double);
+  void setStartX(double start) override;
   /// Get the end X
   double endX()const;
   /// Set the end X
-  void setEndX(double);
+  void setEndX(double end) override;
   /// Set LogValue for PlotPeakByLogValue
   void setLogValue(const QString& lv = "");
   /// Get LogValue
