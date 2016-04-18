@@ -31,7 +31,8 @@ namespace DataHandling {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_DATAHANDLING_DLL LoadNXcanSAS : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadNXcanSAS
+    : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Constructor
   LoadNXcanSAS();
@@ -46,9 +47,7 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling\\Nexus";
-  }
+  const std::string category() const override { return "DataHandling\\Nexus"; }
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;

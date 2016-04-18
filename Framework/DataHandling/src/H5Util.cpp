@@ -18,8 +18,8 @@ Mantid::Kernel::Logger g_log("H5Util");
 
 const std::string NX_ATTR_CLASS("NX_class");
 
-
-H5::DataSet writeScalarStrDataSet(Group &group, const std::string &name, const std::string &value) {
+H5::DataSet writeScalarStrDataSet(Group &group, const std::string &name,
+                                  const std::string &value) {
   StrType dataType(0, value.length() + 1);
   DataSpace dataSpace = getDataSpace(1);
   H5::DataSet data = group.createDataSet(name, dataType, dataSpace);
@@ -95,7 +95,7 @@ DSetCreatPropList setCompressionAttributes(const std::size_t length,
   return propList;
 }
 
-template<typename LocationType>
+template <typename LocationType>
 void writeStrAttribute(LocationType &location, const std::string &name,
                        const std::string &value) {
   StrType attrType(0, H5T_VARIABLE);
@@ -108,12 +108,13 @@ void write(Group &group, const std::string &name, const std::string &value) {
   writeScalarStrDataSet(group, name, value);
 }
 
-void writeWithStrAttributes(H5::Group &group, const std::string &name, const std::string &value,
-                            const std::map<std::string,std::string>& attributes) {
-   auto data = writeScalarStrDataSet(group, name, value);
-   for (const auto& attribute : attributes) {
-      writeStrAttribute(data, attribute.first, attribute.second);
-   }
+void writeWithStrAttributes(
+    H5::Group &group, const std::string &name, const std::string &value,
+    const std::map<std::string, std::string> &attributes) {
+  auto data = writeScalarStrDataSet(group, name, value);
+  for (const auto &attribute : attributes) {
+    writeStrAttribute(data, attribute.first, attribute.second);
+  }
 }
 
 template <typename NumT>
@@ -127,7 +128,6 @@ void writeArray1D(Group &group, const std::string &name,
   auto data = group.createDataSet(name, dataType, dataSpace, propList);
   data.write(values.data(), dataType);
 }
-
 
 // -------------------------------------------------------------------
 // read methods
@@ -162,15 +162,14 @@ std::string readString(H5::DataSet &dataset) {
   return value;
 }
 
-
-template<typename LocationType>
-std::string readAttributeAsString(LocationType &location, const std::string &attributeName) {
+template <typename LocationType>
+std::string readAttributeAsString(LocationType &location,
+                                  const std::string &attributeName) {
   auto attribute = location.openAttribute(attributeName);
   std::string value;
   attribute.read(attribute.getDataType(), value);
   return value;
 }
-
 
 template <typename NumT>
 std::vector<NumT> readArray1DCoerce(H5::Group &group, const std::string &name) {
@@ -241,27 +240,25 @@ template <typename NumT> std::vector<NumT> readArray1DCoerce(DataSet &dataset) {
   throw DataTypeIException();
 }
 
-
 // -------------------------------------------------------------------
 // instantiations for writeStrAttribute
 // -------------------------------------------------------------------
-template MANTID_DATAHANDLING_DLL
-void writeStrAttribute(H5::Group &location, const std::string &name,
-                       const std::string &value);
+template MANTID_DATAHANDLING_DLL void
+writeStrAttribute(H5::Group &location, const std::string &name,
+                  const std::string &value);
 
-template MANTID_DATAHANDLING_DLL
-void writeStrAttribute(H5::DataSet &location, const std::string &name,
-                       const std::string &value);
+template MANTID_DATAHANDLING_DLL void
+writeStrAttribute(H5::DataSet &location, const std::string &name,
+                  const std::string &value);
 
 // -------------------------------------------------------------------
 // instantiations for readAttributeAsString
 // -------------------------------------------------------------------
-template MANTID_DATAHANDLING_DLL
-std::string readAttributeAsString(H5::Group &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::string
+readAttributeAsString(H5::Group &location, const std::string &attributeName);
 
-template MANTID_DATAHANDLING_DLL
-std::string readAttributeAsString(H5::DataSet &location, const std::string &attributeName);
-
+template MANTID_DATAHANDLING_DLL std::string
+readAttributeAsString(H5::DataSet &location, const std::string &attributeName);
 
 // -------------------------------------------------------------------
 // instantiations for writeArray1D
