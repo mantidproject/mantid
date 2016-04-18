@@ -2,7 +2,7 @@
 #define MANTID_HISTOGRAMDATA_HISTOGRAMX_H_
 
 #include "MantidHistogramData/DllConfig.h"
-#include "MantidHistogramData/HistogramData.h"
+#include "MantidHistogramData/FixedLengthVector.h"
 #include "MantidHistogramData/ConstIterable.h"
 #include "MantidHistogramData/Points.h"
 #include "MantidHistogramData/BinEdges.h"
@@ -33,7 +33,8 @@ namespace HistogramData {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_HISTOGRAMDATA_DLL HistogramX : public HistogramData<HistogramX> {
+class MANTID_HISTOGRAMDATA_DLL HistogramX
+    : public FixedLengthVector<HistogramX> {
 public:
   explicit HistogramX(const Points &points);
   explicit HistogramX(const BinEdges &binEdges);

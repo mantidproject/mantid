@@ -1,5 +1,5 @@
-#ifndef MANTID_HISTOGRAMDATA_HISTOGRAMDATA_H_
-#define MANTID_HISTOGRAMDATA_HISTOGRAMDATA_H_
+#ifndef MANTID_HISTOGRAMDATA_FIXEDLENGTHVECTOR_H_
+#define MANTID_HISTOGRAMDATA_FIXEDLENGTHVECTOR_H_
 
 #include "MantidHistogramData/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
@@ -30,12 +30,12 @@ namespace HistogramData {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <class T> class HistogramData {
+template <class T> class FixedLengthVector {
 public:
-  explicit HistogramData(const Kernel::cow_ptr<std::vector<double>> &data)
+  explicit FixedLengthVector(const Kernel::cow_ptr<std::vector<double>> &data)
       : m_data(data) {
     if (!m_data)
-      throw std::logic_error("HistogramData: Cannot init with null data");
+      throw std::logic_error("FixedLengthVector: Cannot init with null data");
   }
 
   explicit operator bool() const { return m_data.operator bool(); }
@@ -48,7 +48,7 @@ public:
 protected:
   // This is used as base class only, cannot delete polymorphically, so
   // destructor is protected.
-  ~HistogramData() = default;
+  ~FixedLengthVector() = default;
 
   Kernel::cow_ptr<std::vector<double>> m_data;
 };
@@ -56,4 +56,4 @@ protected:
 } // namespace HistogramData
 } // namespace Mantid
 
-#endif /* MANTID_HISTOGRAMDATA_HISTOGRAMDATA_H_ */
+#endif /* MANTID_HISTOGRAMDATA_FIXEDLENGTHVECTOR_H_ */
