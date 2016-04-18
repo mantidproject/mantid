@@ -18,6 +18,7 @@ if ( CXXTEST_FOUND )
             DataObjects
             Geometry
             Kernel
+			MantidWidgets
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${QT_LIBRARIES}
