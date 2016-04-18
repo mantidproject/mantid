@@ -73,6 +73,12 @@ public slots:
   void setWorkspaceDetails(int runNumber, const QString &instName) override;
   /// Set names of available groups
   void setAvailableGroups(const QStringList &groupNames) override;
+  /// Set selected workspace index
+  void setWorkspaceIndex(unsigned int index);
+  /// Set start time for fit
+  void setStartTime(double start);
+  /// Set end time for fit
+  void setEndTime(double end);
 
 signals:
   /// Edited the runs, ws index, start or end fields
@@ -83,12 +89,6 @@ signals:
   void selectedPeriodsChanged();
 
 private:
-  /// Set selected workspace index
-  void setWorkspaceIndex(unsigned int index);
-  /// Set start time for fit
-  void setStartTime(double start);
-  /// Set end time for fit
-  void setEndTime(double end);
   /// Add a checkbox to Groups section
   void addGroupCheckbox(const QString &name);
   /// Clear all checkboxes from Groups section
