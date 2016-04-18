@@ -114,8 +114,8 @@ private:
   struct TestWorkspaceDescriptor {
     int nspectra;
     int nbins;
-    Environment environ;
-    Mantid::Kernel::DeltaEMode::Type emode;
+    Environment sampleEnviron;
+    unsigned int emode;
   };
 
   Mantid::API::MatrixWorkspace_const_sptr
@@ -159,7 +159,7 @@ private:
         Material("Vanadium", PhysicalConstants::getNeutronAtom(23, 0), 0.072));
     space->mutableSample().setShape(*sampleShape);
 
-    if (wsProps.environ == Environment::SamplePlusCan) {
+    if (wsProps.sampleEnviron == Environment::SamplePlusCan) {
       const std::string id("container");
       const double radius(0.11);
       const double height(0.03);
