@@ -40,6 +40,9 @@ struct NXcanSASTestParameters {
         instrumentName = "SANS2D";
         radiationSource = "Spallation Neutron Source";
         invalidDetectors = false;
+        ymin = 1.0;
+        ymax = 120.0;
+        is2dData = false;
     }
 
     std::string filename;
@@ -50,6 +53,8 @@ struct NXcanSASTestParameters {
     bool hasDx;
     double xmin;
     double xmax;
+    double ymin;
+    double ymax;
     std::string runNumber;
     std::string userFile;
     std::string workspaceTitle;
@@ -57,6 +62,7 @@ struct NXcanSASTestParameters {
     std::string radiationSource;
     std::vector<std::string> detectors;
     bool invalidDetectors;
+    bool is2dData;
     std::string idf;
 };
 
@@ -306,15 +312,18 @@ public:
       parameters.detectors.push_back("rear-detector");
       parameters.invalidDetectors = false;
 
+      parameters.is2dData = true;
+
       auto ws = provide2DWorkspace(parameters);
       set2DValues(ws);
+
+      parameters.idf = getIDFfromWorkspace(ws);
 
       // Act
       save_file_no_issues(ws, parameters);
 
-
       // Assert
-      //do_assert(parameters);
+      do_assert(parameters);
 
       // Clean up
       //removeFile(parameters.filename);
@@ -409,7 +418,7 @@ private:
       auto ws = provide1DWorkspace(parameters);
 
       std::string axisBinning = std::to_string(parameters.xmin) + ",1," + std::to_string(parameters.xmax);
-
+      std::string axis2Binning = std::to_string(parameters.ymin) + ",1," + std::to_string(parameters.ymax);
 
       // Convert to Histogram data
       auto toHistAlg
@@ -446,7 +455,7 @@ private:
       rebin2DAlg->setProperty("InputWorkspace", ws);
       rebin2DAlg->setProperty("OutputWorkspace", rebinOutputName);
       rebin2DAlg->setProperty("Axis1Binning", axisBinning);
-      rebin2DAlg->setProperty("Axis2Binning", axisBinning);
+      rebin2DAlg->setProperty("Axis2Binning", axis2Binning);
       rebin2DAlg->execute();
       ws = rebin2DAlg->getProperty("OutputWorkspace");
 
@@ -798,7 +807,7 @@ private:
         auto signalAttribute
             = Mantid::DataHandling::H5Util::readAttributeAsString(data,
                                                                   sasSignal);
-        TSM_ASSERT_EQUALS("Should be just 0", signalAttribute, sasDataI);
+        TSM_ASSERT_EQUALS("Should be just I", signalAttribute, sasDataI);
 
         // I data set
         auto intensityDataSet = data.openDataSet(sasDataI);
@@ -842,6 +851,47 @@ private:
         } else {
             do_assert_that_Q_dev_information_is_not_present(data);
         }
+    }
+
+    void do_assert_2D_data(H5::Group& data, int size, double value, double error,
+                           double xmin, double xmax, double ymin, double ymax) {
+        auto numAttributes = data.getNumAttrs();
+          TSM_ASSERT_EQUALS(
+              "Should have 5 attributes, since Q_uncertainty is not present",
+              5, numAttributes);
+
+        // NX_class attribute
+        auto classAttribute
+            = Mantid::DataHandling::H5Util::readAttributeAsString(data,
+                                                                  nxclass);
+        TSM_ASSERT_EQUALS("Should be SASdata class", classAttribute,
+                          sasDataClassAttr);
+
+        // I_axes attribute
+        auto intensityAttribute
+            = Mantid::DataHandling::H5Util::readAttributeAsString(
+                data, sasDataIAxesAttr);
+        TSM_ASSERT_EQUALS("Should be just Q,Q", intensityAttribute, sasDataQ + sasSeparator + sasDataQ);
+
+        // I_uncertainty attribute
+        auto errorAttribute
+            = Mantid::DataHandling::H5Util::readAttributeAsString(
+                data, sasDataIUncertaintyAttr);
+        TSM_ASSERT_EQUALS("Should be just Idev", errorAttribute, sasDataIdev);
+
+        // Q_indices attribute
+        auto qAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(
+            data, sasDataQIndicesAttr);
+        TSM_ASSERT_EQUALS("Should be just 0,1", qAttribute, "0,1");
+
+        // Signal attribute
+        auto signalAttribute
+            = Mantid::DataHandling::H5Util::readAttributeAsString(data,
+                                                                  sasSignal);
+        TSM_ASSERT_EQUALS("Should be just I", signalAttribute, sasDataI);
+
+        // TODO: ADD MORE TESTING ONCE THE READER IS AVAILABLE
+
     }
 
     void do_assert_transmission(H5::Group &entry,
@@ -939,9 +989,15 @@ private:
 
         // Check data
         auto data = entry.openGroup(sasDataGroupName + suffix);
-        do_assert_data(data, parameters.size, parameters.value,
-                       parameters.error, parameters.xmin, parameters.xmax,
-                       parameters.xerror, parameters.hasDx);
+        if (parameters.is2dData) {
+          do_assert_2D_data(data, parameters.size, parameters.value,
+                            parameters.error, parameters.xmin, parameters.xmax,
+                            parameters.ymin, parameters.ymax);
+        } else {
+          do_assert_data(data, parameters.size, parameters.value,
+                         parameters.error, parameters.xmin, parameters.xmax,
+                         parameters.xerror, parameters.hasDx);
+        }
 
         // Check the transmission
         do_assert_transmission(entry, transmissionParameters);

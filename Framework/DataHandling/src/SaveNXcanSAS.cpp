@@ -357,7 +357,7 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace)
     // Add Q with units  + uncertainty definition
     const auto qValue = workspace->readX(0);
     std::map<std::string, std::string> qAttributes;
-    const auto qUnit = getUnitFromMDDimension(workspace->getDimension(0));
+    auto qUnit = getUnitFromMDDimension(workspace->getDimension(0));
     qUnit = getMomentumTransferLabel(qUnit);
     qAttributes.insert(std::make_pair(sasUnitAttr, qUnit));
     if (workspace->hasDx(0)) {
@@ -603,7 +603,7 @@ void addTransmission(H5::Group &group,
     // Add T with units + uncertainty definition
     const auto transmissionData = workspace->readY(0);
     std::map<std::string, std::string> transmissionAttributes;
-    const std::string unit = "";
+    std::string unit = "";
     if (unit.empty()) {
       unit = sasNone;
     }
@@ -628,7 +628,7 @@ void addTransmission(H5::Group &group,
     // Add lambda with units
     const auto lambda = workspace->readX(0);
     std::map<std::string, std::string> lambdaAttributes;
-    const auto lambdaUnit = getUnitFromMDDimension(workspace->getDimension(0));
+    auto lambdaUnit = getUnitFromMDDimension(workspace->getDimension(0));
     if (lambdaUnit.empty() || lambdaUnit == "Angstrom") {
       lambdaUnit = sasAngstrom;
      }
