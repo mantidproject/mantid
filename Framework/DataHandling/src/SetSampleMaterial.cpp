@@ -329,9 +329,9 @@ void SetSampleMaterial::exec() {
         rho = (rho_m / atom.mass) * N_A / 1e24; // measured density in g/cm^3
       }
     }
-    char symbolname[20];
-    sprintf(symbolname, "(%s%i)", atom.symbol.c_str(), a_number);
-    mat.reset(new Material(symbolname, neutron, rho));
+    std::stringstream symbolname;
+    symbolname << "(" << atom.symbol << a_number << ")";
+    mat.reset(new Material(symbolname.str(), neutron, rho));
   }
 
   double normalizedLaue = (b_sq_avg - b_avg * b_avg) / (b_avg * b_avg);
