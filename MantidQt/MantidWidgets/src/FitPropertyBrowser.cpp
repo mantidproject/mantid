@@ -1551,7 +1551,7 @@ void FitPropertyBrowser::populateWorkspaceNames() {
 }
 
 /**
- * Connect to the AnalysisDataServis when shown
+ * Connect to the AnalysisDataService when shown
  */
 void FitPropertyBrowser::showEvent(QShowEvent *e) {
   (void)e;
@@ -1563,7 +1563,7 @@ void FitPropertyBrowser::showEvent(QShowEvent *e) {
 }
 
 /**
- * Disconnect from the AnalysisDataServis when hiden
+ * Disconnect from the AnalysisDataService when hiden
  */
 void FitPropertyBrowser::hideEvent(QHideEvent *e) {
   (void)e;

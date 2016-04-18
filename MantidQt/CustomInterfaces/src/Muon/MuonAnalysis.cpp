@@ -2227,15 +2227,15 @@ void MuonAnalysis::loadAutoSavedValues(const QString &group) {
 */
 void MuonAnalysis::loadFittings() {
   // Title of the fitting dock widget that now lies within the fittings tab.
-  // Should be made
-  // dynamic so that the Chi-sq can be displayed alongside like original
-  // fittings widget
+  // Should be made dynamic so that the Chi-sq can be displayed alongside like
+  // original fittings widget
   m_uiForm.fitBrowser->setWindowTitle("Fit Function");
   // Make sure that the window can't be moved or closed within the tab.
   m_uiForm.fitBrowser->setFeatures(QDockWidget::NoDockWidgetFeatures);
   // Add Data Selector widget to the fit tab
   m_dataSelector = new MuonFitDataSelector(m_uiForm.fitBrowser);
   m_uiForm.verticalLayoutFitBrowser->addWidget(m_dataSelector);
+  //connect(m_dataSelector, SIGNAL(workspacePropertiesChanged()), )
 }
 
 /**
@@ -2485,8 +2485,8 @@ void MuonAnalysis::changeTab(int newTabIndex) {
   if (newTab == m_uiForm.DataAnalysis) // Entering DA tab
   {
     // Save last fitting range
-    auto xmin = m_uiForm.fitBrowser->startX();
-    auto xmax = m_uiForm.fitBrowser->endX();
+    auto xmin = m_dataSelector->getStartTime();
+    auto xmax = m_dataSelector->getEndTime();
 
     // Say MantidPlot to use Muon Analysis fit prop. browser
     emit setFitPropertyBrowser(m_uiForm.fitBrowser);
@@ -2504,18 +2504,18 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     // either initialise it to the correct values:
     if (xmin == 0.0 && xmax == 0.0) {
       // A previous fitting range of [0,0] means this is the first time the
-      // users goes to "Data Analysis" tab
+      // user goes to "Data Analysis" tab
       // We have to initialise the fitting range
-      m_uiForm.fitBrowser->setStartX(
+      m_dataSelector->setStartTime(
           m_uiForm.timeAxisStartAtInput->text().toDouble());
-      m_uiForm.fitBrowser->setEndX(
+      m_dataSelector->setEndTime(
           m_uiForm.timeAxisFinishAtInput->text().toDouble());
     }
     // or set it to the previous values provided by the user:
     else {
       // A previous fitting range already exists, so we use it
-      m_uiForm.fitBrowser->setStartX(xmin);
-      m_uiForm.fitBrowser->setEndX(xmax);
+      m_dataSelector->setStartTime(xmin);
+      m_dataSelector->setEndTime(xmax);
     }
   } else if (newTab == m_uiForm.ResultsTable) {
     m_resultTableTab->refresh();

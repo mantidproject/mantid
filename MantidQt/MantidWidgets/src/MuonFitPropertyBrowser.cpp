@@ -292,7 +292,7 @@ void MuonFitPropertyBrowser::fit() {
 void MuonFitPropertyBrowser::sequentialFit() { emit sequentialFitRequested(); }
 
 /**
- * Connect to the AnalysisDataServis when shown
+ * Connect to the AnalysisDataService when shown
  */
 void MuonFitPropertyBrowser::showEvent(QShowEvent *e) {
   (void)e;
