@@ -1,7 +1,7 @@
 from mantid.api import AlgorithmFactory, ITableWorkspaceProperty, FileAction, FileProperty, \
     MatrixWorkspaceProperty, Progress, PropertyMode, PythonAlgorithm
 from mantid.kernel import Direction, FloatArrayProperty, Property, StringListValidator
-from mantid.simpleapi import ExtractSpectra, SaveFocusedXYE
+from mantid.simpleapi import CreateEmptyTableWorkspace, ExtractSpectra, SaveFocusedXYE
 
 # Too many properties!
 #pylint: disable=too-many-instance-attributes
@@ -366,9 +366,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
         elif "Rietveld refinement" == method:
             (gof_estimates, lattice_params) = self._run_rietveld_pawley_refinement(gs2, gs2_rd, False)
         elif "Peak fitting" == method:
-            (limits, peaks_list, background_def) = fit_inputs
-            (gof_estimates, parm_dict) = self._run_peak_fit(gs2_rd.powderdata, limits, peaks_list,
-                                                            background_def)
+            (gof_estimates, parm_dict) = self._run_peak_fit(gs2_rd, fit_inputs)
         else:
             raise RuntimeError("Inconsistency found. Unknown refinement method: {0}".format(method))
 
@@ -454,33 +452,40 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
         return residuals
 
-    def _run_peak_fit(self, powderdata, limits, peaks_list, background_def):
+    def _run_peak_fit(self, gs2_rd, fit_inputs):
         """
         This performs peak fitting as in GSAS-II "Peaks List/Peak Fitting/PeakFitType".
         Does not require/use phase information. Requires histogram data, instrument parameters
         and background.
 
-        @param powderdata :: histogram data as used in GSAS-II. a list of vectors (X, Y vectors)
-        @param limits :: tuple with the min X and max X values for the fitting
-        @param peaks_list :: list of peaks to fit
-        @param background_def :: background function as defined in GSAS-II, a list of parameters
+        @param gs2_rd :: the GSAS-II "rd" object with powder data in it. It must have a
+        'powderdata' member with the histogram data as used in GSAS-II. a list of vectors
+        (X, Y vectors)
+        @param fit_inputs :: tuple with three inputs:
+        1) tuple with the min X and max X values for the fitting
+        2) peaks_list :: list of peaks to fit
+        3) background_def :: background function as defined in GSAS-II, a list of parameters
 
         @return a tuple with: 1) a tuple with the Rwp and GoF values (weighted profile
         R-factor, goodness of fit), 2) the parameters dictionary
         """
+        (limits, peaks_list, background_def) = fit_inputs
+        (inst_parm1, inst_parm2) = gs2_rd.pwdparms['Instrument Parameters']
         # peaks: ['pos','int','alp','bet','sig','gam'] / with the refine flag each
         sig_dict, result, sig, Rvals, vary_list, parm_dict, full_vary_list, bad_vary = \
             GSASIIpwd.DoPeakFit(FitPgm = 'LSQ', Peaks = peaks_list,
                                 Background = background_def,
                                 Limits = limits,
                                 Inst = inst_parm1, Inst2 = inst_parm2,
-                                data = powderdata,
+                                data = gs2_rd.powderdata,
                                 prevVaryList = None
                                 # OneCycle = False, controls = None, dlg = None
                                )
-        self.log().information("Result: : {0}".format(result))
-        self.log().information("Rwp: : {0}".format(Rvals[0]))
-        self.log().information("GoF: : {0}".format(Rvals[1]))
+        self.log().debug("Result: : {0}".format(result))
+        Rwp = Rvals['Rwp']
+        gof = Rvals['GOF']
+        self.log().information("Rwp: : {0}".format(Rwp))
+        self.log().information("GoF: : {0}".format(gof))
         self.log().information("'Sig': {0}".format(sig))
         self.log().information("'Sig', values: : {0}".format(sig_dict))
         self.log().information("List of parameters fitted: : {0}".format(vary_list))
@@ -490,7 +495,7 @@ class GSASIIFitPeaks(PythonAlgorithm):
                                format(bad_vary))
 
         # chisq value (the 3rd) is not returned by DoPeakFit - TODO, how?
-        gof_estimates = (Rvals['Rwp'], Rvals['GOF'], 0)
+        gof_estimates = (Rwp, gof, 0)
         return (gof_estimates, parm_dict)
 
     def _import_gsas2(self, additional_path_prop):
@@ -768,20 +773,18 @@ class GSASIIFitPeaks(PythonAlgorithm):
 
         par_names = ['Center', 'Intensity', 'Alpha', 'Beta', 'Sigma', 'Gamma']
         par_prefixes = ['pos','int','alp','bet','sig','gam']
-
-        alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
-        alg.execute()
-        table = alg.getProperty('OutputWorkspace').value
-        self.setProperty(tbl_prop_name, table)
+        table = CreateEmptyTableWorkspace(OutputWorkspace=tbl_name)
 
         num_peaks = 0
-        while par_prefixes[0] + str(num_peaks+1) in parm_dict:
+        while par_prefixes[0] + str(num_peaks) in parm_dict:
             num_peaks += 1
 
         for name in par_names:
-            table.addColumn('str', name)
-        for i in range(1, num_peaks+1):
-            par_values = [ parm_dict[par_prefix + str(i)] for par_prefix in par_prefixes]
+            table.addColumn('double', name)
+
+        for idx in range(0, num_peaks):
+            par_values = [ parm_dict[par_prefix + str(idx)] for par_prefix in par_prefixes]
+            print "par_values: ", par_values
             table.addRow(par_values)
 
         for parm in parm_dict:
