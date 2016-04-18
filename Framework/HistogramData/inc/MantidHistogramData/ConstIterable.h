@@ -5,6 +5,7 @@
 
 namespace Mantid {
 namespace HistogramData {
+namespace detail {
 
 /** ConstIterable : TODO: DESCRIPTION
 
@@ -51,6 +52,7 @@ auto cend(const ConstIterable<T> &container)
   return static_cast<const T *>(&container)->data().cend();
 }
 
+} // namespace detail
 } // namespace HistogramData
 } // namespace Mantid
 

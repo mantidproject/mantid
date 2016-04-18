@@ -7,8 +7,8 @@
 #include "MantidHistogramData/VectorOf.h"
 #include "MantidHistogramData/ConstIterable.h"
 
-using namespace Mantid;
-using namespace HistogramData;
+using Mantid::HistogramData::detail::VectorOf;
+using Mantid::HistogramData::detail::ConstIterable;
 using Mantid::Kernel::cow_ptr;
 using Mantid::Kernel::make_cow;
 

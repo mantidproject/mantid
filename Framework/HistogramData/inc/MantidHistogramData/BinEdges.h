@@ -33,8 +33,9 @@ class Points;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_HISTOGRAMDATA_DLL BinEdges : public VectorOf<BinEdges>,
-                                          public ConstIterable<BinEdges> {
+class MANTID_HISTOGRAMDATA_DLL BinEdges
+    : public detail::VectorOf<BinEdges>,
+      public detail::ConstIterable<BinEdges> {
 public:
   using VectorOf<BinEdges>::VectorOf;
   using VectorOf<BinEdges>::operator=;
