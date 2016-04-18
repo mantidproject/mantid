@@ -6,6 +6,7 @@
 #include <qwt_plot_curve.h>
 #include <QStringList>
 
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h"
 
@@ -425,6 +426,10 @@ public:
   virtual void plotReplacingWindow(const std::string &wsName,
                                    const std::string &spectrum,
                                    const std::string &type) = 0;
+
+
+
+
 };
 
 } // namespace CustomInterfaces
