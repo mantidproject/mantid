@@ -78,6 +78,7 @@ set ( SRC_FILES
 	src/ParseKeyValueString.cpp
 	src/Reflectometry/MeasurementItem.cpp
 	src/Reflectometry/QReflTableModel.cpp
+	src/Reflectometry/QReflTableView.cpp
 	src/Reflectometry/QtReflMainView.cpp
 	src/Reflectometry/QtReflOptionsDialog.cpp
 	src/Reflectometry/ReflCatalogSearcher.cpp
@@ -88,6 +89,7 @@ set ( SRC_FILES
 	src/Reflectometry/ReflNexusMeasurementItemSource.cpp
 	src/Reflectometry/ReflSearchModel.cpp
 	src/Reflectometry/ReflTableSchema.cpp
+	src/Reflectometry/ReflTableViewPresenter.cpp
 	src/Reflectometry/TransferResults.cpp
 	src/SANSAddFiles.cpp
 	src/SANSBackgroundCorrectionSettings.cpp
@@ -214,23 +216,53 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/ProgressableView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/MeasurementItem.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ProgressPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h
+	inc/MantidQtCustomInterfaces/Reflectometry/QReflTableView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/QtReflMainView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/QtReflOptionsDialog.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflAppendRowCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflClearSelectedCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflCommandAdapter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflCopySelectedCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflCutSelectedCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflDeleteRowCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflCommandBase.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflExpandCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflGenerateNotebook.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflGroupRowsCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflExportTableCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflImportTableCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMainView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMeasurementItemSource.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflNewTableCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflOptionsCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflOpenTableCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflPasteSelectedCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflPlotGroupCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflPlotRowCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflPrependRowCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflProcessCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflSaveTableAsCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflSaveTableCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflTableView.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflTableViewPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflVectorString.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflWorkspaceCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/TransferResults.h
+	inc/MantidQtCustomInterfaces/Reflectometry/WorkspaceReceiver.h
 	inc/MantidQtCustomInterfaces/SANSAddFiles.h
 	inc/MantidQtCustomInterfaces/SANSBackgroundCorrectionSettings.h
 	inc/MantidQtCustomInterfaces/SANSBackgroundCorrectionWidget.h
@@ -344,8 +376,10 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
+		inc/MantidQtCustomInterfaces/Reflectometry/ReflCommandAdapter.h
                 inc/MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h
+                inc/MantidQtCustomInterfaces/Reflectometry/QReflTableView.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtReflMainView.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtReflOptionsDialog.h
                 inc/MantidQtCustomInterfaces/SampleTransmission.h
@@ -357,6 +391,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
                 inc/MantidQtCustomInterfaces/StepScan.h
                 inc/MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h
+                inc/MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h
                 inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
                 inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
                 inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h
@@ -415,6 +450,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/Muon/ALCInterface.ui
                inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingView.ui
                inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.ui
+               inc/MantidQtCustomInterfaces/Reflectometry/QReflTableView.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflMainWidget.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflOptionsDialog.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflWindow.ui
@@ -452,11 +488,13 @@ set ( TEST_FILES
 	MeasurementItemTest.h
 	MuonAnalysisHelperTest.h
 	ParseKeyValueStringTest.h
+	ReflCommandsTest.h
 	ReflGenerateNotebookTest.h
 	ReflLegacyTransferStrategyTest.h
 	ReflMainViewPresenterTest.h
 	ReflMeasureTransferStrategyTest.h
 	ReflNexusMeasurementItemSourceTest.h
+	ReflTableViewPresenterTest.h
 	StackOfImagesDirsTest.h
 	TomographyIfacePresenterTest.h
 	UserInputValidatorTest.h

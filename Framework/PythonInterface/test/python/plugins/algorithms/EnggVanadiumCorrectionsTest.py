@@ -23,13 +23,13 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
             # Note the pre-calculated file instead of the too big vanadium run
             # self.__class__._van_ws = LoadNexus("ENGINX00236516.nxs", OutputWorkspace='ENGIN-X_test_vanadium_ws')
             self.__class__._van_curves_ws = sapi.LoadNexus(Filename=
-                                                 'ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs',
-                                                 OutputWorkspace='ENGIN-X_vanadium_curves_test_ws')
+                                                           'ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs',
+                                                           OutputWorkspace='ENGIN-X_vanadium_curves_test_ws')
 
         if not self.__class__._van_integ_tbl:
             self.__class__._van_integ_tbl = sapi.LoadNexus(Filename=
-                                                 'ENGINX_precalculated_vanadium_run000236516_integration.nxs',
-                                                 OutputWorkspace='ENGIN-X_vanadium_integ_test_ws')
+                                                           'ENGINX_precalculated_vanadium_run000236516_integration.nxs',
+                                                           OutputWorkspace='ENGIN-X_vanadium_integ_test_ws')
 
     def test_issues_with_properties(self):
         """
@@ -92,20 +92,20 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
                           IntegrationWorkspace=self.__class__._van_integ_tbl,
                           CurvesWorkspace=self.__class__._van_curves_ws)
 
-    def _check_corrected_ws(self, ws):
-        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'TOF')
-        self.assertEqual(ws.getAxis(1).getUnit().unitID(), 'Label')
-        self.assertEqual(ws.getNumberHistograms(), self.NUM_SPEC)
+    def _check_corrected_ws(self, wks):
+        self.assertEqual(wks.getAxis(0).getUnit().unitID(), 'TOF')
+        self.assertEqual(wks.getAxis(1).getUnit().unitID(), 'Label')
+        self.assertEqual(wks.getNumberHistograms(), self.NUM_SPEC)
 
-    def _check_integ_ws(self, ws):
-        self.assertTrue(isinstance(ws, ITableWorkspace),
+    def _check_integ_ws(self, wks):
+        self.assertTrue(isinstance(wks, ITableWorkspace),
                         'The integration workspace should be a table workspace.')
-        self.assertEqual(ws.columnCount(), 1)
-        self.assertEqual(ws.rowCount(), self.NUM_SPEC)
+        self.assertEqual(wks.columnCount(), 1)
+        self.assertEqual(wks.rowCount(), self.NUM_SPEC)
 
-    def _check_curves_ws(self, ws):
-        self.assertTrue(0 == ws.getNumberHistograms() % 3)
-        self.assertTrue(isinstance(ws, MatrixWorkspace),
+    def _check_curves_ws(self, wks):
+        self.assertTrue(0 == wks.getNumberHistograms() % 3)
+        self.assertTrue(isinstance(wks, MatrixWorkspace),
                         'The integration workspace should be a matrix workspace.')
 
     def test_runs_ok_when_reusing_precalculated(self):
@@ -133,10 +133,10 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
         sample_ws = self.__class__._data_ws
         integ_ws_name = 'calc_integ_ws'
         curves_ws_name = 'calc_curves_ws'
-        out = sapi.EnggVanadiumCorrections(Workspace=sample_ws,
-                                           VanadiumWorkspace=self.__class__._van_ws,
-                                           IntegrationWorkspace=integ_ws_name,
-                                           CurvesWorkspace=curves_ws_name)
+        sapi.EnggVanadiumCorrections(Workspace=sample_ws,
+                                     VanadiumWorkspace=self.__class__._van_ws,
+                                     IntegrationWorkspace=integ_ws_name,
+                                     CurvesWorkspace=curves_ws_name)
 
         self._check_corrected_ws(sample_ws)
         self._check_integ_ws(integ_ws_name)

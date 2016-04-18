@@ -187,6 +187,11 @@ private:
   // Set the tool tip text
   void setToolTip(const QString& txt);
 
+  // Set up member variables from curve
+  bool initializeFromCurve(PlotCurve *curve);
+  // Set up - add names of existing fit curves and plot guess status
+  void addExistingFitsAndGuess(const QStringList &curvesList);
+
   /// Creates a pointer to fitPropertyBrowser
   MantidQt::MantidWidgets::FitPropertyBrowser* m_fitPropertyBrowser;
 

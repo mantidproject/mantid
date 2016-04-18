@@ -5,6 +5,7 @@
 #include "MantidQtMantidWidgets/InstrumentView/ObjCompAssemblyActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/ObjComponentActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/RectangularDetectorActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/StructuredDetectorActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/SampleActor.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -1246,6 +1247,13 @@ bool SetVisibleComponentVisitor::visit(RectangularDetectorActor *actor) {
             actor->isChildDetector(m_id);
   actor->setVisibility(on);
   return on;
+}
+
+bool SetVisibleComponentVisitor::visit(StructuredDetectorActor *actor) {
+	bool on = actor->getComponent()->getComponentID() == m_id ||
+		actor->isChildDetector(m_id);
+	actor->setVisibility(on);
+	return on;
 }
 
 //-------------------------------------------------------------------------//
