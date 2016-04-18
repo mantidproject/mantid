@@ -283,8 +283,8 @@ void MWView::spawnWellcomeWorkspace() {
     m_wellcomeWorkspace = Mantid::API::AnalysisDataService::Instance()
       .retrieveWS<Mantid::API::MatrixWorkspace>(m_wellcomeName);
   } else {
-    int numberSpectra{100};
-    double intensity{10.0};
+    int numberSpectra = 100;
+    double intensity = 10.0;
     auto dataX = std::vector<double>();
     auto dataY = std::vector<double>();
     for(int i=0; i<numberSpectra; i++){
