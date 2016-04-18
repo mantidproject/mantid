@@ -4,7 +4,9 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataPostprocessorAlgorithm.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataPreprocessorAlgorithm.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithm.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorWhiteList.h"
@@ -48,13 +50,10 @@ class MANTIDQT_CUSTOMINTERFACES_DLL GenericDataProcessorPresenter
 public:
   GenericDataProcessorPresenter(
       DataProcessorView *tableView, ProgressableView *progressView,
-      const std::map<std::string, DataPreprocessorAlgorithm> &preprocess,
-      const std::string &dataProcessorAlgorithm,
-      const std::set<std::string> &blacklist,
       const DataProcessorWhiteList &whitelist,
-      const std::map<std::string, std::string> &outputInstructions,
-      const std::string &plotInstructions,
-      const std::string &postprocessorAlgorithm);
+      const std::map<std::string, DataPreprocessorAlgorithm> &preprocess,
+      const DataProcessorAlgorithm &processor,
+      const DataPostprocessorAlgorithm &postprocessor);
   ~GenericDataProcessorPresenter() override;
   void notify(DataProcessorPresenter::Flag flag) override;
   const std::map<std::string, QVariant> &options() const override;
@@ -80,21 +79,13 @@ protected:
   // The pre-processing instructions
   std::map<std::string, DataPreprocessorAlgorithm> m_preprocessor;
   // The data processor algorithm
-  std::string m_dataProcessorAlg;
-  // The blacklist
-  std::set<std::string> m_blacklist;
+  DataProcessorAlgorithm m_processor;
   // The whitelist
   DataProcessorWhiteList m_whitelist;
-  // The output instructions
-  std::map<std::string, std::string> m_outputInstructions;
-  // Plot instructions
-  std::string m_plotInstructions;
   // Post-processing algorithm
-  std::string m_postprocessor;
+  DataPostprocessorAlgorithm m_postprocessor;
   // Index of column "Group"
   int m_colGroup;
-  // The algorithm's properties we want to read from the table
-  std::map<std::string, int> m_propToReadFromTable;
   // A workspace receiver we want to notify
   WorkspaceReceiver *m_workspaceReceiver;
   // stores whether or not the table has changed since it was last saved

@@ -2,6 +2,7 @@
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/MantidWidget.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataPostprocessorAlgorithm.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataPreprocessorAlgorithm.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorWhiteList.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h"
@@ -24,34 +25,23 @@ QDataProcessorWidget::QDataProcessorWidget(QWidget *parent)
 
   createTable();
 
-  // Create the presenters to do the thinking for us
-  // The data processor algorithm's name
-  std::string dataProcessorAlgorithm = "ReflectometryReductionOneAuto";
-  // Properties blacklisted from Options column
-  std::set<std::string> blacklist{"ThetaIn",
-                                  "ThetaOut",
-                                  "InputWorkspace",
-                                  "OutputWorkspace",
-                                  "OutputWorkspaceWavelength",
-                                  "FirstTransmissionRun",
-                                  "SecondTransmissionRun"};
-
-  // Output instructions
-  std::map<std::string, std::string> outputInstructions = {
-      {"OutputWorkspace", "IvsQ"}, {"OutputWorkspaceWavelength", "IvsLam"}};
-
-  // Specifies what we want to plot
-  std::string plotInstructions = "IvsQ";
+  // Create the presenter to do the thinking for us
+  // The data processor algorithm
+  DataProcessorAlgorithm processor(
+      "ReflectometryReductionOneAuto",
+      std::vector<std::string>{"IvsQ_", "IvsLam_"},
+      std::set<std::string>{"ThetaIn", "ThetaOut", "InputWorkspace",
+                            "OutputWorkspace", "OutputWorkspaceWavelength",
+                            "FirstTransmissionRun", "SecondTransmissionRun"});
 
   // Pre-processing instructions
   std::map<std::string, DataPreprocessorAlgorithm> preprocessor = {
-      {"Run(s)",
-       DataPreprocessorAlgorithm("Plus", "LHSWorkspace", "RHSWorkspace",
-                                 "OutputWorkspace", false)},
+      {"Run(s)", DataPreprocessorAlgorithm()},
       {"Transmission Run(s)",
        DataPreprocessorAlgorithm(
-           "CreateTransmissionWorkspaceAuto", "FirstTransmissionRun",
-           "SecondTransmissionRun", "OutputWorkspace", true)}};
+           "CreateTransmissionWorkspaceAuto", std::vector<std::string>{"TRANS_"},
+           std::set<std::string>{"FirstTransmissionRun",
+                                 "SecondTransmissionRun", "OutputWorkspace"})}};
 
   // The whitelist
   DataProcessorWhiteList whitelist;
@@ -64,18 +54,15 @@ QDataProcessorWidget::QDataProcessorWidget(QWidget *parent)
   whitelist.addElement("Scale", "Scale");
 
   // The post-processor algorithm's name
-  std::string dataPostprocessorAlgorithm = "Stitch1DMany";
+  DataPostprocessorAlgorithm postprocessor;
 
   m_presenter = boost::make_shared<GenericDataProcessorPresenter>(
       this /*table view*/,
       this /*currently this concrete view is also responsibile for prog reporting*/,
-      preprocessor /*Pre-processing instructions*/,
-      dataProcessorAlgorithm /*the algorithm responsible for the processing*/,
-      blacklist /*Properties we don't want to show in the Options column*/,
       whitelist /*Properties we want to show as columns in the table*/,
-      outputInstructions /*Names of the outputs produced by the reduction algorithm*/,
-      plotInstructions /*The suffix of the ws we want to plot*/,
-      dataPostprocessorAlgorithm /*The name of the post-processing algorithm*/);
+      preprocessor /*Pre-processing instructions*/,
+      processor /*Processing algorithm*/,
+      postprocessor /*The post-processing algorithm*/);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -682,13 +669,27 @@ std::string QDataProcessorWidget::getClipboard() const {
 void QDataProcessorWidget::clearProgress() { ui.progressBar->reset(); }
 
 /**
-TODO
+* Returns the processing instructions for the specified algorithm
+* @param name : The name of the algorithm
+* @return : The processing instructions specified by the user
 */
-std::string QDataProcessorWidget::getPostprocessingInstructions() const {
+std::string
+QDataProcessorWidget::getProcessingOptions(const std::string &name) const {
 
-  const int lastRow = ui.processLayout->rowCount();
-  auto widget = ui.processLayout->itemAtPosition(lastRow - 1, 1)->widget();
-  return dynamic_cast<QLineEdit *>(widget)->text().toStdString();
+  const int nrows = ui.processLayout->rowCount();
+  for (int r = 0; r < nrows; r++) {
+
+    auto widget = ui.processLayout->itemAtPosition(r + 1, 1)->widget();
+    auto text = static_cast<QLabel *>(widget)->text().toStdString();
+    if (text == name) {
+      // This is the algorithm for which we need the processing instructions
+      // (options)
+      auto widget = ui.processLayout->itemAtPosition(r + 1, 2)->widget();
+      auto text = static_cast<HintingLineEdit *>(widget)->text().toStdString();
+      return text;
+    }
+  }
+  return "";
 }
 
 } // namespace CustomInterfaces

@@ -91,7 +91,7 @@ public:
   // Accessor methods
   std::set<int> getSelectedRows() const override;
   std::string getProcessInstrument() const override;
-  std::string getPostprocessingInstructions() const override;
+	std::string getProcessingOptions(const std::string &name) const override;
   std::string getWorkspaceToOpen() const override;
   std::string getClipboard() const override;
 

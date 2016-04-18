@@ -67,30 +67,19 @@ namespace CustomInterfaces {
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     DataProcessorView *tableView, ProgressableView *progressView,
-    const std::map<std::string, DataPreprocessorAlgorithm> &preprocessor,
-    const std::string &dataProcessorAlgorithm,
-    const std::set<std::string> &blacklist,
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, std::string> &outputInstructions,
-    const std::string &plotInstructions, const std::string &postprocessor)
+    const std::map<std::string, DataPreprocessorAlgorithm> &preprocessor,
+    const DataProcessorAlgorithm &processor,
+    const DataPostprocessorAlgorithm &postprocessor)
     : WorkspaceObserver(), m_view(tableView), m_progressView(progressView),
-      m_preprocessor(preprocessor), m_dataProcessorAlg(dataProcessorAlgorithm),
-      m_blacklist(blacklist), m_whitelist(whitelist),
-      m_outputInstructions(outputInstructions),
-      m_plotInstructions(plotInstructions), m_postprocessor(postprocessor),
+      m_preprocessor(preprocessor), m_processor(processor),
+      m_whitelist(whitelist), m_postprocessor(postprocessor),
       m_tableDirty(false) {
 
   // Initialise options
   initOptions();
   // Create the process layout
   createProcessLayout();
-
-  for (size_t i = 0; i < m_whitelist.size(); i++) {
-    std::string colName = m_whitelist.algPropFromColIndex(static_cast<int>(i));
-    if (!m_preprocessor.count(
-            m_whitelist.colNameFromColIndex(static_cast<int>(i))))
-      m_propToReadFromTable[colName] = static_cast<int>(i);
-  }
 
   // Columns Group and Options must be added to the whitelist
   m_colGroup = static_cast<int>(m_whitelist.size());
@@ -121,8 +110,9 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
   // those we blacklist. We blacklist any useless properties or ones we're
   // handling that the user
   // should'nt touch.
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_dataProcessorAlg);
-  m_view->setOptionsHintStrategy(new AlgorithmHintStrategy(alg, m_blacklist));
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_processor.name());
+  m_view->setOptionsHintStrategy(
+      new AlgorithmHintStrategy(alg, m_processor.blacklist()));
 
   // Start with a blank table
   newTable();
@@ -144,7 +134,7 @@ void GenericDataProcessorPresenter::createProcessLayout() {
 
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create(it->second.name());
-    AlgorithmHintStrategy strategy(alg, std::set<std::string>());
+    AlgorithmHintStrategy strategy(alg, it->second.blacklist());
     if (it == m_preprocessor.begin())
       m_view->addHintingLineEdit("<b>Pre-process:</b>", alg->name(),
                                  strategy.createHints());
@@ -156,8 +146,8 @@ void GenericDataProcessorPresenter::createProcessLayout() {
   // Only one algorithm
   {
     IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create(m_dataProcessorAlg);
-    AlgorithmHintStrategy strategy(alg, m_blacklist);
+        AlgorithmManager::Instance().create(m_processor.name());
+    AlgorithmHintStrategy strategy(alg, m_processor.blacklist());
     m_view->addHintingLineEdit("<b>Process:</b>", alg->name(),
                                strategy.createHints());
   }
@@ -165,8 +155,9 @@ void GenericDataProcessorPresenter::createProcessLayout() {
   // Post-process
   // Only one algorithm
   {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_postprocessor);
-    AlgorithmHintStrategy strategy(alg, std::set<std::string>());
+    IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create(m_postprocessor.name());
+    AlgorithmHintStrategy strategy(alg, m_postprocessor.blacklist());
     m_view->addHintingLineEdit("<b>Post-process:</b>", alg->name(),
                                strategy.createHints());
   }
@@ -383,13 +374,13 @@ void GenericDataProcessorPresenter::postProcessRows(std::set<int> rows) {
 
     const std::string runStr = getWorkspaceName(*rowIt, false);
 
-    if (AnalysisDataService::Instance().doesExist(m_plotInstructions +
+    if (AnalysisDataService::Instance().doesExist(m_postprocessor.prefix() +
                                                   runStr)) {
       runs += runStr;
-      workspaceNames.emplace_back(m_plotInstructions + runStr);
+      workspaceNames.emplace_back(m_postprocessor.prefix() + runStr);
     }
   }
-  const std::string outputWSName = m_plotInstructions + runs;
+  const std::string outputWSName = m_postprocessor.prefix() + runs;
 
   // If the previous result is in the ADS already, we'll need to remove it.
   // If it's a group, we'll get an error for trying to group into a used group
@@ -397,13 +388,15 @@ void GenericDataProcessorPresenter::postProcessRows(std::set<int> rows) {
   if (AnalysisDataService::Instance().doesExist(outputWSName))
     AnalysisDataService::Instance().remove(outputWSName);
 
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_postprocessor);
+  IAlgorithm_sptr alg =
+      AlgorithmManager::Instance().create(m_postprocessor.name());
   alg->initialize();
-  alg->setProperty("InputWorkspaces", workspaceNames);
-  alg->setProperty("OutputWorkspace", outputWSName);
+  alg->setProperty(m_postprocessor.inputProperty(), workspaceNames);
+  alg->setProperty(m_postprocessor.outputProperty(), outputWSName);
 
   // Read the post-processing instructions from the view
-  const std::string options = m_view->getPostprocessingInstructions();
+  const std::string options =
+      m_view->getProcessingOptions(m_postprocessor.name());
   auto optionsMap = parseKeyValueString(options);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
@@ -543,13 +536,13 @@ GenericDataProcessorPresenter::getRunNumber(const Workspace_sptr &ws) {
   boost::smatch matches;
 
   if (boost::regex_match(wsName, matches, outputRegex)) {
-    return "_" + matches[2].str();
+    return matches[2].str();
   } else if (boost::regex_match(wsName, matches, instrumentRegex)) {
-    return "_" + matches[1].str();
+    return matches[1].str();
   }
 
   // Resort to using the workspace name
-  return "_" + wsName;
+  return wsName;
 }
 
 /**
@@ -578,7 +571,8 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
   if (runs.size() == 1)
     return loadRun(runs[0], instrument);
 
-  const std::string outputName = boost::algorithm::join(runs, "_");
+  const std::string outputName =
+      preprocessor.prefix() + boost::algorithm::join(runs, "_");
 
   // Check if we've already prepared it
   if (AnalysisDataService::Instance().doesExist(outputName))
@@ -604,14 +598,12 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
     // Iterate through all the remaining runs, adding them to the first run
     for (auto runIt = runs.begin(); runIt != runs.end(); ++runIt) {
 
-      if (preprocessor.applyOptions()) {
-        for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
-          try {
-            alg->setProperty(kvp->first, kvp->second);
-          } catch (Mantid::Kernel::Exception::NotFoundError &) {
-            // We can't apply this option to this pre-processing alg
-            // This is totally OK, just continue with the next option
-          }
+      for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
+        try {
+          alg->setProperty(kvp->first, kvp->second);
+        } catch (Mantid::Kernel::Exception::NotFoundError &) {
+          // We can't apply this option to this pre-processing alg
+          throw;
         }
       }
 
@@ -648,7 +640,7 @@ std::string GenericDataProcessorPresenter::getWorkspaceName(int row,
   std::string wsname;
 
   if (prefix)
-    wsname = wsname + m_plotInstructions;
+    wsname = wsname + m_postprocessor.prefix();
 
   for (auto it = m_preprocessor.begin(); it != m_preprocessor.end(); ++it) {
 
@@ -764,29 +756,48 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
 
   /* Create the processing algorithm */
 
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_dataProcessorAlg);
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_processor.name());
   alg->initialize();
 
-  /* Deal with columns that do not need pre-processing */
-  /* In Reflectometry those are 'Angle', 'Q min', 'Q max', etc */
+  std::string runNo;
+
+  /* Read input properties from the table */
+  /* excluding 'Group' and 'Options' */
 
   int ncols = static_cast<int>(m_whitelist.size());
-  for (auto it = m_propToReadFromTable.begin();
-       it != m_propToReadFromTable.end(); ++it) {
+  for (int i = 0; i < ncols - 2; i++) {
 
-    alg->setPropertyValue(it->first,
-                          m_model->data(m_model->index(rowNo, it->second))
-                              .toString()
-                              .toStdString());
+    auto propertyName = m_whitelist.algPropFromColIndex(i);
+    auto columnName = m_whitelist.colNameFromColIndex(i);
+
+    if (m_preprocessor.count(columnName)) {
+      // This column needs pre-processing
+
+      const std::string runStr =
+          m_model->data(m_model->index(rowNo, i)).toString().toStdString();
+
+      if (!runStr.empty()) {
+
+        auto preprocessor = m_preprocessor[columnName];
+
+        const std::string options =
+            m_view->getProcessingOptions(m_preprocessor[columnName].name());
+        auto optionsMap = parseKeyValueString(options);
+        auto runWS =
+            prepareRunWorkspace(runStr, m_preprocessor[columnName], optionsMap);
+        runNo.append(getRunNumber(runWS)+ "_");
+        alg->setProperty(propertyName, runWS->name());
+      }
+    } else {
+      // No pre-processing needed, read from the table
+      alg->setPropertyValue(
+          propertyName,
+          m_model->data(m_model->index(rowNo, i)).toString().toStdString());
+    }
   }
 
-  /* Deal with Options column */
-
-  const std::string options =
-      m_model->data(m_model->index(rowNo, m_model->columnCount() - 1))
-          .toString()
-          .toStdString();
-
+  /* Deal with processing instructions specified via the hinting line edit */
+  std::string options = m_view->getProcessingOptions(m_processor.name());
   // Parse and set any user-specified options
   auto optionsMap = parseKeyValueString(options);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
@@ -798,36 +809,26 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
     }
   }
 
-  /* Deal with columns that need pre-processing */
-  /* In Reflectometry those are 'Run(s)' and 'Transmission Run(s)' */
-
-  std::string runNo;
-
-  for (auto it = m_preprocessor.begin(); it != m_preprocessor.end(); ++it) {
-    const std::string runStr =
-        m_model
-            ->data(m_model->index(rowNo,
-                                  m_whitelist.colIndexFromColName(it->first)))
-            .toString()
-            .toStdString();
-
-    if (!runStr.empty()) {
-      auto runWS = prepareRunWorkspace(runStr, it->second, optionsMap);
-      runNo.append(getRunNumber(runWS));
-      alg->setProperty(m_whitelist.algPropFromColName(it->first),
-                       runWS->name());
+  /* Now deal with Options column */
+  options = m_model->data(m_model->index(rowNo, m_model->columnCount() - 1))
+                .toString()
+                .toStdString();
+  // Parse and set any user-specified options
+  optionsMap = parseKeyValueString(options);
+  for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
+    try {
+      alg->setProperty(kvp->first, kvp->second);
+    } catch (Mantid::Kernel::Exception::NotFoundError &) {
+      throw std::runtime_error("Invalid property in options column: " +
+                               kvp->first);
     }
   }
 
-  auto vec = alg->getProperties();
-  vec[0]->direction();
-  vec[0]->type();
-
+	runNo.pop_back();
   /* We need to give a name to the output workspaces */
-
-  for (auto it = m_outputInstructions.begin(); it != m_outputInstructions.end();
-       ++it) {
-    alg->setProperty(it->first, it->second + runNo);
+  for (size_t i = 0; i < m_processor.outputProperties(); i++) {
+    alg->setProperty(m_processor.outputPropertyName(i),
+                     m_processor.prefix(i) + runNo);
   }
 
   /* Now run the processing algorithm */
@@ -1396,7 +1397,7 @@ void GenericDataProcessorPresenter::plotGroup() {
   for (auto runsMap = runsByGroup.begin(); runsMap != runsByGroup.end();
        ++runsMap) {
     const std::string wsName =
-        m_plotInstructions + boost::algorithm::join(runsMap->second, "");
+        m_postprocessor.prefix() + boost::algorithm::join(runsMap->second, "");
     if (AnalysisDataService::Instance().doesExist(wsName))
       workspaces.insert(wsName);
     else

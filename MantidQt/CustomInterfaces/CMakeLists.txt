@@ -215,6 +215,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/ParseKeyValueString.h
 	inc/MantidQtCustomInterfaces/ProgressableView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataPreprocessorAlgorithm.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithm.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorAppendRowCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorClearSelectedCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorCommand.h
@@ -242,6 +243,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorWhiteList.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorWorkspaceCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataPostprocessorAlgorithm.h
 	inc/MantidQtCustomInterfaces/Reflectometry/GenericDataProcessorPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h
