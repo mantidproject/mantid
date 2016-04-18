@@ -34,7 +34,7 @@ namespace HistogramData {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_HISTOGRAMDATA_DLL HistogramX
-    : public FixedLengthVector<HistogramX> {
+    : public detail::FixedLengthVector<HistogramX> {
 public:
   explicit HistogramX(const Points &points);
   explicit HistogramX(const BinEdges &binEdges);

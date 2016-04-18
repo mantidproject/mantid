@@ -6,8 +6,8 @@
 #include "MantidHistogramData/ConstIterable.h"
 #include "MantidHistogramData/VectorOf.h"
 
-using namespace Mantid;
-using namespace HistogramData;
+using Mantid::HistogramData::detail::VectorOf;
+using Mantid::HistogramData::detail::ConstIterable;
 
 class ConstIterableTester : public VectorOf<ConstIterableTester>,
                             public ConstIterable<ConstIterableTester> {

@@ -7,6 +7,7 @@
 
 namespace Mantid {
 namespace HistogramData {
+namespace detail {
 
 /** VectorOf : TODO: DESCRIPTION
 
@@ -99,6 +100,7 @@ protected:
   Kernel::cow_ptr<std::vector<double>> m_data{nullptr};
 };
 
+} // namespace detail
 } // namespace HistogramData
 } // namespace Mantid
 

@@ -6,7 +6,7 @@
 #include "MantidHistogramData/FixedLengthVector.h"
 #include "MantidKernel/make_cow.h"
 
-using Mantid::HistogramData::FixedLengthVector;
+using Mantid::HistogramData::detail::FixedLengthVector;
 using Mantid::Kernel::make_cow;
 
 struct FixedLengthVectorTester

@@ -4,10 +4,11 @@ namespace Mantid {
 namespace HistogramData {
 
 HistogramX::HistogramX(const Points &points)
-    : FixedLengthVector<HistogramX>(points.cowData()), m_xMode(XMode::Points) {}
+    : detail::FixedLengthVector<HistogramX>(points.cowData()),
+      m_xMode(XMode::Points) {}
 
 HistogramX::HistogramX(const BinEdges &binEdges)
-    : FixedLengthVector<HistogramX>(binEdges.cowData()),
+    : detail::FixedLengthVector<HistogramX>(binEdges.cowData()),
       m_xMode(XMode::BinEdges) {
   if (size() == 1)
     throw std::logic_error("HistogramX: BinEdges size cannot be 1");
