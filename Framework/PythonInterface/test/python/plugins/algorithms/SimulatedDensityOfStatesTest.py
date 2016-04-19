@@ -224,6 +224,20 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
                           PHONONFile=self._phonon_file,
                           SpectrumType='IonTable')
 
+    def test_bin_ranges_are_correct(self):
+        """
+        Test that the bin ranges are correct when draw peak function is called
+        """
+        bin_width = 3
+        wks_grp = SimulatedDensityOfStates(PHONONFile=self._phonon_file,
+                                           SpectrumType='DOS',
+                                           BinWidth=bin_width,
+                                           Ions='H,C,O')
+        expected_x_min = -0.051481
+        for idx in range(wks_grp.getNumberOfEntries()):
+            ws = wks_grp.getItem(idx)
+            self.assertAlmostEqual(expected_x_min,ws.readX(0)[0])
+            self.assertAlmostEqual(bin_width,(ws.readX(0)[1] - ws.readX(0)[0]))
 
 if __name__=="__main__":
     unittest.main()

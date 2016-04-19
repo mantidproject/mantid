@@ -94,7 +94,7 @@ void MaskBins::exec() {
   // Only create the output workspace if it's different to the input one
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (outputWS != inputWS) {
-    outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
+    outputWS = inputWS->clone();
     setProperty("OutputWorkspace", outputWS);
   }
 

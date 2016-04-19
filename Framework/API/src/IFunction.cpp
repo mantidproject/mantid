@@ -949,7 +949,7 @@ void IFunction::convertValue(std::vector<double> &values,
     double l2(-1.0), twoTheta(0.0);
     if (!det->isMonitor()) {
       l2 = det->getDistance(*sample);
-      twoTheta = ws->detectorTwoTheta(det);
+      twoTheta = ws->detectorTwoTheta(*det);
     } else // If this is a monitor then make l1+l2 = source-detector distance
            // and twoTheta=0
     {

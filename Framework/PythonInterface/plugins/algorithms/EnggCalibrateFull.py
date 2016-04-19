@@ -1,7 +1,8 @@
 #pylint: disable=no-init,invalid-name
+import math
+
 from mantid.kernel import *
 from mantid.api import *
-import math
 import EnggUtils
 
 class EnggCalibrateFull(PythonAlgorithm):
@@ -49,8 +50,8 @@ class EnggCalibrateFull(PythonAlgorithm):
                              doc="A table with the detector IDs and calibrated detector positions and "
                              "additional calibration information. The table includes: the old positions "
                              "in V3D format (3D vector with x, y, z values), the new positions in V3D, the "
-                             "new positions in spherical coordinates, the change in L2, and the DIFC and "
-                             "ZERO parameters.")
+                             "new positions in spherical coordinates, the change in L2, and the DIFA, "
+                             "DIFC and TZERO calibration parameters.")
 
         self.declareProperty(ITableWorkspaceProperty("FittedPeaks", "", Direction.Output),
                              doc = "Information on fitted peaks. The table has one row per calibrated "
@@ -139,7 +140,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         rebin_alg.execute()
         result = rebin_alg.getProperty('OutputWorkspace').value
 
-        if result.isDistribution()==False:
+        if not result.isDistribution():
             convert_alg = self.createChildAlgorithm('ConvertToDistribution')
             convert_alg.setProperty('Workspace', result)
             convert_alg.execute()
@@ -149,7 +150,7 @@ class EnggCalibrateFull(PythonAlgorithm):
     def _calculate_calib_positions_tbl(self, ws, indices, expectedPeaksD):
         """
         Makes a table of calibrated positions (and additional parameters). It goes through
-        the detectors of the workspace and calculates the difc and zero parameters by fitting
+        the detectors of the workspace and calculates the DIFC and TZERO parameters by fitting
         peaks, then calculates the coordinates and adds them in the returned table.
 
         @param ws :: input workspace with an instrument definition
@@ -169,7 +170,8 @@ class EnggCalibrateFull(PythonAlgorithm):
         for i in indices:
 
             try:
-                zero, difc, fitted_peaks_table = self._fit_peaks(ws, i, expectedPeaksD)
+                fitted_peaks_table = self._fit_peaks(ws, i, expectedPeaksD)
+                difa, difc, tzero = self._fit_difc_linear(fitted_peaks_table)
             except RuntimeError as re:
                 raise RuntimeError("Severe issue found when trying to fit peaks for the detector with ID %d. "
                                    "This calibration algorithm cannot continue. Please check the expected "
@@ -186,7 +188,7 @@ class EnggCalibrateFull(PythonAlgorithm):
             old_pos = det.getPos()
 
             pos_tbl.addRow([det.getID(), old_pos, new_pos, new_L2, det_2Theta, det_phi,
-                            new_L2-old_L2, difc, zero])
+                            new_L2-old_L2, difa, difc, tzero])
 
             # fitted parameter details as a string for every peak for one detector
             peaks_details = self._build_peaks_details_string(fitted_peaks_table)
@@ -202,7 +204,8 @@ class EnggCalibrateFull(PythonAlgorithm):
         @param wsIndex workspace index of the spectrum to fit
         @param expectedPeaksD :: expected peaks for the fitting, in d-spacing units
 
-        @returns a pair of parameters: difc and zero
+        @returns the peaks parameters in a table as produced by the algorithm
+        EnggFitPeaks
     	"""
         alg = self.createChildAlgorithm('EnggFitPeaks')
         alg.setProperty('InputWorkspace', ws)
@@ -210,11 +213,28 @@ class EnggCalibrateFull(PythonAlgorithm):
         alg.setProperty('ExpectedPeaks', expectedPeaksD)
         alg.execute()
 
-        difc = alg.getProperty('Difc').value
-        zero = alg.getProperty('Zero').value
         fitted_peaks_table = alg.getProperty('FittedPeaks').value
 
-        return (zero, difc, fitted_peaks_table)
+        return fitted_peaks_table
+
+    def _fit_difc_linear(self, fitted_peaks_table):
+        """
+        Fit the DIFC-TZERO curve (line) to the peaks
+
+        @param fitted_peaks_table a table with peaks parameters, expected
+        in the format produced by EnggFitPeaks
+
+        @returns the DIFA, DIFC, TZERO calibration parameters of GSAS
+        """
+        alg = self.createChildAlgorithm('EnggFitDIFCFromPeaks')
+        alg.setProperty('FittedPeaks', fitted_peaks_table)
+        alg.execute()
+
+        difa = alg.getProperty('DIFA').value
+        difc = alg.getProperty('DIFC').value
+        tzero = alg.getProperty('TZERO').value
+
+        return (difa, difc, tzero)
 
     def _create_positions_table(self):
         """
@@ -235,8 +255,9 @@ class EnggCalibrateFull(PythonAlgorithm):
         table.addColumn('float', '2 \\theta')
         table.addColumn('float', '\\phi')
         table.addColumn('float', '\\delta L2 (calibrated - old)')
-        table.addColumn('float', 'difc')
-        table.addColumn('float', 'zero')
+        table.addColumn('float', 'DIFA')
+        table.addColumn('float', 'DIFC')
+        table.addColumn('float', 'TZERO')
 
         return table
 

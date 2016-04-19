@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/SpectraDetectorTypes.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -72,6 +73,14 @@ private:
   */
   void writeSpectra(const std::set<int>::const_iterator &spectraItr,
                     std::ofstream &file);
+  std::vector<std::string> stringListToVector(std::string &inputString);
+  void populateQMetaData();
+  void populateSpectrumNumberMetaData();
+  void populateAngleMetaData();
+  void populateAllMetaData();
+  bool
+  findElementInUnorderedStringVector(const std::vector<std::string> &vector,
+                                     const std::string &toFind);
 
   /// Map the separator options to their string equivalents
   std::map<std::string, std::string> m_separatorIndex;
@@ -83,6 +92,9 @@ private:
   bool m_isHistogram;
   bool m_isCommonBins;
   API::MatrixWorkspace_const_sptr m_ws;
+  std::vector<std::string> m_metaData;
+  std::map<std::string, std::vector<std::string>> m_metaDataMap;
+  spec2index_map m_specToIndexMap;
 };
 } // namespace DataHandling
 } // namespace Mantid

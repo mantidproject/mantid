@@ -104,7 +104,7 @@ public:
   /*
    * Test mask by detector ID
    * For VULCAN:
-   * workspaceindex:  detector ID  :  Spectrum ID
+   * workspaceindex:  detector ID  :  Spectrum No
    * 34           :   26284        :  35
    * 1000         :   27250        :  1001
    * 2000         :   28268        :  2001

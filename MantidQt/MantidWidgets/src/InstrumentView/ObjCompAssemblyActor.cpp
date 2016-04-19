@@ -31,10 +31,10 @@ namespace MantidQt
           assert(m_n == mNumberOfDetectors);
           m_data = new unsigned char[m_n * 3];
           m_pick_data = new unsigned char[m_n * 3];
-          for (int i = 0; i < getNumberOfDetectors(); ++i) {
+          for (size_t i = 0; i < getNumberOfDetectors(); ++i) {
             IDetector_const_sptr det =
                 boost::dynamic_pointer_cast<const IDetector>(
-                    objAss->getChild(i));
+                    objAss->getChild(static_cast<int>(i)));
             assert(det);
             detid_t id = det->getID();
             m_detIDs.push_back(id);

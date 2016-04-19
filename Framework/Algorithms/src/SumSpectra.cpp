@@ -20,7 +20,7 @@ using namespace API;
 using namespace DataObjects;
 
 SumSpectra::SumSpectra()
-    : API::Algorithm(), m_outSpecId(0), m_minWsInd(0), m_maxWsInd(0),
+    : API::Algorithm(), m_outSpecNum(0), m_minWsInd(0), m_maxWsInd(0),
       m_keepMonitors(false), m_numberOfSpectra(0), m_yLength(0), m_indices(),
       m_calculateWeightedSum(false) {}
 
@@ -116,11 +116,11 @@ void SumSpectra::exec() {
       this->m_indices.insert(i);
   }
 
-  // determine the output spectrum id
-  m_outSpecId = this->getOutputSpecId(localworkspace);
+  // determine the output spectrum number
+  m_outSpecNum = this->getOutputSpecNo(localworkspace);
   g_log.information()
       << "Spectra remapping gives single spectra with spectra number: "
-      << m_outSpecId << "\n";
+      << m_outSpecNum << "\n";
 
   m_calculateWeightedSum = getProperty("WeightedSum");
 
@@ -152,7 +152,7 @@ void SumSpectra::exec() {
     outSpec->dataX() = localworkspace->readX(0);
 
     // Build a new spectra map
-    outSpec->setSpectrumNo(m_outSpecId);
+    outSpec->setSpectrumNo(m_outSpecNum);
     outSpec->clearDetectorIDs();
 
     if (localworkspace->id() == "RebinnedOutput") {
@@ -185,13 +185,13 @@ void SumSpectra::exec() {
 }
 
 /**
- * Determine the minimum spectrum id for summing. This requires that
+ * Determine the minimum spectrum No for summing. This requires that
  * SumSpectra::indices has already been set.
  * @param localworkspace The workspace to use.
- * @return The minimum spectrum id for all the spectra being summed.
+ * @return The minimum spectrum No for all the spectra being summed.
  */
 specnum_t
-SumSpectra::getOutputSpecId(MatrixWorkspace_const_sptr localworkspace) {
+SumSpectra::getOutputSpecNo(MatrixWorkspace_const_sptr localworkspace) {
   // initial value
   specnum_t specId =
       localworkspace->getSpectrum(*(this->m_indices.begin()))->getSpectrumNo();
@@ -441,7 +441,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
 
   // Get the pointer to the output event list
   EventList &outEL = outputWorkspace->getEventList(0);
-  outEL.setSpectrumNo(m_outSpecId);
+  outEL.setSpectrumNo(m_outSpecNum);
   outEL.clearDetectorIDs();
 
   // Loop over spectra

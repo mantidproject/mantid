@@ -6,6 +6,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtMantidWidgets/HintingLineEdit.h"
 #include "MantidQtMantidWidgets/HintStrategy.h"
+#include <boost/scoped_ptr.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

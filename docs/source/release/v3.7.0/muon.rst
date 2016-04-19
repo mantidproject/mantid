@@ -12,6 +12,7 @@ Muon ALC
 ########
 
 - The default directory for the last run is now set to the same directory selected for the first run `#15524 <https://github.com/mantidproject/mantid/pull/15524>`_
+- Fixed an occasional crash seen when "Auto" was selected `#15673 <https://github.com/mantidproject/mantid/pull/15673>`_
 
 Muon Analysis
 #############
@@ -31,6 +32,9 @@ Muon Analysis
   - *Sample Temperature* and *Sample Magnetic Field* are a range if not all the same value
   - *Average Temperature* is calculated from all logs
   - *Start* and *End* are the earliest start and latest end
+
+- When the window is resized, all widgets within the window should now resize with it. This enables the interface to be used on smaller screens. `#15382 <https://github.com/mantidproject/mantid/pull/15832>`_
+- "Plot/Remove guess" now deals correctly with the case when a new run is loaded. `#15872 <https://github.com/mantidproject/mantid/pull/15872>`_
 
 Algorithms
 ----------

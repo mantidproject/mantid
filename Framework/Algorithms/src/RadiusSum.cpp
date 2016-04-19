@@ -380,10 +380,10 @@ std::vector<double>
 RadiusSum::getBoundariesOfInstrument(API::MatrixWorkspace_sptr inWS) {
 
   // This function is implemented based in the following assumption:
-  //   - The workspace is composed by spectrum with associated spectrum ID which
+  //   - The workspace is composed by spectrum with associated spectrum No which
   //   is associated to one detector or monitor
-  //   - The first spectrum ID (non monitor) is associated with one detector
-  //   while the last spectrum ID (non monitor)
+  //   - The first spectrum No (non monitor) is associated with one detector
+  //   while the last spectrum No (non monitor)
   //     is associated with one detector.
   //   - They are in complete oposite direction.
   //

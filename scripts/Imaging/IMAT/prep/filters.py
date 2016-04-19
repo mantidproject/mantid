@@ -80,8 +80,11 @@ def crop_vol(data_vol, coords):
     elif not any(coords) or coords[1] > coords[3] or coords[0] > coords[2]:
         # skip if for example: 0, 0, 0, 0 (empty selection)
         return data_vol
+    elif not all(isinstance(crd, int) for crd in coords):
+        raise ValueError("Cannot use non-integer coordinates to crop images. Got "
+                         "these coordinates: {0}".format(coords))
     else:
-        cropped_data = data_vol[:, coords[1]:coords[3], coords[0]:coords[2]]
+        cropped_data = data_vol[:, coords[1]:(coords[3]+1), coords[0]:(coords[2]+1)]
 
     return cropped_data
 

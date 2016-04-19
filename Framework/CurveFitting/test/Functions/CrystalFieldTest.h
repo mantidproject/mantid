@@ -29,6 +29,7 @@ public:
     DoubleFortranVector bmol(1, 3);
     DoubleFortranVector bext(1, 3);
     ComplexFortranMatrix bkq(0, 6, 0, 6);
+    zeroAllEntries(bmol, bext, bkq);
 
     bkq(2, 0) = 0.3365;
     bkq(2, 2) = 7.4851;
@@ -48,6 +49,7 @@ public:
     DoubleFortranVector bmol(1, 3);
     DoubleFortranVector bext(1, 3);
     ComplexFortranMatrix bkq(0, 6, 0, 6);
+    zeroAllEntries(bmol, bext, bkq);
 
     bmol(1) = 10.;
     bkq(2, 0) = 0.3365;
@@ -68,6 +70,7 @@ public:
     DoubleFortranVector bmol(1, 3);
     DoubleFortranVector bext(1, 3);
     ComplexFortranMatrix bkq(0, 6, 0, 6);
+    zeroAllEntries(bmol, bext, bkq);
 
     bmol(1) = 10.;
     bkq(2, 0) = 0.3365;
@@ -178,6 +181,13 @@ public:
   }
 
 private:
+  void zeroAllEntries(DoubleFortranVector &bmol, DoubleFortranVector &bext,
+                      ComplexFortranMatrix &bkq) {
+    bmol.zero();
+    bext.zero();
+    bkq.zero();
+  }
+
   void doTestEigensystem(DoubleFortranVector &en, ComplexFortranMatrix &wf,
                          ComplexFortranMatrix &ham) {
     const size_t n = en.size();

@@ -20,6 +20,9 @@ New
    :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`, :ref:`CalibrateRectangularDetectors <algm-CalibrateRectangularDetectors>`, *et al* and
    minimizes the difference between the *DIFC* of the instrument and
    calibration by moving and rotating instrument components.
+- :ref:`EnggFitDIFCFromPeaks <algm-AlignComponents>` fits GSAS calibration
+  parameters (DIFA, DIFC, TZERO) from peaks fitted using
+  :ref:`EnggFitPeaks <algm-EnggFitPeaks>`.
 
 Renamed
 #######
@@ -55,20 +58,24 @@ Improved
 -  :ref:`SumSpectra <algm-SumSpectra>` fixed broken scaling of bins for the `WeightedSum=true` case.
 -  :ref:`LoadISISNexus <algm-LoadISISNexus>`now works correctly for data with non-contiguous detector IDs for either monitors or detectors. `#15562 <https://github.com/mantidproject/mantid/pull/15562>`_
 -  A bug has been fixed in several algorithms where they would crash when given a :ref:`WorkspaceGroup <WorkspaceGroup>` as input (if run in the GUI). These algorithms are: `#15584 <https://github.com/mantidproject/mantid/pull/15584>`_
-
    - :ref:`AsymmetryCalc <algm-AsymmetryCalc>`
    - :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>`
    - :ref:`ConvertToDistribution <algm-ConvertToDistribution>`
    - :ref:`ChangeTimeZero <algm-ChangeTimeZero>`
    - :ref:`FFT <algm-FFT>`
    - :ref:`MaxEnt <algm-MaxEnt>`
-- :ref:`LoadNexusMonitors <algm-LoadNexusMonitors>` 
+- :ref:`LoadNexusMonitors <algm-LoadNexusMonitors>`
   now allow user to choose to load either histogram monitor or event monitor only with 2 new
   properties (``LoadEventMonitor`` and ``LoadHistogramMonitor``).
   `#15667 <https://github.com/mantidproject/mantid/pull/15667>`_
 - :ref:`CreateSimulationWorkspace <algm-CreateSimulationWorkspace>` now matches the IDF of the simulation workspace to the IDF of a reference workspace (either Nexus or Raw).
-- :ref:`LoadNexusLogs <algm-LoadNexusLogs>` allows now to load logs from an entry other than the first. :ref:`LoadEventNexus <algm-LoadEventNexus>` now loads the correct logs when an *NXentry* is given 
+- :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` now correctly reads in event data that does not have a common x-axis. `#15746 <https://github.com/mantidproject/mantid/pull/15746>`
+- :ref:`LoadNexusLogs <algm-LoadNexusLogs>` allows now to load logs from an entry other than the first. :ref:`LoadEventNexus <algm-LoadEventNexus>` now loads the correct logs when an *NXentry* is given
 - :ref:`FFT <algm-FFT>`: added property *AutoShift* to enable automatic phase correction for workspaces not centred at zero.
+- :ref:`SaveAscii <algm-SaveAscii2>` now has a SpectrumMetaData property that allows for addition information to be displayed along with the SpectrumNumber. Currently the supported MetaData is SpectrumNumber, Q and Angle.
+- :ref:`SaveMD <algm-SaveMD>` now writes MDHisto signal arrays as compressed data.
+- :ref:`SetUncertainties <algm-SetUncertainties>` has two new modes, ``oneIfZero`` and ``sqrtOrOne``.
+
 
 Deprecated
 ##########
@@ -85,24 +92,35 @@ MD Algorithms (VATES CLI)
 -  PlotMD now plots points at bin centres for MDEventWorkspaces as well as MDHistoWorkspaces.
 -  SliceMD now reports the correct number of events in the output workspace.
 -  The size of densely populated, multidimensional MDEventWorkspace slices produced by SliceMD has been greatly reduced by using more sensible box splitting parameters.
+-  Slicing algorithms (SliceMD and BinMD) do not add masked data to their output workspaces.
 -  MergeMD now does not add masked events to its output workspace.
+-  XorMD, OrMD and AndMD treat masked bins as zero.
+
+Geometry
+--------
+
+The Instrument Definition File syntax has been extended to provide support for a new type of topologically regular, but geometrically irregular form of 2D detectors. This new type of detector available in the IDF is known as a Structured Detector. Information on how to use this new detector type can be found in the :ref:`IDF <InstrumentDefinitionFile>` documentation.
 
 Performance
 -----------
 
 - :ref:`ChangeBinOffset <algm-ChangeBinOffset>` should now run faster for a :ref:`MatrixWorkspace <MatrixWorkspace>` (not EventWorkspaces).
 - Applying ParameterMaps to Detectors now about 30% faster. Algorithms that involve applying ParameterMaps will see performance improvements.
+- This release saw the introduction of the StructuredDetector. This change has reduced load times via :ref:`LoadInstrument <algm-LoadInstrument>` from ~10minutes down to ~1second for the prospective ESS LOKI instrument.
 
 CurveFitting
 ------------
 
-- Concept page for :ref:`Mantid Fitting <Fitting>` has been added. 
+- Concept page for :ref:`Mantid Fitting <Fitting>` has been added.
 
 Improved
 ########
 
 Python
 ------
+
+- It is now possible to use the unit.quickConversion(destinationUnit) functionality in python. If it is possible to convert one unit to another using a multiplication by a constant, this will return the factor and power required for the multiplication.
+
 
 Python Algorithms
 #################
