@@ -8,7 +8,8 @@ Histogram::XMode getHistogramXMode(size_t xLength, size_t yLength) {
     return Histogram::XMode::Points;
   if (xLength == (yLength + 1))
     return Histogram::XMode::BinEdges;
-  return Histogram::XMode::Uninitialized;
+  throw std::logic_error("getHistogramXMode(): x-y size mismatch, cannot "
+                         "determine Histogram::XMode.");
 }
 
 } // namespace HistogramData
