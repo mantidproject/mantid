@@ -62,10 +62,6 @@ void SetSampleMaterial::init() {
   declareProperty("UnitCellVolume", EMPTY_DBL(), mustBePositive,
                   "Unit cell volume in Angstoms^3. Will be calculated from the "
                   "OrientedLattice if not supplied.");
-  declareProperty(
-      "SampleMassDensity", EMPTY_DBL(), mustBePositive,
-      "Measured mass density in g/cubic cm of the sample to be used "
-      "to calculate the number density.");
   declareProperty("CoherentXSection", EMPTY_DBL(), mustBePositive,
                   "Optional:  This coherent cross-section for the sample "
                   "material in barns will be used instead of tabulated");
@@ -79,6 +75,9 @@ void SetSampleMaterial::init() {
                   "Optional:  This total scattering cross-section (coherent + "
                   "incoherent) for the sample material in barns will be used "
                   "instead of tabulated");
+  declareProperty("SampleMassDensity", EMPTY_DBL(), mustBePositive,
+                  "Optional: Measured mass density in g/cubic cm of the sample "
+                  "to be used to calculate the number density.");
 
   // Perform Group Associations.
   std::string formulaGrp("By Formula or Atomic Number");
