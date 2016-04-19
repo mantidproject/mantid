@@ -9,13 +9,14 @@ Points::Points(const BinEdges &edges) {
     return;
   if (edges.size() == 1)
     throw std::logic_error("Points: Cannot construct from BinEdges of size 1");
-  m_data = Kernel::make_cow<std::vector<double>>();
-  if (edges.size() < 2)
+  if (edges.size() == 0) {
+    m_data = Kernel::make_cow<HistogramX>(0);
     return;
+  }
+  m_data = Kernel::make_cow<HistogramX>(edges.size() - 1);
   auto &data = m_data.access();
-  data.reserve(edges.size() - 1);
-  for (auto it = cbegin(edges) + 1; it < cend(edges); ++it) {
-    data.emplace_back(0.5 * (*it + *(it - 1)));
+  for (size_t i = 0; i < data.size(); ++i) {
+    data[i] = (0.5 * (edges[i] + edges[i + 1]));
   }
 }
 

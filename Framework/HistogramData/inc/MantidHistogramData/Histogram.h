@@ -93,36 +93,37 @@ public:
       m_points = X;
   }
   void setX(const MantidVecPtr &X) {
+    // TODO temporay hack: make a copy
     if (xMode() == XMode::BinEdges)
-      m_binEdges = X;
+      m_binEdges = *X;
     else
-      m_points = X;
+      m_points = *X;
   }
   void setX(const MantidVecPtr::ptr_type &X) {
     if (xMode() == XMode::BinEdges)
-      m_binEdges = X;
+      m_binEdges = *X;
     else
-      m_points = X;
+      m_points = *X;
   }
   MantidVec &dataX() {
     if (xMode() == XMode::BinEdges)
-      return m_binEdges.data();
+      return m_binEdges.data().rawData();
     else
-      return m_points.data();
+      return m_points.data().rawData();
   }
   const MantidVec &dataX() const {
     if (xMode() == XMode::BinEdges)
-      return m_binEdges.data();
+      return m_binEdges.data().rawData();
     else
-      return m_points.data();
+      return m_points.data().rawData();
   }
   const MantidVec &constDataX() const {
     if (xMode() == XMode::BinEdges)
-      return m_binEdges.constData();
+      return m_binEdges.constData().rawData();
     else
-      return m_points.constData();
+      return m_points.constData().rawData();
   }
-  MantidVecPtr ptrX() const {
+  Kernel::cow_ptr<HistogramX> ptrX() const {
     if (xMode() == XMode::BinEdges)
       return m_binEdges.cowData();
     else

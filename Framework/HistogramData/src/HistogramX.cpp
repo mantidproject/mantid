@@ -3,6 +3,7 @@
 namespace Mantid {
 namespace HistogramData {
 
+  /*
 HistogramX::HistogramX(const Points &points)
     : detail::FixedLengthVector<HistogramX>(points.cowData()),
       m_xMode(XMode::Points) {}
@@ -58,6 +59,7 @@ void HistogramX::checkSize(const BinEdges &binEdges) const {
   if (target != binEdges.size())
     throw std::logic_error("HistogramX: size mismatch of BinEdges\n");
 }
+*/
 
 } // namespace HistogramData
 } // namespace Mantid

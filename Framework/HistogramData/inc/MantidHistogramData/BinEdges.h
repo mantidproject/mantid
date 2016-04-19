@@ -4,6 +4,7 @@
 #include "MantidHistogramData/DllConfig.h"
 #include "MantidHistogramData/VectorOf.h"
 #include "MantidHistogramData/ConstIterable.h"
+#include "MantidHistogramData/HistogramX.h"
 
 namespace Mantid {
 namespace HistogramData {
@@ -34,11 +35,11 @@ class Points;
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_HISTOGRAMDATA_DLL BinEdges
-    : public detail::VectorOf<BinEdges>,
+    : public detail::VectorOf<BinEdges, HistogramX>,
       public detail::ConstIterable<BinEdges> {
 public:
-  using VectorOf<BinEdges>::VectorOf;
-  using VectorOf<BinEdges>::operator=;
+  using VectorOf<BinEdges, HistogramX>::VectorOf;
+  using VectorOf<BinEdges, HistogramX>::operator=;
   BinEdges() = default;
   explicit BinEdges(const Points &points);
 };
