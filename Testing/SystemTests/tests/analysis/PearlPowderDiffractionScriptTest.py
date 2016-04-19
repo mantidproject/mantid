@@ -1,11 +1,11 @@
-import unittest
-import os.pathimport
+﻿import unittest
+import os.path
+import shutil
 
 from mantid.simpleapi import *
 from mantid import config
 import stresstesting
 import pearl_routines
-from mantid.Framework.PythonInterface.mantid.api import AnalysisDataService  # is that already being imported?
 
 # initial directory to the system test data files
 DIRS = config['datasearch.directories'].split(';')
@@ -30,6 +30,8 @@ class PearlPowderDiffractionScriptTest(stresstesting.MantidStressTest):
             for files in filenames:
                 path = os.path.join(directories[0], files)
                 os.remove(path)
+            cali_path = os.path.join(directories[0], "PEARL/DataOut")
+            shutil.rmtree(cali_path)
         except OSError, ose:
             print 'could not delete the generated file: ', ose.filename
 
@@ -74,8 +76,9 @@ class PearlPowderDiffractionScriptTest(stresstesting.MantidStressTest):
 
     def cleanup(self):
         filenames = []
-        filenames.extend(("PRL92476_92479.nxs", "PRL92476_92479_d_xye-0.dat", "PRL92476_92479_tof_xye-0.dat",
-                          "PRL92476_92479-0.gss"))
+        filenames.extend(("PEARL/DataOut/PRL92476_92479.nxs", "PEARL/DataOut/PRL92476_92479_d_xye-0.dat", 
+                          "PEARL/DataOut/PRL92476_92479_tof_xye-0.dat",
+                          "PEARL/DataOut/PRL92476_92479-0.gss"))
         self._clean_up_files(filenames, DIRS)
 
 
