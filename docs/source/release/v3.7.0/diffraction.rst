@@ -13,6 +13,9 @@ Crystal Improvements
 - 5 detectors added to the MANDI instrument geometry
 - :ref:`LoadCIF <algm-LoadCIF>` can now also load structures where only anisotropic displacement parameters are given,
   which are converted to equivalent isotropic parameters.
+- :ref:`SaveHKL <algm-SaveHKL>` has option to write the same output as anvred3.py including direction cosines.
+- :ref:`LoadHKL <algm-LoadHKL>` reads hkl output that includes direction cosines.
+- :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` has DetCal information sorted by detector numbers
 
 Engineering Diffraction
 -----------------------
