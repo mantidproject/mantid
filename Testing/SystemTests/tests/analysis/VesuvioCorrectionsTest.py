@@ -31,16 +31,17 @@ def tearDown():
         if mtd.doesExist(name):
             mtd.remove(name)
 
-
-def _check_platform():
-    # Check OS for RHEL7 or Ubuntu
+def _is_old_boost_version():
+    # It appears that a difference in boost version is causing different
+    # random number generation. As such an OS check is used.
+    # Older boost (earlier than 56): Ubuntu 14.04, RHEL7
     dist = platform.linux_distribution()
-    is_linux, is_rhel6 = False, False
     if any(dist):
-        is_linux = True
-        if dist[0] == 'Red Hat Enterprise Linux Workstation' and dist[1] == '6.7':
-            is_rhel6 = True
-    return is_linux, is_rhel6
+        if 'Red Hat' in dist[0] and dist[1].startswith('7'):
+            return True
+        if dist[0] == 'Ubuntu' and dist[1] == '14.04':
+            return True
+    return False
 
 def _create_algorithm(**kwargs):
     alg = AlgorithmManager.createUnmanaged("VesuvioCorrections")
@@ -143,15 +144,13 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         _validate_group_structure(self, corrections_wsg, 3)
         corrections_gb_peak = 0.0126756398636
         corrections_ts_peak = 0.161125285346
-        corrections_ms_peak = 0.000170937010003 # Ubuntu = 0.000230503344114
-        #if self._is_linux and not self._is_rhel6:
-            #corrections_gb_peak = 6.170476e-07
-            #corrections_ts_peak = 8.545568e-02
-            #corrections_ms_peak = 9.109919e-05
-
+        corrections_ms_peak = 0.000170937010003
+        if is_old_boost_version:
+            corrections_ms_peak = 0.000230503344114
         _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak)
-        _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak, tolerance = 0.24)
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak)
+
 
         # Test Corrected Workspaces
         corrected_wsg = self._algorithm.getProperty("CorrectedWorkspaces").value
@@ -159,11 +158,6 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         corrected_gb_peak = 0.636547077684
         corrected_ts_peak = 0.587870515272
         corrected_ms_peak = 0.636436654367
-        #if self._is_linux and not self._is_rhel6:
-            #corrected_gb_peak = 4.663811e-01
-            #corrected_ts_peak = 4.659339e-01
-            #corrected_ms_peak = 4.663553e-01
-
         _validate_matrix_peak_height(self, corrected_wsg.getItem(0), corrected_gb_peak)
         _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak)
         _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak)
@@ -171,17 +165,13 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         # Test OutputWorkspace
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
         _validate_matrix_structure(self, output_ws, 1, self._input_bins)
-        output_expected_peak = 1.6003707534
-        #if self._is_linux and not self._is_rhel6:
-            #output_expected_peak = 4.663559e-01
+        output_expected_peak = 0.6003707534
         _validate_matrix_peak_height(self, output_ws, output_expected_peak)
 
         # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
         _validate_table_workspace(self, linear_params, 7, 3)
         expected_values = [1.6003707534, 0.0, 1.0, 13.4977299425, 0.0, 1.0, 3.1231762417]
-        #if self._is_linux and not self._is_rhel6:
-            #expected_values = [6.087759e-05, 0.0, 1.0, 2.019595, 0.0, 1.0, 11.80356]
         _validate_table_values_top_to_bottom(self, linear_params, expected_values)
         tearDown()
 
@@ -213,15 +203,13 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
         _validate_group_structure(self, corrections_wsg, 3)
         corrections_gb_peak = 0.0106977817681
         corrections_ts_peak = 0.159340707436
-        corrections_ms_peak = 0.000226355717662 #Ubuntu = 0.000197140262829
-        #if self._is_linux and not self._is_rhel6:
-            #corrections_gb_peak = 1.605327e-06
-            #corrections_ts_peak = 9.994254e-02
-            #corrections_ms_peak = 1.089477e-04
+        corrections_ms_peak = 0.000226355717662
+        if is_old_boost_version:
+            corrections_ms_peak = 0.000197140262829
 
         _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak)
-        _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak, tolerance=0.08)
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak)
 
         # Test Corrected Workspaces
         corrected_wsg = self._algorithm.getProperty("CorrectedWorkspaces").value
@@ -229,10 +217,6 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
         corrected_gb_peak = 0.710957315887
         corrected_ts_peak = 0.650023356109
         corrected_ms_peak = 0.702029231969
-        #if self._is_linux and not self._is_rhel6:
-            #corrected_gb_peak = 5.235046e-01
-            #corrected_ts_peak = 5.234076e-01
-            #corrected_ms_peak = 5.234477e-01
 
         _validate_matrix_peak_height(self, corrected_wsg.getItem(0), corrected_gb_peak)
         _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak)
@@ -242,16 +226,12 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
         _validate_matrix_structure(self, output_ws, 1, self._input_bins)
         output_expected_peak = 0.710897137455
-        #if self._is_linux and not self._is_rhel6:
-            #output_expected_peak = 0.5234463
         _validate_matrix_peak_height(self, output_ws, output_expected_peak)
 
         # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
         _validate_table_workspace(self, linear_params, 7, 3)
         expected_values = [1.34824466369, 0.0, 1.0, 13.995593067, 0.0, 1.0, 2.92802316632]
-        #if self._is_linux and not self._is_rhel6:
-            #expected_values = [1.550200e-04, 0.0, 1.0, 2.390063, 0.0, 1.0, 10.055330]
         _validate_table_values_top_to_bottom(self, linear_params, expected_values)
         tearDown()
 
@@ -454,8 +434,7 @@ def _validate_table_values_top_to_bottom(self, table_ws, expected_values, tolera
         if expected_values[i] != 'skip':
             tolerance_value = expected_values[i] * tolerance
             abs_difference = abs(expected_values[i] - table_ws.cell(i,1))
-            logger.warning('table cell = ' + str(table_ws.cell(i,1)))
-            #self.assertTrue(abs_difference <= abs(tolerance_value))
+            self.assertTrue(abs_difference <= abs(tolerance_value))
 
 def _validate_matrix_peak_height(self, matrix_ws, expected_height, ws_index=0, tolerance=0.05):
     """
@@ -468,8 +447,7 @@ def _validate_matrix_peak_height(self, matrix_ws, expected_height, ws_index=0, t
     peak_height = np.amax(y_data)
     tolerance_value = expected_height * tolerance
     abs_difference = abs(expected_height - peak_height)
-    logger.warning('peak height = '+str(peak_height))
-    #self.assertTrue(abs_difference <= abs(tolerance_value))
+    self.assertTrue(abs_difference <= abs(tolerance_value))
 
 
 if __name__ == "__main__":
