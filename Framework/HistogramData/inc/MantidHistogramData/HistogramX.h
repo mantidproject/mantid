@@ -3,9 +3,6 @@
 
 #include "MantidHistogramData/DllConfig.h"
 #include "MantidHistogramData/FixedLengthVector.h"
-#include "MantidHistogramData/ConstIterable.h"
-#include "MantidHistogramData/Points.h"
-#include "MantidHistogramData/BinEdges.h"
 
 namespace Mantid {
 namespace HistogramData {
@@ -36,17 +33,23 @@ namespace HistogramData {
 class MANTID_HISTOGRAMDATA_DLL HistogramX
     : public detail::FixedLengthVector<HistogramX> {
 public:
-  explicit HistogramX(const Points &points);
-  explicit HistogramX(const BinEdges &binEdges);
+  using detail::FixedLengthVector<HistogramX>::FixedLengthVector;
+  using detail::FixedLengthVector<HistogramX>::operator=;
 
-  HistogramX &operator=(const HistogramX &rhs);
+  friend class Histogram;
 
-  Points points() const;
-  template <typename T> void setPoints(T &&data);
-  BinEdges binEdges() const;
-  template <typename T> void setBinEdges(T &&data);
+  //explicit HistogramX(const Points &points);
+  //explicit HistogramX(const BinEdges &binEdges);
+
+  //HistogramX &operator=(const HistogramX &rhs);
+
+  //Points points() const;
+  //template <typename T> void setPoints(T &&data);
+  //BinEdges binEdges() const;
+  //template <typename T> void setBinEdges(T &&data);
 
 private:
+  /*
   enum class XMode { BinEdges, Points };
 
   XMode xMode() const noexcept;
@@ -54,8 +57,10 @@ private:
   void checkSize(const BinEdges &binEdges) const;
 
   XMode m_xMode;
+  */
 };
 
+/*
 template <typename T> void HistogramX::setPoints(T &&data) {
   Points &&points = Points(std::forward<T>(data));
   checkSize(points);
@@ -69,6 +74,7 @@ template <typename T> void HistogramX::setBinEdges(T &&data) {
   m_xMode = XMode::BinEdges;
   m_data = edges.cowData();
 }
+*/
 
 } // namespace HistogramData
 } // namespace Mantid

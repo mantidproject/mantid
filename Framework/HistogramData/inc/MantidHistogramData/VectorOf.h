@@ -32,17 +32,17 @@ namespace detail {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <class T> class VectorOf {
+template <class T, class CowType> class VectorOf {
 public:
   VectorOf() = default;
   VectorOf(size_t count, const double &value) {
-    m_data = Kernel::make_cow<std::vector<double>>(count, value);
+    m_data = Kernel::make_cow<CowType>(count, value);
   }
   explicit VectorOf(size_t count) {
-    m_data = Kernel::make_cow<std::vector<double>>(count);
+    m_data = Kernel::make_cow<CowType>(count);
   }
   VectorOf(std::initializer_list<double> init) {
-    m_data = Kernel::make_cow<std::vector<double>>(init);
+    m_data = Kernel::make_cow<CowType>(init);
   }
   VectorOf(const VectorOf &) = default;
   VectorOf(VectorOf &&) = default;
@@ -50,32 +50,32 @@ public:
   VectorOf &operator=(VectorOf &&) = default;
 
   VectorOf &operator=(std::initializer_list<double> ilist) {
-    m_data = Kernel::make_cow<std::vector<double>>(ilist);
+    m_data = Kernel::make_cow<CowType>(ilist);
     return *this;
   }
 
   // TODO figure out if we want all these overloads.
-  explicit VectorOf(const Kernel::cow_ptr<std::vector<double>> &other)
+  explicit VectorOf(const Kernel::cow_ptr<CowType> &other)
       : m_data(other) {}
-  explicit VectorOf(const boost::shared_ptr<std::vector<double>> &other)
+  explicit VectorOf(const boost::shared_ptr<CowType> &other)
       : m_data(other) {}
   // TODO cow_ptr is not movable, can we implement move?
-  explicit VectorOf(const std::vector<double> &data)
-      : m_data(Kernel::make_cow<std::vector<double>>(data)) {}
+  explicit VectorOf(const CowType &data)
+      : m_data(Kernel::make_cow<CowType>(data)) {}
   // VectorOf(std::vector<double> &&data) { m_data =
   // Kernel::make_cow<std::vector<double>>(std::move(data)); }
 
-  VectorOf &operator=(const Kernel::cow_ptr<std::vector<double>> &other) {
+  VectorOf &operator=(const Kernel::cow_ptr<CowType> &other) {
     m_data = other;
     return *this;
   }
-  VectorOf &operator=(const boost::shared_ptr<std::vector<double>> &other) {
+  VectorOf &operator=(const boost::shared_ptr<CowType> &other) {
     m_data = other;
     return *this;
   }
-  VectorOf &operator=(const std::vector<double> &data) {
+  VectorOf &operator=(const CowType &data) {
     if (!m_data)
-      m_data = Kernel::make_cow<std::vector<double>>(data);
+      m_data = Kernel::make_cow<CowType>(data);
     else
       m_data.access() = data;
     return *this;
@@ -87,17 +87,17 @@ public:
 
   // Note that this function returns the internal data of VectorOf, i.e., does
   // not forward to std::vector::data().
-  const std::vector<double> &data() const { return *m_data; }
-  const std::vector<double> &constData() const { return *m_data; }
-  std::vector<double> &data() { return m_data.access(); }
-  Kernel::cow_ptr<std::vector<double>> cowData() const { return m_data; }
+  const CowType &data() const { return *m_data; }
+  const CowType &constData() const { return *m_data; }
+  CowType &data() { return m_data.access(); }
+  Kernel::cow_ptr<CowType> cowData() const { return m_data; }
 
 protected:
   // This is used as base class only, cannot delete polymorphically, so
   // destructor is protected.
   ~VectorOf() = default;
 
-  Kernel::cow_ptr<std::vector<double>> m_data{nullptr};
+  Kernel::cow_ptr<CowType> m_data{nullptr};
 };
 
 } // namespace detail

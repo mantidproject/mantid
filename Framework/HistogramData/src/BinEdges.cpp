@@ -7,14 +7,15 @@ namespace HistogramData {
 BinEdges::BinEdges(const Points &points) {
   if (!points)
     return;
-  m_data = Kernel::make_cow<std::vector<double>>();
   const size_t numPoints = points.size();
-  const size_t numEdges = numPoints + 1;
-
-  if (numPoints < 1)
+  size_t numEdges = numPoints + 1;
+  if (numPoints == 0)
+    numEdges = 0;
+  m_data = Kernel::make_cow<HistogramX>(numEdges);
+  if (numPoints == 0)
     return;
+
   auto &data = m_data.access();
-  data.resize(numEdges);
 
   if (numPoints == 1) {
     data[0] = points[0] - 0.5;

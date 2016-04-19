@@ -23,41 +23,165 @@ public:
   }
   static void destroySuite(FixedLengthVectorTest *suite) { delete suite; }
 
-  void test_constructor() {
-    TS_ASSERT_THROWS_NOTHING(
-        FixedLengthVectorTester data(make_cow<std::vector<double>>(0)));
+  void test_empty_constructor() {
+    const FixedLengthVectorTester values;
+    TS_ASSERT_EQUALS(values.size(), 0);
   }
 
-  void test_constructor_fail() {
-    TS_ASSERT_THROWS(FixedLengthVectorTester data(nullptr), std::logic_error);
+  void test_length_zero_constructor() {
+    const FixedLengthVectorTester values(0);
+    TS_ASSERT_EQUALS(values.size(), 0);
   }
 
-  void test_operator_bool() {
-    FixedLengthVectorTester data(make_cow<std::vector<double>>(0));
-    TS_ASSERT(data);
+  void test_count_value_constructor() {
+    const FixedLengthVectorTester values(2, 0.1);
+    TS_ASSERT_EQUALS(values.size(), 2);
+    TS_ASSERT_EQUALS(values[0], 0.1);
+    TS_ASSERT_EQUALS(values[1], 0.1);
+  }
+
+  void test_length_zero_value_constructor() {
+    const FixedLengthVectorTester values(0, 0.1);
+    TS_ASSERT_EQUALS(values.size(), 0);
+  }
+
+  void test_count_constructor() {
+    const FixedLengthVectorTester values(2);
+    TS_ASSERT_EQUALS(values.size(), 2);
+    TS_ASSERT_EQUALS(values[0], 0.0);
+    TS_ASSERT_EQUALS(values[1], 0.0);
+  }
+
+  void test_initializer_list_constructor() {
+    const FixedLengthVectorTester values{0.1, 0.2, 0.3};
+    TS_ASSERT_EQUALS(values.size(), 3);
+    TS_ASSERT_EQUALS(values[0], 0.1);
+    TS_ASSERT_EQUALS(values[1], 0.2);
+    TS_ASSERT_EQUALS(values[2], 0.3);
+  }
+
+  void test_empty_initializer_list_constructor() {
+    std::initializer_list<double> empty_list;
+    const FixedLengthVectorTester values(empty_list);
+    TS_ASSERT_EQUALS(values.size(), 0);
+  }
+
+  void test_copy_constructor() {
+    const FixedLengthVectorTester src(2, 0.1);
+    const FixedLengthVectorTester dest(src);
+    TS_ASSERT_EQUALS(dest[0], 0.1);
+    TS_ASSERT_EQUALS(dest[1], 0.1);
+  }
+
+  void test_move_constructor() {
+    FixedLengthVectorTester src(2, 0.1);
+    TS_ASSERT_EQUALS(src.size(), 2);
+    const FixedLengthVectorTester dest(std::move(src));
+    TS_ASSERT_EQUALS(src.size(), 0);
+    TS_ASSERT_EQUALS(dest[0], 0.1);
+    TS_ASSERT_EQUALS(dest[1], 0.1);
+  }
+
+  void test_copy_assignment() {
+    const FixedLengthVectorTester src(2, 0.1);
+    FixedLengthVectorTester dest(2);
+    dest = src;
+    TS_ASSERT_EQUALS(dest.size(), 2);
+    TS_ASSERT_EQUALS(dest[0], 0.1);
+    TS_ASSERT_EQUALS(dest[1], 0.1);
+  }
+
+  void test_copy_assignment_fail() {
+    const FixedLengthVectorTester src(2, 0.1);
+    FixedLengthVectorTester dest(1);
+    TS_ASSERT_THROWS(dest = src, std::logic_error);
+  }
+
+  void test_move_assignment() {
+    FixedLengthVectorTester src(2, 0.1);
+    FixedLengthVectorTester dest(2);
+    dest = std::move(src);
+    TS_ASSERT_EQUALS(src.size(), 0);
+    TS_ASSERT_EQUALS(dest[0], 0.1);
+    TS_ASSERT_EQUALS(dest[1], 0.1);
+  }
+
+  void test_move_assignment_fail() {
+    FixedLengthVectorTester src(2, 0.1);
+    FixedLengthVectorTester dest(1);
+    TS_ASSERT_THROWS(dest = std::move(src), std::logic_error);
+  }
+
+  void test_initializer_list_assignment() {
+    FixedLengthVectorTester values(3);
+    values = {0.1, 0.2, 0.3};
+    TS_ASSERT_EQUALS(values.size(), 3);
+    TS_ASSERT_EQUALS(values[0], 0.1);
+    TS_ASSERT_EQUALS(values[1], 0.2);
+    TS_ASSERT_EQUALS(values[2], 0.3);
+  }
+
+  void test_empty_initializer_list_assignment() {
+    std::initializer_list<double> empty_list;
+    FixedLengthVectorTester values(0);
+    values = empty_list;
+    TS_ASSERT_EQUALS(values.size(), 0);
+  }
+
+  void test_initializer_list_assignment_fail() {
+    FixedLengthVectorTester values(2);
+    TS_ASSERT_THROWS((values = {0.1, 0.2, 0.3}), std::logic_error);
+  }
+
+  void test_vector_constructor() {
+    const std::vector<double> vector(2, 0.1);
+    FixedLengthVectorTester values(vector);
+    TS_ASSERT_EQUALS(values.size(), 2);
+    TS_ASSERT_EQUALS(values[0], 0.1);
+    TS_ASSERT_EQUALS(values[1], 0.1);
+  }
+
+  void test_vector_move_constructor() {
+    std::vector<double> vector(2, 0.1);
+    FixedLengthVectorTester values(std::move(vector));
+    TS_ASSERT_EQUALS(vector.size(), 0);
+    TS_ASSERT_EQUALS(values.size(), 2);
+    TS_ASSERT_EQUALS(values[0], 0.1);
+    TS_ASSERT_EQUALS(values[1], 0.1);
+  }
+
+  void test_vector_assignment() {
+    const std::vector<double> vector{0.1, 0.2};
+    FixedLengthVectorTester values(2);
+    TS_ASSERT_THROWS_NOTHING(values = vector);
+    TS_ASSERT_EQUALS(values.size(), 2);
+    TS_ASSERT_EQUALS(values[0], 0.1);
+    TS_ASSERT_EQUALS(values[1], 0.2);
+  }
+
+  void test_vector_move_assignment() {
+    std::vector<double> vector{0.1, 0.2};
+    FixedLengthVectorTester values(2);
+    TS_ASSERT_THROWS_NOTHING(values = std::move(vector));
+    TS_ASSERT_EQUALS(vector.size(), 0);
+    TS_ASSERT_EQUALS(values.size(), 2);
+    TS_ASSERT_EQUALS(values[0], 0.1);
+    TS_ASSERT_EQUALS(values[1], 0.2);
   }
 
   void test_size() {
-    FixedLengthVectorTester data0(make_cow<std::vector<double>>(0));
-    TS_ASSERT_EQUALS(data0.size(), 0);
-    FixedLengthVectorTester data1(make_cow<std::vector<double>>(1));
-    TS_ASSERT_EQUALS(data1.size(), 1);
+    const FixedLengthVectorTester values(42);
+    TS_ASSERT_EQUALS(values.size(), 42);
   }
 
   void test_const_index_operator() {
-    const FixedLengthVectorTester data(
-        make_cow<std::vector<double>>(std::vector<double>{0.1, 0.2}));
-    const auto copy(data);
-    TS_ASSERT_EQUALS(&data[0], &copy[0]);
+    const FixedLengthVectorTester data{0.1, 0.2};
     TS_ASSERT_EQUALS(data[0], 0.1);
     TS_ASSERT_EQUALS(data[1], 0.2);
   }
 
   void test_index_operator() {
-    FixedLengthVectorTester data(
-        make_cow<std::vector<double>>(std::vector<double>{0.1, 0.2}));
-    const auto copy(data);
-    TS_ASSERT_DIFFERS(&data[0], &copy[0]);
+    FixedLengthVectorTester data{0.1, 0.2};
     TS_ASSERT_EQUALS(data[0], 0.1);
     TS_ASSERT_EQUALS(data[1], 0.2);
   }
