@@ -450,8 +450,7 @@ void SaveHKL::exec() {
           double cmonx = 1.0;
           if (p.getMonitorCount() > 0)
             cmonx = 100e6 / p.getMonitorCount();
-          double spect =
-              spectrumCalc(p.getTOF(), iSpec, time, spectra, bank);
+          double spect = spectrumCalc(p.getTOF(), iSpec, time, spectra, bank);
           // Find spectra at wavelength of 1 for normalization
           std::vector<double> xdata(1, 1.0); // wl = 1
           std::vector<double> ydata;
@@ -478,15 +477,15 @@ void SaveHKL::exec() {
             correc *= detScale[bank];
 
           // instrument background constant for sigma
-          instBkg = 0.*12.28 / cmonx * scaleFactor;
+          instBkg = 0. * 12.28 / cmonx * scaleFactor;
         }
 
         // SHELX can read data without the space between the l and intensity
         if (p.getDetectorID() != -1) {
           double ckIntensity = correc * p.getIntensity();
-          double cksigI =
-              std::sqrt(std::pow(correc * p.getSigmaIntensity(), 2) +
-                        std::pow(relSigSpect * correc * p.getIntensity(), 2) + instBkg);
+          double cksigI = std::sqrt(
+              std::pow(correc * p.getSigmaIntensity(), 2) +
+              std::pow(relSigSpect * correc * p.getIntensity(), 2) + instBkg);
           p.setIntensity(ckIntensity);
           p.setSigmaIntensity(cksigI);
           if (ckIntensity > 99999.985)
@@ -751,16 +750,15 @@ void SaveHKL::sizeBanks(std::string bankName, int &nCols, int &nRows) {
     nCols = RDet->xpixels();
     nRows = RDet->ypixels();
   } else {
-          if (ws->getInstrument()->getName().compare("CORELLI") ==
-              0) // for Corelli with sixteenpack under bank
-          {
-            std::vector<Geometry::IComponent_const_sptr> children;
-            boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-                boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-                    parent);
-            asmb->getChildren(children, false);
-            parent = children[0];
-          }
+    if (ws->getInstrument()->getName().compare("CORELLI") ==
+        0) // for Corelli with sixteenpack under bank
+    {
+      std::vector<Geometry::IComponent_const_sptr> children;
+      boost::shared_ptr<const Geometry::ICompAssembly> asmb =
+          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+      asmb->getChildren(children, false);
+      parent = children[0];
+    }
     std::vector<Geometry::IComponent_const_sptr> children;
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);

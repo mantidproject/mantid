@@ -40,7 +40,6 @@ void LoadHKL::init() {
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace.");
-
 }
 
 //----------------------------------------------------------------------------------------------
@@ -85,7 +84,8 @@ void LoadHKL::exec() {
   double mu1 = 0.0, mu2 = 0.0, wl1 = 0.0, wl2 = 0.0, sc1 = 0.0, astar1 = 0.0;
   do {
     getline(in, line);
-    if (line.length() > 125) cosines = true;
+    if (line.length() > 125)
+      cosines = true;
     double h = atof(line.substr(0, 4).c_str());
     double k = atof(line.substr(4, 4).c_str());
     double l = atof(line.substr(8, 4).c_str());
