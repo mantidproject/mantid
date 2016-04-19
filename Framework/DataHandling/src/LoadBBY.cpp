@@ -385,9 +385,8 @@ void LoadBBY::exec() {
       "bm_counts", static_cast<double>(frame_count) * period /
                        1.0e6); // static_cast<double>(instrumentInfo.bm_counts)
 
-  Kernel::time_duration duration =
-      boost::posix_time::microseconds(static_cast<boost::int64_t>(
-          static_cast<double>(frame_count) * period));
+  Kernel::time_duration duration = boost::posix_time::microseconds(
+      static_cast<boost::int64_t>(static_cast<double>(frame_count) * period));
 
   Kernel::DateAndTime start_time("2000-01-01T00:00:00");
   Kernel::DateAndTime end_time(start_time + duration);
@@ -607,7 +606,7 @@ LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
     if (conf->hasProperty("Ltof_det"))
       instrumentInfo.L1_chopper_value =
           conf->getDouble("Ltof_det") * toMeters - instrumentInfo.L2_det_value;
-     if (conf->hasProperty("L1"))
+    if (conf->hasProperty("L1"))
       instrumentInfo.L1_source_value = conf->getDouble("L1") * toMeters;
 
     if (conf->hasProperty("L2_curtainl"))

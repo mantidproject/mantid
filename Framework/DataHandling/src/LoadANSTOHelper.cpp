@@ -56,18 +56,16 @@ EventProcessor::EventProcessor(const std::vector<bool> &roi,
                                const double tofMaxBoundary,
                                const double timeMinBoundary,
                                const double timeMaxBoundary)
-    : m_roi(roi), m_stride(stride), m_frames(0), m_framesValid(0), m_period(period),
-      m_phase(phase), m_tofMinBoundary(tofMinBoundary),
+    : m_roi(roi), m_stride(stride), m_frames(0), m_framesValid(0),
+      m_period(period), m_phase(phase), m_tofMinBoundary(tofMinBoundary),
       m_tofMaxBoundary(tofMaxBoundary), m_timeMinBoundary(timeMinBoundary),
       m_timeMaxBoundary(timeMaxBoundary) {}
 bool EventProcessor::validFrame() const {
   // frame boundary
   double frameTime =
-    (static_cast<double>(m_frames) * m_period) * 1e-6; // in seconds
+      (static_cast<double>(m_frames) * m_period) * 1e-6; // in seconds
 
-  return
-    (frameTime >= m_timeMinBoundary) &&
-    (frameTime <= m_timeMaxBoundary);
+  return (frameTime >= m_timeMinBoundary) && (frameTime <= m_timeMaxBoundary);
 }
 void EventProcessor::newFrame() {
   m_frames++;
