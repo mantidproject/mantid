@@ -1,7 +1,7 @@
 from mantid.api import AlgorithmFactory, ITableWorkspaceProperty, FileAction, FileProperty, \
     MatrixWorkspaceProperty, Progress, PropertyMode, PythonAlgorithm
 from mantid.kernel import Direction, FloatArrayProperty, Property, StringListValidator
-from mantid.simpleapi import CreateEmptyTableWorkspace, ExtractSpectra, SaveFocusedXYE
+import mantid.simpleapi as msapi
 
 # Too many properties!
 #pylint: disable=too-many-instance-attributes
@@ -298,8 +298,8 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         in_idx = self.getProperty(index_prop_name).value
 
         if in_wks.getNumberHistograms() > 1 or 0 != in_idx:
-            focused_wks = ExtractSpectra(InputWorkspace = in_wks, StartWorkspaceIndex = in_idx,
-                                         EndworkspaceIndex = in_idx)
+            focused_wks = msapi.ExtractSpectra(InputWorkspace = in_wks, StartWorkspaceIndex = in_idx,
+                                               EndworkspaceIndex = in_idx)
         else:
             focused_wks = in_wks
 
@@ -555,12 +555,11 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
 
         # produce histo_file, to "import" it with the reader from GSAS-II which will initialize
         # the "rd" object.
-        import os
         import tempfile
         with tempfile.NamedTemporaryFile(mode='w', suffix='.xye', delete=False) as histo_data_tmp:
             # SplitFiles=False is important to get the filename without suffix
-            SaveFocusedXYE(InputWorkspace=gs2_focused_wks, Filename=histo_data_tmp.name,
-                           Format="XYE", SplitFiles=False)
+            msapi.SaveFocusedXYE(InputWorkspace=gs2_focused_wks, Filename=histo_data_tmp.name,
+                                 Format="XYE", SplitFiles=False)
             gs2_rd = self._get_histo_data_reader(gs2, histo_data_tmp.name)
 
         gs2_rd.powderdata = self._transform_to_centers_bins(gs2_rd.powderdata)
@@ -773,7 +772,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
 
         par_names = ['Center', 'Intensity', 'Alpha', 'Beta', 'Sigma', 'Gamma']
         par_prefixes = ['pos','int','alp','bet','sig','gam']
-        table = CreateEmptyTableWorkspace(OutputWorkspace=tbl_name)
+        table = msapi.CreateEmptyTableWorkspace(OutputWorkspace=tbl_name)
 
         num_peaks = 0
         while par_prefixes[0] + str(num_peaks) in parm_dict:
@@ -867,7 +866,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         (latt_a, latt_b, latt_c, latt_alpha, latt_beta, latt_gamma) = 6*[0]
         # To grab parameters from the gs2 object:
         # G2gd.GetPatternTreeItemId(self,self.root,'Phases')
-        with open(out_lattice_file, 'wt') as lattice_txt:
+        with open(out_lattice_file, 'w') as lattice_txt:
             print >>lattice_txt, "a, b, c, alpha, beta, gamma"
             print >>lattice_txt, ("{0}, {1}, {2}, {3}, {4}, {5}".
                                   format(latt_a, latt_b, latt_c, latt_alpha, latt_beta, latt_gamma))
