@@ -63,8 +63,6 @@ class DLLExport LoadBBY : public API::IFileLoader<Kernel::FileDescriptor> {
     double L2_curtainu_value;
     double L2_curtaind_value;
     //
-    double D_det_value;
-    //
     double D_curtainl_value;
     double D_curtainr_value;
     double D_curtainu_value;
