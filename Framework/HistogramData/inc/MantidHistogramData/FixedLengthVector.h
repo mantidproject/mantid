@@ -83,8 +83,9 @@ public:
   const double &operator[](size_t pos) const { return m_data[pos]; }
   double &operator[](size_t pos) { return m_data[pos]; }
 
-protected:
   const std::vector<double> &rawData() const { return m_data; }
+
+protected:
   std::vector<double> &rawData() { return m_data; }
 
   // This is used as base class only, cannot delete polymorphically, so

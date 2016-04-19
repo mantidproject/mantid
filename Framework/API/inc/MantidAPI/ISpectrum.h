@@ -10,6 +10,7 @@
 namespace Mantid {
 namespace HistogramData {
 class Histogram;
+class HistogramX;
 }
 namespace API {
 
@@ -58,10 +59,9 @@ public:
   virtual void setX(const MantidVec &X) = 0;
   virtual void setDx(const MantidVec &Dx);
 
-  virtual void setX(const MantidVecPtr &X) = 0;
+  virtual void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) = 0;
   virtual void setDx(const MantidVecPtr &Dx);
 
-  virtual void setX(const MantidVecPtr::ptr_type &X) = 0;
   virtual void setDx(const MantidVecPtr::ptr_type &Dx);
 
   virtual MantidVec &dataX() = 0;
@@ -73,7 +73,7 @@ public:
   virtual const MantidVec &readX() const = 0;
   virtual const MantidVec &readDx() const;
 
-  virtual MantidVecPtr ptrX() const = 0;
+  virtual Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const = 0;
   virtual MantidVecPtr ptrDx() const;
 
   virtual void setData(const MantidVec &Y) = 0;

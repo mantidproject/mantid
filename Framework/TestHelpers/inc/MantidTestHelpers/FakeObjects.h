@@ -47,12 +47,15 @@ public:
       : ISpectrum(specNo), m_histogram(mode) {}
 
   void setX(const MantidVec &X) override { m_histogram.setX(X); }
-  void setX(const MantidVecPtr &X) override { m_histogram.setX(X); }
-  void setX(const MantidVecPtr::ptr_type &X) override { m_histogram.setX(X); }
+  void setX(const cow_ptr<HistogramData::HistogramX> &X) override {
+    m_histogram.setX(X);
+  }
   MantidVec &dataX() override { return m_histogram.dataX(); }
   const MantidVec &dataX() const override { return m_histogram.dataX(); }
   const MantidVec &readX() const override { return m_histogram.constDataX(); }
-  MantidVecPtr ptrX() const override { return m_histogram.ptrX(); }
+  cow_ptr<HistogramData::HistogramX> ptrX() const override {
+    return m_histogram.ptrX();
+  }
 
   void setData(const MantidVec &Y) override { data = Y; }
   void setData(const MantidVec &Y, const MantidVec &E) override {

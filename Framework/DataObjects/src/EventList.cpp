@@ -1455,17 +1455,7 @@ size_t EventList::histogram_size() const {
  * histogram to be calculated.
  * @param X :: The vector of doubles to set as the histogram limits.
  */
-void EventList::setX(const MantidVecPtr::ptr_type &X) {
-  m_histogram.setX(X);
-  if (mru)
-    mru->deleteIndex(this->m_specNo);
-}
-
-/** Set the x-component for the histogram view. This will NOT cause the
- * histogram to be calculated.
- * @param X :: The vector of doubles to set as the histogram limits.
- */
-void EventList::setX(const MantidVecPtr &X) {
+void EventList::setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
   m_histogram.setX(X);
   if (mru)
     mru->deleteIndex(this->m_specNo);
@@ -1505,7 +1495,9 @@ const MantidVec &EventList::constDataX() const {
 const MantidVec &EventList::readX() const { return m_histogram.constDataX(); }
 
 /// Returns a pointer to the x data
-MantidVecPtr EventList::ptrX() const { return m_histogram.ptrX(); }
+Kernel::cow_ptr<HistogramData::HistogramX> EventList::ptrX() const {
+  return m_histogram.ptrX();
+}
 
 // ==============================================================================================
 // --- Return Data Vectors --------------------------------------------------

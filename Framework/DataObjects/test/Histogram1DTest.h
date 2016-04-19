@@ -58,8 +58,9 @@ public:
     TS_ASSERT_EQUALS(h.dataE()[12], 0.0);
   }
   void testsetgetXPointer() {
-    h.setX(pa);
-    TS_ASSERT_EQUALS(h.dataX(), *pa);
+    auto px = boost::make_shared<HistogramX>(0);
+    h.setX(px);
+    TS_ASSERT_EQUALS(&(*h.ptrX()), &(*px));
   }
   void testsetgetDataYPointer() {
     h.setData(pa);

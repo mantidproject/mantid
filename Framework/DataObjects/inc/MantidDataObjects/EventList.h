@@ -186,9 +186,7 @@ public:
   EventSortType getSortType() const;
 
   // X-vector accessors. These reset the MRU for this spectrum
-  void setX(const MantidVecPtr::ptr_type &X) override;
-
-  void setX(const MantidVecPtr &X) override;
+  void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) override;
 
   void setX(const MantidVec &X) override;
 
@@ -197,7 +195,7 @@ public:
   const MantidVec &constDataX() const;
 
   const MantidVec &readX() const override;
-  MantidVecPtr ptrX() const override;
+  Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const override;
 
   // TODO: This overload will probably be needed in a future to work with Event
   // data properly
