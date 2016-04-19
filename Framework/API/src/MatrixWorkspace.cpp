@@ -966,11 +966,6 @@ bool MatrixWorkspace::isHistogramData() const {
   return isHist;
 }
 
-void MatrixWorkspace::setXMode(HistogramData::Histogram::XMode mode) {
-  for (size_t i = 0; i < getNumberHistograms(); ++i)
-    getSpectrum(i)->histogram().setXMode(mode);
-}
-
 /**
 *  Whether the workspace contains common X bins
 *  @return whether the workspace contains common X bins

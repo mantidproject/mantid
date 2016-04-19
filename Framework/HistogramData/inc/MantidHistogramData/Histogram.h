@@ -36,102 +36,47 @@ namespace HistogramData {
 */
 class MANTID_HISTOGRAMDATA_DLL Histogram {
 private:
-  // MantidVecPtr refX;
-  BinEdges m_binEdges;
-  Points m_points;
+  Kernel::cow_ptr<HistogramX> m_x;
 
 public:
-  enum class XMode { BinEdges, Points, Uninitialized };
-  Histogram(XMode mode) : m_xMode(mode) {
-    switch (mode) {
-    case XMode::BinEdges:
-      m_binEdges = BinEdges(0);
-      break;
-    case XMode::Points:
-      m_points = Points(0);
-      break;
-    default:
-      throw std::logic_error("Histogram: XMode must be BinEdges or Points");
-    }
-  }
+  enum class XMode { BinEdges, Points };
+  Histogram(XMode mode) : m_x(Kernel::make_cow<HistogramX>(0)), m_xMode(mode) {}
+  Histogram(const Points &points)
+      : m_x(points.cowData()), m_xMode(XMode::Points) {}
+  Histogram(const BinEdges &edges)
+      : m_x(edges.cowData()), m_xMode(XMode::BinEdges) {}
 
   XMode xMode() const noexcept { return m_xMode; }
-  void setXMode(XMode mode) {
-    if (mode != XMode::BinEdges || mode != XMode::Points)
-      throw std::logic_error("Histogram: XMode must be BinEdges or Points");
-    if (m_xMode == mode)
-      return;
-    m_xMode = mode;
-    if (mode == XMode::Points) {
-      m_points = Points(m_binEdges);
-      m_binEdges = BinEdges();
-    } else {
-      m_binEdges = BinEdges(m_points);
-      m_points = Points();
-    }
-  }
 
   Points points() const {
     if (xMode() == XMode::BinEdges)
-      return Points(m_binEdges);
+      return Points(BinEdges(m_x));
     else
-      return Points(m_points);
+      return Points(m_x);
   }
 
+  /*
   template <typename T> void setPoints(T &&data) {
+    // TODO size check
+    if (xMode() == XMode::BinEdges)
     if (m_binEdges)
       m_binEdges = BinEdges{};
     m_xMode = XMode::Points;
     m_points = std::forward<T>(data);
   }
+  */
 
   // Temporary legacy interface to X
-  void setX(const MantidVec &X) {
-    if (xMode() == XMode::BinEdges)
-      m_binEdges = X;
-    else
-      m_points = X;
-  }
-  void setX(const MantidVecPtr &X) {
-    // TODO temporay hack: make a copy
-    if (xMode() == XMode::BinEdges)
-      m_binEdges = *X;
-    else
-      m_points = *X;
-  }
-  void setX(const MantidVecPtr::ptr_type &X) {
-    if (xMode() == XMode::BinEdges)
-      m_binEdges = *X;
-    else
-      m_points = *X;
-  }
-  MantidVec &dataX() {
-    if (xMode() == XMode::BinEdges)
-      return m_binEdges.data().rawData();
-    else
-      return m_points.data().rawData();
-  }
-  const MantidVec &dataX() const {
-    if (xMode() == XMode::BinEdges)
-      return m_binEdges.data().rawData();
-    else
-      return m_points.data().rawData();
-  }
-  const MantidVec &constDataX() const {
-    if (xMode() == XMode::BinEdges)
-      return m_binEdges.constData().rawData();
-    else
-      return m_points.constData().rawData();
-  }
-  Kernel::cow_ptr<HistogramX> ptrX() const {
-    if (xMode() == XMode::BinEdges)
-      return m_binEdges.cowData();
-    else
-      return m_points.cowData();
-  }
+  void setX(const MantidVec &X) { m_x.access() = X; }
+  void setX(const Kernel::cow_ptr<HistogramX> &X) { m_x = X; }
+  void setX(const boost::shared_ptr<HistogramX> &X) { m_x = X; }
+  MantidVec &dataX() { return m_x.access().rawData(); }
+  const MantidVec &dataX() const { return m_x->rawData(); }
+  const MantidVec &constDataX() const { return m_x->rawData(); }
+  Kernel::cow_ptr<HistogramX> ptrX() const { return m_x; }
 
 private:
-  XMode m_xMode = XMode::Uninitialized;
+  XMode m_xMode;
 };
 
 MANTID_HISTOGRAMDATA_DLL Histogram::XMode getHistogramXMode(size_t xLength,

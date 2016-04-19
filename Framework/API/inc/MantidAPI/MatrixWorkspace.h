@@ -357,8 +357,6 @@ public:
   /// to point-like)
   virtual bool isHistogramData() const;
 
-  void setXMode(HistogramData::Histogram::XMode mode);
-
   /// Returns true if the workspace contains has common X bins
   virtual bool isCommonBins() const;
 
