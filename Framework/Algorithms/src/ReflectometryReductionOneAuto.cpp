@@ -17,8 +17,11 @@ namespace {
 * @
 */
 double calculateQ(double lambda, double theta) {
+  if (lambda == 0.0)
+    throw std::runtime_error("Minimum/Maximum value of the IvsLambda Workspace "
+                             "is 0. Cannot calculate Q");
   double thetaInRad = theta * M_PI / 180;
-  return 4 * M_PI * sin(thetaInRad) / lambda;
+  return (4 * M_PI * sin(thetaInRad)) / lambda;
 }
 }
 /*end of Anonymous namespace*/

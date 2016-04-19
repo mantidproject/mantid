@@ -83,6 +83,9 @@ std::vector<int> getSpectrumNumbers(MatrixWorkspace_sptr &ws) {
 * @
 */
 double calculateQ(double lambda, double theta) {
+  if (lambda == 0.0)
+    throw std::runtime_error("Minimum/Maximum value of the IvsLambda Workspace "
+                             "is 0. Cannot calculate Q");
   double thetaInRad = theta * M_PI / 180;
   return (4 * M_PI * sin(thetaInRad)) / lambda;
 }
@@ -653,6 +656,8 @@ void ReflectometryReductionOne::exec() {
     QParams.push_back(-momentumTransferStep);
     QParams.push_back(momentumTransferMaximum);
   } else {
+    auto min = IvsLam->readX(0).front();
+    auto max = IvsLam->readX(0).back();
     momentumTransferMinimum = calculateQ(IvsLam->readX(0).back(), theta.get());
     momentumTransferMaximum = calculateQ(IvsLam->readX(0).front(), theta.get());
     if (isDefault("MomentumTransferStep")) {
