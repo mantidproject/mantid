@@ -151,7 +151,7 @@ PeakRepresentation_sptr PeakViewFactory::createPeakRepresentationSphere(
         = dynamic_cast<const Mantid::DataObjects::PeakShapeSpherical &>(shape);
 
     // Get the radius
-    const auto peakRadius = sphericalShape.radius();
+    const auto peakRadius = sphericalShape.radius().value();
 
     // Get the background inner radius. If it does not exist, default to radius.
     const auto backgroundInnerRadiusOptional
