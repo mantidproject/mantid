@@ -15,6 +15,7 @@ namespace MantidWidgets {
  */
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IMuonFitDataSelector {
 public:
+  enum class FitType { Single, CoAdd, Simultaneous };
   virtual ~IMuonFitDataSelector() {}
   virtual QStringList getRuns() const = 0;
   virtual unsigned int getWorkspaceIndex() const = 0;
@@ -31,6 +32,7 @@ public:
   virtual void setEndTime(double end) = 0;
   virtual void setStartTimeQuietly(double start) = 0;
   virtual void setEndTimeQuietly(double end) = 0;
+  virtual FitType getFitType() const = 0;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

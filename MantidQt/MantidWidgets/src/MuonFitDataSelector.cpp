@@ -374,5 +374,26 @@ void MuonFitDataSelector::setUserInput(const QVariant &value) {
   }
 }
 
+/**
+ * Returns the selected fit type.
+ * - If only one run is selected, this is a single fit.
+ * - If multiple runs are selected, the user has the option of co-adding them or
+ * doing a simultaneous fit, chosen via the radio buttons.
+ * @returns :: fit type from enum
+ */
+IMuonFitDataSelector::FitType MuonFitDataSelector::getFitType() const {
+  const auto runs = getRuns();
+  if (runs.size() < 2) {
+    return FitType::Single;
+  } else {
+    // check the radio buttons
+    if (m_ui.rbCoAdd->isChecked()) {
+      return FitType::CoAdd;
+    } else {
+      return FitType::Simultaneous;
+    }
+  }
+}
+
 } // namespace MantidWidgets
 } // namespace MantidQt

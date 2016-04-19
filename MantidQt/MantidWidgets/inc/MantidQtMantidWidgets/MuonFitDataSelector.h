@@ -64,6 +64,8 @@ public:
   QStringList getChosenGroups() const override;
   /// Get selected periods
   QStringList getPeriodSelections() const override;
+  /// Get type of fit
+  IMuonFitDataSelector::FitType getFitType() const override;
 
 public slots:
   /// Set number of periods in data
