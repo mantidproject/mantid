@@ -352,8 +352,9 @@ private:
   ITableWorkspace_sptr
   getDeadTimeCorrection(boost::shared_ptr<LoadResult> loadResult) const;
 
-  /// Creates and algorithm with all the properties set according to widget values on the interface
-  Algorithm_sptr createLoadAlgorithm();
+  /// Creates an algorithm with all the properties set according to widget
+  /// values on the interface
+  Algorithm_sptr createProcessAlgorithm();
 
   /// Plots specific WS spectrum (used by plotPair and plotGroup)
   void plotSpectrum(const QString& wsName, bool logScale = false);

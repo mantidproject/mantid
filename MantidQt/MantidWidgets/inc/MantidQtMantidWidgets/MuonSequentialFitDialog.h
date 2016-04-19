@@ -45,7 +45,8 @@ namespace MantidWidgets
     Q_OBJECT
 
   public:
-    MuonSequentialFitDialog(MuonFitPropertyBrowser* fitPropBrowser, Algorithm_sptr loadAlg);
+    MuonSequentialFitDialog(MuonFitPropertyBrowser *fitPropBrowser,
+                            Algorithm_sptr processAlg);
     ~MuonSequentialFitDialog() override;
 
     enum DialogState 
@@ -95,8 +96,8 @@ namespace MantidWidgets
     /// Whether user requested fitting to be stopped
     bool m_stopRequested;
 
-    /// Algorithm the dialog should use for loading 
-    Algorithm_sptr m_loadAlg;
+    /// Algorithm the dialog should use for processing loaded data 
+    Algorithm_sptr m_processAlg;
 
     // -- STATIC MEMBERS ------------------------------------------------------
 

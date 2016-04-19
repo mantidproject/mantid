@@ -2927,12 +2927,12 @@ ITableWorkspace_sptr MuonAnalysis::parseGrouping() {
  * Opens a sequential fit dialog.
  */
 void MuonAnalysis::openSequentialFitDialog() {
-  Algorithm_sptr loadAlg;
+  Algorithm_sptr procAlg;
 
   try {
-    loadAlg = createLoadAlgorithm();
+    procAlg = createProcessAlgorithm();
   } catch (const std::runtime_error &err) {
-    QString message("Error while setting load properties.\n"
+    QString message("Error while setting algorithm properties.\n"
                     "If instrument was changed, properties will have been "
                     "cleared and should be reset.\n\n"
                     "Error was: ");
@@ -2942,14 +2942,14 @@ void MuonAnalysis::openSequentialFitDialog() {
     return;
   } catch (...) {
     QMessageBox::critical(this, "Unable to open dialog",
-                          "Error while setting load properties");
+                          "Error while setting algorithm properties");
     return;
   }
 
   m_uiForm.fitBrowser->blockSignals(true);
 
   MuonSequentialFitDialog *dialog =
-      new MuonSequentialFitDialog(m_uiForm.fitBrowser, loadAlg);
+      new MuonSequentialFitDialog(m_uiForm.fitBrowser, procAlg);
   dialog->exec();
 
   m_uiForm.fitBrowser->blockSignals(false);
@@ -3036,15 +3036,15 @@ MuonAnalysis::deadTimesToTable(const Workspace_sptr &deadTimes) const {
 }
 
 /**
- * Creates and algorithm with all the properties set according to widget values
+ * Creates an algorithm with all the properties set according to widget values
  * on the interface.
  * @return The algorithm with properties set
  */
-Algorithm_sptr MuonAnalysis::createLoadAlgorithm() {
-  Algorithm_sptr loadAlg =
+Algorithm_sptr MuonAnalysis::createProcessAlgorithm() {
+  Algorithm_sptr procAlg =
       AlgorithmManager::Instance().createUnmanaged("MuonProcess");
-  loadAlg->initialize();
-  loadAlg->setProperty("Mode", "Combined");
+  procAlg->initialize();
+  procAlg->setProperty("Mode", "Combined");
 
   // -- Dead Time Correction --------------------------------------------------
   // If ApplyDeadTimeCorrection is set, the algorithm must have DeadTimeTable
@@ -3052,39 +3052,39 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm() {
   // must load the dead times from each file.
 
   if (m_uiForm.deadTimeType->currentIndex() != 0) {
-    loadAlg->setProperty("ApplyDeadTimeCorrection", true);
+    procAlg->setProperty("ApplyDeadTimeCorrection", true);
 
     if (m_uiForm.deadTimeType->currentIndex() == 2) // From Specified File
     {
 
       Workspace_sptr deadTimes = loadDeadTimes(deadTimeFilename());
 
-      loadAlg->setProperty("DeadTimeTable", deadTimesToTable(deadTimes));
+      procAlg->setProperty("DeadTimeTable", deadTimesToTable(deadTimes));
     }
   }
 
   // -- Grouping --------------------------------------------------------------
 
   ITableWorkspace_sptr grouping = parseGrouping();
-  loadAlg->setProperty("DetectorGroupingTable", grouping);
+  procAlg->setProperty("DetectorGroupingTable", grouping);
 
   // -- X axis options --------------------------------------------------------
-  loadAlg->setProperty("Xmin", startTime());
+  procAlg->setProperty("Xmin", startTime());
 
   double Xmax = finishTime();
   if (Xmax != EMPTY_DBL()) {
-    loadAlg->setProperty("Xmax", Xmax);
+    procAlg->setProperty("Xmax", Xmax);
   }
 
   double timeZero = m_uiForm.timeZeroFront->text().toDouble();
-  loadAlg->setProperty("TimeZero", timeZero);
+  procAlg->setProperty("TimeZero", timeZero);
 
   // -- Rebin options ---------------------------------------------------------
   std::string params =
       rebinParams(AnalysisDataService::Instance().retrieve(m_grouped_name));
 
   if (!params.empty()) {
-    loadAlg->setPropertyValue("RebinParams", params);
+    procAlg->setPropertyValue("RebinParams", params);
   }
 
   // -- Group/pair properties -------------------------------------------------
@@ -3092,7 +3092,7 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm() {
   int index = getGroupOrPairToPlot();
 
   if (index >= numGroups()) {
-    loadAlg->setProperty("OutputType", "PairAsymmetry");
+    procAlg->setProperty("OutputType", "PairAsymmetry");
     int tableRow = m_pairToRow[index - numGroups()];
 
     QTableWidget *t = m_uiForm.pairTable;
@@ -3103,29 +3103,29 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm() {
     int index2 =
         static_cast<QComboBox *>(t->cellWidget(tableRow, 2))->currentIndex();
 
-    loadAlg->setProperty("PairFirstIndex", index1);
-    loadAlg->setProperty("PairSecondIndex", index2);
-    loadAlg->setProperty("Alpha", alpha);
+    procAlg->setProperty("PairFirstIndex", index1);
+    procAlg->setProperty("PairSecondIndex", index2);
+    procAlg->setProperty("Alpha", alpha);
   } else {
     if (parsePlotType(m_uiForm.frontPlotFuncs) == Asymmetry)
-      loadAlg->setProperty("OutputType", "GroupAsymmetry");
+      procAlg->setProperty("OutputType", "GroupAsymmetry");
     else
-      loadAlg->setProperty("OutputType", "GroupCounts");
+      procAlg->setProperty("OutputType", "GroupCounts");
 
     int groupIndex = getGroupNumberFromRow(m_groupToRow[index]);
-    loadAlg->setProperty("GroupIndex", groupIndex);
+    procAlg->setProperty("GroupIndex", groupIndex);
   }
 
   // -- Period options --------------------------------------------------------
 
-  loadAlg->setProperty("SummedPeriodSet", getSummedPeriods());
+  procAlg->setProperty("SummedPeriodSet", getSummedPeriods());
 
   const auto subtracted = getSubtractedPeriods();
   if (subtracted != "None") {
-    loadAlg->setProperty("SubtractedPeriodSet", subtracted);
+    procAlg->setProperty("SubtractedPeriodSet", subtracted);
   }
 
-  return loadAlg;
+  return procAlg;
 }
 
 /**

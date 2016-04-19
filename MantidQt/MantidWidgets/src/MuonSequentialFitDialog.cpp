@@ -20,11 +20,13 @@ const std::string MuonSequentialFitDialog::SEQUENTIAL_PREFIX("MuonSeqFit_");
 
 /**
  * Constructor
+ * @param fitPropBrowser :: [input] Pointer to fit property browser
+ * @param processAlg :: [input] MuonProcess algorithm to use
  */
 MuonSequentialFitDialog::MuonSequentialFitDialog(
-    MuonFitPropertyBrowser *fitPropBrowser, Algorithm_sptr loadAlg)
+    MuonFitPropertyBrowser *fitPropBrowser, Algorithm_sptr processAlg)
     : QDialog(fitPropBrowser), m_fitPropBrowser(fitPropBrowser),
-      m_loadAlg(loadAlg) {
+      m_processAlg(processAlg) {
   m_ui.setupUi(this);
 
   setState(Stopped);
@@ -376,9 +378,10 @@ void MuonSequentialFitDialog::continueFit() {
       // If ApplyDeadTimeCorrection is set but no dead time table is set,
       // we need to load one from the file.
       bool loadDeadTimesFromFile = false;
-      bool applyDTC = m_loadAlg->getProperty("ApplyDeadTimeCorrection");
+      bool applyDTC = m_processAlg->getProperty("ApplyDeadTimeCorrection");
       if (applyDTC) {
-        if (auto deadTimes = m_loadAlg->getPointerToProperty("DeadTimeTable")) {
+        if (auto deadTimes =
+                m_processAlg->getPointerToProperty("DeadTimeTable")) {
           if (deadTimes->value() == "") {
             // No workspace set for dead time table - we need to load one
             loadDeadTimesFromFile = true;
@@ -405,7 +408,7 @@ void MuonSequentialFitDialog::continueFit() {
       process->initialize();
       process->setChild(true);
       process->setRethrows(true);
-      process->updatePropertyValues(*m_loadAlg);
+      process->updatePropertyValues(*m_processAlg);
       process->setProperty("InputWorkspace", loadedWS);
       process->setProperty("LoadedTimeZero", loadedTimeZero);
       process->setPropertyValue("OutputWorkspace", "__YouDontSeeMeIAmNinja");
