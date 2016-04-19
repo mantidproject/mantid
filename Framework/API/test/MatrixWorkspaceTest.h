@@ -1291,6 +1291,68 @@ public:
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 
+  void test_x_uncertainty_can_be_set() {
+    // Arrange
+    WorkspaceTester ws;
+    const size_t numspec = 4;
+    const size_t j = 3;
+    const size_t k = j;
+    ws.init(numspec, j, k);
+
+    const double value0 = 10;
+    const double value1 = 11;
+    const double value2 = 12;
+
+    Mantid::MantidVec dxSpec0(j, value0);
+    Mantid::MantidVecPtr dxSpec1;
+    auto &spec1 = dxSpec1.access();
+    spec1.resize(j, value1);
+    boost::shared_ptr<Mantid::MantidVec> dxSpec2;
+    for (size_t index = 0; index < j; ++index) {
+      (*dxSpec2).push_back(value2);
+    }
+
+    // Act
+    TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(0));
+    TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(1));
+    TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(2));
+    TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(3));
+
+    ws.setDx(0, dxSpec0);
+    ws.setDx(1, dxSpec1);
+    ws.setDx(2, dxSpec2);
+
+    // Assert
+    TSM_ASSERT("Should have x resolution values", ws.hasDx(0));
+    TSM_ASSERT_EQUALS("Should have a length of 3", ws.dataDx(0).size(), j);
+    TSM_ASSERT_EQUALS("Should have x resolution values of 10", ws.dataDx(0)[0],
+                      value0);
+    TSM_ASSERT_EQUALS("Should have x resolution values of 10", ws.dataDx(0)[1],
+                      value0);
+    TSM_ASSERT_EQUALS("Should have x resolution values of 10", ws.dataDx(0)[2],
+                      value0);
+
+    TSM_ASSERT("Should have x resolution values", ws.hasDx(1));
+    TSM_ASSERT_EQUALS("Should have a length of 3", ws.dataDx(1).size(), j);
+    TSM_ASSERT_EQUALS("Should have x resolution values of 11", ws.dataDx(1)[0],
+                      value1);
+    TSM_ASSERT_EQUALS("Should have x resolution values of 11", ws.dataDx(1)[1],
+                      value1);
+    TSM_ASSERT_EQUALS("Should have x resolution values of 11", ws.dataDx(1)[2],
+                      value1);
+
+    TSM_ASSERT("Should have x resolution values", ws.hasDx(2));
+    TSM_ASSERT_EQUALS("Should have a length of 3", ws.dataDx(2).size(), j);
+    TSM_ASSERT_EQUALS("Should have x resolution values of 11", ws.dataDx(2)[0],
+                      value2);
+    TSM_ASSERT_EQUALS("Should have x resolution values of 11", ws.dataDx(2)[1],
+                      value2);
+    TSM_ASSERT_EQUALS("Should have x resolution values of 11", ws.dataDx(2)[2],
+                      value2);
+
+    TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(4));
+  }
+
 private:
   Mantid::API::MantidImage_sptr createImage(size_t width, size_t height) {
     auto image = new Mantid::API::MantidImage(height);
