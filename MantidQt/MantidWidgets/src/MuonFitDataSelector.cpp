@@ -103,11 +103,19 @@ double MuonFitDataSelector::getStartTime() const {
 }
 
 /**
- * Set the start time in the UI
+ * Set the start time in the UI WITHOUT sending signal
+ * @param start :: [input] Start time in microseconds
+ */
+void MuonFitDataSelector::setStartTimeQuietly(double start) {
+  m_ui.txtStart->setText(QString::number(start));
+}
+
+/**
+ * Set the start time in the UI, and send signal
  * @param start :: [input] Start time in microseconds
  */
 void MuonFitDataSelector::setStartTime(double start) {
-  m_ui.txtStart->setText(QString::number(start));
+  setStartTimeQuietly(start);
   emit workspacePropertiesChanged();
 }
 
@@ -122,11 +130,19 @@ double MuonFitDataSelector::getEndTime() const {
 }
 
 /**
- * Set the end time in the UI
+ * Set the end time in the UI WITHOUT sending signal
+ * @param end :: [input] End time in microseconds
+ */
+void MuonFitDataSelector::setEndTimeQuietly(double end) {
+  m_ui.txtEnd->setText(QString::number(end));
+}
+
+/**
+ * Set the end time in the UI, and send signal
  * @param end :: [input] End time in microseconds
  */
 void MuonFitDataSelector::setEndTime(double end) {
-  m_ui.txtEnd->setText(QString::number(end));
+  setEndTimeQuietly(end);
   emit workspacePropertiesChanged();
 }
 

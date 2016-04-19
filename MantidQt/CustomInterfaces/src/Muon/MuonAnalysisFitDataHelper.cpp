@@ -50,5 +50,18 @@ void MuonAnalysisFitDataHelper::handleSelectedGroupsChanged() {
 void MuonAnalysisFitDataHelper::handleSelectedPeriodsChanged() {
   // TODO: implement this
 }
+
+/**
+ * Called when user drags lines to set fit range
+ * Update the text boxes silently (no event)
+ * @param start :: [input] start of fit range
+ * @param end :: [input] end of fit range
+ */
+void MuonAnalysisFitDataHelper::handleXRangeChangedGraphically(double start,
+                                                               double end) {
+  m_dataSelector->setStartTimeQuietly(start);
+  m_dataSelector->setEndTimeQuietly(end);
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

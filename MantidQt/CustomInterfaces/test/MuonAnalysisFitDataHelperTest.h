@@ -29,6 +29,8 @@ public:
   MOCK_METHOD1(setWorkspaceIndex, void(unsigned int));
   MOCK_METHOD1(setStartTime, void(double));
   MOCK_METHOD1(setEndTime, void(double));
+  MOCK_METHOD1(setStartTimeQuietly, void(double));
+  MOCK_METHOD1(setEndTimeQuietly, void(double));
 };
 
 /// Mock fit property browser
@@ -84,6 +86,12 @@ public:
   void test_handleSelectedGroupsChanged() { TS_FAIL("Test not implemented!"); }
 
   void test_handleSelectedPeriodsChanged() { TS_FAIL("Test not implemented!"); }
+
+  void test_handleXRangeChangedGraphically() {
+    EXPECT_CALL(*m_dataSelector, setStartTimeQuietly(0.4)).Times(1);
+    EXPECT_CALL(*m_dataSelector, setEndTimeQuietly(9.4)).Times(1);
+    m_helper->handleXRangeChangedGraphically(0.4, 9.4);
+  }
 
 private:
   MockDataSelector *m_dataSelector;

@@ -73,11 +73,15 @@ public slots:
   /// Set names of available groups
   void setAvailableGroups(const QStringList &groupNames) override;
   /// Set selected workspace index
-  void setWorkspaceIndex(unsigned int index);
+  void setWorkspaceIndex(unsigned int index) override;
   /// Set start time for fit
-  void setStartTime(double start);
+  void setStartTime(double start) override;
   /// Set end time for fit
-  void setEndTime(double end);
+  void setEndTime(double end) override;
+  /// Set start time without sending a signal
+  void setStartTimeQuietly(double start) override;
+  /// Set end time without sending a signal
+  void setEndTimeQuietly(double end) override;
 
 signals:
   /// Edited the runs, ws index, start or end fields

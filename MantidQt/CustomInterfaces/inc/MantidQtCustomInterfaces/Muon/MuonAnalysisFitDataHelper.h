@@ -47,6 +47,8 @@ public:
   void handleSelectedGroupsChanged();
   /// Handles "selected periods changed"
   void handleSelectedPeriodsChanged();
+  /// Handles user changing X range by dragging lines
+  void handleXRangeChangedGraphically(double start, double end);
 
 private:
   /// Fit browser to update (non-owning pointer)

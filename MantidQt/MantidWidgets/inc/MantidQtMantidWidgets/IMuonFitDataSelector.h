@@ -25,9 +25,11 @@ public:
   virtual void setWorkspaceDetails(int runNumber, const QString &instName) = 0;
   virtual void setAvailableGroups(const QStringList &groupNames) = 0;
   virtual QStringList getChosenGroups() const = 0;
-  void setWorkspaceIndex(unsigned int index);
-  void setStartTime(double start);
-  void setEndTime(double end);
+  virtual void setWorkspaceIndex(unsigned int index) = 0;
+  virtual void setStartTime(double start) = 0;
+  virtual void setEndTime(double end) = 0;
+  virtual void setStartTimeQuietly(double start) = 0;
+  virtual void setEndTimeQuietly(double end) = 0;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

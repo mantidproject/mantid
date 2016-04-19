@@ -2251,6 +2251,8 @@ void MuonAnalysis::loadFittings() {
           SLOT(dataGroupsChanged()));
   connect(m_dataSelector, SIGNAL(selectedPeriodsChanged()), this,
           SLOT(dataPeriodsChanged()));
+  connect(m_uiForm.fitBrowser, SIGNAL(xRangeChanged(double, double)), this,
+          SLOT(fitRangeChangedManually(double, double)));
 }
 
 /**
@@ -3232,6 +3234,18 @@ void MuonAnalysis::dataGroupsChanged() {
 void MuonAnalysis::dataPeriodsChanged() {
   if (m_fitDataHelper) {
     m_fitDataHelper->handleSelectedPeriodsChanged();
+  }
+}
+
+/**
+ * Slot: range to fit changed by dragging lines on graph
+ * Pass this information to the fit helper
+ * @param start :: [input] start of fit range
+ * @param end :: [input] end of fit range
+ */
+void MuonAnalysis::fitRangeChangedManually(double start, double end) {
+  if (m_fitDataHelper) {
+    m_fitDataHelper->handleXRangeChangedGraphically(start, end);
   }
 }
 

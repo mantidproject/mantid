@@ -254,6 +254,8 @@ private slots:
   void dataGroupsChanged();
   /// Called when selected periods to fit change
   void dataPeriodsChanged();
+  /// Called when user changes fit range graphically
+  void fitRangeChangedManually(double start, double end);
 
 private:
  
