@@ -23,6 +23,7 @@
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysis.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataHelper.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h"
@@ -98,6 +99,11 @@ MuonAnalysis::MuonAnalysis(QWidget *parent)
       m_dataTimeZero(0.0), m_dataFirstGoodData(0.0),
       m_currentLabel("NoLabelSet"), m_numPeriods(0),
       m_groupingHelper(this->m_uiForm) {}
+
+/**
+ * Destructor
+ */
+MuonAnalysis::~MuonAnalysis() {}
 
 /**
  * Initialize local Python environmnet.
@@ -2222,8 +2228,8 @@ void MuonAnalysis::loadAutoSavedValues(const QString &group) {
 }
 
 /**
-*   Loads up the options for the fit browser so that it works in a muon analysis
-* tab
+* Loads up the options for fit browser so that it works in muon analysis tab
+* and set up data selector widget and fit data helper
 */
 void MuonAnalysis::loadFittings() {
   // Title of the fitting dock widget that now lies within the fittings tab.
@@ -2235,7 +2241,16 @@ void MuonAnalysis::loadFittings() {
   // Add Data Selector widget to the fit tab
   m_dataSelector = new MuonFitDataSelector(m_uiForm.fitBrowser);
   m_uiForm.verticalLayoutFitBrowser->addWidget(m_dataSelector);
-  //connect(m_dataSelector, SIGNAL(workspacePropertiesChanged()), )
+  // Set up fit data helper
+  m_fitDataHelper = Mantid::Kernel::make_unique<MuonAnalysisFitDataHelper>(
+      m_uiForm.fitBrowser, m_dataSelector);
+  // Connect signals
+  connect(m_dataSelector, SIGNAL(workspacePropertiesChanged()), this,
+          SLOT(dataWorkspaceChanged()));
+  connect(m_dataSelector, SIGNAL(selectedGroupsChanged()), this,
+          SLOT(dataGroupsChanged()));
+  connect(m_dataSelector, SIGNAL(selectedPeriodsChanged()), this,
+          SLOT(dataPeriodsChanged()));
 }
 
 /**
@@ -3190,5 +3205,35 @@ std::string MuonAnalysis::getSubtractedPeriods() const {
   return subtracted;
 }
 
-} // namespace MantidQT
+/**
+ * Slot: workspace to fit changed in data selector widget
+ * Pass this information to the fit helper
+ */
+void MuonAnalysis::dataWorkspaceChanged() {
+  if (m_fitDataHelper) {
+    m_fitDataHelper->handleWorkspacePropertiesChanged();
+  }
+}
+
+/**
+ * Slot: groups to fit changed in data selector widget
+ * Pass this information to the fit helper
+ */
+void MuonAnalysis::dataGroupsChanged() {
+  if (m_fitDataHelper) {
+    m_fitDataHelper->handleSelectedGroupsChanged();
+  }
+}
+
+/**
+ * Slot: periods to fit changed in data selector widget
+ * Pass this information to the fit helper
+ */
+void MuonAnalysis::dataPeriodsChanged() {
+  if (m_fitDataHelper) {
+    m_fitDataHelper->handleSelectedPeriodsChanged();
+  }
+}
+
+} // namespace MantidQt
 } // namespace CustomInterfaces

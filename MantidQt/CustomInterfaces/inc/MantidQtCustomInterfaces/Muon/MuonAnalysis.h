@@ -25,6 +25,7 @@ namespace MantidWidgets {
 class MuonFitDataSelector;
 }
 namespace CustomInterfaces {
+class MuonAnalysisFitDataHelper;
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -96,6 +97,9 @@ public:
 
   /// Default Constructor
   MuonAnalysis(QWidget *parent = 0);
+
+  /// Destructor
+  ~MuonAnalysis();
 
   /// Sets index of group or pair to plot
   /// and causes a replot
@@ -243,6 +247,13 @@ private slots:
 
   /// Opens the managed directory dialog for easier access for the user.
   void openDirectoryDialog();
+
+  /// Called when selected workspace to fit changes
+  void dataWorkspaceChanged();
+  /// Called when selected groups to fit change
+  void dataGroupsChanged();
+  /// Called when selected periods to fit change
+  void dataPeriodsChanged();
 
 private:
  
@@ -528,6 +539,9 @@ private:
 
   /// Data selector widget for fit tab
   MantidQt::MantidWidgets::MuonFitDataSelector *m_dataSelector;
+
+  /// Helper to get data to fit
+  std::unique_ptr<MuonAnalysisFitDataHelper> m_fitDataHelper;
 };
 }
 }
