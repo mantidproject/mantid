@@ -103,12 +103,20 @@ std::string PeakShapeEllipsoid::shapeName() const {
   return PeakShapeEllipsoid::ellipsoidShapeName();
 }
 
-double PeakShapeEllipsoid::radius(RadiusType type) const {
-  double radius = m_abc_radii[0];
-  for (int8_t i = 1; i < 3; ++i) {
-    radius = std::max(radius, m_abc_radii[i]);
+boost::optional<double> PeakShapeEllipsoid::radius(RadiusType type) const {
+  switch (type) {
+  case (RadiusType::Radius):
+    return boost::optional<double>{
+        *std::max_element(m_abc_radii.cbegin(), m_abc_radii.cend())};
+  case (RadiusType::OuterRadius):
+    return boost::optional<double>{
+        *std::max_element(m_abc_radiiBackgroundOuter.cbegin(),
+                          m_abc_radiiBackgroundOuter.cend())};
+  case (RadiusType::InnerRadius):
+    return boost::optional<double>{
+        *std::max_element(m_abc_radiiBackgroundInner.cbegin(),
+                          m_abc_radiiBackgroundInner.cend())};
   }
-  return radius;
 }
 
 const std::string PeakShapeEllipsoid::ellipsoidShapeName() {

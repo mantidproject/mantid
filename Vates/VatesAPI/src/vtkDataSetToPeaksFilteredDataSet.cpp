@@ -44,8 +44,9 @@ vtkDataSetToPeaksFilteredDataSet::vtkDataSetToPeaksFilteredDataSet(
     vtkSmartPointer<vtkUnstructuredGrid> input,
     vtkSmartPointer<vtkUnstructuredGrid> output)
     : m_inputData(input), m_outputData(output), m_isInitialised(false),
-      m_radiusNoShape(0.2), m_radiusType(0), m_radiusFactor(2),
-      m_defaultRadius(0.1), m_coordinateSystem(0) {
+      m_radiusNoShape(0.2),
+      m_radiusType(DataObjects::PeakShapeBase::RadiusType::Radius),
+      m_radiusFactor(2), m_defaultRadius(0.1), m_coordinateSystem(0) {
   if (nullptr == input) {
     throw std::runtime_error("Cannot construct "
                              "vtkDataSetToPeaksFilteredDataSet with NULL input "
@@ -70,7 +71,8 @@ vtkDataSetToPeaksFilteredDataSet::~vtkDataSetToPeaksFilteredDataSet() {}
   */
 void vtkDataSetToPeaksFilteredDataSet::initialize(
     const std::vector<Mantid::API::IPeaksWorkspace_sptr> &peaksWorkspaces,
-    double radiusNoShape, int radiusType, int coordinateSystem) {
+    double radiusNoShape, DataObjects::PeakShapeBase::RadiusType radiusType,
+    int coordinateSystem) {
   m_peaksWorkspaces = peaksWorkspaces;
   m_radiusNoShape = radiusNoShape;
   m_radiusType = radiusType;
@@ -190,55 +192,14 @@ GCC_DIAG_OFF(strict-aliasing)
     const Mantid::Geometry::PeakShape& shape = peak->getPeakShape();
     std::string shapeName = shape.shapeName();
 
-    // Get the radius and the position for the correct peak shape
-    if (shapeName == Mantid::DataObjects::PeakShapeSpherical::sphereShapeName())
-    {
-      const Mantid::DataObjects::PeakShapeSpherical& sphericalShape = dynamic_cast<const Mantid::DataObjects::PeakShapeSpherical&>(shape);
-      if (m_radiusType == 0)
-      {
-        radius = sphericalShape.radius();
-      }
-      else if (m_radiusType == 1)
-      {
-          boost::optional<double> radOut = sphericalShape.backgroundOuterRadius();
-          if (radOut.is_initialized()) {
-            radius = radOut.get();
-          }
-      }
-      else if (m_radiusType == 2)
-      {
-          boost::optional<double> radIn = sphericalShape.backgroundInnerRadius();
-          if (radIn.is_initialized()) { 
-           radius = radIn.get();
-          }
-      }
-      else 
-      {
-        throw std::invalid_argument("The shperical peak shape does not have a radius. \n");
-      }
-    }
-    else if (shapeName == Mantid::DataObjects::PeakShapeEllipsoid::ellipsoidShapeName())
-    {
-      const Mantid::DataObjects::PeakShapeEllipsoid& ellipticalShape = dynamic_cast<const Mantid::DataObjects::PeakShapeEllipsoid&>(shape);
-      if (m_radiusType == 0)
-      {
-        radius = ellipticalShape.radius();
-      }
-      else if (m_radiusType == 1)
-      {
-        const std::vector<double> &radii =
-            ellipticalShape.abcRadiiBackgroundOuter();
-        radius = *(std::max_element(radii.begin(), radii.end()));
-      }
-      else if (m_radiusType == 2)
-      {
-        const std::vector<double> &radii =
-            ellipticalShape.abcRadiiBackgroundInner();
-        radius = *(std::max_element(radii.begin(), radii.end()));
-      }
-      else 
-      {
-        throw std::invalid_argument("The ellipsoidal peak shape does not have a radius. \n");
+    if (shapeName ==
+            Mantid::DataObjects::PeakShapeSpherical::sphereShapeName() ||
+        shapeName ==
+            Mantid::DataObjects::PeakShapeEllipsoid::ellipsoidShapeName()) {
+
+      boost::optional<double> rad = shape.radius(m_radiusType);
+      if (rad.is_initialized()) {
+        radius = rad.get();
       }
     }
     else

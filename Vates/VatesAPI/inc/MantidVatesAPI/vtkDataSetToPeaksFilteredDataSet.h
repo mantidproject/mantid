@@ -1,9 +1,10 @@
 #ifndef MANTID_VATES_PeaksFilter_H
 #define MANTID_VATES_PeaksFilter_H
 
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidDataObjects/PeakShapeBase.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "vtkSmartPointer.h"
 #include <string>
@@ -51,7 +52,9 @@ namespace VATES
       /// Set the name of the peaks workspace
       void initialize(
           const std::vector<Mantid::API::IPeaksWorkspace_sptr> &peaksWorkspaces,
-          double radiusNoShape, int radiusType, int coordinateSystem);
+          double radiusNoShape,
+          DataObjects::PeakShapeBase::RadiusType radiusType,
+          int coordinateSystem);
       /// Apply the peak filtering
       void execute(ProgressAction& progressUpdating);
       /// Get radius of no shape
@@ -69,7 +72,7 @@ namespace VATES
       std::vector<Mantid::API::IPeaksWorkspace_sptr> m_peaksWorkspaces; ///< A list of peaks workspace names.
       bool m_isInitialised; ///<Flag if the filter is initialized
       double m_radiusNoShape; ///< The radius for peaks with no peak shape.
-      int m_radiusType;
+      DataObjects::PeakShapeBase::RadiusType m_radiusType;
       double m_radiusFactor;///< By how much we want to trim the data set.
       double m_defaultRadius; ///< A default radius.
       int m_coordinateSystem;///< A coordinate system.

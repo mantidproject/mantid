@@ -78,7 +78,10 @@ int vtkPeaksFilter::RequestData(vtkInformation*, vtkInformationVector **inputVec
   FilterUpdateProgressAction<vtkPeaksFilter> drawingProgressUpdate(this, "Drawing...");
 
   vtkDataSetToPeaksFilteredDataSet peaksFilter(inputDataSet, outputDataSet);
-  peaksFilter.initialize(peaksWorkspaces, m_radiusNoShape, m_radiusType, m_coordinateSystem);
+  peaksFilter.initialize(
+      peaksWorkspaces, m_radiusNoShape,
+      static_cast<Mantid::DataObjects::PeakShapeBase::RadiusType>(m_radiusType),
+      m_coordinateSystem);
   peaksFilter.execute(drawingProgressUpdate);
   return 1;
 }
