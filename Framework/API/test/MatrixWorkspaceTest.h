@@ -1307,11 +1307,8 @@ public:
     Mantid::MantidVecPtr dxSpec1;
     auto &spec1 = dxSpec1.access();
     spec1.resize(j, value1);
-    boost::shared_ptr<Mantid::MantidVec> dxSpec2;
-    for (size_t index = 0; index < j; ++index) {
-      (*dxSpec2).push_back(value2);
-    }
-
+    boost::shared_ptr<Mantid::MantidVec> dxSpec2(
+        new Mantid::MantidVec{value2, value2, value2});
     // Act
     TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(0));
     TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(1));
@@ -1323,6 +1320,7 @@ public:
     ws.setDx(2, dxSpec2);
 
     // Assert
+    // Test dataDx
     TSM_ASSERT("Should have x resolution values", ws.hasDx(0));
     TSM_ASSERT_EQUALS("Should have a length of 3", ws.dataDx(0).size(), j);
     TSM_ASSERT_EQUALS("Should have x resolution values of 10", ws.dataDx(0)[0],
@@ -1343,14 +1341,45 @@ public:
 
     TSM_ASSERT("Should have x resolution values", ws.hasDx(2));
     TSM_ASSERT_EQUALS("Should have a length of 3", ws.dataDx(2).size(), j);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 11", ws.dataDx(2)[0],
+    TSM_ASSERT_EQUALS("Should have x resolution values of 12", ws.dataDx(2)[0],
                       value2);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 11", ws.dataDx(2)[1],
+    TSM_ASSERT_EQUALS("Should have x resolution values of 12", ws.dataDx(2)[1],
                       value2);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 11", ws.dataDx(2)[2],
+    TSM_ASSERT_EQUALS("Should have x resolution values of 12", ws.dataDx(2)[2],
                       value2);
 
-    TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(4));
+    // Test readDx
+    TSM_ASSERT_EQUALS("Should have x resolution values of 10", ws.readDx(0)[0],
+                      value0);
+    TSM_ASSERT_EQUALS("Should have x resolution values of 10", ws.readDx(0)[1],
+                      value0);
+    TSM_ASSERT_EQUALS("Should have x resolution values of 10", ws.readDx(0)[2],
+                      value0);
+    TSM_ASSERT_EQUALS("Should have x resolution values of 11", ws.readDx(1)[0],
+                      value1);
+    TSM_ASSERT_EQUALS("Should have x resolution values of 11", ws.readDx(1)[1],
+                      value1);
+    TSM_ASSERT_EQUALS("Should have x resolution values of 11", ws.readDx(1)[2],
+                      value1);
+    TSM_ASSERT_EQUALS("Should have x resolution values of 12", ws.readDx(2)[0],
+                      value2);
+    TSM_ASSERT_EQUALS("Should have x resolution values of 12", ws.readDx(2)[1],
+                      value2);
+    TSM_ASSERT_EQUALS("Should have x resolution values of 12", ws.readDx(2)[2],
+                      value2);
+
+    // RefY
+    auto ref0 = ws.refDx(0);
+    TSM_ASSERT_EQUALS("Should have x resolution values of 10", (*ref0)[0],
+                      value0);
+    auto ref1 = ws.refDx(1);
+    TSM_ASSERT_EQUALS("Should have x resolution values of 11", (*ref1)[1],
+                      value1);
+    auto ref2 = ws.refDx(2);
+    TSM_ASSERT_EQUALS("Should have x resolution values of 12", (*ref2)[2],
+                      value2);
+
+    TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(3));
   }
 
 private:
