@@ -7,6 +7,21 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include <boost/optional.hpp>
 
+/*Anonymous namespace*/
+namespace {
+/**
+* Helper free function to calculate MomentumTransfer from lambda and theta
+* @param lambda : Value in wavelength
+* @param theta  : Value in Degrees
+* @return MomentumTransfer
+* @
+*/
+double calculateQ(double lambda, double theta) {
+  double thetaInRad = theta * M_PI / 180;
+  return 4 * M_PI * sin(thetaInRad) / lambda;
+}
+}
+/*end of Anonymous namespace*/
 namespace Mantid {
 namespace Algorithms {
 
@@ -486,15 +501,40 @@ void ReflectometryReductionOneAuto::exec() {
     auto momentumTransferMinimum = isSet<double>("MomentumTransferMinimum");
     auto momentumTransferStep = isSet<double>("MomentumTransferStep");
     auto momentumTransferMaximum = isSet<double>("MomentumTransferMaximum");
+ 
+    if (momentumTransferStep.is_initialized())
+    {
+        refRedOne->setProperty("MomentumTransferStep",
+            momentumTransferStep.get());
+    }
     if (momentumTransferMinimum.is_initialized() &&
-        momentumTransferMaximum.is_initialized() &&
-        momentumTransferStep.is_initialized()) {
+        momentumTransferMaximum.is_initialized()) {
       refRedOne->setProperty("MomentumTransferMinimum",
                              momentumTransferMinimum.get());
-      refRedOne->setProperty("MomentumTransferStep",
-                             momentumTransferStep.get());
       refRedOne->setProperty("MomentumTransferMaximum",
                              momentumTransferMaximum.get());
+    }
+    else if (theta_in.is_initialized()) {
+      momentumTransferMinimum = calculateQ(wavelength_max, theta_in.get());
+      if (!momentumTransferStep.is_initialized()) {
+        IAlgorithm_sptr calcResAlg =
+            AlgorithmManager::Instance().create("CalculateResolution");
+        calcResAlg->setProperty("Workspace", in_ws);
+        calcResAlg->setProperty("TwoTheta", theta_in.get());
+        calcResAlg->execute();
+        if (!calcResAlg->isExecuted())
+          throw std::runtime_error(
+              "CalculateResolution failed. Please manually "
+              "enter a value in the dQ/Q column.");
+        momentumTransferStep = calcResAlg->getProperty("Resolution");
+      }
+       momentumTransferMaximum =
+          calculateQ(wavelength_min, theta_in.get());
+       refRedOne->setProperty("MomentumTransferMinimum",
+           momentumTransferMinimum.get());
+       refRedOne->setProperty("MomentumTransferStep", momentumTransferStep.get());
+       refRedOne->setProperty("MomentumTransferMaximum",
+           momentumTransferMaximum.get());
     }
     refRedOne->execute();
     if (!refRedOne->isExecuted()) {

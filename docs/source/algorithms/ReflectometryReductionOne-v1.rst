@@ -75,6 +75,25 @@ is not aligned with the reflected beamline. The correction algorithm used is
 :ref:`algm-SpecularReflectionPositionCorrect-v1` which is a purely vertical
 position correction.
 
+Post-Processing Options
+#######################
+
+ReflectometryReductionOne contains 2 post-processing options that will be applied to the IvsQ workspace. These two options are `Scale` and `Rebin`.
+
+Rebinning
+=========
+To Rebin your IvsQ workspace you will have to provide values for the following properties: `MomentumTransferMinimum`, `MomentumTransferStep` and `MomentumTransferMaximum`.
+These values will be appended to each other to form your :ref:`algm-Rebin` Params. These values correspond to your `MinimumExtent`, `BinWidth` and `MaximumExtent` respectively.
+
+If you provide a positive `MomentumTransferStep` value then the algorithm will automatically negate this value which will allow for Logarithmic Rebinning. Alternatively,
+a negative `MomentumTransferStep` will result in Linear Rebinning. More details about the Rebinning process can be found in the documentation for :ref:`algm-Rebin`
+
+Scaling
+=======
+To apply a scaling to the IvsQ workspace that has been produced by the reduction, you will need to provide a value for the `ScaleFactor` property in the algorithm.
+The default for this value is 1.0 and thus no scaling is applied to the workspace. The scaling of the IvsQ workspace is performed in-place by the :ref:`algm-Scale` algorithm
+and your IvsQ workspace will be set to the product of this algorithm.
+
 Workflow
 ########
 
@@ -91,7 +110,7 @@ and this instrument setup will be attached to any workspaces associated with tha
 When we pass the IvsLambda workspace to :ref:`algm-ConvertUnits` to produce an IvsQ workspace, :ref:`algm-ConvertUnits` will assume that :math:`2\theta` is the angle between the Beam vector and 
 the sample-to-detector vector. When we have the typical setup seen below, :math:`2\theta` will be exactly half the value we wish it to be.
 
-.. figure:: /images/CurrentExperimentSetupForReflectometry.PNG
+.. figure:: /images/CurrentExperimentSetupForReflectometry.png
     :width: 650px
     :height: 250px
     :align: center
@@ -101,7 +120,7 @@ until the condition :math:`\theta_i = \theta_f` is satisfied. This will achieve 
 After :ref:`algm-ConvertUnits` has produced our IvsQ workspace, we will rotate the position of the source back to its original position so that the experimental setup remains unchanged for other
 algorithms that may need to manipulate/use it.
 
-.. figure:: /images/RotatedExperimentSetupForReflectometry.PNG
+.. figure:: /images/RotatedExperimentSetupForReflectometry.png
     :width: 650px
     :height: 250px
     :align: center

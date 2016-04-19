@@ -892,19 +892,30 @@ void ReflTableViewPresenter::reduceRow(int rowNo) {
   throw std::runtime_error("Failed to run Scale algorithm");
   */
   algReflOne->setProperty("ScaleFactor", scale);
-  const double qmin =
-      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMIN))
-          .toDouble();
-  const double qmax =
-      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMAX))
-          .toDouble();
-  const double dqq =
-      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_DQQ)).toDouble();
-  algReflOne->setProperty("MomentumTransferMinimum", qmin);
-  algReflOne->setProperty("MomentumTransferStep", dqq);
-  algReflOne->setProperty("MomentumTransferMaximum", qmax);
+  if (!m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMIN))
+           .toString()
+           .isEmpty() &&
+      !m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMAX))
+           .toString()
+           .isEmpty()) {
+    const double qmin =
+        m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMIN))
+            .toDouble();
+    const double qmax =
+        m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMAX))
+            .toDouble();
+    algReflOne->setProperty("MomentumTransferMinimum", qmin);
+    algReflOne->setProperty("MomentumTransferMaximum", qmax);
+  }
+  if (!m_model->data(m_model->index(rowNo, ReflTableSchema::COL_DQQ))
+           .toString()
+           .isEmpty()) {
+    const double dqq =
+        m_model->data(m_model->index(rowNo, ReflTableSchema::COL_DQQ))
+            .toDouble();
+    algReflOne->setProperty("MomentumTransferStep", dqq);
+  }
   algReflOne->execute();
-
   if (!algReflOne->isExecuted())
     throw std::runtime_error("Failed to run ReflectometryReductionOneAuto.");
 

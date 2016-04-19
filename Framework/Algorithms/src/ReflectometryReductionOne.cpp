@@ -74,6 +74,18 @@ std::vector<int> getSpectrumNumbers(MatrixWorkspace_sptr &ws) {
 
   return keys;
 }
+
+/**
+* Helper free function to calculate MomentumTransfer from lambda and theta
+* @param lambda : Value in wavelength
+* @param theta  : Value in Degrees
+* @return MomentumTransfer
+* @
+*/
+double calculateQ(double lambda, double theta) {
+  double thetaInRad = theta * M_PI / 180;
+  return (4 * M_PI * sin(thetaInRad)) / lambda;
+}
 }
 /* End of ananomous namespace */
 
@@ -633,23 +645,45 @@ void ReflectometryReductionOne::exec() {
   double momentumTransferMinimum = getProperty("MomentumTransferMinimum");
   double momentumTransferStep = getProperty("MomentumTransferStep");
   double momentumTransferMaximum = getProperty("MomentumTransferMaximum");
+  MantidVec QParams;
   if (!isDefault("MomentumTransferMinimum") &&
       !isDefault("MomentumTransferStep") &&
       !isDefault("MomentumTransferMaximum")) {
-    MantidVec QParams;
     QParams.push_back(momentumTransferMinimum);
     QParams.push_back(-momentumTransferStep);
     QParams.push_back(momentumTransferMaximum);
-    IAlgorithm_sptr algRebin = this->createChildAlgorithm("Rebin");
-    algRebin->initialize();
-    algRebin->setProperty("InputWorkspace", IvsQ);
-    algRebin->setProperty("OutputWorkspace", IvsQ);
-    algRebin->setProperty("Params", QParams);
-    algRebin->execute();
-    if (!algRebin->isExecuted())
-      throw std::runtime_error("Failed to run Rebin algorithm");
-    IvsQ = algRebin->getProperty("OutputWorkspace");
+  } else {
+    momentumTransferMinimum = calculateQ(IvsLam->readX(0).back(), theta.get());
+    momentumTransferMaximum = calculateQ(IvsLam->readX(0).front(), theta.get());
+    if (isDefault("MomentumTransferStep") && theta.is_initialized())
+    {
+      // if the DQQ is not given for this run. 
+      // we will use CalculateResoltion to produce this value
+      // for us.
+      IAlgorithm_sptr calcResAlg =
+          AlgorithmManager::Instance().create("CalculateResolution");
+      calcResAlg->setProperty("Workspace", runWS);
+      calcResAlg->setProperty("TwoTheta", theta.get());
+      calcResAlg->execute();
+      if (!calcResAlg->isExecuted())
+        throw std::runtime_error("CalculateResolution failed. Please manually "
+                                 "enter a value in the dQ/Q column.");
+      momentumTransferStep = calcResAlg->getProperty("Resolution");
+    }
+    QParams.push_back(momentumTransferMinimum);
+    QParams.push_back(-momentumTransferStep);
+    QParams.push_back(momentumTransferMaximum);
   }
+  IAlgorithm_sptr algRebin = this->createChildAlgorithm("Rebin");
+  algRebin->initialize();
+  algRebin->setProperty("InputWorkspace", IvsQ);
+  algRebin->setProperty("OutputWorkspace", IvsQ);
+  algRebin->setProperty("Params", QParams);
+  algRebin->execute();
+  if (!algRebin->isExecuted())
+      throw std::runtime_error("Failed to run Rebin algorithm");
+  IvsQ = algRebin->getProperty("OutputWorkspace");
+
   double scaleFactor = getProperty("ScaleFactor");
   if (!isDefault("ScaleFactor")) {
     IAlgorithm_sptr algScale = this->createChildAlgorithm("Scale");

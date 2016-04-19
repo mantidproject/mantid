@@ -119,6 +119,7 @@ public:
     alg->setProperty("MonitorBackgroundWavelengthMax", 2.0);
     alg->setProperty("MonitorIntegrationWavelengthMin", 1.2);
     alg->setProperty("MonitorIntegrationWavelengthMax", 1.5);
+    alg->setProperty("MomentumTransferStep", 0.1);
     alg->setPropertyValue("ProcessingInstructions", "1");
     alg->setPropertyValue("OutputWorkspace", "x");
     alg->setPropertyValue("OutputWorkspaceWavelength", "y");
@@ -191,6 +192,7 @@ public:
     alg->setProperty("MonitorBackgroundWavelengthMax", 0.0);
     alg->setProperty("MonitorIntegrationWavelengthMin", 0.0);
     alg->setProperty("MonitorIntegrationWavelengthMax", 0.0);
+    alg->setProperty("MomentumTransferStep", 0.1);
     alg->setProperty("NormalizeByIntegratedMonitors", false);
     alg->setProperty("CorrectDetectorPositions", true);
     alg->setProperty("CorrectionAlgorithm", "None");
@@ -240,6 +242,17 @@ public:
     AnalysisDataService::Instance().remove("Test");
     AnalysisDataService::Instance().remove("scaledTest");
   }
+  void test_post_processing_rebin_step_with_params_not_provided() {
+      auto alg = construct_standard_algorithm();
+      auto inWS = Create2DWorkspace154(1, 10, true);
+      // this instrument does not have a "slit-gap" property
+      // defined in the IPF, so CalculateResolution should throw.
+      inWS->setInstrument(m_tinyReflWS->getInstrument());
+      inWS->getAxis(0)->setUnit("Wavelength");
+      alg->setProperty("InputWorkspace", inWS);
+      alg->setProperty("OutputWorkspace", "rebinnedWS");
+      TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+  }
   void test_post_processing_rebin_step_with_logarithmic_rebinning() {
     auto alg = construct_standard_algorithm();
     auto inWS = Create2DWorkspace154(1, 10, true);
@@ -255,6 +268,7 @@ public:
     auto xData = rebinnedIvsQWS->readX(0);
     TSM_ASSERT_EQUALS("QMin should be the same as first Param entry (1.0)",
                       xData[0], 1.0);
+    // based off the equation for logarithmic binning X(i+1)=X(i)(1+|dX|)
     double binWidthFromLogarithmicEquation = fabs((xData[1] / xData[0]) - 1);
     TSM_ASSERT_DELTA("DQQ should be the same as abs(x[1]/x[0] - 1)",
                      binWidthFromLogarithmicEquation, 0.2, 1e-06);
@@ -323,6 +337,7 @@ public:
     alg->setProperty("MonitorBackgroundWavelengthMax", 0.0);
     alg->setProperty("MonitorIntegrationWavelengthMin", 0.0);
     alg->setProperty("MonitorIntegrationWavelengthMax", 0.0);
+    alg->setProperty("MomentumTransferStep", 0.1);
     alg->setProperty("NormalizeByIntegratedMonitors", false);
     alg->setProperty("CorrectDetectorPositions", true);
     alg->setProperty("CorrectionAlgorithm", "None");
