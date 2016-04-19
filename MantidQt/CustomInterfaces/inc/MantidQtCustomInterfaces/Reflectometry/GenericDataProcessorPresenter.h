@@ -84,8 +84,8 @@ protected:
   DataProcessorWhiteList m_whitelist;
   // Post-processing algorithm
   DataPostprocessorAlgorithm m_postprocessor;
-  // Index of column "Group"
-  int m_colGroup;
+  // The number of columns
+  int m_columns;
   // A workspace receiver we want to notify
   WorkspaceReceiver *m_workspaceReceiver;
   // stores whether or not the table has changed since it was last saved

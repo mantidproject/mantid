@@ -82,9 +82,9 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
   createProcessLayout();
 
   // Columns Group and Options must be added to the whitelist
-  m_colGroup = static_cast<int>(m_whitelist.size());
   m_whitelist.addElement("Group", "Group");
   m_whitelist.addElement("Options", "Options");
+  m_columns = static_cast<int>(m_whitelist.size());
 
   // Populate an initial list of valid tables to open, and subscribe to the ADS
   // to keep it up to date
@@ -236,7 +236,6 @@ ITableWorkspace_sptr GenericDataProcessorPresenter::createWorkspace() {
 ITableWorkspace_sptr GenericDataProcessorPresenter::createDefaultWorkspace() {
   auto ws = createWorkspace();
   ws->appendRow();
-  ws->String(0, MantidQt::CustomInterfaces::ReflTableSchema::COL_SCALE) = "1";
   return ws;
 }
 
@@ -254,7 +253,7 @@ int GenericDataProcessorPresenter::getUnusedGroup(
 
     // This is an unselected row. Add it to the list of used group ids
     usedGroups.insert(
-        m_model->data(m_model->index(idx, ReflTableSchema::COL_GROUP)).toInt());
+        m_model->data(m_model->index(idx, m_columns - 2)).toInt());
   }
 
   int groupId = 0;
@@ -294,9 +293,8 @@ void GenericDataProcessorPresenter::process() {
   // Map group numbers to the set of rows in that group we want to process
   std::map<int, std::set<int>> groups;
   for (auto it = rows.begin(); it != rows.end(); ++it)
-    groups[m_model->data(m_model->index(*it, ReflTableSchema::COL_GROUP))
-               .toInt()]
-        .insert(*it);
+    groups[m_model->data(m_model->index(*it, m_columns - 2)).toInt()].insert(
+        *it);
 
   // Check each group and warn if we're only partially processing it
   for (auto gIt = groups.begin(); gIt != groups.end(); ++gIt) {
@@ -488,19 +486,13 @@ bool GenericDataProcessorPresenter::rowsValid(std::set<int> rows) {
 
 /**
 Validate a row.
-If a row passes validation, it is ready to be autofilled, but
-not necessarily ready for processing.
+A row may pass validation, but it is not necessarily ready for processing.
 @param rowNo : The row in the model to validate
 @throws std::invalid_argument if the row fails validation
 */
 void GenericDataProcessorPresenter::validateRow(int rowNo) const {
   if (rowNo >= m_model->rowCount())
     throw std::invalid_argument("Invalid row");
-
-  if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_RUNS))
-          .toString()
-          .isEmpty())
-    throw std::invalid_argument("Run column may not be empty.");
 }
 
 /**
@@ -781,7 +773,7 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
         auto optionsMap = parseKeyValueString(options);
         auto runWS =
             prepareRunWorkspace(runStr, m_preprocessor[columnName], optionsMap);
-        runNo.append(getRunNumber(runWS)+ "_");
+        runNo.append(getRunNumber(runWS) + "_");
         alg->setProperty(propertyName, runWS->name());
       }
     } else {
@@ -820,7 +812,7 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
     }
   }
 
-	runNo.pop_back();
+  runNo.pop_back();
   /* We need to give a name to the output workspaces */
   for (size_t i = 0; i < m_processor.outputProperties(); i++) {
     alg->setProperty(m_processor.outputPropertyName(i),
@@ -839,10 +831,8 @@ void GenericDataProcessorPresenter::insertRow(int index) {
   const int groupId = getUnusedGroup();
   if (!m_model->insertRow(index))
     return;
-  // Set the default scale to 1.0
-  m_model->setData(m_model->index(index, ReflTableSchema::COL_SCALE), "1");
   // Set the group id of the new row
-  m_model->setData(m_model->index(index, ReflTableSchema::COL_GROUP), groupId);
+  m_model->setData(m_model->index(index, m_columns - 2), groupId);
 }
 
 /**
@@ -879,11 +869,10 @@ int GenericDataProcessorPresenter::getBlankRow() {
   const int rowCount = m_model->rowCount();
   for (int i = 0; i < rowCount; ++i) {
     bool isBlank = true;
-    for (int j = ReflTableSchema::COL_RUNS; j <= ReflTableSchema::COL_OPTIONS;
-         ++j) {
-      // Don't bother checking the scale or group column, it'll always have a
+    for (int j = 0; j < m_columns; ++j) {
+      // Don't bother checking the group column, it'll always have a
       // value.
-      if (j == ReflTableSchema::COL_SCALE || j == ReflTableSchema::COL_GROUP)
+      if (j == m_columns - 2)
         continue;
 
       if (!m_model->data(m_model->index(i, j)).toString().isEmpty()) {
@@ -921,7 +910,7 @@ void GenericDataProcessorPresenter::groupRows() {
 
   // Now we just have to set the group id on the selected rows
   for (auto it = rows.begin(); it != rows.end(); ++it)
-    m_model->setData(m_model->index(*it, ReflTableSchema::COL_GROUP), groupId);
+    m_model->setData(m_model->index(*it, m_columns - 2), groupId);
 
   m_tableDirty = true;
 }
@@ -1168,8 +1157,7 @@ void GenericDataProcessorPresenter::afterReplaceHandle(
 size_t GenericDataProcessorPresenter::numRowsInGroup(int groupId) const {
   size_t count = 0;
   for (int i = 0; i < m_model->rowCount(); ++i)
-    if (m_model->data(m_model->index(i, ReflTableSchema::COL_GROUP)).toInt() ==
-        groupId)
+    if (m_model->data(m_model->index(i, m_columns - 2)).toInt() == groupId)
       count++;
   return count;
 }
@@ -1180,16 +1168,14 @@ void GenericDataProcessorPresenter::expandSelection() {
 
   std::set<int> rows = m_view->getSelectedRows();
   for (auto row = rows.begin(); row != rows.end(); ++row)
-    groupIds.insert(
-        m_model->data(m_model->index(*row, ReflTableSchema::COL_GROUP))
-            .toInt());
+    groupIds.insert(m_model->data(m_model->index(*row, m_columns - 2)).toInt());
 
   std::set<int> selection;
 
   for (int i = 0; i < m_model->rowCount(); ++i)
     if (groupIds.find(
-            m_model->data(m_model->index(i, ReflTableSchema::COL_GROUP))
-                .toInt()) != groupIds.end())
+            m_model->data(m_model->index(i, m_columns - 2)).toInt()) !=
+        groupIds.end())
       selection.insert(i);
 
   m_view->setSelection(selection);
@@ -1203,17 +1189,13 @@ void GenericDataProcessorPresenter::clearSelected() {
     ignore.clear();
     ignore.insert(*row);
 
-    m_model->setData(m_model->index(*row, ReflTableSchema::COL_RUNS), "");
-    m_model->setData(m_model->index(*row, ReflTableSchema::COL_ANGLE), "");
-    m_model->setData(m_model->index(*row, ReflTableSchema::COL_TRANSMISSION),
-                     "");
-    m_model->setData(m_model->index(*row, ReflTableSchema::COL_QMIN), "");
-    m_model->setData(m_model->index(*row, ReflTableSchema::COL_QMAX), "");
-    m_model->setData(m_model->index(*row, ReflTableSchema::COL_SCALE), "1");
-    m_model->setData(m_model->index(*row, ReflTableSchema::COL_DQQ), "");
-    m_model->setData(m_model->index(*row, ReflTableSchema::COL_GROUP),
-                     getUnusedGroup(ignore));
-    m_model->setData(m_model->index(*row, ReflTableSchema::COL_OPTIONS), "");
+    for (int i = 0; i < m_columns - 2; i++) {
+      m_model->setData(m_model->index(*row, i), "");
+    }
+    // 'Group' column
+    m_model->setData(m_model->index(*row, m_columns - 2), "");
+    // 'Options' column
+    m_model->setData(m_model->index(*row, m_columns - 1), "");
   }
   m_tableDirty = true;
 }
@@ -1225,8 +1207,7 @@ void GenericDataProcessorPresenter::copySelected() {
   std::set<int> rows = m_view->getSelectedRows();
   for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
     std::vector<std::string> line;
-    for (int col = ReflTableSchema::COL_RUNS;
-         col <= ReflTableSchema::COL_OPTIONS; ++col)
+    for (int col = 0; col < m_columns; ++col)
       line.push_back(
           m_model->data(m_model->index(*rowIt, col)).toString().toStdString());
     lines.push_back(boost::algorithm::join(line, "\t"));
@@ -1269,9 +1250,7 @@ void GenericDataProcessorPresenter::pasteSelected() {
     boost::split(values, *lineIt, boost::is_any_of("\t"));
 
     // Paste as many columns as we can from this line
-    for (int col = ReflTableSchema::COL_RUNS;
-         col <= ReflTableSchema::COL_OPTIONS &&
-         col < static_cast<int>(values.size());
+    for (int col = 0; col < m_columns && col < static_cast<int>(values.size());
          ++col)
       m_model->setData(m_model->index(*rowIt, col),
                        QString::fromStdString(values[col]));
@@ -1291,8 +1270,8 @@ void GenericDataProcessorPresenter::transfer(
   for (auto rowsIt = newRows.begin(); rowsIt != newRows.end(); ++rowsIt) {
     auto &row = *rowsIt;
 
-    if (groups.count(row[ReflTableSchema::GROUP]) == 0)
-      groups[row[ReflTableSchema::GROUP]] = getUnusedGroup();
+    if (groups.count(row["Group"]) == 0)
+      groups[row["Group"]] = getUnusedGroup();
 
     // Overwrite the first blank row we find, otherwise, append a new row to the
     // end.
@@ -1302,24 +1281,18 @@ void GenericDataProcessorPresenter::transfer(
       insertRow(rowIndex);
     }
 
-    /* Set the scale to 1.0 for new rows. If there's a columnHeading specified
-    otherwise,
-    it will be overwritten below.
-    */
-    m_model->setData(m_model->index(rowIndex, ReflTableSchema::COL_SCALE), "1");
-    auto colIndexLookup = ReflTableSchema::makeColumnNameMap();
-
     // Loop over the map (each row with column heading keys to cell values)
     for (auto rowIt = row.begin(); rowIt != row.end(); ++rowIt) {
       const std::string columnHeading = rowIt->first;
       const std::string cellEntry = rowIt->second;
-      m_model->setData(m_model->index(rowIndex, colIndexLookup[columnHeading]),
+      m_model->setData(m_model->index(rowIndex, m_whitelist.colIndexFromColName(
+                                                    columnHeading)),
                        QString::fromStdString(cellEntry));
     }
 
     // Special case grouping. Group cell entry is string it seems!
-    m_model->setData(m_model->index(rowIndex, ReflTableSchema::COL_GROUP),
-                     groups[row[ReflTableSchema::GROUP]]);
+    m_model->setData(m_model->index(rowIndex, m_columns - 2),
+                     groups[row["Group"]]);
   }
 }
 
@@ -1373,13 +1346,13 @@ void GenericDataProcessorPresenter::plotGroup() {
   std::set<int> selectedGroups;
   for (auto row = selectedRows.begin(); row != selectedRows.end(); ++row)
     selectedGroups.insert(
-        m_model->data(m_model->index(*row, m_colGroup)).toInt());
+        m_model->data(m_model->index(*row, m_columns - 2)).toInt());
 
   // Now, get the names of the stitched workspace, one per group
   std::map<int, std::vector<std::string>> runsByGroup;
   const int numRows = m_model->rowCount();
   for (int row = 0; row < numRows; ++row) {
-    int group = m_model->data(m_model->index(row, m_colGroup)).toInt();
+    int group = m_model->data(m_model->index(row, m_columns - 2)).toInt();
 
     // Skip groups we don't care about
     if (selectedGroups.find(group) == selectedGroups.end())
