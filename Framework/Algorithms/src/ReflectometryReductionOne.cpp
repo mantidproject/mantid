@@ -655,7 +655,7 @@ void ReflectometryReductionOne::exec() {
   } else {
     momentumTransferMinimum = calculateQ(IvsLam->readX(0).back(), theta.get());
     momentumTransferMaximum = calculateQ(IvsLam->readX(0).front(), theta.get());
-    if (isDefault("MomentumTransferStep") && theta.is_initialized()) {
+    if (isDefault("MomentumTransferStep")) {
       // if the DQQ is not given for this run.
       // we will use CalculateResoltion to produce this value
       // for us.

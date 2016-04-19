@@ -524,7 +524,8 @@ void ReflectometryReductionOneAuto::exec() {
           throw std::runtime_error(
               "CalculateResolution failed. Please manually "
               "enter a value in the dQ/Q column.");
-        momentumTransferStep = calcResAlg->getProperty("Resolution");
+        double resolution = calcResAlg->getProperty("Resolution");
+        momentumTransferStep = resolution;
       }
       momentumTransferMaximum = calculateQ(wavelength_min, theta_in.get());
       refRedOne->setProperty("MomentumTransferMinimum",

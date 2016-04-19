@@ -86,7 +86,18 @@ To Rebin your IvsQ workspace you will have to provide values for the following p
 These values will be appended to each other to form your :ref:`algm-Rebin` Params. These values correspond to your `MinimumExtent`, `BinWidth` and `MaximumExtent` respectively.
 
 If you provide a positive `MomentumTransferStep` value then the algorithm will automatically negate this value which will allow for Logarithmic Rebinning. Alternatively,
-a negative `MomentumTransferStep` will result in Linear Rebinning. More details about the Rebinning process can be found in the documentation for :ref:`algm-Rebin`
+a negative `MomentumTransferStep` will result in Linear Rebinning. More details about the Rebinning process can be found in the documentation for :ref:`algm-Rebin`.
+
+If no values are provided for `MomentumTransferMinimum` and `MomentumTransferMaximum` then the algorithm will attempt to calculate these values
+by using the equations below:
+
+    :math:`Q_{min} = 2 \, k \, sin \, \theta = \frac{4 \pi sin \theta}{\lambda_{max}}`  
+    
+    :math:`Q_{max} = 2 \, k \, sin \, \theta = \frac{4 \pi sin \theta}{\lambda_{min}}`  
+    
+Where :math:`\lambda_{min}` is the minimum extent of the `IvsLambda` Workspace and :math:`\lambda_{max}` is the maximum extent of the `IvsLambda` Workspace.
+
+If you have not provided a value for `MomentumTransferStep` then the algorithm will use :ref:`algm-CalculateResolution` to calculate this value for you.
 
 Scaling
 =======
