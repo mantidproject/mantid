@@ -656,8 +656,6 @@ void ReflectometryReductionOne::exec() {
     QParams.push_back(-momentumTransferStep);
     QParams.push_back(momentumTransferMaximum);
   } else {
-    auto min = IvsLam->readX(0).front();
-    auto max = IvsLam->readX(0).back();
     momentumTransferMinimum = calculateQ(IvsLam->readX(0).back(), theta.get());
     momentumTransferMaximum = calculateQ(IvsLam->readX(0).front(), theta.get());
     if (isDefault("MomentumTransferStep")) {
