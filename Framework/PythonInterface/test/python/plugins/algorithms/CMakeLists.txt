@@ -32,6 +32,7 @@ set ( TEST_PY_FILES
   EnggVanadiumCorrectionsTest.py
   VesuvioDiffractionReductionTest.py
   FilterLogByTimeTest.py
+  FindEPPTest.py
   FindReflectometryLinesTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
   GetEiT0atSNSTest.py
