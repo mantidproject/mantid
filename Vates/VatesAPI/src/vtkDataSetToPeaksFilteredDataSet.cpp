@@ -45,8 +45,8 @@ vtkDataSetToPeaksFilteredDataSet::vtkDataSetToPeaksFilteredDataSet(
     vtkSmartPointer<vtkUnstructuredGrid> output)
     : m_inputData(input), m_outputData(output), m_isInitialised(false),
       m_radiusNoShape(0.2),
-      m_radiusType(DataObjects::PeakShapeBase::RadiusType::Radius),
-      m_radiusFactor(2), m_defaultRadius(0.1), m_coordinateSystem(0) {
+      m_radiusType(Geometry::PeakShape::RadiusType::Radius), m_radiusFactor(2),
+      m_defaultRadius(0.1), m_coordinateSystem(0) {
   if (nullptr == input) {
     throw std::runtime_error("Cannot construct "
                              "vtkDataSetToPeaksFilteredDataSet with NULL input "
@@ -71,7 +71,7 @@ vtkDataSetToPeaksFilteredDataSet::~vtkDataSetToPeaksFilteredDataSet() {}
   */
 void vtkDataSetToPeaksFilteredDataSet::initialize(
     const std::vector<Mantid::API::IPeaksWorkspace_sptr> &peaksWorkspaces,
-    double radiusNoShape, DataObjects::PeakShapeBase::RadiusType radiusType,
+    double radiusNoShape, Geometry::PeakShape::RadiusType radiusType,
     int coordinateSystem) {
   m_peaksWorkspaces = peaksWorkspaces;
   m_radiusNoShape = radiusNoShape;
