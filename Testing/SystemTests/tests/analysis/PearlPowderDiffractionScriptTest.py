@@ -1,8 +1,9 @@
 import unittest
 import os.path
 import shutil
+import random
 
-from mantid.api import AnalysisDataService, MatrixWorkspace
+from mantid.api import AnalysisDataService, MatrixWorkspace, ITableWorkspace
 from mantid.simpleapi import *
 from mantid import config
 import stresstesting
@@ -119,3 +120,26 @@ class LoadTests(unittest.TestCase):
         self.assertAlmostEquals(11667.996525642744, van10.readX(0)[3420], places=DIFF_PLACES)
         van14 = mtd["van14"]
         self.assertAlmostEqual(3.39159292684e-05, van14.readY(0)[187], places=DIFF_PLACES)
+
+    def test_rdata_workspace(self):
+        for i in range(1, 15, 3):
+            rfile = mtd["rdata" + str(i)]
+            self.assertTrue(isinstance(rfile, MatrixWorkspace))
+            self.assertEquals(1, rfile.getNumberHistograms())
+            self.assertEquals(4310, rfile.blocksize())
+            self.assertIn("glucose+Pb 6 tns in ZTA anvils", rfile.getTitle())
+
+            van_file = mtd["van" + str(i)]
+            self.assertAlmostEquals(van_file.readX(0)[i], rfile.readX(0)[i], places=DIFF_PLACES)
+
+    def test_mod_files(self):
+        mod_group_table = mtd["PRL92476_92479"]
+        self.assertTrue("PRL92476_92479_mods1-9_1" in mod_group_table[0].getName())
+
+        rand_range = random.randint(1, 4)
+        for i in range(rand_range, 10, 2):
+            self.assertTrue("PRL92476_92479_mod" + str(i) in mod_group_table[i].getName())
+            self.assertEquals(4310, mod_group_table[i].blocksize())
+            ind_mod_file = "PRL92476_92479_mod" + str(i)
+            rand_test = random.randint(1, 4300)
+            self.assertAlmostEqual(ind_mod_file[i].readY(rand_test), ind_mod_file.readY(rand_test))
