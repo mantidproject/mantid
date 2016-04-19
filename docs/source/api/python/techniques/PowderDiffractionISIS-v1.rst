@@ -15,7 +15,7 @@ refinement programmes (GSAS, FullProf, etc).
 
 All the script files used to process GEM, HRPD, INS and Polaris data have been
 integrated to Mantid which can be found inside the following directory on a Windows
-machine: `C:\MantidInstall\scripts\PowderISIS`.
+machine: `C:\\MantidInstall\\scripts\\CryPowderISIS`.
 
 Run Requirement
 ---------------
@@ -177,7 +177,7 @@ directly be passed as a variable, for example:
    expt = cry_ini.Files('Polaris', RawDir=FilesDir, Analysisdir='test', forceRootDirFromScripts=False, inputInstDir=dir)
 
 User may also place the instrument folder where the script is located, which would be
-found in the following directory on Windows platform `C:\MantidInstall\scripts\PowderISIS\ `.
+found in the following directory on Windows platform `C:\\MantidInstall\\scripts\CryPowderISIS\ `.
 Using instrument folder from where the scripts are located can simply be done by
 modifying the following line of the :ref:`usage-PowderISIS-ref` script to:
 
