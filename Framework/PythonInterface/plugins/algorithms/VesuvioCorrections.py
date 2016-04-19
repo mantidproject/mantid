@@ -3,8 +3,8 @@ from mantid.kernel import *
 from mantid.api import *
 from vesuvio.base import VesuvioBase, TableWorkspaceDictionaryFacade
 from vesuvio.fitting import parse_fit_options
-
 import mantid.simpleapi as ms
+import math
 
 #----------------------------------------------------------------------------------------
 
@@ -313,27 +313,16 @@ class VesuvioCorrections(VesuvioBase):
             functions.append(function_str)
 
             logger.notice('Corrections scale fit index %d is %s' % (idx, wsn))
-        save = AlgorithmManager.createUnmanaged("SaveNexus")
-        save.initialize()
-        save.setProperty("InputWorkspace", self._output_ws)
-        save.setProperty("Filename", mtd[self._output_ws].getName()+'_pre_fit.nxs')
-        save.execute()
-        function_str = ";".join(functions)
+
         fit = AlgorithmManager.create("Fit")
         fit.initialize()
         fit.setChild(True)
         fit.setLogging(True)
-        fit.setProperty("Function", function_str)
+        fit.setProperty("Function", ";".join(functions))
         fit.setProperty("InputWorkspace", self._output_ws)
         fit.setProperty("Output", param_table_name)
         fit.setProperty("CreateOutput", True)
         fit.execute()
-        out_par = fit.getProperty('OutputParameters').value
-        save = AlgorithmManager.createUnmanaged("SaveNexus")
-        save.initialize()
-        save.setProperty("InputWorkspace", out_par)
-        save.setProperty("Filename", out_par.getName()+'_post_fit.nxs')
-        save.execute()
 
         return fit.getProperty('OutputParameters').value
 
@@ -423,7 +412,20 @@ class VesuvioCorrections(VesuvioBase):
             # The program THICK also uses sigma/int_sum to be consistent with the prgram
             # DINSMS_BATCH
 
-            width = params_dict['f%d.Width' % i]
+            width_prop = 'f%d.Width' % i
+            sigma_x_prop = 'f%d.SigmaX' % i
+            sigma_y_prop = 'f%d.SigmaY' % i
+            sigma_z_prop = 'f%d.SigmaZ' % i
+
+            if width_prop in params_dict:
+                width = params_dict['f%d.Width' % i]
+            elif sigma_x_prop in params_dict:
+                sigma_x = float(params_dict[sigma_x_prop])
+                sigma_y = float(params_dict[sigma_y_prop])
+                sigma_z = float(params_dict[sigma_z_prop])
+                width = math.sqrt((sigma_x**2 + sigma_y**2 + sigma_z**2) / 3.0)
+            else:
+                continue
 
             atom_props.append(mass)
             atom_props.append(intentisy)
