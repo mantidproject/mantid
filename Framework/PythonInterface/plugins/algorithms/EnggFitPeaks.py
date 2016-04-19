@@ -12,7 +12,7 @@ class EnggFitPeaks(PythonAlgorithm):
     CENTER_ERROR_LIMIT = 10
 
     def category(self):
-        return "Diffraction\\Engineering"
+        return "Diffraction\\Engineering;Diffraction\\Fitting"
 
     def name(self):
         return "EnggFitPeaks"

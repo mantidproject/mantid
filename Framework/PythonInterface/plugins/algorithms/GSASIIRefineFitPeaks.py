@@ -16,7 +16,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         """
         Override required for Mantid algorithms
         """
-        return "Diffraction\\Engineering"
+        return "Diffraction\\Engineering;Diffraction\\Fitting"
 
     def name(self):
         """

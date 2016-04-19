@@ -25,18 +25,17 @@ Description
    <https://subversion.xray.aps.anl.gov/trac/pyGSAS>`_.
 
 Uses `GSAS-II <https://subversion.xray.aps.anl.gov/trac/pyGSAS>`_
-(Toby & Von Dreele, 2013) as external software to fit peaks to a
-powder / engineering diffraction pattern. Here the process of peak
-fitting is in the context of Rietveld / Pawley / Le Bail analysis (Le
-Bail 2005).
+[TobyVonDreele2013]_ as external software to fit peaks to a powder /
+engineering diffraction pattern. Here the process of peak fitting is
+in the context of Rietveld / Pawley / Le Bail analysis [LeBail2005]_
 
 The algorithm supports three refinement or fitting methods: Pawley
 refinement, Rietveld refinement, and single peak fitting (or "Peaks
 List" of GSAS-II). The first two methods of this algorithm implement
-whole powder pattern fitting (Le Bail 2005) whereas the third method
-fits peaks individually.  The use of this algorithm is very close to
-the examples described in these two GSAS-II tutorials: `Rietveld
-fitting / CW Neutron Powder fit for Yttrium-Iron Garnet
+whole diffraction pattern fitting whereas the third method fits peaks
+individually.  The use of this algorithm is very close to the examples
+described in these two GSAS-II tutorials: `Rietveld fitting / CW
+Neutron Powder fit for Yttrium-Iron Garnet
 <https://subversion.xray.aps.anl.gov/pyGSAS/Tutorials/CWNeutron/Neutron%20CW%20Powder%20Data.htm>`_,
 and `Getting started / Fitting individual peaks & autoindexing
 <https://subversion.xray.aps.anl.gov/pyGSAS/Tutorials/FitPeaks/Fit%20Peaks.htm>`_,
@@ -71,11 +70,11 @@ used the algorithm will output the lattice parameters in a table
 workspace. The values are given for the the full set of lattice
 parameters (three lattice constants, three angles, and volume in this
 sequence: a, b, c, alpha, beta, gamma, volume). The a,b, and c values
-are given in Angstroms (:math:`\AA`). The angles are given in degrees,
-and the volume in :math:`\AA^3`.
+are given in Angstroms (:math:`\mathrm{\AA{}}`). The angles are given
+in degrees, and the volume in :math:`\mathrm{\AA{}}^3`.
 
 The algorithm provides goodness-of-fit estimates in the outputs *GoF*
-and *Rwp* or weighted profile R-factor (Toby 2008). The *Rwp* is given
+and *Rwp* or weighted profile R-factor [Toby2008]_. The *Rwp* is given
 as a percentage value.
 
 Note that the option to save the GSAS-II project file
@@ -108,19 +107,24 @@ in the "Peaks List" window of the GSAS-II GUI. These results are
 printed in the log messages as well.
 
 For fitting single peaks, one at a time, see also :ref:`EnggFitPeaks
-<algm-EnggFitPeaks>`.
+<algm-EnggFitPeaks>`. For other algorithms that implement different
+variants of whole diffraction pattern refinement and fitting see also
+:ref:`PawleyFit <algm-PawleyFit>` and :ref:`LeBailFit
+<algm-LeBailFit>`.
+
 
 *References*:
 
-Le Bail, A (2005). "Whole Powder Pattern Decomposition Methods and
-Applications: A Retrospection". Powder Diffraction 20(4): 316-326.
+.. [LeBail2005] Le Bail, A (2005). "Whole Powder Pattern Decomposition Methods and
+                Applications: A Retrospection". Powder Diffraction 20(4): 316-326.
 
-Toby, B. H., & Von Dreele, R. B. (2013). "GSAS-II: the genesis of a
-modern open-source all purpose crystallography software
-package". Journal of Applied Crystallography, 46(2), 544-549.
+.. [TobyVonDreele2013] Toby, B. H., & Von Dreele, R. B. (2013). "GSAS-II: the
+                       genesis of a modern open-source all purpose crystallography
+                       software package". Journal of Applied Crystallography, 46(2),
+                       544-549.
 
-Toby, B. H. (2008). "R factors in Rietveld analysis: How good is good
-enough?". Powder Diffraction, 21(1), 67-70.
+.. [Toby2008] Toby, B. H. (2008). "R factors in Rietveld analysis: How good is good
+              enough?". Powder Diffraction, 21(1), 67-70.
 
 Usage
 -----
