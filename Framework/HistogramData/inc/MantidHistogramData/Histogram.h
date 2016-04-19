@@ -67,7 +67,7 @@ public:
   */
 
   // Temporary legacy interface to X
-  void setX(const MantidVec &X) { m_x.access() = X; }
+  void setX(const MantidVec &X) { m_x.access().rawData() = X; }
   void setX(const Kernel::cow_ptr<HistogramX> &X) { m_x = X; }
   void setX(const boost::shared_ptr<HistogramX> &X) { m_x = X; }
   MantidVec &dataX() { return m_x.access().rawData(); }

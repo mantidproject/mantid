@@ -89,9 +89,8 @@ public:
 
     if (setX) {
       // Create the x-axis for histogramming.
-      Kernel::cow_ptr<MantidVec> axis;
-      MantidVec &xRef = axis.access();
-      xRef.resize(NUMBINS);
+      auto axis = Kernel::make_cow<HistogramData::HistogramX>(NUMBINS);
+      auto &xRef = axis.access();
       for (int i = 0; i < NUMBINS; ++i)
         xRef[i] = i * BIN_DELTA;
 
@@ -300,9 +299,8 @@ public:
     }
 
     // Create the x-axis for histogramming.
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec &xRef = axis.access();
-    xRef.resize(NUMBINS);
+    auto axis = Kernel::make_cow<HistogramData::HistogramX>(NUMBINS);
+    auto &xRef = axis.access();
     for (int i = 0; i < NUMBINS; ++i)
       xRef[i] = i * BIN_DELTA;
     // Set all the histograms at once.
@@ -357,9 +355,8 @@ public:
   //------------------------------------------------------------------------------
   void test_setX_individually() {
     // Create A DIFFERENT x-axis for histogramming.
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec &xRef = axis.access();
-    xRef.resize(NUMBINS / 2);
+    auto axis = Kernel::make_cow<HistogramData::HistogramX>(NUMBINS / 2);
+    auto &xRef = axis.access();
     for (int i = 0; i < NUMBINS / 2; ++i)
       xRef[i] = i * BIN_DELTA * 2;
 
@@ -468,9 +465,8 @@ public:
     // Yes, our eventworkspace MRU is full
     TS_ASSERT_EQUALS(ew->MRUSize(), 50);
     TS_ASSERT_EQUALS(ew2->MRUSize(), 50);
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec &xRef = axis.access();
-    xRef.resize(10);
+    auto axis = Kernel::make_cow<HistogramData::HistogramX>(10);
+    auto &xRef = axis.access();
     for (int i = 0; i < 10; ++i)
       xRef[i] = i * BIN_DELTA;
     ew->setAllX(axis);
@@ -527,15 +523,16 @@ public:
                       std::range_error);
   }
 
-  void do_test_binning(EventWorkspace_sptr ws, const MantidVec &X,
-                       cow_ptr<MantidVec> axis,
+  void do_test_binning(EventWorkspace_sptr ws,
+                       const HistogramData::HistogramX &X,
+                       const cow_ptr<HistogramData::HistogramX> axis,
                        size_t expected_occupancy_per_bin) {
     MantidVec Y(NUMBINS - 1);
     MantidVec E(NUMBINS - 1);
     // Required since we are rebinning in place.
     ws->setAllX(axis);
     // perform binning
-    ws->generateHistogramPulseTime(0, X, Y, E);
+    ws->generateHistogramPulseTime(0, X.rawData(), Y, E);
     // Check results
     for (size_t j = 0; j < Y.size(); ++j) {
       TS_ASSERT_EQUALS(expected_occupancy_per_bin, Y[j]);
@@ -550,37 +547,35 @@ public:
                                                  // pulse_time intervals of
                                                  // BIN_DELTA/2
 
-    Mantid::Kernel::cow_ptr<MantidVec> axis;
-    MantidVec &X = axis.access();
-
     // Create bin steps = 4*BIN_DELTA.
-    X.resize(NUMBINS / 4);
-    for (size_t i = 0; i < X.size(); ++i) {
-      X[i] = double(i) * BIN_DELTA * 4;
+    auto axis = Kernel::make_cow<HistogramData::HistogramX>(NUMBINS / 4);
+    auto &X1 = axis.access();
+    for (size_t i = 0; i < X1.size(); ++i) {
+      X1[i] = double(i) * BIN_DELTA * 4;
     }
     size_t expected_occupancy = 8; // Because there are two events with
                                    // pulse_time in each BIN_DELTA interval.
-    do_test_binning(ws, X, axis, expected_occupancy);
+    do_test_binning(ws, X1, axis, expected_occupancy);
 
     // Create bin steps = 2*BIN_DELTA.
-    X.clear();
-    X.resize(NUMBINS / 2);
-    for (size_t i = 0; i < X.size(); ++i) {
-      X[i] = double(i) * BIN_DELTA * 2;
+    axis = Kernel::make_cow<HistogramData::HistogramX>(NUMBINS / 2);
+    auto &X2 = axis.access();
+    for (size_t i = 0; i < X2.size(); ++i) {
+      X2[i] = double(i) * BIN_DELTA * 2;
     }
     expected_occupancy = 4; // Because there are two events with pulse_time in
                             // each BIN_DELTA interval.
-    do_test_binning(ws, X, axis, expected_occupancy);
+    do_test_binning(ws, X2, axis, expected_occupancy);
 
     // Create bin steps = BIN_DELTA.
-    X.clear();
-    X.resize(NUMBINS);
-    for (size_t i = 0; i < X.size(); ++i) {
-      X[i] = double(i) * BIN_DELTA;
+    axis = Kernel::make_cow<HistogramData::HistogramX>(NUMBINS);
+    auto &X3 = axis.access();
+    for (size_t i = 0; i < X3.size(); ++i) {
+      X3[i] = double(i) * BIN_DELTA;
     }
     expected_occupancy = 2; // Because there are two events with pulse_time in
                             // each BIN_DELTA interval.
-    do_test_binning(ws, X, axis, expected_occupancy);
+    do_test_binning(ws, X3, axis, expected_occupancy);
   }
 
   void test_get_pulse_time_max() {

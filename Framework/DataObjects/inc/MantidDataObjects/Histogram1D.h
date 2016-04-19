@@ -46,12 +46,11 @@ public:
       : API::ISpectrum(), m_histogram(mode) {}
 
   void setX(const MantidVec &X) override;
-  void setX(const MantidVecPtr &X) override;
-  void setX(const MantidVecPtr::ptr_type &X) override;
+  void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) override;
   MantidVec &dataX() override;
   const MantidVec &dataX() const override;
   const MantidVec &readX() const override;
-  MantidVecPtr ptrX() const override;
+  Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const override;
 
   /// Sets the data.
   void setData(const MantidVec &Y) override { refY.access() = Y; };

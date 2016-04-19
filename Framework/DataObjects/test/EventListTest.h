@@ -12,6 +12,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::HistogramData;
 using namespace Mantid::DataObjects;
 
 using std::runtime_error;
@@ -301,13 +302,8 @@ public:
   //==================================================================================
 
   /// Make a big bin holding all events
-  MantidVecPtr one_big_bin() {
-    // Generate the histrogram bins
-    MantidVecPtr x;
-    MantidVec &shared_x = x.access();
-    shared_x.push_back(0);
-    shared_x.push_back(1e10);
-    return x;
+  cow_ptr<HistogramX> one_big_bin() {
+    return make_cow<HistogramX>(std::initializer_list<double>{0, 1e10});
   }
 
   void test_MinusOperator_all_9_possibilites() {

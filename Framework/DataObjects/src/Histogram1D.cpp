@@ -18,11 +18,9 @@ void Histogram1D::setX(const MantidVec &X) { m_histogram.setX(X); }
 
 /// Sets the x data.
 /// @param X :: vector of X data
-void Histogram1D::setX(const MantidVecPtr &X) { m_histogram.setX(X); }
-
-/// Sets the x data
-/// @param X :: vector of X data
-void Histogram1D::setX(const MantidVecPtr::ptr_type &X) { m_histogram.setX(X); }
+void Histogram1D::setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
+  m_histogram.setX(X);
+}
 
 /// Returns the x data
 MantidVec &Histogram1D::dataX() { return m_histogram.dataX(); }
@@ -34,7 +32,9 @@ const MantidVec &Histogram1D::dataX() const { return m_histogram.dataX(); }
 const MantidVec &Histogram1D::readX() const { return m_histogram.constDataX(); }
 
 /// Returns a pointer to the x data
-MantidVecPtr Histogram1D::ptrX() const { return m_histogram.ptrX(); }
+Kernel::cow_ptr<HistogramData::HistogramX> Histogram1D::ptrX() const {
+  return m_histogram.ptrX();
+}
 
 const HistogramData::Histogram &Histogram1D::histogram() const {
   return m_histogram;

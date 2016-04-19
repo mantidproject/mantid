@@ -253,7 +253,8 @@ public:
   virtual void getXMinMax(double &xmin, double &xmax) const;
 
   /// Returns a pointer to the x data
-  virtual Kernel::cow_ptr<MantidVec> refX(const std::size_t index) const {
+  virtual Kernel::cow_ptr<HistogramData::HistogramX>
+  refX(const std::size_t index) const {
     return getSpectrum(index)->ptrX();
   }
 
@@ -269,13 +270,15 @@ public:
   }
 
   /// Set the specified X array to point to the given existing array
-  virtual void setX(const std::size_t index, const MantidVecPtr &X) {
+  virtual void setX(const std::size_t index,
+                    const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
     getSpectrum(index)->setX(X);
     invalidateCommonBinsFlag();
   }
 
   /// Set the specified X array to point to the given existing array
-  virtual void setX(const std::size_t index, const MantidVecPtr::ptr_type &X) {
+  virtual void setX(const std::size_t index,
+                    const boost::shared_ptr<HistogramData::HistogramX> &X) {
     getSpectrum(index)->setX(X);
     invalidateCommonBinsFlag();
   }

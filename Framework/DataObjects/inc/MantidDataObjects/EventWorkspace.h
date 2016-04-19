@@ -129,7 +129,8 @@ public:
   const MantidVec &dataDx(const std::size_t) const override;
 
   // Get a pointer to the x data at the given workspace index
-  Kernel::cow_ptr<MantidVec> refX(const std::size_t) const override;
+  Kernel::cow_ptr<HistogramData::HistogramX>
+  refX(const std::size_t) const override;
 
   /// Generate a new histogram from specified event list at the given index.
   void generateHistogram(const std::size_t index, const MantidVec &X,
@@ -143,7 +144,7 @@ public:
 
   //------------------------------------------------------------
   // Set the x-axis data (histogram bins) for all pixels
-  virtual void setAllX(Kernel::cow_ptr<MantidVec> &x);
+  virtual void setAllX(const Kernel::cow_ptr<HistogramData::HistogramX> &x);
 
   // Get an EventList object at the given workspace index number
   virtual EventList &getEventList(const std::size_t workspace_index);

@@ -37,8 +37,8 @@ public:
   static Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins,
                                                   double x0 = 0.0,
                                                   double deltax = 1.0) {
-    MantidVecPtr x, y, e;
-    x.access().resize(nbins + 1);
+    auto x = Kernel::make_cow<HistogramData::HistogramX>(nbins + 1);
+    MantidVecPtr y, e;
     y.access().resize(nbins, 2); // Value of 2.0 in all ys
     e.access().resize(nbins, M_SQRT2);
     for (int i = 0; i < nbins + 1; ++i) {
@@ -92,8 +92,8 @@ public:
 
   void testSetX() {
     double aNumber = 5.3;
-    boost::shared_ptr<MantidVec> v =
-        boost::make_shared<MantidVec>(nbins, aNumber);
+    boost::shared_ptr<HistogramData::HistogramX> v =
+        boost::make_shared<HistogramData::HistogramX>(nbins, aNumber);
     TS_ASSERT_THROWS_NOTHING(ws->setX(0, v));
     TS_ASSERT_EQUALS(ws->dataX(0)[0], aNumber);
     TS_ASSERT_THROWS(ws->setX(-1, v), std::range_error);
@@ -102,8 +102,7 @@ public:
 
   void testSetX_cowptr() {
     double aNumber = 5.4;
-    MantidVecPtr v;
-    v.access() = MantidVec(nbins, aNumber);
+    auto v = Kernel::make_cow<HistogramData::HistogramX>(nbins, aNumber);
     TS_ASSERT_THROWS_NOTHING(ws->setX(0, v));
     TS_ASSERT_EQUALS(ws->dataX(0)[0], aNumber);
     TS_ASSERT_THROWS(ws->setX(-1, v), std::range_error);

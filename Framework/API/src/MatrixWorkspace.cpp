@@ -1169,9 +1169,9 @@ size_t MatrixWorkspace::getMemorySize() const {
 */
 size_t MatrixWorkspace::getMemorySizeForXAxes() const {
   size_t total = 0;
-  MantidVecPtr lastX = this->refX(0);
+  auto lastX = this->refX(0);
   for (size_t wi = 0; wi < getNumberHistograms(); wi++) {
-    MantidVecPtr X = this->refX(wi);
+    auto X = this->refX(wi);
     // If the pointers are the same
     if (!(X == lastX) || wi == 0)
       total += (*X).size() * sizeof(double);
