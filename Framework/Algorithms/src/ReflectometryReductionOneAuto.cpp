@@ -501,11 +501,10 @@ void ReflectometryReductionOneAuto::exec() {
     auto momentumTransferMinimum = isSet<double>("MomentumTransferMinimum");
     auto momentumTransferStep = isSet<double>("MomentumTransferStep");
     auto momentumTransferMaximum = isSet<double>("MomentumTransferMaximum");
- 
-    if (momentumTransferStep.is_initialized())
-    {
-        refRedOne->setProperty("MomentumTransferStep",
-            momentumTransferStep.get());
+
+    if (momentumTransferStep.is_initialized()) {
+      refRedOne->setProperty("MomentumTransferStep",
+                             momentumTransferStep.get());
     }
     if (momentumTransferMinimum.is_initialized() &&
         momentumTransferMaximum.is_initialized()) {
@@ -513,8 +512,7 @@ void ReflectometryReductionOneAuto::exec() {
                              momentumTransferMinimum.get());
       refRedOne->setProperty("MomentumTransferMaximum",
                              momentumTransferMaximum.get());
-    }
-    else if (theta_in.is_initialized()) {
+    } else if (theta_in.is_initialized()) {
       momentumTransferMinimum = calculateQ(wavelength_max, theta_in.get());
       if (!momentumTransferStep.is_initialized()) {
         IAlgorithm_sptr calcResAlg =
@@ -528,13 +526,13 @@ void ReflectometryReductionOneAuto::exec() {
               "enter a value in the dQ/Q column.");
         momentumTransferStep = calcResAlg->getProperty("Resolution");
       }
-       momentumTransferMaximum =
-          calculateQ(wavelength_min, theta_in.get());
-       refRedOne->setProperty("MomentumTransferMinimum",
-           momentumTransferMinimum.get());
-       refRedOne->setProperty("MomentumTransferStep", momentumTransferStep.get());
-       refRedOne->setProperty("MomentumTransferMaximum",
-           momentumTransferMaximum.get());
+      momentumTransferMaximum = calculateQ(wavelength_min, theta_in.get());
+      refRedOne->setProperty("MomentumTransferMinimum",
+                             momentumTransferMinimum.get());
+      refRedOne->setProperty("MomentumTransferStep",
+                             momentumTransferStep.get());
+      refRedOne->setProperty("MomentumTransferMaximum",
+                             momentumTransferMaximum.get());
     }
     refRedOne->execute();
     if (!refRedOne->isExecuted()) {

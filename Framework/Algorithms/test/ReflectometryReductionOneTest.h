@@ -243,15 +243,15 @@ public:
     AnalysisDataService::Instance().remove("scaledTest");
   }
   void test_post_processing_rebin_step_with_params_not_provided() {
-      auto alg = construct_standard_algorithm();
-      auto inWS = Create2DWorkspace154(1, 10, true);
-      // this instrument does not have a "slit-gap" property
-      // defined in the IPF, so CalculateResolution should throw.
-      inWS->setInstrument(m_tinyReflWS->getInstrument());
-      inWS->getAxis(0)->setUnit("Wavelength");
-      alg->setProperty("InputWorkspace", inWS);
-      alg->setProperty("OutputWorkspace", "rebinnedWS");
-      TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    auto alg = construct_standard_algorithm();
+    auto inWS = Create2DWorkspace154(1, 10, true);
+    // this instrument does not have a "slit-gap" property
+    // defined in the IPF, so CalculateResolution should throw.
+    inWS->setInstrument(m_tinyReflWS->getInstrument());
+    inWS->getAxis(0)->setUnit("Wavelength");
+    alg->setProperty("InputWorkspace", inWS);
+    alg->setProperty("OutputWorkspace", "rebinnedWS");
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
   void test_post_processing_rebin_step_with_logarithmic_rebinning() {
     auto alg = construct_standard_algorithm();

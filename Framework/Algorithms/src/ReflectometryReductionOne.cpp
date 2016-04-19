@@ -655,9 +655,8 @@ void ReflectometryReductionOne::exec() {
   } else {
     momentumTransferMinimum = calculateQ(IvsLam->readX(0).back(), theta.get());
     momentumTransferMaximum = calculateQ(IvsLam->readX(0).front(), theta.get());
-    if (isDefault("MomentumTransferStep") && theta.is_initialized())
-    {
-      // if the DQQ is not given for this run. 
+    if (isDefault("MomentumTransferStep") && theta.is_initialized()) {
+      // if the DQQ is not given for this run.
       // we will use CalculateResoltion to produce this value
       // for us.
       IAlgorithm_sptr calcResAlg =
@@ -681,7 +680,7 @@ void ReflectometryReductionOne::exec() {
   algRebin->setProperty("Params", QParams);
   algRebin->execute();
   if (!algRebin->isExecuted())
-      throw std::runtime_error("Failed to run Rebin algorithm");
+    throw std::runtime_error("Failed to run Rebin algorithm");
   IvsQ = algRebin->getProperty("OutputWorkspace");
 
   double scaleFactor = getProperty("ScaleFactor");
