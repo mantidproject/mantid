@@ -1,10 +1,13 @@
-?from mantid.simpleapi import *
-from mantid import config
+import unittest
 import os.pathimport
+
+from mantid.simpleapi import *
+from mantid import config
 import stresstesting
-
 import pearl_routines
+from mantid.Framework.PythonInterface.mantid.api import AnalysisDataService  # is that already being imported?
 
+# initial directory to the system test data files
 DIRS = config['datasearch.directories'].split(';')
 
 
@@ -57,7 +60,7 @@ class PearlPowderDiffractionScriptTest(stresstesting.MantidStressTest):
         # Custom code to create and run this single test suite
         # and then mark as success or a failure
         suite = unittest.TestSuite()
-        suite.adTest(unittest.makeSuite(LoadTests, "test"))
+        suite.addTest(unittest.makeSuite(LoadTests, "test"))
         runner = unittest.TextTestRunner()
         # Run using either runner
         res = runner.run(suite)
@@ -68,3 +71,27 @@ class PearlPowderDiffractionScriptTest(stresstesting.MantidStressTest):
 
     def validate(self):
         return self._success
+
+    def cleanup(self):
+        filenames = []
+        filenames.extend(("PRL92476_92479.nxs", "PRL92476_92479_d_xye-0.dat", "PRL92476_92479_tof_xye-0.dat",
+                          "PRL92476_92479-0.gss"))
+        self._clean_up_files(filenames, DIRS)
+
+
+# ======================================================================
+# work horse
+class LoadTests(unittest.TestCase):
+    wsname = "__LoadTest"
+    cleanup_names = []
+
+    def tearDown(self):
+        self.cleanup_names.append(self.wsname)
+        for name in self.cleanup_names:
+            try:
+                AnalysisDataService.remove(name)
+            except KeyError:
+                pass
+        self.cleanup_names = []
+
+        # ============================ Success =============================
