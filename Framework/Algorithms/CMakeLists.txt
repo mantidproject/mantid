@@ -793,6 +793,7 @@ set ( TEST_FILES
 	ScaleTest.h
 	ScaleXTest.h
 	SetInstrumentParameterTest.h
+        SetUncertaintiesTest.h
 	ShiftLogTimeTest.h
 	SignalOverErrorTest.h
 	SmoothDataTest.h

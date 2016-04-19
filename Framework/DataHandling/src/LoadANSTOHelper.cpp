@@ -139,7 +139,7 @@ void EventAssigner::addEventImpl(size_t id, double tof) {
 }
 
 // FastReadOnlyFile
-#ifdef WIN32
+#ifdef _WIN32
 FastReadOnlyFile::FastReadOnlyFile(const char *filename) {
   m_handle = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, NULL,
                          OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);

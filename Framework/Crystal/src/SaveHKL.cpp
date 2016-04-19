@@ -126,7 +126,7 @@ void SaveHKL::exec() {
 
   PeaksWorkspace_sptr peaksW = getProperty("OutputWorkspace");
   if (peaksW != ws)
-    peaksW.reset(ws->clone().release());
+    peaksW = ws->clone();
   auto inst = peaksW->getInstrument();
   std::vector<Peak> peaks = peaksW->getPeaks();
   double scaleFactor = getProperty("ScalePeaks");

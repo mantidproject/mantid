@@ -1235,8 +1235,8 @@ Table *MantidUI::createDetectorTable(
       // Need to get R, theta through these methods to be correct for grouped
       // detectors
       R = det->getDistance(*sample);
-      theta = showSignedTwoTheta ? ws->detectorSignedTwoTheta(det)
-                                 : ws->detectorTwoTheta(det);
+      theta = showSignedTwoTheta ? ws->detectorSignedTwoTheta(*det)
+                                 : ws->detectorTwoTheta(*det);
       theta *= 180.0 / M_PI; // To degrees
       QString isMonitor = det->isMonitor() ? "yes" : "no";
 
@@ -1252,7 +1252,7 @@ Table *MantidUI::createDetectorTable(
         try {
           // Get unsigned theta and efixed value
           double efixed = ws->getEFixed(det);
-          double usignTheta = ws->detectorTwoTheta(det) / 2.0;
+          double usignTheta = ws->detectorTwoTheta(*det) * 0.5;
 
           double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
           colValues << QVariant(q);
