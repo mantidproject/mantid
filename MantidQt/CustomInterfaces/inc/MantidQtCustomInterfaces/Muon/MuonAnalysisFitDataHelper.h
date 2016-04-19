@@ -49,6 +49,8 @@ public:
   void handleSelectedPeriodsChanged();
   /// Handles user changing X range by dragging lines
   void handleXRangeChangedGraphically(double start, double end);
+  /// Handles peak picker being reassigned to a new graph
+  void peakPickerReassigned(const QString &wsName);
 
 private:
   /// Fit browser to update (non-owning pointer)

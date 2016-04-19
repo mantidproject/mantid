@@ -22,7 +22,8 @@ public:
   virtual double getEndTime() const = 0;
   virtual void setNumPeriods(size_t numPeriods) = 0;
   virtual QStringList getPeriodSelections() const = 0;
-  virtual void setWorkspaceDetails(int runNumber, const QString &instName) = 0;
+  virtual void setWorkspaceDetails(const QString &runNumbers,
+                                   const QString &instName) = 0;
   virtual void setAvailableGroups(const QStringList &groupNames) = 0;
   virtual QStringList getChosenGroups() const = 0;
   virtual void setWorkspaceIndex(unsigned int index) = 0;

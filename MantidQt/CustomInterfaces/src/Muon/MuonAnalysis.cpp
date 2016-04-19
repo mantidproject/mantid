@@ -2003,6 +2003,8 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName) {
     setCurrentDataName(wsName);
   }
 
+  m_fitDataHelper->peakPickerReassigned(wsName);
+
   QString code;
 
   code += "g = graph('" + wsName + "-1')\n"

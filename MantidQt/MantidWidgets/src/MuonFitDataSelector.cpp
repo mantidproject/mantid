@@ -36,7 +36,7 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber,
                                          size_t numPeriods,
                                          const QStringList &groups)
     : MuonFitDataSelector(parent) {
-  this->setWorkspaceDetails(runNumber, instName);
+  this->setWorkspaceDetails(QString::number(runNumber), instName);
   this->setNumPeriods(numPeriods);
   this->setAvailableGroups(groups);
 }
@@ -174,13 +174,15 @@ void MuonFitDataSelector::setUpValidators() {
 
 /**
  * Set up run finder with initial run number and instrument
- * @param runNumber :: [input] Run number from loaded workspace
+ * @param runNumbers :: [input] Run numbers from loaded workspace
  * @param instName :: [input] Instrument name from loaded workspace
  */
-void MuonFitDataSelector::setWorkspaceDetails(int runNumber,
+void MuonFitDataSelector::setWorkspaceDetails(const QString &runNumbers,
                                               const QString &instName) {
   // Set initial run to be run number of the workspace loaded in Home tab
-  m_ui.runs->setText(QString::number(runNumber) + "-");
+  QString runs(runNumbers);
+  runs.remove(QRegExp("^[0]*")); // remove leading zeros, if any
+  m_ui.runs->setText(runs);
   // Set the file finder to the correct instrument (not Mantid's default)
   m_ui.runs->setInstrumentOverride(instName);
 }

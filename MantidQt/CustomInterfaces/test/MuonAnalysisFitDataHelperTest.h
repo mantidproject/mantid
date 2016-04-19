@@ -23,7 +23,7 @@ public:
   MOCK_CONST_METHOD0(getEndTime, double());
   MOCK_METHOD1(setNumPeriods, void(size_t));
   MOCK_CONST_METHOD0(getPeriodSelections, QStringList());
-  MOCK_METHOD2(setWorkspaceDetails, void(int, const QString &));
+  MOCK_METHOD2(setWorkspaceDetails, void(const QString &, const QString &));
   MOCK_METHOD1(setAvailableGroups, void(const QStringList &));
   MOCK_CONST_METHOD0(getChosenGroups, QStringList());
   MOCK_METHOD1(setWorkspaceIndex, void(unsigned int));
@@ -91,6 +91,14 @@ public:
     EXPECT_CALL(*m_dataSelector, setStartTimeQuietly(0.4)).Times(1);
     EXPECT_CALL(*m_dataSelector, setEndTimeQuietly(9.4)).Times(1);
     m_helper->handleXRangeChangedGraphically(0.4, 9.4);
+  }
+
+  void test_peakPickerReassigned() {
+    //const QString wsName("MUSR")
+    TS_FAIL("Test not implemented!");
+    // EXPECT_CALL(*m_dataSelector, setWorkspaceDetails()).Times(1);
+    EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
+    // m_helper->peakPickerReassigned()
   }
 
 private:

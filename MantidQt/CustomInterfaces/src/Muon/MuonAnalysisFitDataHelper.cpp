@@ -63,5 +63,21 @@ void MuonAnalysisFitDataHelper::handleXRangeChangedGraphically(double start,
   m_dataSelector->setEndTimeQuietly(end);
 }
 
+/**
+ * Called by selectMultiPeak: fit browser has been reassigned to a new
+ * workspace.
+ * Sets run number, instrument and workspace index in the data selector.
+ * @param wsName :: [input] Name of new workspace
+ */
+void MuonAnalysisFitDataHelper::peakPickerReassigned(const QString &wsName) {
+  // Parse workspace name here for run number and instrument name
+  const QString instRun = wsName.section(';', 0, 0).trimmed();
+  const int firstZero = instRun.indexOf("0");
+  const QString instName = instRun.left(firstZero);
+  const QString numberString = instRun.right(instRun.size() - firstZero);
+  m_dataSelector->setWorkspaceDetails(numberString, instName);
+  m_dataSelector->setWorkspaceIndex(0u); // always has only one spectrum
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

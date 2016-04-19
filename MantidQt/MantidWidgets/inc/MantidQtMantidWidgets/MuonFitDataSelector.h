@@ -69,7 +69,8 @@ public slots:
   /// Set number of periods in data
   void setNumPeriods(size_t numPeriods) override;
   /// Set starting run number and instrument
-  void setWorkspaceDetails(int runNumber, const QString &instName) override;
+  void setWorkspaceDetails(const QString &runNumbers,
+                           const QString &instName) override;
   /// Set names of available groups
   void setAvailableGroups(const QStringList &groupNames) override;
   /// Set selected workspace index
