@@ -298,7 +298,7 @@ void SaveHKL::exec() {
     std::string spectraFile = getPropertyValue("SpectraFile");
     infile.open(spectraFile.c_str());
     if (infile.is_open()) {
-      size_t a = 0;
+      size_t a = 1;
       for (int wi = 0; wi < 8; wi++)
         getline(infile, STRING); // Saves the line in STRING.
       while (!infile.eof())      // To get you all the lines.
@@ -314,7 +314,8 @@ void SaveHKL::exec() {
           spectra[a].push_back(spectra0);
 
         } else {
-          a++;
+          std::string temp;
+          ss >> temp >> a;
         }
       }
       infile.close();
@@ -413,6 +414,7 @@ void SaveHKL::exec() {
               << std::setw(5 + decimalHKL) << std::fixed
               << std::setprecision(decimalHKL) << -p.getL();
         double correc = scaleFactor;
+        double instBkg = 0;
         double relSigSpect = 0.0;
         bankSequence = static_cast<int>(
             std::distance(uniqueBanks.begin(), uniqueBanks.find(bank)));
@@ -449,7 +451,7 @@ void SaveHKL::exec() {
           if (p.getMonitorCount() > 0)
             cmonx = 100e6 / p.getMonitorCount();
           double spect =
-              spectrumCalc(p.getTOF(), iSpec, time, spectra, bankSequence);
+              spectrumCalc(p.getTOF(), iSpec, time, spectra, bank);
           // Find spectra at wavelength of 1 for normalization
           std::vector<double> xdata(1, 1.0); // wl = 1
           std::vector<double> ydata;
@@ -460,7 +462,7 @@ void SaveHKL::exec() {
               UnitFactory::Instance().create("Wavelength");
           unit->toTOF(xdata, ydata, l1, l2, theta2, 0, 0.0, 0.0);
           double one = xdata[0];
-          double spect1 = spectrumCalc(one, iSpec, time, spectra, bankSequence);
+          double spect1 = spectrumCalc(one, iSpec, time, spectra, bank);
           relSigSpect = std::sqrt((1.0 / spect) + (1.0 / spect1));
           if (spect1 != 0.0) {
             spect /= spect1;
@@ -474,6 +476,9 @@ void SaveHKL::exec() {
           if (inst->getName() == "TOPAZ" &&
               detScale.find(bank) != detScale.end())
             correc *= detScale[bank];
+
+          // instrument background constant for sigma
+          instBkg = 0.*12.28 / cmonx * scaleFactor;
         }
 
         // SHELX can read data without the space between the l and intensity
@@ -481,7 +486,7 @@ void SaveHKL::exec() {
           double ckIntensity = correc * p.getIntensity();
           double cksigI =
               std::sqrt(std::pow(correc * p.getSigmaIntensity(), 2) +
-                        std::pow(relSigSpect * correc * p.getIntensity(), 2));
+                        std::pow(relSigSpect * correc * p.getIntensity(), 2) + instBkg);
           p.setIntensity(ckIntensity);
           p.setSigmaIntensity(cksigI);
           if (ckIntensity > 99999.985)
@@ -746,6 +751,16 @@ void SaveHKL::sizeBanks(std::string bankName, int &nCols, int &nRows) {
     nCols = RDet->xpixels();
     nRows = RDet->ypixels();
   } else {
+          if (ws->getInstrument()->getName().compare("CORELLI") ==
+              0) // for Corelli with sixteenpack under bank
+          {
+            std::vector<Geometry::IComponent_const_sptr> children;
+            boost::shared_ptr<const Geometry::ICompAssembly> asmb =
+                boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+                    parent);
+            asmb->getChildren(children, false);
+            parent = children[0];
+          }
     std::vector<Geometry::IComponent_const_sptr> children;
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);

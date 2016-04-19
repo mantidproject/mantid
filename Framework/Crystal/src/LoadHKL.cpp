@@ -41,10 +41,6 @@ void LoadHKL::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace.");
 
-  declareProperty(
-      "DirectionCosines", false,
-      "Extra columns (22 total) in file if true for direction cosines.\n"
-      "If false, original 14 columns (default).");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -54,7 +50,7 @@ void LoadHKL::exec() {
 
   std::string filename = getPropertyValue("Filename");
   PeaksWorkspace_sptr ws(new PeaksWorkspace());
-  bool cosines = getProperty("DirectionCosines");
+  bool cosines = false;
 
   std::fstream in;
   in.open(filename.c_str(), std::ios::in);
@@ -89,6 +85,7 @@ void LoadHKL::exec() {
   double mu1 = 0.0, mu2 = 0.0, wl1 = 0.0, wl2 = 0.0, sc1 = 0.0, astar1 = 0.0;
   do {
     getline(in, line);
+    if (line.length() > 125) cosines = true;
     double h = atof(line.substr(0, 4).c_str());
     double k = atof(line.substr(4, 4).c_str());
     double l = atof(line.substr(8, 4).c_str());
