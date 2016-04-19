@@ -574,10 +574,6 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
   const std::string outputName =
       preprocessor.prefix() + boost::algorithm::join(runs, "_");
 
-  // Check if we've already prepared it
-  if (AnalysisDataService::Instance().doesExist(outputName))
-    return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
-
   /* Ideally, this should be executed as a child algorithm to keep the ADS tidy,
   * but
   * that doesn't preserve history nicely, so we'll just take care of tidying up
