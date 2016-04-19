@@ -91,7 +91,7 @@ void LoadNexusLogs::init() {
   declareProperty(
       make_unique<PropertyWithValue<bool>>("OverwriteLogs", true,
                                            Direction::Input),
-      "If true then existing logs will be overwritten, if false they will "
+      "If true then some existing logs will be overwritten, if false they will "
       "not.");
   declareProperty(make_unique<PropertyWithValue<std::string>>("NXentryName", "",
                                                               Direction::Input),

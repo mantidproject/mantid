@@ -28,7 +28,6 @@ Items missing from the Nexus file are simply not loaded.
 
 +----------------------------------+----------------------------------------------------+---------------------------------------+
 | Description of Data              | Found in Nexus file                                | Placed in Workspace (Workspace2D)     |
-|                                  |                                                    | or output                             |
 +==================================+====================================================+=======================================+
 | Log group                        | Each group of class ``IXrunlog`` or ``IXselog``    | See below                             |
 |                                  | or with name ``"DASLogs"`` or ``"framelog"``       |                                       |
@@ -38,16 +37,19 @@ Items missing from the Nexus file are simply not loaded.
 |                                  | (henceforth referred as [PERIODS])                 |                                       |
 +----------------------------------+----------------------------------------------------+---------------------------------------+
 | Time series                      | Each group of class ``NXlog`` or ``NXpositioner``  | Time series in workspace run object   |
-|                                  | within [LOG]                                       |                                       |
+|                                  | within [LOG]                                       | *Only these are affected by the       |
+|                                  |                                                    | OverwriteLogs algorithm property.*    |
 +----------------------------------+----------------------------------------------------+---------------------------------------+
 | SE logs                          | Each group of class ``IXseblock``                  | Workspace run object. Item prefixed   |
 |                                  | within [LOG]                                       | with ``selog_``,                      |
 |                                  |                                                    | if name is already in use.            |
 +----------------------------------+----------------------------------------------------+---------------------------------------+
 | Periods                          | Each group of class ``IXperiods`` and  name        | ``nperiods`` item in run object,      |
-|                                  | ``"periods"`` within [PERIOD]                      | if it does not already exist          |
+|                                  | ``"periods"`` within [PERIODS]                     | if it does not already exist          |
 +----------------------------------+----------------------------------------------------+---------------------------------------+
 | Start and end times              | Groups ``"start_time"`` and ``"end time"``         | start and end times in run object     |
+|                                  |                                                    | *Existing values are always           |
+|                                  |                                                    | overwritten.*                         |
 +----------------------------------+----------------------------------------------------+---------------------------------------+
 | Proton charge                    | Group ``"proton_charge"``, if it exists,           | Proton charge in run object           |
 |                                  | else integration of proton charge time series      | if it does not already exist          |
@@ -55,8 +57,11 @@ Items missing from the Nexus file are simply not loaded.
 | Measurement information          | Group ``"measurement"`` of class ``NXcollection``  | Run object items with name from       |
 |                                  |                                                    | Nexus group prefixed with             |
 |                                  |                                                    | ``measurement_``                      |
+|                                  |                                                    | *Existing values are always           |
+|                                  |                                                    | overwritten.*                         |
 +----------------------------------+----------------------------------------------------+---------------------------------------+
 
+If the nexus file has a ``"proton_log"`` group, then this algorithm will do some event filtering to allow SANS2D files to load.
 
 Usage
 -----
