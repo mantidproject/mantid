@@ -52,9 +52,9 @@ class ComputeIncoherentDOS(PythonAlgorithm):
                              doc='Sample temperature in Kelvin.')
         self.declareProperty(name='MeanSquareDisplacement', defaultValue=0., validator=FloatBoundedValidator(lower=0),
                              doc='Average mean square displacement in Angstrom^2.')
-        self.declareProperty(name='QSumRange', defaultValue='Qmax/2,Qmax',
+        self.declareProperty(name='QSumRange', defaultValue='0,Qmax',
                              doc='Range in |Q| (in Angstroms^-1) to sum data over.')
-        self.declareProperty(name='EnergyBinning', defaultValue='0,Emax/50,Emax',
+        self.declareProperty(name='EnergyBinning', defaultValue='0,Emax/50,Emax*0.9',
                              doc='Energy binning parameters [Emin, Estep, Emax] in meV.')
         self.declareProperty(name='Wavenumbers', defaultValue=False,
                              doc='Should the output be in Wavenumbers (cm^-1)?')
@@ -179,12 +179,15 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         # Make a 1D (energy dependent) cut
         dos1d = Rebin2D(dos2d, [dq[0], dq[1]-dq[0], dq[1]], dosebin, True, True)
 
+        # Renomalise energy bin size
+        dos1d = dos1d * dosebin[1]
+
         if absunits:
             print "Converting to states/energy"
             # cross-section information is given in barns, but data is in milibarns.
             sigma = atoms[0].neutron()['tot_scatt_xs'] * 1000
             mass = atoms[0].mass
-            dos1d = dos1d * (mass/sigma)
+            dos1d = dos1d * (mass/sigma) * 4 * np.pi
 
         self.setProperty("OutputWorkspace", dos1d)
         DeleteWorkspace(dos2d)
