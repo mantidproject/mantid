@@ -8,13 +8,13 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
+#include "MantidQtCustomInterfaces/Tomography/ImagingFormatsConvertQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfacePresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 #include "ui_ImageSelectCoRAndRegions.h"
-#include "ui_ImgFormatsConversion.h"
 #include "ui_TomographyIfaceQtGUI.h"
 #include "ui_TomographyIfaceQtTabEnergy.h"
 #include "ui_TomographyIfaceQtTabFiltersSettings.h"
@@ -200,12 +200,8 @@ private slots:
   void sendToOctopusVisClicked();
   void defaultDirLocalVisualizeClicked();
   void defaultDirRemoteVisualizeClicked();
-  void browseVisToolParaviewClicke();
+  void browseVisToolParaviewClicked();
   void browseVisToolOctopusClicked();
-
-  // convert formats section/tab
-  void browseImgInputConvertClicked();
-  void browseImgOutputConvertClicked();
 
   // processing of energy bands
   void browseEnergyInputClicked();
@@ -241,7 +237,6 @@ private:
   void doSetupSectionRun();
   void doSetupSectionFilters();
   void doSetupSectionVisualize();
-  void doSetupSectionConvert();
   void doSetupSectionEnergy();
   void doSetupSectionSystemSettings();
   void doSetupGeneralWidgets();
@@ -335,11 +330,11 @@ private:
   Ui::TomographyIfaceQtTabFiltersSettings m_uiTabFilters;
   Ui::ImageSelectCoRAndRegions m_uiTabCoR;
   Ui::TomographyIfaceQtTabVisualize m_uiTabVisualize;
-  Ui::ImgFormatsConversion m_uiTabConvertFormats;
   Ui::TomographyIfaceQtTabEnergy m_uiTabEnergy;
   Ui::TomographyIfaceQtTabSystemSettings m_uiTabSystemSettings;
 
   ImageROIViewQtWidget *m_tabROIW;
+  ImagingFormatsConvertQtWidget *m_tabImggFormats;
 
   /// Tool specific setup dialogs
   Ui::TomoToolConfigAstra m_uiAstra;

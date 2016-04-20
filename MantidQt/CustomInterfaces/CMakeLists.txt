@@ -103,6 +103,8 @@ set ( SRC_FILES
 	src/StepScan.cpp
 	src/Tomography/ImageROIPresenter.cpp
 	src/Tomography/ImageROIViewQtWidget.cpp
+	src/Tomography/ImagingFormatsConvertPresenter.cpp
+	src/Tomography/ImagingFormatsConvertQtWidget.cpp
 	src/Tomography/ImageStackPreParams.cpp
 	src/Tomography/SavuConfigDialog.cpp
 	src/Tomography/StackOfImagesDirs.cpp
@@ -275,10 +277,14 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/StepScan.h
 	inc/MantidQtCustomInterfaces/Tomography/IImageROIPresenter.h
 	inc/MantidQtCustomInterfaces/Tomography/IImageROIView.h
+	inc/MantidQtCustomInterfaces/Tomography/IImagingFormatsConvertPresenter.h
+	inc/MantidQtCustomInterfaces/Tomography/IImagingFormatsConvertView.h
 	inc/MantidQtCustomInterfaces/Tomography/ITomographyIfacePresenter.h
 	inc/MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h
 	inc/MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h
 	inc/MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h
+	inc/MantidQtCustomInterfaces/Tomography/ImagingFormatsConvertPresenter.h
+	inc/MantidQtCustomInterfaces/Tomography/ImagingFormatsConvertQtWidget.h
 	inc/MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h
 	inc/MantidQtCustomInterfaces/Tomography/StackOfImagesDirs.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h
@@ -392,6 +398,8 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/StepScan.h
                 inc/MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h
                 inc/MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h
+                inc/MantidQtCustomInterfaces/Tomography/ImagingFormatsConvertQtWidget.h
+                inc/MantidQtCustomInterfaces/Tomography/ImagingFormatsConvertPresenter.h
                 inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
                 inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
                 inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h
@@ -485,6 +493,7 @@ set ( TEST_FILES
 	EnggDiffractionPresenterTest.h
 	IO_MuonGroupingTest.h
 	ImageROIPresenterTest.h
+	ImagingFormatsConvertPresenterTest.h
 	MeasurementItemTest.h
 	MuonAnalysisHelperTest.h
 	ParseKeyValueStringTest.h
