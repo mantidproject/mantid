@@ -1,8 +1,9 @@
 #pylint: disable = no-init, invalid-name, line-too-long, eval-used, unused-argument, too-many-locals, too-many-branches, too-many-statements
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
+from mantid.kernel import CompositeValidator, Direction, FloatBoundedValidator
+from mantid.api import mtd, AlgorithmFactory, CommonBinsValidator, HistogramValidator, MatrixWorkspaceProperty, PythonAlgorithm
+from mantid.simpleapi import CreateWorkspace, DeleteWorkspace, Rebin2D
 import numpy as np
+from scipy import constants
 
 def evaluateEbin(Emin, Emax, Ei, string):
     return [eval(estr) for estr in string.split(',')]
@@ -16,14 +17,17 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         measured powder inelastic neutron scattering spectrum.
 
     ComputeIncoherentDOS(InputWorkspace = iws, Temperature = T, MeanSquareDisplacement = msd,
-                         QSumRange = qrange, EnergyBinning = ebins, OutputWorkspace = ows)
+                         QSumRange = qrange, EnergyBinning = ebins, Wavenumbers = cm, StatesPerEnergy = states,
+                         OutputWorkspace = ows)
 
     Input:
             iws     -   An input MatrixWorkspace (must contain the reduced powder INS data)
             T       -   The sample temperature in Kelvin (default: 300 K)
-            msd     -   The average mean-squared displacement of all species in the sample in Angstrom^2 (default: 0.01A^2)
+            msd     -   The average mean-squared displacement of all species in the sample in Angstrom^2 (default: 0)
             qrange  -   Range in |Q| to integrate over (default: 0.5Qmax to Qmax)
             ebins   -   Energy bins in Energy transfer to rebin the data into (default: 0 to Emax in 50 steps)
+            cm      -   (True/False) whether the output should be in meV or cm^{-1}
+            states  -   (True/False) whether the output should be states/unit energy if the sample is a pure element.
             ows     -   An output spectrum workspace (1D)
     """
 
@@ -42,12 +46,11 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         validators = CompositeValidator()
         validators.add(HistogramValidator(True))
         validators.add(CommonBinsValidator())
-        validators.add(WorkspaceUnitValidator('MomentumTransfer'))
         self.declareProperty(MatrixWorkspaceProperty(name='InputWorkspace', defaultValue='', direction=Direction.Input, validator=validators),
                              doc='Input MatrixWorkspace containing the reduced inelastic neutron spectrum in (Q,E) space.')
         self.declareProperty(name='Temperature', defaultValue=300., validator=FloatBoundedValidator(lower=0),
                              doc='Sample temperature in Kelvin.')
-        self.declareProperty(name='MeanSquareDisplacement', defaultValue=0.01, validator=FloatBoundedValidator(lower=0),
+        self.declareProperty(name='MeanSquareDisplacement', defaultValue=0., validator=FloatBoundedValidator(lower=0),
                              doc='Average mean square displacement in Angstrom^2.')
         self.declareProperty(name='QSumRange', defaultValue='Qmax/2,Qmax',
                              doc='Range in |Q| (in Angstroms^-1) to sum data over.')
@@ -70,20 +73,42 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         cm = int(self.getPropertyValue('Wavenumbers'))
         absunits = int(self.getPropertyValue('StatesPerEnergy'))
 
+        # Checks if the input workspace is valid, and which way around it is (Q along x or Q along y).
+        u0 = inws.getAxis(0).getUnit().unitID()
+        u1 = inws.getAxis(1).getUnit().unitID()
+        if u0 == 'MomentumTransfer' and (u1 == 'DeltaE' or u1 == 'DeltaE_inWavenumber'):
+            iqq = 0
+            ien = 1
+        elif u1 == 'MomentumTransfer' and (u0 == 'DeltaE' or u0 == 'DeltaE_inWavenumber'):
+            iqq = 1
+            ien = 0
+        else:
+            raise ValueError('Input workspace must be in (Q,E) [momentum and energy transfer]')
+
         # (Mantid stores the bin boundaries by default rather than bin centers)
-        qq = inws.getAxis(0).extractValues()
+        qq = inws.getAxis(iqq).extractValues()
+        en = inws.getAxis(ien).extractValues()
         qq = (qq[1:len(qq)]+qq[0:len(qq)-1])/2
-        en = inws.getAxis(1).extractValues()
         en = (en[1:len(en)]+en[0:len(en)-1])/2
 
         # Checks qrange is valid
         if QSumRange.count(',') != 1:
             raise ValueError('QSumRange must be a comma separated string with two values.')
         try:
-            # Do this in a member function to make sure no other variables can be evaluated other than Emax and Ei.
+            # Do this in a member function to make sure no other variables can be evaluated other than Qmin and Qmax.
             dq = evaluateQRange(min(qq), max(qq), QSumRange)
         except NameError:
             raise ValueError('Only the variables ''Qmin'' and ''Qmax'' is allowed in QSumRange.')
+
+        # Gets meV to cm^-1 conversion
+        mev2cm = (constants.elementary_charge / 1000) / (constants.h * constants.c * 100)
+        # Gets meV to Kelvin conversion
+        mev2k = (constants.elementary_charge / 1000) / constants.Boltzmann
+
+        # Converts energy to meV for bose factor later
+        if u0 == 'DeltaE_inWavenumber' or u1 == 'DeltaE_inWavenumber':
+            en = en / mev2cm
+
         # Checks energy bins are ok.
         if EnergyBinning.count(',') != 2:
             raise ValueError('EnergyBinning must be a comma separated string with three values.')
@@ -92,9 +117,9 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         except RuntimeError:
             ei = max(en)
         try:
-            # Do this in a function to make sure no other variables can be evaluated other than Emax and Ei.
+            # Do this in a function to make sure no other variables can be evaluated other than Emin, Emax and Ei.
             if cm:
-                dosebin = evaluateEbin(min(en*8.066), max(en*8.066), ei*8.066, EnergyBinning)
+                dosebin = evaluateEbin(min(en*mev2cm), max(en*mev2cm), ei*mev2cm, EnergyBinning)
             else:
                 dosebin = evaluateEbin(min(en), max(en), ei, EnergyBinning)
         except NameError:
@@ -103,6 +128,10 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         # Extracts the intensity (y) and errors (e) from inws.
         y = inws.extractY()
         e = inws.extractE()
+        if iqq == 1:
+            y = np.transpose(y)
+            e = np.transpose(e)
+
         # Creates a grid the same size as the intensity (y) array populated by the q and energy values
         qqgrid = np.tile(np.array(qq), (np.shape(y)[0], 1))
         engrid = np.transpose(np.tile(np.array(en), (np.shape(y)[1], 1)))
@@ -111,8 +140,8 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         DWF = np.exp(-2*(qqgrid**2*msd))
         idm = np.where(engrid < 0)
         idp = np.where(engrid >= 0)
-        expm = np.exp(-engrid[idm]*11.604/Temperature)
-        expp = np.exp(-engrid[idp]*11.604/Temperature)
+        expm = np.exp(-engrid[idm]*mev2k/Temperature)
+        expp = np.exp(-engrid[idp]*mev2k/Temperature)
         Bose = DWF*0
         Bose[idm] = expm / (1 - expm)      # n energy gain, phonon annihilation
         Bose[idp] = expp / (1 - expp) + 1  # n energy loss, phonon creation
@@ -133,20 +162,19 @@ class ComputeIncoherentDOS(PythonAlgorithm):
                 else:
                     ylabel = 'g(E) (states/meV)'
 
-        # Outputs the calculated density of states to another workspace
         # Convert to wavenumbers if requested (y-axis is in mbarns/sr/fu/meV -> mb/sr/fu/cm^-1)
         if cm:
-            print "Converting to cm"
-            en = en*8.066
-            y = y/8.066
-            e = e/8.066
-            dos2d = CreateWorkspace(qq, y, e, Nspec=len(en), VerticalAxisUnit='DeltaE_inWavenumber', VerticalAxisValues=en,
-                                    UnitX='MomentumTransfer', YUnitLabel=ylabel, WorkSpaceTitle='Density of States',
-                                    ParentWorkspace=inws)
+            en = en*mev2cm
+            y = y/mev2cm
+            e = e/mev2cm
+            yunit = 'DeltaE_inWavenumber'
         else:
-            dos2d = CreateWorkspace(qq, y, e, Nspec=len(en), VerticalAxisUnit='DeltaE', VerticalAxisValues=en,
-                                    UnitX='MomentumTransfer', YUnitLabel=ylabel, WorkSpaceTitle='Density of States',
-                                    ParentWorkspace=inws)
+            yunit = 'DeltaE'
+
+        # Outputs the calculated density of states to another workspace
+        dos2d = CreateWorkspace(qq, y, e, Nspec=len(en), VerticalAxisUnit=yunit, VerticalAxisValues=en,
+                                UnitX='MomentumTransfer', YUnitLabel=ylabel, WorkSpaceTitle='Density of States',
+                                ParentWorkspace=inws)
 
         # Make a 1D (energy dependent) cut
         dos1d = Rebin2D(dos2d, [dq[0], dq[1]-dq[0], dq[1]], dosebin, True, True)
