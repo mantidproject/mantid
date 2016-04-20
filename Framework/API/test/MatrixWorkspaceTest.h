@@ -1320,9 +1320,8 @@ public:
     ws.setDx(workspaceIndexWithDx[2], dxSpec2);
 
     // Assert
-    auto compareValue = [&values](double data, size_t index) {
-      return data == values[index];
-    };
+    auto compareValue =
+        [&values](double data, size_t index) { return data == values[index]; };
     for (auto &index : workspaceIndexWithDx) {
       TSM_ASSERT("Should have x resolution values", ws.hasDx(index));
       TSM_ASSERT_EQUALS("Should have a length of 3", ws.dataDx(index).size(),
