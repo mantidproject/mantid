@@ -13,13 +13,13 @@ struct NXcanSASTestParameters {
     void initParameters()
     {
         filename = "SaveNXcanSASTestFile.h5";
-        size = 100;
+        size = 10;
         value = 10.23;
         error = 3.45;
         xerror = 2.3759 / 3.6;
         hasDx = true;
         xmin = 1.0;
-        xmax = 100.0;
+        xmax = 10.0;
         runNumber = "1234";
         userFile = "my_user_file";
         workspaceTitle = "sample_worksapce";
@@ -27,7 +27,7 @@ struct NXcanSASTestParameters {
         radiationSource = "Spallation Neutron Source";
         invalidDetectors = false;
         ymin = 1.0;
-        ymax = 120.0;
+        ymax = 12.0;
         is2dData = false;
     }
 
@@ -56,11 +56,11 @@ struct NXcanSASTestTransmissionParameters {
     NXcanSASTestTransmissionParameters() { initParameters(); }
     void initParameters()
     {
-        size = 100;
+        size = 10;
         value = 12.34;
         error = 3.2345;
         xmin = 1.0;
-        xmax = 100.0;
+        xmax = 10.0;
         usesTransmission = false;
     }
 

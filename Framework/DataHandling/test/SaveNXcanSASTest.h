@@ -555,8 +555,7 @@ private:
     }
   }
 
-  void do_assert_2D_data(H5::Group &data, int size, double value, double error,
-                         double xmin, double xmax, double ymin, double ymax) {
+  void do_assert_2D_data(H5::Group &data) {
     auto numAttributes = data.getNumAttrs();
     TSM_ASSERT_EQUALS(
         "Should have 5 attributes, since Q_uncertainty is not present", 5,
@@ -681,9 +680,7 @@ private:
     // Check data
     auto data = entry.openGroup(sasDataGroupName);
     if (parameters.is2dData) {
-      do_assert_2D_data(data, parameters.size, parameters.value,
-                        parameters.error, parameters.xmin, parameters.xmax,
-                        parameters.ymin, parameters.ymax);
+      do_assert_2D_data(data);
     } else {
       do_assert_data(data, parameters.size, parameters.value, parameters.error,
                      parameters.xmin, parameters.xmax, parameters.xerror,
