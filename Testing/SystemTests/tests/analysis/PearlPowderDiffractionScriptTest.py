@@ -132,6 +132,12 @@ class LoadTests(unittest.TestCase):
             van_file = mtd["van" + str(i)]
             self.assertAlmostEquals(van_file.readX(0)[i], rfile.readX(0)[i], places=DIFF_PLACES)
 
+        focus_file = mtd["focus"]
+        self.assertTrue(isinstance(focus_file, MatrixWorkspace))
+        self.assertEquals(14, focus_file.getNumberHistograms())
+        self.assertEquals(4310, focus_file.blocksize())
+        self.assertIn("glucose+Pb 6 tns in ZTA anvils", rfile.getTitle())
+
     def test_mod_files(self):
         mod_group_table = mtd["PRL92476_92479"]
         self.assertTrue("PRL92476_92479_mods1-9_1" in mod_group_table[0].getName())
@@ -140,6 +146,14 @@ class LoadTests(unittest.TestCase):
         for i in range(rand_range, 10, 2):
             self.assertTrue("PRL92476_92479_mod" + str(i) in mod_group_table[i].getName())
             self.assertEquals(4310, mod_group_table[i].blocksize())
-            ind_mod_file = "PRL92476_92479_mod" + str(i)
+            ind_mod_file = mtd["PRL92476_92479_mod" + str(i)]
             rand_test = random.randint(1, 4300)
-            self.assertAlmostEqual(ind_mod_file[i].readY(rand_test), ind_mod_file.readY(rand_test))
+            self.assertAlmostEqual(mod_group_table[i].readY(0)[rand_test],
+                                   ind_mod_file.readY(0)[rand_test], places=DIFF_PLACES)
+
+        no_atten = mtd["PRL92476_92479_noatten"]
+        self.assertAlmostEqual(1.06842521, no_atten.readY(0)[17], places=DIFF_PLACES)
+        self.assertAlmostEqual(1.52553392, no_atten.readX(0)[2663], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.01567764, no_atten.readE(0)[577], places=DIFF_PLACES)
+        self.assertAlmostEqual(3.61208767, no_atten.readX(0)[4100], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.94553930, no_atten.readY(0)[356], places=DIFF_PLACES)
