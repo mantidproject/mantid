@@ -305,7 +305,7 @@ public:
     tw.getColumn(1)->cell<std::string>(0) = "b";
     tw.getColumn(2)->cell<std::string>(0) = "c";
 
-    boost::scoped_ptr<TableWorkspace> cloned(tw.clone().release());
+    std::unique_ptr<TableWorkspace> cloned(tw.clone());
 
     // Check clone is same as original.
     TS_ASSERT_EQUALS(tw.columnCount(), cloned->columnCount());

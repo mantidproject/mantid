@@ -75,6 +75,9 @@ void SetSampleMaterial::init() {
                   "Optional:  This total scattering cross-section (coherent + "
                   "incoherent) for the sample material in barns will be used "
                   "instead of tabulated");
+  declareProperty("SampleMassDensity", EMPTY_DBL(), mustBePositive,
+                  "Optional: Measured mass density in g/cubic cm of the sample "
+                  "to be used to calculate the number density.");
 
   // Perform Group Associations.
   std::string formulaGrp("By Formula or Atomic Number");
@@ -86,6 +89,7 @@ void SetSampleMaterial::init() {
   setPropertyGroup("SampleNumberDensity", densityGrp);
   setPropertyGroup("ZParameter", densityGrp);
   setPropertyGroup("UnitCellVolume", densityGrp);
+  setPropertyGroup("SampleMassDensity", densityGrp);
 
   std::string specificValuesGrp("Override Cross Section Values");
   setPropertyGroup("CoherentXSection", specificValuesGrp);
@@ -104,6 +108,9 @@ void SetSampleMaterial::init() {
                       make_unique<Kernel::EnabledWhenProperty>(
                           "SampleNumberDensity", Kernel::IS_DEFAULT));
   setPropertySettings("ZParameter",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "SampleNumberDensity", Kernel::IS_DEFAULT));
+  setPropertySettings("SampleMassDensity",
                       make_unique<Kernel::EnabledWhenProperty>(
                           "SampleNumberDensity", Kernel::IS_DEFAULT));
 
@@ -203,6 +210,7 @@ void SetSampleMaterial::exec() {
   // determine the sample number density
   double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
   double zParameter = getProperty("ZParameter");   // number of atoms
+  double rho_m = getProperty("SampleMassDensity"); // in g/cc
 
   // get the scattering information - this will override table values
   double coh_xs = getProperty("CoherentXSection");         // in barns
@@ -236,7 +244,8 @@ void SetSampleMaterial::exec() {
 
     NeutronAtom neutron(0, 0., 0., 0., 0., 0.,
                         0.); // starting thing for neutronic information
-    if (CF.atoms.size() == 1 && isEmpty(zParameter) && isEmpty(rho)) {
+    if (CF.atoms.size() == 1 && isEmpty(zParameter) && isEmpty(rho) &&
+        isEmpty(rho_m)) {
       mat.reset(new Material(chemicalSymbol, CF.atoms[0]->neutron,
                              CF.atoms[0]->number_density));
       // can be directly calculated from the one atom
@@ -247,6 +256,7 @@ void SetSampleMaterial::exec() {
       b_avg = sqrt(b_sq_avg);
     } else {
       double numAtoms = 0.; // number of atoms in formula
+      double rmm = 0.;
       for (size_t i = 0; i < CF.atoms.size(); i++) {
         neutron = neutron + CF.numberAtoms[i] * CF.atoms[i]->neutron;
 
@@ -260,6 +270,7 @@ void SetSampleMaterial::exec() {
         g_log.information() << CF.atoms[i] << ": " << CF.atoms[i]->neutron
                             << "\n";
         numAtoms += static_cast<double>(CF.numberAtoms[i]);
+        rmm += CF.atoms[i]->mass * CF.numberAtoms[i];
       }
       // normalize the accumulated number by the number of atoms
       neutron = (1. / numAtoms) *
@@ -277,6 +288,10 @@ void SetSampleMaterial::exec() {
         // ...but only calculate it if you have both numbers
         if ((!isEmpty(zParameter)) && (!isEmpty(unitCellVolume)))
           rho = numAtoms * zParameter / unitCellVolume;
+        // or from the relative molecular mass if the mass density is specified
+        else if (!isEmpty(rho_m)) {
+          rho = (rho_m / rmm) * N_A / 1e24; // measured density in g/cm^3
+        }
       }
 
       b_avg = b_avg / numAtoms;
@@ -308,8 +323,14 @@ void SetSampleMaterial::exec() {
       // ...but only calculate it if you have both numbers
       if ((!isEmpty(zParameter)) && (!isEmpty(unitCellVolume)))
         rho = zParameter / unitCellVolume;
+      // or from the relative molecular mass if the mass density is specified
+      else if (!isEmpty(rho_m)) {
+        rho = (rho_m / atom.mass) * N_A / 1e24; // measured density in g/cm^3
+      }
     }
-    mat.reset(new Material(chemicalSymbol, neutron, rho));
+    std::stringstream symbolname;
+    symbolname << "(" << atom.symbol << a_number << ")";
+    mat.reset(new Material(symbolname.str(), neutron, rho));
   }
 
   double normalizedLaue = (b_sq_avg - b_avg * b_avg) / (b_avg * b_avg);

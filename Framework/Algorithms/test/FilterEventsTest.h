@@ -14,6 +14,7 @@
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/TimeSplitter.h"
 
 #include <random>
@@ -129,6 +130,7 @@ public:
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getEventList(0).getNumberEvents(), 4);
+    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 10);
 
     // Check Workspace group 1
     DataObjects::EventWorkspace_sptr filteredws1 =
@@ -136,6 +138,7 @@ public:
             AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getEventList(1).getNumberEvents(), 16);
+    TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 11);
 
     // Check Workspace group 2
     DataObjects::EventWorkspace_sptr filteredws2 =
@@ -143,6 +146,7 @@ public:
             AnalysisDataService::Instance().retrieve("FilteredWS01_2"));
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getEventList(1).getNumberEvents(), 21);
+    TS_ASSERT_EQUALS(filteredws2->run().getProtonCharge(), 21);
 
     DataObjects::EventList elist3 = filteredws2->getEventList(3);
     elist3.sortPulseTimeTOF();
@@ -316,6 +320,7 @@ public:
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getEventList(0).getNumberEvents(), 15);
     TS_ASSERT_EQUALS(filteredws0->getEventList(9).getNumberEvents(), 15);
+    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 5);
 
     // 4.2 Workspace group 1
     DataObjects::EventWorkspace_sptr filteredws1 =
@@ -323,6 +328,7 @@ public:
             AnalysisDataService::Instance().retrieve("SplittedDataX_1"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getEventList(1).getNumberEvents(), 10);
+    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 5);
 
     // 4.3 Some individual events
     DataObjects::EventList elist3 = filteredws1->getEventList(3);
@@ -645,12 +651,17 @@ public:
     eventWS->mutableRun().addProperty("run_start", runstart.toISO8601String(),
                                       true);
 
+    // create a pcharge log
+    auto pchargeLog = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+        "proton_charge");
+
     for (size_t i = 0; i < eventWS->getNumberHistograms(); i++) {
       DataObjects::EventList *elist = eventWS->getEventListPtr(i);
 
       for (int64_t pid = 0; pid < static_cast<int64_t>(numpulses); pid++) {
         int64_t pulsetime_i64 = pid * pulsedt + runstart.totalNanoseconds();
         Kernel::DateAndTime pulsetime(pulsetime_i64);
+        pchargeLog->addValue(pulsetime, 1.);
         for (size_t e = 0; e < 10; e++) {
           double tof = static_cast<double>(e * tofdt / 1000);
           DataObjects::TofEvent event(tof, pulsetime);
@@ -658,6 +669,9 @@ public:
         }
       } // FOR each pulse
     }   // For each bank
+
+    eventWS->mutableRun().addLogData(pchargeLog.release());
+    eventWS->mutableRun().integrateProtonCharge();
 
     return eventWS;
   }

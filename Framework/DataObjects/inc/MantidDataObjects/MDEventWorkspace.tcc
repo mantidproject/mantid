@@ -932,6 +932,8 @@ TMDE(void MDEventWorkspace)::setMDMasking(
     // Apply new masks
     this->data->getBoxes(toMaskBoxes, 10000, true, maskingRegion);
     for (const auto box : toMaskBoxes) {
+      box->clear();
+      box->clearFileBacked(false);
       box->mask();
     }
 

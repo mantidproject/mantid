@@ -187,6 +187,11 @@ void BinaryOperationMD::exec() {
           "WorkspaceSingleValue, got " +
           m_rhs->id());
 
+    // Clear any masking flags from the output workspace
+    if (m_out) {
+      m_out->clearMDMasking();
+    }
+
     // When operating on MDHistoWorkspaces, add a simple flag
     // that will be checked in BinMD to avoid binning a modified workspace
     if (m_out_histo->getNumExperimentInfo() == 0) // Create a run if needed
