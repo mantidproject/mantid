@@ -146,7 +146,7 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         corrections_ts_peak = 0.161125285346
         corrections_ms_peak = 0.000170937010003
         if _is_old_boost_version():
-            corrections_ms_peak = 0.000230503344114
+            corrections_ms_peak = 0.000233662993153
         _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak)
@@ -204,7 +204,7 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
         corrections_ts_peak = 0.159340707436
         corrections_ms_peak = 0.000226355717662
         if _is_old_boost_version():
-            corrections_ms_peak = 0.000197140262829
+            corrections_ms_peak = 0.000219113428752
 
         _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak)
