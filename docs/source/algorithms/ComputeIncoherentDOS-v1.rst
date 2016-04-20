@@ -53,12 +53,18 @@ Usage
 
 .. testcode:: ExIsis
 
-    # The MARIReduction_Sample file can be found in the User scripts repository
-    # under direct_inelastic/mari
-    import MARIReduction_Sample
-    # Data is from a measurement of Aluminium pellets on Mari during a neutron training course
-    MARIReduction_Sample.iliad_mari(20228,60,19717,20383,25,27)
-    MAR20228_DOS = ComputeIncoherentDOS('MAR20228_SQW',T=300,MeanSquareDisplacement=0.01)
+    # This is using a generic reduction routine so that automated tests can run
+    # You should use the reductions scripts provided by instrument scientists
+    from Direct import DirectEnergyConversion
+    from mantid.simpleapi import *
+    rd = DirectEnergyConversion.DirectEnergyConversion('MARI')
+    # Run #21334 on MARI is a measurement of a large Aluminium sample from the neutron
+    # training course.
+    ws = rd.convert_to_energy(21334, 21335, 60, [-55,0.05,55], 'mari_res2013.map', 
+        monovan_run=21347, sample_mass=106.4, sample_rmm=27, monovan_mapfile='mari_res2013.map')
+    ws_sqw = SofQW3(ws, [0,0.1,12], 'Direct', 60)
+    SetSampleMaterial(ws_sqw,'Al')
+    ws_dos = ComputeIncoherentDOS(ws_sqw, Temperature=5, StatesPerEnergy=True)
 
 Output
 

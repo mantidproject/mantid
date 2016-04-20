@@ -53,7 +53,7 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         self.declareProperty(name='MeanSquareDisplacement', defaultValue=0., validator=FloatBoundedValidator(lower=0),
                              doc='Average mean square displacement in Angstrom^2.')
         self.declareProperty(name='QSumRange', defaultValue='0,Qmax',
-                             doc='Range in |Q| (in Angstroms^-1) to sum data over.')
+                             doc='Range in Q (in Angstroms^-1) to sum data over.')
         self.declareProperty(name='EnergyBinning', defaultValue='0,Emax/50,Emax*0.9',
                              doc='Energy binning parameters [Emin, Estep, Emax] in meV.')
         self.declareProperty(name='Wavenumbers', defaultValue=False,
