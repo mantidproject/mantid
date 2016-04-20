@@ -85,7 +85,6 @@ void MuonFitDataSelector::setAvailableGroups(const QStringList &groups) {
   clearGroupCheckboxes();
   for (const auto group : groups) {
     addGroupCheckbox(group);
-    setGroupSelected(group, true);
   }
 }
 
@@ -228,11 +227,13 @@ void MuonFitDataSelector::setPeriodVisibility(bool visible) {
 
 /**
  * Add a new checkbox to the list of groups with given name
+ * The new checkbox is checked by default
  * @param name :: [input] Name of group to add
  */
 void MuonFitDataSelector::addGroupCheckbox(const QString &name) {
   auto checkBox = new QCheckBox(name);
   m_groupBoxes.insert(name, checkBox);
+  checkBox->setChecked(true);
   m_ui.verticalLayoutGroups->add(checkBox);
   connect(checkBox, SIGNAL(stateChanged(int)), this,
           SIGNAL(selectedGroupsChanged()));
@@ -249,21 +250,6 @@ void MuonFitDataSelector::clearGroupCheckboxes() {
     iter.data()->deleteLater(); // will disconnect signal automatically
   }
   m_groupBoxes.clear();
-}
-
-/**
- * Set selection state of given group
- * @param name :: [input] Name of group to select/deselect
- * @param selected :: [input] True to select, false to deselect
- */
-void MuonFitDataSelector::setGroupSelected(const QString &name, bool selected) {
-  if (m_groupBoxes.contains(name)) {
-    m_groupBoxes.value(name)->setChecked(selected);
-    emit selectedGroupsChanged();
-  } else {
-    g_log.warning() << "No group called " << name.toStdString()
-                    << ": cannot set selection state";
-  }
 }
 
 /**

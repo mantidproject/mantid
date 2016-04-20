@@ -103,8 +103,6 @@ private:
   void addGroupCheckbox(const QString &name);
   /// Clear all checkboxes from Groups section
   void clearGroupCheckboxes();
-  /// Set selection status of a checkbox
-  void setGroupSelected(const QString &name, bool selected);
   /// Set visibility of "Periods" section
   void setPeriodVisibility(bool visible);
   /// Set default values in some input controls
