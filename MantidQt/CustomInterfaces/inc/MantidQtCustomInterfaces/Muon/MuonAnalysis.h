@@ -250,6 +250,8 @@ private slots:
 
   /// Called when selected workspace to fit changes
   void dataWorkspaceChanged();
+  /// Called when selected ws index, start, end changes
+  void dataPropsChanged();
   /// Called when selected groups to fit change
   void dataGroupsChanged();
   /// Called when selected periods to fit change

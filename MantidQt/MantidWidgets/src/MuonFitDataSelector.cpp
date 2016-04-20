@@ -49,11 +49,11 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber,
 void MuonFitDataSelector::setUpConnections() {
   connect(m_ui.runs, SIGNAL(filesFound()), this, SLOT(userChangedRuns()));
   connect(m_ui.txtWSIndex, SIGNAL(editingFinished()), this,
-          SIGNAL(workspacePropertiesChanged()));
+          SIGNAL(dataPropertiesChanged()));
   connect(m_ui.txtStart, SIGNAL(editingFinished()), this,
-          SIGNAL(workspacePropertiesChanged()));
+          SIGNAL(dataPropertiesChanged()));
   connect(m_ui.txtEnd, SIGNAL(editingFinished()), this,
-          SIGNAL(workspacePropertiesChanged()));
+          SIGNAL(dataPropertiesChanged()));
   connect(m_ui.chkCombine, SIGNAL(stateChanged(int)), this,
           SIGNAL(selectedPeriodsChanged()));
 }
@@ -73,7 +73,7 @@ void MuonFitDataSelector::userChangedRuns() {
     m_ui.rbCoAdd->setEnabled(true);
     m_ui.rbSimultaneous->setEnabled(true);
   }
-  emit workspacePropertiesChanged();
+  emit workspaceChanged();
 }
 
 /**
@@ -106,7 +106,7 @@ unsigned int MuonFitDataSelector::getWorkspaceIndex() const {
  */
 void MuonFitDataSelector::setWorkspaceIndex(unsigned int index) {
   m_ui.txtWSIndex->setText(QString::number(index));
-  emit workspacePropertiesChanged();
+  emit dataPropertiesChanged();
 }
 
 /**
@@ -133,7 +133,7 @@ void MuonFitDataSelector::setStartTimeQuietly(double start) {
  */
 void MuonFitDataSelector::setStartTime(double start) {
   setStartTimeQuietly(start);
-  emit workspacePropertiesChanged();
+  emit dataPropertiesChanged();
 }
 
 /**
@@ -160,7 +160,7 @@ void MuonFitDataSelector::setEndTimeQuietly(double end) {
  */
 void MuonFitDataSelector::setEndTime(double end) {
   setEndTimeQuietly(end);
-  emit workspacePropertiesChanged();
+  emit dataPropertiesChanged();
 }
 
 /**

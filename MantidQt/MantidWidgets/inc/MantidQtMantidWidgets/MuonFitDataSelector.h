@@ -89,12 +89,14 @@ public slots:
   void userChangedRuns();
 
 signals:
-  /// Edited the runs, ws index, start or end fields
-  void workspacePropertiesChanged();
+  /// Edited the ws index, start or end fields
+  void dataPropertiesChanged();
   /// Changed the groups selection
   void selectedGroupsChanged();
   /// Changed the periods selection
   void selectedPeriodsChanged();
+  /// Changed the workspace
+  void workspaceChanged();
 
 private:
   /// Add a checkbox to Groups section

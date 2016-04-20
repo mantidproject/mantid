@@ -41,8 +41,8 @@ public:
   MuonAnalysisFitDataHelper(
       MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
       MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector);
-  /// Handles "workspace properties changed"
-  void handleWorkspacePropertiesChanged();
+  /// Handles "data properties changed"
+  void handleDataPropertiesChanged();
   /// Handles "selected groups changed"
   void handleSelectedGroupsChanged();
   /// Handles "selected periods changed"
@@ -51,6 +51,8 @@ public:
   void handleXRangeChangedGraphically(double start, double end);
   /// Handles peak picker being reassigned to a new graph
   void peakPickerReassigned(const QString &wsName);
+  /// Handles workspace being changed
+  void handleDataWorkspaceChanged();
 
 private:
   /// Fit browser to update (non-owning pointer)

@@ -16,17 +16,10 @@ MuonAnalysisFitDataHelper::MuonAnalysisFitDataHelper(
     : m_fitBrowser(fitBrowser), m_dataSelector(dataSelector) {}
 
 /**
- * Called when data selector reports "workspace properties changed"
- * Updates WS name, WS index, startX, endX
+ * Called when data selector reports "data properties changed"
+ * Updates WS index, startX, endX
  */
-void MuonAnalysisFitDataHelper::handleWorkspacePropertiesChanged() {
-  const auto runs = m_dataSelector->getRuns();
-  // Get workspace from these runs (TODO)
-  throw std::runtime_error("TODO: create workspace and set in fit browser");
-  // m_fitBrowser->setWorkspaceName()
-  // NB we don't want fit browser to signal from this as then it comes back
-  // here!
-
+void MuonAnalysisFitDataHelper::handleDataPropertiesChanged() {
   // update workspace index
   const unsigned int wsIndex = m_dataSelector->getWorkspaceIndex();
   m_fitBrowser->setWorkspaceIndex(static_cast<int>(wsIndex));
@@ -88,6 +81,21 @@ void MuonAnalysisFitDataHelper::peakPickerReassigned(const QString &wsName) {
     m_fitBrowser->allowSequentialFits(
         true); // will still be forbidden if no function
   }
+}
+
+/**
+ * Called when runs are changed in data selector
+ * Creates workspace and sets it in the fit browser
+ * The signal from that will set peak picker and UI properties
+ */
+void MuonAnalysisFitDataHelper::handleDataWorkspaceChanged() {
+  // TODO: implement this
+  throw std::runtime_error("TODO: create workspace and set in fit browser");
+  const QString wsName("THIS_DOESNT_EXIST_YET");
+  // create the workspace here and add to ADS
+  // is it single, co-added or simultaneous?
+  const auto fitType = m_dataSelector->getFitType();
+  m_fitBrowser->setWorkspaceName(wsName);
 }
 
 } // namespace CustomInterfaces
