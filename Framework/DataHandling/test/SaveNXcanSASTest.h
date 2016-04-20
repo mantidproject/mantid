@@ -215,15 +215,10 @@ public:
     do_assert(parameters);
 
     // Clean up
-    // removeFile(parameters.filename);
+    removeFile(parameters.filename);
   }
 
 private:
-  void removeFile(std::string filename) {
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
-  }
-
   void save_file_no_issues(
       Mantid::API::MatrixWorkspace_sptr workspace,
       NXcanSASTestParameters &parameters,
@@ -596,7 +591,7 @@ private:
         Mantid::DataHandling::H5Util::readAttributeAsString(data, sasSignal);
     TSM_ASSERT_EQUALS("Should be just I", signalAttribute, sasDataI);
 
-    // TODO: ADD MORE TESTING ONCE THE READER IS AVAILABLE
+    // Note: Acutal Values are being testin in LoadNXcanSAS to avoid redundant testing
   }
 
   void do_assert_transmission(H5::Group &entry,

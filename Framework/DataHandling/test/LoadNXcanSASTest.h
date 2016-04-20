@@ -4,38 +4,267 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadNXcanSAS.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/Run.h"
+#include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "NXcanSASTestHelper.h"
+#include "MantidKernel/Unit.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 using Mantid::DataHandling::LoadNXcanSAS;
+using namespace NXcanSASTestHelper;
+using namespace Mantid::API;
+using namespace Mantid::DataHandling::NXcanSAS;
+namespace
+{
+const double eps = 1e-6;
+}
 
-class LoadNXcanSASTest : public CxxTest::TestSuite {
+class LoadNXcanSASTest : public CxxTest::TestSuite
+{
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static LoadNXcanSASTest *createSuite() { return new LoadNXcanSASTest(); }
-  static void destroySuite(LoadNXcanSASTest *suite) { delete suite; }
+    // This pair of boilerplate methods prevent the suite being created
+    // statically
+    // This means the constructor isn't called when running other tests
+    static LoadNXcanSASTest *createSuite() { return new LoadNXcanSASTest(); }
+    static void destroySuite(LoadNXcanSASTest *suite) { delete suite; }
 
-  void test_that_1D_workspace_with_Q_resolution_can_be_loaded() {
-    // Arrange
+    void test_that_1D_workspace_with_Q_resolution_can_be_loaded()
+    {
+        // Arrange
 
-  }
+        // Act
 
-  void test_that_1D_workspace_without_Q_resolution_can_be_loaded() {
+        // Assert
+    }
 
-  }
+    void test_that_1D_workspace_without_Q_resolution_can_be_loaded()
+    {
+        // Arrange
+        NXcanSASTestParameters parameters;
+        removeFile(parameters.filename);
+        parameters.detectors.push_back("front-detector");
+        parameters.detectors.push_back("rear-detector");
+        parameters.invalidDetectors = false;
+        parameters.hasDx = false;
 
-  void test_that_1D_workspace_with_transmissions_can_be_loaded() {
+        auto ws = provide1DWorkspace(parameters);
+        setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin,
+                                             parameters.xmax);
+        parameters.idf = getIDFfromWorkspace(ws);
+        save_file_no_issues(ws, parameters);
 
-  }
+        const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
 
-  void test_that_invalid_file_is_rejected() {
+        // Act
+        auto wsOut = load_file_no_issues(
+            parameters, false /*load transmission*/, outWsName);
 
-  }
+        // Assert
+        do_assert_load(ws, wsOut, parameters);
 
-  void test_that_2D_workspace_can_be_loaded() {
+        // Clean up
+        removeFile(parameters.filename);
+    }
 
-  }
+    void test_that_1D_workspace_with_transmissions_can_be_loaded() {}
 
+    void test_that_invalid_file_is_rejected() {}
+
+    void test_that_2D_workspace_can_be_loaded() {}
+
+private:
+    MatrixWorkspace_sptr load_file_no_issues(NXcanSASTestParameters &parameters,
+                                             bool loadTransmission,
+                                             const std::string &outWsName)
+    {
+        LoadNXcanSAS alg;
+        TS_ASSERT_THROWS_NOTHING(alg.initialize())
+        TS_ASSERT(alg.isInitialized())
+        TS_ASSERT_THROWS_NOTHING(
+            alg.setPropertyValue("Filename", parameters.filename));
+        TS_ASSERT_THROWS_NOTHING(
+            alg.setProperty("LoadTransmission", loadTransmission));
+        TS_ASSERT_THROWS_NOTHING(
+            alg.setPropertyValue("OutputWorkspace", outWsName));
+        TS_ASSERT_THROWS_NOTHING(alg.execute(););
+        TS_ASSERT(alg.isExecuted());
+
+        // Retrieve the workspace from data service.
+        Mantid::API::MatrixWorkspace_sptr ws;
+        TS_ASSERT_THROWS_NOTHING(
+            ws = Mantid::API::AnalysisDataService::Instance()
+                     .retrieveWS<Mantid::API::MatrixWorkspace>(outWsName));
+        TS_ASSERT(ws);
+        return ws;
+    }
+
+    void save_file_no_issues(MatrixWorkspace_sptr workspace,
+                             NXcanSASTestParameters &parameters,
+                             MatrixWorkspace_sptr transmission = nullptr,
+                             MatrixWorkspace_sptr transmissionCan = nullptr)
+    {
+        auto saveAlg
+            = AlgorithmManager::Instance().createUnmanaged("SaveNXcanSAS");
+        saveAlg->initialize();
+        saveAlg->setProperty("Filename", parameters.filename);
+        saveAlg->setProperty("InputWorkspace", workspace);
+        saveAlg->setProperty("RadiationSource", parameters.radiationSource);
+        if (!parameters.detectors.empty()) {
+            std::string detectorsAsString
+                = concatenateStringVector(parameters.detectors);
+            saveAlg->setProperty("DetectorNames", detectorsAsString);
+        }
+
+        if (transmission) {
+            saveAlg->setProperty("Transmission", transmission);
+        }
+        if (transmissionCan) {
+            saveAlg->setProperty("TransmissionCan", transmissionCan);
+        }
+
+        TSM_ASSERT_THROWS_NOTHING("Should not throw anything",
+                                  saveAlg->execute());
+        TSM_ASSERT("Should have executed", saveAlg->isExecuted());
+    }
+
+    template <typename Functor>
+    void do_assert_data(MatrixWorkspace_sptr wsIn, MatrixWorkspace_sptr wsOut,
+                        Functor func)
+    {
+        TSM_ASSERT("Should have the same number of histograms",
+                   wsIn->getNumberHistograms() == wsOut->getNumberHistograms());
+        auto numberOfHistograms = wsIn->getNumberHistograms();
+
+        for (size_t index = 0; index < numberOfHistograms; ++index) {
+            const auto &dataIn = func(wsIn, index);
+            const auto &dataOut = func(wsOut, index);
+            TSM_ASSERT("Should have the same number of bins",
+                       dataIn.size() == dataOut.size());
+            auto size = dataIn.size();
+            for (size_t binIndex = 0; binIndex < size; ++binIndex) {
+                TSM_ASSERT_DELTA("Should be have the same values",
+                                 dataIn[binIndex], dataOut[binIndex], eps);
+            }
+        }
+    }
+
+    void do_assert_units(MatrixWorkspace_sptr wsIn, MatrixWorkspace_sptr wsOut)
+    {
+        // Ensure that units of axis 0 are matching
+        auto unit0In = wsIn->getAxis(0)->unit()->label().ascii();
+        auto unit0Out = wsOut->getAxis(0)->unit()->label().ascii();
+        TSM_ASSERT_EQUALS("Should have the same axis 0 unit", unit0In,
+                          unit0Out);
+
+        if (!wsOut->getAxis(1)->isSpectra()) {
+            // Ensure that units of axis 1 are matching
+            auto unit1In = wsIn->getAxis(1)->unit()->label().ascii();
+            auto unit1Out = wsOut->getAxis(1)->unit()->label().ascii();
+            TSM_ASSERT_EQUALS("Should have the same axis 1 unit", unit1In,
+                              unit1Out);
+        }
+
+        // Ensure tat units of DataY are the same
+        auto unitYIn = wsIn->YUnit();
+        auto unitYOut = wsOut->YUnit();
+        TSM_ASSERT_EQUALS("Should have the same y unit", unitYIn, unitYOut);
+    }
+
+    void do_assert_axis1_values_are_the_same(MatrixWorkspace_sptr wsIn,
+                                             MatrixWorkspace_sptr wsOut)
+    {
+        if (!wsOut->getAxis(1)->isNumeric()) {
+            return;
+        }
+
+        auto axis1In = wsIn->getAxis(1);
+        auto axis1Out = wsOut->getAxis(1);
+
+        TSM_ASSERT_EQUALS("Axis 1 should have the same length",
+                          axis1In->length(), axis1Out->length());
+        auto length = axis1In->length();
+        for (size_t index = 0; index < length; ++index) {
+            TSM_ASSERT_DELTA("Axis 1 should have the same value",
+                             axis1In->getValue(index),
+                             axis1Out->getValue(index), eps);
+        }
+    }
+
+    void do_assert_sample_logs(MatrixWorkspace_sptr wsIn,
+                               MatrixWorkspace_sptr wsOut)
+    {
+        auto &runIn = wsIn->mutableRun();
+        auto &runOut = wsOut->mutableRun();
+
+        // Check for User file
+        if (runIn.hasProperty(sasProcessUserFileInLogs)) {
+            auto userFileIn = runIn.getProperty(sasProcessUserFileInLogs);
+            auto userFileOut = runOut.getProperty(sasProcessUserFileInLogs);
+            TSM_ASSERT_EQUALS("Should have loaded the name of the user file.",
+                              userFileIn->value(), userFileOut->value());
+        }
+
+        // Check for the run number
+        if (runIn.hasProperty(sasEntryRunInLogs)) {
+            auto runNumberIn = runIn.getProperty(sasEntryRunInLogs);
+            auto runNumberOut = runOut.getProperty(sasEntryRunInLogs);
+            TSM_ASSERT_EQUALS("Should have loaded the run number.",
+                              runNumberIn->value(), runNumberOut->value());
+        }
+    }
+
+    void do_assert_instrument(MatrixWorkspace_sptr wsIn, MatrixWorkspace_sptr wsOut) {
+      auto idfIn = getIDFfromWorkspace(wsIn);
+      auto idfOut = getIDFfromWorkspace(wsOut);
+      TSM_ASSERT_EQUALS("Should have the same instrument", idfIn, idfOut);
+    }
+
+    void do_assert_load(MatrixWorkspace_sptr wsIn, MatrixWorkspace_sptr wsOut,
+                        NXcanSASTestParameters &parameters)
+    {
+        // Ensure that both have the same units
+        do_assert_units(wsIn, wsOut);
+
+        // Ensure that output workspace is not histogram
+        TSM_ASSERT("Should be a point workspace", !wsOut->isHistogramData());
+
+        // Ensure that both have the same Y data
+        auto readDataY = [](MatrixWorkspace_sptr ws, size_t index) {
+            return ws->dataY(index);
+        };
+        do_assert_data(wsIn, wsOut, readDataY);
+
+        // Ensure that both have the same E data
+        auto readDataE = [](MatrixWorkspace_sptr ws, size_t index) {
+            return ws->dataE(index);
+        };
+        do_assert_data(wsIn, wsOut, readDataE);
+
+        // Ensure that both have the same X data
+        auto readDataX = [](MatrixWorkspace_sptr ws, size_t index) {
+            return ws->dataX(index);
+        };
+        do_assert_data(wsIn, wsOut, readDataX);
+
+        // If applicable, ensure that both have the same Xdev data
+        if (parameters.hasDx) {
+            auto readDataDX = [](MatrixWorkspace_sptr ws, size_t index) {
+                return ws->dataDx(index);
+            };
+            do_assert_data(wsIn, wsOut, readDataDX);
+        }
+
+        // If applicable, ensure that axis1 are the same
+        do_assert_axis1_values_are_the_same(wsIn, wsOut);
+
+        // Ensure that both have the same basic logs
+        do_assert_sample_logs(wsIn, wsOut);
+
+        // Ensure that both have the same IDF loaded
+        do_assert_instrument(wsIn, wsOut);
+    }
 };
 
 #endif /* MANTID_DATAHANDLING_LOADNXCANSASTEST_H_ */

@@ -562,7 +562,7 @@ void LoadNXcanSAS::exec() {
     loadTransmission(entry, sasTransmissionSpectrumNameSampleAttrValue);
 
     // Load can transmission
-    //loadTransmission(entry, sasTransmissionSpectrumNameCanAttrValue);
+    loadTransmission(entry, sasTransmissionSpectrumNameCanAttrValue);
   }
   file.close();
   setProperty("OutputWorkspace", ws);

@@ -7,6 +7,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include <Poco/File.h>
+
 namespace NXcanSASTestHelper
 {
 
@@ -183,5 +185,8 @@ void set2DValues(Mantid::API::MatrixWorkspace_sptr ws) {
   }
 }
 
-
+void removeFile(std::string filename) {
+  if (Poco::File(filename).exists())
+    Poco::File(filename).remove();
+}
 }
