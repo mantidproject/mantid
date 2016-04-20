@@ -1609,6 +1609,49 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
   }
+  void testPlotEmptyRow() {
+    NiceMock<MockTableView> mockTableView;
+    MockProgressableView mockProgress;
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
+    std::set<int> rowlist;
+    rowlist.insert(0);
+    EXPECT_CALL(mockTableView, getSelectedRows())
+        .Times(2)
+        .WillRepeatedly(Return(rowlist));
+    EXPECT_CALL(mockTableView, giveUserCritical(_, _));
+    // Append an empty row to our table
+    presenter.notify(IReflTablePresenter::AppendRowFlag);
+    // Attempt to plot the empty row (should result in critical warning)
+    presenter.notify(IReflTablePresenter::PlotRowFlag);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
+  }
+  void testPlotGroupWithEmptyRow() {
+    NiceMock<MockTableView> mockTableView;
+    MockProgressableView mockProgress;
+    ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
+
+    createPrefilledWorkspace("TestWorkspace");
+    createTOFWorkspace("TOF_12345", "12345");
+    EXPECT_CALL(mockTableView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    std::set<int> rowList;
+    rowList.insert(0);
+    rowList.insert(1);
+    EXPECT_CALL(mockTableView, getSelectedRows())
+        .Times(2)
+        .WillRepeatedly(Return(rowList));
+    EXPECT_CALL(mockTableView, giveUserCritical(_, _));
+    // Open up our table with one row
+    presenter.notify(IReflTablePresenter::OpenTableFlag);
+    // Append an empty row to the table
+    presenter.notify(IReflTablePresenter::AppendRowFlag);
+    // Attempt to plot the group (should result in critical warning)
+    presenter.notify(IReflTablePresenter::PlotGroupFlag);
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("TOF_12345");
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));
+  }
 
   void testPlotGroupWarn() {
     NiceMock<MockTableView> mockTableView;

@@ -142,7 +142,7 @@ def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
 
 # Work out the spectra IDs for block of detectors
 def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
-    '''Compile a list of spectrum IDs for rectangular block of size xdim by ydim'''
+    '''Compile a list of spectrum Nos for rectangular block of size xdim by ydim'''
     output = ''
     if orientation == Orientation.Horizontal:
         start_spec = base + ylow*det_dimension + xlow

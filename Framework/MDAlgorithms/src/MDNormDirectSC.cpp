@@ -257,7 +257,7 @@ MDHistoWorkspace_sptr MDNormDirectSC::binInputWS() {
  */
 void MDNormDirectSC::createNormalizationWS(const MDHistoWorkspace &dataWS) {
   // Copy the MDHisto workspace, and change signals and errors to 0.
-  m_normWS.reset(dataWS.clone().release());
+  m_normWS = dataWS.clone();
   m_normWS->setTo(0., 0., 0.);
 }
 

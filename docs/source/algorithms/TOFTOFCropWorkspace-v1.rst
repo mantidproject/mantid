@@ -22,7 +22,7 @@ Restrictions on the input workspace
 ###################################
 
 -  The unit of the X-axis must be **Time-of-flight**.
--  Workspace must contain *channel_width* and *full_channels* sample logs.
+-  Workspace must contain *channel_width*, *full_channels* and *TOF1* sample logs.
 
 
 Usage

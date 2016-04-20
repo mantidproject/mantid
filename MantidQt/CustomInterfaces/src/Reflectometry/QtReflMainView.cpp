@@ -114,10 +114,7 @@ void QtReflMainView::setRowCommands(std::vector<ReflCommand_uptr> rowCommands) {
 /**
 * Clears all the actions (commands)
 */
-void QtReflMainView::clearCommands() {
-
-	m_commands.clear();
-}
+void QtReflMainView::clearCommands() { m_commands.clear(); }
 
 /**
 * Set all possible tranfer methods
@@ -271,7 +268,7 @@ std::string QtReflMainView::askUserString(const std::string &prompt,
                                           const std::string &defaultValue) {
   bool ok;
   QString text = QInputDialog::getText(
-      QString::fromStdString(title), QString::fromStdString(prompt),
+      this, QString::fromStdString(title), QString::fromStdString(prompt),
       QLineEdit::Normal, QString::fromStdString(defaultValue), &ok);
   if (ok)
     return text.toStdString();

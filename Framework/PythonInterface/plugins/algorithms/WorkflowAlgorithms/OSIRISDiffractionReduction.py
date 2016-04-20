@@ -32,9 +32,9 @@ TIME_REGIME_TO_DRANGE = {
                          13.55e4: DRange( 8.3,  9.5),
                          15.32e4: DRange( 9.4, 10.6),
                          17.09e4: DRange(10.4, 11.6),
-                         18.86e4: DRange(11.0, 12.5)
+                         18.86e4: DRange(11.0, 12.5),
+                         20.63e4: DRange(12.2, 13.8)
 }
-
 
 class DRangeToWorkspaceMap(object):
     """

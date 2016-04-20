@@ -518,7 +518,7 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
       for (size_t d = 0; d < nd; d++) {
         vertIndex[d] = 0;
         // Use a bit mask to iterate through the 2^nd neighbor options
-        size_t mask = 1 << d;
+        size_t mask = size_t{1} << d;
         if (i & mask)
           vertIndex[d] = 1;
       }

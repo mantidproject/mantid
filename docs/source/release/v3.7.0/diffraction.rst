@@ -11,24 +11,40 @@ Crystal Improvements
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` has parameter errors reduced, option for simplex minimization,
   and 3 new workspaces which can plot calculated vs theoretical columns, rows, and TOF for each bank.
 - 5 detectors added to the MANDI instrument geometry
+- :ref:`LoadCIF <algm-LoadCIF>` can now also load structures where only anisotropic displacement parameters are given,
+  which are converted to equivalent isotropic parameters.
 
 Engineering Diffraction
 -----------------------
 
-- New algorithm added: EnggFitDIFCFromPeaks, which forks from the old EnggFitPeaks. EnggFitPeaks modified to
-  fit peaks but not calibration parameters.
+- New algorithm added: EnggFitDIFCFromPeaks, which forks from the old EnggFitPeaks.
+  EnggFitPeaks modified to fit peaks but not calibration parameters.
 
 Graphical user interface:
 
-- Vanadium Curves and Ceria Peaks graphs are plotted once basic and cropped calibration process has been carried out
-- Customise Bank Name text-field will set the workspace and .his file name according to this Bank Name
-  provided by the user for Cropped Calibration
-- The Fitting tab provides a graphical interface which fits an expected diffraction pattern and visualises them.
-  The pastern is specified by providing a list of dSpacing values where Bragg peaks are expected. The algorithm
-  :ref:`EnggFitPeaks<algm-EnggFitPeaks>` used in the background fit peaks in those areas using a peak fitting function.
+- Vanadium Curves and Ceria Peaks graphs are plotted once basic and cropped
+  calibration process has been carried out
+- Customise Bank Name text-field will set the workspace and .his file name
+  according to this Bank Name provided by the user for Cropped Calibration
+- The Fitting tab provides a graphical interface which fits an expected
+  diffraction pattern and visualises them.
+  The pastern is specified by providing a list of dSpacing values where Bragg
+  peaks are expected. The algorithm :ref:`EnggFitPeaks<algm-EnggFitPeaks>`
+  used in the background fit peaks in those areas using a peak fitting function.
+- Fitting tab will automatically select and import all the focused bank files
+  found within working directory and user can also select file now by providing
+  a run-number.
+
+- Improvements to the :ref:`Preview-Engineering_Diffraction-ref` section
+  for Fitting tab, the zoom-in or zoom-out feature on to the data plot
+  is enabled. As well as option to select peak, add peak or save peaks
+  from the data plot is now supported.
 
 Imaging
 -------
+
+- The new algorithm :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>`
+  aggregates stacks of images from wavelength dependent data.
 
 Improvements in the tomographic reconstruction graphical user interface:
 

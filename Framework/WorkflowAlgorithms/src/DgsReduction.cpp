@@ -93,10 +93,10 @@ void DgsReduction::init() {
   mustBePositiveInt->setLower(0);
   this->declareProperty(
       "Monitor1SpecId", EMPTY_INT(), mustBePositiveInt,
-      "Spectrum ID for the first monitor to use in Ei calculation.");
+      "Spectrum No for the first monitor to use in Ei calculation.");
   this->declareProperty(
       "Monitor2SpecId", EMPTY_INT(), mustBePositiveInt,
-      "Spectrum ID for the second monitor to use in Ei calculation.");
+      "Spectrum No for the second monitor to use in Ei calculation.");
   this->declareProperty(
       make_unique<ArrayProperty<double>>(
           "EnergyTransferRange",

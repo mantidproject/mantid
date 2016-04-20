@@ -147,7 +147,7 @@ void Rebin::exec() {
 
     if (PreserveEvents) {
       if (!inPlace) {
-        outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
+        outputWS = inputWS->clone();
       }
       auto eventOutputWS =
           boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
