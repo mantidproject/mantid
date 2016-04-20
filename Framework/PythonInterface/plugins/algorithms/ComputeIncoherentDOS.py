@@ -8,7 +8,7 @@ from scipy import constants
 def evaluateEbin(Emin, Emax, Ei, strn):
     return [eval(estr) for estr in strn.split(',')]
 
-def evaluateQRange(Qmin, Qmax, string):
+def evaluateQRange(Qmin, Qmax, strn):
     return [eval(qstr) for qstr in strn.split(',')]
 
 
