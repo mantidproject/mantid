@@ -55,7 +55,7 @@ public:
   }
 
   void testClone() {
-    Workspace2D_sptr cloned(ws->clone().release());
+    Workspace2D_sptr cloned(ws->clone());
 
     // Swap ws with cloned pointer, such that we can reuse existing tests.
     ws.swap(cloned);

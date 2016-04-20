@@ -421,7 +421,7 @@ void SaveAscii2::populateQMetaData() {
     const auto detector = m_ws->getDetector(workspaceIndex);
     double twoTheta(0.0), efixed(0.0);
     if (!detector->isMonitor()) {
-      twoTheta = m_ws->detectorTwoTheta(detector) / 2.0;
+      twoTheta = 0.5 * m_ws->detectorTwoTheta(*detector);
       try {
         efixed = m_ws->getEFixed(detector);
       } catch (std::runtime_error) {
@@ -463,8 +463,9 @@ void SaveAscii2::populateAngleMetaData() {
     const auto specNo = m_ws->getSpectrum(i)->getSpectrumNo();
     const auto workspaceIndex = m_specToIndexMap[specNo];
     auto det = m_ws->getDetector(workspaceIndex);
-    const auto two_theta = m_ws->detectorTwoTheta(det);
-    const auto angleInDeg = two_theta * (180 / M_PI);
+    const auto two_theta = m_ws->detectorTwoTheta(*det);
+    constexpr double rad2deg = 180. / M_PI;
+    const auto angleInDeg = two_theta * rad2deg;
     const auto angleInDegStr = boost::lexical_cast<std::string>(angleInDeg);
     angles.push_back(angleInDegStr);
   }

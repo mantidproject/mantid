@@ -75,8 +75,8 @@ Improved
 - :ref:`SaveAscii <algm-SaveAscii2>` now has a SpectrumMetaData property that allows for addition information to be displayed along with the SpectrumNumber. Currently the supported MetaData is SpectrumNumber, Q and Angle.
 - :ref:`SaveMD <algm-SaveMD>` now writes MDHisto signal arrays as compressed data.
 - :ref:`SetUncertainties <algm-SetUncertainties>` has two new modes, ``oneIfZero`` and ``sqrtOrOne``.
+- :ref:`SetSampleMaterial <algm-SetSampleMaterial>` will now work out the number density from the chemical formula and mass density if these are given in the input. A user specified number density or if Z and the unit cell volume is given will override the value calculated from the chemical formula and mass density.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` now supports inelastic instruments. It relies on :ref:`ConvertUnits <algm-ConvertUnits>` having set the correct EMode. `#15923 <https://github.com/mantidproject/mantid/pull/15923>`_
-
 
 Deprecated
 ##########
@@ -122,6 +122,9 @@ Python
 
 - It is now possible to use the unit.quickConversion(destinationUnit) functionality in python. If it is possible to convert one unit to another using a multiplication by a constant, this will return the factor and power required for the multiplication.
 
+- The Atom kernel class, which stores the cross-sections, relative atomic masses, and other information for all elements and isotopes is now accessible from Python.
+
+- The Material class has two new Python methods: ``chemicalFormula`` returns a tuple of Atom objects corresponding to the atoms in the compound, and their abundances; ``relativeMolecularMass`` returns the relative formular unit mass in atomic mass units.
 
 Python Algorithms
 #################

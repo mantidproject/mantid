@@ -327,7 +327,7 @@ void ResampleX::exec() {
         g_log.debug() << "Rebinning event workspace in place\n";
       } else {
         g_log.debug() << "Rebinning event workspace out of place\n";
-        outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
+        outputWS = inputWS->clone();
       }
       auto outputEventWS =
           boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
