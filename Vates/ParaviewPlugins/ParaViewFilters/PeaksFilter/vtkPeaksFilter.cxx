@@ -117,8 +117,7 @@ void vtkPeaksFilter::SetPeaksWorkspace(const std::string &peaksWorkspaceName,
                                        const std::string &delimiter) {
   auto tokenizedNames =
       Mantid::Kernel::StringTokenizer(peaksWorkspaceName, delimiter);
-  std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces =
-      getPeaksWorkspaces(tokenizedNames);
+  m_peaksWorkspaces = getPeaksWorkspaces(tokenizedNames);
   this->Modified();
 }
 
@@ -136,9 +135,8 @@ void vtkPeaksFilter::SetRadiusNoShape(double radius)
  * Set the radius type.
  * @param type The type of the radius
  */
-void vtkPeaksFilter::SetRadiusType(
-    Mantid::Geometry::PeakShape::RadiusType type) {
-  m_radiusType = type;
+void vtkPeaksFilter::SetRadiusType(int type) {
+  m_radiusType = static_cast<Mantid::Geometry::PeakShape::RadiusType>(type);
   this->Modified();
 }
 

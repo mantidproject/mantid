@@ -20,7 +20,7 @@ public:
   void SetPeaksWorkspace(const std::string &peaksWorkspaceName,
                          const std::string &delimiter);
   void SetRadiusNoShape(double radius);
-  void SetRadiusType(Mantid::Geometry::PeakShape::RadiusType type);
+  void SetRadiusType(int type);
   void updateAlgorithmProgress(double progress, const std::string& message);
   double GetMinValue();
   double GetMaxValue();

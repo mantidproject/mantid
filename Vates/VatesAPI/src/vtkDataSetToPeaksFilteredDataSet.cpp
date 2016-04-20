@@ -24,12 +24,13 @@
 #include <vtkFieldData.h>
 
 #include <boost/shared_ptr.hpp>
+
+#include <algorithm>
+#include <cmath>
+#include <numeric>
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <algorithm>
-#include <cmath>
-
 
 namespace Mantid
 {
@@ -114,19 +115,17 @@ void vtkDataSetToPeaksFilteredDataSet::execute(
     points->GetPoint(i, point);
 
     // Compare to Peaks
-    const size_t numberOfPeaks = peaksInfo.size();
-    // size_t counter = 0;
-    // while (counter < numberOfPeaks) {
-    for (size_t counter = 0; counter < numberOfPeaks; ++counter) {
-      // Calcuate the differnce between the vtkDataSet point and the peak. Needs
+    for (const auto &peak : peaksInfo) {
+      // Calcuate the difference between the vtkDataSet point and the peak.
+      // Needs
       // to be smaller than the radius
+
       double squaredDifference = 0.;
       for (unsigned k = 0; k < 3; k++) {
-        squaredDifference += pow(point[k] - peaksInfo[counter].first[k], 2);
+        squaredDifference += pow(point[k] - peak.first[k], 2);
       }
 
-      if (squaredDifference <=
-          (peaksInfo[counter].second * peaksInfo[counter].second)) {
+      if (squaredDifference <= pow(peak.second, 2)) {
         ids->InsertNextValue(i);
         break;
       }
