@@ -193,7 +193,6 @@ public:
 
   void test_that_2D_workspace_is_saved_correctly() {
     // Arrange
-    // Arrange
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
 

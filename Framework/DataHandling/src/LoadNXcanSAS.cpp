@@ -324,7 +324,6 @@ void loadData2D(H5::Group &dataGroup,
                 Mantid::API::MatrixWorkspace_sptr workspace) {
   // General
   workspace->isDistribution(true);
-
   //-----------------------------------------
   // Load the I value.
   auto iDataSet = dataGroup.openDataSet(sasDataI);
@@ -446,7 +445,7 @@ void loadTransmissionData(H5::Group& transmission, Mantid::API::MatrixWorkspace_
   Mantid::MantidVec lambdaData =
       Mantid::DataHandling::H5Util::readArray1DCoerce<double>(transmission,
                                                               sasTransmissionSpectrumLambda);
-  auto &dataLambda= workspace->dataE(0);
+  auto &dataLambda= workspace->dataX(0);
   dataLambda.swap(lambdaData);
   workspace->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 }
@@ -473,6 +472,9 @@ void loadTransmission(H5::Group& entry, const std::string& name) {
 
   // Load transmission data
   loadTransmissionData(transmission, workspace);
+
+  // Add the workspace to the ADS
+  Mantid::API::AnalysisDataService::Instance().add(title, workspace);
 }
 
 }

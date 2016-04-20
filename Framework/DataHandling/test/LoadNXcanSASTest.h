@@ -33,10 +33,31 @@ public:
     void test_that_1D_workspace_with_Q_resolution_can_be_loaded()
     {
         // Arrange
+        NXcanSASTestParameters parameters;
+        removeFile(parameters.filename);
+        parameters.detectors.push_back("front-detector");
+        parameters.detectors.push_back("rear-detector");
+        parameters.invalidDetectors = false;
+        parameters.hasDx = true;
+
+        auto ws = provide1DWorkspace(parameters);
+        setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin,
+                                             parameters.xmax);
+        parameters.idf = getIDFfromWorkspace(ws);
+        save_file_no_issues(ws, parameters);
+
+        const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
 
         // Act
+        auto wsOut = load_file_no_issues(
+            parameters, false /*load transmission*/, outWsName);
 
         // Assert
+        do_assert_load(ws, wsOut, parameters);
+
+        // Clean up
+        removeFile(parameters.filename);
+        removeWorkspaceFromADS(outWsName);
     }
 
     void test_that_1D_workspace_without_Q_resolution_can_be_loaded()
@@ -66,15 +87,114 @@ public:
 
         // Clean up
         removeFile(parameters.filename);
+        removeWorkspaceFromADS(outWsName);
     }
 
-    void test_that_1D_workspace_with_transmissions_can_be_loaded() {}
+    void test_that_1D_workspace_with_transmissions_can_be_loaded()
+    {
+        // Arrange
+        NXcanSASTestParameters parameters;
+        removeFile(parameters.filename);
+        parameters.detectors.push_back("front-detector");
+        parameters.detectors.push_back("rear-detector");
+        parameters.invalidDetectors = false;
+        parameters.hasDx = false;
 
-    void test_that_invalid_file_is_rejected() {}
+        auto ws = provide1DWorkspace(parameters);
+        setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin,
+                                             parameters.xmax);
+        parameters.idf = getIDFfromWorkspace(ws);
 
-    void test_that_2D_workspace_can_be_loaded() {}
+        const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
+
+        // Create transmission
+        NXcanSASTestTransmissionParameters transmissionParameters;
+        transmissionParameters.name
+            = sasTransmissionSpectrumNameSampleAttrValue;
+        transmissionParameters.usesTransmission = true;
+
+        NXcanSASTestTransmissionParameters transmissionCanParameters;
+        transmissionCanParameters.name
+            = sasTransmissionSpectrumNameCanAttrValue;
+        transmissionCanParameters.usesTransmission = true;
+
+        auto transmission = getTransmissionWorkspace(transmissionParameters);
+        setXValuesOn1DWorkspaceWithPointData(transmission,
+                                             transmissionParameters.xmin,
+                                             transmissionParameters.xmax);
+
+        auto transmissionCan
+            = getTransmissionWorkspace(transmissionCanParameters);
+        setXValuesOn1DWorkspaceWithPointData(transmissionCan,
+                                             transmissionCanParameters.xmin,
+                                             transmissionCanParameters.xmax);
+
+        save_file_no_issues(ws, parameters, transmission, transmissionCan);
+
+        // Act
+        auto wsOut = load_file_no_issues(parameters, true /*load transmission*/,
+                                         outWsName);
+
+        // Assert
+        do_assert_load(ws, wsOut, parameters, transmission, transmissionCan,
+                       transmissionParameters, transmissionCanParameters);
+
+        // Clean up
+        auto transName = ws->getTitle();
+        const std::string transExtension = "_trans_"
+                                           + transmissionParameters.name;
+        transName += transExtension;
+
+        auto transNameCan = ws->getTitle();
+        const std::string transExtensionCan = "_trans_"
+                                              + transmissionCanParameters.name;
+        transNameCan += transExtensionCan;
+
+        removeFile(parameters.filename);
+        removeWorkspaceFromADS(outWsName);
+        removeWorkspaceFromADS(transName);
+        removeWorkspaceFromADS(transNameCan);
+    }
+
+    void test_that_2D_workspace_can_be_loaded()
+    {
+        // Arrange
+        NXcanSASTestParameters parameters;
+        removeFile(parameters.filename);
+
+        parameters.detectors.push_back("front-detector");
+        parameters.detectors.push_back("rear-detector");
+        parameters.invalidDetectors = false;
+
+        parameters.is2dData = true;
+
+        auto ws = provide2DWorkspace(parameters);
+        set2DValues(ws);
+        const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
+        parameters.idf = getIDFfromWorkspace(ws);
+
+        save_file_no_issues(ws, parameters);
+
+        // Act
+        auto wsOut = load_file_no_issues(
+            parameters, false /*load transmission*/, outWsName);
+
+        // Assert
+        do_assert_load(ws, wsOut, parameters);
+
+        // Clean up
+        removeFile(parameters.filename);
+        removeWorkspaceFromADS(outWsName);
+    }
 
 private:
+    void removeWorkspaceFromADS(const std::string toRemove)
+    {
+        if (AnalysisDataService::Instance().doesExist(toRemove)) {
+            AnalysisDataService::Instance().remove(toRemove);
+        }
+    }
+
     MatrixWorkspace_sptr load_file_no_issues(NXcanSASTestParameters &parameters,
                                              bool loadTransmission,
                                              const std::string &outWsName)
@@ -215,14 +335,57 @@ private:
         }
     }
 
-    void do_assert_instrument(MatrixWorkspace_sptr wsIn, MatrixWorkspace_sptr wsOut) {
-      auto idfIn = getIDFfromWorkspace(wsIn);
-      auto idfOut = getIDFfromWorkspace(wsOut);
-      TSM_ASSERT_EQUALS("Should have the same instrument", idfIn, idfOut);
+    void do_assert_instrument(MatrixWorkspace_sptr wsIn,
+                              MatrixWorkspace_sptr wsOut)
+    {
+        auto idfIn = getIDFfromWorkspace(wsIn);
+        auto idfOut = getIDFfromWorkspace(wsOut);
+        TSM_ASSERT_EQUALS("Should have the same instrument", idfIn, idfOut);
+    }
+
+    void do_assert_transmission(MatrixWorkspace_sptr mainWorkspace,
+                                MatrixWorkspace_sptr transIn,
+                                NXcanSASTestTransmissionParameters parameters)
+    {
+        if (!parameters.usesTransmission || !transIn) {
+            return;
+        }
+
+        auto transName = mainWorkspace->getTitle();
+        const std::string transExtension = "_trans_" + parameters.name;
+        transName += transExtension;
+
+        auto transOut
+            = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+                transName);
+
+        // Ensure that both have the same Y data
+        auto readDataY = [](MatrixWorkspace_sptr ws, size_t index) {
+            return ws->dataY(index);
+        };
+        do_assert_data(transIn, transOut, readDataY);
+
+        // Ensure that both have the same E data
+        auto readDataE = [](MatrixWorkspace_sptr ws, size_t index) {
+            return ws->dataE(index);
+        };
+        do_assert_data(transIn, transOut, readDataE);
+
+        // Ensure that both have the same X data
+        auto readDataX = [](MatrixWorkspace_sptr ws, size_t index) {
+            return ws->dataX(index);
+        };
+        do_assert_data(transIn, transOut, readDataX);
     }
 
     void do_assert_load(MatrixWorkspace_sptr wsIn, MatrixWorkspace_sptr wsOut,
-                        NXcanSASTestParameters &parameters)
+                        NXcanSASTestParameters &parameters,
+                        MatrixWorkspace_sptr transmission = nullptr,
+                        MatrixWorkspace_sptr transmissionCan = nullptr,
+                        NXcanSASTestTransmissionParameters sampleParameters
+                        = NXcanSASTestTransmissionParameters(),
+                        NXcanSASTestTransmissionParameters canParameters
+                        = NXcanSASTestTransmissionParameters())
     {
         // Ensure that both have the same units
         do_assert_units(wsIn, wsOut);
@@ -264,6 +427,10 @@ private:
 
         // Ensure that both have the same IDF loaded
         do_assert_instrument(wsIn, wsOut);
+
+        // Test transmission workspaces
+        do_assert_transmission(wsOut, transmission, sampleParameters);
+        do_assert_transmission(wsOut, transmissionCan, canParameters);
     }
 };
 
