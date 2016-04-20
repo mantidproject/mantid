@@ -41,6 +41,7 @@ def _is_old_boost_version():
             return True
         if dist[0] == 'Ubuntu' and dist[1] == '14.04':
             return True
+
     return False
 
 def _create_algorithm(**kwargs):
@@ -128,7 +129,6 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
     def runTest(self):
         test_ws, _ = setUp()
         self._input_bins = test_ws.blocksize()
-        self._is_linux, self._is_rhel6 = _check_platform()
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
                                             GammaBackground=True,
                                             FitParameters=_create_dummy_fit_parameters_ws_index_1(),
@@ -145,7 +145,7 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         corrections_gb_peak = 0.0126756398636
         corrections_ts_peak = 0.161125285346
         corrections_ms_peak = 0.000170937010003
-        if is_old_boost_version:
+        if _is_old_boost_version():
             corrections_ms_peak = 0.000230503344114
         _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak)
@@ -157,7 +157,7 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         _validate_group_structure(self, corrected_wsg, 3)
         corrected_gb_peak = 0.636547077684
         corrected_ts_peak = 0.587870515272
-        corrected_ms_peak = 0.636436654367
+        corrected_ms_peak = 0.626612845598
         _validate_matrix_peak_height(self, corrected_wsg.getItem(0), corrected_gb_peak)
         _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak)
         _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak)
@@ -165,7 +165,7 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         # Test OutputWorkspace
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
         _validate_matrix_structure(self, output_ws, 1, self._input_bins)
-        output_expected_peak = 0.6003707534
+        output_expected_peak = 0.636436654367
         _validate_matrix_peak_height(self, output_ws, output_expected_peak)
 
         # Test Linear fit Result Workspace
@@ -186,7 +186,6 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
     def runTest(self):
         test_ws, _ = setUp()
         self._input_bins = test_ws.blocksize()
-        self._is_linux, self._is_rhel6 = _check_platform()
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
                                             GammaBackground=True,
                                             FitParameters=_create_dummy_fit_parameters_ws_index_2(),
@@ -204,7 +203,7 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
         corrections_gb_peak = 0.0106977817681
         corrections_ts_peak = 0.159340707436
         corrections_ms_peak = 0.000226355717662
-        if is_old_boost_version:
+        if _is_old_boost_version():
             corrections_ms_peak = 0.000197140262829
 
         _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak)
