@@ -91,7 +91,6 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
         index_one_last = 0.0072029933
         index_two_first = 1.057476742e-05
         index_two_last = 7.023179770e-05
-        dist = platform.linux_distribution()
         if _is_old_boost_version():
             index_one_first = 7.798020e-04
 
@@ -141,7 +140,6 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         index_one_last = 0.00720728978699
         index_two_first = 0.00571520523979
         index_two_last = -0.00211277263055
-        dist = platform.linux_distribution()
         if _is_old_boost_version():
             index_one_first = 6.809169e-04
             index_one_last = 7.206634e-03
