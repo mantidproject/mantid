@@ -37,6 +37,9 @@ Graphical user interface:
 Imaging
 -------
 
+- The new algorithm :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>`
+  aggregates stacks of images from wavelength dependent data.
+
 Improvements in the tomographic reconstruction graphical user interface:
 
 - New capabilities added when visualizing stacks of images:
