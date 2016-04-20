@@ -2005,6 +2005,18 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName) {
 
   m_fitDataHelper->peakPickerReassigned(wsName);
 
+  // Set the available groups/pairs and periods
+  const Grouping groups = m_groupingHelper.parseGroupingTable();
+  QStringList groupsAndPairs;
+  groupsAndPairs.reserve(
+      static_cast<int>(groups.groupNames.size() + groups.pairNames.size()));
+  std::transform(groups.groupNames.begin(), groups.groupNames.end(),
+                 std::back_inserter(groupsAndPairs), &QString::fromStdString);
+  std::transform(groups.pairNames.begin(), groups.pairNames.end(),
+                 std::back_inserter(groupsAndPairs), &QString::fromStdString);
+  m_dataSelector->setAvailableGroups(groupsAndPairs);
+  m_dataSelector->setNumPeriods(m_numPeriods);
+
   QString code;
 
   code += "g = graph('" + wsName + "-1')\n"
