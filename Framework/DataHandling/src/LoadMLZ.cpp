@@ -33,21 +33,13 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMLZ)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadMLZ::LoadMLZ() : API::IFileLoader<Kernel::NexusDescriptor>() {
-  m_instrumentName = "";
-  m_wavelength = 0;
-  m_channelWidth = 0.0;
-  m_numberOfChannels = 0;
-  m_numberOfHistograms = 0;
-  m_numberOfTubes = 0;
-  m_numberOfPixelsPerTube = 0;
-  m_monitorElasticPeakPosition = 0;
-  m_monitorCounts = 0;
-  m_timeOfFlightDelay = 0;
-  m_chopper_speed = 0.0;
-  m_chopper_ratio = 0;
-  m_l1 = 0;
-  m_l2 = 0;
+LoadMLZ::LoadMLZ()
+    : m_instrumentName(""), m_instrumentPath(""), m_numberOfTubes(0),
+      m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
+      m_numberOfHistograms(0), m_monitorElasticPeakPosition(0),
+      m_wavelength(0.0), m_channelWidth(0.0), m_timeOfFlightDelay(0.0),
+      m_monitorCounts(0), m_chopper_speed(0.0), m_chopper_ratio(0), m_l1(0.0),
+      m_l2(0.0), m_t1(0.0) {
   m_supportedInstruments.emplace_back("TOFTOF");
   m_supportedInstruments.emplace_back("DNS");
 }
@@ -370,6 +362,7 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
   runDetails.addProperty("experiment_team", user_name);
 
   runDetails.addProperty("EPP", m_monitorElasticPeakPosition);
+  runDetails.addProperty("TOF1", m_t1);
 }
 
 /**
@@ -400,10 +393,13 @@ void LoadMLZ::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
   NXInt data = dataGroup.openIntData();
   data.load();
 
+  m_t1 = m_mlzloader.calculateTOF(m_l1, m_wavelength) * 1.0e+6;
+  g_log.debug() << " t1 (microseconds): " << m_t1 << std::endl;
+
   std::vector<double> detectorTofBins(m_numberOfChannels + 1);
   for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
     detectorTofBins[i] =
-        m_channelWidth * static_cast<double>(static_cast<int>(i)) +
+        m_channelWidth * static_cast<double>(static_cast<int>(i)) + m_t1 +
         m_channelWidth / 2;
   }
 

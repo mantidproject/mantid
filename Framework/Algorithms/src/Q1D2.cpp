@@ -595,7 +595,7 @@ void Q1D2::convertWavetoQ(const size_t wsInd, const bool doGravity,
     // Calculate the Q values for the current spectrum, using Q =
     // 4*pi*sin(theta)/lambda
     const double factor =
-        2.0 * FOUR_PI * sin(m_dataWS->detectorTwoTheta(det) / 2.0);
+        2.0 * FOUR_PI * sin(m_dataWS->detectorTwoTheta(*det) * 0.5);
     for (; waves != end; ++Qs, ++waves) {
       // the HistogramValidator at the start should ensure that we have one more
       // bin on the input wavelengths
