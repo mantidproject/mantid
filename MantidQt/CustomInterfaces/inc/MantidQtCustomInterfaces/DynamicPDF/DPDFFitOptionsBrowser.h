@@ -40,7 +40,7 @@ namespace DynamicPDF {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DPDFFitOptionsBrowser:
+class MANTIDQT_CUSTOMINTERFACES_DLL DPDFFitOptionsBrowser:
   public MantidQt::MantidWidgets::FitOptionsBrowser {
 
 Q_OBJECT

@@ -102,7 +102,7 @@ double InputDataControl::getSelectedEnergy() {
 
 /**
  * @brief report the name of the workspace containing the slices
- * @except attribute m_workspace has not yet been set
+ * @exception attribute m_workspace has not yet been set
  * @return name of the workspace containing the slices
  */
 std::string InputDataControl::getWorkspaceName() {
@@ -114,7 +114,7 @@ std::string InputDataControl::getWorkspaceName() {
 
 /**
  * @brief report the workspace index of the slice selected
- * @except attribute m_workspace has not yet been set
+ * @exception attribute m_workspace has not yet been set
  * @return the workspace index of the slice selected
  */
 size_t InputDataControl::getWorkspaceIndex() {

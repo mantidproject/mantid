@@ -783,7 +783,7 @@ QString FitOptionsBrowser::getParameterToPlot() const
 /**
  * @brief Declares a property of type double, inserting it in the QMap attributes.
  * Note: It does not add it to the browser. Use displayProperty() for this.
- * @except: std::runtime_error if property already declared
+ * @exception std::runtime_error if property already declared
  * @return a raw pointer to the created property.
  */
 QtProperty* FitOptionsBrowser::addDoubleProperty(const QString &propertyName) {
