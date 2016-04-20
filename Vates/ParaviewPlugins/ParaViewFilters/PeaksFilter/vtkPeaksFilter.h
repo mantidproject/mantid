@@ -37,7 +37,6 @@ private:
   std::vector<Mantid::API::IPeaksWorkspace_sptr>
   getPeaksWorkspaces(const Mantid::Kernel::StringTokenizer &workspaceNames);
   std::vector<Mantid::API::IPeaksWorkspace_sptr> m_peaksWorkspaces;
-  std::string m_delimiter;
   double m_radiusNoShape;
   Mantid::Geometry::PeakShape::RadiusType m_radiusType;
   double m_minValue;

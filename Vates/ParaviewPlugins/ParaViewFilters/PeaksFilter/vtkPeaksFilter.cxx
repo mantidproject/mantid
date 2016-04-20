@@ -22,9 +22,9 @@ vtkStandardNewMacro(vtkPeaksFilter)
 using namespace Mantid::VATES;
 
 vtkPeaksFilter::vtkPeaksFilter()
-    : m_delimiter(";"), m_radiusNoShape(0.5),
-      m_radiusType(Mantid::Geometry::PeakShape::Radius), m_minValue(0.1),
-      m_maxValue(0.1), m_metadataJsonManager(new MetadataJsonManager()),
+    : m_radiusNoShape(0.5), m_radiusType(Mantid::Geometry::PeakShape::Radius),
+      m_minValue(0.1), m_maxValue(0.1),
+      m_metadataJsonManager(new MetadataJsonManager()),
       m_vatesConfigurations(new VatesConfigurations()), m_coordinateSystem(0) {
   this->SetNumberOfInputPorts(1);
   this->SetNumberOfOutputPorts(1);
