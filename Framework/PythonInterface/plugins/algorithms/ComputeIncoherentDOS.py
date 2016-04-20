@@ -5,11 +5,11 @@ from mantid.simpleapi import *
 import numpy as np
 from scipy import constants
 
-def evaluateEbin(Emin, Emax, Ei, string):
-    return [eval(estr) for estr in string.split(',')]
+def evaluateEbin(Emin, Emax, Ei, strn):
+    return [eval(estr) for estr in strn.split(',')]
 
 def evaluateQRange(Qmin, Qmax, string):
-    return [eval(qstr) for qstr in string.split(',')]
+    return [eval(qstr) for qstr in strn.split(',')]
 
 
 class ComputeIncoherentDOS(PythonAlgorithm):
