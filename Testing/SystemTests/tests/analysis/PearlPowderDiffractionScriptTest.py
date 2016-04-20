@@ -3,7 +3,7 @@ import os.path
 import shutil
 import random
 
-from mantid.api import AnalysisDataService, MatrixWorkspace, ITableWorkspace
+from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.simpleapi import *
 from mantid import config
 import stresstesting
@@ -19,7 +19,8 @@ class PearlPowderDiffractionScriptTest(stresstesting.MantidStressTest):
         filenames = []
 
         # existing calibration files
-        filenames.extend(('PEARL/Calibration/pearl_group_12_1_TT70.cal', 'PEARL/Calibration/pearl_offset_15_3.cal',
+        filenames.extend(('PEARL/Calibration/pearl_group_12_1_TT70.cal',
+                          'PEARL/Calibration/pearl_offset_15_3.cal',
                           'PEARL/Calibration/van_spline_TT70_cycle_15_4.nxs',
                           'PEARL/Attentuation/PRL112_DC25_10MM_FF.OUT'))
         # raw files / run numbers 92476-92479
@@ -79,7 +80,8 @@ class PearlPowderDiffractionScriptTest(stresstesting.MantidStressTest):
 
     def cleanup(self):
         filenames = []
-        filenames.extend(("PEARL/DataOut/PRL92476_92479.nxs", "PEARL/DataOut/PRL92476_92479_d_xye-0.dat",
+        filenames.extend(("PEARL/DataOut/PRL92476_92479.nxs",
+                          "PEARL/DataOut/PRL92476_92479_d_xye-0.dat",
                           "PEARL/DataOut/PRL92476_92479_tof_xye-0.dat",
                           "PEARL/DataOut/PRL92476_92479-0.gss"))
         self._clean_up_files(filenames, DIRS)
@@ -157,3 +159,30 @@ class LoadTests(unittest.TestCase):
         self.assertAlmostEqual(0.01567764, no_atten.readE(0)[577], places=DIFF_PLACES)
         self.assertAlmostEqual(3.61208767, no_atten.readX(0)[4100], places=DIFF_PLACES)
         self.assertAlmostEqual(0.94553930, no_atten.readY(0)[356], places=DIFF_PLACES)
+
+    def test_saved_data_files(self):
+        files_data = []
+
+        wsname = "GSSFile"
+        gssfile = (DIRS[0] + "PEARL/DataOut/PRL92476_92479-0.gss")
+        files_data.append(LoadGSS(Filename=gssfile, OutputWorkspace=self.wsname))
+
+        xye_dSpacing_ws = "xye_dSpacing"
+        dSpacing_file = (DIRS[0] + "PEARL/DataOut/PRL92476_92479_d_xye-0.dat")
+        files_data.append(Load(Filename=dSpacing_file, OutputWorkspace=xye_dSpacing_ws))
+
+        xye_ToF_ws = "xye_ToF"
+        ToF_file = (DIRS[0] + "PEARL/DataOut/PRL92476_92479_tof_xye-0.dat")
+        files_data.append(Load(Filename=ToF_file, OutputWorkspace=xye_ToF_ws))
+
+        for data in files_data:
+            self.assertTrue(isinstance(data, MatrixWorkspace))
+            self.assertEquals(1, data.getNumberHistograms())
+            self.assertEquals(4310, data.blocksize())
+
+        self.assertAlmostEqual(files_data[1].readY(0)[356], files_data[2].readY(0)[356],
+                               places=DIFF_PLACES)
+        self.assertAlmostEqual(files_data[1].readE(0)[943], files_data[2].readE(0)[943],
+                               places=DIFF_PLACES)
+        self.assertAlmostEqual(files_data[1].readY(0)[3293], files_data[2].readY(0)[3293],
+                               places=DIFF_PLACES)
