@@ -61,21 +61,6 @@ def _equal_within_tolerance(self, expected, actual, tolerance=0.05):
     abs_difference = abs(expected - actual)
     self.assertTrue(abs_difference <= abs(tolerance_value))
 
-def skip_due_to_os():
-    """
-    Skip tests on some operating systems
-    Currenty tests are only being run on windows and RHEL7
-    @return true if tests SHOULD be skipped
-    """
-    dist = platform.linux_distribution()
-    is_rhel7 = (('Red Hat' in dist[0]) or ('CentOS' in dist[0])) and (dist[1].startswith('7'))
-    is_windows = (platform.system() == "Windows")
-    '''if is_rhel7 or is_windows:
-        return False # Tests should not be skipped
-    else:
-        return True # Tests should be skipped'''
-    return False
-
 #====================================================================================
 
 class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
@@ -86,9 +71,6 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
         flags = _create_test_flags(background=False)
         runs = "15039-15045"
         self._fit_results = fit_tof(runs, flags)
-
-    def skipTests(self):
-        return skip_due_to_os()
 
     def validate(self):
         self.assertTrue(isinstance(self._fit_results, tuple))
@@ -139,9 +121,6 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         flags = _create_test_flags(background=True)
         runs = "15039-15045"
         self._fit_results = fit_tof(runs, flags)
-
-    def skipTests(self):
-        return skip_due_to_os()
 
     def validate(self):
         self.assertTrue(isinstance(self._fit_results, tuple))
@@ -198,9 +177,6 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         runs = "15039-15045"
         self._fit_results = fit_tof(runs, flags)
 
-    def skipTests(self):
-        return skip_due_to_os()
-
     def validate(self):
         self.assertTrue(isinstance(self._fit_results, tuple))
         self.assertEquals(4, len(self._fit_results))
@@ -252,9 +228,6 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         flags['spectra'] = '143-144'
         runs = "15039-15045"
         self._fit_results = fit_tof(runs, flags)
-
-    def skipTests(self):
-        return skip_due_to_os()
 
     def validate(self):
         self.assertTrue(isinstance(self._fit_results, tuple))
