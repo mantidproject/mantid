@@ -589,7 +589,8 @@ private:
         Mantid::DataHandling::H5Util::readAttributeAsString(data, sasSignal);
     TSM_ASSERT_EQUALS("Should be just I", signalAttribute, sasDataI);
 
-    // Note: Acutal Values are being testin in LoadNXcanSAS to avoid redundant testing
+    // Note: Acutal Values are being testin in LoadNXcanSAS to avoid redundant
+    // testing
   }
 
   void do_assert_transmission(H5::Group &entry,

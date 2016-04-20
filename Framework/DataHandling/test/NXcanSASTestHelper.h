@@ -5,72 +5,69 @@
 #include <vector>
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
-
 namespace NXcanSASTestHelper {
 struct NXcanSASTestParameters {
-    NXcanSASTestParameters() { initParameters(); }
+  NXcanSASTestParameters() { initParameters(); }
 
-    void initParameters()
-    {
-        filename = "SaveNXcanSASTestFile.h5";
-        size = 10;
-        value = 10.23;
-        error = 3.45;
-        xerror = 2.3759 / 3.6;
-        hasDx = true;
-        xmin = 1.0;
-        xmax = 10.0;
-        runNumber = "1234";
-        userFile = "my_user_file";
-        workspaceTitle = "sample_worksapce";
-        instrumentName = "SANS2D";
-        radiationSource = "Spallation Neutron Source";
-        invalidDetectors = false;
-        ymin = 1.0;
-        ymax = 12.0;
-        is2dData = false;
-    }
+  void initParameters() {
+    filename = "SaveNXcanSASTestFile.h5";
+    size = 10;
+    value = 10.23;
+    error = 3.45;
+    xerror = 2.3759 / 3.6;
+    hasDx = true;
+    xmin = 1.0;
+    xmax = 10.0;
+    runNumber = "1234";
+    userFile = "my_user_file";
+    workspaceTitle = "sample_worksapce";
+    instrumentName = "SANS2D";
+    radiationSource = "Spallation Neutron Source";
+    invalidDetectors = false;
+    ymin = 1.0;
+    ymax = 12.0;
+    is2dData = false;
+  }
 
-    std::string filename;
-    int size;
-    double value;
-    double error;
-    double xerror;
-    bool hasDx;
-    double xmin;
-    double xmax;
-    double ymin;
-    double ymax;
-    std::string runNumber;
-    std::string userFile;
-    std::string workspaceTitle;
-    std::string instrumentName;
-    std::string radiationSource;
-    std::vector<std::string> detectors;
-    bool invalidDetectors;
-    bool is2dData;
-    std::string idf;
+  std::string filename;
+  int size;
+  double value;
+  double error;
+  double xerror;
+  bool hasDx;
+  double xmin;
+  double xmax;
+  double ymin;
+  double ymax;
+  std::string runNumber;
+  std::string userFile;
+  std::string workspaceTitle;
+  std::string instrumentName;
+  std::string radiationSource;
+  std::vector<std::string> detectors;
+  bool invalidDetectors;
+  bool is2dData;
+  std::string idf;
 };
 
 struct NXcanSASTestTransmissionParameters {
-    NXcanSASTestTransmissionParameters() { initParameters(); }
-    void initParameters()
-    {
-        size = 10;
-        value = 12.34;
-        error = 3.2345;
-        xmin = 1.0;
-        xmax = 10.0;
-        usesTransmission = false;
-    }
+  NXcanSASTestTransmissionParameters() { initParameters(); }
+  void initParameters() {
+    size = 10;
+    value = 12.34;
+    error = 3.2345;
+    xmin = 1.0;
+    xmax = 10.0;
+    usesTransmission = false;
+  }
 
-    int size;
-    double value;
-    double error;
-    double xmin;
-    double xmax;
-    std::string name;
-    bool usesTransmission;
+  int size;
+  double value;
+  double error;
+  double xmin;
+  double xmax;
+  std::string name;
+  bool usesTransmission;
 };
 
 std::string concatenateStringVector(std::vector<std::string> stringVector);
@@ -101,6 +98,5 @@ provide2DWorkspace(NXcanSASTestParameters &parameters);
 void set2DValues(Mantid::API::MatrixWorkspace_sptr ws);
 
 void removeFile(std::string filename);
-
 }
 #endif
