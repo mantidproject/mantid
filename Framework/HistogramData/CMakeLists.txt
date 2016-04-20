@@ -7,7 +7,7 @@ set ( SRC_FILES
 
 set ( INC_FILES
   inc/MantidHistogramData/BinEdges.h
-  inc/MantidHistogramData/ConstIterable.h
+  inc/MantidHistogramData/Iterable.h
   inc/MantidHistogramData/FixedLengthVector.h
   inc/MantidHistogramData/Histogram.h
   inc/MantidHistogramData/HistogramX.h
@@ -17,7 +17,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
   BinEdgesTest.h
-  ConstIterableTest.h
+  IterableTest.h
   FixedLengthVectorTest.h
   HistogramXTest.h
   PointsTest.h

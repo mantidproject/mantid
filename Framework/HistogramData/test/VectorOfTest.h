@@ -5,17 +5,17 @@
 
 #include "MantidKernel/make_cow.h"
 #include "MantidHistogramData/VectorOf.h"
-#include "MantidHistogramData/ConstIterable.h"
+#include "MantidHistogramData/Iterable.h"
 #include "MantidHistogramData/HistogramX.h"
 
 using Mantid::HistogramData::detail::VectorOf;
-using Mantid::HistogramData::detail::ConstIterable;
+using Mantid::HistogramData::detail::Iterable;
 using Mantid::HistogramData::HistogramX;
 using Mantid::Kernel::cow_ptr;
 using Mantid::Kernel::make_cow;
 
 class VectorOfTester : public VectorOf<VectorOfTester, HistogramX>,
-                       public ConstIterable<VectorOfTester> {
+                       public Iterable<VectorOfTester> {
 public:
   using VectorOf<VectorOfTester, HistogramX>::VectorOf;
   using VectorOf<VectorOfTester, HistogramX>::operator=;
