@@ -10,10 +10,11 @@
 
 using namespace Mantid::CurveFitting::RalNlls;
 using namespace Mantid::CurveFitting::Functions;
+using namespace Mantid::CurveFitting;
 
 class DTRSTest : public CxxTest::TestSuite {
 public:
-  void test_sign() {
+  void xtest_sign() {
     TS_ASSERT_EQUALS(sign(12.0, 1.0), 12.0);
     TS_ASSERT_EQUALS(sign(12.0, 0.0), 12.0);
     TS_ASSERT_EQUALS(sign(12.0, -1.0), -12.0);
@@ -22,7 +23,7 @@ public:
     TS_ASSERT_EQUALS(sign(-12.0, -1.0), -12.0);
   }
 
-  void test_roots_quadratic() {
+  void xtest_roots_quadratic() {
     double root1 = 0.0, root2 = 0.0;
     int nroots = -1;
     const double tol = 1e-15;
@@ -61,7 +62,7 @@ public:
     TS_ASSERT_DELTA(root2, -1.0, tol);
   }
 
-  void test_roots_cubic() {
+  void xtest_roots_cubic() {
     double root1 = 0.0, root2 = 0.0, root3 = 0.0;
     int nroots = -1;
     const double tol = 1e-15;
@@ -108,9 +109,20 @@ public:
     TS_ASSERT_DELTA(cubic(root1), 0.0, tol);
     TS_ASSERT_DELTA(cubic(root2), 0.0, tol);
     TS_ASSERT_DELTA(cubic(root3), 0.0, tol);
+
+    std::tie(a0, a1, a2, a3) = std::make_tuple(0.0, 0.0, 0.0, 1.0);
+    roots_cubic(a0, a1, a2, a3, 1e-15, nroots, root1, root2, root3);
+
+    TS_ASSERT_EQUALS(nroots, 3);
+    TS_ASSERT_DELTA(root1, 0.0, tol);
+    TS_ASSERT_DELTA(root2, 0.0, tol);
+    TS_ASSERT_DELTA(root3, 0.0, tol);
+    TS_ASSERT_DELTA(cubic(root1), 0.0, tol);
+    TS_ASSERT_DELTA(cubic(root2), 0.0, tol);
+    TS_ASSERT_DELTA(cubic(root3), 0.0, tol);
   }
 
-  void test_roots_quartic() {
+  void xtest_roots_quartic() {
     double root1 = 0.0, root2 = 0.0, root3 = 0.0, root4 = 0.0;
     int nroots = -1;
     const double tol = 1e-15;
@@ -170,6 +182,67 @@ public:
     TS_ASSERT_DELTA(quartic(root2), 0.0, tol*10);
     TS_ASSERT_DELTA(quartic(root3), 0.0, tol);
     TS_ASSERT_DELTA(quartic(root4), 0.0, tol*10);
+  }
+
+  void test_dtrs_solve_main_1d() {
+    std::cerr <<"\n\nSolve main\n\n";
+    dtrs_control_type control;
+    int n = 1;
+    DoubleFortranVector c(n);
+    DoubleFortranVector h(n);
+    DoubleFortranVector x(n);
+
+    {
+      dtrs_inform_type inform;
+      double radius = 10.0;
+      double f = 1;
+      h(1) = 2.0;
+      c(1) = 2.0;
+      dtrs_solve_main(n, radius, f, c, h, x, control, inform);
+      std::cerr << x << std::endl;
+      TS_ASSERT_DELTA(x(1), -1, 1e-10);
+    }
+    {
+      dtrs_inform_type inform;
+      double radius = 10.0;
+      double f = 0;
+      h(1) = 2.0;
+      c(1) = -2.0;
+      dtrs_solve_main(n, radius, f, c, h, x, control, inform);
+      std::cerr << x << std::endl;
+      TS_ASSERT_DELTA(x(1), 1, 1e-10);
+    }
+    {
+      dtrs_inform_type inform;
+      double radius = 1.0;
+      double f = 0;
+      h(1) = 2.0;
+      c(1) = -2.0;
+      dtrs_solve_main(n, radius, f, c, h, x, control, inform);
+      std::cerr << x << std::endl;
+      TS_ASSERT_DELTA(x(1), 1, 1e-10);
+    }
+    {
+      dtrs_inform_type inform;
+      double radius = 0.5;
+      double f = 1;
+      h(1) = 2.0;
+      c(1) = 2.0;
+      dtrs_solve_main(n, radius, f, c, h, x, control, inform);
+      std::cerr << x << std::endl;
+      TS_ASSERT_DELTA(x(1), -0.5, 1e-10);
+    }
+    {
+      dtrs_inform_type inform;
+      double radius = 2.0;
+      double f = 0;
+      h(1) = -2.0;
+      c(1) = -2.0;
+      dtrs_solve_main(n, radius, f, c, h, x, control, inform);
+      std::cerr << x << ' ' << inform.obj << std::endl;
+
+      TS_ASSERT_DELTA(x(1), 1, 1e-10);
+    }
   }
 };
 

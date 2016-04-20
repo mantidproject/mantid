@@ -46,7 +46,7 @@ public:
   /// Constructor
   FortranVector();
   /// Constructor
-  FortranVector(const int n);
+  explicit FortranVector(const int n);
   /// Constructor
   FortranVector(const int iFrom, const int iTo);
   /// Resize the vector
