@@ -1303,7 +1303,7 @@ public:
     ws.init(numspec, j, k);
 
     double values[3] = {10, 11, 17};
-    size_t specNumWithDx[3] = {0, 1, 2};
+    size_t workspaceIndexWithDx[3] = {0, 1, 2};
 
     Mantid::MantidVec dxSpec0(j, values[0]);
     Mantid::MantidVecPtr dxSpec1 =
@@ -1315,34 +1315,35 @@ public:
     for (size_t spec = 0; spec < numspec; ++spec) {
       TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(spec));
     }
-    ws.setDx(specNumWithDx[0], dxSpec0);
-    ws.setDx(specNumWithDx[1], dxSpec1);
-    ws.setDx(specNumWithDx[2], dxSpec2);
+    ws.setDx(workspaceIndexWithDx[0], dxSpec0);
+    ws.setDx(workspaceIndexWithDx[1], dxSpec1);
+    ws.setDx(workspaceIndexWithDx[2], dxSpec2);
 
     // Assert
-    auto compareValue =
-        [&values](double data, size_t index) { return data == values[index]; };
-    for (auto &specNum : specNumWithDx) {
-      TSM_ASSERT("Should have x resolution values", ws.hasDx(specNum));
-      TSM_ASSERT_EQUALS("Should have a length of 3", ws.dataDx(specNum).size(),
+    auto compareValue = [&values](double data, size_t index) {
+      return data == values[index];
+    };
+    for (auto &index : workspaceIndexWithDx) {
+      TSM_ASSERT("Should have x resolution values", ws.hasDx(index));
+      TSM_ASSERT_EQUALS("Should have a length of 3", ws.dataDx(index).size(),
                         j);
-      auto compareValueForSpecificSpectrumNumber =
-          std::bind(compareValue, std::placeholders::_1, specNum);
+      auto compareValueForSpecificWorkspaceIndex =
+          std::bind(compareValue, std::placeholders::_1, index);
 
-      auto &dataDx = ws.dataDx(specNum);
+      auto &dataDx = ws.dataDx(index);
       TSM_ASSERT("dataDx should allow access to the spectrum",
                  std::all_of(std::begin(dataDx), std::end(dataDx),
-                             compareValueForSpecificSpectrumNumber));
+                             compareValueForSpecificWorkspaceIndex));
 
-      auto &readDx = ws.readDx(specNum);
+      auto &readDx = ws.readDx(index);
       TSM_ASSERT("readDx should allow access to the spectrum",
                  std::all_of(std::begin(readDx), std::end(readDx),
-                             compareValueForSpecificSpectrumNumber));
+                             compareValueForSpecificWorkspaceIndex));
 
-      auto &refDx = ws.refDx(specNum);
+      auto &refDx = ws.refDx(index);
       TSM_ASSERT("readDx should allow access to the spectrum",
                  std::all_of(std::begin(*refDx), std::end(*refDx),
-                             compareValueForSpecificSpectrumNumber));
+                             compareValueForSpecificWorkspaceIndex));
     }
 
     TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(3));
