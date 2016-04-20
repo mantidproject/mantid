@@ -32,7 +32,7 @@ template <typename NumT>
 void writeArray1DWithStrAttributes(
     H5::Group &group, const std::string &dataSetName,
     const std::vector<NumT> &values,
-    const std::map<std::string, std::string>& attributes) {
+    const std::map<std::string, std::string> &attributes) {
   Mantid::DataHandling::H5Util::writeArray1D(group, dataSetName, values);
   auto dataSet = group.openDataSet(dataSetName);
   for (const auto &attribute : attributes) {
