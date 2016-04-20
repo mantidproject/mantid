@@ -8,7 +8,8 @@ namespace CustomInterfaces {
 /** @class DataPostprocessorAlgorithm
 
 DataPostprocessorAlgorithm is an class which defines a post-processor algorithm.
-TODO: Description
+It is responsible for post-processing rows belonging to the same group in a Data
+Processor UI.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -35,16 +36,10 @@ class DataPostprocessorAlgorithm : public DataProcessorAlgorithm {
 public:
   /** Constructor
   * @param name : The name of the post-processing algorithm
-	* @param prefix : The list of prefixes that will be used for the output
-	* workspaces' names
-	* @param blacklist : The list of properties we don't want to show
+  * @param prefix : The list of prefixes that will be used for the output
+  * workspaces' names
+  * @param blacklist : The list of properties we don't want to show
   */
-  DataPostprocessorAlgorithm()
-      : DataPostprocessorAlgorithm(
-            "Stitch1DMany", std::vector<std::string>{"IvsQ"},
-            std::set<std::string>{"InputWorkspaces", "OutputWorkspace"}){
-
-        };
   DataPostprocessorAlgorithm(const std::string &name,
                              const std::vector<std::string> &prefix,
                              const std::set<std::string> &blacklist)
@@ -70,6 +65,14 @@ public:
       throw std::invalid_argument("A post-processing algorithm must have one "
                                   "output workspace property");
   };
+  /** Default constructor: use 'Stitch1DMany' as the default post-processor
+   * algorithm */
+  DataPostprocessorAlgorithm()
+      : DataPostprocessorAlgorithm(
+            "Stitch1DMany", std::vector<std::string>{"IvsQ"},
+            std::set<std::string>{"InputWorkspaces", "OutputWorkspace"}){
+
+        };
   // Destructor
   virtual ~DataPostprocessorAlgorithm(){};
   // The name of the input property

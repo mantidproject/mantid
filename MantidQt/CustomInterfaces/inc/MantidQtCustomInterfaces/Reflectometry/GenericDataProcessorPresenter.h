@@ -51,7 +51,7 @@ public:
   GenericDataProcessorPresenter(
       DataProcessorView *tableView, ProgressableView *progressView,
       const DataProcessorWhiteList &whitelist,
-      const std::map<std::string, DataPreprocessorAlgorithm> &preprocess,
+      const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
       const DataProcessorAlgorithm &processor,
       const DataPostprocessorAlgorithm &postprocessor);
   ~GenericDataProcessorPresenter() override;
@@ -76,12 +76,12 @@ protected:
   DataProcessorView *m_view;
   // The progress view
   ProgressableView *m_progressView;
-  // The pre-processing instructions
-  std::map<std::string, DataPreprocessorAlgorithm> m_preprocessor;
-  // The data processor algorithm
-  DataProcessorAlgorithm m_processor;
   // The whitelist
   DataProcessorWhiteList m_whitelist;
+  // The pre-processing instructions
+  std::map<std::string, DataPreprocessorAlgorithm> m_preprocessMap;
+  // The data processor algorithm
+  DataProcessorAlgorithm m_processor;
   // Post-processing algorithm
   DataPostprocessorAlgorithm m_postprocessor;
   // The number of columns
@@ -92,8 +92,6 @@ protected:
   bool m_tableDirty;
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
-  // calculates qmin and qmax
-  std::vector<double> calcQRange(Mantid::API::Workspace_sptr ws, double theta);
   // Post-process some rows
   void postProcessRows(std::set<int> rows);
   // process selected rows

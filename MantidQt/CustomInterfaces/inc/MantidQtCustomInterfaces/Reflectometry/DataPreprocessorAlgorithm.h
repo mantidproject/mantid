@@ -8,7 +8,8 @@ namespace CustomInterfaces {
 /** @class DataPreprocessorAlgorithm
 
 DataPreprocessorAlgorithm is an class which defines a pre-processor algorithm.
-TODO: description
+A pre-processor algorithm is an algorithm that will pre-process a column in a
+Data Processor UI.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -35,9 +36,9 @@ class DataPreprocessorAlgorithm : public DataProcessorAlgorithm {
 public:
   /** Constructor
   * @param name : The name of the pre-processing algorithm
-	* @param prefix : The list of prefixes that will be used for the output
-	* workspaces' names
-	* @param blacklist : The list of properties we don't want to show
+  * @param prefix : The list of prefixes that will be used for the output
+  * workspaces' names
+  * @param blacklist : The list of properties we don't want to show
   */
   DataPreprocessorAlgorithm(const std::string &name,
                             const std::vector<std::string> &prefix,
@@ -53,7 +54,7 @@ public:
       throw std::invalid_argument(
           "A pre-processing algorithm must have one output workspace property");
   };
-  /** Default constructor
+  /** Default constructor: use 'Plus' as the default pre-processor algorithm
   */
   DataPreprocessorAlgorithm()
       : DataPreprocessorAlgorithm("Plus", std::vector<std::string>{""},

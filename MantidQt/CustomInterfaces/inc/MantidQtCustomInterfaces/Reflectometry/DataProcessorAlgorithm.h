@@ -12,7 +12,7 @@ namespace CustomInterfaces {
 /** @class DataProcessorAlgorithm
 
 DataProcessorAlgorithm is an base class which defines a processing algorithm. 
-TODO: description
+It is the algorithm that will perform the reduction in a Data Processor UI.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source

@@ -58,21 +58,20 @@ namespace CustomInterfaces {
 * Constructor
 * @param tableView : The view this presenter is going to handle
 * @param progressView : The progress view this presenter is going to handle
-* @param preprocessor : A map containing instructions for pre-processing
-* @param dataProcessorAlgorithm : The data processor algorithm's name
-* @param blacklist : The set of blacklisted properties
 * @param whitelist : The set of properties we want to show as columns
-* @param outputInstructions : A map indicating the name of each of the output
+* @param preprocessMap : A map containing instructions for pre-processing
+* @param processor : A DataProcessorAlgorithm
+* @param postprocessor : A DataPostprocessorAlgorithm
 * workspaces
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     DataProcessorView *tableView, ProgressableView *progressView,
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataPreprocessorAlgorithm> &preprocessor,
+    const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
     const DataProcessorAlgorithm &processor,
     const DataPostprocessorAlgorithm &postprocessor)
     : WorkspaceObserver(), m_view(tableView), m_progressView(progressView),
-      m_preprocessor(preprocessor), m_processor(processor),
+      m_preprocessMap(preprocessMap), m_processor(processor),
       m_whitelist(whitelist), m_postprocessor(postprocessor),
       m_tableDirty(false) {
 
@@ -124,22 +123,24 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
 
 /**
-TODO
+Tells the view how to create the HintingLineEdits for pre-, post- and processing
 */
 void GenericDataProcessorPresenter::createProcessLayout() {
 
   // Pre-process
-  // Depends on the number of algorithms needed for pre-processing the data
-  for (auto it = m_preprocessor.begin(); it != m_preprocessor.end(); ++it) {
+  // The number of items depends on the number of algorithms needed for
+  // pre-processing the data
+  for (auto it = m_preprocessMap.begin(); it != m_preprocessMap.end(); ++it) {
 
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create(it->second.name());
     AlgorithmHintStrategy strategy(alg, it->second.blacklist());
-    if (it == m_preprocessor.begin())
+    if (it == m_preprocessMap.begin()) {
       m_view->addHintingLineEdit("<b>Pre-process:</b>", alg->name(),
                                  strategy.createHints());
-    else
+    } else {
       m_view->addHintingLineEdit("", alg->name(), strategy.createHints());
+    }
   }
 
   // Process
@@ -356,7 +357,7 @@ void GenericDataProcessorPresenter::saveNotebook(
 }
 
 /**
-Stitches the workspaces created by the given rows together.
+Post-processes the workspaces created by the given rows together.
 @param rows : the list of rows
 */
 void GenericDataProcessorPresenter::postProcessRows(std::set<int> rows) {
@@ -539,7 +540,7 @@ GenericDataProcessorPresenter::getRunNumber(const Workspace_sptr &ws) {
 
 /**
 Takes a user specified run, or list of runs, and returns a pointer to the
-desired TOF workspace
+desired workspace
 @param runStr : The run or list of runs (separated by '+')
 @throws std::runtime_error if the workspace could not be prepared
 @returns a shared pointer to the workspace
@@ -567,10 +568,8 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
       preprocessor.prefix() + boost::algorithm::join(runs, "_");
 
   /* Ideally, this should be executed as a child algorithm to keep the ADS tidy,
-  * but
-  * that doesn't preserve history nicely, so we'll just take care of tidying up
-  * in
-  * the event of failure.
+  * but that doesn't preserve history nicely, so we'll just take care of tidying
+  * up in the event of failure.
   */
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().create(preprocessor.name());
@@ -616,8 +615,8 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
 }
 
 /**
-Returns the name of the workspace to plot for a given row
-@param row : The row to plot
+Returns the name of the workspace for a given row
+@param row : The row
 @param prefix : Whether to add the specified prefix or not
 @throws std::runtime_error if the workspace could not be prepared
 @returns : The name of the workspace
@@ -630,7 +629,7 @@ std::string GenericDataProcessorPresenter::getWorkspaceName(int row,
   if (prefix)
     wsname = wsname + m_postprocessor.prefix();
 
-  for (auto it = m_preprocessor.begin(); it != m_preprocessor.end(); ++it) {
+  for (auto it = m_preprocessMap.begin(); it != m_preprocessMap.end(); ++it) {
 
     auto colName = it->first;
     int colIndex = m_whitelist.colIndexFromColName(colName);
@@ -691,50 +690,6 @@ GenericDataProcessorPresenter::loadRun(const std::string &run,
 
   return AnalysisDataService::Instance().retrieveWS<Workspace>(run);
 }
-
-/**
-Calculates the minimum and maximum values for Q
-@param ws : The workspace to fetch the instrument values from
-@param theta : The value of two theta to use in calculations
-*/
-std::vector<double> GenericDataProcessorPresenter::calcQRange(Workspace_sptr ws,
-                                                              double theta) {
-  auto mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  auto wsg = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
-
-  // If we've got a workspace group, use the first workspace in it
-  if (!mws && wsg)
-    mws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(0));
-
-  if (!mws)
-    throw std::runtime_error("Could not convert " + ws->name() +
-                             " to a MatrixWorkspace.");
-
-  double lmin, lmax;
-  try {
-    const Instrument_const_sptr instrument = mws->getInstrument();
-    lmin = instrument->getNumberParameter("LambdaMin")[0];
-    lmax = instrument->getNumberParameter("LambdaMax")[0];
-  } catch (std::exception &) {
-    throw std::runtime_error("LambdaMin/LambdaMax instrument parameters are "
-                             "required to calculate qmin/qmax");
-  }
-
-  double qmin = 4 * M_PI / lmax * sin(theta * M_PI / 180.0);
-  double qmax = 4 * M_PI / lmin * sin(theta * M_PI / 180.0);
-
-  if (m_options["RoundQMin"].toBool())
-    qmin = Utils::roundToDP(qmin, m_options["RoundQMinPrecision"].toInt());
-
-  if (m_options["RoundQMax"].toBool())
-    qmax = Utils::roundToDP(qmax, m_options["RoundQMaxPrecision"].toInt());
-
-  std::vector<double> ret;
-  ret.push_back(qmin);
-  ret.push_back(qmax);
-  return ret;
-}
-
 /**
 Reduce a row
 @param rowNo : The row in the model to reduce
@@ -753,12 +708,16 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
   /* excluding 'Group' and 'Options' */
 
   int ncols = static_cast<int>(m_whitelist.size());
+
+  // Loop over all columns except 'Group' and 'Options'
   for (int i = 0; i < ncols - 2; i++) {
 
+    // The algorithm's property linked to this column
     auto propertyName = m_whitelist.algPropFromColIndex(i);
+    // The column's name
     auto columnName = m_whitelist.colNameFromColIndex(i);
 
-    if (m_preprocessor.count(columnName)) {
+    if (m_preprocessMap.count(columnName)) {
       // This column needs pre-processing
 
       const std::string runStr =
@@ -766,13 +725,13 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
 
       if (!runStr.empty()) {
 
-        auto preprocessor = m_preprocessor[columnName];
+        auto preprocessor = m_preprocessMap[columnName];
 
+        // Read the pre-processing options from the view
         const std::string options =
-            m_view->getProcessingOptions(m_preprocessor[columnName].name());
+            m_view->getProcessingOptions(preprocessor.name());
         auto optionsMap = parseKeyValueString(options);
-        auto runWS =
-            prepareRunWorkspace(runStr, m_preprocessor[columnName], optionsMap);
+        auto runWS = prepareRunWorkspace(runStr, preprocessor, optionsMap);
         runNo.append(getRunNumber(runWS) + "_");
         alg->setProperty(propertyName, runWS->name());
       }
@@ -832,6 +791,7 @@ void GenericDataProcessorPresenter::insertRow(int index) {
   if (!m_model->insertRow(index))
     return;
   // Set the group id of the new row
+  // m_columns - 2 is the index of column 'Group'
   m_model->setData(m_model->index(index, m_columns - 2), groupId);
 }
 
