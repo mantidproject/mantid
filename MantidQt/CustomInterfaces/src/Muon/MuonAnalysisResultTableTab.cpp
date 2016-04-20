@@ -592,7 +592,7 @@ void MuonAnalysisResultTableTab::populateFittings(
     // Fill values and delete previous old ones.
     if (row < fittedWsList.size()) {
       QTableWidgetItem *item = new QTableWidgetItem(fittedWsList[row]);
-      int color(colors.find(row).data());
+      const int color(colors.find(row).value());
       switch (color) {
       case (1):
         item->setTextColor("red");
@@ -929,7 +929,7 @@ QStringList MuonAnalysisResultTableTab::getSelectedLogs() {
 * @return name :: The name the results table should be created with.
 */
 std::string MuonAnalysisResultTableTab::getFileName() {
-  std::string fileName(m_uiForm.tableName->text());
+  std::string fileName(m_uiForm.tableName->text().toStdString());
 
   if (Mantid::API::AnalysisDataService::Instance().doesExist(fileName)) {
     int choice = QMessageBox::question(
