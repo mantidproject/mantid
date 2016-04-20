@@ -183,6 +183,12 @@ void MuonFitDataSelector::setWorkspaceDetails(const QString &runNumbers,
   QString runs(runNumbers);
   runs.remove(QRegExp("^[0]*")); // remove leading zeros, if any
   m_ui.runs->setText(runs);
+  // Set fit type - co-add (as this comes from Home tab) or single
+  if (runs.contains('-') || runs.contains(',')) {
+    setFitType(FitType::CoAdd);
+  } else {
+    setFitType(FitType::Single);
+  }
   // Set the file finder to the correct instrument (not Mantid's default)
   m_ui.runs->setInstrumentOverride(instName);
 }
@@ -392,6 +398,24 @@ IMuonFitDataSelector::FitType MuonFitDataSelector::getFitType() const {
     } else {
       return FitType::Simultaneous;
     }
+  }
+}
+
+/**
+ * Sets the fit type.
+ * If single, disables radio buttons.
+ * Otherwise, enables buttons and selects the correct one.
+ * @param type :: [input] Fit type to set (from enum)
+ */
+void MuonFitDataSelector::setFitType(IMuonFitDataSelector::FitType type) {
+  if (type == FitType::Single) {
+    m_ui.rbCoAdd->setEnabled(true);
+    m_ui.rbSimultaneous->setEnabled(true);
+  } else {
+    m_ui.rbCoAdd->setEnabled(false);
+    m_ui.rbSimultaneous->setEnabled(false);
+    m_ui.rbCoAdd->setChecked(type == FitType::CoAdd);
+    m_ui.rbSimultaneous->setChecked(type == FitType::Simultaneous);
   }
 }
 

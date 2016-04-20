@@ -109,6 +109,8 @@ private:
   void setUpValidators();
   /// Set up connections for signals/slots
   void setUpConnections();
+  /// Set type for fit
+  void setFitType(IMuonFitDataSelector::FitType type);
   /// Member - user interface
   Ui::MuonFitDataSelector m_ui;
   /// Map of group names to checkboxes
