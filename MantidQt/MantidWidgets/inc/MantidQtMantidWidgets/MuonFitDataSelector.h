@@ -85,6 +85,8 @@ public slots:
   void setStartTimeQuietly(double start) override;
   /// Set end time without sending a signal
   void setEndTimeQuietly(double end) override;
+  /// Called when user changes runs
+  void userChangedRuns();
 
 signals:
   /// Edited the runs, ws index, start or end fields

@@ -230,6 +230,9 @@ public:
   /// Create a MatrixWorkspace from a TableWorkspace
   Mantid::API::Workspace_sptr createMatrixFromTableWorkspace()const;
 
+  /// Allow or disallow sequential fits (depending on whether other conditions
+  /// are met)
+  void allowSequentialFits(bool allow) override;
 
 public slots:
   virtual void fit();

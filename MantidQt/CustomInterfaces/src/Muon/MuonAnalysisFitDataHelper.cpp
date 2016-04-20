@@ -22,7 +22,10 @@ MuonAnalysisFitDataHelper::MuonAnalysisFitDataHelper(
 void MuonAnalysisFitDataHelper::handleWorkspacePropertiesChanged() {
   const auto runs = m_dataSelector->getRuns();
   // Get workspace from these runs (TODO)
+  throw std::runtime_error("TODO: create workspace and set in fit browser");
   // m_fitBrowser->setWorkspaceName()
+  // NB we don't want fit browser to signal from this as then it comes back
+  // here!
 
   // update workspace index
   const unsigned int wsIndex = m_dataSelector->getWorkspaceIndex();
@@ -67,6 +70,7 @@ void MuonAnalysisFitDataHelper::handleXRangeChangedGraphically(double start,
  * Called by selectMultiPeak: fit browser has been reassigned to a new
  * workspace.
  * Sets run number, instrument and workspace index in the data selector.
+ * If multiple runs selected, disable sequential fit option.
  * @param wsName :: [input] Name of new workspace
  */
 void MuonAnalysisFitDataHelper::peakPickerReassigned(const QString &wsName) {
@@ -77,6 +81,13 @@ void MuonAnalysisFitDataHelper::peakPickerReassigned(const QString &wsName) {
   const QString numberString = instRun.right(instRun.size() - firstZero);
   m_dataSelector->setWorkspaceDetails(numberString, instName);
   m_dataSelector->setWorkspaceIndex(0u); // always has only one spectrum
+  // Check for multiple runs
+  if (numberString.contains('-') || numberString.contains(',')) {
+    m_fitBrowser->allowSequentialFits(false);
+  } else {
+    m_fitBrowser->allowSequentialFits(
+        true); // will still be forbidden if no function
+  }
 }
 
 } // namespace CustomInterfaces

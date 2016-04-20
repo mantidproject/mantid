@@ -41,6 +41,7 @@ public:
   MOCK_METHOD1(setStartX, void(double));
   MOCK_METHOD1(setEndX, void(double));
   MOCK_METHOD1(setWorkspaceIndex, void(int));
+  MOCK_METHOD1(allowSequentialFits, void(bool));
 };
 
 class MuonAnalysisFitDataHelperTest : public CxxTest::TestSuite {

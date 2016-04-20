@@ -39,6 +39,7 @@ public:
   virtual void setStartX(double start) = 0;
   virtual void setEndX(double end) = 0;
   virtual void setWorkspaceIndex(int i) = 0;
+  virtual void allowSequentialFits(bool allow) = 0;
 };
 
 } // namespace MantidWidgets

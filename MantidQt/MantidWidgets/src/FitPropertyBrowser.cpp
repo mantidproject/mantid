@@ -2977,5 +2977,19 @@ void FitPropertyBrowser::browserHelp() {
                                  "Wizard#Fit_Properties_Browser"));
 }
 
+/**=================================================================================================
+ * Allow/disallow sequential fits, depending on whether other conditions are met
+ * @param allow :: [input] Allow or disallow
+ */
+void FitPropertyBrowser::allowSequentialFits(bool allow) {
+  if (m_fitActionSeqFit) {
+    if (allow) {
+      m_fitActionSeqFit->setEnabled(m_compositeFunction->nFunctions() > 0);
+    } else {
+      m_fitActionSeqFit->setEnabled(false);
+    }
+  }
+}
+
 } // MantidQt
 } // API

@@ -47,8 +47,7 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber,
  * selectedPeriodsChanged
  */
 void MuonFitDataSelector::setUpConnections() {
-  connect(m_ui.runs, SIGNAL(filesFound()), this,
-          SIGNAL(workspacePropertiesChanged()));
+  connect(m_ui.runs, SIGNAL(filesFound()), this, SLOT(userChangedRuns()));
   connect(m_ui.txtWSIndex, SIGNAL(editingFinished()), this,
           SIGNAL(workspacePropertiesChanged()));
   connect(m_ui.txtStart, SIGNAL(editingFinished()), this,
@@ -57,6 +56,24 @@ void MuonFitDataSelector::setUpConnections() {
           SIGNAL(workspacePropertiesChanged()));
   connect(m_ui.chkCombine, SIGNAL(stateChanged(int)), this,
           SIGNAL(selectedPeriodsChanged()));
+}
+
+/**
+ * Slot: called when user edits runs box.
+ * Check for single run and enable/disable radio buttons,
+ * and emit signal that runs have changed.
+ */
+void MuonFitDataSelector::userChangedRuns() {
+  // check for single run and enable/disable radio buttons
+  const auto runs = getRuns();
+  if (runs.size() < 2) {
+    setFitType(FitType::Single);
+  } else {
+    // if buttons are disabled, enable them
+    m_ui.rbCoAdd->setEnabled(true);
+    m_ui.rbSimultaneous->setEnabled(true);
+  }
+  emit workspacePropertiesChanged();
 }
 
 /**
@@ -409,11 +426,11 @@ IMuonFitDataSelector::FitType MuonFitDataSelector::getFitType() const {
  */
 void MuonFitDataSelector::setFitType(IMuonFitDataSelector::FitType type) {
   if (type == FitType::Single) {
-    m_ui.rbCoAdd->setEnabled(true);
-    m_ui.rbSimultaneous->setEnabled(true);
-  } else {
     m_ui.rbCoAdd->setEnabled(false);
     m_ui.rbSimultaneous->setEnabled(false);
+  } else {
+    m_ui.rbCoAdd->setEnabled(true);
+    m_ui.rbSimultaneous->setEnabled(true);
     m_ui.rbCoAdd->setChecked(type == FitType::CoAdd);
     m_ui.rbSimultaneous->setChecked(type == FitType::Simultaneous);
   }
