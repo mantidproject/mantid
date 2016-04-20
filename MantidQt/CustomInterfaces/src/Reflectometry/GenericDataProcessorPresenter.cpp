@@ -737,9 +737,10 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
       }
     } else {
       // No pre-processing needed, read from the table
-      alg->setPropertyValue(
-          propertyName,
-          m_model->data(m_model->index(rowNo, i)).toString().toStdString());
+      auto propertyValue =
+          m_model->data(m_model->index(rowNo, i)).toString().toStdString();
+      if (!propertyValue.empty())
+        alg->setPropertyValue(propertyName, propertyValue);
     }
   }
 
