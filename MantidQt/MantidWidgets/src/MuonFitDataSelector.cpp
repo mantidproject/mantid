@@ -168,12 +168,6 @@ void MuonFitDataSelector::setEndTime(double end) {
  * @returns :: list of run filenames
  */
 QStringList MuonFitDataSelector::getRuns() const {
-  // Run file search in case anything's changed
-  m_ui.runs->findFiles();
-  // Wait for file search to finish.
-  while (m_ui.runs->isSearching()) {
-    QApplication::processEvents();
-  }
   return m_ui.runs->getFilenames();
 }
 
@@ -405,11 +399,11 @@ void MuonFitDataSelector::setUserInput(const QVariant &value) {
  * @returns :: fit type from enum
  */
 IMuonFitDataSelector::FitType MuonFitDataSelector::getFitType() const {
-  const auto runs = getRuns();
-  if (runs.size() < 2) {
+  // If radio buttons disabled, it's a single fit
+  if (!m_ui.rbCoAdd->isEnabled()) {
     return FitType::Single;
   } else {
-    // check the radio buttons
+    // which button is selected
     if (m_ui.rbCoAdd->isChecked()) {
       return FitType::CoAdd;
     } else {
