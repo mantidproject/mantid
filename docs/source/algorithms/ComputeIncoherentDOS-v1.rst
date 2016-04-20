@@ -30,6 +30,14 @@ The average Debye-Waller factor :math:`\exp\left(-2\bar{W}(Q)\right)` is
 calculated using an average mean-square displacement :math:`\langle u \rangle`,
 using :math:`W=Q^2\langle u\rangle/2`. 
 
+If the data has been normalised to a Vanadium standard measurement, the
+output of this algorithm is the neutron weighted density of states in
+milibarns/steradians per formula unit per meV (or per cm^-1). If the sample
+material has been set and is found to be a pure element, then an additional
+option will be enabled to calculate the DOS in states per meV (states per 
+cm^-1) by dividing by the scattering cross-section and multiplying by the
+relative atomic mass.
+
 Restrictions on the Input Workspace
 ###################################
 
