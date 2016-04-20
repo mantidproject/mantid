@@ -1339,7 +1339,7 @@ public:
                  std::all_of(std::begin(readDx), std::end(readDx),
                              compareValueForSpecificWorkspaceIndex));
 
-      auto &refDx = ws.refDx(index);
+      auto refDx = ws.refDx(index);
       TSM_ASSERT("readDx should allow access to the spectrum",
                  std::all_of(std::begin(*refDx), std::end(*refDx),
                              compareValueForSpecificWorkspaceIndex));
