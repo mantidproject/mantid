@@ -323,7 +323,7 @@ void AlignAndFocusPowder::exec() {
   m_outputW = getProperty("OutputWorkspace");
   if (m_inputEW) {
     if (m_outputW != m_inputW) {
-      m_outputEW = EventWorkspace_sptr(m_inputEW->clone().release());
+      m_outputEW = m_inputEW->clone();
     }
     m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   } else {

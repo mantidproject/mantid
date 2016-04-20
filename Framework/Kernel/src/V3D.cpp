@@ -345,7 +345,7 @@ double &V3D::operator[](const size_t Index) {
  *  @param phi ::   Returns the phi (azimuthal) angle in degrees
  */
 void V3D::getSpherical(double &R, double &theta, double &phi) const {
-  const double rad2deg = 180.0 / M_PI;
+  constexpr double rad2deg = 180.0 / M_PI;
   R = norm();
   theta = 0.0;
   if (R != 0.0)

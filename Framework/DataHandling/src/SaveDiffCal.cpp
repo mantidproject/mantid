@@ -1,6 +1,7 @@
 #include "MantidDataHandling/SaveDiffCal.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidDataHandling/H5Util.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 
@@ -108,77 +109,13 @@ std::map<std::string, std::string> SaveDiffCal::validateInputs() {
   return result;
 }
 
-namespace { // anonymous
-
-DataSpace getDataSpace(const size_t length) {
-  hsize_t dims[] = {length};
-  return DataSpace(1, dims);
-}
-
-template <typename NumT> DataSpace getDataSpace(const std::vector<NumT> &data) {
-  return getDataSpace(data.size());
-}
-
-/**
- * Sets up the chunking and compression rate.
- * @param length
- * @return The configured property list
- */
-DSetCreatPropList getPropList(const std::size_t length) {
-  DSetCreatPropList propList;
-  hsize_t chunk_dims[1] = {length};
-  propList.setChunk(1, chunk_dims);
-  propList.setDeflate(6);
-  return propList;
-}
-
-void writeStrAttribute(H5::Group &location, const std::string &name,
-                       const std::string &value) {
-  StrType attrType(0, H5T_VARIABLE);
-  DataSpace attrSpace(H5S_SCALAR);
-  auto groupAttr = location.createAttribute(name, attrType, attrSpace);
-  groupAttr.write(attrType, value);
-}
-
-void writeArray(H5::Group &group, const std::string &name,
-                const std::string &value) {
-  StrType dataType(0, value.length() + 1);
-  DataSpace dataSpace = getDataSpace(1);
-  H5::DataSet data = group.createDataSet(name, dataType, dataSpace);
-  data.write(value, dataType);
-}
-
-void writeArray(H5::Group &group, const std::string &name,
-                const std::vector<double> &values) {
-  DataType dataType(PredType::NATIVE_DOUBLE);
-  DataSpace dataSpace = getDataSpace(values);
-
-  DSetCreatPropList propList = getPropList(values.size());
-
-  auto data = group.createDataSet(name, dataType, dataSpace, propList);
-  data.write(&(values[0]), dataType);
-}
-
-void writeArray(H5::Group &group, const std::string &name,
-                const std::vector<int32_t> &values) {
-  DataType dataType(PredType::NATIVE_INT32);
-  DataSpace dataSpace = getDataSpace(values);
-
-  DSetCreatPropList propList = getPropList(values.size());
-
-  auto data = group.createDataSet(name, dataType, dataSpace, propList);
-  data.write(&(values[0]), dataType);
-}
-
-} // anonymous
-
 void SaveDiffCal::writeDoubleFieldFromTable(H5::Group &group,
                                             const std::string &name) {
   auto column = m_calibrationWS->getColumn(name);
   std::vector<double> data;
   column->numeric_fill(data);
   data.erase(data.begin() + m_numValues, data.end());
-  writeArray(group, name, std::vector<double>(data));
+  H5Util::writeArray1D(group, name, data);
 }
 
 void SaveDiffCal::writeIntFieldFromTable(H5::Group &group,
@@ -187,7 +124,7 @@ void SaveDiffCal::writeIntFieldFromTable(H5::Group &group,
   std::vector<int32_t> data;
   column->numeric_fill(data);
   data.erase(data.begin() + m_numValues, data.end());
-  writeArray(group, name, std::vector<int32_t>(data));
+  H5Util::writeArray1D(group, name, data);
 }
 
 // TODO should flip for mask
@@ -221,7 +158,7 @@ void SaveDiffCal::writeIntFieldFromSVWS(
     }
   }
 
-  writeArray(group, name, values);
+  H5Util::writeArray1D(group, name, values);
 }
 
 void SaveDiffCal::generateDetidToIndex() {
@@ -272,8 +209,8 @@ void SaveDiffCal::exec() {
 
   H5File file(filename, H5F_ACC_EXCL);
 
-  auto calibrationGroup = file.createGroup("calibration");
-  writeStrAttribute(calibrationGroup, "NX_class", "NXentry");
+  auto calibrationGroup =
+      H5Util::createGroupNXS(file, "calibration", "NXentry");
 
   this->writeDoubleFieldFromTable(calibrationGroup, "difc");
   this->writeDoubleFieldFromTable(calibrationGroup, "difa");
@@ -314,12 +251,12 @@ void SaveDiffCal::exec() {
 
   // add the instrument information
   auto instrumentGroup = calibrationGroup.createGroup("instrument");
-  writeStrAttribute(instrumentGroup, "NX_class", "NXinstrument");
+  H5Util::writeStrAttribute(instrumentGroup, "NX_class", "NXinstrument");
   if (!instrumentName.empty()) {
-    writeArray(instrumentGroup, "name", instrumentName);
+    H5Util::write(instrumentGroup, "name", instrumentName);
   }
   if (!instrumentSource.empty()) {
-    writeArray(instrumentGroup, "instrument_source", instrumentSource);
+    H5Util::write(instrumentGroup, "instrument_source", instrumentSource);
   }
 
   file.close();

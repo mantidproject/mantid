@@ -125,8 +125,14 @@ elseif ( "${UNIX_DIST}" MATCHES "Ubuntu" )
 endif()
 
 ############################################################################
-# MantidPlot launcher script
+# Launcher scripts
 ############################################################################
+# The scripts need tcmalloc to be resolved to the runtime library as the plain
+# .so symlink is only present when a -dev/-devel package is present
+if ( TCMALLOC_FOUND )
+  get_filename_component ( TCMALLOC_RUNTIME_LIB ${TCMALLOC_LIBRARIES} REALPATH )
+endif ()
+
 # Local dev version
 set ( EXTRA_LDPATH "${ParaView_DIR}/lib" )
 set ( MANTIDPLOT_EXEC MantidPlot )

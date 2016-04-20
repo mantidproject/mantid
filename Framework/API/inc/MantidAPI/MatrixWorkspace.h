@@ -92,8 +92,8 @@ public:
   /**@name Instrument queries */
   //@{
   Geometry::IDetector_const_sptr getDetector(const size_t workspaceIndex) const;
-  double detectorTwoTheta(Geometry::IDetector_const_sptr det) const;
-  double detectorSignedTwoTheta(Geometry::IDetector_const_sptr det) const;
+  double detectorTwoTheta(const Geometry::IDetector &det) const;
+  double detectorSignedTwoTheta(const Geometry::IDetector &det) const;
 
   //@}
 

@@ -114,7 +114,7 @@ vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
         useBox[iBox] = true;
         signals->InsertNextValue(static_cast<float>(signal));
 
-        auto coords = std::unique_ptr<coord_t>(
+        auto coords = std::unique_ptr<coord_t[]>(
             it->getVertexesArray(nVertexes, nNonIntegrated, masks.get()));
 
         // Iterate through all coordinates. Candidate for speed improvement.

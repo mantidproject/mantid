@@ -386,8 +386,7 @@ void VesuvioL1ThetaResolution::calculateDetector(
                 << "detHeight=" << detHeight << std::endl;
 
   // Scattering angle in rad
-  const double theta =
-      m_instWorkspace->detectorTwoTheta(IDetector_const_sptr(detector));
+  const double theta = m_instWorkspace->detectorTwoTheta(*detector);
   if (theta == 0.0)
     return;
 

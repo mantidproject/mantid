@@ -55,14 +55,13 @@ class DLLExport LoadBBY : public API::IFileLoader<Kernel::FileDescriptor> {
     double phase_slave;
     //
     double L1_chopper_value;
+    double L1_source_value;
     double L2_det_value;
     //
     double L2_curtainl_value;
     double L2_curtainr_value;
     double L2_curtainu_value;
     double L2_curtaind_value;
-    //
-    double D_det_value;
     //
     double D_curtainl_value;
     double D_curtainr_value;
@@ -78,9 +77,9 @@ public:
   // description
   int version() const override { return 1; }
   const std::string name() const override { return "LoadBBY"; }
-  const std::string category() const override { return "DataHandling"; }
+  const std::string category() const override { return "DataHandling\\ANSTO"; }
   const std::string summary() const override {
-    return "Loads a BilBy data file into a workspace.";
+    return "Loads a Bilby data file into a workspace.";
   }
 
   // returns a confidence value that this algorithm can load a specified file
