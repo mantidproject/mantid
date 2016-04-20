@@ -22,7 +22,7 @@ vtkStandardNewMacro(vtkPeaksFilter)
 using namespace Mantid::VATES;
 
 vtkPeaksFilter::vtkPeaksFilter()
-    : m_peaksWorkspaceNames(""), m_delimiter(";"), m_radiusNoShape(0.5),
+    : m_delimiter(";"), m_radiusNoShape(0.5),
       m_radiusType(Mantid::Geometry::PeakShape::Radius), m_minValue(0.1),
       m_maxValue(0.1), m_metadataJsonManager(new MetadataJsonManager()),
       m_vatesConfigurations(new VatesConfigurations()), m_coordinateSystem(0) {
@@ -33,7 +33,6 @@ vtkPeaksFilter::vtkPeaksFilter()
 vtkPeaksFilter::~vtkPeaksFilter()
 {
 }
-
 
 int vtkPeaksFilter::RequestData(vtkInformation*, vtkInformationVector **inputVector, vtkInformationVector *outputVector)
 {
@@ -63,8 +62,8 @@ int vtkPeaksFilter::RequestData(vtkInformation*, vtkInformationVector **inputVec
   {
   }
 
-  std::vector<std::string> peaksWorkspaceNames = extractPeakWorkspaceNames();
-  std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces = getPeaksWorkspaces(peaksWorkspaceNames);
+  std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces =
+      getPeaksWorkspaces();
 
   if (peaksWorkspaces.empty())
   {
@@ -117,9 +116,9 @@ void vtkPeaksFilter::PrintSelf(ostream& os, vtkIndent indent)
  * Set the peaks workspace name
  * @param peaksWorkspaceName The peaks workspace name.
 */
-void vtkPeaksFilter::SetPeaksWorkspace(std::string peaksWorkspaceName)
-{
-  m_peaksWorkspaceNames = peaksWorkspaceName;
+void vtkPeaksFilter::SetPeaksWorkspace(const std::string &peaksWorkspaceName) {
+  m_peaksWorkspaceNames =
+      Mantid::Kernel::StringTokenizer(peaksWorkspaceName, m_delimiter);
   this->Modified();
 }
 
@@ -155,33 +154,10 @@ void vtkPeaksFilter::updateAlgorithmProgress(double progress, const std::string&
 }
 
 /**
- * Extract the names of the peaks workspaces.
- * @returns A list of peaks workspace names.
- */
-std::vector<std::string> vtkPeaksFilter::extractPeakWorkspaceNames()
-{
-  // Split the string in to bits 
-  size_t pos = 0;
-  std::string peakNames = m_peaksWorkspaceNames;
-  std::vector<std::string> peaksWorkspaceNamesList;
-  std::string token;
-  while ((pos = peakNames.find(m_delimiter)) != std::string::npos) {
-      token = peakNames.substr(0, pos);
-      peaksWorkspaceNamesList.push_back(token);
-      peakNames.erase(0, pos + m_delimiter.length());
-  }
-
-  // If there was only one element in there then push it
-  peaksWorkspaceNamesList.push_back(peakNames);
-
-  return peaksWorkspaceNamesList;
-}
-
-/**
  * Set the delimiter for concatenated workspace names.
  * @param delimiter The workspace name delimiter
  */
-void vtkPeaksFilter::SetDelimiter(std::string delimiter){
+void vtkPeaksFilter::SetDelimiter(const std::string &delimiter) {
   m_delimiter = delimiter;
   this->Modified();
 }
@@ -191,20 +167,18 @@ void vtkPeaksFilter::SetDelimiter(std::string delimiter){
   * @returns A list of peaks workspace pointers.
   */
 std::vector<Mantid::API::IPeaksWorkspace_sptr>
-vtkPeaksFilter::getPeaksWorkspaces(
-    const std::vector<std::string> &peaksWorkspaceNames) {
-  std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces;
+vtkPeaksFilter::getPeaksWorkspaces() {
   Mantid::API::AnalysisDataServiceImpl &ADS =
       Mantid::API::AnalysisDataService::Instance();
 
-  for (const auto &name : peaksWorkspaceNames) {
+  std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces;
+  for (const auto &name : m_peaksWorkspaceNames) {
     // Check if the peaks workspace exists
     if (ADS.doesExist(name)) {
       peaksWorkspaces.push_back(
           ADS.retrieveWS<Mantid::API::IPeaksWorkspace>(name));
     }
   }
-
   return peaksWorkspaces;
 }
 
