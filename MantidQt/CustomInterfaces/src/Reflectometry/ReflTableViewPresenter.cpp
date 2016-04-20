@@ -136,7 +136,7 @@ namespace CustomInterfaces {
 ReflTableViewPresenter::ReflTableViewPresenter(ReflTableView *tableView,
                                                ProgressableView *progressView)
     : WorkspaceObserver(), m_tableView(tableView), m_progressView(progressView),
-      m_tableDirty(false) {
+      m_workspaceReceiver(), m_tableDirty(false) {
 
   // TODO. Select strategy.
   /*
@@ -145,7 +145,7 @@ ReflTableViewPresenter::ReflTableViewPresenter(ReflTableView *tableView,
   UserCatalogInfo catalogInfo(
   ConfigService::Instance().getFacility().catalogInfo(), *catConfigService);
   */
-
+  // Initialise m_workspaceReceiver
   // Initialise options
   initOptions();
 
@@ -478,7 +478,7 @@ void ReflTableViewPresenter::validateRow(int rowNo) const {
   if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_RUNS))
           .toString()
           .isEmpty())
-    throw std::invalid_argument("Run column may not be empty.");
+    throw std::invalid_argument("Run column may be empty.");
 }
 
 /**
@@ -625,14 +625,20 @@ ReflTableViewPresenter::prepareRunWorkspace(const std::string &runStr) {
 
   std::vector<std::string> runs;
   boost::split(runs, runStr, boost::is_any_of("+"));
-
-  if (runs.empty())
-    throw std::runtime_error("No runs given");
-
   // Remove leading/trailing whitespace from each run
-  for (auto runIt = runs.begin(); runIt != runs.end(); ++runIt)
-    boost::trim(*runIt);
-
+  for (auto runIt = runs.begin(); runIt != runs.end();) {
+    if (runIt->compare("") == 0) {
+      runIt = runs.erase(runIt);
+    } else {
+      boost::trim(*runIt);
+      ++runIt;
+    }
+  }
+  if (runs.empty())
+    throw std::runtime_error(
+        "The processing table contains a row that has no "
+        "run number given.\n Please enter a run number for "
+        "this row to continue with processing.");
   // If we're only given one run, just return that
   if (runs.size() == 1)
     return loadRun(runs[0], instrument);
@@ -705,7 +711,6 @@ ReflTableViewPresenter::loadRun(const std::string &run,
     if (AnalysisDataService::Instance().doesExist(wsName))
       return AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
   }
-
   // We'll just have to load it ourselves
   const std::string filename = instrument + run;
   IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create("Load");
@@ -713,7 +718,6 @@ ReflTableViewPresenter::loadRun(const std::string &run,
   algLoadRun->setProperty("Filename", filename);
   algLoadRun->setProperty("OutputWorkspace", "TOF_" + run);
   algLoadRun->execute();
-
   if (!algLoadRun->isExecuted())
     throw std::runtime_error("Could not open " + filename);
 
@@ -1126,8 +1130,7 @@ Press changes to the same item in the ADS
 */
 void ReflTableViewPresenter::saveTable() {
   if (!m_wsName.empty()) {
-    AnalysisDataService::Instance().addOrReplace(
-        m_wsName, boost::shared_ptr<ITableWorkspace>(m_ws->clone().release()));
+    AnalysisDataService::Instance().addOrReplace(m_wsName, m_ws->clone());
     m_tableDirty = false;
   } else {
     saveTableAs();
@@ -1193,8 +1196,7 @@ void ReflTableViewPresenter::openTable() {
 
   // We create a clone of the table for live editing. The original is not
   // updated unless we explicitly save.
-  ITableWorkspace_sptr newTable =
-      boost::shared_ptr<ITableWorkspace>(origTable->clone().release());
+  ITableWorkspace_sptr newTable = origTable->clone();
   try {
     validateModel(newTable);
     m_ws = newTable;
@@ -1468,7 +1470,8 @@ void ReflTableViewPresenter::plotRow() {
 
   if (selectedRows.empty())
     return;
-
+  if (!rowsValid(selectedRows))
+    return;
   std::set<std::string> workspaces, notFound;
   for (auto row = selectedRows.begin(); row != selectedRows.end(); ++row) {
     const std::string wsName =
@@ -1500,6 +1503,9 @@ void ReflTableViewPresenter::plotGroup() {
   auto selectedRows = m_tableView->getSelectedRows();
 
   if (selectedRows.empty())
+    return;
+
+  if (!rowsValid(selectedRows))
     return;
 
   std::set<int> selectedGroups;

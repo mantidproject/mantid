@@ -2,9 +2,11 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEWQTGUI_H_
 
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
+#include "MantidQtMantidWidgets/PeakPicker.h"
 
 #include "ui_EnggDiffractionQtGUI.h"
 #include "ui_EnggDiffractionQtTabCalib.h"
@@ -15,6 +17,7 @@
 
 #include <boost/scoped_ptr.hpp>
 #include <qwt_plot_curve.h>
+#include <qwt_plot_zoomer.h>
 
 // Qt classes forward declarations
 class QMutex;
@@ -159,6 +162,19 @@ public:
   void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data,
                          std::vector<QwtPlotCurve *> &dataVector, bool focused);
 
+  void setPeakPickerEnabled(bool enabled);
+
+  void
+  setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak);
+
+  double getPeakCentre() const;
+
+  void fittingWriteFile(const std::string &fileDir);
+
+  void setZoomTool(bool enabled);
+
+  void resetView();
+
   void plotFocusedSpectrum(const std::string &wsName) override;
 
   void plotWaterfallSpectrum(const std::string &wsName) override;
@@ -233,6 +249,9 @@ private slots:
   void browsePeaksToFit();
   void fittingListWidgetBank(int idx);
   void setListWidgetBank(int idx);
+  void setPeakPick();
+  void addPeakToList();
+  void savePeakList();
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
@@ -325,6 +344,12 @@ private:
 
   /// Loaded data curves
   std::vector<QwtPlotCurve *> m_fittedDataVector;
+
+  /// Peak picker tool for fitting - only one on the plot at any given moment
+  MantidWidgets::PeakPicker *m_peakPicker;
+
+  /// zoom-in/zoom-out tool for fitting
+  QwtPlotZoomer *m_zoomTool;
 
   /// presenter as in the model-view-presenter
   boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;

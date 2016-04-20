@@ -8182,7 +8182,7 @@ void ApplicationWindow::selectMultiPeak(MultiLayer *plot,
     return;
   }
 
-  if (dynamic_cast<Graph *>(plot->activeGraph())->isPiePlot()) {
+  if (plot->activeGraph()->isPiePlot()) {
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"), // Mantid
         tr("This functionality is not available for pie plots!"));

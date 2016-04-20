@@ -11,6 +11,8 @@ Crystal Improvements
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` has parameter errors reduced, option for simplex minimization,
   and 3 new workspaces which can plot calculated vs theoretical columns, rows, and TOF for each bank.
 - 5 detectors added to the MANDI instrument geometry
+- :ref:`LoadCIF <algm-LoadCIF>` can now also load structures where only anisotropic displacement parameters are given,
+  which are converted to equivalent isotropic parameters.
 
 Engineering Diffraction
 -----------------------
@@ -26,6 +28,11 @@ Graphical user interface:
 - The Fitting tab provides a graphical interface which fits an expected diffraction pattern and visualises them.
   The pastern is specified by providing a list of dSpacing values where Bragg peaks are expected. The algorithm
   :ref:`EnggFitPeaks<algm-EnggFitPeaks>` used in the background fit peaks in those areas using a peak fitting function.
+
+- Improvements to the :ref:`Preview-Engineering_Diffraction-ref` section
+  for Fitting tab, the zoom-in or zoom-out feature on to the data plot
+  is enabled. As well as option to select peak, add peak or save peaks
+  from the data plot is now supported.
 
 Imaging
 -------

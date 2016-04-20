@@ -120,7 +120,7 @@ void IntegratePeaksUsingClusters::exec() {
   IPeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
   IPeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
   if (peakWS != inPeakWS) {
-    peakWS = IPeaksWorkspace_sptr(inPeakWS->clone().release());
+    peakWS = inPeakWS->clone();
   }
 
   {
