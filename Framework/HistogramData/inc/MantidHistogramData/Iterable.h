@@ -1,5 +1,5 @@
-#ifndef MANTID_HISTOGRAMDATA_CONSTITERABLE_H_
-#define MANTID_HISTOGRAMDATA_CONSTITERABLE_H_
+#ifndef MANTID_HISTOGRAMDATA_ITERABLE_H_
+#define MANTID_HISTOGRAMDATA_ITERABLE_H_
 
 #include "MantidHistogramData/DllConfig.h"
 
@@ -7,7 +7,7 @@ namespace Mantid {
 namespace HistogramData {
 namespace detail {
 
-/** ConstIterable : TODO: DESCRIPTION
+/** Iterable : TODO: DESCRIPTION
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -30,24 +30,50 @@ namespace detail {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <class T> class ConstIterable {
+template <class T> class Iterable {
 public:
+  // Note: There is no non-const version of this since it requires expensive cow
+  // access.
   const double &operator[](size_t pos) const {
     return static_cast<const T *>(this)->constData()[pos];
   }
 
 protected:
-  ~ConstIterable() = default;
+  ~Iterable() = default;
 };
 
 template <class T>
-auto cbegin(const ConstIterable<T> &container)
+auto begin(Iterable<T> &container)
+    -> decltype(static_cast<T *>(&container)->data().begin()) {
+  return static_cast<T *>(&container)->data().begin();
+}
+
+template <class T>
+auto end(Iterable<T> &container)
+    -> decltype(static_cast<T *>(&container)->data().end()) {
+  return static_cast<T *>(&container)->data().end();
+}
+
+template <class T>
+auto begin(const Iterable<T> &container)
+    -> decltype(static_cast<const T *>(&container)->data().begin()) {
+  return static_cast<const T *>(&container)->data().begin();
+}
+
+template <class T>
+auto end(const Iterable<T> &container)
+    -> decltype(static_cast<const T *>(&container)->data().end()) {
+  return static_cast<const T *>(&container)->data().end();
+}
+
+template <class T>
+auto cbegin(const Iterable<T> &container)
     -> decltype(static_cast<const T *>(&container)->data().cbegin()) {
   return static_cast<const T *>(&container)->data().cbegin();
 }
 
 template <class T>
-auto cend(const ConstIterable<T> &container)
+auto cend(const Iterable<T> &container)
     -> decltype(static_cast<const T *>(&container)->data().cend()) {
   return static_cast<const T *>(&container)->data().cend();
 }
@@ -56,4 +82,4 @@ auto cend(const ConstIterable<T> &container)
 } // namespace HistogramData
 } // namespace Mantid
 
-#endif /* MANTID_HISTOGRAMDATA_CONSTITERABLE_H_ */
+#endif /* MANTID_HISTOGRAMDATA_ITERABLE_H_ */
