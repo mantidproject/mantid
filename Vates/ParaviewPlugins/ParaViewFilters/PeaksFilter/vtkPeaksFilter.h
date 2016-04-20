@@ -17,10 +17,10 @@ public:
       ostream &os, vtkIndent indent) override;
   vtkPeaksFilter(const vtkPeaksFilter &) = delete;
   vtkPeaksFilter &operator=(const vtkPeaksFilter &) = delete;
-  void SetPeaksWorkspace(const std::string &peaksWorkspaceName);
+  void SetPeaksWorkspace(const std::string &peaksWorkspaceName,
+                         const std::string &delimiter);
   void SetRadiusNoShape(double radius);
   void SetRadiusType(Mantid::Geometry::PeakShape::RadiusType type);
-  void SetDelimiter(const std::string &delimiter);
   void updateAlgorithmProgress(double progress, const std::string& message);
   double GetMinValue();
   double GetMaxValue();
@@ -34,8 +34,9 @@ protected:
                   vtkInformationVector *) override;
 
 private:
-  std::vector<Mantid::API::IPeaksWorkspace_sptr> getPeaksWorkspaces();
-  Mantid::Kernel::StringTokenizer m_peaksWorkspaceNames;
+  std::vector<Mantid::API::IPeaksWorkspace_sptr>
+  getPeaksWorkspaces(const Mantid::Kernel::StringTokenizer &workspaceNames);
+  std::vector<Mantid::API::IPeaksWorkspace_sptr> m_peaksWorkspaces;
   std::string m_delimiter;
   double m_radiusNoShape;
   Mantid::Geometry::PeakShape::RadiusType m_radiusType;

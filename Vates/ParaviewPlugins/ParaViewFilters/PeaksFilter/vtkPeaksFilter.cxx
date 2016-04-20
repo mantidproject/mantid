@@ -62,17 +62,13 @@ int vtkPeaksFilter::RequestData(vtkInformation*, vtkInformationVector **inputVec
   {
   }
 
-  std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces =
-      getPeaksWorkspaces();
-
-  if (peaksWorkspaces.empty())
-  {
+  if (m_peaksWorkspaces.empty()) {
     return 0;
   }
   FilterUpdateProgressAction<vtkPeaksFilter> drawingProgressUpdate(this, "Drawing...");
 
   vtkDataSetToPeaksFilteredDataSet peaksFilter(inputDataSet, outputDataSet);
-  peaksFilter.initialize(peaksWorkspaces, m_radiusNoShape, m_radiusType,
+  peaksFilter.initialize(m_peaksWorkspaces, m_radiusNoShape, m_radiusType,
                          m_coordinateSystem);
   peaksFilter.execute(drawingProgressUpdate);
   return 1;
@@ -115,10 +111,14 @@ void vtkPeaksFilter::PrintSelf(ostream& os, vtkIndent indent)
 /**
  * Set the peaks workspace name
  * @param peaksWorkspaceName The peaks workspace name.
+ * @param delimiter The workspace name delimiter
 */
-void vtkPeaksFilter::SetPeaksWorkspace(const std::string &peaksWorkspaceName) {
-  m_peaksWorkspaceNames =
-      Mantid::Kernel::StringTokenizer(peaksWorkspaceName, m_delimiter);
+void vtkPeaksFilter::SetPeaksWorkspace(const std::string &peaksWorkspaceName,
+                                       const std::string &delimiter) {
+  auto tokenizedNames =
+      Mantid::Kernel::StringTokenizer(peaksWorkspaceName, delimiter);
+  std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces =
+      getPeaksWorkspaces(tokenizedNames);
   this->Modified();
 }
 
@@ -154,25 +154,18 @@ void vtkPeaksFilter::updateAlgorithmProgress(double progress, const std::string&
 }
 
 /**
- * Set the delimiter for concatenated workspace names.
- * @param delimiter The workspace name delimiter
- */
-void vtkPeaksFilter::SetDelimiter(const std::string &delimiter) {
-  m_delimiter = delimiter;
-  this->Modified();
-}
-
-/**
   * Get a list of peaks workspace pointers
   * @returns A list of peaks workspace pointers.
   */
 std::vector<Mantid::API::IPeaksWorkspace_sptr>
-vtkPeaksFilter::getPeaksWorkspaces() {
+vtkPeaksFilter::getPeaksWorkspaces(
+    const Mantid::Kernel::StringTokenizer &workspaceNames) {
+
   Mantid::API::AnalysisDataServiceImpl &ADS =
       Mantid::API::AnalysisDataService::Instance();
 
   std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces;
-  for (const auto &name : m_peaksWorkspaceNames) {
+  for (const auto &name : workspaceNames) {
     // Check if the peaks workspace exists
     if (ADS.doesExist(name)) {
       peaksWorkspaces.push_back(
