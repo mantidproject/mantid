@@ -116,7 +116,7 @@ void SaveHKL::exec() {
   // HKL will be overwritten by equivalent HKL but never seen by user
   PeaksWorkspace_sptr peaksW = getProperty("OutputWorkspace");
   if (peaksW != ws)
-    peaksW.reset(ws->clone().release());
+    peaksW = ws->clone();
   double scaleFactor = getProperty("ScalePeaks");
   double dMin = getProperty("MinDSpacing");
   double wlMin = getProperty("MinWavelength");

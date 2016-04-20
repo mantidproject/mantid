@@ -16,27 +16,19 @@ Description
    instrument scientists decide to do so.
 
 
-Fits a series of single peak to a spectrum with an expected
+Fits a series of single peaks to a spectrum with an expected
 diffraction pattern.  The pattern is specified by providing a list of
-dSpacing values where Bragg peaks are expected. The algorithm then
-fits peaks in those areas using a peak fitting function. The dSpacing
-values for ExpectedPeaks are then converted to time-of-flight (TOF)
-(as in the Mantid :ref:`ConvertUnits <algm-ConvertUnits>`
-algorithm). Expected dSpacing values can be given as an input string
-or in a file with values separated by commas.
+dSpacing values where Bragg peaks are expected. These expected values
+are used as initial peak positions when fitting the peaks. The
+expected dSpacing values can be given as an input string or in a file
+with values separated by commas.
 
-These values are used as start peak position in fit. It is these
-adjusted peak TOF value positions that are fitted against
-ExpectedPeaks dSpacing values according to:
-
-
-.. math:: TOF = DIFC*d + TZERO
-
-
-TZERO and DIFC can then be used within the GSAS program.  The
-parameters DIFC and ZERO are returned and can be retrieved as output
-properties as well. The DIFA coefficient (quadratic term on d) is not
-considered in this version of the algorithm.
+The peaks are fitted one at a time. The dSpacing values given in the
+property ExpectedPeaks are then converted to time-of-flight (TOF) (as
+in the Mantid :ref:`ConvertUnits <algm-ConvertUnits>` algorithm).
+After the conversion of units, the algorithm tries to fit (in
+time-of-flight) a peak in the neighborhood of every expected peak
+using a peak shape or function.
 
 This algorithm currently fits (single) peaks of type
 :ref:`Back2BackExponential <func-Back2BackExponential>`. Other
@@ -45,16 +37,15 @@ simpler :ref:`Gaussian <func-Gaussian>` or the more complex
 :ref:`Bk2BkExpConvPV <func-Bk2BkExpConvPV` or :ref:`IkedaCarpenterPV
 <func-IkedaCarpenterPV>`). To produce an initial guess for the peak
 function parameters this algorithm uses the :ref:`FindPeaks
-<algm-FindPeaks>` algorithm.
+<algm-FindPeaks>` algorithm starting from the expected peaks list
+given in the inputs.
 
-If a name is given in OutParametersTable this algorithm also produces
-a table workspace with that name, containing the two fitted (DIFC,
-ZERO) parameters. The algorithm produces an output table workspace
-with information about the peaks fitted. The table has one row per
-peak and several columns for the different fitted parameters (and the
-errors of these parameters). If a name is given in the input
-OutFittedPeaksTable, the table will be available in the "analysis data
-service" (workspaces window) with that name.
+The algorithm produces an output table workspace with information
+about the peaks fitted. The table has one row per peak and several
+columns for the different fitted parameters (and the errors of these
+parameters). If a name is given in the input OutFittedPeaksTable, the
+table will be available in the "analysis data service" (workspaces
+window) with that name.
 
 Usage
 -----
@@ -81,16 +72,10 @@ Usage
 
    # Run the algorithm. Defaults are shown below. Files entered must be in .csv format and if both ExpectedPeaks and ExpectedPeaksFromFile are entered, the latter will be used.
 
-   out_tbl_name = 'peaks'
-   difc, zero, peaks_tbl = EnggFitPeaks(ws, 0, [0.8, 1.9], OutParametersTable=out_tbl_name)
+   peaks_tbl = EnggFitPeaks(ws, 0, [0.8, 1.9])
 
 
    # Print the results
-   print "Difc: %.1f" % difc
-   print "Zero: %.1f" % zero
-   tbl = mtd[out_tbl_name]
-   print "The output table has %d row(s)" % tbl.rowCount()
-   print "Parameters from the table, Difc: %.1f, Zero: %.1f" % (tbl.cell(0,0), tbl.cell(0,1))
    print "Number of peaks fitted: {0}".format(peaks_tbl.rowCount())
    print "First peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[0])
    print "First fitted peak center (ToF): {0:.1f}".format(peaks_tbl.column('X0')[0])
@@ -101,14 +86,10 @@ Output:
 
 .. testcleanup:: ExTwoPeaks
 
-   DeleteWorkspace(out_tbl_name)
+   DeleteWorkspace(peaks_tbl)
 
 .. testoutput:: ExTwoPeaks
 
-   Difc: 18181.8
-   Zero: 460.5
-   The output table has 1 row(s)
-   Parameters from the table, Difc: 18181.8, Zero: 460.5
    Number of peaks fitted: 2
    First peak expected (dSpacing): 0.8
    First fitted peak center (ToF): 15006.0

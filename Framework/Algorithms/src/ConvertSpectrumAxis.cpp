@@ -27,6 +27,10 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
+namespace {
+constexpr double rad2deg = 180. / M_PI;
+}
+
 void ConvertSpectrumAxis::init() {
   // Validator for Input Workspace
   auto wsVal = boost::make_shared<CompositeValidator>();
@@ -101,7 +105,7 @@ void ConvertSpectrumAxis::exec() {
       IDetector_const_sptr detector = inputWS->getDetector(i);
       double twoTheta, l1val, l2;
       if (!detector->isMonitor()) {
-        twoTheta = inputWS->detectorTwoTheta(detector);
+        twoTheta = inputWS->detectorTwoTheta(*detector);
         l2 = detector->getDistance(*sample);
         l1val = l1;
         efixed = getEfixed(detector, inputWS, emode); // get efixed
@@ -121,7 +125,7 @@ void ConvertSpectrumAxis::exec() {
   } else {
     // Set up binding to memeber funtion. Avoids condition as part of loop over
     // nHistograms.
-    boost::function<double(IDetector_const_sptr)> thetaFunction;
+    boost::function<double(const IDetector &)> thetaFunction;
     if (unitTarget.compare("signed_theta") == 0) {
       thetaFunction =
           boost::bind(&MatrixWorkspace::detectorSignedTwoTheta, inputWS, _1);
@@ -135,7 +139,7 @@ void ConvertSpectrumAxis::exec() {
       try {
         IDetector_const_sptr det = inputWS->getDetector(i);
         // Invoke relevant member function.
-        indexMap.emplace(thetaFunction(det) * 180.0 / M_PI, i);
+        indexMap.emplace(thetaFunction(*det) * rad2deg, i);
       } catch (Exception::NotFoundError &) {
         if (!warningGiven)
           g_log.warning("The instrument definition is incomplete - spectra "

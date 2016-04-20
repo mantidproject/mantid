@@ -129,6 +129,7 @@ void ConvertToMDParent::init() {
       "without quotes) or empty (possible from script only) "
       "to force the workspace recalculation each time the algorithm is "
       "invoked.*");
+  getPointerToProperty("PreprocDetectorsWS")->setAutoTrim(false);
 
   declareProperty(
       make_unique<PropertyWithValue<bool>>("UpdateMasks", false,

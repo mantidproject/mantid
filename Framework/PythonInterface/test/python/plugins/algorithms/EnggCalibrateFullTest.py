@@ -73,7 +73,6 @@ class EnggCalibrateFullTest(unittest.TestCase):
         # for testing purposes. A test with real (much larger) data that produces
         # a correct fit is included in system tests
         tbl_name = 'det_peaks_tbl'
-        det_peaks_tbl = CreateEmptyTableWorkspace()
         self.assertRaises(RuntimeError,
                           EnggCalibrateFull,
                           InputWorkspace=self.__class__._data_ws, Bank=2,

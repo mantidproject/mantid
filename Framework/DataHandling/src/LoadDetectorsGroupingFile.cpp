@@ -131,7 +131,7 @@ void LoadDetectorsGroupingFile::exec() {
     // 4. Translate and set geometry
     this->setByComponents();
     this->setByDetectors();
-    this->setBySpectrumIDs();
+    this->setBySpectrumNos();
 
     progress.report("Checking grouping description");
 
@@ -174,7 +174,7 @@ void LoadDetectorsGroupingFile::exec() {
     m_groupWS->mutableRun().addProperty("Filename", inputFile.toString());
     setProperty("OutputWorkspace", m_groupWS);
 
-    this->setBySpectrumIDs();
+    this->setBySpectrumNos();
   } else {
     // Unknown file type
     throw std::invalid_argument("File type is not supported: " + ext);
@@ -305,9 +305,9 @@ void LoadDetectorsGroupingFile::setByDetectors() {
 }
 
 /*
- * Set workspace index/group id by spectrum IDs
+ * Set workspace index/group id by spectrum Nos
  */
-void LoadDetectorsGroupingFile::setBySpectrumIDs() {
+void LoadDetectorsGroupingFile::setBySpectrumNos() {
   // 1. Get map
   const spec2index_map s2imap = m_groupWS->getSpectrumToWorkspaceIndexMap();
   spec2index_map::const_iterator s2iter;
@@ -318,11 +318,11 @@ void LoadDetectorsGroupingFile::setBySpectrumIDs() {
   for (gsiter = m_groupSpectraMap.begin(); gsiter != m_groupSpectraMap.end();
        ++gsiter) {
     int groupid = gsiter->first;
-    for (auto specid : gsiter->second) {
-      s2iter = s2imap.find(specid);
+    for (auto specNo : gsiter->second) {
+      s2iter = s2imap.find(specNo);
       if (s2iter == s2imap.end()) {
         g_log.error()
-            << "Spectrum " << specid
+            << "Spectrum " << specNo
             << " does not have an entry in GroupWorkspace's spec2index map"
             << std::endl;
         throw std::runtime_error("Logic error");
@@ -331,15 +331,15 @@ void LoadDetectorsGroupingFile::setBySpectrumIDs() {
         if (wsindex >= m_groupWS->getNumberHistograms()) {
           g_log.error() << "Group workspace's spec2index map is set wrong: "
                         << " Found workspace index = " << wsindex
-                        << " for spectrum ID " << specid
+                        << " for spectrum No " << specNo
                         << " with workspace size = "
                         << m_groupWS->getNumberHistograms() << std::endl;
         } else {
           // Finally set the group workspace
           m_groupWS->dataY(wsindex)[0] = groupid;
         } // IF-ELSE: ws index out of range
-      }   // IF-ELSE: spectrum ID has an entry
-    }     // FOR: each spectrum ID
+      }   // IF-ELSE: spectrum No has an entry
+    }     // FOR: each spectrum No
   }       // FOR: each group ID
 
   return;
@@ -382,7 +382,7 @@ void LoadDetectorsGroupingFile::generateNoInstrumentGroupWorkspace() {
   std::sort(specids.begin(), specids.end());
 
   if (specids.size() != spectrumidgroupmap.size()) {
-    g_log.warning() << "Duplicate spectrum ID is defined in input XML file!"
+    g_log.warning() << "Duplicate spectrum No is defined in input XML file!"
                     << std::endl;
   }
 

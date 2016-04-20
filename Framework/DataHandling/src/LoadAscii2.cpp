@@ -223,8 +223,8 @@ void LoadAscii2::writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace,
 /**
 * Check the start of the file for the first data set, then set the number of
 * columns that should be expected thereafter
-* This will also place the file marker at the first spectrum ID or data line,
-* inoring any header information at the moment.
+* This will also place the file marker at the first spectrum No or data line,
+* ignoring any header information at the moment.
 * @param[in] file : The file stream
 * @param[in] line : The current line of data
 * @param[in] columns : the columns of values in the current line of data
