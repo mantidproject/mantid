@@ -1339,7 +1339,7 @@ public:
       auto detector = m_workspace.getDetector(i);
       result += L1;
       result += detector->getDistance(*sample);
-      result += m_workspace.detectorTwoTheta(detector);
+      result += m_workspace.detectorTwoTheta(*detector);
     }
     // We are computing an using the result to fool the optimizer.
     TS_ASSERT_DELTA(result, 5214709.740869, 1e-6);

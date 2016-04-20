@@ -9,7 +9,7 @@
 
 #include <QMutex>
 
-#ifndef WIN32
+#ifndef _WIN32
 // This is exclusively for kill/waitpid (interim solution, see below)
 #include <signal.h>
 #include <sys/wait.h>
@@ -514,7 +514,7 @@ void TomographyIfaceModel::checkDataPathsSet() const {
  * @return running status
  */
 bool TomographyIfaceModel::processIsRunning(int pid) {
-#ifdef WIN32
+#ifdef _WIN32
   HANDLE handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
   DWORD code;
   BOOL rc = GetExitCodeProcess(handle, &code);
@@ -906,14 +906,14 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
 
   // Filters:
 
-  // TODO: (we require here IMAT specific headers to become available soon)
+  // TODO: (we'd require here IMAT specific headers to become available soon)
   // if (filters.prep.normalizeByProtonCharge)
 
   double cor = 0;
   cor = corRegions.cor.X();
   opts.emplace_back("--cor=" + std::to_string(cor));
 
-  int rotationIdx = filters.prep.rotation / 90;
+  int rotationIdx = static_cast<int>(corRegions.rotation / 90);
   // filters.prep.rotation
   opts.emplace_back("--rotation=" + std::to_string(rotationIdx));
 

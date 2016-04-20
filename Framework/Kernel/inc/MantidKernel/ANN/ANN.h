@@ -77,7 +77,7 @@
 #pragma warning(disable : 4100)
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 //----------------------------------------------------------------------
 // For Microsoft Visual C++, externally accessible symbols must be
 // explicitly indicated with DLL_API, which is somewhat like "extern."

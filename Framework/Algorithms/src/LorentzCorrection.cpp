@@ -104,7 +104,7 @@ void LorentzCorrection::exec() {
     if (!detector)
       continue;
 
-    const double twoTheta = inWS->detectorTwoTheta(detector);
+    const double twoTheta = inWS->detectorTwoTheta(*detector);
     const double sinTheta = std::sin(twoTheta / 2);
     double sinThetaSq = sinTheta * sinTheta;
 

@@ -88,9 +88,10 @@ void MantidTable::fillTable() {
     return;
   }
 
-  // temporarily allow resizing
+  // temporarily allow resizing and disable graph auto-update
   d_table->blockResizing(false);
   d_table->blockSignals(true);
+  applicationWindow()->setUpdateCurvesFromTable(this, false);
 
   setNumRows(0);
   setNumCols(0);
@@ -151,9 +152,11 @@ void MantidTable::fillTable() {
     setColumnWidth(i, maxWidth);
   }
 
-  // block resizing
+  // block resizing and turn auto-update back on
   d_table->blockResizing(true);
   d_table->blockSignals(false);
+  applicationWindow()->setUpdateCurvesFromTable(this, true);
+  this->notifyChanges();
 }
 
 /**

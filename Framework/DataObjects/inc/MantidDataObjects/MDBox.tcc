@@ -796,8 +796,7 @@ TMDE(size_t MDBox)::addEventUnsafe(const MDE &Evnt) {
  *
  * @param events :: vector of events to be copied.
  *
- * @return the number of events that were rejected (because of being out of
- *bounds)
+ * @return always returns 0
  */
 TMDE(size_t MDBox)::addEvents(const std::vector<MDE> &events) {
   std::lock_guard<std::mutex> _lock(this->m_dataMutex);

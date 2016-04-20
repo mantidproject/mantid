@@ -314,7 +314,7 @@ Using detector/monitor IDs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Any component that is either a detector or monitor must be assigned a
-unique detector/monitor ID numbers (note this is *not* spectrum ID
+unique detector/monitor ID numbers (note this is *not* spectrum
 numbers but detector/monitor ID numbers). There are at least two
 important reason to insist on this.
 

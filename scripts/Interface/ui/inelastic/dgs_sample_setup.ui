@@ -309,10 +309,10 @@
            </size>
           </property>
           <property name="toolTip">
-           <string>Override the default monitor spectrum IDs for Ei calculation.</string>
+           <string>Override the default monitor spectrum Nos for Ei calculation.</string>
           </property>
           <property name="text">
-           <string>Monitor Spectrum IDs</string>
+           <string>Monitor Spectrum Nos</string>
           </property>
          </widget>
         </item>

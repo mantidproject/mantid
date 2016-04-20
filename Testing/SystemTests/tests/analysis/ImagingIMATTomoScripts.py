@@ -195,11 +195,11 @@ class ImagingIMATTomoTests(unittest.TestCase):
         self.assertTrue(isinstance(cropped, np.ndarray),
                         msg="the result of cropping should be a numpy array")
 
-        expected_shape = (self.data_vol.shape[0], coords[3]-coords[1], coords[2]-coords[0])
+        expected_shape = (self.data_vol.shape[0], coords[3] - coords[1] + 1, coords[2] - coords[0] + 1)
         self.assertEqual(cropped.shape, expected_shape,
                          msg="the result of cropping should have the appropriate dimensions")
 
-        orig_cropped_equals = self.data_vol[:, coords[1]:coords[3], coords[0]:coords[2]] == cropped
+        orig_cropped_equals = self.data_vol[:, coords[1]:coords[3]+1, coords[0]:coords[2]+1] == cropped
         self.assertTrue(orig_cropped_equals.all())
 
     def test_correct_import_excepts(self):
@@ -327,9 +327,11 @@ class ImagingIMATTomoTests(unittest.TestCase):
         self.assertEquals(pre.input_dir_flat, None)
         self.assertEquals(pre.input_dir_dark, None)
         self.assertEquals(pre.max_angle, 360)
+        self.assertEquals(pre.rotation, -1)
         self.assertEquals(pre.normalize_flat_dark, True)
         self.assertEquals(pre.crop_coords, None)
         self.assertEquals(pre.scale_down, 0)
+        self.assertEquals(pre.median_filter_size, 3)
         self.assertEquals(pre.stripe_removal_method, 'wavelet-fourier')
         self.assertEquals(pre.save_preproc_imgs, True)
 
@@ -410,7 +412,7 @@ class ImagingIMATTomoTests(unittest.TestCase):
                                                     '0.README_reconstruction.txt')))
         self.assertTrue(os.path.exists(self.test_output_dir))
 
-    def test_normalize_air_raises(self):
+    def test_rotate_raises(self):
         import IMAT.tomorec.reconstruction_command as cmd
         cmd = cmd.ReconstructionCommand()
 
@@ -420,9 +422,71 @@ class ImagingIMATTomoTests(unittest.TestCase):
         post_conf = cfgs.PostProcConfig()
         conf = cfgs.ReconstructionConfig(pre_conf, alg_conf, post_conf)
 
-        normalized = cmd.normalize_air_region(self.data_vol, pre_conf)
-        np.testing.assert_allclose(normalized, self.data_vol,
-                                   err_msg="Epected normalized data volume not to changed")
+        pre_conf.rotation = 1
+        # absolutely invalid data
+        with self.assertRaises(ValueError):
+            cmd.rotate_stack([], pre_conf)
+
+        # wrong data type or dimensions (for samples / flats / darks
+        with self.assertRaises(ValueError):
+            cmd.rotate_stack(np.ones((3, 2)), pre_conf)
+
+        with self.assertRaises(ValueError):
+            cmd.rotate_stack(self.data_vol, pre_conf, [1])
+
+        with self.assertRaises(ValueError):
+            cmd.rotate_stack(self.data_vol, pre_conf, None, np.zeros((3, 3)))
+
+        with self.assertRaises(ValueError):
+            cmd.rotate_stack(self.data_vol, pre_conf, None, [0, 1])
+
+        # invalid configurations
+        with self.assertRaises(ValueError):
+            cmd.rotate_stack(self.data_vol, None)
+
+        with self.assertRaises(ValueError):
+            cmd.rotate_stack(self.data_vol, [])
+
+        with self.assertRaises(ValueError):
+            cmd.rotate_stack(self.data_vol, conf)
+
+    def test_rotate_imgs_ok(self):
+        import IMAT.tomorec.reconstruction_command as cmd
+        cmd = cmd.ReconstructionCommand()
+
+        import IMAT.tomorec.configs as cfgs
+        pre_conf = cfgs.PreProcConfig()
+        pre_conf.rotation = 1
+
+        (rotated, white, dark) = cmd.rotate_stack(self.data_vol, pre_conf)
+        np.testing.assert_allclose(rotated, self.data_vol,
+                                   err_msg="Epected rotated data volume not to change when "
+                                   "the rotation option is disabled")
+        self.assertEquals(white, None, msg="When the white stack is None, it should still be "
+                          "None after rotation")
+        self.assertEquals(dark, None, msg="When the dark stack is None, it should still be "
+                          "None after rotation")
+
+        pre_conf.rotation = 1
+        (rotated_90, white, dark) = cmd.rotate_stack(self.data_vol, pre_conf)
+        coordinates =  [(3, 510, 0), (2,2,3), (1,0,0), (0, 500, 5)]
+        expected_vals = [-0.810005187988, 0.656108379364, -0.531451165676, 0.430478185415]
+        for coord, expected in zip(coordinates, expected_vals):
+            real_val = rotated_90[coord]
+            self.assertAlmostEquals(real_val, expected,
+                                    msg="Rotation: wrong value found at coordinate {0},{1},{2}. "
+                                    "Expected: {3}, found: {4}".format(coord[0], coord[1], coord[2],
+                                                                       expected, real_val))
+
+    def test_normalize_air_raises(self):
+        import IMAT.tomorec.reconstruction_command as cmd
+        cmd = cmd.ReconstructionCommand()
+
+        import IMAT.tomorec.configs as cfgs
+        pre_conf = cfgs.PreProcConfig()
+        alg_conf = cfgs.ToolAlgorithmConfig()
+        post_conf = cfgs.PostProcConfig()
+        conf = cfgs.ReconstructionConfig(pre_conf, alg_conf, post_conf)
 
         # absolutely invalid data
         with self.assertRaises(ValueError):
@@ -454,6 +518,21 @@ class ImagingIMATTomoTests(unittest.TestCase):
         pre_conf.normalize_air_region = [3, 0, 100]
         with self.assertRaises(ValueError):
             cmd.normalize_air_region(self.data_vol, pre_conf)
+
+        pre_conf.normalize_air_region = [0.1, 0, 50, 50]
+        with self.assertRaises(ValueError):
+            cmd.normalize_air_region(self.data_vol, pre_conf)
+
+    def test_normalize_air_ok(self):
+        import IMAT.tomorec.reconstruction_command as cmd
+        cmd = cmd.ReconstructionCommand()
+
+        import IMAT.tomorec.configs as cfgs
+        pre_conf = cfgs.PreProcConfig()
+
+        normalized = cmd.normalize_air_region(self.data_vol, pre_conf)
+        np.testing.assert_allclose(normalized, self.data_vol,
+                                   err_msg="Epected normalized data volume not to changed")
 
     def test_normalize_flat_raises(self):
         import IMAT.tomorec.reconstruction_command as cmd
@@ -511,6 +590,7 @@ class ImagingIMATTomoTests(unittest.TestCase):
         import IMAT.tomorec.reconstruction_command as cmd
         cmd = cmd.ReconstructionCommand()
 
+        # The images are not .tiff but .fits so the loader should raise
         with self.assertRaises(RuntimeError):
             cmd.read_in_stack(self.test_input_dir, 'tiff')
 

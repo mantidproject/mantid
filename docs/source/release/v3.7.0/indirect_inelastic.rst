@@ -39,6 +39,11 @@ Vesuvio
     - :ref:`VesuvioDiffractionReduction <algm-VesuvioDiffractionReduction>` previously ``EVSDiffractionReduction``
 
 
+- :ref:`LoadVesuvio <algm-LoadVesuvio>` now has the option to load the monitor data in addition to its normal operation. This is  loaded as an additional separate workspace.
+
+- Added a fit function to fit a multivariate Gaussian profile (:ref:`MultivariateGaussianComptonProfile <func-MultivariateGaussianComptonProfile>`)
+
+
 Improvements
 ------------
 
@@ -52,7 +57,6 @@ Improvements
 - :ref:`QECoverage <Interfaces>` planning tool has now been updated, There is now an Emin option included for direct tab,
     If Emin or Emax are left empty; appropriate values are set automatically, the negative values of Ei are treated as
     positive, appropriate informative pop-up messages displayed for invalid values and minor calculations updates.
-
 
 Bugfixes
 --------
