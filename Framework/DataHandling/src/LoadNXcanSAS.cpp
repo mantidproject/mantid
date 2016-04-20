@@ -57,7 +57,6 @@ DataSpaceInformation getDataSpaceInfo(H5::DataSet &dataSet) {
 }
 
 std::string getNameOfEntry(H5::H5File &root) {
-  std::string entryName = "";
   auto numberOfObjects = root.getNumObjs();
   if (numberOfObjects != 1) {
     throw std::invalid_argument("LoadNXcanSAS: Trying to load multiperiod "
