@@ -192,10 +192,10 @@ void InputDataControl::updateDomain() {
   auto y = m_workspace->dataY(m_selectedWorkspaceIndex);
   // find first index with non-zero signal
   auto it = std::find_if(y.begin(), y.end(), [](const double &s){return s>0.0;});
-  auto first = std::distance(y.begin(), it);
+  int first = std::distance(y.begin(), it);
   // find first index with zero signal after the non-zero signal range
   it = std::find_if(it, y.end(), [](const double &s){return s==0.0;});
-  auto second = std::distance(y.begin(), it);
+  int second = std::distance(y.begin(), it);
   m_domain.at(m_selectedWorkspaceIndex) = std::pair<int,int>(first,second);
 }
 
