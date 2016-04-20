@@ -1362,28 +1362,24 @@ void update_trust_region_radius(double& rho, const nlls_options& options, nlls_i
 
 } //     end subroutine update_trust_region_radius
 
-//     subroutine test_convergence(normF,normJF,normF0,normJF0,options,inform)
-//
-//       real, intent(in)  normF, normJf, normF0, normJF0
-//       type( nlls_options ), intent(in)  options
-//       type( nlls_inform ), intent(inout)  inform
-//
-//       if ( normF <= max(options.stop_g_absolute, &
-//            options.stop_g_relative * normF0) ) then
-//          inform.convergence_normf = 1
-//          return
-//       end if
-//
-//       if ( (normJF/normF) <= max(options.stop_g_absolute, &
-//            options.stop_g_relative * (normJF0/normF0)) ) then
-//          inform.convergence_normg = 1
-//       end if
-//
-//       return
-//
-//     end subroutine test_convergence
-//
-//     subroutine solve_spd(A,b,LtL,x,n,inform)
+void test_convergence(double normF, double normJF, double normF0, double normJF0,
+  const nlls_options& options, nlls_inform& inform) {
+
+       if ( normF <= std::max(options.stop_g_absolute, 
+            options.stop_g_relative * normF0) ) then
+          inform.convergence_normf = 1;
+          return;
+       end_if
+
+       if ( (normJF/normF) <= std::max(options.stop_g_absolute, 
+            options.stop_g_relative * (normJF0/normF0)) ) then
+          inform.convergence_normg = 1;
+       end_if
+
+} //     end subroutine test_convergence
+
+void solve_spd(const DoubleFortranMatrix& A, const DoubleFortranVector& b, 
+  DoubleFortranMatrix& LtL, DoubleFortranVector& x, int n, nlls_inform& inform) {
 //       REAL, intent(in)  A(:,:)
 //       REAL, intent(in)  b(:)
 //       REAL, intent(out)  LtL(:,:)
@@ -1393,128 +1389,41 @@ void update_trust_region_radius(double& rho, const nlls_options& options, nlls_i
 //
 //       ! A wrapper for the lapack subroutine dposv.f
 //       ! get workspace for the factors....
-//       LtL(1:n,1:n) = A(1:n,1:n)
-//       x(1:n) = b(1:n)
+       LtL = A;
+       //x = b;
 //       call dposv('L', n, 1, LtL, n, x, n, inform.external_return)
 //       if (inform.external_return .ne. 0) then
 //          inform.status = ERROR.FROM_EXTERNAL
 //          inform.external_name = 'lapack_dposv'
 //          return
 //       end if
-//
-//     end subroutine solve_spd
-//
-//     subroutine solve_general(A,b,x,n,inform,w)
-//       REAL, intent(in)  A(:,:)
-//       REAL, intent(in)  b(:)
-//       REAL, intent(out)  x(:)
-//       integer, intent(in)  n
-//       type( nlls_inform ), intent(inout)  inform
-//       type( solve_general_work )  w
-//
+       LtL.solve(b, x);
+} //     end subroutine solve_spd
+
+void solve_general(const DoubleFortranMatrix& A, const DoubleFortranVector& b,
+   DoubleFortranVector& x, int n, nlls_inform& inform, solve_general_work& w) {
 //       ! A wrapper for the lapack subroutine dposv.f
 //       ! NOTE: A would be destroyed
-//       w.A(1:n,1:n) = A(1:n,1:n)
+       w.A = A;
+       w.A.solve(b, x);
 //       x(1:n) = b(1:n)
 //       call dgesv( n, 1, w.A, n, w.ipiv, x, n, inform.external_return)
-//       if (inform.external_return .ne. 0 ) then
-//          inform.status = ERROR.FROM_EXTERNAL
-//          inform.external_name = 'lapack_dgesv'
-//          return
-//       end if
-//
-//     end subroutine solve_general
-//
-//     subroutine all_eig_symm(A,n,ew,ev,w,inform)
+} //     end subroutine solve_general
+
+void all_eig_symm(const DoubleFortranMatrix& A, int n, DoubleFortranVector& ew, 
+  DoubleFortranMatrix& ev,all_eig_symm_work& w,nlls_inform& inform) {
 //       ! calculate all the eigenvalues of A (symmetric)
-//
-//       real, intent(in)  A(:,:)
-//       integer, intent(in)  n
-//       real, intent(out)  ew(:), ev(:,:)
-//       type( all_eig_symm_work )  w
-//       type( nlls_inform ), intent(inout)  inform
-//
-//       integer  lwork
-//
-//       ! copy the matrix A into the eigenvector array
-//       ev(1:n,1:n) = A(1:n,1:n)
-//
-//       lwork = size(w.work)
-//       ! call dsyev --> all eigs of a symmetric matrix
-//
-//       call dsyev('V', & ! both ew's and ev's 
-//            'U', & ! upper triangle of A
-//            n, ev, n, & ! data about A
-//            ew, w.work, lwork, & 
-//            inform.external_return)
-//       if (inform.external_return .ne. 0) then
-//          inform.status = ERROR.FROM_EXTERNAL
-//          inform.external_name = 'lapack_dsyev'
-//          return
-//       end if
-//
-//     end subroutine all_eig_symm
-//
-//     subroutine min_eig_symm(A,n,ew,ev,options,inform,w)
+  auto M = A;
+  M.eigenSystem(ew, ev);
+} //     end subroutine all_eig_symm
+
 //       ! calculate the leftmost eigenvalue of A
-//
-//       real, intent(in)  A(:,:)
-//       integer, intent(in)  n
-//       real, intent(out)  ew, ev(:)
-//       type( nlls_inform ), intent(inout)  inform
-//       type( nlls_options ), INTENT( IN )  options
-//       type( min_eig_symm_work )  w
-//
-//       real  tol, dlamch
-//       integer  lwork, eigsout, minindex(1)
-//
-//       tol = 2*dlamch('S')!1e-15
-//
-//       w.A(1:n,1:n) = A(1:n,1:n) ! copy A, as workspace for dsyev(x)
-//       ! note that dsyevx (but not dsyev) only destroys the lower (or upper) part of A
-//       ! so we could possibly reduce memory use here...leaving for 
-//       ! ease of understanding for now.
-//
-//       lwork = size(w.work)
-//       if ( options.subproblem_eig_fact ) then
-//          ! call dsyev --> all eigs of a symmetric matrix
-//          call dsyev('V', & ! both ew's and ev's 
-//               'U', & ! upper triangle of A
-//               n, w.A, n, & ! data about A
-//               w.ew, w.work, lwork, & 
-//               inform.external_return)
-//          if (inform.external_return .ne. 0) then
-//             inform.status = ERROR.FROM_EXTERNAL
-//             inform.external_name = 'lapack_dsyev'
-//          end if
-//          minindex = minloc(w.ew)
-//          ew = w.ew(minindex(1))
-//          ev = w.A(1:n,minindex(1))
-//       else
-//          ! call dsyevx --> selected eigs of a symmetric matrix
-//          call dsyevx( 'V',& ! get both ew's and ev's
-//               'I',& ! just the numbered eigenvalues
-//               'U',& ! upper triangle of A
-//               n, w.A, n, & 
-//               1.0, 1.0, & ! not used for RANGE = 'I'
-//               1, 1, & ! only find the first eigenpair
-//               tol, & ! abstol for the eigensolver
-//               eigsout, & ! total number of eigs found
-//               ew, ev, & ! the eigenvalue and eigenvector
-//               n, & ! ldz (the eigenvector array)
-//               w.work, lwork, w.iwork, &  ! workspace
-//               w.ifail, & ! array containing indicies of non-converging ews
-//               inform.external_return)
-//          if (inform.external_return .ne. 0) then
-//             inform.status = ERROR.FROM_EXTERNAL
-//             inform.external_name = 'lapack_dsyevx'
-//          end if
-//       end if
-//
-//       return
-//
-//     end subroutine min_eig_symm
-//
+void min_eig_symm(const DoubleFortranMatrix& A, int n, DoubleFortranVector& ew,
+  DoubleFortranMatrix& ev,const nlls_options& options,nlls_inform& inform,min_eig_symm_work& w) {
+  auto M = A;
+  M.eigenSystem(ew, ev);
+} //     end subroutine min_eig_symm
+
 //     subroutine max_eig(A,B,n,ew,ev,nullevs,options,inform,w)
 //
 //       real, intent(inout)  A(:,:), B(:,:)
