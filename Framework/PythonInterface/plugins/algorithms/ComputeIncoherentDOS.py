@@ -1,7 +1,7 @@
 #pylint: disable = no-init, invalid-name, line-too-long, eval-used, unused-argument, too-many-locals, too-many-branches, too-many-statements
 from mantid.kernel import CompositeValidator, Direction, FloatBoundedValidator
 from mantid.api import mtd, AlgorithmFactory, CommonBinsValidator, HistogramValidator, MatrixWorkspaceProperty, PythonAlgorithm
-from mantid.simpleapi import CreateWorkspace, DeleteWorkspace, Rebin2D
+from mantid.simpleapi import *
 import numpy as np
 from scipy import constants
 
