@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidKernel/make_cow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
 #include "MantidTestHelpers/FakeGmockObjects.h"
@@ -18,6 +19,8 @@
 #include "PropertyManagerHelper.h"
 
 #include <cxxtest/TestSuite.h>
+#include <algorithm>
+#include <functional>
 #include <boost/make_shared.hpp>
 
 using std::size_t;
@@ -1299,85 +1302,49 @@ public:
     const size_t k = j;
     ws.init(numspec, j, k);
 
-    const double value0 = 10;
-    const double value1 = 11;
-    const double value2 = 12;
+    double values[3] = {10, 11, 17};
+    size_t specNumWithDx[3] = {0, 1, 2};
 
-    Mantid::MantidVec dxSpec0(j, value0);
-    Mantid::MantidVecPtr dxSpec1;
-    auto &spec1 = dxSpec1.access();
-    spec1.resize(j, value1);
-    boost::shared_ptr<Mantid::MantidVec> dxSpec2(
-        new Mantid::MantidVec{value2, value2, value2});
+    Mantid::MantidVec dxSpec0(j, values[0]);
+    Mantid::MantidVecPtr dxSpec1 =
+        Kernel::make_cow<Mantid::MantidVec>(j, values[1]);
+    boost::shared_ptr<Mantid::MantidVec> dxSpec2 =
+        boost::make_shared<Mantid::MantidVec>(Mantid::MantidVec(j, values[2]));
+
     // Act
-    TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(0));
-    TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(1));
-    TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(2));
-    TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(3));
-
-    ws.setDx(0, dxSpec0);
-    ws.setDx(1, dxSpec1);
-    ws.setDx(2, dxSpec2);
+    for (size_t spec = 0; spec < numspec; ++spec) {
+      TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(spec));
+    }
+    ws.setDx(specNumWithDx[0], dxSpec0);
+    ws.setDx(specNumWithDx[1], dxSpec1);
+    ws.setDx(specNumWithDx[2], dxSpec2);
 
     // Assert
-    // Test dataDx
-    TSM_ASSERT("Should have x resolution values", ws.hasDx(0));
-    TSM_ASSERT_EQUALS("Should have a length of 3", ws.dataDx(0).size(), j);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 10", ws.dataDx(0)[0],
-                      value0);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 10", ws.dataDx(0)[1],
-                      value0);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 10", ws.dataDx(0)[2],
-                      value0);
+    auto compareValue = [&values](double data, size_t index) {
+      return data == values[index];
+    };
+    for (auto &specNum : specNumWithDx) {
+      TSM_ASSERT("Should have x resolution values", ws.hasDx(specNum));
+      TSM_ASSERT_EQUALS("Should have a length of 3", ws.dataDx(specNum).size(),
+                        j);
+      auto compareValueForSpecificSpectrumNumber =
+          std::bind(compareValue, std::placeholders::_1, specNum);
 
-    TSM_ASSERT("Should have x resolution values", ws.hasDx(1));
-    TSM_ASSERT_EQUALS("Should have a length of 3", ws.dataDx(1).size(), j);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 11", ws.dataDx(1)[0],
-                      value1);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 11", ws.dataDx(1)[1],
-                      value1);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 11", ws.dataDx(1)[2],
-                      value1);
+      auto &dataDx = ws.dataDx(specNum);
+      TSM_ASSERT("dataDx should allow access to the spectrum",
+                 std::all_of(std::begin(dataDx), std::end(dataDx),
+                             compareValueForSpecificSpectrumNumber));
 
-    TSM_ASSERT("Should have x resolution values", ws.hasDx(2));
-    TSM_ASSERT_EQUALS("Should have a length of 3", ws.dataDx(2).size(), j);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 12", ws.dataDx(2)[0],
-                      value2);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 12", ws.dataDx(2)[1],
-                      value2);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 12", ws.dataDx(2)[2],
-                      value2);
+      auto &readDx = ws.readDx(specNum);
+      TSM_ASSERT("readDx should allow access to the spectrum",
+                 std::all_of(std::begin(readDx), std::end(readDx),
+                             compareValueForSpecificSpectrumNumber));
 
-    // Test readDx
-    TSM_ASSERT_EQUALS("Should have x resolution values of 10", ws.readDx(0)[0],
-                      value0);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 10", ws.readDx(0)[1],
-                      value0);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 10", ws.readDx(0)[2],
-                      value0);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 11", ws.readDx(1)[0],
-                      value1);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 11", ws.readDx(1)[1],
-                      value1);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 11", ws.readDx(1)[2],
-                      value1);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 12", ws.readDx(2)[0],
-                      value2);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 12", ws.readDx(2)[1],
-                      value2);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 12", ws.readDx(2)[2],
-                      value2);
-
-    // RefY
-    auto ref0 = ws.refDx(0);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 10", (*ref0)[0],
-                      value0);
-    auto ref1 = ws.refDx(1);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 11", (*ref1)[1],
-                      value1);
-    auto ref2 = ws.refDx(2);
-    TSM_ASSERT_EQUALS("Should have x resolution values of 12", (*ref2)[2],
-                      value2);
+      auto &refDx = ws.refDx(specNum);
+      TSM_ASSERT("readDx should allow access to the spectrum",
+                 std::all_of(std::begin(*refDx), std::end(*refDx),
+                             compareValueForSpecificSpectrumNumber));
+    }
 
     TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(3));
   }
