@@ -192,7 +192,7 @@ void FindDetectorsPar::setOutputTable() {
 }
 
 // Constant for converting Radians to Degrees
-const double rad2deg = 180.0 / M_PI;
+constexpr double rad2deg = 180.0 / M_PI;
 
 /** method calculates an angle closest to the initial one taken on a ring
   * e.g. given inital angle 179 deg and another one -179 closest one to 179 is
