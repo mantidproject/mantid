@@ -40,11 +40,15 @@ private:
 
 public:
   enum class XMode { BinEdges, Points };
-  Histogram(XMode mode) : m_x(Kernel::make_cow<HistogramX>(0)), m_xMode(mode) {}
-  Histogram(const Points &points)
+  explicit Histogram(XMode mode)
+      : m_x(Kernel::make_cow<HistogramX>(0)), m_xMode(mode) {}
+  explicit Histogram(const Points &points)
       : m_x(points.cowData()), m_xMode(XMode::Points) {}
-  Histogram(const BinEdges &edges)
-      : m_x(edges.cowData()), m_xMode(XMode::BinEdges) {}
+  explicit Histogram(const BinEdges &edges)
+      : m_x(edges.cowData()), m_xMode(XMode::BinEdges) {
+    if (m_x->size() == 1)
+      throw std::logic_error("Histogram: BinEdges size cannot be 1");
+  }
 
   XMode xMode() const noexcept { return m_xMode; }
 
@@ -65,16 +69,9 @@ public:
   template <typename T> void setBinEdges(T &&data);
   template <typename T> void setPoints(T &&data);
 
-  /*
-  template <typename T> void setPoints(T &&data) {
-    // TODO size check
-    if (xMode() == XMode::BinEdges)
-    if (m_binEdges)
-      m_binEdges = BinEdges{};
-    m_xMode = XMode::Points;
-    m_points = std::forward<T>(data);
-  }
-  */
+  const HistogramX &x() const { return *m_x; }
+  const HistogramX &constX() const { return *m_x; }
+  HistogramX &x() { return m_x.access(); }
 
   // Temporary legacy interface to X
   void setX(const MantidVec &X) { m_x.access().rawData() = X; }
