@@ -22,6 +22,7 @@ The type of Nexus file is identified as follows:
 
 * Else if main entry is ``"mantid_workspace_1"``
   then it is taken to be a processed Nexus file and :ref:`algm-LoadNexusProcessed` is called.
+  *The spectrum properties are ignored in this case.*
 
 * Else if main entry is ``"raw_data_1"``
   then it is taken to be an ISIS Nexus file and :ref:`algm-LoadISISNexus` is called.
