@@ -73,7 +73,7 @@ public:
     return *this;
   }
   VectorOf &operator=(const CowType &data) {
-    if (&(*m_data) != &data)
+    if (!m_data || (&(*m_data) != &data))
       m_data = Kernel::make_cow<CowType>(data);
     return *this;
   }

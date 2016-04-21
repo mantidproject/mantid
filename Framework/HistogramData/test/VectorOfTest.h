@@ -267,7 +267,7 @@ public:
 
   void test_vector_assignment() {
     const std::vector<double> raw{0.1, 0.2, 0.3};
-    VectorOfTester values;
+    VectorOfTester values(0);
     TS_ASSERT_THROWS_NOTHING(values = raw);
     TS_ASSERT(values);
     TS_ASSERT_DIFFERS(&(values.constData()[0]), &raw[0]);
@@ -283,6 +283,16 @@ public:
     TS_ASSERT(values);
     // Reference still valid after self assignment
     TS_ASSERT_EQUALS(&(values.constData()), &vector);
+  }
+
+  void test_vector_assignment_to_null_vector() {
+    const std::vector<double> raw{0.1, 0.2, 0.3};
+    VectorOfTester values;
+    TS_ASSERT_THROWS_NOTHING(values = raw);
+    TS_ASSERT(values);
+    TS_ASSERT_DIFFERS(&(values.constData()[0]), &raw[0]);
+    TS_ASSERT_EQUALS(values.size(), 3);
+    TS_ASSERT_EQUALS(values[0], 0.1);
   }
 
   void test_operator_bool() {
