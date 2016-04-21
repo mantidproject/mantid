@@ -229,7 +229,7 @@ void OptimizeCrystalPlacement::exec() {
   int N = 3 * nPeaksUsed; // Peaks->getNumberPeaks();
   mwkspc = WorkspaceFactory::Instance().create("Workspace2D",
                                                static_cast<size_t>(1), N, N);
-  mwkspc->setX(0, Kernel::make_cow<HistogramData::HistogramX>(std::move(xRef)));
+  mwkspc->setX(0, xRef);
   mwkspc->setData(0, yvals, errs);
 
   std::string FuncArg = "name=PeakHKLErrors,PeakWorkspaceName=" +

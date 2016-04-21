@@ -269,8 +269,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
     Yvals.access().push_back(0.0);
   }
 
-  auto Xptr = Kernel::make_cow<HistogramData::HistogramX>(Xvals);
-  ws->setX(0, Xptr);
+  ws->setX(0, Xvals);
   ws->setData(0, Yvals);
 
   //       -------------Set up other Fit function arguments------------------
