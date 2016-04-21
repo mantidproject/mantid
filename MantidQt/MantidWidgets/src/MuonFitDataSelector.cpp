@@ -255,6 +255,7 @@ void MuonFitDataSelector::clearGroupCheckboxes() {
 /**
  * Sets checkboxes on UI for given number
  * of periods plus "combination" boxes.
+ * Hides control for single-period data.
  * @param numPeriods :: [input] Number of periods
  */
 void MuonFitDataSelector::setNumPeriods(size_t numPeriods) {
@@ -284,6 +285,12 @@ void MuonFitDataSelector::setNumPeriods(size_t numPeriods) {
       m_periodBoxes.remove(name);
     }
   }
+  // Always put the combination at the bottom ("-1" = at end)
+  m_ui.verticalLayoutPeriods->removeItem(m_ui.horizontalLayoutPeriodsCombine);
+  m_ui.verticalLayoutPeriods->insertLayout(-1,
+                                           m_ui.horizontalLayoutPeriodsCombine);
+
+  // Hide box if single-period
   this->setPeriodVisibility(numPeriods > 1);
 }
 
