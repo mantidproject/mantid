@@ -1,5 +1,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Workspace.h"
@@ -528,6 +529,10 @@ void LoadNXcanSAS::exec() {
   const bool loadTransmissions = getProperty("LoadTransmission");
   H5::H5File file(fileName, H5F_ACC_RDONLY);
 
+  // Setup progress bar
+  const int numberOfSteps = loadTransmissions ? 4 : 3;
+  Progress progress(this, 0.1, 1.0, numberOfSteps);
+
   auto entryName = getNameOfEntry(file);
   auto entry = file.openGroup(entryName);
 
@@ -537,16 +542,21 @@ void LoadNXcanSAS::exec() {
   auto ws = createWorkspace(intensity);
 
   // Load the logs
+  progress.report("Loading logs.");
   loadLogs(entry, ws);
 
   // Load instrument
+  progress.report("Loading instrument.");
   loadInstrument(entry, ws);
 
   // Load data
+  progress.report("Loading data.");
   loadData(entry, ws);
 
   // Load Transmissions
+
   if (loadTransmissions) {
+     progress.report("Loading transmissions.");
     // Load sample transmission
     loadTransmission(entry, sasTransmissionSpectrumNameSampleAttrValue);
 

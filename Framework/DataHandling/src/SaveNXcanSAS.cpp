@@ -1,6 +1,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataHandling/H5Util.h"
@@ -721,30 +722,49 @@ void SaveNXcanSAS::exec() {
 
   const std::string suffix("01");
 
+
+  // Setup progress bar
+  int numberOfSteps = 4;
+  if (transmissionSample) {
+    ++numberOfSteps;
+  }
+
+  if (transmissionCan) {
+    ++numberOfSteps;
+  }
+
+  Progress progress(this, 0.1, 1.0, numberOfSteps);
+
   // Add a new entry
+  progress.report("Adding a new entry.");
   auto sasEntry = addSasEntry(file, workspace, suffix);
 
-  // Add the data
-  addData(sasEntry, workspace);
-
   // Add the instrument information
+  progress.report("Adding instrument information.");
   const auto detectors = splitDetectorNames(detectorNames);
   addInstrument(sasEntry, workspace, radiationSource, detectors);
 
   // Add the process information
+  progress.report("Adding process information.");
   addProcess(sasEntry, workspace);
 
   // Add the transmissions for sample
   if (transmissionSample) {
+    progress.report("Adding sample transmission information.");
     addTransmission(sasEntry, transmissionSample,
                     sasTransmissionSpectrumNameSampleAttrValue);
   }
 
   // Add the transmissions for can
   if (transmissionCan) {
+    progress.report("Adding can transmission information.");
     addTransmission(sasEntry, transmissionCan,
                     sasTransmissionSpectrumNameCanAttrValue);
   }
+
+  // Add the data
+  progress.report("Adding data.");
+  addData(sasEntry, workspace);
 
   file.close();
 }
