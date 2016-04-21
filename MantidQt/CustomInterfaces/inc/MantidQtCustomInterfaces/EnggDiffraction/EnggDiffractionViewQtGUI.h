@@ -160,11 +160,15 @@ public:
 
   std::vector<std::string> splitFittingDirectory(std::string &selectedfPath);
 
+  void enableMultiRun(std::string firstRun, std::string lastRun);
+
   void addBankItems(std::vector<std::string> splittedBaseName,
                     QString selectedFile);
 
   void setDefaultBank(std::vector<std::string> splittedBaseName,
                       QString selectedFile);
+
+  bool isDigit(std::string text);
 
   std::string fittingRunNoFactory(std::string bank, std::string fileName,
                                   std::string &bankDir, std::string fileDir);
