@@ -35,6 +35,13 @@ with an integer value of ``2`` and also a
 ``definition`` item with string value ``"muonTD"`` or ``"pulsedTD"``,
 else it will be identified as version 1.
 
+The following properties apply only to Version 1:
+
+* AutoGroup
+* MainFieldDirection
+* DeadTimeTable
+* DetectorGroupingTable
+
 Time series data
 ################
 
