@@ -27,6 +27,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Algorithms;
+using Mantid::HistogramData::BinEdges;
 
 typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
 typedef Mantid::DataObjects::TableWorkspace_sptr TWS_type;
@@ -583,8 +584,7 @@ private:
             numHists, numBins, true);
     testWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
-    MantidVecPtr xdata;
-    xdata.access().resize(numBins + 1);
+    BinEdges xdata(numBins + 1);
     // Update X data  to a sensible values. Looks roughly like the MARI binning
     // Update the Y values. We don't care about errors here
 
@@ -602,10 +602,10 @@ private:
             peakTwoHeight *
             exp(-0.5 * pow(xValue - peakTwoCentre, 2.) / sigmaSqTwo);
       }
-      xdata.access()[i] = xValue;
+      xdata.data()[i] = xValue;
     }
-    testWS->setX(0, xdata);
-    testWS->setX(1, xdata);
+    testWS->histogram(0).setBinEdges(xdata);
+    testWS->histogram(1).setBinEdges(xdata);
 
     std::vector<double> edges;
     edges.push_back(0.0);
