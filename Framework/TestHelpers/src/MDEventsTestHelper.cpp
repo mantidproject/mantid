@@ -89,7 +89,7 @@ createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
 
   // Create the x-axis for histogramming.
   HistogramData::BinEdges x1(numBins);
-  auto &xRef = x1.rawData();
+  auto &xRef = x1.data();
   for (int i = 0; i < numBins; ++i) {
     xRef[i] = i * binDelta;
   }

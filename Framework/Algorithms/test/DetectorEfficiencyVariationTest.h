@@ -107,9 +107,9 @@ public:
     Workspace2D_sptr inputA = boost::dynamic_pointer_cast<Workspace2D>(spaceA);
     Workspace2D_sptr inputB = boost::dynamic_pointer_cast<Workspace2D>(spaceB);
     BinEdges x(NXs);
-    auto &rawX = x.rawData();
+    auto &xData = x.data();
     for (int i = 0; i < NXs; ++i) {
-      rawX[i] = i * 1000;
+      xData[i] = i * 1000;
     }
     // random numbers that will be copied into the workspace spectra
     const short ySize = NXs - 1;

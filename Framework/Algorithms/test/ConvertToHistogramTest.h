@@ -47,9 +47,7 @@ public:
         numSpectra, numYPoints, false);
     // Reset the X data to something reasonable
     Points x(numYPoints);
-    for (int i = 0; i < numYPoints; ++i) {
-      x.rawData()[i] = (double)i;
-    }
+    std::iota(begin(x), end(x), 0.0);
     for (int i = 0; i < numSpectra; ++i) {
       testWS->histogram(i).setPoints(x);
     }

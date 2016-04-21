@@ -116,16 +116,14 @@ private:
     space->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
 
-    BinEdges x(nbins + 1, 0.0);
+    BinEdges x{0.0, 1.0, 2.0, 3.0, 4.0};
     MantidVecPtr y, e;
     y.access().resize(nbins, 0.0);
     e.access().resize(nbins, 0.0);
     for (int i = 0; i < nbins; ++i) {
-      x.rawData()[i] = static_cast<double>((1 + i) / 100);
       y.access()[i] = 10 + i;
       e.access()[i] = sqrt(5.0);
     }
-    x.rawData()[nbins] = static_cast<double>(nbins);
     // Fill a couple of zeros just as a check that it doesn't get changed
     y.access()[nbins - 1] = 0.0;
     e.access()[nbins - 1] = 0.0;

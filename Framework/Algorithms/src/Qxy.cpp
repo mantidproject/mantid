@@ -370,9 +370,8 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   outputWorkspace->replaceAxis(1, verticalAxis);
 
   // Build up the X values
-  HistogramData::BinEdges axis(0);
-  auto &horizontalAxisRef = axis.rawData();
-  horizontalAxisRef.resize(bins);
+  HistogramData::BinEdges axis(bins);
+  auto &horizontalAxisRef = axis.data();
   for (int i = 0; i < bins; ++i) {
     const double currentVal = startVal + i * delta;
     // Set the X value
