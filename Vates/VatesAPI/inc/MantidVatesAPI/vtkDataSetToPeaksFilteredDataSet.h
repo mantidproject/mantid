@@ -49,7 +49,7 @@ namespace VATES
           vtkSmartPointer<vtkUnstructuredGrid> input,
           vtkSmartPointer<vtkUnstructuredGrid> output);
       vtkDataSetToPeaksFilteredDataSet(
-          const vtkDataSetToPeaksFilteredDataSet &) = delete;
+          const vtkDataSetToPeaksFilteredDataSet &) = default;
       vtkDataSetToPeaksFilteredDataSet &
       operator=(const vtkDataSetToPeaksFilteredDataSet &) = delete;
       virtual ~vtkDataSetToPeaksFilteredDataSet();
