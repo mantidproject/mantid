@@ -44,10 +44,11 @@ namespace VATES
 vtkDataSetToPeaksFilteredDataSet::vtkDataSetToPeaksFilteredDataSet(
     vtkSmartPointer<vtkUnstructuredGrid> input,
     vtkSmartPointer<vtkUnstructuredGrid> output)
-    : m_inputData(input), m_outputData(output), m_isInitialised(false),
-      m_radiusNoShape(0.2),
-      m_radiusType(Geometry::PeakShape::RadiusType::Radius), m_radiusFactor(2),
-      m_defaultRadius(0.1), m_coordinateSystem(0) {
+    : m_radiusNoShape(0.2), m_radiusFactor(2), m_defaultRadius(0.1),
+      m_radiusType(Geometry::PeakShape::RadiusType::Radius),
+      m_isInitialised(false),
+      m_coordinateSystem(Mantid::Kernel::SpecialCoordinateSystem::None),
+      m_inputData(input), m_outputData(output) {
   if (nullptr == input) {
     throw std::runtime_error("Cannot construct "
                              "vtkDataSetToPeaksFilteredDataSet with NULL input "
@@ -78,7 +79,8 @@ void vtkDataSetToPeaksFilteredDataSet::initialize(
   m_radiusNoShape = radiusNoShape;
   m_radiusType = radiusType;
   m_isInitialised = true;
-  m_coordinateSystem = coordinateSystem;
+  m_coordinateSystem =
+      static_cast<Mantid::Kernel::SpecialCoordinateSystem>(coordinateSystem);
 }
 
 /**
@@ -165,14 +167,11 @@ vtkDataSetToPeaksFilteredDataSet::getPeaksInfo(
   // Iterate over all peaksworkspaces and add the their info to the output
   // vector
   for (const auto &workspace : peaksWorkspaces) {
-    const auto coordinateSystem =
-        static_cast<Mantid::Kernel::SpecialCoordinateSystem>(
-            m_coordinateSystem);
     int numPeaks = workspace->getNumberPeaks();
     // Iterate over all peaks for the workspace
     for (int i = 0; i < numPeaks; i++) {
       Mantid::Geometry::IPeak *peak = workspace->getPeakPtr(i);
-      addSinglePeak(peak, coordinateSystem, peaksInfo);
+      addSinglePeak(peak, peaksInfo);
     }
   }
   return peaksInfo;
@@ -185,47 +184,43 @@ GCC_DIAG_OFF(strict-aliasing)
    * @param coordinateSystem The coordinate system in which the peaks position should be retrieved.
    * @param peaksInfo A reference to the vector containing peak information.
    */
-  void vtkDataSetToPeaksFilteredDataSet::addSinglePeak(Mantid::Geometry::IPeak* peak, const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem, std::vector<std::pair<Mantid::Kernel::V3D, double>>& peaksInfo)
-  {
-    double radius = m_defaultRadius;
-    const Mantid::Geometry::PeakShape& shape = peak->getPeakShape();
-    std::string shapeName = shape.shapeName();
+void vtkDataSetToPeaksFilteredDataSet::addSinglePeak(
+    Mantid::Geometry::IPeak *peak,
+    std::vector<std::pair<Mantid::Kernel::V3D, double>> &peaksInfo) {
+  double radius = m_defaultRadius;
+  const Mantid::Geometry::PeakShape &shape = peak->getPeakShape();
+  std::string shapeName = shape.shapeName();
 
-    if (shapeName ==
-            Mantid::DataObjects::PeakShapeSpherical::sphereShapeName() ||
-        shapeName ==
-            Mantid::DataObjects::PeakShapeEllipsoid::ellipsoidShapeName()) {
+  if (shapeName == Mantid::DataObjects::PeakShapeSpherical::sphereShapeName() ||
+      shapeName ==
+          Mantid::DataObjects::PeakShapeEllipsoid::ellipsoidShapeName()) {
 
-      boost::optional<double> rad = shape.radius(m_radiusType);
-      if (rad.is_initialized()) {
-        radius = rad.get();
-      }
+    boost::optional<double> rad = shape.radius(m_radiusType);
+    if (rad.is_initialized()) {
+      radius = rad.get();
     }
-    else
-    {
-      radius = m_radiusNoShape;
-    }
+  } else {
+    radius = m_radiusNoShape;
+  }
 
-    // Get the position in the correct frame.
-    switch(coordinateSystem)
-    {
-      case(Mantid::Kernel::SpecialCoordinateSystem::HKL):
-        peaksInfo.emplace_back(peak->getHKL(), radius * m_radiusFactor);
-        break;
-      case(Mantid::Kernel::SpecialCoordinateSystem::QLab):
-        peaksInfo.emplace_back(peak->getQLabFrame(), radius * m_radiusFactor);
-        break;
-      case(Mantid::Kernel::SpecialCoordinateSystem::QSample):
-        peaksInfo.emplace_back(peak->getQSampleFrame(),
-                               radius * m_radiusFactor);
-        break;
-      default:
-        throw std::invalid_argument("The special coordinate systems don't match.");
-    }
+  // Get the position in the correct frame.
+  switch (m_coordinateSystem) {
+  case (Mantid::Kernel::SpecialCoordinateSystem::HKL):
+    peaksInfo.emplace_back(peak->getHKL(), radius * m_radiusFactor);
+    break;
+  case (Mantid::Kernel::SpecialCoordinateSystem::QLab):
+    peaksInfo.emplace_back(peak->getQLabFrame(), radius * m_radiusFactor);
+    break;
+  case (Mantid::Kernel::SpecialCoordinateSystem::QSample):
+    peaksInfo.emplace_back(peak->getQSampleFrame(), radius * m_radiusFactor);
+    break;
+  default:
+    throw std::invalid_argument("The special coordinate systems don't match.");
+  }
   }
 //GCC_DIAG_ON(strict-aliasing)
   /**
-   * Get the radiys for no shape
+   * Get the radius for no shape
    * @returns The shape of the radius.
    */
   double vtkDataSetToPeaksFilteredDataSet::getRadiusNoShape(){

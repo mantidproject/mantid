@@ -86,6 +86,7 @@ bool PeakShapeSpherical::operator==(const PeakShapeSpherical &other) const {
 
 /**
  * @brief Get radius of sphere
+ * @param type Which radius to get.
  * @return radius
  */
 boost::optional<double> PeakShapeSpherical::radius(RadiusType type) const {

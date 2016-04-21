@@ -47,6 +47,7 @@ public:
   virtual int algorithmVersion() const = 0;
   /// Shape name
   virtual std::string shapeName() const = 0;
+  /// For selecting different radius types.
   enum RadiusType { Radius = 0, OuterRadius = 1, InnerRadius = 2 };
   /// Radius
   virtual boost::optional<double> radius(RadiusType type) const = 0;

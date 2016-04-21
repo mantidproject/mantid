@@ -36,14 +36,14 @@ protected:
 private:
   std::vector<Mantid::API::IPeaksWorkspace_sptr>
   getPeaksWorkspaces(const Mantid::Kernel::StringTokenizer &workspaceNames);
-  std::vector<Mantid::API::IPeaksWorkspace_sptr> m_peaksWorkspaces;
   double m_radiusNoShape;
-  Mantid::Geometry::PeakShape::RadiusType m_radiusType;
   double m_minValue;
   double m_maxValue;
+  int m_coordinateSystem;
+  Mantid::Geometry::PeakShape::RadiusType m_radiusType;
   std::string m_instrument;
+  std::vector<Mantid::API::IPeaksWorkspace_sptr> m_peaksWorkspaces;
   boost::scoped_ptr<Mantid::VATES::MetadataJsonManager> m_metadataJsonManager;
   boost::scoped_ptr<Mantid::VATES::VatesConfigurations> m_vatesConfigurations;
-  int m_coordinateSystem;
 };
 #endif

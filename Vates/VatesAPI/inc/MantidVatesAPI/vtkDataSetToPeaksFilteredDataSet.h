@@ -48,6 +48,10 @@ namespace VATES
       vtkDataSetToPeaksFilteredDataSet(
           vtkSmartPointer<vtkUnstructuredGrid> input,
           vtkSmartPointer<vtkUnstructuredGrid> output);
+      vtkDataSetToPeaksFilteredDataSet(
+          const vtkDataSetToPeaksFilteredDataSet &) = delete;
+      vtkDataSetToPeaksFilteredDataSet &
+      operator=(const vtkDataSetToPeaksFilteredDataSet &) = delete;
       virtual ~vtkDataSetToPeaksFilteredDataSet();
       /// Set the name of the peaks workspace
       void initialize(
@@ -61,20 +65,23 @@ namespace VATES
       /// Get radius factor
       double getRadiusFactor();
     private:
-      vtkDataSetToPeaksFilteredDataSet& operator=(const vtkDataSetToPeaksFilteredDataSet& other);
       std::vector<std::pair<Mantid::Kernel::V3D, double>>
       getPeaksInfo(const std::vector<Mantid::API::IPeaksWorkspace_sptr>
                        &peaksWorkspaces);
-      void addSinglePeak(Mantid::Geometry::IPeak* peak, const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem, std::vector<std::pair<Mantid::Kernel::V3D, double>>& peaksInfo);
-      vtkSmartPointer<vtkUnstructuredGrid> m_inputData; ///< Data to peak filter
-      vtkSmartPointer<vtkUnstructuredGrid> m_outputData; ///< Peak filtered data
-      std::vector<Mantid::API::IPeaksWorkspace_sptr> m_peaksWorkspaces; ///< A list of peaks workspace names.
-      bool m_isInitialised; ///<Flag if the filter is initialized
+      void addSinglePeak(
+          Mantid::Geometry::IPeak *peak,
+          std::vector<std::pair<Mantid::Kernel::V3D, double>> &peaksInfo);
       double m_radiusNoShape; ///< The radius for peaks with no peak shape.
-      Geometry::PeakShape::RadiusType m_radiusType;
       double m_radiusFactor;///< By how much we want to trim the data set.
       double m_defaultRadius; ///< A default radius.
-      int m_coordinateSystem;///< A coordinate system.
+      Geometry::PeakShape::RadiusType m_radiusType;
+      bool m_isInitialised; ///<Flag if the filter is initialized
+      Mantid::Kernel::SpecialCoordinateSystem
+          m_coordinateSystem; ///< A coordinate system.
+      vtkSmartPointer<vtkUnstructuredGrid> m_inputData; ///< Data to peak filter
+      vtkSmartPointer<vtkUnstructuredGrid> m_outputData; ///< Peak filtered data
+      std::vector<Mantid::API::IPeaksWorkspace_sptr>
+          m_peaksWorkspaces; ///< A list of peaks workspace names.
   };
 }
 }
