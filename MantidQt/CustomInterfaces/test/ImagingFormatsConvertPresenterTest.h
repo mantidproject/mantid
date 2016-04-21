@@ -41,16 +41,45 @@ public:
   }
 
   void test_init() {
-    m_presenter->notify(IImagingFormatsConvertPresenter::Init);
+    testing::NiceMock<ImagingFormatsConvertViewMock> mockView;
+    MantidQt::CustomInterfaces::ImagingFormatsConvertPresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, setFormats(testing::_, testing::_)).Times(1);
+
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IImagingFormatsConvertPresenter::Init);
+    TSM_ASSERT("Expected use of Mock view not satisfied.",
+               testing::Mock::VerifyAndClearExpectations(&mockView));
   }
 
   void test_convertFails() {
-    m_presenter->notify(IImagingFormatsConvertPresenter::Convert);
+    testing::NiceMock<ImagingFormatsConvertViewMock> mockView;
+    MantidQt::CustomInterfaces::ImagingFormatsConvertPresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, inputPath()).Times(1).WillRepeatedly(Return(""));
+    EXPECT_CALL(mockView, outputPath()).Times(1).WillRepeatedly(Return(""));
+
+    pres.notify(IImagingFormatsConvertPresenter::Convert);
+    TSM_ASSERT("Expected use of Mock view not satisfied.",
+               testing::Mock::VerifyAndClearExpectations(&mockView));
   }
 
   void test_shutDown() {
+    testing::NiceMock<ImagingFormatsConvertViewMock> mockView;
+    MantidQt::CustomInterfaces::ImagingFormatsConvertPresenter pres(&mockView);
 
-    m_presenter->notify(IImagingFormatsConvertPresenter::ShutDown);
+    EXPECT_CALL(mockView, saveSettings()).Times(1);
+
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IImagingFormatsConvertPresenter::ShutDown);
+    TSM_ASSERT("Expected use of Mock view not satisfied.",
+               testing::Mock::VerifyAndClearExpectations(&mockView));
   }
 
 private:
