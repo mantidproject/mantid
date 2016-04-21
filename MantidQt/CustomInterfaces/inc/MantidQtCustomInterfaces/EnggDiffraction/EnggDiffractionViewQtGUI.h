@@ -165,7 +165,7 @@ public:
   void addBankItems(std::vector<std::string> splittedBaseName,
                     QString selectedFile);
 
-  void addRunNoItem(std::vector<std::string> splittedBaseName);
+  void addRunNoItem(std::vector<std::string> runNumVector);
 
   void setDefaultBank(std::vector<std::string> splittedBaseName,
                       QString selectedFile);
@@ -226,9 +226,6 @@ private slots:
   void focusStopClicked();
   void rebinTimeClicked();
   void rebinMultiperiodClicked();
-  void fitClicked();
-  void fittingRunNoChanged();
-  void setBankDir(int idx);
 
   // slots of the settings tab/section of the interface
   void browseInputDirCalib();
@@ -274,6 +271,10 @@ private slots:
   void setPeakPick();
   void addPeakToList();
   void savePeakList();
+  void fitClicked();
+  void fittingRunNoChanged();
+  void setBankDir(int idx);
+  void listViewFittingRun(int idx);
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();

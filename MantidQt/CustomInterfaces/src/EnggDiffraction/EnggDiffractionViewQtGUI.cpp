@@ -224,8 +224,11 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   // this one should stay as it only updates the value from qt to code
 
 
-  //connect(m_uiTabFitting.listWidget_fitting_run_num,
-  //      SIGNAL(currentRowChanged(int)), this, SLOT(setBankIdComboBox(int)));
+ // connect(m_uiTabFitting.listWidget_fitting_run_num,
+        //SIGNAL(currentRowChanged(int)), this, SLOT(setBankIdComboBox(int)));
+
+  connect(m_uiTabFitting.listWidget_fitting_run_num, SIGNAL(currentRowChanged(int)), this,
+	  SLOT(listViewFittingRun(int)));
 
   connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)), this,
           SLOT(setBankDir(int)));
@@ -714,6 +717,17 @@ void EnggDiffractionViewQtGUI::setBankDir(int idx) {
 
     setfittingRunNo(QString::fromUtf8(bankDir.c_str()));
   }
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::listViewFittingRun(
+	int idx) {
+
+	auto listView = m_uiTabFitting.listWidget_fitting_run_num;
+	auto item = listView->item(idx);
+	auto itemText = item->text();
+
+	setfittingRunNo(itemText);
+	fittingRunNoChanged(); // this can be setperate connection too
 }
 
 std::string EnggDiffractionViewQtGUI::fittingRunNoFactory(std::string bank,
@@ -1542,17 +1556,17 @@ void EnggDiffractionViewQtGUI::addBankItems(
 }
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addRunNoItem(
-    std::vector<std::string> splittedBaseName) {
+    std::vector<std::string> runNumVector) {
   try {
-    if (!splittedBaseName.empty()) {
+    if (!runNumVector.empty()) {
 
       // delete previous bank added to the list
       m_uiTabFitting.listWidget_fitting_run_num->clear();
 
-      for (size_t i = 0; i < splittedBaseName.size(); i++) {
+      for (size_t i = 0; i < runNumVector.size(); i++) {
 
         // get the last split in vector which will be bank
-        std::string currentRun = (splittedBaseName[i]);
+        std::string currentRun = (runNumVector[i]);
 
         m_uiTabFitting.listWidget_fitting_run_num->addItem(
             QString::fromStdString(currentRun));
