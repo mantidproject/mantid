@@ -471,17 +471,21 @@ std::string MuonAnalysis::getNewAnalysisWSName(ItemType itemType, int tableRow,
     workspaceName << "Logs";
     break;
   }
-  
-  // Period(s)
-  workspaceName << sep << getPeriodLabels();
 
-  // Construct workspace name
+  // Period(s)
+  const auto periods = getPeriodLabels();
+  if (!periods.empty()) {
+    workspaceName << sep << periods;
+  }
+
+  // Version - always "#1" if overwrite is on, otherwise increment
+  workspaceName << sep << "#";
   std::string newName;
   if (isOverwriteEnabled()) {
+    workspaceName << "1"; // Always use #1
     newName = workspaceName.str();
   } else {
     // If overwrite is disabled, need to find unique name for the new workspace
-    workspaceName << sep << "#";
     newName = workspaceName.str();
     std::string uniqueName;
     int plotNum(1);

@@ -538,7 +538,7 @@ void LoadSpice2D::runLoadMappingTable(
     throw std::runtime_error(error.str());
   }
 
-  // Generate mapping of detector/channel IDs to spectrum ID
+  // Generate mapping of detector/channel IDs to workspace index
 
   // Detector/channel counter
   int icount = 0;

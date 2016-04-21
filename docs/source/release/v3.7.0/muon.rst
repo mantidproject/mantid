@@ -33,6 +33,8 @@ Muon Analysis
   - *Average Temperature* is calculated from all logs
   - *Start* and *End* are the earliest start and latest end
 
+- When the window is resized, all widgets within the window should now resize with it. This enables the interface to be used on smaller screens. `#15382 <https://github.com/mantidproject/mantid/pull/15832>`_
+
 Algorithms
 ----------
 

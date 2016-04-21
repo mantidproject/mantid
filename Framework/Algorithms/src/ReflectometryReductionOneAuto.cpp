@@ -7,6 +7,24 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include <boost/optional.hpp>
 
+/*Anonymous namespace*/
+namespace {
+/**
+* Helper free function to calculate MomentumTransfer from lambda and theta
+* @param lambda : Value in wavelength
+* @param theta  : Value in Degrees
+* @return MomentumTransfer
+* @
+*/
+double calculateQ(double lambda, double theta) {
+  if (lambda == 0.0)
+    throw std::runtime_error("Minimum/Maximum value of the IvsLambda Workspace "
+                             "is 0. Cannot calculate Q");
+  double thetaInRad = theta * M_PI / 180;
+  return (4 * M_PI * sin(thetaInRad)) / lambda;
+}
+}
+/*end of Anonymous namespace*/
 namespace Mantid {
 namespace Algorithms {
 
@@ -99,7 +117,8 @@ void ReflectometryReductionOneAuto::init() {
 
   declareProperty("EndOverlap", Mantid::EMPTY_DBL(), "End overlap in Q.",
                   Direction::Input);
-
+  declareProperty("ScaleFactor", 1.0,
+                  "Factor you wish to scale Q workspace by.", Direction::Input);
   auto index_bounds = boost::make_shared<BoundedValidator<int>>();
   index_bounds->setLower(0);
 
@@ -116,14 +135,21 @@ void ReflectometryReductionOneAuto::init() {
                   "Wavelength Max in angstroms", Direction::Input);
   declareProperty("WavelengthStep", Mantid::EMPTY_DBL(),
                   "Wavelength step in angstroms", Direction::Input);
-  declareProperty("QMin", Mantid::EMPTY_DBL(), "Momentum Min in angstroms-1",
+  declareProperty("MomentumTransferMinimum", Mantid::EMPTY_DBL(),
+                  "Minimum Q value in IvsQ "
+                  "Workspace. Used for Rebinning "
+                  "the IvsQ Workspace",
                   Direction::Input);
-  declareProperty("QMax", Mantid::EMPTY_DBL(), "Momentum Max in angstroms-1",
+  declareProperty("MomentumTransferStep", Mantid::EMPTY_DBL(),
+                  "Resolution value in IvsQ Workspace. Used for Rebinning the "
+                  "IvsQ Workspace. This value will be made minus to apply "
+                  "logarithmic rebinning. If you wish to have linear "
+                  "bin-widths then please provide a negative DQQ",
                   Direction::Input);
-  declareProperty("QStep", Mantid::EMPTY_DBL(), "Momentum step in angstroms",
-                  Direction::Input);
-  declareProperty("Scale", Mantid::EMPTY_DBL(),
-                  "The factor by which to scale the OutputWorkspace",
+  declareProperty("MomentumTransferMaximum", Mantid::EMPTY_DBL(),
+                  "Maximum Q value in IvsQ "
+                  "Workspace. Used for Rebinning "
+                  "the IvsQ Workspace",
                   Direction::Input);
   declareProperty("MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
                   "Monitor wavelength background min in angstroms",
@@ -471,21 +497,59 @@ void ReflectometryReductionOneAuto::exec() {
     if (theta_in.is_initialized()) {
       refRedOne->setProperty("ThetaIn", theta_in.get());
     }
+    double scaleFactor = getProperty("ScaleFactor");
+    if (scaleFactor != 1.0) {
+      refRedOne->setProperty("ScaleFactor", scaleFactor);
+    }
+    auto momentumTransferMinimum = isSet<double>("MomentumTransferMinimum");
+    auto momentumTransferStep = isSet<double>("MomentumTransferStep");
+    auto momentumTransferMaximum = isSet<double>("MomentumTransferMaximum");
 
+    if (momentumTransferStep.is_initialized()) {
+      refRedOne->setProperty("MomentumTransferStep",
+                             momentumTransferStep.get());
+    }
+    if (momentumTransferMinimum.is_initialized() &&
+        momentumTransferMaximum.is_initialized()) {
+      refRedOne->setProperty("MomentumTransferMinimum",
+                             momentumTransferMinimum.get());
+      refRedOne->setProperty("MomentumTransferMaximum",
+                             momentumTransferMaximum.get());
+    } else if (theta_in.is_initialized()) {
+      momentumTransferMinimum = calculateQ(wavelength_max, theta_in.get());
+      if (!momentumTransferStep.is_initialized()) {
+        IAlgorithm_sptr calcResAlg =
+            AlgorithmManager::Instance().create("CalculateResolution");
+        calcResAlg->setProperty("Workspace", in_ws);
+        calcResAlg->setProperty("TwoTheta", theta_in.get());
+        calcResAlg->execute();
+        if (!calcResAlg->isExecuted())
+          throw std::runtime_error(
+              "CalculateResolution failed. Please manually "
+              "enter a value in the dQ/Q column.");
+        double resolution = calcResAlg->getProperty("Resolution");
+        momentumTransferStep = resolution;
+      }
+      momentumTransferMaximum = calculateQ(wavelength_min, theta_in.get());
+      refRedOne->setProperty("MomentumTransferMinimum",
+                             momentumTransferMinimum.get());
+      refRedOne->setProperty("MomentumTransferStep",
+                             momentumTransferStep.get());
+      refRedOne->setProperty("MomentumTransferMaximum",
+                             momentumTransferMaximum.get());
+    }
     refRedOne->execute();
     if (!refRedOne->isExecuted()) {
       throw std::runtime_error(
           "ReflectometryReductionOne did not execute sucessfully");
-    } else {
-      MatrixWorkspace_sptr new_IvsQ1 =
-          refRedOne->getProperty("OutputWorkspace");
-      MatrixWorkspace_sptr new_IvsLam1 =
-          refRedOne->getProperty("OutputWorkspaceWavelength");
-      double thetaOut1 = refRedOne->getProperty("ThetaOut");
-      setProperty("OutputWorkspace", new_IvsQ1);
-      setProperty("OutputWorkspaceWavelength", new_IvsLam1);
-      setProperty("ThetaOut", thetaOut1);
     }
+    MatrixWorkspace_sptr new_IvsQ1 = refRedOne->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr new_IvsLam1 =
+        refRedOne->getProperty("OutputWorkspaceWavelength");
+    double thetaOut1 = refRedOne->getProperty("ThetaOut");
+    setProperty("OutputWorkspace", new_IvsQ1);
+    setProperty("OutputWorkspaceWavelength", new_IvsLam1);
+    setProperty("ThetaOut", thetaOut1);
   } else {
     throw std::runtime_error(
         "ReflectometryReductionOne could not be initialised");

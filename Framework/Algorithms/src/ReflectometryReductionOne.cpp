@@ -28,10 +28,10 @@ namespace {
 *on the host end-point workspace.
 *
 * @param originWS : Origin workspace, which provides the original workspace
-*index to spectrum id mapping.
+*index to spectrum number mapping.
 * @param hostWS : Workspace onto which the resulting workspace indexes will be
 *hosted
-* @return Remapped wokspace indexes applicable for the host workspace. results
+* @return Remapped workspace indexes applicable for the host workspace. results
 *as comma separated string.
 */
 std::string createWorkspaceIndexListFromDetectorWorkspace(
@@ -73,6 +73,21 @@ std::vector<int> getSpectrumNumbers(MatrixWorkspace_sptr &ws) {
       keys.end()); // Sort the keys, as the order is not guaranteed in the map.
 
   return keys;
+}
+
+/**
+* Helper free function to calculate MomentumTransfer from lambda and theta
+* @param lambda : Value in wavelength
+* @param theta  : Value in Degrees
+* @return MomentumTransfer
+* @
+*/
+double calculateQ(double lambda, double theta) {
+  if (lambda == 0.0)
+    throw std::runtime_error("Minimum/Maximum value of the IvsLambda Workspace "
+                             "is 0. Cannot calculate Q");
+  double thetaInRad = theta * M_PI / 180;
+  return (4 * M_PI * sin(thetaInRad)) / lambda;
 }
 }
 /* End of ananomous namespace */
@@ -254,6 +269,24 @@ void ReflectometryReductionOne::init() {
       "RegionOfDirectBeam",
       Kernel::make_unique<Kernel::EnabledWhenProperty>(
           "AnalysisMode", IS_EQUAL_TO, "MultiDetectorAnalysis"));
+  declareProperty("ScaleFactor", Mantid::EMPTY_DBL(),
+                  "Factor you wish to scale Q workspace by.", Direction::Input);
+  declareProperty("MomentumTransferMinimum", Mantid::EMPTY_DBL(),
+                  "Minimum Q value in IvsQ "
+                  "Workspace. Used for Rebinning "
+                  "the IvsQ Workspace",
+                  Direction::Input);
+  declareProperty("MomentumTransferStep", Mantid::EMPTY_DBL(),
+                  "Resolution value in IvsQ Workspace. Used for Rebinning the "
+                  "IvsQ Workspace. This value will be made minus to apply "
+                  "logarithmic rebinning. If you wish to have linear "
+                  "bin-widths then please provide a negative DQQ",
+                  Direction::Input);
+  declareProperty("MomentumTransferMaximum", Mantid::EMPTY_DBL(),
+                  "Maximum Q value in IvsQ "
+                  "Workspace. Used for Rebinning "
+                  "the IvsQ Workspace",
+                  Direction::Input);
 }
 
 /**
@@ -612,7 +645,59 @@ void ReflectometryReductionOne::exec() {
   }
 
   IvsQ = this->toIvsQ(IvsLam, correctDetectorPositions, theta, isPointDetector);
+  double momentumTransferMinimum = getProperty("MomentumTransferMinimum");
+  double momentumTransferStep = getProperty("MomentumTransferStep");
+  double momentumTransferMaximum = getProperty("MomentumTransferMaximum");
+  MantidVec QParams;
+  if (!isDefault("MomentumTransferMinimum") &&
+      !isDefault("MomentumTransferStep") &&
+      !isDefault("MomentumTransferMaximum")) {
+    QParams.push_back(momentumTransferMinimum);
+    QParams.push_back(-momentumTransferStep);
+    QParams.push_back(momentumTransferMaximum);
+  } else {
+    momentumTransferMinimum = calculateQ(IvsLam->readX(0).back(), theta.get());
+    momentumTransferMaximum = calculateQ(IvsLam->readX(0).front(), theta.get());
+    if (isDefault("MomentumTransferStep")) {
+      // if the DQQ is not given for this run.
+      // we will use CalculateResoltion to produce this value
+      // for us.
+      IAlgorithm_sptr calcResAlg =
+          AlgorithmManager::Instance().create("CalculateResolution");
+      calcResAlg->setProperty("Workspace", runWS);
+      calcResAlg->setProperty("TwoTheta", theta.get());
+      calcResAlg->execute();
+      if (!calcResAlg->isExecuted())
+        throw std::runtime_error("CalculateResolution failed. Please manually "
+                                 "enter a value in the dQ/Q column.");
+      momentumTransferStep = calcResAlg->getProperty("Resolution");
+    }
+    QParams.push_back(momentumTransferMinimum);
+    QParams.push_back(-momentumTransferStep);
+    QParams.push_back(momentumTransferMaximum);
+  }
+  IAlgorithm_sptr algRebin = this->createChildAlgorithm("Rebin");
+  algRebin->initialize();
+  algRebin->setProperty("InputWorkspace", IvsQ);
+  algRebin->setProperty("OutputWorkspace", IvsQ);
+  algRebin->setProperty("Params", QParams);
+  algRebin->execute();
+  if (!algRebin->isExecuted())
+    throw std::runtime_error("Failed to run Rebin algorithm");
+  IvsQ = algRebin->getProperty("OutputWorkspace");
 
+  double scaleFactor = getProperty("ScaleFactor");
+  if (!isDefault("ScaleFactor")) {
+    IAlgorithm_sptr algScale = this->createChildAlgorithm("Scale");
+    algScale->initialize();
+    algScale->setProperty("InputWorkspace", IvsQ);
+    algScale->setProperty("OutputWorkspace", IvsQ);
+    algScale->setProperty("Factor", 1.0 / scaleFactor);
+    algScale->execute();
+    if (!algScale->isExecuted())
+      throw std::runtime_error("Failed to run Scale algorithm");
+    IvsQ = algScale->getProperty("OutputWorkspace");
+  }
   setProperty("ThetaOut", theta.get());
   setProperty("OutputWorkspaceWavelength", IvsLam);
   setProperty("OutputWorkspace", IvsQ);
