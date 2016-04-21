@@ -5,8 +5,8 @@
 
 #include "MantidHistogramData/HistogramX.h"
 
-//using Mantid::HistogramData::Points;
-//using Mantid::HistogramData::BinEdges;
+// using Mantid::HistogramData::Points;
+// using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::HistogramX;
 
 class HistogramXTest : public CxxTest::TestSuite {

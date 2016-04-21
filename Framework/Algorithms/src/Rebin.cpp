@@ -132,10 +132,10 @@ void Rebin::exec() {
 
   bool fullBinsOnly = getProperty("FullBinsOnly");
 
-  MantidVecPtr XValues_new;
+  HistogramData::BinEdges XValues_new(0);
   // create new output X axis
   const int ntcnew = VectorHelper::createAxisFromRebinParams(
-      rbParams, XValues_new.access(), true, fullBinsOnly);
+      rbParams, XValues_new.rawData(), true, fullBinsOnly);
 
   //---------------------------------------------------------------------------------
   // Now, determine if the input workspace is actually an EventWorkspace
@@ -178,13 +178,13 @@ void Rebin::exec() {
         PARALLEL_START_INTERUPT_REGION
 
         // Set the X axis for each output histogram
-        outputWS->setX(i, XValues_new);
+        outputWS->histogram(i).setBinEdges(XValues_new);
 
         // Get a const event list reference. eventInputWS->dataY() doesn't work.
         const EventList &el = eventInputWS->getEventList(i);
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
-        el.generateHistogram(*XValues_new, y_data, e_data);
+        el.generateHistogram(XValues_new.constRawData(), y_data, e_data);
 
         // Copy the data over.
         outputWS->dataY(i).assign(y_data.begin(), y_data.end());
@@ -256,15 +256,16 @@ void Rebin::exec() {
 
       // output data arrays are implicitly filled by function
       try {
-        VectorHelper::rebin(XValues, YValues, YErrors, *XValues_new,
-                            YValues_new, YErrors_new, dist);
+        VectorHelper::rebin(XValues, YValues, YErrors,
+                            XValues_new.constRawData(), YValues_new,
+                            YErrors_new, dist);
       } catch (std::exception &ex) {
         g_log.error() << "Error in rebin function: " << ex.what() << std::endl;
         throw;
       }
 
       // Populate the output workspace X values
-      outputWS->setX(hist, XValues_new);
+      outputWS->histogram(hist).setBinEdges(XValues_new);
 
       prog.report(name());
       PARALLEL_END_INTERUPT_REGION

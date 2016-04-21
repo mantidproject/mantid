@@ -6,6 +6,9 @@
 #include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
+namespace HistogramData {
+class BinEdges;
+}
 namespace DataHandling {
 
 /**
@@ -63,7 +66,7 @@ private:
   /// Create the grouping map from the tables
   void createGroupingsFromTables(int *specTable, int *udetTable, int ndets);
   /// Returns new Xbins
-  MantidVecPtr createBinBoundaries() const;
+  HistogramData::BinEdges createBinBoundaries() const;
   /// Apply the created mapping to the workspace
   void applyDetectorMapping();
   /// Apply any instrument adjustments from the file

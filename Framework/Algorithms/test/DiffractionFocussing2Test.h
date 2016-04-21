@@ -22,6 +22,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using Mantid::HistogramData::BinEdges;
 
 class DiffractionFocussing2Test : public CxxTest::TestSuite {
 public:
@@ -121,12 +122,10 @@ public:
     // Create a DIFFERENT x-axis for each pixel. Starting bin = the input
     // workspace index #
     for (size_t pix = 0; pix < inputW->getNumberHistograms(); pix++) {
-      Kernel::cow_ptr<MantidVec> axis;
-      MantidVec &xRef = axis.access();
-      xRef.resize(5);
+      MantidVec axis(5);
       for (int i = 0; i < 5; ++i)
-        xRef[i] = static_cast<double>(1 + pix) + i * 1.0;
-      xRef[4] = 1e6;
+        axis[i] = static_cast<double>(1 + pix) + i * 1.0;
+      axis[4] = 1e6;
       // Set an X-axis
       inputW->setX(pix, axis);
       inputW->getEventList(pix).addEventQuickly(TofEvent(1000.0));
@@ -284,12 +283,7 @@ public:
     }
     ws->getAxis(0)->setUnit("dSpacing");
     // Create the x-axis for histogramming.
-    MantidVecPtr x1;
-    MantidVec &xRef = x1.access();
-    xRef.clear();
-    xRef.push_back(0.0);
-    xRef.push_back(1e6);
-    ws->setAllX(x1);
+    ws->setAllX(BinEdges{0.0, 1e6});
 
     alg = AlgorithmFactory::Instance().create("CreateGroupingWorkspace", 1);
     alg->initialize();

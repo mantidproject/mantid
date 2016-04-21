@@ -483,9 +483,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
   }
 
   // Set all X bins on the output
-  cow_ptr<MantidVec> XValues;
-  XValues.access() = localworkspace->readX(0);
-  outputWorkspace->setAllX(XValues);
+  outputWorkspace->setAllX(HistogramData::BinEdges(localworkspace->refX(0)));
 
   outputWorkspace->mutableRun().addProperty("NumAllSpectra", int(numSpectra),
                                             "", true);

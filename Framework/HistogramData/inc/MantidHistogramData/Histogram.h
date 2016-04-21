@@ -48,12 +48,22 @@ public:
 
   XMode xMode() const noexcept { return m_xMode; }
 
+  BinEdges binEdges() const {
+    if (xMode() == XMode::BinEdges)
+      return BinEdges(m_x);
+    else
+      return BinEdges(Points(m_x));
+  }
+
   Points points() const {
     if (xMode() == XMode::BinEdges)
       return Points(BinEdges(m_x));
     else
       return Points(m_x);
   }
+
+  template <typename T> void setBinEdges(T &&data);
+  template <typename T> void setPoints(T &&data);
 
   /*
   template <typename T> void setPoints(T &&data) {
@@ -76,8 +86,25 @@ public:
   Kernel::cow_ptr<HistogramX> ptrX() const { return m_x; }
 
 private:
+  void checkSize(const Points &points) const;
+  void checkSize(const BinEdges &binEdges) const;
+
   XMode m_xMode;
 };
+
+template <typename T> void Histogram::setBinEdges(T &&data) {
+  BinEdges &&edges = BinEdges(std::forward<T>(data));
+  checkSize(edges);
+  m_xMode = XMode::BinEdges;
+  m_x = edges.cowData();
+}
+
+template <typename T> void Histogram::setPoints(T &&data) {
+  Points &&points = Points(std::forward<T>(data));
+  checkSize(points);
+  m_xMode = XMode::Points;
+  m_x = points.cowData();
+}
 
 MANTID_HISTOGRAMDATA_DLL Histogram::XMode getHistogramXMode(size_t xLength,
                                                             size_t yLength);

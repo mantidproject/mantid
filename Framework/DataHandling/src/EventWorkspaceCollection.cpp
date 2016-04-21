@@ -225,7 +225,7 @@ EventWorkspaceCollection::getDetectorIDToWorkspaceIndexVector(
 Kernel::DateAndTime EventWorkspaceCollection::getFirstPulseTime() const {
   return m_WsVec[0]->getFirstPulseTime();
 }
-void EventWorkspaceCollection::setAllX(Kernel::cow_ptr<MantidVec> &x) {
+void EventWorkspaceCollection::setAllX(HistogramData::BinEdges &x) {
   for (auto &ws : m_WsVec) {
     ws->setAllX(x);
   }

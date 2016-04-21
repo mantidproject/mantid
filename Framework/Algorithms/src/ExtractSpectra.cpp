@@ -146,11 +146,12 @@ void ExtractSpectra::execHistogram() {
       outNumAxis = dynamic_cast<NumericAxis *>(outAxis1);
   }
 
-  cow_ptr<MantidVec> newX;
+  cow_ptr<HistogramData::HistogramX> newX(nullptr);
   if (m_commonBoundaries) {
     const MantidVec &oldX =
         m_inputWorkspace->readX(m_workspaceIndexList.front());
-    newX.access().assign(oldX.begin() + m_minX, oldX.begin() + m_maxX);
+    newX = make_cow<HistogramData::HistogramX>(oldX.begin() + m_minX,
+                                               oldX.begin() + m_maxX);
   }
 
   Progress prog(this, 0.0, 1.0, (m_workspaceIndexList.size()));
@@ -260,11 +261,12 @@ void ExtractSpectra::execEvent() {
 
   // Retrieve and validate the input properties
   this->checkProperties();
-  cow_ptr<MantidVec> XValues_new;
+  HistogramData::BinEdges XValues_new(0);
   if (m_commonBoundaries) {
     const MantidVec &oldX =
         m_inputWorkspace->readX(m_workspaceIndexList.front());
-    XValues_new.access().assign(oldX.begin() + m_minX, oldX.begin() + m_maxX);
+    XValues_new =
+        HistogramData::BinEdges(oldX.begin() + m_minX, oldX.begin() + m_maxX);
   }
   size_t ntcnew = m_maxX - m_minX;
 
@@ -275,7 +277,7 @@ void ExtractSpectra::execEvent() {
     rb_params.push_back(maxX_val - minX_val);
     rb_params.push_back(maxX_val);
     ntcnew = VectorHelper::createAxisFromRebinParams(rb_params,
-                                                     XValues_new.access());
+                                                     XValues_new.rawData());
   }
 
   // run inplace branch if appropriate
@@ -351,7 +353,7 @@ void ExtractSpectra::execEvent() {
       }
     } else {
       // Common bin boundaries get all set to the same value
-      outEL.setX(XValues_new);
+      outEL.setX(XValues_new.cowData());
       if (hasDx) {
         const MantidVec &oldDx = m_inputWorkspace->readDx(i);
         cow_ptr<MantidVec> DxValues_new;

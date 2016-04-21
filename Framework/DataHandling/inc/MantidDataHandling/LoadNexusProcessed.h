@@ -8,6 +8,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidHistogramData/BinEdges.h"
 
 #include "MantidNexus/NexusClasses.h"
 
@@ -207,7 +208,7 @@ private:
   /// Does the current workspace have uniform binning
   bool m_shared_bins;
   /// The cached x binning if we have bins
-  MantidVecPtr m_xbins;
+  HistogramData::BinEdges m_xbins;
   /// Numeric values for the second axis, if applicable
   MantidVec m_axis1vals;
 

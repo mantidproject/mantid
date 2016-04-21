@@ -9,6 +9,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+using Mantid::HistogramData::BinEdges;
 
 class DetectorEfficiencyCorTest : public CxxTest::TestSuite {
 public:
@@ -115,22 +116,22 @@ private:
     space->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
 
-    MantidVecPtr x, y, e;
-    x.access().resize(nbins + 1, 0.0);
+    BinEdges x(nbins + 1, 0.0);
+    MantidVecPtr y, e;
     y.access().resize(nbins, 0.0);
     e.access().resize(nbins, 0.0);
     for (int i = 0; i < nbins; ++i) {
-      x.access()[i] = static_cast<double>((1 + i) / 100);
+      x.rawData()[i] = static_cast<double>((1 + i) / 100);
       y.access()[i] = 10 + i;
       e.access()[i] = sqrt(5.0);
     }
-    x.access()[nbins] = static_cast<double>(nbins);
+    x.rawData()[nbins] = static_cast<double>(nbins);
     // Fill a couple of zeros just as a check that it doesn't get changed
     y.access()[nbins - 1] = 0.0;
     e.access()[nbins - 1] = 0.0;
 
     for (int i = 0; i < nspecs; i++) {
-      space2D->setX(i, x);
+      space2D->histogram(i).setBinEdges(x);
       space2D->setData(i, y, e);
     }
 

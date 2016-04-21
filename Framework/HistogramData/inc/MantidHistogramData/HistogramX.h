@@ -6,6 +6,13 @@
 
 namespace Mantid {
 namespace HistogramData {
+class BinEdges;
+class Points;
+class HistogramX;
+namespace detail {
+template <class BinEdges, class HistogramX> class VectorOf;
+template <class Points, class HistogramX> class VectorOf;
+}
 
 /** HistogramX : TODO: DESCRIPTION
 
@@ -37,16 +44,18 @@ public:
   using detail::FixedLengthVector<HistogramX>::operator=;
 
   friend class Histogram;
+  friend class detail::VectorOf<BinEdges, HistogramX>;
+  friend class detail::VectorOf<Points, HistogramX>;
 
-  //explicit HistogramX(const Points &points);
-  //explicit HistogramX(const BinEdges &binEdges);
+  // explicit HistogramX(const Points &points);
+  // explicit HistogramX(const BinEdges &binEdges);
 
-  //HistogramX &operator=(const HistogramX &rhs);
+  // HistogramX &operator=(const HistogramX &rhs);
 
-  //Points points() const;
-  //template <typename T> void setPoints(T &&data);
-  //BinEdges binEdges() const;
-  //template <typename T> void setBinEdges(T &&data);
+  // Points points() const;
+  // template <typename T> void setPoints(T &&data);
+  // BinEdges binEdges() const;
+  // template <typename T> void setBinEdges(T &&data);
 
 private:
   /*

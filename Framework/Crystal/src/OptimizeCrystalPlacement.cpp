@@ -164,8 +164,7 @@ void OptimizeCrystalPlacement::exec() {
   //              ---------------
   std::vector<int> RunNumList;
   std::vector<V3D> ChiPhiOmega;
-  Mantid::MantidVecPtr pX;
-  Mantid::MantidVec &xRef = pX.access();
+  Mantid::MantidVec xRef;
   Mantid::MantidVecPtr yvals;
   Mantid::MantidVecPtr errs;
   Mantid::MantidVec &yvalB = yvals.access();
@@ -230,7 +229,7 @@ void OptimizeCrystalPlacement::exec() {
   int N = 3 * nPeaksUsed; // Peaks->getNumberPeaks();
   mwkspc = WorkspaceFactory::Instance().create("Workspace2D",
                                                static_cast<size_t>(1), N, N);
-  mwkspc->setX(0, pX);
+  mwkspc->setX(0, Kernel::make_cow<HistogramData::HistogramX>(std::move(xRef)));
   mwkspc->setData(0, yvals, errs);
 
   std::string FuncArg = "name=PeakHKLErrors,PeakWorkspaceName=" +

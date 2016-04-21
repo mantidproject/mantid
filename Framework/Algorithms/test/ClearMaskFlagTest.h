@@ -14,6 +14,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using Mantid::Algorithms::ClearMaskFlag;
 using Mantid::MantidVecPtr;
+using Mantid::HistogramData::BinEdges;
 
 class ClearMaskFlagTest : public CxxTest::TestSuite {
 public:
@@ -41,11 +42,11 @@ public:
     MatrixWorkspace_sptr space =
         WorkspaceFactory::Instance().create("Workspace2D", numspec, 6, 5);
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    MantidVecPtr x, vec;
-    x.access().resize(6, 10.0);
+    BinEdges x(6, 10.0);
+    MantidVecPtr vec;
     vec.access().resize(5, 1.0);
     for (int j = 0; j < numspec; ++j) {
-      space2D->setX(j, x);
+      space2D->histogram(j).setBinEdges(x);
       space2D->setData(j, vec, vec);
       space2D->getSpectrum(j)->setSpectrumNo(j);
       space2D->getSpectrum(j)->setDetectorID(j);

@@ -339,8 +339,7 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
 
   for (size_t i = 0; i < nAxis1Values; ++i) {
     // set the X-values to the common bin values we read above
-    MantidVecPtr toPass;
-    toPass.access() = axis0Data;
+    auto toPass = Kernel::make_cow<HistogramData::HistogramX>(axis0Data);
     outWrksp->setX(i, toPass);
 
     // now read in the Y values
