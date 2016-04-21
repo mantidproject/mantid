@@ -141,7 +141,7 @@ double ConcretePeaksPresenterVsi::getMaxRadius (
   boost::optional<double> radius =
       shape->radius(Mantid::Geometry::PeakShape::Radius);
   if (radius) {
-    return radius.value();
+    return radius.get();
   } else {
     return defaultRadius;
   }

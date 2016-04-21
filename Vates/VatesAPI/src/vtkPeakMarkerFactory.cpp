@@ -220,7 +220,7 @@ stack.
       if(shape.shapeName() == Mantid::DataObjects::PeakShapeSpherical::sphereShapeName())
       {
         double peakRadius =
-            shape.radius(Mantid::Geometry::PeakShape::Radius).value();
+            shape.radius(Mantid::Geometry::PeakShape::Radius).get();
 
         vtkNew<vtkRegularPolygonSource> polygonSource;
         polygonSource->GeneratePolygonOff();
