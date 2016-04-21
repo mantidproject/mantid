@@ -8,6 +8,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/BoundedValidator.h"
 
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
@@ -267,6 +268,13 @@ void CutMD::init() {
                                   "MDHistoWorkspace as output. This is DND "
                                   "only in Horace terminology.");
 
+  auto mustBePositiveInteger = boost::make_shared<BoundedValidator<int>>();
+  mustBePositiveInteger->setLower(0);
+
+  declareProperty("MaxRecursionDepth", 1, mustBePositiveInteger,
+                  "Sets the maximum recursion depth to use. Can be used to "
+                  "constrain the workspaces internal structure");
+
   std::vector<std::string> propOptions{AutoMethod, RLUMethod,
                                        InvAngstromMethod};
   char buffer[1024];
@@ -411,6 +419,11 @@ void CutMD::exec() {
     cutAlg->setProperty("OutputWorkspace", "sliced");
     cutAlg->setProperty("NormalizeBasisVectors", false);
     cutAlg->setProperty("AxisAligned", false);
+    if (!noPix) {
+      int recursion_depth = getProperty("MaxRecursionDepth");
+      cutAlg->setProperty("TakeMaxRecursionDepthFromInput", false);
+      cutAlg->setProperty("MaxRecursionDepth", recursion_depth);
+    }
 
     for (size_t i = 0; i < numDims; ++i) {
       std::string label;

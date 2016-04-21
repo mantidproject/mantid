@@ -14,7 +14,7 @@ else
 fi
 
 # Define extra libraries and load paths
-LOCAL_PRELOAD=`readlink --no-newline --canonicalize-existing @TCMALLOC_LIBRARIES@`
+LOCAL_PRELOAD=@TCMALLOC_RUNTIME_LIB@
 if [ -n "${LD_PRELOAD}" ]; then
     LOCAL_PRELOAD=${LOCAL_PRELOAD}:${LD_PRELOAD}
 fi

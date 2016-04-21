@@ -101,6 +101,7 @@ set ( SRC_FILES
 	src/SANSRunWindow.cpp
 	src/SampleTransmission.cpp
 	src/StepScan.cpp
+	src/Tomography/EnergyBandsViewQtGUI.cpp
 	src/Tomography/ImageROIPresenter.cpp
 	src/Tomography/ImageROIViewQtWidget.cpp
 	src/Tomography/ImagingFormatsConvertPresenter.cpp
