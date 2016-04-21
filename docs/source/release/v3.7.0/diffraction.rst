@@ -63,6 +63,11 @@ Improvements in the tomographic reconstruction graphical user interface:
   separately, which is now supported in the underlying reconstruction
   scripts.
 
+- The energy bands tab can now produce multiple output bands in one
+  pass, and supports different aggregation methods via the new
+  algorithm :ref:`ImggAggregateWavelengths
+  <algm-ImggAggregateWavelengths>`.
+
 Full list of `diffraction <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Diffraction%22>`_
 and
 `imaging <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Imaging%22>`_ changes on GitHub.
