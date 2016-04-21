@@ -165,6 +165,8 @@ public:
   void addBankItems(std::vector<std::string> splittedBaseName,
                     QString selectedFile);
 
+  void addRunNoItem(std::vector<std::string> splittedBaseName);
+
   void setDefaultBank(std::vector<std::string> splittedBaseName,
                       QString selectedFile);
 
