@@ -101,6 +101,8 @@ Geometry
 
 The Instrument Definition File syntax has been extended to provide support for a new type of topologically regular, but geometrically irregular form of 2D detectors. This new type of detector available in the IDF is known as a Structured Detector. Information on how to use this new detector type can be found in the :ref:`IDF <InstrumentDefinitionFile>` documentation.
 
+Refactored `PeakShape` to better support arbitrary shapes.
+
 Performance
 -----------
 
