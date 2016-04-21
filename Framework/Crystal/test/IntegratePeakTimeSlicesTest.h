@@ -47,6 +47,7 @@ using namespace Geometry;
 using namespace API;
 using namespace Mantid::Crystal;
 using namespace std;
+using Mantid::HistogramData::BinEdges;
 
 class IntegratePeakTimeSlicesTest : public CxxTest::TestSuite {
 public:
@@ -76,12 +77,13 @@ public:
     wsPtr->getAxis(0)->setUnit("TOF");
 
     // Set times;
-    MantidVecPtr x_vals;
-    for (int i = 0; i < NTimes; i++)
-      x_vals.access().push_back(18000.0 + i * 100);
+    BinEdges x_vals(NTimes + 1);
+    int i = 0;
+    std::generate(begin(x_vals), end(x_vals),
+                  [&i] { return 18000.0 + i++ * 100; });
 
     for (size_t k = 0; k < wsPtr->getNumberHistograms(); k++)
-      wsPtr->setX(k, x_vals);
+      wsPtr->histogram(k).setBinEdges(x_vals);
 
     Geometry::Instrument_const_sptr instP = wsPtr->getInstrument();
     IComponent_const_sptr bankC =
