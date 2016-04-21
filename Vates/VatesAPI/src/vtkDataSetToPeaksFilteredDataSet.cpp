@@ -181,7 +181,6 @@ GCC_DIAG_OFF(strict-aliasing)
   /**
    * Add information for a single peak to the peakInfo vector.
    * @param peak The peak from which the information will be extracted.
-   * @param coordinateSystem The coordinate system in which the peaks position should be retrieved.
    * @param peaksInfo A reference to the vector containing peak information.
    */
 void vtkDataSetToPeaksFilteredDataSet::addSinglePeak(
