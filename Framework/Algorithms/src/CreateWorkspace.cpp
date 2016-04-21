@@ -127,8 +127,10 @@ void CreateWorkspace::exec() {
   const bool commonX(dataX.size() == ySize || dataX.size() == ySize + 1);
 
   std::size_t xSize;
+  Kernel::cow_ptr<HistogramData::HistogramX> XValues(nullptr);
   if (commonX) {
     xSize = dataX.size();
+    XValues = Kernel::make_cow<HistogramData::HistogramX>(dataX);
   } else {
     if (dataX.size() % nSpec != 0) {
       throw std::invalid_argument("Length of DataX must be divisible by NSpec");
@@ -173,7 +175,7 @@ void CreateWorkspace::exec() {
     // Just set the pointer if common X bins. Otherwise, copy in the right chunk
     // (as we do for Y).
     if (commonX) {
-      outputWS->setX(i, Kernel::make_cow<HistogramData::HistogramX>(dataX));
+      outputWS->setX(i, XValues);
     } else {
       outputWS->dataX(i).assign(dataX.begin() + xStart, dataX.begin() + xEnd);
     }
