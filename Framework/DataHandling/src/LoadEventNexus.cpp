@@ -2037,8 +2037,10 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     }
   }
   // Now, create a default X-vector for histogramming, with just 2 bins.
-  auto axis = HistogramData::BinEdges{shortest_tof - 1, longest_tof + 1};
-  m_ws->setAllX(axis);
+  if (eventsLoaded > 0)
+    m_ws->setAllX(HistogramData::BinEdges{shortest_tof - 1, longest_tof + 1});
+  else
+    m_ws->setAllX(HistogramData::BinEdges(2, 0.0));
 
   // if there is time_of_flight load it
   loadTimeOfFlight(m_ws, m_top_entry_name, classType);

@@ -766,7 +766,7 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
 
       // Set the X axis
       if (this->m_shared_bins)
-        el.histogram().setBinEdges(this->m_xbins);
+        el.setX(this->m_xbins.cowData());
       else {
         MantidVec x;
         x.resize(xbins.dim1());
@@ -1905,7 +1905,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       xErrors_end += nxbins;
     }
 
-    local_workspace->histogram(hist).setBinEdges(m_xbins);
+    local_workspace->setX(hist, m_xbins.cowData());
     ++hist;
   }
 }
@@ -1981,7 +1981,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       xErrors_start += nxbins;
       xErrors_end += nxbins;
     }
-    local_workspace->histogram(wsIndex).setBinEdges(m_xbins);
+    local_workspace->setX(wsIndex, m_xbins.cowData());
     ++hist;
     ++wsIndex;
   }

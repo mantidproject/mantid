@@ -32,6 +32,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
+using Mantid::HistogramData::Points;
 /**
  * Used for testing only
  */
@@ -117,15 +118,15 @@ public:
       data.access().push_back(val);
     }
 
-    Mantid::MantidVecPtr x_vec_ptr;
+    Points x_vec_ptr(0);
     double xx[nCells];
     for (int i = 0; i < nCells; i++) {
       xx[i] = i;
-      x_vec_ptr.access().push_back(static_cast<double>(i));
+      x_vec_ptr.rawData().push_back(static_cast<double>(i));
     }
     NormalFit.setAttributeValue("CalcVariances", CalcVariances);
 
-    ws->setX(0, x_vec_ptr);
+    ws->histogram(0).setPoints(x_vec_ptr);
     ws->setData(0, data);
     ws->setData(1, xvals);
     ws->setData(2, yvals);

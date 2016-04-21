@@ -18,6 +18,7 @@
 using Mantid::Algorithms::ConvolutionFitSequential;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using Mantid::HistogramData::BinEdges;
 
 class ConvolutionFitSequentialTest : public CxxTest::TestSuite {
 public:
@@ -271,8 +272,7 @@ public:
   MatrixWorkspace_sptr create2DWorkspace(int xlen, int ylen) {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
         xlen, ylen, false, false, true, "testInst");
-    boost::shared_ptr<Mantid::MantidVec> x1 =
-        boost::make_shared<Mantid::MantidVec>(xlen, 0.0);
+    BinEdges x1(xlen, 0.0);
     boost::shared_ptr<Mantid::MantidVec> y1(
         new Mantid::MantidVec(xlen - 1, 3.0));
     boost::shared_ptr<Mantid::MantidVec> e1(
@@ -280,15 +280,11 @@ public:
 
     MatrixWorkspace_sptr testWs(ws);
     testWs->initialize(ylen, xlen, xlen - 1);
-    double j = 1.0;
-
-    for (int i = 0; i < xlen; i++) {
-      (*x1)[i] = j * 0.5;
-      j += 1.5;
-    }
+    int j = 0;
+    std::generate(begin(x1), end(x1), [&j] { return 0.5 + 0.75 * j++; });
 
     for (int i = 0; i < ylen; i++) {
-      testWs->setX(i, x1);
+      testWs->histogram(i).setBinEdges(x1);
       testWs->setData(i, y1, e1);
     }
 
@@ -310,8 +306,7 @@ public:
   void createConvFitResWorkspace(int totalHist, int totalBins) {
     auto convFitRes = WorkspaceFactory::Instance().create(
         "Workspace2D", totalHist + 1, totalBins + 1, totalBins);
-    boost::shared_ptr<Mantid::MantidVec> x1(
-        new Mantid::MantidVec(totalBins + 1, 0.0));
+    BinEdges x1(totalBins + 1, 0.0);
     boost::shared_ptr<Mantid::MantidVec> y1(
         new Mantid::MantidVec(totalBins, 3.0));
     boost::shared_ptr<Mantid::MantidVec> e1(
@@ -319,15 +314,11 @@ public:
 
     MatrixWorkspace_sptr testWs(convFitRes);
     testWs->initialize(totalHist + 1, totalBins + 1, totalBins);
-    double j = 1.0;
+    int j = 0;
+    std::generate(begin(x1), end(x1), [&j] { return 0.5 + 0.75 * j++; });
 
     for (int i = 0; i < totalBins; i++) {
-      (*x1)[i] = j * 0.5;
-      j += 1.5;
-    }
-
-    for (int i = 0; i < totalBins; i++) {
-      testWs->setX(i, x1);
+      testWs->histogram(i).setBinEdges(x1);
       testWs->setData(i, y1, e1);
     }
 
