@@ -48,10 +48,10 @@ QDataProcessorWidget::QDataProcessorWidget(QWidget *parent)
   whitelist.addElement("Run(s)", "InputWorkspace");
   whitelist.addElement("Angle", "ThetaIn");
   whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun");
-  whitelist.addElement("Q min", "Qmin");
-  whitelist.addElement("Q max", "Qmax");
-  whitelist.addElement("dQ/Q", "Qstep");
-  whitelist.addElement("Scale", "Scale");
+  whitelist.addElement("Q min", "MomentumTransferMinimum");
+  whitelist.addElement("Q max", "MomentumTransferMaximum");
+  whitelist.addElement("dQ/Q", "MomentumTransferStep");
+  whitelist.addElement("Scale", "ScaleFactor");
 
   // The post-processor algorithm's name
   DataPostprocessorAlgorithm postprocessor;
