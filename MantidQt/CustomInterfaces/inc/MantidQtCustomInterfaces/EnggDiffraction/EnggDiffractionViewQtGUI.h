@@ -267,7 +267,6 @@ private slots:
   void browseFitFocusedRun();
   void setBankIdComboBox(int idx);
   void browsePeaksToFit();
-  void setListWidgetBank(int idx);
   void setPeakPick();
   void addPeakToList();
   void savePeakList();

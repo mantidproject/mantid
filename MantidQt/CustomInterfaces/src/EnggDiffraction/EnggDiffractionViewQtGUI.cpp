@@ -217,18 +217,8 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
 
   connect(this, SIGNAL(getBanks()), this, SLOT(fittingRunNoChanged()));
 
-  // connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)),
-  // this,
-  //       SLOT(setListWidgetBank(int)));
-
-  // this one should stay as it only updates the value from qt to code
-
-
- // connect(m_uiTabFitting.listWidget_fitting_run_num,
-        //SIGNAL(currentRowChanged(int)), this, SLOT(setBankIdComboBox(int)));
-
-  connect(m_uiTabFitting.listWidget_fitting_run_num, SIGNAL(currentRowChanged(int)), this,
-	  SLOT(listViewFittingRun(int)));
+  connect(m_uiTabFitting.listWidget_fitting_run_num,
+          SIGNAL(currentRowChanged(int)), this, SLOT(listViewFittingRun(int)));
 
   connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)), this,
           SLOT(setBankDir(int)));
@@ -720,14 +710,14 @@ void EnggDiffractionViewQtGUI::setBankDir(int idx) {
 }
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::listViewFittingRun(
-	int idx) {
+    int idx) {
 
-	auto listView = m_uiTabFitting.listWidget_fitting_run_num;
-	auto item = listView->item(idx);
-	auto itemText = item->text();
+  auto listView = m_uiTabFitting.listWidget_fitting_run_num;
+  auto item = listView->item(idx);
+  auto itemText = item->text();
 
-	setfittingRunNo(itemText);
-	fittingRunNoChanged(); // this can be setperate connection too
+  setfittingRunNo(itemText);
+  fittingRunNoChanged();
 }
 
 std::string EnggDiffractionViewQtGUI::fittingRunNoFactory(std::string bank,
@@ -1366,12 +1356,6 @@ std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {
   return exptPeaks;
 }
 
-void EnggDiffractionViewQtGUI::setListWidgetBank(int idx) {
-
-  QListWidget *selectBank = m_uiTabFitting.listWidget_fitting_run_num;
-  selectBank->setCurrentRow(idx);
-}
-
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
     fittingRunNoChanged() {
   // TODO: much of this should be moved to presenter
@@ -1407,7 +1391,6 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
       // assuming that no directory is found so look for number
       // if run number length greater
     } else if (focusedFile.count() > 4) {
-      /// shahroz
       if (strFocusedFile.find("-") != std::string::npos) {
         std::vector<std::string> firstLastRunNoVec;
         boost::split(firstLastRunNoVec, strFocusedFile, boost::is_any_of("-"));
@@ -1429,7 +1412,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
       }
     }
     // set the directory here to the first in the vector if its not empty
-    if (!m_fitting_runno_dir_vec.empty()) {
+    if (m_fitting_runno_dir_vec.empty()) {
       QString firstDir = QString::fromStdString(m_fitting_runno_dir_vec[0]);
       setfittingRunNo(firstDir);
 
@@ -1487,7 +1470,7 @@ EnggDiffractionViewQtGUI::splitFittingDirectory(std::string &selectedfPath) {
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enableMultiRun(
     std::string firstRun, std::string lastRun) {
-  /// shahroz
+
   std::vector<std::string> RunNumberVec;
   if (isDigit(firstRun) && isDigit(lastRun)) {
     int firstNum = std::stoi(firstRun);
@@ -1503,9 +1486,6 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enableMultiRun(
   }
 
   addRunNoItem(RunNumberVec);
-
-
-
 }
 
 void EnggDiffractionViewQtGUI::addBankItems(
