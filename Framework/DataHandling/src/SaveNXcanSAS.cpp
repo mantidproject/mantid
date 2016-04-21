@@ -722,7 +722,6 @@ void SaveNXcanSAS::exec() {
 
   const std::string suffix("01");
 
-
   // Setup progress bar
   int numberOfSteps = 4;
   if (transmissionSample) {

@@ -556,7 +556,7 @@ void LoadNXcanSAS::exec() {
   // Load Transmissions
 
   if (loadTransmissions) {
-     progress.report("Loading transmissions.");
+    progress.report("Loading transmissions.");
     // Load sample transmission
     loadTransmission(entry, sasTransmissionSpectrumNameSampleAttrValue);
 
