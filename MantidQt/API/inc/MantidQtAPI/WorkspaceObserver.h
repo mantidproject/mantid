@@ -9,7 +9,7 @@
 #include <QMetaType>
 
 
-Q_DECLARE_METATYPE(std::string) //needed to use std::string as a custom type in QVariant
+Q_DECLARE_METATYPE(std::string)
 Q_DECLARE_METATYPE(Mantid::API::Workspace_sptr)
 
 //------------------------------------------------
