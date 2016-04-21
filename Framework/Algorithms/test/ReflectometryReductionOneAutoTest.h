@@ -17,6 +17,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
+using Mantid::HistogramData::BinEdges;
 
 namespace {
 class PropertyFinder {
@@ -384,12 +385,10 @@ public:
   void test_normalize_by_detmon() {
     // Prepare workspace
     //-----------------
-    MantidVecPtr x, e, detData, monData;
-
     // Single bin from 1->2
-    x.access().resize(2);
-    x.access()[0] = 1;
-    x.access()[1] = 2;
+    BinEdges x{1, 2};
+    MantidVecPtr e, detData, monData;
+
     // No error at all
     e.access().resize(1, 0.0);
 
@@ -400,8 +399,8 @@ public:
     auto tinyWS = MatrixWorkspace_sptr(new Workspace2D());
     // 2 spectra, 2 x values, 1 y value per spectra
     tinyWS->initialize(2, 2, 1);
-    tinyWS->setX(0, x);
-    tinyWS->setX(1, x);
+    tinyWS->histogram(0).setBinEdges(x);
+    tinyWS->histogram(1).setBinEdges(x);
     tinyWS->setData(0, detData, e);
     tinyWS->setData(1, monData, e);
 

@@ -144,7 +144,7 @@ public:
 
   //------------------------------------------------------------
   // Set the x-axis data (histogram bins) for all pixels
-  virtual void setAllX(const Kernel::cow_ptr<HistogramData::HistogramX> &x);
+  virtual void setAllX(const HistogramData::BinEdges &x);
 
   // Get an EventList object at the given workspace index number
   virtual EventList &getEventList(const std::size_t workspace_index);

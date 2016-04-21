@@ -92,7 +92,7 @@ void EventWorkspace::init(const std::size_t &NVectors,
   // Move the rhs very,very slightly just incase something doesn't like them
   // being the same
   HistogramData::BinEdges edges{0.0, std::numeric_limits<double>::min()};
-  this->setAllX(edges.cowData());
+  this->setAllX(edges);
 
   // Create axes.
   m_axes.resize(2);
@@ -550,7 +550,7 @@ void EventWorkspace::resizeTo(const std::size_t numSpectra) {
   // Put on a default set of X vectors, with one bin of 0 & extremely close to
   // zero
   HistogramData::BinEdges edges{0.0, std::numeric_limits<double>::min()};
-  this->setAllX(edges.cowData());
+  this->setAllX(edges);
 
   // Clearing the MRU list is a good idea too.
   this->clearMRU();
@@ -743,12 +743,13 @@ void EventWorkspace::generateHistogramPulseTime(const std::size_t index,
 /*** Set all histogram X vectors.
  * @param x :: The X vector of histogram bins to use.
  */
-void EventWorkspace::setAllX(
-    const Kernel::cow_ptr<HistogramData::HistogramX> &x) {
+void EventWorkspace::setAllX(const HistogramData::BinEdges &x) {
   // int counter=0;
   auto i = this->data.begin();
   for (; i != this->data.end(); ++i) {
-    (*i)->setX(x);
+    // This is an EventWorkspace, so changing X size is ok as long as we clear
+    // the MRU below, i.e., we bypass the size check of Histogram::setBinEdges.
+    (*i)->histogram().setX(x.cowData());
   }
 
   // Clear MRU lists now, free up memory

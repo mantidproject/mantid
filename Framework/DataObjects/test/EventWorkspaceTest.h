@@ -35,6 +35,7 @@ using std::vector;
 using std::cout;
 using std::endl;
 using namespace boost::posix_time;
+using Mantid::HistogramData::BinEdges;
 
 //==========================================================================================
 class EventWorkspaceTest : public CxxTest::TestSuite {
@@ -89,13 +90,13 @@ public:
 
     if (setX) {
       // Create the x-axis for histogramming.
-      auto axis = Kernel::make_cow<HistogramData::HistogramX>(NUMBINS);
-      auto &xRef = axis.access();
+      BinEdges axis(NUMBINS);
+      auto &xRef = axis.rawData();
       for (int i = 0; i < NUMBINS; ++i)
         xRef[i] = i * BIN_DELTA;
 
       // Try setting a single axis, make sure it doesn't throw
-      retVal->setX(2, axis);
+      retVal->setX(2, axis.cowData());
 
       // Set all the histograms at once.
       retVal->setAllX(axis);
@@ -299,8 +300,8 @@ public:
     }
 
     // Create the x-axis for histogramming.
-    auto axis = Kernel::make_cow<HistogramData::HistogramX>(NUMBINS);
-    auto &xRef = axis.access();
+    BinEdges axis(NUMBINS);
+    auto &xRef = axis.rawData();
     for (int i = 0; i < NUMBINS; ++i)
       xRef[i] = i * BIN_DELTA;
     // Set all the histograms at once.
@@ -465,8 +466,8 @@ public:
     // Yes, our eventworkspace MRU is full
     TS_ASSERT_EQUALS(ew->MRUSize(), 50);
     TS_ASSERT_EQUALS(ew2->MRUSize(), 50);
-    auto axis = Kernel::make_cow<HistogramData::HistogramX>(10);
-    auto &xRef = axis.access();
+    BinEdges axis(10);
+    auto &xRef = axis.rawData();
     for (int i = 0; i < 10; ++i)
       xRef[i] = i * BIN_DELTA;
     ew->setAllX(axis);
@@ -524,8 +525,7 @@ public:
   }
 
   void do_test_binning(EventWorkspace_sptr ws,
-                       const HistogramData::HistogramX &X,
-                       const cow_ptr<HistogramData::HistogramX> axis,
+                       const HistogramData::HistogramX &X, const BinEdges &axis,
                        size_t expected_occupancy_per_bin) {
     MantidVec Y(NUMBINS - 1);
     MantidVec E(NUMBINS - 1);
@@ -548,34 +548,34 @@ public:
                                                  // BIN_DELTA/2
 
     // Create bin steps = 4*BIN_DELTA.
-    auto axis = Kernel::make_cow<HistogramData::HistogramX>(NUMBINS / 4);
-    auto &X1 = axis.access();
+    BinEdges axis1(NUMBINS / 4);
+    auto &X1 = axis1.rawData();
     for (size_t i = 0; i < X1.size(); ++i) {
       X1[i] = double(i) * BIN_DELTA * 4;
     }
     size_t expected_occupancy = 8; // Because there are two events with
                                    // pulse_time in each BIN_DELTA interval.
-    do_test_binning(ws, X1, axis, expected_occupancy);
+    do_test_binning(ws, X1, axis1, expected_occupancy);
 
     // Create bin steps = 2*BIN_DELTA.
-    axis = Kernel::make_cow<HistogramData::HistogramX>(NUMBINS / 2);
-    auto &X2 = axis.access();
+    BinEdges axis2(NUMBINS / 2);
+    auto &X2 = axis2.rawData();
     for (size_t i = 0; i < X2.size(); ++i) {
       X2[i] = double(i) * BIN_DELTA * 2;
     }
     expected_occupancy = 4; // Because there are two events with pulse_time in
                             // each BIN_DELTA interval.
-    do_test_binning(ws, X2, axis, expected_occupancy);
+    do_test_binning(ws, X2, axis2, expected_occupancy);
 
     // Create bin steps = BIN_DELTA.
-    axis = Kernel::make_cow<HistogramData::HistogramX>(NUMBINS);
-    auto &X3 = axis.access();
+    BinEdges axis3(NUMBINS);
+    auto &X3 = axis3.rawData();
     for (size_t i = 0; i < X3.size(); ++i) {
       X3[i] = double(i) * BIN_DELTA;
     }
     expected_occupancy = 2; // Because there are two events with pulse_time in
                             // each BIN_DELTA interval.
-    do_test_binning(ws, X3, axis, expected_occupancy);
+    do_test_binning(ws, X3, axis3, expected_occupancy);
   }
 
   void test_get_pulse_time_max() {

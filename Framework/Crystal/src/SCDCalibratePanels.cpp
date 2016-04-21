@@ -116,8 +116,7 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
   //   X = peak index (repeated 3 times
   //   Y = 0. as the function evals to (Q-vec) - (UB * hkl * 2pi)
   //   E = the weighting as used in the cost function
-  Mantid::MantidVecPtr pX;
-  Mantid::MantidVec &xRef = pX.access();
+  Mantid::MantidVec xRef;
   Mantid::MantidVecPtr yvals;
   Mantid::MantidVec &yvalB = yvals.access();
   Mantid::MantidVecPtr errs;
@@ -171,7 +170,7 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
   MatrixWorkspace_sptr mwkspc =
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * N, 3 * N);
 
-  mwkspc->setX(0, pX);
+  mwkspc->setX(0, Kernel::make_cow<HistogramData::HistogramX>(std::move(xRef)));
   mwkspc->setData(0, yvals, errs);
 
   return boost::dynamic_pointer_cast<DataObjects::Workspace2D>(mwkspc);

@@ -332,9 +332,9 @@ void Q1D2::exec() {
 API::MatrixWorkspace_sptr
 Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
   // Calculate the output binning
-  MantidVecPtr XOut;
+  HistogramData::BinEdges XOut(0);
   size_t sizeOut = static_cast<size_t>(
-      VectorHelper::createAxisFromRebinParams(binParams, XOut.access()));
+      VectorHelper::createAxisFromRebinParams(binParams, XOut.rawData()));
 
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS =
@@ -344,7 +344,7 @@ Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
   outputWS->setYUnitLabel("1/cm");
 
   // Set the X vector for the output workspace
-  outputWS->setX(0, XOut);
+  outputWS->histogram(0).setBinEdges(XOut);
   outputWS->setDistribution(true);
 
   outputWS->getSpectrum(0)->clearDetectorIDs();

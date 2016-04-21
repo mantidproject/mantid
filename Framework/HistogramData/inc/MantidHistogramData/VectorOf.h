@@ -38,9 +38,7 @@ public:
   VectorOf(size_t count, const double &value) {
     m_data = Kernel::make_cow<CowType>(count, value);
   }
-  explicit VectorOf(size_t count) {
-    m_data = Kernel::make_cow<CowType>(count);
-  }
+  explicit VectorOf(size_t count) { m_data = Kernel::make_cow<CowType>(count); }
   VectorOf(std::initializer_list<double> init) {
     m_data = Kernel::make_cow<CowType>(init);
   }
@@ -53,12 +51,13 @@ public:
     m_data = Kernel::make_cow<CowType>(ilist);
     return *this;
   }
+  template <class InputIt>
+  VectorOf(InputIt first, InputIt last)
+      : m_data(Kernel::make_cow<CowType>(first, last)) {}
 
   // TODO figure out if we want all these overloads.
-  explicit VectorOf(const Kernel::cow_ptr<CowType> &other)
-      : m_data(other) {}
-  explicit VectorOf(const boost::shared_ptr<CowType> &other)
-      : m_data(other) {}
+  explicit VectorOf(const Kernel::cow_ptr<CowType> &other) : m_data(other) {}
+  explicit VectorOf(const boost::shared_ptr<CowType> &other) : m_data(other) {}
   // TODO cow_ptr is not movable, can we implement move?
   explicit VectorOf(const CowType &data)
       : m_data(Kernel::make_cow<CowType>(data)) {}
@@ -74,10 +73,8 @@ public:
     return *this;
   }
   VectorOf &operator=(const CowType &data) {
-    if (!m_data)
+    if (&(*m_data) != &data)
       m_data = Kernel::make_cow<CowType>(data);
-    else
-      m_data.access() = data;
     return *this;
   }
 
@@ -91,6 +88,9 @@ public:
   const CowType &constData() const { return *m_data; }
   CowType &data() { return m_data.access(); }
   Kernel::cow_ptr<CowType> cowData() const { return m_data; }
+  const std::vector<double> &rawData() const { return m_data->rawData(); }
+  const std::vector<double> &constRawData() const { return m_data->rawData(); }
+  std::vector<double> &rawData() { return m_data.access().rawData(); }
 
 protected:
   // This is used as base class only, cannot delete polymorphically, so

@@ -624,8 +624,8 @@ CreateEventWorkspaceWithStartTime(int numPixels, int numBins, int numEvents,
   }
 
   // Create the x-axis for histogramming.
-  auto x1 = Kernel::make_cow<HistogramData::HistogramX>(numBins);
-  auto &xRef = x1.access();
+  HistogramData::BinEdges x1(numBins);
+  auto &xRef = x1.rawData();
   for (int i = 0; i < numBins; ++i) {
     xRef[i] = x0 + i * binDelta;
   }
@@ -658,8 +658,8 @@ CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
 
   if (xOffset == 0.) {
     // Create the x-axis for histogramming.
-    auto x1 = Kernel::make_cow<HistogramData::HistogramX>(numBins);
-    auto &xRef = x1.access();
+    HistogramData::BinEdges x1(numBins);
+    auto &xRef = x1.rawData();
     const double x0 = 0.;
     for (int i = 0; i < numBins; ++i) {
       xRef[i] = x0 + static_cast<double>(i) * binDelta;
@@ -670,11 +670,10 @@ CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
   } else {
     for (size_t g = 0; g < groups.size(); g++) {
       // Create the x-axis for histogramming.
-      auto x1 = Kernel::make_cow<HistogramData::HistogramX>(numBins);
-      auto &xRef = x1.access();
+      MantidVec x1(numBins);
       const double x0 = xOffset * static_cast<double>(g);
       for (int i = 0; i < numBins; ++i) {
-        xRef[i] = x0 + static_cast<double>(i) * binDelta;
+        x1[i] = x0 + static_cast<double>(i) * binDelta;
       }
       retVal->setX(g, x1);
     }
@@ -700,8 +699,8 @@ EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels,
   auto pAxis0 = new NumericAxis(numbins);
   // Create the original X axis to histogram on.
   // Create the x-axis for histogramming.
-  auto axis = Kernel::make_cow<HistogramData::HistogramX>(numbins);
-  auto &xRef = axis.access();
+  HistogramData::BinEdges axis(numbins);
+  auto &xRef = axis.rawData();
   for (int i = 0; i < static_cast<int>(numbins); ++i) {
     xRef[i] = i * bin_delta;
     pAxis0->setValue(i, xRef[i]);

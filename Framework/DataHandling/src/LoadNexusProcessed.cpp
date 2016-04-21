@@ -192,7 +192,7 @@ bool isMultiPeriodFile(int nWorkspaceEntries, Workspace_sptr sampleWS,
 
 /// Default constructor
 LoadNexusProcessed::LoadNexusProcessed()
-    : m_shared_bins(false), m_xbins(), m_axis1vals(), m_list(false),
+    : m_shared_bins(false), m_xbins(0), m_axis1vals(), m_list(false),
       m_interval(false), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT()),
       m_spec_list(), m_filtered_spec_idxs(), m_cppFile(nullptr) {}
 
@@ -766,7 +766,7 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
 
       // Set the X axis
       if (this->m_shared_bins)
-        el.setX(this->m_xbins);
+        el.histogram().setBinEdges(this->m_xbins);
       else {
         MantidVec x;
         x.resize(xbins.dim1());
@@ -1512,7 +1512,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
     xlength = xbins.dim0();
     m_shared_bins = true;
     xbins.load();
-    m_xbins.access().assign(xbins(), xbins() + xlength);
+    m_xbins = HistogramData::HistogramX(xbins(), xbins() + xlength);
   } else {
     throw std::runtime_error("Unknown axis1 dimension encountered.");
   }
@@ -1866,7 +1866,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   double *err_end = err_start + nchannels;
   double *farea_start = nullptr;
   double *farea_end = nullptr;
-  const int64_t nxbins(m_xbins->size());
+  const int64_t nxbins(m_xbins.size());
   double *xErrors_start = nullptr;
   double *xErrors_end = nullptr;
   RebinnedOutput_sptr rb_workspace;
@@ -1905,7 +1905,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       xErrors_end += nxbins;
     }
 
-    local_workspace->setX(hist, m_xbins);
+    local_workspace->histogram(hist).setBinEdges(m_xbins);
     ++hist;
   }
 }
@@ -1943,7 +1943,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   double *err_end = err_start + nchannels;
   double *farea_start = nullptr;
   double *farea_end = nullptr;
-  const int64_t nxbins(m_xbins->size());
+  const int64_t nxbins(m_xbins.size());
   double *xErrors_start = nullptr;
   double *xErrors_end = nullptr;
   RebinnedOutput_sptr rb_workspace;
@@ -1981,7 +1981,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       xErrors_start += nxbins;
       xErrors_end += nxbins;
     }
-    local_workspace->setX(wsIndex, m_xbins);
+    local_workspace->histogram(wsIndex).setBinEdges(m_xbins);
     ++hist;
     ++wsIndex;
   }

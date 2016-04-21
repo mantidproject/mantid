@@ -38,44 +38,62 @@ public:
     return static_cast<const T *>(this)->constData()[pos];
   }
 
+  std::vector<double>::iterator begin() {
+    return static_cast<T *>(this)->data().begin();
+  }
+
+  std::vector<double>::iterator end() {
+    return static_cast<T *>(this)->data().end();
+  }
+
+  std::vector<double>::const_iterator begin() const {
+    return static_cast<const T *>(this)->data().begin();
+  }
+
+  std::vector<double>::const_iterator end() const {
+    return static_cast<const T *>(this)->data().end();
+  }
+
+  std::vector<double>::const_iterator cbegin() const {
+    return static_cast<const T *>(this)->data().cbegin();
+  }
+
+  std::vector<double>::const_iterator cend() const {
+    return static_cast<const T *>(this)->data().cend();
+  }
+
 protected:
   ~Iterable() = default;
 };
 
 template <class T>
-auto begin(Iterable<T> &container)
-    -> decltype(static_cast<T *>(&container)->data().begin()) {
-  return static_cast<T *>(&container)->data().begin();
+auto begin(Iterable<T> &container) -> decltype(container.begin()) {
+  return container.begin();
 }
 
 template <class T>
-auto end(Iterable<T> &container)
-    -> decltype(static_cast<T *>(&container)->data().end()) {
-  return static_cast<T *>(&container)->data().end();
+auto end(Iterable<T> &container) -> decltype(container.end()) {
+  return container.end();
 }
 
 template <class T>
-auto begin(const Iterable<T> &container)
-    -> decltype(static_cast<const T *>(&container)->data().begin()) {
-  return static_cast<const T *>(&container)->data().begin();
+auto begin(const Iterable<T> &container) -> decltype(container.begin()) {
+  return container.begin();
 }
 
 template <class T>
-auto end(const Iterable<T> &container)
-    -> decltype(static_cast<const T *>(&container)->data().end()) {
-  return static_cast<const T *>(&container)->data().end();
+auto end(const Iterable<T> &container) -> decltype(container.end()) {
+  return container.end();
 }
 
 template <class T>
-auto cbegin(const Iterable<T> &container)
-    -> decltype(static_cast<const T *>(&container)->data().cbegin()) {
-  return static_cast<const T *>(&container)->data().cbegin();
+auto cbegin(const Iterable<T> &container) -> decltype(container.cbegin()) {
+  return container.cbegin();
 }
 
 template <class T>
-auto cend(const Iterable<T> &container)
-    -> decltype(static_cast<const T *>(&container)->data().cend()) {
-  return static_cast<const T *>(&container)->data().cend();
+auto cend(const Iterable<T> &container) -> decltype(container.cend()) {
+  return container.cend();
 }
 
 } // namespace detail

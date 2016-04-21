@@ -1586,9 +1586,8 @@ void IntegratePeakTimeSlices::SetUpData1(
   double minRow = 20000, maxRow = -1, minCol = 20000, maxCol = -1;
 
   int jj = 0;
-  Mantid::MantidVecPtr pX;
 
-  Mantid::MantidVec &xRef = pX.access();
+  Mantid::MantidVec xRef;
   for (int i = 2; i < m_NeighborIDs[1]; i++) {
     int DetID = m_NeighborIDs[i];
 
@@ -1681,6 +1680,7 @@ void IntegratePeakTimeSlices::SetUpData1(
   if (m_AttributeValues->EdgeX <= 1)
     m_AttributeValues->EdgeX = 0;
 
+  auto pX = Kernel::make_cow<HistogramData::HistogramX>(std::move(xRef));
   Data->setX(0, pX);
   Data->setX(1, pX);
   Data->setX(2, pX);

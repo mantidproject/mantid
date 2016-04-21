@@ -276,13 +276,7 @@ void LoadNexusMonitors2::exec() {
     double xmin, xmax;
     eventWS->getEventXMinMax(xmin, xmax);
 
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec &xRef = axis.access();
-    xRef.resize(2, 0.0);
-    if (eventWS->getNumberEvents() > 0) {
-      xRef[0] = xmin - 1; // Just to make sure the bins hold it all
-      xRef[1] = xmax + 1;
-    }
+    auto axis = HistogramData::BinEdges{xmin - 1, xmax + 1};
     eventWS->setAllX(axis); // Set the binning axis using this.
   }
 

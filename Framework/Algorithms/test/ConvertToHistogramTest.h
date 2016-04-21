@@ -12,6 +12,7 @@ using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::Algorithms::ConvertToHistogram;
 using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::MantidVecPtr;
+using Mantid::HistogramData::Points;
 
 class ConvertToHistogramTest : public CxxTest::TestSuite {
 
@@ -45,13 +46,12 @@ public:
     Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspace123(
         numSpectra, numYPoints, false);
     // Reset the X data to something reasonable
-    MantidVecPtr x;
-    x.access().resize(numYPoints);
+    Points x(numYPoints);
     for (int i = 0; i < numYPoints; ++i) {
-      x.access()[i] = (double)i;
+      x.rawData()[i] = (double)i;
     }
     for (int i = 0; i < numSpectra; ++i) {
-      testWS->setX(i, x);
+      testWS->histogram(i).setPoints(x);
     }
 
     TS_ASSERT_EQUALS(testWS->isHistogramData(), false);

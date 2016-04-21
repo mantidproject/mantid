@@ -46,6 +46,9 @@ public:
   FixedLengthVector(FixedLengthVector &&) = default;
   FixedLengthVector(const std::vector<double> &other) : m_data(other) {}
   FixedLengthVector(std::vector<double> &&other) : m_data(std::move(other)) {}
+  template <class InputIt>
+  FixedLengthVector(InputIt first, InputIt last)
+      : m_data(first, last) {}
 
   FixedLengthVector &operator=(const FixedLengthVector &rhs) {
     if (size() != rhs.size())
@@ -95,13 +98,12 @@ protected:
   std::vector<double> m_data;
 
 public:
-  auto cbegin() const -> decltype(m_data.cbegin()) {
-    return m_data.cbegin();
-  }
-
-  auto cend() const -> decltype(m_data.cend()) {
-    return m_data.cend();
-  }
+  auto begin() -> decltype(m_data.begin()) { return m_data.begin(); }
+  auto end() -> decltype(m_data.end()) { return m_data.end(); }
+  auto begin() const -> decltype(m_data.begin()) { return m_data.begin(); }
+  auto end() const -> decltype(m_data.end()) { return m_data.end(); }
+  auto cbegin() const -> decltype(m_data.cbegin()) { return m_data.cbegin(); }
+  auto cend() const -> decltype(m_data.cend()) { return m_data.cend(); }
 };
 
 } // namespace detail

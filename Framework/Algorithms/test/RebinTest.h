@@ -19,6 +19,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
+using Mantid::HistogramData::BinEdges;
 
 class RebinTest : public CxxTest::TestSuite {
 public:
@@ -485,8 +486,7 @@ private:
   }
 
   Workspace2D_sptr Create2DWorkspace(int xlen, int ylen) {
-    boost::shared_ptr<Mantid::MantidVec> x1 =
-        boost::make_shared<Mantid::MantidVec>(xlen, 0.0);
+    BinEdges x1(xlen, 0.0);
     boost::shared_ptr<Mantid::MantidVec> y1(
         new Mantid::MantidVec(xlen - 1, 3.0));
     boost::shared_ptr<Mantid::MantidVec> e1(
@@ -496,13 +496,13 @@ private:
     retVal->initialize(ylen, xlen, xlen - 1);
     double j = 1.0;
 
-    for (int i = 0; i < xlen; i++) {
-      (*x1)[i] = j * 0.5;
+    for (auto &x : x1) {
+      x = j * 0.5;
       j += 1.5;
     }
 
     for (int i = 0; i < ylen; i++) {
-      retVal->setX(i, x1);
+      retVal->histogram(i).setBinEdges(x1);
       retVal->setData(i, y1, e1);
     }
 

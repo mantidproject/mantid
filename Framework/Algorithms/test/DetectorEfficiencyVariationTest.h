@@ -25,6 +25,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using Mantid::HistogramData::BinEdges;
 
 class DetectorEfficiencyVariationTest : public CxxTest::TestSuite {
 public:
@@ -105,9 +106,10 @@ public:
         WorkspaceFactory::Instance().create("Workspace2D", Nhist, NXs, NXs - 1);
     Workspace2D_sptr inputA = boost::dynamic_pointer_cast<Workspace2D>(spaceA);
     Workspace2D_sptr inputB = boost::dynamic_pointer_cast<Workspace2D>(spaceB);
-    boost::shared_ptr<MantidVec> x = boost::make_shared<MantidVec>(NXs);
+    BinEdges x(NXs);
+    auto &rawX = x.rawData();
     for (int i = 0; i < NXs; ++i) {
-      (*x)[i] = i * 1000;
+      rawX[i] = i * 1000;
     }
     // random numbers that will be copied into the workspace spectra
     const short ySize = NXs - 1;
@@ -125,9 +127,9 @@ public:
     boost::shared_ptr<MantidVec> forInputA, forInputB;
 
     for (int j = 0; j < Nhist; ++j) {
-      inputA->setX(j, x);
+      inputA->histogram(j).setBinEdges(x);
       // both workspaces must have the same x bins
-      inputB->setX(j, x);
+      inputB->histogram(j).setBinEdges(x);
       forInputA.reset(new MantidVec);
       forInputB.reset(new MantidVec);
       // the spectravalues will be multiples of the random numbers above

@@ -289,14 +289,14 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
     int numPixels, int numBins, double x0, double binDelta,
     int start_at_pixelID, Geometry::Instrument_sptr inst,
     const std::string &functionString, bool isRandom) {
-  MantidVecPtr x, y, e;
-  x.access().resize(numBins + 1);
+  HistogramData::BinEdges x(numBins + 1);
+  MantidVecPtr y, e;
   e.access().resize(numBins);
   for (int i = 0; i < numBins + 1; ++i) {
-    x.access()[i] = x0 + i * binDelta;
+    x.data()[i] = x0 + i * binDelta;
   }
 
-  std::vector<double> xValues(x.access().begin(), x.access().end() - 1);
+  std::vector<double> xValues(cbegin(x), cend(x) - 1);
   y.access() = evalFunction(functionString, xValues, isRandom ? 1 : 0);
   e.access().resize(numBins);
 
@@ -311,7 +311,7 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
   retVal->setInstrument(inst);
 
   for (size_t wi = 0; wi < static_cast<size_t>(numPixels); wi++) {
-    retVal->setX(wi, x);
+    retVal->histogram(wi).setBinEdges(x);
     retVal->setData(wi, y, e);
     retVal->getSpectrum(wi)->setDetectorID(detid_t(start_at_pixelID + wi));
     retVal->getSpectrum(wi)->setSpectrumNo(specnum_t(wi + 1));
@@ -337,9 +337,8 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
   retVal->setInstrument(inst);
 
   // Create the x-axis for histogramming.
-  MantidVecPtr x1;
-  MantidVec &xRef = x1.access();
-  xRef.resize(numXBins);
+  HistogramData::BinEdges x1(numXBins);
+  auto &xRef = x1.data();
   for (int i = 0; i < numXBins; ++i) {
     xRef[i] = x0 + i * binDelta;
   }

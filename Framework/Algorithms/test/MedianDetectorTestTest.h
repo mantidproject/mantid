@@ -27,6 +27,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using Mantid::HistogramData::BinEdges;
 
 const int THEMASKED(40);
 const int SAVEDBYERRORBAR(143);
@@ -172,13 +173,14 @@ public:
   MedianDetectorTestTest() : m_IWSName("MedianDetectorTestInput") {
     using namespace Mantid;
     // Set up a small workspace for testing
-    Workspace_sptr space =
-        WorkspaceFactory::Instance().create("Workspace2D", Nhist, 11, 10);
-    m_2DWS = boost::dynamic_pointer_cast<Workspace2D>(space);
     const short specLength = 22;
-    boost::shared_ptr<MantidVec> x = boost::make_shared<MantidVec>(specLength);
+    Workspace_sptr space = WorkspaceFactory::Instance().create(
+        "Workspace2D", Nhist, specLength, specLength - 1);
+    m_2DWS = boost::dynamic_pointer_cast<Workspace2D>(space);
+    BinEdges x(specLength);
+    auto &rawX = x.rawData();
     for (int i = 0; i < specLength; ++i) {
-      (*x)[i] = i * 1000;
+      rawX[i] = i * 1000;
     }
     // the data will be 21 random numbers
     double yArray[specLength - 1] = {0.2, 4, 50, 0.001, 0, 0,     0,
@@ -202,7 +204,7 @@ public:
     (*bigEnough)[0] = 1.2 * m_YSum * (0.5 * Nhist);
 
     for (int j = 0; j < Nhist; ++j) {
-      m_2DWS->setX(j, x);
+      m_2DWS->histogram(j).setBinEdges(x);
       boost::shared_ptr<MantidVec> spectrum = boost::make_shared<MantidVec>();
       // the spectravalues will be multiples of the random numbers above
       for (int l = 0; l < specLength - 1; ++l) {
