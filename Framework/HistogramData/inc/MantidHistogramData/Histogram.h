@@ -66,8 +66,8 @@ public:
       return Points(m_x);
   }
 
-  template <typename T> void setBinEdges(T &&data);
-  template <typename T> void setPoints(T &&data);
+  template <typename... T> void setBinEdges(T &&... data);
+  template <typename... T> void setPoints(T &&... data);
 
   const HistogramX &x() const { return *m_x; }
   const HistogramX &constX() const { return *m_x; }
@@ -89,15 +89,15 @@ private:
   XMode m_xMode;
 };
 
-template <typename T> void Histogram::setBinEdges(T &&data) {
-  BinEdges &&edges = BinEdges(std::forward<T>(data));
+template <typename... T> void Histogram::setBinEdges(T &&... data) {
+  BinEdges &&edges = BinEdges(std::forward<T>(data)...);
   checkSize(edges);
   m_xMode = XMode::BinEdges;
   m_x = edges.cowData();
 }
 
-template <typename T> void Histogram::setPoints(T &&data) {
-  Points &&points = Points(std::forward<T>(data));
+template <typename... T> void Histogram::setPoints(T &&... data) {
+  Points &&points = Points(std::forward<T>(data)...);
   checkSize(points);
   m_xMode = XMode::Points;
   m_x = points.cowData();
