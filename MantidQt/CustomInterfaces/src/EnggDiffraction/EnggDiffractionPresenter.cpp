@@ -703,7 +703,7 @@ std::string EnggDiffractionPresenter::functionStrFactory(
   double S = paramTableWS->cell<double>(row, size_t(11));
 
   startX = boost::lexical_cast<std::string>(X0 - (3 * S));
-  endX = boost::lexical_cast<std::string>(X0 + (3 * S));
+  endX = boost::lexical_cast<std::string>(X0 + (5 * S));
 
   std::string functionStr =
       "name=LinearBackground,A0=" + boost::lexical_cast<std::string>(A0) +

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>664</width>
+    <width>690</width>
     <height>683</height>
    </rect>
   </property>
@@ -245,7 +245,7 @@
       <item row="0" column="3">
        <widget class="QLabel" name="label_qlist_bank">
         <property name="text">
-         <string>Bank:</string>
+         <string>Run Number:</string>
         </property>
        </widget>
       </item>
@@ -274,19 +274,19 @@
       <item row="1" column="3">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QListWidget" name="listWidget_fitting_bank_preview">
+         <widget class="QListWidget" name="listWidget_fitting_run_num">
           <property name="enabled">
            <bool>false</bool>
           </property>
           <property name="minimumSize">
            <size>
-            <width>0</width>
+            <width>20</width>
             <height>300</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>20</width>
+            <width>65</width>
             <height>16777215</height>
            </size>
           </property>
