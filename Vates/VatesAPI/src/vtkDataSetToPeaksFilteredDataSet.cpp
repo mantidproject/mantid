@@ -190,10 +190,7 @@ void vtkDataSetToPeaksFilteredDataSet::addSinglePeak(
   const Mantid::Geometry::PeakShape &shape = peak->getPeakShape();
   std::string shapeName = shape.shapeName();
 
-  if (shapeName == Mantid::DataObjects::PeakShapeSpherical::sphereShapeName() ||
-      shapeName ==
-          Mantid::DataObjects::PeakShapeEllipsoid::ellipsoidShapeName()) {
-
+  if (shapeName != Mantid::DataObjects::NoShape::noShapeName()) {
     boost::optional<double> rad = shape.radius(m_radiusType);
     if (rad.is_initialized()) {
       radius = rad.get();

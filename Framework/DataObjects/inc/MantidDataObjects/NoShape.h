@@ -48,6 +48,8 @@ public:
   boost::optional<double> radius(RadiusType) const override {
     return boost::optional<double>{};
   }
+  /// Return the shape name
+  static const std::string noShapeName();
 };
 
 } // namespace DataObjects
