@@ -5,7 +5,11 @@
 #include "MantidQtCustomInterfaces/Tomography/IImagingFormatsConvertPresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/IImagingFormatsConvertView.h"
 
-#include <QObject>
+// forward declarations for Poco classes
+namespace Poco {
+class File;
+class Path;
+}
 
 namespace MantidQt {
 
@@ -62,6 +66,11 @@ protected:
   void processShutDown();
 
 private:
+  void goThroughDirRecur(const Poco::File &inFilePath,
+                          const std::string &inFormat,
+                          const Poco::File &outFilePath,
+                          const std::string &outExt, size_t depth);
+
   /// Associated view for this presenter (MVP pattern)
   IImagingFormatsConvertView *const m_view;
 };

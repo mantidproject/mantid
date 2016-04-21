@@ -40,7 +40,11 @@ std::string shortName(Format fmt);
 
 std::vector<std::string> fileExtension(Format fmt);
 
+std::string fileExtension(const std::string &format);
+
 bool isFileExtension(std::string extension, Format fmt);
+
+bool isFileExtension(std::string extension, const std::string &shortName);
 
 std::string description(Format fmt);
 

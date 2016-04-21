@@ -51,7 +51,8 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(IImagingFormatsConvertPresenter::Init);
-    TSM_ASSERT("Expected use of Mock view not satisfied.",
+    TSM_ASSERT("Mock view not used as expected. Some EXPECT_CALL conditions "
+               "were not satisfied",
                testing::Mock::VerifyAndClearExpectations(&mockView));
   }
 
@@ -61,9 +62,18 @@ public:
 
     EXPECT_CALL(mockView, inputPath()).Times(1).WillRepeatedly(Return(""));
     EXPECT_CALL(mockView, outputPath()).Times(1).WillRepeatedly(Return(""));
+    EXPECT_CALL(mockView, maxSearchDepth()).Times(1).WillRepeatedly(Return(3));
+    // should not get there
+    EXPECT_CALL(mockView, inputFormatName()).Times(0);
+    EXPECT_CALL(mockView, outputFormatName()).Times(0);
+
+    // empty paths should produce an error
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(1);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(IImagingFormatsConvertPresenter::Convert);
-    TSM_ASSERT("Expected use of Mock view not satisfied.",
+    TSM_ASSERT("Mock view not used as expected. Some EXPECT_CALL conditions "
+               "were not satisfied",
                testing::Mock::VerifyAndClearExpectations(&mockView));
   }
 
@@ -78,7 +88,8 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(IImagingFormatsConvertPresenter::ShutDown);
-    TSM_ASSERT("Expected use of Mock view not satisfied.",
+    TSM_ASSERT("Mock view not used as expected. Some EXPECT_CALL conditions "
+               "were not satisfied",
                testing::Mock::VerifyAndClearExpectations(&mockView));
   }
 

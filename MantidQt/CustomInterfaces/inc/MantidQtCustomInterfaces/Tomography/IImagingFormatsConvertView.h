@@ -111,6 +111,28 @@ public:
   virtual bool compressHint() const = 0;
 
   /**
+   * Maximum depth (subdirectories) to search for file from the input path.
+   *
+   * @return maximum depth set by the user
+   */
+  virtual size_t maxSearchDepth() const = 0;
+
+  /**
+   * Convert image (format A) to image (format B) when both formats
+   * are only supported via Qt QImage and related classes.  TODO: This
+   * should not be here. Move to presenter when we have the
+   * Load/SaveImage algorithm.
+   *
+   * @param inputName name of a readable image file(assuming Qt format
+   * guess by header probing + extension)
+   *
+   * @param outputName name of an output image file (assuming Qt
+   * format guessing by suffix/extension)
+   */
+  virtual void convert(const std::string &inputName,
+                       const std::string &outputName) const = 0;
+
+  /**
    * Save this widget settings (when closing this widget).
    */
   virtual void saveSettings() const = 0;

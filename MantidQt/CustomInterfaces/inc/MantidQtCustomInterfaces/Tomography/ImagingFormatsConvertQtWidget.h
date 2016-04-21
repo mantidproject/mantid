@@ -68,6 +68,11 @@ public:
 
   bool compressHint() const override;
 
+  size_t maxSearchDepth() const override;
+
+  void convert(const std::string &inputName,
+               const std::string &outputName) const override;
+
 protected:
   void initLayout();
 

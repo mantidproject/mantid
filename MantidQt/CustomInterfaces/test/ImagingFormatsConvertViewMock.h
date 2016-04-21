@@ -37,6 +37,14 @@ public:
   // bool compressHint() const
   MOCK_CONST_METHOD0(compressHint, bool());
 
+  // void convert(const std::string &inputName, const std::string &outputName)
+  // const;
+  MOCK_CONST_METHOD2(convert, void(const std::string &inputName,
+                                   const std::string &outputName));
+
+  // size_t maxSearchDepth() const
+  MOCK_CONST_METHOD0(maxSearchDepth, size_t());
+
   // void saveSettings() const
   MOCK_CONST_METHOD0(saveSettings, void());
 };

@@ -7,6 +7,7 @@ using namespace MantidQt::CustomInterfaces;
 
 #include <QCloseEvent>
 #include <QFileDialog>
+#include <QImage>
 #include <QMessageBox>
 #include <QSettings>
 
@@ -42,6 +43,7 @@ void ImagingFormatsConvertQtWidget::setFormats(
   setFormatsCombo(m_ui.comboBox_input_format, fmts, enable);
   setFormatsCombo(m_ui.comboBox_output_format, fmts, enable);
 
+  m_ui.spinBox_max_search_depth->setValue(3);
   if (m_ui.comboBox_output_format->count() > 0) {
     m_ui.comboBox_output_format->setCurrentIndex(1);
   }
@@ -86,6 +88,25 @@ std::string ImagingFormatsConvertQtWidget::outputFormatName() const {
 
 bool ImagingFormatsConvertQtWidget::compressHint() const {
   return 0 == m_ui.comboBox_compression->currentIndex();
+}
+
+void ImagingFormatsConvertQtWidget::convert(
+    const std::string &inputName, const std::string &outputName) const {
+  QImage img;
+  img.load(QString::fromStdString(inputName));
+
+  if (!img.isGrayscale()) {
+    // Qt5 has QImage::Format_Alpha8;
+    QImage::Format toFormat = QImage::Format_RGB16;
+    Qt::ImageConversionFlag toFlags = Qt::MonoOnly;
+    img.convertToFormat(toFormat, toFlags);
+  }
+
+  img.save(QString::fromStdString(outputName));
+}
+
+size_t ImagingFormatsConvertQtWidget::maxSearchDepth() const {
+  return static_cast<size_t>(m_ui.spinBox_max_search_depth->value());
 }
 
 void ImagingFormatsConvertQtWidget::saveSettings() const {

@@ -27,6 +27,23 @@ const static std::vector<std::string> descriptions{
 std::string shortName(Format fmt) { return shortNames.at(fmt); }
 
 /**
+ * Get sequence number or ID of the format
+ *
+ * @param shortName short name of the format (example: "FITS")
+ *
+ * @return the format id number, -1 if it is unknown
+ */
+size_t formatID(const std::string &shortName) {
+  auto pos = std::find(shortNames.begin(), shortNames.end(), shortName);
+
+  if (shortNames.end() == pos) {
+    return 0;
+  }
+
+  return pos - shortNames.begin();
+}
+
+/**
  * Possible common/accepted file extensions for a format
  *
  * @return extensions (without the dot, like "fits") in no particular
@@ -34,6 +51,24 @@ std::string shortName(Format fmt) { return shortNames.at(fmt); }
  */
 std::vector<std::string> fileExtensions(Format fmt) {
   return extensions.at(fmt);
+}
+
+/**
+ * The first-choice file extension for a format (given by
+ * name). Example: FITS => fit
+ *
+ * @param name string of the format
+ *
+ * @return extension as a string, empty if the format is unknown.
+ */
+std::string fileExtension(const std::string &format) {
+  auto pos = std::find(shortNames.begin(), shortNames.end(), format);
+
+  if (shortNames.end() == pos) {
+    return "";
+  }
+
+  return extensions[pos - shortNames.begin()].front();
 }
 
 /**
@@ -49,6 +84,12 @@ bool isFileExtension(std::string extension, Format fmt) {
 
   const auto &valid = extensions.at(fmt);
   return (valid.end() != std::find(valid.begin(), valid.end(), lowExt));
+}
+
+bool isFileExtension(std::string extension, const std::string &shortName) {
+  size_t idx = formatID(shortName);
+
+  return isFileExtension(extension, static_cast<Format>(idx));
 }
 
 /**
