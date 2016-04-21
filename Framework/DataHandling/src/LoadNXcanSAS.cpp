@@ -382,19 +382,19 @@ bool findDefinition(::NeXus::File &file) {
   bool foundDefinition = false;
   auto entries = file.getEntries();
 
-  for (auto& entry : entries) {
+  for (auto &entry : entries) {
     if (entry.second == sasEntryClassAttr) {
-        file.openGroup(entry.first, entry.second);
-        file.openData(sasEntryDefinition);
-        auto definitionFromFile = file.getStrData();
-        if (definitionFromFile == sasEntryDefinitionFormat) {
-          foundDefinition = true;
-          break;
-        }
-        file.closeData();
-        file.closeGroup();
+      file.openGroup(entry.first, entry.second);
+      file.openData(sasEntryDefinition);
+      auto definitionFromFile = file.getStrData();
+      if (definitionFromFile == sasEntryDefinitionFormat) {
+        foundDefinition = true;
+        break;
       }
+      file.closeData();
+      file.closeGroup();
     }
+  }
   return foundDefinition;
 }
 
@@ -486,7 +486,7 @@ int LoadNXcanSAS::confidence(Kernel::NexusDescriptor &descriptor) const {
 
   int confidence(0);
 
-  ::NeXus::File& file = descriptor.data();
+  ::NeXus::File &file = descriptor.data();
   // Check if there is an entry root/SASentry/definition->NXcanSAS
   try {
     bool foundDefinition = findDefinition(file);
