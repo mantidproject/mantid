@@ -271,7 +271,7 @@ public:
 
   MatrixWorkspace_sptr create2DWorkspace(int xlen, int ylen) {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        xlen, ylen, false, false, true, "testInst");
+        xlen, xlen - 1, false, false, true, "testInst");
     BinEdges x1(xlen, 0.0);
     boost::shared_ptr<Mantid::MantidVec> y1(
         new Mantid::MantidVec(xlen - 1, 3.0));
