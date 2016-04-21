@@ -93,7 +93,7 @@ set ( SRC_FILES
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
-	src/LoadReflTBL.cpp
+	src/LoadTBL.cpp
 	src/LoadSINQFocus.cpp
 	src/LoadSNSspec.cpp
 	src/LoadSPE.cpp
@@ -257,7 +257,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadRawBin0.h
 	inc/MantidDataHandling/LoadRawHelper.h
 	inc/MantidDataHandling/LoadRawSpectrum0.h
-	inc/MantidDataHandling/LoadReflTBL.h
+	inc/MantidDataHandling/LoadTBL.h
 	inc/MantidDataHandling/LoadSINQFocus.h
 	inc/MantidDataHandling/LoadSNSspec.h
 	inc/MantidDataHandling/LoadSPE.h
@@ -417,7 +417,7 @@ set ( TEST_FILES
 	LoadRawBin0Test.h
 	LoadRawSaveNxsLoadNxsTest.h
 	LoadRawSpectrum0Test.h
-	LoadReflTBLTest.h
+	LoadTBLTest.h
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h
 	LoadSPETest.h

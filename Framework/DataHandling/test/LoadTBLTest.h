@@ -1,8 +1,8 @@
-#ifndef LOADREFLTBLTEST_H_
-#define LOADREFLTBLTEST_H_
+#ifndef LOADTBLTEST_H_
+#define LOADTBLTEST_H_
 
 #include "cxxtest/TestSuite.h"
-#include "MantidDataHandling/LoadReflTBL.h"
+#include "MantidDataHandling/LoadTBL.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/TableRow.h"
@@ -14,16 +14,16 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 
-class LoadReflTBLTest : public CxxTest::TestSuite {
+class LoadTBLTest : public CxxTest::TestSuite {
 public:
-  static LoadReflTBLTest *createSuite() { return new LoadReflTBLTest(); }
-  static void destroySuite(LoadReflTBLTest *suite) { delete suite; }
+  static LoadTBLTest *createSuite() { return new LoadTBLTest(); }
+  static void destroySuite(LoadTBLTest *suite) { delete suite; }
 
-  LoadReflTBLTest()
-      : m_filename("LoadReflTBLTest.tbl"), m_wsName("LoadReflTBLTestWS"),
+  LoadTBLTest()
+      : m_filename("LoadTBLTest.tbl"), m_wsName("LoadTBLTestWS"),
         m_abspath() {}
 
-  ~LoadReflTBLTest() override {}
+  ~LoadTBLTest() override {}
 
   void testFileNoQuotes() {
     // create a file with each line containing different but valid data format
@@ -40,7 +40,7 @@ public:
     file.close();
 
     Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadReflTBL");
+        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -121,7 +121,7 @@ public:
     file.close();
 
     Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadReflTBL");
+        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -202,7 +202,7 @@ public:
     file.close();
 
     Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadReflTBL");
+        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -229,7 +229,7 @@ public:
     file.close();
 
     Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadReflTBL");
+        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -259,7 +259,7 @@ public:
     file.close();
 
     Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadReflTBL");
+        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -276,27 +276,14 @@ public:
     file.close();
 
     Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadReflTBL");
+        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
     m_abspath = alg->getPropertyValue("Filename"); // Get absolute path
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", m_wsName));
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-
-    TS_ASSERT(alg->isExecuted());
-
-    TS_ASSERT_EQUALS(AnalysisDataService::Instance().doesExist(m_wsName), true);
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve(m_wsName));
-    TableWorkspace_sptr outputWS =
-        boost::dynamic_pointer_cast<TableWorkspace>(output);
-
-    // the columns should be there, but no rows
-    TS_ASSERT_EQUALS(outputWS->columnCount(), 9);
-    TS_ASSERT_EQUALS(outputWS->rowCount(), 0);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
 
     cleanupafterwards();
   }
@@ -315,28 +302,14 @@ public:
     file.close();
 
     Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadReflTBL");
+        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
     m_abspath = alg->getPropertyValue("Filename"); // Get absolute path
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", m_wsName));
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-
-    TS_ASSERT(alg->isExecuted());
-
-    TS_ASSERT_EQUALS(AnalysisDataService::Instance().doesExist(m_wsName), true);
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve(m_wsName));
-    TableWorkspace_sptr outputWS =
-        boost::dynamic_pointer_cast<TableWorkspace>(output);
-
-    // the columns should be there, but no rows
-    TS_ASSERT_EQUALS(outputWS->columnCount(), 9);
-    TS_ASSERT_EQUALS(outputWS->rowCount(), 0);
-
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
     cleanupafterwards();
   }
 
@@ -350,4 +323,4 @@ private:
   }
 };
 
-#endif // LOADREFLTBLTEST_H_
+#endif // LOADTBLTEST_H_
