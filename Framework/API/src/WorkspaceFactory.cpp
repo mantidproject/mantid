@@ -103,7 +103,7 @@ void WorkspaceFactoryImpl::initializeFromParent(
   child->m_run = parent->m_run;
   child->setYUnit(parent->m_YUnit);
   child->setYUnitLabel(parent->m_YUnitLabel);
-  child->isDistribution(parent->isDistribution());
+      child->setDistribution(parent->isDistribution());
 
   // Only copy the axes over if new sizes are not given
   if (!differentSize) {

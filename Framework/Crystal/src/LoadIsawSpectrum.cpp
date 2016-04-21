@@ -140,7 +140,7 @@ void LoadIsawSpectrum::exec() {
   outWS->setInstrument(inst);
   outWS->getAxis(0)->setUnit("TOF");
   outWS->setYUnit("Counts");
-  outWS->isDistribution(true);
+          outWS->setDistribution(true);
   outWS->rebuildSpectraMapping(false);
 
   // Go through each point at this run / bank

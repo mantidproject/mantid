@@ -193,7 +193,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         input = AnalysisDataService::Instance().retrieve("testSpace"));
     Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(output);
-    input2D->isDistribution(true);
+    input2D->setDistribution(true);
     // Replace workspace
     AnalysisDataService::Instance().addOrReplace("testSpace", input2D);
 

@@ -153,7 +153,7 @@ void DiffractionFocussing::exec() {
 
   progress(1.);
 
-  outputW->isDistribution(dist);
+          outputW->setDistribution(dist);
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputW);

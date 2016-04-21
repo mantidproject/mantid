@@ -194,7 +194,7 @@ private:
     m_Pmap->addBool(toMask.get(), "masked", true);
 
     // required to get it passed the algorthms validator
-    inputWS->isDistribution(true);
+    inputWS->setDistribution(true);
 
     return inputWS;
   }
