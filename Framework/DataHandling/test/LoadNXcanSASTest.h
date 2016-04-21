@@ -169,7 +169,7 @@ public:
     do_assert_load(ws, wsOut, parameters);
 
     // Clean up
-    removeFile(parameters.filename);
+    //removeFile(parameters.filename);
     removeWorkspaceFromADS(outWsName);
   }
 

@@ -1,16 +1,17 @@
-#include "MantidDataHandling/LoadNXcanSAS.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidDataHandling/LoadNXcanSAS.h"
 #include "MantidDataHandling/H5Util.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <H5Cpp.h>
@@ -377,35 +378,23 @@ void loadData(H5::Group &entry, Mantid::API::MatrixWorkspace_sptr workspace) {
   }
 }
 
-bool findDefinitionInGroup(H5::H5File &file, hsize_t index) {
+bool findDefinition(::NeXus::File &file) {
   bool foundDefinition = false;
-  auto groupName = file.getObjnameByIdx(index);
-  auto group = file.openGroup(groupName);
+  auto entries = file.getEntries();
 
-  try {
-    auto dataSet = group.openDataSet(sasEntryDefinition);
-    auto value = Mantid::DataHandling::H5Util::readString(dataSet);
-    if (value == sasEntryDefinitionFormat) {
-      foundDefinition = true;
-    }
-  } catch (...) {
-    foundDefinition = false;
-  }
-  return foundDefinition;
-}
-
-bool findDefinition(H5::H5File &file) {
-  bool foundDefinition = false;
-  auto numberOfObjects = file.getNumObjs();
-  for (hsize_t index; index < numberOfObjects; ++index) {
-    auto objectType = file.getObjTypeByIdx(index);
-    if (objectType == H5G_GROUP) {
-      foundDefinition = findDefinitionInGroup(file, index);
-      if (foundDefinition) {
-        break;
+  for (auto& entry : entries) {
+    if (entry.second == sasEntryClassAttr) {
+        file.openGroup(entry.first, entry.second);
+        file.openData(sasEntryDefinition);
+        auto definitionFromFile = file.getStrData();
+        if (definitionFromFile == sasEntryDefinitionFormat) {
+          foundDefinition = true;
+          break;
+        }
+        file.closeData();
+        file.closeGroup();
       }
     }
-  }
   return foundDefinition;
 }
 
@@ -484,20 +473,20 @@ namespace Mantid {
 namespace DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadNXcanSAS)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXcanSAS)
 
 /// constructor
 LoadNXcanSAS::LoadNXcanSAS() {}
 
-int LoadNXcanSAS::confidence(Kernel::FileDescriptor &descriptor) const {
+int LoadNXcanSAS::confidence(Kernel::NexusDescriptor &descriptor) const {
   const std::string &extn = descriptor.extension();
-  if (extn.compare(".nxs") != 0 || extn.compare(".h5") != 0) {
+  if (extn.compare(".nxs") != 0 && extn.compare(".h5") != 0) {
     return 0;
   }
 
   int confidence(0);
 
-  H5::H5File file(descriptor.filename(), H5F_ACC_RDONLY);
+  ::NeXus::File& file = descriptor.data();
   // Check if there is an entry root/SASentry/definition->NXcanSAS
   try {
     bool foundDefinition = findDefinition(file);
@@ -507,7 +496,6 @@ int LoadNXcanSAS::confidence(Kernel::FileDescriptor &descriptor) const {
   } catch (...) {
   }
 
-  file.close();
   return confidence;
 }
 

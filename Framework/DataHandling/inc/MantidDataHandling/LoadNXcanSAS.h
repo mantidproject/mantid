@@ -32,7 +32,7 @@ namespace DataHandling {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_DATAHANDLING_DLL LoadNXcanSAS
-    : public API::IFileLoader<Kernel::FileDescriptor> {
+    : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Constructor
   LoadNXcanSAS();
@@ -50,7 +50,7 @@ public:
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::FileDescriptor &descriptor) const override;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
   /// Initialisation code
