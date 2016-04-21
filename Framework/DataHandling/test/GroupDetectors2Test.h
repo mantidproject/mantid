@@ -30,6 +30,8 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using Mantid::detid_t;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::HistogramX;
 
 class GroupDetectors2Test : public CxxTest::TestSuite {
 public:
@@ -51,11 +53,11 @@ public:
         "Workspace2D", NHIST, NBINS + 1, NBINS);
     space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    Mantid::MantidVecPtr xs, errors, data[NHIST];
-    xs.access().resize(NBINS + 1, 10.0);
+    BinEdges xs(NBINS + 1, 10.0);
+    Mantid::MantidVecPtr errors, data[NHIST];
     errors.access().resize(NBINS, 1.0);
     for (int j = 0; j < NHIST; ++j) {
-      space2D->setX(j, xs);
+      space2D->histogram(j).setBinEdges(xs);
       data[j].access().resize(NBINS, j + 1); // the y values will be different
                                              // for each spectra
                                              // (1+index_number) but the same
@@ -614,14 +616,7 @@ public:
 
     // Create an axis for each pixel.
     for (size_t pix = 0; pix < inputW->getNumberHistograms(); pix++) {
-      cow_ptr<Mantid::MantidVec> axis;
-      Mantid::MantidVec &xRef = axis.access();
-      xRef.resize(5);
-      for (int i = 0; i < 5; ++i)
-        xRef[i] = static_cast<double>(1) + i * 1.0;
-      xRef[4] = 1e6;
-      // Set an X-axis
-      inputW->setX(pix, axis);
+      inputW->setX(pix, std::vector<double>{1.0, 2.0, 3.0, 4.0, 1e6});
       inputW->getEventList(pix).addEventQuickly(TofEvent(1000.0));
     }
 
@@ -726,14 +721,7 @@ public:
 
     // Create an axis for each pixel.
     for (size_t pix = 0; pix < inputW->getNumberHistograms(); pix++) {
-      cow_ptr<Mantid::MantidVec> axis;
-      Mantid::MantidVec &xRef = axis.access();
-      xRef.resize(5);
-      for (int i = 0; i < 5; ++i)
-        xRef[i] = static_cast<double>(1) + i * 1.0;
-      xRef[4] = 1e6;
-      // Set an X-axis
-      inputW->setX(pix, axis);
+      inputW->setX(pix, std::vector<double>{1.0, 2.0, 3.0, 4.0, 1e6});
       inputW->getEventList(pix).addEventQuickly(TofEvent(1000.0));
     }
 
