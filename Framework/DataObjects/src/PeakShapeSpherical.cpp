@@ -91,14 +91,19 @@ bool PeakShapeSpherical::operator==(const PeakShapeSpherical &other) const {
  */
 boost::optional<double> PeakShapeSpherical::radius(RadiusType type) const {
 
+  boost::optional<double> value;
   switch (type) {
   case (RadiusType::Radius):
-    return boost::optional<double>{m_radius};
+    value = boost::optional<double>{m_radius};
+    break;
   case (RadiusType::OuterRadius):
-    return m_backgroundOuterRadius;
+    value = m_backgroundOuterRadius;
+    break;
   case (RadiusType::InnerRadius):
-    return m_backgroundInnerRadius;
+    value = m_backgroundInnerRadius;
+    break;
   }
+  return value;
 }
 
 /**
