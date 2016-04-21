@@ -118,11 +118,11 @@ public:
       data.access().push_back(val);
     }
 
-    Points x_vec_ptr(0);
+    Points x_vec_ptr(nCells);
+    std::iota(begin(x_vec_ptr), end(x_vec_ptr), 0.0);
     double xx[nCells];
     for (int i = 0; i < nCells; i++) {
       xx[i] = i;
-      x_vec_ptr.rawData().push_back(static_cast<double>(i));
     }
     NormalFit.setAttributeValue("CalcVariances", CalcVariances);
 

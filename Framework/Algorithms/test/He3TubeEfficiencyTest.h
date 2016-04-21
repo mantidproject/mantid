@@ -177,11 +177,11 @@ private:
     y.access().resize(nbins, 0.0);
     e.access().resize(nbins, 0.0);
     for (int i = 0; i < nbins; ++i) {
-      x.rawData()[i] = static_cast<double>((1. + i) / 10.);
+      x.data()[i] = static_cast<double>((1. + i) / 10.);
       y.access()[i] = 10.0;
       e.access()[i] = sqrt(5.0);
     }
-    x.rawData()[nbins] = static_cast<double>((1. + nbins) / 10.);
+    x.data()[nbins] = static_cast<double>((1. + nbins) / 10.);
 
     for (int i = 0; i < nspecs; i++) {
       space2D->histogram(i).setBinEdges(x);

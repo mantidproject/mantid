@@ -622,7 +622,7 @@ CreateEventWorkspaceWithStartTime(int numPixels, int numBins, int numEvents,
 
   // Create the x-axis for histogramming.
   HistogramData::BinEdges x1(numBins);
-  auto &xRef = x1.rawData();
+  auto &xRef = x1.data();
   for (int i = 0; i < numBins; ++i) {
     xRef[i] = x0 + i * binDelta;
   }
@@ -656,7 +656,7 @@ CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
   if (xOffset == 0.) {
     // Create the x-axis for histogramming.
     HistogramData::BinEdges x1(numBins);
-    auto &xRef = x1.rawData();
+    auto &xRef = x1.data();
     const double x0 = 0.;
     for (int i = 0; i < numBins; ++i) {
       xRef[i] = x0 + static_cast<double>(i) * binDelta;
@@ -697,7 +697,7 @@ EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels,
   // Create the original X axis to histogram on.
   // Create the x-axis for histogramming.
   HistogramData::BinEdges axis(numbins);
-  auto &xRef = axis.rawData();
+  auto &xRef = axis.data();
   for (int i = 0; i < static_cast<int>(numbins); ++i) {
     xRef[i] = i * bin_delta;
     pAxis0->setValue(i, xRef[i]);

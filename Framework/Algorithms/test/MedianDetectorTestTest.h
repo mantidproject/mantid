@@ -178,9 +178,9 @@ public:
         "Workspace2D", Nhist, specLength, specLength - 1);
     m_2DWS = boost::dynamic_pointer_cast<Workspace2D>(space);
     BinEdges x(specLength);
-    auto &rawX = x.rawData();
+    auto &xData = x.data();
     for (int i = 0; i < specLength; ++i) {
-      rawX[i] = i * 1000;
+      xData[i] = i * 1000;
     }
     // the data will be 21 random numbers
     double yArray[specLength - 1] = {0.2, 4, 50, 0.001, 0, 0,     0,
