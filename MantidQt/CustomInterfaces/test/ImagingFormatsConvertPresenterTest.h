@@ -5,7 +5,7 @@
 #include "MantidQtCustomInterfaces/Tomography/ImagingFormatsConvertPresenter.h"
 
 #include <cxxtest/TestSuite.h>
-// #include "MockImagingFormatsConvertView.h"
+#include "ImagingFormatsConvertViewMock.h"
 
 using namespace MantidQt::CustomInterfaces;
 using testing::TypedEq;
@@ -30,9 +30,9 @@ public:
   }
 
   void setUp() override {
-    m_view.reset(new testing::NiceMock<MockImagingFormatsConvertPresenter>());
+    m_view.reset(new testing::NiceMock<ImagingFormatsConvertViewMock>());
     m_presenter.reset(
-        new MantidQt::CustomInterfaces::ImagingFormatsConvertPresenterTest(
+        new MantidQt::CustomInterfaces::ImagingFormatsConvertPresenter(
             m_view.get()));
   }
 
@@ -44,9 +44,8 @@ public:
     m_presenter->notify(IImagingFormatsConvertPresenter::Init);
   }
 
-
   void test_convertFails() {
-    pres.notify(IImagingFormatsConvertPresenter::Convert);
+    m_presenter->notify(IImagingFormatsConvertPresenter::Convert);
   }
 
   void test_shutDown() {
@@ -55,8 +54,9 @@ public:
   }
 
 private:
-  // boost::scoped_ptr<testing::NiceMock<MockImagingFormatsConvertView>> m_view;
-  boost::scoped_ptr<MantidQt::CustomInterfaces::TomographyIfacePresenter>
+  std::unique_ptr<testing::NiceMock<ImagingFormatsConvertViewMock>> m_view;
+
+  std::unique_ptr<MantidQt::CustomInterfaces::ImagingFormatsConvertPresenter>
       m_presenter;
   // To have one FITS, etc.
   Mantid::API::MatrixWorkspace_sptr m_ws;

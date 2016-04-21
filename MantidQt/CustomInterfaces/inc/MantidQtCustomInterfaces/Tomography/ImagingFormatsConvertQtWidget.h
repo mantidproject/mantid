@@ -57,7 +57,7 @@ public:
 protected:
   void initLayout();
 
-  void saveSettings() const;
+  void saveSettings() const override;
   void setup();
 
 private slots:

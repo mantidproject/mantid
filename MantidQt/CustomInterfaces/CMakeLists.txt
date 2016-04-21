@@ -106,6 +106,7 @@ set ( SRC_FILES
 	src/Tomography/ImagingFormatsConvertPresenter.cpp
 	src/Tomography/ImagingFormatsConvertQtWidget.cpp
 	src/Tomography/ImageStackPreParams.cpp
+	src/Tomography/ImggFormats.cpp
 	src/Tomography/SavuConfigDialog.cpp
 	src/Tomography/StackOfImagesDirs.cpp
 	src/Tomography/TomoPathsConfig.cpp
@@ -286,6 +287,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Tomography/ImagingFormatsConvertPresenter.h
 	inc/MantidQtCustomInterfaces/Tomography/ImagingFormatsConvertQtWidget.h
 	inc/MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h
+	inc/MantidQtCustomInterfaces/Tomography/ImggFormats.h
 	inc/MantidQtCustomInterfaces/Tomography/StackOfImagesDirs.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h

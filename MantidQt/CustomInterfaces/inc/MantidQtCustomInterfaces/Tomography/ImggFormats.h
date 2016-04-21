@@ -1,14 +1,16 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGINGFORMATSCONVERTVIEW_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGINGFORMATSCONVERTVIEW_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMGGFORMATS_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMGGFORMATS_H_
 
 #include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 /**
-Widget to convert images and stacks of images between different image
-formats.
+File formats used to store imaging data (image file formats and
+generic imaging formats such as NXTomo
+http://download.nexusformat.org/sphinx/classes/applications/NXtomo.html).
 
 Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
@@ -31,23 +33,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IImagingFormatsConvertView {
+namespace ImggFormats {
+enum Format { FITS = 0, TIFF = 1, PNG = 2, NXTomo = 3 };
 
-public:
-  IImagingFormatsConvertView() {}
+std::vector<std::string> fileExtension(Format fmt);
 
-  virtual ~IImagingFormatsConvertView() {}
+bool isFileExtension(std::string extension, Format fmt);
 
-  virtual void userWarning(const std::string &err,
-                           const std::string &description) = 0;
+std::string description(Format fmt);
 
-  virtual void userError(const std::string &err,
-                         const std::string &description) = 0;
-
-  virtual void saveSettings() const = 0;
-};
+} // namespace ImggFormats
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGINGFORMATSCONVERTVIEW_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMGGFORMATS_H_
