@@ -18,6 +18,7 @@ if ( CXXTEST_FOUND )
             API
             DataObjects
             Geometry
+            HistogramData
             Kernel
             ${QT_LIBRARIES}
             ${QWT_LIBRARIES}

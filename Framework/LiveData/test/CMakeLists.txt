@@ -18,6 +18,7 @@ if ( CXXTEST_FOUND )
             API
             DataObjects
             Geometry
+            HistogramData
             Kernel
             LiveData
             ${Boost_LIBRARIES}
