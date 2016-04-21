@@ -35,7 +35,6 @@ const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
 int EnggDiffractionViewQtGUI::m_currentType = 0;
 int EnggDiffractionViewQtGUI::m_currentRunMode = 0;
 int EnggDiffractionViewQtGUI::m_currentCropCalibBankName = 0;
-int EnggDiffractionViewQtGUI::m_fitting_bank_Id = 0;
 std::vector<std::string> EnggDiffractionViewQtGUI::m_fitting_runno_dir_vec;
 
 const std::string EnggDiffractionViewQtGUI::g_iparmExtStr =
@@ -218,19 +217,14 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
 
   connect(this, SIGNAL(getBanks()), this, SLOT(fittingRunNoChanged()));
 
-  connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(fittingBankIdChanged(int)));
-
   // connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)),
   // this,
   //       SLOT(setListWidgetBank(int)));
 
   // this one should stay as it only updates the value from qt to code
-  connect(m_uiTabFitting.listWidget_fitting_run_num,
-          SIGNAL(currentRowChanged(int)), this,
-          SLOT(fittingListWidgetBank(int)));
 
-  // connect(m_uiTabFitting.listWidget_fitting_run_num,
+
+  //connect(m_uiTabFitting.listWidget_fitting_run_num,
   //      SIGNAL(currentRowChanged(int)), this, SLOT(setBankIdComboBox(int)));
 
   connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)), this,
@@ -1325,13 +1319,6 @@ void EnggDiffractionViewQtGUI::plotRepChanged(int /*idx*/) {
   m_currentType = plotType->currentIndex();
 }
 
-void EnggDiffractionViewQtGUI::fittingBankIdChanged(int /*idx*/) {
-  QComboBox *BankName = m_uiTabFitting.comboBox_bank;
-  if (!BankName)
-    return;
-  m_fitting_bank_Id = BankName->currentIndex();
-}
-
 void EnggDiffractionViewQtGUI::setBankIdComboBox(int idx) {
   QComboBox *bankName = m_uiTabFitting.comboBox_bank;
   bankName->setCurrentIndex(idx);
@@ -1363,14 +1350,6 @@ std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {
     }
   }
   return exptPeaks;
-}
-
-void EnggDiffractionViewQtGUI::fittingListWidgetBank(int /*idx*/) {
-
-  QListWidget *BankSelected = m_uiTabFitting.listWidget_fitting_run_num;
-  if (!BankSelected)
-    return;
-  m_fitting_bank_Id = BankSelected->currentRow();
 }
 
 void EnggDiffractionViewQtGUI::setListWidgetBank(int idx) {
@@ -1495,19 +1474,24 @@ EnggDiffractionViewQtGUI::splitFittingDirectory(std::string &selectedfPath) {
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enableMultiRun(
     std::string firstRun, std::string lastRun) {
   /// shahroz
+  std::vector<std::string> RunNumberVec;
   if (isDigit(firstRun) && isDigit(lastRun)) {
-    auto firstNum = std::stoi(firstRun);
-    auto lastNum = std::stoi(firstRun);
+    int firstNum = std::stoi(firstRun);
+    int lastNum = (std::stoi(lastRun));
 
-    std::vector<int> ivec;
     for (int i = firstNum; i <= lastNum; i++) {
-      ivec.push_back(i);
+      RunNumberVec.push_back(std::to_string(i));
     }
 
   } else {
     throw std::invalid_argument("Invalid Run Number, the multi-run number "
                                 "provided is invalid. Please try again");
   }
+
+  addRunNoItem(RunNumberVec);
+
+
+
 }
 
 void EnggDiffractionViewQtGUI::addBankItems(

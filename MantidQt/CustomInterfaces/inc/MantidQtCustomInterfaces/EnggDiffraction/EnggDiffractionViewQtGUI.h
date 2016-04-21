@@ -268,10 +268,8 @@ private slots:
 
   // slot of the fitting peaks per part of the interface
   void browseFitFocusedRun();
-  void fittingBankIdChanged(int idx);
   void setBankIdComboBox(int idx);
   void browsePeaksToFit();
-  void fittingListWidgetBank(int idx);
   void setListWidgetBank(int idx);
   void setPeakPick();
   void addPeakToList();
@@ -339,9 +337,6 @@ private:
 
   // multi-run focus mode type selected
   int static m_currentRunMode;
-
-  // fitting bankID
-  int static m_fitting_bank_Id;
 
   // vector holding directory of focused bank file
   std::vector<std::string> static m_fitting_runno_dir_vec;
