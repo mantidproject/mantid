@@ -337,9 +337,9 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
   Progress prog(read2DHeader(firstLine, outWrksp, axis0Data));
   const size_t nAxis1Values = outWrksp->getNumberHistograms();
 
+  // set the X-values to the common bin values we read above
+  auto toPass = Kernel::make_cow<HistogramData::HistogramX>(axis0Data);
   for (size_t i = 0; i < nAxis1Values; ++i) {
-    // set the X-values to the common bin values we read above
-    auto toPass = Kernel::make_cow<HistogramData::HistogramX>(axis0Data);
     outWrksp->setX(i, toPass);
 
     // now read in the Y values
