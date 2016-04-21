@@ -207,7 +207,7 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_ui.tabMain->addTab(tabVizW, QString("Visualize"));
 
   // this is a Qt widget, let Qt manage the pointer
-  QWidget *m_tabImggFormats = new QWidget();
+  QWidget *m_tabImggFormats = new ImagingFormatsConvertQtWidget();
   m_ui.tabMain->addTab(m_tabImggFormats, QString("Convert"));
 
   QWidget *tabEBandsW = new QWidget();
@@ -2034,8 +2034,8 @@ std::string TomographyIfaceViewQtGUI::checkUserBrowseDir(
     prev = le->text();
   }
 
-  QString path(QFileDialog::getExistingDirectory(
-      this, tr(QString::fromStdString(userMsg)), prev));
+  QString path(
+      QFileDialog::getExistingDirectory(this, tr(userMsg.c_str()), prev));
 
   if (!path.isEmpty()) {
     le->setText(path);
@@ -2075,8 +2075,7 @@ std::string TomographyIfaceViewQtGUI::checkUserBrowseFile(
     prev = le->text();
   }
 
-  QString path(QFileDialog::getOpenFileName(
-      this, tr(QString::fromStdString(userMsg)), prev));
+  QString path(QFileDialog::getOpenFileName(this, tr(userMsg.c_str()), prev));
 
   if (!path.isEmpty()) {
     le->setText(path);
