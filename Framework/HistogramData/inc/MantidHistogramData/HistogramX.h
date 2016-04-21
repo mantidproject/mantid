@@ -46,44 +46,7 @@ public:
   friend class Histogram;
   friend class detail::VectorOf<BinEdges, HistogramX>;
   friend class detail::VectorOf<Points, HistogramX>;
-
-  // explicit HistogramX(const Points &points);
-  // explicit HistogramX(const BinEdges &binEdges);
-
-  // HistogramX &operator=(const HistogramX &rhs);
-
-  // Points points() const;
-  // template <typename T> void setPoints(T &&data);
-  // BinEdges binEdges() const;
-  // template <typename T> void setBinEdges(T &&data);
-
-private:
-  /*
-  enum class XMode { BinEdges, Points };
-
-  XMode xMode() const noexcept;
-  void checkSize(const Points &points) const;
-  void checkSize(const BinEdges &binEdges) const;
-
-  XMode m_xMode;
-  */
 };
-
-/*
-template <typename T> void HistogramX::setPoints(T &&data) {
-  Points &&points = Points(std::forward<T>(data));
-  checkSize(points);
-  m_xMode = XMode::Points;
-  m_data = points.cowData();
-}
-
-template <typename T> void HistogramX::setBinEdges(T &&data) {
-  BinEdges &&edges = BinEdges(std::forward<T>(data));
-  checkSize(edges);
-  m_xMode = XMode::BinEdges;
-  m_data = edges.cowData();
-}
-*/
 
 } // namespace HistogramData
 } // namespace Mantid
