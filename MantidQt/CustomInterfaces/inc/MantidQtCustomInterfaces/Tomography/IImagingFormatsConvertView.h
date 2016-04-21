@@ -38,12 +38,81 @@ public:
 
   virtual ~IImagingFormatsConvertView() {}
 
-  virtual void userWarning(const std::string &err,
+  /**
+   * Display a warning to the user (normally as a pop-up).
+   *
+   * @param warn warning title, should be short and would normally be
+   * shown as the title of the window or a big banner.
+   *
+   * @param description longer, free form and human readable
+   * description of the issue.
+   */
+  virtual void userWarning(const std::string &warn,
                            const std::string &description) = 0;
 
+  /**
+   * Display a visible error message (normally as a pop-up).
+   *
+   * @param err error title, should be short and would normally be
+   * shown as the title of the pop-up window or a big banner.
+   *
+   * @param description longer, free form description of the issue, as
+   * user-understandable and detailed as posssible.
+   */
   virtual void userError(const std::string &err,
                          const std::string &description) = 0;
 
+  /**
+   * Set the list of formats that should be shown to the user
+   *
+   * @param fmts list of formats (identified by a (short) name).
+   *
+   * @param enable (optional) whether to enable each of the
+   * formats. If not given all of them will be enabled.
+   */
+  virtual void setFormats(const std::vector<std::string> &fmts,
+                          const std::vector<bool> &enable = {}) = 0;
+
+  /**
+   * The input path to the files to convert, as selected by the user
+   *
+   * @return path as a string / validation is not done here
+   */
+  virtual std::string inputPath() const = 0;
+
+  /**
+   * Name of the format selected to pick input files.
+   *
+   * @return format name as a string
+   */
+  virtual std::string inputFormatName() const = 0;
+
+  /**
+   * The output / destination path for the converted files, as
+   * selected by the user
+   *
+   * @return path as a string / validation is not done here
+   */
+  virtual std::string outputPath() const = 0;
+
+  /**
+   * Name of the output format selected.
+   *
+   * @return format name as a string
+   */
+  virtual std::string outputFormatName() const = 0;
+
+  /**
+   * User preference as to whether to compress the output images/data
+   * files.
+   *
+   * @return compress or not
+   */
+  virtual bool compressHint() const = 0;
+
+  /**
+   * Save this widget settings (when closing this widget).
+   */
   virtual void saveSettings() const = 0;
 };
 

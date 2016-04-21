@@ -1,6 +1,7 @@
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidQtCustomInterfaces/Tomography/ImagingFormatsConvertPresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/IImagingFormatsConvertView.h"
+#include "MantidQtCustomInterfaces/Tomography/ImggFormats.h"
+#include "MantidQtCustomInterfaces/Tomography/ImagingFormatsConvertPresenter.h"
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -45,11 +46,18 @@ void ImagingFormatsConvertPresenter::notify(Notification notif) {
 }
 
 void ImagingFormatsConvertPresenter::processInit() {
-  // m_view->setParams(p);
+  const std::vector<std::string> formats = {
+      shortName(ImggFormats::FITS), shortName(ImggFormats::TIFF),
+      shortName(ImggFormats::PNG), shortName(ImggFormats::JPG),
+      shortName(ImggFormats::NXTomo)};
+
+  m_view->setFormats(formats);
 }
 
 void ImagingFormatsConvertPresenter::processConvert() {
-  // m_view->setParams(p);
+  const std::string inPS = m_view->inputPath();
+  const std::string outPS = m_view->outputPath();
+
 }
 
 void ImagingFormatsConvertPresenter::processShutDown() {

@@ -10,6 +10,9 @@
 
 #include <QWidget>
 
+// forward declarations for Qt
+class QComboBox;
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -54,6 +57,17 @@ public:
   void userError(const std::string &err,
                  const std::string &description) override;
 
+  void setFormats(const std::vector<std::string> &fmts,
+                  const std::vector<bool> &enable) override;
+
+  std::string inputPath() const override;
+  std::string inputFormatName() const override;
+
+  std::string outputPath() const override;
+  std::string outputFormatName() const override;
+
+  bool compressHint() const override;
+
 protected:
   void initLayout();
 
@@ -63,13 +77,19 @@ protected:
 private slots:
   void browseImgInputConvertClicked();
   void browseImgOutputConvertClicked();
+  void convertClicked();
 
 private:
+  void setFormatsCombo(QComboBox *cbox, const std::vector<std::string> &fmts,
+                       const std::vector<bool> &enable);
+
   std::string
-  checkUserBrowseDir(QLineEdit *le,
-                     const std::string &userMsg = "Open directory/folder",
-                     bool remember = true);
+  grabUserBrowseDir(QLineEdit *le,
+                    const std::string &userMsg = "Open directory/folder",
+                    bool remember = true);
   std::string askImgOrStackPath();
+
+  void closeEvent(QCloseEvent *event) override;
 
   Ui::ImgFormatsConversion m_ui;
 

@@ -34,7 +34,9 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 namespace ImggFormats {
-enum Format { FITS = 0, TIFF = 1, PNG = 2, NXTomo = 3 };
+enum Format { FITS = 0, TIFF = 1, PNG = 2, JPG = 3, NXTomo = 4 };
+
+std::string shortName(Format fmt);
 
 std::vector<std::string> fileExtension(Format fmt);
 

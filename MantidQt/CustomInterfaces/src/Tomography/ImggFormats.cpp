@@ -6,13 +6,25 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ImggFormats {
 
+const static std::vector<std::string> shortNames{"FITS", "TIFF", "PNG", "JPEG",
+                                                 "NXTomo"};
+
 const static std::vector<std::vector<std::string>> extensions{
-    {"fits", "fit"}, {"tiff", "tif"}, {"png"}, {"nxs"}};
+    {"fits", "fit"}, {"tiff", "tif"}, {"png"}, {"jpg", "jpeg"}, {"nxs"}};
 
 const static std::vector<std::string> descriptions{
     "FITS: Flexible Image Transport System.",
     "TIFF: - Tagged Image File Format", "PNG: Portable Network Graphics",
+    "JPEG: Joint Photographic Experts Group",
     "NXTomo NeXus application definition"};
+
+/**
+ * Possible common/accepted file extensions for a format
+ *
+ * @return extensions (without the dot, like "fits") in no particular
+ * order, lowercase
+ */
+std::string shortName(Format fmt) { return shortNames.at(fmt); }
 
 /**
  * Possible common/accepted file extensions for a format
