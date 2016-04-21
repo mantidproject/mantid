@@ -164,7 +164,7 @@ public:
 
     TS_ASSERT_EQUALS(collection.intensityType(), PoldiPeakCollection::Maximum);
 
-    TableWorkspace_sptr newDummy(m_dummyData->clone().release());
+    TableWorkspace_sptr newDummy(m_dummyData->clone());
     newDummy->logs()->addProperty<std::string>("IntensityType", "Integral");
 
     PoldiPeakCollection otherCollection(newDummy);
@@ -173,7 +173,7 @@ public:
   }
 
   void testIntensityTypeRecoveryConversion() {
-    TableWorkspace_sptr newDummy(m_dummyData->clone().release());
+    TableWorkspace_sptr newDummy(m_dummyData->clone());
     newDummy->logs()->addProperty<std::string>("IntensityType", "Integral");
 
     PoldiPeakCollection collection(newDummy);
@@ -223,7 +223,7 @@ public:
   }
 
   void testUnitCellFromLogs() {
-    TableWorkspace_sptr newDummy(m_dummyData->clone().release());
+    TableWorkspace_sptr newDummy(m_dummyData->clone());
 
     UnitCell cell(1, 2, 3, 90, 91, 92);
     newDummy->logs()->addProperty<std::string>("UnitCell", unitCellToStr(cell));
@@ -248,7 +248,7 @@ public:
   }
 
   void testGetPointGroupStringFromLog() {
-    TableWorkspace_sptr newDummy(m_dummyData->clone().release());
+    TableWorkspace_sptr newDummy(m_dummyData->clone());
     newDummy->logs()->addProperty<std::string>("PointGroup", "SomeString");
 
     TestablePoldiPeakCollection peaks;

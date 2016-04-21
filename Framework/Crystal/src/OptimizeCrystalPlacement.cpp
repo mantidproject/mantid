@@ -149,8 +149,7 @@ void OptimizeCrystalPlacement::exec() {
   PeaksWorkspace_sptr OutPeaks = getProperty("ModifiedPeaksWorkspace");
 
   if (Peaks != OutPeaks) {
-    boost::shared_ptr<PeaksWorkspace> X(Peaks->clone().release());
-    OutPeaks = X;
+    OutPeaks = Peaks->clone();
   }
 
   std::vector<int> NOoptimizeRuns = getProperty("KeepGoniometerFixedfor");

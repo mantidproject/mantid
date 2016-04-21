@@ -226,7 +226,7 @@ void BinaryOperation::exec() {
             "Contact the developers.");
     } else {
       // You HAVE to copy the data from lhs to to the output!
-      m_out = MatrixWorkspace_sptr(m_lhs->clone().release());
+      m_out = m_lhs->clone();
       // Make sure m_eout still points to the same as m_out;
       m_eout = boost::dynamic_pointer_cast<EventWorkspace>(m_out);
     }

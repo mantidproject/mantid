@@ -112,7 +112,7 @@ TMDE(std::vector<Mantid::Kernel::VMD> MDBoxBase)::getVertexes() const {
     for (size_t d = 0; d < nd; d++) {
       // Use a bit mask to look at each bit of the integer we are iterating
       // through.
-      size_t mask = 1 << d;
+      size_t mask = size_t{1} << d;
       if ((i & mask) > 0) {
         // Bit is 1, use the max of the dimension
         coords[d] = extents[d].getMax();
@@ -153,7 +153,7 @@ TMDE(coord_t *MDBoxBase)::getVertexesArray(size_t &numVertices) const {
     for (size_t d = 0; d < nd; d++) {
       // Use a bit mask to look at each bit of the integer we are iterating
       // through.
-      size_t mask = 1 << d;
+      size_t mask = size_t{1} << d;
       if ((i & mask) > 0) {
         // Bit is 1, use the max of the dimension
         out[outIndex + d] = extents[d].getMax();

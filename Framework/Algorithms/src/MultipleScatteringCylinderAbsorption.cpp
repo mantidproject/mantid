@@ -163,7 +163,7 @@ void MultipleScatteringCylinderAbsorption::exec() {
     // not in-place so create a new copy
     MatrixWorkspace_sptr out_WS = getProperty("OutputWorkspace");
     if (in_WS != out_WS) {
-      out_WS = MatrixWorkspace_sptr(in_WS->clone().release());
+      out_WS = in_WS->clone();
     }
     auto out_WSevent = boost::dynamic_pointer_cast<EventWorkspace>(out_WS);
 

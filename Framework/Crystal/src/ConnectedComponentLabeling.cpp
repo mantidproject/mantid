@@ -61,7 +61,7 @@ size_t calculateMaxClusters(IMDHistoWorkspace const *const ws,
  */
 boost::shared_ptr<Mantid::API::IMDHistoWorkspace>
 cloneInputWorkspace(IMDHistoWorkspace_sptr &inWS) {
-  IMDHistoWorkspace_sptr outWS(inWS->clone().release());
+  IMDHistoWorkspace_sptr outWS(inWS->clone());
 
   // Initialize to zero.
   PARALLEL_FOR_NO_WSP_CHECK()
