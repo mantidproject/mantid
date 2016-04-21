@@ -954,7 +954,7 @@ void writeFITSHeaderBlock(const API::MatrixWorkspace_sptr img,
 }
 
 uint64_t endian_reverse(uint64_t value) {
-#if defined(_MSVC_VER)
+#if defined(_MSC_VER)
   return _byteswap_uint64(value);
 #else
   return __builtin_bswap64(value);
