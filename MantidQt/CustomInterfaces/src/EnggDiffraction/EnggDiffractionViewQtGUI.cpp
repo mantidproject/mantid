@@ -251,8 +251,7 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
           SLOT(savePeakList()));
 
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
-  m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom,
-                                        "d-Spacing (A)");
+  m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom, "d-Spacing (A)");
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::yLeft, "Counts (us)^-1");
   QFont font("MS Shell Dlg 2", 8);
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::xBottom, font);
@@ -1392,6 +1391,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
     // handling of vectors
     m_fitting_runno_dir_vec.clear();
     std::string strFPath = selectedfPath.toString();
+    // returns empty if no directory is found
     std::vector<std::string> splitBaseName = splitFittingDirectory(strFPath);
 
     if (selectedfPath.isFile() && !splitBaseName.empty()) {
@@ -1401,18 +1401,26 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
 #else
       bankDir = (bankDir).expand(selectedfPath.parent().toString());
 #endif
-
       if (!splitBaseName.empty() && splitBaseName.size() > 3) {
         std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] + "_" +
                                splitBaseName[2] + "_" + splitBaseName[3];
         std::string strBankDir = bankDir.toString();
         updateFittingDirVec(strBankDir, foc_file);
       }
+      // assuming that no directory is found so look for number
       // if run number length greater
     } else if (focusedFile.count() > 4) {
       // if given a run number instead
       updateFittingDirVec(m_focusDir, strFocusedFile);
-    } else {
+      // set the directory here to the first in the vector if its not empty
+
+      if (!m_fitting_runno_dir_vec.empty()) {
+        QString setter = QString::fromStdString(m_fitting_runno_dir_vec[0]);
+        setfittingRunNo(setter);
+
+        // setBankDir(0)
+      }
+    } else if (fittingRunNo().empty()) {
       userWarning("Invalid Input", "Invalid directory or run number given. "
                                    "Please try again");
     }
@@ -1488,7 +1496,7 @@ void EnggDiffractionViewQtGUI::addBankItems(
       std::string strVecFile = vecFile.toString();
       // split the directory from m_fitting_runno_dir_vec
       std::vector<std::string> vecFileSplit = splitFittingDirectory(strVecFile);
-      // assign the file bank id
+      // get the last split in vector which will be bank
       std::string bankID = (vecFileSplit[vecFileSplit.size() - 1]);
 
       bool isDigit = false;
@@ -1509,6 +1517,7 @@ void EnggDiffractionViewQtGUI::addBankItems(
             QString("%1").arg(i + 1));
       }
     }
+
     m_uiTabFitting.comboBox_bank->setEnabled(true);
     m_uiTabFitting.listWidget_fitting_bank_preview->setEnabled(true);
   } else {
@@ -1538,9 +1547,18 @@ void EnggDiffractionViewQtGUI::setDefaultBank(
     } else {
       setfittingRunNo(selectedFile);
     }
-  } else {
-    setfittingRunNo(selectedFile);
   }
+  // check if the vector is not empty so that the first directory
+  // can be assigned to text-field when number is given
+  else if (!m_fitting_runno_dir_vec.empty()) {
+    auto firstDir = m_fitting_runno_dir_vec.at(0);
+    auto intialDir = QString::fromStdString(firstDir);
+    setfittingRunNo(intialDir);
+  }
+  // if nothing found related to text-field input
+  else if (!fittingRunNo().empty())
+    setfittingRunNo(selectedFile);
+
 }
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setPeakPick() {
