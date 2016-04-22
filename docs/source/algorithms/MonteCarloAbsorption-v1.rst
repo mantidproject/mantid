@@ -22,7 +22,7 @@ spectra in turn:
    product of the factor for each defined material of the
    sample/container that the track passes through.  Any process that 
    removes neutrons from the beam prior to the scattering point looks
-   like absorption.  Therefore both the absorption cross section are 
+   like absorption.  Therefore both the absorption and total scattering cross sections are 
    used to calculate the attenuation factor.  This follows the description
    of T. M. Sabine (International Tables for Crystallography Vol C., pg 603.) 
 
