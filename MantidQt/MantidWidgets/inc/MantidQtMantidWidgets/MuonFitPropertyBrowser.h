@@ -14,6 +14,7 @@ class QtStringPropertyManager;
 class QtEnumPropertyManager;
 class QtProperty;
 class QtBrowserItem;
+class QVBoxLayout;
 
 namespace Mantid
 {
@@ -44,6 +45,8 @@ public:
   void setWorkspaceName(const QString &wsName) override;
   /// Called when the fit is finished
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
+  /// Add an extra widget into the browser
+  void addExtraWidget(QWidget *widget);
 
 public slots:
   /// Perform the fit algorithm
@@ -66,6 +69,8 @@ private:
   void populateFunctionNames() override;
   /// Check if the workspace can be used in the fit
   bool isWorkspaceValid(Mantid::API::Workspace_sptr) const override;
+  /// Layout for extra widgets
+  QVBoxLayout *m_additionalLayout;
 };
 
 } // MantidQt

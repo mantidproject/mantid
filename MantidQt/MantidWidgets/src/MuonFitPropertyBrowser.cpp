@@ -38,6 +38,7 @@
 #include <QSettings>
 #include <QMessageBox>
 #include <QAction>
+#include <QLayout>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -132,6 +133,15 @@ void MuonFitPropertyBrowser::init() {
 
   // Initialise the layout.
   initLayout(w);
+
+  // Create an empty layout that can hold extra widgets
+  // and add it after the buttons but before the browser
+  m_additionalLayout = new QVBoxLayout();
+  auto parentLayout = qobject_cast<QVBoxLayout *>(w->layout());
+  if (parentLayout) {
+    const int index = parentLayout->count() - 2;
+    parentLayout->insertLayout(index, m_additionalLayout);
+  }
 }
 
 /**
@@ -333,6 +343,16 @@ void MuonFitPropertyBrowser::finishHandle(const IAlgorithm *alg) {
     outWs->copyExperimentInfoFrom(inWs.get());
 
   FitPropertyBrowser::finishHandle(alg);
+}
+
+/**
+ * Adds an extra widget in between the fit buttons and the browser
+ * @param widget :: [input] Pointer to widget to add
+ */
+void MuonFitPropertyBrowser::addExtraWidget(QWidget *widget) {
+  if (m_additionalLayout) {
+    m_additionalLayout->addWidget(widget);
+  }
 }
 
 } // MantidQt
