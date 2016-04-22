@@ -238,6 +238,10 @@ private:
   friend class TableWorkspace;
 };
 
+/// Template specialization for strings so they can contain spaces
+template <>
+void TableColumn<std::string>::read(size_t index, const std::string &text);
+
 /// Read in a string and set the value at the given index
 template <typename Type>
 void TableColumn<Type>::read(size_t index, const std::string &text) {
