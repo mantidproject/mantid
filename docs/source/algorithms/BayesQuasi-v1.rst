@@ -25,7 +25,7 @@ Usage
 
 **Example - BayesQuasi**
 
-.. code-block:: Python
+.. testcode:: BayesQuasiExample
 
     # Check OS support for F2Py
     from IndirectImport import is_supported_f2py_platform
