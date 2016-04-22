@@ -28,8 +28,9 @@ using namespace Mantid::Kernel;
 namespace MantidQt {
 namespace CustomInterfaces {
 ReflMainViewPresenter::ReflMainViewPresenter(
-    ReflMainView *mainView, DataProcessorPresenter *tablePresenter,
-    ProgressableView *progressView, boost::shared_ptr<IReflSearcher> searcher)
+    ReflMainView *mainView, ProgressableView *progressView,
+    boost::shared_ptr<DataProcessorPresenter> tablePresenter,
+    boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_tablePresenter(tablePresenter),
       m_progressView(progressView), m_searcher(searcher) {
 

@@ -56,8 +56,6 @@ namespace CustomInterfaces {
 
 /**
 * Constructor
-* @param tableView : The view this presenter is going to handle
-* @param progressView : The progress view this presenter is going to handle
 * @param whitelist : The set of properties we want to show as columns
 * @param preprocessMap : A map containing instructions for pre-processing
 * @param processor : A DataProcessorAlgorithm
@@ -65,25 +63,42 @@ namespace CustomInterfaces {
 * workspaces
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    DataProcessorView *tableView, ProgressableView *progressView,
     const DataProcessorWhiteList &whitelist,
     const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
     const DataProcessorAlgorithm &processor,
     const DataPostprocessorAlgorithm &postprocessor)
-    : WorkspaceObserver(), m_view(tableView), m_progressView(progressView),
+    : WorkspaceObserver(), m_whitelist(whitelist),
       m_preprocessMap(preprocessMap), m_processor(processor),
-      m_whitelist(whitelist), m_postprocessor(postprocessor),
-      m_tableDirty(false) {
-
-  // Initialise options
-  initOptions();
-  // Create the process layout
-  createProcessLayout();
+      m_postprocessor(postprocessor), m_tableDirty(false) {
 
   // Columns Group and Options must be added to the whitelist
   m_whitelist.addElement("Group", "Group");
   m_whitelist.addElement("Options", "Options");
   m_columns = static_cast<int>(m_whitelist.size());
+}
+
+/**
+* Destructor
+*/
+GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
+
+/**
+* Sets the views this presenter is going to handle
+* @param tableView : The table view
+* @param progressView : The progress view
+*/
+void GenericDataProcessorPresenter::acceptView(DataProcessorView *tableView,
+                                               ProgressableView *progressView) {
+
+  // As soon as we are given a view, initialize everything
+  m_view = tableView;
+  m_progressView = progressView;
+
+  // Initialise options
+  // Load saved values from disk
+  initOptions();
+  // Create the process layout
+  createProcessLayout();
 
   // Populate an initial list of valid tables to open, and subscribe to the ADS
   // to keep it up to date
@@ -105,10 +120,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
   m_view->setTableList(m_workspaceList);
 
   // Provide autocompletion hints for the options column. We use the algorithm's
-  // properties minus
-  // those we blacklist. We blacklist any useless properties or ones we're
-  // handling that the user
-  // should'nt touch.
+  // properties minus those we blacklist. We blacklist any useless properties or
+  // ones we're handling that the user should'nt touch.
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_processor.name());
   m_view->setOptionsHintStrategy(
       new AlgorithmHintStrategy(alg, m_processor.blacklist()));
@@ -116,11 +129,6 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
   // Start with a blank table
   newTable();
 }
-
-/**
-* Destructor
-*/
-GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
 
 /**
 Tells the view how to create the HintingLineEdits for pre-, post- and processing
@@ -409,7 +417,7 @@ void GenericDataProcessorPresenter::postProcessRows(std::set<int> rows) {
   alg->execute();
 
   if (!alg->isExecuted())
-    throw std::runtime_error("Failed to run Stitch1DMany on IvsQ workspaces.");
+    throw std::runtime_error("Failed to post-process workspaces.");
 }
 
 /**

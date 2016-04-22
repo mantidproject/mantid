@@ -4,8 +4,9 @@
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorCommandAdapter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorWidget.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflGenericDataProcessorPresenterFactory.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 #include <qinputdialog.h>
 #include <qmessagebox.h>
@@ -44,27 +45,35 @@ void QtReflMainView::initLayout() {
   ui.splitterTables->setStretchFactor(0, 0);
   ui.splitterTables->setStretchFactor(1, 1);
 
+  ReflGenericDataProcessorPresenterFactory presenterFactory;
+
+  boost::shared_ptr<DataProcessorPresenter> processorPresenter =
+      presenterFactory.create();
+
+  QDataProcessorWidget *qDataProcessorWidget =
+      new QDataProcessorWidget(processorPresenter, this);
+  ui.layoutProcessPane->addWidget(qDataProcessorWidget);
+
   // Custom context menu for table
   connect(ui.tableSearchResults,
           SIGNAL(customContextMenuRequested(const QPoint &)), this,
           SLOT(showSearchContextMenu(const QPoint &)));
   // Synchronize the two instrument selection widgets
   connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)),
-          ui.qDataProcessorWidget,
+          qDataProcessorWidget,
           SLOT(on_comboProcessInstrument_currentIndexChanged(int)));
-  connect(ui.qDataProcessorWidget,
+  connect(qDataProcessorWidget,
           SIGNAL(comboProcessInstrument_currentIndexChanged(int)),
           ui.comboSearchInstrument, SLOT(setCurrentIndex(int)));
-
   // Needed to Import/Export TBL, plot row and plot group
-  connect(ui.qDataProcessorWidget,
+  connect(qDataProcessorWidget,
           SIGNAL(runAsPythonScript(const QString &, bool)), this,
           SIGNAL(runAsPythonScript(const QString &, bool)));
 
   m_presenter = boost::make_shared<ReflMainViewPresenter>(
       this /*main view*/,
-      ui.qDataProcessorWidget->getTablePresenter().get(),
-      this /*currently this concrete view is also responsibile for prog reporting*/);
+      this /*currently this concrete view is also responsibile for prog reporting*/,
+      processorPresenter /*the table presenter*/);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 }
 

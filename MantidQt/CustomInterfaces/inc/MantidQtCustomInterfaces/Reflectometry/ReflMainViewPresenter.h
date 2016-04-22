@@ -48,11 +48,11 @@ class MANTIDQT_CUSTOMINTERFACES_DLL ReflMainViewPresenter
     : public IReflPresenter,
       public WorkspaceReceiver {
 public:
-  ReflMainViewPresenter(ReflMainView *mainView,
-                        DataProcessorPresenter *tablePresenter,
-                        ProgressableView *progressView,
-                        boost::shared_ptr<IReflSearcher> searcher =
-                            boost::shared_ptr<IReflSearcher>());
+  ReflMainViewPresenter(
+      ReflMainView *mainView, ProgressableView *progressView,
+      boost::shared_ptr<DataProcessorPresenter> tablePresenter,
+      boost::shared_ptr<IReflSearcher> searcher =
+          boost::shared_ptr<IReflSearcher>());
   ~ReflMainViewPresenter() override;
   void notify(IReflPresenter::Flag flag) override;
   void notify(WorkspaceReceiver::Flag flag) override;
@@ -63,7 +63,7 @@ protected:
   // the main view we're managing
   ReflMainView *m_view;
   // The table view's presenter
-  DataProcessorPresenter *m_tablePresenter;
+  boost::shared_ptr<DataProcessorPresenter> m_tablePresenter;
   // The progress view
   ProgressableView *m_progressView;
   // the search implementation

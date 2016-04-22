@@ -49,7 +49,6 @@ class MANTIDQT_CUSTOMINTERFACES_DLL GenericDataProcessorPresenter
       public MantidQt::API::WorkspaceObserver {
 public:
   GenericDataProcessorPresenter(
-      DataProcessorView *tableView, ProgressableView *progressView,
       const DataProcessorWhiteList &whitelist,
       const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
       const DataProcessorAlgorithm &processor,
@@ -169,6 +168,8 @@ protected:
                           Mantid::API::Workspace_sptr workspace) override;
   void saveNotebook(std::map<int, std::set<int>> groups, std::set<int> rows);
   void accept(WorkspaceReceiver *workspaceReceiver) override;
+  void acceptView(DataProcessorView *tableView,
+                  ProgressableView *progressView) override;
   std::vector<DataProcessorCommand_uptr> getTableList();
 
   void validateModel(Mantid::API::ITableWorkspace_sptr model);

@@ -2,9 +2,6 @@
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/MantidWidget.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataPostprocessorAlgorithm.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataPreprocessorAlgorithm.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorWhiteList.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 
@@ -20,49 +17,14 @@ using namespace Mantid::API;
 //----------------------------------------------------------------------------------------------
 /** Constructor
 */
-QDataProcessorWidget::QDataProcessorWidget(QWidget *parent)
-    : MantidWidget(parent), m_openMap(new QSignalMapper(this)) {
+QDataProcessorWidget::QDataProcessorWidget(
+    boost::shared_ptr<DataProcessorPresenter> presenter, QWidget *parent)
+    : MantidWidget(parent), m_presenter(presenter),
+      m_openMap(new QSignalMapper(this)) {
 
   createTable();
 
-  // Create the presenter to do the thinking for us
-  // The data processor algorithm
-  DataProcessorAlgorithm processor(
-      "ReflectometryReductionOneAuto",
-      std::vector<std::string>{"IvsQ_", "IvsLam_"},
-      std::set<std::string>{"ThetaIn", "ThetaOut", "InputWorkspace",
-                            "OutputWorkspace", "OutputWorkspaceWavelength",
-                            "FirstTransmissionRun", "SecondTransmissionRun"});
-
-  // Pre-processing instructions
-  std::map<std::string, DataPreprocessorAlgorithm> preprocessor = {
-      {"Run(s)", DataPreprocessorAlgorithm()},
-      {"Transmission Run(s)",
-       DataPreprocessorAlgorithm(
-           "CreateTransmissionWorkspaceAuto", std::vector<std::string>{"TRANS_"},
-           std::set<std::string>{"FirstTransmissionRun",
-                                 "SecondTransmissionRun", "OutputWorkspace"})}};
-
-  // The whitelist
-  DataProcessorWhiteList whitelist;
-  whitelist.addElement("Run(s)", "InputWorkspace");
-  whitelist.addElement("Angle", "ThetaIn");
-  whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun");
-  whitelist.addElement("Q min", "MomentumTransferMinimum");
-  whitelist.addElement("Q max", "MomentumTransferMaximum");
-  whitelist.addElement("dQ/Q", "MomentumTransferStep");
-  whitelist.addElement("Scale", "ScaleFactor");
-
-  // The post-processor algorithm's name
-  DataPostprocessorAlgorithm postprocessor;
-
-  m_presenter = boost::make_shared<GenericDataProcessorPresenter>(
-      this /*table view*/,
-      this /*currently this concrete view is also responsibile for prog reporting*/,
-      whitelist /*Properties we want to show as columns in the table*/,
-      preprocessor /*Pre-processing instructions*/,
-      processor /*Processing algorithm*/,
-      postprocessor /*The post-processing algorithm*/);
+  m_presenter->acceptView(this, this);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -588,7 +550,11 @@ void QDataProcessorWidget::setOptionsHintStrategy(HintStrategy *hintStrategy) {
 }
 
 /**
-TODO
+* Adds a HintingLineEdit to this view. The hinting line edit comes with a label
+* and an algorithm's name
+* @param title : The label
+* @param name : The name of the algorithm
+* @param hints : The hints for the algorithm
 */
 void QDataProcessorWidget::addHintingLineEdit(
     const std::string &title, const std::string &name,

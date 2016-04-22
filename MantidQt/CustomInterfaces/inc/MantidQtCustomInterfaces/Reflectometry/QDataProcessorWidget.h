@@ -6,7 +6,6 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/GenericDataProcessorPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h"
 #include "ui_DataProcessorWidget.h"
 #include <QSignalMapper>
@@ -44,7 +43,8 @@ class DLLExport QDataProcessorWidget : public MantidQt::API::MantidWidget,
 
   Q_OBJECT
 public:
-  QDataProcessorWidget(QWidget *parent = 0);
+  QDataProcessorWidget(boost::shared_ptr<DataProcessorPresenter> presenter,
+                       QWidget *parent = 0);
   ~QDataProcessorWidget() override;
 
   // Connect the model
@@ -91,7 +91,7 @@ public:
   // Accessor methods
   std::set<int> getSelectedRows() const override;
   std::string getProcessInstrument() const override;
-	std::string getProcessingOptions(const std::string &name) const override;
+  std::string getProcessingOptions(const std::string &name) const override;
   std::string getWorkspaceToOpen() const override;
   std::string getClipboard() const override;
 
@@ -104,7 +104,7 @@ private:
   void setModel(std::string name);
 
   // the presenter
-  boost::shared_ptr<GenericDataProcessorPresenter> m_presenter;
+  boost::shared_ptr<DataProcessorPresenter> m_presenter;
   // the models
   QDataProcessorTableModel_sptr m_model;
   // the interface

@@ -16,6 +16,8 @@ namespace CustomInterfaces {
 // Forward decs
 class WorkspaceReceiver;
 class DataProcessorCommand;
+class DataProcessorView;
+class ProgressableView;
 using DataProcessorCommand_uptr = std::unique_ptr<DataProcessorCommand>;
 
 /** @class DataProcessorPresenter
@@ -81,6 +83,8 @@ public:
                                  const std::string &defaultInstrument) = 0;
   virtual std::vector<DataProcessorCommand_uptr> publishCommands() = 0;
   virtual void accept(WorkspaceReceiver *workspaceReceiver) = 0;
+  virtual void acceptView(DataProcessorView *tableView,
+                          ProgressableView *progressView) = 0;
   virtual void setModel(std::string name) = 0;
 };
 }

@@ -244,7 +244,9 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorWhiteList.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorWorkspaceCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataPostprocessorAlgorithm.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorGenerateNotebook.h
 	inc/MantidQtCustomInterfaces/Reflectometry/GenericDataProcessorPresenter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/GenericDataProcessorPresenterFactory.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h
 	inc/MantidQtCustomInterfaces/Reflectometry/MeasurementItem.h
@@ -254,7 +256,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/QtReflMainView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/QtDataProcessorOptionsDialog.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h
-	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorGenerateNotebook.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflGenericDataProcessorPresenterFactory.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMainView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h
