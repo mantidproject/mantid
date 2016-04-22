@@ -385,23 +385,39 @@ algorithm processes the input directories and files.
    :align: center
    :scale: 60%
 
-Conversion between formats
---------------------------
-
-.. warning:: The interface is being extended to provide a simple graphical
-             interface to convert between different image formats for
-             convenience and interoperability with third party tools.
-             This is work in progress as support for new formats is being
-             integrated.
+Convert image formats
+---------------------
 
 .. figure:: /images/tomo_tab6_formats_convert.png
    :align: center
    :scale: 60%
 
+This interface provides a simple way of converting stacks of images
+between diferent formats. This is for convenience and interoperability
+with third party tools that for example may not be able to load FITS
+images but require them in TIFF format. All the images found under the
+input path (directory) will be converted from the input format
+selected into the output format. The output images will be created
+under the output path (directory) with the same tree structure as the
+input images.
+
+The conversion process will look for images recursively inside the
+input directory. That is, it will process all its subdirectories and
+the subdirectories of these up to a given maximum depth.  To limit the
+search depth. The usual default value is 3 which is sufficient for
+stacks of images and sets of stacks of images from a series of samples
+for an experiment, following the conventions for IMAT tomography
+data. If higher depth values than the default are used we recommend to
+take extreme care, making sure the input path given makes sense. This
+process can be lengthy and demanding in terms of disk space when
+processing more than one or a small number of experiments (RB
+reference numbers), and especially so for wavelength dependent
+experiments.
+
 Example
 -------
 
-TODO: there should be an example using a small data set.
+TODO: there should be a worked out example using a small data set.
 
 TomoPy
 ------
