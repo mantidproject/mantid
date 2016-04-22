@@ -6,7 +6,7 @@
 #include "MantidQtCustomInterfaces/Tomography/IImagingFormatsConvertPresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/IImagingFormatsConvertView.h"
 
-#include "ui_ImgFormatsConversion.h"
+#include "ui_ImggFormatsConvert.h"
 
 #include <QWidget>
 
@@ -96,7 +96,7 @@ private:
 
   void closeEvent(QCloseEvent *event) override;
 
-  Ui::ImgFormatsConversion m_ui;
+  Ui::ImggFormatsConvert m_ui;
 
   // path name for persistent settings
   const static std::string m_settingsGroup;

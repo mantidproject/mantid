@@ -470,8 +470,8 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/SANSRunWindow.ui
                inc/MantidQtCustomInterfaces/SANSEventSlicing.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
-               inc/MantidQtCustomInterfaces/Tomography/ImgFormatsConversion.ui
                inc/MantidQtCustomInterfaces/Tomography/ImageSelectCoRAndRegions.ui
+               inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvert.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtGUI.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabEnergy.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabFiltersSettings.ui
