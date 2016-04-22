@@ -1,3 +1,5 @@
+# pylint: disable= attribute-defined-outside-init, no-init
+
 import unittest
 import os.path
 import shutil
@@ -49,15 +51,15 @@ class PearlPowderDiffractionScriptTest(stresstesting.MantidStressTest):
         # DIRS[0] is the system test directory
 
         # setting raw files directory
-        current_directory = pearl_routines.pearl_set_currentdatadir(DIRS[0] + "PEARL\\RawFiles\\")
+        current_directory = pearl_routines.pearl_set_currentdatadir(DIRS[0] + "PEARL/RawFiles/")
         pearl_routines.PEARL_setdatadir(current_directory)
 
         # setting calibration files directory
-        pearl_routines.pearl_initial_dir(DIRS[0] + "\\PEARL\\")
-        pearl_routines.PEARL_setattenfile(DIRS[0] + "\\PEARL\\Attentuation\PRL112_DC25_10MM_FF.OUT")
+        pearl_routines.pearl_initial_dir(DIRS[0] + "/PEARL/")
+        pearl_routines.PEARL_setattenfile(DIRS[0] + "/PEARL/Attentuation/PRL112_DC25_10MM_FF.OUT")
 
         # setting data output folder
-        pearl_routines.pearl_set_userdataoutput_dir(DIRS[0] + '\\PEARL\\DataOut\\')
+        pearl_routines.pearl_set_userdataoutput_dir(DIRS[0] + '/PEARL/DataOut/')
 
         # run the script by calling PEARL_focus function
         pearl_routines.PEARL_focus('92476_92479', 'raw', fmode='trans', ttmode='TT70',
@@ -165,7 +167,7 @@ class LoadTests(unittest.TestCase):
 
         wsname = "GSSFile"
         gssfile = (DIRS[0] + "PEARL/DataOut/PRL92476_92479-0.gss")
-        files_data.append(LoadGSS(Filename=gssfile, OutputWorkspace=self.wsname))
+        files_data.append(LoadGSS(Filename=gssfile, OutputWorkspace=wsname))
 
         xye_dSpacing_ws = "xye_dSpacing"
         dSpacing_file = (DIRS[0] + "PEARL/DataOut/PRL92476_92479_d_xye-0.dat")
