@@ -90,7 +90,7 @@ void SortTableWorkspace::exec() {
     crt->second = (*asc) != 0;
   }
 
-  API::ITableWorkspace_sptr outputWS(ws->clone().release());
+  API::ITableWorkspace_sptr outputWS(ws->clone());
   outputWS->sort(criteria);
   setProperty("OutputWorkspace", outputWS);
 }

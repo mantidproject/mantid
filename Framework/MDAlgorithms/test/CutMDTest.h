@@ -464,6 +464,69 @@ public:
     AnalysisDataService::Instance().remove(wsOutName);
   }
 
+  void test_MaxRecursionDepth_one() {
+    // Test that with MaxRecursionDepth = 1, boxes are not split despite
+    // many events
+    const std::string wsName = "__CutMDTest_MaxRecursionDepth_one";
+
+    FrameworkManager::Instance().exec(
+        "CreateMDWorkspace", 10, "OutputWorkspace", wsName.c_str(),
+        "Dimensions", "3", "Extents", "-1,1,-1,1,-1,1", "Names", "H,K,L",
+        "Units", "U,U,U");
+    FrameworkManager::Instance().exec(
+        "FakeMDEventData", 6, "InputWorkspace", wsName.c_str(), "PeakParams",
+        "2000,-0.5,-0.5,-0.5,0.1", "RandomizeSignal", "0");
+
+    FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(),
+                                      "a", "1", "b", "1", "c", "1", "alpha",
+                                      "90", "beta", "90", "gamma", "90");
+
+    FrameworkManager::Instance().exec("SetSpecialCoordinates", 4,
+                                      "InputWorkspace", wsName.c_str(),
+                                      "SpecialCoordinates", "HKL");
+
+    ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
+    proj->addColumn("str", "name");
+    proj->addColumn("V3D", "value");
+    proj->addColumn("double", "offset");
+    proj->addColumn("str", "type");
+
+    TableRow uRow = proj->appendRow();
+    TableRow vRow = proj->appendRow();
+    TableRow wRow = proj->appendRow();
+    uRow << "u" << V3D(1, 0, 0) << 0.0 << "r";
+    vRow << "v" << V3D(0, 1, 0) << 0.0 << "r";
+    wRow << "w" << V3D(0, 0, 1) << 0.0 << "r";
+
+    addNormalization(wsName);
+
+    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    algCutMD->initialize();
+    algCutMD->setRethrows(true);
+    algCutMD->setProperty("InputWorkspace", wsName);
+    algCutMD->setProperty("OutputWorkspace", wsName);
+    algCutMD->setProperty("Projection", proj);
+    algCutMD->setProperty("P1Bin", "-1,1");
+    algCutMD->setProperty("P2Bin", "-1,1");
+    algCutMD->setProperty("P3Bin", "-1,1");
+    algCutMD->setProperty("NoPix", false);
+    algCutMD->execute();
+    TS_ASSERT(algCutMD->isExecuted());
+
+    IMDEventWorkspace_sptr outWS =
+        AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(wsName);
+    TS_ASSERT(outWS.get());
+
+    auto bc = outWS->getBoxController();
+    TSM_ASSERT_EQUALS("Boxes should not have split into more than the 1 bin we "
+                      "specificed in PnBin properties, because CutMD should "
+                      "specify MaxRecursionDepth=1 in SliceMD",
+                      bc->getTotalNumMDBoxes(), 1);
+
+    // Clean up
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
   void test_slice_md_histo_workspace() {
 
     /*

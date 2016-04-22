@@ -140,6 +140,8 @@ class TOFTOFConvertTofToDeltaE(PythonAlgorithm):
 
         instrument = outws.getInstrument()
         sample = instrument.getSample()
+        length1 = instrument.getSource().getPos().distance(sample.getPos())
+        self.log().debug("Sample-source distance: " + str(length1))
         factor = sp.constants.m_n*1e+15/sp.constants.eV
 
         # calculate new values for dataX and data Y
@@ -148,7 +150,7 @@ class TOFTOFConvertTofToDeltaE(PythonAlgorithm):
             det = instrument.getDetector(outws.getSpectrum(idx).getDetectorIDs()[0])
             xbins = input_ws.readX(idx)                   # take bin boundaries
             tof = xbins[:-1] + 0.5*channel_width          # take middle of each bin
-            sdd = det.getDistance(sample)
+            sdd = det.getDistance(sample) + length1       # det.getDistance(source) is different for different detectors
             # calculate new I = t^3*I(t)/(factor*sdd^2*dt)
             dataY = input_ws.readY(idx)*tof**3/(factor*channel_width*sdd*sdd)
             dataE = input_ws.readE(idx)*tof**3/(factor*channel_width*sdd*sdd)

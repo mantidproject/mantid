@@ -212,7 +212,7 @@ API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
   // If input and output workspaces are NOT the same, create a new workspace for
   // the output
   if (outputWS != inputWS) {
-    outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
+    outputWS = inputWS->clone();
   }
 
   if (!m_inputEvents && m_distribution) {
@@ -418,7 +418,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
   bool bUseSignedVersion =
       (!parameters.empty()) &&
       find(parameters.begin(), parameters.end(), "Always") != parameters.end();
-  function<double(IDetector_const_sptr)> thetaFunction =
+  function<double(const IDetector &)> thetaFunction =
       bUseSignedVersion
           ? bind(&MatrixWorkspace::detectorSignedTwoTheta, outputWS, _1)
           : bind(&MatrixWorkspace::detectorTwoTheta, outputWS, _1);
@@ -437,7 +437,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
       if (!det->isMonitor()) {
         l2 = det->getDistance(*sample);
         // The scattering angle for this detector (in radians).
-        twoTheta = thetaFunction(det);
+        twoTheta = thetaFunction(*det);
         // If an indirect instrument, try getting Efixed from the geometry
         if (emode == 2) // indirect
         {
