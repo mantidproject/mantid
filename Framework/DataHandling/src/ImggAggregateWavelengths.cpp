@@ -953,11 +953,11 @@ void writeFITSHeaderBlock(const API::MatrixWorkspace_sptr img,
   writePaddingFITSHeaders(entriesPerHDU - 9, file);
 }
 
-uint64_t endian_reverse(uint64_t value) {
+uint16_t endian_reverse(uint16_t value) {
 #if defined(_MSC_VER)
-  return _byteswap_uint64(value);
+  return _byteswap_ushort(value);
 #else
-  return __builtin_bswap64(value);
+  return __builtin_bswap16(value);
 #endif
 }
 
@@ -970,8 +970,8 @@ void writeFITSImageMatrix(const API::MatrixWorkspace_sptr img,
     Mantid::API::ISpectrum *spectrum = img->getSpectrum(row);
     const auto &dataY = spectrum->readY();
     for (size_t col = 0; col < sizeX; col++) {
-      uint64_t pixelVal = static_cast<uint64_t>(dataY[col]);
-      uint64_t bytesPixel = endian_reverse(pixelVal);
+      uint16_t pixelVal = static_cast<uint16_t>(dataY[col]);
+      uint16_t bytesPixel = endian_reverse(pixelVal);
       file.write(reinterpret_cast<const char *>(&bytesPixel),
                  sizeof(bytesPixel));
     }
