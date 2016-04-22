@@ -2254,7 +2254,7 @@ void MuonAnalysis::loadFittings() {
   m_uiForm.fitBrowser->setFeatures(QDockWidget::NoDockWidgetFeatures);
   // Add Data Selector widget to the fit tab
   m_dataSelector = new MuonFitDataSelector(m_uiForm.fitBrowser);
-  m_uiForm.verticalLayoutFitBrowser->addWidget(m_dataSelector);
+  m_uiForm.fitBrowser->addExtraWidget(m_dataSelector);
   // Set up fit data helper
   m_fitDataHelper = Mantid::Kernel::make_unique<MuonAnalysisFitDataHelper>(
       m_uiForm.fitBrowser, m_dataSelector);
