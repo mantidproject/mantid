@@ -22,6 +22,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+class FunctionBrowser;
 class MuonFitDataSelector;
 }
 namespace CustomInterfaces {
@@ -541,6 +542,9 @@ private:
 
   /// Get period number string in subtracted set
   std::string getSubtractedPeriods() const;
+
+  /// Function browser widget for fit tab
+  MantidQt::MantidWidgets::FunctionBrowser *m_functionBrowser;
 
   /// Data selector widget for fit tab
   MantidQt::MantidWidgets::MuonFitDataSelector *m_dataSelector;

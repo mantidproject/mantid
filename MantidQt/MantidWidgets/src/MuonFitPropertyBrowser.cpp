@@ -107,7 +107,8 @@ void MuonFitPropertyBrowser::init() {
   m_functionsGroup = m_browser->addProperty(functionsGroup);
   m_settingsGroup = m_browser->addProperty(settingsGroup);
 
-  // Don't show "Data" section as we have a separate widget to control this
+  // Don't show "Function" or "Data" sections as they have separate widgets
+  m_browser->setItemVisible(m_functionsGroup, false);
   m_browser->setItemVisible(m_settingsGroup, false);
 
   // Custom settings that are specific and asked for by the muon scientists.
