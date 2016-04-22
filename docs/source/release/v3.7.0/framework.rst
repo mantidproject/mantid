@@ -26,6 +26,7 @@ New
 - :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>`
    aggregates stacks of images from wavelength dependent imaging
    into one or more output bands.
+- :ref:`SaveFITS <algm-SaveFITS>` saves images in FITS format.
 
 Renamed
 #######

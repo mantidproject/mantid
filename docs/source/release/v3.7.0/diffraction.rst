@@ -51,6 +51,9 @@ Imaging
 - The new algorithm :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>`
   aggregates stacks of images from wavelength dependent data.
 
+- Images loaded as Mantid workspaces can now be saved into FITS files
+  using the algorithm :ref:`SaveFITS <algm-SaveFITS>`.
+
 Improvements in the tomographic reconstruction graphical user interface:
 
 - New capabilities added when visualizing stacks of images:
