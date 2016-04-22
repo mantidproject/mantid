@@ -1303,16 +1303,7 @@ void FunctionBrowser::addFunction()
   }
 
   // Get new function type 
-  SelectFunctionDialog dlg(this);
-  if (dlg.exec() == QDialog::Accepted)
-  {
-    newFunction = dlg.getFunction();
-  }
-  else
-  {
-    return;
-  }
-
+  newFunction = getUserFunctionFromDialog();
   if (newFunction.isEmpty()) return;
 
   // create new function
@@ -1344,6 +1335,19 @@ void FunctionBrowser::addFunction()
     addFunction(NULL,f);
   }
   emit functionStructureChanged();
+}
+
+/**
+ * Ask user to select a function and return it
+ * @returns :: function string
+ */
+QString FunctionBrowser::getUserFunctionFromDialog() {
+  SelectFunctionDialog dlg(this);
+  if (dlg.exec() == QDialog::Accepted) {
+    return dlg.getFunction();
+  } else {
+    return QString();
+  }
 }
 
 /**

@@ -77,6 +77,7 @@ set ( SRC_FILES
 	src/MultifitSetupDialog.cpp
 	src/MuonFitDataSelector.cpp
 	src/MuonFitPropertyBrowser.cpp
+	src/MuonFunctionBrowser.cpp
 	src/MuonSequentialFitDialog.cpp
 	src/PeakPicker.cpp
 	src/PeriodicTableWidget.cpp
@@ -130,6 +131,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/MultifitSetupDialog.h
     inc/MantidQtMantidWidgets/MuonFitDataSelector.h
     inc/MantidQtMantidWidgets/MuonFitPropertyBrowser.h
+    inc/MantidQtMantidWidgets/MuonFunctionBrowser.h
     inc/MantidQtMantidWidgets/MuonSequentialFitDialog.h
     inc/MantidQtMantidWidgets/MWDiag.h
     inc/MantidQtMantidWidgets/MWRunFiles.h
@@ -187,6 +189,8 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/CatalogHelper.h
 	inc/MantidQtMantidWidgets/ErrorCurve.h
 	inc/MantidQtMantidWidgets/HintStrategy.h
+	inc/MantidQtMantidWidgets/IMuonFitDataSelector.h
+	inc/MantidQtMantidWidgets/IWorkspaceFitControl.h
 	inc/MantidQtMantidWidgets/InstrumentView/BinDialog.h
 	inc/MantidQtMantidWidgets/InstrumentView/CollapsiblePanel.h
 	inc/MantidQtMantidWidgets/InstrumentView/ColorMapWidget.h
@@ -234,9 +238,8 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h
 	inc/MantidQtMantidWidgets/InstrumentView/Viewport.h
 	inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
-	inc/MantidQtMantidWidgets/IMuonFitDataSelector.h
-	inc/MantidQtMantidWidgets/IWorkspaceFitControl.h
 	inc/MantidQtMantidWidgets/MuonFitDataSelector.h
+	inc/MantidQtMantidWidgets/MuonFunctionBrowser.h
 	inc/MantidQtMantidWidgets/WidgetDllOption.h
 )
 

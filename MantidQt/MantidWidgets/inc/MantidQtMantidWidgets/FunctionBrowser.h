@@ -83,7 +83,7 @@ public:
   /// Constructor
   FunctionBrowser(QWidget *parent = NULL, bool multi = false);
   /// Destructor
-  ~FunctionBrowser() override;
+  virtual ~FunctionBrowser() override;
   /// Clear the contents
   void clear();
   /// Set the function in the browser
@@ -259,6 +259,9 @@ protected:
   void checkLocalParameter(const QString& parName)const;
   /// Make sure that properties are in sync with the cached ties
   void updateLocalTie(const QString& parName);
+
+  /// Ask user for function type
+  virtual QString getUserFunctionFromDialog();
 
 protected slots:
   /// Show the context menu
