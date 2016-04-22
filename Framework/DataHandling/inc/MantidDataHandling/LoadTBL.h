@@ -73,9 +73,6 @@ private:
   void csvParse(std::string line, std::vector<std::string> &cols,
                 std::vector<std::vector<size_t>> &quoteBounds,
                 size_t expectedCommas) const;
-  /// the perfect number of commas expected in a single line. more is fine, less
-  /// is not (set to 16)
-  const size_t m_expectedCommas;
 };
 
 } // namespace DataHandling

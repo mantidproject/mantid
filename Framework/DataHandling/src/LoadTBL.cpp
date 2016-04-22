@@ -22,7 +22,7 @@ using namespace Kernel;
 using namespace API;
 
 /// Empty constructor
-LoadTBL::LoadTBL() : m_expectedCommas(16) {}
+LoadTBL::LoadTBL(){}
 
 /**
 * Return the confidence with with this algorithm can load the file
@@ -121,6 +121,7 @@ LoadTBL::findQuotePairs(std::string line,
 * @param cols The vector to parse into
 * @param quoteBounds a vector<vector<size_t>> containing the locations of pairs
 * of quotes
+* @param expectedCommas The number of expected commas in the line
 * @throws std::length_error if anything other than 17 columns (or 16
 * cell-delimiting commas) is found
 */
@@ -185,6 +186,7 @@ void LoadTBL::csvParse(std::string line, std::vector<std::string> &cols,
 * Return the confidence with with this algorithm can load the file
 * @param line the line to parse
 * @param cols The vector to parse into
+* @param expectedCommas The number of expected commas in the line
 * @returns An integer specifying how many columns were parsed into. This should
 * always be 17.
 * @throws std::length_error if anything other than 17 columns (or 16

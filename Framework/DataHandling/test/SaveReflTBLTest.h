@@ -204,7 +204,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(m_name));
   }
 
-  void testLoadWithLoadReflTBL() {
+  void testLoadWithLoadTBL() {
     ITableWorkspace_sptr ws = CreateWorkspace();
 
     Mantid::API::IAlgorithm_sptr alg =
@@ -221,13 +221,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(m_name));
 
     Mantid::API::IAlgorithm_sptr algLoad =
-        Mantid::API::AlgorithmManager::Instance().create("LoadReflTBL");
+        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     algLoad->setRethrows(true);
     algLoad->setPropertyValue("OutputWorkspace", m_name);
     algLoad->setPropertyValue("Filename", m_abspath);
     TS_ASSERT_THROWS_NOTHING(algLoad->execute());
     if (!alg->isExecuted()) {
-      TS_FAIL("Could not run LoadReflTBL");
+      TS_FAIL("Could not run LoadTBL");
     }
 
     cleanupafterwards();
