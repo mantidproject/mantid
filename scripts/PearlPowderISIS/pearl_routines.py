@@ -1,4 +1,4 @@
-# pylint: disable=anomalous-backslash-in-string, global-variable-undefined, global-variable-not-assigned
+# pylint: disable=anomalous-backslash-in-string, global-variable-undefined, global-variable-not-assigned, too-many-lines
 # pylint: disable=invalid-name, too-many-arguments, superfluous-parens, too-many-branches, redefined-builtin
 
 import os.path
