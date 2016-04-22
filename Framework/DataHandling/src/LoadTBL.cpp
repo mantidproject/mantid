@@ -411,7 +411,7 @@ void LoadTBL::exec() {
       getCells(line, columns, columns.size() - 1);
       // populate the columns with their values for this row.
       TableRow row = ws->appendRow();
-      for (int i = 0; i < columns.size() - 1; ++i) {
+      for (int i = 0; i < columns.size(); ++i) {
         if (i == columns.size() - 2)
           // taking into consideration Group column
           // of type "int"
