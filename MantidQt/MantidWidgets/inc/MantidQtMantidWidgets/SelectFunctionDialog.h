@@ -1,5 +1,5 @@
-#ifndef FINDDIALOG_H_
-#define FINDDIALOG_H_
+#ifndef MANTIDWIDGETS_SELECTFUNCTIONDIALOG_H_
+#define MANTIDWIDGETS_SELECTFUNCTIONDIALOG_H_
 
 //--------------------------------------------------
 // Includes
@@ -40,5 +40,5 @@ private:
                         const std::vector<std::string> &restrictions);
 };
 
-#endif // FINDDIALOG_H_
+#endif // MANTIDWIDGETS_SELECTFUNCTIONDIALOG_H_
 
