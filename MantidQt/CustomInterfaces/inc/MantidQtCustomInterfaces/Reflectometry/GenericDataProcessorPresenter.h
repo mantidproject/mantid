@@ -109,9 +109,8 @@ protected:
   std::string getWorkspaceName(int row, bool prefix = true);
   // load a run into the ADS, or re-use one in the ADS if possible
   Mantid::API::Workspace_sptr loadRun(const std::string &run,
-                                      const std::string &instrument); // change
-  // get the run number of a TOF workspace
-  std::string getRunNumber(const Mantid::API::Workspace_sptr &ws);
+                                      const std::string &instrument,
+                                      const std::string &prefix); // change
   // get an unused group id
   int getUnusedGroup(std::set<int> ignoredRows = std::set<int>()) const;
   // get the number of rows in a group

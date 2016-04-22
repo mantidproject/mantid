@@ -497,48 +497,6 @@ void GenericDataProcessorPresenter::validateRow(int rowNo) const {
 }
 
 /**
-Extracts the run number of a workspace
-@param ws : The workspace to fetch the run number from
-@returns The run number of the workspace
-*/
-std::string
-GenericDataProcessorPresenter::getRunNumber(const Workspace_sptr &ws) {
-  // If we can, use the run number from the workspace's sample log
-  MatrixWorkspace_sptr mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  if (mws) {
-    try {
-      const Property *runProperty = mws->mutableRun().getLogData("run_number");
-      auto runNumber =
-          dynamic_cast<const PropertyWithValue<std::string> *>(runProperty);
-      if (runNumber)
-        return *runNumber;
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      // We'll just fall back to looking at the workspace's name
-    }
-  }
-
-  // Okay, let's see what we can get from the workspace's name
-  const std::string wsName = ws->name();
-
-  // Matches IvsQ_13460 -> 13460
-  boost::regex outputRegex("(IvsQ|IvsLam)_([0-9]+)");
-
-  // Matches INTER13460 -> 13460
-  boost::regex instrumentRegex("[a-zA-Z]{3,}([0-9]{3,})");
-
-  boost::smatch matches;
-
-  if (boost::regex_match(wsName, matches, outputRegex)) {
-    return matches[2].str();
-  } else if (boost::regex_match(wsName, matches, instrumentRegex)) {
-    return matches[1].str();
-  }
-
-  // Resort to using the workspace name
-  return wsName;
-}
-
-/**
 Takes a user specified run, or list of runs, and returns a pointer to the
 desired workspace
 @param runStr : The run or list of runs (separated by '+')
@@ -562,7 +520,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
 
   // If we're only given one run, just return that
   if (runs.size() == 1)
-    return loadRun(runs[0], instrument);
+    return loadRun(runs[0], instrument, preprocessor.prefix());
 
   const std::string outputName =
       preprocessor.prefix() + boost::algorithm::join(runs, "_");
@@ -575,7 +533,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
       AlgorithmManager::Instance().create(preprocessor.name());
   alg->initialize();
   alg->setProperty(preprocessor.firstInputProperty(),
-                   loadRun(runs[0], instrument)->name());
+                   loadRun(runs[0], instrument, preprocessor.prefix())->name());
   alg->setProperty(preprocessor.outputProperty(), outputName);
 
   // Drop the first run from the runs list
@@ -594,8 +552,9 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
         }
       }
 
-      alg->setProperty(preprocessor.secondInputProperty(),
-                       loadRun(*runIt, instrument)->name());
+      alg->setProperty(
+          preprocessor.secondInputProperty(),
+          loadRun(*runIt, instrument, preprocessor.prefix())->name());
       alg->execute();
 
       if (runIt != --runs.end()) {
@@ -652,12 +611,14 @@ std::string GenericDataProcessorPresenter::getWorkspaceName(int row,
 Loads a run from disk or fetches it from the AnalysisDataService
 @param run : The name of the run
 @param instrument : The instrument the run belongs to
+@param prefix : The prefix to be prepended to the run number
 @throws std::runtime_error if the run could not be loaded
 @returns a shared pointer to the workspace
 */
 Workspace_sptr
 GenericDataProcessorPresenter::loadRun(const std::string &run,
-                                       const std::string &instrument = "") {
+                                       const std::string &instrument,
+                                       const std::string &prefix) {
   // First, let's see if the run given is the name of a workspace in the ADS
   if (AnalysisDataService::Instance().doesExist(run))
     return AnalysisDataService::Instance().retrieveWS<Workspace>(run);
@@ -679,16 +640,17 @@ GenericDataProcessorPresenter::loadRun(const std::string &run,
 
   // We'll just have to load it ourselves
   const std::string filename = instrument + run;
+  const std::string outputName = prefix + run;
   IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create("Load");
   algLoadRun->initialize();
   algLoadRun->setProperty("Filename", filename);
-  algLoadRun->setProperty("OutputWorkspace", run);
+  algLoadRun->setProperty("OutputWorkspace", outputName);
   algLoadRun->execute();
 
   if (!algLoadRun->isExecuted())
     throw std::runtime_error("Could not open " + filename);
 
-  return AnalysisDataService::Instance().retrieveWS<Workspace>(run);
+  return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
 }
 /**
 Reduce a row
@@ -732,7 +694,7 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
             m_view->getProcessingOptions(preprocessor.name());
         auto optionsMap = parseKeyValueString(options);
         auto runWS = prepareRunWorkspace(runStr, preprocessor, optionsMap);
-        runNo.append(getRunNumber(runWS) + "_");
+        runNo.append(runWS->name() + "_");
         alg->setProperty(propertyName, runWS->name());
       }
     } else {
