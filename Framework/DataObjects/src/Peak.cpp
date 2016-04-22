@@ -832,6 +832,18 @@ int Peak::getRow() const { return m_row; }
 int Peak::getCol() const { return m_col; }
 
 // -------------------------------------------------------------------------------------
+/** For RectangularDetectors only, sets the row (y) of the pixel of the
+ * detector.
+ * @param m_row :: row value   */
+void Peak::setRow(int m_row) { this->m_row = m_row; }
+
+// -------------------------------------------------------------------------------------
+/** For RectangularDetectors only, sets the column (x) of the pixel of the
+ * detector.
+ * @param m_col :: col value   */
+void Peak::setCol(int m_col) { this->m_col = m_col; }
+
+// -------------------------------------------------------------------------------------
 /** Return the detector position vector */
 Mantid::Kernel::V3D Peak::getDetPos() const { return detPos; }
 
