@@ -34,6 +34,7 @@ DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
 const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
 int EnggDiffractionViewQtGUI::m_currentType = 0;
 int EnggDiffractionViewQtGUI::m_currentRunMode = 0;
+bool m_fittingMutliRunMode = false;
 int EnggDiffractionViewQtGUI::m_currentCropCalibBankName = 0;
 std::vector<std::string> EnggDiffractionViewQtGUI::m_fitting_runno_dir_vec;
 
@@ -1374,6 +1375,8 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
     std::string strFPath = selectedfPath.toString();
     // returns empty if no directory is found
     std::vector<std::string> splitBaseName = splitFittingDirectory(strFPath);
+    // runNo when single focused file selected
+    std::vector<std::string> runNoVec;
 
     if (selectedfPath.isFile() && !splitBaseName.empty()) {
 
@@ -1390,6 +1393,10 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
 
         // add bank to the combo-box and list view
         addBankItems(splitBaseName, focusedFile);
+        runNoVec.clear();
+        runNoVec.push_back(splitBaseName[1]);
+        if (!m_fittingMutliRunMode)
+          addRunNoItem(runNoVec, false);
       }
       // assuming that no directory is found so look for number
       // if run number length greater
@@ -1403,6 +1410,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
           firstRun = firstLastRunNoVec[0];
           lastRun = firstLastRunNoVec[1];
 
+          m_fittingMutliRunMode = true;
           enableMultiRun(firstRun, lastRun);
         }
 
@@ -1412,6 +1420,10 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
 
         // add bank to the combo-box and list view
         addBankItems(splitBaseName, focusedFile);
+        runNoVec.clear();
+        runNoVec.push_back(strFocusedFile);
+        if (!m_fittingMutliRunMode)
+          addRunNoItem(runNoVec, false);
       }
     }
     // set the directory here to the first in the vector if its not empty
@@ -1489,7 +1501,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enableMultiRun(
       RunNumberVec.push_back(std::to_string(i));
     }
 
-    addRunNoItem(RunNumberVec);
+    addRunNoItem(RunNumberVec, true);
 
     emit setBank();
 
@@ -1547,7 +1559,7 @@ void EnggDiffractionViewQtGUI::addBankItems(
 }
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addRunNoItem(
-    std::vector<std::string> runNumVector) {
+    std::vector<std::string> runNumVector, bool multiRun) {
   try {
     if (!runNumVector.empty()) {
 
@@ -1565,10 +1577,12 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addRunNoItem(
 
       m_uiTabFitting.listWidget_fitting_run_num->setEnabled(true);
 
-      auto currentIndex =
-          m_uiTabFitting.listWidget_fitting_run_num->currentRow();
-      if (currentIndex == -1)
-        m_uiTabFitting.listWidget_fitting_run_num->setCurrentRow(0);
+      if (multiRun) {
+        auto currentIndex =
+            m_uiTabFitting.listWidget_fitting_run_num->currentRow();
+        if (currentIndex == -1)
+          m_uiTabFitting.listWidget_fitting_run_num->setCurrentRow(0);
+      }
     }
 
     else {

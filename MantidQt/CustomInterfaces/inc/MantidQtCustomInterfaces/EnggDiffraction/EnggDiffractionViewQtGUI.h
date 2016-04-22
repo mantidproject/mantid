@@ -165,7 +165,7 @@ public:
   void addBankItems(std::vector<std::string> splittedBaseName,
                     QString selectedFile);
 
-  void addRunNoItem(std::vector<std::string> runNumVector);
+  void addRunNoItem(std::vector<std::string> runNumVector, bool multiRun);
 
   void setDefaultBank(std::vector<std::string> splittedBaseName,
                       QString selectedFile);
@@ -338,6 +338,9 @@ private:
 
   // multi-run focus mode type selected
   int static m_currentRunMode;
+
+  /// indentifier for fitting multi-run or single run input
+  bool m_fittingMutliRunMode;
 
   // vector holding directory of focused bank file
   std::vector<std::string> static m_fitting_runno_dir_vec;
