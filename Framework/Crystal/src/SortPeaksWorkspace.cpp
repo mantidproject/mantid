@@ -92,7 +92,7 @@ void SortPeaksWorkspace::exec() {
     inputWS->getColumn(columnToSortBy);
 
     if (inputWS != outputWS) {
-      outputWS = boost::shared_ptr<PeaksWorkspace>(inputWS->clone().release());
+      outputWS = inputWS->clone();
     }
 
     // Perform the sorting.

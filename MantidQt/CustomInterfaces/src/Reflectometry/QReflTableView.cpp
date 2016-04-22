@@ -73,7 +73,7 @@ this method is public and takes a std::string as argument. The reason is that
 this method is intended to be called by the presenter
 @param name : the string name of the workspace to be grabbed
 */
-void QReflTableView::setModel(std::string name) {
+void QReflTableView::setModel(const std::string &name) {
   m_toOpen = name;
   m_tablePresenter->notify(IReflTablePresenter::OpenTableFlag);
 }
@@ -359,7 +359,7 @@ std::string QReflTableView::askUserString(const std::string &prompt,
                                           const std::string &defaultValue) {
   bool ok;
   QString text = QInputDialog::getText(
-      QString::fromStdString(title), QString::fromStdString(prompt),
+      this, QString::fromStdString(title), QString::fromStdString(prompt),
       QLineEdit::Normal, QString::fromStdString(defaultValue), &ok);
   if (ok)
     return text.toStdString();

@@ -33,7 +33,8 @@ ImageROIPresenter::ImageROIPresenter(IImageROIView *view)
                              "with an empty/null view (tomography interface). "
                              "Cannot continue.");
   }
-  m_algRunner.reset(new MantidQt::API::BatchAlgorithmRunner());
+  m_algRunner =
+      Mantid::Kernel::make_unique<MantidQt::API::BatchAlgorithmRunner>();
 }
 
 ImageROIPresenter::~ImageROIPresenter() { cleanup(); }
@@ -497,7 +498,8 @@ std::string ImageROIPresenter::filterImagePathsForFITSStack(
         "stack ( " +
         m_stackPath + "). Ignoring them under the assumption that these are "
                       "note original images. Please make sure that this is "
-                      "correct. The files ignored are: " + filesStrMsg;
+                      "correct. The files ignored are: " +
+        filesStrMsg;
 
     if (g_warnIfUnexpectedFileExtensions) {
       m_view->userWarning("Files that presumably are summed images have been "

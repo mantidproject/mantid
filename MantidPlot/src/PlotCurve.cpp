@@ -404,7 +404,8 @@ bool DataCurve::updateData(Table *t, const QString &colName) {
                        colName != d_labels_column))
     return false;
 
-  loadData();
+  // Update data with all rows in table
+  setFullRange();
   return true;
 }
 

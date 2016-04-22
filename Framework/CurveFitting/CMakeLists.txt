@@ -1,7 +1,5 @@
 set ( SRC_FILES
 	src/Algorithms/CalculateChiSquared.cpp
-	src/Algorithms/VesuvioCalculateGammaBackground.cpp
-	src/Algorithms/VesuvioCalculateMS.cpp
 	src/Algorithms/ConvertToYSpace.cpp
 	src/Algorithms/ConvolveWorkspaces.cpp
 	src/Algorithms/CrystalFieldEnergies.cpp
@@ -20,6 +18,8 @@ set ( SRC_FILES
 	src/Algorithms/SplineBackground.cpp
 	src/Algorithms/SplineInterpolation.cpp
 	src/Algorithms/SplineSmoothing.cpp
+	src/Algorithms/VesuvioCalculateGammaBackground.cpp
+	src/Algorithms/VesuvioCalculateMS.cpp
 	src/AugmentedLagrangianOptimizer.cpp
 	src/ComplexMatrix.cpp
 	src/ComplexVector.cpp
@@ -53,6 +53,7 @@ set ( SRC_FILES
 	src/Functions/ComptonScatteringCountRate.cpp
 	src/Functions/Convolution.cpp
 	src/Functions/CrystalElectricField.cpp
+	src/Functions/CrystalFieldPeaks.cpp
 	src/Functions/CubicSpline.cpp
 	src/Functions/DeltaFunction.cpp
 	src/Functions/DiffRotDiscreteCircle.cpp
@@ -108,6 +109,7 @@ set ( SRC_FILES
 	src/GSLFunctions.cpp
 	src/GSLMatrix.cpp
 	src/GSLVector.cpp
+	src/GeneralDomainCreator.cpp
 	src/IFittingAlgorithm.cpp
 	src/LatticeDomainCreator.cpp
 	src/LatticeFunction.cpp
@@ -124,8 +126,6 @@ set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
 
 set ( INC_FILES
 	inc/MantidCurveFitting/Algorithms/CalculateChiSquared.h
-	inc/MantidCurveFitting/Algorithms/VesuvioCalculateGammaBackground.h
-	inc/MantidCurveFitting/Algorithms/VesuvioCalculateMS.h
 	inc/MantidCurveFitting/Algorithms/ConvertToYSpace.h
 	inc/MantidCurveFitting/Algorithms/ConvolveWorkspaces.h
 	inc/MantidCurveFitting/Algorithms/CrystalFieldEnergies.h
@@ -144,6 +144,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Algorithms/SplineBackground.h
 	inc/MantidCurveFitting/Algorithms/SplineInterpolation.h
 	inc/MantidCurveFitting/Algorithms/SplineSmoothing.h
+	inc/MantidCurveFitting/Algorithms/VesuvioCalculateGammaBackground.h
+	inc/MantidCurveFitting/Algorithms/VesuvioCalculateMS.h
 	inc/MantidCurveFitting/AugmentedLagrangianOptimizer.h
 	inc/MantidCurveFitting/ComplexMatrix.h
 	inc/MantidCurveFitting/ComplexVector.h
@@ -181,6 +183,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/ComptonScatteringCountRate.h
 	inc/MantidCurveFitting/Functions/Convolution.h
 	inc/MantidCurveFitting/Functions/CrystalElectricField.h
+	inc/MantidCurveFitting/Functions/CrystalFieldPeaks.h
 	inc/MantidCurveFitting/Functions/CubicSpline.h
 	inc/MantidCurveFitting/Functions/DeltaFunction.h
 	inc/MantidCurveFitting/Functions/DiffRotDiscreteCircle.h
@@ -237,6 +240,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/GSLJacobian.h
 	inc/MantidCurveFitting/GSLMatrix.h
 	inc/MantidCurveFitting/GSLVector.h
+	inc/MantidCurveFitting/GeneralDomainCreator.h
 	inc/MantidCurveFitting/HalfComplex.h
 	inc/MantidCurveFitting/IFittingAlgorithm.h
 	inc/MantidCurveFitting/Jacobian.h
@@ -256,8 +260,6 @@ set ( TEST_FILES
 	# RefinePowderInstrumentParametersTest.h
 	#SCDPanelErrorsTest.h
 	Algorithms/CalculateChiSquaredTest.h
-	Algorithms/VesuvioCalculateGammaBackgroundTest.h
-	Algorithms/VesuvioCalculateMSTest.h
 	Algorithms/ConvertToYSpaceTest.h
 	Algorithms/ConvolveWorkspacesTest.h
 	Algorithms/EstimatePeakErrorsTest.h
@@ -275,6 +277,8 @@ set ( TEST_FILES
 	Algorithms/SplineBackgroundTest.h
 	Algorithms/SplineInterpolationTest.h
 	Algorithms/SplineSmoothingTest.h
+	Algorithms/VesuvioCalculateGammaBackgroundTest.h
+	Algorithms/VesuvioCalculateMSTest.h
 	AugmentedLagrangianOptimizerTest.h
 	ComplexMatrixTest.h
 	ComplexVectorTest.h
@@ -283,6 +287,7 @@ set ( TEST_FILES
 	CostFunctions/CostFuncUnweightedLeastSquaresTest.h
 	CostFunctions/LeastSquaresTest.h
 	CrystalFieldEnergiesTest.h
+	CrystalFieldPeaksTest.h
 	FitMWTest.h
 	FortranMatrixTest.h
 	FortranVectorTest.h
@@ -363,6 +368,7 @@ set ( TEST_FILES
 	Functions/VoigtTest.h
 	GSLMatrixTest.h
 	GSLVectorTest.h
+	GeneralDomainCreatorTest.h
 	IPeakFunctionCentreParameterNameTest.h
 	IPeakFunctionIntensityTest.h
 	LatticeDomainCreatorTest.h

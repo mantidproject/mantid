@@ -11,7 +11,7 @@ namespace Algorithms {
  *@param hostAlgorithm :: the pointer to SofQ algorithm hosting the base class.
  *This algorithm expects to have EMode and EFixed properties attached to it.
 */
-void SofQCommon::initCachedValues(API::MatrixWorkspace_const_sptr workspace,
+void SofQCommon::initCachedValues(const API::MatrixWorkspace &workspace,
                                   API::Algorithm *const hostAlgorithm) {
   // Retrieve the emode & efixed properties
   const std::string emode = hostAlgorithm->getProperty("EMode");
@@ -29,8 +29,8 @@ void SofQCommon::initCachedValues(API::MatrixWorkspace_const_sptr workspace,
     // If GetEi was run then it will have been stored in the workspace, if not
     // the user will need to enter one
     if (m_efixed == 0.0) {
-      if (workspace->run().hasProperty("Ei")) {
-        Kernel::Property *p = workspace->run().getProperty("Ei");
+      if (workspace.run().hasProperty("Ei")) {
+        Kernel::Property *p = workspace.run().getProperty("Ei");
         Kernel::PropertyWithValue<double> *eiProp =
             dynamic_cast<Kernel::PropertyWithValue<double> *>(p);
         if (!eiProp)
@@ -60,7 +60,7 @@ void SofQCommon::initCachedValues(API::MatrixWorkspace_const_sptr workspace,
  * @param det A pointer to a detector object
  * @return The value of efixed
  */
-double SofQCommon::getEFixed(Geometry::IDetector_const_sptr det) const {
+double SofQCommon::getEFixed(const Geometry::IDetector &det) const {
   double efixed(0.0);
   if (m_emode == 1) // Direct
   {
@@ -70,10 +70,10 @@ double SofQCommon::getEFixed(Geometry::IDetector_const_sptr det) const {
     if (m_efixedGiven)
       efixed = m_efixed; // user provided a value
     else {
-      std::vector<double> param = det->getNumberParameter("EFixed");
+      std::vector<double> param = det.getNumberParameter("EFixed");
       if (param.empty())
         throw std::runtime_error(
-            "Cannot find EFixed parameter for component \"" + det->getName() +
+            "Cannot find EFixed parameter for component \"" + det.getName() +
             "\". This is required in indirect mode. Please check the IDF "
             "contains these values.");
       efixed = param[0];
