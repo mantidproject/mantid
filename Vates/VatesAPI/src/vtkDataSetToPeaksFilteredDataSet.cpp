@@ -170,67 +170,79 @@ vtkDataSetToPeaksFilteredDataSet::getPeaksInfo(
     int numPeaks = workspace->getNumberPeaks();
     // Iterate over all peaks for the workspace
     for (int i = 0; i < numPeaks; i++) {
-      Mantid::Geometry::IPeak *peak = workspace->getPeakPtr(i);
-      addSinglePeak(peak, peaksInfo);
+      const Mantid::Geometry::IPeak &peak = workspace->getPeak(i);
+      peaksInfo.emplace_back(this->getPeakPosition(peak),
+                             this->getPeakRadius(peak.getPeakShape()));
     }
   }
   return peaksInfo;
 }
 
 GCC_DIAG_OFF(strict-aliasing)
-  /**
-   * Add information for a single peak to the peakInfo vector.
-   * @param peak The peak from which the information will be extracted.
-   * @param peaksInfo A reference to the vector containing peak information.
-   */
-void vtkDataSetToPeaksFilteredDataSet::addSinglePeak(
-    Mantid::Geometry::IPeak *peak,
-    std::vector<std::pair<Mantid::Kernel::V3D, double>> &peaksInfo) {
+/**
+ * Get the radius from a PeakShape object.
+ * @param shape The PeakShape from which the information will be extracted.
+ * @return radius of peak shape.
+ */
+double vtkDataSetToPeaksFilteredDataSet::getPeakRadius(
+    const Mantid::Geometry::PeakShape &shape) {
   double radius = m_defaultRadius;
-  const Mantid::Geometry::PeakShape &shape = peak->getPeakShape();
-  std::string shapeName = shape.shapeName();
 
-  if (shapeName != Mantid::DataObjects::NoShape::noShapeName()) {
-    boost::optional<double> rad = shape.radius(m_radiusType);
-    if (rad.is_initialized()) {
-      radius = rad.get();
-    }
+  boost::optional<double> rad = shape.radius(m_radiusType);
+  if (rad.is_initialized()) {
+    radius = rad.get();
   } else {
-    radius = m_radiusNoShape;
+    if (shape.shapeName() == Mantid::DataObjects::NoShape::noShapeName()) {
+      radius = m_radiusNoShape;
+    }
   }
 
+  return radius * m_radiusFactor;
+}
+
+/**
+ * Get the position of a peak object.
+ * @param peak The Peak from which the information will be extracted.
+ * @return position of peak shape in the specified coordinate system.
+ */
+Kernel::V3D vtkDataSetToPeaksFilteredDataSet::getPeakPosition(
+    const Mantid::Geometry::IPeak &peak) {
   // Get the position in the correct frame.
+  Kernel::V3D position;
   switch (m_coordinateSystem) {
   case (Mantid::Kernel::SpecialCoordinateSystem::HKL):
-    peaksInfo.emplace_back(peak->getHKL(), radius * m_radiusFactor);
+    position = peak.getHKL();
     break;
   case (Mantid::Kernel::SpecialCoordinateSystem::QLab):
-    peaksInfo.emplace_back(peak->getQLabFrame(), radius * m_radiusFactor);
+    position = peak.getQLabFrame();
     break;
   case (Mantid::Kernel::SpecialCoordinateSystem::QSample):
-    peaksInfo.emplace_back(peak->getQSampleFrame(), radius * m_radiusFactor);
+    position = peak.getQSampleFrame();
     break;
   default:
     throw std::invalid_argument("The special coordinate systems don't match.");
   }
-  }
-//GCC_DIAG_ON(strict-aliasing)
-  /**
-   * Get the radius for no shape
-   * @returns The shape of the radius.
-   */
-  double vtkDataSetToPeaksFilteredDataSet::getRadiusNoShape(){
-    return m_radiusNoShape;
-  }
+  return position;
+}
 
-  /**
-   * Get the radius factor which is used to calculate the radius of the culled data set around each peak
-   * The culling radius is the radius of the peak times the radius factor.
-   * @returns The radius factor.
-   */
-  double vtkDataSetToPeaksFilteredDataSet::getRadiusFactor() {
-    return m_radiusFactor;
-  }
+// GCC_DIAG_ON(strict-aliasing)
+/**
+ * Get the radius for no shape
+ * @returns The shape of the radius.
+ */
+double vtkDataSetToPeaksFilteredDataSet::getRadiusNoShape() {
+  return m_radiusNoShape;
+}
+
+/**
+ * Get the radius factor which is used to calculate the radius of the culled
+ * data set around each peak
+ * The culling radius is the radius of the peak times the radius factor.
+ * @returns The radius factor.
+ */
+double vtkDataSetToPeaksFilteredDataSet::getRadiusFactor() {
+  return m_radiusFactor;
+}
 }
 }
 

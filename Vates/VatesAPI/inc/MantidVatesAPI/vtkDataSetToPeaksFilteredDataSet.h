@@ -68,9 +68,8 @@ namespace VATES
       std::vector<std::pair<Mantid::Kernel::V3D, double>>
       getPeaksInfo(const std::vector<Mantid::API::IPeaksWorkspace_sptr>
                        &peaksWorkspaces);
-      void addSinglePeak(
-          Mantid::Geometry::IPeak *peak,
-          std::vector<std::pair<Mantid::Kernel::V3D, double>> &peaksInfo);
+      Kernel::V3D getPeakPosition(const Mantid::Geometry::IPeak &peak);
+      double getPeakRadius(const Mantid::Geometry::PeakShape &shape);
       double m_radiusNoShape; ///< The radius for peaks with no peak shape.
       double m_radiusFactor;///< By how much we want to trim the data set.
       double m_defaultRadius; ///< A default radius.
