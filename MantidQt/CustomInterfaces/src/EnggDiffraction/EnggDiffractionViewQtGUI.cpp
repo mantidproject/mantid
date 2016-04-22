@@ -217,8 +217,10 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
 
   connect(this, SIGNAL(getBanks()), this, SLOT(fittingRunNoChanged()));
 
+  connect(this, SIGNAL(setBank()), this, SLOT(listViewFittingRun()));
+
   connect(m_uiTabFitting.listWidget_fitting_run_num,
-          SIGNAL(currentRowChanged(int)), this, SLOT(listViewFittingRun(int)));
+          SIGNAL(itemSelectionChanged()), this, SLOT(listViewFittingRun()));
 
   connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)), this,
           SLOT(setBankDir(int)));
@@ -709,12 +711,13 @@ void EnggDiffractionViewQtGUI::setBankDir(int idx) {
   }
 }
 
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::listViewFittingRun(
-    int idx) {
-
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    listViewFittingRun() {
+  /// shahroz
   auto listView = m_uiTabFitting.listWidget_fitting_run_num;
-  auto item = listView->item(idx);
-  auto itemText = item->text();
+  auto currentRow = listView->currentRow();
+  auto item = listView->item(currentRow);
+  QString itemText = item->text();
 
   setfittingRunNo(itemText);
   fittingRunNoChanged();
@@ -1412,11 +1415,12 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
       }
     }
     // set the directory here to the first in the vector if its not empty
-    if (m_fitting_runno_dir_vec.empty()) {
-      QString firstDir = QString::fromStdString(m_fitting_runno_dir_vec[0]);
-      setfittingRunNo(firstDir);
+    // if (!m_fitting_runno_dir_vec.empty()) {
+    //  QString firstDir = QString::fromStdString(m_fitting_runno_dir_vec[0]);
+    // setfittingRunNo(firstDir);
 
-    } else if (fittingRunNo().empty()) {
+    //} else
+    if (fittingRunNo().empty()) {
       userWarning("Invalid Input", "Invalid directory or run number given. "
                                    "Please try again");
     }
@@ -1470,22 +1474,29 @@ EnggDiffractionViewQtGUI::splitFittingDirectory(std::string &selectedfPath) {
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enableMultiRun(
     std::string firstRun, std::string lastRun) {
+  int firstNum;
+  int lastNum;
 
   std::vector<std::string> RunNumberVec;
   if (isDigit(firstRun) && isDigit(lastRun)) {
-    int firstNum = std::stoi(firstRun);
-    int lastNum = (std::stoi(lastRun));
+    firstNum = std::stoi(firstRun);
+    lastNum = (std::stoi(lastRun));
+  }
+
+  if (firstRun <= lastRun) {
 
     for (int i = firstNum; i <= lastNum; i++) {
       RunNumberVec.push_back(std::to_string(i));
     }
 
+    addRunNoItem(RunNumberVec);
+
+    emit setBank();
+
   } else {
     throw std::invalid_argument("Invalid Run Number, the multi-run number "
                                 "provided is invalid. Please try again");
   }
-
-  addRunNoItem(RunNumberVec);
 }
 
 void EnggDiffractionViewQtGUI::addBankItems(
@@ -1554,6 +1565,10 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addRunNoItem(
 
       m_uiTabFitting.listWidget_fitting_run_num->setEnabled(true);
 
+      auto currentIndex =
+          m_uiTabFitting.listWidget_fitting_run_num->currentRow();
+      if (currentIndex == -1)
+        m_uiTabFitting.listWidget_fitting_run_num->setCurrentRow(0);
     }
 
     else {

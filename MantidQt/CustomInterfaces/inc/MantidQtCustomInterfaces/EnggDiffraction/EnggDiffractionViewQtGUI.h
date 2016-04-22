@@ -214,6 +214,7 @@ public:
 
 signals:
   void getBanks();
+  void setBank();
 
 private slots:
   /// for buttons, do calibrate, focus, event->histo rebin, and similar
@@ -273,7 +274,7 @@ private slots:
   void fitClicked();
   void fittingRunNoChanged();
   void setBankDir(int idx);
-  void listViewFittingRun(int idx);
+  void listViewFittingRun();
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
