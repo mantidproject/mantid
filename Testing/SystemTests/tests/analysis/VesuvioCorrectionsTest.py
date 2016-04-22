@@ -13,13 +13,16 @@ import platform
 
 
 from mantid.api import *
-import vesuvio.testing as testing
 import mantid.simpleapi as ms
+from mantid import *
 
 #====================================Helper Functions=======================================
 def setUp():
-    test_ws = testing.create_test_ws()
-    test_container_ws = testing.create_test_container_ws()
+    test_ws = ms.LoadVesuvio(Filename="15039-15045", InstrumentParFile="IP0004_10.par",
+                             Mode="SingleDifference", SpectrumList="135-136")
+    test_container_ws = ms.LoadVesuvio(Filename="15036", InstrumentParFile="IP0004_10.par",
+                                       Mode="SingleDifference", SpectrumList="135-136")
+
     return test_ws, test_container_ws
 
 def tearDown():
@@ -28,16 +31,18 @@ def tearDown():
         if mtd.doesExist(name):
             mtd.remove(name)
 
-
-def _check_platform():
-    # Check OS for RHEL7 or Ubuntu
+def _is_old_boost_version():
+    # It appears that a difference in boost version is causing different
+    # random number generation. As such an OS check is used.
+    # Older boost (earlier than 56): Ubuntu 14.04, RHEL7
     dist = platform.linux_distribution()
-    is_linux, is_rhel6 = False, False
     if any(dist):
-        is_linux = True
-        if dist[0] == 'Red Hat Enterprise Linux Workstation' and dist[1] == '6.7':
-            is_rhel6 = True
-    return is_linux, is_rhel6
+        if 'Red Hat' in dist[0] and dist[1].startswith('7'):
+            return True
+        if dist[0] == 'Ubuntu' and dist[1] == '14.04':
+            return True
+
+    return False
 
 def _create_algorithm(**kwargs):
     alg = AlgorithmManager.createUnmanaged("VesuvioCorrections")
@@ -52,26 +57,51 @@ def _create_algorithm(**kwargs):
     return alg
 
 
-def _create_dummy_fit_parameters():
+def _create_dummy_fit_parameters_ws_index_1():
     params = ms.CreateEmptyTableWorkspace(OutputWorkspace='__VesuvioCorrections_test_fit_params')
 
     params.addColumn('str', 'Name')
     params.addColumn('float', 'Value')
     params.addColumn('float', 'Error')
 
-    params.addRow(['f0.Width', 4.72912, 0.41472])
-    params.addRow(['f0.FSECoeff', 0.557332, 0])
-    params.addRow(['f0.C_0', 11.8336, 1.11468])
-    params.addRow(['f1.Width', 10, 0])
-    params.addRow(['f1.Intensity', 2.21085, 0.481347])
-    params.addRow(['f2.Width', 13, 0])
-    params.addRow(['f2.Intensity', 1.42443, 0.583283])
-    params.addRow(['f3.Width', 30, 0])
-    params.addRow(['f3.Intensity', 0.499497, 0.28436])
-    params.addRow(['f4.A0', -0.00278903, 0.00266163])
-    params.addRow(['f4.A1', 14.5313, 22.2307])
-    params.addRow(['f4.A2', -5475.01, 35984.4])
-    params.addRow(['Cost function value', 2.34392, 0])
+    params.addRow(['f0.Mass', 1.0079, 0.0])
+    params.addRow(['f0.Width', 3.70295, 0.199336])
+    params.addRow(['f0.FSECoeff', 0.436396, 0])
+    params.addRow(['f0.C_0', 21.2616, 0.750185])
+    params.addRow(['f1.Mass', 16.0, 0.0])
+    params.addRow(['f1.Width', 10.0, 0.0])
+    params.addRow(['f1.Intensity', 4.03064, 0.41762])
+    params.addRow(['f2.Mass', 27.0, 0.0])
+    params.addRow(['f2.Width', 13.0, 0.0])
+    params.addRow(['f2.Intensity', 3.23823, 0.447593])
+    params.addRow(['f3.Mass', 133.0, 0.0])
+    params.addRow(['f3.Width', 30.0, 0.0])
+    params.addRow(['f3.Intensity', 0.882613, 0.218913])
+    params.addRow(['Cost function value', 3.19573, 0.0])
+
+    return params
+
+def _create_dummy_fit_parameters_ws_index_2():
+    params = ms.CreateEmptyTableWorkspace(OutputWorkspace='__VesuvioCorrections_test_fit_params')
+
+    params.addColumn('str', 'Name')
+    params.addColumn('float', 'Value')
+    params.addColumn('float', 'Error')
+
+    params.addRow(['f0.Mass', 1.0079, 0.0])
+    params.addRow(['f0.Width', 4.34424, 0.205241])
+    params.addRow(['f0.FSECoeff', 0.511974, 0])
+    params.addRow(['f0.C_0', 21.6463, 0.726012])
+    params.addRow(['f1.Mass', 16.0, 0.0])
+    params.addRow(['f1.Width', 10.0, 0.0])
+    params.addRow(['f1.Intensity', 4.49586, 0.438959])
+    params.addRow(['f2.Mass', 27.0, 0.0])
+    params.addRow(['f2.Width', 13.0, 0.0])
+    params.addRow(['f2.Intensity', 2.60706, 0.482777])
+    params.addRow(['f3.Mass', 133.0, 0.0])
+    params.addRow(['f3.Width', 30.0, 0.0])
+    params.addRow(['f3.Intensity', 1.11099, 0.232988])
+    params.addRow(['Cost function value', 2.98231, 0.0])
 
     return params
 
@@ -89,7 +119,7 @@ def _create_dummy_profiles():
 #===========================================================================================
 #========================================Success cases======================================
 
-class GammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
+class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
 
     _algorithm = None
     _is_linux = None
@@ -99,10 +129,9 @@ class GammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
     def runTest(self):
         test_ws, _ = setUp()
         self._input_bins = test_ws.blocksize()
-        self._is_linux, self._is_rhel6 = _check_platform()
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
                                             GammaBackground=True,
-                                            FitParameters=_create_dummy_fit_parameters(),
+                                            FitParameters=_create_dummy_fit_parameters_ws_index_1(),
                                             Masses=_create_dummy_masses(),
                                             MassProfiles=_create_dummy_profiles())
 
@@ -113,29 +142,22 @@ class GammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         # Test Corrections Workspaces
         corrections_wsg = self._algorithm.getProperty("CorrectionWorkspaces").value
         _validate_group_structure(self, corrections_wsg, 3)
-        corrections_gb_peak = 4.22729680e-07
-        corrections_ts_peak = 0.083994253007
-        corrections_ms_peak = 8.64757253e-05
-        if self._is_linux and not self._is_rhel6:
-            corrections_gb_peak = 6.170476e-07
-            corrections_ts_peak = 8.545568e-02
-            corrections_ms_peak = 9.109919e-05
-
+        corrections_gb_peak = 0.0126756398636
+        corrections_ts_peak = 0.161125285346
+        corrections_ms_peak = 0.000170937010003
+        if _is_old_boost_version():
+            corrections_ms_peak = 0.000233662993153
         _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak)
 
+
         # Test Corrected Workspaces
         corrected_wsg = self._algorithm.getProperty("CorrectedWorkspaces").value
         _validate_group_structure(self, corrected_wsg, 3)
-        corrected_gb_peak = 0.46638088
-        corrected_ts_peak = 0.46593182
-        corrected_ms_peak = 0.46635277
-        if self._is_linux and not self._is_rhel6:
-            corrected_gb_peak = 4.663811e-01
-            corrected_ts_peak = 4.659339e-01
-            corrected_ms_peak = 4.663553e-01
-
+        corrected_gb_peak = 0.636547077684
+        corrected_ts_peak = 0.587870515272
+        corrected_ms_peak = 0.626612845598
         _validate_matrix_peak_height(self, corrected_wsg.getItem(0), corrected_gb_peak)
         _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak)
         _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak)
@@ -143,17 +165,13 @@ class GammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         # Test OutputWorkspace
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
         _validate_matrix_structure(self, output_ws, 1, self._input_bins)
-        output_expected_peak = 0.46635315
-        if self._is_linux and not self._is_rhel6:
-            output_expected_peak = 4.663559e-01
+        output_expected_peak = 0.636436654367
         _validate_matrix_peak_height(self, output_ws, output_expected_peak)
 
         # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
         _validate_table_workspace(self, linear_params, 7, 3)
-        expected_values = [4.17063e-05, 0.0, 1.0, 2.026619013, 0.0, 1.0, 11.799966]
-        if self._is_linux and not self._is_rhel6:
-            expected_values = [6.087759e-05, 0.0, 1.0, 2.019595, 0.0, 1.0, 11.80356]
+        expected_values = [1.6003707534, 0.0, 1.0, 13.4977299425, 0.0, 1.0, 3.1231762417]
         _validate_table_values_top_to_bottom(self, linear_params, expected_values)
         tearDown()
 
@@ -168,10 +186,9 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
     def runTest(self):
         test_ws, _ = setUp()
         self._input_bins = test_ws.blocksize()
-        self._is_linux, self._is_rhel6 = _check_platform()
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
                                             GammaBackground=True,
-                                            FitParameters=_create_dummy_fit_parameters(),
+                                            FitParameters=_create_dummy_fit_parameters_ws_index_2(),
                                             Masses=_create_dummy_masses(),
                                             MassProfiles=_create_dummy_profiles(),
                                             WorkspaceIndex=1)
@@ -183,13 +200,11 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
         # Test Corrections Workspaces
         corrections_wsg = self._algorithm.getProperty("CorrectionWorkspaces").value
         _validate_group_structure(self, corrections_wsg, 3)
-        corrections_gb_peak = 1.2250951e-06
-        corrections_ts_peak = 0.09844847237
-        corrections_ms_peak = 9.9243003e-05
-        if self._is_linux and not self._is_rhel6:
-            corrections_gb_peak = 1.605327e-06
-            corrections_ts_peak = 9.994254e-02
-            corrections_ms_peak = 1.089477e-04
+        corrections_gb_peak = 0.0106977817681
+        corrections_ts_peak = 0.159340707436
+        corrections_ms_peak = 0.000226355717662
+        if _is_old_boost_version():
+            corrections_ms_peak = 0.000219113428752
 
         _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak)
@@ -198,13 +213,9 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
         # Test Corrected Workspaces
         corrected_wsg = self._algorithm.getProperty("CorrectedWorkspaces").value
         _validate_group_structure(self, corrected_wsg, 3)
-        corrected_gb_peak = 0.52350495
-        corrected_ts_peak = 0.52341546
-        corrected_ms_peak = 0.52344493
-        if self._is_linux and not self._is_rhel6:
-            corrected_gb_peak = 5.235046e-01
-            corrected_ts_peak = 5.234076e-01
-            corrected_ms_peak = 5.234477e-01
+        corrected_gb_peak = 0.710957315887
+        corrected_ts_peak = 0.650023356109
+        corrected_ms_peak = 0.702029231969
 
         _validate_matrix_peak_height(self, corrected_wsg.getItem(0), corrected_gb_peak)
         _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak)
@@ -213,17 +224,13 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
         # Test OutputWorkspace
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
         _validate_matrix_structure(self, output_ws, 1, self._input_bins)
-        output_expected_peak = 0.5234438813082305
-        if self._is_linux and not self._is_rhel6:
-            output_expected_peak = 0.5234463
+        output_expected_peak = 0.710897137455
         _validate_matrix_peak_height(self, output_ws, output_expected_peak)
 
         # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
         _validate_table_workspace(self, linear_params, 7, 3)
-        expected_values = [0.0001183, 0.0, 1.0, 2.4028667, 0.0, 1.0, 10.5412496]
-        if self._is_linux and not self._is_rhel6:
-            expected_values = [1.550200e-04, 0.0, 1.0, 2.390063, 0.0, 1.0, 10.055330]
+        expected_values = [1.34824466369, 0.0, 1.0, 13.995593067, 0.0, 1.0, 2.92802316632]
         _validate_table_values_top_to_bottom(self, linear_params, expected_values)
         tearDown()
 
@@ -239,7 +246,7 @@ class TestMsCorrectWithContainer(stresstesting.MantidStressTest):
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
                                             ContainerWorkspace=test_container_ws,
                                             GammaBackground=False,
-                                            FitParameters=_create_dummy_fit_parameters(),
+                                            FitParameters=_create_dummy_fit_parameters_ws_index_1(),
                                             Masses=_create_dummy_masses(),
                                             MassProfiles=_create_dummy_profiles())
 
@@ -272,7 +279,7 @@ class TestGammaAndMsCorrectWithContainer(stresstesting.MantidStressTest):
         self._input_bins = test_ws.blocksize()
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
                                             ContainerWorkspace=test_container_ws,
-                                            FitParameters=_create_dummy_fit_parameters(),
+                                            FitParameters=_create_dummy_fit_parameters_ws_index_1(),
                                             Masses=_create_dummy_masses(),
                                             MassProfiles=_create_dummy_profiles())
 
@@ -305,7 +312,7 @@ class TestGammaAndMsCorrectWithContainerFixedScaling(stresstesting.MantidStressT
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
                                             ContainerWorkspace=test_container_ws,
                                             GammaBackground=True,
-                                            FitParameters=_create_dummy_fit_parameters(),
+                                            FitParameters=_create_dummy_fit_parameters_ws_index_1(),
                                             Masses=_create_dummy_masses(),
                                             MassProfiles=_create_dummy_profiles(),
                                             ContainerScale=0.1,
@@ -335,7 +342,7 @@ class TestGammaAndMsCorrectWithContainerFixedScaling(stresstesting.MantidStressT
 
 #========================================Failure cases======================================
 
-class RunningWithoutFitParamsRaisesError(stresstesting.MantidStressTest):
+class TestRunningWithoutFitParamsRaisesError(stresstesting.MantidStressTest):
 
     _algorithm = None
 
@@ -347,27 +354,27 @@ class RunningWithoutFitParamsRaisesError(stresstesting.MantidStressTest):
     def validate(self):
         self.assertRaises(RuntimeError, self._algorithm.execute)
 
-class RunningWithoutMassesRaisesError(stresstesting.MantidStressTest):
+class TestRunningWithoutMassesRaisesError(stresstesting.MantidStressTest):
 
     _algorithm = None
 
     def runTest(self):
         test_ws, _ = setUp()
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
-                                            FitParameters=_create_dummy_fit_parameters(),
+                                            FitParameters=_create_dummy_fit_parameters_ws_index_1(),
                                             MassProfiles=_create_dummy_profiles())
     def validate(self):
         self.assertRaises(RuntimeError, self._algorithm.execute)
 
 
-class RunningWithoutProfilesRaisesError(stresstesting.MantidStressTest):
+class TestRunningWithoutProfilesRaisesError(stresstesting.MantidStressTest):
 
     _algorithm = None
 
     def runTest(self):
         test_ws, _ = setUp()
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
-                                            FitParameters=_create_dummy_fit_parameters(),
+                                            FitParameters=_create_dummy_fit_parameters_ws_index_1(),
                                             Masses=_create_dummy_masses())
     def validate(self):
         self.assertRaises(RuntimeError, self._algorithm.execute)

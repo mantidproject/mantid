@@ -243,7 +243,9 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
           SLOT(savePeakList()));
 
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
+
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom, "d-Spacing (A)");
+
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::yLeft, "Counts (us)^-1");
   QFont font("MS Shell Dlg 2", 8);
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::xBottom, font);

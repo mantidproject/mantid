@@ -164,19 +164,21 @@ public:
 
     TS_ASSERT_EQUALS(collection.intensityType(), PoldiPeakCollection::Maximum);
 
-    TableWorkspace_sptr newDummy(m_dummyData->clone());
+    ITableWorkspace_sptr newDummy(m_dummyData->clone().release());
     newDummy->logs()->addProperty<std::string>("IntensityType", "Integral");
 
-    PoldiPeakCollection otherCollection(newDummy);
+    PoldiPeakCollection otherCollection(
+        boost::static_pointer_cast<TableWorkspace>(newDummy));
     TS_ASSERT_EQUALS(otherCollection.intensityType(),
                      PoldiPeakCollection::Integral);
   }
 
   void testIntensityTypeRecoveryConversion() {
-    TableWorkspace_sptr newDummy(m_dummyData->clone());
+    ITableWorkspace_sptr newDummy(m_dummyData->clone().release());
     newDummy->logs()->addProperty<std::string>("IntensityType", "Integral");
 
-    PoldiPeakCollection collection(newDummy);
+    PoldiPeakCollection collection(
+        boost::static_pointer_cast<TableWorkspace>(newDummy));
 
     TableWorkspace_sptr compare = collection.asTableWorkspace();
 
@@ -223,12 +225,13 @@ public:
   }
 
   void testUnitCellFromLogs() {
-    TableWorkspace_sptr newDummy(m_dummyData->clone());
+    ITableWorkspace_sptr newDummy(m_dummyData->clone().release());
 
     UnitCell cell(1, 2, 3, 90, 91, 92);
     newDummy->logs()->addProperty<std::string>("UnitCell", unitCellToStr(cell));
 
-    PoldiPeakCollection collection(newDummy);
+    PoldiPeakCollection collection(
+        boost::static_pointer_cast<TableWorkspace>(newDummy));
     TS_ASSERT_EQUALS(unitCellToStr(collection.unitCell()), unitCellToStr(cell));
   }
 
@@ -248,7 +251,7 @@ public:
   }
 
   void testGetPointGroupStringFromLog() {
-    TableWorkspace_sptr newDummy(m_dummyData->clone());
+    ITableWorkspace_sptr newDummy(m_dummyData->clone().release());
     newDummy->logs()->addProperty<std::string>("PointGroup", "SomeString");
 
     TestablePoldiPeakCollection peaks;
