@@ -1,5 +1,5 @@
 # pylint: disable=anomalous-backslash-in-string, global-variable-undefined, global-variable-not-assigned
-# pylint: disable=invalid-name, too-many-arguments, unidiomatic-typecheck, too-many-branches, redefined-builtin
+# pylint: disable=invalid-name, too-many-arguments, superfluous-parens, too-many-branches, redefined-builtin
 
 import os.path
 import sys
@@ -30,6 +30,9 @@ def PEARL_startup(usern="matt", thiscycle='11_1'):
     global mtdplt
     global cycle
     global instver
+
+    # global variables are continuously and excessively used within the script
+    # the script is also familiar to Pearl scientists hence leaving as it is for now
 
     # import Mantid_plotting as mtdplt
     # The lines below set the default value for the rest of the focussing routines
