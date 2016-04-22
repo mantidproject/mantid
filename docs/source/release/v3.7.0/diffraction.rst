@@ -40,6 +40,11 @@ Graphical user interface:
   is enabled. As well as option to select peak, add peak or save peaks
   from the data plot is now supported.
 
+- :ref:`Preview-Engineering_Diffraction-ref` under Fitting tab, you can
+  now view the plot in `dSpacing` instead `ToF`, which enables you to
+  rerun the fitting process after selecting peaks from the interface.
+
+
 Imaging
 -------
 
@@ -62,6 +67,11 @@ Improvements in the tomographic reconstruction graphical user interface:
 - Normalization by flat and dark images can be disabled explicitly and
   separately, which is now supported in the underlying reconstruction
   scripts.
+
+- The energy bands tab can now produce multiple output bands in one
+  pass, and supports different aggregation methods via the new
+  algorithm :ref:`ImggAggregateWavelengths
+  <algm-ImggAggregateWavelengths>`.
 
 Full list of `diffraction <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Diffraction%22>`_
 and

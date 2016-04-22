@@ -415,6 +415,14 @@ public:
   virtual void fix(size_t i) = 0;
   /// Restores a declared parameter i to the active status
   virtual void unfix(size_t i) = 0;
+  /// Fix a parameter
+  void fixParameter(const std::string &name);
+  /// Free a parameter
+  void unfixParameter(const std::string &name);
+  /// Fix all parameters
+  void fixAll();
+  /// Free all parameters
+  void unfixAll();
 
   /// Return parameter index from a parameter reference. Usefull for constraints
   /// and ties in composite functions
@@ -493,6 +501,8 @@ public:
 
   /// Set up the function for a fit.
   virtual void setUpForFit() = 0;
+  /// Get number of values for a given domain.
+  virtual size_t getValuesSize(const FunctionDomain &domain) const;
 
   /// Calculate numerical derivatives
   void calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobian);
