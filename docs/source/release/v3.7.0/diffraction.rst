@@ -13,6 +13,9 @@ Crystal Improvements
 - 5 detectors added to the MANDI instrument geometry
 - :ref:`LoadCIF <algm-LoadCIF>` can now also load structures where only anisotropic displacement parameters are given,
   which are converted to equivalent isotropic parameters.
+- :ref:`SaveHKL <algm-SaveHKL>` has option to write the same output as anvred3.py including direction cosines.
+- :ref:`LoadHKL <algm-LoadHKL>` reads hkl output that includes direction cosines.
+- :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` has DetCal information sorted by detector numbers
 
 Engineering Diffraction
 -----------------------
@@ -50,6 +53,9 @@ Imaging
 
 - The new algorithm :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>`
   aggregates stacks of images from wavelength dependent data.
+
+- Images loaded as Mantid workspaces can now be saved into FITS files
+  using the algorithm :ref:`SaveFITS <algm-SaveFITS>`.
 
 Improvements in the tomographic reconstruction graphical user interface:
 

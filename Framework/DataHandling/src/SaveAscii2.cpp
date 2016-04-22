@@ -390,16 +390,14 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
  */
 std::vector<std::string>
 SaveAscii2::stringListToVector(std::string &inputString) {
-  std::vector<std::string> stringVector;
   const std::vector<std::string> validMetaData{"spectrumnumber", "q", "angle"};
   boost::to_lower(inputString);
-  stringVector =
+  auto stringVector =
       Kernel::VectorHelper::splitStringIntoVector<std::string>(inputString);
-  for (auto iter = stringVector.begin(); iter != stringVector.end(); ++iter) {
-
-    if (std::find(validMetaData.begin(), validMetaData.end(), *iter) ==
+  for (const auto &input : stringVector) {
+    if (std::find(validMetaData.begin(), validMetaData.end(), input) ==
         validMetaData.end()) {
-      throw std::runtime_error(*iter + " is not recognised as a possible input "
+      throw std::runtime_error(input + " is not recognised as a possible input "
                                        "for SpectrumMetaData.\n Valid inputs "
                                        "are: SpectrumNumber, Q, Angle.");
     }
