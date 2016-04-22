@@ -458,7 +458,7 @@ set ( TEST_FILES
 	SaveDetectorsGroupingTest.h
 	SaveDiffCalTest.h
 	SaveDspacemapTest.h
-	SaveFITS.h
+	SaveFITSTest.h
 	SaveFocussedXYETest.h
 	SaveFullprofResolutionTest.h
 	SaveGSASInstrumentFileTest.h
