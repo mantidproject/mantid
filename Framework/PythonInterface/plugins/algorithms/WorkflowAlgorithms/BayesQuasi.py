@@ -134,9 +134,10 @@ class BayesQuasi(PythonAlgorithm):
 
     #pylint: disable=too-many-locals,too-many-statements
     def PyExec(self):
-        #from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
 
-        run_f2py_compatibility_test()
+        # Check for platform support
+        if not is_supported_f2py_platform():
+            raise RuntimeError("This algorithm can only be run on valid platforms. please view the algorithm documentation to see what platforms are currently supported")
 
         from IndirectBayes import (CalcErange, GetXYE, ReadNormFile,
                                    ReadWidthFile, QLAddSampleLogs, C2Fw,
@@ -400,6 +401,6 @@ class BayesQuasi(PythonAlgorithm):
             self.setProperty('OutputWorkspaceProb', probWS)
 
 
-if is_supported_f2py_platform():
-    # Register algorithm with Mantid
-    AlgorithmFactory.subscribe(BayesQuasi)
+
+# Register algorithm with Mantid
+AlgorithmFactory.subscribe(BayesQuasi)
