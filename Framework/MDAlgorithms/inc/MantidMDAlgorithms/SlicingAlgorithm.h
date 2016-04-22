@@ -164,6 +164,8 @@ private:
   Mantid::Geometry::MDFrame_uptr
   extractMDFrameForNonAxisAligned(std::vector<size_t> indicesWithProjection,
                                   std::string units) const;
+  void setTargetUnits(Mantid::Geometry::MDFrame_uptr &frame,
+                      const std::string &units) const;
 };
 
 } // namespace DataObjects
