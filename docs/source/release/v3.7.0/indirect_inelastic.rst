@@ -61,6 +61,9 @@ Improvements
 - The file OSIRIS_GSS_Parameters.prm which describes OSIRIS in the .prm, format has been added to the instrument directory. This file can
     be used together with .gss files from OSIRIS diffraction.
 
+- :ref:`OSIRISDiffractionReduction <algm-OSIRISDiffractionReduction>` has an additional DRange added for conversion from time regime.
+
+
 Bugfixes
 --------
 

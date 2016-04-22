@@ -17,14 +17,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
 
-class SaveMD2Tester : public SaveMD2 {
-public:
-  void saveExperimentInfos(::NeXus::File *const file,
-                           IMDEventWorkspace_const_sptr ws) {
-    this->saveExperimentInfos(file, ws);
-  }
-};
-
 /** Note: See the LoadMDTest class
  * for a more thorough test that does
  * a round-trip.

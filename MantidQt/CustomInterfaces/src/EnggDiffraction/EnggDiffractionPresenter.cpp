@@ -560,6 +560,7 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
   }
 
   // run the algorithm EnggFitPeaks with workspace loaded above
+  // requires unit in Time of Flight
   auto enggFitPeaks =
       Mantid::API::AlgorithmManager::Instance().createUnmanaged("EnggFitPeaks");
   const std::string FocusedFitPeaksTableName =
@@ -626,6 +627,7 @@ void EnggDiffractionPresenter::runFittingAlgs(
   std::string endX = "";
 
   if (rowCount > size_t(0)) {
+
     for (size_t i = 0; i < rowCount; i++) {
 
       // get the functionStrFactory to generate the string for function
@@ -637,7 +639,9 @@ void EnggDiffractionPresenter::runFittingAlgs(
 
       g_log.debug() << "startX: " + startX + " . endX: " + endX << std::endl;
 
-      current_peak_out_WS = "engggui_fitting_single_peaks" + std::to_string(i);
+      current_peak_out_WS =
+          "__engggui_fitting_single_peaks" + std::to_string(i);
+      std::string current_peak_cloned_WS;
 
       // run EvaluateFunction algorithm with focused workspace to produce
       // the correct fit function
@@ -654,29 +658,31 @@ void EnggDiffractionPresenter::runFittingAlgs(
 
       // if the first peak
       if (i == size_t(0)) {
-        auto renameWs =
-            Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-                "RenameWorkspace");
-        g_log.notice() << "EvaluateFunction algorithm has started" << std::endl;
-        try {
-          renameWs->initialize();
 
-          renameWs->setProperty("InputWorkspace",
-                                "engggui_fitting_single_peaks0");
-          renameWs->setProperty("OutputWorkspace", single_peak_out_WS);
-          renameWs->execute();
-        } catch (std::runtime_error &re) {
-          g_log.error() << "Could not run the algorithm EvaluateFunction, "
-                           "Error description: " +
-                               static_cast<std::string>(re.what())
-                        << std::endl;
-        }
+        // create a workspace clone of bank focus file
+        // this will import all information of the previous file
+        runCloneWorkspaceAlg(FocusedWSName, single_peak_out_WS);
+
+        setDataToClonedWS(current_peak_out_WS, single_peak_out_WS);
+
       } else {
+        current_peak_cloned_WS =
+            "__engggui_fitting_cloned_peaks" + std::to_string(i);
+
+        runCloneWorkspaceAlg(FocusedWSName, current_peak_cloned_WS);
+
+        setDataToClonedWS(current_peak_out_WS, current_peak_cloned_WS);
+
         // append all peaks in to single workspace & remove
-        runAppendSpectraAlg(single_peak_out_WS, current_peak_out_WS);
+        runAppendSpectraAlg(single_peak_out_WS, current_peak_cloned_WS);
         ADS.remove(current_peak_out_WS);
+        ADS.remove(current_peak_cloned_WS);
       }
     }
+
+    // convert units for both workspaces to dSpacing from ToF
+    runConvetUnitsAlg(single_peak_out_WS);
+    runConvetUnitsAlg(FocusedWSName);
   }
 
   m_fittingFinishedOK = true;
@@ -786,6 +792,54 @@ void EnggDiffractionPresenter::runRebinToWorkspaceAlg(
                          static_cast<std::string>(re.what())
                   << std::endl;
   }
+}
+
+void EnggDiffractionPresenter::runConvetUnitsAlg(std::string workspaceName) {
+
+  auto ConvertUnits =
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged("ConvertUnits");
+  try {
+    ConvertUnits->initialize();
+    ConvertUnits->setProperty("InputWorkspace", workspaceName);
+    ConvertUnits->setProperty("OutputWorkspace", workspaceName);
+    std::string targetUnit = "dSpacing";
+    ConvertUnits->setProperty("Target", targetUnit);
+    ConvertUnits->setPropertyValue("EMode", "Elastic");
+    ConvertUnits->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Could not run the algorithm ConvertUnits, "
+                     "Error description: " +
+                         static_cast<std::string>(re.what())
+                  << std::endl;
+  }
+}
+
+void EnggDiffractionPresenter::runCloneWorkspaceAlg(
+    std::string inputWorkspace, std::string outputWorkspace) {
+
+  auto cloneWorkspace =
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+          "CloneWorkspace");
+  try {
+    cloneWorkspace->initialize();
+    cloneWorkspace->setProperty("InputWorkspace", inputWorkspace);
+    cloneWorkspace->setProperty("OutputWorkspace", outputWorkspace);
+    cloneWorkspace->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Could not run the algorithm CreateWorkspace, "
+                     "Error description: " +
+                         static_cast<std::string>(re.what())
+                  << std::endl;
+  }
+}
+
+void EnggDiffractionPresenter::setDataToClonedWS(std::string current_WS,
+                                                 std::string cloned_WS) {
+  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+  auto currentPeakWS = ADS.retrieveWS<MatrixWorkspace>(current_WS);
+  auto currentClonedWS = ADS.retrieveWS<MatrixWorkspace>(cloned_WS);
+  currentClonedWS->getSpectrum(0)
+      ->setData(currentPeakWS->readY(0), currentPeakWS->readE(0));
 }
 
 void EnggDiffractionPresenter::plotFitPeaksCurves() {

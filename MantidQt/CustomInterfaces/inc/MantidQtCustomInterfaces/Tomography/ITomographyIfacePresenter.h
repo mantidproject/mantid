@@ -9,7 +9,7 @@ Interface for what the presenter of the tomography GUI needs to
 implement. Here the term presenter is used as in the MVP
 (Model-View-Presenter) pattern. The (passive) view will use this.
 
-Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014-2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -52,6 +52,7 @@ public:
     CancelJobFromTable,    ///< cancel one job from the list
     VisualizeJobFromTable, ///< open visualization window for one job
     ViewImg,               ///< user wants to view an image (2D)
+    AggregateEnergyBands,  ///< run aggregate bands (in the background)
     LogMsg,                ///< need to send a message to the Mantid log system
     ShutDown               ///< closing the interface
   };
