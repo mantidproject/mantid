@@ -55,7 +55,7 @@ class PearlPowderDiffractionScriptTest(stresstesting.MantidStressTest):
         pearl_routines.PEARL_setdatadir(current_directory)
 
         # setting calibration files directory
-        pearl_routines.pearl_initial_dir(DIRS[0] + "/PEARL/")
+        pearl_routines.pearl_initial_dir(DIRS[0] + "/PEARL/Calibration/")
         pearl_routines.PEARL_setattenfile(DIRS[0] + "/PEARL/Attentuation/PRL112_DC25_10MM_FF.OUT")
 
         # setting data output folder
