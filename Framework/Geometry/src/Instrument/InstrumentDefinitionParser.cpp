@@ -2459,24 +2459,23 @@ void InstrumentDefinitionParser::createNeutronicInstrument() {
   m_instrument->setPhysicalInstrument(physical);
 
   // Now we manipulate the original instrument (m_instrument) to hold
-  // neutronic
-  // positions
-  std::map<IComponent *, Poco::XML::Element *>::const_iterator it;
-  for (it = m_neutronicPos.begin(); it != m_neutronicPos.end(); ++it) {
-    if (it->second) {
-      setLocation(it->first, it->second, m_angleConvertConst, m_deltaOffsets);
+  // neutronic positions
+  for (const auto &component : m_neutronicPos) {
+    if (component.second) {
+      setLocation(component.first, component.second, m_angleConvertConst,
+                  m_deltaOffsets);
       // TODO: Do we need to deal with 'facing'???
 
       // Check for a 'type' attribute, indicating that we want to set the
       // neutronic shape
-      if (it->second->hasAttribute("type") &&
-          dynamic_cast<ObjComponent *>(it->first)) {
-        const Poco::XML::XMLString shapeName = it->second->getAttribute("type");
-        std::map<std::string, Object_sptr>::const_iterator shapeIt =
-            mapTypeNameToShape.find(shapeName);
+      if (component.second->hasAttribute("type") &&
+          dynamic_cast<ObjComponent *>(component.first)) {
+        const Poco::XML::XMLString shapeName =
+            component.second->getAttribute("type");
+        auto shapeIt = mapTypeNameToShape.find(shapeName);
         if (shapeIt != mapTypeNameToShape.end()) {
           // Change the shape on the current component to the one requested
-          auto objCmpt = dynamic_cast<ObjComponent *>(it->first);
+          auto objCmpt = dynamic_cast<ObjComponent *>(component.first);
           if (objCmpt)
             objCmpt->setShape(shapeIt->second);
         } else {
@@ -2488,7 +2487,7 @@ void InstrumentDefinitionParser::createNeutronicInstrument() {
            // neutronic position
     {
       // This should only happen for detectors
-      Detector *det = dynamic_cast<Detector *>(it->first);
+      Detector *det = dynamic_cast<Detector *>(component.first);
       if (det)
         m_instrument->removeDetector(det);
     }
