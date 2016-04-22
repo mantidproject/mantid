@@ -35,6 +35,8 @@ with an integer value of ``2`` and also a
 ``definition`` item with string value ``"muonTD"`` or ``"pulsedTD"``,
 else it will be identified as version 1.
 
+.. _`Version 1 only`:
+
 The following properties apply only to Version 1:
 
 * AutoGroup
@@ -144,6 +146,8 @@ file it will call the previous version of the algorithm to perform the
 task.
 
 See :ref:`algm-LoadMuonNexus-v1` for more details about version 1.
+
+Some algorithm properties apply to `Version 1 only`_.
 
 Usage
 -----
