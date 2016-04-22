@@ -51,6 +51,11 @@ Kernel::UnitLabel HKL::getUnitLabel() const { return m_unit->getUnitLabel(); }
 
 const Kernel::MDUnit &HKL::getMDUnit() const { return *m_unit; }
 
+bool HKL::setMDUnit(const Mantid::Kernel::MDUnit &newUnit) {
+  m_unit = std::unique_ptr<Kernel::MDUnit>(newUnit.clone());
+  return true;
+}
+
 bool HKL::canConvertTo(const Kernel::MDUnit &otherUnit) const {
   return this->m_unit->canConvertTo(otherUnit);
 }

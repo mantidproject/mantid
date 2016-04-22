@@ -255,7 +255,7 @@ DateAndTime EventWorkspace::getTimeAtSampleMin(double tofOffset) const {
   auto instrument = this->getInstrument();
   auto sample = instrument->getSample();
   auto source = instrument->getSource();
-  const double L1 = sample->getDistance(*source.get());
+  const double L1 = sample->getDistance(*source);
 
   // set to crazy values to start
   Mantid::Kernel::DateAndTime tMin = DateAndTime::maximum();
@@ -263,8 +263,7 @@ DateAndTime EventWorkspace::getTimeAtSampleMin(double tofOffset) const {
   DateAndTime temp;
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
        workspaceIndex++) {
-    const double L2 =
-        this->getDetector(workspaceIndex)->getDistance(*sample.get());
+    const double L2 = this->getDetector(workspaceIndex)->getDistance(*sample);
     const double tofFactor = L1 / (L1 + L2);
 
     const EventList &evList = this->getEventList(workspaceIndex);
@@ -284,7 +283,7 @@ DateAndTime EventWorkspace::getTimeAtSampleMax(double tofOffset) const {
   auto instrument = this->getInstrument();
   auto sample = instrument->getSample();
   auto source = instrument->getSource();
-  const double L1 = sample->getDistance(*source.get());
+  const double L1 = sample->getDistance(*source);
 
   // set to crazy values to start
   Mantid::Kernel::DateAndTime tMax = DateAndTime::minimum();
@@ -292,8 +291,7 @@ DateAndTime EventWorkspace::getTimeAtSampleMax(double tofOffset) const {
   DateAndTime temp;
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
        workspaceIndex++) {
-    const double L2 =
-        this->getDetector(workspaceIndex)->getDistance(*sample.get());
+    const double L2 = this->getDetector(workspaceIndex)->getDistance(*sample);
     const double tofFactor = L1 / (L1 + L2);
 
     const EventList &evList = this->getEventList(workspaceIndex);

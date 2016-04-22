@@ -31,9 +31,17 @@ MinMax getDimensionExtents(IMDEventWorkspace_sptr ws, size_t index) {
   return std::make_pair(dim->getMinimum(), dim->getMaximum());
 }
 
+std::string numToStringWithPrecision(const double num) {
+  std::stringstream s;
+  s.precision(2);
+  s.setf(std::ios::fixed, std::ios::floatfield);
+  s << num;
+  return s.str();
+}
+
 DblMatrix scaleProjection(const DblMatrix &inMatrix,
                           const std::vector<std::string> &inUnits,
-                          const std::vector<std::string> &outUnits,
+                          std::vector<std::string> &outUnits,
                           IMDEventWorkspace_sptr inWS) {
   DblMatrix ret(inMatrix);
   // Check if we actually need to do anything
@@ -44,6 +52,7 @@ DblMatrix scaleProjection(const DblMatrix &inMatrix,
     throw std::runtime_error(
         "scaleProjection given different quantity of input and output units");
 
+  assert(inWS->getNumExperimentInfo() > 0);
   const OrientedLattice &orientedLattice =
       inWS->getExperimentInfo(0)->sample().getOrientedLattice();
 
@@ -56,6 +65,7 @@ DblMatrix scaleProjection(const DblMatrix &inMatrix,
       continue;
     else if (inUnits[i] == Mantid::MDAlgorithms::CutMD::InvAngstromSymbol) {
       // inv angstroms to rlu
+      outUnits[i] = "in " + numToStringWithPrecision(dStar) + " A^-1";
       for (size_t j = 0; j < numDims; ++j)
         ret[i][j] *= dStar;
     } else {
@@ -173,12 +183,7 @@ std::vector<std::string> labelProjection(const DblMatrix &projection) {
       else if (in == 0)
         labels[j] = "0";
       else {
-        // We have to be explicit about precision, so lexical cast won't work
-        std::stringstream s;
-        s.precision(2);
-        s.setf(std::ios::fixed, std::ios::floatfield);
-        s << "'" << in << replacements[i] << "'";
-        labels[j] = s.str();
+        labels[j] = "'" + numToStringWithPrecision(in) + replacements[i] + "'";
       }
     }
     ret[i] = "[" + boost::algorithm::join(labels, ", ") + "]";
@@ -186,18 +191,23 @@ std::vector<std::string> labelProjection(const DblMatrix &projection) {
   return ret;
 }
 
+} // anonymous namespace
+
+namespace Mantid {
+namespace MDAlgorithms {
+
 /**
 Determine the original q units. Assumes first 3 dimensions by index are r,l,d
 @param inws : Input workspace to extract dimension info from
 @param logger : logging object
 @return vector of markers
 */
-std::vector<std::string> findOriginalQUnits(IMDWorkspace const *const inws,
+std::vector<std::string> findOriginalQUnits(IMDWorkspace_const_sptr inws,
                                             Mantid::Kernel::Logger &logger) {
   std::vector<std::string> unitMarkers(3);
   for (size_t i = 0; i < inws->getNumDims() && i < 3; ++i) {
     auto units = inws->getDimension(i)->getUnits();
-    const boost::regex re("A\\^-1", boost::regex::icase);
+    const boost::regex re("(Angstrom\\^-1)|(A\\^-1)", boost::regex::icase);
     // Does the unit label look like it's in Angstroms?
     std::string unitMarker;
     if (boost::regex_match(units.ascii(), re)) {
@@ -212,11 +222,6 @@ std::vector<std::string> findOriginalQUnits(IMDWorkspace const *const inws,
   }
   return unitMarkers;
 }
-
-} // anonymous namespace
-
-namespace Mantid {
-namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CutMD)
@@ -304,7 +309,7 @@ void CutMD::exec() {
       getProperty("P1Bin"), getProperty("P2Bin"), getProperty("P3Bin"),
       getProperty("P4Bin"), getProperty("P5Bin")};
 
-  Workspace_sptr sliceWS; // output worskpace
+  Workspace_sptr sliceWS; // output workspace
 
   // Histogram workspaces can be sliced axis-aligned only.
   if (auto histInWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(inWS)) {
@@ -365,7 +370,7 @@ void CutMD::exec() {
         this->getProperty("InterpretQDimensionUnits");
     std::vector<std::string> originUnits;
     if (determineUnitsMethod == AutoMethod) {
-      originUnits = findOriginalQUnits(inWS.get(), g_log);
+      originUnits = findOriginalQUnits(inWS, g_log);
     } else if (determineUnitsMethod == RLUMethod) {
       originUnits = std::vector<std::string>(3, RLUSymbol);
     } else {
@@ -409,7 +414,7 @@ void CutMD::exec() {
     }
 
     // Make labels
-    std::vector<std::string> labels = labelProjection(scaledProjectionMatrix);
+    std::vector<std::string> labels = labelProjection(projectionMatrix);
 
     // Either run RebinMD or SliceMD
     const std::string cutAlgName = noPix ? "BinMD" : "SliceMD";

@@ -114,7 +114,7 @@ API::Column_sptr TableWorkspace::getColumn(const std::string &name) {
 API::Column_const_sptr
 TableWorkspace::getColumn(const std::string &name) const {
   for (const auto &column : m_columns) {
-    if (column.get()->name() == name) {
+    if (column->name() == name) {
       return column;
     }
   }
