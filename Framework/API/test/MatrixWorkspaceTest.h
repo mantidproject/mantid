@@ -1355,10 +1355,10 @@ private:
   Mantid::API::MantidImage_sptr createImage(size_t width, size_t height) {
     auto image =
         boost::make_shared<Mantid::API::MantidImage>(height, MantidVec(width));
-    double value = 1.0;
+    double startingValue = 1.0;
     for (auto &row : *image) {
-      std::iota(row.begin(), row.end(), value);
-      value += width;
+      std::iota(row.begin(), row.end(), startingValue);
+      startingValue += static_cast<double>(width);
     }
     return image;
   }
