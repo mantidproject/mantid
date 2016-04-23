@@ -184,9 +184,6 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         dos1d = Rebin2D(dos2d, [dq[0], dq[1]-dq[0], dq[1]], dosebin, True, True)
         dos1d.setYUnit(yunit)
 
-        # Renomalise energy bin size
-        dos1d = dos1d * dosebin[1]
-
         if absunits:
             print "Converting to states/energy"
             # cross-section information is given in barns, but data is in milibarns.
