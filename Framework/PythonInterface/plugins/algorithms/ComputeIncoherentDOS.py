@@ -172,12 +172,17 @@ class ComputeIncoherentDOS(PythonAlgorithm):
             yunit = 'DeltaE'
 
         # Outputs the calculated density of states to another workspace
-        dos2d = CreateWorkspace(qq, y, e, Nspec=len(en), VerticalAxisUnit=yunit, VerticalAxisValues=en,
-                                UnitX='MomentumTransfer', YUnitLabel=ylabel, WorkSpaceTitle='Density of States',
-                                ParentWorkspace=inws)
+        dos2d = CloneWorkspace(inws)
+        if iqq == 1:
+            dos2d = Transpose(dos2d)
+        for i in range(len(y)):
+            dos2d.setY(i, y[i,:])
+            dos2d.setE(i, e[i,:])
+        dos2d.setYUnitLabel(ylabel)
 
         # Make a 1D (energy dependent) cut
         dos1d = Rebin2D(dos2d, [dq[0], dq[1]-dq[0], dq[1]], dosebin, True, True)
+        dos1d.setYUnit(yunit)
 
         # Renomalise energy bin size
         dos1d = dos1d * dosebin[1]
