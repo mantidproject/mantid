@@ -19,9 +19,12 @@
 #include "PropertyManagerHelper.h"
 
 #include <cxxtest/TestSuite.h>
+
+#include <boost/make_shared.hpp>
+
 #include <algorithm>
 #include <functional>
-#include <boost/make_shared.hpp>
+#include <numeric>
 
 using std::size_t;
 using namespace Mantid::Kernel;
@@ -1350,16 +1353,14 @@ public:
 
 private:
   Mantid::API::MantidImage_sptr createImage(size_t width, size_t height) {
-    auto image = new Mantid::API::MantidImage(height);
+    auto image =
+        boost::make_shared<Mantid::API::MantidImage>(height, MantidVec(width));
     double value = 1.0;
-    for (auto row = image->begin(); row != image->end(); ++row) {
-      row->resize(width);
-      for (auto pixel = row->begin(); pixel != row->end();
-           ++pixel, value += 1.0) {
-        *pixel = value;
-      }
+    for (auto &row : *image) {
+      std::iota(row.begin(), row.end(), value);
+      value += width;
     }
-    return Mantid::API::MantidImage_sptr(image);
+    return image;
   }
 
   boost::shared_ptr<MatrixWorkspace> ws;
