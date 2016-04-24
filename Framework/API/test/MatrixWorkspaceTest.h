@@ -46,7 +46,7 @@ boost::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra,
       boost::make_shared<WorkspaceTester>();
   ws2->initialize(numSpectra, numBins, numBins);
 
-  Instrument_sptr inst(new Instrument("TestInstrument"));
+  auto inst = boost::make_shared<Instrument>("TestInstrument");
   ws2->setInstrument(inst);
   // We get a 1:1 map by default so the detector ID should match the spectrum
   // number
@@ -69,7 +69,9 @@ public:
   }
   static void destroySuite(MatrixWorkspaceTest *suite) { delete suite; }
 
-  MatrixWorkspaceTest() : ws(new WorkspaceTester) { ws->initialize(1, 1, 1); }
+  MatrixWorkspaceTest() : ws(boost::make_shared<WorkspaceTester>()) {
+    ws->initialize(1, 1, 1);
+  }
 
   void test_toString_Produces_Expected_Contents() {
     auto testWS = boost::make_shared<WorkspaceTester>();
@@ -1271,7 +1273,7 @@ public:
   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
-    MatrixWorkspace_sptr wsInput(new WorkspaceTester());
+    auto wsInput = boost::make_shared<WorkspaceTester>();
     PropertyManagerHelper manager;
     manager.declareProperty(wsName, wsInput, Direction::Input);
 
