@@ -166,7 +166,8 @@ TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
       m_processingJobsIDs(), m_currentComputeRes(""), m_currentReconTool(""),
       m_imgPath(""), m_logMsgs(), m_systemSettings(), m_toolsSettings(),
       m_settings(), m_settingsGroup("CustomInterfaces/Tomography"),
-      m_availPlugins(), m_currPlugins(), m_currentParamPath(),
+      m_settingsSubGroupEnergy(m_settingsGroup + "/EnergyBands"),
+      m_aggAlgRunner(), m_availPlugins(), m_currPlugins(), m_currentParamPath(),
       m_presenter(NULL) {
 
   // defaults from the tools
@@ -429,14 +430,6 @@ void TomographyIfaceViewQtGUI::doSetupSectionConvert() {
 
   connect(m_uiTabConvertFormats.pushButton_browse_output, SIGNAL(released()),
           this, SLOT(browseImgOutputConvertClicked()));
-}
-
-void TomographyIfaceViewQtGUI::doSetupSectionEnergy() {
-  connect(m_uiTabEnergy.pushButton_browse_input, SIGNAL(released()), this,
-          SLOT(browseEnergyInputClicked()));
-
-  connect(m_uiTabEnergy.pushButton_browse_input, SIGNAL(released()), this,
-          SLOT(browseEnergyOutputClicked()));
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionSystemSettings() {
@@ -829,6 +822,8 @@ void TomographyIfaceViewQtGUI::readSettings() {
 
   restoreGeometry(qs.value("interface-win-geometry").toByteArray());
 
+  readSettingsEnergy();
+
   qs.endGroup();
 }
 
@@ -929,6 +924,9 @@ QDataStream &operator<<(QDataStream &stream, TomoPathsConfig const &cfg) {
 void TomographyIfaceViewQtGUI::saveSettings() const {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
+
+  saveSettingsEnergy();
+
   qs.setValue("on-close-ask-for-confirmation",
               m_settings.onCloseAskForConfirmation);
   qs.setValue("use-keep-alive", m_settings.useKeepAlive);
@@ -2018,14 +2016,6 @@ void TomographyIfaceViewQtGUI::browseImgOutputConvertClicked() {
   checkUserBrowseDir(m_uiTabConvertFormats.lineEdit_output);
   // m_pathsConfig.updatePathDarks(str, );
   // m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
-}
-
-void TomographyIfaceViewQtGUI::browseEnergyInputClicked() {
-  checkUserBrowseDir(m_uiTabEnergy.lineEdit_input_path);
-}
-
-void TomographyIfaceViewQtGUI::browseEnergyOutputClicked() {
-  checkUserBrowseDir(m_uiTabEnergy.lineEdit_output_path);
 }
 
 /**

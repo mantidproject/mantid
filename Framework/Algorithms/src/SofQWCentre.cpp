@@ -106,7 +106,7 @@ void SofQWCentre::exec() {
   std::vector<specnum_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
 
-  m_EmodeProperties.initCachedValues(inputWorkspace, this);
+  m_EmodeProperties.initCachedValues(*inputWorkspace, this);
   int emode = m_EmodeProperties.m_emode;
 
   // Get a pointer to the instrument contained in the workspace
@@ -145,7 +145,7 @@ void SofQWCentre::exec() {
       if (spectrumDet->isMonitor())
         continue;
 
-      const double efixed = m_EmodeProperties.getEFixed(spectrumDet);
+      const double efixed = m_EmodeProperties.getEFixed(*spectrumDet);
 
       // For inelastic scattering the simple relationship q=4*pi*sinTheta/lambda
       // does not hold. In order to

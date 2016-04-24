@@ -100,7 +100,7 @@ private:
   // initialise the interface
   void createTable();
   // Set a selected model (table workspace)
-  void setModel(std::string name);
+  void setModel(const std::string &name) override;
 
   // the presenter
   boost::shared_ptr<IReflTablePresenter> m_tablePresenter;

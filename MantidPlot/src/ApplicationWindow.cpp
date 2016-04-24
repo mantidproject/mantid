@@ -2792,6 +2792,10 @@ MultiLayer *ApplicationWindow::multilayerPlot(
   if (!autoscale2DPlots)
     ag->enableAutoscaling(false);
 
+  // Set graph title to the same as the table
+  if (auto mantidTable = dynamic_cast<MantidTable *>(w)) {
+    ag->setTitle(mantidTable->getWorkspaceName().c_str());
+  }
   QApplication::restoreOverrideCursor();
   return g;
 }
@@ -8178,7 +8182,7 @@ void ApplicationWindow::selectMultiPeak(MultiLayer *plot,
     return;
   }
 
-  if (dynamic_cast<Graph *>(plot->activeGraph())->isPiePlot()) {
+  if (plot->activeGraph()->isPiePlot()) {
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"), // Mantid
         tr("This functionality is not available for pie plots!"));
@@ -11960,10 +11964,7 @@ void ApplicationWindow::connectMultilayerPlot(MultiLayer *g) {
 void ApplicationWindow::connectTable(Table *w) {
   connect(w->table(), SIGNAL(itemSelectionChanged()), this,
           SLOT(customColumnActions()));
-  connect(w, SIGNAL(removedCol(const QString &)), this,
-          SLOT(removeCurves(const QString &)));
-  connect(w, SIGNAL(modifiedData(Table *, const QString &)), this,
-          SLOT(updateCurves(Table *, const QString &)));
+  setUpdateCurvesFromTable(w, true);
   connect(w, SIGNAL(optionsDialog()), this, SLOT(showColumnOptionsDialog()));
   connect(w, SIGNAL(colValuesDialog()), this, SLOT(showColumnValuesDialog()));
   connect(w, SIGNAL(showContextMenu(bool)), this,
@@ -11974,6 +11975,27 @@ void ApplicationWindow::connectTable(Table *w) {
           this, SLOT(newTable(const QString &, int, int, const QString &)));
 
   w->confirmClose(confirmCloseTable);
+}
+
+/**
+ * Connect or disconnect the auto-update of curves from a table
+ * @param table :: [input] Table to connect/disconnect signal from
+ * @param on :: [bool] True to turn auto-update on, false to turn off
+ */
+void ApplicationWindow::setUpdateCurvesFromTable(Table *table, bool on) {
+  if (table) { // If no table, nothing to do
+    if (on) {
+      connect(table, SIGNAL(removedCol(const QString &)), this,
+              SLOT(removeCurves(const QString &)));
+      connect(table, SIGNAL(modifiedData(Table *, const QString &)), this,
+              SLOT(updateCurves(Table *, const QString &)));
+    } else {
+      disconnect(table, SIGNAL(removedCol(const QString &)), this,
+                 SLOT(removeCurves(const QString &)));
+      disconnect(table, SIGNAL(modifiedData(Table *, const QString &)), this,
+                 SLOT(updateCurves(Table *, const QString &)));
+    }
+  }
 }
 
 void ApplicationWindow::setAppColors(const QColor &wc, const QColor &pc,

@@ -112,6 +112,15 @@ public:
 
   void runRebinToWorkspaceAlg(std::string workspaceName);
 
+  void runConvetUnitsAlg(std::string workspaceName);
+
+  void runCloneWorkspaceAlg(std::string inputWorkspace,
+	  std::string outputWorkspace);
+
+  void setDataToClonedWS(std::string inputWorkspace,
+	  std::string outputWorkspace);
+
+
 protected:
   void initialize();
 

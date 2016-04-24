@@ -1,6 +1,7 @@
 #pylint: disable=invalid-name
-from itertools import chain, ifilterfalse
-import string, os, re
+from itertools import ifilterfalse
+import os
+import re
 
 # Authors in Git that do not have a translation listed here or that have not
 # been blacklisted will cause the DOI script to fail.
@@ -183,7 +184,7 @@ def _clean_up_author_list(author_list):
     '''Apply translations and blacklist, and get rid of duplicates.
     '''
     # Double check that all names have no leading or trailing whitespace.
-    result = map(string.strip, author_list)
+    result = map(str.strip, author_list)
 
     # Remove any blacklisted names.
     result = set(ifilterfalse(_blacklist.__contains__, result))
@@ -222,21 +223,14 @@ def _authors_from_tag_info(tag_info):
     authors = subprocess.check_output(args).replace('"', '').split('\n')
     return _clean_up_author_list(authors)
 
-def find_tag(major, minor, patch):
-    '''Return the Git tag, if it actually exists.  Where the patch number is
-    zero, check for "v[major].[minor].[patch]" as well as "v[major].[minor]".
+def find_tag(version_str):
+    '''Return the Git tag, if it actually exists, for a given version".
     '''
-    suggested_tags = []
-    if patch == 0:
-        suggested_tags.append('v%d.%d' % (major, minor))
-    suggested_tags.append('v%d.%d.%d' % (major, minor, patch))
-
-    for tag in suggested_tags:
-        if tag in _get_all_git_tags():
-            return tag
-
-    raise Exception(
-        "Could not find the following tag(s): " + str(suggested_tags))
+    tag_title = 'v' + version_str
+    if tag_title in _get_all_git_tags():
+        return tag_title
+    else:
+        raise RuntimeError("Cannot find expected git tag '{0}'".format(tag_title))
 
 def get_previous_tag(tag):
     '''Given an existing git tag, will return the tag that is found before it.
@@ -247,31 +241,40 @@ def get_previous_tag(tag):
 
     return all_tags[all_tags.index(tag) - 1]
 
-def get_version_string(major, minor, patch):
+def get_major_minor_patch(version_str):
+    '''Return the major, minor & patch revision numbers as integers
+    '''
+    version_components = version_str.split('.')
+    if len(version_components) != 3:
+        raise RuntimeError("Invalid format for version string. Expected X.Y.Z")
+    return map(int, version_components)
+
+def get_shortened_version_string(version_str):
     '''We use the convention whereby the patch number is ignored if it is zero,
     i.e. "3.0.0" becomes "3.0".
     '''
+    major, minor, patch = get_major_minor_patch(version_str)
     if patch == 0:
-        return '%d.%d' % (major, minor)
+        return '{0}.{1}'.format(major, minor)
     else:
-        return '%d.%d.%d' % (major, minor, patch)
+        return '{0}.{1}.{2}'.format(major, minor, patch)
 
 def get_version_from_git_tag(tag):
     '''Given a tag from Git, extract the major, minor and patch version
     numbers.
     '''
-    short_regexp = '^v(\d+).(\d+)$'
-    long_regexp  = '^v(\d+).(\d+).(\d+)$'
+    short_regexp = r'^v(\d+).(\d+)$'
+    long_regexp  = r'^v(\d+).(\d+).(\d+)$'
 
     if re.match(short_regexp, tag):
-        a, b = [int(x) for x in re.findall('\d+', tag)]
+        a, b = [int(x) for x in re.findall(r'\d+', tag)]
         c = 0
     elif re.match(long_regexp, tag):
-        a, b, c = [int(x) for x in re.findall('\d+', tag)]
+        a, b, c = [int(x) for x in re.findall(r'\d+', tag)]
     else:
-        raise Exception(
+        raise RuntimeError(
             "Unable to parse version information from \"" + tag + "\"")
-    return a, b, c
+    return '{0}.{1}.{2}'.format(a, b, c)
 
 def authors_up_to_git_tag(tag):
     '''Get a list of all authors who have made a commit, up to and including

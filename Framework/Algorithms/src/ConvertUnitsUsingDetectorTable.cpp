@@ -226,7 +226,7 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::setupOutputWorkspace(
   // If input and output workspaces are NOT the same, create a new workspace for
   // the output
   if (outputWS != inputWS) {
-    outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
+    outputWS = inputWS->clone();
   }
 
   if (!m_inputEvents && m_distribution) {
@@ -316,7 +316,7 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
   // PARALLEL_FOR1(outputWS)
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
 
-    // Lets find what row this spectrum ID appears in our detector table.
+    // Lets find what row this spectrum Number appears in our detector table.
 
     // PARALLEL_START_INTERUPT_REGION
 
@@ -327,17 +327,17 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
       double deg2rad = M_PI / 180.;
 
       auto det = outputWS->getDetector(i);
-      int specid = det->getID();
+      int specNo = det->getID();
 
       // int spectraNumber = static_cast<int>(spectraColumn->toDouble(i));
       // wsid = outputWS->getIndexFromSpectrumNumber(spectraNumber);
-      g_log.debug() << "###### Spectra #" << specid
+      g_log.debug() << "###### Spectra #" << specNo
                     << " ==> Workspace ID:" << wsid << std::endl;
 
       // Now we need to find the row that contains this spectrum
       std::vector<int>::iterator specIter;
 
-      specIter = std::find(spectraColumn.begin(), spectraColumn.end(), specid);
+      specIter = std::find(spectraColumn.begin(), spectraColumn.end(), specNo);
       if (specIter != spectraColumn.end()) {
         size_t detectorRow = std::distance(spectraColumn.begin(), specIter);
         double l1 = l1Column[detectorRow];
@@ -346,7 +346,7 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
         double efixed = efixedColumn[detectorRow];
         int emode = emodeColumn[detectorRow];
 
-        g_log.debug() << "specId from detector table = "
+        g_log.debug() << "specNo from detector table = "
                       << spectraColumn[detectorRow] << std::endl;
 
         // l1 = l1Column->toDouble(detectorRow);
@@ -355,7 +355,7 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
         // efixed = efixedColumn->toDouble(detectorRow);
         // emode = static_cast<int>(emodeColumn->toDouble(detectorRow));
 
-        g_log.debug() << "###### Spectra #" << specid
+        g_log.debug() << "###### Spectra #" << specNo
                       << " ==> Det Table Row:" << detectorRow << std::endl;
 
         g_log.debug() << "\tL1=" << l1 << ",L2=" << l2 << ",TT=" << twoTheta
@@ -384,7 +384,7 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
 
       } else {
         // Not found
-        g_log.debug() << "Spectrum " << specid << " not found!" << std::endl;
+        g_log.debug() << "Spectrum " << specNo << " not found!" << std::endl;
         failedDetectorCount++;
         outputWS->maskWorkspaceIndex(wsid);
       }
