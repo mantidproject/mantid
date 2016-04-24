@@ -1273,7 +1273,7 @@ public:
   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
-    auto wsInput = boost::make_shared<WorkspaceTester>();
+    MatrixWorkspace_sptr wsInput = boost::make_shared<WorkspaceTester>();
     PropertyManagerHelper manager;
     manager.declareProperty(wsName, wsInput, Direction::Input);
 
