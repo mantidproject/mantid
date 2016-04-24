@@ -1,4 +1,6 @@
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtCustomInterfaces/Tomography/IImagingFormatsConvertView.h"
 #include "MantidQtCustomInterfaces/Tomography/ImggFormats.h"
 #include "MantidQtCustomInterfaces/Tomography/ImagingFormatsConvertPresenter.h"
@@ -181,15 +183,44 @@ void ImagingFormatsConvertPresenter::convert(
 
 Mantid::API::MatrixWorkspace_sptr
 ImagingFormatsConvertPresenter::loadFITS(const std::string &inputName) const {
-  Mantid::API::MatrixWorkspace_sptr img;
-  // child LoadFITS 'LoadImgAsRect'
-  return img;
+  // Just run LoadFITS
+  auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadFITS");
+  alg->initialize();
+  alg->setProperty("Filename", inputName);
+  const std::string wksName = "__fits_img_to_convert";
+  alg->setProperty("OutputWorkspace", wksName);
+  alg->setProperty("LoadAsRectImg", true);
+  alg->execute();
+
+  if (!alg->isExecuted()) {
+    throw std::runtime_error("Failed to execute the algorithm "
+                             "LoadFITS to load the image file '" +
+                             inputName + "' in FITS format.");
+  }
+
+  Mantid::API::MatrixWorkspace_sptr imgWorkspace =
+      Mantid::API::AnalysisDataService::Instance()
+          .retrieveWS<Mantid::API::MatrixWorkspace>(wksName);
+
+  return imgWorkspace;
 }
 
 void ImagingFormatsConvertPresenter::saveFITS(
     Mantid::API::MatrixWorkspace_sptr image,
     const std::string &outputName) const {
-  // child SaveFITS
+  // Just run LoadFITS
+  // Just run LoadFITS
+  auto alg = Mantid::API::AlgorithmManager::Instance().create("SaveFITS");
+  alg->initialize();
+  alg->setProperty("InputWorkspace", image);
+  alg->setProperty("Filename", outputName);
+  alg->execute();
+
+  if (!alg->isExecuted()) {
+    throw std::runtime_error("Failed to execute the algorithm SaveFITS to save "
+                             "an image in FITS format into the file '" +
+                             outputName + ".");
+  }
 }
 
 } // namespace CustomInterfaces
