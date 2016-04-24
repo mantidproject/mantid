@@ -491,7 +491,7 @@ void GroupDetectors2::processFile(std::string fname,
 void GroupDetectors2::processXMLFile(std::string fname,
                                      API::MatrixWorkspace_const_sptr workspace,
                                      std::vector<int64_t> &unUsedSpec) {
-  // 1. Get maps for spectrum ID and detector ID
+  // 1. Get maps for spectrum No and detector ID
   spec2index_map specs2index;
   const SpectraAxis *axis =
       dynamic_cast<const SpectraAxis *>(workspace->getAxis(1));
@@ -542,7 +542,7 @@ void GroupDetectors2::processXMLFile(std::string fname,
     } // for index
   }   // for group
 
-  // 5. Spectrum IDs
+  // 5. Spectrum Nos
   std::map<int, std::vector<int>>::iterator pit;
   for (pit = mGroupSpectraMap.begin(); pit != mGroupSpectraMap.end(); ++pit) {
     int groupid = pit->first;
@@ -555,8 +555,8 @@ void GroupDetectors2::processXMLFile(std::string fname,
 
     std::vector<size_t> &wsindexes = sit->second;
 
-    for (auto specid : spectra) {
-      auto ind = specs2index.find(specid);
+    for (auto specNum : spectra) {
+      auto ind = specs2index.find(specNum);
       if (ind != specs2index.end()) {
         size_t wsid = ind->second;
         wsindexes.push_back(wsid);
@@ -564,7 +564,7 @@ void GroupDetectors2::processXMLFile(std::string fname,
           unUsedSpec[wsid] = (USED);
         }
       } else {
-        g_log.error() << "Spectrum with ID " << specid
+        g_log.error() << "Spectrum with ID " << specNum
                       << " is not found in instrument " << std::endl;
       }
     } // for index

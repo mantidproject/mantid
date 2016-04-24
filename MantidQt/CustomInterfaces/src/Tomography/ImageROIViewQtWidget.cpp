@@ -14,6 +14,7 @@ using namespace MantidQt::CustomInterfaces;
 #include <QMessageBox>
 #include <QPainter>
 #include <QSettings>
+#include <QTimer>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -50,23 +51,25 @@ void ImageROIViewQtWidget::changeSelectionState(
 void ImageROIViewQtWidget::showStack(const std::string & /*path*/) {
   // TODO:
   // a) load as proper stack of images workspace - this can only be done when
-  //    we have a firt working version of the "lean MD workspace". This method
+  //    we have a first working version of the "lean MD workspace". This method
   //    would then load into one workspace of such type.
   // b) load as workspace group - this is done in the overloaded method below
 
   // enableParamWidgets(true);
 }
 
-void ImageROIViewQtWidget::showStack(Mantid::API::WorkspaceGroup_sptr &wsg) {
+void ImageROIViewQtWidget::showStack(
+    const Mantid::API::WorkspaceGroup_sptr &wsg,
+    const Mantid::API::WorkspaceGroup_sptr &wsgFlats,
+    const Mantid::API::WorkspaceGroup_sptr &wsgDarks) {
   if (0 == wsg->size())
     return;
 
-  m_stack = wsg;
+  m_stackSamples = wsg;
+  m_stackFlats = wsgFlats;
+  m_stackDarks = wsgDarks;
 
-  m_ui.horizontalScrollBar_img_stack->setEnabled(true);
-  m_ui.horizontalScrollBar_img_stack->setMinimum(0);
-  m_ui.horizontalScrollBar_img_stack->setMaximum(
-      static_cast<int>(m_stack->size() - 1));
+  resetWidgetsOnNewStack();
 
   size_t width = 0, height = 0;
   try {
@@ -83,17 +86,20 @@ void ImageROIViewQtWidget::showStack(Mantid::API::WorkspaceGroup_sptr &wsg) {
                              QString::fromStdString(e.what()));
   }
 
-  showProjection(m_stack, 0);
+  showProjection(m_stackSamples, 0);
   initParamWidgets(width, height);
   refreshROIetAl();
   enableParamWidgets(true);
+  enableImageTypes(wsg && wsg->size() > 0, wsgFlats && wsgFlats->size() > 0,
+                   wsgDarks && wsgDarks->size() > 0);
 }
 
 void ImageROIViewQtWidget::showProjection(
     const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx) {
 
-  showProjectionImage(wsg, idx);
-  refreshROIetAl();
+  m_params.rotation = 0;
+  m_ui.comboBox_rotation->setCurrentIndex(0);
+  showProjectionImage(wsg, idx, 0);
 
   // give name, set up scroll/slider
   std::string name;
@@ -131,6 +137,16 @@ void ImageROIViewQtWidget::userError(const std::string &err,
                         QMessageBox::Ok);
 }
 
+void ImageROIViewQtWidget::enableActions(bool enable) {
+  m_ui.pushButton_browse_img->setEnabled(enable);
+  m_ui.pushButton_play->setEnabled(enable);
+  m_ui.comboBox_image_type->setEnabled(enable);
+  m_ui.comboBox_rotation->setEnabled(enable);
+  m_ui.groupBox_cor->setEnabled(enable);
+  m_ui.groupBox_roi->setEnabled(enable);
+  m_ui.groupBox_norm->setEnabled(enable);
+}
+
 std::string ImageROIViewQtWidget::askImgOrStackPath() {
   // get path
   QString fitsStr = QString("Supported formats: FITS, TIFF and PNG "
@@ -151,6 +167,27 @@ std::string ImageROIViewQtWidget::askImgOrStackPath() {
   }
 
   return path.toStdString();
+}
+
+void ImageROIViewQtWidget::enableImageTypes(bool enableSamples,
+                                            bool enableFlats,
+                                            bool enableDarks) {
+  QComboBox *itypes = m_ui.comboBox_image_type;
+  if (!itypes || 3 != itypes->count())
+    return;
+
+  std::vector<bool> enable = {enableSamples, enableFlats, enableDarks};
+  for (size_t idx = 0; idx < enable.size(); idx++) {
+    QVariant var;
+    if (!enable[idx]) {
+      var = 0;
+    } else {
+      var = 1 | 32;
+    }
+    // trick to display a combobox entry as a disabled/enabled row
+    QModelIndex modelIdx = itypes->model()->index(static_cast<int>(idx), 0);
+    itypes->model()->setData(modelIdx, var, Qt::UserRole - 1);
+  }
 }
 
 void ImageROIViewQtWidget::saveSettings() const {
@@ -193,12 +230,16 @@ void ImageROIViewQtWidget::initLayout() {
   sizes.push_back(100);
   m_ui.splitter_main_horiz->setSizes(sizes);
 
+  m_ui.comboBox_image_type->setCurrentIndex(0);
+  m_ui.comboBox_rotation->setCurrentIndex(0);
+
   sizes.clear();
   sizes.push_back(10);
   sizes.push_back(1000);
   m_ui.splitter_img_vertical->setSizes(sizes);
   m_ui.horizontalScrollBar_img_stack->setEnabled(false);
   m_ui.lineEdit_img_seq->setText("---");
+  m_ui.label_img_name->setText("none");
 
   enableParamWidgets(false);
 
@@ -237,9 +278,20 @@ void ImageROIViewQtWidget::setupConnections() {
   connect(m_ui.pushButton_norm_area_reset, SIGNAL(released()), this,
           SLOT(normAreaResetClicked()));
 
+  // "Play" the stack for quick visualization of input images
+  connect(m_ui.pushButton_play, SIGNAL(released()), this, SLOT(playClicked()));
+
   // image sequence scroll/slide:
   connect(m_ui.horizontalScrollBar_img_stack, SIGNAL(valueChanged(int)), this,
           SLOT(updateFromImagesSlider(int)));
+
+  // image rotation
+  connect(m_ui.comboBox_rotation, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(rotationUpdated(int)));
+
+  // image type
+  connect(m_ui.comboBox_image_type, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(imageTypeUpdated(int)));
 
   // parameter (points) widgets
   connect(m_ui.spinBox_cor_x, SIGNAL(valueChanged(int)), this,
@@ -264,6 +316,14 @@ void ImageROIViewQtWidget::setupConnections() {
           SLOT(valueUpdatedNormArea(int)));
   connect(m_ui.spinBox_norm_bottom_y, SIGNAL(valueChanged(int)), this,
           SLOT(valueUpdatedNormArea(int)));
+}
+
+void ImageROIViewQtWidget::resetWidgetsOnNewStack() {
+  m_ui.horizontalScrollBar_img_stack->setEnabled(true);
+  m_ui.horizontalScrollBar_img_stack->setMinimum(0);
+  m_ui.horizontalScrollBar_img_stack->setMaximum(
+      static_cast<int>(m_stackSamples->size() - 1));
+  m_ui.comboBox_rotation->setCurrentIndex(0);
 }
 
 void ImageROIViewQtWidget::valueUpdatedCoR(int) {
@@ -321,35 +381,12 @@ void ImageROIViewQtWidget::refreshROIetAl() {
   QPixmap toDisplay(*m_basePixmap.get());
   QPainter painter(&toDisplay);
 
-  // TODO: display settings / nicer symbol?
+  drawCenterCrossSymbol(painter, m_params.cor);
 
-  QPen penCoR(Qt::red);
-  painter.setPen(penCoR);
-  painter.drawLine(static_cast<int>(m_params.cor.X() - 5),
-                   static_cast<int>(m_params.cor.Y()),
-                   static_cast<int>(m_params.cor.X() + 5),
-                   static_cast<int>(m_params.cor.Y()));
-  painter.drawLine(static_cast<int>(m_params.cor.X()),
-                   static_cast<int>(m_params.cor.Y() - 5),
-                   static_cast<int>(m_params.cor.X()),
-                   static_cast<int>(m_params.cor.Y() + 5));
+  drawBoxROI(painter, m_params.roi.first, m_params.roi.second);
 
-  QPen penROI(Qt::green);
-  painter.setPen(penROI);
-  painter.drawRect(
-      static_cast<int>(m_params.roi.first.X()),
-      static_cast<int>(m_params.roi.first.Y()),
-      static_cast<int>(m_params.roi.second.X() - m_params.roi.first.X()),
-      static_cast<int>(m_params.roi.second.Y() - m_params.roi.first.Y()));
-
-  QPen penNA(Qt::yellow);
-  painter.setPen(penNA);
-  painter.drawRect(static_cast<int>(m_params.normalizationRegion.first.X()),
-                   static_cast<int>(m_params.normalizationRegion.first.Y()),
-                   static_cast<int>(m_params.normalizationRegion.second.X() -
-                                    m_params.normalizationRegion.first.X()),
-                   static_cast<int>(m_params.normalizationRegion.second.Y() -
-                                    m_params.normalizationRegion.first.Y()));
+  drawBoxNormalizationRegion(painter, m_params.normalizationRegion.first,
+                             m_params.normalizationRegion.second);
 
   m_ui.label_img->setPixmap(toDisplay);
 }
@@ -363,16 +400,8 @@ void ImageROIViewQtWidget::refreshCoR() {
 
   QPixmap toDisplay(*m_basePixmap.get());
   QPainter painter(&toDisplay);
-  QPen pen(Qt::red);
-  painter.setPen(pen);
-  painter.drawLine(static_cast<int>(m_params.cor.X() - 5),
-                   static_cast<int>(m_params.cor.Y()),
-                   static_cast<int>(m_params.cor.X() + 5),
-                   static_cast<int>(m_params.cor.Y()));
-  painter.drawLine(static_cast<int>(m_params.cor.X()),
-                   static_cast<int>(m_params.cor.Y() - 5),
-                   static_cast<int>(m_params.cor.X()),
-                   static_cast<int>(m_params.cor.Y() + 5));
+  drawCenterCrossSymbol(painter, m_params.cor);
+
   m_ui.label_img->setPixmap(toDisplay);
 }
 
@@ -387,13 +416,8 @@ void ImageROIViewQtWidget::refreshROI() {
   // QPixmap const *pm = m_ui.label_img->pixmap();
   QPixmap toDisplay(*m_basePixmap.get());
   QPainter painter(&toDisplay);
-  QPen pen(Qt::green);
-  painter.setPen(pen);
-  painter.drawRect(
-      static_cast<int>(m_params.roi.first.X()),
-      static_cast<int>(m_params.roi.first.Y()),
-      static_cast<int>(m_params.roi.second.X() - m_params.roi.first.X()),
-      static_cast<int>(m_params.roi.second.Y() - m_params.roi.first.Y()));
+  drawBoxROI(painter, m_params.roi.first, m_params.roi.second);
+
   m_ui.label_img->setPixmap(toDisplay);
 }
 
@@ -408,18 +432,51 @@ void ImageROIViewQtWidget::refreshNormArea() {
   // QPixmap const *pm = m_ui.label_img->pixmap();
   QPixmap toDisplay(*m_basePixmap.get());
   QPainter painter(&toDisplay);
-  QPen pen(Qt::yellow);
-  painter.setPen(pen);
-  painter.drawRect(static_cast<int>(m_params.normalizationRegion.first.X()),
-                   static_cast<int>(m_params.normalizationRegion.first.Y()),
-                   static_cast<int>(m_params.normalizationRegion.second.X() -
-                                    m_params.normalizationRegion.first.X()),
-                   static_cast<int>(m_params.normalizationRegion.second.Y() -
-                                    m_params.normalizationRegion.first.Y()));
+
+  drawBoxNormalizationRegion(painter, m_params.normalizationRegion.first,
+                             m_params.normalizationRegion.second);
+
   m_ui.label_img->setPixmap(toDisplay);
 }
 
+void ImageROIViewQtWidget::drawCenterCrossSymbol(QPainter &painter,
+                                                 Mantid::Kernel::V2D &center) {
+  // TODO: display settings / nicer symbol?
+
+  QPen penCoR(Qt::red);
+  painter.setPen(penCoR);
+  painter.drawLine(
+      static_cast<int>(center.X() - 5), static_cast<int>(center.Y()),
+      static_cast<int>(center.X() + 5), static_cast<int>(center.Y()));
+  painter.drawLine(
+      static_cast<int>(center.X()), static_cast<int>(center.Y() - 5),
+      static_cast<int>(center.X()), static_cast<int>(center.Y() + 5));
+}
+
+void ImageROIViewQtWidget::drawBoxROI(QPainter &painter,
+                                      Mantid::Kernel::V2D &first,
+                                      Mantid::Kernel::V2D &second) {
+  QPen penROI(Qt::green);
+  painter.setPen(penROI);
+  painter.drawRect(static_cast<int>(first.X()), static_cast<int>(first.Y()),
+                   static_cast<int>(second.X() - first.X()),
+                   static_cast<int>(second.Y() - first.Y()));
+}
+
+void ImageROIViewQtWidget::drawBoxNormalizationRegion(
+    QPainter &painter, Mantid::Kernel::V2D &first,
+    Mantid::Kernel::V2D &second) {
+  QPen penNA(Qt::yellow);
+  painter.setPen(penNA);
+  painter.drawRect(static_cast<int>(first.X()), static_cast<int>(first.Y()),
+                   static_cast<int>(second.X() - first.X()),
+                   static_cast<int>(second.Y() - first.Y()));
+}
+
 void ImageROIViewQtWidget::enableParamWidgets(bool enable) {
+  m_ui.comboBox_image_type->setEnabled(enable);
+  m_ui.comboBox_rotation->setEnabled(enable);
+
   m_ui.groupBox_cor->setEnabled(enable);
   m_ui.groupBox_roi->setEnabled(enable);
   m_ui.groupBox_norm->setEnabled(enable);
@@ -461,6 +518,13 @@ void ImageROIViewQtWidget::initParamWidgets(size_t maxWidth, size_t maxHeight) {
 }
 
 void ImageROIViewQtWidget::setParamWidgets(ImageStackPreParams &params) {
+  if (params.rotation > 0 && params.rotation <= 360) {
+    m_ui.comboBox_rotation->setCurrentIndex(
+        static_cast<int>(params.rotation / 90.0f) % 4);
+  } else {
+    m_ui.comboBox_rotation->setCurrentIndex(0);
+  }
+
   m_ui.spinBox_cor_x->setValue(static_cast<int>(params.cor.X()));
   m_ui.spinBox_cor_y->setValue(static_cast<int>(params.cor.Y()));
 
@@ -508,12 +572,53 @@ void ImageROIViewQtWidget::normAreaResetClicked() {
   refreshROIetAl();
 }
 
+void ImageROIViewQtWidget::playClicked() {
+  m_presenter->notify(IImageROIPresenter::PlayStartStop);
+}
+
+void ImageROIViewQtWidget::playStart() {
+  m_ui.pushButton_play->setText("Stop");
+  // start timer
+  m_playTimer = Mantid::Kernel::make_unique<QTimer>(this);
+  connect(m_playTimer.get(), SIGNAL(timeout()), this, SLOT(updatePlay()));
+  m_playTimer->start(133);
+  m_ui.pushButton_play->setEnabled(true);
+}
+
+void ImageROIViewQtWidget::playStop() {
+  // stop timer
+  m_playTimer->stop();
+  m_ui.pushButton_play->setText("Play");
+}
+
+void ImageROIViewQtWidget::updatePlay() {
+  // TODO: maybe change to sample? Not obvious what would be users'
+  // preference
+  int val = m_ui.horizontalScrollBar_img_stack->value();
+  ++val;
+  if (m_ui.horizontalScrollBar_img_stack->maximum() <= val) {
+    val = m_ui.horizontalScrollBar_img_stack->minimum();
+  }
+  m_ui.horizontalScrollBar_img_stack->setValue(val);
+  showProjectionImage(m_stackSamples, val, currentRotationAngle());
+}
+
 void ImageROIViewQtWidget::browseImgClicked() {
   m_presenter->notify(IImageROIPresenter::BrowseImgOrStack);
 }
 
 void ImageROIViewQtWidget::updateFromImagesSlider(int /* current */) {
   m_presenter->notify(IImageROIPresenter::UpdateImgIndex);
+}
+
+void ImageROIViewQtWidget::imageTypeUpdated(int /* idx */) {
+  m_presenter->notify(ImageROIPresenter::ChangeImageType);
+}
+
+void ImageROIViewQtWidget::rotationUpdated(int /* idx */) {
+  m_params.rotation =
+      static_cast<float>(m_ui.comboBox_rotation->currentIndex()) * 90.0f;
+  m_presenter->notify(ImageROIPresenter::ChangeRotation);
 }
 
 size_t ImageROIViewQtWidget::currentImgIndex() const {
@@ -524,68 +629,227 @@ void ImageROIViewQtWidget::updateImgWithIndex(size_t idx) {
   int max = m_ui.horizontalScrollBar_img_stack->maximum();
   int current = m_ui.horizontalScrollBar_img_stack->value();
 
-  showProjection(m_stack, idx);
   m_ui.lineEdit_img_seq->setText(
       QString::fromStdString(boost::lexical_cast<std::string>(current + 1) +
                              "/" + boost::lexical_cast<std::string>(max + 1)));
+
+  showProjectionImage(currentImageTypeStack(), idx, currentRotationAngle());
 }
 
 void ImageROIViewQtWidget::showProjectionImage(
-    const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx) {
+    const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx,
+    float rotationAngle) {
 
-  MatrixWorkspace_sptr ws;
+  size_t width, height;
+  std::string imgName;
+  Mantid::API::MatrixWorkspace_sptr ws;
   try {
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(idx));
-    if (!ws)
-      return;
-  } catch (std::exception &e) {
-    QMessageBox::warning(
-        this, "Cannot load image",
-        "There was a problem while trying to find the image data: " +
-            QString::fromStdString(e.what()));
+    checkNewProjectionImage(wsg, idx, width, height, ws, imgName);
+  } catch (std::runtime_error &rexc) {
+    QMessageBox::critical(this, "Cannot load image",
+                          "There was a problem while trying to "
+                          "find essential parameters of the image. Details: " +
+                              QString::fromStdString(rexc.what()));
+    return;
   }
 
-  const size_t MAXDIM = 2048 * 16;
-  size_t width;
+  m_ui.label_img_name->setText(QString::fromStdString(imgName));
+  // load / transfer image into a QImage, handling the rotation, width height
+  // consistently
+  QPixmap pixmap = transferWSImageToQPixmap(ws, width, height, rotationAngle);
+
+  m_ui.label_img->setPixmap(pixmap);
+  m_ui.label_img->show();
+  m_basePixmap.reset(new QPixmap(pixmap));
+
+  refreshROIetAl();
+}
+
+/**
+ * Paint an image from a workspace (MatrixWorkspace) into a
+ * QPixmap. The QPixmap can then be display by for example setting
+ * it into a QLabel widget.
+ *
+ * @param ws image workspace
+ *
+ * @param width width of the image in pixels
+ *
+ * @param height height of the image in pixels
+ *
+ * @param rotationAngle rotate the image by this angle with respect to the
+ *  original image in the workspace when displaying it
+ */
+QPixmap
+ImageROIViewQtWidget::transferWSImageToQPixmap(const MatrixWorkspace_sptr ws,
+                                               size_t width, size_t height,
+                                               float rotationAngle) {
+
+  // find min and max to scale pixel values
+  double min = std::numeric_limits<double>::max(),
+         max = std::numeric_limits<double>::min();
+  getPixelMinMax(ws, min, max);
+  if (max <= min) {
+    QMessageBox::warning(
+        this, "Empty image!",
+        "The image could be loaded but it contains "
+        "effectively no information, all pixels have the same value.");
+    // black picture
+    QPixmap pix(static_cast<int>(width), static_cast<int>(height));
+    pix.fill(QColor(0, 0, 0));
+    return pix;
+  }
+
+  QImage rawImg(QSize(static_cast<int>(width), static_cast<int>(height)),
+                QImage::Format_RGB32);
+  const double max_min = max - min;
+  const double scaleFactor = 255.0 / max_min;
+
+  for (size_t yi = 0; yi < width; ++yi) {
+    const auto &yvec = ws->readY(yi);
+    for (size_t xi = 0; xi < width; ++xi) {
+      const double &v = yvec[xi];
+      // color the range min-max in gray scale. To apply different color
+      // maps you'd need to use rawImg.setColorTable() or similar.
+      const int scaled = static_cast<int>(scaleFactor * (v - min));
+      QRgb vRgb = qRgb(scaled, scaled, scaled);
+
+      size_t rotX = 0, rotY = 0;
+      if (0 == rotationAngle) {
+        rotX = xi;
+        rotY = yi;
+      } else if (90 == rotationAngle) {
+        rotX = height - (yi + 1);
+        rotY = xi;
+      } else if (180 == rotationAngle) {
+        rotX = width - (xi + 1);
+        rotY = height - (yi + 1);
+      } else if (270 == rotationAngle) {
+        rotX = yi;
+        rotY = width - (xi + 1);
+      }
+      rawImg.setPixel(static_cast<int>(rotX), static_cast<int>(rotY), vRgb);
+    }
+  }
+
+  // paint image direct from QImage object
+  QPixmap pix = QPixmap::fromImage(rawImg);
+  // Alternative, drawing with a painter:
+  // QPixmap pix(static_cast<int>(width), static_cast<int>(height));
+  // QPainter painter;
+  // painter.begin(&pix);
+  // painter.drawImage(0, 0, rawImg);
+  // painter.end();
+
+  return pix;
+}
+
+/**
+ * Finds several parameters from an image in a stack (given the group
+ * of images and an index), checking for errors. This is meant to be
+ * used whenever a new image is going to be shown (for example when
+ * using the slider to go through a stack).
+ *
+ * @param wsg the group of images
+ * @param idx index of the image
+ * @param width width or number of columns (in pixels)
+ * @param height height or number of rows (in pixels)
+ * @param imgWS image workspace corresponding to the index given
+ * @param imgName name of the image (normally derived from the
+ * original filename)
+ *
+ * @throws runtime_error when unrecoverable errors are found (no
+ * data, issue with dimensions, etc.).
+ */
+void ImageROIViewQtWidget::checkNewProjectionImage(
+    const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx, size_t &width,
+    size_t &height, Mantid::API::MatrixWorkspace_sptr &imgWS,
+    std::string &imgName) {
   try {
-    width = boost::lexical_cast<size_t>(ws->run().getLogData("Axis1")->value());
+    imgWS = boost::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(idx));
+    if (!imgWS)
+      return;
+  } catch (std::exception &exc) {
+    throw std::runtime_error("Could not find the image data: " +
+                             std::string(exc.what()));
+  }
+
+  try {
+    getCheckedDimensions(imgWS, width, height);
+  } catch (std::runtime_error &rexc) {
+    throw std::runtime_error("Could not find the width of the image: " +
+                             std::string(rexc.what()));
+  }
+
+  try {
+    imgName = imgWS->run().getLogData("run_title")->value();
+  } catch (std::exception &e) {
+    QMessageBox::warning(
+        this, "Cannot load image information",
+        "There was a problem while "
+        " trying to find the name (run_title log entry) of the image: " +
+            QString::fromStdString(e.what()));
+  }
+}
+
+/**
+ * Gets the width and height of an image MatrixWorkspace.
+ *
+ * @param ws image workspace
+ *
+ * @param width width of the image in pixels (bins)
+ *
+ * @param height height of the image in pixels (histograms)
+ *
+ * @throws runtime_error if there are problems when retrieving the
+ * width/height or if they are inconsistent.
+ */
+void ImageROIViewQtWidget::getCheckedDimensions(const MatrixWorkspace_sptr ws,
+                                                size_t &width, size_t &height) {
+  const size_t MAXDIM = 2048 * 32;
+  const std::string widthLogName = "Axis1";
+  try {
+    width = boost::lexical_cast<size_t>(
+        ws->run().getLogData(widthLogName)->value());
     // TODO: add a settings option for this (like max mem allocation for
     // images)?
     if (width >= MAXDIM)
       width = MAXDIM;
-  } catch (std::exception &e) {
-    QMessageBox::critical(this, "Cannot load image",
-                          "There was a problem while trying to "
-                          "find the width of the image: " +
-                              QString::fromStdString(e.what()));
-    return;
+  } catch (std::exception &exc) {
+    throw std::runtime_error(
+        "Could not find the width of the image from the run log data (entry: " +
+        widthLogName + "). Error: " + exc.what());
   }
 
-  size_t height;
+  const std::string heightLogName = "Axis2";
   try {
-    height =
-        boost::lexical_cast<size_t>(ws->run().getLogData("Axis2")->value());
+    height = boost::lexical_cast<size_t>(
+        ws->run().getLogData(heightLogName)->value());
     if (height >= MAXDIM)
       height = MAXDIM;
-  } catch (std::exception &e) {
-    QMessageBox::critical(this, "Cannot load image",
-                          "There was a problem while trying to "
-                          "find the height of the image: " +
-                              QString::fromStdString(e.what()));
-    return;
+  } catch (std::exception &exc) {
+    throw std::runtime_error("could not find the height of the image from the "
+                             "run log data (entry: " +
+                             heightLogName + "). Error: " + exc.what());
   }
 
-  // images are loaded as 1 histogram == 1 pixel (1 bin per histogram):
-  if (height != ws->getNumberHistograms() || width != ws->blocksize()) {
-    QMessageBox::critical(
-        this, "Image dimensions do not match in the input image workspace",
+  // images are loaded as 1 histogram == 1 row (1 bin per image column):
+  size_t histos = ws->getNumberHistograms();
+  size_t bins = ws->blocksize();
+  if (height != histos || width != bins) {
+    throw std::runtime_error(
+        "Image dimensions do not match in the input image workspace. "
         "Could not load the expected "
-        "number of rows and columns.");
-    return;
+        "number of rows and columns. The width and height found in the run log "
+        "data of the input files is: " +
+        std::to_string(width) + ", " + std::to_string(height) +
+        ", but the number of bins, histograms in "
+        "the workspace loaded is: " +
+        std::to_string(histos) + ", " + std::to_string(bins) + ".");
   }
-  // find min and max to scale pixel values
-  double min = std::numeric_limits<double>::max(),
-         max = std::numeric_limits<double>::min();
+}
+
+void ImageROIViewQtWidget::getPixelMinMax(MatrixWorkspace_sptr ws, double &min,
+                                          double &max) {
   for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
     for (size_t j = 0; j < ws->blocksize(); ++j) {
       const double &v = ws->readY(i)[j];
@@ -595,51 +859,54 @@ void ImageROIViewQtWidget::showProjectionImage(
         max = v;
     }
   }
-  if (min >= max) {
-    QMessageBox::warning(
-        this, "Empty image!",
-        "The image could be loaded but it contains "
-        "effectively no information, all pixels have the same value.");
-    // black picture
-    QPixmap pix(static_cast<int>(width), static_cast<int>(height));
-    pix.fill(QColor(0, 0, 0));
-    m_ui.label_img->setPixmap(pix);
-    m_ui.label_img->show();
-    m_basePixmap.reset(new QPixmap(pix));
+}
+
+float ImageROIViewQtWidget::currentRotationAngle() const {
+  return m_params.rotation;
+}
+
+void ImageROIViewQtWidget::updateRotationAngle(float angle) {
+  if (angle < 0 || (0 != static_cast<int>(angle) % 90))
     return;
-  }
 
-  // load / transfer image into a QImage
-  QImage rawImg(QSize(static_cast<int>(width), static_cast<int>(height)),
-                QImage::Format_RGB32);
-  const double max_min = max - min;
-  const double scaleFactor = 255.0 / max_min;
-  for (size_t yi = 0; yi < width; ++yi) {
-    for (size_t xi = 0; xi < width; ++xi) {
-      const double &v = ws->readY(yi)[xi];
-      // color the range min-max in gray scale. To apply different color
-      // maps you'd need to use rawImg.setColorTable() or similar.
-      const int scaled = static_cast<int>(scaleFactor * (v - min));
-      QRgb vRgb = qRgb(scaled, scaled, scaled);
-      rawImg.setPixel(static_cast<int>(xi), static_cast<int>(yi), vRgb);
-    }
-  }
+  m_params.rotation = angle;
+  m_ui.comboBox_rotation->setCurrentIndex(
+      static_cast<int>((static_cast<int>(angle) / 90) % 4));
 
-  // paint and show image
-  // direct from image
-  QPixmap pix = QPixmap::fromImage(rawImg);
-  m_ui.label_img->setPixmap(pix);
-  m_ui.label_img->show();
-  m_basePixmap.reset(new QPixmap(pix));
-  // Alternative, drawing with a painter:
-  // QPixmap pix(static_cast<int>(width), static_cast<int>(height));
-  // QPainter painter;
-  // painter.begin(&pix);
-  // painter.drawImage(0, 0, rawImg);
-  // painter.end();
-  // m_ui.label_img->setPixmap(pix);
-  // m_ui.label_img->show();
-  // m_basePixmap.reset(new QPixmap(pix));
+  showProjectionImage(currentImageTypeStack(), currentImgIndex(),
+                      currentRotationAngle());
+}
+
+void ImageROIViewQtWidget::updateImageType(
+    const Mantid::API::WorkspaceGroup_sptr wsg) {
+  if (!wsg || 0 == wsg->size())
+    return;
+
+  const int newIdx = 0;
+  m_ui.horizontalScrollBar_img_stack->setEnabled(true);
+  m_ui.horizontalScrollBar_img_stack->setMinimum(0);
+  m_ui.horizontalScrollBar_img_stack->setValue(newIdx);
+  m_ui.horizontalScrollBar_img_stack->setMaximum(
+      static_cast<int>(wsg->size() - 1));
+
+  const size_t numPics = wsg->size();
+  m_ui.lineEdit_img_seq->setText(
+      QString::fromStdString("1/" + boost::lexical_cast<std::string>(numPics)));
+
+  showProjectionImage(wsg, currentImgIndex(), currentRotationAngle());
+}
+
+Mantid::API::WorkspaceGroup_sptr
+ImageROIViewQtWidget::currentImageTypeStack() const {
+  int type = m_ui.comboBox_image_type->currentIndex();
+
+  if (1 == type) {
+    return m_stackFlats;
+  } else if (2 == type) {
+    return m_stackDarks;
+  } else {
+    return m_stackSamples;
+  }
 }
 
 /**

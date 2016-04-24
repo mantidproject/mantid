@@ -6,6 +6,7 @@
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/DateAndTime.h"
 
 #include <QSettings>
 #include <QVector>
@@ -47,15 +48,43 @@ MANTIDQT_CUSTOMINTERFACES_DLL std::string getRunLabel(std::vector<Workspace_sptr
 /// Sums a list of workspaces together
 MANTIDQT_CUSTOMINTERFACES_DLL Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces);
 
-/// Compares two workspaces by run numbers
-MANTIDQT_CUSTOMINTERFACES_DLL bool compareByRunNumber(Workspace_sptr ws1, Workspace_sptr ws2);
-
 /// Makes sure the specified workspaces are in specified group
 MANTIDQT_CUSTOMINTERFACES_DLL void groupWorkspaces(const std::string& groupName,
                                                    const std::vector<std::string>& inputWorkspaces);
 
+/// Finds runs of consecutive numbers
+MANTIDQT_CUSTOMINTERFACES_DLL std::vector<std::pair<int, int>>
+findConsecutiveRuns(const std::vector<int> &runs);
+
+/// Replaces sample log value
+MANTIDQT_CUSTOMINTERFACES_DLL void replaceLogValue(const std::string &wsName,
+                                                   const std::string &logName,
+                                                   const std::string &logValue);
+
+/// Finds all of the values for a log
+MANTIDQT_CUSTOMINTERFACES_DLL std::vector<std::string>
+findLogValues(const Mantid::API::Workspace_sptr ws, const std::string &logName);
+
+/// Finds the range of values for a log
+MANTIDQT_CUSTOMINTERFACES_DLL std::pair<std::string, std::string> findLogRange(
+    const Mantid::API::Workspace_sptr ws, const std::string &logName,
+    bool (*isLessThan)(const std::string &first, const std::string &second));
+
+/// Finds the range of values for a log for a vector of workspaces
+MANTIDQT_CUSTOMINTERFACES_DLL std::pair<std::string, std::string> findLogRange(
+    const std::vector<Mantid::API::Workspace_sptr> &workspaces,
+    const std::string &logName,
+    bool (*isLessThan)(const std::string &first, const std::string &second));
+
+/// Concatenates time-series log of one workspace with the second
+MANTIDQT_CUSTOMINTERFACES_DLL void
+appendTimeSeriesLogs(boost::shared_ptr<Mantid::API::Workspace> toAppend,
+                     boost::shared_ptr<Mantid::API::Workspace> resultant,
+                     const std::string &logName);
+
 /**
- * A class which deals with auto-saving the widget values. Widgets are registered and then on any
+ * A class which deals with auto-saving the widget values. Widgets are
+ * registered and then on any
  * change, their value is stored using QSettings.
  */
 class MANTIDQT_CUSTOMINTERFACES_DLL WidgetAutoSaver : QObject

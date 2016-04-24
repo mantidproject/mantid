@@ -48,7 +48,6 @@ namespace Mantid
       std::vector<double> BackgroundRgbProvider::getRgbFromSetting(bool useCurrentBackgroundColor)
       {
         // Set the mantid default here
-        std::vector<double> background;
         QColor userBackground;
 
         if (useCurrentBackgroundColor)
@@ -96,11 +95,8 @@ namespace Mantid
           bVal = defaultBackgroundColor.blue();
         }
 
-        background.push_back(static_cast<double>(rVal));
-        background.push_back(static_cast<double>(gVal));
-        background.push_back(static_cast<double>(bVal));
-
-        return background;
+        return {static_cast<double>(rVal), static_cast<double>(gVal),
+                static_cast<double>(bVal)};
       }
 
       void BackgroundRgbProvider::update()

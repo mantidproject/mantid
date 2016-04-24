@@ -158,7 +158,7 @@ void DataComparison::addDataItem(Workspace_const_sptr ws)
     return;
   }
 
-  QString wsName = QString::fromStdString(matrixWs->name());
+  std::string wsName = matrixWs->name();
 
   // Append a new row to the data table
   int currentRows = m_uiForm.twCurrentData->rowCount();
@@ -191,7 +191,7 @@ void DataComparison::addDataItem(Workspace_const_sptr ws)
   m_uiForm.twCurrentData->setCellWidget(currentRows, COLOUR, colourCombo);
 
   // Insert the workspace name
-  QTableWidgetItem *wsNameItem = new QTableWidgetItem(tr(wsName));
+  QTableWidgetItem *wsNameItem = new QTableWidgetItem(tr(wsName.c_str()));
   wsNameItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
   m_uiForm.twCurrentData->setItem(currentRows, WORKSPACE_NAME, wsNameItem);
 
@@ -373,7 +373,8 @@ void DataComparison::plotWorkspaces()
     }
 
     // Update current spectrum display
-    m_uiForm.twCurrentData->item(row, CURRENT_SPEC)->setText(tr(QString::number(wsIndex)));
+    m_uiForm.twCurrentData->item(row, CURRENT_SPEC)
+        ->setText(tr(std::to_string(wsIndex).c_str()));
 
     // Create the curve data
     const bool logScale(false), distribution(false);

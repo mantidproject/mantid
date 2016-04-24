@@ -85,7 +85,7 @@ public:
     TS_ASSERT_EQUALS(1, detectorWS->getNumberHistograms());
 
     auto map = detectorWS->getSpectrumToWorkspaceIndexMap();
-    // Check the spectrum ids retained.
+    // Check the spectrum Nos retained.
     TS_ASSERT_EQUALS(map[specId1], 0);
 
     // Check the cropped x range
@@ -102,7 +102,7 @@ public:
     TS_ASSERT_EQUALS(1, monitorWS->getNumberHistograms());
 
     map = monitorWS->getSpectrumToWorkspaceIndexMap();
-    // Check the spectrum ids retained.
+    // Check the spectrum Nos retained.
     TS_ASSERT_EQUALS(map[monitorSpecId], 0);
   }
 

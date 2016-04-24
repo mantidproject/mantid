@@ -43,13 +43,13 @@ MDHistoWorkspace::MDHistoWorkspace(
       m_coordSystem(None), m_displayNormalization(displayNormalization) {
   std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
   if (dimX)
-    dimensions.push_back(dimX);
+    dimensions.push_back(std::move(dimX));
   if (dimY)
-    dimensions.push_back(dimY);
+    dimensions.push_back(std::move(dimY));
   if (dimZ)
-    dimensions.push_back(dimZ);
+    dimensions.push_back(std::move(dimZ));
   if (dimT)
-    dimensions.push_back(dimT);
+    dimensions.push_back(std::move(dimT));
   this->init(dimensions);
 }
 
@@ -89,7 +89,10 @@ MDHistoWorkspace::MDHistoWorkspace(
  * @param other :: MDHistoWorkspace to copy from.
  */
 MDHistoWorkspace::MDHistoWorkspace(const MDHistoWorkspace &other)
-    : IMDHistoWorkspace(other) {
+    : IMDHistoWorkspace(other),
+      m_nEventsContributed(other.m_nEventsContributed),
+      m_coordSystem(other.m_coordSystem),
+      m_displayNormalization(other.m_displayNormalization) {
   // Dimensions are copied by the copy constructor of MDGeometry
   this->cacheValues();
   // Allocate the linear arrays
@@ -97,16 +100,11 @@ MDHistoWorkspace::MDHistoWorkspace(const MDHistoWorkspace &other)
   m_errorsSquared = new signal_t[m_length];
   m_numEvents = new signal_t[m_length];
   m_masks = new bool[m_length];
-  m_nEventsContributed = other.m_nEventsContributed;
-  this->setCoordinateSystem(other.getSpecialCoordinateSystem());
-  m_displayNormalization = other.displayNormalization();
   // Now copy all the data
-  for (size_t i = 0; i < m_length; ++i) {
-    m_signals[i] = other.m_signals[i];
-    m_errorsSquared[i] = other.m_errorsSquared[i];
-    m_numEvents[i] = other.m_numEvents[i];
-    m_masks[i] = other.m_masks[i];
-  }
+  std::copy_n(other.m_signals, m_length, m_signals);
+  std::copy_n(other.m_errorsSquared, m_length, m_errorsSquared);
+  std::copy_n(other.m_numEvents, m_length, m_numEvents);
+  std::copy_n(other.m_masks, m_length, m_masks);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -205,7 +203,8 @@ void MDHistoWorkspace::initVertexesArray() {
   size_t nd = numDimensions;
   // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd
   // bits
-  size_t numVertices = 1 << numDimensions;
+  // cppcheck-suppress constStatement
+  size_t numVertices = size_t{1} << numDimensions;
 
   // Allocate the array of the right size
   m_vertexesArray = new coord_t[nd * numVertices];
@@ -219,7 +218,8 @@ void MDHistoWorkspace::initVertexesArray() {
     for (size_t d = 0; d < nd; d++) {
       // Use a bit mask to look at each bit of the integer we are iterating
       // through.
-      size_t mask = 1 << d;
+      // cppcheck-suppress constStatement
+      size_t mask = size_t{1} << d;
       if ((i & mask) > 0) {
         // Bit is 1, use the max of the dimension
         m_vertexesArray[outIndex + d] = m_dimensions[d]->getX(1);
@@ -256,13 +256,11 @@ void MDHistoWorkspace::initVertexesArray() {
  */
 void MDHistoWorkspace::setTo(signal_t signal, signal_t errorSquared,
                              signal_t numEvents) {
-  for (size_t i = 0; i < m_length; i++) {
-    m_signals[i] = signal;
-    m_errorsSquared[i] = errorSquared;
-    m_numEvents[i] = numEvents;
-    m_masks[i] = false; // Not masked by default;
-    m_nEventsContributed += uint64_t(numEvents);
-  }
+  std::fill_n(m_signals, m_length, signal);
+  std::fill_n(m_errorsSquared, m_length, errorSquared);
+  std::fill_n(m_numEvents, m_length, numEvents);
+  std::fill_n(m_masks, m_length, false);
+  m_nEventsContributed = static_cast<uint64_t>(numEvents) * m_length;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -463,7 +461,6 @@ size_t MDHistoWorkspace::getMemorySize() const {
 //----------------------------------------------------------------------------------------------
 /// @return a vector containing a copy of the signal data in the workspace.
 std::vector<signal_t> MDHistoWorkspace::getSignalDataVector() const {
-  // TODO: Make this more efficient if needed.
   std::vector<signal_t> out;
   out.resize(m_length, 0.0);
   for (size_t i = 0; i < m_length; ++i)
@@ -474,7 +471,6 @@ std::vector<signal_t> MDHistoWorkspace::getSignalDataVector() const {
 
 /// @return a vector containing a copy of the error data in the workspace.
 std::vector<signal_t> MDHistoWorkspace::getErrorDataVector() const {
-  // TODO: Make this more efficient if needed.
   std::vector<signal_t> out;
   out.resize(m_length, 0.0);
   for (size_t i = 0; i < m_length; ++i)
@@ -1048,7 +1044,10 @@ void MDHistoWorkspace::power(double exponent) {
 MDHistoWorkspace &MDHistoWorkspace::operator&=(const MDHistoWorkspace &b) {
   checkWorkspaceSize(b, "&= (and)");
   for (size_t i = 0; i < m_length; ++i) {
-    m_signals[i] = ((m_signals[i] != 0) && (b.m_signals[i] != 0)) ? 1.0 : 0.0;
+    m_signals[i] = ((m_signals[i] != 0 && !m_masks[i]) &&
+                    (b.m_signals[i] != 0 && !b.m_masks[i]))
+                       ? 1.0
+                       : 0.0;
     m_errorsSquared[i] = 0;
   }
   return *this;
@@ -1064,7 +1063,10 @@ MDHistoWorkspace &MDHistoWorkspace::operator&=(const MDHistoWorkspace &b) {
 MDHistoWorkspace &MDHistoWorkspace::operator|=(const MDHistoWorkspace &b) {
   checkWorkspaceSize(b, "|= (or)");
   for (size_t i = 0; i < m_length; ++i) {
-    m_signals[i] = ((m_signals[i] != 0) || (b.m_signals[i] != 0)) ? 1.0 : 0.0;
+    m_signals[i] = ((m_signals[i] != 0 && !m_masks[i]) ||
+                    (b.m_signals[i] != 0 && !b.m_masks[i]))
+                       ? 1.0
+                       : 0.0;
     m_errorsSquared[i] = 0;
   }
   return *this;
@@ -1081,7 +1083,10 @@ MDHistoWorkspace &MDHistoWorkspace::operator|=(const MDHistoWorkspace &b) {
 MDHistoWorkspace &MDHistoWorkspace::operator^=(const MDHistoWorkspace &b) {
   checkWorkspaceSize(b, "^= (xor)");
   for (size_t i = 0; i < m_length; ++i) {
-    m_signals[i] = ((m_signals[i] != 0) ^ (b.m_signals[i] != 0)) ? 1.0 : 0.0;
+    m_signals[i] = ((m_signals[i] != 0 && !m_masks[i]) ^
+                    (b.m_signals[i] != 0 && !b.m_masks[i]))
+                       ? 1.0
+                       : 0.0;
     m_errorsSquared[i] = 0;
   }
   return *this;
@@ -1095,7 +1100,7 @@ MDHistoWorkspace &MDHistoWorkspace::operator^=(const MDHistoWorkspace &b) {
  */
 void MDHistoWorkspace::operatorNot() {
   for (size_t i = 0; i < m_length; ++i) {
-    m_signals[i] = (m_signals[i] == 0.0);
+    m_signals[i] = (m_signals[i] == 0.0 || m_masks[i]);
     m_errorsSquared[i] = 0;
   }
 }

@@ -328,5 +328,6 @@ void SaveFocusedXYE::getFocusedPos(Mantid::API::MatrixWorkspace_const_sptr wksp,
   l1 = source->getDistance(*sample);
   Geometry::IDetector_const_sptr det = wksp->getDetector(spectrum);
   l2 = det->getDistance(*sample);
-  tth = wksp->detectorTwoTheta(det) * 180. / M_PI;
+  constexpr double rad2deg = 180. / M_PI;
+  tth = wksp->detectorTwoTheta(*det) * rad2deg;
 }

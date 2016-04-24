@@ -413,10 +413,10 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
   if (!leafOnly)
     outBoxes.push_back(this);
 
-  if (this->getDepth() + 1 <= maxDepth) {
-    for (size_t i = 0; i < numBoxes; i++) {
+  if (this->getDepth() < maxDepth) {
+    for(API::IMDNode * child: m_Children){
       // Recursively go deeper, if needed
-      m_Children[i]->getBoxes(outBoxes, maxDepth, leafOnly);
+      child->getBoxes(outBoxes, maxDepth, leafOnly);
     }
   } else {
     // Oh, we reached the max depth and want only leaves.
@@ -450,7 +450,7 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
   if (!leafOnly)
     outBoxes.push_back(this);
 
-  if (this->getDepth() + 1 <= maxDepth) {
+  if (this->getDepth() < maxDepth) {
     // OK, let's look for children that are either touching or completely
     // contained by the implicit function.
 
@@ -518,7 +518,7 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
       for (size_t d = 0; d < nd; d++) {
         vertIndex[d] = 0;
         // Use a bit mask to iterate through the 2^nd neighbor options
-        size_t mask = 1 << d;
+        size_t mask = size_t{1} << d;
         if (i & mask)
           vertIndex[d] = 1;
       }

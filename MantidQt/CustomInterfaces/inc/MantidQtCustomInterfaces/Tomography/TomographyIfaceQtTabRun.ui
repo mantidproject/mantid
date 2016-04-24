@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>737</width>
-    <height>573</height>
+    <width>826</width>
+    <height>576</height>
    </rect>
   </property>
   <layout class="QGridLayout" name="gridLayout">
@@ -105,8 +105,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>256</width>
-                <height>239</height>
+                <width>273</width>
+                <height>256</height>
                </rect>
               </property>
               <property name="sizePolicy">
@@ -361,14 +361,14 @@
         <item row="0" column="0" colspan="3">
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
-           <widget class="QLabel" name="label_rb_number">
+           <widget class="QLabel" name="label_experiment_reference">
             <property name="text">
-             <string>RB Number:</string>
+             <string>Exp. reference (RB number)</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit_rb_number">
+           <widget class="QLineEdit" name="lineEdit_experiment_reference">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>1</horstretch>
@@ -490,6 +490,20 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>lineEdit_experiment_reference</tabstop>
+  <tabstop>comboBox_run_compute_resource</tabstop>
+  <tabstop>pushButton_remote_status</tabstop>
+  <tabstop>comboBox_run_tool</tabstop>
+  <tabstop>pushButton_run_tool_setup</tabstop>
+  <tabstop>pushButton_reconstruct</tabstop>
+  <tabstop>pushButton_run_refresh</tabstop>
+  <tabstop>pushButton_run_job_visualize</tabstop>
+  <tabstop>pushButton_run_job_cancel</tabstop>
+  <tabstop>pushButton_browse_image</tabstop>
+  <tabstop>scrollArea_image</tabstop>
+  <tabstop>tableWidget_run_jobs</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

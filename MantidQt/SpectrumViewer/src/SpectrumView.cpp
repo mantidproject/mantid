@@ -107,7 +107,9 @@ void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
   int tab = 0;
   if (isFirstPlot)
   {
-    m_ui->imageTabs->setTabLabel(m_ui->imageTabs->currentWidget(),QString::fromStdString(wksp->name()));
+    m_ui->imageTabs->setTabText(
+        m_ui->imageTabs->indexOf(m_ui->imageTabs->currentWidget()),
+        QString::fromStdString(wksp->name()));
     m_hGraph = boost::make_shared<GraphDisplay>(m_ui->h_graphPlot,
                                                      m_ui->h_graph_table, false);
     m_vGraph = boost::make_shared<GraphDisplay>(m_ui->v_graphPlot,

@@ -689,7 +689,7 @@ void LoadISISNexus2::buildSpectraInd2SpectraNumMap(
     int64_t hist = 0;
     for (; !generator->isDone(); generator->next()) {
       specnum_t spec_num = static_cast<specnum_t>(generator->getValue());
-      m_wsInd2specNum_map.insert(std::make_pair(hist, spec_num));
+      m_wsInd2specNum_map.emplace(hist, spec_num);
       ++hist;
     }
   }

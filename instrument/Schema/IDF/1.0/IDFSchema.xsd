@@ -698,6 +698,31 @@
           <xs:complexType>
             <xs:choice maxOccurs="unbounded" minOccurs="0">
               <xs:element name="parameter" type="idf:parameterType"/>
+              <xs:element name="vertex">
+                <xs:complexType>
+                  <xs:choice maxOccurs="unbounded" minOccurs="0">
+                    <xs:element name="rot" type="idf:rotType"/>
+                    <xs:element name="trans">
+                      <xs:complexType>
+                        <xs:attributeGroup ref="idf:cartesian"/>
+                        <xs:attributeGroup ref="idf:spherical"/>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="exclude">
+                      <xs:complexType>
+                        <xs:attribute name="sub-part"/>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="neutronic" type="idf:locationType"/>
+                  </xs:choice>
+                  <xs:attribute name="ang"/>
+                  <xs:attributeGroup ref="idf:cartesian"/>
+                  <xs:attributeGroup ref="idf:spherical"/>
+                  <xs:attribute name="name"/>
+                  <xs:attribute name="rot"/>
+                  <xs:attributeGroup ref="idf:axes"/>
+                </xs:complexType>
+              </xs:element>
               <xs:element name="location">
                 <xs:complexType>
                   <xs:choice maxOccurs="unbounded" minOccurs="0">
