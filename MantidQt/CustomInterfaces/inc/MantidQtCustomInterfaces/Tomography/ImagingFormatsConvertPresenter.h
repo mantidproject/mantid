@@ -4,6 +4,7 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/IImagingFormatsConvertPresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/IImagingFormatsConvertView.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 // forward declarations for Poco classes
 namespace Poco {
@@ -67,9 +68,19 @@ protected:
 
 private:
   void goThroughDirRecur(const Poco::File &inFilePath,
-                          const std::string &inFormat,
-                          const Poco::File &outFilePath,
-                          const std::string &outExt, size_t depth);
+                         const std::string &inFormat,
+                         const Poco::File &outFilePath,
+                         const std::string &outExt, size_t depth);
+
+  void convert(const std::string &inputName, const std::string &inFormat,
+               const std::string &outputName,
+               const std::string &outFormat) const;
+
+  Mantid::API::MatrixWorkspace_sptr
+  loadFITS(const std::string &inputName) const;
+
+  void saveFITS(Mantid::API::MatrixWorkspace_sptr image,
+                const std::string &outputName) const;
 
   /// Associated view for this presenter (MVP pattern)
   IImagingFormatsConvertView *const m_view;

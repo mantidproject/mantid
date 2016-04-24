@@ -70,13 +70,23 @@ public:
 
   size_t maxSearchDepth() const override;
 
-  void convert(const std::string &inputName,
-               const std::string &outputName) const override;
+  void convert(const std::string &inputName, const std::string &inputFormat,
+               const std::string &outputName,
+               const std::string &outputFormat) const override;
+
+  void writeImg(Mantid::API::MatrixWorkspace_sptr inWks,
+                const std::string &outputName,
+                const std::string &outFormat) const override;
+
+  Mantid::API::MatrixWorkspace_sptr
+  loadImg(const std::string &inputName,
+          const std::string &inFormat) const override;
 
 protected:
   void initLayout();
 
   void saveSettings() const override;
+  void readSettings();
   void setup();
 
 private slots:

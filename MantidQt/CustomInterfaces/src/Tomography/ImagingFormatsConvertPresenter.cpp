@@ -63,6 +63,9 @@ void ImagingFormatsConvertPresenter::processConvert() {
   const std::string outPS = m_view->outputPath();
   size_t depth = m_view->maxSearchDepth();
 
+  g_log.information() << "Converting images from path: " << inPS << " into "
+                      << outPS << ", with depth " << depth << std::endl;
+
   const std::string emptyMsg = "Please specify an input and and output path.";
   if (inPS.empty()) {
     m_view->userError("Empty imput path", emptyMsg);
@@ -93,9 +96,9 @@ void ImagingFormatsConvertPresenter::processConvert() {
 
   const std::string inFormat = m_view->inputFormatName();
   const std::string outFormat = m_view->outputFormatName();
-  const std::string oext = ImggFormats::fileExtension(outFormat);
+
   try {
-    goThroughDirRecur(inPS, inFormat, outPS, oext, depth);
+    goThroughDirRecur(inPS, inFormat, outPS, outFormat, depth);
   } catch (std::runtime_error &rexc) {
     m_view->userError("Error while converting files",
                       "There was an error in the conversion process: " +
@@ -115,15 +118,16 @@ void ImagingFormatsConvertPresenter::processShutDown() {
  * @param inFilePath input path where to search for image/stack files
  * @param inFormat input format to consider
  * @param outFilePath output path to write converted files
- * @param outExt extension for output files
+ * @param outFormat format for the output images
  * @param depth search depth remaining (for recursive calls).
  */
 void ImagingFormatsConvertPresenter::goThroughDirRecur(
     const Poco::File &inFilePath, const std::string &inFormat,
-    const Poco::File &outFilePath, const std::string &outExt, size_t depth) {
+    const Poco::File &outFilePath, const std::string &outFormat, size_t depth) {
+
+  const std::string outExt = ImggFormats::fileExtension(outFormat);
 
   Poco::DirectoryIterator end;
-
   for (Poco::DirectoryIterator it(inFilePath); it != end; ++it) {
     if (it->isDirectory()) {
 
@@ -133,17 +137,59 @@ void ImagingFormatsConvertPresenter::goThroughDirRecur(
       // append to go into subdirectory:
       Poco::Path outPath(outFilePath.path());
       outPath.append(it.name());
-      goThroughDirRecur(it.path(), inFormat, outPath, outExt, depth - 1);
+      goThroughDirRecur(it.path(), inFormat, outPath, outFormat, depth - 1);
     } else if (it->isFile()) {
 
       const std::string fname = it.name();
       if (ImggFormats::isFileExtension(fname, inFormat)) {
-        // not removing source/original extension
-        const std::string outFilename = outFilePath.path() + "." + outExt;
-        m_view->convert(it.path().toString(), outFilename);
+        // intentionally not removing source/original extension
+        Poco::Path path(outFilePath.path());
+        path.append(it.name());
+        const std::string outFilename = path.toString() + "." + outExt;
+        convert(it.path().toString(), inFormat, outFilename, outFormat);
       }
     }
   }
+}
+
+/**
+ * Create an output image from an input image, converting
+ * formats. This uses the view (Qt classes) to process images in
+ * traditional formats like TIFF, PNG, JPG. That should be moved to
+ * this presenter when we have the Load/SaveImage algorithm.
+ *
+ * @param inputName name of input image
+ * @param inFormat format the input image is in
+ * @param outputName name of the output image to produce
+ * @param outFormat format for the output image
+ */
+void ImagingFormatsConvertPresenter::convert(
+    const std::string &inputName, const std::string &inFormat,
+    const std::string &outputName, const std::string &outFormat) const {
+
+  if ("FITS" == inFormat) {
+    auto inWks = loadFITS(inputName);
+    m_view->writeImg(inWks, outputName, outFormat);
+  } else if ("FITS" == outFormat) {
+    auto inWks = m_view->loadImg(inputName, inFormat);
+    saveFITS(inWks, outputName);
+  } else {
+    // other image formats
+    m_view->convert(inputName, inFormat, outputName, outFormat);
+  }
+}
+
+Mantid::API::MatrixWorkspace_sptr
+ImagingFormatsConvertPresenter::loadFITS(const std::string &inputName) const {
+  Mantid::API::MatrixWorkspace_sptr img;
+  // child LoadFITS 'LoadImgAsRect'
+  return img;
+}
+
+void ImagingFormatsConvertPresenter::saveFITS(
+    Mantid::API::MatrixWorkspace_sptr image,
+    const std::string &outputName) const {
+  // child SaveFITS
 }
 
 } // namespace CustomInterfaces

@@ -1,6 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGINGFORMATSCONVERTVIEW_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGINGFORMATSCONVERTVIEW_H_
 
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+
 #include <string>
 
 namespace MantidQt {
@@ -121,16 +123,47 @@ public:
    * Convert image (format A) to image (format B) when both formats
    * are only supported via Qt QImage and related classes.  TODO: This
    * should not be here. Move to presenter when we have the
-   * Load/SaveImage algorithm.
+   * Load/SaveImage algorithm:
+   * https://github.com/mantidproject/mantid/issues/6843
    *
    * @param inputName name of a readable image file(assuming Qt format
    * guess by header probing + extension)
    *
+   * @param inputFormat image format to read
+   *
    * @param outputName name of an output image file (assuming Qt
    * format guessing by suffix/extension)
+   *
+   * @param outputFormat image format to write
    */
   virtual void convert(const std::string &inputName,
-                       const std::string &outputName) const = 0;
+                       const std::string &inputFormat,
+                       const std::string &outputName,
+                       const std::string &outputFormat) const = 0;
+
+  /**
+   * Write an image that has been loaded in a matrix workspace. As
+   * with convert(), move out of here when we have a Load/SaveImage
+   * algorithm.
+   *
+   * @param inWks workspace holding image data
+   * @param outputName name for the output file
+   * @param outFormat image format
+   */
+  virtual void writeImg(Mantid::API::MatrixWorkspace_sptr inWks,
+                        const std::string &outputName,
+                        const std::string &outFormat) const = 0;
+
+  /**
+   * Load an image in a matrix workspace. As with convert(), move out
+   * of here when we have a Load/SaveImage algorithm.
+   *
+   * @param inWks workspace holding image data
+   * @param outputName name for the output file
+   * @param inFormat image format
+   */
+  virtual Mantid::API::MatrixWorkspace_sptr
+  loadImg(const std::string &inputName, const std::string &inFormat) const = 0;
 
   /**
    * Save this widget settings (when closing this widget).

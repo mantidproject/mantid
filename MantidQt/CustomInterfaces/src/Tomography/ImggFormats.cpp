@@ -75,11 +75,14 @@ std::string fileExtension(const std::string &format) {
  * Find out whether this extension is one of the accepted format
  * extensions. This is case insensitive
  *
- * @param extension a file name extension like .fits
+ * @param extension a file name extension like .fits, or a filename
  * @param fmt a file format
  */
 bool isFileExtension(std::string extension, Format fmt) {
   std::string lowExt = extension;
+  size_t pos = lowExt.find_last_of('.');
+  lowExt = lowExt.substr(pos+1);
+
   std::transform(lowExt.begin(), lowExt.end(), lowExt.begin(), ::tolower);
 
   const auto &valid = extensions.at(fmt);

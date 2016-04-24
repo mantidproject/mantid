@@ -121,7 +121,7 @@ void ImagingFormatsConvertQtWidget::writeImg(
 
 MatrixWorkspace_sptr
 ImagingFormatsConvertQtWidget::loadImg(const std::string &inputName,
-                                       const std::string &inputFormat) const {}
+                                       const std::string &inFormat) const {}
 
 size_t ImagingFormatsConvertQtWidget::maxSearchDepth() const {
   return static_cast<size_t>(m_ui.spinBox_max_search_depth->value());

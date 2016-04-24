@@ -1,7 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_IMAGINGFORMATSCONVERTVIEWMOCK_H
 #define MANTID_CUSTOMINTERFACES_IMAGINGFORMATSCONVERTVIEWMOCK_H
 
-#include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
+#include "MantidQtCustomInterfaces/Tomography/IImagingFormatsConvertView.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <gmock/gmock.h>
 
@@ -37,10 +38,26 @@ public:
   // bool compressHint() const
   MOCK_CONST_METHOD0(compressHint, bool());
 
-  // void convert(const std::string &inputName, const std::string &outputName)
-  // const;
-  MOCK_CONST_METHOD2(convert, void(const std::string &inputName,
-                                   const std::string &outputName));
+  // void convert(const std::string &inputName, const std::string
+  // &inputFormat, const std::string &outputName, const std::string
+  // &outputFormat) const
+  MOCK_CONST_METHOD4(convert, void(const std::string &inputName,
+                                   const std::string &inputFormat,
+                                   const std::string &outputName,
+                                   const std::string &outputFormat));
+
+  // void writeImg(MatrixWorkspace_sptr inWks, const std::string
+  // &outputName, const std::string &outFormat) const
+
+  MOCK_CONST_METHOD3(writeImg, void(Mantid::API::MatrixWorkspace_sptr inWks,
+                                    const std::string &outputName,
+                                    const std::string &outFormat));
+
+  // MatrixWorkspace_sptr loadImg(const std::string &inputName, const
+  // std::string &inputFormat) const
+  MOCK_CONST_METHOD2(
+      loadImg, Mantid::API::MatrixWorkspace_sptr(const std::string &outputName,
+                                                 const std::string &outFormat));
 
   // size_t maxSearchDepth() const
   MOCK_CONST_METHOD0(maxSearchDepth, size_t());
