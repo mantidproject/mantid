@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataHandling/H5Util.h"
 #include "MantidDataHandling/LoadCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -99,52 +100,16 @@ void LoadDiffCal::init() {
   declareProperty("TofMin", 0., "Minimum for TOF axis. Defaults to 0.");
   declareProperty("TofMax", EMPTY_DBL(),
                   "Maximum for TOF axis. Defaults to Unused.");
+  declareProperty(Kernel::make_unique<PropertyWithValue<bool>>(
+                      "FixConversionIssues", true, Direction::Input),
+                  "Set DIFA and TZERO to zero if there is an error and the "
+                  "pixel is masked");
   setPropertyGroup("TofMin", grpName);
   setPropertyGroup("TofMax", grpName);
+  setPropertyGroup("FixConversionIssues", grpName);
 }
 
 namespace { // anonymous
-
-std::string readString(H5File &file, const std::string &path) {
-  try {
-    DataSet data = file.openDataSet(path);
-    std::string value;
-    data.read(value, data.getDataType(), data.getSpace());
-    return value;
-  } catch (H5::FileIException &e) {
-    UNUSED_ARG(e);
-    return "";
-  } catch (H5::GroupIException &e) {
-    UNUSED_ARG(e);
-    return "";
-  }
-}
-
-template <typename NumT>
-std::vector<NumT> readArrayCoerce(DataSet &dataset,
-                                  const DataType &desiredDataType) {
-  std::vector<NumT> result;
-  DataType dataType = dataset.getDataType();
-  DataSpace dataSpace = dataset.getSpace();
-
-  if (desiredDataType == dataType) {
-    result.resize(dataSpace.getSelectNpoints());
-    dataset.read(&result[0], dataType, dataSpace);
-  } else if (PredType::NATIVE_UINT32 == dataType) {
-    std::vector<uint32_t> temp(dataSpace.getSelectNpoints());
-    dataset.read(&temp[0], dataType, dataSpace);
-    result.assign(temp.begin(), temp.end());
-  } else if (PredType::NATIVE_FLOAT == dataType) {
-    std::vector<float> temp(dataSpace.getSelectNpoints());
-    dataset.read(&temp[0], dataType, dataSpace);
-    for (float value : temp)
-      result.push_back(static_cast<NumT>(value));
-  } else {
-    throw DataTypeIException();
-  }
-
-  return result;
-}
 
 bool endswith(const std::string &str, const std::string &ending) {
   if (ending.size() > str.size()) {
@@ -184,52 +149,6 @@ void setCalWSProperty(API::Algorithm *alg, const std::string &prefix,
 
 } // anonymous namespace
 
-std::vector<double> LoadDiffCal::readDoubleArray(Group &group,
-                                                 const std::string &name) {
-  std::vector<double> result;
-
-  try {
-    DataSet dataset = group.openDataSet(name);
-    result = readArrayCoerce<double>(dataset, PredType::NATIVE_DOUBLE);
-  } catch (H5::GroupIException &e) {
-    UNUSED_ARG(e);
-    g_log.information() << "Failed to open dataset \"" << name << "\"\n";
-  } catch (H5::DataTypeIException &e) {
-    UNUSED_ARG(e);
-    g_log.information() << "DataSet \"" << name << "\" should be double"
-                        << "\n";
-  }
-
-  for (double &value : result) {
-    if (std::abs(value) < 1.e-10) {
-      value = 0.;
-    } else if (value != value) { // check for NaN
-      value = 0.;
-    }
-  }
-
-  return result;
-}
-
-std::vector<int32_t> LoadDiffCal::readInt32Array(Group &group,
-                                                 const std::string &name) {
-  std::vector<int32_t> result;
-
-  try {
-    DataSet dataset = group.openDataSet(name);
-    result = readArrayCoerce<int32_t>(dataset, PredType::NATIVE_INT32);
-  } catch (H5::GroupIException &e) {
-    UNUSED_ARG(e);
-    g_log.information() << "Failed to open dataset \"" << name << "\"\n";
-  } catch (H5::DataTypeIException &e) {
-    UNUSED_ARG(e);
-    g_log.information() << "DataSet \"" << name << "\" should be int32"
-                        << "\n";
-  }
-
-  return result;
-}
-
 void LoadDiffCal::getInstrument(H5File &file) {
   // don't bother if there isn't a mask or grouping requested
   bool makeMask = getProperty("MakeMaskWorkspace");
@@ -244,8 +163,9 @@ void LoadDiffCal::getInstrument(H5File &file) {
   }
 
   std::string idf =
-      readString(file, "/calibration/instrument/instrument_source");
-  std::string instrumentName = readString(file, "/calibration/instrument/name");
+      H5Util::readString(file, "/calibration/instrument/instrument_source");
+  std::string instrumentName =
+      H5Util::readString(file, "/calibration/instrument/name");
 
   g_log.debug() << "IDF : " << idf << "\n"
                 << "NAME: " << instrumentName << "\n";
@@ -358,7 +278,8 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
                                    const std::vector<double> &difa,
                                    const std::vector<double> &tzero,
                                    const std::vector<int32_t> &dasids,
-                                   const std::vector<double> &offsets) {
+                                   const std::vector<double> &offsets,
+                                   const std::vector<int32_t> &use) {
   bool makeWS = getProperty("MakeCalWorkspace");
   if (!makeWS) {
     g_log.information("Not making a calibration workspace");
@@ -370,6 +291,7 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
 
   bool haveDasids = !dasids.empty();
   bool haveOffsets = !offsets.empty();
+  bool fixIssues = getProperty("FixConversionIssues");
 
   double tofMin = getProperty("TofMin");
   double tofMax = getProperty("TofMax");
@@ -426,6 +348,27 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
       if (haveDasids)
         longMsg << ", dasid=" << dasids[i];
       longMsg << "] " << msg.str();
+
+      // to fix issues for masked pixels, just zero difa and tzero
+      if (fixIssues && (!use[i])) {
+        longMsg << " pixel is masked, ";
+        longMsg << " changing difa (" << wksp->cell<double>(i, 2) << " to 0.)";
+        wksp->cell<double>(i, 2) = 0.;
+
+        longMsg << " and tzero (" << wksp->cell<double>(i, 3) << " to 0.)";
+        wksp->cell<double>(i, 3) = 0.;
+
+        // restore valid tof range
+        size_t index = 4; // where tofmin natively is
+        if (haveDasids)
+          index += 1;
+        if (haveOffsets)
+          index += 1;
+        wksp->cell<double>(i, index) = tofMin;
+        if (useTofMax)
+          wksp->cell<double>(i, index + 1) = tofMax;
+      }
+
       this->g_log.warning(longMsg.str());
     }
 
@@ -501,22 +444,30 @@ void LoadDiffCal::exec() {
   }
 
   progress.report("Reading detid");
-  std::vector<int32_t> detids = readInt32Array(calibrationGroup, "detid");
+  std::vector<int32_t> detids =
+      H5Util::readArray1DCoerce<int32_t>(calibrationGroup, "detid");
   progress.report("Reading dasid");
-  std::vector<int32_t> dasids = readInt32Array(calibrationGroup, "dasid");
+  std::vector<int32_t> dasids =
+      H5Util::readArray1DCoerce<int32_t>(calibrationGroup, "dasid");
   progress.report("Reading group");
-  std::vector<int32_t> groups = readInt32Array(calibrationGroup, "group");
+  std::vector<int32_t> groups =
+      H5Util::readArray1DCoerce<int32_t>(calibrationGroup, "group");
   progress.report("Reading use");
-  std::vector<int32_t> use = readInt32Array(calibrationGroup, "use");
+  std::vector<int32_t> use =
+      H5Util::readArray1DCoerce<int32_t>(calibrationGroup, "use");
 
   progress.report("Reading difc");
-  std::vector<double> difc = readDoubleArray(calibrationGroup, "difc");
+  std::vector<double> difc =
+      H5Util::readArray1DCoerce<double>(calibrationGroup, "difc");
   progress.report("Reading difa");
-  std::vector<double> difa = readDoubleArray(calibrationGroup, "difa");
+  std::vector<double> difa =
+      H5Util::readArray1DCoerce<double>(calibrationGroup, "difa");
   progress.report("Reading tzero");
-  std::vector<double> tzero = readDoubleArray(calibrationGroup, "tzero");
+  std::vector<double> tzero =
+      H5Util::readArray1DCoerce<double>(calibrationGroup, "tzero");
   progress.report("Reading offset");
-  std::vector<double> offset = readDoubleArray(calibrationGroup, "offset");
+  std::vector<double> offset =
+      H5Util::readArray1DCoerce<double>(calibrationGroup, "offset");
 
   file.close();
 
@@ -543,7 +494,7 @@ void LoadDiffCal::exec() {
   // create the appropriate output workspaces
   makeGroupingWorkspace(detids, groups);
   makeMaskWorkspace(detids, use);
-  makeCalWorkspace(detids, difc, difa, tzero, dasids, offset);
+  makeCalWorkspace(detids, difc, difa, tzero, dasids, offset, use);
 }
 
 } // namespace DataHandling

@@ -45,6 +45,7 @@ Example 1 (using detector IDs and explicit group ID):
   <group ID="4">
    <detids>28750-29981</detids>
    <component>bank21</component>
+  </group>
   <group ID="5">
    <component>bank26</component>
   </group>
@@ -59,6 +60,7 @@ Example 2 (using detector IDs and default group ID):
   <group>
    <detids>28750-29981</detids>
    <component>bank21</component>
+  </group>
   <group>
    <component>bank26</component>
   </group>
@@ -72,6 +74,7 @@ Example 3 (using spectra number - note that no instrument is required):
  <detector-grouping>
   <group ID="1">
    <ids>3,34-44,47</ids>
+  </group>
   <group ID="2">
    <ids>26</ids>
    <ids>27,28</ids>

@@ -6,11 +6,11 @@
 
 /**
  * The MantidSurfacePlotDialog offers the same functionality of choosing a
- * workspace index/spectrum ID as MantidWSIndexDialog, but adds to it the
+ * workspace index/spectrum No as MantidWSIndexDialog, but adds to it the
  * ability to choose a log value and the name for an axis.
  * This is for plotting a surface from a WorkspaceGroup.
  *
- * - The user may choose only one spectrum ID, not a range.
+ * - The user may choose only one spectrum No, not a range.
  * - The user is offered the choice of only those logs that have single values
  * per workspace.
  */

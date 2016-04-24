@@ -9,7 +9,7 @@ Interface for what the presenter of the tomography GUI needs to
 implement. Here the term presenter is used as in the MVP
 (Model-View-Presenter) pattern. The (passive) view will use this.
 
-Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014-2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -37,18 +37,22 @@ public:
   /// These are user actions, triggered from the (passive) view, that need
   /// handling by the presenter
   enum Notification {
+    SystemSettingsUpdated,  ///< Change in the system settings (local or remote)
     SetupResourcesAndTools, ///< Setup what are available, normally at startup
     CompResourceChanged,    ///< 'current' compute resource changed
-    ToolChanged,        ///< 'current' tomographic reconstruction tool changed
-    TomoPathsChanged,   ///< user manipulates tomography data paths
-    LogInRequested,     ///< user hits 'log in' or similar
-    LogOutRequested,    ///< user hits 'log out' or similar
-    SetupReconTool,     ///< To start the setup (open dialog, etc.)
-    RunReconstruct,     ///< user hits 'reconstruct' or similar
-    RefreshJobs,        ///< get updated jobs info in the table/tree
-    CancelJobFromTable, ///< cancel one job from the list
+    ToolChanged,      ///< 'current' tomographic reconstruction tool changed
+    TomoPathsChanged, ///< user selects tomography data paths
+    TomoPathsEditedByUser, ///< user edits manually paths that may modify other
+                           ///paths
+    LogInRequested,        ///< user hits 'log in' or similar
+    LogOutRequested,       ///< user hits 'log out' or similar
+    SetupReconTool,        ///< To start the setup (open dialog, etc.)
+    RunReconstruct,        ///< user hits 'reconstruct' or similar
+    RefreshJobs,           ///< get updated jobs info in the table/tree
+    CancelJobFromTable,    ///< cancel one job from the list
     VisualizeJobFromTable, ///< open visualization window for one job
     ViewImg,               ///< user wants to view an image (2D)
+    AggregateEnergyBands,  ///< run aggregate bands (in the background)
     LogMsg,                ///< need to send a message to the Mantid log system
     ShutDown               ///< closing the interface
   };

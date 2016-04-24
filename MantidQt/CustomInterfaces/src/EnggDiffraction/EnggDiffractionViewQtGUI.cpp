@@ -1,3 +1,4 @@
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
@@ -5,12 +6,16 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 #include "MantidQtMantidWidgets/MWRunFiles.h"
+#include "Poco/DirectoryIterator.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
-#include <boost/lexical_cast.hpp>
+#include <array>
+#include <fstream>
+#include <random>
 
+#include <boost/lexical_cast.hpp>
 #include <Poco/Path.h>
 
 #include <QCheckBox>
@@ -18,6 +23,8 @@ using namespace MantidQt::CustomInterfaces;
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
+
+#include <qwt_symbol.h>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -28,6 +35,8 @@ const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
 int EnggDiffractionViewQtGUI::m_currentType = 0;
 int EnggDiffractionViewQtGUI::m_currentRunMode = 0;
 int EnggDiffractionViewQtGUI::m_currentCropCalibBankName = 0;
+int EnggDiffractionViewQtGUI::m_fitting_bank_Id = 0;
+std::vector<std::string> EnggDiffractionViewQtGUI::m_fitting_runno_dir_vec;
 
 const std::string EnggDiffractionViewQtGUI::g_iparmExtStr =
     "GSAS instrument parameters, IPARM file: PRM, PAR, IPAR, IPARAM "
@@ -58,9 +67,20 @@ const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
 */
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGINX"),
-      m_currentCalibFilename(""), m_presenter(NULL) {}
+      m_currentCalibFilename(""), m_focusedDataVector(), m_fittedDataVector(),
+      m_peakPicker(NULL), m_zoomTool(NULL), m_presenter(NULL) {}
 
-EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {}
+EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {
+  for (auto curves : m_focusedDataVector) {
+    curves->detach();
+    delete curves;
+  }
+
+  for (auto curves : m_fittedDataVector) {
+    curves->detach();
+    delete curves;
+  }
+}
 
 void EnggDiffractionViewQtGUI::initLayout() {
   // setup container ui
@@ -78,6 +98,10 @@ void EnggDiffractionViewQtGUI::initLayout() {
   m_uiTabPreproc.setupUi(wPreproc);
   m_ui.tabMain->addTab(wPreproc, QString("Pre-processing"));
 
+  QWidget *wFitting = new QWidget(m_ui.tabMain);
+  m_uiTabFitting.setupUi(wFitting);
+  m_ui.tabMain->addTab(wFitting, QString("Fitting"));
+
   QWidget *wSettings = new QWidget(m_ui.tabMain);
   m_uiTabSettings.setupUi(wSettings);
   m_ui.tabMain->addTab(wSettings, QString("Settings"));
@@ -93,6 +117,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
   doSetupTabCalib();
   doSetupTabFocus();
   doSetupTabPreproc();
+  doSetupTabFitting();
   doSetupTabSettings();
 
   // presenter that knows how to handle a IEnggDiffractionView should take care
@@ -178,6 +203,74 @@ void EnggDiffractionViewQtGUI::doSetupTabPreproc() {
 
   connect(m_uiTabPreproc.pushButton_rebin_multiperiod, SIGNAL(released()), this,
           SLOT(rebinMultiperiodClicked()));
+}
+
+void EnggDiffractionViewQtGUI::doSetupTabFitting() {
+
+  connect(m_uiTabFitting.pushButton_fitting_browse_run_num, SIGNAL(released()),
+          this, SLOT(browseFitFocusedRun()));
+
+  connect(m_uiTabFitting.lineEdit_pushButton_run_num, SIGNAL(editingFinished()),
+          this, SLOT(fittingRunNoChanged()));
+
+  connect(m_uiTabFitting.lineEdit_pushButton_run_num, SIGNAL(returnPressed()),
+          this, SLOT(fittingRunNoChanged()));
+
+  connect(this, SIGNAL(getBanks()), this, SLOT(fittingRunNoChanged()));
+
+  connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(fittingBankIdChanged(int)));
+
+  connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(setListWidgetBank(int)));
+
+  connect(m_uiTabFitting.listWidget_fitting_bank_preview,
+          SIGNAL(currentRowChanged(int)), this,
+          SLOT(fittingListWidgetBank(int)));
+
+  connect(m_uiTabFitting.listWidget_fitting_bank_preview,
+          SIGNAL(currentRowChanged(int)), this, SLOT(setBankIdComboBox(int)));
+
+  connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(setBankDir(int)));
+
+  connect(m_uiTabFitting.pushButton_fitting_browse_peaks, SIGNAL(released()),
+          this, SLOT(browsePeaksToFit()));
+
+  connect(m_uiTabFitting.pushButton_fit, SIGNAL(released()), this,
+          SLOT(fitClicked()));
+
+  // add peak by clicking the button
+  connect(m_uiTabFitting.pushButton_select_peak, SIGNAL(released()),
+          SLOT(setPeakPick()));
+
+  connect(m_uiTabFitting.pushButton_add_peak, SIGNAL(released()),
+          SLOT(addPeakToList()));
+
+  connect(m_uiTabFitting.pushButton_save_peak_list, SIGNAL(released()),
+          SLOT(savePeakList()));
+
+  m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
+  m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom,
+                                        "d-Spacing (A)");
+  m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::yLeft, "Counts (us)^-1");
+  QFont font("MS Shell Dlg 2", 8);
+  m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::xBottom, font);
+  m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::yLeft, font);
+
+  // constructor of the peakPicker
+  // XXX: Being a QwtPlotItem, should get deleted when m_ui.plot gets deleted
+  // (auto-delete option)
+  m_peakPicker =
+      new MantidWidgets::PeakPicker(m_uiTabFitting.dataPlot, Qt::red);
+  setPeakPickerEnabled(false);
+
+  m_zoomTool = new QwtPlotZoomer(
+      QwtPlot::xBottom, QwtPlot::yLeft,
+      QwtPicker::DragSelection | QwtPicker::CornerToCorner,
+      QwtPicker::AlwaysOff, m_uiTabFitting.dataPlot->canvas());
+  m_zoomTool->setRubberBandPen(QPen(Qt::black));
+  setZoomTool(false);
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -322,6 +415,14 @@ void EnggDiffractionViewQtGUI::readSettings() {
   m_uiTabPreproc.doubleSpinBox_step_time->setValue(
       qs.value("user-params-step-time", 1).toDouble());
 
+  // user params - fitting
+  m_uiTabFitting.lineEdit_pushButton_run_num->setText(
+      qs.value("user-params-fitting-focused-file", "").toString());
+  m_uiTabFitting.comboBox_bank->setCurrentIndex(0);
+  m_uiTabFitting.lineEdit_fitting_peaks->setText(
+      qs.value("user-params-fitting-peaks-to-fit", "").toString());
+  m_uiTabFitting.listWidget_fitting_bank_preview->setCurrentRow(0);
+
   // settings
   QString lastPath =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
@@ -424,6 +525,13 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
 
   qs.value("user-params-step-time",
            m_uiTabPreproc.doubleSpinBox_step_time->value());
+
+  // fitting tab
+
+  qs.setValue("user-params-fitting-focused-file",
+              m_uiTabFitting.lineEdit_pushButton_run_num->text());
+  qs.setValue("user-params-fitting-peaks-to-fit",
+              m_uiTabFitting.lineEdit_fitting_peaks->text());
 
   // TODO: this should become << >> operators on EnggDiffCalibSettings
   qs.setValue("input-dir-calib-files",
@@ -570,6 +678,13 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabPreproc.MWRunFiles_preproc_run_num->setEnabled(enable);
   m_uiTabPreproc.pushButton_rebin_time->setEnabled(enable);
   m_uiTabPreproc.pushButton_rebin_multiperiod->setEnabled(enable);
+
+  // fitting
+  m_uiTabFitting.pushButton_fitting_browse_run_num->setEnabled(enable);
+  m_uiTabFitting.lineEdit_pushButton_run_num->setEnabled(enable);
+  m_uiTabFitting.pushButton_fitting_browse_peaks->setEnabled(enable);
+  m_uiTabFitting.lineEdit_fitting_peaks->setEnabled(enable);
+  m_uiTabFitting.pushButton_fit->setEnabled(enable);
 }
 
 void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
@@ -594,6 +709,159 @@ size_t EnggDiffractionViewQtGUI::rebinningPulsesNumberPeriods() const {
 
 double EnggDiffractionViewQtGUI::rebinningPulsesTime() const {
   return m_uiTabPreproc.doubleSpinBox_step_time->value();
+}
+
+void EnggDiffractionViewQtGUI::setBankDir(int idx) {
+
+  if (m_fitting_runno_dir_vec.size() >= size_t(idx)) {
+
+    std::string bankDir = m_fitting_runno_dir_vec[idx];
+    Poco::Path fpath(bankDir);
+
+    setfittingRunNo(QString::fromUtf8(bankDir.c_str()));
+  }
+}
+
+std::string EnggDiffractionViewQtGUI::fittingRunNoFactory(std::string bank,
+                                                          std::string fileName,
+                                                          std::string &bankDir,
+                                                          std::string fileDir) {
+
+  std::string genDir = fileName.substr(0, fileName.size() - 1);
+  Poco::Path bankFile(genDir + bank + ".nxs");
+  if (bankFile.isFile()) {
+    bankDir = fileDir + genDir + bank + ".nxs";
+  }
+  return bankDir;
+}
+
+std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
+  std::string fileData = "";
+  std::string line;
+  std::string comma = ", ";
+
+  std::ifstream peakFile(fileDir);
+
+  if (peakFile.is_open()) {
+    while (std::getline(peakFile, line)) {
+      fileData += line;
+      if (!peakFile.eof())
+        fileData += comma;
+    }
+    peakFile.close();
+  }
+
+  else
+    fileData = "";
+
+  return fileData;
+}
+
+void EnggDiffractionViewQtGUI::setDataVector(
+    std::vector<boost::shared_ptr<QwtData>> &data, bool focused) {
+  if (focused) {
+    dataCurvesFactory(data, m_focusedDataVector, focused);
+  } else {
+    dataCurvesFactory(data, m_fittedDataVector, focused);
+  }
+}
+
+void EnggDiffractionViewQtGUI::dataCurvesFactory(
+    std::vector<boost::shared_ptr<QwtData>> &data,
+    std::vector<QwtPlotCurve *> &dataVector, bool focused) {
+
+  // clear vector
+  for (auto curves : dataVector) {
+    if (curves) {
+      curves->detach();
+      delete curves;
+    }
+  }
+
+  if (dataVector.size() > 0)
+    dataVector.clear();
+  resetView();
+
+  // dark colours could be removed so the colored peaks stand out more
+  const std::array<QColor, 16> QPenList{
+      {Qt::white, Qt::red, Qt::darkRed, Qt::green, Qt::darkGreen, Qt::blue,
+       Qt::darkBlue, Qt::cyan, Qt::darkCyan, Qt::magenta, Qt::darkMagenta,
+       Qt::yellow, Qt::darkYellow, Qt::gray, Qt::darkGray, Qt::lightGray}};
+
+  std::mt19937 gen;
+  std::uniform_int_distribution<std::size_t> dis(0, QPenList.size() - 1);
+
+  for (size_t i = 0; i < data.size(); i++) {
+    auto *peak = data[i].get();
+
+    QwtPlotCurve *dataCurve = new QwtPlotCurve();
+    dataCurve->setStyle(QwtPlotCurve::Lines);
+    if (!focused) {
+      auto randIndex = dis(gen);
+      dataCurve->setPen(QPen(QPenList[randIndex], 1));
+    }
+    dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+
+    dataVector.push_back(dataCurve);
+
+    dataVector[i]->setData(*peak);
+    dataVector[i]->attach(m_uiTabFitting.dataPlot);
+  }
+
+  m_uiTabFitting.dataPlot->replot();
+  m_zoomTool->setZoomBase();
+  // enable zoom & select peak btn after the plotting on graph
+  setZoomTool(true);
+  m_uiTabFitting.pushButton_select_peak->setEnabled(true);
+  data.clear();
+}
+
+void EnggDiffractionViewQtGUI::setPeakPickerEnabled(bool enabled) {
+  m_peakPicker->setEnabled(enabled);
+  m_peakPicker->setVisible(enabled);
+  m_uiTabFitting.dataPlot->replot(); // PeakPicker might get hidden/shown
+  m_uiTabFitting.pushButton_add_peak->setEnabled(enabled);
+  if (enabled) {
+    QString btnText = "Reset Peak Selector";
+    m_uiTabFitting.pushButton_select_peak->setText(btnText);
+  }
+}
+
+void EnggDiffractionViewQtGUI::setPeakPicker(
+    const IPeakFunction_const_sptr &peak) {
+  m_peakPicker->setPeak(peak);
+  m_uiTabFitting.dataPlot->replot();
+}
+
+double EnggDiffractionViewQtGUI::getPeakCentre() const {
+  auto peak = m_peakPicker->peak();
+  auto centre = peak->centre();
+  return centre;
+}
+
+void EnggDiffractionViewQtGUI::fittingWriteFile(const std::string &fileDir) {
+  std::ofstream outfile(fileDir.c_str());
+  if (!outfile) {
+    userWarning("File not found",
+                "File " + fileDir + " , could not be found. Please try again!");
+  } else {
+    auto expPeaks = m_uiTabFitting.lineEdit_fitting_peaks->text();
+    outfile << expPeaks.toStdString();
+  }
+}
+
+void EnggDiffractionViewQtGUI::setZoomTool(bool enabled) {
+  m_zoomTool->setEnabled(enabled);
+}
+
+void EnggDiffractionViewQtGUI::resetView() {
+  // Resets the view to a sensible default
+  // Auto scale the axis
+  m_uiTabFitting.dataPlot->setAxisAutoScale(QwtPlot::xBottom);
+  m_uiTabFitting.dataPlot->setAxisAutoScale(QwtPlot::yLeft);
+
+  // Set this as the default zoom level
+  m_zoomTool->setZoomBase(true);
 }
 
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
@@ -773,6 +1041,10 @@ void EnggDiffractionViewQtGUI::rebinMultiperiodClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::RebinMultiperiod);
 }
 
+void EnggDiffractionViewQtGUI::fitClicked() {
+  m_presenter->notify(IEnggDiffractionPresenter::FitPeaks);
+}
+
 void EnggDiffractionViewQtGUI::browseInputDirCalib() {
   QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirCalib);
   if (prevPath.isEmpty()) {
@@ -888,6 +1160,58 @@ void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
   m_uiTabFocus.lineEdit_texture_grouping_file->setText(path);
 }
 
+void EnggDiffractionViewQtGUI::browseFitFocusedRun() {
+  QString prevPath = QString::fromStdString(m_focusDir);
+  if (prevPath.isEmpty()) {
+    prevPath =
+        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  }
+  std::string nexusFormat = "Nexus file with calibration table: NXS, NEXUS"
+                            "(*.nxs *.nexus);;";
+
+  QString path(
+      QFileDialog::getOpenFileName(this, tr("Open Focused File "), prevPath,
+                                   QString::fromStdString(nexusFormat)));
+
+  if (path.isEmpty()) {
+    return;
+  }
+
+  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
+  setfittingRunNo(path);
+  getBanks();
+}
+
+void EnggDiffractionViewQtGUI::browsePeaksToFit() {
+
+  try {
+    QString prevPath = QString::fromStdString(m_focusDir);
+    if (prevPath.isEmpty()) {
+      prevPath = MantidQt::API::AlgorithmInputHistory::Instance()
+                     .getPreviousDirectory();
+    }
+
+    QString path(
+        QFileDialog::getOpenFileName(this, tr("Open Peaks To Fit"), prevPath,
+                                     QString::fromStdString(g_DetGrpExtStr)));
+
+    if (path.isEmpty()) {
+      return;
+    }
+
+    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
+
+    std::string peaksData = readPeaksFile(path.toStdString());
+
+    m_uiTabFitting.lineEdit_fitting_peaks->setText(
+        QString::fromStdString(peaksData));
+  } catch (...) {
+    userWarning("Unable to import the peaks from a file: ",
+                "File corrupted or could not be opened. Please try again");
+    return;
+  }
+}
+
 std::vector<std::string> EnggDiffractionViewQtGUI::focusingRunNo() const {
   return qListToVector(m_uiTabFocus.lineEdit_run_num->getFilenames(),
                        m_uiTabFocus.lineEdit_run_num->isValid());
@@ -999,6 +1323,287 @@ void EnggDiffractionViewQtGUI::plotRepChanged(int /*idx*/) {
   if (!plotType)
     return;
   m_currentType = plotType->currentIndex();
+}
+
+void EnggDiffractionViewQtGUI::fittingBankIdChanged(int /*idx*/) {
+  QComboBox *BankName = m_uiTabFitting.comboBox_bank;
+  if (!BankName)
+    return;
+  m_fitting_bank_Id = BankName->currentIndex();
+}
+
+void EnggDiffractionViewQtGUI::setBankIdComboBox(int idx) {
+  QComboBox *bankName = m_uiTabFitting.comboBox_bank;
+  bankName->setCurrentIndex(idx);
+}
+
+void EnggDiffractionViewQtGUI::setfittingRunNo(QString path) {
+  m_uiTabFitting.lineEdit_pushButton_run_num->setText(path);
+}
+
+std::string EnggDiffractionViewQtGUI::fittingRunNo() const {
+  return m_uiTabFitting.lineEdit_pushButton_run_num->text().toStdString();
+}
+
+std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {
+  // this should be moved to Helper or could use the poco string tokenizers
+  std::string exptPeaks =
+      m_uiTabFitting.lineEdit_fitting_peaks->text().toStdString();
+  size_t strLength = exptPeaks.length() - 1;
+
+  if (!exptPeaks.empty()) {
+
+    if (exptPeaks.at(size_t(0)) == ',') {
+      exptPeaks.erase(size_t(0), 1);
+      strLength -= size_t(1);
+    }
+
+    if (exptPeaks.at(strLength) == ',') {
+      exptPeaks.erase(strLength, 1);
+    }
+  }
+  return exptPeaks;
+}
+
+void EnggDiffractionViewQtGUI::fittingListWidgetBank(int /*idx*/) {
+
+  QListWidget *BankSelected = m_uiTabFitting.listWidget_fitting_bank_preview;
+  if (!BankSelected)
+    return;
+  m_fitting_bank_Id = BankSelected->currentRow();
+}
+
+void EnggDiffractionViewQtGUI::setListWidgetBank(int idx) {
+
+  QListWidget *selectBank = m_uiTabFitting.listWidget_fitting_bank_preview;
+  selectBank->setCurrentRow(idx);
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    fittingRunNoChanged() {
+  // TODO: much of this should be moved to presenter
+  try {
+    QString focusedFile = m_uiTabFitting.lineEdit_pushButton_run_num->text();
+    std::string strFocusedFile = focusedFile.toStdString();
+    // file name
+    Poco::Path selectedfPath(strFocusedFile);
+    Poco::Path bankDir;
+
+    // handling of vectors
+    m_fitting_runno_dir_vec.clear();
+    std::string strFPath = selectedfPath.toString();
+    std::vector<std::string> splitBaseName = splitFittingDirectory(strFPath);
+
+    if (selectedfPath.isFile() && !splitBaseName.empty()) {
+
+#ifdef __unix__
+      bankDir = selectedfPath.parent();
+#else
+      bankDir = (bankDir).expand(selectedfPath.parent().toString());
+#endif
+
+      if (!splitBaseName.empty() && splitBaseName.size() > 3) {
+        std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] + "_" +
+                               splitBaseName[2] + "_" + splitBaseName[3];
+        std::string strBankDir = bankDir.toString();
+        updateFittingDirVec(strBankDir, foc_file);
+      }
+      // if run number length greater
+    } else if (focusedFile.count() > 4) {
+      // if given a run number instead
+      updateFittingDirVec(m_focusDir, strFocusedFile);
+    } else {
+      userWarning("Invalid Input", "Invalid directory or run number given. "
+                                   "Please try again");
+    }
+
+    try {
+      // add bank to the combo-box and list view
+      addBankItems(splitBaseName, focusedFile);
+    } catch (std::runtime_error &re) {
+      userWarning("Unable to insert items: ",
+                  "Could not add banks to "
+                  "combo-box or list widget; " +
+                      static_cast<std::string>(re.what()) +
+                      ". Please try again");
+    }
+  } catch (std::runtime_error &re) {
+    userWarning("Invalid file", "Unable to select the file; " +
+                                    static_cast<std::string>(re.what()));
+    return;
+  }
+}
+
+void EnggDiffractionViewQtGUI::updateFittingDirVec(std::string &bankDir,
+                                                   std::string &focusedFile) {
+
+  try {
+
+    std::string cwd(bankDir);
+    Poco::DirectoryIterator it(cwd);
+    Poco::DirectoryIterator end;
+    while (it != end) {
+      if (it->isFile()) {
+        std::string itFilePath = it->path();
+        Poco::Path itBankfPath(itFilePath);
+
+        std::string itbankFileName = itBankfPath.getBaseName();
+        // check if it not any other file.. e.g: texture
+        if (itbankFileName.find(focusedFile) != std::string::npos) {
+          m_fitting_runno_dir_vec.push_back(itFilePath);
+        }
+      }
+      ++it;
+    }
+  } catch (std::runtime_error &re) {
+    userWarning("Invalid file", "File not found in the following directory; " +
+                                    bankDir + ". " +
+                                    static_cast<std::string>(re.what()));
+  }
+}
+
+std::vector<std::string>
+EnggDiffractionViewQtGUI::splitFittingDirectory(std::string &selectedfPath) {
+
+  Poco::Path PocofPath(selectedfPath);
+  std::string selectedbankfName = PocofPath.getBaseName();
+  std::vector<std::string> splitBaseName;
+  if (selectedbankfName.find("ENGINX_") != std::string::npos) {
+    boost::split(splitBaseName, selectedbankfName, boost::is_any_of("_."));
+  }
+  return splitBaseName;
+}
+
+void EnggDiffractionViewQtGUI::addBankItems(
+    std::vector<std::string> splittedBaseName, QString selectedFile) {
+
+  if (!m_fitting_runno_dir_vec.empty()) {
+
+    // delete previous bank added to the list
+    m_uiTabFitting.comboBox_bank->clear();
+    m_uiTabFitting.listWidget_fitting_bank_preview->clear();
+
+    for (size_t i = 0; i < m_fitting_runno_dir_vec.size(); i++) {
+      Poco::Path vecFile(m_fitting_runno_dir_vec[i]);
+      std::string strVecFile = vecFile.toString();
+      // split the directory from m_fitting_runno_dir_vec
+      std::vector<std::string> vecFileSplit = splitFittingDirectory(strVecFile);
+      // assign the file bank id
+      std::string bankID = (vecFileSplit[vecFileSplit.size() - 1]);
+
+      bool isDigit = false;
+      for (size_t i = 0; i < bankID.size(); i++) {
+        char *str = &bankID[i];
+        if (std::isdigit(*str)) {
+          isDigit = true;
+        }
+      }
+
+      if (isDigit) {
+        m_uiTabFitting.comboBox_bank->addItem(QString::fromStdString(bankID));
+        m_uiTabFitting.listWidget_fitting_bank_preview->addItem(
+            QString::fromStdString(bankID));
+      } else {
+        m_uiTabFitting.comboBox_bank->addItem(QString("Bank %1").arg(i + 1));
+        m_uiTabFitting.listWidget_fitting_bank_preview->addItem(
+            QString("%1").arg(i + 1));
+      }
+    }
+    m_uiTabFitting.comboBox_bank->setEnabled(true);
+    m_uiTabFitting.listWidget_fitting_bank_preview->setEnabled(true);
+  } else {
+    // upon invalid file
+    // disable the widgets when only one related file found
+    m_uiTabFitting.comboBox_bank->setEnabled(false);
+    m_uiTabFitting.listWidget_fitting_bank_preview->setEnabled(false);
+
+    m_uiTabFitting.comboBox_bank->clear();
+    m_uiTabFitting.listWidget_fitting_bank_preview->clear();
+  }
+
+  setDefaultBank(splittedBaseName, selectedFile);
+}
+
+void EnggDiffractionViewQtGUI::setDefaultBank(
+    std::vector<std::string> splittedBaseName, QString selectedFile) {
+
+  if (!splittedBaseName.empty()) {
+
+    std::string bankID = (splittedBaseName[splittedBaseName.size() - 1]);
+    auto combo_data =
+        m_uiTabFitting.comboBox_bank->findText(QString::fromStdString(bankID));
+
+    if (combo_data > -1) {
+      setBankIdComboBox(combo_data);
+    } else {
+      setfittingRunNo(selectedFile);
+    }
+  } else {
+    setfittingRunNo(selectedFile);
+  }
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setPeakPick() {
+  auto bk2bk =
+      FunctionFactory::Instance().createFunction("BackToBackExponential");
+  auto bk2bkFunc = boost::dynamic_pointer_cast<IPeakFunction>(bk2bk);
+  // set the peak to BackToBackExponential function
+  setPeakPicker(bk2bkFunc);
+  setPeakPickerEnabled(true);
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addPeakToList() {
+
+  if (m_peakPicker->isEnabled()) {
+    auto peakCentre = getPeakCentre();
+
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(4) << peakCentre;
+    auto strPeakCentre = stream.str();
+
+    auto curExpPeaksList = m_uiTabFitting.lineEdit_fitting_peaks->text();
+
+    if (!curExpPeaksList.isEmpty()) {
+
+      std::string expPeakStr = curExpPeaksList.toStdString();
+      std::string lastTwoChr = expPeakStr.substr(expPeakStr.size() - 2);
+      auto lastChr = expPeakStr.back();
+      char comma = ',';
+      if (lastChr == comma || lastTwoChr == ", ") {
+        curExpPeaksList.append(QString::fromStdString(" " + strPeakCentre));
+      } else {
+        QString comma = ", ";
+        curExpPeaksList.append(comma + QString::fromStdString(strPeakCentre));
+      }
+      m_uiTabFitting.lineEdit_fitting_peaks->setText(curExpPeaksList);
+    }
+  }
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::savePeakList() {
+  // call function in EnggPresenter..
+
+  try {
+    QString prevPath = QString::fromStdString(m_focusDir);
+    if (prevPath.isEmpty()) {
+      prevPath = MantidQt::API::AlgorithmInputHistory::Instance()
+                     .getPreviousDirectory();
+    }
+
+    QString path(QFileDialog::getSaveFileName(
+        this, tr("Save Expected Peaks List"), prevPath,
+        QString::fromStdString(g_DetGrpExtStr)));
+
+    if (path.isEmpty()) {
+      return;
+    }
+    const std::string strPath = path.toStdString();
+    fittingWriteFile(strPath);
+  } catch (...) {
+    userWarning("Unable to save the peaks file: ",
+                "Invalid file path or or could not be saved. Please try again");
+    return;
+  }
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {

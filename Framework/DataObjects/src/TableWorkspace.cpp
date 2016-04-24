@@ -114,7 +114,7 @@ API::Column_sptr TableWorkspace::getColumn(const std::string &name) {
 API::Column_const_sptr
 TableWorkspace::getColumn(const std::string &name) const {
   for (const auto &column : m_columns) {
-    if (column.get()->name() == name) {
+    if (column->name() == name) {
       return column;
     }
   }
@@ -270,6 +270,28 @@ void TableWorkspace::sort(std::vector<std::pair<std::string, bool>> &criteria) {
   for (size_t i = 0; i < nCols; ++i) {
     getColumn(i)->sortValues(indexVec);
   }
+}
+
+/// Clone the workspace keeping only selected columns.
+/// @param colNames :: Names of columns to clone.
+API::ITableWorkspace *
+TableWorkspace::doCloneColumns(const std::vector<std::string> &colNames) const {
+  if (colNames.empty()) {
+    return new TableWorkspace(*this);
+  }
+  auto ws = new TableWorkspace();
+  ws->setRowCount(rowCount());
+  auto it = m_columns.cbegin();
+  while (it != m_columns.cend()) {
+    if (colNames.end() !=
+        std::find(colNames.begin(), colNames.end(), (**it).name())) {
+      ws->addColumn(boost::shared_ptr<API::Column>((*it)->clone()));
+    }
+    ++it;
+  }
+  // copy logs/properties.
+  ws->m_LogManager = boost::make_shared<API::LogManager>(*(m_LogManager));
+  return ws;
 }
 
 //    template<>

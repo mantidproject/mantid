@@ -26,6 +26,24 @@ loaded.
 -  TODO load the spectra detector mapping. This may be very simple for
    Muon instruments.
 
+Version Identification
+######################
+
+To be identified as a version 2 muon nexus file, the nexus file must have a
+``IDF_version`` or ``idf_version`` item in its main group 
+with an integer value of ``2`` and also a
+``definition`` item with string value ``"muonTD"`` or ``"pulsedTD"``,
+else it will be identified as version 1.
+
+.. _`Version 1 only`:
+
+The following properties apply only to Version 1:
+
+* AutoGroup
+* MainFieldDirection
+* DeadTimeTable
+* DetectorGroupingTable
+
 Time series data
 ################
 
@@ -39,32 +57,79 @@ Errors
 The error for each histogram count is set as the square root of the
 number of counts.
 
-Time bin data
-#############
+Details of data loaded
+######################
 
-The *corrected\_times* field of the Nexus file is used to provide time
-bin data and the bin edge values are calculated from these bin centre
-times.
+Here are more details of data loaded from the Nexus file:
 
-Multiperiod data
-################
 
-To determine if a file contains data from more than one period the field
-*switching\_states* is read from the Nexus file. If this value is
-greater than one it is taken to be the number of periods, :math:`N_p` of
-the data. In this case the :math:`N_s` spectra in the *histogram\_data*
-field are split with :math:`N_s/N_p` assigned to each period.
++----------------------------------+--------------------------------------------+----------------------------------------+
+| Description of Data              | Found in Nexus file                        | Placed in Workspace (Workspace2D)      |
+|                                  | (within the main entry)                    | or output                              |
++==================================+============================================+========================================+
+| Detector Data                    | First group of class NXData                | Histogram Data of workspace            |
+|                                  | (henceforth referred as [DET])             |                                        |
++----------------------------------+--------------------------------------------+----------------------------------------+
+| Instrument                       | group ``Instrument``                       | Workspace instrument                   |
+|                                  |                                            | as loaded by LoadInstrumentFromNexus   |
++----------------------------------+--------------------------------------------+----------------------------------------+ 
+| Spectrum of each workspace index | [DET]``/spectrum_index``                   | Spectra-Detector mapping of workspace  |
++----------------------------------+--------------------------------------------+----------------------------------------+ 
+| Title (optional)                 | ``title``                                  | ``title`` in workspace                 |
++----------------------------------+--------------------------------------------+----------------------------------------+
+| Note orcomment (optional)        | ``note``                                   | ``comment`` in workspace               |
++----------------------------------+--------------------------------------------+----------------------------------------+ 
+| Time Zero (optional)             | ``instrument/detector_fb/time_zero``       | TimeZero property                      |
+|                                  | if found                                   |                                        |
++----------------------------------+--------------------------------------------+----------------------------------------+ 
+| First good time (optional)       | ``instrument/detector_fb/first_good_time`` | FirstGoodData property                 |
+|                                  | if found                                   |                                        |
++----------------------------------+--------------------------------------------+----------------------------------------+ 
+| Run                              | various places as shown later on           | Run object of workspace                |
++----------------------------------+--------------------------------------------+----------------------------------------+
+| Sample name                      | ``sample/name``                            | ``name`` in Sample Object of workspace | 
++----------------------------------+--------------------------------------------+----------------------------------------+
+| Time series                      | ``sample/`` groups of class ``NXLog``      |  time series log in run object         |
++----------------------------------+--------------------------------------------+----------------------------------------+
 
-ChildAlgorithms used
-####################
+Run Object
+''''''''''
+LoadMuonNexus does not run LoadNexuslogs to load run logs. Information is loaded as follows:
+
++---------------------------+----------------------------------+
+| Nexus                     | Workspace run object             |
++===========================+==================================+
+| ``title``                 | ``run_title``                    |
++---------------------------+----------------------------------+
+| (data)                    | ``nspectra``                     | 
++---------------------------+----------------------------------+
+| ``start_time``            | ``run_start``                    |
++---------------------------+----------------------------------+
+| ``end_time``              | ``run_end``                      |
++---------------------------+----------------------------------+
+| ``run/good_total_frames`` | ``goodfrm``                      |
++---------------------------+----------------------------------+
+| ``run/number_periods``    | ``nperiods``                     |
++---------------------------+----------------------------------+
+| (start & end times)       | ``dur_secs``                     |
++---------------------------+----------------------------------+
+
+
+(data) indicates that the number is got from the histogram data in an appropiate manner.
+
+
+Child Algorithms used
+#####################
 
 The ChildAlgorithms used by LoadMuonNexus are:
 
--  LoadMuonLog - this reads log information from the Nexus file and uses
-   it to create TimeSeriesProperty entries in the workspace.
--  LoadInstrument - this algorithm looks for an XML description of the
+-  :ref:`algm-LoadMuonNexus-v1` - this loads the muon nexus file if not identified as
+   version 2. It in turn uses the following child algorithm:
+    -  :ref:`algm-LoadMuonLog` - this reads log information from the Nexus file and uses
+       it to create TimeSeriesProperty entries in the workspace.
+-  :ref:`algm-LoadInstrument` - this algorithm looks for an XML description of the
    instrument and if found reads it.
--  LoadIntstrumentFromNexus - this is called if the normal
+-  :ref:`algm-LoadInstrumentFromNexus` - this is called if the normal
    LoadInstrument fails. As the Nexus file has limited instrument data,
    this only populates a few fields.
 
@@ -79,6 +144,10 @@ This is still in active use, if the current version of LoadMuonNexus
 detects that it has been asked to load a previous version muon nexus
 file it will call the previous version of the algorithm to perform the
 task.
+
+See :ref:`algm-LoadMuonNexus-v1` for more details about version 1.
+
+Some algorithm properties apply to `Version 1 only`_.
 
 Usage
 -----

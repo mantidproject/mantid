@@ -57,6 +57,12 @@ private:
     doRebinningPulses(runNo, nperiods, timeStep, outWSName);
     rebinningFinished();
   }
+
+  void startAsyncFittingWorker(const std::string &focusedRunNo,
+                               const std::string &ExpectedPeaks) override {
+    doFitting(focusedRunNo, ExpectedPeaks);
+    fittingFinished();
+  }
 };
 
 class EnggDiffractionPresenterTest : public CxxTest::TestSuite {
@@ -1128,6 +1134,62 @@ public:
     pres.notify(IEnggDiffractionPresenter::RebinMultiperiod);
   }
 
+  void test_fitting_with_missing_param() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, fittingRunNo()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, fittingPeaksData()).Times(1).WillOnce(Return(""));
+
+    // No errors/1 warnings. There will be an error log from the algorithms
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    pres.notify(IEnggDiffractionPresenter::FitPeaks);
+  }
+
+  // This would test the fitting tab with no focused workspace
+  // which should produce a warning
+  void test_fitting_without_focused_run() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    EnggDiffPresenterNoThread pres(&mockView);
+
+    // inputs from user
+    const std::string mockFname = "";
+    EXPECT_CALL(mockView, fittingRunNo()).Times(1).WillOnce(Return(mockFname));
+    EXPECT_CALL(mockView, fittingPeaksData())
+        .Times(1)
+        .WillOnce(Return("2.57,4.88,5.78"));
+
+    // No errors/1 warnings. There will be an error log from the algorithms
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    pres.notify(IEnggDiffractionPresenter::FitPeaks);
+  }
+
+  // This would test the fitting tab with invalid expected peaks but should only
+  // produce a warning
+  void test_fitting_with_invalid_expected_peaks() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    EnggDiffPresenterNoThread pres(&mockView);
+    EnggDiffCalibSettings calibSettings;
+
+    // inputs from user
+    EXPECT_CALL(mockView, fittingRunNo())
+        .Times(1)
+        .WillOnce(Return(g_focusedRun));
+    EXPECT_CALL(mockView, fittingPeaksData())
+        .Times(1)
+        .WillOnce(Return(",3.5,7.78,r43d"));
+
+    // No errors/1 warnings. There will be an error log from the algorithms
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    pres.notify(IEnggDiffractionPresenter::FitPeaks);
+  }
+
   void test_logMsg() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
@@ -1204,6 +1266,7 @@ private:
   std::vector<bool> m_ex_enginx_banks;
   const static std::string g_eventModeRunNo;
   const static std::string g_validRunNo;
+  const static std::string g_focusedRun;
   EnggDiffCalibSettings m_basicCalibSettings;
 
   std::vector<std::string> m_ex_empty_run_num;
@@ -1220,6 +1283,9 @@ private:
 // unit test data. TODO: find a small one or crop a big one.
 const std::string EnggDiffractionPresenterTest::g_eventModeRunNo =
     "ENGINX228061";
+
+const std::string EnggDiffractionPresenterTest::g_focusedRun =
+    "focused_texture_bank_1";
 
 const std::string EnggDiffractionPresenterTest::g_validRunNo = "228061";
 

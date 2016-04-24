@@ -91,8 +91,11 @@ void LoadNexusLogs::init() {
   declareProperty(
       make_unique<PropertyWithValue<bool>>("OverwriteLogs", true,
                                            Direction::Input),
-      "If true then existing logs will be overwritten, if false they will "
+      "If true then some existing logs will be overwritten, if false they will "
       "not.");
+  declareProperty(make_unique<PropertyWithValue<std::string>>("NXentryName", "",
+                                                              Direction::Input),
+                  "Entry in the nexus file from which to read the logs");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -106,17 +109,20 @@ void LoadNexusLogs::exec() {
   std::string filename = getPropertyValue("Filename");
   MatrixWorkspace_sptr workspace = getProperty("Workspace");
 
+  std::string entry_name = getPropertyValue("NXentryName");
   // Find the entry name to use (normally "entry" for SNS, "raw_data_1" for
-  // ISIS)
-  std::string entry_name = LoadTOFRawNexus::getEntryName(filename);
-
+  // ISIS) if entry name is empty
+  if (entry_name.empty()) {
+    entry_name = LoadTOFRawNexus::getEntryName(filename);
+  }
   ::NeXus::File file(filename);
   // Find the root entry
   try {
     file.openGroup(entry_name, "NXentry");
   } catch (::NeXus::Exception &) {
     throw std::invalid_argument("Unknown NeXus file format found in file '" +
-                                filename + "'");
+                                filename + "', or '" + entry_name +
+                                "' is not a valid NXentry");
   }
 
   /// Use frequency start for Monitor19 and Special1_19 logs with "No Time" for

@@ -750,7 +750,7 @@ int CreateSimpleAPI(int, mxArray **, int nrhs, const mxArray *prhs[]) {
     std::string name = key.substr(0, key.find("|"));
     VersionMap::iterator vIter = vMap.find(name);
     if (vIter == vMap.end())
-      vMap.insert(make_pair(name, 1));
+      vMap.emplace(name, 1);
     else
       ++(vIter->second);
   }

@@ -15,8 +15,6 @@ namespace Mantid {
 namespace VATES {
 class DLLExport CompositePeaksPresenterVsi : public PeaksPresenterVsi {
 public:
-  CompositePeaksPresenterVsi();
-  ~CompositePeaksPresenterVsi() override;
   Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() const override {
     throw std::runtime_error(
         "The composite peaks presenter has no single peaks workspace.");
@@ -36,8 +34,8 @@ public:
                         specialCoordinateSystem) const override;
   void addPresenter(PeaksPresenterVsi_sptr presenter);
   std::map<std::string, std::vector<bool>> getInitializedViewablePeaks() const;
-  void removePresenter(std::string peaksWorkspaceName);
-  void updateWorkspaces(std::vector<std::string> peaksWorkspaceNames);
+  void removePresenter(const std::string &peaksWorkspaceName);
+  void updateWorkspaces(const std::vector<std::string> &peaksWorkspaceNames);
   void sortPeaksWorkspace(const std::string &, const bool) override {}
   void sortPeaksWorkspace(
       const std::string &columnToSortBy, const bool sortedAscending,

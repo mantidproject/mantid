@@ -2,6 +2,7 @@ import unittest
 
 from mantid.simpleapi import *
 from vesuvio.profiles import (create_from_str, GaussianMassProfile,
+                              MultivariateGaussianMassProfile,
                               GramCharlierMassProfile)
 
 # --------------------------------------------------------------------------------
@@ -56,17 +57,17 @@ class GaussianMassProfileTest(unittest.TestCase):
         # and with prefix
         self.assertEqual("2.000000 < f0.Width < 7.000000,f0.Intensity > 0.0", test_profile.create_constraint_str("f0."))
 
-    def test_ties_str_is_empty_for_fixed_width(self):
+    def test_ties_str_for_fixed_width(self):
         test_profile = GaussianMassProfile(10, 16)
 
-        self.assertEqual("Width=10.000000", test_profile.create_ties_str())
+        self.assertEqual("Mass=16.000000,Width=10.000000", test_profile.create_ties_str())
 
-    def test_ties_str_for_constrained_width_is_empty(self):
+    def test_ties_str_for_constrained_width_contains_only_mass(self):
         test_profile = GaussianMassProfile([2,5,7], 16)
 
-        self.assertEqual("", test_profile.create_ties_str())
+        self.assertEqual("Mass=16.000000", test_profile.create_ties_str())
         # and with prefix
-        self.assertEqual("", test_profile.create_ties_str("f0."))
+        self.assertEqual("f0.Mass=16.000000", test_profile.create_ties_str("f0."))
 
 
     # ---------------- Failure cases ---------------------------
@@ -91,6 +92,75 @@ class GaussianMassProfileTest(unittest.TestCase):
 
         self.assertRaises(TypeError, GaussianMassProfile.from_str,
                           function_str, mass)
+
+
+# --------------------------------------------------------------------------------
+# Multivariate Gaussian
+# --------------------------------------------------------------------------------
+
+class MultivariateGaussianMassProfileTest(unittest.TestCase):
+
+    # ---------------- Success cases ---------------------------
+
+    def test_function_string_has_expected_form_with_no_defaults(self):
+        test_profiles = MultivariateGaussianMassProfile(None, 16)
+
+        expected = "name=MultivariateGaussianComptonProfile,IntegrationSteps=64,Mass=16.000000,SigmaX=1.000000,SigmaY=1.000000,SigmaZ=1.000000;"
+        self.assertEqual(expected, test_profiles.create_fit_function_str())
+
+    def test_function_string_has_expected_form_with_defaults_given(self):
+        test_profiles = MultivariateGaussianMassProfile(None, 16)
+        param_prefix = "f1."
+        param_vals = {
+                "f1.SigmaX": 5.0,
+                "f1.SigmaY": 8.0,
+                "f1.SigmaZ": 6.0,
+                "f1.Intensity": 4.5}
+
+        expected = "name=MultivariateGaussianComptonProfile,IntegrationSteps=64,Mass=16.000000,SigmaX=5.000000,SigmaY=8.000000,SigmaZ=6.000000,Intensity=4.500000;"
+        self.assertEqual(expected, test_profiles.create_fit_function_str(param_vals, param_prefix))
+
+    def test_function_string_integration_steps(self):
+        test_profiles = MultivariateGaussianMassProfile(None, 16)
+        test_profiles.integration_steps = 256
+
+        expected = "name=MultivariateGaussianComptonProfile,IntegrationSteps=256,Mass=16.000000,SigmaX=1.000000,SigmaY=1.000000,SigmaZ=1.000000;"
+        self.assertEqual(expected, test_profiles.create_fit_function_str())
+
+    def test_constraint_str(self):
+        test_profile = MultivariateGaussianMassProfile(None, 16)
+
+        self.assertEqual("Intensity > 0.0,SigmaX > 0.0,SigmaY > 0.0,SigmaZ > 0.0", test_profile.create_constraint_str())
+
+    def test_ties_str_for_fixed_width(self):
+        test_profile = MultivariateGaussianMassProfile(None, 16)
+
+        self.assertEqual("Mass=16.000000", test_profile.create_ties_str())
+
+    # ---------------- Failure cases ---------------------------
+
+    def test_string_not_starting_with_function_equals_name_gives_error(self):
+        function_str = "functipn=MultivariateGaussia,SigmaX=1.0,SigmaY=1.0,SigmaZ=1.0"
+        mass = 16.0
+
+        self.assertRaises(TypeError, MultivariateGaussianMassProfile.from_str,
+                          function_str, mass)
+
+    def test_string_not_starting_with_function_gives_error(self):
+        function_str = "MultivariateGaussian,SigmaX=1.0,SigmaY=1.0,SigmaZ=1.0"
+        mass = 16.0
+
+        self.assertRaises(TypeError, MultivariateGaussianMassProfile.from_str,
+                          function_str, mass)
+
+    def test_string_with_wrong_function_gives_error(self):
+        function_str = "function=Gaussian,width=[2, 5, 7]"
+        mass = 16.0
+
+        self.assertRaises(TypeError, MultivariateGaussianMassProfile.from_str,
+                          function_str, mass)
+
+
 
 # --------------------------------------------------------------------------------
 # GramCharlier
@@ -144,44 +214,44 @@ class GramCharlierMassProfileTest(unittest.TestCase):
     def test_ties_str_for_constrained_width_and_k_is_free_is_empty(self):
         test_profile = GramCharlierMassProfile([2,5,7], 16, [1,0,1], k_free=1, sears_flag=1)
 
-        expected = ""
+        expected = "Mass=16.000000"
         self.assertEqual(expected, test_profile.create_ties_str())
 
     def test_ties_str_for_constrained_width(self):
         # k is free
         test_profile = GramCharlierMassProfile([2,5,7], 16, [1,0,1], k_free=1, sears_flag=1)
 
-        expected = ""
+        expected = "Mass=16.000000"
         self.assertEqual(expected, test_profile.create_ties_str())
 
         # k is tied, sears=0
         test_profile = GramCharlierMassProfile([2,5,7], 16, [1,0,1], k_free=0, sears_flag=0)
 
-        expected = "f0.FSECoeff=0"
+        expected = "f0.Mass=16.000000,f0.FSECoeff=0"
         self.assertEqual(expected, test_profile.create_ties_str("f0."))
 
         # k is tied, sears=1
         test_profile = GramCharlierMassProfile([2,5,7], 16, [1,0,1], k_free=0, sears_flag=1)
 
-        expected = "f0.FSECoeff=f0.Width*sqrt(2)/12"
+        expected = "f0.Mass=16.000000,f0.FSECoeff=f0.Width*sqrt(2)/12"
         self.assertEqual(expected, test_profile.create_ties_str("f0."))
 
     def test_ties_str_for_fixed_width(self):
         test_profile = GramCharlierMassProfile(5, 16, [1,0,1], k_free=1, sears_flag=1)
 
-        expected = "Width=5.000000"
+        expected = "Mass=16.000000,Width=5.000000"
         self.assertEqual(expected, test_profile.create_ties_str())
 
         # k is tied, sears=0
         test_profile = GramCharlierMassProfile(5, 16, [1,0,1], k_free=0, sears_flag=0)
 
-        expected = "f0.Width=5.000000,f0.FSECoeff=0"
+        expected = "f0.Mass=16.000000,f0.Width=5.000000,f0.FSECoeff=0"
         self.assertEqual(expected, test_profile.create_ties_str("f0."))
 
         # k is tied, sears=1
         test_profile = GramCharlierMassProfile(5, 16, [1,0,1], k_free=0, sears_flag=1)
 
-        expected = "f0.Width=5.000000,f0.FSECoeff=f0.Width*sqrt(2)/12"
+        expected = "f0.Mass=16.000000,f0.Width=5.000000,f0.FSECoeff=f0.Width*sqrt(2)/12"
         self.assertEqual(expected, test_profile.create_ties_str("f0."))
 
     # ---------------- Failure cases ---------------------------

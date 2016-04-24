@@ -8,23 +8,20 @@ namespace Mantid {
 namespace CurveFitting {
 
 /// Constructor
-GSLMatrix::GSLMatrix() : m_matrix(nullptr) {}
+GSLMatrix::GSLMatrix() {}
 /// Constructor
 /// @param nx :: First dimension
 /// @param ny :: Second dimension
-GSLMatrix::GSLMatrix(const size_t nx, const size_t ny) {
-  m_matrix = gsl_matrix_alloc(nx, ny);
-}
+GSLMatrix::GSLMatrix(const size_t nx, const size_t ny)
+    : m_data(nx * ny), m_view(gsl_matrix_view_array(m_data.data(), nx, ny)) {}
 
 /// Copy constructor
 /// @param M :: The other matrix.
-GSLMatrix::GSLMatrix(const GSLMatrix &M) {
-  m_matrix = gsl_matrix_alloc(M.size1(), M.size2());
-  gsl_matrix_memcpy(m_matrix, M.gsl());
-}
+GSLMatrix::GSLMatrix(const GSLMatrix &M)
+    : m_data(M.m_data),
+      m_view(gsl_matrix_view_array(m_data.data(), M.size1(), M.size2())) {}
 
-/// Create a submatrix. A submatrix is a view into the parent matrix.
-/// Lifetime of a submatrix cannot exceed the lifetime of the parent.
+/// Create a submatrix. A submatrix is a copy of the parent matrix.
 /// @param M :: The parent matrix.
 /// @param row :: The first row in the submatrix.
 /// @param col :: The first column in the submatrix.
@@ -36,72 +33,72 @@ GSLMatrix::GSLMatrix(const GSLMatrix &M, size_t row, size_t col, size_t nRows,
     throw std::runtime_error("Submatrix exceeds matrix size.");
   }
   auto view = gsl_matrix_const_submatrix(M.gsl(), row, col, nRows, nCols);
-  m_matrix = gsl_matrix_alloc(nRows, nCols);
-  gsl_matrix_memcpy(m_matrix, &view.matrix);
+  m_data.resize(nRows * nCols);
+  m_view = gsl_matrix_view_array(m_data.data(), nRows, nCols);
+  gsl_matrix_memcpy(&m_view.matrix, &view.matrix);
 }
 
 /// Constructor
 /// @param M :: A matrix to copy.
-GSLMatrix::GSLMatrix(const Kernel::Matrix<double> &M) {
-  m_matrix = gsl_matrix_alloc(M.numRows(), M.numCols());
-  for (size_t i = 0; i < size1(); ++i)
-    for (size_t j = 0; j < size2(); ++j) {
-      set(i, j, M[i][j]);
-    }
-}
+GSLMatrix::GSLMatrix(const Kernel::Matrix<double> &M)
+    : m_data(M.getVector()),
+      m_view(gsl_matrix_view_array(m_data.data(), M.numRows(), M.numCols())) {}
 
 /// Create this matrix from a product of two other matrices
 /// @param mult2 :: Matrix multiplication helper object.
-GSLMatrix::GSLMatrix(const GSLMatrixMult2 &mult2) : m_matrix(nullptr) {
-  *this = mult2;
-}
+GSLMatrix::GSLMatrix(const GSLMatrixMult2 &mult2) { *this = mult2; }
 
 /// Create this matrix from a product of three other matrices
 /// @param mult3 :: Matrix multiplication helper object.
-GSLMatrix::GSLMatrix(const GSLMatrixMult3 &mult3) : m_matrix(nullptr) {
-  *this = mult3;
-}
+GSLMatrix::GSLMatrix(const GSLMatrixMult3 &mult3) { *this = mult3; }
+
+/// "Move" constructor
+GSLMatrix::GSLMatrix(std::vector<double> &&data, size_t nx, size_t ny)
+    : m_data(std::move(data)),
+      m_view(gsl_matrix_view_array(m_data.data(), nx, ny)) {}
 
 /// Destructor.
-GSLMatrix::~GSLMatrix() {
-  if (m_matrix) {
-    gsl_matrix_free(m_matrix);
-  }
-}
+GSLMatrix::~GSLMatrix() {}
 
 /// Copy assignment operator
 GSLMatrix &GSLMatrix::operator=(const GSLMatrix &M) {
-  resize(M.size1(), M.size2());
-  gsl_matrix_memcpy(m_matrix, M.gsl());
+  m_data = M.m_data;
+  m_view = gsl_matrix_view_array(m_data.data(), M.size1(), M.size2());
   return *this;
 }
 
+/// Get the pointer to the GSL matrix
+gsl_matrix *GSLMatrix::gsl() { return &m_view.matrix; }
+/// Get the const pointer to the GSL matrix
+const gsl_matrix *GSLMatrix::gsl() const { return &m_view.matrix; }
+
 /// Is matrix empty
-bool GSLMatrix::isEmpty() const { return m_matrix == nullptr; }
+bool GSLMatrix::isEmpty() const { return m_data.empty(); }
 
 /// Resize the matrix
 /// @param nx :: New first dimension
 /// @param ny :: New second dimension
 void GSLMatrix::resize(const size_t nx, const size_t ny) {
-  if (m_matrix) {
-    gsl_matrix_free(m_matrix);
-  }
-  m_matrix = gsl_matrix_alloc(nx, ny);
+  m_data.resize(nx * ny);
+  m_view = gsl_matrix_view_array(m_data.data(), nx, ny);
 }
 
 /// First size of the matrix
-size_t GSLMatrix::size1() const { return m_matrix ? m_matrix->size1 : 0; }
+size_t GSLMatrix::size1() const { return m_view.matrix.size1; }
 
 /// Second size of the matrix
-size_t GSLMatrix::size2() const { return m_matrix ? m_matrix->size2 : 0; }
+size_t GSLMatrix::size2() const { return m_view.matrix.size2; }
 
 /// set an element
 /// @param i :: The row
 /// @param j :: The column
 /// @param value :: The new vaule
 void GSLMatrix::set(size_t i, size_t j, double value) {
-  if (i < m_matrix->size1 && j < m_matrix->size2)
-    gsl_matrix_set(m_matrix, i, j, value);
+  if (isEmpty()) {
+    throw std::out_of_range("Matrix is empty.");
+  }
+  if (i < m_view.matrix.size1 && j < m_view.matrix.size2)
+    gsl_matrix_set(&m_view.matrix, i, j, value);
   else {
     throw std::out_of_range("GSLMatrix indices are out of range.");
   }
@@ -111,16 +108,21 @@ void GSLMatrix::set(size_t i, size_t j, double value) {
 /// @param i :: The row
 /// @param j :: The column
 double GSLMatrix::get(size_t i, size_t j) const {
-  if (i < m_matrix->size1 && j < m_matrix->size2)
-    return gsl_matrix_get(m_matrix, i, j);
-  throw std::out_of_range("GSLMatrix indices are out of range.");
+  if (isEmpty()) {
+    throw std::out_of_range("Matrix is empty.");
+  }
+  if (i < m_view.matrix.size1 && j < m_view.matrix.size2)
+    return gsl_matrix_get(&m_view.matrix, i, j);
+  else {
+    throw std::out_of_range("GSLMatrix indices are out of range.");
+  }
 }
 
 /// Set this matrix to identity matrix
-void GSLMatrix::identity() { gsl_matrix_set_identity(m_matrix); }
+void GSLMatrix::identity() { gsl_matrix_set_identity(&m_view.matrix); }
 
 /// Set all elements to zero
-void GSLMatrix::zero() { gsl_matrix_set_zero(m_matrix); }
+void GSLMatrix::zero() { gsl_matrix_set_zero(&m_view.matrix); }
 
 /// Set the matrix to be diagonal.
 /// @param d :: Values on the diagonal.
@@ -136,25 +138,25 @@ void GSLMatrix::diag(const GSLVector &d) {
 /// add a matrix to this
 /// @param M :: A matrix
 GSLMatrix &GSLMatrix::operator+=(const GSLMatrix &M) {
-  gsl_matrix_add(m_matrix, M.gsl());
+  gsl_matrix_add(&m_view.matrix, M.gsl());
   return *this;
 }
 /// add a constant to this matrix
 /// @param d :: A number
 GSLMatrix &GSLMatrix::operator+=(const double &d) {
-  gsl_matrix_add_constant(m_matrix, d);
+  gsl_matrix_add_constant(&m_view.matrix, d);
   return *this;
 }
 /// subtract a matrix from this
 /// @param M :: A matrix
 GSLMatrix &GSLMatrix::operator-=(const GSLMatrix &M) {
-  gsl_matrix_sub(m_matrix, M.gsl());
+  gsl_matrix_sub(&m_view.matrix, M.gsl());
   return *this;
 }
 /// multiply this matrix by a number
 /// @param d :: A number
 GSLMatrix &GSLMatrix::operator*=(const double &d) {
-  gsl_matrix_scale(m_matrix, d);
+  gsl_matrix_scale(&m_view.matrix, d);
   return *this;
 }
 
@@ -288,6 +290,11 @@ GSLVector GSLMatrix::copyColumn(size_t i) const {
   }
   auto columnView = gsl_matrix_const_column(gsl(), i);
   return GSLVector(&columnView.vector);
+}
+
+/// Create a new matrix and move the data to it.
+GSLMatrix GSLMatrix::move() {
+  return GSLMatrix(std::move(m_data), size1(), size2());
 }
 
 } // namespace CurveFitting
