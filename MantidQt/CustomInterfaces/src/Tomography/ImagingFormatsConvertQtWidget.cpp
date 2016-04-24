@@ -7,9 +7,12 @@ using namespace MantidQt::CustomInterfaces;
 
 #include <QCloseEvent>
 #include <QFileDialog>
-#include <QImage>
+#include <QImageWriter>
 #include <QMessageBox>
 #include <QSettings>
+
+#include <iostream>
+#include <QImage>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -64,7 +67,7 @@ void ImagingFormatsConvertQtWidget::setFormatsCombo(
 }
 
 std::string ImagingFormatsConvertQtWidget::inputPath() const {
-  return m_ui.lineEdit_input->text().toStdString();
+  return m_ui.lineEdit_input_path->text().toStdString();
 }
 
 std::string ImagingFormatsConvertQtWidget::inputFormatName() const {
@@ -72,18 +75,19 @@ std::string ImagingFormatsConvertQtWidget::inputFormatName() const {
   if (!cbox)
     return "";
 
-  return cbox->itemData(cbox->currentIndex()).toString().toStdString();
+  return cbox->currentText().toStdString();
 }
 
 std::string ImagingFormatsConvertQtWidget::outputPath() const {
-  return m_ui.lineEdit_output->text().toStdString();
+  return m_ui.lineEdit_output_path->text().toStdString();
 }
 
 std::string ImagingFormatsConvertQtWidget::outputFormatName() const {
   const auto cbox = m_ui.comboBox_output_format;
   if (!cbox)
     return "";
-  return cbox->itemData(cbox->currentIndex()).toString().toStdString();
+
+  return cbox->currentText().toStdString();
 }
 
 bool ImagingFormatsConvertQtWidget::compressHint() const {
@@ -91,7 +95,9 @@ bool ImagingFormatsConvertQtWidget::compressHint() const {
 }
 
 void ImagingFormatsConvertQtWidget::convert(
-    const std::string &inputName, const std::string &outputName) const {
+    const std::string &inputName, const std::string &inputFormat,
+    const std::string &outputName, const std::string &outputFormat) const {
+
   QImage img;
   img.load(QString::fromStdString(inputName));
 
@@ -102,8 +108,20 @@ void ImagingFormatsConvertQtWidget::convert(
     img.convertToFormat(toFormat, toFlags);
   }
 
-  img.save(QString::fromStdString(outputName));
+  // With (less flexible) QImage: img.save(QString::fromStdString(outputName));
+  QImageWriter writer(QString::fromStdString(outputName));
+  writer.setFormat(outputFormat.c_str());
+  writer.setCompression(0);
+  writer.write(img);
 }
+
+void ImagingFormatsConvertQtWidget::writeImg(
+    MatrixWorkspace_sptr inWks, const std::string &outputName,
+    const std::string &outFormat) const {}
+
+MatrixWorkspace_sptr
+ImagingFormatsConvertQtWidget::loadImg(const std::string &inputName,
+                                       const std::string &inputFormat) const {}
 
 size_t ImagingFormatsConvertQtWidget::maxSearchDepth() const {
   return static_cast<size_t>(m_ui.spinBox_max_search_depth->value());
@@ -113,18 +131,31 @@ void ImagingFormatsConvertQtWidget::saveSettings() const {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
 
+  qs.setValue("input-format", m_ui.comboBox_input_format->currentIndex());
+  qs.setValue("input-path", m_ui.lineEdit_input_path->text());
+
+  qs.setValue("output-format", m_ui.comboBox_output_format->currentIndex());
+  qs.setValue("bit-depth", m_ui.comboBox_bit_depth->currentIndex());
+  qs.setValue("compression", m_ui.comboBox_compression->currentIndex());
+  qs.setValue("max-search-depth", m_ui.spinBox_max_search_depth->value());
+  qs.setValue("output-path", m_ui.lineEdit_output_path->text());
+
   qs.setValue("interface-win-geometry", saveGeometry());
   qs.endGroup();
 }
+
+void ImagingFormatsConvertQtWidget::readSettings() {}
 
 void ImagingFormatsConvertQtWidget::initLayout() {
   // setup container ui
   m_ui.setupUi(this);
 
+  readSettings();
+
   setup();
-  // presenter that knows how to handle a IImageROIView should take care
-  // of all the logic. Note the view needs to now the concrete presenter
-  // here
+  // presenter that knows how to handle a view like this. It should
+  // take care of all the logic. Note the view needs to now the
+  // concrete presenter here
   m_presenter.reset(new ImagingFormatsConvertPresenter(this));
 
   // it will know what compute resources and tools we have available:
@@ -133,22 +164,23 @@ void ImagingFormatsConvertQtWidget::initLayout() {
 }
 
 void ImagingFormatsConvertQtWidget::setup() {
+
   connect(m_ui.pushButton_browse_input, SIGNAL(released()), this,
           SLOT(browseImgInputConvertClicked()));
 
   connect(m_ui.pushButton_browse_output, SIGNAL(released()), this,
           SLOT(browseImgOutputConvertClicked()));
 
-  connect(m_ui.pushButton_browse_output, SIGNAL(released()), this,
+  connect(m_ui.pushButton_convert, SIGNAL(released()), this,
           SLOT(convertClicked()));
 }
 
 void ImagingFormatsConvertQtWidget::browseImgInputConvertClicked() {
-  grabUserBrowseDir(m_ui.lineEdit_input);
+  grabUserBrowseDir(m_ui.lineEdit_input_path);
 }
 
 void ImagingFormatsConvertQtWidget::browseImgOutputConvertClicked() {
-  grabUserBrowseDir(m_ui.lineEdit_output);
+  grabUserBrowseDir(m_ui.lineEdit_output_path);
 }
 
 void ImagingFormatsConvertQtWidget::convertClicked() {
