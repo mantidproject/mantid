@@ -141,8 +141,12 @@ class LRReflectivityOutput(PythonAlgorithm):
 
                 if data_y_i[j] > 0:
                     if data_y[j] > 0:
-                        data_y[j] = 0.5 * (data_y[j] + data_y_i[j])
-                        data_e[j] = 0.5 * math.sqrt(data_e[j] * data_e[j] + data_e_i[j] * data_e_i[j])
+                        denom = 1.0 / data_e[j]**2 + 1.0 / data_e_i[j]**2
+                        data_y[j] = (data_y[j]/data_e[j]**2 + data_y_i[j]/data_e_i[j]**2) / denom
+                        data_e[j] = math.sqrt(1.0 / denom)
+
+                        #data_y[j] = 0.5 * (data_y[j] + data_y_i[j])
+                        #data_e[j] = 0.5 * math.sqrt(data_e[j] * data_e[j] + data_e_i[j] * data_e_i[j])
                     else:
                         data_y[j] = data_y_i[j]
                         data_e[j] = data_e_i[j]
@@ -169,8 +173,9 @@ class LRReflectivityOutput(PythonAlgorithm):
             total = 0.0
             weights = 0.0
             for i in range(len(y_values)):
-                total += e_values[i] * y_values[i]
-                weights += e_values[i]
+                w = 1.0 / e_values[i]**2
+                total += w * y_values[i]
+                weights += w
             scaling_factor = total / weights
 
         Scale(InputWorkspace=scaled_ws_list[0] + '_histo', OutputWorkspace=scaled_ws_list[0] + '_scaled',

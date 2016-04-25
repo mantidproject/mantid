@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidKernel/make_cow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
 #include "MantidTestHelpers/FakeGmockObjects.h"
@@ -18,6 +19,8 @@
 #include "PropertyManagerHelper.h"
 
 #include <cxxtest/TestSuite.h>
+#include <algorithm>
+#include <functional>
 #include <boost/make_shared.hpp>
 
 using std::size_t;
@@ -1291,6 +1294,60 @@ public:
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 
+  void test_x_uncertainty_can_be_set() {
+    // Arrange
+    WorkspaceTester ws;
+    const size_t numspec = 4;
+    const size_t j = 3;
+    const size_t k = j;
+    ws.init(numspec, j, k);
+
+    double values[3] = {10, 11, 17};
+    size_t workspaceIndexWithDx[3] = {0, 1, 2};
+
+    Mantid::MantidVec dxSpec0(j, values[0]);
+    Mantid::MantidVecPtr dxSpec1 =
+        Kernel::make_cow<Mantid::MantidVec>(j, values[1]);
+    boost::shared_ptr<Mantid::MantidVec> dxSpec2 =
+        boost::make_shared<Mantid::MantidVec>(Mantid::MantidVec(j, values[2]));
+
+    // Act
+    for (size_t spec = 0; spec < numspec; ++spec) {
+      TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(spec));
+    }
+    ws.setDx(workspaceIndexWithDx[0], dxSpec0);
+    ws.setDx(workspaceIndexWithDx[1], dxSpec1);
+    ws.setDx(workspaceIndexWithDx[2], dxSpec2);
+
+    // Assert
+    auto compareValue =
+        [&values](double data, size_t index) { return data == values[index]; };
+    for (auto &index : workspaceIndexWithDx) {
+      TSM_ASSERT("Should have x resolution values", ws.hasDx(index));
+      TSM_ASSERT_EQUALS("Should have a length of 3", ws.dataDx(index).size(),
+                        j);
+      auto compareValueForSpecificWorkspaceIndex =
+          std::bind(compareValue, std::placeholders::_1, index);
+
+      auto &dataDx = ws.dataDx(index);
+      TSM_ASSERT("dataDx should allow access to the spectrum",
+                 std::all_of(std::begin(dataDx), std::end(dataDx),
+                             compareValueForSpecificWorkspaceIndex));
+
+      auto &readDx = ws.readDx(index);
+      TSM_ASSERT("readDx should allow access to the spectrum",
+                 std::all_of(std::begin(readDx), std::end(readDx),
+                             compareValueForSpecificWorkspaceIndex));
+
+      auto refDx = ws.refDx(index);
+      TSM_ASSERT("readDx should allow access to the spectrum",
+                 std::all_of(std::begin(*refDx), std::end(*refDx),
+                             compareValueForSpecificWorkspaceIndex));
+    }
+
+    TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(3));
+  }
+
 private:
   Mantid::API::MantidImage_sptr createImage(size_t width, size_t height) {
     auto image = new Mantid::API::MantidImage(height);
@@ -1339,7 +1396,7 @@ public:
       auto detector = m_workspace.getDetector(i);
       result += L1;
       result += detector->getDistance(*sample);
-      result += m_workspace.detectorTwoTheta(detector);
+      result += m_workspace.detectorTwoTheta(*detector);
     }
     // We are computing an using the result to fool the optimizer.
     TS_ASSERT_DELTA(result, 5214709.740869, 1e-6);

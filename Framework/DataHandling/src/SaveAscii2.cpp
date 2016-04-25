@@ -390,16 +390,14 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
  */
 std::vector<std::string>
 SaveAscii2::stringListToVector(std::string &inputString) {
-  std::vector<std::string> stringVector;
   const std::vector<std::string> validMetaData{"spectrumnumber", "q", "angle"};
   boost::to_lower(inputString);
-  stringVector =
+  auto stringVector =
       Kernel::VectorHelper::splitStringIntoVector<std::string>(inputString);
-  for (auto iter = stringVector.begin(); iter != stringVector.end(); ++iter) {
-
-    if (std::find(validMetaData.begin(), validMetaData.end(), *iter) ==
+  for (const auto &input : stringVector) {
+    if (std::find(validMetaData.begin(), validMetaData.end(), input) ==
         validMetaData.end()) {
-      throw std::runtime_error(*iter + " is not recognised as a possible input "
+      throw std::runtime_error(input + " is not recognised as a possible input "
                                        "for SpectrumMetaData.\n Valid inputs "
                                        "are: SpectrumNumber, Q, Angle.");
     }
@@ -421,7 +419,7 @@ void SaveAscii2::populateQMetaData() {
     const auto detector = m_ws->getDetector(workspaceIndex);
     double twoTheta(0.0), efixed(0.0);
     if (!detector->isMonitor()) {
-      twoTheta = m_ws->detectorTwoTheta(detector) / 2.0;
+      twoTheta = 0.5 * m_ws->detectorTwoTheta(*detector);
       try {
         efixed = m_ws->getEFixed(detector);
       } catch (std::runtime_error) {
@@ -463,8 +461,9 @@ void SaveAscii2::populateAngleMetaData() {
     const auto specNo = m_ws->getSpectrum(i)->getSpectrumNo();
     const auto workspaceIndex = m_specToIndexMap[specNo];
     auto det = m_ws->getDetector(workspaceIndex);
-    const auto two_theta = m_ws->detectorTwoTheta(det);
-    const auto angleInDeg = two_theta * (180 / M_PI);
+    const auto two_theta = m_ws->detectorTwoTheta(*det);
+    constexpr double rad2deg = 180. / M_PI;
+    const auto angleInDeg = two_theta * rad2deg;
     const auto angleInDegStr = boost::lexical_cast<std::string>(angleInDeg);
     angles.push_back(angleInDegStr);
   }

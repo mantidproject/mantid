@@ -151,8 +151,8 @@ void TOFSANSResolution::exec() {
 
     // Multiplicative factor to go from lambda to Q
     // Don't get fooled by the function name...
-    const double theta = reducedWS->detectorTwoTheta(det);
-    const double factor = 4.0 * M_PI * sin(theta / 2.0);
+    const double theta = reducedWS->detectorTwoTheta(*det);
+    const double factor = 4.0 * M_PI * sin(0.5 * theta);
 
     const MantidVec &XIn = reducedWS->readX(i);
     const MantidVec &YIn = reducedWS->readY(i);
