@@ -101,12 +101,7 @@ void ImagingFormatsConvertQtWidget::convert(
     const std::string &inputName, const std::string &inputFormat,
     const std::string &outputName, const std::string &outputFormat) const {
 
-  // Simpler load with QImage: img.load(QString::fromStdString(inputName));
-  QImageReader reader(inputName.c_str());
-  if (!reader.autoDetectImageFormat()) {
-    reader.setFormat(inputFormat.c_str());
-  }
-  QImage img = reader.read();
+  QImage img = loadImgFile(inputName, inputFormat);
 
   if (!img.isGrayscale()) {
     // Qt5 has QImage::Format_Alpha8;
@@ -115,12 +110,7 @@ void ImagingFormatsConvertQtWidget::convert(
     img.convertToFormat(toFormat, toFlags);
   }
 
-  // With (less flexible) QImage: img.save(QString::fromStdString(outputName));
-  QImageWriter writer(QString::fromStdString(outputName));
-  writer.setFormat(outputFormat.c_str());
-  if (compressHint())
-    writer.setCompression(1);
-  writer.write(img);
+  writeImgFile(img, outputName, outputFormat);
 }
 
 void ImagingFormatsConvertQtWidget::writeImg(
@@ -150,6 +140,22 @@ void ImagingFormatsConvertQtWidget::writeImg(
     }
   }
 
+  writeImgFile(img, outputName, outFormat);
+}
+
+/**
+ * Write an image using a QImageWriter
+ *
+ * @param QImage with data ready
+ * @param outputName output filename
+ * @param outFormat format for the image file
+ */
+void ImagingFormatsConvertQtWidget::writeImgFile(
+    const QImage &img, const std::string &outputName,
+    const std::string &outFormat) const {
+  // With (simpler but less flexible) QImage:
+  // img.save(QString::fromStdString(outputName));
+
   QImageWriter writer(QString::fromStdString(outputName));
   writer.setFormat(outFormat.c_str());
   if (compressHint())
@@ -160,14 +166,10 @@ void ImagingFormatsConvertQtWidget::writeImg(
 MatrixWorkspace_sptr
 ImagingFormatsConvertQtWidget::loadImg(const std::string &inputName,
                                        const std::string &inFormat) const {
-  QImageReader reader(inputName.c_str());
-  if (!reader.autoDetectImageFormat()) {
-    reader.setFormat(inFormat.c_str());
-  }
 
-  int width = reader.size().width();
-  int height = reader.size().height();
-  QImage img = reader.read();
+  QImage img = loadImgFile(inputName, inFormat);
+  int width = img.width();
+  int height = img.height();
 
   MatrixWorkspace_sptr imgWks = boost::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", height, width + 1,
@@ -186,6 +188,28 @@ ImagingFormatsConvertQtWidget::loadImg(const std::string &inputName,
   }
 
   return imgWks;
+}
+
+/**
+ * Write an image using a QImageReader
+ *
+ * @param outputName output filename
+ * @param outFormat format for the image file
+ *
+ * @return QImage object with image data read from file
+ */
+QImage
+ImagingFormatsConvertQtWidget::loadImgFile(const std::string &inputName,
+                                       const std::string inFormat) const {
+  // Simpler but less flexible load with QImage:
+  // img.load(QString::fromStdString(inputName));
+
+  QImageReader reader(inputName.c_str());
+  if (!reader.autoDetectImageFormat()) {
+    reader.setFormat(inFormat.c_str());
+  }
+
+  return reader.read();
 }
 
 size_t ImagingFormatsConvertQtWidget::maxSearchDepth() const {

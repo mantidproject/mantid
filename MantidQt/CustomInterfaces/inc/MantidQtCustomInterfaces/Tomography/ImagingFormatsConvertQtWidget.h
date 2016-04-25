@@ -12,6 +12,7 @@
 
 // forward declarations for Qt
 class QComboBox;
+class QImage;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -95,6 +96,12 @@ private slots:
   void convertClicked();
 
 private:
+  void writeImgFile(const QImage &img, const std::string &outputName,
+                const std::string &outFormat) const;
+
+  QImage loadImgFile(const std::string &inputName,
+                 const std::string inFormat) const;
+
   void setFormatsCombo(QComboBox *cbox, const std::vector<std::string> &fmts,
                        const std::vector<bool> &enable);
 
