@@ -44,10 +44,12 @@ public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "CrystalFieldSpectrum"; }
   const std::string category() const override { return "General"; }
-  /// Evaluate the function
-  void function1D(double *out, const double *xValues,
-                          const size_t nData) const override;
 
+  /** @name Overrides implementing composition of two functions:
+   * CrystalFieldPeaks and CompositeFunction. 
+   * These can be factored out into a separate class later.
+   */
+  //@{
   /// Set i-th parameter
   virtual void setParameter(size_t, const double &value,
                             bool explicitlySet = true) override;
@@ -86,6 +88,40 @@ public:
   /// Restores a declared parameter i to the active status
   virtual void unfix(size_t i) override;
 
+  /// Return parameter index from a parameter reference.
+  virtual size_t getParameterIndex(const API::ParameterReference &ref) const override;
+  /// Apply the ties
+  virtual void applyTies() override;
+  /// Remove all ties
+  virtual void clearTies() override;
+  /// Removes i-th parameter's tie
+  virtual bool removeTie(size_t i) override;
+  /// Get the tie of i-th parameter
+  virtual API::ParameterTie *getTie(size_t i) const override;
+
+  /// Add a constraint to function
+  virtual void addConstraint(API::IConstraint *ic) override;
+  /// Get constraint of i-th parameter
+  virtual API::IConstraint *getConstraint(size_t i) const override;
+  /// Remove a constraint
+  virtual void removeConstraint(const std::string &parName) override;
+
+  /// Set up the function for a fit.
+  virtual void setUpForFit() override;
+
+protected:
+  /// Declare a new parameter
+  virtual void declareParameter(const std::string &name, double initValue = 0,
+                                const std::string &description = "") override;
+
+  /// Add a new tie. Derived classes must provide storage for ties
+  virtual void addTie(API::ParameterTie *tie) override;
+  //@}
+
+  /// Evaluate the function
+  void function1D(double *out, const double *xValues,
+                          const size_t nData) const override;
+
   void setAttribute(const std::string &attName, const Attribute &) override;
 
 protected:
@@ -93,9 +129,13 @@ protected:
   void init() override;
 
 private:
+  /// Build m_spectrum function.
+  void buildSpectrumFunction();
   /// Function that calculates peak centres and intensities.
   CrystalFieldPeaks m_crystalField;
-  API::CompositeFunction m_peaks;
+  /// Function that actually callculates the spectrum.
+  API::CompositeFunction m_spectrum;
+  /// Cached number of parameters in m_crystalField.
   size_t m_nOwnParams;
 };
 
