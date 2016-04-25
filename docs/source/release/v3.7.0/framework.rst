@@ -23,6 +23,8 @@ New
 - :ref:`EnggFitDIFCFromPeaks <algm-AlignComponents>` fits GSAS calibration
   parameters (DIFA, DIFC, TZERO) from peaks fitted using
   :ref:`EnggFitPeaks <algm-EnggFitPeaks>`.
+- :ref:`FindEPP <algm-FindEPP>` This algorithm performs Gaussian fit to find the elastic peak position.
+  As a result, `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ with parameters of the fitted peaks is created.
 
 Renamed
 #######
@@ -76,6 +78,8 @@ Improved
 - :ref:`SaveMD <algm-SaveMD>` now writes MDHisto signal arrays as compressed data.
 - :ref:`SetUncertainties <algm-SetUncertainties>` has two new modes, ``oneIfZero`` and ``sqrtOrOne``.
 - :ref:`SetSampleMaterial <algm-SetSampleMaterial>` will now work out the number density from the chemical formula and mass density if these are given in the input. A user specified number density or if Z and the unit cell volume is given will override the value calculated from the chemical formula and mass density.
+- :ref:`ComputeCalibrationCoefVan <algm-ComputeCalibrationCoefVan>`
+  does not perform fit of data by itself, but requires an additional argument: ``EPPTable``. This should accelerate the data reduction workflow, because fitting results can be reused. Table with elastic peak positions can be created using the new :ref:`FindEPP <algm-FindEPP>` algorithm.
 
 Deprecated
 ##########
