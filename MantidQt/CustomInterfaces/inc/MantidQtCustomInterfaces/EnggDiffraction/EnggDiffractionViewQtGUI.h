@@ -266,6 +266,7 @@ private slots:
 
   // slot of the fitting peaks per part of the interface
   void browseFitFocusedRun();
+  void resetFittingMultiMode();
   void setBankIdComboBox(int idx);
   void browsePeaksToFit();
   void setPeakPick();
@@ -275,6 +276,7 @@ private slots:
   void fittingRunNoChanged();
   void setBankDir(int idx);
   void listViewFittingRun();
+
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();

@@ -210,6 +210,10 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   connect(m_uiTabFitting.pushButton_fitting_browse_run_num, SIGNAL(released()),
           this, SLOT(browseFitFocusedRun()));
 
+  connect(m_uiTabFitting.lineEdit_pushButton_run_num,
+          SIGNAL(textEdited(const QString &)), this,
+          SLOT(resetFittingMultiMode()));
+
   connect(m_uiTabFitting.lineEdit_pushButton_run_num, SIGNAL(editingFinished()),
           this, SLOT(fittingRunNoChanged()));
 
@@ -729,6 +733,13 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
     setfittingRunNo(itemText);
     fittingRunNoChanged();
   }
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    resetFittingMultiMode() {
+  // resets the global variable so the list view widgets
+  // adds the run number to for single runs too
+  m_fittingMutliRunMode = false;
 }
 
 std::string EnggDiffractionViewQtGUI::fittingRunNoFactory(std::string bank,
@@ -1588,6 +1599,8 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addRunNoItem(
             m_uiTabFitting.listWidget_fitting_run_num->currentRow();
         if (currentIndex == -1)
           m_uiTabFitting.listWidget_fitting_run_num->setCurrentRow(0);
+      } else {
+        m_uiTabFitting.listWidget_fitting_run_num->setEnabled(false);
       }
     }
 
