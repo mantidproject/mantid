@@ -36,8 +36,8 @@ class UserProperties(object):
         if args[0] is None:
             return
         if len(args) == 1:
-            input = str(args[0])
-            param = input.split()
+            input_str = str(args[0])
+            param = input_str.split()
             self._user_id = param[0]
             if len(param) == 5:
                 self.set_user_properties(param[1], param[2], param[3], param[4])
@@ -160,13 +160,13 @@ class UserProperties(object):
            consisting of string RB and string representation of
            RB number e.g. RB1510324,
            used on the date specified
-        """        
+        """
         return os.path.basename(self._rb_dirs[exp_date])
     #
     def get_rb_dir(self,exp_date):
-        """Returns full name name of user's RB folder correspinding to the 
+        """Returns full name name of user's RB folder correspinding to the
            experiment, with the data provided.
-        """        
+        """
         return self._rb_dirs[exp_date]
 
     @property
@@ -285,12 +285,12 @@ class UserProperties(object):
         if not isinstance(rb_folder_or_id, str):
             raise RuntimeError("RB Folder {0} should be a string".format(rb_folder_or_id))
         else:
-            base, rbf = os.path.split(rb_folder_or_id)
+            f_path, rbf = os.path.split(rb_folder_or_id)
             if len(rbf) != 9:
                 try:
                     rbf = int(rbf)
                     rbf = "RB{0:07}".format(rbf)
-                    rb_folder_or_id = os.path.join(base, rbf)
+                    rb_folder_or_id = os.path.join(f_path, rbf)
                 except ValueError:
                     raise RuntimeError(
                         "RB Folder {0} should be a string containing RB number at the end".format(rb_folder_or_id))
@@ -337,13 +337,13 @@ class MantidConfigDirectInelastic(object):
     """
     # pylint: disable=too-many-instance-attributes
     # It has as many as parameters describing ISIS configuration.
-    def __init__(self, mantid='/opt/Mantid/', home='/home/', \
+    def __init__(self, mantid='/opt/Mantid/', home_dir='/home/', \
                  script_repo='/opt/UserScripts/', \
                  map_mask_folder='/usr/local/mprogs/InstrumentFiles/'):
         """Initialize generic config variables and variables specific to a server"""
 
         self._mantid_path = str(mantid)
-        self._home_path = str(home)
+        self._home_path = str(home_dir)
         self._script_repo = str(script_repo)
         self._map_mask_folder = str(map_mask_folder)
         # check if all necessary server folders specified as class parameters are present
@@ -449,10 +449,10 @@ class MantidConfigDirectInelastic(object):
         else:
             return False
             #
-    
+    #
     def get_user_file_description(self,instr_name=None):
         """returbs full file name (with path) for an xml file which describes
-           files, which should be copied to a user. 
+           files, which should be copied to a user.
 
            If instrument name is known or provided, function
            calculates this name wrt. the location of the file in the Mantid user
@@ -830,7 +830,7 @@ class MantidConfigDirectInelastic(object):
         self.make_map_mask_links(user_path)
 
         users_cycles = self._user.get_all_cycles()
-                                       
+        #
         for cycle in users_cycles:
             instr = self._user.get_instrument(cycle)
             self.copy_reduction_sample(self.get_user_file_description(instr),cycle)
@@ -930,7 +930,7 @@ if __name__ == "__main__":
     rb_user_folder = os.path.join(mcf._home_path, user.userID)
     user.rb_dir = rb_user_folder
     if not user.rb_dir_exist:
-        print "RB folder {0} for user {1} should exist and be accessible to configure this user".format(user.rb_dir,
+        print "RB folder {0} for user {1} should exist and be accessible to configure this user".format(user.rb_dir,\
                                                                                                         user.userID)
         exit()
     # Configure user
