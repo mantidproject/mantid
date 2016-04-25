@@ -1,6 +1,5 @@
 from mantid.kernel import Direction, logger
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, Progress)
-import mantid.simpleapi as ms
 
 import numpy as np
 import math
@@ -73,10 +72,17 @@ class VesuvioThickness(PythonAlgorithm):
 
     def PyExec(self):
         # Initialise output table workspaces
-        density_guesses_tbl_ws = ms.CreateEmptyTableWorkspace()
+        create_tbl_alg = self.createChildAlgorithm("CreateEmptyTableWorkspace")
+
+        create_tbl_alg.setProperty('OutputWorkspace', 'density_guesses')
+        create_tbl_alg.execute()
+        density_guesses_tbl_ws = create_tbl_alg.getProperty('OutputWorkspace').value
         density_guesses_tbl_ws.addColumn("str", "Iteration")
         density_guesses_tbl_ws.addColumn("double", "Density")
-        trans_guesses_tbl_ws = ms.CreateEmptyTableWorkspace()
+
+        create_tbl_alg.setProperty('OutputWorkspace', 'transmission_guesses')
+        create_tbl_alg.execute()
+        trans_guesses_tbl_ws = create_tbl_alg.getProperty('OutputWorkspace').value
         trans_guesses_tbl_ws.addColumn("str","Iteration")
         trans_guesses_tbl_ws.addColumn("double","Transmission")
 
