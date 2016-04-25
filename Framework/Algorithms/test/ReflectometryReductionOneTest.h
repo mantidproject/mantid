@@ -253,6 +253,24 @@ public:
     alg->setProperty("OutputWorkspace", "rebinnedWS");
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
+  void test_post_processing_rebin_step_with_partial_params_provided() {
+    auto alg = construct_standard_algorithm();
+    auto inWS = Create2DWorkspace154(1, 10, true);
+    inWS->setInstrument(m_tinyReflWS->getInstrument());
+    inWS->getAxis(0)->setUnit("Wavelength");
+    alg->setProperty("InputWorkspace", inWS);
+    alg->setProperty("MomentumTransferMaximum", 15.0);
+    alg->setProperty("OutputWorkspace", "rebinnedWS");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    MatrixWorkspace_sptr rebinnedIvsQWS = alg->getProperty("OutputWorkspace");
+    auto xData = rebinnedIvsQWS->readX(0);
+    // based off the equation for logarithmic binning X(i+1)=X(i)(1+|dX|)
+    double binWidthFromLogarithmicEquation = fabs((xData[1] / xData[0]) - 1);
+    TSM_ASSERT_DELTA("DQQ should be the same as abs(x[1]/x[0] - 1)",
+                     binWidthFromLogarithmicEquation, 0.1, 1e-06);
+    TSM_ASSERT_DELTA("Qmax should be the same as last Params entry (5.0)",
+                     xData[xData.size() - 1], 15.0, 1e-06);
+  }
   void test_post_processing_rebin_step_with_logarithmic_rebinning() {
     auto alg = construct_standard_algorithm();
     auto inWS = Create2DWorkspace154(1, 10, true);

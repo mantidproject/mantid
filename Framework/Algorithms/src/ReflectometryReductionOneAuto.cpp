@@ -509,14 +509,15 @@ void ReflectometryReductionOneAuto::exec() {
       refRedOne->setProperty("MomentumTransferStep",
                              momentumTransferStep.get());
     }
-    if (momentumTransferMinimum.is_initialized() &&
-        momentumTransferMaximum.is_initialized()) {
+    if (momentumTransferMinimum.is_initialized())
       refRedOne->setProperty("MomentumTransferMinimum",
                              momentumTransferMinimum.get());
+    if (momentumTransferMaximum.is_initialized())
       refRedOne->setProperty("MomentumTransferMaximum",
                              momentumTransferMaximum.get());
-    } else if (theta_in.is_initialized()) {
-      momentumTransferMinimum = calculateQ(wavelength_max, theta_in.get());
+    if (theta_in.is_initialized()) {
+      if (!momentumTransferMinimum.is_initialized())
+        momentumTransferMinimum = calculateQ(wavelength_max, theta_in.get());
       if (!momentumTransferStep.is_initialized()) {
         IAlgorithm_sptr calcResAlg =
             AlgorithmManager::Instance().create("CalculateResolution");
@@ -530,7 +531,8 @@ void ReflectometryReductionOneAuto::exec() {
         double resolution = calcResAlg->getProperty("Resolution");
         momentumTransferStep = resolution;
       }
-      momentumTransferMaximum = calculateQ(wavelength_min, theta_in.get());
+      if (!momentumTransferMaximum.is_initialized())
+        momentumTransferMaximum = calculateQ(wavelength_min, theta_in.get());
       refRedOne->setProperty("MomentumTransferMinimum",
                              momentumTransferMinimum.get());
       refRedOne->setProperty("MomentumTransferStep",

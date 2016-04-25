@@ -649,33 +649,31 @@ void ReflectometryReductionOne::exec() {
   double momentumTransferStep = getProperty("MomentumTransferStep");
   double momentumTransferMaximum = getProperty("MomentumTransferMaximum");
   MantidVec QParams;
-  if (!isDefault("MomentumTransferMinimum") &&
-      !isDefault("MomentumTransferStep") &&
-      !isDefault("MomentumTransferMaximum")) {
-    QParams.push_back(momentumTransferMinimum);
-    QParams.push_back(-momentumTransferStep);
-    QParams.push_back(momentumTransferMaximum);
-  } else {
+  if (isDefault("MomentumTransferMinimum"))
     momentumTransferMinimum = calculateQ(IvsLam->readX(0).back(), theta.get());
+  if (isDefault("MomentumTransferMaximum"))
     momentumTransferMaximum = calculateQ(IvsLam->readX(0).front(), theta.get());
-    if (isDefault("MomentumTransferStep")) {
-      // if the DQQ is not given for this run.
-      // we will use CalculateResoltion to produce this value
-      // for us.
-      IAlgorithm_sptr calcResAlg =
-          AlgorithmManager::Instance().create("CalculateResolution");
-      calcResAlg->setProperty("Workspace", runWS);
-      calcResAlg->setProperty("TwoTheta", theta.get());
-      calcResAlg->execute();
-      if (!calcResAlg->isExecuted())
-        throw std::runtime_error("CalculateResolution failed. Please manually "
-                                 "enter a value in the dQ/Q column.");
-      momentumTransferStep = calcResAlg->getProperty("Resolution");
-    }
-    QParams.push_back(momentumTransferMinimum);
-    QParams.push_back(-momentumTransferStep);
-    QParams.push_back(momentumTransferMaximum);
+  if (isDefault("MomentumTransferStep")) {
+    // if the DQQ is not given for this run.
+    // we will use CalculateResoltion to produce this value
+    // for us.
+    IAlgorithm_sptr calcResAlg =
+        AlgorithmManager::Instance().create("CalculateResolution");
+    calcResAlg->setProperty("Workspace", runWS);
+    calcResAlg->setProperty("TwoTheta", theta.get());
+    calcResAlg->execute();
+    if (!calcResAlg->isExecuted())
+      throw std::runtime_error("CalculateResolution failed. Please manually "
+                               "enter a value in the dQ/Q column.");
+    momentumTransferStep = calcResAlg->getProperty("Resolution");
   }
+  if (momentumTransferMinimum > momentumTransferMaximum)
+    throw std::invalid_argument("MomentumTransferMinimum must be less than "
+                                "MomentumTransferMaximum. Please check your "
+                                "inputs for these Properties.");
+  QParams.push_back(momentumTransferMinimum);
+  QParams.push_back(-momentumTransferStep);
+  QParams.push_back(momentumTransferMaximum);
   IAlgorithm_sptr algRebin = this->createChildAlgorithm("Rebin");
   algRebin->initialize();
   algRebin->setProperty("InputWorkspace", IvsQ);
