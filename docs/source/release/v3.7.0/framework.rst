@@ -23,14 +23,11 @@ New
 - :ref:`EnggFitDIFCFromPeaks <algm-AlignComponents>` fits GSAS calibration
   parameters (DIFA, DIFC, TZERO) from peaks fitted using
   :ref:`EnggFitPeaks <algm-EnggFitPeaks>`.
-<<<<<<< HEAD
 - :ref:`FindEPP <algm-FindEPP>` This algorithm performs Gaussian fit to find the elastic peak position.
   As a result, `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ with parameters of the fitted peaks is created.
-=======
 - :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>`
    aggregates stacks of images from wavelength dependent imaging
    into one or more output bands.
->>>>>>> upstream/master
 
 Renamed
 #######
