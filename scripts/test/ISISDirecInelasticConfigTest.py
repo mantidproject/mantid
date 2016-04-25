@@ -458,69 +458,34 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
 
         mcf.init_user(user)
-
+        # Generate fake test files to copy to test users
         self.makeFakeSourceReductionFile(mcf)
-        self.assertEqual(len(mcf._dynamic_configuration),6)
-        self.assertEqual(mcf._dynamic_configuration[1],'default.instrument=MERLIN')
 
         mcf.generate_config()
 
-        config_file = os.path.join(self.userRootDir,'.mantid','Mantid.user.properties')
-        self.assertTrue(os.path.exists(os.path.join(self.userRootDir,'.mantid')))
-        self.assertTrue(os.path.exists(config_file))
 
-        self.assertTrue(mcf.config_need_replacing(config_file))
-        start_date = user.start_date
-        date_in_apast=datetime.date(start_date.year,start_date.month,start_date.day-1)
-        time_in_a_past = time.mktime(date_in_apast.timetuple())
-        os.utime(config_file,(time_in_a_past,time_in_a_past))
-        self.assertFalse(mcf.config_need_replacing(config_file))
-        #--------------------------------------------------------------------
-        user1ID = 'tuf299966'
-        user1RootDir = os.path.join(self.get_save_dir(),user1ID)
-        if not os.path.exists(user1RootDir):
-            os.makedirs(user1RootDir)
         #
-        user1 = UserProperties(user1ID)
-        user1.set_user_properties('MARI',rbdir2,'CYCLE20991','20990124')
-
-        mcf.init_user(user1)
-        source_file = self.makeFakeSourceReductionFile(mcf)
-
-        mcf.generate_config()
-        self.assertEqual(len(mcf._dynamic_configuration),6)
-        self.assertEqual(mcf._dynamic_configuration[1],'default.instrument=MARI')
-        config_file = os.path.join(self.userRootDir,'.mantid','Mantid.user.properties')
-        self.assertTrue(os.path.exists(os.path.join(user1RootDir,'.mantid')))
-        self.assertTrue(os.path.exists(config_file))
+        # Check sample reduction files
         #
-        # Check sample reduction file
-        #
-        full_rb_path = rbdir2
-        cycle_id = user1.cycleID
-        instr = user1.instrument
-        target_file = mcf._target_reduction_file(instr,cycle_id)
-        full_target_file = os.path.join(full_rb_path,target_file)
-        self.assertTrue(os.path.exists(full_target_file))
-        # Fresh target file should always be replaced
-        self.assertTrue(mcf.script_need_replacing(full_target_file))
-        # modify target file access time:
-        access_time = os.path.getmtime(full_target_file)
-        now = time.time()
-        os.utime(full_target_file,(access_time ,now))
-        # should not replace modified target file
-        self.assertFalse(mcf.script_need_replacing(full_target_file))
+        # Sample file for MERLIN:
+        rbdir1 = self.rbdir
+        mer_file = os.path.join(rbdir1,'MERLINReduction_2015_1.py')
+        self.assertTrue(os.path.isfile(mer_file))
+        mar_file = os.path.join(rbdir2,'MARIReduction_2015_1.py')
+        self.assertTrue(os.path.isfile(mar_file))
+        maps_file = os.path.join(rbdir3,'MAPSReduction_2015_1.py')
+        self.assertTrue(os.path.isfile(maps_file))
 
         #--------------------------------------------------------------------
         # clean up
         if os.path.exists(os.path.join(self.userRootDir,'.mantid')):
             shutil.rmtree(os.path.join(self.userRootDir,'.mantid'),ignore_errors=True)
+        if os.path.exists(rbdir1):
+            shutil.rmtree(rbdir1,ignore_errors=True)
         if os.path.exists(rbdir2):
             shutil.rmtree(rbdir2,ignore_errors=True)
         if os.path.exists(rbdir3):
             shutil.rmtree(rbdir3,ignore_errors=True)
-        if os.path.exists(user1RootDir):
-            shutil.rmtree(user1RootDir,ignore_errors=True)
         #
 
 
