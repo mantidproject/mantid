@@ -569,7 +569,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   loadCustomActions();
 
   // Nullify catalogSearch
-  catalogSearch = NULL;
+  catalogSearch = nullptr;
 
   // Print a warning message if the scripting language is set to muParser
   if (defaultScriptingLang == "muParser") {
@@ -9788,7 +9788,7 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
   if (catalogSearch) {
     catalogSearch->disconnect();
     delete catalogSearch;
-    catalogSearch = NULL;
+    catalogSearch = nullptr;
   }
 
   if (scriptingWindow) {
@@ -16554,7 +16554,7 @@ void ApplicationWindow::CatalogLogin() {
 }
 
 void ApplicationWindow::CatalogSearch() {
-  if (catalogSearch == NULL || catalogSearch) {
+  if (catalogSearch == nullptr || catalogSearch) {
     // Only one ICAT GUI will appear, and that the previous one will be
     // overridden.
     // E.g. if a user opens the ICAT GUI without being logged into ICAT they
