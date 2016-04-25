@@ -1408,7 +1408,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
         std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] + "_" +
                                splitBaseName[2] + "_" + splitBaseName[3];
         std::string strBankDir = bankDir.toString();
-        updateFittingDirVec(strBankDir, foc_file);
+        updateFittingDirVec(strBankDir, foc_file, false);
 
         // add bank to the combo-box and list view
         addBankItems(splitBaseName, focusedFile);
@@ -1420,6 +1420,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
       // assuming that no directory is found so look for number
       // if run number length greater
     } else if (focusedFile.count() > 4) {
+      /// SHAHROZ
       if (strFocusedFile.find("-") != std::string::npos) {
         std::vector<std::string> firstLastRunNoVec;
         boost::split(firstLastRunNoVec, strFocusedFile, boost::is_any_of("-"));
@@ -1435,7 +1436,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
 
       } else {
         // if given a single run number instead
-        updateFittingDirVec(m_focusDir, strFocusedFile);
+        updateFittingDirVec(m_focusDir, strFocusedFile, false);
 
         // add bank to the combo-box and list view
         addBankItems(splitBaseName, focusedFile);
@@ -1463,7 +1464,8 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
 }
 
 void EnggDiffractionViewQtGUI::updateFittingDirVec(std::string &bankDir,
-                                                   std::string &focusedFile) {
+                                                   std::string &focusedFile,
+                                                   bool multi_run) {
 
   try {
 
@@ -1479,6 +1481,8 @@ void EnggDiffractionViewQtGUI::updateFittingDirVec(std::string &bankDir,
         // check if it not any other file.. e.g: texture
         if (itbankFileName.find(focusedFile) != std::string::npos) {
           m_fitting_runno_dir_vec.push_back(itFilePath);
+          if (multi_run)
+            return;
         }
       }
       ++it;
@@ -1504,6 +1508,7 @@ EnggDiffractionViewQtGUI::splitFittingDirectory(std::string &selectedfPath) {
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enableMultiRun(
     std::string firstRun, std::string lastRun) {
+  m_fitting_runno_dir_vec.clear();
   int firstNum;
   int lastNum;
 
@@ -1518,14 +1523,29 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enableMultiRun(
     for (int i = firstNum; i <= lastNum; i++) {
       RunNumberVec.push_back(std::to_string(i));
     }
+    /// shahroz
 
-    addRunNoItem(RunNumberVec, true);
+    // if given a single run number instead
+    for (int i = 0; i < RunNumberVec.size(); i++) {
+      updateFittingDirVec(m_focusDir, RunNumberVec[i], true);
+    }
+    // std::minus<int>()
+    int diff = (lastNum - firstNum) + 1;
+    auto global_vec_size = m_fitting_runno_dir_vec.size();
+    if (diff == global_vec_size) {
 
-    emit setBank();
+      addRunNoItem(RunNumberVec, true);
 
+      emit setBank();
+      m_fitting_runno_dir_vec.clear();
+    } else {
+      userWarning("Invalid Run Number", "One or more run file not found "
+                                        "from the specified range of runs."
+                                        "Please try again");
+    }
   } else {
-    userWarning("Invalid Run Number", "the multi-run number "
-                                      "provided is invalid. Please try again");
+    userWarning("Invalid Run Number", "The specfied range of run number "
+                                      "entered is invalid. Please try again");
   }
 }
 

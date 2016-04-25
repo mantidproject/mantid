@@ -175,7 +175,7 @@ public:
   std::string fittingRunNoFactory(std::string bank, std::string fileName,
                                   std::string &bankDir, std::string fileDir);
 
-  void updateFittingDirVec(std::string &bankDir, std::string &focusedFile);
+  void updateFittingDirVec(std::string &bankDir, std::string &focusedFile, bool multi_run);
 
   std::string readPeaksFile(std::string fileDir);
 
