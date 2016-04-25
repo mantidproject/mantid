@@ -1366,7 +1366,7 @@ private:
   QWidgetList *hiddenWindows;
   QLineEdit *info;
 
-  QScopedPointer > QWidget > catalogSearch;
+  QScopedPointer<QWidget> catalogSearch;
 
   QMenu *windowsMenu, *view, *graph, *fileMenu, *format, *edit;
   QMenu *recentProjectsMenu, *recentFilesMenu, *interfaceMenu;
