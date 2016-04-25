@@ -4,8 +4,6 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 
-#include <boost/make_shared.hpp>
-
 namespace Mantid {
 namespace Kernel {
 class V3D;

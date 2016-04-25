@@ -4,6 +4,8 @@
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Rendering/GluGeometryRenderer.h"
 
+#include <boost/make_shared.hpp>
+
 namespace Mantid {
 namespace Geometry {
 using Kernel::V3D;
