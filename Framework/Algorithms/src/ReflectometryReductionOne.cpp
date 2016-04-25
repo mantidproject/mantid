@@ -28,10 +28,10 @@ namespace {
 *on the host end-point workspace.
 *
 * @param originWS : Origin workspace, which provides the original workspace
-*index to spectrum id mapping.
+*index to spectrum number mapping.
 * @param hostWS : Workspace onto which the resulting workspace indexes will be
 *hosted
-* @return Remapped wokspace indexes applicable for the host workspace. results
+* @return Remapped workspace indexes applicable for the host workspace. results
 *as comma separated string.
 */
 std::string createWorkspaceIndexListFromDetectorWorkspace(

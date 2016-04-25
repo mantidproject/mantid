@@ -413,8 +413,8 @@ public:
     ew->refreshCache();
 
     TSM_ASSERT_DELTA(
-        "Value ignoring mask is 1.0",
-        ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization), 1.0, 1e-5);
+        "Value ignoring mask is 0.0 as masking deletes the events",
+        ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization), 0.0, 1e-5);
     TSM_ASSERT("Masked returns NaN",
                boost::math::isnan(ew->getSignalWithMaskAtCoord(
                    coords1, Mantid::API::NoNormalization)));

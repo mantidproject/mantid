@@ -55,6 +55,7 @@ protected:
   const size_t m_stride;
   // number of frames
   size_t m_frames;
+  size_t m_framesValid;
   // tof correction
   const double m_period;
   const double m_phase;
@@ -65,6 +66,7 @@ protected:
   const double m_timeMaxBoundary;
 
   // methods
+  bool validFrame() const;
   virtual void addEventImpl(size_t id, double tof) = 0;
 
 public:
@@ -123,7 +125,7 @@ public:
 
 class FastReadOnlyFile {
 private:
-#ifdef WIN32
+#ifdef _WIN32
   HANDLE m_handle;
 #else
   FILE *m_handle;

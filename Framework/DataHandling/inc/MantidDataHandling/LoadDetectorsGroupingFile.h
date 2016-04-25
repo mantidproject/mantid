@@ -85,12 +85,12 @@ private:
   void setByComponents();
   /// Set workspace->group ID map by detectors (range)
   void setByDetectors();
-  /// Set workspace index/group ID by spectraum ID
-  void setBySpectrumIDs();
+  /// Set workspace index/group ID by spectrum Number
+  void setBySpectrumNos();
   /// Convert detector ID combination string to vector of detectors
   void parseDetectorIDs(std::string inputstring, std::vector<detid_t> &detids);
-  /// Convert spectrum IDs combintation string to vector of spectrum ids
-  void parseSpectrumIDs(std::string inputstring, std::vector<int> &specids);
+  /// Convert spectrum Nos combination string to vector of spectrum Nos
+  void parseSpectrumNos(std::string inputstring, std::vector<int> &specids);
   /// Get attribute value from an XML node
   static std::string getAttributeValueByName(Poco::XML::Node *pNode,
                                              std::string attributename,

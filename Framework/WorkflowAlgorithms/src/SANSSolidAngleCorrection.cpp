@@ -140,7 +140,7 @@ void SANSSolidAngleCorrection::exec() {
 
     // Compute solid angle correction factor
     const bool is_tube = getProperty("DetectorTubes");
-    const double tanTheta = tan(inputWS->detectorTwoTheta(det));
+    const double tanTheta = tan(inputWS->detectorTwoTheta(*det));
     const double theta_term = sqrt(tanTheta * tanTheta + 1.0);
     double corr;
     if (is_tube) {
@@ -169,7 +169,7 @@ void SANSSolidAngleCorrection::execEvent() {
   // generate the output workspace pointer
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (outputWS != inputWS) {
-    outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
+    outputWS = inputWS->clone();
     setProperty("OutputWorkspace", outputWS);
   }
   auto outputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
@@ -204,7 +204,7 @@ void SANSSolidAngleCorrection::execEvent() {
 
     // Compute solid angle correction factor
     const bool is_tube = getProperty("DetectorTubes");
-    const double tanTheta = tan(outputEventWS->detectorTwoTheta(det));
+    const double tanTheta = tan(outputEventWS->detectorTwoTheta(*det));
     const double theta_term = sqrt(tanTheta * tanTheta + 1.0);
     double corr;
     if (is_tube) {

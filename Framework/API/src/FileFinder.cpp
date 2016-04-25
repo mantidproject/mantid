@@ -457,7 +457,7 @@ FileFinderImpl::findRun(const std::string &hintstr,
 
   // get instrument and facility
   const Kernel::InstrumentInfo instrument = this->getInstrument(hint);
-  const Kernel::FacilityInfo facility = instrument.facility();
+  const Kernel::FacilityInfo &facility = instrument.facility();
   // get facility extensions
   const std::vector<std::string> facility_extensions = facility.extensions();
   // select allowed extensions

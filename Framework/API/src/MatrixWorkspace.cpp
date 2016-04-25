@@ -32,6 +32,7 @@ using Kernel::V3D;
 namespace {
 /// static logger
 Kernel::Logger g_log("MatrixWorkspace");
+constexpr double rad2deg = 180. / M_PI;
 }
 
 const std::string MatrixWorkspace::xDimensionId = "xDimension";
@@ -790,10 +791,10 @@ MatrixWorkspace::getDetector(const size_t workspaceIndex) const {
 *  @throws InstrumentDefinitionError if source or sample is missing, or they are
 * in the same place
 */
-double MatrixWorkspace::detectorSignedTwoTheta(
-    Geometry::IDetector_const_sptr det) const {
-  Instrument_const_sptr instrument = getInstrument();
+double
+MatrixWorkspace::detectorSignedTwoTheta(const Geometry::IDetector &det) const {
 
+  Instrument_const_sptr instrument = getInstrument();
   Geometry::IComponent_const_sptr source = instrument->getSource();
   Geometry::IComponent_const_sptr sample = instrument->getSample();
   if (source == nullptr || sample == nullptr) {
@@ -812,7 +813,7 @@ double MatrixWorkspace::detectorSignedTwoTheta(
   // Get the instrument up axis.
   const V3D &instrumentUpAxis =
       instrument->getReferenceFrame()->vecPointingUp();
-  return det->getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
+  return det.getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
 }
 
 /** Returns the 2Theta scattering angle for a detector
@@ -822,10 +823,10 @@ double MatrixWorkspace::detectorSignedTwoTheta(
 *  @throws InstrumentDefinitionError if source or sample is missing, or they are
 * in the same place
 */
-double
-MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const {
-  Geometry::IComponent_const_sptr source = getInstrument()->getSource();
-  Geometry::IComponent_const_sptr sample = getInstrument()->getSample();
+double MatrixWorkspace::detectorTwoTheta(const Geometry::IDetector &det) const {
+  Instrument_const_sptr instrument = this->getInstrument();
+  Geometry::IComponent_const_sptr source = instrument->getSource();
+  Geometry::IComponent_const_sptr sample = instrument->getSample();
   if (source == nullptr || sample == nullptr) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Instrument not sufficiently defined: failed to get source and/or "
@@ -840,7 +841,7 @@ MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const {
         "Source and sample are at same position!");
   }
 
-  return det->getTwoTheta(samplePos, beamLine);
+  return det.getTwoTheta(samplePos, beamLine);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1693,7 +1694,7 @@ void MatrixWorkspace::saveSpectraMapNexus(
           Kernel::V3D pos = det->getPos() - sample_pos;
           pos.getSpherical(R, Theta, Phi);
           R = det->getDistance(*sample);
-          Theta = this->detectorTwoTheta(det) * 180.0 / M_PI;
+          Theta = this->detectorTwoTheta(*det) * rad2deg;
         } catch (...) {
           R = 0.;
           Theta = 0.;
