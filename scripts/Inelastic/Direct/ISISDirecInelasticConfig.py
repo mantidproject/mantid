@@ -283,7 +283,9 @@ class UserProperties(object):
 
         return instrument, start_date, cycle, rb_folder_or_id, rb_exist
 
-
+    def get_all_instruments(self):
+        """ Return list of all instruments, user is working on during this cycle"""
+        return mcf._user._instrument.values()
 #
 # --------------------------------------------------------------------#
 #
