@@ -13,6 +13,8 @@
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include <boost/make_shared.hpp>
 #include <vector>
+#include <stack>
+#include <numeric>
 #include <map>
 #include <string>
 #include <sstream>
@@ -27,8 +29,11 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-// Typedef for with vector
-typedef std::vector<int> WidthVector;
+// Typedef for width vector
+typedef std::vector<double> WidthVector;
+
+// Typedef for kernel vector
+typedef std::vector<double> KernelVector;
 
 // Typedef for an optional md histo workspace
 typedef boost::optional<IMDHistoWorkspace_const_sptr>
@@ -48,20 +53,104 @@ namespace {
  * @brief functions
  * @return Allowed smoothing functions
  */
-std::vector<std::string> functions() { return {"Hat"}; }
+std::vector<std::string> functions() {
+  std::vector<std::string> propOptions;
+  propOptions.push_back("Hat");
+  propOptions.push_back("Gaussian");
+  return propOptions;
+}
 
 /**
  * Maps a function name to a smoothing function
  * @return function map
  */
 SmoothFunctionMap makeFunctionMap(Mantid::MDAlgorithms::SmoothMD *instance) {
-  return {{"Hat", boost::bind(&Mantid::MDAlgorithms::SmoothMD::hatSmooth,
-                              instance, _1, _2, _3)}};
+  return {
+      {"Hat", boost::bind(&Mantid::MDAlgorithms::SmoothMD::hatSmooth, instance,
+                          _1, _2, _3)},
+      {"Gaussian", boost::bind(&Mantid::MDAlgorithms::SmoothMD::gaussianSmooth,
+                               instance, _1, _2, _3)}};
 }
 }
 
 namespace Mantid {
 namespace MDAlgorithms {
+
+/*
+ * Create a Gaussian kernel. The returned kernel is a 1D vector,
+ * the order of which matches the linear indices returned by
+ * the findNeighbourIndexesByWidth1D method.
+ * @param fwhm : Full Width Half Maximum of the Gaussian (in units of pixels)
+ * @return The Gaussian kernel
+ */
+KernelVector gaussianKernel(const double fwhm) {
+
+  // Calculate sigma from FWHM
+  // FWHM = 2 sqrt(2 * ln(2)) * sigma
+  const double sigma = (fwhm * 0.42463) / 2.0;
+  const double sigma_factor = M_SQRT1_2 / (fwhm * 0.42463);
+
+  KernelVector kernel_one_side;
+  // Start from centre and calculate values going outwards until value < 0.02
+  // We have to truncate the function at some point and 0.02 is chosen
+  // for consistency with Horace
+  // Use erf to get the value of the Gaussian integrated over the width of the
+  // pixel, more accurate than just using centre value of pixel and erf is fast
+  double pixel_value = std::erf(0.5 * sigma_factor) * sigma;
+  int pixel_count = 0;
+  while (pixel_value > 0.02) {
+    kernel_one_side.push_back(pixel_value);
+    pixel_count++;
+    pixel_value = (std::erf((pixel_count + 0.5) * sigma_factor) -
+                   std::erf((pixel_count - 0.5) * sigma_factor)) *
+                  0.5 * sigma;
+  }
+
+  // Create the symmetric kernel vector
+  KernelVector kernel;
+  kernel.resize(kernel_one_side.size() * 2 - 1);
+  std::reverse_copy(kernel_one_side.cbegin(), kernel_one_side.cend(),
+                    kernel.begin());
+  std::copy(kernel_one_side.cbegin() + 1, kernel_one_side.cend(),
+            kernel.begin() + kernel_one_side.size());
+
+  return normaliseKernel(kernel);
+}
+
+/*
+ * Normalise the kernel
+ * It is necessary to renormlise where the kernel overlaps edges of the
+ * workspace
+ * The contributing elements should sum to unity
+ */
+KernelVector renormaliseKernel(KernelVector kernel,
+                               std::vector<bool> validity) {
+
+  if (std::accumulate(validity.cbegin(), validity.cend(), 0.0) <
+      kernel.size()) {
+    // Use validity as a mask
+    for (size_t i = 0; i < kernel.size(); ++i) {
+      kernel[i] *= validity[i];
+    }
+
+    kernel = normaliseKernel(kernel);
+  }
+
+  return kernel;
+}
+
+/*
+ * Normalise the kernel so that sum of valid elements is unity
+ */
+KernelVector normaliseKernel(KernelVector kernel) {
+  double sum_kernel_recip =
+      1.0 / std::accumulate(kernel.cbegin(), kernel.cend(), 0.0);
+  for (auto &pixel : kernel) {
+    pixel *= sum_kernel_recip;
+  }
+
+  return kernel;
+}
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SmoothMD)
@@ -138,12 +227,11 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
 
       if (useWeights) {
 
-        // Check that we could measuer here.
+        // Check that we could measure here.
         if ((*weightingWS)->getSignalAt(iteratorIndex) == 0) {
 
           outWS->setSignalAt(iteratorIndex,
                              std::numeric_limits<double>::quiet_NaN());
-
           outWS->setErrorSquaredAt(iteratorIndex,
                                    std::numeric_limits<double>::quiet_NaN());
 
@@ -151,8 +239,17 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
         }
       }
 
+      // Explicitly cast the doubles to int
+      // We've already checked in the validator that the doubles we have are odd
+      // integer values and well below max int
+      std::vector<int> widthVectorInt;
+      widthVectorInt.reserve(widthVector.size());
+      for (auto const widthEntry : widthVector) {
+        widthVectorInt.push_back(static_cast<int>(widthEntry));
+      }
+
       std::vector<size_t> neighbourIndexes =
-          iterator->findNeighbourIndexesByWidth(widthVector);
+          iterator->findNeighbourIndexesByWidth(widthVectorInt);
 
       size_t nNeighbours = neighbourIndexes.size();
       double sumSignal = iterator->getSignal();
@@ -186,6 +283,126 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
   return outWS;
 }
 
+/**
+ * Gaussian function smoothing.
+ * The Gaussian function is linearly separable, allowing convolution
+ * of a multidimensional Gaussian kernel with the workspace to be carried out by
+ * a convolution with a 1D Gaussian kernel in each dimension. This
+ * reduces the number of calculations overall.
+ * @param toSmooth : Workspace to smooth
+ * @param widthVector : Width vector
+ * @param weightingWS : Weighting workspace (optional)
+ * @return Smoothed MDHistoWorkspace
+ */
+IMDHistoWorkspace_sptr
+SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
+                         const WidthVector &widthVector,
+                         OptionalIMDHistoWorkspace_const_sptr weightingWS) {
+
+  const bool useWeights = weightingWS.is_initialized();
+  uint64_t nPoints = toSmooth->getNPoints();
+  Progress progress(this, 0, 1, size_t(double(nPoints) * 1.1));
+  // Create the output workspace
+  IMDHistoWorkspace_sptr outWS(toSmooth->clone().release());
+  // Create a temporary workspace
+  IMDHistoWorkspace_sptr tempWS(toSmooth->clone().release());
+  progress.reportIncrement(
+      size_t(double(nPoints) * 0.1)); // Report ~10% progress
+
+  // Create a kernel for each dimension and
+  std::vector<KernelVector> gaussian_kernels;
+  gaussian_kernels.reserve(widthVector.size());
+  for (size_t dimension_number = 0; dimension_number < widthVector.size();
+       ++dimension_number) {
+    gaussian_kernels.push_back(gaussianKernel(widthVector[dimension_number]));
+  }
+
+  const int nThreads = Mantid::API::FrameworkManager::Instance()
+                           .getNumOMPThreads(); // NThreads to Request
+
+  auto read_ws = outWS;
+  auto write_ws = tempWS;
+  for (size_t dimension_number = 0; dimension_number < widthVector.size();
+       ++dimension_number) {
+
+    auto iterators = toSmooth->createIterators(nThreads, NULL);
+
+    // Alternately write to each workspace
+    if (dimension_number % 2 == 0) {
+      read_ws = outWS;
+      write_ws = tempWS;
+    } else {
+      read_ws = tempWS;
+      write_ws = outWS;
+    }
+
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int it = 0; it < int(iterators.size()); ++it) {
+
+      PARALLEL_START_INTERUPT_REGION
+      boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(
+          dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it]));
+
+      if (!iterator) {
+        throw std::logic_error(
+            "Failed to cast IMDIterator to MDHistoWorkspaceIterator");
+      }
+
+      do {
+
+        // Gets linear index at current position
+        size_t iteratorIndex = iterator->getLinearIndex();
+
+        if (useWeights) {
+
+          // Check that we could measure here.
+          if ((*weightingWS)->getSignalAt(iteratorIndex) == 0) {
+
+            write_ws->setSignalAt(iteratorIndex,
+                                  std::numeric_limits<double>::quiet_NaN());
+            write_ws->setErrorSquaredAt(
+                iteratorIndex, std::numeric_limits<double>::quiet_NaN());
+
+            continue; // Skip we couldn't measure here.
+          }
+        }
+
+        std::pair<std::vector<size_t>, std::vector<bool>> indexesAndValidity =
+            iterator->findNeighbourIndexesByWidth1D(
+                static_cast<int>(gaussian_kernels[dimension_number].size()),
+                static_cast<int>(dimension_number));
+        std::vector<size_t> neighbourIndexes = std::get<0>(indexesAndValidity);
+        std::vector<bool> indexValidity = std::get<1>(indexesAndValidity);
+        auto normalised_kernel = renormaliseKernel(
+            gaussian_kernels[dimension_number], indexValidity);
+
+        // Convolve signal with kernel
+        double sumSignal = 0;
+        double sumSquareError = 0;
+        double error = 0;
+        for (size_t i = 0; i < neighbourIndexes.size(); ++i) {
+          if (indexValidity[i]) {
+            sumSignal += read_ws->getSignalAt(neighbourIndexes[i]) *
+                         normalised_kernel[i];
+            error =
+                read_ws->getErrorAt(neighbourIndexes[i]) * normalised_kernel[i];
+            sumSquareError += error * error;
+          }
+
+          write_ws->setSignalAt(iteratorIndex, sumSignal);
+          write_ws->setErrorSquaredAt(iteratorIndex, sumSquareError);
+        }
+        progress.report();
+
+      } while (iterator->next());
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
+  }
+
+  return write_ws;
+}
+
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
@@ -196,16 +413,17 @@ void SmoothMD::init() {
 
   auto widthVectorValidator = boost::make_shared<CompositeValidator>();
   auto boundedValidator =
-      boost::make_shared<ArrayBoundedValidator<int>>(1, 100);
+      boost::make_shared<ArrayBoundedValidator<double>>(1, 1000);
   widthVectorValidator->add(boundedValidator);
   widthVectorValidator->add(
-      boost::make_shared<MandatoryValidator<std::vector<int>>>());
+      boost::make_shared<MandatoryValidator<WidthVector>>());
 
-  declareProperty(make_unique<ArrayProperty<int>>(
-                      "WidthVector", widthVectorValidator, Direction::Input),
-                  "Width vector. Either specify the width in n-pixels for each "
-                  "dimension, or provide a single entry (n-pixels) for all "
-                  "dimensions.");
+  declareProperty(
+      make_unique<ArrayProperty<double>>("WidthVector", widthVectorValidator,
+                                         Direction::Input),
+      "Width vector. Either specify the width in n-pixels for each "
+      "dimension, or provide a single entry (n-pixels) for all "
+      "dimensions. Must be odd integers if Hat function is chosen.");
 
   const auto allFunctionTypes = functions();
   const std::string first = allFunctionTypes.front();
@@ -218,6 +436,21 @@ void SmoothMD::init() {
           boost::make_shared<ListValidator<std::string>>(allFunctionTypes),
           Direction::Input),
       docBuffer.str());
+
+  std::vector<std::string> unitOptions = {"pixels"};
+
+  std::stringstream docUnits;
+  docUnits << "The units that WidthVector has been specified in. Allowed "
+              "values are: ";
+  for (auto const &unitOption : unitOptions) {
+    docUnits << unitOption << ", ";
+  }
+  declareProperty(
+      Kernel::make_unique<PropertyWithValue<std::string>>(
+          "Units", "pixels",
+          boost::make_shared<ListValidator<std::string>>(unitOptions),
+          Direction::Input),
+      docUnits.str());
 
   declareProperty(make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
                       "InputNormalizationWorkspace", "", Direction::Input,
@@ -246,14 +479,15 @@ void SmoothMD::exec() {
   }
 
   // Get the width vector
-  std::vector<int> widthVector = this->getProperty("WidthVector");
+  std::vector<double> widthVector = this->getProperty("WidthVector");
   if (widthVector.size() == 1) {
     // Pad the width vector out to the right size if only one entry has been
     // provided.
-    widthVector = std::vector<int>(toSmooth->getNumDims(), widthVector.front());
+    widthVector =
+        std::vector<double>(toSmooth->getNumDims(), widthVector.front());
   }
 
-  // Find the choosen smooth operation
+  // Find the chosen smooth operation
   const std::string smoothFunctionName = this->getProperty("Function");
   SmoothFunctionMap functionMap = makeFunctionMap(this);
   SmoothFunction smoothFunction = functionMap[smoothFunctionName];
@@ -273,9 +507,12 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
 
   IMDHistoWorkspace_sptr toSmoothWs = this->getProperty("InputWorkspace");
 
+  // Function type
+  std::string function_type = this->getProperty("Function");
+
   // Check the width vector
   const std::string widthVectorPropertyName = "WidthVector";
-  std::vector<int> widthVector = this->getProperty(widthVectorPropertyName);
+  std::vector<double> widthVector = this->getProperty(widthVectorPropertyName);
 
   if (widthVector.size() != 1 &&
       widthVector.size() != toSmoothWs->getNumDims()) {
@@ -284,13 +521,21 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
                         " can either have one entry or needs to "
                         "have entries for each dimension of the "
                         "InputWorkspace.");
-  } else {
-    for (auto widthEntry : widthVector) {
-      if (widthEntry % 2 == 0) {
+  } else if (function_type == "Hat") {
+    // If Hat function is used then widthVector must contain odd integers only
+    for (auto const widthEntry : widthVector) {
+      double intpart;
+      if (modf(widthEntry, &intpart) != 0.0) {
         std::stringstream message;
-        message << widthVectorPropertyName
-                << " entries must be odd numbers. Bad entry is " << widthEntry;
+        message << widthVectorPropertyName << " entries must be (odd) integers "
+                                              "when Hat function is chosen. "
+                                              "Bad entry is " << widthEntry;
         product.emplace(widthVectorPropertyName, message.str());
+      } else if (static_cast<unsigned long>(widthEntry) % 2 == 0) {
+        std::stringstream message;
+        message << widthVectorPropertyName << " entries must be odd integers "
+                                              "when Hat function is chosen. "
+                                              "Bad entry is " << widthEntry;
       }
     }
   }

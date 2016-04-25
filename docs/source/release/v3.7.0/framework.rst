@@ -101,6 +101,7 @@ MD Algorithms (VATES CLI)
 -  Dimension labelling in MD slicing algorithms is consistent with ConvertToMD.
 -  The box structure of workspaces created with CutMD using NoPix=false now matches that specified by the PnBins properties. Additional box splitting is only allowed if MaxRecursionDepth is set to higher than its default of 1.
 -  XorMD, OrMD and AndMD treat masked bins as zero.
+-  A Gaussian smoothing option has been added to SmoothMD. Note, this currently only supports specifying widths for the smoothing function in units of pixels along the dimensions of the workspace.
 
 Geometry
 --------
