@@ -651,15 +651,19 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain,
   double step;                   // real step
   double cutoff = 100.0 * minDouble / stepPercentage;
   size_t nParam = nParams();
-  size_t nData = domain.size();
+  size_t nData = getValuesSize(domain);
 
-  FunctionValues minusStep(domain);
-  FunctionValues plusStep(domain);
+  FunctionValues minusStep(nData);
+  FunctionValues plusStep(nData);
 
   // PARALLEL_CRITICAL(numeric_deriv)
   {
     applyTies(); // just in case
     function(domain, minusStep);
+  }
+
+  if (nData == 0) {
+    nData = minusStep.size();
   }
 
   for (size_t iP = 0; iP < nParam; iP++) {
@@ -1094,6 +1098,40 @@ void IFunction::setCovarianceMatrix(
         "IFunction: Covariance matrix has a wrong size");
   }
   m_covar = covar;
+}
+
+/// Get number of values for a given domain.
+/// @param domain :: A domain.
+size_t IFunction::getValuesSize(const FunctionDomain &domain) const {
+  return domain.size();
+}
+
+/// Fix a parameter
+/// @param name :: A name of a parameter to fix
+void IFunction::fixParameter(const std::string &name) {
+  auto i = parameterIndex(name);
+  fix(i);
+}
+
+/// Free a parameter
+/// @param name :: A name of a parameter to free
+void IFunction::unfixParameter(const std::string &name) {
+  auto i = parameterIndex(name);
+  unfix(i);
+}
+
+/// Fix all parameters
+void IFunction::fixAll() {
+  for (size_t i = 0; i < nParams(); ++i) {
+    fix(i);
+  }
+}
+
+/// Free all parameters
+void IFunction::unfixAll() {
+  for (size_t i = 0; i < nParams(); ++i) {
+    fix(i);
+  }
 }
 
 } // namespace API

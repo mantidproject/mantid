@@ -13,6 +13,9 @@ Crystal Improvements
 - 5 detectors added to the MANDI instrument geometry
 - :ref:`LoadCIF <algm-LoadCIF>` can now also load structures where only anisotropic displacement parameters are given,
   which are converted to equivalent isotropic parameters.
+- :ref:`SaveHKL <algm-SaveHKL>` has option to write the same output as anvred3.py including direction cosines.
+- :ref:`LoadHKL <algm-LoadHKL>` reads hkl output that includes direction cosines.
+- :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` has DetCal information sorted by detector numbers
 
 Engineering Diffraction
 -----------------------
@@ -40,6 +43,11 @@ Graphical user interface:
   is enabled. As well as option to select peak, add peak or save peaks
   from the data plot is now supported.
 
+- :ref:`Preview-Engineering_Diffraction-ref` under Fitting tab, you can
+  now view the plot in `dSpacing` instead `ToF`, which enables you to
+  rerun the fitting process after selecting peaks from the interface.
+
+
 Imaging
 -------
 
@@ -62,6 +70,26 @@ Improvements in the tomographic reconstruction graphical user interface:
 - Normalization by flat and dark images can be disabled explicitly and
   separately, which is now supported in the underlying reconstruction
   scripts.
+
+- The energy bands tab can now produce multiple output bands in one
+  pass, and supports different aggregation methods via the new
+  algorithm :ref:`ImggAggregateWavelengths
+  <algm-ImggAggregateWavelengths>`.
+
+
+Powder Diffraction Scripts
+--------------------------
+
+- Pearl legacy powder diffraction has been integrated and can be found
+  `Script/PearlPowderISIS`. The routines/script has been differentiated from
+  the long list of directories of calibration and raw files. The calibration
+  directories can be found in a file by the name of pearl_calib_factory.py,
+  whereas the raw directories can be found in a file by the name of
+  pearl_cycle_factory.py.
+
+- PowderISIS/Aziz script has been renamed to CryPowderISIS and can be found
+  `Script/CryPowderISIS`
+
 
 Full list of `diffraction <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Diffraction%22>`_
 and
