@@ -58,13 +58,13 @@ class MANTID_GEOMETRY_DLL GluGeometryHandler : public GeometryHandler {
   };
 
 private:
-  static Kernel::Logger &PLog;   ///< The official logger
+  static Kernel::Logger &PLog;                   ///< The official logger
   std::unique_ptr<GluGeometryRenderer> Renderer; ///< Geometry renderer variable
                                                  /// used for rendering
   /// Object/ObjComponent
   std::vector<Kernel::V3D> m_points;
-  double radius;      ///<Radius for the sphere, cone and cylinder
-  double height;      ///<height for cone and cylinder;
+  double radius; ///<Radius for the sphere, cone and cylinder
+  double height; ///<height for cone and cylinder;
   GEOMETRY_TYPE
   type; ///< the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
 public:
