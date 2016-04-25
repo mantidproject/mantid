@@ -340,7 +340,7 @@ private:
   int static m_currentRunMode;
 
   /// indentifier for fitting multi-run or single run input
-  bool m_fittingMutliRunMode;
+  bool static m_fittingMutliRunMode;
 
   // vector holding directory of focused bank file
   std::vector<std::string> static m_fitting_runno_dir_vec;

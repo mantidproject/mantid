@@ -34,7 +34,7 @@ DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
 const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
 int EnggDiffractionViewQtGUI::m_currentType = 0;
 int EnggDiffractionViewQtGUI::m_currentRunMode = 0;
-bool m_fittingMutliRunMode = false;
+bool EnggDiffractionViewQtGUI::m_fittingMutliRunMode = false;
 int EnggDiffractionViewQtGUI::m_currentCropCalibBankName = 0;
 std::vector<std::string> EnggDiffractionViewQtGUI::m_fitting_runno_dir_vec;
 
@@ -716,14 +716,19 @@ void EnggDiffractionViewQtGUI::setBankDir(int idx) {
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
     listViewFittingRun() {
-  /// shahroz
-  auto listView = m_uiTabFitting.listWidget_fitting_run_num;
-  auto currentRow = listView->currentRow();
-  auto item = listView->item(currentRow);
-  QString itemText = item->text();
 
-  setfittingRunNo(itemText);
-  fittingRunNoChanged();
+  if (m_fittingMutliRunMode) {
+    auto listView = m_uiTabFitting.listWidget_fitting_run_num;
+    auto currentRow = listView->currentRow();
+    auto item = listView->item(currentRow);
+    QString itemText = item->text();
+
+    std::string text = itemText.toStdString();
+    std::string ttext = text + "";
+
+    setfittingRunNo(itemText);
+    fittingRunNoChanged();
+  }
 }
 
 std::string EnggDiffractionViewQtGUI::fittingRunNoFactory(std::string bank,
@@ -1165,6 +1170,7 @@ void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
 }
 
 void EnggDiffractionViewQtGUI::browseFitFocusedRun() {
+  m_fittingMutliRunMode = false;
   QString prevPath = QString::fromStdString(m_focusDir);
   if (prevPath.isEmpty()) {
     prevPath =
@@ -1429,12 +1435,11 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
       }
     }
     // set the directory here to the first in the vector if its not empty
-    // if (!m_fitting_runno_dir_vec.empty()) {
-    //  QString firstDir = QString::fromStdString(m_fitting_runno_dir_vec[0]);
-    // setfittingRunNo(firstDir);
+    if (!m_fitting_runno_dir_vec.empty()) {
+      QString firstDir = QString::fromStdString(m_fitting_runno_dir_vec[0]);
+      setfittingRunNo(firstDir);
 
-    //} else
-    if (fittingRunNo().empty()) {
+    } else if (fittingRunNo().empty()) {
       userWarning("Invalid Input", "Invalid directory or run number given. "
                                    "Please try again");
     }
@@ -1508,8 +1513,8 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enableMultiRun(
     emit setBank();
 
   } else {
-    throw std::invalid_argument("Invalid Run Number, the multi-run number "
-                                "provided is invalid. Please try again");
+    userWarning("Invalid Run Number", "the multi-run number "
+                                      "provided is invalid. Please try again");
   }
 }
 
@@ -1577,9 +1582,8 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addRunNoItem(
             QString::fromStdString(currentRun));
       }
 
-      m_uiTabFitting.listWidget_fitting_run_num->setEnabled(true);
-
       if (multiRun) {
+        m_uiTabFitting.listWidget_fitting_run_num->setEnabled(true);
         auto currentIndex =
             m_uiTabFitting.listWidget_fitting_run_num->currentRow();
         if (currentIndex == -1)
