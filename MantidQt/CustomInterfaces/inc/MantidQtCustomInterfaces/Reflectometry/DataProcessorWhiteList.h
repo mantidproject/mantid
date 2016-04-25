@@ -42,14 +42,14 @@ public:
     m_colNameToColIndex[colName] = m_lastIndex++;
   };
 
-  int colIndexFromColName(const std::string &colName) {
-    return m_colNameToColIndex[colName];
+  int colIndexFromColName(const std::string &colName) const {
+    return m_colNameToColIndex.at(colName);
   }
-  std::string colNameFromColIndex(int index) {
-    return m_colIndexToColName[index];
+  std::string colNameFromColIndex(int index) const {
+    return m_colIndexToColName.at(index);
   }
-  std::string algPropFromColIndex(int index) {
-    return m_colIndexToAlgProp[index];
+  std::string algPropFromColIndex(int index) const {
+    return m_colIndexToAlgProp.at(index);
   }
 
   size_t size() const { return m_colNameToColIndex.size(); }

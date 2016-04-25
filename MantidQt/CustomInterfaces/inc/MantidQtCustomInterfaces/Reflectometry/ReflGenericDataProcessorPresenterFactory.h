@@ -91,8 +91,10 @@ public:
              std::vector<std::string>{"TRANS_"},
              /*Blacklist of properties we don't want to show*/
              std::set<std::string>{"FirstTransmissionRun",
-                                   "SecondTransmissionRun",
-                                   "OutputWorkspace"})}};
+                                   "SecondTransmissionRun", "OutputWorkspace"},
+             /*I don't want to show the transmission runs in the output ws
+                name*/
+             false)}};
 
     // The post-processor algorithm's name, 'Stitch1DMany' by default
     DataPostprocessorAlgorithm postprocessor;

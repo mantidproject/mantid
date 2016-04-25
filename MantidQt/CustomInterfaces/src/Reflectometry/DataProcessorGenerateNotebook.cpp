@@ -32,13 +32,13 @@ std::vector<std::string> splitByCommas(const std::string &names_string) {
 
 DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
     std::string name, QDataProcessorTableModel_sptr model,
-    const std::string instrument, const int runs_column,
-    const int transmission_column, const int options_column,
-    const int angle_column, const int min_q, const int max_q, const int d_qq,
-    const int scale_column, const int group_column)
+    const std::string instrument, const DataProcessorWhiteList &whitelist,
+    const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
+    const DataProcessorAlgorithm &processor,
+    const DataPostprocessorAlgorithm &postprocessor)
     : m_wsName(name), m_model(model), m_instrument(instrument),
-      col_nums(runs_column, transmission_column, options_column, angle_column,
-               min_q, max_q, d_qq, scale_column, group_column) {}
+      m_whitelist(whitelist), m_preprocessMap(preprocessMap),
+      m_processor(processor), m_postprocessor(postprocessor) {}
 
 /**
   Generate an ipython notebook
@@ -53,40 +53,50 @@ std::string DataProcessorGenerateNotebook::generateNotebook(
 
   notebook->markdownCell(titleString(m_wsName));
 
-  notebook->markdownCell(tableString(m_model, col_nums, rows));
+  notebook->markdownCell(tableString(m_model, m_whitelist, rows));
 
   int groupNo = 1;
   for (auto gIt = groups.begin(); gIt != groups.end(); ++gIt, ++groupNo) {
     const std::set<int> groupRows = gIt->second;
 
-    // Announce the stitch group in the notebook
-    std::ostringstream stitch_title_string;
-    stitch_title_string << "Stitch group " << groupNo;
-    notebook->markdownCell(stitch_title_string.str());
+    /** Announce the stitch group in the notebook **/
 
-    // Reduce each row
+    std::ostringstream group_title_string;
+    group_title_string << "Group " << groupNo;
+    notebook->markdownCell(group_title_string.str());
+
+    /**  Reduce all rows **/
+
+    // The python code
     std::ostringstream code_string;
-    boost::tuple<std::string, std::string, std::string> reduce_row_string;
-    std::vector<std::string> unstitched_ws;
-    std::vector<std::string> IvsLam_ws;
+    // A vector to store the output ws produced during the reduction process
+    // In the case of Reflectometry those will be the IvsQ_ and IvsLam
+    // workspaces
+    std::vector<std::string> output_ws;
+
     code_string << "#Load and reduce\n";
     for (auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt) {
-      reduce_row_string =
-          reduceRowString(*rIt, m_instrument, m_model, col_nums);
+      auto reduce_row_string =
+          reduceRowString(*rIt, m_instrument, m_model, m_whitelist,
+                          m_preprocessMap, m_processor);
+      // The reduction code
       code_string << boost::get<0>(reduce_row_string);
-      unstitched_ws.push_back(boost::get<1>(reduce_row_string));
-      IvsLam_ws.push_back(boost::get<2>(reduce_row_string));
+      // The output workspace names
+      output_ws.emplace_back(boost::get<1>(reduce_row_string));
     }
     notebook->codeCell(code_string.str());
 
-    // Stitch group
-    boost::tuple<std::string, std::string> stitch_string =
-        stitchGroupString(groupRows, m_instrument, m_model, col_nums);
-    notebook->codeCell(boost::get<0>(stitch_string));
+    /** Post-process group **/
 
-    // Draw plots
+    boost::tuple<std::string, std::string> postprocess_string =
+        postprocessGroupString(groupRows, m_instrument, m_model, m_whitelist,
+                               m_preprocessMap, m_processor, m_postprocessor);
+    notebook->codeCell(boost::get<0>(postprocess_string));
+
+    /** Draw plots **/
+
     notebook->codeCell(
-        plotsString(unstitched_ws, IvsLam_ws, boost::get<1>(stitch_string)));
+        plotsString(output_ws, boost::get<1>(postprocess_string), m_processor));
   }
 
   return notebook->writeNotebook();
@@ -115,34 +125,78 @@ std::string titleString(const std::string &wsName) {
 
 /**
   Create string of python code to call plots() with the required workspaces
-  @param unstitched_ws : vector of unstitched data workspace names to be plotted
-  together
-  @param IvsLam_ws : vector of I vs lambda data workspace names to be plotted
-  together
-  @param stitched_wsStr : name of stitched data workspace
+  @param output_ws : vector containing all the output workspaces produced during
+  the reduction
+  @param stitched_wsStr : name of post-processed data workspace
   @return string containing the python code
   */
-std::string plotsString(const std::vector<std::string> &unstitched_ws,
-                        const std::vector<std::string> &IvsLam_ws,
-                        const std::string &stitched_wsStr) {
-  // Group workspaces which should be plotted on same axes
+std::string plotsString(const std::vector<std::string> &output_ws,
+                        const std::string &stitched_wsStr,
+                        const DataProcessorAlgorithm &processor) {
+
   std::ostringstream plot_string;
+
+  // First, we have to parse 'output_ws'
+  // This is a vector containing all the output workspace produced during the
+  // reduction for a specific group
+  // For example, in the Reflectometry case, assuming the following table (only
+  // relevant information is shown below):
+  // Run(s), Group
+  // 13460,  0
+  // 13462,  0
+  // 13463,  0
+  // output_ws will be:
+  // output_ws [0] = 'IvsQ_TOF_13460, IvsLam_TOF_13460'
+  // output_ws [1] = 'IvsQ_TOF_13462, IvsLam_TOF_13462'
+  // output_ws [3] = 'IvsQ_TOF_13463, IvsLam_TOF_13463'
+  // As the reduction algorithm, ReflectometryReductionOneAuto, produces two
+  // output workspaces
+  // We need to group the 'IvsQ_' workspaces and the 'IvsLam_' workspaces
+
   plot_string << "#Group workspaces to be plotted on same axes\n";
-  plot_string << "unstitchedGroupWS = GroupWorkspaces("
-              << vectorParamString("InputWorkspaces", unstitched_ws) << ")\n";
-  plot_string << "IvsLamGroupWS = GroupWorkspaces("
-              << vectorParamString("InputWorkspaces", IvsLam_ws) << ")\n";
+
+  // Group workspaces which should be plotted on same axes
+  // But first we need to determine how many groups of ws we have
+  // We can do that from the processing algorithm
+  size_t nGroups = processor.outputProperties();
+
+  // A vector to store the list of groups
+  std::vector<std::string> workspaceList;
+
+  // Now we iterate through groups to get the relevant workspace
+  for (size_t group = 0; group < nGroups; group++) {
+
+    // From the reduction (processing) algorithm, get the prefix for the
+    // output workspace, we'll use it to give name to this group
+    std::string prefix = processor.prefix(group);
+
+    plot_string << prefix << "groupWS = GroupWorkspaces(InputWorkspaces = '";
+
+    // Save this group to workspaceList
+    workspaceList.emplace_back(prefix + "groupWS");
+
+    std::vector<std::string> wsNames;
+
+    // Iterate through the elements of output_ws
+    for (auto &outws : output_ws) {
+
+      auto workspaces = splitByCommas(outws);
+
+      // Get the workspace we need for this group
+      wsNames.push_back(workspaces[group]);
+    }
+
+    plot_string << boost::algorithm::join(wsNames, ", ") << "')\n";
+  }
+
+  // Add the post-processed workspace to the list of workspaces to plot
+  workspaceList.push_back(stitched_wsStr);
 
   // Plot I vs Q and I vs Lambda graphs
   plot_string << "#Plot workspaces\n";
-  std::vector<std::string> workspaceList;
-  workspaceList.emplace_back("unstitchedGroupWS");
-  workspaceList.push_back(stitched_wsStr);
-  workspaceList.emplace_back("IvsLamGroupWS");
 
-  plot_string << plot1DString(
-      workspaceList,
-      "['I vs Q Unstitched', 'I vs Q Stitiched', 'I vs Lambda']");
+  plot_string << plot1DString(workspaceList);
+
   return plot_string.str();
 }
 
@@ -154,130 +208,88 @@ std::string plotsString(const std::vector<std::string> &unstitched_ws,
   @return string containing the markdown code
   */
 std::string tableString(QDataProcessorTableModel_sptr model,
-                        ColNumbers col_nums, const std::set<int> &rows) {
+                        const DataProcessorWhiteList &whitelist,
+                        const std::set<int> &rows) {
   std::ostringstream table_string;
 
-  table_string << "Run(s) | Angle | Transmission Run(s) | Q min | Q max | dQ/Q "
-                  "| Scale | Group | Options\n";
-  table_string << "------ | ----- | ------------------- | ----- | ----- | ---- "
-                  "| ----- | ----- | -------\n";
+  const int ncols = static_cast<int>(whitelist.size());
+
+  for (int i = 0; i < ncols - 1; i++) {
+    table_string << whitelist.colNameFromColIndex(i) << " | ";
+  }
+  table_string << whitelist.colNameFromColIndex(ncols - 1) << "\n";
+  for (int i = 0; i < ncols - 1; i++) {
+    table_string << "---"
+                 << " | ";
+  }
+  table_string << "---"
+               << "\n";
 
   for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
-    table_string << model->data(model->index(*rowIt, col_nums.runs))
-                        .toString()
-                        .toStdString()
-                 << " | ";
-    table_string << model->data(model->index(*rowIt, col_nums.angle))
-                        .toString()
-                        .toStdString()
-                 << " | ";
-    table_string << model->data(model->index(*rowIt, col_nums.transmission))
-                        .toString()
-                        .toStdString()
-                 << " | ";
-    table_string << model->data(model->index(*rowIt, col_nums.qmin))
-                        .toString()
-                        .toStdString()
-                 << " | ";
-    table_string << model->data(model->index(*rowIt, col_nums.qmax))
-                        .toString()
-                        .toStdString()
-                 << " | ";
-    table_string << model->data(model->index(*rowIt, col_nums.dqq))
-                        .toString()
-                        .toStdString()
-                 << " | ";
-    table_string << model->data(model->index(*rowIt, col_nums.scale))
-                        .toString()
-                        .toStdString()
-                 << " | ";
-    table_string << model->data(model->index(*rowIt, col_nums.group))
-                        .toString()
-                        .toStdString()
-                 << " | ";
-    table_string << model->data(model->index(*rowIt, col_nums.options))
-                        .toString()
-                        .toStdString()
-                 << "\n";
+
+    for (int col = 0; col < ncols - 1; col++)
+      table_string
+          << model->data(model->index(*rowIt, col)).toString().toStdString()
+          << " | ";
+
+    table_string
+        << model->data(model->index(*rowIt, ncols - 1)).toString().toStdString()
+        << "\n";
   }
 
   return table_string.str();
 }
 
 /**
-  Create string of python code to stitch workspaces in the same group
-  @param rows : rows in the stitch group
+  Create string of python code to post-process workspaces in the same group
+  @param rows : rows in the group
   @param instrument : name of the instrument
   @param model : table model containing details of runs and processing settings
   @param col_nums : column numbers used to find data in model
   @return tuple containing the python code string and the output workspace name
   */
-boost::tuple<std::string, std::string>
-stitchGroupString(const std::set<int> &rows, const std::string &instrument,
-                  QDataProcessorTableModel_sptr model, ColNumbers col_nums) {
+boost::tuple<std::string, std::string> postprocessGroupString(
+    const std::set<int> &rows, const std::string &instrument,
+    QDataProcessorTableModel_sptr model,
+    const DataProcessorWhiteList &whitelist,
+    const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
+    const DataProcessorAlgorithm &processor,
+    const DataPostprocessorAlgorithm &postprocessor) {
   std::ostringstream stitch_string;
 
-  stitch_string << "#Stitch workspaces\n";
+  stitch_string << "#Post-process workspaces\n";
 
   // If we can get away with doing nothing, do.
   if (rows.size() < 2)
     return boost::make_tuple("", "");
 
-  // Properties for Stitch1DMany
-  std::vector<std::string> workspaceNames;
-  std::vector<std::string> runs;
+  // Properties for post-processing algorithm
+  // Vector containing the list of input workspaces
+  std::vector<std::string> inputNames;
+  // Vector containing the different bits of the output ws name
+  std::vector<std::string> outputName;
 
-  std::vector<double> params;
-  std::vector<double> startOverlaps;
-  std::vector<double> endOverlaps;
-
-  // Go through each row and prepare the properties
+  // Go through each row and prepare the input and output properties
   for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
-    const std::string runStr = model->data(model->index(*rowIt, col_nums.runs))
-                                   .toString()
-                                   .toStdString();
-    const double qmin =
-        model->data(model->index(*rowIt, col_nums.qmin)).toDouble();
-    const double qmax =
-        model->data(model->index(*rowIt, col_nums.qmax)).toDouble();
 
-    const boost::tuple<std::string, std::string> load_ws_string =
-        loadWorkspaceString(runStr, instrument);
+    // The reduced ws name without prefix (for example 'TOF_13460_13462')
+    auto suffix = getWorkspaceName(*rowIt, model, whitelist, preprocessMap,
+                                   processor, false);
 
-    const std::string runNo = getRunNumber(boost::get<1>(load_ws_string));
-    runs.push_back(runNo);
-    workspaceNames.emplace_back("IvsQ_" + runNo);
-
-    startOverlaps.push_back(qmin);
-    endOverlaps.push_back(qmax);
+    // The reduced ws name: 'IvsQ_TOF_13460_13462'
+    inputNames.emplace_back(processor.prefix(0) + suffix);
+    // Add the suffix (i.e. 'TOF_13460_13462') to the output ws name
+    outputName.emplace_back(suffix);
   }
 
-  double dqq =
-      model->data(model->index(*(rows.begin()), col_nums.dqq)).toDouble();
+  std::string outputWSName =
+      postprocessor.prefix() + boost::algorithm::join(outputName, "_");
+  stitch_string << outputWSName << " = ";
+  stitch_string << postprocessor.name() << "(";
+  stitch_string << postprocessor.inputProperty() << "='";
+  stitch_string << boost::algorithm::join(inputNames, ", ") << "')";
 
-  // params are qmin, -dqq, qmax for the final output
-  params.push_back(
-      *std::min_element(startOverlaps.begin(), startOverlaps.end()));
-  params.push_back(-dqq);
-  params.push_back(*std::max_element(endOverlaps.begin(), endOverlaps.end()));
-
-  // startOverlaps and endOverlaps need to be slightly offset from each other
-  // See usage examples of Stitch1DMany to see why we discard first qmin and
-  // last qmax
-  startOverlaps.erase(startOverlaps.begin());
-  endOverlaps.pop_back();
-
-  std::string outputWSName = "IvsQ_" + boost::algorithm::join(runs, "_");
-
-  stitch_string << outputWSName << ", _ = Stitch1DMany(";
-  stitch_string << vectorParamString("InputWorkspaces", workspaceNames);
-  stitch_string << ", ";
-  stitch_string << vectorParamString("Params", params);
-  stitch_string << ", ";
-  stitch_string << vectorParamString("StartOverlaps", startOverlaps);
-  stitch_string << ", ";
-  stitch_string << vectorParamString("EndOverlaps", endOverlaps);
-  stitch_string << ")\n";
+  // TODO: Now options for post-processing
 
   return boost::make_tuple(stitch_string.str(), outputWSName);
 }
@@ -285,227 +297,204 @@ stitchGroupString(const std::set<int> &rows, const std::string &instrument,
 /**
   Create string of python code to create 1D plots from workspaces
   @param ws_names : vector of workspace names to plot
-  @param title : title for figure
   @return string  of python code to plot I vs Q
   */
-std::string plot1DString(const std::vector<std::string> &ws_names,
-                         const std::string &title) {
+std::string plot1DString(const std::vector<std::string> &ws_names) {
 
   std::ostringstream plot_string;
 
-  plot_string << "fig = plots([" << vectorString(ws_names)
-              << "], title=" << title << ", legendLocation=[1, 1, 4])\n";
+  plot_string << "fig = plots([" << vectorString(ws_names) << "], title="
+              << "['";
+  plot_string << boost::algorithm::join(ws_names, "', '");
+  plot_string << "']"
+              << ", legendLocation=[1, 1, 4])\n";
 
   return plot_string.str();
 }
 
 /**
- Create string of python code to run reduction algorithm on the specified row
- @param rowNo : the row in the model to run the reduction algorithm on
+ Constructs the name for the reduced workspace
+ @param rowNo : the row
+ @param whitelist : the whitelist
+ @param preprocessMap : the pre-processing instructions as a map
+ @param prefix : wheter to return the name with the prefix or not
+ @return : the workspace name
+*/
+std::string getWorkspaceName(
+    int rowNo, QDataProcessorTableModel_sptr model,
+    const DataProcessorWhiteList &whitelist,
+    const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
+    const DataProcessorAlgorithm &processor, bool prefix) {
+
+  // The name of the output workspaces, e.g. 'TOF_13462', 'TRANS_13463', etc
+  std::vector<std::string> workspaceNames;
+
+  int ncols = static_cast<int>(whitelist.size());
+
+  // Run through columns, excluding 'Group' and 'Options'
+  for (int col = 0; col < ncols - 2; col++) {
+
+    const std::string colName = whitelist.colNameFromColIndex(col);
+
+    // We only included in the ws name pre-processed columns
+    if (preprocessMap.count(colName)) {
+
+      auto preprocessor = preprocessMap.at(colName);
+
+      // Did we include this bit in the output ws name?
+      if (preprocessor.show()) {
+        // The runs
+        const std::string runStr =
+            model->data(model->index(rowNo, col)).toString().toStdString();
+
+        if (!runStr.empty()) {
+
+          std::vector<std::string> runs;
+          boost::split(runs, runStr, boost::is_any_of("+"));
+
+          workspaceNames.emplace_back(preprocessor.prefix() +
+                                      boost::algorithm::join(runs, "_"));
+        }
+      }
+    }
+  }
+  if (prefix)
+    return processor.prefix(0) + boost::algorithm::join(workspaceNames, "_");
+  else
+    return boost::algorithm::join(workspaceNames, "_");
+}
+
+/**
+ Create string of python code to run pre-processing and reduction algorithms on
+ the specified row
+ @param rowNo : the row in the model to run the pre-processing and reduction
+ algorithms on
  @param instrument : name of the instrument
  @param model : table model containing details of runs and processing settings
- @param col_nums : column numbers used to find data in model
- @return tuple containing the python string and the output workspace name
+ @param whitelist : the whitelist containing information about the model columns
+ and how they relate to the algorithm properties
+ @param preprocessMap : the pre-processing instructions as a map
+ @param processor : the processing algorithm
+ @return tuple containing the python string and the output workspace names
 */
-boost::tuple<std::string, std::string, std::string>
-reduceRowString(const int rowNo, const std::string &instrument,
-                QDataProcessorTableModel_sptr model, ColNumbers col_nums) {
-  std::ostringstream code_string;
+boost::tuple<std::string, std::string> reduceRowString(
+    const int rowNo, const std::string &instrument,
+    QDataProcessorTableModel_sptr model,
+    const DataProcessorWhiteList &whitelist,
+    const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
+    const DataProcessorAlgorithm &processor) {
 
-  const std::string runStr =
-      model->data(model->index(rowNo, col_nums.runs)).toString().toStdString();
-  const std::string transStr =
-      model->data(model->index(rowNo, col_nums.transmission))
-          .toString()
-          .toStdString();
-  const std::string options = model->data(model->index(rowNo, col_nums.options))
-                                  .toString()
-                                  .toStdString();
+  std::ostringstream preprocess_string;
 
-  double theta = 0;
+  // Vector to store the algorithm properties with values
+  // For example
+  // InputWorkspace = 'TOF_13460_13463'
+  // ThetaIn = 0.2
+  // etc
+  std::vector<std::string> algProperties;
 
-  const bool thetaGiven =
-      !model->data(model->index(rowNo, col_nums.angle)).toString().isEmpty();
+  int ncols = static_cast<int>(whitelist.size());
 
-  if (thetaGiven)
-    theta = model->data(model->index(rowNo, col_nums.angle)).toDouble();
+  // Run through columns, excluding 'Group' and 'Options'
+  for (int col = 0; col < ncols - 2; col++) {
 
-  const boost::tuple<std::string, std::string> load_ws_string =
-      loadWorkspaceString(runStr, instrument);
-  code_string << boost::get<0>(load_ws_string);
+    // The column's name
+    const std::string colName = whitelist.colNameFromColIndex(col);
+    // The algorithm property linked to this column
+    const std::string algProp = whitelist.algPropFromColIndex(col);
 
-  const std::string runNo = getRunNumber(boost::get<1>(load_ws_string));
-  const std::string IvsLamName = "IvsLam_" + runNo;
-  const std::string thetaName = "theta_" + runNo;
+    if (preprocessMap.count(colName)) {
+      // This column was pre-processed, we need to print pre-processing
+      // instructions
 
-  if (!transStr.empty()) {
-    const boost::tuple<std::string, std::string> trans_string =
-        transWSString(transStr, instrument);
-    code_string << boost::get<0>(trans_string);
-    code_string << "IvsQ_" << runNo << ", " << IvsLamName << ", " << thetaName
-                << " = ";
-    code_string << "ReflectometryReductionOneAuto(InputWorkspace = '"
-                << boost::get<1>(load_ws_string) << "'";
-    code_string << ", "
-                << "FirstTransmissionRun = '" << boost::get<1>(trans_string)
-                << "'";
-  } else {
-    code_string << "IvsQ_" << runNo << ", " << IvsLamName << ", " << thetaName
-                << " = ";
-    code_string << "ReflectometryReductionOneAuto(InputWorkspace = '"
-                << boost::get<1>(load_ws_string) << "'";
+      // Get the runs
+      const std::string runStr =
+          model->data(model->index(rowNo, col)).toString().toStdString();
+
+      if (!runStr.empty()) {
+        // Some runs were given for pre-processing
+
+        // The pre-processing alg
+        const DataPreprocessorAlgorithm preprocessor =
+            preprocessMap.at(colName);
+        // Python code ran to load and pre-process runs
+        const boost::tuple<std::string, std::string> load_ws_string =
+            loadWorkspaceString(runStr, instrument, preprocessor);
+        // Populate preprocess_string
+        preprocess_string << boost::get<0>(load_ws_string);
+
+        // Add runs to reduction properties
+        algProperties.push_back(algProp + " = '" +
+                                boost::get<1>(load_ws_string) + "'");
+      }
+    } else {
+      // No pre-processing
+
+      // Just read the property value from the table
+      const std::string propStr =
+          model->data(model->index(rowNo, col)).toString().toStdString();
+      if (!propStr.empty()) {
+        // If it was not empty, we used it as an input property to the reduction
+        // algorithm
+        algProperties.push_back(algProp + " = " + propStr);
+      }
+    }
   }
 
-  if (thetaGiven) {
-    code_string << ", "
-                << "ThetaIn = " << theta;
-  }
-
+  // 'Options' column
+  const std::string options =
+      model->data(model->index(rowNo, ncols - 1)).toString().toStdString();
   // Parse and set any user-specified options
   auto optionsMap = parseKeyValueString(options);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
-    code_string << ", " << kvp->first << " = " << kvp->second;
-  }
-  code_string << ")\n";
-
-  const double scale =
-      model->data(model->index(rowNo, col_nums.scale)).toDouble();
-  if (scale != 1.0) {
-    const boost::tuple<std::string, std::string> scale_string =
-        scaleString(runNo, scale);
-    code_string << boost::get<0>(scale_string);
+    algProperties.push_back(kvp->first + " = " + kvp->second);
   }
 
-  const boost::tuple<std::string, std::string> rebin_string =
-      rebinString(rowNo, runNo, model, col_nums);
-  code_string << boost::get<0>(rebin_string);
+  /* Now construct the output workspace names */
 
-  return boost::make_tuple(code_string.str(), boost::get<1>(rebin_string),
-                           IvsLamName);
-}
+  // The output ws suffix, for example 'TOF_13460_13462'
+  const std::string outputName = getWorkspaceName(
+      rowNo, model, whitelist, preprocessMap, processor, false);
 
-/**
- Create string of python code to run the scale algorithm
- @param runNo : the number of the run to scale
- @param scale : value of scaling factor to use
- @return tuple of strings of python code and output workspace name
- */
-boost::tuple<std::string, std::string> scaleString(const std::string &runNo,
-                                                   const double scale) {
-  std::ostringstream scale_string;
-
-  scale_string << "IvsQ_" << runNo << " = Scale(";
-  scale_string << "InputWorkspace = IvsQ_" << runNo;
-  scale_string << ", Factor = " << 1.0 / scale;
-  scale_string << ")\n";
-
-  return boost::make_tuple(scale_string.str(), "IvsQ" + runNo);
-}
-
-/**
- Create string of python code to rebin data in a workspace
- @param rowNo : the number of the row to rebin
- @param runNo : the number of the run to rebin
- @param model : table model containing details of runs and processing settings
- @param col_nums : column numbers used to find data in model
- @return tuple of strings of python code and output workspace name
-*/
-boost::tuple<std::string, std::string>
-rebinString(const int rowNo, const std::string &runNo,
-            QDataProcessorTableModel_sptr model, ColNumbers col_nums) {
-  // We need to make sure that qmin and qmax are respected, so we rebin to
-  // those limits here.
-  std::ostringstream rebin_string;
-  rebin_string << "IvsQ_" << runNo << " = ";
-  rebin_string << "Rebin(";
-  rebin_string << "IvsQ_" << runNo;
-
-  const double qmin =
-      model->data(model->index(rowNo, col_nums.qmin)).toDouble();
-  const double qmax =
-      model->data(model->index(rowNo, col_nums.qmax)).toDouble();
-  const double dqq = model->data(model->index(rowNo, col_nums.dqq)).toDouble();
-
-  rebin_string << ", "
-               << "Params = ";
-  rebin_string << "'" << qmin << ", " << -dqq << ", " << qmax << "'";
-  rebin_string << ")\n";
-
-  return boost::make_tuple(rebin_string.str(), "IvsQ_" + runNo);
-}
-
-/**
- Create string of python code to create a transmission workspace
- @param trans_ws_str : string of workspaces to create transmission workspace
- from
- @param instrument : name of the instrument
- @return tuple of strings of python code and output workspace name
-*/
-boost::tuple<std::string, std::string>
-transWSString(const std::string &trans_ws_str, const std::string &instrument) {
-  const size_t maxTransWS = 2;
-
-  std::ostringstream trans_string;
-  std::vector<std::string> trans_ws_name;
-
-  std::vector<std::string> trans_vector = splitByCommas(trans_ws_str);
-  if (trans_vector.size() > maxTransWS)
-    trans_vector.resize(maxTransWS);
-
-  // Load the transmission runs
-  boost::tuple<std::string, std::string> load_tuple;
-  for (const auto &trans_name : trans_vector) {
-    load_tuple = loadWorkspaceString(trans_name, instrument);
-    trans_ws_name.push_back(boost::get<1>(load_tuple));
-    trans_string << boost::get<0>(load_tuple);
+  // Vector containing the output ws names
+  // For example
+  // 'IvsQ_TOF_13460_13462',
+  // 'IvsLam_TOF_13460_13462
+  std::vector<std::string> output_properties;
+  for (size_t prop = 0; prop < processor.outputProperties(); prop++) {
+    output_properties.push_back(processor.prefix(prop) + outputName);
   }
+  std::string outputPropertiesStr =
+      boost::algorithm::join(output_properties, ", ");
 
-  // The runs are loaded, so we can create a TransWS
-  std::string wsName = "TRANS_" + getRunNumber(trans_ws_name[0]);
-  if (trans_ws_name.size() > 1)
-    wsName += "_" + getRunNumber(trans_ws_name[1]);
-  trans_string << wsName << " = ";
-  trans_string << "CreateTransmissionWorkspaceAuto(";
-  trans_string << "FirstTransmissionRun = '" << trans_ws_name[0] << "'";
-  if (trans_ws_name.size() > 1)
-    trans_string << ", SecondTransmissionRun = '" << trans_ws_name[1] << "'";
-  trans_string << ")\n";
+  // Populate process_string
+  std::ostringstream process_string;
+  process_string << outputPropertiesStr;
+  process_string << " = " << processor.name() << "(";
+  process_string << boost::algorithm::join(algProperties, ", ");
+  process_string << ")";
 
-  return boost::make_tuple(trans_string.str(), wsName);
-}
+  // Populate code_string, which contains both pre-processing and processing
+  // python code
+  std::ostringstream code_string;
+  code_string << preprocess_string.str();
+  code_string << process_string.str();
 
-/**
- Get run number from workspace name
- @param ws_name : workspace name
- @return run number, as a string
-*/
-std::string getRunNumber(const std::string &ws_name) {
-  // Matches TOF_13460 -> 13460
-  boost::regex outputRegex("(TOF|IvsQ|IvsLam)_([0-9]+)");
-
-  // Matches INTER13460 -> 13460
-  boost::regex instrumentRegex("[a-zA-Z]{3,}([0-9]{3,})");
-
-  boost::smatch matches;
-
-  if (boost::regex_match(ws_name, matches, outputRegex)) {
-    return matches[2].str();
-  } else if (boost::regex_match(ws_name, matches, instrumentRegex)) {
-    return matches[1].str();
-  }
-
-  // Resort to using the workspace name
-  return ws_name;
+  // Return the python code + the output properties
+  return boost::make_tuple(code_string.str(), outputPropertiesStr);
 }
 
 /**
  Create string of python code to load workspaces
  @param runStr : string of workspaces to load
  @param instrument : name of the instrument
- @return tuple of strings of python code and output workspace name
+ @param preprocessor : the pre-processing algorithm
+ @return : tuple of strings of python code and output workspace name
 */
 boost::tuple<std::string, std::string>
-loadWorkspaceString(const std::string &runStr, const std::string &instrument) {
+loadWorkspaceString(const std::string &runStr, const std::string &instrument,
+                    const DataPreprocessorAlgorithm &preprocessor) {
+
   std::vector<std::string> runs;
   boost::split(runs, runStr, boost::is_any_of("+"));
 
@@ -515,11 +504,12 @@ loadWorkspaceString(const std::string &runStr, const std::string &instrument) {
   for (auto runIt = runs.begin(); runIt != runs.end(); ++runIt)
     boost::trim(*runIt);
 
-  const std::string outputName = "TOF_" + boost::algorithm::join(runs, "_");
+  const std::string prefix = preprocessor.prefix();
+  const std::string outputName = prefix + boost::algorithm::join(runs, "_");
 
   boost::tuple<std::string, std::string> load_string;
 
-  load_string = loadRunString(runs[0], instrument);
+  load_string = loadRunString(runs[0], instrument, prefix);
   load_strings << boost::get<0>(load_string);
 
   // EXIT POINT if there is only one run
@@ -530,9 +520,10 @@ loadWorkspaceString(const std::string &runStr, const std::string &instrument) {
 
   // Load each subsequent run and add it to the first run
   for (auto runIt = std::next(runs.begin()); runIt != runs.end(); ++runIt) {
-    load_string = loadRunString(*runIt, instrument);
+    load_string = loadRunString(*runIt, instrument, prefix);
     load_strings << boost::get<0>(load_string);
-    load_strings << plusString(boost::get<1>(load_string), outputName);
+    load_strings << plusString(boost::get<1>(load_string), outputName,
+                               preprocessor);
   }
 
   return boost::make_tuple(load_strings.str(), outputName);
@@ -542,15 +533,19 @@ loadWorkspaceString(const std::string &runStr, const std::string &instrument) {
  Create string of python code to run the Plus algorithm on specified workspaces
  @param input_name : name of workspace to add to the other workspace
  @param output_name : other workspace will be added to the one with this name
+ @param preprocessor : the preprocessor algorithm
  @return string of python code
 */
 std::string plusString(const std::string &input_name,
-                       const std::string &output_name) {
+                       const std::string &output_name,
+                       const DataPreprocessorAlgorithm &preprocessor) {
   std::ostringstream plus_string;
 
-  plus_string << output_name << " = Plus('LHSWorkspace' = " << output_name;
-  plus_string << ", 'RHSWorkspace' = " << input_name;
-  plus_string << ")\n";
+  plus_string << output_name << " = " << preprocessor.name() << "(";
+  plus_string << preprocessor.firstInputProperty() << " = '" << output_name
+              << "', ";
+  plus_string << preprocessor.secondInputProperty() << " = '" << input_name;
+  plus_string << "')\n";
 
   return plus_string.str();
 }
@@ -562,12 +557,13 @@ std::string plusString(const std::string &input_name,
  @return tuple of strings of python code and output workspace name
 */
 boost::tuple<std::string, std::string>
-loadRunString(const std::string &run, const std::string &instrument) {
+loadRunString(const std::string &run, const std::string &instrument,
+              const std::string &prefix) {
   std::ostringstream load_string;
   // We do not have access to AnalysisDataService from notebook, so must load
   // run from file
   const std::string filename = instrument + run;
-  const std::string ws_name = "TOF_" + run;
+  const std::string ws_name = prefix + run;
   load_string << ws_name << " = ";
   load_string << "Load(";
   load_string << "Filename = '" << filename << "'";

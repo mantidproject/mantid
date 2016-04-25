@@ -69,7 +69,7 @@ public:
    * algorithm */
   DataPostprocessorAlgorithm()
       : DataPostprocessorAlgorithm(
-            "Stitch1DMany", std::vector<std::string>{"IvsQ"},
+            "Stitch1DMany", std::vector<std::string>{"IvsQ_"},
             std::set<std::string>{"InputWorkspaces", "OutputWorkspace"}){
 
         };

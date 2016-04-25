@@ -39,11 +39,14 @@ public:
   * @param prefix : The list of prefixes that will be used for the output
   * workspaces' names
   * @param blacklist : The list of properties we don't want to show
+  * @param show : Whether or not to show the information associated with
+  * this pre-processor in the processed workspace's name
   */
   DataPreprocessorAlgorithm(const std::string &name,
                             const std::vector<std::string> &prefix,
-                            const std::set<std::string> &blacklist)
-      : DataProcessorAlgorithm(name, prefix, blacklist) {
+                            const std::set<std::string> &blacklist,
+                            bool show = true)
+      : DataProcessorAlgorithm(name, prefix, blacklist), m_show(show) {
 
     // A pre-processing algorithm must have two input workspaces
     if (m_inputProperties.size() != 2)
@@ -57,7 +60,7 @@ public:
   /** Default constructor: use 'Plus' as the default pre-processor algorithm
   */
   DataPreprocessorAlgorithm()
-      : DataPreprocessorAlgorithm("Plus", std::vector<std::string>{""},
+      : DataPreprocessorAlgorithm("Plus", std::vector<std::string>{"TOF_"},
                                   std::set<std::string>{"LHSWorkspace",
                                                         "RHSWorkspace",
                                                         "OutputWorkspace"}){};
@@ -71,6 +74,12 @@ public:
   std::string outputProperty() const { return m_outputProperties[0]; };
   // The prefix of the output property
   std::string prefix() const { return m_prefix[0]; };
+  // If we want to show the info associated with this pre-processor
+  bool show() const { return m_show; };
+
+private:
+  // Indicates wheter or not the information will appear in the output ws name
+  bool m_show;
 };
 }
 }

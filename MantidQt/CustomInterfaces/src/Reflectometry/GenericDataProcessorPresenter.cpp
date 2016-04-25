@@ -350,12 +350,8 @@ void GenericDataProcessorPresenter::saveNotebook(
   }
 
   auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
-      m_wsName, m_model, m_view->getProcessInstrument(),
-      ReflTableSchema::COL_RUNS, ReflTableSchema::COL_TRANSMISSION,
-      ReflTableSchema::COL_OPTIONS, ReflTableSchema::COL_ANGLE,
-      ReflTableSchema::COL_QMIN, ReflTableSchema::COL_QMAX,
-      ReflTableSchema::COL_DQQ, ReflTableSchema::COL_SCALE,
-      ReflTableSchema::COL_GROUP);
+      m_wsName, m_model, m_view->getProcessInstrument(), m_whitelist,
+      m_preprocessMap, m_processor, m_postprocessor);
   std::string generatedNotebook = notebook->generateNotebook(groups, rows);
 
   std::ofstream file(filename.c_str(), std::ofstream::trunc);
@@ -373,21 +369,26 @@ void GenericDataProcessorPresenter::postProcessRows(std::set<int> rows) {
   if (rows.size() < 2)
     return;
 
-  std::vector<std::string> workspaceNames;
-  std::string runs;
+  // The input workspace names
+  std::vector<std::string> inputNames;
+  // Vector to construct the output ws name
+  std::vector<std::string> outputNames;
 
   // Go through each row and prepare the properties
   for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
 
+    // The names of the processed workspaces (without prefix)
     const std::string runStr = getWorkspaceName(*rowIt, false);
 
-    if (AnalysisDataService::Instance().doesExist(m_postprocessor.prefix() +
-                                                  runStr)) {
-      runs += runStr;
-      workspaceNames.emplace_back(m_postprocessor.prefix() + runStr);
+    if (AnalysisDataService::Instance().doesExist(runStr)) {
+
+      inputNames.emplace_back(m_processor.prefix(0) + runStr);
+      outputNames.emplace_back(runStr);
     }
   }
-  const std::string outputWSName = m_postprocessor.prefix() + runs;
+  const std::string inputWSNames = boost::algorithm::join(inputNames, ", ");
+  const std::string outputWSName =
+      m_postprocessor.prefix() + boost::algorithm::join(outputNames, "_");
 
   // If the previous result is in the ADS already, we'll need to remove it.
   // If it's a group, we'll get an error for trying to group into a used group
@@ -398,7 +399,7 @@ void GenericDataProcessorPresenter::postProcessRows(std::set<int> rows) {
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().create(m_postprocessor.name());
   alg->initialize();
-  alg->setProperty(m_postprocessor.inputProperty(), workspaceNames);
+  alg->setProperty(m_postprocessor.inputProperty(), inputWSNames);
   alg->setProperty(m_postprocessor.outputProperty(), outputWSName);
 
   // Read the post-processing instructions from the view
@@ -582,36 +583,59 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
 }
 
 /**
-Returns the name of the workspace for a given row
+Returns the name of the workspace
 @param row : The row
-@param prefix : Whether to add the specified prefix or not
+@param prefix : Wheter or not to include the prefix
 @throws std::runtime_error if the workspace could not be prepared
 @returns : The name of the workspace
 */
 std::string GenericDataProcessorPresenter::getWorkspaceName(int row,
                                                             bool prefix) {
 
-  std::string wsname;
+  /* This method calculates, for a given row, the name of the output (processed)
+   * workspace. In Reflectometry for example, where we have two columns that
+   * need pre-processing, 'Run(s)' and 'Transmission Run(s)', the name of the
+   * output ws will contain the information (i.e. run numbers) displayed in
+   * those columns. To construct the ws name we also need the prefix associated
+   * with the processor algorithm (for instance 'IvsQ_' in Reflectometry)
+   */
 
-  if (prefix)
-    wsname = wsname + m_postprocessor.prefix();
+  // Temporary vector of strings to construct the name
+  std::vector<std::string> names;
 
-  for (auto it = m_preprocessMap.begin(); it != m_preprocessMap.end(); ++it) {
+  int ncols = static_cast<int>(m_whitelist.size());
 
-    auto colName = it->first;
-    int colIndex = m_whitelist.colIndexFromColName(colName);
-    auto runStr =
-        m_model->data(m_model->index(row, colIndex)).toString().toStdString();
+  for (int col = 0; col < ncols; col++) {
 
-    if (!runStr.empty()) {
-      std::vector<std::string> runs;
-      boost::split(runs, runStr, boost::is_any_of("+"));
+    const std::string colName = m_whitelist.colNameFromColIndex(col);
 
-      for (auto &run : runs) {
-        wsname = wsname + "_" + run;
+    if (m_preprocessMap.count(colName)) {
+      // OK, this column was pre-processed, that means that the output ws name
+      // may contain information associated with this pre-processor
+
+      if (m_preprocessMap[colName].show()) {
+        // OK, we do want to show the pre-processed run numbers
+
+        const std::string runStr =
+            m_model->data(m_model->index(row, col)).toString().toStdString();
+
+        if (!runStr.empty()) {
+          std::vector<std::string> runs;
+          boost::split(runs, runStr, boost::is_any_of("+"));
+
+          names.push_back(m_preprocessMap[colName].prefix() +
+                          boost::algorithm::join(runs, "_"));
+        }
       }
     }
   }
+
+  std::string wsname;
+
+  if (prefix)
+    wsname += m_processor.prefix(0);
+  wsname += boost::algorithm::join(names, "_");
+
   return wsname;
 }
 
@@ -660,6 +684,7 @@ GenericDataProcessorPresenter::loadRun(const std::string &run,
 
   return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
 }
+
 /**
 Reduce a row
 @param rowNo : The row in the model to reduce
@@ -671,8 +696,6 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_processor.name());
   alg->initialize();
-
-  std::string runNo;
 
   /* Read input properties from the table */
   /* excluding 'Group' and 'Options' */
@@ -702,7 +725,6 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
             m_view->getProcessingOptions(preprocessor.name());
         auto optionsMap = parseKeyValueString(options);
         auto runWS = prepareRunWorkspace(runStr, preprocessor, optionsMap);
-        runNo.append(runWS->name() + "_");
         alg->setProperty(propertyName, runWS->name());
       }
     } else {
@@ -727,7 +749,7 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
     }
   }
 
-  /* Now deal with Options column */
+  /* Now deal with 'Options' column */
   options = m_model->data(m_model->index(rowNo, m_model->columnCount() - 1))
                 .toString()
                 .toStdString();
@@ -742,11 +764,10 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
     }
   }
 
-  runNo.pop_back();
   /* We need to give a name to the output workspaces */
   for (size_t i = 0; i < m_processor.outputProperties(); i++) {
     alg->setProperty(m_processor.outputPropertyName(i),
-                     m_processor.prefix(i) + runNo);
+                     m_processor.prefix(i) + getWorkspaceName(rowNo, false));
   }
 
   /* Now run the processing algorithm */
@@ -1274,13 +1295,14 @@ void GenericDataProcessorPresenter::plotGroup() {
   if (selectedRows.empty())
     return;
 
+  // The set of selected groups
   std::set<int> selectedGroups;
   for (auto row = selectedRows.begin(); row != selectedRows.end(); ++row)
     selectedGroups.insert(
         m_model->data(m_model->index(*row, m_columns - 2)).toInt());
 
-  // Now, get the names of the stitched workspace, one per group
-  std::map<int, std::vector<std::string>> runsByGroup;
+  // Now, get the rows belonging to the specified groups
+  std::map<int, std::vector<int>> rowsByGroup;
   const int numRows = m_model->rowCount();
   for (int row = 0; row < numRows; ++row) {
     int group = m_model->data(m_model->index(row, m_columns - 2)).toInt();
@@ -1289,15 +1311,25 @@ void GenericDataProcessorPresenter::plotGroup() {
     if (selectedGroups.find(group) == selectedGroups.end())
       continue;
 
-    // Add this to the list of runs
-    runsByGroup[group].push_back(getWorkspaceName(row, false));
+    // Add this row to group 'group'
+    rowsByGroup[group].push_back(row);
   }
 
+  // Now get the workspace names
+
   std::set<std::string> workspaces, notFound;
-  for (auto runsMap = runsByGroup.begin(); runsMap != runsByGroup.end();
-       ++runsMap) {
+  for (auto rowsMap = rowsByGroup.begin(); rowsMap != rowsByGroup.end();
+       ++rowsMap) {
+
+    auto rows = rowsMap->second;
+
+    std::vector<std::string> names;
+    for (auto &row : rows) {
+      names.emplace_back(getWorkspaceName(row, false));
+    }
+
     const std::string wsName =
-        m_postprocessor.prefix() + boost::algorithm::join(runsMap->second, "");
+        m_postprocessor.prefix() + boost::algorithm::join(names, "_");
     if (AnalysisDataService::Instance().doesExist(wsName))
       workspaces.insert(wsName);
     else

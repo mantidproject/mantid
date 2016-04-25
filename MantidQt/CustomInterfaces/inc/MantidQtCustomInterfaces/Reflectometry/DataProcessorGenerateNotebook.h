@@ -29,6 +29,10 @@
     */
 
 #include "MantidKernel/System.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataPostprocessorAlgorithm.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataPreprocessorAlgorithm.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithm.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorWhiteList.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h"
 
 #include <boost/tuple/tuple.hpp>
@@ -40,90 +44,64 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-// Column numbers to find data in model
-struct DLLExport ColNumbers {
-
-  ColNumbers(const int runs_column, const int transmission_column,
-             const int options_column, const int angle_column,
-             const int qmin_column, const int qmax_column, const int dqq_column,
-             const int scale_column, const int group_column)
-      : runs(runs_column), transmission(transmission_column),
-        options(options_column), angle(angle_column), qmin(qmin_column),
-        qmax(qmax_column), dqq(dqq_column), scale(scale_column),
-        group(group_column) {}
-
-  const int runs;
-  const int transmission;
-  const int options;
-  const int angle;
-  const int qmin;
-  const int qmax;
-  const int dqq;
-  const int scale;
-  const int group;
-};
-
 std::vector<std::string>
     DLLExport splitByCommas(const std::string &names_string);
 
-std::string DLLExport plot1DString(const std::vector<std::string> &ws_names,
-                                   const std::string &title);
+std::string DLLExport plot1DString(const std::vector<std::string> &ws_names);
 
 std::string DLLExport tableString(QDataProcessorTableModel_sptr model,
-                                  ColNumbers col_nums,
+                                  const DataProcessorWhiteList &whitelist,
                                   const std::set<int> &rows);
 
 std::string DLLExport titleString(const std::string &wsName);
 
-boost::tuple<std::string, std::string> DLLExport
-stitchGroupString(const std::set<int> &rows, const std::string &instrument,
-                  QDataProcessorTableModel_sptr model, ColNumbers col_nums);
+boost::tuple<std::string, std::string> DLLExport postprocessGroupString(
+    const std::set<int> &rows, const std::string &instrument,
+    QDataProcessorTableModel_sptr model,
+    const DataProcessorWhiteList &whitelist,
+    const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
+    const DataProcessorAlgorithm &processor,
+    const DataPostprocessorAlgorithm &postprocessor);
 
-std::string DLLExport plotsFunctionString();
+std::string DLLExport plotsString(const std::vector<std::string> &output_ws,
+                                  const std::string &stitched_wsStr,
+                                  const DataProcessorAlgorithm &processor);
 
-std::string DLLExport plotsString(const std::vector<std::string> &unstitched_ws,
-                                  const std::vector<std::string> &IvsLam_ws,
-                                  const std::string &stitched_wsStr);
+std::string DLLExport getWorkspaceName(
+    int rowNo, QDataProcessorTableModel_sptr model,
+    const DataProcessorWhiteList &whitelist,
+    const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
+    const DataProcessorAlgorithm &processor, bool prefix);
 
-boost::tuple<std::string, std::string, std::string>
-    DLLExport reduceRowString(const int rowNo, const std::string &instrument,
-                              QDataProcessorTableModel_sptr model,
-                              ColNumbers col_nums);
+boost::tuple<std::string, std::string> DLLExport reduceRowString(
+    const int rowNo, const std::string &instrument,
+    QDataProcessorTableModel_sptr model,
+    const DataProcessorWhiteList &whitelist,
+    const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
+    const DataProcessorAlgorithm &processor);
 
 boost::tuple<std::string, std::string>
-loadWorkspaceString(const std::string &runStr, const std::string &instrument);
+loadWorkspaceString(const std::string &runStr, const std::string &instrument,
+                    const DataPreprocessorAlgorithm &preprocessor);
 
 std::string DLLExport plusString(const std::string &input_name,
-                                 const std::string &output_name);
-
-boost::tuple<std::string, std::string> DLLExport
-loadRunString(const std::string &run, const std::string &instrument);
-
-std::string DLLExport getRunNumber(const std::string &ws_name);
+                                 const std::string &output_name,
+                                 const DataPreprocessorAlgorithm &preprocessor);
 
 boost::tuple<std::string, std::string>
-    DLLExport scaleString(const std::string &runNo, const double scale);
-
-boost::tuple<std::string, std::string>
-    DLLExport rebinString(const int rowNo, const std::string &runNo,
-                          QDataProcessorTableModel_sptr model,
-                          ColNumbers col_nums);
-
-boost::tuple<std::string, std::string> DLLExport
-transWSString(const std::string &trans_ws_str, const std::string &instrument);
+    DLLExport loadRunString(const std::string &run,
+                            const std::string &instrument,
+                            const std::string &prefix);
 
 class DLLExport DataProcessorGenerateNotebook {
 
 public:
-  DataProcessorGenerateNotebook(std::string name,
-                                QDataProcessorTableModel_sptr model,
-                                const std::string instrument,
-                                const int col_runs, const int col_transmission,
-                                const int col_options, const int col_angle,
-                                const int col_qmin, const int col_qmax,
-                                const int col_dqq, const int col_scale,
-                                const int col_group);
-
+  DataProcessorGenerateNotebook(
+      std::string name, QDataProcessorTableModel_sptr model,
+      const std::string instrument, const DataProcessorWhiteList &whitelist,
+      const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
+      const DataProcessorAlgorithm &processor,
+      const DataPostprocessorAlgorithm &postprocessor);
   virtual ~DataProcessorGenerateNotebook(){};
 
   std::string generateNotebook(std::map<int, std::set<int>> groups,
@@ -133,8 +111,10 @@ private:
   std::string m_wsName;
   QDataProcessorTableModel_sptr m_model;
   const std::string m_instrument;
-
-  ColNumbers col_nums;
+  DataProcessorWhiteList m_whitelist;
+  std::map<std::string, DataPreprocessorAlgorithm> m_preprocessMap;
+  DataProcessorAlgorithm m_processor;
+  DataPostprocessorAlgorithm m_postprocessor;
 };
 }
 }
