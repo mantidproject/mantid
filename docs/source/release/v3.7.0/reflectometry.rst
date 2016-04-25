@@ -24,6 +24,12 @@ ReflectometryReductionOne
 Reflectometry Reduction Interface
 ---------------------------------
 
+- The ReflTBL data handling algorithms (namely SaveReflTBL and LoadReflTBL) have been generalised to allow for any number of column headings and 
+  custom column heading titles. Any old ReflTBL files will still work with the new algorithms (SaveTBL and LoadTBL) however any new tables created
+  using SaveTBL will now be made with the new format. In the new format, the first line of the TBL file will contain a comma-separated list of column headings
+  and all subsequent lines will define the data for each row. For an example this new format see here `LoadTBL <http://docs.mantidproject.org/nightly/algorithms/LoadTBL-v1.html>`_ .
+  `#15968 <https://github.com/mantidproject/mantid/pull/15968>`_
+
 ISIS Reflectometry (Polref)
 ###########################
 
