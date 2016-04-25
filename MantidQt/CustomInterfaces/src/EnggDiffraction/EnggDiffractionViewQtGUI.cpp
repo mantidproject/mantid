@@ -681,6 +681,8 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabFitting.pushButton_fitting_browse_peaks->setEnabled(enable);
   m_uiTabFitting.lineEdit_fitting_peaks->setEnabled(enable);
   m_uiTabFitting.pushButton_fit->setEnabled(enable);
+  m_uiTabFitting.comboBox_bank->setEnabled(enable);
+  m_uiTabFitting.groupBox_fititng_preview->setEnabled(enable);
 }
 
 void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
@@ -726,9 +728,6 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
     auto currentRow = listView->currentRow();
     auto item = listView->item(currentRow);
     QString itemText = item->text();
-
-    std::string text = itemText.toStdString();
-    std::string ttext = text + "";
 
     setfittingRunNo(itemText);
     fittingRunNoChanged();
@@ -1181,7 +1180,7 @@ void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
 }
 
 void EnggDiffractionViewQtGUI::browseFitFocusedRun() {
-  m_fittingMutliRunMode = false;
+  resetFittingMultiMode();
   QString prevPath = QString::fromStdString(m_focusDir);
   if (prevPath.isEmpty()) {
     prevPath =
