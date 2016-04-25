@@ -92,6 +92,8 @@ KernelVector gaussianKernel(const double fwhm) {
 
   KernelVector kernel_one_side;
   // Start from centre and calculate values going outwards until value < 0.02
+  // We have to truncate the function at some point and 0.02 is chosen
+  // for consistency with Horace
   // Use erf to get the value of the Gaussian integrated over the width of the
   // pixel, more accurate than just using centre value of pixel and erf is fast
   double pixel_value = std::erf(0.5 * sigma_factor) * sigma;
