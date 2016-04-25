@@ -11,6 +11,8 @@
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
 
+#include <boost/regex.hpp>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -1080,7 +1082,7 @@ std::vector<size_t> SlicingAlgorithm::getIndicesWithProjection(
  */
 Mantid::Geometry::MDFrame_uptr
 SlicingAlgorithm::extractMDFrameForNonAxisAligned(
-    std::vector<size_t> indicesWithProjection, std::string) const {
+    std::vector<size_t> indicesWithProjection, std::string units) const {
   if (indicesWithProjection.empty()) {
     g_log.warning() << "Slicing Algorithm: Chosen vector does not "
                        "project on any vector of the old basis.";
@@ -1098,7 +1100,34 @@ SlicingAlgorithm::extractMDFrameForNonAxisAligned(
   }
 
   Mantid::Geometry::MDFrame_uptr mdFrame(referenceMDFrame.clone());
+  setTargetUnits(mdFrame, units);
+
   return mdFrame;
+}
+
+/*
+ * Set units of the output workspace
+ * @param mdFrame: MDFrame to be added to the output workspace
+ * @param unit: the unit to use in mdFrame
+ */
+void SlicingAlgorithm::setTargetUnits(Mantid::Geometry::MDFrame_uptr &mdFrame,
+                                      const std::string &unit) const {
+  boost::regex pattern("in.*A.*\\^-1");
+
+  if (boost::regex_match(unit, pattern)) {
+    // RLU with special label
+    auto md_unit = ReciprocalLatticeUnit(unit);
+    mdFrame->setMDUnit(md_unit);
+  } else if (unit == "r") {
+    // RLU
+    auto md_unit = ReciprocalLatticeUnit();
+    mdFrame->setMDUnit(md_unit);
+  } else if (unit == "a") {
+    // Inverse angstroms
+    auto md_unit = InverseAngstromsUnit();
+    mdFrame->setMDUnit(md_unit);
+  }
+  // else leave the unit the same as the input workspace
 }
 
 } // namespace Mantid

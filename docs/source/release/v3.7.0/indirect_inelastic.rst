@@ -58,6 +58,9 @@ Improvements
     If Emin or Emax are left empty; appropriate values are set automatically, the negative values of Ei are treated as
     positive, appropriate informative pop-up messages displayed for invalid values and minor calculations updates.
 
+- :ref:`OSIRISDiffractionReduction <algm-OSIRISDiffractionReduction>` has an additional DRange added for conversion from time regime.
+
+
 Bugfixes
 --------
 

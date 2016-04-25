@@ -37,10 +37,6 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL MaxentEntropyNegativeValues : public MaxentEntropy {
 public:
-  // Constructor
-  MaxentEntropyNegativeValues() = default;
-  // Destructor
-  virtual ~MaxentEntropyNegativeValues() = default;
   // First derivative
   double getDerivative(double value) override;
   // Second derivative
@@ -49,7 +45,7 @@ public:
   double correctValue(double value, double newValue) override;
 };
 
-// Helper typedef for scoped pointer of this type.
+// Helper typedef for shared pointer of this type.
 typedef boost::shared_ptr<MaxentEntropyNegativeValues>
     MaxentEntropyNegativeValues_sptr;
 

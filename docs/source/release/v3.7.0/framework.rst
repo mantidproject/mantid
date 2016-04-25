@@ -23,8 +23,14 @@ New
 - :ref:`EnggFitDIFCFromPeaks <algm-AlignComponents>` fits GSAS calibration
   parameters (DIFA, DIFC, TZERO) from peaks fitted using
   :ref:`EnggFitPeaks <algm-EnggFitPeaks>`.
+<<<<<<< HEAD
 - :ref:`FindEPP <algm-FindEPP>` This algorithm performs Gaussian fit to find the elastic peak position.
   As a result, `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ with parameters of the fitted peaks is created.
+=======
+- :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>`
+   aggregates stacks of images from wavelength dependent imaging
+   into one or more output bands.
+>>>>>>> upstream/master
 
 Renamed
 #######
@@ -96,9 +102,13 @@ MD Algorithms (VATES CLI)
 -  PlotMD now plots points at bin centres for MDEventWorkspaces as well as MDHistoWorkspaces.
 -  SliceMD now reports the correct number of events in the output workspace.
 -  The size of densely populated, multidimensional MDEventWorkspace slices produced by SliceMD has been greatly reduced by using more sensible box splitting parameters.
+-  MD slicing algorithms now correctly detect units in input workspace and set units in output workspace as directed with the BasisVector properties.
 -  Slicing algorithms (SliceMD and BinMD) do not add masked data to their output workspaces.
 -  MergeMD now does not add masked events to its output workspace.
+-  Dimension labelling in MD slicing algorithms is consistent with ConvertToMD.
+-  The box structure of workspaces created with CutMD using NoPix=false now matches that specified by the PnBins properties. Additional box splitting is only allowed if MaxRecursionDepth is set to higher than its default of 1.
 -  XorMD, OrMD and AndMD treat masked bins as zero.
+-  A Gaussian smoothing option has been added to SmoothMD. Note, this currently only supports specifying widths for the smoothing function in units of pixels along the dimensions of the workspace.
 
 Geometry
 --------

@@ -41,7 +41,8 @@ The dimension will be truncated to have extents 'minimum' and 'maximum', with 's
 '(maximum - minimum)/stepsize' is rounded down to produce an integer number, greater than or equal to 1, of equally-sized bins between 'minimum' and 'maximum'.
 
 Note that if the output workspace is an MDEventWorkspace (NoPix=False), these properties define the top-level box structure of the workspace.
-If many events fall within a single box it is split further, see the documentation for :ref:`MDEventWorkspace <MDWorkspace>`.
+If the MaxRecursionDepth property is set to higher than its default of 1 then if many events fall within a single box it may be split further,
+see the documentation for :ref:`MDEventWorkspace <MDWorkspace>`.
 
 The PnBin parameters must match one of these three formats:
 

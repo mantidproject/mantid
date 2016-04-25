@@ -110,11 +110,8 @@ public:
 
   //@}
 
-protected:
-  /// Protected, unimplemented copy constructor
-  WorkspaceGroup(const WorkspaceGroup &ref);
-  /// Protected, unimplemented copy assignment operator
-  const WorkspaceGroup &operator=(const WorkspaceGroup &);
+  WorkspaceGroup(const WorkspaceGroup &ref) = delete;
+  WorkspaceGroup &operator=(const WorkspaceGroup &) = delete;
 
 private:
   WorkspaceGroup *doClone() const override {
