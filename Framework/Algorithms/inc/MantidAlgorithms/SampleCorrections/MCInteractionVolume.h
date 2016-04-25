@@ -10,11 +10,16 @@ class Sample;
 namespace Geometry {
 class Object;
 }
+namespace Kernel {
+class PseudoRandomNumberGenerator;
+class V3D;
+}
 namespace Algorithms {
 
 /**
-  Defines a volume where interactions a Tracks and Objects can take place. It
-  is capable of randomly selecting an interaction point within the volume.
+  Defines a volume where interactions of Tracks and Objects can take place.
+  Given an initial Track, end point & wavelengths it calculates the absorption
+  correction factor.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -40,6 +45,12 @@ namespace Algorithms {
 class MANTID_ALGORITHMS_DLL MCInteractionVolume {
 public:
   MCInteractionVolume(const API::Sample &sample);
+
+  double calculateAbsorption(Kernel::PseudoRandomNumberGenerator &rng,
+                             const Kernel::V3D &startPos,
+                             const Kernel::V3D &direc,
+                             const Kernel::V3D &endPos, double lambdaBefore,
+                             double lambdaAfter);
 
 private:
   const Geometry::Object &m_sample;
