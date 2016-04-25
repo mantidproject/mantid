@@ -42,25 +42,7 @@ class Object;
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
    File change history is stored at: <https://github.com/mantidproject/mantid>
- */
-
-enum GEOMETRY_TYPE {
-  CUBOID,            ///< CUBOID
-  HEXAHEDRON,        ///< HEXAHEDRON
-  SPHERE,            ///< SPHERE
-  CYLINDER,          ///< CYLINDER
-  CONE,              ///< CONE
-  SEGMENTED_CYLINDER ///< Cylinder with 1 or more segments (along the axis).
-                     /// Sizes of segments are important.
-};
-
-struct ObjectGeometry {
-  GEOMETRY_TYPE type;
-  double radius;
-  double height;
-  std::vector<Kernel::V3D> vectors;
-};
-
+*/
 class MANTID_GEOMETRY_DLL GeometryHandler {
 private:
   static Kernel::Logger &PLog; ///< The official logger
@@ -115,10 +97,13 @@ public:
   };
   /// return the actual type and points of one of the "standard" objects,
   /// cuboid/cone/cyl/sphere
-  virtual ObjectGeometry GetObjectGeom() {
-    ObjectGeometry result;
-    result.type = static_cast<GEOMETRY_TYPE>(-1);
-    return result;
+  virtual void GetObjectGeom(int &mytype, std::vector<Kernel::V3D> &vectors,
+                             double &myradius, double &myheight) {
+    UNUSED_ARG(vectors);
+    UNUSED_ARG(myradius);
+    UNUSED_ARG(myheight);
+    // Flag that this is unknown at this point
+    mytype = -1;
   };
 };
 

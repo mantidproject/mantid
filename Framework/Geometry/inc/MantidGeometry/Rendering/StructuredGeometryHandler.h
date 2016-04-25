@@ -45,7 +45,6 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class ObjComponent;
 class Object;
-
 class MANTID_GEOMETRY_DLL StructuredGeometryHandler : public GeometryHandler {
 private:
   static Kernel::Logger &PLog; ///< The official logger

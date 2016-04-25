@@ -4,8 +4,6 @@
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Rendering/GluGeometryRenderer.h"
 
-#include <boost/make_shared.hpp>
-
 namespace Mantid {
 namespace Geometry {
 using Kernel::V3D;
@@ -25,11 +23,14 @@ GluGeometryHandler::GluGeometryHandler(Object *obj)
       Renderer(Kernel::make_unique<GluGeometryRenderer>()), radius(0.0),
       height(0.0), type(CUBOID) {}
 
+GluGeometryHandler::GluGeometryHandler(const GluGeometryHandler &other)
+    : GeometryHandler(other), m_points(other.m_points), radius(other.radius),
+      height(other.height), type(other.type) {
+  this->Renderer = Kernel::make_unique<GluGeometryRenderer>();
+}
+
 boost::shared_ptr<GeometryHandler> GluGeometryHandler::clone() const {
-  auto clone = boost::make_shared<GluGeometryHandler>(*this);
-  clone->Renderer =
-      Kernel::make_unique<GluGeometryRenderer>(); // overwrite the renderer
-  return clone;
+  return boost::make_shared<GluGeometryHandler>(*this);
 }
 
 GluGeometryHandler::~GluGeometryHandler() = default;
@@ -83,15 +84,16 @@ void GluGeometryHandler::Render() {
   }
 }
 
-ObjectGeometry GluGeometryHandler::GetObjectGeom() {
-  ObjectGeometry result;
-  result.type = static_cast<GEOMETRY_TYPE>(0);
+void GluGeometryHandler::GetObjectGeom(int &mytype,
+                                       std::vector<Kernel::V3D> &vectors,
+                                       double &myradius, double &myheight) {
+  mytype = 0;
   if (Obj != nullptr) {
-    result.type = type;
-    result.vectors = m_points;
+    mytype = static_cast<int>(type);
+    vectors = m_points;
     switch (type) {
     case CUBOID:
-      result.type = 1;
+      mytype = 1;
       break;
     case HEXAHEDRON:
       break;

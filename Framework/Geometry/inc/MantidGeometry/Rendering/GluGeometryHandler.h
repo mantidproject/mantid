@@ -4,6 +4,8 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 
+#include <boost/make_shared.hpp>
+
 namespace Mantid {
 namespace Kernel {
 class V3D;
@@ -68,6 +70,7 @@ private:
   GEOMETRY_TYPE
   type; ///< the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
 public:
+  GluGeometryHandler(const GluGeometryHandler &other);
   GluGeometryHandler(IObjComponent *comp);           ///< Constructor
   GluGeometryHandler(boost::shared_ptr<Object> obj); ///< Constructor
   GluGeometryHandler(Object *obj);                   ///< Constructor
@@ -96,7 +99,8 @@ public:
   void Triangulate() override;
   void Render() override;
   void Initialize() override;
-  ObjectGeometry GetObjectGeom() override;
+  void GetObjectGeom(int &mytype, std::vector<Kernel::V3D> &vectors,
+                     double &myradius, double &myheight) override;
 };
 
 } // NAMESPACE Geometry
