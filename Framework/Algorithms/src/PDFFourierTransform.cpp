@@ -166,11 +166,11 @@ void PDFFourierTransform::exec() {
     // nothing to do
   } else if (inputXunit == "dSpacing") {
     // convert the x-units to Q/MomentumTransfer
-    std::transform(inputDQ.begin(), inputDQ.end(), inputQ.begin(),
-                   inputDQ.begin(), std::divides<double>());
     const double PI_2(2. * M_PI);
     std::transform(inputQ.begin(), inputQ.end(), inputQ.begin(),
                    std::bind1st(std::divides<double>(), PI_2));
+    std::transform(inputDQ.begin(), inputDQ.end(), inputQ.begin(),
+                   inputDQ.begin(), std::divides<double>());
 
     // reverse all of the arrays
     std::reverse(inputQ.begin(), inputQ.end());
@@ -321,7 +321,7 @@ void PDFFourierTransform::exec() {
 
     // put the information into the output
     outputY[r_index] = fs * 2 / M_PI;
-    outputE[r_index] = sqrt(error) * 2 / M_PI; // TODO: Wrong!
+    outputE[r_index] = sqrt(error) * 2 / M_PI;
   }
 
   // convert to the correct form of PDF
@@ -344,7 +344,7 @@ void PDFFourierTransform::exec() {
   } else if (pdfType == LITTLE_G_OF_R) {
     const double factor = 1. / (4. * M_PI * rho0);
     for (size_t i = 0; i < outputY.size(); ++i) {
-      // error propogation - assuming uncertainty in r = 0
+      // error propagation - assuming uncertainty in r = 0
       outputE[i] = outputE[i] / outputR[i];
       // transform the data
       outputY[i] = 1. + factor * outputY[i] / outputR[i];
@@ -352,7 +352,7 @@ void PDFFourierTransform::exec() {
   } else if (pdfType == RDF_OF_R) {
     const double factor = 4. * M_PI * rho0;
     for (size_t i = 0; i < outputY.size(); ++i) {
-      // error propogation - assuming uncertainty in r = 0
+      // error propagation - assuming uncertainty in r = 0
       outputE[i] = outputE[i] * outputR[i];
       // transform the data
       outputY[i] = outputR[i] * outputY[i] + factor * outputR[i] * outputR[i];
