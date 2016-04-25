@@ -1,9 +1,9 @@
+#include "MantidQtCustomInterfaces/Tomography/ImagingFormatsConvertPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtCustomInterfaces/Tomography/IImagingFormatsConvertView.h"
 #include "MantidQtCustomInterfaces/Tomography/ImggFormats.h"
-#include "MantidQtCustomInterfaces/Tomography/ImagingFormatsConvertPresenter.h"
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>
