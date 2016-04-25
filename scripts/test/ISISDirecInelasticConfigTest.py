@@ -480,8 +480,6 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         # clean up
         if os.path.exists(os.path.join(self.userRootDir,'.mantid')):
             shutil.rmtree(os.path.join(self.userRootDir,'.mantid'),ignore_errors=True)
-        if os.path.exists(rbdir1):
-            shutil.rmtree(rbdir1,ignore_errors=True)
         if os.path.exists(rbdir2):
             shutil.rmtree(rbdir2,ignore_errors=True)
         if os.path.exists(rbdir3):
@@ -491,9 +489,9 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
 
 if __name__=="__main__":
-   test = ISISDirectInelasticConfigTest('test_copy_multiplpe_ucf')
-   test._set_up()
-   test.run()
-   test._tear_down()
+   #test = ISISDirectInelasticConfigTest('test_copy_multiplpe_ucf')
+   #test._set_up()
+   #test.run()
+   #test._tear_down()
 
-   #unittest.main()
+   unittest.main()
