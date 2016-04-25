@@ -1,5 +1,5 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGINGFORMATSCONVERTVIEW_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGINGFORMATSCONVERTVIEW_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMGGFORMATSCONVERTVIEW_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMGGFORMATSCONVERTVIEW_H_
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
@@ -33,12 +33,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IImagingFormatsConvertView {
+class IImggFormatsConvertView {
 
 public:
-  IImagingFormatsConvertView() {}
+  IImggFormatsConvertView() {}
 
-  virtual ~IImagingFormatsConvertView() {}
+  virtual ~IImggFormatsConvertView() {}
 
   /**
    * Display a warning to the user (normally as a pop-up).
@@ -174,4 +174,4 @@ public:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGINGFORMATSCONVERTVIEW_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMGGFORMATSCONVERTVIEW_H_

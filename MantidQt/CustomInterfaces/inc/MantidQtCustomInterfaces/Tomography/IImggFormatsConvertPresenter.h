@@ -1,5 +1,5 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGINGFORMATSCONVERTPRESENTER_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGINGFORMATSCONVERTPRESENTER_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMGGFORMATSCONVERTPRESENTER_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMGGFORMATSCONVERTPRESENTER_H_
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -29,11 +29,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IImagingFormatsConvertPresenter {
+class IImggFormatsConvertPresenter {
 
 public:
-  IImagingFormatsConvertPresenter(){};
-  virtual ~IImagingFormatsConvertPresenter(){};
+  IImggFormatsConvertPresenter(){};
+  virtual ~IImggFormatsConvertPresenter(){};
 
   /// These are user actions, triggered from the (passive) view, that need
   /// handling by the presenter
@@ -51,10 +51,10 @@ public:
    *
    * @param notif Type of notification to process.
    */
-  virtual void notify(IImagingFormatsConvertPresenter::Notification notif) = 0;
+  virtual void notify(IImggFormatsConvertPresenter::Notification notif) = 0;
 };
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGINGFORMATSCONVERTPRESENTER_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMGGFORMATSCONVERTPRESENTER_H_

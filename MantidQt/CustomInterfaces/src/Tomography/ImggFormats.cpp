@@ -1,16 +1,23 @@
 #include "MantidQtCustomInterfaces/Tomography/ImggFormats.h"
 
 #include <algorithm>
+#include <map>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ImggFormats {
 
+// Names are often acronyms, so writing them uppercase
 const static std::vector<std::string> shortNames{"FITS", "TIFF", "PNG", "JPEG",
                                                  "NXTomo"};
 
-const static std::vector<std::vector<std::string>> extensions{
-    {"fits", "fit"}, {"tiff", "tif"}, {"png"}, {"jpg", "jpeg"}, {"nxs"}};
+// Map format name to vector of accepted/recognized extensions
+const static std::map<std::string, std::vector<std::string>> extensions{
+    {"FITS", {"fits", "fit"}},
+    {"TIFF", {"tiff", "tif"}},
+    {"PNG", {"png"}},
+    {"JPG", {"jpg", "jpeg"}},
+    {"NXTomo", {"nxs"}}};
 
 const static std::vector<std::string> descriptions{
     "FITS: Flexible Image Transport System.",
@@ -44,16 +51,6 @@ size_t formatID(const std::string &shortName) {
 }
 
 /**
- * Possible common/accepted file extensions for a format
- *
- * @return extensions (without the dot, like "fits") in no particular
- * order, lowercase
- */
-std::vector<std::string> fileExtensions(Format fmt) {
-  return extensions.at(fmt);
-}
-
-/**
  * The first-choice file extension for a format (given by
  * name). Example: FITS => fit
  *
@@ -62,13 +59,9 @@ std::vector<std::string> fileExtensions(Format fmt) {
  * @return extension as a string, empty if the format is unknown.
  */
 std::string fileExtension(const std::string &format) {
-  auto pos = std::find(shortNames.begin(), shortNames.end(), format);
+  const auto &exts = extensions.at(format);
 
-  if (shortNames.end() == pos) {
-    return "";
-  }
-
-  return extensions[pos - shortNames.begin()].front();
+  return exts.front();
 }
 
 /**
@@ -76,23 +69,17 @@ std::string fileExtension(const std::string &format) {
  * extensions. This is case insensitive
  *
  * @param extension a file name extension like .fits, or a filename
- * @param fmt a file format
+ * @param shortName name of a file format
  */
-bool isFileExtension(std::string extension, Format fmt) {
+bool isFileExtension(std::string extension, const std::string &shortName) {
   std::string lowExt = extension;
   size_t pos = lowExt.find_last_of('.');
-  lowExt = lowExt.substr(pos+1);
+  lowExt = lowExt.substr(pos + 1);
 
   std::transform(lowExt.begin(), lowExt.end(), lowExt.begin(), ::tolower);
 
-  const auto &valid = extensions.at(fmt);
+  const auto &valid = extensions.at(shortName);
   return (valid.end() != std::find(valid.begin(), valid.end(), lowExt));
-}
-
-bool isFileExtension(std::string extension, const std::string &shortName) {
-  size_t idx = formatID(shortName);
-
-  return isFileExtension(extension, static_cast<Format>(idx));
 }
 
 /**

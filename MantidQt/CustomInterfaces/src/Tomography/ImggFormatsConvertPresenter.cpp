@@ -1,8 +1,8 @@
-#include "MantidQtCustomInterfaces/Tomography/ImagingFormatsConvertPresenter.h"
+#include "MantidQtCustomInterfaces/Tomography/ImggFormatsConvertPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtCustomInterfaces/Tomography/IImagingFormatsConvertView.h"
+#include "MantidQtCustomInterfaces/Tomography/IImggFormatsConvertView.h"
 #include "MantidQtCustomInterfaces/Tomography/ImggFormats.h"
 
 #include <Poco/DirectoryIterator.h>
@@ -15,11 +15,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 namespace {
-Mantid::Kernel::Logger g_log("ImagingFormatsConvert");
+Mantid::Kernel::Logger g_log("ImggFormatsConvert");
 }
 
-ImagingFormatsConvertPresenter::ImagingFormatsConvertPresenter(
-    IImagingFormatsConvertView *view)
+ImggFormatsConvertPresenter::ImggFormatsConvertPresenter(
+    IImggFormatsConvertView *view)
     : m_view(view) {
   if (!m_view) {
     throw std::runtime_error(
@@ -29,29 +29,29 @@ ImagingFormatsConvertPresenter::ImagingFormatsConvertPresenter(
   }
 }
 
-ImagingFormatsConvertPresenter::~ImagingFormatsConvertPresenter() { cleanup(); }
+ImggFormatsConvertPresenter::~ImggFormatsConvertPresenter() { cleanup(); }
 
-void ImagingFormatsConvertPresenter::cleanup() {}
+void ImggFormatsConvertPresenter::cleanup() {}
 
-void ImagingFormatsConvertPresenter::notify(Notification notif) {
+void ImggFormatsConvertPresenter::notify(Notification notif) {
 
   switch (notif) {
 
-  case IImagingFormatsConvertPresenter::Init:
+  case IImggFormatsConvertPresenter::Init:
     processInit();
     break;
 
-  case IImagingFormatsConvertPresenter::Convert:
+  case IImggFormatsConvertPresenter::Convert:
     processConvert();
     break;
 
-  case IImagingFormatsConvertPresenter::ShutDown:
+  case IImggFormatsConvertPresenter::ShutDown:
     processShutDown();
     break;
   }
 }
 
-void ImagingFormatsConvertPresenter::processInit() {
+void ImggFormatsConvertPresenter::processInit() {
   const std::vector<std::string> formats = {
       shortName(ImggFormats::FITS), shortName(ImggFormats::TIFF),
       shortName(ImggFormats::PNG), shortName(ImggFormats::JPG),
@@ -60,7 +60,7 @@ void ImagingFormatsConvertPresenter::processInit() {
   m_view->setFormats(formats);
 }
 
-void ImagingFormatsConvertPresenter::processConvert() {
+void ImggFormatsConvertPresenter::processConvert() {
   const std::string inPS = m_view->inputPath();
   const std::string outPS = m_view->outputPath();
   size_t depth = m_view->maxSearchDepth();
@@ -108,9 +108,7 @@ void ImagingFormatsConvertPresenter::processConvert() {
   }
 }
 
-void ImagingFormatsConvertPresenter::processShutDown() {
-  m_view->saveSettings();
-}
+void ImggFormatsConvertPresenter::processShutDown() { m_view->saveSettings(); }
 
 /**
  * Search for images in the input path and transfers them to the
@@ -123,7 +121,7 @@ void ImagingFormatsConvertPresenter::processShutDown() {
  * @param outFormat format for the output images
  * @param depth search depth remaining (for recursive calls).
  */
-void ImagingFormatsConvertPresenter::goThroughDirRecur(
+void ImggFormatsConvertPresenter::goThroughDirRecur(
     const Poco::File &inFilePath, const std::string &inFormat,
     const Poco::File &outFilePath, const std::string &outFormat, size_t depth) {
 
@@ -165,9 +163,10 @@ void ImagingFormatsConvertPresenter::goThroughDirRecur(
  * @param outputName name of the output image to produce
  * @param outFormat format for the output image
  */
-void ImagingFormatsConvertPresenter::convert(
-    const std::string &inputName, const std::string &inFormat,
-    const std::string &outputName, const std::string &outFormat) const {
+void ImggFormatsConvertPresenter::convert(const std::string &inputName,
+                                          const std::string &inFormat,
+                                          const std::string &outputName,
+                                          const std::string &outFormat) const {
 
   if ("FITS" == inFormat) {
     auto inWks = loadFITS(inputName);
@@ -182,7 +181,7 @@ void ImagingFormatsConvertPresenter::convert(
 }
 
 Mantid::API::MatrixWorkspace_sptr
-ImagingFormatsConvertPresenter::loadFITS(const std::string &inputName) const {
+ImggFormatsConvertPresenter::loadFITS(const std::string &inputName) const {
   // Just run LoadFITS
   auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadFITS");
   alg->initialize();
@@ -205,7 +204,7 @@ ImagingFormatsConvertPresenter::loadFITS(const std::string &inputName) const {
   return imgWorkspace;
 }
 
-void ImagingFormatsConvertPresenter::saveFITS(
+void ImggFormatsConvertPresenter::saveFITS(
     Mantid::API::MatrixWorkspace_sptr image,
     const std::string &outputName) const {
   // Just run LoadFITS

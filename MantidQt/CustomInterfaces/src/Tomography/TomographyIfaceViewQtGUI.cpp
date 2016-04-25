@@ -208,7 +208,7 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_ui.tabMain->addTab(tabVizW, QString("Visualize"));
 
   // this is a Qt widget, let Qt manage the pointer
-  QWidget *m_tabImggFormats = new ImagingFormatsConvertQtWidget();
+  QWidget *m_tabImggFormats = new ImggFormatsConvertQtWidget();
   m_ui.tabMain->addTab(m_tabImggFormats, QString("Convert"));
 
   QWidget *tabEBandsW = new QWidget();

@@ -1,9 +1,9 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGINGFORMATSCONVERTPRESENTER_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGINGFORMATSCONVERTPRESENTER_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMGGFORMATSCONVERTPRESENTER_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMGGFORMATSCONVERTPRESENTER_H_
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Tomography/IImagingFormatsConvertPresenter.h"
-#include "MantidQtCustomInterfaces/Tomography/IImagingFormatsConvertView.h"
+#include "MantidQtCustomInterfaces/Tomography/IImggFormatsConvertPresenter.h"
+#include "MantidQtCustomInterfaces/Tomography/IImggFormatsConvertView.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 // forward declarations for Poco classes
@@ -45,15 +45,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL ImagingFormatsConvertPresenter
-    : public IImagingFormatsConvertPresenter {
+class MANTIDQT_CUSTOMINTERFACES_DLL ImggFormatsConvertPresenter
+    : public IImggFormatsConvertPresenter {
 
 public:
   /// Default constructor - normally used from the concrete view
-  ImagingFormatsConvertPresenter(IImagingFormatsConvertView *view);
-  ~ImagingFormatsConvertPresenter() override;
+  ImggFormatsConvertPresenter(IImggFormatsConvertView *view);
+  ~ImggFormatsConvertPresenter() override;
 
-  void notify(IImagingFormatsConvertPresenter::Notification notif) override;
+  void notify(IImggFormatsConvertPresenter::Notification notif) override;
 
 protected:
   void initialize();
@@ -83,10 +83,10 @@ private:
                 const std::string &outputName) const;
 
   /// Associated view for this presenter (MVP pattern)
-  IImagingFormatsConvertView *const m_view;
+  IImggFormatsConvertView *const m_view;
 };
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGINGFORMATSCONVERTPRESENTER_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMGGGFORMATSCONVERTPRESENTER_H_

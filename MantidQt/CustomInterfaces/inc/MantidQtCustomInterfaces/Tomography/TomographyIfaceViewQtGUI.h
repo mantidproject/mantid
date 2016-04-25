@@ -8,10 +8,10 @@
 #include "MantidQtAPI/BatchAlgorithmRunner.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
-#include "MantidQtCustomInterfaces/Tomography/ImagingFormatsConvertQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfacePresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
+#include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
+#include "MantidQtCustomInterfaces/Tomography/ImggFormatsConvertQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
@@ -359,7 +359,7 @@ private:
   Ui::TomographyIfaceQtTabSystemSettings m_uiTabSystemSettings;
 
   ImageROIViewQtWidget *m_tabROIW;
-  ImagingFormatsConvertQtWidget *m_tabImggFormats;
+  ImggFormatsConvertQtWidget *m_tabImggFormats;
 
   /// Tool specific setup dialogs
   Ui::TomoToolConfigAstra m_uiAstra;

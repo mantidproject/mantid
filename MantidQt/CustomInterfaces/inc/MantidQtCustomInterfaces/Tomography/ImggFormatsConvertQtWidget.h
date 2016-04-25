@@ -1,10 +1,10 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGINGFORMATSCONVERTQTWIDGET_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGINGFORMATSCONVERTQTWIDGET_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMGGFORMATSCONVERTQTWIDGET_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMGGFORMATSCONVERTQTWIDGET_H_
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Tomography/IImagingFormatsConvertPresenter.h"
-#include "MantidQtCustomInterfaces/Tomography/IImagingFormatsConvertView.h"
+#include "MantidQtCustomInterfaces/Tomography/IImggFormatsConvertPresenter.h"
+#include "MantidQtCustomInterfaces/Tomography/IImggFormatsConvertView.h"
 
 #include "ui_ImggFormatsConvert.h"
 
@@ -42,15 +42,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL ImagingFormatsConvertQtWidget
+class MANTIDQT_CUSTOMINTERFACES_DLL ImggFormatsConvertQtWidget
     : public QWidget,
-      public IImagingFormatsConvertView {
+      public IImggFormatsConvertView {
   Q_OBJECT
 
 public:
-  ImagingFormatsConvertQtWidget(QWidget *parent = 0);
+  ImggFormatsConvertQtWidget(QWidget *parent = 0);
 
-  ~ImagingFormatsConvertQtWidget() override{};
+  ~ImggFormatsConvertQtWidget() override{};
 
   void userWarning(const std::string &err,
                    const std::string &description) override;
@@ -119,10 +119,10 @@ private:
   const static std::string m_settingsGroup;
 
   // presenter as in the model-view-presenter
-  std::unique_ptr<IImagingFormatsConvertPresenter> m_presenter;
+  std::unique_ptr<IImggFormatsConvertPresenter> m_presenter;
 };
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGINGFORMATSCONVERTQTWIDGET_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMGGFORMATSCONVERTQTWIDGET_H_
