@@ -44,6 +44,10 @@ Graphical user interface:
   now view the plot in `dSpacing` instead `ToF`, which enables you to
   rerun the fitting process after selecting peaks from the interface.
 
+- Improvements to Fitting tab, Single peak fitting for consecutive run
+  number's focused files has now been enabled. The tab will automatically load
+  the consecutive run numbers to the list widget from the range provided by the
+  user, bank combo-box will update upon selection of run number.
 
 Imaging
 -------
