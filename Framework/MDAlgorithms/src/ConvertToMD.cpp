@@ -485,8 +485,10 @@ bool ConvertToMD::buildTargetWSDescription(
 /**
 * Create new MD workspace and set up its box controller using algorithm's box
 * controllers properties
-* @param targWSDescr
-* @return
+* @param targWSDescr :: Description of workspace to create
+* @param filebackend :: true if the workspace will have a file back end
+* @param filename :: file to use for file back end of workspace
+* @return :: Shared pointer for the created workspace
 */
 API::IMDEventWorkspace_sptr
 ConvertToMD::createNewMDWorkspace(const MDWSDescription &targWSDescr,
@@ -692,7 +694,8 @@ void ConvertToMD::findMinMax(
 /**
  * Setup the filebackend for the output workspace. It assumes that the
  * box controller has already been initialized
- * @param filebackPath Path to the file used for backend storage
+ * @param filebackPath :: Path to the file used for backend storage
+ * @param outputWS :: Workspace on which to set the file back end
  */
 void ConvertToMD::setupFileBackend(
     std::string filebackPath, Mantid::API::IMDEventWorkspace_sptr outputWS) {
