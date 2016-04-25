@@ -66,6 +66,8 @@ private:
   class MockRNG final : public Mantid::Kernel::PseudoRandomNumberGenerator {
   public:
     MOCK_METHOD0(nextValue, double());
+    MOCK_METHOD2(nextValue, double(double, double));
+    MOCK_METHOD2(nextInt, int(int, int));
     MOCK_METHOD0(restart, void());
     MOCK_METHOD0(save, void());
     MOCK_METHOD0(restore, void());
