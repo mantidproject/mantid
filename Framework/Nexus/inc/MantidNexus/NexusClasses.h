@@ -599,11 +599,11 @@ public:
   int getInt(const std::string &name) const;
 
   /// Returns a list of all classes (or groups) in this NXClass
-  std::vector<NXClassInfo> &groups() const { return *m_groups.get(); }
+  std::vector<NXClassInfo> &groups() const { return *m_groups; }
   /// Returns whether an individual group (or group) is present
   bool containsGroup(const std::string &query) const;
   /// Returns a list of all datasets in this NXClass
-  std::vector<NXInfo> &datasets() const { return *m_datasets.get(); }
+  std::vector<NXInfo> &datasets() const { return *m_datasets; }
   /** Returns NXInfo for a dataset
   *  @param name :: The name of the dataset
   *  @return NXInfo::stat is set to NX_ERROR if the dataset does not exist
