@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorGenerateNotebook.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/NotebookWriter.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtCustomInterfaces/ParseKeyValueString.h"
@@ -74,8 +75,9 @@ std::string DataProcessorGenerateNotebook::generateNotebook(
     // workspaces
     std::vector<std::string> output_ws;
 
-    code_string << "#Load and reduce\n";
     for (auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt) {
+      code_string << "#Load and reduce\n";
+
       auto reduce_row_string =
           reduceRowString(*rIt, m_instrument, m_model, m_whitelist,
                           m_preprocessMap, m_processor);
@@ -284,7 +286,10 @@ boost::tuple<std::string, std::string> postprocessGroupString(
 
   std::string outputWSName =
       postprocessor.prefix() + boost::algorithm::join(outputName, "_");
-  stitch_string << outputWSName << " = ";
+  stitch_string << outputWSName;
+  stitch_string << completeOutputProperties(postprocessor.name(),
+                                            postprocessor.outputProperties())
+                << " = ";
   stitch_string << postprocessor.name() << "(";
   stitch_string << postprocessor.inputProperty() << "='";
   stitch_string << boost::algorithm::join(inputNames, ", ") << "')";
@@ -464,12 +469,15 @@ boost::tuple<std::string, std::string> reduceRowString(
   for (size_t prop = 0; prop < processor.outputProperties(); prop++) {
     output_properties.push_back(processor.prefix(prop) + outputName);
   }
+
   std::string outputPropertiesStr =
       boost::algorithm::join(output_properties, ", ");
 
   // Populate process_string
   std::ostringstream process_string;
   process_string << outputPropertiesStr;
+  process_string << completeOutputProperties(processor.name(),
+                                             processor.outputProperties());
   process_string << " = " << processor.name() << "(";
   process_string << boost::algorithm::join(algProperties, ", ");
   process_string << ")";
@@ -479,6 +487,7 @@ boost::tuple<std::string, std::string> reduceRowString(
   std::ostringstream code_string;
   code_string << preprocess_string.str();
   code_string << process_string.str();
+  code_string << "\n";
 
   // Return the python code + the output properties
   return boost::make_tuple(code_string.str(), outputPropertiesStr);
@@ -570,6 +579,36 @@ loadRunString(const std::string &run, const std::string &instrument,
   load_string << ")\n";
 
   return boost::make_tuple(load_string.str(), ws_name);
+}
+
+/** Given an algorithm's name, completes the list of output properties
+* @param algName : The name of the algorithm
+* @param currentProperties : The number of output properties that are workspaces
+* @return : The list of output properties as a string
+*/
+std::string completeOutputProperties(const std::string &algName,
+                                     size_t currentProperties) {
+
+  // In addition to output ws properties, our reduction and post-processing
+  // algorithms could return other types of properties, for instance,
+  // ReflectometryReductionOneAuto also returns a number called 'ThetaOut'
+  // We need to specify those too in our python code
+
+  Mantid::API::IAlgorithm_sptr alg =
+      Mantid::API::AlgorithmManager::Instance().create(algName);
+  auto properties = alg->getProperties();
+  int totalOutputProp = 0;
+  for (auto &prop : properties) {
+    if (prop->direction())
+      totalOutputProp++;
+  }
+  totalOutputProp -= static_cast<int>(currentProperties);
+
+  std::string outString;
+  for (int i = 0; i < totalOutputProp; i++)
+    outString += ", _";
+
+  return outString;
 }
 }
 }

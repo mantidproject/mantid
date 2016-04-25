@@ -93,6 +93,9 @@ boost::tuple<std::string, std::string>
                             const std::string &instrument,
                             const std::string &prefix);
 
+std::string DLLExport completeOutputProperties(const std::string &algName,
+                                               size_t currentProperties);
+
 class DLLExport DataProcessorGenerateNotebook {
 
 public:
