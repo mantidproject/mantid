@@ -275,7 +275,8 @@ background fit peaks in those areas using a peak fitting function.
 
 To use the Fitting tab, user is required to provide:
 
-1. A focused file as Focus Run input by browsing or entering run number
+1. A focused file as Focus Run input by browsing or entering single/multi
+   run number
 2. List of expected peaks which can be either by browsing a (*CSV*) file
    or entering within the text-field simply click on the Fit button.
 
@@ -286,15 +287,19 @@ These parameters are required to process Fitting successfully:
 
 Focused Run #:
   Focused workspace directory or selected with the help of browse button.
-  User may also select the file by simply entering the file run number,
-  which is located within the focused output directory.
+  User may also select the file/s by simply entering the file run number
+  or a range of consecutive run number separated by dash (`-`), for
+  example: "194547-194550" or "241391-241399". It is  compulsory for
+  these file/s to be located within the focused output directory.
   Focused workspace can be generated with the help of
   :ref:`focus-Engineering_Diffraction-ref` tab, the output folder
   directory can be set in the :ref:`setting-Engineering_Diffraction-ref`
   tab under the *Focusing settings* section.
-  The interface will automatically select all the bank files found with the
-  same run-number and update the Plot Bank combo-box and Bank list
-  accordingly.
+  When a valid range of consecutive run numbers is given, the interface will
+  automatically import and add the run number/s to the list on the right side
+  of the graph, from where each run number can be selected from by click on it.
+  The interface will then automatically update the Plot Bank combo-box
+  according to the bank files found for each entered/selected run-number.
 
 .. _ExpectedPeaks-Engineering_Diffraction-ref:
 

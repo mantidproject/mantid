@@ -175,7 +175,8 @@ public:
   std::string fittingRunNoFactory(std::string bank, std::string fileName,
                                   std::string &bankDir, std::string fileDir);
 
-  void updateFittingDirVec(std::string &bankDir, std::string &focusedFile, bool multi_run);
+  void updateFittingDirVec(std::string &bankDir, std::string &focusedFile,
+                           bool multi_run);
 
   std::string readPeaksFile(std::string fileDir);
 
@@ -276,7 +277,6 @@ private slots:
   void fittingRunNoChanged();
   void setBankDir(int idx);
   void listViewFittingRun();
-
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();

@@ -1420,7 +1420,6 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
       // assuming that no directory is found so look for number
       // if run number length greater
     } else if (focusedFile.count() > 4) {
-      /// SHAHROZ
       if (strFocusedFile.find("-") != std::string::npos) {
         std::vector<std::string> firstLastRunNoVec;
         boost::split(firstLastRunNoVec, strFocusedFile, boost::is_any_of("-"));
@@ -1523,13 +1522,11 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enableMultiRun(
     for (int i = firstNum; i <= lastNum; i++) {
       RunNumberVec.push_back(std::to_string(i));
     }
-    /// shahroz
 
     // if given a single run number instead
     for (int i = 0; i < RunNumberVec.size(); i++) {
       updateFittingDirVec(m_focusDir, RunNumberVec[i], true);
     }
-    // std::minus<int>()
     int diff = (lastNum - firstNum) + 1;
     auto global_vec_size = m_fitting_runno_dir_vec.size();
     if (diff == global_vec_size) {
