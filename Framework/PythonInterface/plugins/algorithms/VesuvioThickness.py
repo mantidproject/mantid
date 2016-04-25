@@ -5,12 +5,6 @@ import mantid.simpleapi as ms
 import numpy as np
 import math
 
-def sq(list):
-    out = []
-    for i in range(len(list)):
-        out.append(list[i]**2)
-    return out
-
 class VesuvioThickness(PythonAlgorithm):
 
     _masses = None
