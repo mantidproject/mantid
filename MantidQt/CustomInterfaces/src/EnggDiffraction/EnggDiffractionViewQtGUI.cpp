@@ -1506,42 +1506,40 @@ EnggDiffractionViewQtGUI::splitFittingDirectory(std::string &selectedfPath) {
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enableMultiRun(
     std::string firstRun, std::string lastRun) {
-  m_fitting_runno_dir_vec.clear();
   int firstNum;
   int lastNum;
 
   std::vector<std::string> RunNumberVec;
   if (isDigit(firstRun) && isDigit(lastRun)) {
     firstNum = std::stoi(firstRun);
-    lastNum = (std::stoi(lastRun));
-  }
+    lastNum = std::stoi(lastRun);
 
-  if (firstRun <= lastRun) {
+    if (firstRun <= lastRun) {
 
-    for (int i = firstNum; i <= lastNum; i++) {
-      RunNumberVec.push_back(std::to_string(i));
-    }
+      for (size_t i = firstNum; i <= lastNum; i++) {
+        RunNumberVec.push_back(std::to_string(i));
+      }
 
-    // if given a single run number instead
-    for (int i = 0; i < RunNumberVec.size(); i++) {
-      updateFittingDirVec(m_focusDir, RunNumberVec[i], true);
-    }
-    int diff = (lastNum - firstNum) + 1;
-    auto global_vec_size = m_fitting_runno_dir_vec.size();
-    if (diff == global_vec_size) {
+      // if given a single run number instead
+      for (int i = 0; i < RunNumberVec.size(); i++) {
+        updateFittingDirVec(m_focusDir, RunNumberVec[i], true);
+      }
+      int diff = (lastNum - firstNum) + 1;
+      auto global_vec_size = m_fitting_runno_dir_vec.size();
+      if (size_t(diff) == global_vec_size) {
 
-      addRunNoItem(RunNumberVec, true);
+        addRunNoItem(RunNumberVec, true);
 
-      emit setBank();
-      m_fitting_runno_dir_vec.clear();
+        emit setBank();
+      } else {
+        userWarning("Invalid Run Number", "One or more run file not found "
+                                          "from the specified range of runs."
+                                          "Please try again");
+      }
     } else {
-      userWarning("Invalid Run Number", "One or more run file not found "
-                                        "from the specified range of runs."
-                                        "Please try again");
+      userWarning("Invalid Run Number", "The specfied range of run number "
+                                        "entered is invalid. Please try again");
     }
-  } else {
-    userWarning("Invalid Run Number", "The specfied range of run number "
-                                      "entered is invalid. Please try again");
   }
 }
 
