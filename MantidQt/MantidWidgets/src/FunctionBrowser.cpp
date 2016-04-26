@@ -1634,15 +1634,15 @@ QtProperty* FunctionBrowser::getParameterProperty(const QString& funcIndex, cons
  * @param fun :: A function to copy the values from. It must have the same
  *   type (composition) as the function in the browser.
  */
-void FunctionBrowser::updateParameters(const Mantid::API::IFunction& fun)
-{
-  auto paramNames = fun.getParameterNames();
-  for(auto par = paramNames.begin(); par != paramNames.end(); ++par)
-  {
-    setParameter( QString::fromStdString(*par), fun.getParameter(*par) );
+void FunctionBrowser::updateParameters(const Mantid::API::IFunction &fun) {
+  const auto paramNames = fun.getParameterNames();
+  for (const auto parameter : paramNames) {
+    const QString qName = QString::fromStdString(parameter);
+    setParameter(qName, fun.getParameter(parameter));
+    const size_t index = fun.parameterIndex(parameter);
+    setParamError(qName, fun.getError(index));
   }
 }
-
 
 /**
  * Return FunctionFactory function string

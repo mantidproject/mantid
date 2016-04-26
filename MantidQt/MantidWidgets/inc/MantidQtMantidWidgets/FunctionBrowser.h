@@ -118,7 +118,7 @@ public:
   /// Get a value of a parameter
   double getParameter(const QString& paramName) const;
   /// Update parameter values in the browser to match those of a function.
-  void updateParameters(const Mantid::API::IFunction& fun);
+  void updateParameters(const Mantid::API::IFunction& fun) override;
 
   /// Get a list of names of global parameters
   QStringList getGlobalParameters() const;

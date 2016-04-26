@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionHelper.h"
+#include "MantidAPI/IFunction.h"
 
 using MantidQt::MantidWidgets::IFunctionBrowser;
 using MantidQt::MantidWidgets::IMuonFitFunctionControl;
@@ -30,6 +31,8 @@ void MuonAnalysisFitFunctionHelper::doConnect() {
             SLOT(updateFunction()));
     connect(fitBrowser, SIGNAL(functionUpdateAndFitRequested(bool)), this,
             SLOT(updateFunctionAndFit(bool)));
+    connect(fitBrowser, SIGNAL(fittingDone(const QString &)), this,
+            SLOT(handleFitFinished(const QString &)));
   }
   if (const QObject *funcBrowser = dynamic_cast<QObject *>(m_funcBrowser)) {
     connect(funcBrowser, SIGNAL(functionStructureChanged()), this,
@@ -59,6 +62,17 @@ void MuonAnalysisFitFunctionHelper::updateFunctionAndFit(bool sequential) {
   } else {
     m_fitBrowser->runFit();
   }
+}
+
+/**
+ * Called when fit finished.
+ * Updates parameters displayed in function browser from the fit results.
+ * @param wsName :: [input] UNUSED (workspace name)
+ */
+void MuonAnalysisFitFunctionHelper::handleFitFinished(const QString &wsName) {
+  Q_UNUSED(wsName)
+  const auto function = m_fitBrowser->getFunction();
+  m_funcBrowser->updateParameters(*function);
 }
 
 } // namespace CustomInterfaces

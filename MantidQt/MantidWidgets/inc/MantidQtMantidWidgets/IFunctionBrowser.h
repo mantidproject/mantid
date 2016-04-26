@@ -2,6 +2,7 @@
 #define MANTID_MANTIDWIDGETS_IFUNCTIONBROWSER_H_
 
 #include "WidgetDllOption.h"
+#include "MantidAPI/IFunction.h"
 #include <QString>
 
 namespace MantidQt {
@@ -37,6 +38,7 @@ public:
   virtual ~IFunctionBrowser() {}
   virtual QString getFunctionString() = 0;
   virtual void functionStructureChanged() = 0;
+  virtual void updateParameters(const Mantid::API::IFunction &fun) = 0;
 };
 
 } // namespace MantidWidgets

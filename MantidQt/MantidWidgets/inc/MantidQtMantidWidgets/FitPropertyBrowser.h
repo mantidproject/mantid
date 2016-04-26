@@ -275,7 +275,7 @@ signals:
 
   /// signal which can optionally be caught for customization after a fit has 
   /// been done
-  void fittingDone(QString);
+  void fittingDone(const QString &);
   void functionFactoryUpdateReceived();
 
 protected slots:

@@ -2,7 +2,9 @@
 #define MANTID_MANTIDWIDGETS_IMUONFITFUNCTIONCONTROL_H_
 
 #include "WidgetDllOption.h"
+#include "MantidAPI/IFunction.h"
 #include <QObject>
+
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -38,7 +40,7 @@ public:
   virtual void setFunction(const QString &funcString) = 0;
   virtual void runFit() = 0;
   virtual void runSequentialFit() = 0;
-
+  virtual Mantid::API::IFunction_sptr getFunction() const = 0;
 signals:
   virtual void functionUpdateRequested() = 0;
   virtual void functionUpdateAndFitRequested(bool sequential) = 0;

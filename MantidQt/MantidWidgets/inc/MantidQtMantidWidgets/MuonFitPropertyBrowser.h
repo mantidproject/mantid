@@ -55,6 +55,10 @@ public:
   void runFit() override;
   /// Run a sequential fit
   void runSequentialFit() override;
+  /// Get the fitting function
+  Mantid::API::IFunction_sptr getFunction() const override {
+    return getFittingFunction();
+  }
 
 public slots:
   /// Perform the fit algorithm

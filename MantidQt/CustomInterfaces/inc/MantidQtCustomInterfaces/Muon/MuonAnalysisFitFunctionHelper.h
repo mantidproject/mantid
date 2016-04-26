@@ -48,6 +48,8 @@ public slots:
   void updateFunction();
   /// Update function and pass to fit property browser, then fit
   void updateFunctionAndFit(bool sequential);
+  /// When fit finished, update parameters in function browser
+  void handleFitFinished(const QString &wsName);
 
 private:
   /// Connect signals and slots

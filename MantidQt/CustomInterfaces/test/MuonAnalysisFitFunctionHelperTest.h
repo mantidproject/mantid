@@ -4,6 +4,9 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionHelper.h"
 #include "MantidQtMantidWidgets/IFunctionBrowser.h"
 #include "MantidQtMantidWidgets/IMuonFitFunctionControl.h"
@@ -18,6 +21,7 @@ class MockFunctionBrowser : public IFunctionBrowser {
 public:
   QString getFunctionString() override { return QString("Test function"); }
   MOCK_METHOD0(functionStructureChanged, void());
+  MOCK_METHOD1(updateParameters, void(const Mantid::API::IFunction &));
 };
 
 // Mock muon fit property browser
@@ -28,6 +32,7 @@ public:
   MOCK_METHOD0(runSequentialFit, void());
   MOCK_METHOD0(functionUpdateRequested, void());
   MOCK_METHOD1(functionUpdateAndFitRequested, void(bool));
+  MOCK_CONST_METHOD0(getFunction, Mantid::API::IFunction_sptr());
 };
 
 class MuonAnalysisFitFunctionHelperTest : public CxxTest::TestSuite {
@@ -39,6 +44,16 @@ public:
   }
   static void destroySuite(MuonAnalysisFitFunctionHelperTest *suite) {
     delete suite;
+  }
+
+  MuonAnalysisFitFunctionHelperTest() {
+    Mantid::API::FrameworkManager::Instance(); // To make sure everything is
+                                               // initialized
+  }
+
+  /// Create a test function
+  Mantid::API::IFunction_sptr createFunction() {
+    return Mantid::API::FunctionFactory::Instance().createFunction("Gaussian");
   }
 
   /// Run before each test to create mock objects
@@ -74,6 +89,15 @@ public:
     EXPECT_CALL(*m_fitBrowser, setFunction(testString)).Times(1);
     EXPECT_CALL(*m_fitBrowser, runSequentialFit()).Times(1);
     m_helper->updateFunctionAndFit(true);
+  }
+
+  void test_handleFitFinished() {
+    const auto function = createFunction();
+    ON_CALL(*m_fitBrowser, getFunction()).WillByDefault(Return(function));
+    EXPECT_CALL(*m_fitBrowser, getFunction()).Times(1);
+    EXPECT_CALL(*m_funcBrowser, updateParameters(testing::Ref(*function)))
+        .Times(1);
+    m_helper->handleFitFinished("unused argument");
   }
 
 private:

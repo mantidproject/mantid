@@ -27,7 +27,8 @@ void MuonAnalysisFitDataTab::init()
   connect(m_uiForm.muonAnalysisHelpDataAnalysis, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpDataAnalysisClicked()));
   
   // Detect when the fit has finished and group the workspaces that have been created as a result.
-  connect(m_uiForm.fitBrowser, SIGNAL(fittingDone(QString)), this, SLOT(groupFittedWorkspaces(QString)));
+  connect(m_uiForm.fitBrowser, SIGNAL(fittingDone(const QString &)), this,
+          SLOT(groupFittedWorkspaces(const QString &)));
 }
 
 
@@ -60,8 +61,8 @@ void MuonAnalysisFitDataTab::makeRawWorkspace(const std::string& wsName)
 *
 * @param workspaceName :: The workspaceName that the fit has been done against
 */
-void MuonAnalysisFitDataTab::groupFittedWorkspaces(QString workspaceName)
-{
+void MuonAnalysisFitDataTab::groupFittedWorkspaces(
+    const QString &workspaceName) {
   std::string wsNormalised = workspaceName.toStdString() + "_NormalisedCovarianceMatrix";
   std::string wsParameters = workspaceName.toStdString() + "_Parameters";
   std::string wsWorkspace = workspaceName.toStdString() + "_Workspace";
