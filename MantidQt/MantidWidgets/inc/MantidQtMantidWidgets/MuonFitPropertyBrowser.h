@@ -2,6 +2,7 @@
 #define MUONFITPROPERTYBROWSER_H_
 
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/IMuonFitFunctionControl.h"
 
 /* Forward declarations */
 
@@ -32,8 +33,9 @@ namespace MantidWidgets
 {
 class PropertyHandler;
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonFitPropertyBrowser: public MantidQt::MantidWidgets::FitPropertyBrowser
-{  
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonFitPropertyBrowser
+    : public MantidQt::MantidWidgets::FitPropertyBrowser,
+      public MantidQt::MantidWidgets::IMuonFitFunctionControl {
   Q_OBJECT
 
 public:

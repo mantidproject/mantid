@@ -1,17 +1,15 @@
-#ifndef MANTID_CUSTOMINTERFACES_MUONANALYSISFITFUNCTIONHELPER_H_
-#define MANTID_CUSTOMINTERFACES_MUONANALYSISFITFUNCTIONHELPER_H_
+#ifndef MANTID_MANTIDWIDGETS_IMUONFITFUNCTIONCONTROL_H_
+#define MANTID_MANTIDWIDGETS_IMUONFITFUNCTIONCONTROL_H_
 
-#include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtMantidWidgets/IMuonFitFunctionControl.h"
+#include "WidgetDllOption.h"
 #include <QObject>
 
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
-/** MuonAnalysisFitFunctionHelper : Updates fit browser from function widget
+/** IMuonFitFunctionControl: set function to fit for a muon fit property browser
 
-  Handles interaction between FunctionBrowser widget and fit property browser.
-  Implemented as a QObject to handle signals and slots.
+  Abstract base class to be implemented
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -34,15 +32,12 @@ namespace CustomInterfaces {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL MuonAnalysisFitFunctionHelper : QObject {
-  Q_OBJECT
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IMuonFitFunctionControl {
 public:
-private:
-  /// Non-owning pointer to muon fit property browser
-  MantidQt::MantidWidgets::IMuonFitFunctionControl *m_fitBrowser;
+  virtual ~IMuonFitFunctionControl() {}
 };
 
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif /* MANTID_CUSTOMINTERFACES_MUONANALYSISFITFUNCTIONHELPER_H_ */
+#endif MANTID_MANTIDWIDGETS_IMUONFITFUNCTIONCONTROL_H
