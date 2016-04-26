@@ -127,9 +127,9 @@ class VesuvioThickness(PythonAlgorithm):
         Analytic expression for integration of PDCS over E1 and solid angle
         """
 
-        xs_mass = 1.00867/Mass
+        xs_masses = 1.00867/Mass
         scatter_len_sq = np.square(scatter_length)
-        cross_section = np.divide((self.FOUR_PI * scatter_len_sq),(np.square(xs_mass+1)))
+        cross_section = np.divide((self.FOUR_PI * scatter_len_sq),(np.square(xs_masses+1)))
         xs_sum = sum(cross_section)
         return xs_sum
 
