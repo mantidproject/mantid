@@ -74,8 +74,8 @@ public:
         "Transmission Run(s)", "FirstTransmissionRun",
         "<b>Transmission run(s) to use to normalise the sample runs.</b><br "
         "/><i>optional</i><br />To specify two transmission runs, separate "
-        "them with a comma. If left blank, the sample runs will be normalised "
-        "by monitor only.<br /><br /><b>Example:</b> <samp>1234,12345</samp>");
+        "them with a '+'. If left blank, the sample runs will be normalised "
+        "by monitor only.<br /><br /><b>Example:</b> <samp>1234+12345</samp>");
     whitelist.addElement("Q min", "MomentumTransferMinimum",
                          "<b>Minimum value of Q to be used</b><br "
                          "/><i>optional</i><br />Unit: &#197;<sup>-1</sup><br "
