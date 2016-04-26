@@ -81,6 +81,38 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(wks.getNumberHistograms(), 1)
 
 
+    def test_reduction_with_multiple_runs(self):
+        """
+        Test reduction with multiple sample and vanadium runs
+        """
+        wks = OSIRISDiffractionReduction(Sample=['OSI10203.raw','OSI10204.raw','OSI10205.raw','OSI10206.raw'],
+                                         CalFile='osiris_041_RES10.cal',
+                                         Vanadium=['OSI10156.raw','OSI10157.raw','OSI10158.raw','OSI10159.raw'],
+                                         ContainerScaleFactor=0.5,
+                                         SpectraMin=3,
+                                         SpectraMax=361,
+                                         DetectDRange=True)
+        self.assertTrue(isinstance(wks, MatrixWorkspace), 'Result workspace should be a matrix workspace.')
+        self.assertEqual(wks.getAxis(0).getUnit().unitID(), 'dSpacing')
+        self.assertEqual(wks.getNumberHistograms(), 1)
+
+    def test_reduction_with_mulitple_can_multiple(self):
+        """
+        Test reduction with multiple sample, vanadium and container runs
+        """
+        wks = OSIRISDiffractionReduction(Sample=['OSI10203.raw','OSI10204.raw','OSI10205.raw','OSI10206.raw'],
+                                         CalFile='osiris_041_RES10.cal',
+                                         Vanadium=['OSI10156.raw','OSI10157.raw','OSI10158.raw','OSI10159.raw'],
+                                         Container=['OSI10241.raw','OSI10242.raw','OSI10243.raw','OSI10244.raw'],
+                                         ContainerScaleFactor=0.5,
+                                         SpectraMin=3,
+                                         SpectraMax=361,
+                                         DetectDRange=True)
+        self.assertTrue(isinstance(wks, MatrixWorkspace), 'Result workspace should be a matrix workspace.')
+        self.assertEqual(wks.getAxis(0).getUnit().unitID(), 'dSpacing')
+        self.assertEqual(wks.getNumberHistograms(), 1)
+
+
     def test_spectra_with_bad_detectors(self):
         """
         Tests reduction with a spectra range that includes no selected Detectors from the Cal file
