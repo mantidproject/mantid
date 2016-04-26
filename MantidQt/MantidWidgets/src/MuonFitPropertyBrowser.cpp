@@ -242,9 +242,14 @@ void MuonFitPropertyBrowser::populateFunctionNames() {
 }
 
 /**
+ * Updates function prior to running a fit
+ */
+void MuonFitPropertyBrowser::fit() { emit functionUpdateRequested(false); }
+
+/**
  * Creates an instance of Fit algorithm, sets its properties and launches it.
  */
-void MuonFitPropertyBrowser::fit() {
+void MuonFitPropertyBrowser::runFit() {
   std::string wsName = workspaceName();
 
   if (wsName.empty()) {
@@ -303,7 +308,16 @@ void MuonFitPropertyBrowser::fit() {
 /**
  * Show sequential fit dialog.
  */
-void MuonFitPropertyBrowser::sequentialFit() { emit sequentialFitRequested(); }
+void MuonFitPropertyBrowser::runSequentialFit() {
+  emit sequentialFitRequested();
+}
+
+/**
+ * Update function prior to running a sequential fit
+ */
+void MuonFitPropertyBrowser::sequentialFit() {
+  emit functionUpdateRequested(true);
+}
 
 /**
  * Connect to the AnalysisDataService when shown
@@ -354,6 +368,14 @@ void MuonFitPropertyBrowser::addExtraWidget(QWidget *widget) {
   if (m_additionalLayout) {
     m_additionalLayout->addWidget(widget);
   }
+}
+
+/**
+ * Called externally to set the function via a string
+ * @param funcString :: [input] Fit function as a string
+ */
+void MuonFitPropertyBrowser::setFunction(const QString &funcString) {
+  throw std::runtime_error("Not implemented yet!");
 }
 
 } // MantidQt

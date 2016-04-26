@@ -49,6 +49,12 @@ public:
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
   /// Add an extra widget into the browser
   void addExtraWidget(QWidget *widget);
+  /// Set function externally
+  void setFunction(const QString &funcString) override;
+  /// Run a non-sequential fit
+  void runFit() override;
+  /// Run a sequential fit
+  void runSequentialFit() override;
 
 public slots:
   /// Perform the fit algorithm
