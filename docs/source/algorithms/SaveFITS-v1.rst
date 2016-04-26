@@ -42,7 +42,7 @@ Usage
 
 **Example - LoadSaveLoadFITS**
 
-.. code-block:: python
+.. testcode:: python
 
     # Load an image
     wsg_name = 'images'
@@ -82,13 +82,19 @@ Usage
     print "Pixel value at coordinates ({0},{1}), first image: {2}, second image: {3}".
           format(pos_x, pos_y, ws.readX(pos_y)[pos_x], ws_reload.readX(pos_y)[pos_x])
                 
-.. testcleanup:: LoadFITS1SpectrumPerRow
+.. testcleanup:: LoadSaveLoadFITS
 
    import os
                  
     DeleteWorkspace(wsg_name)
     DeleteWorkspace(wsg_reload_name)
     os.remove(save_name)
+
+Output:
+
+.. testoutput:: LoadSaveLoadFITS
+
+   Pixel value at coordinates (22, 33), first image: 0.0, second image: 0.1
 
 .. categories::
 
