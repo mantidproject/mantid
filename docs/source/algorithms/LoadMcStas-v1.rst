@@ -23,6 +23,9 @@ reading McStas 2.1 histogram and event data.
 :ref:`algm-LoadMcStasNexus` can be used 
 for reading McStas 2.0 histogram data. 
 
+LoadMcStas will be called by Load, if the file has an 
+``/entry1/simulation/name`` item whose value is ``"mccode"``.
+
 
 References
 ##########
