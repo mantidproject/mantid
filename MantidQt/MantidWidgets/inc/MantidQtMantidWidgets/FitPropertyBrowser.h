@@ -366,6 +366,8 @@ protected:
   void minimizerChanged();
   /// Do the fitting
   void doFit(int maxIterations);
+  /// Create CompositeFunction
+  void createCompositeFunction(const QString &str = "");
 
   /// Property managers:
   QtGroupPropertyManager  *m_groupManager;
@@ -448,8 +450,6 @@ private:
   /// load and save function
   void loadFunction(const QString& funcString);
   void saveFunction(const QString& fnName);
-  /// Create CompositeFunction
-  void createCompositeFunction(const QString& str = "");
   /// Check if the workspace can be used in the fit
   virtual bool isWorkspaceValid(Mantid::API::Workspace_sptr)const;
   /// Find QtBrowserItem for a property prop among the chidren of 

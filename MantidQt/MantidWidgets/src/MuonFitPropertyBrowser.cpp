@@ -377,7 +377,7 @@ void MuonFitPropertyBrowser::addExtraWidget(QWidget *widget) {
  * @param funcString :: [input] Fit function as a string
  */
 void MuonFitPropertyBrowser::setFunction(const QString &funcString) {
-  throw std::runtime_error("Not implemented yet!");
+  createCompositeFunction(funcString);
 }
 
 } // MantidQt
