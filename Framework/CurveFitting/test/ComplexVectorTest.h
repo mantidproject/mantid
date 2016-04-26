@@ -152,6 +152,8 @@ public:
     TS_ASSERT_EQUALS(gv.get(0), 9.9);
     TS_ASSERT_EQUALS(gv.get(1), 7.7);
     TS_ASSERT_EQUALS(gv.get(2), 3.3);
+    TS_ASSERT_EQUALS(gv.get(3), 0.0);
+    TS_ASSERT_EQUALS(gv.get(4), 0.0);
 
     gv.set(3, ComplexType(22, 0.22));
     gv.set(4, ComplexType(44, 0.44));
