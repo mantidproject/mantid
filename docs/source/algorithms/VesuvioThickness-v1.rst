@@ -18,6 +18,7 @@ Usage
 **Example - VesuvioThickness**
 
 .. testcode:: VesuvioThicknessExample
+  :options: +NORMALIZE_WHITESPACE
 
     # Algorithm inputs
     masses = "1.0079,27.0,91.0"
@@ -36,6 +37,7 @@ Usage
 Output:
 
 .. testoutput:: VesuvioThicknessExample
+  :options: +NORMALIZE_WHITESPACE
 
     The final density is: 24.451460
     The final transmission is: 0.831000
