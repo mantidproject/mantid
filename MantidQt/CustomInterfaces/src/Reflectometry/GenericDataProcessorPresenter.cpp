@@ -359,9 +359,20 @@ void GenericDataProcessorPresenter::saveNotebook(
     return;
   }
 
+  // Get all the options used for the reduction from the view
+  std::map<std::string, std::string> preprocessingOptionsMap;
+  for (auto it = m_preprocessMap.begin(); it != m_preprocessMap.end(); ++it) {
+    preprocessingOptionsMap[it->first] =
+        m_view->getProcessingOptions(it->second.name());
+  }
+  auto processingOptions = m_view->getProcessingOptions(m_processor.name());
+  auto postprocessingOptions =
+      m_view->getProcessingOptions(m_postprocessor.name());
+
   auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
       m_wsName, m_model, m_view->getProcessInstrument(), m_whitelist,
-      m_preprocessMap, m_processor, m_postprocessor);
+      m_preprocessMap, m_processor, m_postprocessor, preprocessingOptionsMap,
+      processingOptions, postprocessingOptions);
   std::string generatedNotebook = notebook->generateNotebook(groups, rows);
 
   std::ofstream file(filename.c_str(), std::ofstream::trunc);

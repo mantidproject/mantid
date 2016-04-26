@@ -31,15 +31,39 @@ std::vector<std::string> splitByCommas(const std::string &names_string) {
   return names_split_by_commas;
 }
 
+/**
+Constructor
+@param name : the name of the table workspace used for the reduction
+@param model : the model associated with the table
+@param instrument : the instrument
+@param whitelist : the white list defining the columns
+@param preprocessMap : a map indicating which columns were pre-processed and the
+corresponding pre-processing algorithms
+@param processor : the reduction algorithm
+@param postprocessor : the post-processing algorithm
+@param preprocessingOptionsMap : options to pre-processing algorithms
+specified via hinting line edits in the view
+@param processingOptions : options to the reduction algorithm specified via
+the corresponding hinting line edit in the view
+@param postprocessingOptions : options to the post-processing algorithm
+specified via the corresponding hinting line edit in the view
+@returns ipython notebook string
+*/
 DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
     std::string name, QDataProcessorTableModel_sptr model,
     const std::string instrument, const DataProcessorWhiteList &whitelist,
     const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
     const DataProcessorAlgorithm &processor,
-    const DataPostprocessorAlgorithm &postprocessor)
+    const DataPostprocessorAlgorithm &postprocessor,
+    const std::map<std::string, std::string> preprocessingOptionsMap,
+    const std::string processingOptions,
+    const std::string postprocessingOptions)
     : m_wsName(name), m_model(model), m_instrument(instrument),
       m_whitelist(whitelist), m_preprocessMap(preprocessMap),
-      m_processor(processor), m_postprocessor(postprocessor) {}
+      m_processor(processor), m_postprocessor(postprocessor),
+      m_preprocessingOptionsMap(preprocessingOptionsMap),
+      m_processingOptions(processingOptions),
+      m_postprocessingOptions(postprocessingOptions) {}
 
 /**
   Generate an ipython notebook
@@ -78,9 +102,9 @@ std::string DataProcessorGenerateNotebook::generateNotebook(
     for (auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt) {
       code_string << "#Load and reduce\n";
 
-      auto reduce_row_string =
-          reduceRowString(*rIt, m_instrument, m_model, m_whitelist,
-                          m_preprocessMap, m_processor);
+      auto reduce_row_string = reduceRowString(
+          *rIt, m_instrument, m_model, m_whitelist, m_preprocessMap,
+          m_processor, m_preprocessingOptionsMap, m_processingOptions);
       // The reduction code
       code_string << boost::get<0>(reduce_row_string);
       // The output workspace names
@@ -92,7 +116,8 @@ std::string DataProcessorGenerateNotebook::generateNotebook(
 
     boost::tuple<std::string, std::string> postprocess_string =
         postprocessGroupString(groupRows, m_instrument, m_model, m_whitelist,
-                               m_preprocessMap, m_processor, m_postprocessor);
+                               m_preprocessMap, m_processor, m_postprocessor,
+                               m_postprocessingOptions);
     notebook->codeCell(boost::get<0>(postprocess_string));
 
     /** Draw plots **/
@@ -247,7 +272,13 @@ std::string tableString(QDataProcessorTableModel_sptr model,
   @param rows : rows in the group
   @param instrument : name of the instrument
   @param model : table model containing details of runs and processing settings
-  @param col_nums : column numbers used to find data in model
+  @param whitelist : the whitelist
+  @param preprocessMap : pre-processing instructions as a map
+  @param processor : the reduction algorithm
+  @param postprocessor : the algorithm responsible for post-processing
+  groups
+  @param postprocessingOptions : options specified for post-processing via
+  HintingLineEdit
   @return tuple containing the python code string and the output workspace name
   */
 boost::tuple<std::string, std::string> postprocessGroupString(
@@ -256,7 +287,8 @@ boost::tuple<std::string, std::string> postprocessGroupString(
     const DataProcessorWhiteList &whitelist,
     const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
     const DataProcessorAlgorithm &processor,
-    const DataPostprocessorAlgorithm &postprocessor) {
+    const DataPostprocessorAlgorithm &postprocessor,
+    const std::string &postprocessingOptions) {
   std::ostringstream stitch_string;
 
   stitch_string << "#Post-process workspaces\n";
@@ -292,9 +324,8 @@ boost::tuple<std::string, std::string> postprocessGroupString(
                 << " = ";
   stitch_string << postprocessor.name() << "(";
   stitch_string << postprocessor.inputProperty() << "='";
-  stitch_string << boost::algorithm::join(inputNames, ", ") << "')";
-
-  // TODO: Now options for post-processing
+  stitch_string << boost::algorithm::join(inputNames, ", ") << "', ";
+  stitch_string << postprocessingOptions << ")";
 
   return boost::make_tuple(stitch_string.str(), outputWSName);
 }
@@ -380,6 +411,9 @@ std::string getWorkspaceName(
  and how they relate to the algorithm properties
  @param preprocessMap : the pre-processing instructions as a map
  @param processor : the processing algorithm
+ @param preprocessingOptionsMap : a map containing the pre-processing options
+ @param processingOptions : the pre-processing options specified via hinting
+ line edit
  @return tuple containing the python string and the output workspace names
 */
 boost::tuple<std::string, std::string> reduceRowString(
@@ -387,7 +421,9 @@ boost::tuple<std::string, std::string> reduceRowString(
     QDataProcessorTableModel_sptr model,
     const DataProcessorWhiteList &whitelist,
     const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
-    const DataProcessorAlgorithm &processor) {
+    const DataProcessorAlgorithm &processor,
+    const std::map<std::string, std::string> &preprocessingOptionsMap,
+    const std::string &processingOptions) {
 
   std::ostringstream preprocess_string;
 
@@ -422,9 +458,11 @@ boost::tuple<std::string, std::string> reduceRowString(
         // The pre-processing alg
         const DataPreprocessorAlgorithm preprocessor =
             preprocessMap.at(colName);
+        // The pre-processing options
+        const std::string options = preprocessingOptionsMap.at(colName);
         // Python code ran to load and pre-process runs
         const boost::tuple<std::string, std::string> load_ws_string =
-            loadWorkspaceString(runStr, instrument, preprocessor);
+            loadWorkspaceString(runStr, instrument, preprocessor, options);
         // Populate preprocess_string
         preprocess_string << boost::get<0>(load_ws_string);
 
@@ -446,11 +484,14 @@ boost::tuple<std::string, std::string> reduceRowString(
     }
   }
 
-  // 'Options' column
-  const std::string options =
+  // 'Options' specified either via 'Options' column or HintinLineEdit
+  auto options = parseKeyValueString(processingOptions);
+  const std::string optionsStr =
       model->data(model->index(rowNo, ncols - 1)).toString().toStdString();
   // Parse and set any user-specified options
-  auto optionsMap = parseKeyValueString(options);
+  auto optionsMap = parseKeyValueString(optionsStr);
+  // Options specified via 'Options' column will be preferred
+  optionsMap.insert(options.begin(), options.end());
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     algProperties.push_back(kvp->first + " = " + kvp->second);
   }
@@ -498,11 +539,13 @@ boost::tuple<std::string, std::string> reduceRowString(
  @param runStr : string of workspaces to load
  @param instrument : name of the instrument
  @param preprocessor : the pre-processing algorithm
+ @param options : options given to this pre-processing algorithm
  @return : tuple of strings of python code and output workspace name
 */
 boost::tuple<std::string, std::string>
 loadWorkspaceString(const std::string &runStr, const std::string &instrument,
-                    const DataPreprocessorAlgorithm &preprocessor) {
+                    const DataPreprocessorAlgorithm &preprocessor,
+                    const std::string &options) {
 
   std::vector<std::string> runs;
   boost::split(runs, runStr, boost::is_any_of("+"));
@@ -532,7 +575,7 @@ loadWorkspaceString(const std::string &runStr, const std::string &instrument,
     load_string = loadRunString(*runIt, instrument, prefix);
     load_strings << boost::get<0>(load_string);
     load_strings << plusString(boost::get<1>(load_string), outputName,
-                               preprocessor);
+                               preprocessor, options);
   }
 
   return boost::make_tuple(load_strings.str(), outputName);
@@ -543,18 +586,21 @@ loadWorkspaceString(const std::string &runStr, const std::string &instrument,
  @param input_name : name of workspace to add to the other workspace
  @param output_name : other workspace will be added to the one with this name
  @param preprocessor : the preprocessor algorithm
+ @param options : options given for pre-processing
  @return string of python code
 */
 std::string plusString(const std::string &input_name,
                        const std::string &output_name,
-                       const DataPreprocessorAlgorithm &preprocessor) {
+                       const DataPreprocessorAlgorithm &preprocessor,
+                       const std::string &options) {
   std::ostringstream plus_string;
 
   plus_string << output_name << " = " << preprocessor.name() << "(";
   plus_string << preprocessor.firstInputProperty() << " = '" << output_name
               << "', ";
   plus_string << preprocessor.secondInputProperty() << " = '" << input_name;
-  plus_string << "')\n";
+  plus_string << "', " << options;
+  plus_string << ")\n";
 
   return plus_string.str();
 }
