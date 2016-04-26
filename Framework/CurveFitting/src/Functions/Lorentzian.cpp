@@ -41,6 +41,22 @@ void Lorentzian::setHeight(const double h) {
   }
 }
 
+void Lorentzian::fixCentre() {
+  fixParameter("PeakCentre");
+}
+
+void Lorentzian::unfixCentre() {
+  unfixParameter("PeakCentre");
+}
+
+void Lorentzian::fixIntensity() {
+  fixParameter("Amplitude");
+}
+
+void Lorentzian::unfixIntensity() {
+  unfixParameter("Amplitude");
+}
+
 void Lorentzian::functionLocal(double *out, const double *xValues,
                                const size_t nData) const {
   const double amplitude = getParameter("Amplitude");

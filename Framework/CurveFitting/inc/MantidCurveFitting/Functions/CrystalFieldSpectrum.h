@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidCurveFitting/Functions/CrystalFieldPeaks.h"
 
 namespace Mantid {
@@ -35,7 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CrystalFieldSpectrum : public API::IFunction1D {
+class DLLExport CrystalFieldSpectrum : public API::IFunction {
 public:
 
   /// Constructor
@@ -90,6 +90,9 @@ public:
 
   /// Return parameter index from a parameter reference.
   virtual size_t getParameterIndex(const API::ParameterReference &ref) const override;
+  /// Tie a parameter to other parameters (or a constant)
+  virtual API::ParameterTie *tie(const std::string &parName, const std::string &expr,
+                            bool isDefault = false) override;
   /// Apply the ties
   virtual void applyTies() override;
   /// Remove all ties
@@ -109,6 +112,9 @@ public:
   /// Set up the function for a fit.
   virtual void setUpForFit() override;
 
+  /// Build m_spectrum function.
+  void buildSpectrumFunction() const;
+
 protected:
   /// Declare a new parameter
   virtual void declareParameter(const std::string &name, double initValue = 0,
@@ -118,25 +124,41 @@ protected:
   virtual void addTie(API::ParameterTie *tie) override;
   //@}
 
-  /// Evaluate the function
-  void function1D(double *out, const double *xValues,
-                          const size_t nData) const override;
+public:
+  /** @name Attributes */
+  //@{
+  /// Returns the number of attributes associated with the function
+  virtual size_t nAttributes() const override;
+  /// Returns a list of attribute names
+  virtual std::vector<std::string> getAttributeNames() const override;
+  /// Return a value of attribute attName
+  virtual Attribute getAttribute(const std::string &name) const override;
+  /// Set a value to attribute attName
+  virtual void setAttribute(const std::string &name, const Attribute &) override;
+  /// Check if attribute attName exists
+  virtual bool hasAttribute(const std::string &name) const override;
+  //@}
 
-  void setAttribute(const std::string &attName, const Attribute &) override;
+  /// Evaluate the function
+  void function(const API::FunctionDomain &domain, API::FunctionValues &values) const override;
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters
   void init() override;
 
 private:
-  /// Build m_spectrum function.
-  void buildSpectrumFunction();
+  /// Test if a name (parameter's or attribute's) belongs to m_crystalFiled
+  bool isOwnName(const std::string &aName) const;
+  /// Update m_spectrum function.
+  void updateSpectrumFunction() const;
   /// Function that calculates peak centres and intensities.
   CrystalFieldPeaks m_crystalField;
   /// Function that actually callculates the spectrum.
-  API::CompositeFunction m_spectrum;
+  mutable API::CompositeFunction m_spectrum;
   /// Cached number of parameters in m_crystalField.
   size_t m_nOwnParams;
+  /// Flag indicating that updateSpectrumFunction() is required.
+  mutable bool m_dirty;
 };
 
 } // namespace Functions

@@ -3,8 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/CrystalFieldSpectrum.h"
 #include "MantidCurveFitting/Functions/DeltaFunction.h"
-#include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/ParameterTie.h"
 
 #include <cmath>
 #include <algorithm>
@@ -31,9 +32,9 @@ using namespace API;
 DECLARE_FUNCTION(CrystalFieldSpectrum)
 
 /// Constructor
-CrystalFieldSpectrum::CrystalFieldSpectrum(): m_nOwnParams(m_crystalField.nParams()) {
+CrystalFieldSpectrum::CrystalFieldSpectrum(): m_nOwnParams(m_crystalField.nParams()),m_dirty(true) {
   declareAttribute("PeakShape", Attribute("Lorentzian"));
-  setAttributeValue("NumDeriv", true);
+  declareAttribute("FWHM", Attribute(0.0));
 }
 
 void CrystalFieldSpectrum::init() {}
@@ -43,7 +44,11 @@ void CrystalFieldSpectrum::setParameter(size_t i, const double &value,
   bool explicitlySet) {
   if (i < m_nOwnParams) {
     m_crystalField.setParameter(i, value, explicitlySet);
+    m_dirty = true;
   } else {
+    if (m_dirty) {
+      updateSpectrumFunction();
+    }
     m_spectrum.setParameter(i - m_nOwnParams, value, explicitlySet);
   }
 }
@@ -54,6 +59,9 @@ void CrystalFieldSpectrum::setParameterDescription(size_t i,
   if (i < m_nOwnParams) {
     m_crystalField.setParameterDescription(i, description);
   } else {
+    if (m_dirty) {
+      updateSpectrumFunction();
+    }
     m_spectrum.setParameterDescription(i - m_nOwnParams, description);
   }
 }
@@ -91,13 +99,13 @@ size_t CrystalFieldSpectrum::nParams() const {
 
   /// Returns the index of parameter name
 size_t CrystalFieldSpectrum::parameterIndex(const std::string &name) const {
-  if (name.empty()) {
-    throw std::invalid_argument("Parameter name cannot be empty string.");
-  }
-  if (name.front() != 'f' || name.find('.') == std::string::npos) {
+  if (isOwnName(name)) {
     return m_crystalField.parameterIndex(name);
   } else {
-    return m_spectrum.parameterIndex(name);
+    if (m_dirty) {
+      updateSpectrumFunction();
+    }
+    return m_spectrum.parameterIndex(name) + m_nOwnParams;
   }
 }
 
@@ -126,6 +134,9 @@ void CrystalFieldSpectrum::setError(size_t i, double err) {
   if (i < m_nOwnParams) {
     m_crystalField.setError(i, err);
   } else {
+    if (m_dirty) {
+      updateSpectrumFunction();
+    }
     m_spectrum.setError(i - m_nOwnParams, err);
   }
 }
@@ -158,7 +169,20 @@ size_t CrystalFieldSpectrum::getParameterIndex(const ParameterReference &ref) co
   if (index < m_nOwnParams) {
     return index;
   }
-  return m_spectrum.getParameterIndex(ref);
+  return m_spectrum.getParameterIndex(ref) + m_nOwnParams;
+}
+
+/// Tie a parameter to other parameters (or a constant)
+API::ParameterTie *CrystalFieldSpectrum::tie(const std::string &parName, const std::string &expr,
+                          bool isDefault) {
+  if (isOwnName(parName)) {
+    return m_crystalField.tie(parName, expr, isDefault);
+  } else {
+    if (m_dirty) {
+      updateSpectrumFunction();
+    }
+    return m_spectrum.tie(parName, expr, isDefault);
+  }
 }
 
 /// Apply the ties
@@ -210,6 +234,7 @@ void CrystalFieldSpectrum::removeConstraint(const std::string &parName) {
 
 /// Set up the function for a fit.
 void CrystalFieldSpectrum::setUpForFit() {
+  updateSpectrumFunction();
 }
 
 /// Declare a new parameter
@@ -220,29 +245,164 @@ void CrystalFieldSpectrum::declareParameter(const std::string &, double,
 }
 
 /// Add a new tie. Derived classes must provide storage for ties
-void CrystalFieldSpectrum::addTie(ParameterTie *tie) {
+void CrystalFieldSpectrum::addTie(API::ParameterTie *tie) {
+  size_t i = getParameterIndex(*tie);
+  if (i < m_nOwnParams) {
+    m_crystalField.addTie(tie);
+  } else {
+    if (m_dirty) {
+      updateSpectrumFunction();
+    }
+    m_spectrum.addTie(tie);
+  }
 }
 
+
+/// Returns the number of attributes associated with the function
+size_t CrystalFieldSpectrum::nAttributes() const {
+  return IFunction::nAttributes() + m_crystalField.nAttributes() + m_spectrum.nAttributes();
+}
+
+/// Returns a list of attribute names
+std::vector<std::string> CrystalFieldSpectrum::getAttributeNames() const {
+  std::vector<std::string> attNames(2);
+  attNames[0] = "PeakShape";
+  attNames[1] = "FWHM";
+  auto cfNames = m_crystalField.getAttributeNames();
+  auto spNames = m_spectrum.getAttributeNames();
+  attNames.insert(attNames.end(), cfNames.begin(), cfNames.end());
+  attNames.insert(attNames.end(), spNames.begin(), spNames.end());
+  return attNames;
+}
+
+/// Return a value of attribute attName
+API::IFunction::Attribute CrystalFieldSpectrum::getAttribute(const std::string &attName) const {
+  if (attName == "PeakShape" || attName == "FWHM") {
+    return IFunction::getAttribute(attName);
+  } else if (attName == "NumDeriv") {
+    return m_spectrum.getAttribute(attName);
+  } else if (isOwnName(attName)) {
+    return m_crystalField.getAttribute(attName);
+  } else {
+    return m_spectrum.getAttribute(attName);
+  }
+}
+
+/// Set a value to attribute attName
 void CrystalFieldSpectrum::setAttribute(const std::string &attName,
                                const IFunction::Attribute &att) {
-  if (attName == "PeakShape") {
+  if (attName == "PeakShape" || attName == "FWHM") {
+    IFunction::setAttribute(attName, att);
+    m_dirty = true;
+    m_spectrum.clear();
+  } else if (attName == "NumDeriv") {
+    m_spectrum.setAttribute(attName, att);
+  } else if (isOwnName(attName)) {
+    m_crystalField.setAttribute(attName, att);
+    m_dirty = true;
+  } else {
+    if (m_dirty) {
+      updateSpectrumFunction();
+    }
+    m_spectrum.setAttribute(attName, att);
   }
-  //CompositeFunction::setAttribute(attName, att);
+}
+
+/// Check if attribute attName exists
+bool CrystalFieldSpectrum::hasAttribute(const std::string &attName) const {
+  if (attName == "NumDeriv" || IFunction::hasAttribute(attName)) {
+    return true;
+  }
+  if (isOwnName(attName)) {
+    return m_crystalField.hasAttribute(attName);
+  } else {
+    return m_spectrum.hasAttribute(attName);
+  }
 }
 
 // Evaluates the function
-void CrystalFieldSpectrum::function1D(double *out, const double *xValues,
-                          const size_t nData) const {
+void CrystalFieldSpectrum::function(const API::FunctionDomain &domain,
+                        API::FunctionValues &values) const {
+  updateSpectrumFunction();
+  m_spectrum.function(domain, values);
+}
+
+/// Test if a name (parameter's or attribute's) belongs to m_crystalFiled
+/// @param aName :: A name to test.
+bool CrystalFieldSpectrum::isOwnName(const std::string &aName) const {
+  if (aName.empty()) {
+    throw std::invalid_argument("Parameter or attribute name cannot be empty string.");
+  }
+  return (aName.front() != 'f' || aName.find('.') == std::string::npos);
 }
 
 /// Uses m_crystalField to calculate peak centres and intensities
 /// then populates m_spectrum with peaks of type given in PeakShape attribute.
-void CrystalFieldSpectrum::buildSpectrumFunction() {
+void CrystalFieldSpectrum::buildSpectrumFunction() const {
+  m_dirty = false;
+  m_spectrum.clear();
+
   FunctionDomainGeneral domain;
   FunctionValues values;
   m_crystalField.functionGeneral(domain, values);
+
+  if (values.size() == 0) {
+    return;
+  }
+
+  if (values.size() % 2 != 0) {
+    throw std::runtime_error("CrystalFieldPeaks returned add number of values.");
+  }
+
+  auto peakShape = IFunction::getAttribute("PeakShape").asString();
+  auto fwhm = IFunction::getAttribute("FWHM").asDouble();
+  auto nPeaks = values.size() / 2;
+  for(size_t i = 0; i < nPeaks; ++i) {
+    auto fun = API::FunctionFactory::Instance().createFunction(peakShape);
+    auto peak = boost::dynamic_pointer_cast<API::IPeakFunction>(fun);
+    if (!peak) {
+      throw std::runtime_error("A peak function is expected.");
+    }
+    peak->fixCentre();
+    peak->fixIntensity();
+    peak->setCentre(values.getCalculated(i));
+    peak->setIntensity(values.getCalculated(i + nPeaks));
+    peak->setIntensity(fwhm);
+    m_spectrum.addFunction(peak);
+  }
 }
 
+/// Update m_spectrum function.
+void CrystalFieldSpectrum::updateSpectrumFunction() const {
+  if (m_spectrum.nFunctions() == 0) {
+    buildSpectrumFunction();
+    return;
+  }
+  m_dirty = false;
+  FunctionDomainGeneral domain;
+  FunctionValues values;
+  m_crystalField.functionGeneral(domain, values);
+  auto nPeaks = values.size() / 2;
+
+  if (m_spectrum.nFunctions() != nPeaks) {
+    //throw std::runtime_error("Number of peaks has changed: "+std::to_string(nPeaks));
+    buildSpectrumFunction();
+    return;
+  }
+
+  for(size_t i = 0; i < nPeaks; ++i) {
+    auto fun = m_spectrum.getFunction(i);
+    auto peak = boost::dynamic_pointer_cast<API::IPeakFunction>(fun);
+    if (!peak) {
+      throw std::runtime_error("A peak function is expected.");
+    }
+    auto centre = values.getCalculated(i);
+    auto intensity = values.getCalculated(i + nPeaks);
+    peak->setCentre(centre);
+    peak->setIntensity(intensity);
+  }
+
+}
 
 } // namespace Functions
 } // namespace CurveFitting

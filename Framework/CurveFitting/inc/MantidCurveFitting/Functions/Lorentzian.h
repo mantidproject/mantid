@@ -50,9 +50,15 @@ public:
   double centre() const override { return getParameter("PeakCentre"); }
   double height() const override;
   double fwhm() const override { return getParameter("FWHM"); }
+  double intensity() const override { return getParameter("Amplitude"); }
   void setCentre(const double c) override { setParameter("PeakCentre", c); }
   void setHeight(const double h) override;
   void setFwhm(const double w) override { setParameter("FWHM", w); }
+  void setIntensity(const double i) override { setParameter("Amplitude", i); }
+  void fixCentre() override;
+  void unfixCentre() override;
+  void fixIntensity() override;
+  void unfixIntensity() override;
 
   /// overwrite IFunction base class methods
   std::string name() const override { return "Lorentzian"; }
