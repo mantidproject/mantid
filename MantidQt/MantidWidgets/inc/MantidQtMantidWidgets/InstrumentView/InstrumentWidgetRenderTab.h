@@ -42,7 +42,6 @@ public:
   void setAxis(const QString &axisName);
   bool areAxesOn() const;
   void setupColorBar(const MantidColorMap &, double, double, double, bool);
-
 signals:
   void rescaleColorMap();
   void setAutoscaling(bool);

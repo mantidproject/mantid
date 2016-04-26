@@ -319,7 +319,6 @@ namespace MantidQt
 				m_UCorrection->setEnabled(false);
 			}
 		}
-
 		/**
 		*
 		*/

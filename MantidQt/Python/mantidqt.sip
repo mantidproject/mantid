@@ -1825,6 +1825,14 @@ public:
         tool One of InstrumentWidgetPickTab.{Zoom, PixelSelect, TubeSelect, PeakSelect, PeakErase}
 %End
 
+  int get_currentPickID();
+%Docstring
+  for use of live-data-prototype to find detector id
+
+  Args:
+	none
+%End
+
 private:
   InstrumentWidgetPickTab();
   InstrumentWidgetPickTab(const MantidQt::MantidWidgets::InstrumentWidgetPickTab &);

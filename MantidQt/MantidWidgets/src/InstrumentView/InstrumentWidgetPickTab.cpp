@@ -43,7 +43,6 @@
 #include <QPixmap>
 #include <QSettings>
 #include <QApplication>
-
 #include <numeric>
 #include <cfloat>
 #include <cmath>
@@ -76,7 +75,6 @@ namespace MantidQt
 
 			// connect to InstrumentWindow signals
 			connect(m_instrWidget, SIGNAL(integrationRangeChanged(double, double)), this, SLOT(changedIntegrationRange(double, double)));
-
 			m_plotSum = true;
 
 			QVBoxLayout* layout = new QVBoxLayout(this);
@@ -660,6 +658,13 @@ namespace MantidQt
 			setSelectionType();
 		}
 
+		
+		int InstrumentWidgetPickTab::get_currentPickID()
+                {
+                        int pickID;
+			pickID = m_infoController->get_currentPickID();
+			return pickID;
+                }
 
 		void InstrumentWidgetPickTab::singleComponentTouched(size_t pickID)
 		{
@@ -743,7 +748,9 @@ namespace MantidQt
 			m_selectionInfoDisplay(infoDisplay),
 			m_freezePlot(false),
 			m_instrWidgetBlocked(false),
+			m_liveDataDetID(0),
 			m_currentPickID(-1)
+			//m_liveDataDetID(0)
 		{
 		}
 
@@ -764,6 +771,7 @@ namespace MantidQt
 			if (detid >= 0)
 			{
 				text += displayDetectorInfo(detid);
+				m_liveDataDetID = detid;
 			}
 			else if (auto componentID = m_instrActor->getComponentID(pickID))
 			{
@@ -785,7 +793,10 @@ namespace MantidQt
 				clear();
 			}
 		}
-
+		int ComponentInfoController::get_currentPickID()
+		{
+			return m_liveDataDetID;
+		}
 		/**
 		* Return string with info on a detector.
 		* @param detid :: A detector ID.
@@ -813,10 +824,11 @@ namespace MantidQt
 					// expect exceptions thrown
 					return "";
 				}
-
+				
 				text = "Selected detector: " + QString::fromStdString(det->getName()) + "\n";
 				text += "Detector ID: " + QString::number(detid) + '\n';
 				QString wsIndex;
+				
 				try {
 					wsIndex = QString::number(m_instrActor->getWorkspaceIndex(detid));
 				}
@@ -824,6 +836,7 @@ namespace MantidQt
 					// Detector doesn't have a workspace index relating to it
 					wsIndex = "None";
 				}
+				//could set workspaceID here as m_?
 				text += "Workspace index: " + wsIndex + '\n';
 				Mantid::Kernel::V3D pos = det->getPos();
 				text += "xyz: " + QString::number(pos.X()) + "," + QString::number(pos.Y()) + "," + QString::number(pos.Z()) + '\n';
