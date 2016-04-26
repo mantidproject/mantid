@@ -16,26 +16,24 @@
 namespace Mantid {
 namespace DataHandling {
 
-// Minimalistic SaveFITS.  At a very least we should add headers for
-// ToF, time bin, counts, triggers, etc.
-// TODO: this is a very early version of what should become an
-// algorithm of its own
-const size_t maxLenHdr = 80;
-const std::string FITSHdrFirst =
+const size_t SaveFITS::g_maxLenHdr = 80;
+// TODO: add headers for ToF, time bin, counts, triggers, etc.
+const std::string SaveFITS::g_FITSHdrEnd = "END";
+const std::string SaveFITS::g_FITSHdrFirst =
     "SIMPLE  =                    T / file does conform to FITS standard";
-const std::string FITSHdrBitDepth =
+const std::string SaveFITS::g_FITSHdrBitDepth =
     "BITPIX  =                   16 / number of bits per data pixel";
-const std::string FITSHdrAxes =
+const std::string SaveFITS::g_FITSHdrAxes =
     "NAXIS   =                    2 / number of data axes";
-const std::string FITSHdrExtensions =
+const std::string SaveFITS::g_FITSHdrExtensions =
     "EXTEND  =                    T / FITS dataset may contain extensions";
-const std::string FITSHdrRefComment1 = "COMMENT   FITS (Flexible Image "
-                                       "Transport System) format is defined in "
-                                       "'Astronomy";
-const std::string FITSHdrRefComment2 =
+const std::string SaveFITS::g_FITSHdrRefComment1 =
+    "COMMENT   FITS (Flexible Image "
+    "Transport System) format is defined in "
+    "'Astronomy";
+const std::string SaveFITS::g_FITSHdrRefComment2 =
     "COMMENT   and Astrophysics', volume 376, page 359; bibcode: "
     "2001A&A...376..359H";
-const std::string FITSHdrEnd = "END";
 
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
@@ -133,14 +131,14 @@ void SaveFITS::saveFITSImage(const API::MatrixWorkspace_sptr img,
 void SaveFITS::writeFITSHeaderBlock(const API::MatrixWorkspace_sptr img,
                                     std::ofstream &file) {
   // minimal sequence of standard headers
-  writeFITSHeaderEntry(FITSHdrFirst, file);
-  writeFITSHeaderEntry(FITSHdrBitDepth, file);
-  writeFITSHeaderEntry(FITSHdrAxes, file);
+  writeFITSHeaderEntry(g_FITSHdrFirst, file);
+  writeFITSHeaderEntry(g_FITSHdrBitDepth, file);
+  writeFITSHeaderEntry(g_FITSHdrAxes, file);
   writeFITSHeaderAxesSizes(img, file);
-  writeFITSHeaderEntry(FITSHdrExtensions, file);
-  writeFITSHeaderEntry(FITSHdrRefComment1, file);
-  writeFITSHeaderEntry(FITSHdrRefComment2, file);
-  writeFITSHeaderEntry(FITSHdrEnd, file);
+  writeFITSHeaderEntry(g_FITSHdrExtensions, file);
+  writeFITSHeaderEntry(g_FITSHdrRefComment1, file);
+  writeFITSHeaderEntry(g_FITSHdrRefComment2, file);
+  writeFITSHeaderEntry(g_FITSHdrEnd, file);
 
   const size_t entriesPerHDU = 36;
   writePaddingFITSHeaders(entriesPerHDU - 9, file);
@@ -171,14 +169,14 @@ void SaveFITS::writeFITSImageMatrix(const API::MatrixWorkspace_sptr img,
 
 void SaveFITS::writeFITSHeaderEntry(const std::string &hdr,
                                     std::ofstream &file) {
-  static const std::vector<char> zeros(maxLenHdr, 0);
+  static const std::vector<char> zeros(g_maxLenHdr, 0);
 
   size_t count = hdr.size();
-  if (count >= maxLenHdr)
-    count = maxLenHdr;
+  if (count >= g_maxLenHdr)
+    count = g_maxLenHdr;
 
   file.write(hdr.c_str(), sizeof(char) * count);
-  file.write(zeros.data(), maxLenHdr - count);
+  file.write(zeros.data(), g_maxLenHdr - count);
 }
 
 void SaveFITS::writeFITSHeaderAxesSizes(const API::MatrixWorkspace_sptr img,
@@ -207,10 +205,10 @@ void SaveFITS::writeFITSHeaderAxesSizes(const API::MatrixWorkspace_sptr img,
  * @param file output stream to write to
  */
 void SaveFITS::writePaddingFITSHeaders(size_t count, std::ofstream &file) {
-  static const std::vector<char> zeros(maxLenHdr, 0);
+  static const std::vector<char> zeros(g_maxLenHdr, 0);
 
   for (size_t i = 0; i < count; ++i) {
-    file.write(zeros.data(), maxLenHdr);
+    file.write(zeros.data(), g_maxLenHdr);
   }
 }
 
