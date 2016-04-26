@@ -43,6 +43,8 @@ Vesuvio
 
 - Added a fit function to fit a multivariate Gaussian profile (:ref:`MultivariateGaussianComptonProfile <func-MultivariateGaussianComptonProfile>`)
 
+- Added :ref:`VesuvioThickness <algm-VesuvioThickness>` algorithm to calclulate the sample density
+
 
 Improvements
 ------------
