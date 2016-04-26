@@ -155,6 +155,7 @@ EventAssignerFixedWavelength::EventAssignerFixedWavelength(
                     timeMinBoundary, timeMaxBoundary, eventVectors),
       m_wavelength(wavelength) {}
 void EventAssignerFixedWavelength::addEventImpl(size_t id, double tof) {
+  UNUSED_ARG(tof);
   m_eventVectors[id]->push_back(m_wavelength);
 }
 

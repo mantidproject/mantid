@@ -192,6 +192,7 @@ void PatchBBY::exec() {
   for (auto itr = std::begin(PatchableProperties);
        itr != std::end(PatchableProperties); ++itr) {
     auto property_value = getProperty(itr->Name);
+
     // if (!isEmpty(property_value))
     switch (itr->Type) {
     case TYPE_INT:
@@ -211,7 +212,7 @@ void PatchBBY::exec() {
         throw std::invalid_argument(std::string("not implemented: ") +
                                     itr->Name);
 
-      tmp_str = property_value;
+      tmp_str = static_cast<std::string>(property_value);
       if (!tmp_str.empty()) {
         if (Poco::icompare(tmp_str, EXTERNAL) == 0)
           logContentNewBuffer << itr->Name << " = " << EXTERNAL << std::endl;
