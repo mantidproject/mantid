@@ -32,15 +32,22 @@ void MuonAnalysisFitFunctionHelper::doConnect() {
 }
 
 /**
+ * Queries function browser and updates function in fit property browser.
+ */
+void MuonAnalysisFitFunctionHelper::updateFunction() {
+  const QString funcString = m_funcBrowser->getFunctionString();
+  m_fitBrowser->setFunction(funcString);
+}
+
+/**
  * Called when a fit is requested.
  * Queries function browser and updates function in fit property browser.
  * Then calls fit or sequential fit as controlled by argument.
  * @param sequential :: [input] Whether a regular or sequential fit was
  * requested.
  */
-void MuonAnalysisFitFunctionHelper::updateFunction(bool sequential) {
-  const QString funcString = m_funcBrowser->getFunctionString();
-  m_fitBrowser->setFunction(funcString);
+void MuonAnalysisFitFunctionHelper::updateFunctionAndFit(bool sequential) {
+  updateFunction();
   if (sequential) {
     m_fitBrowser->runSequentialFit();
   } else {

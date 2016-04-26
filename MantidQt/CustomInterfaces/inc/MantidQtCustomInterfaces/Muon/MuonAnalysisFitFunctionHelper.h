@@ -45,7 +45,9 @@ public:
       MantidQt::MantidWidgets::IFunctionBrowser *funcBrowser);
 public slots:
   /// Update function and pass to fit property browser
-  void updateFunction(bool sequential);
+  void updateFunction();
+  /// Update function and pass to fit property browser, then fit
+  void updateFunctionAndFit(bool sequential);
 
 private:
   /// Connect signals and slots

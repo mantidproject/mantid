@@ -65,8 +65,10 @@ public slots:
 signals:
   /// Emitted when sequential fit is requested by user
   void sequentialFitRequested();
+  /// Emitted when function should be updated
+  void functionUpdateRequested() override;
   /// Emitted when a fit or sequential fit is requested
-  void functionUpdateRequested(bool sequential) override;
+  void functionUpdateAndFitRequested(bool sequential) override;
 
 protected:
   void showEvent(QShowEvent *e) override;

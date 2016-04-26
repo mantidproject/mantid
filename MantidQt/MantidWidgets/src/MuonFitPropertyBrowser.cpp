@@ -244,7 +244,9 @@ void MuonFitPropertyBrowser::populateFunctionNames() {
 /**
  * Updates function prior to running a fit
  */
-void MuonFitPropertyBrowser::fit() { emit functionUpdateRequested(false); }
+void MuonFitPropertyBrowser::fit() {
+  emit functionUpdateAndFitRequested(false);
+}
 
 /**
  * Creates an instance of Fit algorithm, sets its properties and launches it.
@@ -316,7 +318,7 @@ void MuonFitPropertyBrowser::runSequentialFit() {
  * Update function prior to running a sequential fit
  */
 void MuonFitPropertyBrowser::sequentialFit() {
-  emit functionUpdateRequested(true);
+  emit functionUpdateAndFitRequested(true);
 }
 
 /**

@@ -25,7 +25,8 @@ public:
   MOCK_METHOD1(setFunction, void(const QString &));
   MOCK_METHOD0(runFit, void());
   MOCK_METHOD0(runSequentialFit, void());
-  MOCK_METHOD1(functionUpdateRequested, void(bool));
+  MOCK_METHOD0(functionUpdateRequested, void());
+  MOCK_METHOD1(functionUpdateAndFitRequested, void(bool));
 };
 
 class MuonAnalysisFitFunctionHelperTest : public CxxTest::TestSuite {
@@ -57,16 +58,21 @@ public:
     delete m_helper;
   }
 
-  void test_updateFunction_nonSequential() {
+  void test_updateFunction() {
     EXPECT_CALL(*m_fitBrowser, setFunction(testString)).Times(1);
-    EXPECT_CALL(*m_fitBrowser, runFit()).Times(1);
-    m_helper->updateFunction(false);
+    m_helper->updateFunction();
   }
 
-  void test_updateFunction_sequential() {
+  void test_updateFunctionAndFit_nonSequential() {
+    EXPECT_CALL(*m_fitBrowser, setFunction(testString)).Times(1);
+    EXPECT_CALL(*m_fitBrowser, runFit()).Times(1);
+    m_helper->updateFunctionAndFit(false);
+  }
+
+  void test_updateFunctionAndFit_sequential() {
     EXPECT_CALL(*m_fitBrowser, setFunction(testString)).Times(1);
     EXPECT_CALL(*m_fitBrowser, runSequentialFit()).Times(1);
-    m_helper->updateFunction(true);
+    m_helper->updateFunctionAndFit(true);
   }
 
 private:

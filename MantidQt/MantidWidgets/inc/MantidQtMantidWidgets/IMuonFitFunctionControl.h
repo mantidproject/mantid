@@ -40,7 +40,8 @@ public:
   virtual void runSequentialFit() = 0;
 
 signals:
-  virtual void functionUpdateRequested(bool sequential) = 0;
+  virtual void functionUpdateRequested() = 0;
+  virtual void functionUpdateAndFitRequested(bool sequential) = 0;
 };
 
 } // namespace MantidWidgets
