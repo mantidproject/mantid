@@ -97,7 +97,7 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(wks.getNumberHistograms(), 1)
 
 
-    def test_reduction_with_mulitple_can_multiple(self):
+    def test_reduction_with_mulitple_sample_and_multiple_can(self):
         """
         Test reduction with multiple sample, vanadium and container runs
         """
