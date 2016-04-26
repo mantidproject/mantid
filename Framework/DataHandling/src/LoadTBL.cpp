@@ -46,7 +46,8 @@ int LoadTBL::confidence(Kernel::FileDescriptor &descriptor) const {
     Kernel::Strings::extractToEOL(stream, firstLine);
     std::vector<std::string> columns;
     try {
-      if (getCells(firstLine, columns, 16) == 17) // right ammount of columns
+      if (getCells(firstLine, columns, 16, true) ==
+          17) // right ammount of columns
       {
         if (filePath.compare(filenameLength - 4, 4, ".tbl") == 0) {
           confidence = 40;
@@ -159,6 +160,7 @@ void LoadTBL::csvParse(std::string line, std::vector<std::string> &cols,
           cols.push_back(line.substr(0, pos));
           firstCell = false;
         } else {
+          auto colVal = line.substr(lastComma + 1, pos - (lastComma + 1));
           cols.push_back(line.substr(lastComma + 1, pos - (lastComma + 1)));
         }
         ++valsFound;
@@ -193,37 +195,56 @@ void LoadTBL::csvParse(std::string line, std::vector<std::string> &cols,
 * cell-delimiting commas) is found
 */
 size_t LoadTBL::getCells(std::string line, std::vector<std::string> &cols,
-                         size_t expectedCommas) const {
+                         size_t expectedCommas, bool isOldTBL) const {
   // first check the number of commas in the line.
   size_t found = countCommas(line);
-  if (found == expectedCommas) {
-    // If there are 16 that simplifies things and i can get boost to do the hard
-    // work
-    boost::split(cols, line, boost::is_any_of(","), boost::token_compress_off);
-  } else if (found < expectedCommas) {
-    // less than 16 means the line isn't properly formatted. So Throw
-    std::string message = "A line must contain " +
-                          boost::lexical_cast<std::string>(expectedCommas) +
-                          " cell-delimiting commas. Found " +
-                          boost::lexical_cast<std::string>(found) + ".";
-    throw std::length_error(message);
+  if (isOldTBL) {
+    if (found == expectedCommas) {
+      // If there are 16 that simplifies things and i can get boost to do the
+      // hard
+      // work
+      boost::split(cols, line, boost::is_any_of(","),
+                   boost::token_compress_off);
+    } else if (found < expectedCommas) {
+      // less than 16 means the line isn't properly formatted. So Throw
+      std::string message = "A line must contain " +
+                            boost::lexical_cast<std::string>(expectedCommas) +
+                            " cell-delimiting commas. Found " +
+                            boost::lexical_cast<std::string>(found) + ".";
+      throw std::length_error(message);
+    } else {
+      // More than 16 will need further checks as more is only ok when pairs of
+      // quotes surround a comma, meaning it isn't a delimiter
+      std::vector<std::vector<size_t>> quoteBounds;
+      findQuotePairs(line, quoteBounds);
+      // if we didn't find any quotes, then there are too many commas and we
+      // definitely have too many delimiters
+      if (quoteBounds.empty()) {
+        std::string message = "A line must contain " +
+                              boost::lexical_cast<std::string>(expectedCommas) +
+                              " cell-delimiting commas. Found " +
+                              boost::lexical_cast<std::string>(found) + ".";
+        throw std::length_error(message);
+      }
+      // now go through and split it up manually. Throw if we find ourselves in
+      // a
+      // positon where we'd add a 18th value to the vector
+      csvParse(line, cols, quoteBounds, expectedCommas);
+    }
   } else {
-    // More than 16 will need further checks as more is only ok when pairs of
-    // quotes surround a comma, meaning it isn't a delimiter
-    std::vector<std::vector<size_t>> quoteBounds;
-    findQuotePairs(line, quoteBounds);
-    // if we didn't find any quotes, then there are too many commas and we
-    // definitely have too many delimiters
-    if (quoteBounds.empty()) {
+    boost::split(cols, line, boost::is_any_of(","), boost::token_compress_off);
+    if (cols.size() > expectedCommas) {
+      for (size_t i = expectedCommas + 1; i < cols.size(); i++) {
+        cols[expectedCommas].append(
+            boost::lexical_cast<std::string>("," + cols[i]));
+      }
+    } else if (cols.size() > expectedCommas) {
       std::string message = "A line must contain " +
                             boost::lexical_cast<std::string>(expectedCommas) +
                             " cell-delimiting commas. Found " +
                             boost::lexical_cast<std::string>(found) + ".";
       throw std::length_error(message);
     }
-    // now go through and split it up manually. Throw if we find ourselves in a
-    // positon where we'd add a 18th value to the vector
-    csvParse(line, cols, quoteBounds, expectedCommas);
   }
   return cols.size();
 }
@@ -329,7 +350,7 @@ void LoadTBL::exec() {
       if (line == "" || line == ",,,,,,,,,,,,,,,,") {
         continue;
       }
-      getCells(line, columns, 16);
+      getCells(line, columns, 16, isOld);
       const std::string scaleStr = columns.at(16);
       double scale = 1.0;
       if (!scaleStr.empty())
@@ -404,17 +425,17 @@ void LoadTBL::exec() {
         }
       }
     }
-
+    size_t expectedCommas = columns.size() - 1;
     while (Kernel::Strings::extractToEOL(file, line)) {
       if (line == "" || line == ",,,,,,,,,,,,,,,,") {
         // skip over any empty lines
         continue;
       }
-      getCells(line, columns, columns.size() - 1);
+      getCells(line, columns, columns.size() - 1, isOld);
       // populate the columns with their values for this row.
       TableRow row = ws->appendRow();
-      for (size_t i = 0; i < columns.size(); ++i) {
-        if (i == columns.size() - 2)
+      for (size_t i = 0; i < expectedCommas + 1; ++i) {
+        if (i == expectedCommas - 1)
           // taking into consideration Group column
           // of type "int"
           row << boost::lexical_cast<int>(columns.at(i));

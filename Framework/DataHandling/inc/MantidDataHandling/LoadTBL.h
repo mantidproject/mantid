@@ -62,7 +62,7 @@ private:
   bool getColumnHeadings(std::string line, std::vector<std::string> &cols);
   /// Split into columns with respect to the comma delimiters
   size_t getCells(std::string line, std::vector<std::string> &cols,
-                  size_t expectedCommas) const;
+                  size_t expectedCommas, bool isOldTBL) const;
   /// count the number of commas in the line
   size_t countCommas(std::string line) const;
   /// find all pairs of quotes in the line
