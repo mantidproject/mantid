@@ -1506,15 +1506,23 @@ EnggDiffractionViewQtGUI::splitFittingDirectory(std::string &selectedfPath) {
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enableMultiRun(
     std::string firstRun, std::string lastRun) {
-  int firstNum;
-  int lastNum;
+
+  bool firstDig = isDigit(firstRun);
+  bool lastDig = isDigit(lastRun);
 
   std::vector<std::string> RunNumberVec;
-  if (isDigit(firstRun) && isDigit(lastRun)) {
-    firstNum = std::stoi(firstRun);
-    lastNum = std::stoi(lastRun);
+  if (firstDig && lastDig) {
+    int firstNum = std::stoi(firstRun);
+    int lastNum = std::stoi(lastRun);
 
-    if (firstRun <= lastRun) {
+    if ((lastNum - firstNum) > 200) {
+      userWarning(
+          "Please try again",
+          "The specified run number range is "
+          "far to big, please try a smaller range of consecutive run numbers.");
+    }
+
+    else if (firstNum <= lastNum) {
 
       for (size_t i = firstNum; i <= lastNum; i++) {
         RunNumberVec.push_back(std::to_string(i));
@@ -1531,15 +1539,15 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enableMultiRun(
         addRunNoItem(RunNumberVec, true);
 
         emit setBank();
-      } else {
-        userWarning("Invalid Run Number", "One or more run file not found "
-                                          "from the specified range of runs."
-                                          "Please try again");
       }
     } else {
-      userWarning("Invalid Run Number", "The specfied range of run number "
-                                        "entered is invalid. Please try again");
+      userWarning("Invalid Run Number", "One or more run file not found "
+                                        "from the specified range of runs."
+                                        "Please try again");
     }
+  } else {
+    userWarning("Invalid Run Number", "The specfied range of run number "
+                                      "entered is invalid. Please try again");
   }
 }
 
