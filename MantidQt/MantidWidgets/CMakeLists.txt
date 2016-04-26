@@ -189,6 +189,7 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/CatalogHelper.h
 	inc/MantidQtMantidWidgets/ErrorCurve.h
 	inc/MantidQtMantidWidgets/HintStrategy.h
+	inc/MantidQtMantidWidgets/IFunctionBrowser.h
 	inc/MantidQtMantidWidgets/IMuonFitDataSelector.h
 	inc/MantidQtMantidWidgets/IMuonFitFunctionControl.h
 	inc/MantidQtMantidWidgets/IWorkspaceFitControl.h

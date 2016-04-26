@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_MUONANALYSISFITFUNCTIONHELPER_H_
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtMantidWidgets/IFunctionBrowser.h"
 #include "MantidQtMantidWidgets/IMuonFitFunctionControl.h"
 #include <QObject>
 
@@ -40,7 +41,8 @@ public:
   /// Constructor
   MuonAnalysisFitFunctionHelper(
       QObject *parent,
-      MantidQt::MantidWidgets::IMuonFitFunctionControl *fitBrowser);
+      MantidQt::MantidWidgets::IMuonFitFunctionControl *fitBrowser,
+      MantidQt::MantidWidgets::IFunctionBrowser *funcBrowser);
 public slots:
   /// Update function and pass to fit property browser
   void updateFunction(bool sequential);
@@ -50,6 +52,8 @@ private:
   void doConnect();
   /// Non-owning pointer to muon fit property browser
   MantidQt::MantidWidgets::IMuonFitFunctionControl *m_fitBrowser;
+  /// Non-owning pointer to function browser widget
+  MantidQt::MantidWidgets::IFunctionBrowser *m_funcBrowser;
 };
 
 } // namespace CustomInterfaces

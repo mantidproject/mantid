@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionHelper.h"
 
+using MantidQt::MantidWidgets::IFunctionBrowser;
 using MantidQt::MantidWidgets::IMuonFitFunctionControl;
 
 namespace MantidQt {
@@ -9,10 +10,12 @@ namespace CustomInterfaces {
  * Constructor
  * @param parent :: [input] Parent dialog (MuonAnalysis)
  * @param fitBrowser :: [input] Non-owning pointer to muon fit property browser
+ * @param funcBrowser :: [input] Non-owning pointer to function browser
  */
 MuonAnalysisFitFunctionHelper::MuonAnalysisFitFunctionHelper(
-    QObject *parent, IMuonFitFunctionControl *fitBrowser)
-    : QObject(parent), m_fitBrowser(fitBrowser) {
+    QObject *parent, IMuonFitFunctionControl *fitBrowser,
+    IFunctionBrowser *funcBrowser)
+    : QObject(parent), m_fitBrowser(fitBrowser), m_funcBrowser(funcBrowser) {
   doConnect();
 }
 
@@ -36,8 +39,7 @@ void MuonAnalysisFitFunctionHelper::doConnect() {
  * requested.
  */
 void MuonAnalysisFitFunctionHelper::updateFunction(bool sequential) {
-  const QString funcString;
-  // TODO: get function string
+  const QString funcString = m_funcBrowser->getFunctionString();
   m_fitBrowser->setFunction(funcString);
   if (sequential) {
     m_fitBrowser->runSequentialFit();

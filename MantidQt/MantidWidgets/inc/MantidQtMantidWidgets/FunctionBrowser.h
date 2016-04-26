@@ -4,6 +4,7 @@
 #include "WidgetDllOption.h"
 
 #include "MantidAPI/IFunction.h"
+#include "MantidQtMantidWidgets/IFunctionBrowser.h"
 
 #include <QWidget>
 #include <QMap>
@@ -55,8 +56,9 @@ class CreateAttributePropertyForFunctionBrowser;
  * 
  * @date 18/04/2012
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FunctionBrowser: public QWidget
-{
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FunctionBrowser
+    : public QWidget,
+      public IFunctionBrowser {
   Q_OBJECT
 public:
   /// To keep QtProperty and its QtBrowserItem in one place
@@ -91,7 +93,7 @@ public:
   /// Set the function in the browser
   void setFunction(Mantid::API::IFunction_sptr fun);
   /// Return FunctionFactory function string
-  QString getFunctionString();
+  QString getFunctionString() override;
   /// Return the function
   Mantid::API::IFunction_sptr getFunction(QtProperty* prop = NULL, bool attributesOnly = false);
   /// Check if a function is set
