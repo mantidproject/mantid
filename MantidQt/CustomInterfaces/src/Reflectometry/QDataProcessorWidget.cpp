@@ -542,11 +542,13 @@ void QDataProcessorWidget::setInstrumentList(
 /**
 Set the strategy used for generating hints for the autocompletion in the options
 column.
-@param hintStrategy The hinting strategy to use
+@param hintStrategy : The hinting strategy to use
+@param column : The index of the 'Options' column
 */
-void QDataProcessorWidget::setOptionsHintStrategy(HintStrategy *hintStrategy) {
+void QDataProcessorWidget::setOptionsHintStrategy(HintStrategy *hintStrategy,
+                                                  int column) {
   ui.viewTable->setItemDelegateForColumn(
-      ReflTableSchema::COL_OPTIONS, new HintingLineEditFactory(hintStrategy));
+      column, new HintingLineEditFactory(hintStrategy));
 }
 
 /**

@@ -3,7 +3,7 @@
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorWhiteList.h"
 #include <QAbstractTableModel>
 #include <boost/shared_ptr.hpp>
 #include <map>
@@ -40,7 +40,8 @@ class MANTIDQT_CUSTOMINTERFACES_DLL QDataProcessorTableModel
     : public QAbstractTableModel {
   Q_OBJECT
 public:
-  QDataProcessorTableModel(Mantid::API::ITableWorkspace_sptr tableWorkspace);
+  QDataProcessorTableModel(Mantid::API::ITableWorkspace_sptr tableWorkspace,
+                           const DataProcessorWhiteList &whitelist);
   ~QDataProcessorTableModel() override;
   // emit a signal saying things have changed
   void update();
@@ -81,8 +82,8 @@ private:
   /// Collection of data for viewing.
   Mantid::API::ITableWorkspace_sptr m_tWS;
 
-  /// Map of column indexes to names
-  ReflTableSchema::ColumnIndexNameMap m_columnNameMap;
+  /// Map of column indexes to names and viceversa
+  DataProcessorWhiteList m_whitelist;
 };
 
 /// Typedef for a shared pointer to \c QDataProcessorTableModel

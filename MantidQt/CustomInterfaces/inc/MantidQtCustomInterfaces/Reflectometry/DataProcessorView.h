@@ -75,8 +75,9 @@ public:
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
                                  const std::string &defaultInstrument) = 0;
   virtual void setSelection(const std::set<int> &rows) = 0;
-  virtual void setOptionsHintStrategy(
-      MantidQt::MantidWidgets::HintStrategy *hintStrategy) = 0;
+  virtual void
+  setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
+                         int column) = 0;
   virtual void setClipboard(const std::string &text) = 0;
   virtual void setModel(std::string name) = 0;
   virtual void

@@ -35,10 +35,16 @@ public:
   DataProcessorWhiteList() : m_lastIndex(0){};
   virtual ~DataProcessorWhiteList(){};
 
-  // Adds an element to the whitelist
-  void addElement(const std::string &colName, const std::string &algProperty) {
+  /** Adds an element to the whitelist
+  @param colName : the name of the column to be added
+  @param algProperty : the name of the property linked to this column
+  @param description : a description of this column
+  */
+  void addElement(const std::string &colName, const std::string &algProperty,
+                  const std::string &description = "") {
     m_colIndexToColName[m_lastIndex] = colName;
     m_colIndexToAlgProp[m_lastIndex] = algProperty;
+    m_description[m_lastIndex] = description;
     m_colNameToColIndex[colName] = m_lastIndex++;
   };
 
@@ -51,6 +57,7 @@ public:
   std::string algPropFromColIndex(int index) const {
     return m_colIndexToAlgProp.at(index);
   }
+  std::string description(int index) const { return m_description.at(index); }
 
   size_t size() const { return m_colNameToColIndex.size(); }
 
@@ -59,6 +66,7 @@ private:
   std::map<std::string, int> m_colNameToColIndex;
   std::map<int, std::string> m_colIndexToColName;
   std::map<int, std::string> m_colIndexToAlgProp;
+  std::map<int, std::string> m_description;
 };
 }
 }

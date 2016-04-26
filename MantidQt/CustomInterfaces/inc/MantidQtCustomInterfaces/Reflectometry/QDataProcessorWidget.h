@@ -81,8 +81,9 @@ public:
   void setTableList(const std::set<std::string> &tables) override;
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
-  void setOptionsHintStrategy(
-      MantidQt::MantidWidgets::HintStrategy *hintStrategy) override;
+  void
+  setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
+                         int column) override;
   void setClipboard(const std::string &text) override;
   void
   addHintingLineEdit(const std::string &title, const std::string &name,

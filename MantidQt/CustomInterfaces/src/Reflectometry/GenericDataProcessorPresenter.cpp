@@ -72,8 +72,21 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
       m_postprocessor(postprocessor), m_tableDirty(false) {
 
   // Columns Group and Options must be added to the whitelist
-  m_whitelist.addElement("Group", "Group");
-  m_whitelist.addElement("Options", "Options");
+  m_whitelist.addElement("Group", "Group",
+                         "<b>Grouping for post-processing</b><br "
+                         "/><i>required</i><br />The value of this column "
+                         "determines which other rows this row's output will "
+                         "be post-processed with. All rows with the same group "
+                         "number are post-processed together.");
+  m_whitelist.addElement("Options", "Options",
+                         "<b>Override <samp>" + processor.name() +
+                             "</samp> properties</b><br /><i>optional</i><br "
+                             "/>This column allows you to "
+                             "override the properties used when executing "
+                             "<samp>ReflectometryReductionOneAuto</samp>. "
+                             "Options are given as "
+                             "key=value pairs, separated by commas. Values "
+                             "containing commas must be quoted.");
   m_columns = static_cast<int>(m_whitelist.size());
 }
 
@@ -124,7 +137,7 @@ void GenericDataProcessorPresenter::acceptView(DataProcessorView *tableView,
   // ones we're handling that the user should'nt touch.
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_processor.name());
   m_view->setOptionsHintStrategy(
-      new AlgorithmHintStrategy(alg, m_processor.blacklist()));
+      new AlgorithmHintStrategy(alg, m_processor.blacklist()), m_columns - 1);
 
   // Start with a blank table
   newTable();
@@ -181,7 +194,7 @@ void GenericDataProcessorPresenter::validateModel(ITableWorkspace_sptr model) {
   if (!model)
     throw std::runtime_error("Null pointer");
 
-  if (model->columnCount() != m_whitelist.size())
+  if (model->columnCount() != m_columns)
     throw std::runtime_error("Selected table has the incorrect number of "
                              "columns to be used as a data processor table.");
 
@@ -221,13 +234,10 @@ bool GenericDataProcessorPresenter::isValidModel(Workspace_sptr model) {
 ITableWorkspace_sptr GenericDataProcessorPresenter::createWorkspace() {
   ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
 
-  size_t ncols = m_whitelist.size();
-
-  for (size_t i = 0; i < ncols - 2; i++) {
+  for (int col = 0; col < m_columns - 2; col++) {
     // The columns provided to this presenter
-    auto col = ws->addColumn(
-        "str", m_whitelist.colNameFromColIndex(static_cast<int>(i)));
-    col->setPlotType(0);
+    auto column = ws->addColumn("str", m_whitelist.colNameFromColIndex(col));
+    column->setPlotType(0);
   }
   // The Group column, must be int
   auto colGroup = ws->addColumn("int", "Group");
@@ -603,9 +613,7 @@ std::string GenericDataProcessorPresenter::getWorkspaceName(int row,
   // Temporary vector of strings to construct the name
   std::vector<std::string> names;
 
-  int ncols = static_cast<int>(m_whitelist.size());
-
-  for (int col = 0; col < ncols; col++) {
+  for (int col = 0; col < m_columns; col++) {
 
     const std::string colName = m_whitelist.colNameFromColIndex(col);
 
@@ -700,10 +708,8 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
   /* Read input properties from the table */
   /* excluding 'Group' and 'Options' */
 
-  int ncols = static_cast<int>(m_whitelist.size());
-
   // Loop over all columns except 'Group' and 'Options'
-  for (int i = 0; i < ncols - 2; i++) {
+  for (int i = 0; i < m_columns - 2; i++) {
 
     // The algorithm's property linked to this column
     auto propertyName = m_whitelist.algPropFromColIndex(i);
@@ -973,7 +979,7 @@ void GenericDataProcessorPresenter::newTable() {
       return;
 
   m_ws = createDefaultWorkspace();
-  m_model.reset(new QDataProcessorTableModel(m_ws));
+  m_model.reset(new QDataProcessorTableModel(m_ws, m_whitelist));
   m_wsName.clear();
   m_view->showTable(m_model);
 
@@ -1011,7 +1017,7 @@ void GenericDataProcessorPresenter::openTable() {
   try {
     validateModel(newTable);
     m_ws = newTable;
-    m_model.reset(new QDataProcessorTableModel(m_ws));
+    m_model.reset(new QDataProcessorTableModel(m_ws, m_whitelist));
     m_wsName = toOpen;
     m_view->showTable(m_model);
     m_tableDirty = false;
