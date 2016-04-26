@@ -82,7 +82,7 @@ void LoadNexus::exec() {
   m_filename = getPropertyValue("Filename");
   m_workspace = getPropertyValue("OutputWorkspace");
 
-  // Test the file of the given file name as described in the 
+  // Test the file of the given file name as described in the
   // documentation of this algorithm.
 
   std::vector<std::string> entryName, definition;
