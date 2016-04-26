@@ -1524,12 +1524,12 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enableMultiRun(
 
     else if (firstNum <= lastNum) {
 
-      for (size_t i = firstNum; i <= lastNum; i++) {
+      for (int i = firstNum; i <= lastNum; i++) {
         RunNumberVec.push_back(std::to_string(i));
       }
 
       // if given a single run number instead
-      for (int i = 0; i < RunNumberVec.size(); i++) {
+      for (size_t i = 0; i < RunNumberVec.size(); i++) {
         updateFittingDirVec(m_focusDir, RunNumberVec[i], true);
       }
       int diff = (lastNum - firstNum) + 1;
