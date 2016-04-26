@@ -1,5 +1,5 @@
-from mantid.kernel import Direction, logger
-from mantid.api import (PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, Progress)
+from mantid.kernel import Direction
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty)
 
 import numpy as np
 import math
@@ -36,13 +36,13 @@ class VesuvioThickness(PythonAlgorithm):
                              doc="The Number Density of the sample material")
 
         self.declareProperty(ITableWorkspaceProperty("DensityWorkspace", "",
-                             direction=Direction.Output),
+                                                     direction=Direction.Output),
                              doc="Output Workspace containing the iterative "
                              +"approximations for Sample Density. The final "
                              +"Y value in the first spectrum will be the last iteration")
-                             
+
         self.declareProperty(ITableWorkspaceProperty("TransmissionWorkspace", "",
-                             direction=Direction.Output),
+                                                     direction=Direction.Output),
                              doc="Output Workspace containing the iterative "
                              +"approximation for Transmission.")
 
