@@ -27,6 +27,7 @@ class MuonFitDataSelector;
 }
 namespace CustomInterfaces {
 class MuonAnalysisFitDataHelper;
+class MuonAnalysisFitFunctionHelper;
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -551,6 +552,9 @@ private:
 
   /// Helper to get data to fit
   std::unique_ptr<MuonAnalysisFitDataHelper> m_fitDataHelper;
+
+  /// Helper to get fit function
+  std::unique_ptr<MuonAnalysisFitFunctionHelper> m_fitFunctionHelper;
 };
 }
 }

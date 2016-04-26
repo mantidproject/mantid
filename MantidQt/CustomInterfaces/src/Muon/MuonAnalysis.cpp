@@ -25,6 +25,7 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysis.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataHelper.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionHelper.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h"
 #include "MantidQtMantidWidgets/MuonFunctionBrowser.h"
@@ -2258,9 +2259,12 @@ void MuonAnalysis::loadFittings() {
   // Add Data Selector widget to the fit tab
   m_dataSelector = new MuonFitDataSelector(m_uiForm.fitBrowser);
   m_uiForm.fitBrowser->addExtraWidget(m_dataSelector);
-  // Set up fit data helper
+  // Set up fit data and function helpers
   m_fitDataHelper = Mantid::Kernel::make_unique<MuonAnalysisFitDataHelper>(
       m_uiForm.fitBrowser, m_dataSelector);
+  m_fitFunctionHelper =
+      Mantid::Kernel::make_unique<MuonAnalysisFitFunctionHelper>(
+          nullptr, m_uiForm.fitBrowser, m_functionBrowser);
   // Connect signals
   connect(m_dataSelector, SIGNAL(dataPropertiesChanged()), this,
           SLOT(dataPropsChanged()));
