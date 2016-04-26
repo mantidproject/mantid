@@ -263,7 +263,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self._van_ws_map = DRangeToWorkspaceMap()
 
 
-    def PyExec(self):
+    def _get_properties(self):
         self._load_logs = self.getProperty('LoadLogFiles').value
         self._cal = self.getProperty("CalFile").value
         self._output_ws_name = self.getPropertyValue("OutputWorkspace")
@@ -284,11 +284,27 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         if not self.getProperty("DetectDRange").value:
             self._man_d_range = self.getProperty("DRange").value - 1
 
-        self.execDiffOnly()
+
+    def validateInputs(self):
+        self._get_properties()
+        issues = dict()
+
+        num_samples = len(self._sample_runs)
+        num_vanadium = len(self._vanadium_runs)
+        if num_samples != num_vanadium:
+            run_num_mismatch = 'You must input the same number of sample and vanadium runs'
+            issues['Sample'] = run_num_mismatch
+            issues['Vanadium'] = run_num_mismatch
+        if self._container_files:
+            num_containers = len(self._container_files)
+            if num_samples != num_containers:
+                issues['Container'] = 'You must input the same number of sample and container runs'
+
+        return issues
 
 
     #pylint: disable=too-many-branches
-    def execDiffOnly(self):
+    def PyExec(self):
         """
         Execute the algorithm in diffraction-only mode
         """
