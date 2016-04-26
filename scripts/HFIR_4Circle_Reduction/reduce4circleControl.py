@@ -736,6 +736,31 @@ class CWSCDReductionControl(object):
 
         return
 
+    def has_integrated_peak(self, exp_number, scan_number, masked, pt_list=None,
+                            normalized_by_monitor=False, normalized_by_time=False):
+        """ Check whether the peak is integrated as designated
+        :param exp_number:
+        :param scan_number:
+        :param pt_list:
+        :param normalized_by_monitor:
+        :param normalized_by_time:
+        :return:
+        """
+        # TODO/NOW - Doc & check
+
+        if pt_list is None:
+            status, ret_obj = self.get_pt_numbers(exp_number, scan_number)
+            if status is False:
+                raise RuntimeError(ret_obj)
+            pt_list = ret_obj
+        # END-IF
+
+        peak_ws_name = get_integrated_peak_ws_name(exp_number, scan_number, pt_list, masked,
+                                                   normalized_by_monitor, normalized_by_time)
+
+        return AnalysisDataService.doesExist(peak_ws_name)
+
+
     def has_merged_data(self, exp_number, scan_number, pt_number_list=None):
         """
         Check whether the data has been merged to an MDEventWorkspace
@@ -893,6 +918,9 @@ class CWSCDReductionControl(object):
         elif normalization == 'monitor':
             norm_by_mon = True
 
+        print '[DB-INFO] Integrate Pt. with mask workspace %s. Norm by time = %d; Norm by monitor = %d.' \
+              '' % (mask_ws_name, norm_by_time, norm_by_mon)
+
         api.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
                                OutputWorkspace=integrated_peak_ws_name,
                                PeakRadius=peak_radius,
@@ -908,6 +936,7 @@ class CWSCDReductionControl(object):
         out_peak_ws = AnalysisDataService.retrieve(integrated_peak_ws_name)
         num_peaks = out_peak_ws.rowCount()
         print '[DB....BAT] There are %d peaks to export!' % num_peaks
+
         for i_peak in xrange(num_peaks):
             peak_i = out_peak_ws.getPeak(i_peak)
             run_number_i = peak_i.getRunNumber() % 1000

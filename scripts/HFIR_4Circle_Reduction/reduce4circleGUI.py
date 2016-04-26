@@ -990,13 +990,29 @@ class MainWindow(QtGui.QMainWindow):
         pt_dict = ret_obj
         assert isinstance(pt_dict, dict)
 
-        print pt_dict
+        print '[DB-BAT] Returned Pt. dict: ', pt_dict
 
-        # TODO/FIXME/NOW: there must be something wrong here!
+        # clear table
+        if self.ui.tableWidget_peakIntegration.rowCount() > 0:
+            self.ui.tableWidget_peakIntegration.remove_all_rows()
+
+        # Append new lines
         pt_list = sorted(pt_dict.keys())
+        intensity_list = list()
         for pt in pt_list:
             pt_intensity = pt_dict[pt]
-            self.ui.tableWidget_peakIntegration.append_pt(pt, -1, pt_intensity)
+            intensity_list.append(pt_intensity)
+            status, msg = self.ui.tableWidget_peakIntegration.append_pt(pt, -1, pt_intensity)
+            if not status:
+                print '[Error!] Unable to add Pt %d due to %s.' % (pt, msg)
+
+        # Set up the experiment information to table
+        self.ui.tableWidget_peakIntegration.set_exp_info(exp_number, scan_number)
+
+        # Clear previous line and plot the Pt.
+        self.ui.graphicsView_integratedPeakView.clear_all_lines()
+        self.ui.graphicsView_integratedPeakView.add_plot_1d(numpy.array(pt_list), numpy.array(intensity_list),
+                                                            numpy.array(intensity_list), color='blue')
 
         return
 
@@ -1249,22 +1265,17 @@ class MainWindow(QtGui.QMainWindow):
                 norm_by_monitor = True
 
         # Integrate peak if the integrated peak workspace does not exist
-        status, exp_number = gutil.parse_integers_editors([self.ui.lineEdit_exp])
-        assert status
-        exp_number = exp_number[0]
 
-        has_integrated = self._myControl.has_integrated_peak(exp_number, scan_num, pt_list=xx,
+        # get experiment number and scan number from the table
+        exp_number, scan_number = self.ui.tableWidget_peakIntegration.get_exp_info()
+
+        has_integrated = self._myControl.has_integrated_peak(exp_number, scan_number, pt_list=None,
                                                              normalized_by_monitor=norm_by_monitor,
                                                              normalized_by_time=norm_by_time)
+
+        # integrate again
         if has_integrated is False:
-            self._myControl.integrate_peak(exp_num=xx, scan_num=xx, pt_num=xx,
-                                           normalized_by_monitor=False)
-
-        # update table
-        self.ui.tableWidget_peakIntegration.update_peak_counts()
-
-        # update figure
-        blablabla
+            self.do_integrate_per_pt()
 
         return
 

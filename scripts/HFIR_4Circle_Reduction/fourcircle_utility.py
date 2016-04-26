@@ -407,7 +407,9 @@ def get_raw_data_workspace_name(exp_number, scan_number, pt_number):
     return ws_name
 
 
-def get_integrated_peak_ws_name(exp_number, scan_number, pt_list, mask=False):
+def get_integrated_peak_ws_name(exp_number, scan_number, pt_list, mask=False,
+                                normalized_by_monitor=False,
+                                normalized_by_time=False):
     """
     Get/form the integrated peak workspace's name
     :param exp_number:
@@ -429,6 +431,12 @@ def get_integrated_peak_ws_name(exp_number, scan_number, pt_list, mask=False):
 
     if mask:
         ws_name += '_Masked'
+
+    if normalized_by_monitor:
+        ws_name += '_NormMon'
+
+    if normalized_by_time:
+        ws_name += '_NormTime'
 
     return ws_name
 

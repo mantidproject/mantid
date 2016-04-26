@@ -22,6 +22,9 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         """
         tableBase.NTableWidget.__init__(self, parent)
 
+        self._expNumber = -1
+        self._scanNumber = -1
+
         return
 
     def append_pt(self, pt_number, raw_signal, masked_signal):
@@ -33,11 +36,19 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         # TODO/NOW - Doc and check
         # assert ...
 
-        status, msg = self.append_row([pt_number, raw_signal, masked_signal])
+        status, msg = self.append_row([pt_number, raw_signal, masked_signal, False])
         if status is False:
             msg = 'Unable to append row to peak integration table due to %s' % msg
 
         return status, msg
+
+    def get_exp_info(self):
+        """
+
+        :return:
+        """
+        # TODO/NOW - doc and check
+        return self._expNumber, self._scanNumber
 
     def setup(self):
         """
@@ -47,6 +58,19 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         self.init_setup(self.Table_Setup)
 
         self._statusColName = 'Selected'
+
+        return
+
+    def set_exp_info(self, exp_no, scan_no):
+        """
+        :param exp_no:
+        :param scan_no:
+        :return:
+        """
+        # TODO/NOW - Doc and check
+
+        self._expNumber = exp_no
+        self._scanNumber = scan_no
 
         return
 
