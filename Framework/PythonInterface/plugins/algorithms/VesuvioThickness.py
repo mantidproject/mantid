@@ -61,13 +61,13 @@ class VesuvioThickness(PythonAlgorithm):
 
         try:
             self._masses = np.asarray([float(mass) for mass in self._masses])
-        except:
+        except ValueError:
             issues['Masses'] = ('Could not interpret \"%s\" ' % self._masses \
                                     + 'as a list of numbers . Please ensure that ' \
                                     + 'all inputs are valid')
         try:
             self._amplitudes = np.asarray([float(amp) for amp in self._amplitudes])
-        except:
+        except ValueError:
             issues['Amplitudes'] = ('Could not interpret \"%s\" ' % self._amplitudes \
                                     + 'as a list of numbers . Please ensure that ' \
                                     + 'all inputs are valid')
