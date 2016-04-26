@@ -106,7 +106,7 @@ public:
 
   void test_handleParameterEdited() {
     const double paramValue = 12.345;
-    const QString funcIndex = "f0", paramName = "A0";
+    const QString funcIndex = "f0.", paramName = "A0";
     ON_CALL(*m_funcBrowser, getParameter(funcIndex, paramName))
         .WillByDefault(Return(paramValue));
     EXPECT_CALL(*m_funcBrowser, getParameter(funcIndex, paramName)).Times(1);

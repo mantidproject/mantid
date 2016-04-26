@@ -382,6 +382,7 @@ void MuonFitPropertyBrowser::setFunction(const QString &funcString) {
 
 /**
  * Called externally to set the value of a parameter
+ * Will raise a messagebox on failure
  * @param funcIndex :: [input] Function index
  * @param paramName :: [input] Name of parameter
  * @param value :: [input] Value to set parameter to
@@ -389,7 +390,25 @@ void MuonFitPropertyBrowser::setFunction(const QString &funcString) {
 void MuonFitPropertyBrowser::setParameterValue(const QString &funcIndex,
                                                const QString &paramName,
                                                double value) {
-  throw std::runtime_error("TODO: implement setParameterValue");
+  std::ostringstream parameter;
+  if (funcIndex.isEmpty() || !funcIndex.contains('.')) {
+    parameter << "f0."; // only one function
+  } else {
+    parameter << funcIndex.toStdString();
+  }
+  parameter << paramName.toStdString();
+  if (const auto func = compositeFunction()) {
+    try {
+      const size_t index = func->parameterIndex(parameter.str());
+      func->setParameter(index, value);
+    } catch (const std::exception &error) {
+      const QString message = QString("Failed to set parameter %1 to %2:\n")
+                                  .arg(QString::fromStdString(parameter.str()),
+                                       QString::number(value))
+                                  .append(error.what());
+      QMessageBox::critical(this, "Mantid - error", message);
+    }
+  }
 }
 
 } // MantidQt
