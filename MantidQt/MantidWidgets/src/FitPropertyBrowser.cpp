@@ -1171,7 +1171,7 @@ void FitPropertyBrowser::boolChanged(QtProperty *prop) {
     settings.beginGroup("Mantid/FitBrowser");
     settings.setValue(prop->propertyName(), val);
 
-    if (m_showParamErrors) {
+    if (prop == m_showParamErrors) {
       m_parameterManager->setErrorsEnabled(val);
     }
   } else { // it could be an attribute
@@ -1493,7 +1493,7 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
   QString name(QString::fromStdString(alg->getProperty("InputWorkspace")));
   if (name.contains('_')) // Must be fitting to raw data, need to group under
                           // name without "_Raw".
-    emit fittingDone(name.left(name.find('_')));
+                          emit fittingDone(name.left(name.indexOf('_')));
   else // else fitting to current workspace, group under same name.
     emit fittingDone(name);
 

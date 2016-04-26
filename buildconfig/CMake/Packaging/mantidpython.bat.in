@@ -1,0 +1,52 @@
+@echo off
+setlocal enableextensions
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Launch script for command line python
+:: 
+:: Sets the required environment variables for the Python to run correctly.
+:: All variables that are passed to this script are passed directly to
+:: python.exe
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Assume this is placed next to the dlls
+set _SCRIPT_DIR=%~dp0
+set _BIN_DIR=%_SCRIPT_DIR:~,-1%
+
+:: Set paths for dependencies, including Python
+@MANTIDPYTHON_PREAMBLE@
+
+set MANTIDPATH=%_BIN_DIR%
+set PYTHONPATH=%MANTIDPATH%;%PYTHONPATH%
+
+:: Python drivers
+set _PYTHON_EXE=%PYTHONHOME%\python.exe
+set _IPYTHON_CMD=%PYTHONHOME%\Scripts\ipython.cmd
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Start python
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:: If --classic is supplied as the first argument then use python (not ipython) and pass any further arguments to python else launch ipython and pass all arguments to it
+
+if "%1"=="--classic" (
+    :: Can't execute the stuff at StartPython in this if statement because effects of shift are not seen until after the if block
+    goto StartPython
+)
+
+:: Start ipython and pass through all arguments to it
+start "Mantid Python" /B /WAIT %_IPYTHON_CMD% %*
+goto TheEnd
+
+:StartPython
+:: shift does not affect %* so we are stuck doing this loop to pass any other arguments to python
+:: Avoid a possible infinite loop by clearing ArgsExceptFirst. If this script drives another script that then calls this
+:: it already has ArgsExceptFirst defined and uses the wrong argument set.
+set ArgsExceptFirst=
+shift
+:ArgumentsLoop
+set ArgsExceptFirst=%ArgsExceptFirst% %1
+shift
+if not "%~1"=="" goto ArgumentsLoop
+
+start "Mantid Python" /B /WAIT %_PYTHON_EXE%%ArgsExceptFirst%
+
+:TheEnd

@@ -2,6 +2,7 @@
 #include "MantidQtMantidWidgets/InstrumentView/ObjComponentActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/ObjCompAssemblyActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/RectangularDetectorActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/StructuredDetectorActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/OpenGLError.h"
 #include "MantidQtMantidWidgets/InstrumentView/GLActorVisitor.h"
 
@@ -13,6 +14,7 @@
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidKernel/Exception.h"
 
 #include <cfloat>
@@ -24,7 +26,7 @@ using Mantid::Geometry::ICompAssembly;
 using Mantid::Geometry::ObjCompAssembly;
 using Mantid::Geometry::ComponentID;
 using Mantid::Geometry::RectangularDetector;
-using Mantid::Geometry::RectangularDetector;
+using Mantid::Geometry::StructuredDetector;
 using Mantid::Geometry::IDetector;
 using Mantid::Geometry::Object;
 
@@ -60,8 +62,17 @@ namespace MantidQt
 					{
 						boost::shared_ptr<ObjCompAssembly> ChildOCAPtr = boost::dynamic_pointer_cast<ObjCompAssembly>(ChildCompPtr);
 						boost::shared_ptr<RectangularDetector> ChildRDPtr = boost::dynamic_pointer_cast<RectangularDetector>(ChildCompPtr);
+						boost::shared_ptr<StructuredDetector> ChildSDPtr = boost::dynamic_pointer_cast<StructuredDetector>(ChildCompPtr);
 
-						if (ChildRDPtr)
+						if (ChildSDPtr)
+						{
+							StructuredDetectorActor *iActor = new StructuredDetectorActor(instrActor, ChildSDPtr->getComponentID());
+							iActor->getBoundingBox(minBound, maxBound);
+							AppendBoundingBox(minBound, maxBound);
+							mNumberOfDetectors += iActor->getNumberOfDetectors();
+							mChildCompAssemActors.push_back(iActor);
+						}
+						else if (ChildRDPtr)
 						{
 							//If the child is a RectangularDetector, then create a RectangularDetectorActor for it.
 							RectangularDetectorActor* iActor = new RectangularDetectorActor(instrActor, ChildCAPtr->getComponentID());

@@ -836,30 +836,47 @@ void LoadRawHelper::loadRunParameters(API::MatrixWorkspace_sptr localWorkspace,
 
   // Note isis raw date format which is stored in DD-MMM-YYYY. Store dates in
   // ISO 8601
-  std::string isisDate = std::string(localISISRaw->rpb.r_enddate, 11);
+  auto endTime = extractEndTime(localISISRaw);
+  runDetails.addProperty("run_end", endTime.toISO8601String());
+
+  auto startTime = extractStartTime(localISISRaw);
+  runDetails.addProperty("run_start", startTime.toISO8601String());
+}
+
+/**
+ * Extracts the end time from the Raw file
+ * @param isisRaw: pointer to the raw file
+ * @return the endtime
+ */
+Kernel::DateAndTime LoadRawHelper::extractEndTime(ISISRAW *isisRaw) {
+  std::string isisDate = std::string(isisRaw->rpb.r_enddate, 11);
   if (isisDate[0] == ' ')
     isisDate[0] = '0';
-  runDetails.addProperty(
-      "run_end", DateAndTime(isisDate.substr(7, 4) + "-" +
-                             convertMonthLabelToIntStr(isisDate.substr(3, 3)) +
-                             "-" + isisDate.substr(0, 2) + "T" +
-                             std::string(localISISRaw->rpb.r_endtime, 8))
-                     .toISO8601String());
-  isisDate = std::string(localISISRaw->hdr.hd_date, 11);
+  return DateAndTime(isisDate.substr(7, 4) + "-" +
+                     convertMonthLabelToIntStr(isisDate.substr(3, 3)) + "-" +
+                     isisDate.substr(0, 2) + "T" +
+                     std::string(isisRaw->rpb.r_endtime, 8));
+}
+
+/**
+ * Extracts the start time from the Raw file
+ * @param isisRaw: pointer to the raw file
+ * @return the start time
+ */
+Kernel::DateAndTime LoadRawHelper::extractStartTime(ISISRAW *isisRaw) {
+  auto isisDate = std::string(isisRaw->hdr.hd_date, 11);
   if (isisDate[0] == ' ')
     isisDate[0] = '0';
-  runDetails.addProperty(
-      "run_start",
-      DateAndTime(isisDate.substr(7, 4) + "-" +
-                  convertMonthLabelToIntStr(isisDate.substr(3, 3)) + "-" +
-                  isisDate.substr(0, 2) + "T" +
-                  std::string(localISISRaw->hdr.hd_time, 8)).toISO8601String());
+  return DateAndTime(isisDate.substr(7, 4) + "-" +
+                     convertMonthLabelToIntStr(isisDate.substr(3, 3)) + "-" +
+                     isisDate.substr(0, 2) + "T" +
+                     std::string(isisRaw->hdr.hd_time, 8));
 }
 
 /// To help transforming date stored in ISIS raw file into iso 8601
 /// @param month
 /// @return month as string integer e.g. 01
-std::string LoadRawHelper::convertMonthLabelToIntStr(std::string month) const {
+std::string LoadRawHelper::convertMonthLabelToIntStr(std::string month) {
   std::transform(month.begin(), month.end(), month.begin(), toupper);
 
   if (month == "JAN")
@@ -1258,7 +1275,7 @@ LoadRawHelper::getLogFilenamesfromADS(const std::string &pathToRawFile) {
   Poco::Path logpath(pathToRawFile);
   size_t pos = pathToRawFile.find_last_of('/');
   if (pos == std::string::npos) {
-    pos = pathToRawFile.find_last_of("\\");
+    pos = pathToRawFile.find_last_of('\\');
   }
   if (pos != std::string::npos) {
     path = pathToRawFile.substr(0, pos);

@@ -28,10 +28,10 @@ namespace {
 *on the host end-point workspace.
 *
 * @param originWS : Origin workspace, which provides the original workspace
-*index to spectrum id mapping.
+*index to spectrum number mapping.
 * @param hostWS : Workspace onto which the resulting workspace indexes will be
 *hosted
-* @return Remapped wokspace indexes applicable for the host workspace. results
+* @return Remapped workspace indexes applicable for the host workspace. results
 *as comma separated string.
 */
 std::string createWorkspaceIndexListFromDetectorWorkspace(
@@ -234,25 +234,20 @@ void ReflectometryReductionOne::init() {
   setPropertyGroup("StartOverlap", "Transmission");
   setPropertyGroup("EndOverlap", "Transmission");
 
-  // Only do transmission corrections when point detector.
-  setPropertySettings(
-      "FirstTransmissionRun",
-      Kernel::make_unique<Kernel::EnabledWhenProperty>(
-          "AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
-  setPropertySettings(
-      "SecondTransmissionRun",
-      Kernel::make_unique<Kernel::EnabledWhenProperty>(
-          "AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
-  setPropertySettings(
-      "Params", Kernel::make_unique<Kernel::EnabledWhenProperty>(
-                    "AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
-  setPropertySettings(
-      "StartOverlap",
-      Kernel::make_unique<Kernel::EnabledWhenProperty>(
-          "AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
-  setPropertySettings(
-      "EndOverlap", Kernel::make_unique<Kernel::EnabledWhenProperty>(
-                        "AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
+  // Only ask for transmission parameters when a FirstTranmissionRun has been
+  // provided
+  setPropertySettings("SecondTransmissionRun",
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "FirstTransmissionRun", IS_NOT_DEFAULT));
+  setPropertySettings("Params",
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "FirstTransmissionRun", IS_NOT_DEFAULT));
+  setPropertySettings("StartOverlap",
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "FirstTransmissionRun", IS_NOT_DEFAULT));
+  setPropertySettings("EndOverlap",
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "FirstTransmissionRun", IS_NOT_DEFAULT));
 
   // Only use region of direct beam when in multi-detector analysis mode.
   setPropertySettings(

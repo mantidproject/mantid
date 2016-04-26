@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include "MantidQtMantidWidgets/MuonSequentialFitDialog.h"
@@ -37,10 +38,9 @@ using namespace MantidQt::MantidWidgets;
 
 const std::string MuonAnalysisResultTableTab::WORKSPACE_POSTFIX("_Workspace");
 const std::string MuonAnalysisResultTableTab::PARAMS_POSTFIX("_Parameters");
-
+const QString MuonAnalysisResultTableTab::RUN_NUMBER_LOG("run_number");
 const QStringList MuonAnalysisResultTableTab::NON_TIMESERIES_LOGS =
-    QStringList() << "run_number"
-                  << "sample_temp"
+    QStringList() << MuonAnalysisResultTableTab::RUN_NUMBER_LOG << "sample_temp"
                   << "sample_magn_field";
 
 /**
@@ -416,8 +416,8 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
     QMap<QString, QVariant> wsLogValues;
 
     // Get log information
-    auto ws = retrieveWSChecked<ExperimentInfo>(fittedWsList[i].toStdString() +
-                                                WORKSPACE_POSTFIX);
+    std::string wsName = fittedWsList[i].toStdString();
+    auto ws = retrieveWSChecked<ExperimentInfo>(wsName + WORKSPACE_POSTFIX);
 
     Mantid::Kernel::DateAndTime start = ws->run().startTime();
     Mantid::Kernel::DateAndTime end = ws->run().endTime();
@@ -463,8 +463,11 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
         if (NON_TIMESERIES_LOGS.contains(logName)) {
           QVariant value;
 
-          if (auto stringProp =
-                  dynamic_cast<PropertyWithValue<std::string> *>(*pItr)) {
+          if (logName == RUN_NUMBER_LOG) { // special case
+            value = runNumberString(wsName, (*pItr)->value());
+          } else if (auto stringProp =
+                         dynamic_cast<PropertyWithValue<std::string> *>(
+                             *pItr)) {
             value = QString::fromStdString((*stringProp)());
           } else if (auto doubleProp =
                          dynamic_cast<PropertyWithValue<double> *>(*pItr)) {
@@ -589,7 +592,7 @@ void MuonAnalysisResultTableTab::populateFittings(
     // Fill values and delete previous old ones.
     if (row < fittedWsList.size()) {
       QTableWidgetItem *item = new QTableWidgetItem(fittedWsList[row]);
-      int color(colors.find(row).data());
+      const int color(colors.find(row).value());
       switch (color) {
       case (1):
         item->setTextColor("red");
@@ -926,7 +929,7 @@ QStringList MuonAnalysisResultTableTab::getSelectedLogs() {
 * @return name :: The name the results table should be created with.
 */
 std::string MuonAnalysisResultTableTab::getFileName() {
-  std::string fileName(m_uiForm.tableName->text());
+  std::string fileName(m_uiForm.tableName->text().toStdString());
 
   if (Mantid::API::AnalysisDataService::Instance().doesExist(fileName)) {
     int choice = QMessageBox::question(
@@ -946,6 +949,38 @@ std::string MuonAnalysisResultTableTab::getFileName() {
     }
   }
   return fileName;
+}
+
+/**
+ * Uses the format of the workspace name
+ * (INST00012345-8; Pair; long; Asym; 1+2-3+4; #2)
+ * to get a string in the format "run number: period"
+ * @param workspaceName :: [input] Name of the workspace
+ * @param firstRun :: [input] First run number - use this if tokenizing fails
+ * @returns Run number/period string
+ */
+QString
+MuonAnalysisResultTableTab::runNumberString(const std::string &workspaceName,
+                                            const std::string &firstRun) {
+  std::string periods = "";        // default
+  std::string instRuns = firstRun; // default
+
+  Mantid::Kernel::StringTokenizer tokenizer(
+      workspaceName, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+  if (tokenizer.count() > 4) {
+    instRuns = tokenizer[0];
+    periods = tokenizer[4];
+    // Remove "INST000" off the start
+    // No muon instruments have numbers in their names
+    size_t numPos = instRuns.find_first_of("123456789");
+    instRuns = instRuns.substr(numPos, instRuns.size());
+  }
+
+  QString ret(instRuns.c_str());
+  if (!periods.empty()) {
+    ret.append(": ").append(periods.c_str());
+  }
+  return ret;
 }
 }
 }

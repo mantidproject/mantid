@@ -1,35 +1,31 @@
-#pylint: disable=too-many-lines,invalid-name,unused-import,bare-except,too-many-arguments
-
-from PyQt4 import QtGui, QtCore
-import reduction_gui.widgets.util as util
+# pylint: disable=too-many-lines,invalid-name,bare-except,too-many-arguments,too-many-branches
 import math
-import os
 import time
 import sys
-import numpy as np
 from functools import partial
+import numpy as np
+from PyQt4 import QtGui, QtCore
+import reduction_gui.widgets.util as util
 from reduction_gui.widgets.base_widget import BaseWidget
-#from launch_peak_back_selection_1d import DesignerMainWindow
+# from launch_peak_back_selection_1d import DesignerMainWindow
 
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot
-    import mantid
-    #from MantidFramework import *
-    #mtd.initialise(False)
-    #from mantidsimple import *
+    # from MantidFramework import *
+    # mtd.initialise(False)
+    # from mantidsimple import *
     from mantid.simpleapi import *
     from reduction.instruments.reflectometer import data_manipulation
 
     IS_IN_MANTIDPLOT = True
-except ImportError:
-    pass
+except ImportError, e:
+    logger.error(e.message())
 
 class BaseRefWidget(BaseWidget):
     """
         Base widget for reflectivity interfaces
     """
-    ## Widget name
+    # Widget name
     name = "Data"
     instrument_name = ''
     short_name = ''
@@ -86,26 +82,35 @@ class BaseRefWidget(BaseWidget):
         self._summary.norm_background_to_pixel1.setValidator(QtGui.QIntValidator(self._summary.norm_background_to_pixel1))
 
         # Event connections
-        self.connect(self._summary.data_run_number_edit, QtCore.SIGNAL("returnPressed()"), self.data_run_number_validated)
-        self.connect(self._summary.data_low_res_range_switch, QtCore.SIGNAL("clicked(bool)"), self._data_low_res_clicked)
-        self.connect(self._summary.norm_low_res_range_switch, QtCore.SIGNAL("clicked(bool)"), self._norm_low_res_clicked)
+        self.connect(self._summary.data_run_number_edit, QtCore.SIGNAL("returnPressed()"),
+                     self.data_run_number_validated)
+        self.connect(self._summary.data_low_res_range_switch, QtCore.SIGNAL("clicked(bool)"),
+                     self._data_low_res_clicked)
+        self.connect(self._summary.norm_low_res_range_switch, QtCore.SIGNAL("clicked(bool)"),
+                     self._norm_low_res_clicked)
         self.connect(self._summary.norm_switch, QtCore.SIGNAL("clicked(bool)"), self._norm_clicked)
-        self.connect(self._summary.norm_background_switch, QtCore.SIGNAL("clicked(bool)"), self._norm_background_clicked)
-        self.connect(self._summary.data_background_switch, QtCore.SIGNAL("clicked(bool)"), self._data_background_clicked)
+        self.connect(self._summary.norm_background_switch, QtCore.SIGNAL("clicked(bool)"),
+                     self._norm_background_clicked)
+        self.connect(self._summary.data_background_switch, QtCore.SIGNAL("clicked(bool)"),
+                     self._data_background_clicked)
         self.connect(self._summary.tof_range_switch, QtCore.SIGNAL("clicked(bool)"), self._tof_range_clicked)
         self.connect(self._summary.plot_count_vs_y_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y)
         self.connect(self._summary.plot_count_vs_x_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_x)
         self.connect(self._summary.plot_count_vs_y_bck_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y_bck)
 
-        self.connect(self._summary.plot_data_count_vs_x_2d_btn, QtCore.SIGNAL("clicked(bool)"), self._plot_data_count_vs_x_2d)
-        self.connect(self._summary.plot_data_count_vs_tof_2d_btn, QtCore.SIGNAL("clicked(bool)"), self._plot_data_count_vs_tof_2d)
+        self.connect(self._summary.plot_data_count_vs_x_2d_btn, QtCore.SIGNAL("clicked(bool)"),
+                     self._plot_data_count_vs_x_2d)
+        self.connect(self._summary.plot_data_count_vs_tof_2d_btn, QtCore.SIGNAL("clicked(bool)"),
+                     self._plot_data_count_vs_tof_2d)
 
         self.connect(self._summary.norm_count_vs_y_btn, QtCore.SIGNAL("clicked()"), self._norm_count_vs_y)
         self.connect(self._summary.norm_count_vs_x_btn, QtCore.SIGNAL("clicked()"), self._norm_count_vs_x)
         self.connect(self._summary.norm_count_vs_y_bck_btn, QtCore.SIGNAL("clicked()"), self._norm_count_vs_y_bck)
 
-        self.connect(self._summary.plot_norm_count_vs_x_2d_btn, QtCore.SIGNAL("clicked(bool)"), self._plot_norm_count_vs_x_2d)
-        self.connect(self._summary.plot_norm_count_vs_tof_2d_btn, QtCore.SIGNAL("clicked(bool)"), self._plot_norm_count_vs_tof_2d)
+        self.connect(self._summary.plot_norm_count_vs_x_2d_btn, QtCore.SIGNAL("clicked(bool)"),
+                     self._plot_norm_count_vs_x_2d)
+        self.connect(self._summary.plot_norm_count_vs_tof_2d_btn, QtCore.SIGNAL("clicked(bool)"),
+                     self._plot_norm_count_vs_tof_2d)
 
         self.connect(self._summary.plot_tof_btn, QtCore.SIGNAL("clicked()"), self._plot_tof)
         self.connect(self._summary.add_dataset_btn, QtCore.SIGNAL("clicked()"), self._add_data)
@@ -118,7 +123,8 @@ class BaseRefWidget(BaseWidget):
         # Catch edited controls
         call_back = partial(self._edit_event, ctrl=self._summary.data_peak_from_pixel)
         self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
-#        self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), self.refresh_data_peak_counts_vs_pixel)
+        # self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"),\
+        # self.refresh_data_peak_counts_vs_pixel)
 
         call_back = partial(self._edit_event, ctrl=self._summary.use_sf_config_switch)
         self.connect(self._summary.use_sf_config_switch, QtCore.SIGNAL("clicked()"), call_back)
@@ -155,7 +161,8 @@ class BaseRefWidget(BaseWidget):
         call_back = partial(self._edit_event, ctrl=self._summary.norm_run_number_edit)
         self.connect(self._summary.norm_run_number_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.data_run_number_edit)
-        self.connect(self._summary.data_run_number_edit, QtCore.SIGNAL("textChanged(QString)"), self._run_number_changed)
+        self.connect(self._summary.data_run_number_edit, QtCore.SIGNAL("textChanged(QString)"),
+                     self._run_number_changed)
         self.connect(self._summary.data_run_number_edit, QtCore.SIGNAL("returnPressed()"), self._run_number_changed)
         self._run_number_first_edit = True
 
@@ -172,11 +179,11 @@ class BaseRefWidget(BaseWidget):
         call_back = partial(self._edit_event, ctrl=self._summary.log_scale_chk)
         self.connect(self._summary.log_scale_chk, QtCore.SIGNAL("clicked()"), call_back)
 
-        #Incident medium (selection or text changed)
+        # Incident medium (selection or text changed)
         call_back = partial(self._edit_event, ctrl=self._summary.incident_medium_combobox)
         self.connect(self._summary.incident_medium_combobox, QtCore.SIGNAL("editTextChanged(QString)"), call_back)
 
-        #4th column
+        # 4th column
         call_back = partial(self._edit_event, ctrl=self._summary.dq0)
         self.connect(self._summary.dq0, QtCore.SIGNAL("textChanged(QString)"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.dq_over_q)
@@ -184,18 +191,19 @@ class BaseRefWidget(BaseWidget):
         call_back = partial(self._edit_event, ctrl=self._summary.fourth_column_switch)
         self.connect(self._summary.fourth_column_switch, QtCore.SIGNAL("clicked()"), call_back)
 
-        #overlap values
+        # overlap values
         call_back = partial(self._edit_event, ctrl=self._summary.overlapValueMeanRadioButton)
         self.connect(self._summary.overlapValueMeanRadioButton, QtCore.SIGNAL("clicked()"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.overlapValueLowestErrorRadioButton)
         self.connect(self._summary.overlapValueLowestErrorRadioButton, QtCore.SIGNAL("clicked()"), call_back)
 
-        #name of output file changed
+        # name of output file changed
         call_back = partial(self._edit_event, ctrl=self._summary.cfg_scaling_factor_file_name)
         self.connect(self._summary.cfg_scaling_factor_file_name_browse, QtCore.SIGNAL("clicked()"), call_back)
 
-        #scaling factor configuration file
-        self.connect(self._summary.cfg_scaling_factor_file_name_browse, QtCore.SIGNAL("clicked()"), self.browse_config_file_name)
+        # scaling factor configuration file
+        self.connect(self._summary.cfg_scaling_factor_file_name_browse, QtCore.SIGNAL("clicked()"),
+                     self.browse_config_file_name)
 
         # Output directory
         self._summary.outdir_edit.setText(os.path.expanduser('~'))
@@ -211,7 +219,7 @@ class BaseRefWidget(BaseWidget):
         if not self._settings.debug and not os.path.isdir("/SNS/%s" % self.instrument_name):
             self._summary.auto_reduce_check.hide()
 
-    def getMetadata(self,filename):
+    def getMetadata(self, filename):
         """
         This retrieve the metadata from the data event NeXus filename
         """
@@ -220,27 +228,27 @@ class BaseRefWidget(BaseWidget):
 
         isSi = False
 
-        #mt1 = mtd['tmpWks']
-        #mt_run = mt1.getRun()
+        # mt1 = mtd['tmpWks']
+        # mt_run = mt1.getRun()
         mt_run = tmpWks.getRun()
 
-        #tthd
+        # tthd
         tthd = mt_run.getProperty('tthd').value[0]
 
-        #ths
+        # ths
         ths = mt_run.getProperty('ths').value[0]
 
-        #lambda requested
+        # lambda requested
         lambda_requested = mt_run.getProperty('LambdaRequest').value[0]
 
-        #s1h, s2h, s1w and s2w
+        # s1h, s2h, s1w and s2w
         s1h = mt_run.getProperty('S1VHeight').value[0]
         s1w = mt_run.getProperty('S1HWidth').value[0]
 
         try:
             s2h = mt_run.getProperty('SiVHeight').value[0]
             isSi = True
-        except:
+        except RuntimeError:
             s2h = mt_run.getProperty('S2VHeight').value[0]
 
         try:
@@ -403,15 +411,15 @@ class BaseRefWidget(BaseWidget):
         # calculate the numerator of mean
         dataNum = 0
         for i in range(sz):
-            if not data_array[i] == 0:
-                tmpFactor = float(data_array[i]) / float((pow(error_array[i],2)))
+            if data_array[i] != 0:
+                tmpFactor = float(data_array[i]) / float((pow(error_array[i], 2)))
                 dataNum += tmpFactor
 
         # calculate denominator
         dataDen = 0
         for i in range(sz):
-            if not error_array[i] == 0:
-                tmpFactor = 1./float((pow(error_array[i],2)))
+            if error_array[i] != 0:
+                tmpFactor = 1./float((pow(error_array[i], 2)))
                 dataDen += tmpFactor
 
         if dataDen == 0:
@@ -456,16 +464,19 @@ class BaseRefWidget(BaseWidget):
         data_e = mtd[scaled_ws_list[0]+'_histo'].dataE(0)
 
         # Add in the other histos, averaging the overlaps
-        for i in range(1, len(scaled_ws_list)):
-            data_y_i = mtd[scaled_ws_list[i]+'_histo'].dataY(0)
-            data_e_i = mt[scaled_ws_list[i]+'_histo'].dataE(0)
-            for j in range(len(data_y_i)):
-
-                if data_y[j]>0 and data_y_i[j]>0:
-                    [data_y[j], data_e[j]] = self.weightedMean([data_y[j], data_y_i[j]], [data_e[j], data_e_i[j]])
-                elif (data_y[j] == 0) and (data_y_i[j]>0):
-                    data_y[j] = data_y_i[j]
-                    data_e[j] = data_e_i[j]
+        for scaled_ws in scaled_ws_list:
+            y_val_index = 0
+            data_y_i = mtd[scaled_ws +'_histo'].dataY(0)
+            data_e_i = mtd[scaled_ws+'_histo'].dataE(0)
+            for y_val in data_y_i:
+                y_val_index += 1
+                if data_y[y_val_index] > 0 and y_val > 0:
+                    data_y[y_val_index], data_e[y_val_index] = self.weightedMean([data_y[y_val_index], y_val],
+                                                                                 [data_e[y_val_index],
+                                                                                  data_e_i[y_val_index]])
+                elif (data_y[y_val_index] == 0) and (y_val > 0):
+                    data_y[y_val_index] = y_val
+                    data_e[y_val_index] = data_e_i[y_val_index]
 
         return scaled_ws_list[0]+'_histo'
 
@@ -489,24 +500,24 @@ class BaseRefWidget(BaseWidget):
         _bin_max = str(2)
         binning_parameters = _from_q + ',-' + _bin_size + ',' + _bin_max
 
-        ## DEBUGGING ONLY
-        file_number = 0
+        # DEBUGGING ONLY
+        _file_number = 0
 #        print '=========== BEFORE REBINING =========='
         for ws in scaled_ws_list:
-#            print 'file_number: ' , file_number
+            # print 'file_number: ' , file_number
             data_y = mtd[ws].dataY(0)
-            data_e = mtd[ws].dataE(0)
+            _data_e = mtd[ws].dataE(0)
 
             # cleanup data 0-> NAN
-            for j in range(len(data_y)):
-#                print '-> data_y[j]: ' , data_y[j] , ' data_e[j]: ' , data_y[j]
-                if data_y[j] < 1e-12:
-                    data_y[j] = np.nan
-                    data_e[j] = np.nan
+            for y_val in data_y:
+                # print '-> data_y[j]: ' , data_y[j] , ' data_e[j]: ' , data_y[j]
+                if y_val < 1e-12:
+                    _y_val = np.nan
+                    _y_val = np.nan
 
-            file_number = file_number + 1
+            _file_number += 1
 
-        ## END OF DEBUGGING ONLY
+        # END OF DEBUGGING ONLY
 
         # Convert each histo to histograms and rebin to final binning
         for ws in scaled_ws_list:
@@ -587,7 +598,8 @@ class BaseRefWidget(BaseWidget):
         default_file_name = 'REFL_' + run_number + '_combined_data.txt'
 
         #retrieve name of the output file
-        file_name = QtGui.QFileDialog.getSaveFileName(self, "Select or define a ASCII file name", default_file_name, "(*.txt)")
+        file_name = QtGui.QFileDialog.getSaveFileName(self, "Select or define a ASCII file name", default_file_name,
+                                                      "(*.txt)")
         if str(file_name).strip() == '':
             return
 
@@ -693,15 +705,18 @@ class BaseRefWidget(BaseWidget):
         _unique_list = list(set(list_incident_medium))
 
         self._summary.incident_medium_combobox.clear()
-        for i in range(len(_unique_list)):
-            self._summary.incident_medium_combobox.addItem(str(_unique_list[i]))
+        for entry in _unique_list:
+            self._summary.incident_medium_combobox.addItem(str(entry))
 
     def _run_number_changed(self):
         self._edit_event(ctrl=self._summary.data_run_number_edit)
 
     def _edit_event(self, text=None, ctrl=None):
+        if text is None:
+            text = ""
+            _text = text
         self._summary.edited_warning_label.show()
-        util.set_edited(ctrl,True)
+        util.set_edited(ctrl, True)
 
     def _reset_warnings(self):
         self._summary.edited_warning_label.hide()
@@ -731,7 +746,7 @@ class BaseRefWidget(BaseWidget):
         util.set_edited(self._summary.data_low_res_range_switch, False)
         util.set_edited(self._summary.norm_low_res_range_switch, False)
         util.set_edited(self._summary.norm_switch, False)
-        #util.set_edited(self._summary.tof_range_switch, False)
+        # util.set_edited(self._summary.tof_range_switch, False)
         util.set_edited(self._summary.q_min_edit, False)
         util.set_edited(self._summary.q_step_edit, False)
         util.set_edited(self._summary.cfg_scaling_factor_file_name, False)
@@ -774,7 +789,7 @@ class BaseRefWidget(BaseWidget):
         content += "# Place holder for python script\n"
         content += "file_path = os.path.join(outputDir, '%s_'+runNumber+'.py')\n" % self.instrument_name
         content += "f=open(file_path,'w')\n"
-        content += "f.write(\"runNumber=\%s \% runNumber\\n\")\n"
+        content += r"f.write(\"runNumber=\%s \% runNumber\\n\")\n"
         content += "f.write(\"\"\"%s\"\"\")\n" % reduce_script
         content += "f.close()\n\n"
 
@@ -991,7 +1006,7 @@ class BaseRefWidget(BaseWidget):
             For REFM, this is X
             For REFL, this is Y
         """
-
+        _is_peak = is_peak
 #        run_number = self._summary.data_run_number_edit.text()
 #        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(run_number)))[0]
 #
@@ -1027,11 +1042,11 @@ class BaseRefWidget(BaseWidget):
 #        # with the same return code of Qt application
 ##        sys.exit(app.exec_())
 
-        min, max = self._integrated_plot(True,
-                                         self._summary.data_run_number_edit,
-                                         self._summary.data_peak_from_pixel,
-                                         self._summary.data_peak_to_pixel,
-                                         True)
+        _minimum, _maximum = self._integrated_plot(True,
+                                                   self._summary.data_run_number_edit,
+                                                   self._summary.data_peak_from_pixel,
+                                                   self._summary.data_peak_to_pixel,
+                                                   True)
 
     def _plot_count_vs_y_bck(self):
         """
@@ -1041,11 +1056,11 @@ class BaseRefWidget(BaseWidget):
             For REFL, this is Y
         """
 
-        min, max = self._integrated_plot(True,\
-                              self._summary.data_run_number_edit,\
-                              self._summary.data_background_from_pixel1,\
-                              self._summary.data_background_to_pixel1,\
-                              False)
+        _minimum, _maximum = self._integrated_plot(True,
+                                                   self._summary.data_run_number_edit,
+                                                   self._summary.data_background_from_pixel1,
+                                                   self._summary.data_background_to_pixel1,
+                                                   False)
 
     def _plot_count_vs_x(self):
         """
@@ -1054,10 +1069,10 @@ class BaseRefWidget(BaseWidget):
             For REFL, this is X
         """
 
-        min, max = self._integrated_plot(False,
-                                         self._summary.data_run_number_edit,
-                                         self._summary.x_min_edit,
-                                         self._summary.x_max_edit)
+        _minimum, _maximum = self._integrated_plot(False,
+                                                   self._summary.data_run_number_edit,
+                                                   self._summary.x_min_edit,
+                                                   self._summary.x_max_edit)
 
     def _plot_data_count_vs_x_2d(self):
         """
@@ -1071,7 +1086,7 @@ class BaseRefWidget(BaseWidget):
             Will launch the 2d plot for the data of counts vs TOF
         """
 
-        #retrieve name of workspace first
+        # retrieve name of workspace first
         run_number =  self._summary.data_run_number_edit.text()
         file_path = FileFinder.findRuns("%s%s" % (self.instrument_name, str(run_number)))[0]
 
@@ -1136,8 +1151,10 @@ class BaseRefWidget(BaseWidget):
 #            self._summary.x_max_edit.setText("%-d" % int(tofmax))
 
         # mantidplot.app should be used instead of _qti.app (it's just an alias)
-        #mantidplot.app.connect(mantidplot.app.mantidUI, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
-        #mantidplot.app.connect(mantidplot.app.RefDetectorViewer, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
+        #mantidplot.app.connect(mantidplot.app.mantidUI, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,
+        # double,double,double,double)"), call_back)
+        #mantidplot.app.connect(mantidplot.app.RefDetectorViewer, QtCore.SIGNAL("python_peak_back_tof_range_update
+        # (double,double,double,double,double,double)"), call_back)
 
         peak_min = int(self._summary.data_peak_from_pixel.text())
         peak_max = int(self._summary.data_peak_to_pixel.text())
@@ -1147,9 +1164,12 @@ class BaseRefWidget(BaseWidget):
         tof_max = int(self._summary.data_to_tof.text())
 
         import mantidqtpython
-        self.ref_det_view = mantidqtpython.MantidQt.RefDetectorViewer.RefMatrixWSImageView(ws_output_base, peak_min, peak_max, back_min, back_max, tof_min, tof_max)
+        self.ref_det_view = mantidqtpython.MantidQt.RefDetectorViewer.RefMatrixWSImageView(ws_output_base, peak_min,
+                                                                                           peak_max, back_min, back_max,
+                                                                                           tof_min, tof_max)
         QtCore.QObject.connect(self.ref_det_view.getConnections(),
-                               QtCore.SIGNAL("peak_back_tof_range_update(double,double, double,double,double,double)"), self.call_back)
+                               QtCore.SIGNAL("peak_back_tof_range_update(double,double, double,double,double,double)"),
+                               self.call_back)
 
 
     def call_back(self, peakmin, peakmax, backmin, backmax, tofmin, tofmax):
@@ -1196,10 +1216,10 @@ class BaseRefWidget(BaseWidget):
 
 #        dmw = DesignerMainWindow(self, 'norm')
 #        dmw.show()
-        min, max = self._integrated_plot(True,
-                                         self._summary.norm_run_number_edit,
-                                         self._summary.norm_peak_from_pixel,
-                                         self._summary.norm_peak_to_pixel)
+        _minimum, _maximum = self._integrated_plot(True,
+                                                   self._summary.norm_run_number_edit,
+                                                   self._summary.norm_peak_from_pixel,
+                                                   self._summary.norm_peak_to_pixel)
 
     def _norm_count_vs_y_bck(self):
 
@@ -1210,10 +1230,10 @@ class BaseRefWidget(BaseWidget):
 
     def _norm_count_vs_x(self):
 
-        min, max = self._integrated_plot(False,
-                                         self._summary.norm_run_number_edit,
-                                         self._summary.norm_x_min_edit,
-                                         self._summary.norm_x_max_edit)
+        _minimum, _maximum = self._integrated_plot(False,
+                                                   self._summary.norm_run_number_edit,
+                                                   self._summary.norm_x_min_edit,
+                                                   self._summary.norm_x_max_edit)
 
     def _plot_norm_count_vs_x_2d(self):
         """
@@ -1250,7 +1270,7 @@ class BaseRefWidget(BaseWidget):
         """
 
         if not IS_IN_MANTIDPLOT:
-            return
+            return None, None
 
         try:
             f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(file_ctrl.text())))[0]
@@ -1269,17 +1289,17 @@ class BaseRefWidget(BaseWidget):
             if self.short_name == "REFM":
                 is_pixel_y = not is_pixel_y
 
-            min, max = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
-                                                                      callback=call_back,
-                                                                      range_min=range_min,
-                                                                      range_max=range_max,
-                                                                      high_res=is_high_res,
-                                                                      instrument=self.short_name,
-                                                                      isPeak=isPeak)
+            minimum, maximum = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
+                                                                              callback=call_back,
+                                                                              range_min=range_min,
+                                                                              range_max=range_max,
+                                                                              high_res=is_high_res,
+                                                                              instrument=self.short_name,
+                                                                              isPeak=isPeak)
 
-            return min, max
-        except:
-            pass
+            return minimum, maximum
+        except IOError, e:
+            logger.error("Could not find file: " + e.filename())
 
     def _plot_tof(self):
         if not IS_IN_MANTIDPLOT:
@@ -1414,7 +1434,8 @@ class BaseRefWidget(BaseWidget):
         else:
             for item in state.data_sets:
                 if item is not None:
-                    item_widget = QtGui.QListWidgetItem(unicode(str(','.join([str(i) for i in item.data_files]))), self._summary.angle_list)
+                    item_widget = QtGui.QListWidgetItem(unicode(str(','.join([str(i) for i in item.data_files]))),
+                                                        self._summary.angle_list)
                     item_widget.setData(QtCore.Qt.UserRole, item)
 
         if len(state.data_sets)>0:
@@ -1439,8 +1460,8 @@ class BaseRefWidget(BaseWidget):
         self._summary.incident_medium_combobox.clear()
         _incident_medium_str = str(state.incident_medium_list[0])
         _list = _incident_medium_str.split(',')
-        for i in range(len(_list)):
-            self._summary.incident_medium_combobox.addItem(str(_list[i]))
+        for item in _list:
+            self._summary.incident_medium_combobox.addItem(str(item))
         self._summary.incident_medium_combobox.setCurrentIndex(state.incident_medium_index_selected)
 
         #Peak from/to pixels

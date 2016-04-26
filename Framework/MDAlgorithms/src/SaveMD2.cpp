@@ -167,21 +167,28 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
     size[numDims - 1 - d] = int(dim->getNBins());
   }
 
-  file->makeData("signal", ::NeXus::FLOAT64, size, true);
+  std::vector<int> chunks = size;
+  chunks[0] = 1; // Drop the largest stride for chunking, I don't know
+                 // if this is the best but appears to work
+
+  file->makeCompData("signal", ::NeXus::FLOAT64, size, ::NeXus::LZW, chunks,
+                     true);
   file->putData(ws->getSignalArray());
   file->putAttr("signal", 1);
   file->putAttr("axes", axes_label);
   file->closeData();
 
-  file->makeData("errors_squared", ::NeXus::FLOAT64, size, true);
+  file->makeCompData("errors_squared", ::NeXus::FLOAT64, size, ::NeXus::LZW,
+                     chunks, true);
   file->putData(ws->getErrorSquaredArray());
   file->closeData();
 
-  file->makeData("num_events", ::NeXus::FLOAT64, size, true);
+  file->makeCompData("num_events", ::NeXus::FLOAT64, size, ::NeXus::LZW, chunks,
+                     true);
   file->putData(ws->getNumEventsArray());
   file->closeData();
 
-  file->makeData("mask", ::NeXus::INT8, size, true);
+  file->makeCompData("mask", ::NeXus::INT8, size, ::NeXus::LZW, chunks, true);
   file->putData(ws->getMaskArray());
   file->closeData();
 

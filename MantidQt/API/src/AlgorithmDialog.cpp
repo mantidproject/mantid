@@ -741,7 +741,7 @@ void AlgorithmDialog::helpClicked() {
  * A slot to handle the keep open button click
  */
 void AlgorithmDialog::keepOpenChanged(int state) {
-  m_keepOpen = (state == QCheckBox::On);
+  m_keepOpen = (state == Qt::Checked);
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -4,8 +4,9 @@
 <component-link name = "VESUVIO">
 
   <!-- The monitor spectrum  -->
-  <parameter name="monitor_spectrum">
-    <value val="1"/>
+  <parameter name="monitor_spectra" type="string">
+    <!-- The first item in the list is used for monitor normalisation -->
+    <value val="1,2"/>
   </parameter>
 
   <!-- Back scattering spectrum numbers -->
@@ -157,5 +158,35 @@
 
 </component-link>
 <!-- End VESUVIO link -->
+
+<!-- ======================= Energy widths for foils ================================= -->
+
+<component-link name = "foil-pos0">
+  <!-- Lorentzian HWHM of the foil energy (meV) -->
+  <parameter name="hwhm_lorentz">
+    <value val="144"/>
+  </parameter>
+
+  <!-- Gaussian standard deviation of the foil energy (meV)
+       Note that this is not the HWHM but the standard deviation unlike the
+       Lorentzian parameter -->
+  <parameter name="sigma_gauss">
+    <value val="20"/>
+  </parameter>
+</component-link>
+
+<component-link name = "foil-pos1">
+  <!-- Lorentzian HWHM of the foil energy (meV) -->
+  <parameter name="hwhm_lorentz">
+    <value val="144"/>
+  </parameter>
+
+  <!-- Gaussian standard deviation of the foil energy (meV)
+       Note that this is not the HWHM but the standard deviation unlike the
+       Lorentzian parameter -->
+  <parameter name="sigma_gauss">
+    <value val="20"/>
+  </parameter>
+</component-link>
 
 </parameter-file>

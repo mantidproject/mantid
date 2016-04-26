@@ -149,7 +149,7 @@ void AlignAndFocusPowder::init() {
   declareProperty("PrimaryFlightPath", -1.0,
                   "If positive, focus positions are changed.  (Default -1) ");
   declareProperty(make_unique<ArrayProperty<int32_t>>("SpectrumIDs"),
-                  "Optional: Spectrum IDs (note that it is not detector ID or "
+                  "Optional: Spectrum Nos (note that it is not detector ID or "
                   "workspace indices).");
   declareProperty(make_unique<ArrayProperty<double>>("L2"),
                   "Optional: Secondary flight (L2) paths for each detector");
@@ -159,13 +159,13 @@ void AlignAndFocusPowder::init() {
                   "Azimuthal angles (out-of-plain) for detectors");
 
   declareProperty("LowResSpectrumOffset", -1,
-                  "Offset on spectrum ID of low resolution spectra from high "
+                  "Offset on spectrum No of low resolution spectra from high "
                   "resolution one. "
                   "If negative, then all the low resolution TOF will not be "
                   "processed.  Otherwise, low resolution TOF "
                   "will be stored in an additional set of spectra. "
                   "If offset is equal to 0, then the low resolution will have "
-                  "same spectrum IDs as the normal ones.  "
+                  "same spectrum Nos as the normal ones.  "
                   "Otherwise, the low resolution spectra will have spectrum "
                   "IDs offset from normal ones. ");
   declareProperty("ReductionProperties", "__powdereduction", Direction::Input);
@@ -323,7 +323,7 @@ void AlignAndFocusPowder::exec() {
   m_outputW = getProperty("OutputWorkspace");
   if (m_inputEW) {
     if (m_outputW != m_inputW) {
-      m_outputEW = EventWorkspace_sptr(m_inputEW->clone().release());
+      m_outputEW = m_inputEW->clone();
     }
     m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   } else {
@@ -777,18 +777,18 @@ AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
                                        API::MatrixWorkspace_sptr ws2,
                                        size_t offset) {
   // Get information from ws1: maximum spectrum number, and store original
-  // spectrum IDs
+  // spectrum Nos
   size_t nspec1 = ws1->getNumberHistograms();
-  specnum_t maxspecid1 = 0;
-  std::vector<specnum_t> origspecids;
+  specnum_t maxspecNo1 = 0;
+  std::vector<specnum_t> origspecNos;
   for (size_t i = 0; i < nspec1; ++i) {
-    specnum_t tmpspecid = ws1->getSpectrum(i)->getSpectrumNo();
-    origspecids.push_back(tmpspecid);
-    if (tmpspecid > maxspecid1)
-      maxspecid1 = tmpspecid;
+    specnum_t tmpspecNo = ws1->getSpectrum(i)->getSpectrumNo();
+    origspecNos.push_back(tmpspecNo);
+    if (tmpspecNo > maxspecNo1)
+      maxspecNo1 = tmpspecNo;
   }
 
-  g_log.information() << "[DBx536] Max spectrum number of ws1 = " << maxspecid1
+  g_log.information() << "[DBx536] Max spectrum number of ws1 = " << maxspecNo1
                       << ", Offset = " << offset << ".\n";
 
   size_t nspec2 = ws2->getNumberHistograms();
@@ -807,21 +807,21 @@ AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
 
   API::MatrixWorkspace_sptr outws = alg->getProperty("OutputWorkspace");
 
-  // FIXED : Restore the original spectrum IDs to spectra from ws1
+  // FIXED : Restore the original spectrum Nos to spectra from ws1
   for (size_t i = 0; i < nspec1; ++i) {
-    specnum_t tmpspecid = outws->getSpectrum(i)->getSpectrumNo();
-    outws->getSpectrum(i)->setSpectrumNo(origspecids[i]);
+    specnum_t tmpspecNo = outws->getSpectrum(i)->getSpectrumNo();
+    outws->getSpectrum(i)->setSpectrumNo(origspecNos[i]);
 
     g_log.information() << "[DBx540] Conjoined spectrum " << i
                         << ": restore spectrum number to "
                         << outws->getSpectrum(i)->getSpectrumNo()
-                        << " from spectrum number = " << tmpspecid << ".\n";
+                        << " from spectrum number = " << tmpspecNo << ".\n";
   }
 
   // Rename spectrum number
   if (offset >= 1) {
     for (size_t i = 0; i < nspec2; ++i) {
-      specnum_t newspecid = maxspecid1 + static_cast<specnum_t>((i) + offset);
+      specnum_t newspecid = maxspecNo1 + static_cast<specnum_t>((i) + offset);
       outws->getSpectrum(nspec1 + i)->setSpectrumNo(newspecid);
       // ISpectrum* spec = outws->getSpectrum(nspec1+i);
       // if (spec)
@@ -917,6 +917,8 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
   alg->setProperty<bool>("MakeCalWorkspace", loadCalibration);
   alg->setProperty<bool>("MakeGroupingWorkspace", loadGrouping);
   alg->setProperty<bool>("MakeMaskWorkspace", loadMask);
+  alg->setProperty<double>("TofMin", getProperty("TMin"));
+  alg->setProperty<double>("TofMax", getProperty("TMax"));
   alg->setPropertyValue("WorkspaceName", m_instName);
   alg->executeAsChildAlg();
 

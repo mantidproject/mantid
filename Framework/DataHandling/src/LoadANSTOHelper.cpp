@@ -56,11 +56,22 @@ EventProcessor::EventProcessor(const std::vector<bool> &roi,
                                const double tofMaxBoundary,
                                const double timeMinBoundary,
                                const double timeMaxBoundary)
-    : m_roi(roi), m_stride(stride), m_frames(0), m_period(period),
-      m_phase(phase), m_tofMinBoundary(tofMinBoundary),
+    : m_roi(roi), m_stride(stride), m_frames(0), m_framesValid(0),
+      m_period(period), m_phase(phase), m_tofMinBoundary(tofMinBoundary),
       m_tofMaxBoundary(tofMaxBoundary), m_timeMinBoundary(timeMinBoundary),
       m_timeMaxBoundary(timeMaxBoundary) {}
-void EventProcessor::newFrame() { m_frames++; }
+bool EventProcessor::validFrame() const {
+  // frame boundary
+  double frameTime =
+      (static_cast<double>(m_frames) * m_period) * 1e-6; // in seconds
+
+  return (frameTime >= m_timeMinBoundary) && (frameTime <= m_timeMaxBoundary);
+}
+void EventProcessor::newFrame() {
+  m_frames++;
+  if (validFrame())
+    m_framesValid++;
+}
 void EventProcessor::addEvent(size_t x, size_t y, double tof) {
   // tof correction
   if (m_period > 0.0) {
@@ -72,11 +83,7 @@ void EventProcessor::addEvent(size_t x, size_t y, double tof) {
   }
 
   // check if event is in valid range
-
-  // frame boundary
-  double frameTime =
-      (static_cast<double>(m_frames) * m_period) * 1e-6; // in seconds
-  if ((frameTime < m_timeMinBoundary) || (frameTime > m_timeMaxBoundary))
+  if (!validFrame())
     return;
 
   // ToF boundary
@@ -107,7 +114,7 @@ EventCounter::EventCounter(const std::vector<bool> &roi, const size_t stride,
                      timeMinBoundary, timeMaxBoundary),
       m_eventCounts(eventCounts), m_tofMin(std::numeric_limits<double>::max()),
       m_tofMax(std::numeric_limits<double>::min()) {}
-size_t EventCounter::numFrames() const { return m_frames; }
+size_t EventCounter::numFrames() const { return m_framesValid; }
 double EventCounter::tofMin() const {
   return m_tofMin <= m_tofMax ? m_tofMin : 0.0;
 }
@@ -139,7 +146,7 @@ void EventAssigner::addEventImpl(size_t id, double tof) {
 }
 
 // FastReadOnlyFile
-#ifdef WIN32
+#ifdef _WIN32
 FastReadOnlyFile::FastReadOnlyFile(const char *filename) {
   m_handle = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, NULL,
                          OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);

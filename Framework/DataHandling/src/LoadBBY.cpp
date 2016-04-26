@@ -372,22 +372,21 @@ void LoadBBY::exec() {
   // set log values
   API::LogManager &logManager = eventWS->mutableRun();
 
+  int frame_count = static_cast<int>(eventCounter.numFrames());
+
   logManager.addProperty("filename", filename);
   logManager.addProperty("att_pos", static_cast<int>(instrumentInfo.att_pos));
-  logManager.addProperty("frame_count",
-                         static_cast<int>(eventCounter.numFrames()));
+  logManager.addProperty("frame_count", frame_count);
   logManager.addProperty("period", period);
 
   // currently beam monitor counts are not available, instead number of frames
   // times period is used
   logManager.addProperty(
-      "bm_counts", static_cast<double>(eventCounter.numFrames()) * period /
+      "bm_counts", static_cast<double>(frame_count) * period /
                        1.0e6); // static_cast<double>(instrumentInfo.bm_counts)
 
-  // currently
-  Kernel::time_duration duration =
-      boost::posix_time::microseconds(static_cast<boost::int64_t>(
-          static_cast<double>(eventCounter.numFrames()) * period));
+  Kernel::time_duration duration = boost::posix_time::microseconds(
+      static_cast<boost::int64_t>(static_cast<double>(frame_count) * period));
 
   Kernel::DateAndTime start_time("2000-01-01T00:00:00");
   Kernel::DateAndTime end_time(start_time + duration);
@@ -398,6 +397,8 @@ void LoadBBY::exec() {
   std::string time_str = start_time.toISO8601String();
   AddSinglePointTimeSeriesProperty(logManager, time_str, "L1_chopper_value",
                                    instrumentInfo.L1_chopper_value);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "L1",
+                                   instrumentInfo.L1_source_value);
   AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_det_value",
                                    instrumentInfo.L2_det_value);
   AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_curtainl_value",
@@ -408,8 +409,6 @@ void LoadBBY::exec() {
                                    instrumentInfo.L2_curtainu_value);
   AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_curtaind_value",
                                    instrumentInfo.L2_curtaind_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "D_det_value",
-                                   instrumentInfo.D_det_value);
   AddSinglePointTimeSeriesProperty(logManager, time_str, "D_curtainl_value",
                                    instrumentInfo.D_curtainl_value);
   AddSinglePointTimeSeriesProperty(logManager, time_str, "D_curtainr_value",
@@ -498,14 +497,13 @@ LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
   instrumentInfo.phase_slave = 0.0;
 
   instrumentInfo.L1_chopper_value = 18.47258984375;
+  instrumentInfo.L1_source_value = 16.671;
   instrumentInfo.L2_det_value = 33.15616015625;
 
   instrumentInfo.L2_curtainl_value = 23.28446093750;
   instrumentInfo.L2_curtainr_value = 23.28201953125;
   instrumentInfo.L2_curtainu_value = 24.28616015625;
   instrumentInfo.L2_curtaind_value = 24.28235937500;
-
-  instrumentInfo.D_det_value = (8.4 + 2.0) / (2 * 1000);
 
   instrumentInfo.D_curtainl_value = 0.3816;
   instrumentInfo.D_curtainr_value = 0.4024;
@@ -555,8 +553,8 @@ LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
       if (loadNXDataSet(entry, "instrument/Ltof_det", tmp_float))
         instrumentInfo.L1_chopper_value =
             tmp_float * toMeters - instrumentInfo.L2_det_value;
-      // if (loadNXDataSet(entry, "instrument/L1", tmp_float))
-      //  instrumentInfo.L1_source_value = tmp_float * toMeters;
+      if (loadNXDataSet(entry, "instrument/L1", tmp_float))
+        instrumentInfo.L1_source_value = tmp_float * toMeters;
 
       if (loadNXDataSet(entry, "instrument/L2_curtainl", tmp_float))
         instrumentInfo.L2_curtainl_value = tmp_float * toMeters;
@@ -608,8 +606,8 @@ LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
     if (conf->hasProperty("Ltof_det"))
       instrumentInfo.L1_chopper_value =
           conf->getDouble("Ltof_det") * toMeters - instrumentInfo.L2_det_value;
-    // if (conf->hasProperty("L1"))
-    //  instrumentInfo.L1_source_value = conf->getDouble("L1") * toMeters;
+    if (conf->hasProperty("L1"))
+      instrumentInfo.L1_source_value = conf->getDouble("L1") * toMeters;
 
     if (conf->hasProperty("L2_curtainl"))
       instrumentInfo.L2_curtainl_value =
@@ -786,21 +784,21 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
   ANSTO::ProgressTracker progTracker(prog, progMsg, fileSize,
                                      Progress_LoadBinFile);
 
-  uint64_t x = 0; // 9 bits [0-239] tube number
-  uint64_t y = 0; // 8 bits [0-255] position along tube
+  uint32_t x = 0; // 9 bits [0-239] tube number
+  uint32_t y = 0; // 8 bits [0-255] position along tube
 
   // uint v = 0; // 0 bits [     ]
   // uint w = 0; // 0 bits [     ] energy
-  uint64_t dt = 0;
+  uint32_t dt = 0;
   double tof = 0.0;
 
   if ((fileSize == 0) || !tarFile.skip(128))
     return;
 
   int state = 0;
-  uint64_t c;
-  while ((c = static_cast<unsigned int>(tarFile.read_byte())) !=
-         static_cast<unsigned int>(-1)) {
+  uint32_t c;
+  while ((c = static_cast<uint32_t>(tarFile.read_byte())) !=
+         static_cast<uint32_t>(-1)) {
 
     bool event_ended = false;
     switch (state) {

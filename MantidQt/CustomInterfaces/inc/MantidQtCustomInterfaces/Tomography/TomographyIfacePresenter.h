@@ -17,13 +17,15 @@ class QTimer;
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class TomoPathsConfig;
+
 /**
 Tomography GUI. Presenter for the GUI (as in the MVP
 (Model-View-Presenter) pattern). In principle, in a strict MVP setup,
 signals from the model should always be handled through this presenter
 and never go directly to the view, and viceversa.
 
-Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014-2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -63,10 +65,12 @@ protected:
   /// clean shut down of model, view, etc.
   void cleanup();
 
-  void processSetup();
-  void processCompResourceChange();
-  void processToolChange();
+  void processSystemSettingsUpdated();
+  void processSetupResourcesAndTools();
+  void processCompResourceChanged();
+  void processToolChanged();
   void processTomoPathsChanged();
+  void processTomoPathsEditedByUser();
   void processLogin();
   void processLogout();
   void processSetupReconTool();
@@ -84,9 +88,19 @@ protected:
   void processVisualizeJobs();
   void processViewImg();
   void processLogMsg();
+  void processAggregateEnergyBands();
   void processShutDown();
 
   void doVisualize(const std::vector<std::string> &ids);
+
+  /// To prepare a local run
+  void makeRunnableWithOptionsLocal(const std::string &comp, std::string &run,
+                                    std::string &opt);
+
+  /// auto-guess additional directories when the user gives the samples path
+  void findFlatsDarksFromSampleGivenByUser(TomoPathsConfig &cfg);
+
+  bool usableEnergyBandsPaths(const std::map<std::string, std::string> &algParams);
 
   /// Starts a periodic query just to keep sessions alive when logged in
   void startKeepAliveMechanism(int period);
@@ -99,10 +113,6 @@ private:
 
   /// Associated model for this presenter (MVP pattern)
   const boost::scoped_ptr<TomographyIfaceModel> m_model;
-
-  /// To prepare a local run
-  void makeRunnableWithOptionsLocal(const std::string &comp, std::string &run,
-                                    std::string &opt);
 
   // TODO: replace this with an std::mutex. Also below for threads.
   // mutex for the job status info update operations on the view

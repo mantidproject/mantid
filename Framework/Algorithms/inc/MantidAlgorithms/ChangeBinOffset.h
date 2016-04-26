@@ -1,11 +1,7 @@
 #ifndef MANTID_ALGORITHM_CHANGEBINOFFSET_H_
 #define MANTID_ALGORITHM_CHANGEBINOFFSET_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Workspace_fwd.h"
+#include "MantidAlgorithms/SpectrumAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -43,12 +39,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ChangeBinOffset : public API::Algorithm {
+class DLLExport ChangeBinOffset : public SpectrumAlgorithm {
 public:
-  /// Default constructor
-  ChangeBinOffset();
-  /// Destructor
-  ~ChangeBinOffset() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "ChangeBinOffset"; }
   /// Summary of algorithms purpose
@@ -65,25 +57,10 @@ public:
   const std::string alias() const override { return "OffsetX"; }
 
 private:
-  // Overridden Algorithm methods
+  /// Initialisation method. Declares properties to be used in algorithm.
   void init() override;
+  /// Executes the algorithm
   void exec() override;
-
-  /// Execute algorithm for EventWorkspaces
-  void execEvent();
-
-  /// Create output workspace
-  API::MatrixWorkspace_sptr createOutputWS(API::MatrixWorkspace_sptr input);
-
-  /// The progress reporting object
-  API::Progress *m_progress;
-
-  /// Offset to shift by
-  double offset;
-  /// Start workspace index
-  int64_t wi_min;
-  /// Stop workspace index
-  int64_t wi_max;
 };
 
 } // namespace Algorithm

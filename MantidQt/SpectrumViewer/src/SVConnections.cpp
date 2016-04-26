@@ -651,7 +651,7 @@ SpectrumDisplay* SVConnections::getCurrentSpectrumDisplay() const {
 
 void SVConnections::removeSpectrumDisplay(SpectrumDisplay* spectrumDisplay) {
   if (m_spectrumDisplays.contains(spectrumDisplay)) {
-    m_spectrumDisplays.remove(spectrumDisplay);
+    m_spectrumDisplays.removeAll(spectrumDisplay);
   }
   if (m_spectrumDisplays.isEmpty()) {
     m_currentSpectrumDisplay = NULL;

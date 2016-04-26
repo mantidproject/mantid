@@ -421,7 +421,7 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
     QString wsNameQ = QString::fromStdString(wsName);
 
     // Plot the workspace
-    plotSpectrum(wsNameQ, (plotType == Logorithm));
+    plotSpectrum(wsNameQ, (plotType == Logarithm));
     setCurrentDataName(wsNameQ);
   } catch (std::exception &e) {
     g_log.error(e.what());
@@ -434,6 +434,7 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
 
 /**
  * Finds a name for new analysis workspace.
+ * Format: "INST00012345; Pair; long; Asym; 1[; #1]"
  * @param itemType :: Whether it's a group or pair
  * @param tableRow :: Row in the group/pair table which contains the item
  * @param plotType :: What kind of plot we want to analyse
@@ -441,45 +442,57 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
  */
 std::string MuonAnalysis::getNewAnalysisWSName(ItemType itemType, int tableRow,
                                                PlotType plotType) {
-  std::string plotTypeName;
+  std::ostringstream workspaceName;
+  const static std::string sep("; ");
 
+  // Instrument and run number
+  workspaceName << m_currentLabel << sep;
+
+  // Pair/group and name of pair/group
+  if (itemType == Pair) {
+    workspaceName << "Pair" << sep;
+    workspaceName << m_uiForm.pairTable->item(tableRow, 0)->text().toStdString()
+                  << sep;
+  } else if (itemType == Group) {
+    workspaceName << "Group" << sep;
+    workspaceName
+        << m_uiForm.groupTable->item(tableRow, 0)->text().toStdString() << sep;
+  }
+
+  // Type of plot
   switch (plotType) {
   case Asymmetry:
-    plotTypeName = "Asym";
+    workspaceName << "Asym";
     break;
   case Counts:
-    plotTypeName = "Counts";
+    workspaceName << "Counts";
     break;
-  case Logorithm:
-    plotTypeName = "Logs";
+  case Logarithm:
+    workspaceName << "Logs";
     break;
   }
 
-  std::string itemTypeName;
-  std::string itemName;
-
-  if (itemType == Pair) {
-    itemTypeName = "Pair";
-    itemName = m_uiForm.pairTable->item(tableRow, 0)->text().toStdString();
-  } else if (itemType == Group) {
-    itemTypeName = "Group";
-    itemName = m_uiForm.groupTable->item(tableRow, 0)->text().toStdString();
+  // Period(s)
+  const auto periods = getPeriodLabels();
+  if (!periods.empty()) {
+    workspaceName << sep << periods;
   }
 
-  const std::string firstPart = (m_currentLabel + "; " + itemTypeName + "; " +
-                                 itemName + "; " + plotTypeName + "; #");
-
+  // Version - always "#1" if overwrite is on, otherwise increment
+  workspaceName << sep << "#";
   std::string newName;
-
   if (isOverwriteEnabled()) {
-    // If ovewrite is enabled, can use the same name again and again
-    newName = firstPart + "1";
+    workspaceName << "1"; // Always use #1
+    newName = workspaceName.str();
   } else {
     // If overwrite is disabled, need to find unique name for the new workspace
+    newName = workspaceName.str();
+    std::string uniqueName;
     int plotNum(1);
     do {
-      newName = firstPart + boost::lexical_cast<std::string>(plotNum++);
-    } while (AnalysisDataService::Instance().doesExist(newName));
+      uniqueName = newName + std::to_string(plotNum++);
+    } while (AnalysisDataService::Instance().doesExist(uniqueName));
+    newName = uniqueName;
   }
 
   return newName;
@@ -497,8 +510,8 @@ MuonAnalysis::PlotType MuonAnalysis::parsePlotType(QComboBox *selector) {
     return Asymmetry;
   } else if (plotTypeName == "Counts") {
     return Counts;
-  } else if (plotTypeName == "Logorithm") {
-    return Logorithm;
+  } else if (plotTypeName == "Logarithm") {
+    return Logarithm;
   } else {
     throw std::runtime_error("Unknown plot type name: " + plotTypeName);
   }
@@ -533,12 +546,8 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
       inputGroup->addWorkspace(ws);
     }
     // Parse selected operation
-    const std::string summedPeriods =
-        m_uiForm.homePeriodBox1->text().toStdString();
-    const std::string subtractedPeriods =
-        m_uiForm.homePeriodBox2->text().toStdString();
-    alg->setProperty("SummedPeriodSet", summedPeriods);
-    alg->setProperty("SubtractedPeriodSet", subtractedPeriods);
+    alg->setProperty("SummedPeriodSet", getSummedPeriods());
+    alg->setProperty("SubtractedPeriodSet", getSubtractedPeriods());
   } else if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS)) {
     // Put this single WS into a group and set it as the input property
     inputGroup->addWorkspace(ws);
@@ -573,7 +582,7 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
 
     switch (plotType) {
     case Counts:
-    case Logorithm:
+    case Logarithm:
       outputType = "GroupCounts";
       break;
     case Asymmetry:
@@ -1767,32 +1776,44 @@ void MuonAnalysis::clearLoadedRun() {
 
 /**
  * Get period labels for the periods selected in the GUI
- * @return Return empty string if no periods (well just one period). If more
- *         one period then return "_#" string for the periods selected by user
+ * Return an empty string for single-period data or all periods
+ * @return String for the period(s) selected by user
  */
-QStringList MuonAnalysis::getPeriodLabels() const {
-  QStringList retVal;
-  if (m_uiForm.homePeriodBox2->isEnabled() &&
-      m_uiForm.homePeriodBox2->text() != "") {
-    retVal.append("_" + m_uiForm.homePeriodBox1->text());
-    retVal.append("_" + m_uiForm.homePeriodBox2->text());
-  } else if (m_uiForm.homePeriodBox2->isEnabled()) {
-    retVal.append("_" + m_uiForm.homePeriodBox1->text());
-  } else
-    retVal.append("");
+std::string MuonAnalysis::getPeriodLabels() const {
+  std::ostringstream retVal;
 
-  return retVal;
+  // Change input comma-separated to more readable format
+  auto summed = getSummedPeriods();
+  std::replace(summed.begin(), summed.end(), ',', '+');
+  auto subtracted = getSubtractedPeriods();
+  if (!subtracted.empty()) {
+    std::replace(subtracted.begin(), subtracted.end(), ',', '+');
+  }
+
+  // If single period, or all (1,2,3,...) then leave blank
+  // All periods => size of string is 2n-1
+  const bool isSinglePeriod = m_numPeriods == 1;
+  const bool isAllPeriods =
+      summed.size() == 2 * m_numPeriods - 1 && subtracted.empty();
+
+  if (!isSinglePeriod && !isAllPeriods) {
+    retVal << summed;
+    if (!subtracted.empty()) {
+      retVal << "-" << subtracted;
+    }
+  }
+
+  return retVal.str();
 }
 
 /**
- * plots specific WS spectrum (used by plotPair and plotGroup)
+ * Plots specific WS spectrum (used by plotPair and plotGroup)
+ * This is done with a Python script (there must be a better way!)
  * @param wsName   :: Workspace name
  * @param logScale :: Whether to plot using logarithmic scale
  */
 void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
-  // List of script lines which acquire a window for plotting. The window is
-  // placed to Python
-  // variable named 'w';'
+  // List of script lines which acquire a window and plot in it.
   QStringList acquireWindowScript;
 
   MuonAnalysisOptionTab::NewPlotPolicy policy = m_optionTab->newPlotPolicy();
@@ -1804,28 +1825,70 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   }
 
   QStringList &s = acquireWindowScript; // To keep short
-  s << "ws = mtd['%WSNAME%']";
-  s << "altName = ws.name() + '-1'";
 
-  if (policy == MuonAnalysisOptionTab::PreviousWindow) {
-    s << "ew = graph(altName)";
-    s << "if '%WSNAME%' != '%PREV%' and ew != None:";
-    s << "    ew.close()";
+  // Get the window to plot in (returns window)
+  // ws_name: name of workspace to plot
+  // prev_name: name of currently plotted workspace
+  // use_prev: whether to plot in existing window or new
+  s << "def get_window(ws_name, prev_name, use_prev):";
+  s << "  graph_name = ws_name + '-1'";
+  s << "  if not use_prev:";
+  s << "    return newGraph(graph_name, 0)";
+  s << "  existing = graph(graph_name)";
+  s << "  if existing is not None and ws_name != prev_name:";
+  s << "    existing.close()";
+  s << "  window = graph(prev_name + '-1')";
+  s << "  if window is None:";
+  s << "    window = newGraph(graph_name, 0)";
+  s << "  return window";
+  s << "";
 
-    s << "pw = graph('%PREV%-1')";
-    s << "if pw == None:";
-    s << "  pw = newGraph(altName, 0)";
-  } else if (policy == MuonAnalysisOptionTab::NewWindow) {
-    s << "pw = newGraph(altName, 0)";
-  }
+  // Remove data and difference from given plot (keep fit and guess)
+  s << "def remove_data(window):";
+  s << "  if window is None:";
+  s << "    raise ValueError('No plot to remove data from')";
+  s << "  to_keep = ['Workspace-Calc', 'CompositeFunction']";
+  s << "  layer = window.activeLayer()";
+  s << "  if layer is not None:";
+  s << "    for i in range(0, layer.numCurves()):";
+  s << "      if not any (x in layer.curveTitle(i) for x in to_keep):";
+  s << "        layer.removeCurve(i)";
+  s << "";
 
-  s << "w = plotSpectrum(ws.name(), 0, error_bars = %ERRORS%, type = "
-       "%CONNECT%, window = pw, "
-       "clearWindow = True)";
-  s << "w.setName(altName)";
-  s << "w.setObjectName(ws.name())";
-  s << "w.show()";
-  s << "w.setFocus()";
+  // Plot data in the given window with given options
+  s << "def plot_data(ws_name, errors, connect, window_to_use):";
+  s << "  w = plotSpectrum(ws_name, 0, error_bars = errors, type = connect, "
+       "window = window_to_use)";
+  s << "  w.setName(ws_name + '-1')";
+  s << "  w.setObjectName(ws_name)";
+  s << "  w.show()";
+  s << "  w.setFocus()";
+  s << "  return w";
+  s << "";
+
+  // Format the graph scale, title, legends and colours
+  // Data (most recently added curve) should be black
+  s << "def format_graph(graph, ws_name, log_scale, y_auto, y_min, y_max):";
+  s << "  layer = graph.activeLayer()";
+  s << "  num_curves = layer.numCurves()";
+  s << "  layer.setCurveTitle(num_curves, ws_name)";
+  s << "  layer.setTitle(mtd[ws_name].getTitle())";
+  s << "  for i in range(0, num_curves):";
+  s << "    color = i + 1 if i != num_curves - 1 else 0";
+  s << "    layer.setCurveLineColor(i, color)";
+  s << "  if log_scale:";
+  s << "    layer.logYlinX()";
+  s << "  if y_auto:";
+  s << "    layer.setAutoScale()";
+  s << "  else:";
+  s << "    layer.setAxisScale(Layer.Left, y_min, y_max)";
+  s << "";
+
+  // Plot the data!
+  s << "win = get_window('%WSNAME%', '%PREV%', %USEPREV%)";
+  s << "remove_data(win)";
+  s << "g = plot_data('%WSNAME%', %ERRORS%, %CONNECT%, win)";
+  s << "format_graph(g, '%WSNAME%', %LOGSCALE%, %YAUTO%, '%YMIN%', '%YMAX%')";
 
   QString pyS;
 
@@ -1840,25 +1903,16 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   safeWSName.replace("'", "\'");
   pyS.replace("%WSNAME%", safeWSName);
   pyS.replace("%PREV%", m_currentDataName);
+  pyS.replace("%USEPREV%", policy == MuonAnalysisOptionTab::PreviousWindow
+                               ? "True"
+                               : "False");
   pyS.replace("%ERRORS%", params["ShowErrors"]);
   pyS.replace("%CONNECT%", params["ConnectType"]);
+  pyS.replace("%LOGSCALE%", logScale ? "True" : "False");
+  pyS.replace("%YAUTO%", params["YAxisAuto"]);
+  pyS.replace("%YMIN%", params["YAxisMin"]);
+  pyS.replace("%YMAX%", params["YAxisMax"]);
 
-  // Update titles
-  pyS += "l = w.activeLayer()\n"
-         "l.setCurveTitle(0, ws.name())\n"
-         "l.setTitle(ws.getTitle())\n";
-
-  // Set logarithmic scale if required
-  if (logScale)
-    pyS += "l.logYlinX()\n";
-
-  // Set scaling
-  if (params["YAxisAuto"] == "True") {
-    pyS += "l.setAutoScale()\n";
-  } else {
-    pyS += "l.setAxisScale(Layer.Left, %1, %2)\n";
-    pyS = pyS.arg(params["YAxisMin"]).arg(params["YAxisMax"]);
-  }
   runPythonCode(pyS);
 }
 
@@ -1932,8 +1986,10 @@ bool MuonAnalysis::plotExists(const QString &wsName) {
 void MuonAnalysis::selectMultiPeak(const QString &wsName) {
   disableAllTools();
 
-  if (!plotExists(wsName))
+  if (!plotExists(wsName)) {
     plotSpectrum(wsName);
+    setCurrentDataName(wsName);
+  }
 
   QString code;
 
@@ -2856,7 +2912,7 @@ void MuonAnalysis::openSequentialFitDialog() {
                     "Error was: ");
     message.append(err.what());
     QMessageBox::critical(this, "Unable to open dialog", message);
-    g_log.error(message.ascii());
+    g_log.error(message.toLatin1().data());
     return;
   } catch (...) {
     QMessageBox::critical(this, "Unable to open dialog",
@@ -3036,12 +3092,11 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm() {
 
   // -- Period options --------------------------------------------------------
 
-  QString periodLabel1 = m_uiForm.homePeriodBox1->text();
-  loadAlg->setProperty("SummedPeriodSet", periodLabel1.toStdString());
+  loadAlg->setProperty("SummedPeriodSet", getSummedPeriods());
 
-  QString periodLabel2 = m_uiForm.homePeriodBox2->text();
-  if (periodLabel2 != "None") {
-    loadAlg->setProperty("SubtractedPeriodSet", periodLabel2.toStdString());
+  const auto subtracted = getSubtractedPeriods();
+  if (subtracted != "None") {
+    loadAlg->setProperty("SubtractedPeriodSet", subtracted);
   }
 
   return loadAlg;
@@ -3103,6 +3158,26 @@ int MuonAnalysis::getGroupOrPairToPlot() const {
 void MuonAnalysis::fillGroupingTable(const Grouping &grouping) {
   int defaultIndex = m_groupingHelper.fillGroupingTable(grouping);
   setGroupOrPairAndReplot(defaultIndex);
+}
+
+/**
+ * Returns the set of summed period numbers
+ * @returns :: period number string
+ */
+std::string MuonAnalysis::getSummedPeriods() const {
+  auto summed = m_uiForm.homePeriodBox1->text().toStdString();
+  summed.erase(std::remove(summed.begin(), summed.end(), ' '));
+  return summed;
+}
+
+/**
+ * Returns the set of subtracted period numbers
+ * @returns :: period number string
+ */
+std::string MuonAnalysis::getSubtractedPeriods() const {
+  auto subtracted = m_uiForm.homePeriodBox2->text().toStdString();
+  subtracted.erase(std::remove(subtracted.begin(), subtracted.end(), ' '));
+  return subtracted;
 }
 
 } // namespace MantidQT

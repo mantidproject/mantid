@@ -195,7 +195,10 @@ def fitting_algorithm(f):
         algm = _create_algorithm_object(function_name)
         _set_logging_option(algm, kwargs)
         algm.setProperty('Function', Function) # Must be set first
-        algm.setProperty('InputWorkspace', InputWorkspace)
+        if InputWorkspace is not None:
+            algm.setProperty('InputWorkspace', InputWorkspace)
+        else:
+            del algm['InputWorkspace']
 
         # Set all workspace properties before others
         for key in kwargs.keys():
@@ -260,6 +263,19 @@ def CalculateChiSquared(*args, **kwargs):
       chi2_1, chi2_2, chi2_3, chi2_4 = \\
         CalculateChiSquared(Function='name=LinearBackground,A0=0.3', InputWorkspace=dataWS',
             StartX='0.05',EndX='1.0')
+    """
+    return None
+
+# Use a python decorator (defined above) to generate the code for this function.
+@fitting_algorithm
+def EvaluateFunction(*args, **kwargs):
+    """
+    This function evaluates a function on a data set.
+    The data set is defined in a way similar to Fit algorithm.
+
+    Example:
+      EvaluateFunction(Function='name=LinearBackground,A0=0.3', InputWorkspace=dataWS',
+          StartX='0.05',EndX='1.0',Output="Z1")
     """
     return None
 
@@ -603,7 +619,7 @@ def _check_mandatory_args(algorithm, _algm_object, error, *args, **kwargs):
         raise RuntimeError("%s argument(s) not supplied to %s" % (missing_arg_list,algorithm))
     # If the error was not caused by missing property the algorithm specific error should suffice
     else:
-        raise RuntimeError(error.message)
+        raise RuntimeError(str(error))
 
 #------------------------ General simple function calls ----------------------
 

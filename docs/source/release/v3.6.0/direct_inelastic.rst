@@ -31,7 +31,7 @@ substantial simplification of the Direct Reduction workflow, where the
 number of operations are performed on a workspace itself and the monitor
 workspace, which is associated with the main workspace.
 
-`Re#13980 <https://github.com/mantidproject/mantid/tree/13980_AutoreductionCapability>`_
+`Re#13980 <https://github.com/mantidproject/mantid/issues/13980>`_
 On the basis of changes outlined in
 `Re#13566 <https://github.com/mantidproject/mantid/issues/13566>`_ and
 `Re#14071 <https://github.com/mantidproject/mantid/issues/14071>`_,

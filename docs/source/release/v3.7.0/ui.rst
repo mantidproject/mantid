@@ -17,6 +17,22 @@ OS X
 User Interface
 --------------
 
+Plotting Improvements
+#####################
+
+Line plots
+^^^^^^^^^^
+.. figure::  ../../images/R37AllErrorBars.png
+   :width: 500
+   :align: right
+
+- The default for plotting line plots has been changed to include plotting error bars on every data point.
+  This in general makes more sense than the previous approach of missing some points based on the data density.
+- However it can make dense data plots with errors look more obscured, so if you preferred the old approach you can change it back by unselecting the option Draw All Errors in the View->Prefences menu.
+
+.. figure::  ../../images/R37PlotAllErrorsOption.png
+   :align: center
+
 Instrument View
 ###############
 
@@ -74,14 +90,15 @@ Instrument View
         # put back the facility
         ConfigService.setFacility(facility)
 
-Plotting Improvements
-#####################
 
 Algorithm Toolbox
 #################
 
 Scripting Window
 ################
+
+- If `MantidPlot` was launched with the `-x` option but the script was already opened by the recent files list then
+  the wrong script would be executed. This bug has been fixed. `#15682 <https://github.com/mantidproject/mantid/issue/15682>`_
 
 Documentation
 #############
@@ -98,6 +115,16 @@ Bugs Resolved
 -  VSI: Fix Mantid crash when pressing :ref:`Scale <algm-Scale>` or Cut when "builtin" node
    is selected in Pipeline Browser
 
+-  VSI: The TECHNIQUE-DEPENDENT initial view now checks for Spectroscopy before Neutron Diffraction.
+
+-  A bug was fixed in the Fit property browser where the "Plot Difference" and other checkboxes affected the display of parameter errors. Now only the "Show Parameter Errors" box will control this.
+
+-  Plots from tables: the axis labels correspond to the data plotted and not just the first two columns.
+
+-  Plots from tables: the title of the plot is the title of the TableWorkspace rather than the default "Table" (this is useful when several tables and plots are open)
+
+-  Plots from tables auto-update when the TableWorkspace is replaced in the ADS. If extra rows are added then the new points are added to the graph.
+
 SliceViewer Improvements
 ------------------------
 
@@ -107,6 +134,22 @@ SliceViewer Improvements
 
 .. figure::  ../../images/Elliptical_peaks_slice_viewer.png
    :align: center
+
+VSI Improvements
+----------------
+
+-  The representation of points in the splatter plot was changed from opaque cubes to translucent spheres.
+
+.. figure::  ../../images/VSIPointGaussianRepresentation.png
+   :align: center
+
+- The sphere and ellipse wireframes have been simplified so that it is easier to see the enclosed points.
+
+.. figure:: ../../images/VSIEllipses.png
+    :align: center
+
+- Removed the error-prone right-click option to view peaks workspaces in the VSI. One should load a MDWorkspace,
+  then drag the corresponding peaks workspace into the VSI window.
 
 |
 
