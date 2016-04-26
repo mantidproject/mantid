@@ -3,13 +3,14 @@
 
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 
 namespace Mantid {
 namespace Algorithms {
 
 /**
-  ImggTomographicReconstruction: reconstruct volumes from 2D
-  projections using tomographic reconstruction methods.
+  ImggTomographicReconstruction: reconstruct volumes from a sequence
+  of 2D projections using tomographic reconstruction methods.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -50,6 +51,24 @@ private:
 
   std::map<std::string, std::string> validateInputs() override;
 
+  std::unique_ptr<std::vector<float>>
+  prepareProjectionAngles(API::WorkspaceGroup_const_sptr wks, double minAngle,
+                          double maxAngle) const;
+
+  std::unique_ptr<std::vector<float>>
+  prepareInputData(size_t totalSize, API::WorkspaceGroup_sptr wsg);
+
+  std::unique_ptr<std::vector<float>> prepareDataVol(size_t totalSize);
+
+  std::unique_ptr<std::vector<float>> prepareCenters(int cor, size_t totalSize);
+
+  size_t xSizeProjections(API::WorkspaceGroup_const_sptr wks) const;
+
+  size_t pSizeProjections(API::WorkspaceGroup_const_sptr wks) const;
+
+  size_t ySizeProjections(API::WorkspaceGroup_const_sptr wks) const;
+
+  API::WorkspaceGroup_sptr buildOutputWks();
 };
 
 } // namespace Algorithms
