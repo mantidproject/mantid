@@ -564,7 +564,7 @@ class MantidConfigDirectInelastic(object):
         file_time = time.mktime(start_date.timetuple())
         os.utime(output_file, (file_time, file_time))
 
-    def _get_file_attributes(self, file_node):
+    def _get_file_attributes(self, file_node,cycle=None):
         """processes xml file_node to retrieve file attributes to copy """
 
         source_file = file_node.getAttribute("file_name")
@@ -577,7 +577,7 @@ class MantidConfigDirectInelastic(object):
         else:
             if "$" in target_file:
                 target_file = self._user.replace_variables(target_file)
-        full_source, full_target = self._fullpath_to_copy(source_file, target_file)
+        full_source, full_target = self._fullpath_to_copy(source_file, target_file,cycle)
 
         return (full_source, full_target)
 
@@ -633,7 +633,7 @@ class MantidConfigDirectInelastic(object):
         # go through all files in the description and define file copying operations
         for file_node in files_to_copy:
             # retrieve file attributes or its default values if the attributes are missing
-            input_file, output_file = self._get_file_attributes(file_node)
+            input_file, output_file = self._get_file_attributes(file_node,cycle_id)
             if input_file is None:
                 continue
 
