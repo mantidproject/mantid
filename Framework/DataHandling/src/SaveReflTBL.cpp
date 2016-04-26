@@ -41,10 +41,10 @@ void SaveReflTBL::findGroups(ITableWorkspace_sptr ws) {
   size_t rowCount = ws->rowCount();
   for (size_t i = 0; i < rowCount; ++i) {
     TableRow row = ws->getRow(i);
-    if (row.cell<int>(7) != 0) {
+    if (row.cell<int>(row.size() - 2) != 0) {
       // it was part of a group
-      m_stichgroups[row.cell<int>(7)].push_back(i);
-      if (m_stichgroups[row.cell<int>(7)].size() > 3) {
+      m_stichgroups[row.cell<int>(row.size() - 2)].push_back(i);
+      if (m_stichgroups[row.cell<int>(row.size() - 2)].size() > 3) {
         std::string message = "Cannot save a table with stitch groups that are "
                               "larger than three runs to Reflectometry .tbl "
                               "format.";
@@ -65,55 +65,33 @@ void SaveReflTBL::exec() {
   ITableWorkspace_sptr ws = getProperty("InputWorkspace");
 
   findGroups(ws);
-
   std::string filename = getProperty("Filename");
   std::ofstream file(filename.c_str());
 
   if (!file) {
     throw Exception::FileError("Unable to create file: ", filename);
   }
-
-  for (auto &stichgroup : m_stichgroups) {
-    std::vector<size_t> &rowNos = stichgroup.second;
-    size_t i = 0;
-    for (; i < rowNos.size(); ++i) {
-      // for each row in the group print the first 5 columns to file
-      TableRow row = ws->getRow(rowNos[i]);
-      for (int j = 0; j < 5; ++j) {
-        writeVal(row.cell<std::string>(j), file);
-      }
-    }
-    // if i comes out of that loop as less than 3, then we need to add the blank
-    // runs
-    for (; i < 3; ++i) {
-      for (int j = 0; j < 5; ++j) {
-        file << m_sep;
-      }
-    }
-    // now add dq/q and scale from the first row in the group
-    TableRow row = ws->getRow(rowNos[0]);
-    writeVal(row.cell<std::string>(5), file);
-    std::string scaleStr =
-        boost::lexical_cast<std::string>(row.cell<double>(6));
-    writeVal(scaleStr, file, false, true);
+  std::vector<std::string> columnHeadings = ws->getColumnNames();
+  for (auto &heading : columnHeadings) {
+    if (heading == "Options")
+      writeVal<std::string>(heading, file, false, true);
+    else
+      writeVal<std::string>(heading, file);
   }
+  for (auto rowIndex = 0; rowIndex < ws->rowCount(); ++rowIndex) {
+    TableRow row = ws->getRow(rowIndex);
+    for (size_t columnIndex = 0; columnIndex < columnHeadings.size();
+         columnIndex++) {
+      if (columnIndex == columnHeadings.size() - 2)
+        writeVal<int>(row.cell<int>(columnIndex), file);
+      else if (columnIndex == columnHeadings.size() - 1)
+        writeVal<std::string>(row.cell<std::string>(columnIndex), file, false,
+                              true);
+      else
+        writeVal<std::string>(row.cell<std::string>(columnIndex), file);
 
-  // now do the same for the ungrouped
-
-  for (auto &iterator : m_nogroup) {
-    TableRow row = ws->getRow(iterator);
-    for (int j = 0; j < 5; ++j) {
-      writeVal(row.cell<std::string>(j), file);
-    }
-    for (int k = 0; k < 10; ++k) {
-      file << m_sep;
-    }
-    // now add dq/q and scale
-    writeVal(row.cell<std::string>(5), file);
-    std::string scaleStr =
-        boost::lexical_cast<std::string>(row.cell<double>(6));
-    writeVal(scaleStr, file, false, true);
-  }
+    } // col for loop
+  }   // row for loop
   file.close();
 }
 
@@ -125,13 +103,15 @@ void SaveReflTBL::exec() {
 * @param endsep : boolean true to include a comma after the data
 * @param endline : boolean true to put an EOL at the end of this data value
 */
-void SaveReflTBL::writeVal(std::string &val, std::ofstream &file, bool endsep,
+template <class T>
+void SaveReflTBL::writeVal(T &val, std::ofstream &file, bool endsep,
                            bool endline) {
-  size_t comPos = val.find(',');
+  std::string valStr = boost::lexical_cast<std::string>(val);
+  size_t comPos = valStr.find(',');
   if (comPos != std::string::npos) {
     file << '"' << val << '"';
   } else {
-    file << val;
+    file << boost::lexical_cast<T>(val);
   }
   if (endsep) {
     file << m_sep;

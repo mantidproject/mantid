@@ -60,7 +60,8 @@ private:
   /// Overwrites Algorithm method
   void exec() override;
   /// Writes a value to the file
-  void writeVal(std::string &val, std::ofstream &file, bool endsep = true,
+  template <class T>
+  void writeVal(T &val, std::ofstream &file, bool endsep = true,
                 bool endline = false);
   /// the separator
   const char m_sep;
