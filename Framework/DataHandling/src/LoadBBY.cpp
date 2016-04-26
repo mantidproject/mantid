@@ -204,7 +204,8 @@ void LoadBBY::exec() {
   if (instrumentInfo.is_tof)
     eventWS->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
   else
-    eventWS->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("Wavelength");
+    eventWS->getAxis(0)->unit() =
+        Kernel::UnitFactory::Instance().create("Wavelength");
 
   eventWS->setYUnit("Counts");
 
@@ -267,18 +268,18 @@ void LoadBBY::exec() {
 
   if (instrumentInfo.is_tof) {
     ANSTO::EventAssigner eventAssigner(
-      roi, HISTO_BINS_Y, period, shift, tofMinBoundary, tofMaxBoundary,
-      timeMinBoundary, timeMaxBoundary, eventVectors);
+        roi, HISTO_BINS_Y, period, shift, tofMinBoundary, tofMaxBoundary,
+        timeMinBoundary, timeMaxBoundary, eventVectors);
 
     loadEvents(prog, "loading neutron events (TOF)", tarFile, eventAssigner);
-  }
-  else {
+  } else {
     ANSTO::EventAssignerFixedWavelength eventAssigner(
-      roi, HISTO_BINS_Y, instrumentInfo.wavelength, period, shift,
-      tofMinBoundary, tofMaxBoundary, timeMinBoundary, timeMaxBoundary,
-      eventVectors);
+        roi, HISTO_BINS_Y, instrumentInfo.wavelength, period, shift,
+        tofMinBoundary, tofMaxBoundary, timeMinBoundary, timeMaxBoundary,
+        eventVectors);
 
-    loadEvents(prog, "loading neutron events (Wavelength)", tarFile, eventAssigner);
+    loadEvents(prog, "loading neutron events (Wavelength)", tarFile,
+               eventAssigner);
   }
 
   Kernel::cow_ptr<MantidVec> axis;
@@ -289,8 +290,7 @@ void LoadBBY::exec() {
         0.0,
         floor(eventCounter.tofMin())); // just to make sure the bins hold it all
     xRef[1] = eventCounter.tofMax() + 1;
-  }
-  else {
+  } else {
     // +/-10%
     xRef[0] = instrumentInfo.wavelength * 0.9;
     xRef[1] = instrumentInfo.wavelength * 1.1;
@@ -498,9 +498,11 @@ void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
       if (loadNXDataSet(entry, "instrument/nvs067/lambda", tmp_float))
         instrumentInfo.wavelength = tmp_float;
 
-      if (loadNXDataSet(entry, "instrument/master_chopper_freq", tmp_float) && (tmp_float > 0.0f))
+      if (loadNXDataSet(entry, "instrument/master_chopper_freq", tmp_float) &&
+          (tmp_float > 0.0f))
         instrumentInfo.period_master = 1.0 / tmp_float * 1.0e6;
-      if (loadNXDataSet(entry, "instrument/t0_chopper_freq", tmp_float) && (tmp_float > 0.0f))
+      if (loadNXDataSet(entry, "instrument/t0_chopper_freq", tmp_float) &&
+          (tmp_float > 0.0f))
         instrumentInfo.period_slave = 1.0 / tmp_float * 1.0e6;
       if (loadNXDataSet(entry, "instrument/t0_chopper_phase", tmp_float))
         instrumentInfo.phase_slave = tmp_float < 999.0 ? tmp_float : 0.0;
@@ -623,8 +625,7 @@ bool LoadBBY::loadNXString(NeXus::NXEntry &entry, const std::string &path,
 
     value = std::string(dataSet(), dataSet.dim0());
     return true;
-  }
-  catch (std::runtime_error &) {
+  } catch (std::runtime_error &) {
     return false;
   }
 }

@@ -133,10 +133,13 @@ protected:
 
 public:
   // construction
-  EventAssignerFixedWavelength(const std::vector<bool> &roi, const size_t stride,
-                               const double wavelength, const double period, const double phase,
-                               const double tofMinBoundary, const double tofMaxBoundary,
-                               const double timeMinBoundary, const double timeMaxBoundary,
+  EventAssignerFixedWavelength(const std::vector<bool> &roi,
+                               const size_t stride, const double wavelength,
+                               const double period, const double phase,
+                               const double tofMinBoundary,
+                               const double tofMaxBoundary,
+                               const double timeMinBoundary,
+                               const double timeMaxBoundary,
                                std::vector<EventVector_pt> &eventVectors);
 };
 

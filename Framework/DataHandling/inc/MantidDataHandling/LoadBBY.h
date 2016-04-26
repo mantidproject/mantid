@@ -49,7 +49,7 @@ class DLLExport LoadBBY : public API::IFileLoader<Kernel::FileDescriptor> {
     //
     int32_t bm_counts;
     int32_t att_pos;
-    bool is_tof;        // tof or wavelength data
+    bool is_tof; // tof or wavelength data
     double wavelength;
     //
     double period_master;

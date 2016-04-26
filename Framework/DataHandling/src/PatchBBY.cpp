@@ -32,7 +32,7 @@ static char const *const INTERNAL = "INTERNAL";
 static PropertyInfo PatchableProperties[] = {
     {"Calibration", "Bm1Counts", TYPE_INT},
     {"Calibration", "AttPos", TYPE_DBL},
-  
+
     {"Velocity Selector and Choppers", "MasterChopperFreq", TYPE_DBL},
     {"Velocity Selector and Choppers", "T0ChopperFreq", TYPE_DBL},
     {"Velocity Selector and Choppers", "T0ChopperPhase", TYPE_DBL},
@@ -67,15 +67,15 @@ bool loadNXDataSet(NeXus::NXEntry &entry, const std::string &path, T &value) {
     return false;
   }
 }
-bool loadNXString(NeXus::NXEntry &entry, const std::string &path, std::string &value) {
+bool loadNXString(NeXus::NXEntry &entry, const std::string &path,
+                  std::string &value) {
   try {
     NeXus::NXChar buffer = entry.openNXChar(path);
     buffer.load();
 
     value = std::string(buffer(), buffer.dim0());
     return true;
-  }
-  catch (std::runtime_error &) {
+  } catch (std::runtime_error &) {
     return false;
   }
 }
@@ -119,11 +119,12 @@ void PatchBBY::init() {
         keys.emplace_back("");
         keys.emplace_back(EXTERNAL);
         keys.emplace_back(INTERNAL);
-        declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(
-                            itr->Name, "",
-                            boost::make_shared<Kernel::ListValidator<std::string>>(keys),
-                            Kernel::Direction::Input),
-                        "Optional");
+        declareProperty(
+            Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(
+                itr->Name, "",
+                boost::make_shared<Kernel::ListValidator<std::string>>(keys),
+                Kernel::Direction::Input),
+            "Optional");
       }
       break;
     }
@@ -207,7 +208,8 @@ void PatchBBY::exec() {
 
     case TYPE_STR:
       if (std::strcmp(itr->Name, "FrameSource") != 0)
-        throw std::invalid_argument(std::string("not implemented: ") + itr->Name);
+        throw std::invalid_argument(std::string("not implemented: ") +
+                                    itr->Name);
 
       tmp_str = property_value;
       if (!tmp_str.empty()) {
@@ -261,13 +263,14 @@ void PatchBBY::exec() {
           logContentNewBuffer << "Wavelength = " << tmp_float << std::endl;
 
         if (loadNXDataSet(entry, "instrument/master_chopper_freq", tmp_float))
-          logContentNewBuffer << "MasterChopperFreq = " << tmp_float << std::endl;
+          logContentNewBuffer << "MasterChopperFreq = " << tmp_float
+                              << std::endl;
         if (loadNXDataSet(entry, "instrument/t0_chopper_freq", tmp_float))
           logContentNewBuffer << "T0ChopperFreq = " << tmp_float << std::endl;
         if (loadNXDataSet(entry, "instrument/t0_chopper_phase", tmp_float))
-          logContentNewBuffer << "T0ChopperPhase = "
-                              << (tmp_float < 999.0 ? tmp_float : 0.0)
-                              << std::endl;
+          logContentNewBuffer
+              << "T0ChopperPhase = " << (tmp_float < 999.0 ? tmp_float : 0.0)
+              << std::endl;
 
         if (loadNXDataSet(entry, "instrument/L1", tmp_float))
           logContentNewBuffer << "L1 = " << tmp_float << std::endl;
