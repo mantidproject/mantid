@@ -30,12 +30,6 @@ call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" amd64
 set CM_GENERATOR=Visual Studio 14 2015 Win64
 set PARAVIEW_DIR=%PARAVIEW_NEXT_DIR%
 
-:: While we transition between VS 2012 & 2015 we need to be able to clean the build directory
-:: if the previous build was not with the same compiler
-for /f "delims=" %%I in ('where git') do @set GIT_EXE_DIR=%%~dpI
-set GIT_ROOT_DIR=%GIT_EXE_DIR:~0,-4%
-set GREP_EXE=%GIT_ROOT_DIR%bin\grep.exe
-
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Set up the location for local object store outside of the build and source
 :: tree, which can be shared by multiple builds.
@@ -64,6 +58,10 @@ if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
   ) else (
     set BUILDPKG=no
   )
+)
+:: Never want package for debug builds
+if not "%JOB_NAME%" == "%JOB_NAME:debug=%" (
+  set BUILDPKG=no
 )
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -131,7 +129,13 @@ if not "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-call cmake.exe -G "%CM_GENERATOR%" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_DOCS% ..
+:: Note the exception: Vates disabled in Debug mode for now.
+if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
+  set VATES_OPT_VAL=OFF
+) else (
+  set VATES_OPT_VAL=ON
+)
+call cmake.exe -G "%CM_GENERATOR%" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_DOCS% ..
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -152,6 +156,15 @@ call ctest.exe -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Run docs-tests if in the special Debug builds
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+echo Note: not running doc-test target as it currently takes too long
+:: if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
+::   call cmake.exe --build . --target StandardTestData
+::   call cmake.exe --build . --target docs-test
+:: )
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the install kit if required
 :: Disabled while it takes 10 minutes to create & 5-10 mins to archive!
 :: Just create the docs to check they work
@@ -166,4 +179,3 @@ if "%BUILDPKG%" == "yes" (
   echo Building package
   cpack.exe -C %BUILD_CONFIG% --config CPackConfig.cmake
 )
-

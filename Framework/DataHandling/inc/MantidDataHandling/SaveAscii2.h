@@ -78,6 +78,9 @@ private:
   void populateSpectrumNumberMetaData();
   void populateAngleMetaData();
   void populateAllMetaData();
+  bool
+  findElementInUnorderedStringVector(const std::vector<std::string> &vector,
+                                     const std::string &toFind);
 
   /// Map the separator options to their string equivalents
   std::map<std::string, std::string> m_separatorIndex;

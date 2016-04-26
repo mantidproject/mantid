@@ -178,7 +178,7 @@ Geometry::ParameterMap &ExperimentInfo::instrumentParameters() {
 *    @return a const reference to the instrument ParameterMap.
 */
 const Geometry::ParameterMap &ExperimentInfo::instrumentParameters() const {
-  return *m_parmap.get();
+  return *m_parmap;
 }
 
 //---------------------------------------------------------------------------------------

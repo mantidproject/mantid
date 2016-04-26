@@ -72,7 +72,7 @@ this method is public and takes a std::string as argument. The reason is that
 this method is intended to be called by the presenter
 @param name : the string name of the workspace to be grabbed
 */
-void QDataProcessorWidget::setModel(std::string name) {
+void QDataProcessorWidget::setModel(const std::string &name) {
   m_toOpen = name;
   m_presenter->notify(DataProcessorPresenter::OpenTableFlag);
 }
@@ -362,7 +362,7 @@ QDataProcessorWidget::askUserString(const std::string &prompt,
                                     const std::string &defaultValue) {
   bool ok;
   QString text = QInputDialog::getText(
-      QString::fromStdString(title), QString::fromStdString(prompt),
+      this, QString::fromStdString(title), QString::fromStdString(prompt),
       QLineEdit::Normal, QString::fromStdString(defaultValue), &ok);
   if (ok)
     return text.toStdString();

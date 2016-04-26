@@ -7,6 +7,14 @@
 namespace Mantid {
 namespace API {
 
+/// Constructor.
+/// @param n :: A number of values to store.
+FunctionValues::FunctionValues(size_t n) {
+  if (n > 0) {
+    m_calculated.resize(n);
+  }
+}
+
 /**
  * Constructs a set of output values based on the given domain.
  * @param domain :: A reference to the domain over which the function is

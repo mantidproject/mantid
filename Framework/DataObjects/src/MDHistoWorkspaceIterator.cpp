@@ -570,7 +570,7 @@ std::vector<int64_t> MDHistoWorkspaceIterator::createPermutations(
     if (widths[0] % 2 == 0) {
       throw std::invalid_argument("MDHistoWorkspaceIterator::"
                                   "findNeighbourIndexesByWidth, width must "
-                                  "always be an even number");
+                                  "always be an odd number");
     }
     if (widths.size() != m_nd) {
       throw std::invalid_argument("MDHistoWorkspaceIterator::"
@@ -676,6 +676,59 @@ std::vector<size_t> MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(
       std::unique(neighbourIndexes.begin(), neighbourIndexes.end()),
       neighbourIndexes.end());
   return neighbourIndexes;
+}
+
+/**
+ * Find vertex-touching neighbours. This function always returns a vector of
+ * indexes which has a size equal to the product of the widths. This is
+ * because it also returns a vector of bools (of the same size) which
+ * records the validity of each index, rather than removing invalid indexes
+ * from the list. This function only allows a width vector to have one
+ * non-singleton dimension.
+ * NB, the index of the central pixel is included in the output array.
+ * @param width : Width in the non-singleton dimension
+ * @param width_dimension : The non-singleton dimension of the widths vector
+ * @return collection of indexes.
+ */
+std::pair<std::vector<size_t>, std::vector<bool>>
+MDHistoWorkspaceIterator::findNeighbourIndexesByWidth1D(
+    const int &width, const int &width_dimension) const {
+
+  std::vector<int> widths;
+  for (size_t dimension = 0; dimension < m_nd; ++dimension) {
+    if (static_cast<int>(dimension) == width_dimension) {
+      widths.push_back(width);
+    } else {
+      widths.push_back(1);
+    }
+  }
+
+  // Find existing or create required index permutations.
+  std::vector<int64_t> permutationsVertexTouching = createPermutations(widths);
+
+  std::vector<bool> indexValidity(permutationsVertexTouching.size(), false);
+
+  Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker,
+                                                  m_indexMax, m_index);
+
+  std::sort(permutationsVertexTouching.begin(),
+            permutationsVertexTouching.end());
+
+  // Accumulate neighbour indexes.
+  // Record indexes as valid only if they are actually neighbours.
+  std::vector<size_t> neighbourIndexes(permutationsVertexTouching.size());
+  for (size_t i = 0; i < permutationsVertexTouching.size(); ++i) {
+
+    size_t neighbour_index = m_pos + permutationsVertexTouching[i];
+    neighbourIndexes[i] = neighbour_index;
+    if (neighbour_index < m_ws->getNPoints() &&
+        Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
+                                    m_indexMaker, m_indexMax, widths)) {
+      indexValidity[i] = true;
+    }
+  }
+
+  return std::make_pair(neighbourIndexes, indexValidity);
 }
 
 /**

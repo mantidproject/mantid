@@ -79,7 +79,7 @@ public:
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) = 0;
   virtual void setClipboard(const std::string &text) = 0;
-  virtual void setModel(std::string name) = 0;
+  virtual void setModel(const std::string &name) = 0;
   virtual void
   addHintingLineEdit(const std::string &title, const std::string &name,
                      const std::map<std::string, std::string> &hints) = 0;

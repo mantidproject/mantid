@@ -14,7 +14,7 @@ Converts X-axis units of the given workspace or group of workspaces from time-of
 
 :math:`\Delta E = \frac{1}{2} C m_n L^2\cdot\left(\frac{1}{t_{el}^2} - \frac{1}{t^2}\right)`
 
-where :math:`L` is the sample-detector distance, :math:`m_n` is the neutron mass, :math:`t_{el}` is the time-of-flight corresponding to the elastic peak, :math:`t` is the time-of-flight corresponding to the bin boundaries of the X data in the input workspace. Coefficient :math:`C` is related to the unit conversion and calculated as
+where :math:`L` is the source-detector distance, :math:`m_n` is the neutron mass, :math:`t_{el}` is the time-of-flight corresponding to the elastic peak, :math:`t` is the time-of-flight corresponding to the bin boundaries of the X data in the input workspace. Coefficient :math:`C` is related to the unit conversion and calculated as
 
 :math:`C = \frac{10^{12}\cdot 10^3}{1.6\cdot 10^{-19}}`
 
@@ -64,8 +64,8 @@ Usage
 
     # create workspace with appropriate sample logs
     ws_tof = CreateSampleWorkspace(Function="User Defined", UserDefinedFunction="name=LinearBackground, \
-                A0=0.3;name=Gaussian, PeakCentre=6000, Height=5, Sigma=75", NumBanks=2, BankPixelWidth=1,
-                XMin=4005.75, XMax=7995.75, BinWidth=10.5, BankDistanceFromSample=4.0)
+                A0=0.3;name=Gaussian, PeakCentre=8000, Height=5, Sigma=75", NumBanks=2, BankPixelWidth=1,
+                XMin=6005.75, XMax=9995.75, BinWidth=10.5, BankDistanceFromSample=4.0, SourceDistanceFromSample=1.4)
 
     lognames="channel_width,chopper_ratio,chopper_speed,Ei,wavelength,EPP"
     logvalues="10.5,5,14000,2.27,6,190.0"
@@ -84,8 +84,8 @@ Output:
 
     Unit of X-axis before conversion:  TOF
     Unit of X-axis after conversion:  DeltaE
-    First 5 X values before conversion:  [ 4005.75  4016.25  4026.75  4037.25  4047.75]
-    First 5 X values after conversion:  [-2.89 -2.86 -2.84 -2.81 -2.78]
+    First 5 X values before conversion:  [ 6005.75  6016.25  6026.75  6037.25  6047.75]
+    First 5 X values after conversion:  [-1.84 -1.83 -1.82 -1.8  -1.79]
 
 
 **Example 2: Convert using the FitSample option.**
@@ -96,8 +96,8 @@ Output:
 
     # create workspace with appropriate sample logs
     ws_tof = CreateSampleWorkspace(Function="User Defined", UserDefinedFunction="name=LinearBackground, \
-                A0=0.3;name=Gaussian, PeakCentre=6000, Height=5, Sigma=75", NumBanks=2, BankPixelWidth=1,
-                XMin=4005.75, XMax=7995.75, BinWidth=10.5, BankDistanceFromSample=4.0)
+                A0=0.3;name=Gaussian, PeakCentre=8000, Height=5, Sigma=75", NumBanks=2, BankPixelWidth=1,
+                XMin=6005.75, XMax=9995.75, BinWidth=10.5, BankDistanceFromSample=4.0, SourceDistanceFromSample=1.4)
 
     lognames="channel_width,chopper_ratio,chopper_speed,Ei,wavelength,EPP"
     logvalues="10.5,5,14000,2.27,6,190.0"
@@ -116,8 +116,8 @@ Output:
 
     Unit of X-axis before conversion:  TOF
     Unit of X-axis after conversion:  DeltaE
-    First 5 X values before conversion:  [ 4005.75  4016.25  4026.75  4037.25  4047.75]
-    First 5 X values after conversion:  [-2.89 -2.87 -2.84 -2.81 -2.79]
+    First 5 X values before conversion:  [ 6005.75  6016.25  6026.75  6037.25  6047.75]
+    First 5 X values after conversion:  [-1.85 -1.83 -1.82 -1.8  -1.79]
 
 .. categories::
 
