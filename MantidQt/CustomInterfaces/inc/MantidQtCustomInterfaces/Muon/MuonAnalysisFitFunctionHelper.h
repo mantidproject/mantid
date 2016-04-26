@@ -37,7 +37,17 @@ namespace CustomInterfaces {
 class MANTIDQT_CUSTOMINTERFACES_DLL MuonAnalysisFitFunctionHelper : QObject {
   Q_OBJECT
 public:
+  /// Constructor
+  MuonAnalysisFitFunctionHelper(
+      QObject *parent,
+      MantidQt::MantidWidgets::IMuonFitFunctionControl *fitBrowser);
+public slots:
+  /// Update function and pass to fit property browser
+  void updateFunction(bool sequential);
+
 private:
+  /// Connect signals and slots
+  void doConnect();
   /// Non-owning pointer to muon fit property browser
   MantidQt::MantidWidgets::IMuonFitFunctionControl *m_fitBrowser;
 };
