@@ -198,7 +198,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
     _output_ws_name = None
     _sample_runs = None
     _vanadium_runs = None
-    _container_file = None
+    _container_files = None
     _container_scale_factor = None
     _sam_ws_map = None
     _van_ws_map = None
@@ -227,8 +227,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self.declareProperty(StringArrayProperty('Vanadium'),
                              doc=runs_desc)
 
-        self.declareProperty('Container', '',
-                             doc='Run for the container')
+        self.declareProperty(StringArrayProperty('Container'),
+                             doc=runs_desc)
 
         self.declareProperty('ContainerScaleFactor', 1.0,
                              doc='Factor by which to scale the container')
@@ -271,11 +271,11 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self._sample_runs = self._find_runs(self.getProperty("Sample").value)
         self._vanadium_runs = self._find_runs(self.getProperty("Vanadium").value)
 
-        self._container_file = self.getPropertyValue("Container")
+        self._container_files = self.getProperty("Container").value
         self._container_scale_factor = self.getProperty("ContainerScaleFactor").value
 
-        if self._container_file != '':
-            self._container_file = self._find_runs([self._container_file])[0]
+        if self._container_files:
+            self._container_files = self._find_runs(self._container_files)
 
         self._spec_min = self.getPropertyValue("SpectraMin")
         self._spec_max = self.getPropertyValue("SpectraMax")
@@ -301,36 +301,38 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                  LoadLogFiles=self._load_logs)
 
         # Load the container run
-        if self._container_file != '':
-            container = Load(Filename=self._container_file,
-                             OutputWorkspace='__container',
-                             SpectrumMin=self._spec_min,
-                             SpectrumMax=self._spec_max,
-                             LoadLogFiles=self._load_logs)
+        if self._container_files:
+            for container in self._container_files:
+                Load(Filename=container,
+                     OutputWorkspace=container,
+                     SpectrumMin=self._spec_min,
+                     SpectrumMax=self._spec_max,
+                     LoadLogFiles=self._load_logs)
 
-            # Scale the container run if required
-            if self._container_scale_factor != 1.0:
-                Scale(InputWorkspace=container,
-                      OutputWorkspace=container,
-                      Factor=self._container_scale_factor,
-                      Operation='Multiply')
+                # Scale the container run if required
+                if self._container_scale_factor != 1.0:
+                    Scale(InputWorkspace=container,
+                          OutputWorkspace=container,
+                          Factor=self._container_scale_factor,
+                          Operation='Multiply')
 
         # Add the sample workspaces to the dRange to sample map
-        for sam in self._sample_runs:
-            if self._container_file != '':
-                Minus(LHSWorkspace=sam,
-                      RHSWorkspace=container,
-                      OutputWorkspace=sam)
+        for idx in range(len(self._sample_runs)):
+            if self._container_files:
+                Minus(LHSWorkspace=self._sample_runs[idx],
+                      RHSWorkspace=self._container_files[idx],
+                      OutputWorkspace=self._sample_runs[idx])
 
-            self._sam_ws_map.addWs(sam)
+            self._sam_ws_map.addWs(self._sample_runs[idx])
 
         # Add the vanadium workspaces to the dRange to vanadium map
         for van in self._vanadium_runs:
             self._van_ws_map.addWs(van)
 
         # Finished with container now so delete it
-        if self._container_file != '':
-            DeleteWorkspace(container)
+        if self._container_files:
+            for container in self._container_files:
+                DeleteWorkspace(container)
 
         # Check to make sure that there are corresponding vanadium files with the same DRange for each sample file.
         for d_range in self._sam_ws_map.getMap().iterkeys():
