@@ -110,7 +110,7 @@ public:
   /// Update the function parameter error
   void setParamError(const QString& funcIndex, const QString& paramName, double error);
   /// Get a value of a parameter
-  double getParameter(const QString& funcIndex, const QString& paramName) const;
+  double getParameter(const QString& funcIndex, const QString& paramName) const override;
   /// Update the function parameter value
   void setParameter(const QString& paramName, double value);
   /// Update the function parameter error
@@ -154,7 +154,8 @@ signals:
   /// Function parameter gets changed
   /// @param funcIndex :: Index of the changed function
   /// @param paramName :: Name of the changed parameter
-  void parameterChanged(const QString& funcIndex, const QString& paramName);
+  void parameterChanged(const QString &funcIndex,
+                        const QString &paramName) override;
 
   /// In multi-dataset context a button value editor was clicked
   void localParameterButtonClicked(const QString& parName);

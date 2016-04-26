@@ -22,6 +22,8 @@ public:
   QString getFunctionString() override { return QString("Test function"); }
   MOCK_METHOD0(functionStructureChanged, void());
   MOCK_METHOD1(updateParameters, void(const Mantid::API::IFunction &));
+  MOCK_METHOD2(parameterChanged, void(const QString &, const QString &));
+  MOCK_CONST_METHOD2(getParameter, double(const QString &, const QString &));
 };
 
 // Mock muon fit property browser
@@ -33,6 +35,8 @@ public:
   MOCK_METHOD0(functionUpdateRequested, void());
   MOCK_METHOD1(functionUpdateAndFitRequested, void(bool));
   MOCK_CONST_METHOD0(getFunction, Mantid::API::IFunction_sptr());
+  MOCK_METHOD3(setParameterValue,
+               void(const QString &, const QString &, double));
 };
 
 class MuonAnalysisFitFunctionHelperTest : public CxxTest::TestSuite {
@@ -98,6 +102,18 @@ public:
     EXPECT_CALL(*m_funcBrowser, updateParameters(testing::Ref(*function)))
         .Times(1);
     m_helper->handleFitFinished("unused argument");
+  }
+
+  void test_handleParameterEdited() {
+    const double paramValue = 12.345;
+    const QString funcIndex = "f0", paramName = "A0";
+    ON_CALL(*m_funcBrowser, getParameter(funcIndex, paramName))
+        .WillByDefault(Return(paramValue));
+    EXPECT_CALL(*m_funcBrowser, getParameter(funcIndex, paramName)).Times(1);
+    EXPECT_CALL(*m_fitBrowser,
+                setParameterValue(funcIndex, paramName, paramValue))
+        .Times(1);
+    m_helper->handleParameterEdited(funcIndex, paramName);
   }
 
 private:

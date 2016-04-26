@@ -50,6 +50,9 @@ public slots:
   void updateFunctionAndFit(bool sequential);
   /// When fit finished, update parameters in function browser
   void handleFitFinished(const QString &wsName);
+  /// When parameter edited in function browser, update in fit property browser
+  void handleParameterEdited(const QString &funcIndex,
+                             const QString &paramName);
 
 private:
   /// Connect signals and slots

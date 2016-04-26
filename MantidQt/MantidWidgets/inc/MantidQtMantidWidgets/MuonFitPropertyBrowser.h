@@ -59,6 +59,9 @@ public:
   Mantid::API::IFunction_sptr getFunction() const override {
     return getFittingFunction();
   }
+  /// Set parameter value externally
+  void setParameterValue(const QString &funcIndex, const QString &paramName,
+                         double value) override;
 
 public slots:
   /// Perform the fit algorithm

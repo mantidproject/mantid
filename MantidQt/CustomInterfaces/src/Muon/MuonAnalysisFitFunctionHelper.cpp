@@ -37,6 +37,9 @@ void MuonAnalysisFitFunctionHelper::doConnect() {
   if (const QObject *funcBrowser = dynamic_cast<QObject *>(m_funcBrowser)) {
     connect(funcBrowser, SIGNAL(functionStructureChanged()), this,
             SLOT(updateFunction()));
+    connect(funcBrowser,
+            SIGNAL(parameterChanged(const QString &, const QString &)), this,
+            SLOT(handleParameterEdited(const QString &, const QString &)));
   }
 }
 
@@ -73,6 +76,18 @@ void MuonAnalysisFitFunctionHelper::handleFitFinished(const QString &wsName) {
   Q_UNUSED(wsName)
   const auto function = m_fitBrowser->getFunction();
   m_funcBrowser->updateParameters(*function);
+}
+
+/**
+ * Called when user edits a parameter in the function browser.
+ * Updates the parameter value in the fit property browser.
+ * @param funcIndex :: [input] index of the function
+ * @param paramName :: [input] parameter name
+ */
+void MuonAnalysisFitFunctionHelper::handleParameterEdited(
+    const QString &funcIndex, const QString &paramName) {
+  const double value = m_funcBrowser->getParameter(funcIndex, paramName);
+  m_fitBrowser->setParameterValue(funcIndex, paramName, value);
 }
 
 } // namespace CustomInterfaces

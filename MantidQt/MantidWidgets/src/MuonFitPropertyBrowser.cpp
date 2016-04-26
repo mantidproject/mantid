@@ -380,5 +380,17 @@ void MuonFitPropertyBrowser::setFunction(const QString &funcString) {
   createCompositeFunction(funcString);
 }
 
+/**
+ * Called externally to set the value of a parameter
+ * @param funcIndex :: [input] Function index
+ * @param paramName :: [input] Name of parameter
+ * @param value :: [input] Value to set parameter to
+ */
+void MuonFitPropertyBrowser::setParameterValue(const QString &funcIndex,
+                                               const QString &paramName,
+                                               double value) {
+  throw std::runtime_error("TODO: implement setParameterValue");
+}
+
 } // MantidQt
 } // API
