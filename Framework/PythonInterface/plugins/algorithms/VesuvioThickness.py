@@ -78,7 +78,6 @@ class VesuvioThickness(PythonAlgorithm):
             issues['Masses'] = ('The number of masses: %d, ' % num_masses \
                                 + 'is not equal to the number of amplitudes: %d' % num_amplitudes)
 
-        logger.warning(str(issues))
         return issues
 
 
@@ -91,12 +90,14 @@ class VesuvioThickness(PythonAlgorithm):
         density_guesses_tbl_ws = create_tbl_alg.getProperty('OutputWorkspace').value
         density_guesses_tbl_ws.addColumn("str", "Iteration")
         density_guesses_tbl_ws.addColumn("double", "Density")
+        density_guesses_tbl_ws.setPlotType(0, 1)
 
         create_tbl_alg.setProperty('OutputWorkspace', 'transmission_guesses')
         create_tbl_alg.execute()
         trans_guesses_tbl_ws = create_tbl_alg.getProperty('OutputWorkspace').value
         trans_guesses_tbl_ws.addColumn("str","Iteration")
         trans_guesses_tbl_ws.addColumn("double","Transmission")
+        trans_guesses_tbl_ws.setPlotType(0, 1)
 
         # Unit conversions and scatter length calculation
         self._thickness /= 200.0
