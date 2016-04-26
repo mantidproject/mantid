@@ -51,8 +51,8 @@ class PearlPowderDiffractionScriptTest(stresstesting.MantidStressTest):
 
         # setting raw files directory
         raw_path = os.path.join(DIRS[0], "PEARL/RawFiles/")
-        current_directory = pearl_routines.pearl_set_currentdatadir(raw_path)
-        pearl_routines.PEARL_setdatadir(current_directory)
+        pearl_routines.pearl_set_currentdatadir(raw_path)
+        pearl_routines.PEARL_setdatadir(raw_path)
 
         # setting calibration files directory
         cali_path = os.path.join(DIRS[0], "PEARL/Calibration/")
@@ -93,7 +93,9 @@ class PearlPowderDiffractionScriptTest(stresstesting.MantidStressTest):
 
 
 # ======================================================================
+# pylint: disable = too-many-public-methods
 # work horse
+
 class LoadTests(unittest.TestCase):
     wsname = "__LoadTest"
     cleanup_names = []
