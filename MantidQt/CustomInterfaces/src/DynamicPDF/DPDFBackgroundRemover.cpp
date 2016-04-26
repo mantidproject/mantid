@@ -52,6 +52,11 @@ void BackgroundRemover::initLayout() {
   m_uiForm.setupUi(this);
   m_fitControl = m_uiForm.fitControl;
   m_fourierTransform = m_uiForm.fourier;
+  // Correct size for the vertical splitter
+  QList<int> sizes;
+  sizes.push_back(300);
+  sizes.push_back(200);
+  m_uiForm.splitterModelResiduals->setSizes(sizes);
   // user wants to load new slices
   connect(m_uiForm.pushButtonSummonSliceSelector, SIGNAL(clicked()), this,
     SLOT(summonSliceSelector()));
