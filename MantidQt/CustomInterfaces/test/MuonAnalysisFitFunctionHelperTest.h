@@ -17,6 +17,7 @@ using namespace testing;
 class MockFunctionBrowser : public IFunctionBrowser {
 public:
   QString getFunctionString() override { return QString("Test function"); }
+  MOCK_METHOD0(functionStructureChanged, void());
 };
 
 // Mock muon fit property browser

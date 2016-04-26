@@ -159,7 +159,7 @@ signals:
   /// In multi-dataset context a button value editor was clicked
   void localParameterButtonClicked(const QString& parName);
 
-  void functionStructureChanged();
+  void functionStructureChanged() override;
   void globalsChanged();
 
 public slots:

@@ -36,6 +36,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IFunctionBrowser {
 public:
   virtual ~IFunctionBrowser() {}
   virtual QString getFunctionString() = 0;
+  virtual void functionStructureChanged() = 0;
 };
 
 } // namespace MantidWidgets

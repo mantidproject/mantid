@@ -26,8 +26,14 @@ MuonAnalysisFitFunctionHelper::MuonAnalysisFitFunctionHelper(
  */
 void MuonAnalysisFitFunctionHelper::doConnect() {
   if (const QObject *fitBrowser = dynamic_cast<QObject *>(m_fitBrowser)) {
-    connect(fitBrowser, SIGNAL(functionUpdateRequested(bool)), this,
-            SLOT(updateFunction(bool)));
+    connect(fitBrowser, SIGNAL(functionUpdateRequested()), this,
+            SLOT(updateFunction()));
+    connect(fitBrowser, SIGNAL(functionUpdateAndFitRequested(bool)), this,
+            SLOT(updateFunctionAndFit(bool)));
+  }
+  if (const QObject *funcBrowser = dynamic_cast<QObject *>(m_funcBrowser)) {
+    connect(funcBrowser, SIGNAL(functionStructureChanged()), this,
+            SLOT(updateFunction()));
   }
 }
 
