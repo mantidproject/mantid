@@ -21,10 +21,10 @@ class VesuvioThickness(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty("Masses", "",
-                             doc="A String list of the masses that make up the sample")
+                             doc="A comma seperated list of the masses that make up the sample")
 
         self.declareProperty("Amplitudes", "",
-                             doc="A string list of the amplitude of the peaks")
+                             doc="A comma separated list of the amplitudes of the peaks")
 
         self.declareProperty("TransmissionGuess", 1.0,
                              doc="Initial guess for the transmission")
@@ -48,10 +48,8 @@ class VesuvioThickness(PythonAlgorithm):
 
 
     def _get_properties(self):
-        masses_str = self.getPropertyValue("Masses").split(',')
-        self._masses = np.asarray([float(mass) for mass in masses_str])
-        amplitude_str = self.getPropertyValue("Amplitudes").split(',')
-        self._amplitudes = np.asarray([float(amp) for amp in amplitude_str])
+        self._masses = self.getPropertyValue("Masses").split(',')
+        self._amplitudes = self.getPropertyValue("Amplitudes").split(',')
         self._transmission_guess = self.getProperty("TransmissionGuess").value
         self._thickness = self.getProperty("Thickness").value
         self._number_density = self.getProperty("NumberDensity").value
@@ -61,12 +59,26 @@ class VesuvioThickness(PythonAlgorithm):
         self._get_properties()
         issues = dict()
 
+        try:
+            self._masses = np.asarray([float(mass) for mass in self._masses])
+        except:
+            issues['Masses'] = ('Could not interpret \"%s\" ' % self._masses \
+                                    + 'as a list of numbers . Please ensure that ' \
+                                    + 'all inputs are valid')
+        try:
+            self._amplitudes = np.asarray([float(amp) for amp in self._amplitudes])
+        except:
+            issues['Amplitudes'] = ('Could not interpret \"%s\" ' % self._amplitudes \
+                                    + 'as a list of numbers . Please ensure that ' \
+                                    + 'all inputs are valid')
+
         num_masses = len(self._masses)
         num_amplitudes = len(self._amplitudes)
         if num_masses != num_amplitudes:
             issues['Masses'] = ('The number of masses: %d, ' % num_masses \
-                               + 'is not equal to the number of amplitudes: %d' % num_amplitudes)
+                                + 'is not equal to the number of amplitudes: %d' % num_amplitudes)
 
+        logger.warning(str(issues))
         return issues
 
 
