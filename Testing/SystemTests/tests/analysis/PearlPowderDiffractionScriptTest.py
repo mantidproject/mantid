@@ -3,7 +3,6 @@
 import unittest
 import os.path
 import shutil
-import random
 
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.simpleapi import *
@@ -146,14 +145,12 @@ class LoadTests(unittest.TestCase):
         mod_group_table = mtd["PRL92476_92479"]
         self.assertTrue("PRL92476_92479_mods1-9_1" in mod_group_table[0].getName())
 
-        rand_range = random.randint(1, 4)
-        for i in range(rand_range, 10, 2):
+        for i in range(1, 10):
             self.assertTrue("PRL92476_92479_mod" + str(i) in mod_group_table[i].getName())
             self.assertEquals(4310, mod_group_table[i].blocksize())
             ind_mod_file = mtd["PRL92476_92479_mod" + str(i)]
-            rand_test = random.randint(1, 4300)
-            self.assertAlmostEqual(mod_group_table[i].readY(0)[rand_test],
-                                   ind_mod_file.readY(0)[rand_test], places=DIFF_PLACES)
+            self.assertAlmostEqual(mod_group_table[i].readY(0)[50],
+                                   ind_mod_file.readY(0)[50], places=DIFF_PLACES)
 
         no_atten = mtd["PRL92476_92479_noatten"]
         self.assertAlmostEqual(1.06842521, no_atten.readY(0)[17], places=DIFF_PLACES)
