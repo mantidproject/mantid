@@ -49,25 +49,31 @@ double MCInteractionVolume::calculateAbsorption(
   // for each intersection
   Track path1(startPos, direc);
   const int nsegments = m_sample.interceptSurface(path1);
+  if (nsegments == 0) {
+    throw std::logic_error(
+        "MCInteractionVolume::calculateAbsorption() - Zero "
+        "intersections found for input track and sample object.");
+  }
   int scatterSegmentNo(1);
   if (nsegments != 1) {
-    throw std::runtime_error("Unable to handle holes in intersections!");
+    scatterSegmentNo = rng.nextInt(1, nsegments);
   }
 
   // Generate scatter point
   double l1(0.0);
+  V3D scatterPos;
   int segmentCount(0);
   for (const auto &segment : path1) {
     segmentCount += 1;
     if (segmentCount != scatterSegmentNo) {
       l1 += segment.distInsideObject;
     } else {
-      l1 += rng.nextValue() * segment.distInsideObject;
+      const double depth = rng.nextValue() * segment.distInsideObject;
+      scatterPos = segment.entryPoint + direc * depth;
+      l1 += depth;
       break;
     }
   }
-  // Scatter point
-  const V3D scatterPos = path1.cbegin()->entryPoint + direc * l1;
 
   // Now track to final destination
   V3D scatteredDirec = endPos - scatterPos;
