@@ -953,7 +953,7 @@ std::string MuonAnalysisResultTableTab::getFileName() {
 
 /**
  * Uses the format of the workspace name
- * (INST00012345-8; Pair; long; Asym; 1+2-3+4; #2)
+ * (INST00012345-8; Pair; long; Asym; [1+2-3+4]; #2)
  * to get a string in the format "run number: period"
  * @param workspaceName :: [input] Name of the workspace
  * @param firstRun :: [input] First run number - use this if tokenizing fails
@@ -967,13 +967,16 @@ MuonAnalysisResultTableTab::runNumberString(const std::string &workspaceName,
 
   Mantid::Kernel::StringTokenizer tokenizer(
       workspaceName, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
-  if (tokenizer.count() > 4) {
+  const size_t numTokens = tokenizer.count();
+  if (numTokens > 4) { // format is ok
     instRuns = tokenizer[0];
-    periods = tokenizer[4];
     // Remove "INST000" off the start
     // No muon instruments have numbers in their names
     size_t numPos = instRuns.find_first_of("123456789");
     instRuns = instRuns.substr(numPos, instRuns.size());
+    if (numTokens > 5) { // periods included
+      periods = tokenizer[4];
+    }
   }
 
   QString ret(instRuns.c_str());
