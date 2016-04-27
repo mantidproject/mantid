@@ -14,6 +14,7 @@ ComplexMatrix::ComplexMatrix() : m_matrix(nullptr) {}
 /// @param ny :: Second dimension
 ComplexMatrix::ComplexMatrix(const size_t nx, const size_t ny) {
   m_matrix = gsl_matrix_complex_alloc(nx, ny);
+  zero();
 }
 
 /// Copy constructor
@@ -108,6 +109,7 @@ void ComplexMatrix::resize(const size_t nx, const size_t ny) {
     gsl_matrix_complex_free(m_matrix);
   }
   m_matrix = gsl_matrix_complex_alloc(nx, ny);
+  zero();
 }
 
 /// First size of the matrix

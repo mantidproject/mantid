@@ -89,7 +89,7 @@ public:
         TS_ASSERT_EQUALS(d7, 1.5);
         TS_ASSERT_EQUALS(d8, 0.1591);
         TS_ASSERT_EQUALS(d9, 1000.);
-        TS_ASSERT_EQUALS(d10, 9);
+        TS_ASSERT_EQUALS(d10, 2);
         TS_ASSERT_EQUALS(d11, 0.9434);
         TS_ASSERT_EQUALS(d12, 1);
         TS_ASSERT_DELTA(d13, 0.4205, 1e-4);
