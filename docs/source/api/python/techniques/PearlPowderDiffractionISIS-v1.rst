@@ -38,30 +38,53 @@ usage):
 
 - user name e.g: (`Bull`)
 - cycle number e.g: (`15_4`)
-- Attentuation file e.g: (`FileName.OUT`)
 - run number/s e.g: (`92476_92479`)
 - fmode e.g: (`trans`)
 - ttmode e.g: (`TT70`)
 
-- optional: data output directory - only if you wish to write out the
+- optional: Attentuation file directory - if you would wish to use
+  a different Attentuation file e.g:
+  (`P:\\Mantid\\Attentuation\\PRL112_DC25_10MM_FF.OUT`)
+- optional: Output directory - only if you wish to write out the
   files to preferred directory/location instead of the Pearl network.
   e.g: (`C:\\Mantid\\MantidOut\\`)
+
+To run the script, an example can be found within the usage section.
 
 File & Folders
 --------------
 
-You are not require to set calibration and raw files directory, unless
-you are utilising calibration files from your local machine. The script
-will automatically find the correct calibration files on the Pearl
-network according to the input run number, fmode and ttmode.
-All the calibration files can be found in `P:\\Mantid\\Calibration`,
-whereas all the Attenuation (`.OUT`) files can be found within the
-following directory `P:\\Mantid\\Attentuation`.
+You are not require to set calibration and raw files directory,
+unless you are utilising calibration files from your local machine.
+The script will automatically find the correct calibration files
+on the Pearl network according to the input run number, fmode and
+ttmode. All the calibration files can be found in
+`P:\\Mantid\\Calibration`, whereas all the Attenuation (`.OUT`)
+files can be found within the following directory
+`P:\\Mantid\\Attentuation`.
 
-The output files by default will be written on the following location:
-`P:\\users\\cycle number\\user name` e.g:
+The output files by default will be written out to the following
+location: `P:\\users\\cycle number\\user name` e.g:
 `P:\\users\\Cycle_15_4\\Bull\\`, however a personalised output
-directory can be provided instead like explained in Run Requirement
-section.
+directory can be provided instead like explained in Run
+Requirement section.
+
+Usage
+-----
+
+**Example - General Script Utilised To Process Powder Diffraction With Pearl**
+
+.. code-block:: python
+
+   import pearl_routines
+
+   # set up the user name and cycle number
+   pearl_routines.PEARL_startup("Bull","15_4")
+
+   # set up the directory to the attentuation file
+   pearl_routines.PEARL_setattenfile(new_atten="P:\\Mantid\\Attentuation\\PRL112_DC25_10MM_FF.OUT")
+
+   # set up the run number/s, fmode, ttmode, use attentuation file (True/False), do vanadium normalisation (True/False)
+   pearl_routines.PEARL_focus("92476_92479",fmode="trans",ttmode="TT70",atten=True,van_norm=True)
 
 
