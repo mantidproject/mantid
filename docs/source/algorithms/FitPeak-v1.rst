@@ -147,7 +147,7 @@ Usage
   peakheight = tbws.cell(2, 1)
   peakcentre = tbws.cell(3, 1)
   sigma = tbws.cell(4, 1)
-  print "Chi-square = %.5f: Peak centre = %.5f, Height = %.5f, Sigma = %.5f" % (chi2, peakcentre, peakheight, sigma)
+  print "Chi-square = %.5f: Peak centre = %.5f, Height = %.2f, Sigma = %.5f" % (chi2, peakcentre, peakheight, sigma)
 
 
 .. testcleanup:: ExFitPeak
@@ -159,7 +159,7 @@ Output:
 
 .. testoutput:: ExFitPeak
 
-  Chi-square = 1.74892: Peak centre = 2.14201, Height = 7490.66905, Sigma = 0.00776
+  Chi-square = 1.74892: Peak centre = 2.14201, Height = 7490.67, Sigma = 0.00776
 
 .. categories::
 
