@@ -1,0 +1,17 @@
+graph DPDFBackgroundRemoverMainComponents {
+  label = "Main Objects"
+
+  subgraph algorithms {
+    $algorithm_style
+    SliceSelector [label="SliceSelector"]
+    BackgroundRemover [label="BackgroundRemover"]
+    InputDataControl [label="InputDataControl"]
+    DisplayControl [label="DisplayControl"]
+    DisplayModelFit [label="DisplayModelFit"]
+  }
+  BackgroundRemover -- SliceSelector
+  BackgroundRemover -- InputDataControl
+  BackgroundRemover -- DisplayControl
+  InputDataControl -- DisplayControl
+  DisplayControl -- DisplayModelFit
+}
