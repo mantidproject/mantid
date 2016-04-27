@@ -160,7 +160,7 @@ void IqtFit::run() {
   func->applyTies();
 
   const auto function = std::string(func->asString());
-  const auto fitType = fitTypeString();
+  const auto fitType = fitTypeString().toStdString();
   const long specMin = m_uiForm.spSpectraMin->value();
   const long specMax = m_uiForm.spSpectraMax->value();
   const auto minimizer = minimizerString("$outputname_$wsindex");
@@ -173,67 +173,43 @@ void IqtFit::run() {
   const auto maxIt = boost::lexical_cast<long>(
       m_properties["MaxIterations"]->valueText().toStdString());
 
-  QString pyInput =
-      "from IndirectDataAnalysis import furyfitSeq\n"
-      "input = '" +
-      m_ffInputWSName + "'\n"
-                        "func = r'" +
-      QString::fromStdString(function) + "'\n"
-                                         "ftype = '" +
-      fitTypeString() + "'\n"
-                        "startx = " +
-      m_properties["StartX"]->valueText() + "\n"
-                                            "endx = " +
-      m_properties["EndX"]->valueText() + "\n"
-                                          "plot = '" +
-      QString::fromStdString(m_plotOption) + "'\n"
-                                             "spec_min = " +
-      QString::number(specMin) + "\n"
-                                 "spec_max = " +
-      QString::number(specMax) + "\n"
-                                 "spec_max = None\n"
-                                 "minimizer = '" +
-      minimizer + "'\n"
-                  "max_iterations = " +
-      QString::number(m_dblManager->value(m_properties["MaxIterations"])) +
-      "\n";
-
-  if (constrainIntens)
-    pyInput += "constrain_intens = True \n";
-  else
-    pyInput += "constrain_intens = False \n";
-
-  if (save)
-    pyInput += "save = True\n";
-  else
-    pyInput += "save = False\n";
-
   if (!constrainBeta) {
-    pyInput += "furyfitSeq(input, func, ftype, startx, endx, "
-               "spec_min=spec_min, spec_max=spec_max, "
-               "intensities_constrained=constrain_intens, Save=save, "
-               "Plot=plot, minimizer=minimizer, "
-               "max_iterations=max_iterations)\n";
-
-    QString pyOutput = runPythonCode(pyInput);
-
-    // Set the result workspace for Python script export
-    QString inputWsName = QString::fromStdString(m_ffInputWS->getName());
-    QString resultWsName = inputWsName.left(inputWsName.lastIndexOf("_")) +
-                           "_fury_" + fitType + QString::number(specMin) +
-                           "_to_" + QString::number(specMax) + "_Workspaces";
-    m_pythonExportWsName = resultWsName.toStdString();
-    updatePlot();
+    m_baseName = constructBaseName(m_ffInputWSName.toStdString(), fitType,
+                                   false, specMin, specMax);
+    auto iqtFitSequential =
+        AlgorithmManager::Instance().create("IqtFitSequential");
+    iqtFitSequential->initialize();
+    iqtFitSequential->setProperty("InputWorkspace", m_ffInputWS);
+    iqtFitSequential->setProperty("Function", function);
+    iqtFitSequential->setProperty("FitType", fitType);
+    iqtFitSequential->setProperty("StartX", startX);
+    iqtFitSequential->setProperty("EndX", endX);
+    iqtFitSequential->setProperty("SpecMin", specMin);
+    iqtFitSequential->setProperty("SpecMax", specMax);
+    iqtFitSequential->setProperty("Minimizer", minimizer.toStdString());
+    iqtFitSequential->setProperty("MaxIterations", maxIt);
+    iqtFitSequential->setProperty("ConstrainIntensities", constrainIntens);
+    iqtFitSequential->setProperty("OutputResultWorkspace",
+                                  m_baseName + "_Result");
+    iqtFitSequential->setProperty("OutputParameterWorkspace",
+                                  m_baseName + "_Parameters");
+    iqtFitSequential->setProperty("OutputWorkspaceGroup",
+                                  m_baseName + "_Workspaces");
+    m_pythonExportWsName = (m_baseName + "_Workspaces");
+    m_batchAlgoRunner->addAlgorithm(iqtFitSequential);
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+            SLOT(algorithmComplete(bool)));
+    m_batchAlgoRunner->executeBatchAsync();
 
   } else {
-    m_baseName =
-        constructBaseName(m_ffInputWSName.toStdString(), specMin, specMax);
+    m_baseName = constructBaseName(m_ffInputWSName.toStdString(), fitType, true,
+                                   specMin, specMax);
     auto iqtFitMultiple = AlgorithmManager::Instance().create("IqtFitMultiple");
     iqtFitMultiple->initialize();
     iqtFitMultiple->setProperty("InputWorkspace",
                                 m_ffInputWSName.toStdString());
     iqtFitMultiple->setProperty("Function", function);
-    iqtFitMultiple->setProperty("FitType", fitType.toStdString());
+    iqtFitMultiple->setProperty("FitType", fitType);
     iqtFitMultiple->setProperty("StartX", startX);
     iqtFitMultiple->setProperty("EndX", endX);
     iqtFitMultiple->setProperty("SpecMin", specMin);
@@ -313,11 +289,18 @@ void IqtFit::algorithmComplete(bool error) {
  * @return the base name
  */
 std::string IqtFit::constructBaseName(const std::string &inputName,
-                                      const long &specMin,
+                                      const std::string &fitType,
+                                      const bool &multi, const long &specMin,
                                       const long &specMax) {
+  QString functionType = QString::fromStdString(fitType);
+  if (multi) {
+	  functionType = "1Smult_s";
+  }
+
   QString baseName = QString::fromStdString(inputName);
   baseName = baseName.left(baseName.lastIndexOf("_"));
-  baseName += "_Iqt_1Smult_s";
+  baseName += "_Iqt_";
+  baseName += functionType;
   baseName += QString::number(specMin);
   baseName += "_to_";
   baseName += QString::number(specMax);
