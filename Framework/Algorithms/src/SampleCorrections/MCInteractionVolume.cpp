@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/SampleCorrections/MCInteractionVolume.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SampleEnvironment.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
@@ -10,16 +11,39 @@ using Kernel::V3D;
 
 namespace Algorithms {
 
+namespace {
+/**
+ * Compute the attenuation factor for the given coefficients
+ * @param rho Number density of the sample in \f$\A^{-3}\f$
+ * @param sigma Cross-section in barns
+ * @param length Path length in metres
+ * @return The dimensionless attenuated fraction
+ */
+double attenuation(double rho, double sigma, double length) {
+  using std::exp;
+  return exp(-100 * rho * sigma * length);
+}
+}
+
 /**
  * Construct the volume with only a sample object
  * @param sample A reference to a sample object that defines a valid shape
  * & material
  */
 MCInteractionVolume::MCInteractionVolume(const API::Sample &sample)
-    : m_sample(sample.getShape()) {
+    : m_sample(sample.getShape()), m_env(nullptr) {
   if (!m_sample.hasValidShape()) {
     throw std::invalid_argument(
         "MCInteractionVolume() - Sample shape does not have a valid shape.");
+  }
+  try {
+    m_env = &sample.getEnvironment();
+    if (m_env->nelements() == 0) {
+      throw std::invalid_argument(
+          "MCInteractionVolume() - Sample enviroment has zero components.");
+    }
+  } catch (std::runtime_error &) {
+    // swallow this as no defined environment from getEnvironment
   }
 }
 
@@ -47,32 +71,38 @@ double MCInteractionVolume::calculateAbsorption(
   // to give a second set of intersections.
   // The total attenuation factor is the product of the attenuation factor
   // for each intersection
+
+  // Generate scatter point
   Track path1(startPos, direc);
-  const int nsegments = m_sample.interceptSurface(path1);
+  int nsegments = m_sample.interceptSurface(path1);
+  if (m_env) {
+    nsegments += m_env->interceptSurfaces(path1);
+  }
   if (nsegments == 0) {
     throw std::logic_error(
         "MCInteractionVolume::calculateAbsorption() - Zero "
-        "intersections found for input track and sample object.");
+        "intersections found for input track and sample/container objects.");
   }
   int scatterSegmentNo(1);
   if (nsegments != 1) {
     scatterSegmentNo = rng.nextInt(1, nsegments);
   }
 
-  // Generate scatter point
-  double l1(0.0);
+  double atten(1.0);
   V3D scatterPos;
-  int segmentCount(0);
-  for (const auto &segment : path1) {
-    segmentCount += 1;
-    if (segmentCount != scatterSegmentNo) {
-      l1 += segment.distInsideObject;
-    } else {
-      const double depth = rng.nextValue() * segment.distInsideObject;
-      scatterPos = segment.entryPoint + direc * depth;
-      l1 += depth;
-      break;
+  auto segItr(path1.cbegin());
+  for (int i = 0; i < scatterSegmentNo; ++i, ++segItr) {
+    double length = segItr->distInsideObject;
+    if (i == scatterSegmentNo - 1) {
+      length *= rng.nextValue();
+      scatterPos = segItr->entryPoint + direc * length;
     }
+    const auto &segObj = *(segItr->object);
+    const auto segMat = segObj.material();
+    atten *= attenuation(segMat.numberDensity(),
+                         segMat.totalScatterXSection(lambdaBefore) +
+                             segMat.absorbXSection(lambdaBefore),
+                         length);
   }
 
   // Now track to final destination
@@ -80,18 +110,21 @@ double MCInteractionVolume::calculateAbsorption(
   scatteredDirec.normalize();
   Track path2(scatterPos, scatteredDirec);
   m_sample.interceptSurface(path2);
-  double l2(0.0);
-  for (const auto &segment : path2) {
-    l2 += segment.distInsideObject;
+  if (m_env) {
+    nsegments += m_env->interceptSurfaces(path2);
   }
 
-  const auto &material = m_sample.material();
-  const double rho = material.numberDensity() * 100;
-  const double sigmaTot1 = material.totalScatterXSection(lambdaBefore) +
-                           material.absorbXSection(lambdaBefore);
-  const double sigmaTot2 = material.totalScatterXSection(lambdaAfter) +
-                           material.absorbXSection(lambdaAfter);
-  return exp(-rho * (sigmaTot1 * l1 + sigmaTot2 * l2));
+  for (const auto &segment : path2) {
+    double length = segment.distInsideObject;
+    const auto &segObj = *(segment.object);
+    const auto segMat = segObj.material();
+    atten *= attenuation(segMat.numberDensity(),
+                         segMat.totalScatterXSection(lambdaAfter) +
+                             segMat.absorbXSection(lambdaAfter),
+                         length);
+  }
+
+  return atten;
 }
 
 } // namespace Algorithms

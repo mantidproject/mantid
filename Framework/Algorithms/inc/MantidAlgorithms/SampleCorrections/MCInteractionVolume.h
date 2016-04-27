@@ -6,6 +6,7 @@
 namespace Mantid {
 namespace API {
 class Sample;
+class SampleEnvironment;
 }
 namespace Geometry {
 class Object;
@@ -45,6 +46,9 @@ namespace Algorithms {
 class MANTID_ALGORITHMS_DLL MCInteractionVolume {
 public:
   MCInteractionVolume(const API::Sample &sample);
+  // No creation from temporaries as we store a reference to the object in
+  // the sample
+  MCInteractionVolume(const API::Sample &&sample) = delete;
 
   double calculateAbsorption(Kernel::PseudoRandomNumberGenerator &rng,
                              const Kernel::V3D &startPos,
@@ -54,6 +58,7 @@ public:
 
 private:
   const Geometry::Object &m_sample;
+  const API::SampleEnvironment *m_env;
 };
 
 } // namespace Algorithms
