@@ -159,7 +159,7 @@ Output:
 
 .. testoutput:: ExFitPeak
 
-  Chi-square = 7.138740: Peak centre = 2.141713, Height = 8365.836316, Sigma = 0.005644
+  Chi-square = 7.13874: Peak centre = 2.14171, Height = 8365.83632, Sigma = 0.00564
 
 .. categories::
 
