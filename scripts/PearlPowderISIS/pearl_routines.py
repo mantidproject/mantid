@@ -49,7 +49,7 @@ def PEARL_startup(usern="matt", thiscycle='11_1'):
     # groupfile=pearl_file_dir + "test_cal_group_mods_11_1.cal"
     vabsorbfile = pearl_file_dir + "pearl_absorp_sphere_10mm_newinst_long.nxs"
     vanfile = pearl_file_dir + "van_spline_all_cycle_11_1.nxs"
-    attenfile = pearl_file_dir + "Attentuation\\PRL985_WC_HOYBIDE_NK_10MM_FF.OUT"
+    attenfile = "P:\Mantid\\Attentuation\\PRL985_WC_HOYBIDE_NK_10MM_FF.OUT"
     mode = "all"
     tt_mode = "TT88"
     tofbinning = "1500,-0.0006,19900"
