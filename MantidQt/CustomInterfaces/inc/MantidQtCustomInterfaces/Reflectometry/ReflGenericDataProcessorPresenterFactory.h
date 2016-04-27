@@ -108,9 +108,11 @@ public:
         /*Prefixes to the output workspaces*/
         std::vector<std::string>{"IvsQ_", "IvsLam_"},
         /*The blacklist*/
-        std::set<std::string>{"ThetaIn", "ThetaOut", "InputWorkspace",
-                              "OutputWorkspace", "OutputWorkspaceWavelength",
-                              "FirstTransmissionRun", "SecondTransmissionRun"});
+        std::set<std::string>{
+            "ThetaIn", "ThetaOut", "InputWorkspace", "OutputWorkspace",
+            "OutputWorkspaceWavelength", "FirstTransmissionRun",
+            "SecondTransmissionRun", "MomentumTransferMinimum",
+            "MomentumTransferMaximum", "MomentumTransferStep", "ScaleFactor"});
 
     // Pre-processing instructions as a map:
     // Keys are the column names
