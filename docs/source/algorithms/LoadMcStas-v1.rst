@@ -26,6 +26,12 @@ for reading McStas 2.0 histogram data.
 LoadMcStas will be called by Load, if the file has an 
 ``/entry1/simulation/name`` item whose value is ``"mccode"``.
 
+The output workspace will contain one workspace for each group of
+class ``NXdata`` and not of name ``"content_nxs"`` found in a  
+group of class ``NXDetector`` of name ``"Data"``.
+The name of the workspace is the same as the name of the group, 
+but with ``__mcstas_event_hist`` added to the end.
+
 
 References
 ##########
