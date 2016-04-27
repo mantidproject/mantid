@@ -12,12 +12,19 @@
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
+
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
+namespace PhysicalConstants = Mantid::PhysicalConstants;
 
 /// @cond
 namespace {
@@ -27,6 +34,35 @@ const int MaxRandPointAttempts(500);
 
 /// Element size in mm
 const double ELEMENT_SIZE = 1.0;
+
+/// Energy to wavelength
+inline double toWavelength(double energy) {
+  static const double factor =
+      1e10 * PhysicalConstants::h /
+      sqrt(2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV);
+  return factor / sqrt(energy);
+}
+
+struct EFixedProvider {
+  EFixedProvider(const ExperimentInfo &expt)
+      : m_expt(expt), m_emode(expt.getEMode()), m_value(0.0) {
+    if (m_emode == DeltaEMode::Direct) {
+      m_value = m_expt.getEFixed();
+    }
+  }
+  inline DeltaEMode::Type emode() const { return m_emode; }
+  inline double value(const IDetector_const_sptr &det) const {
+    if (m_emode != DeltaEMode::Indirect)
+      return m_value;
+    else
+      return m_expt.getEFixed(det);
+  }
+
+private:
+  const ExperimentInfo &m_expt;
+  const DeltaEMode::Type m_emode;
+  double m_value;
+};
 }
 /// @endcond
 
@@ -34,10 +70,6 @@ namespace Mantid {
 namespace Algorithms {
 
 DECLARE_ALGORITHM(MonteCarloAbsorption)
-
-using namespace API;
-using namespace Geometry;
-using namespace Kernel;
 
 //------------------------------------------------------------------------------
 // Public methods
@@ -114,7 +146,11 @@ void MonteCarloAbsorption::exec() {
   g_log.information() << "Simulation performed every " << m_xStepSize
                       << " wavelength points" << std::endl;
 
+  EFixedProvider efixed(*m_inputWS);
   Progress prog(this, 0.0, 1.0, numHists * numBins / m_xStepSize);
+  prog.setNotifyStep(0.01);
+  const std::string reportMsg = "Computing corrections";
+
   PARALLEL_FOR1(correctionFactors)
   for (int i = 0; i < numHists; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -127,22 +163,28 @@ void MonteCarloAbsorption::exec() {
     try {
       detector = m_inputWS->getDetector(i);
     } catch (Kernel::Exception::NotFoundError &) {
-      // intel compiler hangs with continue statements inside a catch
-      // block that is within an omp loop...
-    }
-    if (!detector)
       continue;
+    }
 
     MantidVec &yValues = correctionFactors->dataY(i);
     MantidVec &eValues = correctionFactors->dataE(i);
+    const auto &detPos = detector->getPos();
+    const double lambdaFixed = toWavelength(efixed.value(detector));
     // Simulation for each requested wavelength point
     for (int bin = 0; bin < numBins; bin += m_xStepSize) {
-      prog.report("Computing corrections for bin " +
-                  boost::lexical_cast<std::string>(bin));
-      const double lambda = isHistogram
-                                ? (0.5 * (xValues[bin] + xValues[bin + 1]))
-                                : xValues[bin];
-      doSimulation(detector.get(), lambda, yValues[bin], eValues[bin]);
+      prog.report(reportMsg);
+      const double lambdaStep = isHistogram
+                                    ? (0.5 * (xValues[bin] + xValues[bin + 1]))
+                                    : xValues[bin];
+      double lambdaIn(lambdaStep), lambdaOut(lambdaStep);
+      if (efixed.emode() == DeltaEMode::Direct) {
+        lambdaIn = lambdaFixed;
+      } else if (efixed.emode() == DeltaEMode::Indirect) {
+        lambdaOut = lambdaFixed;
+      } else {
+        // elastic case already initialized
+      }
+      doSimulation(detPos, lambdaIn, lambdaOut, yValues[bin], eValues[bin]);
       // Ensure we have the last point for the interpolation
       if (m_xStepSize > 1 && bin + m_xStepSize >= numBins &&
           bin + 1 != numBins) {
@@ -152,7 +194,6 @@ void MonteCarloAbsorption::exec() {
 
     // Interpolate through points not simulated
     if (m_xStepSize > 1) {
-      prog.report("Interpolating unsimulated points");
       Kernel::VectorHelper::linearlyInterpolateY(xValues, yValues, m_xStepSize);
     }
 
@@ -166,14 +207,16 @@ void MonteCarloAbsorption::exec() {
 
 /**
  * Perform the simulation
- * @param detector :: A pointer to the current detector
- * @param lambda :: The chosen wavelength
+ * @param detPos :: The final position where the neutron is detected
+ * @param lambdaIn :: The wavelength value for paths before the scatter point
+ * @param lambdaOut :: The wavelength value for paths after the scatter point
  * @param attenFactor :: [Output] The calculated attenuation factor for this
  * wavelength
  * @param error :: [Output] The value of the error on the factor
  */
-void MonteCarloAbsorption::doSimulation(const IDetector *const detector,
-                                        const double lambda,
+void MonteCarloAbsorption::doSimulation(const Kernel::V3D &detPos,
+                                        const double lambdaIn,
+                                        const double lambdaOut,
                                         double &attenFactor, double &error) {
   /**
    Currently, assuming square beam profile to pick start position then randomly
@@ -183,9 +226,6 @@ void MonteCarloAbsorption::doSimulation(const IDetector *const detector,
    lengths and final
    directional vector to the detector
    */
-  // Absolute detector position
-  const V3D detectorPos(detector->getPos());
-
   int numDetected(0);
   attenFactor = 0.0;
   error = 0.0;
@@ -193,7 +233,7 @@ void MonteCarloAbsorption::doSimulation(const IDetector *const detector,
     V3D startPos = sampleBeamProfile();
     V3D scatterPoint = selectScatterPoint();
     double eventFactor(0.0);
-    if (attenuationFactor(startPos, scatterPoint, detectorPos, lambda,
+    if (attenuationFactor(startPos, scatterPoint, detPos, lambdaIn, lambdaOut,
                           eventFactor)) {
       attenFactor += eventFactor;
       ++numDetected;
@@ -267,15 +307,14 @@ V3D MonteCarloAbsorption::selectScatterPoint() const {
  * @param startPos :: The origin of the track
  * @param scatterPoint :: The point of scatter
  * @param finalPos :: The end point of the track
- * @param lambda :: The wavelength of the neutron
+ * @param lambdaIn :: The wavelength of the neutron before scattering
+ * @param lambdaOut :: The wavelength of the neutron after scattering
  * @param factor :: Output parameter storing the attenuation factor
  * @returns True if the track was valid, false otherwise
  */
-bool MonteCarloAbsorption::attenuationFactor(const V3D &startPos,
-                                             const V3D &scatterPoint,
-                                             const V3D &finalPos,
-                                             const double lambda,
-                                             double &factor) {
+bool MonteCarloAbsorption::attenuationFactor(
+    const V3D &startPos, const V3D &scatterPoint, const V3D &finalPos,
+    const double lambdaIn, const double lambdaOut, double &factor) {
   // Start at one
   factor = 1.0;
   // Define two tracks, before and after scatter, and trace check their
@@ -292,7 +331,7 @@ bool MonteCarloAbsorption::attenuationFactor(const V3D &startPos,
   }
 
   double length = beforeScatter.cbegin()->distInsideObject;
-  factor *= attenuation(length, *m_sampleMaterial, lambda);
+  factor *= attenuation(length, *m_sampleMaterial, lambdaIn);
 
   beforeScatter.clearIntersectionResults();
   if (m_container) {
@@ -301,11 +340,11 @@ bool MonteCarloAbsorption::attenuationFactor(const V3D &startPos,
   // Attenuation factor is product of factor for each material
   for (const auto &citr : beforeScatter) {
     length = citr.distInsideObject;
-    factor *= attenuation(length, citr.object->material(), lambda);
+    factor *= attenuation(length, citr.object->material(), lambdaIn);
   }
 
   length = afterScatter.cbegin()->distInsideObject;
-  factor *= attenuation(length, *m_sampleMaterial, lambda);
+  factor *= attenuation(length, *m_sampleMaterial, lambdaOut);
 
   afterScatter.clearIntersectionResults();
   if (m_container) {
@@ -314,7 +353,7 @@ bool MonteCarloAbsorption::attenuationFactor(const V3D &startPos,
   // Attenuation factor is product of factor for each material
   for (const auto &citr : afterScatter) {
     length = citr.distInsideObject;
-    factor *= attenuation(length, citr.object->material(), lambda);
+    factor *= attenuation(length, citr.object->material(), lambdaOut);
   }
 
   return true;
