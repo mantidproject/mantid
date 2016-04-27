@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/CrystalFieldSpectrum.h"
 #include "MantidCurveFitting/Functions/DeltaFunction.h"
+#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ParameterTie.h"
@@ -46,9 +47,7 @@ void CrystalFieldSpectrum::setParameter(size_t i, const double &value,
     m_crystalField.setParameter(i, value, explicitlySet);
     m_dirty = true;
   } else {
-    if (m_dirty) {
-      updateSpectrumFunction();
-    }
+    checkSpectrumFunction();
     m_spectrum.setParameter(i - m_nOwnParams, value, explicitlySet);
   }
 }
@@ -59,9 +58,7 @@ void CrystalFieldSpectrum::setParameterDescription(size_t i,
   if (i < m_nOwnParams) {
     m_crystalField.setParameterDescription(i, description);
   } else {
-    if (m_dirty) {
-      updateSpectrumFunction();
-    }
+    checkSpectrumFunction();
     m_spectrum.setParameterDescription(i - m_nOwnParams, description);
   }
 }
@@ -102,9 +99,7 @@ size_t CrystalFieldSpectrum::parameterIndex(const std::string &name) const {
   if (isOwnName(name)) {
     return m_crystalField.parameterIndex(name);
   } else {
-    if (m_dirty) {
-      updateSpectrumFunction();
-    }
+    checkSpectrumFunction();
     return m_spectrum.parameterIndex(name) + m_nOwnParams;
   }
 }
@@ -134,9 +129,7 @@ void CrystalFieldSpectrum::setError(size_t i, double err) {
   if (i < m_nOwnParams) {
     m_crystalField.setError(i, err);
   } else {
-    if (m_dirty) {
-      updateSpectrumFunction();
-    }
+    checkSpectrumFunction();
     m_spectrum.setError(i - m_nOwnParams, err);
   }
 }
@@ -178,9 +171,7 @@ API::ParameterTie *CrystalFieldSpectrum::tie(const std::string &parName, const s
   if (isOwnName(parName)) {
     return m_crystalField.tie(parName, expr, isDefault);
   } else {
-    if (m_dirty) {
-      updateSpectrumFunction();
-    }
+    checkSpectrumFunction();
     return m_spectrum.tie(parName, expr, isDefault);
   }
 }
@@ -216,7 +207,16 @@ ParameterTie *CrystalFieldSpectrum::getTie(size_t i) const {
 }
 
 /// Add a constraint to function
-void CrystalFieldSpectrum::addConstraint(IConstraint *ic) {
+void CrystalFieldSpectrum::addConstraint(API::IConstraint *ic) {
+  auto i = ic->getIndex();
+  if (i < m_nOwnParams) {
+    ic->reset(&m_crystalField, i);
+    m_crystalField.addConstraint(ic);
+  } else {
+    checkSpectrumFunction();
+    ic->reset(&m_spectrum, i - m_nOwnParams);
+    m_spectrum.addConstraint(ic);
+  }
 }
 
 /// Get constraint of i-th parameter
@@ -224,12 +224,19 @@ IConstraint *CrystalFieldSpectrum::getConstraint(size_t i) const {
   if (i < m_nOwnParams) {
     return m_crystalField.getConstraint(i);
   } else {
+    checkSpectrumFunction();
     return m_spectrum.getConstraint(i - m_nOwnParams);
   }
 }
 
 /// Remove a constraint
 void CrystalFieldSpectrum::removeConstraint(const std::string &parName) {
+  if (isOwnName(parName)) {
+    m_crystalField.removeConstraint(parName);
+  } else {
+    checkSpectrumFunction();
+    m_spectrum.removeConstraint(parName);
+  }
 }
 
 /// Set up the function for a fit.
@@ -250,9 +257,7 @@ void CrystalFieldSpectrum::addTie(API::ParameterTie *tie) {
   if (i < m_nOwnParams) {
     m_crystalField.addTie(tie);
   } else {
-    if (m_dirty) {
-      updateSpectrumFunction();
-    }
+    checkSpectrumFunction();
     m_spectrum.addTie(tie);
   }
 }
@@ -301,9 +306,7 @@ void CrystalFieldSpectrum::setAttribute(const std::string &attName,
     m_crystalField.setAttribute(attName, att);
     m_dirty = true;
   } else {
-    if (m_dirty) {
-      updateSpectrumFunction();
-    }
+    checkSpectrumFunction();
     m_spectrum.setAttribute(attName, att);
   }
 }
@@ -367,7 +370,7 @@ void CrystalFieldSpectrum::buildSpectrumFunction() const {
     peak->fixIntensity();
     peak->setCentre(values.getCalculated(i));
     peak->setIntensity(values.getCalculated(i + nPeaks));
-    peak->setIntensity(fwhm);
+    peak->setFwhm(fwhm);
     m_spectrum.addFunction(peak);
   }
 }
@@ -402,6 +405,13 @@ void CrystalFieldSpectrum::updateSpectrumFunction() const {
     peak->setIntensity(intensity);
   }
 
+}
+
+/// Update spectrum function if necessary.
+void CrystalFieldSpectrum::checkSpectrumFunction() const {
+  if (m_dirty) {
+    updateSpectrumFunction();
+  }
 }
 
 } // namespace Functions

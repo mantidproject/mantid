@@ -149,8 +149,10 @@ protected:
 private:
   /// Test if a name (parameter's or attribute's) belongs to m_crystalFiled
   bool isOwnName(const std::string &aName) const;
-  /// Update m_spectrum function.
+  /// Update spectrum function.
   void updateSpectrumFunction() const;
+  /// Update spectrum function if necessary.
+  void checkSpectrumFunction() const;
   /// Function that calculates peak centres and intensities.
   CrystalFieldPeaks m_crystalField;
   /// Function that actually callculates the spectrum.
