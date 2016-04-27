@@ -107,3 +107,12 @@ Usage
    # uses the default attentuation file within the script - "PRL985_WC_HOYBIDE_NK_10MM_FF.OUT"
    pearl_routines.PEARL_focus(86329, fmode="trans", ttmode="TT70")
 
+**Example 3 - Script Utilised To Process Powder Diffraction With Pearl In Debug Mode**
+
+.. code-block:: python
+
+   import pearl_routines
+
+   pearl_routines.PEARL_startup("Bull","15_4")
+   # "s01" is being passed as extension instead of "raw"
+   pearl_routines.PEARL_focus(92475, "s01", fmode="trans", ttmode="TT70", atten=False, van_norm=True, debug=True)
