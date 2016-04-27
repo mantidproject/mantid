@@ -1354,7 +1354,8 @@ public:
   }
 
 private:
-  Mantid::API::MantidImage_sptr createImage(size_t width, size_t height) {
+  Mantid::API::MantidImage_sptr createImage(const size_t width,
+                                            const size_t height) {
     auto image =
         boost::make_shared<Mantid::API::MantidImage>(height, MantidVec(width));
     double startingValue = 1.0;
