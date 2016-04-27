@@ -90,14 +90,14 @@ private:
 };
 
 template <typename... T> void Histogram::setBinEdges(T &&... data) {
-  BinEdges &&edges = BinEdges(std::forward<T>(data)...);
+  BinEdges edges(std::forward<T>(data)...);
   checkSize(edges);
   m_xMode = XMode::BinEdges;
   m_x = edges.cowData();
 }
 
 template <typename... T> void Histogram::setPoints(T &&... data) {
-  Points &&points = Points(std::forward<T>(data)...);
+  Points points(std::forward<T>(data)...);
   checkSize(points);
   m_xMode = XMode::Points;
   m_x = points.cowData();
