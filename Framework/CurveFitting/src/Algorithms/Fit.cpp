@@ -36,7 +36,7 @@ void Fit::initConcrete() {
   auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(
-      "MaxIterations", 500, mustBePositive->clone(),
+      "MaxIterations", 50, mustBePositive->clone(),
       "Stop after this number of iterations if a good fit is not found");
   declareProperty("OutputStatus", "", Kernel::Direction::Output);
   getPointerToProperty("OutputStatus")
