@@ -63,7 +63,13 @@ DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
       m_processor(processor), m_postprocessor(postprocessor),
       m_preprocessingOptionsMap(preprocessingOptionsMap),
       m_processingOptions(processingOptions),
-      m_postprocessingOptions(postprocessingOptions) {}
+      m_postprocessingOptions(postprocessingOptions) {
+
+  // Some checks
+  if (m_whitelist.size() < 2)
+    throw std::invalid_argument(
+        "A valid WhiteList must have at least two columns");
+}
 
 /**
   Generate an ipython notebook
@@ -144,8 +150,6 @@ std::string titleString(const std::string &wsName) {
   } else {
     title_string = "Processed data\n---------------";
   }
-  title_string +=
-      "\nNotebook generated from the ISIS Reflectometry (Polref) Interface";
 
   return title_string;
 }
@@ -323,9 +327,10 @@ boost::tuple<std::string, std::string> postprocessGroupString(
                                             postprocessor.outputProperties())
                 << " = ";
   stitch_string << postprocessor.name() << "(";
-  stitch_string << postprocessor.inputProperty() << "='";
-  stitch_string << boost::algorithm::join(inputNames, ", ") << "', ";
-  stitch_string << postprocessingOptions << ")";
+  stitch_string << postprocessor.inputProperty() << " = '";
+  stitch_string << boost::algorithm::join(inputNames, ", ") << "'";
+  if (!postprocessingOptions.empty())
+    stitch_string << ", " << postprocessingOptions << ")";
 
   return boost::make_tuple(stitch_string.str(), outputWSName);
 }
@@ -598,8 +603,10 @@ std::string plusString(const std::string &input_name,
   plus_string << output_name << " = " << preprocessor.name() << "(";
   plus_string << preprocessor.firstInputProperty() << " = '" << output_name
               << "', ";
-  plus_string << preprocessor.secondInputProperty() << " = '" << input_name;
-  plus_string << "', " << options;
+  plus_string << preprocessor.secondInputProperty() << " = '" << input_name
+              << "'";
+  if (!options.empty())
+    plus_string << ", " << options;
   plus_string << ")\n";
 
   return plus_string.str();

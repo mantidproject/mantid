@@ -21,27 +21,64 @@ using namespace testing;
 class DataProcessorGenerateNotebookTest : public CxxTest::TestSuite {
 
 private:
-  ITableWorkspace_sptr createWorkspace(const std::string &wsName) {
+  DataProcessorWhiteList createReflectometryWhiteList() {
+
+    // Reflectometry white list
+    DataProcessorWhiteList whitelist;
+    whitelist.addElement("Run(s)", "InputWorkspace");
+    whitelist.addElement("Angle", "ThetaIn");
+    whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun");
+    whitelist.addElement("Q min", "MomentumTransferMinimum");
+    whitelist.addElement("Q max", "MomentumTransferMaximum");
+    whitelist.addElement("dQ/Q", "MomentumTransferStep");
+    whitelist.addElement("Scale", "ScaleFactor");
+    whitelist.addElement("Group", "Group");
+    whitelist.addElement("Options", "Options");
+    return whitelist;
+  }
+  std::map<std::string, DataPreprocessorAlgorithm>
+  createReflectometryPreprocessMap(const std::string &plusPrefix = "") {
+
+    // Reflectometry pre-process map
+    return std::map<std::string, DataPreprocessorAlgorithm>{
+        {"Run(s)",
+         DataPreprocessorAlgorithm("Plus", std::vector<std::string>{plusPrefix},
+                                   std::set<std::string>())},
+        {"Transmission Run(s)",
+         DataPreprocessorAlgorithm(
+             "CreateTransmissionWorkspaceAuto",
+             std::vector<std::string>{"TRANS_"},
+             std::set<std::string>{"FirstTransmissionRun",
+                                   "SecondTransmissionRun", "OutputWorkspace"},
+             false)}};
+  }
+
+  DataProcessorAlgorithm createReflectometryProcessor() {
+
+    return DataProcessorAlgorithm(
+        "ReflectometryReductionOneAuto",
+        std::vector<std::string>{"IvsQ_", "IvsLam_"},
+        std::set<std::string>{"ThetaIn", "ThetaOut", "InputWorkspace",
+                              "OutputWorkspace", "OutputWorkspaceWavelength",
+                              "FirstTransmissionRun", "SecondTransmissionRun"});
+  }
+
+  ITableWorkspace_sptr
+  createWorkspace(const std::string &wsName,
+                  const DataProcessorWhiteList &whitelist) {
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
 
-    auto colRuns = ws->addColumn("str", "Run(s)");
-    auto colTheta = ws->addColumn("str", "ThetaIn");
-    auto colTrans = ws->addColumn("str", "TransRun(s)");
-    auto colQmin = ws->addColumn("str", "Qmin");
-    auto colQmax = ws->addColumn("str", "Qmax");
-    auto colDqq = ws->addColumn("str", "dq/q");
-    auto colScale = ws->addColumn("double", "Scale");
-    auto colStitch = ws->addColumn("int", "StitchGroup");
-    auto colOptions = ws->addColumn("str", "Options");
+    const int ncols = static_cast<int>(whitelist.size());
 
-    colRuns->setPlotType(0);
-    colTheta->setPlotType(0);
-    colTrans->setPlotType(0);
-    colQmin->setPlotType(0);
-    colQmax->setPlotType(0);
-    colDqq->setPlotType(0);
-    colScale->setPlotType(0);
-    colStitch->setPlotType(0);
+    for (int col = 0; col < ncols - 2; col++) {
+      auto column = ws->addColumn("str", whitelist.colNameFromColIndex(col));
+      column->setPlotType(0);
+    }
+    auto colGroup =
+        ws->addColumn("int", whitelist.colNameFromColIndex(ncols - 2));
+    auto colOptions =
+        ws->addColumn("str", whitelist.colNameFromColIndex(ncols - 1));
+    colGroup->setPlotType(0);
     colOptions->setPlotType(0);
 
     if (wsName.length() > 0)
@@ -50,42 +87,50 @@ private:
     return ws;
   }
 
-  ITableWorkspace_sptr createPrefilledWorkspace(const std::string &wsName) {
-    auto ws = createWorkspace(wsName);
+  ITableWorkspace_sptr
+  createPrefilledWorkspace(const std::string &wsName,
+                           const DataProcessorWhiteList &whitelist) {
+    auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
     row << "12345"
         << "0.5"
         << ""
         << "0.1"
         << "1.6"
-        << "0.04" << 1.0 << 0 << "";
+        << "0.04"
+        << "1" << 0 << "";
     row = ws->appendRow();
     row << "12346"
         << "1.5"
         << ""
         << "1.4"
         << "2.9"
-        << "0.04" << 1.0 << 0 << "";
+        << "0.04"
+        << "1" << 0 << "";
     row = ws->appendRow();
     row << "24681"
         << "0.5"
         << ""
         << "0.1"
         << "1.6"
-        << "0.04" << 1.0 << 1 << "";
+        << "0.04"
+        << "1" << 1 << "";
     row = ws->appendRow();
     row << "24682"
         << "1.5"
         << ""
         << "1.4"
         << "2.9"
-        << "0.04" << 1.0 << 1 << "";
+        << "0.04"
+        << "1" << 1 << "";
     return ws;
   }
 
   void createModel(const std::string &wsName) {
-    ITableWorkspace_sptr prefilled_ws = createPrefilledWorkspace(wsName);
-    m_model.reset(new QDataProcessorTableModel(prefilled_ws));
+    DataProcessorWhiteList whitelist = createReflectometryWhiteList();
+    ITableWorkspace_sptr prefilled_ws =
+        createPrefilledWorkspace(wsName, whitelist);
+    m_model.reset(new QDataProcessorTableModel(prefilled_ws, whitelist));
   }
 
   std::string m_wsName;
@@ -93,7 +138,6 @@ private:
   QDataProcessorTableModel_sptr m_model;
   std::set<int> m_rows;
   std::map<int, std::set<int>> m_groups;
-  ColNumbers col_nums;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -105,9 +149,7 @@ public:
     delete suite;
   }
 
-  DataProcessorGenerateNotebookTest() : col_nums(0, 2, 8, 1, 3, 4, 5, 6, 7) {
-    FrameworkManager::Instance();
-  }
+  DataProcessorGenerateNotebookTest() { FrameworkManager::Instance(); }
 
   // Create a notebook to test
   void setUp() override {
@@ -120,24 +162,27 @@ public:
     for (int idx = 0; idx < m_model->rowCount(); ++idx)
       m_rows.insert(idx);
 
+    const int colGroup = static_cast<int>(m_model->columnCount() - 2);
+
     // Map group numbers to the set of rows in that group we want to process
     for (auto it = m_rows.begin(); it != m_rows.end(); ++it)
-      m_groups[m_model->data(m_model->index(*it, col_nums.group)).toInt()]
-          .insert(*it);
+      m_groups[m_model->data(m_model->index(*it, colGroup)).toInt()].insert(
+          *it);
   }
 
   void testGenerateNotebook() {
+
     auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
-        m_wsName, m_model, m_instrument, col_nums.runs, col_nums.transmission,
-        col_nums.options, col_nums.angle, col_nums.qmin, col_nums.qmax,
-        col_nums.dqq, col_nums.scale, col_nums.group);
+        m_wsName, m_model, m_instrument, createReflectometryWhiteList(),
+        std::map<std::string, DataPreprocessorAlgorithm>(),
+        createReflectometryProcessor(), DataPostprocessorAlgorithm(),
+        std::map<std::string, std::string>(), "", "");
 
     std::string generatedNotebook =
         notebook->generateNotebook(m_groups, m_rows);
 
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, generatedNotebook, boost::is_any_of("\n"));
-
     const std::string result[] = {
         "{",
         "   \"metadata\" : {",
@@ -163,16 +208,18 @@ public:
     ws_names.emplace_back("workspace1");
     ws_names.emplace_back("workspace2");
 
-    std::string output = plot1DString(ws_names, "Plot Title");
+    std::string output = plot1DString(ws_names);
 
-    const std::string result = "fig = plots([workspace1, workspace2], "
-                               "title=Plot Title, legendLocation=[1, 1, 4])\n";
+    const std::string result =
+        "fig = plots([workspace1, workspace2], "
+        "title=['workspace1', 'workspace2'], legendLocation=[1, 1, 4])\n";
 
     TS_ASSERT_EQUALS(output, result)
   }
 
   void testTableString() {
-    std::string output = tableString(m_model, col_nums, m_rows);
+    std::string output =
+        tableString(m_model, createReflectometryWhiteList(), m_rows);
 
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, output, boost::is_any_of("\n"));
@@ -180,8 +227,8 @@ public:
     const std::string result[] = {
         "Run(s) | Angle | Transmission Run(s) | Q min | Q max | dQ/Q | Scale | "
         "Group | Options",
-        "------ | ----- | ------------------- | ----- | ----- | ---- | ----- | "
-        "----- | -------",
+        "--- | --- | --- | --- | --- | --- | --- | "
+        "--- | ---",
         "12345 | 0.5 |  | 0.1 | 1.6 | 0.04 | 1 | 0 | ",
         "12346 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 | 0 | ",
         "24681 | 0.5 |  | 0.1 | 1.6 | 0.04 | 1 | 1 | ",
@@ -220,9 +267,7 @@ public:
     std::string output = titleString("TEST_WORKSPACE");
 
     const std::string result[] = {
-        "Processed data from workspace: TEST_WORKSPACE", "---------------",
-        "Notebook generated from the ISIS Reflectometry (Polref) Interface",
-        ""};
+        "Processed data from workspace: TEST_WORKSPACE", "---------------", ""};
 
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, output, boost::is_any_of("\n"));
@@ -236,10 +281,8 @@ public:
     // Test without workspace name
     std::string outputEmptyStr = titleString("");
 
-    const std::string resultEmptyStr[] = {
-        "Processed data", "---------------",
-        "Notebook generated from the ISIS Reflectometry (Polref) Interface",
-        ""};
+    const std::string resultEmptyStr[] = {"Processed data", "---------------",
+                                          ""};
 
     std::vector<std::string> notebookLinesEmptyStr;
     boost::split(notebookLinesEmptyStr, outputEmptyStr, boost::is_any_of("\n"));
@@ -251,12 +294,18 @@ public:
     }
   }
 
-  void testStitchGroupString() {
-    boost::tuple<std::string, std::string> output =
-        stitchGroupString(m_rows, m_instrument, m_model, col_nums);
+  void testPostprocessGroupString() {
+
+    std::string userOptions = "Params = '0.1, -0.04, 2.9', StartOverlaps = "
+                              "'1.4, 0.1, 1.4', EndOverlaps = '1.6, 2.9, 1.6'";
+
+    boost::tuple<std::string, std::string> output = postprocessGroupString(
+        m_rows, m_instrument, m_model, createReflectometryWhiteList(),
+        createReflectometryPreprocessMap(), createReflectometryProcessor(),
+        DataPostprocessorAlgorithm(), userOptions);
 
     const std::string result[] = {
-        "#Stitch workspaces",
+        "#Post-process workspaces",
         "IvsQ_12345_12346_24681_24682, _ = Stitch1DMany(InputWorkspaces = "
         "'IvsQ_12345, IvsQ_12346, IvsQ_24681,"
         " IvsQ_24682', Params = '0.1, -0.04, 2.9', StartOverlaps = '1.4, 0.1, "
@@ -274,26 +323,28 @@ public:
   }
 
   void testPlotsString() {
-    std::vector<std::string> unstitched_ws;
-    unstitched_ws.emplace_back("TEST_WS1");
-    unstitched_ws.emplace_back("TEST_WS2");
+    std::vector<std::string> unprocessed_ws;
+    unprocessed_ws.emplace_back("TEST_WS1_1, TEST_WS1_2");
+    unprocessed_ws.emplace_back("TEST_WS2_1, TEST_WS2_2");
 
-    std::vector<std::string> IvsLam_ws;
-    IvsLam_ws.emplace_back("TEST_WS3");
-    IvsLam_ws.emplace_back("TEST_WS4");
+    std::vector<std::string> postprocessed_ws;
+    postprocessed_ws.emplace_back("TEST_WS3");
+    postprocessed_ws.emplace_back("TEST_WS4");
 
-    std::string output = plotsString(unstitched_ws, IvsLam_ws, "TEST_WS5");
+    std::string output = plotsString(
+        unprocessed_ws, boost::algorithm::join(postprocessed_ws, "_"),
+        createReflectometryProcessor());
 
     const std::string result[] = {
         "#Group workspaces to be plotted on same axes",
-        "unstitchedGroupWS = GroupWorkspaces(InputWorkspaces = 'TEST_WS1, "
-        "TEST_WS2')",
-        "IvsLamGroupWS = GroupWorkspaces(InputWorkspaces = 'TEST_WS3, "
-        "TEST_WS4')",
-        "#Plot workspaces", "fig = plots([unstitchedGroupWS, TEST_WS5, "
-                            "IvsLamGroupWS], title=['I vs Q Unstitched', 'I vs "
-                            "Q Stitiched', 'I vs Lambda'], legendLocation=[1, "
-                            "1, 4])",
+        "IvsQ_groupWS = GroupWorkspaces(InputWorkspaces = 'TEST_WS1_1, "
+        "TEST_WS2_1')",
+        "IvsLam_groupWS = GroupWorkspaces(InputWorkspaces = 'TEST_WS1_2, "
+        "TEST_WS2_2')",
+        "#Plot workspaces", "fig = plots([IvsQ_groupWS, IvsLam_groupWS, "
+                            "TEST_WS3_TEST_WS4], title=['IvsQ_groupWS', "
+                            "'IvsLam_groupWS', 'TEST_WS3_TEST_WS4'], "
+                            "legendLocation=[1, 1, 4])",
         ""};
 
     std::vector<std::string> notebookLines;
@@ -307,15 +358,22 @@ public:
   }
 
   void testReduceRowString() {
-    boost::tuple<std::string, std::string, std::string> output =
-        reduceRowString(1, m_instrument, m_model, col_nums);
+
+    std::map<std::string, std::string> userPreProcessingOptions = {
+        {"Run(s)", ""}, {"Transmission Run(s)", ""}};
+
+    boost::tuple<std::string, std::string> output = reduceRowString(
+        1, m_instrument, m_model, createReflectometryWhiteList(),
+        createReflectometryPreprocessMap("TOF_"),
+        createReflectometryProcessor(), userPreProcessingOptions, "");
 
     const std::string result[] = {
         "TOF_12346 = Load(Filename = 'INSTRUMENT12346')",
-        "IvsQ_12346, IvsLam_12346, theta_12346 = "
+        "IvsQ_TOF_12346, IvsLam_TOF_12346, _ = "
         "ReflectometryReductionOneAuto(InputWorkspace = 'TOF_12346', ThetaIn = "
-        "1.5)",
-        "IvsQ_12346 = Rebin(IvsQ_12346, Params = '1.4, -0.04, 2.9')", ""};
+        "1.5, MomentumTransferMinimum = 1.4, MomentumTransferMaximum = 2.9, "
+        "MomentumTransferStep = 0.04, ScaleFactor = 1)",
+        ""};
 
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, boost::get<0>(output), boost::is_any_of("\n"));
@@ -328,36 +386,21 @@ public:
   }
 
   void testPlusString() {
-    std::string output = plusString("INPUT_WS", "OUTPUT_WS");
-    const std::string result = "OUTPUT_WS = Plus('LHSWorkspace' = OUTPUT_WS, "
-                               "'RHSWorkspace' = INPUT_WS)\n";
+
+    auto reflectometryPreprocessMap = createReflectometryPreprocessMap();
+
+    std::string output = plusString("INPUT_WS", "OUTPUT_WS",
+                                    reflectometryPreprocessMap["Run(s)"], "");
+    const std::string result = "OUTPUT_WS = Plus(LHSWorkspace = 'OUTPUT_WS', "
+                               "RHSWorkspace = 'INPUT_WS')\n";
     TS_ASSERT_EQUALS(output, result)
   }
 
   void testLoadRunString() {
     boost::tuple<std::string, std::string> output =
-        loadRunString("12345", m_instrument);
+        loadRunString("12345", m_instrument, "TOF_");
     const std::string result =
         "TOF_12345 = Load(Filename = 'INSTRUMENT12345')\n";
-    TS_ASSERT_EQUALS(boost::get<0>(output), result)
-  }
-
-  void testGetRunNumber() {
-    // Test with no run number in string
-    std::string output = getRunNumber("TEST_WORKSPACE");
-    const std::string result = "TEST_WORKSPACE";
-    TS_ASSERT_EQUALS(output, result)
-
-    // Test with instrument and number
-    std::string output1 = getRunNumber("INSTRUMENT12345");
-    const std::string result1 = "12345";
-    TS_ASSERT_EQUALS(output1, result1)
-  }
-
-  void testScaleString() {
-    boost::tuple<std::string, std::string> output = scaleString("12345", 1.0);
-    const std::string result =
-        "IvsQ_12345 = Scale(InputWorkspace = IvsQ_12345, Factor = 1)\n";
     TS_ASSERT_EQUALS(boost::get<0>(output), result)
   }
 
@@ -371,14 +414,6 @@ public:
         vectorParamString("PARAM_NAME", stringVector);
 
     TS_ASSERT_EQUALS(stringOutput, "PARAM_NAME = 'A, B, C'")
-  }
-
-  void testRebinString() {
-    boost::tuple<std::string, std::string> output =
-        rebinString(1, "12345", m_model, col_nums);
-    const std::string result =
-        "IvsQ_12345 = Rebin(IvsQ_12345, Params = '1.4, -0.04, 2.9')\n";
-    TS_ASSERT_EQUALS(boost::get<0>(output), result)
   }
 };
 
