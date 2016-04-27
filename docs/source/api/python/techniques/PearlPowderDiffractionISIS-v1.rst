@@ -65,6 +65,12 @@ used instead.
 File & Folders
 --------------
 
+The routines/script has been differentiated from the list of
+directories of `calibration` and `raw` files. The calibration
+directories can be found within `'pearl_calib_factory.py'`,
+whereas the the raw directories can be found within
+`'pearl_cycle_factory.py'`.
+
 You are not require to set calibration and raw files directory,
 unless you are utilising calibration files from your local machine.
 The script will automatically find the correct calibration files
