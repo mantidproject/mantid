@@ -107,23 +107,23 @@ class IqtFitSequentialTest(unittest.TestCase):
         # Check f1.Tau
         tau = matrixWS.readY(2)
         self.assertEquals(round(tau[0], 7), 0.0287487)
-        self.assertEquals(round(tau[-1],8), 0.0034430)
+        self.assertEquals(round(tau[-1],7), 0.0034430)
 
 
     def _validate_group_values(self, groupWS):
         sub_ws = groupWS.getItem(0)
         # Check Data
         data = sub_ws.readY(0)
-        self.assertEquals(round(data[0], 5), 0.797069)
-        self.assertEquals(round(data[-1],5), 0.039049)
+        self.assertEquals(round(data[0], 6), 0.797069)
+        self.assertEquals(round(data[-1],6), 0.039044)
         # Check Calc
         calc = sub_ws.readY(1)
-        self.assertEquals(round(calc[0], 5), 0.870523)
-        self.assertEquals(round(calc[-1],5), 0.033887)
+        self.assertEquals(round(calc[0], 6), 0.870523)
+        self.assertEquals(round(calc[-1],6), 0.033887)
         # Check Diff
         diff = sub_ws.readY(2)
-        self.assertEquals(round(diff[0], 5),-0.073454)
-        self.assertEquals(round(diff[-1],5), 0.005157)
+        self.assertEquals(round(diff[0], 6),-0.073454)
+        self.assertEquals(round(diff[-1],6), 0.005157)
 
 
 #---------------------------------------Success cases--------------------------------------
