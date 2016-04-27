@@ -1,3 +1,4 @@
+.. _cry-powder-diffraction-ref:
 
 =========================================
 Crystallography Powder Diffraction Script
