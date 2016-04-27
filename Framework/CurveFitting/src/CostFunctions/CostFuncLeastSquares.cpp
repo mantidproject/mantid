@@ -227,10 +227,10 @@ void CostFuncLeastSquares::addValDerivHessian(API::IFunction_sptr function,
                                               bool evalDeriv,
                                               bool evalHessian) const {
   UNUSED_ARG(evalDeriv);
-  size_t np = function->nParams(); // number of parameters
-  size_t ny = domain->size();      // number of data points
-  Jacobian jacobian(ny, np);
   function->function(*domain, *values);
+  size_t np = function->nParams(); // number of parameters
+  size_t ny = values->size();      // number of data points
+  Jacobian jacobian(ny, np);
   function->functionDeriv(*domain, jacobian);
 
   size_t iActiveP = 0;

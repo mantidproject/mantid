@@ -39,6 +39,7 @@
 
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_blas.h>
+#include <gsl/gsl_version.h>
 
 #include <QApplication>
 #include <QMessageBox>
@@ -141,7 +142,14 @@ gsl_multifit_fdfsolver *Fit::fitGSL(gsl_multifit_function_fdf f,
     status = gsl_multifit_test_delta(s->dx, s->x, d_tolerance, d_tolerance);
   } while (inRange && status == GSL_CONTINUE && (int)iter < d_max_iterations);
 
+#if GSL_MAJOR_VERSION < 2
   gsl_multifit_covar(s->J, 0.0, covar);
+#else
+  gsl_matrix *J = gsl_matrix_alloc(d_n, d_p);
+  gsl_multifit_fdfsolver_jac(s, J);
+  gsl_multifit_covar(J, 0.0, covar);
+  gsl_matrix_free (J);
+#endif
   iterations = static_cast<int>(iter);
   return s;
 }

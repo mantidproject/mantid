@@ -80,6 +80,9 @@ public:
     TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(
                         run.getProperty("L1_chopper_value"))->firstValue(),
                     18.4726, 1.0e-3);
+    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(
+                        run.getProperty("L1"))->firstValue(),
+                    9.35959, 1.0e-3);
 
     TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(
                         run.getProperty("L2_det_value"))->firstValue(),
@@ -97,9 +100,6 @@ public:
                         run.getProperty("L2_curtaind_value"))->firstValue(),
                     24.2824, 1.0e-3);
 
-    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(
-                        run.getProperty("D_det_value"))->firstValue(),
-                    0.0052, 1.0e-4);
     TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(
                         run.getProperty("D_curtainl_value"))->firstValue(),
                     0.3816, 1.0e-4);

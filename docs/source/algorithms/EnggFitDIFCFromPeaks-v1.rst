@@ -72,16 +72,16 @@ Usage
 
    # Print the results
    print "DIFA: %.1f" % difa
-   print "DIFC: %.1f" % difc
-   print "TZERO: %.1f" % tzero
+   print "DIFC: %.0f" % round(difc,-1)
+   print "TZERO: %.0f" %round(tzero,-1)
    tbl = mtd[out_tbl_name]
    print "The output table has %d row(s)" % tbl.rowCount()
-   print "Parameters from the table, DIFA: %.1f, DIFC: %.1f, TZERO: %.1f" % (tbl.cell(0,0), tbl.cell(0,1), tbl.cell(0,2))
+   print "Parameters from the table, DIFA: %.1f, DIFC: %.0f, TZERO: %.0f" % (tbl.cell(0,0), round(tbl.cell(0,1),-1), round(tbl.cell(0,2),-1))
    print "Number of peaks fitted: {0}".format(peaks_tbl.rowCount())
    print "First peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[0])
    print "First fitted peak center (ToF): {0:.1f}".format(peaks_tbl.column('X0')[0])
    print "Second peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[1])
-   print "Second fitted peak center (ToF): {0:.1f}".format(peaks_tbl.column('X0')[1])
+   print "Second fitted peak center (ToF): {0:.0f}".format(round(peaks_tbl.column('X0')[1],-1))
 
 Output:
 
@@ -92,15 +92,15 @@ Output:
 .. testoutput:: ExTwoPeaks
 
    DIFA: 0.0
-   DIFC: 18181.8
-   TZERO: 460.5
+   DIFC: 18180
+   TZERO: 460
    The output table has 1 row(s)
-   Parameters from the table, DIFA: 0.0, DIFC: 18181.8, TZERO: 460.5
+   Parameters from the table, DIFA: 0.0, DIFC: 18180, TZERO: 460
    Number of peaks fitted: 2
    First peak expected (dSpacing): 0.8
    First fitted peak center (ToF): 15006.0
    Second peak expected (dSpacing): 1.9
-   Second fitted peak center (ToF): 35006.0
+   Second fitted peak center (ToF): 35010
 
 .. categories::
 
