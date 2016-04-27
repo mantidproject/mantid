@@ -100,10 +100,12 @@ class IqtFitSequential(PythonAlgorithm):
         from IndirectDataAnalysis import (convertToElasticQ)
         from IndirectCommon import (getWSprefix)
 
+        setup_prog = Progress(self, start=0.0, end=0.1, nreports=4)
         self._fit_type = self._fit_type[:-2]
         logger.information('Option: ' + self._fit_type)
         logger.information(self._function)
 
+        setup_prog.report('Cropping workspace')
         tmp_fit_workspace = "__furyfit_fit_ws"
         CropWorkspace(InputWorkspace=self._input_ws, OutputWorkspace=tmp_fit_workspace, XMin=self._start_x, XMax=self._end_x)
 
@@ -114,13 +116,17 @@ class IqtFitSequential(PythonAlgorithm):
         # Name stem for generated workspace
         output_workspace = '%sfury_%s%d_to_%d' % (getWSprefix(self._input_ws.getName()), self._fit_type, self._spec_min, self._spec_max)
 
+        setup_prog.report('Converting to Histogram')
         ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
+        setup_prog.report('Convert to Elastic Q')
         convertToElasticQ(tmp_fit_workspace)
 
         # Build input string for PlotPeakByLogValue
         input_str = [tmp_fit_workspace + ',i%d' % i for i in range(self._spec_min, self._spec_max + 1)]
         input_str = ';'.join(input_str)
 
+        fit_prog = Progress(self, start=0.1, end=0.8, nreports=2)
+        fit_prog.report('Fitting...')
         PlotPeakByLogValue(Input=input_str,
                            OutputWorkspace=output_workspace,
                            Function=self._function,
@@ -130,11 +136,14 @@ class IqtFitSequential(PythonAlgorithm):
                            EndX=self._end_x,
                            FitType='Sequential',
                            CreateOutput=True)
+        fit_prog.report('Fitting complete')
 
+        conclusion_prog = Progress(self, start=0.8, end=1.0, nreports=5)
         # Remove unsused workspaces
         DeleteWorkspace(output_workspace + '_NormalisedCovarianceMatrices')
         DeleteWorkspace(output_workspace + '_Parameters')
 
+        conclusion_prog.report('Renaming workspaces')
         # rename workspaces to match user input
         if output_workspace + "_Workspaces" != self._fit_group_name:
             RenameWorkspace(InputWorkspace=output_workspace + "_Workspaces", OutputWorkspace=self._fit_group_name)
@@ -143,6 +152,7 @@ class IqtFitSequential(PythonAlgorithm):
 
         # Create *_Result workspace
         parameter_names = 'A0,Intensity,Tau,Beta'
+        conclusion_prog.report('Processing indirect fit parameters')
         self._result_name = ProcessIndirectFitParameters(InputWorkspace=self._parameter_name,
                                                          ColumnX="axis-1", XAxisUnit="MomentumTransfer",
                                                          ParameterNames=parameter_names)
@@ -156,16 +166,19 @@ class IqtFitSequential(PythonAlgorithm):
         sample_logs  = {'start_x': self._start_x, 'end_x': self._end_x, 'fit_type': self._fit_type,
                         'intensities_constrained': self._intensities_constrained, 'beta_constrained': False}
 
+        conclusion_prog.report('Copying sample logs')
         CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=self._fit_group_name)
         CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=self._result_name)
 
         log_names = [item[0] for item in sample_logs]
         log_values = [item[1] for item in sample_logs]
+        conclusion_prog.report('Adding sample logs')
         AddSampleLogMultiple(Workspace=self._result_name, LogNames=log_names, LogValues=log_values)
         AddSampleLogMultiple(Workspace=self._fit_group_name, LogNames=log_names, LogValues=log_values)
 
         self.setProperty('OutputParameterWorkspace', self._parameter_name)
         self.setProperty('OutputWorkspaceGroup', self._fit_group_name)
         self.setProperty('OutputResultWorkspace', self._result_name)
+        conclusion_prog.report('Algorithm complete')
 
 AlgorithmFactory.subscribe(IqtFitSequential)
