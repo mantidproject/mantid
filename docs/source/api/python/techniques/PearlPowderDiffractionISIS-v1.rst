@@ -42,6 +42,15 @@ usage):
 - fmode e.g: (`trans`)
 - ttmode e.g: (`TT70`)
 
+If the following parameters are not passed, the default values are
+ used instead.
+
+- ext e.g: (`raw` or `s01`) - file extension, default is set as `raw`
+- atten e.g: (`True`/`False`) - whether use attentuation file, default
+  is set as `True`
+- debug e.g: (`True`/`False`) - whether to use debug mode, default
+  is set as `False`
+
 - optional: Attentuation file directory - if you would wish to use
   a different Attentuation file e.g:
   (`P:\\Mantid\\Attentuation\\PRL112_DC25_10MM_FF.OUT`)
@@ -49,7 +58,7 @@ usage):
   files to preferred directory/location instead of the Pearl network.
   e.g: (`C:\\Mantid\\MantidOut\\`)
 
-To run the script, an example can be found within the usage section.
+**Usage examples can be found under the usage section.**
 
 File & Folders
 --------------
@@ -84,7 +93,17 @@ Usage
    # set up the directory to the attentuation file
    pearl_routines.PEARL_setattenfile(new_atten="P:\\Mantid\\Attentuation\\PRL112_DC25_10MM_FF.OUT")
 
-   # set up the run number/s, fmode, ttmode, use attentuation file (True/False), do vanadium normalisation (True/False)
-   pearl_routines.PEARL_focus("92476_92479",fmode="trans",ttmode="TT70",atten=True,van_norm=True)
+   # set up the run number/s, ext, fmode, ttmode, use attentuation file (True), do vanadium normalisation (True)
+   pearl_routines.PEARL_focus("92476_92479", ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True)
 
+**Example 2 - Simplified Script Utilised To Process Powder Diffraction With Pearl**
+
+.. code-block:: python
+
+   import pearl_routines
+
+   pearl_routines.PEARL_startup("Mantid_Developer","15_4")
+   # default values used here for ext ("raw"), atten (True), van_norm (True) and debug (False)
+   # uses the default attentuation file within the script - "PRL985_WC_HOYBIDE_NK_10MM_FF.OUT"
+   pearl_routines.PEARL_focus(86329, fmode="trans", ttmode="TT70")
 
