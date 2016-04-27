@@ -138,7 +138,7 @@ Usage
   Load(Filename=r'focussed.nxs', OutputWorkspace='focussed')
   FitPeak(InputWorkspace='focussed', OutputWorkspace='peak4', ParameterTableWorkspace='peak4result',
           WorkspaceIndex='3',PeakFunctionType='Gaussian (Height, PeakCentre, Sigma)',
-          PeakParameterValues='2000,2.1,0.01',BackgroundType='Linear (A0, A1)',
+          PeakParameterValues='2000,2.14,0.01',BackgroundType='Linear (A0, A1)',
           BackgroundParameterValues='2500,2000',FitWindow='2,2.3',PeakRange='2.1,2.25')
 
 
@@ -159,7 +159,7 @@ Output:
 
 .. testoutput:: ExFitPeak
 
-  Chi-square = 7.13874: Peak centre = 2.14171, Height = 8365.83632, Sigma = 0.00564
+  Chi-square = 1.74892: Peak centre = 2.14201, Height = 7490.66905, Sigma = 0.00776
 
 .. categories::
 
