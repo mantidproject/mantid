@@ -80,7 +80,7 @@ Improvements in the tomographic reconstruction graphical user interface:
 Powder Diffraction Scripts
 --------------------------
 
-- Pearl legacy powder diffraction has been integrated and can be found
+- Pearl powder diffraction has been integrated and can be found
   `Script/PearlPowderISIS`. The routines/script has been differentiated from
   the long list of directories of calibration and raw files. The calibration
   directories can be found in a file by the name of pearl_calib_factory.py,
@@ -89,6 +89,9 @@ Powder Diffraction Scripts
 
 - PowderISIS/Aziz script has been renamed to CryPowderISIS and can be found
   `Script/CryPowderISIS`
+
+- :ref:`pearl-powder-diffraction-ref` documentation has been implemented and
+  PowderISIS/Aziz script documentation has been renamed to ref:`cry-powder-diffraction-ref`
 
 
 Full list of `diffraction <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Diffraction%22>`_
