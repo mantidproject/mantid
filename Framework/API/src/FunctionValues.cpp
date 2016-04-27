@@ -226,9 +226,7 @@ void FunctionValues::setFitDataFromCalculated(const FunctionValues &values) {
 /*
  *@brief Return a reference to the calculated values
  */
-std::vector<double>& FunctionValues::getCalculated(){
-  return m_calculated;
-}
+std::vector<double> &FunctionValues::getCalculated() { return m_calculated; }
 
 } // namespace API
 } // namespace Mantid

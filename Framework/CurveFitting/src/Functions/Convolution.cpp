@@ -80,8 +80,6 @@ struct RealFFTWorkspace {
 };
 }
 
-
-
 /**
  * Calculates convolution of the two member functions.
  * @param domain :: space on which the function acts
@@ -102,27 +100,29 @@ void Convolution::function(const FunctionDomain &domain,
 
   const size_t mData = domain.size();
   const double *xOrigVals = d1d->getPointerAt(0);
-  double dx = (xOrigVals[mData-1]-xOrigVals[0])/static_cast<double>((mData-1));
-  auto ixP = static_cast<size_t>(xOrigVals[mData-1]/dx); //positive x-values
-  auto ixN = mData-ixP-1; // negative x-values (ixP+ixN=mData-1)
+  double dx =
+      (xOrigVals[mData - 1] - xOrigVals[0]) / static_cast<double>((mData - 1));
+  auto ixP = static_cast<size_t>(xOrigVals[mData - 1] / dx); // positive
+                                                             // x-values
+  auto ixN = mData - ixP - 1; // negative x-values (ixP+ixN=mData-1)
 
   refreshResolution();
 
   // double the domain where to evaluate the convolution. Guarantees complete
   // overlap betwen convolution and signal in the original range.
-  const size_t nData = mData+ixN+ixP; // equal to 2*mData-1
-  std::vector<double>xValuesVec(nData);
+  const size_t nData = mData + ixN + ixP; // equal to 2*mData-1
+  std::vector<double> xValuesVec(nData);
   double *xValues = xValuesVec.data();
   Mantid::API::FunctionDomain1DView domainExtd(xValues, nData);
-  double Dx = dx*static_cast<double>(ixN+ixP);
-  for(size_t i=0; i<nData; i++){
-    xValues[i] = -Dx + static_cast<double>(i)*dx;
+  double Dx = dx * static_cast<double>(ixN + ixP);
+  for (size_t i = 0; i < nData; i++) {
+    xValues[i] = -Dx + static_cast<double>(i) * dx;
   }
 
   // Fill m_resolution with the resolution function data
   IFunction1D_sptr resolution =
       boost::dynamic_pointer_cast<IFunction1D>(getFunction(0));
-  if(!resolution) {
+  if (!resolution) {
     throw std::runtime_error("Convolution can work only with IFunction1D");
   }
   if (m_resolution.empty()) {
@@ -174,17 +174,16 @@ void Convolution::function(const FunctionDomain &domain,
     // Evaluate the model on the extended domain
     Mantid::API::FunctionValues valuesExtd(domainExtd);
     getFunction(1)->function(domainExtd, valuesExtd);
-    //Convolve with resolution
+    // Convolve with resolution
     double *outExt = valuesExtd.getPointerToCalculated(0);
-    for(size_t i=0; i<mData; i++) {
+    for (size_t i = 0; i < mData; i++) {
       double tmp{0.0};
-      for(size_t j=0; j<mData; j++) {
-        tmp += outExt[i+j]*m_resolution[j];
+      for (size_t j = 0; j < mData; j++) {
+        tmp += outExt[i + j] * m_resolution[j];
       }
-      out[i] = tmp*dx;
+      out[i] = tmp * dx;
     }
-  }
-  else {
+  } else {
     values.zeroCalculated();
   }
 
