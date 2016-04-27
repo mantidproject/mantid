@@ -13,6 +13,8 @@ Algorithms
 
 - *IndirectNormSpectra* algorithm is designed to normalise all spectra in a
   MatrixWorkspace so that the maximum value for any spectra is 1
+- :ref: `IqtFitSequential <algm-IqtFitSequential>` algorithm has been added to sequential Iqt Fit data.
+  This algorithm will be mainly used in the IqtFit interface.
 
 Data Analysis
 #############
