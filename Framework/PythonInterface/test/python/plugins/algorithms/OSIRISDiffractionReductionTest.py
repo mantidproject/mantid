@@ -85,9 +85,9 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
         """
         Test reduction with multiple sample and vanadium runs
         """
-        wks = OSIRISDiffractionReduction(Sample=['OSI10203.raw','OSI10204.raw'],
+        wks = OSIRISDiffractionReduction(Sample=['OSI10203.raw','OSI10204.RAW'],
                                          CalFile='osiris_041_RES10.cal',
-                                         Vanadium=['OSI10156.raw','OSI10157.raw'],
+                                         Vanadium=['OSI10156.raw','OSI10157.RAW'],
                                          ContainerScaleFactor=0.5,
                                          SpectraMin=3,
                                          SpectraMax=361,
@@ -101,10 +101,10 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
         """
         Test reduction with multiple sample, vanadium and container runs
         """
-        wks = OSIRISDiffractionReduction(Sample=['OSI10203.raw','OSI10204.raw'],
+        wks = OSIRISDiffractionReduction(Sample=['OSI10203.raw','OSI10204.RAW'],
                                          CalFile='osiris_041_RES10.cal',
-                                         Vanadium=['OSI10156.raw','OSI10157.raw'],
-                                         Container=['OSI10241.raw','OSI10242.raw'],
+                                         Vanadium=['OSI10156.raw','OSI10157.RAW'],
+                                         Container=['OSI10241.raw','OSI10242.RAW'],
                                          ContainerScaleFactor=0.5,
                                          SpectraMin=3,
                                          SpectraMax=361,
@@ -148,7 +148,7 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
         """
         self.assertRaises(RuntimeError,
                           OSIRISDiffractionReduction,
-                          Sample=['OSI89813.raw', 'OSI89814.raw'],
+                          Sample=['OSI89813.raw', 'OSI89814.RAW'],
                           CalFile='osiris_041_RES10.cal',
                           Vanadium=['OSI10156.raw'],
                           SpectraMin=3,
@@ -161,9 +161,9 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
         """
         self.assertRaises(RuntimeError,
                           OSIRISDiffractionReduction,
-                          Sample=['OSI89813.raw', 'OSI89814.raw'],
+                          Sample=['OSI89813.raw', 'OSI89814.RAW'],
                           CalFile='osiris_041_RES10.cal',
-                          Vanadium=['OSI10156.raw', 'OSI10157.raw'],
+                          Vanadium=['OSI10156.raw', 'OSI10157.RAW'],
                           Container=['OSI10241.raw'],
                           SpectraMin=3,
                           SpectraMax=361)
