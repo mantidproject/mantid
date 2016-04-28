@@ -38,6 +38,8 @@ void MuonAnalysisFitFunctionHelper::doConnect() {
     connect(fitBrowser, SIGNAL(errorsEnabled(bool)), this,
             SLOT(handleErrorsEnabled(bool)));
     connect(fitBrowser, SIGNAL(fitUndone()), this, SLOT(handleFitFinished()));
+    connect(fitBrowser, SIGNAL(functionLoaded(const QString &)), this,
+            SLOT(handleFunctionLoaded(const QString &)));
   }
   if (const QObject *funcBrowser = dynamic_cast<QObject *>(m_funcBrowser)) {
     connect(funcBrowser, SIGNAL(functionStructureChanged()), this,
@@ -111,10 +113,21 @@ void MuonAnalysisFitFunctionHelper::handleModelCleared() {
 /**
  * Called when user shows/hides parameter errors.
  * Pass this change on to the function browser.
- * @param enabled :: enabled/disabled state of param errors
+ * @param enabled :: [input] enabled/disabled state of param errors
  */
 void MuonAnalysisFitFunctionHelper::handleErrorsEnabled(bool enabled) {
   m_funcBrowser->setErrorsEnabled(enabled);
+}
+
+/**
+ * Called when a saved setup is loaded into the fit property browser.
+ * Update the function browser with this loaded function.
+ * @param funcString :: [input] Loaded function as a string
+ */
+void MuonAnalysisFitFunctionHelper::handleFunctionLoaded(
+    const QString &funcString) {
+  m_funcBrowser->clear();
+  m_funcBrowser->setFunction(funcString);
 }
 
 } // namespace CustomInterfaces

@@ -57,6 +57,8 @@ public slots:
   void handleModelCleared();
   /// Pass show/hide parameter errors to function browser
   void handleErrorsEnabled(bool enabled);
+  /// When a saved setup is loaded, update the function browser
+  void handleFunctionLoaded(const QString &funcString);
 
 private:
   /// Connect signals and slots

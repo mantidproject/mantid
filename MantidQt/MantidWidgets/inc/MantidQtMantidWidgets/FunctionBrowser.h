@@ -89,7 +89,7 @@ public:
   /// Clear the contents
   void clear() override;
   /// Set the function in the browser
-  void setFunction(const QString& funStr);
+  void setFunction(const QString& funStr) override;
   /// Set the function in the browser
   void setFunction(Mantid::API::IFunction_sptr fun);
   /// Return FunctionFactory function string

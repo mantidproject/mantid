@@ -27,6 +27,7 @@ public:
   MOCK_METHOD0(clear, void());
   MOCK_METHOD1(setErrorsEnabled, void(bool));
   MOCK_METHOD0(clearErrors, void());
+  MOCK_METHOD1(setFunction, void(const QString &));
 };
 
 // Mock muon fit property browser
@@ -132,6 +133,13 @@ public:
   void test_handleErrorsEnabled_Off() {
     EXPECT_CALL(*m_funcBrowser, setErrorsEnabled(false)).Times(1);
     m_helper->handleErrorsEnabled(false);
+  }
+
+  void test_handleFunctionLoaded() {
+    const QString funcString("some function string");
+    EXPECT_CALL(*m_funcBrowser, clear()).Times(1);
+    EXPECT_CALL(*m_funcBrowser, setFunction(funcString)).Times(1);
+    m_helper->handleFunctionLoaded(funcString);
   }
 
 private:

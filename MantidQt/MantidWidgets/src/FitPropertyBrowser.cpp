@@ -2214,7 +2214,7 @@ void FitPropertyBrowser::loadFunctionFromString() {
 }
 
 void FitPropertyBrowser::loadFunction(const QString &funcString) {
-  // when loading a function from a sting initially
+  // when loading a function from a string initially
   // do not try to do auto background even if set
   bool isAutoBGset = false;
   if (m_auto_back) {
@@ -2225,6 +2225,7 @@ void FitPropertyBrowser::loadFunction(const QString &funcString) {
   getHandler()->removeAllPlots();
   clearBrowser();
   createCompositeFunction(funcString);
+  emit functionLoaded(funcString);
 
   if (isAutoBGset)
     m_auto_back = true;
