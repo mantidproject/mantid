@@ -277,6 +277,7 @@ signals:
   /// been done
   void fittingDone(const QString &);
   void functionFactoryUpdateReceived();
+  void errorsEnabled(bool enabled);
 
 protected slots:
   /// Get the registered function names

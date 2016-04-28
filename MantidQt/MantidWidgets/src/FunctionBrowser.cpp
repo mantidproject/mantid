@@ -210,7 +210,7 @@ void FunctionBrowser::createActions()
   m_actionRemoveConstraint = new QAction("Remove",this);
   connect(m_actionRemoveConstraint,SIGNAL(triggered()),this,SLOT(removeConstraint()));
 
-  m_parameterManager->setErrorsEnabled(true);
+  setErrorsEnabled(true);
 }
 
 /**
@@ -2384,6 +2384,14 @@ void FunctionBrowser::setColumnSizes(int s0, int s1, int s2)
 void FunctionBrowser::globalChanged(QtProperty*, const QString&, bool)
 {
   emit globalsChanged();
+}
+
+/**
+ * Set display of parameter errors on/off
+ * @param enabled :: [input] On/off display of errors
+ */
+void FunctionBrowser::setErrorsEnabled(bool enabled) {
+  m_parameterManager->setErrorsEnabled(enabled);
 }
 
 } // MantidWidgets

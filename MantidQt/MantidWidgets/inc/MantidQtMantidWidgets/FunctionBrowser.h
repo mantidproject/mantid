@@ -147,6 +147,9 @@ public:
   /// Resize the browser's columns
   void setColumnSizes(int s0, int s1, int s2 = -1);
 
+  /// Set error display on/off
+  void setErrorsEnabled(bool enabled) override;
+
 signals:
   /// User selects a different function (or one of it's sub-properties)
   void currentFunctionChanged();

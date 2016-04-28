@@ -25,6 +25,7 @@ public:
   MOCK_METHOD2(parameterChanged, void(const QString &, const QString &));
   MOCK_CONST_METHOD2(getParameter, double(const QString &, const QString &));
   MOCK_METHOD0(clear, void());
+  MOCK_METHOD1(setErrorsEnabled, void(bool));
 };
 
 // Mock muon fit property browser
@@ -120,6 +121,16 @@ public:
   void test_handleModelCleared() {
     EXPECT_CALL(*m_funcBrowser, clear()).Times(1);
     m_helper->handleModelCleared();
+  }
+
+  void test_handleErrorsEnabled_On() {
+    EXPECT_CALL(*m_funcBrowser, setErrorsEnabled(true)).Times(1);
+    m_helper->handleErrorsEnabled(true);
+  }
+
+  void test_handleErrorsEnabled_Off() {
+    EXPECT_CALL(*m_funcBrowser, setErrorsEnabled(false)).Times(1);
+    m_helper->handleErrorsEnabled(false);
   }
 
 private:

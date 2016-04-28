@@ -44,6 +44,7 @@ public:
   virtual double getParameter(const QString &funcIndex,
                               const QString &paramName) const = 0;
   virtual void clear() = 0;
+  virtual void setErrorsEnabled(bool enabled) = 0;
 };
 
 } // namespace MantidWidgets

@@ -35,6 +35,8 @@ void MuonAnalysisFitFunctionHelper::doConnect() {
             SLOT(handleFitFinished(const QString &)));
     connect(fitBrowser, SIGNAL(functionCleared()), this,
             SLOT(handleModelCleared()));
+    connect(fitBrowser, SIGNAL(errorsEnabled(bool)), this,
+            SLOT(handleErrorsEnabled(bool)));
   }
   if (const QObject *funcBrowser = dynamic_cast<QObject *>(m_funcBrowser)) {
     connect(funcBrowser, SIGNAL(functionStructureChanged()), this,
@@ -98,6 +100,15 @@ void MuonAnalysisFitFunctionHelper::handleParameterEdited(
  */
 void MuonAnalysisFitFunctionHelper::handleModelCleared() {
   m_funcBrowser->clear();
+}
+
+/**
+ * Called when user shows/hides parameter errors.
+ * Pass this change on to the function browser.
+ * @param enabled :: enabled/disabled state of param errors
+ */
+void MuonAnalysisFitFunctionHelper::handleErrorsEnabled(bool enabled) {
+  m_funcBrowser->setErrorsEnabled(enabled);
 }
 
 } // namespace CustomInterfaces

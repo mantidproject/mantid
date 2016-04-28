@@ -55,6 +55,8 @@ public slots:
                              const QString &paramName);
   /// When "Clear model" selected, clear function browser
   void handleModelCleared();
+  /// Pass show/hide parameter errors to function browser
+  void handleErrorsEnabled(bool enabled);
 
 private:
   /// Connect signals and slots

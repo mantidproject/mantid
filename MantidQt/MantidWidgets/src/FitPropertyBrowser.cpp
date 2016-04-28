@@ -1183,6 +1183,7 @@ void FitPropertyBrowser::boolChanged(QtProperty *prop) {
 
     if (prop == m_showParamErrors) {
       m_parameterManager->setErrorsEnabled(val);
+      emit errorsEnabled(val);
     }
   } else { // it could be an attribute
     PropertyHandler *h = getHandler()->findHandler(prop);
