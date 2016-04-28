@@ -189,10 +189,12 @@ void LoadTBL::csvParse(std::string line, std::vector<std::string> &cols,
 * @param line the line to parse
 * @param cols The vector to parse into
 * @param expectedCommas The number of expected commas in the line
-* @returns An integer specifying how many columns were parsed into. This should
-* always be 17.
+* @param isOldTBL boolean to deal with new and old TBL formats.
+* @returns An integer specifying how many columns were parsed into.
 * @throws std::length_error if anything other than 17 columns (or 16
-* cell-delimiting commas) is found
+* cell-delimiting commas) is found when loading an old Refl TBL. A
+* length_error will be thrown for new TBL formats if there are less column
+* headings than expected commas.
 */
 size_t LoadTBL::getCells(std::string line, std::vector<std::string> &cols,
                          size_t expectedCommas, bool isOldTBL) const {
