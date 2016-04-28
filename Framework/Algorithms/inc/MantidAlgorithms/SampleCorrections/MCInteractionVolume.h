@@ -54,7 +54,7 @@ public:
                              const Kernel::V3D &startPos,
                              const Kernel::V3D &direc,
                              const Kernel::V3D &endPos, double lambdaBefore,
-                             double lambdaAfter);
+                             double lambdaAfter) const;
 
 private:
   const Geometry::Object &m_sample;

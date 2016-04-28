@@ -62,7 +62,7 @@ MCInteractionVolume::MCInteractionVolume(const API::Sample &sample)
 double MCInteractionVolume::calculateAbsorption(
     Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &startPos,
     const Kernel::V3D &direc, const Kernel::V3D &endPos, double lambdaBefore,
-    double lambdaAfter) {
+    double lambdaAfter) const {
   // Create track with start position and direction and "fire" it through
   // the sample to produce a number of intersections. Choose a random
   // intersection and within this section pick a random "depth". This point
