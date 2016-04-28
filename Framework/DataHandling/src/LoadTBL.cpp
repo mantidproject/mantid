@@ -238,7 +238,7 @@ size_t LoadTBL::getCells(std::string line, std::vector<std::string> &cols,
         cols[expectedCommas].append(
             boost::lexical_cast<std::string>("," + cols[i]));
       }
-    } else if (cols.size() > expectedCommas) {
+    } else if (cols.size() < expectedCommas) {
       std::string message = "A line must contain " +
                             boost::lexical_cast<std::string>(expectedCommas) +
                             " cell-delimiting commas. Found " +
@@ -252,12 +252,12 @@ bool LoadTBL::getColumnHeadings(std::string line,
                                 std::vector<std::string> &cols) {
   boost::split(cols, line, boost::is_any_of(","), boost::token_compress_off);
   std::string firstEntry = cols[0];
-  if (std::all_of(firstEntry.begin(), firstEntry.end(), ::isalpha))
+  if (std::all_of(firstEntry.begin(), firstEntry.end(), ::isdigit)) {
     // TBL file contains column headings
-    return false;
-  else {
     cols.clear();
     return true;
+  } else {
+    return false;
   }
 }
 //--------------------------------------------------------------------------
@@ -287,34 +287,36 @@ void LoadTBL::exec() {
 
   ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
 
-  std::vector<std::string> columns;
+  std::vector<std::string> columnHeadings;
 
   Kernel::Strings::extractToEOL(file, line);
   // We want to check if the first line contains an empty string or series of
   // ",,,,,"
   // to see if we are loading a TBL file that actually contains data or not.
-  boost::split(columns, line, boost::is_any_of(","), boost::token_compress_off);
-  for (auto entry = columns.begin(); entry != columns.end();) {
+  boost::split(columnHeadings, line, boost::is_any_of(","),
+               boost::token_compress_off);
+  for (auto entry = columnHeadings.begin(); entry != columnHeadings.end();) {
     if (std::string(*entry).compare("") == 0) {
       // erase the empty values
-      entry = columns.erase(entry);
+      entry = columnHeadings.erase(entry);
     } else {
       // keep any non-empty values
       ++entry;
     }
   }
-  if (columns.empty()) {
+  if (columnHeadings.empty()) {
     // we have an empty string or series of ",,,,,"
     throw std::runtime_error("The file you are trying to load is Empty. \n "
                              "Please load a non-empty TBL file");
   } else {
     // set columns back to empty ready to populated with columnHeadings.
-    columns.clear();
+    columnHeadings.clear();
   }
   // this will tell us if we need to just fill in the cell values
   // or whether we will have to create the column headings as well.
-  bool isOld = getColumnHeadings(line, columns);
+  bool isOld = getColumnHeadings(line, columnHeadings);
 
+  std::vector<std::string> rowVec;
   if (isOld) {
     /**THIS IS ESSENTIALLY THE OLD LoadReflTBL CODE**/
     // create the column headings
@@ -350,48 +352,48 @@ void LoadTBL::exec() {
       if (line == "" || line == ",,,,,,,,,,,,,,,,") {
         continue;
       }
-      getCells(line, columns, 16, isOld);
-      const std::string scaleStr = columns.at(16);
+      getCells(line, rowVec, 16, isOld);
+      const std::string scaleStr = rowVec.at(16);
       double scale = 1.0;
       if (!scaleStr.empty())
-        Mantid::Kernel::Strings::convert<double>(columns.at(16), scale);
+        Mantid::Kernel::Strings::convert<double>(rowVec.at(16), scale);
 
       // check if the first run in the row has any data associated with it
       // 0 = runs, 1 = theta, 2 = trans, 3 = qmin, 4 = qmax
-      if (columns[0] != "" || columns[1] != "" || columns[2] != "" ||
-          columns[3] != "" || columns[4] != "") {
+      if (rowVec[0] != "" || rowVec[1] != "" || rowVec[2] != "" ||
+          rowVec[3] != "" || rowVec[4] != "") {
         TableRow row = ws->appendRow();
         for (int i = 0; i < 5; ++i) {
-          row << columns.at(i);
+          row << rowVec.at(i);
         }
-        row << columns.at(15);
+        row << rowVec.at(15);
         row << scale;
         row << stitchID;
       }
 
       // check if the second run in the row has any data associated with it
       // 5 = runs, 6 = theta, 7 = trans, 8 = qmin, 9 = qmax
-      if (columns[5] != "" || columns[6] != "" || columns[7] != "" ||
-          columns[8] != "" || columns[9] != "") {
+      if (rowVec[5] != "" || rowVec[6] != "" || rowVec[7] != "" ||
+          rowVec[8] != "" || rowVec[9] != "") {
         TableRow row = ws->appendRow();
         for (int i = 5; i < 10; ++i) {
-          row << columns.at(i);
+          row << rowVec.at(i);
         }
-        row << columns.at(15);
+        row << rowVec.at(15);
         row << scale;
         row << stitchID;
       }
 
       // check if the third run in the row has any data associated with it
       // 10 = runs, 11 = theta, 12 = trans, 13 = qmin, 14 = qmax
-      if (columns[10] != "" || columns[11] != "" || columns[12] != "" ||
-          columns[13] != "" || columns[14] != "") {
+      if (rowVec[10] != "" || rowVec[11] != "" || rowVec[12] != "" ||
+          rowVec[13] != "" || rowVec[14] != "") {
         TableRow row = ws->appendRow();
         for (int i = 10; i < 17; ++i) {
           if (i == 16)
             row << scale;
           else
-            row << columns.at(i);
+            row << rowVec.at(i);
         }
         row << stitchID;
       }
@@ -402,19 +404,20 @@ void LoadTBL::exec() {
   } else {
     // we have a TBL format that contains column headings
     // on the first row. These are now entries in the columns vector
-    if (!columns.empty()) {
+    if (!columnHeadings.empty()) {
       // now we need to add the custom column headings from
       // the columns vector to the TableWorkspace
-      for (auto heading = columns.begin(); heading != columns.end();) {
+      for (auto heading = columnHeadings.begin();
+           heading != columnHeadings.end();) {
         if (std::string(*heading).compare("") == 0) {
           // there is no need to have empty column headings.
-          heading = columns.erase(heading);
+          heading = columnHeadings.erase(heading);
         } else {
           Mantid::API::Column_sptr col;
           // The Group column will always be second-to-last
           // in the TBL file. This is the only column that
           // should be of type "int".
-          if (*heading == columns.at(columns.size() - 2))
+          if (*heading == columnHeadings.at(columnHeadings.size() - 2))
             col = ws->addColumn("int", *heading);
           else
             // All other entries in the TableWorkspace will
@@ -425,22 +428,22 @@ void LoadTBL::exec() {
         }
       }
     }
-    size_t expectedCommas = columns.size() - 1;
+    size_t expectedCommas = columnHeadings.size() - 1;
     while (Kernel::Strings::extractToEOL(file, line)) {
       if (line == "" || line == ",,,,,,,,,,,,,,,,") {
         // skip over any empty lines
         continue;
       }
-      getCells(line, columns, columns.size() - 1, isOld);
+      getCells(line, rowVec, columnHeadings.size() - 1, isOld);
       // populate the columns with their values for this row.
       TableRow row = ws->appendRow();
       for (size_t i = 0; i < expectedCommas + 1; ++i) {
         if (i == expectedCommas - 1)
           // taking into consideration Group column
           // of type "int"
-          row << boost::lexical_cast<int>(columns.at(i));
+          row << boost::lexical_cast<int>(rowVec.at(i));
         else
-          row << columns.at(i);
+          row << rowVec.at(i);
       }
     }
     setProperty("OutputWorkspace", ws);

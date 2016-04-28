@@ -1,28 +1,30 @@
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 
-#include "MantidDataHandling/SaveReflTBL.h"
+#include "MantidDataHandling/SaveTBL.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include <fstream>
+#include "Poco/File.h"
 #include <boost/tokenizer.hpp>
 
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the algorithm factory
-DECLARE_ALGORITHM(SaveReflTBL)
+DECLARE_ALGORITHM(SaveTBL)
 
 using namespace Kernel;
 using namespace API;
 
 /// Empty constructor
-SaveReflTBL::SaveReflTBL() : m_sep(','), m_stichgroups(), m_nogroup() {}
+SaveTBL::SaveTBL() : m_sep(','), m_stichgroups(), m_nogroup() {}
 
 /// Initialisation method.
-void SaveReflTBL::init() {
+void SaveTBL::init() {
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::Save, ".tbl"),
       "The filename of the output TBL file.");
@@ -37,19 +39,13 @@ void SaveReflTBL::init() {
 * Finds the stitch groups that need to be on the same line
 * @param ws : a pointer to a tableworkspace
 */
-void SaveReflTBL::findGroups(ITableWorkspace_sptr ws) {
+void SaveTBL::findGroups(ITableWorkspace_sptr ws) {
   size_t rowCount = ws->rowCount();
   for (size_t i = 0; i < rowCount; ++i) {
     TableRow row = ws->getRow(i);
-    if (row.cell<int>(row.size() - 2) != 0) {
+    if (row.cell<int>(ws->columnCount() - 2) != 0) {
       // it was part of a group
-      m_stichgroups[row.cell<int>(row.size() - 2)].push_back(i);
-      if (m_stichgroups[row.cell<int>(row.size() - 2)].size() > 3) {
-        std::string message = "Cannot save a table with stitch groups that are "
-                              "larger than three runs to Reflectometry .tbl "
-                              "format.";
-        throw std::length_error(message);
-      }
+      m_stichgroups[row.cell<int>(ws->columnCount() - 2)].push_back(i);
     } else {
       // it wasn't part of a group
       m_nogroup.push_back(i);
@@ -58,12 +54,13 @@ void SaveReflTBL::findGroups(ITableWorkspace_sptr ws) {
 }
 
 /**
- *   Executes the algorithm.
- */
-void SaveReflTBL::exec() {
+*   Executes the algorithm.
+*/
+void SaveTBL::exec() {
   // Get the workspace
   ITableWorkspace_sptr ws = getProperty("InputWorkspace");
-
+  if (!ws)
+    throw std::runtime_error("Please provide an input workspace to be saved.");
   findGroups(ws);
   std::string filename = getProperty("Filename");
   std::ofstream file(filename.c_str());
@@ -82,16 +79,22 @@ void SaveReflTBL::exec() {
     TableRow row = ws->getRow(rowIndex);
     for (size_t columnIndex = 0; columnIndex < columnHeadings.size();
          columnIndex++) {
-      if (columnIndex == columnHeadings.size() - 2)
-        writeVal<int>(row.cell<int>(columnIndex), file);
-      else if (columnIndex == columnHeadings.size() - 1)
-        writeVal<std::string>(row.cell<std::string>(columnIndex), file, false,
-                              true);
+      if (columnIndex == columnHeadings.size() - 2) {
+        std::string groupHeading = columnHeadings[columnIndex];
+        if (ws->getColumn(groupHeading)->type() != "int") {
+          file.close();
+          remove(filename.c_str());
+          throw std::runtime_error(groupHeading +
+                                   " Column must be of type \"int\"");
+        } else
+          writeVal<int>(row.Int(columnIndex), file);
+      } else if (columnIndex == columnHeadings.size() - 1)
+        writeVal<std::string>(row.String(columnIndex), file, false, true);
       else
-        writeVal<std::string>(row.cell<std::string>(columnIndex), file);
+        writeVal<std::string>(row.String(columnIndex), file);
 
-    } // col for loop
-  }   // row for loop
+    } // col for-loop
+  }   // row for-loop
   file.close();
 }
 
@@ -104,8 +107,7 @@ void SaveReflTBL::exec() {
 * @param endline : boolean true to put an EOL at the end of this data value
 */
 template <class T>
-void SaveReflTBL::writeVal(T &val, std::ofstream &file, bool endsep,
-                           bool endline) {
+void SaveTBL::writeVal(T &val, std::ofstream &file, bool endsep, bool endline) {
   std::string valStr = boost::lexical_cast<std::string>(val);
   size_t comPos = valStr.find(',');
   if (comPos != std::string::npos) {
