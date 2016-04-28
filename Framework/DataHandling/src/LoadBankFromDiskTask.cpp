@@ -50,12 +50,13 @@ public:
                   boost::shared_array<float> event_time_of_flight,
                   size_t numEvents, size_t startAt,
                   boost::shared_ptr<std::vector<uint64_t>> event_index,
-                  boost::shared_ptr<Mantid::DataHandling::BankPulseTimes> thisBankPulseTimes,
+                  boost::shared_ptr<Mantid::DataHandling::BankPulseTimes>
+                      thisBankPulseTimes,
                   bool have_weight, boost::shared_array<float> event_weight,
                   detid_t min_event_id, detid_t max_event_id)
       : // Mantid::Kernel::Task(),
-        alg(alg), entry_name(entry_name),
-        pixelID_to_wi_vector(alg->pixelID_to_wi_vector),
+        alg(alg),
+        entry_name(entry_name), pixelID_to_wi_vector(alg->pixelID_to_wi_vector),
         pixelID_to_wi_offset(alg->pixelID_to_wi_offset), prog(prog),
         event_id(event_id), event_time_of_flight(event_time_of_flight),
         numEvents(numEvents), startAt(startAt), event_index(event_index),
@@ -194,8 +195,8 @@ public:
           if (have_weight) {
             double weight = static_cast<double>(event_weight[i]);
             double errorSq = weight * weight;
-            Mantid::DataHandling::LoadEventNexus::WeightedEventVector_pt eventVector =
-                alg->weightedEventVectors[periodIndex][detId];
+            Mantid::DataHandling::LoadEventNexus::WeightedEventVector_pt
+                eventVector = alg->weightedEventVectors[periodIndex][detId];
             // NULL eventVector indicates a bad spectrum lookup
             if (eventVector) {
 #if !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
@@ -338,7 +339,6 @@ private:
   double m_cost;
 }; // END-DEF-CLASS ProcessBankData
 
-
 /** This task does the disk IO from loading the NXS file,
 * and so will be on a disk IO mutex */
 class LoadBankFromDiskTask { // : public Mantid::Kernel::Task {
@@ -358,7 +358,7 @@ public:
   * @param framePeriodNumbers :: Period numbers corresponding to each frame
   */
   LoadBankFromDiskTask(Mantid::DataHandling::LoadEventNexus *input_alg,
-      const std::string &entry_name,
+                       const std::string &entry_name,
                        const std::string &entry_type,
                        const std::size_t numEvents,
                        const bool oldNeXusFileNames,
@@ -368,15 +368,15 @@ public:
                        const std::vector<int> &framePeriodNumbers,
                        Mantid::Kernel::Logger &logger)
       : // Task(),
-        alg(input_alg), entry_name(entry_name), entry_type(entry_type),
+        alg(input_alg),
+        entry_name(entry_name), entry_type(entry_type),
         // prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL),
         // m_loadError(false),
         prog(prog), scheduler(scheduler), m_loadError(false),
         m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(), m_loadSize(),
         m_event_id(nullptr), m_event_time_of_flight(nullptr),
         m_have_weight(false), m_event_weight(nullptr),
-        m_framePeriodNumbers(framePeriodNumbers),
-        alg_Logger(logger){
+        m_framePeriodNumbers(framePeriodNumbers), alg_Logger(logger) {
     // setMutex(ioMutex);
     m_cost = static_cast<double>(numEvents);
     m_min_id = std::numeric_limits<uint32_t>::max();
@@ -394,7 +394,8 @@ public:
     } catch (::NeXus::Exception &) {
       // Field not found error is most likely.
       // Use the "proton_charge" das logs.
-      thisBankPulseTimes = alg->m_allBanksPulseTimes; // alg->m_allBanksPulseTimes;
+      thisBankPulseTimes =
+          alg->m_allBanksPulseTimes; // alg->m_allBanksPulseTimes;
       return;
     }
     std::string thisStartTime = "";
@@ -406,7 +407,7 @@ public:
 
     // Now, we look through existing ones to see if it is already loaded
     // thisBankPulseTimes = NULL;
-    for (auto &bankPulseTime : alg->m_bankPulseTimes ) { // alg.m_bankPulseTimes
+    for (auto &bankPulseTime : alg->m_bankPulseTimes) { // alg.m_bankPulseTimes
       if (bankPulseTime->equals(thisNumPulses, thisStartTime)) {
         thisBankPulseTimes = bankPulseTime;
         return;
@@ -414,8 +415,9 @@ public:
     }
 
     // Not found? Need to load and add it
-    thisBankPulseTimes = boost::make_shared<Mantid::DataHandling::BankPulseTimes>(
-        boost::ref(file), m_framePeriodNumbers);
+    thisBankPulseTimes =
+        boost::make_shared<Mantid::DataHandling::BankPulseTimes>(
+            boost::ref(file), m_framePeriodNumbers);
     alg->m_bankPulseTimes.push_back(thisBankPulseTimes);
     // alg->bankPulsetimes.push_back(thisBankPulseTimes);
   }
@@ -521,7 +523,7 @@ public:
       stop_event = dim0;
 
     alg_Logger.debug() << entry_name << ": start_event " << start_event
-                             << " stop_event " << stop_event << "\n";
+                       << " stop_event " << stop_event << "\n";
 
     return;
   }
@@ -540,9 +542,9 @@ public:
     // Check that the required space is there in the file.
     if (dim0 < m_loadSize[0] + m_loadStart[0]) {
       alg_Logger.warning() << "Entry " << entry_name
-                                 << "'s event_id field is too small (" << dim0
-                                 << ") to load the desired data size ("
-                                 << m_loadSize[0] + m_loadStart[0] << ").\n";
+                           << "'s event_id field is too small (" << dim0
+                           << ") to load the desired data size ("
+                           << m_loadSize[0] + m_loadStart[0] << ").\n";
       m_loadError = true;
     }
 
@@ -834,7 +836,8 @@ public:
         numEvents, startAt, event_index_shrd, thisBankPulseTimes, m_have_weight,
         event_weight_shrd, m_min_id, mid_id);
     // scheduler->push(newTask1);
-    newTask1->run();;
+    newTask1->run();
+    ;
     if (alg->splitProcessing && (mid_id < m_max_id)) {
       ProcessBankData *newTask2 = new ProcessBankData(
           alg, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
@@ -904,4 +907,3 @@ private:
   double m_cost;
 
 }; // END-DEF-CLASS LoadBankFromDiskTask
-

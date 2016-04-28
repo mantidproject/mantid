@@ -143,7 +143,6 @@ bool BankPulseTimes::equals(size_t otherNumPulse, std::string otherStartTime) {
           (this->numPulses == otherNumPulse));
 }
 
-
 //===============================================================================================
 // LoadEventNexus
 //===============================================================================================
@@ -1117,11 +1116,10 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   for (size_t i = bank0; i < bankn; i++) {
     // We make tasks for loading
-    if (bankNumEvents[i] > 0)
-    {
+    if (bankNumEvents[i] > 0) {
       LoadBankFromDiskTask *task = new LoadBankFromDiskTask(
-            this, bankNames[i], classType, bankNumEvents[i], oldNeXusFileNames,
-            prog2, diskIOMutex, scheduler, periodLogVec, this->getLogger());
+          this, bankNames[i], classType, bankNumEvents[i], oldNeXusFileNames,
+          prog2, diskIOMutex, scheduler, periodLogVec, this->getLogger());
       task->run();
 
       // pool.schedule(new LoadBankFromDiskTask(
