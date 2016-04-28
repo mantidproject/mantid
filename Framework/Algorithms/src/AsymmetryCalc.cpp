@@ -130,7 +130,7 @@ void AsymmetryCalc::exec() {
   API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(
       inputWS, 1, blocksize, blocksize);
 
-  outputWS->setX(0, tmpWS->histogram(forward).points().cowData());
+  outputWS->histogram(0).setPoints(tmpWS->histogram(forward).points());
 
   // Calculate asymmetry for each time bin
   // F-aB / F+aB
