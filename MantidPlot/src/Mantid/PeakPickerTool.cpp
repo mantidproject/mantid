@@ -1069,7 +1069,7 @@ void PeakPickerTool::removeFitCurves()
 
 /**
  * Called from constructor.
- * Sets up tool based on curves in graph.
+ * Sets up tool based on the given curve.
  * @param curve :: [input] Curve to use for initialization
  * @returns :: success or failure
  */
@@ -1084,10 +1084,17 @@ bool PeakPickerTool::initializeFromCurve(PlotCurve *curve) {
   } else {
     MantidMatrixCurve *mcurve = dynamic_cast<MantidMatrixCurve *>(curve);
     if (mcurve) {
-      m_wsName = mcurve->workspaceName();
-      m_spec = mcurve->workspaceIndex();
-      m_shouldBeNormalised =
-          mcurve->isDistribution() && mcurve->isNormalizable();
+      const QString title = mcurve->title().text();
+      if (title.contains("Workspace-Calc")) {
+        // Don't set up from a fit curve
+        return false;
+      } else {
+        // Set up the tool from this curve
+        m_wsName = mcurve->workspaceName();
+        m_spec = mcurve->workspaceIndex();
+        m_shouldBeNormalised =
+            mcurve->isDistribution() && mcurve->isNormalizable();
+      }
     } else {
       return false;
     }
