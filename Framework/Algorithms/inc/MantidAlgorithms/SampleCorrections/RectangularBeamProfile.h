@@ -41,10 +41,10 @@ namespace Algorithms {
 class MANTID_ALGORITHMS_DLL RectangularBeamProfile final : public IBeamProfile {
 public:
   RectangularBeamProfile(const Geometry::ReferenceFrame &frame,
-                         const Kernel::V3D & center, double width,
+                         const Kernel::V3D &center, double width,
                          double height);
 
-  Kernel::V3D
+  IBeamProfile::Ray
   generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const override;
 
 private:
@@ -54,6 +54,7 @@ private:
   const double m_width;
   const double m_height;
   std::array<double, 3> m_min;
+  Kernel::V3D m_beamDir;
 };
 
 } // namespace Algorithms

@@ -2,11 +2,11 @@
 #define MANTID_ALGORITHMS_IBEAMPROFILE_H_
 
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace Kernel {
 class PseudoRandomNumberGenerator;
-class V3D;
 }
 namespace Algorithms {
 
@@ -37,9 +37,13 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL IBeamProfile {
 public:
+  struct Ray {
+    Kernel::V3D startPos;
+    Kernel::V3D unitDir;
+  };
+
   virtual ~IBeamProfile() = default;
-  virtual Kernel::V3D
-  generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const = 0;
+  virtual Ray generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const = 0;
 };
 
 } // namespace Algorithms

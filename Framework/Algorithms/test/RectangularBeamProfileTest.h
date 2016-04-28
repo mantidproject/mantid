@@ -4,10 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
+#include "MonteCarloTesting.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidKernel/PseudoRandomNumberGenerator.h"
-
-#include <gmock/gmock.h>
 
 using Mantid::Algorithms::RectangularBeamProfile;
 
@@ -25,6 +23,7 @@ public:
   //----------------------------------------------------------------------------
   void test_GeneratePoint_Respects_ReferenceFrame() {
     using Mantid::Kernel::V3D;
+    using namespace MonteCarloTesting;
     using namespace ::testing;
 
     const double width(0.1), height(0.2);
@@ -36,11 +35,14 @@ public:
     EXPECT_CALL(rng, nextValue())
         .Times(Exactly(2))
         .WillRepeatedly(Return(rand));
-    TS_ASSERT_EQUALS(V3D(0.0, 0.025, 0.05), profile.generatePoint(rng));
+    auto ray = profile.generatePoint(rng);
+    TS_ASSERT_EQUALS(V3D(0.0, 0.025, 0.05), ray.startPos);
+    TS_ASSERT_EQUALS(V3D(1.0, 0, 0), ray.unitDir);
   }
 
   void test_GeneratePoint_Respects_Center() {
     using Mantid::Kernel::V3D;
+    using namespace MonteCarloTesting;
     using namespace ::testing;
 
     const double width(0.1), height(0.2);
@@ -52,11 +54,14 @@ public:
     EXPECT_CALL(rng, nextValue())
         .Times(Exactly(2))
         .WillRepeatedly(Return(rand));
-    TS_ASSERT_EQUALS(V3D(1.0, 2.025, -2.95), profile.generatePoint(rng));
+    auto ray = profile.generatePoint(rng);
+    TS_ASSERT_EQUALS(V3D(1.0, 2.025, -2.95), ray.startPos);
+    TS_ASSERT_EQUALS(V3D(1.0, 0, 0), ray.unitDir);
   }
 
-  void test_GeneratePoint_Uses_2_Random_Numbers() {
+  void test_GeneratePoint_Uses_2_Different_Random_Numbers() {
     using Mantid::Kernel::V3D;
+    using namespace MonteCarloTesting;
     using namespace ::testing;
 
     const double width(0.1), height(0.2);
@@ -69,22 +74,12 @@ public:
         .Times(Exactly(2))
         .WillOnce(Return(rand1))
         .WillRepeatedly(Return(rand2));
-    TS_ASSERT_EQUALS(V3D(1.0, 1.975, -2.95), profile.generatePoint(rng));
+    auto ray = profile.generatePoint(rng);
+    TS_ASSERT_EQUALS(V3D(1.0, 1.975, -2.95), ray.startPos);
+    TS_ASSERT_EQUALS(V3D(1.0, 0, 0), ray.unitDir);
   }
 
 private:
-  class MockRNG final : public Mantid::Kernel::PseudoRandomNumberGenerator {
-  public:
-    MOCK_METHOD0(nextValue, double());
-    MOCK_METHOD2(nextValue, double(double, double));
-    MOCK_METHOD2(nextInt, int(int, int));
-    MOCK_METHOD0(restart, void());
-    MOCK_METHOD0(save, void());
-    MOCK_METHOD0(restore, void());
-    MOCK_METHOD1(setSeed, void(size_t));
-    MOCK_METHOD2(setRange, void(const double, const double));
-  };
-
   Mantid::Geometry::ReferenceFrame createTestFrame() {
     using Mantid::Geometry::ReferenceFrame;
     using Mantid::Geometry::PointingAlong;
