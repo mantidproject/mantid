@@ -151,14 +151,14 @@ public:
 
   void setfittingRunNo(QString path) override;
 
-  std::string fittingRunNo() const override;
+  std::string getfittingRunNo() const override;
 
   std::string fittingPeaksData() const override;
 
   std::vector<std::string>
   splitFittingDirectory(std::string &selectedfPath) override;
 
-  void setBankEmit() override;
+  void setBankEmit(bool multiRun) override;
 
   std::string getFocusDir() override;
 
@@ -166,22 +166,18 @@ public:
                      bool focused) override;
 
   void addBankItems(std::vector<std::string> splittedBaseName,
-	  QString selectedFile) override;
+	  QString selectedFile, std::vector<std::string> bankFileVector) override;
 
   void addRunNoItem(std::vector<std::string> runNumVector, bool multiRun) override;
 
-  void enableMultiRun(std::string firstRun, std::string lastRun);
 
   void setDefaultBank(std::vector<std::string> splittedBaseName,
-                      QString selectedFile);
+                      QString selectedFile, std::vector<std::string> bankFileVector);
 
   bool isDigit(std::string text);
 
   std::string fittingRunNoFactory(std::string bank, std::string fileName,
                                   std::string &bankDir, std::string fileDir);
-
-  void updateFittingDirVec(std::string &bankDir, std::string &focusedFile,
-                           bool multi_run);
 
   std::string readPeaksFile(std::string fileDir);
 
@@ -279,7 +275,7 @@ private slots:
   void addPeakToList();
   void savePeakList();
   void fitClicked();
-  void fittingRunNoChanged();
+  void FittingRunNo();
   void setBankDir(int idx);
   void listViewFittingRun();
 

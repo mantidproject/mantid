@@ -214,13 +214,23 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
           SIGNAL(textEdited(const QString &)), this,
           SLOT(resetFittingMultiMode()));
 
+  // connect(m_uiTabFitting.lineEdit_pushButton_run_num,
+  // SIGNAL(editingFinished()),
+  //     this, SLOT(fittingRunNoChanged()));
+
   connect(m_uiTabFitting.lineEdit_pushButton_run_num, SIGNAL(editingFinished()),
-          this, SLOT(fittingRunNoChanged()));
+          this, SLOT(FittingRunNo()));
+
+  // connect(m_uiTabFitting.lineEdit_pushButton_run_num,
+  // SIGNAL(returnPressed()),
+  //       this, SLOT(fittingRunNoChanged()));
 
   connect(m_uiTabFitting.lineEdit_pushButton_run_num, SIGNAL(returnPressed()),
-          this, SLOT(fittingRunNoChanged()));
+          this, SLOT(FittingRunNo()));
 
-  connect(this, SIGNAL(getBanks()), this, SLOT(fittingRunNoChanged()));
+  // connect(this, SIGNAL(getBanks()), this, SLOT(fittingRunNoChanged()));
+
+  connect(this, SIGNAL(getBanks()), this, SLOT(FittingRunNo()));
 
   connect(this, SIGNAL(setBank()), this, SLOT(listViewFittingRun()));
 
@@ -730,7 +740,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
     QString itemText = item->text();
 
     setfittingRunNo(itemText);
-    fittingRunNoChanged();
+    FittingRunNo();
   }
 }
 
@@ -1064,6 +1074,10 @@ void EnggDiffractionViewQtGUI::fitClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::FitPeaks);
 }
 
+void EnggDiffractionViewQtGUI::FittingRunNo() {
+  m_presenter->notify(IEnggDiffractionPresenter::FittingRunNo);
+}
+
 void EnggDiffractionViewQtGUI::browseInputDirCalib() {
   QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirCalib);
   if (prevPath.isEmpty()) {
@@ -1354,7 +1368,7 @@ void EnggDiffractionViewQtGUI::setfittingRunNo(QString path) {
   m_uiTabFitting.lineEdit_pushButton_run_num->setText(path);
 }
 
-std::string EnggDiffractionViewQtGUI::fittingRunNo() const {
+std::string EnggDiffractionViewQtGUI::getfittingRunNo() const {
   return m_uiTabFitting.lineEdit_pushButton_run_num->text().toStdString();
 }
 
@@ -1378,120 +1392,6 @@ std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {
   return exptPeaks;
 }
 
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
-    fittingRunNoChanged() {
-  // TODO: much of this should be moved to presenter
-  try {
-    QString focusedFile = m_uiTabFitting.lineEdit_pushButton_run_num->text();
-    std::string strFocusedFile = focusedFile.toStdString();
-    // file name
-    Poco::Path selectedfPath(strFocusedFile);
-    Poco::Path bankDir;
-
-    // handling of vectors
-    m_fitting_runno_dir_vec.clear();
-    std::string strFPath = selectedfPath.toString();
-    // returns empty if no directory is found
-    std::vector<std::string> splitBaseName = splitFittingDirectory(strFPath);
-    // runNo when single focused file selected
-    std::vector<std::string> runNoVec;
-
-    if (selectedfPath.isFile() && !splitBaseName.empty()) {
-
-#ifdef __unix__
-      bankDir = selectedfPath.parent();
-#else
-      bankDir = (bankDir).expand(selectedfPath.parent().toString());
-#endif
-      if (!splitBaseName.empty() && splitBaseName.size() > 3) {
-        std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] + "_" +
-                               splitBaseName[2] + "_" + splitBaseName[3];
-        std::string strBankDir = bankDir.toString();
-        updateFittingDirVec(strBankDir, foc_file, false);
-
-        // add bank to the combo-box and list view
-        addBankItems(splitBaseName, focusedFile);
-        runNoVec.clear();
-        runNoVec.push_back(splitBaseName[1]);
-        if (!m_fittingMutliRunMode)
-          addRunNoItem(runNoVec, false);
-      }
-      // assuming that no directory is found so look for number
-      // if run number length greater
-    } else if (focusedFile.count() > 4) {
-      if (strFocusedFile.find("-") != std::string::npos) {
-        std::vector<std::string> firstLastRunNoVec;
-        boost::split(firstLastRunNoVec, strFocusedFile, boost::is_any_of("-"));
-        std::string firstRun;
-        std::string lastRun;
-        if (!firstLastRunNoVec.empty()) {
-          firstRun = firstLastRunNoVec[0];
-          lastRun = firstLastRunNoVec[1];
-
-          m_fittingMutliRunMode = true;
-          enableMultiRun(firstRun, lastRun);
-        }
-
-      } else {
-        // if given a single run number instead
-        updateFittingDirVec(m_focusDir, strFocusedFile, false);
-
-        // add bank to the combo-box and list view
-        addBankItems(splitBaseName, focusedFile);
-        runNoVec.clear();
-        runNoVec.push_back(strFocusedFile);
-        if (!m_fittingMutliRunMode)
-          addRunNoItem(runNoVec, false);
-      }
-    }
-    // set the directory here to the first in the vector if its not empty
-    if (!m_fitting_runno_dir_vec.empty()) {
-      QString firstDir = QString::fromStdString(m_fitting_runno_dir_vec[0]);
-      setfittingRunNo(firstDir);
-
-    } else if (fittingRunNo().empty()) {
-      userWarning("Invalid Input", "Invalid directory or run number given. "
-                                   "Please try again");
-    }
-
-  } catch (std::runtime_error &re) {
-    userWarning("Invalid file", "Unable to select the file; " +
-                                    static_cast<std::string>(re.what()));
-    return;
-  }
-}
-
-void EnggDiffractionViewQtGUI::updateFittingDirVec(std::string &bankDir,
-                                                   std::string &focusedFile,
-                                                   bool multi_run) {
-
-  try {
-
-    std::string cwd(bankDir);
-    Poco::DirectoryIterator it(cwd);
-    Poco::DirectoryIterator end;
-    while (it != end) {
-      if (it->isFile()) {
-        std::string itFilePath = it->path();
-        Poco::Path itBankfPath(itFilePath);
-
-        std::string itbankFileName = itBankfPath.getBaseName();
-        // check if it not any other file.. e.g: texture
-        if (itbankFileName.find(focusedFile) != std::string::npos) {
-          m_fitting_runno_dir_vec.push_back(itFilePath);
-          if (multi_run)
-            return;
-        }
-      }
-      ++it;
-    }
-  } catch (std::runtime_error &re) {
-    userWarning("Invalid file", "File not found in the following directory; " +
-                                    bankDir + ". " +
-                                    static_cast<std::string>(re.what()));
-  }
-}
-
 std::vector<std::string>
 EnggDiffractionViewQtGUI::splitFittingDirectory(std::string &selectedfPath) {
 
@@ -1504,66 +1404,23 @@ EnggDiffractionViewQtGUI::splitFittingDirectory(std::string &selectedfPath) {
   return splitBaseName;
 }
 
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setBankEmit()
-{
-	emit setBank();
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setBankEmit(
+    bool multiRun) {
+	m_fittingMutliRunMode = multiRun;
+  emit setBank();
 }
 
-std::string MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::getFocusDir()
-{
-	return m_focusDir;
-}
-
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enableMultiRun(
-    std::string firstRun, std::string lastRun) {
-
-  bool firstDig = isDigit(firstRun);
-  bool lastDig = isDigit(lastRun);
-
-  std::vector<std::string> RunNumberVec;
-  if (firstDig && lastDig) {
-    int firstNum = std::stoi(firstRun);
-    int lastNum = std::stoi(lastRun);
-
-    if ((lastNum - firstNum) > 200) {
-      userWarning(
-          "Please try again",
-          "The specified run number range is "
-          "far to big, please try a smaller range of consecutive run numbers.");
-    }
-
-    else if (firstNum <= lastNum) {
-
-      for (int i = firstNum; i <= lastNum; i++) {
-        RunNumberVec.push_back(std::to_string(i));
-      }
-
-      // if given a single run number instead
-      for (size_t i = 0; i < RunNumberVec.size(); i++) {
-        updateFittingDirVec(m_focusDir, RunNumberVec[i], true);
-      }
-      int diff = (lastNum - firstNum) + 1;
-      auto global_vec_size = m_fitting_runno_dir_vec.size();
-      if (size_t(diff) == global_vec_size) {
-
-        addRunNoItem(RunNumberVec, true);
-
-        emit setBank();
-      }
-    } else {
-      userWarning("Invalid Run Number", "One or more run file not found "
-                                        "from the specified range of runs."
-                                        "Please try again");
-    }
-  } else {
-    userWarning("Invalid Run Number", "The specfied range of run number "
-                                      "entered is invalid. Please try again");
-  }
+std::string
+MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::getFocusDir() {
+  return m_focusDir;
 }
 
 void EnggDiffractionViewQtGUI::addBankItems(
-    std::vector<std::string> splittedBaseName, QString selectedFile) {
+    std::vector<std::string> splittedBaseName, QString selectedFile,
+    std::vector<std::string> bankFileVector) {
   try {
+    /// @ shahroz
+    m_fitting_runno_dir_vec = bankFileVector;
     if (!m_fitting_runno_dir_vec.empty()) {
 
       // delete previous bank added to the list
@@ -1598,7 +1455,7 @@ void EnggDiffractionViewQtGUI::addBankItems(
       m_uiTabFitting.comboBox_bank->clear();
     }
 
-    setDefaultBank(splittedBaseName, selectedFile);
+    setDefaultBank(splittedBaseName, selectedFile, m_fitting_runno_dir_vec);
 
   } catch (std::runtime_error &re) {
     userWarning("Unable to insert items: ",
@@ -1652,7 +1509,8 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addRunNoItem(
 }
 
 void EnggDiffractionViewQtGUI::setDefaultBank(
-    std::vector<std::string> splittedBaseName, QString selectedFile) {
+    std::vector<std::string> splittedBaseName, QString selectedFile,
+    std::vector<std::string> bankFileVector) {
 
   if (!splittedBaseName.empty()) {
 
@@ -1668,13 +1526,13 @@ void EnggDiffractionViewQtGUI::setDefaultBank(
   }
   // check if the vector is not empty so that the first directory
   // can be assigned to text-field when number is given
-  else if (!m_fitting_runno_dir_vec.empty()) {
-    auto firstDir = m_fitting_runno_dir_vec.at(0);
+  else if (!bankFileVector.empty()) {
+    auto firstDir = bankFileVector.at(0);
     auto intialDir = QString::fromStdString(firstDir);
     setfittingRunNo(intialDir);
   }
   // if nothing found related to text-field input
-  else if (!fittingRunNo().empty())
+  else if (!getfittingRunNo().empty())
     setfittingRunNo(selectedFile);
 }
 
