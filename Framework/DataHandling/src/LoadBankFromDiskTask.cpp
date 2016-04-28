@@ -7,6 +7,7 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Logger.h"
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidAPI/MemoryManager.h"
 
@@ -15,6 +16,7 @@
 #include <boost/shared_array.hpp>
 
 using namespace Mantid;
+using namespace Mantid::DataObjects;
 
 //==============================================================================================
 // Class ProcessBankData
