@@ -7,6 +7,9 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 
+// re order includes @shahroz
+#include "Poco/DirectoryIterator.h"
+
 #include <fstream>
 
 #include <boost/lexical_cast.hpp>
@@ -43,6 +46,8 @@ bool EnggDiffractionPresenter::g_abortThread = false;
 std::string EnggDiffractionPresenter::g_lastValidRun = "";
 std::string EnggDiffractionPresenter::g_calibCropIdentifier = "SpectrumNumbers";
 std::string EnggDiffractionPresenter::g_sumOfFilesFocus = "";
+std::vector<std::string> EnggDiffractionPresenter::m_fitting_runno_dir_vec;
+bool EnggDiffractionPresenter::m_fittingMutliRunMode = false;
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(NULL), m_calibFinishedOK(false), m_focusFinishedOK(false),
@@ -452,6 +457,124 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
   // rebinningFinished()
   startAsyncRebinningPulsesWorker(runNo, nperiods, timeStep, outWSName);
 }
+
+// Fitting Tab Run Number & Bank handling here
+void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
+    fittingRunNoChanged() {
+  // TODO: much of this should be moved to presenter
+  try {
+    /// needs be simplfied here @shahroz
+    QString focusedFile = QString::fromStdString(m_view->fittingRunNo());
+    std::string strFocusedFile = focusedFile.toStdString();
+    // file name
+    Poco::Path selectedfPath(strFocusedFile);
+    Poco::Path bankDir;
+
+    // handling of vectors
+    m_fitting_runno_dir_vec.clear();
+    std::string strFPath = selectedfPath.toString();
+    // returns empty if no directory is found
+    std::vector<std::string> splitBaseName =
+        m_view->splitFittingDirectory(strFPath);
+    // runNo when single focused file selected
+    std::vector<std::string> runNoVec;
+
+    if (selectedfPath.isFile() && !splitBaseName.empty()) {
+
+#ifdef __unix__
+      bankDir = selectedfPath.parent();
+#else
+      bankDir = (bankDir).expand(selectedfPath.parent().toString());
+#endif
+      if (!splitBaseName.empty() && splitBaseName.size() > 3) {
+        std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] + "_" +
+                               splitBaseName[2] + "_" + splitBaseName[3];
+        std::string strBankDir = bankDir.toString();
+        updateFittingDirVec(strBankDir, foc_file, false);
+
+        // add bank to the combo-box and list view
+        m_view->addBankItems(splitBaseName, focusedFile);
+        runNoVec.clear();
+        runNoVec.push_back(splitBaseName[1]);
+        if (!m_fittingMutliRunMode)
+          m_view->addRunNoItem(runNoVec, false);
+      }
+      // assuming that no directory is found so look for number
+      // if run number length greater
+    } else if (focusedFile.count() > 4) {
+      if (strFocusedFile.find("-") != std::string::npos) {
+        std::vector<std::string> firstLastRunNoVec;
+        boost::split(firstLastRunNoVec, strFocusedFile, boost::is_any_of("-"));
+        std::string firstRun;
+        std::string lastRun;
+        if (!firstLastRunNoVec.empty()) {
+          firstRun = firstLastRunNoVec[0];
+          lastRun = firstLastRunNoVec[1];
+
+          m_fittingMutliRunMode = true;
+          enableMultiRun(firstRun, lastRun);
+        }
+
+      } else {
+        // if given a single run number instead
+        updateFittingDirVec(m_focusDir, strFocusedFile, false);
+
+        // add bank to the combo-box and list view
+		m_view->addBankItems(splitBaseName, focusedFile);
+        runNoVec.clear();
+        runNoVec.push_back(strFocusedFile);
+        if (!m_fittingMutliRunMode)
+			m_view->addRunNoItem(runNoVec, false);
+      }
+    }
+    // set the directory here to the first in the vector if its not empty
+    if (!m_fitting_runno_dir_vec.empty()) {
+      QString firstDir = QString::fromStdString(m_fitting_runno_dir_vec[0]);
+      setfittingRunNo(firstDir);
+
+    } else if (m_view->fittingRunNo().empty()) {
+		m_view->userWarning("Invalid Input", "Invalid directory or run number given. "
+                                   "Please try again");
+    }
+
+  } catch (std::runtime_error &re) {
+    userWarning("Invalid file", "Unable to select the file; " +
+                                    static_cast<std::string>(re.what()));
+    return;
+  }
+}
+
+void EnggDiffractionPresenter::updateFittingDirVec(std::string &bankDir,
+                                                   std::string &focusedFile,
+                                                   bool multi_run) {
+  try {
+    std::string cwd(bankDir);
+    Poco::DirectoryIterator it(cwd);
+    Poco::DirectoryIterator end;
+    while (it != end) {
+      if (it->isFile()) {
+        std::string itFilePath = it->path();
+        Poco::Path itBankfPath(itFilePath);
+
+        std::string itbankFileName = itBankfPath.getBaseName();
+        // check if it not any other file.. e.g: texture
+        if (itbankFileName.find(focusedFile) != std::string::npos) {
+          m_fitting_runno_dir_vec.push_back(itFilePath);
+          if (multi_run)
+            return;
+        }
+      }
+      ++it;
+    }
+  } catch (std::runtime_error &re) {
+    m_view->userWarning("Invalid file",
+                        "File not found in the following directory; " +
+                            bankDir + ". " +
+                            static_cast<std::string>(re.what()));
+  }
+}
+
+// Process Fitting Peaks begins here
 
 void EnggDiffractionPresenter::processFitPeaks() {
   const std::string focusedRunNo = m_view->fittingRunNo();
