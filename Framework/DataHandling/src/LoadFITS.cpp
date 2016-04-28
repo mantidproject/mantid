@@ -32,8 +32,28 @@ template <typename InterpretType> double toDouble(uint8_t *src) {
 
 namespace Mantid {
 namespace DataHandling {
+
 // Register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadFITS)
+
+struct FITSInfo {
+  std::vector<std::string> headerItems;
+  std::map<std::string, std::string> headerKeys;
+  int bitsPerPixel;
+  int numberOfAxis;
+  int offset;
+  int headerSizeMultiplier;
+  std::vector<size_t> axisPixelLengths;
+  double tof;
+  double timeBin;
+  double scale;
+  std::string imageKey;
+  long int countsInImage;
+  long int numberOfTriggers;
+  std::string extension;
+  std::string filePath;
+  bool isFloat;
+};
 
 // Static class constants
 const std::string LoadFITS::g_BIT_DEPTH_NAME = "BitDepthName";
@@ -540,7 +560,8 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
   headerInfo.headerSizeMultiplier = 0;
   std::ifstream istr(headerInfo.filePath.c_str(), std::ios::binary);
   istr.seekg(0, istr.end);
-  if (!(istr.tellg() > 0)) {
+  const std::streampos fileSize = istr.tellg();
+  if (fileSize <= 0) {
     throw std::runtime_error(
         "Found a file that is readable but empty (0 bytes size): " +
         headerInfo.filePath);
@@ -554,9 +575,12 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
   // 2880/80 = 36 iterations required
   const std::string commentKW = "COMMENT";
   bool endFound = false;
-  while (!endFound) {
+
+  while (!endFound &&
+         (g_BASE_HEADER_SIZE * headerInfo.headerSizeMultiplier < fileSize)) {
     headerInfo.headerSizeMultiplier++;
     const int entriesPerHDU = 36;
+
     for (int i = 0; i < entriesPerHDU; ++i) {
       // Keep vect of each header item, including comments, and also keep a
       // map of individual keys.
@@ -595,6 +619,16 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
           headerInfo.headerKeys[key] = value;
       }
     }
+  }
+
+  if (!endFound) {
+    throw std::runtime_error(
+        "Could not find any valid END entry in the headers of this file after "
+        "scanning the file (" +
+        std::to_string(fileSize) +
+        " bytes). This does not look like a valid FITS file and "
+        "it is not possible to read it correctly as the boundary between "
+        "the headers and the data is undefined.");
   }
 
   istr.close();
@@ -1047,7 +1081,7 @@ void LoadFITS::doRebin(size_t rebin, MantidImage &imageY, MantidImage &imageE,
  * @return whether this file seems to come from 'another' camera such
  * as Starlight Xpress, etc.
  */
-bool LoadFITS::isInstrOtherThanIMAT(FITSInfo &hdr) {
+bool LoadFITS::isInstrOtherThanIMAT(const FITSInfo &hdr) {
   bool res = false;
 
   // Images taken with Starlight camera contain this header entry:

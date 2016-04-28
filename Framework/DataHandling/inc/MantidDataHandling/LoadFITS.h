@@ -12,27 +12,11 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-struct FITSInfo {
-  std::vector<std::string> headerItems;
-  std::map<std::string, std::string> headerKeys;
-  int bitsPerPixel;
-  int numberOfAxis;
-  int offset;
-  int headerSizeMultiplier;
-  std::vector<size_t> axisPixelLengths;
-  double tof;
-  double timeBin;
-  double scale;
-  std::string imageKey;
-  long int countsInImage;
-  long int numberOfTriggers;
-  std::string extension;
-  std::string filePath;
-  bool isFloat;
-};
-
 namespace Mantid {
 namespace DataHandling {
+
+struct FITSInfo;
+
 /**
 LoadFITS: Load one or more of FITS files into a Workspace2D. The FITS
 format, normally used for images, is described for example here:
@@ -144,7 +128,7 @@ private:
                API::MantidImage &rebinnedY, API::MantidImage &rebinnedE);
 
   /// identifies fits coming from 'other' cameras by specific headers
-  bool isInstrOtherThanIMAT(FITSInfo &hdr);
+  bool isInstrOtherThanIMAT(const FITSInfo &hdr);
 
   void setupDefaultKeywordNames();
 
