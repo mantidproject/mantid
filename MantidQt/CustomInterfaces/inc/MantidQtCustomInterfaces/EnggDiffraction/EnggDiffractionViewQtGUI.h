@@ -158,7 +158,7 @@ public:
   std::vector<std::string>
   splitFittingDirectory(std::string &selectedfPath) override;
 
-  void setBankEmit(bool multiRun) override;
+  void setBankEmit() override;
 
   std::string getFocusDir() override;
 
@@ -170,9 +170,16 @@ public:
 
   void addRunNoItem(std::vector<std::string> runNumVector, bool multiRun) override;
 
+  std::vector<std::string> getFittingRunNumVec() override;
+
+  void setFittingRunNumVec(std::vector<std::string> assignVec) override;
+
+  bool getFittingMutliRunMode() override;
+
+  void setFittingMultiRunMode(bool mode) override;
 
   void setDefaultBank(std::vector<std::string> splittedBaseName,
-                      QString selectedFile, std::vector<std::string> bankFileVector);
+                      QString selectedFile);
 
   bool isDigit(std::string text);
 

@@ -1404,9 +1404,7 @@ EnggDiffractionViewQtGUI::splitFittingDirectory(std::string &selectedfPath) {
   return splitBaseName;
 }
 
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setBankEmit(
-    bool multiRun) {
-	m_fittingMutliRunMode = multiRun;
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setBankEmit() {
   emit setBank();
 }
 
@@ -1420,7 +1418,7 @@ void EnggDiffractionViewQtGUI::addBankItems(
     std::vector<std::string> bankFileVector) {
   try {
     /// @ shahroz
-    m_fitting_runno_dir_vec = bankFileVector;
+    // m_fitting_runno_dir_vec = bankFileVector;
     if (!m_fitting_runno_dir_vec.empty()) {
 
       // delete previous bank added to the list
@@ -1455,7 +1453,7 @@ void EnggDiffractionViewQtGUI::addBankItems(
       m_uiTabFitting.comboBox_bank->clear();
     }
 
-    setDefaultBank(splittedBaseName, selectedFile, m_fitting_runno_dir_vec);
+    setDefaultBank(splittedBaseName, selectedFile);
 
   } catch (std::runtime_error &re) {
     userWarning("Unable to insert items: ",
@@ -1508,9 +1506,26 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addRunNoItem(
   }
 }
 
+std::vector<std::string> EnggDiffractionViewQtGUI::getFittingRunNumVec() {
+  return m_fitting_runno_dir_vec;
+}
+
+void EnggDiffractionViewQtGUI::setFittingRunNumVec(
+    std::vector<std::string> assignVec) {
+  m_fitting_runno_dir_vec.clear();
+  m_fitting_runno_dir_vec = assignVec;
+}
+
+void EnggDiffractionViewQtGUI::setFittingMultiRunMode(bool mode) {
+	m_fittingMutliRunMode = mode;
+}
+
+bool EnggDiffractionViewQtGUI::getFittingMutliRunMode() {
+	return m_fittingMutliRunMode;
+}
+
 void EnggDiffractionViewQtGUI::setDefaultBank(
-    std::vector<std::string> splittedBaseName, QString selectedFile,
-    std::vector<std::string> bankFileVector) {
+    std::vector<std::string> splittedBaseName, QString selectedFile) {
 
   if (!splittedBaseName.empty()) {
 
@@ -1526,8 +1541,8 @@ void EnggDiffractionViewQtGUI::setDefaultBank(
   }
   // check if the vector is not empty so that the first directory
   // can be assigned to text-field when number is given
-  else if (!bankFileVector.empty()) {
-    auto firstDir = bankFileVector.at(0);
+  else if (!m_fitting_runno_dir_vec.empty()) {
+    auto firstDir = m_fitting_runno_dir_vec.at(0);
     auto intialDir = QString::fromStdString(firstDir);
     setfittingRunNo(intialDir);
   }
