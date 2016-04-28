@@ -67,6 +67,8 @@ The event data of the McStas file occurs in a table with six columns:
 5. Detector ID
 6. Time
 
+The **ErrorBarsSetTo1** property applies to event data, but not to histogram data.
+
 
 References
 ##########
