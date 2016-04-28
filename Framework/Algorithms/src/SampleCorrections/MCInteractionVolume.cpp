@@ -79,9 +79,8 @@ double MCInteractionVolume::calculateAbsorption(
     nsegments += m_env->interceptSurfaces(path1);
   }
   if (nsegments == 0) {
-    throw std::logic_error(
-        "MCInteractionVolume::calculateAbsorption() - Zero "
-        "intersections found for input track and sample/container objects.");
+    // The track passed through nothing and so was not attenuated at all.
+    return 1.0;
   }
   int scatterSegmentNo(1);
   if (nsegments != 1) {

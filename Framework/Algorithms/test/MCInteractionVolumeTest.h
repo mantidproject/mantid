@@ -105,6 +105,26 @@ public:
     Mock::VerifyAndClearExpectations(&rng);
   }
 
+  void test_Track_With_Zero_Intersections_Returns_Unity_Factor() {
+    using Mantid::Kernel::V3D;
+    using namespace MonteCarloTesting;
+    using namespace ::testing;
+
+    // Testing inputs
+    const V3D startPos(-2.0, 0.0, 0.0), direc(0.0, 1.0, 0.0),
+        endPos(0.7, 0.7, 1.4);
+    const double lambdaBefore(2.5), lambdaAfter(3.5);
+    MockRNG rng;
+    EXPECT_CALL(rng, nextValue()).Times(Exactly(0));
+
+    auto sample = createTestSample(TestSampleType::SolidSphere);
+    MCInteractionVolume interactor(sample);
+    TS_ASSERT_DELTA(1.0,
+                    interactor.calculateAbsorption(rng, startPos, direc, endPos,
+                                                   lambdaBefore, lambdaAfter),
+                    1e-08);
+  }
+
   //----------------------------------------------------------------------------
   // Failure cases
   //----------------------------------------------------------------------------
@@ -128,27 +148,6 @@ public:
     sample.setEnvironment(new SampleEnvironment("Empty"));
     TS_ASSERT_THROWS(MCInteractionVolume mcv(sample), std::invalid_argument);
   }
-
-  void test_Track_With_Zero_Intersections_Throws_Error() {
-    using Mantid::Kernel::V3D;
-    using namespace MonteCarloTesting;
-    using namespace ::testing;
-
-    // Testing inputs
-    const V3D startPos(-2.0, 0.0, 0.0), direc(0.0, 1.0, 0.0),
-        endPos(0.7, 0.7, 1.4);
-    const double lambdaBefore(2.5), lambdaAfter(3.5);
-    MockRNG rng;
-    EXPECT_CALL(rng, nextValue()).Times(Exactly(0));
-
-    auto sample = createTestSample(TestSampleType::SolidSphere);
-    MCInteractionVolume interactor(sample);
-    TS_ASSERT_THROWS(interactor.calculateAbsorption(rng, startPos, direc,
-                                                    endPos, lambdaBefore,
-                                                    lambdaAfter),
-                     std::logic_error);
-  }
-
 };
 
 #endif /* MANTID_ALGORITHMS_MCINTERACTIONVOLUMETEST_H_ */
