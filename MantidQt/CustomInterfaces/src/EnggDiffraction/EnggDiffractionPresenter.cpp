@@ -517,29 +517,32 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
 
       } else {
         // if given a single run number instead
-        updateFittingDirVec(m_focusDir, strFocusedFile, false);
+        auto focusDir = m_view->getFocusDir();
+        updateFittingDirVec(focusDir, strFocusedFile, false);
 
         // add bank to the combo-box and list view
-		m_view->addBankItems(splitBaseName, focusedFile);
+        m_view->addBankItems(splitBaseName, focusedFile);
         runNoVec.clear();
         runNoVec.push_back(strFocusedFile);
         if (!m_fittingMutliRunMode)
-			m_view->addRunNoItem(runNoVec, false);
+          m_view->addRunNoItem(runNoVec, false);
       }
     }
     // set the directory here to the first in the vector if its not empty
     if (!m_fitting_runno_dir_vec.empty()) {
       QString firstDir = QString::fromStdString(m_fitting_runno_dir_vec[0]);
-      setfittingRunNo(firstDir);
+      m_view->setfittingRunNo(firstDir);
 
     } else if (m_view->fittingRunNo().empty()) {
-		m_view->userWarning("Invalid Input", "Invalid directory or run number given. "
-                                   "Please try again");
+      m_view->userWarning("Invalid Input",
+                          "Invalid directory or run number given. "
+                          "Please try again");
     }
 
   } catch (std::runtime_error &re) {
-    userWarning("Invalid file", "Unable to select the file; " +
-                                    static_cast<std::string>(re.what()));
+    m_view->userWarning("Invalid file",
+                        "Unable to select the file; " +
+                            static_cast<std::string>(re.what()));
     return;
   }
 }
@@ -571,6 +574,57 @@ void EnggDiffractionPresenter::updateFittingDirVec(std::string &bankDir,
                         "File not found in the following directory; " +
                             bankDir + ". " +
                             static_cast<std::string>(re.what()));
+  }
+}
+
+void EnggDiffractionPresenter::enableMultiRun(std::string firstRun,
+                                              std::string lastRun) {
+
+  bool firstDig = m_view->isDigit(firstRun);
+  bool lastDig = m_view->isDigit(lastRun);
+
+  std::vector<std::string> RunNumberVec;
+  if (firstDig && lastDig) {
+    int firstNum = std::stoi(firstRun);
+    int lastNum = std::stoi(lastRun);
+
+    if ((lastNum - firstNum) > 200) {
+      m_view->userWarning(
+          "Please try again",
+          "The specified run number range is "
+          "far to big, please try a smaller range of consecutive run numbers.");
+    }
+
+    else if (firstNum <= lastNum) {
+
+      for (int i = firstNum; i <= lastNum; i++) {
+        RunNumberVec.push_back(std::to_string(i));
+      }
+
+      // if given a single run number instead
+      for (size_t i = 0; i < RunNumberVec.size(); i++) {
+        std::string focusDir = m_view->getFocusDir();
+        updateFittingDirVec(focusDir, RunNumberVec[i], true);
+      }
+      int diff = (lastNum - firstNum) + 1;
+      auto global_vec_size = m_fitting_runno_dir_vec.size();
+      if (size_t(diff) == global_vec_size) {
+
+        m_view->addRunNoItem(RunNumberVec, true);
+
+        /// what todo with this signal @shahroz
+        m_view->setBankEmit();
+      }
+    } else {
+      m_view->userWarning("Invalid Run Number",
+                          "One or more run file not found "
+                          "from the specified range of runs."
+                          "Please try again");
+    }
+  } else {
+    m_view->userWarning("Invalid Run Number",
+                        "The specfied range of run number "
+                        "entered is invalid. Please try again");
   }
 }
 

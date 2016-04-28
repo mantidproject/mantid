@@ -151,11 +151,11 @@ protected slots:
   void rebinningFinished();
   void fittingFinished();
   
-  // fitting
+  // fitting @shahroz
   void fittingRunNoChanged();
   void updateFittingDirVec(std::string &bankDir, std::string &focusedFile,
 	  bool multi_run);
-
+  void enableMultiRun(std::string firstRun, std::string lastRun);
 
 private:
   bool validateRBNumber(const std::string &rbn) const;
