@@ -10,6 +10,8 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <utility>
+
 //----------------------------------------------------------------------
 
 namespace Poco {
@@ -98,7 +100,7 @@ private:
   void setInputPropertiesAsMemberProperties();
 
   void addMetadataAsRunProperties(const std::map<std::string, std::string> &);
-  void parseDetectorDimensions(const std::string &);
+  std::pair<int, int> parseDetectorDimensions(const std::string &);
   void createWorkspace();
   std::vector<int> getData(const std::string &);
   void createWorkspace(const std::vector<int> &data, const std::string &title,
@@ -121,8 +123,6 @@ private:
   double m_wavelength_input;
   double m_wavelength_spread_input;
   Mantid::DataHandling::XmlHandler m_xmlHandler;
-  int m_numberXPixels;
-  int m_numberYPixels;
   double m_wavelength;
   double m_dwavelength;
 };

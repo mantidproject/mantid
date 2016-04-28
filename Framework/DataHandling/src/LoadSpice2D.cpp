@@ -32,6 +32,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <utility>
 
 //-----------------------------------------------------------------------
 
@@ -100,8 +101,13 @@ int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
     Poco::AutoPtr<Document> pDoc;
     try {
       pDoc = pParser.parse(&src);
+    } catch (Poco::Exception &e) {
+      throw Kernel::Exception::FileError("Unable to parse File (" +
+                                             descriptor.filename() + ")",
+                                         e.displayText());
+
     } catch (...) {
-      throw Kernel::Exception::FileError("Unable to parse File:",
+      throw Kernel::Exception::FileError("Unable to parse File",
                                          descriptor.filename());
     }
     // Get pointer to root element
@@ -118,8 +124,8 @@ int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
 
 /// Constructor
 LoadSpice2D::LoadSpice2D()
-    : m_wavelength_input(0), m_wavelength_spread_input(0), m_numberXPixels(0),
-      m_numberYPixels(0), m_wavelength(0), m_dwavelength(0) {}
+    : m_wavelength_input(0), m_wavelength_spread_input(0), m_wavelength(0),
+      m_dwavelength(0) {}
 
 /// Destructor
 LoadSpice2D::~LoadSpice2D() {}
@@ -161,7 +167,8 @@ void LoadSpice2D::exec() {
       m_xmlHandler.get_metadata("Detector");
   setWavelength(metadata);
 
-  std::vector<int> data = getData("//Data/Detector");
+  std::vector<int> data = getData("//Data");
+
   double monitorCounts = 0;
   from_string<double>(monitorCounts, metadata["Counters/monitor"], std::dec);
   double countingTime = 0;
@@ -177,7 +184,7 @@ void LoadSpice2D::exec() {
   // run load instrument
   std::string instrument = metadata["Header/Instrument"];
   runLoadInstrument(instrument, m_workspace);
-  runLoadMappingTable(m_workspace, m_numberXPixels, m_numberYPixels);
+//  runLoadMappingTable(m_workspace, m_numberXPixels, m_numberYPixels);
 
   // sample_detector_distances
   double detector_distance = detectorDistance(metadata);
@@ -188,18 +195,24 @@ void LoadSpice2D::exec() {
  * Parse the 2 integers of the form: INT32[192,256]
  * @param dims_str : INT32[192,256]
  */
-void LoadSpice2D::parseDetectorDimensions(const std::string &dims_str) {
+std::pair<int, int>
+LoadSpice2D::parseDetectorDimensions(const std::string &dims_str) {
 
   // Read in the detector dimensions from the Detector tag
+
+  std::pair<int, int> dims = std::make_pair(0, 0);
 
   boost::regex b_re_sig("INT\\d+\\[(\\d+),(\\d+)\\]");
   if (boost::regex_match(dims_str, b_re_sig)) {
     boost::match_results<std::string::const_iterator> match;
     boost::regex_search(dims_str, match, b_re_sig);
     // match[0] is the full string
-    Kernel::Strings::convert(match[1], m_numberXPixels);
-    Kernel::Strings::convert(match[2], m_numberYPixels);
+    Kernel::Strings::convert(match[1], dims.first);
+    Kernel::Strings::convert(match[2], dims.second);
   }
+  if (dims.first == 0 || dims.second == 0)
+    g_log.notice() << "Could not read in the number of pixels!" << std::endl;
+  return dims;
 }
 
 /**
@@ -265,25 +278,34 @@ void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata) {
  * Parses the data dimensions and stores them as member variables
  * Reads the data and returns a vector
  */
-std::vector<int>
-LoadSpice2D::getData(const std::string &dataXpath = "//Data/Detector") {
-  // type : INT32[192,256]
-  std::map<std::string, std::string> attributes =
-      m_xmlHandler.get_attributes_from_tag(dataXpath);
-  parseDetectorDimensions(attributes["type"]);
-  if (m_numberXPixels == 0 || m_numberYPixels == 0)
-    g_log.notice() << "Could not read in the number of pixels!" << std::endl;
+std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data") {
 
-  std::string data_str = m_xmlHandler.get_text_from_tag(dataXpath);
-  // convert string data into a vector<int>
+  // data container
   std::vector<int> data;
-  std::stringstream iss(data_str);
-  int number;
-  while (iss >> number) {
-    data.push_back(number);
+  unsigned int totalDataSize = 0;
+
+  // let's see how many detectors we have
+  std::vector<std::string> detectors = m_xmlHandler.get_subnodes(dataXpath);
+
+  // iterate every detector in the xml file
+  for (const auto detector : detectors) {
+    std::string detectorXpath = dataXpath + "/" + detector;
+    // type : INT32[192,256]
+    std::map<std::string, std::string> attributes =
+        m_xmlHandler.get_attributes_from_tag(detectorXpath);
+    std::pair<int, int> dims = parseDetectorDimensions(attributes["type"]);
+    totalDataSize += dims.first * dims.second;
+
+    std::string data_str = m_xmlHandler.get_text_from_tag(detectorXpath);
+    // convert string data into a vector<int>
+    std::stringstream iss(data_str);
+    int number;
+    while (iss >> number) {
+      data.push_back(number);
+    }
   }
 
-  if (data.size() != static_cast<size_t>(m_numberXPixels * m_numberYPixels))
+  if (data.size() != totalDataSize)
     throw Kernel::Exception::NotImplementedError(
         "Inconsistent data set: There were more data pixels found than "
         "declared in the Spice XML meta-data.");
@@ -298,7 +320,7 @@ void LoadSpice2D::createWorkspace(const std::vector<int> &data,
                                   double monitor1_counts,
                                   double monitor2_counts) {
   int nBins = 1;
-  int numSpectra = m_numberXPixels * m_numberYPixels + LoadSpice2D::nMonitors;
+  int numSpectra = static_cast<int>(data.size()) + LoadSpice2D::nMonitors;
 
   m_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
       API::WorkspaceFactory::Instance().create("Workspace2D", numSpectra,
