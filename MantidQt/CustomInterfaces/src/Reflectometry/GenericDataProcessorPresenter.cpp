@@ -563,7 +563,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().create(preprocessor.name());
   alg->initialize();
-  alg->setProperty(preprocessor.firstInputProperty(),
+  alg->setProperty(preprocessor.lhsProperty(),
                    loadRun(runs[0], instrument, preprocessor.prefix())->name());
   alg->setProperty(preprocessor.outputProperty(), outputName);
 
@@ -584,13 +584,13 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
       }
 
       alg->setProperty(
-          preprocessor.secondInputProperty(),
+          preprocessor.rhsProperty(),
           loadRun(*runIt, instrument, preprocessor.prefix())->name());
       alg->execute();
 
       if (runIt != --runs.end()) {
         // After the first execution we replace the LHS with the previous output
-        alg->setProperty(preprocessor.firstInputProperty(), outputName);
+        alg->setProperty(preprocessor.lhsProperty(), outputName);
       }
     }
   } catch (...) {
@@ -786,7 +786,7 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
   }
 
   /* We need to give a name to the output workspaces */
-  for (size_t i = 0; i < m_processor.outputProperties(); i++) {
+  for (size_t i = 0; i < m_processor.numberOfOutputProperties(); i++) {
     alg->setProperty(m_processor.outputPropertyName(i),
                      m_processor.prefix(i) + getWorkspaceName(rowNo, false));
   }

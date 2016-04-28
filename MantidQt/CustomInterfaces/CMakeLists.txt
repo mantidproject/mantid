@@ -495,6 +495,9 @@ set ( TEST_FILES
 	MeasurementItemTest.h
 	MuonAnalysisHelperTest.h
 	ParseKeyValueStringTest.h
+	DataPostprocessorAlgorithmTest.h
+	DataPreprocessorAlgorithmTest.h
+	DataProcessorAlgorithmTest.h
 	DataProcessorCommandsTest.h
 	DataProcessorGenerateNotebookTest.h
 	ReflLegacyTransferStrategyTest.h

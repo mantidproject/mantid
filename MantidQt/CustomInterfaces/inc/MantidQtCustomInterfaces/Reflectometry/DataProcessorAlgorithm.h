@@ -11,8 +11,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 /** @class DataProcessorAlgorithm
 
-DataProcessorAlgorithm is an base class which defines a processing algorithm. 
-It is the algorithm that will perform the reduction in a Data Processor UI.
+DataProcessorAlgorithm defines a processing algorithm that will perform the
+reduction in a Data Processor UI.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -44,9 +44,9 @@ public:
   * workspaces' names
   * @param blacklist : The list of properties we do not want to show
   */
-  DataProcessorAlgorithm(const std::string &name,
-                         const std::vector<std::string> &prefix,
-                         const std::set<std::string> &blacklist)
+  DataProcessorAlgorithm(
+      const std::string &name, const std::vector<std::string> &prefix,
+      const std::set<std::string> &blacklist = std::set<std::string>())
       : m_name(name), m_prefix(prefix), m_blacklist(blacklist) {
 
     Mantid::API::IAlgorithm_sptr alg =
@@ -58,8 +58,7 @@ public:
       if (prop->direction() == 0 &&
           (prop->type() == "MatrixWorkspace" || prop->type() == "Workspace")) {
         // For now, we restrict the input workspaces to either MatrixWorkspace
-        // or Workspace
-        // This condition can be relaxed if necessary
+        // or Workspace, this condition can be relaxed if necessary
         m_inputProperties.push_back(prop->name());
       }
       if (prop->direction() == 1 &&
@@ -69,7 +68,17 @@ public:
       }
     }
 
-    // The number of prefixes given should match the number of output workspaces
+    if (!m_inputProperties.size())
+      throw std::invalid_argument("Invalid Processing algorithm. A valid "
+                                  "algorithm must have at least one input "
+                                  "workpsace property");
+    if (!m_outputProperties.size())
+      throw std::invalid_argument("Invalid processing algorithm. A valid "
+                                  "algorithm must have at least one output "
+                                  "workspace property");
+
+    // The number of prefixes given should match the number of output
+    // workspaces
     if (m_outputProperties.size() != m_prefix.size()) {
       throw std::invalid_argument("Invalid DataProcessorAlgorithm");
     }
@@ -77,30 +86,30 @@ public:
   virtual ~DataProcessorAlgorithm(){};
 
   // The name of this algorithm
-  virtual std::string name() const { return m_name; };
+  std::string name() const { return m_name; };
   // The number of output properties
-  virtual size_t outputProperties() const { return m_outputProperties.size(); };
+  size_t numberOfOutputProperties() const { return m_outputProperties.size(); };
   // The prefix for this output property
-  virtual std::string prefix(size_t index) const { return m_prefix[index]; };
+  std::string prefix(size_t index) const { return m_prefix[index]; };
   // The name of this input property
-  virtual std::string inputPropertyName(size_t index) const {
+  std::string inputPropertyName(size_t index) const {
     return m_inputProperties[index];
   };
   // The name of this output property
-  virtual std::string outputPropertyName(size_t index) const {
+  std::string outputPropertyName(size_t index) const {
     return m_outputProperties[index];
   };
   // The blacklist
-  virtual std::set<std::string> blacklist() const { return m_blacklist; };
+  std::set<std::string> blacklist() const { return m_blacklist; };
 
-protected:
+private:
   // The name of this algorithm
   std::string m_name;
   // The prefix of the output workspace(s)
   std::vector<std::string> m_prefix;
-  // The names of the input properties
+  // The names of the input workspace properties
   std::vector<std::string> m_inputProperties;
-  // The names of the output properties
+  // The names of the output workspace properties
   std::vector<std::string> m_outputProperties;
   // The blacklist
   std::set<std::string> m_blacklist;

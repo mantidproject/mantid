@@ -1,15 +1,17 @@
 #ifndef MANTID_CUSTOMINTERFACES_DATAPOSTPROCESSORALGORITHM_H
 #define MANTID_CUSTOMINTERFACES_DATAPOSTPROCESSORALGORITHM_H
 
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
+
+#include <set>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 /** @class DataPostprocessorAlgorithm
 
-DataPostprocessorAlgorithm is an class which defines a post-processor algorithm.
-It is responsible for post-processing rows belonging to the same group in a Data
-Processor UI.
+DataPostprocessorAlgorithm defines a post-processor algorithm responsible for
+post-processing rows belonging to the same group in a Data Processor UI.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -32,55 +34,86 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataPostprocessorAlgorithm : public DataProcessorAlgorithm {
+class DataPostprocessorAlgorithm {
 public:
   /** Constructor
   * @param name : The name of the post-processing algorithm
-  * @param prefix : The list of prefixes that will be used for the output
-  * workspaces' names
+  * @param prefix : The prefix that will be added to the output workspace name
   * @param blacklist : The list of properties we don't want to show
   */
-  DataPostprocessorAlgorithm(const std::string &name,
-                             const std::vector<std::string> &prefix,
-                             const std::set<std::string> &blacklist)
-      : DataProcessorAlgorithm(name, prefix, blacklist) {
+  DataPostprocessorAlgorithm(
+      const std::string &name, const std::string &prefix = "",
+      const std::set<std::string> &blacklist = std::set<std::string>())
+      : m_name(name), m_prefix(prefix), m_blacklist(blacklist) {
 
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create(m_name);
+
+    int countInputWS = 0;
+    int countOutputWS = 0;
 
     auto properties = alg->getProperties();
     for (auto &prop : properties) {
 
       if (prop->direction() == 0 && prop->type() == "str list") {
-        m_inputProperties.push_back(prop->name());
+        // For now, we assume we receive the list of workspace to post-process
+        // as
+        // a 'str list'
+        m_inputProp = prop->name();
+
+        countInputWS++;
+      }
+      if (prop->direction() == 1 &&
+          (prop->type() == "MatrixWorkspace" || prop->type() == "Workspace")) {
+        // For now, we restrict the output workspaces to either MatrixWorkspace
+        // or Worksace
+        m_outputProp = prop->name();
+
+        countOutputWS++;
       }
     }
 
-    // A post-processing algorithm must have two input workspaces
-    // And one output workspace
-    if (m_inputProperties.size() != 1)
-      throw std::invalid_argument(
-          "A post-processing algorithm must have one input workspace property");
-    if (m_outputProperties.size() != 1)
-      throw std::invalid_argument("A post-processing algorithm must have one "
-                                  "output workspace property");
+    if (countInputWS != 1)
+      throw std::invalid_argument("Invalid post-processing algorithm. A "
+                                  "valid algorithm must have one input "
+                                  "'str list' property");
+    if (countOutputWS != 1)
+      throw std::invalid_argument("Invalid post-processing algorithm. A "
+                                  "valid algorithm must have one output "
+                                  "workspace property");
   };
   /** Default constructor: use 'Stitch1DMany' as the default post-processor
    * algorithm */
   DataPostprocessorAlgorithm()
       : DataPostprocessorAlgorithm(
-            "Stitch1DMany", std::vector<std::string>{"IvsQ_"},
-            std::set<std::string>{"InputWorkspaces", "OutputWorkspace"}){
-
-        };
+            "Stitch1DMany", "IvsQ_",
+            std::set<std::string>{"InputWorkspaces", "OutputWorkspace"}){};
   // Destructor
   virtual ~DataPostprocessorAlgorithm(){};
-  // The name of the input property
-  std::string inputProperty() const { return m_inputProperties[0]; };
-  // The name of the output property
-  std::string outputProperty() const { return m_outputProperties[0]; };
+  // The name of this algorithm
+  std::string name() const { return m_name; };
+  // The name of the input workspace property
+  std::string inputProperty() const { return m_inputProp; };
+  // The name of the output workspace property
+  std::string outputProperty() const { return m_outputProp; };
+	// The number of output workspace properties (currently only 1)
+	size_t numberOfOutputProperties() const { return 1; };
   // The prefix of the output property
-  std::string prefix() const { return m_prefix[0]; };
+  std::string prefix() const { return m_prefix; };
+	// The blacklist
+	std::set<std::string> blacklist() const { return m_blacklist; };
+
+private:
+  // The name of this algorithm
+  std::string m_name;
+  // The prefix of the output workspace
+  std::string m_prefix;
+  // The name of the input property
+  std::string m_inputProp;
+  // The name of the output property
+  std::string m_outputProp;
+  // The blacklist
+  std::set<std::string> m_blacklist;
 };
 }
 }

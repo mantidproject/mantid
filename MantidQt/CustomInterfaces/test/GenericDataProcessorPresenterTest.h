@@ -66,7 +66,7 @@ private:
         {"Transmission Run(s)",
          DataPreprocessorAlgorithm(
              "CreateTransmissionWorkspaceAuto",
-             std::vector<std::string>{"TRANS_"},
+             "TRANS_",
              std::set<std::string>{"FirstTransmissionRun",
                                    "SecondTransmissionRun", "OutputWorkspace"},
              false)}};

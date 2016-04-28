@@ -127,7 +127,7 @@ public:
          DataPreprocessorAlgorithm(
              "CreateTransmissionWorkspaceAuto",
              /*Prefix for the output workspace*/
-             std::vector<std::string>{"TRANS_"},
+             "TRANS_",
              /*Blacklist of properties we don't want to show*/
              std::set<std::string>{"FirstTransmissionRun",
                                    "SecondTransmissionRun", "OutputWorkspace"},

@@ -189,7 +189,7 @@ std::string plotsString(const std::vector<std::string> &output_ws,
   // Group workspaces which should be plotted on same axes
   // But first we need to determine how many groups of ws we have
   // We can do that from the processing algorithm
-  size_t nGroups = processor.outputProperties();
+  size_t nGroups = processor.numberOfOutputProperties();
 
   // A vector to store the list of groups
   std::vector<std::string> workspaceList;
@@ -323,8 +323,9 @@ boost::tuple<std::string, std::string> postprocessGroupString(
   std::string outputWSName =
       postprocessor.prefix() + boost::algorithm::join(outputName, "_");
   stitch_string << outputWSName;
-  stitch_string << completeOutputProperties(postprocessor.name(),
-                                            postprocessor.outputProperties())
+  stitch_string << completeOutputProperties(
+                       postprocessor.name(),
+                       postprocessor.numberOfOutputProperties())
                 << " = ";
   stitch_string << postprocessor.name() << "(";
   stitch_string << postprocessor.inputProperty() << " = '";
@@ -512,7 +513,7 @@ boost::tuple<std::string, std::string> reduceRowString(
   // 'IvsQ_TOF_13460_13462',
   // 'IvsLam_TOF_13460_13462
   std::vector<std::string> output_properties;
-  for (size_t prop = 0; prop < processor.outputProperties(); prop++) {
+  for (size_t prop = 0; prop < processor.numberOfOutputProperties(); prop++) {
     output_properties.push_back(processor.prefix(prop) + outputName);
   }
 
@@ -522,8 +523,8 @@ boost::tuple<std::string, std::string> reduceRowString(
   // Populate process_string
   std::ostringstream process_string;
   process_string << outputPropertiesStr;
-  process_string << completeOutputProperties(processor.name(),
-                                             processor.outputProperties());
+  process_string << completeOutputProperties(
+      processor.name(), processor.numberOfOutputProperties());
   process_string << " = " << processor.name() << "(";
   process_string << boost::algorithm::join(algProperties, ", ");
   process_string << ")";
@@ -601,10 +602,8 @@ std::string plusString(const std::string &input_name,
   std::ostringstream plus_string;
 
   plus_string << output_name << " = " << preprocessor.name() << "(";
-  plus_string << preprocessor.firstInputProperty() << " = '" << output_name
-              << "', ";
-  plus_string << preprocessor.secondInputProperty() << " = '" << input_name
-              << "'";
+  plus_string << preprocessor.lhsProperty() << " = '" << output_name << "', ";
+  plus_string << preprocessor.rhsProperty() << " = '" << input_name << "'";
   if (!options.empty())
     plus_string << ", " << options;
   plus_string << ")\n";

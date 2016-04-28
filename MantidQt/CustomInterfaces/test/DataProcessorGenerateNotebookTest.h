@@ -10,7 +10,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorGenerateNotebook.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflVectorString.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorVectorString.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace MantidQt::CustomInterfaces;
@@ -42,12 +42,12 @@ private:
     // Reflectometry pre-process map
     return std::map<std::string, DataPreprocessorAlgorithm>{
         {"Run(s)",
-         DataPreprocessorAlgorithm("Plus", std::vector<std::string>{plusPrefix},
+         DataPreprocessorAlgorithm("Plus", plusPrefix,
                                    std::set<std::string>())},
         {"Transmission Run(s)",
          DataPreprocessorAlgorithm(
              "CreateTransmissionWorkspaceAuto",
-             std::vector<std::string>{"TRANS_"},
+             "TRANS_",
              std::set<std::string>{"FirstTransmissionRun",
                                    "SecondTransmissionRun", "OutputWorkspace"},
              false)}};
