@@ -32,6 +32,41 @@ group of class ``NXDetector`` of name ``"Data"``.
 The name of the workspace is the same as the name of the group, 
 but with ``__mcstas_event_hist`` added to the end.
 
++----------------------------------+------------------------------------------+---------------------------------------+
+| Description of Data              | Found in Nexus file (within 'run')       | Placed in Workspace (Workspace2D)     |
+|                                  |                                          | or output                             |
++==================================+==========================================+=======================================+
+| All data                         | Group of class ``NXDetector``            | See below                             |
+|                                  | of name ``"data"``                       |                                       |
++----------------------------------+------------------------------------------+---------------------------------------+
+| Generic group including either   | each group of class ``NXdata`` in        | one workspace each                    |
+| event or histrogram data         | ``"data"``, henceforth referred to as    |                                       |
+|                                  | [DATA]                                   |                                       |
++----------------------------------+------------------------------------------+---------------------------------------+
+| Event data                       | item in a [DATA] with a ``long_name``    | event data                            |
+|                                  | attribute containing ``"Neutron_ID"``    |                                       |
+|                                  | and name ``"events"``                    |                                       |
++----------------------------------+------------------------------------------+---------------------------------------+
+| Histrogram data                  | items in a [DATA] with a ``long_name``   | histogram data                        |
+|                                  | attribute **not** containing             |                                       |
+|                                  | ``"Neutron_ID"``                         |                                       |
++----------------------------------+------------------------------------------+---------------------------------------+
+| Instrument                       | ``/instrument``                          | loaded into workspace, only if        |
+|                                  |                                          | events are loaded                     | 
++----------------------------------+------------------------------------------+---------------------------------------+
+| Instrument definition            | ``/instrument/instrument_xml/data``      | loaded into workspace, only if        |
+|                                  | is needed for events to be loaded        | events are loaded                     | 
++----------------------------------+------------------------------------------+---------------------------------------+
+
+The event data of the McStas file occurs in a table with six columns:
+
+1. Weight
+2. X coordinate
+3. Y coordinate
+4. Number of previous events
+5. Detector ID
+6. Time
+
 
 References
 ##########
