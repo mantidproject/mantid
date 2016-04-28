@@ -132,6 +132,8 @@ Python
 
 - The Material class has two new Python methods: ``chemicalFormula`` returns a tuple of Atom objects corresponding to the atoms in the compound, and their abundances; ``relativeMolecularMass`` returns the relative formular unit mass in atomic mass units.
 
+- The plot() function of mantidplot.pyplot now supports empty marker (marker=None).
+
 Python Algorithms
 #################
 
