@@ -8,8 +8,7 @@
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h"
 #include <qwt_plot_spectrogram.h>
-
-//#include "MantidQtCustomInterfaces/DynamicPDF/BackgroundRemover.h"
+// system includes
 
 namespace {
 Mantid::Kernel::Logger g_log("DynamicPDF");
@@ -19,12 +18,23 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace DynamicPDF {
 
+/**
+ * @brief Constructor
+ * @param workspaceName retrieve the workspace with the Analysis Data Service
+ */
 WorkspaceRecord::WorkspaceRecord(const std::string &workspaceName) :
   m_name{workspaceName},
   m_energy{0.0},
   m_label() {
   m_ws = Mantid::API::AnalysisDataService::Instance()
-             .retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
+    .retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
+}
+
+/**
+ * @brief Destructor. Reset the pointer to the workspace
+ */
+WorkspaceRecord::~WorkspaceRecord(){
+  m_ws.reset();
 }
 
 void WorkspaceRecord::updateMetadata(const size_t &newIndex) {
@@ -47,29 +57,58 @@ std::pair<double,double> WorkspaceRecord::getErange(){
   return std::pair<double,double>(minimum, maximum);
 }
 
-// Add this class to the list of specialised dialogs in this namespace
-DECLARE_SUBWINDOW(SliceSelector)
+/*        **********************
+ *        **  Public Members  **
+ *        **********************/
 
-/// Constructor
-// SliceSelector::SliceSelector(QWidget *parent) : UserSubWindow{parent},
-// m_loadedWorkspace{nullptr}, m_BackgroundRemover{nullptr} {
+/**
+ * @brief Constructor
+ */
 SliceSelector::SliceSelector(QWidget *parent) :
-  UserSubWindow{parent},
+  QMainWindow(parent),
   m_pickerLine{nullptr},
   m_loadedWorkspace(),
   m_selectedWorkspaceIndex{0} {
-
+  this->observePreDelete(true); // Subscribe to notifications
+  this->initLayout();
 }
 
 SliceSelector::~SliceSelector() {
+  this->observePreDelete(false);  // Cancel subscription to notifications
   delete m_pickerLine;
 }
 
+/*              *************************
+ *              **  Protected Members  **
+ *              *************************/
+
+/**
+ * @brief Actions when slices workspace is deleted
+ */
+void SliceSelector::preDeleteHandle(const std::string &workspaceName,
+  const boost::shared_ptr<Mantid::API::Workspace> workspace) {
+  UNUSED_ARG(workspaceName);
+  Mantid::API::MatrixWorkspace_sptr ws =
+    boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
+  if ( !ws || (ws != m_loadedWorkspace->m_ws) ){
+    return;
+  }
+
+  // Clean the 2D view
+  m_pickerLine->setVisible(false);
+  // Clean the 1D view (automatically taken care by the underlying PreviewPlot objet)
+  // Clean the rest of the widgets
+  m_uiForm.labelSliceEnergy->setText(QString::fromStdString("Energy = NAN"));
+  // Clean the data structure
+  m_selectedWorkspaceIndex = 0;
+  this->tearConnections(); // prevent unwanted signaling from the spin box
+  m_uiForm.spinboxSliceSelector->setValue(0);
+  m_loadedWorkspace.reset();
+}
 
 /*        *********************
  *        **  Private Slots  **
  *        *********************/
-
 
 /**
  * @brief Load file or workspace, then initialize the widgets
@@ -77,7 +116,7 @@ SliceSelector::~SliceSelector() {
  */
 void SliceSelector::loadSlices(const QString &workspaceName) {
   m_loadedWorkspace =
-      boost::make_shared<WorkspaceRecord>(workspaceName.toStdString());
+    Mantid::Kernel::make_unique<WorkspaceRecord>(workspaceName.toStdString());
   /// don't process if workspace is not valid
   if(!this->isWorkspaceValid()){
     return;
@@ -106,6 +145,9 @@ void SliceSelector::loadSlices(const QString &workspaceName) {
 
   /// initialize the 1D PreviewPlot widget
   updatePreviewPlotSelectedSlice();
+
+  this->setupConnections();
+  emit signalSlicesLoaded(workspaceName);
 }
 
 /**
@@ -114,8 +156,8 @@ void SliceSelector::loadSlices(const QString &workspaceName) {
 void SliceSelector::updatePreviewPlotSelectedSlice() {
   m_uiForm.previewPlotSelectedSlice->clear();
   m_uiForm.previewPlotSelectedSlice->addSpectrum(
-      QString::fromStdString(m_loadedWorkspace->m_label),
-      m_loadedWorkspace->m_ws, m_selectedWorkspaceIndex);
+  QString::fromStdString(m_loadedWorkspace->m_label),
+  m_loadedWorkspace->m_ws, m_selectedWorkspaceIndex);
 }
 
 /**
@@ -129,7 +171,7 @@ void SliceSelector::updateSelectedSlice(const int &newSelectedIndex) {
   if (m_loadedWorkspace) {
     m_loadedWorkspace->updateMetadata(m_selectedWorkspaceIndex);
     m_uiForm.labelSliceEnergy->setText(
-        QString::fromStdString(m_loadedWorkspace->m_label));
+    QString::fromStdString(m_loadedWorkspace->m_label));
     m_uiForm.spinboxSliceSelector->setValue(newSelectedIndex);
     this->updatePickerLine();
     this->updatePreviewPlotSelectedSlice();
@@ -164,18 +206,12 @@ void SliceSelector::updatePickerLine(){
 }
 
 /**
- * @brief Initialize and/or update the dialog to remove the multiphonon background
+ * @brief Public broadcast of the slice that user selected for fitting
  */
-void SliceSelector::launchBackgroundRemover() {
-  /// parent of BackgroundRemover is this main window
-  // if (!m_BackgroundRemover){
-  //  m_BackgroundRemover = boost::make_shared<BackgroundRemover>(this);
-  //}
-  // m_BackgroundRemover->refreshSlice(m_loadedWorkspace,
-  // m_selectedWorkspaceIndex);
-  auto title = QString::fromStdString(this->name());
-  auto error = QString::fromStdString("Not so fast, cowboy! (not implemented)");
-  QMessageBox::warning(this, title, error);
+void SliceSelector::selectSliceForFitting() {
+  if(m_loadedWorkspace) {
+    emit this->signalSliceForFittingSelected(m_selectedWorkspaceIndex);
+  }
 }
 
 /**
@@ -183,14 +219,12 @@ void SliceSelector::launchBackgroundRemover() {
  */
 void SliceSelector::showHelp() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      NULL, QString("DynamicPDFSliceSelector"));
+      NULL, QString("DPDFBackgroundRemover"));
 }
-
 
 /*        ***********************
  *        **  Private Members  **
  *        ***********************/
-
 
 /**
  * @brief Initialize UI form, spawn picker line, connect SIGNALS/SLOTS
@@ -198,27 +232,49 @@ void SliceSelector::showHelp() {
 void SliceSelector::initLayout() {
   m_uiForm.setupUi(this);
   this->spawnPickerLine();
-  connect(m_uiForm.dataSelector, SIGNAL(dataReady(const QString &)), this,
-          SLOT(loadSlices(const QString &)));
+  // user wants help
   connect(m_uiForm.buttonpushHelp, SIGNAL(clicked()), this, SLOT(showHelp()));
-  connect(m_uiForm.spinboxSliceSelector, SIGNAL(valueChanged(int)), this,
-          SLOT(updateSelectedSlice(int)));
-  connect(m_uiForm.pushLaunchBackgroundRemover, SIGNAL(clicked()), this,
-          SLOT(launchBackgroundRemover()));
-  connect(m_pickerLine, SIGNAL(minValueChanged(double)), this,
-          SLOT(newIndexFromPickedEnergy(double)));
+  // user wants to fit the selected slice with the Background remover
+  connect(m_uiForm.pushButtonFit, SIGNAL(clicked()), this, SLOT(selectSliceForFitting()));
+  // user has loaded slices from a workspace or file
+  connect(m_uiForm.dataSelector, SIGNAL(dataReady(const QString &)), this,
+    SLOT(loadSlices(const QString &)));
+  this->setupConnections();
 }
 
 /**
- * @brief Allocate the slice selector in the 2D view. No workspace loading is neccessary.
+ * @brief Establish signals/connections between widgets components
+ */
+void  SliceSelector::setupConnections() {
+  // user is selecting a slice with the spin box
+  connect(m_uiForm.spinboxSliceSelector, SIGNAL(valueChanged(int)), this,
+    SLOT(updateSelectedSlice(int)));
+  // user is selecting a slice with the picker line
+  connect(m_pickerLine, SIGNAL(minValueChanged(double)), this,
+    SLOT(newIndexFromPickedEnergy(double)));
+}
+
+/**
+ * @brief disconnect the signals/connections established
+ *  in setupConnections
+ */
+void  SliceSelector::tearConnections() {
+  // user is selecting a slice with the spin box
+  disconnect(m_uiForm.spinboxSliceSelector, SIGNAL(valueChanged(int)), this,
+    SLOT(updateSelectedSlice(int)));
+  // user is selecting a slice with the picker line
+  disconnect(m_pickerLine, SIGNAL(minValueChanged(double)), this,
+    SLOT(newIndexFromPickedEnergy(double)));
+}
+
+/**
+ * @brief Allocate the slice selector in the 2D view. No workspace loading is necessary.
  */
 void SliceSelector::spawnPickerLine(){
   auto qwtplot = m_uiForm.slices2DPlot->getPlot2D();
   bool isVisible{false};
   m_pickerLine = new MantidWidgets::RangeSelector(
-      qwtplot, MantidWidgets::RangeSelector::YSINGLE, isVisible);
-  //    Mantid::Kernel::make_unique<MantidWidgets::RangeSelector>(
-  //        qwtplot, MantidWidgets::RangeSelector::YSINGLE, isVisible);
+    qwtplot, MantidWidgets::RangeSelector::YSINGLE, isVisible);
   m_pickerLine->setColour(QColor(Qt::black));
 }
 
@@ -230,10 +286,8 @@ void SliceSelector::initPickerLine(){
   m_pickerLine->setRange(eRange);
   m_pickerLine->setMinimum(eRange.first);
   m_pickerLine->setMaximum(eRange.second);
-
   m_pickerLine->setVisible(true);
 }
-
 
 /**
  * @brief Check for correct units and workspace type
@@ -264,8 +318,6 @@ bool SliceSelector::isWorkspaceValid(){
   }
   return true;
 }
-
-
 
 
 }

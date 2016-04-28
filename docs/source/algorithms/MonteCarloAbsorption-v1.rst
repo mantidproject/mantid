@@ -20,7 +20,11 @@ spectra in turn:
    and an outgoing vector to the final detector;
 -  The total attenuation factor for this path is then calculated as the
    product of the factor for each defined material of the
-   sample/container that the track passes through.
+   sample/container that the track passes through.  Any process that 
+   removes neutrons from the beam prior to the scattering point looks
+   like absorption.  Therefore both the absorption and total scattering cross sections are 
+   used to calculate the attenuation factor.  This follows the description
+   of T. M. Sabine (International Tables for Crystallography Vol C., pg 603.) 
 
 Known limitations
 -----------------

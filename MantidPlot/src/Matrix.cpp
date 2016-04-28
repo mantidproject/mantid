@@ -1020,7 +1020,7 @@ void Matrix::exportVector(const QString& fileName, int res, bool color, bool kee
       int width = static_cast<int>(height*aspect);
       int x = (printer.width()- width)/2;
       rect = QRect(x, margin, width, height);
-    } else if (aspect >= page_aspect){
+    } else {
       int margin = (int) ((0.1/2.54)*printer.logicalDpiX()); // 1 mm margins
       int width = printer.width() - 2*margin;
       int height = static_cast<int>(width/aspect);
