@@ -121,7 +121,7 @@ std::string DataProcessorGenerateNotebook::generateNotebook(
     /** Post-process group **/
 
     boost::tuple<std::string, std::string> postprocess_string =
-        postprocessGroupString(groupRows, m_instrument, m_model, m_whitelist,
+        postprocessGroupString(groupRows, m_model, m_whitelist,
                                m_preprocessMap, m_processor, m_postprocessor,
                                m_postprocessingOptions);
     notebook->codeCell(boost::get<0>(postprocess_string));
@@ -158,6 +158,7 @@ std::string titleString(const std::string &wsName) {
   Create string of python code to call plots() with the required workspaces
   @param output_ws : vector containing all the output workspaces produced during
   the reduction
+  @param stitched_wsStr : string containing the name of the stitched (post-processed workspace)
   @param stitched_wsStr : name of post-processed data workspace
   @return string containing the python code
   */
@@ -234,7 +235,7 @@ std::string plotsString(const std::vector<std::string> &output_ws,
 /**
   Create string of markdown code to display a table of data from the GUI
   @param model : tablemodel for the full table
-  @param col_nums : column number for each column title
+  @param whitelist : the whitelist defining the table columns
   @param rows : rows from full table to include
   @return string containing the markdown code
   */
@@ -274,7 +275,6 @@ std::string tableString(QDataProcessorTableModel_sptr model,
 /**
   Create string of python code to post-process workspaces in the same group
   @param rows : rows in the group
-  @param instrument : name of the instrument
   @param model : table model containing details of runs and processing settings
   @param whitelist : the whitelist
   @param preprocessMap : pre-processing instructions as a map
@@ -286,7 +286,7 @@ std::string tableString(QDataProcessorTableModel_sptr model,
   @return tuple containing the python code string and the output workspace name
   */
 boost::tuple<std::string, std::string> postprocessGroupString(
-    const std::set<int> &rows, const std::string &instrument,
+    const std::set<int> &rows,
     QDataProcessorTableModel_sptr model,
     const DataProcessorWhiteList &whitelist,
     const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
@@ -357,8 +357,10 @@ std::string plot1DString(const std::vector<std::string> &ws_names) {
 /**
  Constructs the name for the reduced workspace
  @param rowNo : the row
+ @param model : tablemodel for the full table
  @param whitelist : the whitelist
  @param preprocessMap : the pre-processing instructions as a map
+ @param processor : the processing (reduction) algorithm
  @param prefix : wheter to return the name with the prefix or not
  @return : the workspace name
 */
@@ -615,6 +617,7 @@ std::string plusString(const std::string &input_name,
  Create string of python code to load a single workspace
  @param run : run to load
  @param instrument : name of the instrument
+ @param prefix : the prefix to prepend to the output workspace name
  @return tuple of strings of python code and output workspace name
 */
 boost::tuple<std::string, std::string>

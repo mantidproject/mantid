@@ -56,7 +56,7 @@ std::string DLLExport tableString(QDataProcessorTableModel_sptr model,
 std::string DLLExport titleString(const std::string &wsName);
 
 boost::tuple<std::string, std::string> DLLExport postprocessGroupString(
-    const std::set<int> &rows, const std::string &instrument,
+    const std::set<int> &rows,
     QDataProcessorTableModel_sptr model,
     const DataProcessorWhiteList &whitelist,
     const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,

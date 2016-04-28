@@ -1,6 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_DATAPROCESSORWHITELIST_H
 #define MANTID_CUSTOMINTERFACES_DATAPROCESSORWHITELIST_H
 
+#include <map>
 #include <string>
 
 namespace MantidQt {

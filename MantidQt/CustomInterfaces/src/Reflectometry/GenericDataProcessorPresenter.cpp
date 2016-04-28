@@ -194,7 +194,8 @@ void GenericDataProcessorPresenter::validateModel(ITableWorkspace_sptr model) {
   if (!model)
     throw std::runtime_error("Null pointer");
 
-  if (model->columnCount() != m_columns)
+  int columns = static_cast<int>(model->columnCount());
+  if (columns != m_columns)
     throw std::runtime_error("Selected table has the incorrect number of "
                              "columns to be used as a data processor table.");
 
@@ -531,6 +532,8 @@ void GenericDataProcessorPresenter::validateRow(int rowNo) const {
 Takes a user specified run, or list of runs, and returns a pointer to the
 desired workspace
 @param runStr : The run or list of runs (separated by '+')
+@param preprocessor : The pre-processing algorithm acting on this column
+@param optionsMap : User-specified options as a map
 @throws std::runtime_error if the workspace could not be prepared
 @returns a shared pointer to the workspace
 */
