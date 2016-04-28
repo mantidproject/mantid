@@ -118,9 +118,10 @@ void MonteCarloAbsorption::exec() {
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   const int nevents = getProperty("EventsPerPoint");
   const int nlambda = getProperty("NumberOfWavelengthPoints");
-  const int seed = getProperty("Seed");
-  auto outputWS = doSimulation(*inputWS, static_cast<size_t>(nevents),
-                               nlambda, seed);
+  const int seed = getProperty("SeedValue");
+
+  auto outputWS =
+      doSimulation(*inputWS, static_cast<size_t>(nevents), nlambda, seed);
 
   setProperty("OutputWorkspace", outputWS);
 }
@@ -139,14 +140,23 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
   auto outputWS = createOutputWorkspace(inputWS);
   // Cache information about the workspace that will be used repeatedly
   auto instrument = inputWS.getInstrument();
-  const int64_t numHists = static_cast<int64_t>(inputWS.getNumberHistograms());
-  const int numBins = static_cast<int>(inputWS.blocksize());
+  const int64_t nhists = static_cast<int64_t>(inputWS.getNumberHistograms());
+  const int nbins = static_cast<int>(inputWS.blocksize());
+  if (isEmpty(nlambda) || nlambda > nbins) {
+    if (!isEmpty(nlambda)) {
+      g_log.warning() << "The requested number of wavelength points is larger "
+                         "than the spectra size. "
+                         "Defaulting to spectra size.\n";
+    }
+    nlambda = nbins;
+  }
+
   EFixedProvider efixed(inputWS);
   auto beamProfile = createBeamProfile(*instrument, inputWS.sample());
 
   // Configure progress
-  const int lambdaStepSize = numBins / nlambda;
-  Progress prog(this, 0.0, 1.0, numHists * numBins / lambdaStepSize);
+  const int lambdaStepSize = nbins / nlambda;
+  Progress prog(this, 0.0, 1.0, nhists * nbins / lambdaStepSize);
   prog.setNotifyStep(0.01);
   const std::string reportMsg = "Computing corrections";
 
@@ -160,7 +170,7 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
     lambda = &getWavelengthPointData;
   }
 
-  for (int64_t i = 0; i < numHists; ++i) {
+  for (int64_t i = 0; i < nhists; ++i) {
     const auto &xvalues = outputWS->readX(i);
     auto &signal = outputWS->dataY(i);
     auto &errors = outputWS->dataE(i);
@@ -181,7 +191,7 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
     MersenneTwister rng(seed);
 
     // Simulation for each requested wavelength point
-    for (int j = 0; j < numBins; j += lambdaStepSize) {
+    for (int j = 0; j < nbins; j += lambdaStepSize) {
       prog.report(reportMsg);
       const double lambdaStep = lambda(j, xvalues);
       double lambdaIn(lambdaStep), lambdaOut(lambdaStep);
@@ -192,13 +202,13 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
       } else {
         // elastic case already initialized
       }
-      std::tie(signal[i], errors[i]) =
+      std::tie(signal[j], errors[j]) =
           strategy.calculate(rng, detPos, lambdaIn, lambdaOut);
 
       // Ensure we have the last point for the interpolation
-      if (lambdaStepSize > 1 && j + lambdaStepSize >= numBins &&
-          j + 1 != numBins) {
-        j = numBins - lambdaStepSize - 1;
+      if (lambdaStepSize > 1 && j + lambdaStepSize >= nbins &&
+          j + 1 != nbins) {
+        j = nbins - lambdaStepSize - 1;
       }
     }
 
