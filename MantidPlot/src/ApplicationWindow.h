@@ -32,15 +32,16 @@ Description          : QtiPlot's main window
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#include <QMainWindow>
-#include <QFile>
-#include <QSplitter>
-#include <QDesktopServices>
 #include <QBuffer>
+#include <QDesktopServices>
+#include <QFile>
 #include <QLocale>
+#include <QMainWindow>
+#include <QPointer>
+#include <QScopedPointer>
 #include <QSet>
 #include <QSettings>
-#include <QPointer>
+#include <QSplitter>
 
 #include "MantidQtAPI/HelpWindow.h"
 #include "Table.h"
@@ -1365,7 +1366,7 @@ private:
   QWidgetList *hiddenWindows;
   QLineEdit *info;
 
-  QWidget* catalogSearch;
+  QScopedPointer<QWidget> catalogSearch;
 
   QMenu *windowsMenu, *view, *graph, *fileMenu, *format, *edit;
   QMenu *recentProjectsMenu, *recentFilesMenu, *interfaceMenu;

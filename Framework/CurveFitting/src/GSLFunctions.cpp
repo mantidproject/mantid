@@ -101,7 +101,7 @@ int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
 
   // p->function->addPenaltyDeriv(&p->J);
   // add penalty
-  size_t n = p->costFunction->getDomain()->size() - 1;
+  size_t n = p->costFunction->getValues()->size() - 1;
   size_t ia = 0;
   for (size_t i = 0; i < p->function->nParams(); ++i) {
     if (!p->function->isActive(i))

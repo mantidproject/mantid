@@ -9,6 +9,7 @@
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
+#include<iostream>
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1125
@@ -91,8 +92,28 @@ void FitOptionsBrowser::createBrowser()
   //connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
 
   connect(m_enumManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(enumChanged(QtProperty*)));
-
+  connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)),
+    this, SLOT(doubleChanged(QtProperty*)));
   // Fill in getter and setter maps
+}
+
+/**
+ * @brief Initialize the fitting type property. Show in the browser
+ * only if user can switch fit type.
+ */
+void FitOptionsBrowser::initFittingTypeProp() {
+  m_fittingTypeProp = m_enumManager->addProperty("Fitting");
+  QStringList types;
+  types << "Simultaneous" << "Sequential";
+  m_enumManager->setEnumNames(m_fittingTypeProp, types);
+  if (m_fittingType == SimultaneousAndSequential)
+  {
+    m_browser->addProperty(m_fittingTypeProp);
+  }
+  else if (m_fittingType == Simultaneous || m_fittingType == Sequential)
+  {
+    this->lockCurrentFittingType(m_fittingType);
+  }
 }
 
 /**
@@ -100,6 +121,7 @@ void FitOptionsBrowser::createBrowser()
  */
 void FitOptionsBrowser::createProperties()
 {
+  initFittingTypeProp();
   createCommonProperties();
   if (m_fittingType == Simultaneous || m_fittingType == SimultaneousAndSequential)
   {
@@ -113,15 +135,6 @@ void FitOptionsBrowser::createProperties()
 
 void FitOptionsBrowser::createCommonProperties()
 {
-  if (m_fittingType == SimultaneousAndSequential)
-  {
-    m_fittingTypeProp = m_enumManager->addProperty("Fitting");
-    QStringList types;
-    types << "Simultaneous" << "Sequential";
-    m_enumManager->setEnumNames(m_fittingTypeProp, types);
-    m_browser->addProperty(m_fittingTypeProp);
-  }
-
   // Create MaxIterations property
   m_maxIterations = m_intManager->addProperty("Max Iterations");
   {
@@ -202,7 +215,7 @@ void FitOptionsBrowser::createSimultaneousFitProperties()
 
 void FitOptionsBrowser::createSequentialFitProperties()
 {
-  // Create FitType property
+  // Create FitType property, a property of algorithm PlotPeakByLogValue
   m_fitType = m_enumManager->addProperty("Fit Type");
   {
     QStringList types;
@@ -272,18 +285,9 @@ void FitOptionsBrowser::addProperty(const QString& name, QtProperty* prop,
   m_setters[prop] = setter;
 }
 
-
-/** Create a double property and set some settings
- * @param name :: The name of the new property
- * @return Pointer to the created property
- */
-QtProperty* FitOptionsBrowser::addDoubleProperty(const QString& name)
-{
-  QtProperty* prop = m_doubleManager->addProperty(name);
-  m_doubleManager->setDecimals(prop,m_decimals);
-  m_doubleManager->setRange(prop,-std::numeric_limits<double>::max(),std::numeric_limits<double>::max());
-  return prop;
-}
+/*                *********************
+ *                **  Private Slots  **
+ *                *********************/
 
 /**
  * Update the browser when an enum property changes.
@@ -299,6 +303,13 @@ void FitOptionsBrowser::enumChanged(QtProperty* prop)
   {
     switchFitType();
   }
+}
+
+/**
+ * @brief pass the signal emitted by m_doubleManager
+ */
+void FitOptionsBrowser::doubleChanged(QtProperty *property) {
+  emit doublePropertyChanged(property->propertyName());
 }
 
 /**
@@ -363,22 +374,6 @@ void FitOptionsBrowser::displayNormalFitProperties()
   {
     m_browser->removeProperty(prop);
   }
-}
-
-/**
- * Show sequential fit (PlotPeakByLogValue) properties and hide the others.
- */
-void FitOptionsBrowser::displaySequentialFitProperties()
-{
-  foreach(QtProperty* prop, m_sequentialProperties)
-  {
-    m_browser->addProperty(prop);
-  }
-  foreach(QtProperty* prop, m_simultaneousProperties)
-  {
-    m_browser->removeProperty(prop);
-  }
-  emit changedToSequentialFitting();
 }
 
 /**
@@ -576,6 +571,24 @@ void FitOptionsBrowser::setIntProperty(QtProperty* prop, const QString& value)
 }
 
 /**
+ * Get the value of a double algorithm property.
+ * @param prop :: The corresponding QtProperty.
+ * @return the stored value
+ */
+QString FitOptionsBrowser::getDoubleProperty(QtProperty* prop) const {
+  return QString::number(m_doubleManager->value(prop));
+}
+
+/**
+ * Set a new value of a double algorithm property.
+ * @param prop :: The corresponding QtProperty.
+ * @param value :: The new value.
+ */
+void FitOptionsBrowser::setDoubleProperty(QtProperty* prop, const QString& value) {
+  m_doubleManager->setValue(prop,value.toDouble());
+}
+
+/**
  * Get the value of a bool algorithm property.
  * @param prop :: The corresponding QtProperty.
  */
@@ -762,6 +775,62 @@ QString FitOptionsBrowser::getParameterToPlot() const
   if (i < 0) i = 0;
   return m_enumManager->enumNames(m_plotParameter)[i];
 }
+
+/*                *************************
+ *                **  Protected Members  **
+ *                *************************/
+
+/**
+ * @brief Declares a property of type double, inserting it in the QMap attributes.
+ * Note: It does not add it to the browser. Use displayProperty() for this.
+ * @exception std::runtime_error if property already declared
+ * @return a raw pointer to the created property.
+ */
+QtProperty* FitOptionsBrowser::addDoubleProperty(const QString &propertyName) {
+  if(m_propertyNameMap.contains(propertyName)){
+    throw std::runtime_error("Property " + propertyName.toStdString() + " already added.");
+  }
+  QtProperty *property = m_doubleManager->addProperty(propertyName);
+  m_doubleManager->setDecimals(property, m_decimals);
+  m_doubleManager->setRange(property, -std::numeric_limits<double>::max(),std::numeric_limits<double>::max());
+  this->addProperty(propertyName, property,
+    &FitOptionsBrowser::getDoubleProperty, &FitOptionsBrowser::setDoubleProperty);
+  return property;
+}
+
+/**
+ * @brief Show or hide in the browser a supported property
+ * @param propertyName name of the existing property
+ * @param show toggles the visibility of the property on/off
+ * @pre if property is to be shown, property should not have been previously added to the browser
+ * @pre if property is to be hidden, property should not have been previously removed from the browser
+ */
+void FitOptionsBrowser::displayProperty(const QString &propertyName, bool show) {
+  if ( !m_propertyNameMap.contains(propertyName) ) {
+    throw std::runtime_error("Property " + propertyName.toStdString() + " isn't supported by the browser.");
+  }
+  auto prop = m_propertyNameMap[propertyName];
+  if(show) {
+    m_browser->addProperty(prop);
+  }
+  else {
+    m_browser->removeProperty(prop);
+  }
+}
+
+/**
+ * Show sequential fit (PlotPeakByLogValue) properties and hide the others.
+ */
+void FitOptionsBrowser::displaySequentialFitProperties() {
+  foreach(QtProperty* prop, m_sequentialProperties) {
+    m_browser->addProperty(prop);
+  }
+  foreach(QtProperty* prop, m_simultaneousProperties) {
+    m_browser->removeProperty(prop);
+  }
+  emit changedToSequentialFitting();
+}
+
 
 } // MantidWidgets
 } // MantidQt

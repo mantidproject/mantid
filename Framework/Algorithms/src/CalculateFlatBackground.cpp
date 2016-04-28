@@ -181,6 +181,7 @@ void CalculateFlatBackground::exec() {
 
       MantidVec &E = outputWS->dataE(currentSpec);
       // only the Mean() function calculates the variance
+      // cppcheck-suppress knownConditionTrueFalse
       if (variance > 0) {
         // adjust the errors using the variance (variance = error^2)
         std::transform(
