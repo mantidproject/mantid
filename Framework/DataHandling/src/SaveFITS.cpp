@@ -1,7 +1,5 @@
 #include "MantidDataHandling/SaveFITS.h"
 
-//// ????
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -16,26 +14,34 @@
 namespace Mantid {
 namespace DataHandling {
 
-// Minimalistic SaveFITS.  At a very least we should add headers for
-// ToF, time bin, counts, triggers, etc.
-// TODO: this is a very early version of what should become an
-// algorithm of its own
-const size_t maxLenHdr = 80;
-const std::string FITSHdrFirst =
+const size_t SaveFITS::g_maxLenHdr = 80;
+
+// TODO: add headers for ToF, time bin, counts, triggers, etc.
+const std::string SaveFITS::g_FITSHdrEnd = "END";
+const std::string SaveFITS::g_FITSHdrFirst =
     "SIMPLE  =                    T / file does conform to FITS standard";
-const std::string FITSHdrBitDepth =
-    "BITPIX  =                   16 / number of bits per data pixel";
-const std::string FITSHdrAxes =
+
+// To build something like:
+// "BITPIX  =                   16 / number of bits per data pixel";
+const std::string SaveFITS::g_bitDepthPre = "BITPIX  =                   ";
+const std::string SaveFITS::g_bitDepthPost = " / number of bits per data pixel";
+
+const std::string SaveFITS::g_FITSHdrAxes =
     "NAXIS   =                    2 / number of data axes";
-const std::string FITSHdrExtensions =
+const std::string SaveFITS::g_FITSHdrExtensions =
     "EXTEND  =                    T / FITS dataset may contain extensions";
-const std::string FITSHdrRefComment1 = "COMMENT   FITS (Flexible Image "
-                                       "Transport System) format is defined in "
-                                       "'Astronomy";
-const std::string FITSHdrRefComment2 =
+const std::string SaveFITS::g_FITSHdrRefComment1 =
+    "COMMENT   FITS (Flexible Image "
+    "Transport System) format is defined in "
+    "'Astronomy";
+const std::string SaveFITS::g_FITSHdrRefComment2 =
     "COMMENT   and Astrophysics', volume 376, page 359; bibcode: "
     "2001A&A...376..359H";
-const std::string FITSHdrEnd = "END";
+
+// extend this if we ever want to support 64 bits pixels
+const size_t SaveFITS::g_maxBitDepth = 32;
+const std::vector<int> SaveFITS::g_bitDepths{8, 16, g_maxBitDepth};
+const size_t SaveFITS::g_maxBytesPP = g_maxBitDepth / 8;
 
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
@@ -56,7 +62,8 @@ const std::string SaveFITS::category() const { return "DataHandling\\Imaging"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string SaveFITS::summary() const {
-  return "Aggregates images from multiple energy bands or wavelengths";
+  return "Saves image data from a workspace in FITS (Flexible Image Transport "
+         "System) format";
 }
 
 namespace {
@@ -88,9 +95,8 @@ void SaveFITS::init() {
                       std::vector<std::string>(1, ".fits")),
                   "Name of the output file where the image is saved.");
 
-  const std::vector<int> bitDepths{16};
   declareProperty(PROP_BIT_DEPTH, 16,
-                  boost::make_shared<Kernel::ListValidator<int>>(bitDepths),
+                  boost::make_shared<Kernel::ListValidator<int>>(g_bitDepths),
                   "The bit depth or number of bits per pixel to use for the "
                   "output image(s). Only 16 bits is supported at the "
                   "moment.",
@@ -111,9 +117,9 @@ void SaveFITS::exec() {
   const auto filename = getPropertyValue(PROP_FILENAME);
 
   saveFITSImage(ws, filename);
-  g_log.notice() << "Image of size " + std::to_string(0) + " columns by " +
-                        std::to_string(0) + " rows saved in '" + filename +
-                        "'" << std::endl;
+  g_log.information() << "Image of size " + std::to_string(0) + " columns by " +
+                             std::to_string(0) + " rows saved in '" + filename +
+                             "'" << std::endl;
 }
 
 /**
@@ -133,14 +139,16 @@ void SaveFITS::saveFITSImage(const API::MatrixWorkspace_sptr img,
 void SaveFITS::writeFITSHeaderBlock(const API::MatrixWorkspace_sptr img,
                                     std::ofstream &file) {
   // minimal sequence of standard headers
-  writeFITSHeaderEntry(FITSHdrFirst, file);
-  writeFITSHeaderEntry(FITSHdrBitDepth, file);
-  writeFITSHeaderEntry(FITSHdrAxes, file);
+  writeFITSHeaderEntry(g_FITSHdrFirst, file);
+  int depth = getProperty(PROP_BIT_DEPTH);
+  const std::string bitDepthHdr = makeBitDepthHeader(depth);
+  writeFITSHeaderEntry(bitDepthHdr, file);
+  writeFITSHeaderEntry(g_FITSHdrAxes, file);
   writeFITSHeaderAxesSizes(img, file);
-  writeFITSHeaderEntry(FITSHdrExtensions, file);
-  writeFITSHeaderEntry(FITSHdrRefComment1, file);
-  writeFITSHeaderEntry(FITSHdrRefComment2, file);
-  writeFITSHeaderEntry(FITSHdrEnd, file);
+  writeFITSHeaderEntry(g_FITSHdrExtensions, file);
+  writeFITSHeaderEntry(g_FITSHdrRefComment1, file);
+  writeFITSHeaderEntry(g_FITSHdrRefComment2, file);
+  writeFITSHeaderEntry(g_FITSHdrEnd, file);
 
   const size_t entriesPerHDU = 36;
   writePaddingFITSHeaders(entriesPerHDU - 9, file);
@@ -151,34 +159,44 @@ void SaveFITS::writeFITSImageMatrix(const API::MatrixWorkspace_sptr img,
   const size_t sizeX = img->blocksize();
   const size_t sizeY = img->getNumberHistograms();
 
-  for (size_t row = 0; row < sizeY; row++) {
+  int bitDepth = getProperty(PROP_BIT_DEPTH);
+  const size_t bytespp = static_cast<size_t>(bitDepth) / 8;
+
+  for (size_t row = 0; row < sizeY; ++row) {
     Mantid::API::ISpectrum *spectrum = img->getSpectrum(row);
     const auto &dataY = spectrum->readY();
-    for (size_t col = 0; col < sizeX; col++) {
-      int16_t pixelVal = static_cast<uint16_t>(dataY[col]);
+    for (size_t col = 0; col < sizeX; ++col) {
+      int32_t pixelVal;
+      if (8 == bitDepth) {
+        pixelVal = static_cast<uint8_t>(dataY[col]);
+      } if (16 == bitDepth) {
+        pixelVal = static_cast<uint16_t>(dataY[col]);
+      } else if (32 == bitDepth) {
+        pixelVal = static_cast<uint32_t>(dataY[col]);
+      }
 
       // change endianness: to sequence of bytes in big-endian
-      const size_t bytespp = 2;
-      uint8_t bytesPixel[bytespp];
+      // this needs revisiting (similarly in LoadFITS)
+      // See https://github.com/mantidproject/mantid/pull/15964
+      std::array<uint8_t, g_maxBytesPP> bytesPixel;
       uint8_t *iter = reinterpret_cast<uint8_t *>(&pixelVal);
-      std::reverse_copy(iter, iter + bytespp, bytesPixel);
+      std::reverse_copy(iter, iter + bytespp, bytesPixel.data());
 
-      file.write(reinterpret_cast<const char *>(&bytesPixel),
-                 sizeof(bytesPixel));
+      file.write(reinterpret_cast<const char *>(bytesPixel.data()), bytespp);
     }
   }
 }
 
 void SaveFITS::writeFITSHeaderEntry(const std::string &hdr,
                                     std::ofstream &file) {
-  static const std::vector<char> zeros(maxLenHdr, 0);
+  static const std::vector<char> blanks(g_maxLenHdr, 32);
 
   size_t count = hdr.size();
-  if (count >= maxLenHdr)
-    count = maxLenHdr;
+  if (count >= g_maxLenHdr)
+    count = g_maxLenHdr;
 
   file.write(hdr.c_str(), sizeof(char) * count);
-  file.write(zeros.data(), maxLenHdr - count);
+  file.write(blanks.data(), g_maxLenHdr - count);
 }
 
 void SaveFITS::writeFITSHeaderAxesSizes(const API::MatrixWorkspace_sptr img,
@@ -198,19 +216,26 @@ void SaveFITS::writeFITSHeaderAxesSizes(const API::MatrixWorkspace_sptr img,
   writeFITSHeaderEntry(axis2.str(), file);
 }
 
+std::string SaveFITS::makeBitDepthHeader(size_t depth) const {
+  std::stringstream hdr;
+  hdr << g_bitDepthPre << std::setw(2) << depth << g_bitDepthPost;
+  return hdr.str();
+}
+
 /**
- * Writes the padding required to fill every header block. FITS headers consist
- * of subblocks of 36 entries/lines. This method
- * is to write the "padding" lines required to have 36 in a block
+ * Writes the padding required to fill every header block. FITS
+ * headers consist of subblocks of 36 entries/lines, with 80
+ * characters per line. This method is to write as many "padding"
+ * lines as required to have 36 lines in a block
  *
  * @param count how may bytes to write
  * @param file output stream to write to
  */
 void SaveFITS::writePaddingFITSHeaders(size_t count, std::ofstream &file) {
-  static const std::vector<char> zeros(maxLenHdr, 0);
+  static const std::vector<char> blanks(g_maxLenHdr, 32);
 
   for (size_t i = 0; i < count; ++i) {
-    file.write(zeros.data(), maxLenHdr);
+    file.write(blanks.data(), g_maxLenHdr);
   }
 }
 

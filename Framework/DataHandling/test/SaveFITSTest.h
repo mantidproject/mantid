@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_IMGGAGGREGATEWAVELENGTHSTEST_H_
-#define MANTID_DATAHANDLING_IMGGAGGREGATEWAVELENGTHSTEST_H_
+#ifndef MANTID_DATAHANDLING_SAVEFITSTEST_H_
+#define MANTID_DATAHANDLING_SAVEFITSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -47,6 +47,12 @@ public:
     TS_ASSERT_THROWS(
         alg->setPropertyValue("BitDepth", "this_is_wrong_you_must_fail"),
         std::invalid_argument);
+
+    TS_ASSERT_THROWS(alg->setProperty("BitDepth", 10),
+                     std::invalid_argument);
+
+    TS_ASSERT_THROWS(alg->setProperty("BitDepth", 64),
+                     std::invalid_argument);
   }
 
   void test_exec_fail() {
@@ -115,4 +121,4 @@ public:
   }
 };
 
-#endif /* MANTID_DATAHANDLING_IMGGAGGREGATEWAVELENGTHSTEST_H_ */
+#endif /* MANTID_DATAHANDLING_SAVEFITSTEST_H_ */

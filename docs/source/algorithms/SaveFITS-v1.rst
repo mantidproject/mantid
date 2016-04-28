@@ -24,7 +24,7 @@ a "color fill plot" or plot2D.
 
 The current implementation of this algorithm only supports:
 - 2D files (FITS images with two axes).
-- 16 bits as pixel bit depth
+- 8, 16 or 32 bits as pixel bit depth (only for integer types)
 
 The files produced by this algorithm follow the FITS standard and can
 be loaded by widespread software and libraries such as `ImageJ/Fiji
@@ -42,7 +42,7 @@ Usage
 
 **Example - LoadSaveLoadFITS**
 
-.. code-block:: python
+.. testcode:: LoadSaveLoadFITS
 
     # Load an image
     wsg_name = 'images'
@@ -74,21 +74,31 @@ Usage
         print "Image size in first image: {0} x {1} pixels".format(int(log1), int(log2))
         log1_reload = ws_reload.getRun().getLogData(axis1_log).value
         log2_reload = ws_reload.getRun().getLogData(axis2_log).value
-        print "Image size in first image: {0} x {1} pixels".format(int(log1_reload), int(log2_reload))
+        print "Image size in second image: {0} x {1} pixels".format(int(log1_reload), int(log2_reload))
     except RuntimeError:
         print "Could not find the keywords '%s' and '%s' in this FITS file" % (axis1_log, axis2_log)
 
     pos_x, pos_y = 22, 33
-    print "Pixel value at coordinates ({0},{1}), first image: {2}, second image: {3}".
-          format(pos_x, pos_y, ws.readX(pos_y)[pos_x], ws_reload.readX(pos_y)[pos_x])
+    print ("Pixel value at coordinates ({0},{1}), first image: {2}, second image: {3}".
+           format(pos_x, pos_y, ws.readY(pos_y)[pos_x], ws_reload.readY(pos_y)[pos_x]))
                 
-.. testcleanup:: LoadFITS1SpectrumPerRow
+.. testcleanup:: LoadSaveLoadFITS
 
-   import os
+    import os
                  
     DeleteWorkspace(wsg_name)
     DeleteWorkspace(wsg_reload_name)
     os.remove(save_name)
+
+Output:
+
+.. testoutput:: LoadSaveLoadFITS
+
+    Bits per pixel in first image: 16
+    Bits per pixel in second image: 16
+    Image size in first image: 512 x 512 pixels
+    Image size in second image: 512 x 512 pixels
+    Pixel value at coordinates (22,33), first image: 63.0, second image: 63.0
 
 .. categories::
 

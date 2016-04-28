@@ -203,7 +203,6 @@ void MDHistoWorkspace::initVertexesArray() {
   size_t nd = numDimensions;
   // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd
   // bits
-  // cppcheck-suppress constStatement
   size_t numVertices = size_t{1} << numDimensions;
 
   // Allocate the array of the right size
@@ -218,7 +217,6 @@ void MDHistoWorkspace::initVertexesArray() {
     for (size_t d = 0; d < nd; d++) {
       // Use a bit mask to look at each bit of the integer we are iterating
       // through.
-      // cppcheck-suppress constStatement
       size_t mask = size_t{1} << d;
       if ((i & mask) > 0) {
         // Bit is 1, use the max of the dimension

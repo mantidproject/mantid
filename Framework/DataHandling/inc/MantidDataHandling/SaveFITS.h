@@ -60,10 +60,27 @@ private:
 
   void writeFITSHeaderEntry(const std::string &hdr, std::ofstream &file);
 
-  void writePaddingFITSHeaders(size_t count, std::ofstream &file);
+  std::string makeBitDepthHeader(size_t depth) const;
 
   void writeFITSHeaderAxesSizes(const API::MatrixWorkspace_sptr img,
                                 std::ofstream &file);
+
+  void writePaddingFITSHeaders(size_t count, std::ofstream &file);
+
+  static const size_t g_maxBitDepth;
+  static const std::vector<int> g_bitDepths;
+  static const size_t g_maxBytesPP;
+  // size of header entries in bytes
+  static const size_t g_maxLenHdr;
+  // pre-defined header contents
+  static const std::string g_FITSHdrEnd;
+  static const std::string g_FITSHdrFirst;
+  static const std::string g_bitDepthPre;
+  static const std::string g_bitDepthPost;
+  static const std::string g_FITSHdrAxes;
+  static const std::string g_FITSHdrExtensions;
+  static const std::string g_FITSHdrRefComment1;
+  static const std::string g_FITSHdrRefComment2;
 };
 
 } // namespace DataHandling
