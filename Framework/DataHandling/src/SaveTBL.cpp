@@ -75,7 +75,7 @@ void SaveTBL::exec() {
     else
       writeVal<std::string>(heading, file);
   }
-  for (auto rowIndex = 0; rowIndex < ws->rowCount(); ++rowIndex) {
+  for (size_t rowIndex = 0; rowIndex < ws->rowCount(); ++rowIndex) {
     TableRow row = ws->getRow(rowIndex);
     for (size_t columnIndex = 0; columnIndex < columnHeadings.size();
          columnIndex++) {
