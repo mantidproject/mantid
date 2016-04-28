@@ -102,16 +102,17 @@ void Convolution::function(const FunctionDomain &domain,
   const double *xValues = d1d->getPointerAt(0);
   double dx =
       (xValues[nData - 1] - xValues[0]) / static_cast<double>((nData - 1));
-  auto ixP = static_cast<size_t>(xValues[nData - 1] / dx); // positive
-                                                           // x-values
+  // positive x-values:
+  auto ixP = static_cast<size_t>(xValues[nData - 1] / dx);
   auto ixN = nData - ixP - 1; // negative x-values (ixP+ixN=nData-1)
 
   // determine wether to use FFT or Direct calculations
   int assymmetry = abs(static_cast<int>(ixP - ixN));
-  if (assymmetry < 0.02 * static_cast<double>(ixP + ixN)) {
-    functionFFTMode(domain, values);
-  } else {
+  if (xValues[0]*xValues[nData-1]<0 &&
+      assymmetry > 0.02 * static_cast<double>(ixP + ixN)) {
     functionDirectMode(domain, values);
+  } else {
+    functionFFTMode(domain, values);
   }
 }
 
