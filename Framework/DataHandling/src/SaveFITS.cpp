@@ -8,6 +8,8 @@
 
 #include <fstream>
 
+#include <boost/pointer_cast.hpp>
+
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
@@ -106,6 +108,18 @@ void SaveFITS::init() {
 std::map<std::string, std::string> SaveFITS::validateInputs() {
   std::map<std::string, std::string> result;
 
+  API::MatrixWorkspace_const_sptr wks = getProperty(PROP_INPUT_WS);
+  if (wks) {
+    if (0 == wks->blocksize()) {
+      result[PROP_INPUT_WS] = "The input workspace must have at least one "
+                              "column (the X axis is empty)";
+    }
+    if (0 == wks->getNumberHistograms()) {
+      result[PROP_INPUT_WS] = "The input workspace must have at least one row "
+                              "(the Y axis is empty)";
+    }
+  }
+
   return result;
 }
 
@@ -169,7 +183,7 @@ void SaveFITS::writeFITSImageMatrix(const API::MatrixWorkspace_sptr img,
       int32_t pixelVal;
       if (8 == bitDepth) {
         pixelVal = static_cast<uint8_t>(dataY[col]);
-      } if (16 == bitDepth) {
+      } else if (16 == bitDepth) {
         pixelVal = static_cast<uint16_t>(dataY[col]);
       } else if (32 == bitDepth) {
         pixelVal = static_cast<uint32_t>(dataY[col]);
