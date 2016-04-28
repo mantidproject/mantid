@@ -44,7 +44,7 @@ inline double toWavelength(double energy) {
 }
 
 struct EFixedProvider {
-  EFixedProvider(const ExperimentInfo &expt)
+  explicit EFixedProvider(const ExperimentInfo &expt)
       : m_expt(expt), m_emode(expt.getEMode()), m_value(0.0) {
     if (m_emode == DeltaEMode::Direct) {
       m_value = m_expt.getEFixed();
