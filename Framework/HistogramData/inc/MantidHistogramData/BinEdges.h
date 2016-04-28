@@ -41,6 +41,13 @@ public:
   using VectorOf<BinEdges, HistogramX>::VectorOf;
   using VectorOf<BinEdges, HistogramX>::operator=;
   BinEdges() = default;
+  // The copy and move constructor and assignment are not captured properly by
+  // the using declaration above, so we need them here explicitly.
+  BinEdges(const BinEdges &other) = default;
+  BinEdges(BinEdges &&other) = default;
+  BinEdges &operator=(const BinEdges &other) & = default;
+  BinEdges &operator=(BinEdges &&other) & = default;
+
   explicit BinEdges(const Points &points);
 };
 

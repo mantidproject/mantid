@@ -20,6 +20,10 @@ public:
   using VectorOf<VectorOfTester, HistogramX>::VectorOf;
   using VectorOf<VectorOfTester, HistogramX>::operator=;
   VectorOfTester() = default;
+  VectorOfTester(const VectorOfTester &other) = default;
+  VectorOfTester(VectorOfTester &&other) = default;
+  VectorOfTester &operator=(const VectorOfTester &other) & = default;
+  VectorOfTester &operator=(VectorOfTester &&other) & = default;
 };
 
 class VectorOfTest : public CxxTest::TestSuite {
