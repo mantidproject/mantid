@@ -96,7 +96,7 @@ public:
         xRef[i] = i * BIN_DELTA;
 
       // Try setting a single axis, make sure it doesn't throw
-      retVal->setX(2, axis.cowData());
+      retVal->histogram(2).setBinEdges(axis);
 
       // Set all the histograms at once.
       retVal->setAllX(axis);
