@@ -37,6 +37,7 @@ void MuonAnalysisFitFunctionHelper::doConnect() {
             SLOT(handleModelCleared()));
     connect(fitBrowser, SIGNAL(errorsEnabled(bool)), this,
             SLOT(handleErrorsEnabled(bool)));
+    connect(fitBrowser, SIGNAL(fitUndone()), this, SLOT(handleFitFinished()));
   }
   if (const QObject *funcBrowser = dynamic_cast<QObject *>(m_funcBrowser)) {
     connect(funcBrowser, SIGNAL(functionStructureChanged()), this,
@@ -72,8 +73,9 @@ void MuonAnalysisFitFunctionHelper::updateFunctionAndFit(bool sequential) {
 }
 
 /**
- * Called when fit finished.
+ * Called when fit finished OR undone.
  * Updates parameters displayed in function browser from the fit results.
+ * In the case of "fit undone", this has the effect of resetting them.
  * @param wsName :: [input] UNUSED (workspace name)
  */
 void MuonAnalysisFitFunctionHelper::handleFitFinished(const QString &wsName) {

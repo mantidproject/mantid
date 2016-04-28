@@ -278,6 +278,7 @@ signals:
   void fittingDone(const QString &);
   void functionFactoryUpdateReceived();
   void errorsEnabled(bool enabled);
+  void fitUndone();
 
 protected slots:
   /// Get the registered function names

@@ -1791,6 +1791,7 @@ void FitPropertyBrowser::undoFit() {
     }
     updateParameters();
     getHandler()->clearErrors();
+    emit fitUndone();
   }
   disableUndo();
 }
