@@ -115,12 +115,10 @@ public:
   void runConvetUnitsAlg(std::string workspaceName);
 
   void runCloneWorkspaceAlg(std::string inputWorkspace,
-	  std::string outputWorkspace);
+                            std::string outputWorkspace);
 
   void setDataToClonedWS(std::string inputWorkspace,
-	  std::string outputWorkspace);
-
-  
+                         std::string outputWorkspace);
 
 protected:
   void initialize();
@@ -150,12 +148,9 @@ protected slots:
   void focusingFinished();
   void rebinningFinished();
   void fittingFinished();
-  
+
   // fitting @shahroz
   void fittingRunNoChanged();
-  void updateFittingDirVec(std::string &bankDir, std::string &focusedFile,
-	  bool multi_run);
-  void enableMultiRun(std::string firstRun, std::string lastRun);
 
 private:
   bool validateRBNumber(const std::string &rbn) const;
@@ -282,6 +277,14 @@ private:
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
                                 const std::string &ExpectedPeaks);
 
+  // shahroz
+  void updateFittingDirVec(std::string &bankDir, std::string &focusedFile,
+                           bool multi_run,
+                           std::vector<std::string> &fittingRunNoDirVec);
+
+  void enableMultiRun(std::string firstRun, std::string lastRun,
+                      std::vector<std::string> &fittingRunNoDirVec);
+
   // plots workspace according to the user selection
   void plotFocusedWorkspace(std::string outWSName);
 
@@ -338,10 +341,10 @@ private:
   static const std::string g_vanIntegrationWSName;
 
   // vector holding directory of focused bank file
-  std::vector<std::string> static m_fitting_runno_dir_vec;
+  // std::vector<std::string> static m_fitting_runno_dir_vec;
 
   // indentifier for fitting multi-run or single run input
-  bool static m_fittingMutliRunMode;
+  // bool static m_fittingMutliRunMode;
 
   QThread *m_workerThread;
 

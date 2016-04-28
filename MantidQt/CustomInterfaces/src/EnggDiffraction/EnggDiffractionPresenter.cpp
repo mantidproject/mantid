@@ -46,8 +46,8 @@ bool EnggDiffractionPresenter::g_abortThread = false;
 std::string EnggDiffractionPresenter::g_lastValidRun = "";
 std::string EnggDiffractionPresenter::g_calibCropIdentifier = "SpectrumNumbers";
 std::string EnggDiffractionPresenter::g_sumOfFilesFocus = "";
-std::vector<std::string> EnggDiffractionPresenter::m_fitting_runno_dir_vec;
-bool EnggDiffractionPresenter::m_fittingMutliRunMode = false;
+// std::vector<std::string> EnggDiffractionPresenter::m_fitting_runno_dir_vec;
+// bool EnggDiffractionPresenter::m_fittingMutliRunMode = false;
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(NULL), m_calibFinishedOK(false), m_focusFinishedOK(false),
@@ -462,6 +462,7 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
   startAsyncRebinningPulsesWorker(runNo, nperiods, timeStep, outWSName);
 }
 
+/// SHAHROZ
 // Fitting Tab Run Number & Bank handling here
 void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
     fittingRunNoChanged() {
@@ -475,7 +476,9 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
     Poco::Path bankDir;
 
     // handling of vectors
-    m_fitting_runno_dir_vec.clear();
+    auto runnoDirVector = m_view->getFittingRunNumVec();
+    runnoDirVector.clear();
+
     std::string strFPath = selectedfPath.toString();
     // returns empty if no directory is found
     std::vector<std::string> splitBaseName =
@@ -494,14 +497,14 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
         std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] + "_" +
                                splitBaseName[2] + "_" + splitBaseName[3];
         std::string strBankDir = bankDir.toString();
-        updateFittingDirVec(strBankDir, foc_file, false);
+        updateFittingDirVec(strBankDir, foc_file, false, runnoDirVector);
 
         // add bank to the combo-box and list view
-        m_view->addBankItems(splitBaseName, focusedFile,
-                             m_fitting_runno_dir_vec);
+        m_view->addBankItems(splitBaseName, focusedFile, runnoDirVector);
         runNoVec.clear();
         runNoVec.push_back(splitBaseName[1]);
-        if (!m_fittingMutliRunMode)
+        auto fittingMultiRunMode = m_view->getFittingMutliRunMode();
+        if (!fittingMultiRunMode)
           m_view->addRunNoItem(runNoVec, false);
       }
       // assuming that no directory is found so look for number
@@ -516,27 +519,28 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
           firstRun = firstLastRunNoVec[0];
           lastRun = firstLastRunNoVec[1];
 
-          m_fittingMutliRunMode = true;
-          enableMultiRun(firstRun, lastRun);
+          m_view->setFittingMultiRunMode(true);
+          enableMultiRun(firstRun, lastRun, runnoDirVector);
         }
 
       } else {
         // if given a single run number instead
         auto focusDir = m_view->getFocusDir();
-        updateFittingDirVec(focusDir, strFocusedFile, false);
+        updateFittingDirVec(focusDir, strFocusedFile, false, runnoDirVector);
 
         // add bank to the combo-box and list view
-        m_view->addBankItems(splitBaseName, focusedFile,
-                             m_fitting_runno_dir_vec);
+        m_view->addBankItems(splitBaseName, focusedFile, runnoDirVector);
         runNoVec.clear();
         runNoVec.push_back(strFocusedFile);
-        if (!m_fittingMutliRunMode)
+
+        auto fittingMultiRunMode = m_view->getFittingMutliRunMode();
+        if (!fittingMultiRunMode)
           m_view->addRunNoItem(runNoVec, false);
       }
     }
     // set the directory here to the first in the vector if its not empty
-    if (!m_fitting_runno_dir_vec.empty()) {
-      QString firstDir = QString::fromStdString(m_fitting_runno_dir_vec[0]);
+    if (!runnoDirVector.empty()) {
+      QString firstDir = QString::fromStdString(runnoDirVector[0]);
       m_view->setfittingRunNo(firstDir);
 
     } else if (m_view->getfittingRunNo().empty()) {
@@ -553,9 +557,10 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
   }
 }
 
-void EnggDiffractionPresenter::updateFittingDirVec(std::string &bankDir,
-                                                   std::string &focusedFile,
-                                                   bool multi_run) {
+void EnggDiffractionPresenter::updateFittingDirVec(
+    std::string &bankDir, std::string &focusedFile, bool multi_run,
+    std::vector<std::string> &fittingRunNoDirVec) {
+
   try {
     std::string cwd(bankDir);
     Poco::DirectoryIterator it(cwd);
@@ -568,13 +573,14 @@ void EnggDiffractionPresenter::updateFittingDirVec(std::string &bankDir,
         std::string itbankFileName = itBankfPath.getBaseName();
         // check if it not any other file.. e.g: texture
         if (itbankFileName.find(focusedFile) != std::string::npos) {
-          m_fitting_runno_dir_vec.push_back(itFilePath);
+          fittingRunNoDirVec.push_back(itFilePath);
           if (multi_run)
             return;
         }
       }
       ++it;
     }
+    m_view->setFittingRunNumVec(fittingRunNoDirVec);
   } catch (std::runtime_error &re) {
     m_view->userWarning("Invalid file",
                         "File not found in the following directory; " +
@@ -583,8 +589,9 @@ void EnggDiffractionPresenter::updateFittingDirVec(std::string &bankDir,
   }
 }
 
-void EnggDiffractionPresenter::enableMultiRun(std::string firstRun,
-                                              std::string lastRun) {
+void EnggDiffractionPresenter::enableMultiRun(
+    std::string firstRun, std::string lastRun,
+    std::vector<std::string> &fittingRunNoDirVec) {
 
   bool firstDig = m_view->isDigit(firstRun);
   bool lastDig = m_view->isDigit(lastRun);
@@ -610,17 +617,19 @@ void EnggDiffractionPresenter::enableMultiRun(std::string firstRun,
       // if given a single run number instead
       for (size_t i = 0; i < RunNumberVec.size(); i++) {
         std::string focusDir = m_view->getFocusDir();
-        updateFittingDirVec(focusDir, RunNumberVec[i], true);
+        updateFittingDirVec(focusDir, RunNumberVec[i], true,
+                            fittingRunNoDirVec);
       }
       int diff = (lastNum - firstNum) + 1;
-      auto global_vec_size = m_fitting_runno_dir_vec.size();
+      auto runnoDirVector = m_view->getFittingRunNumVec();
+      auto global_vec_size = runnoDirVector.size();
       if (size_t(diff) == global_vec_size) {
 
         m_view->addRunNoItem(RunNumberVec, true);
 
         /// what todo with this signal @shahroz
 
-        m_view->setBankEmit(m_fittingMutliRunMode);
+        m_view->setBankEmit();
       }
     } else {
       m_view->userWarning("Invalid Run Number",
