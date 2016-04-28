@@ -14,7 +14,7 @@ namespace Algorithms {
 namespace {
 /**
  * Compute the attenuation factor for the given coefficients
- * @param rho Number density of the sample in \f$\A^{-3}\f$
+ * @param rho Number density of the sample in \f$\\A^{-3}\f$
  * @param sigma Cross-section in barns
  * @param length Path length in metres
  * @return The dimensionless attenuated fraction
@@ -55,8 +55,8 @@ MCInteractionVolume::MCInteractionVolume(const API::Sample &sample)
  * @param direc Direction of travel of the neutron
  * @param endPos Final position of neutron after scattering (assumed to be
  * outside of the "volume")
- * @param lambdaBefore Wavelength, in \f$\A^-1\f$, before scattering
- * @param lambdaAfter Wavelength, in \f$\A^-1\f$, after scattering
+ * @param lambdaBefore Wavelength, in \f$\\A^-1\f$, before scattering
+ * @param lambdaAfter Wavelength, in \f$\\A^-1\f$, after scattering
  * @return The fraction of the beam that has been attenuated
  */
 double MCInteractionVolume::calculateAbsorption(
