@@ -128,6 +128,10 @@ void EnggDiffractionPresenter::notify(
     processRebinMultiperiod();
     break;
 
+  case IEnggDiffractionPresenter::FittingRunNo:
+    fittingRunNoChanged();
+    break;
+
   case IEnggDiffractionPresenter::FitPeaks:
     processFitPeaks();
 
@@ -464,7 +468,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
   // TODO: much of this should be moved to presenter
   try {
     /// needs be simplfied here @shahroz
-    QString focusedFile = QString::fromStdString(m_view->fittingRunNo());
+    QString focusedFile = QString::fromStdString(m_view->getfittingRunNo());
     std::string strFocusedFile = focusedFile.toStdString();
     // file name
     Poco::Path selectedfPath(strFocusedFile);
@@ -493,7 +497,8 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
         updateFittingDirVec(strBankDir, foc_file, false);
 
         // add bank to the combo-box and list view
-        m_view->addBankItems(splitBaseName, focusedFile);
+        m_view->addBankItems(splitBaseName, focusedFile,
+                             m_fitting_runno_dir_vec);
         runNoVec.clear();
         runNoVec.push_back(splitBaseName[1]);
         if (!m_fittingMutliRunMode)
@@ -521,7 +526,8 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
         updateFittingDirVec(focusDir, strFocusedFile, false);
 
         // add bank to the combo-box and list view
-        m_view->addBankItems(splitBaseName, focusedFile);
+        m_view->addBankItems(splitBaseName, focusedFile,
+                             m_fitting_runno_dir_vec);
         runNoVec.clear();
         runNoVec.push_back(strFocusedFile);
         if (!m_fittingMutliRunMode)
@@ -533,7 +539,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
       QString firstDir = QString::fromStdString(m_fitting_runno_dir_vec[0]);
       m_view->setfittingRunNo(firstDir);
 
-    } else if (m_view->fittingRunNo().empty()) {
+    } else if (m_view->getfittingRunNo().empty()) {
       m_view->userWarning("Invalid Input",
                           "Invalid directory or run number given. "
                           "Please try again");
@@ -613,7 +619,8 @@ void EnggDiffractionPresenter::enableMultiRun(std::string firstRun,
         m_view->addRunNoItem(RunNumberVec, true);
 
         /// what todo with this signal @shahroz
-        m_view->setBankEmit();
+
+        m_view->setBankEmit(m_fittingMutliRunMode);
       }
     } else {
       m_view->userWarning("Invalid Run Number",
@@ -631,7 +638,7 @@ void EnggDiffractionPresenter::enableMultiRun(std::string firstRun,
 // Process Fitting Peaks begins here
 
 void EnggDiffractionPresenter::processFitPeaks() {
-  const std::string focusedRunNo = m_view->fittingRunNo();
+  const std::string focusedRunNo = m_view->getfittingRunNo();
   const std::string fitPeaksData = m_view->fittingPeaksData();
 
   g_log.debug() << "the expected peaks are: " << fitPeaksData << std::endl;
