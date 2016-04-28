@@ -33,6 +33,8 @@ void MuonAnalysisFitFunctionHelper::doConnect() {
             SLOT(updateFunctionAndFit(bool)));
     connect(fitBrowser, SIGNAL(fittingDone(const QString &)), this,
             SLOT(handleFitFinished(const QString &)));
+    connect(fitBrowser, SIGNAL(functionCleared()), this,
+            SLOT(handleModelCleared()));
   }
   if (const QObject *funcBrowser = dynamic_cast<QObject *>(m_funcBrowser)) {
     connect(funcBrowser, SIGNAL(functionStructureChanged()), this,
@@ -88,6 +90,14 @@ void MuonAnalysisFitFunctionHelper::handleParameterEdited(
     const QString &funcIndex, const QString &paramName) {
   const double value = m_funcBrowser->getParameter(funcIndex, paramName);
   m_fitBrowser->setParameterValue(funcIndex, paramName, value);
+}
+
+/**
+ * Called when "Clear model" selected on the fit property browser.
+ * Clears the function set in the function browser.
+ */
+void MuonAnalysisFitFunctionHelper::handleModelCleared() {
+  m_funcBrowser->clear();
 }
 
 } // namespace CustomInterfaces

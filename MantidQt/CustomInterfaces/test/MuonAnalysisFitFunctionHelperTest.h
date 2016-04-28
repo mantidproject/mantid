@@ -24,6 +24,7 @@ public:
   MOCK_METHOD1(updateParameters, void(const Mantid::API::IFunction &));
   MOCK_METHOD2(parameterChanged, void(const QString &, const QString &));
   MOCK_CONST_METHOD2(getParameter, double(const QString &, const QString &));
+  MOCK_METHOD0(clear, void());
 };
 
 // Mock muon fit property browser
@@ -114,6 +115,11 @@ public:
                 setParameterValue(funcIndex, paramName, paramValue))
         .Times(1);
     m_helper->handleParameterEdited(funcIndex, paramName);
+  }
+
+  void test_handleModelCleared() {
+    EXPECT_CALL(*m_funcBrowser, clear()).Times(1);
+    m_helper->handleModelCleared();
   }
 
 private:

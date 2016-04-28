@@ -87,7 +87,7 @@ public:
   /// Destructor
   virtual ~FunctionBrowser() override;
   /// Clear the contents
-  void clear();
+  void clear() override;
   /// Set the function in the browser
   void setFunction(const QString& funStr);
   /// Set the function in the browser

@@ -53,6 +53,8 @@ public slots:
   /// When parameter edited in function browser, update in fit property browser
   void handleParameterEdited(const QString &funcIndex,
                              const QString &paramName);
+  /// When "Clear model" selected, clear function browser
+  void handleModelCleared();
 
 private:
   /// Connect signals and slots
