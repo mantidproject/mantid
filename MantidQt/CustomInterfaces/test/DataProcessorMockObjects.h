@@ -1,6 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_DATAPROCESSORVIEWMOCKOBJECTS_H
 #define MANTID_CUSTOMINTERFACES_DATAPROCESSORVIEWMOCKOBJECTS_H
 
+#include "MantidKernel/make_unique.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorAppendRowCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h"
 #include <gmock/gmock.h>
@@ -68,6 +70,40 @@ public:
   boost::shared_ptr<DataProcessorPresenter> getTablePresenter() const override {
     return boost::shared_ptr<DataProcessorPresenter>();
   }
+};
+
+class MockDataProcessorPresenter : public DataProcessorPresenter {
+
+public:
+  MockDataProcessorPresenter(){};
+  ~MockDataProcessorPresenter() override {}
+
+  MOCK_METHOD1(notify, void(DataProcessorPresenter::Flag));
+  MOCK_METHOD1(setModel, void(std::string name));
+  MOCK_METHOD1(accept, void(WorkspaceReceiver *));
+
+private:
+  // Calls we don't care about
+  const std::map<std::string, QVariant> &options() const { return m_options; };
+  std::vector<DataProcessorCommand_uptr> publishCommands() {
+    std::vector<DataProcessorCommand_uptr> commands;
+    for (size_t i = 0; i < 26; i++)
+      commands.push_back(
+          Mantid::Kernel::make_unique<DataProcessorAppendRowCommand>(this));
+		return commands;
+  };
+  std::set<std::string> getTableList() const {
+    return std::set<std::string>();
+  };
+  // Calls we don't care about
+  void setOptions(const std::map<std::string, QVariant> &){};
+  void transfer(const std::vector<std::map<std::string, std::string>> &){};
+  void setInstrumentList(const std::vector<std::string> &,
+                         const std::string &){};
+  // void accept(WorkspaceReceiver *) {};
+  void acceptViews(DataProcessorView *, ProgressableView *){};
+
+  std::map<std::string, QVariant> m_options;
 };
 
 #endif /*MANTID_CUSTOMINTERFACES_DATAPROCESSORVIEWMOCKOBJECTS_H*/

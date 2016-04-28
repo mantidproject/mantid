@@ -28,36 +28,11 @@
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorSaveTableCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorSeparatorCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorWorkspaceCommand.h"
+#include "DataProcessorMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;
 // using namespace Mantid::API;
 using namespace testing;
-
-class MockDataProcessorPresenter : public DataProcessorPresenter {
-
-public:
-  MOCK_METHOD1(notify, void(DataProcessorPresenter::Flag));
-  MOCK_METHOD1(setModel, void(std::string name));
-
-private:
-  // Calls we don't care about
-  const std::map<std::string, QVariant> &options() const { return m_options; };
-  std::vector<DataProcessorCommand_uptr> publishCommands() {
-    return std::vector<DataProcessorCommand_uptr>();
-  };
-  std::set<std::string> getTableList() const {
-    return std::set<std::string>();
-  };
-  // Calls we don't care about
-  void setOptions(const std::map<std::string, QVariant> &){};
-  void transfer(const std::vector<std::map<std::string, std::string>> &){};
-  void setInstrumentList(const std::vector<std::string> &,
-                         const std::string &){};
-  void accept(WorkspaceReceiver *){};
-  void acceptViews(DataProcessorView *, ProgressableView *){};
-
-  std::map<std::string, QVariant> m_options;
-};
 
 //=====================================================================================
 // Functional tests

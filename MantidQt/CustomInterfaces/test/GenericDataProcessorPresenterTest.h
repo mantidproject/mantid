@@ -31,8 +31,8 @@
 #include "MantidQtCustomInterfaces/Reflectometry/GenericDataProcessorPresenter.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "ProgressableViewMockObject.h"
+#include "DataProcessorMockObjects.h"
 
-#include "DataProcessorAlgorithmViewMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
