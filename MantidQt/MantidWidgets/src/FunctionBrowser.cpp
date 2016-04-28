@@ -2394,5 +2394,10 @@ void FunctionBrowser::setErrorsEnabled(bool enabled) {
   m_parameterManager->setErrorsEnabled(enabled);
 }
 
+/**
+ * Clear all errors, if they are set
+ */
+void FunctionBrowser::clearErrors() { m_parameterManager->clearErrors(); }
+
 } // MantidWidgets
 } // MantidQt

@@ -149,6 +149,8 @@ public:
 
   /// Set error display on/off
   void setErrorsEnabled(bool enabled) override;
+  /// Clear all errors
+  void clearErrors() override;
 
 signals:
   /// User selects a different function (or one of it's sub-properties)

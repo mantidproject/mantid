@@ -45,6 +45,7 @@ public:
                               const QString &paramName) const = 0;
   virtual void clear() = 0;
   virtual void setErrorsEnabled(bool enabled) = 0;
+  virtual void clearErrors() = 0;
 };
 
 } // namespace MantidWidgets

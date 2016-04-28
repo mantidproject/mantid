@@ -26,6 +26,7 @@ public:
   MOCK_CONST_METHOD2(getParameter, double(const QString &, const QString &));
   MOCK_METHOD0(clear, void());
   MOCK_METHOD1(setErrorsEnabled, void(bool));
+  MOCK_METHOD0(clearErrors, void());
 };
 
 // Mock muon fit property browser
@@ -98,12 +99,12 @@ public:
   }
 
   void test_handleFitFinished() {
-    const auto function = createFunction();
-    ON_CALL(*m_fitBrowser, getFunction()).WillByDefault(Return(function));
-    EXPECT_CALL(*m_fitBrowser, getFunction()).Times(1);
-    EXPECT_CALL(*m_funcBrowser, updateParameters(testing::Ref(*function)))
-        .Times(1);
-    m_helper->handleFitFinished("unused argument");
+    doTest_HandleFitFinishedOrUndone("MUSR00015189; Pair; long; Asym; 1; #1");
+  }
+
+  void test_handleFitUndone() {
+    EXPECT_CALL(*m_funcBrowser, clearErrors()).Times(1);
+    doTest_HandleFitFinishedOrUndone("");
   }
 
   void test_handleParameterEdited() {
@@ -134,6 +135,16 @@ public:
   }
 
 private:
+  /// Run a test of "handleFitFinished" with the given workspace name
+  void doTest_HandleFitFinishedOrUndone(const QString &wsName) {
+    const auto function = createFunction();
+    ON_CALL(*m_fitBrowser, getFunction()).WillByDefault(Return(function));
+    EXPECT_CALL(*m_fitBrowser, getFunction()).Times(1);
+    EXPECT_CALL(*m_funcBrowser, updateParameters(testing::Ref(*function)))
+        .Times(1);
+    m_helper->handleFitFinished(wsName);
+  }
+
   QString testString;
   MockFunctionBrowser *m_funcBrowser;
   MockFitFunctionControl *m_fitBrowser;

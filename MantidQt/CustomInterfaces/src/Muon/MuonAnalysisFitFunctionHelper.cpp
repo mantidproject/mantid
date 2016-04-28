@@ -75,13 +75,17 @@ void MuonAnalysisFitFunctionHelper::updateFunctionAndFit(bool sequential) {
 /**
  * Called when fit finished OR undone.
  * Updates parameters displayed in function browser from the fit results.
- * In the case of "fit undone", this has the effect of resetting them.
- * @param wsName :: [input] UNUSED (workspace name)
+ * In the case of "fit undone", this has the effect of resetting them, and also
+ * removing the errors.
+ * @param wsName :: [input] workspace name - empty if fit undone
  */
 void MuonAnalysisFitFunctionHelper::handleFitFinished(const QString &wsName) {
-  Q_UNUSED(wsName)
   const auto function = m_fitBrowser->getFunction();
   m_funcBrowser->updateParameters(*function);
+  if (wsName.isEmpty()) {
+    // No fitted workspace: a fit was undone so clear the errors
+    m_funcBrowser->clearErrors();
+  }
 }
 
 /**
