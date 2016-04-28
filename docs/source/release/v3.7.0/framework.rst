@@ -133,6 +133,52 @@ CurveFitting
 ------------
 
 - Concept page for :ref:`Mantid Fitting <Fitting>` has been added.
+- In order to guarantee a complete overlap between resolution and signal in the region of interest, Function :ref:`Convolution <func-Convolution>` can switch between a fast FFT mode for data defined over a symmetric domain, and slower direct calculations for data defined over an asymmetric domain .
+
+Improved
+########
+
+Python
+------
+
+- It is now possible to use the unit.quickConversion(destinationUnit) functionality in python. If it is possible to convert one unit to another using a multiplication by a constant, this will return the factor and power required for the multiplication.
+
+- The Atom kernel class, which stores the cross-sections, relative atomic masses, and other information for all elements and isotopes is now accessible from Python.
+
+- The Material class has two new Python methods: ``chemicalFormula`` returns a tuple of Atom objects corresponding to the atoms in the compound, and their abundances; ``relativeMolecularMass`` returns the relative formular unit mass in atomic mass units.
+
+Python Algorithms
+Algorithm 
+
+Improved
+########
+
+Python
+------
+
+- It is now possible to use the unit.quickConversion(destinationUnit) functionality in python. If it is possible to convert one unit to another using a multiplication by a constant, this will return the factor and power required for the multiplication.
+
+- The Atom kernel class, which stores the cross-sections, relative atomic masses, and other information for all elements and isotopes is now accessible from Python.
+
+- The Material class has two new Python methods: ``chemicalFormula`` returns a tuple of Atom objects corresponding to the atoms in the compound, and their abundances; ``relativeMolecularMass`` returns the relative formular unit mass in atomic mass units.
+
+Python Algorithms
+Algorithm 
+
+Improved
+########
+
+Python
+------
+
+- It is now possible to use the unit.quickConversion(destinationUnit) functionality in python. If it is possible to convert one unit to another using a multiplication by a constant, this will return the factor and power required for the multiplication.
+
+- The Atom kernel class, which stores the cross-sections, relative atomic masses, and other information for all elements and isotopes is now accessible from Python.
+
+- The Material class has two new Python methods: ``chemicalFormula`` returns a tuple of Atom objects corresponding to the atoms in the compound, and their abundances; ``relativeMolecularMass`` returns the relative formular unit mass in atomic mass units.
+
+Python Algorithms
+Algorithm 
 
 Improved
 ########

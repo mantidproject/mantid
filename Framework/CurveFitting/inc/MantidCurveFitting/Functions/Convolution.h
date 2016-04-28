@@ -149,8 +149,9 @@ protected:
   void init() override;
 
 private:
-  /// To keep the Fourier transform of the resolution function (divided by the
-  /// step in xValues)
+  /// Keep the Fourier transform of the resolution function (divided by the
+  /// step in xValues) when in FFT mode, and the inverted resolution if in
+  /// Direct mode
   mutable std::vector<double> m_resolution;
 };
 
