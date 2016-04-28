@@ -1,7 +1,5 @@
 #include "MantidDataHandling/SaveFITS.h"
 
-//// ????
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
