@@ -59,6 +59,12 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
 
         self._statusColName = 'Selected'
 
+        # set columns' width
+        self.setColumnWidth(0, 35)
+        self.setColumnWidth(1, 60)
+        self.setColumnWidth(2, 90)
+        self.setColumnWidth(3, 90)
+
         return
 
     def set_exp_info(self, exp_no, scan_no):

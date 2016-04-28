@@ -101,7 +101,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_addROI, QtCore.SIGNAL('clicked()'),
                      self.do_add_roi)
         self.connect(self.ui.pushButton_saveROI, QtCore.SIGNAL('clicked()'),
-                     self.do_save_roi)
+                     self.do_apply_roi)
         self.connect(self.ui.pushButton_cancelROI, QtCore.SIGNAL('clicked()'),
                      self.do_del_roi)
         self.connect(self.ui.pushButton_nextScanNumber, QtCore.SIGNAL('clicked()'),
@@ -110,6 +110,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_plot_prev_scan)
         self.connect(self.ui.pushButton_maskScanPt, QtCore.SIGNAL('clicked()'),
                      self.do_mask_pt_2d)
+        self.connect(self.ui.pushButton_saveMask, QtCore.SIGNAL('clicked()'),
+                     self.do_save_roi)
 
         # Tab 'calculate ub matrix'
         self.connect(self.ui.pushButton_findPeak, QtCore.SIGNAL('clicked()'),
@@ -182,12 +184,12 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_integrate_peaks)
         self.connect(self.ui.comboBox_ptCountType, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.do_plot_pt_peak)
-        self.connect(self.ui.comboBox_ptCountNormType, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.do_plot_pt_peak)
         self.connect(self.ui.pushButton_fitBkgd, QtCore.SIGNAL('clicked()'),
                      self.do_fit_bkgd)
         self.connect(self.ui.pushButton_handPickBkgd, QtCore.SIGNAL('clicked()'),
                      self.do_manual_bkgd)
+        self.connect(self.ui.pushButton_calBkgd, QtCore.SIGNAL('clicked()'),
+                     self.do_cal_background)
 
         # Tab survey
         self.connect(self.ui.pushButton_survey, QtCore.SIGNAL('clicked()'),
@@ -625,6 +627,29 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_cal_background(self):
+        """
+        calculate background
+        algorithm 1: average the selected pt's intensity.
+        :return:
+        """
+        # get the selected rows in table
+        background_rows = self.ui.tableWidget_peakIntegration.get_selected_rows(True)
+
+        # loop through the selected rows and do the average
+        intensity_sum = 0.
+        for i_row in background_rows:
+            tmp_intensity = self.ui.tableWidget_peakIntegration.get_cell_value(i_row, 2)
+            intensity_sum += tmp_intensity
+
+        # calculate background value
+        background = intensity_sum / float(len(background_rows))
+
+        # set the value
+        self.ui.lineEdit_background.setText('%.7f' % background)
+
+        return
+
     def do_cal_ub_matrix(self):
         """ Calculate UB matrix by 2 or 3 reflections
         """
@@ -952,12 +977,12 @@ class MainWindow(QtGui.QMainWindow):
             exp_number, scan_number = ret_obj
 
         # mask workspace?
-        mask_dets = self.ui.checkBox_applyMask.isChecked()
+        mask_detectors = self.ui.checkBox_applyMask.isChecked()
 
-        normalization = str(self.ui.comboBox_ptCountNormType.currentText())
-        if normalization.lower().count('time') > 0:
+        normalization = str(self.ui.comboBox_ptCountType.currentText())
+        if normalization.count('Time') > 0:
             norm_type = 'time'
-        elif normalization.lower().count('monitor') > 0:
+        elif normalization.count('Monitor') > 0:
             norm_type = 'monitor'
         else:
             norm_type = ''
@@ -977,7 +1002,7 @@ class MainWindow(QtGui.QMainWindow):
                                                                peak_radius=1.0,
                                                                peak_centre=this_peak_centre,
                                                                merge_peaks=False,
-                                                               use_mask=mask_dets,
+                                                               use_mask=mask_detectors,
                                                                normalization=norm_type)
 
         # result due to error
@@ -1011,64 +1036,11 @@ class MainWindow(QtGui.QMainWindow):
 
         # Clear previous line and plot the Pt.
         self.ui.graphicsView_integratedPeakView.clear_all_lines()
-        self.ui.graphicsView_integratedPeakView.add_plot_1d(numpy.array(pt_list), numpy.array(intensity_list),
-                                                            numpy.array(intensity_list), color='blue')
-
-        return
-
-    def _integrate_per_pt(self, exp_number, scan_number):
-        """
-        Use the peak center of the merged scan. Then on each Pt. with specified radius,
-        calculate the integrated peak intensity and number of counts
-        :return:
-        """
-        # TODO/NOW - Doc and check!
-        # assert ...
-
-        # call myController to get peak center from all pt in scans
-        if self._myControl.has_peak_info(exp_number, scan_number) is False:
-            # merge scan and find peak
-            if not self._myControl.has_merged_data(exp_number, scan_number):
-                # merge all Pts. in scan if necessary
-                status, pt_number_list = self._myControl.get_pt_numbers(exp_number, scan_number)
-                assert status
-                self._myControl.merge_pts_in_scan(exp_number, scan_number, pt_number_list,
-                                                  'q-sample')
-            # find peak
-            self._myControl.find_peak(exp_number, scan_number)
-        scan_peak_info = self._myControl.get_peak_info(exp_number, scan_number)
-        weighted_peak_center = scan_peak_info.get_peak_centre()
-
-        label = 'Exp %d Scan %d: weighted peak center = %s.' % (exp_number, scan_number,
-                                                                str(weighted_peak_center))
-        self.ui.label_peakIntegraeInfo.setText(label)
-        print '[DB] ', label
-
-        # get peak radius
-        status, peak_radius = gutil.parse_float_editors(self.ui.lineEdit_peakRadius)
-        if not status:
-            self.pop_one_button_dialog('Unable to get valid peak radius from GUI.')
-            return
-        else:
-            assert peak_radius > 0, 'Peak radius cannot be zero or negative!'
-
-        # call myController to integrate on each individual Pt.
-        self._myControl.integrate_scan_peaks(exp_number, scan_number, peak_radius,
-                                             peak_centre=weighted_peak_center,
-                                             merge_peaks=False)
-
-        # plot all the result to the table
-        vec_x, vec_y = self._myControl.get_peaks_integrated_intensities(exp_number, scan_number, None)
-        self.ui.graphicsView_integratedPeakView.clear_all_lines()
-        self.ui.graphicsView_integratedPeakView.add_plot_1d(vec_x, vec_y)
-
-        # set the integrated result to table
-        self.ui.tableWidget_peakIntegration.remove_all_rows()
-        self.ui.tableWidget_peakIntegration.set_integrated_values(vec_x, vec_y)
-
-        print '[DB] Print for testing fit!'
-        for i in xrange(len(vec_x)):
-            print vec_x[i], vec_y[i]
+        x_array = numpy.array(pt_list)
+        y_array = numpy.array(intensity_list)
+        self.ui.graphicsView_integratedPeakView.add_plot_1d(x_array, y_array,
+                                                            color='blue')
+        self.ui.graphicsView_integratedPeakView.set_smart_y_limit(y_array)
 
         return
 
@@ -1247,31 +1219,36 @@ class MainWindow(QtGui.QMainWindow):
 
         :return:
         """
+        # TODO/NOW - Doc
+
         # Find out the current condition including (1) absolute (2) normalized by time
         # (3) normalized by monitor counts
         be_norm_str = str(self.ui.comboBox_ptCountType.currentText())
-        if be_norm_str.startswith('Absolute'):
-            to_norm = False
-        else:
-            to_norm = True
 
         norm_by_time = False
         norm_by_monitor = False
-        if to_norm:
-            norm_type = str(self.ui.comboBox_ptCountNormType.currentText())
-            if norm_type.count('Time') > 0:
-                norm_by_time = True
-            else:
-                norm_by_monitor = True
+
+        if be_norm_str.startswith('Absolute'):
+            # no normalization
+            pass
+        elif be_norm_str.count('Time') > 0:
+            # norm by time
+            norm_by_time = True
+        elif be_norm_str.count('Monitor') > 0:
+            # norm by monitor counts
+            norm_by_monitor = True
+        else:
+            # exception!
+            raise RuntimeError('Normalization mode %s is not supported.' % be_norm_str)
 
         # Integrate peak if the integrated peak workspace does not exist
-
         # get experiment number and scan number from the table
         exp_number, scan_number = self.ui.tableWidget_peakIntegration.get_exp_info()
 
         has_integrated = self._myControl.has_integrated_peak(exp_number, scan_number, pt_list=None,
                                                              normalized_by_monitor=norm_by_monitor,
-                                                             normalized_by_time=norm_by_time)
+                                                             normalized_by_time=norm_by_time,
+                                                             masked=self.ui.checkBox_applyMask.isChecked())
 
         # integrate again
         if has_integrated is False:
@@ -1629,6 +1606,37 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_save_roi(self):
+        """
+
+        :return:
+        """
+        # TODO/NOW - Doc!
+
+        # get the experiment and scan value
+        status, par_val_list = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run])
+        assert status
+        exp_number = par_val_list[0]
+        scan_number = par_val_list[1]
+
+        # get the user specified name from ...
+        roi_name, ok = QtGui.QInputDialog.getText(self, 'Input Mask Name', 'Enter mask name:')
+
+        # return if cancelled
+        if not ok:
+            return
+
+        # get current ROI
+        roi = self._myControl.get_region_of_interest(exp_number=exp_number, scan_number=scan_number)
+        roi_name = str(roi_name)
+        self._myControl.save_roi(roi_name, roi)
+
+        # set it to combo-box
+        self.ui.comboBox_maskNames.addItem(roi_name)
+        self.ui.comboBox_maskNames2.addItem(roi_name)
+
+        return
+
+    def do_apply_roi(self):
         """ Save current selection of region of interest
         :return:
         """

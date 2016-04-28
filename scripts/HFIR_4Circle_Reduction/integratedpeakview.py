@@ -69,3 +69,26 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
         print event.y, event.ydata
 
         return
+
+    def set_smart_y_limit(self, vec_y):
+        """
+
+        :return:
+        """
+        # TODO/NOW - Check and doc
+
+        min_y = min(vec_y)
+        max_y = max(vec_y)
+
+        d_y = max_y - min_y
+
+        if min_y > 0:
+            y_lower_limit = 0
+        else:
+            y_lower_limit = min_y - 0.1 * d_y
+
+        y_upper_limit = max_y + 0.1 * d_y
+
+        self.setXYLimit(ymin=y_lower_limit, ymax=y_upper_limit)
+
+        return
