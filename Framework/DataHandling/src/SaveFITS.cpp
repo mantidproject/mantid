@@ -42,7 +42,9 @@ const std::string SaveFITS::g_FITSHdrRefComment2 =
 
 // extend this if we ever want to support 64 bits pixels
 const size_t SaveFITS::g_maxBitDepth = 32;
-const std::vector<int> SaveFITS::g_bitDepths{8, 16, g_maxBitDepth};
+// this has to have int type for the validator and getProperty
+const std::vector<int> SaveFITS::g_bitDepths{8, 16,
+                                             static_cast<int>(g_maxBitDepth)};
 const size_t SaveFITS::g_maxBytesPP = g_maxBitDepth / 8;
 
 using Mantid::Kernel::Direction;
@@ -72,14 +74,6 @@ namespace {
 const std::string PROP_INPUT_WS = "InputWorkspace";
 const std::string PROP_FILENAME = "Filename";
 const std::string PROP_BIT_DEPTH = "BitDepth";
-
-// just to compare two Poco::Path objects, used for std algorithms
-struct PocoPathComp
-    : public std::binary_function<Poco::Path, Poco::Path, bool> {
-  bool operator()(const Poco::Path &lhs, const Poco::Path &rhs) const {
-    return lhs.toString() < rhs.toString();
-  }
-};
 }
 
 //----------------------------------------------------------------------------------------------
