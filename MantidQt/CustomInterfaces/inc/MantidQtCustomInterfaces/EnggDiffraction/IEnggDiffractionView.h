@@ -352,7 +352,7 @@ public:
   *
   * @return directory as std::string
   */
-  virtual std::string fittingRunNo() const = 0;
+  virtual std::string getfittingRunNo() const = 0;
 
   /**
   * A list of dSpacing values to be translated into TOF
@@ -427,8 +427,33 @@ public:
                                    const std::string &spectrum,
                                    const std::string &type) = 0;
 
+  //
+  virtual std::vector<std::string>
+  splitFittingDirectory(std::string &selectedfPath) = 0;
 
+  //
+  virtual void addBankItems(std::vector<std::string> splittedBaseName,
+	  QString selectedFile, std::vector<std::string> bankFileVector) = 0;
 
+  //
+
+  virtual void addRunNoItem(std::vector<std::string> runNumVector, bool multiRun) = 0;
+
+  virtual bool isDigit(std::string text) = 0;
+
+  virtual void setBankEmit() = 0;
+
+  virtual std::string getFocusDir() = 0;
+
+  virtual void setfittingRunNo(QString path) = 0;
+
+  virtual std::vector<std::string> getFittingRunNumVec() = 0;
+
+  virtual void setFittingRunNumVec(std::vector<std::string> assignVec) = 0;
+
+  virtual bool getFittingMutliRunMode() = 0;
+
+  virtual void setFittingMultiRunMode(bool mode) = 0;
 
 };
 

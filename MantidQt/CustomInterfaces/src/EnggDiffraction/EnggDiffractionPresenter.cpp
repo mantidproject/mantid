@@ -498,6 +498,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
                                splitBaseName[2] + "_" + splitBaseName[3];
         std::string strBankDir = bankDir.toString();
         updateFittingDirVec(strBankDir, foc_file, false, runnoDirVector);
+        m_view->setFittingRunNumVec(runnoDirVector);
 
         // add bank to the combo-box and list view
         m_view->addBankItems(splitBaseName, focusedFile, runnoDirVector);
@@ -527,6 +528,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
         // if given a single run number instead
         auto focusDir = m_view->getFocusDir();
         updateFittingDirVec(focusDir, strFocusedFile, false, runnoDirVector);
+        m_view->setFittingRunNumVec(runnoDirVector);
 
         // add bank to the combo-box and list view
         m_view->addBankItems(splitBaseName, focusedFile, runnoDirVector);
@@ -580,7 +582,6 @@ void EnggDiffractionPresenter::updateFittingDirVec(
       }
       ++it;
     }
-    m_view->setFittingRunNumVec(fittingRunNoDirVec);
   } catch (std::runtime_error &re) {
     m_view->userWarning("Invalid file",
                         "File not found in the following directory; " +
@@ -614,21 +615,19 @@ void EnggDiffractionPresenter::enableMultiRun(
         RunNumberVec.push_back(std::to_string(i));
       }
 
+      auto focusDir = m_view->getFocusDir();
       // if given a single run number instead
       for (size_t i = 0; i < RunNumberVec.size(); i++) {
-        std::string focusDir = m_view->getFocusDir();
         updateFittingDirVec(focusDir, RunNumberVec[i], true,
                             fittingRunNoDirVec);
       }
       int diff = (lastNum - firstNum) + 1;
-      auto runnoDirVector = m_view->getFittingRunNumVec();
-      auto global_vec_size = runnoDirVector.size();
+      auto global_vec_size = fittingRunNoDirVec.size();
       if (size_t(diff) == global_vec_size) {
 
         m_view->addRunNoItem(RunNumberVec, true);
 
         /// what todo with this signal @shahroz
-
         m_view->setBankEmit();
       }
     } else {
