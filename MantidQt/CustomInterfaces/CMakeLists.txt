@@ -215,6 +215,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
 	inc/MantidQtCustomInterfaces/ParseKeyValueString.h
 	inc/MantidQtCustomInterfaces/ProgressableView.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataPostprocessorAlgorithm.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataPreprocessorAlgorithm.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithm.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorAppendRowCommand.h
@@ -227,6 +228,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorCommandBase.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorExpandCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorGenerateNotebook.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorGroupRowsCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorExportTableCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorImportTableCommand.h
@@ -242,10 +244,9 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorSaveTableAsCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorSaveTableCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorView.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorVectorString.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorWhiteList.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorWorkspaceCommand.h
-	inc/MantidQtCustomInterfaces/Reflectometry/DataPostprocessorAlgorithm.h
-	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorGenerateNotebook.h
 	inc/MantidQtCustomInterfaces/Reflectometry/GenericDataProcessorPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/GenericDataProcessorPresenterFactory.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h
@@ -267,7 +268,6 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflVectorString.h
 	inc/MantidQtCustomInterfaces/Reflectometry/TransferResults.h
 	inc/MantidQtCustomInterfaces/Reflectometry/WorkspaceReceiver.h
 	inc/MantidQtCustomInterfaces/SANSAddFiles.h

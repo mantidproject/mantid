@@ -1,10 +1,7 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLVECTORSTRING_H
-#define MANTID_CUSTOMINTERFACES_REFLVECTORSTRING_H
+#ifndef MANTID_CUSTOMINTERFACES_DATAPROCESSORVECTORSTRING_H
+#define MANTID_CUSTOMINTERFACES_DATAPROCESSORVECTORSTRING_H
 
-/** @class ReflGenerateNotebook
-
-    This class creates ipython notebooks from the ISIS Reflectometry
-    (Polref) interface
+/** @class DataProcessorVectorString
 
     Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
     National Laboratory & European Spallation Source
@@ -72,4 +69,4 @@ namespace MantidQt {
 }
 
 
-#endif //MANTID_CUSTOMINTERFACES_REFLVECTORSTRING_H
+#endif //MANTID_CUSTOMINTERFACES_DATAPROCESSORVECTORSTRING_H
