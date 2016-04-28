@@ -51,32 +51,27 @@ public:
       : m_data(first, last) {}
 
   FixedLengthVector &operator=(const FixedLengthVector &rhs) {
-    if (size() != rhs.size())
-      throw std::logic_error("FixedLengthVector::operator=: size mismatch");
+    checkAssignmentSize(rhs);
     m_data = rhs.m_data;
     return *this;
   }
   FixedLengthVector &operator=(FixedLengthVector &&rhs) {
-    if (size() != rhs.size())
-      throw std::logic_error("FixedLengthVector::operator=: size mismatch");
+    checkAssignmentSize(rhs);
     m_data = std::move(rhs.m_data);
     return *this;
   }
   FixedLengthVector &operator=(const std::vector<double> &rhs) {
-    if (size() != rhs.size())
-      throw std::logic_error("FixedLengthVector::operator=: size mismatch");
+    checkAssignmentSize(rhs);
     m_data = rhs;
     return *this;
   }
   FixedLengthVector &operator=(std::vector<double> &&rhs) {
-    if (size() != rhs.size())
-      throw std::logic_error("FixedLengthVector::operator=: size mismatch");
+    checkAssignmentSize(rhs);
     m_data = std::move(rhs);
     return *this;
   }
   FixedLengthVector &operator=(std::initializer_list<double> ilist) {
-    if (size() != ilist.size())
-      throw std::logic_error("FixedLengthVector::operator=: size mismatch");
+    checkAssignmentSize(ilist);
     m_data = ilist;
     return *this;
   }
@@ -94,6 +89,13 @@ protected:
   // This is used as base class only, cannot delete polymorphically, so
   // destructor is protected.
   ~FixedLengthVector() = default;
+
+private:
+  template<class Other>
+  void checkAssignmentSize(const Other &other) {
+    if (size() != other.size())
+      throw std::logic_error("FixedLengthVector::operator=: size mismatch");
+  }
 
   std::vector<double> m_data;
 

@@ -82,6 +82,30 @@ public:
     TS_ASSERT_EQUALS(dest[1], 0.1);
   }
 
+  void test_iterator_constructor() {
+    std::vector<double> data{0.1, 0.2, 0.3, 0.4};
+    FixedLengthVectorTester testee(data.begin() + 1, data.end() - 1);
+    TS_ASSERT_EQUALS(testee.size(), 2);
+    TS_ASSERT_EQUALS(testee[0], 0.2);
+    TS_ASSERT_EQUALS(testee[1], 0.3);
+  }
+
+  void test_iterator_constructor_special_case() {
+    // Used like this, we might think that the (count, value) constructor is
+    // called. However, that would require converting the second int to a
+    // double, so actually the templated iterator constructor matches. We could
+    // prevent that with some complicated SFINAE (as done by std::vector),
+    // however it actually does not seem to matter: We just forward to the
+    // std::vector constructor, where the templated constructor does not work,
+    // so we are back to the std::vector(count, value) constructor, after the
+    // detour to the templated FixedLengthVector constructor.
+    FixedLengthVectorTester testee(3, 1);
+    TS_ASSERT_EQUALS(testee.size(), 3);
+    TS_ASSERT_EQUALS(testee[0], 1.0);
+    TS_ASSERT_EQUALS(testee[1], 1.0);
+    TS_ASSERT_EQUALS(testee[2], 1.0);
+  }
+
   void test_copy_assignment() {
     const FixedLengthVectorTester src(2, 0.1);
     FixedLengthVectorTester dest(2);
