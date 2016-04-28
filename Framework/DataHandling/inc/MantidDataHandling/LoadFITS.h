@@ -81,9 +81,13 @@ private:
   /// Execution code
   void exec() override;
 
-  /// Loads the FITS header(s) into a struct
+  /// Load a block of FITS header(s) at once
   void doLoadHeaders(const std::vector<std::string> &paths,
-                     std::vector<FITSInfo> &headers);
+                     std::vector<FITSInfo> &headers, size_t firstIndex,
+                     size_t lastIndex);
+
+  /// Load the FITS header(s) from one fits file into a struct
+  void loadHeader(const std::string &filePath, FITSInfo &header);
 
   /// Once loaded, check against standard and limitations of this algorithm
   void headerSanityCheck(const FITSInfo &hdr, const FITSInfo &hdrFirst);
