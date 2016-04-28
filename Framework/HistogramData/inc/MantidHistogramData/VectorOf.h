@@ -44,10 +44,13 @@ public:
   }
   VectorOf(const VectorOf &) = default;
   VectorOf(VectorOf &&) = default;
-  VectorOf &operator=(const VectorOf &) = default;
-  VectorOf &operator=(VectorOf &&) = default;
+  // Note the lvalue reference qualifier for all assignment operators. This
+  // prevent mistakes in client code, assigning to an rvalue, such as
+  // histogram.getBinEdges() = { 0.1, 0.2 };
+  VectorOf &operator=(const VectorOf &other) & = default;
+  VectorOf &operator=(VectorOf &&other) & = default;
 
-  VectorOf &operator=(std::initializer_list<double> ilist) {
+  VectorOf &operator=(std::initializer_list<double> ilist) & {
     m_data = Kernel::make_cow<CowType>(ilist);
     return *this;
   }
@@ -64,15 +67,15 @@ public:
   // VectorOf(std::vector<double> &&data) { m_data =
   // Kernel::make_cow<std::vector<double>>(std::move(data)); }
 
-  VectorOf &operator=(const Kernel::cow_ptr<CowType> &other) {
+  VectorOf &operator=(const Kernel::cow_ptr<CowType> &other) & {
     m_data = other;
     return *this;
   }
-  VectorOf &operator=(const boost::shared_ptr<CowType> &other) {
+  VectorOf &operator=(const boost::shared_ptr<CowType> &other) & {
     m_data = other;
     return *this;
   }
-  VectorOf &operator=(const CowType &data) {
+  VectorOf &operator=(const CowType &data) & {
     if (!m_data || (&(*m_data) != &data))
       m_data = Kernel::make_cow<CowType>(data);
     return *this;
