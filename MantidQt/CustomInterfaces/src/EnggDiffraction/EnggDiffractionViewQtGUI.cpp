@@ -1504,6 +1504,16 @@ EnggDiffractionViewQtGUI::splitFittingDirectory(std::string &selectedfPath) {
   return splitBaseName;
 }
 
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setBankEmit()
+{
+	emit setBank();
+}
+
+std::string MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::getFocusDir()
+{
+	return m_focusDir;
+}
+
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enableMultiRun(
     std::string firstRun, std::string lastRun) {
 

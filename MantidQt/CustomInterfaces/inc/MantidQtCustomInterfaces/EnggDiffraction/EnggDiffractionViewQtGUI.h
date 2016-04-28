@@ -149,23 +149,28 @@ public:
 
   double rebinningPulsesTime() const override;
 
-  void setfittingRunNo(QString path);
+  void setfittingRunNo(QString path) override;
 
   std::string fittingRunNo() const override;
 
   std::string fittingPeaksData() const override;
 
+  std::vector<std::string>
+  splitFittingDirectory(std::string &selectedfPath) override;
+
+  void setBankEmit() override;
+
+  std::string getFocusDir() override;
+
   void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                      bool focused) override;
 
-  std::vector<std::string> splitFittingDirectory(std::string &selectedfPath);
+  void addBankItems(std::vector<std::string> splittedBaseName,
+	  QString selectedFile) override;
+
+  void addRunNoItem(std::vector<std::string> runNumVector, bool multiRun) override;
 
   void enableMultiRun(std::string firstRun, std::string lastRun);
-
-  void addBankItems(std::vector<std::string> splittedBaseName,
-                    QString selectedFile);
-
-  void addRunNoItem(std::vector<std::string> runNumVector, bool multiRun);
 
   void setDefaultBank(std::vector<std::string> splittedBaseName,
                       QString selectedFile);
