@@ -316,8 +316,7 @@ void PDFFourierTransform::exec() {
         sinus *= sin(q * rdelta) / (q * rdelta);
       }
       fs += sinus * inputFOfQ[q_index];
-      error +=
-          (sinus * inputDfOfQ[q_index]) * (sinus * inputDfOfQ[q_index]);
+      error += (sinus * inputDfOfQ[q_index]) * (sinus * inputDfOfQ[q_index]);
       // g_log.debug() << "q[" << i << "] = " << q << "  dq = " << deltaq << "
       // S(q) =" << s;
       // g_log.debug() << "  d(gr) = " << temp << "  gr = " << gr << std::endl;
