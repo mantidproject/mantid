@@ -91,14 +91,18 @@ private:
 
 template <typename... T> void Histogram::setBinEdges(T &&... data) {
   BinEdges edges(std::forward<T>(data)...);
-  checkSize(edges);
+  // If there is no data changing the size is ok.
+  //if(m_y)
+  //  checkSize(edges);
   m_xMode = XMode::BinEdges;
   m_x = edges.cowData();
 }
 
 template <typename... T> void Histogram::setPoints(T &&... data) {
   Points points(std::forward<T>(data)...);
-  checkSize(points);
+  // If there is no data changing the size is ok.
+  //if(m_y)
+  //  checkSize(points);
   m_xMode = XMode::Points;
   m_x = points.cowData();
 }
