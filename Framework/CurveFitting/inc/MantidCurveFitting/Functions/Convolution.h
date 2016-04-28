@@ -123,11 +123,11 @@ public:
   /// @param domain :: The buffer for writing the calculated values. Must be big
   /// enough to accept dataSize() values
   void function(const API::FunctionDomain &domain,
-    API::FunctionValues &values) const override;
+                API::FunctionValues &values) const override;
   void functionFFTMode(const API::FunctionDomain &domain,
-    API::FunctionValues &values) const;
+                       API::FunctionValues &values) const;
   void functionDirectMode(const API::FunctionDomain &domain,
-    API::FunctionValues &values) const;
+                          API::FunctionValues &values) const;
   /// Derivatives of function with respect to active parameters
   void functionDeriv(const API::FunctionDomain &domain,
                      API::Jacobian &jacobian) override;
