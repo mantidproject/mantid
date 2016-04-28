@@ -8,6 +8,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 
+#include <cstdlib>
 #include <fstream>
 
 #include <Poco/File.h>
@@ -692,7 +693,7 @@ ImggAggregateWavelengths::buildOutputSubdirNamesFromUniformBands(
   std::vector<std::string> outputSubdirs;
   // get number of available images from first effective subdirectory
   std::vector<Poco::Path> images;
-  for (size_t idx = 0; idx < inputSubDirs.size() && 0 == images.size(); ++idx) {
+  for (size_t idx = 0; idx < inputSubDirs.size() && images.empty(); ++idx) {
     images = findInputImages(inputSubDirs[idx]);
   }
   auto outRanges = splitSizeIntoRanges(images.size(), bands);
@@ -701,9 +702,9 @@ ImggAggregateWavelengths::buildOutputSubdirNamesFromUniformBands(
       getProperty(PROP_OUTPUT_SUBDIRS_PREFIX_UNIFORM_BANDS);
   for (const auto &range : outRanges) {
     // one different subdirectory for every output band
-    outputSubdirs.emplace_back(subdirsPrefix + indexRangesPrefix +
-                               std::to_string(range.first) + "_to_" +
-                               std::to_string(range.second));
+    outputSubdirs.push_back(subdirsPrefix + indexRangesPrefix +
+                            std::to_string(range.first) + "_to_" +
+                            std::to_string(range.second));
   }
 
   return outputSubdirs;
@@ -786,9 +787,6 @@ void ImggAggregateWavelengths::aggImage(API::MatrixWorkspace_sptr accum,
     const auto &dataYIn = specIn->readY();
     std::transform(dataY.begin(), dataY.end(), dataYIn.cbegin(), dataY.begin(),
                    std::plus<double>());
-    // for (size_t col = 0; col < sizeX; col++) {
-    //  dataY[col] += dataYIn[col];
-    //}
   }
 }
 
@@ -955,6 +953,14 @@ void writeFITSHeaderBlock(const API::MatrixWorkspace_sptr img,
   writePaddingFITSHeaders(entriesPerHDU - 9, file);
 }
 
+uint16_t endian_reverse(uint16_t value) {
+#if defined(_MSC_VER)
+  return _byteswap_ushort(value);
+#else
+  return __builtin_bswap16(value);
+#endif
+}
+
 void writeFITSImageMatrix(const API::MatrixWorkspace_sptr img,
                           std::ofstream &file) {
   const size_t sizeX = img->blocksize();
@@ -964,14 +970,8 @@ void writeFITSImageMatrix(const API::MatrixWorkspace_sptr img,
     Mantid::API::ISpectrum *spectrum = img->getSpectrum(row);
     const auto &dataY = spectrum->readY();
     for (size_t col = 0; col < sizeX; col++) {
-      int16_t pixelVal = static_cast<uint16_t>(dataY[col]);
-
-      // change endianness: to sequence of bytes in big-endian
-      const size_t bytespp = 2;
-      uint8_t bytesPixel[bytespp];
-      uint8_t *iter = reinterpret_cast<uint8_t *>(&pixelVal);
-      std::reverse_copy(iter, iter + bytespp, bytesPixel);
-
+      uint16_t pixelVal = static_cast<uint16_t>(dataY[col]);
+      uint16_t bytesPixel = endian_reverse(pixelVal);
       file.write(reinterpret_cast<const char *>(&bytesPixel),
                  sizeof(bytesPixel));
     }
