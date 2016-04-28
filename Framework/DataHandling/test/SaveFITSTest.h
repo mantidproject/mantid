@@ -47,6 +47,12 @@ public:
     TS_ASSERT_THROWS(
         alg->setPropertyValue("BitDepth", "this_is_wrong_you_must_fail"),
         std::invalid_argument);
+
+    TS_ASSERT_THROWS(alg->setProperty("BitDepth", 10),
+                     std::invalid_argument);
+
+    TS_ASSERT_THROWS(alg->setProperty("BitDepth", 64),
+                     std::invalid_argument);
   }
 
   void test_exec_fail() {
