@@ -62,7 +62,12 @@ public:
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
   std::vector<DataProcessorCommand_uptr> publishCommands() override;
+  void acceptViews(DataProcessorView *tableView,
+                  ProgressableView *progressView) override;
   void setModel(std::string name) override;
+
+  // Only for testing purposes
+  DataProcessorWhiteList getWhiteList() const { return m_whitelist; };
 
 protected:
   // the workspace the model is currently representing
@@ -168,8 +173,6 @@ protected:
                           Mantid::API::Workspace_sptr workspace) override;
   void saveNotebook(std::map<int, std::set<int>> groups, std::set<int> rows);
   void accept(WorkspaceReceiver *workspaceReceiver) override;
-  void acceptView(DataProcessorView *tableView,
-                  ProgressableView *progressView) override;
   std::vector<DataProcessorCommand_uptr> getTableList();
 
   void validateModel(Mantid::API::ITableWorkspace_sptr model);

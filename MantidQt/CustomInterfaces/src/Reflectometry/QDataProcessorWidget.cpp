@@ -24,7 +24,7 @@ QDataProcessorWidget::QDataProcessorWidget(
 
   createTable();
 
-  m_presenter->acceptView(this, this);
+  m_presenter->acceptViews(this, this);
 }
 
 //----------------------------------------------------------------------------------------------

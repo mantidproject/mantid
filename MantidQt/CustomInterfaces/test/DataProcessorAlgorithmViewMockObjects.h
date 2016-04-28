@@ -1,26 +1,25 @@
-#ifndef MANTID_CUSTOMINTERFACES_DATAPROCESSORALGORITHMVIEWMOCKOBJECTS_H
-#define MANTID_CUSTOMINTERFACES_DATAPROCESSORALGORITHMVIEWMOCKOBJECTS_H
+#ifndef MANTID_CUSTOMINTERFACES_DATAPROCESSORVIEWMOCKOBJECTS_H
+#define MANTID_CUSTOMINTERFACES_DATAPROCESSORVIEWMOCKOBJECTS_H
 
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithmView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
 #include <gmock/gmock.h>
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
 
 // Clean column ids for use within tests
-const int RunCol = ReflTableSchema::COL_RUNS;
-const int ThetaCol = ReflTableSchema::COL_ANGLE;
-const int TransCol = ReflTableSchema::COL_TRANSMISSION;
-const int QMinCol = ReflTableSchema::COL_QMIN;
-const int QMaxCol = ReflTableSchema::COL_QMAX;
-const int DQQCol = ReflTableSchema::COL_DQQ;
-const int ScaleCol = ReflTableSchema::COL_SCALE;
-const int GroupCol = ReflTableSchema::COL_GROUP;
-const int OptionsCol = ReflTableSchema::COL_OPTIONS;
+const int RunCol = 0;
+const int ThetaCol = 1;
+const int TransCol = 2;
+const int QMinCol = 3;
+const int QMaxCol = 4;
+const int DQQCol = 5;
+const int ScaleCol = 6;
+const int GroupCol = 7;
+const int OptionsCol = 8;
 
-class MockDataProcessorView : public DataProcessorAlgorithmView {
+class MockDataProcessorView : public DataProcessorView {
 public:
   MockDataProcessorView(){};
   ~MockDataProcessorView() override {}
@@ -42,20 +41,28 @@ public:
   MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());
   MOCK_CONST_METHOD0(getSelectedRows, std::set<int>());
   MOCK_CONST_METHOD0(getClipboard, std::string());
+  MOCK_CONST_METHOD1(getProcessingOptions, std::string(const std::string &));
   MOCK_METHOD0(getEnableNotebook, bool());
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
   MOCK_METHOD1(setClipboard, void(const std::string &text));
-  MOCK_METHOD1(setOptionsHintStrategy,
-               void(MantidQt::MantidWidgets::HintStrategy *));
-  MOCK_METHOD1(setModel, void(const std::string&));
+
+  MOCK_METHOD1(setModel, void(const std::string &));
   MOCK_METHOD1(setTableList, void(const std::set<std::string> &));
   MOCK_METHOD2(setInstrumentList,
                void(const std::vector<std::string> &, const std::string &));
+  MOCK_METHOD2(setOptionsHintStrategy,
+               void(MantidQt::MantidWidgets::HintStrategy *, int));
+
+  MOCK_METHOD3(addHintingLineEdit,
+               void(const std::string &, const std::string &,
+                    const std::map<std::string, std::string> &));
+
+  // Settings
+  MOCK_METHOD1(loadSettings, void(std::map<std::string, QVariant> &));
 
   // Calls we don't care about
   void showTable(QDataProcessorTableModel_sptr) override{};
   void saveSettings(const std::map<std::string, QVariant> &) override{};
-  void loadSettings(std::map<std::string, QVariant> &) override{};
   std::string getProcessInstrument() const override { return "FAKE"; }
 
   boost::shared_ptr<DataProcessorPresenter> getTablePresenter() const override {
@@ -63,4 +70,4 @@ public:
   }
 };
 
-#endif /*MANTID_CUSTOMINTERFACES_DATAPROCESSORALGORITHMVIEWMOCKOBJECTS_H*/
+#endif /*MANTID_CUSTOMINTERFACES_DATAPROCESSORVIEWMOCKOBJECTS_H*/

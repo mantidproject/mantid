@@ -54,7 +54,7 @@ private:
   void setInstrumentList(const std::vector<std::string> &,
                          const std::string &){};
   void accept(WorkspaceReceiver *){};
-  void acceptView(DataProcessorView *, ProgressableView *){};
+  void acceptViews(DataProcessorView *, ProgressableView *){};
 
   std::map<std::string, QVariant> m_options;
 };

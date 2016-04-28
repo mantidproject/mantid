@@ -100,8 +100,8 @@ GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
 * @param tableView : The table view
 * @param progressView : The progress view
 */
-void GenericDataProcessorPresenter::acceptView(DataProcessorView *tableView,
-                                               ProgressableView *progressView) {
+void GenericDataProcessorPresenter::acceptViews(
+    DataProcessorView *tableView, ProgressableView *progressView) {
 
   // As soon as we are given a view, initialize everything
   m_view = tableView;
@@ -401,7 +401,8 @@ void GenericDataProcessorPresenter::postProcessRows(std::set<int> rows) {
     // The names of the processed workspaces (without prefix)
     const std::string runStr = getWorkspaceName(*rowIt, false);
 
-    if (AnalysisDataService::Instance().doesExist(runStr)) {
+    if (AnalysisDataService::Instance().doesExist(m_processor.prefix(0) +
+                                                  runStr)) {
 
       inputNames.emplace_back(m_processor.prefix(0) + runStr);
       outputNames.emplace_back(runStr);
@@ -673,6 +674,9 @@ GenericDataProcessorPresenter::loadRun(const std::string &run,
   // First, let's see if the run given is the name of a workspace in the ADS
   if (AnalysisDataService::Instance().doesExist(run))
     return AnalysisDataService::Instance().retrieveWS<Workspace>(run);
+  // Try with prefix
+  if (AnalysisDataService::Instance().doesExist(prefix + run))
+    return AnalysisDataService::Instance().retrieveWS<Workspace>(prefix + run);
 
   // Is the run string is numeric
   if (boost::regex_match(run, boost::regex("\\d+"))) {
@@ -1162,7 +1166,7 @@ void GenericDataProcessorPresenter::clearSelected() {
       m_model->setData(m_model->index(*row, i), "");
     }
     // 'Group' column
-    m_model->setData(m_model->index(*row, m_columns - 2), "");
+    m_model->setData(m_model->index(*row, m_columns - 2), getUnusedGroup());
     // 'Options' column
     m_model->setData(m_model->index(*row, m_columns - 1), "");
   }
