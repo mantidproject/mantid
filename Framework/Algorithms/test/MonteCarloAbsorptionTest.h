@@ -123,8 +123,7 @@ private:
     auto inputWS = setUpWS(wsProps);
     auto mcabs = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(mcabs->setProperty("InputWorkspace", inputWS));
-    // To ensure reproducible results we need to use a single thread
-    TS_ASSERT_THROWS_NOTHING(executeOnSingleThread(mcabs));
+    mcabs->execute();
     return getOutputWorkspace(mcabs);
   }
 
@@ -197,20 +196,6 @@ private:
     alg->setChild(true);
     alg->setPropertyValue("OutputWorkspace", "__unused_on_child");
     return alg;
-  }
-
-  void executeOnSingleThread(Mantid::API::IAlgorithm_sptr alg) {
-    using Mantid::API::FrameworkManager;
-    auto &fmgr = FrameworkManager::Instance();
-    const int ompThreadsOnEntry = fmgr.getNumOMPThreads();
-    fmgr.setNumOMPThreads(1);
-    try {
-      alg->execute();
-      fmgr.setNumOMPThreads(ompThreadsOnEntry);
-    } catch (...) {
-      fmgr.setNumOMPThreads(ompThreadsOnEntry);
-      throw;
-    }
   }
 
   Mantid::API::MatrixWorkspace_const_sptr
