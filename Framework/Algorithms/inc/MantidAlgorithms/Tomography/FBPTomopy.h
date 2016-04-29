@@ -34,9 +34,9 @@ namespace Tomography {
 */
 
 /// FBP - Filtered Back-Projection routine as implemented in tomopy
-void MANTID_ALGORITHMS_DLL
-FBPTomopy(const float *data, int dy, int dt, int dx, const float *center,
-          const float *theta, float *recon, int ngridx, int ngridy);
+void MANTID_ALGORITHMS_DLL FBPTomopy(const float *data, int dy, int dt, int dx,
+                                     const float *center, const float *theta,
+                                     float *recon, int ngridx, int ngridy);
 
 } // namespace Tomography
 } // namespace Algorithms

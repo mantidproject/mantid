@@ -185,6 +185,7 @@ ImggTomographicReconstruction::prepareInputData(size_t totalSize,
   auto data = prepareDataVol(totalSize);
 
   // TODO: fill in
+  UNUSED_ARG(wsg);
 
   return data;
 }
@@ -252,6 +253,9 @@ ImggTomographicReconstruction::buildOutputWks(const std::vector<float> &dataVol,
   wsGroup->setTitle("Reconstructed volume from imaging projection data");
 
   // TODO: fill in
+  UNUSED_ARG(dataVol);
+  UNUSED_ARG(xsize);
+  UNUSED_ARG(ysize);
 
   return wsGroup;
 }

@@ -29,7 +29,6 @@ extern "C" {
 void fbp(const float *data, int dy, int dt, int dx, const float *center,
          const float *theta, float *recon, int ngridx, int ngridy,
          const char * /*fname*/, const float * /*filter_par*/);
-
 }
 
 #endif /* MANTID_ALGORITHMS_TOMOGRAPHY_TOMOPY_FBP_H_ */
