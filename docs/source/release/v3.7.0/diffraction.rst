@@ -76,6 +76,24 @@ Improvements in the tomographic reconstruction graphical user interface:
   algorithm :ref:`ImggAggregateWavelengths
   <algm-ImggAggregateWavelengths>`.
 
+
+Powder Diffraction Scripts
+--------------------------
+
+- Pearl powder diffraction has been integrated and can be found
+  `scripts/PearlPowderISIS`. The routines/script has been differentiated from
+  the long list of directories of calibration and raw files. The calibration
+  directories can be found in a file by the name of pearl_calib_factory.py,
+  whereas the raw directories can be found in a file by the name of
+  pearl_cycle_factory.py.
+
+- PowderISIS script has been renamed to CryPowderISIS and can be found within
+  the following folder `scripts/CryPowderISIS`
+
+- :ref:`pearl-powder-diffraction-ref` documentation has been implemented and
+  PowderISIS script documentation has been renamed to
+  :ref:`cry-powder-diffraction-ref`
+
 Full list of `diffraction <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Diffraction%22>`_
 and
 `imaging <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Imaging%22>`_ changes on GitHub.

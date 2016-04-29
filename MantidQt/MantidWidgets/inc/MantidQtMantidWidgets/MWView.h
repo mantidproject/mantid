@@ -8,6 +8,7 @@
 #include "MantidQtAPI/MdSettings.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 // includes for workspace handling
+#include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -65,7 +66,9 @@ using MWDimension_const_sptr =
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MWView : public QWidget {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MWView :
+  public QWidget,
+  public MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 
 public:
@@ -76,14 +79,14 @@ public:
   void updateDisplay();
   SafeQwtPlot* getPlot2D();
 
-signals:
-  /// Signal emitted when someone uses setWorkspace() on MWView
-  void workspaceChanged();
-
 public slots:
   void colorRangeChangedSlot();
   void loadColorMapSlot();
   void setTransparentZerosSlot(bool transparent);
+
+protected:
+  void preDeleteHandle(const std::string &workspaceName,
+    const boost::shared_ptr<Mantid::API::Workspace> workspace) override;
 
 private:
   void initLayout();
@@ -92,6 +95,8 @@ private:
   void checkRangeLimits();
   void findRangeFull();
   void setVectorDimensions();
+  void spawnWellcomeWorkspace();
+  void showWellcomeWorkspace();
 
   Ui::MWView m_uiForm;
   /// Spectrogram plot of MWView
@@ -104,6 +109,10 @@ private:
   boost::shared_ptr<MantidQt::API::MdSettings> m_mdSettings;
   /// Workspace being shown
   Mantid::API::MatrixWorkspace_sptr m_workspace;
+  /// Default workspace shown if no data is loaded
+  Mantid::API::MatrixWorkspace_sptr m_wellcomeWorkspace;
+  /// Name of default workspace
+  const std::string m_wellcomeName;
   /// The calculated range of values in the FULL data set
   QwtDoubleInterval m_colorRangeFull;
   Mantid::API::MDNormalization m_normalization;
