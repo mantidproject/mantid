@@ -2,7 +2,7 @@ import os
 import unittest
 import stresstesting
 
-from mantid.simpleapi import DeleteWorkspace, ImggAggregateWavelengths, LoadFITS, mtd
+from mantid.simpleapi import DeleteWorkspace, ImggAggregateWavelengths, LoadFITS
 from mantid import config
 
 class ImagingAggregateTests(unittest.TestCase):
