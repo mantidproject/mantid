@@ -59,7 +59,8 @@ public:
                  const std::string &description) override;
 
   void setFormats(const std::vector<std::string> &fmts,
-                  const std::vector<bool> &enable) override;
+                  const std::vector<bool> &enableLoad,
+                  const std::vector<bool> &enableSave) override;
 
   std::string inputPath() const override;
   std::string inputFormatName() const override;
@@ -97,10 +98,10 @@ private slots:
 
 private:
   void writeImgFile(const QImage &img, const std::string &outputName,
-                const std::string &outFormat) const;
+                    const std::string &outFormat) const;
 
   QImage loadImgFile(const std::string &inputName,
-                 const std::string inFormat) const;
+                     const std::string inFormat) const;
 
   void setFormatsCombo(QComboBox *cbox, const std::vector<std::string> &fmts,
                        const std::vector<bool> &enable);

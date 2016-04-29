@@ -70,11 +70,15 @@ public:
    *
    * @param fmts list of formats (identified by a (short) name).
    *
-   * @param enable (optional) whether to enable each of the
-   * formats. If not given all of them will be enabled.
+   * @param enableLoad (optional) whether to enable the loading of
+   * each of the formats. If not given all of them will be enabled.
+   *
+   * @param enableLoad (optional) whether to enable saving of
+   * each of the formats. If not given all of them will be enabled.
    */
   virtual void setFormats(const std::vector<std::string> &fmts,
-                          const std::vector<bool> &enable = {}) = 0;
+                          const std::vector<bool> &enableLoad = {},
+                          const std::vector<bool> &enableSave = {}) = 0;
 
   /**
    * The input path to the files to convert, as selected by the user

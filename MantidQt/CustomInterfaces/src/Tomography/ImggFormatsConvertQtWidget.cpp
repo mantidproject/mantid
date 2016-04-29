@@ -44,10 +44,11 @@ void ImggFormatsConvertQtWidget::userError(const std::string &err,
 }
 
 void ImggFormatsConvertQtWidget::setFormats(
-    const std::vector<std::string> &fmts, const std::vector<bool> &enable) {
+    const std::vector<std::string> &fmts, const std::vector<bool> &enableLoad,
+    const std::vector<bool> &enableSave) {
   // same formats for inputs and outputs
-  setFormatsCombo(m_ui.comboBox_input_format, fmts, enable);
-  setFormatsCombo(m_ui.comboBox_output_format, fmts, enable);
+  setFormatsCombo(m_ui.comboBox_input_format, fmts, enableLoad);
+  setFormatsCombo(m_ui.comboBox_output_format, fmts, enableSave);
 
   m_ui.spinBox_max_search_depth->setValue(3);
   if (m_ui.comboBox_output_format->count() > 0) {
@@ -66,7 +67,14 @@ void ImggFormatsConvertQtWidget::setFormatsCombo(
   if (enable.empty() || enable.size() != fmts.size())
     return;
 
-  // disable
+  for (size_t fmtIdx = 0; fmtIdx < fmts.size(); fmtIdx++) {
+    if (!enable[fmtIdx]) {
+      // to display the text in this row as "disabled"
+      QModelIndex rowIdx = cbox->model()->index(static_cast<int>(fmtIdx), 0);
+      QVariant disabled(0);
+      cbox->model()->setData(rowIdx, disabled, Qt::UserRole - 1);
+    }
+  }
 }
 
 std::string ImggFormatsConvertQtWidget::inputPath() const {

@@ -52,12 +52,14 @@ void ImggFormatsConvertPresenter::notify(Notification notif) {
 }
 
 void ImggFormatsConvertPresenter::processInit() {
-  const std::vector<std::string> formats = {
+  const std::vector<std::string> formats{
       shortName(ImggFormats::FITS), shortName(ImggFormats::TIFF),
       shortName(ImggFormats::PNG), shortName(ImggFormats::JPG),
       shortName(ImggFormats::NXTomo)};
 
-  m_view->setFormats(formats);
+  const std::vector<bool> enableLoads{true, true, true, true, false};
+
+  m_view->setFormats(formats, enableLoads);
 }
 
 void ImggFormatsConvertPresenter::processConvert() {

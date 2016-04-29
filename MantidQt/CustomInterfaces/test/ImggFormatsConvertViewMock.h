@@ -18,10 +18,11 @@ public:
   MOCK_METHOD2(userError,
                void(const std::string &err, const std::string &description));
 
-  // void setFormats(const std::vector<std::string> &fmts, const
-  // std::vector<bool> &enable)
-  MOCK_METHOD2(setFormats, void(const std::vector<std::string> &fmts,
-                                const std::vector<bool> &enable));
+  // void setFormats(const std::vector<std::string> &fmts,
+  // std::vector<bool> &enableLoad, std::vector<bool> &enableSave)
+  MOCK_METHOD3(setFormats, void(const std::vector<std::string> &fmts,
+                                const std::vector<bool> &enableLoad,
+                                const std::vector<bool> &enableSave));
 
   // std::string inputPath() const
   MOCK_CONST_METHOD0(inputPath, std::string());

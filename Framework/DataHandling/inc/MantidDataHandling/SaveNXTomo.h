@@ -57,7 +57,7 @@ public:
 
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Writes a MatrixWorkspace to a file in the NXTomo format.";
+    return "Saves one or more workspaces (of type MatrixWorkspace) to a file in the NXTomo format.";
   }
 
   /// Algorithm's version
@@ -65,7 +65,7 @@ public:
 
   /// Algorithm's category for identification
   const std::string category() const override {
-    return "DataHandling\\Nexus;DataHandling\\Tomography;"
+    return "DataHandling\\Nexus;DataHandling\\Imaging;"
            "Diffraction\\DataHandling";
   }
 

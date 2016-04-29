@@ -44,7 +44,8 @@ public:
     testing::NiceMock<ImggFormatsConvertViewMock> mockView;
     MantidQt::CustomInterfaces::ImggFormatsConvertPresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, setFormats(testing::_, testing::_)).Times(1);
+    EXPECT_CALL(mockView, setFormats(testing::_, testing::_, testing::_))
+        .Times(1);
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
