@@ -107,7 +107,7 @@ void ImggFormatsConvertQtWidget::convert(
     // Qt5 has QImage::Format_Alpha8;
     QImage::Format toFormat = QImage::Format_RGB32;
     Qt::ImageConversionFlag toFlags = Qt::MonoOnly;
-    img.convertToFormat(toFormat, toFlags);
+    img = img.convertToFormat(toFormat, toFlags);
   }
 
   writeImgFile(img, outputName, outputFormat);
