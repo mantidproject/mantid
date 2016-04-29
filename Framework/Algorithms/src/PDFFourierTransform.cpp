@@ -167,11 +167,7 @@ void PDFFourierTransform::exec() {
   } else if (inputXunit == "dSpacing") {
     // convert the x-units to Q/MomentumTransfer
     const double PI_2(2. * M_PI);
-    std::transform(inputQ.begin(), inputQ.end(), inputQ.begin(),
-                   std::bind1st(std::divides<double>(), PI_2));
-    std::transform(inputDQ.begin(), inputDQ.end(), inputQ.begin(),
-                   inputDQ.begin(), std::divides<double>());
-
+    std::for_each(inputQ.begin(), inputQ.end(), [&PI_2](double Q){Q/=PI_2;});
     // reverse all of the arrays
     std::reverse(inputQ.begin(), inputQ.end());
     std::reverse(inputDQ.begin(), inputDQ.end());
@@ -209,8 +205,7 @@ void PDFFourierTransform::exec() {
   if (soqType == S_OF_Q) {
     g_log.information() << "Subtracting one from all values\n";
     // there is no error propagation for subtracting one
-    std::transform(inputFOfQ.begin(), inputFOfQ.end(), inputFOfQ.begin(),
-                   std::bind2nd(std::minus<double>(), 1.));
+    std::for_each(inputFOfQ.begin(), inputFOfQ.end(), [&](double F){--F;});
     soqType = S_OF_Q_MINUS_ONE;
   }
   if (soqType == S_OF_Q_MINUS_ONE) {
