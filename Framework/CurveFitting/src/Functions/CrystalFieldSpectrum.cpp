@@ -270,9 +270,7 @@ size_t CrystalFieldSpectrum::nAttributes() const {
 
 /// Returns a list of attribute names
 std::vector<std::string> CrystalFieldSpectrum::getAttributeNames() const {
-  std::vector<std::string> attNames(2);
-  attNames[0] = "PeakShape";
-  attNames[1] = "FWHM";
+  std::vector<std::string> attNames = IFunction::getAttributeNames();
   auto cfNames = m_crystalField.getAttributeNames();
   auto spNames = m_spectrum.getAttributeNames();
   attNames.insert(attNames.end(), cfNames.begin(), cfNames.end());
@@ -282,7 +280,7 @@ std::vector<std::string> CrystalFieldSpectrum::getAttributeNames() const {
 
 /// Return a value of attribute attName
 API::IFunction::Attribute CrystalFieldSpectrum::getAttribute(const std::string &attName) const {
-  if (attName == "PeakShape" || attName == "FWHM") {
+  if (IFunction::hasAttribute(attName)) {
     return IFunction::getAttribute(attName);
   } else if (attName == "NumDeriv") {
     return m_spectrum.getAttribute(attName);
@@ -296,7 +294,7 @@ API::IFunction::Attribute CrystalFieldSpectrum::getAttribute(const std::string &
 /// Set a value to attribute attName
 void CrystalFieldSpectrum::setAttribute(const std::string &attName,
                                const IFunction::Attribute &att) {
-  if (attName == "PeakShape" || attName == "FWHM") {
+  if (IFunction::hasAttribute(attName)) {
     IFunction::setAttribute(attName, att);
     m_dirty = true;
     m_spectrum.clear();

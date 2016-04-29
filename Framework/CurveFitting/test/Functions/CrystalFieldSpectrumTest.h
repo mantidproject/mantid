@@ -93,16 +93,16 @@ public:
     fun->setAttributeValue("ToleranceIntensity", 0.001);
     fun->buildSpectrumFunction();
     fun->setParameter("f0.FWHM", 2.0);
-    fun->setParameter("f1.FWHM", 2.0);
-    fun->setParameter("f2.FWHM", 2.0);
+    fun->setParameter("f1.FWHM", 20.0);
+    fun->setParameter("f2.FWHM", 20.0);
     FunctionDomain1DVector x(0.0, 55.0, 100);
     FunctionValues y(x);
     fun->function(x, y);
 
     auto testFun = FunctionFactory::Instance().createInitialized(
         "name=Lorentzian,PeakCentre=0.0,Amplitude=2.749,FWHM=2.0;"
-        "name=Lorentzian,PeakCentre=29.3261,Amplitude=0.7204,FWHM=2.0;"
-        "name=Lorentzian,PeakCentre=44.3412,Amplitude=0.4298,FWHM=2.0;");
+        "name=Lorentzian,PeakCentre=29.3261,Amplitude=0.7204,FWHM=20.0;"
+        "name=Lorentzian,PeakCentre=44.3412,Amplitude=0.4298,FWHM=20.0;");
     FunctionValues t(x);
     testFun->function(x, t);
 
@@ -123,24 +123,25 @@ public:
     fun->setAttributeValue("ToleranceIntensity", 0.001);
     fun->setAttributeValue("PeakShape", "Gaussian");
     fun->buildSpectrumFunction();
-    fun->setParameter("f0.Sigma", 1.0);
+    fun->setParameter("f0.Sigma", 10.0);
     fun->setParameter("f1.Sigma", 2.0);
     fun->setParameter("f2.Sigma", 3.0);
     FunctionDomain1DVector x(0.0, 55.0, 100);
     FunctionValues y(x);
     fun->function(x, y);
 
-    auto height1 = std::to_string(2.749 / (1.0 * sqrt(2.0 * M_PI)));
+    auto height1 = std::to_string(2.749 / (10.0 * sqrt(2.0 * M_PI)));
     auto height2 = std::to_string(0.7204 / (2.0 * sqrt(2.0 * M_PI)));
     auto height3 = std::to_string(0.4298 / (3.0 * sqrt(2.0 * M_PI)));
     auto testFun = FunctionFactory::Instance().createInitialized(
-        "name=Gaussian,PeakCentre=0.0,Height="+height1+",Sigma=1.0;"
+        "name=Gaussian,PeakCentre=0.0,Height="+height1+",Sigma=10.0;"
         "name=Gaussian,PeakCentre=29.3261,Height="+height2+",Sigma=2.0;"
         "name=Gaussian,PeakCentre=44.3412,Height="+height3+",Sigma=3.0;");
     FunctionValues t(x);
     testFun->function(x, t);
 
     for(size_t i = 0; i < x.size(); ++i) {
+      std::cerr << y[i]  << ' ' << t[i] << std::endl;
       TS_ASSERT_DELTA( y[i] / t[i], 1, 2e-4);
     }
   }
