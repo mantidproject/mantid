@@ -82,7 +82,7 @@ class ImagingAggregateTests(unittest.TestCase):
             for pos_idx, pos in enumerate(ref_positions):
                 self.assertEquals(wks.readY(pos[1])[pos[0]], ref_values[image_idx][pos_idx])
 
-        mspai.DeleteWorkspace(group_name)
+        msapi.DeleteWorkspace(group_name)
 
         self._cleanup_dirs_files()
 
