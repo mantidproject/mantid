@@ -1087,6 +1087,8 @@ int FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input,
         "No 7th column for use FindPeakBackground result or not. ");
 
   if (peaklisttablews->rowCount() > 0) {
+    // setting fitresult currently breaks several tests
+    // see issues ##13667, 13950 and 15978
     int fitresult = peaklisttablews->Int(0, 6);
     g_log.information() << "fitresult=" << fitresult << "\n";
   }

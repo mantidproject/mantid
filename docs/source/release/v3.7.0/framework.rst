@@ -74,7 +74,7 @@ Improved
   properties (``LoadEventMonitor`` and ``LoadHistogramMonitor``).
   `#15667 <https://github.com/mantidproject/mantid/pull/15667>`_
 - :ref:`CreateSimulationWorkspace <algm-CreateSimulationWorkspace>` now matches the IDF of the simulation workspace to the IDF of a reference workspace (either Nexus or Raw).
-- :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` now correctly reads in event data that does not have a common x-axis. `#15746 <https://github.com/mantidproject/mantid/pull/15746>`
+- :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` now correctly reads in event data that does not have a common x-axis. `#15746 <https://github.com/mantidproject/mantid/pull/15746>`_
 - :ref:`LoadNexusLogs <algm-LoadNexusLogs>` allows now to load logs from an entry other than the first. :ref:`LoadEventNexus <algm-LoadEventNexus>` now loads the correct logs when an *NXentry* is given
 - :ref:`FFT <algm-FFT>`: added property *AutoShift* to enable automatic phase correction for workspaces not centred at zero.
 - :ref:`SaveAscii <algm-SaveAscii2>` now has a SpectrumMetaData property that allows for addition information to be displayed along with the SpectrumNumber. Currently the supported MetaData is SpectrumNumber, Q and Angle.
@@ -83,6 +83,7 @@ Improved
 - :ref:`SetSampleMaterial <algm-SetSampleMaterial>` will now work out the number density from the chemical formula and mass density if these are given in the input. A user specified number density or if Z and the unit cell volume is given will override the value calculated from the chemical formula and mass density.
 - :ref:`ComputeCalibrationCoefVan <algm-ComputeCalibrationCoefVan>`
   does not perform fit of data by itself, but requires an additional argument: ``EPPTable``. This should accelerate the data reduction workflow, because fitting results can be reused. Table with elastic peak positions can be created using the new :ref:`FindEPP <algm-FindEPP>` algorithm.
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` now supports inelastic instruments. It relies on :ref:`ConvertUnits <algm-ConvertUnits>` having set the correct EMode. `#15923 <https://github.com/mantidproject/mantid/pull/15923>`_
 
 Deprecated
 ##########
