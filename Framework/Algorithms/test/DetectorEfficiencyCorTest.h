@@ -116,7 +116,7 @@ private:
     space->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
 
-    BinEdges x{0.0, 1.0, 2.0, 3.0, 4.0};
+    BinEdges x{0.0, 0.0, 0.0, 0.0, 4.0};
     MantidVecPtr y, e;
     y.access().resize(nbins, 0.0);
     e.access().resize(nbins, 0.0);
