@@ -220,16 +220,18 @@ def contains_newapi_algorithm(filename):
         @returns True if a python algorithm written with the new API
         has been found.
     """
-    alg_found = False
+    alg_found = True
     try:
         with open(filename,'r') as file:
             for line in reversed(file.readlines()):
                 if 'registerPyAlgorithm' in line:
-                    break  # not found
+                    alg_found = False
+                    break
                 if 'AlgorithmFactory.subscribe' in line:
                     alg_found = True
                     break
     except IOError:
-        pass  # something wrong with reading the file
+        # something wrong with reading the file
+        alg_found = False
 
     return alg_found
