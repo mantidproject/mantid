@@ -373,11 +373,11 @@ public:
         // prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL),
         // m_loadError(false),
         prog(prog), // scheduler(scheduler),
-        m_loadError(false),
-        m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(), m_loadSize(),
-        m_event_id(nullptr), m_event_time_of_flight(nullptr),
-        m_have_weight(false), m_event_weight(nullptr),
-        m_framePeriodNumbers(framePeriodNumbers), alg_Logger(logger) {
+        m_loadError(false), m_oldNexusFileNames(oldNeXusFileNames),
+        m_loadStart(), m_loadSize(), m_event_id(nullptr),
+        m_event_time_of_flight(nullptr), m_have_weight(false),
+        m_event_weight(nullptr), m_framePeriodNumbers(framePeriodNumbers),
+        alg_Logger(logger) {
     // setMutex(ioMutex);
     m_cost = static_cast<double>(numEvents);
     m_min_id = std::numeric_limits<uint32_t>::max();
