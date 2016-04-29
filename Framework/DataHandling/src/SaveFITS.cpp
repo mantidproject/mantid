@@ -121,13 +121,14 @@ std::map<std::string, std::string> SaveFITS::validateInputs() {
 /** Execute the algorithm.
  */
 void SaveFITS::exec() {
-  auto ws = getProperty(PROP_INPUT_WS);
+  API::MatrixWorkspace_sptr ws = getProperty(PROP_INPUT_WS);
   const auto filename = getPropertyValue(PROP_FILENAME);
 
   saveFITSImage(ws, filename);
-  g_log.information() << "Image of size " + std::to_string(0) + " columns by " +
-                             std::to_string(0) + " rows saved in '" + filename +
-                             "'" << std::endl;
+  g_log.information() << "Image of size " + std::to_string(ws->blocksize()) +
+                             " columns by " +
+                             std::to_string(ws->getNumberHistograms()) +
+                             " rows saved in '" + filename + "'" << std::endl;
 }
 
 /**

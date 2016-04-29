@@ -2,7 +2,7 @@ import os
 import unittest
 import stresstesting
 
-from mantid.simpleapi import ImggAggregateWavelengths
+from mantid.simpleapi import DeleteWorkspace, ImggAggregateWavelengths, LoadFITS, mtd
 from mantid import config
 
 class ImagingAggregateTests(unittest.TestCase):
@@ -58,6 +58,31 @@ class ImagingAggregateTests(unittest.TestCase):
 
         self.assertEquals(num_proj, 4)
         self.assertEquals(num_bands, 6)
+
+        # (x,y) coordinates of some pixels
+        ref_positions = [(44, 77), (312, 265), (480, 397), (118, 109),
+                         (0, 0), (511, 0), (0, 511), (511, 511)]
+        # Their expected values in every of the output images
+        ref_values = [[0, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0],
+                      [2, 1, 2, 3, 6, 5, 2, 3], [5, 3, 4, 7, 4, 1, 5, 5]]
+        for ref_val in ref_values:
+            self.assertEquals(len(ref_positions), len(ref_val))
+        for image_idx, fname in enumerate(self._expected_out_fnames):
+            fname = os.path.join(self._out_dir, fname)
+            group_name = 'loaded_fits'
+            group = LoadFITS(Filename=fname, LoadAsRectImg=True, OutputWorkspace=group_name)
+
+            self.assertEquals(image_idx+1, group.size())
+            wks = group.getItem(group.size()-1)
+
+            self.assertEquals(wks.getNumberHistograms(), 512)
+            self.assertEquals(wks.blocksize(), 512)
+
+            for pos_idx, pos in enumerate(ref_positions):
+                self.assertEquals(wks.readY(pos[1])[pos[0]], ref_values[image_idx][pos_idx])
+
+        DeleteWorkspace(group_name)
+
         self._cleanup_dirs_files()
 
 # Runs the unittest tests defined above in the mantid stress testing framework
