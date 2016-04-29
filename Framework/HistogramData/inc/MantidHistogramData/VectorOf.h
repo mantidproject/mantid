@@ -9,7 +9,11 @@ namespace Mantid {
 namespace HistogramData {
 namespace detail {
 
-/** VectorOf : TODO: DESCRIPTION
+/** VectorOf
+
+  This class is an implementation detail of class like HistogramData::BinEdges
+  and HistogramData::Points. It wraps a copy-on-write pointer to an underlying
+  data type based on std::vector, such as HistogramX.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -45,7 +49,7 @@ public:
   VectorOf(const VectorOf &) = default;
   VectorOf(VectorOf &&) = default;
   // Note the lvalue reference qualifier for all assignment operators. This
-  // prevent mistakes in client code, assigning to an rvalue, such as
+  // prevents mistakes in client code, assigning to an rvalue, such as
   // histogram.getBinEdges() = { 0.1, 0.2 };
   VectorOf &operator=(const VectorOf &other) & = default;
   VectorOf &operator=(VectorOf &&other) & = default;
@@ -58,14 +62,12 @@ public:
   VectorOf(InputIt first, InputIt last)
       : m_data(Kernel::make_cow<CowType>(first, last)) {}
 
-  // TODO figure out if we want all these overloads.
   explicit VectorOf(const Kernel::cow_ptr<CowType> &other) : m_data(other) {}
   explicit VectorOf(const boost::shared_ptr<CowType> &other) : m_data(other) {}
-  // TODO cow_ptr is not movable, can we implement move?
   explicit VectorOf(const CowType &data)
       : m_data(Kernel::make_cow<CowType>(data)) {}
-  // VectorOf(std::vector<double> &&data) { m_data =
-  // Kernel::make_cow<std::vector<double>>(std::move(data)); }
+  explicit VectorOf(CowType &&data)
+      : m_data(Kernel::make_cow<CowType>(std::move(data))) {}
 
   VectorOf &operator=(const Kernel::cow_ptr<CowType> &other) & {
     m_data = other;
@@ -80,19 +82,38 @@ public:
       m_data = Kernel::make_cow<CowType>(data);
     return *this;
   }
+  VectorOf &operator=(CowType &&data) & {
+    if (!m_data || (&(*m_data) != &data))
+      m_data = Kernel::make_cow<CowType>(std::move(data));
+    return *this;
+  }
 
+  /// Checks if *this stores a non-null pointer.
   explicit operator bool() const { return m_data.operator bool(); }
 
+  /// Returns the size of the stored object. The behavior is undefined if the
+  /// stored pointer is null.
   size_t size() const { return m_data->size(); }
 
-  // Note that this function returns the internal data of VectorOf, i.e., does
-  // not forward to std::vector::data().
+  /// Returns a const reference to the stored object. The behavior is undefined
+  /// if the stored pointer is null.
   const CowType &data() const { return *m_data; }
+  /// Returns a const reference to the stored object. The behavior is undefined
+  /// if the stored pointer is null.
   const CowType &constData() const { return *m_data; }
+  /// Returns a reference to the stored object. The behavior is undefined if the
+  /// stored pointer is null.
   CowType &data() { return m_data.access(); }
+  /// Returns a copy-on-write pointer to the stored object.
   Kernel::cow_ptr<CowType> cowData() const { return m_data; }
+  /// Returns a const reference to the internal data structure of the stored
+  /// object. The behavior is undefined if the stored pointer is null.
   const std::vector<double> &rawData() const { return m_data->rawData(); }
+  /// Returns a const reference to the internal data structure of the stored
+  /// object. The behavior is undefined if the stored pointer is null.
   const std::vector<double> &constRawData() const { return m_data->rawData(); }
+  /// Returns a reference to the internal data structure of the stored object.
+  /// The behavior is undefined if the stored pointer is null.
   std::vector<double> &rawData() { return m_data.access().rawData(); }
 
 protected:

@@ -206,6 +206,16 @@ public:
     TS_ASSERT_EQUALS(values[1], 0.1);
   }
 
+  void test_vector_move_constructor() {
+    std::vector<double> vector(2, 0.1);
+    VectorOfTester values(std::move(vector));
+    TS_ASSERT_EQUALS(vector.size(), 0);
+    TS_ASSERT(values);
+    TS_ASSERT_EQUALS(values.size(), 2);
+    TS_ASSERT_EQUALS(values[0], 0.1);
+    TS_ASSERT_EQUALS(values[1], 0.1);
+  }
+
   void test_cow_ptr_assignment() {
     auto cow = make_cow<HistogramX>(2, 0.1);
     VectorOfTester values(1);
@@ -293,6 +303,17 @@ public:
     const std::vector<double> raw{0.1, 0.2, 0.3};
     VectorOfTester values;
     TS_ASSERT_THROWS_NOTHING(values = raw);
+    TS_ASSERT(values);
+    TS_ASSERT_DIFFERS(&(values.constData()[0]), &raw[0]);
+    TS_ASSERT_EQUALS(values.size(), 3);
+    TS_ASSERT_EQUALS(values[0], 0.1);
+  }
+
+  void test_vector_move_assignment() {
+    std::vector<double> raw{0.1, 0.2, 0.3};
+    VectorOfTester values(0);
+    TS_ASSERT_THROWS_NOTHING(values = std::move(raw));
+    TS_ASSERT_EQUALS(raw.size(), 0);
     TS_ASSERT(values);
     TS_ASSERT_DIFFERS(&(values.constData()[0]), &raw[0]);
     TS_ASSERT_EQUALS(values.size(), 3);
