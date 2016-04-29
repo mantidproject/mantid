@@ -511,7 +511,8 @@ std::string MuonAnalysis::getNewAnalysisWSName(ItemType itemType, int tableRow,
  * @param selector :: Widget to use for parsing
  * @return PlotType as selected using the widget
  */
-MuonAnalysis::PlotType MuonAnalysis::parsePlotType(QComboBox *selector) {
+CustomInterfaces::Muon::PlotType
+MuonAnalysis::parsePlotType(QComboBox *selector) {
   std::string plotTypeName = selector->currentText().toStdString();
 
   if (plotTypeName == "Asymmetry") {

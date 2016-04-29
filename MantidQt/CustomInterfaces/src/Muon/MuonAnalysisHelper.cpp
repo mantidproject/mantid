@@ -364,69 +364,73 @@ void WidgetAutoSaver::endGroup()
  * Get a run label for the workspace.
  * E.g. for MUSR data of run 15189 it will look like MUSR00015189.
  * @param ws :: Workspace to get label for.
- * @return
+ * @return :: run label
  */
-std::string getRunLabel(const Workspace_sptr& ws)
-{
-  MatrixWorkspace_const_sptr firstPrd = firstPeriod(ws);
-
-  int runNumber = firstPrd->getRunNumber();
-  std::string instrName = firstPrd->getInstrument()->getName();
-
-  int zeroPadding;
-  try {
-    zeroPadding =
-        ConfigService::Instance().getInstrument(instrName).zeroPadding(
-            runNumber);
-  } catch (const Mantid::Kernel::Exception::NotFoundError &) {
-    // Old muon instrument without an IDF - default to 3 zeros
-    zeroPadding = 3;
-  }
-
-  std::ostringstream label;
-  label << instrName;
-  label << std::setw(zeroPadding) << std::setfill('0') << std::right << runNumber;
-  return label.str();
+std::string getRunLabel(const Workspace_sptr &ws) {
+  const std::vector<Workspace_sptr> wsList{ws};
+  return getRunLabel(wsList);
 }
 
 /**
  * Get a run label for a list of workspaces.
  * E.g. for MUSR data of runs 15189, 15190, 15191 it will look like
  * MUSR00015189-91.
- * @param wsList
- * @return
+ * (Assumes all runs have the same instrument)
+ * @param wsList :: [input] Vector of workspace pointers
+ * @return :: run label
+ * @throws std::invalid_argument if empty list given
  */
-std::string getRunLabel(std::vector<Workspace_sptr> wsList) {
+std::string getRunLabel(const std::vector<Workspace_sptr> &wsList) {
   if (wsList.empty())
     throw std::invalid_argument("Unable to run on an empty list");
 
-  // Extract the run numbers and find the first run in the list
+  const std::string instrument =
+      firstPeriod(wsList.front())->getInstrument()->getName();
+
+  // Extract the run numbers
   std::vector<int> runNumbers;
-  int firstRunIndex = 0;
-  int firstRunNumber = firstPeriod(wsList.front())->getRunNumber();
   int numWorkspaces = static_cast<int>(wsList.size());
   for (int i = 0; i < numWorkspaces; i++) {
     int runNumber = firstPeriod(wsList[i])->getRunNumber();
     runNumbers.push_back(runNumber);
-    if (runNumber < firstRunNumber) {
-      firstRunNumber = runNumber;
-      firstRunIndex = i;
-    }
+  }
+
+  return getRunLabel(instrument, runNumbers);
+}
+
+/**
+ * Get a run label for a given instrument and list of runs.
+ * E.g. for MUSR data of runs 15189, 15190, 15191 it will look like
+ * MUSR00015189-91.
+ * (Assumes all runs have the same instrument)
+ * @param instrument :: [input] instrument name
+ * @param runNumbers :: [input] List of run numbers
+ * @return :: run label
+ * @throws std::invalid_argument if empty run list given
+ */
+std::string getRunLabel(const std::string &instrument,
+                        const std::vector<int> &runNumbers) {
+  if (runNumbers.empty()) {
+    throw std::invalid_argument("Cannot run on an empty list");
   }
 
   // Find ranges of consecutive runs
   auto ranges = findConsecutiveRuns(runNumbers);
 
+  // Zero-padding for the first run
+  int zeroPadding = ConfigService::Instance()
+                        .getInstrument(instrument)
+                        .zeroPadding(ranges.begin()->first);
+
   // Begin string output with full label of first run
   std::ostringstream label;
-  label << getRunLabel(wsList[firstRunIndex]);
+  label << instrument;
+  label << std::setw(zeroPadding) << std::setfill('0') << std::right;
 
   for (auto range : ranges) {
     std::string firstRun = std::to_string(range.first);
     std::string lastRun = std::to_string(range.second);
-    if (range != ranges.front()) {
-      label << firstRun;
-    }
+    label << firstRun;
     if (range.second != range.first) {
       // Remove the common part of the first and last run, so we get e.g.
       // "12345-56" instead of "12345-12356"
@@ -902,6 +906,67 @@ bool isReloadGroupingNecessary(
   }
 
   return reloadNecessary;
+}
+
+/**
+ * Parse a workspace name into dataset parameters
+ * Format: "INST00012345; Pair; long; Asym;[ 1;] #1"
+ * @param wsName :: [input] Name of workspace
+ * @returns :: Struct containing dataset parameters
+ */
+Muon::DatasetParams parseWorkspaceName(const std::string &wsName) {
+  // TODO
+  return Muon::DatasetParams();
+}
+
+/**
+ * Generate a workspace name from the given parameters
+ * Format: "INST00012345; Pair; long; Asym;[ 1;] #1"
+ * @param params :: [input] Struct containing dataset parameters
+ * @returns :: Name for analysis workspace
+ */
+std::string generateWorkspaceName(const Muon::DatasetParams &params) {
+  std::ostringstream workspaceName;
+  const static std::string sep("; ");
+
+  // Instrument and run number
+  if (params.label.empty()) {
+    workspaceName << getRunLabel(params.instrument, params.runs) << sep;
+  } else {
+    workspaceName << params.label << sep;
+  }
+
+  // Pair/group and name of pair/group
+  if (params.itemType == Muon::ItemType::Pair) {
+    workspaceName << "Pair" << sep;
+  } else if (params.itemType == Muon::ItemType::Group) {
+    workspaceName << "Group" << sep;
+  }
+  workspaceName << params.itemName << sep;
+
+  // Type of plot
+  switch (params.plotType) {
+  case Muon::PlotType::Asymmetry:
+    workspaceName << "Asym";
+    break;
+  case Muon::PlotType::Counts:
+    workspaceName << "Counts";
+    break;
+  case Muon::PlotType::Logarithm:
+    workspaceName << "Logs";
+    break;
+  }
+
+  // Period(s)
+  const auto periods = params.periods;
+  if (!periods.empty()) {
+    workspaceName << sep << periods;
+  }
+
+  // Version - always "#1" if overwrite is on, otherwise increment
+  workspaceName << sep << "#" << params.version;
+
+  return workspaceName.str();
 }
 
 } // namespace MuonAnalysisHelper

@@ -13,12 +13,28 @@
 #include <QDoubleValidator>
 #include <QLineEdit>
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
-namespace MuonAnalysisHelper
-{
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace Muon {
+/// Types of entities we are dealing with
+enum ItemType { Pair, Group };
+
+/// Possible plot types users might request
+enum PlotType { Asymmetry, Counts, Logarithm };
+
+/// Parameters from parsed workspace name
+struct DatasetParams {
+  std::string label;
+  std::string instrument;
+  std::vector<int> runs;
+  ItemType itemType;
+  std::string itemName;
+  PlotType plotType;
+  std::string periods;
+  size_t version;
+};
+}
+namespace MuonAnalysisHelper {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -43,7 +59,12 @@ MANTIDQT_CUSTOMINTERFACES_DLL void printRunInfo(MatrixWorkspace_sptr runWs, std:
 MANTIDQT_CUSTOMINTERFACES_DLL std::string getRunLabel(const Workspace_sptr& ws);
 
 /// Get a run label for a list of workspaces
-MANTIDQT_CUSTOMINTERFACES_DLL std::string getRunLabel(std::vector<Workspace_sptr> wsList);
+MANTIDQT_CUSTOMINTERFACES_DLL std::string
+getRunLabel(const std::vector<Workspace_sptr> &wsList);
+
+/// Get a run label given instrument and run numbers
+MANTIDQT_CUSTOMINTERFACES_DLL std::string
+getRunLabel(const std::string &instrument, const std::vector<int> &runNumbers);
 
 /// Sums a list of workspaces together
 MANTIDQT_CUSTOMINTERFACES_DLL Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces);
@@ -81,6 +102,14 @@ MANTIDQT_CUSTOMINTERFACES_DLL void
 appendTimeSeriesLogs(boost::shared_ptr<Mantid::API::Workspace> toAppend,
                      boost::shared_ptr<Mantid::API::Workspace> resultant,
                      const std::string &logName);
+
+/// Parse analysis workspace name
+MANTIDQT_CUSTOMINTERFACES_DLL MantidQt::CustomInterfaces::Muon::DatasetParams
+parseWorkspaceName(const std::string &wsName);
+
+/// Generate new analysis workspace name
+MANTIDQT_CUSTOMINTERFACES_DLL std::string generateWorkspaceName(
+    const MantidQt::CustomInterfaces::Muon::DatasetParams &params);
 
 /// Get "run: period" string from workspace name
 MANTIDQT_CUSTOMINTERFACES_DLL QString

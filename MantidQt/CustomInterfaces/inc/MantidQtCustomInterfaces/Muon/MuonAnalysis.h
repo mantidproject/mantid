@@ -17,6 +17,7 @@
 #include "MantidQtMantidWidgets/pythonCalc.h"
 #include "MantidQtMantidWidgets/MWDiag.h"
 #include "MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
 #include <map>
 
@@ -263,15 +264,6 @@ private slots:
 
 private:
  
-  /// Types of entities we are dealing with
-  enum ItemType { Pair, Group };
-  
-  /// Possible plot types users might request
-  enum PlotType { Asymmetry, Counts, Logarithm };
-
-  /// Types of periods
-  enum PeriodType { First, Second };
-
   /// Initialize local Python environment
   void initLocalPython() override;
 
