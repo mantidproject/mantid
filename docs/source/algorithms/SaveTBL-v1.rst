@@ -42,12 +42,12 @@ Usage
 
 **Example - Save a TableWorkspace in Reflectometry TBL format**
 
-.. testcode:: ExReflTBLSimple
+.. testcode:: ExTBLSimple
 
     #import the os path libraries for directory functions
     import os
 
-    # Create a table workspace with data to save. You'd normally have the table workspace in mantid already, probably as a product of LoadReflTBL
+    # Create a table workspace with data to save. You'd normally have the table workspace in mantid already, probably as a product of LoadTBL
     ws = CreateEmptyTableWorkspace()
     ws.addColumn("str","Run(s)");
     ws.addColumn("str","ThetaIn");
@@ -58,35 +58,37 @@ Usage
     ws.addColumn("str","Scale");
     ws.addColumn("int","StitchGroup");
     ws.addColumn("str","Options");
-    nextRow = {'Run(s)':"13460",'ThetaIn':"0.7",'TransRun(s)':"13463,13464",'Qmin':"0.01",'Qmax':"0.06",'dq/q':"0.04",'Scale':"",'StitchGroup':1,'Options':""}
+    nextRow = {'Run(s)':"13460",'ThetaIn':"0.7",'TransRun(s)':"13463+13464",'Qmin':"0.01",'Qmax':"0.06",'dq/q':"0.04",'Scale':"",'StitchGroup':1,'Options':""}
     ws.addRow ( nextRow )
-    nextRow = {'Run(s)':"13470",'ThetaIn':"2.3",'TransRun(s)':"13463,13464",'Qmin':"0.035",'Qmax':"0.3",'dq/q':"0.04",'Scale':"",'StitchGroup':0,'Options':""}
+    nextRow = {'Run(s)':"13470",'ThetaIn':"2.3",'TransRun(s)':"13463+13464",'Qmin':"0.035",'Qmax':"0.3",'dq/q':"0.04",'Scale':"",'StitchGroup':0,'Options':""}
     ws.addRow ( nextRow )
-    nextRow = {'Run(s)':"13462",'ThetaIn':"2.3",'TransRun(s)':"13463,13464",'Qmin':"0.035",'Qmax':"0.3",'dq/q':"0.04",'Scale':"",'StitchGroup':1,'Options':"ProcessingInstructions=\"1:2\""}
+    nextRow = {'Run(s)':"13462",'ThetaIn':"2.3",'TransRun(s)':"13463+13464",'Qmin':"0.035",'Qmax':"0.3",'dq/q':"0.04",'Scale':"",'StitchGroup':1,'Options':"ProcessingInstructions=\"1:2\""}
     ws.addRow ( nextRow )
-    nextRow = {'Run(s)':"13469",'ThetaIn':"0.7",'TransRun(s)':"13463,13464",'Qmin':"0.01",'Qmax':"0.06",'dq/q':"0.04",'Scale':"",'StitchGroup':2,'Options':""}
+    nextRow = {'Run(s)':"13469",'ThetaIn':"0.7",'TransRun(s)':"13463+13464",'Qmin':"0.01",'Qmax':"0.06",'dq/q':"0.04",'Scale':"",'StitchGroup':2,'Options':""}
     ws.addRow ( nextRow )
 
     #Create an absolute path by joining the proposed filename to a directory
     #os.path.expanduser("~") used in this case returns the home directory of the current user
-    savefile = os.path.join(os.path.expanduser("~"), "ReflTBLFile.tbl")
+    savefile = os.path.join(os.path.expanduser("~"), "TBLFile.tbl")
 
     # perform the algorithm
     SaveTBL(Filename=savefile,InputWorkspace=ws)
 
     #the file contains
-    # 13460,0.7,"13463,13464",0.01,0.06,13462,2.3,"13463,13464",0.035,0.3,,,,,,0.04,
-    # 13469,0.7,"13463,13464",0.01,0.06,,,,,,,,,,,0.04,
-    # 13470,2.3,"13463,13464",0.035,0.3,,,,,,,,,,,0.04,
+    # Run(s),ThetaIn,TransRun(s),Qmin,Qmax,dq/q,Scale,StitchGroup,Options
+    # 13460,0.7,13463+13464,0.01,0.06,0.04,,1,
+    # 13470,2.3,13463+13464,0.035,0.3,0.04,,0,
+    # 13462,2.3,13463+13464,0.035,0.3,0.04,,1,ProcessingInstruction="1:2"
+    # 13469,0.7,13463+13464,0.01,0.06,0.04,,1,
     print "File Exists:", os.path.exists(savefile)
 
-.. testcleanup:: ExReflTBLSimple
+.. testcleanup:: ExTBLSimple
 
     os.remove(savefile)
 
 Output:
 
-.. testoutput:: ExReflTBLSimple
+.. testoutput:: ExTBLSimple
 
     File Exists: True
 
