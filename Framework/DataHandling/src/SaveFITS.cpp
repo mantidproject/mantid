@@ -8,6 +8,8 @@
 
 #include <fstream>
 
+#include <boost/pointer_cast.hpp>
+
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
@@ -40,7 +42,9 @@ const std::string SaveFITS::g_FITSHdrRefComment2 =
 
 // extend this if we ever want to support 64 bits pixels
 const size_t SaveFITS::g_maxBitDepth = 32;
-const std::vector<int> SaveFITS::g_bitDepths{8, 16, g_maxBitDepth};
+// this has to have int type for the validator and getProperty
+const std::vector<int> SaveFITS::g_bitDepths{8, 16,
+                                             static_cast<int>(g_maxBitDepth)};
 const size_t SaveFITS::g_maxBytesPP = g_maxBitDepth / 8;
 
 using Mantid::Kernel::Direction;
@@ -70,14 +74,6 @@ namespace {
 const std::string PROP_INPUT_WS = "InputWorkspace";
 const std::string PROP_FILENAME = "Filename";
 const std::string PROP_BIT_DEPTH = "BitDepth";
-
-// just to compare two Poco::Path objects, used for std algorithms
-struct PocoPathComp
-    : public std::binary_function<Poco::Path, Poco::Path, bool> {
-  bool operator()(const Poco::Path &lhs, const Poco::Path &rhs) const {
-    return lhs.toString() < rhs.toString();
-  }
-};
 }
 
 //----------------------------------------------------------------------------------------------
@@ -106,6 +102,18 @@ void SaveFITS::init() {
 std::map<std::string, std::string> SaveFITS::validateInputs() {
   std::map<std::string, std::string> result;
 
+  API::MatrixWorkspace_const_sptr wks = getProperty(PROP_INPUT_WS);
+  if (wks) {
+    if (0 == wks->blocksize()) {
+      result[PROP_INPUT_WS] = "The input workspace must have at least one "
+                              "column (the X axis is empty)";
+    }
+    if (0 == wks->getNumberHistograms()) {
+      result[PROP_INPUT_WS] = "The input workspace must have at least one row "
+                              "(the Y axis is empty)";
+    }
+  }
+
   return result;
 }
 
@@ -113,13 +121,14 @@ std::map<std::string, std::string> SaveFITS::validateInputs() {
 /** Execute the algorithm.
  */
 void SaveFITS::exec() {
-  auto ws = getProperty(PROP_INPUT_WS);
+  API::MatrixWorkspace_sptr ws = getProperty(PROP_INPUT_WS);
   const auto filename = getPropertyValue(PROP_FILENAME);
 
   saveFITSImage(ws, filename);
-  g_log.information() << "Image of size " + std::to_string(0) + " columns by " +
-                             std::to_string(0) + " rows saved in '" + filename +
-                             "'" << std::endl;
+  g_log.information() << "Image of size " + std::to_string(ws->blocksize()) +
+                             " columns by " +
+                             std::to_string(ws->getNumberHistograms()) +
+                             " rows saved in '" + filename + "'" << std::endl;
 }
 
 /**
@@ -169,7 +178,7 @@ void SaveFITS::writeFITSImageMatrix(const API::MatrixWorkspace_sptr img,
       int32_t pixelVal;
       if (8 == bitDepth) {
         pixelVal = static_cast<uint8_t>(dataY[col]);
-      } if (16 == bitDepth) {
+      } else if (16 == bitDepth) {
         pixelVal = static_cast<uint16_t>(dataY[col]);
       } else if (32 == bitDepth) {
         pixelVal = static_cast<uint32_t>(dataY[col]);

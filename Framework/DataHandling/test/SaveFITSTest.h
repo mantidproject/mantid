@@ -6,6 +6,7 @@
 #include "MantidDataHandling/SaveFITS.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -48,11 +49,9 @@ public:
         alg->setPropertyValue("BitDepth", "this_is_wrong_you_must_fail"),
         std::invalid_argument);
 
-    TS_ASSERT_THROWS(alg->setProperty("BitDepth", 10),
-                     std::invalid_argument);
+    TS_ASSERT_THROWS(alg->setProperty("BitDepth", 10), std::invalid_argument);
 
-    TS_ASSERT_THROWS(alg->setProperty("BitDepth", 64),
-                     std::invalid_argument);
+    TS_ASSERT_THROWS(alg->setProperty("BitDepth", 64), std::invalid_argument);
   }
 
   void test_exec_fail() {
@@ -80,6 +79,22 @@ public:
 
     TSM_ASSERT_THROWS(
         "The algorithm should not accept workspaces if the units are wrong",
+        alg.setProperty("InputWorkspace", ws), std::invalid_argument);
+  }
+
+  void test_exec_fails_empty() {
+    const std::string filename = "./savefits_wont_work.fits";
+
+    // auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+    auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+
+    SaveFITS alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
+
+    TSM_ASSERT_THROWS(
+        "The algorithm should not accept empty / uninitialized workspaces",
         alg.setProperty("InputWorkspace", ws), std::invalid_argument);
   }
 
