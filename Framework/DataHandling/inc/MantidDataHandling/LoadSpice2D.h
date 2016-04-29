@@ -93,9 +93,6 @@ private:
   /// Run LoadInstrument Child Algorithm
   void runLoadInstrument(const std::string &inst_name,
                          DataObjects::Workspace2D_sptr localWorkspace);
-  /// Run the LoadMappingTable Child Algorithm to fill the SpectraToDetectorMap
-  void runLoadMappingTable(DataObjects::Workspace2D_sptr localWorkspace,
-                           int nxbins, int nybins);
 
   void setInputPropertiesAsMemberProperties();
 
@@ -117,6 +114,7 @@ private:
   void moveDetector(double sample_detector_distance);
   double detectorDistance(std::map<std::string, std::string> &metadata);
   void setMetadataAsRunProperties(std::map<std::string, std::string> &metadata);
+  void rotateDetector(const std::string &, const double &, const double &);
 
   // Member variables:
   DataObjects::Workspace2D_sptr m_workspace;

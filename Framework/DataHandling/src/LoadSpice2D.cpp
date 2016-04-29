@@ -14,6 +14,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Strings.h"
+#include "MantidGeometry/Instrument/ComponentHelper.h"
 
 #include <boost/regex.hpp>
 #include <boost/shared_array.hpp>
@@ -45,6 +46,14 @@ using Poco::XML::Text;
 
 namespace Mantid {
 namespace DataHandling {
+
+using Mantid::Kernel::Direction;
+using Mantid::API::WorkspaceProperty;
+using namespace Kernel;
+using namespace API;
+using namespace Geometry;
+using namespace DataObjects;
+
 // Register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadSpice2D)
 
@@ -184,11 +193,22 @@ void LoadSpice2D::exec() {
   // run load instrument
   std::string instrument = metadata["Header/Instrument"];
   runLoadInstrument(instrument, m_workspace);
-//  runLoadMappingTable(m_workspace, m_numberXPixels, m_numberYPixels);
 
   // sample_detector_distances
   double detector_distance = detectorDistance(metadata);
   moveDetector(detector_distance);
+
+  // ugly hack for Biosans wing detector:
+  if (metadata.find("Header/west_wing_det_dist") != metadata.end()) {
+    // found
+    double distance = 0;
+    from_string<double>(distance, metadata["Header/west_wing_det_dist"],
+                        std::dec);
+    double angle = 0;
+    from_string<double>(angle, metadata["Motor_Positions/det_west_wing_rot"],
+                        std::dec);
+    rotateDetector("wing_detector", distance, -angle);
+  }
 }
 
 /**
@@ -534,54 +554,8 @@ void LoadSpice2D::runLoadInstrument(
   }
 }
 
-/**
- * Populate spectra mapping to detector IDs
- *
- * TODO: Get the detector size information from the workspace directly
- *
- * @param localWorkspace: Workspace2D object
- * @param nxbins: number of bins in X
- * @param nybins: number of bins in Y
- */
-void LoadSpice2D::runLoadMappingTable(
-    DataObjects::Workspace2D_sptr localWorkspace, int nxbins, int nybins) {
-  // Get the number of monitor channels
-  boost::shared_ptr<const Geometry::Instrument> instrument =
-      localWorkspace->getInstrument();
-  std::vector<detid_t> monitors = instrument->getMonitors();
-  const int nMonitors = static_cast<int>(monitors.size());
-
-  // Number of monitors should be consistent with data file format
-  if (nMonitors != LoadSpice2D::nMonitors) {
-    std::stringstream error;
-    error << "Geometry error for " << instrument->getName()
-          << ": Spice data format defines " << LoadSpice2D::nMonitors
-          << " monitors, " << nMonitors << " were/was found";
-    throw std::runtime_error(error.str());
-  }
-
-  // Generate mapping of detector/channel IDs to workspace index
-
-  // Detector/channel counter
-  int icount = 0;
-
-  // Monitor: IDs start at 1 and increment by 1
-  for (int i = 0; i < nMonitors; i++) {
-    localWorkspace->getSpectrum(icount)->setDetectorID(icount + 1);
-    icount++;
-  }
-
-  // Detector pixels
-  for (int ix = 0; ix < nxbins; ix++) {
-    for (int iy = 0; iy < nybins; iy++) {
-      localWorkspace->getSpectrum(icount)
-          ->setDetectorID(1000000 + iy * 1000 + ix);
-      icount++;
-    }
-  }
-}
-
-/* This method throws not found error if a element is not found in the xml file
+/* This method throws not found error if a element is not found in the xml
+ * file
  * @param elem :: pointer to  element
  * @param name ::  element name
  * @param fileName :: xml file name
@@ -593,6 +567,40 @@ void LoadSpice2D::throwException(Poco::XML::Element *elem,
     throw Kernel::Exception::NotFoundError(
         name + " element not found in Spice XML file", fileName);
   }
+}
+
+/**
+ * This will rotate the detector named componentName
+ *
+ *
+ * @param angle in degrees
+ */
+void LoadSpice2D::rotateDetector(const std::string &componentName,
+                                 const double &radius, const double &angle) {
+
+  const double distance = radius;
+  constexpr double deg2rad = M_PI / 180.0;
+  Geometry::Instrument_const_sptr instrument = m_workspace->getInstrument();
+
+  // detector position
+  Geometry::IComponent_const_sptr component =
+      instrument->getComponentByName(componentName);
+  V3D pos = component->getPos();
+
+  g_log.debug() << "Moving " << componentName << "; Pos = " << pos
+                << "; distance = " << distance << "." << std::endl;
+
+  double angle_rad = angle * deg2rad;
+  V3D newPos(distance * sin(angle_rad), pos.Y(), distance * cos(angle_rad));
+  Geometry::ParameterMap &pmap = m_workspace->instrumentParameters();
+  Geometry::ComponentHelper::moveComponent(*component, pmap, newPos,
+                                           Geometry::ComponentHelper::Relative);
+
+  // Apply a local rotation to stay perpendicular to the beam
+  const V3D axis(0.0, 1.0, 0.0);
+  Quat rotation(angle, axis);
+  Geometry::ComponentHelper::rotateComponent(
+      *component, pmap, rotation, Geometry::ComponentHelper::Relative);
 }
 }
 }

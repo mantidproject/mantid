@@ -5,7 +5,7 @@
 	<component-link name = "BIOSANS">
 		
 		<parameter name="detector-name" type="string">
-			<value val="main_detector"/>
+			<value val="detector1"/>
 		</parameter>
 		
 		<parameter name="default-incident-timer-spectrum">
