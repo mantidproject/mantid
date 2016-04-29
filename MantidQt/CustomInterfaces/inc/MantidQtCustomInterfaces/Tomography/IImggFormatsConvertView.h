@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
