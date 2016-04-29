@@ -48,7 +48,7 @@ MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
   }
 
   using std::make_tuple;
-  return make_tuple(factor/static_cast<double>(m_nevents), m_error);
+  return make_tuple(factor / static_cast<double>(m_nevents), m_error);
 }
 
 } // namespace Algorithms

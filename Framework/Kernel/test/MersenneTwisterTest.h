@@ -104,7 +104,8 @@ public:
     }
   }
 
-  void test_That_A_Given_Range_Produces_Numbers_Within_That_Range_For_Doubles() {
+  void
+  test_That_A_Given_Range_Produces_Numbers_Within_That_Range_For_Doubles() {
     long seed(15423894);
     const double start(0.), end(1.);
     MersenneTwister randGen(seed, start, end);

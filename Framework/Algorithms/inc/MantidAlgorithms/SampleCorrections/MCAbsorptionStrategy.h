@@ -56,7 +56,7 @@ public:
                                        double lambdaAfter) const;
 
 private:
-  const IBeamProfile & m_beamProfile;
+  const IBeamProfile &m_beamProfile;
   const MCInteractionVolume m_scatterVol;
   const size_t m_nevents;
   const double m_error;
