@@ -13,7 +13,12 @@ class Histogram;
 
 namespace detail {
 
-/** HistogramData : TODO: DESCRIPTION
+/** FixedLengthVector
+
+  Base class providing an object similar to std::vector, with the key difference
+  that the length cannot be changed after creation. This is an implementation
+  detail of HistogramData::Histogram, HistogramData::BinEdges, and
+  HistogramData::Points and is not intended for direct use in client code.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -81,9 +86,14 @@ public:
   const double &operator[](size_t pos) const { return m_data[pos]; }
   double &operator[](size_t pos) { return m_data[pos]; }
 
+  // Returns a const reference to the underlying vector.
   const std::vector<double> &rawData() const { return m_data; }
 
 protected:
+  /** Returns a reference to the underlying vector.
+   *
+   * Note that this is not available in the public interface, since that would
+   * allow for length modifications, which we need to prevent. */
   std::vector<double> &rawData() { return m_data; }
 
   // This is used as base class only, cannot delete polymorphically, so
