@@ -13,7 +13,7 @@ Introduction to Calibration
 Some instruments use tubes. Each tube acts as set of detectors along a
 line.
 
-.. figure:: ../images/Tubes_and_detectors.png
+.. figure:: ../../images/Tubes_and_detectors.png
 
     Illustration of a tube with its detectors
 
@@ -29,7 +29,7 @@ patterns may be formed. Below you find an example of some narrow peaks
 or edges. Although the plot shows measures of peaks of neutron
 intensity, dip of intensity could be used as well.
 
-.. image:: ../images/CalibrationPeaksAndEdges.png
+.. image:: ../../images/CalibrationPeaksAndEdges.png
 
 The image below shows an acquired data with the shadows and the the
 peaks in two tubes; the blue are shadows and the red lines are peaks
@@ -38,7 +38,7 @@ lines are different in each tube. Even though they were expected to be
 aligned, i.e. in the figure below the vertical red lines should be
 connected up to form straight lines.
 
-.. figure:: ../images/CalibrationAcquiredDataInTwoTubes.png
+.. figure:: ../../images/CalibrationAcquiredDataInTwoTubes.png
   :alt:  Acquired Data in two tubes not calibrated
 
   Acquired Data in two tubes not calibrated
@@ -47,7 +47,7 @@ Below is the plot of the integration counts in a single tube. The x-axis
 shows pixels (detector numbers, where the detectors are numbered 0 to
 511) and the y-axis shows integrated counts.
 
-.. figure:: ../images/CalibrationAcquiredDataTube.png 
+.. figure:: ../../images/CalibrationAcquiredDataTube.png 
   :alt:  Plot of the acquired Data in a single tube
 
   Plot of the acquired Data in a single tube
@@ -75,7 +75,7 @@ through fitting the peak to a combination of a linear background and a
 foreseen as for example, the mean value among the peak position of the
 neighbors, or simply getting the index where the maximum value occur.
 
-.. image:: ../images/FittingPeaks.png
+.. image:: ../../images/FittingPeaks.png
 			:width: 800px
 			:alt: Fitting peaks for the tubes acquired data
 
@@ -108,7 +108,7 @@ Having this, we display the data using the peaks positions (pixel
 number) found for each tube and the correspondingly ideal position we
 expected them to be.
 
-.. image:: ../images/PeaksPositionsForTube100.png
+.. image:: ../../images/PeaksPositionsForTube100.png
 
 Look, that the peaks positions are given in 'pixels', and we are looking
 for a transformation that moves the peaks position to the known postion,
@@ -123,7 +123,7 @@ Currently, this is done by fitting these data to a quadratic function.
 
 The result is shown in the plot below
 
-.. image:: ../images/CalibrationTransformationPixelPosition.png
+.. image:: ../../images/CalibrationTransformationPixelPosition.png
 
 
 The final step is to define the transformation that moves the position
@@ -132,7 +132,7 @@ in relation to the center of the tube to the 3D space where the tube is.
 Assuming that the units given for the position in the **IdealTube** and
 for the 3D space are the same, as in the picture below
 
-.. image:: ../images/Changing_coordinates.png 
+.. image:: ../../images/Changing_coordinates.png 
  
 
 We have that the 3D position is:

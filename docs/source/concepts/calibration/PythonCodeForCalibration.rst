@@ -77,7 +77,7 @@ the same measures of the 3D space (usually meters)**
 For example, the calibration experiment carried on MAPS instrument, you
 find the following data acquired on tubes as shown in the image below.
 
-.. image:: ../images/Maps_data_on_tube_10.png
+.. image:: ../../images/Maps_data_on_tube_10.png
 			:width: 300px
 
 There are 5 special points that can be used to the calibration. A rising
@@ -134,7 +134,7 @@ are passed to the fitting functions.
 The **plotTube** allows to output the data acquired and fitted as
 workspaces for each tube. That allows the creation of plots like this
 
-.. image:: ../images/Maps_data_on_tube_10.png
+.. image:: ../../images/Maps_data_on_tube_10.png
 			:width: 300px
 
 

@@ -9,10 +9,6 @@ link <https://github.com/mantidproject/mantid/tree/master/scripts/Calibration/Ex
 Where **MANTIDINSTALL** usually points to C:/MandtidInstall on Windows
 machines and to /opt/Mantid on linux machines.
 
-Those examples are self-documented, the documentation is available
-online as well on the following link:
-http://download.mantidproject.org/docs/master/python/html/techiniques/calibration.html#module-Examples
-
 The examples shows how the calibration tools available in Mantid can be
 used to calibrate three different real instruments inside ISIS facility
 (`MERLIN <http://www.isis.stfc.ac.uk/instruments/merlin/>`__,
@@ -36,7 +32,7 @@ Running TubeCalibDemoWish_Simple.py
 
 Open Script Window Console (MantidPlot: Python Window **F3**)
 
-.. image:: ../images/MultipleScriptsZoomed.png
+.. image:: ../../images/MultipleScriptsZoomed.png
 			:alt: center
 			:width: 300px
 
@@ -55,11 +51,11 @@ Another possibility is to open a new file and write the following lines:
 
 The results are, uncalibrated WISH panel 03:
 
-.. image:: ../images/UncalibratedWish.png
+.. image:: ../../images/UncalibratedWish.png
 
 Calibrated panel 03:
 
-.. image:: ../images/CalibratedWish.png
+.. image:: ../../images/CalibratedWish.png
 
 .. note:: These images were taken from the InstrumentView having
           *Autoscaling* enabled, *ColorMap* set to Log10 and using the
@@ -94,13 +90,13 @@ calling the functions as in the following example:
 
 The results are, Uncalibrated MAPS B2 window (lower part) instrument:
 
-.. image:: ../images/UncalibratedMAPS.png 
+.. image:: ../../images/UncalibratedMAPS.png 
 			:width: 500px
  
 
 Calibrated MAPS B2 window:
 
-.. image:: ../images/CalibratedMAPS.png 
+.. image:: ../../images/CalibratedMAPS.png 
 			:width: 500px
  
 Running TubeCalibDemoMerlin.py
@@ -122,12 +118,12 @@ Window Console or, alternatively, write the following lines:
 
 The results are, Uncalibrated MERLIN instrument:
 
-.. image:: ../images/UncalibratedMerlin.png
+.. image:: ../../images/UncalibratedMerlin.png
 
 
 Calibrated MERLIN instrument:
 
-.. image:: ../images/CalibratedMantidMerlin.png 
+.. image:: ../../images/CalibratedMantidMerlin.png 
 			:width: 500px
 
 
@@ -147,7 +143,7 @@ the panels.
 The picture below show part of two panels that result from the
 calibration (they are rotated):
 
-.. image:: ../images/CalibratedWish5Panels.jpg 
+.. image:: ../../images/CalibratedWish5Panels.jpg 
 			:width: 800px
 
 .. categories:: Calibration

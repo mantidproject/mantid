@@ -3,8 +3,8 @@
 PSD Tube Calibration
 ====================
 
-**Welcome!** This is a landing page for documentation relating to the
-  use of Mantid for Tube Calibration.
+Welcome! This is a landing page for documentation relating to the 
+use of Mantid for Tube Calibration.
 
 
 Tutorial

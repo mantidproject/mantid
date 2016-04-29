@@ -1,5 +1,8 @@
 .. _After_Tube_Calibration:
 
+After Tube Calibration
+======================
+
 After calibration, on option is to save the workspace to a :ref:`Nexus file <Nexus file>`.
 This saved file will include the calibration (in fact any modification
 done to the instrument). Reloading this file in Mantid will recreate the
@@ -18,3 +21,5 @@ Also, specific to the ISIS facility, the algorithm
 .dat file and create a new version of that .dat file with the
 calibration of the workspace put into it.
 
+
+.. categories:: Calibration

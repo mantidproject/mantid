@@ -17,4 +17,4 @@
    :maxdepth: 1
 
    *
-   concepts/index
+   calibration/index.rst

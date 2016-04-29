@@ -7,12 +7,11 @@
 
 .. _calibration contents:
 
-==========
- Concepts
-==========
+=============
+ Calibration
+=============
 
 .. toctree::
-   :hidden:
    :glob:
    :maxdepth: 1
 
