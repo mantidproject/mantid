@@ -363,8 +363,8 @@ public:
                        const std::size_t numEvents,
                        const bool oldNeXusFileNames,
                        Mantid::API::Progress *prog,
-                       boost::shared_ptr<std::mutex> ioMutex,
-                       Mantid::Kernel::ThreadScheduler *scheduler,
+                       // boost::shared_ptr<std::mutex> ioMutex,
+                       // Mantid::Kernel::ThreadScheduler *scheduler,
                        const std::vector<int> &framePeriodNumbers,
                        Mantid::Kernel::Logger &logger)
       : // Task(),
@@ -372,7 +372,8 @@ public:
         entry_name(entry_name), entry_type(entry_type),
         // prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL),
         // m_loadError(false),
-        prog(prog), scheduler(scheduler), m_loadError(false),
+        prog(prog), // scheduler(scheduler),
+        m_loadError(false),
         m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(), m_loadSize(),
         m_event_id(nullptr), m_event_time_of_flight(nullptr),
         m_have_weight(false), m_event_weight(nullptr),
@@ -874,7 +875,7 @@ private:
   /// Progress reporting
   Mantid::API::Progress *prog;
   /// ThreadScheduler running this task
-  Mantid::Kernel::ThreadScheduler *scheduler;
+  // Mantid::Kernel::ThreadScheduler *scheduler;
   /// Object with the pulse times for this bank
   boost::shared_ptr<Mantid::DataHandling::BankPulseTimes> thisBankPulseTimes;
   /// Did we get an error in loading

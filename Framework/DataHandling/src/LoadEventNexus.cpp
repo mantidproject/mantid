@@ -1035,9 +1035,9 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   longest_tof = 0.;
 
   // Make the thread pool
-  ThreadScheduler *scheduler = new ThreadSchedulerMutexes();
-  ThreadPool pool(scheduler);
-  auto diskIOMutex = boost::make_shared<std::mutex>();
+  // ThreadScheduler *scheduler = new ThreadSchedulerMutexes();
+  // ThreadPool pool(scheduler);
+  // auto diskIOMutex = boost::make_shared<std::mutex>();
   size_t bank0 = 0;
   size_t bankn = bankNames.size();
 
@@ -1119,7 +1119,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     if (bankNumEvents[i] > 0) {
       LoadBankFromDiskTask *task = new LoadBankFromDiskTask(
           this, bankNames[i], classType, bankNumEvents[i], oldNeXusFileNames,
-          prog2, diskIOMutex, scheduler, periodLogVec, this->getLogger());
+          prog2, // diskIOMutex, scheduler,
+          periodLogVec, this->getLogger());
       task->run();
 
       // pool.schedule(new LoadBankFromDiskTask(
@@ -1128,8 +1129,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     }
   }
   // Start and end all threads
-  pool.joinAll();
-  diskIOMutex.reset();
+  // pool.joinAll();
+  // diskIOMutex.reset();
   delete prog2;
 
   // Info reporting
