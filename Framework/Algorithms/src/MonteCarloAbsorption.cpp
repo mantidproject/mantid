@@ -170,7 +170,10 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
     lambda = &getWavelengthPointData;
   }
 
+  PARALLEL_FOR1(outputWS)
   for (int64_t i = 0; i < nhists; ++i) {
+    PARALLEL_START_INTERUPT_REGION
+
     const auto &xvalues = outputWS->readX(i);
     auto &signal = outputWS->dataY(i);
     auto &errors = outputWS->dataE(i);
@@ -216,7 +219,11 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
       Kernel::VectorHelper::linearlyInterpolateY(xvalues, signal,
                                                  lambdaStepSize);
     }
+
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
+
   return outputWS;
 }
 
