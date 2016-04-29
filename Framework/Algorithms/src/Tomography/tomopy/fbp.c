@@ -3,6 +3,7 @@
  Back-Projection) method of tomopy, available from
  https://github.com/tomopy/tomopy/blob/master/src/fbp.c, which is:
  */
+/*
 // Copyright (c) 2015, UChicago Argonne, LLC. All rights reserved.
 
 // Copyright 2015. UChicago Argonne, LLC. This software was produced
@@ -45,6 +46,7 @@
 // LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
+*/
 
 #include "MantidAlgorithms/Tomography/tomopy/utils.h"
 
@@ -55,9 +57,6 @@
 void fbp(const float *data, int dy, int dt, int dx, const float *center,
          const float *theta, float *recon, int ngridx, int ngridy,
          const char *fname, const float *filter_par) {
-  // unused arguments:
-  (void)fname;
-  (void)filter_par;
 
   float *gridx = (float *)malloc((size_t)(ngridx + 1) * sizeof(float));
   float *gridy = (float *)malloc((size_t)(ngridy + 1) * sizeof(float));
@@ -83,24 +82,30 @@ void fbp(const float *data, int dy, int dt, int dx, const float *center,
   int asize, bsize, csize;
   int ind_data, ind_recon;
 
-  // For each slice
+  /* unused arguments: */
+  (void)fname;
+  (void)filter_par;
+
+  /* For each slice */
   for (s = 0; s < dy; s++) {
     preprocessing(ngridx, ngridy, dx, center[s], &mov, gridx,
-                  gridy); // Outputs: mov, gridx, gridy
+                  gridy); /* Outputs: mov, gridx, gridy */
 
     // For each projection angle
     for (p = 0; p < dt; p++) {
-      // Calculate the sin and cos values
-      // of the projection angle and find
-      // at which quadrant on the cartesian grid.
+      /*
+         Calculate the sin and cos values
+         of the projection angle and find
+         at which quadrant on the cartesian grid.
+      */
       theta_p = (float)fmod(theta[p], 2 * M_PI);
       quadrant = calc_quadrant(theta_p);
       sin_p = sinf(theta_p);
       cos_p = cosf(theta_p);
 
-      // For each detector pixel
+      /* For each detector pixel */
       for (d = 0; d < dx; d++) {
-        // Calculate coordinates
+        /* Calculate coordinates */
         xi = (float)(-ngridx - ngridy);
         yi = (float)(1 - dx) / 2.0f + (float)d + mov;
         calc_coords(ngridx, ngridy, xi, yi, sin_p, cos_p, gridx, gridy, coordx,
@@ -110,19 +115,23 @@ void fbp(const float *data, int dy, int dt, int dx, const float *center,
         trim_coords(ngridx, ngridy, coordx, coordy, gridx, gridy, &asize, ax,
                     ay, &bsize, bx, by);
 
-        // Sort the array of intersection points (ax, ay) and
-        // (bx, by). The new sorted intersection points are
-        // stored in (coorx, coory). Total number of points
-        // are csize.
+        /*
+          Sort the array of intersection points (ax, ay) and
+          (bx, by). The new sorted intersection points are
+          stored in (coorx, coory). Total number of points
+          are csize.
+        */
         sort_intersections(quadrant, asize, ax, ay, bsize, bx, by, &csize,
                            coorx, coory);
 
-        // Calculate the distances (dist) between the
-        // intersection points (coorx, coory). Find the
-        // indices of the pixels on the reconstruction grid.
+        /*
+          Calculate the distances (dist) between the
+          intersection points (coorx, coory). Find the
+          indices of the pixels on the reconstruction grid.
+        */
         calc_dist(ngridx, ngridy, csize, coorx, coory, indi, dist);
 
-        // Update
+        /* Update */
         ind_recon = s * ngridx * ngridy;
         ind_data = d + p * dx + s * dt * dx;
         for (n = 0; n < csize - 1; n++) {
