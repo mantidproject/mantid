@@ -97,27 +97,27 @@ public:
     m_helper->handleXRangeChangedGraphically(0.4, 9.4);
   }
 
-  void test_peakPickerReassigned_singleWorkspace() {
+  void test_setAssignedFirstRun_singleWorkspace() {
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00015189"), QString("MUSR")))
         .Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
     EXPECT_CALL(*m_fitBrowser, allowSequentialFits(true)).Times(1);
-    m_helper->peakPickerReassigned(wsName);
+    m_helper->setAssignedFirstRun(wsName);
   }
 
-  void test_peakPickerReassigned_contiguousRange() {
+  void test_setAssignedFirstRun_contiguousRange() {
     const QString wsName("MUSR00015189-91; Pair; long; Asym; 1; #1");
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00015189-91"), QString("MUSR")))
         .Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
     EXPECT_CALL(*m_fitBrowser, allowSequentialFits(false)).Times(1);
-    m_helper->peakPickerReassigned(wsName);
+    m_helper->setAssignedFirstRun(wsName);
   }
 
-  void test_peakPickerReassigned_nonContiguousRange() {
+  void test_setAssignedFirstRun_nonContiguousRange() {
     const QString wsName("MUSR00015189-91, 15193; Pair; long; Asym; 1; #1");
     EXPECT_CALL(
         *m_dataSelector,
@@ -125,7 +125,22 @@ public:
         .Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
     EXPECT_CALL(*m_fitBrowser, allowSequentialFits(false)).Times(1);
-    m_helper->peakPickerReassigned(wsName);
+    m_helper->setAssignedFirstRun(wsName);
+  }
+
+  void test_setAssignedFirstRun_alreadySet() {
+    const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
+    m_helper->setAssignedFirstRun(wsName);
+    EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(_, _)).Times(0);
+    EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(_)).Times(0);
+    EXPECT_CALL(*m_fitBrowser, allowSequentialFits(_)).Times(0);
+    m_helper->setAssignedFirstRun(wsName);
+  }
+
+  void test_getAssignedFirstRun() {
+    const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
+    m_helper->setAssignedFirstRun(wsName);
+    TS_ASSERT_EQUALS(wsName, m_helper->getAssignedFirstRun());
   }
 
   void test_handleDataWorkspaceChanged() {

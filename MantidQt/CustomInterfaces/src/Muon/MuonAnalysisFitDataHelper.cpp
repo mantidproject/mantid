@@ -66,7 +66,11 @@ void MuonAnalysisFitDataHelper::handleXRangeChangedGraphically(double start,
  * If multiple runs selected, disable sequential fit option.
  * @param wsName :: [input] Name of new workspace
  */
-void MuonAnalysisFitDataHelper::peakPickerReassigned(const QString &wsName) {
+void MuonAnalysisFitDataHelper::setAssignedFirstRun(const QString &wsName) {
+  if (wsName == m_PPAssignedFirstRun)
+    return;
+
+  m_PPAssignedFirstRun = wsName;
   // Parse workspace name here for run number and instrument name
   const QString instRun = wsName.section(';', 0, 0).trimmed();
   const int firstZero = instRun.indexOf("0");

@@ -442,7 +442,7 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
 
 /**
  * Finds a name for new analysis workspace.
- * Format: "INST00012345; Pair; long; Asym; 1[; #1]"
+ * Format: "INST00012345; Pair; long; Asym;[ 1;] #1"
  * @param itemType :: Whether it's a group or pair
  * @param tableRow :: Row in the group/pair table which contains the item
  * @param plotType :: What kind of plot we want to analyse
@@ -2004,19 +2004,21 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName) {
     setCurrentDataName(wsName);
   }
 
-  m_fitDataHelper->peakPickerReassigned(wsName);
+  if (wsName != m_fitDataHelper->getAssignedFirstRun()) {
+    m_fitDataHelper->setAssignedFirstRun(wsName);
 
-  // Set the available groups/pairs and periods
-  const Grouping groups = m_groupingHelper.parseGroupingTable();
-  QStringList groupsAndPairs;
-  groupsAndPairs.reserve(
-      static_cast<int>(groups.groupNames.size() + groups.pairNames.size()));
-  std::transform(groups.groupNames.begin(), groups.groupNames.end(),
-                 std::back_inserter(groupsAndPairs), &QString::fromStdString);
-  std::transform(groups.pairNames.begin(), groups.pairNames.end(),
-                 std::back_inserter(groupsAndPairs), &QString::fromStdString);
-  m_dataSelector->setAvailableGroups(groupsAndPairs);
-  m_dataSelector->setNumPeriods(m_numPeriods);
+    // Set the available groups/pairs and periods
+    const Grouping groups = m_groupingHelper.parseGroupingTable();
+    QStringList groupsAndPairs;
+    groupsAndPairs.reserve(
+        static_cast<int>(groups.groupNames.size() + groups.pairNames.size()));
+    std::transform(groups.groupNames.begin(), groups.groupNames.end(),
+                   std::back_inserter(groupsAndPairs), &QString::fromStdString);
+    std::transform(groups.pairNames.begin(), groups.pairNames.end(),
+                   std::back_inserter(groupsAndPairs), &QString::fromStdString);
+    m_dataSelector->setAvailableGroups(groupsAndPairs);
+    m_dataSelector->setNumPeriods(m_numPeriods);
+  }
 
   QString code;
 

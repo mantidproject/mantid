@@ -50,7 +50,9 @@ public:
   /// Handles user changing X range by dragging lines
   void handleXRangeChangedGraphically(double start, double end);
   /// Handles peak picker being reassigned to a new graph
-  void peakPickerReassigned(const QString &wsName);
+  void setAssignedFirstRun(const QString &wsName);
+  /// Get the workspace the peak picker is currently assigned to
+  QString getAssignedFirstRun() const { return m_PPAssignedFirstRun; };
   /// Handles workspace being changed
   void handleDataWorkspaceChanged();
 
@@ -59,6 +61,8 @@ private:
   MantidQt::MantidWidgets::IWorkspaceFitControl *m_fitBrowser;
   /// Data selector to get input from (non-owning pointer)
   MantidQt::MantidWidgets::IMuonFitDataSelector *m_dataSelector;
+  /// Workspace assigned to peak picker
+  QString m_PPAssignedFirstRun;
 };
 
 } // namespace CustomInterfaces
