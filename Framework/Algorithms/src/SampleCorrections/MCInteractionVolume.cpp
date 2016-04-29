@@ -110,7 +110,7 @@ double MCInteractionVolume::calculateAbsorption(
   Track path2(scatterPos, scatteredDirec);
   m_sample.interceptSurface(path2);
   if (m_env) {
-    nsegments += m_env->interceptSurfaces(path2);
+    m_env->interceptSurfaces(path2);
   }
 
   for (const auto &segment : path2) {
