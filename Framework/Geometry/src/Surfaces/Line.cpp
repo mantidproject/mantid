@@ -161,7 +161,7 @@ added. It does not check the points for validity.
 @return Number of points found.
 */
 {
-  const std::vector<double> BN = Sur.copyBaseEqn();
+  const std::vector<double> &BN = Sur.copyBaseEqn();
   const double a(Origin[0]), b(Origin[1]), c(Origin[2]);
   const double d(Direct[0]), e(Direct[1]), f(Direct[2]);
   double Coef[3];

@@ -48,6 +48,7 @@ public:
     ResetFocus,        ///< Re-set / clear all focus inputs and options
     RebinTime,         ///< From event to histo, with a time bin
     RebinMultiperiod,  ///< From event to histo, multiperiod event data
+    FitPeaks,          ///< Preforms single peak fits
     LogMsg,            ///< need to send a message to the Mantid log system
     InstrumentChange,  ///< Instrument selection updated
     RBNumberChange,    ///< RBNumber filled-in/changed

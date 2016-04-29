@@ -26,10 +26,11 @@ set ( TEST_PY_FILES
   DSFinterpTest.py
   EnggCalibrateFullTest.py
   EnggCalibrateTest.py
+  EnggFitDIFCFromPeaksTest.py
   EnggFitPeaksTest.py
   EnggFocusTest.py
   EnggVanadiumCorrectionsTest.py
-  EVSDiffractionReductionTest.py
+  VesuvioDiffractionReductionTest.py
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
@@ -94,7 +95,6 @@ set ( TEST_PY_FILES
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py
   PoldiMergeTest.py
-  VesuvioCorrectionsTest.py
   VesuvioPreFitTest.py
   VesuvioResolutionTest.py
   VesuvioTOFFitTest.py

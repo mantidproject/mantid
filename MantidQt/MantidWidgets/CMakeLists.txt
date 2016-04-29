@@ -86,6 +86,7 @@ set ( SRC_FILES
     src/InstrumentView/Projection3D.cpp
     src/InstrumentView/ProjectionSurface.cpp
     src/InstrumentView/RectangularDetectorActor.cpp
+    src/InstrumentView/StructuredDetectorActor.cpp
     src/InstrumentView/RectF.cpp
     src/InstrumentView/RotationSurface.cpp
     src/InstrumentView/SampleActor.cpp
@@ -219,6 +220,7 @@ set ( INC_FILES
     inc/MantidQtMantidWidgets/InstrumentView/Projection3D.h
     inc/MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h
     inc/MantidQtMantidWidgets/InstrumentView/RectangularDetectorActor.h
+    inc/MantidQtMantidWidgets/InstrumentView/StructuredDetectorActor.h
     inc/MantidQtMantidWidgets/InstrumentView/RectF.h
     inc/MantidQtMantidWidgets/InstrumentView/RotationSurface.h
     inc/MantidQtMantidWidgets/InstrumentView/SampleActor.h

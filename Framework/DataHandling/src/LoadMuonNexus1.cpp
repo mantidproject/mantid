@@ -702,26 +702,30 @@ void LoadMuonNexus1::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace) {
 
   NXRoot root(m_filename);
 
+  // Get main field direction
+  std::string mainFieldDirection = "Longitudinal"; // default
   try {
     NXChar orientation = root.openNXChar("run/instrument/detector/orientation");
     // some files have no data there
     orientation.load();
 
     if (orientation[0] == 't') {
-      Kernel::TimeSeriesProperty<double> *p =
-          new Kernel::TimeSeriesProperty<double>("fromNexus");
+      auto p =
+          Kernel::make_unique<Kernel::TimeSeriesProperty<double>>("fromNexus");
       std::string start_time = root.getString("run/start_time");
       p->addValue(start_time, -90.0);
-      localWorkspace->mutableRun().addLogData(p);
-      setProperty("MainFieldDirection", "Transverse");
-    } else {
-      setProperty("MainFieldDirection", "Longitudinal");
+      localWorkspace->mutableRun().addLogData(std::move(p));
+      mainFieldDirection = "Transverse";
     }
   } catch (...) {
-    setProperty("MainFieldDirection", "Longitudinal");
+    // no data - assume main field was longitudinal
   }
 
+  // set output property and add to workspace logs
   auto &run = localWorkspace->mutableRun();
+  setProperty("MainFieldDirection", mainFieldDirection);
+  run.addProperty("main_field_direction", mainFieldDirection);
+
   ISISRunLogs runLogs(run);
   runLogs.addStatusLog(run);
 }

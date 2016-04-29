@@ -621,11 +621,11 @@ void MultiDatasetFit::loadSettings()
   QSettings settings;
   settings.beginGroup("Mantid/MultiDatasetFit");
   m_fitOptionsBrowser->loadSettings( settings );
-  bool option = settings.value("ShowDataErrors",false).asBool();
+  bool option = settings.value("ShowDataErrors", false).toBool();
   m_uiForm.cbShowDataErrors->setChecked(option);
-  option = settings.value("ApplyRangeToAll",false).asBool();
+  option = settings.value("ApplyRangeToAll", false).toBool();
   m_uiForm.cbApplyRangeToAll->setChecked(option);
-  option = settings.value("PlotGuess",false).asBool();
+  option = settings.value("PlotGuess", false).toBool();
   m_uiForm.cbPlotGuess->setChecked(option);
 }
 

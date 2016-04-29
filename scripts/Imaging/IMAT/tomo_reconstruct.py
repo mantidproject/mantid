@@ -56,7 +56,7 @@ from os import path
 # So insert in the path the directory that contains this file
 sys.path.insert(0, os.path.split(path.dirname(__file__))[0])
 
-import IMAT.tomorec.reconstruction_command as tomocmd
+from IMAT.tomorec import reconstruction_command as tomocmd
 import IMAT.tomorec.configs as tomocfg
 
 def setup_cmd_options():
@@ -121,8 +121,8 @@ def setup_cmd_options():
 
     grp_pre.add_argument("--air-region", required=False, type=str,
                          help="Air region /region for normalization. "
-                         "If not provided, the normalization against beam intensity fluctuations will not be "
-                         "performed")
+                         "If not provided, the normalization against beam intensity fluctuations in this "
+                         "region will not be performed")
 
     grp_pre.add_argument("--median-filter-size", type=int,
                          required=False, help="Size/width of the median filter (pre-processing")
@@ -185,30 +185,36 @@ def grab_preproc_options(args):
     if args.out_img_format:
         pre_config.out_img_format = args.out_img_format
 
-    pre_config.cor = int(args.cor)
+    if args.max_angle:
+        pre_config.max_angle = float(args.max_angle)
+
+    if args.rotation:
+        pre_config.rotation = int(args.rotation)
+
+    if args.air_region:
+        coords = ast.literal_eval(args.air_region)
+        pre_config.normalize_air_region = [int(val) for val in coords]
+
+    if args.air_region:
+        coords = ast.literal_eval(args.air_region)
+        pre_config.normalize_air_region = [int(val) for val in coords]
+
+    if args.region_of_interest:
+        roi_coords = ast.literal_eval(args.region_of_interest)
+        pre_config.crop_coords = [int(val) for val in roi_coords]
 
     if 'yes' == args.mcp_corrections:
         pre_config.mcp_corrections = True
-
-    if 'wf' == args.remove_stripes:
-        pre_config.stripe_removal_method = 'wavelet-fourier'
-
-    if args.region_of_interest:
-        pre_config.crop_coords = ast.literal_eval(args.region_of_interest)
-    else:
-        border_pix = 5
-        pre_config.crop_coords = [0+border_pix, 252, 512-border_pix, 512-border_pix]
-
-    if args.air_region:
-        pre_config.crop_coords = ast.literal_eval(args.air_region)
 
     if args.median_filter_size:
         if isinstance(args.median_filter_size, str) and not args.median_filter_size.isdigit():
             raise RuntimeError("The median filter size/width must be an integer")
         pre_config.median_filter_size = args.median_filter_size
 
-    if args.max_angle:
-        pre_config.max_angle = float(args.max_angle)
+    if 'wf' == args.remove_stripes:
+        pre_config.stripe_removal_method = 'wavelet-fourier'
+
+    pre_config.cor = int(args.cor)
 
     return pre_config
 

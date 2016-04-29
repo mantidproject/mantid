@@ -308,7 +308,7 @@ class RunSetupWidget(BaseWidget):
     def _calfile_browse(self):
         """ Event handing for browsing calibrtion file
         """
-        fname = self.data_browse_dialog(data_type="*.cal;;*.h5;;*.hd5;;*.hdf;;*.*")
+        fname = self.data_browse_dialog(data_type="*.h5;;*.cal;;*.hd5;;*.hdf;;*.*")
         if fname:
             self._content.calfile_edit.setText(fname)
 

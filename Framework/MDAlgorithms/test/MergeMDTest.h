@@ -5,6 +5,7 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidAPI/FrameworkManager.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -58,17 +59,13 @@ public:
     TS_ASSERT(!alg.isExecuted());
   }
 
-  void test_exec() {
-    // Name of the output workspace.
-    std::string outWSName("MergeMDTest_OutputWS");
-
+  IMDEventWorkspace_sptr execute_merge(const std::string &wsName) {
     MergeMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("InputWorkspaces", "ws0,ws1,ws2"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", wsName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -76,13 +73,48 @@ public:
     IMDEventWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
         ws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            outWSName));
+            wsName));
     TS_ASSERT(ws);
+    return ws;
+  }
+
+  void test_exec() {
+    // Name of the output workspace.
+    std::string outWSName("MergeMDTest_OutputWS");
+
+    auto ws = execute_merge(outWSName);
     if (!ws)
       return;
 
     // Number of events is the sum of the 3 input ones.
     TS_ASSERT_EQUALS(ws->getNPoints(), 2 * 2 + 6 * 6 + 10 * 10);
+    for (size_t d = 0; d < 2; d++) {
+      IMDDimension_const_sptr dim = ws->getDimension(d);
+      TS_ASSERT_DELTA(dim->getMinimum(), -5.0, 1e-3);
+      TS_ASSERT_DELTA(dim->getMaximum(), +20.0, 1e-3);
+    }
+
+    TS_ASSERT_EQUALS(3, ws->getNumExperimentInfo());
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
+  void test_masked_data_omitted() {
+    // Name of the output workspace.
+    std::string outWSName("MergeMDTest_OutputWS");
+
+    // Mask half of ws2
+    FrameworkManager::Instance().exec("MaskMD", 6, "Workspace", "ws2",
+                                      "Dimensions", "Axis0,Axis1", "Extents",
+                                      "0,10,0,20");
+
+    auto ws = execute_merge(outWSName);
+    if (!ws)
+      return;
+
+    // Number of events is the sum of the 3 input ones, minus the masked events
+    TS_ASSERT_EQUALS(ws->getNPoints(), 2 * 2 + 6 * 6 + 10 * 10 - 5 * 10);
     for (size_t d = 0; d < 2; d++) {
       IMDDimension_const_sptr dim = ws->getDimension(d);
       TS_ASSERT_DELTA(dim->getMinimum(), -5.0, 1e-3);

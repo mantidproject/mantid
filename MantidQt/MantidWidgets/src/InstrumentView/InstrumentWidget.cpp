@@ -96,9 +96,9 @@ namespace MantidQt
 			QSplitter *controlPanelLayout = new QSplitter(Qt::Horizontal);
 
 			// Add Tab control panel
-			mControlsTab = new QTabWidget(this, 0);
-			controlPanelLayout->addWidget(mControlsTab);
-			controlPanelLayout->setSizePolicy(QSizePolicy::Expanding,
+                        mControlsTab = new QTabWidget(this);
+                        controlPanelLayout->addWidget(mControlsTab);
+                        controlPanelLayout->setSizePolicy(QSizePolicy::Expanding,
 				QSizePolicy::Expanding);
 
 			// Create the display widget

@@ -65,6 +65,8 @@ private:
   void exec() override;
   /// Check whether supplied values are evenly spaced
   bool areBinWidthsUneven(const MantidVec &xValues) const;
+  /// Get phase shift - user supplied or auto-calculated
+  double getPhaseShift(const MantidVec &xValues);
 };
 
 } // namespace Algorithm
