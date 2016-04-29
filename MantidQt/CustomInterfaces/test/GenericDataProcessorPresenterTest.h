@@ -206,7 +206,7 @@ public:
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
 
-    // Check that the presenter updates the view adding columns 'Group' and
+    // Check that the presenter updates the whitelist adding columns 'Group' and
     // 'Options'
     auto whitelist = presenter.getWhiteList();
     TS_ASSERT_EQUALS(whitelist.size(), 9);
@@ -222,15 +222,26 @@ public:
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
 
-    // When the presenter accepts the view, expect the following:
-    // Expect that the list of tables is populated
+    // When the presenter accepts the views, expect the following:
+    // Expect that the list of settings is populated
     EXPECT_CALL(mockDataProcessorView, loadSettings(_)).Times(Exactly(1));
     // Expect that the list of tables is populated
     EXPECT_CALL(mockDataProcessorView, setTableList(_)).Times(Exactly(1));
     // Expect that the layout containing pre-processing, processing and
     // post-processing options is created
-    EXPECT_CALL(mockDataProcessorView, addHintingLineEdit(_, _, _))
-        .Times(Exactly(4));
+    EXPECT_CALL(mockDataProcessorView,
+                addHintingLineEdit("<b>Pre-process:</b>", "Plus", _))
+        .Times(Exactly(1));
+    EXPECT_CALL(mockDataProcessorView,
+                addHintingLineEdit("", "CreateTransmissionWorkspaceAuto", _))
+        .Times(Exactly(1));
+    EXPECT_CALL(mockDataProcessorView,
+                addHintingLineEdit("<b>Process:</b>",
+                                   "ReflectometryReductionOneAuto", _))
+        .Times(Exactly(1));
+    EXPECT_CALL(mockDataProcessorView,
+                addHintingLineEdit("<b>Post-process:</b>", "Stitch1DMany", _))
+        .Times(Exactly(1));
     // Expect that the autocompletion hints are populated
     EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, 8))
         .Times(Exactly(1));

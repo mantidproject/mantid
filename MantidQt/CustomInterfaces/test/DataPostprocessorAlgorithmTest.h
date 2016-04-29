@@ -42,8 +42,13 @@ public:
   }
 
   void test_valid_algorithms() {
+    // MergeRuns
     TS_ASSERT_THROWS_NOTHING(DataPostprocessorAlgorithm("MergeRuns"));
-    // The default algorithm is valid
+    // Default: Stitch1DMany
+    TS_ASSERT_THROWS_NOTHING(DataPostprocessorAlgorithm());
+  }
+  void test_Stitch1DMany() {
+
     auto stitch = DataPostprocessorAlgorithm();
     TS_ASSERT_EQUALS(stitch.name(), "Stitch1DMany");
     TS_ASSERT_EQUALS(stitch.inputProperty(), "InputWorkspaces");
@@ -53,5 +58,7 @@ public:
     std::set<std::string> blacklist = {"InputWorkspaces", "OutputWorkspace"};
     TS_ASSERT_EQUALS(stitch.blacklist(), blacklist);
   }
+
+  // Add more algorithms you want to test here
 };
 #endif /* MANTID_CUSTOMINTERFACES_DATAPOSTPROCESSORALGORITHMTEST_H */

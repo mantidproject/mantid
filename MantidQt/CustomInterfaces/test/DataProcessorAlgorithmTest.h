@@ -27,6 +27,28 @@ public:
   static void destroySuite(DataProcessorAlgorithmTest *suite) { delete suite; }
   DataProcessorAlgorithmTest() { FrameworkManager::Instance(); };
 
+  void test_valid_algorithms() {
+    // Any algorithm with at least one input ws property and one output ws
+    // property is valid
+    // Currently ws must be either MatrixWorkspace or Workspace but this can be
+    // changed
+    std::vector<std::string> prefix = {"run_"};
+    TS_ASSERT_THROWS_NOTHING(DataProcessorAlgorithm("Rebin", prefix));
+    TS_ASSERT_THROWS_NOTHING(DataProcessorAlgorithm("ExtractSpectra", prefix));
+    TS_ASSERT_THROWS_NOTHING(DataProcessorAlgorithm("ConvertUnits", prefix));
+  }
+
+  void test_invalid_algorithms() {
+
+    std::vector<std::string> prefix = {"IvsQ_"};
+
+    // Algorithms with no input workspace properties
+    TS_ASSERT_THROWS(DataProcessorAlgorithm("Stitch1DMany", prefix),
+                     std::invalid_argument);
+    // Algorithms with no output workspace properties
+    TS_ASSERT_THROWS(DataProcessorAlgorithm("SaveAscii", prefix),
+                     std::invalid_argument);
+  }
   void test_ReflectometryReductionOneAuto() {
 
     std::string algName = "ReflectometryReductionOneAuto";
@@ -54,25 +76,6 @@ public:
     TS_ASSERT_EQUALS(alg.outputPropertyName(1), "OutputWorkspaceWavelength");
   }
 
-  void test_valid_algorithms() {
-    // Any algorithm with at least one input ws property and one output ws
-    // property is valid
-    // Currently ws must be either MatrixWorkspace or Workspace but this can be
-    // changed
-    std::vector<std::string> prefix = {"run_"};
-    TS_ASSERT_THROWS_NOTHING(DataProcessorAlgorithm("Rebin", prefix));
-    TS_ASSERT_THROWS_NOTHING(DataProcessorAlgorithm("ExtractSpectra", prefix));
-    TS_ASSERT_THROWS_NOTHING(DataProcessorAlgorithm("ConvertUnits", prefix));
-  }
-
-  void test_invalid_algorithms() {
-
-    std::vector<std::string> prefix = {"IvsQ_"};
-
-    // Stitch1DMany is not a valid DataProcessorAlgorithm
-    // because it has no input workspace properties
-    TS_ASSERT_THROWS(DataProcessorAlgorithm("Stitch1DMany", prefix),
-                     std::invalid_argument);
-  }
+  // Add more tests for specific algorithms here
 };
 #endif /* MANTID_CUSTOMINTERFACES_DATAPROCESSORALGORITHMTEST_H */

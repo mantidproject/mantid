@@ -9,8 +9,8 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorGenerateNotebook.h"
-#include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorVectorString.h"
+#include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace MantidQt::CustomInterfaces;
@@ -41,13 +41,11 @@ private:
 
     // Reflectometry pre-process map
     return std::map<std::string, DataPreprocessorAlgorithm>{
-        {"Run(s)",
-         DataPreprocessorAlgorithm("Plus", plusPrefix,
-                                   std::set<std::string>())},
+        {"Run(s)", DataPreprocessorAlgorithm("Plus", plusPrefix,
+                                             std::set<std::string>())},
         {"Transmission Run(s)",
          DataPreprocessorAlgorithm(
-             "CreateTransmissionWorkspaceAuto",
-             "TRANS_",
+             "CreateTransmissionWorkspaceAuto", "TRANS_",
              std::set<std::string>{"FirstTransmissionRun",
                                    "SecondTransmissionRun", "OutputWorkspace"},
              false)}};
@@ -300,7 +298,7 @@ public:
                               "'1.4, 0.1, 1.4', EndOverlaps = '1.6, 2.9, 1.6'";
 
     boost::tuple<std::string, std::string> output = postprocessGroupString(
-        m_rows, m_instrument, m_model, createReflectometryWhiteList(),
+        m_rows, m_model, createReflectometryWhiteList(),
         createReflectometryPreprocessMap(), createReflectometryProcessor(),
         DataPostprocessorAlgorithm(), userOptions);
 

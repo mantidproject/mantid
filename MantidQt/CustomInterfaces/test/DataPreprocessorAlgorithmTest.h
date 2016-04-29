@@ -41,14 +41,20 @@ public:
   }
 
   void test_valid_algorithms() {
-		// WeightedMean
-		TS_ASSERT_THROWS_NOTHING(DataPreprocessorAlgorithm("WeightedMean"));
     // Minus
     TS_ASSERT_THROWS_NOTHING(DataPreprocessorAlgorithm("Minus"));
     // Multiply
     TS_ASSERT_THROWS_NOTHING(DataPreprocessorAlgorithm("Multiply"));
     // Divide
     TS_ASSERT_THROWS_NOTHING(DataPreprocessorAlgorithm("Divide"));
+    // Default: Plus
+    TS_ASSERT_THROWS_NOTHING(DataPreprocessorAlgorithm());
+    // WeightedMean
+    TS_ASSERT_THROWS_NOTHING(DataPreprocessorAlgorithm("WeightedMean"));
+  }
+
+  void test_default() {
+
     // Default: Plus
     auto plus = DataPreprocessorAlgorithm();
     TS_ASSERT_EQUALS(plus.name(), "Plus");
@@ -61,5 +67,19 @@ public:
                                        "OutputWorkspace"};
     TS_ASSERT_EQUALS(plus.blacklist(), blacklist);
   }
+
+  void test_WeightedMean() {
+
+    // WeightedMean
+    std::set<std::string> blacklist = {"InputWorkspace1", "InputWorkspace2",
+                                       "OutputWorkspace"};
+    auto mean = DataPreprocessorAlgorithm("WeightedMean", "", blacklist);
+    TS_ASSERT_EQUALS(mean.lhsProperty(), "InputWorkspace1");
+    TS_ASSERT_EQUALS(mean.rhsProperty(), "InputWorkspace2");
+    TS_ASSERT_EQUALS(mean.outputProperty(), "OutputWorkspace");
+    TS_ASSERT_EQUALS(mean.blacklist().size(), 3);
+  }
+
+  // Add specific algorithms you want to test here
 };
 #endif /* MANTID_CUSTOMINTERFACES_DATAPREPROCESSORALGORITHMTEST_H */

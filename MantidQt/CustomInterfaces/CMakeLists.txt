@@ -500,6 +500,7 @@ set ( TEST_FILES
 	DataProcessorAlgorithmTest.h
 	DataProcessorCommandsTest.h
 	DataProcessorGenerateNotebookTest.h
+	DataProcessorWhiteListTest.h
 	ReflLegacyTransferStrategyTest.h
 	ReflMainViewPresenterTest.h
 	ReflMeasureTransferStrategyTest.h
