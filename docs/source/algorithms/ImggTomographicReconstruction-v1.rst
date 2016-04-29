@@ -80,7 +80,7 @@ Usage
 
 **Example - LoadReconstructProjections**
 
-.. testcode:: python
+.. testcode:: LoadReconstructProjections
 
     # Load an image
     wsg_name = 'images'
