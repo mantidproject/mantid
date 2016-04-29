@@ -118,7 +118,7 @@ void IQTransform::exec() {
   m_label->setLabel("");
   outputWS->setYUnit("");
   // Copy the data over. Assume single spectrum input (output will be).
-  outputWS->histogram(0).setBinEdges(tmpWS->histogram(0).points());
+  outputWS->histogram(0).setPoints(tmpWS->histogram(0).points());
   MantidVec &Y = outputWS->dataY(0) = tmpWS->dataY(0);
   outputWS->dataE(0) = tmpWS->dataE(0);
 
