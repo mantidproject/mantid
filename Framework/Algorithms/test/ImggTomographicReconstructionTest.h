@@ -40,13 +40,12 @@ public:
     auto alg = Mantid::API::AlgorithmManager::Instance().create(
         "ImggTomographicReconstruction");
 
-    TS_ASSERT_THROWS(
-        alg->setPropertyValue("OutputWorkspace", "_unused_for_child"),
-        Mantid::Kernel::Exception::NotFoundError);
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setPropertyValue("OutputWorkspace", "_unused_for_child"));
 
     TS_ASSERT_THROWS(
         alg->setPropertyValue("BitDepth", "this_is_wrong_you_must_fail"),
-        std::invalid_argument);
+        std::runtime_error);
   }
 
   void test_exec_fail() {
