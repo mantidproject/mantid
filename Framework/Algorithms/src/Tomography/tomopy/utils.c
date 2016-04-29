@@ -55,18 +55,18 @@ void preprocessing(int ry, int rz, int num_pixels, float center, float *mov,
   int i;
 
   for (i = 0; i <= ry; i++) {
-    gridx[i] = -ry / 2. + i;
+    gridx[i] = ((float)-ry / 2.f + (float)i);
   }
 
   for (i = 0; i <= rz; i++) {
-    gridy[i] = -rz / 2. + i;
+    gridy[i] = ((float)-rz / 2.f + (float)i);
   }
 
-  *mov = ((float)num_pixels - 1) / 2.0 - center;
-  if (*mov - floor(*mov) < 0.01) {
-    *mov += 0.01;
+  *mov = ((float)num_pixels - 1) / 2.0f - center;
+  if (*mov - floor(*mov) < 0.01f) {
+    *mov += 0.01f;
   }
-  *mov += 0.5;
+  *mov += 0.5f;
 }
 
 int calc_quadrant(float theta_p) {
@@ -169,19 +169,21 @@ void sort_intersections(int ind_condition, int asize, const float *ax,
 
 void calc_dist(int ry, int rz, int csize, const float *coorx,
                const float *coory, int *indi, float *dist) {
-  int n, i1, i2;
-  float x1, x2;
-  float diffx, diffy, midx, midy;
-  int indx, indy;
+  int n;
 
   for (n = 0; n < csize - 1; n++) {
+    int i1, i2;
+    float x1, x2;
+    float diffx, diffy, midx, midy;
+    int indx, indy;
+
     diffx = coorx[n + 1] - coorx[n];
     diffy = coory[n + 1] - coory[n];
-    dist[n] = sqrt(diffx * diffx + diffy * diffy);
+    dist[n] = (float)sqrt(diffx * diffx + diffy * diffy);
     midx = (coorx[n + 1] + coorx[n]) / 2;
     midy = (coory[n + 1] + coory[n]) / 2;
-    x1 = midx + ry / 2.;
-    x2 = midy + rz / 2.;
+    x1 = midx + (float)ry / 2.f;
+    x2 = midy + (float)rz / 2.f;
     i1 = (int)(midx + ry / 2.);
     i2 = (int)(midy + rz / 2.);
     indx = i1 - (i1 > x1);
