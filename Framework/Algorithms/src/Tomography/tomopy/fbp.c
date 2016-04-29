@@ -55,18 +55,22 @@
 void fbp(const float *data, int dy, int dt, int dx, const float *center,
          const float *theta, float *recon, int ngridx, int ngridy,
          const char *fname, const float *filter_par) {
-  float *gridx = (float *)malloc((ngridx + 1) * sizeof(float));
-  float *gridy = (float *)malloc((ngridy + 1) * sizeof(float));
-  float *coordx = (float *)malloc((ngridy + 1) * sizeof(float));
-  float *coordy = (float *)malloc((ngridx + 1) * sizeof(float));
-  float *ax = (float *)malloc((ngridx + ngridy) * sizeof(float));
-  float *ay = (float *)malloc((ngridx + ngridy) * sizeof(float));
-  float *bx = (float *)malloc((ngridx + ngridy) * sizeof(float));
-  float *by = (float *)malloc((ngridx + ngridy) * sizeof(float));
-  float *coorx = (float *)malloc((ngridx + ngridy) * sizeof(float));
-  float *coory = (float *)malloc((ngridx + ngridy) * sizeof(float));
-  float *dist = (float *)malloc((ngridx + ngridy) * sizeof(float));
-  int *indi = (int *)malloc((ngridx + ngridy) * sizeof(int));
+  // unused arguments:
+  (void)fname;
+  (void)filter_par;
+
+  float *gridx = (float *)malloc((size_t)(ngridx + 1) * sizeof(float));
+  float *gridy = (float *)malloc((size_t)(ngridy + 1) * sizeof(float));
+  float *coordx = (float *)malloc((size_t)(ngridy + 1) * sizeof(float));
+  float *coordy = (float *)malloc((size_t)(ngridx + 1) * sizeof(float));
+  float *ax = (float *)malloc((size_t)(ngridx + ngridy) * sizeof(float));
+  float *ay = (float *)malloc((size_t)(ngridx + ngridy) * sizeof(float));
+  float *bx = (float *)malloc((size_t)(ngridx + ngridy) * sizeof(float));
+  float *by = (float *)malloc((size_t)(ngridx + ngridy) * sizeof(float));
+  float *coorx = (float *)malloc((size_t)(ngridx + ngridy) * sizeof(float));
+  float *coory = (float *)malloc((size_t)(ngridx + ngridy) * sizeof(float));
+  float *dist = (float *)malloc((size_t)(ngridx + ngridy) * sizeof(float));
+  int *indi = (int *)malloc((size_t)(ngridx + ngridy) * sizeof(int));
 
   assert(coordx != NULL && coordy != NULL && ax != NULL && ay != NULL &&
          by != NULL && bx != NULL && coorx != NULL && coory != NULL &&
