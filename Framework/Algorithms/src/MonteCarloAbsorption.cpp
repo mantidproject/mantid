@@ -174,15 +174,15 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
     const auto &xvalues = outputWS->readX(i);
     auto &signal = outputWS->dataY(i);
     auto &errors = outputWS->dataE(i);
+    // The input was cloned so clear the errors out
+    // Y values are all overwritten later
+    std::fill(errors.begin(), errors.end(), 0.0);
 
     // Final detector position
     IDetector_const_sptr detector;
     try {
       detector = outputWS->getDetector(i);
     } catch (Kernel::Exception::NotFoundError &) {
-      // The input was cloned so clear it out
-      std::fill(signal.begin(), signal.end(), 0.0);
-      std::fill(errors.begin(), errors.end(), 0.0);
       continue;
     }
     // Per spectrum values
@@ -202,12 +202,11 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
       } else {
         // elastic case already initialized
       }
-      std::tie(signal[j], errors[j]) =
+      std::tie(signal[j], std::ignore) =
           strategy.calculate(rng, detPos, lambdaIn, lambdaOut);
 
       // Ensure we have the last point for the interpolation
-      if (lambdaStepSize > 1 && j + lambdaStepSize >= nbins &&
-          j + 1 != nbins) {
+      if (lambdaStepSize > 1 && j + lambdaStepSize >= nbins && j + 1 != nbins) {
         j = nbins - lambdaStepSize - 1;
       }
     }
