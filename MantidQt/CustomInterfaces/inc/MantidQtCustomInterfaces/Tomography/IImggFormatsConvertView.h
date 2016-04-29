@@ -159,9 +159,10 @@ public:
    * Load an image in a matrix workspace. As with convert(), move out
    * of here when we have a Load/SaveImage algorithm.
    *
-   * @param inWks workspace holding image data
-   * @param outputName name for the output file
+   * @param inputName name for the output file
    * @param inFormat image format
+   *
+   * @return a workspace with image data loaded from file
    */
   virtual Mantid::API::MatrixWorkspace_sptr
   loadImg(const std::string &inputName, const std::string &inFormat) const = 0;

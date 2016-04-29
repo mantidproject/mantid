@@ -146,7 +146,7 @@ void ImggFormatsConvertQtWidget::writeImg(MatrixWorkspace_sptr inWks,
 /**
  * Write an image using a QImageWriter
  *
- * @param QImage with data ready
+ * @param img QImage with data ready to be saved
  * @param outputName output filename
  * @param outFormat format for the image file
  */
@@ -191,10 +191,10 @@ ImggFormatsConvertQtWidget::loadImg(const std::string &inputName,
 }
 
 /**
- * Write an image using a QImageReader
+ * Load an image using a QImageReader
  *
- * @param outputName output filename
- * @param outFormat format for the image file
+ * @param inputName filename
+ * @param inFormat format for the image file
  *
  * @return QImage object with image data read from file
  */

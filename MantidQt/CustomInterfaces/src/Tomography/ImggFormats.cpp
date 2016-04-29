@@ -54,7 +54,7 @@ size_t formatID(const std::string &shortName) {
  * The first-choice file extension for a format (given by
  * name). Example: FITS => fit
  *
- * @param name string of the format
+ * @param format name of the format (short string)
  *
  * @return extension as a string, empty if the format is unknown.
  */
