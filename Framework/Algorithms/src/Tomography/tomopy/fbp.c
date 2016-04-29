@@ -69,10 +69,6 @@ void fbp(const float *data, int dy, int dt, int dx, const float *center,
       *dist;
   int *indi;
 
-  assert(coordx != NULL && coordy != NULL && ax != NULL && ay != NULL &&
-         by != NULL && bx != NULL && coorx != NULL && coory != NULL &&
-         dist != NULL && indi != NULL);
-
   gridx = (float *)malloc((size_t)(ngridx + 1) * sizeof(float));
   gridy = (float *)malloc((size_t)(ngridy + 1) * sizeof(float));
   coordx = (float *)malloc((size_t)(ngridy + 1) * sizeof(float));
@@ -89,6 +85,10 @@ void fbp(const float *data, int dy, int dt, int dx, const float *center,
   /* unused arguments: */
   (void)fname;
   (void)filter_par;
+
+  assert(coordx != NULL && coordy != NULL && ax != NULL && ay != NULL &&
+         by != NULL && bx != NULL && coorx != NULL && coory != NULL &&
+         dist != NULL && indi != NULL);
 
   /* For each slice */
   for (s = 0; s < dy; s++) {
