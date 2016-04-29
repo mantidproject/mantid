@@ -27,7 +27,7 @@ int ImggTomographicReconstruction::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ImggTomographicReconstruction::category() const {
-  return "Algorithms\\Tomography";
+  return "Diffraction\\Imaging;Diffraction\\Tomography";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
