@@ -34,7 +34,7 @@ constexpr int DEFAULT_SEED = 123456789;
 
 /// Energy (meV) to wavelength (angstroms)
 inline double toWavelength(double energy) {
-  static constexpr double factor =
+  static const double factor =
       1e10 * PhysicalConstants::h /
       sqrt(2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV);
   return factor / sqrt(energy);
