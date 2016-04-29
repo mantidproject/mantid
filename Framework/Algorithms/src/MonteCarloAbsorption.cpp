@@ -128,6 +128,7 @@ void MonteCarloAbsorption::exec() {
 
 /**
  * Run the simulation over the whole input workspace
+ * @param inputWS A reference to the input workspace
  * @param nevents Number of MC events per wavelength point to simulate
  * @param nlambda Number of wavelength points to simulate. The remainder
  * are computed using interpolation
