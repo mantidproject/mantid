@@ -130,7 +130,7 @@ void ImggTomographicReconstruction::exec() {
   int ysize = static_cast<int>(ySizeProjections(wks));
   int projSize = static_cast<int>(angles->size());
   int xsize = static_cast<int>(xSizeProjections(wks));
-  // total size in voxels
+  // total size of input data in voxels
   size_t totalSize = ysize * projSize * xsize;
 
   auto inVol = prepareInputData(totalSize, wks);
@@ -142,7 +142,18 @@ void ImggTomographicReconstruction::exec() {
       &inVol->front(), ysize, projSize, xsize, &centers->front(),
       &angles->front(), &reconVol->front(), xsize, ysize);
 
-  auto outputGrp = buildOutputWks();
+  size_t expectedVox = ysize * ysize * xsize;
+  if (reconVol->size() != expectedVox) {
+    std::stringstream stream;
+    stream << std::string("The reconstructed volume data block does not "
+                          "have the expected dimensions. It has ")
+           << reconVol->size() << "voxels, but was expecting: " << ysize
+           << " x " << ysize << " x " << xsize << " = " << expectedVox
+           << " voxels in total";
+    throw std::runtime_error(stream.str());
+  }
+
+  auto outputGrp = buildOutputWks(*reconVol, xsize, ysize);
   setProperty(PROP_OUTPUT_WS, outputGrp);
 
   g_log.notice() << "Reconstructe volume from workspace " << wks->getTitle()
@@ -160,7 +171,9 @@ ImggTomographicReconstruction::prepareProjectionAngles(
   auto vec = *angles;
   double factor = (maxAngle - minAngle);
   for (size_t idx = 0; idx < wks->size(); ++idx) {
-    vec[idx] = minAngle + factor * idx / static_cast<double>(idx - 1);
+    vec[idx] = static_cast<float>(minAngle +
+                                  factor * static_cast<double>(idx) /
+                                      static_cast<double>(idx - 1));
   }
 
   return angles;
@@ -225,7 +238,23 @@ size_t ImggTomographicReconstruction::ySizeProjections(
   return wksItem->blocksize();
 }
 
-API::WorkspaceGroup_sptr ImggTomographicReconstruction::buildOutputWks() {}
+/**
+ *
+ * Output will produce ysize slices (images) of dimensions ysize rows by xsize
+ *columns
+ *
+ */
+API::WorkspaceGroup_sptr
+ImggTomographicReconstruction::buildOutputWks(const std::vector<float> &dataVol,
+                                              size_t xsize, size_t ysize) {
+
+  auto wsGroup = boost::make_shared<API::WorkspaceGroup>();
+  wsGroup->setTitle("Reconstructed volume from imaging projection data");
+
+  // TODO: fill in
+
+  return wsGroup;
+}
 
 } // namespace Algorithms
 } // namespace Mantid

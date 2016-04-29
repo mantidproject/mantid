@@ -68,7 +68,8 @@ private:
 
   size_t ySizeProjections(API::WorkspaceGroup_const_sptr wks) const;
 
-  API::WorkspaceGroup_sptr buildOutputWks();
+  API::WorkspaceGroup_sptr buildOutputWks(const std::vector<float> &dataVol,
+                                          size_t xsize, size_t ysize);
 };
 
 } // namespace Algorithms
