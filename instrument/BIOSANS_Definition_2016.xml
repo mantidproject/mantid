@@ -5,7 +5,7 @@
             name="BIOSANS"
             valid-from="2016-04-22 00:00:00"
             valid-to="2100-01-31 23:59:59"
-		    last-modified="2016-04-28 14:46:43.941437">
+		    last-modified="2016-04-29 08:28:47.262521">
 
 <defaults>
     <length unit="meter"/>
@@ -50,7 +50,7 @@
 <!-- ***************************************************************** -->
 <!-- Main Detector -->
 <component type="main_detector" idstart="3" idfillbyfirst="x" idstep="256" idstepbyrow="1">
-    <location z='2' />
+    <location z='0' />
 </component>
 
 <!-- Detector: -->

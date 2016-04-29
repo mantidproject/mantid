@@ -106,9 +106,6 @@ public:
     TS_ASSERT_DELTA(ws2d->dataY(1)[0], 3600.0, tolerance);
     TS_ASSERT_DELTA(ws2d->dataE(1)[0], 0.0, tolerance);
 
-    // First non-monitor spectrum is detector ID 1 million
-    TS_ASSERT_EQUALS(ws2d->getDetector(0 + nmon)->getID(), 1000000);
-
     // Check instrument
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check Child Algorithm is running
