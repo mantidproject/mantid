@@ -82,20 +82,26 @@ algorithm *IntegrateEllipsoids* works only for event in unit as time-of-flight.
 Peak Integration with automatic background subtraction by approximation
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+TODO/NOW - Polish this section!
+
 This is an easy approximation to integrate a peak with background subtraction
 by specified region of interest.
 
 The pre-requisit is that all events are normalized by monitor counts
 and scaled up by same factor (e.g, 1500).
 
-1. Estimate background on detector
-   Read the first and last several measuring Pts of a scan.  It is assumed that these Pts. only containing background counts;
-   Then sum the counts on each individual detectors and average them.
+1. Set up region of interest
+   Define region of interest on the detector.
 
 2. Mask detectors
    Mask all the detectors out of the region of interest, which is defined by the pixel ID of its upper-left corner and lower-right corner. 
 
-3. Background subtraction
+3. Integrate counts inside region of interest
+   Bla bla bla
+
+4. Estimate background
+
+5. Background subtraction
    Subtract the background from detector's count.  If the result is negative, keep it as negative. 
 
 

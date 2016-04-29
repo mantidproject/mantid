@@ -1308,7 +1308,8 @@ class CWSCDReductionControl(object):
 
     def set_roi(self, exp_number, scan_number, lower_left_corner, upper_right_corner):
         """
-
+        Purpose: Set region of interest and record it by the combination of experiment number
+                 and scan number
         :param exp_number:
         :param scan_number:
         :param lower_left_corner:
