@@ -2,13 +2,14 @@ import os
 import unittest
 import stresstesting
 
-from mantid.simpleapi import DeleteWorkspace, ImggAggregateWavelengths, LoadFITS
+import mantid.simpleapi as msapi
 from mantid import config
 
+#pylint: disable=too-many-public-methods
 class ImagingAggregateTests(unittest.TestCase):
     """
     Tests aggregation of wavelengths/energy bands, which at the moment
-    is done by the algorithm ImggAggregateWavelengths.
+    is done by the algorithm msapi.ImggAggregateWavelengths.
     """
     def setUp(self):
         # example files to make a stack of images
@@ -45,7 +46,7 @@ class ImagingAggregateTests(unittest.TestCase):
 
     def test_input_output_path_errors(self):
         self.assertRaises(ValueError,
-                          ImggAggregateWavelengths,
+                          msapi.ImggAggregateWavelengths,
                           InputPath = self._raw_files_dir + '_should_fail',
                           OutputPath = self._out_dir)
 
@@ -53,8 +54,8 @@ class ImagingAggregateTests(unittest.TestCase):
         if not os.path.exists(self._out_dir):
             os.mkdir(self._out_dir)
 
-        num_proj, num_bands = ImggAggregateWavelengths(InputPath = self._raw_files_dir,
-                                                       OutputPath = self._out_dir)
+        num_proj, num_bands = msapi.ImggAggregateWavelengths(InputPath = self._raw_files_dir,
+                                                             OutputPath = self._out_dir)
 
         self.assertEquals(num_proj, 4)
         self.assertEquals(num_bands, 6)
@@ -70,7 +71,7 @@ class ImagingAggregateTests(unittest.TestCase):
         for image_idx, fname in enumerate(self._expected_out_fnames):
             fname = os.path.join(self._out_dir, fname)
             group_name = 'loaded_fits'
-            group = LoadFITS(Filename=fname, LoadAsRectImg=True, OutputWorkspace=group_name)
+            group = msapi.LoadFITS(Filename=fname, LoadAsRectImg=True, OutputWorkspace=group_name)
 
             self.assertEquals(image_idx+1, group.size())
             wks = group.getItem(group.size()-1)
@@ -81,7 +82,7 @@ class ImagingAggregateTests(unittest.TestCase):
             for pos_idx, pos in enumerate(ref_positions):
                 self.assertEquals(wks.readY(pos[1])[pos[0]], ref_values[image_idx][pos_idx])
 
-        DeleteWorkspace(group_name)
+        mspai.DeleteWorkspace(group_name)
 
         self._cleanup_dirs_files()
 

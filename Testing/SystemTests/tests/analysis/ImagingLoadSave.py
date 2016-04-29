@@ -2,7 +2,7 @@ import os
 import unittest
 import stresstesting
 
-from mantid.simpleapi import CompareWorkspaces, DeleteWorkspace, LoadFITS, SaveFITS, mtd
+import mantid.simpleapi as msapi
 from mantid import config
 
 def required_larmor_test_files():
@@ -30,7 +30,7 @@ def required_larmor_test_files():
 
     return file_paths
 
-
+#pylint: disable=too-many-public-methods
 class ImagingLoadSaveTests(unittest.TestCase):
     """
     Tests load/save images. This is just around FITS format at the
@@ -50,11 +50,11 @@ class ImagingLoadSaveTests(unittest.TestCase):
 
         group_name = 'all_fits_rect'
         for fpath in self._fits_paths:
-            group = LoadFITS(Filename=fpath, LoadAsRectImg=True, OutputWorkspace=group_name)
+            group = msapi.LoadFITS(Filename=fpath, LoadAsRectImg=True, OutputWorkspace=group_name)
 
         group_norect_name = 'all_fits_norect'
         for fpath in self._fits_paths:
-            group_norect = LoadFITS(Filename=fpath, LoadAsRectImg=False, OutputWorkspace=group_norect_name)
+            group_norect = msapi.LoadFITS(Filename=fpath, LoadAsRectImg=False, OutputWorkspace=group_norect_name)
 
         self.assertEquals(group.size(), group_norect.size())
         for idx in range(0, group.size()):
@@ -68,19 +68,19 @@ class ImagingLoadSaveTests(unittest.TestCase):
             for row in [0, 100, 200, 300, 400, 511]:
                 self.assertEquals(img_a.readY(row)[0], img_b.readY(row*img_a.blocksize() + 0))
 
-        DeleteWorkspace(group_name)
-        DeleteWorkspace(group_norect_name)
+        msapi.DeleteWorkspace(group_name)
+        msapi.DeleteWorkspace(group_norect_name)
 
     def test_load_all_at_once(self):
         """
         A batch load, as when stacks are loaded at once
         """
         all_filepaths = ','.join(self._fits_paths)
-        group = LoadFITS(Filename=all_filepaths, LoadAsRectImg=True)
+        group = msapi.LoadFITS(Filename=all_filepaths, LoadAsRectImg=True)
 
         self.assertEquals(group.size(), len(self._fits_paths))
 
-        DeleteWorkspace(group)
+        msapi.DeleteWorkspace(group)
 
     def test_load_save_load(self):
         """
@@ -88,32 +88,32 @@ class ImagingLoadSaveTests(unittest.TestCase):
         """
         group_name = 'all_indiv'
         for fpath in self._fits_paths:
-            LoadFITS(Filename=fpath, LoadAsRectImg=True, OutputWorkspace=group_name)
-        group = mtd[group_name]
+            msapi.LoadFITS(Filename=fpath, LoadAsRectImg=True, OutputWorkspace=group_name)
+        group = msapi.mtd[group_name]
 
         for idx in range(0, group.size()):
             # Save
             img_loaded = group.getItem(idx)
             save_filename = 'test.fits'
-            SaveFITS(Filename=save_filename, InputWorkspace=img_loaded)
+            msapi.SaveFITS(Filename=save_filename, InputWorkspace=img_loaded)
 
             # Re-load and compare
             reload_name = 'indiv_fits_reloaded'
-            grp_reloaded = LoadFITS(Filename=save_filename, LoadAsRectImg=True, OutputWorkspace=reload_name)
+            grp_reloaded = msapi.LoadFITS(Filename=save_filename, LoadAsRectImg=True, OutputWorkspace=reload_name)
             self.assertEquals(1, grp_reloaded.size())
             img_reloaded = grp_reloaded.getItem(0)
 
             self.assertEquals(img_loaded.getNumberHistograms(), img_reloaded.getNumberHistograms())
             self.assertEquals(img_loaded.blocksize(), img_reloaded.blocksize())
 
-            (comp_result, tbl_messages) = CompareWorkspaces(img_loaded, img_reloaded)
+            (comp_result, tbl_messages) = msapi.CompareWorkspaces(img_loaded, img_reloaded)
             num_rows = tbl_messages.rowCount()
             txt_messages = [tbl_messages.row(idx) for idx in range(0, num_rows)]
             self.assertTrue(comp_result,
                             "Workspace comparison failed. Details: {0}".format(txt_messages))
-            DeleteWorkspace(grp_reloaded)
+            msapi.DeleteWorkspace(grp_reloaded)
 
-        DeleteWorkspace(group_name)
+        msapi.DeleteWorkspace(group_name)
 
 # Runs the unittest tests defined above in the mantid stress testing framework
 class ImagingAggregateWavelengths(stresstesting.MantidStressTest):
