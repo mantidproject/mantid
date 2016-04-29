@@ -86,7 +86,7 @@ public:
   const double &operator[](size_t pos) const { return m_data[pos]; }
   double &operator[](size_t pos) { return m_data[pos]; }
 
-  // Returns a const reference to the underlying vector.
+  /// Returns a const reference to the underlying vector.
   const std::vector<double> &rawData() const { return m_data; }
 
 protected:
