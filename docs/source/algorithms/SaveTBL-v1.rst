@@ -62,7 +62,7 @@ Usage
     ws.addRow ( nextRow )
     nextRow = {'Run(s)':"13470",'ThetaIn':"2.3",'TransRun(s)':"13463,13464",'Qmin':"0.035",'Qmax':"0.3",'dq/q':"0.04",'Scale':"",'StitchGroup':0,'Options':""}
     ws.addRow ( nextRow )
-    nextRow = {'Run(s)':"13462",'ThetaIn':"2.3",'TransRun(s)':"13463,13464",'Qmin':"0.035",'Qmax':"0.3",'dq/q':"0.04",'Scale':"",'StitchGroup':1,'Options':"ProcessingInstructions="1:2"}
+    nextRow = {'Run(s)':"13462",'ThetaIn':"2.3",'TransRun(s)':"13463,13464",'Qmin':"0.035",'Qmax':"0.3",'dq/q':"0.04",'Scale':"",'StitchGroup':1,'Options':"ProcessingInstructions=\"1:2\""}
     ws.addRow ( nextRow )
     nextRow = {'Run(s)':"13469",'ThetaIn':"0.7",'TransRun(s)':"13463,13464",'Qmin':"0.01",'Qmax':"0.06",'dq/q':"0.04",'Scale':"",'StitchGroup':2,'Options':""}
     ws.addRow ( nextRow )
