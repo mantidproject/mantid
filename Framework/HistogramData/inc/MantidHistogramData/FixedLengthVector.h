@@ -101,8 +101,7 @@ protected:
   ~FixedLengthVector() = default;
 
 private:
-  template<class Other>
-  void checkAssignmentSize(const Other &other) {
+  template <class Other> void checkAssignmentSize(const Other &other) {
     if (size() != other.size())
       throw std::logic_error("FixedLengthVector::operator=: size mismatch");
   }
