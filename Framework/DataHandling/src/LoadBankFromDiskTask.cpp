@@ -346,16 +346,18 @@ class LoadBankFromDiskTask { // : public Mantid::Kernel::Task {
 public:
   //---------------------------------------------------------------------------------------------------
   /** Constructor
-  *
-  * @param alg :: Handle to the main algorithm
+  * deleted parameters:
+  *   - ioMutex : a mutex shared for all Disk I-O tasks
+  *   - scheduler : the ThreadScheduler that runs this task.
+  * 
+  * @param input_alg :: Handle to the main algorithm
   * @param entry_name :: The pathname of the bank to load
   * @param entry_type :: The classtype of the entry to load
   * @param numEvents :: The number of events in the bank.
   * @param oldNeXusFileNames :: Identify if file is of old variety.
   * @param prog :: an optional Progress object
-  * @param ioMutex :: a mutex shared for all Disk I-O tasks
-  * @param scheduler :: the ThreadScheduler that runs this task.
   * @param framePeriodNumbers :: Period numbers corresponding to each frame
+  * @param logger :: reference to Mantid log
   */
   LoadBankFromDiskTask(Mantid::DataHandling::LoadEventNexus *input_alg,
                        const std::string &entry_name,
