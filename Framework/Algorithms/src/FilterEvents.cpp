@@ -1035,12 +1035,14 @@ void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
           eventws->mutableRun().getProperty(logname));
   Kernel::TimeSeriesProperty<int> *int_prop =
       dynamic_cast<Kernel::TimeSeriesProperty<int> *>(
-        eventws->mutableRun().getProperty(logname));
+          eventws->mutableRun().getProperty(logname));
 
   if (!dbl_prop && !int_prop) {
-    g_log.warning() << "Log " << logname
-                    << " is not TimeSeriesProperty<int> or TimeSeriesProperty<double>. "
-                    << "Unable to split." << "\n";
+    g_log.warning()
+        << "Log " << logname
+        << " is not TimeSeriesProperty<int> or TimeSeriesProperty<double>. "
+        << "Unable to split."
+        << "\n";
   } else {
     for (const auto &split : splitters) {
       g_log.debug() << "[FilterEvents DB1226] Going to filter workspace "
