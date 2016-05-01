@@ -20,19 +20,30 @@ public:
   //----------------------------------------------------------------------------
   // Success tests
   //----------------------------------------------------------------------------
-  void test_Default_Direction_Is_Input() {
+  void test_Constructor_Default_Direction_Is_Input() {
     using Mantid::Kernel::Direction;
 
     PropertyManagerProperty pmap("Test");
     TS_ASSERT_EQUALS(Direction::Input, pmap.direction());
   }
 
-  void test_Name_And_Direction_Are_Set_Correctly() {
+  void test_Constructor_Sets_Name_And_Direction() {
     using Mantid::Kernel::Direction;
 
     PropertyManagerProperty pmap("Test", Direction::Output);
     TS_ASSERT_EQUALS("Test", pmap.name());
     TS_ASSERT_EQUALS(Direction::Output, pmap.direction());
+  }
+
+  void test_Constructor_Sets_Name_Direction_DefaultValue() {
+    using Mantid::Kernel::Direction;
+
+    auto testMgr = createPropMgrWithInt();
+    PropertyManagerProperty pmap("Test", testMgr, Direction::Output);
+    TS_ASSERT_EQUALS("Test", pmap.name());
+    TS_ASSERT_EQUALS(Direction::Output, pmap.direction());
+    TS_ASSERT_EQUALS(testMgr, pmap());
+    TS_ASSERT(pmap.isDefault());
   }
 
   void test_Assignment_Updates_Stored_Value() {

@@ -40,6 +40,9 @@ public:
 
   PropertyManagerProperty(const std::string &name,
                           unsigned int direction = Direction::Input);
+  PropertyManagerProperty(const std::string &name,
+                          const ValueType &defaultValue,
+                          unsigned int direction = Direction::Input);
   using BaseClass::operator=;
 };
 

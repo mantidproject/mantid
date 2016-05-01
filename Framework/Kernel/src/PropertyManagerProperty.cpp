@@ -8,13 +8,24 @@ namespace Kernel {
 // Public Methods
 // -----------------------------------------------------------------------------
 /**
- * Constructor
+ * Constructor with a default empty pointer
  * @param name The name of the property
  * @param direction Direction of the property
  */
 PropertyManagerProperty::PropertyManagerProperty(const std::string &name,
                                                  unsigned int direction)
-    : BaseClass(name, ValueType(), direction) {
+    : PropertyManagerProperty(name, ValueType(), direction) {}
+
+/**
+ * Constructor taking an initial value
+ * @param name The name of the property
+ * @param defaultValue A default value for the property
+ * @param direction Direction of the property
+ */
+PropertyManagerProperty::PropertyManagerProperty(const std::string &name,
+                                                 const ValueType &defaultValue,
+                                                 unsigned int direction)
+    : BaseClass(name, defaultValue, direction) {
   if (name.empty()) {
     throw std::invalid_argument("PropertyManagerProperty() requires a name");
   }
