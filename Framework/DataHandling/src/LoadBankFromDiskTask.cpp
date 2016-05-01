@@ -349,7 +349,7 @@ public:
   * deleted parameters:
   *   - ioMutex : a mutex shared for all Disk I-O tasks
   *   - scheduler : the ThreadScheduler that runs this task.
-  * 
+  *
   * @param input_alg :: Handle to the main algorithm
   * @param entry_name :: The pathname of the bank to load
   * @param entry_type :: The classtype of the entry to load
