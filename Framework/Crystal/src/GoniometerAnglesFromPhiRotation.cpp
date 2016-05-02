@@ -256,16 +256,19 @@ void GoniometerAnglesFromPhiRotation::exec() {
       boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
           WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * Npeaks,
                                               3 * Npeaks));
-  MantidVecPtr Xvals, Yvals;
+
+  MantidVec Xvals;
+  MantidVecPtr Yvals;
 
   for (int i = 0; i < Npeaks; ++i) {
-    Xvals.access().push_back(i);
+    Xvals.push_back(i);
     Yvals.access().push_back(0.0);
-    Xvals.access().push_back(i);
+    Xvals.push_back(i);
     Yvals.access().push_back(0.0);
-    Xvals.access().push_back(i);
+    Xvals.push_back(i);
     Yvals.access().push_back(0.0);
   }
+
   ws->setX(0, Xvals);
   ws->setData(0, Yvals);
 

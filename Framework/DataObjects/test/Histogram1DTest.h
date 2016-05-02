@@ -10,11 +10,13 @@
 
 using Mantid::DataObjects::Histogram1D;
 using Mantid::MantidVec;
+using namespace Mantid::HistogramData;
 
 class Histogram1DTest : public CxxTest::TestSuite {
 private:
-  int nel;              // Number of elements in the array
-  Histogram1D h, h2;    // Two histograms
+  int nel; // Number of elements in the array
+  Histogram1D h{Histogram::XMode::Points};
+  Histogram1D h2{Histogram::XMode::Points};
   MantidVec x1, y1, e1; // vectors
   typedef boost::shared_ptr<MantidVec> parray;
   parray pa, pb; // Shared_ptr to vectors
@@ -56,8 +58,9 @@ public:
     TS_ASSERT_EQUALS(h.dataE()[12], 0.0);
   }
   void testsetgetXPointer() {
-    h.setX(pa);
-    TS_ASSERT_EQUALS(h.dataX(), *pa);
+    auto px = boost::make_shared<HistogramX>(0);
+    h.setX(px);
+    TS_ASSERT_EQUALS(&(*h.ptrX()), &(*px));
   }
   void testsetgetDataYPointer() {
     h.setData(pa);

@@ -18,6 +18,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using Mantid::HistogramData::BinEdges;
 
 class SolidAngleTest : public CxxTest::TestSuite {
 public:
@@ -30,11 +31,7 @@ public:
     Workspace_sptr space =
         WorkspaceFactory::Instance().create("Workspace2D", Nhist, 11, 10);
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    boost::shared_ptr<Mantid::MantidVec> x =
-        boost::make_shared<Mantid::MantidVec>(11);
-    for (int i = 0; i < 11; ++i) {
-      (*x)[i] = i * 1000;
-    }
+    BinEdges x{0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
     boost::shared_ptr<Mantid::MantidVec> a =
         boost::make_shared<Mantid::MantidVec>(10);
     boost::shared_ptr<Mantid::MantidVec> e =
@@ -45,7 +42,7 @@ public:
     }
 
     for (int j = 0; j < Nhist; ++j) {
-      space2D->setX(j, x);
+      space2D->histogram(j).setBinEdges(x);
       space2D->setData(j, a, e);
       // Just set the spectrum number to match the index
       space2D->getSpectrum(j)->setSpectrumNo(j + 1);

@@ -194,7 +194,7 @@ void DiffractionFocussing2::exec() {
     auto it = group2xvector.find(group);
     group2vectormap::difference_type dif =
         std::distance(group2xvector.begin(), it);
-    const MantidVec &Xout = *((*it).second);
+    const MantidVec &Xout = (*it).second.constRawData();
 
     // Assign the new X axis only once (i.e when this group is encountered the
     // first time)
@@ -496,10 +496,11 @@ void DiffractionFocussing2::execEvent() {
     if (!group2xvector.empty()) {
       auto git = group2xvector.find(group);
       if (git != group2xvector.end())
-        out->setX(workspaceIndex, (git->second));
+        out->histogram(workspaceIndex).setBinEdges(git->second);
       else
         // Just use the 1st X vector it found, instead of nothin.
-        out->setX(workspaceIndex, (group2xvector.begin()->second));
+        out->histogram(workspaceIndex)
+            .setBinEdges(group2xvector.begin()->second);
     } else
       g_log.warning() << "Warning! No X histogram bins were found for any "
                          "groups. Histogram will be empty.\n";
@@ -652,12 +653,12 @@ void DiffractionFocussing2::determineRebinParameters() {
     mess.str("");
 
     // Build up the X vector.
-    boost::shared_ptr<MantidVec> xnew =
-        boost::make_shared<MantidVec>(xPoints); // New X vector
-    (*xnew)[0] = Xmin;
+    HistogramData::BinEdges xnew(xPoints);
+    auto &xnewData = xnew.data();
+    xnewData[0] = Xmin;
     for (int64_t j = 1; j < xPoints; j++) {
-      (*xnew)[j] = Xmin * (1.0 + step);
-      Xmin = (*xnew)[j];
+      xnewData[j] = Xmin * (1.0 + step);
+      Xmin = xnewData[j];
     }
     group2xvector[gpit->first] = xnew; // Register this vector in the map
   }

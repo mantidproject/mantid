@@ -18,6 +18,7 @@ if ( CXXTEST_FOUND )
             DataHandling
             DataObjects
             Geometry
+            HistogramData
             Kernel
             Nexus
             ${NEXUS_LIBRARIES}

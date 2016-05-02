@@ -12,6 +12,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/Unit.h"
+#include "MantidHistogramData/Histogram.h"
 #include <cstddef>
 #include <iosfwd>
 #include <set>
@@ -185,15 +186,16 @@ public:
   EventSortType getSortType() const;
 
   // X-vector accessors. These reset the MRU for this spectrum
-  void setX(const MantidVecPtr::ptr_type &X) override;
-
-  void setX(const MantidVecPtr &X) override;
+  void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) override;
 
   void setX(const MantidVec &X) override;
 
   MantidVec &dataX() override;
   const MantidVec &dataX() const override;
   const MantidVec &constDataX() const;
+
+  const MantidVec &readX() const override;
+  Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const override;
 
   // TODO: This overload will probably be needed in a future to work with Event
   // data properly
@@ -360,7 +362,13 @@ public:
                           Mantid::Kernel::Unit *toUnit);
   void convertUnitsQuickly(const double &factor, const double &power);
 
+  const HistogramData::Histogram &histogram() const override;
+  HistogramData::Histogram &histogram() override;
+
 private:
+  /// Histogram object holding the histogram data. Currently only X.
+  HistogramData::Histogram m_histogram;
+
   /// List of TofEvent (no weights).
   mutable std::vector<TofEvent> events;
 

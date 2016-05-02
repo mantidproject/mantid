@@ -19,6 +19,7 @@ if ( CXXTEST_FOUND )
             API
             DataObjects
             Geometry
+            HistogramData
             Kernel
             ${NEXUS_LIBRARIES}
             ${JSONCPP_LIBRARIES}

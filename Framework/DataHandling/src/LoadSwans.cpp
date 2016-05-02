@@ -260,10 +260,8 @@ void LoadSwans::setTimeAxis() {
   const unsigned int longest_tof = static_cast<unsigned int>(
       m_ws->getInstrument()->getNumberParameter("longest-tof")[0]);
   // Now, create a default X-vector for histogramming, with just 2 bins.
-  Kernel::cow_ptr<MantidVec> axis;
-  MantidVec &xRef = axis.access();
-  xRef = {static_cast<double>(shortest_tof), static_cast<double>(longest_tof)};
-  // Set the binning axis using this.
+  auto axis = HistogramData::BinEdges{static_cast<double>(shortest_tof),
+                                      static_cast<double>(longest_tof)};
   m_ws->setAllX(axis);
 }
 

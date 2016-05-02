@@ -27,6 +27,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
+using Mantid::HistogramData::BinEdges;
 
 class CentroidPeaksTest : public CxxTest::TestSuite {
 public:
@@ -111,12 +112,9 @@ public:
       delete gens[d];
 
     // Create the x-axis for histogramming.
-    MantidVecPtr x1;
-    MantidVec &xRef = x1.access();
-    xRef.resize(numBins);
-    for (int i = 0; i < numBins; ++i) {
-      xRef[i] = i * binDelta;
-    }
+    BinEdges x1(numBins);
+    int i = 0;
+    std::generate(begin(x1), end(x1), [&] { return i++ * binDelta; });
 
     // Set all the histograms at once.
     retVal->setAllX(x1);

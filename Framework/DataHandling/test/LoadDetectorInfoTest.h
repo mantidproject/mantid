@@ -30,6 +30,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+using Mantid::HistogramData::BinEdges;
 
 /* choose an instrument to test, we could test all instruments
  * every time but I think a detailed test on the smallest workspace
@@ -207,12 +208,12 @@ void makeTestWorkspace(const int ndets, const int nbins,
       "Workspace2D", ndets, nbins + 1, nbins);
   space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-  Mantid::MantidVecPtr xs, errors;
+  BinEdges xs(nbins + 1, 0.0);
+  Mantid::MantidVecPtr errors;
   std::vector<Mantid::MantidVecPtr> data(ndets);
-  xs.access().resize(nbins + 1, 0.0);
   errors.access().resize(nbins, 1.0);
   for (int j = 0; j < ndets; ++j) {
-    space2D->setX(j, xs);
+    space2D->histogram(j).setBinEdges(xs);
     data[j].access().resize(nbins, j + 1); // the y values will be different for
                                            // each spectra (1+index_number) but
                                            // the same for each bin

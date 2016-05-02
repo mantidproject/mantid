@@ -8,6 +8,10 @@
 #include <set>
 
 namespace Mantid {
+namespace HistogramData {
+class Histogram;
+class HistogramX;
+}
 namespace API {
 
 /** A "spectrum" is an object that holds the data for a particular spectrum,
@@ -52,25 +56,24 @@ public:
 
   void copyInfoFrom(const ISpectrum &other);
 
-  virtual void setX(const MantidVec &X);
+  virtual void setX(const MantidVec &X) = 0;
   virtual void setDx(const MantidVec &Dx);
 
-  virtual void setX(const MantidVecPtr &X);
+  virtual void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) = 0;
   virtual void setDx(const MantidVecPtr &Dx);
 
-  virtual void setX(const MantidVecPtr::ptr_type &X);
   virtual void setDx(const MantidVecPtr::ptr_type &Dx);
 
-  virtual MantidVec &dataX();
+  virtual MantidVec &dataX() = 0;
   virtual MantidVec &dataDx();
 
-  virtual const MantidVec &dataX() const;
+  virtual const MantidVec &dataX() const = 0;
   virtual const MantidVec &dataDx() const;
 
-  virtual const MantidVec &readX() const;
+  virtual const MantidVec &readX() const = 0;
   virtual const MantidVec &readDx() const;
 
-  virtual MantidVecPtr ptrX() const;
+  virtual Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const = 0;
   virtual MantidVecPtr ptrDx() const;
 
   virtual void setData(const MantidVec &Y) = 0;
@@ -123,15 +126,15 @@ public:
   virtual bool hasDx() const;
   virtual void resetHasDx();
 
+  virtual const HistogramData::Histogram &histogram() const = 0;
+  virtual HistogramData::Histogram &histogram() = 0;
+
 protected:
   /// The spectrum number of this spectrum
   specnum_t m_specNo;
 
   /// Set of the detector IDs associated with this spectrum
   std::set<detid_t> detectorIDs;
-
-  /// Copy-on-write pointer to the X data vector.
-  MantidVecPtr refX;
 
   /// Copy-on-write pointer to the Dx (X error) vector.
   MantidVecPtr refDx;

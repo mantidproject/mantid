@@ -12,5 +12,34 @@ void Histogram1D::clearData() {
   std::fill(eValues.begin(), eValues.end(), 0.0);
 }
 
+/// Sets the x data.
+/// @param X :: vector of X data
+void Histogram1D::setX(const MantidVec &X) { m_histogram.setX(X); }
+
+/// Sets the x data.
+/// @param X :: vector of X data
+void Histogram1D::setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
+  m_histogram.setX(X);
+}
+
+/// Returns the x data
+MantidVec &Histogram1D::dataX() { return m_histogram.dataX(); }
+
+/// Returns the x data const
+const MantidVec &Histogram1D::dataX() const { return m_histogram.dataX(); }
+
+/// Returns the x data const
+const MantidVec &Histogram1D::readX() const { return m_histogram.constDataX(); }
+
+/// Returns a pointer to the x data
+Kernel::cow_ptr<HistogramData::HistogramX> Histogram1D::ptrX() const {
+  return m_histogram.ptrX();
+}
+
+const HistogramData::Histogram &Histogram1D::histogram() const {
+  return m_histogram;
+}
+HistogramData::Histogram &Histogram1D::histogram() { return m_histogram; }
+
 } // namespace DataObjects
 } // namespace Mantid

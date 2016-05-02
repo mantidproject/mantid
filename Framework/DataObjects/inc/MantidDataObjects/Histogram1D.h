@@ -4,6 +4,7 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
+#include "MantidHistogramData/Histogram.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -32,11 +33,25 @@ namespace DataObjects {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport Histogram1D : public Mantid::API::ISpectrum {
+private:
+  /// Histogram object holding the histogram data. Currently only X.
+  HistogramData::Histogram m_histogram;
+
 protected:
   MantidVecPtr refY; ///< RefCounted Y
   MantidVecPtr refE; ///< RefCounted Error
 
 public:
+  Histogram1D(HistogramData::Histogram::XMode mode)
+      : API::ISpectrum(), m_histogram(mode) {}
+
+  void setX(const MantidVec &X) override;
+  void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) override;
+  MantidVec &dataX() override;
+  const MantidVec &dataX() const override;
+  const MantidVec &readX() const override;
+  Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const override;
+
   /// Sets the data.
   void setData(const MantidVec &Y) override { refY.access() = Y; };
   /// Sets the data and errors
@@ -83,8 +98,11 @@ public:
 
   /// Gets the memory size of the histogram
   size_t getMemorySize() const override {
-    return ((refX->size() + refY->size() + refE->size()) * sizeof(double));
+    return ((readX().size() + refY->size() + refE->size()) * sizeof(double));
   }
+
+  const HistogramData::Histogram &histogram() const override;
+  HistogramData::Histogram &histogram() override;
 };
 
 } // namespace DataObjects

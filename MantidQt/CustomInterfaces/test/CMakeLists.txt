@@ -17,6 +17,7 @@ if ( CXXTEST_FOUND )
             API
             DataObjects
             Geometry
+            HistogramData
             Kernel
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}

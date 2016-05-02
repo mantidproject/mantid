@@ -77,7 +77,6 @@ void CorrectKiKf::exec() {
   // Calculate the number of spectra in this workspace
   const int numberOfSpectra = static_cast<int>(inputWS->size() / size);
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
-  const bool histogram = inputWS->isHistogramData();
   bool negativeEnergyWarning = false;
 
   const std::string emodeStr = getProperty("EMode");
@@ -139,13 +138,13 @@ void CorrectKiKf::exec() {
 
     MantidVec &yOut = outputWS->dataY(i);
     MantidVec &eOut = outputWS->dataE(i);
-    const MantidVec &xIn = inputWS->readX(i);
+    const auto &xIn = inputWS->histogram(i).points();
     const MantidVec &yIn = inputWS->readY(i);
     const MantidVec &eIn = inputWS->readE(i);
     // Copy the energy transfer axis
     outputWS->setX(i, inputWS->refX(i));
     for (unsigned int j = 0; j < size; ++j) {
-      const double deltaE = histogram ? 0.5 * (xIn[j] + xIn[j + 1]) : xIn[j];
+      const double deltaE = xIn[j];
       double Ei = 0.;
       double Ef = 0.;
       double kioverkf = 1.;
