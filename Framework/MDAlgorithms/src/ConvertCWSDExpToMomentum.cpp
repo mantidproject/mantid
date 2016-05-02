@@ -282,8 +282,11 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
     int scanid = m_expDataTableWS->cell<int>(ir, m_iColScan);
     g_log.notice() << "[DB] Scan = " << scanid << "\n";
     int runid = m_expDataTableWS->cell<int>(ir, m_iColPt);
-    g_log.notice() << "Pt = " << runid << "\n" << m_iTime << "-th for time/duration" << "\n";
-    double time = static_cast<double>(m_expDataTableWS->cell<float>(ir, m_iTime));
+    g_log.notice() << "Pt = " << runid << "\n" << m_iTime
+                   << "-th for time/duration"
+                   << "\n";
+    double time =
+        static_cast<double>(m_expDataTableWS->cell<float>(ir, m_iTime));
     int monitor_counts = m_expDataTableWS->cell<int>(ir, m_iMonitorCounts);
     if (!usevirtual)
       start_detid = 0;
@@ -371,7 +374,8 @@ void ConvertCWSDExpToMomentum::setupTransferMatrix(
  */
 void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
     MatrixWorkspace_sptr dataws, bool usevirtual, const detid_t &startdetid,
-    const int scannumber, const int runnumber, double measuretime, int monitor_counts) {
+    const int scannumber, const int runnumber, double measuretime,
+    int monitor_counts) {
   // Create transformation matrix from which the transformation is
   Kernel::DblMatrix rotationMatrix;
   setupTransferMatrix(dataws, rotationMatrix);

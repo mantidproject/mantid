@@ -5,6 +5,7 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
+#include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 
 #include <fstream>
 
@@ -45,7 +46,7 @@ std::string EnggDiffractionPresenter::g_sumOfFilesFocus = "";
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(NULL), m_calibFinishedOK(false), m_focusFinishedOK(false),
-      m_rebinningFinishedOK(false),
+      m_rebinningFinishedOK(false), m_fittingFinishedOK(false),
       m_view(view) /*, m_model(new EnggDiffractionModel()), */ {
   if (!m_view) {
     throw std::runtime_error(
@@ -120,6 +121,11 @@ void EnggDiffractionPresenter::notify(
 
   case IEnggDiffractionPresenter::RebinMultiperiod:
     processRebinMultiperiod();
+    break;
+
+  case IEnggDiffractionPresenter::FitPeaks:
+    processFitPeaks();
+
     break;
 
   case IEnggDiffractionPresenter::LogMsg:
@@ -201,7 +207,7 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
     if (m_view->currentCalibSpecNos().empty() &&
         specNoNum == BankMode::SPECNOS) {
       throw std::invalid_argument(
-          "The Spectrum IDs cannot be empty, must be a"
+          "The Spectrum Nos cannot be empty, must be a"
           "valid range or a Bank Name can be selected instead");
     }
   } catch (std::invalid_argument &ia) {
@@ -445,6 +451,469 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
   // doRebinningPulses(runNo, nperiods, timeStep, outWSName)
   // rebinningFinished()
   startAsyncRebinningPulsesWorker(runNo, nperiods, timeStep, outWSName);
+}
+
+void EnggDiffractionPresenter::processFitPeaks() {
+  const std::string focusedRunNo = m_view->fittingRunNo();
+  const std::string fitPeaksData = m_view->fittingPeaksData();
+
+  g_log.debug() << "the expected peaks are: " << fitPeaksData << std::endl;
+
+  try {
+    inputChecksBeforeFitting(focusedRunNo, fitPeaksData);
+  } catch (std::invalid_argument &ia) {
+    m_view->userWarning("Error in the inputs required for fitting", ia.what());
+    return;
+  }
+
+  const std::string outWSName = "engggui_fitting_fit_peak_ws";
+  g_log.notice() << "EnggDiffraction GUI: starting new "
+                    "single peak fits into workspace '" +
+                        outWSName + "'. This "
+                                    "may take some seconds... "
+                 << std::endl;
+
+  // startAsyncFittingWorker
+  // doFitting()
+  startAsyncFittingWorker(focusedRunNo, fitPeaksData);
+}
+
+void EnggDiffractionPresenter::inputChecksBeforeFitting(
+    const std::string &focusedRunNo, const std::string &ExpectedPeaks) {
+  if (focusedRunNo.size() == 0) {
+    throw std::invalid_argument(
+        "Focused Run "
+        "cannot be empty and must be a valid directory");
+  }
+
+  Poco::File file(focusedRunNo);
+  if (!file.exists()) {
+    throw std::invalid_argument("The focused workspace file for single peak "
+                                "fitting could not be found: " +
+                                focusedRunNo);
+  }
+
+  if (ExpectedPeaks.empty()) {
+    g_log.warning() << "Expected peaks were not passed, via fitting interface,"
+                       "the default list of"
+                       "expected peaks will be utlised instead."
+                    << std::endl;
+  }
+  bool contains_non_digits =
+      ExpectedPeaks.find_first_not_of("0123456789,. ") != std::string::npos;
+  if (contains_non_digits) {
+    throw std::invalid_argument("The expected peaks provided " + ExpectedPeaks +
+                                " is invalid, "
+                                "fitting process failed. Please try again!");
+  }
+}
+
+void EnggDiffractionPresenter::startAsyncFittingWorker(
+    const std::string &focusedRunNo, const std::string &ExpectedPeaks) {
+
+  delete m_workerThread;
+  m_workerThread = new QThread(this);
+  EnggDiffWorker *worker =
+      new EnggDiffWorker(this, focusedRunNo, ExpectedPeaks);
+  worker->moveToThread(m_workerThread);
+
+  connect(m_workerThread, SIGNAL(started()), worker, SLOT(fitting()));
+  connect(worker, SIGNAL(finished()), this, SLOT(fittingFinished()));
+  // early delete of thread and worker
+  connect(m_workerThread, SIGNAL(finished()), m_workerThread,
+          SLOT(deleteLater()), Qt::DirectConnection);
+  connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
+  m_workerThread->start();
+}
+
+void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
+                                         const std::string &ExpectedPeaks) {
+  // disable GUI to avoid any double threads
+  m_view->enableCalibrateAndFocusActions(false);
+  g_log.notice() << "EnggDiffraction GUI: starting new fitting. This may "
+                    "take a few seconds... "
+                 << std::endl;
+
+  MatrixWorkspace_sptr focusedWS;
+  const std::string FocusedWSName = "engggui_fitting_focused_ws";
+  m_fittingFinishedOK = false;
+
+  // load the focused workspace file to preform single peak fits
+  try {
+    auto load =
+        Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+    load->initialize();
+    load->setPropertyValue("Filename", focusedRunNo);
+    load->setPropertyValue("OutputWorkspace", FocusedWSName);
+    load->execute();
+
+    AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+    focusedWS = ADS.retrieveWS<MatrixWorkspace>(FocusedWSName);
+  } catch (std::runtime_error &re) {
+    g_log.error()
+        << "Error while loading focused data. "
+           "Could not run the algorithm Load succesfully for the Fit "
+           "peaks (file name: " +
+               focusedRunNo + "). Error description: " + re.what() +
+               " Please check also the previous log messages for details.";
+    throw;
+  }
+
+  // run the algorithm EnggFitPeaks with workspace loaded above
+  // requires unit in Time of Flight
+  auto enggFitPeaks =
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged("EnggFitPeaks");
+  const std::string FocusedFitPeaksTableName =
+      "engggui_fitting_fitpeaks_params";
+
+  // delete existing table workspace to avoid confusion
+  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+  if (ADS.doesExist(FocusedFitPeaksTableName)) {
+    ADS.remove(FocusedFitPeaksTableName);
+  }
+
+  try {
+    enggFitPeaks->initialize();
+    enggFitPeaks->setProperty("InputWorkspace", focusedWS);
+    if (!ExpectedPeaks.empty()) {
+      enggFitPeaks->setProperty("ExpectedPeaks", ExpectedPeaks);
+    }
+    enggFitPeaks->setProperty("FittedPeaks", FocusedFitPeaksTableName);
+    enggFitPeaks->execute();
+
+  } catch (std::exception &re) {
+    g_log.error() << "Could not run the algorithm EnggFitPeaks "
+                     "successfully for bank, "
+                     // bank name
+                     "Error description: " +
+                         static_cast<std::string>(re.what()) +
+                         " Please check also the log message for detail."
+                  << std::endl;
+  } catch (...) {
+    g_log.error() << "Caught an unknown exception\n";
+  }
+
+  try {
+    runFittingAlgs(FocusedFitPeaksTableName, FocusedWSName);
+
+  } catch (std::invalid_argument &ia) {
+    g_log.error() << "Error, Fitting could not finish off correctly, " +
+                         std::string(ia.what())
+                  << std::endl;
+    return;
+  }
+}
+
+void EnggDiffractionPresenter::runFittingAlgs(
+    std::string FocusedFitPeaksTableName, std::string FocusedWSName) {
+  // retrieve the table with parameters
+  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+  if (!ADS.doesExist(FocusedFitPeaksTableName)) {
+    throw std::invalid_argument(
+        FocusedFitPeaksTableName +
+        " workspace could not be found. "
+        "Please check the log messages for more details.");
+  };
+
+  ITableWorkspace_sptr table =
+      ADS.retrieveWS<ITableWorkspace>(FocusedFitPeaksTableName);
+
+  size_t rowCount = table->rowCount();
+  std::string single_peak_out_WS = "engggui_fitting_single_peaks";
+  std::string current_peak_out_WS;
+
+  std::string Bk2BkExpFunctionStr;
+  std::string startX = "";
+  std::string endX = "";
+
+  if (rowCount > size_t(0)) {
+
+    for (size_t i = 0; i < rowCount; i++) {
+
+      // get the functionStrFactory to generate the string for function
+      // property
+      // return the string with i row from table workspace
+      // table is just passed so it works?
+      Bk2BkExpFunctionStr =
+          functionStrFactory(table, FocusedFitPeaksTableName, i, startX, endX);
+
+      g_log.debug() << "startX: " + startX + " . endX: " + endX << std::endl;
+
+      current_peak_out_WS =
+          "__engggui_fitting_single_peaks" + std::to_string(i);
+      std::string current_peak_cloned_WS;
+
+      // run EvaluateFunction algorithm with focused workspace to produce
+      // the correct fit function
+      // FocusedWSName is not going to change as its always going to be from
+      // single workspace
+      runEvaluateFunctionAlg(Bk2BkExpFunctionStr, FocusedWSName,
+                             current_peak_out_WS, startX, endX);
+
+      // crop workspace so only the correct workspace index is plotted
+      runCropWorkspaceAlg(current_peak_out_WS);
+
+      // apply the same binning as a focused workspace
+      runRebinToWorkspaceAlg(current_peak_out_WS);
+
+      // if the first peak
+      if (i == size_t(0)) {
+
+        // create a workspace clone of bank focus file
+        // this will import all information of the previous file
+        runCloneWorkspaceAlg(FocusedWSName, single_peak_out_WS);
+
+        setDataToClonedWS(current_peak_out_WS, single_peak_out_WS);
+
+      } else {
+        current_peak_cloned_WS =
+            "__engggui_fitting_cloned_peaks" + std::to_string(i);
+
+        runCloneWorkspaceAlg(FocusedWSName, current_peak_cloned_WS);
+
+        setDataToClonedWS(current_peak_out_WS, current_peak_cloned_WS);
+
+        // append all peaks in to single workspace & remove
+        runAppendSpectraAlg(single_peak_out_WS, current_peak_cloned_WS);
+        ADS.remove(current_peak_out_WS);
+        ADS.remove(current_peak_cloned_WS);
+      }
+    }
+
+    // convert units for both workspaces to dSpacing from ToF
+    runConvetUnitsAlg(single_peak_out_WS);
+    runConvetUnitsAlg(FocusedWSName);
+  }
+
+  m_fittingFinishedOK = true;
+}
+
+std::string EnggDiffractionPresenter::functionStrFactory(
+    Mantid::API::ITableWorkspace_sptr &paramTableWS, std::string tableName,
+    size_t row, std::string &startX, std::string &endX) {
+  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+  paramTableWS = ADS.retrieveWS<ITableWorkspace>(tableName);
+
+  double A0 = paramTableWS->cell<double>(row, size_t(1));
+  double A1 = paramTableWS->cell<double>(row, size_t(3));
+  double I = paramTableWS->cell<double>(row, size_t(13));
+  double A = paramTableWS->cell<double>(row, size_t(7));
+  double B = paramTableWS->cell<double>(row, size_t(9));
+  double X0 = paramTableWS->cell<double>(row, size_t(5));
+  double S = paramTableWS->cell<double>(row, size_t(11));
+
+  startX = boost::lexical_cast<std::string>(X0 - (3 * S));
+  endX = boost::lexical_cast<std::string>(X0 + (3 * S));
+
+  std::string functionStr =
+      "name=LinearBackground,A0=" + boost::lexical_cast<std::string>(A0) +
+      ",A1=" + boost::lexical_cast<std::string>(A1) +
+      ";name=BackToBackExponential,I=" + boost::lexical_cast<std::string>(I) +
+      ",A=" + boost::lexical_cast<std::string>(A) + ",B=" +
+      boost::lexical_cast<std::string>(B) + ",X0=" +
+      boost::lexical_cast<std::string>(X0) + ",S=" +
+      boost::lexical_cast<std::string>(S);
+
+  return functionStr;
+}
+
+void EnggDiffractionPresenter::runEvaluateFunctionAlg(
+    std::string bk2BkExpFunction, std::string InputName, std::string OutputName,
+    std::string startX, std::string endX) {
+
+  auto evalFunc = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "EvaluateFunction");
+  g_log.notice() << "EvaluateFunction algorithm has started" << std::endl;
+  try {
+    evalFunc->initialize();
+    evalFunc->setProperty("Function", bk2BkExpFunction);
+    evalFunc->setProperty("InputWorkspace", InputName);
+    evalFunc->setProperty("OutputWorkspace", OutputName);
+    evalFunc->setProperty("StartX", startX);
+    evalFunc->setProperty("EndX", endX);
+    evalFunc->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Could not run the algorithm EvaluateFunction, "
+                     "Error description: " +
+                         static_cast<std::string>(re.what())
+                  << std::endl;
+  }
+}
+
+void EnggDiffractionPresenter::runCropWorkspaceAlg(std::string workspaceName) {
+  auto cropWS = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "CropWorkspace");
+  try {
+    cropWS->initialize();
+    cropWS->setProperty("InputWorkspace", workspaceName);
+    cropWS->setProperty("OutputWorkspace", workspaceName);
+    cropWS->setProperty("StartWorkspaceIndex", 1);
+    cropWS->setProperty("EndWorkspaceIndex", 1);
+    cropWS->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Could not run the algorithm CropWorkspace, "
+                     "Error description: " +
+                         static_cast<std::string>(re.what())
+                  << std::endl;
+  }
+}
+
+void EnggDiffractionPresenter::runAppendSpectraAlg(std::string workspace1Name,
+                                                   std::string workspace2Name) {
+  auto appendSpec = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "AppendSpectra");
+  try {
+    appendSpec->initialize();
+    appendSpec->setProperty("InputWorkspace1", workspace1Name);
+    appendSpec->setProperty("InputWorkspace2", workspace2Name);
+    appendSpec->setProperty("OutputWorkspace", workspace1Name);
+    appendSpec->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Could not run the algorithm AppendWorkspace, "
+                     "Error description: " +
+                         static_cast<std::string>(re.what())
+                  << std::endl;
+  }
+}
+
+void EnggDiffractionPresenter::runRebinToWorkspaceAlg(
+    std::string workspaceName) {
+  auto RebinToWs = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "RebinToWorkspace");
+  try {
+    RebinToWs->initialize();
+    RebinToWs->setProperty("WorkspaceToRebin", workspaceName);
+    RebinToWs->setProperty("WorkspaceToMatch", "engggui_fitting_focused_ws");
+    RebinToWs->setProperty("OutputWorkspace", workspaceName);
+    RebinToWs->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Could not run the algorithm RebinToWorkspace, "
+                     "Error description: " +
+                         static_cast<std::string>(re.what())
+                  << std::endl;
+  }
+}
+
+void EnggDiffractionPresenter::runConvetUnitsAlg(std::string workspaceName) {
+
+  auto ConvertUnits =
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged("ConvertUnits");
+  try {
+    ConvertUnits->initialize();
+    ConvertUnits->setProperty("InputWorkspace", workspaceName);
+    ConvertUnits->setProperty("OutputWorkspace", workspaceName);
+    std::string targetUnit = "dSpacing";
+    ConvertUnits->setProperty("Target", targetUnit);
+    ConvertUnits->setPropertyValue("EMode", "Elastic");
+    ConvertUnits->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Could not run the algorithm ConvertUnits, "
+                     "Error description: " +
+                         static_cast<std::string>(re.what())
+                  << std::endl;
+  }
+}
+
+void EnggDiffractionPresenter::runCloneWorkspaceAlg(
+    std::string inputWorkspace, std::string outputWorkspace) {
+
+  auto cloneWorkspace =
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+          "CloneWorkspace");
+  try {
+    cloneWorkspace->initialize();
+    cloneWorkspace->setProperty("InputWorkspace", inputWorkspace);
+    cloneWorkspace->setProperty("OutputWorkspace", outputWorkspace);
+    cloneWorkspace->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Could not run the algorithm CreateWorkspace, "
+                     "Error description: " +
+                         static_cast<std::string>(re.what())
+                  << std::endl;
+  }
+}
+
+void EnggDiffractionPresenter::setDataToClonedWS(std::string current_WS,
+                                                 std::string cloned_WS) {
+  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+  auto currentPeakWS = ADS.retrieveWS<MatrixWorkspace>(current_WS);
+  auto currentClonedWS = ADS.retrieveWS<MatrixWorkspace>(cloned_WS);
+  currentClonedWS->getSpectrum(0)
+      ->setData(currentPeakWS->readY(0), currentPeakWS->readE(0));
+}
+
+void EnggDiffractionPresenter::plotFitPeaksCurves() {
+  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+  std::string singlePeaksWs = "engggui_fitting_single_peaks";
+  std::string focusedPeaksWs = "engggui_fitting_focused_ws";
+
+  if (ADS.doesExist(singlePeaksWs) && ADS.doesExist(focusedPeaksWs)) {
+    auto focusedPeaksWS = ADS.retrieveWS<MatrixWorkspace>(focusedPeaksWs);
+    auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(singlePeaksWs);
+    try {
+      auto focusedData = ALCHelper::curveDataFromWs(focusedPeaksWS);
+      m_view->setDataVector(focusedData, true);
+      auto singlePeaksData = ALCHelper::curveDataFromWs(singlePeaksWS);
+      m_view->setDataVector(singlePeaksData, false);
+
+    } catch (std::runtime_error) {
+      g_log.error()
+          << "Unable to finish of the plotting of the graph for "
+             "engggui_fitting_focused_fitpeaks  workspace. Error "
+             "description. Please check also the log message for detail.";
+      throw;
+    }
+  } else {
+    g_log.error() << "Fitting could not be plotted as there is no " +
+                         singlePeaksWs + " or " + focusedPeaksWs +
+                         " workspace found."
+                  << std::endl;
+  }
+}
+
+void EnggDiffractionPresenter::fittingFinished() {
+  if (!m_view)
+    return;
+
+  if (!m_fittingFinishedOK) {
+    g_log.warning() << "The single peak fitting did not finish correctly."
+                    << std::endl;
+    if (m_workerThread) {
+      delete m_workerThread;
+      m_workerThread = NULL;
+    }
+
+  } else {
+    g_log.notice() << "The single peak fitting finished - the output "
+                      "workspace is ready."
+                   << std::endl;
+
+    if (m_workerThread) {
+      delete m_workerThread;
+      m_workerThread = NULL;
+    }
+
+    g_log.notice()
+        << "EnggDiffraction GUI: plotting peaks for single peak fits "
+           "has started... "
+        << std::endl;
+    try {
+      plotFitPeaksCurves();
+
+    } catch (std::runtime_error &re) {
+      g_log.error() << "Unable to finish of the plotting of the graph for "
+                       "engggui_fitting_focused_fitpeaks workspace. Error "
+                       "description : " +
+                           static_cast<std::string>(re.what()) +
+                           " Please check also the log message for detail.";
+      throw;
+    }
+    g_log.notice() << "EnggDiffraction GUI: plotting of peaks for single peak "
+                      "fits has completed. "
+                   << std::endl;
+  }
+  // enable the GUI
+  m_view->enableCalibrateAndFocusActions(true);
 }
 
 void EnggDiffractionPresenter::processLogMsg() {
@@ -1043,7 +1512,7 @@ void EnggDiffractionPresenter::inputChecksBeforeFocusCropped(
   }
 
   if (specNos.empty()) {
-    throw std::invalid_argument("The list of spectrum IDs cannot be empty when "
+    throw std::invalid_argument("The list of spectrum Nos cannot be empty when "
                                 "focusing in 'cropped' mode.");
   }
 
@@ -1264,7 +1733,7 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
       // Cropped focusing
       // just to iterate once, but there's no real bank here
       bankIDs.push_back(0);
-      specs.push_back(specNos); // one spectrum IDs list given by the user
+      specs.push_back(specNos); // one spectrum Nos list given by the user
       effectiveFilenames.push_back(outputFocusCroppedFilename(runNo));
     } else {
       if (dgFile.empty()) {
@@ -1346,7 +1815,7 @@ void EnggDiffractionPresenter::loadDetectorGroupingCSV(
       throw std::runtime_error(
           "In file '" + dgFile + "', wrong format in line: " +
           boost::lexical_cast<std::string>(li) +
-          " which does not containe any delimiters (comma, etc.)");
+          " which does not contain any delimiters (comma, etc.)");
     }
 
     try {
@@ -1362,7 +1831,7 @@ void EnggDiffractionPresenter::loadDetectorGroupingCSV(
         throw std::runtime_error("In file '" + dgFile +
                                  "', wrong format in line: " +
                                  boost::lexical_cast<std::string>(li) +
-                                 ", the list of spectrum IDs is empty!");
+                                 ", the list of spectrum Nos is empty!");
       }
 
       size_t bankID = boost::lexical_cast<size_t>(bstr);

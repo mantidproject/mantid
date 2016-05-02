@@ -157,7 +157,7 @@ QColor PreviewPlot::canvasColour() { return m_uiForm.plot->canvasBackground(); }
  * @param colour Plot canvas colour
  */
 void PreviewPlot::setCanvasColour(const QColor &colour) {
-  m_uiForm.plot->setCanvasBackground(QBrush(colour));
+  m_uiForm.plot->setCanvasBackground(colour);
 }
 
 /**
@@ -355,7 +355,7 @@ void PreviewPlot::removeSpectrum(const QString &curveName) {
     removeCurve(m_curves[curveName].errorCurve);
     m_uiForm.loLegend->removeWidget(m_curves[curveName].label);
     m_errorBarOptionCache[curveName] =
-        m_curves[curveName].showErrorsAction->isChecked();
+    m_curves[curveName].showErrorsAction->isChecked();
     m_showErrorsMenu->removeAction(m_curves[curveName].showErrorsAction);
     delete m_curves[curveName].showErrorsAction;
     delete m_curves[curveName].label;

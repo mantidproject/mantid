@@ -286,8 +286,8 @@ void SlicingAlgorithmDialog::makeDimensionInputs(
   // Remove excess dimensions from the tied properties and the stored property
   // values
   size_t indexRemoved = 0;
-  QString propertyNameRemoved =
-      propertyPrefix.copy().append(QString().number(indexRemoved));
+  QString propertyNameRemoved = propertyPrefix;
+  propertyNameRemoved.append(QString().number(indexRemoved));
   Mantid::Kernel::Property *propertyRemoved =
       getAlgorithmProperty(propertyNameRemoved);
 
@@ -296,8 +296,8 @@ void SlicingAlgorithmDialog::makeDimensionInputs(
     removePropertyValue(propertyNameRemoved);
 
     indexRemoved++;
-    propertyNameRemoved =
-        propertyPrefix.copy().append(QString().number(indexRemoved));
+    propertyNameRemoved = propertyPrefix;
+    propertyNameRemoved.append(QString().number(indexRemoved));
     propertyRemoved = getAlgorithmProperty(propertyNameRemoved);
   }
 
@@ -312,8 +312,8 @@ void SlicingAlgorithmDialog::makeDimensionInputs(
       Mantid::Geometry::IMDDimension_const_sptr dim = ws->getDimension(index);
 
       // Configure the label
-      const QString propertyName =
-          propertyPrefix.copy().append(QString().number(index));
+      QString propertyName = propertyPrefix;
+      propertyName.append(QString().number(index));
 
       QLabel *dimensionLabel = new QLabel(propertyName);
 
@@ -411,7 +411,7 @@ void SlicingAlgorithmDialog::onBrowse() {
   dialog.setDirectory(QDir::homePath());
   dialog.setNameFilter("Nexus files (*.nxs)");
   if (dialog.exec()) {
-    ui.txt_filename->setText(dialog.selectedFile());
+    ui.txt_filename->setText(dialog.selectedFiles().front());
   }
 }
 
@@ -469,8 +469,7 @@ void SlicingAlgorithmDialog::resestAlignedDimProperty(size_t index,
                                                       QString propertyValue) {
   QString alignedDim = "AlignedDim";
 
-  const QString propertyName =
-      alignedDim.copy().append(QString().number(index));
+  const QString propertyName = alignedDim.append(QString().number(index));
 
   if (!m_tied_properties.contains(propertyName)) {
     return;

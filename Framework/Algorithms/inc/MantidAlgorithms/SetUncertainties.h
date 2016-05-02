@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_CONVERTTOMATRIXWORKSPACE_H_
-#define MANTID_ALGORITHMS_CONVERTTOMATRIXWORKSPACE_H_
+#ifndef MANTID_ALGORITHMS_SETUNCERTAINTIES_H_
+#define MANTID_ALGORITHMS_SETUNCERTAINTIES_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -72,4 +72,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_CONVERTTOMATRIXWORKSPACE_H_*/
+#endif /*MANTID_ALGORITHMS_SETUNCERTAINTIES_H_*/

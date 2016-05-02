@@ -175,7 +175,7 @@ public:
   {
     EXPECT_CALL(*m_view, firstRun()).WillRepeatedly(Return("MUSR00015189.nxs"));
     // Test logs
-    EXPECT_CALL(*m_view, setAvailableLogs(AllOf(Property(&std::vector<std::string>::size, 38),
+    EXPECT_CALL(*m_view, setAvailableLogs(AllOf(Property(&std::vector<std::string>::size, 39),
                                                 Contains("run_number"),
                                                 Contains("sample_magn_field"),
                                                 Contains("Field_Danfysik")))).Times(1);

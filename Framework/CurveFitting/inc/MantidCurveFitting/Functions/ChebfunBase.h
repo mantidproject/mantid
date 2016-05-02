@@ -85,7 +85,7 @@ public:
   /// Copy constructor
   ChebfunBase(const ChebfunBase &) = default;
   /// Move constructor
-  ChebfunBase(ChebfunBase &&) = default;
+  ChebfunBase(ChebfunBase &&) noexcept = default;
   /// Get the polynomial order of this base.
   size_t order() const { return m_n; }
   /// Get the size of the base which is the number of x-points.

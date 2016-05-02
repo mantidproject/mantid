@@ -58,14 +58,14 @@ if ERRORLEVEL 1 exit /b %ERRORLEVEL%
 :: Remove any Mantid.user.properties file
 set USERPROPS=C:\MantidInstall\bin\Mantid.user.properties
 del /Q %USERPROPS%
-:: Turn off usage reports and instrument downloading for the mantid call
-:: that creates the properties file
+:: Turn off any auto updating on startup
 echo UpdateInstrumentDefinitions.OnStartup = 0 > %USERPROPS%
 echo usagereports.enabled = 0 >> %USERPROPS%
+echo CheckMantidVersion.OnStartup = 0 >> %USERPROPS%
 
 :: Run
 set PKGDIR=%WORKSPACE%\build
-set PATH=C:\MantidInstall\bin;C:\MantidInstall\plugins;%PATH%
-:: Temporary fix to ensure that a full Python install is called otherwise we might get a broken one in MantidInstall.
-:: The correct thing to do is not have MantidInstall in the PATH and use mantidpython.bat internally.
-C:\Python27\python.exe %WORKSPACE%\Testing\SystemTests\scripts\InstallerTests.py -o -d %PKGDIR%
+:: A completely clean build will not have Mantid installed but will need Python to
+:: run the testing setup scripts. Assume it is in the PATH
+set PYTHON_EXE=python.exe
+%PYTHON_EXE% %WORKSPACE%\Testing\SystemTests\scripts\InstallerTests.py -o -d %PKGDIR%

@@ -260,7 +260,7 @@ Mantid::DataObjects::EventWorkspace_sptr CreateEventWorkspaceWithStartTime(
 
 Mantid::DataObjects::EventWorkspace_sptr
 CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
-                            double binDelta = 1.0);
+                            double binDelta = 1., double xOffset = 0.);
 
 Mantid::DataObjects::EventWorkspace_sptr
 CreateRandomEventWorkspace(size_t numbins, size_t numpixels,

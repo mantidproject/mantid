@@ -1535,7 +1535,7 @@ void Graph::exportVector(const QString &fileName, int, bool color,
       int width = static_cast<int>(height * plot_aspect);
       int x = (printer.width() - width) / 2;
       plotRect = QRect(x, margin, width, height);
-    } else if (plot_aspect >= page_aspect) {
+    } else {
       int margin = (int)((0.1 / 2.54) * printer.logicalDpiX()); // 1 mm margins
       int width = printer.width() - 2 * margin;
       int height = static_cast<int>(width / plot_aspect);
@@ -3026,8 +3026,20 @@ void Graph::updateScale() {
     setXAxisTitle(mantidCurve->mantidData()->getXAxisLabel());
     setYAxisTitle(mantidCurve->mantidData()->getYAxisLabel());
   } else if (dataCurve && dataCurve->table()) {
-    setXAxisTitle(dataCurve->table()->colLabel(0));
-    setYAxisTitle(dataCurve->table()->colLabel(1).section(".", 0, 0));
+    auto xTitle = dataCurve->xColumnName();
+    auto yTitle = dataCurve->title().text();
+    // X, Y labels in form "Table-1_axisTitle" so split on '_'
+    auto cleanTitle = [](const QString &title) {
+      if (title.contains(QRegExp("^Table")) && title.contains('_')) {
+        return title.section('_', 1);
+      } else {
+        return title;
+      }
+    };
+    xTitle = cleanTitle(xTitle);
+    yTitle = cleanTitle(yTitle);
+    setXAxisTitle(xTitle);
+    setYAxisTitle(yTitle);
   }
 
   Spectrogram *spec = spectrogram();

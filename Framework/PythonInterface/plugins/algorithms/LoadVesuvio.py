@@ -17,9 +17,11 @@ MODES=["SingleDifference", "DoubleDifference", "ThickDifference", "FoilOut", "Fo
 SPECTRA_PROP = "SpectrumList"
 INST_PAR_PROP = "InstrumentParFile"
 SUM_PROP = "SumSpectra"
+LOAD_MON = "LoadMonitors"
+WKSP_PROP_LOAD_MON= "OutputMonitorWorkspace"
 
 # Raw workspace names which are necessary at the moment
-SUMMED_WS, SUMMED_MON = "__loadraw_evs", "__loadraw_evs_monitors"
+SUMMED_WS = "__loadraw_evs"
 # Enumerate the indexes for the different foil state sums
 IOUT = 0
 ITHIN = 1
@@ -40,6 +42,8 @@ class LoadVesuvio(LoadEmptyVesuvio):
     _inst_prefix = None
     _back_scattering = None
     _load_common_called = False
+    _load_monitors = False
+    _load_monitors_workspace = None
     _crop_required = False
     _mon_spectra = None
     _mon_index = None
@@ -125,6 +129,10 @@ class LoadVesuvio(LoadEmptyVesuvio):
                              doc="If true then the final output is a single spectrum containing "
                                  "the sum of all of the requested spectra. All detector angles/"
                                  "parameters are averaged over the individual inputs")
+
+        self.declareProperty(LOAD_MON, False,
+                             doc="If true then the monitor data is loaded and will be output by the "
+                                 "algorithm into a separate workspace.")
 
         self.declareProperty(WorkspaceProperty(WKSP_PROP, "", Direction.Output),
                              doc="The name of the output workspace.")
@@ -322,8 +330,9 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         self._raise_error_period_scatter(run_str, self._back_scattering)
         all_spectra = [item for sublist in self._spectra for item in sublist]
-        ms.LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spectra,
-                   EnableLogging=_LOGGING_)
+
+        self._load_single_run_spec_and_mon(all_spectra, run_str)
+
         raw_group = mtd[SUMMED_WS]
         self._nperiods = raw_group.size()
         first_ws = raw_group[0]
@@ -367,6 +376,36 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
+    def _load_single_run_spec_and_mon(self, all_spectra, run_str):
+        # check if the monitor spectra are already in the spectra list
+        filtered_spectra = [i for i in all_spectra if i <= self._mon_spectra[-1]]
+        filtered_spectra.sort()
+        if filtered_spectra == self._mon_spectra and self._load_monitors:
+            # Load monitors in workspace if defined by user
+            self._load_monitors = False
+            logger.warning("LoadMonitors is true while monitor spectra are defined in the spectra list.")
+            logger.warning("Monitors have been loaded into the data workspace not separately.")
+        if not self._load_monitors:
+            ms.LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spectra,
+                       EnableLogging=_LOGGING_)
+        else:
+            all_spec_inc_mon = self._mon_spectra
+            all_spec_inc_mon.extend(all_spectra)
+            ms.LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spec_inc_mon,
+                       LoadMonitors='Separate', EnableLogging=_LOGGING_)
+            monitor_group = mtd[SUMMED_WS +'_monitors']
+            mon_out_name = self.getPropertyValue(WKSP_PROP) + "_monitors"
+            clone = self.createChildAlgorithm("CloneWorkspace", False)
+            clone.setProperty("InputWorkspace", monitor_group.getItem(0))
+            clone.setProperty("OutputWorkspace", mon_out_name)
+            clone.execute()
+            self._load_monitors_workspace = clone.getProperty("OutputWorkspace").value
+            self._load_monitors_workspace = self._sum_monitors_in_group(monitor_group,
+                                                                        self._load_monitors_workspace)
+            ms.DeleteWorkspace(Workspace=monitor_group)
+
+#----------------------------------------------------------------------------------------
+
     def _load_common_inst_parameters(self):
         """
             Loads an empty VESUVIO instrument and attaches the necessary
@@ -396,8 +435,10 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 parvalue = empty_vesuvio.getStringParameter(name)
             setattr(self, name, parvalue[0]) # Adds attributes to self from Parameter file
 
-        self._mon_spectra = [int(self.monitor_spectrum)]
-        self._mon_index = self._mon_spectra[0] - 1
+        int_mon_spectra = self.monitor_spectra.split(',')
+        int_mon_spectra = [int(i) for i in int_mon_spectra]
+        self._mon_spectra = int_mon_spectra
+        self._mon_index = int_mon_spectra[0] - 1
 
         self._backward_spectra_list = to_int_list(self.backward_scatter_spectra)
         self._forward_spectra_list = to_int_list(self.forward_scatter_spectra)
@@ -457,7 +498,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
     def _retrieve_input(self):
         self._diff_opt = self.getProperty(MODE_PROP).value
-
+        self._load_monitors = self.getProperty(LOAD_MON).value
         # Check for sets of spectra to sum. Semi colon delimits sets
         # that should be summed
         spectra_str = self.getPropertyValue(SPECTRA_PROP)
@@ -512,24 +553,22 @@ class LoadVesuvio(LoadEmptyVesuvio):
         runs = self._get_runs()
 
         self.summed_ws, self.summed_mon = "__loadraw_evs", "__loadraw_evs_monitors"
+        spec_inc_mon = self._mon_spectra
+        spec_inc_mon.extend(spectra)
         for index, run in enumerate(runs):
             run = inst_prefix + str(run)
             self._raise_error_period_scatter(run, self._back_scattering)
             if index == 0:
-                out_name, out_mon = SUMMED_WS, SUMMED_MON
+                out_name, out_mon = SUMMED_WS, SUMMED_WS + '_monitors'
             else:
-                out_name, out_mon = SUMMED_WS + 'tmp', SUMMED_MON + 'tmp'
+                out_name, out_mon = SUMMED_WS + 'tmp', SUMMED_WS + 'tmp_monitors'
 
             # Load data
             raw_filepath = FileFinder.findRuns(run)[0]
             ms.LoadRaw(Filename=raw_filepath,
-                       SpectrumList=spectra,
+                       SpectrumList=spec_inc_mon,
                        OutputWorkspace=out_name,
-                       LoadMonitors='Exclude',
-                       EnableLogging=_LOGGING_)
-            ms.LoadRaw(Filename=raw_filepath,
-                       SpectrumList=self._mon_spectra,
-                       OutputWorkspace=out_mon,
+                       LoadMonitors='Separate',
                        EnableLogging=_LOGGING_)
 
             # Sum
@@ -538,9 +577,9 @@ class LoadVesuvio(LoadEmptyVesuvio):
                         RHSWorkspace=out_name,
                         OutputWorkspace=SUMMED_WS,
                         EnableLogging=_LOGGING_)
-                ms.Plus(LHSWorkspace=SUMMED_MON,
+                ms.Plus(LHSWorkspace=SUMMED_WS + '_monitors',
                         RHSWorkspace=out_mon,
-                        OutputWorkspace=SUMMED_MON,
+                        OutputWorkspace=SUMMED_WS + '_monitors',
                         EnableLogging=_LOGGING_)
 
                 ms.DeleteWorkspace(out_name, EnableLogging=_LOGGING_)
@@ -556,14 +595,47 @@ class LoadVesuvio(LoadEmptyVesuvio):
                          OutputWorkspace=SUMMED_WS,
                          XMax=x_max,
                          EnableLogging=_LOGGING_)
-        ms.CropWorkspace(Inputworkspace= SUMMED_MON,
-                         OutputWorkspace=SUMMED_MON,
+        ms.CropWorkspace(Inputworkspace= SUMMED_WS + '_monitors',
+                         OutputWorkspace=SUMMED_WS + '_monitors',
                          XMax=self._mon_tof_max,
                          EnableLogging=_LOGGING_)
 
-        summed_data, summed_mon = mtd[SUMMED_WS], mtd[SUMMED_MON]
+        summed_data, summed_mon = mtd[SUMMED_WS], mtd[SUMMED_WS + '_monitors']
+
+        # Sum monitors from each period together
+        if self._load_monitors:
+            mon_out_name = self.getPropertyValue(WKSP_PROP) + "_monitors"
+            clone = self.createChildAlgorithm("CloneWorkspace", False)
+            clone.setProperty("InputWorkspace",summed_mon.getItem(0))
+            clone.setProperty("OutputWorkspace", mon_out_name)
+            clone.execute()
+            self._load_monitors_workspace = clone.getProperty("OutputWorkspace").value
+            self._load_monitors_workspace = self._sum_monitors_in_group(summed_mon,
+                                                                        self._load_monitors_workspace)
+
         self._load_diff_mode_parameters(summed_data)
         return summed_data, summed_mon
+
+
+#----------------------------------------------------------------------------------------
+
+    def _sum_monitors_in_group(self, monitor_group, output_ws):
+        """
+        Sums together all the monitors for one run
+        @param monitor_group    :: All the monitor workspaces for a single run
+        @param output_ws        :: The workspace that will contain the summed monitor data
+        @return                 :: The workspace contianing the summed monitor data
+        """
+
+        for mon_index in range(1, monitor_group.getNumberOfEntries()):
+            plus = self.createChildAlgorithm("Plus", False)
+            plus.setProperty("LHSWorkspace", output_ws)
+            plus.setProperty("RHSWorkspace", monitor_group.getItem(mon_index))
+            plus.setProperty("OutputWorkspace", output_ws)
+            plus.execute()
+            output_ws = plus.getProperty("OutputWorkspace").value
+        return output_ws
+
 
 #----------------------------------------------------------------------------------------
 
@@ -968,8 +1040,23 @@ class LoadVesuvio(LoadEmptyVesuvio):
             crop.setProperty("XMax", self._tof_max)
             crop.execute()
             self.foil_out = crop.getProperty("OutputWorkspace").value
+            if self._load_monitors:
+                crop_mon = self.createChildAlgorithm("CropWorkspace")
+                crop.setProperty("InputWorkspace" , self._load_monitors_workspace)
+                crop.setProperty("OutputWorkspace", self._load_monitors_workspace)
+                crop.setProperty("XMax", self._tof_max)
+                crop.execute()
+                self._load_monitors_workspace = crop.getProperty("OutputWorkspace").value
 
         self.setProperty(WKSP_PROP, self.foil_out)
+        # Add OutputWorkspace property for Monitors
+        if self._load_monitors:
+            # Check property is not being re-decalred
+            if not self.existsProperty(WKSP_PROP_LOAD_MON):
+                mon_out_name = self.getPropertyValue(WKSP_PROP) + '_monitors'
+                self.declareProperty(WorkspaceProperty(WKSP_PROP_LOAD_MON, mon_out_name, Direction.Output),
+                                     doc="The output workspace that contains the monitor spectra.")
+            self.setProperty(WKSP_PROP_LOAD_MON, self._load_monitors_workspace)
 
     def _cleanup_raw(self):
         """
@@ -977,8 +1064,8 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """
         if SUMMED_WS in mtd:
             ms.DeleteWorkspace(SUMMED_WS,EnableLogging=_LOGGING_)
-        if SUMMED_MON in mtd:
-            ms.DeleteWorkspace(SUMMED_MON,EnableLogging=_LOGGING_)
+        if SUMMED_WS + '_monitors' in mtd:
+            ms.DeleteWorkspace(SUMMED_WS + '_monitors',EnableLogging=_LOGGING_)
 
 #########################################################################################
 

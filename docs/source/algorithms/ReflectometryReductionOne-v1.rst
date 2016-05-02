@@ -80,6 +80,31 @@ Workflow
 
 .. diagram:: ReflectometryReductionOne-v1_wkflw.dot
 
+
+Source Rotation
+###############
+
+In the workflow diagram above, after we produce the IvsLambda workspace, it may be necessary to rotate the position of the source to match the value of ThetaOut (:math:`\theta_f`).
+
+Below we see the typical experimental setup for a Reflectometry instrument. The source direction (Beam vector) is along the horizon. This setup is defined in the Instrument Defintion File
+and this instrument setup will be attached to any workspaces associated with that instrument.
+When we pass the IvsLambda workspace to :ref:`algm-ConvertUnits` to produce an IvsQ workspace, :ref:`algm-ConvertUnits` will assume that :math:`2\theta` is the angle between the Beam vector and 
+the sample-to-detector vector. When we have the typical setup seen below, :math:`2\theta` will be exactly half the value we wish it to be.
+
+.. figure:: /images/CurrentExperimentSetupForReflectometry.PNG
+    :width: 650px
+    :height: 250px
+    :align: center
+
+We rotate the position of the Source (and therefore the Beam vector) in the Instrument Defintion associated with the IvsLambda workspace
+until the condition :math:`\theta_i = \theta_f` is satisfied. This will achieve the desired result for :math:`2\theta` (see below for rotated source diagram).
+After :ref:`algm-ConvertUnits` has produced our IvsQ workspace, we will rotate the position of the source back to its original position so that the experimental setup remains unchanged for other
+algorithms that may need to manipulate/use it.
+
+.. figure:: /images/RotatedExperimentSetupForReflectometry.PNG
+    :width: 650px
+    :height: 250px
+    :align: center
 Usage
 -----
 

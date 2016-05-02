@@ -319,6 +319,27 @@ public:
     TS_ASSERT_EQUALS(p1.value(), "");
   }
 
+  void test_trimmming() {
+    // trimming on
+    Workspace_sptr ws1 =
+        WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    AnalysisDataService::Instance().add("space1", ws1);
+    WorkspaceProperty<Workspace> p1("workspace1", "", Direction::Input);
+    p1.setValue("  space1\t\n");
+    TS_ASSERT_EQUALS(p1.value(), "space1");
+
+    // turn trimming off
+    Workspace_sptr ws2 =
+        WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    AnalysisDataService::Instance().add("  space1\t\n", ws2);
+    WorkspaceProperty<Workspace> p2("workspace1", "", Direction::Input);
+    p2.setAutoTrim(false);
+    p2.setValue("  space1\t\n");
+    TS_ASSERT_EQUALS(p2.value(), "  space1\t\n");
+
+    AnalysisDataService::Instance().clear();
+  }
+
 private:
   WorkspaceProperty<Workspace> *wsp1;
   WorkspaceProperty<Workspace> *wsp2;

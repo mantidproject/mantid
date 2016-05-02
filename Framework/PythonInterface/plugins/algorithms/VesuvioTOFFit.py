@@ -149,7 +149,15 @@ class VesuvioTOFFit(VesuvioBase):
                                           MaxIterations=max_iter,
                                           Minimizer=self.getPropertyValue("Minimizer"))
 
-        reduced_chi_square, params, fitted_data = outputs[1], outputs[3], outputs[4]
+        result, reduced_chi_square, params, fitted_data = outputs[0], outputs[1], outputs[3], outputs[4]
+
+        # Output result of fiting to log
+        result_log_str = 'Fit result: {0}'.format(result)
+        if result == 'success':
+            logger.information(result_log_str)
+        else:
+            logger.warning(result_log_str)
+
         fitted_data = self._execute_child_alg("ScaleX", InputWorkspace=fitted_data,
                                               OutputWorkspace=fitted_data,
                                               Operation='Multiply', Factor=1e06)

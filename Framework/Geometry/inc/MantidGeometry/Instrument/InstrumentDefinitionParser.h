@@ -174,6 +174,24 @@ private:
                   const Poco::XML::Element *pLocElem,
                   const Poco::XML::Element *pCompElem, IdList &idList);
 
+  void createDetectorOrMonitor(Geometry::ICompAssembly *parent,
+                               const Poco::XML::Element *pLocElem,
+                               const Poco::XML::Element *pCompElem,
+                               const std::string &filename, IdList &idList,
+                               const std::string &category);
+
+  void createRectangularDetector(Geometry::ICompAssembly *parent,
+                                 const Poco::XML::Element *pLocElem,
+                                 const Poco::XML::Element *pCompElem,
+                                 const std::string &filename,
+                                 const Poco::XML::Element *pType);
+
+  void createStructuredDetector(Geometry::ICompAssembly *parent,
+                                const Poco::XML::Element *pLocElem,
+                                const Poco::XML::Element *pCompElem,
+                                const std::string &filename,
+                                const Poco::XML::Element *pType);
+
   /// Append \<locations\> in a locations element
   void appendLocations(Geometry::ICompAssembly *parent,
                        const Poco::XML::Element *pLocElems,

@@ -460,7 +460,7 @@ namespace API
       widget->setVisible( visible );
     } // for each property
 
-    this->repaint(true);
+    this->repaint();
   }
 
   //-------------------------------------------------------------------------------------------------

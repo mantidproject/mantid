@@ -88,8 +88,8 @@ private:
   double m_peakRadius;
   bool m_doMergePeak;
   bool m_normalizeByMonitor;
-  bool m_normalizeByTime;  // NormalizeByTime
-  double m_scaleFactor; // ScaleFactor
+  bool m_normalizeByTime; // NormalizeByTime
+  double m_scaleFactor;   // ScaleFactor
 
   /// Peaks
   std::vector<DataObjects::Peak> m_vecPeaks;
