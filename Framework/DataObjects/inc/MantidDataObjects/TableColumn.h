@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidAPI/Column.h"
 #include "MantidKernel/Logger.h"
 
@@ -26,7 +27,7 @@ namespace Mantid {
 
 namespace DataObjects {
 
-template <class T> class TableVector;
+template <class T> class MANTID_DATAOBJECTS_DLL TableVector;
 
 /** \class TableColumn
 
