@@ -43,10 +43,10 @@ public:
   BinEdges() = default;
   // The copy and move constructor and assignment are not captured properly by
   // the using declaration above, so we need them here explicitly.
-  BinEdges(const BinEdges &other) = default;
-  BinEdges(BinEdges &&other) = default;
-  BinEdges &operator=(const BinEdges &other) & = default;
-  BinEdges &operator=(BinEdges &&other) & = default;
+  BinEdges(const BinEdges &) = default;
+  BinEdges(BinEdges &&) = default;
+  BinEdges &operator=(const BinEdges &)& = default;
+  BinEdges &operator=(BinEdges &&)& = default;
 
   explicit BinEdges(const Points &points);
 };
