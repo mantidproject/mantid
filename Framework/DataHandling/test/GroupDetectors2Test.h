@@ -616,8 +616,8 @@ public:
 
     // Create an axis for each pixel.
     for (size_t pix = 0; pix < inputW->getNumberHistograms(); pix++) {
-      inputW->histogram(pix)
-          .setBinEdges(std::vector<double>{1.0, 2.0, 3.0, 4.0, 1e6});
+      inputW->histogram(pix) =
+          Histogram(BinEdges(std::vector<double>{1.0, 2.0, 3.0, 4.0, 1e6}));
       inputW->getEventList(pix).addEventQuickly(TofEvent(1000.0));
     }
 
@@ -722,8 +722,8 @@ public:
 
     // Create an axis for each pixel.
     for (size_t pix = 0; pix < inputW->getNumberHistograms(); pix++) {
-      inputW->histogram(pix)
-          .setBinEdges(std::vector<double>{1.0, 2.0, 3.0, 4.0, 1e6});
+      inputW->histogram(pix) =
+          Histogram(BinEdges(std::vector<double>{1.0, 2.0, 3.0, 4.0, 1e6}));
       inputW->getEventList(pix).addEventQuickly(TofEvent(1000.0));
     }
 

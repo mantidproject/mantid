@@ -32,6 +32,8 @@ public:
     std::fill(pa->begin(), pa->end(), rand());
     pb = parray(new MantidVec(nel));
     std::fill(pa->begin(), pa->end(), rand());
+    h.histogram() = Histogram(Points(100));
+    h2.histogram() = Histogram(Points(100));
   }
 
   void testsetgetXvector() {
