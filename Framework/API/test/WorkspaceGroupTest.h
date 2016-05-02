@@ -84,7 +84,6 @@ private:
   }
 
 public:
-
   void test_toString_Produces_Expected_String() {
     WorkspaceGroup_sptr group = makeGroup();
 
