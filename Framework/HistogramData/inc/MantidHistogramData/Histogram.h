@@ -70,8 +70,7 @@ public:
   template <typename... T> void setPoints(T &&... data);
 
   const HistogramX &x() const { return *m_x; }
-  const HistogramX &constX() const { return *m_x; }
-  HistogramX &x() { return m_x.access(); }
+  HistogramX &mutableX() { return m_x.access(); }
 
   // Temporary legacy interface to X
   void setX(const MantidVec &X) { m_x.access().rawData() = X; }
