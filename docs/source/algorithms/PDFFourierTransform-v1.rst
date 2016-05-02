@@ -17,11 +17,19 @@ spectral density :math:`S(Q)`, :math:`S(Q)-1`, or :math:`Q[S(Q)-1]`
 The input Workspace spectrum should be in the Q-space (\ **MomentumTransfer**\ ) `units <http://www.mantidproject.org/Units>`_ . 
 (d-spacing is not supported any more. Contact development team to fix that and enable **dSpacing** again)
 
+References
+----------
+
+#. B. H. Toby and T. Egami, *Accuracy of Pair Distribution Functions Analysis Appliced to Crystalline and Non-Crystalline Materials*, Acta Cryst. (1992) A**48**, 336-346
+   `doi: 10.1107/S0108767391011327 <http://dx.doi.org/10.1107/S0108767391011327>`_
+#. B.H. Toby and S. Billinge, *Determination of Standard uncertainities in fits to pair distribution functions*  Acta Cryst. (2004) A**60**, 315-317]
+   `doi: 10.1107/S0108767304011754 <http://dx.doi.org/10.1107/S0108767304011754>`_
+
 .. The algorithm itself is able to identify the unit.  -- not any more. TODO:  should be investigated why this has been disabled
 
 
-Output Options:
-###############
+Output Options
+--------------
 
 **G(r)**
 '''''''''
