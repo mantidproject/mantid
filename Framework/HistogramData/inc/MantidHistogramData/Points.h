@@ -43,10 +43,10 @@ public:
   Points() = default;
   // The copy and move constructor and assignment are not captured properly by
   // the using declaration above, so we need them here explicitly.
-  Points(const Points &other) = default;
-  Points(Points &&other) = default;
-  Points &operator=(const Points &other) & = default;
-  Points &operator=(Points &&other) & = default;
+  Points(const Points &) = default;
+  Points(Points &&) = default;
+  Points &operator=(const Points &)& = default;
+  Points &operator=(Points &&)& = default;
 
   Points(const BinEdges &edges);
 };

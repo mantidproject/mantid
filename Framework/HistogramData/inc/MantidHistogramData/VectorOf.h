@@ -51,8 +51,8 @@ public:
   // Note the lvalue reference qualifier for all assignment operators. This
   // prevents mistakes in client code, assigning to an rvalue, such as
   // histogram.getBinEdges() = { 0.1, 0.2 };
-  VectorOf &operator=(const VectorOf &other) & = default;
-  VectorOf &operator=(VectorOf &&other) & = default;
+  VectorOf &operator=(const VectorOf &)& = default;
+  VectorOf &operator=(VectorOf &&)& = default;
 
   VectorOf &operator=(std::initializer_list<double> ilist) & {
     m_data = Kernel::make_cow<CowType>(ilist);
