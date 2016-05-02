@@ -265,12 +265,6 @@ public:
   }
 
   /// Set the specified X array to point to the given existing array
-  virtual void setX(const std::size_t index, const MantidVec &X) {
-    getSpectrum(index)->setX(X);
-    invalidateCommonBinsFlag();
-  }
-
-  /// Set the specified X array to point to the given existing array
   virtual void setX(const std::size_t index,
                     const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
     getSpectrum(index)->setX(X);

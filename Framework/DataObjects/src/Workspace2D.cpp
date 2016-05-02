@@ -240,7 +240,7 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
     }
     PARALLEL_FOR_IF(parallelExecution)
     for (int i = 1; i < static_cast<int>(height); ++i) {
-      data[i]->setX(data[0]->dataX());
+      data[i]->setX(data[0]->ptrX());
     }
   }
 }

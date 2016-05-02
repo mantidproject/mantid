@@ -45,7 +45,6 @@ public:
   Histogram1D(HistogramData::Histogram::XMode mode)
       : API::ISpectrum(), m_histogram(mode) {}
 
-  void setX(const MantidVec &X) override;
   void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) override;
   MantidVec &dataX() override;
   const MantidVec &dataX() const override;

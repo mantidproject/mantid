@@ -111,12 +111,12 @@ void NormaliseByPeakArea::exec() {
   m_progress = new API::Progress(this, 0.10, 1.0, nreports);
 
   for (int64_t i = 0; i < nhist; ++i) {
-    m_normalisedWS->setX(i, m_inputWS->readX(i)); // TOF
+    m_normalisedWS->setX(i, m_inputWS->refX(i)); // TOF
     if (!m_sumResults) // avoid setting multiple times if we are summing
     {
-      m_yspaceWS->setX(i, yspaceIn->readX(i));      // momentum
-      m_fittedWS->setX(i, yspaceIn->readX(i));      // momentum
-      m_symmetrisedWS->setX(i, yspaceIn->readX(i)); // momentum
+      m_yspaceWS->setX(i, yspaceIn->refX(i));      // momentum
+      m_fittedWS->setX(i, yspaceIn->refX(i));      // momentum
+      m_symmetrisedWS->setX(i, yspaceIn->refX(i)); // momentum
     }
 
     double peakArea = fitToMassPeak(yspaceIn, static_cast<size_t>(i));

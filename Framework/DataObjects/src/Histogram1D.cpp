@@ -14,10 +14,6 @@ void Histogram1D::clearData() {
 
 /// Sets the x data.
 /// @param X :: vector of X data
-void Histogram1D::setX(const MantidVec &X) { m_histogram.setX(X); }
-
-/// Sets the x data.
-/// @param X :: vector of X data
 void Histogram1D::setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
   m_histogram.setX(X);
 }

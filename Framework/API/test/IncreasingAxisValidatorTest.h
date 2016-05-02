@@ -24,22 +24,14 @@ public:
     m_right_ws = boost::make_shared<WorkspaceTester>();
     m_right_ws->initialize(1, 3, 3);
 
-    auto right_x = boost::make_shared<MantidVec>();
-    right_x->push_back(0);
-    right_x->push_back(1);
-    right_x->push_back(2);
-
-    m_right_ws->setX(0, *right_x.get());
+    auto points = {0.0, 1.0, 2.0};
+    m_right_ws->histogram(0).setPoints(points);
 
     m_wrong_ws = boost::make_shared<WorkspaceTester>();
     m_wrong_ws->initialize(1, 3, 3);
 
-    auto wrong_x = boost::make_shared<MantidVec>();
-    wrong_x->push_back(2);
-    wrong_x->push_back(1);
-    wrong_x->push_back(0);
-
-    m_wrong_ws->setX(0, *wrong_x.get());
+    points = {2.0, 1.0, 0.0};
+    m_wrong_ws->histogram(0).setPoints(points);
   }
 
   void testRight() { TS_ASSERT_EQUALS(validator.isValid(m_right_ws), ""); }

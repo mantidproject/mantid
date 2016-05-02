@@ -347,7 +347,7 @@ void ExtractSpectra::execEvent() {
     if (!m_commonBoundaries) {
       // If the X axis is NOT common, then keep the initial X axis, just clear
       // the events
-      outEL.setX(el.dataX());
+      outEL.setX(el.ptrX());
       if (hasDx) {
         outEL.setDx(el.dataDx());
       }

@@ -127,7 +127,7 @@ public:
         axis[i] = static_cast<double>(1 + pix) + i * 1.0;
       axis[4] = 1e6;
       // Set an X-axis
-      inputW->setX(pix, axis);
+      inputW->histogram(pix).setBinEdges(axis);
       inputW->getEventList(pix).addEventQuickly(TofEvent(1000.0));
     }
 

@@ -35,11 +35,11 @@ public:
   }
 
   void testsetgetXvector() {
-    h.setX(x1);
+    h.histogram().setPoints(x1);
     TS_ASSERT_EQUALS(x1, h.dataX());
   }
   void testcopyX() {
-    h2.setX(x1);
+    h2.histogram().setPoints(x1);
     h.dataX() = h2.dataX();
     TS_ASSERT_EQUALS(h.dataX(), x1);
   }
@@ -72,7 +72,7 @@ public:
     TS_ASSERT_EQUALS(h.dataE(), *pb);
   }
   void testgetXindex() {
-    h.setX(x1);
+    h.histogram().setPoints(x1);
     TS_ASSERT_EQUALS(h.dataX()[4], x1[4]);
   }
   void testgetYindex() {
@@ -84,7 +84,7 @@ public:
     TS_ASSERT_EQUALS(h.dataE()[4], e1[4]);
   }
   void testoperatorbracket() {
-    //	  h.setX(x1);
+    //	  h.histogram().setPoints(x1);
     //	  h.setData(y1,e1);
     //	  double* xye;
     //	  xye=h[0];
@@ -94,7 +94,7 @@ public:
   }
 
   void testrangeexceptionX() {
-    h.setX(x1);
+    h.histogram().setPoints(x1);
     TS_ASSERT_THROWS(h.dataX().at(nel), std::out_of_range);
   }
   void testrangeexceptionY() {

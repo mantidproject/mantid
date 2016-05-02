@@ -46,7 +46,6 @@ public:
   SpectrumTester(const specnum_t specNo, HistogramData::Histogram::XMode mode)
       : ISpectrum(specNo), m_histogram(mode) {}
 
-  void setX(const MantidVec &X) override { m_histogram.setX(X); }
   void setX(const cow_ptr<HistogramData::HistogramX> &X) override {
     m_histogram.setX(X);
   }

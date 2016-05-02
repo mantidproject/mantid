@@ -159,6 +159,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
   ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
       WorkspaceFactory::Instance().create("Workspace2D", nSpectra,
                                           spectraLength, spectraLength));
+  HistogramData::Points points(xData);
   for (int wsIndex = 0; wsIndex < nSpectra; wsIndex++) {
     Mantid::MantidVec &Y = ws->dataY(wsIndex);
     for (int j = 0; j < spectraLength; j++) {
@@ -167,7 +168,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
     // Create and fill another vector for the errors, containing sqrt(count)
     Mantid::MantidVec &E = ws->dataE(wsIndex);
     std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
-    ws->setX(wsIndex, xData);
+    ws->histogram(wsIndex).setPoints(points);
     // Xtof		ws->getAxis(1)->spectraNo(i)= i;
     ws->getSpectrum(wsIndex)
         ->setSpectrumNo(static_cast<specnum_t>(yData[wsIndex]));

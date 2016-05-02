@@ -1461,16 +1461,6 @@ void EventList::setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
     mru->deleteIndex(this->m_specNo);
 }
 
-/** Set the x-component for the histogram view. This will NOT cause the
- * histogram to be calculated.
- * @param X :: The vector of doubles to set as the histogram limits.
- */
-void EventList::setX(const MantidVec &X) {
-  m_histogram.setX(X);
-  if (mru)
-    mru->deleteIndex(this->m_specNo);
-}
-
 /** Returns a reference to the x data.
  *  @return a reference to the X (bin) vector.
  */

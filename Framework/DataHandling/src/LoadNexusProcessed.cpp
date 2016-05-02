@@ -772,7 +772,7 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
         x.resize(xbins.dim1());
         for (int i = 0; i < xbins.dim1(); i++)
           x[i] = xbins(static_cast<int>(wi), i);
-        el.setX(x);
+        el.histogram().setBinEdges(x);
       }
     }
 
