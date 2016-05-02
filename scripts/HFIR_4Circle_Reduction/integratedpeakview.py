@@ -1,3 +1,4 @@
+#pylint: disable=W0403,R0904,R0903
 import mplgraphicsview
 
 
@@ -26,6 +27,10 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
 
         self._bkgdIndicatorID = -1
 
+        # current mouse position
+        self._currX = 0.
+        self._currY = 0.
+
         return
 
     def add_background_indictor(self):
@@ -43,6 +48,8 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
         :param event:
         :return:
         """
+        self._currX = event.xdata
+        self._currY = event.ydata
 
         return
 
@@ -72,21 +79,27 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
 
     def set_smart_y_limit(self, vec_y):
         """
-
+        Set limit on Y axis automatically (in a 'smart' way), i.e.,
+        - to the smaller of zero and 10 percent delta Y under minimum Y
+        - to 10 percent delta Y above maximum Y
         :return:
         """
-        # TODO/NOW - Check and doc
+        # check
+        assert len(vec_y) > 0
 
+        # find y's minimum and maximum
         min_y = min(vec_y)
         max_y = max(vec_y)
 
         d_y = max_y - min_y
 
+        # set Y to the smaller of zero and 10 percent delta Y under minimum Y
         if min_y > 0:
             y_lower_limit = 0
         else:
             y_lower_limit = min_y - 0.1 * d_y
 
+        # set Y to 10 percent delta Y above maximum Y
         y_upper_limit = max_y + 0.1 * d_y
 
         self.setXYLimit(ymin=y_lower_limit, ymax=y_upper_limit)

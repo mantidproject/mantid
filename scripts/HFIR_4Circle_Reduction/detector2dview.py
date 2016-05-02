@@ -1,3 +1,4 @@
+#pylint: disable=W0403,R0902,R0903,R0904,W0212
 import mpl2dgraphicsview
 
 import numpy as np
@@ -134,6 +135,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
             self._myPolygon.remove()
             self._myPolygon = None
 
+            # FUTURE-TO-DO: this should be replaced by some update() method of canvas
             self._myCanvas._flush()
 
         return

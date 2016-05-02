@@ -727,7 +727,7 @@ class MplGraphicsView(QtGui.QWidget):
         else:
             # 2-way
             canvas_line_index_h, canvas_line_index_v = self._myIndicatorsManager.get_canvas_line_index(i_key)
-            h_vec_set, v_vec_set = self._myIndicatorsManager.get_2way_data(i_key)
+            # h_vec_set, v_vec_set = self._myIndicatorsManager.get_2way_data(i_key)
 
             self._myCanvas.updateLine(ikey=canvas_line_index_h, vecx=None, vecy=None, linecolor=color)
             self._myCanvas.updateLine(ikey=canvas_line_index_v, vecx=None, vecy=None, linecolor=color)
@@ -811,7 +811,6 @@ class MplGraphicsView(QtGui.QWidget):
         self._myLineMarkerColorIndex = 0
         return
 
-    # FIXME - Find out difference between setXYLimit() and setXYLimits()
     def setXYLimit(self, xmin=None, xmax=None, ymin=None, ymax=None):
         """ Set X-Y limit automatically
         """
@@ -821,11 +820,6 @@ class MplGraphicsView(QtGui.QWidget):
         self._myCanvas.draw()
 
         return
-
-    """ Permanently removed
-    def setXYLimits(self, xmin=None, xmax=None, ymin=None, ymax=None):
-        return self._myCanvas.setXYLimit(xmin, xmax, ymin, ymax)
-    """
 
     def setAutoLineMarkerColorCombo(self):
         """
@@ -1197,17 +1191,9 @@ class Qt4MplCanvas(FigureCanvas):
         :param plot_key:
         :return:
         """
-        # self._lineDict[ikey].remove()
-        debug_info = 'Remove line... '
-
         # Get all lines in list
         lines = self.axes.lines
         assert isinstance(lines, list)
-
-        debug_info += 'Number of lines = %d, List: %s.\n' % (len(lines), str(lines))
-        debug_info += 'Line to remove: key = %s, Line Dict has key = %s' % (
-            str(plot_key), plot_key in self._lineDict)
-        # print debug_info
 
         if plot_key in self._lineDict:
             self.axes.lines.remove(self._lineDict[plot_key])

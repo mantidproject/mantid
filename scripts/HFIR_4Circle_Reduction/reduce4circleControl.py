@@ -146,16 +146,17 @@ class CWSCDReductionControl(object):
 
     def calculate_peak_center(self, exp_number, scan_number, pt_numbers=None):
         """
-
+        Calculate center of peak by weighting the peak centers of multiple Pt (slice from 3D peak)
         :param exp_number:
         :param scan_number:
         :param pt_numbers:
         :return: 3-tuple
         """
-        # TODO/NOW - Doc and check
         # Check & set pt. numbers
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
+        assert isinstance(exp_number, int), 'Experiment number %s must be an integer but not %s.' \
+                                            '' % (str(exp_number), str(type(exp_number)))
+        assert isinstance(scan_number, int), 'Scan number %s must be an integer but not %s.' \
+                                             '' % (str(scan_number), str(type(scan_number)))
         if pt_numbers is None:
             status, pt_number_list = self.get_pt_numbers(exp_number, scan_number)
             assert status
@@ -253,6 +254,7 @@ class CWSCDReductionControl(object):
         Download a scan/pt data from internet
         :param exp_number: experiment number
         :param scan_number:
+        :param over_write:
         :return:
         """
         # Check
@@ -501,6 +503,7 @@ class CWSCDReductionControl(object):
     def get_raw_detector_counts(self, exp_no, scan_no, pt_no):
         """
         Get counts on raw detector
+        :param exp_no:
         :param scan_no:
         :param pt_no:
         :return: boolean, 2D numpy data
@@ -516,9 +519,7 @@ class CWSCDReductionControl(object):
             for j in xrange(DET_Y_SIZE):
                 array2d[i][j] = raw_ws.readY(i * DET_X_SIZE + j)[0]
 
-        # Rotate the output matrix
-        # array2d = numpy.rot90(array2d, 1)
-        # FIXME - Later
+        # Flip the 2D array to look detector from sample
         array2d = numpy.flipud(array2d)
 
         return array2d
@@ -588,6 +589,7 @@ class CWSCDReductionControl(object):
         Get merged data in format of numpy.ndarray to plot
         :param exp_number:
         :param scan_number:
+        :param pt_number_list:
         :return: numpy.ndarray. shape = (?, 3)
         """
         # check
@@ -741,19 +743,26 @@ class CWSCDReductionControl(object):
         """ Check whether the peak is integrated as designated
         :param exp_number:
         :param scan_number:
+        :param masked:
         :param pt_list:
         :param normalized_by_monitor:
         :param normalized_by_time:
         :return:
         """
-        # TODO/NOW - Doc & check
+        # check requirements
+        assert isinstance(exp_number,int), 'Experiment number must be an integer but not %s.' \
+                                           '' % str(type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number must be an integer but not %s.' \
+                                             '' % str(type(scan_number))
 
+        # get default Pt list if required
         if pt_list is None:
             status, ret_obj = self.get_pt_numbers(exp_number, scan_number)
             if status is False:
                 raise RuntimeError(ret_obj)
             pt_list = ret_obj
         # END-IF
+        assert isinstance(pt_list, list) and len(pt_list) > 0
 
         peak_ws_name = get_integrated_peak_ws_name(exp_number, scan_number, pt_list, masked,
                                                    normalized_by_monitor, normalized_by_time)
@@ -876,6 +885,7 @@ class CWSCDReductionControl(object):
         :param peak_centre: a float radius or None for not using
         :param merge_peaks: If selected, merged all the Pts can return 1 integrated peak's value;
                       otherwise, integrate peak for each Pt.
+        :param normalization :: normalization set up (by time or ...)
         :return:
         """
         # check
@@ -885,7 +895,7 @@ class CWSCDReductionControl(object):
         assert len(peak_centre) == 3
         assert isinstance(merge_peaks, bool)
 
-        # FIXME - combine the download and naming for common use
+        # VZ-FUTURE - combine the download and naming for common use
         # get spice file
         spice_table_name = get_spice_table_name(exp, scan)
         if AnalysisDataService.doesExist(spice_table_name) is False:
@@ -921,6 +931,7 @@ class CWSCDReductionControl(object):
         print '[DB-INFO] Integrate Pt. with mask workspace %s. Norm by time = %d; Norm by monitor = %d.' \
               '' % (mask_ws_name, norm_by_time, norm_by_mon)
 
+        # VZ-FUTURE: Are you sure ScaleFactor is 1 !!!
         api.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
                                OutputWorkspace=integrated_peak_ws_name,
                                PeakRadius=peak_radius,

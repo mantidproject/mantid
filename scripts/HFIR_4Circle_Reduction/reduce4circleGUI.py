@@ -179,11 +179,12 @@ class MainWindow(QtGui.QMainWindow):
         # Tab 'Integrate Peaks'
         self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
                      self.do_integrate_per_pt)
-        # FIXME/TODO/NOW : it makes the same call to method do_integrate_peaks!
-        self.connect(self.ui.pushButton_integratePeak, QtCore.SIGNAL('clicked()'),
-                     self.do_integrate_peaks)
         self.connect(self.ui.comboBox_ptCountType, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.do_plot_pt_peak)
+
+        self.connect(self.ui.pushButton_integratePeak, QtCore.SIGNAL('clicked()'),
+                     self.do_integrate_peaks)
+
         self.connect(self.ui.pushButton_fitBkgd, QtCore.SIGNAL('clicked()'),
                      self.do_fit_bkgd)
         self.connect(self.ui.pushButton_handPickBkgd, QtCore.SIGNAL('clicked()'),
@@ -883,12 +884,14 @@ class MainWindow(QtGui.QMainWindow):
         vec_x, vec_y, vec_e = self.ui.graphicsView_integratedPeakView.get_xye()
 
         # fit Gaussian for starting value of a, b and c
-        popt, pcov = curve_fit(gauss, vec_x, vec_y)
-        gauss_fit = gauss(vec_x, popt[0], popt[1], popt[2])
+        fit_result1 = curve_fit(gauss, vec_x, vec_y)
+        popt = fit_result1[0]  # popt, pcov
+        # gauss_fit = gauss(vec_x, popt[0], popt[1], popt[2])
 
         # fit Gaussian again including background
         p0 = [popt[0], popt[1], popt[2], 0.]
-        popt2, pcov2 = curve_fit(gauss4, vec_x, vec_y, sigma=vec_e,  p0=p0)
+        fit_result2 = curve_fit(gauss4, vec_x, vec_y, sigma=vec_e,  p0=p0)
+        popt2 = fit_result2[0]  # popt2, pcov2
         gauss_fit4 = gauss4(vec_x, popt2[0], popt2[1], popt2[2], popt2[3])
 
         # plot the result
@@ -964,9 +967,10 @@ class MainWindow(QtGui.QMainWindow):
 
     def do_integrate_per_pt(self):
         """
+        Integrate and plot per Pt.
         :return:
         """
-        # TODO/NOW - Doc
+        # VZ-FUTURE: consider to compare and merge with method do_plot_pt_peak()
         # get experiment and scan number
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
                                                         self.ui.lineEdit_scanIntegratePeak])
@@ -1049,7 +1053,7 @@ class MainWindow(QtGui.QMainWindow):
         Integrate peaks
         :return:
         """
-        raise NotImplementedError('Unfinished!')
+        # VZ-FUTURE: Implement this next!
 
         # get rows to merge
         row_number_list = self.ui.tableWidget_mergeScans.get_selected_rows(True)
@@ -1216,11 +1220,10 @@ class MainWindow(QtGui.QMainWindow):
 
     def do_plot_pt_peak(self):
         """
-
+        Integrate Pt. vs integrated intensity of detectors of that Pt. if it is not calculated before
+        and then plot pt vs. integrated intensity on
         :return:
         """
-        # TODO/NOW - Doc
-
         # Find out the current condition including (1) absolute (2) normalized by time
         # (3) normalized by monitor counts
         be_norm_str = str(self.ui.comboBox_ptCountType.currentText())
@@ -1250,8 +1253,11 @@ class MainWindow(QtGui.QMainWindow):
                                                              normalized_by_time=norm_by_time,
                                                              masked=self.ui.checkBox_applyMask.isChecked())
 
-        # integrate again
-        if has_integrated is False:
+        # integrate and/or plot
+        if has_integrated:
+            self.plot_pt_intensity()
+        else:
+            # VZ-FUTURE: implement this new method!
             self.do_integrate_per_pt()
 
         return
@@ -1607,11 +1613,10 @@ class MainWindow(QtGui.QMainWindow):
 
     def do_save_roi(self):
         """
-
+        Save region of interest to a specific name and reflects in combo boxes for future use,
+        especially used as a general ROI for multiple scans
         :return:
         """
-        # TODO/NOW - Doc!
-
         # get the experiment and scan value
         status, par_val_list = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run])
         assert status
@@ -1805,7 +1810,6 @@ class MainWindow(QtGui.QMainWindow):
         status, ret_obj = gutil.parse_float_array(ub_str)
 
         # check whether the ub matrix in text editor is valid
-        # FIXME - This is somehow a redundant check!
         if status is False:
             # unable to parse to float arrays
             self.pop_one_button_dialog(ret_obj)
@@ -1907,6 +1911,7 @@ class MainWindow(QtGui.QMainWindow):
 
         elif self.ui.radioButton_loadUBmatrix.isChecked():
             # load ub matrix from a file
+            # VZ-FUTURE: Implement this next!
             ub_matrix = set_ub_from_file()
 
         elif self.ui.radioButton_ubFromList.isChecked():
@@ -2151,8 +2156,6 @@ class MainWindow(QtGui.QMainWindow):
         save_dict['lineEdit_gamma'] = str(self.ui.lineEdit_gamma.text())
 
         # Merge scan
-        # FIXME : use self._myUBMatrix instead
-        #         save_dict['plainTextEdit_ubInput'] = str(self.ui.plainTextEdit_ubInput.toPlainText())
         save_dict['lineEdit_listScansSliceView'] = str(self.ui.lineEdit_listScansSliceView.text())
         save_dict['lineEdit_baseMergeMDName'] = str(self.ui.lineEdit_baseMergeMDName.text())
 

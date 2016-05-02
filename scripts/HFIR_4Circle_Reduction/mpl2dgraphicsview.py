@@ -189,9 +189,10 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         # set y ticks as an option:
         if yticklabels is not None:
             # it will always label the first N ticks even image is zoomed in
-            # FIXME - The way to set up the Y-axis ticks is wrong!"
+            # FUTURE-VZ : The way to set up the Y-axis ticks is wrong!"
             # self.axes.set_yticklabels(yticklabels)
-            pass
+            print '[Warning] The method to set up the Y-axis ticks to 2D image is ' \
+                  'wrong!'
 
         # explicitly set aspect ratio of the image
         self.axes.set_aspect('auto')
@@ -266,13 +267,19 @@ class Qt4Mpl2dCanvas(FigureCanvas):
 
     def plot_polygon(self, vertex_array, fill=False, color='w'):
         """
-
+        Plot a new polygon
         :param vertex_array:
         :param fill:
         :param color:
         :return:
         """
-        p = plt.Polygon(vertex_array, fill=False, color='w')
+        # check requirements
+        assert isinstance(vertex_array, np.ndarray)
+        assert isinstance(fill, bool)
+        assert isinstance(color, str)
+
+        # plot polygon
+        p = plt.Polygon(vertex_array, fill=fill, color=color)
         self.axes.add_artist(p)
 
         # Flush...

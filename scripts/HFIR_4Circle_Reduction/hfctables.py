@@ -29,13 +29,18 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
 
     def append_pt(self, pt_number, raw_signal, masked_signal):
         """
-        out_ws, target_frame, exp_no, scan_no, None
-        :param info_tuple:
+        Append a new row for the signal/intensity of a Pt.
+        :param pt_number:
+        :param raw_signal:
+        :param masked_signal:
         :return: 2-tuple as boolean and error message
         """
-        # TODO/NOW - Doc and check
-        # assert ...
+        # check requirements
+        assert isinstance(pt_number, int)
+        assert isinstance(raw_signal, int) or isinstance(raw_signal, float)
+        assert isinstance(masked_signal, float)
 
+        # form a new row and append
         status, msg = self.append_row([pt_number, raw_signal, masked_signal, False])
         if status is False:
             msg = 'Unable to append row to peak integration table due to %s' % msg
@@ -44,10 +49,9 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
 
     def get_exp_info(self):
         """
-
+        Get experiment information of the data written in the table now
         :return:
         """
-        # TODO/NOW - doc and check
         return self._expNumber, self._scanNumber
 
     def setup(self):
@@ -69,11 +73,13 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
 
     def set_exp_info(self, exp_no, scan_no):
         """
+        Set experiment number and scan number to this table for the data that are written to it
         :param exp_no:
         :param scan_no:
         :return:
         """
-        # TODO/NOW - Doc and check
+        assert isinstance(exp_no, int)
+        assert isinstance(scan_no, int)
 
         self._expNumber = exp_no
         self._scanNumber = scan_no

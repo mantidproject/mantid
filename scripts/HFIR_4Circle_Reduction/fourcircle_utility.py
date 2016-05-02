@@ -1,4 +1,4 @@
-#pylint: disable=W0633,too-many-branches
+#pylint: disable=W0633,R0913,too-many-branches
 import os
 import urllib2
 import socket
