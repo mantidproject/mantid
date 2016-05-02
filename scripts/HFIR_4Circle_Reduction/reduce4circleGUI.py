@@ -183,7 +183,7 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_plot_pt_peak)
 
         self.connect(self.ui.pushButton_integratePeak, QtCore.SIGNAL('clicked()'),
-                     self.do_integrate_peaks)
+                     self.do_integrate_peak)
 
         self.connect(self.ui.pushButton_fitBkgd, QtCore.SIGNAL('clicked()'),
                      self.do_fit_bkgd)
@@ -965,6 +965,49 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_integrate_peak(self):
+        """ Integrate a peak in tab peak integration
+        :return:
+        """
+        # TODO/NOW - Doc!
+        # only support the simple cuboid counts summing algorithm
+
+        # get experiment number and scan number
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_scanIntegratePeak],
+                                                       allow_blank=False)
+        if status is False:
+            err_msg = ret_obj
+            self.pop_one_button_dialog(err_msg)
+            return
+
+        # check table
+        table_exp, table_scan = self.ui.tableWidget_peakIntegration.get_exp_info()
+        if (table_exp, table_scan) != tuple(ret_obj):
+            err_msg = 'Table has value of a different experiment/scan (%d/%d vs %d/%d). Integrate Pt. first!' \
+                      '' % (table_exp, table_scan, ret_obj[0], ret_obj[1])
+            self.pop_one_button_dialog(err_msg)
+            return
+
+        # integrate
+        status, ret_obj = gutil.parse_float_editors(self.ui.lineEdit_background, allow_blank=True)
+        assert status, ret_obj
+        if ret_obj is None:
+            background = 0.
+        else:
+            background = ret_obj
+        peak_intensity = self.ui.tableWidget_peakIntegration.simple_integrate_peak(background)
+
+        # write result to label
+        norm_type = str(self.ui.comboBox_ptCountType.currentText())
+        label_str = 'Experiment %d Scan %d: Peak intensity = %.7f, Normalized by %s, Background = %.7f.' \
+                    '' % (table_exp, table_scan, peak_intensity, norm_type, background)
+        self.ui.label_peakIntegraeInfo.setText(label_str)
+
+        # set value to previous table
+        self.ui.tableWidget_mergeScans.set_peak_intensity(None, table_scan, peak_intensity)
+
+        return
+
     def do_integrate_per_pt(self):
         """
         Integrate and plot per Pt.
@@ -1049,11 +1092,11 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_integrate_peaks(self):
-        """ Integrate selected peaks with.  If any scan is not merged, then it will merge the scan first
+        """ Integrate selected peaks.  If any scan is not merged, then it will merge the scan first.
         Integrate peaks
         :return:
         """
-        # VZ-FUTURE: Implement this next!
+        # TODO/NOW - Docs & ...
 
         # get rows to merge
         row_number_list = self.ui.tableWidget_mergeScans.get_selected_rows(True)
@@ -1062,27 +1105,55 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         # get the parameters for integration
-        status, peak_radius = gutil.parse_float_editors([self.ui.lineEdit_peakRadius], allow_blank=False)
-        if status is False:
-            self.pop_one_button_dialog('Peak radius is not given right')
-            return
+        # SKIPPED!
+        # status, peak_radius = gutil.parse_float_editors([self.ui.lineEdit_peakRadius], allow_blank=False)
+        # if status is False:
+        #    self.pop_one_button_dialog('Peak radius is not given right')
+        #    return
 
         # merged workspace base name
-        use_default_merge_name = self.ui.checkBox_useDefaultMergedName.isChecked()
+        # use_default_merge_name = self.ui.checkBox_useDefaultMergedName.isChecked()
 
-        # integrate peak
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp], allow_blank=False)
+        # get experiment number
+        status, ret_obj = gutil.parse_integers_editors(self.ui.lineEdit_exp, allow_blank=False)
         if status:
-            exp_number = ret_obj[0]
+            exp_number = ret_obj
         else:
             self.pop_one_button_dialog('Unable to get valid experiment number due to %s.' % ret_obj)
             return
 
+        # mask workspace
+        selected_mask = str(self.ui.comboBox_maskNames1.currentText())
+        if selected_mask == 'No Mask':
+            selected_mask = None
+            mask_det = False
+        else:
+            mask_det = True
+
+        # normalization
+        norm_str = str(self.ui.comboBox_mergePeakNormType.currentText())
+        if norm_str.lower().count('time') > 0:
+            norm_type = 'time'
+        elif norm_str.lower().count('monitor') > 0:
+            norm_type = 'monitor'
+        else:
+            norm_type = ''
+
+        # background Pt.
+        status, num_bg_pt = gutil.parse_integers_editors(self.ui.lineEdit_numPt4Background, allow_blank=False)
+        assert status and num_bg_pt > 0, 'Number of Pt number for background must be larger than 0!'
+
+        # integrate peak
         for row_number in row_number_list:
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
-            pt_number_list = self._myControl.get_pt_numbers(exp_number, scan_number)
+            status, pt_number_list = self._myControl.get_pt_numbers(exp_number, scan_number)
+            if status is False:
+                print ('Unable to get Pt. of experiment %d scan %d due to %s.' % (
+                    exp_number, scan_number, str(pt_number_list)
+                ))
+                continue
 
-            # merge if required
+            # merge all Pt. of the scan if they are not merged.
             merged = self.ui.tableWidget_mergeScans.get_merged_status(row_number)
             if merged is False:
                 self._myControl.merge_pts_in_scan(exp_no=exp_number, scan_no=scan_number, pt_num_list=pt_number_list,
@@ -1090,10 +1161,37 @@ class MainWindow(QtGui.QMainWindow):
                 self.ui.tableWidget_mergeScans.set_status_by_row(row_number, 'Done')
             # END-IF
 
-            # integrate peak
-            peak_intensity = self._myControl.integrate_peak(exp_number, scan_number, pt_number_list, peak_radius)
-            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, peak_intensity)
+            # calculate peak center
+            status, ret_obj = self._myControl.calculate_peak_center(exp_number, scan_number, pt_number_list)
+            if status:
+                center_i = ret_obj
+            else:
+                print ('Unable to find peak for exp %d scan %d.' % (exp_number, scan_number))
+                continue
 
+            # mask workspace
+            # VZ-FUTURE: consider to modify method generate_mask_workspace() such that it can be generalized outside
+            #            loop
+            self._myControl.check_generate_mask_workspace(exp_number, scan_number, selected_mask)
+
+            # integrate peak
+            status, ret_obj = self._myControl.integrate_scan_peaks(exp=exp_number,
+                                                                   scan=scan_number,
+                                                                   peak_radius=1.0,
+                                                                   peak_centre=center_i,
+                                                                   merge_peaks=False,
+                                                                   use_mask=mask_det,
+                                                                   normalization=norm_type,
+                                                                   mask_ws_name=selected_mask)
+            assert status, str(ret_obj)
+            pt_dict = ret_obj
+
+            background_pt_list = pt_number_list[:num_bg_pt] + pt_number_list[-num_bg_pt:]
+            avg_bg_value = self._myControl.estimate_background(pt_dict, background_pt_list)
+            intensity_i = self._myControl.simple_integrate_peak(pt_dict, avg_bg_value)
+
+            # set the value to table
+            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, None, intensity_i)
         # END-FOR
 
         return
@@ -1631,12 +1729,13 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         # get current ROI
-        roi = self._myControl.get_region_of_interest(exp_number=exp_number, scan_number=scan_number)
+        status, roi = self._myControl.get_region_of_interest(exp_number=exp_number, scan_number=scan_number)
+        assert status, str(roi)
         roi_name = str(roi_name)
         self._myControl.save_roi(roi_name, roi)
 
         # set it to combo-box
-        self.ui.comboBox_maskNames.addItem(roi_name)
+        self.ui.comboBox_maskNames1.addItem(roi_name)
         self.ui.comboBox_maskNames2.addItem(roi_name)
 
         return

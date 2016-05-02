@@ -25,6 +25,8 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         self._expNumber = -1
         self._scanNumber = -1
 
+        self._intensityColIndex = None
+
         return
 
     def append_pt(self, pt_number, raw_signal, masked_signal):
@@ -69,6 +71,9 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         self.setColumnWidth(2, 90)
         self.setColumnWidth(3, 90)
 
+        # Set others...
+        self._intensityColIndex = self._myColumnNameList.index('Masked')
+
         return
 
     def set_exp_info(self, exp_no, scan_no):
@@ -112,9 +117,10 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
 
     def set_q(self, row_index, vec_q):
         """
-        Set up Q value
+        Set Q to rows
         :param row_index:
         :param vec_q: a list or array with size 3
+        :return:
         """
         assert len(vec_q) == 3
 
@@ -123,8 +129,27 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         for j in xrange(3):
             col_index = j + index_q_x
             self.update_cell_value(row_index, col_index, vec_q[j])
+        # END-FOR (j)
 
         return
+
+    def simple_integrate_peak(self, background):
+        """
+        Integrate peak in a simple way. Refer to documentation of this interface
+        :param background:
+        :return:
+        """
+        # Check
+        assert self.rowCount() > 0, 'Table is empty!'
+        assert isinstance(background, float) and background >= 0.
+
+        # Integrate
+        sum_intensity = 0.
+        for i_row in range(self.rowCount()):
+            intensity_i = self.get_cell_value(i_row, self._intensityColIndex)
+            sum_intensity += intensity_i - background
+
+        return sum_intensity
 
 
 class UBMatrixTable(tableBase.NTableWidget):
@@ -462,7 +487,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         assert 0 <= row_number < self.rowCount()
 
         # get value
-        merge_status_col_index = self._myColumnNameList.index('status')
+        merge_status_col_index = self._myColumnNameList.index('Status')
         status_str = self.get_cell_value(row_number, merge_status_col_index)
 
         if status_str.lower() == 'done':
@@ -550,10 +575,11 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :return:
         """
         # check requirements
-        assert row_number is not None and scan_number is not None, 'Row number and scan number cannot be defined ' \
-                                                                   'simultaneously.'
-        assert row_number is None and scan_number is None, 'Row number and scan number cannot be left empty ' \
-                                                           'simultaneously.'
+        if row_number is not None and scan_number is not None:
+            raise AssertionError('Row number %s and scan number %s cannot be given simultaneously.' % (
+                str(row_number), str(scan_number)))
+        elif row_number is None and scan_number is None:
+            raise AssertionError('Row number and scan number cannot be left empty simultaneously.')
         assert isinstance(peak_intensity, float)
 
         if row_number is None:

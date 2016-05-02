@@ -150,7 +150,7 @@ class CWSCDReductionControl(object):
         :param exp_number:
         :param scan_number:
         :param pt_numbers:
-        :return: 3-tuple
+        :return: 2-tuple: boolean, peak center (3-tuple of float)
         """
         # Check & set pt. numbers
         assert isinstance(exp_number, int), 'Experiment number %s must be an integer but not %s.' \
@@ -362,6 +362,30 @@ class CWSCDReductionControl(object):
 
         return True, error_message
 
+    def check_generate_mask_workspace(self, exp_number, scan_number, mask_tag):
+        """
+
+        :param exp_number:
+        :param scan_number:
+        :param mask_tag:
+        :return:
+        """
+        # TODO/NOW - Check and Doc
+
+        #
+        mask_ws_name = mask_tag
+
+        if AnalysisDataService.doesExist(mask_ws_name) is False:
+            # ...
+            # assert blabla
+            region_of_interest = self._roiDict[mask_tag]
+            ll = region_of_interest[0]
+            ur = region_of_interest[1]
+            print '[DB...BAT] LL and UR are ', ll, ur
+            self.generate_mask_workspace(exp_number, scan_number, ll, ur, mask_ws_name)
+
+        return
+
     def does_file_exist(self, exp_number, scan_number, pt_number=None):
         """
         Check whether data file for a scan or pt number exists on the
@@ -392,6 +416,25 @@ class CWSCDReductionControl(object):
         # END-IF
 
         return os.path.exists(file_name)
+
+    @staticmethod
+    def estimate_background(pt_intensity_dict, bg_pt_list):
+        """
+        Estimate background value
+        :param pt_intensity_dict:
+        :param bg_pt_list:
+        :return:
+        """
+        # TODO/NOW - doc and check
+        # assert blabla
+
+        bg_sum = 0.
+        for bg_pt in bg_pt_list:
+            bg_sum += pt_intensity_dict[bg_pt]
+
+        avg_bg = float(bg_sum) / len(bg_pt_list)
+
+        return avg_bg
 
     def export_md_data(self, exp_number, scan_number, base_file_name):
         """
@@ -682,7 +725,7 @@ class CWSCDReductionControl(object):
 
         return vec_x, vec_y
 
-    def generate_mask_workspace(self, exp_number, scan_number, roi_start, roi_end):
+    def generate_mask_workspace(self, exp_number, scan_number, roi_start, roi_end, mask_tag=None):
         """ Generate a mask workspace
         :param exp_number:
         :param scan_number:
@@ -701,7 +744,13 @@ class CWSCDReductionControl(object):
                            ur_corner=roi_end)
 
         # load the mask workspace
-        mask_ws_name = get_mask_ws_name(exp_number, scan_number)
+        if mask_tag is None:
+            # use default name
+            mask_ws_name = get_mask_ws_name(exp_number, scan_number)
+        else:
+            # use given name
+            mask_ws_name = str(mask_tag)
+
         api.LoadMask(Instrument='HB3A',
                      InputFile=mask_file_name,
                      OutputWorkspace=mask_ws_name)
@@ -768,7 +817,6 @@ class CWSCDReductionControl(object):
                                                    normalized_by_monitor, normalized_by_time)
 
         return AnalysisDataService.doesExist(peak_ws_name)
-
 
     def has_merged_data(self, exp_number, scan_number, pt_number_list=None):
         """
@@ -876,7 +924,7 @@ class CWSCDReductionControl(object):
 
     def integrate_scan_peaks(self, exp, scan, peak_radius, peak_centre,
                              merge_peaks=True, use_mask=False,
-                             normalization=''):
+                             normalization='', mask_ws_name=None):
         """
         Integrate peaks in a merged scan
         Requirements:
@@ -885,7 +933,8 @@ class CWSCDReductionControl(object):
         :param peak_centre: a float radius or None for not using
         :param merge_peaks: If selected, merged all the Pts can return 1 integrated peak's value;
                       otherwise, integrate peak for each Pt.
-        :param normalization :: normalization set up (by time or ...)
+        :param normalization : normalization set up (by time or ...)
+        :param mask_ws_name : workspace name or None
         :return:
         """
         # check
@@ -912,8 +961,11 @@ class CWSCDReductionControl(object):
 
         # mask workspace
         if use_mask:
-            mask_ws_name = get_mask_ws_name(exp, scan)
-            assert AnalysisDataService.doesExist(mask_ws_name), 'MaskWorkspace does not exist'
+            if mask_ws_name is None:
+                # get default mask workspace name
+                mask_ws_name = get_mask_ws_name(exp, scan)
+            assert AnalysisDataService.doesExist(mask_ws_name), 'MaskWorkspace %s does not exist.' \
+                                                                '' % mask_ws_name
 
             integrated_peak_ws_name = get_integrated_peak_ws_name(exp, scan, pt_list, use_mask)
         else:
@@ -1645,6 +1697,22 @@ class CWSCDReductionControl(object):
 
         return
 
+    def save_roi(self, tag, region_of_interest):
+        """
+        Save region of interest to controller for future use
+        :param tag:
+        :param region_of_interest:
+        :return:
+        """
+        # TODO/NOW - Check and more doc
+
+        # example:  ret_value = self._roiDict[exp_number]
+        self._roiDict[tag] = region_of_interest
+
+        print '[DB...BAT] roiDict: ', str(self._roiDict)
+
+        return
+
     def set_exp_number(self, exp_number):
         """ Add experiment number
         :param exp_number:
@@ -1779,6 +1847,23 @@ class CWSCDReductionControl(object):
             ptlist.append(ptno)
 
         return ptlist
+
+    @staticmethod
+    def simple_integrate_peak(pt_intensity_dict, bg_value):
+        """
+
+        :param pt_intensity_dict:
+        :param bg_value:
+        :return:
+        """
+        # TODO/NOW - Doc and check
+
+        #
+        sum_intensity = 0.
+        for intensity in pt_intensity_dict.values():
+            sum_intensity += intensity - bg_value
+
+        return sum_intensity
 
     def survey(self, exp_number, start_scan, end_scan):
         """ Load all the SPICE ascii file to get the big picture such that
