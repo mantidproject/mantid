@@ -31,7 +31,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using Mantid::detid_t;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::Histogram;
 
 class GroupDetectors2Test : public CxxTest::TestSuite {
 public:
