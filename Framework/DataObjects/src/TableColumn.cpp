@@ -15,14 +15,5 @@ DECLARE_TABLECOLUMN(API::Boolean, bool)
 DECLARE_TABLECOLUMN(std::string, str)
 DECLARE_TABLECOLUMN(Mantid::Kernel::V3D, V3D)
 
-template <>
-void TableColumn<std::string>::read(size_t index, const std::string &text) {
-  /* As opposed to other types, assigning strings via a stream does not work if
-   * it contains a whitespace character, so instead the assignment operator is
-   * used.
-   */
-  m_data[index] = text;
-}
-
 } // namespace DataObjects
 } // namespace Mantid

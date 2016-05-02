@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 
-#include "MantidDataObjects/DllConfig.h"
 #include "MantidAPI/Column.h"
 #include "MantidKernel/Logger.h"
 
@@ -27,7 +26,7 @@ namespace Mantid {
 
 namespace DataObjects {
 
-template <class T> class MANTID_DATAOBJECTS_DLL TableVector;
+template <class T> class TableVector;
 
 /** \class TableColumn
 
@@ -241,7 +240,14 @@ private:
 
 /// Template specialization for strings so they can contain spaces
 template <>
-void TableColumn<std::string>::read(size_t index, const std::string &text);
+inline void TableColumn<std::string>::read(size_t index,
+                                           const std::string &text) {
+  /* As opposed to other types, assigning strings via a stream does not work if
+   * it contains a whitespace character, so instead the assignment operator is
+   * used.
+   */
+  m_data[index] = text;
+}
 
 /// Read in a string and set the value at the given index
 template <typename Type>
