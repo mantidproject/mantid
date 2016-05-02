@@ -353,7 +353,7 @@ void ExtractSpectra::execEvent() {
       }
     } else {
       // Common bin boundaries get all set to the same value
-      outEL.histogram().setBinEdges(XValues_new);
+      outEL.setX(XValues_new.cowData());
       if (hasDx) {
         const MantidVec &oldDx = m_inputWorkspace->readDx(i);
         cow_ptr<MantidVec> DxValues_new;

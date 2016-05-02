@@ -766,7 +766,7 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
 
       // Set the X axis
       if (this->m_shared_bins)
-        el.histogram().setBinEdges(this->m_xbins);
+        el.setX(this->m_xbins.cowData());
       else {
         MantidVec x;
         x.resize(xbins.dim1());

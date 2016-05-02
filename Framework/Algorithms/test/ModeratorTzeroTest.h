@@ -275,7 +275,7 @@ private:
         xdata.data()[ibin] = tof;
         evlist.addEventQuickly(tofevent); // insert event
       }
-      evlist.histogram().setBinEdges(xdata);
+      evlist.setX(xdata.cowData()); // set the bins for the associated histogram
     }
     return testWS;
   }

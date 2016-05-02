@@ -496,11 +496,12 @@ void DiffractionFocussing2::execEvent() {
     if (!group2xvector.empty()) {
       auto git = group2xvector.find(group);
       if (git != group2xvector.end())
-        out->histogram(workspaceIndex).setBinEdges(git->second);
+        // Workaround for setting different length BinEdges.
+        out->setX(workspaceIndex, git->second.cowData());
       else
         // Just use the 1st X vector it found, instead of nothin.
-        out->histogram(workspaceIndex)
-            .setBinEdges(group2xvector.begin()->second);
+        // Workaround for setting different length BinEdges.
+        out->setX(workspaceIndex, group2xvector.begin()->second.cowData());
     } else
       g_log.warning() << "Warning! No X histogram bins were found for any "
                          "groups. Histogram will be empty.\n";

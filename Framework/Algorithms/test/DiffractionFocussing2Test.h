@@ -122,12 +122,10 @@ public:
     // Create a DIFFERENT x-axis for each pixel. Starting bin = the input
     // workspace index #
     for (size_t pix = 0; pix < inputW->getNumberHistograms(); pix++) {
-      MantidVec axis(5);
-      for (int i = 0; i < 5; ++i)
-        axis[i] = static_cast<double>(1 + pix) + i * 1.0;
-      axis[4] = 1e6;
       // Set an X-axis
-      inputW->histogram(pix).setBinEdges(axis);
+      HistogramData::BinEdges edges(5);
+      std::iota(begin(edges), end(edges), static_cast<double>(1 + pix));
+      inputW->setX(pix, edges.cowData());
       inputW->getEventList(pix).addEventQuickly(TofEvent(1000.0));
     }
 
