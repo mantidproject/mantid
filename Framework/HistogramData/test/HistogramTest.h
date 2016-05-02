@@ -147,54 +147,54 @@ public:
   void test_setPoints_from_vector() {
     Histogram h1(Points(2));
     TS_ASSERT_THROWS_NOTHING(h1.setPoints(std::vector<double>{0.1, 0.2}));
-    TS_ASSERT_EQUALS(h1.constX().size(), 2);
-    TS_ASSERT_EQUALS(h1.constX()[0], 0.1);
-    TS_ASSERT_EQUALS(h1.constX()[1], 0.2);
+    TS_ASSERT_EQUALS(h1.x().size(), 2);
+    TS_ASSERT_EQUALS(h1.x()[0], 0.1);
+    TS_ASSERT_EQUALS(h1.x()[1], 0.2);
     Histogram h2(BinEdges(2));
     TS_ASSERT_THROWS_NOTHING(h2.setPoints(std::vector<double>{0.1}));
-    TS_ASSERT_EQUALS(h2.constX().size(), 1);
-    TS_ASSERT_EQUALS(h2.constX()[0], 0.1);
+    TS_ASSERT_EQUALS(h2.x().size(), 1);
+    TS_ASSERT_EQUALS(h2.x()[0], 0.1);
   }
 
   void test_setPoints_from_Points() {
     Histogram h1(Points(2));
     TS_ASSERT_THROWS_NOTHING(h1.setPoints(Points{0.1, 0.2}));
-    TS_ASSERT_EQUALS(h1.constX().size(), 2);
-    TS_ASSERT_EQUALS(h1.constX()[0], 0.1);
-    TS_ASSERT_EQUALS(h1.constX()[1], 0.2);
+    TS_ASSERT_EQUALS(h1.x().size(), 2);
+    TS_ASSERT_EQUALS(h1.x()[0], 0.1);
+    TS_ASSERT_EQUALS(h1.x()[1], 0.2);
     Histogram h2(BinEdges(2));
     TS_ASSERT_THROWS_NOTHING(h2.setPoints(Points{0.1}));
-    TS_ASSERT_EQUALS(h2.constX().size(), 1);
-    TS_ASSERT_EQUALS(h2.constX()[0], 0.1);
+    TS_ASSERT_EQUALS(h2.x().size(), 1);
+    TS_ASSERT_EQUALS(h2.x()[0], 0.1);
   }
 
   void test_setPoints_from_BinEdges() {
     Histogram h1(Points(2));
     TS_ASSERT_THROWS_NOTHING(h1.setPoints(BinEdges{0.1, 0.2, 0.4}));
-    TS_ASSERT_EQUALS(h1.constX().size(), 2);
-    TS_ASSERT_DELTA(h1.constX()[0], 0.15, 1e-14);
-    TS_ASSERT_DELTA(h1.constX()[1], 0.3, 1e-14);
+    TS_ASSERT_EQUALS(h1.x().size(), 2);
+    TS_ASSERT_DELTA(h1.x()[0], 0.15, 1e-14);
+    TS_ASSERT_DELTA(h1.x()[1], 0.3, 1e-14);
     Histogram h2(BinEdges(2));
     TS_ASSERT_THROWS_NOTHING(h2.setPoints(BinEdges{0.1, 0.2}));
-    TS_ASSERT_EQUALS(h2.constX().size(), 1);
-    TS_ASSERT_DELTA(h2.constX()[0], 0.15, 1e-14);
+    TS_ASSERT_EQUALS(h2.x().size(), 1);
+    TS_ASSERT_DELTA(h2.x()[0], 0.15, 1e-14);
   }
 
   void test_setPoints_degenerate() {
     Histogram h1(Points(0));
     TS_ASSERT_THROWS_NOTHING(h1.setPoints(std::vector<double>(0)));
-    TS_ASSERT_EQUALS(h1.constX().size(), 0);
+    TS_ASSERT_EQUALS(h1.x().size(), 0);
     TS_ASSERT_THROWS_NOTHING(h1.setPoints(Points(0)));
-    TS_ASSERT_EQUALS(h1.constX().size(), 0);
+    TS_ASSERT_EQUALS(h1.x().size(), 0);
     TS_ASSERT_THROWS_NOTHING(h1.setPoints(BinEdges(0)));
-    TS_ASSERT_EQUALS(h1.constX().size(), 0);
+    TS_ASSERT_EQUALS(h1.x().size(), 0);
     Histogram h2(BinEdges(0));
     TS_ASSERT_THROWS_NOTHING(h2.setPoints(std::vector<double>(0)));
-    TS_ASSERT_EQUALS(h2.constX().size(), 0);
+    TS_ASSERT_EQUALS(h2.x().size(), 0);
     TS_ASSERT_THROWS_NOTHING(h2.setPoints(Points(0)));
-    TS_ASSERT_EQUALS(h2.constX().size(), 0);
+    TS_ASSERT_EQUALS(h2.x().size(), 0);
     TS_ASSERT_THROWS_NOTHING(h2.setPoints(BinEdges(0)));
-    TS_ASSERT_EQUALS(h2.constX().size(), 0);
+    TS_ASSERT_EQUALS(h2.x().size(), 0);
   }
 
   // TODO test disabled until we add Histogram::m_y
@@ -230,14 +230,14 @@ public:
   void test_edges_from_edges() {
     const Histogram hist(BinEdges{0.1, 0.2, 0.4});
     const auto edges = hist.binEdges();
-    TS_ASSERT_EQUALS(&edges[0], &hist.constX()[0]);
+    TS_ASSERT_EQUALS(&edges[0], &hist.x()[0]);
     TS_ASSERT_EQUALS(edges.size(), 3);
   }
 
   void test_edges_from_points() {
     const Histogram hist(Points{0.1, 0.2, 0.4});
     const auto edges = hist.binEdges();
-    TS_ASSERT_DIFFERS(&edges[0], &hist.constX()[0]);
+    TS_ASSERT_DIFFERS(&edges[0], &hist.x()[0]);
     TS_ASSERT_EQUALS(edges.size(), 4);
   }
 
@@ -256,60 +256,60 @@ public:
     Histogram h1(Points(2));
     TS_ASSERT_THROWS_NOTHING(
         h1.setBinEdges(std::vector<double>{0.1, 0.2, 0.4}));
-    TS_ASSERT_EQUALS(h1.constX().size(), 3);
-    TS_ASSERT_EQUALS(h1.constX()[0], 0.1);
-    TS_ASSERT_EQUALS(h1.constX()[1], 0.2);
-    TS_ASSERT_EQUALS(h1.constX()[2], 0.4);
+    TS_ASSERT_EQUALS(h1.x().size(), 3);
+    TS_ASSERT_EQUALS(h1.x()[0], 0.1);
+    TS_ASSERT_EQUALS(h1.x()[1], 0.2);
+    TS_ASSERT_EQUALS(h1.x()[2], 0.4);
     Histogram h2(BinEdges(2));
     TS_ASSERT_THROWS_NOTHING(h2.setBinEdges(std::vector<double>{0.1, 0.2}));
-    TS_ASSERT_EQUALS(h2.constX().size(), 2);
-    TS_ASSERT_EQUALS(h2.constX()[0], 0.1);
-    TS_ASSERT_EQUALS(h2.constX()[1], 0.2);
+    TS_ASSERT_EQUALS(h2.x().size(), 2);
+    TS_ASSERT_EQUALS(h2.x()[0], 0.1);
+    TS_ASSERT_EQUALS(h2.x()[1], 0.2);
   }
 
   void test_setBinEdges_from_Points() {
     Histogram h1(Points(2));
     TS_ASSERT_THROWS_NOTHING(h1.setBinEdges(Points{0.1, 0.3}));
-    TS_ASSERT_EQUALS(h1.constX().size(), 3);
-    TS_ASSERT_DELTA(h1.constX()[0], 0.0, 1e-14);
-    TS_ASSERT_DELTA(h1.constX()[1], 0.2, 1e-14);
-    TS_ASSERT_DELTA(h1.constX()[2], 0.4, 1e-14);
+    TS_ASSERT_EQUALS(h1.x().size(), 3);
+    TS_ASSERT_DELTA(h1.x()[0], 0.0, 1e-14);
+    TS_ASSERT_DELTA(h1.x()[1], 0.2, 1e-14);
+    TS_ASSERT_DELTA(h1.x()[2], 0.4, 1e-14);
     Histogram h2(BinEdges(2));
     TS_ASSERT_THROWS_NOTHING(h2.setBinEdges(Points{1.0}));
-    TS_ASSERT_EQUALS(h2.constX().size(), 2);
-    TS_ASSERT_DELTA(h2.constX()[0], 0.5, 1e-14);
-    TS_ASSERT_DELTA(h2.constX()[1], 1.5, 1e-14);
+    TS_ASSERT_EQUALS(h2.x().size(), 2);
+    TS_ASSERT_DELTA(h2.x()[0], 0.5, 1e-14);
+    TS_ASSERT_DELTA(h2.x()[1], 1.5, 1e-14);
   }
 
   void test_setBinEdges_from_BinEdges() {
     Histogram h1(Points(2));
     TS_ASSERT_THROWS_NOTHING(h1.setBinEdges(BinEdges{0.1, 0.2, 0.4}));
-    TS_ASSERT_EQUALS(h1.constX().size(), 3);
-    TS_ASSERT_EQUALS(h1.constX()[0], 0.1);
-    TS_ASSERT_EQUALS(h1.constX()[1], 0.2);
-    TS_ASSERT_EQUALS(h1.constX()[2], 0.4);
+    TS_ASSERT_EQUALS(h1.x().size(), 3);
+    TS_ASSERT_EQUALS(h1.x()[0], 0.1);
+    TS_ASSERT_EQUALS(h1.x()[1], 0.2);
+    TS_ASSERT_EQUALS(h1.x()[2], 0.4);
     Histogram h2(BinEdges(2));
     TS_ASSERT_THROWS_NOTHING(h2.setBinEdges(BinEdges{0.1, 0.2}));
-    TS_ASSERT_EQUALS(h2.constX().size(), 2);
-    TS_ASSERT_EQUALS(h2.constX()[0], 0.1);
-    TS_ASSERT_EQUALS(h2.constX()[1], 0.2);
+    TS_ASSERT_EQUALS(h2.x().size(), 2);
+    TS_ASSERT_EQUALS(h2.x()[0], 0.1);
+    TS_ASSERT_EQUALS(h2.x()[1], 0.2);
   }
 
   void test_setBinEdges_degenerate() {
     Histogram h1(Points(0));
     TS_ASSERT_THROWS_NOTHING(h1.setBinEdges(std::vector<double>(0)));
-    TS_ASSERT_EQUALS(h1.constX().size(), 0);
+    TS_ASSERT_EQUALS(h1.x().size(), 0);
     TS_ASSERT_THROWS_NOTHING(h1.setBinEdges(Points(0)));
-    TS_ASSERT_EQUALS(h1.constX().size(), 0);
+    TS_ASSERT_EQUALS(h1.x().size(), 0);
     TS_ASSERT_THROWS_NOTHING(h1.setBinEdges(BinEdges(0)));
-    TS_ASSERT_EQUALS(h1.constX().size(), 0);
+    TS_ASSERT_EQUALS(h1.x().size(), 0);
     Histogram h2(BinEdges(0));
     TS_ASSERT_THROWS_NOTHING(h2.setBinEdges(std::vector<double>(0)));
-    TS_ASSERT_EQUALS(h2.constX().size(), 0);
+    TS_ASSERT_EQUALS(h2.x().size(), 0);
     TS_ASSERT_THROWS_NOTHING(h2.setBinEdges(Points(0)));
-    TS_ASSERT_EQUALS(h2.constX().size(), 0);
+    TS_ASSERT_EQUALS(h2.x().size(), 0);
     TS_ASSERT_THROWS_NOTHING(h2.setBinEdges(BinEdges(0)));
-    TS_ASSERT_EQUALS(h2.constX().size(), 0);
+    TS_ASSERT_EQUALS(h2.x().size(), 0);
   }
 
   // TODO test disabled until we add Histogram::m_y
