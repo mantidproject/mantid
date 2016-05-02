@@ -341,68 +341,6 @@ public:
     TS_ASSERT_THROWS(h2.setBinEdges(Points(1)), std::logic_error);
     TS_ASSERT_THROWS(h2.setBinEdges(BinEdges(1)), std::logic_error);
   }
-
-  /*
-  void xtest_setPoints_fromPoints() {
-    Histogram hist(Histogram::XMode::Points);
-    hist.setPoints(Points{0.1, 0.2, 0.4});
-    TS_ASSERT_EQUALS(hist.xMode(), Histogram::XMode::Points);
-    auto points = hist.points();
-    TS_ASSERT_EQUALS(points[0], 0.1);
-    TS_ASSERT_EQUALS(points[1], 0.2);
-    TS_ASSERT_EQUALS(points[2], 0.4);
-  }
-
-  void xtest_setPoints_fromBinEdges() {
-    Histogram hist(Histogram::XMode::Points);
-    hist.setPoints(BinEdges{0.1, 0.2, 0.4});
-    TS_ASSERT_EQUALS(hist.xMode(), Histogram::XMode::Points);
-    auto points = hist.points();
-    TS_ASSERT_DELTA(points[0], 0.15, 1e-14);
-    TS_ASSERT_DELTA(points[1], 0.3, 1e-14);
-  }
-
-  void xtest_setPoints_fromVector() {
-    Histogram hist(Histogram::XMode::Points);
-    hist.setPoints(std::vector<double>{0.1, 0.2, 0.4});
-    TS_ASSERT_EQUALS(hist.xMode(), Histogram::XMode::Points);
-    auto points = hist.points();
-    TS_ASSERT_EQUALS(points[0], 0.1);
-    TS_ASSERT_EQUALS(points[1], 0.2);
-    TS_ASSERT_EQUALS(points[2], 0.4);
-  }
-
-  void xtest_setPoints_moveFromPoints() {
-    Histogram hist(Histogram::XMode::Points);
-    Points src{0.1, 0.2, 0.4};
-    hist.setPoints(std::move(src));
-    TS_ASSERT(!src);
-    TS_ASSERT_EQUALS(hist.xMode(), Histogram::XMode::Points);
-    auto points = hist.points();
-    TS_ASSERT_EQUALS(points[0], 0.1);
-    TS_ASSERT_EQUALS(points[1], 0.2);
-    TS_ASSERT_EQUALS(points[2], 0.4);
-  }
-
-  void xtest_setPoints_moveFromBinEdges() {
-    Histogram hist(Histogram::XMode::Points);
-    BinEdges src{0.1, 0.2, 0.4};
-    hist.setPoints(std::move(src));
-    // Creating Points from BinEdges: currently there is no move constructor
-    // implemented, so src should be untouched.
-    TS_ASSERT(src);
-    TS_ASSERT_EQUALS(hist.xMode(), Histogram::XMode::Points);
-    auto points = hist.points();
-    TS_ASSERT_DELTA(points[0], 0.15, 1e-14);
-    TS_ASSERT_DELTA(points[1], 0.3, 1e-14);
-  }
-
-  void xtest_setPoints_changes_xMode() {
-    Histogram hist(Histogram::XMode::BinEdges);
-    hist.setPoints(Points{0.1});
-    TS_ASSERT_EQUALS(hist.xMode(), Histogram::XMode::Points);
-  }
-  */
 };
 
 #endif /* MANTID_HISTOGRAMDATA_HISTOGRAMTEST_H_ */
