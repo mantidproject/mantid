@@ -6,6 +6,7 @@
 #include "MantidHistogramData/Histogram.h"
 
 using Mantid::HistogramData::Histogram;
+using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::getHistogramXMode;
 using Mantid::HistogramData::Points;
 using Mantid::HistogramData::BinEdges;
@@ -336,6 +337,74 @@ public:
     TS_ASSERT_THROWS(h2.setBinEdges(std::vector<double>(1)), std::logic_error);
     TS_ASSERT_THROWS(h2.setBinEdges(Points(1)), std::logic_error);
     TS_ASSERT_THROWS(h2.setBinEdges(BinEdges(1)), std::logic_error);
+  }
+
+  void test_x() {
+    Histogram hist(Points({0.1, 0.2, 0.4}));
+    TS_ASSERT_EQUALS(hist.x()[0], 0.1);
+    TS_ASSERT_EQUALS(hist.x()[1], 0.2);
+    TS_ASSERT_EQUALS(hist.x()[2], 0.4);
+  }
+
+  void test_x_references_internal_data() {
+    Histogram hist(Points(0));
+    auto copy(hist);
+    TS_ASSERT_EQUALS(&hist.x(), &copy.x());
+  }
+
+  void test_mutableX() {
+    Histogram hist(Points({0.1, 0.2, 0.4}));
+    TS_ASSERT_EQUALS(hist.mutableX()[0], 0.1);
+    TS_ASSERT_EQUALS(hist.mutableX()[1], 0.2);
+    TS_ASSERT_EQUALS(hist.mutableX()[2], 0.4);
+  }
+
+  void test_mutableX_triggers_copy() {
+    Histogram hist(Points(0));
+    auto copy(hist);
+    TS_ASSERT_DIFFERS(&hist.x(), &copy.mutableX());
+  }
+
+  void test_x_references_same_data_as_binEdges() {
+    Histogram hist(BinEdges(0));
+    TS_ASSERT_EQUALS(&hist.x(), &hist.binEdges().constData());
+    TS_ASSERT_DIFFERS(&hist.x(), &hist.points().constData());
+  }
+
+  void test_x_references_same_data_as_points() {
+    Histogram hist(Points(0));
+    TS_ASSERT_DIFFERS(&hist.x(), &hist.binEdges().constData());
+    TS_ASSERT_EQUALS(&hist.x(), &hist.points().constData());
+  }
+
+  void test_sharedX() {
+    auto data = Mantid::Kernel::make_cow<HistogramX>(0);
+    Histogram hist{BinEdges(data)};
+    TS_ASSERT_EQUALS(hist.sharedX(), data);
+  }
+
+  void test_setSharedX() {
+    auto data1 = Mantid::Kernel::make_cow<HistogramX>(0);
+    auto data2 = Mantid::Kernel::make_cow<HistogramX>(0);
+    Histogram hist{BinEdges(data1)};
+    TS_ASSERT_EQUALS(hist.sharedX(), data1);
+    TS_ASSERT_THROWS_NOTHING(hist.setSharedX(data2));
+    TS_ASSERT_DIFFERS(hist.sharedX(), data1);
+    TS_ASSERT_EQUALS(hist.sharedX(), data2);
+  }
+
+  void test_setSharedX_size_mismatch() {
+    auto data1 = Mantid::Kernel::make_cow<HistogramX>(0);
+    auto data2 = Mantid::Kernel::make_cow<HistogramX>(2);
+    Histogram hist{BinEdges(data1)};
+    TS_ASSERT_THROWS(hist.setSharedX(data2), std::logic_error);
+  }
+
+  void test_setSharedX_catches_misuse() {
+    BinEdges edges(2);
+    Histogram hist(edges);
+    auto points = hist.points();
+    TS_ASSERT_THROWS(hist.setSharedX(points.cowData()), std::logic_error);
   }
 };
 
