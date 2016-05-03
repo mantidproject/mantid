@@ -141,7 +141,6 @@ public:
     testFun->function(x, t);
 
     for(size_t i = 0; i < x.size(); ++i) {
-      std::cerr << y[i]  << ' ' << t[i] << std::endl;
       TS_ASSERT_DELTA( y[i] / t[i], 1, 2e-4);
     }
   }
