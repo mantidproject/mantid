@@ -96,6 +96,19 @@ provide1DWorkspace(NXcanSASTestParameters &parameters) {
   // Set instrument
   set_instrument(ws, parameters.instrumentName);
 
+  // Set to point data or histogram data
+  if (parameters.isHistogram) {
+      const std::string outName = "convert_to_histo_out_name";
+      auto toHistAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+          "ConvertToHistogram");
+      toHistAlg->initialize();
+      toHistAlg->setChild(true);
+      toHistAlg->setProperty("InputWorkspace", ws);
+      toHistAlg->setProperty("OutputWorkspace", outName);
+      toHistAlg->execute();
+      ws = toHistAlg->getProperty("OutputWorkspace");
+  }
+
   return ws;
 }
 
@@ -154,6 +167,7 @@ provide2DWorkspace(NXcanSASTestParameters &parameters) {
   rebin2DAlg->execute();
   ws = rebin2DAlg->getProperty("OutputWorkspace");
 
+  if (!parameters.isHistogram) {
   // Convert to Point data
   auto toPointAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "ConvertToPointData");
@@ -164,6 +178,7 @@ provide2DWorkspace(NXcanSASTestParameters &parameters) {
   toPointAlg->setProperty("OutputWorkspace", toPointOutputName);
   toPointAlg->execute();
   ws = toPointAlg->getProperty("OutputWorkspace");
+  }
 
   // At this point we have a mismatch between the Axis1 elements and the
   // number of histograms.

@@ -173,6 +173,91 @@ public:
     removeWorkspaceFromADS(outWsName);
   }
 
+  void test_that_2D_workspace_histogram_can_be_loaded() {
+    // Arrange
+    NXcanSASTestParameters parameters;
+    removeFile(parameters.filename);
+
+    parameters.detectors.push_back("front-detector");
+    parameters.detectors.push_back("rear-detector");
+    parameters.invalidDetectors = false;
+
+    parameters.is2dData = true;
+    parameters.isHistogram = true;
+
+    auto ws = provide2DWorkspace(parameters);
+    set2DValues(ws);
+    const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
+    parameters.idf = getIDFfromWorkspace(ws);
+
+    save_file_no_issues(ws, parameters);
+
+    // Act
+    auto wsOut =
+        load_file_no_issues(parameters, false /*load transmission*/, outWsName);
+
+    // Assert
+
+    // We need to convert the ws file back into point data since the would have loaded point data
+    auto toPointAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+        "ConvertToPointData");
+    std::string toPointOutputName("toPointOutput");
+    toPointAlg->initialize();
+    toPointAlg->setChild(true);
+    toPointAlg->setProperty("InputWorkspace", ws);
+    toPointAlg->setProperty("OutputWorkspace", toPointOutputName);
+    toPointAlg->execute();
+    MatrixWorkspace_sptr wsPoint = toPointAlg->getProperty("OutputWorkspace");
+
+    do_assert_load(wsPoint, wsOut, parameters);
+
+    // Clean up
+    // removeFile(parameters.filename);
+    removeWorkspaceFromADS(outWsName);
+  }
+
+  void test_that_1D_workspace_histogram_can_be_loaded() {
+    // Arrange
+    NXcanSASTestParameters parameters;
+    removeFile(parameters.filename);
+    parameters.detectors.push_back("front-detector");
+    parameters.detectors.push_back("rear-detector");
+    parameters.invalidDetectors = false;
+    parameters.hasDx = true;
+
+    parameters.isHistogram = true;
+
+    auto ws = provide1DWorkspace(parameters);
+    setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin, parameters.xmax);
+    parameters.idf = getIDFfromWorkspace(ws);
+    save_file_no_issues(ws, parameters);
+
+    const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
+
+    // Act
+    auto wsOut =
+        load_file_no_issues(parameters, false /*load transmission*/, outWsName);
+
+    // Assert
+    // We need to convert the ws file back into point data since the would have loaded point data
+    auto toPointAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+        "ConvertToPointData");
+    std::string toPointOutputName("toPointOutput");
+    toPointAlg->initialize();
+    toPointAlg->setChild(true);
+    toPointAlg->setProperty("InputWorkspace", ws);
+    toPointAlg->setProperty("OutputWorkspace", toPointOutputName);
+    toPointAlg->execute();
+    MatrixWorkspace_sptr wsPoint = toPointAlg->getProperty("OutputWorkspace");
+
+    do_assert_load(wsPoint, wsOut, parameters);
+
+    // Clean up
+    removeFile(parameters.filename);
+    removeWorkspaceFromADS(outWsName);
+  }
+
+
 private:
   void removeWorkspaceFromADS(const std::string toRemove) {
     if (AnalysisDataService::Instance().doesExist(toRemove)) {

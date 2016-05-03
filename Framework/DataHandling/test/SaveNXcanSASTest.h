@@ -53,7 +53,6 @@ public:
         saveAlg->setProperty("InputWorkspace", ws));
   }
 
-
   void test_that_1D_workspace_without_transmissions_is_saved_correctly() {
     // Arrange
     NXcanSASTestParameters parameters;
@@ -184,6 +183,33 @@ public:
     parameters.invalidDetectors = false;
 
     parameters.is2dData = true;
+
+    auto ws = provide2DWorkspace(parameters);
+    set2DValues(ws);
+
+    parameters.idf = getIDFfromWorkspace(ws);
+
+    // Act
+    save_file_no_issues(ws, parameters);
+
+    // Assert
+    do_assert(parameters);
+
+    // Clean up
+    removeFile(parameters.filename);
+  }
+
+  void test_that_2D_workspace_histogram_is_saved_correctly() {
+    // Arrange
+    NXcanSASTestParameters parameters;
+    removeFile(parameters.filename);
+
+    parameters.detectors.push_back("front-detector");
+    parameters.detectors.push_back("rear-detector");
+    parameters.invalidDetectors = false;
+
+    parameters.is2dData = true;
+    parameters.isHistogram = true;  // The new bit
 
     auto ws = provide2DWorkspace(parameters);
     set2DValues(ws);

@@ -27,6 +27,7 @@ struct NXcanSASTestParameters {
     ymin = 1.0;
     ymax = 12.0;
     is2dData = false;
+    isHistogram = false;
   }
 
   std::string filename;
@@ -48,6 +49,7 @@ struct NXcanSASTestParameters {
   bool invalidDetectors;
   bool is2dData;
   std::string idf;
+  bool isHistogram;
 };
 
 struct NXcanSASTestTransmissionParameters {
