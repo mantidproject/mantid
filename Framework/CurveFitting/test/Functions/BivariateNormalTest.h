@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <exception>
+#include <numeric>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

@@ -6,6 +6,8 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include <numeric>
+
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
