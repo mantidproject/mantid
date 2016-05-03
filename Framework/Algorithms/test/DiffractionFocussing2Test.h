@@ -16,6 +16,8 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/FrameworkManager.h"
 
+#include <numeric>
+
 using namespace Mantid;
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
