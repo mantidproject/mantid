@@ -8,7 +8,6 @@
 
 #include "vtkPVChangeOfBasisHelper.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/regex.hpp>
 
 // using namespace Mantid::Geometry;

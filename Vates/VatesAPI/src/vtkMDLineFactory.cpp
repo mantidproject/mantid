@@ -17,6 +17,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/make_unique.h"
 
+#include <cmath>
+
 using namespace Mantid::API;
 
 namespace {
