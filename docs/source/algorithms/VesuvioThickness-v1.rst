@@ -20,8 +20,8 @@ Usage
 .. testcode:: VesuvioThicknessExample
 
 # Algorithm inputs
-masses = "1.0079,27.0,91.0"
-amplitudes = "0.9301589,2.9496644e-02,4.0345035e-02"
+masses = [1.0079,27.0,91.0]
+amplitudes = [0.9301589,2.9496644e-02,4.0345035e-02]
 trans_guess = 0.831
 thickness = 5.0
 number_density = 1.0
