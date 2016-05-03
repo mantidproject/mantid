@@ -69,9 +69,8 @@ const std::string MaxEnt::category() const { return "Arithmetic\\FFT"; }
 const std::string MaxEnt::summary() const {
   return "Runs Maximum Entropy method on every spectrum of an input workspace. "
          "Note this algorithm is still in development, and its interface is "
-         "likely to change. It currently works for the case where the "
-         "number of data points equals the number of reconstructed (image) "
-         "points and data and image are related by Fourier transform.";
+         "likely to change. It currently works for the case where data and "
+         "image are related by a Fourier transform.";
 }
 
 //----------------------------------------------------------------------------------------------
