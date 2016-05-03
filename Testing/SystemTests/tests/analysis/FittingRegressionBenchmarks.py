@@ -131,7 +131,8 @@ def parse_nist_file(spec_file):
         if line.startswith('Model'):
             print "Found model"
 
-            # Would skip number of parameters, and empty line
+            # Would skip number of parameters, and empty line, but not
+            # adequate for all test problems
             # idx += 3
 
             # Before 'y = ...' there can be lines like 'pi = 3.14159...'
@@ -140,11 +141,6 @@ def parse_nist_file(spec_file):
                    and idx < len(lines): # [\s*\+\s*e]
                 print "Didn't match: ", lines[idx]
                 idx += 1
-
-            #eq_line = lines[idx]
-            #idx += 1
-            #print "Equation (first)  line found: {0}".format(eq_line)
-            #equation_text = eq_line.strip()
             # Next non-empty lines are assumed to continue the equation
             equation_text = ''
             while lines[idx].strip():
@@ -223,10 +219,16 @@ def run_fit(wks, function, minimizer='Levenberg-Marquardt', cost_function='Least
     param_tbl = None
     fit_wks = None
     try:
+        ignore_invalid = True
         status, chi2, covar_tbl, param_tbl, fit_wks = msapi.Fit(function, wks, Output='ws',
                                                                 Minimizer=minimizer,
                                                                 CostFunction=cost_function,
-                                                                IgnoreInvalidData=True)
+                                                                IgnoreInvalidData=ignore_invalid)
+
+        calc_chi2 = msapi.CalculateChiSquared(Function=function,
+                                              InputWorkspace=wks, IgnoreInvalidData=ignore_invalid)
+        print "*** with minimizer {0}, calculated: chi2: {1}".format(minimizer, calc_chi2)
+
     except RuntimeError as rerr:
         print "Warning, Fit probably failed. Going on. Error: {0}".format(str(rerr))
 
@@ -260,10 +262,6 @@ ref_dir = r'/home/fedemp/mantid-repos/mantid-fitting-benchmarking/Testing/System
                    
 
 def do_regression_fitting_benchmark_minimizer(include_nist, include_cutest, minimizer_name):
-    # problem_filename = 'reference/nist_nonlinear_regression/Misra1a.dat'
-    #problem_filename = 'reference/nist_nonlinear_regression/Gauss3.dat'
-    #parse_nist_fitting_problem_file(problem_filename)
-
     # Grouped by "level of difficulty"
     nist_lower = [ 'Misra1a.dat', 'Chwirut2.dat', 'Chwirut1.dat', 'Lanczos3.dat',
                    'Gauss1.dat', 'Gauss2.dat', 'DanWood.dat', 'Misra1b.dat' ]
@@ -316,7 +314,7 @@ def do_regression_fitting_benchmark_minimizer(include_nist, include_cutest, mini
                                                             minimizer=minimizer_name,
                                                             cost_function=cost_function)
             t_end = time.clock()
-            print "*** with minimizer {0}, Status: {0}, chi2: {1}".format(minimizer_name, status, chi2)
+            print "*** with minimizer {0}, Status: {1}, chi2: {2}".format(minimizer_name, status, chi2)
             print "   params: {0}, errors: {1}".format(params, errors)
 
             def sum_of_squares(values):
@@ -437,9 +435,13 @@ class FittingBenchmarkTests(unittest.TestCase):
         norm_rankings = results_tbl / min_sum_err_sq[:, None]
         # summary lines
         results_text += '---------------- Summary (accuracy): -------- \n'
-        results_text += 'Average ranking: {0}\n'.format(np.average(norm_rankings, 0))
-        results_text += 'Median ranking: {0}\n'.format(np.median(norm_rankings, 0))
         results_text += 'Best ranking: {0}\n'.format(np.amin(norm_rankings, 0))
+        results_text += 'Worst ranking: {0}\n'.format(np.amax(norm_rankings, 0))
+        results_text += 'Average: {0}\n'.format(np.average(norm_rankings, 0))
+        results_text += 'Median: {0}\n'.format(np.median(norm_rankings, 0))
+        results_text += '\n'
+        results_text += 'First quartile: {0}\n'.format(np.percentile(norm_rankings, 25, axis=0))
+        results_text += 'Third quartile: {0}\n'.format(np.percentile(norm_rankings, 75, axis=0))
 
         print results_text
 
@@ -453,9 +455,13 @@ class FittingBenchmarkTests(unittest.TestCase):
 
         norm_runtimes = time_tbl / min_runtime[:, None]
         time_text += '---------------- Summary (run time): -------- \n'
-        time_text += 'Average ranking: {0}\n'.format(np.average(norm_runtimes, 0))
-        time_text += 'Median ranking: {0}\n'.format(np.median(norm_runtimes, 0))
         time_text += 'Best ranking: {0}\n'.format(np.amin(norm_runtimes, 0))
+        time_text += 'Worst ranking: {0}\n'.format(np.amax(norm_runtimes, 0))
+        time_text += 'Average: {0}\n'.format(np.average(norm_runtimes, 0))
+        time_text += 'Median: {0}\n'.format(np.median(norm_runtimes, 0))
+        time_text += '\n'
+        time_text += 'First quartile: {0}\n'.format(np.percentile(norm_runtimes, 25, axis=0))
+        time_text += 'Third quartile: {0}\n'.format(np.percentile(norm_runtimes, 75, axis=0))
 
         print time_text
 
