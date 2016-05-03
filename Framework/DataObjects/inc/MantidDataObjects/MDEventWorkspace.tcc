@@ -369,7 +369,7 @@ TMDE(signal_t MDEventWorkspace)::getSignalWithMaskAtCoord(
  *workspace
  */
 TMDE(std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-         MDEventWorkspace)::getMinimumExtents(size_t depth) {
+         MDEventWorkspace)::getMinimumExtents(size_t depth) const {
   std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> out(nd);
   std::vector<API::IMDNode *> boxes;
   // Get all the end (leaf) boxes

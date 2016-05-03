@@ -159,7 +159,7 @@ public:
   size_t addEvents(const std::vector<MDE> &events);
 
   std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-  getMinimumExtents(size_t depth = 2) override;
+  getMinimumExtents(size_t depth = 2) const override;
 
   /// Return true if the underlying box is a MDGridBox.
   bool isGridBox() {
