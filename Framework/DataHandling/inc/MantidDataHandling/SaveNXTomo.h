@@ -57,7 +57,8 @@ public:
 
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Saves one or more workspaces (of type MatrixWorkspace) to a file in the NXTomo format.";
+    return "Saves one or more workspaces (of type MatrixWorkspace) to a file "
+           "in the NXTomo format.";
   }
 
   /// Algorithm's version
