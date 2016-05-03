@@ -23,7 +23,7 @@ namespace ADARA {
 class DLLExport Parser {
 public:
   /// Constructor
-  Parser(uint32_t inital_buffer_size = 1024 * 1024,
+  Parser(uint32_t initial_buffer_size = 1024 * 1024,
          uint32_t max_pkt_size = 8 * 1024 * 1024);
 
   /// Destructor

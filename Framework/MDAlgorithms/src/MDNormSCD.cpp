@@ -226,7 +226,7 @@ MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
  */
 void MDNormSCD::createNormalizationWS(const MDHistoWorkspace &dataWS) {
   // Copy the MDHisto workspace, and change signals and errors to 0.
-  m_normWS.reset(dataWS.clone().release());
+  m_normWS = dataWS.clone();
   m_normWS->setTo(0., 0., 0.);
 }
 
@@ -402,7 +402,7 @@ void MDNormSCD::calculateNormalization(
   const detid2index_map solidAngDetToIdx =
       solidAngleWS->getDetectorIDToWorkspaceIndexMap();
 
-  auto *prog = new API::Progress(this, 0.3, 1.0, ndets);
+  auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
   PARALLEL_FOR1(integrFlux)
   for (int64_t i = 0; i < ndets; i++) {
     PARALLEL_START_INTERUPT_REGION
@@ -494,8 +494,6 @@ void MDNormSCD::calculateNormalization(
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
-  delete prog;
 }
 
 /**

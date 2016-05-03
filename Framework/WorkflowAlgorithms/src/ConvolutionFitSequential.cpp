@@ -162,7 +162,7 @@ void ConvolutionFitSequential::exec() {
 
   // Output workspace name
   std::string outputWsName = inputWs->getName();
-  pos = outputWsName.rfind("_");
+  pos = outputWsName.rfind('_');
   if (pos != std::string::npos) {
     outputWsName = outputWsName.substr(0, pos + 1);
   }
@@ -381,7 +381,7 @@ ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
   auto startPos = function.rfind("name=");
   if (startPos != std::string::npos) {
     fitType = function.substr(startPos, function.size());
-    auto nextPos = fitType.find_first_of(",");
+    auto nextPos = fitType.find_first_of(',');
     fitType = fitType.substr(5, nextPos - 5);
     functionName = fitType;
     if (fitType.compare("Lorentzian") == 0) {
@@ -598,7 +598,7 @@ void ConvolutionFitSequential::calculateEISF(
 std::string
 ConvolutionFitSequential::convertBackToShort(const std::string &original) {
   std::string result = original.substr(0, 3);
-  auto pos = original.find(" ");
+  auto pos = original.find(' ');
   if (pos != std::string::npos) {
     result += original.at(pos + 1);
   }

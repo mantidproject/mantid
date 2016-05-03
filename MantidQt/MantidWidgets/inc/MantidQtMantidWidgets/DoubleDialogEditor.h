@@ -33,7 +33,6 @@ private:
   DoubleEditor* m_editor;
   QPushButton* m_button;
   QtProperty* m_property;
-  int m_decimals;
 };
 
 /**

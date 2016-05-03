@@ -120,12 +120,12 @@ class MANTID_API_DLL ITableWorkspace : public API::Workspace {
 public:
   /// Constructor
   ITableWorkspace() {}
-  /// Virtual destructor.
-  ~ITableWorkspace() override {}
 
   /// Returns a clone of the workspace
-  ITableWorkspace_uptr clone() const { return ITableWorkspace_uptr(doClone()); }
+  ITableWorkspace_uptr clone(const std::vector<std::string> &colNames =
+                                 std::vector<std::string>()) const;
 
+  ITableWorkspace &operator=(const ITableWorkspace &) = delete;
   /// Return the workspace typeID
   const std::string id() const override { return "ITableWorkspace"; }
   const std::string toString() const override;
@@ -307,9 +307,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  ITableWorkspace(const ITableWorkspace &other) : Workspace(other) {}
-  /// Protected copy assignment operator. Assignment not implemented.
-  ITableWorkspace &operator=(const ITableWorkspace &other);
+  ITableWorkspace(const ITableWorkspace &) = default;
 
   /**  Resize a column.
          @param c :: Pointer to the column
@@ -331,7 +329,11 @@ protected:
   void removeFromColumn(Column *c, size_t index) { c->remove(index); }
 
 private:
-  ITableWorkspace *doClone() const override = 0;
+  ITableWorkspace *doClone() const override {
+    return doCloneColumns(std::vector<std::string>());
+  }
+  virtual ITableWorkspace *
+  doCloneColumns(const std::vector<std::string> &colNames) const = 0;
 };
 
 // =====================================================================================

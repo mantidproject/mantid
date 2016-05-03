@@ -292,15 +292,12 @@ void FunctionBrowser::removeProperty(QtProperty *prop)
 
   // remove references to the children
   auto children = prop->subProperties();
-  foreach(QtProperty* child,children)
-  {
-    m_properties.erase(child);
-  }
+  foreach (QtProperty *child, children) { m_properties.remove(child); }
   m_properties.erase(p);
 
   if ( isFunction(prop) )
   {
-    m_ties.erase(prop);
+    m_ties.remove(prop);
   }
 
   if ( isTie(prop) )

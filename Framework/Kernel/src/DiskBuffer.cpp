@@ -29,11 +29,6 @@ DiskBuffer::DiskBuffer(uint64_t m_writeBufferSize)
   m_free.clear();
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DiskBuffer::~DiskBuffer() {}
-
 //---------------------------------------------------------------------------------------------
 /** Call this method when an object is ready to be written
  * out to disk.
@@ -269,7 +264,6 @@ void DiskBuffer::defragFreeBlocks() {
     // Get iterator to the block after "it".
     freeSpace_t::iterator it_after = it;
     ++it_after;
-    FreeBlock block_after = *it_after;
 
     if (FreeBlock::merge(thisBlock, *it_after)) {
       // Change the map by replacing the old "before" block with the new merged

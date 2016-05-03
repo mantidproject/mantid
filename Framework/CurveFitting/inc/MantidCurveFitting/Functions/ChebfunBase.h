@@ -83,7 +83,9 @@ class MANTID_CURVEFITTING_DLL ChebfunBase {
 public:
   ChebfunBase(size_t n, double start, double end, double tolerance = 0.0);
   /// Copy constructor
-  ChebfunBase(const ChebfunBase &other);
+  ChebfunBase(const ChebfunBase &) = default;
+  /// Move constructor
+  ChebfunBase(ChebfunBase &&) noexcept = default;
   /// Get the polynomial order of this base.
   size_t order() const { return m_n; }
   /// Get the size of the base which is the number of x-points.
@@ -155,7 +157,8 @@ public:
 
 private:
   /// Private assingment operator to stress the immutability of ChebfunBase.
-  ChebfunBase &operator=(const ChebfunBase &other);
+  ChebfunBase &operator=(const ChebfunBase &other) = delete;
+  ChebfunBase &operator=(ChebfunBase &&other) = delete;
   /// Calculate the x-values based on the (start,end) interval.
   void calcX();
   /// Calculate the integration weights
@@ -166,7 +169,7 @@ private:
                              std::vector<double> &p) const;
   /// Calculate function values at odd-valued indices of the base x-points
   std::vector<double> fitOdd(const API::IFunction &f,
-                             std::vector<double> &p) const;
+                             std::vector<double> &pEven) const;
   /// Test an array of Chebyshev coefficients for convergence
   static bool hasConverged(const std::vector<double> &a, double maxA,
                            double tolerance, size_t shift = 0);

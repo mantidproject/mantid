@@ -72,19 +72,19 @@ namespace MantidQt
       /// the specific load algorithm
       void createDynamicWidgets();
       /// Override the help button clicked method
-      void helpClicked();
+      void helpClicked() override;
       /// Suggest a workspace name from the file
       void suggestWSName();
       /// Connect/Disconnect the signal that updates the workspace name with a suggested value
       void enableNameSuggestion(const bool on = false);
       /// Override accept() slot
-      void accept();
+      void accept() override;
 
     private:
       /// Initialize the layout
-      void initLayout();
+      void initLayout() override;
       /// Save the input history
-      void saveInput();
+      void saveInput() override;
       /// Tie static widgets to their properties
       void tieStaticWidgets(const bool readHistory);
       /// Clears all of the widgets from the old layout

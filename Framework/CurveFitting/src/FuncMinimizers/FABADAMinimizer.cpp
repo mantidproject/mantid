@@ -87,9 +87,6 @@ FABADAMinimizer::FABADAMinimizer()
 
 //----------------------------------------------------------------------------------------------
 
-/// Destructor
-FABADAMinimizer::~FABADAMinimizer() {}
-
 /// Initialize minimizer. Set initial values for all private members.
 void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
                                  size_t maxIterations) {

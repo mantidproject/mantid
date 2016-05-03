@@ -536,7 +536,7 @@ A. This will make the form DNF.
 {
   Units.clear();
   deleteComp();
-  if (A.size() == 0)
+  if (A.empty())
     return;
 
   if (A.size() == 1) // special case for single intersection
@@ -566,7 +566,7 @@ A. This will make the form DNF.
 {
   Units.clear();
   deleteComp();
-  if (A.size() == 0)
+  if (A.empty())
     return;
 
   if (A.size() == 1) // special case for single union
@@ -663,7 +663,7 @@ int Acomp::isNull() const
 @return 1 if there are no memebers
 */
 {
-  return ((!Units.size() && !Comp.size()) ? 1 : 0);
+  return ((Units.empty() && Comp.empty()) ? 1 : 0);
 }
 
 int Acomp::isDNF() const
@@ -888,7 +888,7 @@ It is set on exit (to the EPI)
 */
 {
   const int debug(0);
-  if (!PIform.size())
+  if (PIform.empty())
     return 0;
 
   std::vector<BnId> EPI; // Created Here.
@@ -1358,7 +1358,7 @@ singles exist and up-promotes them.
     const Acomp *Lower = itemC(0); // returns pointer
     Units.clear();
     Intersect = Lower->Intersect;
-    if (Lower->Units.size()) {
+    if (!Lower->Units.empty()) {
       Units.resize(Lower->Units.size());
       copy(Lower->Units.begin(), Lower->Units.end(), Units.begin());
     }

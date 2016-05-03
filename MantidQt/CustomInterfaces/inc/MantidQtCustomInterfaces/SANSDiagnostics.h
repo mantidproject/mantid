@@ -103,14 +103,14 @@ public:
   /// Default Constructor
   SANSDiagnostics(QWidget *parent, Ui::SANSRunWindow *ParWidgets);
   /// Destructor
-  virtual ~SANSDiagnostics();
+  ~SANSDiagnostics() override;
 
 signals:
   void applyMask(const QString &wsName, bool time_pixel);
 
 private:
   /// Initilaise the current tab
-  void initLayout();
+  void initLayout() override;
   /// set tool tips
   void setToolTips();
   /// execute sumrowcolumn algorithm
@@ -166,8 +166,8 @@ private:
   /// hide the group boxes
   void disableDetectorGroupBoxes(bool bStatus);
 
-  /// minimum and maximum spectrum ids for detector
-  void minandMaxSpectrumIds(const std::vector<Mantid::specnum_t> &specList,
+  /// minimum and maximum spectrum Nos for detector
+  void minandMaxSpectrumNos(const std::vector<Mantid::specnum_t> &specList,
                             QString &minSpec, QString &maxSpec);
 
   /// get workspaceIndexes from spectrum list

@@ -107,11 +107,6 @@ ReflectometryTransform::ReflectometryTransform(
 }
 
 /**
- * Destructor
- */
-ReflectometryTransform::~ReflectometryTransform() {}
-
-/**
  * Creates an MD workspace
  * @param a : pointer to the first dimension of the MDWorkspace
   *@param b : pointer to the second dimension of the MDWorkspace
@@ -240,7 +235,7 @@ DetectorAngularCache initAngularCaches(const MatrixWorkspace *const workspace) {
       continue;
     }
     // We have to convert theta from radians to degrees
-    const double theta = workspace->detectorSignedTwoTheta(det) * 180.0 / M_PI;
+    const double theta = workspace->detectorSignedTwoTheta(*det) * rad2deg;
     thetas[i] = theta;
     /**
      * Determine width from shape geometry. A group is assumed to contain
@@ -421,7 +416,7 @@ IMDHistoWorkspace_sptr ReflectometryTransform::executeMDNormPoly(
 
 /**
  * Execution path for NormalisedPolygon Rebinning
- * @param inputWs : Workspace to be rebinned
+ * @param inputWS : Workspace to be rebinned
  * @param vertexes : TableWorkspace for debugging purposes
  * @param dumpVertexes : determines whether vertexes will be written to for
  * debugging purposes or not

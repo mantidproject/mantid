@@ -73,8 +73,8 @@ std::map<std::string, std::string> AsymmetryCalc::validateInputs() {
 void AsymmetryCalc::exec() {
   std::vector<int> forward_list = getProperty("ForwardSpectra");
   std::vector<int> backward_list = getProperty("BackwardSpectra");
-  int forward = forward_list.size() ? forward_list[0] : 1;
-  int backward = backward_list.size() ? backward_list[0] : 2;
+  int forward = !forward_list.empty() ? forward_list[0] : 1;
+  int backward = !backward_list.empty() ? backward_list[0] : 2;
   double alpha = getProperty("Alpha");
 
   // Get original workspace

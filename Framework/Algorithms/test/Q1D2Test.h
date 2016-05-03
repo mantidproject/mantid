@@ -519,13 +519,13 @@ public:
   Mantid::API::MatrixWorkspace_sptr m_inputWS, m_wavNorm, m_pixel;
   std::string m_outputWS;
 
-  void setUp() {
+  void setUp() override {
     // load all the spectra from the LOQ workspace
     createInputWorkspaces(1, 17792, m_inputWS, m_wavNorm, m_pixel);
     m_outputWS = "Q1D2Test_result";
   }
 
-  void tearDown() {
+  void tearDown() override {
     Mantid::API::AnalysisDataService::Instance().remove(m_outputWS);
   }
 
@@ -626,8 +626,8 @@ void createQResolutionWorkspace(Mantid::API::MatrixWorkspace_sptr &qResolution,
                                 double value1, double value2) {
   // The q resolution workspace is almost the same to the input workspace,
   // except for the y value, we set all Y values to 1
-  qResolution = Mantid::API::MatrixWorkspace_sptr(input->clone().release());
-  alteredInput = Mantid::API::MatrixWorkspace_sptr(input->clone().release());
+  qResolution = input->clone();
+  alteredInput = input->clone();
 
   // Populate Y with Value1
   for (size_t i = 0; i < qResolution->getNumberHistograms(); ++i) {

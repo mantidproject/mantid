@@ -1,9 +1,8 @@
 set ( SRC_FILES
 	src/Algorithms/CalculateChiSquared.cpp
-	src/Algorithms/CalculateGammaBackground.cpp
-	src/Algorithms/CalculateMSVesuvio.cpp
 	src/Algorithms/ConvertToYSpace.cpp
 	src/Algorithms/ConvolveWorkspaces.cpp
+	src/Algorithms/CrystalFieldEnergies.cpp
 	src/Algorithms/EstimatePeakErrors.cpp
 	src/Algorithms/EvaluateFunction.cpp
 	src/Algorithms/Fit.cpp
@@ -19,7 +18,11 @@ set ( SRC_FILES
 	src/Algorithms/SplineBackground.cpp
 	src/Algorithms/SplineInterpolation.cpp
 	src/Algorithms/SplineSmoothing.cpp
+	src/Algorithms/VesuvioCalculateGammaBackground.cpp
+	src/Algorithms/VesuvioCalculateMS.cpp
 	src/AugmentedLagrangianOptimizer.cpp
+	src/ComplexMatrix.cpp
+	src/ComplexVector.cpp
 	src/Constraints/BoundaryConstraint.cpp
 	src/CostFunctions/CostFuncFitting.cpp
 	src/CostFunctions/CostFuncLeastSquares.cpp
@@ -49,6 +52,8 @@ set ( SRC_FILES
 	src/Functions/ComptonProfile.cpp
 	src/Functions/ComptonScatteringCountRate.cpp
 	src/Functions/Convolution.cpp
+	src/Functions/CrystalElectricField.cpp
+	src/Functions/CrystalFieldPeaks.cpp
 	src/Functions/CubicSpline.cpp
 	src/Functions/DeltaFunction.cpp
 	src/Functions/DiffRotDiscreteCircle.cpp
@@ -71,6 +76,7 @@ set ( SRC_FILES
 	src/Functions/Lorentzian.cpp
 	src/Functions/Lorentzian1D.cpp
 	src/Functions/MuonFInteraction.cpp
+        src/Functions/MultivariateGaussianComptonProfile.cpp
 	src/Functions/NeutronBk2BkExpConvPVoigt.cpp
 	src/Functions/PawleyFunction.cpp
 	src/Functions/PeakParameterFunction.cpp
@@ -103,6 +109,7 @@ set ( SRC_FILES
 	src/GSLFunctions.cpp
 	src/GSLMatrix.cpp
 	src/GSLVector.cpp
+	src/GeneralDomainCreator.cpp
 	src/IFittingAlgorithm.cpp
 	src/LatticeDomainCreator.cpp
 	src/LatticeFunction.cpp
@@ -119,10 +126,9 @@ set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
 
 set ( INC_FILES
 	inc/MantidCurveFitting/Algorithms/CalculateChiSquared.h
-	inc/MantidCurveFitting/Algorithms/CalculateGammaBackground.h
-	inc/MantidCurveFitting/Algorithms/CalculateMSVesuvio.h
 	inc/MantidCurveFitting/Algorithms/ConvertToYSpace.h
 	inc/MantidCurveFitting/Algorithms/ConvolveWorkspaces.h
+	inc/MantidCurveFitting/Algorithms/CrystalFieldEnergies.h
 	inc/MantidCurveFitting/Algorithms/EstimatePeakErrors.h
 	inc/MantidCurveFitting/Algorithms/EvaluateFunction.h
 	inc/MantidCurveFitting/Algorithms/Fit.h
@@ -138,7 +144,11 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Algorithms/SplineBackground.h
 	inc/MantidCurveFitting/Algorithms/SplineInterpolation.h
 	inc/MantidCurveFitting/Algorithms/SplineSmoothing.h
+	inc/MantidCurveFitting/Algorithms/VesuvioCalculateGammaBackground.h
+	inc/MantidCurveFitting/Algorithms/VesuvioCalculateMS.h
 	inc/MantidCurveFitting/AugmentedLagrangianOptimizer.h
+	inc/MantidCurveFitting/ComplexMatrix.h
+	inc/MantidCurveFitting/ComplexVector.h
 	inc/MantidCurveFitting/Constraints/BoundaryConstraint.h
 	inc/MantidCurveFitting/CostFunctions/CostFuncFitting.h
 	inc/MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h
@@ -146,6 +156,9 @@ set ( INC_FILES
 	inc/MantidCurveFitting/CostFunctions/CostFuncUnweightedLeastSquares.h
 	inc/MantidCurveFitting/DllConfig.h
 	inc/MantidCurveFitting/FitMW.h
+	inc/MantidCurveFitting/FortranDefs.h
+	inc/MantidCurveFitting/FortranMatrix.h
+	inc/MantidCurveFitting/FortranVector.h
 	inc/MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DampingMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DerivMinimizer.h
@@ -169,6 +182,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/ComptonProfile.h
 	inc/MantidCurveFitting/Functions/ComptonScatteringCountRate.h
 	inc/MantidCurveFitting/Functions/Convolution.h
+	inc/MantidCurveFitting/Functions/CrystalElectricField.h
+	inc/MantidCurveFitting/Functions/CrystalFieldPeaks.h
 	inc/MantidCurveFitting/Functions/CubicSpline.h
 	inc/MantidCurveFitting/Functions/DeltaFunction.h
 	inc/MantidCurveFitting/Functions/DiffRotDiscreteCircle.h
@@ -191,6 +206,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/Lorentzian.h
 	inc/MantidCurveFitting/Functions/Lorentzian1D.h
 	inc/MantidCurveFitting/Functions/MuonFInteraction.h
+        inc/MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h
 	inc/MantidCurveFitting/Functions/NeutronBk2BkExpConvPVoigt.h
 	inc/MantidCurveFitting/Functions/PawleyFunction.h
 	inc/MantidCurveFitting/Functions/PeakParameterFunction.h
@@ -224,6 +240,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/GSLJacobian.h
 	inc/MantidCurveFitting/GSLMatrix.h
 	inc/MantidCurveFitting/GSLVector.h
+	inc/MantidCurveFitting/GeneralDomainCreator.h
 	inc/MantidCurveFitting/HalfComplex.h
 	inc/MantidCurveFitting/IFittingAlgorithm.h
 	inc/MantidCurveFitting/Jacobian.h
@@ -243,8 +260,6 @@ set ( TEST_FILES
 	# RefinePowderInstrumentParametersTest.h
 	#SCDPanelErrorsTest.h
 	Algorithms/CalculateChiSquaredTest.h
-	Algorithms/CalculateGammaBackgroundTest.h
-	Algorithms/CalculateMSVesuvioTest.h
 	Algorithms/ConvertToYSpaceTest.h
 	Algorithms/ConvolveWorkspacesTest.h
 	Algorithms/EstimatePeakErrorsTest.h
@@ -262,12 +277,20 @@ set ( TEST_FILES
 	Algorithms/SplineBackgroundTest.h
 	Algorithms/SplineInterpolationTest.h
 	Algorithms/SplineSmoothingTest.h
+	Algorithms/VesuvioCalculateGammaBackgroundTest.h
+	Algorithms/VesuvioCalculateMSTest.h
 	AugmentedLagrangianOptimizerTest.h
+	ComplexMatrixTest.h
+	ComplexVectorTest.h
 	CompositeFunctionTest.h
 	Constraints/BoundaryConstraintTest.h
 	CostFunctions/CostFuncUnweightedLeastSquaresTest.h
 	CostFunctions/LeastSquaresTest.h
+	CrystalFieldEnergiesTest.h
+	CrystalFieldPeaksTest.h
 	FitMWTest.h
+	FortranMatrixTest.h
+	FortranVectorTest.h
 	FuncMinimizers/BFGSTest.h
 	FuncMinimizers/DampingMinimizerTest.h
 	FuncMinimizers/FABADAMinimizerTest.h
@@ -290,6 +313,7 @@ set ( TEST_FILES
 	Functions/ComptonProfileTest.h
 	Functions/ComptonScatteringCountRateTest.h
 	Functions/ConvolutionTest.h
+	Functions/CrystalFieldTest.h
 	Functions/CubicSplineTest.h
 	Functions/DeltaFunctionTest.h
 	Functions/DiffRotDiscreteCircleTest.h
@@ -312,6 +336,7 @@ set ( TEST_FILES
 	Functions/Lorentzian1DTest.h
 	Functions/LorentzianTest.h
 	Functions/MuonFInteractionTest.h
+        Functions/MultivariateGaussianComptonProfileTest.h
 	Functions/NeutronBk2BkExpConvPVoigtTest.h
 	Functions/PawleyFunctionTest.h
 	Functions/PeakParameterFunctionTest.h
@@ -343,6 +368,7 @@ set ( TEST_FILES
 	Functions/VoigtTest.h
 	GSLMatrixTest.h
 	GSLVectorTest.h
+	GeneralDomainCreatorTest.h
 	IPeakFunctionCentreParameterNameTest.h
 	IPeakFunctionIntensityTest.h
 	LatticeDomainCreatorTest.h

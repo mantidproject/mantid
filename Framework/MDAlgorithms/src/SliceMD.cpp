@@ -135,9 +135,11 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // bc->setCacheParameters(1,0);
 
   BoxController_sptr obc = outWS->getBoxController();
-  // Use the "number of bins" as the "split into" parameter
-  for (size_t od = 0; od < m_binDimensions.size(); od++)
-    obc->setSplitInto(od, m_binDimensions[od]->getNBins());
+  // Use the "number of bins" as the "split into" parameter for the top level
+  for (size_t od = 0; od < m_binDimensions.size(); od++) {
+    obc->setSplitTopInto(od, m_binDimensions[od]->getNBins());
+    obc->setSplitInto(od, bc->getSplitInto(od));
+  }
   obc->setSplitThreshold(bc->getSplitThreshold());
 
   bool bTakeDepthFromInputWorkspace =
@@ -209,7 +211,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   for (int i = 0; i < int(boxes.size()); i++) {
     MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
     // Perform the binning in this separate method.
-    if (box) {
+    if (box && !box->getIsMasked()) {
       // An array to hold the rotated/transformed coordinates
       coord_t outCenter[ond];
 
@@ -228,9 +230,8 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           // Copy extra data, if any
           copyEvent(*it, newEvent);
           // Add it to the workspace
-          outRootBox->addEvent(newEvent);
-
-          numSinceSplit++;
+          if (outRootBox->addEvent(newEvent))
+            numSinceSplit++;
         }
       }
       box->releaseEvents();
@@ -265,8 +266,10 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Refresh all cache.
   outWS->refreshCache();
 
+  // Account for events that were added after the last split
+  totalAdded += numSinceSplit;
   g_log.notice() << totalAdded << " " << OMDE::getTypeName()
-                 << "'s added to the output workspace." << std::endl;
+                 << "s added to the output workspace." << std::endl;
 
   if (outWS->isFileBacked()) {
     // Update the file-back-end

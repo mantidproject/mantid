@@ -30,9 +30,6 @@ FileValidator::FileValidator(const std::vector<std::string> &extensions,
   }
 }
 
-/// Destructor
-FileValidator::~FileValidator() {}
-
 /// Returns the set of valid values
 std::vector<std::string> FileValidator::allowedValues() const {
   return m_extensions;

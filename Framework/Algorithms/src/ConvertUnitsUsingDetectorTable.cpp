@@ -163,7 +163,7 @@ void ConvertUnitsUsingDetectorTable::exec() {
 
   // If the units conversion has flipped the ascending direction of X, reverse
   // all the vectors
-  if (outputWS->dataX(0).size() &&
+  if (!outputWS->dataX(0).empty() &&
       (outputWS->dataX(0).front() > outputWS->dataX(0).back() ||
        outputWS->dataX(m_numberOfSpectra / 2).front() >
            outputWS->dataX(m_numberOfSpectra / 2).back())) {
@@ -226,60 +226,35 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::setupOutputWorkspace(
   // If input and output workspaces are NOT the same, create a new workspace for
   // the output
   if (outputWS != inputWS) {
-    if (m_inputEvents) {
-      outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
-    } else {
-      // Create the output workspace
-      outputWS = WorkspaceFactory::Instance().create(inputWS);
-      // Copy the data over
-      this->fillOutputHist(inputWS, outputWS);
+    outputWS = inputWS->clone();
+  }
+
+  if (!m_inputEvents && m_distribution) {
+    // Loop over the histograms (detector spectra)
+    Progress prog(this, 0.0, 0.2, m_numberOfSpectra);
+    PARALLEL_FOR1(outputWS)
+    for (int64_t i = 0; i < static_cast<int64_t>(m_numberOfSpectra); ++i) {
+      PARALLEL_START_INTERUPT_REGION
+      // Take the bin width dependency out of the Y & E data
+      const auto &X = outputWS->dataX(i);
+      auto &Y = outputWS->dataY(i);
+      auto &E = outputWS->dataE(i);
+      for (size_t j = 0; j < outputWS->blocksize(); ++j) {
+        const double width = std::abs(X[j + 1] - X[j]);
+        Y[j] *= width;
+        E[j] *= width;
+      }
+
+      prog.report("Convert to " + m_outputUnit->unitID());
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
   }
 
   // Set the final unit that our output workspace will have
   outputWS->getAxis(0)->unit() = m_outputUnit;
 
   return outputWS;
-}
-
-/** Do the initial copy of the data from the input to the output workspace for
- * histogram workspaces.
- *  Takes out the bin width if necessary.
- *  @param inputWS  The input workspace
- *  @param outputWS The output workspace
- */
-void ConvertUnitsUsingDetectorTable::fillOutputHist(
-    const API::MatrixWorkspace_const_sptr inputWS,
-    const API::MatrixWorkspace_sptr outputWS) {
-  const int size = static_cast<int>(inputWS->blocksize());
-
-  // Loop over the histograms (detector spectra)
-  Progress prog(this, 0.0, 0.2, m_numberOfSpectra);
-  int64_t numberOfSpectra_i =
-      static_cast<int64_t>(m_numberOfSpectra); // cast to make openmp happy
-  PARALLEL_FOR2(inputWS, outputWS)
-  for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
-    PARALLEL_START_INTERUPT_REGION
-    // Take the bin width dependency out of the Y & E data
-    if (m_distribution) {
-      for (int j = 0; j < size; ++j) {
-        const double width =
-            std::abs(inputWS->dataX(i)[j + 1] - inputWS->dataX(i)[j]);
-        outputWS->dataY(i)[j] = inputWS->dataY(i)[j] * width;
-        outputWS->dataE(i)[j] = inputWS->dataE(i)[j] * width;
-      }
-    } else {
-      // Just copy over
-      outputWS->dataY(i) = inputWS->readY(i);
-      outputWS->dataE(i) = inputWS->readE(i);
-    }
-    // Copy over the X data
-    outputWS->setX(i, inputWS->refX(i));
-
-    prog.report("Convert to " + m_outputUnit->unitID());
-    PARALLEL_END_INTERUPT_REGION
-  }
-  PARALLEL_CHECK_INTERUPT_REGION
 }
 
 /** Convert the workspace units using TOF as an intermediate step in the
@@ -341,7 +316,7 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
   // PARALLEL_FOR1(outputWS)
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
 
-    // Lets find what row this spectrum ID appears in our detector table.
+    // Lets find what row this spectrum Number appears in our detector table.
 
     // PARALLEL_START_INTERUPT_REGION
 
@@ -352,17 +327,17 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
       double deg2rad = M_PI / 180.;
 
       auto det = outputWS->getDetector(i);
-      int specid = det->getID();
+      int specNo = det->getID();
 
       // int spectraNumber = static_cast<int>(spectraColumn->toDouble(i));
       // wsid = outputWS->getIndexFromSpectrumNumber(spectraNumber);
-      g_log.debug() << "###### Spectra #" << specid
+      g_log.debug() << "###### Spectra #" << specNo
                     << " ==> Workspace ID:" << wsid << std::endl;
 
       // Now we need to find the row that contains this spectrum
       std::vector<int>::iterator specIter;
 
-      specIter = std::find(spectraColumn.begin(), spectraColumn.end(), specid);
+      specIter = std::find(spectraColumn.begin(), spectraColumn.end(), specNo);
       if (specIter != spectraColumn.end()) {
         size_t detectorRow = std::distance(spectraColumn.begin(), specIter);
         double l1 = l1Column[detectorRow];
@@ -371,7 +346,7 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
         double efixed = efixedColumn[detectorRow];
         int emode = emodeColumn[detectorRow];
 
-        g_log.debug() << "specId from detector table = "
+        g_log.debug() << "specNo from detector table = "
                       << spectraColumn[detectorRow] << std::endl;
 
         // l1 = l1Column->toDouble(detectorRow);
@@ -380,7 +355,7 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
         // efixed = efixedColumn->toDouble(detectorRow);
         // emode = static_cast<int>(emodeColumn->toDouble(detectorRow));
 
-        g_log.debug() << "###### Spectra #" << specid
+        g_log.debug() << "###### Spectra #" << specNo
                       << " ==> Det Table Row:" << detectorRow << std::endl;
 
         g_log.debug() << "\tL1=" << l1 << ",L2=" << l2 << ",TT=" << twoTheta
@@ -409,7 +384,7 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
 
       } else {
         // Not found
-        g_log.debug() << "Spectrum " << specid << " not found!" << std::endl;
+        g_log.debug() << "Spectrum " << specNo << " not found!" << std::endl;
         failedDetectorCount++;
         outputWS->maskWorkspaceIndex(wsid);
       }

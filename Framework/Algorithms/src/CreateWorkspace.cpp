@@ -75,7 +75,7 @@ std::map<std::string, std::string> CreateWorkspace::validateInputs() {
   const std::string vUnit = getProperty("VerticalAxisUnit");
   const std::vector<std::string> vAxis = getProperty("VerticalAxisValues");
 
-  if (vUnit == "SpectraNumber" && vAxis.size() > 0)
+  if (vUnit == "SpectraNumber" && !vAxis.empty())
     issues["VerticalAxisValues"] =
         "Axis values cannot be provided when using a spectra axis";
 

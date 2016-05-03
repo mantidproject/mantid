@@ -2,13 +2,15 @@
 #define MANTID_API_GROUPINGLOADER_H_
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
 namespace API {
 
 /// Structure to represent grouping information
-struct Grouping {
+class MANTID_API_DLL Grouping {
+public:
   std::vector<std::string> groupNames;
   std::vector<std::string> groups; // Range strings, e.g. "1-32"
 
@@ -18,6 +20,18 @@ struct Grouping {
 
   std::string description;
   std::string defaultName; // Not storing id because can be either group or pair
+
+  /// Default constructor
+  Grouping() = default;
+
+  /// Destructor
+  ~Grouping();
+
+  /// Construct a Grouping from a table
+  Grouping(ITableWorkspace_sptr table);
+
+  /// Convert to grouping table
+  ITableWorkspace_sptr toTable() const;
 };
 
 /** GroupingLoader : Loads instrument grouping from IDF file
@@ -54,6 +68,8 @@ public:
   /// Loads grouping from the XML file specified
   static void loadGroupingFromXML(const std::string &filename,
                                   Grouping &grouping);
+  /// Returns a "dummy" grouping of a single group with all the detectors in it
+  boost::shared_ptr<Grouping> getDummyGrouping();
 
 private:
   /// Instrument to load grouping from

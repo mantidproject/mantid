@@ -16,14 +16,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
 
-class SaveMDTester : public SaveMD {
-public:
-  void saveExperimentInfos(::NeXus::File *const file,
-                           IMDEventWorkspace_const_sptr ws) {
-    this->saveExperimentInfos(file, ws);
-  }
-};
-
 /** Note: See the LoadMDTest class
  * for a more thorough test that does
  * a round-trip.
@@ -250,7 +242,7 @@ public:
 class SaveMDTestPerformance : public CxxTest::TestSuite {
 public:
   MDEventWorkspace3Lean::sptr ws;
-  void setUp() {
+  void setUp() override {
     // Make a 1D MDEventWorkspace
     ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
     ws->getBoxController()->setSplitInto(5);

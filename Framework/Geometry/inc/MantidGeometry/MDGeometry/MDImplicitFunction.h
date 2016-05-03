@@ -5,6 +5,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
+#include <boost/shared_ptr.hpp>
 #include <vector>
 #include <string>
 
@@ -60,8 +61,7 @@ namespace Geometry {
 class DLLExport MDImplicitFunction {
 public:
   MDImplicitFunction();
-  MDImplicitFunction(const MDImplicitFunction &other);
-  virtual ~MDImplicitFunction();
+  virtual ~MDImplicitFunction() = default;
 
   void addPlane(const MDPlane &plane);
 

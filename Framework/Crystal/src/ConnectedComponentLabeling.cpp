@@ -61,7 +61,7 @@ size_t calculateMaxClusters(IMDHistoWorkspace const *const ws,
  */
 boost::shared_ptr<Mantid::API::IMDHistoWorkspace>
 cloneInputWorkspace(IMDHistoWorkspace_sptr &inWS) {
-  IMDHistoWorkspace_sptr outWS(inWS->clone().release());
+  IMDHistoWorkspace_sptr outWS(inWS->clone());
 
   // Initialize to zero.
   PARALLEL_FOR_NO_WSP_CHECK()
@@ -344,10 +344,9 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
     // equivalent clusters. Must be done in sequence.
     // Combine cluster maps processed by each thread.
     ClusterRegister clusterRegister;
-    for (auto &parallelClusterMap : parallelClusterMapVec) {
-      for (auto it = parallelClusterMap.begin(); it != parallelClusterMap.end();
-           ++it) {
-        clusterRegister.add(it->first, it->second);
+    for (const auto &parallelClusterMap : parallelClusterMapVec) {
+      for (const auto &cluster : parallelClusterMap) {
+        clusterRegister.add(cluster.first, cluster.second);
       }
     }
 
@@ -441,7 +440,7 @@ ClusterTuple ConnectedComponentLabeling::executeAndFetchClusters(
   }
   // Write each cluster out to the output workspace
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int i = 0; i < static_cast<int>(keys.size()); ++i) {
+  for (int i = 0; i < static_cast<int>(keys.size()); ++i) { // NOLINT
     clusters[keys[i]]->writeTo(outWS);
   }
 

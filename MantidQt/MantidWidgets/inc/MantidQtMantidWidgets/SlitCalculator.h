@@ -39,7 +39,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SlitCalculator : public QDialog {
   Q_OBJECT
 public:
   SlitCalculator(QWidget *parent);
-  virtual ~SlitCalculator();
+  ~SlitCalculator() override;
   void setCurrentInstrumentName(std::string instrumentName);
   void processInstrumentHasBeenChanged();
 

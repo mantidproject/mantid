@@ -77,9 +77,9 @@ local.properties
 *.log
 
 # Build results
-[Dd]ebug/
-[Rr]elease/
 build/
+/[Rr]elease/
+/[Dd]ebug/
 *_i.c
 *_p.c
 *.ilk

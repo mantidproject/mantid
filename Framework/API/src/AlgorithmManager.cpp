@@ -204,7 +204,7 @@ std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(
     const std::string &algorithmName) const {
   std::vector<IAlgorithm_const_sptr> theRunningInstances;
   std::lock_guard<std::mutex> _lock(this->m_managedMutex);
-  for (auto currentAlgorithm : m_managed_algs) {
+  for (const auto &currentAlgorithm : m_managed_algs) {
     if (currentAlgorithm->name() == algorithmName &&
         currentAlgorithm->isRunning()) {
       theRunningInstances.push_back(currentAlgorithm);

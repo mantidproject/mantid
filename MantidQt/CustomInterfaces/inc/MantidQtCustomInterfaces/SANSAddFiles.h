@@ -20,7 +20,7 @@ public:
   /// Default Constructor
   SANSAddFiles(QWidget *parent, Ui::SANSRunWindow *ParWidgets);
   /// Destructor
-  virtual ~SANSAddFiles();
+  ~SANSAddFiles() override;
 
 private:
   ///set to point to the object that has the Add Files controls
@@ -59,7 +59,7 @@ private:
   /// SANS constants
   SANSConstants m_constants;
 
-  void initLayout();
+  void initLayout() override;
   void setToolTips();
   QListWidgetItem* insertListFront(const QString &text);
   void changeOutputDir(Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo);

@@ -24,11 +24,11 @@ using namespace Mantid::RemoteJobManagers;
  */
 class MockedSCARFLSFJM : public SCARFLSFJobManager {
 protected:
-  virtual int doSendRequestGetResponse(
+  int doSendRequestGetResponse(
       const Poco::URI & /*url*/, std::ostream &response,
       const StringToStringMap & /*headers*/ = StringToStringMap(),
       const std::string & /*method*/ = std::string(),
-      const std::string & /*body*/ = "") const {
+      const std::string & /*body*/ = "") const override {
 
     response << "response OK - mocked up";
     return 200;
@@ -42,11 +42,11 @@ protected:
  */
 class MockedErrorResponse_SCARFLSFJM : public SCARFLSFJobManager {
 protected:
-  virtual int doSendRequestGetResponse(
+  int doSendRequestGetResponse(
       const Poco::URI & /*url*/, std::ostream &response,
       const StringToStringMap & /*headers*/ = StringToStringMap(),
       const std::string & /*method*/ = std::string(),
-      const std::string & /*body*/ = "") const {
+      const std::string & /*body*/ = "") const override {
 
     response << "Error response - mocked up";
     return 404;
@@ -60,11 +60,11 @@ protected:
  */
 class MockedConnectionError_SCARFLSFJM : public SCARFLSFJobManager {
 protected:
-  virtual int doSendRequestGetResponse(
+  int doSendRequestGetResponse(
       const Poco::URI & /*url*/, std::ostream & /*response*/,
       const StringToStringMap & /*headers*/ = StringToStringMap(),
       const std::string & /*method*/ = std::string(),
-      const std::string & /*body*/ = "") const {
+      const std::string & /*body*/ = "") const override {
 
     // throw as if there was a connection error
     throw Mantid::Kernel::Exception::InternetError(
@@ -82,11 +82,11 @@ protected:
  */
 class MockedGoodLoginResponse_SCARFLSFJM : public SCARFLSFJobManager {
 protected:
-  virtual int doSendRequestGetResponse(
+  int doSendRequestGetResponse(
       const Poco::URI & /*url*/, std::ostream &response,
       const StringToStringMap & /*headers*/ = StringToStringMap(),
       const std::string & /*method*/ = std::string(),
-      const std::string & /*body*/ = "") const {
+      const std::string & /*body*/ = "") const override {
 
     response << makeGoodLoginResponse();
     return 200;
@@ -116,11 +116,11 @@ public:
       : MockedGoodLoginResponse_SCARFLSFJM(), jobID(id), jobName(name){};
 
 protected:
-  virtual int doSendRequestGetResponse(
+  int doSendRequestGetResponse(
       const Poco::URI &url, std::ostream &response,
       const StringToStringMap & /*headers*/ = StringToStringMap(),
       const std::string & /*method*/ = std::string(),
-      const std::string & /*body*/ = "") const {
+      const std::string & /*body*/ = "") const override {
 
     if (url.toString().find("cgi-bin/token.py")) {
       response << makeGoodLoginResponse();
@@ -149,11 +149,11 @@ private:
  */
 class MockedGoodPingResponse_SCARFLSFJM : public SCARFLSFJobManager {
 protected:
-  virtual int doSendRequestGetResponse(
+  int doSendRequestGetResponse(
       const Poco::URI & /*url*/, std::ostream &response,
       const StringToStringMap & /*headers*/ = StringToStringMap(),
       const std::string & /*method*/ = std::string(),
-      const std::string & /*body*/ = "") const {
+      const std::string & /*body*/ = "") const override {
 
     response << "Web Services are ready:  mocked up";
     return 200;

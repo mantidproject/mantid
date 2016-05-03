@@ -40,12 +40,12 @@ public:
   HKL &operator=(const HKL &other);
   HKL(std::unique_ptr<Kernel::MDUnit> &unit);
   HKL(Kernel::MDUnit *unit);
-  ~HKL() override;
   static const std::string HKLName;
 
   // MDFrame interface
   Kernel::UnitLabel getUnitLabel() const override;
   const Kernel::MDUnit &getMDUnit() const override;
+  bool setMDUnit(const Mantid::Kernel::MDUnit &newUnit) override;
   bool canConvertTo(const Kernel::MDUnit &otherUnit) const override;
   bool isQ() const override;
   bool isSameType(const MDFrame &frame) const override;

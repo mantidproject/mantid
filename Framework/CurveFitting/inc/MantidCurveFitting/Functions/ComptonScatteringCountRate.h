@@ -57,16 +57,15 @@ private:
   void updateCMatrixValues() const;
 
   /// Cache reference to workspace for use in setupForFit
-  void
-  setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX) override;
+  void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> matrix,
+                          size_t wsIndex, double startX, double endX) override;
   /// Cache ptrs to the individual profiles and their parameters
   void cacheFunctions();
   /// Cache ptr to the individual profile and its parameters
   void cacheComptonProfile(const boost::shared_ptr<ComptonProfile> &profile,
                            const size_t paramsOffset);
   /// Cache parameters positions for background function
-  void cacheBackground(const API::IFunction1D_sptr &profile,
+  void cacheBackground(const API::IFunction1D_sptr &function1D,
                        const size_t paramsOffset);
   /// Set up the constraint matrices
   void createConstraintMatrices(const std::vector<double> &xValues);

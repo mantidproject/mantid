@@ -95,19 +95,13 @@ class MANTID_MDALGORITHMS_DLL MDTransfFactoryImpl
 public:
   boost::shared_ptr<MDTransfInterface>
   create(const std::string &className) const override;
+  MDTransfFactoryImpl(const MDTransfFactoryImpl &) = delete;
+  MDTransfFactoryImpl &operator=(const MDTransfFactoryImpl &) = delete;
 
 private:
-  friend struct Kernel::CreateUsingNew<MDTransfFactoryImpl>;
-
   /// Private Constructor for singleton class
-  MDTransfFactoryImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  MDTransfFactoryImpl(const MDTransfFactoryImpl &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  MDTransfFactoryImpl &operator=(const MDTransfFactoryImpl &);
-  /// Private Destructor
-  ~MDTransfFactoryImpl() override;
-
+  MDTransfFactoryImpl() = default;
+  friend struct Kernel::CreateUsingNew<MDTransfFactoryImpl>;
   /// Stores pointers to already created unit instances, with their name as the
   /// key
   mutable std::map<std::string, boost::shared_ptr<MDTransfInterface>>

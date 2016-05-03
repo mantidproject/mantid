@@ -31,9 +31,6 @@ CompositeFunction::CompositeFunction()
   declareAttribute("NumDeriv", Attribute(false));
 }
 
-/// Destructor
-CompositeFunction::~CompositeFunction() {}
-
 /// Function initialization. Declare function parameters in this method.
 void CompositeFunction::init() {}
 
@@ -386,7 +383,7 @@ size_t CompositeFunction::addFunction(IFunction_sptr f) {
   m_IFunction.insert(m_IFunction.end(), f->nParams(), m_functions.size());
   m_functions.push_back(f);
   //?f->init();
-  if (m_paramOffsets.size() == 0) {
+  if (m_paramOffsets.empty()) {
     m_paramOffsets.push_back(0);
     m_nParams = f->nParams();
   } else {

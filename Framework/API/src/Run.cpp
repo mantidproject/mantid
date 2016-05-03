@@ -41,35 +41,6 @@ Kernel::Logger g_log("Run");
 //----------------------------------------------------------------------
 // Public member functions
 //----------------------------------------------------------------------
-/**
- * Default constructor
- */
-Run::Run() : m_goniometer(), m_histoBins() {}
-
-/**
- * Destructor
- */
-Run::~Run() {}
-
-/**
- * Copy constructor
- * @param copy :: The object to initialize the copy from
- */
-Run::Run(const Run &copy) : LogManager(copy), m_goniometer(copy.m_goniometer) {}
-
-//-----------------------------------------------------------------------------------------------
-/**
- * Assignment operator
- * @param rhs :: The object whose properties should be copied into this
- * @returns A cont reference to the copied object
- */
-const Run &Run::operator=(const Run &rhs) {
-  if (this == &rhs)
-    return *this;
-  m_manager = rhs.m_manager;
-  m_goniometer = rhs.m_goniometer;
-  return *this;
-}
 
 //-----------------------------------------------------------------------------------------------
 /**
@@ -462,7 +433,8 @@ void Run::calculateGoniometerMatrix() {
     const double maxAngle =
         getLogAsSingleValue(axisName, Kernel::Math::Maximum);
     const double angle = getLogAsSingleValue(axisName, Kernel::Math::Mean);
-    if (minAngle != maxAngle) {
+    if (minAngle != maxAngle &&
+        !(boost::math::isnan(minAngle) && boost::math::isnan(maxAngle))) {
       const double lastAngle =
           getLogAsSingleValue(axisName, Kernel::Math::LastValue);
       g_log.warning("Goniometer angle changed in " + axisName + " log from " +
@@ -503,7 +475,7 @@ void Run::mergeMergables(Mantid::Kernel::PropertyManager &sum,
                          const Mantid::Kernel::PropertyManager &toAdd) {
   // get pointers to all the properties on the right-handside and prepare to
   // loop through them
-  const std::vector<Property *> inc = toAdd.getProperties();
+  const std::vector<Property *> &inc = toAdd.getProperties();
   for (auto ptr : inc) {
     const std::string &rhs_name = ptr->name();
     try {

@@ -7,6 +7,7 @@ set ( SRC_FILES
     src/ColorBarWidget.cpp
     src/DataSelector.cpp
     src/DiagResults.cpp
+    src/DisplayCurveFit.cpp
     src/DoubleDialogEditor.cpp
     src/DoubleSpinBox.cpp
     src/ErrorCurve.cpp
@@ -85,6 +86,7 @@ set ( SRC_FILES
     src/InstrumentView/Projection3D.cpp
     src/InstrumentView/ProjectionSurface.cpp
     src/InstrumentView/RectangularDetectorActor.cpp
+    src/InstrumentView/StructuredDetectorActor.cpp
     src/InstrumentView/RectF.cpp
     src/InstrumentView/RotationSurface.cpp
     src/InstrumentView/SampleActor.cpp
@@ -106,6 +108,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/ColorBarWidget.h
     inc/MantidQtMantidWidgets/DataSelector.h
     inc/MantidQtMantidWidgets/DiagResults.h
+    inc/MantidQtMantidWidgets/DisplayCurveFit.h
     inc/MantidQtMantidWidgets/DoubleDialogEditor.h
     inc/MantidQtMantidWidgets/DoubleSpinBox.h
     inc/MantidQtMantidWidgets/FilenameDialogEditor.h
@@ -217,6 +220,7 @@ set ( INC_FILES
     inc/MantidQtMantidWidgets/InstrumentView/Projection3D.h
     inc/MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h
     inc/MantidQtMantidWidgets/InstrumentView/RectangularDetectorActor.h
+    inc/MantidQtMantidWidgets/InstrumentView/StructuredDetectorActor.h
     inc/MantidQtMantidWidgets/InstrumentView/RectF.h
     inc/MantidQtMantidWidgets/InstrumentView/RotationSurface.h
     inc/MantidQtMantidWidgets/InstrumentView/SampleActor.h
@@ -237,6 +241,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/CatalogSearch.ui
     inc/MantidQtMantidWidgets/CatalogSelector.ui
     inc/MantidQtMantidWidgets/ColorBarWidget.ui
+    inc/MantidQtMantidWidgets/DisplayCurveFit.ui
     inc/MantidQtMantidWidgets/IndirectInstrumentConfig.ui
     inc/MantidQtMantidWidgets/MWDiag.ui
     inc/MantidQtMantidWidgets/MWRunFiles.ui

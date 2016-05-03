@@ -60,6 +60,8 @@ class Algorithm;
 class MANTID_API_DLL AlgorithmFactoryImpl final
     : public Kernel::DynamicFactory<Algorithm> {
 public:
+  AlgorithmFactoryImpl(const AlgorithmFactoryImpl &) = delete;
+  AlgorithmFactoryImpl &operator=(const AlgorithmFactoryImpl &) = delete;
   // Unhide the base class version (to satisfy the intel compiler)
   using Kernel::DynamicFactory<Algorithm>::create;
   /// Creates an instance of an algorithm
@@ -154,10 +156,6 @@ private:
 
   /// Private Constructor for singleton class
   AlgorithmFactoryImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  AlgorithmFactoryImpl(const AlgorithmFactoryImpl &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  AlgorithmFactoryImpl &operator=(const AlgorithmFactoryImpl &);
   /// Private Destructor
   ~AlgorithmFactoryImpl() override;
   /// creates an algorithm name convolved from an name and version

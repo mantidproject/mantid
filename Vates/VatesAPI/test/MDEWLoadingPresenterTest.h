@@ -38,42 +38,35 @@ private:
     typedef MDEWLoadingPresenter BaseClass;
 
   public:
-
-    virtual void extractMetadata(Mantid::API::IMDEventWorkspace_sptr eventWs)
-    {
+    void extractMetadata(Mantid::API::IMDEventWorkspace_sptr eventWs) override {
       return MDEWLoadingPresenter::extractMetadata(eventWs);
     }
 
     ConcreteMDEWLoadingPresenter(std::unique_ptr<MDLoadingView> view)
         : MDEWLoadingPresenter(std::move(view)) {}
 
-    virtual vtkSmartPointer<vtkDataSet>
-    execute(vtkDataSetFactory *, ProgressAction &, ProgressAction &) {
+    vtkSmartPointer<vtkDataSet> execute(vtkDataSetFactory *, ProgressAction &,
+                                        ProgressAction &) override {
       return vtkSmartPointer<vtkUnstructuredGrid>::New();
     }
 
-    virtual void executeLoadMetadata()
-    {
-    }
+    void executeLoadMetadata() override {}
 
-    virtual bool canReadFile() const
-    {
-      return true;
-    }
+    bool canReadFile() const override { return true; }
 
-    virtual bool shouldLoad()
-    {
+    bool shouldLoad() override {
       //Forwarding method
       return BaseClass::shouldLoad();
     }
 
-    virtual bool canLoadFileBasedOnExtension(const std::string& filename, const std::string& expectedExtension) const
-    {
+    bool canLoadFileBasedOnExtension(
+        const std::string &filename,
+        const std::string &expectedExtension) const override {
       //Forwarding method.
       return BaseClass::canLoadFileBasedOnExtension(filename, expectedExtension);
     }
 
-    ~ConcreteMDEWLoadingPresenter(){}
+    ~ConcreteMDEWLoadingPresenter() override {}
   };
 
 

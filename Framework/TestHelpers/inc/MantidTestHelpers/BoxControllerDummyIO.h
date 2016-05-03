@@ -48,8 +48,7 @@ namespace MantidTestHelpers {
 */
 class DLLExport BoxControllerDummyIO : public Mantid::API::IBoxControllerIO {
 public:
-  BoxControllerDummyIO(const Mantid::API::BoxController *theBC);
-
+  BoxControllerDummyIO(const Mantid::API::BoxController *bc);
   ///@return true if the file to write events is opened and false otherwise
   bool isOpened() const override { return (m_isOpened); }
   /// get the full file name of the file used for IO operations
@@ -81,9 +80,9 @@ public:
   ~BoxControllerDummyIO() override;
   // Auxiliary functions. Used to change default state of this object which is
   // not fully supported. Should be replaced by some IBoxControllerIO factory
-  void setDataType(const size_t coordSize,
+  void setDataType(const size_t blockSize,
                    const std::string &typeName) override;
-  void getDataType(size_t &coordSize, std::string &typeName) const override;
+  void getDataType(size_t &CoordSize, std::string &typeName) const override;
 
   // Auxiliary functions (non-virtual, used at testing)
   int64_t getNDataColums() const { return 2; }

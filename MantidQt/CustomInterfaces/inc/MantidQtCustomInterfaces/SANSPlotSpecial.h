@@ -63,7 +63,7 @@ public:
   enum Column { FitInformation, FitInformationValues, GradientLabels, GradientDerived, GradientUnits,
     InterceptLabels, InterceptDerived, InterceptUnits };
   SANSPlotSpecial(QWidget *parent = 0);
-  ~SANSPlotSpecial();
+  ~SANSPlotSpecial() override;
 
 public slots:
   void rangeChanged(double, double);

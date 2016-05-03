@@ -673,6 +673,9 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
   numspec = calculateWorkspaceSize(numspec, true);
 
   int num_xbins = xbins.dim0();
+  if (xbins.rank() == 2) {
+    num_xbins = xbins.dim1();
+  }
   if (num_xbins < 2)
     num_xbins = 2;
   EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(
@@ -766,8 +769,8 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
         el.setX(this->m_xbins);
       else {
         MantidVec x;
-        x.resize(xbins.dim0());
-        for (int i = 0; i < xbins.dim0(); i++)
+        x.resize(xbins.dim1());
+        for (int i = 0; i < xbins.dim1(); i++)
           x[i] = xbins(static_cast<int>(wi), i);
         el.setX(x);
       }
@@ -1098,7 +1101,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     peakWS->addPeak(*p);
   }
 
-  for (auto str : columnNames) {
+  for (const auto &str : columnNames) {
     if (!str.compare("column_1")) {
       NXInt nxInt = nx_tw.openNXInt(str.c_str());
       nxInt.load();
@@ -1728,11 +1731,11 @@ bool UDlesserExecCount(NXClassInfo elem1, NXClassInfo elem2) {
   std::string::size_type index1, index2;
   std::string num1, num2;
   // find the number after "_" in algorithm name ( eg:MantidAlogorthm_1)
-  index1 = elem1.nxname.find("_");
+  index1 = elem1.nxname.find('_');
   if (index1 != std::string::npos) {
     num1 = elem1.nxname.substr(index1 + 1, elem1.nxname.length() - index1);
   }
-  index2 = elem2.nxname.find("_");
+  index2 = elem2.nxname.find('_');
   if (index2 != std::string::npos) {
     num2 = elem2.nxname.substr(index2 + 1, elem2.nxname.length() - index2);
   }
@@ -2157,7 +2160,7 @@ LoadNexusProcessed::calculateWorkspaceSize(const std::size_t numberofspectra,
           } else
             ++it;
       }
-      if (m_spec_list.size() == 0)
+      if (m_spec_list.empty())
         m_list = false;
       total_specs += static_cast<int>(m_spec_list.size());
 

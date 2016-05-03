@@ -66,7 +66,7 @@ void ConvertEmptyToTof::init() {
                   "Name of the output workspace, can be the same as the input");
   declareProperty(
       make_unique<Kernel::ArrayProperty<int>>("ListOfSpectraIndices"),
-      "A list of spectra indices as a string with ranges; e.g. "
+      "A list of spectra workspace indices as a string with ranges; e.g. "
       "5-10,15,20-23. \n"
       "Optional: if not specified, then the Start/EndIndex fields "
       "are used alone. "
@@ -91,7 +91,7 @@ void ConvertEmptyToTof::init() {
       "ElasticPeakPosition", EMPTY_INT(), mustBePositive,
       "Value of elastic peak position if none of the above are filled in.");
   declareProperty("ElasticPeakPositionSpectrum", EMPTY_INT(), mustBePositive,
-                  "Spectrum index used for elastic peak position above.");
+                  "Workspace Index used for elastic peak position above.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ void ConvertEmptyToTof::exec() {
   else {
 
     // validations
-    validateSpectraIndices(spectraIndices);
+    validateWorkspaceIndices(spectraIndices);
     validateChannelIndices(channelIndices);
 
     // Map of spectra index, epp
@@ -163,11 +163,12 @@ void ConvertEmptyToTof::exec() {
  * in the input workspace. If v is empty, uses all spectra.
  * @param v :: vector with the spectra indices
  */
-void ConvertEmptyToTof::validateSpectraIndices(std::vector<int> &v) {
+void ConvertEmptyToTof::validateWorkspaceIndices(std::vector<int> &v) {
   auto nHist = m_inputWS->getNumberHistograms();
-  if (v.size() == 0) {
-    g_log.information("No spectrum index given. Using all spectra to calculate "
-                      "the elastic peak.");
+  if (v.empty()) {
+    g_log.information(
+        "No spectrum number given. Using all spectra to calculate "
+        "the elastic peak.");
     // use all spectra indices
     v.reserve(nHist);
     for (unsigned int i = 0; i < nHist; ++i)
@@ -190,7 +191,7 @@ void ConvertEmptyToTof::validateSpectraIndices(std::vector<int> &v) {
  */
 void ConvertEmptyToTof::validateChannelIndices(std::vector<int> &v) {
   auto blockSize = m_inputWS->blocksize() + 1;
-  if (v.size() == 0) {
+  if (v.empty()) {
     g_log.information("No channel index given. Using all channels (full "
                       "spectrum!) to calculate the elastic peak.");
     // use all channel indices

@@ -41,9 +41,6 @@ National Laboratory & European Spallation Source
 class DLLExport MuonFInteraction : public API::ParamFunction,
                                    public API::IFunction1D {
 public:
-  /// Destructor
-  ~MuonFInteraction() override {}
-
   /// overwrite IFunction base class methods
   std::string name() const override { return "MuonFInteraction"; }
 

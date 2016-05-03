@@ -16,7 +16,7 @@ public:
   MOCK_METHOD1(
       setSuccessor,
       void(boost::shared_ptr<const PeakShapeFactory> successorFactory));
-  virtual ~MockPeakShapeFactory() {}
+  ~MockPeakShapeFactory() override {}
 };
 
 class MockPeakShape : public Mantid::Geometry::PeakShape {
@@ -28,7 +28,7 @@ public:
   MOCK_CONST_METHOD0(algorithmVersion, int());
   MOCK_CONST_METHOD0(shapeName, std::string());
 
-  virtual ~MockPeakShape() {}
+  ~MockPeakShape() override {}
 };
 }
 }

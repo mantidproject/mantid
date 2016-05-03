@@ -54,12 +54,8 @@ public:
   Projection(const Kernel::V3D &u, const Kernel::V3D &v, const Kernel::V3D &w);
   /// Construct from an ITableWorkspace
   Projection(const ITableWorkspace &ws);
-  /// Copy constructor
-  Projection(const Projection &other);
-  /// Assignment operator
-  Projection &operator=(const Projection &other);
   /// Destructor
-  virtual ~Projection();
+  virtual ~Projection() = default;
   /// Retrieves the offset for the given dimension
   double getOffset(size_t nd);
   /// Retrieves the axis vector for the given dimension

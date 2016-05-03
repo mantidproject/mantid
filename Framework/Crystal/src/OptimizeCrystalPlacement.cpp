@@ -149,8 +149,7 @@ void OptimizeCrystalPlacement::exec() {
   PeaksWorkspace_sptr OutPeaks = getProperty("ModifiedPeaksWorkspace");
 
   if (Peaks != OutPeaks) {
-    boost::shared_ptr<PeaksWorkspace> X(Peaks->clone().release());
-    OutPeaks = X;
+    OutPeaks = Peaks->clone();
   }
 
   std::vector<int> NOoptimizeRuns = getProperty("KeepGoniometerFixedfor");
@@ -441,7 +440,6 @@ void OptimizeCrystalPlacement::exec() {
   PeakHKLErrors::cLone(pmap_new, OldInstrument, pmap_old);
 
   double L0 = peak.getL1();
-  V3D oldSampPos = OldInstrument->getSample()->getPos();
   V3D newSampPos(Results["SampleXOffset"], Results["SampleYOffset"],
                  Results["SampleZOffset"]);
 

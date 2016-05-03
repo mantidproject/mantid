@@ -164,8 +164,8 @@ void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax,
   pMax = snappedPMax;
 
   // Bins
-  numberOfBins = static_cast<size_t>(
-      (pMax - pMin) / width + 0.5); // round up to a whole number of bins.
+  numberOfBins =
+      std::lround((pMax - pMin) / width); // round up to a whole number of bins.
 }
 }
 
@@ -319,8 +319,8 @@ void IntegrateMDHistoWorkspace::exec() {
   if (emptyCount == pbins.size()) {
     // No work to do.
     g_log.information(this->name() + " Direct clone of input.");
-    this->setProperty("OutputWorkspace", boost::shared_ptr<IMDHistoWorkspace>(
-                                             inWS->clone().release()));
+    this->setProperty("OutputWorkspace",
+                      boost::shared_ptr<IMDHistoWorkspace>(inWS->clone()));
   } else {
 
     /* Create the output workspace in the right shape. This allows us to iterate
@@ -362,7 +362,7 @@ void IntegrateMDHistoWorkspace::exec() {
     auto outIterators = outWS->createIterators(nThreads, nullptr);
 
     PARALLEL_FOR_NO_WSP_CHECK()
-    for (int i = 0; i < int(outIterators.size()); ++i) {
+    for (int i = 0; i < int(outIterators.size()); ++i) { // NOLINT
       PARALLEL_START_INTERUPT_REGION
       boost::scoped_ptr<MDHistoWorkspaceIterator> outIterator(
           dynamic_cast<MDHistoWorkspaceIterator *>(outIterators[i]));
@@ -409,7 +409,6 @@ void IntegrateMDHistoWorkspace::exec() {
         performWeightedSum(inIterator.get(), box, sumSignal, sumSQErrors,
                            sumNEvents); // Use the present position. neighbours
                                         // below exclude the current position.
-
         // Look at all of the neighbours of our position. We previously
         // calculated what the width vector would need to be.
         auto neighbourIndexes =

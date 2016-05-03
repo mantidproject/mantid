@@ -81,9 +81,6 @@ public:
   EnabledWhenProperty(std::string otherPropName, ePropertyCriterion when,
                       std::string value = "");
 
-  /// Destructor
-  ~EnabledWhenProperty() override;
-
   //--------------------------------------------------------------------------------------------
   /** Does the validator fulfill the criterion based on the
    * other property values?

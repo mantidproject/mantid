@@ -32,6 +32,7 @@ using Kernel::V3D;
 namespace {
 /// static logger
 Kernel::Logger g_log("MatrixWorkspace");
+constexpr double rad2deg = 180. / M_PI;
 }
 
 const std::string MatrixWorkspace::xDimensionId = "xDimension";
@@ -707,7 +708,7 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out,
     const Mantid::MantidVec &x = this->readX(wksp_index);
     const Mantid::MantidVec &y = this->readY(wksp_index);
     // If it is a 1D workspace, no need to integrate
-    if ((x.size() <= 2) && (y.size() >= 1)) {
+    if ((x.size() <= 2) && (!y.empty())) {
       out[wksp_index] = y[0];
     } else {
       // Iterators for limits - whole range by default
@@ -790,10 +791,10 @@ MatrixWorkspace::getDetector(const size_t workspaceIndex) const {
 *  @throws InstrumentDefinitionError if source or sample is missing, or they are
 * in the same place
 */
-double MatrixWorkspace::detectorSignedTwoTheta(
-    Geometry::IDetector_const_sptr det) const {
-  Instrument_const_sptr instrument = getInstrument();
+double
+MatrixWorkspace::detectorSignedTwoTheta(const Geometry::IDetector &det) const {
 
+  Instrument_const_sptr instrument = getInstrument();
   Geometry::IComponent_const_sptr source = instrument->getSource();
   Geometry::IComponent_const_sptr sample = instrument->getSample();
   if (source == nullptr || sample == nullptr) {
@@ -812,7 +813,7 @@ double MatrixWorkspace::detectorSignedTwoTheta(
   // Get the instrument up axis.
   const V3D &instrumentUpAxis =
       instrument->getReferenceFrame()->vecPointingUp();
-  return det->getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
+  return det.getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
 }
 
 /** Returns the 2Theta scattering angle for a detector
@@ -822,10 +823,10 @@ double MatrixWorkspace::detectorSignedTwoTheta(
 *  @throws InstrumentDefinitionError if source or sample is missing, or they are
 * in the same place
 */
-double
-MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const {
-  Geometry::IComponent_const_sptr source = getInstrument()->getSource();
-  Geometry::IComponent_const_sptr sample = getInstrument()->getSample();
+double MatrixWorkspace::detectorTwoTheta(const Geometry::IDetector &det) const {
+  Instrument_const_sptr instrument = this->getInstrument();
+  Geometry::IComponent_const_sptr source = instrument->getSource();
+  Geometry::IComponent_const_sptr sample = instrument->getSample();
   if (source == nullptr || sample == nullptr) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Instrument not sufficiently defined: failed to get source and/or "
@@ -840,7 +841,7 @@ MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const {
         "Source and sample are at same position!");
   }
 
-  return det->getTwoTheta(samplePos, beamLine);
+  return det.getTwoTheta(samplePos, beamLine);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1037,7 +1038,7 @@ void MatrixWorkspace::maskWorkspaceIndex(const std::size_t index) {
 * on the same spectrum. Writing to
 *  the mask set is marked parrallel critical so different spectra can be
 * analysised in parallel
-*  @param workspaceIndex :: The workspace spectrum index of the bin
+*  @param workspaceIndex :: The workspace index of the bin
 *  @param binIndex ::      The index of the bin in the spectrum
 *  @param weight ::        'How heavily' the bin is to be masked. =1 for full
 * masking (the default).
@@ -1065,20 +1066,20 @@ void MatrixWorkspace::maskBin(const size_t &workspaceIndex,
 }
 
 /** Writes the masking weight to m_masks (doesn't alter y-values). Contains a
-* parrallel critical section
+* parallel critical section
 *  and so is thread safe
-*  @param spectrumIndex :: The workspace spectrum index of the bin
+*  @param index :: The workspace index of the spectrum
 *  @param binIndex ::      The index of the bin in the spectrum
 *  @param weight ::        'How heavily' the bin is to be masked. =1 for full
 * masking (the default).
 */
-void MatrixWorkspace::flagMasked(const size_t &spectrumIndex,
-                                 const size_t &binIndex, const double &weight) {
+void MatrixWorkspace::flagMasked(const size_t &index, const size_t &binIndex,
+                                 const double &weight) {
   // Writing to m_masks is not thread-safe, so put in some protection
   PARALLEL_CRITICAL(maskBin) {
     // First get a reference to the list for this spectrum (or create a new
     // list)
-    MaskList &binList = m_masks[spectrumIndex];
+    MaskList &binList = m_masks[index];
     auto it = binList.find(binIndex);
     if (it != binList.end()) {
       binList.erase(it);
@@ -1088,7 +1089,7 @@ void MatrixWorkspace::flagMasked(const size_t &spectrumIndex,
 }
 
 /** Does this spectrum contain any masked bins
-*  @param workspaceIndex :: The workspace spectrum index to test
+*  @param workspaceIndex :: The workspace index to test
 *  @return True if there are masked bins for this spectrum
 */
 bool MatrixWorkspace::hasMaskedBins(const size_t &workspaceIndex) const {
@@ -1345,8 +1346,6 @@ public:
   }
   const Geometry::MDFrame &getMDFrame() const override { return *m_frame; }
 
-  ~MWDimension() override {}
-
 private:
   const Axis &m_axis;
   const std::string m_dimensionId;
@@ -1366,8 +1365,6 @@ public:
                                            m_ws->getAxis(0)->unit()->label())) {
     m_X = ws->readX(0);
   }
-
-  ~MWXDimension() override {}
 
   /// the name of the dimennlsion as can be displayed along the axis
   std::string getName() const override {
@@ -1697,7 +1694,7 @@ void MatrixWorkspace::saveSpectraMapNexus(
           Kernel::V3D pos = det->getPos() - sample_pos;
           pos.getSpherical(R, Theta, Phi);
           R = det->getDistance(*sample);
-          Theta = this->detectorTwoTheta(det) * 180.0 / M_PI;
+          Theta = this->detectorTwoTheta(*det) * rad2deg;
         } catch (...) {
           R = 0.;
           Theta = 0.;

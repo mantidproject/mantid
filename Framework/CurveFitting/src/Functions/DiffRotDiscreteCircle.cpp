@@ -105,7 +105,7 @@ void InelasticDiffRotDiscreteCircle::function1D(double *out,
 
   double Q;
   if (getAttribute("Q").asDouble() == EMPTY_DBL()) {
-    if (m_qValueCache.size() == 0) {
+    if (m_qValueCache.empty()) {
       throw std::runtime_error(
           "No Q attribute provided and cannot retrieve from worksapce.");
     }
@@ -182,7 +182,7 @@ void InelasticDiffRotDiscreteCircle::setWorkspace(
 
     try {
       double efixed = workspace->getEFixed(det);
-      double usignTheta = workspace->detectorTwoTheta(det) / 2.0;
+      double usignTheta = 0.5 * workspace->detectorTwoTheta(*det);
 
       double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
 

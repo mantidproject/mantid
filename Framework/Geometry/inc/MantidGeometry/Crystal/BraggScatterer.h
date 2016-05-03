@@ -68,7 +68,6 @@ typedef boost::shared_ptr<BraggScatterer> BraggScatterer_sptr;
 class MANTID_GEOMETRY_DLL BraggScatterer : public Kernel::PropertyManager {
 public:
   BraggScatterer();
-  ~BraggScatterer() override {}
 
   void initialize();
   bool isInitialized();

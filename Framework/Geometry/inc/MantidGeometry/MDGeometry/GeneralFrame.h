@@ -42,9 +42,9 @@ public:
   GeneralFrame(const std::string &frameName, const Kernel::UnitLabel &unit);
   GeneralFrame(const std::string &frameName,
                std::unique_ptr<Mantid::Kernel::MDUnit> unit);
-  ~GeneralFrame() override;
   Kernel::UnitLabel getUnitLabel() const override;
   const Kernel::MDUnit &getMDUnit() const override;
+  bool setMDUnit(const Mantid::Kernel::MDUnit &newUnit) override;
   bool canConvertTo(const Kernel::MDUnit &otherUnit) const override;
   bool isQ() const override;
   bool isSameType(const MDFrame &frame) const override;
@@ -55,7 +55,7 @@ public:
 
 private:
   /// Label unit
-  const std::unique_ptr<Mantid::Kernel::MDUnit> m_unit;
+  std::unique_ptr<Mantid::Kernel::MDUnit> m_unit;
   /// Frame name
   const std::string m_frameName;
 };

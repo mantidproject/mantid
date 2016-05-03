@@ -52,8 +52,8 @@ private:
   Sphere *doClone() const override;
 
 protected:
-  Sphere(const Sphere &);
-  Sphere &operator=(const Sphere &);
+  Sphere(const Sphere &) = default;
+  Sphere &operator=(const Sphere &) = default;
 
 public:
   Sphere();

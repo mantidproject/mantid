@@ -12,7 +12,6 @@ set ( SRC_FILES
 	src/Axis.cpp
 	src/BinEdgeAxis.cpp
 	src/BoxController.cpp
-	src/CatalogFactory.cpp
 	src/CatalogManager.cpp
 	src/CatalogSession.cpp
 	src/ChopperModel.cpp
@@ -39,6 +38,7 @@ set ( SRC_FILES
 	src/FrameworkManager.cpp
 	src/FuncMinimizerFactory.cpp
 	src/FunctionDomain1D.cpp
+	src/FunctionDomainGeneral.cpp
 	src/FunctionDomainMD.cpp
 	src/FunctionFactory.cpp
 	src/FunctionParameterDecorator.cpp
@@ -59,6 +59,7 @@ set ( SRC_FILES
 	src/IFunction.cpp
 	src/IFunction1D.cpp
 	src/IFunction1DSpectrum.cpp
+	src/IFunctionGeneral.cpp
 	src/IFunctionMD.cpp
 	src/IFunctionMW.cpp
 	src/ILatticeFunction.cpp
@@ -72,7 +73,6 @@ set ( SRC_FILES
 	src/IPeaksWorkspace.cpp
 	src/IPowderDiffPeakFunction.cpp
 	src/ISpectrum.cpp
-	src/ISplittersWorkspace.cpp
 	src/ITableWorkspace.cpp
 	src/IkedaCarpenterModerator.cpp
 	src/ImmutableCompositeFunction.cpp
@@ -194,6 +194,7 @@ set ( INC_FILES
 	inc/MantidAPI/FuncMinimizerFactory.h
 	inc/MantidAPI/FunctionDomain.h
 	inc/MantidAPI/FunctionDomain1D.h
+	inc/MantidAPI/FunctionDomainGeneral.h
 	inc/MantidAPI/FunctionDomainMD.h
 	inc/MantidAPI/FunctionFactory.h
 	inc/MantidAPI/FunctionParameterDecorator.h
@@ -225,6 +226,7 @@ set ( INC_FILES
 	inc/MantidAPI/IFunction.h
 	inc/MantidAPI/IFunction1D.h
 	inc/MantidAPI/IFunction1DSpectrum.h
+	inc/MantidAPI/IFunctionGeneral.h
 	inc/MantidAPI/IFunctionMD.h
 	inc/MantidAPI/IFunctionMW.h
 	inc/MantidAPI/IFunctionWithLocation.h
@@ -356,6 +358,7 @@ set ( TEST_FILES
 	FrameworkManagerTest.h
 	FuncMinimizerFactoryTest.h
 	FunctionAttributeTest.h
+	FunctionDomainGeneralTest.h
 	FunctionDomainTest.h
 	FunctionFactoryTest.h
 	FunctionParameterDecoratorTest.h

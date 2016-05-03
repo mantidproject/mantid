@@ -1088,7 +1088,7 @@ SCARFTomoReconstruction::buildUploadBody(const std::string &boundary,
   std::string upName = filename;
   std::replace(upName.begin(), upName.end(), '\\', '/');
   // discard up to last / (path)
-  upName = upName.substr(upName.rfind("/") + 1);
+  upName = upName.substr(upName.rfind('/') + 1);
 
   // BLOCK: start and encode destination directory like this:
   // --4k89ogja023oh1-gkdfk903jf9wngmujfs95m
@@ -1232,7 +1232,7 @@ void SCARFTomoReconstruction::genOutputStatusInfo(
     setProperty("RemoteJobsCommands", jobCommands);
   } else {
     // Single job query. Here the job ID is an input
-    if (0 == jobIds.size()) {
+    if (jobIds.empty()) {
       setProperty("RemoteJobName", "Unknown!");
       setProperty("RemoteJobStatus", "Unknown!");
       setProperty("RemoteJobCommand", "Unknown!");
@@ -1321,9 +1321,9 @@ const std::string SCARFTomoReconstruction::checkDownloadOutputFile(
 const std::string
 SCARFTomoReconstruction::filterPACFilename(const std::string PACName) const {
   // discard up to last / (path)
-  std::string name = PACName.substr(PACName.rfind("/") + 1);
+  std::string name = PACName.substr(PACName.rfind('/') + 1);
   // remove trailing parameters
-  size_t ast = name.find("*");
+  size_t ast = name.find('*');
   name.replace(ast, std::string::npos, "");
   return name;
 }

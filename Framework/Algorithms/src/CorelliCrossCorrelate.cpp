@@ -111,7 +111,7 @@ void CorelliCrossCorrelate::exec() {
   outputWS = getProperty("OutputWorkspace");
 
   if (outputWS != inputWS) {
-    outputWS = EventWorkspace_sptr(inputWS->clone().release());
+    outputWS = inputWS->clone();
   }
 
   // Read in chopper sequence from IDF.

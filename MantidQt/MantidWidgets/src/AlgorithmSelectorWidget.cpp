@@ -52,7 +52,7 @@ namespace MantidWidgets
     buttonLayout->addWidget(m_findAlg);
 
     // Layout the tree and combo box
-    QVBoxLayout * layout = new QVBoxLayout(this, 0 /*border*/, 4 /*spacing*/);
+    QVBoxLayout *layout = new QVBoxLayout(this);
     //this->setLayout(layout);
     layout->addLayout(buttonLayout);
     layout->addWidget(m_tree);
@@ -413,7 +413,8 @@ namespace MantidWidgets
   SelectedAlgorithm FindAlgComboBox::getSelectedAlgorithm()
   {
     //typed selection
-    QString typedText = this->currentText().stripWhiteSpace(); //text as typed in the combobox
+    QString typedText =
+        this->currentText().trimmed(); // text as typed in the combobox
     if (!typedText.isEmpty()) // if the text is not empty
     {
       //find the closest matching entry

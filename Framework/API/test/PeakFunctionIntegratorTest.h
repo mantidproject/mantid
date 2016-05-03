@@ -24,29 +24,29 @@ class LocalGaussian : public IPeakFunction {
 public:
   LocalGaussian() : IPeakFunction() {}
 
-  std::string name() const { return "LocalGaussian"; }
+  std::string name() const override { return "LocalGaussian"; }
 
-  double centre() const { return getParameter("Center"); }
-  void setCentre(const double c) { setParameter("Center", c); }
+  double centre() const override { return getParameter("Center"); }
+  void setCentre(const double c) override { setParameter("Center", c); }
 
-  double fwhm() const {
+  double fwhm() const override {
     return getParameter("Sigma") * (2.0 * sqrt(2.0 * log(2.0)));
   }
-  void setFwhm(const double w) {
+  void setFwhm(const double w) override {
     setParameter("Sigma", w / (2.0 * sqrt(2.0 * log(2.0))));
   }
 
-  double height() const { return getParameter("Height"); }
-  void setHeight(const double h) { setParameter("Height", h); }
+  double height() const override { return getParameter("Height"); }
+  void setHeight(const double h) override { setParameter("Height", h); }
 
-  void init() {
+  void init() override {
     declareParameter("Center");
     declareParameter("Sigma");
     declareParameter("Height");
   }
 
   void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const {
+                     const size_t nData) const override {
     double h = getParameter("Height");
     double s = getParameter("Sigma");
     double c = getParameter("Center");
@@ -57,7 +57,7 @@ public:
   }
 
   void functionDerivLocal(Jacobian *out, const double *xValues,
-                          const size_t nData) {
+                          const size_t nData) override {
     UNUSED_ARG(out);
     UNUSED_ARG(xValues);
     UNUSED_ARG(nData);

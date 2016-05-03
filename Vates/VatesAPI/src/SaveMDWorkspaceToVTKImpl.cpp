@@ -195,17 +195,16 @@ SaveMDWorkspaceToVTKImpl::translateStringToVisualNormalization(
 }
 
 void SaveMDWorkspaceToVTKImpl::setupMembers() {
-  m_normalizations.insert(
-      std::make_pair("AutoSelect", VisualNormalization::AutoSelect));
-  m_normalizations.insert(
-      std::make_pair("NoNormalization", VisualNormalization::NoNormalization));
-  m_normalizations.insert(std::make_pair(
-      "NumEventsNormalization", VisualNormalization::NumEventsNormalization));
-  m_normalizations.insert(std::make_pair(
-      "VolumeNormalization", VisualNormalization::VolumeNormalization));
+  m_normalizations.emplace("AutoSelect", VisualNormalization::AutoSelect);
+  m_normalizations.emplace("NoNormalization",
+                           VisualNormalization::NoNormalization);
+  m_normalizations.emplace("NumEventsNormalization",
+                           VisualNormalization::NumEventsNormalization);
+  m_normalizations.emplace("VolumeNormalization",
+                           VisualNormalization::VolumeNormalization);
 
-  m_thresholds.push_back("IgnoreZerosThresholdRange");
-  m_thresholds.push_back("NoThresholdRange");
+  m_thresholds.emplace_back("IgnoreZerosThresholdRange");
+  m_thresholds.emplace_back("NoThresholdRange");
 }
 
 std::vector<std::string>

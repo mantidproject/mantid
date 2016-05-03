@@ -35,7 +35,7 @@ public:
     factory.notificationCenter.addObserver(m_notificationObserver);
   }
 
-  ~DynamicFactoryTest() {
+  ~DynamicFactoryTest() override {
     factory.notificationCenter.removeObserver(m_notificationObserver);
   }
 

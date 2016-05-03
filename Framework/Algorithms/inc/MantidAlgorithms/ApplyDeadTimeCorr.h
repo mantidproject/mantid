@@ -44,7 +44,7 @@ public:
   const std::string name() const override { return "ApplyDeadTimeCorr"; };
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Apply deadtime correction to each spectra of a workspace.";
+    return "Apply deadtime correction to each spectrum of a workspace.";
   }
 
   /// Algorithm's version for identification
@@ -59,6 +59,8 @@ private:
   void init() override;
   /// Run the algorithm
   void exec() override;
+  /// Validate the inputs
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace Algorithms

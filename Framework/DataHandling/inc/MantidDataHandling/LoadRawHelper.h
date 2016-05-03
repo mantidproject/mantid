@@ -87,14 +87,13 @@ public:
                                         bool &bexcludeMonitors,
                                         API::Algorithm *const pAlgo);
   /// creates monitor workspace
-  static void createMonitorWorkspace(DataObjects::Workspace2D_sptr &monws_sptr,
-                                     DataObjects::Workspace2D_sptr &ws_sptr,
-                                     API::WorkspaceGroup_sptr &mongrp_sptr,
-                                     const int64_t mwsSpecs,
-                                     const int64_t nwsSpecs,
-                                     const int64_t numberOfPeriods,
-                                     const int64_t lenthIn, std::string title,
-                                     API::Algorithm *const pAlg);
+  static void
+  createMonitorWorkspace(DataObjects::Workspace2D_sptr &monws_sptr,
+                         DataObjects::Workspace2D_sptr &normalws_sptr,
+                         API::WorkspaceGroup_sptr &mongrp_sptr,
+                         const int64_t mwsSpecs, const int64_t nwsSpecs,
+                         const int64_t numberOfPeriods, const int64_t lengthIn,
+                         std::string title, API::Algorithm *const pAlg);
   /// creates  shared pointer to group workspace
   static API::WorkspaceGroup_sptr createGroupWorkspace();
 
@@ -122,6 +121,12 @@ public:
                                    const int64_t period, bool bmonitors,
                                    API::Algorithm *const pAlg);
 
+  /// Extract the start time from a raw file
+  static Kernel::DateAndTime extractStartTime(ISISRAW *isisRaw);
+
+  /// Extract the end time from a raw file
+  static Kernel::DateAndTime extractEndTime(ISISRAW *isisRaw);
+
 protected:
   /// Overwrites Algorithm method.
   void init() override;
@@ -141,8 +146,8 @@ protected:
   void ioRaw(FILE *file, bool from_file);
 
   /// reads data
-  bool readData(FILE *file, int histToRead);
-  bool readData(FILE *file, int64_t histToRead);
+  bool readData(FILE *file, int hist);
+  bool readData(FILE *file, int64_t hist);
 
   // Constructs the time channel (X) vector(s)
   std::vector<boost::shared_ptr<MantidVec>>
@@ -203,7 +208,7 @@ protected:
                                specnum_t &normalwsSpecs,
                                specnum_t &monitorwsSpecs);
   /// load the spectra
-  void loadSpectra(FILE *file, const int &period, const int &m_total_specs,
+  void loadSpectra(FILE *file, const int &period, const int &total_specs,
                    DataObjects::Workspace2D_sptr ws_sptr,
                    std::vector<boost::shared_ptr<MantidVec>>);
 
@@ -224,7 +229,7 @@ private:
   /// Overwrites Algorithm method
   void exec() override;
   /// convert month label to int string
-  std::string convertMonthLabelToIntStr(std::string month) const;
+  static std::string convertMonthLabelToIntStr(std::string month);
 
   /// Allowed values for the cache property
   std::vector<std::string> m_cache_options;
@@ -250,15 +255,16 @@ private:
 
   /// Search for the log files in the workspace, and output their names as a
   /// set.
-  std::list<std::string> searchForLogFiles(const std::string &fileName);
+  std::list<std::string> searchForLogFiles(const std::string &pathToRawFile);
   /// Extract the log name from the path to the specific log file.
   std::string extractLogName(const std::string &path);
   /// Checks if the file is an ASCII file
-  bool isAscii(const std::string &filenamePart);
+  bool isAscii(const std::string &filename);
   /// if  alternate data stream named checksum exists for the raw file
   bool adsExists(const std::string &pathToFile);
   /// returns the list of log files from ADS checksum
-  std::set<std::string> getLogFilenamesfromADS(const std::string &pathToFile);
+  std::set<std::string>
+  getLogFilenamesfromADS(const std::string &pathToRawFile);
 };
 
 } // namespace DataHandling

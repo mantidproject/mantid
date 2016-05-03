@@ -148,7 +148,7 @@ public:
   size_t numMonitors() const;
 
   /// Get the bounding box for this component and store it in the given argument
-  void getBoundingBox(BoundingBox &boundingBox) const override;
+  void getBoundingBox(BoundingBox &assemblyBox) const override;
 
   /// Get pointers to plottable components
   boost::shared_ptr<const std::vector<IObjComponent_const_sptr>>
@@ -238,7 +238,7 @@ public:
 
   void setFilename(const std::string &filename);
   const std::string &getFilename() const;
-  void setXmlText(const std::string &filename);
+  void setXmlText(const std::string &XmlText);
   const std::string &getXmlText() const;
 
   /// Set reference Frame

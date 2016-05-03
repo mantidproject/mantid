@@ -227,7 +227,7 @@ void RemoveBins::crop(const double &start, const double &end) {
 }
 
 /** Convert the X range given into the unit of the input workspace
- *  @param index ::  The current spectrum index
+ *  @param index ::  The current workspace index
  *  @param startX :: Returns the start of the range in the workspace's unit
  *  @param endX ::   Returns the end of the range in the workspace's unit
  */
@@ -288,7 +288,7 @@ void RemoveBins::calculateDetectorPosition(const int &index, double &l1,
   if (!det->isMonitor()) {
     l2 = det->getDistance(*sample);
     // The scattering angle for this detector (in radians).
-    twoTheta = m_inputWorkspace->detectorTwoTheta(det);
+    twoTheta = m_inputWorkspace->detectorTwoTheta(*det);
   } else // If this is a monitor then make l1+l2 = source-detector distance and
          // twoTheta=0
   {

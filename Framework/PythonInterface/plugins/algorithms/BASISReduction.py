@@ -9,6 +9,7 @@ DEFAULT_BINS = [0., 0., 0.]
 DEFAULT_RANGE = [6.24, 6.30]
 DEFAULT_MASK_GROUP_DIR = "/SNS/BSS/shared/autoreduce"
 DEFAULT_MASK_FILE = "BASIS_Mask.xml"
+DEFAULT_VANADIUM_ENERGY_RANGE = [-0.0034, 0.0034]  # meV
 
 #pylint: disable=too-many-instance-attributes
 class BASISReduction(PythonAlgorithm):
@@ -24,12 +25,15 @@ class BASISReduction(PythonAlgorithm):
     _groupDetOpt = None
     _overrideMask = None
     _dMask = None
-    _doNorm = None
+
+    # class variables related to division by Vanadium (normalization)
+    _doNorm = None  # stores the selected item from normalization_types
     _normRange = None
     _norm_run_list = None
     _normWs = None
     _normMonWs = None
-    _run_list = None
+
+    _run_list = None  # a list of runs, or a list of sets of runs
     _samWs = None
     _samMonWs = None
     _samWsRun = None
@@ -40,6 +44,9 @@ class BASISReduction(PythonAlgorithm):
 
     def name(self):
         return "BASISReduction"
+
+    def version(self):
+        return 1
 
     def summary(self):
         return "This algorithm is meant to temporarily deal with letting BASIS reduce lots of files via Mantid."
@@ -53,11 +60,8 @@ class BASISReduction(PythonAlgorithm):
         self.declareProperty("DoIndividual", False, "Do each run individually")
         self.declareProperty("NoMonitorNorm", False,
                              "Stop monitor normalization")
-        self.declareProperty("NormRunNumbers", "", "Normalization run numbers")
         arrVal = FloatArrayLengthValidator(2)
-        self.declareProperty(FloatArrayProperty("NormWavelengthRange", DEFAULT_RANGE,
-                                                arrVal, direction=Direction.Input),
-                             "Wavelength range for normalization. default:(6.24A, 6.30A)")
+
         self.declareProperty(FloatArrayProperty("EnergyBins", DEFAULT_BINS,
                                                 direction=Direction.Input),
                              "Energy transfer binning scheme (in ueV)")
@@ -72,6 +76,31 @@ class BASISReduction(PythonAlgorithm):
         self.declareProperty("GroupDetectors", "None",
                              StringListValidator(grouping_type),
                              "Switch for grouping detectors")
+
+        # Properties setting the division by vanadium
+        titleDivideByVanadium = "Normalization by Vanadium"
+        self.declareProperty("DivideByVanadium", False, direction=Direction.Input,
+                             doc="Do we normalize by the vanadium intensity?")
+        self.setPropertyGroup("DivideByVanadium", titleDivideByVanadium)
+        ifDivideByVanadium = EnabledWhenProperty("DivideByVanadium",
+                                                 PropertyCriterion.IsNotDefault)
+
+        normalization_types = ["by Q slice", "by detector ID"]
+        self.declareProperty("NormalizationType", "by Q slice",
+                             StringListValidator(normalization_types),
+                             "Select a Vanadium normalization")
+        self.setPropertySettings("NormalizationType", ifDivideByVanadium)
+        self.setPropertyGroup("NormalizationType", titleDivideByVanadium)
+
+        self.declareProperty("NormRunNumbers", "", "Normalization run numbers")
+        self.setPropertySettings("NormRunNumbers", ifDivideByVanadium)
+        self.setPropertyGroup("NormRunNumbers", titleDivideByVanadium)
+
+        self.declareProperty(FloatArrayProperty("NormWavelengthRange", DEFAULT_RANGE,
+                                                arrVal, direction=Direction.Input),
+                             "Wavelength range for normalization")
+        self.setPropertySettings("NormWavelengthRange", ifDivideByVanadium)
+        self.setPropertyGroup("NormWavelengthRange", titleDivideByVanadium)
 
     def PyExec(self):
         config['default.facility'] = "SNS"
@@ -101,100 +130,96 @@ class BASISReduction(PythonAlgorithm):
         self._dMask = _dMask[1]
         api.DeleteWorkspace(_dMask[0])
 
-        # Do normalization if run numbers are present
+        ############################
+        ##  Process the Vanadium  ##
+        ############################
         norm_runs = self.getProperty("NormRunNumbers").value
-        self._doNorm = bool(norm_runs)
-        self.log().information("Do Norm: " + str(self._doNorm))
-        if self._doNorm:
+        if bool(norm_runs):
             if ";" in norm_runs:
                 raise SyntaxError("Normalization does not support run groups")
-            # Setup the integration (rebin) parameters
-            normRange = self.getProperty("NormWavelengthRange").value
-            self._normRange = [normRange[0], normRange[1]-normRange[0], normRange[1]]
+            self._doNorm = self.getProperty("NormalizationType").value
+            self.log().information("Divide by Vanadium with normalization" + self._doNorm)
 
-            # Process normalization runs
-            self._norm_run_list = self._getRuns(norm_runs)
-            for norm_set in self._norm_run_list:
-                extra_extension = "_norm"
-                self._normWs = self._makeRunName(norm_set[0])
-                self._normWs += extra_extension
-                self._normMonWs = self._normWs + "_monitors"
-                self._sumRuns(norm_set, self._normWs, self._normMonWs, extra_extension)
-                self._calibData(self._normWs, self._normMonWs)
+            # The following steps are common to all types of Vanadium normalization
 
-            api.Rebin(InputWorkspace=self._normWs, OutputWorkspace=self._normWs,
-                      Params=self._normRange)
+            # norm_runs encompasses a single set, thus _getRuns returns
+            # a list of only one item
+            norm_set = self._getRuns(norm_runs, doIndiv=False)[0]
+            self._normWs = self._sum_and_calibrate(norm_set, extra_extension="_norm")
+
+            # This rebin integrates counts onto a histogram of a single bin
+            if self._doNorm == "by detectorID":
+                normRange = self.getProperty("NormWavelengthRange").value
+                self._normRange = [normRange[0], normRange[1]-normRange[0], normRange[1]]
+                api.Rebin(InputWorkspace=self._normWs, OutputWorkspace=self._normWs,
+                          Params=self._normRange)
+
+            # FindDetectorsOutsideLimits to be substituted by MedianDetectorTest
             api.FindDetectorsOutsideLimits(InputWorkspace=self._normWs,
                                            OutputWorkspace="BASIS_NORM_MASK")
 
-        self._run_list = self._getRuns(self.getProperty("RunNumbers").value)
+            # additional reduction steps when normalizing by Q slice
+            if self._doNorm == "by Q slice":
+                self._normWs = self._group_and_SofQW(self._normWs, self._etBins, isSample=False)
+
+        ##########################
+        ##  Process the sample  ##
+        ##########################
+        self._run_list = self._getRuns(self.getProperty("RunNumbers").value,
+                                       doIndiv=self._doIndiv)
         for run_set in self._run_list:
-            self._samWs = self._makeRunName(run_set[0])
-            self._samMonWs = self._samWs + "_monitors"
+            self._samWs = self._sum_and_calibrate(run_set)
             self._samWsRun = str(run_set[0])
-
-            self._sumRuns(run_set, self._samWs, self._samMonWs)
-            # After files are all added, run the reduction
-            self._calibData(self._samWs, self._samMonWs)
-
+            # Mask detectors with insufficient Vanadium signal
             if self._doNorm:
                 api.MaskDetectors(Workspace=self._samWs,
                                   MaskedWorkspace='BASIS_NORM_MASK')
+            # Divide by Vanadium
+            if self._doNorm == "by detector ID":
                 api.Divide(LHSWorkspace=self._samWs, RHSWorkspace=self._normWs,
                            OutputWorkspace=self._samWs)
-
-            api.ConvertUnits(InputWorkspace=self._samWs,
-                             OutputWorkspace=self._samWs,
-                             Target='DeltaE', EMode='Indirect')
-            api.CorrectKiKf(InputWorkspace=self._samWs,
-                            OutputWorkspace=self._samWs,
-                            EMode='Indirect')
-
-            api.Rebin(InputWorkspace=self._samWs,
-                      OutputWorkspace=self._samWs,
-                      Params=self._etBins)
-            if self._groupDetOpt != "None":
-                if self._groupDetOpt == "Low-Resolution":
-                    grp_file = "BASIS_Grouping_LR.xml"
-                else:
-                    grp_file = "BASIS_Grouping.xml"
-                # If mask override used, we need to add default grouping file location to
-                # search paths
-                if self._overrideMask:
-                    config.appendDataSearchDir(DEFAULT_MASK_GROUP_DIR)
-
-                api.GroupDetectors(InputWorkspace=self._samWs,
-                                   OutputWorkspace=self._samWs,
-                                   MapFile=grp_file, Behaviour="Sum")
-
-            self._samSqwWs = self._samWs+'_sqw'
-            api.SofQW3(InputWorkspace=self._samWs,
-                       OutputWorkspace=self._samSqwWs,
-                       QAxisBinning=self._qBins, EMode='Indirect',
-                       EFixed='2.0826')
-            # Clear mask from reduced file. Needed for binary operations involving this S(Q,w)
+            # additional reduction steps
+            self._samSqwWs = self._group_and_SofQW(self._samWs, self._etBins, isSample=True)
+            # Divide by Vanadium
+            if self._doNorm == "by Q slice":
+                api.Integration(InputWorkspace=self._normWs, OutputWorkspace=self._normWs,
+                                RangeLower=DEFAULT_VANADIUM_ENERGY_RANGE[0],
+                                RangeUpper=DEFAULT_VANADIUM_ENERGY_RANGE[1])
+                api.Divide(LHSWorkspace=self._samSqwWs, RHSWorkspace=self._normWs,
+                           OutputWorkspace=self._samSqwWs)
+            # Clear mask from reduced file. Needed for binary operations
+            # involving this S(Q,w)
             api.ClearMaskFlag(Workspace=self._samSqwWs)
-
+            # Scale so that elastic line has Y-values ~ 1
+            self._ScaleY(self._samSqwWs)
+            # Output Dave and Nexus files
+            extension = "_divided.dat" if self._doNorm else ".dat"
             dave_grp_filename = self._makeRunName(self._samWsRun,
-                                                  False) + ".dat"
+                                                  False) + extension
             api.SaveDaveGrp(Filename=dave_grp_filename,
                             InputWorkspace=self._samSqwWs,
                             ToMicroEV=True)
+            extension = "_divided_sqw.nxs" if self._doNorm else "_sqw.nxs"
             processed_filename = self._makeRunName(self._samWsRun,
-                                                   False) + "_sqw.nxs"
+                                                   False) + extension
             api.SaveNexus(Filename=processed_filename,
                           InputWorkspace=self._samSqwWs)
 
-    def _getRuns(self, rlist):
+    def _getRuns(self, rlist, doIndiv=True):
         """
         Create sets of run numbers for analysis. A semicolon indicates a
         separate group of runs to be processed together.
+        @param rlist: string containing all the run numbers to be reduced.
+        @return if _doIndiv is False, return a list of IntArrayProperty objects.
+         Each item is a pseudolist containing a set of runs to be reduced together.
+         if _doIndiv is True, return a list of strings, each string is a run number.
         """
         run_list = []
+        # ";" separates the runs into substrings. Each substring represents a set of runs
         rlvals = rlist.split(';')
         for rlval in rlvals:
-            iap = IntArrayProperty("", rlval)
-            if self._doIndiv:
+            iap = IntArrayProperty("", rlval)  # split the substring
+            if doIndiv:
                 run_list.extend([[x] for x in iap.value])
             else:
                 run_list.append(iap.value)
@@ -216,6 +241,13 @@ class BASISReduction(PythonAlgorithm):
         return self._short_inst + str(run)
 
     def _sumRuns(self, run_set, sam_ws, mon_ws, extra_ext=None):
+        """
+        Aggregate the set of runs
+        @param run_set: list of run numbers
+        @param sam_ws:  name of aggregate workspace for the sample
+        @param mon_ws:  name of aggregate workspace for the monitors
+        @param extra_ext: string to be added to the temporary workspaces
+        """
         for run in run_set:
             ws_name = self._makeRunName(run)
             if extra_ext is not None:
@@ -270,6 +302,65 @@ class BASISReduction(PythonAlgorithm):
             api.Divide(LHSWorkspace=sam_ws,
                        RHSWorkspace=mon_ws,
                        OutputWorkspace=sam_ws)
+
+    def _sum_and_calibrate(self, run_set, extra_extension=""):
+        """
+        Aggregate the set of runs and calibrate
+        @param run_set: list of run numbers
+        @param extra_extension: string to be added to the workspace names
+        @return: workspace name of the aggregated and calibrated data
+        """
+        wsName = self._makeRunName(run_set[0])
+        wsName += extra_extension
+        wsMonName = wsName + "_monitors"
+        self._sumRuns(run_set, wsName, wsMonName, extra_extension)
+        self._calibData(wsName, wsMonName)
+        return wsName
+
+    def _group_and_SofQW(self, wsName, etRebins, isSample=True):
+        """ Transforms from wavelength and detector ID to S(Q,E)
+        @param wsName: workspace as a function of wavelength and detector id
+        @return: S(Q,E)
+        """
+        api.ConvertUnits(InputWorkspace=wsName,
+                         OutputWorkspace=wsName,
+                         Target='DeltaE', EMode='Indirect')
+        api.CorrectKiKf(InputWorkspace=wsName,
+                        OutputWorkspace=wsName,
+                        EMode='Indirect')
+        api.Rebin(InputWorkspace=wsName,
+                  OutputWorkspace=wsName,
+                  Params=etRebins)
+        if self._groupDetOpt != "None":
+            if self._groupDetOpt == "Low-Resolution":
+                grp_file = "BASIS_Grouping_LR.xml"
+            else:
+                grp_file = "BASIS_Grouping.xml"
+            # If mask override used, we need to add default grouping file
+            # location to search paths
+            if self._overrideMask:
+                config.appendDataSearchDir(DEFAULT_MASK_GROUP_DIR)
+                api.GroupDetectors(InputWorkspace=wsName,
+                                   OutputWorkspace=wsName,
+                                   MapFile=grp_file, Behaviour="Sum")
+        wsSqwName = wsName+'_divided_sqw' if isSample and self._doNorm else wsName+'_sqw'
+        api.SofQW3(InputWorkspace=wsName,
+                   OutputWorkspace=wsSqwName,
+                   QAxisBinning=self._qBins, EMode='Indirect',
+                   EFixed='2.0826')
+        return wsSqwName
+
+    def _ScaleY(self, wsName):
+        """
+        Scale all spectra by a number so that the maximum of the first spectra
+        is rescaled to 1
+        @param wsName: name of the workspace to rescale
+        """
+        workspace = mtd[wsName]
+        maximumYvalue = workspace.dataY(0).max()
+        api.Scale(InputWorkspace=wsName,
+                  OutputWorkspace=wsName,
+                  Factor=1./maximumYvalue, Operation="Multiply",)
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISReduction)

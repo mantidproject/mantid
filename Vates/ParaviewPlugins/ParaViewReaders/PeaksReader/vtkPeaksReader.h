@@ -9,8 +9,9 @@ class VTK_EXPORT vtkPeaksReader : public vtkPolyDataAlgorithm
 {
 public:
   static vtkPeaksReader *New();
-  vtkTypeMacro(vtkPeaksReader, vtkPolyDataAlgorithm)
-  void PrintSelf(ostream& os, vtkIndent indent);
+  vtkTypeMacro(vtkPeaksReader,
+               vtkPolyDataAlgorithm) void PrintSelf(ostream &os,
+                                                    vtkIndent indent) override;
   vtkSetStringMacro(FileName)
   vtkGetStringMacro(FileName)
   int CanReadFile(const char* fname);
@@ -24,12 +25,14 @@ public:
 
 protected:
   vtkPeaksReader();
-  ~vtkPeaksReader();
-  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  ~vtkPeaksReader() override;
+  int RequestInformation(vtkInformation *, vtkInformationVector **,
+                         vtkInformationVector *) override;
+  int RequestData(vtkInformation *, vtkInformationVector **,
+                  vtkInformationVector *) override;
   ///Handle time variation.
-  unsigned long GetMTime();
-  
+  unsigned long GetMTime() override;
+
 private:
   
   vtkPeaksReader(const vtkPeaksReader&);

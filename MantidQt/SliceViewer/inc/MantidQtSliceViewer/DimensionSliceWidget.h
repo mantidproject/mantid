@@ -36,7 +36,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER DimensionSliceWidget : public QWidget
 
 public:
   DimensionSliceWidget(QWidget *parent = 0);
-  ~DimensionSliceWidget();
+  ~DimensionSliceWidget() override;
 
   void setDimension(int index, Mantid::Geometry::IMDDimension_const_sptr dim);
   void setMinMax(double min, double max);

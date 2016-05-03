@@ -29,6 +29,31 @@ namespace ALCHelper
   }
 
   /**
+  * Creates a vector of QwtData using X and Y values from every single
+  * workspace index in ws, written for only Engg Diffraction fitting tab
+  * @param ws :: Workspace with X and Y values to use
+  * @return Pointer to created Vector QwtData
+  */
+  std::vector<boost::shared_ptr<QwtData>>
+  curveDataFromWs(MatrixWorkspace_const_sptr ws) {
+
+    std::vector<boost::shared_ptr<QwtData>> dataVector;
+    auto histograms = ws->getNumberHistograms();
+
+    for (size_t wsIndex = 0; wsIndex < histograms; wsIndex++) {
+
+      const double *x = &ws->readX(wsIndex)[0];
+      const double *y = &ws->readY(wsIndex)[0];
+      size_t size = ws->blocksize();
+
+      auto wsIdxData = boost::make_shared<QwtArrayData>(x, y, size);
+
+      dataVector.push_back(wsIdxData);
+    }
+    return dataVector;
+  }
+
+  /**
    * Creates vector of errors using E values from the workspace spectra.
    * @param ws :: Workspace with E values to use
    * @param wsIndex :: Workspace index to use

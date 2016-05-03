@@ -412,7 +412,7 @@ void LoadSassena::exec() {
   // Block to read the Q-vectors
   std::vector<int> sorting_indexes;
   const MantidVec qvmod = this->loadQvectors(h5file, gws, sorting_indexes);
-  if (qvmod.size() == 0) {
+  if (qvmod.empty()) {
     this->g_log.error("No Q-vectors read. Unable to proceed");
     H5Fclose(h5file);
     return;

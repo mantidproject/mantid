@@ -134,8 +134,8 @@ public:
                      size_t &nColumns) const override;
   void setEventsData(const std::vector<coord_t> &coordTable) override;
 
-  void addEvent(const MDE &Evnt) override;
-  void addEventUnsafe(const MDE &Evnt) override;
+  size_t addEvent(const MDE &Evnt) override;
+  size_t addEventUnsafe(const MDE &Evnt) override;
 
   // add range of events
   size_t addEvents(const std::vector<MDE> &events) override;
@@ -221,7 +221,7 @@ private:
   /// one with the boxController;
   MDBox(const MDBox &);
   /// common part of mdBox constructor
-  void initMDBox(const size_t numEvents);
+  void initMDBox(const size_t nBoxEvents);
 
 public:
   /// Typedef for a shared pointer to a MDBox

@@ -1,7 +1,6 @@
 #include "MantidGeometry/Surfaces/Line.h"
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/Math/mathSupport.h"
-#include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Plane.h"
@@ -31,14 +30,6 @@ Constructor
   Direct.normalize();
 }
 
-Line::Line(const Line &A)
-    : Origin(A.Origin), Direct(A.Direct)
-/**
-Copy Constructor
-@param A :: Line to copy
-*/
-{}
-
 Line *Line::clone() const
 /**
 Virtual copy constructor (not currently used)
@@ -47,26 +38,6 @@ Virtual copy constructor (not currently used)
 {
   return new Line(*this);
 }
-
-Line &Line::operator=(const Line &A)
-/**
-Assignment operator
-@param A :: Line to copy
-@return *this
-*/
-{
-  if (this != &A) {
-    Origin = A.Origin;
-    Direct = A.Direct;
-  }
-  return *this;
-}
-
-Line::~Line()
-/**
-Destructor
-*/
-{}
 
 Kernel::V3D Line::getPoint(const double lambda) const
 /**
@@ -190,7 +161,7 @@ added. It does not check the points for validity.
 @return Number of points found.
 */
 {
-  const std::vector<double> BN = Sur.copyBaseEqn();
+  const std::vector<double> &BN = Sur.copyBaseEqn();
   const double a(Origin[0]), b(Origin[1]), c(Origin[2]);
   const double d(Direct[0]), e(Direct[1]), f(Direct[2]);
   double Coef[3];

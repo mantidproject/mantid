@@ -85,7 +85,7 @@ void PlotController::tableUpdated()
   for(int row = 0; row < rowCount; ++row)
   {
     QString itemText = QString("%1 (%2)").arg(m_table->item(row,wsColumn)->text(),m_table->item(row,wsIndexColumn)->text());
-    m_plotSelector->insertItem( itemText );
+    m_plotSelector->insertItem(-1, itemText);
   }
   m_plotData.clear();
   m_currentIndex = -1;
@@ -323,14 +323,14 @@ void PlotController::enableZoom()
 /// Enable panning tool.
 void PlotController::enablePan()
 {
-  enableTool(m_panner,Qt::pointingHandCursor);
+  enableTool(m_panner, Qt::PointingHandCursor);
   m_magnifier->setEnabled(true);
 }
 
 /// Enable range selector tool.
 void PlotController::enableRange()
 {
-  enableTool(m_rangeSelector,Qt::pointingHandCursor);
+  enableTool(m_rangeSelector, Qt::PointingHandCursor);
   m_rangeSelector->setColour(rangeSelectorEnabledColor);
   m_plot->replot();
 }

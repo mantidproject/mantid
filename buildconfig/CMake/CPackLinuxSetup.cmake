@@ -7,8 +7,13 @@ string ( TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_PACKAGE_NAME )
 
 # define the source generators
 set ( CPACK_SOURCE_GENERATOR TGZ )
-set ( CPACK_SOURCE_IGNORE_FILES
-  "${CMAKE_BINARY_DIR};/\\\\.git*;${CPACK_SOURCE_IGNORE_FILES}" )
+set ( CPACK_SOURCE_IGNORE_FILES "/\\\\.git*")
+if (CMAKE_BINARY_DIR MATCHES "^${CMAKE_SOURCE_DIR}/.+")
+  # In-source build add the binary directory to files to ignore for the tarball
+  string (REGEX REPLACE "^${CMAKE_SOURCE_DIR}/([^\\/]+)(.*)\$" "/\\1/" _ignore_dir "${CMAKE_BINARY_DIR}")
+  set (CPACK_SOURCE_IGNORE_FILES "${CPACK_SOURCE_IGNORE_FILES};${_ignore_dir}")
+endif ()
+message("CPACK_SOURCE_IGNORE_FILES = ${CPACK_SOURCE_IGNORE_FILES}")
 
 include (DetermineLinuxDistro)
 
@@ -20,10 +25,10 @@ if ( "${UNIX_DIST}" MATCHES "Ubuntu" )
     execute_process( COMMAND ${DPKG_CMD} --print-architecture
       OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
       OUTPUT_STRIP_TRAILING_WHITESPACE )
-    # according to debian <foo>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb 
+    # according to debian <foo>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb
     set( CPACK_PACKAGE_FILE_NAME
-      "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_RELEASE}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")   
-  endif ( DPKG_CMD ) 
+      "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_RELEASE}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+  endif ( DPKG_CMD )
 endif ( "${UNIX_DIST}" MATCHES "Ubuntu" )
 
 #RedHatEnterpriseClient RedHatEnterpriseWorkstation
@@ -41,7 +46,7 @@ if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "Fedora
     elseif ( "${UNIX_DIST}" MATCHES "Fedora" )
       set ( CPACK_RPM_PACKAGE_RELEASE "1.fc${UNIX_RELEASE}" )
     endif ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" )
-    
+
     # If CPACK_SET_DESTDIR is ON then the Prefix doesn't get put in the spec file
     if( CPACK_SET_DESTDIR )
       message ( "Adding \"Prefix:\" line to spec file manually when CPACK_SET_DESTDIR is set")
@@ -53,4 +58,3 @@ if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "Fedora
       "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}.${CPACK_RPM_PACKAGE_ARCHITECTURE}" )
   endif ( RPMBUILD_CMD)
 endif ()
-

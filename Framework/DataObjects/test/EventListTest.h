@@ -42,7 +42,7 @@ public:
     NUMEVENTS = 100;
   }
 
-  void setUp() {
+  void setUp() override {
     // Make a little event list with 3 events
     vector<TofEvent> mylist;
     mylist.push_back(TofEvent(100, 200));
@@ -1339,14 +1339,14 @@ public:
 
   /// Dummy unit for testing conversion
   class DummyUnit1 : public Mantid::Kernel::Units::Degrees {
-    virtual double singleToTOF(const double x) const { return x * 10.; }
-    virtual double singleFromTOF(const double tof) const { return tof / 10.; }
+    double singleToTOF(const double x) const override { return x * 10.; }
+    double singleFromTOF(const double tof) const override { return tof / 10.; }
   };
 
   /// Dummy unit for testing conversion
   class DummyUnit2 : public Mantid::Kernel::Units::Degrees {
-    virtual double singleToTOF(const double x) const { return x / 20.; }
-    virtual double singleFromTOF(const double tof) const { return tof * 20.; }
+    double singleToTOF(const double x) const override { return x / 20.; }
+    double singleFromTOF(const double tof) const override { return tof * 20.; }
   };
 
   //-----------------------------------------------------------------------------------------------
@@ -1470,9 +1470,51 @@ public:
       for (size_t i = 1; i < el.getNumberEvents(); i++) {
         auto tAtSample1 = el.getEvent(i - 1).pulseTime().totalNanoseconds() +
                           static_cast<int64_t>(el.getEvent(i - 1).tof() * 1e3);
-        auto tAtSample2 = el.getEvent(i - 1).pulseTime().totalNanoseconds() +
-                          static_cast<int64_t>(el.getEvent(i - 1).tof() * 1e3);
+        auto tAtSample2 = el.getEvent(i).pulseTime().totalNanoseconds() +
+                          static_cast<int64_t>(el.getEvent(i).tof() * 1e3);
         TSM_ASSERT_LESS_THAN_EQUALS(this_type, tAtSample1, tAtSample2);
+      }
+    }
+  }
+
+  void test_sortByPulseTime_random_tof_and_pulse_time() {
+    for (int this_type = 0; this_type < 3; this_type++) {
+      EventType curType = static_cast<EventType>(this_type);
+      EventList el = this->fake_data();
+      el.switchTo(curType);
+
+      if (curType == WEIGHTED_NOTIME) {
+        continue;
+      }
+
+      TS_ASSERT_THROWS_NOTHING(el.sortPulseTime());
+
+      for (size_t i = 1; i < el.getNumberEvents(); i++) {
+        auto tAtSample1 = el.getEvent(i - 1).pulseTime().totalNanoseconds();
+        auto tAtSample2 = el.getEvent(i).pulseTime().totalNanoseconds();
+        TSM_ASSERT_LESS_THAN_EQUALS(this_type, tAtSample1, tAtSample2);
+      }
+    }
+  }
+
+  void test_sortByPulseTimeTOF_random_tof_and_pulse_time() {
+    for (int this_type = 0; this_type < 3; this_type++) {
+      EventType curType = static_cast<EventType>(this_type);
+      EventList el = this->fake_data();
+      el.switchTo(curType);
+
+      if (curType == WEIGHTED_NOTIME) {
+        continue;
+      }
+
+      TS_ASSERT_THROWS_NOTHING(el.sortPulseTimeTOF());
+
+      for (size_t i = 1; i < el.getNumberEvents(); i++) {
+        TSM_ASSERT_LESS_THAN_EQUALS(this_type, el.getEvent(i - 1).pulseTime(),
+                                    el.getEvent(i).pulseTime());
+        if (el.getEvent(i - 1).pulseTime() == el.getEvent(i).pulseTime())
+          TSM_ASSERT_LESS_THAN_EQUALS(this_type, el.getEvent(i - 1).tof(),
+                                      el.getEvent(i).tof());
       }
     }
   }
@@ -2476,7 +2518,7 @@ public:
   MantidVec fineX;
   MantidVec coarseX;
 
-  void setUp() {
+  void setUp() override {
     // Reset the random event list
     el_random.clear();
     el_random += el_random_source;
@@ -2486,7 +2528,7 @@ public:
     el_sorted.setSortOrder(TOF_SORT);
   }
 
-  void tearDown() {}
+  void tearDown() override {}
 
   void test_sort_tof() { el_random.sortTof(); }
 

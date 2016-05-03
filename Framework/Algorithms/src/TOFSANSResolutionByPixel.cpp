@@ -142,7 +142,7 @@ void TOFSANSResolutionByPixel::exec() {
     try {
       det = inWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
-      g_log.information() << "Spectrum index " << i
+      g_log.information() << "Workspace index " << i
                           << " has no detector assigned to it - discarding"
                           << std::endl;
     }
@@ -162,8 +162,8 @@ void TOFSANSResolutionByPixel::exec() {
 
     // Multiplicative factor to go from lambda to Q
     // Don't get fooled by the function name...
-    const double theta = inWS->detectorTwoTheta(det);
-    double sinTheta = sin(theta / 2.0);
+    const double theta = inWS->detectorTwoTheta(*det);
+    double sinTheta = sin(0.5 * theta);
     double factor = 4.0 * M_PI * sinTheta;
 
     const MantidVec &xIn = inWS->readX(i);

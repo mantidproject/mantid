@@ -79,7 +79,7 @@ void LoadMuonNexus::init() {
   declareProperty("MainFieldDirection", "Transverse",
                   boost::make_shared<StringListValidator>(FieldOptions),
                   "Output the main field direction if specified in Nexus file "
-                  "(default Transverse)",
+                  "(run/instrument/detector/orientation, default longitudinal)",
                   Direction::Output);
 
   declareProperty("TimeZero", 0.0,

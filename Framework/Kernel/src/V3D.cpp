@@ -18,9 +18,6 @@ V3D::V3D() : x(0), y(0), z(0) {}
 V3D::V3D(const double xx, const double yy, const double zz)
     : x(xx), y(yy), z(zz) {}
 
-/// Copy constructor
-V3D::V3D(const V3D &v) : x(v.x), y(v.y), z(v.z) {}
-
 /**
   Sets the vector position based on spherical coordinates
 
@@ -31,7 +28,7 @@ V3D::V3D(const V3D &v) : x(v.x), y(v.y), z(v.z) {}
   along +X and rotates counter-clockwise in the XY plane
 */
 void V3D::spherical(const double &R, const double &theta, const double &phi) {
-  const double deg2rad = M_PI / 180.0;
+  constexpr double deg2rad = M_PI / 180.0;
   z = R * cos(theta * deg2rad);
   const double ct = sin(theta * deg2rad);
   x = R * ct * cos(phi * deg2rad);
@@ -97,21 +94,6 @@ void V3D::azimuth_polar_SNS(const double &R, const double &azimuth,
   if (std::abs(z) < Tolerance)
     z = 0.0;
 }
-
-/**
-  Assignment operator
-  @param rhs :: V3D to copy
-  @return *this
-*/
-V3D &V3D::operator=(const V3D &rhs) {
-  x = rhs.x;
-  y = rhs.y;
-  z = rhs.z;
-  return *this;
-}
-
-/// Destructor
-V3D::~V3D() {}
 
 /**
   Addtion operator
@@ -363,7 +345,7 @@ double &V3D::operator[](const size_t Index) {
  *  @param phi ::   Returns the phi (azimuthal) angle in degrees
  */
 void V3D::getSpherical(double &R, double &theta, double &phi) const {
-  const double rad2deg = 180.0 / M_PI;
+  constexpr double rad2deg = 180.0 / M_PI;
   R = norm();
   theta = 0.0;
   if (R != 0.0)
@@ -397,9 +379,9 @@ double V3D::normalize() {
 
 /** Round each component to the nearest integer */
 void V3D::round() {
-  x = double(long(x + (x < 0 ? -0.5 : +0.5)));
-  y = double(long(y + (y < 0 ? -0.5 : +0.5)));
-  z = double(long(z + (z < 0 ? -0.5 : +0.5)));
+  x = std::round(x);
+  y = std::round(y);
+  z = std::round(z);
 }
 
 /**
@@ -730,14 +712,13 @@ void V3D::loadNexus(::NeXus::File *file, const std::string &name) {
   *  As crystallographical coordinate sytem is based on 3 integers, eps is used
   *as accuracy to convert into integers
 */
-#define DINT(x) std::fabs((x) - double(size_t((x) + 0.5)))
 double nearInt(double val, double eps, double mult) {
   if (val > 0) {
     if (val < 1) {
       mult /= val;
     } else {
-      if (DINT(val) > eps) {
-        mult *= (double(size_t(val / eps) + 1) * eps / val);
+      if (std::abs(val - std::round(val)) > eps) {
+        mult *= std::ceil(val / eps) * eps / val;
       }
     }
   }
@@ -779,12 +760,12 @@ double V3D::toMillerIndexes(double eps) {
   mult = nearInt(ay, eps, mult);
   mult = nearInt(az, eps, mult);
 
-  size_t iax = size_t(ax * mult / eps + 0.5);
-  size_t iay = size_t(ay * mult / eps + 0.5);
-  size_t iaz = size_t(az * mult / eps + 0.5);
+  size_t iax = std::lround(ax * mult / eps);
+  size_t iay = std::lround(ay * mult / eps);
+  size_t iaz = std::lround(az * mult / eps);
 
   size_t div = boost::math::gcd(iax, boost::math::gcd(iay, iaz));
-  mult /= (double(div) * eps);
+  mult /= (static_cast<double>(div) * eps);
   x *= mult;
   y *= mult;
   z *= mult;

@@ -361,7 +361,7 @@ void ConvertCWPDMDToSpectra::findXBoundary(
     // Get source and sample position
     std::vector<detid_t> vec_detid =
         dataws->getExperimentInfo(irun)->getInstrument()->getDetectorIDs(true);
-    if (vec_detid.size() == 0) {
+    if (vec_detid.empty()) {
       g_log.information() << "Run " << runnumber << " has no detectors."
                           << "\n";
       continue;
@@ -640,7 +640,7 @@ void ConvertCWPDMDToSpectra::linearInterpolation(
     }
     g_log.debug() << "iMinNonZero = " << minNonZeroIndex
                   << ", iMaxNonZero = " << maxNonZeroIndex
-                  << " Spectrum index = " << i
+                  << " Workspace index = " << i
                   << ", Y size = " << matrixws->readY(i).size() << "\n";
     if (minNonZeroIndex >= maxNonZeroIndex)
       throw std::runtime_error("It is not right!");

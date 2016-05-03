@@ -55,7 +55,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ColorBarWidget : public QWidget
 
 public:
   ColorBarWidget(QWidget *parent = 0);
-  ~ColorBarWidget();
+  ~ColorBarWidget() override;
 
   void updateColorMap();
 

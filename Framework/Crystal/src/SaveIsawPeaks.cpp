@@ -77,7 +77,7 @@ void SaveIsawPeaks::exec() {
   // workspace indices of it
   typedef std::map<int, std::vector<size_t>> bankMap_t;
   typedef std::map<int, bankMap_t> runMap_t;
-  std::unordered_set<int> uniqueBanks;
+  std::set<int> uniqueBanks;
   runMap_t runMap;
   for (size_t i = 0; i < peaks.size(); ++i) {
     Peak &p = peaks[i];
@@ -166,9 +166,8 @@ void SaveIsawPeaks::exec() {
              "  CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY "
              "     UpZ" << std::endl;
       // Here would save each detector...
-      for (auto it = uniqueBanks.begin(); it != uniqueBanks.end(); ++it) {
+      for (const auto bank : uniqueBanks) {
         // Build up the bank name
-        int bank = *it;
         std::ostringstream mess;
         if (bankPart == "bank")
           mess << "bank" << bank;

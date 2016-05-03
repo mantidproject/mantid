@@ -1,12 +1,14 @@
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflMainView.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtAPI/HelpWindow.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCommandAdapter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtAPI/FileDialogHandler.h"
-#include "MantidKernel/ConfigService.h"
 #include <qinputdialog.h>
 #include <qmessagebox.h>
 
@@ -24,7 +26,7 @@ DECLARE_SUBWINDOW(QtReflMainView)
 /** Constructor
 */
 QtReflMainView::QtReflMainView(QWidget *parent)
-    : UserSubWindow(parent), m_openMap(new QSignalMapper(this)),
+    : UserSubWindow(parent),
       m_calculator(new MantidWidgets::SlitCalculator(this)) {}
 
 //----------------------------------------------------------------------------------------------
@@ -38,42 +40,81 @@ Initialise the Interface
 void QtReflMainView::initLayout() {
   ui.setupUi(this);
 
-  ui.buttonProcess->setDefaultAction(ui.actionProcess);
   ui.buttonTransfer->setDefaultAction(ui.actionTransfer);
-
-  // Create a whats this button
-  ui.rowToolBar->addAction(QWhatsThis::createAction(this));
 
   // Expand the process runs column at the expense of the search column
   ui.splitterTables->setStretchFactor(0, 0);
   ui.splitterTables->setStretchFactor(1, 1);
 
-  // Allow rows and columns to be reordered
-  ui.viewTable->verticalHeader()->setMovable(true);
-  ui.viewTable->horizontalHeader()->setMovable(true);
-
   // Custom context menu for table
-  connect(ui.viewTable, SIGNAL(customContextMenuRequested(const QPoint &)),
-          this, SLOT(showContextMenu(const QPoint &)));
   connect(ui.tableSearchResults,
           SIGNAL(customContextMenuRequested(const QPoint &)), this,
           SLOT(showSearchContextMenu(const QPoint &)));
-  // Finally, create a presenter to do the thinking for us
+  // Synchronize the two instrument selection widgets
+  connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)),
+          ui.qReflTableView,
+          SLOT(on_comboProcessInstrument_currentIndexChanged(int)));
+  connect(ui.qReflTableView,
+          SIGNAL(comboProcessInstrument_currentIndexChanged(int)),
+          ui.comboSearchInstrument, SLOT(setCurrentIndex(int)));
+
+  // Needed to Import/Export TBL, plot row and plot group
+  connect(ui.qReflTableView, SIGNAL(runAsPythonScript(const QString &, bool)),
+          this, SIGNAL(runAsPythonScript(const QString &, bool)));
+
   m_presenter = boost::make_shared<ReflMainViewPresenter>(
-      this /*main view*/,
+      this /*main view*/, ui.qReflTableView->getTablePresenter().get(),
       this /*currently this concrete view is also responsibile for prog reporting*/);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 }
 
 /**
-This slot loads a table workspace model and changes to a LoadedMainView
-presenter
-@param name : the string name of the workspace to be grabbed
+* Add a command (action) to a menu
+* @param menu : [input] The menu where actions will be added
+* @param command : [input] The command (action) to add
 */
-void QtReflMainView::setModel(QString name) {
-  m_toOpen = name.toStdString();
-  m_presenter->notify(IReflPresenter::OpenTableFlag);
+void QtReflMainView::addToMenu(QMenu *menu, ReflCommand_uptr command) {
+
+  m_commands.push_back(Mantid::Kernel::make_unique<ReflCommandAdapter>(
+      menu, std::move(command)));
 }
+
+/**
+* Adds actions to the "Reflectometry" menu
+* @param tableCommands : [input] The list of commands to add to the
+* "Reflectometry" menu
+*/
+void QtReflMainView::setTableCommands(
+    std::vector<ReflCommand_uptr> tableCommands) {
+
+  ui.menuTable->clear();
+  for (auto &command : tableCommands) {
+    addToMenu(ui.menuTable, std::move(command));
+  }
+
+  // Slit calculator
+  QAction *slitCalc = ui.menuTable->addAction(
+      QIcon(QString::fromStdString(":/param_range_btn.png")),
+      QString("Slit Calculator"));
+  connect(slitCalc, SIGNAL(triggered()), this, SLOT(slitCalculatorTriggered()));
+}
+
+/**
+* Adds actions to the "Edit" menu
+* @param rowCommands : [input] The list of commands to add to the "Edit" menu
+*/
+void QtReflMainView::setRowCommands(std::vector<ReflCommand_uptr> rowCommands) {
+
+  ui.menuRows->clear();
+  for (auto &command : rowCommands) {
+    addToMenu(ui.menuRows, std::move(command));
+  }
+}
+
+/**
+* Clears all the actions (commands)
+*/
+void QtReflMainView::clearCommands() { m_commands.clear(); }
 
 /**
 * Set all possible tranfer methods
@@ -86,22 +127,47 @@ void QtReflMainView::setTransferMethods(const std::set<std::string> &methods) {
 }
 
 /**
-Set a new model in the tableview
-@param model : the model to be attached to the tableview
+Set the list of available instruments to search for and updates the list of
+available instruments in the table view
+@param instruments : The list of instruments available
+@param defaultInstrument : The instrument to have selected by default
 */
-void QtReflMainView::showTable(QReflTableModel_sptr model) {
-  m_model = model;
-  // So we can notify the presenter when the user updates the table
-  connect(m_model.get(),
-          SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
-          SLOT(tableUpdated(const QModelIndex &, const QModelIndex &)));
-  ui.viewTable->setModel(m_model.get());
-  ui.viewTable->resizeColumnsToContents();
-  std::string windowTitle = "ISIS Reflectometry (Polref) - " + m_toOpen;
-  auto mainWindowWidget = this->topLevelWidget();
-  mainWindowWidget->setWindowTitle(QString::fromStdString(windowTitle + "[*]"));
-  this->setWindowModified(false);
+void QtReflMainView::setInstrumentList(
+    const std::vector<std::string> &instruments,
+    const std::string &defaultInstrument) {
+  ui.comboSearchInstrument->clear();
+
+  for (auto it = instruments.begin(); it != instruments.end(); ++it) {
+    QString instrument = QString::fromStdString(*it);
+    ui.comboSearchInstrument->addItem(instrument);
+  }
+
+  int index = ui.comboSearchInstrument->findData(
+      QString::fromStdString(defaultInstrument), Qt::DisplayRole);
+  ui.comboSearchInstrument->setCurrentIndex(index);
 }
+
+/**
+Set the range of the progress bar
+@param min : The minimum value of the bar
+@param max : The maxmimum value of the bar
+*/
+void QtReflMainView::setProgressRange(int min, int max) {
+  ui.progressBar->setRange(min, max);
+}
+
+/**
+Set the status of the progress bar
+@param progress : The current value of the bar
+*/
+void QtReflMainView::setProgress(int progress) {
+  ui.progressBar->setValue(progress);
+}
+
+/**
+* Clear the progress
+*/
+void QtReflMainView::clearProgress() { ui.progressBar->reset(); }
 
 /**
 Set a new model for search results
@@ -114,135 +180,10 @@ void QtReflMainView::showSearch(ReflSearchModel_sptr model) {
 }
 
 /**
-Set the list of tables the user is offered to open
-@param tables : the names of the tables in the ADS
+This slot notifies the presenter that the ICAT search was completed
 */
-void QtReflMainView::setTableList(const std::set<std::string> &tables) {
-  ui.menuOpenTable->clear();
-  for (auto it = tables.begin(); it != tables.end(); ++it) {
-    QAction *openTable =
-        ui.menuOpenTable->addAction(QString::fromStdString(*it));
-    openTable->setIcon(QIcon("://worksheet.png"));
-
-    // Map this action to the table name
-    m_openMap->setMapping(openTable, QString::fromStdString(*it));
-    // When repeated corrections happen the QMessageBox from openTable()
-    // method in ReflMainViewPresenter will be called multiple times
-    // when 'no' is clicked.
-    // ConnectionType = UniqueConnection ensures that
-    // each object has only one of these signals.
-    connect(openTable, SIGNAL(triggered()), m_openMap, SLOT(map()),
-            Qt::UniqueConnection);
-    connect(m_openMap, SIGNAL(mapped(QString)), this, SLOT(setModel(QString)),
-            Qt::UniqueConnection);
-  }
-}
-
 void QtReflMainView::icatSearchComplete() {
   m_presenter->notify(IReflPresenter::ICATSearchCompleteFlag);
-}
-
-/**
-This slot notifies the presenter that the "save" button has been pressed
-*/
-void QtReflMainView::on_actionSaveTable_triggered() {
-  m_presenter->notify(IReflPresenter::SaveFlag);
-}
-
-/**
-This slot notifies the presenter that the "save as" button has been pressed
-*/
-void QtReflMainView::on_actionSaveTableAs_triggered() {
-  m_presenter->notify(IReflPresenter::SaveAsFlag);
-}
-
-/**
-This slot notifies the presenter that the "append row" button has been pressed
-*/
-void QtReflMainView::on_actionAppendRow_triggered() {
-  m_presenter->notify(IReflPresenter::AppendRowFlag);
-}
-
-/**
-This slot notifies the presenter that the "prepend row" button has been pressed
-*/
-void QtReflMainView::on_actionPrependRow_triggered() {
-  m_presenter->notify(IReflPresenter::PrependRowFlag);
-}
-
-/**
-This slot notifies the presenter that the "delete" button has been pressed
-*/
-void QtReflMainView::on_actionDeleteRow_triggered() {
-  m_presenter->notify(IReflPresenter::DeleteRowFlag);
-}
-
-/**
-This slot notifies the presenter that the "process" button has been pressed
-*/
-void QtReflMainView::on_actionProcess_triggered() {
-  m_presenter->notify(IReflPresenter::ProcessFlag);
-}
-
-/**
-This slot notifies the presenter that the "group rows" button has been pressed
-*/
-void QtReflMainView::on_actionGroupRows_triggered() {
-  m_presenter->notify(IReflPresenter::GroupRowsFlag);
-}
-
-/**
-This slot notifies the presenter that the "clear selected" button has been
-pressed
-*/
-void QtReflMainView::on_actionClearSelected_triggered() {
-  m_presenter->notify(IReflPresenter::ClearSelectedFlag);
-}
-
-/**
-This slot notifies the presenter that the "copy selection" button has been
-pressed
-*/
-void QtReflMainView::on_actionCopySelected_triggered() {
-  m_presenter->notify(IReflPresenter::CopySelectedFlag);
-}
-
-/**
-This slot notifies the presenter that the "cut selection" button has been
-pressed
-*/
-void QtReflMainView::on_actionCutSelected_triggered() {
-  m_presenter->notify(IReflPresenter::CutSelectedFlag);
-}
-
-/**
-This slot notifies the presenter that the "paste selection" button has been
-pressed
-*/
-void QtReflMainView::on_actionPasteSelected_triggered() {
-  m_presenter->notify(IReflPresenter::PasteSelectedFlag);
-}
-
-/**
-This slot notifies the presenter that the "new table" button has been pressed
-*/
-void QtReflMainView::on_actionNewTable_triggered() {
-  m_presenter->notify(IReflPresenter::NewTableFlag);
-}
-
-/**
-This slot notifies the presenter that the "expand selection" button has been
-pressed
-*/
-void QtReflMainView::on_actionExpandSelection_triggered() {
-  m_presenter->notify(IReflPresenter::ExpandSelectionFlag);
-}
-
-/**
-This slot notifies the presenter that the "options..." button has been pressed
-*/
-void QtReflMainView::on_actionOptionsDialog_triggered() {
-  m_presenter->notify(IReflPresenter::OptionsDialogFlag);
 }
 
 /**
@@ -258,37 +199,7 @@ void QtReflMainView::on_actionSearch_triggered() {
 This slot notifies the presenter that the "transfer" button has been pressed
 */
 void QtReflMainView::on_actionTransfer_triggered() {
-  m_presenter->notify(IReflPresenter::TransferFlag);
-}
-
-/**
-This slot notifies the presenter that the "export table" button has been pressed
-*/
-void QtReflMainView::on_actionExportTable_triggered() {
-  m_presenter->notify(IReflPresenter::ExportTableFlag);
-}
-
-/**
-This slot notifies the presenter that the "import table" button has been pressed
-*/
-void QtReflMainView::on_actionImportTable_triggered() {
-  m_presenter->notify(IReflPresenter::ImportTableFlag);
-}
-
-/** This slot is used to syncrhonise the two instrument selection widgets */
-void QtReflMainView::on_comboProcessInstrument_currentIndexChanged(int index) {
-  ui.comboSearchInstrument->setCurrentIndex(index);
-  m_calculator->setCurrentInstrumentName(
-      ui.comboProcessInstrument->currentText().toStdString());
-  m_calculator->processInstrumentHasBeenChanged();
-}
-
-/** This slot is used to syncrhonise the two instrument selection widgets */
-void QtReflMainView::on_comboSearchInstrument_currentIndexChanged(int index) {
-  ui.comboProcessInstrument->setCurrentIndex(index);
-  m_calculator->setCurrentInstrumentName(
-      ui.comboProcessInstrument->currentText().toStdString());
-  m_calculator->processInstrumentHasBeenChanged();
+  m_presenter->notify(IReflPresenter::Flag::TransferFlag);
 }
 
 /**
@@ -302,70 +213,12 @@ void QtReflMainView::on_actionHelp_triggered() {
 }
 
 /**
-This slot notifies the presenter that the "plot selected rows" button has been
-pressed
-*/
-void QtReflMainView::on_actionPlotRow_triggered() {
-  m_presenter->notify(IReflPresenter::PlotRowFlag);
-}
-
-/**
-This slot notifies the presenter that the "plot selected groups" button has been
-pressed
-*/
-void QtReflMainView::on_actionPlotGroup_triggered() {
-  m_presenter->notify(IReflPresenter::PlotGroupFlag);
-}
-
-/**
 This slot shows the slit calculator
 */
-void QtReflMainView::on_actionSlitCalculator_triggered() {
+void QtReflMainView::slitCalculatorTriggered() {
   m_calculator->setCurrentInstrumentName(
-      ui.comboProcessInstrument->currentText().toStdString());
+      ui.comboSearchInstrument->currentText().toStdString());
   m_calculator->show();
-}
-
-/**
-This slot notifies the presenter that the table has been updated/changed by the
-user
-*/
-void QtReflMainView::tableUpdated(const QModelIndex &topLeft,
-                                  const QModelIndex &bottomRight) {
-  Q_UNUSED(topLeft);
-  Q_UNUSED(bottomRight);
-  m_presenter->notify(IReflPresenter::TableUpdatedFlag);
-}
-
-/**
-This slot is triggered when the user right clicks on the table
-@param pos : The position of the right click within the table
-*/
-void QtReflMainView::showContextMenu(const QPoint &pos) {
-  // If the user didn't right-click on anything, don't show a context menu.
-  if (!ui.viewTable->indexAt(pos).isValid())
-    return;
-
-  // parent widget takes ownership of QMenu
-  QMenu *menu = new QMenu(this);
-  menu->addAction(ui.actionProcess);
-  menu->addAction(ui.actionExpandSelection);
-  menu->addSeparator();
-  menu->addAction(ui.actionPlotRow);
-  menu->addAction(ui.actionPlotGroup);
-  menu->addSeparator();
-  menu->addAction(ui.actionPrependRow);
-  menu->addAction(ui.actionAppendRow);
-  menu->addSeparator();
-  menu->addAction(ui.actionGroupRows);
-  menu->addAction(ui.actionCopySelected);
-  menu->addAction(ui.actionCutSelected);
-  menu->addAction(ui.actionPasteSelected);
-  menu->addAction(ui.actionClearSelected);
-  menu->addSeparator();
-  menu->addAction(ui.actionDeleteRow);
-
-  menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
 }
 
 /**
@@ -404,32 +257,6 @@ void QtReflMainView::giveUserCritical(std::string prompt, std::string title) {
 }
 
 /**
-Show a warning dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void QtReflMainView::giveUserWarning(std::string prompt, std::string title) {
-  QMessageBox::warning(this, QString(title.c_str()), QString(prompt.c_str()),
-                       QMessageBox::Ok, QMessageBox::Ok);
-}
-
-/**
-Ask the user a Yes/No question
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-@returns a boolean true if Yes, false if No
-*/
-bool QtReflMainView::askUserYesNo(std::string prompt, std::string title) {
-  auto response = QMessageBox::question(
-      this, QString(title.c_str()), QString(prompt.c_str()),
-      QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-  if (response == QMessageBox::Yes) {
-    return true;
-  }
-  return false;
-}
-
-/**
 Ask the user to enter a string.
 @param prompt : The prompt to appear on the dialog
 @param title : The text for the title bar of the dialog
@@ -441,7 +268,7 @@ std::string QtReflMainView::askUserString(const std::string &prompt,
                                           const std::string &defaultValue) {
   bool ok;
   QString text = QInputDialog::getText(
-      QString::fromStdString(title), QString::fromStdString(prompt),
+      this, QString::fromStdString(title), QString::fromStdString(prompt),
       QLineEdit::Normal, QString::fromStdString(defaultValue), &ok);
   if (ok)
     return text.toStdString();
@@ -460,207 +287,12 @@ void QtReflMainView::showAlgorithmDialog(const std::string &algorithm) {
   runPythonCode(QString::fromStdString(pythonSrc.str()), false);
 }
 
-void QtReflMainView::showImportDialog() {
-  std::stringstream pythonSrc;
-  pythonSrc << "try:\n";
-  pythonSrc << "  algm = "
-            << "LoadReflTBL"
-            << "Dialog()\n";
-  pythonSrc << "  print algm.getPropertyValue(\"OutputWorkspace\")\n";
-  pythonSrc << "except:\n";
-  pythonSrc << "  pass\n";
-  // outputWorkspaceName will hold the name of the workspace
-  // otherwise this should be an empty string.
-  QString outputWorkspaceName =
-      runPythonCode(QString::fromStdString(pythonSrc.str()), false);
-  m_toOpen = outputWorkspaceName.trimmed().toStdString();
-  // notifying the presenter that a new table should be opened
-  // The presenter will ask about any unsaved changes etc
-  // before opening the new table
-  m_presenter->notify(ReflMainViewPresenter::OpenTableFlag);
-}
-
-/**
-Show the user file dialog to choose save location of notebook
-*/
-std::string QtReflMainView::requestNotebookPath() {
-
-  // We won't use QFileDialog directly here as using the NativeDialog option
-  // causes problems on MacOS.
-  QString qfilename = API::FileDialogHandler::getSaveFileName(
-      this, "Save notebook file", QDir::currentPath(),
-      "IPython Notebook files (*.ipynb);;All files (*.*)",
-      new QString("IPython Notebook files (*.ipynb)"));
-
-  // There is a Qt bug (QTBUG-27186) which means the filename returned
-  // from the dialog doesn't always the file extension appended.
-  // So we'll have to ensure this ourselves.
-  // Important, notebooks can't be loaded without this extension.
-  std::string filename = qfilename.toStdString();
-  if (filename.size() > 6) {
-    if (filename.substr(filename.size() - 6) != ".ipynb") {
-      filename.append(".ipynb");
-    }
-  } else {
-    filename.append(".ipynb");
-  }
-
-  return filename;
-}
-
-/**
-Save settings
-@param options : map of user options to save
-*/
-void QtReflMainView::saveSettings(
-    const std::map<std::string, QVariant> &options) {
-  QSettings settings;
-  settings.beginGroup(ReflSettingsGroup);
-  for (auto it = options.begin(); it != options.end(); ++it)
-    settings.setValue(QString::fromStdString(it->first), it->second);
-  settings.endGroup();
-}
-
-/**
-Load settings
-@param options : map of user options to load into
-*/
-void QtReflMainView::loadSettings(std::map<std::string, QVariant> &options) {
-  QSettings settings;
-  settings.beginGroup(ReflSettingsGroup);
-  QStringList keys = settings.childKeys();
-  for (auto it = keys.begin(); it != keys.end(); ++it)
-    options[it->toStdString()] = settings.value(*it);
-  settings.endGroup();
-}
-
-/**
-Plot a workspace
-*/
-void QtReflMainView::plotWorkspaces(const std::set<std::string> &workspaces) {
-  if (workspaces.empty())
-    return;
-
-  std::stringstream pythonSrc;
-  pythonSrc << "base_graph = None\n";
-  for (auto ws = workspaces.begin(); ws != workspaces.end(); ++ws)
-    pythonSrc << "base_graph = plotSpectrum(\"" << *ws
-              << "\", 0, True, window = base_graph)\n";
-
-  pythonSrc << "base_graph.activeLayer().logLogAxes()\n";
-
-  runPythonCode(QString::fromStdString(pythonSrc.str()));
-}
-
-/**
-Set the range of the progress bar
-@param min : The minimum value of the bar
-@param max : The maxmimum value of the bar
-*/
-void QtReflMainView::setProgressRange(int min, int max) {
-  ui.progressBar->setRange(min, max);
-}
-
-/**
-Set the status of the progress bar
-@param progress : The current value of the bar
-*/
-void QtReflMainView::setProgress(int progress) {
-  ui.progressBar->setValue(progress);
-}
-
-/**
-Get status of checkbox which determines whether an ipython notebook is produced
-@return true if a notebook should be output on process, false otherwise
-*/
-bool QtReflMainView::getEnableNotebook() {
-  return ui.checkEnableNotebook->isChecked();
-}
-
-/**
-Set which rows are selected
-@param rows : The set of rows to select
-*/
-void QtReflMainView::setSelection(const std::set<int> &rows) {
-  ui.viewTable->clearSelection();
-  auto selectionModel = ui.viewTable->selectionModel();
-
-  for (auto row = rows.begin(); row != rows.end(); ++row)
-    selectionModel->select(ui.viewTable->model()->index((*row), 0),
-                           QItemSelectionModel::Select |
-                               QItemSelectionModel::Rows);
-}
-
-/**
-Set the list of available instruments to search and process for
-@param instruments : The list of instruments available
-@param defaultInstrument : The instrument to have selected by default
-*/
-void QtReflMainView::setInstrumentList(
-    const std::vector<std::string> &instruments,
-    const std::string &defaultInstrument) {
-  ui.comboSearchInstrument->clear();
-  ui.comboProcessInstrument->clear();
-
-  for (auto it = instruments.begin(); it != instruments.end(); ++it) {
-    QString instrument = QString::fromStdString(*it);
-    ui.comboSearchInstrument->addItem(instrument);
-    ui.comboProcessInstrument->addItem(instrument);
-  }
-
-  int index = ui.comboSearchInstrument->findData(
-      QString::fromStdString(defaultInstrument), Qt::DisplayRole);
-  ui.comboSearchInstrument->setCurrentIndex(index);
-  ui.comboProcessInstrument->setCurrentIndex(index);
-}
-
-/**
-Set the strategy used for generating hints for the autocompletion in the options
-column.
-@param hintStrategy The hinting strategy to use
-*/
-void QtReflMainView::setOptionsHintStrategy(HintStrategy *hintStrategy) {
-  ui.viewTable->setItemDelegateForColumn(
-      ReflTableSchema::COL_OPTIONS, new HintingLineEditFactory(hintStrategy));
-}
-
-/**
-Sets the contents of the system's clipboard
-@param text The contents of the clipboard
-*/
-void QtReflMainView::setClipboard(const std::string &text) {
-  QApplication::clipboard()->setText(QString::fromStdString(text));
-}
-
 /**
 Get the selected instrument for searching
 @returns the selected instrument to search for
 */
 std::string QtReflMainView::getSearchInstrument() const {
   return ui.comboSearchInstrument->currentText().toStdString();
-}
-
-/**
-Get the selected instrument for processing
-@returns the selected instrument to process with
-*/
-std::string QtReflMainView::getProcessInstrument() const {
-  return ui.comboProcessInstrument->currentText().toStdString();
-}
-
-/**
-Get the indices of the highlighted rows
-@returns a set of ints containing the highlighted row numbers
-*/
-std::set<int> QtReflMainView::getSelectedRows() const {
-  std::set<int> rows;
-  auto selectionModel = ui.viewTable->selectionModel();
-  if (selectionModel) {
-    auto selectedRows = selectionModel->selectedRows();
-    for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
-      rows.insert(it->row());
-  }
-  return rows;
 }
 
 /**
@@ -679,12 +311,6 @@ std::set<int> QtReflMainView::getSelectedSearchRows() const {
 }
 
 /**
-Get the name of the workspace that the user wishes to open as a table
-@returns The name of the workspace to open
-*/
-std::string QtReflMainView::getWorkspaceToOpen() const { return m_toOpen; }
-
-/**
 Get a pointer to the presenter that's currently controlling this view.
 @returns A pointer to the presenter
 */
@@ -698,25 +324,12 @@ QtReflMainView::getAlgorithmRunner() const {
 }
 
 /**
-Gets the contents of the system's clipboard
-@returns The contents of the clipboard
-*/
-std::string QtReflMainView::getClipboard() const {
-  return QApplication::clipboard()->text().toStdString();
-}
-
-/**
 Get the string the user wants to search for.
 @returns The search string
 */
 std::string QtReflMainView::getSearchString() const {
   return ui.textSearch->text().toStdString();
 }
-
-/**
-* Clear the progress
-*/
-void QtReflMainView::clearProgress() { ui.progressBar->reset(); }
 
 /**
 * @return the transfer method selected.

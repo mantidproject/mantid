@@ -192,7 +192,7 @@ void FindDetectorsPar::setOutputTable() {
 }
 
 // Constant for converting Radians to Degrees
-const double rad2deg = 180.0 / M_PI;
+constexpr double rad2deg = 180.0 / M_PI;
 
 /** method calculates an angle closest to the initial one taken on a ring
   * e.g. given inital angle 179 deg and another one -179 closest one to 179 is
@@ -626,7 +626,7 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
   if (space_to_symbol_change >
       1) { // more then one group of symbols in the string, spe file
     int nData_records(0), nData_blocks(0);
-    // cppcheck-suppress invalidscanf
+
     int nDatas = sscanf(&BUF[0], " %d %d ", &nData_records, &nData_blocks);
     file_descriptor.nData_records = static_cast<size_t>(nData_records);
     file_descriptor.nData_blocks = static_cast<size_t>(nData_blocks);
