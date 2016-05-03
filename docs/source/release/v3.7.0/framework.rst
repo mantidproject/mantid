@@ -5,6 +5,14 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+API
+---
+
+Improved
+########
+
+- A sorting members by name method was added to :ref:`WorkspaceGroup <WorkspaceGroup>`.
+
 Algorithms
 ----------
 
