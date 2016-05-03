@@ -672,7 +672,8 @@ CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
       for (int i = 0; i < numBins; ++i) {
         x1[i] = x0 + static_cast<double>(i) * binDelta;
       }
-      retVal->histogram(g).setBinEdges(x1);
+      retVal->histogram(g) =
+          HistogramData::Histogram(HistogramData::BinEdges(x1));
     }
   }
 
