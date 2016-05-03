@@ -35,7 +35,8 @@ public:
 
     PropertyManagerProperty pmap("Test", Direction::Output);
     TS_ASSERT_EQUALS("Test", pmap.name());
-    TS_ASSERT_EQUALS(Direction::Output, pmap.direction());
+    TS_ASSERT_EQUALS(static_cast<unsigned int>(Direction::Output),
+                     pmap.direction());
   }
 
   void test_Constructor_Sets_Name_Direction_DefaultValue() {
@@ -44,7 +45,8 @@ public:
     auto testMgr = createPropMgrWithInt();
     PropertyManagerProperty pmap("Test", testMgr, Direction::Output);
     TS_ASSERT_EQUALS("Test", pmap.name());
-    TS_ASSERT_EQUALS(Direction::Output, pmap.direction());
+    TS_ASSERT_EQUALS(static_cast<unsigned int>(Direction::Output),
+                     pmap.direction());
     TS_ASSERT_EQUALS(testMgr, pmap());
     TS_ASSERT(pmap.isDefault());
   }
