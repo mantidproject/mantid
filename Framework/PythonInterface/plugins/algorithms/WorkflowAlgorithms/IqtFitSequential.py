@@ -2,7 +2,7 @@
 from mantid import logger, AlgorithmFactory
 from mantid.api import *
 from mantid.kernel import *
-from mantid.simpleapi import *
+import mantid.simpleapi as ms
 import os.path
 
 class IqtFitSequential(PythonAlgorithm):
@@ -106,8 +106,9 @@ class IqtFitSequential(PythonAlgorithm):
         logger.information(self._function)
 
         setup_prog.report('Cropping workspace')
-        tmp_fit_workspace = "__furyfit_fit_ws"
-        CropWorkspace(InputWorkspace=self._input_ws, OutputWorkspace=tmp_fit_workspace, XMin=self._start_x, XMax=self._end_x)
+        tmp_fit_workspace = self._execute_child_alg("CropWorkspace",InputWorkspace=self._input_ws,
+                                                    OutputWorkspace="__furyfit_fit_ws", 
+                                                    XMin=self._start_x, XMax=self._end_x)
 
         num_hist = self._input_ws.getNumberHistograms()
         if self._spec_max is None:
