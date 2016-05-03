@@ -333,8 +333,8 @@ API::MatrixWorkspace_sptr
 Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
   // Calculate the output binning
   HistogramData::BinEdges XOut(0);
-  size_t sizeOut = static_cast<size_t>(
-      VectorHelper::createAxisFromRebinParams(binParams, XOut.rawData()));
+  size_t sizeOut = static_cast<size_t>(VectorHelper::createAxisFromRebinParams(
+      binParams, XOut.mutableRawData()));
 
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS =

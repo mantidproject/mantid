@@ -63,8 +63,8 @@ void InterpolatingRebin::exec() {
       Rebin::rebinParamsFromInput(getProperty("Params"), *inputW, g_log);
   HistogramData::BinEdges XValues_new(0);
   // create new output X axis
-  const int ntcnew =
-      VectorHelper::createAxisFromRebinParams(rb_params, XValues_new.rawData());
+  const int ntcnew = VectorHelper::createAxisFromRebinParams(
+      rb_params, XValues_new.mutableRawData());
 
   const int nHists = static_cast<int>(inputW->getNumberHistograms());
   // make output Workspace the same type as the input but with the new axes

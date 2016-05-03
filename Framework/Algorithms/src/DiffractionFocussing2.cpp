@@ -194,7 +194,7 @@ void DiffractionFocussing2::exec() {
     auto it = group2xvector.find(group);
     group2vectormap::difference_type dif =
         std::distance(group2xvector.begin(), it);
-    const MantidVec &Xout = (*it).second.constRawData();
+    const MantidVec &Xout = (*it).second.rawData();
 
     // Assign the new X axis only once (i.e when this group is encountered the
     // first time)

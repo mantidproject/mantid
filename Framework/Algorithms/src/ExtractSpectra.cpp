@@ -276,8 +276,8 @@ void ExtractSpectra::execEvent() {
     rb_params.push_back(minX_val);
     rb_params.push_back(maxX_val - minX_val);
     rb_params.push_back(maxX_val);
-    ntcnew = VectorHelper::createAxisFromRebinParams(rb_params,
-                                                     XValues_new.rawData());
+    ntcnew = VectorHelper::createAxisFromRebinParams(
+        rb_params, XValues_new.mutableRawData());
   }
 
   // run inplace branch if appropriate

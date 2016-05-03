@@ -335,8 +335,8 @@ void ResampleX::exec() {
       if (common_limits) {
         // get the delta from the first since they are all the same
         HistogramData::BinEdges xValues(0);
-        double delta =
-            this->determineBinning(xValues.rawData(), xmins[0], xmaxs[0]);
+        double delta = this->determineBinning(xValues.mutableRawData(),
+                                              xmins[0], xmaxs[0]);
         g_log.debug() << "delta = " << delta << "\n";
         outputEventWS->setAllX(xValues);
       } else {

@@ -70,7 +70,7 @@ void Regroup::exec() {
   std::vector<int> xoldIndex; // indeces of new x in XValues_old
   // create new output X axis
   int ntcnew =
-      newAxis(rb_params, XValues_old, XValues_new.rawData(), xoldIndex);
+      newAxis(rb_params, XValues_old, XValues_new.mutableRawData(), xoldIndex);
 
   // make output Workspace the same type is the input, but with new length of
   // signal array

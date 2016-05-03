@@ -135,7 +135,7 @@ void Rebin::exec() {
   HistogramData::BinEdges XValues_new(0);
   // create new output X axis
   const int ntcnew = VectorHelper::createAxisFromRebinParams(
-      rbParams, XValues_new.rawData(), true, fullBinsOnly);
+      rbParams, XValues_new.mutableRawData(), true, fullBinsOnly);
 
   //---------------------------------------------------------------------------------
   // Now, determine if the input workspace is actually an EventWorkspace
@@ -184,7 +184,7 @@ void Rebin::exec() {
         const EventList &el = eventInputWS->getEventList(i);
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
-        el.generateHistogram(XValues_new.constRawData(), y_data, e_data);
+        el.generateHistogram(XValues_new.rawData(), y_data, e_data);
 
         // Copy the data over.
         outputWS->dataY(i).assign(y_data.begin(), y_data.end());
@@ -256,9 +256,8 @@ void Rebin::exec() {
 
       // output data arrays are implicitly filled by function
       try {
-        VectorHelper::rebin(XValues, YValues, YErrors,
-                            XValues_new.constRawData(), YValues_new,
-                            YErrors_new, dist);
+        VectorHelper::rebin(XValues, YValues, YErrors, XValues_new.rawData(),
+                            YValues_new, YErrors_new, dist);
       } catch (std::exception &ex) {
         g_log.error() << "Error in rebin function: " << ex.what() << std::endl;
         throw;

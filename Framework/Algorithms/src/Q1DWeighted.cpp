@@ -85,7 +85,7 @@ void Q1DWeighted::exec() {
   // bins + 1
   HistogramData::BinEdges XOut(0);
   const int sizeOut =
-      VectorHelper::createAxisFromRebinParams(binParams, XOut.rawData());
+      VectorHelper::createAxisFromRebinParams(binParams, XOut.mutableRawData());
 
   // Get pixel size and pixel sub-division
   double pixelSizeX = getProperty("PixelSizeX");
