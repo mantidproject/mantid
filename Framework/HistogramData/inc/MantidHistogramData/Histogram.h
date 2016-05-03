@@ -65,7 +65,7 @@ public:
 
   // Temporary legacy interface to X
   void setX(const Kernel::cow_ptr<HistogramX> &X) { m_x = X; }
-  MantidVec &dataX() { return m_x.access().rawData(); }
+  MantidVec &dataX() { return m_x.access().mutableRawData(); }
   const MantidVec &dataX() const { return m_x->rawData(); }
   const MantidVec &constDataX() const { return m_x->rawData(); }
   Kernel::cow_ptr<HistogramX> ptrX() const { return m_x; }

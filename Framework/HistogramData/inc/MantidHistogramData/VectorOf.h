@@ -108,7 +108,9 @@ public:
   const std::vector<double> &rawData() const { return m_data->rawData(); }
   /// Returns a reference to the internal data structure of the stored object.
   /// The behavior is undefined if the stored pointer is null.
-  std::vector<double> &mutableRawData() { return m_data.access().rawData(); }
+  std::vector<double> &mutableRawData() {
+    return m_data.access().mutableRawData();
+  }
 
 protected:
   // This is used as base class only, cannot delete polymorphically, so
