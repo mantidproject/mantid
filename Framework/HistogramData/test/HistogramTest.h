@@ -27,13 +27,11 @@ public:
   }
 
   void test_construct_from_Points() {
-    TS_ASSERT_THROWS_NOTHING(Histogram src(Points));
     TS_ASSERT_THROWS_NOTHING(Histogram src(Points(0)));
     TS_ASSERT_THROWS_NOTHING(Histogram src(Points{0.1, 0.2, 0.4}));
   }
 
   void test_construct_from_BinEdges() {
-    TS_ASSERT_THROWS_NOTHING(Histogram src(BinEdges));
     TS_ASSERT_THROWS_NOTHING(Histogram src(BinEdges(0)));
     TS_ASSERT_THROWS_NOTHING(Histogram src(BinEdges{0.1, 0.2, 0.4}));
   }
