@@ -124,7 +124,7 @@ class VesuvioThickness(PythonAlgorithm):
         """
         Analytic expression for integration of PDCS over E1 and solid angle
         """
-
+	# Neutron rest mass(u) / Mass
         xs_masses = 1.00867/Mass
         scatter_len_sq = np.square(scatter_length)
         cross_section = np.divide((self.FOUR_PI * scatter_len_sq),(np.square(xs_masses+1)))
