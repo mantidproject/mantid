@@ -11,8 +11,8 @@ class VesuvioThicknessTest(unittest.TestCase):
 
     def test_basic_input(self):
         # Original test values from fortran routines
-        masses = "1.0079,27.0,91.0"
-        amplitudes = "0.9301589,2.9496644e-02,4.0345035e-02"
+        masses = [1.0079, 27.0, 91.0]
+        amplitudes = [0.9301589, 2.9496644e-02, 4.0345035e-02]
         trans_guess = 0.831
         thickness = 5.0
         number_density = 1.0
@@ -32,16 +32,32 @@ class VesuvioThicknessTest(unittest.TestCase):
 #----------------------------------Failure cases------------------------------------------------
 
     def test_bad_input(self):
-        masses = "test,bad,input"
-        amplitudes = "test,bad,input"
-        self.assertRaises(RuntimeError, VesuvioThickness, Masses=masses,
+        masses = ['test', 'bad', 'input']
+        amplitudes = ['test', 'bad', 'input']
+        self.assertRaises(TypeError, VesuvioThickness, Masses=masses,
                           Amplitudes=amplitudes,
                           DensityWorkspace='dens_tbl',
                           TransmissionWorkspace='trans_tbl')
 
     def test_mismatch_mass_amplitude_inputs(self):
-        masses = '1.0,2.0,3.0,4.0'
-        amplitudes = '1.0,2.0'
+        masses = [1.0, 2.0, 3.0, 4.0]
+        amplitudes = [1.0, 2.0]
+        self.assertRaises(RuntimeError, VesuvioThickness, Masses=masses,
+                          Amplitudes=amplitudes,
+                          DensityWorkspace='dens_tbl',
+                          TransmissionWorkspace='trans_tbl')
+
+    def test_no_masses_input(self):
+	masses = []
+	amplitudes =[1.0, 2.0]
+        self.assertRaises(RuntimeError, VesuvioThickness, Masses=masses,
+                          Amplitudes=amplitudes,
+                          DensityWorkspace='dens_tbl',
+                          TransmissionWorkspace='trans_tbl')
+
+    def test_no_amplitudes_input(self):
+	masses = [1.0, 2.0]
+	amplitudes =[]
         self.assertRaises(RuntimeError, VesuvioThickness, Masses=masses,
                           Amplitudes=amplitudes,
                           DensityWorkspace='dens_tbl',
