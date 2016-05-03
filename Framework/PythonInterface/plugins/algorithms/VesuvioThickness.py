@@ -104,14 +104,13 @@ class VesuvioThickness(PythonAlgorithm):
         total_mass = sum(total_mass)
 
         for i in range(10):
-            ndens = self._number_density/total_mass*1e6
+            ndens = (self._number_density/total_mass)*1e6
             xst = self.free_xst(self._masses, scatter_length)
             attenuation_length = ndens*xst*1e-28
 
             dmur = 2*attenuation_length*self._thickness
             trans_guess = math.exp(-dmur)
-            self._number_density = (1-self._transmission_guess)/(1-trans_guess)*self._number_density
-
+            self._number_density = ((1-self._transmission_guess)/(1-trans_guess))*self._number_density
             # Add guesses to output workspaces
             density_guesses_tbl_ws.addRow([str(i+1), self._number_density])
             trans_guesses_tbl_ws.addRow([str(i+1), trans_guess])
