@@ -98,15 +98,15 @@ provide1DWorkspace(NXcanSASTestParameters &parameters) {
 
   // Set to point data or histogram data
   if (parameters.isHistogram) {
-      const std::string outName = "convert_to_histo_out_name";
-      auto toHistAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-          "ConvertToHistogram");
-      toHistAlg->initialize();
-      toHistAlg->setChild(true);
-      toHistAlg->setProperty("InputWorkspace", ws);
-      toHistAlg->setProperty("OutputWorkspace", outName);
-      toHistAlg->execute();
-      ws = toHistAlg->getProperty("OutputWorkspace");
+    const std::string outName = "convert_to_histo_out_name";
+    auto toHistAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+        "ConvertToHistogram");
+    toHistAlg->initialize();
+    toHistAlg->setChild(true);
+    toHistAlg->setProperty("InputWorkspace", ws);
+    toHistAlg->setProperty("OutputWorkspace", outName);
+    toHistAlg->execute();
+    ws = toHistAlg->getProperty("OutputWorkspace");
   }
 
   return ws;
@@ -168,16 +168,16 @@ provide2DWorkspace(NXcanSASTestParameters &parameters) {
   ws = rebin2DAlg->getProperty("OutputWorkspace");
 
   if (!parameters.isHistogram) {
-  // Convert to Point data
-  auto toPointAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-      "ConvertToPointData");
-  std::string toPointOutputName("toPointOutput");
-  toPointAlg->initialize();
-  toPointAlg->setChild(true);
-  toPointAlg->setProperty("InputWorkspace", ws);
-  toPointAlg->setProperty("OutputWorkspace", toPointOutputName);
-  toPointAlg->execute();
-  ws = toPointAlg->getProperty("OutputWorkspace");
+    // Convert to Point data
+    auto toPointAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+        "ConvertToPointData");
+    std::string toPointOutputName("toPointOutput");
+    toPointAlg->initialize();
+    toPointAlg->setChild(true);
+    toPointAlg->setProperty("InputWorkspace", ws);
+    toPointAlg->setProperty("OutputWorkspace", toPointOutputName);
+    toPointAlg->execute();
+    ws = toPointAlg->getProperty("OutputWorkspace");
   }
 
   // At this point we have a mismatch between the Axis1 elements and the

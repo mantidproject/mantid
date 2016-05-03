@@ -209,7 +209,7 @@ public:
     parameters.invalidDetectors = false;
 
     parameters.is2dData = true;
-    parameters.isHistogram = true;  // The new bit
+    parameters.isHistogram = true; // The new bit
 
     auto ws = provide2DWorkspace(parameters);
     set2DValues(ws);

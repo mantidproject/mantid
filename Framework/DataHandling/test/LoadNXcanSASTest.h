@@ -198,7 +198,8 @@ public:
 
     // Assert
 
-    // We need to convert the ws file back into point data since the would have loaded point data
+    // We need to convert the ws file back into point data since the would have
+    // loaded point data
     auto toPointAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
         "ConvertToPointData");
     std::string toPointOutputName("toPointOutput");
@@ -239,7 +240,8 @@ public:
         load_file_no_issues(parameters, false /*load transmission*/, outWsName);
 
     // Assert
-    // We need to convert the ws file back into point data since the would have loaded point data
+    // We need to convert the ws file back into point data since the would have
+    // loaded point data
     auto toPointAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
         "ConvertToPointData");
     std::string toPointOutputName("toPointOutput");
@@ -256,7 +258,6 @@ public:
     removeFile(parameters.filename);
     removeWorkspaceFromADS(outWsName);
   }
-
 
 private:
   void removeWorkspaceFromADS(const std::string toRemove) {

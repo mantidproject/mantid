@@ -315,8 +315,6 @@ getUnitFromMDDimension(Mantid::Geometry::IMDDimension_const_sptr dimension) {
   return unitLabel.ascii();
 }
 
-
-
 void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
   // Add attributes for @signal, @I_axes, @Q_indices,
   Mantid::DataHandling::H5Util::writeStrAttribute(data, sasSignal, sasDataI);
@@ -379,12 +377,13 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
 
     if (workspace->isHistogramData()) {
       std::vector<double> qResolutionCentres;
-      Mantid::Kernel::VectorHelper::convertToBinCentre(qResolution, qResolutionCentres);
+      Mantid::Kernel::VectorHelper::convertToBinCentre(qResolution,
+                                                       qResolutionCentres);
       writeArray1DWithStrAttributes(data, sasDataQdev, qResolutionCentres,
                                     xUncertaintyAttributes);
     } else {
-        writeArray1DWithStrAttributes(data, sasDataQdev, qResolution,
-                                      xUncertaintyAttributes);
+      writeArray1DWithStrAttributes(data, sasDataQdev, qResolution,
+                                    xUncertaintyAttributes);
     }
   }
 }
@@ -436,13 +435,13 @@ private:
 /**
  * QxExtractor functor which allows us to convert 2D Qx data into point data.
  */
-template <typename T>
-class QxExtractor {
+template <typename T> class QxExtractor {
 public:
-  T* operator()(Mantid::API::MatrixWorkspace_sptr ws, int index) {
+  T *operator()(Mantid::API::MatrixWorkspace_sptr ws, int index) {
     if (ws->isHistogramData()) {
       qxPointData.clear();
-      Mantid::Kernel::VectorHelper::convertToBinCentre(ws->dataX(index), qxPointData);
+      Mantid::Kernel::VectorHelper::convertToBinCentre(ws->dataX(index),
+                                                       qxPointData);
       return qxPointData.data();
     } else {
       return ws->dataX(index).data();
