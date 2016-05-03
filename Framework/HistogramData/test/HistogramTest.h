@@ -64,9 +64,11 @@ public:
 
   void test_copy_assignment() {
     Histogram src(Points{0.1, 0.2, 0.4});
-    Histogram dest(Histogram::XMode::Points);
+    Histogram dest(Histogram::XMode::BinEdges);
+    TS_ASSERT_EQUALS(dest.xMode(), Histogram::XMode::BinEdges);
     dest = src;
     TS_ASSERT(src.points());
+    TS_ASSERT_EQUALS(dest.xMode(), Histogram::XMode::Points);
     auto points = dest.points();
     TS_ASSERT(points);
     TS_ASSERT_EQUALS(points.size(), 3);
@@ -77,10 +79,12 @@ public:
 
   void test_move_assignment() {
     Histogram src(Points{0.1, 0.2, 0.4});
-    Histogram dest(Histogram::XMode::Points);
+    Histogram dest(Histogram::XMode::BinEdges);
+    TS_ASSERT_EQUALS(dest.xMode(), Histogram::XMode::BinEdges);
     dest = std::move(src);
     TS_ASSERT(!src.points());
     TS_ASSERT(dest.points());
+    TS_ASSERT_EQUALS(dest.xMode(), Histogram::XMode::Points);
   }
 
   void test_xMode() {

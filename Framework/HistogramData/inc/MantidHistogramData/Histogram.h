@@ -52,20 +52,8 @@ public:
 
   XMode xMode() const noexcept { return m_xMode; }
 
-  BinEdges binEdges() const {
-    if (xMode() == XMode::BinEdges)
-      return BinEdges(m_x);
-    else
-      return BinEdges(Points(m_x));
-  }
-
-  Points points() const {
-    if (xMode() == XMode::BinEdges)
-      return Points(BinEdges(m_x));
-    else
-      return Points(m_x);
-  }
-
+  BinEdges binEdges() const;
+  Points points() const;
   template <typename... T> void setBinEdges(T &&... data);
   template <typename... T> void setPoints(T &&... data);
 
@@ -73,11 +61,7 @@ public:
   HistogramX &mutableX() { return m_x.access(); }
 
   Kernel::cow_ptr<HistogramX> sharedX() const { return m_x; }
-  void setSharedX(const Kernel::cow_ptr<HistogramX> &X) {
-    if (m_x->size() != X->size())
-      throw std::logic_error("Histogram::setSharedX: size mismatch\n");
-    m_x = X;
-  }
+  void setSharedX(const Kernel::cow_ptr<HistogramX> &X);
 
   // Temporary legacy interface to X
   void setX(const Kernel::cow_ptr<HistogramX> &X) { m_x = X; }
@@ -93,6 +77,11 @@ private:
   XMode m_xMode;
 };
 
+/** Sets the Histogram's bin edges.
+
+ Any arguments that can be used for constructing a BinEdges object are allowed,
+ however, a size check ensures that the Histogram stays valid, i.e., that x and
+ y lengths are consistent. */
 template <typename... T> void Histogram::setBinEdges(T &&... data) {
   BinEdges edges(std::forward<T>(data)...);
   // If there is no data changing the size is ok.
@@ -102,6 +91,11 @@ template <typename... T> void Histogram::setBinEdges(T &&... data) {
   m_x = edges.cowData();
 }
 
+/** Sets the Histogram's points.
+
+ Any arguments that can be used for constructing a Points object are allowed,
+ however, a size check ensures that the Histogram stays valid, i.e., that x and
+ y lengths are consistent. */
 template <typename... T> void Histogram::setPoints(T &&... data) {
   Points points(std::forward<T>(data)...);
   // If there is no data changing the size is ok.
