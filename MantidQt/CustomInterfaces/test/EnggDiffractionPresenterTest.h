@@ -100,11 +100,11 @@ public:
     g_vanNo.emplace_back("8899999988");
     g_ceriaNo.emplace_back("9999999999");
     g_rebinRunNo.push_back(g_eventModeRunNo);
-	splittedFileVec.emplace_back("ENGINX");
-	splittedFileVec.emplace_back("23931");
-	splittedFileVec.emplace_back("focused");
-	splittedFileVec.emplace_back("bank");
-	splittedFileVec.emplace_back("1");
+    splittedFileVec.emplace_back("ENGINX");
+    splittedFileVec.emplace_back("23931");
+    splittedFileVec.emplace_back("focused");
+    splittedFileVec.emplace_back("bank");
+    splittedFileVec.emplace_back("1");
 
     // provide personal directories in order to carry out the full disable tests
     m_basicCalibSettings.m_inputDirCalib = "GUI_calib_folder/";
@@ -1248,13 +1248,12 @@ public:
   void test_fitting_runno_multiple_run() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     EnggDiffPresenterNoThread pres(&mockView);
-	// 23931-23934
-	std::vector<std::string> RunNumDir;
-	RunNumDir.emplace_back("241391");
-	RunNumDir.emplace_back("241392");
-	RunNumDir.emplace_back("241393");
-	RunNumDir.emplace_back("241394");
-	
+    // 23931-23934
+    std::vector<std::string> RunNumDir;
+    RunNumDir.emplace_back("241391");
+    RunNumDir.emplace_back("241392");
+    RunNumDir.emplace_back("241393");
+    RunNumDir.emplace_back("241394");
 
     // inputs from user - given multiple run
     EXPECT_CALL(mockView, getFittingRunNo())
@@ -1269,16 +1268,54 @@ public:
         .Times(1)
         .WillOnce(Return(splittedFileVec));
 
-    EXPECT_CALL(mockView, getFittingMultiRunMode()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(mockView, getFittingMultiRunMode())
+        .Times(1)
+        .WillOnce(Return(true));
 
-    EXPECT_CALL(mockView, setFittingRunNumVec(testing::_))
-            .Times(1);
+    EXPECT_CALL(mockView, setFittingRunNumVec(testing::_)).Times(1);
 
-	EXPECT_CALL(mockView, addRunNoItem(testing::_, testing::_))
-		.Times(0);
+    EXPECT_CALL(mockView, addRunNoItem(testing::_, testing::_)).Times(0);
 
-	EXPECT_CALL(mockView, addBankItems(testing::_, testing::_, testing::_))
-		.Times(1);
+    EXPECT_CALL(mockView, addBankItems(testing::_, testing::_, testing::_))
+        .Times(1);
+
+    // No errors/0 warnings.
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffractionPresenter::FittingRunNo);
+  }
+
+  void test_fitting_runno_single_run_add_run_item() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    EnggDiffPresenterNoThread pres(&mockView);
+    // 23931-23934
+    std::vector<std::string> RunNumDir;
+    RunNumDir.emplace_back("241391");
+
+    // inputs from user - given multiple run
+    EXPECT_CALL(mockView, getFittingRunNo())
+        .Times(2)
+        .WillRepeatedly(Return("241391"));
+
+    EXPECT_CALL(mockView, getFittingRunNumVec())
+        .Times(1)
+        .WillOnce(Return(RunNumDir));
+
+    EXPECT_CALL(mockView, splitFittingDirectory(testing::_))
+        .Times(1)
+        .WillOnce(Return(splittedFileVec));
+
+    EXPECT_CALL(mockView, getFittingMultiRunMode())
+        .Times(1)
+        .WillOnce(Return(false));
+
+    EXPECT_CALL(mockView, setFittingRunNumVec(testing::_)).Times(1);
+
+    EXPECT_CALL(mockView, addRunNoItem(testing::_, testing::_)).Times(1);
+
+    EXPECT_CALL(mockView, addBankItems(testing::_, testing::_, testing::_))
+        .Times(1);
 
     // No errors/0 warnings.
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
