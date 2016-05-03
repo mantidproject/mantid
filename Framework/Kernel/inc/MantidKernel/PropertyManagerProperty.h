@@ -44,6 +44,9 @@ public:
                           const ValueType &defaultValue,
                           unsigned int direction = Direction::Input);
   using BaseClass::operator=;
+
+  std::string value() const override;
+  std::string setValue(const std::string &strValue) override;
 };
 
 } // namespace Kernel

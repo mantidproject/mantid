@@ -1,5 +1,5 @@
 #include "MantidKernel/PropertyManagerProperty.h"
-#include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/PropertyManager.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -29,6 +29,37 @@ PropertyManagerProperty::PropertyManagerProperty(const std::string &name,
   if (name.empty()) {
     throw std::invalid_argument("PropertyManagerProperty() requires a name");
   }
+}
+
+/**
+ * @return The value of the property represented as a string
+ */
+std::string PropertyManagerProperty::value() const {
+  return (*this)()->asString();
+}
+
+/**
+ * Overwrite the current value with a string containing serialized Json
+ * @param strValue A string assumed to contain serialized Json
+ * @return If an error occurred then this contains an error message, otherwise
+ * an empty string
+ */
+std::string PropertyManagerProperty::setValue(const std::string &strValue) {
+  auto value = (*this)();
+  if (!value) {
+    value = boost::make_shared<PropertyManager>();
+    (*this) = value;
+  }
+  std::ostringstream msg;
+  try {
+    value->setProperties(strValue);
+  } catch (std::invalid_argument &exc) {
+    msg << "Error setting value from string. Json-formatted string expected.\n"
+        << "Parser error: " << exc.what();
+  } catch (std::runtime_error &exc) {
+    msg << "Error setting value from string.\n" << exc.what();
+  }
+  return msg.str();
 }
 
 // -----------------------------------------------------------------------------

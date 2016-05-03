@@ -25,7 +25,8 @@ public:
 
     PropertyManagerProperty pmap("Test");
     // MSVC warns about comparing signed/unsigned here
-    TS_ASSERT_EQUALS(static_cast<unsigned int>(Direction::Input), pmap.direction());
+    TS_ASSERT_EQUALS(static_cast<unsigned int>(Direction::Input),
+                     pmap.direction());
   }
 
   void test_Constructor_Sets_Name_And_Direction() {
@@ -59,7 +60,7 @@ public:
     TS_ASSERT_DIFFERS(retrieved, emptyMgr);
   }
 
-  void test_PropertyManager_Can_Implicitly_Convert_To_Value_Type() {
+  void test_Property_Can_Implicitly_Convert_To_Value_Type() {
     using Mantid::Kernel::PropertyManager;
     using Mantid::Kernel::PropertyManager_sptr;
     // Create a top-level PropertyManager, add a PropertyManagerProperty
@@ -72,11 +73,31 @@ public:
     PropertyManager_sptr args = topMgr->getProperty("Args");
   }
 
+  void test_Property_Set_With_Json_String_Overwrites_Existing_Values() {
+    PropertyManagerProperty prop("Test", createPropMgrWithInt());
+
+    auto secondMgr = createPropMgrWithInt();
+    secondMgr->setProperty("Prop1", 5);
+    TS_ASSERT_EQUALS("", prop.setValue(secondMgr->asString(true)));
+    auto retrieved = prop();
+    TS_ASSERT_EQUALS(1, retrieved->propertyCount());
+    TS_ASSERT(prop()->existsProperty("Prop1"));
+  }
+
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
   void test_Empty_Name_Is_Not_Accepted() {
     TS_ASSERT_THROWS(PropertyManagerProperty(""), std::invalid_argument);
+  }
+
+  void test_Empty_Property_Set_With_Json_String_Throws_Error() {
+    PropertyManagerProperty prop("Test");
+
+    auto json = createPropMgrWithInt()->asString(true);
+    std::string msg;
+    TS_ASSERT_THROWS_NOTHING(msg = prop.setValue(json));
+    TS_ASSERT(msg.length() > 0);
   }
 
 private:
