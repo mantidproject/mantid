@@ -364,24 +364,26 @@ class CWSCDReductionControl(object):
 
     def check_generate_mask_workspace(self, exp_number, scan_number, mask_tag):
         """
-
+        Check whether a workspace does exist.
+        If it does not, then generate one according to the tag
         :param exp_number:
         :param scan_number:
         :param mask_tag:
         :return:
         """
-        # TODO/NOW - Check and Doc
+        # Check
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+        assert isinstance(mask_tag, str)
 
-        #
         mask_ws_name = mask_tag
 
         if AnalysisDataService.doesExist(mask_ws_name) is False:
-            # ...
-            # assert blabla
+            # if the workspace does not exist, create a new mask workspace
+            assert mask_tag in self._roiDict
             region_of_interest = self._roiDict[mask_tag]
             ll = region_of_interest[0]
             ur = region_of_interest[1]
-            print '[DB...BAT] LL and UR are ', ll, ur
             self.generate_mask_workspace(exp_number, scan_number, ll, ur, mask_ws_name)
 
         return
@@ -420,16 +422,19 @@ class CWSCDReductionControl(object):
     @staticmethod
     def estimate_background(pt_intensity_dict, bg_pt_list):
         """
-        Estimate background value
+        Estimate background value by average the integrated counts of some Pt.
         :param pt_intensity_dict:
-        :param bg_pt_list:
+        :param bg_pt_list: list of Pt. that are used to calculate background
         :return:
         """
-        # TODO/NOW - doc and check
-        # assert blabla
+        # Check
+        assert isinstance(pt_intensity_dict, dict)
+        assert isinstance(bg_pt_list, list) and len(bg_pt_list) > 0
 
+        # Sum over all Pt.
         bg_sum = 0.
         for bg_pt in bg_pt_list:
+            assert bg_pt in pt_intensity_dict, 'Pt. %d is not calculated.' % bg_pt
             bg_sum += pt_intensity_dict[bg_pt]
 
         avg_bg = float(bg_sum) / len(bg_pt_list)
@@ -926,15 +931,16 @@ class CWSCDReductionControl(object):
                              merge_peaks=True, use_mask=False,
                              normalization='', mask_ws_name=None):
         """
-        Integrate peaks in a merged scan
-        Requirements:
+
         :param exp:
         :param scan:
-        :param peak_centre: a float radius or None for not using
+        :param peak_radius:
+        :param peak_centre:  a float radius or None for not using
         :param merge_peaks: If selected, merged all the Pts can return 1 integrated peak's value;
-                      otherwise, integrate peak for each Pt.
-        :param normalization : normalization set up (by time or ...)
-        :param mask_ws_name : workspace name or None
+                            otherwise, integrate peak for each Pt.
+        :param use_mask:
+        :param normalization: normalization set up (by time or ...)
+        :param mask_ws_name: mask workspace name or None
         :return:
         """
         # check
@@ -953,7 +959,7 @@ class CWSCDReductionControl(object):
 
         # get MD workspace name
         status, pt_list = self.get_pt_numbers(exp, scan)
-        assert status
+        assert status, str(pt_list)
         md_ws_name = get_merged_md_name(self._instrumentName, exp, scan, pt_list)
 
         peak_centre_str = '%f, %f, %f' % (peak_centre[0], peak_centre[1],
@@ -1701,15 +1707,17 @@ class CWSCDReductionControl(object):
         """
         Save region of interest to controller for future use
         :param tag:
-        :param region_of_interest:
+        :param region_of_interest: a 2-tuple for 2-tuple as lower-left and upper-right corners of the region
         :return:
         """
-        # TODO/NOW - Check and more doc
+        # check
+        assert isinstance(tag, str)
+        assert len(region_of_interest) == 2
+        assert len(region_of_interest[0]) == 2
+        assert len(region_of_interest[1]) == 2
 
         # example:  ret_value = self._roiDict[exp_number]
         self._roiDict[tag] = region_of_interest
-
-        print '[DB...BAT] roiDict: ', str(self._roiDict)
 
         return
 
@@ -1851,14 +1859,16 @@ class CWSCDReductionControl(object):
     @staticmethod
     def simple_integrate_peak(pt_intensity_dict, bg_value):
         """
-
+        A simple approach to integrate peak in a cuboid with background removed.
         :param pt_intensity_dict:
         :param bg_value:
         :return:
         """
-        # TODO/NOW - Doc and check
+        # check
+        assert isinstance(pt_intensity_dict, dict)
+        assert isinstance(bg_value, float) and bg_value >= 0.
 
-        #
+        # loop over Pt. to sum for peak's intensity
         sum_intensity = 0.
         for intensity in pt_intensity_dict.values():
             sum_intensity += intensity - bg_value
