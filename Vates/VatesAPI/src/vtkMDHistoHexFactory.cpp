@@ -17,6 +17,7 @@
 #include "vtkFloatArray.h"
 #include "vtkDoubleArray.h"
 
+#include <cmath>
 
 using Mantid::API::IMDWorkspace;
 using Mantid::API::IMDHistoWorkspace;
