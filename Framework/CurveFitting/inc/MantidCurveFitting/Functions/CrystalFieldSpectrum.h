@@ -98,6 +98,8 @@ public:
   virtual void applyTies() override;
   /// Remove all ties
   virtual void clearTies() override;
+  // Unhide base class function: removeTie(string).
+  using IFunction::removeTie;
   /// Removes i-th parameter's tie
   virtual bool removeTie(size_t i) override;
   /// Get the tie of i-th parameter
