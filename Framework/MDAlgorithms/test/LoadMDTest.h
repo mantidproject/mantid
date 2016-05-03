@@ -815,28 +815,27 @@ public:
         AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(
             "withHisto");
 
-    //BinMD and LoadMD should be in the history
-    TS_ASSERT_EQUALS(newWSh->getHistory().size(),2);
+    // BinMD and LoadMD should be in the history
+    TS_ASSERT_EQUALS(newWSh->getHistory().size(), 2);
 
     loadAlg.initialize();
     loadAlg.isInitialized();
     loadAlg.setPropertyValue("Filename", this_filename);
     loadAlg.setProperty("FileBackEnd", false);
     loadAlg.setPropertyValue("OutputWorkspace", "noHisto");
-    loadAlg.setProperty("LoadHistory",false);
+    loadAlg.setProperty("LoadHistory", false);
     loadAlg.execute();
     TS_ASSERT(loadAlg.isExecuted());
 
     // Check the affine matrix over at a couple of locations
     MDHistoWorkspace_sptr newWSnh =
-        AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(
-            "noHisto");
+        AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>("noHisto");
 
-    //Only LoadMD should be in the history
-    TS_ASSERT_EQUALS(newWSnh->getHistory().size(),1);
+    // Only LoadMD should be in the history
+    TS_ASSERT_EQUALS(newWSnh->getHistory().size(), 1);
 
     if (Poco::File(this_filename).exists()) {
-        Poco::File(this_filename).remove();
+      Poco::File(this_filename).remove();
     }
 
     AnalysisDataService::Instance().remove("HistoryEvTest_ws");

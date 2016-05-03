@@ -317,8 +317,8 @@ void LoadMD::loadHisto() {
   ws->setCoordinateSystem(m_coordSystem);
 
   // Load the WorkspaceHistory "process"
-  if(this->getProperty("LoadHistory")){
-      ws->history().loadNexus(m_file.get());
+  if (this->getProperty("LoadHistory")) {
+    ws->history().loadNexus(m_file.get());
   }
 
   this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
@@ -506,8 +506,8 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   ws->setTitle(title);
 
   // Load the WorkspaceHistory "process"
-  if(this->getProperty("LoadHistory")){
-      ws->history().loadNexus(m_file.get());
+  if (this->getProperty("LoadHistory")) {
+    ws->history().loadNexus(m_file.get());
   }
 
   this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
