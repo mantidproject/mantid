@@ -20,7 +20,7 @@
 #include <fstream>
 
 namespace {
-  const double tolerance{0.02};
+const double tolerance{0.02};
 }
 
 namespace Mantid {
