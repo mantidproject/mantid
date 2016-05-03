@@ -73,7 +73,7 @@ public:
   HistogramX &mutableX() { return m_x.access(); }
 
   Kernel::cow_ptr<HistogramX> sharedX() const { return m_x; }
-  void setSharedX(Kernel::cow_ptr<HistogramX> &X) {
+  void setSharedX(const Kernel::cow_ptr<HistogramX> &X) {
     if (m_x->size() != X->size())
       throw std::logic_error("Histogram::setSharedX: size mismatch\n");
     m_x = X;
