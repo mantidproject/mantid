@@ -76,11 +76,21 @@ private:
                const std::string &outputName,
                const std::string &outFormat) const;
 
+  void convertToFITS(const std::string &inputName, const std::string &inFormat,
+                     const std::string &outputName) const;
+
+  void convertToNXTomo(const std::string &inputName,
+                       const std::string &inFormat,
+                       const std::string &outputName) const;
+
   Mantid::API::MatrixWorkspace_sptr
   loadFITS(const std::string &inputName) const;
 
   void saveFITS(Mantid::API::MatrixWorkspace_sptr image,
                 const std::string &outputName) const;
+
+  void saveNXTomo(Mantid::API::MatrixWorkspace_sptr image,
+                  const std::string &outputName) const;
 
   /// Associated view for this presenter (MVP pattern)
   IImggFormatsConvertView *const m_view;

@@ -170,16 +170,42 @@ void ImggFormatsConvertPresenter::convert(const std::string &inputName,
                                           const std::string &outputName,
                                           const std::string &outFormat) const {
 
-  if ("FITS" == inFormat) {
-    auto inWks = loadFITS(inputName);
-    m_view->writeImg(inWks, outputName, outFormat);
+  if ("NXTomo" == outFormat) {
+    convertToNXTomo(inputName, inFormat, outputName);
   } else if ("FITS" == outFormat) {
-    auto inWks = m_view->loadImg(inputName, inFormat);
-    saveFITS(inWks, outputName);
+    convertToFITS(inputName, inFormat, outputName);
   } else {
-    // other image formats
-    m_view->convert(inputName, inFormat, outputName, outFormat);
+    if ("FITS" == inFormat) {
+      auto inWks = loadFITS(inputName);
+      m_view->writeImg(inWks, outputName, outFormat);
+    } else {
+      // other image formats
+      m_view->convert(inputName, inFormat, outputName, outFormat);
+    }
   }
+}
+
+void ImggFormatsConvertPresenter::convertToFITS(
+    const std::string &inputName, const std::string &inFormat,
+    const std::string &outputName) const {
+
+  Mantid::API::MatrixWorkspace_sptr inWks;
+  if ("FITS" == inFormat) {
+    inWks = loadFITS(inputName);
+  } else {
+    inWks = m_view->loadImg(inputName, inFormat);
+  }
+
+  saveFITS(inWks, outputName);
+}
+
+void ImggFormatsConvertPresenter::convertToNXTomo(
+    const std::string &inputName, const std::string &inFormat,
+    const std::string &outputName) const {
+  // loadNXTomo is not enabled (and there is no LoadNXTomo algorithm for now)
+
+  auto inWks = m_view->loadImg(inputName, inFormat);
+  saveNXTomo(inWks, outputName);
 }
 
 Mantid::API::MatrixWorkspace_sptr
@@ -210,7 +236,6 @@ void ImggFormatsConvertPresenter::saveFITS(
     Mantid::API::MatrixWorkspace_sptr image,
     const std::string &outputName) const {
   // Just run LoadFITS
-  // Just run LoadFITS
   auto alg = Mantid::API::AlgorithmManager::Instance().create("SaveFITS");
   alg->initialize();
   alg->setProperty("InputWorkspace", image);
@@ -222,6 +247,29 @@ void ImggFormatsConvertPresenter::saveFITS(
                              "an image in FITS format into the file '" +
                              outputName + ".");
   }
+}
+
+void ImggFormatsConvertPresenter::saveNXTomo(
+    Mantid::API::MatrixWorkspace_sptr image,
+    const std::string &outputName) const {
+  // Run the algorithm SaveNXTomo
+  auto alg = Mantid::API::AlgorithmManager::Instance().create("SaveNXTomo");
+  alg->initialize();
+  alg->setProperty("InputWorkspace", image);
+  alg->setProperty("Filename", outputName);
+  alg->setProperty("OverwriteFile", false);
+  alg->execute();
+
+  if (!alg->isExecuted()) {
+    throw std::runtime_error(
+        "Failed to execute the algorithm SaveNXTomo to save "
+        "images in NXTomo format into the file '" +
+        outputName + ".");
+  }
+
+  g_log.information()
+      << "Save NXTomo file (overwriting if the file already existed: "
+      << outputName << std::endl;
 }
 
 } // namespace CustomInterfaces
