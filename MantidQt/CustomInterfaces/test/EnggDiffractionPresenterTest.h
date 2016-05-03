@@ -1138,7 +1138,7 @@ public:
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, fittingRunNo()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, getFittingRunNo()).Times(1).WillOnce(Return(""));
     EXPECT_CALL(mockView, fittingPeaksData()).Times(1).WillOnce(Return(""));
 
     // No errors/1 warnings. There will be an error log from the algorithms
@@ -1156,7 +1156,7 @@ public:
 
     // inputs from user
     const std::string mockFname = "";
-    EXPECT_CALL(mockView, fittingRunNo()).Times(1).WillOnce(Return(mockFname));
+    EXPECT_CALL(mockView, getFittingRunNo()).Times(1).WillOnce(Return(mockFname));
     EXPECT_CALL(mockView, fittingPeaksData())
         .Times(1)
         .WillOnce(Return("2.57,4.88,5.78"));
@@ -1176,7 +1176,7 @@ public:
     EnggDiffCalibSettings calibSettings;
 
     // inputs from user
-    EXPECT_CALL(mockView, fittingRunNo())
+    EXPECT_CALL(mockView, getFittingRunNo())
         .Times(1)
         .WillOnce(Return(g_focusedRun));
     EXPECT_CALL(mockView, fittingPeaksData())

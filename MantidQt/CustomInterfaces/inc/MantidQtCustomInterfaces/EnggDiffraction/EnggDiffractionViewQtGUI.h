@@ -149,9 +149,9 @@ public:
 
   double rebinningPulsesTime() const override;
 
-  void setfittingRunNo(QString path) override;
+  void setFittingRunNo(QString path) override;
 
-  std::string getfittingRunNo() const override;
+  std::string getFittingRunNo() const override;
 
   std::string fittingPeaksData() const override;
 
@@ -174,7 +174,7 @@ public:
 
   void setFittingRunNumVec(std::vector<std::string> assignVec) override;
 
-  bool getFittingMutliRunMode() override;
+  bool getFittingMultiRunMode() override;
 
   void setFittingMultiRunMode(bool mode) override;
 

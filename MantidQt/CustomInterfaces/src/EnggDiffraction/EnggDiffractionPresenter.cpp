@@ -469,7 +469,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
   // TODO: much of this should be moved to presenter
   try {
     /// needs be simplfied here @shahroz
-    QString focusedFile = QString::fromStdString(m_view->getfittingRunNo());
+    QString focusedFile = QString::fromStdString(m_view->getFittingRunNo());
     std::string strFocusedFile = focusedFile.toStdString();
     // file name
     Poco::Path selectedfPath(strFocusedFile);
@@ -504,7 +504,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
         m_view->addBankItems(splitBaseName, focusedFile, runnoDirVector);
         runNoVec.clear();
         runNoVec.push_back(splitBaseName[1]);
-        auto fittingMultiRunMode = m_view->getFittingMutliRunMode();
+        auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
         if (!fittingMultiRunMode)
           m_view->addRunNoItem(runNoVec, false);
       }
@@ -535,7 +535,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
         runNoVec.clear();
         runNoVec.push_back(strFocusedFile);
 
-        auto fittingMultiRunMode = m_view->getFittingMutliRunMode();
+        auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
         if (!fittingMultiRunMode)
           m_view->addRunNoItem(runNoVec, false);
       }
@@ -543,9 +543,9 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
     // set the directory here to the first in the vector if its not empty
     if (!runnoDirVector.empty()) {
       QString firstDir = QString::fromStdString(runnoDirVector[0]);
-      m_view->setfittingRunNo(firstDir);
+      m_view->setFittingRunNo(firstDir);
 
-    } else if (m_view->getfittingRunNo().empty()) {
+    } else if (m_view->getFittingRunNo().empty()) {
       m_view->userWarning("Invalid Input",
                           "Invalid directory or run number given. "
                           "Please try again");
@@ -646,7 +646,7 @@ void EnggDiffractionPresenter::enableMultiRun(
 // Process Fitting Peaks begins here
 
 void EnggDiffractionPresenter::processFitPeaks() {
-  const std::string focusedRunNo = m_view->getfittingRunNo();
+  const std::string focusedRunNo = m_view->getFittingRunNo();
   const std::string fitPeaksData = m_view->fittingPeaksData();
 
   g_log.debug() << "the expected peaks are: " << fitPeaksData << std::endl;

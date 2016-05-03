@@ -726,7 +726,7 @@ void EnggDiffractionViewQtGUI::setBankDir(int idx) {
     std::string bankDir = m_fitting_runno_dir_vec[idx];
     Poco::Path fpath(bankDir);
 
-    setfittingRunNo(QString::fromUtf8(bankDir.c_str()));
+    setFittingRunNo(QString::fromUtf8(bankDir.c_str()));
   }
 }
 
@@ -739,7 +739,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
     auto item = listView->item(currentRow);
     QString itemText = item->text();
 
-    setfittingRunNo(itemText);
+    setFittingRunNo(itemText);
     FittingRunNo();
   }
 }
@@ -1212,7 +1212,7 @@ void EnggDiffractionViewQtGUI::browseFitFocusedRun() {
   }
 
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
-  setfittingRunNo(path);
+  setFittingRunNo(path);
   getBanks();
 }
 
@@ -1364,11 +1364,11 @@ void EnggDiffractionViewQtGUI::setBankIdComboBox(int idx) {
   bankName->setCurrentIndex(idx);
 }
 
-void EnggDiffractionViewQtGUI::setfittingRunNo(QString path) {
+void EnggDiffractionViewQtGUI::setFittingRunNo(QString path) {
   m_uiTabFitting.lineEdit_pushButton_run_num->setText(path);
 }
 
-std::string EnggDiffractionViewQtGUI::getfittingRunNo() const {
+std::string EnggDiffractionViewQtGUI::getFittingRunNo() const {
   return m_uiTabFitting.lineEdit_pushButton_run_num->text().toStdString();
 }
 
@@ -1520,7 +1520,7 @@ void EnggDiffractionViewQtGUI::setFittingMultiRunMode(bool mode) {
 	m_fittingMutliRunMode = mode;
 }
 
-bool EnggDiffractionViewQtGUI::getFittingMutliRunMode() {
+bool EnggDiffractionViewQtGUI::getFittingMultiRunMode() {
 	return m_fittingMutliRunMode;
 }
 
@@ -1536,7 +1536,7 @@ void EnggDiffractionViewQtGUI::setDefaultBank(
     if (combo_data > -1) {
       setBankIdComboBox(combo_data);
     } else {
-      setfittingRunNo(selectedFile);
+      setFittingRunNo(selectedFile);
     }
   }
   // check if the vector is not empty so that the first directory
@@ -1544,11 +1544,11 @@ void EnggDiffractionViewQtGUI::setDefaultBank(
   else if (!m_fitting_runno_dir_vec.empty()) {
     auto firstDir = m_fitting_runno_dir_vec.at(0);
     auto intialDir = QString::fromStdString(firstDir);
-    setfittingRunNo(intialDir);
+    setFittingRunNo(intialDir);
   }
   // if nothing found related to text-field input
-  else if (!getfittingRunNo().empty())
-    setfittingRunNo(selectedFile);
+  else if (!getFittingRunNo().empty())
+    setFittingRunNo(selectedFile);
 }
 
 bool MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::isDigit(
