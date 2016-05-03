@@ -24,7 +24,8 @@ public:
     using Mantid::Kernel::Direction;
 
     PropertyManagerProperty pmap("Test");
-    TS_ASSERT_EQUALS(Direction::Input, pmap.direction());
+    // MSVC warns about comparing signed/unsigned here
+    TS_ASSERT_EQUALS(static_cast<unsigned int>(Direction::Input), pmap.direction());
   }
 
   void test_Constructor_Sets_Name_And_Direction() {
