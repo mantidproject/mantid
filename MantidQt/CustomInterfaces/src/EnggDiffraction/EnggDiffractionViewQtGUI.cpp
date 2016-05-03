@@ -214,21 +214,11 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
           SIGNAL(textEdited(const QString &)), this,
           SLOT(resetFittingMultiMode()));
 
-  // connect(m_uiTabFitting.lineEdit_pushButton_run_num,
-  // SIGNAL(editingFinished()),
-  //     this, SLOT(fittingRunNoChanged()));
-
   connect(m_uiTabFitting.lineEdit_pushButton_run_num, SIGNAL(editingFinished()),
           this, SLOT(FittingRunNo()));
 
-  // connect(m_uiTabFitting.lineEdit_pushButton_run_num,
-  // SIGNAL(returnPressed()),
-  //       this, SLOT(fittingRunNoChanged()));
-
   connect(m_uiTabFitting.lineEdit_pushButton_run_num, SIGNAL(returnPressed()),
           this, SLOT(FittingRunNo()));
-
-  // connect(this, SIGNAL(getBanks()), this, SLOT(fittingRunNoChanged()));
 
   connect(this, SIGNAL(getBanks()), this, SLOT(FittingRunNo()));
 
@@ -1417,8 +1407,6 @@ void EnggDiffractionViewQtGUI::addBankItems(
     std::vector<std::string> splittedBaseName, QString selectedFile,
     std::vector<std::string> bankFileVector) {
   try {
-    /// @ shahroz
-    // m_fitting_runno_dir_vec = bankFileVector;
     if (!m_fitting_runno_dir_vec.empty()) {
 
       // delete previous bank added to the list
@@ -1517,11 +1505,11 @@ void EnggDiffractionViewQtGUI::setFittingRunNumVec(
 }
 
 void EnggDiffractionViewQtGUI::setFittingMultiRunMode(bool mode) {
-	m_fittingMutliRunMode = mode;
+  m_fittingMutliRunMode = mode;
 }
 
 bool EnggDiffractionViewQtGUI::getFittingMultiRunMode() {
-	return m_fittingMutliRunMode;
+  return m_fittingMutliRunMode;
 }
 
 void EnggDiffractionViewQtGUI::setDefaultBank(

@@ -166,9 +166,11 @@ public:
                      bool focused) override;
 
   void addBankItems(std::vector<std::string> splittedBaseName,
-	  QString selectedFile, std::vector<std::string> bankFileVector) override;
+                    QString selectedFile,
+                    std::vector<std::string> bankFileVector) override;
 
-  void addRunNoItem(std::vector<std::string> runNumVector, bool multiRun) override;
+  void addRunNoItem(std::vector<std::string> runNumVector,
+                    bool multiRun) override;
 
   std::vector<std::string> getFittingRunNumVec() override;
 

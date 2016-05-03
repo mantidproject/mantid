@@ -7,13 +7,11 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 
-// re order includes @shahroz
-#include "Poco/DirectoryIterator.h"
-
 #include <fstream>
 
 #include <boost/lexical_cast.hpp>
 
+#include "Poco/DirectoryIterator.h"
 #include <Poco/File.h>
 
 #include <QThread>
@@ -462,15 +460,13 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
   startAsyncRebinningPulsesWorker(runNo, nperiods, timeStep, outWSName);
 }
 
-/// SHAHROZ
 // Fitting Tab Run Number & Bank handling here
 void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
     fittingRunNoChanged() {
-  // TODO: much of this should be moved to presenter
+
   try {
-    /// needs be simplfied here @shahroz
-    QString focusedFile = QString::fromStdString(m_view->getFittingRunNo());
-    std::string strFocusedFile = focusedFile.toStdString();
+    std::string strFocusedFile = m_view->getFittingRunNo();
+    QString focusedFile = QString::fromStdString(strFocusedFile);
     // file name
     Poco::Path selectedfPath(strFocusedFile);
     Poco::Path bankDir;
@@ -627,7 +623,6 @@ void EnggDiffractionPresenter::enableMultiRun(
 
         m_view->addRunNoItem(RunNumberVec, true);
 
-        /// what todo with this signal @shahroz
         m_view->setBankEmit();
       }
     } else {

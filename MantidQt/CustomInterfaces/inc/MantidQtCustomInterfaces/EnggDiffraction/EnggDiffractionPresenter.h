@@ -148,8 +148,6 @@ protected slots:
   void focusingFinished();
   void rebinningFinished();
   void fittingFinished();
-
-  // fitting @shahroz
   void fittingRunNoChanged();
 
 private:
@@ -277,7 +275,6 @@ private:
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
                                 const std::string &ExpectedPeaks);
 
-  // shahroz
   void updateFittingDirVec(std::string &bankDir, std::string &focusedFile,
                            bool multi_run,
                            std::vector<std::string> &fittingRunNoDirVec);
