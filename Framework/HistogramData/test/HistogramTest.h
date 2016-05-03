@@ -244,6 +244,14 @@ public:
     TS_ASSERT_EQUALS(&h.constDataX(), old_address);
   }
 
+  void test_setPoints_self_assignment_with_size_mismatch() {
+    Histogram h(BinEdges(2));
+    auto &x = h.x();
+    // This test makes sure that size mismatch takes precedence over the
+    // self-assignment check. x is bin edges, setting it as points should fail.
+    TS_ASSERT_THROWS(h.setPoints(x), std::logic_error);
+  }
+
   void test_edges_from_edges() {
     const Histogram hist(BinEdges{0.1, 0.2, 0.4});
     const auto edges = hist.binEdges();
@@ -371,6 +379,14 @@ public:
     auto old_address = &x;
     h.setBinEdges(x);
     TS_ASSERT_EQUALS(&h.constDataX(), old_address);
+  }
+
+  void test_setBinEdges_self_assignment_with_size_mismatch() {
+    Histogram h(Points(2));
+    auto &x = h.x();
+    // This test makes sure that size mismatch takes precedence over the
+    // self-assignment check. x is points, setting it as bin edges should fail.
+    TS_ASSERT_THROWS(h.setBinEdges(x), std::logic_error);
   }
 
   void test_x() {

@@ -84,12 +84,12 @@ private:
  however, a size check ensures that the Histogram stays valid, i.e., that x and
  y lengths are consistent. */
 template <typename... T> void Histogram::setBinEdges(T &&... data) {
-  if (selfAssignment(data...))
-    return;
   BinEdges edges(std::forward<T>(data)...);
   // If there is no data changing the size is ok.
   // if(m_y)
   checkSize(edges);
+  if (selfAssignment(data...))
+    return;
   m_xMode = XMode::BinEdges;
   m_x = edges.cowData();
 }
@@ -100,12 +100,12 @@ template <typename... T> void Histogram::setBinEdges(T &&... data) {
  however, a size check ensures that the Histogram stays valid, i.e., that x and
  y lengths are consistent. */
 template <typename... T> void Histogram::setPoints(T &&... data) {
-  if (selfAssignment(data...))
-    return;
   Points points(std::forward<T>(data)...);
   // If there is no data changing the size is ok.
   // if(m_y)
   checkSize(points);
+  if (selfAssignment(data...))
+    return;
   m_xMode = XMode::Points;
   m_x = points.cowData();
 }
