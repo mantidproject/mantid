@@ -47,6 +47,9 @@ public:
 
   std::string value() const override;
   std::string setValue(const std::string &strValue) override;
+
+private:
+  std::string m_dataServiceKey;
 };
 
 } // namespace Kernel

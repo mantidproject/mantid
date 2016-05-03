@@ -1,5 +1,6 @@
 #include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -25,7 +26,7 @@ PropertyManagerProperty::PropertyManagerProperty(const std::string &name,
 PropertyManagerProperty::PropertyManagerProperty(const std::string &name,
                                                  const ValueType &defaultValue,
                                                  unsigned int direction)
-    : BaseClass(name, defaultValue, direction) {
+    : BaseClass(name, defaultValue, direction), m_dataServiceKey() {
   if (name.empty()) {
     throw std::invalid_argument("PropertyManagerProperty() requires a name");
   }
@@ -35,16 +36,31 @@ PropertyManagerProperty::PropertyManagerProperty(const std::string &name,
  * @return The value of the property represented as a string
  */
 std::string PropertyManagerProperty::value() const {
-  return (*this)()->asString();
+  if (m_dataServiceKey.empty())
+    return (*this)()->asString(true);
+  else
+    return m_dataServiceKey;
 }
 
 /**
- * Overwrite the current value with a string containing serialized Json
+ * Overwrite the current value. The string is expected to contain either:
+ *   - the key to a PropertyManager stored in the PropertyManagerDataService
+ *   - or json-serialized data, where the properties must already exist on the
+ * containing PropertyManager
  * @param strValue A string assumed to contain serialized Json
  * @return If an error occurred then this contains an error message, otherwise
  * an empty string
  */
 std::string PropertyManagerProperty::setValue(const std::string &strValue) {
+  auto &globalPropMgrs = PropertyManagerDataService::Instance();
+  try {
+    (*this) = globalPropMgrs.retrieve(strValue);
+    m_dataServiceKey = strValue;
+    return "";
+  } catch (Exception::NotFoundError &) {
+    // try the string as json
+  }
+
   auto value = (*this)();
   if (!value) {
     value = boost::make_shared<PropertyManager>();
@@ -53,9 +69,12 @@ std::string PropertyManagerProperty::setValue(const std::string &strValue) {
   std::ostringstream msg;
   try {
     value->setProperties(strValue);
+    m_dataServiceKey.clear();
   } catch (std::invalid_argument &exc) {
-    msg << "Error setting value from string. Json-formatted string expected.\n"
-        << "Parser error: " << exc.what();
+    msg << "Error setting value from string.\n"
+           "String is expected to contain either the name of a global "
+           "PropertyManager or a json-formatted object.\n"
+           "Parser error: " << exc.what();
   } catch (std::runtime_error &exc) {
     msg << "Error setting value from string.\n" << exc.what();
   }

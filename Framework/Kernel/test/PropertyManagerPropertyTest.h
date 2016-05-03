@@ -5,6 +5,7 @@
 
 #include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 
 using Mantid::Kernel::PropertyManagerProperty;
 
@@ -79,9 +80,43 @@ public:
     auto secondMgr = createPropMgrWithInt();
     secondMgr->setProperty("Prop1", 5);
     TS_ASSERT_EQUALS("", prop.setValue(secondMgr->asString(true)));
+    TS_ASSERT_EQUALS(secondMgr->asString(true), prop.value());
     auto retrieved = prop();
     TS_ASSERT_EQUALS(1, retrieved->propertyCount());
     TS_ASSERT(prop()->existsProperty("Prop1"));
+  }
+
+  void test_Property_Set_With_String_Checks_PropertyManager_DataService() {
+    using Mantid::Kernel::PropertyManagerDataService;
+    auto globalMgr = createPropMgrWithInt();
+    const std::string pmdsName("globalprops");
+    auto &pmds = PropertyManagerDataService::Instance();
+    pmds.add(pmdsName, globalMgr);
+    PropertyManagerProperty prop("PMDSTest");
+
+    TS_ASSERT_EQUALS("", prop.setValue(pmdsName));
+    TS_ASSERT_EQUALS(pmdsName, prop.value());
+    auto retrieved = prop();
+    TS_ASSERT_EQUALS(1, retrieved->propertyCount());
+    TS_ASSERT(prop()->existsProperty("Prop1"));
+
+    pmds.remove(pmdsName);
+  }
+
+  void test_Property_Set_As_DataService_Key_Then_Json_Returns_Correct_String() {
+    using Mantid::Kernel::PropertyManagerDataService;
+    auto globalMgr = createPropMgrWithInt();
+    const std::string pmdsName("globalprops");
+    auto &pmds = PropertyManagerDataService::Instance();
+    pmds.add(pmdsName, globalMgr);
+
+    PropertyManagerProperty prop("PMDSTest");
+    prop.setValue(pmdsName);
+    TS_ASSERT_EQUALS(pmdsName, prop.value());
+    pmds.remove(pmdsName);
+
+    TS_ASSERT_EQUALS("", prop.setValue(globalMgr->asString(true)));
+    TS_ASSERT_EQUALS(globalMgr->asString(true), prop.value());
   }
 
   //----------------------------------------------------------------------------
@@ -91,12 +126,19 @@ public:
     TS_ASSERT_THROWS(PropertyManagerProperty(""), std::invalid_argument);
   }
 
-  void test_Empty_Property_Set_With_Json_String_Throws_Error() {
+  void test_Empty_Property_Set_With_Json_String_Returns_Error() {
     PropertyManagerProperty prop("Test");
 
     auto json = createPropMgrWithInt()->asString(true);
     std::string msg;
     TS_ASSERT_THROWS_NOTHING(msg = prop.setValue(json));
+    TS_ASSERT(msg.length() > 0);
+  }
+
+  void test_String_Not_Holding_Valid_Json_or_Global_PM_Name_Returns_Error() {
+    PropertyManagerProperty prop("Test");
+    std::string msg;
+    TS_ASSERT_THROWS_NOTHING(msg = prop.setValue("notvalid"));
     TS_ASSERT(msg.length() > 0);
   }
 
