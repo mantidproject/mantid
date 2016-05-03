@@ -1,5 +1,5 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMGGFORMATSCONVERTQTWIDGET_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMGGFORMATSCONVERTQTWIDGET_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMGGFORMATSCONVERTVIEWQTWIDGET_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMGGFORMATSCONVERTVIEWQTWIDGET_H_
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
@@ -42,15 +42,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL ImggFormatsConvertQtWidget
+class MANTIDQT_CUSTOMINTERFACES_DLL ImggFormatsConvertViewQtWidget
     : public QWidget,
       public IImggFormatsConvertView {
   Q_OBJECT
 
 public:
-  ImggFormatsConvertQtWidget(QWidget *parent = 0);
+  ImggFormatsConvertViewQtWidget(QWidget *parent = 0);
 
-  ~ImggFormatsConvertQtWidget() override{};
+  ~ImggFormatsConvertViewQtWidget() override{};
 
   void userWarning(const std::string &err,
                    const std::string &description) override;
@@ -126,4 +126,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMGGFORMATSCONVERTQTWIDGET_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMGGFORMATSCONVERTVIEWQTWIDGET_H_

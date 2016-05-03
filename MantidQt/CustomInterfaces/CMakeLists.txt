@@ -111,7 +111,7 @@ set ( SRC_FILES
 	src/Tomography/ImageROIPresenter.cpp
 	src/Tomography/ImageROIViewQtWidget.cpp
 	src/Tomography/ImggFormatsConvertPresenter.cpp
-	src/Tomography/ImggFormatsConvertQtWidget.cpp
+	src/Tomography/ImggFormatsConvertViewQtWidget.cpp
 	src/Tomography/ImageStackPreParams.cpp
 	src/Tomography/ImggFormats.cpp
 	src/Tomography/SavuConfigDialog.cpp
@@ -299,7 +299,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h
 	inc/MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h
 	inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvertPresenter.h
-	inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvertQtWidget.h
+	inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvertViewQtWidget.h
 	inc/MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h
 	inc/MantidQtCustomInterfaces/Tomography/ImggFormats.h
 	inc/MantidQtCustomInterfaces/Tomography/StackOfImagesDirs.h
@@ -420,7 +420,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/StepScan.h
                 inc/MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h
                 inc/MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h
-                inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvertQtWidget.h
+                inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvertViewQtWidget.h
                 inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
                 inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
                 inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h

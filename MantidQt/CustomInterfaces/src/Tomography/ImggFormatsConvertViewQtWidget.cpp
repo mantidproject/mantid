@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/Tomography/ImggFormatsConvertQtWidget.h"
+#include "MantidQtCustomInterfaces/Tomography/ImggFormatsConvertViewQtWidget.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
@@ -21,29 +21,29 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 // this would be more like a CustomWidget if it's eventually moved there
-const std::string ImggFormatsConvertQtWidget::m_settingsGroup =
+const std::string ImggFormatsConvertViewQtWidget::m_settingsGroup =
     "CustomInterfaces/ImggFormatsConvertView";
 
-ImggFormatsConvertQtWidget::ImggFormatsConvertQtWidget(QWidget *parent)
+ImggFormatsConvertViewQtWidget::ImggFormatsConvertViewQtWidget(QWidget *parent)
     : QWidget(parent), IImggFormatsConvertView(), m_presenter(nullptr) {
   initLayout();
 }
 
-void ImggFormatsConvertQtWidget::userWarning(const std::string &warn,
-                                             const std::string &description) {
+void ImggFormatsConvertViewQtWidget::userWarning(
+    const std::string &warn, const std::string &description) {
   QMessageBox::warning(this, QString::fromStdString(warn),
                        QString::fromStdString(description), QMessageBox::Ok,
                        QMessageBox::Ok);
 }
 
-void ImggFormatsConvertQtWidget::userError(const std::string &err,
-                                           const std::string &description) {
+void ImggFormatsConvertViewQtWidget::userError(const std::string &err,
+                                               const std::string &description) {
   QMessageBox::critical(this, QString::fromStdString(err),
                         QString::fromStdString(description), QMessageBox::Ok,
                         QMessageBox::Ok);
 }
 
-void ImggFormatsConvertQtWidget::setFormats(
+void ImggFormatsConvertViewQtWidget::setFormats(
     const std::vector<std::string> &fmts, const std::vector<bool> &enableLoad,
     const std::vector<bool> &enableSave) {
   // same formats for inputs and outputs
@@ -56,7 +56,7 @@ void ImggFormatsConvertQtWidget::setFormats(
   }
 }
 
-void ImggFormatsConvertQtWidget::setFormatsCombo(
+void ImggFormatsConvertViewQtWidget::setFormatsCombo(
     QComboBox *cbox, const std::vector<std::string> &fmts,
     const std::vector<bool> &enable) {
   cbox->clear();
@@ -77,11 +77,11 @@ void ImggFormatsConvertQtWidget::setFormatsCombo(
   }
 }
 
-std::string ImggFormatsConvertQtWidget::inputPath() const {
+std::string ImggFormatsConvertViewQtWidget::inputPath() const {
   return m_ui.lineEdit_input_path->text().toStdString();
 }
 
-std::string ImggFormatsConvertQtWidget::inputFormatName() const {
+std::string ImggFormatsConvertViewQtWidget::inputFormatName() const {
   const auto cbox = m_ui.comboBox_input_format;
   if (!cbox)
     return "";
@@ -89,11 +89,11 @@ std::string ImggFormatsConvertQtWidget::inputFormatName() const {
   return cbox->currentText().toStdString();
 }
 
-std::string ImggFormatsConvertQtWidget::outputPath() const {
+std::string ImggFormatsConvertViewQtWidget::outputPath() const {
   return m_ui.lineEdit_output_path->text().toStdString();
 }
 
-std::string ImggFormatsConvertQtWidget::outputFormatName() const {
+std::string ImggFormatsConvertViewQtWidget::outputFormatName() const {
   const auto cbox = m_ui.comboBox_output_format;
   if (!cbox)
     return "";
@@ -101,11 +101,11 @@ std::string ImggFormatsConvertQtWidget::outputFormatName() const {
   return cbox->currentText().toStdString();
 }
 
-bool ImggFormatsConvertQtWidget::compressHint() const {
+bool ImggFormatsConvertViewQtWidget::compressHint() const {
   return 0 == m_ui.comboBox_compression->currentIndex();
 }
 
-void ImggFormatsConvertQtWidget::convert(
+void ImggFormatsConvertViewQtWidget::convert(
     const std::string &inputName, const std::string &inputFormat,
     const std::string &outputName, const std::string &outputFormat) const {
 
@@ -121,9 +121,9 @@ void ImggFormatsConvertQtWidget::convert(
   writeImgFile(img, outputName, outputFormat);
 }
 
-void ImggFormatsConvertQtWidget::writeImg(MatrixWorkspace_sptr inWks,
-                                          const std::string &outputName,
-                                          const std::string &outFormat) const {
+void ImggFormatsConvertViewQtWidget::writeImg(
+    MatrixWorkspace_sptr inWks, const std::string &outputName,
+    const std::string &outFormat) const {
 
   size_t width = inWks->getNumberHistograms();
   if (0 == width)
@@ -158,7 +158,7 @@ void ImggFormatsConvertQtWidget::writeImg(MatrixWorkspace_sptr inWks,
  * @param outputName output filename
  * @param outFormat format for the image file
  */
-void ImggFormatsConvertQtWidget::writeImgFile(
+void ImggFormatsConvertViewQtWidget::writeImgFile(
     const QImage &img, const std::string &outputName,
     const std::string &outFormat) const {
   // With (simpler but less flexible) QImage:
@@ -172,8 +172,8 @@ void ImggFormatsConvertQtWidget::writeImgFile(
 }
 
 MatrixWorkspace_sptr
-ImggFormatsConvertQtWidget::loadImg(const std::string &inputName,
-                                    const std::string &inFormat) const {
+ImggFormatsConvertViewQtWidget::loadImg(const std::string &inputName,
+                                        const std::string &inFormat) const {
 
   QImage img = loadImgFile(inputName, inFormat);
   int width = img.width();
@@ -207,8 +207,8 @@ ImggFormatsConvertQtWidget::loadImg(const std::string &inputName,
  * @return QImage object with image data read from file
  */
 QImage
-ImggFormatsConvertQtWidget::loadImgFile(const std::string &inputName,
-                                        const std::string inFormat) const {
+ImggFormatsConvertViewQtWidget::loadImgFile(const std::string &inputName,
+                                            const std::string inFormat) const {
   // Simpler but less flexible load with QImage:
   // img.load(QString::fromStdString(inputName));
 
@@ -220,11 +220,11 @@ ImggFormatsConvertQtWidget::loadImgFile(const std::string &inputName,
   return reader.read();
 }
 
-size_t ImggFormatsConvertQtWidget::maxSearchDepth() const {
+size_t ImggFormatsConvertViewQtWidget::maxSearchDepth() const {
   return static_cast<size_t>(m_ui.spinBox_max_search_depth->value());
 }
 
-void ImggFormatsConvertQtWidget::initLayout() {
+void ImggFormatsConvertViewQtWidget::initLayout() {
   // setup container ui
   m_ui.setupUi(this);
 
@@ -241,7 +241,7 @@ void ImggFormatsConvertQtWidget::initLayout() {
   m_presenter->notify(IImggFormatsConvertPresenter::Init);
 }
 
-void ImggFormatsConvertQtWidget::setup() {
+void ImggFormatsConvertViewQtWidget::setup() {
 
   connect(m_ui.pushButton_browse_input, SIGNAL(released()), this,
           SLOT(browseImgInputConvertClicked()));
@@ -253,7 +253,7 @@ void ImggFormatsConvertQtWidget::setup() {
           SLOT(convertClicked()));
 }
 
-void ImggFormatsConvertQtWidget::readSettings() {
+void ImggFormatsConvertViewQtWidget::readSettings() {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
 
@@ -274,7 +274,7 @@ void ImggFormatsConvertQtWidget::readSettings() {
   qs.endGroup();
 }
 
-void ImggFormatsConvertQtWidget::saveSettings() const {
+void ImggFormatsConvertViewQtWidget::saveSettings() const {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
 
@@ -291,19 +291,19 @@ void ImggFormatsConvertQtWidget::saveSettings() const {
   qs.endGroup();
 }
 
-void ImggFormatsConvertQtWidget::browseImgInputConvertClicked() {
+void ImggFormatsConvertViewQtWidget::browseImgInputConvertClicked() {
   grabUserBrowseDir(m_ui.lineEdit_input_path);
 }
 
-void ImggFormatsConvertQtWidget::browseImgOutputConvertClicked() {
+void ImggFormatsConvertViewQtWidget::browseImgOutputConvertClicked() {
   grabUserBrowseDir(m_ui.lineEdit_output_path);
 }
 
-void ImggFormatsConvertQtWidget::convertClicked() {
+void ImggFormatsConvertViewQtWidget::convertClicked() {
   m_presenter->notify(IImggFormatsConvertPresenter::Convert);
 }
 
-std::string ImggFormatsConvertQtWidget::grabUserBrowseDir(
+std::string ImggFormatsConvertViewQtWidget::grabUserBrowseDir(
     QLineEdit *le, const std::string &userMsg, bool remember) {
 
   QString prev;
@@ -328,7 +328,7 @@ std::string ImggFormatsConvertQtWidget::grabUserBrowseDir(
   return path.toStdString();
 }
 
-std::string ImggFormatsConvertQtWidget::askImgOrStackPath() {
+std::string ImggFormatsConvertViewQtWidget::askImgOrStackPath() {
   // get path
   QString fitsStr = QString("Supported formats: FITS, TIFF and PNG "
                             "(*.fits *.fit *.tiff *.tif *.png);;"
@@ -350,7 +350,7 @@ std::string ImggFormatsConvertQtWidget::askImgOrStackPath() {
   return path.toStdString();
 }
 
-void ImggFormatsConvertQtWidget::closeEvent(QCloseEvent *event) {
+void ImggFormatsConvertViewQtWidget::closeEvent(QCloseEvent *event) {
   m_presenter->notify(IImggFormatsConvertPresenter::ShutDown);
   event->accept();
 }

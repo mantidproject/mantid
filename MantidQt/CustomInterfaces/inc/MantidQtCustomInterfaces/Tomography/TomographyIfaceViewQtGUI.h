@@ -11,7 +11,7 @@
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfacePresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
-#include "MantidQtCustomInterfaces/Tomography/ImggFormatsConvertQtWidget.h"
+#include "MantidQtCustomInterfaces/Tomography/ImggFormatsConvertViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
@@ -359,7 +359,7 @@ private:
   Ui::TomographyIfaceQtTabSystemSettings m_uiTabSystemSettings;
 
   ImageROIViewQtWidget *m_tabROIW;
-  ImggFormatsConvertQtWidget *m_tabImggFormats;
+  ImggFormatsConvertViewQtWidget *m_tabImggFormats;
 
   /// Tool specific setup dialogs
   Ui::TomoToolConfigAstra m_uiAstra;
