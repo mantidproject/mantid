@@ -267,8 +267,6 @@ set ( SRC_FILES
 	src/TimeAtSampleStrategyElastic.cpp
 	src/TimeAtSampleStrategyIndirect.cpp
 	src/Tomography/FBPTomopy.cpp
-	src/Tomography/tomopy/fbp.c
-	src/Tomography/tomopy/utils.c
 	src/Transpose.cpp
 	src/UnGroupWorkspace.cpp
 	src/UnaryOperation.cpp
@@ -282,6 +280,12 @@ set ( SRC_FILES
 	src/WienerSmooth.cpp
 	src/WorkspaceJoiners.cpp
 	src/XDataConverter.cpp
+)
+
+# C as they originally come from a different project (tomopy)
+set ( C_SRC_FILES
+	src/Tomography/tomopy/fbp.c
+	src/Tomography/tomopy/utils.c
 )
 
 set ( INC_FILES
@@ -582,7 +586,7 @@ set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp
 
 if(UNITY_BUILD)
   include(UnityBuild)
-  enable_unity_build(Algorithms SRC_FILES SRC_UNITY_IGNORE_FILES 10)
+  enable_unity_build(Algorithms SRC_FILES C_SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
 set ( TEST_FILES
@@ -848,7 +852,7 @@ set ( TEST_FILES
 set ( TEST_PY_FILES NormaliseToUnityTest.py )
 
 if (COVERALLS)
-    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+    foreach( loop_var ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
       set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
     endforeach(loop_var)
 endif()
@@ -856,7 +860,7 @@ endif()
 # Add a precompiled header where they are supported
 enable_precompiled_headers ( inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
-add_library ( Algorithms ${SRC_FILES} ${INC_FILES})
+add_library ( Algorithms ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms
 						           COMPILE_DEFINITIONS "IN_MANTID_ALGORITHMS" )
