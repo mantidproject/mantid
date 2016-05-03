@@ -329,13 +329,12 @@ void GetEi::extractSpec(int64_t wsInd, double start, double end) {
   childAlg->setProperty("XMin", start);
   childAlg->setProperty("XMax", end);
   if (wsInd < std::numeric_limits<int>::max()) {
-	  auto ivsInd = static_cast<int>(wsInd);
-	  childAlg->setProperty("StartWorkspaceIndex", ivsInd);
-	  childAlg->setProperty("EndWorkspaceIndex", ivsInd);
-  }
-  else {
+    auto ivsInd = static_cast<int>(wsInd);
+    childAlg->setProperty("StartWorkspaceIndex", ivsInd);
+    childAlg->setProperty("EndWorkspaceIndex", ivsInd);
+  } else {
     childAlg->setProperty("StartWorkspaceIndex", wsInd);
-	childAlg->setProperty("EndWorkspaceIndex", wsInd);
+    childAlg->setProperty("EndWorkspaceIndex", wsInd);
   }
   childAlg->executeAsChildAlg();
 
