@@ -61,10 +61,10 @@ class VesuvioThickness(PythonAlgorithm):
 
 	num_masses = len(self._masses)
         num_amplitudes = len(self._amplitudes)
-	if num_masses == 0:
-	    isuues['Masses'] = ('Must have 1 or more Masses defined')
-	if num_amplitudes == 0:
-	    isuues['Amplitudes'] = ('Must have 1 or more Amplitudes defined')
+	    if num_masses == 0:
+	        isuues['Masses'] = ('Must have 1 or more Masses defined')
+	    if num_amplitudes == 0:
+	        isuues['Amplitudes'] = ('Must have 1 or more Amplitudes defined')
 
         if num_masses != num_amplitudes:
             issues['Masses'] = ('The number of masses: %d, ' % num_masses \
@@ -74,9 +74,9 @@ class VesuvioThickness(PythonAlgorithm):
 
 
     def PyExec(self):
-	# Create numpy arrays
-	self._masses = np.asarray(self._masses)
-	self._amplitudes = np.asarray(self._amplitudes)
+        # Create numpy arrays
+        self._masses = np.asarray(self._masses)
+        self._amplitudes = np.asarray(self._amplitudes)
 
         # Initialise output table workspaces
         create_tbl_alg = self.createChildAlgorithm("CreateEmptyTableWorkspace")
@@ -95,11 +95,11 @@ class VesuvioThickness(PythonAlgorithm):
         trans_guesses_tbl_ws.addColumn("double","Transmission")
         trans_guesses_tbl_ws.setPlotType(0, 1)
 
-	### Unit conversions and scatter length calculation ###
-	# Thickness converted to m and halved
+        ### Unit conversions and scatter length calculation ###
+        #Thickness converted to m and halved
         self._thickness /= 200.0
         scatter_length = np.sqrt(np.divide(self._amplitudes, self.FOUR_PI))
-	# Mass * atomic mass unit(g)
+        # Mass * atomic mass unit(g)
         total_mass = self._masses*1.66054e-24
         total_mass = sum(total_mass)
 
@@ -123,7 +123,7 @@ class VesuvioThickness(PythonAlgorithm):
         """
         Analytic expression for integration of PDCS over E1 and solid angle
         """
-	# Neutron rest mass(u) / Mass
+        # Neutron rest mass(u) / Mass
         xs_masses = 1.00867/Mass
         scatter_len_sq = np.square(scatter_length)
         cross_section = np.divide((self.FOUR_PI * scatter_len_sq),(np.square(xs_masses+1)))
