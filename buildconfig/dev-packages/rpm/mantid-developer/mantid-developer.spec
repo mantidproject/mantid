@@ -1,5 +1,5 @@
 Name:           mantid-developer
-Version:        1.14
+Version:        1.15
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -8,10 +8,10 @@ License:        GPL
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-%{?fc20:Requires: rpmfusion-nonfree-release}
+%{?fedora:Requires: rpmfusion-nonfree-release}
 Requires: clang
 Requires: cmake-gui >= 2.8.12
-%{?el6:Requires: epel-release}
+%{?rhel:Requires: epel-release}
 %if 0%{?el6}
 Requires: boost157-devel
 %else
@@ -38,6 +38,8 @@ Requires: python-devel
 Requires: python-ipython >= 1.1
 %{?el6:Conflicts: python-ipython >= 2.0}
 Requires: python-matplotlib
+%{?fedora:Requires: python2-matplotlib-qt4}
+%{?rhel:Requires: python-matplotlib-qt4}
 Requires: python-pip
 Requires: python-sphinx
 Requires: qscintilla-devel
