@@ -228,6 +228,22 @@ public:
     TS_ASSERT_THROWS(h2.setPoints(BinEdges(1)), std::logic_error);
   }
 
+  void test_setPoints_self_assignment() {
+    Histogram h(Points(0));
+    auto &x = h.x();
+    auto old_address = &x;
+    h.setPoints(x);
+    TS_ASSERT_EQUALS(&h.x(), old_address);
+  }
+
+  void test_setPoints_legacy_self_assignment() {
+    Histogram h(Points(0));
+    auto &x = h.constDataX();
+    auto old_address = &x;
+    h.setPoints(x);
+    TS_ASSERT_EQUALS(&h.constDataX(), old_address);
+  }
+
   void test_edges_from_edges() {
     const Histogram hist(BinEdges{0.1, 0.2, 0.4});
     const auto edges = hist.binEdges();
@@ -339,6 +355,22 @@ public:
     TS_ASSERT_THROWS(h2.setBinEdges(std::vector<double>(1)), std::logic_error);
     TS_ASSERT_THROWS(h2.setBinEdges(Points(1)), std::logic_error);
     TS_ASSERT_THROWS(h2.setBinEdges(BinEdges(1)), std::logic_error);
+  }
+
+  void test_setBinEdges_self_assignment() {
+    Histogram h(BinEdges(0));
+    auto &x = h.x();
+    auto old_address = &x;
+    h.setBinEdges(x);
+    TS_ASSERT_EQUALS(&h.x(), old_address);
+  }
+
+  void test_setBinEdges_legacy_self_assignment() {
+    Histogram h(BinEdges(0));
+    auto &x = h.constDataX();
+    auto old_address = &x;
+    h.setBinEdges(x);
+    TS_ASSERT_EQUALS(&h.constDataX(), old_address);
   }
 
   void test_x() {

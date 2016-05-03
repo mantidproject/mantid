@@ -73,6 +73,7 @@ public:
 private:
   void checkSize(const Points &points) const;
   void checkSize(const BinEdges &binEdges) const;
+  template <class... T> bool selfAssignment(const T &...) { return false; }
 
   XMode m_xMode;
 };
@@ -83,6 +84,8 @@ private:
  however, a size check ensures that the Histogram stays valid, i.e., that x and
  y lengths are consistent. */
 template <typename... T> void Histogram::setBinEdges(T &&... data) {
+  if (selfAssignment(data...))
+    return;
   BinEdges edges(std::forward<T>(data)...);
   // If there is no data changing the size is ok.
   // if(m_y)
@@ -97,12 +100,23 @@ template <typename... T> void Histogram::setBinEdges(T &&... data) {
  however, a size check ensures that the Histogram stays valid, i.e., that x and
  y lengths are consistent. */
 template <typename... T> void Histogram::setPoints(T &&... data) {
+  if (selfAssignment(data...))
+    return;
   Points points(std::forward<T>(data)...);
   // If there is no data changing the size is ok.
   // if(m_y)
   checkSize(points);
   m_xMode = XMode::Points;
   m_x = points.cowData();
+}
+
+template <> inline bool Histogram::selfAssignment(const HistogramX &data) {
+  return &data == m_x.get();
+}
+
+template <>
+inline bool Histogram::selfAssignment(const std::vector<double> &data) {
+  return &data == &(m_x->rawData());
 }
 
 MANTID_HISTOGRAMDATA_DLL Histogram::XMode getHistogramXMode(size_t xLength,
