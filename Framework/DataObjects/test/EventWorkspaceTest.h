@@ -92,7 +92,7 @@ public:
     if (setX) {
       // Create the x-axis for histogramming.
       BinEdges axis(NUMBINS);
-      auto &xRef = axis.data();
+      auto &xRef = axis.mutableData();
       for (int i = 0; i < NUMBINS; ++i)
         xRef[i] = i * BIN_DELTA;
 
@@ -302,7 +302,7 @@ public:
 
     // Create the x-axis for histogramming.
     BinEdges axis(NUMBINS);
-    auto &xRef = axis.data();
+    auto &xRef = axis.mutableData();
     for (int i = 0; i < NUMBINS; ++i)
       xRef[i] = i * BIN_DELTA;
     // Set all the histograms at once.
@@ -468,7 +468,7 @@ public:
     TS_ASSERT_EQUALS(ew->MRUSize(), 50);
     TS_ASSERT_EQUALS(ew2->MRUSize(), 50);
     BinEdges axis(10);
-    auto &xRef = axis.data();
+    auto &xRef = axis.mutableData();
     for (int i = 0; i < 10; ++i)
       xRef[i] = i * BIN_DELTA;
     ew->setAllX(axis);
@@ -550,7 +550,7 @@ public:
 
     // Create bin steps = 4*BIN_DELTA.
     BinEdges axis1(NUMBINS / 4);
-    auto &X1 = axis1.data();
+    auto &X1 = axis1.mutableData();
     for (size_t i = 0; i < X1.size(); ++i) {
       X1[i] = double(i) * BIN_DELTA * 4;
     }
@@ -560,7 +560,7 @@ public:
 
     // Create bin steps = 2*BIN_DELTA.
     BinEdges axis2(NUMBINS / 2);
-    auto &X2 = axis2.data();
+    auto &X2 = axis2.mutableData();
     for (size_t i = 0; i < X2.size(); ++i) {
       X2[i] = double(i) * BIN_DELTA * 2;
     }
@@ -570,7 +570,7 @@ public:
 
     // Create bin steps = BIN_DELTA.
     BinEdges axis3(NUMBINS);
-    auto &X3 = axis3.data();
+    auto &X3 = axis3.mutableData();
     for (size_t i = 0; i < X3.size(); ++i) {
       X3[i] = double(i) * BIN_DELTA;
     }

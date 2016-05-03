@@ -108,14 +108,14 @@ public:
     const Histogram src(Points(1));
     Histogram dest(Points(1));
     TS_ASSERT_THROWS_NOTHING(dest = src);
-    TS_ASSERT_EQUALS(&dest.constDataX()[0], &src.constDataX()[0]);
+    TS_ASSERT_EQUALS(&dest.x()[0], &src.x()[0]);
   }
 
   void test_assignment_mutating() {
     const Histogram src(Points(1));
     Histogram dest(BinEdges(2));
     TS_ASSERT_THROWS_NOTHING(dest = src);
-    TS_ASSERT_EQUALS(&dest.constDataX()[0], &src.constDataX()[0]);
+    TS_ASSERT_EQUALS(&dest.x()[0], &src.x()[0]);
   }
 
   void test_assignment_size_change() {
@@ -137,7 +137,7 @@ public:
     BinEdges binEdges{0.1, 0.2, 0.4};
     const Histogram hist(binEdges);
     const auto points = hist.points();
-    TS_ASSERT_DIFFERS(&points[0], &hist.constDataX()[0]);
+    TS_ASSERT_DIFFERS(&points[0], &hist.x()[0]);
     TS_ASSERT_EQUALS(points.size(), 2);
     TS_ASSERT_DELTA(points[0], 0.15, 1e-14);
     TS_ASSERT_DELTA(points[1], 0.3, 1e-14);
@@ -146,7 +146,7 @@ public:
   void test_points_from_points() {
     const Histogram hist(Points{0.1, 0.2, 0.4});
     const auto points = hist.points();
-    TS_ASSERT_EQUALS(&points[0], &hist.constDataX()[0]);
+    TS_ASSERT_EQUALS(&points[0], &hist.x()[0]);
   }
 
   void test_setPoints_from_vector() {
@@ -371,14 +371,14 @@ public:
 
   void test_x_references_same_data_as_binEdges() {
     Histogram hist(BinEdges(0));
-    TS_ASSERT_EQUALS(&hist.x(), &hist.binEdges().constData());
-    TS_ASSERT_DIFFERS(&hist.x(), &hist.points().constData());
+    TS_ASSERT_EQUALS(&hist.x(), &hist.binEdges().data());
+    TS_ASSERT_DIFFERS(&hist.x(), &hist.points().data());
   }
 
   void test_x_references_same_data_as_points() {
     Histogram hist(Points(0));
-    TS_ASSERT_DIFFERS(&hist.x(), &hist.binEdges().constData());
-    TS_ASSERT_EQUALS(&hist.x(), &hist.points().constData());
+    TS_ASSERT_DIFFERS(&hist.x(), &hist.binEdges().data());
+    TS_ASSERT_EQUALS(&hist.x(), &hist.points().data());
   }
 
   void test_sharedX() {

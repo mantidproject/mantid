@@ -293,7 +293,7 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
   MantidVecPtr y, e;
   e.access().resize(numBins);
   for (int i = 0; i < numBins + 1; ++i) {
-    x.data()[i] = x0 + i * binDelta;
+    x.mutableData()[i] = x0 + i * binDelta;
   }
 
   std::vector<double> xValues(cbegin(x), cend(x) - 1);
@@ -338,7 +338,7 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
 
   // Create the x-axis for histogramming.
   HistogramData::BinEdges x1(numXBins);
-  auto &xRef = x1.data();
+  auto &xRef = x1.mutableData();
   for (int i = 0; i < numXBins; ++i) {
     xRef[i] = x0 + i * binDelta;
   }

@@ -655,7 +655,7 @@ void DiffractionFocussing2::determineRebinParameters() {
 
     // Build up the X vector.
     HistogramData::BinEdges xnew(xPoints);
-    auto &xnewData = xnew.data();
+    auto &xnewData = xnew.mutableData();
     xnewData[0] = Xmin;
     for (int64_t j = 1; j < xPoints; j++) {
       xnewData[j] = Xmin * (1.0 + step);

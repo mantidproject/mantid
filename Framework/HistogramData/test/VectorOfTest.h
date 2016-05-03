@@ -172,7 +172,7 @@ public:
     TS_ASSERT_EQUALS(values.size(), 2);
     TS_ASSERT_EQUALS(values[0], 0.1);
     TS_ASSERT_EQUALS(values[1], 0.1);
-    TS_ASSERT_EQUALS(&values.constData(), cow.get());
+    TS_ASSERT_EQUALS(&values.data(), cow.get());
   }
 
   void test_null_cow_ptr_constructor() {
@@ -188,7 +188,7 @@ public:
     TS_ASSERT_EQUALS(values.size(), 2);
     TS_ASSERT_EQUALS(values[0], 0.1);
     TS_ASSERT_EQUALS(values[1], 0.1);
-    TS_ASSERT_EQUALS(&values.constData(), shared.get());
+    TS_ASSERT_EQUALS(&values.data(), shared.get());
   }
 
   void test_null_shared_ptr_constructor() {
@@ -224,7 +224,7 @@ public:
     TS_ASSERT_EQUALS(values.size(), 2);
     TS_ASSERT_EQUALS(values[0], 0.1);
     TS_ASSERT_EQUALS(values[1], 0.1);
-    TS_ASSERT_EQUALS(&values.constData(), cow.get());
+    TS_ASSERT_EQUALS(&values.data(), cow.get());
   }
 
   void test_null_cow_ptr_assignment() {
@@ -236,16 +236,16 @@ public:
 
   void test_cow_ptr_self_assignment() {
     VectorOfTester values(2, 0.1);
-    const auto *raw_data = &values.constData();
+    const auto *raw_data = &values.data();
     auto cow = values.cowData();
     values = cow;
     TS_ASSERT(values);
     TS_ASSERT_EQUALS(cow.use_count(), 2);
-    TS_ASSERT_EQUALS(&values.constData(), raw_data);
+    TS_ASSERT_EQUALS(&values.data(), raw_data);
     TS_ASSERT_EQUALS(values.size(), 2);
     TS_ASSERT_EQUALS(values[0], 0.1);
     TS_ASSERT_EQUALS(values[1], 0.1);
-    TS_ASSERT_EQUALS(&values.constData(), cow.get());
+    TS_ASSERT_EQUALS(&values.data(), cow.get());
   }
 
   void test_shared_ptr_assignment() {
@@ -256,7 +256,7 @@ public:
     TS_ASSERT_EQUALS(values.size(), 2);
     TS_ASSERT_EQUALS(values[0], 0.1);
     TS_ASSERT_EQUALS(values[1], 0.1);
-    TS_ASSERT_EQUALS(&values.constData(), shared.get());
+    TS_ASSERT_EQUALS(&values.data(), shared.get());
   }
 
   void test_null_shared_ptr_assignment() {
@@ -276,7 +276,7 @@ public:
     TS_ASSERT_EQUALS(values.size(), 2);
     TS_ASSERT_EQUALS(values[0], 0.1);
     TS_ASSERT_EQUALS(values[1], 0.1);
-    TS_ASSERT_EQUALS(&values.constData(), shared.get());
+    TS_ASSERT_EQUALS(&values.data(), shared.get());
   }
 
   void test_vector_assignment() {
@@ -284,7 +284,7 @@ public:
     VectorOfTester values(0);
     TS_ASSERT_THROWS_NOTHING(values = raw);
     TS_ASSERT(values);
-    TS_ASSERT_DIFFERS(&(values.constData()[0]), &raw[0]);
+    TS_ASSERT_DIFFERS(&(values.data()[0]), &raw[0]);
     TS_ASSERT_EQUALS(values.size(), 3);
     TS_ASSERT_EQUALS(values[0], 0.1);
   }
@@ -292,11 +292,11 @@ public:
   void test_vector_self_assignment() {
     VectorOfTester values(2, 0.1);
     // Reference to internal data
-    auto &vector = values.constData();
+    auto &vector = values.data();
     values = vector;
     TS_ASSERT(values);
     // Reference still valid after self assignment
-    TS_ASSERT_EQUALS(&(values.constData()), &vector);
+    TS_ASSERT_EQUALS(&(values.data()), &vector);
   }
 
   void test_vector_assignment_to_null_vector() {
@@ -304,7 +304,7 @@ public:
     VectorOfTester values;
     TS_ASSERT_THROWS_NOTHING(values = raw);
     TS_ASSERT(values);
-    TS_ASSERT_DIFFERS(&(values.constData()[0]), &raw[0]);
+    TS_ASSERT_DIFFERS(&(values.data()[0]), &raw[0]);
     TS_ASSERT_EQUALS(values.size(), 3);
     TS_ASSERT_EQUALS(values[0], 0.1);
   }
@@ -315,7 +315,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(values = std::move(raw));
     TS_ASSERT_EQUALS(raw.size(), 0);
     TS_ASSERT(values);
-    TS_ASSERT_DIFFERS(&(values.constData()[0]), &raw[0]);
+    TS_ASSERT_DIFFERS(&(values.data()[0]), &raw[0]);
     TS_ASSERT_EQUALS(values.size(), 3);
     TS_ASSERT_EQUALS(values[0], 0.1);
   }
@@ -335,37 +335,37 @@ public:
   void test_data_const() {
     const VectorOfTester values(2, 0.1);
     auto copy(values);
-    TS_ASSERT_EQUALS(&copy.constData(), &values.constData());
+    TS_ASSERT_EQUALS(&copy.data(), &values.data());
     const auto &data = values.data();
-    TS_ASSERT_EQUALS(&copy.constData(), &values.constData());
+    TS_ASSERT_EQUALS(&copy.data(), &values.data());
     TS_ASSERT_EQUALS(data.size(), 2);
   }
 
   void test_const_data() {
     VectorOfTester values(2, 0.1);
     auto copy(values);
-    TS_ASSERT_EQUALS(&copy.constData(), &values.constData());
-    const auto &data = values.constData();
-    TS_ASSERT_EQUALS(&copy.constData(), &values.constData());
+    TS_ASSERT_EQUALS(&copy.data(), &values.data());
+    const auto &data = values.data();
+    TS_ASSERT_EQUALS(&copy.data(), &values.data());
     TS_ASSERT_EQUALS(data.size(), 2);
   }
 
-  void test_data() {
+  void test_mutable_data() {
     VectorOfTester values(2, 0.1);
     auto copy(values);
-    TS_ASSERT_EQUALS(&copy.constData(), &values.constData());
-    auto &data = values.data();
-    TS_ASSERT_DIFFERS(&copy.constData(), &values.constData());
+    TS_ASSERT_EQUALS(&copy.data(), &values.data());
+    auto &data = values.mutableData();
+    TS_ASSERT_DIFFERS(&copy.data(), &values.data());
     TS_ASSERT_EQUALS(data.size(), 2);
   }
 
   void test_cow_data() {
     VectorOfTester values(2, 0.1);
     auto cow = values.cowData();
-    TS_ASSERT_EQUALS(cow.get(), &values.constData());
+    TS_ASSERT_EQUALS(cow.get(), &values.data());
     TS_ASSERT_EQUALS(cow.use_count(), 2);
-    auto &data = values.data();
-    TS_ASSERT_DIFFERS(cow.get(), &values.constData());
+    auto &data = values.mutableData();
+    TS_ASSERT_DIFFERS(cow.get(), &values.data());
     TS_ASSERT_EQUALS(cow.use_count(), 1);
     TS_ASSERT_EQUALS(data.size(), 2);
   }

@@ -178,7 +178,7 @@ public:
         "Workspace2D", Nhist, specLength, specLength - 1);
     m_2DWS = boost::dynamic_pointer_cast<Workspace2D>(space);
     BinEdges x(specLength);
-    auto &xData = x.data();
+    auto &xData = x.mutableData();
     for (int i = 0; i < specLength; ++i) {
       xData[i] = i * 1000;
     }

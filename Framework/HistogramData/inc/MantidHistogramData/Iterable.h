@@ -35,15 +35,15 @@ public:
   // Note: There is no non-const version of this since it requires expensive cow
   // access.
   const double &operator[](size_t pos) const {
-    return static_cast<const T *>(this)->constData()[pos];
+    return static_cast<const T *>(this)->data()[pos];
   }
 
   std::vector<double>::iterator begin() {
-    return static_cast<T *>(this)->data().begin();
+    return static_cast<T *>(this)->mutableData().begin();
   }
 
   std::vector<double>::iterator end() {
-    return static_cast<T *>(this)->data().end();
+    return static_cast<T *>(this)->mutableData().end();
   }
 
   std::vector<double>::const_iterator begin() const {

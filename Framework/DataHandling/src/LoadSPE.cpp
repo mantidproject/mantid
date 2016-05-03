@@ -136,7 +136,7 @@ void LoadSPE::exec() {
 
   // Now the X bin boundaries
   auto XValues = HistogramData::BinEdges(nbins + 1);
-  auto &X = XValues.data();
+  auto &X = XValues.mutableData();
 
   for (size_t i = 0; i <= nbins; ++i) {
     retval = fscanf(speFile, "%10le", &X[i]);

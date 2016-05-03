@@ -260,7 +260,7 @@ Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0,
   y.access().resize(nbins, 2);
   e.access().resize(nbins, M_SQRT2);
   for (int i = 0; i < nbins + 1; ++i) {
-    x.data()[i] = x0 + i * deltax;
+    x.mutableData()[i] = x0 + i * deltax;
   }
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(nhist, nbins + 1, nbins);
@@ -283,7 +283,7 @@ Workspace2D_sptr Create2DWorkspaceBinned(int nhist, const int numBoundaries,
   y.access().resize(numBins, 2);
   e.access().resize(numBins, M_SQRT2);
   for (int i = 0; i < numBoundaries; ++i) {
-    x.data()[i] = xBoundaries[i];
+    x.mutableData()[i] = xBoundaries[i];
   }
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(nhist, numBins + 1, numBins);
@@ -622,7 +622,7 @@ CreateEventWorkspaceWithStartTime(int numPixels, int numBins, int numEvents,
 
   // Create the x-axis for histogramming.
   HistogramData::BinEdges x1(numBins);
-  auto &xRef = x1.data();
+  auto &xRef = x1.mutableData();
   for (int i = 0; i < numBins; ++i) {
     xRef[i] = x0 + i * binDelta;
   }
@@ -656,7 +656,7 @@ CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
   if (xOffset == 0.) {
     // Create the x-axis for histogramming.
     HistogramData::BinEdges x1(numBins);
-    auto &xRef = x1.data();
+    auto &xRef = x1.mutableData();
     const double x0 = 0.;
     for (int i = 0; i < numBins; ++i) {
       xRef[i] = x0 + static_cast<double>(i) * binDelta;
@@ -698,7 +698,7 @@ EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels,
   // Create the original X axis to histogram on.
   // Create the x-axis for histogramming.
   HistogramData::BinEdges axis(numbins);
-  auto &xRef = axis.data();
+  auto &xRef = axis.mutableData();
   for (int i = 0; i < static_cast<int>(numbins); ++i) {
     xRef[i] = i * bin_delta;
     pAxis0->setValue(i, xRef[i]);

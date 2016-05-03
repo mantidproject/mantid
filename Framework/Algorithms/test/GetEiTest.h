@@ -248,7 +248,7 @@ private:
             peakTwoHeight *
             exp(-0.5 * pow(xValue - peakTwoCentre, 2.) / sigmaSqTwo);
       }
-      xdata.data()[i] = xValue;
+      xdata.mutableData()[i] = xValue;
     }
     testWS->histogram(0).setBinEdges(xdata);
     testWS->histogram(1).setBinEdges(xdata);

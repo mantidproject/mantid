@@ -248,9 +248,9 @@ private:
       const double xValue = rescaling_factor * ibin;
       testWS->dataY(0)[ibin] =
           peakHeight * exp(-0.5 * pow(xValue - peakCentre, 2.) / sigmaSq);
-      xdata.data()[ibin] = xValue;
+      xdata.mutableData()[ibin] = xValue;
     }
-    xdata.data()[numBins] = rescaling_factor * numBins;
+    xdata.mutableData()[numBins] = rescaling_factor * numBins;
     for (int ihist = 0; ihist < numHists; ihist++)
       testWS->histogram(ihist).setBinEdges(xdata);
     return testWS;
@@ -272,7 +272,7 @@ private:
       for (int ibin = 0; ibin <= numBins; ++ibin) {
         double tof = rescaling_factor * ibin;
         TofEvent tofevent(tof);
-        xdata.data()[ibin] = tof;
+        xdata.mutableData()[ibin] = tof;
         evlist.addEventQuickly(tofevent); // insert event
       }
       evlist.setX(xdata.cowData()); // set the bins for the associated histogram
