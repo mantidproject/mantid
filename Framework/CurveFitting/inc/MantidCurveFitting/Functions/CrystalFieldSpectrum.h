@@ -12,7 +12,7 @@ namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
 /**
-Calculates crystal field spectrum. 
+Calculates crystal field spectrum.
 
 Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -37,7 +37,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport CrystalFieldSpectrum : public API::IFunction {
 public:
-
   /// Constructor
   CrystalFieldSpectrum();
 
@@ -46,7 +45,7 @@ public:
   const std::string category() const override { return "General"; }
 
   /** @name Overrides implementing composition of two functions:
-   * CrystalFieldPeaks and CompositeFunction. 
+   * CrystalFieldPeaks and CompositeFunction.
    * These can be factored out into a separate class later.
    */
   //@{
@@ -89,10 +88,12 @@ public:
   virtual void unfix(size_t i) override;
 
   /// Return parameter index from a parameter reference.
-  virtual size_t getParameterIndex(const API::ParameterReference &ref) const override;
+  virtual size_t
+  getParameterIndex(const API::ParameterReference &ref) const override;
   /// Tie a parameter to other parameters (or a constant)
-  virtual API::ParameterTie *tie(const std::string &parName, const std::string &expr,
-                            bool isDefault = false) override;
+  virtual API::ParameterTie *tie(const std::string &parName,
+                                 const std::string &expr,
+                                 bool isDefault = false) override;
   /// Apply the ties
   virtual void applyTies() override;
   /// Remove all ties
@@ -134,13 +135,15 @@ public:
   /// Return a value of attribute attName
   virtual Attribute getAttribute(const std::string &name) const override;
   /// Set a value to attribute attName
-  virtual void setAttribute(const std::string &name, const Attribute &) override;
+  virtual void setAttribute(const std::string &name,
+                            const Attribute &) override;
   /// Check if attribute attName exists
   virtual bool hasAttribute(const std::string &name) const override;
   //@}
 
   /// Evaluate the function
-  void function(const API::FunctionDomain &domain, API::FunctionValues &values) const override;
+  void function(const API::FunctionDomain &domain,
+                API::FunctionValues &values) const override;
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters

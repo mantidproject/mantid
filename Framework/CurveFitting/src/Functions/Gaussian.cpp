@@ -18,8 +18,7 @@ using namespace API;
 
 DECLARE_FUNCTION(Gaussian)
 
-Gaussian::Gaussian() : IPeakFunction(), m_intensityCache(0.0) {
-}
+Gaussian::Gaussian() : IPeakFunction(), m_intensityCache(0.0) {}
 
 void Gaussian::init() {
   declareParameter("Height", 0.0, "Height of peak");
@@ -88,7 +87,8 @@ double Gaussian::intensity() const {
       m_intensityCache = height;
     }
   } else {
-    m_intensityCache = getParameter("Height") * getParameter("Sigma") * sqrt(2.0 * M_PI);
+    m_intensityCache =
+        getParameter("Height") * getParameter("Sigma") * sqrt(2.0 * M_PI);
   }
   return m_intensityCache;
 }
@@ -108,23 +108,17 @@ void Gaussian::setIntensity(const double i) {
   }
 }
 
-void Gaussian::fixCentre() {
-  fixParameter("PeakCentre");
-}
+void Gaussian::fixCentre() { fixParameter("PeakCentre"); }
 
-void Gaussian::unfixCentre() {
-  unfixParameter("PeakCentre");
-}
+void Gaussian::unfixCentre() { unfixParameter("PeakCentre"); }
 
 void Gaussian::fixIntensity() {
-  std::string formula = std::to_string(intensity() / sqrt(2.0 * M_PI)) + "/Sigma";
+  std::string formula =
+      std::to_string(intensity() / sqrt(2.0 * M_PI)) + "/Sigma";
   tie("Height", formula);
 }
 
-void Gaussian::unfixIntensity() {
-  removeTie("Height");
-}
-
+void Gaussian::unfixIntensity() { removeTie("Height"); }
 
 } // namespace Functions
 } // namespace CurveFitting

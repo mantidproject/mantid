@@ -213,9 +213,9 @@ public:
     TS_ASSERT(s.minimize());
 
     API::IFunction_sptr res = costFun->getFittingFunction();
-    //std::cerr << "result=" << s.getError() << std::endl;
-    //std::cerr << "cost=" << costFun->val() << std::endl;
-    //for (size_t i = 0; i < res->nParams(); ++i) {
+    // std::cerr << "result=" << s.getError() << std::endl;
+    // std::cerr << "cost=" << costFun->val() << std::endl;
+    // for (size_t i = 0; i < res->nParams(); ++i) {
     //  std::cerr << res->parameterName(i) << " = " << res->getParameter(i)
     //            << std::endl;
     //}
@@ -586,7 +586,6 @@ public:
     TS_ASSERT_DELTA(fn.intensity(), intensity, 1e-6);
     TS_ASSERT_DELTA(fn.getParameter("Height"), 0.398942, 1e-6);
   }
-
 };
 
 #endif /*GAUSSIANTEST_H_*/

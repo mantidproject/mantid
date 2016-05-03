@@ -58,7 +58,6 @@ If the peak functions have any own attributes they can be accessed using the "f-
 
 .. properties::
 
-
 .. categories::
 
 .. sourcelink::

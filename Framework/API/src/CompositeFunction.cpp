@@ -375,7 +375,7 @@ void CompositeFunction::checkFunction() {
   }
 }
 
-/** 
+/**
  * Remove all member functions
  */
 void CompositeFunction::clear() {
@@ -745,7 +745,6 @@ CompositeFunction::getContainingFunction(const ParameterReference &ref) const {
   }
   return IFunction_sptr();
 }
-
 
 } // namespace API
 } // namespace Mantid

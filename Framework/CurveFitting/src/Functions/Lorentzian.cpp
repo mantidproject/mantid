@@ -44,7 +44,7 @@ void Lorentzian::setHeight(const double h) {
   }
 }
 
-void Lorentzian::setFwhm(const double w) { 
+void Lorentzian::setFwhm(const double w) {
   auto gamma = getParameter("FWHM");
   if (gamma == 0.0 && w != 0.0 && m_amplitudeEqualHeight) {
     auto h = getParameter("Amplitude");
@@ -53,24 +53,16 @@ void Lorentzian::setFwhm(const double w) {
   if (w != 0.0) {
     m_amplitudeEqualHeight = false;
   }
-  setParameter("FWHM", w); 
+  setParameter("FWHM", w);
 }
 
-void Lorentzian::fixCentre() {
-  fixParameter("PeakCentre");
-}
+void Lorentzian::fixCentre() { fixParameter("PeakCentre"); }
 
-void Lorentzian::unfixCentre() {
-  unfixParameter("PeakCentre");
-}
+void Lorentzian::unfixCentre() { unfixParameter("PeakCentre"); }
 
-void Lorentzian::fixIntensity() {
-  fixParameter("Amplitude");
-}
+void Lorentzian::fixIntensity() { fixParameter("Amplitude"); }
 
-void Lorentzian::unfixIntensity() {
-  unfixParameter("Amplitude");
-}
+void Lorentzian::unfixIntensity() { unfixParameter("Amplitude"); }
 
 void Lorentzian::functionLocal(double *out, const double *xValues,
                                const size_t nData) const {

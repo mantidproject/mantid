@@ -72,8 +72,10 @@ protected:
                           const size_t nData) override;
   /// overwrite IFunction base class method, which declare function parameters
   void init() override;
+
 private:
-  /// When Amplitude is set via setHeight() and fwhm() == 0 height is made equal to Amplitude.
+  /// When Amplitude is set via setHeight() and fwhm() == 0 height is made equal
+  /// to Amplitude.
   /// The flag is used after that when FWHM is set to non-zero value.
   /// The height in this case must remain the same but amplitude change.
   bool m_amplitudeEqualHeight;

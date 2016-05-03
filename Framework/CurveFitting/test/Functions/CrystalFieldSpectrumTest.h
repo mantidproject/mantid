@@ -19,10 +19,8 @@ using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::CurveFitting::Functions;
 
-
 class CrystalFieldSpectrumTest : public CxxTest::TestSuite {
 public:
-
   void test_function() {
     CrystalFieldSpectrum fun;
     fun.setParameter("B20", 0.37737);
@@ -82,7 +80,8 @@ public:
   }
 
   void test_evaluate() {
-    auto fun = boost::shared_ptr<CrystalFieldSpectrum>(new CrystalFieldSpectrum);
+    auto fun =
+        boost::shared_ptr<CrystalFieldSpectrum>(new CrystalFieldSpectrum);
     fun->setParameter("B20", 0.37737);
     fun->setParameter("B22", 3.9770);
     fun->setParameter("B40", -0.031787);
@@ -106,13 +105,14 @@ public:
     FunctionValues t(x);
     testFun->function(x, t);
 
-    for(size_t i = 0; i < x.size(); ++i) {
-      TS_ASSERT_DELTA( y[i] / t[i], 1, 2e-4);
+    for (size_t i = 0; i < x.size(); ++i) {
+      TS_ASSERT_DELTA(y[i] / t[i], 1, 2e-4);
     }
   }
 
   void test_evaluate_gaussian() {
-    auto fun = boost::shared_ptr<CrystalFieldSpectrum>(new CrystalFieldSpectrum);
+    auto fun =
+        boost::shared_ptr<CrystalFieldSpectrum>(new CrystalFieldSpectrum);
     fun->setParameter("B20", 0.37737);
     fun->setParameter("B22", 3.9770);
     fun->setParameter("B40", -0.031787);
@@ -134,14 +134,17 @@ public:
     auto height2 = std::to_string(0.7204 / (2.0 * sqrt(2.0 * M_PI)));
     auto height3 = std::to_string(0.4298 / (3.0 * sqrt(2.0 * M_PI)));
     auto testFun = FunctionFactory::Instance().createInitialized(
-        "name=Gaussian,PeakCentre=0.0,Height="+height1+",Sigma=10.0;"
-        "name=Gaussian,PeakCentre=29.3261,Height="+height2+",Sigma=2.0;"
-        "name=Gaussian,PeakCentre=44.3412,Height="+height3+",Sigma=3.0;");
+        "name=Gaussian,PeakCentre=0.0,Height=" + height1 +
+        ",Sigma=10.0;"
+        "name=Gaussian,PeakCentre=29.3261,Height=" +
+        height2 + ",Sigma=2.0;"
+                  "name=Gaussian,PeakCentre=44.3412,Height=" +
+        height3 + ",Sigma=3.0;");
     FunctionValues t(x);
     testFun->function(x, t);
 
-    for(size_t i = 0; i < x.size(); ++i) {
-      TS_ASSERT_DELTA( y[i] / t[i], 1, 2e-4);
+    for (size_t i = 0; i < x.size(); ++i) {
+      TS_ASSERT_DELTA(y[i] / t[i], 1, 2e-4);
     }
   }
 
@@ -167,24 +170,24 @@ public:
     auto i = fun->parameterIndex("f2.FWHM");
     auto tie = fun->getTie(i);
     TS_ASSERT(tie);
-    if (tie){
+    if (tie) {
       TS_ASSERT_EQUALS(tie->asString(), "f2.FWHM=2.1")
     }
     i = fun->parameterIndex("B60");
     tie = fun->getTie(i);
     TS_ASSERT(tie);
-    if (tie){
+    if (tie) {
       TS_ASSERT_EQUALS(tie->asString(), "B60=0")
     }
     i = fun->parameterIndex("BmolY");
     tie = fun->getTie(i);
     TS_ASSERT(tie);
-    if (tie){
+    if (tie) {
       TS_ASSERT_EQUALS(tie->asString(), "BmolY=0")
     }
 
     size_t nTies = 0;
-    for(size_t i = 0; i < fun->nParams(); ++i) {
+    for (size_t i = 0; i < fun->nParams(); ++i) {
       auto tie = fun->getTie(i);
       if (tie) {
         ++nTies;
@@ -195,7 +198,7 @@ public:
 
   void test_constraints() {
     std::string funDef =
-      "name=CrystalFieldSpectrum,Ion=Ce,B20=0.37,B22=3.9,"
+        "name=CrystalFieldSpectrum,Ion=Ce,B20=0.37,B22=3.9,"
         "B40=-0.03,B42=-0.1,B44=-0.12,constraints=(0<B44<10,f1.FWHM>1.3)";
     auto fun = FunctionFactory::Instance().createInitialized(funDef);
     TS_ASSERT(fun);
@@ -214,8 +217,6 @@ public:
       TS_ASSERT_EQUALS(constraint->getIndex(), 13);
     }
   }
-
 };
 
 #endif /*CRYSTALFIELDSPECTRUMTEST_H_*/
-

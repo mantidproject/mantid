@@ -33,16 +33,17 @@ using namespace API;
 DECLARE_FUNCTION(CrystalFieldSpectrum)
 
 /// Constructor
-CrystalFieldSpectrum::CrystalFieldSpectrum(): m_nOwnParams(m_crystalField.nParams()),m_dirty(true) {
+CrystalFieldSpectrum::CrystalFieldSpectrum()
+    : m_nOwnParams(m_crystalField.nParams()), m_dirty(true) {
   declareAttribute("PeakShape", Attribute("Lorentzian"));
   declareAttribute("FWHM", Attribute(0.0));
 }
 
 void CrystalFieldSpectrum::init() {}
 
-  /// Set i-th parameter
+/// Set i-th parameter
 void CrystalFieldSpectrum::setParameter(size_t i, const double &value,
-  bool explicitlySet) {
+                                        bool explicitlySet) {
   if (i < m_nOwnParams) {
     m_crystalField.setParameter(i, value, explicitlySet);
     m_dirty = true;
@@ -52,9 +53,9 @@ void CrystalFieldSpectrum::setParameter(size_t i, const double &value,
   }
 }
 
-  /// Set i-th parameter description
-void CrystalFieldSpectrum::setParameterDescription(size_t i,
-  const std::string &description) {
+/// Set i-th parameter description
+void CrystalFieldSpectrum::setParameterDescription(
+    size_t i, const std::string &description) {
   if (i < m_nOwnParams) {
     m_crystalField.setParameterDescription(i, description);
   } else {
@@ -63,38 +64,39 @@ void CrystalFieldSpectrum::setParameterDescription(size_t i,
   }
 }
 
-  /// Get i-th parameter
+/// Get i-th parameter
 double CrystalFieldSpectrum::getParameter(size_t i) const {
   return i < m_nOwnParams ? m_crystalField.getParameter(i)
                           : m_spectrum.getParameter(i - m_nOwnParams);
 }
 
 /// Set parameter by name.
-void CrystalFieldSpectrum::setParameter(const std::string &name, const double &value,
-  bool explicitlySet) {
+void CrystalFieldSpectrum::setParameter(const std::string &name,
+                                        const double &value,
+                                        bool explicitlySet) {
   auto i = parameterIndex(name);
   setParameter(i, value, explicitlySet);
 }
 
-  /// Set description of parameter by name.
-void CrystalFieldSpectrum::setParameterDescription(const std::string &name,
-  const std::string &description) {
+/// Set description of parameter by name.
+void CrystalFieldSpectrum::setParameterDescription(
+    const std::string &name, const std::string &description) {
   auto i = parameterIndex(name);
   setParameterDescription(i, description);
 }
 
-  /// Get parameter by name.
+/// Get parameter by name.
 double CrystalFieldSpectrum::getParameter(const std::string &name) const {
   auto i = parameterIndex(name);
   return getParameter(i);
 }
 
-  /// Total number of parameters
+/// Total number of parameters
 size_t CrystalFieldSpectrum::nParams() const {
   return m_crystalField.nParams() + m_spectrum.nParams();
 }
 
-  /// Returns the index of parameter name
+/// Returns the index of parameter name
 size_t CrystalFieldSpectrum::parameterIndex(const std::string &name) const {
   if (isOwnName(name)) {
     return m_crystalField.parameterIndex(name);
@@ -104,27 +106,31 @@ size_t CrystalFieldSpectrum::parameterIndex(const std::string &name) const {
   }
 }
 
-  /// Returns the name of parameter i
+/// Returns the name of parameter i
 std::string CrystalFieldSpectrum::parameterName(size_t i) const {
-  return i < m_nOwnParams ? m_crystalField.parameterName(i) : m_spectrum.parameterName(i - m_nOwnParams);
+  return i < m_nOwnParams ? m_crystalField.parameterName(i)
+                          : m_spectrum.parameterName(i - m_nOwnParams);
 }
 
-  /// Returns the description of parameter i
+/// Returns the description of parameter i
 std::string CrystalFieldSpectrum::parameterDescription(size_t i) const {
-  return i < m_nOwnParams ? m_crystalField.parameterDescription(i) : m_spectrum.parameterDescription(i - m_nOwnParams);
+  return i < m_nOwnParams ? m_crystalField.parameterDescription(i)
+                          : m_spectrum.parameterDescription(i - m_nOwnParams);
 }
 
-  /// Checks if a parameter has been set explicitly
+/// Checks if a parameter has been set explicitly
 bool CrystalFieldSpectrum::isExplicitlySet(size_t i) const {
-  return i < m_nOwnParams ? m_crystalField.isExplicitlySet(i) : m_spectrum.isExplicitlySet(i - m_nOwnParams);
+  return i < m_nOwnParams ? m_crystalField.isExplicitlySet(i)
+                          : m_spectrum.isExplicitlySet(i - m_nOwnParams);
 }
 
-  /// Get the fitting error for a parameter
+/// Get the fitting error for a parameter
 double CrystalFieldSpectrum::getError(size_t i) const {
-  return i < m_nOwnParams ? m_crystalField.getError(i) : m_spectrum.getError(i - m_nOwnParams);
+  return i < m_nOwnParams ? m_crystalField.getError(i)
+                          : m_spectrum.getError(i - m_nOwnParams);
 }
 
-  /// Set the fitting error for a parameter
+/// Set the fitting error for a parameter
 void CrystalFieldSpectrum::setError(size_t i, double err) {
   if (i < m_nOwnParams) {
     m_crystalField.setError(i, err);
@@ -134,11 +140,13 @@ void CrystalFieldSpectrum::setError(size_t i, double err) {
   }
 }
 
-  /// Check if a declared parameter i is fixed
+/// Check if a declared parameter i is fixed
 bool CrystalFieldSpectrum::isFixed(size_t i) const {
-  return i < m_nOwnParams ? m_crystalField.isFixed(i) : m_spectrum.isFixed(i - m_nOwnParams);}
+  return i < m_nOwnParams ? m_crystalField.isFixed(i)
+                          : m_spectrum.isFixed(i - m_nOwnParams);
+}
 
-  /// Removes a declared parameter i from the list of active
+/// Removes a declared parameter i from the list of active
 void CrystalFieldSpectrum::fix(size_t i) {
   if (i < m_nOwnParams) {
     m_crystalField.fix(i);
@@ -147,7 +155,7 @@ void CrystalFieldSpectrum::fix(size_t i) {
   }
 }
 
-  /// Restores a declared parameter i to the active status
+/// Restores a declared parameter i to the active status
 void CrystalFieldSpectrum::unfix(size_t i) {
   if (i < m_nOwnParams) {
     m_crystalField.unfix(i);
@@ -157,7 +165,8 @@ void CrystalFieldSpectrum::unfix(size_t i) {
 }
 
 /// Return parameter index from a parameter reference.
-size_t CrystalFieldSpectrum::getParameterIndex(const ParameterReference &ref) const {
+size_t
+CrystalFieldSpectrum::getParameterIndex(const ParameterReference &ref) const {
   auto index = m_crystalField.getParameterIndex(ref);
   if (index < m_nOwnParams) {
     return index;
@@ -166,8 +175,9 @@ size_t CrystalFieldSpectrum::getParameterIndex(const ParameterReference &ref) co
 }
 
 /// Tie a parameter to other parameters (or a constant)
-API::ParameterTie *CrystalFieldSpectrum::tie(const std::string &parName, const std::string &expr,
-                          bool isDefault) {
+API::ParameterTie *CrystalFieldSpectrum::tie(const std::string &parName,
+                                             const std::string &expr,
+                                             bool isDefault) {
   if (isOwnName(parName)) {
     return m_crystalField.tie(parName, expr, isDefault);
   } else {
@@ -240,13 +250,11 @@ void CrystalFieldSpectrum::removeConstraint(const std::string &parName) {
 }
 
 /// Set up the function for a fit.
-void CrystalFieldSpectrum::setUpForFit() {
-  updateSpectrumFunction();
-}
+void CrystalFieldSpectrum::setUpForFit() { updateSpectrumFunction(); }
 
 /// Declare a new parameter
 void CrystalFieldSpectrum::declareParameter(const std::string &, double,
-                              const std::string &) {
+                                            const std::string &) {
   throw Kernel::Exception::NotImplementedError(
       "CrystalFieldSpectrum cannot not have its own parameters.");
 }
@@ -262,10 +270,10 @@ void CrystalFieldSpectrum::addTie(API::ParameterTie *tie) {
   }
 }
 
-
 /// Returns the number of attributes associated with the function
 size_t CrystalFieldSpectrum::nAttributes() const {
-  return IFunction::nAttributes() + m_crystalField.nAttributes() + m_spectrum.nAttributes();
+  return IFunction::nAttributes() + m_crystalField.nAttributes() +
+         m_spectrum.nAttributes();
 }
 
 /// Returns a list of attribute names
@@ -279,7 +287,8 @@ std::vector<std::string> CrystalFieldSpectrum::getAttributeNames() const {
 }
 
 /// Return a value of attribute attName
-API::IFunction::Attribute CrystalFieldSpectrum::getAttribute(const std::string &attName) const {
+API::IFunction::Attribute
+CrystalFieldSpectrum::getAttribute(const std::string &attName) const {
   if (IFunction::hasAttribute(attName)) {
     return IFunction::getAttribute(attName);
   } else if (attName == "NumDeriv") {
@@ -293,7 +302,7 @@ API::IFunction::Attribute CrystalFieldSpectrum::getAttribute(const std::string &
 
 /// Set a value to attribute attName
 void CrystalFieldSpectrum::setAttribute(const std::string &attName,
-                               const IFunction::Attribute &att) {
+                                        const IFunction::Attribute &att) {
   if (IFunction::hasAttribute(attName)) {
     IFunction::setAttribute(attName, att);
     m_dirty = true;
@@ -323,7 +332,7 @@ bool CrystalFieldSpectrum::hasAttribute(const std::string &attName) const {
 
 // Evaluates the function
 void CrystalFieldSpectrum::function(const API::FunctionDomain &domain,
-                        API::FunctionValues &values) const {
+                                    API::FunctionValues &values) const {
   updateSpectrumFunction();
   m_spectrum.function(domain, values);
 }
@@ -332,7 +341,8 @@ void CrystalFieldSpectrum::function(const API::FunctionDomain &domain,
 /// @param aName :: A name to test.
 bool CrystalFieldSpectrum::isOwnName(const std::string &aName) const {
   if (aName.empty()) {
-    throw std::invalid_argument("Parameter or attribute name cannot be empty string.");
+    throw std::invalid_argument(
+        "Parameter or attribute name cannot be empty string.");
   }
   return (aName.front() != 'f' || aName.find('.') == std::string::npos);
 }
@@ -352,13 +362,14 @@ void CrystalFieldSpectrum::buildSpectrumFunction() const {
   }
 
   if (values.size() % 2 != 0) {
-    throw std::runtime_error("CrystalFieldPeaks returned add number of values.");
+    throw std::runtime_error(
+        "CrystalFieldPeaks returned add number of values.");
   }
 
   auto peakShape = IFunction::getAttribute("PeakShape").asString();
   auto fwhm = IFunction::getAttribute("FWHM").asDouble();
   auto nPeaks = values.size() / 2;
-  for(size_t i = 0; i < nPeaks; ++i) {
+  for (size_t i = 0; i < nPeaks; ++i) {
     auto fun = API::FunctionFactory::Instance().createFunction(peakShape);
     auto peak = boost::dynamic_pointer_cast<API::IPeakFunction>(fun);
     if (!peak) {
@@ -386,12 +397,13 @@ void CrystalFieldSpectrum::updateSpectrumFunction() const {
   auto nPeaks = values.size() / 2;
 
   if (m_spectrum.nFunctions() != nPeaks) {
-    //throw std::runtime_error("Number of peaks has changed: "+std::to_string(nPeaks));
+    // throw std::runtime_error("Number of peaks has changed:
+    // "+std::to_string(nPeaks));
     buildSpectrumFunction();
     return;
   }
 
-  for(size_t i = 0; i < nPeaks; ++i) {
+  for (size_t i = 0; i < nPeaks; ++i) {
     auto fun = m_spectrum.getFunction(i);
     auto peak = boost::dynamic_pointer_cast<API::IPeakFunction>(fun);
     if (!peak) {
@@ -402,7 +414,6 @@ void CrystalFieldSpectrum::updateSpectrumFunction() const {
     peak->setCentre(centre);
     peak->setIntensity(intensity);
   }
-
 }
 
 /// Update spectrum function if necessary.

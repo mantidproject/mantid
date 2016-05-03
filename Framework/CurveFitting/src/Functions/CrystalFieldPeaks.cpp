@@ -317,7 +317,8 @@ CrystalFieldPeaks::CrystalFieldPeaks()
   declareParameter("IB65", 0.0, "Imaginary part of the B65 field parameter.");
   declareParameter("IB66", 0.0, "Imaginary part of the B66 field parameter.");
 
-  declareParameter("IntensityScaling", 1.0, "A scaling factor for peak intensities.");
+  declareParameter("IntensityScaling", 1.0,
+                   "A scaling factor for peak intensities.");
 
   setSymmetryC1(*this);
 }
