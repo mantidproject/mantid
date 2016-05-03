@@ -73,7 +73,7 @@ public:
    * @param enableLoad (optional) whether to enable the loading of
    * each of the formats. If not given all of them will be enabled.
    *
-   * @param enableLoad (optional) whether to enable saving of
+   * @param enableSave (optional) whether to enable saving of
    * each of the formats. If not given all of them will be enabled.
    */
   virtual void setFormats(const std::vector<std::string> &fmts,
