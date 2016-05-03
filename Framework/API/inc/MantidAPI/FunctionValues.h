@@ -101,9 +101,6 @@ public:
   /// Return the calculated values as a vector
   std::vector<double> toVector() const { return m_calculated; }
 
-  /// Return a reference to the calculated values
-  std::vector<double> &getCalculated();
-
 protected:
   /// Copy calculated values to a buffer
   /// @param to :: Pointer to the buffer
