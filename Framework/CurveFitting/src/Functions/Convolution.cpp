@@ -17,8 +17,11 @@
 #include <gsl/gsl_fft_halfcomplex.h>
 
 #include <sstream>
-#include <iostream>
 #include <fstream>
+
+namespace {
+  const double tolerance{0.02};
+}
 
 namespace Mantid {
 namespace CurveFitting {
@@ -109,7 +112,7 @@ void Convolution::function(const FunctionDomain &domain,
   // determine wether to use FFT or Direct calculations
   int assymmetry = abs(static_cast<int>(ixP - ixN));
   if (xValues[0] * xValues[nData - 1] < 0 &&
-      assymmetry > 0.02 * static_cast<double>(ixP + ixN)) {
+      assymmetry > tolerance * static_cast<double>(ixP + ixN)) {
     functionDirectMode(domain, values);
   } else {
     functionFFTMode(domain, values);
