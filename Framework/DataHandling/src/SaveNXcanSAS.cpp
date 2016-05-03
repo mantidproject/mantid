@@ -14,6 +14,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <H5Cpp.h>
 #include <boost/make_shared.hpp>
@@ -314,6 +315,8 @@ getUnitFromMDDimension(Mantid::Geometry::IMDDimension_const_sptr dimension) {
   return unitLabel.ascii();
 }
 
+
+
 void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
   // Add attributes for @signal, @I_axes, @Q_indices,
   Mantid::DataHandling::H5Util::writeStrAttribute(data, sasSignal, sasDataI);
@@ -339,7 +342,13 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
     qAttributes.insert(std::make_pair(sasUncertaintyAttr, sasDataQdev));
   }
 
-  writeArray1DWithStrAttributes(data, sasDataQ, qValue, qAttributes);
+  if (workspace->isHistogramData()) {
+    std::vector<double> qValueCentres;
+    Mantid::Kernel::VectorHelper::convertToBinCentre(qValue, qValueCentres);
+    writeArray1DWithStrAttributes(data, sasDataQ, qValueCentres, qAttributes);
+  } else {
+    writeArray1DWithStrAttributes(data, sasDataQ, qValue, qAttributes);
+  }
 
   //-----------------------------------------
   // Add I with units + uncertainty definition
@@ -368,8 +377,15 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
     std::map<std::string, std::string> xUncertaintyAttributes;
     xUncertaintyAttributes.insert(std::make_pair(sasUnitAttr, qUnit));
 
-    writeArray1DWithStrAttributes(data, sasDataQdev, qResolution,
-                                  xUncertaintyAttributes);
+    if (workspace->isHistogramData()) {
+      std::vector<double> qResolutionCentres;
+      Mantid::Kernel::VectorHelper::convertToBinCentre(qResolution, qResolutionCentres);
+      writeArray1DWithStrAttributes(data, sasDataQdev, qResolutionCentres,
+                                    xUncertaintyAttributes);
+    } else {
+        writeArray1DWithStrAttributes(data, sasDataQdev, qResolution,
+                                      xUncertaintyAttributes);
+    }
   }
 }
 
@@ -415,6 +431,25 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_workspace;
   Mantid::MantidVec m_spectrumAxisValues;
   Mantid::MantidVec m_currentAxisValues;
+};
+
+/**
+ * QxExtractor functor which allows us to convert 2D Qx data into point data.
+ */
+template <typename T>
+class QxExtractor {
+public:
+  T* operator()(Mantid::API::MatrixWorkspace_sptr ws, int index) {
+    if (ws->isHistogramData()) {
+      qxPointData.clear();
+      Mantid::Kernel::VectorHelper::convertToBinCentre(ws->dataX(index), qxPointData);
+      return qxPointData.data();
+    } else {
+      return ws->dataX(index).data();
+    }
+  }
+
+  std::vector<T> qxPointData;
 };
 
 /**
@@ -477,10 +512,7 @@ void addData2D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
   auto qxUnit = getUnitFromMDDimension(workspace->getXDimension());
   qxUnit = getMomentumTransferLabel(qxUnit);
   qxAttributes.insert(std::make_pair(sasUnitAttr, qxUnit));
-
-  auto qxExtractor = [](Mantid::API::MatrixWorkspace_sptr ws, int index) {
-    return ws->dataX(index).data();
-  };
+  QxExtractor<double> qxExtractor;
   write2DWorkspace(data, workspace, sasDataQx, qxExtractor, qxAttributes);
 
   // Get 2D Qy data and store it
@@ -666,14 +698,6 @@ std::map<std::string, std::string> SaveNXcanSAS::validateInputs() {
   if (!API::WorkspaceHelpers::commonBoundaries(workspace)) {
     result.insert(std::make_pair(
         "InputWorkspace", "The InputWorkspace cannot be a ragged workspace."));
-  }
-
-  // Should not allow histogram data
-  if (workspace->isHistogramData()) {
-    result.insert(std::make_pair("InputWorkspace",
-                                 "The InputWorkspace cannot be histogram "
-                                 "workspace. The save algorithm expects "
-                                 "the same number of x and y values."));
   }
 
   // Transmission data should be 1D

@@ -53,23 +53,6 @@ public:
         saveAlg->setProperty("InputWorkspace", ws));
   }
 
-  void test_that_histogram_data_cannot_be_saved() {
-    // Arrange
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(
-        1 /*nhist*/, 10 /*nbins*/, 1.0 /*xmin*/, 1.0 /*increment*/);
-    ws->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
-    const std::string filename = "SaveNXcanSASTestFile.h5";
-    // Act + Assert
-    auto saveAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-        "SaveNXcanSAS");
-    saveAlg->initialize();
-    saveAlg->setProperty("Filename", filename);
-    saveAlg->setProperty("InputWorkspace", ws);
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Should not run since we are providing a histogram.",
-        saveAlg->execute());
-  }
 
   void test_that_1D_workspace_without_transmissions_is_saved_correctly() {
     // Arrange
