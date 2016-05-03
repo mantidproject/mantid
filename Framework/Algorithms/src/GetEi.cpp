@@ -180,7 +180,7 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specnum_t mon0Spec,
 
   // repeat for the second detector
   try {
-    monWI = WS->getIndexFromSpectrumNumber(mon0Spec);
+    monWI = WS->getIndexFromSpectrumNumber(mon1Spec);
   } catch (std::runtime_error &) {
     g_log.error()
         << "Could not find the workspace index for the monitor at spectrum "
@@ -237,7 +237,7 @@ std::vector<size_t> GetEi::getMonitorWsIndexs(
     throw Exception::NotFoundError("GetEi::getMonitorWsIndexs()", specNum2);
   }
 
-  wsInds.push_back(specNumTemp[0]);
+  wsInds.push_back(wsIndexTemp[0]);
   return wsInds;
 }
 /** Uses E_KE = mv^2/2 and s = vt to calculate the time required for a neutron
@@ -325,10 +325,18 @@ void GetEi::extractSpec(int64_t wsInd, double start, double end) {
 
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace",
                                               getProperty("InputWorkspace"));
+
   childAlg->setProperty("XMin", start);
   childAlg->setProperty("XMax", end);
-  childAlg->setProperty("StartWorkspaceIndex", wsInd);
-  childAlg->setProperty("EndWorkspaceIndex", wsInd);
+  if (wsInd < std::numeric_limits<int>::max()) {
+	  auto ivsInd = static_cast<int>(wsInd);
+	  childAlg->setProperty("StartWorkspaceIndex", ivsInd);
+	  childAlg->setProperty("EndWorkspaceIndex", ivsInd);
+  }
+  else {
+    childAlg->setProperty("StartWorkspaceIndex", wsInd);
+	childAlg->setProperty("EndWorkspaceIndex", wsInd);
+  }
   childAlg->executeAsChildAlg();
 
   m_tempWS = childAlg->getProperty("OutputWorkspace");
