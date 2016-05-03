@@ -35,6 +35,7 @@ Muon Analysis
 
 - When the window is resized, all widgets within the window should now resize with it. This enables the interface to be used on smaller screens. `#15382 <https://github.com/mantidproject/mantid/pull/15832>`_
 - "Plot/Remove guess" now deals correctly with the case when a new run is loaded. `#15872 <https://github.com/mantidproject/mantid/pull/15872>`_
+- When plotting data from a new run in the same window as the previous plot, previous fits now remain on the graph, to enable easy comparison between datasets. They can be removed with the "Clear fit curves" option. `#16018 <https://github.com/mantidproject/mantid/pull/16018>`_
 
 Algorithms
 ----------
