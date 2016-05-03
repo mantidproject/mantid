@@ -269,6 +269,7 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   VatesAPI 
   DataHandling 
   Kernel 
+  HistogramData
   DataObjects 
   vtkCommonCore
   vtkCommonDataModel
