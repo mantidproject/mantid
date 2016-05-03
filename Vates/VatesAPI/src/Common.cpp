@@ -72,9 +72,5 @@ void setAxisLabel(std::string metadataLabel, std::string labelString,
   fieldData->AddArray(axisTitle.GetPointer());
 }
 
-bool isSpecial(double value) {
-  return boost::math::isnan(value) || boost::math::isinf(value);
-}
-
 } // VATES
 } // Mantid
