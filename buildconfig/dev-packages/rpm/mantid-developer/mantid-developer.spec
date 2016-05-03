@@ -25,6 +25,7 @@ Requires: git-all
 Requires: gsl-devel
 Requires: hdf-devel
 Requires: hdf5-devel
+Requires: h5py
 Requires: jsoncpp-devel >= 0.7.0
 Requires: muParser-devel
 Requires: mxml-devel
@@ -96,6 +97,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Tue May 03 2016 Pete Peterson <petersonpf@ornl.gov>
+- Require python-matplotlib-qt4 and h5py
+
 * Mon Nov 30 2015 Steven Hahn <hahnse@ornl.gov>
 - Require jsoncpp-devel >= 0.7.0
 
