@@ -109,7 +109,8 @@ std::unique_ptr<Kernel::Property> PropertyWithValueFactory::create(
  * @param direction :: Specifies whether the property is Input, InOut or Output
  * @returns A pointer to a new Property object
  */
-std::unique_ptr<Kernel::Property> PropertyWithValueFactory::create(const std::string &name,
+std::unique_ptr<Kernel::Property>
+PropertyWithValueFactory::create(const std::string &name,
                                  const boost::python::object &defaultValue,
                                  const unsigned int direction) {
   boost::python::object validator; // Default construction gives None object

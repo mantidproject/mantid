@@ -56,7 +56,8 @@ void MappingTypeHandler::set(Kernel::IPropertyManager *alg,
  * @param direction The direction of the property
  * @returns A pointer to a newly constructed property instance
  */
-std::unique_ptr<Kernel::Property> MappingTypeHandler::create(const std::string &name,
+std::unique_ptr<Kernel::Property>
+MappingTypeHandler::create(const std::string &name,
                            const boost::python::api::object &defaultValue,
                            const boost::python::api::object &validator,
                            const unsigned int direction) const {

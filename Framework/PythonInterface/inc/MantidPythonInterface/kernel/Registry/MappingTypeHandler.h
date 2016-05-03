@@ -36,10 +36,11 @@ class MappingTypeHandler final : public PropertyValueHandler {
 
   void set(Kernel::IPropertyManager *alg, const std::string &name,
            const boost::python::api::object &mapping) const override;
-  std::unique_ptr<Kernel::Property> create(const std::string &name,
-                           const boost::python::api::object &defaultValue,
-                           const boost::python::api::object &validator,
-                           const unsigned int direction) const override;
+  std::unique_ptr<Kernel::Property>
+  create(const std::string &name,
+         const boost::python::api::object &defaultValue,
+         const boost::python::api::object &validator,
+         const unsigned int direction) const override;
 };
 }
 }
