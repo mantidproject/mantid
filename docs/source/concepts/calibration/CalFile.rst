@@ -17,19 +17,21 @@ File Format
 
 The file is a simple text file with the following format
 
-| ``#  number  UDET  offset  select  group``
-| ``   0        611  0.0000000  1    0``
-| ``   1        612  0.0000000  1    0``
-| ``   2        601  0.0000000  0    0``
-| ``            ...``
-| ``  19     101001 -0.0497075  1    2``
-| ``  20     101002 -0.3515893  1    2``
-| ``  21     101003 -0.2803879  0    2``
-| ``            ...``
-| `` 349     201001  0.0525040  1    3``
-| `` 350     201002  0.0538936  1    3``
-| `` 351     201003  0.0535027  1    3``
-| ``            ...``
+.. code-block:: none
+
+  #  number  UDET  offset  select  group
+     0        611  0.0000000  1    0
+     1        612  0.0000000  1    0
+     2        601  0.0000000  0    0
+              ...
+    19     101001 -0.0497075  1    2
+    20     101002 -0.3515893  1    2
+    21     101003 -0.2803879  0    2
+              ...
+   349     201001  0.0525040  1    3
+   350     201002  0.0538936  1    3
+   351     201003  0.0535027  1    3
+              ...
 
 The first column is simply an index, the second is a UDET identifier for
 the detector, the third column corresponds to an offset in
