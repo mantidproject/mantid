@@ -43,6 +43,8 @@ Vesuvio
 
 - Added a fit function to fit a multivariate Gaussian profile (:ref:`MultivariateGaussianComptonProfile <func-MultivariateGaussianComptonProfile>`)
 
+- Added :ref:`VesuvioThickness <algm-VesuvioThickness>` algorithm to calclulate the sample density
+
 
 Improvements
 ------------
@@ -58,6 +60,9 @@ Improvements
     If Emin or Emax are left empty; appropriate values are set automatically, the negative values of Ei are treated as
     positive, appropriate informative pop-up messages displayed for invalid values and minor calculations updates.
 
+- The file OSIRIS_GSS_Parameters.prm which describes OSIRIS in the .prm, format has been added to the instrument directory. This file can
+    be used together with .gss files from OSIRIS diffraction.
+
 - :ref:`OSIRISDiffractionReduction <algm-OSIRISDiffractionReduction>` has an additional DRange added for conversion from time regime.
 
 
@@ -68,5 +73,6 @@ Bugfixes
 - :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>` only corrects for detailed balance when one is actually specified as input.
 - :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` should no longer manipulate the actual data values and only rebins the data to the desired bin width.
 - :ref:`VesuvioCorrections <algm-VesuvioCorrections>` no longer always fits using only the first spectrum in the input workspace.
+- The mini plot range bars in *BayesQuasi* now automatically update on sample loading.
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_

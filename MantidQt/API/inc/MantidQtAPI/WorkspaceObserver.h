@@ -30,7 +30,7 @@ namespace MantidQt
     * 
     * This adds an extra level of indirection to the call between a Poco notification handler and the call to the correct WorkspaceObserver handler.
     * It is necessary to do this rather than just call the function directly so that the function call gets executed in the object's thread rather than
-    * in the thread that the notificiation was recieved in.
+    * in the thread that the notification was received in.
     *
     * Multiple inheritance is not used in WorkspaceObserver as their seems to be some problem using it and QObject
     * 

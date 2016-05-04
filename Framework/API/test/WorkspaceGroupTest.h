@@ -94,6 +94,25 @@ public:
     TS_ASSERT_EQUALS(expected, group->toString());
   }
 
+  void test_sortByName() {
+    WorkspaceGroup_sptr group = makeGroup();
+    AnalysisDataService::Instance().rename("ws0", "ws3");
+    AnalysisDataService::Instance().sortGroupByName("group");
+    const std::string expected = "WorkspaceGroup\n"
+                                 " -- ws1\n"
+                                 " -- ws2\n"
+                                 " -- ws3\n";
+    TS_ASSERT_EQUALS(expected, group->toString());
+    AnalysisDataService::Instance().rename("ws1", "ws5");
+    const std::string expected2 = "WorkspaceGroup\n"
+                                  " -- ws2\n"
+                                  " -- ws3\n"
+                                  " -- ws5\n";
+    group->sortMembersByName();
+    TS_ASSERT_EQUALS(expected2, group->toString());
+    AnalysisDataService::Instance().clear();
+  }
+
   void test_add() {
     WorkspaceGroup_sptr group = makeGroup();
     TS_ASSERT_EQUALS(group->size(), 3);

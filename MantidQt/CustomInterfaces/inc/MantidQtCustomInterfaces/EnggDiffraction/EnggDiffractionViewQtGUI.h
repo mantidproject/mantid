@@ -180,10 +180,10 @@ public:
 
   void setFittingMultiRunMode(bool mode) override;
 
+  bool isDigit(std::string text) override;
+
   void setDefaultBank(std::vector<std::string> splittedBaseName,
                       QString selectedFile);
-
-  bool isDigit(std::string text);
 
   std::string fittingRunNoFactory(std::string bank, std::string fileName,
                                   std::string &bankDir, std::string fileDir);
