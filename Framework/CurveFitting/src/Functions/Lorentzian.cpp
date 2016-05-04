@@ -17,6 +17,8 @@ using namespace API;
 
 DECLARE_FUNCTION(Lorentzian)
 
+Lorentzian::Lorentzian() : m_amplitudeEqualHeight(false) {}
+
 void Lorentzian::init() {
   declareParameter("Amplitude", 1.0, "Intensity scaling");
   declareParameter("PeakCentre", 0.0, "Centre of peak");
@@ -35,11 +37,32 @@ double Lorentzian::height() const {
 void Lorentzian::setHeight(const double h) {
   double gamma = getParameter("FWHM");
   if (gamma == 0.0) {
+    m_amplitudeEqualHeight = true;
     setParameter("Amplitude", h);
   } else {
     setParameter("Amplitude", h * gamma * M_PI / 2.0);
   }
 }
+
+void Lorentzian::setFwhm(const double w) {
+  auto gamma = getParameter("FWHM");
+  if (gamma == 0.0 && w != 0.0 && m_amplitudeEqualHeight) {
+    auto h = getParameter("Amplitude");
+    setParameter("Amplitude", h * w * M_PI / 2.0);
+  }
+  if (w != 0.0) {
+    m_amplitudeEqualHeight = false;
+  }
+  setParameter("FWHM", w);
+}
+
+void Lorentzian::fixCentre() { fixParameter("PeakCentre"); }
+
+void Lorentzian::unfixCentre() { unfixParameter("PeakCentre"); }
+
+void Lorentzian::fixIntensity() { fixParameter("Amplitude"); }
+
+void Lorentzian::unfixIntensity() { unfixParameter("Amplitude"); }
 
 void Lorentzian::functionLocal(double *out, const double *xValues,
                                const size_t nData) const {
