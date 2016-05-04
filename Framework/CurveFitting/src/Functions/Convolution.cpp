@@ -306,6 +306,8 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
 /**
  * Calculates convolution of the two member functions when the
  * domain is not symmetric with respect to inversion E --> -E.
+ * The direct mode is slower than the FFT mode. This is meant to be a temporary
+ * method until the need for a faster computation of asymetric domain arises.
  * @param domain :: space on which the function acts
  * @param values :: buffer to store the values returned by the function after
  * acting on the domain.
