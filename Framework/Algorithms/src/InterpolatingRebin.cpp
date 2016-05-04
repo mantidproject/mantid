@@ -73,7 +73,7 @@ void InterpolatingRebin::exec() {
   // Copy over the 'vertical' axis
   if (inputW->axes() > 1)
     outputW->replaceAxis(1, inputW->getAxis(1)->clone(outputW.get()));
-          outputW->setDistribution(true);
+    outputW->setDistribution(true);
 
   // this calculation requires a distribution workspace but deal with the
   // situation when we don't get this

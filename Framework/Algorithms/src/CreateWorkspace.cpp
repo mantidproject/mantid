@@ -236,7 +236,7 @@ void CreateWorkspace::exec() {
   }
 
   // Set distribution flag
-      outputWS->setDistribution(getProperty("Distribution"));
+  outputWS->setDistribution(getProperty("Distribution"));
 
   // Set Y Unit label
   if (!parentWS || !getPropertyValue("YUnitLabel").empty()) {

@@ -98,7 +98,7 @@ void normaliseOutput(MatrixWorkspace_sptr outputWS,
       outputE[j] = eValue;
     }
   }
-      outputWS->setDistribution(inputWS->isDistribution());
+  outputWS->setDistribution(inputWS->isDistribution());
 }
 
 /**

@@ -18,7 +18,7 @@ WorkspaceSingleValue::WorkspaceSingleValue(double value, double error)
   data.dataE().resize(1, error);
   data.dataDx().resize(1, 0.0);
 
-      setDistribution(true);
+  setDistribution(true);
 }
 
 WorkspaceSingleValue::WorkspaceSingleValue(const WorkspaceSingleValue &other)

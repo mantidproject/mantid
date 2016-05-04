@@ -176,7 +176,7 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
   Element *titleElem = workspaceElem->getChildElement("Title");
   check(titleElem, "<Title>");
   dataWS->setTitle(titleElem->innerText());
-      dataWS->setDistribution(true);
+  dataWS->setDistribution(true);
   dataWS->setYUnit("");
 
   // load workspace data

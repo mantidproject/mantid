@@ -576,7 +576,7 @@ void WorkspaceHelpers::makeDistribution(MatrixWorkspace_sptr workspace,
                      std::multiplies<double>());
     }
   }
-          workspace->setDistribution(forwards);
+  workspace->setDistribution(forwards);
 }
 
 } // namespace API

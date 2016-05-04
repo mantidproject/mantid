@@ -103,7 +103,7 @@ void AbsorptionCorrection::exec() {
   MatrixWorkspace_sptr correctionFactors =
       WorkspaceFactory::Instance().create(m_inputWS);
   correctionFactors->setDistribution(
-          true);                       // The output of this is a distribution
+      true);                       // The output of this is a distribution
   correctionFactors->setYUnit(""); // Need to explicitly set YUnit to nothing
   correctionFactors->setYUnitLabel("Attenuation factor");
 
