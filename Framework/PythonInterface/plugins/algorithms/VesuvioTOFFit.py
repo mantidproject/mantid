@@ -1,8 +1,6 @@
 # pylint: disable=no-init
 from mantid.kernel import *
 from mantid.api import *
-import mantid.simpleapi as ms
-import sys
 
 from vesuvio.base import VesuvioBase, TableWorkspaceDictionaryFacade
 from vesuvio.fitting import parse_fit_options
