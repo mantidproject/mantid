@@ -13,7 +13,7 @@ Calculating Calibration
 Data Required
 #############
 
-You will need to run a sample which will create  good clean peaks at known reference dSpacing positions.  To get a good calibration you will want good statistics on this calibration data.
+You will need to run a sample which will create good clean peaks at known reference dSpacing positions.  To get a good calibration you will want good statistics on this calibration data.
 
 Steps for rectangular detector based instruments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
