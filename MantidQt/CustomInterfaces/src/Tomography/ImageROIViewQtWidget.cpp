@@ -138,7 +138,7 @@ void ImageROIViewQtWidget::userError(const std::string &err,
 }
 
 void ImageROIViewQtWidget::enableActions(bool enable) {
-  m_ui.pushButton_browse_img->setEnabled(enable);
+  m_ui.pushButton_browse_stack->setEnabled(enable);
   m_ui.pushButton_play->setEnabled(enable);
   m_ui.comboBox_image_type->setEnabled(enable);
   m_ui.comboBox_rotation->setEnabled(enable);
@@ -262,7 +262,7 @@ void ImageROIViewQtWidget::initLayout() {
 void ImageROIViewQtWidget::setupConnections() {
 
   // 'browse' buttons
-  connect(m_ui.pushButton_browse_img, SIGNAL(released()), this,
+  connect(m_ui.pushButton_browse_stack, SIGNAL(released()), this,
           SLOT(browseImgClicked()));
 
   connect(m_ui.pushButton_cor, SIGNAL(released()), this, SLOT(corClicked()));
