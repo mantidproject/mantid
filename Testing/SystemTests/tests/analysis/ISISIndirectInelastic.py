@@ -841,11 +841,11 @@ class ISISIndirectInelasticIqtAndIqtFit(ISISIndirectInelasticBase):
         LoadNexus(self.resolution, OutputWorkspace=self.resolution)
 
         _, iqt_ws = TransformToIqt(SampleWorkspace=self.samples[0],
-                                    ResolutionWorkspace=self.resolution,
-                                    EnergyMin=self.e_min,
-                                    EnergyMax=self.e_max,
-                                    BinReductionFactor=self.num_bins,
-                                    DryRun=False)
+                                   ResolutionWorkspace=self.resolution,
+                                   EnergyMin=self.e_min,
+                                   EnergyMax=self.e_max,
+                                   BinReductionFactor=self.num_bins,
+                                   DryRun=False)
 
         # Test IqtFit Sequential
         iqtfitSeq_ws, params, fit_group = IqtFitSequential(iqt_ws.getName(),
