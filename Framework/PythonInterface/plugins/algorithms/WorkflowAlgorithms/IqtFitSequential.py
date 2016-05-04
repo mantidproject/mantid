@@ -1,4 +1,4 @@
-#pylint: disable=no-init, too-many-instance-attributes, too-many-local-variables
+#pylint: disable=no-init, too-many-instance-attributes
 from mantid import logger, AlgorithmFactory
 from mantid.api import *
 from mantid.kernel import *
@@ -17,6 +17,7 @@ class IqtFitSequential(PythonAlgorithm):
     _minimizer = None
     _max_iterations = None
     _result_name = None
+    _result_ws = None
     _parameter_name = None
     _fit_group_name = None
 
@@ -142,14 +143,14 @@ class IqtFitSequential(PythonAlgorithm):
         fit_prog = Progress(self, start=0.1, end=0.8, nreports=2)
         fit_prog.report('Fitting...')
         ms.PlotPeakByLogValue(Input=input_str,
-                           OutputWorkspace=output_workspace,
-                           Function=self._function,
-                           Minimizer=self._minimizer,
-                           MaxIterations=self._max_iterations,
-                           StartX=self._start_x,
-                           EndX=self._end_x,
-                           FitType='Sequential',
-                           CreateOutput=True)
+                              OutputWorkspace=output_workspace,
+                              Function=self._function,
+                              Minimizer=self._minimizer,
+                              MaxIterations=self._max_iterations,
+                              StartX=self._start_x,
+                              EndX=self._end_x,
+                              FitType='Sequential',
+                              CreateOutput=True)
         fit_prog.report('Fitting complete')
 
         conclusion_prog = Progress(self, start=0.8, end=1.0, nreports=5)
@@ -182,7 +183,7 @@ class IqtFitSequential(PythonAlgorithm):
         pifp_alg.setProperty("ParameterNames", parameter_names)
         pifp_alg.setProperty("OutputWorkspace", self._result_name)
         pifp_alg.execute()
-        result_ws = pifp_alg.getProperty("OutputWorkspace").value
+        self._result_ws = pifp_alg.getProperty("OutputWorkspace").value
 
         # Process generated workspaces
         wsnames = mtd[self._fit_group_name].getNames()
@@ -192,23 +193,36 @@ class IqtFitSequential(PythonAlgorithm):
             rename_alg.setProperty("OutputWorkspace", output_ws)
             rename_alg.execute()
 
+        conclusion_prog.report('Copying and transfering sample logs')
+        self._transfer_sample_logs()
+
+        self.setProperty('OutputParameterWorkspace', self._parameter_name)
+        self.setProperty('OutputWorkspaceGroup', self._fit_group_name)
+        self.setProperty('OutputResultWorkspace', self._result_ws)
+        conclusion_prog.report('Algorithm complete')
+
+
+    def _transfer_sample_logs(self):
+        """
+        Copy the sample logs from the input workspace and add them to the output workspaces
+        """
+
         sample_logs  = {'start_x': self._start_x, 'end_x': self._end_x, 'fit_type': self._fit_type,
                         'intensities_constrained': self._intensities_constrained, 'beta_constrained': False}
 
-        conclusion_prog.report('Copying sample logs')
         copy_log_alg = self.createChildAlgorithm("CopyLogs")
         copy_log_alg.setProperty("InputWorkspace", self._input_ws)
         copy_log_alg.setProperty("OutputWorkspace", self._fit_group_name)
         copy_log_alg.execute()
         copy_log_alg.setProperty("InputWorkspace", self._input_ws)
-        copy_log_alg.setProperty("OutputWorkspace", result_ws)
+        copy_log_alg.setProperty("OutputWorkspace", self._result_ws)
         copy_log_alg.execute()
 
         log_names = [item[0] for item in sample_logs]
         log_values = [item[1] for item in sample_logs]
-        conclusion_prog.report('Adding sample logs')
+
         add_sample_log_multi = self.createChildAlgorithm("AddSampleLogMultiple")
-        add_sample_log_multi.setProperty("Workspace", result_ws.getName())
+        add_sample_log_multi.setProperty("Workspace", self._result_ws.getName())
         add_sample_log_multi.setProperty("LogNames", log_names)
         add_sample_log_multi.setProperty("LogValues", log_values)
         add_sample_log_multi.execute()
@@ -216,10 +230,5 @@ class IqtFitSequential(PythonAlgorithm):
         add_sample_log_multi.setProperty("LogNames", log_names)
         add_sample_log_multi.setProperty("LogValues", log_values)
         add_sample_log_multi.execute()
-
-        self.setProperty('OutputParameterWorkspace', self._parameter_name)
-        self.setProperty('OutputWorkspaceGroup', self._fit_group_name)
-        self.setProperty('OutputResultWorkspace', result_ws)
-        conclusion_prog.report('Algorithm complete')
 
 AlgorithmFactory.subscribe(IqtFitSequential)
