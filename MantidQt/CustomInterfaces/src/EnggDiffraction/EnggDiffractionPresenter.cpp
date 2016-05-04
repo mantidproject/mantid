@@ -44,8 +44,6 @@ bool EnggDiffractionPresenter::g_abortThread = false;
 std::string EnggDiffractionPresenter::g_lastValidRun = "";
 std::string EnggDiffractionPresenter::g_calibCropIdentifier = "SpectrumNumbers";
 std::string EnggDiffractionPresenter::g_sumOfFilesFocus = "";
-// std::vector<std::string> EnggDiffractionPresenter::m_fitting_runno_dir_vec;
-// bool EnggDiffractionPresenter::m_fittingMutliRunMode = false;
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(NULL), m_calibFinishedOK(false), m_focusFinishedOK(false),

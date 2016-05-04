@@ -100,11 +100,6 @@ public:
     g_vanNo.emplace_back("8899999988");
     g_ceriaNo.emplace_back("9999999999");
     g_rebinRunNo.push_back(g_eventModeRunNo);
-    splittedFileVec.emplace_back("ENGINX");
-    splittedFileVec.emplace_back("23931");
-    splittedFileVec.emplace_back("focused");
-    splittedFileVec.emplace_back("bank");
-    splittedFileVec.emplace_back("1");
 
     // provide personal directories in order to carry out the full disable tests
     m_basicCalibSettings.m_inputDirCalib = "GUI_calib_folder/";
@@ -1255,6 +1250,9 @@ public:
     RunNumDir.emplace_back("241393");
     RunNumDir.emplace_back("241394");
 
+	// empty vector
+	std::vector<std::string> splittedFileVec;
+
     // inputs from user - given multiple run
     EXPECT_CALL(mockView, getFittingRunNo())
         .Times(2)
@@ -1268,16 +1266,12 @@ public:
         .Times(1)
         .WillOnce(Return(splittedFileVec));
 
-    EXPECT_CALL(mockView, getFittingMultiRunMode())
-        .Times(1)
-        .WillOnce(Return(true));
+	EXPECT_CALL(mockView, isDigit(testing::_))
+		.Times(2)
+		.WillRepeatedly(Return(true));
 
-    EXPECT_CALL(mockView, setFittingRunNumVec(testing::_)).Times(1);
-
-    EXPECT_CALL(mockView, addRunNoItem(testing::_, testing::_)).Times(0);
-
-    EXPECT_CALL(mockView, addBankItems(testing::_, testing::_, testing::_))
-        .Times(1);
+	EXPECT_CALL(mockView, getFocusDir())
+		.Times(1);
 
     // No errors/0 warnings.
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -1286,17 +1280,24 @@ public:
     pres.notify(IEnggDiffractionPresenter::FittingRunNo);
   }
 
-  void test_fitting_runno_single_run_add_run_item() {
+  void test_fitting_runno_browsed_run_add_run_item() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     EnggDiffPresenterNoThread pres(&mockView);
-    // 23931-23934
+    // Tests the browse directory file
     std::vector<std::string> RunNumDir;
     RunNumDir.emplace_back("241391");
+
+	std::vector<std::string> splittedFileVec;
+	splittedFileVec.emplace_back("ENGINX");
+	splittedFileVec.emplace_back("23931");
+	splittedFileVec.emplace_back("focused");
+	splittedFileVec.emplace_back("bank");
+	splittedFileVec.emplace_back("1");
 
     // inputs from user - given multiple run
     EXPECT_CALL(mockView, getFittingRunNo())
         .Times(2)
-        .WillRepeatedly(Return("241391"));
+        .WillRepeatedly(Return("ENGINX_241391_focused_texture_bank_1"));
 
     EXPECT_CALL(mockView, getFittingRunNumVec())
         .Times(1)
@@ -1411,7 +1412,6 @@ private:
   std::vector<std::string> g_vanNo;
   std::vector<std::string> g_ceriaNo;
   std::vector<std::string> g_rebinRunNo;
-  std::vector<std::string> splittedFileVec;
 };
 
 // Note this is not a correct event mode run number. Using it here just
