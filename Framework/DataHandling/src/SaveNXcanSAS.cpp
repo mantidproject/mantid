@@ -409,8 +409,15 @@ public:
 
   Mantid::MantidVec::value_type *operator()(Mantid::API::MatrixWorkspace_sptr,
                                             int index) {
-    Mantid::MantidVec tempVec(m_workspace->dataX(index).size(),
-                              m_spectrumAxisValues[index]);
+    auto isPointData = m_workspace->blocksize() == m_spectrumAxisValues.size();
+    double value = 0;
+    if (isPointData) {
+      value = m_spectrumAxisValues[index];
+    } else {
+      value = (m_spectrumAxisValues[index + 1] + m_spectrumAxisValues[index]) / 2.0;
+    }
+
+    Mantid::MantidVec tempVec(m_workspace->dataY(index).size(),value);
     m_currentAxisValues.swap(tempVec);
     return m_currentAxisValues.data();
   }
