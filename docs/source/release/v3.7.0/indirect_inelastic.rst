@@ -23,6 +23,14 @@ Jump Fit
 - The interface now has the option to plot a guess of what the fit will look like before running the algorithm.
 - The Plot button is no longer present in the interface as it is no longer used.
 
+
+Diffraction
+###########
+
+- OSIRIS Diffraction DiffOnly interface and the :ref `OSIRISDiffractionReduction <algm-OSIRISDiffractionReduction>` algorithm now support the use of multiple
+  contianer runs. Additional validation also ensures you have the same number of sample/vanadium/container runs.
+
+
 Vesuvio
 #######
 
@@ -42,6 +50,8 @@ Vesuvio
 - :ref:`LoadVesuvio <algm-LoadVesuvio>` now has the option to load the monitor data in addition to its normal operation. This is  loaded as an additional separate workspace.
 
 - Added a fit function to fit a multivariate Gaussian profile (:ref:`MultivariateGaussianComptonProfile <func-MultivariateGaussianComptonProfile>`)
+
+- Added :ref:`VesuvioThickness <algm-VesuvioThickness>` algorithm to calclulate the sample density
 
 
 Improvements
