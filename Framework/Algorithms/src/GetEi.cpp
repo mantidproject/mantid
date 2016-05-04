@@ -7,6 +7,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Exception.h"
 
 #include <boost/lexical_cast.hpp>
 #include <cmath>
@@ -81,7 +82,7 @@ void GetEi::init() {
 * does not have common binning
 */
 void GetEi::exec() {
-  MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   const specnum_t mon1Spec = getProperty("Monitor1Spec");
   const specnum_t mon2Spec = getProperty("Monitor2Spec");
   double dist2moni0 = -1, dist2moni1 = -1;
@@ -139,6 +140,11 @@ void GetEi::exec() {
                  << " (your estimate was " << E_est << " meV)\n";
 
   setProperty("IncidentEnergy", E_i);
+  // store property in input workspace
+  Property *incident_energy =
+      new PropertyWithValue<double>("Ei", E_i, Direction::Input);
+  inWS->mutableRun().addProperty(incident_energy, true);
+
 }
 /** Gets the distances between the source and detectors whose IDs you pass to it
 *  @param WS :: the input workspace
@@ -273,14 +279,23 @@ double GetEi::timeToFly(double s, double E_KE) const {
 *  @throw runtime_error a Child Algorithm just falls over
 */
 double GetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS,
-                            const int64_t monitIn, const double peakTime) {
+                            const size_t monitIn, const double peakTime) {
   const MantidVec &timesArray = WS->readX(monitIn);
   // we search for the peak only inside some window because there are often more
   // peaks in the monitor histogram
   double halfWin = (timesArray.back() - timesArray.front()) * HALF_WINDOW;
-  // runs CropWorkspace as a Child Algorithm to and puts the result in a new
-  // temporary workspace that will be deleted when this algorithm has finished
-  extractSpec(monitIn, peakTime - halfWin, peakTime + halfWin);
+  if (monitIn < std::numeric_limits<int>::max()) {
+      int ivsInd = static_cast<int>(monitIn);
+
+      // runs CropWorkspace as a Child Algorithm to and puts the result in a new
+    // temporary workspace that will be deleted when this algorithm has finished
+      extractSpec(ivsInd, peakTime - halfWin, peakTime + halfWin);
+  }
+  else {
+      throw Kernel::Exception::NotImplementedError("Spectra number exceeds maximal"
+          " integer number defined for this OS."
+          " This behaviour is not yet supported");
+  }
   // converting the workspace to count rate is required by the fitting algorithm
   // if the bin widths are not all the same
   WorkspaceHelpers::makeDistribution(m_tempWS);
@@ -318,7 +333,7 @@ double GetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS,
 *  @throw runtime_error if the algorithm just falls over
 *  @throw invalid_argument if the input workspace does not have common binning
 */
-void GetEi::extractSpec(int64_t wsInd, double start, double end) {
+void GetEi::extractSpec(int wsInd, double start, double end) {
   IAlgorithm_sptr childAlg = createChildAlgorithm(
       "CropWorkspace", 100 * m_fracCompl, 100 * (m_fracCompl + CROP));
   m_fracCompl += CROP;
@@ -328,14 +343,8 @@ void GetEi::extractSpec(int64_t wsInd, double start, double end) {
 
   childAlg->setProperty("XMin", start);
   childAlg->setProperty("XMax", end);
-  if (wsInd < std::numeric_limits<int>::max()) {
-    auto ivsInd = static_cast<int>(wsInd);
-    childAlg->setProperty("StartWorkspaceIndex", ivsInd);
-    childAlg->setProperty("EndWorkspaceIndex", ivsInd);
-  } else {
-    childAlg->setProperty("StartWorkspaceIndex", wsInd);
-    childAlg->setProperty("EndWorkspaceIndex", wsInd);
-  }
+  childAlg->setProperty("StartWorkspaceIndex", wsInd);
+  childAlg->setProperty("EndWorkspaceIndex", wsInd);
   childAlg->executeAsChildAlg();
 
   m_tempWS = childAlg->getProperty("OutputWorkspace");
