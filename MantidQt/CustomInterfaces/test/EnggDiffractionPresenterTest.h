@@ -1250,8 +1250,8 @@ public:
     RunNumDir.emplace_back("241393");
     RunNumDir.emplace_back("241394");
 
-	// empty vector
-	std::vector<std::string> splittedFileVec;
+    // empty vector
+    std::vector<std::string> splittedFileVec;
 
     // inputs from user - given multiple run
     EXPECT_CALL(mockView, getFittingRunNo())
@@ -1266,12 +1266,52 @@ public:
         .Times(1)
         .WillOnce(Return(splittedFileVec));
 
-	EXPECT_CALL(mockView, isDigit(testing::_))
-		.Times(2)
-		.WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, isDigit(testing::_))
+        .Times(2)
+        .WillRepeatedly(Return(true));
 
-	EXPECT_CALL(mockView, getFocusDir())
-		.Times(1);
+    EXPECT_CALL(mockView, getFocusDir()).Times(1);
+
+    // No errors/0 warnings.
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffractionPresenter::FittingRunNo);
+  }
+
+  void test_fitting_runno_single_run() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    EnggDiffPresenterNoThread pres(&mockView);
+    // 23931-23934
+    std::vector<std::string> RunNumDir;
+    RunNumDir.emplace_back("241391");
+
+    // empty vector
+    std::vector<std::string> splittedFileVec;
+
+    // inputs from user - given multiple run
+    EXPECT_CALL(mockView, getFittingRunNo())
+        .Times(2)
+        .WillRepeatedly(Return("241391"));
+
+    EXPECT_CALL(mockView, getFittingRunNumVec())
+        .Times(1)
+        .WillOnce(Return(RunNumDir));
+
+    EXPECT_CALL(mockView, splitFittingDirectory(testing::_))
+        .Times(1)
+        .WillOnce(Return(splittedFileVec));
+
+    EXPECT_CALL(mockView, getFittingMultiRunMode())
+        .Times(1)
+        .WillOnce(Return(false));
+
+    EXPECT_CALL(mockView, setFittingRunNumVec(testing::_)).Times(1);
+
+    EXPECT_CALL(mockView, addRunNoItem(testing::_, testing::_)).Times(1);
+
+    EXPECT_CALL(mockView, addBankItems(testing::_, testing::_, testing::_))
+        .Times(1);
 
     // No errors/0 warnings.
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -1287,12 +1327,12 @@ public:
     std::vector<std::string> RunNumDir;
     RunNumDir.emplace_back("241391");
 
-	std::vector<std::string> splittedFileVec;
-	splittedFileVec.emplace_back("ENGINX");
-	splittedFileVec.emplace_back("23931");
-	splittedFileVec.emplace_back("focused");
-	splittedFileVec.emplace_back("bank");
-	splittedFileVec.emplace_back("1");
+    std::vector<std::string> splittedFileVec;
+    splittedFileVec.emplace_back("ENGINX");
+    splittedFileVec.emplace_back("23931");
+    splittedFileVec.emplace_back("focused");
+    splittedFileVec.emplace_back("bank");
+    splittedFileVec.emplace_back("1");
 
     // inputs from user - given multiple run
     EXPECT_CALL(mockView, getFittingRunNo())
