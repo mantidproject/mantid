@@ -54,6 +54,7 @@ set ( SRC_FILES
 	src/MantidVersion.cpp
 	src/MaskedProperty.cpp
 	src/Material.cpp
+	src/MaterialBuilder.cpp
 	src/Math/ChebyshevPolyFit.cpp
 	src/Math/Distributions/BoseEinsteinDistribution.cpp
 	src/Math/Distributions/ChebyshevPolynomial.cpp
@@ -91,8 +92,8 @@ set ( SRC_FILES
 	src/Statistics.cpp
 	src/StdoutChannel.cpp
 	src/StringContainsValidator.cpp
-	src/Strings.cpp
 	src/StringTokenizer.cpp
+	src/Strings.cpp
 	src/TestChannel.cpp
 	src/ThreadPool.cpp
 	src/ThreadPoolRunnable.cpp
@@ -145,7 +146,7 @@ set ( INC_FILES
 	inc/MantidKernel/Chainable.h
 	inc/MantidKernel/ChainableFactory.h
 	inc/MantidKernel/ChecksumHelper.h
-        inc/MantidKernel/ClassMacros.h
+	inc/MantidKernel/ClassMacros.h
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ComputeResourceInfo.h
 	inc/MantidKernel/ConfigService.h
@@ -202,6 +203,7 @@ set ( INC_FILES
 	inc/MantidKernel/MantidVersion.h
 	inc/MantidKernel/MaskedProperty.h
 	inc/MantidKernel/Material.h
+	inc/MantidKernel/MaterialBuilder.h
 	inc/MantidKernel/Math/ChebyshevPolyFit.h
 	inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
 	inc/MantidKernel/Math/Distributions/ChebyshevPolynomial.h
@@ -248,8 +250,8 @@ set ( INC_FILES
 	inc/MantidKernel/Statistics.h
 	inc/MantidKernel/StdoutChannel.h
 	inc/MantidKernel/StringContainsValidator.h
-	inc/MantidKernel/Strings.h
 	inc/MantidKernel/StringTokenizer.h
+	inc/MantidKernel/Strings.h
 	inc/MantidKernel/System.h
 	inc/MantidKernel/Task.h
 	inc/MantidKernel/TestChannel.h
@@ -281,7 +283,7 @@ set ( INC_FILES
 	inc/MantidKernel/WriteLock.h
 	inc/MantidKernel/XMLInstantiator.h
 	inc/MantidKernel/cow_ptr.h
-        inc/MantidKernel/make_cow.h
+	inc/MantidKernel/make_cow.h
 	inc/MantidKernel/make_unique.h
 )
 
@@ -305,7 +307,7 @@ set ( TEST_FILES
 	CompositeValidatorTest.h
 	ComputeResourceInfoTest.h
 	ConfigServiceTest.h
-        CowPtrTest.h
+	CowPtrTest.h
 	DataServiceTest.h
 	DateAndTimeTest.h
 	DateTimeValidatorTest.h
@@ -343,11 +345,12 @@ set ( TEST_FILES
 	MDUnitTest.h
 	MRUListTest.h
 	MagneticFormFactorTableTest.h
-        MagneticIonTest.h
-        MakeCowTest.h
+	MagneticIonTest.h
+	MakeCowTest.h
 	MakeUniqueTest.h
 	MandatoryValidatorTest.h
 	MaskedPropertyTest.h
+	MaterialBuilderTest.h
 	MaterialTest.h
 	MatrixPropertyTest.h
 	MatrixTest.h
@@ -381,8 +384,8 @@ set ( TEST_FILES
 	StatisticsTest.h
 	StdoutChannelTest.h
 	StringContainsValidatorTest.h
+	StringTokenizerTest.h
 	StringsTest.h
-        StringTokenizerTest.h
 	TaskTest.h
 	ThreadPoolRunnableTest.h
 	ThreadPoolTest.h
