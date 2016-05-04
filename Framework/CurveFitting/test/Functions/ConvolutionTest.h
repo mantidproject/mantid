@@ -315,8 +315,8 @@ public:
     Convolution conv;
 
     double pi = acos(0.) * 2;
-    double c1 = 0.; // center of the gaussian
-    double h1 = 3; // intensity
+    double c1 = 0.;     // center of the gaussian
+    double h1 = 3;      // intensity
     double s1 = pi / 2; // standard deviation
     boost::shared_ptr<ConvolutionTest_Gauss> res =
         boost::make_shared<ConvolutionTest_Gauss>();
@@ -369,7 +369,7 @@ public:
   /*
    * Convolve a Gausian (resolution) with a Delta-Dirac
    */
-  void testConvolvingWithDeltaDirac(){
+  void testConvolvingWithDeltaDirac() {
     Convolution conv;
     // Add resolution function
     double c1 = 0.0; // center of the gaussian
@@ -390,10 +390,10 @@ public:
     double xs[N]; // symmetric range
     double xa[N]; // asymmetric range
     double xm{-4.0}, xMs{4.0}, xMa{8.0};
-    double dxs{(xMs-xm)/(N-1)}, dxa{(xMa-xm)/(N-1)};
-    for(int i=0; i<N; i++) {
-      xs[i] = xm + i*dxs;
-      xa[i] = xm + i*dxa;
+    double dxs{(xMs - xm) / (N - 1)}, dxa{(xMa - xm) / (N - 1)};
+    for (int i = 0; i < N; i++) {
+      xs[i] = xm + i * dxs;
+      xa[i] = xm + i * dxa;
     }
     // Carry out the convolution
     FunctionDomain1DView ds(&xs[0], N); // symmetric domain
@@ -402,9 +402,11 @@ public:
     conv.function(ds, outs);
     conv.function(da, outa);
     // Check output is the original resolution function
-    for (int i=0; i<N; i++) {
-      TS_ASSERT_DELTA(outs.getCalculated(i), h1*h2*exp(-s1*xs[i]*xs[i]), 1e-10);
-      TS_ASSERT_DELTA(outa.getCalculated(i), h1*h2*exp(-s1*xa[i]*xa[i]), 1e-10);
+    for (int i = 0; i < N; i++) {
+      TS_ASSERT_DELTA(outs.getCalculated(i), h1 * h2 * exp(-s1 * xs[i] * xs[i]),
+                      1e-10);
+      TS_ASSERT_DELTA(outa.getCalculated(i), h1 * h2 * exp(-s1 * xa[i] * xa[i]),
+                      1e-10);
     }
   }
 
