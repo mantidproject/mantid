@@ -52,6 +52,8 @@ Powder Diffraction
 
 - :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been corrected in its calculation of errors.
 
+- New algorithm :ref:`SaveNexusPD <algm-SaveNexusPD>` which creates a nexus file for use in GUDRUN and will hopefully be supported by Rietveld packages in the future.
+
 Imaging
 -------
 
