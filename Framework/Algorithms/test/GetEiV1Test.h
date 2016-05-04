@@ -39,12 +39,11 @@ public:
 
     IAlgorithm_sptr alg;
     TS_ASSERT_THROWS_NOTHING(
-        alg = runGetEiUsingTestMonitors(outputName, input_ei, fixei));
+        alg = runGetEiUsingTestMonitors(outputName, input_ei));
 
     // Test output answers
     // The monitor peak should always be calculated from the data
     const double expected_mon_peak = 6495.7499801169;
-    const int expected_mon_index = 0;
     const double expected_ei = (fixei) ? input_ei : 15.001453367;
     const double ei = alg->getProperty("IncidentEnergy");
     const double first_mon_peak = alg->getProperty("FirstMonitorPeak");
@@ -77,7 +76,7 @@ public:
 
     IAlgorithm_sptr alg;
     TS_ASSERT_THROWS_NOTHING(
-        alg = runGetEiUsingTestMonitors(outputName, 15, false));
+        alg = runGetEiUsingTestMonitors(outputName, 15));
 
     // Test output answers
     const double expected_ei = 15.001453367;
@@ -190,8 +189,7 @@ private:
   }
 
   IAlgorithm_sptr runGetEiUsingTestMonitors(const std::string &inputWS,
-                                            const double energyGuess,
-                                            const bool fixei) {
+                                            const double energyGuess) {
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().createUnmanaged("GetEi", 1);
     alg->initialize();
