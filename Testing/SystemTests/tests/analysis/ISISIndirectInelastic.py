@@ -50,10 +50,10 @@ stresstesting.MantidStressTest
      |   +--IRISElwinAndMSDFit
      |   +--OSIRISElwinAndMSDFit
      |
-     +--ISISIndirectInelasticFuryAndFuryFit
+     +--ISISIndirectInelasticIqtAndIqtFit
      |   |
-     |   +--IRISFuryAndFuryFit
-     |   +--OSIRISFuryAndFuryFit
+     |   +--IRISIqtAndIqtFit
+     |   +--OSIRISIqtAndIqtFit
      |
      +--ISISIndirectInelasticIqtAndIqtFitMulti
      |   |
@@ -76,9 +76,6 @@ from mantid.simpleapi import *
 
 # For debugging only.
 from mantid.api import FileFinder
-
-# Import our workflows.
-from IndirectDataAnalysis import furyfitSeq
 
 class ISISIndirectInelasticBase(stresstesting.MantidStressTest):
     '''
@@ -823,11 +820,11 @@ class IRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
 
 #==============================================================================
 
-class ISISIndirectInelasticFuryAndFuryFit(ISISIndirectInelasticBase):
+class ISISIndirectInelasticIqtAndIqtFit(ISISIndirectInelasticBase):
     '''
-    A base class for the ISIS indirect inelastic Fury/FuryFit tests
+    A base class for the ISIS indirect inelastic Iqt/IqtFit tests
 
-    The output of TransformToIqt is usually used with FuryFit and so we plug one into
+    The output of TransformToIqt is usually used with IqtFit and so we plug one into
     the other in this test.
     '''
 
@@ -843,24 +840,24 @@ class ISISIndirectInelasticFuryAndFuryFit(ISISIndirectInelasticBase):
             LoadNexus(sample, OutputWorkspace=sample)
         LoadNexus(self.resolution, OutputWorkspace=self.resolution)
 
-        _, fury_ws = TransformToIqt(SampleWorkspace=self.samples[0],
+        _, iqt_ws = TransformToIqt(SampleWorkspace=self.samples[0],
                                     ResolutionWorkspace=self.resolution,
                                     EnergyMin=self.e_min,
                                     EnergyMax=self.e_max,
                                     BinReductionFactor=self.num_bins,
                                     DryRun=False)
 
-        # Test FuryFit Sequential
-        furyfitSeq_ws = furyfitSeq(fury_ws.getName(),
-                                   self.func,
-                                   self.ftype,
-                                   self.startx,
-                                   self.endx,
-                                   Save=False,
-                                   Plot='None')
+        # Test IqtFit Sequential
+        iqtfitSeq_ws = IqtFitSequential(iqt_ws.getName(),
+                                         self.func,
+                                         self.ftype,
+                                         self.startx,
+                                         self.endx,
+                                         Save=False,
+                                         Plot='None')
 
-        self.result_names = [fury_ws.getName(),
-                             furyfitSeq_ws]
+        self.result_names = [iqt_ws.getName(),
+                             iqtfitSeq_ws]
 
         # Remove workspaces from Mantid
         for sample in self.samples:
@@ -892,10 +889,10 @@ class ISISIndirectInelasticFuryAndFuryFit(ISISIndirectInelasticBase):
 
 #------------------------- OSIRIS tests ---------------------------------------
 
-class OSIRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
+class OSIRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
 
     def __init__(self):
-        ISISIndirectInelasticFuryAndFuryFit.__init__(self)
+        ISISIndirectInelasticIqtAndIqtFit.__init__(self)
 
         # TransformToIqt
         self.samples = ['osi97935_graphite002_red.nxs']
@@ -904,7 +901,7 @@ class OSIRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
         self.e_max = 0.4
         self.num_bins = 4
 
-        # Fury Seq Fit
+        # Iqt Seq Fit
         self.func = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
                      'Intensity=0.304185,Tau=100;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1E_s'
@@ -917,10 +914,10 @@ class OSIRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
 
 #------------------------- IRIS tests -----------------------------------------
 
-class IRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
+class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
 
     def __init__(self):
-        ISISIndirectInelasticFuryAndFuryFit.__init__(self)
+        ISISIndirectInelasticIqtAndIqtFit.__init__(self)
 
         # TransformToIqt
         self.samples = ['irs53664_graphite002_red.nxs']
@@ -929,7 +926,7 @@ class IRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
         self.e_max = 0.4
         self.num_bins = 4
 
-        # Fury Seq Fit
+        # Iqt Seq Fit
         self.func = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
                      'Intensity=0.355286,Tau=100;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1E_s'
@@ -961,24 +958,24 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
             LoadNexus(sample, OutputWorkspace=sample)
         LoadNexus(self.resolution, OutputWorkspace=self.resolution)
 
-        _, fury_ws = TransformToIqt(SampleWorkspace=self.samples[0],
-                                    ResolutionWorkspace=self.resolution,
-                                    EnergyMin=self.e_min,
-                                    EnergyMax=self.e_max,
-                                    BinReductionFactor=self.num_bins,
-                                    DryRun=False)
+        _, iqt_ws = TransformToIqt(SampleWorkspace=self.samples[0],
+                                   ResolutionWorkspace=self.resolution,
+                                   EnergyMin=self.e_min,
+                                   EnergyMax=self.e_max,
+                                   BinReductionFactor=self.num_bins,
+                                   DryRun=False)
 
         # Test IqtFitMultiple
-        furyfitSeq_ws, params, fit_group = IqtFitMultiple(fury_ws.getName(),
-                                                          self.func,
-                                                          self.ftype,
-                                                          self.startx,
-                                                          self.endx,
-                                                          self.spec_min,
-                                                          self.spec_max)
+        iqtfitSeq_ws, params, fit_group = IqtFitMultiple(iqt_ws.getName(),
+                                                         self.func,
+                                                         self.ftype,
+                                                         self.startx,
+                                                         self.endx,
+                                                         self.spec_min,
+                                                         self.spec_max)
 
-        self.result_names = [fury_ws.getName(),
-                             furyfitSeq_ws.getName()]
+        self.result_names = [iqt_ws.getName(),
+                             iqtfitSeq_ws.getName()]
 
         #remove workspaces from mantid
         for sample in self.samples:
