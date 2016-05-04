@@ -34,13 +34,13 @@ Steps for other instruments
 
      6. Cross correlate the spectrum with :ref:`CrossCorrelate <algm-CrossCorrelate>`, enter the workspace index as the ReferenceSpectra you found in the last step.
      7. Run :ref:`GetDetectorOffsets <algm-GetDetectorOffsets>`, the InputWorkspace if the output from :ref:`CrossCorrelate <algm-CrossCorrelate>`.  Use the rebinning step you made a note of in step 3 as the step parameter, and DReference as the expected value of the reference peak that you are fitting to.  XMax and XMin define the window around the reference peak to search for the peak in each spectra, if you find that some spectra do not find the peak try increasing those values.
-     8. The output is an OffsetsWorspace, that can be used directly in :ref:`DiffractionFocussing <algm-DiffractionFocussing>`, or saved using :ref:`SaveCalFile <algm-SaveCalFile>`.  You can also save it as a cal file from :ref:`GetDetectorOffsets <algm-GetDetectorOffsets>`, by defining the GroupingFileName parameter.
+     8. The output is an OffsetsWorspace, that can be used directly in :ref:`DiffractionFocussing <algm-DiffractionFocussing>`, or saved using :ref:`SaveCalFile <algm-SaveCalFile>`.  You can also save it as a :ref:`CalFile` from :ref:`GetDetectorOffsets <algm-GetDetectorOffsets>`, by defining the GroupingFileName parameter.
        
    * **Multi Peak Calibration** (*This is less well tested*)
      If you do not have a single peak in all detectors, but a range of known peaks across detectors you can try this approach. Another possible approach is to perform the single peak calibration across sections of the instrument with different reference peaks and combine the output calibration.
 
      6. Run :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`, the Input workspace is the one from step 3 earlier.  For DReference you can enter a comma seperated list of the d-spacing values of the known peaks.
-     7. The output is an OffsetsWorspace, and a workspace with the number of peaks found in each spectra,  The output offsets workspace that can be used directly in :ref:`DiffractionFocussing <algm-DiffractionFocussing>`, or saved using :ref:`SaveCalFile <algm-SaveCalFile>`.  You can also save it as a cal file from :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`, by defining the GroupingFileName parameter.
+     7. The output is an OffsetsWorspace, and a workspace with the number of peaks found in each spectra,  The output offsets workspace that can be used directly in :ref:`DiffractionFocussing <algm-DiffractionFocussing>`, or saved using :ref:`SaveCalFile <algm-SaveCalFile>`.  You can also save it as a :ref:`CalFile` from :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`, by defining the GroupingFileName parameter.
      
 .. figure:: /images/PG3_Calibrate.png
   :width: 400px
@@ -57,7 +57,7 @@ You will need to test that the calibration managed to find a reasonable offset f
 The easiest way to do this is to apply the calibration to your calibration data and check that the bragg peaks align as expected.
 
 1. Load the calibration data using :ref:`Load <algm-Load>` 
-2. Run :ref:`AlignDetectors <algm-AlignDetectors>`, this will convert the data to d-spacing and apply the calibration.  You can provide the calibration either by defining the OffsetsWrokspace, or by providing the path to the saved CalFile.
+2. Run :ref:`AlignDetectors <algm-AlignDetectors>`, this will convert the data to d-spacing and apply the calibration.  You can provide the calibration either by defining the OffsetsWrokspace, or by providing the path to the saved :ref:`CalFile`.
 3. Plot the workspace as a Color Fill plot, or a few spectra as a line plot.
 
 Applying your calibration
@@ -69,7 +69,7 @@ During Focussing
 The calibration can be applied as part of the reduction and processing workflow using the two algorithms 
 
 1. Load the experimental data using :ref:`Load <algm-Load>` 
-2. Run :ref:`AlignDetectors <algm-AlignDetectors>`, this will convert the data to d-spacing and apply the calibration.  You can provide the calibration either by defining the OffsetsWrokspace, or by providing the path to the saved CalFile.
+2. Run :ref:`AlignDetectors <algm-AlignDetectors>`, this will convert the data to d-spacing and apply the calibration.  You can provide the calibration either by defining the OffsetsWrokspace, or by providing the path to the saved :ref:`CalFile`.
 3. Run :ref:`DiffractionFocussing <algm-DiffractionFocussing>` with the output from AlignDetectors as the input.  This will group the detectors according to the GroupingWorkspace or CalFile.
 
 Adjusting the Instrument Definition
@@ -83,8 +83,6 @@ This approach attempts to correct the instrument component positions based on th
    * :ref:`ExportGeometry <algm-ExportGeometry>` will export the resulting geometry into a format that can be used to create a new XML instrument definition.  The Mantid team at ORNL have tools to automate this for common instruments at the SNS.
    * At ISIS enter the resulting workspace as the calibration workspace into the DAE software when recording new runs.  The calibrated workspace will be copied into the resulting NeXuS file of the run.
   
-**Notes on cal file handling**
-  * :ref:`LoadCalFile <algm-LoadCalFile>` text file format
-  * merge cal files
+
 
 .. categories:: Calibration

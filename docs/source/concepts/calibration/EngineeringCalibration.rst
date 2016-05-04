@@ -18,38 +18,57 @@ Notes
 Data Required
 #############
 
-You will need to run a sample which will create good clean peaks at known reference dSpacing positions.  To get a good calibration you will want good statistics on this calibration data.
+You will need to run a sample which will create good clean peaks at known reference dSpacing positions.  To get a good calibration you will want good statistics on this calibration data.  Vanadium and Ceria are common samples used for calibration.
+
+.. interface:: Engineering Diffraction
+  :align: right
+  :width: 400
 
 Using the Engineering GUI
 #########################
 
-*  Custom GUI: [calibration tab](http://www.mantidproject.org/File:Engggui_36_calib_tab.png)
+Mantid rpovides a graphical user interface that  calculate can calibrations and
+visualize them.
+
+It is possible to load an existing calibration (as a CSV file) and to
+generate a new calibration file (which becomes the new current
+calibration).
+
+A description of the inte3rface and all of it's controls can be found 
+:ref:`here <ui engineering calibration>`.
 
 Calibrating the entire instrument
 #################################
 
-* Calibration of every detector/pixel: :ref:`EnggCalibrateFull <algm-EnggCalibrateFull>` 
+Calibration of every detector/pixel at the same time is done by :ref:`EnggCalibrateFull <algm-EnggCalibrateFull>`.  This calculates the calibration in a single step and outputs a table workspace of the calibration.  As it is calibrating the whole intrstrument it can take some time, the next section shows howw you can perform a partial calibration.
 
 Calibrating individual banks
 ############################
 
-* Calibration of banks:  :ref:`EnggCalibrate <algm-EnggCalibrate>`
+:ref:`EnggCalibrate <algm-EnggCalibrate>` allows calibration of indiviual bank within the instrument, which is usefull if only one bank has moved from a previous calibration, or if the calibration failed for a certain area of the instrument.  
   
 Under the hood
 ##############
 
-*  Under the hood: :ref:`EnggFitPeaks <algm-EnggFitPeaks>`, :ref:`FindPeaks <algm-FindPeaks>`,  :ref:`EnggVanadiumCorrections <algm-EnggVanadiumCorrections>`
-*  Peak functions (shapes):  [Back2BackExponential](http://docs.mantidproject.org/nightly/fitfunctions/BackToBackExponential.html) (in EnggFitPeaks), [Gaussian](http://docs.mantidproject.org/nightly/fitfunctions/Gaussian.html) (in FindPeaks), Bk2BkExpConvPV (in GSAS).
+All of these approaches use the algorithm :ref:`EnggFitPeaks <algm-EnggFitPeaks>`, :ref:`FindPeaks <algm-FindPeaks>` and  :ref:`EnggVanadiumCorrections <algm-EnggVanadiumCorrections>` to find, and fit the recorded peaks and compare them to the expected values.  
+
+The peak functions (shapes):  
+
+* :ref:`BackToBackExponential<func-BackToBackExponential>` (used in EnggFitPeaks, to fit the peaks when accuacy is needed)
+* :ref:`Gaussian<func-Gaussian>` (used in FindPeaks when the a quick validation is needed, but fit accuracy is not vital)
+* :ref:`NeutronBk2BkExpConvPVoigt<func-NeutronBk2BkExpConvPVoigt>` (is the Mantid equivalent to the function usedin GSAS).
 
 File Formats
 ############
 
-*  The legacy ascii/csv format that you should never use: [ENGINX_full_pixel_calibration_vana194547_ceria193749.csv](https://github.com/mantidproject/mantid/blob/master/scripts/Engineering/calib/ENGINX_full_pixel_calibration_vana194547_ceria193749.csv)
-*  The [HDF format](http://docs.mantidproject.org/nightly/concepts/DiffractionCalibrationWorkspace.html) that should/will be used.
+*  The legacy ascii/csv format: [ENGINX_full_pixel_calibration_vana194547_ceria193749.csv](https://github.com/mantidproject/mantid/blob/master/scripts/Engineering/calib/ENGINX_full_pixel_calibration_vana194547_ceria193749.csv)
+   This can get very large and cumbersome to deal with for instruments with many detectors.
+*  The :ref:`HDF format<DiffractionCalibrationWorkspace>`.
+   This is that is moe compact and is increasingly being used.
 
 Applying your calibration
 #########################
 
-
+The result of the calibration (the output table given in OutDetPosTable) is accepted by both :ref:`EnggCalibrate<algm-EnggCalibrate>` and :ref:`EnggFocus<algm-EnggFocus>` which use the columns ‘Detector ID’ and ‘Detector Position’ of the table to correct the detector positions before focussing.  The OutDetPosTable output table can also be used to apply the calibration calculated by this algorithm on any other workspace by using the algorithm :ref:`ApplyCalibration<algm-ApplyCalibration>`.
 
 .. categories:: Calibration
