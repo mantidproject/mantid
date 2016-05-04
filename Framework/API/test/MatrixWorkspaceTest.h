@@ -180,7 +180,7 @@ public:
 
   void testIsDistribution() {
     TS_ASSERT(!ws->isDistribution());
-    TS_ASSERT(ws->setDistribution(true));
+    ws->setDistribution(true);
     TS_ASSERT(ws->isDistribution());
   }
 

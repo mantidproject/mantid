@@ -356,7 +356,7 @@ public:
 
   /// Are the Y-values dimensioned?
   const bool &isDistribution() const;
-  bool &setDistribution(bool newValue);
+  void setDistribution(bool newValue);
 
   /// Mask a given workspace index, setting the data and error values to zero
   void maskWorkspaceIndex(const std::size_t index);
