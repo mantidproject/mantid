@@ -88,10 +88,17 @@ void SaveTBL::exec() {
                                    " Column must be of type \"int\"");
         } else
           writeVal<int>(row.Int(columnIndex), file);
-      } else if (columnIndex == columnHeadings.size() - 1)
-        writeVal<std::string>(row.String(columnIndex), file, false, true);
-      else
-        writeVal<std::string>(row.String(columnIndex), file);
+      } else if (ws->getColumn(columnIndex)->type() != "str") {
+        file.close();
+        remove(filename.c_str());
+        throw std::runtime_error(columnHeadings[columnIndex] +
+                                 " columns must be of type \"str\"");
+      } else {
+        if (columnIndex == columnHeadings.size() - 1)
+          writeVal<std::string>(row.String(columnIndex), file, false, true);
+        else
+          writeVal<std::string>(row.String(columnIndex), file);
+      }
 
     } // col for-loop
   }   // row for-loop

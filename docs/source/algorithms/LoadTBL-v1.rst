@@ -40,7 +40,7 @@ This file would produce the following TableWorkspace:
 
 
 The first line of the TBL file will define your column headings. As you can see in the table above
-the number of commas on each subsequent line must be equal to the number of column headings.
+the number of commas on each subsequent line must be equal to the number of column headings minus one.
 If you wish for a cell in the table to be blank you must still provide the surrounding commas in place
 of data.
 

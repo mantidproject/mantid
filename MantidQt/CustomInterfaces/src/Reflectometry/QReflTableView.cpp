@@ -386,7 +386,7 @@ void QReflTableView::showImportDialog() {
   std::stringstream pythonSrc;
   pythonSrc << "try:\n";
   pythonSrc << "  algm = "
-            << "LoadReflTBL"
+            << "LoadTBL"
             << "Dialog()\n";
   pythonSrc << "  print algm.getPropertyValue(\"OutputWorkspace\")\n";
   pythonSrc << "except:\n";
