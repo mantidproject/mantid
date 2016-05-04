@@ -109,6 +109,9 @@ Documentation
   and also concrete equations that describe them
   `#15064 <https://github.com/mantidproject/mantid/pull/15064>`_
 
+- The documentation for all calibration approaches has been pulled together, improved and expanded :ref:`here<Calibration>`.
+
+
 Bugs Resolved
 -------------
 

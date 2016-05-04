@@ -39,6 +39,7 @@ RB Number
   likely because the file specified has not been found. Error message
   can be viewed by hovering over the red star sign.
 
+.. _ui engineering calibration:
 
 Calibration
 -----------
