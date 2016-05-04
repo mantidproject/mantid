@@ -414,10 +414,11 @@ public:
     if (isPointData) {
       value = m_spectrumAxisValues[index];
     } else {
-      value = (m_spectrumAxisValues[index + 1] + m_spectrumAxisValues[index]) / 2.0;
+      value =
+          (m_spectrumAxisValues[index + 1] + m_spectrumAxisValues[index]) / 2.0;
     }
 
-    Mantid::MantidVec tempVec(m_workspace->dataY(index).size(),value);
+    Mantid::MantidVec tempVec(m_workspace->dataY(index).size(), value);
     m_currentAxisValues.swap(tempVec);
     return m_currentAxisValues.data();
   }
