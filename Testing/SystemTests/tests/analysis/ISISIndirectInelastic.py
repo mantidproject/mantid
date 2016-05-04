@@ -848,13 +848,11 @@ class ISISIndirectInelasticIqtAndIqtFit(ISISIndirectInelasticBase):
                                     DryRun=False)
 
         # Test IqtFit Sequential
-        iqtfitSeq_ws = IqtFitSequential(iqt_ws.getName(),
-                                         self.func,
-                                         self.ftype,
-                                         self.startx,
-                                         self.endx,
-                                         Save=False,
-                                         Plot='None')
+        iqtfitSeq_ws, params, fit_group = IqtFitSequential(iqt_ws.getName(),
+                                                           self.func,
+                                                           self.ftype,
+                                                           self.startx,
+                                                           self.endx)
 
         self.result_names = [iqt_ws.getName(),
                              iqtfitSeq_ws]
@@ -862,7 +860,8 @@ class ISISIndirectInelasticIqtAndIqtFit(ISISIndirectInelasticBase):
         # Remove workspaces from Mantid
         for sample in self.samples:
             DeleteWorkspace(sample)
-
+        DeleteWorkspace(params)
+        DeleteWorkspace(fit_group)
         DeleteWorkspace(self.resolution)
 
     def _validate_properties(self):
