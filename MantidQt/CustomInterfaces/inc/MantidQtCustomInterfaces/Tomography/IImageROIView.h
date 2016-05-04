@@ -230,6 +230,13 @@ public:
   virtual void updateRotationAngle(float angle) = 0;
 
   /**
+   * Get the path/location of a single image file.
+   *
+   * @return location as a string
+   */
+  virtual std::string askSingleImagePath() = 0;
+
+  /**
    * Get the path/location of a stack of images (or single image as a
    * particular case) that the user is requesting to display.  The
    * path would be expected to point to a recognized directory
@@ -237,7 +244,7 @@ public:
    * case).
    *
    * @return location (can be a directory, file, etc.) that needs to
-   * be figured out elsewhere.
+   * be figured out elsewhere
    */
   virtual std::string askImgOrStackPath() = 0;
 

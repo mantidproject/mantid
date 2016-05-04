@@ -46,8 +46,9 @@ public:
   /// handling by the presenter
   enum Notification {
     Init,                  ///< interface is initing (set, defaults, etc.)
-    BrowseImgOrStack,      ///< User browses for an image file or stack
-    NewImgOrStack,         ///< A new image or stack needs to be loaded
+    BrowseImage,           ///< User browses for a single image file
+    BrowseStack,           ///< User browses for a stack (with
+                           ///< possibly many files)
     ChangeImageType,       ///< Change between sample/flat/dark images
     ChangeRotation,        ///< Modify the rotation in the images displayed
     UpdateImgIndex,        ///< Sliding/scrolling through the stack

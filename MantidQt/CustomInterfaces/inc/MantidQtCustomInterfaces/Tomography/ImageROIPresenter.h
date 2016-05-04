@@ -70,8 +70,9 @@ protected:
 
   // Methods that process notifications from view->presenter
   void processInit();
-  void processBrowseImg();
-  void processNewStack();
+  void processBrowseImage();
+  void processBrowseStack();
+  void processNewStack(bool singleImage);
   void processChangeImageType();
   void processChangeRotation();
   void processPlayStartStop();
