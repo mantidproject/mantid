@@ -2,8 +2,6 @@
 from mantid import logger, AlgorithmFactory
 from mantid.api import *
 from mantid.kernel import *
-import mantid.simpleapi as ms
-import os.path
 
 class IqtFitSequential(PythonAlgorithm):
 
@@ -107,7 +105,7 @@ class IqtFitSequential(PythonAlgorithm):
 
         setup_prog.report('Cropping workspace')
         tmp_fit_workspace = self._execute_child_alg("CropWorkspace",InputWorkspace=self._input_ws,
-                                                    OutputWorkspace="__furyfit_fit_ws", 
+                                                    OutputWorkspace="__furyfit_fit_ws",
                                                     XMin=self._start_x, XMax=self._end_x)
 
         num_hist = self._input_ws.getNumberHistograms()
@@ -118,7 +116,8 @@ class IqtFitSequential(PythonAlgorithm):
         output_workspace = '%sfury_%s%d_to_%d' % (getWSprefix(self._input_ws.getName()), self._fit_type, self._spec_min, self._spec_max)
 
         setup_prog.report('Converting to Histogram')
-        ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
+        self._execute_child_alg("ConvertToHistogram", InputWorkspace=tmp_fit_workspace,
+                                OutputWorkspace=tmp_fit_workspace)
         setup_prog.report('Convert to Elastic Q')
         convertToElasticQ(tmp_fit_workspace)
 
@@ -128,54 +127,64 @@ class IqtFitSequential(PythonAlgorithm):
 
         fit_prog = Progress(self, start=0.1, end=0.8, nreports=2)
         fit_prog.report('Fitting...')
-        PlotPeakByLogValue(Input=input_str,
-                           OutputWorkspace=output_workspace,
-                           Function=self._function,
-                           Minimizer=self._minimizer,
-                           MaxIterations=self._max_iterations,
-                           StartX=self._start_x,
-                           EndX=self._end_x,
-                           FitType='Sequential',
-                           CreateOutput=True)
+        self._execute_child_alg("PlotPeakByLogValue", Input=input_str,
+                                OutputWorkspace=output_workspace,
+                                Function=self._function,
+                                Minimizer=self._minimizer,
+                                MaxIterations=self._max_iterations,
+                                StartX=self._start_x,
+                                EndX=self._end_x,
+                                FitType='Sequential',
+                                CreateOutput=True)
         fit_prog.report('Fitting complete')
 
         conclusion_prog = Progress(self, start=0.8, end=1.0, nreports=5)
         # Remove unsused workspaces
-        DeleteWorkspace(output_workspace + '_NormalisedCovarianceMatrices')
-        DeleteWorkspace(output_workspace + '_Parameters')
+        self._execute_child_alg("DeleteWorkspace", 
+                                Workspace=output_workspace + '_NormalisedCovarianceMatrices')
+        self._execute_child_alg("DeleteWorkspace",
+                                Workspace=output_workspace + '_Parameters')
 
         conclusion_prog.report('Renaming workspaces')
         # rename workspaces to match user input
         if output_workspace + "_Workspaces" != self._fit_group_name:
-            RenameWorkspace(InputWorkspace=output_workspace + "_Workspaces", OutputWorkspace=self._fit_group_name)
+            self._execute_child_alg("RenameWorkspace", InputWorkspace=output_workspace + "_Workspaces",
+                                    OutputWorkspace=self._fit_group_name)
         if output_workspace != self._parameter_name:
-            RenameWorkspace(InputWorkspace=output_workspace, OutputWorkspace=self._parameter_name)
+            self._execute_child_alg("RenameWorkspace", InputWorkspace=output_workspace,
+                                    OutputWorkspace=self._parameter_name)
 
         # Create *_Result workspace
         parameter_names = 'A0,Intensity,Tau,Beta'
         conclusion_prog.report('Processing indirect fit parameters')
-        self._result_name = ProcessIndirectFitParameters(InputWorkspace=self._parameter_name,
-                                                         ColumnX="axis-1", XAxisUnit="MomentumTransfer",
-                                                         ParameterNames=parameter_names)
+        self._result_name = self._execute_child_alg("ProcessIndirectFitParameters", 
+                                                    InputWorkspace=self._parameter_name,
+                                                    ColumnX="axis-1", XAxisUnit="MomentumTransfer",
+                                                    ParameterNames=parameter_names)
 
         # Process generated workspaces
         wsnames = mtd[self._fit_group_name].getNames()
         for i, workspace in enumerate(wsnames):
             output_ws = output_workspace + '_%d_Workspace' % i
-            RenameWorkspace(workspace, OutputWorkspace=output_ws)
+            self._execute_child_alg("RenameWorkspace", InputWorkspace=workspace,
+                                    OutputWorkspace=output_ws)
 
         sample_logs  = {'start_x': self._start_x, 'end_x': self._end_x, 'fit_type': self._fit_type,
                         'intensities_constrained': self._intensities_constrained, 'beta_constrained': False}
 
         conclusion_prog.report('Copying sample logs')
-        CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=self._fit_group_name)
-        CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=self._result_name)
+        self._execute_child_alg("CopyLogs", InputWorkspace=self._input_ws,
+                                OutputWorkspace=self._fit_group_name)
+        self._execute_child_alg("CopyLogs", InputWorkspace=self._input_ws,
+                                OutputWorkspace=self._result_name)
 
         log_names = [item[0] for item in sample_logs]
         log_values = [item[1] for item in sample_logs]
         conclusion_prog.report('Adding sample logs')
-        AddSampleLogMultiple(Workspace=self._result_name, LogNames=log_names, LogValues=log_values)
-        AddSampleLogMultiple(Workspace=self._fit_group_name, LogNames=log_names, LogValues=log_values)
+        self._execute_child_alg("AddSampleLogMultiple", Workspace=self._result_name,
+                                LogNames=log_names, LogValues=log_values)
+        self._execute_child_alg("AddSampleLogMultiple", Workspace=self._fit_group_name,
+                                LogNames=log_names, LogValues=log_values)
 
         self.setProperty('OutputParameterWorkspace', self._parameter_name)
         self.setProperty('OutputWorkspaceGroup', self._fit_group_name)
