@@ -2,6 +2,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtAPI/MantidColorMap.h"
 
 #include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h"
@@ -24,8 +25,8 @@ const std::string ImageROIViewQtWidget::m_settingsGroup =
     "CustomInterfaces/ImageROIView";
 
 ImageROIViewQtWidget::ImageROIViewQtWidget(QWidget *parent)
-    : QWidget(parent), IImageROIView(), m_imgWidth(0), m_imgHeight(0),
-      m_selectionState(SelectNone), m_presenter(NULL) {
+    : QWidget(parent), IImageROIView(), m_colorMapFilename(), m_imgWidth(0),
+      m_imgHeight(0), m_selectionState(SelectNone), m_presenter(NULL) {
   initLayout();
 
   // using an event filter. might be worth refactoring into a specific
@@ -138,8 +139,12 @@ void ImageROIViewQtWidget::userError(const std::string &err,
 }
 
 void ImageROIViewQtWidget::enableActions(bool enable) {
+  m_ui.pushButton_browse_img->setEnabled(enable);
   m_ui.pushButton_browse_stack->setEnabled(enable);
   m_ui.pushButton_play->setEnabled(enable);
+
+  m_ui.colorBarWidget->setEnabled(enable);
+
   m_ui.comboBox_image_type->setEnabled(enable);
   m_ui.comboBox_rotation->setEnabled(enable);
   m_ui.groupBox_cor->setEnabled(enable);
@@ -161,12 +166,37 @@ std::string ImageROIViewQtWidget::askImgOrStackPath() {
   QString prevPath =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
   QString path(QFileDialog::getExistingDirectory(
-      this, tr("Open stack of images"), prevPath, QFileDialog::ShowDirsOnly));
+      this, tr("Open a stack of images (directory containing sample, dark and "
+               "flat images, or a directory containing images)"),
+      prevPath, QFileDialog::ShowDirsOnly));
   if (!path.isEmpty()) {
     MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
   }
 
   return path.toStdString();
+}
+
+std::string ImageROIViewQtWidget::askSingleImagePath() {
+  // get path
+  QString fitsStr = QString("Supported formats: FITS, TIFF and PNG "
+                            "(*.fits *.fit *.tiff *.tif *.png);;"
+                            "FITS, Flexible Image Transport System images "
+                            "(*.fits *.fit);;"
+                            "TIFF, Tagged Image File Format "
+                            "(*.tif *.tiff);;"
+                            "PNG, Portable Network Graphics "
+                            "(*.png);;"
+                            "Other extensions/all files (*.*)");
+  QString prevPath =
+      MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  QString filepath(
+      QFileDialog::getOpenFileName(this, tr("Open image"), prevPath, fitsStr));
+  if (!filepath.isEmpty()) {
+    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(
+        filepath);
+  }
+
+  return filepath.toStdString();
 }
 
 void ImageROIViewQtWidget::enableImageTypes(bool enableSamples,
@@ -242,6 +272,7 @@ void ImageROIViewQtWidget::initLayout() {
   m_ui.label_img_name->setText("none");
 
   enableParamWidgets(false);
+  m_ui.colorBarWidget->setEnabled(false);
 
   setupConnections();
 
@@ -249,6 +280,11 @@ void ImageROIViewQtWidget::initLayout() {
   grabCoRFromWidgets();
   grabROIFromWidgets();
   grabNormAreaFromWidgets();
+
+  // the factory default would be "Gray.map"
+  if (!m_colorMapFilename.empty())
+    loadColorMap(m_colorMapFilename);
+  m_ui.colorBarWidget->setViewRange(1, 65536);
 
   // presenter that knows how to handle a IImageROIView should take care
   // of all the logic. Note the view needs to now the concrete presenter here
@@ -262,8 +298,11 @@ void ImageROIViewQtWidget::initLayout() {
 void ImageROIViewQtWidget::setupConnections() {
 
   // 'browse' buttons
+  connect(m_ui.pushButton_browse_img, SIGNAL(released()), this,
+          SLOT(browseImageClicked()));
+
   connect(m_ui.pushButton_browse_stack, SIGNAL(released()), this,
-          SLOT(browseImgClicked()));
+          SLOT(browseStackClicked()));
 
   connect(m_ui.pushButton_cor, SIGNAL(released()), this, SLOT(corClicked()));
   connect(m_ui.pushButton_cor_reset, SIGNAL(released()), this,
@@ -316,6 +355,13 @@ void ImageROIViewQtWidget::setupConnections() {
           SLOT(valueUpdatedNormArea(int)));
   connect(m_ui.spinBox_norm_bottom_y, SIGNAL(valueChanged(int)), this,
           SLOT(valueUpdatedNormArea(int)));
+
+  // colors
+  connect(m_ui.colorBarWidget, SIGNAL(colorBarDoubleClicked()), this,
+          SLOT(loadColorMapRequest()));
+
+  connect(m_ui.colorBarWidget, SIGNAL(changedColorRange(double, double, bool)),
+          this, SLOT(colorRangeChanged()));
 }
 
 void ImageROIViewQtWidget::resetWidgetsOnNewStack() {
@@ -603,8 +649,12 @@ void ImageROIViewQtWidget::updatePlay() {
   showProjectionImage(m_stackSamples, val, currentRotationAngle());
 }
 
-void ImageROIViewQtWidget::browseImgClicked() {
-  m_presenter->notify(IImageROIPresenter::BrowseImgOrStack);
+void ImageROIViewQtWidget::browseStackClicked() {
+  m_presenter->notify(IImageROIPresenter::BrowseStack);
+}
+
+void ImageROIViewQtWidget::browseImageClicked() {
+  m_presenter->notify(IImageROIPresenter::BrowseImage);
 }
 
 void ImageROIViewQtWidget::updateFromImagesSlider(int /* current */) {
@@ -1086,6 +1136,31 @@ void ImageROIViewQtWidget::readSettings() {
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
   restoreGeometry(qs.value("interface-win-geometry").toByteArray());
   qs.endGroup();
+}
+
+void ImageROIViewQtWidget::loadColorMapRequest() { loadColorMap(""); }
+
+void ImageROIViewQtWidget::loadColorMap(const std::string &initial) {
+  QString filename;
+  if (initial.empty()) {
+    filename = MantidColorMap::loadMapDialog(
+        QString::fromStdString(m_colorMapFilename), this);
+    if (filename.isEmpty())
+      return;
+  } else {
+    filename = QString::fromStdString(initial);
+  }
+
+  m_colorMapFilename = filename.toStdString();
+
+  // Load from file
+  m_ui.colorBarWidget->getColorMap().loadMap(filename);
+  m_ui.colorBarWidget->updateColorMap();
+}
+
+void ImageROIViewQtWidget::colorRangeChanged() {
+  // use  m_colorBar->getColorMap())
+  // update image display
 }
 
 void ImageROIViewQtWidget::closeEvent(QCloseEvent *event) {

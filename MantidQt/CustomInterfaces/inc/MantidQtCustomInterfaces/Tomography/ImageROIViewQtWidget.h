@@ -114,6 +114,8 @@ public:
 
   void updateImageType(const Mantid::API::WorkspaceGroup_sptr wsg) override;
 
+  virtual std::string askSingleImagePath() override;
+
   std::string askImgOrStackPath() override;
 
   void saveSettings() const override;
@@ -138,11 +140,15 @@ protected:
   void mouseFinishNormArea(int x, int y);
 
 private slots:
-  void browseImgClicked();
+  void browseImageClicked();
+  void browseStackClicked();
 
   void rotationUpdated(int idx);
 
   void imageTypeUpdated(int idx);
+
+  void loadColorMapRequest();
+  void colorRangeChanged();
 
   void corClicked();
   void corResetClicked();
@@ -200,6 +206,8 @@ private:
                                    size_t width, size_t height,
                                    float rotationAngle);
 
+  void loadColorMap(const std::string &initial);
+
   void grabCoRFromWidgets();
   void grabROIFromWidgets();
   void grabNormAreaFromWidgets();
@@ -236,6 +244,9 @@ private:
   /// this holds the base image on top of which rectangles and other
   /// objects are drawn
   boost::scoped_ptr<QPixmap> m_basePixmap;
+
+  /// current color map used to visualize the image/slice
+  std::string m_colorMapFilename;
 
   /// persistent settings
   static const std::string m_settingsGroup;
