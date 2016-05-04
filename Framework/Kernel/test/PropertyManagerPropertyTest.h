@@ -73,7 +73,9 @@ public:
         Mantid::Kernel::make_unique<PropertyManagerProperty>("Args"));
     topMgr->setProperty("Args", createPropMgrWithInt());
 
-    PropertyManager_sptr args = topMgr->getProperty("Args");
+    PropertyManager_sptr args;
+    TS_ASSERT_THROWS_NOTHING(args = topMgr->getProperty("Args"));
+    TS_ASSERT(args);
   }
 
   void test_Property_Set_With_Json_String_Overwrites_Existing_Values() {
