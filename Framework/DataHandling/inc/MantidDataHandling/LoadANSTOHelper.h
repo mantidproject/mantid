@@ -123,6 +123,26 @@ public:
                 std::vector<EventVector_pt> &eventVectors);
 };
 
+class EventAssignerFixedWavelength : public EventAssigner {
+protected:
+  // fields
+  double m_wavelength;
+
+  // methods
+  void addEventImpl(size_t id, double tof) override;
+
+public:
+  // construction
+  EventAssignerFixedWavelength(const std::vector<bool> &roi,
+                               const size_t stride, const double wavelength,
+                               const double period, const double phase,
+                               const double tofMinBoundary,
+                               const double tofMaxBoundary,
+                               const double timeMinBoundary,
+                               const double timeMaxBoundary,
+                               std::vector<EventVector_pt> &eventVectors);
+};
+
 class FastReadOnlyFile {
 private:
 #ifdef _WIN32

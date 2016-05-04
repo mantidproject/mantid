@@ -62,6 +62,8 @@ public:
 
   /// The collection itself is considered to take up no space
   size_t getMemorySize() const override { return 0; }
+  /// Sort the internal data structure according to member name
+  void sortMembersByName();
   /// Adds a workspace to the group.
   void addWorkspace(Workspace_sptr workspace);
   /// Return the number of entries within the group
@@ -88,6 +90,11 @@ public:
 
   /// @name Wrapped ADS calls
   //@{
+
+  /// Invokes the ADS to sort group members by orkspace name
+  void sortByName() {
+    AnalysisDataService::Instance().sortGroupByName(this->name());
+  }
 
   /// Adds a workspace to the group.
   void add(const std::string &wsName) {

@@ -87,11 +87,11 @@ Usage
    EnggUtils.write_ENGINX_GSAS_iparam_file(GSAS_iparm_fname, [Difc1, Difc2], [Zero1, Zero2])
 
    print "DIFA1: %.2f" % (Difa1)
-   print "DIFC1: %.2f" % (Difc1)
+   print "DIFC1: %.1f" % (Difc1)
    print "TZERO1: %.2f" % (Zero1)
    tbl = mtd[out_tbl_name]
    print "The output table has %d row(s)" % tbl.rowCount()
-   print "Parameters from the table, DIFC1: %.2f, ZERO1: %.2f" % (tbl.cell(0,1), tbl.cell(0,2))
+   print "Parameters from the table, DIFC1: %.1f, ZERO1: %.2f" % (tbl.cell(0,1), tbl.cell(0,2))
    import os
    print "Output GSAS iparam file was written?", os.path.exists(GSAS_iparm_fname)
    print "Number of lines of the GSAS iparam file:", sum(1 for line in open(GSAS_iparm_fname))
@@ -110,9 +110,9 @@ Output:
 .. testoutput:: ExampleCalib
 
    DIFA1: 0.00
-   DIFC1: 18400.19
+   DIFC1: 18400.2
    TZERO1: -2.06
    The output table has 1 row(s)
-   Parameters from the table, DIFC1: 18400.19, ZERO1: -2.06
+   Parameters from the table, DIFC1: 18400.2, ZERO1: -2.06
    Output GSAS iparam file was written? True
    Number of lines of the GSAS iparam file: 35

@@ -3,6 +3,7 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/StringTokenizer.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -795,6 +796,40 @@ void appendTimeSeriesLogs(Workspace_sptr toAppend, Workspace_sptr resultant,
   } else {
     throw std::invalid_argument("Workspaces have different number of periods");
   }
+}
+
+/**
+ * Uses the format of the workspace name
+ * (INST00012345-8; Pair; long; Asym; [1+2-3+4]; #2)
+ * to get a string in the format "run number: period"
+ * @param workspaceName :: [input] Name of the workspace
+ * @param firstRun :: [input] First run number - use this if tokenizing fails
+ * @returns Run number/period string
+ */
+QString runNumberString(const std::string &workspaceName,
+                        const std::string &firstRun) {
+  std::string periods = "";        // default
+  std::string instRuns = firstRun; // default
+
+  Mantid::Kernel::StringTokenizer tokenizer(
+      workspaceName, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+  const size_t numTokens = tokenizer.count();
+  if (numTokens > 4) { // format is ok
+    instRuns = tokenizer[0];
+    // Remove "INST000" off the start
+    // No muon instruments have numbers in their names
+    size_t numPos = instRuns.find_first_of("123456789");
+    instRuns = instRuns.substr(numPos, instRuns.size());
+    if (numTokens > 5) { // periods included
+      periods = tokenizer[4];
+    }
+  }
+
+  QString ret(instRuns.c_str());
+  if (!periods.empty()) {
+    ret.append(": ").append(periods.c_str());
+  }
+  return ret;
 }
 
 } // namespace MuonAnalysisHelper
