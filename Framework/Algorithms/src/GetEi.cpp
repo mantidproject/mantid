@@ -144,7 +144,6 @@ void GetEi::exec() {
   Property *incident_energy =
       new PropertyWithValue<double>("Ei", E_i, Direction::Input);
   inWS->mutableRun().addProperty(incident_energy, true);
-
 }
 /** Gets the distances between the source and detectors whose IDs you pass to it
 *  @param WS :: the input workspace
@@ -285,16 +284,16 @@ double GetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS,
   // peaks in the monitor histogram
   double halfWin = (timesArray.back() - timesArray.front()) * HALF_WINDOW;
   if (monitIn < std::numeric_limits<int>::max()) {
-      int ivsInd = static_cast<int>(monitIn);
+    int ivsInd = static_cast<int>(monitIn);
 
-      // runs CropWorkspace as a Child Algorithm to and puts the result in a new
+    // runs CropWorkspace as a Child Algorithm to and puts the result in a new
     // temporary workspace that will be deleted when this algorithm has finished
-      extractSpec(ivsInd, peakTime - halfWin, peakTime + halfWin);
-  }
-  else {
-      throw Kernel::Exception::NotImplementedError("Spectra number exceeds maximal"
-          " integer number defined for this OS."
-          " This behaviour is not yet supported");
+    extractSpec(ivsInd, peakTime - halfWin, peakTime + halfWin);
+  } else {
+    throw Kernel::Exception::NotImplementedError(
+        "Spectra number exceeds maximal"
+        " integer number defined for this OS."
+        " This behaviour is not yet supported");
   }
   // converting the workspace to count rate is required by the fitting algorithm
   // if the bin widths are not all the same

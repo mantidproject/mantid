@@ -58,7 +58,6 @@ public:
         dynamic_cast<PropertyWithValue<double> *>(ei_runprop);
     TS_ASSERT_DELTA((*ei_propvalue)(), expected_ei, 1e-08);
 
-
     AnalysisDataService::Instance().remove(outputName);
   }
 
@@ -107,9 +106,9 @@ public:
     alg->setProperty("Monitor2Spec", 2);
     alg->setProperty("EnergyEstimate", 15.0);
     alg->setRethrows(true);
-    TS_ASSERT_THROWS_EQUALS(
-        alg->execute(), const std::runtime_error &e, std::string(e.what()),
-        "Some invalid Properties found");
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::runtime_error &e,
+                            std::string(e.what()),
+                            "Some invalid Properties found");
     AnalysisDataService::Instance().remove(outputName);
   }
   void testThrowsEi() {
@@ -151,7 +150,6 @@ public:
     AnalysisDataService::Instance().remove(outputName);
   }
 
- 
 private:
   MatrixWorkspace_sptr
   createTestWorkspaceWithMonitors(const bool includePeaks = true) {
@@ -185,7 +183,6 @@ private:
             exp(-0.5 * pow(xValue - peakTwoCentre, 2.) / sigmaSqTwo);
       }
       xdata.access()[i] = xValue;
-
     }
     testWS->setX(0, xdata);
     testWS->setX(1, xdata);

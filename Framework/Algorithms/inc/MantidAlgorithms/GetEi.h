@@ -90,8 +90,8 @@ private:
                                          specnum_t specNum1,
                                          specnum_t specNum2) const;
   double timeToFly(double s, double E_KE) const;
-  double getPeakCentre(API::MatrixWorkspace_const_sptr WS,
-                       const size_t monitIn, const double peakTime);
+  double getPeakCentre(API::MatrixWorkspace_const_sptr WS, const size_t monitIn,
+                       const double peakTime);
   void extractSpec(int wsInd, double start, double end);
   void getPeakEstimates(double &height, int64_t &centreInd,
                         double &background) const;
