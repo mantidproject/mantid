@@ -103,11 +103,12 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         nxmoderator = nxinstrument.create_group('moderator')
         nxmoderator.attrs[self.NX_CLASS] = 'NXmoderator'
 
-        L1 = self._sourcePos.distance(self._sample.getPos())
-        L1 = -1.*abs(L1)  # nexus likes the distance negative
-        temp = nxmoderator.create_dataset('distance', data=[L1],
-                                          dtype=self._dtype)
-        temp.attrs['units'] = 'metre'
+        if self._sourcePos is not None:
+            L1 = self._sourcePos.distance(self._sample.getPos())
+            L1 = -1.*abs(L1)  # nexus likes the distance negative
+            temp = nxmoderator.create_dataset('distance', data=[L1],
+                                              dtype=self._dtype)
+            temp.attrs['units'] = 'metre'
 
         return nxinstrument
 
@@ -148,6 +149,9 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
             temp.attrs['units'] = units
 
     def _writeProtonCharge(self, nxentry, wksp):
+        if not 'gd_prtn_chrg' in wksp.run().keys():
+            return  # nothing to do
+
         pcharge = wksp.run()['gd_prtn_chrg']
 
         value = pcharge.value
@@ -168,25 +172,26 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         field.attrs['units'] = units
 
     def _writeDetectorPos(self, nxinstrument, name, detector):
-        L2 = detector.getDistance(self._sample)
-        polar = detector.getTwoTheta(self._sample.getPos(),
-                                     self._sourcePos)  # radians
-        azi = detector.getPhi()  # radians
-
         nxdetector = nxinstrument.create_group(name)
         nxdetector.attrs[self.NX_CLASS] = 'NXdetector'
 
-        temp = nxdetector.create_dataset('distance', data=[abs(L2)],
-                                         dtype=self._dtype)
-        temp.attrs['units'] = 'metre'
+        if self._sample is not None:
+            L2 = detector.getDistance(self._sample)
+            polar = detector.getTwoTheta(self._sample.getPos(),
+                                         self._sourcePos)  # radians
+            azi = detector.getPhi()  # radians
 
-        temp = nxdetector.create_dataset('polar_angle', data=[polar],
-                                         dtype=self._dtype)
-        temp.attrs['units'] = 'radian'
+            temp = nxdetector.create_dataset('distance', data=[abs(L2)],
+                                             dtype=self._dtype)
+            temp.attrs['units'] = 'metre'
 
-        temp = nxdetector.create_dataset('azimuthal_angle', data=[azi],
-                                         dtype=self._dtype)
-        temp.attrs['units'] = 'radian'
+            temp = nxdetector.create_dataset('polar_angle', data=[polar],
+                                             dtype=self._dtype)
+            temp.attrs['units'] = 'radian'
+
+            temp = nxdetector.create_dataset('azimuthal_angle', data=[azi],
+                                             dtype=self._dtype)
+            temp.attrs['units'] = 'radian'
 
         return nxdetector
 
@@ -207,18 +212,27 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
             if str(x_id) == target:
                 result.append(wksp)
             else:
-                wsname = '__SaveNexusPD_%s' % target
-                self._tempNames.append(wsname)
-                temp = api.ConvertUnits(InputWorkspace=wksp,
-                                        OutputWorkspace=wsname,
-                                        Target=target, EMode='Elastic')
-                result.append(temp)
+                if self._sourcePos is None:  # can't ConvertUnits
+                    result.append(None)
+                else:
+                    wsname = '__SaveNexusPD_%s' % target
+                    self._tempNames.append(wsname)
+                    temp = api.ConvertUnits(InputWorkspace=wksp,
+                                            OutputWorkspace=wsname,
+                                            Target=target, EMode='Elastic')
+                    result.append(temp)
         return result
 
     def _determineSourceSample(self, wksp):
         self._sample = wksp.getInstrument().getSample()
         source = wksp.getInstrument().getSource()
-        self._sourcePos = self._sample.getPos() - source.getPos()
+
+        # set all of the information to None if the
+        # instrument doesn't supply it
+        if source is None or self._sample is None:
+            self._sourcePos = None
+        else:
+            self._sourcePos = self._sample.getPos() - source.getPos()
 
     def PyExec(self):
         self._determineDtype()
@@ -230,8 +244,13 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
 
         (tof, dspacing, momentumtransfer) = self._getOtherUnits(wksp)
 
-        xAxesToWrite = ['tof', 'dspacing']
-        if self.getProperty('WriteMomentumTransfer').value:
+        xAxesToWrite = []
+        if tof is not None:
+            xAxesToWrite.append('tof')
+        if dspacing is not None:
+            xAxesToWrite.append('dspacing')
+        if self.getProperty('WriteMomentumTransfer').value and \
+           momentumtransfer is not None:
             xAxesToWrite.append('Q')
 
         append = self.getProperty('Append').value
@@ -269,8 +288,12 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
                 nxdata = nxentry.create_group(dataname)
                 nxdata.attrs[self.NX_CLASS] = 'NXdata'
 
+                if self._sourcePos is None:
+                    detector = None
+                else:
+                    detector = wksp.getDetector(i)
                 nxdetector = self._writeDetectorPos(nxinstrument, dataname,
-                                                    wksp.getDetector(i))
+                                                    detector)
 
                 self._writeY(nxdetector, tof, i)
 
