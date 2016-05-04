@@ -164,7 +164,6 @@ void IqtFit::run() {
   const long specMin = m_uiForm.spSpectraMin->value();
   const long specMax = m_uiForm.spSpectraMax->value();
   const auto minimizer = minimizerString("$outputname_$wsindex");
-  const auto save = m_uiForm.ckSave->isChecked();
   m_plotOption = m_uiForm.cbPlotType->currentText().toStdString();
   const auto startX = boost::lexical_cast<double>(
       m_properties["StartX"]->valueText().toStdString());
@@ -283,9 +282,11 @@ void IqtFit::algorithmComplete(bool error) {
 
 /**
  * Constructs the desired output base name for the  IqtFitMultiple
- * @param inputName		:: Name of the inputworkspace
- * @param specMin		:: Minimum number of spectra being fitted
- * @param specMax		:: Maximum number of spectra being fitted
+ * @param inputName     :: Name of the inputworkspace
+ * @param fitType       :: The type of fit that is being performed
+ * @param multi         :: If the fit is running the IqtFitMultiple
+ * @param specMin       :: Minimum number of spectra being fitted
+ * @param specMax       :: Maximum number of spectra being fitted
  * @return the base name
  */
 std::string IqtFit::constructBaseName(const std::string &inputName,
@@ -294,7 +295,7 @@ std::string IqtFit::constructBaseName(const std::string &inputName,
                                       const long &specMax) {
   QString functionType = QString::fromStdString(fitType);
   if (multi) {
-	  functionType = "1Smult_s";
+    functionType = "1Smult_s";
   }
 
   QString baseName = QString::fromStdString(inputName);
