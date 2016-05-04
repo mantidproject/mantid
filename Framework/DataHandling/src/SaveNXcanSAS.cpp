@@ -401,7 +401,8 @@ bool areAxesNumeric(Mantid::API::MatrixWorkspace_sptr workspace) {
 
 class SpectrumAxisValueProvider {
 public:
-  explicit SpectrumAxisValueProvider(Mantid::API::MatrixWorkspace_sptr workspace) {
+  explicit SpectrumAxisValueProvider(
+      Mantid::API::MatrixWorkspace_sptr workspace) {
     m_workspace = workspace;
     setSpectrumAxisValues();
   }
