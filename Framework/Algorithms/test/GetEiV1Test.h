@@ -75,8 +75,7 @@ public:
     AnalysisDataService::Instance().add(outputName, testWS);
 
     IAlgorithm_sptr alg;
-    TS_ASSERT_THROWS_NOTHING(
-        alg = runGetEiUsingTestMonitors(outputName, 15));
+    TS_ASSERT_THROWS_NOTHING(alg = runGetEiUsingTestMonitors(outputName, 15));
 
     // Test output answers
     const double expected_ei = 15.001453367;
