@@ -401,12 +401,7 @@ bool areAxesNumeric(Mantid::API::MatrixWorkspace_sptr workspace) {
 
 class SpectrumAxisValueProvider {
 public:
-  SpectrumAxisValueProvider(Mantid::API::MatrixWorkspace_sptr workspace) {
-    if (workspace->isHistogramData()) {
-      std::invalid_argument("SaveNXcanSAS: Cannot handle 2D histogram "
-                            "data, make sure you provide 2D point data.");
-    }
-
+  explicit SpectrumAxisValueProvider(Mantid::API::MatrixWorkspace_sptr workspace) {
     m_workspace = workspace;
     setSpectrumAxisValues();
   }
