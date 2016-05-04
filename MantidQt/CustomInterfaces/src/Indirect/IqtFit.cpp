@@ -522,6 +522,8 @@ void IqtFit::typeSelection(int index) {
   }
 
   plotGuess(NULL);
+  m_uiForm.ppPlot->removeSpectrum("Fit");
+  m_uiForm.ppPlot->removeSpectrum("Diff");
 }
 
 void IqtFit::updatePlot() {
