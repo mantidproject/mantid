@@ -112,9 +112,9 @@ class VesuvioTOFFit(VesuvioBase):
             constraints = fit_options.create_constraints_str()
             ties = fit_options.create_ties_str()
 
-            chi_square, params, fitted_data = self._do_fit(function_str, data_ws, workspace_index,
-                                                       constraints, ties,
-                                                       max_iter=self.getProperty("MaxIterations").value)
+            _, params, fitted_data = self._do_fit(function_str, data_ws, workspace_index,
+                                                  constraints, ties,
+                                                  max_iter=self.getProperty("MaxIterations").value)
 
             # Run second time using standard CompositeFunction & no constraints matrix to
             # calculate correct reduced chisq
@@ -126,7 +126,7 @@ class VesuvioTOFFit(VesuvioBase):
                                                workspace_index, constraints,
                                                ties, max_iter=max_iter)
 
-        return chi_square, params, fitted_data
+        return reduced_chi_square, params, fitted_data
 
     # ----------------------------------------------------------------------------------------
 
