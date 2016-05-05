@@ -192,3 +192,48 @@ class LoadTests(unittest.TestCase):
                                places=DIFF_PLACES)
         self.assertAlmostEqual(files_data[1].readY(0)[3293], files_data[2].readY(0)[3293],
                                places=DIFF_PLACES)
+
+
+class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest):
+    def requiredFiles(self):
+        filenames = []
+
+        # existing calibration files
+        filenames.extend(('PEARL/Attentuation/PRL112_DC25_10MM_FF.OUT'))
+        # raw files / run numbers 92476-92479
+        for i in range(6, 10):
+            filenames.append('PEARL/Calibration_Test/RawFiles/PEARL0009247' + str(i)) # need to change run numbers
+
+        return filenames
+
+    def _clean_up_files(self, filenames, directories):
+        try:
+            for files in filenames:
+                path = os.path.join(directories[0], files)
+                os.remove(path)
+            cali_path = os.path.join(directories[0], "PEARL/DataOut")
+            shutil.rmtree(cali_path)
+        except OSError, ose:
+            print 'could not delete the generated file: ', ose.filename
+
+    def runTest(self):
+        self._success = False
+
+        # TEST SCRIPT GOES HERE
+
+        # Custom code to create and run this single test suite
+        # and then mark as success or a failure
+        suite = unittest.TestSuite()
+        suite.addTest(unittest.makeSuite(LoadTests, "test"))
+        runner = unittest.TextTestRunner()
+        # Run using either runner
+        res = runner.run(suite)
+        if res.wasSuccessful():
+            self._success = True
+        else:
+            self._success = False
+
+    def validate(self):
+        return self._success
+
+
