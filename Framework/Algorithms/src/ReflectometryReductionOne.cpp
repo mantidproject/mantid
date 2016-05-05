@@ -683,7 +683,6 @@ void ReflectometryReductionOne::exec() {
   if (!algRebin->isExecuted())
     throw std::runtime_error("Failed to run Rebin algorithm");
   IvsQ = algRebin->getProperty("OutputWorkspace");
-
   double scaleFactor = getProperty("ScaleFactor");
   if (!isDefault("ScaleFactor")) {
     IAlgorithm_sptr algScale = this->createChildAlgorithm("Scale");
@@ -699,6 +698,8 @@ void ReflectometryReductionOne::exec() {
   setProperty("ThetaOut", theta.get());
   setProperty("OutputWorkspaceWavelength", IvsLam);
   setProperty("OutputWorkspace", IvsQ);
+  setProperty("MomentumTransferMinimum", momentumTransferMinimum);
+  setProperty("MomentumTransferMaximum", momentumTransferMaximum);
 }
 
 /**
