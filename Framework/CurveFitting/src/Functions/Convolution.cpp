@@ -337,6 +337,8 @@ void Convolution::functionDirectMode(const FunctionDomain &domain,
   }
 
   // Fill m_resolution with the resolution function data
+  // Lines 341-349 is duplicated in functionFFTmode. To be cleanup
+  // in issue 16064
   IFunction1D_sptr resolution =
       boost::dynamic_pointer_cast<IFunction1D>(getFunction(0));
   if (!resolution) {
@@ -407,6 +409,8 @@ void Convolution::functionDirectMode(const FunctionDomain &domain,
   if (dltF != 0.0 && !deltaShifted) {
     // If model contains any delta functions their effect is addition of scaled
     // resolution
+    // Lines 412-430 is duplicated in functionFFTmode. To be cleanup
+    // in issue 16064
     std::vector<double> tmp(nData);
     resolution->function1D(tmp.data(), xValues, nData);
     std::transform(tmp.begin(), tmp.end(), tmp.begin(),
