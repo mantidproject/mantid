@@ -1038,14 +1038,14 @@ void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
           eventws->mutableRun().getProperty(logname));
 
   if (!dbl_prop && !int_prop) {
-    g_log.warning()
-        << "Log " << logname
-        << " is not TimeSeriesProperty<int> or TimeSeriesProperty<double>. "
-        << "Unable to split."
-        << "\n";
+    std::stringstream errmsg;
+    errmsg << "Log " << logname
+           << " is not TimeSeriesProperty<int> or TimeSeriesProperty<double>. "
+           << "Unable to split.";
+    throw std::runtime_error(errmsg.str());
   } else {
     for (const auto &split : splitters) {
-      g_log.debug() << "[FilterEvents DB1226] Going to filter workspace "
+      g_log.debug() << "Workspace "
                     << eventws->name() << ": "
                     << "log name = " << logname
                     << ", duration = " << split.duration() << " from "
@@ -1063,7 +1063,7 @@ void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
 }
 
 //----------------------------------------------------------------------------------------------
-/** Get all filterable logs' names
+/** Get all filterable logs' names (double and integer)
  * @returns Vector of names of logs
  */
 std::vector<std::string> FilterEvents::getTimeSeriesLogNames() {
@@ -1072,10 +1072,15 @@ std::vector<std::string> FilterEvents::getTimeSeriesLogNames() {
   const std::vector<Kernel::Property *> allprop =
       m_eventWS->mutableRun().getProperties();
   for (auto ip : allprop) {
-    Kernel::TimeSeriesProperty<double> *timeprop =
+    // cast to double log and integer log
+    Kernel::TimeSeriesProperty<double> *dbltimeprop =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(ip);
-    if (timeprop) {
-      std::string pname = timeprop->name();
+    Kernel::TimeSeriesProperty<int> *inttimeprop =
+        dynamic_cast<Kernel::TimeSeriesProperty<int> *>(ip);
+
+    // append to vector if it is either double TimeSeries or int TimeSeries
+    if (dbltimeprop || inttimeprop) {
+      std::string pname = ip->name();
       lognames.push_back(pname);
     }
   }
