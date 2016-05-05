@@ -918,14 +918,21 @@ void ReflTableViewPresenter::reduceRow(int rowNo) {
   algReflOne->execute();
   if (!algReflOne->isExecuted())
     throw std::runtime_error("Failed to run ReflectometryReductionOneAuto.");
-  std::string momentumMin = algReflOne->getPropertyValue("MomentumTransferMinimum");
-  std::string momentumMax = algReflOne->getPropertyValue("MomentumTransferMaximum");
+  std::string momentumMin =
+      algReflOne->getPropertyValue("MomentumTransferMinimum");
+  std::string momentumStep =
+      algReflOne->getPropertyValue("MomentumTransferStep");
+  std::string momentumMax =
+      algReflOne->getPropertyValue("MomentumTransferMaximum");
   // Reduction has completed. Put Qmin and Qmax into the table if needed, for
   // stitching.
   if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMIN))
           .toString()
           .isEmpty() ||
       m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMAX))
+          .toString()
+          .isEmpty() ||
+      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_DQQ))
           .toString()
           .isEmpty()) {
     Workspace_sptr ws =
@@ -942,7 +949,13 @@ void ReflTableViewPresenter::reduceRow(int rowNo) {
             .toString()
             .isEmpty())
       m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_QMAX),
-          boost::lexical_cast<double>(momentumMax));
+                       boost::lexical_cast<double>(momentumMax));
+
+    if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_DQQ))
+            .toString()
+            .isEmpty())
+      m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_DQQ),
+                       boost::lexical_cast<double>(momentumStep));
 
     m_tableDirty = true;
   }

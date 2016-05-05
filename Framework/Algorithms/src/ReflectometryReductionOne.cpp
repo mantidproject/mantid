@@ -699,6 +699,7 @@ void ReflectometryReductionOne::exec() {
   setProperty("OutputWorkspaceWavelength", IvsLam);
   setProperty("OutputWorkspace", IvsQ);
   setProperty("MomentumTransferMinimum", momentumTransferMinimum);
+  setProperty("MomentumTransferStep", momentumTransferStep);
   setProperty("MomentumTransferMaximum", momentumTransferMaximum);
 }
 
