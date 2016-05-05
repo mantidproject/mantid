@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,relative-import,W0611,R0921,R0902,R0904,R0921,C0302
+#pylint: disable=invalid-name,relative-import,W0611,R0921,R0902,R0904,R0921,C0302,R0912
 ################################################################################
 #
 # MainWindow application for reducing HFIR 4-circle
@@ -969,7 +969,6 @@ class MainWindow(QtGui.QMainWindow):
         """ Integrate a peak in tab peak integration
         :return:
         """
-        # TODO/NOW - Doc!
         # only support the simple cuboid counts summing algorithm
 
         # get experiment number and scan number
@@ -988,7 +987,7 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(err_msg)
             return
 
-        # integrate
+        # integrate by take account of background value
         status, ret_obj = gutil.parse_float_editors(self.ui.lineEdit_background, allow_blank=True)
         assert status, ret_obj
         if ret_obj is None:
@@ -1093,11 +1092,10 @@ class MainWindow(QtGui.QMainWindow):
 
     def do_integrate_peaks(self):
         """ Integrate selected peaks.  If any scan is not merged, then it will merge the scan first.
-        Integrate peaks
+        Integrate peaks from the table of merged peak.
+        It will so the simple cuboid integration with region of interest and background subtraction.
         :return:
         """
-        # TODO/NOW - Docs & ...
-
         # get rows to merge
         row_number_list = self.ui.tableWidget_mergeScans.get_selected_rows(True)
         if len(row_number_list) == 0:
@@ -1166,7 +1164,7 @@ class MainWindow(QtGui.QMainWindow):
             if status:
                 center_i = ret_obj
             else:
-                print ('Unable to find peak for exp %d scan %d.' % (exp_number, scan_number))
+                print 'Unable to find peak for exp %d scan %d.' % (exp_number, scan_number)
                 continue
 
             # mask workspace
