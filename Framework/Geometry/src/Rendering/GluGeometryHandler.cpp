@@ -1,7 +1,7 @@
+#include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
-#include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Rendering/GluGeometryRenderer.h"
 
 #include <boost/make_shared.hpp>
@@ -95,9 +95,6 @@ void GluGeometryHandler::GetObjectGeom(int &mytype,
     vectors = m_points;
     switch (type) {
     case CUBOID:
-      mytype = 1;
-      break;
-    case HEXAHEDRON:
       break;
     case SPHERE:
       myradius = radius;
