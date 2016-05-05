@@ -208,8 +208,7 @@ void vtkPeaksReader::updateAlgorithmProgress(double progress, const std::string&
 /*
 Getter for the workspace type name.
 */
-char* vtkPeaksReader::GetWorkspaceTypeName()
-{
+const char *vtkPeaksReader::GetWorkspaceTypeName() {
   //Preload the Workspace and then cache it to avoid reloading later.
-  return const_cast<char*>(m_wsTypeName.c_str());
+  return m_wsTypeName.c_str();
 }
