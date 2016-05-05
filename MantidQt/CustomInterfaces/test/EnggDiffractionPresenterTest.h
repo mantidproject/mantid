@@ -1240,7 +1240,7 @@ public:
     pres.notify(IEnggDiffractionPresenter::FittingRunNo);
   }
 
-  void test_fitting_runno_multiple_run() {
+  void disable_test_fitting_runno_multiple_run() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     EnggDiffPresenterNoThread pres(&mockView);
     // 23931-23934
@@ -1279,7 +1279,7 @@ public:
     pres.notify(IEnggDiffractionPresenter::FittingRunNo);
   }
 
-  void test_fitting_runno_single_run() {
+  void disable_test_fitting_runno_single_run() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     EnggDiffPresenterNoThread pres(&mockView);
     // 23931-23934
