@@ -63,8 +63,6 @@ public:
         thisBankPulseTimes(thisBankPulseTimes), have_weight(have_weight),
         event_weight(event_weight), m_min_id(min_event_id),
         m_max_id(max_event_id) {
-    // Cost is approximately proportional to the number of events to process.
-    m_cost = static_cast<double>(numEvents);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -199,14 +197,9 @@ public:
                 eventVector = alg->weightedEventVectors[periodIndex][detId];
             // NULL eventVector indicates a bad spectrum lookup
             if (eventVector) {
-#if !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
               // This avoids a copy constructor call but is only available with
               // GCC (requires variadic templates)
               eventVector->emplace_back(tof, pulsetime, weight, errorSq);
-#else
-              eventVector->push_back(
-                  WeightedEvent(tof, pulsetime, weight, errorSq));
-#endif
             } else {
               ++my_discarded_events;
             }
@@ -216,13 +209,9 @@ public:
                 alg->eventVectors[periodIndex][detId];
             // NULL eventVector indicates a bad spectrum lookup
             if (eventVector) {
-#if !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
               // This avoids a copy constructor call but is only available with
               // GCC (requires variadic templates)
               eventVector->emplace_back(tof, pulsetime);
-#else
-              eventVector->push_back(TofEvent(tof, pulsetime));
-#endif
             } else {
               ++my_discarded_events;
             }
@@ -334,9 +323,6 @@ private:
   detid_t m_max_id;
   /// timer for performance
   Mantid::Kernel::Timer m_timer;
-
-  ///
-  double m_cost;
 }; // END-DEF-CLASS ProcessBankData
 
 /** This task does the disk IO from loading the NXS file,
@@ -381,7 +367,6 @@ public:
         m_event_weight(nullptr), m_framePeriodNumbers(framePeriodNumbers),
         alg_Logger(logger) {
     // setMutex(ioMutex);
-    m_cost = static_cast<double>(numEvents);
     m_min_id = std::numeric_limits<uint32_t>::max();
     m_max_id = 0;
   }
@@ -906,7 +891,4 @@ private:
   /// TODO-FIXME: NEW CLASS VARIABLES! NOT INITIALIZED IN CONSTRUCTOR YET!
 
   Mantid::Kernel::Logger &alg_Logger;
-
-  double m_cost;
-
 }; // END-DEF-CLASS LoadBankFromDiskTask
