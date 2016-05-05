@@ -293,7 +293,7 @@ void GramCharlierComptonProfile::addMassProfile(
   const double denom = ((std::pow(2.0, static_cast<int>(npoly))) * factorial);
 
   for (int j = 0; j < NFINE_Y; ++j) {
-    const double y = m_yfine[j] * M_SQRT1_2 / wg;
+    const double y = m_yfine[j] / M_SQRT2 / wg;
     const double hermiteI = Math::hermitePoly(npoly, y);
     result[j] += ampNorm * std::exp(-y * y) * hermiteI * hermiteCoeff / denom;
   }
