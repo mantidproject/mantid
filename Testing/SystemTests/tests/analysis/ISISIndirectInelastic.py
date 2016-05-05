@@ -848,14 +848,15 @@ class ISISIndirectInelasticIqtAndIqtFit(ISISIndirectInelasticBase):
                                    DryRun=False)
 
         # Test IqtFit Sequential
-        iqtfitSeq_ws, params, fit_group = IqtFitSequential(iqt_ws.getName(),
+        iqtfitSeq_ws, params, fit_group = IqtFitSequential(iqt_ws,
                                                            self.func,
                                                            self.ftype,
                                                            self.startx,
-                                                           self.endx)
+                                                           self.endx, 0,
+                                                           self.spec_max)
 
         self.result_names = [iqt_ws.getName(),
-                             iqtfitSeq_ws]
+                             iqtfitSeq_ws.getName()]
 
         # Remove workspaces from Mantid
         for sample in self.samples:
@@ -904,6 +905,7 @@ class OSIRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.func = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
                      'Intensity=0.304185,Tau=100;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1E_s'
+        self.spec_max = 41
         self.startx = 0.022861
         self.endx = 0.118877
 
@@ -929,6 +931,7 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.func = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
                      'Intensity=0.355286,Tau=100;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1E_s'
+        self.spec_max = 50
         self.startx = 0.013717
         self.endx = 0.169171
 
