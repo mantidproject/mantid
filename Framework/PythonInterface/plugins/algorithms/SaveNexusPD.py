@@ -127,9 +127,9 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
                               dtype=self._dtype,
                               **self._compressArgs)
 
-    def _writeX(self, nxdata, name, wksp, index, writeDx, reverse=False):
+    def _writeX(self, nxdata, name, wksp, index, writeDx):
         units = wksp.getAxis(0).getUnit().symbol().ascii()
-
+        reverse = (name == 'Q')  # reverse the array
         arr = wksp.readX(index)
         if reverse:
             arr = arr[::-1]  # reverse the array
@@ -141,8 +141,8 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
 
         if writeDx:  # optional
             arr = wksp.readDx(index)
-            if reverse:
-                arr = arr[::-1]  # reverse the array
+            if reverse:  # reverse the array
+                arr = arr[::-1]
 
             temp = nxdata.create_dataset(name=name+'_errors',
                                          data=arr,
@@ -208,20 +208,19 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         xUnit = wksp.getAxis(0).getUnit()
         x_id = xUnit.unitID()
 
-        result = []
-        for target in ['TOF', 'dSpacing', 'MomentumTransfer']:
+        result = [None, None, None]
+        for (i, target) in enumerate(['TOF', 'dSpacing', 'MomentumTransfer']):
             if str(x_id) == target:
-                result.append(wksp)
+                result[i] = wksp
+            elif self._sourcePos is not None:
+                wsname = '__SaveNexusPD_%s' % target
+                self._tempNames.append(wsname)
+                temp = api.ConvertUnits(InputWorkspace=wksp,
+                                        OutputWorkspace=wsname,
+                                        Target=target, EMode='Elastic')
+                result[i] = temp
             else:
-                if self._sourcePos is None:  # can't ConvertUnits
-                    result.append(None)
-                else:
-                    wsname = '__SaveNexusPD_%s' % target
-                    self._tempNames.append(wsname)
-                    temp = api.ConvertUnits(InputWorkspace=wksp,
-                                            OutputWorkspace=wsname,
-                                            Target=target, EMode='Elastic')
-                    result.append(temp)
+                pass   # can't ConvertUnits
         return result
 
     def _determineSourceSample(self, wksp):
@@ -233,6 +232,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         if (source is not None) and (self._sample is not None):
             self._sourcePos = self._sample.getPos() - source.getPos()
 
+    #pylint: disable=too-many-branches
     def PyExec(self):
         self._determineDtype()
         self._determineCompression()
@@ -299,8 +299,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
                 for (field, wkspIter) in zip(('tof', 'dspacing', 'Q'),
                                              (tof, dspacing, momentumtransfer)):
                     if field in xAxesToWrite:
-                        self._writeX(nxdetector, field, wkspIter, i, writeDx,
-                                     reverse=(field == 'Q'))
+                        self._writeX(nxdetector, field, wkspIter, i, writeDx)
 
                 # create hard links into nxdata
                 for field in ['data', 'errors'] + xAxesToWrite:
