@@ -49,11 +49,9 @@ Introduction of Tabs
     - For each listed run, the information show includes detector counts and HKL
 
 
-Algorithms
-----------
 
 Converting SPICE UB matrix to Mantid UB matrix
-++++++++++++++++++++++++++++++++++++++++++++++
+----------------------------------------------
 
 Assuming that SPICE UB matrix (3 x 3) is composed as 
  * R11, R12, R13
@@ -73,10 +71,54 @@ Counts of neutron on any detector shall be normalized by its corresponding monit
 count and then be multiplied by a constant specified by user.
 
 Peak Integration with automatic background subtraction by IntegrateEllipsoids
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-----------------------------------------------------------------------------
 
 There is no existing algorithm in Mantid to integrate ellipsoid because
 algorithm *IntegrateEllipsoids* works only for event in unit as time-of-flight.
+
+So far, there is only one algorithm is implemented to integrate peaks for HB3A.
+
+Simple cuboid integration
++++++++++++++++++++++++++
+
+
+This is a simple algorithm for approximate the integrated peak intensity.
+
+Measuring one peak usually contains around 20 Pt. in a same scan.
+In most of the cases, the first and last several measurements (called as *Pt* in SPICE) are
+background.
+Therefore, the background for per measurement can be estimated by averaging the
+summed number of counts normalized by either monitor counts or measuring time.
+
+Estimating background
+=====================
+
+For each measurment, the background :math:`B_i` is calculated as
+
+..math.. B_i = \frac{\sum^{(pt)}_{\{d_i\}}n_{d_i}}{F^{(a)}_{d_i}}
+
+where :math:`F^{(a)}` is the normlization of either time or beam monitor counts,
+and :math:`n_{d_i}` is the neutron counts of measumrent :math:`d_i`.
+
+Then the estimation of the normalized background for each measurement is
+
+..math.. B^{(e)} = \sum_{\{P_i\}}\frac{B_i}{N}
+
+where :math:`N` is the number of measurements used to calculated background.
+
+Integrating a peak in cuboid
+============================
+
+In the Q-space, by masking each measurement, it is assumed that the peak's intensity
+is very close to the number of counts in the unmasked cuboid normalized either by
+measuring time or beam monitor counts with background removed.
+
+..math.. I = \sum_{i} \frac{n_i}{F_i} - B^{(e)}
+
+where :math:`n_i` is the counts of Pt i in the region of interest,
+:math:`F_i` is the normalization factor of Pt i,
+and `B^{(e)}` is the estimated background per Pt with the same
+normalization type of :math:`F_i`.
 
 
 Peak Integration with automatic background subtraction by approximation
