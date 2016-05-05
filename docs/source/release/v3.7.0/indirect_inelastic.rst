@@ -23,6 +23,14 @@ Jump Fit
 - The interface now has the option to plot a guess of what the fit will look like before running the algorithm.
 - The Plot button is no longer present in the interface as it is no longer used.
 
+
+Diffraction
+###########
+
+- OSIRIS Diffraction DiffOnly interface and the :ref `OSIRISDiffractionReduction <algm-OSIRISDiffractionReduction>` algorithm now support the use of multiple
+  contianer runs. Additional validation also ensures you have the same number of sample/vanadium/container runs.
+
+
 Vesuvio
 #######
 

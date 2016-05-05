@@ -464,6 +464,8 @@ public:
   virtual bool removeTie(size_t i) = 0;
   /// Get the tie of i-th parameter
   virtual ParameterTie *getTie(size_t i) const = 0;
+  /// Add a new tie. Derived classes must provide storage for ties
+  virtual void addTie(ParameterTie *tie) = 0;
   //@}
 
   /** @name Constraints */
@@ -542,9 +544,6 @@ protected:
   void convertValue(std::vector<double> &values, Kernel::Unit_sptr &outUnit,
                     boost::shared_ptr<const MatrixWorkspace> ws,
                     size_t wsIndex) const;
-
-  /// Add a new tie. Derived classes must provide storage for ties
-  virtual void addTie(ParameterTie *tie) = 0;
 
   /// Override to declare function attributes
   virtual void declareAttributes() {}
