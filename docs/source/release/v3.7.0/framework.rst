@@ -124,7 +124,7 @@ Performance
 - :ref:`ChangeBinOffset <algm-ChangeBinOffset>` should now run faster for a :ref:`MatrixWorkspace <MatrixWorkspace>` (not EventWorkspaces).
 - Applying ParameterMaps to Detectors now about 30% faster. Algorithms that involve applying ParameterMaps will see performance improvements.
 - This release saw the introduction of the StructuredDetector. This change has reduced load times via :ref:`LoadInstrument <algm-LoadInstrument>` from ~10minutes down to ~1second for the prospective ESS LOKI instrument.
-
+- The destructors for ConvexPolygon and Quadrilateral objects are now faster, especially on Linux. 
 CurveFitting
 ------------
 
