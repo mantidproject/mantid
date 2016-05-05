@@ -316,6 +316,9 @@ def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0):
     ReductionSingleton().reduction_properties["MaskedEdges"] = [nx_low, nx_high,
                                                                 ny_low, ny_high]
 
+def MaskComponent(component_name):
+    ReductionSingleton().reduction_properties["MaskedComponent"] = component_name
+    
 def MaskRectangle(x_min, x_max, y_min, y_max):
     masked_pixels = []
     for ix in range(x_min, x_max+1):

@@ -199,6 +199,9 @@ Pixel masking
 ``MaskDetectorSide(side_to_mask=None)``
     Masks a detector plane. Choices are 'Front', 'Back', and 'None'. 
 
+``MaskComponent(component_name)``
+    Masks the given component_name. See the instrument IDF for the correct component name. Useful for BIOSANS to mask the 'wing_detector'.
+
 
 .. _`Sensitivity correction`:
 

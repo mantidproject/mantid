@@ -18,6 +18,8 @@
 
 #include <boost/regex.hpp>
 #include <boost/shared_array.hpp>
+#include <boost/lexical_cast.hpp>
+
 #include <Poco/Path.h>
 #include <MantidKernel/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
@@ -199,14 +201,14 @@ void LoadSpice2D::exec() {
   moveDetector(detector_distance);
 
   // ugly hack for Biosans wing detector:
+  // it tests if there is metadata tagged with the wing detector
+  // if so, puts the detector in the right angle
   if (metadata.find("Header/west_wing_det_dist") != metadata.end()) {
     // found
-    double distance = 0;
-    from_string<double>(distance, metadata["Header/west_wing_det_dist"],
-                        std::dec);
-    double angle = 0;
-    from_string<double>(angle, metadata["Motor_Positions/det_west_wing_rot"],
-                        std::dec);
+    double distance =
+        boost::lexical_cast<double>(metadata["Header/west_wing_det_dist"]);
+    double angle = boost::lexical_cast<double>(
+        metadata["Motor_Positions/det_west_wing_rot"]);
     rotateDetector("wing_detector", distance, -angle);
   }
 }
@@ -570,7 +572,7 @@ void LoadSpice2D::throwException(Poco::XML::Element *elem,
 }
 
 /**
- * This will rotate the detector named componentName
+ * This will rotate the detector named componentName around z-axis
  *
  *
  * @param angle in degrees

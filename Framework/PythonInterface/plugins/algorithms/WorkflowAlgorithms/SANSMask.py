@@ -37,7 +37,9 @@ class SANSMask(PythonAlgorithm):
         self.declareProperty(IntArrayProperty("MaskedEdges", values=[0,0,0,0],
                                               direction=Direction.Input),
                              "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high")
-
+        
+        self.declareProperty("ComponentName","",doc="Component Name to mask. Consult the IDF!")
+        
         sides = [ "None", "Front", "Back"]
         self.declareProperty("MaskedSide", "None",
                              StringListValidator(sides),
@@ -74,6 +76,12 @@ class SANSMask(PythonAlgorithm):
         if len(masked_dets)>0:
             api.MaskDetectors(Workspace=workspace, DetectorList=masked_dets)
 
+        # Mask component
+        component_name = self.getProperty("ComponentName").value
+        if component_name:
+            Logger("SANSMask").debug("Masking component named %s." % component_name)
+            self._mask_component(workspace, component_name)
+        
         self.setProperty("OutputMessage", "Mask applied")
 
     def _mask_pixels(self, pixel_list, workspace, facility):
@@ -141,5 +149,44 @@ class SANSMask(PythonAlgorithm):
                     id_side.append([ix,iy])
 
         self._mask_pixels(id_side, workspace, facility)
+    
+    def _mask_component(self, workspace, component_name):
+        '''
+        Masks component by name (e.g. "detector1" or "wing_detector".
+        '''        
+        instrument = workspace.getInstrument()
+        try:
+            component = instrument.getComponentByName(component_name)
+        except:
+            Logger("SANSMask").error("Component not valid! %s" % component_name)
+            return
+        
+        masked_detectors = []
+        if component.type() == 'RectangularDetector':
+            id_min = component.minDetectorID()
+            id_max = component.maxDetectorID()
+            masked_detectors = range(id_min,id_max+1)
+        elif  component.type() == 'CompAssembly' or component.type() == 'ObjCompAssembly' or component.type() == 'DetectorComponent':
+            ids_gen = self.__get_ids_for_assembly(component)
+            masked_detectors = list(ids_gen)
+        else:
+            Logger("SANSMask").error("Mask not applied. Component not valid: %s of type %s."%(component.getName(), component.type() ))
+            
+        api.MaskDetectors(Workspace=workspace, DetectorList = masked_detectors)
+    
+    def __get_ids_for_assembly(self,component):
+        '''
+        Recursive function that get a generator for all IDs for a component.
+        Component must be one of these:
+        'CompAssembly'
+        'ObjCompAssembly'
+        'DetectorComponent'
+        '''
+        if component.type()  == 'DetectorComponent':
+            yield component.getID()
+        else:        
+            for i in range(component.nelements()):
+                for j in self.__get_ids_for_assembly(component[i]):
+                    yield j
 
 AlgorithmFactory.subscribe(SANSMask())

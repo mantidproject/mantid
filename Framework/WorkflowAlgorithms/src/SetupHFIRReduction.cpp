@@ -511,10 +511,12 @@ void SetupHFIRReduction::init() {
   declareProperty("MaskedSide", "None",
                   boost::make_shared<StringListValidator>(maskOptions),
                   "Mask one side of the detector");
+  declareProperty("MaskedComponent", "", "Component Name to mask according to the IDF file.");
 
   setPropertyGroup("MaskedDetectorList", mask_grp);
   setPropertyGroup("MaskedEdges", mask_grp);
   setPropertyGroup("MaskedSide", mask_grp);
+  setPropertyGroup("MaskedComponent", mask_grp);
 
   // Absolute scale
   std::string abs_scale_grp = "Absolute Scale";
@@ -773,6 +775,8 @@ void SetupHFIRReduction::exec() {
   const std::string maskDetList = getPropertyValue("MaskedDetectorList");
   const std::string maskEdges = getPropertyValue("MaskedEdges");
   const std::string maskSide = getProperty("MaskedSide");
+  const std::string maskComponent = getPropertyValue("MaskedComponent");
+
 
   IAlgorithm_sptr maskAlg = createChildAlgorithm("SANSMask");
   // The following is broken, try PropertyValue
@@ -780,6 +784,7 @@ void SetupHFIRReduction::exec() {
   maskAlg->setPropertyValue("MaskedDetectorList", maskDetList);
   maskAlg->setPropertyValue("MaskedEdges", maskEdges);
   maskAlg->setProperty("MaskedSide", maskSide);
+  maskAlg->setProperty("ComponentName", maskComponent);
   auto maskAlgProp = make_unique<AlgorithmProperty>("MaskAlgorithm");
   maskAlgProp->setValue(maskAlg->toString());
   reductionManager->declareProperty(std::move(maskAlgProp));
