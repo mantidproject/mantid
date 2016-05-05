@@ -86,6 +86,19 @@ bool WorkspaceGroup::isInChildGroup(const Workspace &workspaceToCheck) const {
 }
 
 /**
+ * Sort members by Workspace name
+ */
+void WorkspaceGroup::sortMembersByName() {
+  if (this->size() == 0) {
+    return;
+  }
+  std::sort(m_workspaces.begin(), m_workspaces.end(),
+            [](const Workspace_sptr &w1, const Workspace_sptr &w2) {
+              return (w1->name() < w2->name());
+            });
+}
+
+/**
  * Adds a workspace to the group. The workspace does not have to be in the ADS
  * @param workspace :: A shared pointer to a workspace to add. If the workspace
  * already exists give a warning.

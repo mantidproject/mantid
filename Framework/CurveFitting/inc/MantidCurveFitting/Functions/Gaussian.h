@@ -50,17 +50,21 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport Gaussian : public API::IPeakFunction {
 public:
+  Gaussian();
   /// overwrite IPeakFunction base class methods
-  double centre() const override { return getParameter("PeakCentre"); }
-  double height() const override { return getParameter("Height"); }
-  double fwhm() const override {
-    return 2.0 * sqrt(2.0 * std::log(2.0)) * getParameter("Sigma");
-  }
-  void setCentre(const double c) override { setParameter("PeakCentre", c); }
-  void setHeight(const double h) override { setParameter("Height", h); }
-  void setFwhm(const double w) override {
-    setParameter("Sigma", w / (2.0 * sqrt(2.0 * std::log(2.0))));
-  }
+  double centre() const override;
+  double height() const override;
+  double fwhm() const override;
+  double intensity() const override;
+  void setCentre(const double c) override;
+  void setHeight(const double h) override;
+  void setFwhm(const double w) override;
+  void setIntensity(const double i) override;
+
+  void fixCentre() override;
+  void unfixCentre() override;
+  void fixIntensity() override;
+  void unfixIntensity() override;
 
   /// overwrite IFunction base class methods
   std::string name() const override { return "Gaussian"; }
@@ -75,6 +79,8 @@ protected:
                           const size_t nData) override;
   /// overwrite IFunction base class method, which declare function parameters
   void init() override;
+  /// Intensity cache to help recover form Sigma==0 situation
+  mutable double m_intensityCache;
 };
 
 } // namespace Functions

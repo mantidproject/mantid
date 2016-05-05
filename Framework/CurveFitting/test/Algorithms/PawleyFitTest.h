@@ -133,7 +133,7 @@ public:
     // Error of 'c' should also be small
     TS_ASSERT_LESS_THAN(fabs(cellWs->cell<double>(2, 2)), 1e-4);
     // b should be almost equal to 4.06
-    TS_ASSERT_DELTA(cellWs->cell<double>(2, 1), 4.06, 2e-3);
+    TS_ASSERT_DELTA(cellWs->cell<double>(2, 1), 4.06, 3e-3);
 
     // Check number of peak parameters.
     ITableWorkspace_sptr peakWs =

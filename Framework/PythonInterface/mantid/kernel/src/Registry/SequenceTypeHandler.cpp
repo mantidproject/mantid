@@ -78,11 +78,14 @@ void SequenceTypeHandler<ContainerType>::set(
  * @returns A pointer to a newly constructed property instance
  */
 template <typename ContainerType>
-Kernel::Property *SequenceTypeHandler<ContainerType>::create(
+std::unique_ptr<Kernel::Property> SequenceTypeHandler<ContainerType>::create(
     const std::string &name, const boost::python::object &defaultValue,
     const boost::python::object &validator,
     const unsigned int direction) const {
   typedef typename ContainerType::value_type DestElementType;
+  using Kernel::IValidator;
+  using Kernel::PropertyWithValue;
+  using boost::python::extract;
 
   ContainerType valueInC;
   // Current workaround for things that still pass back wrapped vectors...
@@ -97,14 +100,13 @@ Kernel::Property *SequenceTypeHandler<ContainerType>::create(
     valueInC = std::vector<DestElementType>(1, scalar);
   }
 
-  Kernel::Property *valueProp(nullptr);
+  std::unique_ptr<Kernel::Property> valueProp;
   if (isNone(validator)) {
-    valueProp =
-        new Kernel::PropertyWithValue<ContainerType>(name, valueInC, direction);
+    valueProp = Mantid::Kernel::make_unique<PropertyWithValue<ContainerType>>(
+        name, valueInC, direction);
   } else {
-    const Kernel::IValidator *propValidator =
-        boost::python::extract<Kernel::IValidator *>(validator);
-    valueProp = new Kernel::PropertyWithValue<ContainerType>(
+    const IValidator *propValidator = extract<IValidator *>(validator);
+    valueProp = Mantid::Kernel::make_unique<PropertyWithValue<ContainerType>>(
         name, valueInC, propValidator->clone(), direction);
   }
   return valueProp;

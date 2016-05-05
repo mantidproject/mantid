@@ -1311,7 +1311,7 @@ void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
     detIDMap[liveDetectorsCount] = i;
     L2[liveDetectorsCount] = spDet->getDistance(*sample);
 
-    double polar = inputWS->detectorTwoTheta(spDet);
+    double polar = inputWS->detectorTwoTheta(*spDet);
     double azim = spDet->getPhi();
     TwoTheta[liveDetectorsCount] = polar;
     Azimuthal[liveDetectorsCount] = azim;

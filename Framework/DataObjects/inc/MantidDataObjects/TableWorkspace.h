@@ -80,10 +80,7 @@ class MANTID_DATAOBJECTS_DLL TableWorkspace : public API::ITableWorkspace {
 public:
   /// Constructor.
   TableWorkspace(size_t nrows = 0);
-  /// Returns a clone of the workspace
-  std::unique_ptr<TableWorkspace> clone() const {
-    return std::unique_ptr<TableWorkspace>(doClone());
-  }
+
   TableWorkspace &operator=(const TableWorkspace &other) = delete;
   /// Return the workspace typeID
   const std::string id() const override { return "TableWorkspace"; }
@@ -296,7 +293,10 @@ protected:
   TableWorkspace(const TableWorkspace &other);
 
 private:
-  TableWorkspace *doClone() const override { return new TableWorkspace(*this); }
+  // TableWorkspace *doClone() const override { return new
+  // TableWorkspace(*this); }
+  ITableWorkspace *
+  doCloneColumns(const std::vector<std::string> &colNames) const override;
 
   /// template method to find a given value in a table.
   template <typename Type>

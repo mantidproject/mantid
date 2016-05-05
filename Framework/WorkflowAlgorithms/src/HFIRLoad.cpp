@@ -8,7 +8,7 @@
 #include "Poco/NumberFormatter.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/PropertyManager.h"
 
