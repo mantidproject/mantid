@@ -379,7 +379,6 @@ public:
   *
   * @param splittedBaseName contains the bank number and run number
   * @param selectedFile path of the selected file
-  * @param bankFileVector contains directories of selected run number
   */
   virtual void addBankItems(std::vector<std::string> splittedBaseName,
                             QString selectedFile) = 0;
