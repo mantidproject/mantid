@@ -40,6 +40,10 @@ ISIS Reflectometry (Polref)
 
 .. figure:: /images/ISISReflectometryPolref_newTableView.png
 
+- User can now specific stitching parameters (StartOverlaps, EndOverlaps, ScaleLHSWorkspace and Rebinning-Parameters)
+  from the new stitching tab in the Options dialog for the interface `#15677 <https://github.com/mantidproject/mantid/pull/15677>`_
+
+
 ISIS Reflectometry
 ##################
 

@@ -79,8 +79,7 @@ ReflMainViewPresenter::ReflMainViewPresenter(
 }
 
 ReflMainViewPresenter::~ReflMainViewPresenter() {}
-
-/**
+/*
 Used by the view to tell the presenter something has changed
 */
 void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
@@ -246,10 +245,8 @@ void ReflMainViewPresenter::transfer() {
       }
     }
   }
-
   m_tablePresenter->transfer(results.getTransferRuns());
 }
-
 /**
 * Select and make a transfer strategy on demand based. Pick up the
 * user-provided transfer strategy to do this.

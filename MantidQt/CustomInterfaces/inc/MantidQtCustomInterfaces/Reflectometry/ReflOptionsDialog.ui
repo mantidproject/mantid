@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>372</width>
-    <height>222</height>
+    <width>477</width>
+    <height>296</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -16,6 +16,18 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>400</width>
+    <height>200</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1000</width>
+    <height>1000</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>Reflectometry UI Options</string>
   </property>
@@ -23,7 +35,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tabWarnings">
       <attribute name="title">
@@ -177,6 +189,172 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tabStitching">
+      <attribute name="title">
+       <string>Stitching</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="0">
+        <widget class="QCheckBox" name="checkScaleLHSWorkspace">
+         <property name="toolTip">
+          <string>Choose to scale the left hand workspace when stitching. The RHS workspace is scaled by default.</string>
+         </property>
+         <property name="text">
+          <string>Scale LHS Workspace</string>
+         </property>
+         <property name="reflOptionName" stdset="0">
+          <string>ScaleLHSWorkspace</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QCheckBox" name="checkStartOverlaps">
+         <property name="text">
+          <string>StartOverlaps</string>
+         </property>
+         <property name="reflOptionName" stdset="0">
+          <string>StartOverlaps</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLineEdit" name="lineStartOverlaps">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="acceptDrops">
+          <bool>false</bool>
+         </property>
+         <property name="toolTip">
+          <string>List of values defining the start overlaps for stitching</string>
+         </property>
+         <property name="placeholderText">
+          <string>0.0,2.0</string>
+         </property>
+         <property name="reflOptionName" stdset="0">
+          <string>StartOverlapsList</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="6" column="0">
+        <widget class="QCheckBox" name="checkEndOverlaps">
+         <property name="text">
+          <string>EndOverlaps</string>
+         </property>
+         <property name="reflOptionName" stdset="0">
+          <string>EndOverlaps</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QLineEdit" name="lineEndOverlaps">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="toolTip">
+          <string>List of values defining the end overlaps for stitchin</string>
+         </property>
+         <property name="placeholderText">
+          <string>1.0,3.0</string>
+         </property>
+         <property name="reflOptionName" stdset="0">
+          <string>EndOverlapsList</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0">
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="10" column="0">
+        <widget class="QCheckBox" name="checkParams">
+         <property name="text">
+          <string>Params</string>
+         </property>
+         <property name="reflOptionName" stdset="0">
+          <string>Params</string>
+         </property>
+        </widget>
+       </item>
+       <item row="12" column="0">
+        <widget class="QLineEdit" name="lineParams">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="toolTip">
+          <string>A list of value for the stitching parameters. Defined as &quot;&lt;start&gt;,&lt;step&gt;,&lt;end&gt;&quot;</string>
+         </property>
+         <property name="placeholderText">
+          <string>0.0,0.5,3.0</string>
+         </property>
+         <property name="reflOptionName" stdset="0">
+          <string>ParamsList</string>
+         </property>
+        </widget>
+       </item>
+       <item row="13" column="0">
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="14" column="0">
+        <spacer name="verticalSpacer_5">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
@@ -286,6 +464,54 @@
     <hint type="destinationlabel">
      <x>226</x>
      <y>146</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkStartOverlaps</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lineStartOverlaps</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>240</x>
+     <y>77</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>240</x>
+     <y>100</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkEndOverlaps</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lineEndOverlaps</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>240</x>
+     <y>130</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>240</x>
+     <y>153</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkParams</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lineParams</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>240</x>
+     <y>183</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>240</x>
+     <y>207</y>
     </hint>
    </hints>
   </connection>

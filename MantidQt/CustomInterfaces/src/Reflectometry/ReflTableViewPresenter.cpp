@@ -15,6 +15,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidKernel/Utils.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtCustomInterfaces/ParseKeyValueString.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
@@ -324,19 +325,47 @@ void ReflTableViewPresenter::stitchRows(std::set<int> rows) {
   std::vector<double> startOverlaps;
   std::vector<double> endOverlaps;
 
-  // Go through each row and prepare the properties
+  const bool isStartOverlapsEnabled = m_options["StartOverlaps"].toBool();
+  const bool isEndOverlapsEnabled = m_options["EndtOverlaps"].toBool();
+  const bool isParamsEnabled = m_options["Params"].toBool();
+
+  // fetch stitching properties from Options Dialog if they are available
+  if (isStartOverlapsEnabled) {
+    std::string startOverlapsStr =
+        m_options["StartOverlapsList"].toString().toStdString();
+    startOverlaps = Mantid::Kernel::VectorHelper::splitStringIntoVector<double>(
+        startOverlapsStr);
+  }
+  if (isEndOverlapsEnabled) {
+    std::string endOverlapsStr =
+        m_options["EndOverlapsList"].toString().toStdString();
+    endOverlaps = Mantid::Kernel::VectorHelper::splitStringIntoVector<double>(
+        endOverlapsStr);
+  }
+  if (isParamsEnabled) {
+    std::string paramsStr = m_options["ParamsList"].toString().toStdString();
+    params =
+        Mantid::Kernel::VectorHelper::splitStringIntoVector<double>(paramsStr);
+  }
+  // Go through each row and prepare the properties if they have not been set
+  // from Options
   for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
+    if (!isStartOverlapsEnabled) {
+      const double qmin =
+          m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_QMIN))
+              .toDouble();
+      startOverlaps.push_back(qmin);
+    }
+    if (!isEndOverlapsEnabled) {
+      const double qmax =
+          m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_QMAX))
+              .toDouble();
+      endOverlaps.push_back(qmax);
+    }
     const std::string runStr =
         m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_RUNS))
             .toString()
             .toStdString();
-    const double qmin =
-        m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_QMIN))
-            .toDouble();
-    const double qmax =
-        m_model->data(m_model->index(*rowIt, ReflTableSchema::COL_QMAX))
-            .toDouble();
-
     Workspace_sptr runWS = prepareRunWorkspace(runStr);
     if (runWS) {
       const std::string runNo = getRunNumber(runWS);
@@ -345,27 +374,26 @@ void ReflTableViewPresenter::stitchRows(std::set<int> rows) {
         workspaceNames.emplace_back("IvsQ_" + runNo);
       }
     }
-
-    startOverlaps.push_back(qmin);
-    endOverlaps.push_back(qmax);
   }
+  // prepare Params if it has not been set from Options
+  if (!isParamsEnabled) {
+    double dqq =
+        m_model->data(m_model->index(*(rows.begin()), ReflTableSchema::COL_DQQ))
+            .toDouble();
 
-  double dqq =
-      m_model->data(m_model->index(*(rows.begin()), ReflTableSchema::COL_DQQ))
-          .toDouble();
-
-  // params are qmin, -dqq, qmax for the final output
-  params.push_back(
-      *std::min_element(startOverlaps.begin(), startOverlaps.end()));
-  params.push_back(-dqq);
-  params.push_back(*std::max_element(endOverlaps.begin(), endOverlaps.end()));
-
+    // params are qmin, -dqq, qmax for the final output
+    params.push_back(
+        *std::min_element(startOverlaps.begin(), startOverlaps.end()));
+    params.push_back(-dqq);
+    params.push_back(*std::max_element(endOverlaps.begin(), endOverlaps.end()));
+  }
   // startOverlaps and endOverlaps need to be slightly offset from each other
   // See usage examples of Stitch1DMany to see why we discard first qmin and
   // last qmax
-  startOverlaps.erase(startOverlaps.begin());
-  endOverlaps.pop_back();
-
+  if (!isStartOverlapsEnabled)
+    startOverlaps.erase(startOverlaps.begin());
+  if (!isEndOverlapsEnabled)
+    endOverlaps.pop_back();
   std::string outputWSName = "IvsQ_" + boost::algorithm::join(runs, "_");
 
   // If the previous stitch result is in the ADS already, we'll need to remove
@@ -383,6 +411,10 @@ void ReflTableViewPresenter::stitchRows(std::set<int> rows) {
   algStitch->setProperty("Params", params);
   algStitch->setProperty("StartOverlaps", startOverlaps);
   algStitch->setProperty("EndOverlaps", endOverlaps);
+  // retrieve ScaleLHSWorkspace checkbox as boolean and negate it for
+  // ScaleRHSWorkspace property
+  algStitch->setProperty("ScaleRHSWorkspace",
+                         !m_options["ScaleLHSWorkspace"].toBool());
 
   algStitch->execute();
 
@@ -927,7 +959,6 @@ void ReflTableViewPresenter::reduceRow(int rowNo) {
 
     m_tableDirty = true;
   }
-
   // We need to make sure that qmin and qmax are respected, so we rebin to
   // those limits here.
   IAlgorithm_sptr algCrop = AlgorithmManager::Instance().create("Rebin");
@@ -970,7 +1001,7 @@ void ReflTableViewPresenter::insertRow(int index) {
     return;
   // Set the default scale to 1.0
   m_model->setData(m_model->index(index, ReflTableSchema::COL_SCALE), 1.0);
-  // Set the group id of the new row
+  // Set the group id of the new rowshow
   m_model->setData(m_model->index(index, ReflTableSchema::COL_GROUP), groupId);
 }
 
@@ -1602,6 +1633,13 @@ void ReflTableViewPresenter::initOptions() {
   m_options["RoundQMinPrecision"] = 3;
   m_options["RoundQMaxPrecision"] = 3;
   m_options["RoundDQQPrecision"] = 3;
+  m_options["ScaleLHSWorkspace"] = false;
+  m_options["StartOverlaps"] = false;
+  m_options["EndOverlaps"] = false;
+  m_options["Params"] = false;
+  m_options["StartOverlapsList"];
+  m_options["EndOverlapsList"];
+  m_options["ParamsList"];
 
   // Load saved values from disk
   m_tableView->loadSettings(m_options);

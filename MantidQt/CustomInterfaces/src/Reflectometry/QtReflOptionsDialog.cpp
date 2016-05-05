@@ -5,6 +5,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 /** Constructor */
 QtReflOptionsDialog::QtReflOptionsDialog(
+
     ReflTableView *view, boost::shared_ptr<IReflTablePresenter> presenter)
     : QDialog(dynamic_cast<QtReflMainView *>(view)), m_presenter(presenter) {
   initLayout();
@@ -58,6 +59,11 @@ void QtReflOptionsDialog::saveOptions() {
       options[it->first] = spinbox->value();
       continue;
     }
+    QLineEdit *lineEdit = findChild<QLineEdit *>(widgetName);
+    if (lineEdit) {
+      options[it->first] = lineEdit->text();
+      continue;
+    }
   }
 
   // Update the presenter's options
@@ -84,6 +90,11 @@ void QtReflOptionsDialog::loadOptions() {
     if (spinbox) {
       spinbox->setValue(it->second.toInt());
       continue;
+    }
+
+    QLineEdit *lineEdit = findChild<QLineEdit *>(widgetName);
+    if (lineEdit) {
+      lineEdit->setText(it->second.toString());
     }
   }
 }
