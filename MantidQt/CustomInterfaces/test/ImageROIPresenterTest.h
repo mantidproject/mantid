@@ -390,6 +390,52 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView));
   }
 
+  void test_updateColorMapEmpty() {
+    testing::NiceMock<MockImageROIView> mockView;
+    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, askColorMapFile())
+        .Times(1)
+        .WillOnce(Return(""));
+
+    // Should not get there
+    EXPECT_CALL(mockView, updateColorMap(testing::_)).Times(0);
+
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IImageROIPresenter::UpdateColorMap);
+
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void test_updateColorMapOK() {
+    testing::NiceMock<MockImageROIView> mockView;
+    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+
+    const std::string filename = "test_inexistent_colormap.map";
+    EXPECT_CALL(mockView, askColorMapFile())
+        .Times(1)
+        .WillOnce(Return(filename));
+
+    EXPECT_CALL(mockView, updateColorMap(filename)).Times(1);
+
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IImageROIPresenter::UpdateColorMap);
+
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView));
+  }
+
   void test_selectCoR() {
     testing::NiceMock<MockImageROIView> mockView;
     MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);

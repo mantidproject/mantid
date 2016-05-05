@@ -249,6 +249,21 @@ public:
   virtual std::string askImgOrStackPath() = 0;
 
   /**
+   * Get the path of a color map file from the user.
+   *
+   * @return path as a string (empty if the selection is canceled or
+   * fails otherwise)
+   */
+  virtual std::string askColorMapFile() = 0;
+
+  /**
+   * Update the current color map (and refresh the image with it).
+   *
+   * @param filename name of a color map file
+   */
+  virtual void updateColorMap(const std::string &filename) = 0;
+
+  /**
    * Save settings (normally when closing this widget).
    */
   virtual void saveSettings() const = 0;

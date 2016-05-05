@@ -283,7 +283,7 @@ void ImageROIViewQtWidget::initLayout() {
 
   // the factory default would be "Gray.map"
   if (!m_colorMapFilename.empty())
-    loadColorMap(m_colorMapFilename);
+    updateColorMap(m_colorMapFilename);
   m_ui.colorBarWidget->setViewRange(1, 65536);
 
   // presenter that knows how to handle a IImageROIView should take care
@@ -1138,23 +1138,19 @@ void ImageROIViewQtWidget::readSettings() {
   qs.endGroup();
 }
 
-void ImageROIViewQtWidget::loadColorMapRequest() { loadColorMap(""); }
+void ImageROIViewQtWidget::loadColorMapRequest() {
+  m_presenter->notify(IImageROIPresenter::UpdateColorMap);
+}
 
-void ImageROIViewQtWidget::loadColorMap(const std::string &initial) {
-  QString filename;
-  if (initial.empty()) {
-    filename = MantidColorMap::loadMapDialog(
-        QString::fromStdString(m_colorMapFilename), this);
-    if (filename.isEmpty())
-      return;
-  } else {
-    filename = QString::fromStdString(initial);
-  }
+std::string ImageROIViewQtWidget::askColorMapFile() {
+  QString filename = MantidColorMap::loadMapDialog(
+      QString::fromStdString(m_colorMapFilename), this);
+  return filename.toStdString();
+}
 
-  m_colorMapFilename = filename.toStdString();
-
+void ImageROIViewQtWidget::updateColorMap(const std::string &filename) {
   // Load from file
-  m_ui.colorBarWidget->getColorMap().loadMap(filename);
+  m_ui.colorBarWidget->getColorMap().loadMap(QString::fromStdString(filename));
   m_ui.colorBarWidget->updateColorMap();
 }
 

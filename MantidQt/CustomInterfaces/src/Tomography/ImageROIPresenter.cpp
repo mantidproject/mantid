@@ -73,6 +73,10 @@ void ImageROIPresenter::notify(Notification notif) {
     processPlayStartStop();
     break;
 
+  case IImageROIPresenter::UpdateColorMap:
+    processUpdateColorMap();
+    break;
+
   case IImageROIPresenter::SelectCoR:
     processSelectCoR();
     break;
@@ -216,7 +220,7 @@ void ImageROIPresenter::processNewStack(bool singleImg) {
       if (ads.doesExist(g_wsgDarksName)) {
         ads.remove(g_wsgDarksName);
       }
-    } catch(std::runtime_error &rexc) {
+    } catch (std::runtime_error &rexc) {
     }
 
     loadFITSImage(m_stackPath, g_wsgName);
@@ -363,6 +367,14 @@ void ImageROIPresenter::processPlayStartStop() {
     m_playStatus = true;
     m_view->playStart();
   }
+}
+
+void ImageROIPresenter::processUpdateColorMap() {
+  std::string filename = m_view->askColorMapFile();
+  if (filename.empty())
+    return;
+
+  m_view->updateColorMap(filename);
 }
 
 void ImageROIPresenter::processSelectCoR() {

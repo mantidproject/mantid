@@ -118,6 +118,10 @@ public:
 
   std::string askImgOrStackPath() override;
 
+  std::string askColorMapFile() override;
+
+  void updateColorMap(const std::string &filename) override;
+
   void saveSettings() const override;
 
 protected:
@@ -205,8 +209,6 @@ private:
   QPixmap transferWSImageToQPixmap(const Mantid::API::MatrixWorkspace_sptr ws,
                                    size_t width, size_t height,
                                    float rotationAngle);
-
-  void loadColorMap(const std::string &initial);
 
   void grabCoRFromWidgets();
   void grabROIFromWidgets();

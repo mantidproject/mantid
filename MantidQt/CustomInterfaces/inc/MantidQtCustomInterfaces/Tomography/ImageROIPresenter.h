@@ -70,6 +70,7 @@ protected:
 
   // Methods that process notifications from view->presenter
   void processInit();
+
   void processBrowseImage();
   void processBrowseStack();
   void processNewStack(bool singleImage);
@@ -77,6 +78,8 @@ protected:
   void processChangeRotation();
   void processPlayStartStop();
   void processUpdateImgIndex();
+  void processUpdateColorMap();
+
   void processSelectCoR();
   void processSelectROI();
   void processSelectNormalization();
@@ -86,6 +89,7 @@ protected:
   void processResetCoR();
   void processResetROI();
   void processResetNormalization();
+
   void processShutDown();
 
 private slots:
