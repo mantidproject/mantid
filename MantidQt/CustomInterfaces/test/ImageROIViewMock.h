@@ -76,6 +76,9 @@ public:
   // void updateRotationAngle(float angle)
   MOCK_METHOD1(updateRotationAngle, void(float));
 
+  // std::string askSingleImagePath();
+  MOCK_METHOD0(askSingleImagePath, std::string());
+
   // std::string askImgOrStackPath();
   MOCK_METHOD0(askImgOrStackPath, std::string());
 
