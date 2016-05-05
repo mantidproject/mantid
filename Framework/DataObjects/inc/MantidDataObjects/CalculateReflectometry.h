@@ -16,7 +16,6 @@ protected:
   const double to_radians_factor = M_PI / 180.0;
 
 public:
-
   virtual ~CalculateReflectometry() = default;
 
   /**
