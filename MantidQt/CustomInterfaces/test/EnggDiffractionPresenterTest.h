@@ -1211,7 +1211,7 @@ public:
 
     // No errors/0 warnings. There will be no errors or warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::FittingRunNo);
   }
@@ -1240,7 +1240,7 @@ public:
     pres.notify(IEnggDiffractionPresenter::FittingRunNo);
   }
 
-  void disable_test_fitting_runno_multiple_run() {
+  void test_fitting_runno_multiple_run() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     EnggDiffPresenterNoThread pres(&mockView);
     // 23931-23934
@@ -1270,11 +1270,14 @@ public:
         .Times(2)
         .WillRepeatedly(Return(true));
 
+    // could possibly feature to create unique path
+
     EXPECT_CALL(mockView, getFocusDir()).Times(1);
 
-    // No errors/0 warnings.
+    // No errors/1 warnings. The warning will be produced because there
+    // is no focus output directory within the settings tab
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::FittingRunNo);
   }
@@ -1282,6 +1285,9 @@ public:
   void disable_test_fitting_runno_single_run() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     EnggDiffPresenterNoThread pres(&mockView);
+
+    // focus directory need to be set for this in the settings
+
     // 23931-23934
     std::vector<std::string> RunNumDir;
     RunNumDir.emplace_back("241391");
@@ -1325,11 +1331,11 @@ public:
     EnggDiffPresenterNoThread pres(&mockView);
     // Tests the browse directory file
     std::vector<std::string> RunNumDir;
-    RunNumDir.emplace_back("241391");
+    RunNumDir.emplace_back("241395");
 
     std::vector<std::string> splittedFileVec;
     splittedFileVec.emplace_back("ENGINX");
-    splittedFileVec.emplace_back("23931");
+    splittedFileVec.emplace_back("241395");
     splittedFileVec.emplace_back("focused");
     splittedFileVec.emplace_back("bank");
     splittedFileVec.emplace_back("1");
@@ -1337,7 +1343,7 @@ public:
     // inputs from user - given multiple run
     EXPECT_CALL(mockView, getFittingRunNo())
         .Times(2)
-        .WillRepeatedly(Return("ENGINX_241391_focused_texture_bank_1"));
+        .WillRepeatedly(Return(g_focusedBankFile));
 
     EXPECT_CALL(mockView, getFittingRunNumVec())
         .Times(1)
@@ -1347,20 +1353,18 @@ public:
         .Times(1)
         .WillOnce(Return(splittedFileVec));
 
-    EXPECT_CALL(mockView, getFittingMultiRunMode())
-        .Times(1)
-        .WillOnce(Return(false));
+    EXPECT_CALL(mockView, getFittingMultiRunMode()).Times(0);
 
-    EXPECT_CALL(mockView, setFittingRunNumVec(testing::_)).Times(1);
+    EXPECT_CALL(mockView, setFittingRunNumVec(testing::_)).Times(0);
 
-    EXPECT_CALL(mockView, addRunNoItem(testing::_, testing::_)).Times(1);
+    EXPECT_CALL(mockView, addRunNoItem(testing::_, testing::_)).Times(0);
 
     EXPECT_CALL(mockView, addBankItems(testing::_, testing::_, testing::_))
-        .Times(1);
+        .Times(0);
 
-    // No errors/0 warnings.
+    // No errors/0 warnings. File entered is not found
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::FittingRunNo);
   }
@@ -1467,7 +1471,7 @@ const std::string EnggDiffractionPresenterTest::g_focusedRun =
 const std::string EnggDiffractionPresenterTest::g_validRunNo = "228061";
 
 const std::string EnggDiffractionPresenterTest::g_focusedBankFile =
-    "ENGINX_241391_focused_texture_bank_1";
+    "ENGINX_241395_focused_texture_bank_1";
 
 const std::string EnggDiffractionPresenterTest::g_focusedFittingRunNo =
     "241391-241394";

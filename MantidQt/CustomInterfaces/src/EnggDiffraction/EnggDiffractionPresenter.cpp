@@ -491,16 +491,27 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
         std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] + "_" +
                                splitBaseName[2] + "_" + splitBaseName[3];
         std::string strBankDir = bankDir.toString();
-        updateFittingDirVec(strBankDir, foc_file, false, runnoDirVector);
-        m_view->setFittingRunNumVec(runnoDirVector);
 
-        // add bank to the combo-box and list view
-        m_view->addBankItems(splitBaseName, focusedFile, runnoDirVector);
-        runNoVec.clear();
-        runNoVec.push_back(splitBaseName[1]);
-        auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
-        if (!fittingMultiRunMode)
-          m_view->addRunNoItem(runNoVec, false);
+        if (strBankDir.empty()) {
+          m_view->userWarning(
+              "Invalid Input",
+              "Please check that a valid directory is "
+              "set for Output Folder under Focusing Settings on the "
+              "settings tab. "
+              "Please try again");
+        } else {
+
+          updateFittingDirVec(strBankDir, foc_file, false, runnoDirVector);
+          m_view->setFittingRunNumVec(runnoDirVector);
+
+          // add bank to the combo-box and list view
+          m_view->addBankItems(splitBaseName, focusedFile, runnoDirVector);
+          runNoVec.clear();
+          runNoVec.push_back(splitBaseName[1]);
+          auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
+          if (!fittingMultiRunMode)
+            m_view->addRunNoItem(runNoVec, false);
+        }
       }
       // assuming that no directory is found so look for number
       // if run number length greater
@@ -521,17 +532,28 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
       } else {
         // if given a single run number instead
         auto focusDir = m_view->getFocusDir();
-        updateFittingDirVec(focusDir, strFocusedFile, false, runnoDirVector);
-        m_view->setFittingRunNumVec(runnoDirVector);
 
-        // add bank to the combo-box and list view
-        m_view->addBankItems(splitBaseName, focusedFile, runnoDirVector);
-        runNoVec.clear();
-        runNoVec.push_back(strFocusedFile);
+        if (focusDir.empty()) {
+          m_view->userWarning(
+              "Invalid Input",
+              "Please check that a valid directory is "
+              "set for Output Folder under Focusing Settings on the "
+              "settings tab. "
+              "Please try again");
+        } else {
 
-        auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
-        if (!fittingMultiRunMode)
-          m_view->addRunNoItem(runNoVec, false);
+          updateFittingDirVec(focusDir, strFocusedFile, false, runnoDirVector);
+          m_view->setFittingRunNumVec(runnoDirVector);
+
+          // add bank to the combo-box and list view
+          m_view->addBankItems(splitBaseName, focusedFile, runnoDirVector);
+          runNoVec.clear();
+          runNoVec.push_back(strFocusedFile);
+
+          auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
+          if (!fittingMultiRunMode)
+            m_view->addRunNoItem(runNoVec, false);
+        }
       }
     }
     // set the directory here to the first in the vector if its not empty
@@ -610,18 +632,27 @@ void EnggDiffractionPresenter::enableMultiRun(
       }
 
       auto focusDir = m_view->getFocusDir();
-      // if given a single run number instead
-      for (size_t i = 0; i < RunNumberVec.size(); i++) {
-        updateFittingDirVec(focusDir, RunNumberVec[i], true,
-                            fittingRunNoDirVec);
-      }
-      int diff = (lastNum - firstNum) + 1;
-      auto global_vec_size = fittingRunNoDirVec.size();
-      if (size_t(diff) == global_vec_size) {
+      if (focusDir.empty()) {
+        m_view->userWarning(
+            "Invalid Input",
+            "Please check that a valid directory is "
+            "set for Output Folder under Focusing Settings on the "
+            "settings tab. "
+            "Please try again");
+      } else {
+        // if given a single run number instead
+        for (size_t i = 0; i < RunNumberVec.size(); i++) {
+          updateFittingDirVec(focusDir, RunNumberVec[i], true,
+                              fittingRunNoDirVec);
+        }
+        int diff = (lastNum - firstNum) + 1;
+        auto global_vec_size = fittingRunNoDirVec.size();
+        if (size_t(diff) == global_vec_size) {
 
-        m_view->addRunNoItem(RunNumberVec, true);
+          m_view->addRunNoItem(RunNumberVec, true);
 
-        m_view->setBankEmit();
+          m_view->setBankEmit();
+        }
       }
     } else {
       m_view->userWarning("Invalid Run Number",
