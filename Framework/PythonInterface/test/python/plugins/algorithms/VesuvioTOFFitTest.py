@@ -82,8 +82,8 @@ class VesuvioTOFFitTest(unittest.TestCase):
 
         self.assertAlmostEqual(0.0279822, output_ws.readY(0)[0])
         self.assertAlmostEqual(0.0063585, output_ws.readY(0)[-1])
-        self.assertTrue(abs(-0.012 - output_ws.readY(1)[0]) < 0.002)
-        self.assertTrue(abs(0.0056 - output_ws.readY(1)[-1]) < 0.0004)
+        self.assertTrue(abs(-0.012 - output_ws.readY(1)[0]) < 0.004)
+        self.assertTrue(abs(0.0056 - output_ws.readY(1)[-1]) < 0.008)
     # -------------- Failure cases ------------------
 
     def test_empty_masses_raises_error(self):
