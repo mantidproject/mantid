@@ -17,6 +17,12 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
                  'dspacing': 'd-spacing',
                  'Q': 'momentum transfer'}
 
+    _dtype = None
+    _compressArgs = {}
+    _tempNames = []
+    _sample = None
+    _sourcePos = None
+
     def category(self):
         return "DataHandling\\Nexus"
 
@@ -27,7 +33,6 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         return "Save powder diffraction data to a NeXus file"
 
     def _determineDtype(self):
-        # TODO read from a property
         datatype = self.getProperty('DataType').value
 
         if datatype == 'float32':
@@ -39,8 +44,6 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
 
     def _determineCompression(self):
         compression = self.getProperty('Compression').value
-
-        self._compressArgs = {}
 
         if not str(compression) is "None":
             self._compressArgs['compression'] = compression
@@ -113,14 +116,13 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         return nxinstrument
 
     def _writeY(self, nxdata, wksp, index):
-        yUnit = str(wksp.YUnit())
-
         temp = nxdata.create_dataset(name='data', data=wksp.readY(index),
                                      dtype=self._dtype,
                                      **self._compressArgs)
         temp.attrs['uncertainties'] = 'errors'
         temp.attrs['axes'] = 'dspacing'
         temp.attrs['signal'] = 1
+        temp.attrs['units'] = str(wksp.YUnit())
         nxdata.create_dataset(name='errors', data=wksp.readE(index),
                               dtype=self._dtype,
                               **self._compressArgs)
@@ -206,7 +208,6 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         xUnit = wksp.getAxis(0).getUnit()
         x_id = xUnit.unitID()
 
-        self._tempNames = []
         result = []
         for target in ['TOF', 'dSpacing', 'MomentumTransfer']:
             if str(x_id) == target:
@@ -229,9 +230,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
 
         # set all of the information to None if the
         # instrument doesn't supply it
-        if source is None or self._sample is None:
-            self._sourcePos = None
-        else:
+        if (source is not None) and (self._sample is not None):
             self._sourcePos = self._sample.getPos() - source.getPos()
 
     def PyExec(self):
@@ -268,9 +267,8 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
 
             # check for the entry alread existing in append mode
             if append and wkspname in handle.keys():
-                msg = "NXentry named '%s' already exists in '%s'" % \
-                      (wkspname, filename)
-                raise IOError(msg)
+                raise IOError("NXentry named '%s' already exists in '%s'" % \
+                      (wkspname, filename))
 
             # create the entry
             nxentry = handle.create_group(wkspname)
