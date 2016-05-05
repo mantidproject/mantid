@@ -45,6 +45,9 @@ public:
   MaterialBuilder &setMassNumber(int massNumber);
 
   MaterialBuilder &setNumberDensity(double rho);
+  MaterialBuilder &setZParameter(double zparam);
+  MaterialBuilder &setUnitCellVolume(double cellVolume);
+  MaterialBuilder &setMassDensity(double massDensity);
 
   MaterialBuilder &setTotalScatterXSection(double xsec);
   MaterialBuilder &setCoherentXSection(double xsec);
@@ -59,13 +62,13 @@ private:
   void overrideNeutronProperties(PhysicalConstants::NeutronAtom &neutron) const;
   Composition createCompositionFromFormula() const;
   Composition createCompositionFromAtomicNumber() const;
-  double getNumberDensity() const;
+  double getOrCalculateRho(double totalNumAtoms, double rmm) const;
 
   std::string m_name;
   std::unique_ptr<Material::ChemicalFormula> m_formula;
   boost::optional<int> m_atomicNo;
   int m_massNo;
-  boost::optional<double> m_numberDensity;
+  boost::optional<double> m_numberDensity, m_zParam, m_cellVol, m_massDensity;
   boost::optional<double> m_totalXSection, m_cohXSection, m_incXSection,
       m_absSection;
 };

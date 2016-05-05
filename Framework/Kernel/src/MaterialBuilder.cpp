@@ -16,7 +16,8 @@ namespace Kernel {
  */
 MaterialBuilder::MaterialBuilder()
     : m_name(), m_formula(), m_atomicNo(), m_massNo(0), m_numberDensity(),
-      m_totalXSection(), m_cohXSection(), m_incXSection(), m_absSection() {}
+      m_zParam(), m_cellVol(), m_massDensity(), m_totalXSection(),
+      m_cohXSection(), m_incXSection(), m_absSection() {}
 
 /**
  * Set the string name given to the material
@@ -38,6 +39,11 @@ MaterialBuilder &MaterialBuilder::setName(const std::string &name) {
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setFormula(const std::string &formula) {
+  if (m_atomicNo) {
+    throw std::runtime_error("MaterialBuilder::setFormula() - Atomic no. "
+                             "already set, cannot use formula aswell.");
+  }
+
   typedef Material::ChemicalFormula ChemicalFormula;
   try {
     m_formula = Mantid::Kernel::make_unique<ChemicalFormula>(
@@ -55,6 +61,10 @@ MaterialBuilder &MaterialBuilder::setFormula(const std::string &formula) {
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setAtomicNumber(int atomicNumber) {
+  if (m_formula) {
+    throw std::runtime_error("MaterialBuilder::setAtomicNumber() - Formula "
+                             "already set, cannot use atomic number aswell.");
+  }
   m_atomicNo = atomicNumber;
   return *this;
 }
@@ -76,6 +86,54 @@ MaterialBuilder &MaterialBuilder::setMassNumber(int massNumber) {
  */
 MaterialBuilder &MaterialBuilder::setNumberDensity(double rho) {
   m_numberDensity = rho;
+  return *this;
+}
+
+/**
+ * Set the number of atoms in the unit cell
+ * @param zparam Number of atoms
+ * @return A reference to the this object to allow chaining
+ */
+MaterialBuilder &MaterialBuilder::setZParameter(double zparam) {
+  if (m_massDensity) {
+    throw std::runtime_error("MaterialBuilder::setZParameter() - Mass density "
+                             "already set, cannot use Z parameter as well.");
+  }
+  m_zParam = zparam;
+  return *this;
+}
+
+/**
+ * Set the volume of unit cell
+ * @param cellVolume The volume of the unit cell
+ * @return A reference to the this object to allow chaining
+ */
+MaterialBuilder &MaterialBuilder::setUnitCellVolume(double cellVolume) {
+  if (m_massDensity) {
+    throw std::runtime_error(
+        "MaterialBuilder::setUnitCellVolume() - Mass density "
+        "already set, cannot use unit cell volume as well.");
+  }
+  m_cellVol = cellVolume;
+  return *this;
+}
+
+/**
+ * Set the mass density of the sample and calculate the density from this
+ * @param massDensity The mass density value
+ * @return A reference to the this object to allow chaining
+ */
+MaterialBuilder &MaterialBuilder::setMassDensity(double massDensity) {
+  if (m_zParam) {
+    throw std::runtime_error("MaterialBuilder::setMassDensity() - Z parameter "
+                             "already set, cannot use mass density as well.");
+  }
+  if (m_cellVol) {
+    throw std::runtime_error(
+        "MaterialBuilder::setMassDensity() - Unit cell "
+        "volume already set, cannot use mass density as well.");
+  }
+  m_massDensity = massDensity;
   return *this;
 }
 
@@ -126,11 +184,7 @@ MaterialBuilder &MaterialBuilder::setAbsorptionXSection(double xsec) {
 Material MaterialBuilder::build() const {
   NeutronAtom neutron;
   double density(0.0);
-  if (m_formula && m_atomicNo) {
-    throw std::runtime_error("MaterialBuilder::createNeutronAtom() - Both a "
-                             "formula and atomic number have been specified "
-                             "please only provide one.");
-  } else if (m_formula) {
+  if (m_formula) {
     std::tie(neutron, density) = createCompositionFromFormula();
   } else if (m_atomicNo) {
     std::tie(neutron, density) = createCompositionFromAtomicNumber();
@@ -140,9 +194,6 @@ Material MaterialBuilder::build() const {
                              "number.");
   }
   overrideNeutronProperties(neutron);
-  if (m_numberDensity) {
-    density = m_numberDensity.get();
-  }
   return Material(m_name, neutron, density);
 }
 
@@ -154,13 +205,13 @@ MaterialBuilder::Composition
 MaterialBuilder::createCompositionFromFormula() const {
   // The zeroes here are important. By default the entries are all nan
   NeutronAtom composition(0, 0., 0., 0., 0., 0., 0.);
-  double density(EMPTY_DBL());
   const size_t numAtomTypes(m_formula->atoms.size());
+  double totalNumAtoms(0.0), rmm(0.0);
   if (numAtomTypes == 1) {
     composition = m_formula->atoms[0]->neutron;
-    density = m_formula->atoms[0]->number_density;
+    totalNumAtoms = 1.0;
+    rmm = m_formula->atoms[0]->mass;
   } else {
-    double totalNumAtoms(0.0), rmm(0.0);
     for (size_t i = 0; i < numAtomTypes; i++) {
       const auto &atom(m_formula->atoms[i]);
       const double natoms(m_formula->numberAtoms[i]);
@@ -171,6 +222,7 @@ MaterialBuilder::createCompositionFromFormula() const {
     // normalize the accumulated number by the number of atoms
     composition = (1. / totalNumAtoms) * composition;
   }
+  const double density = getOrCalculateRho(totalNumAtoms, rmm);
   return Composition{composition, density};
 }
 
@@ -182,7 +234,28 @@ MaterialBuilder::Composition
 MaterialBuilder::createCompositionFromAtomicNumber() const {
   auto atom = getAtom(static_cast<uint16_t>(m_atomicNo.get()),
                       static_cast<uint16_t>(m_massNo));
-  return Composition{atom.neutron, atom.number_density};
+  return Composition{atom.neutron, getOrCalculateRho(1.0, atom.mass)};
+}
+
+/**
+ * Return the manually set density or calculate it from other parameters
+ * @param totalNumAtoms Total number of atoms
+ * @param rmm The relative molecular mass
+ * @return The number density
+ */
+double MaterialBuilder::getOrCalculateRho(double totalNumAtoms,
+                                          double rmm) const {
+  if (m_numberDensity) {
+    return m_numberDensity.get();
+  } else if (m_zParam && m_cellVol) {
+    return totalNumAtoms * m_zParam.get() / m_cellVol.get();
+  } else if (m_massDensity) {
+    return (m_massDensity.get() / rmm) * PhysicalConstants::N_A * 1e-24;
+  } else if (m_formula && m_formula->atoms.size() == 1) {
+    return m_formula->atoms[0]->number_density;
+  } else {
+    return EMPTY_DBL();
+  }
 }
 
 /**

@@ -62,16 +62,55 @@ public:
     MaterialBuilder builder;
     Material mat = builder.setName("Nickel").setAtomicNumber(28).build();
     // Default isotope
-    TS_ASSERT_DELTA(mat.numberDensity(), 0.0913375, 0.0001);
     TS_ASSERT_DELTA(mat.totalScatterXSection(), 18.5, 0.0001);
     TS_ASSERT_DELTA(mat.absorbXSection(), 4.49, 0.0001);
 
-    mat =
-        builder.setName("Nickel").setAtomicNumber(28).setMassNumber(58).build();
+    mat = builder.setName("Ni").setAtomicNumber(28).setMassNumber(58).build();
     // Other isotop
-    TS_ASSERT_DELTA(mat.numberDensity(), 0.0913375, 0.0001);
     TS_ASSERT_DELTA(mat.totalScatterXSection(), 26.1, 0.0001);
     TS_ASSERT_DELTA(mat.absorbXSection(), 4.6, 0.0001);
+  }
+
+  void test_Number_Density_Set_By_Formula_ZParameter_And_Cell_Volume() {
+    MaterialBuilder builder;
+    auto mat = builder.setName("Nickel")
+                   .setFormula("Al2-O3")
+                   .setZParameter(6)
+                   .setUnitCellVolume(253.54)
+                   .build();
+
+    TS_ASSERT_DELTA(mat.numberDensity(), 0.1183245, 0.001);
+  }
+
+  void test_Number_Density_Set_By_Formula_MassDensity() {
+    MaterialBuilder builder;
+    auto mat = builder.setName("Nickel")
+                   .setFormula("Al2-O3")
+                   .setMassDensity(4)
+                   .build();
+
+    TS_ASSERT_DELTA(mat.numberDensity(), 0.0236252, 0.001);
+  }
+
+  void test_Number_Density_Set_By_AtomicNumber_MassDensity() {
+    MaterialBuilder builder;
+    auto mat = builder.setName("Nickel")
+                   .setAtomicNumber(28)
+                   .setMassDensity(4)
+                   .build();
+
+    TS_ASSERT_DELTA(mat.numberDensity(), 0.0410414, 0.001);
+  }
+  
+  void test_Number_Set_By_AtomicNumber_ZParameter_And_Cell_Volume() {
+    MaterialBuilder builder;
+    auto mat = builder.setName("Nickel")
+                   .setAtomicNumber(28)
+                   .setZParameter(6)
+                   .setUnitCellVolume(253)
+                   .build();
+
+    TS_ASSERT_DELTA(mat.numberDensity(), 0.0237154, 0.001);
   }
 
   //----------------------------------------------------------------------------
@@ -94,9 +133,25 @@ public:
 
   void test_Setting_Both_ChemicalFormula_And_AtomicNumber_Throws_Error() {
     MaterialBuilder builder;
-    TS_ASSERT_THROWS(builder.setFormula("Al2-O3").setAtomicNumber(28).build(),
+    TS_ASSERT_THROWS(builder.setFormula("Al2-O3").setAtomicNumber(28),
+                     std::runtime_error);
+    TS_ASSERT_THROWS(builder.setAtomicNumber(28).setFormula("Al2-O3"),
                      std::runtime_error);
   }
+
+  void test_Setting_ZParameter_UnitCell_And_MassDensity_Throws_Error() {
+    MaterialBuilder builder;
+    TS_ASSERT_THROWS(builder.setMassDensity(4).setZParameter(6),
+                     std::runtime_error);
+    TS_ASSERT_THROWS(builder.setMassDensity(4).setUnitCellVolume(250.),
+                     std::runtime_error);
+
+    TS_ASSERT_THROWS(builder.setZParameter(6).setMassDensity(4),
+                     std::runtime_error);
+    TS_ASSERT_THROWS(builder.setUnitCellVolume(6).setMassDensity(4),
+                     std::runtime_error);
+  }
+  
 };
 
 #endif /* MANTID_KERNEL_MATERIALBUILDERTEST_H_ */
