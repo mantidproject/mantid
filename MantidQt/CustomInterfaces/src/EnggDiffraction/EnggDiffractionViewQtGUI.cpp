@@ -1404,8 +1404,7 @@ MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::getFocusDir() {
 }
 
 void EnggDiffractionViewQtGUI::addBankItems(
-    std::vector<std::string> splittedBaseName, QString selectedFile,
-    std::vector<std::string> bankFileVector) {
+    std::vector<std::string> splittedBaseName, QString selectedFile) {
   try {
     if (!m_fitting_runno_dir_vec.empty()) {
 

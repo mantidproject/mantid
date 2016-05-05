@@ -505,7 +505,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
           m_view->setFittingRunNumVec(runnoDirVector);
 
           // add bank to the combo-box and list view
-          m_view->addBankItems(splitBaseName, focusedFile, runnoDirVector);
+          m_view->addBankItems(splitBaseName, focusedFile);
           runNoVec.clear();
           runNoVec.push_back(splitBaseName[1]);
           auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
@@ -546,7 +546,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
           m_view->setFittingRunNumVec(runnoDirVector);
 
           // add bank to the combo-box and list view
-          m_view->addBankItems(splitBaseName, focusedFile, runnoDirVector);
+          m_view->addBankItems(splitBaseName, focusedFile);
           runNoVec.clear();
           runNoVec.push_back(strFocusedFile);
 

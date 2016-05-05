@@ -142,9 +142,8 @@ public:
                std::vector<std::string>(std::string &selectedfPath));
 
   // adds the number of banks to the combo-box widget on the interface
-  MOCK_METHOD3(addBankItems, void(std::vector<std::string> splittedBaseName,
-                                  QString selectedFile,
-                                  std::vector<std::string> bankFileVector));
+  MOCK_METHOD2(addBankItems, void(std::vector<std::string> splittedBaseName,
+                                  QString selectedFile));
 
   // adds the run number to the list view widget on the interface
   MOCK_METHOD2(addRunNoItem,

@@ -382,8 +382,7 @@ public:
   * @param bankFileVector contains directories of selected run number
   */
   virtual void addBankItems(std::vector<std::string> splittedBaseName,
-                            QString selectedFile,
-                            std::vector<std::string> bankFileVector) = 0;
+                            QString selectedFile) = 0;
 
   /**
   * adds the run number to the list view widget on the interface

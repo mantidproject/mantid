@@ -1316,8 +1316,7 @@ public:
 
     EXPECT_CALL(mockView, addRunNoItem(testing::_, testing::_)).Times(1);
 
-    EXPECT_CALL(mockView, addBankItems(testing::_, testing::_, testing::_))
-        .Times(1);
+    EXPECT_CALL(mockView, addBankItems(testing::_, testing::_)).Times(1);
 
     // No errors/0 warnings.
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -1359,8 +1358,7 @@ public:
 
     EXPECT_CALL(mockView, addRunNoItem(testing::_, testing::_)).Times(0);
 
-    EXPECT_CALL(mockView, addBankItems(testing::_, testing::_, testing::_))
-        .Times(0);
+    EXPECT_CALL(mockView, addBankItems(testing::_, testing::_)).Times(0);
 
     // No errors/0 warnings. File entered is not found
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
