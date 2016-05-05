@@ -62,6 +62,8 @@ public:
 
   /// The collection itself is considered to take up no space
   size_t getMemorySize() const override { return 0; }
+  /// Sort the internal data structure according to member name
+  void sortMembersByName();
   /// Adds a workspace to the group.
   void addWorkspace(Workspace_sptr workspace);
   /// Return the number of entries within the group
@@ -89,6 +91,11 @@ public:
   /// @name Wrapped ADS calls
   //@{
 
+  /// Invokes the ADS to sort group members by orkspace name
+  void sortByName() {
+    AnalysisDataService::Instance().sortGroupByName(this->name());
+  }
+
   /// Adds a workspace to the group.
   void add(const std::string &wsName) {
     AnalysisDataService::Instance().addToGroup(this->name(), wsName);
@@ -110,11 +117,8 @@ public:
 
   //@}
 
-protected:
-  /// Protected, unimplemented copy constructor
-  WorkspaceGroup(const WorkspaceGroup &ref);
-  /// Protected, unimplemented copy assignment operator
-  const WorkspaceGroup &operator=(const WorkspaceGroup &);
+  WorkspaceGroup(const WorkspaceGroup &ref) = delete;
+  WorkspaceGroup &operator=(const WorkspaceGroup &) = delete;
 
 private:
   WorkspaceGroup *doClone() const override {

@@ -309,11 +309,11 @@ std::map<std::string, std::string> ChangeTimeZero::validateInputs() {
       try {
         run.getTimeSeriesProperty<double>("proton_charge");
       } catch (...) {
-        invalidProperties.insert(std::make_pair(
+        invalidProperties.emplace(
             "InputWorkspace",
             "A TimeOffset with an absolute time requires the "
             "input workspace to have a proton_charge property in "
-            "its log."));
+            "its log.");
       }
     }
   }

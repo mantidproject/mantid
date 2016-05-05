@@ -2,9 +2,12 @@
 import unittest
 from testhelpers import assertRaisesNothing
 
-from LoadCIF import UBMatrixBuilder, CrystalStructureBuilder
+from LoadCIF import SpaceGroupBuilder, UnitCellBuilder, AtomListBuilder, UBMatrixBuilder, CrystalStructureBuilder
 
 from mantid.api import AlgorithmFactory
+from mantid.geometry import UnitCell
+
+import numpy as np
 
 
 def merge_dicts(lhs, rhs):
@@ -14,9 +17,9 @@ def merge_dicts(lhs, rhs):
     return merged
 
 
-class CrystalStructureBuilderTestSpaceGroup(unittest.TestCase):
+class SpaceGroupBuilderTest(unittest.TestCase):
     def setUp(self):
-        self.builder = CrystalStructureBuilder()
+        self.builder = SpaceGroupBuilder()
 
     def test_getSpaceGroupFromString_valid_no_exceptions(self):
         valid_new = {u'_space_group_name_h-m_alt': u'P m -3 m'}
@@ -64,9 +67,9 @@ class CrystalStructureBuilderTestSpaceGroup(unittest.TestCase):
         self.assertRaises(RuntimeError, self.builder._getSpaceGroupFromNumber, cifData=invalid_new)
 
 
-class CrystalStructureBuilderTestUnitCell(unittest.TestCase):
+class UnitCellBuilderTest(unittest.TestCase):
     def setUp(self):
-        self.builder = CrystalStructureBuilder()
+        self.builder = UnitCellBuilder()
 
     def test_getUnitCell_invalid(self):
         invalid_no_a = {u'_cell_length_b': u'5.6'}
@@ -96,9 +99,9 @@ class CrystalStructureBuilderTestUnitCell(unittest.TestCase):
         self.assertEqual(self.builder._getUnitCell(cell_errors), '5.6 5.6 2.3 90.0 90.0 120.0')
 
 
-class CrystalStructureBuilderTestAtoms(unittest.TestCase):
+class AtomListBuilderTest(unittest.TestCase):
     def setUp(self):
-        self.builder = CrystalStructureBuilder()
+        self.builder = AtomListBuilder()
         self._baseData = dict([
             (u'_atom_site_fract_x', [u'1/8', u'0.34(1)']),
             (u'_atom_site_fract_y', [u'1/8', u'0.56(2)']),
@@ -123,10 +126,10 @@ class CrystalStructureBuilderTestAtoms(unittest.TestCase):
 
     def test_getAtoms_correct(self):
         data = self._getData(dict([(u'_atom_site_label', [u'Si', u'Al']),
-                                   (u'_atom_site_occupancy', [u'1.0', u'1.0(0)']),
+                                   (u'_atom_site_occupancy', [u'0.6', u'0.4(0)']),
                                    (u'_atom_site_u_iso_or_equiv', [u'0.01', u'0.02'])]))
 
-        self.assertEqual(self.builder._getAtoms(data), 'Si 1/8 1/8 1/8 1.0 0.01;Al 0.34 0.56 0.23 1.0 0.02')
+        self.assertEqual(self.builder._getAtoms(data), 'Si 1/8 1/8 1/8 0.6 0.01;Al 0.34 0.56 0.23 0.4 0.02')
 
     def test_getAtoms_atom_type_symbol(self):
         data = self._getData(dict([(u'_atom_site_label', [u'Fake1', u'Fake2']),
@@ -135,6 +138,7 @@ class CrystalStructureBuilderTestAtoms(unittest.TestCase):
 
         self.assertEqual(self.builder._getAtoms(data), 'Fake 1/8 1/8 1/8 1.0 0.01;Fake 0.34 0.56 0.23 1.0 0.02')
 
+        del data[u'_atom_site_label']
         data[u'_atom_site_type_symbol'] = [u'Si', u'Al']
 
         self.assertEqual(self.builder._getAtoms(data), 'Si 1/8 1/8 1/8 1.0 0.01;Al 0.34 0.56 0.23 1.0 0.02')
@@ -146,6 +150,146 @@ class CrystalStructureBuilderTestAtoms(unittest.TestCase):
 
         self.assertEqual(self.builder._getAtoms(data),
                          'Si 1/8 1/8 1/8 1.0 0.0126651479553;Al 0.34 0.56 0.23 1.0 0.0253302959106')
+
+    def test_getAtoms_no_occupancy(self):
+        data = self._getData(dict([(u'_atom_site_label', [u'Si', u'Al']),
+                                   (u'_atom_site_u_iso_or_equiv', [u'0.01', u'0.02'])]))
+
+        self.assertEqual(self.builder._getAtoms(data), 'Si 1/8 1/8 1/8 1.0 0.01;Al 0.34 0.56 0.23 1.0 0.02')
+
+    def test_getAtoms_no_u_or_b(self):
+        data = self._getData(dict([(u'_atom_site_label', [u'Si', u'Al']),
+                                   (u'_atom_site_occupancy', [u'1.0', u'1.0(0)'])]))
+
+        self.assertEqual(self.builder._getAtoms(data),
+                         'Si 1/8 1/8 1/8 1.0;Al 0.34 0.56 0.23 1.0')
+
+    def test_getAtoms_invalid_u(self):
+        data = self._getData(dict([(u'_atom_site_label', [u'Si', u'Al']),
+                                   (u'_atom_site_occupancy', [u'1.0', u'1.0(0)']),
+                                   (u'_atom_site_u_iso_or_equiv', [u'0.01', u'sdfsdfs'])]))
+
+        self.assertEqual(self.builder._getAtoms(data),
+                         'Si 1/8 1/8 1/8 1.0 0.01;Al 0.34 0.56 0.23 1.0')
+
+    def test_getAtoms_invalid_b(self):
+        data = self._getData(dict([(u'_atom_site_label', [u'Si', u'Al']),
+                                   (u'_atom_site_occupancy', [u'1.0', u'1.0(0)']),
+                                   (u'_atom_site_b_iso_or_equiv', [u'1.0', u'sdfsdfs'])]))
+
+        self.assertEqual(self.builder._getAtoms(data),
+                         'Si 1/8 1/8 1/8 1.0 0.0126651479553;Al 0.34 0.56 0.23 1.0')
+
+    def test_getAtoms_aniso_u_orthogonal(self):
+        uElements = {'11': [u'0.01', u'0.02'], '12': [u'0.0', u'0.0'], '13': [u'0.0', u'0.0'], '22': [u'0.01', u'0.02'],
+                     '23': [u'0.0', u'0.0'], '33': [u'0.04', u'0.05']}
+
+        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in uElements.iteritems()])
+        uDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
+                           (u'_atom_site_aniso_label', [u'Si', u'Al'])
+                           ]))
+
+        data = self._getData(uDict)
+        cell = UnitCell(5.4, 4.3, 3.2)
+
+        # u_equiv should be (0.01 + 0.01 + 0.04)/3 = 0.02 and (0.2 + 0.2 + 0.5)/3 = 0.03
+        self.assertEqual(self.builder._getAtoms(data, cell),
+                         'Si 1/8 1/8 1/8 1.0 0.02;Al 0.34 0.56 0.23 1.0 0.03')
+
+    def test_getAtoms_aniso_u_hexagonal(self):
+        uElements = {'11': [u'0.01', u'0.02'], '12': [u'0.01', u'0.01'], '13': [u'0.0', u'0.0'],
+                     '22': [u'0.01', u'0.02'],
+                     '23': [u'0.0', u'0.0'], '33': [u'0.04', u'0.05']}
+
+        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in uElements.iteritems()])
+        uDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
+                           (u'_atom_site_aniso_label', [u'Si', u'Al'])
+                           ]))
+
+        data = self._getData(uDict)
+        cell = UnitCell(5.4, 4.3, 3.2, 90, 90, 120)
+
+        # u_equiv should be (4/3*(0.01 + 0.01 - 0.01) + 0.04)/3 = 0.0177... and (4/3*(0.02 + 0.02 - 0.01) + 0.05)/3 = 0.03
+        self.assertEqual(self.builder._getAtoms(data, cell),
+                         'Si 1/8 1/8 1/8 1.0 0.01778;Al 0.34 0.56 0.23 1.0 0.03')
+
+    def test_getAtoms_aniso_b_orthogonal(self):
+        bElements = {'11': [u'1.0', u'2.0'], '12': [u'0.0', u'0.0'], '13': [u'0.0', u'0.0'],
+                     '22': [u'1.0', u'2.0'], '23': [u'0.0', u'0.0'], '33': [u'4.0', u'5.0']}
+
+        bDict = dict([(u'_atom_site_aniso_b_{0}'.format(key), value) for key, value in bElements.iteritems()])
+        bDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
+                           (u'_atom_site_aniso_label', [u'Si', u'Al'])
+                           ]))
+
+        data = self._getData(bDict)
+        cell = UnitCell(5.4, 4.3, 3.2)
+
+        self.assertEqual(self.builder._getAtoms(data, cell),
+                         'Si 1/8 1/8 1/8 1.0 0.02533;Al 0.34 0.56 0.23 1.0 0.038')
+
+    def test_getAtoms_aniso_iso_mixed(self):
+        uElements = {'11': [u'0.01'], '12': [u'0.0'], '13': [u'0.0'], '22': [u'0.01'],
+                     '23': [u'0.0'], '33': [u'0.04']}
+
+        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in uElements.iteritems()])
+        uDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
+                           (u'_atom_site_aniso_label', [u'Al']),
+                           (u'_atom_site_u_iso_or_equiv', [u'0.01', u'invalid'])
+                           ]))
+
+        data = self._getData(uDict)
+        cell = UnitCell(5.4, 4.3, 3.2)
+
+        self.assertEqual(self.builder._getAtoms(data, cell),
+                         'Si 1/8 1/8 1/8 1.0 0.01;Al 0.34 0.56 0.23 1.0 0.02')
+
+    def test_getAtoms_iso_preferred(self):
+        uElements = {'11': [u'0.01', u'0.02'], '12': [u'0.0', u'0.0'], '13': [u'0.0', u'0.0'],
+                     '22': [u'0.01', u'0.02'], '23': [u'0.0', u'0.0'], '33': [u'0.04', u'0.05']}
+
+        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in uElements.iteritems()])
+        uDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
+                           (u'_atom_site_aniso_label', [u'Si', u'Al']),
+                           (u'_atom_site_u_iso_or_equiv', [u'0.01', u'0.02'])
+                           ]))
+
+        data = self._getData(uDict)
+        cell = UnitCell(5.4, 4.3, 3.2)
+
+        self.assertEqual(self.builder._getAtoms(data, cell),
+                         'Si 1/8 1/8 1/8 1.0 0.01;Al 0.34 0.56 0.23 1.0 0.02')
+
+    def test_getReciprocalLengthMatrix(self):
+        cell = UnitCell(1, 2, 3)
+
+        matrix = self.builder._getReciprocalLengthSquaredMatrix(cell)
+
+        expected = np.array([[(1.0 / 1.0 * 1.0 / 1.0), (1.0 / 1.0 * 1.0 / 2.0), (1.0 / 1.0 * 1.0 / 3.0)],
+                             [(1.0 / 2.0 * 1.0 / 1.0), (1.0 / 2.0 * 1.0 / 2.0), (1.0 / 2.0 * 1.0 / 3.0)],
+                             [(1.0 / 3.0 * 1.0 / 1.0), (1.0 / 3.0 * 1.0 / 2.0), (1.0 / 3.0 * 1.0 / 3.0)]])
+
+        self.assertTrue(np.all(matrix == expected))
+
+    def test_getSumWeights_orthorhombic(self):
+        cell = UnitCell(1, 2, 3, 90, 90, 90)
+
+        matrix = self.builder._getMetricDependentWeights(cell)
+        expected = np.array([[1.0, 0.0, 0.0],
+                             [0.0, 1.0, 0.0],
+                             [0.0, 0.0, 1.0]])
+
+        self.assertTrue(np.all(np.abs(matrix - expected) < 1.e-9))
+
+    def test_getSumWeights_hexagonal(self):
+        cell = UnitCell(2, 2, 3, 90, 90, 120)
+
+        matrix = self.builder._getMetricDependentWeights(cell)
+        expected = np.array([[4. / 3., -2. / 3., 0.0],
+                             [-2. / 3., 4. / 3., 0.0],
+                             [0.0, 0.0, 1.0]])
+
+        self.assertTrue(np.all(np.abs(matrix - expected) < 1.e-9))
 
 
 class UBMatrixBuilderTest(unittest.TestCase):

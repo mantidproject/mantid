@@ -144,14 +144,14 @@ void CreateTransmissionWorkspaceAuto::exec() {
       if (start == stop) {
         processing_commands = boost::lexical_cast<std::string>(start);
       } else {
-        processing_commands = boost::lexical_cast<std::string>(start) + "," +
+        processing_commands = boost::lexical_cast<std::string>(start) + ":" +
                               boost::lexical_cast<std::string>(stop);
       }
     } else {
       processing_commands =
           boost::lexical_cast<std::string>(static_cast<int>(
               instrument->getNumberParameter("MultiDetectorStart")[0])) +
-          "," +
+          ":" +
           boost::lexical_cast<std::string>(firstWS->getNumberHistograms() - 1);
     }
   } else {

@@ -842,6 +842,12 @@ API::LogManager_sptr PeaksWorkspace::logs() {
   m_logCash = API::LogManager_sptr(&(this->mutableRun()), NullDeleter());
   return m_logCash;
 }
+
+ITableWorkspace *
+PeaksWorkspace::doCloneColumns(const std::vector<std::string> &) const {
+  throw Kernel::Exception::NotImplementedError(
+      "PeaksWorkspace cannot clone columns.");
+}
 }
 }
 

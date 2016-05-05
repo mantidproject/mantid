@@ -273,6 +273,30 @@ public:
     TS_ASSERT_EQUALS(6, prop->valueAsCorrectMap().size());
   }
 
+  void test_runNumberString_singlePeriod() {
+    doTestRunNumberString("15189", false);
+  }
+
+  void test_runNumberString_multiPeriod() {
+    doTestRunNumberString("15189", true);
+  }
+
+  void test_runNumberString_singlePeriod_runRange() {
+    doTestRunNumberString("15189-91", false);
+  }
+
+  void test_runNumberString_singlePeriod_runRangeNonContinuous() {
+    doTestRunNumberString("15189-90, 15192", false);
+  }
+
+  void test_runNumberString_multiPeriod_runRange() {
+    doTestRunNumberString("15189-91", true);
+  }
+
+  void test_runNumberString_multiPeriod_runRangeNonContinuous() {
+    doTestRunNumberString("15189-90, 15192", true);
+  }
+
 private:
   // Creates a single-point workspace with instrument and runNumber set
   Workspace_sptr createWs(const std::string &instrName, int runNumber) {
@@ -321,6 +345,30 @@ private:
         Mantid::Kernel::make_unique<TimeSeriesProperty<double>>(logName);
     prop->addValues(times, values);
     matrixWS->mutableRun().addLogData(std::move(prop));
+  }
+
+  void doTestRunNumberString(const std::string &runs, bool multiPeriod) {
+    // create workspace name
+    const std::string sep("; ");
+    std::ostringstream wsName;
+    wsName << "MUSR000" << runs << sep; // MUSR00012345-8
+    wsName << "Pair" << sep;
+    wsName << "long" << sep;
+    wsName << "Asym" << sep;
+    if (multiPeriod) {
+      wsName << "1+2-3+4" << sep;
+    }
+    wsName << "#1";
+
+    // create expected output
+    QString expected = QString::fromStdString(runs);
+    if (multiPeriod) {
+      expected.append(": 1+2-3+4");
+    }
+
+    // test
+    const QString result = runNumberString(wsName.str(), runs);
+    TS_ASSERT_EQUALS(expected, result);
   }
 };
 

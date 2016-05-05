@@ -38,13 +38,14 @@ set ( SRC_FILES
 	src/FrameworkManager.cpp
 	src/FuncMinimizerFactory.cpp
 	src/FunctionDomain1D.cpp
+	src/FunctionDomainGeneral.cpp
 	src/FunctionDomainMD.cpp
 	src/FunctionFactory.cpp
 	src/FunctionParameterDecorator.cpp
 	src/FunctionProperty.cpp
 	src/FunctionValues.cpp
-	src/GeometryInfoFactory.cpp
 	src/GeometryInfo.cpp
+	src/GeometryInfoFactory.cpp
 	src/GridDomain.cpp
 	src/GridDomain1D.cpp
 	src/GroupingLoader.cpp
@@ -58,6 +59,7 @@ set ( SRC_FILES
 	src/IFunction.cpp
 	src/IFunction1D.cpp
 	src/IFunction1DSpectrum.cpp
+	src/IFunctionGeneral.cpp
 	src/IFunctionMD.cpp
 	src/IFunctionMW.cpp
 	src/ILatticeFunction.cpp
@@ -108,7 +110,6 @@ set ( SRC_FILES
 	src/PeakFunctionIntegrator.cpp
 	src/Progress.cpp
 	src/Projection.cpp
-	src/PropertyManagerDataService.cpp
 	src/PropertyNexus.cpp
 	src/RawCountValidator.cpp
 	src/RefAxis.cpp
@@ -192,13 +193,14 @@ set ( INC_FILES
 	inc/MantidAPI/FuncMinimizerFactory.h
 	inc/MantidAPI/FunctionDomain.h
 	inc/MantidAPI/FunctionDomain1D.h
+	inc/MantidAPI/FunctionDomainGeneral.h
 	inc/MantidAPI/FunctionDomainMD.h
 	inc/MantidAPI/FunctionFactory.h
 	inc/MantidAPI/FunctionParameterDecorator.h
 	inc/MantidAPI/FunctionProperty.h
 	inc/MantidAPI/FunctionValues.h
-	inc/MantidAPI/GeometryInfoFactory.h
 	inc/MantidAPI/GeometryInfo.h
+	inc/MantidAPI/GeometryInfoFactory.h
 	inc/MantidAPI/GridDomain.h
 	inc/MantidAPI/GridDomain1D.h
 	inc/MantidAPI/GroupingLoader.h
@@ -223,6 +225,7 @@ set ( INC_FILES
 	inc/MantidAPI/IFunction.h
 	inc/MantidAPI/IFunction1D.h
 	inc/MantidAPI/IFunction1DSpectrum.h
+	inc/MantidAPI/IFunctionGeneral.h
 	inc/MantidAPI/IFunctionMD.h
 	inc/MantidAPI/IFunctionMW.h
 	inc/MantidAPI/IFunctionWithLocation.h
@@ -291,7 +294,6 @@ set ( INC_FILES
 	inc/MantidAPI/PeakFunctionIntegrator.h
 	inc/MantidAPI/Progress.h
 	inc/MantidAPI/Projection.h
-	inc/MantidAPI/PropertyManagerDataService.h
 	inc/MantidAPI/PropertyNexus.h
 	inc/MantidAPI/RawCountValidator.h
 	inc/MantidAPI/RefAxis.h
@@ -354,6 +356,7 @@ set ( TEST_FILES
 	FrameworkManagerTest.h
 	FuncMinimizerFactoryTest.h
 	FunctionAttributeTest.h
+	FunctionDomainGeneralTest.h
 	FunctionDomainTest.h
 	FunctionFactoryTest.h
 	FunctionParameterDecoratorTest.h
@@ -401,7 +404,6 @@ set ( TEST_FILES
 	ParameterTieTest.h
 	PeakFunctionIntegratorTest.h
 	ProjectionTest.h
-	PropertyManagerDataServiceTest.h
 	PropertyNexusTest.h
 	RawCountValidatorTest.h
 	RemoteJobManagerFactoryTest.h

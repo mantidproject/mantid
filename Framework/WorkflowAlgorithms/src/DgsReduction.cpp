@@ -1,7 +1,7 @@
 #include "MantidWorkflowAlgorithms/DgsReduction.h"
 
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
@@ -93,10 +93,10 @@ void DgsReduction::init() {
   mustBePositiveInt->setLower(0);
   this->declareProperty(
       "Monitor1SpecId", EMPTY_INT(), mustBePositiveInt,
-      "Spectrum ID for the first monitor to use in Ei calculation.");
+      "Spectrum No for the first monitor to use in Ei calculation.");
   this->declareProperty(
       "Monitor2SpecId", EMPTY_INT(), mustBePositiveInt,
-      "Spectrum ID for the second monitor to use in Ei calculation.");
+      "Spectrum No for the second monitor to use in Ei calculation.");
   this->declareProperty(
       make_unique<ArrayProperty<double>>(
           "EnergyTransferRange",

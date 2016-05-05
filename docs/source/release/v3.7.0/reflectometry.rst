@@ -8,7 +8,11 @@ Reflectometry Changes
 Reflectometry Instruments
 --------------------------
 
-An updated version of the OFFSPEC IDF is now being used in mantid `#15561 <https://github.com/mantidproject/mantid/pull/15561>`_
+- An updated version of the OFFSPEC IDF is now being used in mantid `#15561 <https://github.com/mantidproject/mantid/pull/15561>`_
+
+- CRISP and POLREF IDFs were causing problems in the ISIS Reflectometry (Polref) interface as they were using the `opening height` tag
+  when defining their slits. This has now been changed to be uniform across all reflectometry instruments (INTER, POLREF, CRISP, SURF, OFFSPEC)
+  to `vertical gap` such that the CalculateResolution algorithm invoked by the interface will now work correctly. `#16040 <https://github.com/mantidproject/mantid/pull/16040>`_ 
    
 ConvertToReflectometryQ
 -----------------------
@@ -30,6 +34,9 @@ ISIS Reflectometry (Polref)
 - Bugfix: When using the ICAT search in the interface, if the wrong user credentials were entered or the login dialog
   was closed before the details had been entered then mantid crashed. This has been fixed.
   `#15410 <https://github.com/mantidproject/mantid/pull/15410>`_
+- Bugfix: When attempting to plot rows in the Processing Table, if the processing table contained a row without an associated Run Number
+  Mantid will raise an unexpected exception. This has now been fixed resulting in a warning being shown to the user that a certain row does not
+  contain a Run Number. `#15820 <https://github.com/mantidproject/mantid/pull/15820>`_
 - Some changes were made to the interface as part of a code refactoring (functional behaviour remains the same). 
   The only change visible to user is a new progress bar that has been added to the *Search Runs* section. It show the progress when
   transferring runs. The progress bar that existed before will only indicate the progress of processing that is

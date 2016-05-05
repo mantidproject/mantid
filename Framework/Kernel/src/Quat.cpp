@@ -798,7 +798,7 @@ Quat::getEulerAngles(const std::string &convention = "XYZ") const {
   V3D axis3(0, 0, 0);
   axis3[last] = 1.0;
 
-  const double rad2deg = 180.0 / M_PI;
+  constexpr double rad2deg = 180.0 / M_PI;
 
   angles[2] = atan2(s3, c3) * rad2deg;
 

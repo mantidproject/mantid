@@ -145,7 +145,8 @@ void DisplayCurveFit::addRangeSelector(const dcRange &adcRange,
                                   RangeSelector::SelectType aType) {
   if (m_rangeSelector.find(adcRange) == m_rangeSelector.end()) {
     const QString dcRangeName(m_dcRangeToQString.at(adcRange));
-    m_rangeSelector.insert(std::pair<dcRange, RangeSelector *>(adcRange, m_uiForm.fitPlot->addRangeSelector(dcRangeName, aType)));
+    m_rangeSelector.emplace(
+        adcRange, m_uiForm.fitPlot->addRangeSelector(dcRangeName, aType));
     switch (adcRange) {
       case dcRange::fit:
         m_rangeSelector.at(adcRange)->setColour(QColor(Qt::black));

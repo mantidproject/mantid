@@ -80,7 +80,7 @@ Usage
    print "First peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[0])
    print "First fitted peak center (ToF): {0:.1f}".format(peaks_tbl.column('X0')[0])
    print "Second peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[1])
-   print "Second fitted peak center (ToF): {0:.1f}".format(peaks_tbl.column('X0')[1])
+   print "Second fitted peak center (ToF): {0:.0f}".format(round(peaks_tbl.column('X0')[1],-1))
 
 Output:
 
@@ -94,7 +94,7 @@ Output:
    First peak expected (dSpacing): 0.8
    First fitted peak center (ToF): 15006.0
    Second peak expected (dSpacing): 1.9
-   Second fitted peak center (ToF): 35006.0
+   Second fitted peak center (ToF): 35010
 
 .. categories::
 

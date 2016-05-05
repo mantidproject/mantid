@@ -106,6 +106,9 @@ void LoadMD::init() {
   setPropertySettings("Memory", make_unique<EnabledWhenProperty>(
                                     "FileBackEnd", IS_EQUAL_TO, "1"));
 
+  declareProperty("LoadHistory", true,
+                  "If true, the workspace history will be loaded");
+
   declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace.");
@@ -314,7 +317,9 @@ void LoadMD::loadHisto() {
   ws->setCoordinateSystem(m_coordSystem);
 
   // Load the WorkspaceHistory "process"
-  ws->history().loadNexus(m_file.get());
+  if (this->getProperty("LoadHistory")) {
+    ws->history().loadNexus(m_file.get());
+  }
 
   this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
 
@@ -501,7 +506,9 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   ws->setTitle(title);
 
   // Load the WorkspaceHistory "process"
-  ws->history().loadNexus(m_file.get());
+  if (this->getProperty("LoadHistory")) {
+    ws->history().loadNexus(m_file.get());
+  }
 
   this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
 
