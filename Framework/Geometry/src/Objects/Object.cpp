@@ -1511,8 +1511,8 @@ const BoundingBox &Object::getBoundingBox() const {
   // Set to a large box so that a) we don't keep trying to calculate a box
   // every time this is called and b) to serve as a visual indicator that
   // something went wrong.
-  const_cast<Object *>(this)->defineBoundingBox(100, 100, 100, -100, -100,
-                                                -100);
+  const_cast<Object *>(this)
+      ->defineBoundingBox(100, 100, 100, -100, -100, -100);
   return m_boundingBox;
 }
 
