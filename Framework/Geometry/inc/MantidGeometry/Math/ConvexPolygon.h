@@ -53,7 +53,7 @@ class MANTID_GEOMETRY_DLL ConvexPolygon {
 
 public:
   /// Type of the point list
-  typedef std::vector<Kernel::V2D> Vertices;
+  using Vertices = std::vector<Kernel::V2D>;
 
   //-----------------------------------------------------------------
   // Forward directional iterator inner class
