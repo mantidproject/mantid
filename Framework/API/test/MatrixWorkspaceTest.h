@@ -19,9 +19,12 @@
 #include "PropertyManagerHelper.h"
 
 #include <cxxtest/TestSuite.h>
+
+#include <boost/make_shared.hpp>
+
 #include <algorithm>
 #include <functional>
-#include <boost/make_shared.hpp>
+#include <numeric>
 
 using std::size_t;
 using namespace Mantid::Kernel;
@@ -43,7 +46,7 @@ boost::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra,
       boost::make_shared<WorkspaceTester>();
   ws2->initialize(numSpectra, numBins, numBins);
 
-  Instrument_sptr inst(new Instrument("TestInstrument"));
+  auto inst = boost::make_shared<Instrument>("TestInstrument");
   ws2->setInstrument(inst);
   // We get a 1:1 map by default so the detector ID should match the spectrum
   // number
@@ -66,7 +69,9 @@ public:
   }
   static void destroySuite(MatrixWorkspaceTest *suite) { delete suite; }
 
-  MatrixWorkspaceTest() : ws(new WorkspaceTester) { ws->initialize(1, 1, 1); }
+  MatrixWorkspaceTest() : ws(boost::make_shared<WorkspaceTester>()) {
+    ws->initialize(1, 1, 1);
+  }
 
   void test_toString_Produces_Expected_Contents() {
     auto testWS = boost::make_shared<WorkspaceTester>();
@@ -1268,7 +1273,7 @@ public:
   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
-    MatrixWorkspace_sptr wsInput(new WorkspaceTester());
+    MatrixWorkspace_sptr wsInput = boost::make_shared<WorkspaceTester>();
     PropertyManagerHelper manager;
     manager.declareProperty(wsName, wsInput, Direction::Input);
 
@@ -1349,17 +1354,16 @@ public:
   }
 
 private:
-  Mantid::API::MantidImage_sptr createImage(size_t width, size_t height) {
-    auto image = new Mantid::API::MantidImage(height);
-    double value = 1.0;
-    for (auto row = image->begin(); row != image->end(); ++row) {
-      row->resize(width);
-      for (auto pixel = row->begin(); pixel != row->end();
-           ++pixel, value += 1.0) {
-        *pixel = value;
-      }
+  Mantid::API::MantidImage_sptr createImage(const size_t width,
+                                            const size_t height) {
+    auto image =
+        boost::make_shared<Mantid::API::MantidImage>(height, MantidVec(width));
+    double startingValue = 1.0;
+    for (auto &row : *image) {
+      std::iota(row.begin(), row.end(), startingValue);
+      startingValue += static_cast<double>(width);
     }
-    return Mantid::API::MantidImage_sptr(image);
+    return image;
   }
 
   boost::shared_ptr<MatrixWorkspace> ws;

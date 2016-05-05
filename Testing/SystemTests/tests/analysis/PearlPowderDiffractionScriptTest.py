@@ -131,13 +131,14 @@ class LoadTests(unittest.TestCase):
         self.assertAlmostEqual(3.39159292684e-05, van14.readY(0)[187], places=DIFF_PLACES)
 
     def test_rdata_workspace(self):
+        expected_title = "glucose+Pb 6 tns in ZTA anvils"
         for i in range(1, 15, 3):
             rfile = mtd["rdata" + str(i)]
             self.assertTrue(isinstance(rfile, MatrixWorkspace))
             self.assertEquals(1, rfile.getNumberHistograms())
             self.assertEquals(4310, rfile.blocksize())
-            self.assertIn("glucose+Pb 6 tns in ZTA anvils", rfile.getTitle())
-
+            # Not using assertIn - not supported on rhel6 (python 2.6)
+            self.assertTrue(expected_title in rfile.getTitle())
             van_file = mtd["van" + str(i)]
             self.assertAlmostEquals(van_file.readX(0)[i], rfile.readX(0)[i], places=DIFF_PLACES)
 
@@ -145,7 +146,7 @@ class LoadTests(unittest.TestCase):
         self.assertTrue(isinstance(focus_file, MatrixWorkspace))
         self.assertEquals(14, focus_file.getNumberHistograms())
         self.assertEquals(4310, focus_file.blocksize())
-        self.assertIn("glucose+Pb 6 tns in ZTA anvils", rfile.getTitle())
+        self.assertTrue(expected_title in focus_file.getTitle())
 
     def test_mod_files(self):
         mod_group_table = mtd["PRL92476_92479"]

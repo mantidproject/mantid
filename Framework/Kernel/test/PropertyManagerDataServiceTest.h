@@ -2,12 +2,10 @@
 #define PROPERTYMANAGERDATASERVICETEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/Exception.h"
 
-using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 class PropertyManagerDataServiceTest : public CxxTest::TestSuite {

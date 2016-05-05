@@ -1,14 +1,15 @@
-#ifndef MANTID_API_PROPERTYMANAGERDATASERVICE_
-#define MANTID_API_PROPERTYMANAGERDATASERVICE_
+#ifndef MANTID_KERNEL_PROPERTYMANAGERDATASERVICE_
+#define MANTID_KERNEL_PROPERTYMANAGERDATASERVICE_
 
-#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DataService.h"
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid {
-namespace API {
-/** PropertyManagerDataService Class. Derived from DataService.
+namespace Kernel {
+/**
+PropertyManagerDataService Class. Derived from DataService.
+
 Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
@@ -30,8 +31,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL PropertyManagerDataServiceImpl final
-    : public Mantid::Kernel::DataService<Mantid::Kernel::PropertyManager> {
+class MANTID_KERNEL_DLL PropertyManagerDataServiceImpl final
+    : public DataService<PropertyManager> {
 public:
   PropertyManagerDataServiceImpl(const PropertyManagerDataServiceImpl &) =
       delete;
@@ -50,12 +51,12 @@ private:
 /// typedef for it.
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-template class MANTID_API_DLL
+template class MANTID_KERNEL_DLL
     Mantid::Kernel::SingletonHolder<PropertyManagerDataServiceImpl>;
 #endif /* _WIN32 */
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<
+typedef MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<
     PropertyManagerDataServiceImpl> PropertyManagerDataService;
 
-} // Namespace API
+} // Namespace Kernel
 } // Namespace Mantid
-#endif /*MANTID_API_PROPERTYMANAGERDATASERVICE_*/
+#endif /*MANTID_KERNEL_PROPERTYMANAGERDATASERVICE_*/
