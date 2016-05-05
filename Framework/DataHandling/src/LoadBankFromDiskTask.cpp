@@ -62,8 +62,7 @@ public:
         numEvents(numEvents), startAt(startAt), event_index(event_index),
         thisBankPulseTimes(thisBankPulseTimes), have_weight(have_weight),
         event_weight(event_weight), m_min_id(min_event_id),
-        m_max_id(max_event_id) {
-  }
+        m_max_id(max_event_id) {}
 
   //----------------------------------------------------------------------------------------------
   /** Run the data processing
