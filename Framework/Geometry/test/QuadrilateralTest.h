@@ -152,15 +152,10 @@ private:
 //------------------------------------------------------------------------------
 class QuadrilateralTestPerformance : public CxxTest::TestSuite {
 public:
-  // FractionalRebinning constructs ConvexPolygon once, then updates its values.
-  void test_update_values() {
+  void xtest_update_values() {
     const size_t ntests{50000000};
-    Quadrilateral test(V2D(), V2D(2.0, 0.0), V2D(2.0, 1.5), V2D(0.0, 1.5));
     for (size_t i = 0; i < ntests; ++i) {
-      test[0] = V2D();
-      test[1] = V2D(2.0, 0.0);
-      test[2] = V2D(2.0, 1.5);
-      test[3] = V2D(0.0, 1.5);
+      Quadrilateral test(V2D(), V2D(2.0, 0.0), V2D(2.0, 1.5), V2D(0.0, 1.5));
     }
   }
 
