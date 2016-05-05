@@ -213,7 +213,7 @@ public:
     do_assert_load(wsPoint, wsOut, parameters);
 
     // Clean up
-     removeFile(parameters.filename);
+    removeFile(parameters.filename);
     removeWorkspaceFromADS(outWsName);
   }
 
@@ -368,9 +368,10 @@ private:
 
     // The numeric axis of wsIn is histo, while axisIn is point data
     for (size_t index = 0; index < length - 1; ++index) {
-      TSM_ASSERT_DELTA("Axis 1 should have the same value",
-                       (axis1In->getValue(index + 1) + axis1In->getValue(index))/2.0, axis1Out->getValue(index),
-                       eps);
+      TSM_ASSERT_DELTA(
+          "Axis 1 should have the same value",
+          (axis1In->getValue(index + 1) + axis1In->getValue(index)) / 2.0,
+          axis1Out->getValue(index), eps);
     }
   }
 
