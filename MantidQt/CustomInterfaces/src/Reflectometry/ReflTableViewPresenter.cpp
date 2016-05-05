@@ -924,6 +924,7 @@ void ReflTableViewPresenter::reduceRow(int rowNo) {
       algReflOne->getPropertyValue("MomentumTransferStep");
   std::string momentumMax =
       algReflOne->getPropertyValue("MomentumTransferMaximum");
+  std::string thetaIn = algReflOne->getPropertyValue("ThetaIn");
   // Reduction has completed. Put Qmin and Qmax into the table if needed, for
   // stitching.
   if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMIN))
@@ -990,7 +991,8 @@ void ReflTableViewPresenter::reduceRow(int rowNo) {
           .toString()
           .isEmpty() &&
       thetaGiven)
-    m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_ANGLE), theta);
+    m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_ANGLE),
+                     boost::lexical_cast<double>(thetaIn));
 }
 
 /**

@@ -559,12 +559,14 @@ void ReflectometryReductionOneAuto::exec() {
         refRedOne->getPropertyValue("MomentumTransferStep");
     std::string momentumMaximum =
         refRedOne->getPropertyValue("MomentumTransferMaximum");
+    std::string thetaIn = refRedOne->getPropertyValue("ThetaIn");
     setProperty("MomentumTransferMinimum",
                 boost::lexical_cast<double>(momentumMinimum));
     setProperty("MomentumTransferStep",
                 boost::lexical_cast<double>(momentumStep));
     setProperty("MomentumTransferMaximum",
                 boost::lexical_cast<double>(momentumMaximum));
+    setProperty("ThetaIn", boost::lexical_cast<double>(thetaIn));
   } else {
     throw std::runtime_error(
         "ReflectometryReductionOne could not be initialised");
@@ -837,6 +839,8 @@ bool ReflectometryReductionOneAuto::processGroups() {
       alg->getPropertyValue("MomentumTransferMinimum");
   std::string momentumMaximum =
       alg->getPropertyValue("MomentumTransferMaximum");
+  std::string thetaIn = alg->getPropertyValue("ThetaIn");
+  setProperty("ThetaIn", boost::lexical_cast<double>(thetaIn));
   this->setProperty("MomentumTransferMinimum",
                     boost::lexical_cast<double>(momentumMinimum));
   this->setProperty("MomentumTransferMaximum",
