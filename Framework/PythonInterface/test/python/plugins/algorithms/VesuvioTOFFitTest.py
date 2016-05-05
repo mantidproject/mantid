@@ -68,7 +68,7 @@ class VesuvioTOFFitTest(unittest.TestCase):
         self.assertAlmostEqual(-0.0070975, output_ws.readY(0)[-1])
         peak_height_val, peak_height_bin = _get_peak_height_and_bin(output_ws.readY(1))
         self.assertTrue(abs(0.14780208913 - peak_height_val) < 0.002)
-        self.assertEquals(158, peak_height_bin)
+        self.assertTrue(abs(158 - peak_height_bin) <= 1)
 
     def test_single_run_produces_correct_output_workspace_index0_kfixed_including_background(self):
         profiles = "function=GramCharlier,width=[2, 5, 7],hermite_coeffs=[1, 0, 0],k_free=0,sears_flag=1;"\
@@ -92,7 +92,7 @@ class VesuvioTOFFitTest(unittest.TestCase):
         self.assertAlmostEqual(0.0063585, output_ws.readY(0)[-1])
         peak_height_val, peak_height_bin = _get_peak_height_and_bin(output_ws.readY(1))
         self.assertTrue(abs(0.129538171297 - peak_height_val) < 0.002)
-        self.assertEquals(159, peak_height_bin)
+        self.assertTrue(abs(159 - peak_height_bin) <= 1)
     # -------------- Failure cases ------------------
 
     def test_empty_masses_raises_error(self):
