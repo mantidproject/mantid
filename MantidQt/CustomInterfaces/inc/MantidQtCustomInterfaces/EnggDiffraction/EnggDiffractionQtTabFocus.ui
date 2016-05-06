@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>616</width>
-    <height>630</height>
+    <width>660</width>
+    <height>682</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -460,7 +460,7 @@
         <item>
          <widget class="QComboBox" name="comboBox_PlotData">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -560,7 +560,7 @@
            <bool>true</bool>
           </property>
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -574,7 +574,7 @@
           <property name="maximumSize">
            <size>
             <width>175</width>
-            <height>20</height>
+            <height>16777215</height>
            </size>
           </property>
           <property name="sizeIncrement">
