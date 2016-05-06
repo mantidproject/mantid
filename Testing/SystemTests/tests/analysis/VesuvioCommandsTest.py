@@ -148,7 +148,7 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
 
         index_one_first = -0.0221362198069
         index_one_last = 0.00720728978699
-	calc_data_height = 0.138704
+        calc_data_height = 0.138704
         if _is_old_boost_version():
             index_one_first = 6.809169e-04
             index_one_last = 7.206634e-03
