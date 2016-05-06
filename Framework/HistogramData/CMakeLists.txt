@@ -6,24 +6,28 @@ set ( SRC_FILES
   )
 
 set ( INC_FILES
-  inc/MantidHistogramData/BinEdges.h
-  inc/MantidHistogramData/Iterable.h
-  inc/MantidHistogramData/FixedLengthVector.h
-  inc/MantidHistogramData/Histogram.h
-  inc/MantidHistogramData/HistogramX.h
-  inc/MantidHistogramData/Points.h
-  inc/MantidHistogramData/VectorOf.h
-  )
+	inc/MantidHistogramData/BinEdges.h
+	inc/MantidHistogramData/FixedLengthVector.h
+	inc/MantidHistogramData/Histogram.h
+	inc/MantidHistogramData/HistogramX.h
+	inc/MantidHistogramData/Iterable.h
+	inc/MantidHistogramData/Offsetable.h
+	inc/MantidHistogramData/Points.h
+	inc/MantidHistogramData/Scalable.h
+	inc/MantidHistogramData/VectorOf.h
+)
 
 set ( TEST_FILES
-  BinEdgesTest.h
-  IterableTest.h
-  FixedLengthVectorTest.h
-  HistogramXTest.h
-  PointsTest.h
-  HistogramTest.h
-  VectorOfTest.h
-  )
+	BinEdgesTest.h
+	FixedLengthVectorTest.h
+	HistogramTest.h
+	HistogramXTest.h
+	IterableTest.h
+	OffsetableTest.h
+	PointsTest.h
+	ScalableTest.h
+	VectorOfTest.h
+)
 
 if (COVERALLS)
   foreach( loop_var ${SRC_FILES} ${INC_FILES})
