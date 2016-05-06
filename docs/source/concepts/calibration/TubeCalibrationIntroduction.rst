@@ -31,7 +31,7 @@ intensity, dip of intensity could be used as well.
 
 .. image:: ../../images/CalibrationPeaksAndEdges.png
 
-The image below shows an acquired data with the shadows and the the
+The image below shows an acquired data with the shadows and the
 peaks in two tubes; the blue are shadows and the red lines are peaks
 where neutron are getting through. Observe that the positions of the
 lines are different in each tube. Even though they were expected to be
@@ -111,7 +111,7 @@ expected them to be.
 .. image:: ../../images/PeaksPositionsForTube100.png
 
 Look, that the peaks positions are given in 'pixels', and we are looking
-for a transformation that moves the peaks position to the known postion,
+for a transformation that moves the peaks position to the known position,
 those defined in the IdealTube, as the function:
 
 :math:`T(pixels) = TubePosition`

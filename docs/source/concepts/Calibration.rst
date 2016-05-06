@@ -9,7 +9,7 @@ Calibration
 What is Calibration?
 --------------------
 
-Calibration is a process which determines and corrects for differences in the definition of an instrument to reality, generally conducted by peorforming a measurement of a reference compound under known conditions.
+Calibration is a process which determines and corrects for differences in the definition of an instrument to reality, generally conducted by performing a measurement of a reference compound under known conditions.
 
 
 

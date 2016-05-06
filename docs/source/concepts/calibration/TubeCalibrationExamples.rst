@@ -103,7 +103,7 @@ Running TubeCalibDemoMerlin.py
 ##############################
 
 MERLIN instruments are loaded with already calibrated values. The
-calibration works nicelly with these files, but if you want to see the
+calibration works nicely with these files, but if you want to see the
 uncalibrated file you can do it. Look at :ref:`How to reset detectors
 calibration <How_to_reset_detectors_calibration>`.
 
@@ -134,7 +134,7 @@ This example extends the work presented for the calibration of a single
 panel in WISH to 5 panels.
 
 To execute it, open the TubeCalibDemoWish_5panels.py inside mantid and
-run it. The data files were colected in the cycle_11_1.
+run it. The data files were collected in the cycle_11_1.
 
 It uses the python feature of kwargs to selectively pass parameters to
 the calibrate function and in this way append the calibration data for

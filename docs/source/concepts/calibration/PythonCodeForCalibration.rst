@@ -49,10 +49,10 @@ Below, it shows an example of a workspace:
 Parameter: tubeSet
 ##################
 
-The seccond step is to define what are the tubes to be calibrated
+The second step is to define what are the tubes to be calibrated
 (**tubeSet**). This parameter accepts the following inputs:
 
-* As ingle string that defines a set of tubes 
+* As single string that defines a set of tubes 
   (e.g. MERLIN/door2/tube_1_1), door (e.g. MAPS/A1_window), or the whole instrument 
   (e.g. MAPS)
 * A list of strings (e.g. [MERLIN/door2/tube_1_1, MERLIN/door2/tube_1_2], [MERLIN/door1, MERLIN/door2])
@@ -81,14 +81,14 @@ find the following data acquired on tubes as shown in the image below.
 			:width: 300px
 
 There are 5 special points that can be used to the calibration. A rising
-edge, followed by 3 gaussian through, and finally, a final edge. These 5
-points were mesured and the result was:
+edge, followed by 3 Gaussian through, and finally, a final edge. These 5
+points were measured and the result was:
 
 .. code:: python
 
       # remember that the origin is in the center of the tube. measured in meters.
       knownPositions = [-0.50, -0.16, 0.0, 0.16, 0.50] 
-      # the shape of these points: edge, gaussian, gaussian, gaussian, edge
+      # the shape of these points: edge, Gaussian, Gaussian, Gaussian, edge
       funcForm = [2, 1, 1, 1, 2]
 
 Execution of calibrate function

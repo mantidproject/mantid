@@ -5,14 +5,14 @@ TubeSpec
 
 The python class **TubeSpec** provides a way of specifying a set of
 tubes for calibration, so that the necessary information about detectors
-etc. is forethcoming. This class is provide by the python file
+etc. is forthcoming. This class is provide by the python file
 **tube_spec.py**. The function **getCalibration** of
 :ref:`Tube Calib <Tube_calib>` needs such an object.
 
 Constructor
 -----------
 
-The construct TubeSpec takes one aqrgument, which is a workspace that
+The construct TubeSpec takes one argument, which is a workspace that
 contains the instrument with tubes to be selected.
 
 setTubeSpecByString
@@ -61,7 +61,7 @@ integers are returned:
    -1).
 
 **getTubeLength** returns the length of the (N+1)st tube in the
-specification in metres, where N is the argument.
+specification in meters, where N is the argument.
 
 **getTubeName** returns the name of the (N+1)st tube in the
 specification, where N is the argument.

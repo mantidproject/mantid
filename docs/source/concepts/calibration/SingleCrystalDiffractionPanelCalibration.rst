@@ -24,7 +24,7 @@ You will need :ref:`PeaksWorkspace` with indexed peaks from multiple orientation
 Steps for rectangular detector based instruments
 ################################################
 
-:ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` is the primae algorithm that performs this caliration.  Thake a look the the desciption and worklow sections of the :ref:`algorithm documentation  <algm-SCDCalibratePanels>` for more details. If you set a value for DetCalFilename then it will output a DetCal file for :ref:`LoadIsawDetCal <algm-LoadIsawDetCal>`.
+:ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` is the prime algorithm that performs this calibration.  Take a look the  description and workflow sections of the :ref:`algorithm documentation  <algm-SCDCalibratePanels>` for more details. If you set a value for DetCalFilename then it will output a DetCal file for :ref:`LoadIsawDetCal <algm-LoadIsawDetCal>`.
 
 
 Applying your calibration

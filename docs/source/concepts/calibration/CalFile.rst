@@ -61,10 +61,10 @@ Using CalFiles
 Loading and saving CalFiles
 ###########################
 
-* :ref:`LoadCalFile <algm-LoadCalFile>` will load the CalFile into seperate offset, masking and grouping workspaces.
-* :ref:`SaveCalFile <algm-SaveCalFile>` will save a CalFile from seperate offset, masking and grouping workspaces.
+* :ref:`LoadCalFile <algm-LoadCalFile>` will load the CalFile into separate offset, masking and grouping workspaces.
+* :ref:`SaveCalFile <algm-SaveCalFile>` will save a CalFile from separate offset, masking and grouping workspaces.
 * :ref:`MaskWorkspaceToCalFile<algm-MaskWorkspaceToCalFile>` will save a mask workspace as a CalFile.
-* :ref:`ReadGroupsFromFile<algm-ReadGroupsFromFile>` Reads the groups from a CalFile, and output a 2D workspace containing on the Y-axis the values of the Group each detector belongs to. This is used to visualise the grouping scheme for powder diffractometers.
+* :ref:`ReadGroupsFromFile<algm-ReadGroupsFromFile>` Reads the groups from a CalFile, and output a 2D workspace containing on the Y-axis the values of the Group each detector belongs to. This is used to visualize the grouping scheme for powder diffractometers.
 
 
 Creating CalFiles
