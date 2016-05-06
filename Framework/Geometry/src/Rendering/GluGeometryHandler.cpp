@@ -80,6 +80,8 @@ void GluGeometryHandler::Render() {
       Renderer->RenderSegmentedCylinder(m_points[0], m_points[1], radius,
                                         height);
       break;
+    case NOSHAPE:
+      break;
     }
   } else if (ObjComp != nullptr) {
     Renderer->Render(ObjComp);
