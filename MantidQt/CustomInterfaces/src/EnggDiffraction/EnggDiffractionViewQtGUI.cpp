@@ -193,7 +193,7 @@ void EnggDiffractionViewQtGUI::doSetupTabFocus() {
   connect(m_uiTabFocus.comboBox_Multi_Runs, SIGNAL(currentIndexChanged(int)),
           this, SLOT(multiRunModeChanged(int)));
 
-  connect(m_uiTabFocus.checkBox_FocusedWS, SIGNAL(clicked()), this,
+  connect(m_uiTabFocus.checkBox_plot_focused_ws, SIGNAL(clicked()), this,
           SLOT(plotFocusStatus()));
 }
 
@@ -251,8 +251,7 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
           SLOT(savePeakList()));
 
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
-  m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom,
-                                        "d-Spacing (A)");
+  m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom, "d-Spacing (A)");
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::yLeft, "Counts (us)^-1");
   QFont font("MS Shell Dlg 2", 8);
   m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::xBottom, font);
@@ -395,8 +394,11 @@ void EnggDiffractionViewQtGUI::readSettings() {
   m_uiTabFocus.groupBox_texture->setChecked(
       qs.value("user-params-focus-texture-group-checkbox", false).toBool());
 
-  m_uiTabFocus.checkBox_FocusedWS->setChecked(
-      qs.value("user-params-focus-plot-ws", true).toBool());
+  m_uiTabFocus.checkBox_plot_focus_ws->setChecked(
+      qs.value("user-params-focus-plot-focused-ws", true).toBool());
+
+  m_uiTabFocus.checkBox_plotfocused_ws->setChecked(
+      qs.value("user-params-focus-save-output-files", true).toBool());
 
   m_uiTabFocus.comboBox_PlotData->setCurrentIndex(0);
 
@@ -512,7 +514,11 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
   qs.setValue("user-params-focus-texture-group-checkbox",
               m_uiTabFocus.groupBox_texture->isChecked());
 
-  qs.setValue("value", m_uiTabFocus.checkBox_FocusedWS->isChecked());
+  qs.setValue("user-params-focus-plot-focused-ws",
+              m_uiTabFocus.checkBox_plotfocused_ws->isChecked());
+
+  qs.setValue("user-params-focus-save-output-files",
+              m_uiTabFocus.checkBox_plotfocused_ws->isChecked());
 
   // pre-processing (re-binning)
   qs.setValue("user-params-preproc-runno",
@@ -667,8 +673,8 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabFocus.groupBox_texture->setEnabled(enable);
 
   m_uiTabFocus.pushButton_focus->setEnabled(enable);
-  m_uiTabFocus.checkBox_FocusedWS->setEnabled(enable);
-  m_uiTabFocus.checkBox_SaveOutputFiles->setEnabled(enable);
+  m_uiTabFocus.checkBox_plot_focus_ws->setEnabled(enable);
+  m_uiTabFocus.checkBox_save_output_files->setEnabled(enable);
   m_uiTabFocus.comboBox_Multi_Runs->setEnabled(enable);
 
   m_uiTabFocus.pushButton_focus->setEnabled(enable);
@@ -1261,7 +1267,7 @@ std::string EnggDiffractionViewQtGUI::focusingTextureGroupingFile() const {
 }
 
 bool EnggDiffractionViewQtGUI::focusedOutWorkspace() const {
-  return m_uiTabFocus.checkBox_FocusedWS->checkState();
+  return m_uiTabFocus.checkBox_plot_focused_ws->checkState();
 }
 
 bool EnggDiffractionViewQtGUI::plotCalibWorkspace() const {
@@ -1269,7 +1275,7 @@ bool EnggDiffractionViewQtGUI::plotCalibWorkspace() const {
 }
 
 bool EnggDiffractionViewQtGUI::saveFocusedOutputFiles() const {
-  return m_uiTabFocus.checkBox_SaveOutputFiles->checkState();
+  return m_uiTabFocus.checkBox_save_output_files->checkState();
 }
 
 void EnggDiffractionViewQtGUI::plotFocusStatus() {
