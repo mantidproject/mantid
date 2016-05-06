@@ -30,10 +30,10 @@ public:
   void setCentre(const double c) override { setParameter("Center", c); }
 
   double fwhm() const override {
-    return getParameter("Sigma") * (2.0 * sqrt(2.0 * log(2.0)));
+    return getParameter("Sigma") * (2.0 * sqrt(2.0 * M_LN2));
   }
   void setFwhm(const double w) override {
-    setParameter("Sigma", w / (2.0 * sqrt(2.0 * log(2.0))));
+    setParameter("Sigma", w / (2.0 * sqrt(2.0 * M_LN2)));
   }
 
   double height() const override { return getParameter("Height"); }
@@ -80,8 +80,8 @@ private:
   }
 
   double getGaussianAnalyticalInfiniteIntegral(IPeakFunction_sptr gaussian) {
-    return gaussian->height() * gaussian->fwhm() /
-           (2.0 * sqrt(2.0 * log(2.0))) * sqrt(2.0 * M_PI);
+    return gaussian->height() * gaussian->fwhm() / (2.0 * sqrt(M_LN2)) *
+           sqrt(M_PI);
   }
 
 public:
@@ -169,7 +169,7 @@ public:
      *  -integral from -3 to 3 should give approx. 0.997
      */
     IPeakFunction_sptr gaussian =
-        getGaussian(0.0, 2.0 * sqrt(2.0 * log(2.0)), 1.0 / sqrt(2.0 * M_PI));
+        getGaussian(0.0, 2.0 * sqrt(2.0 * M_LN2), 1.0 / sqrt(2.0 * M_PI));
     PeakFunctionIntegrator integrator(1e-10);
 
     IntegrationResult rOneSigma = integrator.integrate(*gaussian, -1.0, 1.0);

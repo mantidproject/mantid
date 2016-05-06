@@ -153,7 +153,7 @@ void LoadMcStas::exec() {
 } // LoadMcStas::exec()
 
 /**
- * Return the confidence with with this algorithm can load the file
+ * Read Event Data
  * @param eventEntries map of the file entries that have events
  * @param outputGroup pointer to the workspace group
  * @param nxFile Reads data from inside first first top entry
@@ -161,6 +161,7 @@ void LoadMcStas::exec() {
 void LoadMcStas::readEventData(
     const std::map<std::string, std::string> &eventEntries,
     WorkspaceGroup_sptr &outputGroup, ::NeXus::File &nxFile) {
+
   std::string filename = getPropertyValue("Filename");
   auto entries = nxFile.getEntries();
   bool errorBarsSetTo1 = getProperty("ErrorBarsSetTo1");
@@ -403,12 +404,10 @@ void LoadMcStas::readEventData(
 }
 
 /**
- * Return the confidence with with this algorithm can load the file
+ * Read histogram data
  * @param histogramEntries map of the file entries that have histogram
  * @param outputGroup pointer to the workspace group
  * @param nxFile Reads data from inside first first top entry
- * @returns An integer specifying the confidence level. 0 indicates it will not
- * be used
  */
 void LoadMcStas::readHistogramData(
     const std::map<std::string, std::string> &histogramEntries,
