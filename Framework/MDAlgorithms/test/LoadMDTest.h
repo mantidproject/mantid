@@ -771,7 +771,77 @@ public:
 
     AnalysisDataService::Instance().remove("SaveMDAffineTest_ws");
     AnalysisDataService::Instance().remove("SaveMDAffineTestHisto_ws");
-    AnalysisDataService::Instance().remove("OutputWorkspace");
+    AnalysisDataService::Instance().remove("reloaded_affine");
+  }
+
+  void test_loadHistory() {
+    std::string filename("History.nxs");
+    // Make a 4D MDEventWorkspace
+    MDEventWorkspace4Lean::sptr ws =
+        MDEventsTestHelper::makeMDEW<4>(10, 0.0, 10.0, 2);
+    AnalysisDataService::Instance().addOrReplace("HistoryEvTest_ws", ws);
+
+    // Bin data
+    BinMD balg;
+    balg.initialize();
+    balg.setProperty("InputWorkspace", "HistoryEvTest_ws");
+    balg.setProperty("OutputWorkspace", "HistoryHiTest_ws");
+    balg.setProperty("AlignedDim0", "Axis2,0,10,10");
+    balg.setProperty("AlignedDim1", "Axis0,0,10,5");
+    balg.setProperty("AlignedDim2", "Axis1,0,10,5");
+    balg.setProperty("AlignedDim3", "Axis3,0,10,2");
+    balg.execute();
+
+    SaveMD2 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "HistoryHiTest_ws");
+    alg.setPropertyValue("Filename", filename);
+    alg.setProperty("MakeFileBacked", "0");
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+    std::string this_filename = alg.getProperty("Filename");
+
+    LoadMD loadAlg;
+    loadAlg.initialize();
+    loadAlg.isInitialized();
+    loadAlg.setPropertyValue("Filename", this_filename);
+    loadAlg.setProperty("FileBackEnd", false);
+    loadAlg.setPropertyValue("OutputWorkspace", "withHisto");
+    loadAlg.execute();
+    TS_ASSERT(loadAlg.isExecuted());
+
+    // Check the affine matrix over at a couple of locations
+    MDHistoWorkspace_sptr newWSh =
+        AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(
+            "withHisto");
+
+    // BinMD and LoadMD should be in the history
+    TS_ASSERT_EQUALS(newWSh->getHistory().size(), 2);
+
+    loadAlg.initialize();
+    loadAlg.isInitialized();
+    loadAlg.setPropertyValue("Filename", this_filename);
+    loadAlg.setProperty("FileBackEnd", false);
+    loadAlg.setPropertyValue("OutputWorkspace", "noHisto");
+    loadAlg.setProperty("LoadHistory", false);
+    loadAlg.execute();
+    TS_ASSERT(loadAlg.isExecuted());
+
+    // Check the affine matrix over at a couple of locations
+    MDHistoWorkspace_sptr newWSnh =
+        AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>("noHisto");
+
+    // Only LoadMD should be in the history
+    TS_ASSERT_EQUALS(newWSnh->getHistory().size(), 1);
+
+    if (Poco::File(this_filename).exists()) {
+      Poco::File(this_filename).remove();
+    }
+
+    AnalysisDataService::Instance().remove("HistoryEvTest_ws");
+    AnalysisDataService::Instance().remove("HistoryHiTest_ws");
+    AnalysisDataService::Instance().remove("withHisto");
+    AnalysisDataService::Instance().remove("noHisto");
   }
 
   void test_MDEventWorkspace_contains_normalization_flags() {

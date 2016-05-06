@@ -26,7 +26,7 @@ namespace Mantid {
 namespace Algorithms {
 namespace {
 /// Factor to convert full width half max to sigma for calculations of I/sigma.
-const double FWHM_TO_SIGMA = 2.0 * sqrt(2.0 * std::log(2.0));
+const double FWHM_TO_SIGMA = 2.0 * sqrt(2.0 * M_LN2);
 const double BAD_OFFSET(1000.); // mark things that didn't work with this
 
 //--------------------------------------------------------------------------------------------
@@ -1087,7 +1087,7 @@ void GetDetOffsetsMultiPeaks::generatePeaksList(
     vec_widthDivPos.push_back(widthdevpos);
 
     // g_log.debug() << " h:" << height << " c:" << centre << " w:" <<
-    // (width/(2.*std::sqrt(2.*std::log(2.))))
+    // (width/(2.*std::sqrt(2.*M_LN2)))
     //               << " b:" << background << " chisq:" << chi2 << "\n";
 
     // Add peak to vectors

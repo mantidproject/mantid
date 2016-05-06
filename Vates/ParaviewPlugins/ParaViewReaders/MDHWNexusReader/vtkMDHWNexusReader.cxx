@@ -217,8 +217,7 @@ void vtkMDHWNexusReader::setTimeRange(vtkInformationVector *outputVector) {
 /*
 Getter for the workspace type name.
 */
-char *vtkMDHWNexusReader::GetWorkspaceTypeName() {
+const char *vtkMDHWNexusReader::GetWorkspaceTypeName() {
   // Forward request on to MVP presenter
-  typeName = m_presenter->getWorkspaceTypeName();
-  return const_cast<char *>(typeName.c_str());
+  return m_presenter->getWorkspaceTypeName().c_str();
 }

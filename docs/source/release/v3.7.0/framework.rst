@@ -111,6 +111,7 @@ MD Algorithms (VATES CLI)
 -  The box structure of workspaces created with CutMD using NoPix=false now matches that specified by the PnBins properties. Additional box splitting is only allowed if MaxRecursionDepth is set to higher than its default of 1.
 -  XorMD, OrMD and AndMD treat masked bins as zero.
 -  A Gaussian smoothing option has been added to SmoothMD. Note, this currently only supports specifying widths for the smoothing function in units of pixels along the dimensions of the workspace.
+-  LoadMD has an option to skip loading workspace history. This is useful for workspaces created form large number of files, treated separately. 
 
 Geometry
 --------

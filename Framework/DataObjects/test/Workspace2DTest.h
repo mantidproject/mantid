@@ -40,7 +40,7 @@ public:
     MantidVecPtr x, y, e;
     x.access().resize(nbins + 1);
     y.access().resize(nbins, 2); // Value of 2.0 in all ys
-    e.access().resize(nbins, sqrt(2.0));
+    e.access().resize(nbins, M_SQRT2);
     for (int i = 0; i < nbins + 1; ++i) {
       x.access()[i] = x0 + i * deltax;
     }

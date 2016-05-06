@@ -177,12 +177,12 @@ void PoldiIndexKnownCompounds::initializeIndexedPeaks(
 
 /// Converts FWHM to sigma of a Gaussian
 double PoldiIndexKnownCompounds::fwhmToSigma(double fwhm) {
-  return fwhm / (2.0 * sqrt(2.0 * log(2.0)));
+  return fwhm / (2.0 * sqrt(2.0 * M_LN2));
 }
 
 /// Converts sigma of a Gaussian to FWHM
 double PoldiIndexKnownCompounds::sigmaToFwhm(double sigma) {
-  return sigma * (2.0 * sqrt(2.0 * log(2.0)));
+  return sigma * (2.0 * sqrt(2.0 * M_LN2));
 }
 
 /** Recursively creates a list of Workspaces from a list of workspace names.

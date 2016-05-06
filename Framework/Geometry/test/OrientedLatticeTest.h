@@ -115,7 +115,7 @@ public:
         "The permutation transformation should not throw",
         theCell.setUFromVectors(V3D(1, 1, 0), V3D(1, -1, 0)));
     const DblMatrix &rot = theCell.getUB();
-    V3D dir0(sqrt(2.), 0, 0), rez, expected(1, 0, 1);
+    V3D dir0(M_SQRT2, 0, 0), rez, expected(1, 0, 1);
     rez = rot * dir0;
     // should be (1,0,1)
     TSM_ASSERT_EQUALS("vector should be (1,0,1)", rez, expected);
@@ -125,8 +125,8 @@ public:
   void testRotations3D() {
     OrientedLattice theCell;
     // two orthogonal vectors
-    V3D ort1(sqrt(2.), -1, -1);
-    V3D ort2(sqrt(2.), 1, 1);
+    V3D ort1(M_SQRT2, -1, -1);
+    V3D ort2(M_SQRT2, 1, 1);
     TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",
                               theCell.setUFromVectors(ort1, ort2));
     const DblMatrix &rot = theCell.getUB();

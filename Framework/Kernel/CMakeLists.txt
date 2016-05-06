@@ -78,7 +78,9 @@ set ( SRC_FILES
 	src/Property.cpp
 	src/PropertyHistory.cpp
 	src/PropertyManager.cpp
+	src/PropertyManagerDataService.cpp
 	src/PropertyManagerOwner.cpp
+	src/PropertyManagerProperty.cpp
 	src/PropertyWithValue.cpp
 	src/ProxyInfo.cpp
 	src/PseudoRandomNumberGenerator.cpp
@@ -234,7 +236,10 @@ set ( INC_FILES
 	inc/MantidKernel/Property.h
 	inc/MantidKernel/PropertyHistory.h
 	inc/MantidKernel/PropertyManager.h
+	inc/MantidKernel/PropertyManagerDataService.h
 	inc/MantidKernel/PropertyManagerOwner.h
+	inc/MantidKernel/PropertyManagerProperty.h
+	inc/MantidKernel/PropertyManager_fwd.h
 	inc/MantidKernel/PropertyWithValue.h
 	inc/MantidKernel/ProxyInfo.h
 	inc/MantidKernel/PseudoRandomNumberGenerator.h
@@ -371,6 +376,8 @@ set ( TEST_FILES
 	ProgressBaseTest.h
 	ProgressTextTest.h
 	PropertyHistoryTest.h
+	PropertyManagerDataServiceTest.h
+	PropertyManagerPropertyTest.h
 	PropertyManagerTest.h
 	PropertyTest.h
 	PropertyWithValueTest.h

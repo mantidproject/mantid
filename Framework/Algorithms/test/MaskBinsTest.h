@@ -72,7 +72,7 @@ public:
           TS_ASSERT_EQUALS(outputWS->readE(i)[j], 0.0);
         } else {
           TS_ASSERT_EQUALS(outputWS->readY(i)[j], 2.0);
-          TS_ASSERT_DELTA(outputWS->readE(i)[j], sqrt(2.0), 0.0001);
+          TS_ASSERT_DELTA(outputWS->readE(i)[j], M_SQRT2, 0.0001);
         }
         TS_ASSERT_EQUALS(outputWS->readX(i)[j], j);
       }
