@@ -1478,11 +1478,11 @@ const MantidVec &EventList::dataX() const { return m_histogram.dataX(); }
  *  @return a reference to the X (bin) vector.
  */
 const MantidVec &EventList::constDataX() const {
-  return m_histogram.constDataX();
+  return m_histogram.readX();
 }
 
 /// Returns the x data const
-const MantidVec &EventList::readX() const { return m_histogram.constDataX(); }
+const MantidVec &EventList::readX() const { return m_histogram.readX(); }
 
 /// Returns a pointer to the x data
 Kernel::cow_ptr<HistogramData::HistogramX> EventList::ptrX() const {

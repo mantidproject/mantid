@@ -51,7 +51,7 @@ public:
   }
   MantidVec &dataX() override { return m_histogram.dataX(); }
   const MantidVec &dataX() const override { return m_histogram.dataX(); }
-  const MantidVec &readX() const override { return m_histogram.constDataX(); }
+  const MantidVec &readX() const override { return m_histogram.readX(); }
   cow_ptr<HistogramData::HistogramX> ptrX() const override {
     return m_histogram.ptrX();
   }

@@ -25,7 +25,7 @@ MantidVec &Histogram1D::dataX() { return m_histogram.dataX(); }
 const MantidVec &Histogram1D::dataX() const { return m_histogram.dataX(); }
 
 /// Returns the x data const
-const MantidVec &Histogram1D::readX() const { return m_histogram.constDataX(); }
+const MantidVec &Histogram1D::readX() const { return m_histogram.readX(); }
 
 /// Returns a pointer to the x data
 Kernel::cow_ptr<HistogramData::HistogramX> Histogram1D::ptrX() const {

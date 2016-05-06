@@ -238,10 +238,10 @@ public:
 
   void test_setPoints_legacy_self_assignment() {
     Histogram h(Points(0));
-    auto &x = h.constDataX();
+    auto &x = h.readX();
     auto old_address = &x;
     h.setPoints(x);
-    TS_ASSERT_EQUALS(&h.constDataX(), old_address);
+    TS_ASSERT_EQUALS(&h.readX(), old_address);
   }
 
   void test_setPoints_self_assignment_with_size_mismatch() {
@@ -375,10 +375,10 @@ public:
 
   void test_setBinEdges_legacy_self_assignment() {
     Histogram h(BinEdges(0));
-    auto &x = h.constDataX();
+    auto &x = h.readX();
     auto old_address = &x;
     h.setBinEdges(x);
-    TS_ASSERT_EQUALS(&h.constDataX(), old_address);
+    TS_ASSERT_EQUALS(&h.readX(), old_address);
   }
 
   void test_setBinEdges_self_assignment_with_size_mismatch() {
