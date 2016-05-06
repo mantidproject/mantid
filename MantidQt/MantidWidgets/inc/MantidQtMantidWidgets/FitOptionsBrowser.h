@@ -67,14 +67,22 @@ public:
 
 signals:
   void changedToSequentialFitting();
+  // emitted when m_doubleManager reports a change
+  void doublePropertyChanged(const QString &propertyName);
+
+protected:
+  QtProperty* addDoubleProperty(const QString &propertyName);
+  void displayProperty(const QString &propertyName, bool show=true);
+  void displaySequentialFitProperties();
 
 private slots:
-
   void enumChanged(QtProperty*);
+  void doubleChanged(QtProperty *property);
 
 private:
 
   void createBrowser();
+  void initFittingTypeProp();
   void createProperties();
   void createCommonProperties();
   void createSimultaneousFitProperties();
@@ -82,10 +90,8 @@ private:
   void updateMinimizer();
   void switchFitType();
   void displayNormalFitProperties();
-  void displaySequentialFitProperties();
 
   QtProperty* createPropertyProperty(Mantid::Kernel::Property* prop);
-  QtProperty* addDoubleProperty(const QString& name);
 
   void addProperty(const QString& name, QtProperty* prop,
     QString (FitOptionsBrowser::*getter)(QtProperty*)const, 
@@ -97,6 +103,8 @@ private:
 
   QString getIntProperty(QtProperty*) const;
   void setIntProperty(QtProperty*, const QString&);
+  QString getDoubleProperty(QtProperty*) const;
+  void setDoubleProperty(QtProperty*, const QString&);
   QString getBoolProperty(QtProperty*) const;
   void setBoolProperty(QtProperty*, const QString&);
   QString getStringEnumProperty(QtProperty*) const;
@@ -106,15 +114,12 @@ private:
 
   void setPropertyEnumValues(QtProperty* prop, const QStringList& values);
 
-  /// Qt property browser which displays properties
-  QtTreePropertyBrowser* m_browser;
-
-  /// Manager for double properties
-  QtDoublePropertyManager* m_doubleManager;
-  /// Manager for int properties
-  QtIntPropertyManager* m_intManager;
   /// Manager for bool properties
   QtBoolPropertyManager* m_boolManager;
+  /// Manager for int properties
+  QtIntPropertyManager* m_intManager;
+  /// Manager for double properties
+  QtDoublePropertyManager* m_doubleManager;
   /// Manager for string properties
   QtStringPropertyManager* m_stringManager;
   /// Manager for the string list properties
@@ -132,7 +137,7 @@ private:
   QtProperty* m_costFunction;
   /// MaxIterations property
   QtProperty* m_maxIterations;
-  
+
   // Fit properties
   /// Output property
   QtProperty* m_output;
@@ -140,6 +145,8 @@ private:
   QtProperty* m_ignoreInvalidData;
 
   // PlotPeakByLogValue properties
+  /// Store special properties of the sequential Fit
+  QList<QtProperty*> m_sequentialProperties;
   /// FitType property
   QtProperty* m_fitType;
   /// OutputWorkspace property
@@ -149,6 +156,9 @@ private:
   /// Property for a name of a parameter to plot
   /// against LogValue
   QtProperty* m_plotParameter;
+
+  /// Qt property browser which displays properties
+  QtTreePropertyBrowser* m_browser;
 
   /// Precision of doubles in m_doubleManager
   int m_decimals;
@@ -166,8 +176,6 @@ private:
   FittingType m_fittingType;
   /// Store special properties of the normal Fit
   QList<QtProperty*> m_simultaneousProperties;
-  /// Store special properties of the sequential Fit
-  QList<QtProperty*> m_sequentialProperties;
 };
 
 } // MantidWidgets

@@ -242,6 +242,11 @@ private:
     throw std::runtime_error(
         "Cloning of TableWorkspaceTester is not implemented.");
   }
+  ITableWorkspace *
+  doCloneColumns(const std::vector<std::string> &) const override {
+    throw std::runtime_error(
+        "Cloning of TableWorkspaceTester is not implemented.");
+  }
 };
 
 //===================================================================================================================

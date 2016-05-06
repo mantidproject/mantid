@@ -6,14 +6,14 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/UsageService.h"
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/UsageService.h"
 
 #include <Poco/ActiveResult.h>
 
@@ -250,6 +250,7 @@ void FrameworkManagerImpl::clearInstruments() {
  * Clear memory associated with the PropertyManagers
  */
 void FrameworkManagerImpl::clearPropertyManagers() {
+  using Kernel::PropertyManagerDataService;
   PropertyManagerDataService::Instance().clear();
 }
 

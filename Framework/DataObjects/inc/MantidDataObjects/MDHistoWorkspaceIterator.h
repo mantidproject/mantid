@@ -126,6 +126,10 @@ public:
 
   std::vector<size_t> findNeighbourIndexesByWidth(const int &width) const;
 
+  std::pair<std::vector<size_t>, std::vector<bool>>
+  findNeighbourIndexesByWidth1D(const int &width,
+                                const int &width_dimension) const;
+
   std::vector<size_t>
   findNeighbourIndexesByWidth(const std::vector<int> &widths) const;
 

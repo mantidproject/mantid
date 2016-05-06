@@ -85,7 +85,7 @@ void FilterByXValue::exec() {
     // entail new methods (e.g. iterators) on EventList as this algorithm
     // shouldn't
     // need to know about the type of the events (e.g. weighted).
-    outputWS = EventWorkspace_sptr(inputWS->clone().release());
+    outputWS = inputWS->clone();
     setProperty("OutputWorkspace", outputWS);
   }
 
