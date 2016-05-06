@@ -43,7 +43,10 @@ MaterialBuilder &MaterialBuilder::setFormula(const std::string &formula) {
     throw std::runtime_error("MaterialBuilder::setFormula() - Atomic no. "
                              "already set, cannot use formula aswell.");
   }
-
+  if (formula.empty()) {
+    throw std::invalid_argument(
+        "MaterialBuilder::setFormula() - Empty formula provided.");
+  }
   typedef Material::ChemicalFormula ChemicalFormula;
   try {
     m_formula = Mantid::Kernel::make_unique<ChemicalFormula>(

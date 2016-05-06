@@ -123,6 +123,7 @@ public:
 
   void test_Invalid_Formula_Throws_Error_When_Set() {
     MaterialBuilder builder;
+    TS_ASSERT_THROWS(builder.setFormula(""), std::invalid_argument);
     TS_ASSERT_THROWS(builder.setFormula("Al-2"), std::invalid_argument);
   }
 

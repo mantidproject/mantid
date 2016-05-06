@@ -55,6 +55,7 @@ set ( SRC_FILES
 	src/MaskedProperty.cpp
 	src/Material.cpp
 	src/MaterialBuilder.cpp
+	src/MaterialXMLParser.cpp
 	src/Math/ChebyshevPolyFit.cpp
 	src/Math/Distributions/BoseEinsteinDistribution.cpp
 	src/Math/Distributions/ChebyshevPolynomial.cpp
@@ -204,6 +205,7 @@ set ( INC_FILES
 	inc/MantidKernel/MaskedProperty.h
 	inc/MantidKernel/Material.h
 	inc/MantidKernel/MaterialBuilder.h
+	inc/MantidKernel/MaterialXMLParser.h
 	inc/MantidKernel/Math/ChebyshevPolyFit.h
 	inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
 	inc/MantidKernel/Math/Distributions/ChebyshevPolynomial.h
@@ -352,6 +354,7 @@ set ( TEST_FILES
 	MaskedPropertyTest.h
 	MaterialBuilderTest.h
 	MaterialTest.h
+	MaterialXMLParserTest.h
 	MatrixPropertyTest.h
 	MatrixTest.h
 	MemoryTest.h
