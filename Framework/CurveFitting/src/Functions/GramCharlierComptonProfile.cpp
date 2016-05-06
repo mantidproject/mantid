@@ -316,7 +316,7 @@ void GramCharlierComptonProfile::addFSETerm(std::vector<double> &lhs) const {
     kfse *= getParameter("C_0");
 
   for (int j = 0; j < NFINE_Y; ++j) {
-    const double y = m_yfine[j] * M_SQRT1_2 / wg;
+    const double y = m_yfine[j] / M_SQRT2 / wg;
     const double he3 = Math::hermitePoly(3, y);
     lhs[j] += ampNorm * std::exp(-y * y) * he3 * (kfse / m_qfine[j]);
   }
