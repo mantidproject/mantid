@@ -3,6 +3,8 @@
 
 #include "MantidHistogramData/DllConfig.h"
 #include "MantidHistogramData/FixedLengthVector.h"
+#include "MantidHistogramData/Offsetable.h"
+#include "MantidHistogramData/Scalable.h"
 
 namespace Mantid {
 namespace HistogramData {
@@ -38,7 +40,9 @@ template <class Points, class HistogramX> class VectorOf;
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_HISTOGRAMDATA_DLL HistogramX
-    : public detail::FixedLengthVector<HistogramX> {
+    : public detail::FixedLengthVector<HistogramX>,
+      public detail::Offsetable<HistogramX>,
+      public detail::Scalable<HistogramX> {
 public:
   using detail::FixedLengthVector<HistogramX>::FixedLengthVector;
   using detail::FixedLengthVector<HistogramX>::operator=;
