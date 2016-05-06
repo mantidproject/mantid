@@ -1,6 +1,6 @@
 #include "MantidPythonInterface/kernel/DataServiceExporter.h"
 
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
 
 #include <boost/python/register_ptr_to_python.hpp>

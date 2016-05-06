@@ -8,7 +8,6 @@
 
 #include "vtkPVChangeOfBasisHelper.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/regex.hpp>
 
 // using namespace Mantid::Geometry;
@@ -70,10 +69,6 @@ void setAxisLabel(std::string metadataLabel, std::string labelString,
   axisTitle->SetNumberOfTuples(1);
   axisTitle->SetValue(0, labelString.c_str());
   fieldData->AddArray(axisTitle.GetPointer());
-}
-
-bool isSpecial(double value) {
-  return boost::math::isnan(value) || boost::math::isinf(value);
 }
 
 } // VATES
