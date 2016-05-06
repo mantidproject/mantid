@@ -1477,9 +1477,7 @@ const MantidVec &EventList::dataX() const { return m_histogram.dataX(); }
 /** Returns a reference to the x data.
  *  @return a reference to the X (bin) vector.
  */
-const MantidVec &EventList::constDataX() const {
-  return m_histogram.readX();
-}
+const MantidVec &EventList::constDataX() const { return m_histogram.readX(); }
 
 /// Returns the x data const
 const MantidVec &EventList::readX() const { return m_histogram.readX(); }
