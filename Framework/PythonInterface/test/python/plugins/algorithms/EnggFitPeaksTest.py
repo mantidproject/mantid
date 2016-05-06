@@ -98,10 +98,10 @@ class EnggFitPeaksTest(unittest.TestCase):
 
         # some values
         # note approx comparison - fitting results differences of ~5% between glinux/win/osx
-        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(0,0), cell00, 5e-3))
-        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(0,1), cell01, 5e-3))
-        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(1,0), cell10, 5e-3))
-        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(1,4), cell14, 5e-3))
+        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(0,0), cell00, 5e-2))
+        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(0,1), cell01, 5e-2))
+        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(1,0), cell10, 5e-2))
+        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(1,4), cell14, 5e-2))
 
     def test_fitting_fails_ok(self):
         """
@@ -190,8 +190,8 @@ class EnggFitPeaksTest(unittest.TestCase):
         Tests fitting a couple of peaks.
         """
 
-        peak_def1 = "name=BackToBackExponential, I=15000, A=0.1, B=0.14, X0=15000, S=50"
-        peak_def2 = "name=BackToBackExponential, I=6000, A=0.2, B=0.21, X0=20000, S=60"
+        peak_def1 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=15000, A=0.1, B=0.14, X0=15000, S=50"
+        peak_def2 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=6000, A=0.02, B=0.021, X0=20000, S=40"
         sws = CreateSampleWorkspace(Function="User Defined",
                                     UserDefinedFunction=peak_def1 + ";" + peak_def2,
                                     NumBanks=1, BankPixelWidth=1,
@@ -208,8 +208,8 @@ class EnggFitPeaksTest(unittest.TestCase):
         self.assertEquals(test_fit_peaks_table.rowCount(), 2)
 
         # check 'OutFittedPeaksTable' table workspace
-        self._check_outputs_ok(peaksTblName, 2, [ep1, 2.11282066963e-07,
-                                                 ep2, 3.87183221144e-06])
+        self._check_outputs_ok(peaksTblName, 2, [ep1, 1.98624796464,
+                                                 ep2, 0.00180987932115])
 
     def test_runs_ok_3peaks(self):
         """
