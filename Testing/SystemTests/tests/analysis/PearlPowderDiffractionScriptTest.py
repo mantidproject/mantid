@@ -199,10 +199,18 @@ class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest
         filenames = []
 
         # existing calibration files
-        filenames.extend(('PEARL/Attentuation/PRL112_DC25_10MM_FF.OUT'))
+        filenames.extend(('PEARL/Calibration_Test/Calibratoin/pearl_absorp_sphere_10mm_newinst2_long.nxs',
+                          'PEARL/Calibration_Test/Calibratoin/pearl_group_12_1_TT35.cal',
+                          'PEARL/Calibration_Test/Calibratoin/pearl_group_12_1_TT70.cal',
+                          'PEARL/Calibration_Test/Calibratoin/pearl_group_12_1_TT88.cal'))
+
         # raw files / run numbers 92476-92479
-        for i in range(6, 10):
-            filenames.append('PEARL/Calibration_Test/RawFiles/PEARL0009247' + str(i))  # need to change run numbers
+        for i in range(0, 2):
+            filenames.append('PEARL/Calibration_Test/RawFiles/PEARL0009153' + str(i))
+        for i in range(0, 2):
+            filenames.append('PEARL/Calibration_Test/RawFiles/PEARL0009155' + str(i))
+        for i in range(0, 2):
+            filenames.append('PEARL/Calibration_Test/RawFiles/PEARL0009156' + str(i))
 
         return filenames
 
@@ -230,7 +238,7 @@ class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest
         # DIRS[0] is the system test directory
 
         # setting raw files directory
-        DataDir = DIRS[0] + "PEARL/Calibration_Test/RawFiles/"
+        DataDir = DIRS[0] + 'PEARL/Calibration_Test/RawFiles/'
         pearl_routines.pearl_set_currentdatadir(DataDir)
         pearl_routines.PEARL_setdatadir(DataDir)
 
@@ -241,26 +249,26 @@ class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest
 
         # creating group cal file
         ngrpfile = CalibDir + 'test_cal_group_15_3.cal'
-        pearl_routines.PEARL_creategroup("91560_91563", ngroupfile=ngrpfile)
+        pearl_routines.PEARL_creategroup("91560_91561", ngroupfile=ngrpfile)
 
         # create offset files
         offsetfile = CalibDir + 'pearl_offset_15_3.cal'
-        pearl_routines.PEARL_createcal("91560_91563", noffsetfile=offsetfile, groupfile=ngrpfile)
+        pearl_routines.PEARL_createcal("91560_91561", noffsetfile=offsetfile, groupfile=ngrpfile)
 
         # Creates the vanadium file for a cycle, where the first set of runs are the vanadium and
         # the second are the background in each case.
         vanFile35 = CalibDir + 'van_spline_TT35_cycle_15_3.nxs'
-        pearl_routines.PEARL_createvan("91530_91533", "91550_91553", ttmode="TT35",
+        pearl_routines.PEARL_createvan("91530_91531", "91550_91551", ttmode="TT35",
                                        nvanfile=vanFile35, nspline=40, absorb=True, debug=True)
         CloneWorkspace(InputWorkspace="Van_data", OutputWorkspace="van_tt35")
 
         vanFile70 = CalibDir + 'van_spline_TT70_cycle_15_3.nxs'
-        pearl_routines.PEARL_createvan("91530_91533", "91550_91553", ttmode="TT70",
+        pearl_routines.PEARL_createvan("91530_91531", "91550_91551", ttmode="TT70",
                                        nvanfile=vanFile70, nspline=40, absorb=True, debug=True)
         CloneWorkspace(InputWorkspace="Van_data", OutputWorkspace="van_tt70")
 
         vanFile88 = CalibDir + 'van_spline_TT88_cycle_15_3.nxs'
-        pearl_routines.PEARL_createvan("91530_91533", "91550_91553", ttmode="TT88",
+        pearl_routines.PEARL_createvan("91530_91531", "91550_91551", ttmode="TT88",
                                        nvanfile=vanFile88, nspline=40, absorb=True, debug=True)
         CloneWorkspace(InputWorkspace="Van_data", OutputWorkspace="van_tt88")
 
@@ -279,3 +287,11 @@ class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest
     def validate(self):
         return self._success
 
+    def cleanup(self):
+        filenames = []
+        filenames.extend(('PEARL/Calibration_Test/Calibration/pearl_offset_15_3.cal',
+                          'PEARL/Calibration_Test/Calibration/test_cal_group_11_1.cal',
+                          'PEARL/Calibration_Test/Calibration/van_spline_TT35_cycle_15_3.nxs',
+                          'PEARL/Calibration_Test/Calibration/van_spline_TT70_cycle_15_3.nxs',
+                          'PEARL/Calibration_Test/Calibration/van_spline_TT88_cycle_15_3.nxs'))
+        self._clean_up_files(filenames, DIRS)
