@@ -96,8 +96,8 @@ void GluGeometryHandler::GetObjectGeom(int &mytype,
     switch (type) {
     case CUBOID:
       break;
-	case HEXAHEDRON:
-		break;
+    case HEXAHEDRON:
+      break;
     case SPHERE:
       myradius = radius;
       break;
