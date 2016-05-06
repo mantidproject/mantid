@@ -25,7 +25,7 @@ public:
   static void destroySuite(FixedLengthVectorTest *suite) { delete suite; }
 
   void test_empty_constructor() {
-    const FixedLengthVectorTester values;
+    const FixedLengthVectorTester values{};
     TS_ASSERT_EQUALS(values.size(), 0);
   }
 
