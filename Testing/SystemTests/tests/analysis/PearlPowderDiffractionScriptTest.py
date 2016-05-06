@@ -219,8 +219,6 @@ class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest
             for files in filenames:
                 path = os.path.join(directories[0], files)
                 os.remove(path)
-            cali_path = os.path.join(directories[0], "PEARL/Calibration_Test/Calibration")
-            shutil.rmtree(cali_path)
         except OSError, ose:
             print 'could not delete the generated file: ', ose.filename
 
@@ -290,7 +288,7 @@ class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest
     def cleanup(self):
         filenames = []
         filenames.extend(('PEARL/Calibration_Test/Calibration/pearl_offset_15_3.cal',
-                          'PEARL/Calibration_Test/Calibration/test_cal_group_11_1.cal',
+                          'PEARL/Calibration_Test/Calibration/test_cal_group_15_3.cal',
                           'PEARL/Calibration_Test/Calibration/van_spline_TT35_cycle_15_3.nxs',
                           'PEARL/Calibration_Test/Calibration/van_spline_TT70_cycle_15_3.nxs',
                           'PEARL/Calibration_Test/Calibration/van_spline_TT88_cycle_15_3.nxs'))
@@ -346,11 +344,13 @@ class LoadCalibTests(unittest.TestCase):
         for i in range(0, 1000, 50):
             self.assertEqual(table_workspaces[0].cell(i, 0), table_workspaces[0].cell(i, 0))
 
-        self.assertEqual(4491.84, table_workspaces[0].cell(0, 1))
-        self.assertEqual(4826.7, table_workspaces[1].cell(34, 1))
-        self.assertEqual(4814.15, table_workspaces[0].cell(190, 1))
-        self.assertEqual(4639.09, table_workspaces[1].cell(405, 1))
-        self.assertEqual(5219.48, table_workspaces[0].cell(703, 1))
-        self.assertEqual(3018.97, table_workspaces[1].cell(1055, 1))
+        diff_places = 2
+
+        self.assertAlmostEqual(4491.84, table_workspaces[0].cell(0, 1), places=diff_places)
+        self.assertAlmostEqual(4826.7, table_workspaces[1].cell(34, 1), places=diff_places)
+        self.assertAlmostEqual(4814.51, table_workspaces[0].cell(190, 1), places=diff_places)
+        self.assertAlmostEqual(4639.09, table_workspaces[1].cell(405, 1), places=diff_places)
+        self.assertAlmostEqual(5219.48, table_workspaces[0].cell(703, 1), places=diff_places)
+        self.assertAlmostEqual(3018.97, table_workspaces[1].cell(1055, 1), places=diff_places)
 
 
