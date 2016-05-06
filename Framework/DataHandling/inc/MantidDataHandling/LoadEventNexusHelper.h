@@ -90,7 +90,6 @@ private:
   Mantid::Kernel::Timer m_timer;
 }; // END-DEF-CLASS ProcessBankData
 
-
 /** This task does the disk IO from loading the NXS file,
 * and so will be on a disk IO mutex */
 class LoadBankFromDiskTask { // : public Mantid::Kernel::Task {
@@ -123,7 +122,6 @@ public:
   void run();
 
   int64_t recalculateDataSize(const int64_t &size);
-
 
 private:
   /// Algorithm being run
