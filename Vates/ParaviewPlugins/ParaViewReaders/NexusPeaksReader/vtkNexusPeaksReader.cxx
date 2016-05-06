@@ -88,8 +88,7 @@ int vtkNexusPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   p_peakFactory->initialize(m_PeakWS);
 
   FilterUpdateProgressAction<vtkNexusPeaksReader> drawingProgressUpdate(this, "Drawing...");
-  auto structuredMesh = vtkSmartPointer<vtkDataSet>::Take(
-      p_peakFactory->create(drawingProgressUpdate));
+  auto structuredMesh = p_peakFactory->create(drawingProgressUpdate);
 
   vtkSmartPointer<vtkPolyDataAlgorithm> shapeMarker;
   if(p_peakFactory->isPeaksWorkspaceIntegrated())
@@ -241,8 +240,7 @@ void vtkNexusPeaksReader::updateAlgorithmProgress(double progress, const std::st
 /*
 Getter for the workspace type name.
 */
-char* vtkNexusPeaksReader::GetWorkspaceTypeName()
-{
+const char *vtkNexusPeaksReader::GetWorkspaceTypeName() {
   //Preload the Workspace and then cache it to avoid reloading later.
-  return const_cast<char*>(m_wsTypeName.c_str());
+  return m_wsTypeName.c_str();
 }

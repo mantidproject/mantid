@@ -96,9 +96,9 @@ namespace MantidQt
 			QSplitter *controlPanelLayout = new QSplitter(Qt::Horizontal);
 
 			// Add Tab control panel
-			mControlsTab = new QTabWidget(this, 0);
-			controlPanelLayout->addWidget(mControlsTab);
-			controlPanelLayout->setSizePolicy(QSizePolicy::Expanding,
+                        mControlsTab = new QTabWidget(this);
+                        controlPanelLayout->addWidget(mControlsTab);
+                        controlPanelLayout->setSizePolicy(QSizePolicy::Expanding,
 				QSizePolicy::Expanding);
 
 			// Create the display widget
@@ -1275,6 +1275,8 @@ namespace MantidQt
 					// if workspace and instrument don't change keep the scaling
 					if (sameWS && !resetGeometry) {
 						m_instrumentActor->updateColors();
+						setupColorMap();
+						updateInstrumentView();
 					}
 					else {
 						resetInstrument(resetGeometry);

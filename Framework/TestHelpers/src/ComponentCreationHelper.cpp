@@ -33,12 +33,14 @@ using Mantid::Kernel::Quat;
 
 namespace ComponentCreationHelper {
 //----------------------------------------------------------------------------------------------
+
 /**
- * Create a capped cylinder object
+ * Return the XML for a capped cylinder
  */
-Object_sptr createCappedCylinder(double radius, double height,
-                                 const V3D &baseCentre, const V3D &axis,
-                                 const std::string &id) {
+std::string cappedCylinderXML(double radius, double height,
+                              const Mantid::Kernel::V3D &baseCentre,
+                              const Mantid::Kernel::V3D &axis,
+                              const std::string &id) {
   std::ostringstream xml;
   xml << "<cylinder id=\"" << id << "\">"
       << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\""
@@ -48,9 +50,17 @@ Object_sptr createCappedCylinder(double radius, double height,
       << "<radius val=\"" << radius << "\" />"
       << "<height val=\"" << height << "\" />"
       << "</cylinder>";
+  return xml.str();
+}
 
-  ShapeFactory shapeMaker;
-  return shapeMaker.createShape(xml.str());
+/**
+ * Create a capped cylinder object
+ */
+Object_sptr createCappedCylinder(double radius, double height,
+                                 const V3D &baseCentre, const V3D &axis,
+                                 const std::string &id) {
+  return ShapeFactory().createShape(
+      cappedCylinderXML(radius, height, baseCentre, axis, id));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -584,6 +594,84 @@ createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
   instrument->add(det);
   instrument->markAsDetector(det);
 
+  return instrument;
+}
+
+CompAssembly *makeBank(size_t width, size_t height, Instrument *instrument) {
+
+  double width_d = double(width);
+  double height_d = double(height);
+  static int bankNo = 1;
+  auto bank = new CompAssembly("Bank" + std::to_string(bankNo++));
+  static size_t id = 1;
+  for (size_t i = 0; i < width; ++i) {
+    for (size_t j = 0; j < height; ++j) {
+      Detector *det = new Detector("pixel", int(id++) /*detector id*/, bank);
+      det->setPos(V3D{double(i), double(j), double(0)});
+      det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+      bank->add(det);
+      instrument->markAsDetector(det);
+    }
+  }
+  bank->setPos(V3D{width_d / 2, height_d / 2, 0});
+
+  return bank;
+}
+
+Instrument_sptr sansInstrument(const Mantid::Kernel::V3D &sourcePos,
+                               const Mantid::Kernel::V3D &samplePos,
+                               const Mantid::Kernel::V3D &trolley1Pos,
+                               const Mantid::Kernel::V3D &trolley2Pos) {
+
+  /*
+  This has been generated for comparison with newer Instrument designs. It is
+  therefore not
+  an exact representation of an instrument one might expect to create for SANS.
+   */
+  auto instrument = boost::make_shared<Instrument>();
+
+  instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+      Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left,
+      "0,0,0"));
+
+  // A source
+  ObjComponent *source = new ObjComponent("source");
+  source->setPos(sourcePos);
+  source->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  instrument->add(source);
+  instrument->markAsSource(source);
+
+  // A sample
+  ObjComponent *sample = new ObjComponent("some-surface-holder");
+  sample->setPos(samplePos);
+  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  instrument->add(sample);
+  instrument->markAsSamplePos(sample);
+
+  size_t width = 100;
+  size_t height = 100;
+
+  CompAssembly *trolley1 = new CompAssembly("Trolley1");
+  trolley1->setPos(trolley1Pos);
+  CompAssembly *trolley2 = new CompAssembly("Trolley2");
+  trolley2->setPos(trolley2Pos);
+
+  CompAssembly *N = makeBank(width, height, instrument.get());
+  trolley1->add(N);
+  CompAssembly *E = makeBank(width, height, instrument.get());
+  trolley1->add(E);
+  CompAssembly *S = makeBank(width, height, instrument.get());
+  trolley1->add(S);
+  CompAssembly *W = makeBank(width, height, instrument.get());
+  trolley1->add(W);
+
+  CompAssembly *l_curtain = makeBank(width, height, instrument.get());
+  trolley2->add(l_curtain);
+  CompAssembly *r_curtain = makeBank(width, height, instrument.get());
+  trolley2->add(r_curtain);
+
+  instrument->add(trolley1);
+  instrument->add(trolley2);
   return instrument;
 }
 }

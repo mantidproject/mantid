@@ -161,7 +161,7 @@ bool MdSettings::getUsageGeneralMdColorMap()
   QSettings settings;
 
   settings.beginGroup(m_generalMdGroup);
-  bool flag = settings.value(m_lblUseGeneralMdColorMap, false).asBool();
+  bool flag = settings.value(m_lblUseGeneralMdColorMap, false).toBool();
   settings.endGroup();
 
   return flag;
@@ -181,7 +181,7 @@ bool MdSettings::getUsageLastSession()
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  bool flag = settings.value(m_lblUseLastSessionColorMap, false).asBool();
+  bool flag = settings.value(m_lblUseLastSessionColorMap, false).toBool();
   settings.endGroup();
 
   return flag;
@@ -201,7 +201,10 @@ QString MdSettings::getUserSettingInitialView()
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  QString initialView = settings.value(m_lblUserSettingInitialView, m_mdConstants.getTechniqueDependence()).asString();
+  QString initialView = settings
+                            .value(m_lblUserSettingInitialView,
+                                   m_mdConstants.getTechniqueDependence())
+                            .toString();
   settings.endGroup();
 
   return initialView;
@@ -212,7 +215,7 @@ bool MdSettings::getLastSessionLogScale()
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  bool logScale = settings.value(m_lblLastSessionLogScale, false).asBool();
+  bool logScale = settings.value(m_lblLastSessionLogScale, false).toBool();
   settings.endGroup();
 
   return logScale;

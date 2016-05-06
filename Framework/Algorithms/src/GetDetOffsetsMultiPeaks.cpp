@@ -3,6 +3,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
@@ -14,6 +15,7 @@
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/StartsWithValidator.h"
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -24,7 +26,7 @@ namespace Mantid {
 namespace Algorithms {
 namespace {
 /// Factor to convert full width half max to sigma for calculations of I/sigma.
-const double FWHM_TO_SIGMA = 2.0 * sqrt(2.0 * std::log(2.0));
+const double FWHM_TO_SIGMA = 2.0 * sqrt(2.0 * M_LN2);
 const double BAD_OFFSET(1000.); // mark things that didn't work with this
 
 //--------------------------------------------------------------------------------------------
@@ -123,12 +125,12 @@ DECLARE_ALGORITHM(GetDetOffsetsMultiPeaks)
   */
 GetDetOffsetsMultiPeaks::GetDetOffsetsMultiPeaks()
     : API::Algorithm(), m_inputWS(), m_eventW(), m_isEvent(false), m_backType(),
-      m_peakType(), m_maxChiSq(0.), m_minPeakHeight(0.), m_leastMaxObsY(0.),
-      m_maxOffset(0.), m_peakPositions(), m_fitWindows(), m_inputResolutionWS(),
-      m_hasInputResolution(false), m_minResFactor(0.), m_maxResFactor(0.),
-      m_outputW(), m_outputNP(), m_maskWS(), m_infoTableWS(),
-      m_peakOffsetTableWS(), m_resolutionWS(), m_useFitWindowTable(false),
-      m_vecFitWindow() {}
+      m_peakType(), m_minimizer(), m_maxChiSq(0.), m_minPeakHeight(0.),
+      m_leastMaxObsY(0.), m_maxOffset(0.), m_peakPositions(), m_fitWindows(),
+      m_inputResolutionWS(), m_hasInputResolution(false), m_minResFactor(0.),
+      m_maxResFactor(0.), m_outputW(), m_outputNP(), m_maskWS(),
+      m_infoTableWS(), m_peakOffsetTableWS(), m_resolutionWS(),
+      m_useFitWindowTable(false), m_vecFitWindow() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -159,8 +161,8 @@ void GetDetOffsetsMultiPeaks::init() {
                   "Name of the input Tableworkspace containing peak fit window "
                   "information for each spectrum. ");
 
-  std::vector<std::string> peaktypes{"BackToBackExponential", "Gaussian",
-                                     "Lorentzian"};
+  std::vector<std::string> peaktypes =
+      FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>();
   declareProperty("PeakFunction", "Gaussian",
                   boost::make_shared<StringListValidator>(peaktypes),
                   "Type of peak to fit");
@@ -203,6 +205,13 @@ void GetDetOffsetsMultiPeaks::init() {
       "then "
       "this peak will not be fit.  It is designed for EventWorkspace with "
       "integer counts.");
+
+  std::vector<std::string> minimizerOptions =
+      API::FuncMinimizerFactory::Instance().getKeys();
+  declareProperty("Minimizer", "Levenberg-MarquardtMD",
+                  Kernel::IValidator_sptr(
+                      new Kernel::StartsWithValidator(minimizerOptions)),
+                  "Minimizer to use for fitting peaks.");
 
   // Disable default gsl error handler (which is to call abort!)
   gsl_set_error_handler_off();
@@ -344,6 +353,7 @@ void GetDetOffsetsMultiPeaks::processProperties() {
   // The maximum allowable chisq value for an individual peak fit
   m_maxChiSq = this->getProperty("MaxChiSq");
   m_minPeakHeight = this->getProperty("MinimumPeakHeight");
+  m_minimizer = getPropertyValue("Minimizer");
   m_maxOffset = getProperty("MaxOffset");
   m_leastMaxObsY = getProperty("MinimumPeakHeightObs");
 
@@ -909,6 +919,7 @@ int GetDetOffsetsMultiPeaks::fitSpectra(
   findpeaks->setProperty<int>("MinGuessedPeakWidth", 4);
   findpeaks->setProperty<int>("MaxGuessedPeakWidth", 4);
   findpeaks->setProperty<double>("MinimumPeakHeight", m_minPeakHeight);
+  findpeaks->setProperty<std::string>("Minimizer", m_minimizer);
   findpeaks->setProperty("StartFromObservedPeakCentre", true);
   findpeaks->executeAsChildAlg();
 
@@ -1076,7 +1087,7 @@ void GetDetOffsetsMultiPeaks::generatePeaksList(
     vec_widthDivPos.push_back(widthdevpos);
 
     // g_log.debug() << " h:" << height << " c:" << centre << " w:" <<
-    // (width/(2.*std::sqrt(2.*std::log(2.))))
+    // (width/(2.*std::sqrt(2.*M_LN2)))
     //               << " b:" << background << " chisq:" << chi2 << "\n";
 
     // Add peak to vectors

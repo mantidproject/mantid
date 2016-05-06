@@ -76,6 +76,9 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
+  static const std::string muonTD;
+  static const std::string pulsedTD;
+
 private:
   /// Overwrites Algorithm method.
   void init() override;

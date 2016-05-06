@@ -25,6 +25,18 @@ void GluGeometryRenderer::RenderCube(const V3D &Point1, const V3D &Point2,
   CreateCube(Point1, Point2, Point3, Point4);
 }
 
+void GluGeometryRenderer::RenderHexahedron(
+    const Kernel::V3D &Point1, const Kernel::V3D &Point2,
+    const Kernel::V3D &Point3, const Kernel::V3D &Point4,
+    const Kernel::V3D &Point5, const Kernel::V3D &Point6,
+    const Kernel::V3D &Point7, const Kernel::V3D &Point8) {
+
+  while (glGetError() != GL_NO_ERROR)
+    ;
+  CreateHexahedron(Point1, Point2, Point3, Point4, Point5, Point6, Point7,
+                   Point8);
+}
+
 void GluGeometryRenderer::RenderCone(const V3D &center, const V3D &axis,
                                      double radius, double height) {
   while (glGetError() != GL_NO_ERROR)
@@ -144,6 +156,64 @@ void GluGeometryRenderer::CreateCube(const V3D &Point1, const V3D &Point2,
       glVertex3d(vertex[ij][0], vertex[ij][1], vertex[ij][2]);
     }
   }
+  glEnd();
+}
+
+/**
+* Creates a Hexahedron
+* @param Point1 :: first point of the hexahedron
+* @param Point2 :: second point of the hexahedron
+* @param Point3 :: third point of the hexahedron
+* @param Point4 :: fourth point of the hexahedron
+* @param Point5 :: fifth point of the hexahedron
+* @param Point6 :: sixth point of the hexahedron
+* @param Point7 :: seventh point of the hexahedron
+* @param Point8 :: eigth point of the hexahedron
+*/
+void GluGeometryRenderer::CreateHexahedron(
+    const Kernel::V3D &Point1, const Kernel::V3D &Point2,
+    const Kernel::V3D &Point3, const Kernel::V3D &Point4,
+    const Kernel::V3D &Point5, const Kernel::V3D &Point6,
+    const Kernel::V3D &Point7, const Kernel::V3D &Point8) {
+
+  glBegin(GL_QUADS);
+
+  // bottom
+  glVertex3d(Point1.X(), Point1.Y(), Point1.Z());
+  glVertex3d(Point2.X(), Point2.Y(), Point2.Z());
+  glVertex3d(Point3.X(), Point3.Y(), Point3.Z());
+  glVertex3d(Point4.X(), Point4.Y(), Point4.Z());
+
+  // front
+  glVertex3d(Point2.X(), Point2.Y(), Point2.Z());
+  glVertex3d(Point6.X(), Point6.Y(), Point6.Z());
+  glVertex3d(Point7.X(), Point7.Y(), Point7.Z());
+  glVertex3d(Point3.X(), Point3.Y(), Point3.Z());
+
+  // right
+  glVertex3d(Point3.X(), Point3.Y(), Point3.Z());
+  glVertex3d(Point7.X(), Point7.Y(), Point7.Z());
+  glVertex3d(Point8.X(), Point8.Y(), Point8.Z());
+  glVertex3d(Point4.X(), Point4.Y(), Point4.Z());
+
+  // back
+  glVertex3d(Point4.X(), Point4.Y(), Point4.Z());
+  glVertex3d(Point8.X(), Point8.Y(), Point8.Z());
+  glVertex3d(Point5.X(), Point5.Y(), Point5.Z());
+  glVertex3d(Point1.X(), Point1.Y(), Point1.Z());
+
+  // left
+  glVertex3d(Point1.X(), Point1.Y(), Point1.Z());
+  glVertex3d(Point5.X(), Point5.Y(), Point5.Z());
+  glVertex3d(Point6.X(), Point6.Y(), Point6.Z());
+  glVertex3d(Point2.X(), Point2.Y(), Point2.Z());
+
+  // top
+  glVertex3d(Point5.X(), Point5.Y(), Point5.Z());
+  glVertex3d(Point6.X(), Point6.Y(), Point6.Z());
+  glVertex3d(Point7.X(), Point7.Y(), Point7.Z());
+  glVertex3d(Point8.X(), Point8.Y(), Point8.Z());
+
   glEnd();
 }
 

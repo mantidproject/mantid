@@ -134,10 +134,12 @@ const std::string %s::summary() const {
  */
 void %s::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<API::Workspace>>("InputWorkspace", "",
+                                                             Direction::Input),
       "An input workspace.");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "",
+                                                             Direction::Output),
       "An output workspace.");
 }
 

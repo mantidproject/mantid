@@ -26,11 +26,12 @@ set ( TEST_PY_FILES
   DSFinterpTest.py
   EnggCalibrateFullTest.py
   EnggCalibrateTest.py
+  EnggFitDIFCFromPeaksTest.py
   EnggFitPeaksTest.py
   EnggFocusTest.py
   EnggVanadiumCorrectionsTest.py
-  EVSDiffractionReductionTest.py
   FilterLogByTimeTest.py
+  FindEPPTest.py
   FindReflectometryLinesTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
   GetEiT0atSNSTest.py
@@ -61,12 +62,14 @@ set ( TEST_PY_FILES
   MolDynTest.py
   MSDFitTest.py
   MuscatSofQWTest.py
+  NormaliseSpectraTest.py
   OSIRISDiffractionReductionTest.py
   ResNorm2Test.py
   RetrieveRunInfoTest.py
   SANSFitShiftScaleTest.py
   SANSWideAngleCorrectionTest.py
   SavePlot1DTest.py
+  SavePlot1DAsJsonTest.py
   SaveVulcanGSSTest.py
   SimulatedDensityOfStatesTest.py
   SortByQVectorsTest.py
@@ -92,7 +95,11 @@ set ( TEST_PY_FILES
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py
   PoldiMergeTest.py
+  VesuvioDiffractionReductionTest.py
+  VesuvioPreFitTest.py
   VesuvioResolutionTest.py
+  VesuvioThicknessTest.py
+  VesuvioTOFFitTest.py
   PoldiCreatePeaksFromFileTest.py
   LoadCIFTest.py
 )

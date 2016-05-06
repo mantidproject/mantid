@@ -49,29 +49,26 @@ class MANTID_GEOMETRY_DLL GluGeometryHandler : public GeometryHandler {
   /// the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
   enum GEOMETRY_TYPE {
     CUBOID,            ///< CUBOID
+    HEXAHEDRON,        ///< HEXAHEDRON
+    SPHERE,            ///< SPHERE
     CYLINDER,          ///< CYLINDER
     CONE,              ///< CONE
-    SPHERE,            ///< SPHERE
     SEGMENTED_CYLINDER ///< Cylinder with 1 or more segments (along the axis).
     /// Sizes of segments are important.
   };
 
 private:
-  static Kernel::Logger &PLog;   ///< The official logger
-  GluGeometryRenderer *Renderer; ///< Geometry renderer variable used for
-  /// rendering Object/ObjComponent
-
-  Kernel::V3D center; ///<Center for sphere,cone and cylinder
-  Kernel::V3D Point1; ///<cube coordinates
-  Kernel::V3D Point2; ///<cube coordinates
-  Kernel::V3D Point3; ///<cube coordinates
-  Kernel::V3D Point4; ///<cube coordinates
-  double radius;      ///<Radius for the sphere, cone and cylinder
-  double height;      ///<height for cone and cylinder;
-  Kernel::V3D axis;   ///<  Axis
+  static Kernel::Logger &PLog;                   ///< The official logger
+  std::unique_ptr<GluGeometryRenderer> Renderer; ///< Geometry renderer variable
+                                                 /// used for rendering
+  /// Object/ObjComponent
+  std::vector<Kernel::V3D> m_points;
+  double radius; ///<Radius for the sphere, cone and cylinder
+  double height; ///<height for cone and cylinder;
   GEOMETRY_TYPE
   type; ///< the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
 public:
+  GluGeometryHandler(const GluGeometryHandler &other);
   GluGeometryHandler(IObjComponent *comp);           ///< Constructor
   GluGeometryHandler(boost::shared_ptr<Object> obj); ///< Constructor
   GluGeometryHandler(Object *obj);                   ///< Constructor
@@ -81,15 +78,22 @@ public:
   GeometryHandler *createInstance(boost::shared_ptr<Object> obj) override;
   GeometryHandler *createInstance(Object *) override;
   /// sets the geometry handler for a cuboid
-  void setCuboid(Kernel::V3D, Kernel::V3D, Kernel::V3D, Kernel::V3D);
+  void setCuboid(const Kernel::V3D &, const Kernel::V3D &, const Kernel::V3D &,
+                 const Kernel::V3D &);
+  /// sets the geometry handler for a hexahedron
+  void setHexahedron(const Kernel::V3D &, const Kernel::V3D &,
+                     const Kernel::V3D &, const Kernel::V3D &,
+                     const Kernel::V3D &, const Kernel::V3D &,
+                     const Kernel::V3D &, const Kernel::V3D &);
   /// sets the geometry handler for a cone
-  void setSphere(Kernel::V3D, double);
+  void setSphere(const Kernel::V3D &, double);
   /// sets the geometry handler for a cylinder
-  void setCylinder(Kernel::V3D, Kernel::V3D, double, double);
+  void setCylinder(const Kernel::V3D &, const Kernel::V3D &, double, double);
   /// sets the geometry handler for a cone
-  void setCone(Kernel::V3D, Kernel::V3D, double, double);
+  void setCone(const Kernel::V3D &, const Kernel::V3D &, double, double);
   /// sets the geometry handler for a segmented cylinder
-  void setSegmentedCylinder(Kernel::V3D, Kernel::V3D, double, double);
+  void setSegmentedCylinder(const Kernel::V3D &, const Kernel::V3D &, double,
+                            double);
   void Triangulate() override;
   void Render() override;
   void Initialize() override;

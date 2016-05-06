@@ -28,28 +28,6 @@ Quadrilateral::Quadrilateral(const double lowerX, const double upperX,
 {}
 
 /**
- * Copy constructor
- * @param other :: The object to construct this from
- */
-Quadrilateral::Quadrilateral(const Quadrilateral &other)
-    : ConvexPolygon(), m_lowerLeft(other.m_lowerLeft),
-      m_lowerRight(other.m_lowerRight), m_upperRight(other.m_upperRight),
-      m_upperLeft(other.m_upperLeft) {}
-
-/**
- * @param rhs The source object to copy from
- */
-Quadrilateral &Quadrilateral::operator=(const Quadrilateral &rhs) {
-  if (this != &rhs) {
-    m_lowerLeft = rhs.m_lowerLeft;
-    m_lowerRight = rhs.m_lowerRight;
-    m_upperRight = rhs.m_upperRight;
-    m_upperLeft = rhs.m_upperLeft;
-  }
-  return *this;
-}
-
-/**
  * Return the vertex at the given index
  * @param index :: An index, starting at 0
  * @returns A reference to the polygon at that index
@@ -124,26 +102,22 @@ double Quadrilateral::determinant() const { return 2.0 * area(); }
 
 /// @return The smallest X value for all points
 double Quadrilateral::minX() const {
-  return (m_lowerLeft.X() < m_upperLeft.X()) ? m_lowerLeft.X()
-                                             : m_upperLeft.X();
+  return std::min(m_lowerLeft.X(), m_upperLeft.X());
 }
 
 /// @return The largest X value for all points
 double Quadrilateral::maxX() const {
-  return (m_lowerRight.X() > m_upperRight.X()) ? m_lowerRight.X()
-                                               : m_upperRight.X();
+  return std::max(m_lowerRight.X(), m_upperRight.X());
 }
 
 /// @return The smallest Y value for all points
 double Quadrilateral::minY() const {
-  return (m_lowerLeft.Y() < m_lowerRight.Y()) ? m_lowerLeft.Y()
-                                              : m_lowerRight.Y();
+  return std::min(m_lowerLeft.Y(), m_lowerRight.Y());
 }
 
 /// @return The largest Y value for all points
 double Quadrilateral::maxY() const {
-  return (m_upperLeft.Y() > m_upperRight.Y()) ? m_upperLeft.Y()
-                                              : m_upperRight.Y();
+  return std::max(m_upperLeft.Y(), m_upperRight.Y());
 }
 
 /// @return A new polygon based on the current Quadrilateral

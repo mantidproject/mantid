@@ -471,17 +471,21 @@ std::string MuonAnalysis::getNewAnalysisWSName(ItemType itemType, int tableRow,
     workspaceName << "Logs";
     break;
   }
-  
-  // Period(s)
-  workspaceName << sep << getPeriodLabels();
 
-  // Construct workspace name
+  // Period(s)
+  const auto periods = getPeriodLabels();
+  if (!periods.empty()) {
+    workspaceName << sep << periods;
+  }
+
+  // Version - always "#1" if overwrite is on, otherwise increment
+  workspaceName << sep << "#";
   std::string newName;
   if (isOverwriteEnabled()) {
+    workspaceName << "1"; // Always use #1
     newName = workspaceName.str();
   } else {
     // If overwrite is disabled, need to find unique name for the new workspace
-    workspaceName << sep << "#";
     newName = workspaceName.str();
     std::string uniqueName;
     int plotNum(1);
@@ -1803,14 +1807,13 @@ std::string MuonAnalysis::getPeriodLabels() const {
 }
 
 /**
- * plots specific WS spectrum (used by plotPair and plotGroup)
+ * Plots specific WS spectrum (used by plotPair and plotGroup)
+ * This is done with a Python script (there must be a better way!)
  * @param wsName   :: Workspace name
  * @param logScale :: Whether to plot using logarithmic scale
  */
 void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
-  // List of script lines which acquire a window for plotting. The window is
-  // placed to Python
-  // variable named 'w';'
+  // List of script lines which acquire a window and plot in it.
   QStringList acquireWindowScript;
 
   MuonAnalysisOptionTab::NewPlotPolicy policy = m_optionTab->newPlotPolicy();
@@ -1822,28 +1825,70 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   }
 
   QStringList &s = acquireWindowScript; // To keep short
-  s << "ws = mtd['%WSNAME%']";
-  s << "altName = ws.name() + '-1'";
 
-  if (policy == MuonAnalysisOptionTab::PreviousWindow) {
-    s << "ew = graph(altName)";
-    s << "if '%WSNAME%' != '%PREV%' and ew != None:";
-    s << "    ew.close()";
+  // Get the window to plot in (returns window)
+  // ws_name: name of workspace to plot
+  // prev_name: name of currently plotted workspace
+  // use_prev: whether to plot in existing window or new
+  s << "def get_window(ws_name, prev_name, use_prev):";
+  s << "  graph_name = ws_name + '-1'";
+  s << "  if not use_prev:";
+  s << "    return newGraph(graph_name, 0)";
+  s << "  existing = graph(graph_name)";
+  s << "  if existing is not None and ws_name != prev_name:";
+  s << "    existing.close()";
+  s << "  window = graph(prev_name + '-1')";
+  s << "  if window is None:";
+  s << "    window = newGraph(graph_name, 0)";
+  s << "  return window";
+  s << "";
 
-    s << "pw = graph('%PREV%-1')";
-    s << "if pw == None:";
-    s << "  pw = newGraph(altName, 0)";
-  } else if (policy == MuonAnalysisOptionTab::NewWindow) {
-    s << "pw = newGraph(altName, 0)";
-  }
+  // Remove data and difference from given plot (keep fit and guess)
+  s << "def remove_data(window):";
+  s << "  if window is None:";
+  s << "    raise ValueError('No plot to remove data from')";
+  s << "  to_keep = ['Workspace-Calc', 'CompositeFunction']";
+  s << "  layer = window.activeLayer()";
+  s << "  if layer is not None:";
+  s << "    for i in range(0, layer.numCurves()):";
+  s << "      if not any (x in layer.curveTitle(i) for x in to_keep):";
+  s << "        layer.removeCurve(i)";
+  s << "";
 
-  s << "w = plotSpectrum(ws.name(), 0, error_bars = %ERRORS%, type = "
-       "%CONNECT%, window = pw, "
-       "clearWindow = True)";
-  s << "w.setName(altName)";
-  s << "w.setObjectName(ws.name())";
-  s << "w.show()";
-  s << "w.setFocus()";
+  // Plot data in the given window with given options
+  s << "def plot_data(ws_name, errors, connect, window_to_use):";
+  s << "  w = plotSpectrum(ws_name, 0, error_bars = errors, type = connect, "
+       "window = window_to_use)";
+  s << "  w.setName(ws_name + '-1')";
+  s << "  w.setObjectName(ws_name)";
+  s << "  w.show()";
+  s << "  w.setFocus()";
+  s << "  return w";
+  s << "";
+
+  // Format the graph scale, title, legends and colours
+  // Data (most recently added curve) should be black
+  s << "def format_graph(graph, ws_name, log_scale, y_auto, y_min, y_max):";
+  s << "  layer = graph.activeLayer()";
+  s << "  num_curves = layer.numCurves()";
+  s << "  layer.setCurveTitle(num_curves, ws_name)";
+  s << "  layer.setTitle(mtd[ws_name].getTitle())";
+  s << "  for i in range(0, num_curves):";
+  s << "    color = i + 1 if i != num_curves - 1 else 0";
+  s << "    layer.setCurveLineColor(i, color)";
+  s << "  if log_scale:";
+  s << "    layer.logYlinX()";
+  s << "  if y_auto:";
+  s << "    layer.setAutoScale()";
+  s << "  else:";
+  s << "    layer.setAxisScale(Layer.Left, y_min, y_max)";
+  s << "";
+
+  // Plot the data!
+  s << "win = get_window('%WSNAME%', '%PREV%', %USEPREV%)";
+  s << "remove_data(win)";
+  s << "g = plot_data('%WSNAME%', %ERRORS%, %CONNECT%, win)";
+  s << "format_graph(g, '%WSNAME%', %LOGSCALE%, %YAUTO%, '%YMIN%', '%YMAX%')";
 
   QString pyS;
 
@@ -1858,25 +1903,16 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   safeWSName.replace("'", "\'");
   pyS.replace("%WSNAME%", safeWSName);
   pyS.replace("%PREV%", m_currentDataName);
+  pyS.replace("%USEPREV%", policy == MuonAnalysisOptionTab::PreviousWindow
+                               ? "True"
+                               : "False");
   pyS.replace("%ERRORS%", params["ShowErrors"]);
   pyS.replace("%CONNECT%", params["ConnectType"]);
+  pyS.replace("%LOGSCALE%", logScale ? "True" : "False");
+  pyS.replace("%YAUTO%", params["YAxisAuto"]);
+  pyS.replace("%YMIN%", params["YAxisMin"]);
+  pyS.replace("%YMAX%", params["YAxisMax"]);
 
-  // Update titles
-  pyS += "l = w.activeLayer()\n"
-         "l.setCurveTitle(0, ws.name())\n"
-         "l.setTitle(ws.getTitle())\n";
-
-  // Set logarithmic scale if required
-  if (logScale)
-    pyS += "l.logYlinX()\n";
-
-  // Set scaling
-  if (params["YAxisAuto"] == "True") {
-    pyS += "l.setAutoScale()\n";
-  } else {
-    pyS += "l.setAxisScale(Layer.Left, %1, %2)\n";
-    pyS = pyS.arg(params["YAxisMin"]).arg(params["YAxisMax"]);
-  }
   runPythonCode(pyS);
 }
 
@@ -1950,8 +1986,10 @@ bool MuonAnalysis::plotExists(const QString &wsName) {
 void MuonAnalysis::selectMultiPeak(const QString &wsName) {
   disableAllTools();
 
-  if (!plotExists(wsName))
+  if (!plotExists(wsName)) {
     plotSpectrum(wsName);
+    setCurrentDataName(wsName);
+  }
 
   QString code;
 
@@ -2874,7 +2912,7 @@ void MuonAnalysis::openSequentialFitDialog() {
                     "Error was: ");
     message.append(err.what());
     QMessageBox::critical(this, "Unable to open dialog", message);
-    g_log.error(message.ascii());
+    g_log.error(message.toLatin1().data());
     return;
   } catch (...) {
     QMessageBox::critical(this, "Unable to open dialog",

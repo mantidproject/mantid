@@ -316,7 +316,7 @@ public:
     // Each box (cube) has edges 0.5 long, so a face diagonal is sqrt(2)/2
     for (size_t i = 0; i < mid_points_vect.size(); ++i) {
       TS_ASSERT_DELTA(mid_points_vect[i],
-                      (static_cast<double>(i) + 0.5) * 0.5 * sqrt(2.0), 1e-5);
+                      (static_cast<double>(i) + 0.5) * 0.5 * M_SQRT2, 1e-5);
     }
   }
 
@@ -413,8 +413,8 @@ public:
     ew->refreshCache();
 
     TSM_ASSERT_DELTA(
-        "Value ignoring mask is 1.0",
-        ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization), 1.0, 1e-5);
+        "Value ignoring mask is 0.0 as masking deletes the events",
+        ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization), 0.0, 1e-5);
     TSM_ASSERT("Masked returns NaN",
                boost::math::isnan(ew->getSignalWithMaskAtCoord(
                    coords1, Mantid::API::NoNormalization)));
@@ -437,6 +437,28 @@ public:
     TS_ASSERT_EQUALS(binSizes.size(), 2);
     TS_ASSERT_DELTA(binSizes[0], 1.0, 1e-6);
     TS_ASSERT_DELTA(binSizes[1], 1.0, 1e-6);
+  }
+
+  //-------------------------------------------------------------------------------------
+  void test_estimateResolution_with_top_level_splitting() {
+    MDEventWorkspace2Lean::sptr b =
+        MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
+    std::vector<coord_t> binSizes;
+    // First, before any splitting
+    binSizes = b->estimateResolution();
+    TS_ASSERT_EQUALS(binSizes.size(), 2);
+    TS_ASSERT_DELTA(binSizes[0], 10.0, 1e-6);
+    TS_ASSERT_DELTA(binSizes[1], 10.0, 1e-6);
+
+    auto bc = b->getBoxController();
+    bc->setSplitTopInto(0, 5);
+
+    // Resolution is smaller after splitting
+    b->splitBox();
+    binSizes = b->estimateResolution();
+    TS_ASSERT_EQUALS(binSizes.size(), 2);
+    TS_ASSERT_DELTA(binSizes[0], 2.0, 1e-6);
+    TS_ASSERT_DELTA(binSizes[1], 10.0, 1e-6);
   }
 
   ////-------------------------------------------------------------------------------------

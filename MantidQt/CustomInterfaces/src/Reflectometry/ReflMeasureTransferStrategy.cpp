@@ -1,17 +1,17 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMeasurementItemSource.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/UserCatalogInfo.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMeasurementItemSource.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
 #include <boost/regex.hpp>
-#include <memory>
-#include <vector>
-#include <map>
-#include <utility>
 #include <limits>
+#include <map>
+#include <memory>
 #include <set>
 #include <sstream>
+#include <utility>
+#include <vector>
 
 using namespace Mantid::Kernel;
 

@@ -21,6 +21,9 @@
 namespace Mantid {
 namespace DataHandling {
 
+const std::string LoadNexus::muonTD = "muonTD";
+const std::string LoadNexus::pulsedTD = "pulsedTD";
+
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadNexus)
 
@@ -79,18 +82,9 @@ void LoadNexus::exec() {
   m_filename = getPropertyValue("Filename");
   m_workspace = getPropertyValue("OutputWorkspace");
 
-  // Test the given filename to see if it contains the field "analysis" with
-  // value "muonTD"
-  // within the first NXentry.
-  // If so, assume it is a Muon Nexus file (version 1) and pass to the
-  // LoadMuonNexus algorithm
-  // Otherwise try LoadIsisNexus.
+  // Test the file of the given file name as described in the
+  // documentation of this algorithm.
 
-  // FIXME: The following variable isn't used, but the above comments
-  // imply it should be.
-  // std::string dataName="analysis";
-
-  std::string muonTD = "muonTD", pulsedTD = "pulsedTD";
   std::vector<std::string> entryName, definition;
   int count =
       Mantid::NeXus::getNexusEntryTypes(m_filename, entryName, definition);

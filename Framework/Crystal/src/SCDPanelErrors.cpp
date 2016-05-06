@@ -436,8 +436,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
     if (xValues[i] < 0.)
       throw invalid_argument(
           "Improper workspace. xVals must be positive integers");
-    size_t pkIndex =
-        static_cast<size_t>(xValues[i] + .5); // just round to nearest int
+    size_t pkIndex = std::lround(xValues[i]); // just round to nearest int
     if (pkIndex >= m_peaks->rowCount()) {
 
       g_log.error() << "Improper workspace set " << pkIndex << "\n";

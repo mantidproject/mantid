@@ -66,9 +66,11 @@ void SaveCSV::init() {
       "Separator", ",",
       "The separator that will go between the numbers on a line in the\n"
       "output file (default ',')");
+  getPointerToProperty("Separator")->setAutoTrim(false);
   declareProperty("LineSeparator", "\n",
                   "The string to place at the end of lines (default new line\n"
                   "character)");
+  getPointerToProperty("LineSeparator")->setAutoTrim(false);
   declareProperty(
       make_unique<PropertyWithValue<bool>>("SaveXerrors", false,
                                            Direction::Input),

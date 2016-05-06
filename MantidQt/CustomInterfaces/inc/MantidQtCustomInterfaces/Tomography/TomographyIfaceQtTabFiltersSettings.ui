@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>769</width>
-    <height>618</height>
+    <width>826</width>
+    <height>578</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,8 +24,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>731</width>
-        <height>643</height>
+        <width>788</width>
+        <height>671</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -35,7 +35,7 @@
           <string>Pre-processing (raw images)</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
-          <item row="8" column="2">
+          <item row="10" column="2">
            <widget class="QDoubleSpinBox" name="doubleSpinBox_prep_max_angle">
             <property name="toolTip">
              <string>Maximum angle to use for reconstruction</string>
@@ -54,7 +54,180 @@
             </property>
            </widget>
           </item>
-          <item row="6" column="2">
+          <item row="11" column="0">
+           <widget class="QLabel" name="label_prep_scale_factor">
+            <property name="text">
+             <string>Scale down factor:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="checkBox_normalize_by_flats">
+            <property name="statusTip">
+             <string>Normalize every image with respect to the reference flat and dark images, if available</string>
+            </property>
+            <property name="text">
+             <string>Normalize by flat (open beam) mages</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <spacer name="horizontalSpacer_13">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>399</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="11" column="1">
+           <spacer name="horizontalSpacer_14">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>399</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="10" column="1">
+           <spacer name="horizontalSpacer_15">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>399</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="11" column="2">
+           <widget class="QSpinBox" name="spinBox_prep_scale_factor">
+            <property name="toolTip">
+             <string>Sets the size of block to downscale. For example with 2, blocks of 2x2 pixels will be combined into a (median value) pixel</string>
+            </property>
+            <property name="minimum">
+             <number>0</number>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+            <property name="value">
+             <number>0</number>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_prep_median">
+            <property name="text">
+             <string>Dots removal (median filter width):</string>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="0">
+           <widget class="QLabel" name="label_prep_max_angle">
+            <property name="text">
+             <string>Maximum angle:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="2">
+           <widget class="QSpinBox" name="spinBox_prep_median_filter_width">
+            <property name="toolTip">
+             <string>Set size of the blocks to calculate a median filter. Bigger size implies more smoothing.</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>1000</number>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0" colspan="3">
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>Sinogram stripes removal / ring artifacts removal</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="comboBox_3">
+              <item>
+               <property name="text">
+                <string>Wavelet-Fourier</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>None</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="checkBox_corrections_MCP_detector">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Corrections for MCP detector</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QCheckBox" name="checkBox_normalize_by_darks">
+            <property name="statusTip">
+             <string>Normalize every image with respect to the reference flat and dark images, if available</string>
+            </property>
+            <property name="text">
+             <string>Normalize by dark field images</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="checkBox_normalize_by_air_region">
+            <property name="statusTip">
+             <string>Normalize every image by their relative proton charges</string>
+            </property>
+            <property name="text">
+             <string>Normalize by air region / proton charge</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="checkBox_normalize_by_proton_charge">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Normalize by proton charge</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="2">
            <widget class="QComboBox" name="comboBox_prep_rotation">
             <property name="toolTip">
              <string>Rotate all images in the input stacks by this angle</string>
@@ -81,14 +254,7 @@
             </item>
            </widget>
           </item>
-          <item row="9" column="0">
-           <widget class="QLabel" name="label_prep_scale_factor">
-            <property name="text">
-             <string>Scale down factor:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="1">
+          <item row="8" column="1">
            <spacer name="horizontalSpacer_12">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -101,153 +267,10 @@
             </property>
            </spacer>
           </item>
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="checkBox_normalize_flat_dark">
-            <property name="statusTip">
-             <string>Normalize every image with respect to the reference flat and dark images, if available</string>
-            </property>
-            <property name="text">
-             <string>Normalize by flat (open beam) and dark field images</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <spacer name="horizontalSpacer_13">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>399</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="label_prep_rotation">
+          <item row="8" column="0">
+           <widget class="QLabel" name="label">
             <property name="text">
              <string>Rotation (°, clockwise)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="9" column="1">
-           <spacer name="horizontalSpacer_14">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>399</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="8" column="1">
-           <spacer name="horizontalSpacer_15">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>399</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="1" column="0" colspan="2">
-           <widget class="QCheckBox" name="checkBox_normalize_proton_charge">
-            <property name="statusTip">
-             <string>Normalize every image by their relative proton charges</string>
-            </property>
-            <property name="text">
-             <string>Normalize by air region / proton charge</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="9" column="2">
-           <widget class="QSpinBox" name="spinBox_prep_scale_factor">
-            <property name="toolTip">
-             <string>Sets the size of block to downscale. For example with 2, blocks of 2x2 pixels will be combined into a (median value) pixel</string>
-            </property>
-            <property name="minimum">
-             <number>0</number>
-            </property>
-            <property name="maximum">
-             <number>100</number>
-            </property>
-            <property name="value">
-             <number>0</number>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_prep_median">
-            <property name="text">
-             <string>Dots removal (median filter width):</string>
-            </property>
-           </widget>
-          </item>
-          <item row="8" column="0">
-           <widget class="QLabel" name="label_prep_max_angle">
-            <property name="text">
-             <string>Maximum angle:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="2">
-           <widget class="QSpinBox" name="spinBox_prep_median_filter_width">
-            <property name="toolTip">
-             <string>Set size of the blocks to calculate a median filter. Bigger size implies more smoothing.</string>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <number>1000</number>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0" colspan="3">
-           <layout class="QHBoxLayout" name="horizontalLayout_5">
-            <item>
-             <widget class="QLabel" name="label_3">
-              <property name="text">
-               <string>Sinogram stripes removal / ring artifacts removal</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="comboBox_3">
-              <item>
-               <property name="text">
-                <string>Wavelet-Fourier</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>None</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="3" column="0">
-           <widget class="QCheckBox" name="checkBox_2">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>Corrections for MCP detector</string>
             </property>
            </widget>
           </item>
@@ -365,32 +388,49 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <widget class="QCheckBox" name="checkBox_out_preproc_images">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="toolTip">
-             <string>Write pre-processed images in addition to reconstructed volume</string>
-            </property>
-            <property name="text">
-             <string>Produce pre-processed images stack</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QLabel" name="label_out_img_format">
+              <property name="text">
+               <string>Output image format:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="comboBox_out_img_format">
+              <item>
+               <property name="text">
+                <string>PNG</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_6">
             <item>
-             <widget class="QLabel" name="label_4">
+             <widget class="QLabel" name="label_out_bit_depth">
               <property name="text">
                <string>Pixel bit-depth in outputs:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="comboBox_4">
+             <widget class="QComboBox" name="comboBox_out_bit_depth">
               <item>
                <property name="text">
                 <string>16 bits</string>
@@ -412,6 +452,22 @@
              </spacer>
             </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBox_out_preproc_images">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="toolTip">
+             <string>Write pre-processed images in addition to reconstructed volume</string>
+            </property>
+            <property name="text">
+             <string>Produce pre-processed images stack</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QGroupBox" name="groupBox_out_intermediate_prep">
@@ -518,6 +574,31 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>checkBox_normalize_by_air_region</tabstop>
+  <tabstop>checkBox_normalize_by_proton_charge</tabstop>
+  <tabstop>checkBox_normalize_by_flats</tabstop>
+  <tabstop>checkBox_normalize_by_darks</tabstop>
+  <tabstop>checkBox_corrections_MCP_detector</tabstop>
+  <tabstop>spinBox_prep_median_filter_width</tabstop>
+  <tabstop>comboBox_3</tabstop>
+  <tabstop>comboBox_prep_rotation</tabstop>
+  <tabstop>doubleSpinBox_prep_max_angle</tabstop>
+  <tabstop>spinBox_prep_scale_factor</tabstop>
+  <tabstop>doubleSpinBox_post_circ_mask</tabstop>
+  <tabstop>doubleSpinBox_post_cutoff</tabstop>
+  <tabstop>comboBox_out_img_format</tabstop>
+  <tabstop>comboBox_out_bit_depth</tabstop>
+  <tabstop>checkBox_out_preproc_images</tabstop>
+  <tabstop>groupBox_out_intermediate_prep</tabstop>
+  <tabstop>checkBox_output_cropped_images</tabstop>
+  <tabstop>checkBox_output_normalized_proton_images</tabstop>
+  <tabstop>checkBox_output_normalized_flat_images</tabstop>
+  <tabstop>checkBox_output_dot_removal</tabstop>
+  <tabstop>checkBox_output_sinograms</tabstop>
+  <tabstop>pushButton_reset</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

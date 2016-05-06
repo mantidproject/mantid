@@ -1,11 +1,11 @@
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name, too-many-instance-attributes
+
 import math
-import time
 import numpy as np
-import mantid
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
+
 
 class PeakFinderDerivation(object):
     """
@@ -32,7 +32,7 @@ class PeakFinderDerivation(object):
         self.back_offset = back_offset
         self.ydata = workspace.dataY(0)
         self.xdata = np.arange(len(self.ydata))
-        
+
         self.compute()
 
     def compute(self):
@@ -47,7 +47,7 @@ class PeakFinderDerivation(object):
         self.calculate_avg_and_derivative()
         self.calculate_min_max_signal_pixels()
         self.low_resolution_range()
-        
+
     def initArrays(self):
         """
             Initialize internal data members
@@ -72,20 +72,20 @@ class PeakFinderDerivation(object):
     def calculate_five_highest_points(self):
         _xdata = self.xdata
         _ydata = self.ydata
-        
+
         _sort_ydata = np.sort(_ydata)
         _decreasing_sort_ydata = _sort_ydata[::-1]
         self.five_highest_ydata = _decreasing_sort_ydata[0:5]
-        
+
         _sort_index = np.argsort(_ydata)
         _decreasing_sort_index = _sort_index[::-1]
         _5decreasing_sort_index = _decreasing_sort_index[0:5]
         self.five_highest_xdata = _xdata[_5decreasing_sort_index]
-        
-    def calculate_peak_pixel(self):    
+
+    def calculate_peak_pixel(self):
         self.sum_peak_counts = sum(self.five_highest_ydata)
         _sum_peak_counts_time_pixel = -1
-        for index,yvalue in enumerate(self.five_highest_ydata):
+        for index, yvalue in enumerate(self.five_highest_ydata):
             _sum_peak_counts_time_pixel += yvalue * self.five_highest_xdata[index]
         self.sum_peak_counts_time_pixel = _sum_peak_counts_time_pixel
         self.peak_pixel = round(self.sum_peak_counts_time_pixel / self.sum_peak_counts)
@@ -93,33 +93,33 @@ class PeakFinderDerivation(object):
     def calculate_first_derivative(self):
         xdata = self.xdata
         ydata = self.ydata
-        
+
         _xdata_firstderi = []
         _ydata_firstderi = []
-        for i in range(len(xdata)-1):
+        for i in range(len(xdata) - 1):
             _left_x = xdata[i]
-            _right_x = xdata[i+1]
+            _right_x = xdata[i + 1]
             _xdata_firstderi.append(np.mean([_left_x, _right_x]))
-            
+
             _left_y = ydata[i]
-            _right_y = ydata[i+1]
-            _ydata_firstderi.append((_right_y - _left_y)/(_right_x - _left_x))
-        
+            _right_y = ydata[i + 1]
+            _ydata_firstderi.append((_right_y - _left_y) / (_right_x - _left_x))
+
         self.xdata_firstderi = _xdata_firstderi
         self.ydata_firstderi = _ydata_firstderi
-        
+
     def calculate_min_max_derivative_pixels(self):
         _pixel = self.xdata_firstderi
         _counts_firstderi = self.ydata_firstderi
-        
+
         _sort_counts_firstderi = np.sort(_counts_firstderi)
         self.deri_min = _sort_counts_firstderi[0]
         self.deri_max = _sort_counts_firstderi[-1]
-        
+
         _sort_index = np.argsort(_counts_firstderi)
         self.deri_min_pixel_value = int(min([_pixel[_sort_index[0]], _pixel[_sort_index[-1]]]))
         self.deri_max_pixel_value = int(max([_pixel[_sort_index[0]], _pixel[_sort_index[-1]]]))
-        
+
     def calculate_avg_and_derivative(self):
         _counts_firstderi = np.array(self.ydata_firstderi)
         self.mean_counts_firstderi = np.mean(_counts_firstderi)
@@ -142,12 +142,12 @@ class PeakFinderDerivation(object):
         while abs(_counts[int(_deri_min_pixel_value - px_offset)]) > _std_deviation_counts_firstderi:
             px_offset += 1
         _peak_min_final_value = _pixel[int(_deri_min_pixel_value - px_offset)]
-            
+
         px_offset = 0
         while abs(_counts[int(round(_deri_max_pixel_value + px_offset))]) > _std_deviation_counts_firstderi:
             px_offset += 1
         _peak_max_final_value = _pixel[int(round(_deri_max_pixel_value + px_offset))]
-        
+
         self.peak = [int(_peak_min_final_value), int(np.ceil(_peak_max_final_value))]
 
     def low_resolution_range(self):
@@ -159,37 +159,37 @@ class PeakFinderDerivation(object):
         for y_value in self.ydata:
             total += y_value
             y_integrated.append(total)
-            
+
         for i in range(len(y_integrated)):
             y_integrated[i] /= total
-            
+
         # Derivative of the flipped integrated distribution
         deriv = []
         offset = 1
         for i in range(offset, len(y_integrated)):
-            value = (self.xdata[i]-self.xdata[i-offset]) / (y_integrated[i]-y_integrated[i-offset]) 
+            value = (self.xdata[i] - self.xdata[i - offset]) / (y_integrated[i] - y_integrated[i - offset])
             deriv.append(value)
-            
+
         # Find lower edge of the main peak
-        center = int(len(deriv)/2.0)
+        center = int(len(deriv) / 2.0)
         middle_value = deriv[center]
         i_min = 0
         for i in range(center, 0, -1):
-            if deriv[i]/middle_value>3:
+            if deriv[i] / middle_value > 3:
                 i_min = i
                 break
         # Find upper edge of the main peak
         i_max = len(deriv)
         for i in range(center, i_max):
-            if deriv[i]/middle_value>3:
+            if deriv[i] / middle_value > 3:
                 i_max = i
                 break
-                
-        self.low_res = [int(self.xdata[i_min])-self.back_offset, int(self.xdata[i_max])+self.back_offset]
+
+        self.low_res = [int(self.xdata[i_min]) - self.back_offset, int(self.xdata[i_max]) + self.back_offset]
         return self.low_res
 
-class LRPeakSelection(PythonAlgorithm):
 
+class LRPeakSelection(PythonAlgorithm):
     def category(self):
         return "Reflectometry\\SNS"
 
@@ -203,10 +203,10 @@ class LRPeakSelection(PythonAlgorithm):
         return "Find reflectivity peak and return its pixel range."
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty("InputWorkspace", "",Direction.Input), "Workspace to select peak from")
-        self.declareProperty(IntArrayProperty("PeakRange", [0,0], direction=Direction.Output))
-        self.declareProperty(IntArrayProperty("LowResRange", [0,0], direction=Direction.Output))
-        self.declareProperty(IntArrayProperty("PrimaryRange", [0,0], direction=Direction.Output))
+        self.declareProperty(WorkspaceProperty("InputWorkspace", "", Direction.Input), "Workspace to select peak from")
+        self.declareProperty(IntArrayProperty("PeakRange", [0, 0], direction=Direction.Output))
+        self.declareProperty(IntArrayProperty("LowResRange", [0, 0], direction=Direction.Output))
+        self.declareProperty(IntArrayProperty("PrimaryRange", [0, 0], direction=Direction.Output))
         self.declareProperty("ComputePrimaryRange", False, doc="If True, the primary fraction range will be determined")
 
     def PyExec(self):

@@ -50,10 +50,6 @@ private:
   void init() override;
   void exec() override;
   void getInstrument(H5::H5File &file);
-  std::vector<int32_t> readInt32Array(H5::Group &group,
-                                      const std::string &name);
-  std::vector<double> readDoubleArray(H5::Group &group,
-                                      const std::string &name);
   void runLoadCalFile();
   void makeGroupingWorkspace(const std::vector<int32_t> &detids,
                              const std::vector<int32_t> &groups);
@@ -64,7 +60,8 @@ private:
                         const std::vector<double> &difa,
                         const std::vector<double> &tzero,
                         const std::vector<int32_t> &dasids,
-                        const std::vector<double> &offsets);
+                        const std::vector<double> &offsets,
+                        const std::vector<int32_t> &use);
 
   std::string m_filename;
   std::string m_workspaceName;

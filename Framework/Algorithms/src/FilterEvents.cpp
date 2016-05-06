@@ -808,7 +808,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
         m_detTofOffsets[i] = fiter->second;
     } // ENDFOR (each spectrum i)
   } else {
-    // It is spectrum ID already
+    // It is spectrum Number already
     map<detid_t, double>::iterator fiter;
     // correction factor
     for (fiter = toffactormap.begin(); fiter != toffactormap.end(); ++fiter) {

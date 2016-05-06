@@ -97,9 +97,14 @@ public:
                      "2006-Nov-21 07:03:08  182.8");
     // check that sample name has been set correctly
     TS_ASSERT_EQUALS(output->sample().getName(), "Cr2.7Co0.3Si");
+
+    // check that the main field direction has been added as a log
+    Property *fieldDirection = output->run().getLogData("main_field_direction");
+    TS_ASSERT(fieldDirection);
+    TS_ASSERT_EQUALS(fieldDirection->value(), "Longitudinal");
   }
 
-  void testTransvereDataset() {
+  void testTransverseDataset() {
     LoadMuonNexus1 nxL;
     if (!nxL.isInitialized())
       nxL.initialize();
@@ -121,6 +126,14 @@ public:
     TS_ASSERT_DELTA(timeZero, 0.55, 0.001);
     double firstgood = nxL.getProperty("FirstGoodData");
     TS_ASSERT_DELTA(firstgood, 0.656, 0.001);
+
+    // Test that the output workspace knows the field direction
+    MatrixWorkspace_sptr output;
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        outputSpace);
+    Property *fieldDirection = output->run().getLogData("main_field_direction");
+    TS_ASSERT(fieldDirection);
+    TS_ASSERT_EQUALS(fieldDirection->value(), "Transverse");
   }
 
   void testExec2() {
