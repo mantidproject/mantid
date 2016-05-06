@@ -141,10 +141,9 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         index_two_first = 0.00571520523979
         index_two_last = -0.00211277263055
         if _is_old_boost_version():
-            index_one_first = 6.809169e-04
-            index_one_last = 7.206634e-03
-            index_two_first = 3.360576e-03
-            index_two_last = -1.431954e-03
+            index_one_first = 0.000628498710145
+            index_two_first = -0.00487957546659
+            index_two_last = -0.000759933984172
 
         _equal_within_tolerance(self, index_one_first, fitted_ws.readY(0)[0])
         _equal_within_tolerance(self, index_one_last, fitted_ws.readY(0)[-1])
