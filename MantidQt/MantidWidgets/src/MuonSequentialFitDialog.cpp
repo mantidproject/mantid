@@ -279,7 +279,8 @@ void MuonSequentialFitDialog::updateCursor(DialogState newState) {
 }
 
 /**
- * Start fitting process.
+ * Start fitting process by running file search.
+ * Once search is complete, fit continues in continueFit().
  */
 void MuonSequentialFitDialog::startFit() {
   if (m_state != Stopped)
@@ -291,16 +292,19 @@ void MuonSequentialFitDialog::startFit() {
   // straight after editing the run box. In that case, lost focus event might
   // not be processed yet and search might not have been started yet.
   // Otherwise, search is not done as the widget sees that it has not been
-  // changed. Taken from LoadDialog.cpp:124.
+  // changed.
+  connect(m_ui.runs, SIGNAL(fileInspectionFinished()), this,
+          SLOT(continueFit()));
   m_ui.runs->findFiles();
+}
 
-  // Wait for file search to finish.
-  while (m_ui.runs->isSearching()) {
-    QApplication::processEvents();
-  }
-
-  // To process events from the finished thread
-  QApplication::processEvents();
+/**
+ * Carries out the fitting process once the file search has completed.
+ * Called when the run control reports that its search has finished.
+ */
+void MuonSequentialFitDialog::continueFit() {
+  disconnect(m_ui.runs, SIGNAL(fileInspectionFinished()), this,
+             SLOT(continueFit()));
 
   // Validate input fields
   if (!isInputValid()) {

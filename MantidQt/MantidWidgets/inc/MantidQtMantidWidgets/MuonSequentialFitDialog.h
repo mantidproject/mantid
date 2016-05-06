@@ -128,6 +128,9 @@ namespace MantidWidgets
     /// Stop fitting process
     void stopFit();
 
+    /// Run fit after getting file input
+    void continueFit();
+
   };
 
 

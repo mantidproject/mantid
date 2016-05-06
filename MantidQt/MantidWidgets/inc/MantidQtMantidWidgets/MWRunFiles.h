@@ -240,6 +240,8 @@ signals:
   void liveButtonPressed(bool);
   /// Signal emitted after asynchronous checking of live stream availability
   void liveButtonSetEnabledSignal(bool);
+  /// Emitted when inspection of any found files is completed
+  void fileInspectionFinished();
 
 public slots:
   /// Set the file text and try and find it
