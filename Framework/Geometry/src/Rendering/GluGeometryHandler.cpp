@@ -13,17 +13,17 @@ using Kernel::V3D;
 GluGeometryHandler::GluGeometryHandler(IObjComponent *comp)
     : GeometryHandler(comp),
       Renderer(Kernel::make_unique<GluGeometryRenderer>()), radius(0.0),
-      height(0.0), type(CUBOID) {}
+      height(0.0), type(NOSHAPE) {}
 
 GluGeometryHandler::GluGeometryHandler(boost::shared_ptr<Object> obj)
     : GeometryHandler(std::move(obj)),
       Renderer(Kernel::make_unique<GluGeometryRenderer>()), radius(0.0),
-      height(0.0), type(CUBOID) {}
+      height(0.0), type(NOSHAPE) {}
 
 GluGeometryHandler::GluGeometryHandler(Object *obj)
     : GeometryHandler(obj),
       Renderer(Kernel::make_unique<GluGeometryRenderer>()), radius(0.0),
-      height(0.0), type(CUBOID) {}
+      height(0.0), type(NOSHAPE) {}
 
 GluGeometryHandler::GluGeometryHandler(const GluGeometryHandler &other)
     : GeometryHandler(other), m_points(other.m_points), radius(other.radius),
@@ -96,6 +96,8 @@ void GluGeometryHandler::GetObjectGeom(int &mytype,
     switch (type) {
     case CUBOID:
       break;
+	case HEXAHEDRON:
+		break;
     case SPHERE:
       myradius = radius;
       break;
