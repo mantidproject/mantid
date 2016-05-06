@@ -1028,15 +1028,12 @@ EnggDiffractionPresenter::isValidMultiRunNumber(std::vector<std::string> dir) {
   std::vector<std::string> multi_run_number;
 
   // if empty string
-  size_t i = 0;
-  if (!dir.empty() && dir.at(i) != "") {
+  if (!dir.empty() && dir.at(0) != "") {
 
     auto p = run_vec.begin();
-    int i = 0;
     while (p != run_vec.end()) {
       run_number = *p;
       p++;
-      i++;
 
       try {
         if (Poco::File(run_number).exists()) {
