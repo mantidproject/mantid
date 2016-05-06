@@ -11,6 +11,7 @@ using Mantid::Kernel::make_cow;
 
 struct FixedLengthVectorTester
     : public FixedLengthVector<FixedLengthVectorTester> {
+  FixedLengthVectorTester() = default;
   using FixedLengthVector<FixedLengthVectorTester>::FixedLengthVector;
 };
 

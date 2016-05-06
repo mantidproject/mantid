@@ -43,6 +43,8 @@ public:
   using detail::FixedLengthVector<HistogramX>::FixedLengthVector;
   using detail::FixedLengthVector<HistogramX>::operator=;
 
+  HistogramX() = default;
+
   friend class Histogram;
   friend class detail::VectorOf<BinEdges, HistogramX>;
   friend class detail::VectorOf<Points, HistogramX>;
