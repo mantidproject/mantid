@@ -82,6 +82,10 @@ appendTimeSeriesLogs(boost::shared_ptr<Mantid::API::Workspace> toAppend,
                      boost::shared_ptr<Mantid::API::Workspace> resultant,
                      const std::string &logName);
 
+/// Get "run: period" string from workspace name
+MANTIDQT_CUSTOMINTERFACES_DLL QString
+runNumberString(const std::string &workspaceName, const std::string &firstRun);
+
 /**
  * A class which deals with auto-saving the widget values. Widgets are
  * registered and then on any

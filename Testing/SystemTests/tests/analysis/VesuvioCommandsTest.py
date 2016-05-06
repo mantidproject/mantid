@@ -4,6 +4,7 @@ and that mantid can be imported
 """
 import stresstesting
 import platform
+import numpy as np
 
 from mantid.api import (WorkspaceGroup, MatrixWorkspace)
 from mantid.simpleapi import *
@@ -60,6 +61,15 @@ def _equal_within_tolerance(self, expected, actual, tolerance=0.05):
     tolerance_value = expected * tolerance
     abs_difference = abs(expected - actual)
     self.assertTrue(abs_difference <= abs(tolerance_value))
+
+def _get_maximum_peak_height(workspace, ws_index):
+    """
+    returns the maximum height in y of a given spectrum of a workspace
+    workspace is assumed to be a matrix workspace
+    """
+    y_data = workspace.readY(ws_index)
+    peak_height = np.amax(y_data)
+    return peak_height
 
 #====================================================================================
 
@@ -138,17 +148,14 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
 
         index_one_first = -0.0221362198069
         index_one_last = 0.00720728978699
-        index_two_first = 0.00571520523979
-        index_two_last = -0.00211277263055
+        calc_data_height = 0.138704
         if _is_old_boost_version():
             index_one_first = 0.000628498710145
             index_two_first = -0.00487957546659
-            index_two_last = -0.000759933984172
 
         _equal_within_tolerance(self, index_one_first, fitted_ws.readY(0)[0])
         _equal_within_tolerance(self, index_one_last, fitted_ws.readY(0)[-1])
-        _equal_within_tolerance(self, index_two_first, fitted_ws.readY(1)[0])
-        _equal_within_tolerance(self, index_two_last, fitted_ws.readY(1)[-1])
+        _equal_within_tolerance(self, calc_data_height, _get_maximum_peak_height(fitted_ws, 1))
 
         fitted_params = self._fit_results[1]
         self.assertTrue(isinstance(fitted_params, MatrixWorkspace))

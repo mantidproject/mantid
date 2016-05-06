@@ -149,6 +149,8 @@ public:
   bool removeTie(size_t i) override;
   /// Get the tie of i-th parameter
   ParameterTie *getTie(size_t i) const override;
+  /// Add a new tie
+  void addTie(ParameterTie *tie) override;
 
   /// Overwrite IFunction methods
   void addConstraint(IConstraint *ic) override;
@@ -181,6 +183,8 @@ public:
   std::string parameterLocalName(size_t i) const;
   /// Check the function.
   void checkFunction();
+  /// Remove all member functions
+  void clear();
 
   /// Returns the number of attributes associated with the function
   virtual size_t nLocalAttributes() const { return 0; }
@@ -220,8 +224,6 @@ protected:
   /// Declare a new parameter
   void declareParameter(const std::string &name, double initValue = 0,
                         const std::string &description = "") override;
-  /// Add a new tie
-  void addTie(ParameterTie *tie) override;
 
   size_t paramOffset(size_t i) const { return m_paramOffsets[i]; }
 
@@ -243,7 +245,6 @@ private:
   size_t m_nParams;
   /// Function counter to be used in nextConstraint
   mutable size_t m_iConstraintFunction;
-  /// Flag set to use numerical derivatives
 };
 
 /// shared pointer to the composite function base class
