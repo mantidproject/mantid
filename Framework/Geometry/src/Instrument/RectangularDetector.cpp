@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <ostream>
 #include <stdexcept>
+#include <boost/regex.hpp>
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 
 namespace {
@@ -75,10 +76,10 @@ RectangularDetector::RectangularDetector(const std::string &n,
 }
 
 bool RectangularDetector::compareName(const std::string &proposedMatch) {
-  return (proposedMatch.compare("RectangularDetector") == 0 ||
-          proposedMatch.compare("rectangularDetector") == 0 ||
-          proposedMatch.compare("rectangulardetector") == 0 ||
-          proposedMatch.compare("rectangular_detector") == 0);
+  static boost::regex exp("RectangularDetector|rectangularDetector|"
+                          "rectangulardetector|rectangular_detector");
+
+  return boost::regex_match(proposedMatch, exp);
 }
 
 void RectangularDetector::init() {

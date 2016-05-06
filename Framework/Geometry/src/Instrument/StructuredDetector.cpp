@@ -7,6 +7,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 #include <algorithm>
+#include <boost/regex.hpp>
 #include <ostream>
 #include <stdexcept>
 
@@ -51,10 +52,10 @@ StructuredDetector::StructuredDetector(const StructuredDetector *base,
 }
 
 bool StructuredDetector::compareName(const std::string &proposedMatch) {
-  return (proposedMatch.compare("StructuredDetector") == 0 ||
-          proposedMatch.compare("structuredDetector") == 0 ||
-          proposedMatch.compare("structureddetector") == 0 ||
-          proposedMatch.compare("structured_detector") == 0);
+  static boost::regex exp("StructuredDetector|structuredDetector|"
+                          "structureddetector|structured_detector");
+
+  return boost::regex_match(proposedMatch, exp);
 }
 
 void StructuredDetector::init() {

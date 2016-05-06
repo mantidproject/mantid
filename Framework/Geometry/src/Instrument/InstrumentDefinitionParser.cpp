@@ -30,6 +30,7 @@
 #include <Poco/SAX/AttributesImpl.h>
 
 #include <boost/make_shared.hpp>
+#include <boost/regex.hpp>
 #include <unordered_set>
 
 using namespace Mantid;
@@ -1562,15 +1563,14 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
   if (pType->hasAttribute("is"))
     category = pType->getAttribute("is");
 
+  static boost::regex exp("Detector|detector|Monitor|monitor");
+
   // do stuff a bit differently depending on which category the type belong to
   if (RectangularDetector::compareName(category)) {
     createRectangularDetector(parent, pLocElem, pCompElem, filename, pType);
   } else if (StructuredDetector::compareName(category)) {
     createStructuredDetector(parent, pLocElem, pCompElem, filename, pType);
-  } else if (category.compare("Detector") == 0 ||
-             category.compare("detector") == 0 ||
-             category.compare("Monitor") == 0 ||
-             category.compare("monitor") == 0) {
+  } else if (boost::regex_match(category, exp)) {
     createDetectorOrMonitor(parent, pLocElem, pCompElem, filename, idList,
                             category);
   } else {
