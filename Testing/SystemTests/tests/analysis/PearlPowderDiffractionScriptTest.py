@@ -202,7 +202,7 @@ class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest
         filenames.extend(('PEARL/Attentuation/PRL112_DC25_10MM_FF.OUT'))
         # raw files / run numbers 92476-92479
         for i in range(6, 10):
-            filenames.append('PEARL/Calibration_Test/RawFiles/PEARL0009247' + str(i)) # need to change run numbers
+            filenames.append('PEARL/Calibration_Test/RawFiles/PEARL0009247' + str(i))  # need to change run numbers
 
         return filenames
 
@@ -219,7 +219,50 @@ class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest
     def runTest(self):
         self._success = False
 
-        # TEST SCRIPT GOES HERE
+        import pearl_routines
+
+        # initial directory to the system test data files
+        DIRS = config['datasearch.directories'].split(';')
+
+        pearl_routines.PEARL_startup("Calib", "15_3")
+
+        # setting files directory here
+        # DIRS[0] is the system test directory
+
+        # setting raw files directory
+        DataDir = DIRS[0] + "PEARL/Calibration_Test/RawFiles/"
+        pearl_routines.pearl_set_currentdatadir(DataDir)
+        pearl_routines.PEARL_setdatadir(DataDir)
+
+        # create calibration folder to process calibration files too
+        CalibDir = DIRS[0] + '/PEARL/Calibration_Test/Calibration/'
+        # setting calibration files directory
+        pearl_routines.pearl_initial_dir(CalibDir)
+
+        # creating group cal file
+        ngrpfile = CalibDir + 'test_cal_group_15_3.cal'
+        pearl_routines.PEARL_creategroup("91560_91563", ngroupfile=ngrpfile)
+
+        # create offset files
+        offsetfile = CalibDir + 'pearl_offset_15_3.cal'
+        pearl_routines.PEARL_createcal("91560_91563", noffsetfile=offsetfile, groupfile=ngrpfile)
+
+        # Creates the vanadium file for a cycle, where the first set of runs are the vanadium and
+        # the second are the background in each case.
+        vanFile35 = CalibDir + 'van_spline_TT35_cycle_15_3.nxs'
+        pearl_routines.PEARL_createvan("91530_91533", "91550_91553", ttmode="TT35",
+                                       nvanfile=vanFile35, nspline=40, absorb=True, debug=True)
+        CloneWorkspace(InputWorkspace="Van_data", OutputWorkspace="van_tt35")
+
+        vanFile70 = CalibDir + 'van_spline_TT70_cycle_15_3.nxs'
+        pearl_routines.PEARL_createvan("91530_91533", "91550_91553", ttmode="TT70",
+                                       nvanfile=vanFile70, nspline=40, absorb=True, debug=True)
+        CloneWorkspace(InputWorkspace="Van_data", OutputWorkspace="van_tt70")
+
+        vanFile88 = CalibDir + 'van_spline_TT88_cycle_15_3.nxs'
+        pearl_routines.PEARL_createvan("91530_91533", "91550_91553", ttmode="TT88",
+                                       nvanfile=vanFile88, nspline=40, absorb=True, debug=True)
+        CloneWorkspace(InputWorkspace="Van_data", OutputWorkspace="van_tt88")
 
         # Custom code to create and run this single test suite
         # and then mark as success or a failure
@@ -235,5 +278,4 @@ class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest
 
     def validate(self):
         return self._success
-
 
