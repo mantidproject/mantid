@@ -199,18 +199,18 @@ class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest
         filenames = []
 
         # existing calibration files
-        filenames.extend(('PEARL/Calibration_Test/Calibratoin/pearl_absorp_sphere_10mm_newinst2_long.nxs',
-                          'PEARL/Calibration_Test/Calibratoin/pearl_group_12_1_TT35.cal',
-                          'PEARL/Calibration_Test/Calibratoin/pearl_group_12_1_TT70.cal',
-                          'PEARL/Calibration_Test/Calibratoin/pearl_group_12_1_TT88.cal'))
+        filenames.extend(('PEARL/Calibration_Test/Calibration/pearl_absorp_sphere_10mm_newinst2_long.nxs',
+                          'PEARL/Calibration_Test/Calibration/pearl_group_12_1_TT35.cal',
+                          'PEARL/Calibration_Test/Calibration/pearl_group_12_1_TT70.cal',
+                          'PEARL/Calibration_Test/Calibration/pearl_group_12_1_TT88.cal'))
 
         # raw files / run numbers 92476-92479
+        for i in range(0, 2):
+            filenames.append('PEARL/Calibration_Test/RawFiles/PEARL0009156' + str(i))
         for i in range(0, 2):
             filenames.append('PEARL/Calibration_Test/RawFiles/PEARL0009153' + str(i))
         for i in range(0, 2):
             filenames.append('PEARL/Calibration_Test/RawFiles/PEARL0009155' + str(i))
-        for i in range(0, 2):
-            filenames.append('PEARL/Calibration_Test/RawFiles/PEARL0009156' + str(i))
 
         return filenames
 
@@ -275,7 +275,7 @@ class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest
         # Custom code to create and run this single test suite
         # and then mark as success or a failure
         suite = unittest.TestSuite()
-        suite.addTest(unittest.makeSuite(LoadTests, "test"))
+        suite.addTest(unittest.makeSuite(LoadCalibTests, "test"))
         runner = unittest.TextTestRunner()
         # Run using either runner
         res = runner.run(suite)
@@ -295,3 +295,24 @@ class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest
                           'PEARL/Calibration_Test/Calibration/van_spline_TT70_cycle_15_3.nxs',
                           'PEARL/Calibration_Test/Calibration/van_spline_TT88_cycle_15_3.nxs'))
         self._clean_up_files(filenames, DIRS)
+
+
+# ======================================================================
+# pylint: disable = too-many-public-methods
+# work horse
+
+
+class LoadCalibTests(unittest.TestCase):
+    wsname = "__LoadTest"
+    cleanup_names = []
+
+    def tearDown(self):
+        self.cleanup_names.append(self.wsname)
+        for name in self.cleanup_names:
+            try:
+                AnalysisDataService.remove(name)
+            except KeyError:
+                pass
+        self.cleanup_names = []
+
+        # ============================ Success =============================
