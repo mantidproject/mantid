@@ -141,8 +141,6 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
       QString::fromStdString(vanadiumRun));
   m_uiTabCalib.lineEdit_new_ceria_num->setUserInput(
       QString::fromStdString(ceriaRun));
-  m_uiTabCalib.lineEdit_cropped_run_num->setUserInput(
-      QString::fromStdString(ceriaRun));
 
   // push button signals/slots
   connect(m_uiTabCalib.pushButton_load_calib, SIGNAL(released()), this,
@@ -344,9 +342,6 @@ void EnggDiffractionViewQtGUI::readSettings() {
 
   m_uiTabCalib.groupBox_calib_cropped->setChecked(
       qs.value("user-params-calib-cropped-group-checkbox", false).toBool());
-
-  m_uiTabCalib.lineEdit_cropped_run_num->setText(
-      qs.value("user-params-new-ceria-num", "").toString());
 
   m_uiTabCalib.comboBox_calib_cropped_bank_name->setCurrentIndex(0);
 
@@ -1286,7 +1281,6 @@ void EnggDiffractionViewQtGUI::plotFocusStatus() {
 
 void EnggDiffractionViewQtGUI::updateCroppedCalibRun() {
   auto ceria = m_uiTabCalib.lineEdit_new_ceria_num->getText();
-  m_uiTabCalib.lineEdit_cropped_run_num->setText(ceria);
 }
 
 void EnggDiffractionViewQtGUI::calibspecNoChanged(int /*idx*/) {
@@ -1632,7 +1626,6 @@ void EnggDiffractionViewQtGUI::setPrefix(std::string prefix) {
   // focus tab
   m_uiTabFocus.lineEdit_run_num->setInstrumentOverride(prefixInput);
   m_uiTabFocus.lineEdit_texture_run_num->setInstrumentOverride(prefixInput);
-  m_uiTabFocus.lineEdit_cropped_run_num->setInstrumentOverride(prefixInput);
 
   // calibration tab
   m_uiTabCalib.lineEdit_new_ceria_num->setInstrumentOverride(prefixInput);
@@ -1640,7 +1633,6 @@ void EnggDiffractionViewQtGUI::setPrefix(std::string prefix) {
 
   // rebin tab
   m_uiTabPreproc.MWRunFiles_preproc_run_num->setInstrumentOverride(prefixInput);
-  m_uiTabCalib.lineEdit_cropped_run_num->setInstrumentOverride(prefixInput);
 }
 
 void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {

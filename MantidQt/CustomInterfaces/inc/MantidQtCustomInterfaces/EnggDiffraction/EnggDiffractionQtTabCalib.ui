@@ -155,9 +155,6 @@
             <property name="text" stdset="0">
              <string>236516</string>
             </property>
-            <property name="readOnly" stdset="0">
-              <bool>false</bool>
-            </property>
             <property name="label" stdset="0">
              <string>Vanadium #:</string>
             </property>
@@ -181,9 +178,6 @@
            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="lineEdit_new_ceria_num" native="true">
             <property name="text" stdset="0">
              <string>241391</string>
-            </property>
-            <property name="readOnly" stdset="0">
-              <bool>false</bool>
             </property>
             <property name="label" stdset="0">
              <string>Calibration sample #:</string>
@@ -239,7 +233,70 @@
       <bool>false</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout_4">
-      <item row="3" column="0" colspan="2">
+      <item row="3" column="1">
+       <widget class="QPushButton" name="pushButton_new_cropped_calib">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>Calibrate</string>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <spacer name="horizontalSpacer_19">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>473</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_11">
+        <item>
+         <widget class="QLabel" name="label_cropped_spec_nos">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Spectrum Numbers:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_8">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>38</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_cropped_spec_nos">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>1</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="0" colspan="2">
        <layout class="QHBoxLayout" name="horizontalLayout_14">
         <item>
          <spacer name="horizontalSpacer_22">
@@ -276,70 +333,7 @@
         </item>
        </layout>
       </item>
-      <item row="4" column="0">
-       <spacer name="horizontalSpacer_19">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>473</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="4" column="1">
-       <widget class="QPushButton" name="pushButton_new_cropped_calib">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Calibrate</string>
-        </property>
-        <property name="autoDefault">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="2">
-       <layout class="QHBoxLayout" name="horizontalLayout_11">
-        <item>
-         <widget class="QLabel" name="label_cropped_spec_nos">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="text">
-           <string>Spectrum Numbers:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_8">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>38</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="lineEdit_cropped_spec_nos">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>1</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="1" column="0" colspan="2">
+      <item row="0" column="0" colspan="2">
        <layout class="QHBoxLayout" name="horizontalLayout_10">
         <item>
          <spacer name="horizontalSpacer_15">
@@ -357,7 +351,7 @@
         <item>
          <widget class="QLabel" name="label_calib_cropped_spec_ids">
           <property name="enabled">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <property name="text">
            <string>Bank Name:</string>
@@ -367,7 +361,7 @@
         <item>
          <widget class="QComboBox" name="comboBox_calib_cropped_bank_name">
           <property name="enabled">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <item>
            <property name="text">
@@ -384,49 +378,6 @@
             <string>Bank South - 2</string>
            </property>
           </item>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="0" column="0" colspan="2">
-       <layout class="QHBoxLayout" name="horizontalLayout_9">
-        <item>
-         <widget class="QLabel" name="label_vanadium_num_2">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="text">
-           <string>Calibration sample #:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_14">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>98</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="lineEdit_cropped_run_num" native="true">
-          <property name="text" stdset="0">
-           <string>256663</string>
-          </property>
-          <property name="readOnly" stdset="0">
-           <bool>false</bool>
-          </property>
-          <property name="label" stdset="0">
-           <string>Run #:</string>
-          </property>
-          <property name="multipleFiles" stdset="0">
-           <bool>true</bool>
-          </property>
          </widget>
         </item>
        </layout>

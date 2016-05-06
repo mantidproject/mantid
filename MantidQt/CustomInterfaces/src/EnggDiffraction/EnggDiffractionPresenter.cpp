@@ -69,8 +69,7 @@ void EnggDiffractionPresenter::cleanup() {
   if (m_workerThread) {
     if (m_workerThread->isRunning()) {
       g_log.notice() << "A calibration process is currently running, shutting "
-                        "it down immediately..."
-                     << std::endl;
+                        "it down immediately..." << std::endl;
       m_workerThread->wait(10);
     }
     delete m_workerThread;
@@ -184,8 +183,7 @@ void EnggDiffractionPresenter::processCalcCalib() {
     return;
   }
   g_log.notice() << "EnggDiffraction GUI: starting new calibration. This may "
-                    "take a few seconds... "
-                 << std::endl;
+                    "take a few seconds... " << std::endl;
 
   const std::string outFilename = outputCalibFilename(vanNo, ceriaNo);
 
@@ -218,8 +216,7 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
 
   g_log.notice()
       << "EnggDiffraction GUI: starting cropped calibration. This may "
-         "take a few seconds... "
-      << std::endl;
+         "take a few seconds... " << std::endl;
 
   const std::string outFilename = outputCalibFilename(vanNo, ceriaNo);
 
@@ -416,8 +413,7 @@ void EnggDiffractionPresenter::processRebinTime() {
   g_log.notice() << "EnggDiffraction GUI: starting new pre-processing "
                     "(re-binning) with a TOF bin into workspace '" +
                         outWSName + "'. This "
-                                    "may take some seconds... "
-                 << std::endl;
+                                    "may take some seconds... " << std::endl;
 
   m_view->enableCalibrateAndFocusActions(false);
   // GUI-blocking alternative:
@@ -443,8 +439,7 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
   g_log.notice() << "EnggDiffraction GUI: starting new pre-processing "
                     "(re-binning) by pulse times into workspace '" +
                         outWSName + "'. This "
-                                    "may take some seconds... "
-                 << std::endl;
+                                    "may take some seconds... " << std::endl;
 
   m_view->enableCalibrateAndFocusActions(false);
   // GUI-blocking alternative:
@@ -470,8 +465,7 @@ void EnggDiffractionPresenter::processFitPeaks() {
   g_log.notice() << "EnggDiffraction GUI: starting new "
                     "single peak fits into workspace '" +
                         outWSName + "'. This "
-                                    "may take some seconds... "
-                 << std::endl;
+                                    "may take some seconds... " << std::endl;
 
   // startAsyncFittingWorker
   // doFitting()
@@ -496,8 +490,7 @@ void EnggDiffractionPresenter::inputChecksBeforeFitting(
   if (ExpectedPeaks.empty()) {
     g_log.warning() << "Expected peaks were not passed, via fitting interface,"
                        "the default list of"
-                       "expected peaks will be utlised instead."
-                    << std::endl;
+                       "expected peaks will be utlised instead." << std::endl;
   }
   bool contains_non_digits =
       ExpectedPeaks.find_first_not_of("0123456789,. ") != std::string::npos;
@@ -531,8 +524,7 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
   // disable GUI to avoid any double threads
   m_view->enableCalibrateAndFocusActions(false);
   g_log.notice() << "EnggDiffraction GUI: starting new fitting. This may "
-                    "take a few seconds... "
-                 << std::endl;
+                    "take a few seconds... " << std::endl;
 
   MatrixWorkspace_sptr focusedWS;
   const std::string FocusedWSName = "engggui_fitting_focused_ws";
@@ -598,8 +590,7 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
 
   } catch (std::invalid_argument &ia) {
     g_log.error() << "Error, Fitting could not finish off correctly, " +
-                         std::string(ia.what())
-                  << std::endl;
+                         std::string(ia.what()) << std::endl;
     return;
   }
 }
@@ -735,8 +726,7 @@ void EnggDiffractionPresenter::runEvaluateFunctionAlg(
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm EvaluateFunction, "
                      "Error description: " +
-                         static_cast<std::string>(re.what())
-                  << std::endl;
+                         static_cast<std::string>(re.what()) << std::endl;
   }
 }
 
@@ -753,8 +743,7 @@ void EnggDiffractionPresenter::runCropWorkspaceAlg(std::string workspaceName) {
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm CropWorkspace, "
                      "Error description: " +
-                         static_cast<std::string>(re.what())
-                  << std::endl;
+                         static_cast<std::string>(re.what()) << std::endl;
   }
 }
 
@@ -771,8 +760,7 @@ void EnggDiffractionPresenter::runAppendSpectraAlg(std::string workspace1Name,
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm AppendWorkspace, "
                      "Error description: " +
-                         static_cast<std::string>(re.what())
-                  << std::endl;
+                         static_cast<std::string>(re.what()) << std::endl;
   }
 }
 
@@ -789,8 +777,7 @@ void EnggDiffractionPresenter::runRebinToWorkspaceAlg(
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm RebinToWorkspace, "
                      "Error description: " +
-                         static_cast<std::string>(re.what())
-                  << std::endl;
+                         static_cast<std::string>(re.what()) << std::endl;
   }
 }
 
@@ -809,8 +796,7 @@ void EnggDiffractionPresenter::runConvetUnitsAlg(std::string workspaceName) {
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm ConvertUnits, "
                      "Error description: " +
-                         static_cast<std::string>(re.what())
-                  << std::endl;
+                         static_cast<std::string>(re.what()) << std::endl;
   }
 }
 
@@ -828,8 +814,7 @@ void EnggDiffractionPresenter::runCloneWorkspaceAlg(
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm CreateWorkspace, "
                      "Error description: " +
-                         static_cast<std::string>(re.what())
-                  << std::endl;
+                         static_cast<std::string>(re.what()) << std::endl;
   }
 }
 
@@ -866,8 +851,7 @@ void EnggDiffractionPresenter::plotFitPeaksCurves() {
   } else {
     g_log.error() << "Fitting could not be plotted as there is no " +
                          singlePeaksWs + " or " + focusedPeaksWs +
-                         " workspace found."
-                  << std::endl;
+                         " workspace found." << std::endl;
   }
 }
 
@@ -885,8 +869,7 @@ void EnggDiffractionPresenter::fittingFinished() {
 
   } else {
     g_log.notice() << "The single peak fitting finished - the output "
-                      "workspace is ready."
-                   << std::endl;
+                      "workspace is ready." << std::endl;
 
     if (m_workerThread) {
       delete m_workerThread;
@@ -895,8 +878,7 @@ void EnggDiffractionPresenter::fittingFinished() {
 
     g_log.notice()
         << "EnggDiffraction GUI: plotting peaks for single peak fits "
-           "has started... "
-        << std::endl;
+           "has started... " << std::endl;
     try {
       plotFitPeaksCurves();
 
@@ -909,8 +891,7 @@ void EnggDiffractionPresenter::fittingFinished() {
       throw;
     }
     g_log.notice() << "EnggDiffraction GUI: plotting of peaks for single peak "
-                      "fits has completed. "
-                   << std::endl;
+                      "fits has completed. " << std::endl;
   }
   // enable the GUI
   m_view->enableCalibrateAndFocusActions(true);
@@ -943,8 +924,7 @@ void EnggDiffractionPresenter::processStopFocus() {
   if (m_workerThread) {
     if (m_workerThread->isRunning()) {
       g_log.notice() << "A focus process is currently running, shutting "
-                        "it down as soon as possible..."
-                     << std::endl;
+                        "it down as soon as possible..." << std::endl;
 
       g_abortThread = true;
       g_log.warning() << "Focus Stop has been clicked, please wait until "
@@ -1263,6 +1243,9 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
   g_log.notice() << "Generating new calibration file: " << outFilename
                  << std::endl;
 
+  std::cerr << "In doNewCalibration, vanNo: " << vanNo
+            << ", ceriaNo: " << ceriaNo << " specNos: " << specNos << std::endl;
+
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
   Mantid::Kernel::ConfigServiceImpl &conf =
       Mantid::Kernel::ConfigService::Instance();
@@ -1282,13 +1265,11 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
   } catch (std::runtime_error &) {
     g_log.error() << "The calibration calculations failed. One of the "
                      "algorithms did not execute correctly. See log messages "
-                     "for details. "
-                  << std::endl;
+                     "for details. " << std::endl;
   } catch (std::invalid_argument &) {
     g_log.error()
         << "The calibration calculations failed. Some input properties "
-           "were not valid. See log messages for details. "
-        << std::endl;
+           "were not valid. See log messages for details. " << std::endl;
   }
   // restore normal data search paths
   conf.setDataSearchDirs(tmpDirs);
@@ -1707,8 +1688,7 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
     g_lastValidRun = runNo;
 
     g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
-                      "this directory: "
-                   << dir << std::endl;
+                      "this directory: " << dir << std::endl;
 
     // TODO: this is almost 100% common with doNewCalibrate() - refactor
     EnggDiffCalibSettings cs = m_view->currentCalibSettings();
@@ -1751,8 +1731,7 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
           loadDetectorGroupingCSV(dgFile, bankIDs, specs);
         } catch (std::runtime_error &re) {
           g_log.error() << "Error loading detector grouping file: " + dgFile +
-                               ". Detailed error: " + re.what()
-                        << std::endl;
+                               ". Detailed error: " + re.what() << std::endl;
           bankIDs.clear();
           specs.clear();
         }
@@ -1768,8 +1747,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
           fpath.append(effectiveFilenames[idx]).toString();
       g_log.notice() << "Generating new focused file (bank " +
                             boost::lexical_cast<std::string>(bankIDs[idx]) +
-                            ") for run " + runNo + " into: "
-                     << effectiveFilenames[idx] << std::endl;
+                            ") for run " + runNo +
+                            " into: " << effectiveFilenames[idx] << std::endl;
       try {
         m_focusFinishedOK = false;
         doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
@@ -1782,8 +1761,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
       } catch (std::invalid_argument &ia) {
         g_log.error() << "The focusing failed. Some input properties "
                          "were not valid. "
-                         "See log messages for details. Error: "
-                      << ia.what() << std::endl;
+                         "See log messages for details. Error: " << ia.what()
+                      << std::endl;
       }
     }
 
@@ -1879,8 +1858,7 @@ void EnggDiffractionPresenter::focusingFinished() {
     if (lastRun != lastValid) {
       g_log.warning()
           << "Focussing process has been stopped, last successful "
-             "run number: "
-          << g_lastValidRun
+             "run number: " << g_lastValidRun
           << " , total number of focus run that could not be processed: "
           << (lastRun - lastValid) << std::endl;
     }
@@ -1959,8 +1937,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
 
     if (multi_RunNo.size() == 1) {
       g_log.notice() << "Only single file has been listed, the Sum Of Files"
-                        "cannot not be processed"
-                     << std::endl;
+                        "cannot not be processed" << std::endl;
     } else {
       g_log.notice()
           << "Load alogirthm has successfully merged the files provided"
@@ -2130,8 +2107,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                        "This is possibly because some of the settings are not "
                        "consistent. Please check the log messages for "
                        "details. Details: " +
-                           std::string(ia.what())
-                    << std::endl;
+                           std::string(ia.what()) << std::endl;
       throw;
     } catch (std::runtime_error &re) {
       g_log.error() << "Failed to calculate Vanadium corrections. "
@@ -2140,15 +2116,14 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                        "There was no obvious error in the input properties "
                        "but the algorithm failed. Please check the log "
                        "messages for details." +
-                           std::string(re.what())
-                    << std::endl;
+                           std::string(re.what()) << std::endl;
       throw;
     }
   } else {
     g_log.notice() << "Found precalculated Vanadium correction features for "
-                      "Vanadium run "
-                   << vanNo << ". Re-using these files: " << preIntegFilename
-                   << ", and " << preCurvesFilename << std::endl;
+                      "Vanadium run " << vanNo
+                   << ". Re-using these files: " << preIntegFilename << ", and "
+                   << preCurvesFilename << std::endl;
     try {
       loadVanadiumPrecalcWorkspaces(preIntegFilename, preCurvesFilename,
                                     vanIntegWS, vanCurvesWS, vanNo, specNos);
@@ -2411,15 +2386,14 @@ void EnggDiffractionPresenter::doRebinningTime(const std::string &runNo,
   } catch (std::invalid_argument &ia) {
     g_log.error() << "Error when rebinning with a regular bin width in time. "
                      "There was an error in the inputs to the algorithm " +
-                         rebinName + ". Error description: " + ia.what() + "."
-                  << std::endl;
+                         rebinName + ". Error description: " + ia.what() +
+                         "." << std::endl;
     return;
   } catch (std::runtime_error &re) {
     g_log.error() << "Error when rebinning with a regular bin width in time. "
                      "Coult not run the algorithm " +
                          rebinName + " successfully. Error description: " +
-                         re.what() + "."
-                  << std::endl;
+                         re.what() + "." << std::endl;
     return;
   }
 
@@ -2515,15 +2489,14 @@ void EnggDiffractionPresenter::doRebinningPulses(const std::string &runNo,
   } catch (std::invalid_argument &ia) {
     g_log.error() << "Error when rebinning by pulse times. "
                      "There was an error in the inputs to the algorithm " +
-                         rebinName + ". Error description: " + ia.what() + "."
-                  << std::endl;
+                         rebinName + ". Error description: " + ia.what() +
+                         "." << std::endl;
     return;
   } catch (std::runtime_error &re) {
     g_log.error() << "Error when rebinning by pulse times. "
                      "Coult not run the algorithm " +
                          rebinName + " successfully. Error description: " +
-                         re.what() + "."
-                  << std::endl;
+                         re.what() + "." << std::endl;
     return;
   }
 
@@ -2577,8 +2550,7 @@ void EnggDiffractionPresenter::rebinningFinished() {
         << std::endl;
   } else {
     g_log.notice() << "Pre-processing (re-binning) finished - the output "
-                      "workspace is ready."
-                   << std::endl;
+                      "workspace is ready." << std::endl;
   }
   if (m_workerThread) {
     delete m_workerThread;
