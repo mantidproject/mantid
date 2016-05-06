@@ -394,10 +394,10 @@ void EnggDiffractionViewQtGUI::readSettings() {
   m_uiTabFocus.groupBox_texture->setChecked(
       qs.value("user-params-focus-texture-group-checkbox", false).toBool());
 
-  m_uiTabFocus.checkBox_plot_focus_ws->setChecked(
+  m_uiTabFocus.checkBox_plot_focused_ws->setChecked(
       qs.value("user-params-focus-plot-focused-ws", true).toBool());
 
-  m_uiTabFocus.checkBox_plotfocused_ws->setChecked(
+  m_uiTabFocus.checkBox_save_output_files->setChecked(
       qs.value("user-params-focus-save-output-files", true).toBool());
 
   m_uiTabFocus.comboBox_PlotData->setCurrentIndex(0);
@@ -515,10 +515,10 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
               m_uiTabFocus.groupBox_texture->isChecked());
 
   qs.setValue("user-params-focus-plot-focused-ws",
-              m_uiTabFocus.checkBox_plotfocused_ws->isChecked());
+              m_uiTabFocus.checkBox_plot_focused_ws->isChecked());
 
   qs.setValue("user-params-focus-save-output-files",
-              m_uiTabFocus.checkBox_plotfocused_ws->isChecked());
+              m_uiTabFocus.checkBox_plot_focused_ws->isChecked());
 
   // pre-processing (re-binning)
   qs.setValue("user-params-preproc-runno",
@@ -673,7 +673,7 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabFocus.groupBox_texture->setEnabled(enable);
 
   m_uiTabFocus.pushButton_focus->setEnabled(enable);
-  m_uiTabFocus.checkBox_plot_focus_ws->setEnabled(enable);
+  m_uiTabFocus.checkBox_plot_focused_ws->setEnabled(enable);
   m_uiTabFocus.checkBox_save_output_files->setEnabled(enable);
   m_uiTabFocus.comboBox_Multi_Runs->setEnabled(enable);
 
