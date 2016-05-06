@@ -71,7 +71,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
                              doc='Algorithm for compressing data')
         self.declareProperty('WriteMomentumTransfer', True,
                              doc="Add the momentum transfer (Q) axis to the file")
-        self.declareProperty('pChargeUnits', 'uA.hour',
+        self.declareProperty('ProtonChargeUnits', 'uA.hour',
                              StringListValidator(['uA.hour', 'C', 'pC']))
         self.declareProperty('Append', False)
 
@@ -79,7 +79,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         self.setPropertyGroup('DataType', group)
         self.setPropertyGroup('Compression', group)
         self.setPropertyGroup('WriteMomentumTransfer', group)
-        self.setPropertyGroup('pChargeUnits', group)
+        self.setPropertyGroup('ProtonChargeUnits', group)
         self.setPropertyGroup('Append', group)
 
 
@@ -159,7 +159,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         value = pcharge.value
         units = str(pcharge.units)  # will be in units of uA.hour
 
-        unitsDesired = self.getProperty('pChargeUnits').value
+        unitsDesired = self.getProperty('ProtonChargeUnits').value
         if unitsDesired == 'uA.hour':
             pass  # nothing to do
         elif unitsDesired == 'C':
