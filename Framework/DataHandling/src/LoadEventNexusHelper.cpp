@@ -293,7 +293,6 @@ void ProcessBankData::run() { // override {
 * @param input_alg :: Handle to the main algorithm
 * @param entry_name :: The pathname of the bank to load
 * @param entry_type :: The classtype of the entry to load
-* @param numEvents :: The number of events in the bank.
 * @param oldNeXusFileNames :: Identify if file is of old variety.
 * @param prog :: an optional Progress object
 * @param framePeriodNumbers :: Period numbers corresponding to each frame
@@ -302,7 +301,7 @@ void ProcessBankData::run() { // override {
 LoadBankFromDiskTask::LoadBankFromDiskTask(
     Mantid::DataHandling::LoadEventNexus *input_alg,
     const std::string &entry_name, const std::string &entry_type,
-    const std::size_t numEvents, const bool oldNeXusFileNames,
+    const bool oldNeXusFileNames,
     Mantid::API::Progress *prog,
     // boost::shared_ptr<std::mutex> ioMutex,
     // Mantid::Kernel::ThreadScheduler *scheduler,

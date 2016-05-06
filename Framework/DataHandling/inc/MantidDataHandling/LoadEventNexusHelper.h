@@ -98,7 +98,6 @@ public:
   LoadBankFromDiskTask(Mantid::DataHandling::LoadEventNexus *input_alg,
                        const std::string &entry_name,
                        const std::string &entry_type,
-                       const std::size_t numEvents,
                        const bool oldNeXusFileNames,
                        Mantid::API::Progress *prog,
                        // boost::shared_ptr<std::mutex> ioMutex,

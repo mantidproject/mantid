@@ -1118,7 +1118,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     // We make tasks for loading
     if (bankNumEvents[i] > 0) {
       LoadBankFromDiskTask *task = new LoadBankFromDiskTask(
-          this, bankNames[i], classType, bankNumEvents[i], oldNeXusFileNames,
+          this, bankNames[i], classType, oldNeXusFileNames,
           prog2, // diskIOMutex, scheduler,
           periodLogVec, this->getLogger());
       task->run();
