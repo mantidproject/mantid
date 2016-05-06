@@ -54,9 +54,9 @@ def get_masked_pixels(nx_low, nx_high, ny_low, ny_high, workspace):
         @param ny_high: number of pixels to mask on the higher-y side of the detector
         @param workspace: the pixel number and size info will be taken from the workspace
     """
-    nx_pixels, ny_pixels, dummy_pixel_size_x, dummy_pixel_size_y = _get_pixel_info(workspace)
+    nx_pixels, ny_pixels, _, _ = _get_pixel_info(workspace)
     if nx_low<0 or nx_high<0 or ny_low<0 or ny_high<0:
-        raise RuntimeError, "Pixel edges should be greater than zero"
+        raise RuntimeError("Pixel edges should be greater than zero")
 
     masked_x = range(0, nx_low)
     masked_x.extend(range(nx_pixels-nx_high, nx_pixels))
@@ -92,7 +92,7 @@ def get_detector_from_pixel(pixel_list):
         Returns a list of detector IDs from a list of [x,y] pixels,
         where the pixel coordinates are in pixel units.
     """
-    return [ 1000000 + p[0]*1000 + p[1] for p in pixel_list ]
+    return [ 3 + p[0] + p[1]*256 for p in pixel_list ]
 
 def get_aperture_distance(workspace):
     """
