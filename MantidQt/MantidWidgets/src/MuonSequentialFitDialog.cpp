@@ -295,7 +295,9 @@ void MuonSequentialFitDialog::startFit() {
   // changed.
   connect(m_ui.runs, SIGNAL(fileInspectionFinished()), this,
           SLOT(continueFit()));
-  m_ui.runs->findFiles();
+  if (!m_ui.runs->isSearching()) {
+    m_ui.runs->findFiles();
+  }
 }
 
 /**
