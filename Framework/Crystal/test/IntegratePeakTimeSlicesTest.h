@@ -190,7 +190,7 @@ public:
           algP.getProperty("OutputWorkspace");
 
       TS_ASSERT_LESS_THAN(fabs(intensity - 60300), 1500.0);
-      // RT: my ubderstanding is that there are 2 close minima
+      // RT: my understanding is that there are 2 close minima
       // that give different fitting errors which leads to changes in sigma.
       if (sigma > 300.0) {
         // Not sure why this reduced the error so much in the test

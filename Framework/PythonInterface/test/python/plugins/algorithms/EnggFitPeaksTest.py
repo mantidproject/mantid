@@ -190,8 +190,8 @@ class EnggFitPeaksTest(unittest.TestCase):
         Tests fitting a couple of peaks.
         """
 
-        peak_def1 = "name=BackToBackExponential, I=15000, A=1, B=1.7, X0=15000, S=100"
-        peak_def2 = "name=BackToBackExponential, I=8000, A=1, B=1.7, X0=20000, S=300"
+        peak_def1 = "name=BackToBackExponential, I=15000, A=0.1, B=0.14, X0=15000, S=50"
+        peak_def2 = "name=BackToBackExponential, I=6000, A=0.2, B=0.21, X0=20000, S=60"
         sws = CreateSampleWorkspace(Function="User Defined",
                                     UserDefinedFunction=peak_def1 + ";" + peak_def2,
                                     NumBanks=1, BankPixelWidth=1,
@@ -208,8 +208,8 @@ class EnggFitPeaksTest(unittest.TestCase):
         self.assertEquals(test_fit_peaks_table.rowCount(), 2)
 
         # check 'OutFittedPeaksTable' table workspace
-        self._check_outputs_ok(peaksTblName, 2, [ep1, -1.5602448495e-06,
-                                                 ep2, 1.723902507582676e-07])
+        self._check_outputs_ok(peaksTblName, 2, [ep1, 2.11282066963e-07,
+                                                 ep2, 3.87183221144e-06])
 
     def test_runs_ok_3peaks(self):
         """
