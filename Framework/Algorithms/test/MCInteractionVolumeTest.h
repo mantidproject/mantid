@@ -141,7 +141,7 @@ public:
 
   void test_Construction_With_Invalid_Environment_Throws_Error() {
     using Mantid::API::Sample;
-    using Mantid::API::SampleEnvironment;
+    using Mantid::Geometry::SampleEnvironment;
 
     Sample sample;
     sample.setShape(*ComponentCreationHelper::createSphere(1));

@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidAPI/SampleEnvironment.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/Track.h"
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 using Geometry::BoundingBox;
 using Geometry::Track;
 using Kernel::Material;

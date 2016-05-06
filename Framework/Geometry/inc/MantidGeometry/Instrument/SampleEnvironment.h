@@ -1,10 +1,10 @@
-#ifndef MANTID_API_SAMPLEENVIRONMENT_H_
-#define MANTID_API_SAMPLEENVIRONMENT_H_
+#ifndef MANTID_GEOMETRY_SAMPLEENVIRONMENT_H_
+#define MANTID_GEOMETRY_SAMPLEENVIRONMENT_H_
 
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidAPI/DllConfig.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/ClassMacros.h"
 
@@ -12,7 +12,7 @@ namespace Mantid {
 namespace Geometry {
 class Track;
 }
-namespace API {
+namespace Geometry {
 /**
   This class stores details regarding the sample environment that was used
   during
@@ -39,7 +39,7 @@ namespace API {
   File change history is stored at: <https://github.com/mantidproject/mantid>.
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL SampleEnvironment {
+class MANTID_GEOMETRY_DLL SampleEnvironment {
 public:
   /// Constructor defining the name of the environment
   SampleEnvironment(const std::string &name);
@@ -70,4 +70,4 @@ private:
 }
 }
 
-#endif // MANTID_API_SAMPLEENVIRONMENT_H_
+#endif // MANTID_GEOMETRY_SAMPLEENVIRONMENT_H_

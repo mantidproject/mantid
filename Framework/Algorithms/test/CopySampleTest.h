@@ -7,10 +7,10 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/SampleEnvironment.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/Object.h"
 
 #include "MantidDataObjects/MDEvent.h"

@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_MONTECARLOTESTING_H
 
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/SampleEnvironment.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
@@ -58,7 +58,7 @@ createAnnulus(double innerRadius, double outerRadius, double height,
 
 inline Mantid::API::Sample createSamplePlusCan() {
   using Mantid::API::Sample;
-  using Mantid::API::SampleEnvironment;
+  using Mantid::Geometry::SampleEnvironment;
   using Mantid::Kernel::Material;
   using Mantid::Kernel::V3D;
   using Mantid::PhysicalConstants::getNeutronAtom;

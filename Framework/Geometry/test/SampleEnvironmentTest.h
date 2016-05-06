@@ -1,14 +1,14 @@
 #ifndef TESTSAMPLEENVIRONMENT_H_
 #define TESTSAMPLEENVIRONMENT_H_
 
-#include "MantidAPI/SampleEnvironment.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 
-using Mantid::API::SampleEnvironment;
+using Mantid::Geometry::SampleEnvironment;
 
 class SampleEnvironmentTest : public CxxTest::TestSuite {
 public:
