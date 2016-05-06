@@ -21,7 +21,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-#include "LoadBankFromDiskTask.cpp"
+#include "MantidDataHandling/LoadEventNexusHelper.h"
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real.hpp>
