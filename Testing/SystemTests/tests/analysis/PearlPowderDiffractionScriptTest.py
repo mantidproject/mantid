@@ -4,7 +4,7 @@ import unittest
 import os.path
 import shutil
 
-from mantid.api import AnalysisDataService, MatrixWorkspace
+from mantid.api import AnalysisDataService, MatrixWorkspace, ITableWorkspace
 from mantid.simpleapi import *
 from mantid import config
 import stresstesting
@@ -333,8 +333,24 @@ class LoadCalibTests(unittest.TestCase):
                                    mtd['cal_' + cal_type + '_15_3_mask'],
                                    mtd['cal_' + cal_type + '_15_3_offsets']))
 
-        for ws in range(0, len(cal_workspaces)):
+        for ws in cal_workspaces:
             self.assertTrue(isinstance(ws, MatrixWorkspace))
             self.assertEquals(1056, ws.getNumberHistograms())
             self.assertEquals(1, ws.blocksize())
+
+        table_workspaces = []
+        table_workspaces.extend((mtd['cal_group_15_3_cal'], mtd['cal_offset_15_3_cal']))
+        for table in table_workspaces:
+            self.assertTrue(isinstance(table, ITableWorkspace))
+
+        for i in range(0, 1000, 50):
+            self.assertEqual(table_workspaces[0].cell(i, 0), table_workspaces[0].cell(i, 0))
+
+        self.assertEqual(4491.84, table_workspaces[0].cell(0, 1))
+        self.assertEqual(4826.7, table_workspaces[1].cell(34, 1))
+        self.assertEqual(4814.15, table_workspaces[0].cell(190, 1))
+        self.assertEqual(4639.09, table_workspaces[1].cell(405, 1))
+        self.assertEqual(5219.48, table_workspaces[0].cell(703, 1))
+        self.assertEqual(3018.97, table_workspaces[1].cell(1055, 1))
+
 
