@@ -155,6 +155,9 @@
             <property name="text" stdset="0">
              <string>236516</string>
             </property>
+            <property name="readOnly" stdset="0">
+              <bool>false</bool>
+            </property>
             <property name="label" stdset="0">
              <string>Vanadium #:</string>
             </property>
@@ -178,6 +181,9 @@
            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="lineEdit_new_ceria_num" native="true">
             <property name="text" stdset="0">
              <string>241391</string>
+            </property>
+            <property name="readOnly" stdset="0">
+              <bool>false</bool>
             </property>
             <property name="label" stdset="0">
              <string>Calibration sample #:</string>
@@ -221,7 +227,7 @@
    <item row="2" column="0">
     <widget class="QGroupBox" name="groupBox_calib_cropped">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="title">
       <string>Cropped Calibration:</string>
@@ -286,7 +292,7 @@
       <item row="4" column="1">
        <widget class="QPushButton" name="pushButton_new_cropped_calib">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="text">
          <string>Calibrate</string>
@@ -300,6 +306,9 @@
        <layout class="QHBoxLayout" name="horizontalLayout_11">
         <item>
          <widget class="QLabel" name="label_cropped_spec_nos">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="text">
            <string>Spectrum Numbers:</string>
           </property>
@@ -347,6 +356,9 @@
         </item>
         <item>
          <widget class="QLabel" name="label_calib_cropped_spec_ids">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="text">
            <string>Bank Name:</string>
           </property>
@@ -354,6 +366,9 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBox_calib_cropped_bank_name">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <item>
            <property name="text">
             <string>Enable Spectrum-Nos</string>
@@ -378,7 +393,7 @@
         <item>
          <widget class="QLabel" name="label_vanadium_num_2">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
            <string>Calibration sample #:</string>
@@ -400,11 +415,8 @@
         </item>
         <item>
          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="lineEdit_cropped_run_num" native="true">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
           <property name="text" stdset="0">
-           <string/>
+           <string>256663</string>
           </property>
           <property name="readOnly" stdset="0">
            <bool>false</bool>

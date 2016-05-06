@@ -348,8 +348,6 @@ void EnggDiffractionViewQtGUI::readSettings() {
   m_uiTabCalib.lineEdit_cropped_run_num->setText(
       qs.value("user-params-new-ceria-num", "").toString());
 
-  m_uiTabCalib.lineEdit_cropped_run_num->setReadOnly(true);
-
   m_uiTabCalib.comboBox_calib_cropped_bank_name->setCurrentIndex(0);
 
   m_uiTabCalib.lineEdit_cropped_spec_nos->setText(
