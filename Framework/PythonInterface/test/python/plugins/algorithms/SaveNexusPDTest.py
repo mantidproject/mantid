@@ -1,5 +1,4 @@
 #pylint: disable=invalid-name,too-many-public-methods,too-many-arguments
-import h5py
 import mantid
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import CreateWorkspace, SaveNexusPD
@@ -8,6 +7,11 @@ import os
 from testhelpers import WorkspaceCreationHelper as WCH
 import unittest
 
+runTests = True
+try:
+    import h5py
+except ImportError:
+    runTests = False
 
 class SaveNexusPDTest(unittest.TestCase):
     def saveFilePath(self, wkspname):
@@ -21,8 +25,11 @@ class SaveNexusPDTest(unittest.TestCase):
             mantid.api.AnalysisDataService.remove(wkspname)
 
     def testSaveOneSpectrumNoInstrument(self):
-        """ Test to Save one spectrum
+        """ Test to Save one spectrum without and instrument
         """
+        if not runTests:
+            return
+
         wkspname = "SaveNexusPDTest_onespectrumnoinstr"
         filename = self.saveFilePath(wkspname)
         self._createOneSpectrum(wkspname)
@@ -35,8 +42,11 @@ class SaveNexusPDTest(unittest.TestCase):
             self.cleanup(filename, wkspname)
 
     def testSaveMultiSpectra(self):
-        """ Test to Save two curves
+        """ Test to Save multiple spectra with instrument
         """
+        if not runTests:
+            return
+
         wkspname = "SaveNexusPDTest_multispectra"
         filename = self.saveFilePath(wkspname)
         self._createMultiSpectra(wkspname)
