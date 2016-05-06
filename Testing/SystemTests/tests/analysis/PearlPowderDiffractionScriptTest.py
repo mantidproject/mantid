@@ -219,7 +219,7 @@ class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest
             for files in filenames:
                 path = os.path.join(directories[0], files)
                 os.remove(path)
-            cali_path = os.path.join(directories[0], "PEARL/DataOut")
+            cali_path = os.path.join(directories[0], "PEARL/Calibration_Test/Calibration")
             shutil.rmtree(cali_path)
         except OSError, ose:
             print 'could not delete the generated file: ', ose.filename
@@ -235,7 +235,7 @@ class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest
         pearl_routines.PEARL_startup("Calib", "15_3")
 
         # setting files directory here
-        # DIRS[0] is the system test directory
+        # DIRS[0] is the system test data directory
 
         # setting raw files directory
         DataDir = DIRS[0] + 'PEARL/Calibration_Test/RawFiles/'
@@ -298,9 +298,7 @@ class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest
 
 
 # ======================================================================
-# pylint: disable = too-many-public-methods
 # work horse
-
 
 class LoadCalibTests(unittest.TestCase):
     wsname = "__LoadTest"
@@ -315,4 +313,28 @@ class LoadCalibTests(unittest.TestCase):
                 pass
         self.cleanup_names = []
 
-        # ============================ Success =============================
+    # ============================ Success =============================
+
+    def test_calfile_with_workspace(self):
+
+        cal_group_file = (DIRS[0] + 'PEARL/Calibration_Test/Calibration/test_cal_group_15_3.cal')
+        cal_offset_file = (DIRS[0] + 'PEARL/Calibration_Test/Calibration/pearl_offset_15_3.cal')
+        LoadCalFile(InstrumentName="PEARL", CalFilename=cal_group_file,
+                    WorkspaceName='cal_group_15_3')
+        LoadCalFile(InstrumentName="PEARL", CalFilename=cal_offset_file,
+                    WorkspaceName="cal_offset_15_3")
+
+        cal_workspaces = []
+        for i in range(0, 2):
+            cal_type = 'group'
+            if i == 1:
+                cal_type = 'offset'
+            cal_workspaces.extend((mtd['cal_' + cal_type + '_15_3_group'],
+                                   mtd['cal_' + cal_type + '_15_3_mask'],
+                                   mtd['cal_' + cal_type + '_15_3_offsets']))
+
+        for ws in range(0, len(cal_workspaces)):
+            self.assertTrue(isinstance(ws, MatrixWorkspace))
+            self.assertEquals(1056, ws.getNumberHistograms())
+            self.assertEquals(1, ws.blocksize())
+
