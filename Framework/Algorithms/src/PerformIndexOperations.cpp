@@ -309,16 +309,15 @@ VecCommands interpret(const std::string &processingInstructions) {
   boost::split(processingInstructionsSplit, processingInstructions,
                boost::is_any_of(","));
 
-  VecCommandParsers commandParsers;
-  commandParsers.push_back(boost::make_shared<AdditionParserRange>());
-  commandParsers.push_back(boost::make_shared<CropParserRange>());
-  commandParsers.push_back(boost::make_shared<CropParserIndex>());
-  commandParsers.push_back(boost::make_shared<AdditionParser>());
+  VecCommandParsers commandParsers{boost::make_shared<AdditionParserRange>(),
+                                   boost::make_shared<CropParserRange>(),
+                                   boost::make_shared<CropParserIndex>(),
+                                   boost::make_shared<AdditionParser>()};
 
   VecCommands commands;
   for (const auto &candidate : processingInstructionsSplit) {
     bool parserFound = false;
-    for (auto commandParser : commandParsers) {
+    for (const auto &commandParser : commandParsers) {
       Command *command = commandParser->interpret(candidate);
       boost::shared_ptr<Command> commandSptr(command);
       if (commandSptr->isValid()) // Do not record invalid commands.

@@ -118,7 +118,7 @@ void Q1DWeighted::exec() {
   const V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
 
   const int xLength = static_cast<int>(inputWS->readX(0).size());
-  const double fmp = 4.0 * M_PI;
+  constexpr double fmp = 4.0 * M_PI;
 
   // Set up the progress reporting object
   Progress progress(this, 0.0, 1.0, numSpec * (xLength - 1));
@@ -212,15 +212,15 @@ void Q1DWeighted::exec() {
                        nSubPixels;
         double sub_x = pixelSizeX *
                        (floor(static_cast<double>(isub) / nSubPixels) -
-                        (nSubPixels - 1.0) / 2.0) /
+                        (nSubPixels - 1.0) * 0.5) /
                        nSubPixels;
 
         // Find the position of this sub-pixel in real space and compute Q
         // For reference - in the case where we don't use sub-pixels, simply
         // use:
-        //     double sinTheta = sin( inputWS->detectorTwoTheta(det)/2.0 );
+        //     double sinTheta = sin( inputWS->detectorTwoTheta(*det)/2.0 );
         V3D pos = det->getPos() - V3D(sub_x, sub_y, 0.0);
-        double sinTheta = sin(pos.angle(beamLine) / 2.0);
+        double sinTheta = sin(0.5 * pos.angle(beamLine));
         double factor = fmp * sinTheta;
         double q = factor * 2.0 / (XIn[j] + XIn[j + 1]);
         int iq = 0;
@@ -275,13 +275,13 @@ void Q1DWeighted::exec() {
               // only over a forward-going cone
               if (isCone)
                 center_angle *= 2.0;
-              center_angle += M_PI / 180.0 * wedgeOffset;
+              center_angle += deg2rad * wedgeOffset;
               V3D sub_pix = V3D(pos.X(), pos.Y(), 0.0);
               double angle = fabs(sub_pix.angle(
                   V3D(cos(center_angle), sin(center_angle), 0.0)));
-              if (angle < M_PI / 180.0 * wedgeAngle / 2.0 ||
+              if (angle < deg2rad * wedgeAngle * 0.5 ||
                   (!isCone &&
-                   fabs(M_PI - angle) < M_PI / 180.0 * wedgeAngle / 2.0)) {
+                   fabs(M_PI - angle) < deg2rad * wedgeAngle * 0.5)) {
                 wedge_lambda_iq[iWedge][iq] += YIn[j] * w;
                 wedge_lambda_iq_err[iWedge][iq] += w * w * EIn[j] * EIn[j];
                 wedge_XNorm[iWedge][iq] += w;

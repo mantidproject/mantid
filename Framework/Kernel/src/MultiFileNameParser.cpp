@@ -481,7 +481,7 @@ parseToken(std::vector<std::vector<unsigned int>> &parsedRuns,
   }
 
   // We should always end up with at least 1 unsigned int here.
-  assert(1 <= rangeDetails.size());
+  assert(!rangeDetails.empty());
 
   std::vector<std::vector<unsigned int>> runs;
 

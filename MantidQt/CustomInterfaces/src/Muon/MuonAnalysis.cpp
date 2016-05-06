@@ -2912,7 +2912,7 @@ void MuonAnalysis::openSequentialFitDialog() {
                     "Error was: ");
     message.append(err.what());
     QMessageBox::critical(this, "Unable to open dialog", message);
-    g_log.error(message.ascii());
+    g_log.error(message.toLatin1().data());
     return;
   } catch (...) {
     QMessageBox::critical(this, "Unable to open dialog",

@@ -83,7 +83,7 @@ void CentroidPeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
       getProperty("OutputWorkspace");
   if (peakWS != inPeakWS)
-    peakWS.reset(inPeakWS->clone().release());
+    peakWS = inPeakWS->clone();
 
   std::string CoordinatesToUseStr = getPropertyValue("CoordinatesToUse");
   int CoordinatesToUse = ws->getSpecialCoordinateSystem();

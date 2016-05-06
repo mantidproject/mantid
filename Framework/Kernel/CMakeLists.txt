@@ -76,7 +76,9 @@ set ( SRC_FILES
 	src/Property.cpp
 	src/PropertyHistory.cpp
 	src/PropertyManager.cpp
+	src/PropertyManagerDataService.cpp
 	src/PropertyManagerOwner.cpp
+	src/PropertyManagerProperty.cpp
 	src/PropertyWithValue.cpp
 	src/ProxyInfo.cpp
 	src/PseudoRandomNumberGenerator.cpp
@@ -91,8 +93,8 @@ set ( SRC_FILES
 	src/Statistics.cpp
 	src/StdoutChannel.cpp
 	src/StringContainsValidator.cpp
-	src/Strings.cpp
 	src/StringTokenizer.cpp
+	src/Strings.cpp
 	src/TestChannel.cpp
 	src/ThreadPool.cpp
 	src/ThreadPoolRunnable.cpp
@@ -145,7 +147,7 @@ set ( INC_FILES
 	inc/MantidKernel/Chainable.h
 	inc/MantidKernel/ChainableFactory.h
 	inc/MantidKernel/ChecksumHelper.h
-        inc/MantidKernel/ClassMacros.h
+	inc/MantidKernel/ClassMacros.h
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ComputeResourceInfo.h
 	inc/MantidKernel/ConfigService.h
@@ -230,7 +232,10 @@ set ( INC_FILES
 	inc/MantidKernel/Property.h
 	inc/MantidKernel/PropertyHistory.h
 	inc/MantidKernel/PropertyManager.h
+	inc/MantidKernel/PropertyManagerDataService.h
 	inc/MantidKernel/PropertyManagerOwner.h
+	inc/MantidKernel/PropertyManagerProperty.h
+	inc/MantidKernel/PropertyManager_fwd.h
 	inc/MantidKernel/PropertyWithValue.h
 	inc/MantidKernel/ProxyInfo.h
 	inc/MantidKernel/PseudoRandomNumberGenerator.h
@@ -248,8 +253,8 @@ set ( INC_FILES
 	inc/MantidKernel/Statistics.h
 	inc/MantidKernel/StdoutChannel.h
 	inc/MantidKernel/StringContainsValidator.h
-	inc/MantidKernel/Strings.h
 	inc/MantidKernel/StringTokenizer.h
+	inc/MantidKernel/Strings.h
 	inc/MantidKernel/System.h
 	inc/MantidKernel/Task.h
 	inc/MantidKernel/TestChannel.h
@@ -281,7 +286,7 @@ set ( INC_FILES
 	inc/MantidKernel/WriteLock.h
 	inc/MantidKernel/XMLInstantiator.h
 	inc/MantidKernel/cow_ptr.h
-        inc/MantidKernel/make_cow.h
+	inc/MantidKernel/make_cow.h
 	inc/MantidKernel/make_unique.h
 )
 
@@ -305,7 +310,7 @@ set ( TEST_FILES
 	CompositeValidatorTest.h
 	ComputeResourceInfoTest.h
 	ConfigServiceTest.h
-        CowPtrTest.h
+	CowPtrTest.h
 	DataServiceTest.h
 	DateAndTimeTest.h
 	DateTimeValidatorTest.h
@@ -343,8 +348,8 @@ set ( TEST_FILES
 	MDUnitTest.h
 	MRUListTest.h
 	MagneticFormFactorTableTest.h
-        MagneticIonTest.h
-        MakeCowTest.h
+	MagneticIonTest.h
+	MakeCowTest.h
 	MakeUniqueTest.h
 	MandatoryValidatorTest.h
 	MaskedPropertyTest.h
@@ -365,6 +370,8 @@ set ( TEST_FILES
 	ProgressBaseTest.h
 	ProgressTextTest.h
 	PropertyHistoryTest.h
+	PropertyManagerDataServiceTest.h
+	PropertyManagerPropertyTest.h
 	PropertyManagerTest.h
 	PropertyTest.h
 	PropertyWithValueTest.h
@@ -381,8 +388,8 @@ set ( TEST_FILES
 	StatisticsTest.h
 	StdoutChannelTest.h
 	StringContainsValidatorTest.h
+	StringTokenizerTest.h
 	StringsTest.h
-        StringTokenizerTest.h
 	TaskTest.h
 	ThreadPoolRunnableTest.h
 	ThreadPoolTest.h

@@ -107,7 +107,7 @@ public:
         vecPropertyHistories, "ProcessingInstructions");
     std::vector<std::string> pointDetectorStartStop;
     boost::split(pointDetectorStartStop, processingInstructions,
-                 boost::is_any_of(","));
+                 boost::is_any_of(":"));
 
     TS_ASSERT_EQUALS(inst->getNumberParameter("LambdaMin").at(0),
                      wavelengthMin);

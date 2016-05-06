@@ -475,7 +475,7 @@ void Run::mergeMergables(Mantid::Kernel::PropertyManager &sum,
                          const Mantid::Kernel::PropertyManager &toAdd) {
   // get pointers to all the properties on the right-handside and prepare to
   // loop through them
-  const std::vector<Property *> inc = toAdd.getProperties();
+  const std::vector<Property *> &inc = toAdd.getProperties();
   for (auto ptr : inc) {
     const std::string &rhs_name = ptr->name();
     try {

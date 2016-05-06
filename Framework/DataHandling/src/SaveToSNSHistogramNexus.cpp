@@ -232,8 +232,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
     // field.
     NXname attrName = "errors";
     std::string attrBuffer = errors_field_name;
-    if (NXputattr(outId, attrName,
-                  static_cast<void *>(const_cast<char *>(attrBuffer.c_str())),
+    if (NXputattr(outId, attrName, attrBuffer.c_str(),
                   static_cast<int>(attrBuffer.size()), NX_CHAR) != NX_OK)
       return NX_ERROR;
   }
