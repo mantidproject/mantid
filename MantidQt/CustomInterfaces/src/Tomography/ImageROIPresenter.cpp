@@ -77,6 +77,10 @@ void ImageROIPresenter::notify(Notification notif) {
     processUpdateColorMap();
     break;
 
+  case IImageROIPresenter::ColorRangeUpdated:
+    processColorRangeUpdated();
+    break;
+
   case IImageROIPresenter::SelectCoR:
     processSelectCoR();
     break;
@@ -375,6 +379,10 @@ void ImageROIPresenter::processUpdateColorMap() {
     return;
 
   m_view->updateColorMap(filename);
+}
+
+void ImageROIPresenter::processColorRangeUpdated() {
+  m_view->updateImgWithIndex(m_view->currentImgIndex());
 }
 
 void ImageROIPresenter::processSelectCoR() {

@@ -79,6 +79,7 @@ protected:
   void processPlayStartStop();
   void processUpdateImgIndex();
   void processUpdateColorMap();
+  void processColorRangeUpdated();
 
   void processSelectCoR();
   void processSelectROI();

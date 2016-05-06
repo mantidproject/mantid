@@ -1152,11 +1152,13 @@ void ImageROIViewQtWidget::updateColorMap(const std::string &filename) {
   // Load from file
   m_ui.colorBarWidget->getColorMap().loadMap(QString::fromStdString(filename));
   m_ui.colorBarWidget->updateColorMap();
+  m_presenter->notify(IImageROIPresenter::ColorRangeUpdated);
 }
 
 void ImageROIViewQtWidget::colorRangeChanged() {
   // use  m_colorBar->getColorMap())
   // update image display
+  m_presenter->notify(IImageROIPresenter::ColorRangeUpdated);
 }
 
 void ImageROIViewQtWidget::closeEvent(QCloseEvent *event) {

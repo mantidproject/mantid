@@ -55,6 +55,8 @@ public:
     PlayStartStop,         ///< User starts or stops the "play images"
     UpdateColorMap,        ///< When the user wants to change the
                            ///< image colormap
+    ColorRangeUpdated,     ///< The uses changes the values or options of the
+                           ///< color range
     SelectCoR,             ///< Start picking of the center of rotation
     SelectROI,             ///< Start selection of the region of interest
     SelectNormalization,   ///< Start selection of the normalization region

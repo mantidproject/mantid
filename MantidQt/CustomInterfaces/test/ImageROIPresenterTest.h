@@ -394,9 +394,7 @@ public:
     testing::NiceMock<MockImageROIView> mockView;
     MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, askColorMapFile())
-        .Times(1)
-        .WillOnce(Return(""));
+    EXPECT_CALL(mockView, askColorMapFile()).Times(1).WillOnce(Return(""));
 
     // Should not get there
     EXPECT_CALL(mockView, updateColorMap(testing::_)).Times(0);
@@ -429,6 +427,28 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(IImageROIPresenter::UpdateColorMap);
+
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void test_changeColorRange() {
+    testing::NiceMock<MockImageROIView> mockView;
+    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, askColorMapFile()).Times(0);
+
+    size_t img_idx = 0;
+    EXPECT_CALL(mockView, currentImgIndex()).Times(1).WillOnce(Return(img_idx));
+    EXPECT_CALL(mockView, updateImgWithIndex(img_idx)).Times(1);
+
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IImageROIPresenter::ColorRangeUpdated);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
