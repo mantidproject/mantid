@@ -56,8 +56,8 @@ public:
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Result");
     TS_ASSERT_DELTA(-0.000561209, results->cell<double>(3, 1), .01);
     TS_ASSERT_DELTA(6.6194e-06, results->cell<double>(2, 1), .01);
-    TS_ASSERT_DELTA(-4.99864, results->cell<double>(9, 1), .01);
-    TS_ASSERT_DELTA(18.007, results->cell<double>(8, 1), .01);
+    TS_ASSERT_DELTA(0, results->cell<double>(9, 1), .01);
+    TS_ASSERT_DELTA(17.7186, results->cell<double>(8, 1), .01);
   }
 };
 

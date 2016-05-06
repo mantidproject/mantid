@@ -5,7 +5,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
-
+#include "MantidCrystal/SelectCellWithForm.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction1D.h"
@@ -524,35 +524,6 @@ bool GoodStart(const PeaksWorkspace_sptr &peaksWs, double a, double b, double c,
   return true;
 }
 
-/**
- * Tests inputs. Does the indexing correspond to the entered lattice parameters
- * @param peaksWs  The peaks workspace with indexed peaks
- * @param  tolerance   The indexing tolerance
- */
-OrientedLattice GoodEnd(const PeaksWorkspace_sptr &peaksWs, double tolerance) {
-  // put together a list of indexed peaks
-  int nPeaks = peaksWs->getNumberPeaks();
-  std::vector<V3D> hkl;
-  hkl.reserve(nPeaks);
-  std::vector<V3D> qVecs;
-  qVecs.reserve(nPeaks);
-  for (int i = 0; i < nPeaks; i++) {
-    const Peak &peak = peaksWs->getPeak(i);
-    if (IndexingUtils::ValidIndex(peak.getHKL(), tolerance)) {
-      hkl.push_back(peak.getHKL());
-      qVecs.push_back(peak.getQSampleFrame());
-    }
-  }
-
-  // determine the lattice constants
-  Kernel::Matrix<double> UB(3, 3);
-  IndexingUtils::Optimize_UB(UB, hkl, qVecs);
-  OrientedLattice o_lattice;
-  o_lattice.setUB(UB);
-  peaksWs->mutableSample().setOrientedLattice(&o_lattice);
-  return o_lattice;
-}
-
 namespace { // anonymous namespace
 /**
  * Adds a tie to the IFunction.
@@ -584,6 +555,10 @@ static inline void constrain(IFunction_sptr &iFunc, const string &parName,
 
 void SCDCalibratePanels::exec() {
   PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
+  // We must sort the peaks
+  std::vector<std::pair<std::string, bool>> criteria;
+  criteria.push_back(std::pair<std::string, bool>("BankName", true));
+  peaksWs->sort(criteria);
   int nPeaks = peaksWs->getNumberPeaks();
 
   double a = getProperty("a");
@@ -890,12 +865,16 @@ void SCDCalibratePanels::exec() {
       fit_alg->setProperty("MaxIterations", Niterations);
       fit_alg->setProperty("InputWorkspace", ws);
       fit_alg->setProperty("Output", "out");
+      //fit_alg->setProperty("CreateOutput", true);
       fit_alg->setProperty("CalcErrors", false);
       fit_alg->setPropertyValue("Minimizer", minimizer + ",AbsError=" +
                                                  minimizerError + ",RelError=" +
                                                  minimizerError);
       fit_alg->executeAsChildAlg();
+
       PARALLEL_CRITICAL(afterFit) {
+        //MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
+        //AnalysisDataService::Instance().addOrReplace("out"+boost::lexical_cast<std::string>(iGr), fitWS);
         g_log.debug() << "Finished executing Fit algorithm\n";
         string OutputStatus = fit_alg->getProperty("OutputStatus");
         g_log.notice() << BankNameString << " Output Status=" << OutputStatus
@@ -1111,12 +1090,34 @@ void SCDCalibratePanels::exec() {
     peak.setDetectorID(peak.getDetectorID());
   }
 
+  IAlgorithm_sptr ub_alg;
+  try {
+    ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
+  } catch (Exception::NotFoundError &) {
+    g_log.error("Can't locate CalculateUMatrix algorithm");
+    throw;
+  }
+  ub_alg->setProperty("PeaksWorkspace", peaksWs);
+  ub_alg->setProperty("a", a);
+  ub_alg->setProperty("b", b);
+  ub_alg->setProperty("c", c);
+  ub_alg->setProperty("alpha", alpha);
+  ub_alg->setProperty("beta", beta);
+  ub_alg->setProperty("gamma", gamma);
+  ub_alg->executeAsChildAlg();
+  OrientedLattice o_lattice = peaksWs->mutableSample().getOrientedLattice();
+  Kernel::Matrix<double> UB(3, 3);
+  UB = o_lattice.getUB();
+  std::vector<double> sigabc(6);
+  SelectCellWithForm::DetermineErrors(sigabc, UB, peaksWs, tolerance);
+  o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
+                     sigabc[5]);
   g_log.notice() << "Lattice after optimization: "
-                 << GoodEnd(peaksWs, tolerance) << "\n";
+                 << o_lattice << "\n";
 
   // We must sort the peaks
-  std::vector<std::pair<std::string, bool>> criteria;
-  criteria.push_back(std::pair<std::string, bool>("BankName", true));
+  //std::vector<std::pair<std::string, bool>> criteria;
+  //criteria.push_back(std::pair<std::string, bool>("BankName", true));
   criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
   criteria.push_back(std::pair<std::string, bool>("h", true));
   criteria.push_back(std::pair<std::string, bool>("k", true));
@@ -1124,7 +1125,6 @@ void SCDCalibratePanels::exec() {
   peaksWs->sort(criteria);
 
   // create table of theoretical vs calculated
-  Kernel::Matrix<double> UB(3, 3);
   UB = peaksWs->sample().getOrientedLattice().getUB();
   int bankLast = -1;
   int iSpectrum = -1;
