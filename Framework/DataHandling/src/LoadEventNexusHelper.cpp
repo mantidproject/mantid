@@ -301,8 +301,7 @@ void ProcessBankData::run() { // override {
 LoadBankFromDiskTask::LoadBankFromDiskTask(
     Mantid::DataHandling::LoadEventNexus *input_alg,
     const std::string &entry_name, const std::string &entry_type,
-    const bool oldNeXusFileNames,
-    Mantid::API::Progress *prog,
+    const bool oldNeXusFileNames, Mantid::API::Progress *prog,
     // boost::shared_ptr<std::mutex> ioMutex,
     // Mantid::Kernel::ThreadScheduler *scheduler,
     const std::vector<int> &framePeriodNumbers,
