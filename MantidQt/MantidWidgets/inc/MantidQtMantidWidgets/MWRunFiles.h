@@ -21,7 +21,7 @@ class IAlgorithm;
 namespace MantidQt {
 namespace MantidWidgets {
 /**
- * A class to allow the asyncronous finding of files.
+ * A class to allow the asynchronous finding of files.
  */
 class FindFilesThread : public QThread {
   Q_OBJECT

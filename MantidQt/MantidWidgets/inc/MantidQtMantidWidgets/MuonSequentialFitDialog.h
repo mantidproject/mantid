@@ -16,9 +16,10 @@ namespace MantidWidgets
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
 
-  /** MuonSequentialFitDialog : TODO: DESCRIPTION
-    
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  /** MuonSequentialFitDialog : Dialog for running sequential fits for Muon data
+
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+    National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
