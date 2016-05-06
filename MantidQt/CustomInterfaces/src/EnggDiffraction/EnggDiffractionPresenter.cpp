@@ -945,22 +945,28 @@ bool EnggDiffractionPresenter::validateRBNumber(const std::string &rbn) const {
 }
 
 /**
-* Checks if the provided run number is valid and if a direcotory is provided
-* it will convert it to a run number
+* Checks if the provided run number is valid and if a directory is
+* provided it will convert it to a run number. It also records the
+* paths the user has browsed to.
 *
-* @param dir takes the input/directory of the user
+* @param path the input/directory given by the user via the "browse"
+* button
 *
 * @return run_number 6 character string of a run number
 */
-std::string
-EnggDiffractionPresenter::isValidRunNumber(std::vector<std::string> dir) {
+std::string EnggDiffractionPresenter::isValidRunNumber(
+    const std::vector<std::string> &path) {
 
-  std::vector<std::string> run_vec = dir;
+  if (path.empty()) {
+    return "";
+  }
+
+  std::vector<std::string> run_vec = path;
   std::string run_number;
 
   // if empty string
   size_t i = 0;
-  if (!dir.empty() && dir.at(i) != "") {
+  if (!path.empty() && path.at(i) != "") {
 
     auto p = run_vec.begin();
     int i = 0;
@@ -973,8 +979,8 @@ EnggDiffractionPresenter::isValidRunNumber(std::vector<std::string> dir) {
         if (Poco::File(run_number).exists()) {
           Poco::Path inputDir = run_number;
           run_number = "";
-          // get file name name via poco::path
 
+          // get file name via poco::path
           std::string filename = inputDir.getFileName();
 
           // convert to int or assign it to size_t
@@ -985,24 +991,31 @@ EnggDiffractionPresenter::isValidRunNumber(std::vector<std::string> dir) {
             }
           }
           run_number.erase(0, run_number.find_first_not_of('0'));
+
+          // The path of this file needs to be added in the search
+          // path as the user can browse to any path not included in
+          // the interface settings
+          recordPathBrowsedTo(inputDir.toString());
         }
 
       } catch (std::runtime_error &re) {
         throw std::invalid_argument("Error browsing selected file: " +
                                     static_cast<std::string>(re.what()));
-      } catch (...) {
-        throw std::invalid_argument("Error browsing selected file: ");
+      } catch (Poco::FileNotFoundException &rexc) {
+        throw std::invalid_argument("Error looking for selected file: " +
+                                    std::string(rexc.what()));
       }
     }
   }
 
-  g_log.debug() << "run number is: " << run_number << std::endl;
+  g_log.debug() << "Run number inferred from browse path (" << path.front()
+                << ") is: " << run_number << std::endl;
 
   return run_number;
 }
 
 /**
-* Checks if the provided run number is valid and if a direcotory is provided
+* Checks if the provided run number is valid and if a directory is provided
 *
 * @param dir takes the input/directory of the user
 *
@@ -1010,7 +1023,6 @@ EnggDiffractionPresenter::isValidRunNumber(std::vector<std::string> dir) {
 */
 std::vector<std::string>
 EnggDiffractionPresenter::isValidMultiRunNumber(std::vector<std::string> dir) {
-
   std::vector<std::string> run_vec = dir;
   std::string run_number;
   std::vector<std::string> multi_run_number;
@@ -1243,9 +1255,6 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
   g_log.notice() << "Generating new calibration file: " << outFilename
                  << std::endl;
 
-  std::cerr << "In doNewCalibration, vanNo: " << vanNo
-            << ", ceriaNo: " << ceriaNo << " specNos: " << specNos << std::endl;
-
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
   Mantid::Kernel::ConfigServiceImpl &conf =
       Mantid::Kernel::ConfigService::Instance();
@@ -1257,6 +1266,9 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
   }
   if (!cs.m_inputDirRaw.empty() && Poco::File(cs.m_inputDirRaw).exists())
     conf.appendDataSearchDir(cs.m_inputDirRaw);
+  for (const auto &browsed : m_browsedToPaths) {
+    conf.appendDataSearchDir(browsed);
+  }
 
   try {
     m_calibFinishedOK = false;
@@ -1422,20 +1434,30 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
               re.what() + " Please check also the log messages for details.";
       throw;
     }
-    difc[i] = alg->getProperty("Difc");
-    tzero[i] = alg->getProperty("Zero");
+
+    try {
+      difc[i] = alg->getProperty("DIFC");
+      tzero[i] = alg->getProperty("TZERO");
+    } catch (std::runtime_error &rexc) {
+      g_log.error() << "Error in calibration. ",
+          "The calibration algorithm EnggCalibrate run succesfully but could "
+          "not retrieve the outputs DIFC and TZERO. Error description: " +
+              std::string(rexc.what()) +
+              " Please check also the log messages for additional details.";
+      throw;
+    }
 
     g_log.notice() << " * Bank " << i + 1 << " calibrated, "
                    << "difc: " << difc[i] << ", zero: " << tzero[i]
                    << std::endl;
   }
-  // Creates appropriate directory
+
+  // Creates appropriate output directory
   Poco::Path saveDir = outFilesDir("Calibration");
 
   // Double horror: 1st use a python script
   // 2nd: because runPythonCode does this by emitting a signal that goes to
-  // MantidPlot,
-  // it has to be done in the view (which is a UserSubWindow).
+  // MantidPlot, it has to be done in the view (which is a UserSubWindow).
   Poco::Path outFullPath(saveDir);
   outFullPath.append(outFilename);
 
@@ -1703,6 +1725,9 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
     }
     if (!cs.m_inputDirRaw.empty() && Poco::File(cs.m_inputDirRaw).exists()) {
       conf.appendDataSearchDir(cs.m_inputDirRaw);
+    }
+    for (const auto &browsed : m_browsedToPaths) {
+      conf.appendDataSearchDir(browsed);
     }
 
     // Prepare special inputs for "texture" focusing
@@ -2996,6 +3021,29 @@ Poco::Path EnggDiffractionPresenter::outFilesDir(std::string addToDir) {
     g_log.error() << "Error while find/creating a path: " << re.what();
   }
   return saveDir;
+}
+
+/**
+ * Note down a directory that needs to be added to the data search
+ * path when looking for run files. This simply uses a vector and adds
+ * all the paths, as the ConfigService will take care of duplicates,
+ * invalid directories, etc.
+ *
+ * @param filename (full) path to a file
+ */
+void EnggDiffractionPresenter::recordPathBrowsedTo(
+    const std::string &filename) {
+
+  Poco::File file(filename);
+  if (!file.exists() || !file.isFile())
+    return;
+
+  Poco::Path path(filename);
+  Poco::File directory(path.parent());
+  if (!directory.exists() || !directory.isDirectory())
+    return;
+
+  m_browsedToPaths.push_back(directory.path());
 }
 
 } // namespace CustomInterfaces

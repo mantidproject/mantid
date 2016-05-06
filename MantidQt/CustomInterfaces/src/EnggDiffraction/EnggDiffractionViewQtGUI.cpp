@@ -1233,7 +1233,7 @@ EnggDiffractionViewQtGUI::qListToVector(QStringList list,
                                         bool validator) const {
   std::vector<std::string> vec;
   if (validator) {
-    foreach (QString str, list) { vec.push_back(str.toStdString()); }
+    foreach (const QString &str, list) { vec.push_back(str.toStdString()); }
     return vec;
   } else {
     return vec;

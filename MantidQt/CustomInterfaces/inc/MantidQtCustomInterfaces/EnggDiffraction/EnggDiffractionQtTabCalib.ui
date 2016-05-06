@@ -264,7 +264,7 @@
         <item>
          <widget class="QLabel" name="label_cropped_spec_nos">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
            <string>Spectrum Numbers:</string>
@@ -351,7 +351,7 @@
         <item>
          <widget class="QLabel" name="label_calib_cropped_spec_ids">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
            <string>Bank Name:</string>
@@ -361,11 +361,11 @@
         <item>
          <widget class="QComboBox" name="comboBox_calib_cropped_bank_name">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <item>
            <property name="text">
-            <string>Enable Spectrum-Nos</string>
+            <string>Use spectrum numbers</string>
            </property>
           </item>
           <item>
