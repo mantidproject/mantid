@@ -76,8 +76,8 @@ RectangularDetector::RectangularDetector(const std::string &n,
 }
 
 bool RectangularDetector::compareName(const std::string &proposedMatch) {
-  static boost::regex exp("RectangularDetector|rectangularDetector|"
-                          "rectangulardetector|rectangular_detector");
+  static const boost::regex exp("RectangularDetector|rectangularDetector|"
+                                "rectangulardetector|rectangular_detector");
 
   return boost::regex_match(proposedMatch, exp);
 }
