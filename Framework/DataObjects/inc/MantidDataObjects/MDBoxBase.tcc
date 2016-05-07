@@ -142,7 +142,7 @@ TMDE(coord_t *MDBoxBase)::getVertexesArray(size_t &numVertices) const {
   numVertices = 1 << nd;
 
   // Allocate the array of the right size
-  coord_t *out = new coord_t[nd * numVertices];
+  auto out = new coord_t[nd * numVertices];
 
   // For each vertex, increase an integeer
   for (size_t i = 0; i < numVertices; ++i) {
@@ -196,7 +196,7 @@ TMDE(coord_t *MDBoxBase)::getVertexesArray(size_t &numVertices,
   numVertices = (size_t)1 << outDimensions;
 
   // Allocate the array of the right size
-  coord_t *out = new coord_t[outDimensions * numVertices];
+  auto out = new coord_t[outDimensions * numVertices];
 
   // For each vertex, increase an integeer
   for (size_t i = 0; i < numVertices; ++i) {
@@ -240,8 +240,8 @@ TMDE(coord_t *MDBoxBase)::getVertexesArray(size_t &numVertices,
 TMDE(size_t MDBoxBase)::addEvents(const std::vector<MDE> &events) {
   size_t numBad = 0;
   // --- Go event by event and add them ----
-  typename std::vector<MDE>::const_iterator it = events.begin();
-  typename std::vector<MDE>::const_iterator it_end = events.end();
+  auto it = events.begin();
+  auto it_end = events.end();
   m_dataMutex.lock();
   for (; it != it_end; ++it) {
     // Check out-of-bounds-ness
@@ -274,8 +274,8 @@ TMDE(size_t MDBoxBase)::addEvents(const std::vector<MDE> &events) {
  */
 TMDE(size_t MDBoxBase)::addEventsUnsafe(const std::vector<MDE> &events) {
   // --- Go event by event and add them ----
-  typename std::vector<MDE>::const_iterator it = events.begin();
-  typename std::vector<MDE>::const_iterator it_end = events.end();
+  auto it = events.begin();
+  auto it_end = events.end();
   for (; it != it_end; ++it) {
     // Check out-of-bounds-ness
     // Event was in bounds; add it

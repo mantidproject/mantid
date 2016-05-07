@@ -113,7 +113,7 @@ public:
 
   /// Create another copy of the column
   VectorColumn *clone() const override {
-    VectorColumn *newColumn = new VectorColumn<Type>();
+    auto newColumn = new VectorColumn<Type>();
     newColumn->m_data = m_data;
     newColumn->setName(m_name);
     newColumn->setPlotType(m_plotType);

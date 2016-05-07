@@ -203,10 +203,7 @@ public:
     totalErrSq = 0;
 
     size_t index(0);
-    typename std::vector<MDEvent<nd>>::const_iterator it = events.begin();
-    typename std::vector<MDEvent<nd>>::const_iterator it_end = events.end();
-    for (; it != it_end; ++it) {
-      const MDEvent<nd> &event = *it;
+    for (const MDEvent<nd> &event : events) {
       float signal = event.signal;
       float errorSquared = event.errorSquared;
       data[index++] = static_cast<coord_t>(signal);

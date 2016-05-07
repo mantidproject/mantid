@@ -53,19 +53,17 @@ public:
     if (!m_supermap.empty()) {
       // We iterate in reverse as to take the NULL mutex last, even if no mutex
       // is busy
-      SuperMap::iterator it = m_supermap.begin();
-      SuperMap::iterator it_end = m_supermap.end();
-      for (; it != it_end; ++it) {
+      for (auto &it : m_supermap) {
         // The key is the mutex associated with the inner map
-        boost::shared_ptr<std::mutex> mapMutex = it->first;
+        boost::shared_ptr<std::mutex> mapMutex = it.first;
         if ((!mapMutex) || (m_mutexes.empty()) ||
             (m_mutexes.find(mapMutex) == m_mutexes.end())) {
           // The mutex of this map is free!
-          InnerMap &map = it->second;
+          InnerMap &map = it.second;
 
           if (!map.empty()) {
             // Look for the largest cost item in it.
-            InnerMap::iterator it2 = it->second.end();
+            auto it2 = it.second.end();
             it2--;
             // Great, we found something.
             temp = it2->second;
@@ -78,11 +76,9 @@ public:
       if (temp == nullptr) {
         // Nothing was found, meaning all mutexes are in use
         // Try the first non-empty map
-        SuperMap::iterator it = m_supermap.begin();
-        SuperMap::iterator it_end = m_supermap.end();
-        for (; it != it_end; it++) {
-          if (!it->second.empty()) {
-            InnerMap &map = it->second;
+        for (auto &it : m_supermap) {
+          if (!it.second.empty()) {
+            InnerMap &map = it.second;
             // Use the first one
             temp = map.begin()->second;
             // And erase that item (pop it)
@@ -125,10 +121,9 @@ public:
     std::lock_guard<std::mutex> lock(m_queueLock);
     // Add up the sizes of all contained maps.
     size_t total = 0;
-    SuperMap::iterator it = m_supermap.begin();
-    SuperMap::iterator it_end = m_supermap.end();
-    for (; it != it_end; it++)
-      total += it->second.size();
+    for (const auto &it : m_supermap) {
+      total += it.second.size();
+    }
     return total;
   }
 
@@ -136,11 +131,10 @@ public:
   /// @return true if the queue is empty
   bool empty() override {
     std::lock_guard<std::mutex> lock(m_queueLock);
-    SuperMap::iterator it = m_supermap.begin();
-    SuperMap::iterator it_end = m_supermap.end();
-    for (; it != it_end; it++)
-      if (!it->second.empty())
+    for (const auto &it : m_supermap) {
+      if (!it.second.empty())
         return false;
+    }
     return true;
   }
 
@@ -149,14 +143,10 @@ public:
     std::lock_guard<std::mutex> lock(m_queueLock);
 
     // Empty out the queue and delete the pointers!
-    SuperMap::iterator it = m_supermap.begin();
-    SuperMap::iterator it_end = m_supermap.end();
-    for (; it != it_end; it++) {
-      InnerMap &map = it->second;
-      InnerMap::iterator it2 = map.begin();
-      InnerMap::iterator it2_end = map.end();
-      for (; it2 != it2_end; it2++)
-        delete it2->second;
+    for (auto &it : m_supermap) {
+      InnerMap &map = it.second;
+      for (auto &it2 : map)
+        delete it2.second;
       map.clear();
     }
     m_supermap.clear();

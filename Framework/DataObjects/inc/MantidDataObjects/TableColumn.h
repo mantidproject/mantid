@@ -146,7 +146,7 @@ public:
   }
   /// Clone
   TableColumn *clone() const override {
-    TableColumn *temp = new TableColumn();
+    auto temp = new TableColumn();
     temp->m_data = this->m_data;
     temp->setName(this->m_name);
     return temp;

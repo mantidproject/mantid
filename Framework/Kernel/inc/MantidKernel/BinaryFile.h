@@ -108,11 +108,11 @@ public:
     }
 
     // Initialize the pointer
-    std::vector<T> *data = new std::vector<T>;
+    auto data = new std::vector<T>;
 
     // A buffer to load from
     size_t buffer_size = getBufferSize(num_elements);
-    T *buffer = new T[buffer_size];
+    auto buffer = new T[buffer_size];
 
     // Make sure we are at the beginning
     offset = 0;
@@ -149,7 +149,7 @@ public:
 
     // A buffer to load from
     size_t buffer_size = getBufferSize(num_elements);
-    T *buffer = new T[buffer_size];
+    auto buffer = new T[buffer_size];
 
     // Make sure we are at the beginning
     offset = 0;
