@@ -112,6 +112,10 @@ void EnggDiffractionViewQtGUI::initLayout() {
   m_currentInst = inst->currentText().toStdString();
 
   setPrefix(m_currentInst);
+  // An initial check on the RB number will enable the tabs after all
+  // the widgets and connections are set up
+  enableTabs(false);
+
   readSettings();
 
   // basic UI setup, connect signals, etc.
@@ -313,8 +317,6 @@ void EnggDiffractionViewQtGUI::doSetupTabSettings() {
 }
 
 void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
-  enableTabs(false);
-
   // change instrument
   connect(m_ui.comboBox_instrument, SIGNAL(currentIndexChanged(int)), this,
           SLOT(instrumentChanged(int)));
@@ -456,6 +458,8 @@ void EnggDiffractionViewQtGUI::readSettings() {
   // 'focusing' block
   m_focusDir = qs.value("focus-dir").toString().toStdString();
 
+  m_ui.tabMain->setCurrentIndex(qs.value("selected-tab-index").toInt());
+
   restoreGeometry(qs.value("interface-win-geometry").toByteArray());
   qs.endGroup();
 }
@@ -563,6 +567,8 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
 
   // 'focusing' block
   qs.setValue("focus-dir", QString::fromStdString(m_focusDir));
+
+  qs.setValue("selected-tab-index", m_ui.tabMain->currentIndex());
 
   qs.setValue("interface-win-geometry", saveGeometry());
   qs.endGroup();
