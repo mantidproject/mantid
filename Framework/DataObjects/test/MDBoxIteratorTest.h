@@ -591,6 +591,11 @@ public:
                                        // iterate through all boxes.
     {
     }
+
+    // verifying that mockPoly is deleted requires calling evaluationIterator's
+    // destructor before the end of the function.
+    evaluationIterator.reset();
+
     TSM_ASSERT("Has not used SkippingPolicy as expected.",
                testing::Mock::VerifyAndClearExpectations(mockPolicy));
   }
