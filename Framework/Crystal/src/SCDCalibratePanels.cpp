@@ -1112,6 +1112,7 @@ void SCDCalibratePanels::exec() {
   SelectCellWithForm::DetermineErrors(sigabc, UB, peaksWs, tolerance);
   o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
                      sigabc[5]);
+  peaksWs->mutableSample().setOrientedLattice(&o_lattice);
   g_log.notice() << "Lattice after optimization: "
                  << o_lattice << "\n";
 
@@ -1125,7 +1126,6 @@ void SCDCalibratePanels::exec() {
   peaksWs->sort(criteria);
 
   // create table of theoretical vs calculated
-  UB = peaksWs->sample().getOrientedLattice().getUB();
   int bankLast = -1;
   int iSpectrum = -1;
   int icount = 0;

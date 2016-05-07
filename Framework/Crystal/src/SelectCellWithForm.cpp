@@ -72,7 +72,7 @@ Kernel::Matrix<double> SelectCellWithForm::DetermineErrors(
   IndexingUtils::GetIndexedPeaks(UB, q_vectors0, tolerance, miller_ind,
                                  q_vectors, fit_error);
   IndexingUtils::Optimize_UB(newUB1, miller_ind, q_vectors, sigabc);
-  std::cout << sigabc[0]<<"  "<< sigabc[1]<<"  "<< sigabc[2]<<"  "<< sigabc[3]<<"  "<< sigabc[4]<<"  "<< sigabc[5]<<"  "<<"\n";
+
   int nindexed_old = static_cast<int>(q_vectors.size());
   int nindexed_new =
       IndexingUtils::NumberIndexed(newUB1, q_vectors0, tolerance);
