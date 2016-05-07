@@ -77,7 +77,7 @@ void SaveIsawPeaks::exec() {
   // workspace indices of it
   typedef std::map<int, std::vector<size_t>> bankMap_t;
   typedef std::map<int, bankMap_t> runMap_t;
-  std::set<int, std::less<int> > uniqueBanks;
+  std::set<int, std::less<int>> uniqueBanks;
   runMap_t runMap;
   for (size_t i = 0; i < peaks.size(); ++i) {
     Peak &p = peaks[i];

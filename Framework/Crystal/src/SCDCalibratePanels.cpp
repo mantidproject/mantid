@@ -128,12 +128,11 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
   double sumSigInt = 0.0;
   double sumInt = 0.0;
   double sumBinCnt = 0.0;
-  for(int it = 0; it != pwks->getNumberPeaks(); ++it)
-  {
-      const Peak &peak = pwks->getPeak(it);
-      sumSigInt += peak.getSigmaIntensity();
-      sumInt += peak.getIntensity();
-      sumBinCnt += peak.getBinCount();
+  for (int it = 0; it != pwks->getNumberPeaks(); ++it) {
+    const Peak &peak = pwks->getPeak(it);
+    sumSigInt += peak.getSigmaIntensity();
+    sumInt += peak.getIntensity();
+    sumBinCnt += peak.getBinCount();
   }
 
   for (size_t k = 0; k < bankNames.size(); ++k) {
@@ -504,8 +503,7 @@ bool GoodStart(const PeaksWorkspace_sptr &peaksWs, double a, double b, double c,
   Kernel::Logger g_log("Calibration");
   // determine the lattice constants
   OrientedLattice lat = peaksWs->sample().getOrientedLattice();
-  g_log.notice() << "Lattice before optimization: "
-                 << lat << "\n";
+  g_log.notice() << "Lattice before optimization: " << lat << "\n";
 
   // see if the lattice constants are no worse than 25% out
   if (fabs(lat.a() - a) / a > .25)
@@ -525,13 +523,13 @@ bool GoodStart(const PeaksWorkspace_sptr &peaksWs, double a, double b, double c,
 }
 
 namespace { // anonymous namespace
-/**
- * Adds a tie to the IFunction.
- * @param iFunc The function to add the tie to.
- * @param tie Whether or not to actually do it.
- * @param parName The name of the parameter to tie.
- * @param value The value to tie it to.
- */
+            /**
+             * Adds a tie to the IFunction.
+             * @param iFunc The function to add the tie to.
+             * @param tie Whether or not to actually do it.
+             * @param parName The name of the parameter to tie.
+             * @param value The value to tie it to.
+             */
 static inline void tie(IFunction_sptr &iFunc, const bool tie,
                        const string &parName, const double value) {
   if (!tie)
@@ -577,9 +575,7 @@ void SCDCalibratePanels::exec() {
     alpha = latt.alpha();
     beta = latt.beta();
     gamma = latt.gamma();
-  }
-  else
-  {
+  } else {
     boost::shared_ptr<Algorithm> alg =
         createChildAlgorithm("FindUBUsingLatticeParameters", .2, .9, true);
     alg->setProperty("PeaksWorkspace", peaksWs);
@@ -865,7 +861,7 @@ void SCDCalibratePanels::exec() {
       fit_alg->setProperty("MaxIterations", Niterations);
       fit_alg->setProperty("InputWorkspace", ws);
       fit_alg->setProperty("Output", "out");
-      //fit_alg->setProperty("CreateOutput", true);
+      // fit_alg->setProperty("CreateOutput", true);
       fit_alg->setProperty("CalcErrors", false);
       fit_alg->setPropertyValue("Minimizer", minimizer + ",AbsError=" +
                                                  minimizerError + ",RelError=" +
@@ -873,8 +869,9 @@ void SCDCalibratePanels::exec() {
       fit_alg->executeAsChildAlg();
 
       PARALLEL_CRITICAL(afterFit) {
-        //MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
-        //AnalysisDataService::Instance().addOrReplace("out"+boost::lexical_cast<std::string>(iGr), fitWS);
+        // MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
+        // AnalysisDataService::Instance().addOrReplace("out"+boost::lexical_cast<std::string>(iGr),
+        // fitWS);
         g_log.debug() << "Finished executing Fit algorithm\n";
         string OutputStatus = fit_alg->getProperty("OutputStatus");
         g_log.notice() << BankNameString << " Output Status=" << OutputStatus
@@ -1030,7 +1027,7 @@ void SCDCalibratePanels::exec() {
       std::ifstream infile(DetCalFileName +
                            boost::lexical_cast<std::string>(iGr));
       while (std::getline(infile, line)) {
-        if (iGr == 0 && iIter == nIter-1) {
+        if (iGr == 0 && iIter == nIter - 1) {
           if (line[0] == '#' || line[0] == '6')
             outfile << line << "\n";
         }
@@ -1051,7 +1048,7 @@ void SCDCalibratePanels::exec() {
     if (useL0) {
       removeOutliers(l0vec);
       Statistics stats = getStatistics(l0vec);
-      L0 = stats.mean * 0.01;  // cm when read from file
+      L0 = stats.mean * 0.01; // cm when read from file
       useL0 = false;
     }
     if (useTimeOffset) {
@@ -1064,7 +1061,7 @@ void SCDCalibratePanels::exec() {
       useTimeOffset = false;
     }
   }
-  L0 *= 100;  // ISAW uses cm
+  L0 *= 100; // ISAW uses cm
   outfile << "7  " << std::setprecision(4) << std::fixed << L0;
   outfile << std::setw(13) << std::setprecision(3) << T0 << std::endl;
   outfile << "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX "
@@ -1113,12 +1110,11 @@ void SCDCalibratePanels::exec() {
   o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
                      sigabc[5]);
   peaksWs->mutableSample().setOrientedLattice(&o_lattice);
-  g_log.notice() << "Lattice after optimization: "
-                 << o_lattice << "\n";
+  g_log.notice() << "Lattice after optimization: " << o_lattice << "\n";
 
   // We must sort the peaks
-  //std::vector<std::pair<std::string, bool>> criteria;
-  //criteria.push_back(std::pair<std::string, bool>("BankName", true));
+  // std::vector<std::pair<std::string, bool>> criteria;
+  // criteria.push_back(std::pair<std::string, bool>("BankName", true));
   criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
   criteria.push_back(std::pair<std::string, bool>("h", true));
   criteria.push_back(std::pair<std::string, bool>("k", true));
@@ -1157,7 +1153,7 @@ void SCDCalibratePanels::exec() {
       TofWksp->dataY(iSpectrum)[icount] = theoretical.getTOF();
       icount++;
     } catch (...) {
-      //g_log.debug() << "Problem only in printing peaks" << std::endl;
+      // g_log.debug() << "Problem only in printing peaks" << std::endl;
     }
   }
 }
@@ -1621,14 +1617,14 @@ void SCDCalibratePanels::CreateFxnGetValues(
       FunctionFactory::Instance().createFunction("SCDPanelErrors"));
   if (!fit)
     cout << "Could not create fit function" << endl;
-   PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
-   OrientedLattice latt = peaksWs->mutableSample().getOrientedLattice();
-   fit->setAttribute("a", IFunction::Attribute(latt.a()));
-   fit->setAttribute("b", IFunction::Attribute(latt.b()));
-   fit->setAttribute("c", IFunction::Attribute(latt.c()));
-   fit->setAttribute("alpha", IFunction::Attribute(latt.alpha()));
-   fit->setAttribute("beta", IFunction::Attribute(latt.beta()));
-   fit->setAttribute("gamma", IFunction::Attribute(latt.gamma()));
+  PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
+  OrientedLattice latt = peaksWs->mutableSample().getOrientedLattice();
+  fit->setAttribute("a", IFunction::Attribute(latt.a()));
+  fit->setAttribute("b", IFunction::Attribute(latt.b()));
+  fit->setAttribute("c", IFunction::Attribute(latt.c()));
+  fit->setAttribute("alpha", IFunction::Attribute(latt.alpha()));
+  fit->setAttribute("beta", IFunction::Attribute(latt.beta()));
+  fit->setAttribute("gamma", IFunction::Attribute(latt.gamma()));
   string PeakWSName = getPropertyValue("PeakWorkspace");
   if (PeakWSName.length() < 1)
     PeakWSName = "xxx";
@@ -1916,7 +1912,8 @@ void SCDCalibratePanels::removeOutliers(std::vector<double> &intensities) {
       }
     }
 
-    if (outlierIndices.size() == intensities.size()) return;
+    if (outlierIndices.size() == intensities.size())
+      return;
 
     if (!outlierIndices.empty()) {
       for (auto it = outlierIndices.rbegin(); it != outlierIndices.rend();

@@ -123,8 +123,6 @@ public:
     TS_ASSERT_DELTA(out[8], 0.0050, d);
 
     TS_ASSERT_DELTA(out[10], 0.0104, d);
-
-
   };
 };
 
