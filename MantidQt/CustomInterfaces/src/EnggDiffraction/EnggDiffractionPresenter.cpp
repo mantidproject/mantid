@@ -35,8 +35,12 @@ const std::string EnggDiffractionPresenter::g_runNumberErrorStr =
 
 // discouraged at the moment
 const bool EnggDiffractionPresenter::g_askUserCalibFilename = false;
+
 const std::string EnggDiffractionPresenter::g_vanIntegrationWSName =
     "engggui_vanadium_integration_ws";
+const std::string EnggDiffractionPresenter::g_vanCurvesWSName =
+    "engggui_vanadium_curves_ws";
+
 int EnggDiffractionPresenter::g_croppedCounter = 0;
 int EnggDiffractionPresenter::g_plottingCounter = 0;
 bool EnggDiffractionPresenter::g_abortThread = false;
@@ -2244,7 +2248,7 @@ void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
       Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadNexus");
   algCurves->initialize();
   algCurves->setPropertyValue("Filename", preCurvesFilename);
-  std::string curvesWSName = "engggui_vanadium_curves_ws";
+  const std::string curvesWSName = g_vanCurvesWSName;
   algCurves->setPropertyValue("OutputWorkspace", curvesWSName);
   algCurves->execute();
   // algCurves->getProperty("OutputWorkspace");
@@ -2314,7 +2318,7 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
   alg->setProperty("VanadiumWorkspace", vanWS);
   std::string integName = g_vanIntegrationWSName;
   alg->setPropertyValue("OutIntegrationWorkspace", integName);
-  std::string curvesName = "engggui_van_curves_ws";
+  const std::string curvesName = g_vanCurvesWSName;
   alg->setPropertyValue("OutCurvesWorkspace", curvesName);
   alg->execute();
 
@@ -2615,8 +2619,7 @@ void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
     if (g_plottingCounter == 1) {
       m_view->plotVanCurvesCalibOutput();
     } else {
-      m_view->plotReplacingWindow("engggui_vanadium_curves_ws", "[0, 1, 2]",
-                                  "2");
+      m_view->plotReplacingWindow(g_vanCurvesWSName, "[0, 1, 2]", "2");
     }
 
     // Get the Customised Bank Name text-ield string from qt

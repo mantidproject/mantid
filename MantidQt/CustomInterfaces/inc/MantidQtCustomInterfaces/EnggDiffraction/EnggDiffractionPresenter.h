@@ -319,6 +319,12 @@ private:
   /// string to use for invalid run number error message
   const static std::string g_runNumberErrorStr;
 
+  // name of the workspace with the vanadium integration (of spectra)
+  static const std::string g_vanIntegrationWSName;
+
+  // name of the workspace with the vanadium (smoothed) curves
+  static const std::string g_vanCurvesWSName;
+
   /// whether to allow users to give the output calibration filename
   const static bool g_askUserCalibFilename;
 
@@ -333,9 +339,6 @@ private:
 
   /// bank name used or SpecNos for cropped calibration
   static std::string g_calibCropIdentifier;
-
-  // name of the workspace with the vanadium integration (of spectra)
-  static const std::string g_vanIntegrationWSName;
 
   QThread *m_workerThread;
 
