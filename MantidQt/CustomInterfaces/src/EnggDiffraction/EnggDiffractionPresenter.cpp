@@ -957,54 +957,48 @@ bool EnggDiffractionPresenter::validateRBNumber(const std::string &rbn) const {
 std::string EnggDiffractionPresenter::isValidRunNumber(
     const std::vector<std::string> &path) {
 
+  std::string run_number;
   if (path.empty()) {
-    return "";
+    return run_number;
   }
 
   std::vector<std::string> run_vec = path;
-  std::string run_number;
 
-  // if empty string
-  size_t i = 0;
-  if (!path.empty() && path.at(i) != "") {
+  auto p = run_vec.begin();
+  while (p != run_vec.end()) {
+    run_number = *p;
+    p++;
 
-    auto p = run_vec.begin();
-    int i = 0;
-    while (p != run_vec.end()) {
-      run_number = *p;
-      p++;
-      i++;
+    try {
+      if (Poco::File(run_number).exists()) {
+        Poco::Path inputDir = run_number;
+        run_number = "";
 
-      try {
-        if (Poco::File(run_number).exists()) {
-          Poco::Path inputDir = run_number;
-          run_number = "";
+        // get file name via poco::path
+        std::string filename = inputDir.getFileName();
 
-          // get file name via poco::path
-          std::string filename = inputDir.getFileName();
-
-          // convert to int or assign it to size_t
-          for (size_t i = 0; i < filename.size(); i++) {
-            char *str = &filename[i];
-            if (std::isdigit(*str)) {
-              run_number += filename[i];
-            }
+        // convert to int or assign it to size_t
+        for (size_t i = 0; i < filename.size(); i++) {
+          char *str = &filename[i];
+          if (std::isdigit(*str)) {
+            run_number += filename[i];
           }
-          run_number.erase(0, run_number.find_first_not_of('0'));
-
-          // The path of this file needs to be added in the search
-          // path as the user can browse to any path not included in
-          // the interface settings
-          recordPathBrowsedTo(inputDir.toString());
         }
+        run_number.erase(0, run_number.find_first_not_of('0'));
 
-      } catch (std::runtime_error &re) {
-        throw std::invalid_argument("Error browsing selected file: " +
-                                    static_cast<std::string>(re.what()));
-      } catch (Poco::FileNotFoundException &rexc) {
-        throw std::invalid_argument("Error looking for selected file: " +
-                                    std::string(rexc.what()));
+        // The path of this file needs to be added in the search
+        // path as the user can browse to any path not included in
+        // the interface settings
+        recordPathBrowsedTo(inputDir.toString());
       }
+
+    } catch (std::runtime_error &re) {
+      throw std::invalid_argument("Error while checking the selected file: " +
+                                  static_cast<std::string>(re.what()));
+    } catch (Poco::FileNotFoundException &rexc) {
+      throw std::invalid_argument("Error while checking the selected file. "
+                                  "There was a problem with the file: " +
+                                  std::string(rexc.what()));
     }
   }
 
@@ -1023,48 +1017,52 @@ std::string EnggDiffractionPresenter::isValidRunNumber(
 */
 std::vector<std::string>
 EnggDiffractionPresenter::isValidMultiRunNumber(std::vector<std::string> dir) {
+
+  std::vector<std::string> multi_run_number;
+  if (dir.empty())
+    return multi_run_number;
+
   std::vector<std::string> run_vec = dir;
   std::string run_number;
-  std::vector<std::string> multi_run_number;
 
-  // if empty string
-  if (!dir.empty() && dir.at(0) != "") {
+  auto p = run_vec.begin();
+  while (p != run_vec.end()) {
+    run_number = *p;
+    p++;
 
-    auto p = run_vec.begin();
-    while (p != run_vec.end()) {
-      run_number = *p;
-      p++;
+    try {
+      if (Poco::File(run_number).exists()) {
+        Poco::Path inputDir = run_number;
+        run_number = "";
 
-      try {
-        if (Poco::File(run_number).exists()) {
-          Poco::Path inputDir = run_number;
-          run_number = "";
-          // get file name name via poco::path
+        // get file name name via poco::path
+        std::string filename = inputDir.getFileName();
 
-          std::string filename = inputDir.getFileName();
-
-          // convert to int or assign it to size_t
-          for (size_t i = 0; i < filename.size(); i++) {
-            char *str = &filename[i];
-            if (std::isdigit(*str)) {
-              run_number += filename[i];
-            }
+        // convert to int or assign it to size_t
+        for (size_t i = 0; i < filename.size(); i++) {
+          char *str = &filename[i];
+          if (std::isdigit(*str)) {
+            run_number += filename[i];
           }
-          run_number.erase(0, run_number.find_first_not_of('0'));
         }
-      } catch (std::runtime_error &re) {
-        throw std::invalid_argument("Error browsing selected file: " +
-                                    static_cast<std::string>(re.what()));
-      } catch (...) {
-        throw std::invalid_argument("Error browsing selected file: ");
+        run_number.erase(0, run_number.find_first_not_of('0'));
       }
-
-      multi_run_number.push_back(run_number);
+    } catch (std::runtime_error &re) {
+      throw std::invalid_argument(
+          "Error while looking for a run number in the files selected: " +
+          static_cast<std::string>(re.what()));
+    } catch (Poco::FileNotFoundException &rexc) {
+      throw std::invalid_argument("Error while looking for a run number in the "
+                                  "files selected. There was a problem with "
+                                  "the file(s): " +
+                                  std::string(rexc.what()));
     }
+
+    multi_run_number.push_back(run_number);
   }
 
-  g_log.debug() << "run number selected for multi-run: " << run_number
-                << std::endl;
+  g_log.debug() << "Run number inferred from a multi-run selection: "
+                << run_number << std::endl;
 
   return multi_run_number;
 }
