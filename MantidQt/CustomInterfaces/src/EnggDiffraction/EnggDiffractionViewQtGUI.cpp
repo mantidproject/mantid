@@ -401,9 +401,11 @@ void EnggDiffractionViewQtGUI::readSettings() {
   m_uiTabFocus.checkBox_save_output_files->setChecked(
       qs.value("user-params-focus-save-output-files", true).toBool());
 
-  m_uiTabFocus.comboBox_PlotData->setCurrentIndex(0);
+  m_uiTabFocus.comboBox_PlotData->setCurrentIndex(
+      qs.value("user-params-focus-plot-type", 0).toInt());
 
-  m_uiTabFocus.comboBox_Multi_Runs->setCurrentIndex(0);
+  m_uiTabFocus.comboBox_Multi_Runs->setCurrentIndex(
+      qs.value("user-params-multiple-runs-focus-mode", 0).toInt());
 
   // pre-processing (re-binning)
   m_uiTabPreproc.MWRunFiles_preproc_run_num->setUserInput(
@@ -520,6 +522,12 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
 
   qs.setValue("user-params-focus-save-output-files",
               m_uiTabFocus.checkBox_plot_focused_ws->isChecked());
+
+  qs.setValue("user-params-focus-plot-type",
+              m_uiTabFocus.comboBox_PlotData->currentIndex());
+
+  qs.setValue("user-params-multiple-runs-focus-mode",
+              m_uiTabFocus.comboBox_Multi_Runs->currentIndex());
 
   // pre-processing (re-binning)
   qs.setValue("user-params-preproc-runno",
