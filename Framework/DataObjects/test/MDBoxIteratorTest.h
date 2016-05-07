@@ -367,7 +367,6 @@ public:
     // No more!
     TS_ASSERT(!it->next());
     TS_ASSERT(!it->next());
-
   }
 
   //--------------------------------------------------------------------------------------
@@ -535,7 +534,6 @@ public:
                       evaluationIterator->getPosition());
     TSM_ASSERT("The last box should be masked",
                !evaluationIterator->getIsMasked());
-
   }
 
   void test_no_skipping_policy() {

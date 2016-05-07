@@ -124,8 +124,8 @@ public:
     return std::accumulate(
         m_supermap.cbegin(), m_supermap.cend(), size_t{0},
         [](size_t total,
-           const std::pair<boost::shared_ptr<std::mutex>, InnerMap>
-               &mutexedMap) { return total + mutexedMap.second.size(); });
+           const std::pair<boost::shared_ptr<std::mutex>, InnerMap> &
+               mutexedMap) { return total + mutexedMap.second.size(); });
   }
 
   //-------------------------------------------------------------------------------
@@ -134,8 +134,8 @@ public:
     std::lock_guard<std::mutex> lock(m_queueLock);
     auto mapWithTasks = std::find_if_not(
         m_supermap.cbegin(), m_supermap.cend(),
-        [](const std::pair<boost::shared_ptr<std::mutex>, InnerMap>
-               &mutexedMap) { return mutexedMap.second.empty(); });
+        [](const std::pair<boost::shared_ptr<std::mutex>, InnerMap> &
+               mutexedMap) { return mutexedMap.second.empty(); });
     return mapWithTasks == m_supermap.cend();
   }
 
