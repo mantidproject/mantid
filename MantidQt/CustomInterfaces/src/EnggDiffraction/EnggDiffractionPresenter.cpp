@@ -1037,6 +1037,8 @@ std::vector<std::string> EnggDiffractionPresenter::isValidMultiRunNumber(
           }
         }
         run_number.erase(0, run_number.find_first_not_of('0'));
+
+        recordPathBrowsedTo(inputDir.toString());
       }
     } catch (std::runtime_error &re) {
       throw std::invalid_argument(
@@ -1692,96 +1694,96 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
                                           const std::string &specNos,
                                           const std::string &dgFile) {
 
-  if (!g_abortThread) {
-
-    // to track last valid run
-    g_lastValidRun = runNo;
-
-    g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
-                      "this directory: " << dir << std::endl;
-
-    // TODO: this is almost 100% common with doNewCalibrate() - refactor
-    EnggDiffCalibSettings cs = m_view->currentCalibSettings();
-    Mantid::Kernel::ConfigServiceImpl &conf =
-        Mantid::Kernel::ConfigService::Instance();
-    const std::vector<std::string> tmpDirs = conf.getDataSearchDirs();
-    // in principle, the run files will be found from 'DirRaw', and the
-    // pre-calculated Vanadium corrections from 'DirCalib'
-    if (!cs.m_inputDirCalib.empty() &&
-        Poco::File(cs.m_inputDirCalib).exists()) {
-      conf.appendDataSearchDir(cs.m_inputDirCalib);
-    }
-    if (!cs.m_inputDirRaw.empty() && Poco::File(cs.m_inputDirRaw).exists()) {
-      conf.appendDataSearchDir(cs.m_inputDirRaw);
-    }
-    for (const auto &browsed : m_browsedToPaths) {
-      conf.appendDataSearchDir(browsed);
-    }
-
-    // Prepare special inputs for "texture" focusing
-    std::vector<size_t> bankIDs;
-    std::vector<std::string> effectiveFilenames;
-    std::vector<std::string> specs;
-    if (!specNos.empty()) {
-      // Cropped focusing
-      // just to iterate once, but there's no real bank here
-      bankIDs.push_back(0);
-      specs.push_back(specNos); // one spectrum Nos list given by the user
-      effectiveFilenames.push_back(outputFocusCroppedFilename(runNo));
-    } else {
-      if (dgFile.empty()) {
-        // Basic/normal focusing
-        for (size_t bidx = 0; bidx < banks.size(); bidx++) {
-          if (banks[bidx]) {
-            bankIDs.push_back(bidx + 1);
-            specs.emplace_back("");
-            effectiveFilenames = outputFocusFilenames(runNo, banks);
-          }
-        }
-      } else {
-        // texture focusing
-        try {
-          loadDetectorGroupingCSV(dgFile, bankIDs, specs);
-        } catch (std::runtime_error &re) {
-          g_log.error() << "Error loading detector grouping file: " + dgFile +
-                               ". Detailed error: " + re.what() << std::endl;
-          bankIDs.clear();
-          specs.clear();
-        }
-        effectiveFilenames = outputFocusTextureFilenames(runNo, bankIDs);
-      }
-    }
-
-    // focus all requested banks
-    for (size_t idx = 0; idx < bankIDs.size(); idx++) {
-
-      Poco::Path fpath(dir);
-      const std::string fullFilename =
-          fpath.append(effectiveFilenames[idx]).toString();
-      g_log.notice() << "Generating new focused file (bank " +
-                            boost::lexical_cast<std::string>(bankIDs[idx]) +
-                            ") for run " + runNo +
-                            " into: " << effectiveFilenames[idx] << std::endl;
-      try {
-        m_focusFinishedOK = false;
-        doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
-        m_focusFinishedOK = true;
-      } catch (std::runtime_error &) {
-        g_log.error()
-            << "The focusing calculations failed. One of the algorithms"
-               "did not execute correctly. See log messages for details."
-            << std::endl;
-      } catch (std::invalid_argument &ia) {
-        g_log.error() << "The focusing failed. Some input properties "
-                         "were not valid. "
-                         "See log messages for details. Error: " << ia.what()
-                      << std::endl;
-      }
-    }
-
-    // restore initial data search paths
-    conf.setDataSearchDirs(tmpDirs);
+  if (g_abortThread) {
+    return;
   }
+
+  // to track last valid run
+  g_lastValidRun = runNo;
+
+  g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
+                    "this directory: " << dir << std::endl;
+
+  // TODO: this is almost 100% common with doNewCalibrate() - refactor
+  EnggDiffCalibSettings cs = m_view->currentCalibSettings();
+  Mantid::Kernel::ConfigServiceImpl &conf =
+      Mantid::Kernel::ConfigService::Instance();
+  const std::vector<std::string> tmpDirs = conf.getDataSearchDirs();
+  // in principle, the run files will be found from 'DirRaw', and the
+  // pre-calculated Vanadium corrections from 'DirCalib'
+  if (!cs.m_inputDirCalib.empty() && Poco::File(cs.m_inputDirCalib).exists()) {
+    conf.appendDataSearchDir(cs.m_inputDirCalib);
+  }
+  if (!cs.m_inputDirRaw.empty() && Poco::File(cs.m_inputDirRaw).exists()) {
+    conf.appendDataSearchDir(cs.m_inputDirRaw);
+  }
+  for (const auto &browsed : m_browsedToPaths) {
+    conf.appendDataSearchDir(browsed);
+  }
+
+  // Prepare special inputs for "texture" focusing
+  std::vector<size_t> bankIDs;
+  std::vector<std::string> effectiveFilenames;
+  std::vector<std::string> specs;
+  if (!specNos.empty()) {
+    // Cropped focusing
+    // just to iterate once, but there's no real bank here
+    bankIDs.push_back(0);
+    specs.push_back(specNos); // one spectrum Nos list given by the user
+    effectiveFilenames.push_back(outputFocusCroppedFilename(runNo));
+  } else {
+    if (dgFile.empty()) {
+      // Basic/normal focusing
+      for (size_t bidx = 0; bidx < banks.size(); bidx++) {
+        if (banks[bidx]) {
+          bankIDs.push_back(bidx + 1);
+          specs.emplace_back("");
+          effectiveFilenames = outputFocusFilenames(runNo, banks);
+        }
+      }
+    } else {
+      // texture focusing
+      try {
+        loadDetectorGroupingCSV(dgFile, bankIDs, specs);
+      } catch (std::runtime_error &re) {
+        g_log.error() << "Error loading detector grouping file: " + dgFile +
+                             ". Detailed error: " + re.what() << std::endl;
+        bankIDs.clear();
+        specs.clear();
+      }
+      effectiveFilenames = outputFocusTextureFilenames(runNo, bankIDs);
+    }
+  }
+
+  // focus all requested banks
+  for (size_t idx = 0; idx < bankIDs.size(); idx++) {
+
+    Poco::Path fpath(dir);
+    const std::string fullFilename =
+        fpath.append(effectiveFilenames[idx]).toString();
+    g_log.notice() << "Generating new focused file (bank " +
+                          boost::lexical_cast<std::string>(bankIDs[idx]) +
+                          ") for run " + runNo +
+                          " into: " << effectiveFilenames[idx] << std::endl;
+    try {
+      m_focusFinishedOK = false;
+      doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
+      m_focusFinishedOK = true;
+    } catch (std::runtime_error &) {
+      g_log.error()
+          << "The focusing calculations failed. One of the algorithms"
+             "did not execute correctly. See log messages for details."
+          << std::endl;
+    } catch (std::invalid_argument &ia) {
+      g_log.error() << "The focusing failed. Some input properties "
+                       "were not valid. "
+                       "See log messages for details. Error: " << ia.what()
+                    << std::endl;
+    }
+  }
+
+  // restore initial data search paths
+  conf.setDataSearchDirs(tmpDirs);
 }
 
 void EnggDiffractionPresenter::loadDetectorGroupingCSV(
