@@ -376,7 +376,7 @@ makeMDGridBox(size_t split0 = 10, size_t split1 = 10,
   if (nd > 1)
     splitter->setSplitInto(1, split1);
   // Set the size to 10.0 in all directions
-  auto box = new MDBox<MDLeanEvent<nd>, nd>(splitter);
+  auto box = mantid::Kernel::make_unique<MDBox<MDLeanEvent<nd>, nd>>(splitter);
   for (size_t d = 0; d < nd; d++)
     // carefull! function with the side effects!
     box->setExtents(d, dimensionMin, dimensionMax);
@@ -384,9 +384,7 @@ makeMDGridBox(size_t split0 = 10, size_t split1 = 10,
   box->calcVolume();
 
   // Split
-  auto out = new MDGridBox<MDLeanEvent<nd>, nd>(box);
-  delete box;
-
+  auto out = new MDGridBox<MDLeanEvent<nd>, nd>(box.get());
   return out;
 }
 
@@ -468,22 +466,21 @@ static void recurseSplit(MDGridBox<MDLeanEvent<nd>, nd> *box,
  * @return
  */
 template <size_t nd>
-static MDGridBox<MDLeanEvent<nd>, nd> *makeRecursiveMDGridBox(size_t splitInto,
-                                                              size_t levels) {
+static MDGridBox<MDLeanEvent<nd>, nd> makeRecursiveMDGridBox(size_t splitInto,
+                                                             size_t levels) {
   // Split at 5 events
-  auto splitter(new Mantid::API::BoxController(nd));
+  auto splitter = new Mantid::API::BoxController(nd);
   splitter->setSplitThreshold(5);
   splitter->resetNumBoxes();
   splitter->setMaxDepth(levels + 1);
   // Splits into splitInto x splitInto x ... boxes
   splitter->setSplitInto(splitInto);
   // Set the size to splitInto*1.0 in all directions
-  auto box = new MDBox<MDLeanEvent<nd>, nd>(splitter);
+  MDBox<MDLeanEvent<nd>, nd> box(splitter);
   for (size_t d = 0; d < nd; d++)
     box->setExtents(d, 0.0, static_cast<coord_t>(splitInto));
   // Split into the gridbox.
-  auto gridbox = new MDGridBox<MDLeanEvent<nd>, nd>(box);
-  delete box;
+  MDGridBox<MDLeanEvent<nd>, nd> gridbox(&box);
   // Now recursively split more
   recurseSplit(gridbox, 0, levels);
 

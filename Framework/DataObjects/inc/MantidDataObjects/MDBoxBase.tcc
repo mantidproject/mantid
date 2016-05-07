@@ -2,8 +2,8 @@
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
-#include <limits>
 #include <boost/make_shared.hpp>
+#include <limits>
 
 //using NeXus::File;
 
@@ -240,14 +240,12 @@ TMDE(coord_t *MDBoxBase)::getVertexesArray(size_t &numVertices,
 TMDE(size_t MDBoxBase)::addEvents(const std::vector<MDE> &events) {
   size_t numBad = 0;
   // --- Go event by event and add them ----
-  auto it = events.begin();
-  auto it_end = events.end();
   m_dataMutex.lock();
-  for (; it != it_end; ++it) {
+  for (const auto &evnt : events) {
     // Check out-of-bounds-ness
     bool badEvent = false;
     for (size_t d = 0; d < nd; d++) {
-      coord_t x = it->getCenter(d);
+      coord_t x = evnt.getCenter(d);
       if (extents[d].outside(x)) {
         badEvent = true;
         break;
@@ -259,7 +257,7 @@ TMDE(size_t MDBoxBase)::addEvents(const std::vector<MDE> &events) {
       ++numBad;
     else
       // Event was in bounds; add it
-      addEventUnsafe(*it);
+      addEventUnsafe(evnt);
   }
   m_dataMutex.unlock();
   return numBad;
@@ -274,12 +272,10 @@ TMDE(size_t MDBoxBase)::addEvents(const std::vector<MDE> &events) {
  */
 TMDE(size_t MDBoxBase)::addEventsUnsafe(const std::vector<MDE> &events) {
   // --- Go event by event and add them ----
-  auto it = events.begin();
-  auto it_end = events.end();
-  for (; it != it_end; ++it) {
+  for (const auto &evnt : events) {
     // Check out-of-bounds-ness
     // Event was in bounds; add it
-    addEventUnsafe(*it);
+    addEventUnsafe(evnt);
   }
 
   return 0;

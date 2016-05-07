@@ -645,7 +645,7 @@ public:
 };
 
 class MDBoxIteratorTestPerformance : public CxxTest::TestSuite {
-  MDGridBox<MDLeanEvent<3>, 3> *top;
+  MDGridBox<MDLeanEvent<3>, 3> top;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -657,10 +657,9 @@ public:
     delete suite;
   }
 
-  MDBoxIteratorTestPerformance() {
-    // 1968876 boxes in this. Top box is 5*5*5
-    top = MDEventsTestHelper::makeRecursiveMDGridBox<3>(5, 2);
-  }
+  // 1968876 boxes in this. Top box is 5*5*5
+  MDBoxIteratorTestPerformance()
+      : top(MDEventsTestHelper::makeRecursiveMDGridBox<3>(5, 2)) {}
 
 public:
   // ---------------------------------------------------------------
@@ -677,7 +676,7 @@ public:
       function = new MDBoxImplicitFunction(min, max);
     }
 
-    MDBoxIterator<MDLeanEvent<3>, 3> it(top, 20, leafOnly, new SkipNothing,
+    MDBoxIterator<MDLeanEvent<3>, 3> it(&top, 20, leafOnly, new SkipNothing,
                                         function);
 
     // Count all of them
@@ -711,7 +710,7 @@ public:
    * which directly returns that vector, if that happens to be what you need.*/
   void do_test_iterator_that_fills_a_vector(bool leafOnly) {
     MDBoxBase<MDLeanEvent<3>, 3> *box;
-    MDBoxIterator<MDLeanEvent<3>, 3> it(top, 20, leafOnly, new SkipNothing);
+    MDBoxIterator<MDLeanEvent<3>, 3> it(&top, 20, leafOnly, new SkipNothing);
     std::vector<MDBoxBase<MDLeanEvent<3>, 3> *> boxes;
 
     // Iterate and fill the vector as you go.
@@ -749,7 +748,7 @@ public:
       std::vector<coord_t> min(3, 2.001f);
       std::vector<coord_t> max(3, 2.999f);
       function = new MDBoxImplicitFunction(min, max);
-      top->getBoxes(boxes, 20, leafOnly, function);
+      top.getBoxes(boxes, 20, leafOnly, function);
     } else if (ImplicitFunction == 2) {
       // Plane defining 2.2 < x < 2.4
       function = new MDImplicitFunction();
@@ -759,25 +758,23 @@ public:
       coord_t normal2[3] = {-1.000f, 0, 0};
       coord_t origin2[3] = {+2.399f, 0, 0};
       function->addPlane(MDPlane(3, normal2, origin2));
-      top->getBoxes(boxes, 20, leafOnly, function);
+      top.getBoxes(boxes, 20, leafOnly, function);
     } else if (ImplicitFunction == 3) {
       // Box in 3D where -5 < (x,y,z) < +10
       std::vector<coord_t> min(3, -4.999f);
       std::vector<coord_t> max(3, +9.999f);
       function = new MDBoxImplicitFunction(min, max);
-      top->getBoxes(boxes, 20, leafOnly, function);
+      top.getBoxes(boxes, 20, leafOnly, function);
     } else {
-      top->getBoxes(boxes, 20, leafOnly);
+      top.getBoxes(boxes, 20, leafOnly);
     }
     TS_ASSERT_EQUALS(boxes.size(), expected);
 
     // Now we still need to iterate through the vector to do anything, so this
     // is a more fair comparison
     size_t counter = 0;
-    std::vector<API::IMDNode *>::iterator it;
-    std::vector<API::IMDNode *>::iterator it_end = boxes.end();
-    for (it = boxes.begin(); it != it_end; it++) {
-      counter++;
+    for (const auto &box : boxes) {
+      ++counter;
     }
 
     TS_ASSERT_EQUALS(counter, expected);

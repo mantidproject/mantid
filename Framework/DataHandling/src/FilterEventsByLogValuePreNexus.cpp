@@ -2416,7 +2416,7 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
     return;
   }
 
-  std::vector<Pulse> *pulses;
+  std::vector<Pulse> pulses;
 
   // set up for reading
   // Open the file; will throw if there is any problem
@@ -2447,7 +2447,7 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
     DateAndTime lastPulseDateTime(0, 0);
     this->pulsetimes.reserve(m_numPulses);
     for (size_t i = 0; i < m_numPulses; i++) {
-      Pulse &it = (*pulses)[i];
+      Pulse &it = pulses[i];
       DateAndTime pulseDateTime(static_cast<int64_t>(it.seconds),
                                 static_cast<int64_t>(it.nanoseconds));
       this->pulsetimes.push_back(pulseDateTime);
@@ -2468,9 +2468,6 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
   }
 
   this->m_protonChargeTot = this->m_protonChargeTot * CURRENT_CONVERSION;
-
-  // Clear the vector
-  delete pulses;
 }
 
 } // namespace DataHandling

@@ -924,7 +924,7 @@ void LoadEventPreNexus::readPulseidFile(const std::string &filename,
     return;
   }
 
-  std::vector<Pulse> *pulses;
+  std::vector<Pulse> pulses;
 
   // set up for reading
   // Open the file; will throw if there is any problem
@@ -954,7 +954,7 @@ void LoadEventPreNexus::readPulseidFile(const std::string &filename,
   if (num_pulses > 0) {
     this->pulsetimes.reserve(num_pulses);
     for (size_t i = 0; i < num_pulses; i++) {
-      Pulse &it = (*pulses)[i];
+      Pulse &it = pulses[i];
       this->pulsetimes.push_back(
           DateAndTime(static_cast<int64_t>(it.seconds),
                       static_cast<int64_t>(it.nanoseconds)));
@@ -970,9 +970,6 @@ void LoadEventPreNexus::readPulseidFile(const std::string &filename,
   }
 
   this->proton_charge_tot = this->proton_charge_tot * CURRENT_CONVERSION;
-
-  // Clear the vector
-  delete pulses;
 }
 
 } // namespace DataHandling

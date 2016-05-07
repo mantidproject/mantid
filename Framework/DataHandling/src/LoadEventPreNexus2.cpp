@@ -1331,7 +1331,7 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename,
     return;
   }
 
-  std::vector<Pulse> *pulses;
+  std::vector<Pulse> pulses;
 
   // set up for reading
   // Open the file; will throw if there is any problem
@@ -1361,7 +1361,7 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename,
     DateAndTime lastPulseDateTime(0, 0);
     this->pulsetimes.reserve(num_pulses);
     for (size_t i = 0; i < num_pulses; i++) {
-      Pulse &it = (*pulses)[i];
+      Pulse &it = pulses[i];
       DateAndTime pulseDateTime(static_cast<int64_t>(it.seconds),
                                 static_cast<int64_t>(it.nanoseconds));
       this->pulsetimes.push_back(pulseDateTime);
@@ -1387,12 +1387,9 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename,
     std::stringstream dbss;
     for (size_t i = 0; i < m_dbOpNumPulses; ++i)
       dbss << "[Pulse] " << i << "\t " << event_indices[i] << "\t "
-           << pulsetimes[i].totalNanoseconds() << "\n";
+           << pulsetimes[i].totalNanoseconds() << '\n';
     g_log.information(dbss.str());
   }
-
-  // Clear the vector
-  delete pulses;
 }
 
 //----------------------------------------------------------------------------------------------

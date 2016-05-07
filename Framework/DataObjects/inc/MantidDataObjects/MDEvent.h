@@ -203,16 +203,16 @@ public:
     totalErrSq = 0;
 
     size_t index(0);
-    for (const MDEvent<nd> &event : events) {
-      float signal = event.signal;
-      float errorSquared = event.errorSquared;
+    for (const MDEvent<nd> &evnt : events) {
+      float signal = evnt.signal;
+      float errorSquared = evnt.errorSquared;
       data[index++] = static_cast<coord_t>(signal);
       data[index++] = static_cast<coord_t>(errorSquared);
       // Additional stuff for MDEvent
-      data[index++] = static_cast<coord_t>(event.runIndex);
-      data[index++] = static_cast<coord_t>(event.detectorId);
+      data[index++] = static_cast<coord_t>(evnt.runIndex);
+      data[index++] = static_cast<coord_t>(evnt.detectorId);
       for (size_t d = 0; d < nd; d++)
-        data[index++] = event.center[d];
+        data[index++] = evnt.center[d];
       // Track the total signal
       totalSignal += signal_t(signal);
       totalErrSq += signal_t(errorSquared);

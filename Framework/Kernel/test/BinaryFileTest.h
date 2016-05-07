@@ -79,7 +79,7 @@ public:
     size_t num = 20;
     TS_ASSERT_EQUALS(file.getNumElements(), num);
     // Get it
-    std::vector<DasEvent> *data = 0;
+    std::vector<DasEvent> data;
     TS_ASSERT_THROWS_NOTHING(data = file.loadAll());
     TS_ASSERT_EQUALS(data->size(), num);
     // Check the first event
@@ -89,7 +89,6 @@ public:
     TS_ASSERT_EQUALS(data->at(num - 1).tof, 38);
     TS_ASSERT_EQUALS(data->at(num - 1).pid, 39);
 
-    delete data;
     file.close();
     Poco::File(dummy_file).remove();
   }

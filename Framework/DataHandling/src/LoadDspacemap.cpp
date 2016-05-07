@@ -372,15 +372,10 @@ struct VulcanCorrectionFactor {
 void LoadDspacemap::readVulcanBinaryFile(const std::string &fileName,
                                          std::map<detid_t, double> &vulcan) {
   BinaryFile<VulcanCorrectionFactor> file(fileName);
-  std::vector<VulcanCorrectionFactor> *results = file.loadAll();
-  if (results) {
-    for (auto &result : *results) {
-      // std::cout << it->pixelID << " :! " << it->factor << std::endl;
-      vulcan[static_cast<detid_t>(result.pixelID)] = result.factor;
-    }
+  std::vector<VulcanCorrectionFactor> results = file.loadAll();
+  for (auto &result : results) {
+    vulcan[static_cast<detid_t>(result.pixelID)] = result.factor;
   }
-
-  delete results;
 }
 
 } // namespace Mantid

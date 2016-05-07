@@ -4,6 +4,7 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include <mutex>
+#include <numeric>
 #include <set>
 
 namespace Mantid {
@@ -27,7 +28,7 @@ namespace Kernel {
  */
 class DLLExport ThreadSchedulerMutexes : public ThreadScheduler {
 public:
-  ThreadSchedulerMutexes() : ThreadScheduler() {}
+  ThreadSchedulerMutexes() = default;
 
   ~ThreadSchedulerMutexes() override { clear(); }
 
@@ -53,17 +54,17 @@ public:
     if (!m_supermap.empty()) {
       // We iterate in reverse as to take the NULL mutex last, even if no mutex
       // is busy
-      for (auto &it : m_supermap) {
+      for (auto &mutexedMap : m_supermap) {
         // The key is the mutex associated with the inner map
-        boost::shared_ptr<std::mutex> mapMutex = it.first;
+        boost::shared_ptr<std::mutex> mapMutex = mutexedMap.first;
         if ((!mapMutex) || (m_mutexes.empty()) ||
             (m_mutexes.find(mapMutex) == m_mutexes.end())) {
           // The mutex of this map is free!
-          InnerMap &map = it.second;
+          InnerMap &map = mutexedMap.second;
 
           if (!map.empty()) {
             // Look for the largest cost item in it.
-            auto it2 = it.second.end();
+            auto it2 = mutexedMap.second.end();
             it2--;
             // Great, we found something.
             temp = it2->second;
@@ -76,9 +77,9 @@ public:
       if (temp == nullptr) {
         // Nothing was found, meaning all mutexes are in use
         // Try the first non-empty map
-        for (auto &it : m_supermap) {
-          if (!it.second.empty()) {
-            InnerMap &map = it.second;
+        for (auto &mutexedMap : m_supermap) {
+          if (!mutexedMap.second.empty()) {
+            InnerMap &map = mutexedMap.second;
             // Use the first one
             temp = map.begin()->second;
             // And erase that item (pop it)
@@ -120,22 +121,22 @@ public:
   size_t size() override {
     std::lock_guard<std::mutex> lock(m_queueLock);
     // Add up the sizes of all contained maps.
-    size_t total = 0;
-    for (const auto &it : m_supermap) {
-      total += it.second.size();
-    }
-    return total;
+    return std::accumulate(
+        m_supermap.cbegin(), m_supermap.cend(), size_t{0},
+        [](size_t total,
+           const std::pair<boost::shared_ptr<std::mutex>, InnerMap>
+               &mutexedMap) { return total + mutexedMap.second.size(); });
   }
 
   //-------------------------------------------------------------------------------
   /// @return true if the queue is empty
   bool empty() override {
     std::lock_guard<std::mutex> lock(m_queueLock);
-    for (const auto &it : m_supermap) {
-      if (!it.second.empty())
-        return false;
-    }
-    return true;
+    auto mapWithTasks = std::find_if_not(
+        m_supermap.cbegin(), m_supermap.cend(),
+        [](const std::pair<boost::shared_ptr<std::mutex>, InnerMap>
+               &mutexedMap) { return mutexedMap.second.empty(); });
+    return mapWithTasks == m_supermap.cend();
   }
 
   //-------------------------------------------------------------------------------
