@@ -2637,9 +2637,8 @@ void InstrumentDefinitionParser::adjust(
   }
 
   // delete all <component> found in pElem
-  for (auto it = allComponentInType.begin(); it != allComponentInType.end();
-       ++it)
-    pElem->removeChild(*it);
+  for (const auto &component : allComponentInType)
+    pElem->removeChild(component);
 }
 
 /// Returns a translated and rotated \<cuboid\> element with "id" attribute
