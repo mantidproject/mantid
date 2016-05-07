@@ -76,8 +76,9 @@ public:
   std::string isValidRunNumber(const std::vector<std::string> &dir);
 
   /// checks if its a valid run number inside vector and returns a vector;
-  /// used for mutli-run focusing
-  std::vector<std::string> isValidMultiRunNumber(std::vector<std::string> dir);
+  /// used for mutli-run focusing, and other multi-run file selections
+  std::vector<std::string>
+  isValidMultiRunNumber(const std::vector<std::string> &dir);
 
   /// pre-processing re-binning with Rebin, for a worker/thread
   void doRebinningTime(const std::string &runNo, double bin,
@@ -115,11 +116,10 @@ public:
   void runConvetUnitsAlg(std::string workspaceName);
 
   void runCloneWorkspaceAlg(std::string inputWorkspace,
-	  std::string outputWorkspace);
+                            std::string outputWorkspace);
 
   void setDataToClonedWS(std::string inputWorkspace,
-	  std::string outputWorkspace);
-
+                         std::string outputWorkspace);
 
 protected:
   void initialize();

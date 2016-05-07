@@ -949,30 +949,24 @@ bool EnggDiffractionPresenter::validateRBNumber(const std::string &rbn) const {
 * provided it will convert it to a run number. It also records the
 * paths the user has browsed to.
 *
-* @param path the input/directory given by the user via the "browse"
+* @param userPaths the input/directory given by the user via the "browse"
 * button
 *
 * @return run_number 6 character string of a run number
 */
 std::string EnggDiffractionPresenter::isValidRunNumber(
-    const std::vector<std::string> &path) {
+    const std::vector<std::string> &userPaths) {
 
   std::string run_number;
-  if (path.empty()) {
+  if (userPaths.empty() || userPaths.front().empty()) {
     return run_number;
   }
 
-  std::vector<std::string> run_vec = path;
-
-  auto p = run_vec.begin();
-  while (p != run_vec.end()) {
-    run_number = *p;
-    p++;
-
+  for (const auto &path : userPaths) {
+    run_number = "";
     try {
-      if (Poco::File(run_number).exists()) {
-        Poco::Path inputDir = run_number;
-        run_number = "";
+      if (Poco::File(path).exists()) {
+        Poco::Path inputDir = path;
 
         // get file name via poco::path
         std::string filename = inputDir.getFileName();
@@ -1002,7 +996,7 @@ std::string EnggDiffractionPresenter::isValidRunNumber(
     }
   }
 
-  g_log.debug() << "Run number inferred from browse path (" << path.front()
+  g_log.debug() << "Run number inferred from browse path (" << userPaths.front()
                 << ") is: " << run_number << std::endl;
 
   return run_number;
@@ -1011,29 +1005,22 @@ std::string EnggDiffractionPresenter::isValidRunNumber(
 /**
 * Checks if the provided run number is valid and if a directory is provided
 *
-* @param dir takes the input/directory of the user
+* @param paths takes the input/paths of the user
 *
 * @return vector of string multi_run_number, 6 character string of a run number
 */
-std::vector<std::string>
-EnggDiffractionPresenter::isValidMultiRunNumber(std::vector<std::string> dir) {
+std::vector<std::string> EnggDiffractionPresenter::isValidMultiRunNumber(
+    const std::vector<std::string> &paths) {
 
   std::vector<std::string> multi_run_number;
-  if (dir.empty())
+  if (paths.empty() || paths.front().empty())
     return multi_run_number;
 
-  std::vector<std::string> run_vec = dir;
-  std::string run_number;
-
-  auto p = run_vec.begin();
-  while (p != run_vec.end()) {
-    run_number = *p;
-    p++;
-
+  for (auto path : paths) {
+    std::string run_number;
     try {
-      if (Poco::File(run_number).exists()) {
-        Poco::Path inputDir = run_number;
-        run_number = "";
+      if (Poco::File(path).exists()) {
+        Poco::Path inputDir = path;
 
         // get file name name via poco::path
         std::string filename = inputDir.getFileName();
@@ -1061,8 +1048,10 @@ EnggDiffractionPresenter::isValidMultiRunNumber(std::vector<std::string> dir) {
     multi_run_number.push_back(run_number);
   }
 
-  g_log.debug() << "Run number inferred from a multi-run selection: "
-                << run_number << std::endl;
+  g_log.debug()
+      << "First and last run number inferred from a multi-run selection: "
+      << multi_run_number.front() << " ... " << multi_run_number.back()
+      << std::endl;
 
   return multi_run_number;
 }
