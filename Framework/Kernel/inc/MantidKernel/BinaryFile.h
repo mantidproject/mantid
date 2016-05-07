@@ -113,7 +113,7 @@ public:
 
     // A buffer to load from
     size_t buffer_size = getBufferSize(num_elements);
-    auto buffer = mantid::Kernel::make_unique<T[]>(buffer_size);
+    auto buffer = Mantid::Kernel::make_unique<T[]>(buffer_size);
 
     // Make sure we are at the beginning
     offset = 0;
