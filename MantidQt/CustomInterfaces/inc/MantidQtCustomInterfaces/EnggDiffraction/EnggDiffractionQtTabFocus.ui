@@ -47,13 +47,6 @@
       <item row="1" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="QLabel" name="label_banks_sel">
-          <property name="text">
-           <string>Banks:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <spacer name="horizontalSpacer_5">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -65,6 +58,13 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_banks_sel">
+          <property name="text">
+           <string>Banks:</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
@@ -131,7 +131,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="lineEdit_run_num" native="true">
+         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="MWRunFiles_run_num" native="true">
           <property name="text" stdset="0">
            <string/>
           </property>
@@ -189,7 +189,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="lineEdit_cropped_run_num" native="true">
+         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="MWRunFiles_cropped_run_num" native="true">
           <property name="text" stdset="0">
            <string/>
           </property>
@@ -305,7 +305,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="lineEdit_texture_run_num" native="true">
+         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="MWRunFiles_texture_run_num" native="true">
           <property name="text" stdset="0">
            <string/>
           </property>
@@ -397,7 +397,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox_focus_3">
+    <widget class="QGroupBox" name="groupBox_focus_output_options">
      <property name="minimumSize">
       <size>
        <width>596</width>
@@ -612,7 +612,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_13">
      <item>
-      <widget class="QPushButton" name="pushButton_stopFocus">
+      <widget class="QPushButton" name="pushButton_stop_focus">
        <property name="text">
         <string>Stop Focus</string>
        </property>
