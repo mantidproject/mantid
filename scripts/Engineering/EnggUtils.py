@@ -65,7 +65,7 @@ def read_in_expected_peaks(filename, expectedGiven):
             expectedPeaksD = sorted(exPeakArray)
 
     else:
-        if 0 == expectedGiven.size:
+        if 0 == len(expectedGiven):
             raise ValueError("No expected peaks were given in the property 'ExpectedPeaks', "
                              "could not get default expected peaks, and 'ExpectedPeaksFromFile' "
                              "was not given either. Cannot continout without a list of expected peaks.")

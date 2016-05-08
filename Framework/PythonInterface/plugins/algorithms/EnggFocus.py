@@ -70,6 +70,10 @@ class EnggFocus(PythonAlgorithm):
         self.setPropertyGroup('Bank', banks_grp)
         self.setPropertyGroup(self.INDICES_PROP_NAME, banks_grp)
 
+        self.declareProperty('NormaliseByCurrent', True, direction=Direction.Input,
+                             doc = 'Normalize the input data by applying the NormaliseByCurrent algorithm '
+                             'which use the log entry gd_proton_charge')
+
     def PyExec(self):
         # Get the run workspace
         wks = self.getProperty('InputWorkspace').value
@@ -79,12 +83,13 @@ class EnggFocus(PythonAlgorithm):
         spectra = self.getProperty(self.INDICES_PROP_NAME).value
         indices = EnggUtils.getWsIndicesFromInProperties(wks, bank, spectra)
 
-    	# Leave the data for the bank we are interested in only
+        prog = Progress(self, start=0, end=1, nreports=5)
+
+        prog.report('Selecting spectra from input workspace')
+        # Leave the data for the bank/spectra list we are interested in only
         wks = EnggUtils.cropData(self, wks, indices)
 
-        prog = Progress(self, start=0, end=1, nreports=3)
-
-        prog.report('Preparing input workspace')
+        prog.report('Preparing input workspace with vanadium corrections')
         # Leave data for the same bank in the vanadium workspace too
         vanWS = self.getProperty('VanadiumWorkspace').value
         vanIntegWS = self.getProperty('VanIntegrationWorkspace').value
@@ -100,8 +105,12 @@ class EnggFocus(PythonAlgorithm):
         wks = EnggUtils.convertToDSpacing(self, wks)
 
         prog.report('Summing spectra')
-    	# Sum the values
+        # Sum the values across spectra
         wks = EnggUtils.sumSpectra(self, wks)
+
+        prog.report('Normalizing input workspace if needed')
+        if self.getProperty('NormaliseByCurrent').value:
+            self._normalize_by_current(wks)
 
         prog.report('Preparing output workspace')
     	# Convert back to time of flight
@@ -112,6 +121,27 @@ class EnggFocus(PythonAlgorithm):
         self._convertToDistr(wks)
 
         self.setProperty("OutputWorkspace", wks)
+
+    def _normalize_by_current(self, wks):
+        """
+        Apply the normalize by current algorithm on a workspace
+
+        @param wks :: workspace (input, not modified in place)
+
+        @returns :: normalized workspace
+        """
+        p_charge = wks.getRun().getProtonCharge()
+        if p_charge <= 0:
+            self.log().warning("Cannot normalize by current because the proton charge log value "
+                               "is not positive!")
+
+        self.log().notice("Normalizing by current with proton charge: {0} uamp".
+                          format(p_charge))
+
+        alg = self.createChildAlgorithm('NormaliseByCurrent')
+        alg.setProperty('InputWorkspace', wks)
+        alg.setProperty('OutputWorkspace', wks)
+        alg.execute()
 
     def _applyCalibration(self, wks, detPos):
         """
