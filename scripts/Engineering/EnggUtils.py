@@ -6,6 +6,9 @@ import mantid.simpleapi as sapi
 
 ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
 
+ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]
+ENGINX_MASK_BIN_MAXS = [5300, 20400, 40450, 62000, 82670]
+
 def default_ceria_expected_peaks():
     """
     Get the list of expected Ceria peaks, which can be a good default for the expected peaks

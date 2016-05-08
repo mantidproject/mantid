@@ -74,11 +74,11 @@ class EnggFocus(PythonAlgorithm):
                              doc='Normalize the input data by applying the NormaliseByCurrent algorithm '
                              'which use the log entry gd_proton_charge')
 
-        self.declareProperty(FloatArrayProperty('MaskBinsXMins', [0, 19930, 39960, 59850, 79930],
+        self.declareProperty(FloatArrayProperty('MaskBinsXMins', EnggUtils.ENGINX_MASK_BIN_MINS,
                                                 direction=Direction.Input),
                              doc="List of minimum bin values to mask, separated by commas.")
 
-        self.declareProperty(FloatArrayProperty('MaskBinsXMaxs', [5300, 20400, 40450, 62000, 82670],
+        self.declareProperty(FloatArrayProperty('MaskBinsXMaxs', EnggUtils.ENGINX_MASK_BIN_MAXS,
                                                 direction=Direction.Input),
                              doc="List of maximum bin values to mask, separated by commas.")
 
