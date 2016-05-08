@@ -86,6 +86,26 @@ class EnggFocusTest(unittest.TestCase):
                           SpectrumNumbers='3', NormaliseByCurrent='4',
                           OutputWorkspace='nop')
 
+        # wrong bin values for masking
+        self.assertRaises(RuntimeError,
+                          EnggFocus,
+                          InputWorkspace=self.__class__._data_ws, DetectorPositions=tbl,
+                          SpectrumNumbers='3',
+                          MaskBinsXMins=[1, 2, 3], MaskBinsXMaxs=[10, 20],
+                          OutputWorkspace='nop')
+
+        self.assertRaises(RuntimeError,
+                          EnggFocus,
+                          InputWorkspace=self.__class__._data_ws, DetectorPositions=tbl,
+                          SpectrumNumbers='3', MaskBinsXMins=[1, 2, 3],
+                          OutputWorkspace='nop')
+
+        self.assertRaises(RuntimeError,
+                          EnggFocus,
+                          InputWorkspace=self.__class__._data_ws, DetectorPositions=tbl,
+                          SpectrumNumbers='3', MaskBinsXMaxs=[10, 20, 30],
+                          OutputWorkspace='nop')
+
     def _check_output_ok(self, wks, ws_name='', y_dim_max=1, yvalues=None):
         """
         Checks expected types, values, etc. of an output workspace from EnggFocus.
