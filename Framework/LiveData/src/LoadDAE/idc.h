@@ -33,6 +33,7 @@ typedef struct idc_info *idc_handle_t;
 typedef void (*idc_error_report_t)(int status, int code, const char *messsage);
 
 #ifdef __cplusplus
+#include <cstdint>
 extern "C" {
 #endif
 
