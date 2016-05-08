@@ -21,7 +21,10 @@ them up into a single spectrum) and then converts them back to
 TOF. The output workspace produced by this algorithm has one spectrum.
 The algorithm also normalizes the spectra values by current or proton
 charge, using :ref:`algm-NormaliseByCurrent` so that the output
-workspace is focused and normalized.
+workspace is focused and normalized. In the focusing process, several
+bins will be masked as well. A list of minimum and maximum TOF bin
+boundaries for the masking can be given. The default values of this
+list is set for the ENGIN-X instrument.
 
 If a table of detector positions is passed as an input property, the
 detectors are calibrated before performing the conversions between TOF
