@@ -82,6 +82,13 @@ class EnggCalibrateFull(PythonAlgorithm):
                              "saves the same information that is provided in the output table workspace "
                              "(OutDetPosTable).")
 
+        # The default value of '-0.0005' is borrowed from OG routines
+        self.declareProperty('RebinBinWidth', defaultValue='-0.0005', direction=Direction.Input,
+                             doc="Before calculating the calibrated positions (fitting peaks) this algorithms "
+                             "re-bins the input sample data using a single bin width parameter. This option is"
+                             "to change the default bin width which is set to the value traditionally used for "
+                             "the Engin-X instrument")
+
         opt_outs_grp = 'Optional outputs'
         self.setPropertyGroup('OutDetPosFilename', opt_outs_grp)
 
@@ -130,13 +137,13 @@ class EnggCalibrateFull(PythonAlgorithm):
         self._apply_calibration_table(in_wks, pos_tbl)
         self._output_det_pos_file(self.getPropertyValue('OutDetPosFilename'), pos_tbl)
 
-    def _prepare_ws_for_fitting(self, ws):
+    def _prepare_ws_for_fitting(self, ws, bin_width):
         """
         Rebins the workspace and converts it to distribution
         """
         rebin_alg = self.createChildAlgorithm('Rebin')
         rebin_alg.setProperty('InputWorkspace', ws)
-        rebin_alg.setProperty('Params', '-0.0005') # The value is borrowed from OG routines
+        rebin_alg.setProperty('Params', bin_width)
         rebin_alg.execute()
         result = rebin_alg.getProperty('OutputWorkspace').value
 
