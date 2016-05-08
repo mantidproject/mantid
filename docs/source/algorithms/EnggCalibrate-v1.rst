@@ -62,7 +62,7 @@ Usage
 .. testcode:: ExampleCalib
 
    out_tbl_name = 'out_params'
-   ws_name = 'test'
+   ws_name = 'test_engg_data'
    Load('ENGINX00213855.nxs', OutputWorkspace=ws_name)
 
    # Using precalculated Vanadium corrections. To calculate from scrach see EnggVanadiumCorrections
@@ -72,13 +72,13 @@ Usage
    difa1, Difc1, Zero1, peaks1 = EnggCalibrate(InputWorkspace=ws_name,
                                                VanIntegrationWorkspace=van_integ_ws,
                                                VanCurvesWorkspace=van_curves_ws,
-                                               ExpectedPeaks=[1.097, 2.1], Bank='1',
+                                               ExpectedPeaks=[1.28, 2.1], Bank='1',
                                                OutputParametersTableName=out_tbl_name)
 
    Difa1, Difc2, Zero2, peaks2 = EnggCalibrate(InputWorkspace=ws_name,
                                                VanIntegrationWorkspace=van_integ_ws,
                                                VanCurvesWorkspace=van_curves_ws,
-                                               ExpectedPeaks=[1.097, 2.1], Bank='2')
+                                               ExpectedPeaks=[1.28, 2.1], Bank='2')
 
    # You can produce an instrument parameters (iparam) file for GSAS.
    # Note that this is very specific to ENGIN-X
