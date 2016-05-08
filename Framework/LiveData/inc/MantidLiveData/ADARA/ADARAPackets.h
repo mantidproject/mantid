@@ -1,10 +1,10 @@
 #ifndef __ADARA_PACKETS_H
 #define __ADARA_PACKETS_H
 
-#include <stdint.h>
-#include <string>
+#include <cstdint>
+#include <cstring>
 #include <sstream>
-#include <string.h>
+#include <string>
 
 #include "ADARA.h"
 #include "MantidKernel/System.h"

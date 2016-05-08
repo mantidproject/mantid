@@ -1,5 +1,5 @@
+#include <cstring>
 #include <sstream>
-#include <string.h>
 
 #include "MantidLiveData/ADARA/ADARAParser.h"
 
