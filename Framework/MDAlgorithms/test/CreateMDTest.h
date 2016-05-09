@@ -239,14 +239,15 @@ public:
 
     std::string filename = alg.getPropertyValue("Filename");
     TSM_ASSERT("File was indeed created", Poco::File(filename).exists());
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
 
     // Clean up workspaces
     Mantid::API::AnalysisDataService::Instance().remove(
         "__CreateMDTest_mdworkspace");
     Mantid::API::AnalysisDataService::Instance().remove(
         "__CreateMDTest_mdworkspace_fb");
+
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
   }
 };
 
