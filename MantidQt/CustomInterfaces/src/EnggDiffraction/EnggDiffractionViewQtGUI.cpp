@@ -960,54 +960,12 @@ void EnggDiffractionViewQtGUI::resetFocus() {
   m_uiTabFocus.lineEdit_texture_grouping_file->setText("");
 }
 
-void EnggDiffractionViewQtGUI::writeOutCalibFile(
-    const std::string &outFilename, const std::vector<double> &difc,
-    const std::vector<double> &tzero, const std::vector<std::string> &bankNames,
-    const std::string &templateFile) {
-  // TODO: move most of this to the presenter
-  // TODO: this is horrible and should not last much here.
-  // Avoid running Python code. Update this as soon as we have a more stable
-  // way of generating IPARM/PRM files.
-  // Writes a file doing this:
-  // write_ENGINX_GSAS_iparam_file(output_file, difc, zero, ceria_run=241391,
-  // vanadium_run=236516, template_file=None):
-
-  // this replace is to prevent issues with network drives on windows:
-  const std::string safeOutFname =
-      boost::replace_all_copy(outFilename, "\\", "/");
-  std::string pyCode = "import EnggUtils\n";
-  pyCode += "import os\n";
-  // normalize apparently not needed after the replace, but to be double-safe:
-  pyCode += "GSAS_iparm_fname = os.path.normpath('" + safeOutFname + "')\n";
-  pyCode += "bank_names = []\n";
-  pyCode += "Difcs = []\n";
-  pyCode += "Zeros = []\n";
-  std::string templateFileVal = "None";
-  if (!templateFile.empty()) {
-    templateFileVal = "'" + templateFile + "'";
-  }
-  pyCode += "template_file = " + templateFileVal + "\n";
-  for (size_t i = 0; i < difc.size(); i++) {
-    pyCode += "bank_names.append('" + bankNames[i] + "')\n";
-    pyCode +=
-        "Difcs.append(" + boost::lexical_cast<std::string>(difc[i]) + ")\n";
-    pyCode +=
-        "Zeros.append(" + boost::lexical_cast<std::string>(tzero[i]) + ")\n";
-  }
-  pyCode +=
-      "EnggUtils.write_ENGINX_GSAS_iparam_file(output_file=GSAS_iparm_fname, "
-      "bank_names=bank_names, difc=Difcs, tzero=Zeros, "
-      "template_file=template_file) \n";
-
+std::string
+EnggDiffractionViewQtGUI::enggRunPythonCode(const std::string &pyCode) {
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
 
-  // g_log.information()
-  //     << "Saved output calibration file through Python. Status: " << status
-  //     << std::endl;
-  m_logMsgs.push_back(
-      "Run Python code to save output file, with status string: " + status);
-  m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
+  return status;
 }
 
 std::string EnggDiffractionViewQtGUI::askExistingCalibFilename() {

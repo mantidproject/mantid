@@ -1472,7 +1472,7 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   // 2nd: because runPythonCode does this by emitting a signal that goes to
   // MantidPlot, it has to be done in the view (which is a UserSubWindow).
   // First write the all banks parameters file
-  m_view->writeOutCalibFile(outFullPath.toString(), difc, tzero, bankNames);
+  writeOutCalibFile(outFullPath.toString(), difc, tzero, bankNames);
   // Then write one individual file per bank, using different templates and the
   // specific bank name as suffix
   for (size_t bankIdx = 0; bankIdx < difc.size(); ++bankIdx) {
@@ -1485,9 +1485,8 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
       templateFile = "template_ENGINX_241391_236516_South_bank.prm";
     }
 
-    m_view->writeOutCalibFile(bankOutputFullPath.toString(), {difc[bankIdx]},
-                              {tzero[bankIdx]}, {bankNames[bankIdx]},
-                              templateFile);
+    writeOutCalibFile(bankOutputFullPath.toString(), {difc[bankIdx]},
+                      {tzero[bankIdx]}, {bankNames[bankIdx]}, templateFile);
   }
   g_log.notice() << "Calibration file written as " << outFullPath.toString()
                  << std::endl;
@@ -3047,6 +3046,60 @@ Poco::Path EnggDiffractionPresenter::outFilesDir(std::string addToDir) {
     g_log.error() << "Error while find/creating a path: " << re.what();
   }
   return saveDir;
+}
+
+/**
+ * To write the calibration/instrument parameter for GSAS.
+ *
+ * @param outFilename name of the output .par/.prm/.iparm file for GSAS
+ * @param difc list of GSAS DIFC values to include in the file
+ * @param tzero list of GSAS TZERO values to include in the file
+ * @param bankNames list of bank names corresponding the the difc/tzero
+ * @param templateFile a template file where to replace the difc/zero
+ * values. An empty default implies using an "all-banks" template.
+ */
+void EnggDiffractionPresenter::writeOutCalibFile(
+    const std::string &outFilename, const std::vector<double> &difc,
+    const std::vector<double> &tzero, const std::vector<std::string> &bankNames,
+    const std::string &templateFile) {
+  // TODO: this is horrible and should be changed to avoid running
+  // Python code. Update this as soon as we have a more stable way of
+  // generating IPARM/PRM files.
+
+  // Writes a file doing this:
+  // write_ENGINX_GSAS_iparam_file(output_file, difc, zero, ceria_run=241391,
+  // vanadium_run=236516, template_file=None):
+
+  // this replace is to prevent issues with network drives on windows:
+  const std::string safeOutFname =
+      boost::replace_all_copy(outFilename, "\\", "/");
+  std::string pyCode = "import EnggUtils\n";
+  pyCode += "import os\n";
+  // normalize apparently not needed after the replace, but to be double-safe:
+  pyCode += "GSAS_iparm_fname = os.path.normpath('" + safeOutFname + "')\n";
+  pyCode += "bank_names = []\n";
+  pyCode += "Difcs = []\n";
+  pyCode += "Zeros = []\n";
+  std::string templateFileVal = "None";
+  if (!templateFile.empty()) {
+    templateFileVal = "'" + templateFile + "'";
+  }
+  pyCode += "template_file = " + templateFileVal + "\n";
+  for (size_t i = 0; i < difc.size(); i++) {
+    pyCode += "bank_names.append('" + bankNames[i] + "')\n";
+    pyCode +=
+        "Difcs.append(" + boost::lexical_cast<std::string>(difc[i]) + ")\n";
+    pyCode +=
+        "Zeros.append(" + boost::lexical_cast<std::string>(tzero[i]) + ")\n";
+  }
+  pyCode +=
+      "EnggUtils.write_ENGINX_GSAS_iparam_file(output_file=GSAS_iparm_fname, "
+      "bank_names=bank_names, difc=Difcs, tzero=Zeros, "
+      "template_file=template_file) \n";
+
+  const auto status = m_view->enggRunPythonCode(pyCode);
+  g_log.information() << "Saved output calibration file via Python. Status: "
+                      << status << std::endl;
 }
 
 /**

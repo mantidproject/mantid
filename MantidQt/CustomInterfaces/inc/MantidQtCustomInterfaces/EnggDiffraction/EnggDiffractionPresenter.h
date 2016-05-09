@@ -160,7 +160,7 @@ private:
 
   std::string outputCalibFilename(const std::string &vanNo,
                                   const std::string &ceriaNo,
-                                  const std::string &bankName="");
+                                  const std::string &bankName = "");
 
   void parseCalibrateFilename(const std::string &path, std::string &instName,
                               std::string &vanNo, std::string &ceriaNo);
@@ -178,7 +178,7 @@ private:
   std::string
   buildCalibrateSuggestedFilename(const std::string &vanNo,
                                   const std::string &ceriaNo,
-                                  const std::string &bankName="") const;
+                                  const std::string &bankName = "") const;
 
   //@}
 
@@ -308,6 +308,12 @@ private:
 
   std::string
   plotDifcZeroWorkspace(const std::string &customisedBankName) const;
+
+  void writeOutCalibFile(const std::string &outFilename,
+                         const std::vector<double> &difc,
+                         const std::vector<double> &tzero,
+                         const std::vector<std::string> &bankNames,
+                         const std::string &templateFile = "");
 
   /// keep track of the paths the user "browses to", to add them in
   /// the file search path
