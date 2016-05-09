@@ -85,25 +85,26 @@ Output:
     ws_tof = LoadMLZ(Filename='TOFTOFTestdata.nxs')
 
     # find elastic peak positions
-    # the lines below can be uncommented after PR 15962 will be merged
-    #epptable = FindEPP(ws_tof)
+    epptable = FindEPP(ws_tof)
 
     # apply TOF correction
-    #ws_tof_corr = CorrectTOF(ws_tof, epptable)
+    ws_tof_corr = CorrectTOF(ws_tof, epptable)
 
     # apply units conversion to the corrected workspace
-    #ws_dE = ConvertUnits(ws_tof_corr, Target='DeltaE', EMode='Direct', EFixed=2.27)
-    #ConvertToDistribution(ws_dE)
+    ws_dE = ConvertUnits(ws_tof_corr, Target='DeltaE', EMode='Direct', EFixed=2.27)
+    ConvertToDistribution(ws_dE)
 
     print "5 X values of raw data: ", numpy.round(ws_tof.readX(200)[580:585],2)
-    #print "5 X values corrected data: ", numpy.round(ws_tof_corr.readX(200)[580:585],2)
-    #print "5 X values after units conversion: ", numpy.round(ws_dE.readX(200)[580:585], 2)
+    print "5 X values corrected data: ", numpy.round(ws_tof_corr.readX(200)[580:585],2)
+    print "5 X values after units conversion: ", numpy.round(ws_dE.readX(200)[580:585], 2)
 
 Output:
 
 .. testoutput:: ExCorrectTOF2
 
     5 X values of raw data:  [ 8218.59  8229.09  8239.59  8250.09  8260.59]
+    5 X values corrected data:  [ 8218.61  8229.11  8239.61  8250.11  8260.61]
+    5 X values after units conversion:  [ 0.02  0.03  0.03  0.04  0.05]
 
 .. categories::
 
