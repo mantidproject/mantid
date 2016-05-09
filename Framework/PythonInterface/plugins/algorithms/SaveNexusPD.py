@@ -7,9 +7,7 @@ import numpy as np
 try:
     import h5py  # http://www.h5py.org/
 except ImportError:
-    msg = "install 'h5py' to enable 'SaveNexusPD' algorithm"
-    mantid.Logger('SaveNexusPD').warning(msg)
-
+    pass
 
 class SaveNexusPD(mantid.api.PythonAlgorithm):
     NX_CLASS = 'NX_class'
