@@ -55,6 +55,7 @@ public:
   void testCopyConstructorGivesObjectWithSameAttributes() {
     Object_sptr original =
         ComponentCreationHelper::createSphere(1.0, V3D(), "sphere");
+    original->setID("sp-1");
     int objType(-1);
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
@@ -68,6 +69,7 @@ public:
     objType = -1;
     copy.GetObjectGeom(objType, pts, radius, height);
 
+    TS_ASSERT_EQUALS("sp-1", copy.id());
     TS_ASSERT_EQUALS(2, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         copy.getGeometryHandler()));
@@ -80,6 +82,7 @@ public:
   void testAssignmentOperatorGivesObjectWithSameAttributes() {
     Object_sptr original =
         ComponentCreationHelper::createSphere(1.0, V3D(), "sphere");
+    original->setID("sp-1");
     int objType(-1);
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
@@ -94,6 +97,7 @@ public:
     objType = -1;
     lhs.GetObjectGeom(objType, pts, radius, height);
 
+    TS_ASSERT_EQUALS("sp-1", lhs.id());
     TS_ASSERT_EQUALS(2, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         lhs.getGeometryHandler()));
