@@ -1320,7 +1320,7 @@ public:
     for (size_t spec = 0; spec < numspec; ++spec) {
       TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(spec));
     }
-    ws.histogram(workspaceIndexWithDx[0]).mutableDx() = dxSpec0;
+    ws.mutableDx(workspaceIndexWithDx[0]) = dxSpec0;
     ws.setDx(workspaceIndexWithDx[1], dxSpec1);
     ws.setDx(workspaceIndexWithDx[2], dxSpec2);
 

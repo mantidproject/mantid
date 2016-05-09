@@ -129,14 +129,24 @@ public:
     mutableHistogramRef().setPoints(std::forward<T>(data)...);
   }
   const HistogramData::HistogramX &x() const { return histogramRef().x(); }
+  const HistogramData::HistogramDx &dx() const { return histogramRef().dx(); }
   HistogramData::HistogramX &mutableX() {
     return mutableHistogramRef().mutableX();
+  }
+  HistogramData::HistogramDx &mutableDx() {
+    return mutableHistogramRef().mutableDx();
   }
   Kernel::cow_ptr<HistogramData::HistogramX> sharedX() const {
     return histogramRef().sharedX();
   }
+  Kernel::cow_ptr<HistogramData::HistogramDx> sharedDx() const {
+    return histogramRef().sharedDx();
+  }
   void setSharedX(const Kernel::cow_ptr<HistogramData::HistogramX> &x) {
     mutableHistogramRef().setSharedX(x);
+  }
+  void setSharedDx(const Kernel::cow_ptr<HistogramData::HistogramDx> &dx) {
+    mutableHistogramRef().setSharedDx(dx);
   }
 
 protected:

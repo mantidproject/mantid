@@ -100,7 +100,7 @@ Workspace2D_sptr Create1DWorkspaceConstantWithXerror(int size, double value,
                                                      double xError) {
   auto ws = Create1DWorkspaceConstant(size, value, error);
   auto dx1 = Kernel::make_cow<HistogramData::HistogramDx>(size, xError);
-  ws->histogram(0).setSharedDx(dx1);
+  ws->setSharedDx(0, dx1);
   return ws;
 }
 
@@ -178,7 +178,7 @@ Workspace2D_sptr Create2DWorkspaceWithValuesAndXerror(
   auto dx1 = Kernel::make_cow<HistogramData::HistogramDx>(
       isHist ? nBins + 1 : nBins, dxVal);
   for (int i = 0; i < nHist; i++) {
-    ws->histogram(i).setSharedDx(dx1);
+    ws->setSharedDx(i, dx1);
   }
   return ws;
 }

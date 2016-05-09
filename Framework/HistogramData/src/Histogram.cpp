@@ -45,6 +45,7 @@ Points Histogram::points() const {
   Throws if the size does not match the current size. */
 void Histogram::setSharedX(const Kernel::cow_ptr<HistogramX> &X) & {
   // TODO Check size only if we have y-data.
+  // TODO but if size changes, also need to invalidate m_dx!
   if (m_x->size() != X->size())
     throw std::logic_error("Histogram::setSharedX: size mismatch\n");
   m_x = X;
@@ -54,8 +55,8 @@ void Histogram::setSharedX(const Kernel::cow_ptr<HistogramX> &X) & {
 
   Throws if the size does not match the current size. */
 void Histogram::setSharedDx(const Kernel::cow_ptr<HistogramDx> &Dx) & {
-  // TODO Check size only if we have y-data.
-  if (m_dx->size() != Dx->size())
+  // Note that we compare with m_x -- m_dx might be NULL.
+  if (m_x->size() != Dx->size())
     throw std::logic_error("Histogram::setSharedDx: size mismatch\n");
   m_dx = Dx;
 }

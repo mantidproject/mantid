@@ -445,7 +445,7 @@ void LoadAscii2::addToCurrentSpectra(std::list<std::string> &columns) {
   case 4: {
     // E and DX in file, include both
     m_curSpectra->dataE().push_back(values[2]);
-    m_curSpectra->dataDx().push_back(values[3]);
+    m_curDx.push_back(values[3]);
     break;
   }
   }
@@ -502,6 +502,9 @@ void LoadAscii2::newSpectra() {
     if (m_curSpectra) {
       size_t specSize = m_curSpectra->size();
       if (specSize > 0 && specSize == m_lastBins) {
+        if(m_curSpectra->readX().size() == m_curDx.size())
+          m_curSpectra->setSharedDx(
+              Kernel::make_cow<HistogramData::HistogramDx>(std::move(m_curDx)));
         m_spectra.push_back(*m_curSpectra);
       }
       delete m_curSpectra;
@@ -509,6 +512,7 @@ void LoadAscii2::newSpectra() {
 
     m_curSpectra =
         new DataObjects::Histogram1D(HistogramData::Histogram::XMode::Points);
+    m_curDx.clear();
     m_spectraStart = true;
   }
 }

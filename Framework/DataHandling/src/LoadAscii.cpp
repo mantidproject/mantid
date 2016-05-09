@@ -178,6 +178,7 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
   int numBins(0), lineNo(0);
   std::vector<DataObjects::Histogram1D> spectra(
       numSpectra, HistogramData::Histogram::XMode::Points);
+  std::vector<double> dx;
   std::vector<double> values(numCols, 0.);
   do {
     ++lineNo;
@@ -206,14 +207,20 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
       if (haveErrors) {
         spectra[i].dataE().push_back(values[i * 2 + 2]);
       }
-      if (haveXErrors) {
-        // Note: we only have X errors with 4-column files.
-        // We are only here when i=0.
-        spectra[i].dataDx().push_back(values[3]);
-      }
+    }
+    if (haveXErrors) {
+      // Note: we only have X errors with 4-column files.
+      // We are only here when i=0.
+      dx.push_back(values[3]);
     }
     ++numBins;
   } while (getline(file, line));
+  auto sharedDx = Kernel::make_cow<HistogramData::HistogramDx>(dx);
+  for (size_t i = 0; i < numSpectra; ++i) {
+    if (haveXErrors) {
+      spectra[i].setSharedDx(sharedDx);
+    }
+  }
 
   MatrixWorkspace_sptr localWorkspace =
       boost::dynamic_pointer_cast<MatrixWorkspace>(

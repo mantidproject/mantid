@@ -99,7 +99,8 @@ public:
 
     // setDX vesion 2
     SpectrumTester s4(HistogramData::Histogram::XMode::Points);
-    boost::shared_ptr<Mantid::HistogramData::HistogramDx> Dx_vec_ptr_type;
+    auto Dx_vec_ptr_type =
+        boost::make_shared<Mantid::HistogramData::HistogramDx>(0);
     s4.setDx(Dx_vec_ptr_type);
     TS_ASSERT(s4.hasDx());
 
@@ -110,11 +111,11 @@ public:
     TS_ASSERT(s5.hasDx());
   }
 
-  void test_use_dx_flag_not_being_set_when_accessing_dx_with_const() {
+  void test_use_dx_flag_being_set_when_accessing_dx_with_const() {
     // const dataDx()
     const SpectrumTester s(HistogramData::Histogram::XMode::Points);
     s.dataDx();
-    TS_ASSERT(!s.hasDx());
+    TS_ASSERT(s.hasDx());
   }
 
   void test_use_dx_flag_is_copied_during_copy_construction() {

@@ -198,15 +198,29 @@ public:
   const HistogramData::HistogramX &x(const size_t index) const {
     return getSpectrum(index)->x();
   }
+  const HistogramData::HistogramDx &dx(const size_t index) const {
+    return getSpectrum(index)->dx();
+  }
   HistogramData::HistogramX &mutableX(const size_t index) {
     return getSpectrum(index)->mutableX();
+  }
+  HistogramData::HistogramDx &mutableDx(const size_t index) {
+    return getSpectrum(index)->mutableDx();
   }
   Kernel::cow_ptr<HistogramData::HistogramX> sharedX(const size_t index) const {
     return getSpectrum(index)->sharedX();
   }
+  Kernel::cow_ptr<HistogramData::HistogramDx>
+  sharedDx(const size_t index) const {
+    return getSpectrum(index)->sharedDx();
+  }
   void setSharedX(const size_t index,
                   const Kernel::cow_ptr<HistogramData::HistogramX> &x) {
     getSpectrum(index)->setSharedX(x);
+  }
+  void setSharedDx(const size_t index,
+                  const Kernel::cow_ptr<HistogramData::HistogramDx> &dx) {
+    getSpectrum(index)->setSharedDx(dx);
   }
 
   // Methods for getting read-only access to the data.
