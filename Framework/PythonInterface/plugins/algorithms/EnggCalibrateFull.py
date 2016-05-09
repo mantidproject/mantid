@@ -128,7 +128,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         # calibration step, which creates a cycle / chicken-and-egg issue.
         EnggUtils.applyVanadiumCorrections(self, in_wks, wks_indices, van_wks, van_integ_wks, van_curves_wks)
 
-        rebinned_ws = self._prepare_ws_for_fitting(in_wks)
+        rebinned_ws = self._prepare_ws_for_fitting(in_wks, self.getProperty('RebinBinWidth').value)
         pos_tbl, peaks_tbl = self._calculate_calib_positions_tbl(rebinned_ws, wks_indices, expectedPeaksD)
 
         # Produce 2 results: 'output table' and 'apply calibration' + (optional) calibration file

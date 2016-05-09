@@ -1397,14 +1397,14 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   // Bank 1 and 2 - ENGIN-X
   // bank 1 - loops once & used for cropped calibration
   // bank 2 - loops twice, one with each bank & used for new calibration
-  constexpr size_t bankNo1 = 1;
-  constexpr size_t bankNo2 = 2;
   std::vector<double> difc, tzero;
   // for the names of the output files
   std::vector<std::string> bankNames;
 
   bool specNumUsed = specNos != "";
   if (specNumUsed) {
+    constexpr size_t bankNo1 = 1;
+
     difc.resize(bankNo1);
     tzero.resize(bankNo1);
     const std::string customName = m_view->currentCalibCustomisedBankName();
@@ -1414,6 +1414,8 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
       bankNames.push_back(customName);
     }
   } else {
+    constexpr size_t bankNo2 = 2;
+
     difc.resize(bankNo2);
     tzero.resize(bankNo2);
     bankNames = {"North", "South"};
