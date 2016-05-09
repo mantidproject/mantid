@@ -62,7 +62,7 @@ Improvements
    I(Q,t) Fit tab, but it does now have a dialogue box interface from the algorithm list.
    This also allows for better testing, progress tracking and documentation of the algorithm.
 
-- :ref:`BASISReduction <algm-BASISReduction>` now accepts Vanadium runs for normalization.
+- :ref:`BASISReduction <algm-BASISReduction>` now accepts Vanadium runs for normalization, and one option to normalize by the maximum of the first spectrum.
 
 - :ref:`QECoverage <Interfaces>` planning tool has now been updated, There is now an Emin option included for direct tab,
     If Emin or Emax are left empty; appropriate values are set automatically, the negative values of Ei are treated as
