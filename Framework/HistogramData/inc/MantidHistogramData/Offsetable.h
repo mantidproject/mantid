@@ -9,7 +9,11 @@ namespace Mantid {
 namespace HistogramData {
 namespace detail {
 
-/** Offsetable : TODO: DESCRIPTION
+/** Offsetable
+
+  This class is an implementation detail of class like HistogramData::BinEdges
+  and HistogramData::HistogramX. By inheriting from it, a type becomes
+  offsetable, i.e., a scalar can be added to it.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -34,6 +38,7 @@ namespace detail {
 */
 template <class T> class Offsetable {
 public:
+  /// Offsets each element in the container by offset.
   T &operator+=(const double offset) & {
     auto &derived = static_cast<T &>(*this);
     std::for_each(derived.begin(), derived.end(),
@@ -45,6 +50,7 @@ protected:
   ~Offsetable() = default;
 };
 
+/// Offsets each element in lhs by rhs.
 template <class T> inline T operator+(T lhs, const double rhs) {
   return lhs += rhs;
 }

@@ -9,7 +9,11 @@ namespace Mantid {
 namespace HistogramData {
 namespace detail {
 
-/** Scalable : TODO: DESCRIPTION
+/** Scalable
+
+  This class is an implementation detail of class like HistogramData::BinEdges
+  and HistogramData::HistogramX. By inheriting from it, a type becomes scalable,
+  i.e., can be multiplied by a scalar.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -34,6 +38,7 @@ namespace detail {
 */
 template <class T> class Scalable {
 public:
+  /// Scales each element in the container by the factor given by scale.
   T &operator*=(const double scale) & {
     auto &derived = static_cast<T &>(*this);
     std::for_each(derived.begin(), derived.end(),
@@ -45,6 +50,7 @@ protected:
   ~Scalable() = default;
 };
 
+/// Scales each element in lhs by the factor given by rhs.
 template <class T> inline T operator*(T lhs, const double rhs) {
   return lhs *= rhs;
 }

@@ -16,7 +16,13 @@ template <class BinEdges, class HistogramX> class VectorOf;
 template <class Points, class HistogramX> class VectorOf;
 }
 
-/** HistogramX : TODO: DESCRIPTION
+/** HistogramX
+
+  This class holds x-data of a histogram. The x-data can be bin edges or points.
+  HistogramX is used to directly reference data in a Histogram when it needs to
+  be modified without a specific need for bin edges or points. To prevent
+  breaking the histogram, the length of HistogramX cannot be changed via the
+  public interface.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -49,6 +55,7 @@ public:
 
   HistogramX() = default;
 
+  // The classes are friends, such that they can modify the length.
   friend class Histogram;
   friend class detail::VectorOf<BinEdges, HistogramX>;
   friend class detail::VectorOf<Points, HistogramX>;

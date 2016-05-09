@@ -13,7 +13,9 @@ namespace HistogramData {
 
 class Points;
 
-/** BinEdges : TODO: DESCRIPTION
+/** BinEdges
+
+  Container for the bin edges of a histogram.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -52,6 +54,8 @@ public:
   BinEdges &operator=(const BinEdges &)& = default;
   BinEdges &operator=(BinEdges &&)& = default;
 
+  /// Constructs BinEdges from points, approximating each bin edges as mid-point
+  /// between two points.
   explicit BinEdges(const Points &points);
 };
 

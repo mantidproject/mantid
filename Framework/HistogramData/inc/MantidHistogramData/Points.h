@@ -13,7 +13,10 @@ namespace HistogramData {
 
 class BinEdges;
 
-/** Points : TODO: DESCRIPTION
+/** Points
+
+  Container for the points a histogram. This roughly corresponds to the bin
+  centers of the histogram.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -52,6 +55,7 @@ public:
   Points &operator=(const Points &)& = default;
   Points &operator=(Points &&)& = default;
 
+  /// Constructs Points from BinEdges, where each point is a bin center.
   Points(const BinEdges &edges);
 };
 

@@ -7,7 +7,11 @@ namespace Mantid {
 namespace HistogramData {
 namespace detail {
 
-/** Iterable : TODO: DESCRIPTION
+/** Iterable
+
+  This class is an implementation detail of class like HistogramData::BinEdges
+  and HistogramData::Points. By inheriting from it, a type becomes iterable,
+  i.e., provides index and iterator based access.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -32,8 +36,11 @@ namespace detail {
 */
 template <class T> class Iterable {
 public:
-  // Note: There is no non-const version of this since it requires expensive cow
-  // access.
+  /** Returns a const reference to the element at specified location pos. No
+   * bounds checking is performed.
+   *
+   * Note: There is no non-const version of this since it requires expensive cow
+   * access. */
   const double &operator[](size_t pos) const {
     return static_cast<const T *>(this)->data()[pos];
   }
