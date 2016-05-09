@@ -133,10 +133,21 @@ Usage
 
 .. code-block:: python
 
-   wks=Load('ENGINX00241391')
+   # You would normally generate the focused file using the Engg GUI or,
+   # alternatively, with commands like these:
+   #
+   # wks = Load('ENGINX00256663-256675')
+   # wks_ceria = Load('ENGINX00255924')
+   # wks_vana = Load('ENGINX00254854')
+   # # Using default expected peaks for Ceria
+   # difa, difc, tzero, peaks_tbl = EnggCalibrate(InputWorkspace=wks_ceria, VanadiumWorkspace=wks_vana, Bank='North')
+   # wks_focused = EnggFocus(InputWorkspace=wks, VanadiumWorkspace=wks_vana, Bank='North')
+   # SaveNexus(InputWorkspace=wks_focused, Filename='focused_bank1_ENGINX00256663.nxs')
+   #
+   wks=Load('focused_bank1_ENGINX00256663.nxs')
    GoF, Rwp, lattice_tbl = GSASIIRefineFitPeaks(InputWorkspace=wks,
-                                                InstrumentFile='ENGINX_241391_236516_North_bank.par',
-                                                PhaseInfoFile='GRAPHITE_P63MC.cif',
+                                                InstrumentFile='ENGINX_255924_254854_North_bank.par',
+                                                PhaseInfoFile='FE_ALPHA.cif',
                                                 PathToGSASII='/home/user/gsas',
                                                 SaveGSASIIProjectFile='example_gsas2_project',
                                                 LatticeParameters='lattice_tbl')
@@ -149,19 +160,19 @@ Output:
 
 .. code-block:: none
 
-    Goodness of fit coefficient: 0.0379312653294
-    Weighted profile R-factor (Rwp): 28.8433213435
-    Lattice parameters, a: 2.47, b: 2.47, c: 6.79, alpha: 90.0, beta: 90.0, gamma: 120.0, Volume: 35.875
+    Goodness of fit coefficient: 3.63591
+    Weighted profile R-factor (Rwp): 77.27831
+    Lattice parameters, a: 2.8665, b: 2.8665, c: 2.8665, alpha: 90.0, beta: 90.0, gamma: 90.0, Volume: 23.554
 
 **Example - Rietveld refinement of lattice parameters from a diffraction spectrum**
 
 .. code-block:: python
 
-   ws=Load('ENGINX00241391')
-   GoF, Rwp, lattice_tbl = GSASIIRefineFitPeaks(InputWorkspace=ws,
-                                                method='Rietveld refinement',
-                                                InstrumentFile='ENGINX_241391_236516_North_bank.par',
-                                                PhaseInfoFile='GRAPHITE_P63MC.cif',
+   wks=Load('focused_bank1_ENGINX00256663.nxs')
+   GoF, Rwp, lattice_tbl = GSASIIRefineFitPeaks(InputWorkspace=wks,
+                                                Method='Rietveld refinement',
+                                                InstrumentFile='ENGINX_255924_254854_North_bank.par',
+                                                PhaseInfoFile='FE_ALPHA.cif',
                                                 PathToGSASII='/home/user/gsas',
                                                 SaveGSASIIProjectFile='example_gsas2_project',
                                                 LatticeParameters='lattice_tbl')
@@ -174,20 +185,21 @@ Output:
 
 .. code-block:: none
 
-    Goodness of fit coefficient: 0.03785
-    Weighted profile R-factor (Rwp): 28.77990
-    Lattice parameters, a: 2.47, b: 2.47, c: 6.79, alpha: 90.0, beta: 90.0, gamma: 120.0, Volume: 35.875
+    Goodness of fit coefficient: 3.62483
+    Weighted profile R-factor (Rwp): 77.03530
+    Lattice parameters, a: 2.8665, b: 2.8665, c: 2.8665, alpha: 90.0, beta: 90.0, gamma: 90.0, Volume: 23.554
 
 **Example - Fit several peaks from a diffraction spectrum**
 
 .. code-block:: python
 
-   ws=Load('ENGINX00241391')
-   ws=Load('241391')
+   wks=Load('focused_bank1_ENGINX00256663.nxs')
    params_tbl_name = 'tbl_fitted_params'
-   GoF, Rwp, lattice_tbl = GSASIIRefineFitPeaks(InputWorkspace=ws, method='Peak fitting',
-                                                InstrumentFile='ENGINX_241391_236516_North_bank.par',
-                                                PhaseInfoFile='GRAPHITE_P63MC.cif',
+   GoF, Rwp, lattice_tbl = GSASIIRefineFitPeaks(InputWorkspace=wks,
+                                                Method='Peak fitting',
+                                                FittedPeakParameters=params_tbl_name,
+                                                InstrumentFile='ENGINX_255924_254854_North_bank.par',
+                                                PhaseInfoFile='FE_ALPHA.cif',
                                                 PathToGSASII='/home/user/mantid-repos/gsas',
                                                 SaveGSASIIProjectFile='test_gsas2_project',
                                                 FittedPeakParameters=params_tbl_name)
@@ -201,8 +213,8 @@ Output:
 
 .. code-block:: none
 
-    Fitted 60 peaks.
-    Parameters of the first peak. Center: 67555.2, intensity: 1.00000, alpha: 0.07449, beta: 0.01813, sigma: 10885.67571, gamma: 20.51399
+    Fitted 18 peaks.
+    Parameters of the first peak. Center: 38563.8, intensity: 26.22137, alpha: 0.13125, beta: 0.01990, sigma: 125475.11036, gamma: -6681.38965
 
 .. categories::
 
