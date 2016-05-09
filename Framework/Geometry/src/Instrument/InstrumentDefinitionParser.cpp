@@ -1433,7 +1433,7 @@ void InstrumentDefinitionParser::createStructuredDetector(
   std::string beamDir = "";
 
   while (pNode) {
-    if (pNode->nodeName().compare("along-axis") == 0) {
+    if (pNode->nodeName().compare("along-beam") == 0) {
       Element *alongAxis = static_cast<Element *>(pNode);
       beamDir = alongAxis->getAttribute("axis").c_str();
     }
