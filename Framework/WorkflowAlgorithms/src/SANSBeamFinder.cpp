@@ -174,7 +174,7 @@ void SANSBeamFinder::exec() {
 
     // HFIR reduction masks the first pixels on each edge of the detector
     if (specialMapping)
-    	// int high, int low, int left, int right
+      // int high, int low, int left, int right
       maskEdges(beamCenterWS, 1, 1, 1, 1);
 
     IAlgorithm_sptr ctrAlg = createChildAlgorithm("FindCenterOfMassPosition");
@@ -247,47 +247,55 @@ void SANSBeamFinder::maskEdges(MatrixWorkspace_sptr beamCenterWS, int high,
                                const std::string &componentName) {
 
   auto instrument = beamCenterWS->getInstrument();
-  auto component = boost::const_pointer_cast<Mantid::Geometry::RectangularDetector>(
-      boost::dynamic_pointer_cast<const Mantid::Geometry::RectangularDetector>(
-          instrument->getComponentByName(componentName)));
+
+  boost::shared_ptr<Mantid::Geometry::RectangularDetector> component;
+  try {
+    component =
+        boost::const_pointer_cast<Mantid::Geometry::RectangularDetector>(
+            boost::dynamic_pointer_cast<
+                const Mantid::Geometry::RectangularDetector>(
+                instrument->getComponentByName(componentName)));
+  } catch (std::exception &) {
+    g_log.warning("Expecting the component " + componentName +
+                  " to be a RectangularDetector. maskEdges not executed.");
+    return;
+  }
   std::vector<int> IDs;
 
   // right
   for (int i = 0; i < right * component->idstep(); i++) {
     IDs.push_back(component->idstart() + i);
   }
-
   // left
   for (int i = component->maxDetectorID();
        i > (component->maxDetectorID() - left * component->idstep()); i--) {
     IDs.push_back(i);
   }
-
-  // TODO:
-  // Finish: Not working
-
   // low
   // 0,256,512,768,..,1,257,513
   for (int row = 0; row < low; row++) { // 0,1
-    for (int i = row; i < low * component->nelements() + component->idstep();
+    for (int i = row + component->idstart();
+         i < component->nelements() * component->idstep() -
+                 component->idstep() + low + component->idstart();
+         i += component->idstep()) {
+      IDs.push_back(i);
+    }
+  }
+  // high
+  // 255, 511, 767..
+  for (int row = 0; row < high; row++) {
+    for (int i = component->idstep() + component->idstart() - row - 1;
+         i < component->nelements() * component->idstep() +
+                 component->idstart();
          i += component->idstep()) {
       IDs.push_back(i);
     }
   }
 
-  // high
-  //
-//  for (int row = 0; row < component->nelements(); row++) {
-//
-//    for (int i = row; i < low * component->idstep() * component->nelements();
-//         i += component->idstep()) {
-//      IDs.push_back(i);
-//    }
-//  }
-
-  g_log.debug() << "Detector Ids to Mask:" << std::endl;
-  for (auto id : IDs){
-	  g_log.debug() << id << " ";
+  g_log.debug() << "SANSBeamFinder::maskEdges Detector Ids to Mask:"
+                << std::endl;
+  for (auto id : IDs) {
+    g_log.debug() << id << " ";
   }
   g_log.debug() << std::endl;
 
