@@ -32,7 +32,7 @@ namespace detail {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <class T> class MANTID_HISTOGRAMDATA_DLL Scalable {
+template <class T> class Scalable {
 public:
   T &operator*=(const double scale) {
     auto &derived = static_cast<T &>(*this);
