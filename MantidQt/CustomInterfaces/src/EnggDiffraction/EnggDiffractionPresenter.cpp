@@ -213,7 +213,7 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
           "valid range or a Bank Name can be selected instead");
     }
   } catch (std::invalid_argument &ia) {
-    m_view->userWarning("Error in the inputs required for calibrate",
+    m_view->userWarning("Error in the inputs required for cropped calibration",
                         ia.what());
     return;
   }
