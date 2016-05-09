@@ -351,22 +351,32 @@ class LoadCalibTests(unittest.TestCase):
         tt_35_file = 'van_spline_TT35_cycle_15_3.nxs'
         van_tt35_data = LoadNexusProcessed(Filename=vanadium_file_dir + tt_35_file,
                                            OutputWorkspace=tt_35_file)
-        self.matrix_workspaces_test(van_tt35_data)
+        self.matrix_workspaces_test(van_tt35_data, 'tt35')
 
         tt_70_file = 'van_spline_TT70_cycle_15_3.nxs'
         van_tt70_data = LoadNexusProcessed(Filename=vanadium_file_dir + tt_70_file,
                                            OutputWorkspace=tt_70_file)
-        self.matrix_workspaces_test(van_tt70_data)
+        self.matrix_workspaces_test(van_tt70_data, 'tt70')
 
         tt_88_file = 'van_spline_TT88_cycle_15_3.nxs'
         van_tt88_data = LoadNexusProcessed(Filename=vanadium_file_dir + tt_88_file,
                                            OutputWorkspace=tt_88_file)
-        self.matrix_workspaces_test(van_tt88_data)
+        self.matrix_workspaces_test(van_tt88_data, 'tt88')
 
-    def matrix_workspaces_test(self, vanadium_tt_file):
+    def matrix_workspaces_test(self, vanadium_tt_file, tt_mode='tt35'):
         for i in range(1, 15):
             self.assertTrue(isinstance(vanadium_tt_file[i], MatrixWorkspace))
             self.assertTrue('spline' + str(i) in vanadium_tt_file[i].getName())
             self.assertTrue(isinstance(vanadium_tt_file[i], MatrixWorkspace))
             self.assertEquals(1, vanadium_tt_file[i].getNumberHistograms())
             self.assertEquals(8149, vanadium_tt_file[i].blocksize())
+
+        mtd_tt_workspace = mtd['van_' + tt_mode]
+        for i in range(1, 15):
+            self.assertEqual(mtd_tt_workspace[i - 1].readY(0)[2], vanadium_tt_file[i].readY(0)[2])
+            self.assertEqual(mtd_tt_workspace[i - 1].readY(0)[345], vanadium_tt_file[i].readY(0)[345])
+            self.assertEqual(mtd_tt_workspace[i - 1].readY(0)[1343], vanadium_tt_file[i].readY(0)[1343])
+            self.assertEqual(mtd_tt_workspace[i - 1].readY(0)[5984], vanadium_tt_file[i].readY(0)[5984])
+            self.assertEqual(mtd_tt_workspace[i - 1].readY(0)[7654], vanadium_tt_file[i].readY(0)[7654])
+            self.assertEqual(mtd_tt_workspace[i - 1].readX(0)[734], vanadium_tt_file[i].readX(0)[734])
+            self.assertEqual(mtd_tt_workspace[i - 1].readE(0)[17], vanadium_tt_file[i].readE(0)[17])
