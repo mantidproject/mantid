@@ -225,15 +225,7 @@ class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest
     def runTest(self):
         self._success = False
 
-        import pearl_routines
-
-        # initial directory to the system test data files
-        DIRS = config['datasearch.directories'].split(';')
-
         pearl_routines.PEARL_startup("Calib", "15_3")
-
-        # setting files directory here
-        # DIRS[0] is the system test data directory
 
         # setting raw files directory
         DataDir = DIRS[0] + 'PEARL/Calibration_Test/RawFiles/'
@@ -331,10 +323,10 @@ class LoadCalibTests(unittest.TestCase):
                                    mtd['cal_' + cal_type + '_15_3_mask'],
                                    mtd['cal_' + cal_type + '_15_3_offsets']))
 
-        for ws in cal_workspaces:
-            self.assertTrue(isinstance(ws, MatrixWorkspace))
-            self.assertEquals(1056, ws.getNumberHistograms())
-            self.assertEquals(1, ws.blocksize())
+        for workspace in cal_workspaces:
+            self.assertTrue(isinstance(workspace, MatrixWorkspace))
+            self.assertEquals(1056, workspace.getNumberHistograms())
+            self.assertEquals(1, workspace.blocksize())
 
         table_workspaces = []
         table_workspaces.extend((mtd['cal_group_15_3_cal'], mtd['cal_offset_15_3_cal']))
@@ -353,4 +345,28 @@ class LoadCalibTests(unittest.TestCase):
         self.assertAlmostEqual(5219.48, table_workspaces[0].cell(703, 1), places=diff_places)
         self.assertAlmostEqual(3018.97, table_workspaces[1].cell(1055, 1), places=diff_places)
 
+    def test_vanadium_tt_mode_files(self):
 
+        vanadium_file_dir = (DIRS[0] + 'PEARL/Calibration_Test/Calibration/')
+        tt_35_file = 'van_spline_TT35_cycle_15_3.nxs'
+        van_tt35_data = LoadNexusProcessed(Filename=vanadium_file_dir + tt_35_file,
+                                           OutputWorkspace=tt_35_file)
+        self.matrix_workspaces_test(van_tt35_data)
+
+        tt_70_file = 'van_spline_TT70_cycle_15_3.nxs'
+        van_tt70_data = LoadNexusProcessed(Filename=vanadium_file_dir + tt_70_file,
+                                           OutputWorkspace=tt_70_file)
+        self.matrix_workspaces_test(van_tt70_data)
+
+        tt_88_file = 'van_spline_TT88_cycle_15_3.nxs'
+        van_tt88_data = LoadNexusProcessed(Filename=vanadium_file_dir + tt_88_file,
+                                           OutputWorkspace=tt_88_file)
+        self.matrix_workspaces_test(van_tt88_data)
+
+    def matrix_workspaces_test(self, vanadium_tt_file):
+        for i in range(1, 15):
+            self.assertTrue(isinstance(vanadium_tt_file[i], MatrixWorkspace))
+            self.assertTrue('spline' + str(i) in vanadium_tt_file[i].getName())
+            self.assertTrue(isinstance(vanadium_tt_file[i], MatrixWorkspace))
+            self.assertEquals(1, vanadium_tt_file[i].getNumberHistograms())
+            self.assertEquals(8149, vanadium_tt_file[i].blocksize())
