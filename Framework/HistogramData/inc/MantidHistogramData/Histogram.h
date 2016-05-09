@@ -5,6 +5,7 @@
 #include "MantidKernel/cow_ptr.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Points.h"
+#include "MantidHistogramData/HistogramDx.h"
 
 #include <vector>
 
@@ -37,6 +38,8 @@ namespace HistogramData {
 class MANTID_HISTOGRAMDATA_DLL Histogram {
 private:
   Kernel::cow_ptr<HistogramX> m_x;
+  // Mutable until Dx legacy interface is removed.
+  mutable Kernel::cow_ptr<HistogramDx> m_dx{nullptr};
 
 public:
   enum class XMode { BinEdges, Points };
@@ -65,10 +68,14 @@ public:
   template <typename... T> void setPoints(T &&... data) & ;
 
   const HistogramX &x() const { return *m_x; }
+  const HistogramDx &dx() const { return *m_dx; }
   HistogramX &mutableX() & { return m_x.access(); }
+  HistogramDx &mutableDx() & { return m_dx.access(); }
 
   Kernel::cow_ptr<HistogramX> sharedX() const { return m_x; }
+  Kernel::cow_ptr<HistogramDx> sharedDx() const { return m_dx; }
   void setSharedX(const Kernel::cow_ptr<HistogramX> &X) & ;
+  void setSharedDx(const Kernel::cow_ptr<HistogramDx> &Dx) & ;
 
   // Temporary legacy interface to X
   void setX(const Kernel::cow_ptr<HistogramX> &X) & { m_x = X; }
@@ -76,6 +83,30 @@ public:
   const MantidVec &dataX() const & { return m_x->rawData(); }
   const MantidVec &readX() const { return m_x->rawData(); }
   Kernel::cow_ptr<HistogramX> ptrX() const { return m_x; }
+
+  // Temporary legacy interface to Dx. Note that accessors mimic the current
+  // behavior which always has Dx allocated.
+  void setDx(const Kernel::cow_ptr<HistogramDx> &Dx) { m_dx = Dx; }
+  MantidVec &dataDx() {
+    if(!m_dx)
+      m_dx = Kernel::make_cow<HistogramDx>(m_x->size(), 0.0);
+    return m_dx.access().mutableRawData();
+  }
+  const MantidVec &dataDx() const {
+    if(!m_dx)
+      m_dx = Kernel::make_cow<HistogramDx>(m_x->size(), 0.0);
+    return m_dx->rawData();
+  }
+  const MantidVec &readDx() const {
+    if(!m_dx)
+      m_dx = Kernel::make_cow<HistogramDx>(m_x->size(), 0.0);
+    return m_dx->rawData();
+  }
+  Kernel::cow_ptr<HistogramDx> ptrDx() const {
+    if(!m_dx)
+      m_dx = Kernel::make_cow<HistogramDx>(m_x->size(), 0.0);
+    return m_dx;
+  }
 
 private:
   void checkSize(const Points &points) const;

@@ -50,6 +50,16 @@ void Histogram::setSharedX(const Kernel::cow_ptr<HistogramX> &X) & {
   m_x = X;
 }
 
+/** Sets the internal dx-data pointer of the Histogram.
+
+  Throws if the size does not match the current size. */
+void Histogram::setSharedDx(const Kernel::cow_ptr<HistogramDx> &Dx) & {
+  // TODO Check size only if we have y-data.
+  if (m_dx->size() != Dx->size())
+    throw std::logic_error("Histogram::setSharedDx: size mismatch\n");
+  m_dx = Dx;
+}
+
 void Histogram::checkSize(const Points &points) const {
   size_t target = m_x->size();
   // 0 edges -> 0 points, otherwise points are 1 less than edges.

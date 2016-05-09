@@ -9,6 +9,7 @@ set ( INC_FILES
 	inc/MantidHistogramData/BinEdges.h
 	inc/MantidHistogramData/FixedLengthVector.h
 	inc/MantidHistogramData/Histogram.h
+	inc/MantidHistogramData/HistogramDx.h
 	inc/MantidHistogramData/HistogramX.h
 	inc/MantidHistogramData/Iterable.h
 	inc/MantidHistogramData/Offsetable.h
@@ -20,6 +21,7 @@ set ( INC_FILES
 set ( TEST_FILES
 	BinEdgesTest.h
 	FixedLengthVectorTest.h
+	HistogramDxTest.h
 	HistogramTest.h
 	HistogramXTest.h
 	IterableTest.h
