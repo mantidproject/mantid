@@ -70,8 +70,8 @@ void StatisticsOfPeaksWorkspace::init() {
                                      "Overall"};
   declareProperty("SortBy", sortTypes[0],
                   boost::make_shared<StringListValidator>(sortTypes),
-                  "Sort the peaks by bank, run number(default) or only overall "
-                  "statistics.");
+                  "Sort the peaks by resolution shell in d-Spacing(default), "
+                  "bank, run number, or only overall statistics.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -151,7 +151,8 @@ void StatisticsOfPeaksWorkspace::exec() {
       sequence = p.getBankName();
 
     if (sequence.compare(oldSequence) != 0 && tempWS->getNumberPeaks() > 0) {
-      if (tempWS->getNumberPeaks() > 1) doSortHKL(tempWS, oldSequence);
+      if (tempWS->getNumberPeaks() > 1)
+        doSortHKL(tempWS, oldSequence);
       tempWS = WorkspaceFactory::Instance().createPeaks();
       // Copy over ExperimentInfo from input workspace
       tempWS->copyExperimentInfoFrom(ws.get());
