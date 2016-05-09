@@ -29,9 +29,7 @@ class FitGaussianTest(unittest.TestCase):
         """Conditions that raise RuntimeError.
         """
         self._linearWorkspace(0)
-        with self.assertRaises(RuntimeError):
-            # bad index
-            fitResult = FitGaussian(self.ws,1)
+        self.assertRaises(RuntimeError, FitGaussian, Workspace=self.ws, Index=1)
 
     def test_noFit(self):
         """Cases where fit is not possible.
