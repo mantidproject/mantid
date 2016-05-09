@@ -1,10 +1,10 @@
 #ifndef __ADARA_PARSER_H
 #define __ADARA_PARSER_H
 
-#include <string>
-#include <stdint.h>
-#include <stdexcept>
+#include <cstdint>
 #include <map>
+#include <stdexcept>
+#include <string>
 
 #include "ADARA.h"
 #include "ADARAPackets.h"
