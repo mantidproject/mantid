@@ -824,8 +824,12 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
             # those routines save information in the project file that is apparently not
             # updated in the project tree (other than loading the saved project file).
             self._save_gsas2_project(gs2, gs2_rd, out_proj_file)
-            file_lattice_params = self._parse_lattice_params_refined(out_proj_file)
-            self.log().notice("Lattice parameters found in output file: {0}".format(file_lattice_params))
+            try:
+                file_lattice_params = self._parse_lattice_params_refined(out_proj_file)
+                self.log().notice("Lattice parameters found in output file: {0}".format(file_lattice_params))
+            except IOError:
+                self.log().notice("The output project lst file was not found for this project: {0}".
+                                  format(out_proj_file))
 
     def _parse_lattice_params_refined(self, out_proj_file):
         """
