@@ -781,6 +781,10 @@ void SCDCalibratePanels::exec() {
                 samplePos.Y() + SampleYoffset + maxXYOffset);
       constrain(iFunc, "SampleZ", samplePos.Z() + SampleZoffset - maxXYOffset,
                 samplePos.Z() + SampleZoffset + maxXYOffset);
+    } else {
+        iFunc->fixParameter("SampleX");
+        iFunc->fixParameter("SampleY");
+        iFunc->fixParameter("SampleZ");
     }
 
     tie(iFunc, !useL0, "l0", L0);
