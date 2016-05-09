@@ -1166,6 +1166,7 @@ Table *MantidUI::createDetectorTable(
     t->setColPlotDesignation(col, Table::None);
   }
   t->setHeaderColType();
+  t->setTextFormat(2);
   t->setTextFormat(ncols - 1);
 
   // Cache some frequently used values

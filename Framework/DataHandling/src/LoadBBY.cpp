@@ -1,5 +1,5 @@
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
 
 #include "MantidDataHandling/LoadBBY.h"
 #include "MantidAPI/Axis.h"
