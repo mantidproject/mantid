@@ -1,4 +1,5 @@
 #include "MantidGeometry/Instrument/SampleEnvironmentSpec.h"
+#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -24,6 +25,20 @@ Can_const_sptr SampleEnvironmentSpec::findCan(const std::string &id) const {
     throw std::invalid_argument(
         "SampleEnvironmentSpec::find() - Unable to find Can matching ID '" +
         id + "'");
+}
+
+/**
+ * Build a new SampleEnvironment instance from a given can ID
+ * @return A new instance of a SampleEnvironment
+ */
+std::unique_ptr<SampleEnvironment>
+SampleEnvironmentSpec::buildEnvironment(const std::string &canID) const {
+  auto env =
+      Mantid::Kernel::make_unique<SampleEnvironment>(m_name, findCan(canID));
+  for(const auto & component : m_components) {
+    env->add(component);
+  }
+  return env;
 }
 
 /**

@@ -51,6 +51,11 @@ private:
   std::string m_sampleShapeXML;
 };
 
+/// Typdef for a shared pointer
+typedef boost::shared_ptr<Can> Can_sptr;
+/// Typdef for a shared pointer to a const object
+typedef boost::shared_ptr<const Can> Can_const_sptr;
+
 } // namespace Geometry
 } // namespace Mantid
 

@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Instrument/SampleEnvironmentSpec.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <boost/make_shared.hpp>
@@ -48,6 +49,32 @@ public:
     spec.addComponent(ComponentCreationHelper::createSphere(0.01));
     TS_ASSERT_EQUALS(1, spec.ncomponents());
   }
+
+  void test_buildEnvironment_Creates_Expected_Environment() {
+    using Mantid::Geometry::Can;
+    using Mantid::Geometry::ShapeFactory;
+    using Mantid::Kernel::V3D;
+
+    ShapeFactory factory;
+    auto small = factory.createShape<Can>(
+        ComponentCreationHelper::sphereXML(0.004, V3D(), "sp-1"));
+    small->setID("8mm");
+    auto large = factory.createShape<Can>(
+        ComponentCreationHelper::sphereXML(0.005, V3D(), "sp-2"));
+    large->setID("10mm");
+
+    SampleEnvironmentSpec spec("CRYO-001");
+    spec.addCan(small);
+    spec.addCan(large);
+    spec.addComponent(
+        ComponentCreationHelper::createSphere(0.05, V3D(0, 0, -0.1)));
+
+    auto env = spec.buildEnvironment("10mm");
+    TS_ASSERT(env);
+    TS_ASSERT_EQUALS("CRYO-001", env->name());
+    TS_ASSERT_EQUALS(2, env->nelements());
+  }
+
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
@@ -64,6 +91,13 @@ public:
     SampleEnvironmentSpec spec("CRYO-001");
 
     TS_ASSERT_THROWS(spec.findCan("8mm"), std::invalid_argument);
+  }
+
+  void test_BuildEnvironment_Throws_If_ID_Not_Found() {
+    using Mantid::Geometry::Can;
+    SampleEnvironmentSpec spec("CRYO-001");
+
+    TS_ASSERT_THROWS(spec.buildEnvironment("8mm"), std::invalid_argument);
   }
 };
 
