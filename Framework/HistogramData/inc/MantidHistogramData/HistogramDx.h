@@ -35,8 +35,13 @@ class MANTID_HISTOGRAMDATA_DLL HistogramDx
 public:
   using detail::FixedLengthVector<HistogramDx>::FixedLengthVector;
   using detail::FixedLengthVector<HistogramDx>::operator=;
-
   HistogramDx() = default;
+  // The copy and move constructor and assignment are not captured properly by
+  // the using declaration above, so we need them here explicitly.
+  HistogramDx(const HistogramDx &) = default;
+  HistogramDx(HistogramDx &&) = default;
+  HistogramDx &operator=(const HistogramDx &)& = default;
+  HistogramDx &operator=(HistogramDx &&)& = default;
 
   // The classes are friends, such that they can modify the length.
   friend class Histogram;
