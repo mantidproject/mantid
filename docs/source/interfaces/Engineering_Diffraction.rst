@@ -46,9 +46,19 @@ Calibration
 This tab provides a graphical interface to calculate calibrations and
 visualize them.
 
-It is possible to load an existing calibration (as a CSV file) and to
-generate a new calibration file (which becomes the new current
-calibration).
+It is possible to
+- generate a new calibration file (which becomes the new current
+  calibration)
+- load an existing calibration from a GSAS instrument
+  parameters file previously generated
+
+For the current calibration, the following parameters are displayed:
+the vanadium run number, the calibration sample run number, and the
+path to the output calibration file. This output calibration file is a
+GSAS instrument parameters file (IPARM/PAR/PRM). The interface
+produces a "all_banks" calibration file and in addition a calibration
+file for every individual bank. All the calibration files are writen
+in the same directory.
 
 With the help of Cropped Calibration user can also calibrate according
 to bank or by setting the Spectrum Numbers once the Cropped Calibration group
@@ -397,8 +407,9 @@ Force recalculate
   that calculate the corrections
 
 Template .prm file
-  By changing this option you can Use a different template file for the
-  output GSAS IPAR that is generated in the Calibration tab.
+  By changing this option you can Use a different template file for
+  the output GSAS IPAR/PAR/PRM that is generated in the Calibration
+  tab.
 
 Rebin for Calibrate
   This sets a rebin width parameter that can be used by underlying
