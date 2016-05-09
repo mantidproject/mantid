@@ -1,5 +1,5 @@
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -8,8 +8,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 #include <algorithm>
-#include <boost/regex.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/regex.hpp>
 #include <ostream>
 #include <stdexcept>
 
@@ -291,6 +291,7 @@ std::vector<double> const &StructuredDetector::getYValues() const {
 void StructuredDetector::initialize(size_t xPixels, size_t yPixels,
                                     const std::vector<double> &x,
                                     const std::vector<double> &y,
+                                    const std::string &beamDirection,
                                     detid_t idStart, bool idFillByFirstY,
                                     int idStepByRow, int idStep) {
   if (m_map)
@@ -322,6 +323,9 @@ void StructuredDetector::initialize(size_t xPixels, size_t yPixels,
   if (x.size() != (size_t)((m_xPixels + 1) * (m_yPixels + 1)))
     throw std::invalid_argument("StructuredDetector::initialize(): x.size() "
                                 "should be = (xPixels+1)*(yPixels+1)");
+  if (!(beamDirection.compare("z") == 0))
+    throw std::invalid_argument(
+        "Expecting reference_frame to provide z as beam axis.");
 
   // Store vertices
   m_xvalues = x;

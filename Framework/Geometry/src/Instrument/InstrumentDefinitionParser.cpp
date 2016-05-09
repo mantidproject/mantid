@@ -1,33 +1,33 @@
 #include <fstream>
 #include <sstream>
 
-#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ChecksumHelper.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/UnitFactory.h"
 
-#include <Poco/Path.h>
-#include <Poco/String.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
+#include <Poco/Path.h>
 #include <Poco/SAX/AttributesImpl.h>
+#include <Poco/String.h>
 
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
@@ -615,8 +615,9 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
 
     if (rElem) {
       double rotAngle =
-          angleConvertConst * atof((rElem->getAttribute("val"))
-                                       .c_str()); // assumed to be in degrees
+          angleConvertConst *
+          atof(
+              (rElem->getAttribute("val")).c_str()); // assumed to be in degrees
 
       double axis_x = 0.0;
       double axis_y = 0.0;
@@ -1429,8 +1430,14 @@ void InstrumentDefinitionParser::createStructuredDetector(
   Element *pElem = nullptr;
   NodeIterator tags(pCompElem->ownerDocument(), NodeFilter::SHOW_ELEMENT);
   Node *pNode = tags.nextNode();
+  std::string beamDir = "";
 
   while (pNode) {
+    if (pNode->nodeName().compare("along-axis") == 0) {
+      Element *alongAxis = static_cast<Element *>(pNode);
+      beamDir = alongAxis->getAttribute("axis").c_str();
+    }
+
     Element *check = static_cast<Element *>(pNode);
     if (pNode->nodeName().compare("type") == 0 && check->hasAttribute("is")) {
       std::string is = check->getAttribute("is").c_str();
@@ -1472,7 +1479,7 @@ void InstrumentDefinitionParser::createStructuredDetector(
   }
 
   // Now, initialize all the pixels in the bank
-  bank->initialize(xpixels, ypixels, xValues, yValues, idstart, idfillbyfirst_y,
+  bank->initialize(xpixels, ypixels, xValues, yValues, beamDir, idstart, idfillbyfirst_y,
                    idstepbyrow, idstep);
 
   // Loop through all detectors in the newly created bank and mark those in
@@ -2299,7 +2306,8 @@ void InstrumentDefinitionParser::setComponentLinks(
         // user, and throw an exception.
         if (!detector) {
           g_log.error() << "Error whilst loading parameters. No detector "
-                           "found with id '" << detid << "'" << std::endl;
+                           "found with id '"
+                        << detid << "'" << std::endl;
           g_log.error() << "Please check that your detectors' ids are correct."
                         << std::endl;
           throw Kernel::Exception::InstrumentDefinitionError(
