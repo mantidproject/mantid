@@ -1,17 +1,15 @@
-#include "MantidKernel/Task.h"
+#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/Progress.h"
-#include "MantidKernel/ThreadScheduler.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/Events.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Logger.h"
-#include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidDataObjects/Events.h"
-#include "MantidDataObjects/EventList.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/Timer.h"
 
 #include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
+#include <boost/shared_ptr.hpp>
 
 using namespace Mantid;
 
@@ -19,7 +17,7 @@ using namespace Mantid;
 // Class ProcessBankData
 //==============================================================================================
 /** This task does the disk IO from loading the NXS file,
-* and so will be on a disk IO mutex */
+* It is designed to be called by methods in class LoadBankFromDiskTask */
 class ProcessBankData { // : public Mantid::Kernel::Task {
 public:
   //----------------------------------------------------------------------------------------------
@@ -100,8 +98,6 @@ public:
                        const std::string &entry_type,
                        const bool oldNeXusFileNames,
                        Mantid::API::Progress *prog,
-                       // boost::shared_ptr<std::mutex> ioMutex,
-                       // Mantid::Kernel::ThreadScheduler *scheduler,
                        const std::vector<int> &framePeriodNumbers,
                        Mantid::Kernel::Logger &logger);
 
@@ -119,6 +115,10 @@ public:
   void loadEventWeights(::NeXus::File &file);
 
   void run();
+
+  void readFile(std::vector<uint64_t> *index_ptr);
+
+  bool checkSpectra();
 
   int64_t recalculateDataSize(const int64_t &size);
 

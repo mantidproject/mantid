@@ -623,26 +623,8 @@ void LoadBankFromDiskTask::loadEventWeights(::NeXus::File &file) {
   return;
 }
 
-//---------------------------------------------------------------------------------------------------
-void LoadBankFromDiskTask::run() { // override {
-  // The vectors we will be filling
-  auto event_index_ptr = new std::vector<uint64_t>();
+void LoadBankFromDiskTask::readFile(std::vector<uint64_t> *event_index_ptr) {
   std::vector<uint64_t> &event_index = *event_index_ptr;
-
-  // These give the limits in each file as to which events we actually load
-  // (when filtering by time).
-  m_loadStart.resize(1, 0);
-  m_loadSize.resize(1, 0);
-
-  // Data arrays
-  m_event_id = nullptr;
-  m_event_time_of_flight = nullptr;
-  m_event_weight = nullptr;
-
-  m_loadError = false;
-  m_have_weight = alg->m_haveWeights;
-
-  prog->report(entry_name + ": load from disk");
 
   // Open the file
   ::NeXus::File file(alg->m_filename);
@@ -712,6 +694,64 @@ void LoadBankFromDiskTask::run() { // override {
   // Close up the file even if errors occured.
   file.closeGroup();
   file.close();
+}
+
+bool LoadBankFromDiskTask::checkSpectra() {
+  const uint32_t minSpectraToLoad = static_cast<uint32_t>(alg->m_specMin);
+  const uint32_t maxSpectraToLoad = static_cast<uint32_t>(alg->m_specMax);
+  const uint32_t emptyInt = static_cast<uint32_t>(Mantid::EMPTY_INT());
+  // check that if a range of spectra were requested that these fit within
+  // this bank
+  if (minSpectraToLoad != emptyInt && m_min_id < minSpectraToLoad) {
+    if (minSpectraToLoad > m_max_id) { // the minimum spectra to load is more
+                                       // than the max of this bank
+      return false;
+    }
+    // the min spectra to load is higher than the min for this bank
+    m_min_id = minSpectraToLoad;
+  }
+  if (maxSpectraToLoad != emptyInt && m_max_id > maxSpectraToLoad) {
+    if (maxSpectraToLoad < m_min_id) {
+      // the maximum spectra to load is less than the minimum of this bank
+      return false;
+    }
+    // the max spectra to load is lower than the max for this bank
+    m_max_id = maxSpectraToLoad;
+  }
+  if (m_min_id > m_max_id) {
+    // the min is now larger than the max, this means the entire block of
+    // spectra to load is outside this bank
+    return false;
+  }
+
+  return true;
+}
+
+//---------------------------------------------------------------------------------------------------
+/** Main method to load bank from disk
+ * @brief LoadBankFromDiskTask::run
+ */
+void LoadBankFromDiskTask::run() {
+  // The vectors we will be filling
+  auto event_index_ptr = new std::vector<uint64_t>();
+
+  // These give the limits in each file as to which events we actually load
+  // (when filtering by time).
+  m_loadStart.resize(1, 0);
+  m_loadSize.resize(1, 0);
+
+  // Data arrays
+  m_event_id = nullptr;
+  m_event_time_of_flight = nullptr;
+  m_event_weight = nullptr;
+
+  m_loadError = false;
+  m_have_weight = alg->m_haveWeights;
+
+  prog->report(entry_name + ": load from disk");
+
+  // Read file and load the data into memeory
+  this->readFile(event_index_ptr);
 
   // Abort if anything failed
   if (m_loadError) {
@@ -725,33 +765,14 @@ void LoadBankFromDiskTask::run() { // override {
     return;
   }
 
+  // calculate bank size.  m_max_id and m_min_id may be changed in the next
+  // method
   const auto bank_size = m_max_id - m_min_id;
-  const uint32_t minSpectraToLoad = static_cast<uint32_t>(alg->m_specMin);
-  const uint32_t maxSpectraToLoad = static_cast<uint32_t>(alg->m_specMax);
-  const uint32_t emptyInt = static_cast<uint32_t>(Mantid::EMPTY_INT());
-  // check that if a range of spectra were requested that these fit within
-  // this bank
-  if (minSpectraToLoad != emptyInt && m_min_id < minSpectraToLoad) {
-    if (minSpectraToLoad > m_max_id) { // the minimum spectra to load is more
-                                       // than the max of this bank
-      return;
-    }
-    // the min spectra to load is higher than the min for this bank
-    m_min_id = minSpectraToLoad;
-  }
-  if (maxSpectraToLoad != emptyInt && m_max_id > maxSpectraToLoad) {
-    if (maxSpectraToLoad < m_min_id) {
-      // the maximum spectra to load is less than the minimum of this bank
-      return;
-    }
-    // the max spectra to load is lower than the max for this bank
-    m_max_id = maxSpectraToLoad;
-  }
-  if (m_min_id > m_max_id) {
-    // the min is now larger than the max, this means the entire block of
-    // spectra to load is outside this bank
+
+  // check bank and spectra IDs.  If failed the check, return
+  bool file_valid = checkSpectra();
+  if (!file_valid)
     return;
-  }
 
   // schedule the job to generate the event lists
   auto mid_id = m_max_id;
@@ -776,7 +797,7 @@ void LoadBankFromDiskTask::run() { // override {
       event_weight_shrd, m_min_id, mid_id);
   // scheduler->push(newTask1);
   newTask1->run();
-  ;
+
   if (alg->splitProcessing && (mid_id < m_max_id)) {
     ProcessBankData *newTask2 = new ProcessBankData(
         alg, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
