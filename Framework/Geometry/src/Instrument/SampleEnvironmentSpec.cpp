@@ -1,0 +1,51 @@
+#include "MantidGeometry/Instrument/SampleEnvironmentSpec.h"
+
+namespace Mantid {
+namespace Geometry {
+
+/**
+ * Constructor
+ * @param name The string name of the specification
+ */
+SampleEnvironmentSpec::SampleEnvironmentSpec(std::string name)
+    : m_name(std::move(name)), m_cans(), m_components() {}
+
+/**
+ * Find a can by id string
+ * @param id The string id to search for
+ * @return A pointer to the retrieved Can instance
+ * @throws std::invalid_argument
+ */
+Can_const_sptr SampleEnvironmentSpec::findCan(const std::string &id) const {
+  auto indexIter = m_cans.find(id);
+  if (indexIter != m_cans.end())
+    return indexIter->second;
+  else
+    throw std::invalid_argument(
+        "SampleEnvironmentSpec::find() - Unable to find Can matching ID '" +
+        id + "'");
+}
+
+/**
+* Adds a can definition to the known list
+ * @param can A pointer to a Can object
+ * @throws std::invalid::argument if the id is empty
+ */
+void SampleEnvironmentSpec::addCan(const Can_const_sptr &can) {
+  if (can->id().empty()) {
+    throw std::invalid_argument("SampleEnvironmentSpec::addCan() - Can must "
+                                "have an id field. Empty string found.");
+  }
+  m_cans.insert(std::make_pair(can->id(), can));
+}
+
+/**
+ * Add a non-can component to the specification
+ * @param component A pointer to a Object
+ */
+void SampleEnvironmentSpec::addComponent(const Object_const_sptr &component) {
+  m_components.emplace_back(component);
+}
+
+} // namespace Geometry
+} // namespace Mantid
