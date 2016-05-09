@@ -12,6 +12,7 @@
 
 #include "MantidGeometry/Rendering/CacheGeometryHandler.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
+#include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/Quat.h"
@@ -1021,41 +1022,49 @@ double Object::triangleSolidAngle(const V3D &observer) const {
   this->GetObjectGeom(type, geometry_vectors, radius, height);
   int nTri = this->NumberOfTriangles();
   // Cylinders are by far the most frequently used
-  if (type == 4)
+  GluGeometryHandler::GeometryType gluType =
+      static_cast<GluGeometryHandler::GeometryType>(type);
+
+  switch (gluType) {
+  case GluGeometryHandler::GeometryType::CUBOID:
+    return CuboidSolidAngle(observer, geometry_vectors);
+    break;
+  case GluGeometryHandler::GeometryType::SPHERE:
+    return SphereSolidAngle(observer, geometry_vectors, radius);
+    break;
+  case GluGeometryHandler::GeometryType::CYLINDER:
     return CylinderSolidAngle(observer, geometry_vectors[0],
                               geometry_vectors[1], radius, height);
-  else if (type == 1)
-    return CuboidSolidAngle(observer, geometry_vectors);
-  else if (type == 3)
-    return SphereSolidAngle(observer, geometry_vectors, radius);
-  else if (type == 5)
+    break;
+  case GluGeometryHandler::GeometryType::CONE:
     return ConeSolidAngle(observer, geometry_vectors[0], geometry_vectors[1],
                           radius, height);
-  else if (nTri == 0) // Fall back to raytracing if there are no triangles
-  {
-    return rayTraceSolidAngle(observer);
-  }
-  // Compute a generic shape that has been triangulated
-  else {
-    double *vertices = this->getTriangleVertices();
-    int *faces = this->getTriangleFaces();
-    double sangle(0.0), sneg(0.0);
-    for (int i = 0; i < nTri; i++) {
-      int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
-      V3D vp1 =
-          V3D(vertices[3 * p1], vertices[3 * p1 + 1], vertices[3 * p1 + 2]);
-      V3D vp2 =
-          V3D(vertices[3 * p2], vertices[3 * p2 + 1], vertices[3 * p2 + 2]);
-      V3D vp3 =
-          V3D(vertices[3 * p3], vertices[3 * p3 + 1], vertices[3 * p3 + 2]);
-      double sa = getTriangleSolidAngle(vp1, vp2, vp3, observer);
-      if (sa > 0.0) {
-        sangle += sa;
-      } else {
-        sneg += sa;
+    break;
+  default:
+    if (nTri == 0) // Fall back to raytracing if there are no triangles
+    {
+      return rayTraceSolidAngle(observer);
+    } else { // Compute a generic shape that has been triangulated
+      double *vertices = this->getTriangleVertices();
+      int *faces = this->getTriangleFaces();
+      double sangle(0.0), sneg(0.0);
+      for (int i = 0; i < nTri; i++) {
+        int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
+        V3D vp1 =
+            V3D(vertices[3 * p1], vertices[3 * p1 + 1], vertices[3 * p1 + 2]);
+        V3D vp2 =
+            V3D(vertices[3 * p2], vertices[3 * p2 + 1], vertices[3 * p2 + 2]);
+        V3D vp3 =
+            V3D(vertices[3 * p3], vertices[3 * p3 + 1], vertices[3 * p3 + 2]);
+        double sa = getTriangleSolidAngle(vp1, vp2, vp3, observer);
+        if (sa > 0.0) {
+          sangle += sa;
+        } else {
+          sneg += sa;
+        }
       }
+      return 0.5 * (sangle - sneg);
     }
-    return 0.5 * (sangle - sneg);
   }
 }
 /**
@@ -1099,12 +1108,20 @@ double Object::triangleSolidAngle(const V3D &observer,
     int type;
     std::vector<Kernel::V3D> vectors;
     this->GetObjectGeom(type, vectors, radius, height);
-    if (type == 1) {
+    GluGeometryHandler::GeometryType gluType =
+        static_cast<GluGeometryHandler::GeometryType>(type);
+
+    switch (gluType) {
+    case GluGeometryHandler::GeometryType::CUBOID:
       for (auto &vector : vectors)
         vector *= scaleFactor;
       return CuboidSolidAngle(observer, vectors);
-    } else if (type == 3) // this is wrong for scaled objects
+      break;
+    case GluGeometryHandler::GeometryType::SPHERE:
       return SphereSolidAngle(observer, vectors, radius);
+      break;
+    }
+
     //
     // No special case, do the ray trace.
     //
@@ -1511,8 +1528,8 @@ const BoundingBox &Object::getBoundingBox() const {
   // Set to a large box so that a) we don't keep trying to calculate a box
   // every time this is called and b) to serve as a visual indicator that
   // something went wrong.
-  const_cast<Object *>(this)
-      ->defineBoundingBox(100, 100, 100, -100, -100, -100);
+  const_cast<Object *>(this)->defineBoundingBox(100, 100, 100, -100, -100,
+                                                -100);
   return m_boundingBox;
 }
 
@@ -1607,11 +1624,12 @@ void Object::calcBoundingBoxByGeometry() {
 
   // Will only work for shapes handled by GluGeometryHandler
   handle->GetObjectGeom(type, vectors, radius, height);
+  GluGeometryHandler::GeometryType gluType =
+      static_cast<GluGeometryHandler::GeometryType>(type);
 
   // Type of shape is given as a simple integer
-  switch (type) {
-  case 1: // CUBOID
-  {
+  switch (gluType) {
+  case GluGeometryHandler::GeometryType::CUBOID: {
     // Points as defined in IDF XML
     auto &lfb = vectors[0]; // Left-Front-Bottom
     auto &lft = vectors[1]; // Left-Front-Top
@@ -1644,10 +1662,8 @@ void Object::calcBoundingBoxByGeometry() {
       maxZ = std::max(maxZ, vector.Z());
     }
   } break;
-
-  case 4: // CYLINDER
-  case 6: // SEGMENTED_CYLINDER
-  {
+  case GluGeometryHandler::GeometryType::CYLINDER:
+  case GluGeometryHandler::GeometryType::SEGMENTED_CYLINDER: {
     // Center-point of base and normalized axis based on IDF XML
     auto &base = vectors[0];
     auto &axis = vectors[1];
@@ -1670,8 +1686,7 @@ void Object::calcBoundingBoxByGeometry() {
     maxZ = std::max(base.Z(), top.Z()) + rz;
   } break;
 
-  case 5: // CONE
-  {
+  case GluGeometryHandler::GeometryType::CONE: {
     auto &tip = vectors[0];            // Tip-point of cone
     auto &axis = vectors[1];           // Normalized axis
     auto base = tip + (axis * height); // Center of base
