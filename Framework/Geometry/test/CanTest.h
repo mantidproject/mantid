@@ -4,6 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Instrument/Can.h"
+#include "MantidGeometry/Objects/Rules.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
+
+#include <boost/make_shared.hpp>
 
 using Mantid::Geometry::Can;
 
@@ -19,18 +23,96 @@ public:
   // ---------------------------------------------------------------------------
   void test_Default_Constructor_Has_No_Sample_Shape() {
     Can can;
-    TS_ASSERT(can.sampleShapeTemplate().empty());
+    TS_ASSERT_EQUALS(false, can.hasSampleShape());
+    TS_ASSERT_THROWS(can.createSampleShape(Can::ShapeArgs()),
+                     std::runtime_error);
   }
 
-  void test_Constructing_With_Default_Shape_Stores_Same_Default() {
+  void test_Construction_With_XML_Assumes_XML_For_Can_Itself() {
     std::string xml = "<cylinder>"
                       "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" />"
-                      "<axis x =\"0.0\" y=\"1.0\" z=\"0\" />"
-                      "<radius val =\"0.0030\" />"
-                      "<height val =\"0.05\" />"
+                      "<axis x=\"0.0\" y=\"1.0\" z=\"0\" />"
+                      "<radius val=\"0.0030\" />"
+                      "<height val=\"0.05\" />"
                       "</cylinder>";
     Can can(xml);
-    TS_ASSERT_EQUALS(xml, can.sampleShapeTemplate());
+    TS_ASSERT_EQUALS(false, can.hasSampleShape());
+    TS_ASSERT_EQUALS(xml, can.getShapeXML());
+  }
+
+  void test_SetSampleShape_Allows_Creating_Sample_Shape_Object() {
+    using Mantid::Geometry::Object_sptr;
+    auto can = createTestCan();
+    can->setSampleShape("<samplegeometry><sphere id=\"shape\"> "
+                        "<radius val=\"1.0\" /> "
+                        "</sphere></samplegeometry>");
+    Object_sptr sampleShape;
+    TS_ASSERT_THROWS_NOTHING(sampleShape =
+                                 can->createSampleShape(Can::ShapeArgs()));
+    TS_ASSERT(sampleShape->hasValidShape());
+    TS_ASSERT_DELTA(1.0, getSphereRadius(*sampleShape), 1e-10);
+  }
+
+  void test_CreateSampleShape_Args_Override_Defaults() {
+    using Mantid::Geometry::Object_sptr;
+    auto can = createTestCan();
+    can->setSampleShape("<samplegeometry><sphere id=\"shape\"> "
+                        "<radius val=\"1.0\" /> "
+                        "</sphere></samplegeometry>");
+    Object_sptr sampleShape;
+    Can::ShapeArgs args = {{"radius", 0.5}};
+    TS_ASSERT_THROWS_NOTHING(sampleShape = can->createSampleShape(args));
+    TS_ASSERT(sampleShape->hasValidShape());
+    TS_ASSERT_DELTA(0.5, getSphereRadius(*sampleShape), 1e-10);
+  }
+
+  void test_CreateSampleShape_Args_Not_Matching_Do_Nothing() {
+    using Mantid::Geometry::Object_sptr;
+    auto can = createTestCan();
+    can->setSampleShape("<samplegeometry><sphere id=\"shape\"> "
+                        "<radius val=\"1.0\" /> "
+                        "</sphere></samplegeometry>");
+    Object_sptr sampleShape;
+    Can::ShapeArgs args = {{"height", 0.5}};
+    TS_ASSERT_THROWS_NOTHING(sampleShape = can->createSampleShape(args));
+    TS_ASSERT(sampleShape->hasValidShape());
+    TS_ASSERT_DELTA(1.0, getSphereRadius(*sampleShape), 1e-10);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Failure tests
+  // ---------------------------------------------------------------------------
+  void test_SetSampleShape_Throws_If_Top_Tag_Not_SampleGeometry() {
+    auto can = createTestCan();
+    TS_ASSERT_THROWS(can->setSampleShape("<sphere id=\"shape\"> "
+                                         "<radius val=\"1.0\" /> "
+                                         "</sphere>"),
+                     std::invalid_argument);
+  }
+
+private:
+  Mantid::Geometry::Can_sptr createTestCan() {
+    return boost::make_shared<Can>(
+        "<type name=\"usertype\"><cylinder>"
+        "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" />"
+        "<axis x=\"0.0\" y=\"1.0\" z=\"0\" />"
+        "<radius val =\"0.0030\" />"
+        "<height val =\"0.05\" />"
+        "</cylinder></type>");
+  }
+  double getSphereRadius(const Mantid::Geometry::Object &shape) {
+    using Mantid::Geometry::SurfPoint;
+    using Mantid::Geometry::Sphere;
+    auto topRule = shape.topRule();
+    if (auto surfpoint = dynamic_cast<const SurfPoint *>(topRule)) {
+      if (auto sphere = dynamic_cast<Sphere *>(surfpoint->getKey())) {
+        return sphere->getRadius();
+      } else {
+        throw std::runtime_error("Expected Sphere as SurfPoint key.");
+      }
+    } else {
+      throw std::runtime_error("Expected SurfPoint as top rule");
+    }
   }
 };
 

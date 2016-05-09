@@ -3,6 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/Object.h"
+#include <unordered_map>
 
 namespace Mantid {
 namespace Geometry {
@@ -36,13 +37,18 @@ namespace Geometry {
 */
 class MANTID_GEOMETRY_DLL Can final : public Object {
 public:
-  Can() = default;
-  Can(std::string sampleTemplateXML);
+  typedef std::unordered_map<std::string, double> ShapeArgs;
 
-  const std::string &sampleShapeTemplate() const;
+  Can() = default;
+  Can(std::string canXML);
+
+  bool hasSampleShape() const;
+  Object_sptr createSampleShape(const ShapeArgs &args) const;
+
+  void setSampleShape(const std::string &sampleShapeXML);
 
 private:
-  std::string m_sampleShapeTemplate;
+  std::string m_sampleShapeXML;
 };
 
 } // namespace Geometry
