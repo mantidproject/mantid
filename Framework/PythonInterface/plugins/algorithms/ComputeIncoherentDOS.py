@@ -103,7 +103,8 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         # Gets meV to cm^-1 conversion
         mev2cm = (constants.elementary_charge / 1000) / (constants.h * constants.c * 100)
         # Gets meV to Kelvin conversion
-        mev2k = (constants.elementary_charge / 1000) / constants.Boltzmann
+        # Note: constants.Boltzmann alias for constants.k not used here because it is not available on RHEL6
+        mev2k = (constants.elementary_charge / 1000) / constants.k
 
         # Converts energy to meV for bose factor later
         if u0 == 'DeltaE_inWavenumber' or u1 == 'DeltaE_inWavenumber':

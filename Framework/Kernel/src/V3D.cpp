@@ -1,5 +1,5 @@
+#include <cfloat>
 #include <cmath>
-#include <float.h>
 #include <vector>
 
 #include "MantidKernel/V3D.h"

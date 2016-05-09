@@ -24,9 +24,9 @@
 #include <Poco/File.h>
 //#include <hdf5.h> //This is troublesome on multiple platforms.
 
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 
 namespace Mantid {
 namespace DataHandling {
