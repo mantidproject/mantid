@@ -82,9 +82,10 @@ Usage
 
    # You can produce an instrument parameters (iparam) file for GSAS.
    # Note that this is very specific to ENGIN-X
-   GSAS_iparm_fname = 'ENGIN_X_bank1'
+   GSAS_iparm_fname = 'ENGIN_X_banks.prm'
    import EnggUtils
-   EnggUtils.write_ENGINX_GSAS_iparam_file(GSAS_iparm_fname, [Difc1, Difc2], [Zero1, Zero2])
+   EnggUtils.write_ENGINX_GSAS_iparam_file(GSAS_iparm_fname, bank_names=['North', 'South'],
+                                           difc=[Difc1, Difc2], tzero=[Zero1, Zero2])
 
    print "DIFA1: %.2f" % (Difa1)
    print "DIFC1: %.1f" % (Difc1)
