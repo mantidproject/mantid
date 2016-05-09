@@ -1461,6 +1461,14 @@ void EventList::setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
     mru->deleteIndex(this->m_specNo);
 }
 
+/** Set the dx-component for the histogram view. This will NOT cause the
+ * histogram to be calculated.
+ * @param Dx :: The vector of doubles to set as the histogram limits.
+ */
+void EventList::setDx(const Kernel::cow_ptr<HistogramData::HistogramDx> &Dx) {
+  m_histogram.setDx(Dx);
+}
+
 /** Returns a reference to the x data.
  *  @return a reference to the X (bin) vector.
  */
@@ -1470,9 +1478,20 @@ MantidVec &EventList::dataX() {
   return m_histogram.dataX();
 }
 
+/** Returns a reference to the dx data.
+ *  @return a reference to the Dx (bin) vector.
+ */
+MantidVec &EventList::dataDx() {
+  return m_histogram.dataDx();
+}
+
 /** Returns a const reference to the x data.
  *  @return a reference to the X (bin) vector. */
 const MantidVec &EventList::dataX() const { return m_histogram.dataX(); }
+
+/** Returns a const reference to the dx data.
+ *  @return a reference to the Dx (bin) vector. */
+const MantidVec &EventList::dataDx() const { return m_histogram.dataDx(); }
 
 /** Returns a reference to the x data.
  *  @return a reference to the X (bin) vector.
@@ -1482,9 +1501,17 @@ const MantidVec &EventList::constDataX() const { return m_histogram.readX(); }
 /// Returns the x data const
 const MantidVec &EventList::readX() const { return m_histogram.readX(); }
 
+/// Returns the dx data const
+const MantidVec &EventList::readDx() const { return m_histogram.readDx(); }
+
 /// Returns a pointer to the x data
 Kernel::cow_ptr<HistogramData::HistogramX> EventList::ptrX() const {
   return m_histogram.ptrX();
+}
+
+/// Returns a pointer to the dx data
+Kernel::cow_ptr<HistogramData::HistogramDx> EventList::ptrDx() const {
+  return m_histogram.ptrDx();
 }
 
 // ==============================================================================================

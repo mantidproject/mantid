@@ -33,7 +33,7 @@ namespace DataObjects {
 */
 class DLLExport Histogram1D : public Mantid::API::ISpectrum {
 private:
-  /// Histogram object holding the histogram data. Currently only X.
+  /// Histogram object holding the histogram data. Currently only X and Dx.
   HistogramData::Histogram m_histogram;
 
 protected:
@@ -45,10 +45,15 @@ public:
       : API::ISpectrum(), m_histogram(mode) {}
 
   void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) override;
+  void setDx(const Kernel::cow_ptr<HistogramData::HistogramDx> &Dx) override;
   MantidVec &dataX() override;
+  MantidVec &dataDx() override;
   const MantidVec &dataX() const override;
+  const MantidVec &dataDx() const override;
   const MantidVec &readX() const override;
+  const MantidVec &readDx() const override;
   Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const override;
+  Kernel::cow_ptr<HistogramData::HistogramDx> ptrDx() const override;
 
   /// Sets the data.
   void setData(const MantidVec &Y) override { refY.access() = Y; };

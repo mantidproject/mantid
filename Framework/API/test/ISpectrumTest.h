@@ -99,13 +99,13 @@ public:
 
     // setDX vesion 2
     SpectrumTester s4(HistogramData::Histogram::XMode::Points);
-    Mantid::MantidVecPtr::ptr_type Dx_vec_ptr_type;
+    boost::shared_ptr<Mantid::HistogramData::HistogramDx> Dx_vec_ptr_type;
     s4.setDx(Dx_vec_ptr_type);
     TS_ASSERT(s4.hasDx());
 
     // setDX version 3
     SpectrumTester s5(HistogramData::Histogram::XMode::Points);
-    Mantid::MantidVecPtr Dx_vec_ptr;
+    cow_ptr<Mantid::HistogramData::HistogramDx> Dx_vec_ptr;
     s5.setDx(Dx_vec_ptr);
     TS_ASSERT(s5.hasDx());
   }

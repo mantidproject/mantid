@@ -54,19 +54,19 @@ public:
   void copyInfoFrom(const ISpectrum &other);
 
   virtual void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) = 0;
-  virtual void setDx(const MantidVecPtr &Dx);
+  virtual void setDx(const Kernel::cow_ptr<HistogramData::HistogramDx> &Dx) = 0;
 
   virtual MantidVec &dataX() = 0;
-  virtual MantidVec &dataDx();
+  virtual MantidVec &dataDx() = 0;
 
   virtual const MantidVec &dataX() const = 0;
-  virtual const MantidVec &dataDx() const;
+  virtual const MantidVec &dataDx() const = 0;
 
   virtual const MantidVec &readX() const = 0;
-  virtual const MantidVec &readDx() const;
+  virtual const MantidVec &readDx() const = 0;
 
   virtual Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const = 0;
-  virtual MantidVecPtr ptrDx() const;
+  virtual Kernel::cow_ptr<HistogramData::HistogramDx> ptrDx() const = 0;
 
   virtual void setData(const MantidVec &Y) = 0;
   virtual void setData(const MantidVec &Y, const MantidVec &E) = 0;
@@ -115,8 +115,8 @@ public:
   virtual void unlockData() const;
 
   //-------------------------------------------------------
-  virtual bool hasDx() const;
-  virtual void resetHasDx();
+  bool hasDx() const;
+  void resetHasDx();
 
   HistogramData::Histogram histogram() const { return histogramRef(); }
 
@@ -145,12 +145,6 @@ protected:
 
   /// Set of the detector IDs associated with this spectrum
   std::set<detid_t> detectorIDs;
-
-  /// Copy-on-write pointer to the Dx (X error) vector.
-  MantidVecPtr refDx;
-
-  /// Flag to indicate if Dx (X error) is being used or not
-  mutable bool m_hasDx;
 
 private:
   virtual const HistogramData::Histogram &histogramRef() const = 0;

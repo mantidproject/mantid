@@ -466,13 +466,12 @@ private:
   MatrixWorkspace_sptr createInputWorkspaceEventWithDx() const {
     auto ws = createInputWorkspaceEvent();
     // Add the delta x values
+    auto dXvals = make_cow<HistogramData::HistogramDx>(nBins + 1, 0.0);
+    auto &dX = dXvals.access();
+    for (size_t k = 0; k <= nBins; ++k) {
+      dX[k] = sqrt(double(k)) + 1;
+    }
     for (size_t j = 0; j < nSpec; ++j) {
-      Mantid::MantidVecPtr dXvals;
-      Mantid::MantidVec &dX = dXvals.access();
-      dX.resize(nBins + 1, 0.0);
-      for (size_t k = 0; k <= nBins; ++k) {
-        dX[k] = sqrt(double(k)) + 1;
-      }
       ws->setDx(j, dXvals);
     }
     return ws;

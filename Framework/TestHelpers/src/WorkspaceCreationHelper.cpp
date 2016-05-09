@@ -99,9 +99,8 @@ Workspace2D_sptr Create1DWorkspaceConstantWithXerror(int size, double value,
                                                      double error,
                                                      double xError) {
   auto ws = Create1DWorkspaceConstant(size, value, error);
-  MantidVecPtr dx1;
-  dx1.access().resize(size, xError);
-  ws->setDx(0, dx1);
+  auto dx1 = Kernel::make_cow<HistogramData::HistogramDx>(size, xError);
+  ws->histogram(0).setSharedDx(dx1);
   return ws;
 }
 
@@ -176,10 +175,10 @@ Workspace2D_sptr Create2DWorkspaceWithValuesAndXerror(
     const std::set<int64_t> &maskedWorkspaceIndices) {
   auto ws = Create2DWorkspaceWithValues(
       nHist, nBins, isHist, maskedWorkspaceIndices, xVal, yVal, eVal);
-  MantidVecPtr dx1;
-  dx1.access().resize(isHist ? nBins + 1 : nBins, dxVal);
+  auto dx1 = Kernel::make_cow<HistogramData::HistogramDx>(
+      isHist ? nBins + 1 : nBins, dxVal);
   for (int i = 0; i < nHist; i++) {
-    ws->setDx(i, dx1);
+    ws->histogram(i).setSharedDx(dx1);
   }
   return ws;
 }

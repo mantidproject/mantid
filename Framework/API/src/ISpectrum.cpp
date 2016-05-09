@@ -1,5 +1,6 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidKernel/System.h"
+#include "MantidHistogramData/Histogram.h"
 
 namespace Mantid {
 namespace API {
@@ -7,13 +8,13 @@ namespace API {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ISpectrum::ISpectrum() : m_specNo(0), detectorIDs(), refDx(), m_hasDx(false) {}
+ISpectrum::ISpectrum() : m_specNo(0), detectorIDs() {}
 
 /** Constructor with spectrum number
  * @param specNo :: spectrum # of the spectrum
  */
 ISpectrum::ISpectrum(const specnum_t specNo)
-    : m_specNo(specNo), detectorIDs(), refDx(), m_hasDx(false) {}
+    : m_specNo(specNo), detectorIDs() {}
 
 //----------------------------------------------------------------------------------------------
 /** Copy spectrum number and detector IDs, but not X vector, from another
@@ -36,41 +37,11 @@ std::pair<double, double> ISpectrum::getXDataRange() const {
   return std::pair<double, double>(xdata.front(), xdata.back());
 }
 
-/// Sets the x error data.
-/// @param Dx :: vector of X error data
-void ISpectrum::setDx(const MantidVecPtr &Dx) {
-  refDx = Dx;
-  m_hasDx = true;
-}
-
-/** Returns the x error data
- *  BE VERY CAUTIOUS about using this method (when, e.g., just copying
- *  data from an input to output workspace) if you are not actively
- *  using X errors. It may result in the breaking of sharing between
- *  Dx vectors and a significant and unnecessary bloating of memory usage.
- */
-MantidVec &ISpectrum::dataDx() {
-  m_hasDx = true;
-  return refDx.access();
-}
-
-/// Returns the x error data const
-const MantidVec &ISpectrum::dataDx() const { return *refDx; }
-
-/// Returns the x error data const
-const MantidVec &ISpectrum::readDx() const { return *refDx; }
-
 /// Returns the y data const
 const MantidVec &ISpectrum::readY() const { return this->dataY(); }
 
 /// Returns the y error data const
 const MantidVec &ISpectrum::readE() const { return this->dataE(); }
-
-/// Returns a pointer to the x data
-MantidVecPtr ISpectrum::ptrDx() const {
-  m_hasDx = true;
-  return refDx;
-}
 
 // =============================================================================================
 // --------------------------------------------------------------------------
@@ -182,12 +153,12 @@ void ISpectrum::unlockData() const {}
  * Gets the value of the use flag.
  * @returns true if DX has been set, else false
  */
-bool ISpectrum::hasDx() const { return m_hasDx; }
+bool ISpectrum::hasDx() const { return bool(histogramRef().sharedDx()); }
 
 /**
  * Resets the hasDx flag
  */
-void ISpectrum::resetHasDx() { m_hasDx = false; }
+void ISpectrum::resetHasDx() { setDx(nullptr); }
 
 } // namespace Mantid
 } // namespace API

@@ -72,8 +72,7 @@ void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
   data.resize(m_noVectors);
 
   auto x = Kernel::make_cow<HistogramData::HistogramX>(XLength);
-  MantidVecPtr t1, t2;
-  t1.access().resize(XLength); // this call initializes array to zero
+  MantidVecPtr t2;
   t2.access().resize(YLength);
   for (size_t i = 0; i < m_noVectors; i++) {
     // Create the spectrum upon init
@@ -82,8 +81,6 @@ void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
     data[i] = spec;
     // Set the data and X
     spec->setX(x);
-    spec->setDx(t1);
-    spec->resetHasDx();
     // Y,E arrays populated
     spec->setData(t2, t2);
     // Default spectrum number = starts at 1, for workspace index 0.

@@ -356,9 +356,8 @@ void ExtractSpectra::execEvent() {
       outEL.setX(XValues_new.cowData());
       if (hasDx) {
         const MantidVec &oldDx = m_inputWorkspace->readDx(i);
-        cow_ptr<MantidVec> DxValues_new;
-        DxValues_new.access().assign(oldDx.begin() + m_minX,
-                                     oldDx.begin() + m_maxX);
+        auto DxValues_new = make_cow<HistogramData::HistogramDx>(
+            oldDx.begin() + m_minX, oldDx.begin() + m_maxX);
         outEL.setDx(DxValues_new);
       }
     }

@@ -1311,10 +1311,10 @@ public:
     size_t workspaceIndexWithDx[3] = {0, 1, 2};
 
     Mantid::MantidVec dxSpec0(j, values[0]);
-    Mantid::MantidVecPtr dxSpec1 =
-        Kernel::make_cow<Mantid::MantidVec>(j, values[1]);
-    boost::shared_ptr<Mantid::MantidVec> dxSpec2 =
-        boost::make_shared<Mantid::MantidVec>(Mantid::MantidVec(j, values[2]));
+    auto dxSpec1 =
+        Kernel::make_cow<Mantid::HistogramData::HistogramDx>(j, values[1]);
+    auto dxSpec2 = boost::make_shared<Mantid::HistogramData::HistogramDx>(
+        Mantid::MantidVec(j, values[2]));
 
     // Act
     for (size_t spec = 0; spec < numspec; ++spec) {

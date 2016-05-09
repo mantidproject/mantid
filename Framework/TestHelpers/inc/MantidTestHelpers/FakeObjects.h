@@ -48,11 +48,20 @@ public:
   void setX(const cow_ptr<HistogramData::HistogramX> &X) override {
     m_histogram.setX(X);
   }
+  void setDx(const cow_ptr<HistogramData::HistogramDx> &Dx) override {
+    m_histogram.setDx(Dx);
+  }
   MantidVec &dataX() override { return m_histogram.dataX(); }
+  MantidVec &dataDx() override { return m_histogram.dataDx(); }
   const MantidVec &dataX() const override { return m_histogram.dataX(); }
+  const MantidVec &dataDx() const override { return m_histogram.dataDx(); }
   const MantidVec &readX() const override { return m_histogram.readX(); }
+  const MantidVec &readDx() const override { return m_histogram.readDx(); }
   cow_ptr<HistogramData::HistogramX> ptrX() const override {
     return m_histogram.ptrX();
+  }
+  cow_ptr<HistogramData::HistogramDx> ptrDx() const override {
+    return m_histogram.ptrDx();
   }
 
   void setData(const MantidVec &Y) override { data = Y; }
