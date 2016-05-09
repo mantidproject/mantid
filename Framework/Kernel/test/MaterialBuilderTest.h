@@ -94,14 +94,12 @@ public:
 
   void test_Number_Density_Set_By_AtomicNumber_MassDensity() {
     MaterialBuilder builder;
-    auto mat = builder.setName("Nickel")
-                   .setAtomicNumber(28)
-                   .setMassDensity(4)
-                   .build();
+    auto mat =
+        builder.setName("Nickel").setAtomicNumber(28).setMassDensity(4).build();
 
     TS_ASSERT_DELTA(mat.numberDensity(), 0.0410414, 0.001);
   }
-  
+
   void test_Number_Set_By_AtomicNumber_ZParameter_And_Cell_Volume() {
     MaterialBuilder builder;
     auto mat = builder.setName("Nickel")
@@ -152,7 +150,6 @@ public:
     TS_ASSERT_THROWS(builder.setUnitCellVolume(6).setMassDensity(4),
                      std::runtime_error);
   }
-  
 };
 
 #endif /* MANTID_KERNEL_MATERIALBUILDERTEST_H_ */

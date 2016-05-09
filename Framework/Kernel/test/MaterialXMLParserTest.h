@@ -53,53 +53,53 @@ public:
 
   void test_NumberDensity_Attribute() {
     auto mat = parseMaterial("<material id=\"n\" atomicnumber=\"28\" "
-                            "massnumber=\"58\" numberdensity=\"0.12\"/>");
+                             "massnumber=\"58\" numberdensity=\"0.12\"/>");
 
     TS_ASSERT_DELTA(0.12, mat.numberDensity(), 1e-04);
   }
 
   void test_ZParameter_And_UnitCellVolume_Attributes() {
     auto mat = parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
-                            "zparameter=\"6\" unitcellvol=\"253.54\"/>");
+                             "zparameter=\"6\" unitcellvol=\"253.54\"/>");
 
     TS_ASSERT_DELTA(mat.numberDensity(), 0.1183245, 1e-07);
   }
 
   void test_MassDensity_Attribute() {
     auto mat = parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
-                            "massdensity=\"4\" />");
+                             "massdensity=\"4\" />");
 
     TS_ASSERT_DELTA(mat.numberDensity(), 0.0236252, 1e-07);
   }
 
   void test_TotalScattering_Attribute() {
     auto mat = parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
-                            "totalscatterxsec=\"18.1\"/>");
+                             "totalscatterxsec=\"18.1\"/>");
 
     TS_ASSERT_DELTA(mat.totalScatterXSection(), 18.1, 1e-04);
   }
 
   void test_CoherentScattering_Attribute() {
     auto mat = parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
-                            "cohscatterxsec=\"4.6\"/>");
+                             "cohscatterxsec=\"4.6\"/>");
 
     TS_ASSERT_DELTA(mat.cohScatterXSection(), 4.6, 1e-04);
   }
 
   void test_IncoherentScattering_Attribute() {
     auto mat = parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
-                            "incohscatterxsec=\"0.1\"/>");
+                             "incohscatterxsec=\"0.1\"/>");
 
     TS_ASSERT_DELTA(mat.incohScatterXSection(), 0.1, 1e-04);
   }
 
   void test_Absorption_Attribute() {
     auto mat = parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
-                            "absorptionxsec=\"4.45\"/>");
+                             "absorptionxsec=\"4.45\"/>");
 
     TS_ASSERT_DELTA(mat.absorbXSection(), 4.45, 1e-04);
   }
-  
+
   void test_Read_Valid_XML_Returns_Expected_Material_From_Stream_Source() {
     const std::string xml = "<material id=\"vanadium\" formula=\"V\">"
                             "</material>";
@@ -123,16 +123,16 @@ public:
 
   void test_Missing_Or_Empty_Id_Tag_Throws_Error() {
     TS_ASSERT_THROWS(parseMaterial("<material formula=\"V\">"
-                                  "</material>"),
+                                   "</material>"),
                      std::invalid_argument);
     TS_ASSERT_THROWS(parseMaterial("<material id=\"\" formula=\"V\">"
-                                  "</material>"),
+                                   "</material>"),
                      std::invalid_argument);
   }
 
   void test_Unknown_Attribute_Throws_Error() {
     TS_ASSERT_THROWS(parseMaterial("<material id=\"n\" atomic=\"28\">"
-                                  "</material>"),
+                                   "</material>"),
                      std::runtime_error);
   }
 

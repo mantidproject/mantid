@@ -35,7 +35,7 @@ std::unique_ptr<SampleEnvironment>
 SampleEnvironmentSpec::buildEnvironment(const std::string &canID) const {
   auto env =
       Mantid::Kernel::make_unique<SampleEnvironment>(m_name, findCan(canID));
-  for(const auto & component : m_components) {
+  for (const auto &component : m_components) {
     env->add(component);
   }
   return env;
