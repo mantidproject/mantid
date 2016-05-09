@@ -4,6 +4,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Can.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -52,8 +53,9 @@ public:
   test_That_An_Environment_Can_Be_Set_And_The_Same_Environment_Is_Returned() {
     Sample sample;
     const std::string envName("TestKit");
-    SampleEnvironment *kit = new SampleEnvironment(envName);
-    kit->add(Object());
+    SampleEnvironment *kit =
+        new SampleEnvironment(envName, boost::make_shared<const Can>(""));
+    kit->add(boost::make_shared<const Object>());
 
     TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(kit));
 
@@ -61,7 +63,7 @@ public:
     // Test that this references the correct object
     TS_ASSERT_EQUALS(&sampleKit, kit);
     TS_ASSERT_EQUALS(sampleKit.name(), envName);
-    TS_ASSERT_EQUALS(sampleKit.nelements(), 1);
+    TS_ASSERT_EQUALS(sampleKit.nelements(), 2);
   }
 
   void test_OrientedLattice() {

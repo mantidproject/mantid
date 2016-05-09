@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -37,10 +38,10 @@ public:
     Sample sample;
     sample.setName("test");
     const std::string envName("TestKit");
-    SampleEnvironment *kit = new SampleEnvironment(envName);
-    auto shape = ComponentCreationHelper::createCappedCylinder(
+    auto canShape = ComponentCreationHelper::cappedCylinderXML(
         0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
-    kit->add(*shape);
+    SampleEnvironment *kit = new SampleEnvironment(
+        envName, ShapeFactory().createShape<Can>(canShape));
     sample.setEnvironment(kit);
     OrientedLattice *latt = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
     sample.setOrientedLattice(latt);

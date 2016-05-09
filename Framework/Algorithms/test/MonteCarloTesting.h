@@ -37,10 +37,9 @@ public:
 // -----------------------------------------------------------------------------
 enum class TestSampleType { SolidSphere, Annulus, SamplePlusCan };
 
-inline Mantid::Geometry::Object_sptr
-createAnnulus(double innerRadius, double outerRadius, double height,
-              const Mantid::Kernel::V3D &upAxis) {
-  using Mantid::Geometry::ShapeFactory;
+inline std::string annulusXML(double innerRadius, double outerRadius,
+                              double height,
+                              const Mantid::Kernel::V3D &upAxis) {
   using Mantid::Kernel::V3D;
 
   // Cylinders oriented along up, with origin at centre of cylinder
@@ -53,12 +52,22 @@ createAnnulus(double innerRadius, double outerRadius, double height,
   // Combine shapes
   std::ostringstream os;
   os << inner << outer << "<algebra val=\"(outer (# inner))\" />";
-  return ShapeFactory().createShape(os.str());
+  return os.str();
+}
+
+inline Mantid::Geometry::Object_sptr
+createAnnulus(double innerRadius, double outerRadius, double height,
+              const Mantid::Kernel::V3D &upAxis) {
+  using Mantid::Geometry::ShapeFactory;
+  return ShapeFactory().createShape(
+      annulusXML(innerRadius, outerRadius, height, upAxis));
 }
 
 inline Mantid::API::Sample createSamplePlusCan() {
   using Mantid::API::Sample;
+  using Mantid::Geometry::Can;
   using Mantid::Geometry::SampleEnvironment;
+  using Mantid::Geometry::ShapeFactory;
   using Mantid::Kernel::Material;
   using Mantid::Kernel::V3D;
   using Mantid::PhysicalConstants::getNeutronAtom;
@@ -67,11 +76,11 @@ inline Mantid::API::Sample createSamplePlusCan() {
   const double height(0.05), innerRadius(0.0046), outerRadius(0.005);
   const V3D centre(0, 0, -0.5 * height), upAxis(0, 0, 1);
   // Can
-  auto environment =
-      Mantid::Kernel::make_unique<SampleEnvironment>("Annulus Can");
-  auto can = createAnnulus(innerRadius, outerRadius, height, upAxis);
+  auto can = ShapeFactory().createShape<Can>(
+      annulusXML(innerRadius, outerRadius, height, upAxis));
   can->setMaterial(Material("Vanadium", getNeutronAtom(23), 0.02));
-  environment->add(*can);
+  auto environment =
+      Mantid::Kernel::make_unique<SampleEnvironment>("Annulus Can", can);
   // Sample volume
   auto sampleCell = ComponentCreationHelper::createCappedCylinder(
       innerRadius, height, centre, upAxis, "sample");

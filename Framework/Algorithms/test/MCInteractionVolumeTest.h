@@ -138,16 +138,6 @@ public:
     sample.setShape(*ComponentCreationHelper::createSphere(1));
     TS_ASSERT_THROWS_NOTHING(MCInteractionVolume mcv(sample));
   }
-
-  void test_Construction_With_Invalid_Environment_Throws_Error() {
-    using Mantid::API::Sample;
-    using Mantid::Geometry::SampleEnvironment;
-
-    Sample sample;
-    sample.setShape(*ComponentCreationHelper::createSphere(1));
-    sample.setEnvironment(new SampleEnvironment("Empty"));
-    TS_ASSERT_THROWS(MCInteractionVolume mcv(sample), std::invalid_argument);
-  }
 };
 
 #endif /* MANTID_ALGORITHMS_MCINTERACTIONVOLUMETEST_H_ */

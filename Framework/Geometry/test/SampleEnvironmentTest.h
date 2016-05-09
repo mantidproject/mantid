@@ -2,6 +2,7 @@
 #define TESTSAMPLEENVIRONMENT_H_
 
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
@@ -19,51 +20,52 @@ public:
   }
   static void destroySuite(SampleEnvironmentTest *suite) { delete suite; }
 
-  void testThatConstructorGivingNameCreatesTheCorrectName() {
-    SampleEnvironment kit("TestKit");
+  void test_Constructor_Sets_Name_And_Single_Element() {
+    using Mantid::Geometry::Can;
+    auto can = boost::make_shared<Can>("");
+    can->setID("8mm");
+
+    SampleEnvironment kit("TestKit", can);
     TS_ASSERT_EQUALS(kit.name(), "TestKit");
-  }
-
-  void testAddingElementIncreasesSizeByOne() {
-    using namespace Mantid::Geometry;
-    using namespace Mantid::Kernel;
-    SampleEnvironment kit("TestKit");
-
-    TS_ASSERT_EQUALS(0, kit.nelements());
-    auto shape = ComponentCreationHelper::createSphere(1.0);
-    TS_ASSERT_THROWS_NOTHING(kit.add(*shape));
     TS_ASSERT_EQUALS(1, kit.nelements());
-
-    TS_ASSERT_THROWS_NOTHING(kit.add(*shape));
-    TS_ASSERT_EQUALS(2, kit.nelements());
   }
 
-  void testIsValidTestsAllElements() {
+  void test_Adding_Component_Increases_Size_By_One() {
+    auto kit = createTestKit();
+    TS_ASSERT_EQUALS(3, kit->nelements());
+    auto shape = ComponentCreationHelper::createSphere(1.0);
+    TS_ASSERT_THROWS_NOTHING(kit->add(shape));
+    TS_ASSERT_EQUALS(4, kit->nelements());
+  }
+
+  void test_IsValid_Tests_All_Components() {
     using namespace Mantid::Geometry;
     using namespace Mantid::Kernel;
 
     auto kit = createTestKit();
-
-    V3D pt(0.1, 0.0, 0.0); // inside first, outside second
-    TS_ASSERT(kit->isValid(pt));
-    pt = V3D(0.3, 0.0, 0.0); // outside first, inside second
-    TS_ASSERT(kit->isValid(pt));
+    // inside can
+    TS_ASSERT(kit->isValid(V3D(0, 0, 0)));
+    // outside everything
+    TS_ASSERT(kit->isValid(V3D(-0.3, 0, 0)));
+    // inside object before sample
+    TS_ASSERT(kit->isValid(V3D(-0.25, 0, 0)));
+    // inside object after sample
+    TS_ASSERT(kit->isValid(V3D(0.25, 0, 0)));
   }
 
-  void testTrackIntersectionTestsAllElements() {
+  void test_Track_Intersection_Tests_All_Components() {
     using namespace Mantid::Geometry;
     using namespace Mantid::Kernel;
 
     auto kit = createTestKit();
-
-    Track ray(V3D(), V3D(1.0, 0.0, 0.0));
+    Track ray(V3D(-0.5, 0, 0), V3D(1.0, 0.0, 0.0));
     int nsegments(0);
     TS_ASSERT_THROWS_NOTHING(nsegments = kit->interceptSurfaces(ray));
-    TS_ASSERT_EQUALS(2, nsegments);
-    TS_ASSERT_EQUALS(2, ray.count());
+    TS_ASSERT_EQUALS(3, nsegments);
+    TS_ASSERT_EQUALS(3, ray.count());
   }
 
-  void testBoundingBoxEncompassesWholeObject() {
+  void test_BoundingBox_Encompasses_Whole_Object() {
     using namespace Mantid::Geometry;
     using namespace Mantid::Kernel;
 
@@ -71,7 +73,7 @@ public:
     auto bbox = kit->boundingBox();
 
     auto widths = bbox.width();
-    TS_ASSERT_DELTA(0.45, widths.X(), 1e-12);
+    TS_ASSERT_DELTA(0.7, widths.X(), 1e-12);
     TS_ASSERT_DELTA(0.2, widths.Y(), 1e-12);
     TS_ASSERT_DELTA(0.2, widths.Z(), 1e-12);
   }
@@ -81,11 +83,16 @@ private:
     using namespace Mantid::Geometry;
     using namespace Mantid::Kernel;
 
-    auto kit = boost::make_shared<SampleEnvironment>("TestKit");
-    kit->add(*ComponentCreationHelper::createSphere(0.1)); // origin
-    kit->add(*ComponentCreationHelper::createSphere(
-                 0.1, V3D(0.25, 0.0, 0.0))); // shifted in +x
-
+    // at centre
+    ShapeFactory factory;
+    auto can = factory.createShape<Can>(
+        ComponentCreationHelper::sphereXML(0.01, V3D(0, 0, 0), "sp-1"));
+    can->setID("8mm");
+    auto kit = boost::make_shared<SampleEnvironment>("TestKit", can);
+    // before sample
+    kit->add(ComponentCreationHelper::createSphere(0.1, V3D(-0.25, 0.0, 0.0)));
+    // after sample
+    kit->add(ComponentCreationHelper::createSphere(0.1, V3D(0.25, 0.0, 0.0)));
     return kit;
   }
 };

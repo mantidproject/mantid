@@ -5,18 +5,15 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Objects/Object.h"
-#include "MantidKernel/ClassMacros.h"
+#include "MantidGeometry/Instrument/Can.h"
 
 namespace Mantid {
 namespace Geometry {
 class Track;
-}
-namespace Geometry {
+
 /**
-  This class stores details regarding the sample environment that was used
-  during
-  a specific run. It is implemented as a collection of pairs of Object elements
+  Defines a single instance of a SampleEnvironment. It houses a single can
+  along with the other components specified by a SampleEnvironmentSpec.
 
   Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -41,31 +38,23 @@ namespace Geometry {
 */
 class MANTID_GEOMETRY_DLL SampleEnvironment {
 public:
-  /// Constructor defining the name of the environment
-  SampleEnvironment(const std::string &name);
+  SampleEnvironment(std::string name, Can_const_sptr can);
 
   /// @return The name of kit
   inline const std::string name() const { return m_name; }
   /// @return The number of elements the environment is composed of
-  inline size_t nelements() const { return m_elements.size(); }
-  /// Return the bounding box of all of the elements
+  inline size_t nelements() const { return m_components.size(); }
+
   Geometry::BoundingBox boundingBox() const;
-
-  /// Add an element
-  void add(const Geometry::Object &element);
-
-  /// Is the point given a valid point within the environment
   bool isValid(const Kernel::V3D &point) const;
-  /// Update the given track with intersections within the environment
-  int interceptSurfaces(Geometry::Track &track) const;
+  int interceptSurfaces(Track &track) const;
+
+  void add(const Object_const_sptr &component);
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(SampleEnvironment)
-
-  // Name of the kit
   std::string m_name;
-  // The elements
-  std::vector<Geometry::Object> m_elements;
+  // Element zero is always assumed to be the can
+  std::vector<Object_const_sptr> m_components;
 };
 }
 }
