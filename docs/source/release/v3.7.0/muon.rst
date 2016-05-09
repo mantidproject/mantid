@@ -52,8 +52,9 @@ Algorithms
 - :ref:`AsymmetryCalc <algm-AsymmetryCalc>`: a bug was fixed where the algorithm failed to run on input WorkspaceGroups. `#15404 <https://github.com/mantidproject/mantid/pull/15404>`_
 - :ref:`MaxEnt <algm-MaxEnt>`: MaxEnt now handles positive images `#15494 <https://github.com/mantidproject/mantid/pull/15494>`_
 - :ref:`MaxEnt <algm-MaxEnt>`: Some improvements/fixes were added (output label, X rounding errors and ability to increase the
-  number of points in the image and reconstructed data) `#15606 <https://github.com/mantidproject/mantid/pull/15606>`
-- :ref:`MaxEnt <algm-MaxEnt>`: *AutoShift* property was added. As in :ref:`FFT <algm-FFT>` this property allows for automatic phase correction for workspaces not centred at zero `#16031 <https://github.com/mantidproject/mantid/pull/16031>`
+  number of points in the image and reconstructed data) `#15606 <https://github.com/mantidproject/mantid/pull/15606>`_
+- :ref:`MaxEnt <algm-MaxEnt>`: *AutoShift* property was added. As in :ref:`FFT <algm-FFT>` this property allows for automatic phase correction for workspaces not centred at zero `#16031 <https://github.com/mantidproject/mantid/pull/16031>`_
+- :ref:`LoadMuonNexus <algm-LoadMuonNexus>`: If the NeXus file does not contain a grouping entry, or the grouping entry it contains is invalid, then the grouping will be loaded from the IDF. This enables use of such files in the ALC interface. `#16107 <https://github.com/mantidproject/mantid/pull/16107>`_
 
 Fit Functions
 -------------
