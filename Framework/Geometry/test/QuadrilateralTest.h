@@ -152,7 +152,7 @@ private:
 //------------------------------------------------------------------------------
 class QuadrilateralTestPerformance : public CxxTest::TestSuite {
 public:
-  void xtest_update_values() {
+  void test_update_values() {
     const size_t ntests{50000000};
     for (size_t i = 0; i < ntests; ++i) {
       Quadrilateral test(V2D(), V2D(2.0, 0.0), V2D(2.0, 1.5), V2D(0.0, 1.5));
