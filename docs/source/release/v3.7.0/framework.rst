@@ -5,6 +5,14 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+API
+---
+
+Improved
+########
+
+- A sorting members by name method was added to :ref:`WorkspaceGroup <WorkspaceGroup>`.
+
 Algorithms
 ----------
 
@@ -23,6 +31,8 @@ New
 - :ref:`EnggFitDIFCFromPeaks <algm-AlignComponents>` fits GSAS calibration
   parameters (DIFA, DIFC, TZERO) from peaks fitted using
   :ref:`EnggFitPeaks <algm-EnggFitPeaks>`.
+- :ref:`FindEPP <algm-FindEPP>` This algorithm performs Gaussian fit to find the elastic peak position.
+  As a result, `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ with parameters of the fitted peaks is created.
 - :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>`
    aggregates stacks of images from wavelength dependent imaging
    into one or more output bands.
@@ -79,6 +89,8 @@ Improved
 - :ref:`SaveMD <algm-SaveMD>` now writes MDHisto signal arrays as compressed data.
 - :ref:`SetUncertainties <algm-SetUncertainties>` has two new modes, ``oneIfZero`` and ``sqrtOrOne``.
 - :ref:`SetSampleMaterial <algm-SetSampleMaterial>` will now work out the number density from the chemical formula and mass density if these are given in the input. A user specified number density or if Z and the unit cell volume is given will override the value calculated from the chemical formula and mass density.
+- :ref:`ComputeCalibrationCoefVan <algm-ComputeCalibrationCoefVan>`
+  does not perform fit of data by itself, but requires an additional argument: ``EPPTable``. This should accelerate the data reduction workflow, because fitting results can be reused. Table with elastic peak positions can be created using the new :ref:`FindEPP <algm-FindEPP>` algorithm.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` now supports inelastic instruments. It relies on :ref:`ConvertUnits <algm-ConvertUnits>` having set the correct EMode. `#15923 <https://github.com/mantidproject/mantid/pull/15923>`_
 
 Deprecated
@@ -103,6 +115,7 @@ MD Algorithms (VATES CLI)
 -  The box structure of workspaces created with CutMD using NoPix=false now matches that specified by the PnBins properties. Additional box splitting is only allowed if MaxRecursionDepth is set to higher than its default of 1.
 -  XorMD, OrMD and AndMD treat masked bins as zero.
 -  A Gaussian smoothing option has been added to SmoothMD. Note, this currently only supports specifying widths for the smoothing function in units of pixels along the dimensions of the workspace.
+-  LoadMD has an option to skip loading workspace history. This is useful for workspaces created form large number of files, treated separately. 
 
 Geometry
 --------
@@ -132,6 +145,8 @@ Python
 - The Atom kernel class, which stores the cross-sections, relative atomic masses, and other information for all elements and isotopes is now accessible from Python.
 
 - The Material class has two new Python methods: ``chemicalFormula`` returns a tuple of Atom objects corresponding to the atoms in the compound, and their abundances; ``relativeMolecularMass`` returns the relative formular unit mass in atomic mass units.
+
+- The plot() function of mantidplot.pyplot now supports empty marker (marker=None).
 
 Python Algorithms
 #################

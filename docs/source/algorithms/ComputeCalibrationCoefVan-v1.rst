@@ -27,7 +27,7 @@ Algorithm creates a workspace with  detector sensitivity correction coefficients
 
     If sample log *temperature* is not present in the given Vanadium workspace or temperature is set to an invalid value, T=293K will be taken for the Debye-Waller factor calculation. Algorithm will produce warning in this case.
 
-2. Perform Gaussian fit of the data to find out the position of the peak centre and FWHM. These values are used to calculate sum :math:`S_i` as
+2. Load the peak centre and sigma from the *EPPTable*. These values are used to calculate sum :math:`S_i` as
 
    :math:`S_i = \sum_{x = x_C - 3\,\mathrm{fwhm}}^{x_C + 3\,\mathrm{fwhm}} Y_i(x)`
 
@@ -39,17 +39,23 @@ Algorithm creates a workspace with  detector sensitivity correction coefficients
 
 Workspace containing these correction coefficients is created as an output and can be used as a RHS workspace in :ref:`algm-Divide` to apply correction to the LHS workspace.
 
-.. note::
-    
-    If gaussian fit fails, algorithm terminates with an error message. The error message contains name of the workspace and detector number.
 
-Restrictions on the input workspace
+
+Restrictions on the input workspaces
 ###################################
 
 The valid input workspace:
 
 - must have an instrument set
 - must have a *wavelength* sample log
+
+Restrictions for *EPPTable*:
+
+- number of rows of the table must match to the number of histograms of the input workspace.
+- table must have the *PeakCentre* and *Sigma* columns.
+
+.. note::
+    The input *EPPTable* can be produced using the :ref:`algm-FindEPP` algorithm.
 
 
 Usage
@@ -61,8 +67,10 @@ Usage
 
     # load Vanadium data
     wsVana = LoadMLZ(Filename='TOFTOFTestdata.nxs')
-    # calculate correction coefficients
-    wsCoefs = ComputeCalibrationCoefVan(wsVana)
+    # find elastic peak positions
+    epptable = FindEPP(wsVana)
+    # calculate correction coefficients      
+    wsCoefs = ComputeCalibrationCoefVan(wsVana, epptable)
     print 'Spectrum 4 of the output workspace is filled with: ', round(wsCoefs.readY(999)[0])
 
     # wsCoefs can be used as rhs with Divide algorithm to apply correction to the data 

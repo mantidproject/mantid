@@ -156,8 +156,8 @@ public:
     const size_t ntests(50000000);
 
     double totalArea(0.0);
+    Quadrilateral test(V2D(), V2D(2.0, 0.0), V2D(2.0, 1.5), V2D(0.0, 1.5));
     for (size_t i = 0; i < ntests; ++i) {
-      Quadrilateral test(V2D(), V2D(2.0, 0.0), V2D(2.0, 1.5), V2D(0.0, 1.5));
       totalArea += test.area();
     }
   }

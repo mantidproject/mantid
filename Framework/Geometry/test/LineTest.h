@@ -56,8 +56,8 @@ public:
 
   void testDistance() {
     Line A(V3D(1.0, 1.0, 1.0), V3D(1.0, 0.0, 0.0));
-    TS_ASSERT_EQUALS(A.distance(V3D(0.0, 0.0, 0.0)), sqrt(2.0));
-    TS_ASSERT_EQUALS(A.distance(V3D(1.0, 0.0, 0.0)), sqrt(2.0));
+    TS_ASSERT_EQUALS(A.distance(V3D(0.0, 0.0, 0.0)), M_SQRT2);
+    TS_ASSERT_EQUALS(A.distance(V3D(1.0, 0.0, 0.0)), M_SQRT2);
     TS_ASSERT_EQUALS(A.distance(V3D(1.0, 1.0, 0.0)), 1.0);
   }
 

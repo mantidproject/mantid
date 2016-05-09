@@ -14,12 +14,12 @@
     GNU General Public License
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include "MantidKernel/System.h"
 #include "idc.h"
+#include "MantidKernel/System.h"
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 ///@cond nodoc
 /** used to keep status information about the DAE connection */

@@ -1275,6 +1275,8 @@ namespace MantidQt
 					// if workspace and instrument don't change keep the scaling
 					if (sameWS && !resetGeometry) {
 						m_instrumentActor->updateColors();
+						setupColorMap();
+						updateInstrumentView();
 					}
 					else {
 						resetInstrument(resetGeometry);

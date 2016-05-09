@@ -422,7 +422,7 @@ public:
     the repository was never installed, the isValid will return false, and the
     only method valid is ScriptRepository::install.
   */
-  virtual bool isValid(void) = 0;
+  virtual bool isValid() = 0;
 
   /** Install the necessary resources at the local_path given that allows the
     ScriptRepository to operate
@@ -479,7 +479,7 @@ public:
 
      @return List with all the files automatically downloaded.
   */
-  virtual std::vector<std::string> check4Update(void) = 0;
+  virtual std::vector<std::string> check4Update() = 0;
 
   /**
      Upload the local file/folder to be available at the remote repository.
@@ -581,7 +581,7 @@ public:
 
   /** Return the ignore patters that was defined through
    * ScriptRepository::setIgnorePatterns*/
-  virtual std::string ignorePatterns(void) = 0;
+  virtual std::string ignorePatterns() = 0;
 
   /** Define the AutoUpdate option, which define if a file will be updated as
      soon as

@@ -1,9 +1,9 @@
 #ifndef TCP_EVENT_STREAM_DEFS_H
 #define TCP_EVENT_STREAM_DEFS_H
 
+#include <cstdint>
 #include <cstring>
-#include <stdint.h>
-#include <time.h>
+#include <ctime>
 #include <vector>
 
 // to ignore warnings when comparing header versions

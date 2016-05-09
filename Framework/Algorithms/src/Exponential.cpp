@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Exponential.h"
-#include <math.h>
+#include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

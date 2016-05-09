@@ -1,7 +1,7 @@
-#include <time.h>
+#include <ctime>
+#include <exception>
 #include <sstream> // for ostringstream
 #include <string>
-#include <exception>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
