@@ -31,6 +31,7 @@ set ( TEST_PY_FILES
   EnggFocusTest.py
   EnggVanadiumCorrectionsTest.py
   FilterLogByTimeTest.py
+  FindEPPTest.py
   FindReflectometryLinesTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
   GetEiT0atSNSTest.py

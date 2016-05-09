@@ -77,7 +77,7 @@ double Gaussian::activeParameter(size_t i) const {
 double Gaussian::centre() const { return getParameter("PeakCentre"); }
 double Gaussian::height() const { return getParameter("Height"); }
 double Gaussian::fwhm() const {
-  return 2.0 * sqrt(2.0 * std::log(2.0)) * getParameter("Sigma");
+  return 2.0 * sqrt(2.0 * M_LN2) * getParameter("Sigma");
 }
 double Gaussian::intensity() const {
   auto sigma = getParameter("Sigma");
@@ -96,7 +96,7 @@ double Gaussian::intensity() const {
 void Gaussian::setCentre(const double c) { setParameter("PeakCentre", c); }
 void Gaussian::setHeight(const double h) { setParameter("Height", h); }
 void Gaussian::setFwhm(const double w) {
-  setParameter("Sigma", w / (2.0 * sqrt(2.0 * std::log(2.0))));
+  setParameter("Sigma", w / (2.0 * sqrt(2.0 * M_LN2)));
 }
 void Gaussian::setIntensity(const double i) {
   m_intensityCache = i;

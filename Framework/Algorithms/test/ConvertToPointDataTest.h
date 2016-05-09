@@ -78,7 +78,7 @@ public:
       for (int j = 0; j < numBins; ++j) {
         // Now the data. Y and E unchanged
         TS_ASSERT_EQUALS(yValues[j], 2.0);
-        TS_ASSERT_EQUALS(eValues[j], sqrt(2.0));
+        TS_ASSERT_EQUALS(eValues[j], M_SQRT2);
         // X data originally was 0->10 in steps of 1. Now it should be the
         // centre of each bin which is
         // 1.0 away from the last centre
@@ -128,7 +128,7 @@ public:
       for (size_t j = 0; j < numBins; ++j) {
         // Now the data. Y and E unchanged
         TS_ASSERT_EQUALS(yValues[j], 2.0);
-        TS_ASSERT_EQUALS(eValues[j], sqrt(2.0));
+        TS_ASSERT_EQUALS(eValues[j], M_SQRT2);
         // X data originally was 0->10 in steps of 1. Now it should be the
         // centre of each bin which is
         // 1.0 away from the last centre
