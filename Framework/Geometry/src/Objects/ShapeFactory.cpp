@@ -1302,6 +1302,55 @@ V3D ShapeFactory::parsePosition(Poco::XML::Element *pElem) {
   return retVal;
 }
 
+/** Create a hexahedral shape object
+@param xlb :: Left-back x point or hexahedron
+@param xlf :: Left-front x point of hexahedron
+@param xrf :: Right-front x point of hexahedron
+@param xrb :: Right-back x point of hexahedron
+@param ylb :: Left-back y point or hexahedron
+@param ylf :: Left-front y point of hexahedron
+@param yrf :: Right-front y point of hexahedron
+@param yrb :: Right-back y point of hexahedron
+
+@returns the newly created hexahedral shape object
+*/
+boost::shared_ptr<Object>
+ShapeFactory::createHexahedralShape(double xlb, double xlf, double xrf,
+                                    double xrb, double ylb, double ylf,
+                                    double yrf, double yrb) {
+	Hexahedron hex;
+	hex.lbb = V3D(xlb, ylb, 0);
+	hex.lbt = V3D(xlb, ylb, 0.001);
+	hex.lfb = V3D(xlf, ylf, 0);
+	hex.lft = V3D(xlf, ylf, 0.001);
+	hex.rbb = V3D(xrb, yrb, 0);
+	hex.rbt = V3D(xrb, yrb, 0.001);
+	hex.rfb = V3D(xrf, yrf, 0);
+	hex.rft = V3D(xrf, yrf, 0.001);
+
+	std::map<int, boost::shared_ptr<Surface>> prim;
+	int l_id = 1;
+	auto algebra = parseHexahedronFromStruct(hex, prim, l_id);
+
+	auto shape = boost::make_shared<Object>();
+	shape->setObject(21, algebra);
+	shape->populate(prim);
+
+	auto handler = boost::make_shared<GluGeometryHandler>(shape);
+
+	shape->setGeometryHandler(handler);
+
+	auto geomHandler = dynamic_cast<GluGeometryHandler *>(handler.get());
+
+	geomHandler->setHexahedron(hex.lbb, hex.lfb, hex.rfb, hex.rbb, hex.lbt,
+		hex.lft, hex.rft, hex.rbt);
+
+	shape->defineBoundingBox(std::max(xrb, xrf), yrf, 0.001, std::min(xlf, xlb),
+		ylb, 0);
+
+	return shape;
+}
+
 /// create a special geometry handler for the known finite primitives
 void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
                                          boost::shared_ptr<Object> Obj) {
