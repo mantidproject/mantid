@@ -34,7 +34,7 @@ namespace detail {
 */
 template <class T> class Offsetable {
 public:
-  T &operator+=(const double offset) {
+  T &operator+=(const double offset) & {
     auto &derived = static_cast<T &>(*this);
     std::for_each(derived.begin(), derived.end(),
                   [=](double &value) { value += offset; });

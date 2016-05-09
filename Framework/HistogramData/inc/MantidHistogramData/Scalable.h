@@ -34,7 +34,7 @@ namespace detail {
 */
 template <class T> class Scalable {
 public:
-  T &operator*=(const double scale) {
+  T &operator*=(const double scale) & {
     auto &derived = static_cast<T &>(*this);
     std::for_each(derived.begin(), derived.end(),
                   [=](double &value) { value *= scale; });
