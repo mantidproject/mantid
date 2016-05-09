@@ -133,6 +133,7 @@ CurveFitting
 ------------
 
 - Concept page for :ref:`Mantid Fitting <Fitting>` has been added.
+- In order to guarantee a complete overlap between resolution and signal in the region of interest, Function :ref:`Convolution <func-Convolution>` can switch between a fast FFT mode for data defined over a symmetric domain, and slower direct calculations for data defined over an asymmetric domain .
 
 Improved
 ########
