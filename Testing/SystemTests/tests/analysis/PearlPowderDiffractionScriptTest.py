@@ -228,36 +228,36 @@ class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest
         pearl_routines.PEARL_startup("Calib", "15_3")
 
         # setting raw files directory
-        DataDir = DIRS[0] + 'PEARL/Calibration_Test/RawFiles/'
+        DataDir = os.path.join(DIRS[0], 'PEARL/Calibration_Test/RawFiles/')
         pearl_routines.pearl_set_currentdatadir(DataDir)
         pearl_routines.PEARL_setdatadir(DataDir)
 
         # create calibration folder to process calibration files too
-        CalibDir = DIRS[0] + '/PEARL/Calibration_Test/Calibration/'
+        CalibDir = os.path.join(DIRS[0] + '/PEARL/Calibration_Test/Calibration/')
         # setting calibration files directory
         pearl_routines.pearl_initial_dir(CalibDir)
 
         # creating group cal file
-        ngrpfile = CalibDir + 'test_cal_group_15_3.cal'
+        ngrpfile = os.path.join(CalibDir, 'test_cal_group_15_3.cal')
         pearl_routines.PEARL_creategroup("91560_91561", ngroupfile=ngrpfile)
 
         # create offset files
-        offsetfile = CalibDir + 'pearl_offset_15_3.cal'
+        offsetfile = os.path.join(CalibDir, 'pearl_offset_15_3.cal')
         pearl_routines.PEARL_createcal("91560_91561", noffsetfile=offsetfile, groupfile=ngrpfile)
 
         # Creates the vanadium file for a cycle, where the first set of runs are the vanadium and
         # the second are the background in each case.
-        vanFile35 = CalibDir + 'van_spline_TT35_cycle_15_3.nxs'
+        vanFile35 = os.path.join(CalibDir, 'van_spline_TT35_cycle_15_3.nxs')
         pearl_routines.PEARL_createvan("91530_91531", "91550_91551", ttmode="TT35",
                                        nvanfile=vanFile35, nspline=40, absorb=True, debug=True)
         CloneWorkspace(InputWorkspace="Van_data", OutputWorkspace="van_tt35")
 
-        vanFile70 = CalibDir + 'van_spline_TT70_cycle_15_3.nxs'
+        vanFile70 = os.path.join(CalibDir, 'van_spline_TT70_cycle_15_3.nxs')
         pearl_routines.PEARL_createvan("91530_91531", "91550_91551", ttmode="TT70",
                                        nvanfile=vanFile70, nspline=40, absorb=True, debug=True)
         CloneWorkspace(InputWorkspace="Van_data", OutputWorkspace="van_tt70")
 
-        vanFile88 = CalibDir + 'van_spline_TT88_cycle_15_3.nxs'
+        vanFile88 = os.path.join(CalibDir, 'van_spline_TT88_cycle_15_3.nxs')
         pearl_routines.PEARL_createvan("91530_91531", "91550_91551", ttmode="TT88",
                                        nvanfile=vanFile88, nspline=40, absorb=True, debug=True)
         CloneWorkspace(InputWorkspace="Van_data", OutputWorkspace="van_tt88")
@@ -307,8 +307,8 @@ class LoadCalibTests(unittest.TestCase):
 
     def test_calfile_with_workspace(self):
 
-        cal_group_file = (DIRS[0] + 'PEARL/Calibration_Test/Calibration/test_cal_group_15_3.cal')
-        cal_offset_file = (DIRS[0] + 'PEARL/Calibration_Test/Calibration/pearl_offset_15_3.cal')
+        cal_group_file = os.path.join(DIRS[0], 'PEARL/Calibration_Test/Calibration/test_cal_group_15_3.cal')
+        cal_offset_file = os.path.join(DIRS[0], 'PEARL/Calibration_Test/Calibration/pearl_offset_15_3.cal')
         LoadCalFile(InstrumentName="PEARL", CalFilename=cal_group_file,
                     WorkspaceName='cal_group_15_3')
         LoadCalFile(InstrumentName="PEARL", CalFilename=cal_offset_file,
@@ -347,9 +347,10 @@ class LoadCalibTests(unittest.TestCase):
 
     def test_vanadium_tt_mode_files(self):
 
-        vanadium_file_dir = (DIRS[0] + 'PEARL/Calibration_Test/Calibration/')
+        vanadium_base_dir = (DIRS[0] + 'PEARL/Calibration_Test/Calibration/')
         tt_35_file = 'van_spline_TT35_cycle_15_3.nxs'
-        van_tt35_data = LoadNexusProcessed(Filename=vanadium_file_dir + tt_35_file,
+        vanadium_tt_35_dir = os.path.join(vanadium_base_dir, tt_35_file)
+        van_tt35_data = LoadNexusProcessed(Filename=vanadium_tt_35_dir,
                                            OutputWorkspace=tt_35_file)
         self.matrix_workspaces_test(van_tt35_data, 'tt35')
 
@@ -360,7 +361,8 @@ class LoadCalibTests(unittest.TestCase):
         self.assertAlmostEquals(177.218826007, van_tt35_data[13].readX(0)[278], places=DIFF_PLACES)
 
         tt_70_file = 'van_spline_TT70_cycle_15_3.nxs'
-        van_tt70_data = LoadNexusProcessed(Filename=vanadium_file_dir + tt_70_file,
+        vanadium_tt_70_dir = os.path.join(vanadium_base_dir, tt_70_file)
+        van_tt70_data = LoadNexusProcessed(Filename=vanadium_tt_70_dir,
                                            OutputWorkspace=tt_70_file)
         self.matrix_workspaces_test(van_tt70_data, 'tt70')
 
@@ -371,7 +373,8 @@ class LoadCalibTests(unittest.TestCase):
         self.assertAlmostEquals(177.218826007, van_tt70_data[13].readX(0)[278], places=DIFF_PLACES)
 
         tt_88_file = 'van_spline_TT88_cycle_15_3.nxs'
-        van_tt88_data = LoadNexusProcessed(Filename=vanadium_file_dir + tt_88_file,
+        vanadium_tt_88_dir = os.path.join(vanadium_base_dir, tt_88_file)
+        van_tt88_data = LoadNexusProcessed(Filename=vanadium_tt_88_dir,
                                            OutputWorkspace=tt_88_file)
         self.matrix_workspaces_test(van_tt88_data, 'tt88')
 
