@@ -575,8 +575,8 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
             raise RuntimeError("Could not find the reader of type G2pwd_xye.xye_ReaderClass. "
                                "Got a list of only {0} readers.".format(len(readers_list)))
 
-        # 5 is a: 'G2pwd_xye.xye_ReaderClass object'
-        reader_xye = [readers_list[5]]
+        # 6 is a: 'G2pwd_xye.xye_ReaderClass object'. Warning: this can change sometimes
+        reader_xye = [readers_list[6]]
         if not isinstance(reader_xye[0], object):
             raise RuntimeError("Could not find the reader of type G2pwd_xye.xye_ReaderClass. "
                                "Got this object: {0}".format(reader_xye))
