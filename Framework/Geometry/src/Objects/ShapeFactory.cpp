@@ -79,36 +79,24 @@ boost::shared_ptr<ObjectType> ShapeFactory::createShape(std::string shapeXML,
   return createShape<ObjectType>(pRootElem);
 }
 
-/** Creates a geometric object from a DOM-element-node pointing to a \<type>
- *element
- *  containing shape information. If no shape information an empty Object is
- *returned
+/** Creates a geometric object from a DOM-element-node pointing to an element
+ * whose child nodes contain the shape information. If no shape information
+ * an empty Object is returned.
  *
- *  @param pElem :: XML element from instrument def. file which may specify a
- *geometric shape
- *  @return A shared pointer to a geometric shape (defaults to an 'empty' shape
- *if XML tags contain no geo. info.)
- *
- *  @throw logic_error Thrown if argument is not a pointer to a 'type' XML
- *element
+ * @param pElem A pointer to an Element node whose children fully define the
+ * object. The name of this element is unimportant.
+ * @return A shared pointer to a geometric shape
  */
 template <typename ObjectType>
 boost::shared_ptr<ObjectType>
 ShapeFactory::createShape(Poco::XML::Element *pElem) {
-  // check if pElem is an element with tag name 'type'
-
-  if ((pElem->tagName()).compare("type")) {
-    g_log.error("Argument to function createShape must be a pointer to an XML "
-                "element with tag name type.");
-    throw std::logic_error("Argument to function createShape must be a pointer "
-                           "to an XML element with tag name type.");
-  }
-
+  // Write the definition to a string to store in the final object
   std::stringstream xmlstream;
   DOMWriter writer;
   writer.writeNode(xmlstream, pElem);
   std::string shapeXML = xmlstream.str();
   auto retVal = boost::make_shared<ObjectType>(shapeXML);
+
   // if no <algebra> element then use default algebra
   bool defaultAlgebra(false);
   // get algebra string
