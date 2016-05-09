@@ -17,6 +17,7 @@
 #include "vtkFloatArray.h"
 #include "vtkDoubleArray.h"
 
+#include <cmath>
 
 using Mantid::API::IMDWorkspace;
 using Mantid::API::IMDHistoWorkspace;
@@ -136,7 +137,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
     progressUpdate.eventRaised(double(index) * progressFactor);
     double signalScalar = signal->GetValue(index);
     bool maskValue =
-        (isSpecial(signalScalar) || !m_thresholdRange->inRange(signalScalar));
+        (!std::isfinite(signalScalar) || !m_thresholdRange->inRange(signalScalar));
     if (maskValue) {
       visualDataSet->BlankCell(index);
     }

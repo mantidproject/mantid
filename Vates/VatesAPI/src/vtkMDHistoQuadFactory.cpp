@@ -136,8 +136,8 @@ namespace Mantid
             iterator->jumpTo(index);
             signalScalar = static_cast<float>(iterator->getNormalizedSignal()); // Get signal normalized as per m_normalizationOption
 
-            if (isSpecial( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
-            {
+            if (!std::isfinite(signalScalar) ||
+                !m_thresholdRange->inRange(signalScalar)) {
               // out of range
               voxelShown[index] = false;
             }

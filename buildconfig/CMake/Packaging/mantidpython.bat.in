@@ -34,6 +34,7 @@ if "%1"=="--classic" (
 
 :: Start ipython and pass through all arguments to it
 start "Mantid Python" /B /WAIT %_IPYTHON_CMD% %*
+if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
 goto TheEnd
 
 :StartPython
@@ -48,5 +49,7 @@ shift
 if not "%~1"=="" goto ArgumentsLoop
 
 start "Mantid Python" /B /WAIT %_PYTHON_EXE%%ArgsExceptFirst%
+if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
 
 :TheEnd
+exit /B 0

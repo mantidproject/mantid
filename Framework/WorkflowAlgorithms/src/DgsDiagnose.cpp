@@ -1,5 +1,5 @@
 #include "MantidWorkflowAlgorithms/DgsDiagnose.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 

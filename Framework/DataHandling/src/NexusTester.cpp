@@ -6,8 +6,8 @@
 #include <Poco/File.h>
 #include <Poco/Thread.h>
 
+#include <cstdlib>
 #include <nexus/NeXusFile.hpp>
-#include <stdlib.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

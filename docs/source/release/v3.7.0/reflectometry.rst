@@ -8,7 +8,11 @@ Reflectometry Changes
 Reflectometry Instruments
 --------------------------
 
-An updated version of the OFFSPEC IDF is now being used in mantid `#15561 <https://github.com/mantidproject/mantid/pull/15561>`_
+- An updated version of the OFFSPEC IDF is now being used in mantid `#15561 <https://github.com/mantidproject/mantid/pull/15561>`_
+
+- CRISP and POLREF IDFs were causing problems in the ISIS Reflectometry (Polref) interface as they were using the `opening height` tag
+  when defining their slits. This has now been changed to be uniform across all reflectometry instruments (INTER, POLREF, CRISP, SURF, OFFSPEC)
+  to `vertical gap` such that the CalculateResolution algorithm invoked by the interface will now work correctly. `#16040 <https://github.com/mantidproject/mantid/pull/16040>`_ 
    
 ConvertToReflectometryQ
 -----------------------

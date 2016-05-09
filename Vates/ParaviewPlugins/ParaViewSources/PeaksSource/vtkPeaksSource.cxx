@@ -120,9 +120,8 @@ void vtkPeaksSource::updateAlgorithmProgress(double progress, const std::string&
 /*
 Getter for the workspace type name.
 */
-char* vtkPeaksSource::GetWorkspaceTypeName()
-{
-  return const_cast<char*>(m_wsTypeName.c_str());
+const char *vtkPeaksSource::GetWorkspaceTypeName() {
+  return m_wsTypeName.c_str();
 }
 
 const char* vtkPeaksSource::GetWorkspaceName()

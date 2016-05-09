@@ -62,7 +62,7 @@ public:
   /**
    * Create a PropertyWithValue from the given python object value
    */
-  Mantid::Kernel::Property *
+  std::unique_ptr<Mantid::Kernel::Property>
   create(const std::string &name, const boost::python::object &value,
          const boost::python::object &validator,
          const unsigned int direction) const override {
@@ -70,10 +70,11 @@ public:
 
     auto optBool = fromPyObj(value);
     if (isNone(validator)) {
-      return new PropertyWithValue<OptionalBool>(name, optBool, direction);
+      return Mantid::Kernel::make_unique<PropertyWithValue<OptionalBool>>(
+          name, optBool, direction);
     } else {
       const IValidator *propValidator = extract<IValidator *>(validator);
-      return new PropertyWithValue<OptionalBool>(
+      return Mantid::Kernel::make_unique<PropertyWithValue<OptionalBool>>(
           name, optBool, propValidator->clone(), direction);
     }
   }

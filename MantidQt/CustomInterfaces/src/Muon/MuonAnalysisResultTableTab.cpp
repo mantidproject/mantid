@@ -8,11 +8,11 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include "MantidQtMantidWidgets/MuonSequentialFitDialog.h"
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -423,14 +423,12 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
     Mantid::Kernel::DateAndTime end = ws->run().endTime();
 
     const std::vector<Property *> &logData = ws->run().getLogData();
-    std::vector<Property *>::const_iterator pEnd = logData.end();
 
-    for (std::vector<Property *>::const_iterator pItr = logData.begin();
-         pItr != pEnd; ++pItr) {
+    for (const auto prop : logData) {
       // Check if is a timeseries log
       if (TimeSeriesProperty<double> *tspd =
-              dynamic_cast<TimeSeriesProperty<double> *>(*pItr)) {
-        QString logFile(QFileInfo((**pItr).name().c_str()).fileName());
+              dynamic_cast<TimeSeriesProperty<double> *>(prop)) {
+        QString logFile(QFileInfo(prop->name().c_str()).fileName());
 
         double value(0.0);
         int count(0);
@@ -457,20 +455,19 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
         }
       } else // Should be a non-timeseries one
       {
-        QString logName = QString::fromStdString((**pItr).name());
+        QString logName = QString::fromStdString(prop->name());
 
         // Check if we should display it
         if (NON_TIMESERIES_LOGS.contains(logName)) {
           QVariant value;
 
           if (logName == RUN_NUMBER_LOG) { // special case
-            value = runNumberString(wsName, (*pItr)->value());
+            value = MuonAnalysisHelper::runNumberString(wsName, prop->value());
           } else if (auto stringProp =
-                         dynamic_cast<PropertyWithValue<std::string> *>(
-                             *pItr)) {
+                         dynamic_cast<PropertyWithValue<std::string> *>(prop)) {
             value = QString::fromStdString((*stringProp)());
           } else if (auto doubleProp =
-                         dynamic_cast<PropertyWithValue<double> *>(*pItr)) {
+                         dynamic_cast<PropertyWithValue<double> *>(prop)) {
             value = (*doubleProp)();
           } else {
             throw std::runtime_error("Unsupported non-timeseries log type");
@@ -949,38 +946,6 @@ std::string MuonAnalysisResultTableTab::getFileName() {
     }
   }
   return fileName;
-}
-
-/**
- * Uses the format of the workspace name
- * (INST00012345-8; Pair; long; Asym; 1+2-3+4; #2)
- * to get a string in the format "run number: period"
- * @param workspaceName :: [input] Name of the workspace
- * @param firstRun :: [input] First run number - use this if tokenizing fails
- * @returns Run number/period string
- */
-QString
-MuonAnalysisResultTableTab::runNumberString(const std::string &workspaceName,
-                                            const std::string &firstRun) {
-  std::string periods = "";        // default
-  std::string instRuns = firstRun; // default
-
-  Mantid::Kernel::StringTokenizer tokenizer(
-      workspaceName, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
-  if (tokenizer.count() > 4) {
-    instRuns = tokenizer[0];
-    periods = tokenizer[4];
-    // Remove "INST000" off the start
-    // No muon instruments have numbers in their names
-    size_t numPos = instRuns.find_first_of("123456789");
-    instRuns = instRuns.substr(numPos, instRuns.size());
-  }
-
-  QString ret(instRuns.c_str());
-  if (!periods.empty()) {
-    ret.append(": ").append(periods.c_str());
-  }
-  return ret;
 }
 }
 }

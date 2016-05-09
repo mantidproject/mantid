@@ -74,7 +74,7 @@ Table::Table(ScriptingEnv *env, int r, int c, const QString &label,
 
 void Table::init(int rows, int cols) {
   selectedCol = -1;
-  d_saved_cells = 0;
+  d_saved_cells = nullptr;
   d_show_comments = false;
   d_numeric_precision = 13;
 
@@ -1598,7 +1598,7 @@ void Table::setText(int row, int col, const QString &text) {
 
 void Table::saveToMemory()
 {
-  // clear d_saved_cells
+  // clear d_saved_cells, if any
   freeMemory();
   d_saved_cells = new double *[d_table->columnCount()];
   for (int i = 0; i < d_table->columnCount(); ++i)
@@ -1709,12 +1709,17 @@ void Table::saveToMemory()
   }
 }
 
+/**
+ * Clears d_saved_cells. Does nothing if there are no saved cells.
+ */
 void Table::freeMemory() {
-  for (int i = 0; i < d_table->columnCount(); i++)
-    delete[] d_saved_cells[i];
+  if (d_saved_cells) {
+    for (int i = 0; i < d_table->columnCount(); i++)
+      delete[] d_saved_cells[i];
 
-  delete[] d_saved_cells;
-  d_saved_cells = 0;
+    delete[] d_saved_cells;
+    d_saved_cells = nullptr;
+  }
 }
 
 void Table::setTextFormat(int col) {
