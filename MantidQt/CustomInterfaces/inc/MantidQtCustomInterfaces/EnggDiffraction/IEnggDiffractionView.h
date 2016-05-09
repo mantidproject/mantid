@@ -219,10 +219,14 @@ public:
    * @param outFilename output file name
    * @param difc difc values (one per bank)
    * @param tzero tzero values (one per bank)
+   * @param templateFile name of the template file to use (from the
+   * templates distributed with the Engg scripts and files)
    */
   virtual void writeOutCalibFile(const std::string &outFilename,
                                  const std::vector<double> &difc,
-                                 const std::vector<double> &tzero) = 0;
+                                 const std::vector<double> &tzero,
+                                 const std::vector<std::string> &bankNames,
+                                 const std::string &templateFile = "") = 0;
 
   /**
    * Enable/disable all the sections or tabs of the interface. To be
@@ -426,10 +430,6 @@ public:
   virtual void plotReplacingWindow(const std::string &wsName,
                                    const std::string &spectrum,
                                    const std::string &type) = 0;
-
-
-
-
 };
 
 } // namespace CustomInterfaces

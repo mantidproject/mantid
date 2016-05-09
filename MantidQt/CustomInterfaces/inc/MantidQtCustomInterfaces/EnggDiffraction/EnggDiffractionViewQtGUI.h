@@ -115,7 +115,9 @@ public:
 
   void writeOutCalibFile(const std::string &outFilename,
                          const std::vector<double> &difc,
-                         const std::vector<double> &tzero) override;
+                         const std::vector<double> &tzero,
+                         const std::vector<std::string> &bankNames,
+                         const std::string &templateFile) override;
 
   void enableTabs(bool enable) override;
 

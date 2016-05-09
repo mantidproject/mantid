@@ -159,7 +159,8 @@ private:
                                   const std::string &newCeriaNo);
 
   std::string outputCalibFilename(const std::string &vanNo,
-                                  const std::string &ceriaNo);
+                                  const std::string &ceriaNo,
+                                  const std::string &bankName="");
 
   void parseCalibrateFilename(const std::string &path, std::string &instName,
                               std::string &vanNo, std::string &ceriaNo);
@@ -174,8 +175,10 @@ private:
                const std::string &ceriaNo, const std::string &outFilename,
                const std::string &specNos);
 
-  std::string buildCalibrateSuggestedFilename(const std::string &vanNo,
-                                              const std::string &ceriaNo) const;
+  std::string
+  buildCalibrateSuggestedFilename(const std::string &vanNo,
+                                  const std::string &ceriaNo,
+                                  const std::string &bankName="") const;
 
   //@}
 

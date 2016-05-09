@@ -1096,19 +1096,23 @@ void EnggDiffractionPresenter::inputChecksBeforeCalibrate(
 }
 
 /**
-* What should be the name of the output GSAS calibration file, given
-* the Vanadium and Ceria runs
-*
-* @param vanNo number of the Vanadium run, which is normally part of the name
-* @param ceriaNo number of the Ceria run, which is normally part of the name
-*
-* @return filename (without the full path)
-*/
+ * What should be the name of the output GSAS calibration file, given
+ * the Vanadium and Ceria runs
+ *
+ * @param vanNo number of the Vanadium run, which is normally part of the name
+ * @param ceriaNo number of the Ceria run, which is normally part of the name
+ * @param bankName bank name when generating a file for an individual
+ * bank. Leave empty to use a generic name for all banks
+ *
+ * @return filename (without the full path)
+ */
 std::string
 EnggDiffractionPresenter::outputCalibFilename(const std::string &vanNo,
-                                              const std::string &ceriaNo) {
+                                              const std::string &ceriaNo,
+                                              const std::string &bankName) {
   std::string outFilename = "";
-  const std::string sugg = buildCalibrateSuggestedFilename(vanNo, ceriaNo);
+  const std::string sugg =
+      buildCalibrateSuggestedFilename(vanNo, ceriaNo, bankName);
   if (!g_askUserCalibFilename) {
     outFilename = sugg;
   } else {
@@ -1264,10 +1268,12 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
     m_calibFinishedOK = false;
     doCalib(cs, vanNo, ceriaNo, outFilename, specNos);
     m_calibFinishedOK = true;
-  } catch (std::runtime_error &) {
-    g_log.error() << "The calibration calculations failed. One of the "
-                     "algorithms did not execute correctly. See log messages "
-                     "for details. " << std::endl;
+  } catch (std::runtime_error &rexc) {
+    g_log.error()
+        << "The calibration calculations failed. One of the "
+           "algorithms did not execute correctly. See log messages for "
+           "further details. Error: " +
+               std::string(rexc.what()) << std::endl;
   } catch (std::invalid_argument &) {
     g_log.error()
         << "The calibration calculations failed. Some input properties "
@@ -1307,20 +1313,26 @@ void EnggDiffractionPresenter::calibrationFinished() {
 }
 
 /**
-* Build a suggested name for a new calibration, by appending instrument name,
-* relevant run numbers, etc., like: ENGINX_241391_236516_both_banks.par
-*
-* @param vanNo number of the Vanadium run
-* @param ceriaNo number of the Ceria run
-*
-* @return Suggested name for a new calibration file, following
-* ENGIN-X practices
-*/
+ * Build a suggested name for a new calibration, by appending instrument name,
+ * relevant run numbers, etc., like: ENGINX_241391_236516_all_banks.par
+ *
+ * @param vanNo number of the Vanadium run
+ * @param ceriaNo number of the Ceria run
+ * @param bankName bank name when generating a file for an individual
+ * bank. Leave empty to use a generic name for all banks
+ *
+ * @return Suggested name for a new calibration file, following
+ * ENGIN-X practices
+ */
 std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
-    const std::string &vanNo, const std::string &ceriaNo) const {
-  // default and only one supported
+    const std::string &vanNo, const std::string &ceriaNo,
+    const std::string &bankName) const {
+  // default and only one supported instrument for now
   std::string instStr = g_enginxStr;
-  std::string nameAppendix = "_both_banks";
+  std::string nameAppendix = "_all_banks";
+  if (!bankName.empty()) {
+    nameAppendix = "_" + bankName;
+  }
   std::string curInst = m_view->currentInstrument();
   if ("ENGIN-X" != curInst && "ENGINX" != curInst) {
     instStr = "UNKNOWNINST";
@@ -1385,17 +1397,26 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   // Bank 1 and 2 - ENGIN-X
   // bank 1 - loops once & used for cropped calibration
   // bank 2 - loops twice, one with each bank & used for new calibration
-  const size_t bankNo1 = 1;
-  const size_t bankNo2 = 2;
+  constexpr size_t bankNo1 = 1;
+  constexpr size_t bankNo2 = 2;
   std::vector<double> difc, tzero;
+  // for the names of the output files
+  std::vector<std::string> bankNames;
 
   bool specNumUsed = specNos != "";
   if (specNumUsed) {
     difc.resize(bankNo1);
     tzero.resize(bankNo1);
+    const std::string customName = m_view->currentCalibCustomisedBankName();
+    if (customName.empty()) {
+      bankNames.emplace_back("cropped");
+    } else {
+      bankNames.push_back(customName);
+    }
   } else {
     difc.resize(bankNo2);
     tzero.resize(bankNo2);
+    bankNames = {"North", "South"};
   }
 
   for (size_t i = 0; i < difc.size(); i++) {
@@ -1444,14 +1465,30 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
 
   // Creates appropriate output directory
   Poco::Path saveDir = outFilesDir("Calibration");
+  Poco::Path outFullPath(saveDir);
+  outFullPath.append(outFilename);
 
   // Double horror: 1st use a python script
   // 2nd: because runPythonCode does this by emitting a signal that goes to
   // MantidPlot, it has to be done in the view (which is a UserSubWindow).
-  Poco::Path outFullPath(saveDir);
-  outFullPath.append(outFilename);
+  // First write the all banks parameters file
+  m_view->writeOutCalibFile(outFullPath.toString(), difc, tzero, bankNames);
+  // Then write one individual file per bank, using different templates and the
+  // specific bank name as suffix
+  for (size_t bankIdx = 0; bankIdx < difc.size(); ++bankIdx) {
+    Poco::Path bankOutputFullPath(saveDir);
+    const std::string bankFilename = buildCalibrateSuggestedFilename(
+        vanNo, ceriaNo, "bank_" + bankNames[bankIdx]);
+    bankOutputFullPath.append(bankFilename);
+    std::string templateFile = "template_ENGINX_241391_236516_North_bank.prm";
+    if (1 == bankIdx) {
+      templateFile = "template_ENGINX_241391_236516_South_bank.prm";
+    }
 
-  m_view->writeOutCalibFile(outFullPath.toString(), difc, tzero);
+    m_view->writeOutCalibFile(bankOutputFullPath.toString(), {difc[bankIdx]},
+                              {tzero[bankIdx]}, {bankNames[bankIdx]},
+                              templateFile);
+  }
   g_log.notice() << "Calibration file written as " << outFullPath.toString()
                  << std::endl;
 
@@ -1769,11 +1806,11 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
       m_focusFinishedOK = false;
       doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
       m_focusFinishedOK = true;
-    } catch (std::runtime_error &) {
-      g_log.error()
-          << "The focusing calculations failed. One of the algorithms"
-             "did not execute correctly. See log messages for details."
-          << std::endl;
+    } catch (std::runtime_error &rexc) {
+      g_log.error() << "The focusing calculations failed. One of the algorithms"
+                       "did not execute correctly. See log messages for "
+                       "further details. Error: " +
+                           std::string(rexc.what()) << std::endl;
     } catch (std::invalid_argument &ia) {
       g_log.error() << "The focusing failed. Some input properties "
                        "were not valid. "
