@@ -139,7 +139,7 @@ public:
         "2,B40=3,B44=4,ties=(B42=B44/2)";
     auto fun = FunctionFactory::Instance().createInitialized(ini);
     TS_ASSERT(fun);
-    TS_ASSERT_EQUALS(fun->nParams(), 33);
+    TS_ASSERT_EQUALS(fun->nParams(), 34);
     TS_ASSERT_EQUALS(fun->nAttributes(), 5);
     fun->applyTies();
     TS_ASSERT_DELTA(fun->getParameter("B20"), 1.0, 1e-10);

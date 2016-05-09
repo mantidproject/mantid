@@ -131,8 +131,7 @@ public:
 
       // Integral of gaussian is height * sigma * sqrt(2 * pi)
       peak->setIntensity(UncertainValue(oldIntensity * fwhm /
-                                        (2.0 * sqrt(2.0 * log(2.0))) *
-                                        sqrt(2.0 * M_PI)));
+                                        (2.0 * sqrt(M_LN2)) * sqrt(M_PI)));
       integratedReference->addPeak(peak);
     }
 
@@ -338,7 +337,7 @@ public:
                        referencePeak->fwhm().value());
       TS_ASSERT_DELTA(functionPeak->d().error(), sqrt(0.05), 1e-6);
       TS_ASSERT_DELTA(functionPeak->fwhm(PoldiPeak::AbsoluteD).error(),
-                      sqrt(0.05) * (2.0 * sqrt(2.0 * log(2.0))), 1e-6);
+                      sqrt(0.05) * (2.0 * sqrt(2.0 * M_LN2)), 1e-6);
     }
   }
 

@@ -1008,11 +1008,10 @@ void IFunction::setAttributeValue(const std::string &attName,
 
 /// Returns a list of attribute names
 std::vector<std::string> IFunction::getAttributeNames() const {
-  std::vector<std::string> names(nAttributes(), "");
-  size_t index(0);
+  std::vector<std::string> names;
+  names.reserve(m_attrs.size());
   for (const auto &attr : m_attrs) {
-    names[index] = attr.first;
-    ++index;
+    names.push_back(attr.first);
   }
   return names;
 }

@@ -29,7 +29,7 @@ const char *LORENTZ_POS = "LorentzPos";
 const char *LORENTZ_FWHM = "LorentzFWHM";
 const char *GAUSSIAN_FWHM = "GaussianFWHM";
 
-const double SQRTLN2 = std::sqrt(std::log(2.0));
+const double SQRTLN2 = std::sqrt(M_LN2);
 const double SQRTPI = std::sqrt(M_PI);
 ///@endcond
 }

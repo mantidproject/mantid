@@ -31,8 +31,8 @@ set ( TEST_PY_FILES
   EnggFitPeaksTest.py
   EnggFocusTest.py
   EnggVanadiumCorrectionsTest.py
-  VesuvioDiffractionReductionTest.py
   FilterLogByTimeTest.py
+  FindEPPTest.py
   FindReflectometryLinesTest.py
   FitGaussianTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
@@ -97,8 +97,10 @@ set ( TEST_PY_FILES
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py
   PoldiMergeTest.py
+  VesuvioDiffractionReductionTest.py
   VesuvioPreFitTest.py
   VesuvioResolutionTest.py
+  VesuvioThicknessTest.py
   VesuvioTOFFitTest.py
   PoldiCreatePeaksFromFileTest.py
   LoadCIFTest.py
