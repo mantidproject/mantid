@@ -29,7 +29,7 @@ void PseudoVoigt::functionLocal(double *out, const double *xValues,
   double gSquared = g * g;
 
   // Gaussian parameter sigma...fwhm/(2*sqrt(2*ln(2)))...gamma/sqrt(2*ln(2))
-  double sSquared = gSquared / (2.0 * log(2.0));
+  double sSquared = gSquared / (2.0 * M_LN2);
 
   for (size_t i = 0; i < nData; ++i) {
     double xDiffSquared = (xValues[i] - x0) * (xValues[i] - x0);
@@ -54,7 +54,7 @@ void PseudoVoigt::functionDerivLocal(Jacobian *out, const double *xValues,
   double gSquared = g * g;
 
   // Gaussian parameter sigma...fwhm/(2*sqrt(2*ln(2)))...gamma/sqrt(2*ln(2))
-  double sSquared = gSquared / (2.0 * log(2.0));
+  double sSquared = gSquared / (2.0 * M_LN2);
 
   for (size_t i = 0; i < nData; ++i) {
     double xDiff = (xValues[i] - x0);

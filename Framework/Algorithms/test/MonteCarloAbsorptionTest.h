@@ -28,15 +28,16 @@ public:
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-08);
     const size_t middle_index(4);
-    TS_ASSERT_DELTA(outputWS->readY(0).front(), 0.005869405757, delta);
-    TS_ASSERT_DELTA(outputWS->readY(0)[middle_index], 0.000104368636, delta);
-    TS_ASSERT_DELTA(outputWS->readY(0).back(), 0.000004337609, delta);
-    TS_ASSERT_DELTA(outputWS->readY(2).front(), 0.007355971026, delta);
-    TS_ASSERT_DELTA(outputWS->readY(2)[middle_index], 0.000092901957, delta);
-    TS_ASSERT_DELTA(outputWS->readY(2).back(), 0.000003265731, delta);
-    TS_ASSERT_DELTA(outputWS->readY(4).front(), 0.004037809093, delta);
-    TS_ASSERT_DELTA(outputWS->readY(4)[middle_index], 0.000190782521, delta);
-    TS_ASSERT_DELTA(outputWS->readY(4).back(), 0.000019473169, delta);
+
+    TS_ASSERT_DELTA(0.21339478, outputWS->readY(0).front(), delta);
+    TS_ASSERT_DELTA(0.23415902, outputWS->readY(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.18711438, outputWS->readY(0).back(), delta);
+    TS_ASSERT_DELTA(0.21347241, outputWS->readY(2).front(), delta);
+    TS_ASSERT_DELTA(0.2341577, outputWS->readY(2)[middle_index], delta);
+    TS_ASSERT_DELTA(0.18707489, outputWS->readY(2).back(), delta);
+    TS_ASSERT_DELTA(0.21367069, outputWS->readY(4).front(), delta);
+    TS_ASSERT_DELTA(0.23437129, outputWS->readY(4)[middle_index], delta);
+    TS_ASSERT_DELTA(0.18710594, outputWS->readY(4).back(), delta);
   }
 
   void test_Workspace_With_Just_Sample_For_Direct() {
@@ -48,9 +49,9 @@ public:
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-08);
     const size_t middle_index(4);
-    TS_ASSERT_DELTA(outputWS->readY(0).front(), 0.00259928, delta);
-    TS_ASSERT_DELTA(outputWS->readY(0)[middle_index], 0.00023240, delta);
-    TS_ASSERT_DELTA(outputWS->readY(0).back(), 0.00010952, delta);
+    TS_ASSERT_DELTA(0.20488748, outputWS->readY(0).front(), delta);
+    TS_ASSERT_DELTA(0.23469609, outputWS->readY(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.187899, outputWS->readY(0).back(), delta);
   }
 
   void test_Workspace_With_Just_Sample_For_Indirect() {
@@ -62,9 +63,9 @@ public:
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-08);
     const size_t middle_index(4);
-    TS_ASSERT_DELTA(outputWS->readY(0).front(), 0.00067034, delta);
-    TS_ASSERT_DELTA(outputWS->readY(0)[middle_index], 3.877336011e-05, delta);
-    TS_ASSERT_DELTA(outputWS->readY(0).back(), 6.604792751e-06, delta);
+    TS_ASSERT_DELTA(0.20002242, outputWS->readY(0).front(), delta);
+    TS_ASSERT_DELTA(0.23373778, outputWS->readY(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.18742317, outputWS->readY(0).back(), delta);
   }
 
   void test_Workspace_With_Sample_And_Container() {
@@ -76,9 +77,9 @@ public:
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-08);
     const size_t middle_index(4);
-    TS_ASSERT_DELTA(outputWS->readY(0).front(), 0.005122949, delta);
-    TS_ASSERT_DELTA(outputWS->readY(0)[middle_index], 0.000238143162, delta);
-    TS_ASSERT_DELTA(outputWS->readY(0).back(), 0.000003069996, delta);
+    TS_ASSERT_DELTA(0.22929866, outputWS->readY(0).front(), delta);
+    TS_ASSERT_DELTA(0.21436937, outputWS->readY(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.23038325, outputWS->readY(0).back(), delta);
   }
 
   //---------------------------------------------------------------------------
@@ -123,8 +124,7 @@ private:
     auto inputWS = setUpWS(wsProps);
     auto mcabs = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(mcabs->setProperty("InputWorkspace", inputWS));
-    // To ensure reproducible results we need to use a single thread
-    TS_ASSERT_THROWS_NOTHING(executeOnSingleThread(mcabs));
+    mcabs->execute();
     return getOutputWorkspace(mcabs);
   }
 
@@ -197,20 +197,6 @@ private:
     alg->setChild(true);
     alg->setPropertyValue("OutputWorkspace", "__unused_on_child");
     return alg;
-  }
-
-  void executeOnSingleThread(Mantid::API::IAlgorithm_sptr alg) {
-    using Mantid::API::FrameworkManager;
-    auto &fmgr = FrameworkManager::Instance();
-    const int ompThreadsOnEntry = fmgr.getNumOMPThreads();
-    fmgr.setNumOMPThreads(1);
-    try {
-      alg->execute();
-      fmgr.setNumOMPThreads(ompThreadsOnEntry);
-    } catch (...) {
-      fmgr.setNumOMPThreads(ompThreadsOnEntry);
-      throw;
-    }
   }
 
   Mantid::API::MatrixWorkspace_const_sptr
