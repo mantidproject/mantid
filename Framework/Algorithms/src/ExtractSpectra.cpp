@@ -349,7 +349,7 @@ void ExtractSpectra::execEvent() {
       // the events
       outEL.setX(el.ptrX());
       if (hasDx) {
-        outEL.setDx(el.dataDx());
+        outEL.setDx(el.ptrDx());
       }
     } else {
       // Common bin boundaries get all set to the same value

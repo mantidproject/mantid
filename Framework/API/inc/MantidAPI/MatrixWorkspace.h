@@ -297,12 +297,6 @@ public:
   }
 
   /// Set the specified Dx (X Error) array to point to the given existing array
-  virtual void setDx(const std::size_t index, const MantidVec &Dx) {
-    getSpectrum(index)->setDx(Dx);
-    invalidateCommonBinsFlag();
-  }
-
-  /// Set the specified Dx (X Error) array to point to the given existing array
   virtual void setDx(const std::size_t index, const MantidVecPtr &Dx) {
     getSpectrum(index)->setDx(Dx);
     invalidateCommonBinsFlag();

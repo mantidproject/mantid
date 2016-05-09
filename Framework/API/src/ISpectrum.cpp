@@ -38,21 +38,7 @@ std::pair<double, double> ISpectrum::getXDataRange() const {
 
 /// Sets the x error data.
 /// @param Dx :: vector of X error data
-void ISpectrum::setDx(const MantidVec &Dx) {
-  refDx.access() = Dx;
-  m_hasDx = true;
-}
-
-/// Sets the x error data.
-/// @param Dx :: vector of X error data
 void ISpectrum::setDx(const MantidVecPtr &Dx) {
-  refDx = Dx;
-  m_hasDx = true;
-}
-
-/// Sets the x data error
-/// @param Dx :: vector of X error data
-void ISpectrum::setDx(const MantidVecPtr::ptr_type &Dx) {
   refDx = Dx;
   m_hasDx = true;
 }

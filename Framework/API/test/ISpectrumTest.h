@@ -97,12 +97,6 @@ public:
     s2.ptrDx();
     TS_ASSERT(s2.hasDx());
 
-    // setDX vesion 1
-    SpectrumTester s3(HistogramData::Histogram::XMode::Points);
-    Mantid::MantidVec Dx;
-    s3.setDx(Dx);
-    TS_ASSERT(s3.hasDx());
-
     // setDX vesion 2
     SpectrumTester s4(HistogramData::Histogram::XMode::Points);
     Mantid::MantidVecPtr::ptr_type Dx_vec_ptr_type;
