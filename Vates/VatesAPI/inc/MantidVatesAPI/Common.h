@@ -41,9 +41,6 @@ std::string convertAxesTitleToLatex(std::string toConvert);
 void setAxisLabel(std::string metadataLabel,
                   std::string labelString,
                   vtkFieldData *fieldData);
-/// Function to check for special values.
-bool isSpecial(double value);
-
 }
 
 }

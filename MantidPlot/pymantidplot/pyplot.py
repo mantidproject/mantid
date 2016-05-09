@@ -337,7 +337,8 @@ possible) meaning as in matplotlib.
 +------------+---------------------------------------------------------+
 |linestyle   | '-', '--', '-.' '.'                                     |
 +------------+---------------------------------------------------------+
-|marker      |  'o', 'v', '^', '<', '>', 's', '*', 'h', '|', '_'       |
+|marker      | None/"None" 'o', 'v', '^', '<', '>', 's', '*',          |
+|            | 'h', '|', '_'                                           |
 +------------+---------------------------------------------------------+
 |color       |  color character or string ('b', 'blue', 'g', 'green',  |
 |            |  'k', 'black', 'y', 'yellow', 'c', 'cyan', 'r', 'red'.  |
@@ -923,6 +924,7 @@ def __matplotlib_defaults(l):
     l.setYTitle(' ')
 
 __marker_to_plotsymbol = {
+    None: _qti.PlotSymbol.NoSymbol, "None": _qti.PlotSymbol.NoSymbol,
     'o': _qti.PlotSymbol.Ellipse, 'v': _qti.PlotSymbol.DTriangle, '^': _qti.PlotSymbol.UTriangle,
     '<': _qti.PlotSymbol.LTriangle, '>': _qti.PlotSymbol.RTriangle, 's': _qti.PlotSymbol.Rect,
     '*': _qti.PlotSymbol.Star1, 'h': _qti.PlotSymbol.Hexagon, '|': _qti.PlotSymbol.VLine,

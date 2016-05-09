@@ -17,6 +17,7 @@
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Math/Algebra.h"
 #include "MantidGeometry/Surfaces/SurfaceFactory.h"
+#include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -101,7 +102,7 @@ public:
   void testCreateUnitCube() {
     Object_sptr geom_obj = createUnitCube();
 
-    TS_ASSERT_EQUALS(geom_obj->str(), "68 -6 5 -4 3 -2 1");
+    TS_ASSERT_EQUALS(geom_obj->str(), "68 1 -2 3 -4 5 -6");
 
     double xmin(0.0), xmax(0.0), ymin(0.0), ymax(0.0), zmin(0.0), zmax(0.0);
     geom_obj->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
@@ -392,7 +393,7 @@ public:
     checkTrackIntercept(track, expectedResults);
   }
 
-  void xtestTrackTwoIsolatedCubes()
+  void testTrackTwoIsolatedCubes()
   /**
   Test a track going through an object
   */
@@ -549,6 +550,48 @@ public:
     checkTrackIntercept(TL, expectedResults);
   }
 
+  void testComplementWithTwoPrimitives() {
+    auto shell = createSphericalShell();
+
+    TS_ASSERT_EQUALS(2, shell->getSurfaceIndex().size());
+
+    // Are the rules correct?
+    const Rule *headRule = shell->topRule();
+    TS_ASSERT_EQUALS("Intersection", headRule->className());
+    const Rule *leaf1 = headRule->leaf(0);
+    TS_ASSERT_EQUALS("SurfPoint", leaf1->className());
+    auto surfPt1 = dynamic_cast<const SurfPoint *>(leaf1);
+    TS_ASSERT(surfPt1);
+    TS_ASSERT_EQUALS(1, surfPt1->getKeyN());
+    auto outer = dynamic_cast<const Sphere *>(surfPt1->getKey());
+    TS_ASSERT(outer);
+    TS_ASSERT_DELTA(1.0, outer->getRadius(), 1e-10);
+
+    const Rule *leaf2 = headRule->leaf(1);
+    TS_ASSERT_EQUALS("CompGrp", leaf2->className());
+    auto compRule = dynamic_cast<const CompGrp *>(leaf2);
+    TS_ASSERT(compRule);
+    TS_ASSERT_EQUALS("SurfPoint", compRule->leaf(0)->className());
+    auto surfPt2 = dynamic_cast<const SurfPoint *>(compRule->leaf(0));
+    TS_ASSERT_EQUALS(2, surfPt2->getKeyN());
+    auto inner = dynamic_cast<const Sphere *>(surfPt2->getKey());
+    TS_ASSERT(inner);
+    TS_ASSERT_DELTA(0.5, inner->getRadius(), 1e-10);
+
+    TS_ASSERT_EQUALS(false, shell->isValid(V3D(0, 0, 0)));
+
+    Track p1(V3D(-2, 0, 0), V3D(1, 0, 0));
+    int nsegments = shell->interceptSurface(p1);
+    TS_ASSERT_EQUALS(2, nsegments);
+    // total traversed distance -> 2*(r2-r1)
+    double distanceInside(0.0);
+    std::for_each(p1.cbegin(), p1.cend(),
+                  [&distanceInside](const Link &segment) {
+                    distanceInside += segment.distInsideObject;
+                  });
+    TS_ASSERT_DELTA(1.0, distanceInside, 1e-10);
+  }
+
   void testFindPointInCube()
   /**
   Test find point in cube
@@ -610,9 +653,9 @@ public:
     TS_ASSERT_EQUALS(F->getPointInObject(pt), 1); // This now succeeds
     // Test use of defineBoundingBox to explictly set the bounding box, when the
     // automatic method fails
-    F->defineBoundingBox(0.5, -1 / (2.0 * sqrt(2.0)), -1.0 / (2.0 * sqrt(2.0)),
-                         -0.5, -sqrt(2.0) - 1.0 / (2.0 * sqrt(2.0)),
-                         -sqrt(2.0) - 1.0 / (2.0 * sqrt(2.0)));
+    F->defineBoundingBox(0.5, -0.5 * M_SQRT1_2, -0.5 * M_SQRT1_2, -0.5,
+                         -M_SQRT2 - 0.5 * M_SQRT1_2,
+                         -M_SQRT2 - 0.5 * M_SQRT1_2);
     TS_ASSERT_EQUALS(F->getPointInObject(pt), 1);
     Object_sptr S = createSphere();
     TS_ASSERT_EQUALS(S->getPointInObject(pt), 1);
@@ -954,6 +997,26 @@ private:
     retVal->populate(SphSurMap);
 
     return retVal;
+  }
+
+  Object_sptr createSphericalShell() {
+    // First create some surfaces
+    auto outer = boost::make_shared<Sphere>();
+    outer->setName(1);
+    outer->setRadius(1.0);
+    auto inner = boost::make_shared<Sphere>();
+    inner->setName(2);
+    inner->setRadius(0.5);
+    std::map<int, boost::shared_ptr<Surface>> surfaces = {{1, outer},
+                                                          {2, inner}};
+
+    // algebra string is outer with intersection of complement of inner
+    const std::string algebra = "(-1) # (-2)";
+    auto shell = boost::make_shared<Object>();
+    shell->setObject(21, algebra);
+    shell->populate(surfaces);
+
+    return shell;
   }
 
   void clearSurfMap()

@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidKernel/make_cow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
 #include "MantidTestHelpers/FakeGmockObjects.h"
@@ -18,7 +19,12 @@
 #include "PropertyManagerHelper.h"
 
 #include <cxxtest/TestSuite.h>
+
 #include <boost/make_shared.hpp>
+
+#include <algorithm>
+#include <functional>
+#include <numeric>
 
 using std::size_t;
 using namespace Mantid::Kernel;
@@ -40,7 +46,7 @@ boost::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra,
       boost::make_shared<WorkspaceTester>();
   ws2->initialize(numSpectra, numBins, numBins);
 
-  Instrument_sptr inst(new Instrument("TestInstrument"));
+  auto inst = boost::make_shared<Instrument>("TestInstrument");
   ws2->setInstrument(inst);
   // We get a 1:1 map by default so the detector ID should match the spectrum
   // number
@@ -63,7 +69,9 @@ public:
   }
   static void destroySuite(MatrixWorkspaceTest *suite) { delete suite; }
 
-  MatrixWorkspaceTest() : ws(new WorkspaceTester) { ws->initialize(1, 1, 1); }
+  MatrixWorkspaceTest() : ws(boost::make_shared<WorkspaceTester>()) {
+    ws->initialize(1, 1, 1);
+  }
 
   void test_toString_Produces_Expected_Contents() {
     auto testWS = boost::make_shared<WorkspaceTester>();
@@ -1265,7 +1273,7 @@ public:
   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
-    MatrixWorkspace_sptr wsInput(new WorkspaceTester());
+    MatrixWorkspace_sptr wsInput = boost::make_shared<WorkspaceTester>();
     PropertyManagerHelper manager;
     manager.declareProperty(wsName, wsInput, Direction::Input);
 
@@ -1291,18 +1299,71 @@ public:
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 
-private:
-  Mantid::API::MantidImage_sptr createImage(size_t width, size_t height) {
-    auto image = new Mantid::API::MantidImage(height);
-    double value = 1.0;
-    for (auto row = image->begin(); row != image->end(); ++row) {
-      row->resize(width);
-      for (auto pixel = row->begin(); pixel != row->end();
-           ++pixel, value += 1.0) {
-        *pixel = value;
-      }
+  void test_x_uncertainty_can_be_set() {
+    // Arrange
+    WorkspaceTester ws;
+    const size_t numspec = 4;
+    const size_t j = 3;
+    const size_t k = j;
+    ws.init(numspec, j, k);
+
+    double values[3] = {10, 11, 17};
+    size_t workspaceIndexWithDx[3] = {0, 1, 2};
+
+    Mantid::MantidVec dxSpec0(j, values[0]);
+    Mantid::MantidVecPtr dxSpec1 =
+        Kernel::make_cow<Mantid::MantidVec>(j, values[1]);
+    boost::shared_ptr<Mantid::MantidVec> dxSpec2 =
+        boost::make_shared<Mantid::MantidVec>(Mantid::MantidVec(j, values[2]));
+
+    // Act
+    for (size_t spec = 0; spec < numspec; ++spec) {
+      TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(spec));
     }
-    return Mantid::API::MantidImage_sptr(image);
+    ws.setDx(workspaceIndexWithDx[0], dxSpec0);
+    ws.setDx(workspaceIndexWithDx[1], dxSpec1);
+    ws.setDx(workspaceIndexWithDx[2], dxSpec2);
+
+    // Assert
+    auto compareValue =
+        [&values](double data, size_t index) { return data == values[index]; };
+    for (auto &index : workspaceIndexWithDx) {
+      TSM_ASSERT("Should have x resolution values", ws.hasDx(index));
+      TSM_ASSERT_EQUALS("Should have a length of 3", ws.dataDx(index).size(),
+                        j);
+      auto compareValueForSpecificWorkspaceIndex =
+          std::bind(compareValue, std::placeholders::_1, index);
+
+      auto &dataDx = ws.dataDx(index);
+      TSM_ASSERT("dataDx should allow access to the spectrum",
+                 std::all_of(std::begin(dataDx), std::end(dataDx),
+                             compareValueForSpecificWorkspaceIndex));
+
+      auto &readDx = ws.readDx(index);
+      TSM_ASSERT("readDx should allow access to the spectrum",
+                 std::all_of(std::begin(readDx), std::end(readDx),
+                             compareValueForSpecificWorkspaceIndex));
+
+      auto refDx = ws.refDx(index);
+      TSM_ASSERT("readDx should allow access to the spectrum",
+                 std::all_of(std::begin(*refDx), std::end(*refDx),
+                             compareValueForSpecificWorkspaceIndex));
+    }
+
+    TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(3));
+  }
+
+private:
+  Mantid::API::MantidImage_sptr createImage(const size_t width,
+                                            const size_t height) {
+    auto image =
+        boost::make_shared<Mantid::API::MantidImage>(height, MantidVec(width));
+    double startingValue = 1.0;
+    for (auto &row : *image) {
+      std::iota(row.begin(), row.end(), startingValue);
+      startingValue += static_cast<double>(width);
+    }
+    return image;
   }
 
   boost::shared_ptr<MatrixWorkspace> ws;

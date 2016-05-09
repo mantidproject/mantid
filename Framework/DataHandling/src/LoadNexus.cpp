@@ -82,16 +82,8 @@ void LoadNexus::exec() {
   m_filename = getPropertyValue("Filename");
   m_workspace = getPropertyValue("OutputWorkspace");
 
-  // Test the given filename to see if it contains the field "analysis" with
-  // value "muonTD"
-  // within the first NXentry.
-  // If so, assume it is a Muon Nexus file (version 1) and pass to the
-  // LoadMuonNexus algorithm
-  // Otherwise try LoadIsisNexus.
-
-  // FIXME: The following variable isn't used, but the above comments
-  // imply it should be.
-  // std::string dataName="analysis";
+  // Test the file of the given file name as described in the
+  // documentation of this algorithm.
 
   std::vector<std::string> entryName, definition;
   int count =

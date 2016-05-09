@@ -409,7 +409,6 @@ void IntegrateMDHistoWorkspace::exec() {
         performWeightedSum(inIterator.get(), box, sumSignal, sumSQErrors,
                            sumNEvents); // Use the present position. neighbours
                                         // below exclude the current position.
-
         // Look at all of the neighbours of our position. We previously
         // calculated what the width vector would need to be.
         auto neighbourIndexes =

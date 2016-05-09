@@ -29,7 +29,7 @@ public:
   void updateAlgorithmProgress(double progress, const std::string &message);
 
   /// Getter for the workspace type
-  char *GetWorkspaceTypeName();
+  const char *GetWorkspaceTypeName();
   /// Getter for the input geometry
   const char *GetInputGeometryXML();
   /// Setter for the normalization

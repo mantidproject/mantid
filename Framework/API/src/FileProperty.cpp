@@ -112,8 +112,8 @@ FileProperty::FileProperty(const std::string &name,
                            unsigned int action,
                            std::initializer_list<std::string> exts,
                            unsigned int direction)
-    : FileProperty(name, default_value, action,
-                   std::vector<std::string>(std::move(exts)), direction) {}
+    : FileProperty(name, default_value, action, std::vector<std::string>(exts),
+                   direction) {}
 
 /**
  * Check if this is a load property

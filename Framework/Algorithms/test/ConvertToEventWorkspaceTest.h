@@ -47,7 +47,7 @@ public:
     inWS->dataY(0)[2] = 0.0;
     inWS->dataE(0)[2] = 0.0;
     inWS->dataY(0)[3] = 2.0;
-    inWS->dataE(0)[3] = sqrt(2.0);
+    inWS->dataE(0)[3] = M_SQRT2;
     inWS->dataY(0)[4] = 10000.0;
     inWS->dataE(0)[4] = 100.0;
 

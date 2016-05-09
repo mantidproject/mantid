@@ -28,7 +28,7 @@ namespace MantidQt
 
           ObjCompAssembly_const_sptr objAss = getObjCompAssembly();
           mNumberOfDetectors = objAss->nelements();
-          assert(m_n == mNumberOfDetectors);
+          assert(static_cast<size_t>(m_n) == mNumberOfDetectors);
           m_data = new unsigned char[m_n * 3];
           m_pick_data = new unsigned char[m_n * 3];
           for (size_t i = 0; i < getNumberOfDetectors(); ++i) {

@@ -132,7 +132,7 @@ relevant file and data formats is given here:
   <http://en.wikipedia.org/wiki/FITS>`__ used to store images in
   files. You can see the details on how FITS images can be loaded into
   Mantid in the documentation of the algorithm LoadFITS
-  `<http://docs.mantidproject.org/nightly/algorithms/LoadFITS-v1.html>`__.
+  :ref:`LoadFITS <algm-LoadFITS>`.
 
 * TIFF: `Tagged Image File Format
   <http://en.wikipedia.org/wiki/Tagged_Image_File_Format>`__ images
@@ -361,6 +361,25 @@ Energy bands
 .. warning:: The interface is being extended to provide different methods
              of combining energy bands from energy selective experiments.
              This is work in progress.
+
+Here it is possible to aggregate stacks of images normally acquired as
+energy/wavelength selective data. This interface is based on the
+algorithm :ref:`ImggAggWavelengths <algm-ImggAggWavelengths>` which
+supports different ways of aggregating the input images. In the
+simplest case, a number of output bands can be produced by aggregating
+the input bands split into uniform segments. This is called "uniform
+bands". When the number of uniform bands is one, all the wavelengths
+are aggregated into a single output stack.  It is also possible to
+specify a list of boundaries or ranges of image indices. For example
+if an input dataset consists of 1000 images per projection angle (here
+indexed from 0 to 999), three partially (50%) overlapping output bands
+could by produced by specifying the ranges as "0-499, 250-749,
+500-999". In principle it is also possible to aggregate images by time
+of flight ranges, based on specific extension headers that must be
+included in the input (FITS) images. This option is disabled at the
+moment.  Please refer to the documentation of :ref:`ImggAggWavelengths
+<algm-ImggAggWavelengths>` for lower level details on how the
+algorithm processes the input directories and files.
 
 .. figure:: /images/tomo_tab7_energy_bands.png
    :align: center
