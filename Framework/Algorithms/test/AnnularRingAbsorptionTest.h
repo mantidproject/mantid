@@ -38,23 +38,16 @@ public:
     auto inputWS = createInputWorkspace();
 
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", "UnusedForChild"));
-    const int numOMPThreads = FrameworkManager::Instance().getNumOMPThreads();
-    FrameworkManager::Instance().setNumOMPThreads(
-        1); // To ensure reproducible results
     TS_ASSERT_THROWS_NOTHING(alg->execute());
-    FrameworkManager::Instance().setNumOMPThreads(numOMPThreads);
     TS_ASSERT(alg->isExecuted());
-
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
     TS_ASSERT(outWS);
 
     const double delta(1e-08);
     const size_t middle_index = 4;
-    TS_ASSERT_DELTA(outWS->readY(0).front(), 0.984770748517, delta);
-    TS_ASSERT_DELTA(outWS->readY(0)[middle_index], 0.896084505371, delta);
-    TS_ASSERT_DELTA(outWS->readY(0).back(), 0.807794634447, delta);
+    TS_ASSERT_DELTA(0.98887724, outWS->readY(0).front(), delta);
+    TS_ASSERT_DELTA(0.92954551, outWS->readY(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.86377145, outWS->readY(0).back(), delta);
   }
 
   //-------------------- Failure cases --------------------------------

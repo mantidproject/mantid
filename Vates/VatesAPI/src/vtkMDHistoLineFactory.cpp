@@ -113,8 +113,8 @@ namespace Mantid
 
           float signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i));
 
-          if (isSpecial( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
-          {
+          if (!std::isfinite(signalScalar) ||
+              !m_thresholdRange->inRange(signalScalar)) {
             //Flagged so that topological and scalar data is not applied.
             unstructPoint.isSparse = true;
           }

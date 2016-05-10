@@ -127,14 +127,14 @@ public:
 
   void test_Call_To_Normalize_Gives_Unit_Vector_After_Call() {
     V2D diag(1, 1);
-    TS_ASSERT_DELTA(diag.normalize(), std::sqrt(2.0), DBL_EPSILON);
-    TS_ASSERT_DELTA(diag.X(), 1 / std::sqrt(2.0), DBL_EPSILON);
-    TS_ASSERT_DELTA(diag.Y(), 1 / std::sqrt(2.0), DBL_EPSILON);
+    TS_ASSERT_DELTA(diag.normalize(), M_SQRT2, DBL_EPSILON);
+    TS_ASSERT_DELTA(diag.X(), M_SQRT1_2, DBL_EPSILON);
+    TS_ASSERT_DELTA(diag.Y(), M_SQRT1_2, DBL_EPSILON);
   }
 
   void test_Norm_Gives_Length_Of_Vector_Leaving_It_Unchanged() {
     V2D diag(1, 1);
-    TS_ASSERT_DELTA(diag.norm(), std::sqrt(2.0), DBL_EPSILON);
+    TS_ASSERT_DELTA(diag.norm(), M_SQRT2, DBL_EPSILON);
     TS_ASSERT_EQUALS(diag.X(), 1.0);
     TS_ASSERT_EQUALS(diag.Y(), 1.0);
   }

@@ -49,8 +49,12 @@ Some features:
       
    b. QErrorWorkspace contains the Error in Q values for each peak, along with other associated information about the peak
    c. CovarianceInfo contains the "correlations"(x100) between each of the parameters
+   d. ColWorkspace contains the calculated and theoretical column for each peak. To plot go to Preferences/2D Plots/Curves and change the default curve style to Scatter and then Plot Spectra for all the desired banks.
+   e. RowWorkspace contains the calculated and theoretical row for each peak. To plot go to Preferences/2D Plots/Curves and change the default curve style to Scatter and then Plot Spectra for all the desired banks.
+   f. TofWorkspace contains the calculated and theoretical TOF for each peak. To plot go to Preferences/2D Plots/Curves and change the default curve style to Scatter and then Plot Spectra for all the desired banks.
 
-6) Maximum changes in the quantities that are altered during optimization are now settable.
+ 6) Maximum changes in the quantities that are altered during optimization are now settable.
+
 
 "A" Workflow
 ------------

@@ -588,7 +588,7 @@ public:
 
       for (std::size_t i = 0; i < Y.size(); i++) {
         TSM_ASSERT_DELTA(this_type, Y[i], 1.0, 1e-5);
-        TS_ASSERT_DELTA(E[i], sqrt(2.0) / 2.0, 1e-5);
+        TS_ASSERT_DELTA(E[i], 0.5 * M_SQRT2, 1e-5);
       }
     }
   }
@@ -601,7 +601,7 @@ public:
       el.switchTo(static_cast<EventType>(this_type));
       // Divide by two with error sqrt(2) = result has less error than if you
       // had started from a histogram.
-      TS_ASSERT_THROWS_NOTHING(el.divide(2.0, sqrt(2.0)));
+      TS_ASSERT_THROWS_NOTHING(el.divide(2.0, M_SQRT2));
 
       // Make the histogram we are multiplying.
       MantidVec Y, E;
@@ -631,7 +631,7 @@ public:
 
       for (std::size_t i = 0; i < Y.size(); i++) {
         TS_ASSERT_DELTA(Y[i], 4.0, 1e-5);
-        TS_ASSERT_DELTA(E[i], 4.0 / sqrt(2.0), 1e-5);
+        TS_ASSERT_DELTA(E[i], 4.0 * M_SQRT1_2, 1e-5);
       }
     }
   }
@@ -643,7 +643,7 @@ public:
       this->fake_uniform_data();
       el.switchTo(static_cast<EventType>(this_type));
       // Multiply with an error
-      TS_ASSERT_THROWS_NOTHING(el.multiply(2.0, sqrt(2.0)));
+      TS_ASSERT_THROWS_NOTHING(el.multiply(2.0, M_SQRT2));
       MantidVec Y, E;
       MantidVec X = this->makeX(BIN_DELTA);
       el.generateHistogram(X, Y, E);
@@ -843,7 +843,7 @@ public:
       // i-1.
       for (std::size_t i = 0; i < Y->size(); i++) {
         TS_ASSERT_EQUALS((*Y)[i], 2.0);
-        TS_ASSERT_DELTA((*E)[i], sqrt(2.0), 1e-5);
+        TS_ASSERT_DELTA((*E)[i], M_SQRT2, 1e-5);
       }
     }
   }
@@ -871,7 +871,7 @@ public:
 
     for (std::size_t i = 0; i < Y.size(); i++) {
       TS_ASSERT_EQUALS(Y[i], 2.0);
-      TS_ASSERT_DELTA(E[i], sqrt(2.0), 1e-5);
+      TS_ASSERT_DELTA(E[i], M_SQRT2, 1e-5);
     }
   }
 
@@ -925,7 +925,7 @@ public:
 
     for (std::size_t i = 0; i < Y.size(); i++) {
       TS_ASSERT_EQUALS(Y[i], 2.0);
-      TS_ASSERT_DELTA(E[i], sqrt(2.0), 1e-5);
+      TS_ASSERT_DELTA(E[i], M_SQRT2, 1e-5);
     }
   }
 
@@ -986,7 +986,7 @@ public:
 
     for (std::size_t i = 0; i < Y.size(); i++) {
       TS_ASSERT_EQUALS(Y[i], 2.0);
-      TS_ASSERT_DELTA(E[i], sqrt(2.0), 1e-5);
+      TS_ASSERT_DELTA(E[i], M_SQRT2, 1e-5);
     }
   }
 

@@ -49,6 +49,7 @@ static const char *isisds_type_code[] = {"U00", "I32", "R32", "R64",
                                          "C08"}; /* 3 char in length */
 
 #ifdef __cplusplus
+#include <cstdint>
 extern "C" {
 #endif /* __cplusplus */
 

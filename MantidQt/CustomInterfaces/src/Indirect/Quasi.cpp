@@ -328,6 +328,8 @@ void Quasi::handleSampleInputReady(const QString &filename) {
                    range);
   setPlotPropertyRange(eRangeSelector, m_properties["EMin"],
                        m_properties["EMax"], range);
+  eRangeSelector->setMinimum(range.first);
+  eRangeSelector->setMaximum(range.second);
 }
 
 /**

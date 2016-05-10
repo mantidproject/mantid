@@ -1535,7 +1535,7 @@ void Graph::exportVector(const QString &fileName, int, bool color,
       int width = static_cast<int>(height * plot_aspect);
       int x = (printer.width() - width) / 2;
       plotRect = QRect(x, margin, width, height);
-    } else if (plot_aspect >= page_aspect) {
+    } else {
       int margin = (int)((0.1 / 2.54) * printer.logicalDpiX()); // 1 mm margins
       int width = printer.width() - 2 * margin;
       int height = static_cast<int>(width / plot_aspect);

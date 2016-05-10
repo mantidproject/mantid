@@ -1,5 +1,5 @@
+#include <cfloat>
 #include <cmath>
-#include <float.h>
 #include <vector>
 
 #include "MantidKernel/V3D.h"
@@ -28,7 +28,7 @@ V3D::V3D(const double xx, const double yy, const double zz)
   along +X and rotates counter-clockwise in the XY plane
 */
 void V3D::spherical(const double &R, const double &theta, const double &phi) {
-  const double deg2rad = M_PI / 180.0;
+  constexpr double deg2rad = M_PI / 180.0;
   z = R * cos(theta * deg2rad);
   const double ct = sin(theta * deg2rad);
   x = R * ct * cos(phi * deg2rad);
@@ -379,9 +379,9 @@ double V3D::normalize() {
 
 /** Round each component to the nearest integer */
 void V3D::round() {
-  x = double(long(x + (x < 0 ? -0.5 : +0.5)));
-  y = double(long(y + (y < 0 ? -0.5 : +0.5)));
-  z = double(long(z + (z < 0 ? -0.5 : +0.5)));
+  x = std::round(x);
+  y = std::round(y);
+  z = std::round(z);
 }
 
 /**

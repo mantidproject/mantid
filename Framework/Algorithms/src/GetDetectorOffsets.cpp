@@ -249,7 +249,7 @@ IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight,
   peak->setHeight(peakHeight);
   peak->setCentre(peakLoc);
   const double sigma(10.0);
-  peak->setFwhm(2.0 * std::sqrt(2.0 * std::log(2.0)) * sigma);
+  peak->setFwhm(2.0 * std::sqrt(2.0 * M_LN2) * sigma);
 
   auto fitFunc = new CompositeFunction(); // Takes ownership of the functions
   fitFunc->addFunction(background);

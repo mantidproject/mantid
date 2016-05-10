@@ -71,16 +71,15 @@ public:
 
   void test_Area_Of_A_Parallelogram() {
     ConvexPolygon parallelogram = makeParallelogram();
-    TS_ASSERT_DELTA(parallelogram.area(), std::sqrt(2.0), DBL_EPSILON);
+    TS_ASSERT_DELTA(parallelogram.area(), M_SQRT2, DBL_EPSILON);
   }
 
   void test_Extreme_Points_Are_Correct() {
     ConvexPolygon parallelogram = makeParallelogram();
     TS_ASSERT_DELTA(parallelogram.minX(), 0.0, DBL_EPSILON);
-    TS_ASSERT_DELTA(parallelogram.maxX(), 2.0 + 0.5 * std::sqrt(2.0),
-                    DBL_EPSILON);
+    TS_ASSERT_DELTA(parallelogram.maxX(), 2.0 + 0.5 * M_SQRT2, DBL_EPSILON);
     TS_ASSERT_DELTA(parallelogram.minY(), 0.0, DBL_EPSILON);
-    TS_ASSERT_DELTA(parallelogram.maxY(), 0.5 * std::sqrt(2.0), DBL_EPSILON);
+    TS_ASSERT_DELTA(parallelogram.maxY(), 0.5 * M_SQRT2, DBL_EPSILON);
   }
 
   void test_Polygon_Contains_Polygon() {
@@ -147,8 +146,8 @@ private:
   ConvexPolygon makeParallelogram() {
     ConvexPolygon parallelogram;
     parallelogram.insert(0.0, 0.0);
-    parallelogram.insert(0.5 * std::sqrt(2.0), 0.5 * std::sqrt(2.0));
-    parallelogram.insert(2.0 + 0.5 * std::sqrt(2.0), 0.5 * std::sqrt(2.0));
+    parallelogram.insert(0.5 * M_SQRT2, 0.5 * M_SQRT2);
+    parallelogram.insert(2.0 + 0.5 * M_SQRT2, 0.5 * M_SQRT2);
     parallelogram.insert(2.0, 0.0);
     return parallelogram;
   }

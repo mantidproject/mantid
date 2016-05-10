@@ -191,6 +191,8 @@ private:
   bool initializeFromCurve(PlotCurve *curve);
   // Set up - add names of existing fit curves and plot guess status
   void addExistingFitsAndGuess(const QStringList &curvesList);
+  // Test if we are fitting muon data
+  bool isMuonData() const;
 
   /// Creates a pointer to fitPropertyBrowser
   MantidQt::MantidWidgets::FitPropertyBrowser* m_fitPropertyBrowser;
