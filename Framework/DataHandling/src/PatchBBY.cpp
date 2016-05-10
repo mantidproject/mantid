@@ -1,8 +1,10 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/PatchBBY.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/ListValidator.h"
 
 #include <Poco/TemporaryFile.h>
+#include <Poco/String.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -11,6 +13,7 @@ namespace DataHandling {
 DECLARE_ALGORITHM(PatchBBY)
 
 enum TYPE {
+  TYPE_STR,
   TYPE_INT,
   TYPE_DBL,
 };
@@ -24,27 +27,31 @@ struct PropertyInfo {
 // consts
 static char const *const HistoryStr = "History.log";
 static char const *const FilenameStr = "Filename";
+static char const *const EXTERNAL = "EXTERNAL";
+static char const *const INTERNAL = "INTERNAL";
 static PropertyInfo PatchableProperties[] = {
-    {"Group1", "Bm1Counts", TYPE_INT},
-    {"Group1", "AttPos", TYPE_DBL},
+    {"Calibration", "Bm1Counts", TYPE_INT},
+    {"Calibration", "AttPos", TYPE_DBL},
 
-    {"Group2", "MasterChopperFreq", TYPE_DBL},
-    {"Group2", "T0ChopperFreq", TYPE_DBL},
-    {"Group2", "T0ChopperPhase", TYPE_DBL},
+    {"Velocity Selector and Choppers", "MasterChopperFreq", TYPE_DBL},
+    {"Velocity Selector and Choppers", "T0ChopperFreq", TYPE_DBL},
+    {"Velocity Selector and Choppers", "T0ChopperPhase", TYPE_DBL},
+    {"Velocity Selector and Choppers", "FrameSource", TYPE_STR},
+    {"Velocity Selector and Choppers", "Wavelength", TYPE_DBL},
 
-    //{ "Group3", "L1", TYPE_DBL},
-    {"Group3", "L2Det", TYPE_DBL},
-    {"Group3", "LTofDet", TYPE_DBL},
+    {"Geometry Setup", "L1", TYPE_DBL},
+    {"Geometry Setup", "LTofDet", TYPE_DBL},
+    {"Geometry Setup", "L2Det", TYPE_DBL},
 
-    {"Group4", "L2CurtainL", TYPE_DBL},
-    {"Group4", "L2CurtainR", TYPE_DBL},
-    {"Group4", "L2CurtainU", TYPE_DBL},
-    {"Group4", "L2CurtainD", TYPE_DBL},
+    {"Geometry Setup", "L2CurtainL", TYPE_DBL},
+    {"Geometry Setup", "L2CurtainR", TYPE_DBL},
+    {"Geometry Setup", "L2CurtainU", TYPE_DBL},
+    {"Geometry Setup", "L2CurtainD", TYPE_DBL},
 
-    {"Group5", "CurtainL", TYPE_DBL},
-    {"Group5", "CurtainR", TYPE_DBL},
-    {"Group5", "CurtainU", TYPE_DBL},
-    {"Group5", "CurtainD", TYPE_DBL},
+    {"Geometry Setup", "CurtainL", TYPE_DBL},
+    {"Geometry Setup", "CurtainR", TYPE_DBL},
+    {"Geometry Setup", "CurtainU", TYPE_DBL},
+    {"Geometry Setup", "CurtainD", TYPE_DBL},
 };
 
 // load nx dataset
@@ -55,6 +62,18 @@ bool loadNXDataSet(NeXus::NXEntry &entry, const std::string &path, T &value) {
     dataSet.load();
 
     value = *dataSet();
+    return true;
+  } catch (std::runtime_error &) {
+    return false;
+  }
+}
+bool loadNXString(NeXus::NXEntry &entry, const std::string &path,
+                  std::string &value) {
+  try {
+    NeXus::NXChar buffer = entry.openNXChar(path);
+    buffer.load();
+
+    value = std::string(buffer(), buffer.dim0());
     return true;
   } catch (std::runtime_error &) {
     return false;
@@ -92,6 +111,21 @@ void PatchBBY::init() {
       declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
                           itr->Name, EMPTY_DBL(), Kernel::Direction::Input),
                       "Optional");
+      break;
+
+    case TYPE_STR:
+      if (std::strcmp(itr->Name, "FrameSource") == 0) {
+        std::vector<std::string> keys;
+        keys.emplace_back("");
+        keys.emplace_back(EXTERNAL);
+        keys.emplace_back(INTERNAL);
+        declareProperty(
+            Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(
+                itr->Name, "",
+                boost::make_shared<Kernel::ListValidator<std::string>>(keys),
+                Kernel::Direction::Input),
+            "Optional");
+      }
       break;
     }
 
@@ -154,21 +188,39 @@ void PatchBBY::exec() {
   std::ostringstream logContentNewBuffer;
   int tmp_int;
   double tmp_dbl;
+  std::string tmp_str;
   for (auto itr = std::begin(PatchableProperties);
        itr != std::end(PatchableProperties); ++itr) {
     auto property_value = getProperty(itr->Name);
+
     // if (!isEmpty(property_value))
     switch (itr->Type) {
     case TYPE_INT:
       tmp_int = property_value;
-      if (tmp_int != EMPTY_INT()) // !!!
+      if (tmp_int != EMPTY_INT())
         logContentNewBuffer << itr->Name << " = " << tmp_int << std::endl;
       break;
 
     case TYPE_DBL:
       tmp_dbl = property_value;
-      if (tmp_dbl != EMPTY_DBL()) // !!!
+      if (tmp_dbl != EMPTY_DBL())
         logContentNewBuffer << itr->Name << " = " << tmp_dbl << std::endl;
+      break;
+
+    case TYPE_STR:
+      if (std::strcmp(itr->Name, "FrameSource") != 0)
+        throw std::invalid_argument(std::string("not implemented: ") +
+                                    itr->Name);
+
+      tmp_str = static_cast<std::string>(property_value);
+      if (!tmp_str.empty()) {
+        if (Poco::icompare(tmp_str, EXTERNAL) == 0)
+          logContentNewBuffer << itr->Name << " = " << EXTERNAL << std::endl;
+        else if (Poco::icompare(tmp_str, INTERNAL) == 0)
+          logContentNewBuffer << itr->Name << " = " << INTERNAL << std::endl;
+        else
+          throw std::invalid_argument("invalid: FrameSource");
+      }
       break;
     }
   }
@@ -181,6 +233,7 @@ void PatchBBY::exec() {
           return file.rfind(".hdf") == file.length() - 4;
         });
     if (file_it != files.end()) {
+      tarFile.select(file_it->c_str());
       // extract hdf file into tmp file
       Poco::TemporaryFile hdfFile;
       boost::shared_ptr<FILE> handle(fopen(hdfFile.path().c_str(), "wb"),
@@ -198,57 +251,52 @@ void PatchBBY::exec() {
 
         float tmp_float;
         int32_t tmp_int32 = 0;
+        std::string tmp_str;
 
         if (loadNXDataSet(entry, "monitor/bm1_counts", tmp_int32))
-          logContentNewBuffer << "bm1_counts"
-                              << " = " << tmp_int32 << std::endl;
+          logContentNewBuffer << "Bm1Counts = " << tmp_int32 << std::endl;
         if (loadNXDataSet(entry, "instrument/att_pos", tmp_float))
-          logContentNewBuffer << "att_pos"
-                              << " = " << tmp_float << std::endl;
+          logContentNewBuffer << "AttPos = " << tmp_float << std::endl;
+
+        if (loadNXString(entry, "instrument/detector/frame_source", tmp_str))
+          logContentNewBuffer << "FrameSource = " << tmp_str << std::endl;
+        if (loadNXDataSet(entry, "instrument/nvs067/lambda", tmp_float))
+          logContentNewBuffer << "Wavelength = " << tmp_float << std::endl;
 
         if (loadNXDataSet(entry, "instrument/master_chopper_freq", tmp_float))
-          logContentNewBuffer << "master_chopper_freq"
-                              << " = " << tmp_float << std::endl;
-        if (loadNXDataSet(entry, "instrument/t0_chopper_freq", tmp_float))
-          logContentNewBuffer << "t0_chopper_freq"
-                              << " = " << tmp_float << std::endl;
-        if (loadNXDataSet(entry, "instrument/t0_chopper_phase", tmp_float))
-          logContentNewBuffer << "t0_chopper_phase"
-                              << " = " << (tmp_float < 999.0 ? tmp_float : 0.0)
+          logContentNewBuffer << "MasterChopperFreq = " << tmp_float
                               << std::endl;
+        if (loadNXDataSet(entry, "instrument/t0_chopper_freq", tmp_float))
+          logContentNewBuffer << "T0ChopperFreq = " << tmp_float << std::endl;
+        if (loadNXDataSet(entry, "instrument/t0_chopper_phase", tmp_float))
+          logContentNewBuffer
+              << "T0ChopperPhase = " << (tmp_float < 999.0 ? tmp_float : 0.0)
+              << std::endl;
 
-        if (loadNXDataSet(entry, "instrument/L2_det", tmp_float))
-          logContentNewBuffer << "L2_det"
-                              << " = " << tmp_float << std::endl;
+        if (loadNXDataSet(entry, "instrument/L1", tmp_float))
+          logContentNewBuffer << "L1 = " << tmp_float << std::endl;
         if (loadNXDataSet(entry, "instrument/Ltof_det", tmp_float))
-          logContentNewBuffer << "Ltof_det"
-                              << " = " << tmp_float << std::endl;
+          logContentNewBuffer << "LTofDet = " << tmp_float << std::endl;
+        if (loadNXDataSet(entry, "instrument/L2_det", tmp_float))
+          logContentNewBuffer << "L2Det = " << tmp_float << std::endl;
 
         if (loadNXDataSet(entry, "instrument/L2_curtainl", tmp_float))
-          logContentNewBuffer << "L2_curtainl"
-                              << " = " << tmp_float << std::endl;
+          logContentNewBuffer << "L2CurtainL = " << tmp_float << std::endl;
         if (loadNXDataSet(entry, "instrument/L2_curtainr", tmp_float))
-          logContentNewBuffer << "L2_curtainr"
-                              << " = " << tmp_float << std::endl;
+          logContentNewBuffer << "L2CurtainR = " << tmp_float << std::endl;
         if (loadNXDataSet(entry, "instrument/L2_curtainu", tmp_float))
-          logContentNewBuffer << "L2_curtainu"
-                              << " = " << tmp_float << std::endl;
+          logContentNewBuffer << "L2CurtainU = " << tmp_float << std::endl;
         if (loadNXDataSet(entry, "instrument/L2_curtaind", tmp_float))
-          logContentNewBuffer << "L2_curtaind"
-                              << " = " << tmp_float << std::endl;
+          logContentNewBuffer << "L2CurtainD = " << tmp_float << std::endl;
 
         if (loadNXDataSet(entry, "instrument/detector/curtainl", tmp_float))
-          logContentNewBuffer << "curtainl"
-                              << " = " << tmp_float << std::endl;
+          logContentNewBuffer << "CurtainL = " << tmp_float << std::endl;
         if (loadNXDataSet(entry, "instrument/detector/curtainr", tmp_float))
-          logContentNewBuffer << "curtainr"
-                              << " = " << tmp_float << std::endl;
+          logContentNewBuffer << "CurtainR = " << tmp_float << std::endl;
         if (loadNXDataSet(entry, "instrument/detector/curtainu", tmp_float))
-          logContentNewBuffer << "curtainu"
-                              << " = " << tmp_float << std::endl;
+          logContentNewBuffer << "CurtainU = " << tmp_float << std::endl;
         if (loadNXDataSet(entry, "instrument/detector/curtaind", tmp_float))
-          logContentNewBuffer << "curtaind"
-                              << " = " << tmp_float << std::endl;
+          logContentNewBuffer << "CurtainD = " << tmp_float << std::endl;
       }
     }
   }

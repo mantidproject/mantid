@@ -110,6 +110,8 @@ public:
   bool removeTie(size_t i) override;
   /// Get the tie of i-th parameter
   ParameterTie *getTie(size_t i) const override;
+  /// Add a new tie
+  void addTie(ParameterTie *tie) override;
 
   /// Add a constraint to function
   void addConstraint(IConstraint *ic) override;
@@ -125,8 +127,6 @@ protected:
   void declareParameter(const std::string &name, double initValue = 0,
                         const std::string &description = "") override;
 
-  /// Add a new tie
-  void addTie(ParameterTie *tie) override;
   /// Get the address of the parameter. For use in UserFunction with mu::Parser
   virtual double *getParameterAddress(size_t i);
 

@@ -125,6 +125,8 @@ Bugs Resolved
 
 -  Plots from tables auto-update when the TableWorkspace is replaced in the ADS. If extra rows are added then the new points are added to the graph.
 
+- The Fit property browser (Fit Function window) in MantidPlot now supports fitting data plotted from a TableWorkspace.
+
 SliceViewer Improvements
 ------------------------
 

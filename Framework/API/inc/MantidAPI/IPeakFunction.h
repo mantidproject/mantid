@@ -70,6 +70,19 @@ public:
   /// Get name of parameter that is associated to centre.
   std::string getCentreParameterName() const;
 
+  /// Fix a parameter or set up a tie such that value returned
+  /// by intensity() is constant during fitting.
+  virtual void fixIntensity() {
+    throw std::runtime_error(
+        "Generic intensity fixing isn't implemented for this function.");
+  }
+
+  /// Free the intensity parameter.
+  virtual void unfixIntensity() {
+    throw std::runtime_error(
+        "Generic intensity fixing isn't implemented for this function.");
+  }
+
 protected:
   /// Defines the area around the centre where the peak values are to be
   /// calculated (in FWHM).

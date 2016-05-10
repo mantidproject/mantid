@@ -14,11 +14,11 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/lambda/lambda.hpp>
 
-#include <sstream>
 #include <algorithm>
+#include <cfloat>
 #include <functional>
 #include <iterator>
-#include <float.h>
+#include <sstream>
 
 namespace Mantid {
 namespace API {

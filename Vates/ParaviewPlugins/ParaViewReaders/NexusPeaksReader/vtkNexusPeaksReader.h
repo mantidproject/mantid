@@ -9,6 +9,8 @@ class VTK_EXPORT vtkNexusPeaksReader : public vtkPolyDataAlgorithm
 {
 public:
   static vtkNexusPeaksReader *New();
+  vtkNexusPeaksReader(const vtkNexusPeaksReader &) = delete;
+  void operator=(const vtkNexusPeaksReader &) = delete;
   vtkTypeMacro(vtkNexusPeaksReader,
                vtkPolyDataAlgorithm) void PrintSelf(ostream &os,
                                                     vtkIndent indent) override;
@@ -21,7 +23,7 @@ public:
   /// Called by presenter to force progress information updating.
   void updateAlgorithmProgress(double progress, const std::string& message);
   /// Getter for the workspace type
-  char* GetWorkspaceTypeName();
+  const std::string &GetWorkspaceTypeName();
 
 protected:
   vtkNexusPeaksReader();
@@ -34,11 +36,6 @@ protected:
   unsigned long GetMTime() override;
 
 private:
-  
-  vtkNexusPeaksReader(const vtkNexusPeaksReader&);
-  
-  void operator = (const vtkNexusPeaksReader&);
-
   /// File name from which to read.
   char *FileName;
 

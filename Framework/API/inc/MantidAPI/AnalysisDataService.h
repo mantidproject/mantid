@@ -150,6 +150,7 @@ public:
 
   /** @name Methods to work with workspace groups */
   //@{
+  void sortGroupByName(const std::string &groupName);
   void addToGroup(const std::string &groupName, const std::string &wsName);
   void deepRemoveGroup(const std::string &name);
   void removeFromGroup(const std::string &groupName, const std::string &wsName);

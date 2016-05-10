@@ -8,14 +8,17 @@ Diffraction Changes
 Crystal Improvements
 --------------------
 
-- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` has parameter errors reduced, option for simplex minimization,
-  and 3 new workspaces which can plot calculated vs theoretical columns, rows, and TOF for each bank.
+- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` has parameter errors reduced,
+   option for simplex minimization, and 3 new workspaces which can plot calculated 
+   vs theoretical columns, rows, and TOF for each bank. Calibration is now as good 
+   as ISAW's for Mandi data.
 - 5 detectors added to the MANDI instrument geometry
 - :ref:`LoadCIF <algm-LoadCIF>` can now also load structures where only anisotropic displacement parameters are given,
   which are converted to equivalent isotropic parameters.
 - :ref:`SaveHKL <algm-SaveHKL>` has option to write the same output as anvred3.py including direction cosines.
 - :ref:`LoadHKL <algm-LoadHKL>` reads hkl output that includes direction cosines.
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` has DetCal information sorted by detector numbers
+- :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` has resolution shells in units of d-Spacing.
 
 Engineering Diffraction
 -----------------------
@@ -47,6 +50,10 @@ Graphical user interface:
   now view the plot in `dSpacing` instead `ToF`, which enables you to
   rerun the fitting process after selecting peaks from the interface.
 
+Powder Diffraction
+------------------
+
+- :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been corrected in its calculation of errors.
 
 Imaging
 -------
@@ -80,16 +87,19 @@ Improvements in the tomographic reconstruction graphical user interface:
 Powder Diffraction Scripts
 --------------------------
 
-- Pearl legacy powder diffraction has been integrated and can be found
-  `Script/PearlPowderISIS`. The routines/script has been differentiated from
+- Pearl powder diffraction has been integrated and can be found
+  `scripts/PearlPowderISIS`. The routines/script has been differentiated from
   the long list of directories of calibration and raw files. The calibration
   directories can be found in a file by the name of pearl_calib_factory.py,
   whereas the raw directories can be found in a file by the name of
   pearl_cycle_factory.py.
 
-- PowderISIS/Aziz script has been renamed to CryPowderISIS and can be found
-  `Script/CryPowderISIS`
+- PowderISIS script has been renamed to CryPowderISIS and can be found within
+  the following folder `scripts/CryPowderISIS`
 
+- :ref:`pearl-powder-diffraction-ref` documentation has been implemented and
+  PowderISIS script documentation has been renamed to
+  :ref:`cry-powder-diffraction-ref`
 
 Full list of `diffraction <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Diffraction%22>`_
 and

@@ -5,6 +5,8 @@
 #include "MantidCurveFitting/Functions/DeltaFunction.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/FunctionDomain1D.h"
 
 #include <cmath>
 #include <algorithm>
@@ -15,8 +17,11 @@
 #include <gsl/gsl_fft_halfcomplex.h>
 
 #include <sstream>
-
 #include <fstream>
+
+namespace {
+const double tolerance{0.02};
+}
 
 namespace Mantid {
 namespace CurveFitting {
@@ -79,30 +84,55 @@ struct RealFFTWorkspace {
 }
 
 /**
- * Calculates convolution of the two member functions.
+ * Calculates convolution of the two member functions. Switches from FFT mode
+ * to direct mode if the domain is not symmetric with respect to the
+ * inversion E --> -E.
  * @param domain :: space on which the function acts
  * @param values :: buffer to store the values returned by the function after
  * acting on the domain.
  */
 void Convolution::function(const FunctionDomain &domain,
                            FunctionValues &values) const {
-  const FunctionDomain1D *d1d = dynamic_cast<const FunctionDomain1D *>(&domain);
-  if (!d1d) {
-    throw std::invalid_argument("Unexpected domain in Convolution");
-  }
-
   if (nFunctions() == 0) {
     values.zeroCalculated();
     return;
   }
+  const FunctionDomain1D *d1d = dynamic_cast<const FunctionDomain1D *>(&domain);
+  if (!d1d) {
+    throw std::invalid_argument("Unexpected domain in Convolution");
+  }
+  const size_t nData = domain.size();
+  const double *xValues = d1d->getPointerAt(0);
+  double dx =
+      (xValues[nData - 1] - xValues[0]) / static_cast<double>((nData - 1));
+  // positive x-values:
+  auto ixP = static_cast<size_t>(xValues[nData - 1] / dx);
+  auto ixN = nData - ixP - 1; // negative x-values (ixP+ixN=nData-1)
 
+  // determine wether to use FFT or Direct calculations
+  int assymmetry = abs(static_cast<int>(ixP - ixN));
+  if (xValues[0] * xValues[nData - 1] < 0 &&
+      assymmetry > tolerance * static_cast<double>(ixP + ixN)) {
+    functionDirectMode(domain, values);
+  } else {
+    functionFFTMode(domain, values);
+  }
+}
+
+/**
+ * Calculates convolution of the two member functions when the
+ * domain is symmetric with respect to inversion E --> -E.
+ * @param domain :: space on which the function acts
+ * @param values :: buffer to store the values returned by the function after
+ * acting on the domain.
+ */
+void Convolution::functionFFTMode(const FunctionDomain &domain,
+                                  FunctionValues &values) const {
+  const FunctionDomain1D *d1d = dynamic_cast<const FunctionDomain1D *>(&domain);
   size_t nData = domain.size();
   const double *xValues = d1d->getPointerAt(0);
-
   refreshResolution();
-
   RealFFTWorkspace workspace(nData);
-
   int n2 = static_cast<int>(nData) / 2;
   bool odd = n2 * 2 != static_cast<int>(nData);
   if (m_resolution.empty()) {
@@ -270,7 +300,138 @@ void Convolution::function(const FunctionDomain &domain,
       std::transform(out, out + nData, tmp.data(), out, std::plus<double>());
     }
   }
-}
+
+} // end of Convolution::functionFFTMode
+
+/**
+ * Calculates convolution of the two member functions when the
+ * domain is not symmetric with respect to inversion E --> -E.
+ * The direct mode is slower than the FFT mode. This is meant to be a temporary
+ * method until the need for a faster computation of asymetric domain arises.
+ * @param domain :: space on which the function acts
+ * @param values :: buffer to store the values returned by the function after
+ * acting on the domain.
+ */
+void Convolution::functionDirectMode(const FunctionDomain &domain,
+                                     FunctionValues &values) const {
+  const FunctionDomain1D *d1d = dynamic_cast<const FunctionDomain1D *>(&domain);
+  const size_t nData = domain.size();
+  const double *xValues = d1d->getPointerAt(0);
+  double dx =
+      (xValues[nData - 1] - xValues[0]) / static_cast<double>((nData - 1));
+  auto ixP = static_cast<size_t>(xValues[nData - 1] / dx); // positive
+                                                           // x-values
+  auto ixN = nData - ixP - 1; // negative x-values (ixP+ixN=nData-1)
+
+  refreshResolution();
+
+  // double the domain where to evaluate the convolution. Guarantees complete
+  // overlap betwen convolution and signal in the original range.
+  const size_t mData = nData + ixN + ixP; // equal to 2*nData-1
+  std::vector<double> xValuesExtdVec(mData);
+  double *xValuesExtd = xValuesExtdVec.data();
+  Mantid::API::FunctionDomain1DView domainExtd(xValuesExtd, mData);
+  double Dx = dx * static_cast<double>(ixN + ixP);
+  for (size_t i = 0; i < mData; i++) {
+    xValuesExtd[i] = -Dx + static_cast<double>(i) * dx;
+  }
+
+  // Fill m_resolution with the resolution function data
+  // Lines 341-349 is duplicated in functionFFTmode. To be cleanup
+  // in issue 16064
+  IFunction1D_sptr resolution =
+      boost::dynamic_pointer_cast<IFunction1D>(getFunction(0));
+  if (!resolution) {
+    throw std::runtime_error("Convolution can work only with IFunction1D");
+  }
+  if (m_resolution.empty()) {
+    m_resolution.resize(nData);
+  }
+  resolution->function1D(m_resolution.data(), xValues, nData);
+
+  // Reverse the axis of the resolution data
+  std::reverse(m_resolution.begin(), m_resolution.end());
+
+  // check for delta functions
+  std::vector<boost::shared_ptr<DeltaFunction>> dltFuns;
+  double dltF = 0;
+  bool deltaFunctionsOnly = false;
+  bool deltaShifted = false;
+  CompositeFunction_sptr cf =
+      boost::dynamic_pointer_cast<CompositeFunction>(getFunction(1));
+  if (cf) {
+    dltFuns.reserve(cf->nFunctions());
+    for (size_t i = 0; i < cf->nFunctions(); ++i) {
+      auto df = boost::dynamic_pointer_cast<DeltaFunction>(cf->getFunction(i));
+      if (df) {
+        dltFuns.push_back(df);
+        if (df->getParameter("Centre") != 0.0) {
+          deltaShifted = true;
+        }
+        dltF += df->getParameter("Height") * df->HeightPrefactor();
+      }
+    }
+    if (dltFuns.size() == cf->nFunctions()) {
+      // all delta functions - return scaled resolution
+      deltaFunctionsOnly = true;
+    }
+  } else if (auto df =
+                 boost::dynamic_pointer_cast<DeltaFunction>(getFunction(1))) {
+    // single delta function - return scaled resolution
+    deltaFunctionsOnly = true;
+    dltFuns.push_back(df);
+    if (df->getParameter("Centre") != 0.0) {
+      deltaShifted = true;
+    }
+    dltF = df->getParameter("Height") * df->HeightPrefactor();
+  }
+
+  // store the result of the convolution
+  double *out = values.getPointerToCalculated(0);
+
+  if (!deltaFunctionsOnly) {
+    // Evaluate the model on the extended domain
+    Mantid::API::FunctionValues valuesExtd(domainExtd);
+    getFunction(1)->function(domainExtd, valuesExtd);
+    // Convolve with resolution
+    double *outExt = valuesExtd.getPointerToCalculated(0);
+    for (size_t i = 0; i < nData; i++) {
+      double tmp{0.0};
+      for (size_t j = 0; j < nData; j++) {
+        tmp += outExt[i + j] * m_resolution[j];
+      }
+      out[i] = tmp * dx;
+    }
+  } else {
+    values.zeroCalculated();
+  }
+
+  if (dltF != 0.0 && !deltaShifted) {
+    // If model contains any delta functions their effect is addition of scaled
+    // resolution
+    // Lines 412-430 is duplicated in functionFFTmode. To be cleanup
+    // in issue 16064
+    std::vector<double> tmp(nData);
+    resolution->function1D(tmp.data(), xValues, nData);
+    std::transform(tmp.begin(), tmp.end(), tmp.begin(),
+                   std::bind2nd(std::multiplies<double>(), dltF));
+    std::transform(out, out + nData, tmp.data(), out, std::plus<double>());
+  } else if (!dltFuns.empty()) {
+    std::vector<double> x(nData);
+    for (const auto &df : dltFuns) {
+      double shift = -df->getParameter("Centre");
+      dltF = df->getParameter("Height") * df->HeightPrefactor();
+      std::transform(xValues, xValues + nData, x.data(),
+                     std::bind2nd(std::plus<double>(), shift));
+      std::vector<double> tmp(nData);
+      resolution->function1D(tmp.data(), x.data(), nData);
+      std::transform(tmp.begin(), tmp.end(), tmp.begin(),
+                     std::bind2nd(std::multiplies<double>(), dltF));
+      std::transform(out, out + nData, tmp.data(), out, std::plus<double>());
+    }
+  }
+
+} // end of Convolution::functionDirectMode()
 
 /**
  * The first function added must be the resolution.

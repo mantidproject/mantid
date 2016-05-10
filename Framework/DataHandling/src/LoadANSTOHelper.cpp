@@ -145,6 +145,20 @@ void EventAssigner::addEventImpl(size_t id, double tof) {
   m_eventVectors[id]->push_back(tof);
 }
 
+// EventAssignerFixedWavelength
+EventAssignerFixedWavelength::EventAssignerFixedWavelength(
+    const std::vector<bool> &roi, const size_t stride, const double wavelength,
+    const double period, const double phase, const double tofMinBoundary,
+    const double tofMaxBoundary, const double timeMinBoundary,
+    const double timeMaxBoundary, std::vector<EventVector_pt> &eventVectors)
+    : EventAssigner(roi, stride, period, phase, tofMinBoundary, tofMaxBoundary,
+                    timeMinBoundary, timeMaxBoundary, eventVectors),
+      m_wavelength(wavelength) {}
+void EventAssignerFixedWavelength::addEventImpl(size_t id, double tof) {
+  UNUSED_ARG(tof);
+  m_eventVectors[id]->push_back(m_wavelength);
+}
+
 // FastReadOnlyFile
 #ifdef _WIN32
 FastReadOnlyFile::FastReadOnlyFile(const char *filename) {
