@@ -40,7 +40,7 @@ public:
     DoubleFortranVector en;
     ComplexFortranMatrix wf;
     ComplexFortranMatrix ham;
-    calculateEigesystem(en, wf, ham, nre, bmol, bext, bkq);
+    calculateEigensystem(en, wf, ham, nre, bmol, bext, bkq);
     doTestEigensystem(en, wf, ham);
   }
 
@@ -61,7 +61,7 @@ public:
     DoubleFortranVector en;
     ComplexFortranMatrix wf;
     ComplexFortranMatrix ham;
-    calculateEigesystem(en, wf, ham, nre, bmol, bext, bkq);
+    calculateEigensystem(en, wf, ham, nre, bmol, bext, bkq);
     doTestEigensystem(en, wf, ham);
   }
 
@@ -84,7 +84,7 @@ public:
       DoubleFortranVector en;
       ComplexFortranMatrix wf;
       ComplexFortranMatrix ham;
-      calculateEigesystem(en, wf, ham, nre, bmol, bext, bkq);
+      calculateEigensystem(en, wf, ham, nre, bmol, bext, bkq);
       doTestEigensystem(en, wf, ham);
       en1 = en;
     }
@@ -94,7 +94,7 @@ public:
       DoubleFortranVector en;
       ComplexFortranMatrix wf;
       ComplexFortranMatrix ham;
-      calculateEigesystem(en, wf, ham, nre, bmol, bext, bkq, 10.0, 20, 73.0);
+      calculateEigensystem(en, wf, ham, nre, bmol, bext, bkq, 10.0, 20, 73.0);
       doTestEigensystem(en, wf, ham);
       en2 = en;
     }
@@ -118,7 +118,7 @@ public:
     DoubleFortranVector en;
     ComplexFortranMatrix wf;
     ComplexFortranMatrix ham;
-    calculateEigesystem(en, wf, ham, nre, bmol, bext, bkq);
+    calculateEigensystem(en, wf, ham, nre, bmol, bext, bkq);
 
     IntFortranVector degeneration;
     DoubleFortranVector e_energies;
@@ -156,7 +156,7 @@ public:
     DoubleFortranVector en;
     ComplexFortranMatrix wf;
     ComplexFortranMatrix ham;
-    calculateEigesystem(en, wf, ham, nre, bmol, bext, bkq);
+    calculateEigensystem(en, wf, ham, nre, bmol, bext, bkq);
 
     IntFortranVector degeneration;
     DoubleFortranVector e_energies;

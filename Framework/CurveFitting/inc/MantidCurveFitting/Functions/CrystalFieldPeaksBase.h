@@ -1,7 +1,11 @@
-#ifndef MANTID_CURVEFITTING_CRYSTALFIELDPEAKS_H_
-#define MANTID_CURVEFITTING_CRYSTALFIELDPEAKS_H_
+#ifndef MANTID_CURVEFITTING_CRYSTALFIELDPEAKSBASE_H_
+#define MANTID_CURVEFITTING_CRYSTALFIELDPEAKSBASE_H_
 
-#include "MantidCurveFitting/Functions/CrystalFieldPeaksBase.h"
+#include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IFunctionGeneral.h"
+#include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
+#include "MantidCurveFitting/FortranDefs.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -32,17 +36,17 @@ namespace Functions {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_CURVEFITTING_DLL CrystalFieldPeaks : public CrystalFieldPeaksBase {
+class MANTID_CURVEFITTING_DLL CrystalFieldPeaksBase
+    : public API::IFunctionGeneral,
+      public API::ParamFunction {
 public:
-  CrystalFieldPeaks();
-  std::string name() const override;
-  size_t getNumberDomainColumns() const override;
-  size_t getNumberValuesPerArgument() const override;
-  void functionGeneral(const API::FunctionDomainGeneral &generalDomain,
-                       API::FunctionValues &values) const override;
-  size_t getDefaultDomainSize() const override;
+  CrystalFieldPeaksBase();
+  void setAttribute(const std::string &name, const Attribute &) override;
 
-private:
+protected:
+  /// Calculate the crystal field eigensystem
+  void calculateEigenSystem(DoubleFortranVector &en, ComplexFortranMatrix &wf,
+                            int &nre) const;
   /// Store the default domain size after first
   /// function evaluation
   mutable size_t m_defaultDomainSize;
@@ -52,4 +56,4 @@ private:
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /* MANTID_CURVEFITTING_CRYSTALFIELDPEAKS_H_ */
+#endif /* MANTID_CURVEFITTING_CRYSTALFIELDPEAKSBASE_H_ */

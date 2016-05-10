@@ -9,7 +9,7 @@ namespace CurveFitting {
 namespace Functions {
 
 void MANTID_CURVEFITTING_DLL
-calculateEigesystem(DoubleFortranVector &eigenvalues,
+calculateEigensystem(DoubleFortranVector &eigenvalues,
                     ComplexFortranMatrix &eigenvectors,
                     ComplexFortranMatrix &hamiltonian, int nre,
                     const DoubleFortranVector &bmol,

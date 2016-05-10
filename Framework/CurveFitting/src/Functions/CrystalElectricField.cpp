@@ -585,7 +585,7 @@ double c_occupation_factor(const DoubleFortranVector &energy, double dimj,
 /// @param alpha_euler :: The alpha Euler angle. TOD: units.
 /// @param beta_euler :: The beta Euler angle. TOD: units.
 /// @param gamma_euler :: The gamma Euler angle. TOD: units.
-void calculateEigesystem(DoubleFortranVector &eigenvalues,
+void calculateEigensystem(DoubleFortranVector &eigenvalues,
                          ComplexFortranMatrix &eigenvectors,
                          ComplexFortranMatrix &hamiltonian, int nre,
                          const DoubleFortranVector &bmol,
