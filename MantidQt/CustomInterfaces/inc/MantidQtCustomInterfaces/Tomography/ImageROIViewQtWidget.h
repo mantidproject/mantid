@@ -64,7 +64,7 @@ class MANTIDQT_CUSTOMINTERFACES_DLL ImageROIViewQtWidget
 
 public:
   ImageROIViewQtWidget(QWidget *parent = 0);
-  ~ImageROIViewQtWidget() override{};
+  ~ImageROIViewQtWidget() override;
 
   void setParams(ImageStackPreParams &params) override;
 

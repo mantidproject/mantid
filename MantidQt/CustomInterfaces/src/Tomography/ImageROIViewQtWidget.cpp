@@ -1,5 +1,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/MantidColorMap.h"
@@ -33,6 +34,10 @@ ImageROIViewQtWidget::ImageROIViewQtWidget(QWidget *parent)
   // QLabel + selection of ROI+NormArea+CoR class
   // not using Qwt Pickers to avoid Qwt version issues..
   m_ui.label_img->installEventFilter(this);
+}
+
+ImageROIViewQtWidget::~ImageROIViewQtWidget() {
+  m_presenter->notify(ImageROIPresenter::ShutDown);
 }
 
 void ImageROIViewQtWidget::setParams(ImageStackPreParams &params) {
@@ -224,7 +229,43 @@ void ImageROIViewQtWidget::saveSettings() const {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
 
+  // Color bar widget settings
+  qs.setValue("colorbar-file",
+              m_ui.colorBarWidget->getColorMap().getFilePath());
+  qs.setValue("colorbar-scale-type", m_ui.colorBarWidget->getScale());
+  qs.setValue("colorbar-power-exponent", m_ui.colorBarWidget->getExponent());
+  qs.setValue("colorbar-autoscale", m_ui.colorBarWidget->getAutoScale());
+  qs.setValue("colorbar-autoscale-current-slice",
+              m_ui.colorBarWidget->getAutoColorScaleforCurrentSlice());
+
   qs.setValue("interface-win-geometry", saveGeometry());
+  qs.endGroup();
+}
+
+void ImageROIViewQtWidget::readSettings() {
+  QSettings qs;
+  qs.beginGroup(QString::fromStdString(m_settingsGroup));
+
+  // Color bar widget settings
+  // The factory default would be "Gray.map"
+  const auto mapsDir = QString::fromStdString(
+      Mantid::Kernel::ConfigService::Instance().getString(
+          "colormaps.directory"));
+  const auto defMapFile =
+      QFileInfo(mapsDir).absoluteDir().filePath("Gamma1.map");
+  const auto filepath = qs.value("colorbar-file", defMapFile).toString();
+  m_ui.colorBarWidget->getColorMap().loadMap(filepath);
+  m_ui.colorBarWidget->updateColorMap();
+
+  m_ui.colorBarWidget->setScale(qs.value("colorbar-scale-type", 0).toInt());
+  m_ui.colorBarWidget->setExponent(
+      qs.value("colorbar-power-exponent", 2.0).toDouble());
+  m_ui.colorBarWidget->setAutoScale(
+      qs.value("colorbar-autoscale", false).toBool());
+  // ColorBarWidget doesn't support setting "AutoColorScaleforCurrentSlice"
+  // qsetting: "colorbar-autoscale-current-slice"
+
+  restoreGeometry(qs.value("interface-win-geometry").toByteArray());
   qs.endGroup();
 }
 
@@ -274,17 +315,17 @@ void ImageROIViewQtWidget::initLayout() {
   enableParamWidgets(false);
   m_ui.colorBarWidget->setEnabled(false);
 
+  m_ui.colorBarWidget->setViewRange(1, 65536);
+  m_ui.colorBarWidget->setAutoScale(true);
+
+  readSettings();
+
   setupConnections();
 
   initParamWidgets(1, 1);
   grabCoRFromWidgets();
   grabROIFromWidgets();
   grabNormAreaFromWidgets();
-
-  // the factory default would be "Gray.map"
-  if (!m_colorMapFilename.empty())
-    updateColorMap(m_colorMapFilename);
-  m_ui.colorBarWidget->setViewRange(1, 65536);
 
   // presenter that knows how to handle a IImageROIView should take care
   // of all the logic. Note the view needs to now the concrete presenter here
@@ -734,35 +775,51 @@ ImageROIViewQtWidget::transferWSImageToQPixmap(const MatrixWorkspace_sptr ws,
                                                size_t width, size_t height,
                                                float rotationAngle) {
 
-  // find min and max to scale pixel values
-  double min = std::numeric_limits<double>::max(),
-         max = std::numeric_limits<double>::min();
-  getPixelMinMax(ws, min, max);
-  if (max <= min) {
-    QMessageBox::warning(
-        this, "Empty image!",
-        "The image could be loaded but it contains "
-        "effectively no information, all pixels have the same value.");
-    // black picture
-    QPixmap pix(static_cast<int>(width), static_cast<int>(height));
-    pix.fill(QColor(0, 0, 0));
-    return pix;
-  }
-
   QImage rawImg(QSize(static_cast<int>(width), static_cast<int>(height)),
                 QImage::Format_RGB32);
-  const double max_min = max - min;
+
+  double minVal = std::numeric_limits<double>::max(),
+         maxVal = std::numeric_limits<double>::min();
+  // find min and max to scale pixel values, whether from user-given
+  // range, or auto-range
+  if (!m_ui.colorBarWidget->getAutoScale()) {
+    minVal = m_ui.colorBarWidget->getMinimum();
+    maxVal = m_ui.colorBarWidget->getMaximum();
+  } else {
+
+    getPixelMinMax(ws, minVal, maxVal);
+    if (maxVal <= minVal) {
+      QMessageBox::warning(
+          this, "Empty image!",
+          "The image could be loaded but it contains "
+          "effectively no information, all pixels have the same value.");
+      // black picture
+      QPixmap pix(static_cast<int>(width), static_cast<int>(height));
+      pix.fill(QColor(0, 0, 0));
+      return pix;
+    }
+    m_ui.colorBarWidget->setViewRange(minVal, maxVal);
+  }
+  const double max_min = maxVal - minVal;
   const double scaleFactor = 255.0 / max_min;
+
+  // normal Qt rgb values
+  QwtDoubleInterval rgbInterval(0.0, 255.0);
+  const QVector<QRgb> colorTable =
+      m_ui.colorBarWidget->getColorMap().colorTable(rgbInterval);
+  rawImg.setColorTable(colorTable);
 
   for (size_t yi = 0; yi < width; ++yi) {
     const auto &yvec = ws->readY(yi);
     for (size_t xi = 0; xi < width; ++xi) {
       const double &v = yvec[xi];
-      // color the range min-max in gray scale. To apply different color
-      // maps you'd need to use rawImg.setColorTable() or similar.
-      const int scaled = static_cast<int>(scaleFactor * (v - min));
-      QRgb vRgb = qRgb(scaled, scaled, scaled);
-
+      const int scaled = static_cast<int>(scaleFactor * (v - minVal));
+      // You would use this for a trivial mapping of valus to colors:
+      // Coloring the range min-max in gray scale. But setColorTable()
+      // is used to apply different color maps from files QRgb vRgb =
+      // qRgb(scaled, scaled, scaled);
+      // rawImg.setPixel(static_cast<int>(rotX), static_cast<int>(rotY),
+      // scaled);
       size_t rotX = 0, rotY = 0;
       if (0 == rotationAngle) {
         rotX = xi;
@@ -777,7 +834,14 @@ ImageROIViewQtWidget::transferWSImageToQPixmap(const MatrixWorkspace_sptr ws,
         rotX = yi;
         rotY = width - (xi + 1);
       }
-      rawImg.setPixel(static_cast<int>(rotX), static_cast<int>(rotY), vRgb);
+
+      const auto rgb =
+          m_ui.colorBarWidget->getColorMap().rgb(rgbInterval, scaled);
+      rawImg.setPixel(static_cast<int>(rotX), static_cast<int>(rotY), rgb);
+      // This would be faster, using the look-up color table, but for unknown
+      // reasons MantidColorMap::colorTable forces linear scale.
+      // rawImg.setPixel(static_cast<int>(rotX), static_cast<int>(rotY),
+      // colorTable[scaled]);
     }
   }
 
@@ -1131,13 +1195,10 @@ void ImageROIViewQtWidget::mouseFinishNormArea(int x, int y) {
   m_presenter->notify(IImageROIPresenter::FinishedNormalization);
 }
 
-void ImageROIViewQtWidget::readSettings() {
-  QSettings qs;
-  qs.beginGroup(QString::fromStdString(m_settingsGroup));
-  restoreGeometry(qs.value("interface-win-geometry").toByteArray());
-  qs.endGroup();
-}
-
+/**
+ * Slot for the signal emitted by the color bar widget when the user
+ * requests a new color map.
+ */
 void ImageROIViewQtWidget::loadColorMapRequest() {
   m_presenter->notify(IImageROIPresenter::UpdateColorMap);
 }
@@ -1152,12 +1213,20 @@ void ImageROIViewQtWidget::updateColorMap(const std::string &filename) {
   // Load from file
   m_ui.colorBarWidget->getColorMap().loadMap(QString::fromStdString(filename));
   m_ui.colorBarWidget->updateColorMap();
+
+  // if (!m_colorMapFilename.empty())
+  //  updateColorMap(m_colorMapFilename);
+  m_ui.colorBarWidget->setViewRange(1, 65536);
+
   m_presenter->notify(IImageROIPresenter::ColorRangeUpdated);
 }
 
+/**
+ * Slot for the signal emitted by the color bar widget when there's an
+ * update in the values
+ */
 void ImageROIViewQtWidget::colorRangeChanged() {
-  // use  m_colorBar->getColorMap())
-  // update image display
+  // the presenter should handle the image display update
   m_presenter->notify(IImageROIPresenter::ColorRangeUpdated);
 }
 
