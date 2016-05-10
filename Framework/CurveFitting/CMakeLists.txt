@@ -66,6 +66,7 @@ set ( SRC_FILES
 	src/Functions/ExpDecayOsc.cpp
 	src/Functions/FlatBackground.cpp
 	src/Functions/FullprofPolynomial.cpp
+	src/Functions/FunctionGenerator.cpp
 	src/Functions/GausDecay.cpp
 	src/Functions/GausOsc.cpp
 	src/Functions/Gaussian.cpp
@@ -197,6 +198,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/ExpDecayOsc.h
 	inc/MantidCurveFitting/Functions/FlatBackground.h
 	inc/MantidCurveFitting/Functions/FullprofPolynomial.h
+	inc/MantidCurveFitting/Functions/FunctionGenerator.h
 	inc/MantidCurveFitting/Functions/GausDecay.h
 	inc/MantidCurveFitting/Functions/GausOsc.h
 	inc/MantidCurveFitting/Functions/Gaussian.h
