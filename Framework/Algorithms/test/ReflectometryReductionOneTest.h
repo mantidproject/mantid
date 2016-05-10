@@ -202,10 +202,6 @@ public:
     alg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     MatrixWorkspace_sptr outLam = alg->getProperty("OutputWorkspaceWavelength");
-    alg->setProperty("InputWorkspace", outLam);
-    alg->setProperty("OutputWorkspace", "IvsQ");
-    alg->setProperty("OutputWorkspaceWavelength", "IvsLam");
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
     MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(m_tinyReflWS->getInstrument()->getSource()->getPos(),
@@ -214,7 +210,6 @@ public:
                      outQ->getInstrument()->getSource()->getPos());
   }
   void test_post_processing_scale_step() {
-    // auto inWS = Create2DWorkspace123(1, 10);
     auto alg = construct_standard_algorithm();
     auto inWS =
         WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
@@ -222,6 +217,7 @@ public:
     inWS->getAxis(0)->setUnit("Wavelength");
     alg->setProperty("InputWorkspace", inWS);
     alg->setProperty("ScaleFactor", 1.0);
+    alg->setProperty("ThetaIn", 1.5);
     alg->setProperty("OutputWorkspace", "Test");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     MatrixWorkspace_sptr nonScaledWS = alg->getProperty("OutputWorkspace");

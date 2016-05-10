@@ -553,20 +553,20 @@ void ReflectometryReductionOneAuto::exec() {
     setProperty("OutputWorkspace", new_IvsQ1);
     setProperty("OutputWorkspaceWavelength", new_IvsLam1);
     setProperty("ThetaOut", thetaOut1);
-    std::string momentumMinimum =
-        refRedOne->getPropertyValue("MomentumTransferMinimum");
-    std::string momentumStep =
-        refRedOne->getPropertyValue("MomentumTransferStep");
-    std::string momentumMaximum =
-        refRedOne->getPropertyValue("MomentumTransferMaximum");
-    std::string thetaIn = refRedOne->getPropertyValue("ThetaIn");
+    // set properties so they can be retrieved by GenericDataProcesser if
+    // necessary.
     setProperty("MomentumTransferMinimum",
-                boost::lexical_cast<double>(momentumMinimum));
+                boost::lexical_cast<double>(
+                    refRedOne->getPropertyValue("MomentumTransferMinimum")));
     setProperty("MomentumTransferStep",
-                boost::lexical_cast<double>(momentumStep));
+                boost::lexical_cast<double>(
+                    refRedOne->getPropertyValue("MomentumTransferStep")));
     setProperty("MomentumTransferMaximum",
-                boost::lexical_cast<double>(momentumMaximum));
-    setProperty("ThetaIn", boost::lexical_cast<double>(thetaIn));
+                boost::lexical_cast<double>(
+                    refRedOne->getPropertyValue("MomentumTransferMaximum")));
+    setProperty("ThetaIn", boost::lexical_cast<double>(
+                               refRedOne->getPropertyValue("ThetaIn")));
+
   } else {
     throw std::runtime_error(
         "ReflectometryReductionOne could not be initialised");
@@ -835,16 +835,20 @@ bool ReflectometryReductionOneAuto::processGroups() {
   }
 
   // We finished successfully
-  std::string momentumMinimum =
-      alg->getPropertyValue("MomentumTransferMinimum");
-  std::string momentumMaximum =
-      alg->getPropertyValue("MomentumTransferMaximum");
-  std::string thetaIn = alg->getPropertyValue("ThetaIn");
-  setProperty("ThetaIn", boost::lexical_cast<double>(thetaIn));
+  // set the values of these properties so they can be retrieved by the
+  // Interface.
+  this->setProperty(
+      "ThetaIn", boost::lexical_cast<double>(alg->getPropertyValue("ThetaIn")));
   this->setProperty("MomentumTransferMinimum",
-                    boost::lexical_cast<double>(momentumMinimum));
+                    boost::lexical_cast<double>(
+                        alg->getPropertyValue("MomentumTransferMinimum")));
+  this->setProperty("MomentumTransferStep",
+                    boost::lexical_cast<double>(
+                        alg->getPropertyValue("MomentumTransferStep")));
   this->setProperty("MomentumTransferMaximum",
-                    boost::lexical_cast<double>(momentumMaximum));
+                    boost::lexical_cast<double>(
+                        alg->getPropertyValue("MomentumTransferMaximum")));
+  // setting output properties.
   this->setPropertyValue("OutputWorkspace", outputIvsQ);
   this->setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
   setExecuted(true);
