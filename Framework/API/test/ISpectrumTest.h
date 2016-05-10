@@ -92,22 +92,17 @@ public:
     s.dataDx();
     TS_ASSERT(s.hasDx());
 
-    // non-const ptrDx()
-    SpectrumTester s2(HistogramData::Histogram::XMode::Points);
-    s2.ptrDx();
-    TS_ASSERT(s2.hasDx());
-
     // setDX vesion 2
     SpectrumTester s4(HistogramData::Histogram::XMode::Points);
     auto Dx_vec_ptr_type =
         boost::make_shared<Mantid::HistogramData::HistogramDx>(0);
-    s4.setDx(Dx_vec_ptr_type);
+    s4.setSharedDx(Dx_vec_ptr_type);
     TS_ASSERT(s4.hasDx());
 
     // setDX version 3
     SpectrumTester s5(HistogramData::Histogram::XMode::Points);
     cow_ptr<Mantid::HistogramData::HistogramDx> Dx_vec_ptr;
-    s5.setDx(Dx_vec_ptr);
+    s5.setSharedDx(Dx_vec_ptr);
     TS_ASSERT(s5.hasDx());
   }
 

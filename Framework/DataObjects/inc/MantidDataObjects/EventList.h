@@ -186,7 +186,6 @@ public:
 
   // X-vector accessors. These reset the MRU for this spectrum
   void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) override;
-  void setDx(const Kernel::cow_ptr<HistogramData::HistogramDx> &Dx) override;
 
   MantidVec &dataX() override;
   MantidVec &dataDx() override;
@@ -197,7 +196,6 @@ public:
   const MantidVec &readX() const override;
   const MantidVec &readDx() const override;
   Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const override;
-  Kernel::cow_ptr<HistogramData::HistogramDx> ptrDx() const override;
 
   // TODO: This overload will probably be needed in a future to work with Event
   // data properly

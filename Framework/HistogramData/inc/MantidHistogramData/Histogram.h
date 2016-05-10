@@ -86,7 +86,6 @@ public:
 
   // Temporary legacy interface to Dx. Note that accessors mimic the current
   // behavior which always has Dx allocated.
-  void setDx(const Kernel::cow_ptr<HistogramDx> &Dx) { m_dx = Dx; }
   MantidVec &dataDx() {
     if(!m_dx)
       m_dx = Kernel::make_cow<HistogramDx>(m_x->size(), 0.0);
@@ -101,11 +100,6 @@ public:
     if(!m_dx)
       m_dx = Kernel::make_cow<HistogramDx>(m_x->size(), 0.0);
     return m_dx->rawData();
-  }
-  Kernel::cow_ptr<HistogramDx> ptrDx() const {
-    if(!m_dx)
-      m_dx = Kernel::make_cow<HistogramDx>(m_x->size(), 0.0);
-    return m_dx;
   }
 
 private:

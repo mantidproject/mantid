@@ -1321,8 +1321,8 @@ public:
       TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(spec));
     }
     ws.dataDx(workspaceIndexWithDx[0]) = dxSpec0;
-    ws.setDx(workspaceIndexWithDx[1], dxSpec1);
-    ws.setDx(workspaceIndexWithDx[2], dxSpec2);
+    ws.setSharedDx(workspaceIndexWithDx[1], dxSpec1);
+    ws.setSharedDx(workspaceIndexWithDx[2], dxSpec2);
 
     // Assert
     auto compareValue =
@@ -1344,7 +1344,7 @@ public:
                  std::all_of(std::begin(readDx), std::end(readDx),
                              compareValueForSpecificWorkspaceIndex));
 
-      auto refDx = ws.refDx(index);
+      auto refDx = ws.sharedDx(index);
       TSM_ASSERT("readDx should allow access to the spectrum",
                  std::all_of(std::begin(*refDx), std::end(*refDx),
                              compareValueForSpecificWorkspaceIndex));

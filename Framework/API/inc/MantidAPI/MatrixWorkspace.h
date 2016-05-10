@@ -291,12 +291,6 @@ public:
     return getSpectrum(index)->ptrX();
   }
 
-  /// Returns a pointer to the dX  (X Error) data
-  virtual Kernel::cow_ptr<HistogramData::HistogramDx>
-  refDx(const std::size_t index) const {
-    return getSpectrum(index)->ptrDx();
-  }
-
   /// Set the specified X array to point to the given existing array
   virtual void setX(const std::size_t index,
                     const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
@@ -308,20 +302,6 @@ public:
   virtual void setX(const std::size_t index,
                     const boost::shared_ptr<HistogramData::HistogramX> &X) {
     getSpectrum(index)->setX(X);
-    invalidateCommonBinsFlag();
-  }
-
-  /// Set the specified Dx (X Error) array to point to the given existing array
-  virtual void setDx(const std::size_t index,
-                     const Kernel::cow_ptr<HistogramData::HistogramDx> &Dx) {
-    getSpectrum(index)->setDx(Dx);
-    invalidateCommonBinsFlag();
-  }
-
-  /// Set the specified Dx (X Error) array to point to the given existing array
-  virtual void setDx(const std::size_t index,
-                     const boost::shared_ptr<HistogramData::HistogramDx> &Dx) {
-    getSpectrum(index)->setDx(Dx);
     invalidateCommonBinsFlag();
   }
 
