@@ -500,8 +500,8 @@ public:
 
     // Check the bins contain 2
     data1 = ew2->dataE(0);
-    TS_ASSERT_DELTA(ew2->dataE(0)[1], sqrt(2.0), 1e-6);
-    TS_ASSERT_DELTA(data1[1], sqrt(2.0), 1e-6);
+    TS_ASSERT_DELTA(ew2->dataE(0)[1], M_SQRT2, 1e-6);
+    TS_ASSERT_DELTA(data1[1], M_SQRT2, 1e-6);
     // But the Y is still 2.0
     TS_ASSERT_DELTA(ew2->dataY(0)[1], 2.0, 1e-6);
 
@@ -791,7 +791,7 @@ public:
       const MantidVec &Y = ew1->readY(i);
       TS_ASSERT_DELTA(Y[0], 2.0, 1e-5);
       const MantidVec &E = ew1->readE(i);
-      TS_ASSERT_DELTA(E[0], sqrt(2.0), 1e-5);
+      TS_ASSERT_DELTA(E[0], M_SQRT2, 1e-5);
 
       // Vector with 10 bins, 10 wide
       MantidVec X;
@@ -809,7 +809,7 @@ public:
       const MantidVec &Y_other = ew1->readY(i + 1);
       TS_ASSERT_DELTA(Y_other[0], 2.0, 1e-5);
       const MantidVec &E_other = ew1->readE(i + 1);
-      TS_ASSERT_DELTA(E_other[0], sqrt(2.0), 1e-5);
+      TS_ASSERT_DELTA(E_other[0], M_SQRT2, 1e-5);
     }
     // suppress unused argument when built without openmp.
     UNUSED_ARG(do_parallel)

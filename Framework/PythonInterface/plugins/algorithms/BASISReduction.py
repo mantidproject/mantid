@@ -49,7 +49,7 @@ class BASISReduction(PythonAlgorithm):
         return 1
 
     def summary(self):
-        return "This algorithm is meant to temporarily deal with letting BASIS reduce lots of files via Mantid."
+        return "Multiple-file BASIS reduction."
 
     def PyInit(self):
         self._short_inst = "BSS"
@@ -76,6 +76,8 @@ class BASISReduction(PythonAlgorithm):
         self.declareProperty("GroupDetectors", "None",
                              StringListValidator(grouping_type),
                              "Switch for grouping detectors")
+
+        self.declareProperty("NormalizeToFirst", False, "Normalize spectra to intensity of spectrum with lowest Q?")
 
         # Properties setting the division by vanadium
         titleDivideByVanadium = "Normalization by Vanadium"
@@ -111,6 +113,7 @@ class BASISReduction(PythonAlgorithm):
         self._noMonNorm = self.getProperty("NoMonitorNorm").value
         self._maskFile = self.getProperty("MaskFile").value
         self._groupDetOpt = self.getProperty("GroupDetectors").value
+        self._normalizeToFirst = self.getProperty("NormalizeToFirst").value
 
         datasearch = config["datasearch.searcharchive"]
         if datasearch != "On":
@@ -191,7 +194,8 @@ class BASISReduction(PythonAlgorithm):
             # involving this S(Q,w)
             api.ClearMaskFlag(Workspace=self._samSqwWs)
             # Scale so that elastic line has Y-values ~ 1
-            self._ScaleY(self._samSqwWs)
+            if self._normalizeToFirst:
+                self._ScaleY(self._samSqwWs)
             # Output Dave and Nexus files
             extension = "_divided.dat" if self._doNorm else ".dat"
             dave_grp_filename = self._makeRunName(self._samWsRun,

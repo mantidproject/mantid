@@ -7,8 +7,8 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <cmath>
 #include <sstream>
-#include <math.h>
 
 namespace Mantid {
 namespace Algorithms {

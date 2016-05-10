@@ -48,7 +48,7 @@ public:
     TS_ASSERT_EQUALS(A.setSurface("k/x 0.0 0.0 0.0 1.0\n"), 0);
     TS_ASSERT_EQUALS(extractString(A), "-1  kx 0 1\n");
 
-    double val = 0.1 / sqrt(2.0);
+    double val = 0.1 * M_SQRT1_2;
     // Point outside Cone
     TS_ASSERT_EQUALS(A.side(V3D(0.1, 0.0, 0.0)), 1);
     TS_ASSERT_EQUALS(A.side(V3D(0.1, val - 0.1, val - 0.1)), 1);
@@ -75,7 +75,7 @@ public:
     TS_ASSERT_EQUALS(A.setSurface("k/x 0.0 0.0 0.0 1.0\n"), 0);
     TS_ASSERT_EQUALS(extractString(A), "-1  kx 0 1\n");
 
-    double val = 0.1 / sqrt(2.0);
+    double val = 0.1 * M_SQRT1_2;
     // Point outside Cone
     TS_ASSERT_EQUALS(A.onSurface(V3D(0.1, 0.0, 0.0)), 0);
     TS_ASSERT_EQUALS(A.onSurface(V3D(0.1, val - 0.1, val - 0.1)), 0);
@@ -101,12 +101,12 @@ public:
     Cone A;
     TS_ASSERT_EQUALS(A.setSurface("k/x 0.0 0.0 0.0 1.0\n"), 0);
     TS_ASSERT_EQUALS(extractString(A), "-1  kx 0 1\n");
-    double val = 0.1 / sqrt(2.0);
+    double val = 0.1 * M_SQRT1_2;
     TS_ASSERT_DELTA(A.distance(V3D(0.1, val, val)), 0.0, 0.00001);
     // Inside
-    TS_ASSERT_DELTA(A.distance(V3D(0.0, val * 10, val * 10)), 1 / sqrt(2.0),
+    TS_ASSERT_DELTA(A.distance(V3D(0.0, val * 10, val * 10)), M_SQRT1_2,
                     0.00001);
-    TS_ASSERT_DELTA(A.distance(V3D(1, 0.0, 0.0)), -1 / sqrt(2.0), 0.00001);
+    TS_ASSERT_DELTA(A.distance(V3D(1, 0.0, 0.0)), -1 * M_SQRT1_2, 0.00001);
   }
 
   void testSetCentre() {
