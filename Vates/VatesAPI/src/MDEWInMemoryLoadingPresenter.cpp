@@ -92,7 +92,7 @@ namespace Mantid
         this->m_metadataJsonManager->setMaxValue(range[1]);
       }
 
-      this->extractMetadata(eventWs);
+      this->extractMetadata(*eventWs);
 
       this->appendMetadata(visualDataSet, eventWs->getName());
       return visualDataSet;
@@ -122,7 +122,7 @@ namespace Mantid
       m_metadataJsonManager->setSpecialCoordinates(m_specialCoords);
 
       //Call base-class extraction method.
-      this->extractMetadata(eventWs);
+      this->extractMetadata(*eventWs);
     }
 
     /// Destructor
