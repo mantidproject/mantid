@@ -60,6 +60,7 @@ public:
   std::vector<double> toVector() const;
 
 protected:
+  /// Protected constructor, shouldn't be created directly. Use
   /// FunctionDomain1DView instead.
   FunctionDomain1D(const double *x, size_t n) : m_data(x), m_n(n) {}
   /// Reset the pointer and size of the domain
