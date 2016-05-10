@@ -51,7 +51,7 @@ public:
     // Input file does not contain Dx, we just add it for testing.
     auto dx = Kernel::make_cow<HistogramData::HistogramDx>(in->readX(0).size());
     for(size_t i=0; i<in->getNumberHistograms(); ++i)
-      in->histogram(i).setSharedDx(dx);
+      in->setSharedDx(i, dx);
 
         TS_ASSERT_THROWS_NOTHING(
             cloner.setPropertyValue("InputWorkspace", "in"));
@@ -63,13 +63,13 @@ public:
     // Check sharing of the Dx vectors has not been broken
     TSM_ASSERT_EQUALS("Dx vectors should be shared between spectra by default "
                       "(after a LoadRaw)",
-                      in->getSpectrum(0)->ptrDx(), in->getSpectrum(1)->ptrDx())
+                      in->sharedDx(0), in->sharedDx(1));
     MatrixWorkspace_const_sptr out =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
     // Check sharing of the Dx vectors has not been broken
     TSM_ASSERT_EQUALS(
         "Dx vectors should remain shared between spectra after CloneWorkspace",
-        out->getSpectrum(0)->ptrDx(), out->getSpectrum(1)->ptrDx())
+        out->sharedDx(0), out->sharedDx(1));
 
     // Best way to test this is to use the CheckWorkspacesMatch algorithm
     Mantid::Algorithms::CheckWorkspacesMatch checker;

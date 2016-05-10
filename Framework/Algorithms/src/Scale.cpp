@@ -80,7 +80,7 @@ void Scale::exec() {
       bufferWS = inputWS;
     }
     for (size_t index = 0; index < bufferWS->getNumberHistograms(); ++index) {
-      outputWS->setDx(0, bufferWS->refDx(0));
+      outputWS->setSharedDx(index, bufferWS->sharedDx(index));
     }
   }
 
