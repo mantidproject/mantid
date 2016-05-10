@@ -276,6 +276,8 @@ std::vector<double> const &StructuredDetector::getYValues() const {
 * @param yPixels :: number of pixels in Y
 * @param x :: X vertices
 * @param y :: Y vertices
+* @param beamDirection :: Shows axis alignment of the beam. Only z aligned beams
+*are allowed.
 * @param idStart :: detector ID of the first pixel
 * @param idFillByFirstY :: set to true if ID numbers increase with Y indices
 *first. That is: (0,0)=0; (0,1)=1, (0,2)=2 and so on.
