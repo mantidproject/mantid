@@ -16,7 +16,7 @@ WorkspaceSingleValue::WorkspaceSingleValue(double value, double error)
   data.dataX().resize(1, 0.0);
   data.dataY().resize(1, value);
   data.dataE().resize(1, error);
-  data.dataDx().resize(1, 0.0);
+  data.setPointStandardDeviations(1, 0.0);
 
   setDistribution(true);
 }

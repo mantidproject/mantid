@@ -49,9 +49,9 @@ public:
     MatrixWorkspace_sptr in =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("in");
     // Input file does not contain Dx, we just add it for testing.
-    auto dx = Kernel::make_cow<HistogramData::HistogramDx>(in->readX(0).size());
-    for(size_t i=0; i<in->getNumberHistograms(); ++i)
-      in->setSharedDx(i, dx);
+    HistogramData::BinEdgeStandardDeviations dx(in->readX(0).size());
+    for (size_t i = 0; i < in->getNumberHistograms(); ++i)
+      in->setBinEdgeStandardDeviations(i, dx);
 
         TS_ASSERT_THROWS_NOTHING(
             cloner.setPropertyValue("InputWorkspace", "in"));

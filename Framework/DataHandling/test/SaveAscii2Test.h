@@ -99,6 +99,7 @@ public:
       std::vector<double> &X = wsToSave->dataX(i);
       std::vector<double> &Y = wsToSave->dataY(i);
       std::vector<double> &E = wsToSave->dataE(i);
+      wsToSave->setPointStandardDeviations(i, 3);
       auto &DX = wsToSave->mutableDx(i);
       for (int j = 0; j < 3; j++) {
         X[j] = 1.5 * j / 0.9;

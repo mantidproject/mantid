@@ -812,7 +812,7 @@ private:
         UnitFactory::Instance().create("TOF");
     double d = 0.0;
     if (useXErrors) {
-      localWorkspace2D->setSharedDx(0, make_cow<HistogramDx>(10));
+      localWorkspace2D->setPointStandardDeviations(0, 10);
     }
     for (int i = 0; i < 10; ++i, d += 0.1) {
       localWorkspace2D->dataX(0)[i] = d;

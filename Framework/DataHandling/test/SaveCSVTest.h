@@ -135,7 +135,7 @@ private:
       }
       ws->dataY(j).assign(nBins, double(j));
       ws->dataE(j).assign(nBins, sqrt(double(j)));
-      ws->setSharedDx(j, make_cow<HistogramDx>(nBins + 1, sqrt(double(j))));
+      ws->setBinEdgeStandardDeviations(j, nBins + 1, sqrt(double(j)));
     }
     return ws;
   }

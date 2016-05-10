@@ -282,8 +282,7 @@ void Q1D2::exec() {
     if (qResolutionOut.size() > 1) {
       qResolutionOut.rbegin()[0] = qResolutionOut.rbegin()[1];
     }
-    outputWS->setSharedDx(
-        0, make_cow<HistogramData::HistogramDx>(std::move(qResolutionOut)));
+    outputWS->setBinEdgeStandardDeviations(0, std::move(qResolutionOut));
   }
 
   bool doOutputParts = getProperty("OutputParts");

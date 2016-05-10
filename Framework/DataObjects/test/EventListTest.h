@@ -79,7 +79,7 @@ public:
     TS_ASSERT_EQUALS(other.getSpectrumNo(), el.getSpectrumNo());
     TS_ASSERT_EQUALS(other.getDetectorIDs(), el.getDetectorIDs());
     TS_ASSERT_EQUALS(other.readX(), el.readX());
-    TS_ASSERT_EQUALS(other.readDx(), el.readDx());
+    TS_ASSERT_EQUALS(other.sharedDx(), el.sharedDx());
   }
 
   //==================================================================================

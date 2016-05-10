@@ -298,8 +298,7 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
     localworkspace->dataY(0) = ydata;
     localworkspace->dataE(0) = errdata;
     if (hasXError) {
-      localworkspace->setSharedDx(0,
-                                  make_cow<HistogramData::HistogramDx>(xError));
+      localworkspace->setPointStandardDeviations(0, xError);
     }
     return localworkspace;
   } else {
@@ -315,8 +314,7 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
 
     if (hasXError) {
       for (int index = 0; index < pointsToRead; ++index) {
-        localworkspace->setSharedDx(
-            0, make_cow<HistogramData::HistogramDx>(1, xError[index]));
+        localworkspace->setPointStandardDeviations(0, 1, xError[index]);
       }
     }
     return localworkspace;

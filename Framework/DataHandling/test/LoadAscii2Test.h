@@ -395,7 +395,6 @@ private:
       Mantid::DataObjects::Workspace2D_sptr wsToSave =
           boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
               WorkspaceFactory::Instance().create("Workspace2D", 5, 4, 4));
-      auto dx = make_cow<HistogramDx>(4, 1.0);
       for (int i = 0; i < 5; i++) {
         std::vector<double> &X = wsToSave->dataX(i);
         std::vector<double> &Y = wsToSave->dataY(i);
@@ -406,7 +405,7 @@ private:
           E[j] = 1.;
         }
         if (cols == 4)
-          wsToSave->setSharedDx(i, dx);
+          wsToSave->setPointStandardDeviations(i, 4, 1.0);
       }
       const std::string name = "SaveAsciiWS";
       AnalysisDataService::Instance().add(name, wsToSave);

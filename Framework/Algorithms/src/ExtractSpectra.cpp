@@ -353,9 +353,8 @@ void ExtractSpectra::execEvent() {
       outEL.setX(XValues_new.cowData());
       if (hasDx) {
         auto &oldDx = m_inputWorkspace->dx(i);
-        auto DxValues_new = make_cow<HistogramData::HistogramDx>(
-            oldDx.begin() + m_minX, oldDx.begin() + m_maxX);
-        outEL.setSharedDx(DxValues_new);
+        outEL.setBinEdgeStandardDeviations(oldDx.begin() + m_minX,
+                                           oldDx.begin() + m_maxX);
       }
     }
 

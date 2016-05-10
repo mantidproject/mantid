@@ -68,7 +68,9 @@ public:
   Points points() const;
   PointStandardDeviations pointStandardDeviations() const;
   template <typename... T> void setBinEdges(T &&... data) & ;
+  template <typename... T> void setBinEdgeStandardDeviations(T &&... data) & ;
   template <typename... T> void setPoints(T &&... data) & ;
+  template <typename... T> void setPointStandardDeviations(T &&... data) & ;
 
   const HistogramX &x() const { return *m_x; }
   const HistogramDx &dx() const { return *m_dx; }
@@ -129,6 +131,21 @@ template <typename... T> void Histogram::setBinEdges(T &&... data) & {
   m_x = edges.cowData();
 }
 
+/// Sets the Histogram's bin edge standard deviations.
+template <typename... T>
+void Histogram::setBinEdgeStandardDeviations(T &&... data) & {
+  if(m_xMode != XMode::BinEdges)
+    throw std::logic_error("Histogram::setBinEdgeStandardDeviations: XMode is "
+                           "not BinEdges, cannot set bin-edge standard "
+                           "deviations.\n");
+  BinEdgeStandardDeviations edges(std::forward<T>(data)...);
+  if(edges.size() != m_x->size())
+    throw std::logic_error(
+        "Histogram::setBinEdgeStandardDeviations: size mismatch.\n");
+  // TODO check self assignment
+  m_dx = edges.cowData();
+}
+
 /** Sets the Histogram's points.
 
  Any arguments that can be used for constructing a Points object are allowed,
@@ -143,6 +160,21 @@ template <typename... T> void Histogram::setPoints(T &&... data) & {
     return;
   m_xMode = XMode::Points;
   m_x = points.cowData();
+}
+
+/// Sets the Histogram's point standard deviations.
+template <typename... T>
+void Histogram::setPointStandardDeviations(T &&... data) & {
+  if(m_xMode != XMode::Points)
+    throw std::logic_error("Histogram::setPointStandardDeviations: XMode is "
+                           "not Points, cannot set point standard "
+                           "deviations.\n");
+  PointStandardDeviations points(std::forward<T>(data)...);
+  if(points.size() != m_x->size())
+    throw std::logic_error(
+        "Histogram::setPointStandardDeviations: size mismatch.\n");
+  // TODO check self assignment
+  m_dx = points.cowData();
 }
 
 template <> inline bool Histogram::selfAssignment(const HistogramX &data) {

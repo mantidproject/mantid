@@ -200,9 +200,19 @@ public:
   template <typename... T> void setBinEdges(const size_t index, T &&... data) {
     getSpectrum(index)->setBinEdges(std::forward<T>(data)...);
   }
+  template <typename... T>
+  void setBinEdgeStandardDeviations(const size_t index, T &&... data) {
+    getSpectrum(index)->setBinEdgeStandardDeviations(std::forward<T>(data)...);
+  }
+
   template <typename... T> void setPoints(const size_t index, T &&... data) {
     getSpectrum(index)->setPoints(std::forward<T>(data)...);
   }
+  template <typename... T>
+  void setPointStandardDeviations(const size_t index, T &&... data) {
+    getSpectrum(index)->setPointStandardDeviations(std::forward<T>(data)...);
+  }
+
   const HistogramData::HistogramX &x(const size_t index) const {
     return getSpectrum(index)->x();
   }

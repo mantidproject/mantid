@@ -429,7 +429,7 @@ private:
     auto ws = createInputWorkspaceHisto();
     // Add the delta x values
     for (size_t j = 0; j < nSpec; ++j) {
-      ws->setSharedDx(j, make_cow<HistogramData::HistogramDx>(nBins + 1));
+      ws->setBinEdgeStandardDeviations(j, nBins + 1);
       for (size_t k = 0; k <= nBins; ++k) {
         // Add a constant error to all spectra
         ws->mutableDx(j)[k] = sqrt(double(k));
@@ -467,13 +467,13 @@ private:
   MatrixWorkspace_sptr createInputWorkspaceEventWithDx() const {
     auto ws = createInputWorkspaceEvent();
     // Add the delta x values
-    auto dXvals = make_cow<HistogramData::HistogramDx>(nBins + 1, 0.0);
-    auto &dX = dXvals.access();
+    auto dXvals = HistogramData::BinEdgeStandardDeviations(nBins + 1, 0.0);
+    auto &dX = dXvals.mutableData();
     for (size_t k = 0; k <= nBins; ++k) {
       dX[k] = sqrt(double(k)) + 1;
     }
     for (size_t j = 0; j < nSpec; ++j) {
-      ws->setSharedDx(j, dXvals);
+      ws->setBinEdgeStandardDeviations(j, dXvals);
     }
     return ws;
   }
