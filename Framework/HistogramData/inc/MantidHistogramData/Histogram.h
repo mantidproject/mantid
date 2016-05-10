@@ -4,8 +4,9 @@
 #include "MantidHistogramData/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidHistogramData/BinEdges.h"
+#include "MantidHistogramData/BinEdgeStandardDeviations.h"
 #include "MantidHistogramData/Points.h"
-#include "MantidHistogramData/HistogramDx.h"
+#include "MantidHistogramData/PointStandardDeviations.h"
 
 #include <vector>
 
@@ -63,7 +64,9 @@ public:
   XMode xMode() const noexcept { return m_xMode; }
 
   BinEdges binEdges() const;
+  BinEdgeStandardDeviations binEdgeStandardDeviations() const;
   Points points() const;
+  PointStandardDeviations pointStandardDeviations() const;
   template <typename... T> void setBinEdges(T &&... data) & ;
   template <typename... T> void setPoints(T &&... data) & ;
 

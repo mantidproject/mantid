@@ -28,6 +28,14 @@ BinEdges Histogram::binEdges() const {
     return BinEdges(Points(m_x));
 }
 
+/// Returns the standard deviations of the bin edges of the Histogram.
+BinEdgeStandardDeviations Histogram::binEdgeStandardDeviations() const {
+  if (xMode() == XMode::BinEdges)
+    return BinEdgeStandardDeviations(m_dx);
+  else
+    return BinEdgeStandardDeviations(PointStandardDeviations(m_dx));
+}
+
 /** Returns the points (or bin centers) of the Histogram.
 
   If the histogram stores bin edges, the points are computed based on them.
@@ -38,6 +46,14 @@ Points Histogram::points() const {
     return Points(BinEdges(m_x));
   else
     return Points(m_x);
+}
+
+/// Returns the standard deviations of the points (or bin centers) of the Histogram.
+PointStandardDeviations Histogram::pointStandardDeviations() const {
+  if (xMode() == XMode::BinEdges)
+    return PointStandardDeviations(BinEdgeStandardDeviations(m_dx));
+  else
+    return PointStandardDeviations(m_dx);
 }
 
 /** Sets the internal x-data pointer of the Histogram.

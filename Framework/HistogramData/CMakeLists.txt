@@ -1,11 +1,14 @@
 set ( SRC_FILES
-  src/BinEdges.cpp
-  src/Histogram.cpp
-  src/HistogramX.cpp
-  src/Points.cpp
-  )
+	src/BinEdgeStandardDeviations.cpp
+	src/BinEdges.cpp
+	src/Histogram.cpp
+	src/HistogramX.cpp
+	src/PointStandardDeviations.cpp
+	src/Points.cpp
+)
 
 set ( INC_FILES
+	inc/MantidHistogramData/BinEdgeStandardDeviations.h
 	inc/MantidHistogramData/BinEdges.h
 	inc/MantidHistogramData/FixedLengthVector.h
 	inc/MantidHistogramData/Histogram.h
@@ -13,12 +16,14 @@ set ( INC_FILES
 	inc/MantidHistogramData/HistogramX.h
 	inc/MantidHistogramData/Iterable.h
 	inc/MantidHistogramData/Offsetable.h
+	inc/MantidHistogramData/PointStandardDeviations.h
 	inc/MantidHistogramData/Points.h
 	inc/MantidHistogramData/Scalable.h
 	inc/MantidHistogramData/VectorOf.h
 )
 
 set ( TEST_FILES
+	BinEdgeStandardDeviationsTest.h
 	BinEdgesTest.h
 	FixedLengthVectorTest.h
 	HistogramDxTest.h
@@ -26,6 +31,7 @@ set ( TEST_FILES
 	HistogramXTest.h
 	IterableTest.h
 	OffsetableTest.h
+	PointStandardDeviationsTest.h
 	PointsTest.h
 	ScalableTest.h
 	VectorOfTest.h
