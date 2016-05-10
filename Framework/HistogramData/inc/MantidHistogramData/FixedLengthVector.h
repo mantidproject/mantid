@@ -115,6 +115,12 @@ public:
   auto end() const -> decltype(m_data.end()) { return m_data.end(); }
   auto cbegin() const -> decltype(m_data.cbegin()) { return m_data.cbegin(); }
   auto cend() const -> decltype(m_data.cend()) { return m_data.cend(); }
+  auto rbegin() -> decltype(m_data.rbegin()) { return m_data.rbegin(); }
+  auto rend() -> decltype(m_data.rend()) { return m_data.rend(); }
+  auto rbegin() const -> decltype(m_data.rbegin()) { return m_data.rbegin(); }
+  auto rend() const -> decltype(m_data.rend()) { return m_data.rend(); }
+  auto crbegin() const -> decltype(m_data.crbegin()) { return m_data.crbegin(); }
+  auto crend() const -> decltype(m_data.crend()) { return m_data.crend(); }
 };
 
 } // namespace detail
