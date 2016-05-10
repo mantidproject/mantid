@@ -78,9 +78,9 @@ void MuonNexusReader::readFromFile(const string &filename) {
   // find all of the NXdata in the entry
   std::vector<string> nxdataname;
   std::map<string, string> entries = handle.getEntries();
-  for (auto &entrie : entries) {
-    if (entrie.second == NXDATA) {
-      nxdataname.push_back(entrie.first);
+  for (auto &entry : entries) {
+    if (entry.second == NXDATA) {
+      nxdataname.push_back(entry.first);
     }
   }
   handle.openGroup(nxdataname.front(), NXDATA);

@@ -77,6 +77,96 @@ grouping will be loaded from the IDF instead. If this also fails, a dummy
 grouping will be created. In either case, a message will be displayed
 in the log to explain this.
 
+Details of data loaded
+######################
+
+Here are more details of data loaded from the Nexus file.
+Conventionally, the first NX\_ENTRY is called ``run`` and the first NX\_DATA under this is
+called ``histogram_data_1``, and these names are used below.
+
+
++------------------------------------+------------------------------------------------------+------------------------------------------------+
+| Description of Data                | Found in Nexus file                                  | Placed in Workspace (Workspace2D)              |
+|                                    |                                                      | or output                                      |
++====================================+======================================================+================================================+
+| Detector data                      | - Times (X): ``run/histogram_data_1/corrected_time`` | Histogram data of workspace                    |
+|                                    |                                                      |                                                |
+|                                    | - Counts (Y): ``run/histogram_data_1/counts``        |                                                |
+|                                    |   (2D array of counts in each time bin per           |                                                |
+|                                    |   detector)                                          |                                                |
+|                                    |                                                      |                                                |
+|                                    | - Errors: square root of counts                      |                                                |
++------------------------------------+------------------------------------------------------+------------------------------------------------+
+| Instrument                         | Name from ``run/instrument/name``                    | Workspace instrument                           |
+|                                    |                                                      |                                                |
+|                                    | Uses child algorithm LoadInstrument to load          | (as loaded by LoadInstrument from IDF)         |
+|                                    | the instrument of that name                          |                                                |
++------------------------------------+------------------------------------------------------+------------------------------------------------+
+| Title (optional)                   | ``run/title``                                        | Workspace title                                |
++------------------------------------+------------------------------------------------------+------------------------------------------------+
+| Comment (optional)                 | ``run/notes``                                        | Workspace comment                              |
++------------------------------------+------------------------------------------------------+------------------------------------------------+
+| Time zero (optional)               | ``run/histogram_data_1/time_zero``                   | *TimeZero* property                            |
++------------------------------------+------------------------------------------------------+------------------------------------------------+
+| First good data (optional)         | Calculated from first good bin and bin size.         | *FirstGoodData* property                       |
+|                                    |                                                      |                                                |
+|                                    | - First good bin: ``run/histogram_data_1/counts``    | (First good data - time zero) also goes in     | 
+|                                    |   (attribute ``first_good_bin``)                     | run object under the name ``FirstGoodData``    |
+|                                    |                                                      |                                                |
+|                                    | - Bin size: ``run/histogram_data_1/resolution``      |                                                |
++------------------------------------+------------------------------------------------------+------------------------------------------------+
+| Detector grouping table (optional) | ``run/histogram_data_1/grouping``                    | *DetectorGroupingTable* property               |
+|                                    |                                                      |                                                |
+|                                    | If not present, or invalid, loads from IDF.          |                                                |
+|                                    |                                                      |                                                |
+|                                    | If that also fails, creates dummy grouping           |                                                |
+|                                    | (all detectors in one group).                        |                                                |
++------------------------------------+------------------------------------------------------+------------------------------------------------+
+| Dead time table (optional)         | ``run/instrument/detector/deadtimes``                | *DeadTimeTable* property                       |
++------------------------------------+------------------------------------------------------+------------------------------------------------+
+| Main field direction (optional)    | ``run/instrument/detector/orientation``              | *MainFieldDirection* property                  |
+|                                    |                                                      |                                                |
+|                                    | Assumed to be longitudinal if not present            | Also in run object as ``main_field_direction`` |
++------------------------------------+------------------------------------------------------+------------------------------------------------+
+| Sample name                        | ``run/sample/name``                                  | Name of sample object                          |
++------------------------------------+------------------------------------------------------+------------------------------------------------+
+| Run                                | See below                                            | Run object (see below)                         |
++------------------------------------+------------------------------------------------------+------------------------------------------------+
+
+Run Object
+''''''''''
+Log values are loaded into the workspace run object as follows:
+
++-------------------------------------------+-------------------------------+
+| Nexus                                     | Workspace run object          |
++===========================================+===============================+
+| ``run/title``                             | ``run_title``                 |
++-------------------------------------------+-------------------------------+
+| (data)                                    | ``nspectra``                  | 
++-------------------------------------------+-------------------------------+
+| ``run/start_time``                        | ``run_start``                 |
++-------------------------------------------+-------------------------------+
+| ``run/stop_time``                         | ``run_end``                   |
++-------------------------------------------+-------------------------------+
+| ``run/duration``                          | ``dur``, ``dur_secs`` (same), |
+|                                           | ``durunits`` = 1 (seconds)    |
++-------------------------------------------+-------------------------------+
+| ``run/number``                            | ``run_number``                |
++-------------------------------------------+-------------------------------+
+| ``run/sample/temperature``                | ``sample_temp``               |
++-------------------------------------------+-------------------------------+
+| ``run/sample/magnetic_field``             | ``sample_magn_field``         |
++-------------------------------------------+-------------------------------+
+| - single-period:                          | ``goodfrm`` (number of good   |
+| ``run/instrument/beam/frames_good``       | frames)                       |
+|                                           |                               |
+| - multi-period:                           |                               | 
+| ``run/instrument/beam/frames_period_daq`` |                               |
++-------------------------------------------+-------------------------------+
+| Other NX\_LOG entries under ``run``       | time series (via LoadMuonLog) |
++-------------------------------------------+-------------------------------+
+
+
 ChildAlgorithms used
 ####################
 
