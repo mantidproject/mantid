@@ -302,7 +302,7 @@ private:
   /// Returns a list of all keys under a given root key
   void getKeysRecursive(const std::string &root,
                         std::vector<std::string> &allKeys) const;
-  ///Finds the lowest registered logging filter level
+  /// Finds the lowest registered logging filter level
   int ConfigServiceImpl::FindLowestFilterLevel() const;
 
   // Forward declaration of inner class

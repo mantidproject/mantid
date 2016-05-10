@@ -715,9 +715,8 @@ protected:
   std::string m_key;
   std::string m_preValue;
   std::string m_curValue;
-  void handleConfigChange(
-      const Poco::AutoPtr<Mantid::Kernel::ConfigServiceImpl::ValueChanged>
-          &pNf) {
+  void handleConfigChange(const Poco::AutoPtr<
+      Mantid::Kernel::ConfigServiceImpl::ValueChanged> &pNf) {
     m_valueChangedSent = true;
     m_key = pNf->key();
     m_preValue = pNf->preValue();
