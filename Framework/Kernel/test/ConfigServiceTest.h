@@ -184,16 +184,17 @@ public:
 
     configService.setFilterChannelLogLevel(m_FilterChannelName,
                                            Logger::Priority::PRIO_TRACE);
-    TSM_ASSERT("The log level be PRIO_TRACE",
+    TSM_ASSERT("The log level should be PRIO_TRACE",
                log1.getLevel() == Logger::Priority::PRIO_TRACE);
-    TSM_ASSERT("The log filter priority be PRIO_TRACE",
+    TSM_ASSERT("The log filter priority should be PRIO_TRACE",
                testFilterChannel->getPriority() ==
                    Logger::Priority::PRIO_TRACE);
 
     configService.setFilterChannelLogLevel(m_FilterChannelName, prevLogLevel);
-    TSM_ASSERT("The log level be " + prevLogLevel,
+    TSM_ASSERT("The log level should be " + std::to_string(prevLogLevel),
                log1.getLevel() == prevLogLevel);
-    TSM_ASSERT("The log filter priority be " + prevLogLevel,
+    TSM_ASSERT("The log filter priority should be " +
+                   std::to_string(prevLogLevel),
                testFilterChannel->getPriority() ==
                    static_cast<unsigned int>(prevLogLevel));
   }
