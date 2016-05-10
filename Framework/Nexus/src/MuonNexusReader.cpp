@@ -169,7 +169,7 @@ string MuonNexusReader::getInstrumentName() const {
 //            Zero or more NXlog entries which are of the form: <time>,<value>
 //            <time> is 32bit float time wrt start_time and <value> either 32bit
 //            float
-//            or sting.
+//            or string.
 //
 // @param filename ::  name of existing NeXus Muon file to read
 void MuonNexusReader::readLogData(const string &filename) {

@@ -31,8 +31,14 @@ Time series data
 ################
 
 The log data in the Nexus file (NX\_LOG sections) will be loaded as
-TimeSeriesProperty data within the workspace. Time is stored as seconds
-from the Unix epoch.
+TimeSeriesProperty data within the workspace. Time (stored as seconds
+from the Unix epoch in the Nexus file) is corrected relative to the start
+time found in ``run/start_time``.
+
+This time series data comprises various values logged by SECI and includes
+magnetic fields, temperatures, status codes, count rate and beam logs.
+
+See :ref:`algm-LoadMuonLog` for more details.
 
 Errors
 ######

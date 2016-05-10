@@ -12,6 +12,19 @@ Description
 The Algorithm is very similar to :ref:`algm-LoadLog`, except that the
 source of the data is a Muon Nexus file.
 
+LoadMuonLog loads all the time series logs in the top level of a muon Nexus file (version 1).
+These are NX\_LOG entries under the main NX\_ENTRY (usually called ``run``).
+Each entry is added to the given workspace's run object as a time series property.
+
+These logs are various time series properties added to the file by SECI.
+They include magnetic fields, temperatures, status codes, count rate and beam logs.
+(In version 2 muon Nexus files, these are incorporated into the Nexus definition instead).
+
+In the file, times are stored relative to the Unix epoch. The algorithm corrects these
+relative to the start time of the run (``run/start_time``) before adding the properties to the workspace.
+
+The algorithm also sets the workspace's sample name from the Nexus file (``run/sample/name``).
+
 Parent Algorithm
 ################
 
