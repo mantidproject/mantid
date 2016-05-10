@@ -353,6 +353,9 @@ private:
 
   /// true if the last calibration completed successfully
   bool m_calibFinishedOK;
+  /// path where the calibration has been produced (par/prm file)
+  std::string m_calibFullPath;
+
   /// true if the last focusing completed successfully
   bool m_focusFinishedOK;
   /// true if the last pre-processing/re-binning completed successfully

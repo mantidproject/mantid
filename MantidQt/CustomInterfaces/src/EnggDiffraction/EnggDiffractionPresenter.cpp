@@ -1299,16 +1299,14 @@ void EnggDiffractionPresenter::calibrationFinished() {
     const std::string vanNo = isValidRunNumber(m_view->newVanadiumNo());
 
     const std::string ceriaNo = isValidRunNumber(m_view->newCeriaNo());
-    const std::string outFilename =
-        buildCalibrateSuggestedFilename(vanNo, ceriaNo);
-    m_view->newCalibLoaded(vanNo, ceriaNo, outFilename);
+    m_view->newCalibLoaded(vanNo, ceriaNo, m_calibFullPath);
     g_log.notice()
         << "Cablibration finished and ready as 'current calibration'."
         << std::endl;
   }
   if (m_workerThread) {
     delete m_workerThread;
-    m_workerThread = NULL;
+    m_workerThread = nullptr;
   }
 }
 
@@ -1402,16 +1400,25 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   std::vector<std::string> bankNames;
 
   bool specNumUsed = specNos != "";
+  // TODO: this needs sanitizing, it should be simpler
   if (specNumUsed) {
     constexpr size_t bankNo1 = 1;
 
     difc.resize(bankNo1);
     tzero.resize(bankNo1);
-    const std::string customName = m_view->currentCalibCustomisedBankName();
-    if (customName.empty()) {
-      bankNames.emplace_back("cropped");
+    int selection = m_view->currentCropCalibBankName();
+    if (0 == selection) {
+      // user selected "custom" name
+      const std::string customName = m_view->currentCalibCustomisedBankName();
+      if (customName.empty()) {
+        bankNames.emplace_back("cropped");
+      } else {
+        bankNames.push_back(customName);
+      }
+    } else if (1 == selection) {
+      bankNames.push_back("North");
     } else {
-      bankNames.push_back(customName);
+      bankNames.push_back("South");
     }
   } else {
     constexpr size_t bankNo2 = 2;
@@ -1474,7 +1481,8 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   // 2nd: because runPythonCode does this by emitting a signal that goes to
   // MantidPlot, it has to be done in the view (which is a UserSubWindow).
   // First write the all banks parameters file
-  writeOutCalibFile(outFullPath.toString(), difc, tzero, bankNames);
+  m_calibFullPath = outFullPath.toString();
+  writeOutCalibFile(m_calibFullPath, difc, tzero, bankNames);
   // Then write one individual file per bank, using different templates and the
   // specific bank name as suffix
   for (size_t bankIdx = 0; bankIdx < difc.size(); ++bankIdx) {
@@ -1487,10 +1495,15 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
       templateFile = "template_ENGINX_241391_236516_South_bank.prm";
     }
 
-    writeOutCalibFile(bankOutputFullPath.toString(), {difc[bankIdx]},
-                      {tzero[bankIdx]}, {bankNames[bankIdx]}, templateFile);
+    const std::string outPathName = bankOutputFullPath.toString();
+    writeOutCalibFile(outPathName, {difc[bankIdx]}, {tzero[bankIdx]},
+                      {bankNames[bankIdx]}, templateFile);
+    if (1 == difc.size()) {
+      // it is a  single bank or cropped calibration, so take its specific name
+      m_calibFullPath = outPathName;
+    }
   }
-  g_log.notice() << "Calibration file written as " << outFullPath.toString()
+  g_log.notice() << "Calibration file written as " << m_calibFullPath
                  << std::endl;
 
   // plots the calibrated workspaces.

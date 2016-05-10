@@ -122,7 +122,7 @@ public:
   * selected spec will be passed as a bank for the calibrartion
   * process to be carried out
   *
-  * @return which format should to applied for plotting data
+  * @return Bank selection index: spectrum-numbers / north / south
   */
   virtual int currentCropCalibBankName() const = 0;
 
