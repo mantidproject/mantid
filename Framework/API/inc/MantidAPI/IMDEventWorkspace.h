@@ -59,6 +59,9 @@ public:
   /// @return true if the workspace is file-backed
   virtual bool isFileBacked() const = 0;
 
+  /// set filebacked on the contained box
+  virtual void setFileBacked() = 0;
+
   /// Split the top-level MDBox into a MDGridBox.
   virtual void splitBox() = 0;
 

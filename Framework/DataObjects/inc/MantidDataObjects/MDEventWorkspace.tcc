@@ -88,6 +88,12 @@ TMDE(MDEventWorkspace)::~MDEventWorkspace() { delete data; }
 TMDE(void MDEventWorkspace)::setFileBacked(const std::string & /*fileName*/) {
   throw Kernel::Exception::NotImplementedError(" Not yet implemented");
 }
+/*
+ * Set filebacked on the contained box
+ */
+TMDE(void MDEventWorkspace)::setFileBacked() {
+  this->getBox()->setFileBacked();
+}
 /** If the workspace was filebacked, this would clear file-backed information
  *from the workspace nodes and close the files responsible for file backing
  *
