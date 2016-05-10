@@ -68,8 +68,9 @@ void ImggFormatsConvertPresenter::processConvert() {
   const std::string outPS = m_view->outputPath();
   size_t depth = m_view->maxSearchDepth();
 
-  g_log.information() << "Converting images from path: " << inPS << " into "
-                      << outPS << ", with depth " << depth << std::endl;
+  g_log.information() << "Trying to convert images from path: " << inPS
+                      << " into " << outPS << ", with depth " << depth
+                      << std::endl;
 
   const std::string emptyMsg = "Please specify an input and and output path.";
   if (inPS.empty()) {
@@ -88,15 +89,17 @@ void ImggFormatsConvertPresenter::processConvert() {
         "Cannot read from input path",
         "Please check the input path given: " + inPS +
             ". It must be an existing directory and it must be readable.");
+    return;
   }
 
   Poco::File outFilePath(outPS);
-  if (!inFilePath.exists() || !inFilePath.isDirectory() ||
-      !inFilePath.canWrite()) {
+  if (!outFilePath.exists() || !outFilePath.isDirectory() ||
+      !outFilePath.canWrite()) {
     m_view->userError(
         "Cannot write into the output path",
-        "Please check the output path give: " + outPS +
+        "Please check the output path given: " + outPS +
             ". It must be an existing directory and it must be writeable.");
+    return;
   }
 
   const std::string inFormat = m_view->inputFormatName();
@@ -150,7 +153,11 @@ size_t ImggFormatsConvertPresenter::goThroughDirRecur(
       if (1 == depth)
         continue;
 
-      // append to go into subdirectory:
+      // skip the output directory if it is nested in the input path!
+      if (it.path().toString() == outFilePath.path())
+        continue;
+
+      // append, to delve into subdirectory:
       Poco::Path outPath(outFilePath.path());
       outPath.append(it.name());
       // create subdirectory in output path
@@ -231,11 +238,18 @@ void ImggFormatsConvertPresenter::convertToNXTomo(
 Mantid::API::MatrixWorkspace_sptr
 ImggFormatsConvertPresenter::loadFITS(const std::string &inputName) const {
 
+  const std::string wksGrpName = "__fits_img_to_convert";
+  if (Mantid::API::AnalysisDataService::Instance().doesExist(wksGrpName)) {
+    auto algDel =
+        Mantid::API::AlgorithmManager::Instance().create("DeleteWorkspace");
+    algDel->setChild(true);
+    algDel->setPropertyValue("Workspace", wksGrpName);
+    algDel->execute();
+  }
   // Just run LoadFITS
   auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadFITS");
   alg->initialize();
   alg->setProperty("Filename", inputName);
-  const std::string wksGrpName = "__fits_img_to_convert";
   alg->setProperty("OutputWorkspace", wksGrpName);
   alg->setProperty("LoadAsRectImg", true);
   alg->execute();
