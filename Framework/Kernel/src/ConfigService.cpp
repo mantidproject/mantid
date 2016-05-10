@@ -2023,7 +2023,7 @@ int ConfigServiceImpl::FindLowestFilterLevel() const {
   // Find the lowest level of all of the filter channels
   for (const auto filterChannelName : m_filterChannels) {
     try {
-      auto* channel = Poco::LoggingRegistry::defaultRegistry().channelForName(
+      auto *channel = Poco::LoggingRegistry::defaultRegistry().channelForName(
           filterChannelName);
       auto *filterChannel = dynamic_cast<Poco::FilterChannel *>(channel);
       if (filterChannel) {
