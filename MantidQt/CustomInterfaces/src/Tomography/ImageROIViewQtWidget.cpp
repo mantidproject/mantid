@@ -56,8 +56,8 @@ void ImageROIViewQtWidget::initLayout() {
   m_ui.splitter_main_horiz->setSizes(sizes);
 
   sizes.clear();
-  sizes.push_back(100);
   sizes.push_back(200);
+  sizes.push_back(50);
   // between color bar and coordinates panel
   m_ui.splitter_right_horiz->setSizes(sizes);
 
