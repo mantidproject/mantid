@@ -1948,8 +1948,12 @@ class CWSCDReductionControl(object):
 
                 # calculate wavelength
                 wavelength = get_hb3a_wavelength(m1)
-                q_range = 4.*math.pi*math.sin(two_theta/180.*math.pi*0.5)/wavelength
-                print '[DB-BAT] 2theta = %f, lambda = %f, Q = %f' % (two_theta, wavelength, q_range)
+                if wavelength is None:
+                    q_range = 0.
+                    print '[DB-BAT] 2theta = %f, lambda = None, Q = %f' % (two_theta, q_range)
+                else:
+                    q_range = 4.*math.pi*math.sin(two_theta/180.*math.pi*0.5)/wavelength
+                    print '[DB-BAT] 2theta = %f, lambda = %f, Q = %f' % (two_theta, wavelength, q_range)
 
                 # appending to list
                 scan_sum_list.append([max_count, scan_number, max_row, max_h, max_k, max_l,

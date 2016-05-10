@@ -74,6 +74,11 @@ class PeakProcessHelper(object):
             # get Pt. number
             pt_number = run_number % self._myScanNumber
             # get row number and then detector counts and monitor counts
+            if pt_number not in pt_spice_row_dict:
+                # skip
+                print '[Error] Scan %d Peak %d Pt %d cannot be located.' % (self._myScanNumber, i_peak, pt_number)
+                continue
+
             row_index = pt_spice_row_dict[pt_number]
             det_counts = spice_table_ws.cell(row_index, det_col_index)
             monitor_counts = spice_table_ws.cell(row_index, monitor_col_index)
