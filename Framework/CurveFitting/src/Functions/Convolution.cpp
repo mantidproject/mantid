@@ -97,7 +97,7 @@ void Convolution::function(const FunctionDomain &domain,
     values.zeroCalculated();
     return;
   }
-  const auto & d1d = dynamic_cast<const FunctionDomain1D &>(domain);
+  const auto &d1d = dynamic_cast<const FunctionDomain1D &>(domain);
   const size_t nData = domain.size();
   const double *xValues = d1d.getPointerAt(0);
   double dx =
@@ -125,7 +125,7 @@ void Convolution::function(const FunctionDomain &domain,
  */
 void Convolution::functionFFTMode(const FunctionDomain &domain,
                                   FunctionValues &values) const {
-  const auto & d1d = dynamic_cast<const FunctionDomain1D &>(domain);
+  const auto &d1d = dynamic_cast<const FunctionDomain1D &>(domain);
   size_t nData = domain.size();
   const double *xValues = d1d.getPointerAt(0);
   refreshResolution();
@@ -311,7 +311,7 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
  */
 void Convolution::functionDirectMode(const FunctionDomain &domain,
                                      FunctionValues &values) const {
-  const auto & d1d = dynamic_cast<const FunctionDomain1D &>(domain);
+  const auto &d1d = dynamic_cast<const FunctionDomain1D &>(domain);
   const size_t nData = domain.size();
   const double *xValues = d1d.getPointerAt(0);
   double dx =
