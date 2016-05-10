@@ -29,6 +29,91 @@ ImggFormatsConvertViewQtWidget::ImggFormatsConvertViewQtWidget(QWidget *parent)
   initLayout();
 }
 
+ImggFormatsConvertViewQtWidget::~ImggFormatsConvertViewQtWidget() {
+  m_presenter->notify(IImggFormatsConvertPresenter::ShutDown);
+}
+
+void ImggFormatsConvertViewQtWidget::initLayout() {
+  // setup container ui
+  m_ui.setupUi(this);
+
+  setup();
+  // presenter that knows how to handle a view like this. It should
+  // take care of all the logic. Note the view needs to now the
+  // concrete presenter here
+  m_presenter.reset(new ImggFormatsConvertPresenter(this));
+
+  // it will know what compute resources and tools we have available:
+  // This view doesn't even know the names of compute resources, etc.
+  m_presenter->notify(IImggFormatsConvertPresenter::Init);
+
+  // some combo boxes are re-populated by the init process, reload
+  // settings now:
+  readSettings();
+}
+
+void ImggFormatsConvertViewQtWidget::setup() {
+
+  connect(m_ui.pushButton_browse_input, SIGNAL(released()), this,
+          SLOT(browseImgInputConvertClicked()));
+
+  connect(m_ui.pushButton_browse_output, SIGNAL(released()), this,
+          SLOT(browseImgOutputConvertClicked()));
+
+  connect(m_ui.pushButton_convert, SIGNAL(released()), this,
+          SLOT(convertClicked()));
+}
+
+void ImggFormatsConvertViewQtWidget::readSettings() {
+  QSettings qs;
+  qs.beginGroup(QString::fromStdString(m_settingsGroup));
+
+  m_ui.comboBox_input_format->setCurrentIndex(
+      qs.value("input-format", 0).toInt());
+  m_ui.lineEdit_input_path->setText(qs.value("input-path", "").toString());
+
+  m_ui.comboBox_output_format->setCurrentIndex(
+      qs.value("output-format", 0).toInt());
+  m_ui.comboBox_bit_depth->setCurrentIndex(qs.value("bit-depth", 0).toInt());
+  m_ui.comboBox_compression->setCurrentIndex(
+      qs.value("compression", 0).toInt());
+  m_ui.spinBox_max_search_depth->setValue(
+      qs.value("max-search-depth", 0).toInt());
+  m_ui.lineEdit_output_path->setText(qs.value("output-path", "").toString());
+
+  restoreGeometry(qs.value("interface-win-geometry").toByteArray());
+  qs.endGroup();
+}
+
+void ImggFormatsConvertViewQtWidget::saveSettings() const {
+  QSettings qs;
+  qs.beginGroup(QString::fromStdString(m_settingsGroup));
+
+  qs.setValue("input-format", m_ui.comboBox_input_format->currentIndex());
+  qs.setValue("input-path", m_ui.lineEdit_input_path->text());
+
+  qs.setValue("output-format", m_ui.comboBox_output_format->currentIndex());
+  qs.setValue("bit-depth", m_ui.comboBox_bit_depth->currentIndex());
+  qs.setValue("compression", m_ui.comboBox_compression->currentIndex());
+  qs.setValue("max-search-depth", m_ui.spinBox_max_search_depth->value());
+  qs.setValue("output-path", m_ui.lineEdit_output_path->text());
+
+  qs.setValue("interface-win-geometry", saveGeometry());
+  qs.endGroup();
+}
+
+void ImggFormatsConvertViewQtWidget::browseImgInputConvertClicked() {
+  grabUserBrowseDir(m_ui.lineEdit_input_path);
+}
+
+void ImggFormatsConvertViewQtWidget::browseImgOutputConvertClicked() {
+  grabUserBrowseDir(m_ui.lineEdit_output_path);
+}
+
+void ImggFormatsConvertViewQtWidget::convertClicked() {
+  m_presenter->notify(IImggFormatsConvertPresenter::Convert);
+}
+
 void ImggFormatsConvertViewQtWidget::userWarning(
     const std::string &warn, const std::string &description) {
   QMessageBox::warning(this, QString::fromStdString(warn),
@@ -124,27 +209,38 @@ void ImggFormatsConvertViewQtWidget::convert(
 void ImggFormatsConvertViewQtWidget::writeImg(
     MatrixWorkspace_sptr inWks, const std::string &outputName,
     const std::string &outFormat) const {
-
+  if (!inWks)
+    return;
   size_t width = inWks->getNumberHistograms();
   if (0 == width)
     return;
   size_t height = inWks->blocksize();
+
   QImage img(QSize(static_cast<int>(width), static_cast<int>(height)),
              QImage::Format_Indexed8);
 
   int tableSize = 256;
-  QVector<QRgb> grayscale;
-  grayscale.resize(tableSize);
+  QVector<QRgb> grayscale(tableSize);
   for (int i = 0; i < grayscale.size(); i++) {
-    grayscale.push_back(qRgb(i, i, i));
+    int level = i; qGray(i, i, i);
+    grayscale[i] = qRgb(level, level, level);
   }
-  const double scaleFactor = std::numeric_limits<unsigned char>::max();
+  img.setColorTable(grayscale);
+
+  // only 16 to 8 bits color map supported with current libraries
+  const double scaleFactor = std::numeric_limits<unsigned short int>::max() /
+                             std::numeric_limits<unsigned char>::max();
   for (int yi = 0; yi < static_cast<int>(width); ++yi) {
     const auto &row = inWks->readY(yi);
     for (int xi = 0; xi < static_cast<int>(width); ++xi) {
-      const int scaled = static_cast<int>(row[xi] / scaleFactor);
-      QRgb vRgb = qRgb(scaled, scaled, scaled);
-      img.setPixel(xi, yi, vRgb);
+      int scaled = static_cast<int>(row[xi] / scaleFactor);
+      // Images not from IMAT, just crop. This needs much improvement when
+      // we have proper Load/SaveImage algorithms
+      if (scaled > 255)
+        scaled = 255;
+      if (scaled < 0)
+        scaled = 0;
+      img.setPixel(xi, yi, scaled);
     }
   }
 
@@ -222,85 +318,6 @@ ImggFormatsConvertViewQtWidget::loadImgFile(const std::string &inputName,
 
 size_t ImggFormatsConvertViewQtWidget::maxSearchDepth() const {
   return static_cast<size_t>(m_ui.spinBox_max_search_depth->value());
-}
-
-void ImggFormatsConvertViewQtWidget::initLayout() {
-  // setup container ui
-  m_ui.setupUi(this);
-
-  readSettings();
-
-  setup();
-  // presenter that knows how to handle a view like this. It should
-  // take care of all the logic. Note the view needs to now the
-  // concrete presenter here
-  m_presenter.reset(new ImggFormatsConvertPresenter(this));
-
-  // it will know what compute resources and tools we have available:
-  // This view doesn't even know the names of compute resources, etc.
-  m_presenter->notify(IImggFormatsConvertPresenter::Init);
-}
-
-void ImggFormatsConvertViewQtWidget::setup() {
-
-  connect(m_ui.pushButton_browse_input, SIGNAL(released()), this,
-          SLOT(browseImgInputConvertClicked()));
-
-  connect(m_ui.pushButton_browse_output, SIGNAL(released()), this,
-          SLOT(browseImgOutputConvertClicked()));
-
-  connect(m_ui.pushButton_convert, SIGNAL(released()), this,
-          SLOT(convertClicked()));
-}
-
-void ImggFormatsConvertViewQtWidget::readSettings() {
-  QSettings qs;
-  qs.beginGroup(QString::fromStdString(m_settingsGroup));
-
-  m_ui.comboBox_input_format->setCurrentIndex(
-      qs.value("input-format", 0).toInt());
-  m_ui.lineEdit_input_path->setText(qs.value("input-path", "").toString());
-
-  m_ui.comboBox_output_format->setCurrentIndex(
-      qs.value("output-format", 0).toInt());
-  m_ui.comboBox_bit_depth->setCurrentIndex(qs.value("bit-depth", 0).toInt());
-  m_ui.comboBox_compression->setCurrentIndex(
-      qs.value("compression", 0).toInt());
-  m_ui.spinBox_max_search_depth->setValue(
-      qs.value("max-search-depth", 0).toInt());
-  m_ui.lineEdit_output_path->setText(qs.value("output-path", "").toString());
-
-  restoreGeometry(qs.value("interface-win-geometry").toByteArray());
-  qs.endGroup();
-}
-
-void ImggFormatsConvertViewQtWidget::saveSettings() const {
-  QSettings qs;
-  qs.beginGroup(QString::fromStdString(m_settingsGroup));
-
-  qs.setValue("input-format", m_ui.comboBox_input_format->currentIndex());
-  qs.setValue("input-path", m_ui.lineEdit_input_path->text());
-
-  qs.setValue("output-format", m_ui.comboBox_output_format->currentIndex());
-  qs.setValue("bit-depth", m_ui.comboBox_bit_depth->currentIndex());
-  qs.setValue("compression", m_ui.comboBox_compression->currentIndex());
-  qs.setValue("max-search-depth", m_ui.spinBox_max_search_depth->value());
-  qs.setValue("output-path", m_ui.lineEdit_output_path->text());
-
-  qs.setValue("interface-win-geometry", saveGeometry());
-  qs.endGroup();
-}
-
-void ImggFormatsConvertViewQtWidget::browseImgInputConvertClicked() {
-  grabUserBrowseDir(m_ui.lineEdit_input_path);
-}
-
-void ImggFormatsConvertViewQtWidget::browseImgOutputConvertClicked() {
-  grabUserBrowseDir(m_ui.lineEdit_output_path);
-}
-
-void ImggFormatsConvertViewQtWidget::convertClicked() {
-  m_presenter->notify(IImggFormatsConvertPresenter::Convert);
 }
 
 std::string ImggFormatsConvertViewQtWidget::grabUserBrowseDir(

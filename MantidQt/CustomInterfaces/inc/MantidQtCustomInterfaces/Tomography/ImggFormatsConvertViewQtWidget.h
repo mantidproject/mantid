@@ -50,7 +50,7 @@ class MANTIDQT_CUSTOMINTERFACES_DLL ImggFormatsConvertViewQtWidget
 public:
   ImggFormatsConvertViewQtWidget(QWidget *parent = 0);
 
-  ~ImggFormatsConvertViewQtWidget() override{};
+  ~ImggFormatsConvertViewQtWidget() override;
 
   void userWarning(const std::string &err,
                    const std::string &description) override;

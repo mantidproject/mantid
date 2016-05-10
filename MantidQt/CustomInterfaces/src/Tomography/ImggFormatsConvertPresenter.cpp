@@ -2,6 +2,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtCustomInterfaces/Tomography/IImggFormatsConvertView.h"
 #include "MantidQtCustomInterfaces/Tomography/ImggFormats.h"
 
@@ -102,7 +103,17 @@ void ImggFormatsConvertPresenter::processConvert() {
   const std::string outFormat = m_view->outputFormatName();
 
   try {
-    goThroughDirRecur(inPS, inFormat, outPS, outFormat, depth);
+    size_t count = goThroughDirRecur(inPS, inFormat, outPS, outFormat, depth);
+    if (count > 0) {
+      g_log.notice() << "Finished converstion of images from path: " << inPS
+                     << " into " << outPS << ", with depth " << depth
+                     << ". Converted " << count << " images from format "
+                     << inFormat << " to format " << outFormat << std::endl;
+    } else {
+      g_log.notice() << "No images could be found in input path: " << inPS
+                     << " with format " << inFormat << ". 0 images converted."
+                     << std::endl;
+    }
   } catch (std::runtime_error &rexc) {
     m_view->userError("Error while converting files",
                       "There was an error in the conversion process: " +
@@ -122,13 +133,16 @@ void ImggFormatsConvertPresenter::processShutDown() { m_view->saveSettings(); }
  * @param outFilePath output path to write converted files
  * @param outFormat format for the output images
  * @param depth search depth remaining (for recursive calls).
+ *
+ * @return count of images processed/converted
  */
-void ImggFormatsConvertPresenter::goThroughDirRecur(
+size_t ImggFormatsConvertPresenter::goThroughDirRecur(
     const Poco::File &inFilePath, const std::string &inFormat,
     const Poco::File &outFilePath, const std::string &outFormat, size_t depth) {
 
   const std::string outExt = ImggFormats::fileExtension(outFormat);
 
+  size_t count = 0;
   Poco::DirectoryIterator end;
   for (Poco::DirectoryIterator it(inFilePath); it != end; ++it) {
     if (it->isDirectory()) {
@@ -139,7 +153,11 @@ void ImggFormatsConvertPresenter::goThroughDirRecur(
       // append to go into subdirectory:
       Poco::Path outPath(outFilePath.path());
       outPath.append(it.name());
-      goThroughDirRecur(it.path(), inFormat, outPath, outFormat, depth - 1);
+      // create subdirectory in output path
+      Poco::File(outPath).createDirectory();
+
+      count +=
+          goThroughDirRecur(it.path(), inFormat, outPath, outFormat, depth - 1);
     } else if (it->isFile()) {
 
       const std::string fname = it.name();
@@ -149,9 +167,11 @@ void ImggFormatsConvertPresenter::goThroughDirRecur(
         path.append(it.name());
         const std::string outFilename = path.toString() + "." + outExt;
         convert(it.path().toString(), inFormat, outFilename, outFormat);
+        ++count;
       }
     }
   }
+  return count;
 }
 
 /**
@@ -210,12 +230,13 @@ void ImggFormatsConvertPresenter::convertToNXTomo(
 
 Mantid::API::MatrixWorkspace_sptr
 ImggFormatsConvertPresenter::loadFITS(const std::string &inputName) const {
+
   // Just run LoadFITS
   auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadFITS");
   alg->initialize();
   alg->setProperty("Filename", inputName);
-  const std::string wksName = "__fits_img_to_convert";
-  alg->setProperty("OutputWorkspace", wksName);
+  const std::string wksGrpName = "__fits_img_to_convert";
+  alg->setProperty("OutputWorkspace", wksGrpName);
   alg->setProperty("LoadAsRectImg", true);
   alg->execute();
 
@@ -225,9 +246,13 @@ ImggFormatsConvertPresenter::loadFITS(const std::string &inputName) const {
                              inputName + "' in FITS format.");
   }
 
-  Mantid::API::MatrixWorkspace_sptr imgWorkspace =
+  // What should be alg->getProperty("OutputWorkspace"); but this is a group
+  Mantid::API::WorkspaceGroup_sptr grp =
       Mantid::API::AnalysisDataService::Instance()
-          .retrieveWS<Mantid::API::MatrixWorkspace>(wksName);
+          .retrieveWS<Mantid::API::WorkspaceGroup>(wksGrpName);
+  Mantid::API::MatrixWorkspace_sptr imgWorkspace =
+      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          grp->getItem(grp->size() - 1));
 
   return imgWorkspace;
 }

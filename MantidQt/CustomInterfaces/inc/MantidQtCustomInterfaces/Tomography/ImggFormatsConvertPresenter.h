@@ -67,10 +67,10 @@ protected:
   void processShutDown();
 
 private:
-  void goThroughDirRecur(const Poco::File &inFilePath,
-                         const std::string &inFormat,
-                         const Poco::File &outFilePath,
-                         const std::string &outExt, size_t depth);
+  size_t goThroughDirRecur(const Poco::File &inFilePath,
+                           const std::string &inFormat,
+                           const Poco::File &outFilePath,
+                           const std::string &outExt, size_t depth);
 
   void convert(const std::string &inputName, const std::string &inFormat,
                const std::string &outputName,
