@@ -145,7 +145,8 @@ ConfigServiceImpl::ConfigServiceImpl()
       m_user_properties_file_name("Mantid.user.properties"),
 #endif
       m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(),
-      m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false) {
+      m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false),
+      m_filterChannels() {
   // getting at system details
   m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
   m_pConf = nullptr;
@@ -236,7 +237,8 @@ ConfigServiceImpl::ConfigServiceImpl()
                       << " revision " << MantidVersion::revision() << std::endl;
   g_log.information() << "running on " << getComputerName() << " starting "
                       << DateAndTime::getCurrentTime().toFormattedString(
-                             "%Y-%m-%dT%H:%MZ") << "\n";
+                             "%Y-%m-%dT%H:%MZ")
+                      << "\n";
   g_log.information() << "Properties file(s) loaded: " << propertiesFilesList
                       << std::endl;
 #ifndef MPI_BUILD // There is no logging to file by default in MPI build
@@ -362,6 +364,21 @@ bool ConfigServiceImpl::readFile(const std::string &filename,
   return good;
 }
 
+/** Registers additional logging filter channels
+* @param filterChannelName The name to refer to the filter channel, this should
+* be unique
+* @param pChannel a pointer to the channel to be registered, if blank, then the
+* channel must already be registered with the logging registry in Poco
+*/
+void ConfigServiceImpl::registerLoggingFilterChannel(
+    const std::string &filterChannelName, Poco::Channel *pChannel) {
+  m_filterChannels.push_back(filterChannelName);
+  if (pChannel) {
+    Poco::LoggingRegistry::defaultRegistry().registerChannel(filterChannelName,
+                                                             pChannel);
+  }
+}
+
 /** Configures the Poco logging and starts it up
  *
  */
@@ -457,6 +474,10 @@ void ConfigServiceImpl::configureLogging() {
     std::cerr << "Trouble configuring the logging framework " << e.what()
               << std::endl;
   }
+
+  // register the filter channels - the order here is important
+  registerLoggingFilterChannel("fileFilterChannel", nullptr);
+  registerLoggingFilterChannel("consoleFilterChannel", nullptr);
 }
 
 /**
@@ -624,18 +645,22 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
         std::fstream::out);
 
     filestr << "# This file can be used to override any properties for this "
-               "installation." << std::endl;
+               "installation."
+            << std::endl;
     filestr << "# Any properties found in this file will override any that are "
-               "found in the Mantid.Properties file" << std::endl;
+               "found in the Mantid.Properties file"
+            << std::endl;
     filestr << "# As this file will not be replaced with futher installations "
-               "of Mantid it is a safe place to put " << std::endl;
+               "of Mantid it is a safe place to put "
+            << std::endl;
     filestr << "# properties that suit your particular installation."
             << std::endl;
     filestr << "#" << std::endl;
     filestr << "# See here for a list of possible options:" << std::endl;
     filestr << "# "
                "http://www.mantidproject.org/"
-               "Properties_File#Mantid.User.Properties" << std::endl;
+               "Properties_File#Mantid.User.Properties"
+            << std::endl;
     filestr << std::endl;
     filestr << "##" << std::endl;
     filestr << "## GENERAL" << std::endl;
@@ -668,18 +693,21 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << std::endl;
     filestr << "## Sets the Q.convention" << std::endl;
     filestr << "## Set to Crystallography for kf-ki instead of default "
-               "Inelastic which is ki-kf" << std::endl;
+               "Inelastic which is ki-kf"
+            << std::endl;
     filestr << "#Q.convention=Crystallography" << std::endl;
     filestr << "##" << std::endl;
     filestr << "## DIRECTORIES" << std::endl;
     filestr << "##" << std::endl;
     filestr << std::endl;
     filestr << "## Sets a list of directories (separated by semi colons) to "
-               "search for data" << std::endl;
+               "search for data"
+            << std::endl;
     filestr << "#datasearch.directories=../data;../isis/data" << std::endl;
     filestr << std::endl;
     filestr << "## Set a list (separated by semi colons) of directories to "
-               "look for additional Python scripts" << std::endl;
+               "look for additional Python scripts"
+            << std::endl;
     filestr << "#pythonscripts.directories=../scripts;../docs/MyScripts"
             << std::endl;
     filestr << std::endl;
@@ -720,7 +748,8 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << "#MantidOptions.ReusePlotInstances=Off" << std::endl;
     filestr << std::endl;
     filestr << "## Uncomment to disable use of OpenGL to render unwrapped "
-               "instrument views" << std::endl;
+               "instrument views"
+            << std::endl;
     filestr << "#MantidOptions.InstrumentView.UseOpenGL=Off" << std::endl;
 
     filestr.close();
@@ -1952,13 +1981,13 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
 * @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
 */
 void ConfigServiceImpl::setFileLogLevel(int logLevel) {
-  setFilterChannelLogLevel("fileFilterChannel", logLevel);
+  setFilterChannelLogLevel(m_filterChannels[0], logLevel);
 }
 /** Sets the log level priority for the Console log channel
 * @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
 */
 void ConfigServiceImpl::setConsoleLogLevel(int logLevel) {
-  setFilterChannelLogLevel("consoleFilterChannel", logLevel);
+  setFilterChannelLogLevel(m_filterChannels[1], logLevel);
 }
 
 /** Sets the Log level for a filter channel
@@ -1981,10 +2010,11 @@ void ConfigServiceImpl::setFilterChannelLogLevel(
   auto *filterChannel = dynamic_cast<Poco::FilterChannel *>(channel);
   if (filterChannel) {
     filterChannel->setPriority(logLevel);
+    int lowestLogLevel = FindLowestFilterLevel();
     // set root level if required
     int rootLevel = Poco::Logger::root().getLevel();
-    if (rootLevel < logLevel) {
-      Mantid::Kernel::Logger::setLevelForAll(logLevel);
+    if (rootLevel != lowestLogLevel) {
+      Mantid::Kernel::Logger::setLevelForAll(lowestLogLevel);
     }
     g_log.log(filterChannelName + " log channel set to " +
                   Logger::PriorityNames[logLevel] + " priority",
@@ -1995,6 +2025,31 @@ void ConfigServiceImpl::setFilterChannelLogLevel(
   }
 }
 
+/** Finds the lowest Log level for all registered filter channels
+*/
+int ConfigServiceImpl::FindLowestFilterLevel() const {
+  int lowestPriority = Logger::Priority::PRIO_FATAL;
+  // Find the lowest level of all of the filter channels
+  for (const auto filterChannelName : m_filterChannels) {
+    Poco::Channel *channel = nullptr;
+    try {
+      channel = Poco::LoggingRegistry::defaultRegistry().channelForName(
+          filterChannelName);
+      auto *filterChannel = dynamic_cast<Poco::FilterChannel *>(channel);
+      if (filterChannel) {
+        int filterPriority = filterChannel->getPriority();
+        if (filterPriority > lowestPriority) {
+          lowestPriority = filterPriority;
+        }
+      }
+    } catch (Poco::NotFoundException &) {
+      g_log.warning(filterChannelName +
+                    " registered log filter channel not found");
+    }
+  }
+
+  return lowestPriority;
+}
 /// \cond TEMPLATE
 template DLLExport int ConfigServiceImpl::getValue(const std::string &,
                                                    double &);
