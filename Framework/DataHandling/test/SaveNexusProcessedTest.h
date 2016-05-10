@@ -35,6 +35,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::NeXus;
+using Mantid::HistogramData::HistogramDx;
 
 class SaveNexusProcessedTest : public CxxTest::TestSuite {
 public:
@@ -810,12 +811,15 @@ private:
     localWorkspace2D->getAxis(0)->unit() =
         UnitFactory::Instance().create("TOF");
     double d = 0.0;
+    if (useXErrors) {
+      localWorkspace2D->setSharedDx(0, make_cow<HistogramDx>(10));
+    }
     for (int i = 0; i < 10; ++i, d += 0.1) {
       localWorkspace2D->dataX(0)[i] = d;
       localWorkspace2D->dataY(0)[i] = d;
       localWorkspace2D->dataE(0)[i] = d;
       if (useXErrors) {
-        localWorkspace2D->dataDx(0)[i] = d;
+        localWorkspace2D->mutableDx(0)[i] = d;
       }
     }
 

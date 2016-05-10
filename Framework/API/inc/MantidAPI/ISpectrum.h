@@ -119,7 +119,13 @@ public:
   HistogramData::Histogram histogram() const { return histogramRef(); }
 
   HistogramData::BinEdges binEdges() const { return histogramRef().binEdges(); }
+  HistogramData::BinEdgeStandardDeviations binEdgeStandardDeviations() const {
+    return histogramRef().binEdgeStandardDeviations();
+  }
   HistogramData::Points points() const { return histogramRef().binEdges(); }
+  HistogramData::PointStandardDeviations pointStandardDeviations() const {
+    return histogramRef().pointStandardDeviations();
+  }
   template <typename... T> void setBinEdges(T &&... data) {
     mutableHistogramRef().setBinEdges(std::forward<T>(data)...);
   }

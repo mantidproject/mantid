@@ -200,7 +200,7 @@ void SaveAscii::exec() {
     file.precision(prec);
 
   Progress progress(this, 0, 1, nBins);
-  auto pointDeltas = ws->histogram(0).pointStandardDeviations();
+  auto pointDeltas = ws->pointStandardDeviations(0);
   for (int bin = 0; bin < nBins; bin++) {
     if (isHistogram) // bin centres
     {

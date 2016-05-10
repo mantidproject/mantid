@@ -282,8 +282,8 @@ void Q1D2::exec() {
     if (qResolutionOut.size() > 1) {
       qResolutionOut.rbegin()[0] = qResolutionOut.rbegin()[1];
     }
-    outputWS->histogram(0).setSharedDx(
-        make_cow<HistogramData::HistogramDx>(std::move(qResolutionOut)));
+    outputWS->setSharedDx(
+        0, make_cow<HistogramData::HistogramDx>(std::move(qResolutionOut)));
   }
 
   bool doOutputParts = getProperty("OutputParts");
@@ -292,7 +292,7 @@ void Q1D2::exec() {
         WorkspaceFactory::Instance().create(outputWS);
     ws_sumOfCounts->dataX(0) = outputWS->dataX(0);
     ws_sumOfCounts->dataY(0) = outputWS->dataY(0);
-    ws_sumOfCounts->histogram(0).setSharedDx(outputWS->histogram(0).sharedDx());
+    ws_sumOfCounts->setSharedDx(0, outputWS->sharedDx(0));
     for (size_t i = 0; i < outputWS->dataE(0).size(); i++) {
       ws_sumOfCounts->dataE(0)[i] = sqrt(outputWS->dataE(0)[i]);
     }
@@ -300,8 +300,7 @@ void Q1D2::exec() {
     MatrixWorkspace_sptr ws_sumOfNormFactors =
         WorkspaceFactory::Instance().create(outputWS);
     ws_sumOfNormFactors->dataX(0) = outputWS->dataX(0);
-    ws_sumOfNormFactors->histogram(0)
-        .setSharedDx(outputWS->histogram(0).sharedDx());
+    ws_sumOfNormFactors->setSharedDx(0, outputWS->sharedDx(0));
     for (size_t i = 0; i < ws_sumOfNormFactors->dataY(0).size(); i++) {
       ws_sumOfNormFactors->dataY(0)[i] = normSum[i];
       ws_sumOfNormFactors->dataE(0)[i] = sqrt(normError2[i]);

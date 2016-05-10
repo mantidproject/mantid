@@ -35,6 +35,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using Mantid::detid_t;
+using Mantid::HistogramData::HistogramDx;
 
 // Note that this suite tests an old version of Nexus processed files that we
 // continue to support.
@@ -1215,8 +1216,8 @@ private:
     inputWs->dataY(0) = y1;
     inputWs->dataY(1) = y2;
     if (useXErrors) {
-      inputWs->dataDx(0) = dx1;
-      inputWs->dataDx(1) = dx2;
+      inputWs->setSharedDx(0, make_cow<HistogramDx>(dx1));
+      inputWs->setSharedDx(1, make_cow<HistogramDx>(dx2));
     }
     if (numericAxis) {
       auto numericAxis = new NumericAxis(2);
@@ -1259,8 +1260,8 @@ private:
     TS_ASSERT_EQUALS(inputWs->readE(1), outputWs->readE(1));
     if (useXErrors) {
       TSM_ASSERT("Should have an x error", outputWs->hasDx(0));
-      TS_ASSERT_EQUALS(inputWs->readDx(0), outputWs->readDx(0));
-      TS_ASSERT_EQUALS(inputWs->readDx(1), outputWs->readDx(1));
+      TS_ASSERT_EQUALS(inputWs->dx(0).rawData(), outputWs->dx(0).rawData());
+      TS_ASSERT_EQUALS(inputWs->dx(1).rawData(), outputWs->dx(1).rawData());
     }
 
     // Axes
@@ -1297,8 +1298,8 @@ private:
     inputWs->dataY(0) = y1;
     inputWs->dataY(1) = y2;
     if (useXErrors) {
-      inputWs->dataDx(0) = dx1;
-      inputWs->dataDx(1) = dx2;
+      inputWs->setSharedDx(0, make_cow<HistogramDx>(dx1));
+      inputWs->setSharedDx(1, make_cow<HistogramDx>(dx2));
     }
 
     // Save workspace
@@ -1333,8 +1334,8 @@ private:
     TS_ASSERT_EQUALS(inputWs->readE(1), outputWs->readE(1));
     if (useXErrors) {
       TSM_ASSERT("Should have an x error", outputWs->hasDx(0));
-      TS_ASSERT_EQUALS(inputWs->readDx(0), outputWs->readDx(0));
-      TS_ASSERT_EQUALS(inputWs->readDx(1), outputWs->readDx(1));
+      TS_ASSERT_EQUALS(inputWs->dx(0).rawData(), outputWs->dx(0).rawData());
+      TS_ASSERT_EQUALS(inputWs->dx(1).rawData(), outputWs->dx(1).rawData());
     }
 
     // Remove workspace and saved nexus file

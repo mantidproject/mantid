@@ -18,6 +18,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using Mantid::HistogramData::HistogramDx;
 
 class LoadAscii2Test : public CxxTest::TestSuite {
 public:
@@ -394,19 +395,18 @@ private:
       Mantid::DataObjects::Workspace2D_sptr wsToSave =
           boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
               WorkspaceFactory::Instance().create("Workspace2D", 5, 4, 4));
+      auto dx = make_cow<HistogramDx>(4, 1.0);
       for (int i = 0; i < 5; i++) {
         std::vector<double> &X = wsToSave->dataX(i);
         std::vector<double> &Y = wsToSave->dataY(i);
         std::vector<double> &E = wsToSave->dataE(i);
-        std::vector<double> &DX = wsToSave->dataDx(i);
         for (int j = 0; j < 4; j++) {
           X[j] = 1.5 * j / 0.9;
           Y[j] = (i + 1) * (2. + 4. * X[j]);
           E[j] = 1.;
-          if (cols == 4) {
-            DX[j] = 1.;
-          }
         }
+        if (cols == 4)
+          wsToSave->setSharedDx(i, dx);
       }
       const std::string name = "SaveAsciiWS";
       AnalysisDataService::Instance().add(name, wsToSave);
@@ -526,13 +526,13 @@ private:
       TS_ASSERT_DELTA(outputWS->readE(3)[3], 0, 1e-6);
     }
     if (cols == 4) {
-      TS_ASSERT_DELTA(outputWS->readDx(0)[0], 1, 1e-6);
+      TS_ASSERT_DELTA(outputWS->dx(0)[0], 1, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readDx(0)[1], 1, 1e-6);
+      TS_ASSERT_DELTA(outputWS->dx(0)[1], 1, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readDx(1)[2], 1, 1e-6);
+      TS_ASSERT_DELTA(outputWS->dx(1)[2], 1, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readDx(3)[3], 1, 1e-6);
+      TS_ASSERT_DELTA(outputWS->dx(3)[3], 1, 1e-6);
     }
   }
   std::string m_filename;

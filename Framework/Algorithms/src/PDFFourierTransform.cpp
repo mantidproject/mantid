@@ -155,8 +155,8 @@ void PDFFourierTransform::exec() {
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   MantidVec inputQ = inputWS->dataX(0);     //  x for input
   HistogramData::HistogramDx inputDQ(inputQ.size(), 0.0); // dx for input
-  if (inputWS->histogram(0).sharedDx())
-    inputDQ = inputWS->histogram(0).dx();
+  if (inputWS->sharedDx(0))
+    inputDQ = inputWS->dx(0);
   MantidVec inputFOfQ = inputWS->dataY(0);  //  y for input
   MantidVec inputDfOfQ = inputWS->dataE(0); // dy for input
 

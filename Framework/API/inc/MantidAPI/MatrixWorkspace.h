@@ -186,8 +186,16 @@ public:
   HistogramData::BinEdges binEdges(const size_t index) const {
     return getSpectrum(index)->binEdges();
   }
+  HistogramData::BinEdgeStandardDeviations
+  binEdgeStandardDeviations(const size_t index) const {
+    return getSpectrum(index)->binEdgeStandardDeviations();
+  }
   HistogramData::Points points(const size_t index) const {
     return getSpectrum(index)->binEdges();
+  }
+  HistogramData::PointStandardDeviations
+  pointStandardDeviations(const size_t index) const {
+    return getSpectrum(index)->pointStandardDeviations();
   }
   template <typename... T> void setBinEdges(const size_t index, T &&... data) {
     getSpectrum(index)->setBinEdges(std::forward<T>(data)...);

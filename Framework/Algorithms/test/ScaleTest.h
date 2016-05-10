@@ -161,7 +161,7 @@ private:
     TS_ASSERT(outWS.get());
     TSM_ASSERT("Output should contain x errors", outWS->hasDx(0));
 
-    auto &dx = outWS->histogram(0).dx();
+    auto &dx = outWS->dx(0);
     double expectedDx = xError;
     for (size_t spectra = 0; spectra < outWS->getNumberHistograms();
          ++spectra) {

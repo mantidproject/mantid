@@ -14,6 +14,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using Mantid::HistogramData::HistogramDx;
 
 // Notice, the SaveCSV algorithm currently does not create
 // an output workspace and therefore no tests related to the
@@ -134,7 +135,7 @@ private:
       }
       ws->dataY(j).assign(nBins, double(j));
       ws->dataE(j).assign(nBins, sqrt(double(j)));
-      ws->dataDx(j).assign(nBins + 1, sqrt(double(j)));
+      ws->setSharedDx(j, make_cow<HistogramDx>(nBins + 1, sqrt(double(j))));
     }
     return ws;
   }

@@ -243,8 +243,7 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
     if (haveErrors)
       localWorkspace->dataE(i) = spectra[i].dataE();
     if (haveXErrors)
-      localWorkspace->histogram(i)
-          .setSharedDx(spectra[i].histogram().sharedDx());
+      localWorkspace->setSharedDx(i, spectra[i].sharedDx());
     // Just have spectrum number start at 1 and count up
     localWorkspace->getSpectrum(i)
         ->setSpectrumNo(static_cast<specnum_t>(i) + 1);

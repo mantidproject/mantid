@@ -212,11 +212,9 @@ void SaveCSV::saveXerrors(std::ofstream &stream,
   Progress p(this, 0.0, 1.0, numberOfHist);
   stream << "\nXERRORS\n";
   for (size_t i = 0; i < numberOfHist; i++) {
-    const MantidVec &dXvalue = workspace->dataDx(i);
-
     stream << i;
 
-    for (double j : dXvalue) {
+    for (double j : workspace->dx(i)) {
       stream << std::setw(15) << j << m_separator;
     }
     stream << m_lineSeparator;

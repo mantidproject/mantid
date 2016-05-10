@@ -296,7 +296,7 @@ void SaveAscii2::writeSpectra(const std::set<int>::const_iterator &spectraItr,
   }
   file << std::endl;
 
-  auto pointDeltas = m_ws->histogram(0).pointStandardDeviations();
+  auto pointDeltas = m_ws->pointStandardDeviations(0);
   for (int bin = 0; bin < m_nBins; bin++) {
     if (!m_isCommonBins) // checking for ragged workspace
     {
@@ -343,7 +343,7 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
   }
   file << std::endl;
 
-  auto pointDeltas = m_ws->histogram(0).pointStandardDeviations();
+  auto pointDeltas = m_ws->pointStandardDeviations(0);
   for (int bin = 0; bin < m_nBins; bin++) {
     if (m_isHistogram & m_isCommonBins) // bin centres,
     {
