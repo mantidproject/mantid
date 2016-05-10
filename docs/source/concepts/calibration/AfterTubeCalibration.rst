@@ -3,7 +3,7 @@
 After Tube Calibration
 ======================
 
-After calibration, on option is to save the workspace to a :ref:`Nexus file <Nexus file>`.
+After calibration, there is an option is to save the workspace to a :ref:`Nexus file <Nexus file>`.
 This saved file will include the calibration (in fact any modification
 done to the instrument). Reloading this file in Mantid will recreate the
 workspace which was saved.
