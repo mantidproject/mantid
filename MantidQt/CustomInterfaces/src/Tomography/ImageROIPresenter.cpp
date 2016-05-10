@@ -225,6 +225,9 @@ void ImageROIPresenter::processNewStack(bool singleImg) {
         ads.remove(g_wsgDarksName);
       }
     } catch (std::runtime_error &rexc) {
+      g_log.warning("There was a problem while trying to remove apparently "
+                    "existing workspaces. Error details: " +
+                    std::string(rexc.what()));
     }
 
     loadFITSImage(m_stackPath, g_wsgName);
