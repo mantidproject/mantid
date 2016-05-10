@@ -16,24 +16,24 @@ Parent Algorithm
 ################
 
 LoadMuonLog is also a child algorithm of
-:ref:`algm-LoadMuonNexus`, i.e. it gets called whenever
-LoadMuonNexus is executed.
+:ref:`algm-LoadMuonNexus-v1`, i.e. it gets called whenever
+LoadMuonNexus (version 1) is executed.
 
 Usage
 -----
 
 .. include:: ../usagedata-note.txt
 
-**Example - Loading Log Data into Dummy a Workspace:**
+**Example - Loading log data into a dummy workspace:**
 
 .. testcode:: Ex
 
    # Create a dummy workspace and load in the log data from a file.
-   fake_emu_ws = CreateSampleWorkspace()
-   LoadMuonLog(fake_emu_ws, "MUSR00015189.nxs")
+   fake_musr_ws = CreateSampleWorkspace()
+   LoadMuonLog(fake_musr_ws, "MUSR00015189.nxs")
 
    # Extract a property from the log.
-   time_series_prop = fake_emu_ws.run().getLogData("BEAMLOG_FREQ")
+   time_series_prop = fake_musr_ws.run().getLogData("BEAMLOG_FREQ")
 
    print "BEAMLOG_FREQ is a TimeSeriesProperty with %i entries." % time_series_prop.size()
    print "The first entry is %f." % time_series_prop.firstValue()
