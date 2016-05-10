@@ -209,7 +209,8 @@ void LoadAscii2::writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace,
     }
     if (m_baseCols == 4) {
       // DX in file
-      localWorkspace->dataDx(i) = m_spectra[i].readDx();
+      localWorkspace->histogram(i)
+          .setSharedDx(m_spectra[i].histogram().sharedDx());
     }
     if (m_spectrumIDcount != 0) {
       localWorkspace->getSpectrum(i)

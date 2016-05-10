@@ -71,8 +71,9 @@ void Histogram::setSharedX(const Kernel::cow_ptr<HistogramX> &X) & {
 
   Throws if the size does not match the current size. */
 void Histogram::setSharedDx(const Kernel::cow_ptr<HistogramDx> &Dx) & {
+  // Setting a NULL Dx is fine, this disables x errors.
   // Note that we compare with m_x -- m_dx might be NULL.
-  if (m_x->size() != Dx->size())
+  if (Dx && m_x->size() != Dx->size())
     throw std::logic_error("Histogram::setSharedDx: size mismatch\n");
   m_dx = Dx;
 }

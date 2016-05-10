@@ -200,6 +200,7 @@ void SaveAscii::exec() {
     file.precision(prec);
 
   Progress progress(this, 0, 1, nBins);
+  auto pointDeltas = ws->histogram(0).pointStandardDeviations();
   for (int bin = 0; bin < nBins; bin++) {
     if (isHistogram) // bin centres
     {
@@ -225,15 +226,8 @@ void SaveAscii::exec() {
       }
 
     if (write_dx) {
-      if (isHistogram) // bin centres
-      {
-        file << sep;
-        file << (ws->readDx(0)[bin] + ws->readDx(0)[bin + 1]) / 2;
-      } else // data points
-      {
-        file << sep;
-        file << ws->readDx(0)[bin];
-      }
+      file << sep;
+      file << pointDeltas[bin];
     }
     file << std::endl;
     progress.report();

@@ -415,19 +415,19 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData) {
   std::string sasIBlockData;
   std::string sasIHistData;
   for (size_t i = 0; i < m_workspace->getNumberHistograms(); ++i) {
-    const MantidVec &xdata = m_workspace->readX(i);
+    auto intensities = m_workspace->histogram(i).points();
+    auto intensityDeltas = m_workspace->histogram(i).pointStandardDeviations();
+    if(!intensityDeltas)
+      intensityDeltas =
+          HistogramData::PointStandardDeviations(intensities.size(), 0.0);
     const MantidVec &ydata = m_workspace->readY(i);
     const MantidVec &edata = m_workspace->readE(i);
-    const MantidVec &dxdata = m_workspace->readDx(i);
-    const bool isHistogram = m_workspace->isHistogramData();
     for (size_t j = 0; j < m_workspace->blocksize(); ++j) {
       // x data is the QData in xml.If histogramdata take the mean
-      double intensity = isHistogram ? (xdata[j] + xdata[j + 1]) / 2 : xdata[j];
-      double dx = isHistogram ? (dxdata[j] + dxdata[j + 1]) / 2 : dxdata[j];
       std::stringstream x;
-      x << intensity;
+      x << intensities[j];
       std::stringstream dx_str;
-      dx_str << dx;
+      dx_str << intensityDeltas[j];
       sasIData = "\n\t\t\t<Idata><Q unit=\"1/A\">";
       sasIData += x.str();
       sasIData += "</Q>";

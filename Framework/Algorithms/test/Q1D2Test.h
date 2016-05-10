@@ -441,7 +441,7 @@ public:
     // into this
     // bin. We make sure that there is at least one bin with a count
     // of sqrt(1 + 0.5^2/12) ~ 1.01036297108
-    auto &dataDX = result->dataDx(0);
+    auto &dataDX = result->histogram(0).dx();
     unsigned int counter = 0;
     for (auto it = dataDX.begin(); it != dataDX.end(); ++it) {
 
@@ -491,12 +491,7 @@ public:
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
 
     // Make sure that the Q resolution is not calculated
-    auto &dataDX = result->dataDx(0);
-    for (auto it = dataDX.begin(); it != dataDX.end(); ++it) {
-      TSM_ASSERT(
-          "All Dx values should be 0, as we didn't use the QResolution ooption",
-          (*it == 0.0));
-    }
+    TS_ASSERT(!result->histogram(0).sharedDx());
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
 

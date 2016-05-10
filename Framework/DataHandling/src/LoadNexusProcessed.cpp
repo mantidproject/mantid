@@ -1900,8 +1900,9 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       farea_end += nchannels;
     }
     if (hasXErrors) {
-      MantidVec &DX = local_workspace->dataDx(hist);
-      DX.assign(xErrors_start, xErrors_end);
+      local_workspace->histogram(hist)
+          .setSharedDx(Kernel::make_cow<HistogramData::HistogramDx>(
+              xErrors_start, xErrors_end));
       xErrors_start += nxbins;
       xErrors_end += nxbins;
     }
@@ -1977,8 +1978,9 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       farea_end += nchannels;
     }
     if (hasXErrors) {
-      MantidVec &DX = local_workspace->dataDx(wsIndex);
-      DX.assign(xErrors_start, xErrors_end);
+      local_workspace->histogram(wsIndex)
+          .setSharedDx(Kernel::make_cow<HistogramData::HistogramDx>(
+              xErrors_start, xErrors_end));
       xErrors_start += nxbins;
       xErrors_end += nxbins;
     }
@@ -2059,8 +2061,9 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       farea_end += nchannels;
     }
     if (hasXErrors) {
-      MantidVec &DX = local_workspace->dataDx(wsIndex);
-      DX.assign(xErrors_start, xErrors_end);
+      local_workspace->histogram(wsIndex)
+          .setSharedDx(Kernel::make_cow<HistogramData::HistogramDx>(
+              xErrors_start, xErrors_end));
       xErrors_start += nxbins;
       xErrors_end += nxbins;
     }

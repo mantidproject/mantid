@@ -429,9 +429,11 @@ private:
     auto ws = createInputWorkspaceHisto();
     // Add the delta x values
     for (size_t j = 0; j < nSpec; ++j) {
+      ws->histogram(j)
+          .setSharedDx(make_cow<HistogramData::HistogramDx>(nBins + 1));
       for (size_t k = 0; k <= nBins; ++k) {
         // Add a constant error to all spectra
-        ws->dataDx(j)[k] = sqrt(double(k));
+        ws->histogram(j).mutableDx()[k] = sqrt(double(k));
       }
     }
     return ws;
@@ -630,21 +632,21 @@ private:
     void testDx(const MatrixWorkspace &ws) const {
       if (wsType == "histo-dx") {
         TS_ASSERT(ws.hasDx(0));
-        TS_ASSERT_EQUALS(ws.readDx(0)[0], 0.0);
-        TS_ASSERT_EQUALS(ws.readDx(0)[1], 1.0);
-        TS_ASSERT_EQUALS(ws.readDx(0)[2], M_SQRT2);
-        TS_ASSERT_EQUALS(ws.readDx(0)[3], sqrt(3.0));
+        TS_ASSERT_EQUALS(ws.histogram(0).dx()[0], 0.0);
+        TS_ASSERT_EQUALS(ws.histogram(0).dx()[1], 1.0);
+        TS_ASSERT_EQUALS(ws.histogram(0).dx()[2], M_SQRT2);
+        TS_ASSERT_EQUALS(ws.histogram(0).dx()[3], sqrt(3.0));
         // Check that the length of x and dx is the same
         auto x = ws.readX(0);
-        auto dX = ws.readDx(0);
+        auto dX = ws.histogram(0).dx();
         TS_ASSERT_EQUALS(x.size(), dX.size());
 
       } else if (wsType == "event-dx") {
         TS_ASSERT(ws.hasDx(0));
-        TS_ASSERT_EQUALS(ws.readDx(0)[0], 0.0 + 1.0);
-        TS_ASSERT_EQUALS(ws.readDx(0)[1], 1.0 + 1.0);
-        TS_ASSERT_EQUALS(ws.readDx(0)[2], M_SQRT2 + 1.0);
-        TS_ASSERT_EQUALS(ws.readDx(0)[3], sqrt(3.0) + 1.0);
+        TS_ASSERT_EQUALS(ws.histogram(0).dx()[0], 0.0 + 1.0);
+        TS_ASSERT_EQUALS(ws.histogram(0).dx()[1], 1.0 + 1.0);
+        TS_ASSERT_EQUALS(ws.histogram(0).dx()[2], M_SQRT2 + 1.0);
+        TS_ASSERT_EQUALS(ws.histogram(0).dx()[3], sqrt(3.0) + 1.0);
       } else {
         TSM_ASSERT("Should never reach here", false);
       }
