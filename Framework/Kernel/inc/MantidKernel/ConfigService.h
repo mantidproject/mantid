@@ -303,7 +303,7 @@ private:
   void getKeysRecursive(const std::string &root,
                         std::vector<std::string> &allKeys) const;
   /// Finds the lowest registered logging filter level
-  int ConfigServiceImpl::FindLowestFilterLevel() const;
+  int FindLowestFilterLevel() const;
 
   // Forward declaration of inner class
   template <class T> class WrappedObject;
