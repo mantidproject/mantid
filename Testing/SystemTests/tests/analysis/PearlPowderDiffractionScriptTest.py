@@ -20,13 +20,13 @@ class PearlPowderDiffractionScriptTest(stresstesting.MantidStressTest):
         filenames = []
 
         # existing calibration files
-        filenames.extend(('PEARL/Calibration/pearl_group_12_1_TT70.cal',
-                          'PEARL/Calibration/pearl_offset_15_3.cal',
-                          'PEARL/Calibration/van_spline_TT70_cycle_15_4.nxs',
-                          'PEARL/Attentuation/PRL112_DC25_10MM_FF.OUT'))
+        filenames.extend(('PEARL/Focus_Test/Calibration/pearl_group_12_1_TT70.cal',
+                          'PEARL/Focus_Test/Calibration/pearl_offset_15_3.cal',
+                          'PEARL/Focus_Test/Calibration/van_spline_TT70_cycle_15_4.nxs',
+                          'PEARL/Focus_Test/Attentuation/PRL112_DC25_10MM_FF.OUT'))
         # raw files / run numbers 92476-92479
         for i in range(6, 10):
-            filenames.append('PEARL/RawFiles/PEARL0009247' + str(i))
+            filenames.append('PEARL/Focus_Test/RawFiles/PEARL0009247' + str(i))
 
         return filenames
 
@@ -35,7 +35,7 @@ class PearlPowderDiffractionScriptTest(stresstesting.MantidStressTest):
             for files in filenames:
                 path = os.path.join(directories[0], files)
                 os.remove(path)
-            cali_path = os.path.join(directories[0], "PEARL/DataOut")
+            cali_path = os.path.join(directories[0], "PEARL/Focus_Test/DataOut")
             shutil.rmtree(cali_path)
         except OSError, ose:
             print 'could not delete the generated file: ', ose.filename
@@ -50,18 +50,18 @@ class PearlPowderDiffractionScriptTest(stresstesting.MantidStressTest):
         # DIRS[0] is the system test directory
 
         # setting raw files directory
-        raw_path = os.path.join(DIRS[0], "PEARL/RawFiles/")
+        raw_path = os.path.join(DIRS[0], "PEARL/Focus_Test/RawFiles/")
         pearl_routines.pearl_set_currentdatadir(raw_path)
         pearl_routines.PEARL_setdatadir(raw_path)
 
         # setting calibration files directory
-        cali_path = os.path.join(DIRS[0], "PEARL/Calibration/")
+        cali_path = os.path.join(DIRS[0], "PEARL/Focus_Test/Calibration/")
         pearl_routines.pearl_initial_dir(cali_path)
-        atten_path = os.path.join(DIRS[0], "PEARL/Attentuation/PRL112_DC25_10MM_FF.OUT")
+        atten_path = os.path.join(DIRS[0], "PEARL/Focus_Test/Attentuation/PRL112_DC25_10MM_FF.OUT")
         pearl_routines.PEARL_setattenfile(atten_path)
 
         # setting data output folder
-        data_out_path = os.path.join(DIRS[0], "PEARL/DataOut/")
+        data_out_path = os.path.join(DIRS[0], "PEARL/Focus_Test/DataOut/")
         pearl_routines.pearl_set_userdataoutput_dir(data_out_path)
 
         # run the script by calling PEARL_focus function
@@ -85,10 +85,10 @@ class PearlPowderDiffractionScriptTest(stresstesting.MantidStressTest):
 
     def cleanup(self):
         filenames = []
-        filenames.extend(("PEARL/DataOut/PRL92476_92479.nxs",
-                          "PEARL/DataOut/PRL92476_92479_d_xye-0.dat",
-                          "PEARL/DataOut/PRL92476_92479_tof_xye-0.dat",
-                          "PEARL/DataOut/PRL92476_92479-0.gss"))
+        filenames.extend(("PEARL/Focus_Test/DataOut/PRL92476_92479.nxs",
+                          "PEARL/Focus_Test/DataOut/PRL92476_92479_d_xye-0.dat",
+                          "PEARL/Focus_Test/DataOut/PRL92476_92479_tof_xye-0.dat",
+                          "PEARL/Focus_Test/DataOut/PRL92476_92479-0.gss"))
         self._clean_up_files(filenames, DIRS)
 
 
@@ -170,15 +170,15 @@ class LoadTests(unittest.TestCase):
         files_data = []
 
         wsname = "GSSFile"
-        gss_file = os.path.join(DIRS[0], "PEARL/DataOut/PRL92476_92479-0.gss")
+        gss_file = os.path.join(DIRS[0], "PEARL/Focus_Test/DataOut/PRL92476_92479-0.gss")
         files_data.append(LoadGSS(Filename=gss_file, OutputWorkspace=wsname))
 
         xye_dSpacing_ws = "xye_dSpacing"
-        dSpacing_file = os.path.join(DIRS[0], "PEARL/DataOut/PRL92476_92479_d_xye-0.dat")
+        dSpacing_file = os.path.join(DIRS[0], "PEARL/Focus_Test/DataOut/PRL92476_92479_d_xye-0.dat")
         files_data.append(Load(Filename=dSpacing_file, OutputWorkspace=xye_dSpacing_ws))
 
         xye_ToF_ws = "xye_ToF"
-        ToF_file = os.path.join(DIRS[0], "PEARL/DataOut/PRL92476_92479_tof_xye-0.dat")
+        ToF_file = os.path.join(DIRS[0], "PEARL/Focus_Test/DataOut/PRL92476_92479_tof_xye-0.dat")
         files_data.append(Load(Filename=ToF_file, OutputWorkspace=xye_ToF_ws))
 
         for data in files_data:
