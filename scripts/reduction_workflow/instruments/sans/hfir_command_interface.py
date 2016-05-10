@@ -312,12 +312,20 @@ def IQxQy(nbins=100):
 def NoIQxQy():
     ReductionSingleton().reduction_properties["Do2DReduction"] = False
 
-def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0):
+def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0, component_name=None):
+    '''
+    Maks edges of a component_name
+    By default is the main detector for both GPSANS and BioSans
+    '''
     ReductionSingleton().reduction_properties["MaskedEdges"] = [nx_low, nx_high,
                                                                 ny_low, ny_high]
+    ReductionSingleton().reduction_properties["MaskedComponent"] = component_name
 
 def MaskComponent(component_name):
-    ReductionSingleton().reduction_properties["MaskedComponent"] = component_name
+    '''
+    Masks a full component by name
+    '''
+    ReductionSingleton().reduction_properties["MaskedFullComponent"] = component_name
     
 def MaskRectangle(x_min, x_max, y_min, y_max):
     masked_pixels = []

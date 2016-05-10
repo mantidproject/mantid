@@ -38,7 +38,10 @@ class SANSMask(PythonAlgorithm):
                                               direction=Direction.Input),
                              "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high")
         
-        self.declareProperty("ComponentName","",doc="Component Name to mask. Consult the IDF!")
+        self.declareProperty("MaskedComponent","",doc="Component Name to mask Edges. Consult the IDF!")
+        
+        self.declareProperty("MaskedFullComponent","",doc="Component Name to mask ALL of it. Consult the IDF!")
+        
         
         sides = [ "None", "Front", "Back"]
         self.declareProperty("MaskedSide", "None",
@@ -60,11 +63,12 @@ class SANSMask(PythonAlgorithm):
 
         # Mask edges
         edges = self.getProperty("MaskedEdges").value
+        component_name = self.getProperty("MaskedComponent").value
         if len(edges)==4:
             if facility.upper() == "HFIR":
                 masked_pixels = hfir_instrument.get_masked_pixels(edges[0], edges[1],
                                                                   edges[2], edges[3],
-                                                                  workspace)
+                                                                  workspace, component_name)
             else:
                 masked_pixels = sns_instrument.get_masked_pixels(edges[0], edges[1],
                                                                  edges[2], edges[3],
@@ -76,10 +80,10 @@ class SANSMask(PythonAlgorithm):
         if len(masked_dets)>0:
             api.MaskDetectors(Workspace=workspace, DetectorList=masked_dets)
 
-        # Mask component
-        component_name = self.getProperty("ComponentName").value
+        # Mask component: Note that edges cannot be masked
+        component_name = self.getProperty("MaskedFullComponent").value
         if component_name:
-            Logger("SANSMask").debug("Masking component named %s." % component_name)
+            Logger("SANSMask").debug("Masking FULL component named %s." % component_name)
             self._mask_component(workspace, component_name)
         
         self.setProperty("OutputMessage", "Mask applied")
@@ -88,7 +92,8 @@ class SANSMask(PythonAlgorithm):
         if len(pixel_list)>0:
             # Transform the list of pixels into a list of Mantid detector IDs
             if facility.upper() == "HFIR":
-                masked_detectors = hfir_instrument.get_detector_from_pixel(pixel_list)
+                masked_detectors = pixel_list
+                #masked_detectors = hfir_instrument.get_detector_from_pixel(pixel_list)
             else:
                 masked_detectors = sns_instrument.get_detector_from_pixel(pixel_list, workspace)
             # Mask the pixels by passing the list of IDs

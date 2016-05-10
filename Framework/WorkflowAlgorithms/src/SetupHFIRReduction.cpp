@@ -504,6 +504,7 @@ void SetupHFIRReduction::init() {
   declareProperty(
       make_unique<ArrayProperty<int>>("MaskedEdges"),
       "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
+  declareProperty("MaskedComponent", "", "Component Name to mask the edges according to the IDF file.");
   std::vector<std::string> maskOptions;
   maskOptions.emplace_back("None");
   maskOptions.emplace_back("Front");
@@ -511,12 +512,14 @@ void SetupHFIRReduction::init() {
   declareProperty("MaskedSide", "None",
                   boost::make_shared<StringListValidator>(maskOptions),
                   "Mask one side of the detector");
-  declareProperty("MaskedComponent", "", "Component Name to mask according to the IDF file.");
+  declareProperty("MaskedFullComponent", "", "Component Name to mask the edges according to the IDF file.");
 
   setPropertyGroup("MaskedDetectorList", mask_grp);
   setPropertyGroup("MaskedEdges", mask_grp);
-  setPropertyGroup("MaskedSide", mask_grp);
   setPropertyGroup("MaskedComponent", mask_grp);
+  setPropertyGroup("MaskedSide", mask_grp);
+  setPropertyGroup("MaskedFullComponent", mask_grp);
+
 
   // Absolute scale
   std::string abs_scale_grp = "Absolute Scale";
@@ -776,7 +779,7 @@ void SetupHFIRReduction::exec() {
   const std::string maskEdges = getPropertyValue("MaskedEdges");
   const std::string maskSide = getProperty("MaskedSide");
   const std::string maskComponent = getPropertyValue("MaskedComponent");
-
+  const std::string maskFullComponent = getPropertyValue("MaskedFullComponent");
 
   IAlgorithm_sptr maskAlg = createChildAlgorithm("SANSMask");
   // The following is broken, try PropertyValue
@@ -784,7 +787,9 @@ void SetupHFIRReduction::exec() {
   maskAlg->setPropertyValue("MaskedDetectorList", maskDetList);
   maskAlg->setPropertyValue("MaskedEdges", maskEdges);
   maskAlg->setProperty("MaskedSide", maskSide);
-  maskAlg->setProperty("ComponentName", maskComponent);
+  maskAlg->setProperty("MaskedComponent", maskComponent);
+  maskAlg->setProperty("MaskedFullComponent", maskFullComponent);
+
   auto maskAlgProp = make_unique<AlgorithmProperty>("MaskAlgorithm");
   maskAlgProp->setValue(maskAlg->toString());
   reductionManager->declareProperty(std::move(maskAlgProp));

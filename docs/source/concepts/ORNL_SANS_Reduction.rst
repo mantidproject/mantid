@@ -187,8 +187,9 @@ Dark current subtraction
 Pixel masking
 ^^^^^^^^^^^^^
 
-``Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0)``
+``Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0, component_name=None)``
     A band of pixels on each side of the detector is masked according to the input parameters.
+    By default this is done only for the main detector (See IDF tag 'detector-name'). For Biosans one can specify 'component_name="wing_detector"'.
 
 ``MaskRectangle(x_min, x_max, y_min, y_max)``
     Masks a rectangular region on the detector defined by the given pixel numbers.
