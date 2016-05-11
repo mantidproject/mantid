@@ -167,6 +167,9 @@ ShapeFactory::createShape(Poco::XML::Element *pElem) {
             idMatching[idFromUser] =
                 parseSegmentedCylinder(pE, primitives, l_id);
             numPrimitives++;
+          } else if (!primitiveName.compare("hollow-cylinder")) {
+            idMatching[idFromUser] = parseHollowCylinder(pE, primitives, l_id);
+            numPrimitives++;
           } else if (!primitiveName.compare("cuboid")) {
             lastElement = pE;
             idMatching[idFromUser] = parseCuboid(pE, primitives, l_id);
@@ -483,6 +486,73 @@ std::string ShapeFactory::parseSegmentedCylinder(
 
   std::stringstream retAlgebraMatch;
   retAlgebraMatch << "(-" << l_id << " ";
+  l_id++;
+
+  // add top plane
+  auto pPlaneTop = boost::make_shared<Plane>();
+  // to get point in top plane
+  V3D pointInPlane = centreOfBottomBase + (normVec * height);
+  pPlaneTop->setPlane(pointInPlane, normVec);
+  prim[l_id] = pPlaneTop;
+  retAlgebraMatch << "-" << l_id << " ";
+  l_id++;
+
+  // add bottom plane
+  auto pPlaneBottom = boost::make_shared<Plane>();
+  pPlaneBottom->setPlane(centreOfBottomBase, normVec);
+  prim[l_id] = pPlaneBottom;
+  retAlgebraMatch << "" << l_id << ")";
+  l_id++;
+
+  return retAlgebraMatch.str();
+}
+
+/** Parse XML 'hollow-cylinder' element
+ *
+ *  @param pElem :: XML 'hollow-cylinder' element from instrument def. file
+ *  @param prim :: To add shapes to
+ *  @param l_id :: When shapes added to the map prim l_id is the continuous
+ *incremented index
+ *  @return A Mantid algebra string for this shape
+ *
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
+ *instrument file
+ */
+
+std::string ShapeFactory::parseHollowCylinder(
+    Poco::XML::Element *pElem, std::map<int, boost::shared_ptr<Surface>> &prim,
+    int &l_id) {
+  Element *pElemBase = getShapeElement(pElem, "centre-of-bottom-base");
+  Element *pElemAxis = getShapeElement(pElem, "axis");
+  Element *pElemInnerRadius = getShapeElement(pElem, "inner-radius");
+  Element *pElemOuterRadius = getShapeElement(pElem, "outer-radius");
+  Element *pElemHeight = getShapeElement(pElem, "height");
+
+  V3D normVec = parsePosition(pElemAxis);
+  normVec.normalize();
+  const double innerRadius = getDoubleAttribute(pElemInnerRadius, "val");
+  const double outerRadius = getDoubleAttribute(pElemOuterRadius, "val");
+  const double height = getDoubleAttribute(pElemHeight, "val");
+  V3D centreOfBottomBase = parsePosition(pElemBase);
+
+  // add outer infinite cylinder surface
+  auto outerCylinder = boost::make_shared<Cylinder>();
+  outerCylinder->setCentre(centreOfBottomBase + normVec * (0.5 * height));
+  outerCylinder->setNorm(normVec);
+  outerCylinder->setRadius(outerRadius);
+  prim[l_id] = outerCylinder;
+
+  std::stringstream retAlgebraMatch;
+  retAlgebraMatch << "(-" << l_id << " ";
+  l_id++;
+
+  // add inner infinite cylinder surface
+  auto innerCylinder = boost::make_shared<Cylinder>();
+  innerCylinder->setCentre(centreOfBottomBase + normVec * (0.5 * height));
+  innerCylinder->setNorm(normVec);
+  innerCylinder->setRadius(innerRadius);
+  prim[l_id] = innerCylinder;
+  retAlgebraMatch << l_id << " ";
   l_id++;
 
   // add top plane
