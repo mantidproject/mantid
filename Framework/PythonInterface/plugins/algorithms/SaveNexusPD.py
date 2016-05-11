@@ -43,7 +43,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
     def _determineCompression(self):
         compression = self.getProperty('Compression').value
 
-        if not str(compression) is "None":
+        if not str(compression) == "None":
             self._compressArgs['compression'] = compression
 
     def PyInit(self):
