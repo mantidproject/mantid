@@ -21,19 +21,23 @@ class IAlgorithm;
 class Algorithm;
 class AlgorithmHistory;
 
+namespace Detail {
+// Written as a template in order to get around circular issue of CompareHistory
+// needing to know the implementation of AlgorithmHistory and AlgorithmHistory
+// needing to know the implementation of CompareHistory.
 template <class T> struct CompareHistory {
-  /// Less than operator for pointers
   bool operator()(const boost::shared_ptr<T> &lhs,
                   const boost::shared_ptr<T> &rhs) {
     return (*lhs) < (*rhs);
   }
 };
+}
 
 // typedefs for algorithm history pointers
 typedef boost::shared_ptr<AlgorithmHistory> AlgorithmHistory_sptr;
 typedef boost::shared_ptr<const AlgorithmHistory> AlgorithmHistory_const_sptr;
-
-typedef std::set<AlgorithmHistory_sptr, CompareHistory<AlgorithmHistory>>
+typedef std::set<AlgorithmHistory_sptr,
+                 Detail::CompareHistory<AlgorithmHistory>>
     AlgorithmHistories;
 
 /** @class AlgorithmHistory AlgorithmHistory.h API/MAntidAPI/AlgorithmHistory.h
@@ -144,7 +148,7 @@ public:
 
 private:
   // private constructor
-  AlgorithmHistory();
+  AlgorithmHistory() = default;
   // Set properties of algorithm
   void setProperties(const Algorithm *const alg);
   /// The name of the Algorithm

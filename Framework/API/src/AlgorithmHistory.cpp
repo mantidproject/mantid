@@ -36,14 +36,8 @@ AlgorithmHistory::AlgorithmHistory(const Algorithm *const alg,
   setProperties(alg);
 }
 
-/** Private empty constructor for use by Algorithm
- */
-AlgorithmHistory::AlgorithmHistory()
-    : m_name(), m_version(), m_executionDate(), m_executionDuration(),
-      m_execCount() {}
-
 /// Destructor
-AlgorithmHistory::~AlgorithmHistory() {}
+AlgorithmHistory::~AlgorithmHistory() = default;
 
 /**
     Construct AlgorithmHistory by name. Can be used for rstoring the history
@@ -73,10 +67,9 @@ void AlgorithmHistory::setProperties(const Algorithm *const alg) {
   // Now go through the algorithm's properties and create the PropertyHistory
   // objects.
   const std::vector<Property *> &properties = alg->getProperties();
-  std::vector<Property *>::const_iterator it;
-  for (it = properties.begin(); it != properties.end(); ++it) {
+  for (const auto &property : properties) {
     m_properties.push_back(
-        boost::make_shared<PropertyHistory>((*it)->createHistory()));
+        boost::make_shared<PropertyHistory>(property->createHistory()));
   }
 }
 
@@ -132,8 +125,8 @@ void AlgorithmHistory::addExecutionInfo(const DateAndTime &start,
 void AlgorithmHistory::addProperty(const std::string &name,
                                    const std::string &value, bool isdefault,
                                    const unsigned int &direction) {
-  Kernel::PropertyHistory propHist(name, value, "", isdefault, direction);
-  m_properties.push_back(boost::make_shared<PropertyHistory>(propHist));
+  m_properties.push_back(boost::make_shared<PropertyHistory>(
+      name, value, "", isdefault, direction));
 }
 
 /** Add a child algorithm history to history
@@ -167,9 +160,7 @@ AlgorithmHistory::getChildAlgorithmHistory(const size_t index) const {
     throw std::out_of_range(
         "AlgorithmHistory::getAlgorithmHistory() - Index out of range");
   }
-  auto start = m_childHistories.cbegin();
-  std::advance(start, index);
-  return *start;
+  return *std::next(m_childHistories.cbegin(), index);
 }
 
 /**
@@ -209,9 +200,8 @@ void AlgorithmHistory::printSelf(std::ostream &os, const int indent) const {
 
   os << std::string(indent, ' ') << "Parameters:" << std::endl;
 
-  PropertyHistories::const_iterator it;
-  for (it = m_properties.begin(); it != m_properties.end(); ++it) {
-    (*it)->printSelf(os, indent + 2);
+  for (const auto &property : m_properties) {
+    property->printSelf(os, indent + 2);
   }
 }
 
