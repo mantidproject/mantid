@@ -1,7 +1,7 @@
 #include "MantidLiveData/ADARA/ADARAPackets.h"
 
 #include <boost/lexical_cast.hpp>
-#include <string.h>
+#include <cstring>
 
 using namespace ADARA;
 

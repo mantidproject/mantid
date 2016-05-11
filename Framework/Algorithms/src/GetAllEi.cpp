@@ -300,7 +300,7 @@ void GetAllEi::exec() {
   // preprocess first monitors peaks;
   g_log.debug() << "*Looking for real energy peaks on first monitor\n";
   findBinRanges(monitorWS->readX(0), monitorWS->readY(0), guess_ei,
-                this->m_min_Eresolution / (2 * std::sqrt(2 * std::log(2.))),
+                this->m_min_Eresolution / (2. * std::sqrt(2. * M_LN2)),
                 irange_min, irange_max, guessValid);
 
   // remove invalid guess values
@@ -311,7 +311,7 @@ void GetAllEi::exec() {
   if (!this->getProperty("IgnoreSecondMonitor")) {
     g_log.debug() << "*Looking for real energy peaks on second monitor\n";
     findBinRanges(monitorWS->readX(1), monitorWS->readY(1), guess_ei,
-                  this->m_min_Eresolution / (2 * std::sqrt(2 * std::log(2.))),
+                  this->m_min_Eresolution / (2. * std::sqrt(2. * M_LN2)),
                   irange1_min, irange1_max, guessValid);
     removeInvalidValues<double>(guessValid, guess_ei);
     removeInvalidValues<size_t>(guessValid, irange_min);
@@ -471,7 +471,7 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
                          double &peakTwoSigma) {
 
   // calculate sigma from half-width parameters
-  double maxSigma = Ei * m_min_Eresolution / (2 * std::sqrt(2 * std::log(2.)));
+  double maxSigma = Ei * m_min_Eresolution / (2. * std::sqrt(2. * M_LN2));
 
   double sMin(std::numeric_limits<double>::max());
   double sMax(-sMin);
@@ -621,8 +621,8 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
                                double &position, double &height,
                                double &twoSigma) {
   // calculate sigma from half-width parameters
-  double maxSigma = Ei * m_min_Eresolution / (2 * std::sqrt(2 * std::log(2.)));
-  double minSigma = Ei * m_max_Eresolution / (2 * std::sqrt(2 * std::log(2.)));
+  double maxSigma = Ei * m_min_Eresolution / (2. * std::sqrt(2. * M_LN2));
+  double minSigma = Ei * m_max_Eresolution / (2. * std::sqrt(2. * M_LN2));
   //--------------------------------------------------------------------
   double peak1Pos, peak1TwoSigma, peak1Height;
   if (!peakGuess(inputWS, 0, Ei, monsRangeMin, monsRangeMax, peak1Pos,

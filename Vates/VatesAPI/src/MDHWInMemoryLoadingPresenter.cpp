@@ -103,7 +103,7 @@ MDHWInMemoryLoadingPresenter::execute(vtkDataSetFactory *factory,
     this->m_metadataJsonManager->setMaxValue(range[1]);
   }
 
-  this->extractMetadata(m_cachedVisualHistoWs);
+  this->extractMetadata(*m_cachedVisualHistoWs);
 
   // Transposed workpace is temporary, outside the ADS, and does not have a name. so get it from pre-transposed.
   // If this fails, create a default name with a time stamp
@@ -143,7 +143,7 @@ void MDHWInMemoryLoadingPresenter::executeLoadMetadata() {
   m_metadataJsonManager->setSpecialCoordinates(m_specialCoords);
 
   // Call base-class extraction method.
-  this->extractMetadata(m_cachedVisualHistoWs);
+  this->extractMetadata(*m_cachedVisualHistoWs);
 }
 
 /// Destructor

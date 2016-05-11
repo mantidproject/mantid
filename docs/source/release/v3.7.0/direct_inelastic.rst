@@ -18,3 +18,8 @@ Crystal Field
 FOCUS fortran program that fits crystal field parameters is being translated into Mantid (C++ and python).
 The release notes on this work will go here.
 
+Phonon DOS
+----------
+
+The old PySlice routine to compute the phonon DOS from powder data using the incoherent approximation has
+been ported and is now a Mantid Python Algorithm :ref:`ComputeIncoherentDOS <algm-ComputeIncoherentDOS`

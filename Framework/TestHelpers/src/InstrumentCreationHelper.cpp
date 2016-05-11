@@ -17,14 +17,14 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
                                   const std::string &instrumentName) {
   auto instrument = boost::make_shared<Instrument>(instrumentName);
   instrument->setReferenceFrame(
-      boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
+      boost::make_shared<ReferenceFrame>(Y, Z, Right, ""));
   workspace.setInstrument(instrument);
 
   const double pixelRadius(0.05);
   Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
       pixelRadius, 0.02, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
 
-  const double detXPos(5.0);
+  const double detZPos(5.0);
   // Careful! Do not use size_t or auto, the unisgned will break the -=2 below.
   int ndets = static_cast<int>(workspace.getNumberHistograms());
   if (includeMonitors)
@@ -39,7 +39,7 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
     if (startYNegative)
       ycount -= 1;
     const double ypos = ycount * 2.0 * pixelRadius;
-    physicalPixel->setPos(detXPos, ypos, 0.0);
+    physicalPixel->setPos(0.0, ypos, detZPos);
     instrument->add(physicalPixel);
     instrument->markAsDetector(physicalPixel);
     workspace.getSpectrum(i)->setDetectorID(physicalPixel->getID());
@@ -51,7 +51,7 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
     Detector *monitor1 =
         new Detector("mon1", workspace.getAxis(1)->spectraNo(ndets),
                      Object_sptr(), instrument.get());
-    monitor1->setPos(-9.0, 0.0, 0.0);
+    monitor1->setPos(0.0, 0.0, -9.0);
     instrument->add(monitor1);
     instrument->markAsMonitor(monitor1);
     workspace.getSpectrum(ndets)->setDetectorID(ndets + 1);
@@ -59,7 +59,7 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
     Detector *monitor2 =
         new Detector("mon2", workspace.getAxis(1)->spectraNo(ndets) + 1,
                      Object_sptr(), instrument.get());
-    monitor2->setPos(-2.0, 0.0, 0.0);
+    monitor2->setPos(0.0, 0.0, -2.0);
     instrument->add(monitor2);
     instrument->markAsMonitor(monitor2);
     workspace.getSpectrum(ndets + 1)->setDetectorID(ndets + 2);
@@ -71,7 +71,7 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
       "moderator",
       ComponentCreationHelper::createSphere(0.1, V3D(0, 0, 0), "1"),
       instrument.get());
-  source->setPos(V3D(-20, 0.0, 0.0));
+  source->setPos(V3D(0.0, 0.0, -20.0));
   instrument->add(source);
   instrument->markAsSource(source);
 
@@ -85,7 +85,7 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
   instrument->markAsSamplePos(sample);
   // chopper position
   Component *chop_pos = new Component("chopper-position",
-                                      Kernel::V3D(-10, 0, 0), instrument.get());
+                                      Kernel::V3D(0, 0, -10), instrument.get());
   instrument->add(chop_pos);
 }
 }

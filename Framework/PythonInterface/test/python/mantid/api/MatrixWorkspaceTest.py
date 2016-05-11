@@ -68,7 +68,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertTrue(isinstance(det, Detector))
         self.assertEquals(det.getID(), 1)
         self.assertFalse(det.isMasked())
-        self.assertAlmostEqual(2.71496516, det.getTwoTheta(V3D(0,0,11), V3D(0,0,1)))
+        self.assertAlmostEqual(math.pi, det.getTwoTheta(V3D(0,0,11), V3D(0,0,1)))
 
     def test_spectrum_retrieval(self):
         # Spectrum
@@ -344,32 +344,32 @@ class MatrixWorkspaceTest(unittest.TestCase):
         ws1.setComment(comment)
         self.assertEquals(comment, ws1.getComment())
         AnalysisDataService.remove(ws1.getName())
-        
+
     def test_setGetMonitorWS(self):
         run_algorithm('CreateWorkspace', OutputWorkspace='ws1',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
         run_algorithm('CreateWorkspace', OutputWorkspace='ws_mon',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
-        
+
         ws1=AnalysisDataService.retrieve('ws1')
         try:
             monWs = ws1.getMonitorWorkspace()
             GotIt = True
         except RuntimeError:
-            GotIt = False             
+            GotIt = False
         self.assertFalse(GotIt)
-        
+
         monWs = AnalysisDataService.retrieve('ws_mon')
         ws1.setMonitorWorkspace(monWs)
         monWs.setTitle("My Fake Monitor workspace")
-        
+
         monWs1 = ws1.getMonitorWorkspace();
         self.assertEquals(monWs.getTitle(), monWs1.getTitle())
-        
+
         ws1.clearMonitorWorkspace()
         try:
             monWs1 = ws1.getMonitorWorkspace()
             GotIt = True
         except RuntimeError:
-            GotIt = False             
+            GotIt = False
         self.assertFalse(GotIt)
 
         # Check weak pointer issues
@@ -378,9 +378,9 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
         allFine = False
         try:
-            ws1.setMonitorWorkspace(wms) 
+            ws1.setMonitorWorkspace(wms)
             allFine = True
-        except ValueError:            
+        except ValueError:
             pass
         self.assertTrue(allFine)
 

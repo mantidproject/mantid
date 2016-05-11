@@ -46,11 +46,13 @@ namespace Mantid
 class VTK_EXPORT vtkMDHWSource : public vtkStructuredGridAlgorithm
 {
 public:
+  vtkMDHWSource(const vtkMDHWSource &) = delete;
+  void operator=(const vtkMDHWSource &) = delete;
   static vtkMDHWSource *New();
   vtkTypeMacro(vtkMDHWSource, vtkStructuredGridAlgorithm) void PrintSelf(
       ostream &os, vtkIndent indent) override;
 
-  void SetWsName(std::string wsName);
+  void SetWsName(const std::string &wsName);
 
   //------- MDLoadingView methods ----------------
   virtual double getTime() const;
@@ -59,21 +61,21 @@ public:
   //----------------------------------------------
 
   /// Update the algorithm progress.
-  void updateAlgorithmProgress(double, const std::string&);
+  void updateAlgorithmProgress(double progress, const std::string &message);
   /// Getter for the input geometry xml
-  const char* GetInputGeometryXML();
+  std::string GetInputGeometryXML();
   /// Getter for the special coodinate value
   int GetSpecialCoordinates();
   /// Getter for the workspace name
-  const char* GetWorkspaceName();
+  const std::string &GetWorkspaceName();
   /// Getter for the workspace type
-  char* GetWorkspaceTypeName();
+  std::string GetWorkspaceTypeName();
   /// Getter for the minimum value of the workspace data
   double GetMinValue();
   /// Getter for the maximum value of the workspace data
   double GetMaxValue();
   /// Getter for the maximum value of the workspace data
-  const char* GetInstrument();
+  std::string GetInstrument();
   /// Setter for the normalization
   void SetNormalization(int option);
 
@@ -96,15 +98,10 @@ private:
   /// MVP presenter.
   std::unique_ptr<Mantid::VATES::MDLoadingPresenter> m_presenter;
 
-  /// Cached typename.
-  std::string typeName;
-
   /// Normalization Option
   Mantid::VATES::VisualNormalization m_normalizationOption;
 
 
-  vtkMDHWSource(const vtkMDHWSource&);
-  void operator = (const vtkMDHWSource&);
   void setTimeRange(vtkInformationVector* outputVector);
 };
 #endif

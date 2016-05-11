@@ -250,7 +250,13 @@ void FitPropertyBrowser::init() {
 }
 
 /**
-* Initialise the layout.
+* @brief Initialise the layout.
+* This initialization includes:
+*   1. SIGNALs/SLOTs when properties change.
+*   2. Action menus and associated SIGNALs/SLOTs.
+*   3. Initialize the CompositeFunction, the root from which to build the Model.
+*   4. Update the list of available functions
+* @param w widget parenting the action menus and the property tree browser
 */
 void FitPropertyBrowser::initLayout(QWidget *w) {
   // to be able to change windows title from tread
@@ -430,7 +436,11 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
 }
 
 /**
-* Create editors and assign them to the managers
+* @brief Create editors and assign them to the managers.
+* Associates a particular widget factory to each property manager. Thus, the
+* factory will automatically create widgets befitting to edit the properties
+* that we define.
+* @param w :: widget showing the properties tree and the actions buttons
 */
 void FitPropertyBrowser::createEditors(QWidget *w) {
   QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(w);
@@ -1171,7 +1181,7 @@ void FitPropertyBrowser::boolChanged(QtProperty *prop) {
     settings.beginGroup("Mantid/FitBrowser");
     settings.setValue(prop->propertyName(), val);
 
-    if (m_showParamErrors) {
+    if (prop == m_showParamErrors) {
       m_parameterManager->setErrorsEnabled(val);
     }
   } else { // it could be an attribute
@@ -1425,14 +1435,14 @@ void FitPropertyBrowser::setCurrentFunction(
  * Creates an instance of Fit algorithm, sets its properties and launches it.
  */
 void FitPropertyBrowser::doFit(int maxIterations) {
-  std::string wsName = workspaceName();
+  const std::string wsName = workspaceName();
 
   if (wsName.empty()) {
     QMessageBox::critical(this, "Mantid - Error", "Workspace name is not set");
     return;
   }
 
-  auto ws = getWorkspace();
+  const auto ws = getWorkspace();
   if (!ws) {
     return;
   }
@@ -1444,13 +1454,13 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     }
     m_fitActionUndoFit->setEnabled(true);
 
-    std::string funStr = getFittingFunction()->asString();
+    const std::string funStr = getFittingFunction()->asString();
 
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     alg->setPropertyValue("Function", funStr);
-    alg->setPropertyValue("InputWorkspace", wsName);
+    alg->setProperty("InputWorkspace", ws);
     alg->setProperty("WorkspaceIndex", workspaceIndex());
     alg->setProperty("StartX", startX());
     alg->setProperty("EndX", endX());
@@ -1468,7 +1478,7 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     observeFinish(alg);
     alg->executeAsync();
 
-  } catch (std::exception &e) {
+  } catch (const std::exception &e) {
     QString msg = "Fit algorithm failed.\n\n" + QString(e.what()) + "\n";
     QMessageBox::critical(this, "Mantid - Error", msg);
   }
@@ -2466,8 +2476,13 @@ void FitPropertyBrowser::setPeakToolOn(bool on) {
   m_displayActionPlotGuess->setEnabled(on);
 }
 
-void FitPropertyBrowser::updateDecimals() {
-  if (m_decimals < 0) {
+/**
+ * @brief impose a number of decimal places on all defined Double properties
+ */
+void FitPropertyBrowser::updateDecimals()
+{
+  if (m_decimals < 0)
+  {
     QSettings settings;
     settings.beginGroup("Mantid/FitBrowser");
     m_decimals = settings.value("decimals", 6).toInt();

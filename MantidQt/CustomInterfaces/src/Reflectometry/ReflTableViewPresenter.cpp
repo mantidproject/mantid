@@ -136,7 +136,7 @@ namespace CustomInterfaces {
 ReflTableViewPresenter::ReflTableViewPresenter(ReflTableView *tableView,
                                                ProgressableView *progressView)
     : WorkspaceObserver(), m_tableView(tableView), m_progressView(progressView),
-      m_tableDirty(false) {
+      m_workspaceReceiver(), m_tableDirty(false) {
 
   // TODO. Select strategy.
   /*
@@ -145,7 +145,7 @@ ReflTableViewPresenter::ReflTableViewPresenter(ReflTableView *tableView,
   UserCatalogInfo catalogInfo(
   ConfigService::Instance().getFacility().catalogInfo(), *catConfigService);
   */
-
+  // Initialise m_workspaceReceiver
   // Initialise options
   initOptions();
 
@@ -1130,8 +1130,7 @@ Press changes to the same item in the ADS
 */
 void ReflTableViewPresenter::saveTable() {
   if (!m_wsName.empty()) {
-    AnalysisDataService::Instance().addOrReplace(
-        m_wsName, boost::shared_ptr<ITableWorkspace>(m_ws->clone().release()));
+    AnalysisDataService::Instance().addOrReplace(m_wsName, m_ws->clone());
     m_tableDirty = false;
   } else {
     saveTableAs();
@@ -1197,8 +1196,7 @@ void ReflTableViewPresenter::openTable() {
 
   // We create a clone of the table for live editing. The original is not
   // updated unless we explicitly save.
-  ITableWorkspace_sptr newTable =
-      boost::shared_ptr<ITableWorkspace>(origTable->clone().release());
+  ITableWorkspace_sptr newTable = origTable->clone();
   try {
     validateModel(newTable);
     m_ws = newTable;

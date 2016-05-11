@@ -569,7 +569,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   loadCustomActions();
 
   // Nullify catalogSearch
-  catalogSearch = NULL;
+  catalogSearch.reset();
 
   // Print a warning message if the scripting language is set to muParser
   if (defaultScriptingLang == "muParser") {
@@ -9787,8 +9787,6 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
 
   if (catalogSearch) {
     catalogSearch->disconnect();
-    delete catalogSearch;
-    catalogSearch = NULL;
   }
 
   if (scriptingWindow) {
@@ -15435,7 +15433,6 @@ ApplicationWindow::~ApplicationWindow() {
   delete hiddenWindows;
   delete scriptingWindow;
   delete d_text_editor;
-  delete catalogSearch;
   while (!d_user_menus.isEmpty()) {
     QMenu *menu = d_user_menus.takeLast();
     delete menu;
@@ -16554,18 +16551,14 @@ void ApplicationWindow::CatalogLogin() {
 }
 
 void ApplicationWindow::CatalogSearch() {
-  if (catalogSearch == NULL || catalogSearch) {
     // Only one ICAT GUI will appear, and that the previous one will be
     // overridden.
     // E.g. if a user opens the ICAT GUI without being logged into ICAT they
     // will need to
     // login in and then click "Search" again.
-    delete catalogSearch;
-    catalogSearch = new MantidQt::MantidWidgets::CatalogSearch();
-
+    catalogSearch.reset(new MantidQt::MantidWidgets::CatalogSearch());
     catalogSearch->show();
     catalogSearch->raise();
-  }
 }
 
 void ApplicationWindow::CatalogPublish() {

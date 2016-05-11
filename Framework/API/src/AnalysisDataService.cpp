@@ -164,6 +164,20 @@ void AnalysisDataServiceImpl::remove(const std::string &name) {
 }
 
 /**
+ * Sort members by Workspace name. The group must be in the ADS.
+ * @param groupName :: A group name.
+ */
+void AnalysisDataServiceImpl::sortGroupByName(const std::string &groupName) {
+  WorkspaceGroup_sptr group = retrieveWS<WorkspaceGroup>(groupName);
+  if (!group) {
+    throw std::runtime_error("Workspace " + groupName +
+                             " is not a workspace group.");
+  }
+  group->sortMembersByName();
+  notificationCenter.postNotification(new GroupUpdatedNotification(groupName));
+}
+
+/**
  * Add a workspace to a group. The group and the workspace must be in the ADS.
  * @param groupName :: A group name.
  * @param wsName :: Name of a workspace to add to the group.

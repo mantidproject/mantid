@@ -27,6 +27,7 @@ set ( SRC_FILES
 	src/H5Util.cpp
 	src/ISISDataArchive.cpp
 	src/ISISRunLogs.cpp
+	src/ImggAggregateWavelengths.cpp
 	src/Load.cpp
 	src/LoadANSTOHelper.cpp
 	src/LoadAscii.cpp
@@ -197,6 +198,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/H5Util.h
 	inc/MantidDataHandling/ISISDataArchive.h
 	inc/MantidDataHandling/ISISRunLogs.h
+	inc/MantidDataHandling/ImggAggregateWavelengths.h
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadANSTOHelper.h
 	inc/MantidDataHandling/LoadAscii.h
@@ -366,6 +368,7 @@ set ( TEST_FILES
 	GroupDetectorsTest.h
 	H5UtilTest.h
 	ISISDataArchiveTest.h
+	ImggAggregateWavelengthsTest.h
 	InstrumentRayTracerTest.h
 	LoadAscii2Test.h
 	LoadAsciiTest.h

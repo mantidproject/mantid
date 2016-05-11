@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>664</width>
-    <height>683</height>
+    <width>660</width>
+    <height>680</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -94,28 +94,21 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBox_bank">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="minimumSize">
            <size>
-            <width>111</width>
+            <width>75</width>
             <height>0</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>240</width>
+            <width>80</width>
             <height>16777215</height>
            </size>
           </property>
-          <item>
-           <property name="text">
-            <string>Bank North - 1</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Bank South - 2</string>
-           </property>
-          </item>
          </widget>
         </item>
        </layout>
@@ -282,6 +275,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <widget class="QListWidget" name="listWidget_fitting_bank_preview">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -294,28 +290,6 @@
             <height>16777215</height>
            </size>
           </property>
-          <item>
-           <property name="text">
-            <string>1</string>
-           </property>
-           <property name="font">
-            <font>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>2</string>
-           </property>
-           <property name="font">
-            <font>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-          </item>
          </widget>
         </item>
        </layout>

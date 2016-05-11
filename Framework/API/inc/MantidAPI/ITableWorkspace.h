@@ -122,7 +122,8 @@ public:
   ITableWorkspace() {}
 
   /// Returns a clone of the workspace
-  ITableWorkspace_uptr clone() const { return ITableWorkspace_uptr(doClone()); }
+  ITableWorkspace_uptr clone(const std::vector<std::string> &colNames =
+                                 std::vector<std::string>()) const;
 
   ITableWorkspace &operator=(const ITableWorkspace &) = delete;
   /// Return the workspace typeID
@@ -328,7 +329,11 @@ protected:
   void removeFromColumn(Column *c, size_t index) { c->remove(index); }
 
 private:
-  ITableWorkspace *doClone() const override = 0;
+  ITableWorkspace *doClone() const override {
+    return doCloneColumns(std::vector<std::string>());
+  }
+  virtual ITableWorkspace *
+  doCloneColumns(const std::vector<std::string> &colNames) const = 0;
 };
 
 // =====================================================================================

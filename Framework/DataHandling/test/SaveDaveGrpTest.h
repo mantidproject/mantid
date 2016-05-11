@@ -94,7 +94,7 @@ public:
       for (i = 0; i < 3; i++) {
         testfile >> d1 >> d2;
         TS_ASSERT_EQUALS(d1, 2);
-        TS_ASSERT_DELTA(d2, std::sqrt(2.0), 0.0001);
+        TS_ASSERT_DELTA(d2, M_SQRT2, 0.0001);
       }
       getline(testfile, line);
       getline(testfile, line);
@@ -102,7 +102,7 @@ public:
       for (i = 0; i < 3; i++) {
         testfile >> d1 >> d2;
         TS_ASSERT_EQUALS(d1, 2);
-        TS_ASSERT_DELTA(d2, std::sqrt(2.0), 0.0001);
+        TS_ASSERT_DELTA(d2, M_SQRT2, 0.0001);
       }
       testfile.close();
     }

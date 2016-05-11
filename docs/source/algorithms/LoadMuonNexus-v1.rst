@@ -60,22 +60,27 @@ Dead times and detector grouping
 ################################
 
 Muon Nexus v1 files might contain dead time and detector grouping
-informationl. These are loaded as TableWorkspaces of the format accepted
-by ApplyDeadTimeCorr and MuonGroupDetectors accordingly. These are
+information. These are loaded as TableWorkspaces of the format accepted
+by :ref:`algm-ApplyDeadTimeCorr` and :ref:`algm-MuonGroupDetectors` accordingly. These are
 returned if and only if names are specified for the properties. For
 multi-period data workspace groups might be returned, if information in
 the Nexus files contains this information for each period.
+
+If the file contains no grouping entry (or the entry is full of zeros), the
+grouping will be loaded from the IDF instead. If this also fails, a dummy
+grouping will be created. In either case, a message will be displayed
+in the log to explain this.
 
 ChildAlgorithms used
 ####################
 
 The ChildAlgorithms used by LoadMuonNexus are:
 
--  LoadMuonLog - this reads log information from the Nexus file and uses
+-  :ref:`algm-LoadMuonLog` - this reads log information from the Nexus file and uses
    it to create TimeSeriesProperty entries in the workspace.
--  LoadInstrument - this algorithm looks for an XML description of the
+-  :ref:`algm-LoadInstrument` - this algorithm looks for an XML description of the
    instrument and if found reads it.
--  LoadIntstrumentFromNexus - this is called if the normal
+-  :ref:`algm-LoadInstrumentFromNexus` - this is called if the normal
    LoadInstrument fails. As the Nexus file has limited instrument data,
    this only populates a few fields.
 

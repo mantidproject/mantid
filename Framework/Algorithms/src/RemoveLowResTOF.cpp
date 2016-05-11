@@ -10,9 +10,9 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/UnitFactory.h"
+#include <cmath>
 #include <limits>
 #include <map>
-#include <math.h>
 
 namespace Mantid {
 namespace Algorithms {
@@ -123,7 +123,7 @@ void RemoveLowResTOF::exec() {
   // Only create the output workspace if it's different to the input one
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (outputWS != m_inputWS) {
-    outputWS = MatrixWorkspace_sptr(m_inputWS->clone().release());
+    outputWS = m_inputWS->clone();
     setProperty("OutputWorkspace", outputWS);
   }
 
@@ -168,7 +168,7 @@ void RemoveLowResTOF::execEvent() {
 
   MatrixWorkspace_sptr matrixLowResW = getProperty("LowResTOFWorkspace");
   if (m_outputLowResTOF) {
-    matrixLowResW = MatrixWorkspace_sptr(m_inputWS->clone().release());
+    matrixLowResW = m_inputWS->clone();
     setProperty("LowResTOFWorkspace", matrixLowResW);
   }
   auto lowW = boost::dynamic_pointer_cast<EventWorkspace>(matrixLowResW);
