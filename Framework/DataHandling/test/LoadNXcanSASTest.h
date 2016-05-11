@@ -169,7 +169,7 @@ public:
     do_assert_load(ws, wsOut, parameters);
 
     // Clean up
-    // removeFile(parameters.filename);
+    removeFile(parameters.filename);
     removeWorkspaceFromADS(outWsName);
   }
 
@@ -213,7 +213,7 @@ public:
     do_assert_load(wsPoint, wsOut, parameters);
 
     // Clean up
-    // removeFile(parameters.filename);
+    removeFile(parameters.filename);
     removeWorkspaceFromADS(outWsName);
   }
 
@@ -364,13 +364,14 @@ private:
     auto axis1In = wsIn->getAxis(1);
     auto axis1Out = wsOut->getAxis(1);
 
-    TSM_ASSERT_EQUALS("Axis 1 should have the same length", axis1In->length(),
-                      axis1Out->length());
     auto length = axis1In->length();
-    for (size_t index = 0; index < length; ++index) {
-      TSM_ASSERT_DELTA("Axis 1 should have the same value",
-                       axis1In->getValue(index), axis1Out->getValue(index),
-                       eps);
+
+    // The numeric axis of wsIn is histo, while axisIn is point data
+    for (size_t index = 0; index < length - 1; ++index) {
+      TSM_ASSERT_DELTA(
+          "Axis 1 should have the same value",
+          (axis1In->getValue(index + 1) + axis1In->getValue(index)) / 2.0,
+          axis1Out->getValue(index), eps);
     }
   }
 
