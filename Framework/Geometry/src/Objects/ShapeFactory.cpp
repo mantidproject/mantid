@@ -203,6 +203,9 @@ ShapeFactory::createShape(Poco::XML::Element *pElem) {
         } catch (std::invalid_argument &e) {
           g_log.warning() << e.what() << " <" << primitiveName
                           << "> shape is ignored.";
+        } catch (std::runtime_error &e) {
+          g_log.warning() << e.what() << " <" << primitiveName
+                          << "> shape is ignored.";
         } catch (...) {
           g_log.warning() << " Problem with parsing XML string for <"
                           << primitiveName << ">. This shape is ignored.";
@@ -532,7 +535,15 @@ std::string ShapeFactory::parseHollowCylinder(
   normVec.normalize();
   const double innerRadius = getDoubleAttribute(pElemInnerRadius, "val");
   const double outerRadius = getDoubleAttribute(pElemOuterRadius, "val");
+  if (innerRadius > outerRadius) {
+    throw std::runtime_error(
+        "ShapeFactory::parseHollowCylinder(): inner-radius > outer-radius.");
+  }
   const double height = getDoubleAttribute(pElemHeight, "val");
+  if (height < 0.0) {
+    throw std::runtime_error(
+        "ShapeFactory::parseHollowCylinder(): height < 0.0");
+  }
   V3D centreOfBottomBase = parsePosition(pElemBase);
 
   // add outer infinite cylinder surface
