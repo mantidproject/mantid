@@ -287,7 +287,10 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
                 if self._sourcePos is None:
                     detector = None
                 else:
-                    detector = wksp.getDetector(i)
+                    try:
+                        detector = wksp.getDetector(i)
+                    except RuntimeError:
+                        detector = None
                 nxdetector = self._writeDetectorPos(nxinstrument, dataname,
                                                     detector)
 
