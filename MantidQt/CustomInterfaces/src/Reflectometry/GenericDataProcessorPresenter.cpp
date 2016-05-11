@@ -89,7 +89,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                              "containing commas must be quoted. In case of "
                              "conflict between options "
                              "specified via this column and options specified "
-                             "via the <b>Process<\b> line edit, the former "
+                             "via the <b>Process</b> line edit, the former "
                              "prevail.");
   m_columns = static_cast<int>(m_whitelist.size());
 }
@@ -547,7 +547,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
   const std::string instrument = m_view->getProcessInstrument();
 
   std::vector<std::string> runs;
-  boost::split(runs, runStr, boost::is_any_of("+"));
+  boost::split(runs, runStr, boost::is_any_of("+,"));
 
   if (runs.empty())
     throw std::runtime_error("No runs given");
