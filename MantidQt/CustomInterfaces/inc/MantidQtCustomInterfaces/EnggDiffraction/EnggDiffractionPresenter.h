@@ -116,10 +116,9 @@ public:
   void runConvetUnitsAlg(std::string workspaceName);
 
   void runCloneWorkspaceAlg(std::string inputWorkspace,
-                            std::string outputWorkspace);
+                            const std::string &outputWorkspace);
 
-  void setDataToClonedWS(std::string inputWorkspace,
-                         std::string outputWorkspace);
+  void setDataToClonedWS(std::string &current_WS, const std::string &cloned_WS);
 
 protected:
   void initialize();
@@ -276,8 +275,8 @@ private:
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
                                 const std::string &ExpectedPeaks);
 
-  void updateFittingDirVec(std::string &bankDir, std::string &focusedFile,
-                           bool multi_run,
+  void updateFittingDirVec(const std::string &bankDir,
+                           const std::string &focusedFile, const bool multi_run,
                            std::vector<std::string> &fittingRunNoDirVec);
 
   void enableMultiRun(std::string firstRun, std::string lastRun,
