@@ -635,10 +635,7 @@ void EventWorkspace::deleteEmptyLists() {
 /// @param index :: the workspace index to return
 /// @returns A reference to the vector of binned X values
 MantidVec &EventWorkspace::dataX(const std::size_t index) {
-  if (index >= this->m_noVectors)
-    throw std::range_error(
-        "EventWorkspace::dataX, histogram number out of range");
-  return this->data[index]->dataX();
+  return getSpectrum(index)->dataX();
 }
 
 /// Return the data X error vector at a given workspace index
@@ -647,10 +644,7 @@ MantidVec &EventWorkspace::dataX(const std::size_t index) {
 /// @param index :: the workspace index to return
 /// @returns A reference to the vector of binned error values
 MantidVec &EventWorkspace::dataDx(const std::size_t index) {
-  if (index >= this->m_noVectors)
-    throw std::range_error(
-        "EventWorkspace::dataDx, histogram number out of range");
-  return this->data[index]->dataDx();
+  return getSpectrum(index)->dataDx();
 }
 
 /// Return the data Y vector at a given workspace index
@@ -658,9 +652,6 @@ MantidVec &EventWorkspace::dataDx(const std::size_t index) {
 /// @param index :: the workspace index to return
 /// @returns A reference to the vector of binned Y values
 MantidVec &EventWorkspace::dataY(const std::size_t index) {
-  if (index >= this->m_noVectors)
-    throw std::range_error(
-        "EventWorkspace::dataY, histogram number out of range");
   throw NotImplementedError("EventWorkspace::dataY cannot return a non-const "
                             "array: you can't modify the histogrammed data in "
                             "an EventWorkspace!");
@@ -671,9 +662,6 @@ MantidVec &EventWorkspace::dataY(const std::size_t index) {
 /// @param index :: the workspace index to return
 /// @returns A reference to the vector of binned error values
 MantidVec &EventWorkspace::dataE(const std::size_t index) {
-  if (index >= this->m_noVectors)
-    throw std::range_error(
-        "EventWorkspace::dataE, histogram number out of range");
   throw NotImplementedError("EventWorkspace::dataE cannot return a non-const "
                             "array: you can't modify the histogrammed data in "
                             "an EventWorkspace!");
@@ -687,51 +675,34 @@ MantidVec &EventWorkspace::dataE(const std::size_t index) {
 /** @return the const data X vector at a given workspace index
  * @param index :: workspace index   */
 const MantidVec &EventWorkspace::dataX(const std::size_t index) const {
-  if (index >= this->m_noVectors)
-    throw std::range_error(
-        "EventWorkspace::dataX, histogram number out of range");
-  return this->data[index]->constDataX();
+  return getSpectrum(index)->readX();
 }
 
 /** @return the const data X error vector at a given workspace index
  * @param index :: workspace index   */
 const MantidVec &EventWorkspace::dataDx(const std::size_t index) const {
-  if (index >= this->m_noVectors)
-    throw std::range_error(
-        "EventWorkspace::dataDx, histogram number out of range");
-  return this->data[index]->readDx();
+  return getSpectrum(index)->readDx();
 }
 
 //---------------------------------------------------------------------------
 /** @return the const data Y vector at a given workspace index
  * @param index :: workspace index   */
 const MantidVec &EventWorkspace::dataY(const std::size_t index) const {
-  if (index >= this->m_noVectors)
-    throw std::range_error(
-        "EventWorkspace::dataY, histogram number out of range");
-  const MantidVec &out = this->data[index]->constDataY();
-  return out;
+  return getSpectrum(index)->readY();
 }
 
 //---------------------------------------------------------------------------
 /** @return the const data E (error) vector at a given workspace index
  * @param index :: workspace index   */
 const MantidVec &EventWorkspace::dataE(const std::size_t index) const {
-  if (index >= this->m_noVectors)
-    throw std::range_error(
-        "EventWorkspace::dataE, histogram number out of range");
-  const MantidVec &out = this->data[index]->constDataE();
-  return out;
+  return getSpectrum(index)->readE();
 }
 
 //---------------------------------------------------------------------------
 /** @return a pointer to the X data vector at a given workspace index
  * @param index :: workspace index   */
 Kernel::cow_ptr<MantidVec> EventWorkspace::refX(const std::size_t index) const {
-  if (index >= this->m_noVectors)
-    throw std::range_error(
-        "EventWorkspace::refX, histogram number out of range");
-  return this->data[index]->ptrX();
+  return getSpectrum(index)->ptrX();
 }
 
 //---------------------------------------------------------------------------
