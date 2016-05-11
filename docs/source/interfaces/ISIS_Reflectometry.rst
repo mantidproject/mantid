@@ -167,6 +167,25 @@ window will ask for a save location for the notebook after processing is
 complete. A generated notebook contains python code to repeat the processing 
 steps and output relevant plots.
 
+Processing Options
+~~~~~~~~~~~~~~~~~~
+
+This section allows the specification of pre-processing, processing and post-processing
+options. Pre-processing options refer to the algorithms :ref:`Plus <algm-Plus>` (applied
+to the **Run(s)** column) and :ref:`CreateTransmissionWorkspaceAuto <algm-CreateTransmissionWorkspaceAuto>`
+(applied to **Transmission Run(s)**). Options to the reduction algorithm,
+:ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`, can also be
+supplied using the corresponding text box. Note that when conflicting options are specified
+for the reduction, i.e. different values for the same property are specified via this
+text box and the **Options** column (see description below), the latter will prevail. Therefore,
+the **ReflectometryReductionOneAuto** text box should be used to specify global options that will be
+applied to all the rows in the table, whereas the **Options** column will only be applicable
+to the specific row for which those options are defined. Finally, post-processing instructions,
+i.e. instructions to :ref:`Stitch1DMany <algm-Stitch1DMany>`, can also be supplied similarly.
+
+Pre-processing, processing and post-processing options are specified in ``key=value``
+pairs separated by commas. Values containing commas must be quoted.
+
 Tool Bar
 ~~~~~~~~
 
@@ -300,7 +319,10 @@ Columns
 |                     |           | value.                                        |
 |                     |           | Options are specified in ``key=value`` pairs, |
 |                     |           | separated by commas. Values containing commas |
-|                     |           | must be quoted.                               |
+|                     |           | must be quoted. Options specified via this    |
+|                     |           | column will prevail over global options       |
+|                     |           | specified in the                              |
+|                     |           | **ReflectometryReductionOneAuto** text box.   |
 |                     |           |                                               |
 |                     |           | Example: ``StrictSpectrumChecking=0,``        |
 |                     |           | ``RegionOfDirectBeam="0,2", Params="1,2,3"``  |
