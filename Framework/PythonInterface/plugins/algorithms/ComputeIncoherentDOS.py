@@ -141,6 +141,9 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         DWF = np.exp(-2*(qqgrid**2*msd))
         idm = np.where(engrid < 0)
         idp = np.where(engrid >= 0)
+        # The expression for the population (Bose) factor and phonon energy dependence below actually refer to the phonon
+        # energy (always defined to be positive) rather than the neutron energy transfer. So we need the absolute value here
+        engrid = np.abs(engrid)
         expm = np.exp(-engrid[idm]*mev2k/Temperature)
         expp = np.exp(-engrid[idp]*mev2k/Temperature)
         Bose = DWF*0
