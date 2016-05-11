@@ -473,6 +473,36 @@ public:
     TS_ASSERT(!shape_sptr->hasValidShape());
   }
 
+  void testHollowCylinderWithNegativeOrZeroInnerRadius() {
+    const std::string xmlShape =
+        "<hollow-cylinder id=\"an-1\">"
+        " <centre-of-bottom-base x=\"0.0\" y=\"-0.025\" z=\"0.0\" />"
+        " <axis x =\"0.0\" y=\"1.0\" z=\"0.0\" />"
+        " <inner-radius val=\"-0.0\" />"
+        " <outer-radius val=\"0.0065\" />"
+        " <height val=\"-0.05\" />"
+        "</hollow-cylinder> ";
+
+    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    TS_ASSERT(shape_sptr);
+    TS_ASSERT(!shape_sptr->hasValidShape());
+  }
+
+  void testHollowCylinderWithNegativeOuterRadius() {
+    const std::string xmlShape =
+        "<hollow-cylinder id=\"an-1\">"
+        " <centre-of-bottom-base x=\"0.0\" y=\"-0.025\" z=\"0.0\" />"
+        " <axis x =\"0.0\" y=\"1.0\" z=\"0.0\" />"
+        " <inner-radius val=\"0.006\" />"
+        " <outer-radius val=\"-0.0\" />"
+        " <height val=\"-0.05\" />"
+        "</hollow-cylinder> ";
+
+    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    TS_ASSERT(shape_sptr);
+    TS_ASSERT(!shape_sptr->hasValidShape());
+  }
+
   void testInfiniteCylinder() {
     // algebra line is essential
     std::string xmlShape = "<infinite-cylinder id=\"shape\"> ";

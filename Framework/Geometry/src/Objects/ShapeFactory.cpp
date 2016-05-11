@@ -534,13 +534,21 @@ std::string ShapeFactory::parseHollowCylinder(
   V3D normVec = parsePosition(pElemAxis);
   normVec.normalize();
   const double innerRadius = getDoubleAttribute(pElemInnerRadius, "val");
+  if (innerRadius <= 0.0) {
+    throw std::runtime_error(
+        "ShapeFactory::parseHollowCylinder(): inner-radius < 0.0");
+  }
   const double outerRadius = getDoubleAttribute(pElemOuterRadius, "val");
+  if (outerRadius <= 0.0) {
+    throw std::runtime_error(
+        "ShapeFactory::parseHollowCylinder(): outer-radius < 0.0");
+  }
   if (innerRadius > outerRadius) {
     throw std::runtime_error(
         "ShapeFactory::parseHollowCylinder(): inner-radius > outer-radius.");
   }
   const double height = getDoubleAttribute(pElemHeight, "val");
-  if (height < 0.0) {
+  if (height <= 0.0) {
     throw std::runtime_error(
         "ShapeFactory::parseHollowCylinder(): height < 0.0");
   }
