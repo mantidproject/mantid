@@ -86,7 +86,11 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                              "<samp>ReflectometryReductionOneAuto</samp>. "
                              "Options are given as "
                              "key=value pairs, separated by commas. Values "
-                             "containing commas must be quoted.");
+                             "containing commas must be quoted. In case of "
+                             "conflict between options "
+                             "specified via this column and options specified "
+                             "via the <b>Process<\b> line edit, the former "
+                             "prevail.");
   m_columns = static_cast<int>(m_whitelist.size());
 }
 
