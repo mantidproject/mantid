@@ -105,6 +105,7 @@ class LRDirectBeamSort(PythonAlgorithm):
                              "Ordered list of run numbers")
         self.declareProperty(StringArrayProperty("OrderedNameList", [], direction=Direction.Output),
                              "Ordered list of workspace names corresponding to the run list")
+        self.declareProperty("SlitTolerance", 0.02, doc="Tolerance for matching slit positions")
 
     def PyExec(self):
         compute = self.getProperty("ComputeScalingFactors").value
@@ -229,12 +230,14 @@ class LRDirectBeamSort(PythonAlgorithm):
 
             # Compute the scaling factors
             logger.notice("Computing scaling factors for %s" % str(direct_beam_runs))
+            slit_tolerance = self.getProperty("SlitTolerance").value
             LRScalingFactors(DirectBeamRuns=direct_beam_runs,
                              TOFRange=tof_range, TOFSteps=tof_steps,
                              SignalPeakPixelRange=peak_ranges,
                              SignalBackgroundPixelRange=bck_ranges,
                              LowResolutionPixelRange=x_ranges,
                              IncidentMedium=incident_medium,
+                             SlitTolerance=slit_tolerance,
                              ScalingFactorFile=scaling_file)
         logger.notice(summary)
 
