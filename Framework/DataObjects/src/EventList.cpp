@@ -1485,11 +1485,6 @@ const MantidVec &EventList::dataX() const { return m_histogram.dataX(); }
  *  @return a reference to the Dx (bin) vector. */
 const MantidVec &EventList::dataDx() const { return m_histogram.dataDx(); }
 
-/** Returns a reference to the x data.
- *  @return a reference to the X (bin) vector.
- */
-const MantidVec &EventList::constDataX() const { return m_histogram.readX(); }
-
 /// Returns the x data const
 const MantidVec &EventList::readX() const { return m_histogram.readX(); }
 
@@ -1514,7 +1509,7 @@ MantidVec *EventList::makeDataY() const {
   auto Y = new MantidVec();
   MantidVec E;
   // Generate the Y histogram while skipping the E if possible.
-  generateHistogram(constDataX(), *Y, E, true);
+  generateHistogram(readX(), *Y, E, true);
   return Y;
 }
 
@@ -1526,7 +1521,7 @@ MantidVec *EventList::makeDataY() const {
 MantidVec *EventList::makeDataE() const {
   MantidVec Y;
   auto E = new MantidVec();
-  generateHistogram(constDataX(), Y, *E);
+  generateHistogram(readX(), Y, *E);
   // Y is unused.
   return E;
 }
@@ -1536,10 +1531,10 @@ MantidVec *EventList::makeDataE() const {
  *
  * @return reference to the Y vector.
  */
-const MantidVec &EventList::constDataY() const {
+const MantidVec &EventList::dataY() const {
   if (!mru)
-    throw std::runtime_error(
-        "EventList::constDataY() called with no MRU set. This is not allowed.");
+    throw std::runtime_error("'EventList::dataY() const' called with no MRU "
+                             "set. This is not allowed.");
 
   // This is the thread number from which this function was called.
   int thread = PARALLEL_THREAD_NUMBER;
@@ -1561,8 +1556,7 @@ const MantidVec &EventList::constDataY() const {
     bool skipErrors = (eventType == TOF);
 
     // Set the Y data in it
-    this->generateHistogram(constDataX(), yData->m_data, eData->m_data,
-                            skipErrors);
+    this->generateHistogram(readX(), yData->m_data, eData->m_data, skipErrors);
 
     // Lets save it in the MRU
     mru->insertY(thread, yData);
@@ -1579,10 +1573,10 @@ const MantidVec &EventList::constDataY() const {
  *
  * @return reference to the E vector.
  */
-const MantidVec &EventList::constDataE() const {
+const MantidVec &EventList::dataE() const {
   if (!mru)
-    throw std::runtime_error(
-        "EventList::constDataE() called with no MRU set. This is not allowed.");
+    throw std::runtime_error("'EventList::dataE() const' called with no MRU "
+                             "set. This is not allowed.");
 
   // This is the thread number from which this function was called.
   int thread = PARALLEL_THREAD_NUMBER;
@@ -1598,7 +1592,7 @@ const MantidVec &EventList::constDataE() const {
 
     // Now use that to get E -- Y values are generated from another function
     MantidVec Y_ignored;
-    this->generateHistogram(constDataX(), Y_ignored, eData->m_data);
+    this->generateHistogram(readX(), Y_ignored, eData->m_data);
 
     // Lets save it in the MRU
     mru->insertE(thread, eData);

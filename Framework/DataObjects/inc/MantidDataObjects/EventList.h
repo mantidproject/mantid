@@ -191,7 +191,6 @@ public:
   MantidVec &dataDx() override;
   const MantidVec &dataX() const override;
   const MantidVec &dataDx() const override;
-  const MantidVec &constDataX() const;
 
   const MantidVec &readX() const override;
   const MantidVec &readDx() const override;
@@ -241,12 +240,9 @@ public:
 
   // Allowed data accessors - read-only Y/E histogram VIEWS of an event list
   /// Return a read-only Y histogram view of an event list
-  const MantidVec &dataY() const override { return constDataY(); }
+  const MantidVec &dataY() const override;
   /// Return a read-only E histogram view of an event list
-  const MantidVec &dataE() const override { return constDataE(); }
-
-  const MantidVec &constDataY() const;
-  const MantidVec &constDataE() const;
+  const MantidVec &dataE() const override;
 
   MantidVec *makeDataY() const;
   MantidVec *makeDataE() const;

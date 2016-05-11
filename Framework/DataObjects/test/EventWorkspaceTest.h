@@ -151,7 +151,7 @@ public:
 
     // Are the returned arrays the right size?
     const EventList el(ew->getEventList(1));
-    TS_ASSERT_EQUALS(el.constDataX().size(), NUMBINS);
+    TS_ASSERT_EQUALS(el.readX().size(), NUMBINS);
     boost::scoped_ptr<MantidVec> Y(el.makeDataY());
     boost::scoped_ptr<MantidVec> E(el.makeDataE());
     TS_ASSERT_EQUALS(Y->size(), NUMBINS - 1);
@@ -224,9 +224,9 @@ public:
 
     // Didn't set X? well all the histograms show a single bin
     const EventList el(ew->getEventList(1));
-    TS_ASSERT_EQUALS(el.constDataX().size(), 2);
-    TS_ASSERT_EQUALS(el.constDataX()[0], 0.0);
-    TS_ASSERT_EQUALS(el.constDataX()[1], std::numeric_limits<double>::min());
+    TS_ASSERT_EQUALS(el.readX().size(), 2);
+    TS_ASSERT_EQUALS(el.readX()[0], 0.0);
+    TS_ASSERT_EQUALS(el.readX()[1], std::numeric_limits<double>::min());
     boost::scoped_ptr<MantidVec> Y(el.makeDataY());
     TS_ASSERT_EQUALS(Y->size(), 1);
     TS_ASSERT_EQUALS((*Y)[0], 0.0);
@@ -365,11 +365,11 @@ public:
 
     ew->setX(0, axis);
     const EventList el(ew->getEventList(0));
-    TS_ASSERT_EQUALS(el.constDataX()[0], 0);
-    TS_ASSERT_EQUALS(el.constDataX()[1], BIN_DELTA * 2);
+    TS_ASSERT_EQUALS(el.readX()[0], 0);
+    TS_ASSERT_EQUALS(el.readX()[1], BIN_DELTA * 2);
 
     // Are the returned arrays the right size?
-    TS_ASSERT_EQUALS(el.constDataX().size(), NUMBINS / 2);
+    TS_ASSERT_EQUALS(el.readX().size(), NUMBINS / 2);
 
     boost::scoped_ptr<MantidVec> Y(el.makeDataY());
     boost::scoped_ptr<MantidVec> E(el.makeDataE());
@@ -382,7 +382,7 @@ public:
 
     // But pixel 1 is the same, 2 events in the bin
     const EventList el1(ew->getEventList(1));
-    TS_ASSERT_EQUALS(el1.constDataX()[1], BIN_DELTA * 1);
+    TS_ASSERT_EQUALS(el1.readX()[1], BIN_DELTA * 1);
     boost::scoped_ptr<MantidVec> Y1(el1.makeDataY());
     TS_ASSERT_EQUALS((*Y1)[1], 2);
   }
