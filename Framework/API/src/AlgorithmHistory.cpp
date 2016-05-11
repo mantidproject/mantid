@@ -15,6 +15,8 @@ using Kernel::PropertyHistory_sptr;
 using Kernel::PropertyHistory_const_sptr;
 using Kernel::PropertyHistories;
 
+/// Less than operator for pointers
+
 /** Constructor
  *  @param alg ::      A pointer to the algorithm for which the history should
  * be constructed
@@ -28,8 +30,7 @@ AlgorithmHistory::AlgorithmHistory(const Algorithm *const alg,
                                    const double &duration,
                                    std::size_t uexeccount)
     : m_name(alg->name()), m_version(alg->version()), m_executionDate(start),
-      m_executionDuration(duration), m_execCount(uexeccount),
-      m_childHistories(boost::bind(CompareHistory::compare, _1, _2)) {
+      m_executionDuration(duration), m_execCount(uexeccount) {
   // Now go through the algorithm's properties and create the PropertyHistory
   // objects.
   setProperties(alg);
@@ -39,8 +40,7 @@ AlgorithmHistory::AlgorithmHistory(const Algorithm *const alg,
  */
 AlgorithmHistory::AlgorithmHistory()
     : m_name(), m_version(), m_executionDate(), m_executionDuration(),
-      m_execCount(),
-      m_childHistories(boost::bind(CompareHistory::compare, _1, _2)) {}
+      m_execCount() {}
 
 /// Destructor
 AlgorithmHistory::~AlgorithmHistory() {}
@@ -60,8 +60,7 @@ AlgorithmHistory::AlgorithmHistory(const std::string &name, int vers,
                                    const double &duration,
                                    std::size_t uexeccount)
     : m_name(name), m_version(vers), m_executionDate(start),
-      m_executionDuration(duration), m_execCount(uexeccount),
-      m_childHistories(boost::bind(CompareHistory::compare, _1, _2)) {}
+      m_executionDuration(duration), m_execCount(uexeccount) {}
 
 /**
  *  Set the history properties for an algorithm pointer
@@ -110,8 +109,7 @@ AlgorithmHistory::AlgorithmHistory(const AlgorithmHistory &A)
     : m_name(A.m_name), m_version(A.m_version),
       m_executionDate(A.m_executionDate),
       m_executionDuration(A.m_executionDuration), m_properties(A.m_properties),
-      m_execCount(A.m_execCount),
-      m_childHistories(boost::bind(CompareHistory::compare, _1, _2)) {
+      m_execCount(A.m_execCount) {
   m_childHistories = A.m_childHistories;
 }
 

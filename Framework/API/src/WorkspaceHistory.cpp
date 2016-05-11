@@ -24,9 +24,7 @@ Kernel::Logger g_log("WorkspaceHistory");
 }
 
 /// Default Constructor
-WorkspaceHistory::WorkspaceHistory()
-    : m_environment(),
-      m_algorithms(boost::bind(CompareHistory::compare, _1, _2)) {}
+WorkspaceHistory::WorkspaceHistory() : m_environment() {}
 
 /// Destructor
 WorkspaceHistory::~WorkspaceHistory() {}
@@ -36,8 +34,7 @@ WorkspaceHistory::~WorkspaceHistory() {}
   @param A :: WorkspaceHistory Item to copy
  */
 WorkspaceHistory::WorkspaceHistory(const WorkspaceHistory &A)
-    : m_environment(A.m_environment),
-      m_algorithms(boost::bind(CompareHistory::compare, _1, _2)) {
+    : m_environment(A.m_environment) {
   m_algorithms = A.m_algorithms;
 }
 
