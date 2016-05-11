@@ -247,13 +247,13 @@ void TOFSANSResolution::exec() {
   // such that the average for a bin is the value that we computed
   // for that bin.
   if (iqWS->readX(0).size() > iqWS->readY(0).size()) {
-      for (int i = 0; i < xLength; i++) {
-          if (i == 0) {
-            DxOut[i] = _dx_total[i];
-          } else {
-            DxOut[i] = 2.0 * _dx_total[i-1] - DxOut[i-1];
-          }
+    for (int i = 0; i < xLength; i++) {
+      if (i == 0) {
+        DxOut[i] = _dx_total[i];
+      } else {
+        DxOut[i] = 2.0 * _dx_total[i-1] - DxOut[i-1];
       }
+     }
   }
 }
 } // namespace Algorithms
