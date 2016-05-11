@@ -341,9 +341,11 @@ int Object::procPair(std::string &Ln,
   }
   if (Rend == Ln.size() ||
       !Mantid::Kernel::Strings::convert(Ln.c_str() + Rend + 1, Rb) ||
-      Rlist.find(Rb) == Rlist.end())
+      Rlist.find(Rb) == Rlist.end()) {
+    // No second rule but we did find the first one
+    compUnit = Ra;
     return 0;
-
+  }
   // Get end of number (digital)
   for (Rend++; Rend < Ln.size() && Ln[Rend] >= '0' && Ln[Rend] <= '9'; Rend++)
     ;
@@ -508,6 +510,12 @@ int Object::createSurfaceList(const int outFlag) {
         SurList.push_back(SurX->getKey());
       }
     }
+  }
+  // Remove duplicates
+  sort(SurList.begin(), SurList.end());
+  auto sc = unique(SurList.begin(), SurList.end());
+  if (sc != SurList.end()) {
+    SurList.erase(sc, SurList.end());
   }
   if (outFlag) {
 

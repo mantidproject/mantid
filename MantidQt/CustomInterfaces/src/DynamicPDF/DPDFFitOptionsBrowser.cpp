@@ -1,0 +1,61 @@
+//Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
+//Mantid Headers from the same project
+#include "MantidQtCustomInterfaces/DynamicPDF/DPDFFitOptionsBrowser.h"
+//Mantid headers from other projects
+#include "qttreepropertybrowser.h"
+#include "qtpropertymanager.h"
+//3rd party library headers
+#include "MantidKernel/Logger.h"
+//System headers
+//#include<iostream>
+
+namespace {
+  Mantid::Kernel::Logger g_log("DynamicPDF");
+}
+
+using Fittype = MantidQt::MantidWidgets::FitOptionsBrowser::FittingType;
+
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace DynamicPDF {
+
+/*               **********************
+ *               **  Public Members  **
+ *               **********************/
+
+/**
+ * @brief Constructor, override fitting type with Sequential
+ */
+DPDFFitOptionsBrowser::DPDFFitOptionsBrowser(QWidget *parent) :
+  FitOptionsBrowser(parent, Fittype::Sequential) {
+  this->createAdditionalProperties();
+  this->customizeBrowser();
+}
+
+/*                ***********************
+ *                **  Private Members  **
+ *                ***********************/
+
+/**
+ * @brief Include properties not defined in the parent class
+ */
+void DPDFFitOptionsBrowser::createAdditionalProperties(){
+  // fitting range
+  m_startX = this->addDoubleProperty("StartX");
+  m_endX = this->addDoubleProperty("EndX");
+}
+
+/**
+ * @brief Show additional properties in the browser
+ */
+void DPDFFitOptionsBrowser::customizeBrowser(){
+  // show the fitting range
+  this->displayProperty("StartX");
+  this->displayProperty("EndX");
+  this->setProperty("CreateOutput", "true");
+}
+
+
+} // DynamicPDF
+} // CustomInterfaces
+} // MantidQt

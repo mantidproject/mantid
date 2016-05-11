@@ -796,6 +796,21 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
 
   /* Now run the processing algorithm */
   alg->execute();
+
+  if (alg->isExecuted()) {
+
+    /* The reduction is complete, try to populate the columns */
+    for (int i = 0; i < m_columns - 2; i++) {
+      if (m_model->data(m_model->index(rowNo, i)).toString().isEmpty()) {
+
+        std::string propValue =
+            alg->getPropertyValue(m_whitelist.algPropFromColIndex(i));
+
+        m_model->setData(m_model->index(rowNo, i),
+                         QString::fromStdString(propValue));
+      }
+    }
+  }
 }
 
 /**

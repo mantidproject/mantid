@@ -509,14 +509,15 @@ void ReflectometryReductionOneAuto::exec() {
       refRedOne->setProperty("MomentumTransferStep",
                              momentumTransferStep.get());
     }
-    if (momentumTransferMinimum.is_initialized() &&
-        momentumTransferMaximum.is_initialized()) {
+    if (momentumTransferMinimum.is_initialized())
       refRedOne->setProperty("MomentumTransferMinimum",
                              momentumTransferMinimum.get());
+    if (momentumTransferMaximum.is_initialized())
       refRedOne->setProperty("MomentumTransferMaximum",
                              momentumTransferMaximum.get());
-    } else if (theta_in.is_initialized()) {
-      momentumTransferMinimum = calculateQ(wavelength_max, theta_in.get());
+    if (theta_in.is_initialized()) {
+      if (!momentumTransferMinimum.is_initialized())
+        momentumTransferMinimum = calculateQ(wavelength_max, theta_in.get());
       if (!momentumTransferStep.is_initialized()) {
         IAlgorithm_sptr calcResAlg =
             AlgorithmManager::Instance().create("CalculateResolution");
@@ -530,7 +531,8 @@ void ReflectometryReductionOneAuto::exec() {
         double resolution = calcResAlg->getProperty("Resolution");
         momentumTransferStep = resolution;
       }
-      momentumTransferMaximum = calculateQ(wavelength_min, theta_in.get());
+      if (!momentumTransferMaximum.is_initialized())
+        momentumTransferMaximum = calculateQ(wavelength_min, theta_in.get());
       refRedOne->setProperty("MomentumTransferMinimum",
                              momentumTransferMinimum.get());
       refRedOne->setProperty("MomentumTransferStep",
@@ -543,6 +545,7 @@ void ReflectometryReductionOneAuto::exec() {
       throw std::runtime_error(
           "ReflectometryReductionOne did not execute sucessfully");
     }
+
     MatrixWorkspace_sptr new_IvsQ1 = refRedOne->getProperty("OutputWorkspace");
     MatrixWorkspace_sptr new_IvsLam1 =
         refRedOne->getProperty("OutputWorkspaceWavelength");
@@ -550,6 +553,20 @@ void ReflectometryReductionOneAuto::exec() {
     setProperty("OutputWorkspace", new_IvsQ1);
     setProperty("OutputWorkspaceWavelength", new_IvsLam1);
     setProperty("ThetaOut", thetaOut1);
+    // set properties so they can be retrieved by GenericDataProcesser if
+    // necessary.
+    setProperty("MomentumTransferMinimum",
+                boost::lexical_cast<double>(
+                    refRedOne->getPropertyValue("MomentumTransferMinimum")));
+    setProperty("MomentumTransferStep",
+                boost::lexical_cast<double>(
+                    refRedOne->getPropertyValue("MomentumTransferStep")));
+    setProperty("MomentumTransferMaximum",
+                boost::lexical_cast<double>(
+                    refRedOne->getPropertyValue("MomentumTransferMaximum")));
+    setProperty("ThetaIn", boost::lexical_cast<double>(
+                               refRedOne->getPropertyValue("ThetaIn")));
+
   } else {
     throw std::runtime_error(
         "ReflectometryReductionOne could not be initialised");
@@ -818,6 +835,20 @@ bool ReflectometryReductionOneAuto::processGroups() {
   }
 
   // We finished successfully
+  // set the values of these properties so they can be retrieved by the
+  // Interface.
+  this->setProperty(
+      "ThetaIn", boost::lexical_cast<double>(alg->getPropertyValue("ThetaIn")));
+  this->setProperty("MomentumTransferMinimum",
+                    boost::lexical_cast<double>(
+                        alg->getPropertyValue("MomentumTransferMinimum")));
+  this->setProperty("MomentumTransferStep",
+                    boost::lexical_cast<double>(
+                        alg->getPropertyValue("MomentumTransferStep")));
+  this->setProperty("MomentumTransferMaximum",
+                    boost::lexical_cast<double>(
+                        alg->getPropertyValue("MomentumTransferMaximum")));
+  // setting output properties.
   this->setPropertyValue("OutputWorkspace", outputIvsQ);
   this->setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
   setExecuted(true);
