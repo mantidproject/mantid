@@ -58,7 +58,6 @@ set ( SRC_FILES
 	src/Math/Distributions/BoseEinsteinDistribution.cpp
 	src/Math/Distributions/ChebyshevPolynomial.cpp
 	src/Math/Distributions/ChebyshevSeries.cpp
-	src/Math/Distributions/HermitePolynomials.cpp
 	src/Math/Optimization/SLSQPMinimizer.cpp
 	src/Matrix.cpp
 	src/MatrixProperty.cpp
@@ -208,7 +207,6 @@ set ( INC_FILES
 	inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
 	inc/MantidKernel/Math/Distributions/ChebyshevPolynomial.h
 	inc/MantidKernel/Math/Distributions/ChebyshevSeries.h
-	inc/MantidKernel/Math/Distributions/HermitePolynomials.h
 	inc/MantidKernel/Math/Optimization/SLSQPMinimizer.h
 	inc/MantidKernel/Matrix.h
 	inc/MantidKernel/MatrixProperty.h
@@ -331,7 +329,6 @@ set ( TEST_FILES
 	FreeBlockTest.h
 	FunctionTaskTest.h
 	GlobTest.h
-	HermitePolynomialsTest.h
 	IPropertySettingsTest.h
 	ISaveableTest.h
 	IValidatorTest.h

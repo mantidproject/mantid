@@ -1,5 +1,5 @@
+#include <cstring>
 #include <sstream>
-#include <string.h>
 
 #include "MantidLiveData/ADARA/ADARAParser.h"
 
@@ -41,7 +41,7 @@ Parser::Parser(unsigned int initial_buffer_size, unsigned int max_pkt_size)
 
 Parser::~Parser() { delete[] m_buffer; }
 
-void Parser::reset(void) {
+void Parser::reset() {
   m_len = 0;
   m_oversize_len = 0;
   m_restart_offset = 0;
@@ -334,7 +334,7 @@ void Parser::getDiscardedPacketsLogString(std::string &log_info) {
   log_info.append(ss.str());
 }
 
-void Parser::resetDiscardedPacketsStats(void) {
+void Parser::resetDiscardedPacketsStats() {
   // Reset Associative Map, Start Clean Stats...
   m_discarded_packets.clear();
 }

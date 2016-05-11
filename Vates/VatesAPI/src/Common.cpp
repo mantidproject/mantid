@@ -13,15 +13,15 @@
 // using namespace Mantid::Geometry;
 namespace Mantid {
 namespace VATES {
-std::string makeAxisTitle(Dimension_const_sptr dim) {
+std::string makeAxisTitle(const Mantid::Geometry::IMDDimension &dim) {
   // The UnitLabels which are stored in old files don't necessarily contain
   // valid Latex symbols. We check if there is a difference between the ASCII
   // and the Latex symbols, if there is one, then use the Latex else modify
   // the ASCII version to display Latex
 
-  auto latexSymbol = dim->getMDUnits().getUnitLabel().latex();
-  auto asciiSymbol = dim->getMDUnits().getUnitLabel().ascii();
-  auto hasLatexSymbol = asciiSymbol != latexSymbol ? true : false;
+  auto latexSymbol = dim.getMDUnits().getUnitLabel().latex();
+  auto asciiSymbol = dim.getMDUnits().getUnitLabel().ascii();
+  auto hasLatexSymbol = asciiSymbol != latexSymbol;
   std::string symbol;
 
   if (hasLatexSymbol) {
@@ -30,14 +30,14 @@ std::string makeAxisTitle(Dimension_const_sptr dim) {
     symbol = convertAxesTitleToLatex(latexSymbol);
   }
 
-  std::string title = dim->getName();
+  std::string title = dim.getName();
   title += " ($";
   title += symbol;
   title += "$)";
   return title;
 }
 
-std::string convertAxesTitleToLatex(std::string toConvert) {
+std::string convertAxesTitleToLatex(const std::string &toConvert) {
   std::string converted;
   // Check if the input has a unit of A\\^-1: this is converted to \\\\AA^{-1}
   // else
@@ -61,8 +61,8 @@ std::string convertAxesTitleToLatex(std::string toConvert) {
   return converted;
 }
 
-void setAxisLabel(std::string metadataLabel, std::string labelString,
-                  vtkFieldData *fieldData) {
+void setAxisLabel(const std::string &metadataLabel,
+                  const std::string &labelString, vtkFieldData *fieldData) {
   vtkNew<vtkStringArray> axisTitle;
   axisTitle->SetName(metadataLabel.c_str());
   axisTitle->SetNumberOfComponents(1);

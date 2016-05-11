@@ -11,10 +11,10 @@
 #include <boost/date_time/c_local_time_adjustor.hpp>
 #include <boost/scoped_array.hpp>
 
-#include <limits.h>
-#include <nexus/NeXusFile.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
+#include <climits>
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
 namespace NeXus {

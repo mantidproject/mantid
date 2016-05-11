@@ -1,17 +1,17 @@
 #include "MantidCurveFitting/Functions/BivariateNormal.h"
-#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ParameterTie.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
-#include <fstream>
 #include <algorithm>
-#include <math.h>
+#include <boost/shared_ptr.hpp>
+#include <cmath>
+#include <cstdio>
+#include <fstream>
 #include <sstream>
 #include <string>
-#include <cstdio>
 
 using namespace Mantid::API;
 

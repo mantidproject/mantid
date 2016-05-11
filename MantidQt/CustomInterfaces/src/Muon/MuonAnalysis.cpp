@@ -1316,6 +1316,7 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
                       << "\n";
 
       if (loadResult->loadedGrouping) {
+        g_log.warning("Using grouping loaded from NeXus file.");
         ITableWorkspace_sptr groupingTable;
 
         if (!(groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>(
