@@ -917,50 +917,40 @@ void ReflTableViewPresenter::reduceRow(int rowNo) {
     throw std::runtime_error("Failed to run ReflectometryReductionOneAuto.");
   // We need to retrieve these values from the algorithm so they can populate
   // the table.
-  std::string momentumMin =
+  std::string momentumMinEntry =
       algReflOne->getPropertyValue("MomentumTransferMinimum");
-  std::string momentumStep =
+  std::string momentumStepEntry =
       algReflOne->getPropertyValue("MomentumTransferStep");
-  std::string momentumMax =
+  std::string momentumMaxEntry =
       algReflOne->getPropertyValue("MomentumTransferMaximum");
-  std::string thetaIn = algReflOne->getPropertyValue("ThetaIn");
+  std::string thetaEntry = algReflOne->getPropertyValue("ThetaOut");
   // Reduction has completed. Put Qmin and Qmax into the table if needed, for
   // stitching.
   if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMIN))
           .toString()
-          .isEmpty() ||
-      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMAX))
+          .isEmpty())
+    m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_QMIN),
+                     boost::lexical_cast<double>(momentumMinEntry));
+
+  if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMAX))
           .toString()
-          .isEmpty() ||
-      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_DQQ))
+          .isEmpty())
+    m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_QMAX),
+                     boost::lexical_cast<double>(momentumMaxEntry));
+
+  if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_DQQ))
           .toString()
-          .isEmpty()) {
-    if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMIN))
-            .toString()
-            .isEmpty())
-      m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_QMIN),
-                       boost::lexical_cast<double>(momentumMin));
+          .isEmpty())
+    m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_DQQ),
+                     boost::lexical_cast<double>(momentumStepEntry));
 
-    if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMAX))
-            .toString()
-            .isEmpty())
-      m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_QMAX),
-                       boost::lexical_cast<double>(momentumMax));
-
-    if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_DQQ))
-            .toString()
-            .isEmpty())
-      m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_DQQ),
-                       boost::lexical_cast<double>(momentumStep));
-
-    m_tableDirty = true;
-  }
+  m_tableDirty = true;
   // Also fill in theta if needed
   if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_ANGLE))
           .toString()
           .isEmpty())
     m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_ANGLE),
-                     boost::lexical_cast<double>(thetaIn));
+                     boost::lexical_cast<double>(thetaEntry));
 }
 
 /**
