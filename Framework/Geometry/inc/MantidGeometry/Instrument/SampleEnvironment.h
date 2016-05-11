@@ -42,6 +42,8 @@ public:
 
   /// @return The name of kit
   inline const std::string name() const { return m_name; }
+  /// @return The name of can
+  inline const std::string canID() const { return m_components.front()->id(); }
   /// @return The number of elements the environment is composed of
   inline size_t nelements() const { return m_components.size(); }
 
@@ -56,6 +58,11 @@ private:
   // Element zero is always assumed to be the can
   std::vector<Object_const_sptr> m_components;
 };
+
+// Typedef a unique_ptr
+using SampleEnvironment_uptr = std::unique_ptr<SampleEnvironment>;
+// Typedef a unique_ptr to const
+using SampleEnvironment_const_uptr = std::unique_ptr<const SampleEnvironment>;
 }
 }
 

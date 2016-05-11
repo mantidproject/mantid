@@ -27,6 +27,7 @@ public:
 
     SampleEnvironment kit("TestKit", can);
     TS_ASSERT_EQUALS(kit.name(), "TestKit");
+    TS_ASSERT_EQUALS(kit.canID(), "8mm");
     TS_ASSERT_EQUALS(1, kit.nelements());
   }
 
@@ -36,6 +37,8 @@ public:
     auto shape = ComponentCreationHelper::createSphere(1.0);
     TS_ASSERT_THROWS_NOTHING(kit->add(shape));
     TS_ASSERT_EQUALS(4, kit->nelements());
+    TS_ASSERT_EQUALS(kit->name(), "TestKit");
+    TS_ASSERT_EQUALS(kit->canID(), "8mm");
   }
 
   void test_IsValid_Tests_All_Components() {

@@ -31,8 +31,7 @@ Can_const_sptr SampleEnvironmentSpec::findCan(const std::string &id) const {
  * Build a new SampleEnvironment instance from a given can ID
  * @return A new instance of a SampleEnvironment
  */
-std::unique_ptr<SampleEnvironment>
-SampleEnvironmentSpec::buildEnvironment(const std::string &canID) const {
+SampleEnvironment_uptr SampleEnvironmentSpec::buildEnvironment(const std::string &canID) const {
   auto env =
       Mantid::Kernel::make_unique<SampleEnvironment>(m_name, findCan(canID));
   for (const auto &component : m_components) {

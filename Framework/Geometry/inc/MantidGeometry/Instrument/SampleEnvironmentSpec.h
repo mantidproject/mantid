@@ -55,8 +55,7 @@ public:
   inline size_t ncomponents() const { return m_components.size(); }
   Can_const_sptr findCan(const std::string &id) const;
 
-  std::unique_ptr<SampleEnvironment>
-  buildEnvironment(const std::string &canID) const;
+  SampleEnvironment_uptr buildEnvironment(const std::string &canID) const;
 
   void addCan(const Can_const_sptr &can);
   void addComponent(const Object_const_sptr &component);

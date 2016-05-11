@@ -64,6 +64,7 @@ set ( SRC_FILES
 	src/Instrument/RectangularDetectorPixel.cpp
 	src/Instrument/ReferenceFrame.cpp
 	src/Instrument/SampleEnvironment.cpp
+	src/Instrument/SampleEnvironmentFactory.cpp
 	src/Instrument/SampleEnvironmentSpec.cpp
 	src/Instrument/SampleEnvironmentSpecParser.cpp
 	src/Instrument/StructuredDetector.cpp
@@ -220,6 +221,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/RectangularDetectorPixel.h
 	inc/MantidGeometry/Instrument/ReferenceFrame.h
 	inc/MantidGeometry/Instrument/SampleEnvironment.h
+	inc/MantidGeometry/Instrument/SampleEnvironmentFactory.h
 	inc/MantidGeometry/Instrument/SampleEnvironmentSpec.h
 	inc/MantidGeometry/Instrument/SampleEnvironmentSpecParser.h
 	inc/MantidGeometry/Instrument/StructuredDetector.h
@@ -395,8 +397,9 @@ set ( TEST_FILES
 	RulesSurfPointTest.h
 	RulesTest.h
 	RulesUnionTest.h
-	SampleEnvironmentSpecTest.h
+	SampleEnvironmentFactoryTest.h
 	SampleEnvironmentSpecParserTest.h
+	SampleEnvironmentSpecTest.h
 	SampleEnvironmentTest.h
 	ScalarUtilsTest.h
 	ShapeFactoryTest.h
