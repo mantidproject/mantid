@@ -92,6 +92,11 @@ void TOFSANSResolution::exec() {
   // Count histogram for normalization
   const int xLength = static_cast<int>(iqWS->readX(0).size());
   std::vector<double> XNorm(xLength - 1, 0.0);
+  // The input workspace is a histogram, but we compute dQ for each bin.
+  // In order for the saved output to be correct, we will need to assign
+  // the Dx values accordingly. The following vector will be used to
+  // track the resolution per q-bin.
+  std::vector<double> _dx_total(xLength - 1, 0.0);
 
   // Create workspaces with each component of the resolution for debugging
   // purposes
@@ -113,7 +118,7 @@ void TOFSANSResolution::exec() {
 
   // Initialize Dq
   MantidVec &DxOut = iqWS->dataDx(0);
-  for (int i = 0; i < xLength - 1; i++)
+  for (int i = 0; i < xLength; i++)
     DxOut[i] = 0.0;
 
   const V3D samplePos = reducedWS->getInstrument()->getSample()->getPos();
@@ -202,8 +207,8 @@ void TOFSANSResolution::exec() {
                     wl_bin_over_wl * wl_bin_over_wl);
 
       // By using only events with a positive weight, we use only the data
-      // distribution and
-      // leave out the background events
+      // distribution and leave out the background events.
+      // Note: we are looping over bins, therefore the xLength-1.
       if (iq >= 0 && iq < xLength - 1 && !boost::math::isnan(dq_over_q) &&
           dq_over_q > 0 && YIn[j] > 0) {
         _dx[iq] += q * dq_over_q * YIn[j];
@@ -214,9 +219,10 @@ void TOFSANSResolution::exec() {
     }
 
     // Move over the distributions for that pixel
+    // Note: we are looping over bins, therefore the xLength-1.
     PARALLEL_CRITICAL(iq) /* Write to shared memory - must protect */
     for (int iq = 0; iq < xLength - 1; iq++) {
-      DxOut[iq] += _dx[iq];
+      _dx_total[iq] += _dx[iq];
       XNorm[iq] += _norm[iq];
       TOFY[iq] += _tofy[iq];
       ThetaY[iq] += _thetay[iq];
@@ -226,13 +232,28 @@ void TOFSANSResolution::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
   // Normalize according to the chosen weighting scheme
+  // Note: we are looping over bins, therefore the xLength-1.
   for (int i = 0; i < xLength - 1; i++) {
     if (XNorm[i] == 0)
       continue;
-    DxOut[i] /= XNorm[i];
+    _dx_total[i] /= XNorm[i];
     TOFY[i] /= XNorm[i];
     ThetaY[i] /= XNorm[i];
+  }
+
+  // If the X-vector defines bin boundaries, assign the Dx values
+  // such that the average for a bin is the value that we computed
+  // for that bin.
+  if (iqWS->readX(0).size() > iqWS->readY(0).size()) {
+      for (int i = 0; i < xLength; i++) {
+          if (i == 0) {
+            DxOut[i] = _dx_total[i];
+          } else {
+            DxOut[i] = 2.0 * _dx_total[i-1] - DxOut[i-1];
+          }
+      }
   }
 }
 } // namespace Algorithms
