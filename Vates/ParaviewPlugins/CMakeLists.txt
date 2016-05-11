@@ -6,7 +6,7 @@ set_mantid_subprojects( Vates/VatesAPI )
 if("${CMAKE_CFG_INTDIR}" STREQUAL ".")
   # This is NOT a multi-configuration builder
   find_library(NonOrthogonalSourcePlugin_LOCATION name NonOrthogonalSource HINTS ${ParaView_DIR}/lib)
-  file (COPY ${NonOrthogonalSourcePlugin_LOCATION} DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR})
+  #file (COPY ${NonOrthogonalSourcePlugin_LOCATION} DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR})
 elseif(MSVC)
   # find_library won't find dlls only import libraries so just hardcode them
   # Release
