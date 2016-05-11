@@ -7,7 +7,7 @@ if( MSVC )
   # We are building static libraries but we want them to dynamically link
   # the to C/C++ runtime or we get duplicate library warnings
   set ( gtest_force_shared_crt ON )
-elseif(CMAKE_COMPILER_IS_GNUCXX AND GMOCK_VERSION VERSION_GREATER "1.6.0")
+elseif(CMAKE_COMPILER_IS_GNUCXX)
   # Suppress compiler warning in gtest as it's not our code
   # A little bit brutal but cmake doesn't provide a way to remove a compile
   # flag from a single source file
@@ -22,7 +22,7 @@ endif()
 add_subdirectory( gmock-${GMOCK_VERSION} )
 
 # Put the targets in the UnitTests folder
-foreach( target_var 
+foreach( target_var
          gmock gtest )
   set_target_properties( ${target_var} PROPERTIES EXCLUDE_FROM_ALL TRUE
                                                   FOLDER "UnitTests/gmock" )

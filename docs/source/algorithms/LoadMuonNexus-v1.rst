@@ -60,11 +60,16 @@ Dead times and detector grouping
 ################################
 
 Muon Nexus v1 files might contain dead time and detector grouping
-informationl. These are loaded as TableWorkspaces of the format accepted
-by ApplyDeadTimeCorr and MuonGroupDetectors accordingly. These are
+information. These are loaded as TableWorkspaces of the format accepted
+by :ref:`algm-ApplyDeadTimeCorr` and :ref:`algm-MuonGroupDetectors` accordingly. These are
 returned if and only if names are specified for the properties. For
 multi-period data workspace groups might be returned, if information in
 the Nexus files contains this information for each period.
+
+If the file contains no grouping entry (or the entry is full of zeros), the
+grouping will be loaded from the IDF instead. If this also fails, a dummy
+grouping will be created. In either case, a message will be displayed
+in the log to explain this.
 
 ChildAlgorithms used
 ####################

@@ -20,38 +20,41 @@ Some features:
 
 1) Panels can be grouped.
 
-| ``  All panels in a group will move the same way and rotate the same way.  If rigid rotations are``
-| ``   used, each panel is rotated about the center of the instrument, along with panel pixels rotating``
-| ``   around the panel's center. The height and  widths of the panels in a group will``
-| ``    all change by the same factor``
+   All panels in a group will move the same way and rotate the same way.  If rigid rotations are
+   used, each panel is rotated about the center of the instrument, along with panel pixels rotating
+   around the panel's center. The height and  widths of the panels in a group will
+   all change by the same factor.
 
-2) The user can select which quantities to keep fixed during the
-optimization.
+2) The user can select which quantities to keep fixed during the optimization.
 
 3) The results can be saved to an ISAW-like DetCal file or in an xml
-file that can be used with the LoadParameter algorithm.
+   file that can be used with the LoadParameter algorithm.
 
-4) Results from a previous optimization can be applied before another
-optimization is done.
+4) Results from a previous optimization can be applied before another optimization is done.
+   The Levenberg-Marquardt optimization algorithm is used.
 
-| ``  The Levenberg-Marquardt optimization algorithm is used. Later iterations may have too small of changes for the parameters to``
-| ``  get to another optimum value.  Restarting allows for the consideration of parameter values further away and also can change``
-| ``  constraints for the parameter values. This is also useful when fine tuning parameters that do not influence the errors as``
-| ``  much as other parameters.``
+   Later iterations may have too small of changes for the parameters to
+   get to another optimum value.   Restarting allows for the consideration of parameter values further away and also can change
+   constraints for the parameter values. This is also useful when fine tuning parameters that do not influence the errors as
+   much as other parameters.
 
 5) There are several output tables indicating the results of the fit
 
-| ``  A) ResultWorkspace contains the results from fitting.``
-| ``    -t0 is in microseconds``
-| ``    -L0 is in meters``
-| ``    -*Xoffset,*Yoffset,and *Zoffset are in meters``
-| ``    -*Xrot,*Yrot, and *Zrot are in degrees. Note that Zrot is done first, then Yrot , the Xrot.``
+   a. ResultWorkspace contains the results from fitting
+      
+      * t0 is in microseconds
+      * L0 is in meters
+      * Xoffset, Yoffset,and Zoffset are in meters
+      * Xrot, Yrot, and Zrot are in degrees. Note that Zrot is done first, then Yrot , the Xrot.
+      
+   b. QErrorWorkspace contains the Error in Q values for each peak, along with other associated information about the peak
+   c. CovarianceInfo contains the "correlations"(x100) between each of the parameters
+   d. ColWorkspace contains the calculated and theoretical column for each peak. To plot go to Preferences/2D Plots/Curves and change the default curve style to Scatter and then Plot Spectra for all the desired banks.
+   e. RowWorkspace contains the calculated and theoretical row for each peak. To plot go to Preferences/2D Plots/Curves and change the default curve style to Scatter and then Plot Spectra for all the desired banks.
+   f. TofWorkspace contains the calculated and theoretical TOF for each peak. To plot go to Preferences/2D Plots/Curves and change the default curve style to Scatter and then Plot Spectra for all the desired banks.
 
-``  B)QErrorWorkspace contains the Error in Q values for each peak, along with other associated information about the peak``
+ 6) Maximum changes in the quantities that are altered during optimization are now settable.
 
-``  C)CovarianceInfo contains the "correlations"(*100) between each of the parameters``
-
-``6) Maximum changes in the quantities that are altered during optimization are now settable.``
 
 "A" Workflow
 ------------
@@ -129,7 +132,7 @@ Output:
 .. testoutput:: SCDCalibratePanels
 
     matches
-    	
+      
 .. categories::
 
 .. sourcelink::

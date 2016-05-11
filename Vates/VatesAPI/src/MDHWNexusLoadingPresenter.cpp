@@ -88,7 +88,7 @@ MDHWNexusLoadingPresenter::execute(vtkDataSetFactory *factory,
   // extractMetaData needs to be re-run here because the first execution
   // of this from ::executeLoadMetadata will not have ensured that all
   // dimensions have proper range extents set.
-  this->extractMetadata(m_histoWs);
+  this->extractMetadata(*m_histoWs);
 
   this->appendMetadata(visualDataSet, m_histoWs->getName());
   return visualDataSet;
@@ -108,7 +108,7 @@ void MDHWNexusLoadingPresenter::executeLoadMetadata()
   }
   m_wsTypeName = m_histoWs->id();
   // Call base-class extraction method.
-  this->extractMetadata(m_histoWs);
+  this->extractMetadata(*m_histoWs);
 }
 
 /**
