@@ -348,8 +348,8 @@ public:
     // Out of range
     TS_ASSERT_THROWS(ew->dataX(-123), std::range_error);
     TS_ASSERT_THROWS(ew->dataX(5123), std::range_error);
-    TS_ASSERT_THROWS(ew->dataE(5123), std::range_error);
-    TS_ASSERT_THROWS(ew->dataY(5123), std::range_error);
+    TS_ASSERT_THROWS(ew->dataE(5123), NotImplementedError);
+    TS_ASSERT_THROWS(ew->dataY(5123), NotImplementedError);
 
     // Can't try the const access; copy constructors are not allowed.
   }
