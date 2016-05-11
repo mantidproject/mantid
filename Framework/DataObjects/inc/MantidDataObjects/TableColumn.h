@@ -145,12 +145,7 @@ public:
     return static_cast<long int>(m_data.size() * sizeof(Type));
   }
   /// Clone
-  TableColumn *clone() const override {
-    TableColumn *temp = new TableColumn();
-    temp->m_data = this->m_data;
-    temp->setName(this->m_name);
-    return temp;
-  }
+  TableColumn *clone() const override { return new TableColumn(*this); }
 
   /**
    * Cast an element to double if possible. If it's impossible
