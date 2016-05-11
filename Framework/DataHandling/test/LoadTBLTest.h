@@ -71,7 +71,8 @@ public:
                     0.001);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.04,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 2, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 2,
+                    0.01);
     TS_ASSERT_EQUALS(row.cell<int>(7), 1);
 
     row = outputWS->getRow(1);
@@ -85,7 +86,8 @@ public:
                     0.001);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.04,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 2, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 2,
+                    0.01);
     TS_ASSERT_EQUALS(row.cell<int>(7), 2);
 
     row = outputWS->getRow(2);
@@ -99,7 +101,8 @@ public:
                     0.001);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.04,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 2, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 2,
+                    0.01);
     TS_ASSERT_EQUALS(row.cell<int>(7), 2);
 
     cleanupafterwards();
@@ -152,7 +155,8 @@ public:
                     0.001);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.04,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 2, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 2,
+                    0.01);
     TS_ASSERT_EQUALS(row.cell<int>(7), 1);
 
     row = outputWS->getRow(1);
@@ -166,7 +170,8 @@ public:
                     0.001);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.04,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 2, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 2,
+                    0.01);
     TS_ASSERT_EQUALS(row.cell<int>(7), 2);
 
     row = outputWS->getRow(2);
@@ -180,7 +185,8 @@ public:
                     0.001);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.04,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 2, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 2,
+                    0.01);
     TS_ASSERT_EQUALS(row.cell<int>(7), 2);
 
     cleanupafterwards();
