@@ -43,10 +43,10 @@ public:
   CrystalFieldPeaksBase();
   void setAttribute(const std::string &name, const Attribute &) override;
 
-protected:
   /// Calculate the crystal field eigensystem
   void calculateEigenSystem(DoubleFortranVector &en, ComplexFortranMatrix &wf,
                             int &nre) const;
+protected:
   /// Store the default domain size after first
   /// function evaluation
   mutable size_t m_defaultDomainSize;
