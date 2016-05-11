@@ -67,6 +67,12 @@ private:
   ComponentList m_components;
 };
 
+/// unique_ptr to a SampleEnvironmentSpec
+using SampleEnvironmentSpec_uptr = std::unique_ptr<SampleEnvironmentSpec>;
+/// unique_ptr to a const SampleEnvironmentSpec
+using SampleEnvironmentSpec_const_uptr =
+    std::unique_ptr<const SampleEnvironmentSpec>;
+
 } // namespace Geometry
 } // namespace Mantid
 

@@ -65,6 +65,7 @@ set ( SRC_FILES
 	src/Instrument/ReferenceFrame.cpp
 	src/Instrument/SampleEnvironment.cpp
 	src/Instrument/SampleEnvironmentSpec.cpp
+	src/Instrument/SampleEnvironmentSpecParser.cpp
 	src/Instrument/StructuredDetector.cpp
 	src/Instrument/XMLInstrumentParameter.cpp
 	src/MDGeometry/CompositeImplicitFunction.cpp
@@ -220,6 +221,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/ReferenceFrame.h
 	inc/MantidGeometry/Instrument/SampleEnvironment.h
 	inc/MantidGeometry/Instrument/SampleEnvironmentSpec.h
+	inc/MantidGeometry/Instrument/SampleEnvironmentSpecParser.h
 	inc/MantidGeometry/Instrument/StructuredDetector.h
 	inc/MantidGeometry/Instrument/XMLInstrumentParameter.h
 	inc/MantidGeometry/Instrument_fwd.h
@@ -394,6 +396,7 @@ set ( TEST_FILES
 	RulesTest.h
 	RulesUnionTest.h
 	SampleEnvironmentSpecTest.h
+	SampleEnvironmentSpecParserTest.h
 	SampleEnvironmentTest.h
 	ScalarUtilsTest.h
 	ShapeFactoryTest.h

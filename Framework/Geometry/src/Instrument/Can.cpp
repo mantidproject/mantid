@@ -101,7 +101,7 @@ void Can::setSampleShape(const std::string &sampleShapeXML) {
   if (doc->documentElement()->nodeName() != SAMPLEGEOMETRY_TAG) {
     std::ostringstream msg;
     msg << "Can::setSampleShape() - XML definition "
-           "expected to contained within a <" << SAMPLEGEOMETRY_TAG
+           "expected to be contained within a <" << SAMPLEGEOMETRY_TAG
         << "> tag. Found " << doc->documentElement()->nodeName() << "instead.";
     throw std::invalid_argument(msg.str());
   }
