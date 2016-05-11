@@ -328,7 +328,7 @@ void LoadTBL::exec() {
     auto colQmin = ws->addColumn("str", "Qmin");
     auto colQmax = ws->addColumn("str", "Qmax");
     auto colDqq = ws->addColumn("str", "dq/q");
-    auto colScale = ws->addColumn("double", "Scale");
+    auto colScale = ws->addColumn("str", "Scale");
     auto colStitch = ws->addColumn("int", "StitchGroup");
     auto colOptions = ws->addColumn("str", "Options");
 
@@ -356,9 +356,6 @@ void LoadTBL::exec() {
       }
       getCells(line, rowVec, 16, isOld);
       const std::string scaleStr = rowVec.at(16);
-      double scale = 1.0;
-      if (!scaleStr.empty())
-        Mantid::Kernel::Strings::convert<double>(rowVec.at(16), scale);
 
       // check if the first run in the row has any data associated with it
       // 0 = runs, 1 = theta, 2 = trans, 3 = qmin, 4 = qmax
@@ -369,7 +366,7 @@ void LoadTBL::exec() {
           row << rowVec.at(i);
         }
         row << rowVec.at(15);
-        row << scale;
+        row << scaleStr;
         row << stitchID;
       }
 
@@ -382,7 +379,7 @@ void LoadTBL::exec() {
           row << rowVec.at(i);
         }
         row << rowVec.at(15);
-        row << scale;
+        row << scaleStr;
         row << stitchID;
       }
 
@@ -393,7 +390,7 @@ void LoadTBL::exec() {
         TableRow row = ws->appendRow();
         for (int i = 10; i < 17; ++i) {
           if (i == 16)
-            row << scale;
+            row << scaleStr;
           else
             row << rowVec.at(i);
         }
