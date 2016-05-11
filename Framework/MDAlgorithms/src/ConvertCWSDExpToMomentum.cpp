@@ -285,8 +285,16 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
     g_log.notice() << "Pt = " << runid << "\n" << m_iTime
                    << "-th for time/duration"
                    << "\n";
-    double time =
-        static_cast<double>(m_expDataTableWS->cell<float>(ir, m_iTime));
+    double time(0.);
+    try {
+      float time_f = m_expDataTableWS->cell<float>(ir, m_iTime);
+      time = static_cast<double>(time_f);
+    } catch (std::runtime_error e) {
+      time = m_expDataTableWS->cell<double>(ir, m_iTime);
+    }
+
+    // double time =
+    //   static_cast<double>(m_expDataTableWS->cell<float>(ir, m_iTime));
     int monitor_counts = m_expDataTableWS->cell<int>(ir, m_iMonitorCounts);
     if (!usevirtual)
       start_detid = 0;

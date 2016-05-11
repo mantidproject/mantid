@@ -8,28 +8,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidGeometry/Instrument.h"
 
-/*
-#include "MantidDataObjects/PeakShapeSpherical.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/MDEventFactory.h"
-#include "MantidDataObjects/CoordTransformDistance.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/TextAxis.h"
-#include "MantidKernel/Utils.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/Column.h"
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/Progress.h"
-#include <fstream>
-*/
-
 namespace Mantid {
 namespace MDAlgorithms {
 
@@ -97,7 +75,7 @@ void IntegratePeaksCWSD::init() {
       "will be merged.");
 
   declareProperty(
-      "NormalizeByMonitor", true,
+      "NormalizeByMonitor", false,
       "If selected, then all the signals will be normalized by monitor counts."
       "Otherwise, the output peak intensity will be just simple addition of "
       "peak intensity."
@@ -183,7 +161,7 @@ void IntegratePeaksCWSD::processInputs() {
     throw std::invalid_argument(
         "It is not allowed to select to be normalized both  "
         "by time and by monitor counts.");
-  if (m_doMergePeak) {
+  if (m_doMergePeak && !(m_normalizeByMonitor || m_normalizeByTime)) {
     throw std::invalid_argument(
         "Either being normalized by time or being normalized "
         "by monitor must be selected if merge-peak is selected.");

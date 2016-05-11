@@ -73,6 +73,9 @@ public:
     alg.setProperty("PeaksWorkspace", peakws);
     alg.setProperty("OutputWorkspace", "IntegratedPeakWS");
     alg.setProperty("PeakRadius", 0.3);
+    alg.setProperty("MergePeaks", true);
+    alg.setProperty("NormalizeByMonitor", true);
+    alg.setProperty("NormalizeByTime", false);
 
     alg.execute();
     TS_ASSERT(alg.isExecuted())
