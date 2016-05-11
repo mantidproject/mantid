@@ -401,7 +401,7 @@ int NexusFileIO::writeNexusProcessedData2D(
       asize[1] = dims_array[1];
       for (size_t i = 0; i < nSpect; i++) {
         int s = spec[i];
-        NXputslab(fileID, localworkspace->readDx(s).data(), start, asize);
+        NXputslab(fileID, localworkspace->dx(s).rawData().data(), start, asize);
         start[0]++;
       }
     }
