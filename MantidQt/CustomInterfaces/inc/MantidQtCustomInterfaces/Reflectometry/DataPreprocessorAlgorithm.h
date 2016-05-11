@@ -58,12 +58,12 @@ public:
     auto properties = alg->getProperties();
     for (auto &prop : properties) {
 
-      if (prop->direction() == 0 &&
+      if (prop->direction() == Mantid::Kernel::Direction::Input &&
           (prop->type() == "MatrixWorkspace" || prop->type() == "Workspace")) {
         // For now, we restrict the workspaces to either MatrixWorkspace
         // or Workspace, this condition can be relaxed if necessary
 
-        if (!countInputWS) {
+        if (countInputWS == 0) {
           m_lhs = prop->name();
         } else {
           m_rhs = prop->name();
@@ -71,7 +71,7 @@ public:
         countInputWS++;
       }
 
-      if (prop->direction() == 1 &&
+      if (prop->direction() == Mantid::Kernel::Direction::Output &&
           (prop->type() == "MatrixWorkspace" || prop->type() == "Workspace")) {
 
         m_outProperty = prop->name();

@@ -55,7 +55,8 @@ public:
     auto properties = alg->getProperties();
     for (auto &prop : properties) {
 
-      if (prop->direction() == 0 && prop->type() == "str list") {
+      if (prop->direction() == Mantid::Kernel::Direction::Input &&
+          prop->type() == "str list") {
         // For now, we assume we receive the list of workspace to post-process
         // as
         // a 'str list'
@@ -63,7 +64,7 @@ public:
 
         countInputWS++;
       }
-      if (prop->direction() == 1 &&
+      if (prop->direction() == Mantid::Kernel::Direction::Output &&
           (prop->type() == "MatrixWorkspace" || prop->type() == "Workspace")) {
         // For now, we restrict the output workspaces to either MatrixWorkspace
         // or Worksace
@@ -96,12 +97,12 @@ public:
   std::string inputProperty() const { return m_inputProp; };
   // The name of the output workspace property
   std::string outputProperty() const { return m_outputProp; };
-	// The number of output workspace properties (currently only 1)
-	size_t numberOfOutputProperties() const { return 1; };
+  // The number of output workspace properties (currently only 1)
+  size_t numberOfOutputProperties() const { return 1; };
   // The prefix of the output property
   std::string prefix() const { return m_prefix; };
-	// The blacklist
-	std::set<std::string> blacklist() const { return m_blacklist; };
+  // The blacklist
+  std::set<std::string> blacklist() const { return m_blacklist; };
 
 private:
   // The name of this algorithm
