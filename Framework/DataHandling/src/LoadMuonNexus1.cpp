@@ -5,6 +5,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
@@ -164,29 +165,6 @@ void LoadMuonNexus1::exec() {
     m_spec_max = m_numberOfSpectra + 1; // Add +1 to iterate
   }
 
-  Workspace_sptr loadedGrouping;
-
-  // Try to load detector grouping info, if needed for auto-grouping or user
-  // requested it
-  if (autoGroup || returnGrouping) {
-    loadedGrouping = loadDetectorGrouping(root);
-
-    if (loadedGrouping && returnGrouping) {
-      // Return loaded grouping, if requested
-      setProperty("DetectorGroupingTable", loadedGrouping);
-    }
-
-    if (!loadedGrouping && autoGroup) {
-      // If autoGroup requested and no grouping in the file - show a warning
-      g_log.warning(
-          "Unable to load grouping from the file. Grouping not applied.");
-    }
-  }
-
-  // If multiperiod, will need to hold the Instrument & Sample for copying
-  boost::shared_ptr<Instrument> instrument;
-  boost::shared_ptr<Sample> sample;
-
   // Read the number of time channels (i.e. bins) from the Nexus file
   const int channelsPerSpectrum = nxload.t_ntc1;
   // Read in the time bin boundaries
@@ -279,6 +257,26 @@ void LoadMuonNexus1::exec() {
     assert(counter == size_t(total_specs));
 
     Workspace_sptr outWs;
+
+    Workspace_sptr loadedGrouping;
+
+    // Try to load detector grouping info, if needed for auto-grouping or user
+    // requested it
+    if (autoGroup || returnGrouping) {
+      loadedGrouping =
+          loadDetectorGrouping(root, localWorkspace->getInstrument());
+
+      if (loadedGrouping && returnGrouping) {
+        // Return loaded grouping, if requested
+        setProperty("DetectorGroupingTable", loadedGrouping);
+      }
+
+      if (!loadedGrouping && autoGroup) {
+        // If autoGroup requested and no grouping in the file - show a warning
+        g_log.warning(
+            "Unable to load grouping from the file. Grouping not applied.");
+      }
+    }
 
     if (autoGroup && loadedGrouping) {
       TableWorkspace_sptr groupingTable;
@@ -422,9 +420,14 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
 
 /**
  * Loads detector grouping.
+ * If no entry in NeXus file for grouping, load it from the IDF.
  * @param root :: Root entry of the Nexus file to read from
+ * @param inst :: Pointer to instrument (to use if IDF needed)
+ * @returns :: Grouping table - or tables, if per period
  */
-Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
+Workspace_sptr
+LoadMuonNexus1::loadDetectorGrouping(NXRoot &root,
+                                     Geometry::Instrument_const_sptr inst) {
   NXEntry dataEntry = root.openEntry("run/histogram_data_1");
 
   NXInfo infoGrouping = dataEntry.getDataSetInfo("grouping");
@@ -470,7 +473,7 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
     } else {
 
       if (m_numberOfPeriods == 1) {
-        // Simpliest case - one grouping entry per spectrum
+        // Simplest case - one grouping entry per spectrum
         grouping.reserve(grouping.size() + specToLoad.size());
         if (!m_entrynumber) {
           // m_entrynumber = 0 && m_numberOfPeriods = 1 means that user did not
@@ -527,7 +530,18 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
       }
     }
   }
-  return Workspace_sptr();
+  // If we reach this point, no/zero grouping found.
+  // Try to load from IDF instead
+  const std::string mainFieldDirection = getProperty("MainFieldDirection");
+  API::GroupingLoader groupLoader(inst, mainFieldDirection);
+  try {
+    const auto idfGrouping = groupLoader.getGroupingFromIDF();
+    g_log.warning("Loading grouping from IDF");
+    return idfGrouping->toTable();
+  } catch (const std::runtime_error &) {
+    g_log.warning("Loading dummy grouping");
+    return groupLoader.getDummyGrouping()->toTable();
+  }
 }
 
 /**

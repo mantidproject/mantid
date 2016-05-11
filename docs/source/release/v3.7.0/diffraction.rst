@@ -8,14 +8,17 @@ Diffraction Changes
 Crystal Improvements
 --------------------
 
-- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` has parameter errors reduced, option for simplex minimization,
-  and 3 new workspaces which can plot calculated vs theoretical columns, rows, and TOF for each bank.
+- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` has parameter errors reduced,
+   option for simplex minimization, and 3 new workspaces which can plot calculated 
+   vs theoretical columns, rows, and TOF for each bank. Calibration is now as good 
+   as ISAW's for Mandi data.
 - 5 detectors added to the MANDI instrument geometry
 - :ref:`LoadCIF <algm-LoadCIF>` can now also load structures where only anisotropic displacement parameters are given,
   which are converted to equivalent isotropic parameters.
 - :ref:`SaveHKL <algm-SaveHKL>` has option to write the same output as anvred3.py including direction cosines.
 - :ref:`LoadHKL <algm-LoadHKL>` reads hkl output that includes direction cosines.
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` has DetCal information sorted by detector numbers
+- :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` has resolution shells in units of d-Spacing.
 
 
 Engineering Diffraction

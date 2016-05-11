@@ -653,9 +653,9 @@ public:
     TS_ASSERT_EQUALS(F->getPointInObject(pt), 1); // This now succeeds
     // Test use of defineBoundingBox to explictly set the bounding box, when the
     // automatic method fails
-    F->defineBoundingBox(0.5, -1 / (2.0 * sqrt(2.0)), -1.0 / (2.0 * sqrt(2.0)),
-                         -0.5, -sqrt(2.0) - 1.0 / (2.0 * sqrt(2.0)),
-                         -sqrt(2.0) - 1.0 / (2.0 * sqrt(2.0)));
+    F->defineBoundingBox(0.5, -0.5 * M_SQRT1_2, -0.5 * M_SQRT1_2, -0.5,
+                         -M_SQRT2 - 0.5 * M_SQRT1_2,
+                         -M_SQRT2 - 0.5 * M_SQRT1_2);
     TS_ASSERT_EQUALS(F->getPointInObject(pt), 1);
     Object_sptr S = createSphere();
     TS_ASSERT_EQUALS(S->getPointInObject(pt), 1);

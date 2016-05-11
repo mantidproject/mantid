@@ -69,9 +69,8 @@ const std::string MaxEnt::category() const { return "Arithmetic\\FFT"; }
 const std::string MaxEnt::summary() const {
   return "Runs Maximum Entropy method on every spectrum of an input workspace. "
          "Note this algorithm is still in development, and its interface is "
-         "likely to change. It currently works for the case where the "
-         "number of data points equals the number of reconstructed (image) "
-         "points and data and image are related by Fourier transform.";
+         "likely to change. It currently works for the case where data and "
+         "image are related by a Fourier transform.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -91,6 +90,11 @@ void MaxEnt::init() {
   declareProperty("PositiveImage", false, "If true, the reconstructed image "
                                           "must be positive. It can take "
                                           "negative values otherwise");
+
+  declareProperty("AutoShift", false,
+                  "Automatically calculate and apply phase shift. Zero on the "
+                  "X axis is assumed to be in the first bin. If it is not, "
+                  "setting this property will automatically correct for this.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
   mustBePositive->setLower(0);
@@ -212,6 +216,8 @@ void MaxEnt::exec() {
   bool complex = getProperty("ComplexData");
   // Image must be positive?
   bool positiveImage = getProperty("PositiveImage");
+  // Autoshift
+  bool autoShift = getProperty("AutoShift");
   // Increase the number of points in the image by this factor
   size_t densityFactor = getProperty("DensityFactor");
   // Background (default level, sky background, etc)
@@ -334,8 +340,8 @@ void MaxEnt::exec() {
     auto solImage = maxentData->getImage();
 
     // Populate the output workspaces
-    populateOutputWS(inWS, s, nspec, solData, outDataWS, false);
-    populateOutputWS(inWS, s, nspec, solImage, outImageWS, true);
+    populateDataWS(inWS, s, nspec, solData, outDataWS);
+    populateImageWS(inWS, s, nspec, solImage, outImageWS, autoShift);
 
     // Populate workspaces recording the evolution of Chi and Test
     // X values
@@ -591,13 +597,11 @@ std::vector<double> MaxEnt::applyDistancePenalty(
 * @param nspec :: [input] The total number of histograms in the input workspace
 * @param result :: [input] The result to be written in the output workspace
 * @param outWS :: [input] The output workspace to populate
-* @param isImage :: [output] Boolean indicating if result corresponds to the
-* image
-* data
+* @param autoShift :: [input] Whether or not to correct the phase shift
 */
-void MaxEnt::populateOutputWS(const MatrixWorkspace_sptr &inWS, size_t spec,
-                              size_t nspec, const std::vector<double> &result,
-                              MatrixWorkspace_sptr &outWS, bool isImage) {
+void MaxEnt::populateImageWS(const MatrixWorkspace_sptr &inWS, size_t spec,
+                             size_t nspec, const std::vector<double> &result,
+                             MatrixWorkspace_sptr &outWS, bool autoShift) {
 
   if (result.size() % 2)
     throw std::invalid_argument("Cannot write results to output workspaces");
@@ -612,44 +616,82 @@ void MaxEnt::populateOutputWS(const MatrixWorkspace_sptr &inWS, size_t spec,
   double x0 = inWS->readX(spec)[0];
   double dx = inWS->readX(spec)[1] - x0;
 
-  if (isImage) {
+  double delta = 1. / dx / npoints;
+  int isOdd = (inWS->blocksize() % 2) ? 1 : 0;
 
-    double delta = 1. / dx / npoints;
-    int isOdd = (inWS->blocksize() % 2) ? 1 : 0;
+  double shift = x0 * 2 * M_PI;
+  if (!autoShift)
+    shift = 0;
 
-    for (int i = 0; i < npoints; i++) {
-      int j = (npoints / 2 + i + isOdd) % npoints;
-      X[i] = delta * (-npoints / 2 + i);
-      YR[i] = result[2 * j] * dx;
-      YI[i] = result[2 * j + 1] * dx;
-    }
-    if (npointsX == npoints + 1)
-      X[npoints] = X[npoints - 1] + delta;
+  for (int i = 0; i < npoints; i++) {
+    int j = (npoints / 2 + i + isOdd) % npoints;
+    X[i] = delta * (-npoints / 2 + i);
 
-    // Caption & label
-    auto inputUnit = inWS->getAxis(0)->unit();
-    if (inputUnit) {
-      boost::shared_ptr<Kernel::Units::Label> lblUnit =
-          boost::dynamic_pointer_cast<Kernel::Units::Label>(
-              UnitFactory::Instance().create("Label"));
-      if (lblUnit) {
-
-        lblUnit->setLabel(
-            inverseCaption[inWS->getAxis(0)->unit()->caption()],
-            inverseLabel[inWS->getAxis(0)->unit()->label().ascii()]);
-        outWS->getAxis(0)->unit() = lblUnit;
-      }
-    }
-
-  } else {
-    for (int i = 0; i < npoints; i++) {
-      X[i] = x0 + i * dx;
-      YR[i] = result[2 * i];
-      YI[i] = result[2 * i + 1];
-    }
-    if (npointsX == npoints + 1)
-      X[npoints] = x0 + npoints * dx;
+    double xShift = X[i] * shift;
+    double c = cos(xShift);
+    double s = sin(xShift);
+    YR[i] = result[2 * j] * c - result[2 * j + 1] * s;
+    YI[i] = result[2 * j] * s + result[2 * j + 1] * c;
+    YR[i] *= dx;
+    YI[i] *= dx;
   }
+  if (npointsX == npoints + 1)
+    X[npoints] = X[npoints - 1] + delta;
+
+  // Caption & label
+  auto inputUnit = inWS->getAxis(0)->unit();
+  if (inputUnit) {
+    boost::shared_ptr<Kernel::Units::Label> lblUnit =
+        boost::dynamic_pointer_cast<Kernel::Units::Label>(
+            UnitFactory::Instance().create("Label"));
+    if (lblUnit) {
+
+      lblUnit->setLabel(
+          inverseCaption[inWS->getAxis(0)->unit()->caption()],
+          inverseLabel[inWS->getAxis(0)->unit()->label().ascii()]);
+      outWS->getAxis(0)->unit() = lblUnit;
+    }
+  }
+
+  outWS->dataX(spec).assign(X.begin(), X.end());
+  outWS->dataY(spec).assign(YR.begin(), YR.end());
+  outWS->dataE(spec).assign(E.begin(), E.end());
+  outWS->dataX(nspec + spec).assign(X.begin(), X.end());
+  outWS->dataY(nspec + spec).assign(YI.begin(), YI.end());
+  outWS->dataE(nspec + spec).assign(E.begin(), E.end());
+}
+
+/** Populates the output workspaces
+* @param inWS :: [input] The input workspace
+* @param spec :: [input] The current spectrum being analyzed
+* @param nspec :: [input] The total number of histograms in the input workspace
+* @param result :: [input] The result to be written in the output workspace
+* @param outWS :: [input] The output workspace to populate
+*/
+void MaxEnt::populateDataWS(const MatrixWorkspace_sptr &inWS, size_t spec,
+                            size_t nspec, const std::vector<double> &result,
+                            MatrixWorkspace_sptr &outWS) {
+
+  if (result.size() % 2)
+    throw std::invalid_argument("Cannot write results to output workspaces");
+
+  int npoints = static_cast<int>(result.size() / 2);
+  int npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
+  MantidVec X(npointsX);
+  MantidVec YR(npoints);
+  MantidVec YI(npoints);
+  MantidVec E(npoints, 0.);
+
+  double x0 = inWS->readX(spec)[0];
+  double dx = inWS->readX(spec)[1] - x0;
+
+  for (int i = 0; i < npoints; i++) {
+    X[i] = x0 + i * dx;
+    YR[i] = result[2 * i];
+    YI[i] = result[2 * i + 1];
+  }
+  if (npointsX == npoints + 1)
+    X[npoints] = x0 + npoints * dx;
 
   outWS->dataX(spec).assign(X.begin(), X.end());
   outWS->dataY(spec).assign(YR.begin(), YR.end());

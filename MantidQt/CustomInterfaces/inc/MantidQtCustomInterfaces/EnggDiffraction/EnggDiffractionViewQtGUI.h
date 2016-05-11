@@ -268,9 +268,6 @@ private slots:
   // slots of plot spectrum check box status
   void plotFocusStatus();
 
-  // updates the cropped calib run number with new ceria
-  void updateCroppedCalibRun();
-
   // enables the text field when appropriate bank name is selected
   void enableSpecNos();
 

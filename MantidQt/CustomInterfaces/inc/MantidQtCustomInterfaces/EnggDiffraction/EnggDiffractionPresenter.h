@@ -27,7 +27,7 @@ MVP Model-View-Presenter pattern). In principle, in a strict MVP
 setup, signals from the model should always be handled through this
 presenter and never go directly to the view, and viceversa.
 
-Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2015-2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -73,11 +73,12 @@ public:
                   const std::string &dgFile);
 
   /// checks if its a valid run number returns string
-  std::string isValidRunNumber(std::vector<std::string> dir);
+  std::string isValidRunNumber(const std::vector<std::string> &dir);
 
   /// checks if its a valid run number inside vector and returns a vector;
-  /// used for mutli-run focusing
-  std::vector<std::string> isValidMultiRunNumber(std::vector<std::string> dir);
+  /// used for mutli-run focusing, and other multi-run file selections
+  std::vector<std::string>
+  isValidMultiRunNumber(const std::vector<std::string> &dir);
 
   /// pre-processing re-binning with Rebin, for a worker/thread
   void doRebinningTime(const std::string &runNo, double bin,
@@ -313,11 +314,24 @@ private:
   std::string
   plotDifcZeroWorkspace(const std::string &customisedBankName) const;
 
+  /// keep track of the paths the user "browses to", to add them in
+  /// the file search path
+  void recordPathBrowsedTo(const std::string &filename);
+
+  /// paths the user has "browsed to", to add them to the search path
+  std::vector<std::string> m_browsedToPaths;
+
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;
 
   /// string to use for invalid run number error message
   const static std::string g_runNumberErrorStr;
+
+  // name of the workspace with the vanadium integration (of spectra)
+  static const std::string g_vanIntegrationWSName;
+
+  // name of the workspace with the vanadium (smoothed) curves
+  static const std::string g_vanCurvesWSName;
 
   /// whether to allow users to give the output calibration filename
   const static bool g_askUserCalibFilename;
@@ -331,17 +345,8 @@ private:
   /// saves the last valid run number
   static std::string g_lastValidRun;
 
-  /// bank name use or SpecNos for cropped calibration
+  /// bank name used or SpecNos for cropped calibration
   static std::string g_calibCropIdentifier;
-
-  // name of the workspace with the vanadium integration (of spectra)
-  static const std::string g_vanIntegrationWSName;
-
-  // vector holding directory of focused bank file
-  // std::vector<std::string> static m_fitting_runno_dir_vec;
-
-  // indentifier for fitting multi-run or single run input
-  // bool static m_fittingMutliRunMode;
 
   QThread *m_workerThread;
 

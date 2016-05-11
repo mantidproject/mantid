@@ -34,7 +34,6 @@ namespace {
 Kernel::Logger g_log("MatrixWorkspace");
 constexpr double rad2deg = 180. / M_PI;
 }
-
 const std::string MatrixWorkspace::xDimensionId = "xDimension";
 const std::string MatrixWorkspace::yDimensionId = "yDimension";
 
@@ -778,10 +777,8 @@ MatrixWorkspace::getDetector(const size_t workspaceIndex) const {
                                            "");
   }
   // Else need to construct a DetectorGroup and return that
-  std::vector<Geometry::IDetector_const_sptr> dets_ptr =
-      localInstrument->getDetectors(dets);
-  return Geometry::IDetector_const_sptr(
-      new Geometry::DetectorGroup(dets_ptr, false));
+  auto dets_ptr = localInstrument->getDetectors(dets);
+  return boost::make_shared<Geometry::DetectorGroup>(dets_ptr, false);
 }
 
 /** Returns the signed 2Theta scattering angle for a detector
@@ -1278,8 +1275,8 @@ public:
   MWDimension(const Axis *axis, const std::string &dimensionId)
       : m_axis(*axis), m_dimensionId(dimensionId),
         m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != nullptr),
-        m_frame(new Geometry::GeneralFrame(m_axis.unit()->label(),
-                                           m_axis.unit()->label())) {}
+        m_frame(Kernel::make_unique<Geometry::GeneralFrame>(
+            m_axis.unit()->label(), m_axis.unit()->label())) {}
 
   /// the name of the dimennlsion as can be displayed along the axis
   std::string getName() const override {
@@ -1361,8 +1358,9 @@ class MWXDimension : public Mantid::Geometry::IMDDimension {
 public:
   MWXDimension(const MatrixWorkspace *ws, const std::string &dimensionId)
       : m_ws(ws), m_dimensionId(dimensionId),
-        m_frame(new Geometry::GeneralFrame(m_ws->getAxis(0)->unit()->label(),
-                                           m_ws->getAxis(0)->unit()->label())) {
+        m_frame(Kernel::make_unique<Geometry::GeneralFrame>(
+            m_ws->getAxis(0)->unit()->label(),
+            m_ws->getAxis(0)->unit()->label())) {
     m_X = ws->readX(0);
   }
 
@@ -1432,12 +1430,10 @@ private:
 boost::shared_ptr<const Mantid::Geometry::IMDDimension>
 MatrixWorkspace::getDimension(size_t index) const {
   if (index == 0) {
-    auto dimension = new MWXDimension(this, xDimensionId);
-    return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
+    return boost::make_shared<MWXDimension>(this, xDimensionId);
   } else if (index == 1) {
     Axis *yAxis = this->getAxis(1);
-    auto dimension = new MWDimension(yAxis, yDimensionId);
-    return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
+    return boost::make_shared<MWDimension>(yAxis, yDimensionId);
   } else
     throw std::invalid_argument("MatrixWorkspace only has 2 dimensions.");
 }
@@ -1445,20 +1441,20 @@ MatrixWorkspace::getDimension(size_t index) const {
 boost::shared_ptr<const Mantid::Geometry::IMDDimension>
 MatrixWorkspace::getDimensionWithId(std::string id) const {
   int nAxes = this->axes();
-  IMDDimension *dim = nullptr;
+  boost::shared_ptr<IMDDimension> dim;
   for (int i = 0; i < nAxes; i++) {
-    Axis *xAxis = this->getAxis(i);
-    const std::string &knownId = getDimensionIdFromAxis(i);
+    const std::string knownId = getDimensionIdFromAxis(i);
     if (knownId == id) {
-      dim = new MWDimension(xAxis, id);
+      dim = boost::make_shared<MWDimension>(this->getAxis(i), id);
       break;
     }
   }
+
   if (nullptr == dim) {
     std::string message = "Cannot find id : " + id;
     throw std::overflow_error(message);
   }
-  return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dim);
+  return dim;
 }
 
 //--------------------------------------------------------------------------------------------
