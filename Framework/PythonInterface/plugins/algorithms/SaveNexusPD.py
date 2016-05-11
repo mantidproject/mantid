@@ -175,23 +175,26 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         nxdetector = nxinstrument.create_group(name)
         nxdetector.attrs[self.NX_CLASS] = 'NXdetector'
 
-        if self._sample is not None:
-            L2 = detector.getDistance(self._sample)
-            polar = detector.getTwoTheta(self._sample.getPos(),
-                                         self._sourcePos)  # radians
-            azi = detector.getPhi()  # radians
+        if self._sample is None or detector is None:
+            return nxdetector
 
-            temp = nxdetector.create_dataset('distance', data=[abs(L2)],
-                                             dtype=self._dtype)
-            temp.attrs['units'] = 'metre'
+        # only continue if there is position information
+        L2 = detector.getDistance(self._sample)
+        polar = detector.getTwoTheta(self._sample.getPos(),
+                                     self._sourcePos)  # radians
+        azi = detector.getPhi()  # radians
 
-            temp = nxdetector.create_dataset('polar_angle', data=[polar],
-                                             dtype=self._dtype)
-            temp.attrs['units'] = 'radian'
+        temp = nxdetector.create_dataset('distance', data=[abs(L2)],
+                                         dtype=self._dtype)
+        temp.attrs['units'] = 'metre'
 
-            temp = nxdetector.create_dataset('azimuthal_angle', data=[azi],
-                                             dtype=self._dtype)
-            temp.attrs['units'] = 'radian'
+        temp = nxdetector.create_dataset('polar_angle', data=[polar],
+                                         dtype=self._dtype)
+        temp.attrs['units'] = 'radian'
+
+        temp = nxdetector.create_dataset('azimuthal_angle', data=[azi],
+                                         dtype=self._dtype)
+        temp.attrs['units'] = 'radian'
 
         return nxdetector
 
