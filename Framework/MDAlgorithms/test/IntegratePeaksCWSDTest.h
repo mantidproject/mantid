@@ -98,7 +98,7 @@ public:
   /** Test integrate MDEventWorkspace with multiple runs and multiple peaks
    *  in a given PeaksWorkspace
    */
-  void Xtest_multipleRun() {
+  void test_multipleRun() {
     // Create workspaces to test
     std::vector<Mantid::Kernel::V3D> vec_qsample;
     std::vector<double> vec_signal;
@@ -127,11 +127,13 @@ public:
     alg.initialize();
     TS_ASSERT(alg.isInitialized())
 
-    alg.setProperty("InputWorkspace", inputws);
-    alg.setProperty("PeaksWorkspace", peakws);
+    alg.setPropertyValue("InputWorkspace", "TestMDWS2");
+    alg.setPropertyValue("PeaksWorkspace", "TestPeaksWS");
     alg.setProperty("OutputWorkspace", "IntegratedPeakWS");
     alg.setProperty("PeakRadius", 0.2);
     alg.setProperty("MergePeaks", false);
+    alg.setProperty("NormalizeByMonitor", false);
+    alg.setProperty("NormalizeByTime", false);
 
     alg.execute();
     TS_ASSERT(alg.isExecuted())
@@ -152,7 +154,7 @@ public:
   /** Test integrate MDEventWorkspace with multiple runs without PeaksWorkspace
    *  but with a given peak center
    */
-  void Xtest_multipleRun1Peak() {
+  void test_multipleRun1Peak() {
     // Create MDEventWorkspace for testing
     std::vector<Mantid::Kernel::V3D> vec_qsample;
     std::vector<double> vec_signal;
@@ -176,6 +178,8 @@ public:
     alg.setProperty("PeakRadius", 0.2);
     alg.setPropertyValue("PeakCentre", "3, 3, 3");
     alg.setProperty("MergePeaks", true);
+    alg.setProperty("NormalizeByMonitor", true);
+    alg.setProperty("NormalizeByTime", false);
 
     alg.execute();
     TS_ASSERT(alg.isExecuted());
