@@ -81,7 +81,7 @@ Output:
 .. testoutput:: ExReflRedOneAutoSimple
 
     The first four IvsLam Y values are: [ 0.0000e+00, 0.0000e+00, 4.9588e-07, 1.2769e-06 ]
-    The first four IvsQ Y values are: [ 2.1435e-05, 5.0384e-05, 5.2332e-05, 5.2042e-05 ]
+    The first four IvsQ Y values are: [ 6.1751e-04, 7.7788e-04, 9.1477e-04, 1.0946e-03 ]
     Theta out is the same as theta in: 0.7
 
 **Example - Reduce a Run with a transmission run**
@@ -102,7 +102,7 @@ Output:
 .. testoutput:: ExReflRedOneAutoTrans
 
     The first four IvsLam Y values are: [ 0.0000e+00, 0.0000e+00, 4.8592e-06, 1.0580e-05 ]
-    The first four IvsQ Y values are: [ 9.6396e-01, 8.8177e-01, 7.1679e-01, 6.2066e-01 ]
+    The first four IvsQ Y values are: [ 8.3640e-01, 1.0129e+00, 1.3411e+00, 1.2839e+00 ]
     Theta out is the same as theta in: 0.7
 
 **Example - Reduce a Run overloading default parameters**
@@ -122,7 +122,7 @@ Output:
 .. testoutput:: ExReflRedOneAutoOverload
 
     The first four IvsLam Y values are: [ 0.0000e+00, 0.0000e+00, 4.9108e-07, 1.2645e-06 ]
-    The first four IvsQ Y values are: [ 2.1227e-05, 4.9897e-05, 5.1825e-05, 5.1538e-05 ]
+    The first four IvsQ Y values are: [ 6.1153e-04, 7.7035e-04, 9.0591e-04, 1.0840e-03 ]
     Theta out is the same as theta in: 0.7
 
 **Example - Polynomial correction**
