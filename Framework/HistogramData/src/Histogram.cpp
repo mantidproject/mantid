@@ -96,5 +96,19 @@ void Histogram::checkSize(const BinEdges &binEdges) const {
     throw std::logic_error("Histogram: size mismatch of BinEdges\n");
 }
 
+/// Switch the Dx storage mode. Must be called *before* changing m_xMode!
+void Histogram::switchDxToBinEdges() {
+  if (xMode() == XMode::BinEdges || !m_dx)
+    return;
+  m_dx = BinEdgeStandardDeviations(PointStandardDeviations(m_dx)).cowData();
+}
+
+/// Switch the Dx storage mode. Must be called *before* changing m_xMode!
+void Histogram::switchDxToPoints() {
+  if (xMode() == XMode::Points || !m_dx)
+    return;
+  m_dx = PointStandardDeviations(BinEdgeStandardDeviations(m_dx)).cowData();
+}
+
 } // namespace HistogramData
 } // namespace Mantid

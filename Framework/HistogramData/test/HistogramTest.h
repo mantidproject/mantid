@@ -252,6 +252,17 @@ public:
     TS_ASSERT_THROWS(h.setPoints(x), std::logic_error);
   }
 
+  void test_setPoints_changesDxStorageMode() {
+    Histogram hist(BinEdges(3));
+    auto dx = {1.0, 2.0, 3.0};
+    hist.setBinEdgeStandardDeviations(dx);
+    TS_ASSERT_EQUALS(hist.dx().size(), 3);
+    hist.setPoints(Points(2));
+    TS_ASSERT_EQUALS(hist.dx().size(), 2);
+    TS_ASSERT_DELTA(hist.dx()[0], 1.5, 1e-14);
+    TS_ASSERT_DELTA(hist.dx()[1], 2.5, 1e-14);
+  }
+
   void test_edges_from_edges() {
     const Histogram hist(BinEdges{0.1, 0.2, 0.4});
     const auto edges = hist.binEdges();
@@ -387,6 +398,18 @@ public:
     // This test makes sure that size mismatch takes precedence over the
     // self-assignment check. x is points, setting it as bin edges should fail.
     TS_ASSERT_THROWS(h.setBinEdges(x), std::logic_error);
+  }
+
+  void test_setBinEdges_changesDxStorageMode() {
+    Histogram hist(Points(2));
+    auto dx = {1.0, 2.0};
+    hist.setPointStandardDeviations(dx);
+    TS_ASSERT_EQUALS(hist.dx().size(), 2);
+    hist.setBinEdges(BinEdges(3));
+    TS_ASSERT_EQUALS(hist.dx().size(), 3);
+    TS_ASSERT_DELTA(hist.dx()[0], 0.5, 1e-14);
+    TS_ASSERT_DELTA(hist.dx()[1], 1.5, 1e-14);
+    TS_ASSERT_DELTA(hist.dx()[2], 2.5, 1e-14);
   }
 
   void test_x() {

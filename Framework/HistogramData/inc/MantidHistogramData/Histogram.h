@@ -110,7 +110,10 @@ public:
 private:
   void checkSize(const Points &points) const;
   void checkSize(const BinEdges &binEdges) const;
-  template <class... T> bool selfAssignment(const T &...) { return false; }
+  template <class... T> bool selfAssignmentX(const T &...) { return false; }
+  template <class... T> bool selfAssignmentDx(const T &...) { return false; }
+  void switchDxToBinEdges();
+  void switchDxToPoints();
 
   XMode m_xMode;
 };
@@ -125,8 +128,9 @@ template <typename... T> void Histogram::setBinEdges(T &&... data) & {
   // If there is no data changing the size is ok.
   // if(m_y)
   checkSize(edges);
-  if (selfAssignment(data...))
+  if (selfAssignmentX(data...))
     return;
+  switchDxToBinEdges();
   m_xMode = XMode::BinEdges;
   m_x = edges.cowData();
 }
@@ -142,7 +146,8 @@ void Histogram::setBinEdgeStandardDeviations(T &&... data) & {
   if(edges.size() != m_x->size())
     throw std::logic_error(
         "Histogram::setBinEdgeStandardDeviations: size mismatch.\n");
-  // TODO check self assignment
+  if (selfAssignmentDx(data...))
+    return;
   m_dx = edges.cowData();
 }
 
@@ -156,8 +161,9 @@ template <typename... T> void Histogram::setPoints(T &&... data) & {
   // If there is no data changing the size is ok.
   // if(m_y)
   checkSize(points);
-  if (selfAssignment(data...))
+  if (selfAssignmentX(data...))
     return;
+  switchDxToPoints();
   m_xMode = XMode::Points;
   m_x = points.cowData();
 }
@@ -173,17 +179,27 @@ void Histogram::setPointStandardDeviations(T &&... data) & {
   if(points.size() != m_x->size())
     throw std::logic_error(
         "Histogram::setPointStandardDeviations: size mismatch.\n");
-  // TODO check self assignment
+  if (selfAssignmentDx(data...))
+    return;
   m_dx = points.cowData();
 }
 
-template <> inline bool Histogram::selfAssignment(const HistogramX &data) {
+template <> inline bool Histogram::selfAssignmentX(const HistogramX &data) {
   return &data == m_x.get();
 }
 
 template <>
-inline bool Histogram::selfAssignment(const std::vector<double> &data) {
+inline bool Histogram::selfAssignmentX(const std::vector<double> &data) {
   return &data == &(m_x->rawData());
+}
+
+template <> inline bool Histogram::selfAssignmentDx(const HistogramDx &data) {
+  return &data == m_dx.get();
+}
+
+template <>
+inline bool Histogram::selfAssignmentDx(const std::vector<double> &data) {
+  return &data == &(m_dx->rawData());
 }
 
 MANTID_HISTOGRAMDATA_DLL Histogram::XMode getHistogramXMode(size_t xLength,
