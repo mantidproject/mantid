@@ -65,7 +65,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
                              StringListValidator(['float32', 'float64']),
                              doc='All data saved will be converted to this type')
         self.declareProperty('Compression', 'gzip',
-                             StringListValidator(['gzip', 'lzw', 'None']),
+                             StringListValidator(['gzip', 'lzf', 'None']),
                              doc='Algorithm for compressing data')
         self.declareProperty('WriteMomentumTransfer', True,
                              doc="Add the momentum transfer (Q) axis to the file")
