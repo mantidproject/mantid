@@ -15,8 +15,6 @@ using Kernel::PropertyHistory_sptr;
 using Kernel::PropertyHistory_const_sptr;
 using Kernel::PropertyHistories;
 
-/// Less than operator for pointers
-
 /** Constructor
  *  @param alg ::      A pointer to the algorithm for which the history should
  * be constructed

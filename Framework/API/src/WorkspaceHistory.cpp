@@ -23,11 +23,8 @@ namespace {
 Kernel::Logger g_log("WorkspaceHistory");
 }
 
-/// Default Constructor
-WorkspaceHistory::WorkspaceHistory() : m_environment() {}
-
 /// Destructor
-WorkspaceHistory::~WorkspaceHistory() {}
+WorkspaceHistory::~WorkspaceHistory() = default;
 
 /**
   Standard Copy Constructor
@@ -95,9 +92,7 @@ WorkspaceHistory::getAlgorithmHistory(const size_t index) const {
     throw std::out_of_range(
         "WorkspaceHistory::getAlgorithmHistory() - Index out of range");
   }
-  auto start = m_algorithms.cbegin();
-  std::advance(start, index);
-  return *start;
+  return *std::next(m_algorithms.cbegin(), index);
 }
 
 /**
@@ -145,9 +140,9 @@ void WorkspaceHistory::printSelf(std::ostream &os, const int indent) const {
   AlgorithmHistories::const_iterator it;
   os << std::string(indent, ' ') << "Histories:" << std::endl;
 
-  for (it = m_algorithms.begin(); it != m_algorithms.end(); ++it) {
+  for (const auto &algorithm : m_algorithms) {
     os << std::endl;
-    (*it)->printSelf(os, indent + 2);
+    algorithm->printSelf(os, indent + 2);
   }
 }
 
