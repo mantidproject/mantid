@@ -1827,7 +1827,7 @@ public:
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    EXPECT_CALL(mockDataProcessorView, showAlgorithmDialog("SaveReflTBL"));
+    EXPECT_CALL(mockDataProcessorView, showAlgorithmDialog("SaveTBL"));
     presenter.notify(DataProcessorPresenter::ExportTableFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));

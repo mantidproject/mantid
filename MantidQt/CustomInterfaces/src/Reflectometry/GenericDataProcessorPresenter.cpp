@@ -1056,7 +1056,7 @@ void GenericDataProcessorPresenter::importTable() {
 Export a table to TBL file
 */
 void GenericDataProcessorPresenter::exportTable() {
-  m_view->showAlgorithmDialog("SaveReflTBL");
+  m_view->showAlgorithmDialog("SaveTBL");
 }
 
 /**
