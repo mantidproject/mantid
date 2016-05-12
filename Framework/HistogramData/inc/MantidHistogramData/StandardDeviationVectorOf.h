@@ -51,7 +51,9 @@ public:
   operator=(StandardDeviationVectorOf &&other) = default;
 
   StandardDeviationVectorOf(const Variances &variances);
+  StandardDeviationVectorOf(Variances &&variances);
   StandardDeviationVectorOf &operator=(const Variances &variances);
+  StandardDeviationVectorOf &operator=(Variances &&variances);
 
 protected:
   // This is used as base class only, cannot delete polymorphically, so
@@ -71,10 +73,36 @@ StandardDeviationVectorOf<T, CowType, Variances>::StandardDeviationVectorOf(
 }
 
 template <class T, class CowType, class Variances>
+StandardDeviationVectorOf<T, CowType, Variances>::StandardDeviationVectorOf(
+    Variances &&variances) {
+  if (!variances)
+    return;
+  auto &derived = static_cast<T &>(*this);
+  derived.operator=(variances.cowData());
+  // Data is now shared between variances and derived. We want to avoid
+  // triggering a copy by the iterator access below, so we have to set variances
+  // to null. We cannot directly null the cow_ptr in variances, since it is of a
+  // different type and we do not have access to its private members.
+  variances = Kernel::cow_ptr<CowType>(nullptr);
+  std::transform(derived.cbegin(), derived.cend(), derived.begin(),
+                 static_cast<double (*)(const double)>(sqrt));
+}
+
+template <class T, class CowType, class Variances>
 StandardDeviationVectorOf<T, CowType, Variances> &
     StandardDeviationVectorOf<T, CowType, Variances>::
     operator=(const Variances &variances) {
   StandardDeviationVectorOf<T, CowType, Variances> tmp(variances);
+  auto &derived = static_cast<T &>(*this);
+  derived.operator=(tmp.cowData());
+  return *this;
+}
+
+template <class T, class CowType, class Variances>
+StandardDeviationVectorOf<T, CowType, Variances> &
+    StandardDeviationVectorOf<T, CowType, Variances>::
+    operator=(Variances &&variances) {
+  StandardDeviationVectorOf<T, CowType, Variances> tmp(std::move(variances));
   auto &derived = static_cast<T &>(*this);
   derived.operator=(tmp.cowData());
   return *this;

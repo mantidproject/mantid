@@ -15,6 +15,7 @@ class VariancesTester : public VectorOf<VariancesTester, HistogramX>,
                         public Iterable<VariancesTester> {
 public:
   using VectorOf<VariancesTester, HistogramX>::VectorOf;
+  using VectorOf<VariancesTester, HistogramX>::operator=;
 };
 
 class StandardDeviationVectorOfTester
@@ -59,16 +60,37 @@ public:
   }
 
   void test_construct_from_Variances() {
-    VariancesTester variances{1.0, 4.0};
+    const VariancesTester variances{1.0, 4.0};
     StandardDeviationVectorOfTester sigmas(variances);
     TS_ASSERT_EQUALS(sigmas[0], 1.0);
     TS_ASSERT_EQUALS(sigmas[1], 2.0);
   }
 
-  void test_assign_Variances() {
+  void test_move_construct_from_Variances() {
     VariancesTester variances{1.0, 4.0};
+    auto old_ptr = &variances[0];
+    StandardDeviationVectorOfTester sigmas(std::move(variances));
+    TS_ASSERT(!variances);
+    TS_ASSERT_EQUALS(&sigmas[0], old_ptr);
+    TS_ASSERT_EQUALS(sigmas[0], 1.0);
+    TS_ASSERT_EQUALS(sigmas[1], 2.0);
+  }
+
+  void test_assign_Variances() {
+    const VariancesTester variances{1.0, 4.0};
     StandardDeviationVectorOfTester sigmas{};
     sigmas = variances;
+    TS_ASSERT_EQUALS(sigmas[0], 1.0);
+    TS_ASSERT_EQUALS(sigmas[1], 2.0);
+  }
+
+  void test_move_assign_Variances() {
+    VariancesTester variances{1.0, 4.0};
+    auto old_ptr = &variances[0];
+    StandardDeviationVectorOfTester sigmas{};
+    sigmas = std::move(variances);
+    TS_ASSERT(!variances);
+    TS_ASSERT_EQUALS(&sigmas[0], old_ptr);
     TS_ASSERT_EQUALS(sigmas[0], 1.0);
     TS_ASSERT_EQUALS(sigmas[1], 2.0);
   }
