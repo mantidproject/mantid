@@ -54,16 +54,9 @@ public:
   void copyInfoFrom(const ISpectrum &other);
 
   virtual void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) = 0;
-
   virtual MantidVec &dataX() = 0;
-  virtual MantidVec &dataDx() = 0;
-
   virtual const MantidVec &dataX() const = 0;
-  virtual const MantidVec &dataDx() const = 0;
-
   virtual const MantidVec &readX() const = 0;
-  virtual const MantidVec &readDx() const = 0;
-
   virtual Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const = 0;
 
   virtual void setData(const MantidVec &Y) = 0;

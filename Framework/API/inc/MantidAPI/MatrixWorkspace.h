@@ -261,7 +261,7 @@ public:
   /// Returns a read-only (i.e. const) reference to the specified X error array
   /// @param index :: workspace index to retrieve.
   const MantidVec &readDx(size_t const index) const {
-    return getSpectrum(index)->dataDx();
+    return histogram(index).dataDx();
   }
 
   /// Returns the x data
@@ -279,7 +279,7 @@ public:
   }
   /// Returns the x error data
   virtual MantidVec &dataDx(const std::size_t index) {
-    return getSpectrum(index)->dataDx();
+    return histogram(index).dataDx();
   }
 
   /// Returns the x data const
@@ -296,7 +296,7 @@ public:
   }
   /// Returns the error const
   virtual const MantidVec &dataDx(const std::size_t index) const {
-    return getSpectrum(index)->dataDx();
+    return histogram(index).dataDx();
   }
 
   virtual double getXMin() const;

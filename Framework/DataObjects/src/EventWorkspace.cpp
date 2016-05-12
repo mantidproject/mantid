@@ -636,7 +636,7 @@ MantidVec &EventWorkspace::dataX(const std::size_t index) {
 /// @param index :: the workspace index to return
 /// @returns A reference to the vector of binned error values
 MantidVec &EventWorkspace::dataDx(const std::size_t index) {
-  return getSpectrum(index)->dataDx();
+  return histogram(index).dataDx();
 }
 
 /// Return the data Y vector at a given workspace index
@@ -669,7 +669,7 @@ const MantidVec &EventWorkspace::dataX(const std::size_t index) const {
 /** @return the const data X error vector at a given workspace index
  * @param index :: workspace index   */
 const MantidVec &EventWorkspace::dataDx(const std::size_t index) const {
-  return getSpectrum(index)->readDx();
+  return histogram(index).readDx();
 }
 
 //---------------------------------------------------------------------------

@@ -46,11 +46,8 @@ public:
 
   void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) override;
   MantidVec &dataX() override;
-  MantidVec &dataDx() override;
   const MantidVec &dataX() const override;
-  const MantidVec &dataDx() const override;
   const MantidVec &readX() const override;
-  const MantidVec &readDx() const override;
   Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const override;
 
   /// Sets the data.

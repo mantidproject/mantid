@@ -21,20 +21,11 @@ void Histogram1D::setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
 /// Returns the x data
 MantidVec &Histogram1D::dataX() { return m_histogram.dataX(); }
 
-/// Returns the dx data
-MantidVec &Histogram1D::dataDx() { return m_histogram.dataDx(); }
-
 /// Returns the x data const
 const MantidVec &Histogram1D::dataX() const { return m_histogram.dataX(); }
 
-/// Returns the dx data const
-const MantidVec &Histogram1D::dataDx() const { return m_histogram.dataDx(); }
-
 /// Returns the x data const
 const MantidVec &Histogram1D::readX() const { return m_histogram.readX(); }
-
-/// Returns the dx data const
-const MantidVec &Histogram1D::readDx() const { return m_histogram.readDx(); }
 
 /// Returns a pointer to the x data
 Kernel::cow_ptr<HistogramData::HistogramX> Histogram1D::ptrX() const {

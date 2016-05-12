@@ -87,9 +87,8 @@ public:
   }
 
   void test_use_dx_flag_being_set_when_accessing_dx_with_non_const() {
-    // non-const dataDx()
     SpectrumTester s(HistogramData::Histogram::XMode::Points);
-    s.dataDx();
+    s.setPointStandardDeviations(0);
     TS_ASSERT(s.hasDx());
 
     // setDX vesion 2
@@ -106,17 +105,10 @@ public:
     TS_ASSERT(s5.hasDx());
   }
 
-  void test_use_dx_flag_being_set_when_accessing_dx_with_const() {
-    // const dataDx()
-    const SpectrumTester s(HistogramData::Histogram::XMode::Points);
-    s.dataDx();
-    TS_ASSERT(s.hasDx());
-  }
-
   void test_use_dx_flag_is_copied_during_copy_construction() {
     // Copy spectrum which had the flag set
     SpectrumTester s(HistogramData::Histogram::XMode::Points);
-    s.dataDx();
+    s.setPointStandardDeviations(0);
     TS_ASSERT(s.hasDx());
 
     SpectrumTester s2(s);

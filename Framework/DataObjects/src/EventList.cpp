@@ -1470,26 +1470,12 @@ MantidVec &EventList::dataX() {
   return m_histogram.dataX();
 }
 
-/** Returns a reference to the dx data.
- *  @return a reference to the Dx (bin) vector.
- */
-MantidVec &EventList::dataDx() {
-  return m_histogram.dataDx();
-}
-
 /** Returns a const reference to the x data.
  *  @return a reference to the X (bin) vector. */
 const MantidVec &EventList::dataX() const { return m_histogram.dataX(); }
 
-/** Returns a const reference to the dx data.
- *  @return a reference to the Dx (bin) vector. */
-const MantidVec &EventList::dataDx() const { return m_histogram.dataDx(); }
-
 /// Returns the x data const
 const MantidVec &EventList::readX() const { return m_histogram.readX(); }
-
-/// Returns the dx data const
-const MantidVec &EventList::readDx() const { return m_histogram.readDx(); }
 
 /// Returns a pointer to the x data
 Kernel::cow_ptr<HistogramData::HistogramX> EventList::ptrX() const {
