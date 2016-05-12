@@ -190,38 +190,55 @@ ALCDataLoadingView::~ALCDataLoadingView() {
     QMessageBox::critical(m_widget, "Loading error", QString::fromStdString(error));
   }
 
-  void ALCDataLoadingView::setAvailableLogs(const std::vector<std::string>& logs)
-  {
-    // Keep the current log value
-    QString previousLog = m_ui.log->currentText();
-
-    // Clear previous log list
-    m_ui.log->clear();
-
-    // If previousLog is in 'logs' list, add it at the beginning
-    if ( std::find(logs.begin(), logs.end(), previousLog.toStdString()) != logs.end())
-    {
-      m_ui.log->addItem(previousLog);
-    }
-
-    // Add new items
-    for (auto it = logs.begin(); it != logs.end(); ++it)
-    {
-      m_ui.log->addItem(QString::fromStdString(*it));
-    }
+  /**
+   * Set list of available log values
+   * @param logs :: [input] List of log values
+   */
+  void
+  ALCDataLoadingView::setAvailableLogs(const std::vector<std::string> &logs) {
+    setAvailableItems(m_ui.log, logs);
   }
 
-  void ALCDataLoadingView::setAvailablePeriods(const std::vector<std::string>& periods)
-  {
+  /**
+   * Set list of available periods in both boxes
+   * @param periods :: [input] List of periods
+   */
+  void ALCDataLoadingView::setAvailablePeriods(
+      const std::vector<std::string> &periods) {
+    setAvailableItems(m_ui.redPeriod, periods);
+    setAvailableItems(m_ui.greenPeriod, periods);
+  }
+
+  /**
+   * Sets available items in a combo box from given list.
+   * If the current value is in the new list, keep it.
+   * @param comboBox :: [input] Pointer to combo box to populate
+   * @param items :: [input] Vector of items to populate box with
+   */
+  void
+  ALCDataLoadingView::setAvailableItems(QComboBox *comboBox,
+                                        const std::vector<std::string> &items) {
+    if (!comboBox) {
+      throw std::invalid_argument(
+          "No combobox to set items in: this should never happen");
+    }
+
+    // Keep the current value
+    const auto previousValue = comboBox->currentText().toStdString();
+
     // Clear previous list
-    m_ui.redPeriod->clear();
-    m_ui.greenPeriod->clear();
+    comboBox->clear();
+
+    // If previous value is in the list, add it at the beginning
+    if (std::find(items.begin(), items.end(), previousValue) != items.end()) {
+      comboBox->addItem(QString::fromStdString(previousValue));
+    }
 
     // Add new items
-    for (auto it=periods.begin(); it!=periods.end(); ++it)
-    {
-      m_ui.redPeriod->addItem(QString::fromStdString(*it));
-      m_ui.greenPeriod->addItem(QString::fromStdString(*it));
+    for (const auto item : items) {
+      if (item != previousValue) { // has already been added
+        comboBox->addItem(QString::fromStdString(item));
+      }
     }
   }
 
