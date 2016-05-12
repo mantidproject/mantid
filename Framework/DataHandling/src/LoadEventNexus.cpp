@@ -1,3 +1,5 @@
+// TODO-LIST:
+// 1. refactor LoadEventNexus::loadEvents(). It is way tooooo lone
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -855,7 +857,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   map<string, string> entries = m_file->getEntries();
   map<string, string>::const_iterator it = entries.begin();
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
-  ::NeXus::Info info;
+  // ::NeXus::Info info;
   bool oldNeXusFileNames(false);
   bool hasTotalCounts(true);
   m_haveWeights = false;

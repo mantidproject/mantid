@@ -1,3 +1,6 @@
+// TODO LIST
+// (X) LoadBankFromDiskTask: replace alg->getLogger() by alg_logger;
+// 2. Get rid of alg in ProcessBankData
 //==============================================================================================
 // Class LoadBankFromDiskTask
 //==============================================================================================
@@ -24,8 +27,10 @@ using namespace Mantid::DataObjects;
 //==============================================================================================
 /** Constructor
 *
-* @param alg :: LoadEventNexus
+* alg :: LoadEventNexus
 * @param entry_name :: name of the bank
+* @param pixelid_2_wi :: pixel id to workspace index vector
+* @param pixelid_2_offset :: pixel id to workspace index offset
 * @param prog :: Progress reporter
 * @param event_id :: array with event IDs
 * @param event_time_of_flight :: array with event TOFS
@@ -40,20 +45,22 @@ using namespace Mantid::DataObjects;
 * @param max_event_id :: maximum detector ID to load
 * @return
 */
-ProcessBankData::ProcessBankData(
-    Mantid::DataHandling::LoadEventNexus *alg, std::string entry_name,
-    Mantid::API::Progress *prog, boost::shared_array<uint32_t> event_id,
+ProcessBankData::ProcessBankData( // Mantid::DataHandling::LoadEventNexus *alg,
+    std::string entry_name, const std::vector<size_t> &pixelid_2_wi,
+    detid_t pixel2d_2_offset, Mantid::API::Progress *prog,
+    boost::shared_array<uint32_t> event_id,
     boost::shared_array<float> event_time_of_flight, size_t numEvents,
     size_t startAt, boost::shared_ptr<std::vector<uint64_t>> event_index,
     boost::shared_ptr<Mantid::DataHandling::BankPulseTimes> thisBankPulseTimes,
     bool have_weight, boost::shared_array<float> event_weight,
     detid_t min_event_id, detid_t max_event_id)
-    : // Mantid::Kernel::Task(),
-      alg(alg),
-      entry_name(entry_name), pixelID_to_wi_vector(alg->pixelID_to_wi_vector),
-      pixelID_to_wi_offset(alg->pixelID_to_wi_offset), prog(prog),
-      event_id(event_id), event_time_of_flight(event_time_of_flight),
-      numEvents(numEvents), startAt(startAt), event_index(event_index),
+    : // alg(alg),
+      entry_name(entry_name),
+      pixelID_to_wi_vector(pixelid_2_wi),     // alg->pixelID_to_wi_vector
+      pixelID_to_wi_offset(pixel2d_2_offset), // alg->pixelID_to_wi_offset
+      prog(prog), event_id(event_id),
+      event_time_of_flight(event_time_of_flight), numEvents(numEvents),
+      startAt(startAt), event_index(event_index),
       thisBankPulseTimes(thisBankPulseTimes), have_weight(have_weight),
       event_weight(event_weight), m_min_id(min_event_id),
       m_max_id(max_event_id) {}
@@ -376,7 +383,7 @@ void LoadBankFromDiskTask::loadEventIndex(::NeXus::File &file,
   if (file.getInfo().type == ::NeXus::UINT64)
     file.getData(event_index);
   else {
-    alg_Logger.warning() // alg->getLogger()
+    alg_Logger.warning() // alg_Logger
         << "Entry " << entry_name
         << "'s event_index field is not UINT64! It will be skipped.\n";
     m_loadError = true;
@@ -496,7 +503,7 @@ void LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
     if (id_info.type == ::NeXus::UINT32)
       file.getSlab(m_event_id, m_loadStart, m_loadSize);
     else {
-      alg->getLogger().warning()
+      alg_Logger.warning()
           << "Entry " << entry_name
           << "'s event_id field is not UINT32! It will be skipped.\n";
       m_loadError = true;
@@ -546,9 +553,9 @@ void LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   ::NeXus::Info tof_info = file.getInfo();
   int64_t tof_dim0 = recalculateDataSize(tof_info.dims[0]);
   if (tof_dim0 < m_loadSize[0] + m_loadStart[0]) {
-    alg->getLogger().warning() << "Entry " << entry_name
-                               << "'s event_time_offset field is too small "
-                                  "to load the desired data.\n";
+    alg_Logger.warning() << "Entry " << entry_name
+                         << "'s event_time_offset field is too small "
+                            "to load the desired data.\n";
     m_loadError = true;
   }
 
@@ -556,7 +563,7 @@ void LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   if (tof_info.type == ::NeXus::FLOAT32)
     file.getSlab(m_event_time_of_flight, m_loadStart, m_loadSize);
   else {
-    alg->getLogger().warning()
+    alg_Logger.warning()
         << "Entry " << entry_name
         << "'s event_time_offset field is not FLOAT32! It will be skipped.\n";
     m_loadError = true;
@@ -566,9 +573,9 @@ void LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
     std::string units;
     file.getAttr("units", units);
     if (units != "microsecond") {
-      alg->getLogger().warning() << "Entry " << entry_name
-                                 << "'s event_time_offset field's units are "
-                                    "not microsecond. It will be skipped.\n";
+      alg_Logger.warning() << "Entry " << entry_name
+                           << "'s event_time_offset field's units are "
+                              "not microsecond. It will be skipped.\n";
       m_loadError = true;
     }
     file.closeData();
@@ -600,7 +607,8 @@ void LoadBankFromDiskTask::loadEventWeights(::NeXus::File &file) {
   ::NeXus::Info weight_info = file.getInfo();
   int64_t weight_dim0 = recalculateDataSize(weight_info.dims[0]);
   if (weight_dim0 < m_loadSize[0] + m_loadStart[0]) {
-    alg->getLogger().warning()
+    Kernel::Logger &logger = alg_Logger;
+    logger.warning()
         << "Entry " << entry_name
         << "'s event_weight field is too small to load the desired data.\n";
     m_loadError = true;
@@ -610,7 +618,7 @@ void LoadBankFromDiskTask::loadEventWeights(::NeXus::File &file) {
   if (weight_info.type == ::NeXus::FLOAT32)
     file.getSlab(m_event_weight, m_loadStart, m_loadSize);
   else {
-    alg->getLogger().warning()
+    alg_Logger.warning()
         << "Entry " << entry_name
         << "'s event_weight field is not FLOAT32! It will be skipped.\n";
     m_loadError = true;
@@ -644,7 +652,7 @@ void LoadBankFromDiskTask::readFile(std::vector<uint64_t> *event_index_ptr) {
       // The event_index should be the same length as the pulse times from DAS
       // logs.
       if (event_index.size() != thisBankPulseTimes->numPulses)
-        alg->getLogger().warning()
+        alg_Logger.warning()
             << "Bank " << entry_name
             << " has a mismatch between the number of event_index entries "
                "and the number of pulse times in event_time_zero.\n";
@@ -681,13 +689,13 @@ void LoadBankFromDiskTask::readFile(std::vector<uint64_t> *event_index_ptr) {
 
   } // try block
   catch (std::exception &e) {
-    alg->getLogger().error() << "Error while loading bank " << entry_name << ":"
-                             << std::endl;
-    alg->getLogger().error() << e.what() << std::endl;
+    alg_Logger.error() << "Error while loading bank " << entry_name << ":"
+                       << std::endl;
+    alg_Logger.error() << e.what() << std::endl;
     m_loadError = true;
   } catch (...) {
-    alg->getLogger().error() << "Unspecified error while loading bank "
-                             << entry_name << std::endl;
+    alg_Logger.error() << "Unspecified error while loading bank " << entry_name
+                       << std::endl;
     m_loadError = true;
   }
 
@@ -791,20 +799,23 @@ void LoadBankFromDiskTask::run() {
   boost::shared_array<float> event_weight_shrd(m_event_weight);
   boost::shared_ptr<std::vector<uint64_t>> event_index_shrd(event_index_ptr);
 
-  ProcessBankData *newTask1 = new ProcessBankData(
-      alg, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
-      numEvents, startAt, event_index_shrd, thisBankPulseTimes, m_have_weight,
-      event_weight_shrd, m_min_id, mid_id);
-  // scheduler->push(newTask1);
-  newTask1->run();
+  ProcessBankData newTask1(
+      // alg,
+      entry_name, alg->pixelID_to_wi_vector, alg->pixelID_to_wi_offset, prog,
+      event_id_shrd, event_time_of_flight_shrd, numEvents, startAt,
+      event_index_shrd, thisBankPulseTimes, m_have_weight, event_weight_shrd,
+      m_min_id, mid_id);
+  newTask1.run();
 
   if (alg->splitProcessing && (mid_id < m_max_id)) {
-    ProcessBankData *newTask2 = new ProcessBankData(
-        alg, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
-        numEvents, startAt, event_index_shrd, thisBankPulseTimes, m_have_weight,
-        event_weight_shrd, (mid_id + 1), m_max_id);
+    ProcessBankData newTask2(
+        // alg,
+        entry_name, alg->pixelID_to_wi_vector, alg->pixelID_to_wi_offset, prog,
+        event_id_shrd, event_time_of_flight_shrd, numEvents, startAt,
+        event_index_shrd, thisBankPulseTimes, m_have_weight, event_weight_shrd,
+        (mid_id + 1), m_max_id);
     // scheduler->push(newTask2);
-    newTask2->run();
+    newTask2.run();
   }
 }
 
