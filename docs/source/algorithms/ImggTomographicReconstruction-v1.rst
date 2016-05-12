@@ -13,10 +13,12 @@ Description
 .. warning:: This is an early, experimental version of the algorithm.
 
 The input and output workspaces are workspace groups where every
-element is an image workspace. The input workspace must have one image
-workspace per projection from a tomography imaging experiment. The
-output workspace will have one image workspace for every slice of the
-output reconstructed volume.
+element is an image workspace. In the input workspace every image is a
+2D projection from a different angle whereas in the output workspace
+every image is a slice of a reconstructed 3D volume.  The input
+workspace must have one image workspace per projection from a
+tomography imaging experiment. The output workspace will have one
+image workspace for every slice of the output reconstructed volume.
 
 The following method is supported: FBP (following the TomoPy
 implementation [TomoPy2014]).
@@ -93,21 +95,29 @@ Usage
               wks = CreateSampleWorkspace(NumBanks=32, BankPixelWidth=1, XMin=0, XMax=32, BinWidth=1, OutputWorkspace=wks_name)
               wks.getAxis(0).setUnit('Label')
               projections.append(wks)
-   wsg_proj = GroupWorkspaces(projections)
+   wsg_proj = GroupWorkspaces(projections, OutputWorkspace=wsg_name)
    wsg_reconstructed = ImggTomographicReconstruction(InputWorkspace=wsg_proj, CenterOfRotation=15)
    rows = wsg_reconstructed.getItem(0).getNumberHistograms()
    columns = wsg_reconstructed.getItem(0).blocksize()
    print ("The output reconstruction has {0} slices of {1} by {2} pixels".
           format(wsg_reconstructed.size(), rows, columns))
+   slice_idx = 2
+   coord_x = 8
+   coord_y = 15
+   print ("Value of pixel at coordinate ({0},{1}) in slice {2}: {3:.1f}".
+          format(coord_x, coord_y, slice_idx,
+              wsg_reconstructed.getItem(2).readY(coord_y)[coord_x]))
 
 .. testcleanup:: ReconstructProjections
 
-    DeleteWorkspace(wsg_name)
+   DeleteWorkspace(wsg_name)
 
 Output:
-   The output reconstruction has 32 slices of 32 by 32 pixels
 
 .. testoutput:: ReconstructProjections
+
+   The output reconstruction has 32 slices of 32 by 32 pixels
+   Value of pixel at coordinate (8,15) in slice 2: 2.4
 
 .. categories::
 
