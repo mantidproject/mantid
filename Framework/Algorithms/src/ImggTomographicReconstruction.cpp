@@ -107,14 +107,9 @@ ImggTomographicReconstruction::validateInputs() {
     result[PROP_INPUT_WS] = "The current version of this algorithm only "
                             "supports input workspaces of type WorkspaceGroup";
   } else {
-
-    if (!inGrp) {
-      result[PROP_INPUT_WS] = "The input workspace must be a group";
-    } else {
-      if (inGrp->size() < 2) {
-        result[PROP_INPUT_WS] = "The input workspace must have at least two "
-                                "workspaces (projection images)";
-      }
+    if (inGrp->size() < 2) {
+      result[PROP_INPUT_WS] = "The input workspace must have at least two "
+                              "workspaces (projection images)";
     }
 
     auto first = inGrp->getItem(0);
