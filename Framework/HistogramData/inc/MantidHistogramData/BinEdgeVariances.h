@@ -1,8 +1,8 @@
-#ifndef MANTID_HISTOGRAMDATA_POINTSTANDARDDEVIATIONS_H_
-#define MANTID_HISTOGRAMDATA_POINTSTANDARDDEVIATIONS_H_
+#ifndef MANTID_HISTOGRAMDATA_BINEDGEVARIANCES_H_
+#define MANTID_HISTOGRAMDATA_BINEDGEVARIANCES_H_
 
 #include "MantidHistogramData/DllConfig.h"
-#include "MantidHistogramData/StandardDeviationVectorOf.h"
+#include "MantidHistogramData/VarianceVectorOf.h"
 #include "MantidHistogramData/HistogramDx.h"
 
 namespace Mantid {
@@ -11,7 +11,7 @@ namespace HistogramData {
 class BinEdgeStandardDeviations;
 class PointVariances;
 
-/** PointStandardDeviations : TODO: DESCRIPTION
+/** BinEdgeVariances : TODO: DESCRIPTION
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -34,30 +34,29 @@ class PointVariances;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_HISTOGRAMDATA_DLL PointStandardDeviations
-    : public detail::StandardDeviationVectorOf<PointStandardDeviations,
-                                               HistogramDx, PointVariances> {
+class MANTID_HISTOGRAMDATA_DLL BinEdgeVariances
+    : public detail::VarianceVectorOf<BinEdgeVariances, HistogramDx,
+                                      BinEdgeStandardDeviations> {
 public:
-  using StandardDeviationVectorOf<PointStandardDeviations, HistogramDx,
-                                  PointVariances>::StandardDeviationVectorOf;
-  using StandardDeviationVectorOf<PointStandardDeviations, HistogramDx,
-                                  PointVariances>::
+  using VarianceVectorOf<BinEdgeVariances, HistogramDx,
+                         BinEdgeStandardDeviations>::VarianceVectorOf;
+  using VarianceVectorOf<BinEdgeVariances, HistogramDx,
+                         BinEdgeStandardDeviations>::
   operator=;
-  PointStandardDeviations() = default;
+  BinEdgeVariances() = default;
   // The copy and move constructor and assignment are not captured properly by
   // the using declaration above, so we need them here explicitly.
-  PointStandardDeviations(const PointStandardDeviations &) = default;
-  PointStandardDeviations(PointStandardDeviations &&) = default;
-  PointStandardDeviations &
-  operator=(const PointStandardDeviations &)& = default;
-  PointStandardDeviations &operator=(PointStandardDeviations &&)& = default;
+  BinEdgeVariances(const BinEdgeVariances &) = default;
+  BinEdgeVariances(BinEdgeVariances &&) = default;
+  BinEdgeVariances &operator=(const BinEdgeVariances &)& = default;
+  BinEdgeVariances &operator=(BinEdgeVariances &&)& = default;
 
-  /// Constructs PointStandardDeviations from BinEdgeStandardDeviations, where
-  /// each point is a bin center.
-  PointStandardDeviations(const BinEdgeStandardDeviations &edges);
+  /// Constructs BinEdgeVariances from points, approximating each bin
+  /// edge as mid-point between two points.
+  explicit BinEdgeVariances(const PointVariances &points);
 };
 
 } // namespace HistogramData
 } // namespace Mantid
 
-#endif /* MANTID_HISTOGRAMDATA_POINTSTANDARDDEVIATIONS_H_ */
+#endif /* MANTID_HISTOGRAMDATA_BINEDGEVARIANCES_H_ */

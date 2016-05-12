@@ -2,14 +2,14 @@
 #define MANTID_HISTOGRAMDATA_BINEDGESTANDARDDEVIATIONS_H_
 
 #include "MantidHistogramData/DllConfig.h"
-#include "MantidHistogramData/VectorOf.h"
-#include "MantidHistogramData/Iterable.h"
+#include "MantidHistogramData/StandardDeviationVectorOf.h"
 #include "MantidHistogramData/HistogramDx.h"
 
 namespace Mantid {
 namespace HistogramData {
 
 class PointStandardDeviations;
+class BinEdgeVariances;
 
 /** BinEdgeStandardDeviations : TODO: DESCRIPTION
 
@@ -35,11 +35,14 @@ class PointStandardDeviations;
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_HISTOGRAMDATA_DLL BinEdgeStandardDeviations
-    : public detail::VectorOf<BinEdgeStandardDeviations, HistogramDx>,
-      public detail::Iterable<BinEdgeStandardDeviations> {
+    : public detail::StandardDeviationVectorOf<BinEdgeStandardDeviations,
+                                               HistogramDx, BinEdgeVariances> {
 public:
-  using VectorOf<BinEdgeStandardDeviations, HistogramDx>::VectorOf;
-  using VectorOf<BinEdgeStandardDeviations, HistogramDx>::operator=;
+  using StandardDeviationVectorOf<BinEdgeStandardDeviations, HistogramDx,
+                                  BinEdgeVariances>::StandardDeviationVectorOf;
+  using StandardDeviationVectorOf<BinEdgeStandardDeviations, HistogramDx,
+                                  BinEdgeVariances>::
+  operator=;
   BinEdgeStandardDeviations() = default;
   // The copy and move constructor and assignment are not captured properly by
   // the using declaration above, so we need them here explicitly.
