@@ -59,7 +59,7 @@ void GluGeometryHandler::Triangulate() {
 void GluGeometryHandler::Render() {
   if (Obj != nullptr) {
     switch (type) {
-	case GeometryType::CUBOID:
+    case GeometryType::CUBOID:
       Renderer->RenderCube(m_points[0], m_points[1], m_points[2], m_points[3]);
       break;
     case GeometryType::HEXAHEDRON:

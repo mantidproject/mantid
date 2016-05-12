@@ -68,7 +68,7 @@ private:
   double radius; ///<Radius for the sphere, cone and cylinder
   double height; ///<height for cone and cylinder;
   GeometryType
-  type; ///< the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
+      type; ///< the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
 public:
   GluGeometryHandler(const GluGeometryHandler &other);
   GluGeometryHandler(IObjComponent *comp);           ///< Constructor
