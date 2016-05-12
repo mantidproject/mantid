@@ -62,6 +62,8 @@ Graphical user interface:
   user, bank combo-box will update upon selection of run number.
 
 
+- New algorithm :ref:`SaveNexusPD <algm-SaveNexusPD>` which creates a nexus file for use in GUDRUN and will hopefully be supported by Rietveld packages in the future.
+
 Imaging
 -------
 
@@ -78,6 +80,7 @@ Improvements in the tomographic reconstruction graphical user interface:
   - Handle the rotation of all the images in the stack
   - "Play" the stack or sequence of images as a movie
   - Visualize sample, flat, and dark images separately
+  - Multiple color map alternatives and control of the color bar
 
 - Previously existing parameters to set up local and remote paths have
   been moved into a new section of the interface. New options have

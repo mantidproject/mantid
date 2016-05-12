@@ -230,6 +230,13 @@ public:
   virtual void updateRotationAngle(float angle) = 0;
 
   /**
+   * Get the path/location of a single image file.
+   *
+   * @return location as a string
+   */
+  virtual std::string askSingleImagePath() = 0;
+
+  /**
    * Get the path/location of a stack of images (or single image as a
    * particular case) that the user is requesting to display.  The
    * path would be expected to point to a recognized directory
@@ -237,9 +244,24 @@ public:
    * case).
    *
    * @return location (can be a directory, file, etc.) that needs to
-   * be figured out elsewhere.
+   * be figured out elsewhere
    */
   virtual std::string askImgOrStackPath() = 0;
+
+  /**
+   * Get the path of a color map file from the user.
+   *
+   * @return path as a string (empty if the selection is canceled or
+   * fails otherwise)
+   */
+  virtual std::string askColorMapFile() = 0;
+
+  /**
+   * Update the current color map (and refresh the image with it).
+   *
+   * @param filename name of a color map file
+   */
+  virtual void updateColorMap(const std::string &filename) = 0;
 
   /**
    * Save settings (normally when closing this widget).
