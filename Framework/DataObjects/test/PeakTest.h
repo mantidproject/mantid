@@ -19,6 +19,17 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
+namespace boost {
+template <class CharType, class CharTrait>
+std::basic_ostream<CharType, CharTrait> &
+operator<<(std::basic_ostream<CharType, CharTrait> &out,
+           optional<double> const &maybe) {
+  if (maybe)
+    out << maybe;
+  return out;
+}
+}
+
 class PeakTest : public CxxTest::TestSuite {
 private:
   /// Common instrument
