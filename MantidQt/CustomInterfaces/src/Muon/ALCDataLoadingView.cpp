@@ -207,6 +207,11 @@ ALCDataLoadingView::~ALCDataLoadingView() {
       const std::vector<std::string> &periods) {
     setAvailableItems(m_ui.redPeriod, periods);
     setAvailableItems(m_ui.greenPeriod, periods);
+
+    // If single period, disable "Subtract" checkbox and green period box
+    const bool multiPeriod = periods.size() > 1;
+    m_ui.subtractCheckbox->setEnabled(multiPeriod);
+    m_ui.greenPeriod->setEnabled(multiPeriod);
   }
 
   /**
