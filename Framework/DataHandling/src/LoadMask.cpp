@@ -316,7 +316,7 @@ void LoadMask::bankToDetectors(std::vector<std::string> singlebanks,
 }
 
 //----------------------------------------------------------------------------------------------
-/** Set the mask on the spectrum IDs
+/** Set the mask on the spectrum Nos
  */
 void LoadMask::processMaskOnWorkspaceIndex(bool mask,
                                            std::vector<int32_t> pairslow,
@@ -325,10 +325,10 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
   if (pairslow.empty())
     return;
   if (pairslow.size() != pairsup.size()) {
-    g_log.error() << "Input spectrum IDs are not paired.  Size(low) = "
+    g_log.error() << "Input spectrum Nos are not paired.  Size(low) = "
                   << pairslow.size() << ", Size(up) = " << pairsup.size()
                   << std::endl;
-    throw std::invalid_argument("Input spectrum IDs are not paired. ");
+    throw std::invalid_argument("Input spectrum Nos are not paired. ");
   }
 
   // 2. Get Map
@@ -341,12 +341,12 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
     g_log.debug() << "Mask Spectrum " << pairslow[i] << "  To " << pairsup[i]
                   << std::endl;
 
-    for (int32_t specid = pairslow[i]; specid <= pairsup[i]; specid++) {
-      s2iter = s2imap.find(specid);
+    for (int32_t specNo = pairslow[i]; specNo <= pairsup[i]; specNo++) {
+      s2iter = s2imap.find(specNo);
       if (s2iter == s2imap.end()) {
-        // spectrum not found.  bad brach
+        // spectrum not found.  bad branch
         g_log.error()
-            << "Spectrum " << specid
+            << "Spectrum " << specNo
             << " does not have an entry in GroupWorkspace's spec2index map"
             << std::endl;
         throw std::runtime_error("Logic error");
@@ -356,7 +356,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
           // workspace index is out of range.  bad branch
           g_log.error() << "Group workspace's spec2index map is set wrong: "
                         << " Found workspace index = " << wsindex
-                        << " for spectrum ID " << specid
+                        << " for spectrum No " << specNo
                         << " with workspace size = "
                         << m_maskWS->getNumberHistograms() << std::endl;
         } else {
@@ -366,8 +366,8 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
           else
             m_maskWS->dataY(wsindex)[0] = 0.0;
         } // IF-ELSE: ws index out of range
-      }   // IF-ELSE: spectrum ID has an entry
-    }     // FOR EACH SpecID
+      }   // IF-ELSE: spectrum No has an entry
+    }     // FOR EACH SpecNo
   }       // FOR EACH Pair
 
   return;
@@ -492,7 +492,7 @@ void LoadMask::parseXML() {
     } else if (pNode->nodeName().compare("ids") == 0) {
       // Node "ids"
       if (ingroup) {
-        this->parseSpectrumIDs(value, tomask);
+        this->parseSpectrumNos(value, tomask);
       } else {
         g_log.error() << "XML File (ids) heirachial error!"
                       << "  Inner Text = " << pNode->innerText() << std::endl;
@@ -569,9 +569,9 @@ void LoadMask::parseComponent(std::string valuetext, bool tomask) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Parse input string for spectrum ID
+/** Parse input string for spectrum No
  */
-void LoadMask::parseSpectrumIDs(std::string inputstr, bool tomask) {
+void LoadMask::parseSpectrumNos(std::string inputstr, bool tomask) {
 
   // 1. Parse range out
   std::vector<int32_t> singles;
@@ -600,7 +600,7 @@ void LoadMask::parseSpectrumIDs(std::string inputstr, bool tomask) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Parse input string for spectrum ID
+/** Parse input string for detector ID
  */
 void LoadMask::parseDetectorIDs(std::string inputstr, bool tomask) {
   // g_log.information() << "Detector IDs: " << inputstr << std::endl;

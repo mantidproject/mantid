@@ -961,6 +961,31 @@ public:
   }
 
   //--------------------------------------------------------------------------------------
+  void test_boolean_operatorNot_maskedWorkspace() {
+    // 4x4x4 histoWorkspace
+    MDHistoWorkspace_sptr ws =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1., 3, 4, 10.0);
+
+    std::vector<coord_t> min;
+    std::vector<coord_t> max;
+
+    // Make the box that covers the whole workspace.
+    min.push_back(0);
+    min.push_back(0);
+    min.push_back(0);
+    max.push_back(10);
+    max.push_back(10);
+    max.push_back(10);
+
+    // Create an function that encompases ALL of the total bins.
+    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+
+    ws->setMDMasking(function);
+    ws->operatorNot();
+    checkWorkspace(ws, 1.0, 0.0);
+  }
+
+  //--------------------------------------------------------------------------------------
   void test_boolean_lessThan() {
     MDHistoWorkspace_sptr a, b, c;
     a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
@@ -1057,7 +1082,7 @@ public:
 
   void doTestMasking(MDImplicitFunction *function,
                      size_t expectedNumberMasked) {
-    // 10x10x10 eventWorkspace
+    // 10x10x10 histoWorkspace
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 3, 10, 10.0);
 

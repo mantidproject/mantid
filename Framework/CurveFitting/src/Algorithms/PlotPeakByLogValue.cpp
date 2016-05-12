@@ -556,12 +556,7 @@ PlotPeakByLogValue::makeNames() const {
         } else {
           wi = -2;
         }
-      } else { // error
-        // throw std::invalid_argument("Malformed spectrum identifier
-        // ("+index+"). "
-        //  "It must be either \"sp\" followed by a number for a spectrum number
-        //  or"
-        //  "\"i\" followed by a number for a workspace index.");
+      } else {
         wi = default_wi;
       }
     }

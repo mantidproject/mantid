@@ -453,7 +453,7 @@ std::vector<std::string> ScriptRepositoryImpl::listFiles() {
   ensureValidRepository();
 
   repo.clear();
-  assert(repo.size() == 0);
+  assert(repo.empty());
   try {
     parseCentralRepository(repo);
     parseLocalRepository(repo);

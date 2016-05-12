@@ -117,6 +117,14 @@ Bugs Resolved
 
 -  VSI: The TECHNIQUE-DEPENDENT initial view now checks for Spectroscopy before Neutron Diffraction.
 
+-  A bug was fixed in the Fit property browser where the "Plot Difference" and other checkboxes affected the display of parameter errors. Now only the "Show Parameter Errors" box will control this.
+
+-  Plots from tables: the axis labels correspond to the data plotted and not just the first two columns.
+
+-  Plots from tables: the title of the plot is the title of the TableWorkspace rather than the default "Table" (this is useful when several tables and plots are open)
+
+-  Plots from tables auto-update when the TableWorkspace is replaced in the ADS. If extra rows are added then the new points are added to the graph.
+
 SliceViewer Improvements
 ------------------------
 

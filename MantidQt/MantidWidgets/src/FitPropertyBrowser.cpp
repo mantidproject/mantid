@@ -250,7 +250,13 @@ void FitPropertyBrowser::init() {
 }
 
 /**
-* Initialise the layout.
+* @brief Initialise the layout.
+* This initialization includes:
+*   1. SIGNALs/SLOTs when properties change.
+*   2. Action menus and associated SIGNALs/SLOTs.
+*   3. Initialize the CompositeFunction, the root from which to build the Model.
+*   4. Update the list of available functions
+* @param w widget parenting the action menus and the property tree browser
 */
 void FitPropertyBrowser::initLayout(QWidget *w) {
   // to be able to change windows title from tread
@@ -430,7 +436,11 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
 }
 
 /**
-* Create editors and assign them to the managers
+* @brief Create editors and assign them to the managers.
+* Associates a particular widget factory to each property manager. Thus, the
+* factory will automatically create widgets befitting to edit the properties
+* that we define.
+* @param w :: widget showing the properties tree and the actions buttons
 */
 void FitPropertyBrowser::createEditors(QWidget *w) {
   QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(w);
@@ -1171,7 +1181,7 @@ void FitPropertyBrowser::boolChanged(QtProperty *prop) {
     settings.beginGroup("Mantid/FitBrowser");
     settings.setValue(prop->propertyName(), val);
 
-    if (m_showParamErrors) {
+    if (prop == m_showParamErrors) {
       m_parameterManager->setErrorsEnabled(val);
     }
   } else { // it could be an attribute
@@ -1493,7 +1503,7 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
   QString name(QString::fromStdString(alg->getProperty("InputWorkspace")));
   if (name.contains('_')) // Must be fitting to raw data, need to group under
                           // name without "_Raw".
-    emit fittingDone(name.left(name.find('_')));
+                          emit fittingDone(name.left(name.indexOf('_')));
   else // else fitting to current workspace, group under same name.
     emit fittingDone(name);
 
@@ -2466,8 +2476,13 @@ void FitPropertyBrowser::setPeakToolOn(bool on) {
   m_displayActionPlotGuess->setEnabled(on);
 }
 
-void FitPropertyBrowser::updateDecimals() {
-  if (m_decimals < 0) {
+/**
+ * @brief impose a number of decimal places on all defined Double properties
+ */
+void FitPropertyBrowser::updateDecimals()
+{
+  if (m_decimals < 0)
+  {
     QSettings settings;
     settings.beginGroup("Mantid/FitBrowser");
     m_decimals = settings.value("decimals", 6).toInt();

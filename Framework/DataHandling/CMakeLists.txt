@@ -24,8 +24,10 @@ set ( SRC_FILES
 	src/GenerateGroupingPowder.cpp
 	src/GroupDetectors.cpp
 	src/GroupDetectors2.cpp
+	src/H5Util.cpp
 	src/ISISDataArchive.cpp
 	src/ISISRunLogs.cpp
+	src/ImggAggregateWavelengths.cpp
 	src/Load.cpp
 	src/LoadANSTOHelper.cpp
 	src/LoadAscii.cpp
@@ -191,8 +193,10 @@ set ( INC_FILES
 	inc/MantidDataHandling/GenerateGroupingPowder.h
 	inc/MantidDataHandling/GroupDetectors.h
 	inc/MantidDataHandling/GroupDetectors2.h
+	inc/MantidDataHandling/H5Util.h
 	inc/MantidDataHandling/ISISDataArchive.h
 	inc/MantidDataHandling/ISISRunLogs.h
+	inc/MantidDataHandling/ImggAggregateWavelengths.h
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadANSTOHelper.h
 	inc/MantidDataHandling/LoadAscii.h
@@ -357,7 +361,9 @@ set ( TEST_FILES
 	GenerateGroupingPowderTest.h
 	GroupDetectors2Test.h
 	GroupDetectorsTest.h
+	H5UtilTest.h
 	ISISDataArchiveTest.h
+	ImggAggregateWavelengthsTest.h
 	InstrumentRayTracerTest.h
 	LoadAscii2Test.h
 	LoadAsciiTest.h
@@ -497,11 +503,12 @@ enable_precompiled_headers( inc/MantidDataHandling/PrecompiledHeader.h SRC_FILES
 # Add the target for this directory
 add_library ( DataHandling ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling )
+set_target_properties ( DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling
+                        COMPILE_DEFINITIONS "IN_MANTID_DATAHANDLING")
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( DataHandling PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
-endif () 
+endif ()
 
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )

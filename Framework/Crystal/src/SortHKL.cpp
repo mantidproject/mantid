@@ -302,7 +302,7 @@ PeaksWorkspace_sptr SortHKL::getOutputPeaksWorkspace(
     const PeaksWorkspace_sptr &inputPeaksWorkspace) const {
   PeaksWorkspace_sptr outputPeaksWorkspace = getProperty("OutputWorkspace");
   if (outputPeaksWorkspace != inputPeaksWorkspace) {
-    outputPeaksWorkspace.reset(inputPeaksWorkspace->clone().release());
+    outputPeaksWorkspace = inputPeaksWorkspace->clone();
   }
 
   return outputPeaksWorkspace;

@@ -239,9 +239,9 @@ namespace MantidQt
 			toolBox->addWidget(m_tube, 1, 1);
 			toolBox->addWidget(m_peak, 1, 2);
 			toolBox->addWidget(m_peakSelect, 1, 3);
-			toolBox->setColStretch(6, 1);
-			toolBox->setSpacing(2);
-			connect(m_zoom, SIGNAL(clicked()), this, SLOT(setSelectionType()));
+                        toolBox->setColumnStretch(6, 1);
+                        toolBox->setSpacing(2);
+                        connect(m_zoom, SIGNAL(clicked()), this, SLOT(setSelectionType()));
 			connect(m_one, SIGNAL(clicked()), this, SLOT(setSelectionType()));
 			connect(m_tube, SIGNAL(clicked()), this, SLOT(setSelectionType()));
 			connect(m_peak, SIGNAL(clicked()), this, SLOT(setSelectionType()));
