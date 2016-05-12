@@ -1120,8 +1120,8 @@ double Object::triangleSolidAngle(const V3D &observer,
     case GluGeometryHandler::GeometryType::SPHERE:
       return SphereSolidAngle(observer, vectors, radius);
       break;
-	default:
-	  break;
+    default:
+      break;
     }
 
     //
