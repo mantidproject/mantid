@@ -64,7 +64,7 @@ void WorkspaceHistory::addHistory(const WorkspaceHistory &otherHistory) {
 
 /// Append an AlgorithmHistory to this WorkspaceHistory
 void WorkspaceHistory::addHistory(AlgorithmHistory_sptr algHistory) {
-  m_algorithms.insert(algHistory);
+  m_algorithms.insert(std::move(algHistory));
 }
 
 /*
