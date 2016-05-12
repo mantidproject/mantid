@@ -299,7 +299,7 @@ Columns
 |                     |           |                                               |
 |                     |           | Example: ``0.9``                              |
 +---------------------+-----------+-----------------------------------------------+
-| Scale               | **Yes**   | Contains the factor used to scale output      |
+| Scale               | No        | Contains the factor used to scale output      |
 |                     |           | IvsQ workspaces. The IvsQ workspaces are      |
 |                     |           | scaled by ``1/i`` where i is the value of     |
 |                     |           | this column.                                  |
